@@ -1,60 +1,61 @@
 from django.db import models
-import uuid
-'''
-from django.apps import apps
-ser_req = apps.get_model('hotline', 'ser_req')
-owner = apps.get_model('people', 'owner')
-'''
+from hotline.models import EvacReq
+from people.models import Owner
+
+
+#choice tupels
+SPECIES_CHOICES = (
+    ('dog', "Dog"),
+    ('cat', "Cat"),
+    ('oth', "Other"),
+)
+
+BREED_CHOICES = (
+    ('val', "Label"),
+)
+
+SEX_CHOICES = (
+    ('M', "Male"),
+    ('F', "Female"),
+)
+
+PCOLOR_CHOICES = (
+    ('val', "Label"),
+)
+SCOLOR_CHOICES = (
+    ('val', "Label"),
+)
+
+MARKINGS_CHOICES = (
+    ('val', "Label"),
+)
+
+SIZE_CHOICES = (
+    ('L', "Large ()"),
+    ('M', "Medium ()"),
+    ('S', "Small ()"),
+)
+
+AGE_CHOICES = (
+    ('Y', "Youth ()"),
+    ('A', "Adult ()"),
+    ('E', "Elderly ()"),
+)
+
+STATUS_CHOICES = (
+    ('REP', "Reported"),
+    ('SHL', "Sheltered"),
+    ('SIP', "Sheltered In Place"),
+    ('NFD', "Not Found"),
+    ('RIP', "Rest In Peace"),
+)
 
 # Create your models here.
 class animal(models.Model):
-    '''#keys
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
-    request = models.ForeignKey('ser_req', on_delete=SET_NULL)
-    owner = models.ForeignKey('owner', on_delete=models.SET_NULL, blank=True, null=True)
+    request = models.ForeignKey(EvacReq, on_delete=models.SET_NULL, blank=True, null=True)
+    owner = models.ForeignKey(Owner, on_delete=models.SET_NULL, blank=True, null=True)
     name = models.CharField(max_length=50, blank=True, null=True)
-    '''
-    #choice tupels
-    SPECIES_CHOICES = (
-        ('dog', "Dog"),
-        ('cat', "Cat"),
-        ('oth', "Other"),
-    )
-    BREED_CHOICES = (
-        ('val', "Label"),
-    )
-    SEX_CHOICES = (
-        ('M', "Male"),
-        ('F', "Female"),
-    )
-    PCOLOR_CHOICES = (
-        ('val', "Label"),
-    )
-    SCOLOR_CHOICES = (
-        ('val', "Label"),
-    )
-    MARKINGS_CHOICES = (
-        ('val', "Label"),
-    )
-    SIZE_CHOICES = (
-        ('L', "Large ()"),
-        ('M', "Medium ()"),
-        ('S', "Small ()"),
-    )
 
-    AGE_CHOICES = (
-        ('Y', "Youth ()"),
-        ('A', "Adult ()"),
-        ('E', "Elderly ()"),
-    )
-
-    STATUS_CHOICES = (
-        ('REP', "Reported"),
-        ('SHL', "Sheltered"),
-        ('SIP', "Sheltered In Place"),
-        ('NFD', "Not Found"),
-        ('RIP', "Rest In Peace"),
-    )
 
     #choice fields
     species = models.CharField(max_length=50, choices=SPECIES_CHOICES, blank=True, null=True)
@@ -86,7 +87,7 @@ class animal(models.Model):
     address = models.CharField(max_length=50, blank=True, null=True)
     city = models.CharField(max_length=50, blank=True, null=True)
     state = models.CharField(max_length=50, blank=True, null=True)
-    zip = models.PositiveSmallIntegerField(blank=True, null=True)
+    zip_code = models.PositiveSmallIntegerField(blank=True, null=True)
     latitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
     longitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
 
