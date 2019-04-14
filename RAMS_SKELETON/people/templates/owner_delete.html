@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Delete Owner</h1>
+<form action="" method="post">{% csrf_token %}
+  <p>Delete "{{owner.first_name}} {{owner.last_name}}" From Database?</p>
+  <input type="submit" name="" value="Confirm">
+
+</form>
+{% endblock %}

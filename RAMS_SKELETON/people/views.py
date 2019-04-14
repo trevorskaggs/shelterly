@@ -11,4 +11,13 @@ class OwnerListView(generic.ListView):
 class OwnerNewView(generic.edit.CreateView):
     model = Owner
     template_name = 'owner_new.html'
-    fields = ['first_name', 'last_name', 'home_phone', 'work_phone', 'cell_phone', 'best_contact', 'drivers_license', 'address', 'state', 'zip_code']
+    fields = ['first_name', 'last_name', 'home_phone', 'work_phone', 'cell_phone', 'best_contact', 'drivers_license', 'address', 'city', 'state', 'zip_code']
+
+class OwnerDetailView(generic.DetailView):
+    model = Owner
+    template_name = "owner_detail.html"
+
+class OwnerDeleteView(generic.edit.DeleteView):
+    model = Owner
+    template_name = "owner_delete.html"
+    success_url = "http://127.0.0.1:8000/owners/"
