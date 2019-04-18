@@ -5,7 +5,49 @@
 {% block content %}
   <h1>New Owner</h1>
   <form action="" method="post">{% csrf_token %}
-    {{ form|crispy }}
+    <div class="row">
+      <div class="col-6">
+        {{ form.first_name|as_crispy_field }}
+      </div>
+      <div class="col-6">
+        {{ form.last_name|as_crispy_field }}
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-4">
+        {{ form.home_phone|as_crispy_field }}
+      </div>
+      <div class="col-4">
+        {{ form.work_phone|as_crispy_field }}
+      </div>
+      <div class="col-4">
+        {{ form.cell_phone|as_crispy_field }}
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-6">
+        {{ form.best_contact|as_crispy_field }}
+      </div>
+      <div class="col-6">
+        {{ form.drivers_license|as_crispy_field }}
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12">
+        {{ form.address|as_crispy_field }}
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-4">
+        {{ form.city|as_crispy_field }}
+      </div>
+      <div class="col-4">
+        {{ form.state|as_crispy_field }}
+      </div>
+      <div class="col-4">
+        {{ form.zip_code|as_crispy_field }}
+      </div>
+    </div>
     <input type="submit" value="Save">
   </form>
 {% endblock %}
