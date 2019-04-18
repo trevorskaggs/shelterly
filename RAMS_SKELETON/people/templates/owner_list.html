@@ -5,11 +5,11 @@
   {% if owner_list %}
   <ul>
     {% for owner in owner_list %}
-    <li><a href="http://127.0.0.1:8000/owners/{{owner.pk}}">{{owner.first_name}} {{owner.last_name}}</a></li>
+      <li><a href="{% url 'people:owner_detail' owner.pk %}">{{owner.first_name}} {{owner.last_name}}</a></li>
     {% endfor %}
   </ul>
   {% else %}
     <p>THERE ARE CURRENTLY NO OWNERS REGISTED</p>
   {% endif %}
-  <a href="/owners/new">+ Add Owner</a>
+  <a href="{% url 'people:owner_new' %}">+ Add Owner</a>
 {% endblock %}

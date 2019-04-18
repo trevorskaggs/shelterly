@@ -15,8 +15,8 @@
   <p><strong>Latitude:</strong> {{owner.latitude}} </p>
   <p><strong>Longitude:</strong> {{owner.longitude}} </p>
 
-  <p><a href="http://127.0.0.1:8000/owners/">+ Back To Owner List</a></p>
-  <p><a href="http://127.0.0.1:8000/owners/{{owner.pk}}/delete">+ Delete Owner</a></p>
+  <p><a href="{% url 'people:owner_list' %}">+ Back To Owner List</a></p>
+  <p><a href="{% url 'people:owner_delete' owner.pk %}">+ Delete Owner</a></p>
 
 
 {% endblock %}

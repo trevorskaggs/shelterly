@@ -1,6 +1,10 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <h1>THIS IS THE HOME PAGE</h1>
-  <a href="http://127.0.0.1:8000/owners/">List of Owners</a>
+  <ul>
+    <li><a href="{% url 'people:owner_list' %}">List of Owners</a></li>
+    <li>List of Animals</li>
+    <li>Hotline Workflow</li>
+    <li>Intake Workflow</li>
+  </ul>
 {% endblock %}
