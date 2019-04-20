@@ -16,8 +16,8 @@
   <p><strong>Latitude:</strong> {{owner.latitude}} </p>
   <p><strong>Longitude:</strong> {{owner.longitude}} </p>
 
-  <p><a href="{% url 'people:owner_list' %}">+ Back To Owner List</a></p>
-  <p><a href="{% url 'people:owner_delete' owner.pk %}">+ Delete Owner</a></p>
-
+  <a class='btn btn-info' href="{% url 'people:owner_list' %}">Back To Owner List</a>
+  <a class='btn btn-info' href="{% url 'people:owner_edit' owner.pk %}">Edit Owner</a>
+  <a class='btn btn-danger' href="{% url 'people:owner_delete' owner.pk %}">Delete Owner</a>
 
 {% endblock %}

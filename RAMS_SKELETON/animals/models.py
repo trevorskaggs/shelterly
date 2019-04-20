@@ -2,7 +2,6 @@ from django.db import models
 from hotline.models import EvacReq
 from people.models import Owner
 
-
 #choice tupels
 SPECIES_CHOICES = (
     ('dog', "Dog"),

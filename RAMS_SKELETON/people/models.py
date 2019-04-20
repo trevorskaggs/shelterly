@@ -12,7 +12,7 @@ STATE_CHOICES = (
     ('FL', "FL"),
     ('GA', "GA"),
     ('HI', "HI"),
-    ('ID', "ID)"),
+    ('ID', "ID"),
     ('IL', "IL"),
     ('IN', "IN"),
     ('IA', "IA"),
@@ -48,7 +48,6 @@ STATE_CHOICES = (
     ('WV', "WV"),
     ('WI', "WI"),
     ('WY', "WY"),
-
 )
 # Create your models here.
 class Person(models.Model):
