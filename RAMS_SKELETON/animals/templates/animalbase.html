@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>Animals</h1>
+  <a class='btn btn-info' href="{% url 'animals:dog_new' %}">+ Add Dog</a>
+  <a class='btn btn-info'href="{% url 'animals:cat_new' %}">+ Add Cat</a>
+  <a class='btn btn-info' href="{% url 'animals:other_new' %}">+ Add Other</a>
+{% endblock %}

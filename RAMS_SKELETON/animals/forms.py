@@ -5,4 +5,10 @@ class DogForm(forms.ModelForm):
 
     class Meta:
         model = animal
-        exclude = ('latitude', 'longitude',)
+        labels = {
+            "pcolor" : "Dog Primary Color",
+            "scolor" : "Dog Primary Color",
+            "markings" : "Dog Markings",
+        }
+
+        exclude = ('latitude', 'longitude', 'species', 'request', 'owner')
