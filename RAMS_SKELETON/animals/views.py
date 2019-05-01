@@ -1,29 +1,41 @@
 
 from django.shortcuts import render, redirect
+from django.views import generic
 from .forms import DogForm, CatForm, OtherForm
-from animals.models import animal
-from django.http import HttpResponse
-from django.urls import reverse
+from animals.models import Animal
+from django.http import HttpResponseRedirect
+from django.urls import reverse_lazy
+
 
 # Create your views here.
-def AnimalBaseView(request):
-    return render(request, "animalbase.html")
+class AnimalListView(generic.ListView):
+    model = Animal
+    context_object_name = 'animal_list'
+    template_name = 'animal_list.html'
 
-def NewAnimalView(request):
+SPECIES_DICT = {
+    'dog': DogForm,
+    'cat': CatForm,
+    'oth': OtherForm,
+}
 
-    if r'animals/dog/new' in request.path:
-        form_class = DogForm
-    elif r'animals/cat/new' in request.path:
-        form_class = CatForm
-    else:
-        form_class = OtherForm
+def AnimalNewView(request, species):
+    if request.POST:
+        form = SPECIES_DICT[species](request.POST)
+        animal = form.save()
+        #return redirect('animals:animal_edit', pk=animal.pk)
+        return HttpResponseRedirect(reverse_lazy('animals:animal_list'))
+    form = SPECIES_DICT[species]()
+    return render(request, 'animal_new.html', {'form':form})
 
-    if request.method == "POST":
-        form = form_class(request.POST)
+class AnimalDetailView(generic.DetailView):
+    model = Animal
+    template_name = "animal_detail.html"
+
+def AnimalEditView(request, pk):
+    animal = Animal.objects.get(pk=pk)
+    if request.POST:
+        form = SPECIES_DICT['dog'](request.POST, instance=animal)
         form.save()
-        return HttpResponseRedirect('animals:animal_base')
-
-    else:
-        form = form_class()
-
-    return render(request, 'animalnew.html', {'form':form})
+    form = SPECIES_DICT['dog'](instance=animal)
+    return render(request, 'animal_new.html', {'form':form})

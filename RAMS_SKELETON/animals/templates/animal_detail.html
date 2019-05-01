@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>Name: {{animal.name}}</h1>
+
+  <p><strong>Species:</strong> {{animal.species}} </p>
+  <p><strong>Sex:</strong> {{animal.sex}} </p>
+  <p><strong>Breed:</strong> {{animal.breed}} </p>
+  <p><strong>Primary Color:</strong> {{animal.pcolor}} </p>
+  <p><strong>Secondary Color:</strong> {{animal.scolor}} </p>
+  <p><strong>Markngs:</strong> {{animal.markings}} </p>
+  <p><strong>Age:</strong> {{animal.age}} </p>
+  <p><strong>Status:</strong> {{animal.status}} </p>
+  <p><strong>Fixed:</strong> {{animal.fixed}} </p>
+  <p><strong>Aggressive:</strong> {{animal.aggressive}} </p>
+
+  <a class='btn btn-info' href="{% url 'animals:animal_list' %}">Back To Animal List</a>
+  <a class='btn btn-info' href="{% url 'animals:animal_edit' animal.pk %}">Edit Animal</a>
+
+{% endblock %}

@@ -16,6 +16,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
+from hotline import views
+
+app_name = 'hotline'
+
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('startcall', views.start_call, name ='start_call'),
+    path('', views.hotline_landing, name='hotline_landing'),
 ]

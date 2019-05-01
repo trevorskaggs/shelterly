@@ -24,4 +24,5 @@ urlpatterns = [
     path('', views.HomeView, name="home_page"),
     path('owners/', include('people.urls')),
     path('animals/', include('animals.urls')),
+    path('hotline/', include('hotline.urls')),
 ]

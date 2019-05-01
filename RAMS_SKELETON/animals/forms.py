@@ -1,10 +1,10 @@
 from django import forms
-from animals.models import animal
+from animals.models import Animal
 
 class DogForm(forms.ModelForm):
 
     class Meta:
-        model = animal
+        model = Animal
         labels = {
             "pcolor" : "Dog Primary Color",
             "scolor" : "Dog Secondary Color",
@@ -16,7 +16,7 @@ class DogForm(forms.ModelForm):
 class CatForm(forms.ModelForm):
 
     class Meta:
-        model = animal
+        model = Animal
         labels = {
             "pcolor" : "Cat Primary Color",
             "scolor" : "Cat Secondary Color",
@@ -28,7 +28,7 @@ class CatForm(forms.ModelForm):
 class OtherForm(forms.ModelForm):
 
     class Meta:
-        model = animal
+        model = Animal
         labels = {
             "pcolor" : "Primary Color",
             "scolor" : "Secondary Color",
