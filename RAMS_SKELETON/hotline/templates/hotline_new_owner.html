@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% load crispy_forms_tags %}
+
+{% block content %}
+  <h1>Owner Information</h1>
+  <form action="" method="post">{% csrf_token %}
+    <div class='section-1'>
+      <div class="row">
+        <div class="col-6">
+          {{ form.first_name|as_crispy_field }}
+        </div>
+        <div class="col-6">
+          {{ form.last_name|as_crispy_field }}
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-4">
+          {{ form.home_phone|as_crispy_field }}
+        </div>
+        <div class="col-4">
+          {{ form.work_phone|as_crispy_field }}
+        </div>
+        <div class="col-4">
+          {{ form.cell_phone|as_crispy_field }}
+        </div>
+      </div>
+    </div>
+    <div class='section-2' style='display: none;'>
+      <div class="row">
+        <div class="col-6">
+          {{ form.best_contact|as_crispy_field }}
+        </div>
+        <div class="col-6">
+          {{ form.drivers_license|as_crispy_field }}
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-6">
+          {{ form.address|as_crispy_field }}
+        </div>
+        <div class="col-6">
+          {{ form.apartment|as_crispy_field }}
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-4">
+          {{ form.city|as_crispy_field }}
+        </div>
+        <div class="col-4">
+          {{ form.state|as_crispy_field }}
+        </div>
+        <div class="col-4">
+          {{ form.zip_code|as_crispy_field }}
+        </div>
+      </div>
+     </div>
+    <input type="submit" value="Save" class='btn btn-success' id='submit-button' style='display: none;'>
+    <span class='btn btn-success' id='next-section'>Next</span>
+    <a class='btn btn-secondary' href="{% url 'hotline:start_call' %}">Cancel</a>
+  </form>
+
+  <script type="text/javascript">
+    $('#next-section').click(function(){
+      $('.section-1').hide();
+      $('.section-2').show();
+      $('#next-section').hide();
+      $('#submit-button').show();
+    });
+  </script>
+<br>
+<br>
+
+{% endblock %}

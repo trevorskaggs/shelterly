@@ -1,10 +1,12 @@
 
 from django.shortcuts import render, redirect
 from django.views import generic
-from .forms import DogForm, CatForm, OtherForm
-from animals.models import Animal
 from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
+from animals.models import Animal
+from .forms import DogForm, CatForm, OtherForm
+
+
 
 
 # Create your views here.

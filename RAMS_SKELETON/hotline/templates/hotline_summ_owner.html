@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+  <h1>Owner Summary</h1>
+  <h2>{{owner.first_name}} {{owner.last_name}}</h2>
+
+  <a class='btn btn-info' href="http://127.0.0.1:8000/hotline/startcall/owner_summ/{{owner.pk}}/dog/new">+ Add Dog</a>
+  <a class='btn btn-info'href="http://127.0.0.1:8000/hotline/startcall/owner_summ/{{owner.pk}}/cat/new">+ Add Cat</a>
+  <a class='btn btn-info' href="http://127.0.0.1:8000/hotline/startcall/owner_summ/{{owner.pk}}/oth/new">+ Add Other</a>
+
+  {% if owned_animal_list %}
+  <ul>
+    {% for animal in owned_animal_list %}
+      <li><a href="{% url 'animals:animal_detail' animal.pk %}">{{animal.name}}</a></li>
+    {% endfor %}
+  </ul>
+  {% else %}
+    <p>THERE ARE CURRENTLY NO OWNED ANIMALS REGISTED</p>
+  {% endif %}
+{% endblock %}

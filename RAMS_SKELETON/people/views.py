@@ -11,6 +11,8 @@ class OwnerListView(generic.ListView):
 class OwnerNewView(generic.edit.CreateView):
     model = Owner
     template_name = 'owner_new.html'
+
+
     fields = ['first_name', 'last_name', 'home_phone', \
         'work_phone', 'cell_phone', 'best_contact', \
         'drivers_license', 'address', 'apartment', 'city', \
