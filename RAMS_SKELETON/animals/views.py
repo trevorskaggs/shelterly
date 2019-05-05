@@ -41,3 +41,8 @@ def AnimalEditView(request, pk):
         form.save()
     form = SPECIES_DICT['dog'](instance=animal)
     return render(request, 'animal_new.html', {'form':form})
+
+class AnimalDeleteView(generic.edit.DeleteView):
+    model = Animal
+    template_name = "owner_delete.html"
+    success_url = "http://127.0.0.1:8000/animals/"

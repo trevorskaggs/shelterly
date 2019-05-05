@@ -20,8 +20,9 @@ app_name = 'animals'
 
 urlpatterns = [
     path('<int:pk>/', views.AnimalDetailView.as_view(), name='animal_detail'),
+    path('<int:pk>/delete', views.AnimalDeleteView.as_view(), name='animal_delete'),
     path('<species>/new', views.AnimalNewView, name="animal_new"),
-    path('<pk>/edit', views.AnimalEditView, name="animal_edit"),
+    path('<int:pk>/edit', views.AnimalEditView, name="animal_edit"),
     #path('owner/<owner_pk>/animal', views.owner_animal_landing, name='owner_animal_landing'),
     path('', views.AnimalListView.as_view(), name="animal_list"),
 ]

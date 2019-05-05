@@ -12,7 +12,7 @@
   {% if owned_animal_list %}
   <ul>
     {% for animal in owned_animal_list %}
-      <li><a href="{% url 'animals:animal_detail' animal.pk %}">{{animal.name}}</a></li>
+      <li><a href="{% url 'animals:animal_detail' animal.pk %}">{{animal.species}} : {{animal.name}}</a></li>
     {% endfor %}
   </ul>
   {% else %}

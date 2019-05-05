@@ -4,7 +4,8 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
 from people.models import Owner
 from animals.models import Animal
-from .forms import HotlineOwnerForm, DogForm, CatForm, OtherForm
+from animals.forms import DogForm, CatForm, OtherForm
+from .forms import HotlineOwnerForm
 
 
 # Create your views here.

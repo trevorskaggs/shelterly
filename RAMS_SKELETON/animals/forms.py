@@ -3,6 +3,10 @@ from animals.models import Animal
 
 class DogForm(forms.ModelForm):
 
+    def __init__(self, *args, **kwargs):
+        super(DogForm, self).__init__(*args, **kwargs)
+        self.initial['species'] = 'dog'
+
     class Meta:
         model = Animal
         labels = {
@@ -14,6 +18,10 @@ class DogForm(forms.ModelForm):
         exclude = ('latitude', 'longitude', 'request', 'owner')
 
 class CatForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(CatForm, self).__init__(*args, **kwargs)
+        self.initial['species'] = 'cat'
 
     class Meta:
         model = Animal

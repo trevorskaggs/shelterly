@@ -17,5 +17,6 @@
 
   <a class='btn btn-info' href="{% url 'animals:animal_list' %}">Back To Animal List</a>
   <a class='btn btn-info' href="{% url 'animals:animal_edit' animal.pk %}">Edit Animal</a>
+  <a class='btn btn-danger' href="{% url 'animals:animal_delete' animal.pk %}">Delete Animal</a>
 
 {% endblock %}
