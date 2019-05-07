@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>Owner: {{owner.first_name}} {{owner.last_name}}</h1>
+
+  <p><strong>Home Phone:</strong> {{owner.home_phone}} </p>
+  <p><strong>Work Phone:</strong> {{owner.work_phone}} </p>
+  <p><strong>Cell Phone:</strong> {{owner.cell_phone}} </p>
+  <p><strong>Best Contact:</strong> {{owner.best_contact}} </p>
+  <p><strong>Drivers License:</strong> {{owner.drivers_license}} </p>
+  <p><strong>Address:</strong> {{owner.address}} </p>
+  <p><strong>Apartment:</strong> {{owner.apartment}} </p>
+  <p><strong>City:</strong> {{owner.city}} </p>
+  <p><strong>State:</strong> {{owner.state}} </p>
+  <p><strong>Zip Code:</strong> {{owner.zip_code}} </p>
+  <p><strong>Latitude:</strong> {{owner.latitude}} </p>
+  <p><strong>Longitude:</strong> {{owner.longitude}} </p>
+
+  <a class='btn btn-info' href="{% url 'people:owner_list' %}">Back To Owner List</a>
+  <a class='btn btn-info' href="{% url 'people:owner_edit' owner.pk %}">Edit Owner</a>
+  <a class='btn btn-danger' href="{% url 'people:owner_delete' owner.pk %}">Delete Owner</a>
+
+{% endblock %}

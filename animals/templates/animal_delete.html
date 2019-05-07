@@ -1,0 +1,8 @@
+{% block content %}
+<h1>Delete Owner</h1>
+<form action="" method="post">{% csrf_token %}
+  <p>Delete "{{animal.species}} {{animal.name}}" From Database?</p>
+  <input type="submit" name="" value="Confirm">
+
+</form>
+{% endblock %}

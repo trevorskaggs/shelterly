@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <form action="" method="post">{% csrf_token %}
+  <p><strong>First Name:</strong> {{form.first_name}} </p>
+  <p><strong>Last Name:</strong> {{form.last_name}} </p>
+  <p><strong>Home Phone:</strong> {{form.home_phone}} </p>
+  <p><strong>Work Phone:</strong> {{form.work_phone}} </p>
+  <p><strong>Cell Phone:</strong> {{form.cell_phone}} </p>
+  <p><strong>Best Contact:</strong> {{form.best_contact}} </p>
+  <p><strong>Drivers License:</strong> {{form.drivers_license}} </p>
+  <p><strong>Address:</strong> {{form.address}} </p>
+  <p><strong>City:</strong> {{form.city}} </p>
+  <p><strong>State:</strong> {{form.state}} </p>
+  <p><strong>Zip Code:</strong> {{form.zip_code}} </p>
+  <p><strong>Latitude:</strong> {{form.latitude}} </p>
+  <p><strong>Longitude:</strong> {{form.longitude}} </p>
+  <p><strong>Reporter:</<strong> {{ form.reporter }} </p>
+    <input type="submit" value="Save">
+  </form>
+  <p><a href="/owners/{{ owner.pk }}/edit">Edit Owner</a></p>
+  <p><a href="/owners/">+ Back To Owner List</a></p>
+  <p><a href="/owners/{{owner.pk}}/delete">+ Delete Owner</a></p>
+
+
+
+
+{% endblock %}

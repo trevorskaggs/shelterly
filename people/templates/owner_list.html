@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>Owners</h1>
+  {% if owner_list %}
+  <ul>
+    {% for owner in owner_list %}
+      <li><a href="{% url 'people:owner_detail' owner.pk %}">{{owner.first_name}} {{owner.last_name}}</a></li>
+    {% endfor %}
+  </ul>
+  {% else %}
+    <p>THERE ARE CURRENTLY NO OWNERS REGISTED</p>
+  {% endif %}
+  <a href="{% url 'people:owner_new' %}">+ Add Owner</a>
+{% endblock %}
