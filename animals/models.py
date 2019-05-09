@@ -116,7 +116,7 @@ class Animal(models.Model):
     markings = models.CharField(max_length=50, choices=MARKINGS_CHOICES, blank=True, null=True)
     size = models.CharField(max_length=1, choices=SIZE_CHOICES, blank=True, null=True)
     age = models.CharField(max_length=1, choices=AGE_CHOICES, blank=True, null=True)
-    status = models.CharField(max_length=3, choices=SIZE_CHOICES, blank=True, null=True)
+    status = models.CharField(max_length=3, choices=STATUS_CHOICES, blank=True, null=True)
 
     #boolean fields
     fixed = models.BooleanField(blank=True, null=True)
@@ -125,10 +125,11 @@ class Animal(models.Model):
     chipped = models.BooleanField(blank=True, null=True)
     diet_needs = models.BooleanField(blank=True, null=True)
     med_needs = models.BooleanField(blank=True, null=True)
+    collared = models.BooleanField(blank=True, null=True)
 
     #text fields
     collar_info = models.TextField(blank=True, null=True)
-    tag_info = models.TextField(blank=True, null=True)
+    behavior_notes = models.TextField(blank=True, null=True)
     chip_info = models.TextField(blank=True, null=True)
     diet_notes = models.TextField(blank=True, null=True)
     med_notes = models.TextField(blank=True, null=True)
