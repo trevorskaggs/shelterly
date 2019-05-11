@@ -2,56 +2,15 @@ from django.db import models
 from hotline.models import EvacReq
 from people.models import Owner
 from location.models import Location
-
+from animal.choices import AGE_CHOICES, BREED_CHOICES, SEX_CHOICES, SIZE_CHOICES, SPECIES_CHOICES, STATUS_CHOICES
+from animal.colors import DOG_COLOR_CHOICES, DOG_PATTERN_CHOICES
+    
 #choice tupels
-SPECIES_CHOICES = (
-    ('dog', "Dog"),
-    ('cat', "Cat"),
-    ('oth', "Other"),
-)
 
-BREED_CHOICES = (
-    ('val', "Label"),
-)
-
-SEX_CHOICES = (
-    ('M', "Male"),
-    ('F', "Female"),
-)
-
-PCOLOR_CHOICES = (
-    ('val', "Label"),
-)
-SCOLOR_CHOICES = (
-    ('val', "Label"),
-)
-
-MARKINGS_CHOICES = (
-    ('val', "Label"),
-)
-
-SIZE_CHOICES = (
-    ('L', "Large ()"),
-    ('M', "Medium ()"),
-    ('S', "Small ()"),
-)
-
-AGE_CHOICES = (
-    ('Y', "Youth ()"),
-    ('A', "Adult ()"),
-    ('E', "Elderly ()"),
-)
-
-STATUS_CHOICES = (
-    ('REP', "Reported"),
-    ('SHL', "Sheltered"),
-    ('SIP', "Sheltered In Place"),
-    ('NFD', "Not Found"),
-    ('RIP', "Rest In Peace"),
-)
 
 # Create your models here.
 class Animal(Location):
+
     request = models.ForeignKey(EvacReq, on_delete=models.SET_NULL, blank=True, null=True)
     owner = models.ForeignKey(Owner, on_delete=models.SET_NULL, blank=True, null=True)
     name = models.CharField(max_length=50, blank=True, null=True)
@@ -61,12 +20,12 @@ class Animal(Location):
     species = models.CharField(max_length=50, choices=SPECIES_CHOICES, blank=True, null=True)
     breed = models.CharField(max_length=50, choices=BREED_CHOICES, blank=True, null=True)
     sex = models.CharField(max_length=1, choices=SEX_CHOICES, blank=True, null=True)
-    pcolor = models.CharField(max_length=50, choices=PCOLOR_CHOICES, blank=True, null=True)
-    scolor = models.CharField(max_length=50, choices=SCOLOR_CHOICES, blank=True, null=True)
-    markings = models.CharField(max_length=50, choices=MARKINGS_CHOICES, blank=True, null=True)
+    pcolor = models.CharField(max_length=50, choices=DOG_COLOR_CHOICES, blank=True, null=True)
+    scolor = models.CharField(max_length=50, choices=DOG_PATTERN_CHOICES, blank=True, null=True)
+    markings = models.CharField(max_length=50, choices=DOG_PATTERN_CHOICES, blank=True, null=True)
     size = models.CharField(max_length=1, choices=SIZE_CHOICES, blank=True, null=True)
     age = models.CharField(max_length=1, choices=AGE_CHOICES, blank=True, null=True)
-    status = models.CharField(max_length=3, choices=SIZE_CHOICES, blank=True, null=True)
+    status = models.CharField(max_length=3, choices=STATUS_CHOICES, blank=True, null=True)
 
     #boolean fields
     fixed = models.BooleanField(blank=True, null=True)
