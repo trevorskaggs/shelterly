@@ -21,7 +21,7 @@ app_name = 'people'
 
 urlpatterns = [
     path('<int:pk>/delete', views.OwnerDeleteView.as_view(), name='owner_delete'),
-    path('<int:pk>/edit', views.OwnerEditView.as_view(), name='owner_edit'),
+    path('<int:pk>/edit', views.owner_edit, name='owner_edit'),
     path('<int:pk>/', views.owner_detail, name='owner_detail'),
     path('new/', views.OwnerNewView.as_view(), name='owner_new'),
     path('', views.OwnerListView.as_view(), name='owner_list'),

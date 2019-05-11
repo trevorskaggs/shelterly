@@ -1,7 +1,9 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from animals.models import Animal
 from people.models import Owner
+from people.forms import OwnerForm
 from django.views import generic
+
 # Create your views here.
 
 class OwnerListView(generic.ListView):
@@ -11,7 +13,7 @@ class OwnerListView(generic.ListView):
 
 class OwnerNewView(generic.edit.CreateView):
     model = Owner
-    template_name = 'owner_new.html'
+    template_name = 'owner_edit.html'
 
 
     fields = ['first_name', 'last_name', 'home_phone', \
@@ -21,7 +23,7 @@ class OwnerNewView(generic.edit.CreateView):
 
 class OwnerEditView(generic.edit.UpdateView):
     model = Owner
-    template_name = 'owner_new.html'
+    template_name = 'owner_edit.html'
     fields = ['first_name', 'last_name', 'home_phone', \
         'work_phone', 'cell_phone', 'best_contact', \
         'drivers_license', 'address', 'apartment', 'city', \
@@ -30,9 +32,17 @@ class OwnerEditView(generic.edit.UpdateView):
 class OwnerDeleteView(generic.edit.DeleteView):
     model = Owner
     template_name = "owner_delete.html"
-    success_url = "http://127.0.0.1:8000/owners/"
 
 def owner_detail(request, pk):
     owner = Owner.objects.get(pk=pk)
     animal_list = Animal.objects.filter(owner=owner)
     return render(request, 'owner_detail.html', {'owner':owner, 'animal_list':animal_list})
+
+def owner_edit(request, pk):
+    owner = Owner.objects.get(pk=pk)
+    if request.POST:
+        form = OwnerForm(request.POST, instance=owner)
+        form.save()
+        return redirect('people:owner_detail', owner.pk)
+    form = OwnerForm(instance=owner)
+    return render(request, 'owner_edit.html', {'form':form})

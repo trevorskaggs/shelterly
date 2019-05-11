@@ -57,7 +57,7 @@
      </div>
     <input type="submit" value="Save" class='btn btn-success' id='submit-button' style='display: none;'>
     <span class='btn btn-success' id='next-section'>Next</span>
-    <span class='btn btn-secondary' id='back-button'>Cancel</span>
+    <a class='btn btn-secondary' href="{% url 'people:owner_list' %}">Cancel</a>
   </form>
 
   <script type="text/javascript">
@@ -67,9 +67,6 @@
       $('#next-section').hide();
       $('#submit-button').show();
     });
-    $('#back-button').on('click', function(){
-        window.history.back()
-    })
   </script>
 <br>
 <br>

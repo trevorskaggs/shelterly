@@ -57,4 +57,5 @@ def new_owned_animal(request, species, pk):
         form.save(owner)
         return redirect('people:owner_detail', owner.pk)
     form = SPECIES_DICT[species]()
+    form.set_initial_location(owner)
     return render(request, 'animal_new.html', {'form':form, 'owner':owner})

@@ -10,6 +10,11 @@ class AnimalForm(forms.ModelForm):
             animal.owner = owner
             animal.save()
 
+    def set_initial_location(self, location_object):
+        for field_name, field_value in location_object.get_location_fields():
+            self.fields[field_name].initial = field_value
+
+
 class DogForm(AnimalForm):
 
     def __init__(self, *args, **kwargs):

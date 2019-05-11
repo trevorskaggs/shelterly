@@ -10,7 +10,7 @@ def intake_owned(request, reporter_pk=None):
     if request.POST:
         form = OwnerForm(request.POST)
         owner = form.save()
-        return redirect('owner_detail', owner.pk)
+        return redirect('people:owner_detail', owner.pk)
     form = OwnerForm()
     return render(request, 'owner_edit.html', {'form':form})
 

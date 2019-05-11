@@ -21,5 +21,16 @@ class Location(models.Model):
     latitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
     longitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
 
+    def get_location_fields(self):
+        return [
+            ('address', self.address),
+            ('apartment', self.apartment),
+            ('city', self.city),
+            ('state', self.state),
+            ('zip_code', self.zip_code),
+            #('latitude', self.latitude),
+            #('longitude', self.longitude)
+        ]
+
     class Meta:
         abstract=True
