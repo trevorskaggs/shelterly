@@ -5,16 +5,12 @@ from location.models import Location
 from animals.choices import AGE_CHOICES, BREED_CHOICES, SEX_CHOICES, SIZE_CHOICES, SPECIES_CHOICES, STATUS_CHOICES
 from animals.colors import DOG_COLOR_CHOICES, DOG_PATTERN_CHOICES
     
-#choice tupels
-
-
 # Create your models here.
 class Animal(Location):
 
     request = models.ForeignKey(EvacReq, on_delete=models.SET_NULL, blank=True, null=True)
     owner = models.ForeignKey(Owner, on_delete=models.SET_NULL, blank=True, null=True)
     name = models.CharField(max_length=50, blank=True, null=True)
-
 
     #choice fields
     species = models.CharField(max_length=50, choices=SPECIES_CHOICES, blank=True, null=True)
