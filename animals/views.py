@@ -6,6 +6,7 @@ from django.urls import reverse_lazy
 from animals.models import Animal
 from animals.forms import DogForm, CatForm, OtherForm
 from people.models import Owner
+from people.views import owner_detail
 
 
 
@@ -50,6 +51,10 @@ class AnimalDeleteView(generic.edit.DeleteView):
 
 
 def new_owned_animal(request, species, pk):
-    form = SPECIES_DICT[species]()
     owner = Owner.objects.get(pk=pk)
+    if request.POST:
+        form = SPECIES_DICT[species](request.POST)
+        form.save(owner)
+        return redirect('people:owner_detail', owner.pk)
+    form = SPECIES_DICT[species]()
     return render(request, 'animal_new.html', {'form':form, 'owner':owner})

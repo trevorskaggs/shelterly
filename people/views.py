@@ -27,10 +27,6 @@ class OwnerEditView(generic.edit.UpdateView):
         'drivers_license', 'address', 'apartment', 'city', \
         'state', 'zip_code']
 
-class OwnerDetailView(generic.DetailView):
-    model = Owner
-    template_name = "owner_detail.html"
-
 class OwnerDeleteView(generic.edit.DeleteView):
     model = Owner
     template_name = "owner_delete.html"
@@ -39,4 +35,4 @@ class OwnerDeleteView(generic.edit.DeleteView):
 def owner_detail(request, pk):
     owner = Owner.objects.get(pk=pk)
     animal_list = Animal.objects.filter(owner=owner)
-    return render(request, 'owner_detail.html', {'owner':owner})
+    return render(request, 'owner_detail.html', {'owner':owner, 'animal_list':animal_list})

@@ -1,7 +1,16 @@
 from django import forms
 from animals.models import Animal
 
-class DogForm(forms.ModelForm):
+class AnimalForm(forms.ModelForm):
+
+    def save(self, owner=None):
+        animal = super(AnimalForm, self).save()
+        import ipdb; ipdb.set_trace()
+        if owner:
+            animal.owner = owner
+            animal.save()
+
+class DogForm(AnimalForm):
 
     def __init__(self, *args, **kwargs):
         super(DogForm, self).__init__(*args, **kwargs)
@@ -17,7 +26,7 @@ class DogForm(forms.ModelForm):
 
         exclude = ('latitude', 'longitude', 'request', 'owner')
 
-class CatForm(forms.ModelForm):
+class CatForm(AnimalForm):
 
     def __init__(self, *args, **kwargs):
         super(CatForm, self).__init__(*args, **kwargs)
@@ -33,7 +42,7 @@ class CatForm(forms.ModelForm):
 
         exclude = ('latitude', 'longitude', 'request', 'owner')
 
-class OtherForm(forms.ModelForm):
+class OtherForm(AnimalForm):
 
     class Meta:
         model = Animal

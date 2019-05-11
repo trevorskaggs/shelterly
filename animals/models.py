@@ -41,5 +41,3 @@ class Animal(Location):
     class Meta:
         ordering = []
 
-    def __str__(self):
-        return self.name

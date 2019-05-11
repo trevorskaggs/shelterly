@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from people.forms import OwnerForm
 from people.views import owner_detail
 
@@ -10,7 +10,7 @@ def intake_owned(request, reporter_pk=None):
     if request.POST:
         form = OwnerForm(request.POST)
         owner = form.save()
-        return owner_detail(request, owner.pk)
+        return redirect('owner_detail', owner.pk)
     form = OwnerForm()
     return render(request, 'owner_edit.html', {'form':form})
 
