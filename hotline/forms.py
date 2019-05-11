@@ -1,6 +1,5 @@
 from django import forms
 from people.models import Owner
-from animals.models import Animal
 
 class HotlineOwnerForm(forms.ModelForm):
 

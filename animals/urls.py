@@ -25,4 +25,5 @@ urlpatterns = [
     path('<int:pk>/edit', views.AnimalEditView, name="animal_edit"),
     #path('owner/<owner_pk>/animal', views.owner_animal_landing, name='owner_animal_landing'),
     path('', views.AnimalListView.as_view(), name="animal_list"),
+    path('<species>/<pk>/new', views.new_owned_animal, name='new_owned_animal'),
 ]

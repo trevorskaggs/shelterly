@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
+    {% if owner %}<h2>Owner: {{ owner }}</h2>{% endif %}
     <form action="" method="post">
       {% csrf_token %}
       {{ form }}

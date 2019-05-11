@@ -1,11 +1,7 @@
-{% extends 'base.html' %}
-
-{% block content %}
-
   <h1>Animals</h1>
-  <a class='btn btn-info' href="{% url 'animals:animal_new' 'dog' %}">+ Add Dog</a>
-  <a class='btn btn-info'href="{% url 'animals:animal_new' 'cat' %}">+ Add Cat</a>
-  <a class='btn btn-info' href="{% url 'animals:animal_new' 'oth' %}">+ Add Other</a>
+  <a class='btn btn-info' href="{% url 'animals:new_owned_animal' 'dog' owner.pk%}">+ Add Dog</a>
+  <a class='btn btn-info'href="{% url 'animals:new_owned_animal' 'cat' owner.pk %}">+ Add Cat</a>
+  <a class='btn btn-info' href="{% url 'animals:new_owned_animal' 'oth' owner.pk %}">+ Add Other</a>
 
   {% if animal_list %}
   <ul>
@@ -17,4 +13,3 @@
     <p>THERE ARE CURRENTLY NO ANIMALS REGISTED</p>
   {% endif %}
 
-{% endblock %}

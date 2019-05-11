@@ -1,0 +1,7 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<a class="btn btn-warning btn-lg btn-block" href="{% url 'hotline:hotline_new_owner' %}">FROM EVAC REQUEST</a>
+<a class="btn btn-warning btn-lg btn-block" href="{% url 'intake:intake_owned' %}">FROM WALK-IN (OWNER)</a>
+<a class="btn btn-warning btn-lg btn-block" href="{% url 'animals:animal_list' %}">FROM WALK-IN (NON-OWNER)</a>
+{% endblock %}

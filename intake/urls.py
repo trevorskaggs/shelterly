@@ -16,6 +16,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
+from intake import views
+
+app_name = 'intake'
+
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', views.intake_landing, name ='intake_landing'),
+    path('owned/', views.intake_owned, name='intake_owned'),
 ]

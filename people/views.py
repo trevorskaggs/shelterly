@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from animals.models import Animal
 from people.models import Owner
 from django.views import generic
 # Create your views here.
@@ -34,3 +35,8 @@ class OwnerDeleteView(generic.edit.DeleteView):
     model = Owner
     template_name = "owner_delete.html"
     success_url = "http://127.0.0.1:8000/owners/"
+
+def owner_detail(request, pk):
+    owner = Owner.objects.get(pk=pk)
+    animal_list = Animal.objects.filter(owner=owner)
+    return render(request, 'owner_detail.html', {'owner':owner})

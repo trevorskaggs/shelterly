@@ -21,7 +21,6 @@ from hotline import views
 app_name = 'hotline'
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
     path('startcall', views.start_call, name ='start_call'),
     path('startcall/owner_new', views.hotline_new_owner, name = 'hotline_new_owner'),
     path('starcall/owner_summ/<int:pk>', views.hotline_summ_owner, name = 'hotline_summ_owner'),

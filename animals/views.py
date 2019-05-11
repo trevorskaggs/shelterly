@@ -4,7 +4,8 @@ from django.views import generic
 from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
 from animals.models import Animal
-from .forms import DogForm, CatForm, OtherForm
+from animals.forms import DogForm, CatForm, OtherForm
+from people.models import Owner
 
 
 
@@ -46,3 +47,9 @@ class AnimalDeleteView(generic.edit.DeleteView):
     model = Animal
     template_name = "owner_delete.html"
     success_url = "http://127.0.0.1:8000/animals/"
+
+
+def new_owned_animal(request, species, pk):
+    form = SPECIES_DICT[species]()
+    owner = Owner.objects.get(pk=pk)
+    return render(request, 'animal_new.html', {'form':form, 'owner':owner})
