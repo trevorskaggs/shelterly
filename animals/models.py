@@ -2,8 +2,8 @@ from django.db import models
 from hotline.models import EvacReq
 from people.models import Owner
 from location.models import Location
-from animal.choices import AGE_CHOICES, BREED_CHOICES, SEX_CHOICES, SIZE_CHOICES, SPECIES_CHOICES, STATUS_CHOICES
-from animal.colors import DOG_COLOR_CHOICES, DOG_PATTERN_CHOICES
+from animals.choices import AGE_CHOICES, BREED_CHOICES, SEX_CHOICES, SIZE_CHOICES, SPECIES_CHOICES, STATUS_CHOICES
+from animals.colors import DOG_COLOR_CHOICES, DOG_PATTERN_CHOICES
     
 #choice tupels
 
