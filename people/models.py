@@ -11,5 +11,28 @@ class Person(Location):
     best_contact = models.TextField(blank=True, null=True)
     drivers_license = models.CharField(max_length=50, blank=True, null=True)
 
+    class Meta:
+        abstract = True
+
     def __unicode__(self):
         return self.first_name + ' ' + self.last_name
+
+    def get_absolute_url(self):
+        return  "http://127.0.0.1:8000/owners/"
+
+class Owner(Person):
+    reporter = models.OneToOneField('reporter', on_delete=models.SET_NULL, blank=True, null=True)
+
+class Reporter(Person):
+    class Meta:
+        ordering = []
+
+    def __str__(self):
+        return self.field_name
+
+class Worker(Person):
+    class Meta:
+        ordering = []
+
+    def __str__(self):
+        return self.field_name
