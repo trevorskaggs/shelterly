@@ -30,7 +30,7 @@ class Reporter(Person):
     def __str__(self):
         return self.field_name
 
-class Worker(Person):
+class TeamMember(models.Model):
 
     first_name = models.CharField(max_length=50, blank=False, null=False)
     last_name = models.CharField(max_length=50, blank=False, null=False)

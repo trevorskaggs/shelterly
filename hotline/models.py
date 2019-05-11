@@ -1,12 +1,12 @@
 from django.db import models
-from people.models import Owner, Reporter, Worker
+from people.models import Owner, Reporter
 
 # Create your models here.
 class EvacReq(models.Model):
     #keys
     owner = models.ForeignKey(Owner, on_delete=models.SET_NULL, blank=True, null=True)
     reporter = models.ForeignKey(Reporter, on_delete=models.SET_NULL, blank=True, null=True)
-    worker = models.ForeignKey(Worker, on_delete=models.SET_NULL, blank=True, null=True)
+    #worker = models.ForeignKey(Worker, on_delete=models.SET_NULL, blank=True, null=True)
 
     #pre_field
     timestamp = models.DateTimeField(auto_now_add=True)

@@ -22,8 +22,9 @@ import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.HomeView, name="home_page"),
-    path('owners/', include('people.urls')),
     path('animals/', include('animals.urls')),
+    path('evac/', include('evac.urls')),
     path('hotline/', include('hotline.urls')),
     path('intake/', include('intake.urls')),
+    path('owners/', include('people.urls')),
 ]
