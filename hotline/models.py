@@ -30,7 +30,6 @@ class EvacReq(models.Model):
     recovery_time = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
     owner_notification_tstamp = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
 
-
     class Meta:
         ordering = []
 

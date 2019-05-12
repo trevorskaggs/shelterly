@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from animals.models import Animal
 from people.models import Owner
-from people.forms import OwnerForm
+from people.forms import OwnerForm, TeamMemberForm
 from django.views import generic
 
 # Create your views here.
@@ -46,3 +46,11 @@ def owner_edit(request, pk):
         return redirect('people:owner_detail', owner.pk)
     form = OwnerForm(instance=owner)
     return render(request, 'owner_edit.html', {'form':form})
+
+def team_member(request, pk=None):
+    team_member = TeamMember.objects.get(pk=pk) if pk else None
+    if request.POST:
+        form = TeamMemberForm(request.POST, instance=team_member)
+        form.save()
+    form = TeamMemberForm(instance=team_member)
+    return render(request, 'team_member.html', {'form':form})
