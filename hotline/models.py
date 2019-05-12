@@ -33,6 +33,3 @@ class EvacReq(models.Model):
 
     class Meta:
         ordering = []
-
-    def __str__(self):
-        return self.field_name
