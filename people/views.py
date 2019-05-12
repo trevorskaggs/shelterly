@@ -52,5 +52,6 @@ def team_member(request, pk=None):
     if request.POST:
         form = TeamMemberForm(request.POST, instance=team_member)
         form.save()
+        return redirect('evac:evac_landing')
     form = TeamMemberForm(instance=team_member)
     return render(request, 'team_member.html', {'form':form})

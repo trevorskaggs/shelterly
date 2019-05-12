@@ -9,5 +9,7 @@ app_name = 'evac'
 urlpatterns = [
     path('', views.evac_landing, name ='evac_landing'),
     path('teammember/new', team_member, name='new_team_member'),
-    path('teammember/<int:pk>/', team_member, name='edit_team_member'),
+    path('teammember/<int:pk>', team_member, name='edit_team_member'),
+    path('evacteam/new', views.evac_team, name='new_evac_team'),
+    path('evacteam/<int:pk>', team_member, name='edit_evac_team'),
 ]
