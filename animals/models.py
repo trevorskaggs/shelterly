@@ -30,10 +30,11 @@ class Animal(Location):
     chipped = models.BooleanField(blank=True, null=True)
     diet_needs = models.BooleanField(blank=True, null=True)
     med_needs = models.BooleanField(blank=True, null=True)
+    collared = models.BooleanField(blank=True, null=True)
 
     #text fields
     collar_info = models.TextField(blank=True, null=True)
-    tag_info = models.TextField(blank=True, null=True)
+    behavior_notes = models.TextField(blank=True, null=True)
     chip_info = models.TextField(blank=True, null=True)
     diet_notes = models.TextField(blank=True, null=True)
     med_notes = models.TextField(blank=True, null=True)

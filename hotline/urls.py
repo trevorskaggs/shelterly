@@ -22,8 +22,9 @@ app_name = 'hotline'
 
 urlpatterns = [
     path('startcall', views.start_call, name ='start_call'),
-    path('startcall/owner_new', views.hotline_new_owner, name = 'hotline_new_owner'),
-    path('starcall/owner_summ/<int:pk>', views.hotline_summ_owner, name = 'hotline_summ_owner'),
-    path('startcall/owner_summ/<int:pk>/<species>/new', views.hotline_new_animal, name="hotline_new_animal"),
+    path('startcall/<evac_request>/owner_new', views.hotline_new_owner, name = 'hotline_new_owner'),
+    path('starcall/<evac_request>/<int:pk>/edit', views.evac_request_edit, name = 'evac_request_edit'),
+    path('starcall/<evac_request>/<int:pk>', views.evac_request, name = 'evac_request'),
+    path('startcall/<evac_request>/<int:pk>/<species>/new', views.hotline_new_animal, name="hotline_new_animal"),
     path('', views.hotline_landing, name='hotline_landing'),
 ]

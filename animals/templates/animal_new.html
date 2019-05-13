@@ -1,10 +1,116 @@
 {% extends 'base.html' %}
 
+{% load crispy_forms_tags %}
+
 {% block content %}
-    {% if owner %}<h2>Owner: {{ owner }}</h2>{% endif %}
-    <form action="" method="post">
-      {% csrf_token %}
-      {{ form }}
-      <input type="submit" name="submit" value="Submit">
-    </form>
+  {% if owner %}<h2>Owner: {{ owner }}</h2>{% endif %}
+  <h1>Animal Information</h1>
+  <form action="" method="post">
+    {% csrf_token %}
+    <div class='section-1'>
+      <div class="row">
+        <div class="col-6">
+          {{ form.name|as_crispy_field }}
+        </div>
+        <div class="col-6">
+          {{ form.species|as_crispy_field }}
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-3">
+          {{ form.sex|as_crispy_field }}
+        </div>
+        <div class="col-3">
+          {{ form.fixed|as_crispy_field }}
+        </div>
+        <div class="col-3">
+          {{ form.age|as_crispy_field }}
+        </div>
+        <div class="col-3">
+          {{ form.size|as_crispy_field }}
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-6">
+          {{ form.chipped|as_crispy_field }}
+        </div>
+        <div class="col-6">
+          {{ form.chip_info|as_crispy_field }}
+        </div>
+      </div>
+    </div>
+    <div class='section-2' style='display: none;'>
+      <div class="row">
+        <div class="col-12">
+          {{ form.breed|as_crispy_field }}
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-6">
+          {{ form.pcolor|as_crispy_field }}
+        </div>
+        <div class="col-6">
+          {{ form.scolor|as_crispy_field }}
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12">
+          {{ form.markings|as_crispy_field }}
+        </div>
+      </div>
+     </div>
+     <div class='section-3' style='display: none;'>
+       <div class="row">
+         <div class="col-6">
+           {{ form.med_needs|as_crispy_field }}
+         </div>
+         <div class="col-6">
+           {{ form.med_notes|as_crispy_field }}
+         </div>
+       </div>
+       <div class="row">
+         <div class="col-6">
+           {{ form.diet_needs|as_crispy_field }}
+         </div>
+         <div class="col-6">
+           {{ form.diet_notes|as_crispy_field }}
+         </div>
+       </div>
+       <div class="row">
+         <div class="col-6">
+           {{ form.collared|as_crispy_field }}
+         </div>
+         <div class="col-6">
+           {{ form.collar_info|as_crispy_field }}
+         </div>
+       </div>
+       <div class="row">
+         <div class="col-12">
+           {{ form.behavior_notes|as_crispy_field }}
+         </div>
+       </div>
+      </div>
+    <input type="submit" value="Save" class='btn btn-success' id='submit-button' style='display: none;'>
+    <span class='btn btn-success' id='next-section'>Next</span>
+    <a class='btn btn-secondary' href="{% url 'animals:animal_list' %}">Cancel</a>
+  </form>
+
+  <script type="text/javascript">
+    var i = 0;
+    $('#next-section').click(function(){
+      i++;
+      if (i == 1) {
+        $('.section-1').hide();
+        $('.section-2').show();
+        $('.section-3').hide();
+      } else if (i == 2) {
+        $('.section-1').hide();
+        $('.section-2').hide();
+        $('.section-3').show();
+        $('#next-section').hide();
+        $('#submit-button').show();
+      }});
+  </script>
+<br>
+<br>
 {% endblock %}
