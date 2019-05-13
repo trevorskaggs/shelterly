@@ -2,10 +2,10 @@
 
 {% block content %}
   <ul>
-    <li><a href="{% url 'people:owner_list' %}">List of Owners</a></li>
-    <li><a href="{% url 'animals:animal_list' %}">List of Animals</a></li>
-    <li><a href="{% url 'hotline:hotline_landing' %}">Hotline</a></li>
-    <li><a href="{% url 'evac:evac_landing' %}">Evac</a></li>
-    <li><a href="{% url 'intake:intake_landing' %}">Intake</a></li>
+    <a class="btn btn-warning btn-lg btn-block" href="{% url 'people:owner_list' %}">Owners</a>
+    <a class="btn btn-warning btn-lg btn-block" href="{% url 'animals:animal_list' %}">Animals</a>
+    <a class="btn btn-warning btn-lg btn-block" href="{% url 'hotline:hotline_landing' %}">Hotline</a>
+    <a class="btn btn-warning btn-lg btn-block" href="{% url 'evac:evac_landing' %}">Evac</a>
+    <a class="btn btn-warning btn-lg btn-block" href="{% url 'intake:intake_landing' %}">Intake</a>
   </ul>
 {% endblock %}
