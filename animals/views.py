@@ -23,7 +23,7 @@ def new_animal(request, species):
         animal = form.save()
         #return redirect('animals:animal_edit', pk=animal.pk)
         return HttpResponseRedirect(reverse_lazy('animals:animal_list'))
-    form = SPECIES_DICT[species]()
+    form = AnimalForm(species)
     return render(request, 'animal_new.html', {'form':form})
 
 class AnimalDetailView(generic.DetailView):
@@ -33,15 +33,10 @@ class AnimalDetailView(generic.DetailView):
 def AnimalEditView(request, pk):
     animal = Animal.objects.get(pk=pk)
     if request.POST:
-        form = SPECIES_DICT['dog'](request.POST, instance=animal)
+        form = AnimalForm(animal.species, request.POST, instance=animal)
         form.save()
-    form = SPECIES_DICT['dog'](instance=animal)
+    form = AnimalForm(animal.species, instance=animal)
     return render(request, 'animal_new.html', {'form':form})
-
-class AnimalDeleteView(generic.edit.DeleteView):
-    model = Animal
-    template_name = "owner_delete.html"
-    success_url = "http://127.0.0.1:8000/animals/"
 
 def new_owned_animal(request, species, pk):
     owner = Owner.objects.get(pk=pk)

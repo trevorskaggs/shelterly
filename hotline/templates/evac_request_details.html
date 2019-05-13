@@ -3,7 +3,8 @@
 
 {% block content %}
   <h1>Evac Request Summary</h1>
-  <h2>{{owner.first_name}} {{owner.last_name}}</h2>
+  <h2>Owner: <a href="{% url 'people:owner_detail' owner.pk %}">{{owner.first_name}} {{owner.last_name}}</a></h2>
+   <a href="{% url 'people:owner_edit' owner.pk %}">Edit Owner</a> - <a href="{% url 'people:owner_delete' owner.pk %}">Delete Owner</a>
   <p><strong>{{evac_request.timestamp}}</strong></p>
 
   <a class='btn btn-info' href="{% url 'hotline:hotline_new_animal' evac_request.pk 'dog' %}">+ Add Dog</a>

@@ -27,6 +27,7 @@ def evac_request_new(request, owner_pk):
         form = EvacRequestForm(request.POST)
         evac_req = form.save()
         evac_req.owner = owner
+        evac_req.save()
         return redirect('hotline:evac_request_detail', evac_req_pk=evac_req.pk)
     form = EvacRequestForm()
     return render(request, 'evac_request.html', {'form':form})

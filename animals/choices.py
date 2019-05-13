@@ -14,9 +14,9 @@ SEX_CHOICES = (
 )
 
 SIZE_CHOICES = (
-    ('L', "Large ()"),
-    ('M', "Medium ()"),
     ('S', "Small ()"),
+    ('M', "Medium ()"),
+    ('L', "Large ()"),
 )
 
 AGE_CHOICES = (
