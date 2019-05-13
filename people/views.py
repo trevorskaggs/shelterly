@@ -46,12 +46,3 @@ def owner_edit(request, pk):
         return redirect('people:owner_detail', owner.pk)
     form = OwnerForm(instance=owner)
     return render(request, 'owner_edit.html', {'form':form})
-
-def team_member(request, pk=None):
-    team_member = TeamMember.objects.get(pk=pk) if pk else None
-    if request.POST:
-        form = TeamMemberForm(request.POST, instance=team_member)
-        form.save()
-        return redirect('evac:evac_landing')
-    form = TeamMemberForm(instance=team_member)
-    return render(request, 'team_member.html', {'form':form})
