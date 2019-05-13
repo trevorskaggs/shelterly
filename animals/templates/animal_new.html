@@ -58,6 +58,25 @@
           {{ form.markings|as_crispy_field }}
         </div>
       </div>
+      <div class="row">
+        <div class="col-6">
+          {{ form.address|as_crispy_field }}
+        </div>
+        <div class="col-6">
+          {{ form.apartment|as_crispy_field }}
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-4">
+          {{ form.city|as_crispy_field }}
+        </div>
+        <div class="col-4">
+          {{ form.state|as_crispy_field }}
+        </div>
+        <div class="col-4">
+          {{ form.zip_code|as_crispy_field }}
+        </div>
+      </div>
      </div>
      <div class='section-3' style='display: none;'>
        <div class="row">

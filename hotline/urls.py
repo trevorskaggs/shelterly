@@ -21,10 +21,10 @@ from hotline import views
 app_name = 'hotline'
 
 urlpatterns = [
-    path('startcall', views.start_call, name ='start_call'),
-    path('startcall/<evac_request>/owner_new', views.hotline_new_owner, name = 'hotline_new_owner'),
-    path('starcall/<evac_request>/<int:pk>/edit', views.evac_request_edit, name = 'evac_request_edit'),
-    path('starcall/<evac_request>/<int:pk>', views.evac_request, name = 'evac_request'),
-    path('startcall/<evac_request>/<int:pk>/<species>/new', views.hotline_new_animal, name="hotline_new_animal"),
     path('', views.hotline_landing, name='hotline_landing'),
+    path('owner/new', views.hotline_new_owner, name = 'hotline_new_owner'),
+    path('evacreq/<int:owner_pk>/new', views.evac_request_new, name = 'evac_request_new'),
+    path('evacreq/<int:evac_req_pk>/', views.evac_request_detail, name = 'evac_request_detail'),
+    path('evacreq/<int:evac_req_pk>/edit', views.evac_request_edit, name = 'evac_request_edit'),
+    path('startcall/<evac_req_pk>/<species>/new', views.hotline_new_animal, name="hotline_new_animal"),
 ]

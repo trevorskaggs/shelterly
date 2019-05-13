@@ -1,22 +1,11 @@
 {% extends 'base.html' %}
 
-
 {% block content %}
-  <h1>Evac Request Summary</h1>
-  <h2>{{owner.first_name}} {{owner.last_name}}</h2>
-  <p><strong>{{evac_request.timestamp}}</strong></p>
 
-  <a class='btn btn-info' href="{% url 'hotline:hotline_new_animal' evac_request.pk owner.pk 'dog' %}">+ Add Dog</a>
-  <a class='btn btn-info'href="{% url 'hotline:hotline_new_animal' evac_request.pk owner.pk 'cat' %}">+ Add Cat</a>
-  <a class='btn btn-info' href="{% url 'hotline:hotline_new_animal' evac_request.pk owner.pk 'oth' %}">+ Add Other</a>
+  <h1>Evacuation Request Form</h1>
+  <form action="" method="post">{% csrf_token %}
+    {{form.as_p}}
+    <input type="submit" value="Save">
+  </form>
 
-  {% if owned_animal_list %}
-  <ul>
-    {% for animal in owned_animal_list %}
-      <li><a href="{% url 'animals:animal_detail' animal.pk %}">{{animal.species}} : {{animal.name}}</a></li>
-    {% endfor %}
-  </ul>
-  {% else %}
-    <p>THERE ARE CURRENTLY NO OWNED ANIMALS REGISTED</p>
-  {% endif %}
 {% endblock %}

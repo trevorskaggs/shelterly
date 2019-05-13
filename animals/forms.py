@@ -1,19 +1,12 @@
 from django import forms
 from animals.models import Animal
+from location.forms import LocationForm
 
-class AnimalForm(forms.ModelForm):
+class AnimalForm(LocationForm):
 
-    def save(self, owner=None):
-        if owner:
-            animal.owner = owner
-            animal.save()
-
-    def set_initial_location(self, location_object):
-        for field_name, field_value in location_object.get_location_fields():
-            try:
-                self.fields[field_name].initial = field_value
-            except:
-                pass
+    def __init__(self, species, *args, **kwargs):
+        super(AnimalForm, self).__init__(*args, **kwargs)
+        self.set_species_properties(species)
 
     def set_species_properties(self, species):
         self.fields['species'].initial = species
@@ -24,20 +17,3 @@ class AnimalForm(forms.ModelForm):
     class Meta:
         model = Animal
         exclude = ('latitude', 'longitude', 'request', 'owner')
-
-class DogForm(AnimalForm):
-
-    def __init__(self, *args, **kwargs):
-        super(DogForm, self).__init__(*args, **kwargs)
-        self.set_species_properties('dog')
-
-
-class CatForm(AnimalForm):
-
-    def __init__(self, *args, **kwargs):
-        super(CatForm, self).__init__(*args, **kwargs)
-        self.set_species_properties('cat')
-
-class OtherForm(AnimalForm):
-
-    pass

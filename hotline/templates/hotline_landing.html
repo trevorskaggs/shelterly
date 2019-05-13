@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <h1>Hotline Landing Page</h1>
-  <h2><a href="{% url 'hotline:start_call' %}">Start Call</a></h2>
+<a class="btn btn-warning btn-lg btn-block" href="{% url 'hotline:hotline_new_owner' %}"> OWNER CALLING</a>
+<a class="btn btn-warning btn-lg btn-block" href="{% url 'animals:animal_list' %}"> NON-OWNER CALLING</a>
 {% endblock %}

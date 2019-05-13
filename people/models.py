@@ -17,11 +17,9 @@ class Person(Location):
     def __str__(self):
         return self.first_name + ' ' + self.last_name
 
-    def get_absolute_url(self):
-        return  "http://127.0.0.1:8000/owners/"
-
 class Owner(Person):
-    reporter = models.OneToOneField('reporter', on_delete=models.SET_NULL, blank=True, null=True)
+
+    pass
 
 class Reporter(Person):
     class Meta:

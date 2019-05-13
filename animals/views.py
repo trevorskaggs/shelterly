@@ -4,7 +4,7 @@ from django.views import generic
 from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
 from animals.models import Animal
-from animals.forms import DogForm, CatForm, OtherForm
+from animals.forms import AnimalForm
 from people.models import Owner
 from people.views import owner_detail
 
@@ -17,15 +17,9 @@ class AnimalListView(generic.ListView):
     context_object_name = 'animal_list'
     template_name = 'animal_list.html'
 
-SPECIES_DICT = {
-    'dog': DogForm,
-    'cat': CatForm,
-    'oth': OtherForm,
-}
-
-def AnimalNewView(request, species):
+def new_animal(request, species):
     if request.POST:
-        form = SPECIES_DICT[species](request.POST)
+        form = AnimalForm
         animal = form.save()
         #return redirect('animals:animal_edit', pk=animal.pk)
         return HttpResponseRedirect(reverse_lazy('animals:animal_list'))
@@ -49,13 +43,14 @@ class AnimalDeleteView(generic.edit.DeleteView):
     template_name = "owner_delete.html"
     success_url = "http://127.0.0.1:8000/animals/"
 
-
 def new_owned_animal(request, species, pk):
     owner = Owner.objects.get(pk=pk)
     if request.POST:
-        form = SPECIES_DICT[species](request.POST)
-        form.save(owner)
+        form = AnimalForm(species, request.POST)
+        animal = form.save()
+        animal.owner = owner
+        animal.save()
         return redirect('people:owner_detail', owner.pk)
-    form = SPECIES_DICT[species]()
+    form = AnimalForm(species)
     form.set_initial_location(owner)
     return render(request, 'animal_new.html', {'form':form, 'owner':owner})
