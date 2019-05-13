@@ -21,7 +21,7 @@ from intake import views
 app_name = 'intake'
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
     path('', views.intake_landing, name ='intake_landing'),
     path('owned/', views.intake_owned, name='intake_owned'),
+    path('evacreq/select', views.select_evac_req, name='select_evac_req'),
 ]
