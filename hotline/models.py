@@ -10,8 +10,6 @@ class EvacReq(models.Model):
 
     #pre_field
     timestamp = models.DateTimeField(auto_now_add=True)
-    last_seen = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
-    attended_to = models.BooleanField(blank=True, null=True)
     directions = models.TextField(blank=True, null=True)
     verbal_permission = models.BooleanField(blank=True, null=True)
 

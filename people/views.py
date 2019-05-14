@@ -1,37 +1,46 @@
 from django.shortcuts import render, redirect
+from django.contrib import messages
 from animals.models import Animal
 from people.models import Owner
 from people.forms import OwnerForm, TeamMemberForm
-from django.views import generic
+
 
 # Create your views here.
 
-class OwnerListView(generic.ListView):
-    model = Owner
-    context_object_name = 'owner_list'
-    template_name = 'owner_list.html'
+def owner_list(request):
+    owner_list = Owner.objects.all()
+    context = {
+    'owner_list':owner_list,
+    }
+    return render('owner_list.html', context)
 
-class OwnerNewView(generic.edit.CreateView):
-    model = Owner
-    template_name = 'owner_edit.html'
+def owner_new(request):
+    if request.POST:
+        form = OwnerForm(request.POST)
+        form.save()
+        return redirect('people:owner_list')
+    form = NewOwnerForm()
+    return render(request, 'owner.html', {'form':form})
 
 
-    fields = ['first_name', 'last_name', 'home_phone', \
-        'work_phone', 'cell_phone', 'best_contact', \
-        'drivers_license', 'address', 'apartment', 'city', \
-        'state', 'zip_code']
+def owner_edit(request, pk):
+    owner = Owner.objects.get(pk=pk)
+    if request.POST:
+        form = NewOwnerForm(request.POST, instance=owner)
+        form.save()
+        return render('owner_list.html')
+    form = NewOwnerForm(instance=owner)
+    return render(request, 'owner.html', {'form':form})
 
-class OwnerEditView(generic.edit.UpdateView):
-    model = Owner
-    template_name = 'owner_edit.html'
-    fields = ['first_name', 'last_name', 'home_phone', \
-        'work_phone', 'cell_phone', 'best_contact', \
-        'drivers_license', 'address', 'apartment', 'city', \
-        'state', 'zip_code']
-
-class OwnerDeleteView(generic.edit.DeleteView):
-    model = Owner
-    template_name = "owner_delete.html"
+def owner_delete(request, pk):
+    owner = Owner.objects.get(pk=pk)
+    if reqest.POST:
+        owner.delete()
+        messages.success(request, "Owner successfully deleted!")
+    context = {
+    'owner':owner,
+    }
+    return render(request, "owner_delete.html", context)
 
 def owner_detail(request, pk):
     owner = Owner.objects.get(pk=pk)

@@ -4,7 +4,7 @@ from people.models import Owner
 from location.models import Location
 from animals.choices import AGE_CHOICES, BREED_CHOICES, SEX_CHOICES, SIZE_CHOICES, SPECIES_CHOICES, STATUS_CHOICES
 from animals.colors import DOG_COLOR_CHOICES, DOG_PATTERN_CHOICES
-    
+
 # Create your models here.
 class Animal(Location):
 
@@ -31,6 +31,7 @@ class Animal(Location):
     diet_needs = models.BooleanField(blank=True, null=True)
     med_needs = models.BooleanField(blank=True, null=True)
     collared = models.BooleanField(blank=True, null=True)
+    attended_to = models.BooleanField(blank=True, null=True)
 
     #text fields
     collar_info = models.TextField(blank=True, null=True)
@@ -38,7 +39,7 @@ class Animal(Location):
     chip_info = models.TextField(blank=True, null=True)
     diet_notes = models.TextField(blank=True, null=True)
     med_notes = models.TextField(blank=True, null=True)
+    last_seen = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
 
     class Meta:
         ordering = []
-

@@ -1,8 +1,8 @@
 from django import forms
 from animals.models import Animal
-from location.forms import LocationForm
+#from location.forms import LocationForm
 
-class AnimalForm(LocationForm):
+class AnimalForm():
 
     def __init__(self, species, *args, **kwargs):
         super(AnimalForm, self).__init__(*args, **kwargs)

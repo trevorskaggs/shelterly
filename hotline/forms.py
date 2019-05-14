@@ -19,4 +19,4 @@ class EvacRequestForm(forms.ModelForm):
 
     class Meta:
         model  = EvacReq
-        fields = ['owner', 'directions', 'verbal_permission', 'last_seen']
+        fields = ['owner', 'directions', 'verbal_permission']
