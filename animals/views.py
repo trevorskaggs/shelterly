@@ -3,45 +3,58 @@ from django.shortcuts import render, redirect
 from django.views import generic
 from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
-from animals.models import Animal
-from animals.forms import AnimalForm
 from people.models import Owner
 from people.views import owner_detail
+from animals.models import Animal
+from animals.forms import AnimalForm
+
+
 
 
 
 
 # Create your views here.
-class AnimalListView(generic.ListView):
-    model = Animal
-    context_object_name = 'animal_list'
-    template_name = 'animal_list.html'
+def animal_list(request):
+    animal_list = Animal.objects.all()
+    context = {
+    'animal_list':animal_list,
+    }
+    return render(request, 'animal_list.html', context)
 
 def new_animal(request, species):
     if request.POST:
-        form = AnimalForm
+        form = AnimalForm(request.POST)
         animal = form.save()
         #return redirect('animals:animal_edit', pk=animal.pk)
         return HttpResponseRedirect(reverse_lazy('animals:animal_list'))
-    form = SPECIES_DICT[species]()
+    form = AnimalForm(species)
     return render(request, 'animal_new.html', {'form':form})
 
-class AnimalDetailView(generic.DetailView):
-    model = Animal
-    template_name = "animal_detail.html"
+def animal_detail(request, pk):
+    animal = Animal.objects.get(pk=pk)
+    context = {
+    'animal':animal,
+    }
+    return render(request,'animal_detail.html', context)
 
-def AnimalEditView(request, pk):
+
+def animal_edit(request, pk):
     animal = Animal.objects.get(pk=pk)
     if request.POST:
-        form = SPECIES_DICT['dog'](request.POST, instance=animal)
+        form = AnimalForm(animal.species, request.POST, instance=animal)
         form.save()
-    form = SPECIES_DICT['dog'](instance=animal)
+    form = AnimalForm(animal.species, instance=animal)
     return render(request, 'animal_new.html', {'form':form})
 
-class AnimalDeleteView(generic.edit.DeleteView):
-    model = Animal
-    template_name = "owner_delete.html"
-    success_url = "http://127.0.0.1:8000/animals/"
+def animal_delete(request, pk):
+    animal = Animal.objects.get(pk=pk)
+    if request.POST:
+        animal.delete()
+        return render(request, 'animal_delete_success.html')
+    context = {
+    'animal':animal,
+    }
+    return render(request, 'animal_delete.html', context)
 
 def new_owned_animal(request, species, pk):
     owner = Owner.objects.get(pk=pk)

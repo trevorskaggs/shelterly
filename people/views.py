@@ -12,7 +12,7 @@ def owner_list(request):
     context = {
     'owner_list':owner_list,
     }
-    return render('owner_list.html', context)
+    return render(request, 'owner_list.html', context)
 
 def owner_new(request):
     if request.POST:
@@ -34,9 +34,9 @@ def owner_edit(request, pk):
 
 def owner_delete(request, pk):
     owner = Owner.objects.get(pk=pk)
-    if reqest.POST:
+    if request.POST:
         owner.delete()
-        messages.success(request, "Owner successfully deleted!")
+        return render(request, 'owner_delete_success.html')
     context = {
     'owner':owner,
     }
