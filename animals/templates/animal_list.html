@@ -1,3 +1,6 @@
+{% extends 'base.html' %}
+
+{% block content %}
   <h1>Animals</h1>
   <a class='btn btn-info' href="{% url 'animals:new_animal' 'dog'%}">+ Add Dog</a>
   <a class='btn btn-info'href="{% url 'animals:new_animal' 'cat'%}">+ Add Cat</a>
@@ -12,3 +15,4 @@
   {% else %}
     <p>THERE ARE CURRENTLY NO ANIMALS REGISTED</p>
   {% endif %}
+{% endblock %}

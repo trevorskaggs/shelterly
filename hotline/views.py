@@ -13,6 +13,7 @@ from .forms import HotlineOwnerForm, EvacRequestForm
 def hotline_landing(request):
     return render(request, 'hotline_landing.html')
 
+
 def hotline_new_owner(request):
     if request.POST:
         form = HotlineOwnerForm(request.POST)
@@ -27,10 +28,17 @@ def evac_request_new(request, owner_pk):
         form = EvacRequestForm(request.POST)
         evac_req = form.save()
         evac_req.owner = owner
+        evac_req.save()
         return redirect('hotline:evac_request_detail', evac_req_pk=evac_req.pk)
     form = EvacRequestForm()
     return render(request, 'evac_request.html', {'form':form})
 
+def evac_request_list(request):
+    evac_request_list = EvacReq.objects.all()
+    context = {
+    'evac_request_list':evac_request_list,
+    }
+    return render(request, 'evac_request_list.html', context)
 def evac_request_edit(request, pk):
     evac_request_obj = EvacReq.objects.get(pk=pk)
     if request.POST:

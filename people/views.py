@@ -19,7 +19,7 @@ def owner_new(request):
         form = OwnerForm(request.POST)
         form.save()
         return redirect('people:owner_list')
-    form = NewOwnerForm()
+    form = OwnerForm()
     return render(request, 'owner.html', {'form':form})
 
 

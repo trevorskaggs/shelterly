@@ -9,10 +9,6 @@ from animals.models import Animal
 from animals.forms import AnimalForm
 
 
-
-
-
-
 # Create your views here.
 def animal_list(request):
     animal_list = Animal.objects.all()
