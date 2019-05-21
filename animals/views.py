@@ -20,7 +20,7 @@ def animal_list(request):
 def new_animal(request, species):
     if request.POST:
         form = AnimalForm(request.POST)
-        animal = form.save()
+        form.save()
         #return redirect('animals:animal_edit', pk=animal.pk)
         return HttpResponseRedirect(reverse_lazy('animals:animal_list'))
     form = AnimalForm(species)
