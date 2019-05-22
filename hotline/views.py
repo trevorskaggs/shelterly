@@ -61,12 +61,14 @@ def evac_request_detail(request, evac_req_pk):
 
 def hotline_new_animal(request, evac_req_pk, species):
     if request.POST:
-        form = AnimalForm(request.POST)
-        owner = Owner.objects.get(pk=pk)
-        form.instance.owner = owner
+        form = AnimalForm(species, request.POST)
         animal = form.save()
-        #return redirect('animals:animal_edit', pk=animal.pk)
-        return redirect('hotline:evac_request', evac_request=evac_request, pk=owner.pk)
-    form = AnimalForm()
+        evac_req = EvacReq.objects.get(pk=evac_req_pk)
+        owner = evac_req.owner
+        form.instance.owner = owner
+        #animal.owner = owner
+        animal.save()
+        return redirect('hotline:evac_request_detail', evac_req_pk=evac_req_pk)
+    form = AnimalForm(species)
     form.set_species_properties(species)
     return render(request, 'animal_new.html', {'form':form})

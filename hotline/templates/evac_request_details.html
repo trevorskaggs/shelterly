@@ -9,19 +9,20 @@
 
 
   <h1>OWNER SUMMARY</h1>
+  <p><strong>Name:</strong> {{owner.first_name}} {{owner.last_name}}</p>
   <p><strong>Home Phone:</strong> {{owner.home_phone}} </p>
   <p><strong>Work Phone:</strong> {{owner.work_phone}} </p>
   <p><strong>Cell Phone:</strong> {{owner.cell_phone}} </p>
   <p><strong>Best Contact:</strong> {{owner.best_contact}} </p>
-  <p><strong>Drivers License:</strong> {{owner.drivers_license}} </p>
-  <p><strong>Owner PK:</strong>{{owner.pk}}</p>
+
+  
 
 
   <h1>ANIMALS SUMMARY</h1>
 
-  <a class='btn btn-info' href="{% url 'animals:new_owned_animal' 'dog' owner.pk %}">+ Add Dog</a>
-  <a class='btn btn-info'href="{% url 'animals:new_owned_animal' 'cat'  owner.pk %}">+ Add Cat</a>
-  <a class='btn btn-info' href="{% url 'animals:new_owned_animal' 'oth'  owner.pk %}">+ Add Other</a>
+  <a class='btn btn-info' href="{% url 'hotline:hotline_new_animal' evac_request.pk 'dog'%}">+ Add Dog</a>
+  <a class='btn btn-info'href="{% url 'hotline:hotline_new_animal' evac_request.pk 'cat'%}">+ Add Cat</a>
+  <a class='btn btn-info' href="{% url 'hotline:hotline_new_animal' evac_request.pk 'oth'%}">+ Add Other</a>
 
   {% for animal in owned_animal_list %}
     <h3><strong>Name:</strong> {{animal.name}}</h3>
@@ -32,9 +33,9 @@
   {% endfor %}
   <br>
   <br>
-  <a class='btn btn-info' href="{% url 'hotline:hotline_landing' %}">Back To Hotline Start</a>
-  <a class='btn btn-info' href="{% url 'hotline:evac_request_edit' evac_request.pk %}">Edit Request</a>
-  <a class='btn btn-info' href="{% url 'hotline:evac_request_list' %}">View Evacuation Request List</a>
+  <a class='btn btn-success' href="{% url 'hotline:hotline_landing' %}">Finish</a>
+  <a class='btn btn-warning' href="{% url 'hotline:evac_request_edit' evac_request.pk %}">Edit Request</a>
+  <a class='btn btn-secondary' href="{% url 'hotline:evac_request_list' %}">View Evacuation Request List</a>
 
 
 {% endblock %}
