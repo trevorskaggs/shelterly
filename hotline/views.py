@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.views import generic
 from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
-from people.models import Owner
+from people.models import Owner, Reporter
 from animals.models import Animal
 from animals.forms import AnimalForm
 from .models import EvacReq
@@ -14,20 +14,26 @@ def hotline_landing(request):
     return render(request, 'hotline_landing.html')
 
 
-def hotline_new_owner(request):
+def hotline_new_owner(request, rep_pk=None):
+    rep_pk = rep_pk if rep_pk else None
     if request.POST:
         form = HotlineOwnerForm(request.POST)
         owner = form.save()
-        return redirect('hotline:evac_request_new', owner_pk=owner.pk)
+        return redirect('hotline:evac_request_new', owner_pk=owner.pk, rep_pk=rep_pk)
     form = HotlineOwnerForm()
     return render(request, 'hotline_new_owner.html', {'form':form})
 
-def evac_request_new(request, owner_pk):
+def evac_request_new(request, owner_pk, rep_pk):
+    if rep_pk == 'None':
+        reporter = None
+    else:
+        reporter = Reporter.objects.get(pk=rep_pk)
     owner = Owner.objects.get(pk=owner_pk)
     if request.POST:
         form = EvacRequestForm(request.POST)
         evac_req = form.save()
         evac_req.owner = owner
+        evac_req.reporter = reporter
         evac_req.save()
         return redirect('hotline:evac_request_detail', evac_req_pk=evac_req.pk)
     form = EvacRequestForm()

@@ -24,8 +24,8 @@ urlpatterns = [
     path('', views.hotline_landing, name='hotline_landing'),
     path('evacreq/list', views.evac_request_list, name = 'evac_request_list'),
     path('owner/new', views.hotline_new_owner, name = 'hotline_new_owner'),
-    path('evacreq/<int:owner_pk>/new', views.evac_request_new, name = 'evac_request_new'),
+    path('evacreq/<int:owner_pk>/<rep_pk>/new', views.evac_request_new, name = 'evac_request_new'),
     path('evacreq/<int:evac_req_pk>/', views.evac_request_detail, name = 'evac_request_detail'),
     path('evacreq/<int:evac_req_pk>/edit', views.evac_request_edit, name = 'evac_request_edit'),
-    path('evacreq/<evac_req_pk>/<species>/new', views.hotline_new_animal, name = "hotline_new_animal"),
+    path('evacreq/<evac_req_pk>/animal/<species>/new', views.hotline_new_animal, name = "hotline_new_animal"),
 ]
