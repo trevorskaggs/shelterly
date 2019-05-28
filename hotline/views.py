@@ -6,13 +6,20 @@ from people.models import Owner, Reporter
 from animals.models import Animal
 from animals.forms import AnimalForm
 from .models import EvacReq
-from .forms import HotlineOwnerForm, EvacRequestForm
+from .forms import HotlineOwnerForm, HotlineReporterForm, EvacRequestForm
 
 
 # Create your views here.
 def hotline_landing(request):
     return render(request, 'hotline_landing.html')
 
+def hotline_new_reporter(request):
+    if request.POST:
+        form = HotlineReporterForm(request.POST)
+        reporter = form.save()
+        return redirect('hotline:hotline_new_owner', rep_pk = reporter.pk)
+    form = HotlineReporterForm()
+    return render(request, 'hotline_new_reporter.html', {'form':form})
 
 def hotline_new_owner(request, rep_pk=None):
     rep_pk = rep_pk if rep_pk else None
@@ -39,6 +46,20 @@ def evac_request_new(request, owner_pk, rep_pk):
     form = EvacRequestForm()
     return render(request, 'evac_request.html', {'form':form})
 
+def hotline_new_animal(request, evac_req_pk, species):
+    if request.POST:
+        form = AnimalForm(species, request.POST)
+        animal = form.save()
+        evac_req = EvacReq.objects.get(pk=evac_req_pk)
+        owner = evac_req.owner
+        form.instance.owner = owner
+        #animal.owner = owner
+        animal.save()
+        return redirect('hotline:evac_request_detail', evac_req_pk=evac_req_pk)
+    form = AnimalForm(species)
+    form.set_species_properties(species)
+    return render(request, 'animal_new.html', {'form':form})
+
 def evac_request_list(request):
     evac_request_list = EvacReq.objects.all()
     context = {
@@ -64,17 +85,3 @@ def evac_request_detail(request, evac_req_pk):
         'evac_request':evac_request,
     }
     return render(request, 'evac_request_details.html', context)
-
-def hotline_new_animal(request, evac_req_pk, species):
-    if request.POST:
-        form = AnimalForm(species, request.POST)
-        animal = form.save()
-        evac_req = EvacReq.objects.get(pk=evac_req_pk)
-        owner = evac_req.owner
-        form.instance.owner = owner
-        #animal.owner = owner
-        animal.save()
-        return redirect('hotline:evac_request_detail', evac_req_pk=evac_req_pk)
-    form = AnimalForm(species)
-    form.set_species_properties(species)
-    return render(request, 'animal_new.html', {'form':form})
