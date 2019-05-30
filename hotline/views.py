@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.views import generic
 from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
+from django.shortcuts import get_object_or_404
 from people.models import Owner, Reporter
 from animals.models import Animal
 from animals.forms import AnimalForm
@@ -34,8 +35,8 @@ def evac_request_new(request, owner_pk, rep_pk):
     if rep_pk == 'None':
         reporter = None
     else:
-        reporter = Reporter.objects.get(pk=rep_pk)
-    owner = Owner.objects.get(pk=owner_pk)
+        reporter = Reporter.objects.get_object_or_404(pk=rep_pk)
+    owner = Owner.objects.get_object_or_404(pk=owner_pk)
     if request.POST:
         form = EvacRequestForm(request.POST)
         evac_req = form.save()
@@ -50,7 +51,7 @@ def hotline_new_animal(request, evac_req_pk, species):
     if request.POST:
         form = AnimalForm(species, request.POST)
         animal = form.save()
-        evac_req = EvacReq.objects.get(pk=evac_req_pk)
+        evac_req = EvacReq.objects.get_object_or_404(pk=evac_req_pk)
         owner = evac_req.owner
         form.instance.owner = owner
         #animal.owner = owner
@@ -67,7 +68,7 @@ def evac_request_list(request):
     }
     return render(request, 'evac_request_list.html', context)
 def evac_request_edit(request, pk):
-    evac_request_obj = EvacReq.objects.get(pk=pk)
+    evac_request_obj = EvacReq.objects.get_object_or_404(pk=pk)
     if request.POST:
         form = EvacRequestForm(request.POST, instance=evac_request_obj)
         form.save()
@@ -76,7 +77,7 @@ def evac_request_edit(request, pk):
     return render(request, 'evac_request.html', {'form':form})
 
 def evac_request_detail(request, evac_req_pk):
-    evac_request = EvacReq.objects.get(pk=evac_req_pk)
+    evac_request = EvacReq.objects.get_object_or_404(pk=evac_req_pk)
     owner = evac_request.owner
     owned_animal_list = Animal.objects.all().filter(owner=owner)
     context = {
