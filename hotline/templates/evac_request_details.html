@@ -5,15 +5,15 @@
   <p><strong>Time of Request:</strong> {{evac_request.timestamp}}</p>
   <p><strong>Verbal Permission:</strong> {{evac_request.verbal_permission}}</p>
   <p><strong>Location:</strong></p>
-  <p>{{owner.address}} {{owner.apartment}} {{owner.city}} {{owner.state}} {{owner.zip_code}}</p>
+  <p>{{evac_request.owner.address}} {{evac_request.owner.apartment}} {{evac_request.owner.city}} {{evac_request.owner.state}} {{evac_request.owner.zip_code}}</p>
 
 
   <h1>OWNER SUMMARY</h1>
-  <p><strong>Name:</strong> {{owner.first_name}} {{owner.last_name}}</p>
-  <p><strong>Home Phone:</strong> {{owner.home_phone}} </p>
-  <p><strong>Work Phone:</strong> {{owner.work_phone}} </p>
-  <p><strong>Cell Phone:</strong> {{owner.cell_phone}} </p>
-  <p><strong>Best Contact:</strong> {{owner.best_contact}} </p>
+  <p><strong>Name:</strong> {{evac_request.owner.first_name}} {{evac_request.owner.last_name}}</p>
+  <p><strong>Home Phone:</strong> {{evac_request.owner.home_phone}} </p>
+  <p><strong>Work Phone:</strong> {{evac_request.owner.work_phone}} </p>
+  <p><strong>Cell Phone:</strong> {{evac_request.owner.cell_phone}} </p>
+  <p><strong>Best Contact:</strong> {{evac_request.owner.best_contact}} </p>
 
   
 
@@ -24,8 +24,8 @@
   <a class='btn btn-info'href="{% url 'hotline:hotline_new_animal' evac_request.pk 'cat'%}">+ Add Cat</a>
   <a class='btn btn-info' href="{% url 'hotline:hotline_new_animal' evac_request.pk 'oth'%}">+ Add Other</a>
 
-  {% for animal in owned_animal_list %}
-    <h3><strong>Name:</strong> {{animal.name}}</h3>
+  {% for animal in evac_request.animal_set.all %}
+    <h3><strong>Name:</strong> <a href="{% url 'animals:animal_detail' animal.pk %}"> {{animal.name}}</a></h3>
     <p><strong>Species:</strong> {{animal.species}} </p>
     <p><strong>Sex:</strong> {{animal.sex}} </p>
     <p><strong>Breed:</strong> {{animal.breed}} </p>

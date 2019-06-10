@@ -6,7 +6,7 @@
   {% if evac_request_list %}
   <ul>
     {% for evac_request in evac_request_list %}
-      <li><a href="{% url 'animals:animal_detail' evac_request.pk %}">{{evac_request.pk}}</a></li>
+      <li><a href="{% url 'hotline:evac_request_detail' evac_request.pk %}">{{evac_request.pk}}</a></li>
     {% endfor %}
   </ul>
   {% else %}

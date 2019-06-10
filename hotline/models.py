@@ -23,5 +23,10 @@ class EvacReq(Location):
     recovery_time = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
     owner_notification_tstamp = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
 
+    @property
+    def is_resolved(self):
+        from animals.models import Animal
+        return not Animal.objects.filter(request=self).filter(status__in=['REP', 'NFD']).exists()
+
     class Meta:
         ordering = []

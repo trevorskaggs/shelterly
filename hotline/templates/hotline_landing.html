@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<a class="btn btn-warning btn-lg btn-block" href="{% url 'hotline:hotline_new_owner' 'NONE' %}"> OWNER CALLING</a>
+<a class="btn btn-warning btn-lg btn-block" href="{% url 'hotline:hotline_new_owner' %}"> OWNER CALLING</a>
 <a class="btn btn-warning btn-lg btn-block" href="{% url 'hotline:hotline_new_reporter' %}"> NON-OWNER CALLING</a>
+<a class="btn btn-warning btn-lg btn-block" href="{% url 'hotline:evac_request_list' %}"> EVAC REQUEST LIST</a>
 {% endblock %}
