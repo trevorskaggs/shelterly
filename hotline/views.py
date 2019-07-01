@@ -49,6 +49,7 @@ def hotline_new_animal(request, evac_req_pk, species):
         animal = form.save()
         evac_req = get_object_or_404(EvacReq, pk=evac_req_pk)
         animal.request = evac_req
+        animal.status = 'REP'
         owner = evac_req.owner
         form.instance.owner = owner
         #animal.owner = owner
@@ -64,6 +65,21 @@ def evac_request_list(request):
     'evac_request_list':evac_request_list,
     }
     return render(request, 'evac_request_list.html', context)
+
+def evac_request_list_open(request):
+    evac_request_list_open = [req for req in EvacReq.objects.all() if req.is_resolved == False]
+    context = {
+    'evac_request_list_open':evac_request_list_open
+    }
+    return render(request, 'evac_request_list_open.html', context)
+
+def evac_request_list_closed(request):
+    evac_request_list_closed = [req for req in EvacReq.objects.all() if req.is_resolved == True]
+    context = {
+    'evac_request_list_closed':evac_request_list_closed
+    }
+    return render(request, 'evac_request_list_closed.html', context)
+
 def evac_request_edit(request, evac_req_pk):
     evac_request_obj = get_object_or_404(EvacReq, pk=evac_req_pk)
     if request.POST:

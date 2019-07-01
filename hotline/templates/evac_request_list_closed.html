@@ -1,0 +1,17 @@
+{% extends 'base.html'%}
+
+{% block content %}
+  <h1>Evacuation Request List</h1>
+
+  {% if evac_request_list_closed %}
+  <ul>
+    {% for evac_request in evac_request_list_closed %}
+      <li><a href="{% url 'hotline:evac_request_detail' evac_request.pk %}">{{evac_request.pk}}</a></li>
+    {% endfor %}
+  </ul>
+  {% else %}
+    <p>THERE ARE CURRENTLY NO ACTIVE EVACUATION REQUESTS</p>
+  {% endif %}
+
+  <a class='btn btn-info' href="{% url 'hotline:hotline_landing' %}">Back To Hotline Start</a>
+{% endblock %}
