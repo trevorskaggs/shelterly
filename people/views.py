@@ -17,8 +17,9 @@ def owner_list(request):
 def owner_new(request):
     if request.POST:
         form = OwnerForm(request.POST)
-        form.save()
-        return redirect('people:owner_list')
+        if form.is_valid():
+            form.save()
+            return redirect('people:owner_list')
     form = OwnerForm()
     return render(request, 'owner.html', {'form':form})
 

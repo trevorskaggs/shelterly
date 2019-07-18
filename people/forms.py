@@ -2,7 +2,12 @@ from django import forms
 from people.models import Owner, TeamMember
 
 class OwnerForm(forms.ModelForm):
-
+    def clean(self):
+        form_data = self.cleaned_data
+        only_letters(form_data['first_name']):
+            raise validation_error
+        form_data['last_name']
+        form_data['']
     class Meta:
         model = Owner
         fields = [ 'first_name', 'last_name', 'home_phone', \

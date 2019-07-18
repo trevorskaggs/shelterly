@@ -1,3 +1,4 @@
+from bootstrap_datepicker_plus import DateTimePickerInput
 from django import forms
 from animals.models import Animal
 from location.forms import LocationForm
@@ -17,3 +18,6 @@ class AnimalForm(LocationForm):
     class Meta:
         model = Animal
         exclude = ('latitude', 'longitude', 'request', 'owner')
+        widgets = {
+            'last_seen': DateTimePickerInput(), 
+        }

@@ -40,7 +40,7 @@ def animal_edit(request, pk):
         form.save()
         return redirect('animals:animal_list')
     form = AnimalForm(animal.species, instance=animal)
-    return render(request, 'animal_new.html', {'form':form})
+    return render(request, 'animal_new.html', {'my_form':form})
 
 def animal_delete(request, pk):
     animal = get_object_or_404(Animal, pk=pk)
