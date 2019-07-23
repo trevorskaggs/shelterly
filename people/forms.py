@@ -20,6 +20,9 @@ class OwnerForm(forms.ModelForm):
         'drivers_license', 'address', 'apartment', 'city', \
         'state', 'zip_code', ]
 
+
+    def __init__(self, *args, **kwargs):
+        super(OwnerForm, self).__init__(*args, **kwargs)
   
     def clean_first_name(self):
         fname = self.cleaned_data['first_name']
@@ -55,10 +58,13 @@ class OwnerForm(forms.ModelForm):
         city = self.cleaned_data['city']
         if not re.match(NAME_REGEX, city):
             raise validation_error(NAME_ERROR)
+        return city
 
-   # def clean_zip(zip): self.cleaned_data['zip_code']
-       # if not zip.isdigit():
-           # raise validation_error("Invalid Input: Non-Numerical Characters Found")
+    def clean_zipc(self): 
+        czip = self.cleaned_data['zip_code']
+        if not czip.isdigit():
+            raise validation_error("Invalid Input: Non-Numerical Characters Found")
+        return czip
 
 class ReporterForm(forms.ModelForm):
 
