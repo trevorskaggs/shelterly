@@ -56,10 +56,9 @@ class OwnerForm(forms.ModelForm):
         if not re.match(NAME_REGEX, city):
             raise validation_error(NAME_ERROR)
 
-    def clean_zip(zip):
-        zip = self.cleaned_data['zip_code']
-        if not zip.isdigit():
-            raise validation_error("Invalid Input: Non-Numerical Characters Found")
+   # def clean_zip(zip): self.cleaned_data['zip_code']
+       # if not zip.isdigit():
+           # raise validation_error("Invalid Input: Non-Numerical Characters Found")
 
 class ReporterForm(forms.ModelForm):
 
