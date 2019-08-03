@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from evac.models import EvacTeam
 from evac.forms import EvacTeamForm
 from people.models import TeamMember
+from people.forms import TeamMemberForm
 # Create your views here.
 def evac_landing(request):
     return render(request, 'evac_landing.html', {})
