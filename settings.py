@@ -43,8 +43,6 @@ INSTALLED_APPS = [
     'intake',
     'people',
     'crispy_forms',
-    'bootstrap4',
-    'bootstrap_datepicker_plus',
     'coverage',
 ]
 
