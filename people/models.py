@@ -19,14 +19,15 @@ class Person(Location):
 
 class Owner(Person):
 
-    pass
+    @property
+    def location_type(self):
+        return 'owner'
 
 class Reporter(Person):
-    class Meta:
-        ordering = []
 
-    def __str__(self):
-        return self.field_name
+    @property
+    def location_type(self):
+        return 'reporter'
 
 class TeamMember(models.Model):
 

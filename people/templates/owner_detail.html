@@ -17,6 +17,8 @@
   <p><strong>Latitude:</strong> {{owner.latitude}} </p>
   <p><strong>Longitude:</strong> {{owner.longitude}} </p>
   <hr>
+  <p><strong> MAP:</strong></p>
+  {% include "minimap.html" with object=owner %}
   {% include "animal_list.html" %}
 
 <a class="btn btn-primary btn-lg btn-block" href="{% url 'people:owner_list' %}">Back To Owner List</a>

@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'evac',
     'hotline',
     'intake',
+    'location',
     'people',
     'crispy_forms',
     'coverage',

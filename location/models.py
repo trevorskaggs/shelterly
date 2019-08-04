@@ -50,5 +50,19 @@ class Location(models.Model):
             #('longitude', self.longitude)
         ]
 
+    @property
+    def location_type(self):
+        pass
+
+    @property
+    def map_name(self):
+        return '{}_{}'.format(self.location_type, self.pk)
+
+    @property
+    def location_wkt(self):
+        import ipdb; ipdb.set_trace()
+        if self.longitude and self.latitude:
+            return 'POINT({} {})'.format(self.longitude, self.latitude)
+
     class Meta:
         abstract=True
