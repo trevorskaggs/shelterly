@@ -74,12 +74,11 @@ def evac_request_list_closed(request):
     return render(request, 'evac_request_list_closed.html', context)
 
 def evac_request_edit(request, evac_req_pk):
-    evac_request_obj = get_object_or_404(EvacReq, pk=evac_req_pk)
-    if request.POST:
-        form = EvacRequestForm(request.POST, instance=evac_request_obj)
+    evac_request_obj = EvacReq.objects.get(pk=evac_req_pk) if evac_req_pk else None
+    form = EvacRequestForm(request.POST or None, instance=evac_request_obj)
+    if form.is_valid():
         form.save()
         return redirect('hotline:evac_request_detail', evac_req_pk=evac_req_pk)
-    form = EvacRequestForm(instance=evac_request_obj)
     return render(request, 'evac_request_edit.html', {'form':form})
 
 def evac_request_detail(request, evac_req_pk):

@@ -23,10 +23,10 @@ class HotlineOwnerForm(forms.ModelForm):
 
 class EvacRequestForm(LocationForm):
 
-    def __init__(self, owner, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super(EvacRequestForm, self).__init__(*args, **kwargs)
         self.fields['owner'].widget = forms.HiddenInput()
 
     class Meta:
         model  = EvacReq
-        fields = ['owner', 'directions', 'verbal_permission', 'outcome', 'key_provided', 'forced_entry']
+        fields = ['owner', 'directions', 'verbal_permission', 'outcome', 'key_provided', 'forced_entry', 'address']
