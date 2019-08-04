@@ -11,11 +11,10 @@ def hotline_landing(request):
     return render(request, 'hotline_landing.html')
 
 def hotline_new_reporter(request):
-    if request.POST:
-        form = HotlineReporterForm(request.POST)
+    form = HotlineReporterForm(request.POST or None)
+    if request.POST and form.is_valid():
         reporter = form.save()
         return redirect('hotline:hotline_new_owner', rep_pk = reporter.pk)
-    form = HotlineReporterForm()
     return render(request, 'hotline_new_reporter.html', {'form':form})
 
 def hotline_new_owner(request, rep_pk=None):
@@ -26,22 +25,6 @@ def hotline_new_owner(request, rep_pk=None):
         return redirect('hotline:evac_request_new', owner_pk=owner.pk, rep_pk=rep_pk)
     form = HotlineOwnerForm()
     return render(request, 'hotline_new_owner.html', {'form':form})
-
-def evac_request_new(request, owner_pk, rep_pk):
-    if rep_pk == 'None':
-        reporter = None
-    else:
-        reporter = get_object_or_404(Reporter, pk=rep_pk)
-    owner = get_object_or_404(Owner, pk=owner_pk)
-    if request.POST:
-        form = EvacRequestForm(request.POST)
-        evac_req = form.save()
-        evac_req.owner = owner
-        evac_req.reporter = reporter
-        evac_req.save()
-        return redirect('hotline:evac_request_detail', evac_req_pk=evac_req.pk)
-    form = EvacRequestForm()
-    return render(request, 'evac_request.html', {'form':form})
 
 def hotline_new_animal(request, evac_req_pk, species):
     if request.POST:
@@ -58,6 +41,22 @@ def hotline_new_animal(request, evac_req_pk, species):
     form = AnimalForm(species)
     form.set_species_properties(species)
     return render(request, 'animal_new.html', {'form':form})
+
+def evac_request_new(request, owner_pk, rep_pk):
+    if rep_pk == 'None':
+        reporter = None
+    else:
+        reporter = get_object_or_404(Reporter, pk=rep_pk)
+    owner = get_object_or_404(Owner, pk=owner_pk)
+    if request.POST:
+        form = EvacRequestForm(request.POST)
+        evac_req = form.save()
+        evac_req.owner = owner
+        evac_req.reporter = reporter
+        evac_req.save()
+        return redirect('hotline:evac_request_detail', evac_req_pk=evac_req.pk)
+    form = EvacRequestForm()
+    return render(request, 'evac_request.html', {'form':form})
 
 def evac_request_list(request):
     evac_request_list = EvacReq.objects.all()
