@@ -10,5 +10,6 @@ urlpatterns = [
     path('teammember/new', views.team_member, name='new_team_member'),
     path('teammember/<int:pk>', views.team_member, name='edit_team_member'),
     path('evacteam/new', views.evac_team, name='new_evac_team'),
-    path('evacteam/<int:pk>', views.team_member, name='edit_evac_team'),
+    path('evacteam/<int:pk>', views.evac_team, name='edit_evac_team'),
+    path('evacteam/list', views.evac_team_list, name='evac_team_list'),
 ]

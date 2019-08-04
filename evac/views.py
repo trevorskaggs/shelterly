@@ -15,6 +15,10 @@ def evac_team(request, pk=None):
         return redirect('evac:evac_landing')
     return render(request, 'evac_team.html', {'form':form})
 
+def evac_team_list(request):
+    evac_teams = EvacTeam.objects.all()
+    return render(request, 'evac_team_list.html', {'evac_teams':evac_teams})
+
 def team_member(request, pk=None):
     team_member = TeamMember.objects.get(pk=pk) if pk else None
     form = TeamMemberForm(request.POST or None, instance=team_member)
