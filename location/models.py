@@ -39,16 +39,20 @@ class Location(models.Model):
         except:
             pass
 
-    def get_location_fields(self):
-        return [
-            ('address', self.address),
-            ('apartment', self.apartment),
-            ('city', self.city),
-            ('state', self.state),
-            ('zip_code', self.zip_code),
-            #('latitude', self.latitude),
-            #('longitude', self.longitude)
-        ]
+    def get_location_dict(self):
+        return {
+            'address': self.address,
+            'apartment': self.apartment,
+            'city': self.city,
+            'state': self.state,
+            'zip_code': self.zip_code,
+            'longitude': self.longitude,
+            'latitude': self.latitude
+        }
+
+    def set_initial_location_fields(self, seed_location_obj):
+        self.update(**seed_location_obj.get_location_dict())
+        self.save()
 
     @property
     def location_type(self):
@@ -60,7 +64,6 @@ class Location(models.Model):
 
     @property
     def location_wkt(self):
-        import ipdb; ipdb.set_trace()
         if self.longitude and self.latitude:
             return 'POINT({} {})'.format(self.longitude, self.latitude)
 

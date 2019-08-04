@@ -1,6 +1,7 @@
 from django import forms
+from location.forms import LocationForm
+from hotline.models import EvacReq
 from people.models import Owner, Reporter
-from .models import EvacReq
 
 class HotlineReporterForm(forms.ModelForm):
 
@@ -20,9 +21,9 @@ class HotlineOwnerForm(forms.ModelForm):
             'drivers_license', 'address', 'apartment', 'city', \
             'state', 'zip_code', ]
 
-class EvacRequestForm(forms.ModelForm):
+class EvacRequestForm(LocationForm):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, owner, *args, **kwargs):
         super(EvacRequestForm, self).__init__(*args, **kwargs)
         self.fields['owner'].widget = forms.HiddenInput()
 
