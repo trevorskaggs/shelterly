@@ -26,5 +26,5 @@ urlpatterns = [
     path('evac/', include('evac.urls')),
     path('hotline/', include('hotline.urls')),
     path('intake/', include('intake.urls')),
-    path('owners/', include('people.urls')),
+    path('people/', include('people.urls')),
 ]

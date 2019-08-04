@@ -4,7 +4,12 @@
 <h1>Delete Owner</h1>
 <form action="" method="post">{% csrf_token %}
   <p>Delete "{{owner.first_name}} {{owner.last_name}}" From Database?</p>
-  <input type="submit" name="" value="Confirm">
-
+  <input class="btn btn-danger btn-lg btn-block" type="submit" name="" value="Confirm">
 </form>
+<br>
+<br>
+<a class="btn btn-secondary btn-lg btn-block" href="{% url 'people:owner_list' %}">Cancel</a>
+
+
+
 {% endblock %}

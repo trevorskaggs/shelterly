@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% load crispy_forms_tags %}
+{{ my_form.media }}
 
 {% block content %}
   {% if owner %}<h2>Owner: {{ owner }}</h2>{% endif %}
@@ -36,6 +37,11 @@
         </div>
         <div class="col-6">
           {{ form.chip_info|as_crispy_field }}
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12">
+          {{ form.last_seen }}
         </div>
       </div>
     </div>
@@ -106,6 +112,11 @@
        <div class="row">
          <div class="col-12">
            {{ form.behavior_notes|as_crispy_field }}
+         </div>
+       </div>
+       <div class="row">
+         <div class="col-12">
+           {{ form.status|as_crispy_field }}
          </div>
        </div>
       </div>

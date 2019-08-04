@@ -11,10 +11,13 @@
   <p><strong>Secondary Color:</strong> {{animal.scolor}} </p>
   <p><strong>Markngs:</strong> {{animal.markings}} </p>
   <p><strong>Age:</strong> {{animal.age}} </p>
-  <p><strong>Status:</strong> {{animal.status}} </p>
   <p><strong>Fixed:</strong> {{animal.fixed}} </p>
   <p><strong>Aggressive:</strong> {{animal.aggressive}} </p>
+  <p><strong>Status:</strong> {{animal.status}} </p>
 
+{% if animal.request %}
+     <a class='btn btn-info' href="{% url 'hotline:evac_request_detail' animal.request.pk %}">Back To Evac Request</a>
+  {% endif %}
   <a class='btn btn-info' href="{% url 'animals:animal_edit' animal.pk %}">Edit Animal</a>
 
 {% endblock %}

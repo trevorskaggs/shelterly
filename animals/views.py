@@ -1,45 +1,59 @@
 
 from django.shortcuts import render, redirect
-from django.views import generic
+from django.shortcuts import get_object_or_404
 from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
+from people.models import Owner
 from animals.models import Animal
 from animals.forms import AnimalForm
-from people.models import Owner
-from people.views import owner_detail
-
-
 
 
 # Create your views here.
-class AnimalListView(generic.ListView):
-    model = Animal
-    context_object_name = 'animal_list'
-    template_name = 'animal_list.html'
+def animal_list(request):
+    animal_list = Animal.objects.all()
+    context = {
+    'animal_list':animal_list,
+    }
+    return render(request, 'animal_list.html', context)
 
 def new_animal(request, species):
     if request.POST:
-        form = AnimalForm
-        animal = form.save()
+        form = AnimalForm(request.POST)
+        form.save()
         #return redirect('animals:animal_edit', pk=animal.pk)
         return HttpResponseRedirect(reverse_lazy('animals:animal_list'))
     form = AnimalForm(species)
     return render(request, 'animal_new.html', {'form':form})
 
-class AnimalDetailView(generic.DetailView):
-    model = Animal
-    template_name = "animal_detail.html"
+def animal_detail(request, pk):
+    animal = get_object_or_404(Animal, pk=pk)
+    context = {
+    'animal':animal,
+    }
+    return render(request,'animal_detail.html', context)
 
-def AnimalEditView(request, pk):
-    animal = Animal.objects.get(pk=pk)
+
+def animal_edit(request, pk):
+    animal = get_object_or_404(Animal, pk=pk)
     if request.POST:
         form = AnimalForm(animal.species, request.POST, instance=animal)
         form.save()
+        return redirect('animals:animal_list')
     form = AnimalForm(animal.species, instance=animal)
-    return render(request, 'animal_new.html', {'form':form})
+    return render(request, 'animal_new.html', {'my_form':form})
+
+def animal_delete(request, pk):
+    animal = get_object_or_404(Animal, pk=pk)
+    if request.POST:
+        animal.delete()
+        return render(request, 'animal_delete_success.html')
+    context = {
+    'animal':animal,
+    }
+    return render(request, 'animal_delete.html', context)
 
 def new_owned_animal(request, species, pk):
-    owner = Owner.objects.get(pk=pk)
+    owner = get_object_or_404(Owner, pk=pk)
     if request.POST:
         form = AnimalForm(species, request.POST)
         animal = form.save()

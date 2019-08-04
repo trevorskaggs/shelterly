@@ -17,3 +17,4 @@ class AnimalForm(LocationForm):
     class Meta:
         model = Animal
         exclude = ('latitude', 'longitude', 'request', 'owner')
+        
