@@ -4,8 +4,13 @@
 
 {% block content %}
 
-  <h1>Evacuation Request Form: Edit</h1>
+  <h1>Evacuation Request</h1>
   <form action="" method="post">{% csrf_token %}
+      <div class = "row">
+        <div class = "col-12">
+          {{form.outcome|as_crispy_field}}
+        </div>
+      </div>
       <div class = "row">
         <div class = "col-12">
           {{form.directions|as_crispy_field}}
@@ -14,11 +19,6 @@
       <div class = "row">
         <div class = "col-12">
           {{form.verbal_permission|as_crispy_field}}
-        </div>
-      </div>
-      <div class = "row">
-        <div class = "col-12">
-          {{form.outcome|as_crispy_field}}
         </div>
       </div>
       <div class = "row">
