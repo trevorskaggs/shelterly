@@ -1,4 +1,9 @@
+import geocoder
+
+from django.conf import settings
 from django.db import models
+
+
 
 STATE_CHOICES = (
     ('AL', "AL"),('AK', "AK"),('AZ', "AZ"),('AR', "AR"),('CA', "CA"),('CO', "CO"),('CT', "CT"),
@@ -20,6 +25,19 @@ class Location(models.Model):
     zip_code = models.CharField(max_length=50, blank=True, null=True)
     latitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
     longitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        self.set_lat_lon()
+        super(Location, self).save(*args, **kwargs)
+
+    def set_lat_lon(self):
+        try:
+            query_string = (',').join([self.address or '', self.apartment or '', self.city or '', self.state or '', self.zip_code or ''])
+            g = geocoder.here(query_string, app_id=settings.HERE_APP_ID, app_code=settings.HERE_APP_CODE)
+            self.latitude = g.json['lat']
+            self.longitude = g.json['lng']
+        except:
+            pass
 
     def get_location_fields(self):
         return [
