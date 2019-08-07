@@ -11,5 +11,7 @@
   {% else %}
     <p>THERE ARE CURRENTLY NO OWNERS REGISTED</p>
   {% endif %}
-  <a href="{% url 'people:owner_new' %}">+ Add Owner</a>
+  
+<input class='btn btn-primary'  type=button value="Back" onClick="javascript:history.go(-1);">
+
 {% endblock %}

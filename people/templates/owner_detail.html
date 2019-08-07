@@ -1,24 +1,38 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <h1>Owner: {{owner.first_name}} {{owner.last_name}}</h1>
-  <a class = "btn btn-primary" href="{% url 'people:owner_edit' owner.pk %}">Edit Owner</a>  <a class = "btn btn-danger" href="{% url 'people:owner_delete' owner.pk %}">Delete Owner</a>
 
+  <h1>OWNER SUMMARY</h1>
+  <p><strong>Name:</strong> {{owner.first_name}} {{owner.last_name}}</p>
   <p><strong>Home Phone:</strong> {{owner.home_phone}} </p>
   <p><strong>Work Phone:</strong> {{owner.work_phone}} </p>
   <p><strong>Cell Phone:</strong> {{owner.cell_phone}} </p>
   <p><strong>Best Contact:</strong> {{owner.best_contact}} </p>
-  <p><strong>Drivers License:</strong> {{owner.drivers_license}} </p>
-  <p><strong>Address:</strong> {{owner.address}} </p>
-  <p><strong>Apartment:</strong> {{owner.apartment}} </p>
-  <p><strong>City:</strong> {{owner.city}} </p>
-  <p><strong>State:</strong> {{owner.state}} </p>
-  <p><strong>Zip Code:</strong> {{owner.zip_code}} </p>
-  <p><strong>Latitude:</strong> {{owner.latitude}} </p>
-  <p><strong>Longitude:</strong> {{owner.longitude}} </p>
-  <hr>
-  {% include "animal_list.html" %}
 
-<a class="btn btn-primary btn-lg btn-block" href="{% url 'people:owner_list' %}">Back To Owner List</a>
+  <h1>EVACUATION REQUEST NUMBER: {{evac_request.pk}}</h1>
+  <p><strong>Time of Request:</strong> {{evac_request.timestamp}}</p>
+  <p><strong>Verbal Permission:</strong> {{evac_request.verbal_permission}}</p>
+  <p><strong>Location:</strong></p>
+  <p>{{evac_request.owner.address}} {{evac_request.owner.apartment}} {{evac_request.owner.city}} {{evac_request.owner.state}} {{evac_request.owner.zip_code}}</p>
+
+  <h1>ANIMALS SUMMARY</h1>
+
+  {% if evac_request.animal_set.all %}
+
+    {% for animal in evac_request.animal_set.all %}
+      <h3><strong>Name:</strong> <a href="{% url 'animals:animal_detail' animal.pk %}"> {{animal.name}}</a></h3>
+      <p><strong>Species:</strong> {{animal.species}} </p>
+      <p><strong>Sex:</strong> {{animal.sex}} </p>
+      <p><strong>Breed:</strong> {{animal.breed}} </p>
+      <p><strong>Status:</strong> {{animal.status}} </p>
+    {% endfor %}
+  
+  {% else %}
+    <p>THERE ARE CURRENTLY NO ANIMALS REGISTED TO PERSON</p>
+  {% endif %}
+  <br>
+  <a class='btn btn-warning' href="{% url 'hotline:evac_request_edit' evac_request.pk %}">Edit Request</a>
+  <input class='btn btn-primary'  type=button value="Back" onClick="javascript:history.go(-1);">
 
 {% endblock %}
+

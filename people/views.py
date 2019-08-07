@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.shortcuts import get_object_or_404
 from animals.models import Animal
 from people.models import Owner
+from hotline.models import EvacReq
 from people.forms import OwnerForm, TeamMemberForm
 
 
@@ -45,8 +46,12 @@ def owner_delete(request, pk):
 
 def owner_detail(request, pk):
     owner = get_object_or_404(Owner, pk=pk)
-    animal_list = Animal.objects.filter(owner=owner)
-    return render(request, 'owner_detail.html', {'owner':owner, 'animal_list':animal_list})
+    evac_request = get_object_or_404(EvacReq, owner=owner)
+    context = {
+        'evac_request':evac_request,
+        'owner':owner,
+    }
+    return render(request, 'owner_detail.html', context)
 
 def owner_edit(request, pk):
     owner = get_object_or_404(Owner, pk=pk)
