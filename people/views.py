@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.shortcuts import get_object_or_404
+from django.db.models import Q
 from animals.models import Animal
 from people.models import Owner
 from hotline.models import EvacReq
@@ -10,8 +11,16 @@ from people.forms import OwnerForm, TeamMemberForm
 
 def owner_list(request):
     owner_list = Owner.objects.all()
+    search_term = ''
+
+    if 'search' in request.GET:
+        search_term = request.GET['search']
+        namequery = Q(first_name__icontains=search_term)|Q(last_name__icontains=search_term)
+        owner_list = Owner.objects.filter(namequery)
+
     context = {
     'owner_list':owner_list,
+    'search_term':search_term,
     }
     return render(request, 'owner_list.html', context)
 
