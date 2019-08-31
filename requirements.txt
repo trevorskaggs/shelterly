@@ -1,6 +1,6 @@
 cycler==0.10.0
 coverage==4.5.4
-Django==2.1.7
+Django==2.1.11
 django-crispy-forms==1.7.2
 geocoder==1.38.1
 kiwisolver==1.0.1
