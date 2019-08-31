@@ -27,4 +27,5 @@ urlpatterns = [
     path('hotline/', include('hotline.urls')),
     path('intake/', include('intake.urls')),
     path('people/', include('people.urls')),
+    path('shelter/', include('shelter.urls')),
 ]

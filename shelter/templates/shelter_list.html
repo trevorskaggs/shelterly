@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>Shelters</h1>
+  {% if shelter_list %}
+  <ul>
+    {% for shelter in shelter_list %}
+      <li><a href="{% url 'shelter:shelter_detail' shelter.pk %}">{{ shelter.name }}</a> - {{ shelter.description }}</li>
+    {% endfor %}
+  </ul>
+  {% else %}
+    <p>THERE ARE CURRENTLY NO SHELTERS CONFIGURED</p>
+  {% endif %}
+{% endblock %}
