@@ -71,7 +71,7 @@ def service_request_list_closed(request):
 
 def service_request_edit(request, service_request_pk):
     service_request_obj = ServiceRequest.objects.get(pk=service_request_pk) if service_request_pk else None
-    form = ServiceRequestForm(request.POST or None, instance=service_request_obj)
+    form = ServiceRequestForm(None, request.POST or None, instance=service_request_obj)
     if form.is_valid():
         form.save()
         return redirect('hotline:service_request_detail', service_request_pk=service_request_pk)

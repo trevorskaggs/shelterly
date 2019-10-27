@@ -56,15 +56,14 @@
         </div>
       </div>
       <input type="submit" value="Save" class='btn btn-success' id='submit-button'>
+      <input class='btn btn-primary'  type=button value="Cancel" onClick="javascript:history.go(-1);">
       <br>
       <br>
     </div>
     <div v-if="show < 1 ? true:false">
       <span class='btn btn-success' @click="show += 1">Next</span>
-      <br>
-      <br>
+      <input class='btn btn-primary'  type=button value="Cancel" onClick="javascript:history.go(-1);">
     </div>
-    <input class='btn btn-primary'  type=button value="Back" onClick="javascript:history.go(-1);">
   </form>
 </div>
 

@@ -23,8 +23,10 @@ class HotlineOwnerForm(forms.ModelForm):
 
 class ServiceRequestForm(LocationForm):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, owner=None, *args, **kwargs):
         super(ServiceRequestForm, self).__init__(*args, **kwargs)
+        if owner:
+            self.set_initial_location(owner)
         self.fields['owner'].widget = forms.HiddenInput()
 
     class Meta:
