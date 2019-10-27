@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404
 from django.db.models import Q
 from animals.models import Animal
 from people.models import Owner
-from hotline.models import EvacReq
+from hotline.models import ServiceRequest
 from people.forms import OwnerForm, TeamMemberForm
 
 
@@ -55,9 +55,9 @@ def owner_delete(request, pk):
 
 def owner_detail(request, pk):
     owner = get_object_or_404(Owner, pk=pk)
-    evac_request = get_object_or_404(EvacReq, owner=owner)
+    service_request = get_object_or_404(ServiceRequest, owner=owner)
     context = {
-        'evac_request':evac_request,
+        'service_request':service_request,
         'owner':owner,
     }
     return render(request, 'owner_detail.html', context)

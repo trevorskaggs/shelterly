@@ -3,17 +3,15 @@ from location.models import Location
 from people.models import Owner, Reporter
 
 # Create your models here.
-class EvacReq(Location):
+class ServiceRequest(Location):
     #keys
     owner = models.ForeignKey(Owner, on_delete=models.SET_NULL, blank=True, null=True)
     reporter = models.ForeignKey(Reporter, on_delete=models.SET_NULL, blank=True, null=True)
-    #worker = models.ForeignKey(Worker, on_delete=models.SET_NULL, blank=True, null=True)
 
     #pre_field
     timestamp = models.DateTimeField(auto_now_add=True)
     directions = models.TextField(blank=True, null=True)
     verbal_permission = models.BooleanField(blank=True, null=True)
-
 
     #post_field
     key_provided = models.BooleanField(blank=True, null=True)

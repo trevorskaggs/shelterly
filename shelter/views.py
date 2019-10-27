@@ -9,16 +9,16 @@ def shelter_list(request):
 
 def shelter_detail(request, pk):
     shelter = get_object_or_404(Shelter, pk=pk)
-    return render(request, 'shelter_detail.html', {'shelter':shelter})
+    return render(request, 'shelter_details.html', {'shelter':shelter})
 
 def building_detail(request, pk):
     building = get_object_or_404(Building, pk=pk)
-    return render(request, 'building_detail.html', {'building':building})
+    return render(request, 'building_details.html', {'building':building})
 
 def room_detail(request, pk):
     room = get_object_or_404(Room, pk=pk)
-    return render(request, 'room_detail.html', {'room':room})
+    return render(request, 'room_details.html', {'room':room})
 
 def cage_detail(request, pk):
     cage = get_object_or_404(Cage, pk=pk)
-    return render(request, 'cage_detail.html', {'cage':cage})
+    return render(request, 'cage_details.html', {'cage':cage})

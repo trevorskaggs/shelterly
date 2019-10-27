@@ -27,10 +27,8 @@ def new_animal(request, species):
 
 def animal_detail(request, pk):
     animal = get_object_or_404(Animal, pk=pk)
-    context = {
-    'animal':animal,
-    }
-    return render(request,'animal_detail.html', context)
+    data = {'animal':animal}
+    return render(request,'animal_detail.html', data)
 
 
 def animal_edit(request, pk):
@@ -47,16 +45,14 @@ def animal_delete(request, pk):
     if request.POST:
         animal.delete()
         return render(request, 'animal_delete_success.html')
-    context = {
-    'animal':animal,
-    }
-    return render(request, 'animal_delete.html', context)
+    data = {'animal':animal}
+    return render(request, 'animal_delete.html', data)
 
 def new_owned_animal(request, species, pk):
     owner = get_object_or_404(Owner, pk=pk)
-    if request.POST:
-        form = AnimalForm(species, request.POST)
-        animal = form.save()
+    form = AnimalForm(species, request.POST or None)
+    if form.is_valid():
+        animal = form.save(owner)
         animal.owner = owner
         animal.save()
         return redirect('people:owner_detail', owner.pk)

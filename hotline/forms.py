@@ -1,6 +1,6 @@
 from django import forms
 from location.forms import LocationForm
-from hotline.models import EvacReq
+from hotline.models import ServiceRequest
 from people.models import Owner, Reporter
 
 class HotlineReporterForm(forms.ModelForm):
@@ -21,12 +21,12 @@ class HotlineOwnerForm(forms.ModelForm):
             'drivers_license', 'address', 'apartment', 'city', \
             'state', 'zip_code', ]
 
-class EvacRequestForm(LocationForm):
+class ServiceRequestForm(LocationForm):
 
     def __init__(self, *args, **kwargs):
-        super(EvacRequestForm, self).__init__(*args, **kwargs)
+        super(ServiceRequestForm, self).__init__(*args, **kwargs)
         self.fields['owner'].widget = forms.HiddenInput()
 
     class Meta:
-        model  = EvacReq
+        model  = ServiceRequest
         fields = ['owner', 'directions', 'verbal_permission', 'outcome', 'key_provided', 'forced_entry', 'address']

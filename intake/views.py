@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from hotline.models import EvacReq
+from hotline.models import ServiceRequest
 from people.forms import OwnerForm
 from people.views import owner_detail
 from people.models import Owner, Reporter
@@ -17,5 +17,5 @@ def intake_owned(request):
     return render(request, 'owner_edit.html', {'form':form})
 
 def select_evac_req(request):
-    evac_reqs = EvacReq.objects.filter(outcome__isnull=True)
-    return render(request, 'evac_req_list.html', {'evac_reqs':evac_reqs})
+    service_requests = ServiceRequest.objects.filter(outcome__isnull=True)
+    return render(request, 'service_request_list.html', {'service_requests':service_requests})

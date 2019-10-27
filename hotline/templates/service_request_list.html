@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+  <h1>Service Requests</h1>
+  {% if service_requests %}
+  <ul>
+    {% for service_request in service_requests %}
+      <li><a href="{% url 'hotline:service_request_detail' service_request.pk %}">{{service_request}}</a></li>
+    {% endfor %}
+  </ul>
+  {% else %}
+    <p>THERE ARE CURRENTLY NO SERVICE REQUESTS OUTSTANDING</p>
+  {% endif %}
+
+{% endblock content %}
+

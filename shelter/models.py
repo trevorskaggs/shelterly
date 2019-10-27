@@ -9,8 +9,8 @@ class Shelter(Location):
     image = models.ImageField(upload_to = 'images/shelter', blank=True, null=True)
 
     @property
-    def all_animals(self):
-        from animal.models import Animal
+    def animals(self):
+        from animals.models import Animal
         return Animal.objects.filter(cage__room__building__shelter=self)
 
     def __str__(self):

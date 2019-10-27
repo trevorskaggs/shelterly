@@ -3,7 +3,7 @@ from django.db import models
 from animals.choices import AGE_CHOICES, BREED_CHOICES, SEX_CHOICES, SIZE_CHOICES, SPECIES_CHOICES, STATUS_CHOICES
 from animals.colors import DOG_COLOR_CHOICES, DOG_PATTERN_CHOICES
 from location.models import Location
-from hotline.models import EvacReq
+from hotline.models import ServiceRequest
 from people.models import Owner
 from shelter.models import Cage
 
@@ -11,7 +11,7 @@ from shelter.models import Cage
 # Create your models here.
 class Animal(Location):
 
-    request = models.ForeignKey(EvacReq, on_delete=models.SET_NULL, blank=True, null=True)
+    request = models.ForeignKey(ServiceRequest, on_delete=models.SET_NULL, blank=True, null=True)
     owner = models.ForeignKey(Owner, on_delete=models.SET_NULL, blank=True, null=True)
     name = models.CharField(max_length=50, blank=True, null=True)
     cage = models.ForeignKey(Cage, on_delete=models.SET_NULL, blank=True, null=True)
