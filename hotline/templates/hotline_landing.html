@@ -3,7 +3,8 @@
 {% block content %}
 <a class="btn btn-warning btn-lg btn-block" href="{% url 'hotline:hotline_new_owner' %}"> OWNER CALLING</a>
 <a class="btn btn-warning btn-lg btn-block" href="{% url 'hotline:hotline_new_reporter' %}"> NON-OWNER CALLING</a>
-<a class="btn btn-warning btn-lg btn-block" href="{% url 'hotline:evac_request_list' %}"> EVAC REQUEST LIST</a>
-<a class="btn btn-warning btn-lg btn-block" href="{% url 'hotline:evac_request_list_open' %}"> OPEN EVAC REQUEST LIST</a>
-<a class="btn btn-warning btn-lg btn-block" href="{% url 'hotline:evac_request_list_closed' %}"> CLOSED EVAC REQUEST LIST</a>
+<br>
+<br>
+<input class="btn btn-primary btn-lg btn-block"  type=button value="BACK" onClick="javascript:history.go(-1);">
+
 {% endblock %}

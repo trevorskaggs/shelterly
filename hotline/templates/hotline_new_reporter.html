@@ -4,8 +4,9 @@
 
 {% block content %}
   <h1>Reporter Information</h1>
+<div id="app">
   <form action="" method="post">{% csrf_token %}
-    <div class='section-1'>
+    <div class='section-1' v-show="show == 0 ? true:false">
       <div class="row">
         <div class="col-6">
           {{ form.first_name|as_crispy_field }}
@@ -26,7 +27,7 @@
         </div>
       </div>
     </div>
-    <div class='section-2' style='display: none;'>
+    <div class='section-2' v-show="show == 1 ? true:false">
       <div class="row">
         <div class="col-6">
           {{ form.best_contact|as_crispy_field }}
@@ -54,17 +55,25 @@
           {{ form.zip_code|as_crispy_field }}
         </div>
       </div>
-     </div>
-    <input type="submit" value="Save" class='btn btn-success' id='submit-button' style='display: none;'>
-    <span class='btn btn-success' id='next-section'>Next</span>
+      <input type="submit" value="Save" class='btn btn-success' id='submit-button'>
+      <br>
+      <br>
+    </div>
+    <div v-if="show < 1 ? true:false">
+      <span class='btn btn-success' @click="show += 1">Next</span>
+      <br>
+      <br>
+    </div>
+    <input class='btn btn-primary'  type=button value="Back" onClick="javascript:history.go(-1);">
   </form>
+</div>
 
-  <script type="text/javascript">
-    $('#next-section').click(function(){
-      $('.section-1').hide();
-      $('.section-2').show();
-      $('#next-section').hide();
-      $('#submit-button').show();
+  <script>
+    var app = new Vue({
+      el: "#app",
+      data: {
+        show: 0,
+      }
     });
   </script>
 <br>
