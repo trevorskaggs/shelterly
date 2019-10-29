@@ -30,7 +30,7 @@ CAT_COLOR_CHOICES = (
     ('grey', 'Grey'),
     ('chocolate', 'Chocolate'),
     ('cinnamon', 'Cinnamon'),
-    ('caramel', 'Caramel')
+    ('caramel', 'Caramel'),
     ('white', 'White'),
     ('black white', 'Black / White'),
     ('grey white', 'Grey / White'),
@@ -43,7 +43,7 @@ CAT_COLOR_CHOICES = (
 CAT_PATTERN_CHOICES = (
     ('solid', 'Solid'),
     ('bicolor', 'Bicolor'),
-    ('bengal', 'Bengal')
+    ('bengal', 'Bengal'),
     ('colorpoint', 'Colorpoint'),
     ('calico', 'Calico'),
     ('tortoiseshell', 'Tortoiseshell'),
