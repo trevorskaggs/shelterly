@@ -26,7 +26,7 @@
         </div>
       </div>
     </div>
-    <div class='section-2' style='display: none;'>
+    <div class='section-2'>
       <div class="row">
         <div class="col-6">
           {{ form.best_contact|as_crispy_field }}
@@ -56,21 +56,8 @@
       </div>
      </div>
     <input type="submit" value="Save" class='btn btn-success' id='submit-button' style='display: none;'>
-    <span class='btn btn-success' id='next-section'>Next</span>
-    <span class='btn btn-secondary' id='back-button'>Cancel</span>
+    <input class='btn btn-primary'  type=button value="Cancel" onClick="javascript:history.go(-1);">
   </form>
-
-  <script type="text/javascript">
-    $('#next-section').click(function(){
-      $('.section-1').hide();
-      $('.section-2').show();
-      $('#next-section').hide();
-      $('#submit-button').show();
-    });
-    $('#back-button').on('click', function(){
-        window.history.back()
-    })
-  </script>
 <br>
 <br>
 

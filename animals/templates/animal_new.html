@@ -7,7 +7,7 @@
   <h1>Animal Information</h1>
 <div id="app">
   <form action="" method="post">{% csrf_token %}
-    <div class="section-1" v-show="show == 0 ? true:false">
+    <div class="section-1">
       <div class="row">
         <div class="col-6">
           {{ form.name|as_crispy_field }}
@@ -44,7 +44,7 @@
         </div>
       </div>
     </div>
-    <div class="section-2" v-show="show == 1 ? true:false">
+    <div class="section-2">
       <div class="row">
         <div class="col-12">
           {{ form.breed|as_crispy_field }}
@@ -83,7 +83,7 @@
         </div>
       </div>
     </div>
-    <div class="section-3" v-show="show == 2 ? true:false">
+    <div class="section-3">
       <div class="row">
         <div class="col-6">
           {{ form.med_needs|as_crispy_field }}
@@ -122,23 +122,10 @@
       <br>
       <br>
     </div>
-    <div v-if="show < 2 ? true:false">
-      <span class='btn btn-success' @click="show += 1" >Next</span>
-      <br>
-      <br>
-    </div>
     <a class='btn btn-secondary' href="{% url 'animals:animal_list' %}">Cancel</a>
   </form>
 </div>
 
-  <script>
-    var app = new Vue({
-      el: "#app",
-      data:{
-        show: 0,
-      }
-    });
-  </script>
 <br>
 <br>
 

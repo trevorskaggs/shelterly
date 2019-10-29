@@ -6,7 +6,7 @@
   <h1>Owner Information</h1>
 <div id="app">
   <form action="" method="post">{% csrf_token %}
-    <div class='section-1' v-show="show == 0 ? true:false">
+    <div class='section-1'>
       <div class="row">
         <div class="col-6">
           {{ form.first_name|as_crispy_field }}
@@ -27,7 +27,7 @@
         </div>
       </div>
     </div>
-    <div class='section-2' v-show="show == 1 ? true:false">
+    <div class='section-2'>
       <div class="row">
         <div class="col-6">
           {{ form.best_contact|as_crispy_field }}
@@ -60,22 +60,12 @@
       <br>
       <br>
     </div>
-    <div v-if="show < 1 ? true:false">
-      <span class='btn btn-success' @click="show += 1">Next</span>
-      <input class='btn btn-primary'  type=button value="Cancel" onClick="javascript:history.go(-1);">
+    <div>
     </div>
     
   </form>
 </div>
 
-  <script>
-    var app = new Vue({
-      el: "#app",
-      data: {
-        show: 0,
-      }
-    });
-  </script>
 <br>
 <br>
 
