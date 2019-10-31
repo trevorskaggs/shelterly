@@ -3,22 +3,23 @@ from django.shortcuts import get_object_or_404
 
 from animals.forms import AnimalForm
 from hotline.models import ServiceRequest
-from hotline.forms import HotlineOwnerForm, HotlineReporterForm, ServiceRequestForm
+from hotline.forms import ServiceRequestForm
 from people.models import Owner, Reporter
+from people.forms import OwnerForm, ReporterForm
 
 # Create your views here.
 def hotline_landing(request):
     return render(request, 'hotline_landing.html')
 
 def hotline_new_reporter(request):
-    form = HotlineReporterForm(request.POST or None)
+    form = ReporterForm(request.POST or None)
     if form.is_valid():
         reporter = form.save()
         return redirect('hotline:hotline_new_owner', rep_pk=reporter.pk)
     return render(request, 'hotline_new_reporter.html', {'form':form})
 
 def hotline_new_owner(request, rep_pk=None):
-    form = HotlineOwnerForm(request.POST or None)
+    form = OwnerForm(request.POST or None)
     if form.is_valid():
         owner = form.save()
         if rep_pk:

@@ -32,11 +32,7 @@ CAT_COLOR_CHOICES = (
     ('cinnamon', 'Cinnamon'),
     ('caramel', 'Caramel'),
     ('white', 'White'),
-    ('black white', 'Black / White'),
-    ('grey white', 'Grey / White'),
-    ('brown white', 'Brown / White'),
-    ('oranage white', 'Orange / White'),
-    ('black brown', 'Black / Brown'),
+    ('orange', 'Orange'),
 )
 
 ## Source: https://en.wikipedia.org/wiki/Cat_coat_genetics
@@ -50,3 +46,16 @@ CAT_PATTERN_CHOICES = (
     ('tabby', 'Tabby'),
     ('hairless', 'Hairless'),
 )
+
+ANIMAL_COLOR_DICT = {
+    'dog':{
+        'pcolor': DOG_COLOR_CHOICES,
+        'scolor': DOG_COLOR_CHOICES,
+        'markings': DOG_PATTERN_CHOICES,
+    },
+    'cat':{
+        'pcolor': CAT_COLOR_CHOICES,
+        'scolor': CAT_COLOR_CHOICES,
+        'markings': CAT_PATTERN_CHOICES,
+    },
+}

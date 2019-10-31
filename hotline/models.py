@@ -2,8 +2,8 @@ from django.db import models
 from location.models import Location
 from people.models import Owner, Reporter
 
-# Create your models here.
 class ServiceRequest(Location):
+    
     #keys
     owner = models.ForeignKey(Owner, on_delete=models.SET_NULL, blank=True, null=True)
     reporter = models.ForeignKey(Reporter, on_delete=models.SET_NULL, blank=True, null=True)

@@ -31,7 +31,7 @@
 
   <h1>ANIMALS SUMMARY</h1>
 
-  {% if evac_request.animal_set.all %}
+  {% if owner.animal_set.all %}
 
     {% for animal in evac_request.animal_set.all %}
       <h3><strong>Name:</strong> <a href="{% url 'animals:animal_detail' animal.pk %}"> {{animal.name}}</a></h3>
@@ -45,7 +45,7 @@
     <p>THERE ARE CURRENTLY NO ANIMALS REGISTED TO PERSON</p>
   {% endif %}
   <br>
-  <a class='btn btn-warning' href="{% url 'hotline:evac_request_edit' evac_request.pk %}">Edit Request</a>
+  <a class='btn btn-warning' href="{% url 'hotline:service_request_edit' service_request.pk %}">Edit Request</a>
   <input class='btn btn-primary'  type=button value="Back" onClick="javascript:history.go(-1);">
 
 {% endblock %}

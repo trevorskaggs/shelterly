@@ -17,12 +17,10 @@ def animal_list(request):
     return render(request, 'animal_list.html', context)
 
 def new_animal(request, species):
-    if request.POST:
-        form = AnimalForm(request.POST)
+    form = AnimalForm(species, None, request.POST or None)
+    if form.is_valid():
         form.save()
-        #return redirect('animals:animal_edit', pk=animal.pk)
         return HttpResponseRedirect(reverse_lazy('animals:animal_list'))
-    form = AnimalForm(species)
     return render(request, 'animal_new.html', {'form':form})
 
 def animal_detail(request, pk):

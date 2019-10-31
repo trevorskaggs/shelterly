@@ -13,6 +13,8 @@ PHONE_FORM_ERROR = "Invalid Input: Use Following Formats (xxx)-xxx-xxxx OR xxxxx
 
 
 class OwnerForm(forms.ModelForm):
+
+    best_contact = forms.CharField(required=False, widget=forms.Textarea(attrs={'rows': 2, 'cols': 40}))
     
     class Meta:
         model = Owner
@@ -33,7 +35,7 @@ class OwnerForm(forms.ModelForm):
     
     def clean_last_name(self):
         lname = self.cleaned_data['last_name']
-        if not re.match(NAME_ERROR, lname):
+        if not re.match(NAME_REGEX, lname):
             raise ValidationError(NAME_ERROR)
         return lname
     
