@@ -4,22 +4,22 @@ from django.shortcuts import get_object_or_404
 from animals.forms import AnimalForm
 from hotline.models import ServiceRequest
 from hotline.forms import ServiceRequestForm
-from people.models import Owner, Reporter
-from people.forms import OwnerForm, ReporterForm
+from people.models import Person
+from people.forms import PersonForm
 
 # Create your views here.
 def hotline_landing(request):
     return render(request, 'hotline_landing.html')
 
 def hotline_new_reporter(request):
-    form = ReporterForm(request.POST or None)
+    form = PersonForm(request.POST or None)
     if form.is_valid():
         reporter = form.save()
         return redirect('hotline:hotline_new_owner', rep_pk=reporter.pk)
     return render(request, 'hotline_new_reporter.html', {'form':form})
 
 def hotline_new_owner(request, rep_pk=None):
-    form = OwnerForm(request.POST or None)
+    form = PersonForm(request.POST or None)
     if form.is_valid():
         owner = form.save()
         if rep_pk:
@@ -44,8 +44,8 @@ def service_request_detail(request, service_request_pk):
     return render(request, 'service_request_details.html', context)
 
 def service_request_new(request, owner_pk=None, rep_pk=None):
-    reporter = Reporter.objects.get(pk=rep_pk) if rep_pk else None
-    owner = Owner.objects.get(pk=owner_pk) if owner_pk else None
+    reporter = Person.objects.get(pk=rep_pk) if rep_pk else None
+    owner = Person.objects.get(pk=owner_pk) if owner_pk else None
     form = ServiceRequestForm(owner, request.POST or None)
     if form.is_valid():
         service_request = form.save()
@@ -71,4 +71,4 @@ def service_request_add_animal(request, service_request_pk, species):
         animal.request = service_request
         animal.save()
         return redirect('hotline:service_request_detail', service_request_pk=service_request_pk)
-    return render(request, 'animal_new.html', {'form':form})
+    return render(request, 'animal.html', {'form':form})

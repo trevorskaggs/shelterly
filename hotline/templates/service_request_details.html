@@ -13,11 +13,6 @@
   <p>{{service_request.owner.address}} {{service_request.owner.apartment}} {{service_request.owner.city}} {{service_request.owner.state}} {{service_request.owner.zip_code}}</p>
 
   <h1>ANIMALS</h1>
-
-  <a class='btn btn-info' href="{% url 'hotline:service_request_add_animal' service_request.pk 'dog'%}">+ Add Dog</a>
-  <a class='btn btn-info'href="{% url 'hotline:service_request_add_animal' service_request.pk 'cat'%}">+ Add Cat</a>
-  <a class='btn btn-info' href="{% url 'hotline:service_request_add_animal' service_request.pk 'oth'%}">+ Add Other</a>
-
   {% for animal in service_request.animal_set.all %}
     <h3><strong>Name:</strong> <a href="{% url 'animals:animal_detail' animal.pk %}"> {{animal.name}}</a></h3>
     <p><strong>Species:</strong> {{animal.species}} </p>
@@ -27,6 +22,9 @@
     {% include "minimap.html" with object=animal %}
   {% endfor %}
   <br>
+  <a class='btn btn-info btn-lg btn-block' href="{% url 'hotline:service_request_add_animal' service_request.pk 'dog'%}">Add Dog</a>
+  <a class='btn btn-info btn-lg btn-block'href="{% url 'hotline:service_request_add_animal' service_request.pk 'cat'%}">Add Cat</a>
+  <a class='btn btn-info btn-lg btn-block' href="{% url 'hotline:service_request_add_animal' service_request.pk 'oth'%}">Add Other</a>
   <br>
   <a class='btn btn-warning btn-lg btn-block' href="{% url 'hotline:service_request_edit' service_request.pk %}">Edit Request</a>
   <input class='btn btn-primary btn-lg btn-block' type=button value="Back" onClick="javascript:history.go(-1);">

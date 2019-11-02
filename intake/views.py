@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect
 from hotline.models import ServiceRequest
-from people.forms import OwnerForm
+from people.forms import PersonForm
 from people.views import owner_detail
-from people.models import Owner, Reporter
+from people.models import Person
 
 # Create your views here.
 def intake_landing(request):
@@ -10,10 +10,10 @@ def intake_landing(request):
 
 def intake_owned(request):
     if request.POST:
-        form = OwnerForm(request.POST)
+        form = PersonForm(request.POST)
         owner = form.save()
         return redirect('people:owner_detail', owner.pk)
-    form = OwnerForm()
+    form = PersonForm()
     return render(request, 'owner_edit.html', {'form':form})
 
 def select_evac_req(request):

@@ -2,9 +2,9 @@ from django.shortcuts import render, redirect
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
 from animals.models import Animal
-from people.models import Owner
+from people.models import Person
 from hotline.models import ServiceRequest
-from people.forms import OwnerForm, TeamMemberForm
+from people.forms import PersonForm, TeamMemberForm
 
 
 # Create your views here.
@@ -26,21 +26,20 @@ def owner_list(request):
 
 def owner_new(request):
     if request.POST:
-        form = OwnerForm(request.POST)
+        form = PersonForm(request.POST)
         if form.is_valid():
             form.save()
             return redirect('people:owner_list')
-    form = OwnerForm()
+    form = PersonForm()
     return render(request, 'owner.html', {'form':form})
 
 
 def owner_edit(request, pk):
     owner = get_object_or_404(Owner, pk=pk)
-    if request.POST:
-        form = NewOwnerForm(request.POST, instance=owner)
+    form = PersonForm(request.POST, instance=owner)
+    if form.is_valid():
         form.save()
         return render('owner_list.html')
-    form = NewOwnerForm(instance=owner)
     return render(request, 'owner.html', {'form':form})
 
 def owner_delete(request, pk):

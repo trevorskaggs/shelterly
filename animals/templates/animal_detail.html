@@ -16,7 +16,7 @@
   <p><strong>Status:</strong> {{animal.status}} </p>
 
 
-  <a class='btn btn-warning' href="{% url 'animals:animal_edit' animal.pk %}">Edit Animal</a>
-  <input class='btn btn-primary'  type=button value="Back" onClick="javascript:history.go(-1);">
+  <a class='btn btn-warning btn-lg btn-block' href="{% url 'animals:animal_edit' animal.pk %}">Edit Animal</a>
+  <input class='btn btn-primary btn-lg btn-block'  type=button value="Back" onClick="javascript:history.go(-1);">
 
 {% endblock %}

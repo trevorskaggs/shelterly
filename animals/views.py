@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
-from people.models import Owner
+from people.models import Person
 from animals.models import Animal
 from animals.forms import AnimalForm
 
@@ -16,12 +16,13 @@ def animal_list(request):
     }
     return render(request, 'animal_list.html', context)
 
-def new_animal(request, species):
-    form = AnimalForm(species, None, request.POST or None)
+def new_animal(request, species, owner_pk=None):
+    owner = Person.objects.get(pk=owner_pk) if owner_pk else None
+    form = AnimalForm(species, owner, request.POST or None)
     if form.is_valid():
         form.save()
         return HttpResponseRedirect(reverse_lazy('animals:animal_list'))
-    return render(request, 'animal_new.html', {'form':form})
+    return render(request, 'animal.html', {'form':form})
 
 def animal_detail(request, pk):
     animal = get_object_or_404(Animal, pk=pk)
@@ -36,7 +37,7 @@ def animal_edit(request, pk):
         form.save()
         return redirect('animals:animal_list')
     form = AnimalForm(animal.species, instance=animal)
-    return render(request, 'animal_new.html', {'form':form})
+    return render(request, 'animal.html', {'form':form})
 
 def animal_delete(request, pk):
     animal = get_object_or_404(Animal, pk=pk)
@@ -46,14 +47,4 @@ def animal_delete(request, pk):
     data = {'animal':animal}
     return render(request, 'animal_delete.html', data)
 
-def new_owned_animal(request, species, pk):
-    owner = get_object_or_404(Owner, pk=pk)
-    form = AnimalForm(species, request.POST or None)
-    if form.is_valid():
-        animal = form.save(owner)
-        animal.owner = owner
-        animal.save()
-        return redirect('people:owner_detail', owner.pk)
-    form = AnimalForm(species)
-    form.set_initial_location(owner)
-    return render(request, 'animal_new.html', {'form':form, 'owner':owner})
+

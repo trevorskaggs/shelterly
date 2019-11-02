@@ -4,7 +4,7 @@ from animals.choices import AGE_CHOICES, BREED_CHOICES, SEX_CHOICES, SIZE_CHOICE
 from animals.colors import DOG_COLOR_CHOICES, DOG_PATTERN_CHOICES
 from location.models import Location
 from hotline.models import ServiceRequest
-from people.models import Owner
+from people.models import Person
 from shelter.models import Cage
 
 
@@ -12,7 +12,7 @@ from shelter.models import Cage
 class Animal(Location):
 
     request = models.ForeignKey(ServiceRequest, on_delete=models.SET_NULL, blank=True, null=True)
-    owner = models.ForeignKey(Owner, on_delete=models.SET_NULL, blank=True, null=True)
+    owner = models.ForeignKey(Person, on_delete=models.SET_NULL, blank=True, null=True)
     name = models.CharField(max_length=50, blank=True, null=True)
     cage = models.ForeignKey(Cage, on_delete=models.SET_NULL, blank=True, null=True)
     image = models.ImageField(upload_to='images/animals', blank=True, null=True)

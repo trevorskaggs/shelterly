@@ -1,4 +1,4 @@
 from django.contrib import admin
-from people.models import Owner
+from people.models import Person
 
-admin.site.register(Owner)
+admin.site.register(Person)

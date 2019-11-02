@@ -1,6 +1,6 @@
 import re
 from django import forms
-from people.models import Owner, TeamMember
+from people.models import Person, TeamMember
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 
@@ -11,22 +11,29 @@ PHONE_REGEX = re.compile(r'\(?\d{3}\)?\-?\d{3}\-?\d{4}')
 PHONE_FORM_ERROR = "Invalid Input: Use Following Formats (xxx)-xxx-xxxx OR xxxxxxxxxx "
 
 
-
-class OwnerForm(forms.ModelForm):
+class PersonForm(forms.ModelForm):
 
     best_contact = forms.CharField(required=False, widget=forms.Textarea(attrs={'rows': 2, 'cols': 40}))
-    
+
     class Meta:
-        model = Owner
+        model = Person
         fields = [ 'first_name', 'last_name', 'home_phone', \
             'work_phone', 'cell_phone', 'best_contact', \
             'drivers_license', 'address', 'apartment', 'city', \
             'state', 'zip_code', ]
 
 
-    def __init__(self, *args, **kwargs):
-        super(OwnerForm, self).__init__(*args, **kwargs)
-  
+class OwnerForm(forms.ModelForm):
+
+    best_contact = forms.CharField(required=False, widget=forms.Textarea(attrs={'rows': 2, 'cols': 40}))
+    
+    class Meta:
+        model = Person
+        fields = [ 'first_name', 'last_name', 'home_phone', \
+            'work_phone', 'cell_phone', 'best_contact', \
+            'drivers_license', 'address', 'apartment', 'city', \
+            'state', 'zip_code', ]
+
     def clean_first_name(self):
         fname = self.cleaned_data['first_name']
         if not re.match(NAME_REGEX, fname):
@@ -68,15 +75,6 @@ class OwnerForm(forms.ModelForm):
         if not czip.isdigit():
             raise ValidationError("Invalid Input: Non-Numerical Characters Found")
         return czip
-
-class ReporterForm(forms.ModelForm):
-
-    class Meta:
-        model = Owner
-        fields = [ 'first_name', 'last_name', 'home_phone', \
-            'work_phone', 'cell_phone', 'best_contact', \
-            'drivers_license', 'address', 'apartment', 'city', \
-            'state', 'zip_code', ]
 
 
 class TeamMemberForm(forms.ModelForm):

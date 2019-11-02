@@ -1,12 +1,12 @@
 from django.db import models
 from location.models import Location
-from people.models import Owner, Reporter
+from people.models import Person
 
 class ServiceRequest(Location):
     
     #keys
-    owner = models.ForeignKey(Owner, on_delete=models.SET_NULL, blank=True, null=True)
-    reporter = models.ForeignKey(Reporter, on_delete=models.SET_NULL, blank=True, null=True)
+    owner = models.ForeignKey(Person, on_delete=models.SET_NULL, blank=True, null=True, related_name='owner')
+    reporter = models.ForeignKey(Person, on_delete=models.SET_NULL, blank=True, null=True, related_name='reporter')
 
     #pre_field
     timestamp = models.DateTimeField(auto_now_add=True)
@@ -27,8 +27,13 @@ class ServiceRequest(Location):
             output.append('Owner: %s' % self.owner)
         if self.reporter:
             output.append('Reporter: %s' % self.reporter)
-        output.append('Animal Count: %s' % self.animal_set.all().count())
+        output.append('Animal Count: %s' % self.animal_count)
         return ', '.join(output)
+
+    @property
+    def animal_count(self):
+        return self.animal_set.all().count()
+    
 
     @property
     def is_resolved(self):

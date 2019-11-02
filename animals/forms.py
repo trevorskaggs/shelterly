@@ -2,7 +2,6 @@ from django import forms
 from animals.models import Animal
 from animals.colors import ANIMAL_COLOR_DICT
 from location.forms import LocationForm
-from people.models import Owner
 
 class AnimalForm(LocationForm):
 

@@ -10,5 +10,5 @@ urlpatterns = [
     #path('owner/<owner_pk>/animal', views.owner_animal_landing, name='owner_animal_landing'),
     path('', views.animal_list, name="animal_list"),
     path('<species>/new', views.new_animal, name='new_animal'),
-    path('<species>/<pk>/new', views.new_owned_animal, name='new_owned_animal'),
+    path('<species>/<owner_pk>/new', views.new_animal, name='new_animal'),
 ]
