@@ -2,16 +2,16 @@
 <link rel="stylesheet" href="https://cdn.rawgit.com/openlayers/openlayers.github.io/master/en/v5.3.0/css/ol.css" type="text/css">
 <div id="{{object.map_name}}" class="map" style="width:50%;"></div>
 <script>
-  var locationlayer_{{object.map_name}} = new ol.layer.Vector({
+  var {{object.map_name}}_layer = new ol.layer.Vector({
     source: new ol.source.Vector({}),
   });
   var baselayer = new ol.layer.Tile({
     source: new ol.source.OSM()
   });
-  var {{object.map_name}} = new ol.Map({
+  {{object.map_name}}_map = new ol.Map({
     layers: [
       baselayer,
-      locationlayer_{{object.map_name}}
+      {{object.map_name}}_layer,
     ],
     target: '{{object.map_name}}',
     view: new ol.View({
@@ -21,11 +21,25 @@
     })
   });
 
-  var format = new ol.format.WKT();
-  var geometry = format.readGeometry('{{object.location_wkt}}');
-  var feature = new ol.Feature({
-    geometry: geometry,
-  });
-  locationlayer_{{object.map_name}}.getSource().addFeature(feature);
-  {{object.map_name}}.getView().fit(locationlayer_{{object.map_name}}.getSource().getExtent(), {{object.map_name}}.getSize());
+$.ajax({
+    url: '{% url "location:get_location_wkts" object.location_type object.pk %}',
+    type: 'GET',
+    dataType: 'json',
+    success: function(data){
+      for (var pk in data) {
+          if (data.hasOwnProperty(pk) && pk > 0) {
+            var format = new ol.format.WKT();
+            var geometry = format.readGeometry(data[pk]);
+            var feature = new ol.Feature({
+              geometry: geometry,
+            });
+          }
+          console.log(feature)
+          {{object.map_name}}_layer.getSource().addFeature(feature);
+      }
+    {{object.map_name}}_map.getView().fit({{object.map_name}}_layer.getSource().getExtent(), {{object.map_name}}_map.getSize());
+    {{object.map_name}}_map.getView().setZoom(14);    
+    }
+});
+
 </script>

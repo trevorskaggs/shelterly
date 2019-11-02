@@ -9,8 +9,9 @@
   <p><strong>Best Contact:</strong> {{service_request.owner.best_contact}} </p>
   <p><strong>Time of Request:</strong> {{service_request.timestamp}}</p>
   <p><strong>Verbal Permission:</strong> {{service_request.verbal_permission}}</p>
-  <p><strong>Location:</strong></p>
-  <p>{{service_request.owner.address}} {{service_request.owner.apartment}} {{service_request.owner.city}} {{service_request.owner.state}} {{service_request.owner.zip_code}}</p>
+  <p><strong>Location:</strong> {{service_request.owner.address}} {{service_request.owner.apartment}} {{service_request.owner.city}} {{service_request.owner.state}} {{service_request.owner.zip_code}}</p>
+  {% include "minimap.html" with object=service_request %}
+  <p></p>
 
   <h1>ANIMALS</h1>
   {% for animal in service_request.animal_set.all %}
@@ -19,7 +20,7 @@
     <p><strong>Sex:</strong> {{animal.sex}} </p>
     <p><strong>Breed:</strong> {{animal.breed}} </p>
     <p><strong>Status:</strong> {{animal.status}} </p>
-    {% include "minimap.html" with object=animal %}
+
   {% endfor %}
   <br>
   <a class='btn btn-info btn-lg btn-block' href="{% url 'hotline:service_request_add_animal' service_request.pk 'dog'%}">Add Dog</a>
@@ -28,5 +29,5 @@
   <br>
   <a class='btn btn-warning btn-lg btn-block' href="{% url 'hotline:service_request_edit' service_request.pk %}">Edit Request</a>
   <input class='btn btn-primary btn-lg btn-block' type=button value="Back" onClick="javascript:history.go(-1);">
-
+  <br>
 {% endblock %}

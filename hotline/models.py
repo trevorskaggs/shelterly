@@ -34,6 +34,13 @@ class ServiceRequest(Location):
     def animal_count(self):
         return self.animal_set.all().count()
     
+    @property
+    def location_type(self):
+        return 'service_request'
+
+    @property
+    def map_name(self):
+        return '{}_{}'.format(self.location_type, self.pk)
 
     @property
     def is_resolved(self):
