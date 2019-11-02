@@ -3,11 +3,13 @@
 {% block content %}
 
   <h1>Owner: {{service_request.owner.first_name}} {{service_request.owner.last_name}}</h1>
-  <p><strong>Home Phone:</strong> {{service_request.owner.home_phone}} </p>
-  <p><strong>Work Phone:</strong> {{service_request.owner.work_phone}} </p>
-  <p><strong>Cell Phone:</strong> {{service_request.owner.cell_phone}} </p>
+  <p><strong>Phone:</strong>
+  {% if service_request.owner.home_phone %}{{service_request.owner.home_phone}} (H) {% endif %}
+  {% if service_request.owner.work_phone %}{{service_request.owner.work_phone}} (W) {% endif %}
+  {% if service_request.owner.cell_phone %}{{service_request.owner.cell_phone}} (C) {% endif %}
+  </p>
   <p><strong>Best Contact:</strong> {{service_request.owner.best_contact}} </p>
-  <p><strong>Time of Request:</strong> {{service_request.timestamp}}</p>
+  <p><strong>Request Time:</strong> {{service_request.timestamp}}</p>
   <p><strong>Verbal Permission:</strong> {{service_request.verbal_permission}}</p>
   <p><strong>Location:</strong> {{service_request.owner.address}} {{service_request.owner.apartment}} {{service_request.owner.city}} {{service_request.owner.state}} {{service_request.owner.zip_code}}</p>
   {% include "minimap.html" with object=service_request %}
@@ -16,10 +18,7 @@
   <h1>ANIMALS</h1>
   {% for animal in service_request.animal_set.all %}
     <h3><strong>Name:</strong> <a href="{% url 'animals:animal_detail' animal.pk %}"> {{animal.name}}</a></h3>
-    <p><strong>Species:</strong> {{animal.species}} </p>
-    <p><strong>Sex:</strong> {{animal.sex}} </p>
-    <p><strong>Breed:</strong> {{animal.breed}} </p>
-    <p><strong>Status:</strong> {{animal.status}} </p>
+    <p><strong>Species:</strong> {{animal.species|title}}, <strong>Sex:</strong> {{animal.sex|title}}, <strong>Breed:</strong> {{animal.breed|title}}, <strong>Status:</strong> {{animal.status}}</p>
 
   {% endfor %}
   <br>
