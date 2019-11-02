@@ -28,14 +28,14 @@ def hotline_new_owner(request, rep_pk=None):
             return redirect('hotline:service_request_new', owner_pk=owner.pk)
     return render(request, 'hotline_new_owner.html', {'form':form})
 
-def service_request_list(request, status=None):
+def service_request_list(request, status='all'):
     if status == 'unresovled':
-        service_requests = ServiceRequest.objects.filter(animal__status__in=['NFD', 'REP'])
+        service_requests = ServiceRequest.objects.filter(animal__status__in=['NFD', 'REP']).distinct()
     elif status == 'resolved':
-        service_requests = ServiceRequest.objects.exclude(animal__status__in=['NFD', 'REP'])
+        service_requests = ServiceRequest.objects.exclude(animal__status__in=['NFD', 'REP']).distinct()
     else:
-        service_requests = ServiceRequest.objects.all()
-    context = {'service_requests':service_requests}
+        service_requests = ServiceRequest.objects.all().distinct()
+    context = {'service_requests':service_requests, 'status': status}
     return render(request, 'service_request_list.html', context)
 
 def service_request_detail(request, service_request_pk):

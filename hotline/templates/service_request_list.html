@@ -2,16 +2,17 @@
 
 {% block content %}
 
-  <h1>Service Requests</h1>
+  <h1>{{ status|title }} Service Requests</h1>
+  <br>
   {% if service_requests %}
-  <ul>
     {% for service_request in service_requests %}
-      <li><a href="{% url 'hotline:service_request_detail' service_request.pk %}">{{service_request}}</a></li>
+      <a class='btn btn-warning btn-lg btn-block' href="{% url 'hotline:service_request_detail' service_request.pk %}">{{service_request}}</a>
     {% endfor %}
-  </ul>
   {% else %}
     <p>THERE ARE CURRENTLY NO SERVICE REQUESTS OUTSTANDING</p>
   {% endif %}
-
+  <br>
+  <br>
+  <input class='btn btn-primary btn-lg btn-block' type=button value="Back" onClick="javascript:history.go(-1);">
 {% endblock content %}
 

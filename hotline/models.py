@@ -26,9 +26,9 @@ class ServiceRequest(Location):
         if self.owner:
             output.append('Owner: %s' % self.owner)
         if self.reporter:
-            output.append(' Reporter: %s' % self.reporter)
-        output.append('Animal Count: (%s)' % self.animal_set.all().count())
-        return ','.join(output)
+            output.append('Reporter: %s' % self.reporter)
+        output.append('Animal Count: %s' % self.animal_set.all().count())
+        return ', '.join(output)
 
     @property
     def is_resolved(self):

@@ -28,8 +28,7 @@
   {% endfor %}
   <br>
   <br>
-  <a class='btn btn-success' href="{% url 'hotline:hotline_landing' %}">Finish</a>
-  <a class='btn btn-warning' href="{% url 'hotline:service_request_edit' service_request.pk %}">Edit Request</a>
-  <a class='btn btn-secondary' href="{% url 'hotline:service_request_list' %}">View Evacuation Request List</a>
+  <a class='btn btn-warning btn-lg btn-block' href="{% url 'hotline:service_request_edit' service_request.pk %}">Edit Request</a>
+  <input class='btn btn-primary btn-lg btn-block' type=button value="Back" onClick="javascript:history.go(-1);">
 
 {% endblock %}
