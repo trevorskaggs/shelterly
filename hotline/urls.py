@@ -22,15 +22,14 @@ app_name = 'hotline'
 
 urlpatterns = [
     path('', views.hotline_landing, name='hotline_landing'),
-    path('request/list', views.service_request_list, name = 'service_request_list'),
-    path('request/list-open', views.service_request_list_open, name = 'service_request_list_open'),
-    path('request/list-closed', views.service_request_list_closed, name = 'service_request_list_closed'),
-    path('reporter/new', views.hotline_new_reporter, name = 'hotline_new_reporter'),
     path('owner/new', views.hotline_new_owner, name='hotline_new_owner'),
     path('owner/<rep_pk>/new', views.hotline_new_owner, name = 'hotline_new_owner'),
-    path('request/<int:owner_pk>/<int:rep_pk>/new', views.service_request_new, name = 'service_request_new'),
+    path('reporter/new', views.hotline_new_reporter, name = 'hotline_new_reporter'),
+    path('request/list', views.service_request_list, name='service_request_list'),
+    path('request/list/<status>', views.service_request_list, name='service_request_list'),
     path('request/<int:owner_pk>/new', views.service_request_new, name = 'service_request_new'),
+    path('request/<int:owner_pk>/<int:rep_pk>/new', views.service_request_new, name = 'service_request_new'),
     path('request/<int:service_request_pk>/', views.service_request_detail, name = 'service_request_detail'),
     path('request/<int:service_request_pk>/edit', views.service_request_edit, name = 'service_request_edit'),
-    path('request/<service_request_pk>/animal/<species>/new', views.hotline_new_animal, name = "hotline_new_animal"),
+    path('request/<service_request_pk>/animal/<species>/new', views.service_request_add_animal, name = "service_request_add_animal"),
 ]

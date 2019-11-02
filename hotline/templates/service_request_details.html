@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+  <h1>Owner: {{service_request.owner.first_name}} {{service_request.owner.last_name}}</h1>
+  <p><strong>Home Phone:</strong> {{service_request.owner.home_phone}} </p>
+  <p><strong>Work Phone:</strong> {{service_request.owner.work_phone}} </p>
+  <p><strong>Cell Phone:</strong> {{service_request.owner.cell_phone}} </p>
+  <p><strong>Best Contact:</strong> {{service_request.owner.best_contact}} </p>
+  <p><strong>Time of Request:</strong> {{service_request.timestamp}}</p>
+  <p><strong>Verbal Permission:</strong> {{service_request.verbal_permission}}</p>
+  <p><strong>Location:</strong></p>
+  <p>{{service_request.owner.address}} {{service_request.owner.apartment}} {{service_request.owner.city}} {{service_request.owner.state}} {{service_request.owner.zip_code}}</p>
+
+  <h1>ANIMALS</h1>
+
+  <a class='btn btn-info' href="{% url 'hotline:service_request_add_animal' service_request.pk 'dog'%}">+ Add Dog</a>
+  <a class='btn btn-info'href="{% url 'hotline:service_request_add_animal' service_request.pk 'cat'%}">+ Add Cat</a>
+  <a class='btn btn-info' href="{% url 'hotline:service_request_add_animal' service_request.pk 'oth'%}">+ Add Other</a>
+
+  {% for animal in service_request.animal_set.all %}
+    <h3><strong>Name:</strong> <a href="{% url 'animals:animal_detail' animal.pk %}"> {{animal.name}}</a></h3>
+    <p><strong>Species:</strong> {{animal.species}} </p>
+    <p><strong>Sex:</strong> {{animal.sex}} </p>
+    <p><strong>Breed:</strong> {{animal.breed}} </p>
+    <p><strong>Status:</strong> {{animal.status}} </p>
+    {% include "minimap.html" with object=animal %}
+  {% endfor %}
+  <br>
+  <br>
+  <a class='btn btn-success' href="{% url 'hotline:hotline_landing' %}">Finish</a>
+  <a class='btn btn-warning' href="{% url 'hotline:service_request_edit' service_request.pk %}">Edit Request</a>
+  <a class='btn btn-secondary' href="{% url 'hotline:service_request_list' %}">View Evacuation Request List</a>
+
+{% endblock %}

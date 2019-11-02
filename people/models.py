@@ -3,8 +3,9 @@ from location.models import Location
 
 # Create your models here.
 class Person(Location):
-    first_name = models.CharField(max_length=50, blank=True, null=True)
-    last_name = models.CharField(max_length=50, blank=True, null=True)
+    
+    first_name = models.CharField(max_length=50)
+    last_name = models.CharField(max_length=50)
     home_phone = models.CharField(max_length=50, blank=True, null=True)
     work_phone = models.CharField(max_length=50, blank=True, null=True)
     cell_phone = models.CharField(max_length=50, blank=True, null=True)

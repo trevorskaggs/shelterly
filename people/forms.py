@@ -63,7 +63,7 @@ class OwnerForm(forms.ModelForm):
             raise ValidationError(NAME_ERROR)
         return city
 
-    def clean_zipc(self): 
+    def clean_zipcode(self): 
         czip = self.cleaned_data['zip_code']
         if not czip.isdigit():
             raise ValidationError("Invalid Input: Non-Numerical Characters Found")

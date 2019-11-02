@@ -2,6 +2,7 @@ from django import forms
 from animals.models import Animal
 from animals.colors import ANIMAL_COLOR_DICT
 from location.forms import LocationForm
+from people.models import Owner
 
 class AnimalForm(LocationForm):
 
@@ -14,8 +15,9 @@ class AnimalForm(LocationForm):
     def __init__(self, species, owner=None, *args, **kwargs):
         super(AnimalForm, self).__init__(*args, **kwargs)
         self.set_species_properties(species)
+        self.fields["owner"].initial = owner
         if owner:
-            self.self.set_initial_location(owner)
+            self.set_initial_location(owner)
 
     def set_species_properties(self, species):
         self.fields['species'].initial = species
@@ -26,13 +28,8 @@ class AnimalForm(LocationForm):
         self.fields['markings'].label = '%s Markings' % species.capitalize()
         self.fields['markings'].choices = ANIMAL_COLOR_DICT[species]['markings']
 
-    def save(self, owner=None):
-        animal = super(AnimalForm, self).save()
-        if owner:
-            animal.owner = owner
-            animal.save()
-
     class Meta:
         model = Animal
-        exclude = ('latitude', 'longitude', 'request', 'owner')
+        exclude = ('latitude', 'longitude', 'request')
+        widgets = {'owner': forms.HiddenInput()}
         
