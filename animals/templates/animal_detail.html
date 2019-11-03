@@ -4,17 +4,16 @@
   <h1>Name: {{animal.name}}</h1>
 
   <p><strong>Owner:</strong> {{animal.owner}} </p>
-  <p><strong>Species:</strong> {{animal.species}} </p>
-  <p><strong>Sex:</strong> {{animal.sex}} </p>
-  <p><strong>Breed:</strong> {{animal.breed}} </p>
-  <p><strong>Primary Color:</strong> {{animal.pcolor}} </p>
-  <p><strong>Secondary Color:</strong> {{animal.scolor}} </p>
-  <p><strong>Markngs:</strong> {{animal.markings}} </p>
-  <p><strong>Age:</strong> {{animal.age}} </p>
-  <p><strong>Fixed:</strong> {{animal.fixed}} </p>
-  <p><strong>Aggressive:</strong> {{animal.aggressive}} </p>
+  <p><strong>Species:</strong> {{animal.species|title}} </p>
+  <p><strong>Sex:</strong> {{animal.sex:title}} </p>
+  <p><strong>Breed:</strong> {{animal.breed:title}} </p>
+  <p><strong>Primary Color:</strong> {{animal.pcolor|title}} </p>
+  <p><strong>Secondary Color:</strong> {{animal.scolor|title}} </p>
+  <p><strong>Markngs:</strong> {{animal.markings|title}} </p>
+  <p><strong>Age:</strong> {{animal.age|title}} </p>
+  <p><strong>Fixed:</strong> {{animal.fixed|yesno|title}} </p>
+  <p><strong>Aggressive:</strong> {{animal.aggressive|yesno|title}} </p>
   <p><strong>Status:</strong> {{animal.status}} </p>
-
 
   <a class='btn btn-warning btn-lg btn-block' href="{% url 'animals:animal_edit' animal.pk %}">Edit Animal</a>
   <input class='btn btn-primary btn-lg btn-block'  type=button value="Back" onClick="javascript:history.go(-1);">

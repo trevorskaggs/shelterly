@@ -12,22 +12,23 @@
         </div>
       </div>
       <div class = "row">
+        <div class = "col-6">
+          {{form.forced_entry|as_crispy_field}}
+        </div>
+      </div>
+      <div>
         <div class = "col-12">
           {{form.directions|as_crispy_field}}
         </div>
       </div>
       <div class = "row">
-        <div class = "col-12">
+        <div class = "col-6">
           {{form.verbal_permission|as_crispy_field}}
         </div>
-      </div>
-      <div class = "row">
         <div class = "col-6">
           {{form.key_provided|as_crispy_field}}
         </div>
-        <div class = "col-6">
-          {{form.forced_entry|as_crispy_field}}
-        </div>
+
       </div>
     <input type="submit" value="Save" class='btn btn-success'>
     <input class='btn btn-primary'  type=button value="Cancel" onClick="javascript:history.go(-1);">

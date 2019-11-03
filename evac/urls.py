@@ -11,5 +11,5 @@ urlpatterns = [
     path('teammember/<int:pk>', views.team_member, name='edit_team_member'),
     path('evacteam/new', views.evac_team, name='new_evac_team'),
     path('evacteam/<int:pk>', views.evac_team, name='edit_evac_team'),
-    path('evacteam/list', views.evac_team_list, name='evac_team_list'),
+    path('evacteam/list', views.current_evac_team_list, name='current_evac_team_list'),
 ]

@@ -46,16 +46,3 @@ CAT_PATTERN_CHOICES = (
     ('tabby', 'Tabby'),
     ('hairless', 'Hairless'),
 )
-
-ANIMAL_COLOR_DICT = {
-    'dog':{
-        'pcolor': DOG_COLOR_CHOICES,
-        'scolor': DOG_COLOR_CHOICES,
-        'markings': DOG_PATTERN_CHOICES,
-    },
-    'cat':{
-        'pcolor': CAT_COLOR_CHOICES,
-        'scolor': CAT_COLOR_CHOICES,
-        'markings': CAT_PATTERN_CHOICES,
-    },
-}

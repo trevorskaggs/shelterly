@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.shortcuts import render, redirect
 from evac.models import EvacTeam
 from evac.forms import EvacTeamForm
@@ -10,13 +12,13 @@ def evac_landing(request):
 def evac_team(request, pk=None):
     evac_team = EvacTeam.objects.get(pk=pk) if pk else None
     form = EvacTeamForm(request.POST or None, instance=evac_team)
-    if request.POST and form.is_valid():
+    if form.is_valid():
         form.save()
         return redirect('evac:evac_landing')
     return render(request, 'evac_team.html', {'form':form})
 
-def evac_team_list(request):
-    evac_teams = EvacTeam.objects.all()
+def current_evac_team_list(request):
+    evac_teams = EvacTeam.objects.filter(team_date=datetime.now().date())
     return render(request, 'evac_team_list.html', {'evac_teams':evac_teams})
 
 def team_member(request, pk=None):
