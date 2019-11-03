@@ -13,7 +13,7 @@ urlpatterns = [
     path('evac/', include('evac.urls')),
     path('hotline/', include('hotline.urls')),
     path('intake/', include('intake.urls')),
-    path('location/', include('location.urls')),
+    # path('location/', include('location.urls')),
     path('people/', include('people.urls')),
     path('shelter/', include('shelter.urls')),
 ]
