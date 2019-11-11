@@ -1,8 +1,7 @@
 import re
 from django import forms
 from people.models import Person, TeamMember
-from django.core.exceptions import ValidationError
-from django.core.validators import RegexValidator
+from form_utils import NAME_VALIDATOR, PHONE_VALIDATOR, ZIP_VALIDATOR
 
 NAME_REGEX = re.compile(r'[A-Za-z ]+')
 NAME_ERROR = "Invalid Input: Non-Letter Characters Found"
@@ -26,56 +25,19 @@ class PersonForm(forms.ModelForm):
 class OwnerForm(forms.ModelForm):
 
     best_contact = forms.CharField(required=False, widget=forms.Textarea(attrs={'rows': 2, 'cols': 40}))
-    
+    first_name = forms.CharField(required=False, widget=forms.Textarea(attrs={'rows': 2, 'cols': 40}), validators=[NAME_VALIDATOR])
+    last_name = forms.CharField(required=False, widget=forms.Textarea(attrs={'rows': 2, 'cols': 40}), validators=[NAME_VALIDATOR])
+    home_phone = forms.CharField(required=False, widget=forms.Textarea(attrs={'rows': 2, 'cols': 40}), validators=[PHONE_VALIDATOR])
+    cell_phone = forms.CharField(required=False, widget=forms.Textarea(attrs={'rows': 2, 'cols': 40}), validators=[PHONE_VALIDATOR])
+    city = forms.CharField(required=False, widget=forms.Textarea(attrs={'rows': 2, 'cols': 40}), validators=[NAME_VALIDATOR])
+    zip_code = forms.CharField(required=False, widget=forms.Textarea(attrs={'rows': 2, 'cols': 40}), validators=[ZIP_VALIDATOR])
+
     class Meta:
         model = Person
         fields = [ 'first_name', 'last_name', 'home_phone', \
             'work_phone', 'cell_phone', 'best_contact', \
             'drivers_license', 'address', 'apartment', 'city', \
             'state', 'zip_code', ]
-
-    def clean_first_name(self):
-        fname = self.cleaned_data['first_name']
-        if not re.match(NAME_REGEX, fname):
-            raise ValidationError(NAME_ERROR)
-        return fname
-    
-    def clean_last_name(self):
-        lname = self.cleaned_data['last_name']
-        if not re.match(NAME_REGEX, lname):
-            raise ValidationError(NAME_ERROR)
-        return lname
-    
-    def clean_home_phone(self):
-        hphone = self.cleaned_data['home_phone']
-        if not re.match(PHONE_REGEX, hphone):
-            raise ValidationError(PHONE_FORM_ERROR)
-        return hphone
-    
-    def clean_work_phone(self):
-        wphone = self.cleaned_data['work_phone']
-        if not re.match(PHONE_REGEX, wphone):
-            raise ValidationError(PHONE_FORM_ERROR)
-        return wphone
-    
-    def clean_cell_phone(self):
-        cphone = self.cleaned_data['cell_phone']
-        if not re.match(PHONE_REGEX, cphone):
-            raise ValidationError(PHONE_FORM_ERROR)
-        return cphone
-    
-    def clean_city(self):
-        city = self.cleaned_data['city']
-        if not re.match(NAME_REGEX, city):
-            raise ValidationError(NAME_ERROR)
-        return city
-
-    def clean_zipcode(self): 
-        czip = self.cleaned_data['zip_code']
-        if not czip.isdigit():
-            raise ValidationError("Invalid Input: Non-Numerical Characters Found")
-        return czip
-
 
 class TeamMemberForm(forms.ModelForm):
 
