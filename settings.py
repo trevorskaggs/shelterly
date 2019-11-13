@@ -35,6 +35,8 @@ MEDIA_URL = '/media/'
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = get_secret('SECRET_KEY')
+HERE_APP_ID = get_secret('HERE_APP_ID')
+HERE_APP_CODE = get_secret('HERE_APP_CODE')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
