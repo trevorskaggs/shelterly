@@ -32,11 +32,10 @@ def animal_detail(request, pk):
 
 def animal_edit(request, pk):
     animal = get_object_or_404(Animal, pk=pk)
-    if request.POST:
-        form = AnimalForm(animal.species, animal.owner, request.POST, instance=animal)
+    form = AnimalForm(animal.species, animal.owner, request.POST or None, instance=animal)
+    if form.is_valid():
         form.save()
         return redirect('animals:animal_list')
-    form = AnimalForm(animal.species, instance=animal)
     return render(request, 'animal.html', {'form':form})
 
 def animal_delete(request, pk):

@@ -1,13 +1,14 @@
 from django.db import models
 from location.models import Location
+from form_utils import NAME_VALIDATOR, PHONE_VALIDATOR
 
 class Person(Location):
     
-    first_name = models.CharField(max_length=50)
-    last_name = models.CharField(max_length=50)
-    home_phone = models.CharField(max_length=50, blank=True, null=True)
-    work_phone = models.CharField(max_length=50, blank=True, null=True)
-    cell_phone = models.CharField(max_length=50, blank=True, null=True)
+    first_name = models.CharField(max_length=50, validators=[NAME_VALIDATOR])
+    last_name = models.CharField(max_length=50, validators=[NAME_VALIDATOR])
+    home_phone = models.CharField(max_length=50, blank=True, null=True, validators=[PHONE_VALIDATOR])
+    work_phone = models.CharField(max_length=50, blank=True, null=True, validators=[PHONE_VALIDATOR])
+    cell_phone = models.CharField(max_length=50, blank=True, null=True, validators=[PHONE_VALIDATOR])
     best_contact = models.TextField(blank=True, null=True)
     drivers_license = models.CharField(max_length=50, blank=True, null=True)
 

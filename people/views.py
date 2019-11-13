@@ -25,12 +25,10 @@ def owner_list(request):
     return render(request, 'owner_list.html', context)
 
 def owner_new(request):
-    if request.POST:
-        form = PersonForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('people:owner_list')
-    form = PersonForm()
+    form = PersonForm(request.POST or None)
+    if form.is_valid():
+        form.save()
+        return redirect('people:owner_list')
     return render(request, 'owner.html', {'form':form})
 
 
@@ -63,18 +61,16 @@ def owner_detail(request, pk):
 
 def owner_edit(request, pk):
     owner = get_object_or_404(Owner, pk=pk)
-    if request.POST:
-        form = OwnerForm(request.POST, instance=owner)
+    form = OwnerForm(None, request.POST or None, instance=owner)
+    if form.is_valid(): 
         form.save()
         return redirect('people:owner_detail', owner.pk)
-    form = OwnerForm(instance=owner)
     return render(request, 'owner_edit.html', {'form':form})
 
 def team_member(request, pk=None):
     team_member = get_object_or_404(TeamMember, pk=pk) if pk else None
-    if request.POST:
-        form = TeamMemberForm(request.POST, instance=team_member)
+    form = TeamMemberForm(None, request.POST or None, instance=team_member)
+    if form.is_valid():
         form.save()
         return redirect('evac:evac_landing')
-    form = TeamMemberForm(instance=team_member)
     return render(request, 'team_member.html', {'form':form})

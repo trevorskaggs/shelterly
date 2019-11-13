@@ -11,6 +11,18 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
 import os
+import json
+from django.core.exceptions import ImproperlyConfigured
+
+with open('config/secrets.json') as f:
+    secrets = json.loads(f.read())
+
+def get_secret(setting, secrets=secrets):
+    try:
+        return secrets[setting]
+    except KeyError:
+        error_msg = f'Set the {setting} enviromental variable'
+        raise ImproperlyConfigured(error_msg)
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -20,8 +32,9 @@ MEDIA_URL = '/media/'
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
+
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'qjqz0-0-e$h&-x*53g1k2@^)485u&)_!)ax!z9w2dt9=76u8(h'
+SECRET_KEY = get_secret('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -82,17 +95,18 @@ TEMPLATES = [
 WSGI_APPLICATION = 'wsgi.application'
 
 
+
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': os.environ.get('DB_NAME', 'rams'),
-        'USER': os.environ.get('DB_USER', 'rams'),
-        'PASSWORD': os.environ.get('DB_PASS', 'p3pp3r'),
-        'HOST': 'localhost',
-        'PORT': 5432
+        'NAME': os.environ.get('DB_NAME', get_secret('DATABASE_NAME')),
+        'USER': os.environ.get('DB_USER', get_secret('DATABASE_USER')),
+        'PASSWORD': os.environ.get('DB_PASS', get_secret('DATABASE_PASSWORD')),
+        'HOST': get_secret('DATABASE_HOST'),
+        'PORT': get_secret('DATABASE_PORT')
     }
 }
 
