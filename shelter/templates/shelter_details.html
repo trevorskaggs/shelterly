@@ -1,15 +1,16 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <h1>{{ shelter.name }}</h1>
-  {{ shelter.description }}<br>
-  <img src="{{ shelter.image.url }}">
-  Animals:
-  {% if shelter.animals %}
-    {% for animal in shelter.animals %}
-      <li><a href="{% url 'animals:animal_detail' animal.pk %}">{{ animal.name }}</a></li>
-    {% endfor %}
-  {% else %}
-  Shelter is empty!
-  {% endif %}
+<h1>{{ shelter.name }} Shelter</h1>
+<h4> Description: {{ shelter.description }}</h4>
+{% if shelter.image %}
+<img src="{{ shelter.image.url }}">
+{% endif %}
+{% for building in shelter.buildings %}
+  <a class="btn btn-warning btn-lg btn-block" href="{% url 'shelter:building_detail' building.pk %}">{{ building.name }}</a>
+{% endfor %}
+<br>
+<br>
+<a class="btn btn-success btn-lg btn-block"  href="{% url 'shelter:building_new' shelter.pk %}">ADD BUILDING</a>
+<a class="btn btn-primary btn-lg btn-block"  href="{% url 'shelter:shelter_landing' %}">BACK</a>
 {% endblock %}
