@@ -35,7 +35,7 @@ def animal_edit(request, pk):
     form = AnimalForm(animal.species, animal.owner, request.POST or None, instance=animal)
     if form.is_valid():
         form.save()
-        return redirect('animals:animal_list')
+        return redirect('animals:animal_detail', pk=pk)
     return render(request, 'animal.html', {'form':form})
 
 def animal_delete(request, pk):

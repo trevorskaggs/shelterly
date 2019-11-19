@@ -3,24 +3,22 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-  <h1>Shelter Information</h1>
+<h1>Room Information</h1>
 <div id="app">
   <form action="" method="post">{% csrf_token %}
-    <div class='section-1'>
       <div class="row">
         <div class="col-6">
           {{ form.name|as_crispy_field }}
         </div>
         <div class="col-6">
           {{ form.description|as_crispy_field }}
-          {{ form.image|as_crispy_field }}
         </div>
       </div>
-    </div>
+    {{ form.building|as_crispy_field }}
     <input type="submit" value="Save" class='btn btn-success btn-lg btn-block' id='submit-button'>
     <input class='btn btn-primary btn-lg btn-block'  type=button value="Back" onClick="javascript:history.go(-1);">
   </form>
 </div>
 <br>
 <br>
-{% endblock %}
+{% endblock %}mo

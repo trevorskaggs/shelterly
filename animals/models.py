@@ -26,7 +26,7 @@ class Animal(Location):
     markings = models.CharField(max_length=50, choices=DOG_PATTERN_CHOICES, blank=True, null=True)
     size = models.CharField(max_length=1, choices=SIZE_CHOICES, blank=True, null=True)
     age = models.CharField(max_length=1, choices=AGE_CHOICES, blank=True, null=True)
-    status = models.CharField(max_length=3, choices=STATUS_CHOICES, blank=True, null=True, default='Reported')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, blank=True, null=True, default='Reported')
 
     #boolean fields
     fixed = models.BooleanField(blank=True, null=True)

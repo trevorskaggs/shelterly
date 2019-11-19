@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Room Name: {{ room.name }}</h1>
+<h4>Room Description: {{ room.description }}</h4>
+{% for room in room.cage_set.all %}
+  <a class="btn btn-warning btn-lg btn-block" href="{% url 'shelter:room_detail' room.pk %}">{{ cage.name }}</a>
+{% endfor %}
+<br>
+<br>
+<a class="btn btn-success btn-lg btn-block"  href="{% url 'shelter:room_new' room.pk %}">ADD CAGE</a>
+<a class="btn btn-primary btn-lg btn-block"  href="{% url 'shelter:shelter_landing' %}">BACK</a>
+{% endblock %}

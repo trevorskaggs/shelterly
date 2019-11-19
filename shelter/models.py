@@ -6,7 +6,7 @@ class Shelter(Location):
 
     name = models.CharField(max_length=100)
     description = models.CharField(max_length=400, blank=True, null=True)
-    image = models.ImageField(upload_to = 'images/shelter', blank=True, null=True)
+    image = models.ImageField(upload_to='images/shelter', blank=True, null=True)
 
     @property
     def animals(self):

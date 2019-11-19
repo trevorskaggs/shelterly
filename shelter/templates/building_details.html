@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Building Name: {{ building.name }}</h1>
+<h4>Building Description: {{ building.description }}</h4>
+{% for room in building.room_set.all %}
+  <a class="btn btn-warning btn-lg btn-block" href="{% url 'shelter:room_detail' room.pk %}">{{ room.name }}</a>
+{% endfor %}
+<br>
+<br>
+<a class="btn btn-success btn-lg btn-block"  href="{% url 'shelter:room_new' building.pk %}">ADD ROOM</a>
+<a class="btn btn-primary btn-lg btn-block"  href="{% url 'shelter:shelter_landing' %}">BACK</a>
+{% endblock %}
