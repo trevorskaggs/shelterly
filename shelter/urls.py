@@ -6,6 +6,7 @@ app_name = 'shelter'
 urlpatterns = [
     path('', views.shelter_landing, name="shelter_landing"),
     path('list', views.shelter_list, name="shelter_list"),
+    #Shelter Management URLs
     path('new', views.shelter, name='shelter'),
     path('<int:pk>/edit/', views.shelter, name='shelter'),
     path('<int:pk>/', views.shelter_detail, name='shelter_detail'),
@@ -19,4 +20,11 @@ urlpatterns = [
     path('room/<int:room_pk>/cage/<int:pk>', views.cage, name='cage'),
     path('cage/<int:pk>/', views.cage_detail, name='cage_detail'),
     path('<obj_type>/<int:pk>/delete', views.shelter_object_delete, name='shelter_object_delete'),
+
+    # Animal Placement URLs
+    path('<int:animal_pk>/shelter', views.shelter_animal_shelter_select, name='shelter_animal_shelter_select'),
+    path('<int:animal_pk>/<int:shelter_pk>/building', views.shelter_animal_building_select, name='shelter_animal_building_select'),
+    path('<int:animal_pk>/<int:building_pk>/room', views.shelter_animal_room_select, name='shelter_animal_room_select'),
+    path('<int:animal_pk>/<int:room_pk>/cage', views.shelter_animal_cage_select, name='shelter_animal_cage_select'),
+    path('<int:animal_pk>/<int:cage_pk>/', views.shelter_animal_cage, name='shelter_animal_cage'),
 ]

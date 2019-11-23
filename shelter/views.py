@@ -1,5 +1,6 @@
 from django.shortcuts import get_object_or_404, render, redirect
 
+from animals.models import Animal
 from shelter.models import Shelter, Building, Room, Cage
 from shelter.forms import ShelterForm, BuildingForm, RoomForm, CageForm
 
@@ -73,3 +74,37 @@ def shelter_object_delete(request, obj_type, pk):
     parent = obj.parent
     obj.delete()
     return redirect(OBJ_TYPE_DICT[obj_type][1], parent.pk)
+
+def shelter_animal_shelter_select(request, animal_pk):
+    animal = Animal.objects.get(pk=animal_pk)
+    shelters = Shelter.objects.all()
+    data = {'animal': animal, 'shelters':shelters}
+    return render(request, 'shelter_select.html', data)
+
+def shelter_animal_building_select(request, animal_pk, shelter_pk):
+    animal = Animal.objects.get(pk=animal_pk)
+    shelter = Shelter.objects.get(pk=shelter_pk)
+    buildings = shelter.building_set.all()
+    data = {'animal': animal, 'shelter':shelter, 'buildings':buildings}
+    return render(request, 'building_select.html', data)
+
+def shelter_animal_room_select(request, animal_pk, building_pk):
+    animal = Animal.objects.get(pk=animal_pk)
+    building = Building.objects.get(pk=building_pk)
+    rooms = building.room_set.all()
+    data = {'animal': animal, 'building': building, 'rooms':rooms}
+    return render(request, 'room_select.html', data)
+
+def shelter_animal_cage_select(request, animal_pk, room_pk):
+    animal = Animal.objects.get(pk=animal_pk)
+    room = Room.objects.get(pk=room_pk)
+    cages = room.cage_set.all()
+    data = {'animal': animal, 'room': room, 'cages':cages}
+    return render(request, 'cage_select.html', data)
+
+def shelter_animal_cage(request, animal_pk, cage_pk):
+    animal = Animal.objects.get(pk=animal_pk)
+    cage = Cage.objects.get(pk=cage_pk)
+    animal.cage = cage
+    animal.save()
+    return redirect('animals:animal_detail', pk=animal_pk)
