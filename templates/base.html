@@ -5,11 +5,17 @@
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 </head>
+<style>
+h1{
+  text-align: center;
+}
+</style>
+
 <body>
   <div class="container">
     <div class="row">
       <div class="col-12">
-        <h1 class="mt-2" style="text-align: center"><a href="{% url 'home' %}">R.A.M.S.</a></h1>
+        <h1 class="mt-2"><a href="{% url 'home' %}">R.A.M.S.</a></h1>
         <hr class="mt-0 mb-4">
         {% load crispy_forms_tags %}
         {% block content %}
@@ -19,3 +25,5 @@
   </div>
 </body>
 <footer></footer>
+
+

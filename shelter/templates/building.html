@@ -3,7 +3,7 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-<h1>Building Information</h1>
+<h1>ADD BUILDING TO {{ form.shelter.initial|upper }} SHELTER</h1>
 <div id="app">
   <form action="" method="post">{% csrf_token %}
       <div class="row">
@@ -21,4 +21,4 @@
 </div>
 <br>
 <br>
-{% endblock %}
+{% endblock %}mo

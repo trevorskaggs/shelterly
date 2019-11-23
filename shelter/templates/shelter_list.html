@@ -1,16 +1,17 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <h1>Shelters</h1>
+  <h1>SHELTERS</h1>
+  <hr>
   {% if shelter_list %}
     {% for shelter in shelter_list %}
-      <a class="btn btn-warning btn-lg btn-block" href="{% url 'shelter:shelter_detail' shelter.pk %}">{{ shelter.name }}</a>
+      <a class="btn btn-warning btn-lg btn-block" href="{% url 'shelter:shelter_detail' shelter.pk %}">{{ shelter }}</a>
     {% endfor %}
   {% else %}
-    <p>THERE ARE CURRENTLY NO SHELTERS CONFIGURED</p>
+    <a class="btn btn-secondary btn-lg btn-block disabled">NO SHELTERS CONFIGURED</a>
   {% endif %}
   <br>
   <br>
-  <a class="btn btn-success btn-lg btn-block"  href="{% url 'shelter:shelter_new' %}">ADD SHELTER</a>
+  <a class="btn btn-success btn-lg btn-block"  href="{% url 'shelter:shelter' %}">ADD SHELTER</a>
   <a class="btn btn-primary btn-lg btn-block"  href="{% url 'shelter:shelter_landing' %}">BACK</a>
 {% endblock %}

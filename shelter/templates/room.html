@@ -3,7 +3,7 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-<h1>Room Information</h1>
+<h1>ADD ROOM TO {{ form.building.initial }} BUILDING</h1>
 <div id="app">
   <form action="" method="post">{% csrf_token %}
       <div class="row">
@@ -21,4 +21,4 @@
 </div>
 <br>
 <br>
-{% endblock %}mo
+{% endblock %}

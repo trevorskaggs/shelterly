@@ -3,7 +3,8 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-  <h1>Shelter Information</h1>
+<h1>{% if form.instance %}{{ form.instance|upper }}{% else %}NEW{% endif %} SHELTER</h1>
+<hr>
 <div id="app">
   <form action="" method="post">{% csrf_token %}
     <div class='section-1'>
@@ -13,7 +14,6 @@
         </div>
         <div class="col-6">
           {{ form.description|as_crispy_field }}
-          {{ form.image|as_crispy_field }}
         </div>
       </div>
     </div>
