@@ -1,10 +1,9 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<a class="btn btn-warning btn-lg btn-block" href="{% url 'intake:select_evac_req' %}">FROM EVAC REQUEST</a>
 <a class="btn btn-warning btn-lg btn-block" href="{% url 'intake:intake_owned' %}">FROM WALK-IN (OWNER)</a>
 <a class="btn btn-warning btn-lg btn-block" href="{% url 'animals:animal_list' %}">FROM WALK-IN (NON-OWNER)</a>
 <br>
 <br>
-<a class="btn btn-primary btn-lg btn-block"  href="{% url 'home' %}">BACK</a>
+<a class="btn btn-secondary btn-lg btn-block"  href="{% url 'home' %}">BACK</a>
 {% endblock %}

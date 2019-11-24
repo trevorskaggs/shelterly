@@ -14,5 +14,5 @@
 <br>
 <a class="btn btn-success btn-lg btn-block"  href="{% url 'shelter:cage' room.pk %}">ADD CAGE</a>
 <a class="btn btn-info btn-lg btn-block"  href="{% url 'shelter:room' room.building.pk room.pk %}">EDIT ROOM</a>
-<a class="btn btn-primary btn-lg btn-block"  href="{% url 'shelter:building_detail' room.building.pk %}">BACK</a>
+<a class="btn btn-secondary btn-lg btn-block"  href="{% url 'shelter:building_detail' room.building.pk %}">BACK</a>
 {% endblock %}

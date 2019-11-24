@@ -24,4 +24,5 @@ urlpatterns = [
     path('', views.intake_landing, name ='intake_landing'),
     path('owned/', views.intake_owned, name='intake_owned'),
     path('evacreq/select', views.select_evac_req, name='select_evac_req'),
+    path('owned/<owner_pk>/<species>/new', views.intake_new_animal, name='intake_new_animal'),
 ]

@@ -106,5 +106,15 @@ def shelter_animal_cage(request, animal_pk, cage_pk):
     animal = Animal.objects.get(pk=animal_pk)
     cage = Cage.objects.get(pk=cage_pk)
     animal.cage = cage
+    animal.status = 'SHELTERED'
     animal.save()
     return redirect('animals:animal_detail', pk=animal_pk)
+
+def shelter_animal_cage_add(request, animal_pk, room_pk):
+    animal = Animal.objects.get(pk=animal_pk)
+    room = Room.objects.get(pk=room_pk)
+    form = CageForm(room, request.POST or None)
+    if form.is_valid():
+        cage = form.save()
+        return shelter_animal_cage(request, animal.pk, cage.pk)
+    return render(request, 'cage.html', {'form':form})

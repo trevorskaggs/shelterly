@@ -9,35 +9,12 @@ from people.forms import PersonForm, TeamMemberForm
 
 # Create your views here.
 
-def owner_list(request):
-    owner_list = Owner.objects.all()
-    search_term = ''
-
-    if 'search' in request.GET:
-        search_term = request.GET['search']
-        namequery = Q(first_name__icontains=search_term)|Q(last_name__icontains=search_term)
-        owner_list = Owner.objects.filter(namequery)
-
-    context = {
-    'owner_list':owner_list,
-    'search_term':search_term,
-    }
-    return render(request, 'owner_list.html', context)
-
-def owner_new(request):
-    form = PersonForm(request.POST or None)
+def owner(request, pk=None):
+    owner = get_object_or_404(Person, pk=pk) if pk else None
+    form = PersonForm(request.POST or None, instance=owner)
     if form.is_valid():
         form.save()
-        return redirect('people:owner_list')
-    return render(request, 'owner.html', {'form':form})
-
-
-def owner_edit(request, pk):
-    owner = get_object_or_404(Owner, pk=pk)
-    form = PersonForm(request.POST, instance=owner)
-    if form.is_valid():
-        form.save()
-        return render('owner_list.html')
+        return redirect('people:owner_detail', owner.pk)
     return render(request, 'owner.html', {'form':form})
 
 def owner_delete(request, pk):
@@ -51,21 +28,13 @@ def owner_delete(request, pk):
     return render(request, "owner_delete.html", context)
 
 def owner_detail(request, pk):
-    owner = get_object_or_404(Owner, pk=pk)
-    service_request = get_object_or_404(ServiceRequest, owner=owner)
+    owner = get_object_or_404(Person, pk=pk)
+    service_requests = ServiceRequest.objects.filter(owner=owner)
     context = {
-        'service_request':service_request,
+        'service_requests':service_requests,
         'owner':owner,
     }
     return render(request, 'owner_detail.html', context)
-
-def owner_edit(request, pk):
-    owner = get_object_or_404(Owner, pk=pk)
-    form = OwnerForm(None, request.POST or None, instance=owner)
-    if form.is_valid(): 
-        form.save()
-        return redirect('people:owner_detail', owner.pk)
-    return render(request, 'owner_edit.html', {'form':form})
 
 def team_member(request, pk=None):
     team_member = get_object_or_404(TeamMember, pk=pk) if pk else None

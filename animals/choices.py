@@ -8,7 +8,7 @@ SPECIES_CHOICES = (
 )
 
 BREED_CHOICES = (
-    ('val', "Label"),
+    ('unknown', "Unknown"),
 )
 
 SEX_CHOICES = (
@@ -42,9 +42,9 @@ ANIMAL_LOOKUP_DICT = {
 }
 
 STATUS_CHOICES = (
-    ('Reported', 'Reported'),
-    ('Sheltered', 'Sheltered'),
-    ('Sheltered In Place', 'Sheltered In Place'),
-    ('Not Found', 'Not Found'),
-    ('Rest In Peace', 'Rest In Peace'),
+    ('REPORTED', 'REPORTED'),
+    ('SHELTERED', 'SHELTERED'),
+    ('SHELTERED IN PLACE', 'SHELTERED IN PLACE'),
+    ('NOT FOUND', 'NOT FOUND'),
+    ('REST IN PEACE', 'REST IN PEACE'),
 )

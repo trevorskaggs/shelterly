@@ -23,8 +23,10 @@ urlpatterns = [
 
     # Animal Placement URLs
     path('<int:animal_pk>/shelter', views.shelter_animal_shelter_select, name='shelter_animal_shelter_select'),
-    path('<int:animal_pk>/<int:shelter_pk>/building', views.shelter_animal_building_select, name='shelter_animal_building_select'),
-    path('<int:animal_pk>/<int:building_pk>/room', views.shelter_animal_room_select, name='shelter_animal_room_select'),
-    path('<int:animal_pk>/<int:room_pk>/cage', views.shelter_animal_cage_select, name='shelter_animal_cage_select'),
+    path('<int:animal_pk>/<int:shelter_pk>/buildings', views.shelter_animal_building_select, name='shelter_animal_building_select'),
+    path('<int:animal_pk>/<int:building_pk>/rooms', views.shelter_animal_room_select, name='shelter_animal_room_select'),
+    path('<int:animal_pk>/<int:room_pk>/cages', views.shelter_animal_cage_select, name='shelter_animal_cage_select'),
+    path('<int:animal_pk>/<int:room_pk>/cage/add', views.shelter_animal_cage_add, name='shelter_animal_cage_add'),
     path('<int:animal_pk>/<int:cage_pk>/', views.shelter_animal_cage, name='shelter_animal_cage'),
+
 ]

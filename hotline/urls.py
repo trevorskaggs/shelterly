@@ -26,10 +26,14 @@ urlpatterns = [
     path('owner/<rep_pk>/new', views.hotline_new_owner, name = 'hotline_new_owner'),
     path('reporter/new', views.hotline_new_reporter, name = 'hotline_new_reporter'),
     path('request/list', views.service_request_list, name='service_request_list'),
+    path('request/list/search/', views.service_request_search, name='service_request_search'),
+    path('request/list/search/<query>', views.service_request_search, name='service_request_search'),
     path('request/list/<status>', views.service_request_list, name='service_request_list'),
+
     path('request/<int:owner_pk>/new', views.service_request_new, name = 'service_request_new'),
     path('request/<int:owner_pk>/<int:rep_pk>/new', views.service_request_new, name = 'service_request_new'),
     path('request/<int:service_request_pk>/', views.service_request_detail, name = 'service_request_detail'),
-    path('request/<int:service_request_pk>/edit', views.service_request_edit, name = 'service_request_edit'),
-    path('request/<service_request_pk>/animal/<species>/new', views.service_request_add_animal, name = "service_request_add_animal"),
+    path('request/<int:service_request_pk>/update', views.service_request_update, name = 'service_request_update'),
+    path('request/<int:service_request_pk>/add/owner', views.service_request_add_owner, name = 'service_request_add_owner'),
+    path('request/<service_request_pk>/animal/<species>/add', views.service_request_add_animal, name = "service_request_add_animal"),
 ]

@@ -3,11 +3,9 @@
 {% block content %}
 <a class="btn btn-warning btn-lg btn-block" href="{% url 'hotline:hotline_new_owner' %}">OWNER CALLING</a>
 <a class="btn btn-warning btn-lg btn-block" href="{% url 'hotline:hotline_new_reporter' %}">NON-OWNER CALLING</a>
-<a class="btn btn-warning btn-lg btn-block" href="{% url 'hotline:service_request_list' %}">ALL SERVICE REQUESTS</a>
-<a class="btn btn-warning btn-lg btn-block" href="{% url 'hotline:service_request_list' 'unresolved' %}">UNRESOLVED SERVICE REQUESTS</a>
-<a class="btn btn-warning btn-lg btn-block" href="{% url 'hotline:service_request_list' 'resolved' %}">RESOLVED SERVICE REQUESTS</a>
+<a class="btn btn-warning btn-lg btn-block" href="{% url 'hotline:service_request_search' %}">SERVICE REQUESTS SEARCH</a>
 <br>
 <br>
-<a class="btn btn-primary btn-lg btn-block"  href="{% url 'home' %}">BACK</a>
+<a class="btn btn-secondary btn-lg btn-block"  href="{% url 'home' %}">BACK</a>
 
 {% endblock %}

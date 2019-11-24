@@ -10,3 +10,7 @@ class ServiceRequestForm(LocationForm):
         model  = ServiceRequest
         fields = ['owner', 'directions', 'verbal_permission', 'outcome', 'key_provided', 'forced_entry', 'address']
         widgets = {'owner': forms.HiddenInput()}
+
+class ServiceRequestSearchForm(forms.Form):
+
+    search = forms.CharField(required=True)
