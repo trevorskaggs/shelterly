@@ -17,9 +17,10 @@ SEX_CHOICES = (
 )
 
 SIZE_CHOICES = (
-    ('S', "Small"),
-    ('M', "Medium"),
-    ('L', "Large"),
+    ('S', "Small (< 20 lbs)"),
+    ('M', "Medium (21 - 60 lbs)"),
+    ('L', "Large (61 - 110 lbs)"),
+    ('G', "Giant (111+ lbs)"),
 )
 
 AGE_CHOICES = (
@@ -48,3 +49,66 @@ STATUS_CHOICES = (
     ('Not Found', 'Not Found'),
     ('Rest In Peace', 'Rest In Peace'),
 )
+
+# Source: https://www.akc.org/dog-breeds/
+DOG_BREEDS = (
+    ('Sporting Group', 'Sporting Group'),
+    ('Working Group', 'Working Group'),
+    ('Toy Group', 'Toy Group'),
+    ('Herding Group', 'Hearding Group'),
+    ('Hound Group', 'Hound Group'),
+    ('Terrier Group', 'Terrier Group'),
+)
+# DOG_BREEDS = (
+#     ('Affenpinscher', 'Affenpinscher'),
+#     ('Afghan Hound', 'Afghan Hound'),
+#     ('Afghan Shepherd', 'Afghan Shepherd'),
+#     ('Aidi', 'Aidi'),
+#     ('Airedale Terrier', 'Airedale Terrier'),
+#     ('Akbash', 'Akbash'),
+#     ('Akita', 'Akita'),
+#     ('Alaskan Husky', 'Alaskan Husky'),
+#     ('American Bulldog', 'American Bulldog')
+#     ('American Cocker Spaniel', 'American Cocker Spaniel'),
+#     ('American English Coonhound', 'American English Coonhound'),
+#     ('American Foxhound', 'American Foxhound'),
+#     ('American Hairless Terrier', 'American Hairless Terrier'),
+#     ('American Pit Bull Terrier', 'American Pit Bull Terrier'),
+#     ('American Staffordshire Terrier', 'American Staffordshire Terrier'),
+#     ('American Water Spaniel', 'American Water Spaniel'),
+#     ('Australian Cattle Dog', 'Australian Cattle Dog'),
+#     ('Australian Kelpie', 'Australian Kelpie')
+#     ('Australian Shepherd', 'Australian Shepherd'),
+#     ('Australian Terrier', 'Australian Terrier'),
+#     ('Armant', 'Armant'),
+#     ('Basset Hound', 'Basset Hound'),
+#     ('Beagle', 'Beagle'),
+#     ('Bearded Collie', 'Bearded Collie'),
+#     ('Belgian Shepherd Dog', 'Belgian Shepherd Dog'),
+#     ('Bergamasco Shepherd', 'Bergamasco Shepherd'),
+#     ('Black and Tan Coonhound', 'Black and Tan Coonhound'),
+#     ('Mastiff', 'Mastiff'),
+#     ('Black Norwegian Elkhound', 'Black Norwegian Elkhound'),
+#     ('Black Russian Terrier', 'Black Russian Terrier'),
+#     ('Bloodhound', 'Bloodhound'),
+#     ('Bluetick Coonhound', 'Bluetick Coonhound'),
+#     ('Border Collie', 'Border Collie'),
+#     ('Border Terrier', 'Border Terrier'),
+#     ('Boston Terrier', 'Boston Terrier'),
+#     ('Boxer', 'Boxer'),
+#     ('Boykin Spaniel', 'Boykin Spaniel'),
+#     ('Brazilian Terrier', 'Brazilian Terrier'),
+#     ('Bull Terrier', 'Bull Terrier'),
+#     ('Bulldog', 'Bulldog'),
+#     ('Bullmastiff', 'Bullmastiff'),
+#     ('Catalan Sheepdog', 'Catalan Sheepdog'),
+#     ('Chesapeake Bay Retriever', 'Chesapeake Bay Retriever'),
+#     ('Chihuahua', 'Chihuahua'),
+#     ('Chinese Crested Dog', 'Chinese Crested Dog'),
+#     ('Chinese Imperial Dog', 'Chinese Imperial Dog'),
+#     ('Chow Chow', 'Chow Chow'),
+#     ('Collie', 'Collie'),
+#     ('Dachshund', 'Dachshund'),
+#     ('Dalmatian', 'Dalmatian'), 
+
+# )

@@ -13,36 +13,40 @@ DOG_COLOR_CHOICES = (
 
 ## Source: https://en.wikipedia.org/wiki/Coat_(dog)#Patterns
 DOG_PATTERN_CHOICES = (
-    ('merle', 'Merle'),
-    ('tuxedo', 'Tuxedo'),
-    ('harlequin', 'Harlequin'),
-    ('spotted', 'Spotted'),
-    ('speckled', 'Speckled'),
     ('brindle', 'Brindle'),
-    ('saddle', 'Saddle'),
-    ('sable', 'Sable'),
     ('hairless', 'Hairless'),
+    ('harlequin', 'Harlequin'),
+    ('merle', 'Merle'),
+    ('sable', 'Sable'),
+    ('saddle', 'Saddle'),
+    ('speckled', 'Speckled'),
+    ('spotted', 'Spotted'),
+    ('tuxedo', 'Tuxedo'),   
 )
 
 ## Source: https://en.wikipedia.org/wiki/Cat_coat_genetics
 CAT_COLOR_CHOICES = (
     ('black', 'Black'),
-    ('grey', 'Grey'),
+    ('caramel', 'Caramel'),
     ('chocolate', 'Chocolate'),
     ('cinnamon', 'Cinnamon'),
-    ('caramel', 'Caramel'),
-    ('white', 'White'),
+    ('grey', 'Grey'),
     ('orange', 'Orange'),
+    ('white', 'White'),
 )
 
 ## Source: https://en.wikipedia.org/wiki/Cat_coat_genetics
 CAT_PATTERN_CHOICES = (
-    ('solid', 'Solid'),
-    ('bicolor', 'Bicolor'),
     ('bengal', 'Bengal'),
-    ('colorpoint', 'Colorpoint'),
+    ('bicolor', 'Bicolor'),
     ('calico', 'Calico'),
-    ('tortoiseshell', 'Tortoiseshell'),
-    ('tabby', 'Tabby'),
+    ('colorpoint', 'Colorpoint'),
     ('hairless', 'Hairless'),
+    ('solid', 'Solid'),
+    ('tabby', 'Tabby'),
+    ('tortoiseshell', 'Tortoiseshell'),    
+    
 )
+
+ALL_COLOR_CHOICES = DOG_COLOR_CHOICES + CAT_COLOR_CHOICES
+ALL_PATTERN_CHOICES = DOG_PATTERN_CHOICES + CAT_PATTERN_CHOICES
