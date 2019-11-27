@@ -3,7 +3,8 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-<h1>Room Information</h1>
+<h1>ADD ROOM TO {{ form.building.initial }} BUILDING</h1>
+<hr>
 <div id="app">
   <form action="" method="post">{% csrf_token %}
       <div class="row">
@@ -16,9 +17,9 @@
       </div>
     {{ form.building|as_crispy_field }}
     <input type="submit" value="Save" class='btn btn-success btn-lg btn-block' id='submit-button'>
-    <input class='btn btn-primary btn-lg btn-block'  type=button value="Back" onClick="javascript:history.go(-1);">
+    <input class='btn btn-secondary btn-lg btn-block'  type=button value="Back" onClick="javascript:history.go(-1);">
   </form>
 </div>
 <br>
 <br>
-{% endblock %}mo
+{% endblock %}

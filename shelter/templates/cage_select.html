@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>SELECT CAGE FOR {{ animal.name|upper }}</h1>
+  <hr>
+  {% if cages %}
+    {% for cage in cages %}
+      <a class="btn btn-warning btn-lg btn-block" href="{% url 'shelter:shelter_animal_cage' animal.pk cage.pk %}">{{ cage }}</a>
+    {% endfor %}
+  {% else %}
+    <a class="btn btn-secondary btn-lg btn-block disabled">NO CAGES CONFIGURED FOR {{ room }}</a>
+  {% endif %}
+  <br>
+  <br>
+  <a class="btn btn-success btn-lg btn-block"  href="{% url 'shelter:shelter_animal_cage_add' animal.pk room.pk %}">ADD CAGE</a>
+  <a class="btn btn-secondary btn-lg btn-block"  href="{% url 'shelter:shelter_animal_room_select' animal.pk room.building.pk %}">BACK</a>
+{% endblock %}

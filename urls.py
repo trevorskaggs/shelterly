@@ -1,8 +1,9 @@
 import views
 import settings
 from django.contrib import admin
+from django.views.static import serve
 from django.urls import path
-from django.conf.urls import include
+from django.conf.urls import include, url
 from django.contrib.staticfiles.urls import static
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
  
@@ -19,3 +20,6 @@ urlpatterns = [
 ]
 urlpatterns += staticfiles_urlpatterns()
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+if settings.DEBUG:
+    urlpatterns += [url(r'^media/(?P<path>.*)$', serve, {'document_root':settings.MEDIA_ROOT})]

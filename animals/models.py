@@ -19,14 +19,14 @@ class Animal(Location):
 
     #choice fields
     species = models.CharField(max_length=50, choices=SPECIES_CHOICES, blank=True, null=True)
-    breed = models.CharField(max_length=50, choices=BREED_CHOICES, blank=True, null=True)
+    breed = models.CharField(max_length=50, choices=BREED_CHOICES, blank=True, null=True, default='unknown')
     sex = models.CharField(max_length=1, choices=SEX_CHOICES, blank=True, null=True)
     pcolor = models.CharField(max_length=50, choices=ALL_COLOR_CHOICES, verbose_name='Primary Color' , blank=True, null=True)
     scolor = models.CharField(max_length=50, choices=ALL_COLOR_CHOICES, verbose_name='Secondary Color', blank=True, null=True)
     markings = models.CharField(max_length=50, choices=ALL_PATTERN_CHOICES, blank=True, null=True)
     size = models.CharField(max_length=1, choices=SIZE_CHOICES, blank=True, null=True)
     age = models.CharField(max_length=1, choices=AGE_CHOICES, blank=True, null=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, blank=True, null=True, default='Reported')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, blank=True, null=True, default='REPORTED')
 
     #boolean fields
     fixed = models.BooleanField(blank=True, null=True)
@@ -46,9 +46,10 @@ class Animal(Location):
     med_notes = models.TextField(blank=True, null=True)
     last_seen = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
 
-    def assign_cage(self, cage_pk):
-        from shelter.models import Cage
-        cage = Cage.objects.get(pk=cage_pk)
+    @property
+    def info(self):
+        return '%s (%s, %s, %s)' % (self.name.capitalize(), self.species.capitalize(), self.breed.capitalize(), self.sex)
+    
 
     class Meta:
         ordering = []

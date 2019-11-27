@@ -1,21 +1,41 @@
 {% extends 'base.html' %}
-
 {% block content %}
-  <h1>Name: {{animal.name}}</h1>
+  <h1>{{animal.name}}</h1>
+  <hr>
+  <div class="row">
+    <div class="col-sm">
+      <p><strong>Owner:</strong> {{animal.owner}} </p>
+      <p><strong>Species:</strong> {{animal.species|title}} </p>
+      <p><strong>Breed:</strong> {{animal.breed|title}} </p>
+      <p><strong>Sex:</strong> {{animal.sex|title}} </p>
+      <p><strong>Age:</strong> {{animal.age|title}} </p>
+      <p><strong>Fixed:</strong> {{animal.fixed|yesno|title}} </p>
+    </div>
+    <div class="col-sm">
+      <p><strong>Primary Color:</strong> {{animal.pcolor|title}} </p>
+      <p><strong>Secondary Color:</strong> {{animal.scolor|title}} </p>
+      <p><strong>Markings:</strong> {{animal.markings|title}} </p>
+      <p><strong>Aggressive:</strong> {{animal.aggressive|yesno|title}} </p>
+      <p><strong>Status:</strong> {{animal.status|title}} </p>
+      <p><strong>Shelter Location:</strong> {% if animal.cage %}{{ animal.cage.room.building.shelter|title }} > {{ animal.cage.room.building|title }} > {{ animal.cage.room|title }} > {{ animal.cage|title }}{% else %}N/A{% endif %}</p>
+    </div>
+    <div class="col-sm">
+      <!-- RESERVED FOR IMAGE -->
+    </div>
+  </div>
+</div>
 
-  <p><strong>Owner:</strong> {{animal.owner}} </p>
-  <p><strong>Species:</strong> {{animal.species|title}} </p>
-  <p><strong>Sex:</strong> {{animal.sex|title}} </p>
-  <p><strong>Breed:</strong> {{animal.breed|title}} </p>
-  <p><strong>Primary Color:</strong> {{animal.pcolor|title}} </p>
-  <p><strong>Secondary Color:</strong> {{animal.scolor|title}} </p>
-  <p><strong>Markngs:</strong> {{animal.markings|title}} </p>
-  <p><strong>Age:</strong> {{animal.age|title}} </p>
-  <p><strong>Fixed:</strong> {{animal.fixed|yesno|title}} </p>
-  <p><strong>Aggressive:</strong> {{animal.aggressive|yesno|title}} </p>
-  <p><strong>Status:</strong> {{animal.status}} </p>
 
-  <a class='btn btn-warning btn-lg btn-block' href="{% url 'animals:animal_edit' animal.pk %}">Edit Animal</a>
-  <input class='btn btn-primary btn-lg btn-block'  type=button value="Back" onClick="javascript:history.go(-1);">
 
+ 
+
+  <a class='btn btn-info btn-lg btn-block' href="{% url 'animals:animal_edit' animal.pk %}">Edit Animal</a>
+  <a class='btn btn-success btn-lg btn-block' href="{% url 'shelter:shelter_animal_shelter_select' animal.pk %}">{% if animal.cage %}Move{% else %}Shelter{% endif %} Animal</a>
+  {% if animal.owner %}
+  <a class='btn btn-secondary btn-lg btn-block' href="{% url 'people:owner_detail' animal.owner.pk %}">Back to Owner</a>
+  {% endif %}
+  {% if animal.request %}
+  <a class='btn btn-secondary btn-lg btn-block' href="{% url 'hotline:service_request_detail' animal.request.pk %}">Back to Service Request</a>
+  {% endif %}
+<br>
 {% endblock %}

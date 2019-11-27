@@ -1,13 +1,18 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>Room Name: {{ room.name }}</h1>
-<h4>Room Description: {{ room.description }}</h4>
-{% for room in room.cage_set.all %}
-  <a class="btn btn-warning btn-lg btn-block" href="{% url 'shelter:room_detail' room.pk %}">{{ cage.name }}</a>
-{% endfor %}
+<h1>{{ room }} ROOM</h1>
+<hr>
+{% if room.cage_set.exists %}
+    {% for cage in room.cage_set.all %}
+      <a class="btn btn-warning btn-lg btn-block" href="{% url 'shelter:cage_detail' cage.pk %}">{{ cage }}</a>
+    {% endfor %}
+{% else %}
+    <a class="btn btn-secondary btn-lg btn-block disabled">NO CAGES CONFIGURED</a>
+{% endif %}
 <br>
 <br>
-<a class="btn btn-success btn-lg btn-block"  href="{% url 'shelter:room_new' room.pk %}">ADD CAGE</a>
-<a class="btn btn-primary btn-lg btn-block"  href="{% url 'shelter:shelter_landing' %}">BACK</a>
+<a class="btn btn-success btn-lg btn-block"  href="{% url 'shelter:cage' room.pk %}">ADD CAGE</a>
+<a class="btn btn-info btn-lg btn-block"  href="{% url 'shelter:room' room.building.pk room.pk %}">EDIT ROOM</a>
+<a class="btn btn-secondary btn-lg btn-block"  href="{% url 'shelter:building_detail' room.building.pk %}">BACK</a>
 {% endblock %}

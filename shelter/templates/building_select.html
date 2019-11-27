@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>SELECT BUILDING FOR {{ animal.name|upper }}</h1>
+  <hr>
+  {% if buildings %}
+    {% for building in buildings %}
+      <a class="btn btn-warning btn-lg btn-block" href="{% url 'shelter:shelter_animal_room_select' animal.pk building.pk %}">{{ building }}</a>
+    {% endfor %}
+  {% else %}
+    <a class="btn btn-secondary btn-lg btn-block disabled">NO BUILDINGS CONFIGURED FOR {{ shelter }}</a>
+  {% endif %}
+  <br>
+  <br>
+  <a class="btn btn-secondary btn-lg btn-block"  href="{% url 'shelter:shelter_animal_shelter_select' animal.pk %}">BACK</a>
+{% endblock %}

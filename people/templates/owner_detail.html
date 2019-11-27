@@ -16,37 +16,30 @@
   <p><strong>Zip Code:</strong> {{owner.zip_code}} </p>
   <p><strong>Latitude:</strong> {{owner.latitude}} </p>
   <p><strong>Longitude:</strong> {{owner.longitude}} </p>
-  <hr>
-  <p><strong> MAP:</strong></p>
-  {% include "minimap.html" with object=owner %}
-  {% include "animal_list.html" %}
-
-<a class="btn btn-primary btn-lg btn-block" href="{% url 'people:owner_list' %}">Back To Owner List</a>
-
-  <h1>EVACUATION REQUEST NUMBER: {{evac_request.pk}}</h1>
-  <p><strong>Time of Request:</strong> {{evac_request.timestamp}}</p>
-  <p><strong>Verbal Permission:</strong> {{evac_request.verbal_permission}}</p>
-  <p><strong>Location:</strong></p>
-  <p>{{evac_request.owner.address}} {{evac_request.owner.apartment}} {{evac_request.owner.city}} {{evac_request.owner.state}} {{evac_request.owner.zip_code}}</p>
-
-  <h1>ANIMALS SUMMARY</h1>
+  {% if service_requests %}
+  <h1>Service Requests</h1>
+    {% for evac_request in service_requests %}
+      <h1>EVACUATION REQUEST NUMBER: {{evac_request.pk}}</h1>
+      <p><strong>Time of Request:</strong> {{evac_request.timestamp}}</p>
+      <p><strong>Verbal Permission:</strong> {{evac_request.verbal_permission}}</p>
+      <p><strong>Location:</strong></p>
+      <p>{{evac_request.owner.address}} {{evac_request.owner.apartment}} {{evac_request.owner.city}} {{evac_request.owner.state}} {{evac_request.owner.zip_code}}</p>
+    {% endfor %}
+  {% endif %}
 
   {% if owner.animal_set.all %}
-
-    {% for animal in evac_request.animal_set.all %}
-      <h3><strong>Name:</strong> <a href="{% url 'animals:animal_detail' animal.pk %}"> {{animal.name}}</a></h3>
-      <p><strong>Species:</strong> {{animal.species}} </p>
-      <p><strong>Sex:</strong> {{animal.sex}} </p>
-      <p><strong>Breed:</strong> {{animal.breed}} </p>
-      <p><strong>Status:</strong> {{animal.status}} </p>
+  <h1>ANIMALS</h1>
+    {% for animal in owner.animal_set.all %}
+      <a class="btn btn-warning btn-lg btn-block" href="{% url 'animals:animal_detail' animal.pk %}">{{ animal.info }}</a>
     {% endfor %}
-  
-  {% else %}
-    <p>THERE ARE CURRENTLY NO ANIMALS REGISTED TO PERSON</p>
   {% endif %}
   <br>
-  <a class='btn btn-warning' href="{% url 'hotline:service_request_edit' service_request.pk %}">Edit Request</a>
-  <input class='btn btn-primary'  type=button value="Back" onClick="javascript:history.go(-1);">
-
+  <br>
+  <a class='btn btn-success btn-lg btn-block' href="{% url 'intake:intake_new_animal' owner.pk 'dog'%}">Add Dog</a>
+  <a class='btn btn-success btn-lg btn-block'href="{% url 'intake:intake_new_animal' owner.pk 'cat'%}">Add Cat</a>
+  <a class='btn btn-success btn-lg btn-block' href="{% url 'intake:intake_new_animal' owner.pk 'oth'%}">Add Other</a>
+  <a class='btn btn-info btn-lg btn-block' href="{% url 'people:owner_edit' owner.pk %}">Update Owner</a>
+  <input class='btn btn-secondary btn-lg btn-block'  type=button value="Back" onClick="javascript:history.go(-1);">
+  <br>
 {% endblock %}
 
