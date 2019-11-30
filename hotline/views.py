@@ -1,12 +1,13 @@
 from django.db.models import Q
 from django.shortcuts import render, redirect
 from django.shortcuts import get_object_or_404
-
+from animals.models import Animal
 from animals.forms import AnimalForm
 from hotline.models import ServiceRequest
 from hotline.forms import ServiceRequestForm, ServiceRequestSearchForm
 from people.models import Person
 from people.forms import PersonForm
+from django.core.files.storage import FileSystemStorage
 
 # Create your views here.
 def hotline_landing(request):
@@ -63,9 +64,10 @@ def service_request_add_owner(request, service_request_pk):
 
 def service_request_add_animal(request, service_request_pk, species):
     service_request = ServiceRequest.objects.get(pk=service_request_pk)
-    form = AnimalForm(species, service_request.owner, request.POST or None, initial={'owner':service_request.owner})
+    form = AnimalForm(species, service_request.owner, request.POST or None, request.FILES or None, initial={'owner':service_request.owner})
     if form.is_valid():
         animal = form.save()
+        animal.image = request.FILES['image']
         animal.request = service_request
         animal.save()
         return redirect('hotline:service_request_detail', service_request_pk=service_request_pk)

@@ -20,7 +20,11 @@
       <p><strong>Shelter Location:</strong> {% if animal.cage %}{{ animal.cage.room.building.shelter|title }} > {{ animal.cage.room.building|title }} > {{ animal.cage.room|title }} > {{ animal.cage|title }}{% else %}N/A{% endif %}</p>
     </div>
     <div class="col-sm">
-      <!-- RESERVED FOR IMAGE -->
+      {% if animal.image %}
+        <img src="{{ animal.image.url}}" alt="{{ animal.name }}">
+        <br>
+        <br>
+      {% endif %}
     </div>
   </div>
 </div>

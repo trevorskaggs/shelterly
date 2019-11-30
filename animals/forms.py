@@ -10,6 +10,7 @@ class AnimalForm(LocationForm):
     chip_info = forms.CharField(required=False, widget=forms.Textarea(attrs={'rows': 2, 'cols': 40}))
     diet_notes =forms.CharField(required=False, widget=forms.Textarea(attrs={'rows': 2, 'cols': 40}))
     med_notes = forms.CharField(required=False, widget=forms.Textarea(attrs={'rows': 2, 'cols': 40}))
+    image = forms.ImageField(required=False)
 
     def __init__(self, species, owner=None, *args, **kwargs):
         super(AnimalForm, self).__init__(owner, *args, **kwargs)

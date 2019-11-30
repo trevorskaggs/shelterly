@@ -6,7 +6,7 @@
   {% if owner %}<h2>Owner: {{ owner }}</h2>{% endif %}
   <h1>Animal Information</h1>
 <div id="app">
-  <form action="" method="post">{% csrf_token %}
+  <form method="post" enctype="multipart/form-data"> {% csrf_token %}
     <div class="section-1">
       <div class="row">
         <div class="col-6">
@@ -121,7 +121,14 @@
           {{ form.status|as_crispy_field }}
         </div>
       </div>
-      {{ form.owner|as_crispy_field }}
+      <div class="row">
+        <div class="col-6">
+          {{ form.owner|as_crispy_field }}
+        </div>
+        <div class="col-6">
+          {{form.image}}
+        </div>
+      </div>
       <input type="submit" value="Save" class='btn btn-success btn-lg btn-block' id='submit-button'>
       <input class='btn btn-secondary btn-lg btn-block'  type=button value="Back" onClick="javascript:history.go(-1);">
       <br>
