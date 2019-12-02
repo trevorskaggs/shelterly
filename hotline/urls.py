@@ -29,7 +29,6 @@ urlpatterns = [
     path('request/list/search/', views.service_request_search, name='service_request_search'),
     path('request/list/search/<query>', views.service_request_search, name='service_request_search'),
     path('request/list/<status>', views.service_request_list, name='service_request_list'),
-
     path('request/<int:owner_pk>/new', views.service_request_new, name = 'service_request_new'),
     path('request/<int:owner_pk>/<int:rep_pk>/new', views.service_request_new, name = 'service_request_new'),
     path('request/<int:service_request_pk>/', views.service_request_detail, name = 'service_request_detail'),

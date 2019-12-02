@@ -18,7 +18,7 @@ def animal_list(request):
 
 def new_animal(request, species, owner_pk=None):
     owner = Person.objects.get(pk=owner_pk) if owner_pk else None
-    form = AnimalForm(species, owner, request.POST or None)
+    form = AnimalForm(species, owner, request.FILES, request.FILES or None, request.POST or None)
     if form.is_valid():
         form.save()
         return HttpResponseRedirect(reverse_lazy('animals:animal_list'))
@@ -34,6 +34,7 @@ def animal_edit(request, pk):
     animal = get_object_or_404(Animal, pk=pk)
     form = AnimalForm(animal.species, animal.owner, request.POST or None, instance=animal)
     if form.is_valid():
+        animal.image = request.FILES['image']
         form.save()
         return redirect('animals:animal_detail', pk=pk)
     return render(request, 'animal.html', {'form':form})
