@@ -14,7 +14,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, re_path
 
 from hotline import views
 
@@ -29,8 +29,7 @@ urlpatterns = [
     path('request/list/search/', views.service_request_search, name='service_request_search'),
     path('request/list/search/<query>', views.service_request_search, name='service_request_search'),
     path('request/list/<status>', views.service_request_list, name='service_request_list'),
-    path('request/<int:owner_pk>/new', views.service_request_new, name = 'service_request_new'),
-    path('request/<int:owner_pk>/<int:rep_pk>/new', views.service_request_new, name = 'service_request_new'),
+    re_path(r'^request/(?P<owner_pk>\d+)(?:/(?P<rep_pk>\d+))?/new', views.service_request_new, name = 'service_request_new'),
     path('request/<int:service_request_pk>/', views.service_request_detail, name = 'service_request_detail'),
     path('request/<int:service_request_pk>/update', views.service_request_update, name = 'service_request_update'),
     path('request/<int:service_request_pk>/add/owner', views.service_request_add_owner, name = 'service_request_add_owner'),

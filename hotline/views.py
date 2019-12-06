@@ -17,7 +17,9 @@ def hotline_new_owner(request, rep_pk=None):
     form = PersonForm(request.POST or None)
     if form.is_valid():
         owner = form.save()
-        return redirect('hotline:service_request_new', owner_pk=owner.pk, rep_pk=rep_pk)
+        if rep_pk:
+            return redirect('hotline:service_request_new', owner_pk=owner.pk, rep_pk=rep_pk)
+        return redirect('hotline:service_request_new', owner_pk=owner.pk)
     return render(request, 'owner.html', {'form':form})
 
 def hotline_new_reporter(request):
@@ -35,7 +37,7 @@ def service_request_detail(request, service_request_pk):
 def service_request_new(request, owner_pk=None, rep_pk=None):
     reporter = Person.objects.get(pk=rep_pk) if rep_pk else None
     owner = Person.objects.get(pk=owner_pk) if owner_pk else None
-    form = ServiceRequestForm(owner, reporter, request.POST or None)
+    form = ServiceRequestForm(owner, request.POST or None)
     if form.is_valid():
         service_request = form.save()
         service_request.owner = owner
