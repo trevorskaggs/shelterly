@@ -5,8 +5,8 @@
   {% if service_request.owner %}
   <h1>Owner: {{service_request.owner.first_name}} {{service_request.owner.last_name}}</h1>
   {% endif %}
+  <br>
   {% if service_request.animal_set.all %}
-  <h1>ANIMALS</h1>
   {% include "include/animal_table.html" with animals=service_request.animal_set.all %}
   {% endif %}
   <br>

@@ -5,7 +5,11 @@
   <hr>
   {% if cages %}
     {% for cage in cages %}
+      {% if cage.occupied %}
+      <a class="btn btn-warning btn-lg btn-block" style="opacity: 0.5" href="{% url 'shelter:shelter_animal_cage' animal.pk cage.pk %}" title='Occupied!'>{{ cage }}</a>
+      {% else %}
       <a class="btn btn-warning btn-lg btn-block" href="{% url 'shelter:shelter_animal_cage' animal.pk cage.pk %}">{{ cage }}</a>
+      {% endif %}
     {% endfor %}
   {% else %}
     <a class="btn btn-secondary btn-lg btn-block disabled">NO CAGES CONFIGURED FOR {{ room }}</a>

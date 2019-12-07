@@ -1,0 +1,45 @@
+<script src="https://cdn.rawgit.com/openlayers/openlayers.github.io/master/en/v5.3.0/build/ol.js"></script>
+<link rel="stylesheet" href="https://cdn.rawgit.com/openlayers/openlayers.github.io/master/en/v5.3.0/css/ol.css" type="text/css">
+<div id="{{object.map_name}}" class="map" style="width:100%;"></div>
+<script>
+  var {{object.map_name}}_layer = new ol.layer.Vector({
+    source: new ol.source.Vector({}),
+  });
+  var baselayer = new ol.layer.Tile({
+    source: new ol.source.OSM()
+  });
+  {{object.map_name}}_map = new ol.Map({
+    layers: [
+      baselayer,
+      {{object.map_name}}_layer,
+    ],
+    target: '{{object.map_name}}',
+    view: new ol.View({
+      projection: 'EPSG:4326',
+      center: [0, 0],
+      zoom: 2
+    })
+  });
+
+$.ajax({
+    url: '{% url "location:get_service_request_wkts" status %}',
+    type: 'GET',
+    dataType: 'json',
+    success: function(data){
+      for (var pk in data) {
+          if (data.hasOwnProperty(pk) && pk > 0) {
+            var format = new ol.format.WKT();
+            var geometry = format.readGeometry(data[pk]);
+            var feature = new ol.Feature({
+              geometry: geometry,
+            });
+          }
+          console.log(feature)
+          {{object.map_name}}_layer.getSource().addFeature(feature);
+      }
+    {{object.map_name}}_map.getView().fit({{object.map_name}}_layer.getSource().getExtent(), {{object.map_name}}_map.getSize());
+    {{object.map_name}}_map.getView().setZoom(14);    
+    }
+});
+
+</script>
