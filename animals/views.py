@@ -34,7 +34,8 @@ def animal_edit(request, pk):
     animal = get_object_or_404(Animal, pk=pk)
     form = AnimalForm(animal.species, animal.owner, request.POST or None, instance=animal)
     if form.is_valid():
-        animal.image = request.FILES['image']
+        if 'image' in request.FILES.keys():
+            animal.image = request.FILES['image']
         form.save()
         return redirect('animals:animal_detail', pk=pk)
     return render(request, 'animal.html', {'form':form})

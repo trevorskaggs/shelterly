@@ -69,7 +69,8 @@ def service_request_add_animal(request, service_request_pk, species):
     form = AnimalForm(species, service_request.owner, request.POST or None, request.FILES or None, initial={'owner':service_request.owner})
     if form.is_valid():
         animal = form.save()
-        animal.image = request.FILES['image']
+        if 'image' in request.FILES.keys():
+            animal.image = request.FILES['image']
         animal.request = service_request
         animal.save()
         return redirect('hotline:service_request_detail', service_request_pk=service_request_pk)

@@ -18,6 +18,8 @@ class AnimalForm(LocationForm):
         self.fields['pcolor'].choices = ANIMAL_LOOKUP_DICT[species]['pcolor']
         self.fields['scolor'].choices = ANIMAL_LOOKUP_DICT[species]['scolor']
         self.fields['markings'].choices = ANIMAL_LOOKUP_DICT[species]['markings']
+        self.fields['breed'].choices = ANIMAL_LOOKUP_DICT[species]['breeds']
+        self.fields['breed'].default = 'unknown'
         self.fields['owner'].initial = owner
         if owner:
             self.set_initial_location(owner)

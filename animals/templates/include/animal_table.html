@@ -8,13 +8,19 @@
      </tr>
    </thead>
    <tbody>
-    {% for animal in animals %}
-     <tr>
-       <td scope="row"><a href="{% url 'animals:animal_detail' animal.pk %}">{{ animal.name|title }}</a></td>
-       <td>{{ animal.species|title }}</td>
-       <td>{{ animal.breed|title }}</td>
-       <td>{{ animal.sex|title }}</td>
-     </tr>
-     {% endfor %}
+    {% if animals %}
+      {% for animal in animals %}
+       <tr>
+         <td scope="row"><a href="{% url 'animals:animal_detail' animal.pk %}">{{ animal.name|title }}</a></td>
+         <td>{{ animal.species|title }}</td>
+         <td>{{ animal.breed|title }}</td>
+         <td>{{ animal.sex|title }}</td>
+       </tr>
+       {% endfor %}
+     {% else %}
+      <tr>
+        <td>No animals</td>
+      </tr>
+      {% endif %}
     </tbody>
   </table>

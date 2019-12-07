@@ -12,8 +12,8 @@
   <br>
   {% if service_requests %}
     {% for service_request in service_requests %}
-      <a class='btn btn-warning btn-lg btn-block' href="{% url 'hotline:service_request_detail' service_request.pk %}">Service Request - {{service_request}}</a>
-      {% include "include/animal_table.html" with animals=service_request.animal_set.all %}
+      <a class='btn btn-warning btn-lg btn-block' href="{% url 'hotline:service_request_detail' service_request.pk %}">{{service_request}}</a>
+        {% include "include/animal_table.html" with animals=service_request.animal_set.all %}
     {% endfor %}
   {% else %}
     <a class='btn btn-secondary btn-lg btn-block disabled'>NO {{ status|upper }} SERVICE REQUESTS FOUND</a>

@@ -1,5 +1,7 @@
 from animals.colors import CAT_COLOR_CHOICES, CAT_PATTERN_CHOICES, DOG_COLOR_CHOICES, DOG_PATTERN_CHOICES
 
+UNKNOWN_CHOICE = ('Unknown', 'Unknown')
+
 SPECIES_CHOICES = (
     ('cat', "Cat"),
     ('dog', "Dog"),
@@ -8,7 +10,7 @@ SPECIES_CHOICES = (
 )
 
 BREED_CHOICES = (
-    ('unknown', "Unknown"),
+    ('Unknown', "Unknown"),
 )
 
 SEX_CHOICES = (
@@ -17,30 +19,17 @@ SEX_CHOICES = (
 )
 
 SIZE_CHOICES = (
-    ('S', "Small (< 20 lbs)"),
-    ('M', "Medium (21 - 60 lbs)"),
-    ('L', "Large (61 - 110 lbs)"),
-    ('G', "Giant (111+ lbs)"),
+    ('Small', "Small (< 20 lbs)"),
+    ('Medium', "Medium (21 - 60 lbs)"),
+    ('Large', "Large (61 - 110 lbs)"),
+    ('Giant', "Giant (111+ lbs)"),
 )
 
 AGE_CHOICES = (
-    ('Y', "Youth (< 2 Years)"),
-    ('A', "Adult (2 - 8 Years)"),
-    ('E', "Elderly (8+ Years)"),
+    ('Youth', "Youth (< 2 Years)"),
+    ('Adult', "Adult (2 - 8 Years)"),
+    ('Elerly', "Elderly (8+ Years)"),
 )
-
-ANIMAL_LOOKUP_DICT = {
-    'dog':{
-        'pcolor': DOG_COLOR_CHOICES,
-        'scolor': DOG_COLOR_CHOICES,
-        'markings': DOG_PATTERN_CHOICES,
-    },
-    'cat':{
-        'pcolor': CAT_COLOR_CHOICES,
-        'scolor': CAT_COLOR_CHOICES,
-        'markings': CAT_PATTERN_CHOICES,
-    },
-}
 
 STATUS_CHOICES = (
     ('REPORTED', 'REPORTED'),
@@ -51,7 +40,8 @@ STATUS_CHOICES = (
 )
 
 # Source: https://www.akc.org/dog-breeds/
-DOG_BREEDS = (
+DOG_BREEDS =  (
+    UNKNOWN_CHOICE,
     ('Sporting Group', 'Sporting Group'),
     ('Working Group', 'Working Group'),
     ('Toy Group', 'Toy Group'),
@@ -59,6 +49,23 @@ DOG_BREEDS = (
     ('Hound Group', 'Hound Group'),
     ('Terrier Group', 'Terrier Group'),
 )
+
+ANIMAL_LOOKUP_DICT = {
+    'dog':{
+        'pcolor': DOG_COLOR_CHOICES,
+        'scolor': DOG_COLOR_CHOICES,
+        'markings': DOG_PATTERN_CHOICES,
+        'breeds': DOG_BREEDS,
+    },
+    'cat':{
+        'pcolor': CAT_COLOR_CHOICES,
+        'scolor': CAT_COLOR_CHOICES,
+        'markings': CAT_PATTERN_CHOICES,
+        'breeds':[],
+    },
+}
+
+ALL_BREED_CHOICES = DOG_BREEDS
 # DOG_BREEDS = (
 #     ('Affenpinscher', 'Affenpinscher'),
 #     ('Afghan Hound', 'Afghan Hound'),

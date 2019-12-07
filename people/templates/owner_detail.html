@@ -2,22 +2,17 @@
 
 {% block content %}
 
-  <h1>OWNER SUMMARY</h1>
-  <p><strong>Name:</strong> {{owner.first_name}} {{owner.last_name}}</p>
-  <p><strong>Home Phone:</strong> {{owner.home_phone}} </p>
-  <p><strong>Work Phone:</strong> {{owner.work_phone}} </p>
-  <p><strong>Cell Phone:</strong> {{owner.cell_phone}} </p>
-  <p><strong>Best Contact:</strong> {{owner.best_contact}} </p>
-  <p><strong>Drivers License:</strong> {{owner.drivers_license}} </p>
-  <p><strong>Address:</strong> {{owner.address}} </p>
-  <p><strong>Apartment:</strong> {{owner.apartment}} </p>
-  <p><strong>City:</strong> {{owner.city}} </p>
-  <p><strong>State:</strong> {{owner.state}} </p>
-  <p><strong>Zip Code:</strong> {{owner.zip_code}} </p>
-  <p><strong>Latitude:</strong> {{owner.latitude}} </p>
-  <p><strong>Longitude:</strong> {{owner.longitude}} </p>
+  <h1>{{owner.first_name}} {{owner.last_name}}</h1>
+    <p><strong>Phone:</strong>
+      {% if owner.home_phone %}{{ owner.home_phone }} (H) {% endif %}
+      {% if owner.work_phone %}{{ owner.work_phone}} (W) {% endif %}
+      {% if owner.cell_phone %}{{ owner.cell_phone}} (C) {% endif %}
+    </p>
+    <p><strong>Drivers License:</strong> {{owner.drivers_license}} </p>
+    <p><strong>Best Contact:</strong> {{owner.best_contact}} </p>
+    <p><strong>Address:</strong> {{owner.address}} {{owner.apartment}}, {{owner.city}}, {{owner.state}}, {{owner.zip_code}} </p>
   {% if service_requests %}
-  <h1>Service Requests</h1>
+  <h1>Service Request</h1>
     {% for evac_request in service_requests %}
       <h1>EVACUATION REQUEST NUMBER: {{evac_request.pk}}</h1>
       <p><strong>Time of Request:</strong> {{evac_request.timestamp}}</p>
