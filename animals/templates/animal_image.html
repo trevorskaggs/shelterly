@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{{ my_form.media }}
+{% block content %}
+<h1>Animal Image</h1>
+<div id="app">
+  <form method="post" enctype="multipart/form-data"> {% csrf_token %}
+    <div class="col-6">
+        {{form.image}}
+    </div>
+</div>
+<input type="submit" value="Save" class='btn btn-success btn-lg btn-block' id='submit-button'>
+<input class='btn btn-secondary btn-lg btn-block'  type=button value="Back" onClick="javascript:history.go(-1);">
+ 
+ {% endblock %}
