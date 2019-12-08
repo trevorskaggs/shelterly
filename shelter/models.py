@@ -41,3 +41,8 @@ class Cage(BaseShelterModel):
     @property
     def parent(self):
         return self.room
+
+    @property
+    def occupied(self):
+        return self.animal_set.all().exists()
+   

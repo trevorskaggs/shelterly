@@ -17,11 +17,11 @@
       <p><strong>Markings:</strong> {{animal.markings|title}} </p>
       <p><strong>Aggressive:</strong> {{animal.aggressive|yesno|title}} </p>
       <p><strong>Status:</strong> {{animal.status|title}} </p>
-      <p><strong>Shelter Location:</strong> {% if animal.cage %}{{ animal.cage.room.building.shelter|title }} > {{ animal.cage.room.building|title }} > {{ animal.cage.room|title }} > {{ animal.cage|title }}{% else %}N/A{% endif %}</p>
+      <p><strong>Shelter Location:</strong> {% if animal.cage %}{{ animal.cage.room.building.shelter|title }}, {{ animal.cage.room.building|title }}, {{ animal.cage.room|title }}, {{ animal.cage|title }}{% else %}N/A{% endif %}</p>
     </div>
     <div class="col-sm">
       {% if animal.image %}
-        <img src="{{ animal.image.url}}" height="400" width="400">
+        <img src="{{ animal.image.url}}" style='max-width:400px;max-height:200px'>
         <br>
         <br>
       {% endif %}
