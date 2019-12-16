@@ -53,6 +53,6 @@ def animal_image(request, pk):
         animal.image = request.FILES['image']
         animal.save()
         return redirect('animals:animal_detail', pk=pk)
-    return render(request, 'animal_image.html', {'form':form})
+    return render(request, 'animal_image.html', {'form':form, 'animal':animal})
 
 

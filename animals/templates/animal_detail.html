@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block content %}
   <h1>{{animal.name}}</h1>
   <hr>
@@ -20,11 +21,9 @@
       <p><strong>Shelter Location:</strong> {% if animal.cage %}{{ animal.cage.room.building.shelter|title }}, {{ animal.cage.room.building|title }}, {{ animal.cage.room|title }}, {{ animal.cage|title }}{% else %}N/A{% endif %}</p>
     </div>
     <div class="col-sm">
-      {% if animal.image %}
-        <img src="{{ animal.image.url}}" style='max-width:400px;max-height:200px'>
+        <img src="{% if animal.image %}{{ animal.image.url}}{% else %}{% static 'images/no_image_icon.png' %}{% endif %}" style='max-width:400px;max-height:200px'>
         <br>
         <br>
-      {% endif %}
     </div>
   </div>
 </div>
