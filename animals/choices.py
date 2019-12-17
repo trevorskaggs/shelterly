@@ -47,6 +47,18 @@ DOG_BREEDS =  (
     ('Hound Group', 'Hound Group'),
     ('Terrier Group', 'Terrier Group'),
 )
+# Source https://www.purina.com.au/cats/ownership/pedigree-cat-breed-groups
+CAT_BREEDS = (
+    UNKNOWN_CHOICE,
+    ('British Shorthair', 'British Shorthair'),
+    ('Burmese', 'Burmese'),
+    ('Foreign Shorthair', 'Foreign Shorthair'),
+    ('Oriental', 'Oriental'),
+    ('Persian', 'Persian'),
+    ('Semi-longhair', 'Semi-longhair'),
+    ('Siamese', 'Siamese'),
+
+)
 
 ANIMAL_LOOKUP_DICT = {
     'dog':{
@@ -59,11 +71,10 @@ ANIMAL_LOOKUP_DICT = {
         'pcolor': CAT_COLOR_CHOICES,
         'scolor': CAT_COLOR_CHOICES,
         'markings': CAT_PATTERN_CHOICES,
-        'breeds': DOG_BREEDS,
-    },
+        'breeds': CAT_BREEDS,
 }
 
-ALL_BREED_CHOICES = DOG_BREEDS
+ALL_BREED_CHOICES = DOG_BREEDS + CAT_BREEDS
 # DOG_BREEDS = (
 #     ('Affenpinscher', 'Affenpinscher'),
 #     ('Afghan Hound', 'Afghan Hound'),

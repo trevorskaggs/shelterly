@@ -10,7 +10,7 @@ class AnimalForm(LocationForm):
     chip_info = forms.CharField(required=False, widget=forms.Textarea(attrs={'rows': 2, 'cols': 40}))
     diet_notes =forms.CharField(required=False, widget=forms.Textarea(attrs={'rows': 2, 'cols': 40}))
     med_notes = forms.CharField(required=False, widget=forms.Textarea(attrs={'rows': 2, 'cols': 40}))
-    image = forms.ImageField(required=False)
+    
 
     def __init__(self, species, owner=None, *args, **kwargs):
         super(AnimalForm, self).__init__(owner, *args, **kwargs)
@@ -26,6 +26,13 @@ class AnimalForm(LocationForm):
 
     class Meta:
         model = Animal
-        exclude = ('latitude', 'longitude', 'request')
+        exclude = ('latitude', 'longitude', 'request', 'image', 'status')
         widgets = {'owner': forms.HiddenInput()}
-        
+
+class ImageForm(forms.ModelForm):
+
+    image = forms.ImageField(required=True)
+
+    class Meta:
+        model = Animal
+        fields = ['image']

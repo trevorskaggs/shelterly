@@ -19,7 +19,7 @@ class Animal(Location):
 
     #choice fields
     species = models.CharField(max_length=50, choices=SPECIES_CHOICES, blank=True, null=True)
-    breed = models.CharField(max_length=50, choices=ALL_BREED_CHOICES, blank=True, null=True, default='unknown')
+    breed = models.CharField(max_length=50, choices=ALL_BREED_CHOICES, blank=True, null=True, default='Unknown')
     sex = models.CharField(max_length=1, choices=SEX_CHOICES, blank=True, null=True)
     pcolor = models.CharField(max_length=50, choices=ALL_COLOR_CHOICES, verbose_name='Primary Color' , blank=True, null=True)
     scolor = models.CharField(max_length=50, choices=ALL_COLOR_CHOICES, verbose_name='Secondary Color', blank=True, null=True)

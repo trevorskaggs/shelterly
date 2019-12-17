@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block content %}
   <h1>{{animal.name}}</h1>
   <hr>
@@ -20,13 +21,15 @@
       <p><strong>Shelter Location:</strong> {% if animal.cage %}{{ animal.cage.room.building.shelter|title }}, {{ animal.cage.room.building|title }}, {{ animal.cage.room|title }}, {{ animal.cage|title }}{% else %}N/A{% endif %}</p>
     </div>
     <div class="col-sm">
-      {% if animal.image %}
-        <img src="{{ animal.image.url}}" alt="{{ animal.name }}" style='max-width:400px;max-height:200px'>
+        <img src="{% if animal.image %}{{ animal.image.url}}{% else %}{% static 'images/no_image_icon.png' %}{% endif %}" alt="{{ animal.name }}" style='max-width:400px;max-height:200px'>
       {% endif %}
+        <br>
+        <br>
     </div>
   </div>
-</div> 
+
   <a class='btn btn-info btn-lg btn-block' href="{% url 'animals:animal_edit' animal.pk %}">Edit Animal</a>
+  <a class='btn btn-info btn-lg btn-block' href="{% url 'animals:animal_image' animal.pk %}">Add Animal Image</a>
   <a class='btn btn-success btn-lg btn-block' href="{% url 'shelter:shelter_animal_shelter_select' animal.pk %}">{% if animal.cage %}Move{% else %}Shelter{% endif %} Animal</a>
   {% if animal.owner %}
   <a class='btn btn-secondary btn-lg btn-block' href="{% url 'people:owner_detail' animal.owner.pk %}">Back to Owner</a>

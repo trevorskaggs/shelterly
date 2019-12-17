@@ -5,7 +5,7 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
 from people.models import Person
 from animals.models import Animal
-from animals.forms import AnimalForm
+from animals.forms import AnimalForm, ImageForm
 
 
 # Create your views here.
@@ -34,8 +34,6 @@ def animal_edit(request, pk):
     animal = get_object_or_404(Animal, pk=pk)
     form = AnimalForm(animal.species, animal.owner, request.POST or None, instance=animal)
     if form.is_valid():
-        if 'image' in request.FILES.keys():
-            animal.image = request.FILES['image']
         form.save()
         return redirect('animals:animal_detail', pk=pk)
     return render(request, 'animal.html', {'form':form})
@@ -47,5 +45,14 @@ def animal_delete(request, pk):
         return render(request, 'animal_delete_success.html')
     data = {'animal':animal}
     return render(request, 'animal_delete.html', data)
+
+def animal_image(request, pk):
+    animal = get_object_or_404(Animal, pk=pk)
+    form = ImageForm(request.POST or None, request.FILES or None)
+    if form.is_valid():
+        animal.image = request.FILES['image']
+        animal.save()
+        return redirect('animals:animal_detail', pk=pk)
+    return render(request, 'animal_image.html', {'form':form, 'animal':animal})
 
 
