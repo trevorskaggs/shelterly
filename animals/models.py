@@ -33,9 +33,6 @@ class Animal(Location):
     aggressive = models.BooleanField(blank=True, null=True)
     confined = models.BooleanField(blank=True, null=True)
     chipped = models.BooleanField(blank=True, null=True)
-    diet_needs = models.BooleanField(blank=True, null=True)
-    med_needs = models.BooleanField(blank=True, null=True)
-    collared = models.BooleanField(blank=True, null=True)
     attended_to = models.BooleanField(blank=True, null=True)
 
     #text fields
@@ -43,7 +40,7 @@ class Animal(Location):
     behavior_notes = models.TextField(blank=True, null=True)
     chip_info = models.TextField(blank=True, null=True)
     diet_notes = models.TextField(blank=True, null=True)
-    med_notes = models.TextField(blank=True, null=True)
+    med_notes = models.TextField(blank=True, null=True, verbose_name='Medical Notes')
     last_seen = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
 
     @property

@@ -5,7 +5,7 @@
   <hr>
   {% if shelters %}
     {% for shelter in shelters %}
-      <a class="btn btn-warning btn-lg btn-block" href="{% url 'shelter:shelter_animal_building_select' animal.pk shelter.pk %}">{{ shelter }}</a>
+      <a class="btn btn-warning btn-lg btn-block" href="{% url 'shelter:shelter_animal_building_select' animal.pk shelter.pk %}">{{ shelter }} ({{ shelter.counts }})</a>
     {% endfor %}
   {% else %}
     <a class="btn btn-secondary btn-lg btn-block disabled">NO SHELTERS CONFIGURED</a>

@@ -22,24 +22,17 @@
     <div class="col-sm">
       {% if animal.image %}
         <img src="{{ animal.image.url}}" alt="{{ animal.name }}" style='max-width:400px;max-height:200px'>
-        <br>
-        <br>
       {% endif %}
     </div>
   </div>
-</div>
-
-
-
- 
-
+</div> 
   <a class='btn btn-info btn-lg btn-block' href="{% url 'animals:animal_edit' animal.pk %}">Edit Animal</a>
   <a class='btn btn-success btn-lg btn-block' href="{% url 'shelter:shelter_animal_shelter_select' animal.pk %}">{% if animal.cage %}Move{% else %}Shelter{% endif %} Animal</a>
   {% if animal.owner %}
   <a class='btn btn-secondary btn-lg btn-block' href="{% url 'people:owner_detail' animal.owner.pk %}">Back to Owner</a>
   {% endif %}
-  {% if animal.request %}
-  <a class='btn btn-secondary btn-lg btn-block' href="{% url 'hotline:service_request_detail' animal.request.pk %}">Back to Service Request</a>
+  {% if animal.servicerequest %}
+  <a class='btn btn-secondary btn-lg btn-block' href="{% url 'people:owner_detail' animal.owner.pk %}">Back to Owner</a>
   {% endif %}
 <br>
 {% endblock %}

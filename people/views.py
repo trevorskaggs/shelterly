@@ -29,12 +29,7 @@ def owner_delete(request, pk):
 
 def owner_detail(request, pk):
     owner = get_object_or_404(Person, pk=pk)
-    service_requests = ServiceRequest.objects.filter(owner=owner)
-    context = {
-        'service_requests':service_requests,
-        'owner':owner,
-    }
-    return render(request, 'owner_detail.html', context)
+    return render(request, 'owner_detail.html', {'owner':owner})
 
 def team_member(request, pk=None):
     team_member = get_object_or_404(TeamMember, pk=pk) if pk else None

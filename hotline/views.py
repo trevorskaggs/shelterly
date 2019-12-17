@@ -82,7 +82,8 @@ def service_request_search(request):
         query = request.POST['search']
         service_requests = ServiceRequest.objects.filter(Q(animal__name__icontains=query) |\
             Q(owner__first_name__icontains=query) | Q(owner__last_name__icontains=query) |\
-            Q(reporter__first_name__icontains=query) | Q(reporter__last_name__icontains=query)).distinct()
+            Q(reporter__first_name__icontains=query) | Q(reporter__last_name__icontains=query)|
+            Q(owner__address__icontains=query) | Q(owner__city__icontains=query)).distinct()
     search_form = ServiceRequestSearchForm()
     search_form.fields['search'].initial = query
     data = {'form':search_form, 'service_requests':service_requests, 'query': query}

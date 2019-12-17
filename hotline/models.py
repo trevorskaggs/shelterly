@@ -5,8 +5,8 @@ from people.models import Person
 class ServiceRequest(Location):
     
     #keys
-    owner = models.ForeignKey(Person, on_delete=models.SET_NULL, blank=True, null=True, related_name='owner')
-    reporter = models.ForeignKey(Person, on_delete=models.SET_NULL, blank=True, null=True, related_name='reporter')
+    owner = models.OneToOneField(Person, on_delete=models.SET_NULL, blank=True, null=True)
+    reporter = models.ForeignKey(Person, on_delete=models.SET_NULL, blank=True, null=True, related_name='reported_servicerequest')
 
     #pre_field
     timestamp = models.DateTimeField(auto_now_add=True)
@@ -40,11 +40,6 @@ class ServiceRequest(Location):
     @property
     def map_name(self):
         return '{}_{}'.format(self.location_type, self.pk)
-
-    @property
-    def is_resolved(self):
-        from animals.models import Animal
-        return not Animal.objects.filter(request=self).filter(status__in=['REP', 'NFD']).exists()
 
     class Meta:
         ordering = []

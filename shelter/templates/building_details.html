@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>{{ building }} BUILDING</h1>
+<h1>{{ building.name|upper }} BUILDING</h1>
 <hr>
 {% if building.room_set.exists %}
     {% for room in building.room_set.all %}
-      <a class="btn btn-warning btn-lg btn-block" href="{% url 'shelter:room_detail' room.pk %}">{{ room }}</a>
+      <a class="btn btn-warning btn-lg btn-block" href="{% url 'shelter:room_detail' room.pk %}">{{ room }} ({{ room.counts }})</a>
     {% endfor %}
 {% else %}
     <a class="btn btn-secondary btn-lg btn-block disabled">NO ROOMS CONFIGURED</a>

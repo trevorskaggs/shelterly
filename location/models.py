@@ -55,6 +55,15 @@ class Location(models.Model):
         self.save()
 
     @property
+    def location_output(self):
+        valid_outputs = []
+        address = self.address + ' ' + self.apartment if self.apartment else self.address
+        for val in [address, self.city, self.state, self.zip_code]:
+            if val:
+                valid_outputs.append(val)
+        return (', ').join(valid_outputs)    
+
+    @property
     def location_type(self):
         pass
 

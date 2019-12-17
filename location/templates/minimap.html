@@ -34,7 +34,6 @@ $.ajax({
               geometry: geometry,
             });
           }
-          console.log(feature)
           {{object.map_name}}_layer.getSource().addFeature(feature);
       }
     {{object.map_name}}_map.getView().fit({{object.map_name}}_layer.getSource().getExtent(), {{object.map_name}}_map.getSize());

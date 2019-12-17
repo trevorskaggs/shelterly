@@ -3,30 +3,29 @@
 {% block content %}
 
   <h1>{{owner.first_name}} {{owner.last_name}}</h1>
-    <p><strong>Phone:</strong>
-      {% if owner.home_phone %}{{ owner.home_phone }} (H) {% endif %}
-      {% if owner.work_phone %}{{ owner.work_phone}} (W) {% endif %}
-      {% if owner.cell_phone %}{{ owner.cell_phone}} (C) {% endif %}
-    </p>
-    <p><strong>Drivers License:</strong> {{owner.drivers_license}} </p>
-    <p><strong>Best Contact:</strong> {{owner.best_contact}} </p>
-    <p><strong>Address:</strong> {{owner.address}} {{owner.apartment}}, {{owner.city}}, {{owner.state}}, {{owner.zip_code}} </p>
-  {% if service_requests %}
-  <h1>Service Request</h1>
-    {% for evac_request in service_requests %}
-      <h1>EVACUATION REQUEST NUMBER: {{evac_request.pk}}</h1>
-      <p><strong>Time of Request:</strong> {{evac_request.timestamp}}</p>
-      <p><strong>Verbal Permission:</strong> {{evac_request.verbal_permission}}</p>
-      <p><strong>Location:</strong></p>
-      <p>{{evac_request.owner.address}} {{evac_request.owner.apartment}} {{evac_request.owner.city}} {{evac_request.owner.state}} {{evac_request.owner.zip_code}}</p>
-    {% endfor %}
-  {% endif %}
-
+  <hr>
+  <div class="row">
+    <div class="col-sm">
+      <p><strong>Phone:</strong>
+        {% if owner.home_phone %}{{ owner.home_phone }} (H) {% endif %}
+        {% if owner.work_phone %}{{ owner.work_phone}} (W) {% endif %}
+        {% if owner.cell_phone %}{{ owner.cell_phone}} (C) {% endif %}
+      </p>
+      <p><strong>Drivers License:</strong> {{owner.drivers_license}} </p>
+      <p><strong>Best Contact:</strong> {{owner.best_contact}} </p>
+      <p><strong>Address:</strong> {{ owner.location_output }}</p>
+    </div>
+    <div class="col-sm">
+    {% if owner.servicerequest %}
+        <p><strong>Time of Request:</strong> {{owner.servicerequest.timestamp}}</p>
+        <p><strong>Verbal Permission:</strong> {{owner.servicerequest.verbal_permission}}</p>
+        <p><strong>Request Location:</strong> {{ owner.servicerequest.location_output }}</p>
+    {% endif %}
+    </div>
+  </div>
   {% if owner.animal_set.all %}
   <h1>ANIMALS</h1>
-    {% for animal in owner.animal_set.all %}
-      <a class="btn btn-warning btn-lg btn-block" href="{% url 'animals:animal_detail' animal.pk %}">{{ animal.info }}</a>
-    {% endfor %}
+      {% include "include/animal_table.html" with animals=owner.animal_set.all %}
   {% endif %}
   <br>
   <br>
@@ -34,6 +33,9 @@
   <a class='btn btn-success btn-lg btn-block'href="{% url 'intake:intake_new_animal' owner.pk 'cat'%}">Add Cat</a>
   <a class='btn btn-success btn-lg btn-block' href="{% url 'intake:intake_new_animal' owner.pk 'oth'%}">Add Other</a>
   <a class='btn btn-info btn-lg btn-block' href="{% url 'people:owner_edit' owner.pk %}">Update Owner</a>
+  {% if owner.servicerequest %}
+  <a class='btn btn-info btn-lg btn-block' href="{% url 'hotline:service_request_update' owner.servicerequest.pk %}">Update Request</a>
+  {% endif %}
   <input class='btn btn-secondary btn-lg btn-block'  type=button value="Back" onClick="javascript:history.go(-1);">
   <br>
 {% endblock %}

@@ -3,7 +3,7 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-<h1>ADD CAGE TO {{ form.room.initial }} ROOM</h1>
+<h1>ADD CAGE TO {{ form.room.initial.name|upper }} ROOM</h1>
 <hr>
 <div id="app">
   <form action="" method="post">{% csrf_token %}

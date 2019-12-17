@@ -1,6 +1,4 @@
-from animals.colors import CAT_COLOR_CHOICES, CAT_PATTERN_CHOICES, DOG_COLOR_CHOICES, DOG_PATTERN_CHOICES
-
-UNKNOWN_CHOICE = ('Unknown', 'Unknown')
+from animals.colors import CAT_COLOR_CHOICES, CAT_PATTERN_CHOICES, DOG_COLOR_CHOICES, DOG_PATTERN_CHOICES, UNKNOWN_CHOICE
 
 SPECIES_CHOICES = (
     ('cat', "Cat"),
@@ -10,7 +8,7 @@ SPECIES_CHOICES = (
 )
 
 BREED_CHOICES = (
-    ('Unknown', "Unknown"),
+    UNKNOWN_CHOICE,
 )
 
 SEX_CHOICES = (
@@ -61,7 +59,7 @@ ANIMAL_LOOKUP_DICT = {
         'pcolor': CAT_COLOR_CHOICES,
         'scolor': CAT_COLOR_CHOICES,
         'markings': CAT_PATTERN_CHOICES,
-        'breeds':[],
+        'breeds': DOG_BREEDS,
     },
 }
 

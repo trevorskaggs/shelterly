@@ -3,7 +3,7 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-<h1>ADD BUILDING TO {{ form.shelter.initial|upper }} SHELTER</h1>
+<h1>ADD BUILDING TO {{ form.shelter.initial.name|upper }} SHELTER</h1>
 <hr>
 <div id="app">
   <form action="" method="post">{% csrf_token %}

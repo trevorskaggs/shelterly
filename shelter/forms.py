@@ -6,7 +6,7 @@ class ShelterForm(forms.ModelForm):
 
     class Meta:
         model = Shelter
-        fields = ['name', 'description', 'image']
+        exclude = ['apartment']
 
 class BuildingForm(forms.ModelForm):
 

@@ -3,8 +3,9 @@
      <tr>
        <th scope="col">Name</th>
        <th scope="col">Species</th>
-       <th scope="col">Breed</th>
+       <th scope="col">Description</th>
        <th scope="col">Sex</th>
+       <th scope="col">Actions</th>
      </tr>
    </thead>
    <tbody>
@@ -13,8 +14,11 @@
        <tr>
          <td scope="row"><a href="{% url 'animals:animal_detail' animal.pk %}">{{ animal.name|title }}</a></td>
          <td>{{ animal.species|title }}</td>
-         <td>{{ animal.breed|title }}</td>
+         <td>Breed: {{ animal.breed|title }}, Color: {{ animal.pcolor|title }}/{{ animal.scolor|title }}</td>
          <td>{{ animal.sex|title }}</td>
+         <td>
+            <a class="btn btn-success" href="{% url 'shelter:shelter_animal_shelter_select' animal.pk %}">{% if animal.cage %}Move{% else %}Shelter{% endif %} Animal</a>
+        </td>
        </tr>
        {% endfor %}
      {% else %}

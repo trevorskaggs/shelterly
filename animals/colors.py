@@ -1,3 +1,5 @@
+UNKNOWN_CHOICE = ('Unknown', 'Unknown')
+
 ## Source: https://en.wikipedia.org/wiki/Coat_(dog)#Colors
 DOG_COLOR_CHOICES = (
     ('black', 'Black'),
@@ -13,6 +15,7 @@ DOG_COLOR_CHOICES = (
 
 ## Source: https://en.wikipedia.org/wiki/Coat_(dog)#Patterns
 DOG_PATTERN_CHOICES = (
+    ('none', 'None'),
     ('brindle', 'Brindle'),
     ('hairless', 'Hairless'),
     ('harlequin', 'Harlequin'),
@@ -37,6 +40,7 @@ CAT_COLOR_CHOICES = (
 
 ## Source: https://en.wikipedia.org/wiki/Cat_coat_genetics
 CAT_PATTERN_CHOICES = (
+    ('none', 'None'),
     ('bengal', 'Bengal'),
     ('bicolor', 'Bicolor'),
     ('calico', 'Calico'),
