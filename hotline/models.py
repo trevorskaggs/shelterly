@@ -37,9 +37,5 @@ class ServiceRequest(Location):
     def location_type(self):
         return 'service_request'
 
-    @property
-    def map_name(self):
-        return '{}_{}'.format(self.location_type, self.pk)
-
     class Meta:
         ordering = []

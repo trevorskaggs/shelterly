@@ -23,6 +23,10 @@ class Shelter(BaseShelterModel, Location):
         cages = Cage.objects.filter(room__building__shelter=self)
         occupied = cages.filter(animal__isnull=False)
         return 'Animals: %s, Cages: %s' % (occupied.count(), cages.count())
+
+    @property
+    def location_type(self):
+        return 'shelter'
     
 
 class Building(BaseShelterModel):

@@ -57,7 +57,6 @@ CAT_BREEDS = (
     ('Persian', 'Persian'),
     ('Semi-longhair', 'Semi-longhair'),
     ('Siamese', 'Siamese'),
-
 )
 
 ANIMAL_LOOKUP_DICT = {
@@ -72,6 +71,7 @@ ANIMAL_LOOKUP_DICT = {
         'scolor': CAT_COLOR_CHOICES,
         'markings': CAT_PATTERN_CHOICES,
         'breeds': CAT_BREEDS,
+    },
 }
 
 ALL_BREED_CHOICES = DOG_BREEDS + CAT_BREEDS

@@ -46,7 +46,10 @@ class Animal(Location):
     @property
     def info(self):
         return '%s (%s, %s, %s)' % (self.name.capitalize(), self.species.capitalize(), self.breed.capitalize(), self.sex)
-    
+
+    @property
+    def location_type(self):
+        return 'animal'
 
     class Meta:
         ordering = []

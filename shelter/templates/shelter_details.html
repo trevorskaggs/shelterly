@@ -3,6 +3,10 @@
 {% block content %}
 <h1 style="text-align: center">{{ shelter.name|upper }} SHELTER</h1>
 <hr>
+<div class="row">
+  {% include "minimap.html" with object=shelter %}
+</div>
+<br>
 {% if shelter.building_set.exists %}
   {% for building in shelter.building_set.all %}
     <a class="btn btn-warning btn-lg btn-block" href="{% url 'shelter:building_detail' building.pk %}">{{ building }} ({{building.counts }})</a>

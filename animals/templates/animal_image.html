@@ -34,8 +34,8 @@
 <h1>{{ animal.name }}</h1>
 <br>
 <form id="image-upload" method="post" enctype="multipart/form-data"> {% csrf_token %}
-    <div id="image-label" type=button value="change image" class='btn btn-primary btn-lg btn-block' disabled>
-       Click Below to Change<input id="id_image" class="btn btn-primary btn-lg btn-block form-control border-0" type="file" name="image" accept="image/*" required="" onchange="readURL(this);">
+    <div id="image-label" value="change image" disabled>
+       <input id="id_image" class="btn btn-primary btn-lg btn-block form-control border-0" type="file" name="image" accept="image/*" required="" onchange="readURL(this);">
     </div>
 <br>
 <br>
