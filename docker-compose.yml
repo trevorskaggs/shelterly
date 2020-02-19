@@ -5,7 +5,7 @@ services:
   db:
     image: mdillon/postgis
   rams:
-    image: rams:latest
+    image: freeradical3/rams:dev
     volumes:
       - .:/rams
       - node_modules:/rams/frontend/node_modules
