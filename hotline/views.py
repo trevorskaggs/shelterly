@@ -1,12 +1,14 @@
 from django.db.models import Q
 from django.shortcuts import render, redirect
 from django.shortcuts import get_object_or_404
+from .serializers import ServiceRequestSerializer
 from animals.models import Animal
 from animals.forms import AnimalForm
 from hotline.models import ServiceRequest
 from hotline.forms import ServiceRequestForm, ServiceRequestSearchForm
 from people.models import Person
 from people.forms import PersonForm
+from rest_framework import viewsets
 from django.core.files.storage import FileSystemStorage
 
 # Create your views here.
@@ -97,3 +99,8 @@ def service_request_list(request, status='all'):
         service_requests = ServiceRequest.objects.all().distinct()
     data = {'service_requests':service_requests, 'status': status}
     return render(request, 'service_request_list.html', data)
+
+class ServiceRequestViewSet(viewsets.ModelViewSet):
+
+    queryset = ServiceRequest.objects.all()
+    serializer_class = ServiceRequestSerializer

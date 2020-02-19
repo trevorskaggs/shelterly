@@ -36,8 +36,6 @@ MEDIA_ROOT = 'media'
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = get_secret('SECRET_KEY')
-HERE_APP_ID = get_secret('HERE_APP_ID')
-HERE_APP_CODE = get_secret('HERE_APP_CODE')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -62,6 +60,7 @@ INSTALLED_APPS = [
     'intake',
     'location',
     'people',
+    'rest_framework',
     'shelter',
 ]
 
@@ -109,8 +108,8 @@ DATABASES = {
         'NAME': os.environ.get('DB_NAME', get_secret('DATABASE_NAME')),
         'USER': os.environ.get('DB_USER', get_secret('DATABASE_USER')),
         'PASSWORD': os.environ.get('DB_PASS', get_secret('DATABASE_PASSWORD')),
-        'HOST': get_secret('DATABASE_HOST'),
-        'PORT': get_secret('DATABASE_PORT')
+        'HOST': 'db',
+        'PORT': 5432,
     }
 }
 

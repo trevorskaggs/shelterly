@@ -14,14 +14,21 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, re_path
+from django.urls import include, path, re_path
 
 from hotline import views
+from rest_framework.routers import DefaultRouter
+
+from hotline.views import ServiceRequestViewSet
+
 
 app_name = 'hotline'
+router = DefaultRouter()
+router.register(r'servicerequests', views.ServiceRequestViewSet)
 
 urlpatterns = [
     path('', views.hotline_landing, name='hotline_landing'),
+    path('api/', include(router.urls)),
     path('owner/new', views.hotline_new_owner, name='hotline_new_owner'),
     path('owner/<rep_pk>/new', views.hotline_new_owner, name = 'hotline_new_owner'),
     path('reporter/new', views.hotline_new_reporter, name = 'hotline_new_reporter'),
