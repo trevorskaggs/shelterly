@@ -4,8 +4,10 @@ volumes:
 services:
   db:
     image: mdillon/postgis
+    container_name: db
   rams:
     image: freeradical3/rams:dev
+    container_name: rams
     volumes:
       - .:/rams
       - node_modules:/rams/frontend/node_modules
