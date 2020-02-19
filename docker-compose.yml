@@ -1,5 +1,6 @@
 version: '3'
-
+volumes:
+  node_modules:
 services:
   db:
     image: mdillon/postgis
@@ -7,6 +8,7 @@ services:
     image: rams:latest
     volumes:
       - .:/rams
+      - node_modules:/rams/frontend/node_modules
     ports:
       - "8000:8000"
     depends_on:
