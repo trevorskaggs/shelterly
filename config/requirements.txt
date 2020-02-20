@@ -1,6 +1,7 @@
 cycler==0.10.0
 coverage==4.5.4
 Django>=2.2.9
+django-cors-headers
 django-crispy-forms
 djangorestframework
 geocoder==1.38.1
