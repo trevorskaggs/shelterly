@@ -1,9 +1,16 @@
-from django.urls import path
-from . import views
+from django.urls import path, include
+from shelter import views
 
 app_name = 'shelter'
+from rest_framework.routers import DefaultRouter
+router = DefaultRouter()
+router.register(r'shelter', views.ShelterViewSet)
+router.register(r'buildings', views.BuildingViewSet, basename='buildings')
+router.register(r'rooms', views.RoomViewSet, basename='room')
+# router.register('buildings/shelter/<int:shelter>', views.BuildingFilteredView)
 
 urlpatterns = [
+    path('api/', include(router.urls)),
     path('', views.shelter_landing, name="shelter_landing"),
     path('list', views.shelter_list, name="shelter_list"),
     #Shelter Management URLs
@@ -16,17 +23,11 @@ urlpatterns = [
     path('building/<int:building_pk>/room', views.room, name='room'),
     path('building/<int:building_pk>/room/<int:pk>', views.room, name='room'),
     path('room/<int:pk>/', views.room_detail, name='room_detail'),
-    path('room/<int:room_pk>/cage', views.cage, name='cage'),
-    path('room/<int:room_pk>/cage/<int:pk>', views.cage, name='cage'),
-    path('cage/<int:pk>/', views.cage_detail, name='cage_detail'),
     path('<obj_type>/<int:pk>/delete', views.shelter_object_delete, name='shelter_object_delete'),
 
     # Animal Placement URLs
     path('<int:animal_pk>/shelter', views.shelter_animal_shelter_select, name='shelter_animal_shelter_select'),
     path('<int:animal_pk>/<int:shelter_pk>/buildings', views.shelter_animal_building_select, name='shelter_animal_building_select'),
-    path('<int:animal_pk>/<int:building_pk>/rooms', views.shelter_animal_room_select, name='shelter_animal_room_select'),
-    path('<int:animal_pk>/<int:room_pk>/cages', views.shelter_animal_cage_select, name='shelter_animal_cage_select'),
-    path('<int:animal_pk>/<int:room_pk>/cage/add', views.shelter_animal_cage_add, name='shelter_animal_cage_add'),
-    path('<int:animal_pk>/<int:cage_pk>/', views.shelter_animal_cage, name='shelter_animal_cage'),
+    path('<int:animal_pk>/<int:building_pk>/rooms', views.shelter_animal_room_select, name='shelter_animal_room_select')
 
 ]
