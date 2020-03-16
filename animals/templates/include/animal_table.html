@@ -17,7 +17,7 @@
          <td>Breed: {{ animal.breed|title }}, Color: {{ animal.pcolor|title }}/{{ animal.scolor|title }}</td>
          <td>{{ animal.sex|title }}</td>
          <td>
-            <a class="btn btn-success" href="{% url 'shelter:shelter_animal_shelter_select' animal.pk %}">{% if animal.cage %}Move{% else %}Shelter{% endif %} Animal</a>
+            <a class="btn btn-success" href="{% url 'shelter:shelter_animal_shelter_select' animal.pk %}">{% if animal.room %}Move{% else %}Shelter{% endif %} Animal</a>
         </td>
        </tr>
        {% endfor %}

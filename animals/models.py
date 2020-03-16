@@ -5,7 +5,6 @@ from animals.colors import ALL_COLOR_CHOICES, ALL_PATTERN_CHOICES
 from location.models import Location
 from hotline.models import ServiceRequest
 from people.models import Person
-from shelter.models import Cage
 
 
 # Create your models here.
@@ -14,7 +13,6 @@ class Animal(Location):
     request = models.ForeignKey(ServiceRequest, on_delete=models.SET_NULL, blank=True, null=True)
     owner = models.ForeignKey(Person, on_delete=models.SET_NULL, blank=True, null=True)
     name = models.CharField(max_length=50, blank=True, null=True)
-    cage = models.ForeignKey(Cage, on_delete=models.SET_NULL, blank=True, null=True)
     image = models.ImageField(upload_to='images/', null=True)
 
     #choice fields
