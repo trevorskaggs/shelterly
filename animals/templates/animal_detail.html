@@ -7,7 +7,6 @@
     <div class="col-sm">
       <p><strong>Owner:</strong> {{animal.owner}} </p>
       <p><strong>Species:</strong> {{animal.species|title}} </p>
-      <p><strong>Breed:</strong> {{animal.breed|title}} </p>
       <p><strong>Sex:</strong> {{animal.sex|title}} </p>
       <p><strong>Age:</strong> {{animal.age|title}} </p>
       <p><strong>Fixed:</strong> {{animal.fixed|yesno|title}} </p>
@@ -15,7 +14,6 @@
     <div class="col-sm">
       <p><strong>Primary Color:</strong> {{animal.pcolor|title}} </p>
       <p><strong>Secondary Color:</strong> {{animal.scolor|title}} </p>
-      <p><strong>Markings:</strong> {{animal.markings|title}} </p>
       <p><strong>Aggressive:</strong> {{animal.aggressive|yesno|title}} </p>
       <p><strong>Status:</strong> {{animal.status|title}} </p>
       <p><strong>Shelter Location:</strong> {% if animal.cage %}{{ animal.cage.room.building.shelter|title }}, {{ animal.cage.room.building|title }}, {{ animal.cage.room|title }}, {{ animal.cage|title }}{% else %}N/A{% endif %}</p>

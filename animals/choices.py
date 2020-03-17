@@ -16,17 +16,28 @@ SEX_CHOICES = (
     ('F', "Female"),
 )
 
-SIZE_CHOICES = (
+DOG_SIZE_CHOICES = (
     ('Small', "Small (< 20 lbs)"),
     ('Medium', "Medium (21 - 60 lbs)"),
     ('Large', "Large (61 - 110 lbs)"),
     ('Giant', "Giant (111+ lbs)"),
 )
 
-AGE_CHOICES = (
+DOG_AGE_CHOICES = (
     ('Youth', "Youth (< 2 Years)"),
     ('Adult', "Adult (2 - 8 Years)"),
     ('Elerly', "Elderly (8+ Years)"),
+)
+CAT_SIZE_CHOICES = (
+    ('Small', 'Small ( < 10 lbs)'),
+    ('Full Size', 'Full Size (10+ lbs)'),
+)
+CAT_AGE_CHOICES = (
+    ('Kitten', 'Kitten (<6 Months)'),
+    ('Youth', 'Youth (6 Months - 2 Years)'),
+    ('Adult', 'Adult (2 Years - 8 Years)'),
+    ('Elderly', 'Elderly (8 Years - 15 Years)'),
+    ('Geriatric', 'Geriatric (15+ years)'),
 )
 
 STATUS_CHOICES = (
@@ -64,17 +75,21 @@ ANIMAL_LOOKUP_DICT = {
         'pcolor': DOG_COLOR_CHOICES,
         'scolor': DOG_COLOR_CHOICES,
         'markings': DOG_PATTERN_CHOICES,
-        'breeds': DOG_BREEDS,
+        'size': DOG_SIZE_CHOICES,
+        'age': DOG_AGE_CHOICES,
     },
     'cat':{
         'pcolor': CAT_COLOR_CHOICES,
         'scolor': CAT_COLOR_CHOICES,
         'markings': CAT_PATTERN_CHOICES,
-        'breeds': CAT_BREEDS,
+        'size': CAT_SIZE_CHOICES,
+        'age': CAT_AGE_CHOICES,
     },
 }
-
+ALL_AGE_CHOICES = DOG_AGE_CHOICES + CAT_AGE_CHOICES
+ALL_SIZE_CHOICES = DOG_SIZE_CHOICES + CAT_SIZE_CHOICES
 ALL_BREED_CHOICES = DOG_BREEDS + CAT_BREEDS
+
 # DOG_BREEDS = (
 #     ('Affenpinscher', 'Affenpinscher'),
 #     ('Afghan Hound', 'Afghan Hound'),

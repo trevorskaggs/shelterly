@@ -5,8 +5,8 @@ app_name = 'shelter'
 from rest_framework.routers import DefaultRouter
 router = DefaultRouter()
 router.register(r'shelter', views.ShelterViewSet)
-router.register(r'buildings', views.BuildingViewSet, basename='buildings')
-router.register(r'rooms', views.RoomViewSet, basename='room')
+router.register(r'building', views.BuildingViewSet, basename='building')
+router.register(r'room', views.RoomViewSet, basename='room')
 # router.register('buildings/shelter/<int:shelter>', views.BuildingFilteredView)
 
 urlpatterns = [

@@ -16,7 +16,7 @@ class PersonForm(forms.ModelForm):
     class Meta:
         model = Person
         fields = [ 'first_name', 'last_name', 'home_phone', \
-            'work_phone', 'cell_phone', 'best_contact', \
+            'phone', 'best_contact', \
             'drivers_license', 'address', 'apartment', 'city', \
             'state', 'zip_code', ]
 
@@ -34,7 +34,7 @@ class OwnerForm(forms.ModelForm):
     class Meta:
         model = Person
         fields = [ 'first_name', 'last_name', 'home_phone', \
-            'work_phone', 'cell_phone', 'best_contact', \
+           'phone', 'best_contact', \
             'drivers_license', 'address', 'apartment', 'city', \
             'state', 'zip_code', ]
 
