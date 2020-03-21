@@ -4,7 +4,7 @@ from animals.models import Animal
 from shelter.models import Shelter, Building, Room
 from shelter.forms import ShelterForm, BuildingForm, RoomForm
 from rest_framework import viewsets, generics
-from .serializer import ShelterSerializer, BuildingSerializer
+from .serializer import ShelterSerializer, BuildingSerializer, RoomSerializer
 
 
 OBJ_TYPE_DICT = {
@@ -104,7 +104,7 @@ class BuildingViewSet(viewsets.ModelViewSet):
 
 class RoomViewSet(viewsets.ModelViewSet):
     queryset = Room.objects.all()
-    serializer_class = ShelterSerializer
+    serializer_class = RoomSerializer
     def get_queryset(self):
         """
         Optionally restricts the returned purchases to a given user,
@@ -118,6 +118,6 @@ class RoomViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(shelter__id=shelter)
 
         if building is not None:
-            queryset = queryset.filter(buliding__id=building)
+            queryset = queryset.filter(building__id=building)
 
         return queryset

@@ -20,7 +20,7 @@ class RoomSerializer(serializers.ModelSerializer):
         model = Room
         fields = (
             'name',
-            'shelter'
+            'shelter',
             'building',
             'description',
         )
