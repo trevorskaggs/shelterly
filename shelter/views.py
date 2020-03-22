@@ -5,6 +5,8 @@ from shelter.models import Shelter, Building, Room
 from shelter.forms import ShelterForm, BuildingForm, RoomForm
 from rest_framework import viewsets, generics
 from .serializer import ShelterSerializer, BuildingSerializer, RoomSerializer
+from django_filters.rest_framework import DjangoFilterBackend
+from django_filters import rest_framework as filters
 
 
 OBJ_TYPE_DICT = {
@@ -90,34 +92,13 @@ class ShelterViewSet(viewsets.ModelViewSet):
 
 
 class BuildingViewSet(viewsets.ModelViewSet):
+    queryset = Building.objects.all()
     serializer_class = BuildingSerializer
-    def get_queryset(self):
-        """
-        Optionally restricts the returned purchases to a given user,
-        by filtering against a `username` query parameter in the URL.
-        """
-        queryset = Building.objects.all()
-        shelter = self.request.query_params.get('shelter', None)
-        if shelter is not None:
-            queryset = queryset.filter(shelter__id=shelter)
-        return queryset
+    filter_backends = (filters.DjangoFilterBackend,)
+    filterset_fields = ('shelter',)
 
 class RoomViewSet(viewsets.ModelViewSet):
     queryset = Room.objects.all()
     serializer_class = RoomSerializer
-    def get_queryset(self):
-        """
-        Optionally restricts the returned purchases to a given user,
-        by filtering against a `username` query parameter in the URL.
-        """
-        queryset = Room.objects.all()
-        shelter = self.request.query_params.get('shelter', None)
-        building = self.request.query_params.get('building', None)
-
-        if shelter is not None:
-            queryset = queryset.filter(shelter__id=shelter)
-
-        if building is not None:
-            queryset = queryset.filter(building__id=building)
-
-        return queryset
+    filter_backends = (filters.DjangoFilterBackend,)
+    filterset_fields = ('shelter', 'building',)
