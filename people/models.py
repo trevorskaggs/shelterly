@@ -6,9 +6,7 @@ class Person(Location):
     
     first_name = models.CharField(max_length=50, validators=[NAME_VALIDATOR])
     last_name = models.CharField(max_length=50, validators=[NAME_VALIDATOR])
-    home_phone = models.CharField(max_length=50, blank=True, null=True, validators=[PHONE_VALIDATOR])
-    work_phone = models.CharField(max_length=50, blank=True, null=True, validators=[PHONE_VALIDATOR])
-    cell_phone = models.CharField(max_length=50, blank=True, null=True, validators=[PHONE_VALIDATOR])
+    phone = models.CharField(max_length=50, blank=True, null=True, validators=[PHONE_VALIDATOR])
     best_contact = models.TextField(blank=True, null=True)
     drivers_license = models.CharField(max_length=50, blank=True, null=True)
 
