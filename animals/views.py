@@ -3,9 +3,12 @@ from django.shortcuts import render, redirect
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
+from rest_framework import viewsets
+
 from people.models import Person
 from animals.models import Animal
 from animals.forms import AnimalForm, ImageForm
+from animals.serializers import AnimalSerializer
 
 
 # Create your views here.
@@ -55,4 +58,7 @@ def animal_image(request, pk):
         return redirect('animals:animal_detail', pk=pk)
     return render(request, 'animal_image.html', {'form':form, 'animal':animal})
 
+class AnimalViewSet(viewsets.ModelViewSet):
 
+    queryset = Animal.objects.all()
+    serializer_class = AnimalSerializer
