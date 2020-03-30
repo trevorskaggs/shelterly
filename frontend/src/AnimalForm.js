@@ -1,10 +1,19 @@
-import React from "react";
-import ReactDOM from "react-dom";
-import { Field, Form, useField, Formik } from "formik";
-import { Button, Col, FormGroup, Label, Input, Option, Container, Row } from "reactstrap";
-import {Form as ReactstrapForm} from "reactstrap";
-import { ReactstrapInput } from "reactstrap-formik";
-import "bootstrap/dist/css/bootstrap.min.css";
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { Field, Form, useField, Formik } from 'formik';
+import {
+  Button,
+  Col,
+  FormGroup,
+  Label,
+  Input,
+  Option,
+  Container,
+  Row,
+} from 'reactstrap';
+import { Form as ReactstrapForm } from 'reactstrap';
+import { ReactstrapInput } from 'reactstrap-formik';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import * as Yup from 'yup';
 
 // ...props is shorthand for "rest of the items in this array". So the 1st item is
@@ -74,9 +83,7 @@ const AnimalForm = () => {
           owner_name: Yup.string()
             .max(50, 'Must be 50 characters or less')
             .required('Required'),
-          sex: Yup.string()
-            .required('Required')
-            .oneOf(['Male', 'Female']),
+          sex: Yup.string().required('Required').oneOf(['Male', 'Female']),
           description: Yup.boolean()
             .required('Required')
             .oneOf([true], 'You must accept the terms and conditions.'),
@@ -89,39 +96,34 @@ const AnimalForm = () => {
         }}
       >
         <Form>
-            <ReactstrapForm>
+          <ReactstrapForm>
             <Container>
-        <FormGroup>
-          <TextInput
-            //These are passed into above TextInput,
-            // so remaining props passed are name and type
-            label="Animal Name"
-            name="animalName"
-            type="text"
-          />
-        </FormGroup>
-          <TextInput
-            label="Owner Name"
-            name="ownerName"
-            type="text"
-          />
+              <FormGroup>
+                <TextInput
+                  //These are passed into above TextInput,
+                  // so remaining props passed are name and type
+                  label="Animal Name"
+                  name="animalName"
+                  type="text"
+                />
+              </FormGroup>
+              <TextInput label="Owner Name" name="ownerName" type="text" />
 
-        
-        <FormGroup>
-          <TextInput
-            label="Email Address"
-            name="email"
-            type="email"
-            placeholder="jane@formik.com"
-          />
-        </FormGroup>
-          <MySelect label="Sex" name="sex">
-            // <option value="male">Male</option>
-            // <option value="female">Female</option>
-          </MySelect>
+              <FormGroup>
+                <TextInput
+                  label="Email Address"
+                  name="email"
+                  type="email"
+                  placeholder="jane@formik.com"
+                />
+              </FormGroup>
+              <MySelect label="Sex" name="sex">
+                // <option value="male">Male</option>
+                // <option value="female">Female</option>
+              </MySelect>
 
-          <Button type="submit">Submit</Button>
-          </Container>
+              <Button type="submit">Submit</Button>
+            </Container>
           </ReactstrapForm>
         </Form>
       </Formik>

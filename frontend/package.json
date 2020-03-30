@@ -12,6 +12,7 @@
     "bootstrap": "^4.4.1",
     "formik": "^2.1.4",
     "react": "^16.12.0",
+    "react-bootstrap-table-next": "^4.0.0",
     "react-dom": "^16.12.0",
     "react-scripts": "3.4.0",
     "reactstrap": "^8.4.1",
@@ -39,5 +40,6 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  }
+  },
+  "devDependencies": {}
 }
