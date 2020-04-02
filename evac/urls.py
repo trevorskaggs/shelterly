@@ -1,12 +1,16 @@
 from django.contrib import admin
-from django.urls import path
+from django.urls import include, path
+from rest_framework.routers import DefaultRouter
 
 from evac import views
 
 app_name = 'evac'
+router = DefaultRouter()
+router.register(r'evac', views.EvacTeamViewSet)
 
 urlpatterns = [
     path('', views.evac_landing, name ='evac_landing'),
+    path('api/', include(router.urls)),
     path('teammember/new', views.team_member, name='new_team_member'),
     path('teammember/<int:pk>', views.team_member, name='edit_team_member'),
     path('evacteam/new', views.evac_team, name='new_evac_team'),

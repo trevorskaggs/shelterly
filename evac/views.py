@@ -1,10 +1,14 @@
 from datetime import datetime
+from rest_framework import viewsets
 
 from django.shortcuts import render, redirect
+
 from evac.models import EvacTeam
 from evac.forms import EvacTeamForm
+from evac.serializers import EvacTeamSerializer
 from people.models import TeamMember
 from people.forms import TeamMemberForm
+
 # Create your views here.
 def evac_landing(request):
     return render(request, 'evac_landing.html', {})
@@ -28,3 +32,8 @@ def team_member(request, pk=None):
         form.save()
         return redirect('evac:evac_landing')
     return render(request, 'team_member.html', {'form':form})
+
+class EvacTeamViewSet(viewsets.ModelViewSet):
+
+    queryset = EvacTeam.objects.all()
+    serializer_class = EvacTeamSerializer
