@@ -1,16 +1,10 @@
 import React, { Fragment } from "react";
 import logo from "./static/images/nvadg_logo.png"
 import { useRoutes, A } from "hookrouter";
-import Home from "./Home";
-import Evac from "./Evac";
+import routes from "./router";
 
 const style = {
   textAlign: "center",
-};
-
-const routes = {
-  "/": () => <Home />,
-  "/evac": () => <Evac />,
 };
 
 function App() {
