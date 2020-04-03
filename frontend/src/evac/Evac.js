@@ -1,6 +1,6 @@
 import React from "react";
 import { A } from "hookrouter";
-import {TeamMemberForm} from "./EvacForm";
+import {EvacTeamForm, TeamMemberForm} from "./EvacForm";
 
 const link_style = {
     textDecoration: "none",
@@ -36,9 +36,7 @@ export const NewTeam = () => (
 
 export const TeamList = () => (
     <div>
-        <h1>Evac Teams</h1>
-        <div>for team in teamlist:</div>
-        <div>team.number, team.members</div>
+        <EvacTeamForm />
     </div>
 )
 

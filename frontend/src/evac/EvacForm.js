@@ -1,6 +1,6 @@
-import React from 'react';
+import React, {setState, useEffect, useState} from 'react';
 import axios from "axios";
-import { A } from "hookrouter";
+import { A, navigate } from "hookrouter";
 import { Field, Form, useField, Formik } from 'formik';
 import {
   Button,
@@ -46,75 +46,95 @@ const MySelect = ({ label, ...props }) => {
   );
 };
 
-// And now we can use these
-const EvacTeamForm = () => {
+async function TeamMemberHooks() {
+  // const [data, setData] = useState({teammembers: [], isFetching: false});
+  // useEffect(() => {
+  //   const fetchTeamMembers = async () => {
+      try {
+          // setData({teammembers: data.teammembers, isFetching: true});
+          await axios.get('http://localhost:8000/people/api/teammember/').then(function (response) {
+          console.log(response.data);
+        })
+          // setData({teammembers: response.data, isFetching: false});
+      } catch (e) {
+          console.log(e);
+          // setData({teammembers: data.teammembers, isFetching: false});
+      }
+      return ([{value:'test', label:'test'}])
+    }
+
+  //   fetchTeamMembers();
+  // }, []);
+// }
+
+// const buildOptions = () => {
+//   TeamMemberHooks();
+  // var teammembers = [];
+
+  // for (let i = 1; i <= 10; i++) {
+  //   arr.push({value:'test', label:'test'})
+  // }
+//   for (let i = 1; i <= data.teammembers.length; i++) {
+//     teammembers.push({ value: data.teammembers[i].id, label: data.teammembers[i].first_name })
+//   }
+//   return teammembers; 
+// }
+
+const options = TeamMemberHooks();//buildOptions();
+
+const style = {
+  textAlign: "center",
+};
+
+export const EvacTeamForm = () => {
+  
   return (
     <>
-      <h1>Animal Form</h1>
+      <h1 style={style}>Evac Team</h1>
       <Formik
         initialValues={{
-          name: '',
-          owner_name: '',
-          sex: '',
-          description: '', // added for our checkbox
+          evac_team_members: '',
+          callsign: '',
         }}
         validationSchema={Yup.object({
-          name: Yup.string()
-            .max(15, 'Must be 15 characters or less')
+          evac_team_members: Yup.array()
             .required('Required'),
-          owner_name: Yup.string()
-            .max(50, 'Must be 50 characters or less')
+          callsign: Yup.string()
+            .max(50, 'Must be 20 characters or less')
             .required('Required'),
-          sex: Yup.string().required('Required').oneOf(['Male', 'Female']),
-          description: Yup.boolean()
-            .required('Required')
-            .oneOf([true], 'You must accept the terms and conditions.'),
         })}
         onSubmit={(values, { setSubmitting }) => {
-          setTimeout(() => {
-            alert(JSON.stringify(values, null, 2));
-            setSubmitting(false);
-          }, 400);
+          await axios.post('http://localhost:8000/evac/api/evacteam/', values);
+          navigate('/evac');
         }}
       >
         <Form>
           <ReactstrapForm>
             <Container>
               <FormGroup>
-                <TextInput
-                  //These are passed into above TextInput,
-                  // so remaining props passed are name and type
-                  label="Animal Name"
-                  name="animalName"
+                <MySelect label="Evac Team Members*" name="team_members">
+                  {/* for (let i = 1; i <= data.teammembers.length; i++) {
+                    <option key={i} value="{i}">{i}</option>)
+                  } */}
+                  {options.map(({ value, label }, index) => <option value={value} >{label}</option>)}
+                </MySelect>
+                <Field
                   type="text"
+                  label="Callsign*"
+                  name="callsign"
+                  id="callsign"
+                  component={ReactstrapInput}
                 />
               </FormGroup>
-              <TextInput label="Owner Name" name="ownerName" type="text" />
 
-              <FormGroup>
-                <TextInput
-                  label="Email Address"
-                  name="email"
-                  type="email"
-                  placeholder="jane@formik.com"
-                />
-              </FormGroup>
-              <MySelect label="Sex" name="sex">
-                // <option value="male">Male</option>
-                // <option value="female">Female</option>
-              </MySelect>
-
-              <Button type="submit">Submit</Button>
+              <Button type="submit" className="btn-success mr-1">Save</Button>
+              <A class="btn btn-secondary" href="/evac">Cancel</A>
             </Container>
           </ReactstrapForm>
         </Form>
       </Formik>
     </>
   );
-};
-
-const style = {
-  textAlign: "center",
 };
 
 export const TeamMemberForm = () => {
@@ -141,6 +161,7 @@ export const TeamMemberForm = () => {
           onSubmit={async(values, { setSubmitting }) => {
             try {
               await axios.post('http://localhost:8000/people/api/teammember/', values);
+              navigate('/evac');
             }
             catch (e) {
               console.log(e);
@@ -207,4 +228,4 @@ export const TeamMemberForm = () => {
     );
   };
 
-export default EvacTeamForm;
+// export default EvacTeamForm;
