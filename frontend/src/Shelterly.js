@@ -11,10 +11,10 @@ function App() {
   const routeResult = useRoutes(routes);
   return (
       <div>
-        <h1 style={style} class="col-12">
+        <h1 style={style} className="col-12">
         <A href="/"><img src={logo} alt=""/></A>
         </h1>
-        <hr class="mt-0 mb-4"/>
+        <hr className="mt-0 mb-4"/>
         <Fragment>
           {routeResult}
         </Fragment>
