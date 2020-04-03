@@ -1,19 +1,18 @@
 import React from 'react';
+import axios from "axios";
 import { A } from "hookrouter";
-import ReactDOM from 'react-dom';
 import { Field, Form, useField, Formik } from 'formik';
 import {
   Button,
   Col,
   FormGroup,
   Label,
-  Input,
-  Option,
-  Container,
   Row,
+  Input,
+  Container,
 } from 'reactstrap';
 import { Form as ReactstrapForm } from 'reactstrap';
-// import { ReactstrapInput } from 'reactstrap-formik';
+import { ReactstrapInput } from 'reactstrap-formik';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import * as Yup from 'yup';
 
@@ -139,28 +138,67 @@ export const TeamMemberForm = () => {
             cell_phone: Yup.string().required('Required'),
             agency_id: Yup.string(),
           })}
-          onSubmit={(values, { setSubmitting }) => {
-            setTimeout(() => {
-              alert(JSON.stringify(values, null, 2));
-              setSubmitting(false);
-            }, 400);
+          onSubmit={async(values, { setSubmitting }) => {
+            try {
+              await axios.post('http://localhost:8000/people/api/teammember/', values);
+            }
+            catch (e) {
+              console.log(e);
+            }
+            setSubmitting(false);
           }}
         >
           <Form>
             <ReactstrapForm>
               <Container>
                 <FormGroup>
-                    <TextInput label="First name*" name="first_name" type="text"/>
-                    <TextInput label="Last name*" name="last_name" type="text" />
+                  <Row>
+                    <Col xs={{size: 5, offset: 1}}>
+                      <Field
+                        type="text"
+                        label="First Name*"
+                        name="first_name"
+                        id="first_name"
+                        component={ReactstrapInput}
+                      />
+                    </Col>
+                    <Col xs="5">
+                      <Field
+                        type="text"
+                        label="Last Name*"
+                        name="last_name"
+                        id="last_name"
+                        component={ReactstrapInput}
+                      />
+                    </Col>
+                  </Row>
                 </FormGroup>
   
                 <FormGroup>
-                    <TextInput label="Cell phone*" name="cell_phone" type="text"/>
-                    <TextInput label="Agency ID" name="agency_id" type="text"/>
+                <Row>
+                    <Col xs={{size: 5, offset: 1}}>
+                      <Field
+                        type="text"
+                        label="Cell Phone*"
+                        name="cell_phone"
+                        id="cell_phone"
+                        component={ReactstrapInput}
+                      />
+                    </Col>
+                    <Col xs="5">
+                      <Field
+                        type="text"
+                        label="Agency ID"
+                        name="agency_id"
+                        id="agency_id"
+                        component={ReactstrapInput}
+                      />
+                    </Col>
+                  </Row>
                 </FormGroup>
   
-                <Button type="submit" className="btn-success mr-1">Save</Button>
-                <A class="btn btn-secondary" href="/evac">Cancel</A>
+                <A class="btn btn-secondary float-right" href="/evac">Cancel</A>
+                <Button type="submit" className="btn-success mr-1 float-right">Save</Button>
               </Container>
             </ReactstrapForm>
           </Form>
