@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import axios from "axios";
 import { A, navigate } from "hookrouter";
-import { Field, useField, Formik } from 'formik';
+import { Field, Form, useField, Formik } from 'formik';
 import {
   Button,
   Col,
@@ -11,7 +11,6 @@ import {
   Input,
   Container,
 } from 'reactstrap';
-import { Form } from 'reactstrap';
 import { ReactstrapInput } from 'reactstrap-formik';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import * as Yup from 'yup';
@@ -60,12 +59,12 @@ export function EvacTeamForm() {
       <h1 style={style}>Evac Team</h1>
       <Formik
         initialValues={{
-          evac_team_members: '',
+          evac_team_members: [],
           callsign: '',
         }}
         validationSchema={Yup.object({
           evac_team_members: Yup.array()
-            // .of(Yup.string())
+            .of(Yup.string())
             .required('Required'),
           callsign: Yup.string()
             .max(50, 'Must be 20 characters or less')
@@ -86,7 +85,8 @@ export function EvacTeamForm() {
         <Form>
           <Container>
             <FormGroup>
-              <MyMultiSelect label="Evac Team Members*" name="team_members" className="mb-3">
+
+              <MyMultiSelect label="Evac Team Members*" name="evac_team_members" className="mb-3">
                 {data.teammembers.map(({ value, label }, index) => <option value={value} key={value} >{label}</option>)}
               </MyMultiSelect>
               <Field

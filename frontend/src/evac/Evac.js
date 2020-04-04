@@ -26,17 +26,14 @@ const Evac = () => (
 
 export const NewTeam = () => (
     <div>
-        <h1>Evac Team</h1>
-        <div>Evac Team Members</div>
-        <div>Callsign</div>
-        <button className="btn btn-success mr-1">Save</button>
-        <A className="btn btn-secondary" href="/evac">Cancel</A>
+        <EvacTeamForm />
     </div>
 )
 
 export const TeamList = () => (
     <div>
-        <EvacTeamForm />
+        Evac Teams
+        Table
     </div>
 )
 
