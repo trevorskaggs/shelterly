@@ -6,7 +6,7 @@ from evac import views
 
 app_name = 'evac'
 router = DefaultRouter()
-router.register(r'evac', views.EvacTeamViewSet)
+router.register(r'evacteam', views.EvacTeamViewSet)
 
 urlpatterns = [
     path('', views.evac_landing, name ='evac_landing'),
