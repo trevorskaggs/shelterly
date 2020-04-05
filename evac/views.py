@@ -35,5 +35,5 @@ def team_member(request, pk=None):
 
 class EvacTeamViewSet(viewsets.ModelViewSet):
 
-    queryset = EvacTeam.objects.all()
+    queryset = EvacTeam.objects.filter(team_date=datetime.now().date())
     serializer_class = EvacTeamSerializer

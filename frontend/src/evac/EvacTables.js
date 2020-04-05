@@ -18,7 +18,7 @@ const columns = [
         formatter:CellFormatter
     }, 
     {
-        dataField: 'evac_team_members',
+        dataField: 'evac_team_member_names',
         text: 'Team Members'
     },
 ]
