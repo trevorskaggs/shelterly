@@ -85,7 +85,6 @@ export function EvacTeamForm() {
         <Form>
           <Container>
             <FormGroup>
-
               <MyMultiSelect label="Evac Team Members*" name="evac_team_members" className="mb-3">
                 {data.teammembers.map(({ value, label }, index) => <option value={value} key={value} >{label}</option>)}
               </MyMultiSelect>
