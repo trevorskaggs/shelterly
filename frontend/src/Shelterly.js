@@ -11,15 +11,15 @@ const style = {
 function App() {
   const routeResult = useRoutes(routes);
   return (
-      <div>
-        <h1 style={style} className="col-12">
-        <A href="/"><img src={logo} alt=""/></A>
-        </h1>
-        <hr className="mt-0 mb-4"/>
-        <Fragment>
-          {routeResult || <NoPageFound />}
-        </Fragment>
-      </div>
+    <div>
+      <h1 style={style} className="col-12">
+      <A href="/"><img src={logo} alt=""/></A>
+      </h1>
+      <hr className="mt-0 mb-4"/>
+      <Fragment>
+        {routeResult || <NoPageFound />}
+      </Fragment>
+    </div>
   );
 }
 

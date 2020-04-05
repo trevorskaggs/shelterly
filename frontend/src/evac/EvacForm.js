@@ -16,14 +16,11 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import * as Yup from 'yup';
 
 const MyMultiSelect = ({ label, ...props }) => {
-  const [field, meta] = useField(props);
+  const [field] = useField(props);
   return (
     <>
       <Label htmlFor={props.id || props.name}>{label}</Label>
       <Input type="select" {...field} {...props} multiple={true}/>
-      {/* {meta.touched && meta.error ? (
-        <StyledErrorMessage>{meta.error}</StyledErrorMessage>
-      ) : null} */}
     </>
   );
 };
@@ -33,26 +30,35 @@ const style = {
 };
 
 export function EvacTeamForm() {
-    const [data, setData] = useState({teammembers: [], isFetching: false});
-
-    useEffect(() => {
-        const fetchTeamMembers = async () => {
-          setData({teammembers: data.teammembers, isFetching: true});
-          await axios.get('http://localhost:8000/people/api/teammember/')
-          .then(response => {
-            response.data.map(function(teammember){
-              const obj = {value: teammember.id, label: teammember.first_name};
-              data.teammembers.push(obj)
-            });
-            setData({teammembers: data.teammembers, isFetching: false});
-          })
-          .catch(e => {
-            console.log(e);
-            setData({teammembers: data.teammembers, isFetching: false});
-          });
-        };
-        fetchTeamMembers();
-    }, []);
+  const [data, setData] = useState({options: [], isFetching: false});
+  // Hook for initializing data.
+  useEffect(() => {
+    let source = axios.CancelToken.source();
+    const fetchTeamMembers = async () => {
+      setData({options: data.options, isFetching: true});
+      // Fetch TeamMember data.
+      await axios.get('http://localhost:8000/people/api/teammember/', {
+        cancelToken: source.token,
+      })
+      .then(response => {
+        response.data.forEach(function(teammember){
+          // Store relevant information for creating valid options.
+          const obj = {value: teammember.id, label: teammember.first_name};
+          data.options.push(obj)
+        });
+        setData({options: data.options, isFetching: false});
+      })
+      .catch(e => {
+        console.log(e);
+        setData({options: data.options, isFetching: false});
+      });
+    };
+    fetchTeamMembers();
+    // Cleanup.
+    return () => {
+      source.cancel();
+    };
+  }, [data.options]);
 
   return (
     <>
@@ -70,15 +76,14 @@ export function EvacTeamForm() {
             .max(50, 'Must be 20 characters or less')
             .required('Required'),
         })}
-        onSubmit={async(values, { setSubmitting }) => {
-          console.log(values);
-          try {
-            await axios.post('http://localhost:8000/evac/api/evacteam/', values);
+        onSubmit={(values, { setSubmitting }) => {
+          axios.post('http://localhost:8000/evac/api/evacteam/', values)
+          .then(function() {
             navigate('/evac');
-          }
-          catch (e) {
+          })
+          .catch(e => {
             console.log(e);
-          }
+          });
           setSubmitting(false);
         }}
       >
@@ -86,7 +91,7 @@ export function EvacTeamForm() {
           <Container>
             <FormGroup>
               <MyMultiSelect label="Evac Team Members*" name="evac_team_members" className="mb-3">
-                {data.teammembers.map(({ value, label }, index) => <option value={value} key={value} >{label}</option>)}
+                {data.options.map(({ value, label }, index) => <option value={value} key={value} >{label}</option>)}
               </MyMultiSelect>
               <Field
                 type="text"
@@ -127,14 +132,14 @@ export const TeamMemberForm = () => {
             cell_phone: Yup.string().required('Required'),
             agency_id: Yup.string(),
           })}
-          onSubmit={async(values, { setSubmitting }) => {
-            try {
-              await axios.post('http://localhost:8000/people/api/teammember/', values);
+          onSubmit={(values, { setSubmitting }) => {
+            axios.post('http://localhost:8000/people/api/teammember/', values)
+            .then(function() {
               navigate('/evac');
-            }
-            catch (e) {
+            })
+            .catch(e => {
               console.log(e);
-            }
+            });
             setSubmitting(false);
           }}
         >
@@ -164,7 +169,7 @@ export const TeamMemberForm = () => {
               </FormGroup>
 
               <FormGroup>
-              <Row>
+                <Row>
                   <Col xs={{size: 5, offset: 1}}>
                     <Field
                       type="text"
