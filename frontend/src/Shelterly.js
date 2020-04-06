@@ -2,13 +2,13 @@ import React, { Fragment } from "react";
 import logo from "./static/images/nvadg_logo.png"
 import { useRoutes, A } from "hookrouter";
 import routes from "./router";
-import NoPageFound from "./components/NoPageFound";
+import PageNotFound from "./components/PageNotFound";
 
 const style = {
   textAlign: "center",
 };
 
-function App() {
+function Shelterly() {
   const routeResult = useRoutes(routes);
   return (
     <div>
@@ -17,10 +17,10 @@ function App() {
       </h1>
       <hr className="mt-0 mb-4"/>
       <Fragment>
-        {routeResult || <NoPageFound />}
+        {routeResult || <PageNotFound />}
       </Fragment>
     </div>
   );
 }
 
-export default App;
+export default Shelterly;

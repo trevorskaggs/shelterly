@@ -1,10 +1,10 @@
 import React from "react";
 import Home from "./Home";
-import Evac, {NewTeam, TeamList, NewTeamMember} from "./evac/Evac";
+import EvacHome, {NewTeam, TeamList, NewTeamMember} from "./evac/Evac";
 
 const routes = {
   "/": () => <Home />,
-  "/evac": () => <Evac />,
+  "/evac": () => <EvacHome />,
   "/evac/evacteam/new": () => <NewTeam />,
   "/evac/evacteam/list": () => <TeamList />,
   "/evac/teammember/new": () => <NewTeamMember />,

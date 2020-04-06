@@ -29,7 +29,7 @@ export function EvacTeamTable() {
   useEffect(() => {
     let source = axios.CancelToken.source();
     const fetchEvacTeams = async () => {
-      setData({evac_teams: data.evac_teams, isFetching: true});
+      setData({isFetching: true});
       // Fetch EvacTeam data.
       await axios.get('http://localhost:8000/evac/api/evacteam/', {
         cancelToken: source.token,
@@ -39,7 +39,7 @@ export function EvacTeamTable() {
       })
       .catch(e => {
         console.log(e);
-        setData({evac_teams: data.evac_teams, isFetching: false});
+        setData({isFetching: false});
       });
     };
     fetchEvacTeams();

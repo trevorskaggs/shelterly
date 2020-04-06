@@ -13,7 +13,7 @@ const btn_style = {
   margin: "0 auto",
 };
 
-const Evac = () => (
+const EvacHome = () => (
   <div style={btn_style}>
     <A href="/evac/evacteam/new" style={link_style} className="btn btn-warning btn-lg btn-block mb-2">CREATE NEW EVAC TEAM</A>
     <A href="/evac/evacteam/list" style={link_style} className="btn btn-warning btn-lg btn-block mb-2">EVAC TEAM LIST</A>
@@ -44,4 +44,4 @@ export const NewTeamMember = () => (
   </div>
 )
 
-export default Evac
+export default EvacHome

@@ -35,7 +35,7 @@ export function EvacTeamForm() {
   useEffect(() => {
     let source = axios.CancelToken.source();
     const fetchTeamMembers = async () => {
-      setData({options: data.options, isFetching: true});
+      setData({isFetching: true});
       // Fetch TeamMember data.
       await axios.get('http://localhost:8000/people/api/teammember/', {
         cancelToken: source.token,
@@ -50,7 +50,7 @@ export function EvacTeamForm() {
       })
       .catch(e => {
         console.log(e);
-        setData({options: data.options, isFetching: false});
+        setData({isFetching: false});
       });
     };
     fetchTeamMembers();
@@ -199,5 +199,3 @@ export const TeamMemberForm = () => {
       </>
     );
   };
-
-// export default EvacTeamForm;
