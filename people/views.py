@@ -1,11 +1,13 @@
 from django.shortcuts import render, redirect
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
+from rest_framework import viewsets
+
 from animals.models import Animal
-from people.models import Person
+from people.models import Person, TeamMember
 from hotline.models import ServiceRequest
 from people.forms import PersonForm, TeamMemberForm
-
+from people.serializers import TeamMemberSerializer
 
 # Create your views here.
 
@@ -38,3 +40,8 @@ def team_member(request, pk=None):
         form.save()
         return redirect('evac:evac_landing')
     return render(request, 'team_member.html', {'form':form})
+
+class TeamMemberViewSet(viewsets.ModelViewSet):
+
+    queryset = TeamMember.objects.all()
+    serializer_class = TeamMemberSerializer
