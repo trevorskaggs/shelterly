@@ -1,8 +1,11 @@
 import React from "react";
 import { A } from "hookrouter";
-import {EvacTeamForm, TeamMemberForm} from "./EvacForm";
+import {EvacTeamForm, TeamMemberForm} from "./EvacForms";
 import {EvacTeamTable} from "./EvacTables";
 
+const header_style = {
+  textAlign: "center",
+};
 
 const link_style = {
   textDecoration: "none",
@@ -13,7 +16,7 @@ const btn_style = {
   margin: "0 auto",
 };
 
-const EvacHome = () => (
+const Evac = () => (
   <div style={btn_style}>
     <A href="/evac/evacteam/new" style={link_style} className="btn btn-warning btn-lg btn-block mb-2">CREATE NEW EVAC TEAM</A>
     <A href="/evac/evacteam/list" style={link_style} className="btn btn-warning btn-lg btn-block mb-2">EVAC TEAM LIST</A>
@@ -28,20 +31,24 @@ const EvacHome = () => (
 
 export const NewTeam = () => (
   <div>
+    <h1 style={header_style}>Evac Team</h1>
     <EvacTeamForm />
   </div>
 )
 
 export const TeamList = () => (
   <div>
+    <h1 style={header_style}>Evac Teams</h1>
+    <br/>
     <EvacTeamTable />
   </div>
 )
 
 export const NewTeamMember = () => (
   <div>
+    <h1 style={header_style}>Team Member</h1>
     <TeamMemberForm />
   </div>
 )
 
-export default EvacHome
+export default Evac

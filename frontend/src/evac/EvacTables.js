@@ -3,10 +3,6 @@ import axios from "axios";
 import BootstrapTable from 'react-bootstrap-table-next'
 import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
 
-const style = {
-  textAlign: "center",
-};
-
 function CellFormatter(cell) {
   return (<div><a href={"/evac/evacteam/"+cell+"/"}>Evac Team {cell}</a></div>);
 }
@@ -29,7 +25,7 @@ export function EvacTeamTable() {
   useEffect(() => {
     let source = axios.CancelToken.source();
     const fetchEvacTeams = async () => {
-      setData({isFetching: true});
+      setData({evac_teams: data.evac_teams, isFetching: true});
       // Fetch EvacTeam data.
       await axios.get('http://localhost:8000/evac/api/evacteam/', {
         cancelToken: source.token,
@@ -39,7 +35,7 @@ export function EvacTeamTable() {
       })
       .catch(e => {
         console.log(e);
-        setData({isFetching: false});
+        setData({evac_teams: data.evac_teams, isFetching: false});
       });
     };
     fetchEvacTeams();
@@ -51,8 +47,6 @@ export function EvacTeamTable() {
 
   return (
     <div>
-      <h1 style={style}>Evac Teams</h1>
-      <br/>
       <BootstrapTable keyField='id' data={ data.evac_teams } columns={columns}/>
       <p>{data.isFetching ? 'Fetching teams...' : ''}</p>
     </div>

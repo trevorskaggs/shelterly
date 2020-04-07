@@ -25,17 +25,13 @@ const MyMultiSelect = ({ label, ...props }) => {
   );
 };
 
-const style = {
-  textAlign: "center",
-};
-
 export function EvacTeamForm() {
   const [data, setData] = useState({options: [], isFetching: false});
   // Hook for initializing data.
   useEffect(() => {
     let source = axios.CancelToken.source();
     const fetchTeamMembers = async () => {
-      setData({isFetching: true});
+      setData({options: data.options, isFetching: true});
       // Fetch TeamMember data.
       await axios.get('http://localhost:8000/people/api/teammember/', {
         cancelToken: source.token,
@@ -50,7 +46,7 @@ export function EvacTeamForm() {
       })
       .catch(e => {
         console.log(e);
-        setData({isFetching: false});
+        setData({options: data.options, isFetching: false});
       });
     };
     fetchTeamMembers();
@@ -62,7 +58,6 @@ export function EvacTeamForm() {
 
   return (
     <>
-      <h1 style={style}>Evac Team</h1>
       <Formik
         initialValues={{
           evac_team_members: [],
@@ -114,7 +109,6 @@ export function EvacTeamForm() {
 export const TeamMemberForm = () => {
     return (
       <>
-        <h1 style={style}>Team Member</h1>
         <Formik
           initialValues={{
             first_name: '',

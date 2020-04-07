@@ -4,7 +4,7 @@ import { useRoutes, A } from "hookrouter";
 import routes from "./router";
 import PageNotFound from "./components/PageNotFound";
 
-const style = {
+const header_style = {
   textAlign: "center",
 };
 
@@ -12,7 +12,7 @@ function Shelterly() {
   const routeResult = useRoutes(routes);
   return (
     <div>
-      <h1 style={style} className="col-12">
+      <h1 style={header_style} className="col-12">
       <A href="/"><img src={logo} alt=""/></A>
       </h1>
       <hr className="mt-0 mb-4"/>
