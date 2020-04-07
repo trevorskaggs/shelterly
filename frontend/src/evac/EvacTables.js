@@ -1,25 +1,25 @@
 import React, {useEffect, useState} from 'react';
 import axios from "axios";
-import BootstrapTable from 'react-bootstrap-table-next'
-import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
+import Table from '.././components/Table';
 
-function CellFormatter(cell) {
-  return (<div><a href={"/evac/evacteam/"+cell+"/"}>Evac Team {cell}</a></div>);
-}
 
-const columns = [
-  {
-    dataField: 'id',
-    text: 'Evac Team',
-    formatter: CellFormatter
-  }, 
-  {
-    dataField: 'evac_team_member_names',
-    text: 'Team Members'
-  },
-]
 
 export function EvacTeamTable() {
+  const columns = React.useMemo(
+    () => [
+      {
+        Header: 'Evac Team',
+        accessor: 'id'
+      },
+      {
+        Header: 'Team Members',
+        accessor: 'evac_team_member_names',
+        Cell: ({ cell: { value } }) =>
+          <div><a href={"/evac/evacteam/"+value+"/"}>Evac Team {value}</a></div>
+      }
+    ],
+    []
+  )
   const [data, setData] = useState({evac_teams: [], isFetching: false});
   // Hook for initializing data.
   useEffect(() => {
@@ -47,7 +47,7 @@ export function EvacTeamTable() {
 
   return (
     <div>
-      <BootstrapTable keyField='id' data={ data.evac_teams } columns={columns}/>
+      <Table columns={columns} data={data.evac_teams}/>
       <p>{data.isFetching ? 'Fetching teams...' : ''}</p>
     </div>
   )
