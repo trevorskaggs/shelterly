@@ -16,17 +16,28 @@ SEX_CHOICES = (
     ('F', "Female"),
 )
 
-SIZE_CHOICES = (
+DOG_SIZE_CHOICES = (
     ('Small', "Small (< 20 lbs)"),
     ('Medium', "Medium (21 - 60 lbs)"),
     ('Large', "Large (61 - 110 lbs)"),
     ('Giant', "Giant (111+ lbs)"),
 )
 
-AGE_CHOICES = (
+DOG_AGE_CHOICES = (
     ('Youth', "Youth (< 2 Years)"),
     ('Adult', "Adult (2 - 8 Years)"),
     ('Elerly', "Elderly (8+ Years)"),
+)
+CAT_SIZE_CHOICES = (
+    ('Small', 'Small ( < 10 lbs)'),
+    ('Full Size', 'Full Size (10+ lbs)'),
+)
+CAT_AGE_CHOICES = (
+    ('Kitten', 'Kitten (<6 Months)'),
+    ('Youth', 'Youth (6 Months - 2 Years)'),
+    ('Adult', 'Adult (2 Years - 8 Years)'),
+    ('Elderly', 'Elderly (8 Years - 15 Years)'),
+    ('Geriatric', 'Geriatric (15+ years)'),
 )
 
 STATUS_CHOICES = (
@@ -64,67 +75,16 @@ ANIMAL_LOOKUP_DICT = {
         'pcolor': DOG_COLOR_CHOICES,
         'scolor': DOG_COLOR_CHOICES,
         'markings': DOG_PATTERN_CHOICES,
-        'breeds': DOG_BREEDS,
+        'size': DOG_SIZE_CHOICES,
+        'age': DOG_AGE_CHOICES,
     },
     'cat':{
         'pcolor': CAT_COLOR_CHOICES,
         'scolor': CAT_COLOR_CHOICES,
         'markings': CAT_PATTERN_CHOICES,
-        'breeds': CAT_BREEDS,
+        'size': CAT_SIZE_CHOICES,
+        'age': CAT_AGE_CHOICES,
     },
 }
-
-ALL_BREED_CHOICES = DOG_BREEDS + CAT_BREEDS
-# DOG_BREEDS = (
-#     ('Affenpinscher', 'Affenpinscher'),
-#     ('Afghan Hound', 'Afghan Hound'),
-#     ('Afghan Shepherd', 'Afghan Shepherd'),
-#     ('Aidi', 'Aidi'),
-#     ('Airedale Terrier', 'Airedale Terrier'),
-#     ('Akbash', 'Akbash'),
-#     ('Akita', 'Akita'),
-#     ('Alaskan Husky', 'Alaskan Husky'),
-#     ('American Bulldog', 'American Bulldog')
-#     ('American Cocker Spaniel', 'American Cocker Spaniel'),
-#     ('American English Coonhound', 'American English Coonhound'),
-#     ('American Foxhound', 'American Foxhound'),
-#     ('American Hairless Terrier', 'American Hairless Terrier'),
-#     ('American Pit Bull Terrier', 'American Pit Bull Terrier'),
-#     ('American Staffordshire Terrier', 'American Staffordshire Terrier'),
-#     ('American Water Spaniel', 'American Water Spaniel'),
-#     ('Australian Cattle Dog', 'Australian Cattle Dog'),
-#     ('Australian Kelpie', 'Australian Kelpie')
-#     ('Australian Shepherd', 'Australian Shepherd'),
-#     ('Australian Terrier', 'Australian Terrier'),
-#     ('Armant', 'Armant'),
-#     ('Basset Hound', 'Basset Hound'),
-#     ('Beagle', 'Beagle'),
-#     ('Bearded Collie', 'Bearded Collie'),
-#     ('Belgian Shepherd Dog', 'Belgian Shepherd Dog'),
-#     ('Bergamasco Shepherd', 'Bergamasco Shepherd'),
-#     ('Black and Tan Coonhound', 'Black and Tan Coonhound'),
-#     ('Mastiff', 'Mastiff'),
-#     ('Black Norwegian Elkhound', 'Black Norwegian Elkhound'),
-#     ('Black Russian Terrier', 'Black Russian Terrier'),
-#     ('Bloodhound', 'Bloodhound'),
-#     ('Bluetick Coonhound', 'Bluetick Coonhound'),
-#     ('Border Collie', 'Border Collie'),
-#     ('Border Terrier', 'Border Terrier'),
-#     ('Boston Terrier', 'Boston Terrier'),
-#     ('Boxer', 'Boxer'),
-#     ('Boykin Spaniel', 'Boykin Spaniel'),
-#     ('Brazilian Terrier', 'Brazilian Terrier'),
-#     ('Bull Terrier', 'Bull Terrier'),
-#     ('Bulldog', 'Bulldog'),
-#     ('Bullmastiff', 'Bullmastiff'),
-#     ('Catalan Sheepdog', 'Catalan Sheepdog'),
-#     ('Chesapeake Bay Retriever', 'Chesapeake Bay Retriever'),
-#     ('Chihuahua', 'Chihuahua'),
-#     ('Chinese Crested Dog', 'Chinese Crested Dog'),
-#     ('Chinese Imperial Dog', 'Chinese Imperial Dog'),
-#     ('Chow Chow', 'Chow Chow'),
-#     ('Collie', 'Collie'),
-#     ('Dachshund', 'Dachshund'),
-#     ('Dalmatian', 'Dalmatian'), 
-
-# )
+ALL_AGE_CHOICES = DOG_AGE_CHOICES + CAT_AGE_CHOICES
+ALL_SIZE_CHOICES = DOG_SIZE_CHOICES + CAT_SIZE_CHOICES

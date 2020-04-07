@@ -2,17 +2,8 @@
 
 {% block content %}
 <h1>{{ room.name|upper }} ROOM</h1>
-<hr>
-{% if room.cage_set.exists %}
-    {% for cage in room.cage_set.all %}
-      <a class="btn btn-warning btn-lg btn-block" href="{% url 'shelter:cage_detail' cage.pk %}"{% if cage.occupied %}style="opacity: 0.5" title='Occupied!'{% endif %}>{{ cage.name }} ({{ cage.counts }})</a>
-    {% endfor %}
-{% else %}
-    <a class="btn btn-secondary btn-lg btn-block disabled">NO CAGES CONFIGURED</a>
-{% endif %}
 <br>
 <br>
-<a class="btn btn-success btn-lg btn-block"  href="{% url 'shelter:cage' room.pk %}">ADD CAGE</a>
 <a class="btn btn-info btn-lg btn-block"  href="{% url 'shelter:room' room.building.pk room.pk %}">EDIT ROOM</a>
 <a class="btn btn-secondary btn-lg btn-block"  href="{% url 'shelter:building_detail' room.building.pk %}">BACK</a>
 {% endblock %}

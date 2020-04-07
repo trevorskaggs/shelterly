@@ -1,13 +1,17 @@
 from django.shortcuts import get_object_or_404, render, redirect
 
 from animals.models import Animal
-from shelter.models import Shelter, Building, Room, Cage
-from shelter.forms import ShelterForm, BuildingForm, RoomForm, CageForm
+from shelter.models import Shelter, Building, Room
+from shelter.forms import ShelterForm, BuildingForm, RoomForm
+from rest_framework import viewsets, generics
+from .serializer import ShelterSerializer, BuildingSerializer, RoomSerializer
+from django_filters.rest_framework import DjangoFilterBackend
+from django_filters import rest_framework as filters
+
 
 OBJ_TYPE_DICT = {
     'building': (Building, 'shelter:shelter_detail'),
     'room': (Room, 'shelter:building_detail'),
-    'cage': (Cage, 'shelter:room_detail'),
 }
 
 # Create your views here.
@@ -56,19 +60,6 @@ def room(request, building_pk, pk=None):
         return redirect('shelter:building_detail', building_pk)
     return render(request, 'room.html', {'form':form})
 
-def cage_detail(request, pk):
-    cage = get_object_or_404(Cage, pk=pk)
-    return render(request, 'cage_details.html', {'cage':cage})
-
-def cage(request, room_pk, pk=None):
-    instance = Cage.objects.get(pk=pk) if pk else None
-    room = Room.objects.get(pk=room_pk)
-    form = CageForm(room, request.POST or None, instance=instance)
-    if form.is_valid():
-        form.save()
-        return redirect('shelter:room_detail', room_pk)
-    return render(request, 'cage.html', {'form':form})
-
 def shelter_object_delete(request, obj_type, pk):
     obj = OBJ_TYPE_DICT[obj_type][0].objects.get(pk=pk)
     parent = obj.parent
@@ -95,26 +86,19 @@ def shelter_animal_room_select(request, animal_pk, building_pk):
     data = {'animal': animal, 'building': building, 'rooms':rooms}
     return render(request, 'room_select.html', data)
 
-def shelter_animal_cage_select(request, animal_pk, room_pk):
-    animal = Animal.objects.get(pk=animal_pk)
-    room = Room.objects.get(pk=room_pk)
-    cages = room.cage_set.all()
-    data = {'animal': animal, 'room': room, 'cages':cages}
-    return render(request, 'cage_select.html', data)
+class ShelterViewSet(viewsets.ModelViewSet):
+    queryset = Shelter.objects.all()
+    serializer_class = ShelterSerializer
 
-def shelter_animal_cage(request, animal_pk, cage_pk):
-    animal = Animal.objects.get(pk=animal_pk)
-    cage = Cage.objects.get(pk=cage_pk)
-    animal.cage = cage
-    animal.status = 'SHELTERED'
-    animal.save()
-    return redirect('animals:animal_detail', pk=animal_pk)
 
-def shelter_animal_cage_add(request, animal_pk, room_pk):
-    animal = Animal.objects.get(pk=animal_pk)
-    room = Room.objects.get(pk=room_pk)
-    form = CageForm(room, request.POST or None)
-    if form.is_valid():
-        cage = form.save()
-        return shelter_animal_cage(request, animal.pk, cage.pk)
-    return render(request, 'cage.html', {'form':form})
+class BuildingViewSet(viewsets.ModelViewSet):
+    queryset = Building.objects.all()
+    serializer_class = BuildingSerializer
+    filter_backends = (filters.DjangoFilterBackend,)
+    filterset_fields = ('shelter',)
+
+class RoomViewSet(viewsets.ModelViewSet):
+    queryset = Room.objects.all()
+    serializer_class = RoomSerializer
+    filter_backends = (filters.DjangoFilterBackend,)
+    filterset_fields = ('shelter', 'building',)

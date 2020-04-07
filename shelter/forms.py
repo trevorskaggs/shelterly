@@ -1,6 +1,6 @@
 from django import forms
 
-from shelter.models import Shelter, Building, Room, Cage
+from shelter.models import Shelter, Building, Room
 
 class ShelterForm(forms.ModelForm):
 
@@ -29,14 +29,3 @@ class RoomForm(forms.ModelForm):
         model = Room
         fields = ['name', 'description', 'building']
         widgets = {'building': forms.HiddenInput()}
-
-class CageForm(forms.ModelForm):
-
-    def __init__(self, room, *args, **kwargs):
-        super(CageForm, self).__init__(*args, **kwargs)
-        self.fields['room'].initial = room
-
-    class Meta:
-        model = Cage
-        fields = ['name', 'description', 'room']
-        widgets = {'room': forms.HiddenInput()}
