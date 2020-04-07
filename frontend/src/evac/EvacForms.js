@@ -14,16 +14,8 @@ import {
 import { ReactstrapInput } from 'reactstrap-formik';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import * as Yup from 'yup';
+import { MultiSelect } from '.././components/Form';
 
-const MyMultiSelect = ({ label, ...props }) => {
-  const [field] = useField(props);
-  return (
-    <>
-      <Label htmlFor={props.id || props.name}>{label}</Label>
-      <Input type="select" {...field} {...props} multiple={true}/>
-    </>
-  );
-};
 
 export function EvacTeamForm() {
   const [data, setData] = useState({options: [], isFetching: false});
@@ -85,9 +77,9 @@ export function EvacTeamForm() {
         <Form>
           <Container>
             <FormGroup>
-              <MyMultiSelect label="Evac Team Members*" name="evac_team_members" className="mb-3">
+              <MultiSelect label="Evac Team Members*" name="evac_team_members" className="mb-3">
                 {data.options.map(({ value, label }, index) => <option value={value} key={value} >{label}</option>)}
-              </MyMultiSelect>
+              </MultiSelect>
               <Field
                 type="text"
                 label="Callsign*"
