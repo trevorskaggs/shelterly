@@ -7,6 +7,8 @@ from django.conf.urls import include, url
 from django.contrib.staticfiles.urls import static
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
+from knox import views as knox_views
+from accounts.views import LoginView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -18,6 +20,10 @@ urlpatterns = [
     path('location/', include('location.urls')),
     path('people/', include('people.urls')),
     path('shelter/', include('shelter.urls')),
+    url(r'api/auth/', include('knox.urls')),
+    url(r'login/', LoginView.as_view(), name='knox_login'),
+    url(r'logout/', knox_views.LogoutView.as_view(), name='knox_logout'),
+    url(r'logoutall/', knox_views.LogoutAllView.as_view(), name='knox_logoutall'),
 ]
 urlpatterns += staticfiles_urlpatterns()
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
