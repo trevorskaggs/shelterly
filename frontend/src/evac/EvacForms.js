@@ -72,14 +72,16 @@ export function EvacTeamForm() {
             .required('Required'),
         })}
         onSubmit={(values, { setSubmitting }) => {
-          axios.post('http://localhost:8000/evac/api/evacteam/', values)
-          .then(function() {
-            navigate('/evac');
-          })
-          .catch(e => {
-            console.log(e);
-          });
-          setSubmitting(false);
+          setTimeout(() => {
+            axios.post('http://localhost:8000/evac/api/evacteam/', values)
+            .then(function() {
+              navigate('/evac');
+            })
+            .catch(e => {
+              console.log(e);
+            });
+            setSubmitting(false);
+          }, 500);
         }}
       >
         <Form>
@@ -127,14 +129,16 @@ export const TeamMemberForm = () => {
             agency_id: Yup.string(),
           })}
           onSubmit={(values, { setSubmitting }) => {
-            axios.post('http://localhost:8000/people/api/teammember/', values)
-            .then(function() {
-              navigate('/evac');
-            })
-            .catch(e => {
-              console.log(e);
-            });
-            setSubmitting(false);
+            setTimeout(() => {
+              axios.post('http://localhost:8000/people/api/teammember/', values)
+              .then(function() {
+                navigate('/evac');
+              })
+              .catch(e => {
+                console.log(e);
+              });
+              setSubmitting(false);
+            }, 500);
           }}
         >
           <Form>

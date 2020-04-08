@@ -1,16 +1,23 @@
 import React from "react";
+import axios from "axios";
 import { Field, Form, Formik } from 'formik';
+import {
+  Button,
+  Col,
+  FormGroup,
+  Container,
+  Row,
+} from 'reactstrap';
 import { ReactstrapInput } from 'reactstrap-formik';
 import * as Yup from "yup";
+import {login} from "../reducers/auth.js";
 
 export const LoginForm = () => (
   <div>
-    <h1>Form Component</h1>
     <Formik
       initialValues={{ username: "", password: "" }}
       validationSchema={Yup.object({
         username: Yup.string()
-          .email()
           .required('A Username is required.'),
         password: Yup.string()
           .max(50, 'Must be 20 characters or less')
@@ -18,9 +25,11 @@ export const LoginForm = () => (
       })}
       onSubmit={(values, { setSubmitting }) => {
         setTimeout(() => {
-          axios.post('http://localhost:8000/accounts/login/', values)
-          .then(function() {
-            navigate('/evac');
+          // login(this.state.username, this.state.password);
+          axios.post('http://localhost:8000/login/', values)
+          .then(response => {
+            console.log(response);
+            // navigate('/');
           })
           .catch(e => {
             console.log(e);
@@ -32,20 +41,24 @@ export const LoginForm = () => (
       <Form>
         <Container>
           <FormGroup>
-            <Field
-              type="text"
-              label="Username*"
-              name="username"
-              id="username"
-              component={ReactstrapInput}
-            />
-            <Field
-              type="password"
-              label="Password*"
-              name="password"
-              id="password"
-              component={ReactstrapInput}
-            />
+            <Row>
+              <Col xs="6">
+                <Field
+                  type="text"
+                  label="Username*"
+                  name="username"
+                  id="username"
+                  component={ReactstrapInput}
+                />
+                <Field
+                  type="password"
+                  label="Password*"
+                  name="password"
+                  id="password"
+                  component={ReactstrapInput}
+                />
+              </Col>
+            </Row>
           </FormGroup>
 
           <Button type="submit" className="btn-success mr-1">Login</Button>
