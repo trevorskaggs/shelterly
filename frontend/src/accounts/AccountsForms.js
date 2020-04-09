@@ -1,5 +1,6 @@
 import React from "react";
 import axios from "axios";
+import {navigate} from "hookrouter";
 import { Field, Form, Formik } from 'formik';
 import {
   Button,
@@ -33,7 +34,7 @@ export const LoginForm = () => (
             // DISPATCH LOAD USER
             // setData(loadUser());
             // console.log(logged_in);
-            // navigate('/');
+            navigate('/');
           })
           .catch(e => {
             console.log(e);

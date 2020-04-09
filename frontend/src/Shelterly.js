@@ -1,9 +1,9 @@
-import React, { Fragment, useEffect, useState } from "react";
+import React, {Fragment, useEffect, useState} from "react";
 import logo from "./static/images/nvadg_logo.png"
-import { useRoutes, A } from "hookrouter";
+import {navigate, useRoutes, A, Redirect} from "hookrouter";
 import routes from "./router";
 import PageNotFound from "./components/PageNotFound";
-import {loadUser} from "./accounts/Accounts";
+import {loadUser, logoutUser} from "./accounts/Accounts";
 
 const header_style = {
   textAlign: "center",
@@ -16,22 +16,27 @@ function Shelterly() {
   //   };
 
   // Initial login state.
-  const [logged_in, setData] = useState(false);
+  const [user, setUser] = useState(false);
   // const [data, setData] = useState({logged_in:false, user:{}});
   useEffect(() => {
-    // setData(loadUser());
-    let user = loadUser();
-    user.then(function(results){
-      console.log(results);
-    }).catch(e => {console.log('fail')})
-    // console.log(localStorage.getItem('token'));
-    // setData({logged_in:test, user:test})
-    setData(localStorage.getItem('token') ? true : false);
-    // setData(true);
-    console.log(logged_in)
-    // Store.dispatch(loadUser());
-  }, [logged_in]);
+    let user_status = loadUser();
+    user_status.then(function(results){
+      console.log(results.data);
+      setUser(results.data);
+    })
+    .catch(e => {
+      console.log('fail');
+      setUser(false);
+    })
+    // setData(localStorage.getItem('token') ? true : false);
+    console.log("token "+localStorage.getItem('token'));
+  }, []);
 
+  // Redirect to login page if user is logged out.
+  if (!user) {
+    console.log('logged out');
+    navigate('/login');
+  }
   const routeResult = useRoutes(routes);
   return (
     <div>
@@ -42,6 +47,9 @@ function Shelterly() {
       <Fragment>
         {routeResult || <PageNotFound />}
       </Fragment>
+      <div style={{textAlign: "right"}}>
+  <button onClick={logoutUser}>logout {user.username}</button>
+      </div>
     </div>
   );
 }
