@@ -13,6 +13,7 @@ from accounts.views import LoginView
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.home, name="home"),
+    path('accounts/', include('accounts.urls')),
     path('animals/', include('animals.urls')),
     path('evac/', include('evac.urls')),
     path('hotline/', include('hotline.urls')),

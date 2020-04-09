@@ -10,7 +10,6 @@ import {
 } from 'reactstrap';
 import { ReactstrapInput } from 'reactstrap-formik';
 import * as Yup from "yup";
-import {login} from "../reducers/auth.js";
 
 export const LoginForm = () => (
   <div>
@@ -28,7 +27,12 @@ export const LoginForm = () => (
           // login(this.state.username, this.state.password);
           axios.post('http://localhost:8000/login/', values)
           .then(response => {
-            console.log(response);
+            console.log(response.data['token']);
+            // dispatch({ type: 'LOGIN_SUCCESS', payload: response.data });
+            localStorage.setItem('token', response.data['token']);
+            // DISPATCH LOAD USER
+            // setData(loadUser());
+            // console.log(logged_in);
             // navigate('/');
           })
           .catch(e => {
