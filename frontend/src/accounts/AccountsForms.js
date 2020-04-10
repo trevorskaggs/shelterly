@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useReducer} from "react";
 import axios from "axios";
 import {navigate} from "hookrouter";
 import { Field, Form, Formik } from 'formik';
@@ -12,64 +12,65 @@ import {
 import { ReactstrapInput } from 'reactstrap-formik';
 import * as Yup from "yup";
 
-export const LoginForm = () => (
-  <div>
-    <Formik
-      initialValues={{ username: "", password: "" }}
-      validationSchema={Yup.object({
-        username: Yup.string()
-          .required('A Username is required.'),
-        password: Yup.string()
-          .max(50, 'Must be 20 characters or less')
-          .required('No password provided.'),
-      })}
-      onSubmit={(values, { setSubmitting }) => {
-        // const { state, dispatch } = useContext(CounterContext);
-        setTimeout(() => {
-          axios.post('http://localhost:8000/login/', values)
-          .then(response => {
-            console.log(response.data['token']);
-            // dispatch({type: 'LOGIN_SUCCESSFUL', data: response.data });
-            // localStorage.setItem('token', response.data['token']);
-            // DISPATCH LOAD USER
-            // setData(loadUser());
-            // console.log(logged_in);
-            navigate('/');
-          })
-          .catch(e => {
-            console.log(e);
-            // dispatch({type: "AUTHENTICATION_ERROR", data: e});
-          });
-          setSubmitting(false);
-        }, 500);
-      }}
-    >
-      <Form>
-        <Container>
-          <FormGroup>
-            <Row>
-              <Col xs="6">
-                <Field
-                  type="text"
-                  label="Username*"
-                  name="username"
-                  id="username"
-                  component={ReactstrapInput}
-                />
-                <Field
-                  type="password"
-                  label="Password*"
-                  name="password"
-                  id="password"
-                  component={ReactstrapInput}
-                />
-              </Col>
-            </Row>
-          </FormGroup>
+import auth, {initialState} from "./AccountsReducer";
 
-          <Button type="submit" className="btn-success mr-1">Login</Button>
-        </Container>
-      </Form>
-    </Formik>
-  </div>
-);
+export const LoginForm = () => {
+  // const { state, dispatch } = useContext(CounterContext);
+  const [state, dispatch] = useReducer(auth, initialState);
+  return (
+    <div>
+      <Formik
+        initialValues={{ username: "", password: "" }}
+        validationSchema={Yup.object({
+          username: Yup.string()
+            .required('A Username is required.'),
+          password: Yup.string()
+            .max(50, 'Must be 20 characters or less')
+            .required('No password provided.'),
+        })}
+        onSubmit={(values, { setSubmitting }) => {
+          setTimeout(() => {
+            axios.post('http://localhost:8000/login/', values)
+            .then(response => {
+              console.log(response.data['token']);
+              dispatch({type: 'LOGIN_SUCCESSFUL', data: response.data });
+              navigate('/');
+            })
+            .catch(e => {
+              console.log(e);
+              dispatch({type: "AUTHENTICATION_ERROR", data: e});
+            });
+            setSubmitting(false);
+          }, 500);
+        }}
+      >
+        <Form>
+          <Container>
+            <FormGroup>
+              <Row>
+                <Col xs="6">
+                  <Field
+                    type="text"
+                    label="Username*"
+                    name="username"
+                    id="username"
+                    component={ReactstrapInput}
+                  />
+                  <Field
+                    type="password"
+                    label="Password*"
+                    name="password"
+                    id="password"
+                    component={ReactstrapInput}
+                  />
+                </Col>
+              </Row>
+            </FormGroup>
+
+            <Button type="submit" className="btn-success mr-1">Login</Button>
+          </Container>
+        </Form>
+      </Formik>
+    </div>
+  )
+}

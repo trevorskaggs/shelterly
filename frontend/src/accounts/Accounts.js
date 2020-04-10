@@ -18,7 +18,6 @@ export const Login = () => (
 export function logoutUser() {
   let headers = {
     "Content-Type": "application/json",
-    // "Authorization": `Token ${localStorage.getItem('token')}`,
   };
 
   axios.post("http://localhost:8000/logout/", {}, {
@@ -37,7 +36,6 @@ export function logoutUser() {
 
 export async function loadUser() {
   if (localStorage.getItem('token')) setAuthToken(localStorage.getItem('token'));
-  // if (localStorage.token) axios.defaults.headers.common['Authorization'] = `Token ${localStorage.token}`;
 
   // DISPATCH USER_LOADING
   // dispatch({ type: 'USER_LOADING' });

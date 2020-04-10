@@ -1,10 +1,10 @@
-// const initialState = {
-//   token: localStorage.getItem("token"),
-//   isAuthenticated: null,
-//   isLoading: true,
-//   user: null,
-//   errors: {},
-// };
+export const initialState = {
+  token: localStorage.getItem("token"),
+  isAuthenticated: null,
+  isLoading: true,
+  user: null,
+  errors: {},
+};
 
 export default (state, action) => {
 
