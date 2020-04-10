@@ -2,7 +2,7 @@ import React from "react";
 import axios from "axios";
 import {navigate} from "hookrouter";
 import {LoginForm} from "./AccountsForms";
-
+import setAuthToken from "./setAuthToken";
 
 const header_style = {
   textAlign: "center",
@@ -18,7 +18,7 @@ export const Login = () => (
 export function logoutUser() {
   let headers = {
     "Content-Type": "application/json",
-    "Authorization": `Token ${localStorage.getItem('token')}`,
+    // "Authorization": `Token ${localStorage.getItem('token')}`,
   };
 
   axios.post("http://localhost:8000/logout/", {}, {
@@ -36,6 +36,7 @@ export function logoutUser() {
 }
 
 export async function loadUser() {
+  if (localStorage.getItem('token')) setAuthToken(localStorage.getItem('token'));
   // if (localStorage.token) axios.defaults.headers.common['Authorization'] = `Token ${localStorage.token}`;
 
   // DISPATCH USER_LOADING
@@ -51,4 +52,3 @@ export async function loadUser() {
   })
   return user;
 }
-

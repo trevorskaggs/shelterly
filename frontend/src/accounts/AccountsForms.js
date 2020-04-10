@@ -24,13 +24,13 @@ export const LoginForm = () => (
           .required('No password provided.'),
       })}
       onSubmit={(values, { setSubmitting }) => {
+        // const { state, dispatch } = useContext(CounterContext);
         setTimeout(() => {
-          // login(this.state.username, this.state.password);
           axios.post('http://localhost:8000/login/', values)
           .then(response => {
             console.log(response.data['token']);
-            // dispatch({ type: 'LOGIN_SUCCESS', payload: response.data });
-            localStorage.setItem('token', response.data['token']);
+            // dispatch({type: 'LOGIN_SUCCESSFUL', data: response.data });
+            // localStorage.setItem('token', response.data['token']);
             // DISPATCH LOAD USER
             // setData(loadUser());
             // console.log(logged_in);
@@ -38,6 +38,7 @@ export const LoginForm = () => (
           })
           .catch(e => {
             console.log(e);
+            // dispatch({type: "AUTHENTICATION_ERROR", data: e});
           });
           setSubmitting(false);
         }, 500);
