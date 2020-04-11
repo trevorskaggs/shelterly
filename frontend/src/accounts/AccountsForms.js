@@ -1,4 +1,4 @@
-import React, {useReducer} from "react";
+import React, {useContext, useEffect, useReducer} from "react";
 import axios from "axios";
 import {navigate} from "hookrouter";
 import { Field, Form, Formik } from 'formik';
@@ -11,12 +11,41 @@ import {
 } from 'reactstrap';
 import { ReactstrapInput } from 'reactstrap-formik';
 import * as Yup from "yup";
+import {CounterContext} from "./AccountsReducer";
+import setAuthToken from "./setAuthToken";
 
-import auth, {initialState} from "./AccountsReducer";
 
 export const LoginForm = () => {
-  // const { state, dispatch } = useContext(CounterContext);
-  const [state, dispatch] = useReducer(auth, initialState);
+  const { state, dispatch } = useContext(CounterContext);
+  useEffect(() => {
+    if (state.user) {
+      navigate("/");
+    }
+  }, []);
+
+  function loadUser() {
+    if (localStorage.getItem('token')) setAuthToken(localStorage.getItem('token'));
+
+    // DISPATCH USER_LOADING
+    dispatch({ type: 'USER_LOADING' });
+
+    let headers = {
+      "Content-Type": "application/json",
+    };
+
+    axios.get("http://localhost:8000/accounts/auth/user/", {
+      headers: headers
+    })
+    .then(function(results){
+      console.log(results.data);
+      dispatch({type: 'USER_LOADED', user: results.data });
+    })
+    .catch(e => {
+      console.log('error: '+e);
+      dispatch({type: "AUTHENTICATION_ERROR", data: e});
+    })
+  }
+
   return (
     <div>
       <Formik
@@ -34,6 +63,7 @@ export const LoginForm = () => {
             .then(response => {
               console.log(response.data['token']);
               dispatch({type: 'LOGIN_SUCCESSFUL', data: response.data });
+              loadUser();
               navigate('/');
             })
             .catch(e => {

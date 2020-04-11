@@ -1,3 +1,6 @@
+import React from "react";
+import setAuthToken from "./setAuthToken";
+
 export const initialState = {
   token: localStorage.getItem("token"),
   isAuthenticated: null,
@@ -24,6 +27,7 @@ export default (state, action) => {
     case 'LOGIN_FAILED':
     case 'LOGOUT_SUCCESSFUL':
       localStorage.removeItem("token");
+      setAuthToken();
       return {...state, errors: action.data, token: null, user: null,
         isAuthenticated: false, isLoading: false};
 
@@ -31,3 +35,5 @@ export default (state, action) => {
       return state;
   }
 }
+
+export const CounterContext = React.createContext(initialState);
