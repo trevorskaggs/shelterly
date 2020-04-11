@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useReducer} from "react";
+import React, {useContext, useEffect} from "react";
 import axios from "axios";
 import {navigate} from "hookrouter";
 import { Field, Form, Formik } from 'formik';
@@ -11,40 +11,18 @@ import {
 } from 'reactstrap';
 import { ReactstrapInput } from 'reactstrap-formik';
 import * as Yup from "yup";
-import {CounterContext} from "./AccountsReducer";
-import setAuthToken from "./setAuthToken";
+import {AuthContext} from "./AccountsReducer";
+import {loadUser} from "./AccountsUtils";
 
 
 export const LoginForm = () => {
-  const { state, dispatch } = useContext(CounterContext);
+  const { state, dispatch } = useContext(AuthContext);
   useEffect(() => {
+    // If user is logged in, redirect to Home.
     if (state.user) {
       navigate("/");
     }
-  }, []);
-
-  function loadUser() {
-    if (localStorage.getItem('token')) setAuthToken(localStorage.getItem('token'));
-
-    // DISPATCH USER_LOADING
-    dispatch({ type: 'USER_LOADING' });
-
-    let headers = {
-      "Content-Type": "application/json",
-    };
-
-    axios.get("http://localhost:8000/accounts/auth/user/", {
-      headers: headers
-    })
-    .then(function(results){
-      console.log(results.data);
-      dispatch({type: 'USER_LOADED', user: results.data });
-    })
-    .catch(e => {
-      console.log('error: '+e);
-      dispatch({type: "AUTHENTICATION_ERROR", data: e});
-    })
-  }
+  }, [state.user]);
 
   return (
     <div>
@@ -61,9 +39,8 @@ export const LoginForm = () => {
           setTimeout(() => {
             axios.post('http://localhost:8000/login/', values)
             .then(response => {
-              console.log(response.data['token']);
               dispatch({type: 'LOGIN_SUCCESSFUL', data: response.data });
-              loadUser();
+              loadUser({dispatch});
               navigate('/');
             })
             .catch(e => {

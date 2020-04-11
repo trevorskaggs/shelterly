@@ -1,7 +1,7 @@
-import React from "react";
+import React, {useReducer} from "react";
 import setAuthToken from "./setAuthToken";
 
-export const initialState = {
+const initialState = {
   token: localStorage.getItem("token"),
   isAuthenticated: null,
   isLoading: true,
@@ -9,7 +9,7 @@ export const initialState = {
   errors: {},
 };
 
-export default (state, action) => {
+function auth_reducer(state, action) {
 
   switch (action.type) {
 
@@ -21,11 +21,13 @@ export default (state, action) => {
 
     case 'LOGIN_SUCCESSFUL':
       localStorage.setItem("token", action.data.token);
+      setAuthToken(action.data.token);
       return {...state, ...action.data, isAuthenticated: true, isLoading: false, errors: null};
 
     case 'AUTHENTICATION_ERROR':
     case 'LOGIN_FAILED':
     case 'LOGOUT_SUCCESSFUL':
+    case 'LOGOUT_FAILED':
       localStorage.removeItem("token");
       setAuthToken();
       return {...state, errors: action.data, token: null, user: null,
@@ -36,4 +38,15 @@ export default (state, action) => {
   }
 }
 
-export const CounterContext = React.createContext(initialState);
+const AuthContext = React.createContext(initialState);
+
+function AuthProvider(props) {
+  const [state, dispatch] = useReducer(auth_reducer, initialState);
+  return (
+   <AuthContext.Provider value={{ state, dispatch }}>
+      {props.children}
+    </AuthContext.Provider>
+  );
+}
+
+export {AuthContext, AuthProvider}
