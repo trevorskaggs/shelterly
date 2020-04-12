@@ -14,7 +14,6 @@ import * as Yup from "yup";
 import {AuthContext} from "./AccountsReducer";
 import {loadUser} from "./AccountsUtils";
 
-
 export const LoginForm = () => {
   const { state, dispatch } = useContext(AuthContext);
   useEffect(() => {

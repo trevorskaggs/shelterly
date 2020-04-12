@@ -22,8 +22,7 @@ export function loadUser({dispatch}) {
     dispatch({type: 'USER_LOADED', user: results.data });
   })
   .catch(e => {
-    console.log('error: '+e);
-
+    console.log(e);
     // Raise error.
     dispatch({type: "AUTHENTICATION_ERROR", data: e});
   })

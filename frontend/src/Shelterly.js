@@ -21,10 +21,10 @@ function Shelterly() {
     if (!state.user && localStorage.getItem('token')) {
       loadUser({dispatch});
     }
-  }, []);
+  }, [state.user, dispatch]);
 
   // Redirect to login page if no authenticated user object is present.
-  if (!state.user) {
+  if (!state.user && !localStorage.getItem('token')) {
     navigate('/login');
   }
   const routeResult = useRoutes(routes);
