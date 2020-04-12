@@ -3,19 +3,18 @@ import {A, navigate, useRoutes} from "hookrouter";
 import routes from "./router";
 import PageNotFound from "./components/PageNotFound";
 import {AuthContext} from "./accounts/AccountsReducer";
-import setAuthToken from "./accounts/setAuthToken";
-import {loadUser, logoutUser} from "./accounts/AccountsUtils";
+import {loadUser, logoutUser, setAuthToken} from "./accounts/AccountsUtils";
 import logo from "./static/images/nvadg_logo.png"
 
 const header_style = {
   textAlign: "center",
 };
 
-if (localStorage.getItem('token')) setAuthToken(localStorage.getItem('token'));
 function Shelterly() {
 
   // Initial login state.
   const { state, dispatch } = useContext(AuthContext);
+  if (localStorage.getItem('token')) setAuthToken(localStorage.getItem('token'));
 
   useEffect(() => {
     // If we have a token but no user, attempt to authenticate them.

@@ -1,6 +1,5 @@
 import axios from "axios";
 import {navigate} from "hookrouter";
-import setAuthToken from "./setAuthToken";
 
 // Authenticate the user with the backnd to obtain a user.
 export function loadUser({dispatch}) {
@@ -52,3 +51,11 @@ export function logoutUser({dispatch}) {
     dispatch({type: "LOGOUT_FAILED", data: e});
   });
 }
+
+export function setAuthToken(token) {
+  if (token) {
+    axios.defaults.headers.common['Authorization'] = `Token ${token}`;
+  } else {
+    delete axios.defaults.headers.common['Authorization'];
+  }
+};

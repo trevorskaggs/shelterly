@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
-from rest_framework import viewsets
+from rest_framework import permissions, viewsets
 
 from animals.models import Animal
 from people.models import Person, TeamMember
@@ -42,6 +42,6 @@ def team_member(request, pk=None):
     return render(request, 'team_member.html', {'form':form})
 
 class TeamMemberViewSet(viewsets.ModelViewSet):
-
     queryset = TeamMember.objects.all()
+    permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = TeamMemberSerializer

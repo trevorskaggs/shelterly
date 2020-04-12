@@ -1,5 +1,5 @@
 import React, {useReducer} from "react";
-import setAuthToken from "./setAuthToken";
+import {setAuthToken} from "./AccountsUtils";
 
 const initialState = {
   token: localStorage.getItem("token"),

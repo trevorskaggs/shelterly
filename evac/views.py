@@ -1,5 +1,5 @@
 from datetime import datetime
-from rest_framework import viewsets
+from rest_framework import viewsets, permissions
 
 from django.shortcuts import render, redirect
 
@@ -34,6 +34,6 @@ def team_member(request, pk=None):
     return render(request, 'team_member.html', {'form':form})
 
 class EvacTeamViewSet(viewsets.ModelViewSet):
-
     queryset = EvacTeam.objects.filter(team_date=datetime.now().date())
+    permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = EvacTeamSerializer
