@@ -7,7 +7,7 @@ services:
     container_name: db
   rams:
     image: freeradical3/rams:dev
-    container_name: rams
+    container_name: shelterly
     volumes:
       - .:/shelterly
       - node_modules:/shelterly/frontend/node_modules
