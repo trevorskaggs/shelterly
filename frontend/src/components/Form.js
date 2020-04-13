@@ -1,6 +1,6 @@
 import React from 'react';
 import { useFormikContext, useField } from 'formik';
-import { Label, Input } from 'reactstrap';
+import { FormFeedback, Label, Input } from 'reactstrap';
 import Select from 'react-select';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -12,10 +12,10 @@ const TextInput = ({ label, ...props }) => {
   const [field, meta] = useField(props);
   return (
     <>
-      <label htmlFor={props.id || props.name}>{label}</label>
-      <input className="text-input" {...field} {...props} />
+      <Label htmlFor={props.id || props.name}>{label}</Label>
+      <Input className={meta.touched && meta.error ? "is-invalid" : null} {...field} {...props} />
       {meta.touched && meta.error ? (
-        <div className="error">{meta.error}</div>
+        <FormFeedback>{meta.error}</FormFeedback>
       ) : null}
     </>
   );
@@ -28,10 +28,10 @@ const Checkbox = ({ children, ...props }) => {
   const [field, meta] = useField({ ...props, type: 'checkbox' });
   return (
     <>
-      <label className="checkbox">
+      <Label className="checkbox">
         <input type="checkbox" {...field} {...props} />
         {children}
-      </label>
+      </Label>
       {meta.touched && meta.error ? (
         <div className="error">{meta.error}</div>
       ) : null}
@@ -44,7 +44,6 @@ const DropDown = ({ options, label, ...props }) => {
   const [field, meta] = useField(props);
 
   function handleOptionChange(selection) {
-    debugger;
     setFieldValue(props.name, selection);
   }
 

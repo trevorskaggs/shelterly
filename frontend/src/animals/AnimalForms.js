@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState }from "react";
 import ReactDOM from "react-dom";
 import { Field, Form, useField, Formik } from "formik";
 import { Button, Col, FormGroup, Label, Input, Option, Container, Row } from "reactstrap";
@@ -7,36 +7,33 @@ import { ReactstrapInput } from "reactstrap-formik";
 import "bootstrap/dist/css/bootstrap.min.css";
 import * as Yup from 'yup';
 import { DropDown, TextInput } from '.././components/Form.js';
-import { speciesChoices } from './constants'
+import { speciesChoices, sexChoices, dogSizeChoices, catSizeChoices } from './constants'
 
 
 const AnimalForm = () => {
+  const [species, setSpecies] = useState('');
   
     return (
       <>
-        <h1>Animal Form</h1>
         <Formik
           initialValues={{
             name: '',
-            owner_name: '',
+            species: '',
             sex: '',
             description: '', // added for our checkbox
           }}
           validationSchema={Yup.object({
             animalName: Yup.string()
-              .max(15, 'Must be 15 characters or less')
+              .max(15, 'Must be 15 characters or less.')
               .required('Required'),
             species: Yup.string().required()
-              .oneOf(['cockerspaniel', 'doberman', 'yellow lab']),
+              .oneOf(speciesChoices.map(x => x['value'])),
             ownerName: Yup.string()
               .max(50, 'Must be 50 characters or less')
               .required('Required'),
             sex: Yup.string()
               .required('Required')
               .oneOf(['Male', 'Female']),
-            description: Yup.boolean()
-              .required('Required')
-              .oneOf([true], 'You must accept the terms and conditions.'),
           })}
           onSubmit={(values, { setSubmitting }) => {
             setTimeout(() => {
@@ -44,19 +41,27 @@ const AnimalForm = () => {
               setSubmitting(false);
             }, 400);
           }}
-        >
+        >{ props => (
           <Form>
-              <ReactstrapForm>
-              <Container>
+          <ReactstrapForm>
+          <Container>
           <FormGroup>
+            <Label for="animalname">Name</Label>
             <TextInput
               //These are passed into above TextInput,
               // so remaining props passed are name and type
-              label="Animal Name"
+              id="animalname"
               name="animalName"
               type="text"
             />
           </FormGroup>
+          <DropDown
+              label="Sex"
+              id="sexDropDown"
+              name="sex"
+              type="text"
+              options={sexChoices}>
+            </DropDown>
             <DropDown 
             label="Species"
             id="speciesDropdown"
@@ -64,23 +69,19 @@ const AnimalForm = () => {
             type="text"
             options={speciesChoices}
             />
-          <FormGroup>
-            <TextInput
-              label="Email Address"
-              name="email"
-              type="email"
-              placeholder="jane@formik.com"
+            <DropDown 
+              label="Size"
+              id="sizeDropdown"
+              name="size"
+              type="text"
+              options={props.values.species.value == 'dog' ? dogSizeChoices : catSizeChoices }
             />
-          </FormGroup>
-            <DropDown label="Sex">
-              // <option value="male">Male</option>
-              // <option value="female">Female</option>
-            </DropDown>
   
             <Button type="submit">Submit</Button>
             </Container>
             </ReactstrapForm>
           </Form>
+        )}
         </Formik>
       </>
     );
