@@ -5,7 +5,7 @@ services:
   db:
     image: mdillon/postgis
     container_name: db
-  rams:
+  shelterly:
     image: freeradical3/rams:dev
     container_name: shelterly
     volumes:
