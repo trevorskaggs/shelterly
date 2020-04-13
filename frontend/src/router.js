@@ -13,7 +13,7 @@ const routes = {
   "/evac/teammember/new": () => <NewTeamMember />,
   "/animals": () => <Animals />,
   "/animals/list": () => <AnimalTable />,
-  "/animal/new": () => <AnimalForm />,
+  "/animals/add": () => <AnimalForm />,
 };
 
 export default routes;

@@ -6,9 +6,12 @@ import {Form as ReactstrapForm} from "reactstrap";
 import { ReactstrapInput } from "reactstrap-formik";
 import "bootstrap/dist/css/bootstrap.min.css";
 import * as Yup from 'yup';
-import { Select, TextInput } from '.././components/Form.js';
+import { DropDown, TextInput } from '.././components/Form.js';
+import { speciesChoices } from './constants'
+
 
 const AnimalForm = () => {
+  
     return (
       <>
         <h1>Animal Form</h1>
@@ -20,10 +23,12 @@ const AnimalForm = () => {
             description: '', // added for our checkbox
           }}
           validationSchema={Yup.object({
-            name: Yup.string()
+            animalName: Yup.string()
               .max(15, 'Must be 15 characters or less')
               .required('Required'),
-            owner_name: Yup.string()
+            species: Yup.string().required()
+              .oneOf(['cockerspaniel', 'doberman', 'yellow lab']),
+            ownerName: Yup.string()
               .max(50, 'Must be 50 characters or less')
               .required('Required'),
             sex: Yup.string()
@@ -52,13 +57,13 @@ const AnimalForm = () => {
               type="text"
             />
           </FormGroup>
-            <TextInput
-              label="Owner Name"
-              name="ownerName"
-              type="text"
+            <DropDown 
+            label="Species"
+            id="speciesDropdown"
+            name="species"
+            type="text"
+            options={speciesChoices}
             />
-  
-  
           <FormGroup>
             <TextInput
               label="Email Address"
@@ -67,10 +72,10 @@ const AnimalForm = () => {
               placeholder="jane@formik.com"
             />
           </FormGroup>
-            <Select label="Sex" name="sex">
+            <DropDown label="Sex">
               // <option value="male">Male</option>
               // <option value="female">Female</option>
-            </Select>
+            </DropDown>
   
             <Button type="submit">Submit</Button>
             </Container>
