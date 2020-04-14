@@ -1,5 +1,4 @@
 import React, {useReducer} from "react";
-import {setAuthToken} from "./AccountsUtils";
 
 const initialState = {
   token: null,
@@ -20,16 +19,12 @@ function auth_reducer(state, action) {
       return {...state, isAuthenticated: true, isLoading: false, user: action.user};
 
     case 'LOGIN_SUCCESSFUL':
-      // localStorage.setItem("token", action.data.token);
-      setAuthToken(action.data.token);
       return {...state, ...action.data, isAuthenticated: true, isLoading: false, errors: null};
 
     case 'AUTHENTICATION_ERROR':
     case 'LOGIN_FAILED':
     case 'LOGOUT_SUCCESSFUL':
     case 'LOGOUT_FAILED':
-      // localStorage.removeItem("token");
-      setAuthToken();
       return {...state, errors: action.data, token: null, user: null,
         isAuthenticated: false, isLoading: false};
 

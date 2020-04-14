@@ -13,11 +13,11 @@ import { ReactstrapInput } from 'reactstrap-formik';
 import * as Yup from "yup";
 import {useCookies} from 'react-cookie';
 import {AuthContext} from "./AccountsReducer";
-import {loadUser} from "./AccountsUtils";
+import {loadUser, setAuthToken} from "./AccountsUtils";
 
 export const LoginForm = () => {
   const { state, dispatch } = useContext(AuthContext);
-  const [cookies, setCookie, removeCookie] = useCookies(['token']);
+  const [, setCookie, ] = useCookies(['token']);
   useEffect(() => {
     // If user is logged in, redirect to Home.
     if (state.user) {
@@ -40,9 +40,10 @@ export const LoginForm = () => {
           setTimeout(() => {
             axios.post('http://localhost:8000/login/', values)
             .then(response => {
+              setAuthToken(response.data.token);
               dispatch({type: 'LOGIN_SUCCESSFUL', data: response.data });
               loadUser({dispatch});
-              setCookie("token", response.data.token, {httpOnly:true});
+              setCookie("token", response.data.token, {path: '/'});
               navigate('/');
             })
             .catch(e => {

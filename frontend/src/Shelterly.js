@@ -15,22 +15,23 @@ function Shelterly() {
 
   // Initial state.
   const { state, dispatch } = useContext(AuthContext);
-  const [cookies, setCookie, removeCookie] = useCookies(['token']);
+  const [cookies, , removeCookie] = useCookies(['token']);
 
   useEffect(() => {
     if (cookies.token) setAuthToken(cookies.token);
 
     // If we have a token but no user, attempt to authenticate them.
     if (!state.user && cookies.token) {
+      console.log(cookies);
       loadUser({dispatch});
     }
   }, [state.user, dispatch, cookies]);
 
   // Redirect to login page if no authenticated user object is present.
   if (!state.user && !cookies.token) {
-    console.log(cookies);
     navigate('/login');
   }
+
   const routeResult = useRoutes(routes);
 
   return (

@@ -38,14 +38,17 @@ export function logoutUser({dispatch}, {removeCookie}) {
   })
   .then(function() {
     // Logout user out of frontend by removing the token.
+
+    removeCookie("token", {path: '/'});
+    setAuthToken();
     dispatch({ type: 'LOGOUT_SUCCESSFUL' });
-    removeCookie("token", {httpOnly:true});
     // Redirect to login page.
     navigate('/login');
   })
   .catch(e => {
     console.log(e);
-    removeCookie("token", {httpOnly:true});
+    removeCookie("token", {path: '/'});
+    setAuthToken();
     // Raise error.
     dispatch({type: "LOGOUT_FAILED", data: e});
   });
