@@ -11,11 +11,13 @@ import {
 } from 'reactstrap';
 import { ReactstrapInput } from 'reactstrap-formik';
 import * as Yup from "yup";
+import {useCookies} from 'react-cookie';
 import {AuthContext} from "./AccountsReducer";
 import {loadUser} from "./AccountsUtils";
 
 export const LoginForm = () => {
   const { state, dispatch } = useContext(AuthContext);
+  const [cookies, setCookie, removeCookie] = useCookies(['token']);
   useEffect(() => {
     // If user is logged in, redirect to Home.
     if (state.user) {
@@ -40,11 +42,12 @@ export const LoginForm = () => {
             .then(response => {
               dispatch({type: 'LOGIN_SUCCESSFUL', data: response.data });
               loadUser({dispatch});
+              setCookie("token", response.data.token, {httpOnly:true});
               navigate('/');
             })
             .catch(e => {
               console.log(e);
-              dispatch({type: "AUTHENTICATION_ERROR", data: e});
+              dispatch({type: "LOGIN_FAILED", data: e});
             });
             setSubmitting(false);
           }, 500);

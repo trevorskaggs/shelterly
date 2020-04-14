@@ -2,9 +2,9 @@ import React, {useReducer} from "react";
 import {setAuthToken} from "./AccountsUtils";
 
 const initialState = {
-  token: localStorage.getItem("token"),
+  token: null,
   isAuthenticated: null,
-  isLoading: true,
+  isLoading: false,
   user: null,
   errors: {},
 };
@@ -20,7 +20,7 @@ function auth_reducer(state, action) {
       return {...state, isAuthenticated: true, isLoading: false, user: action.user};
 
     case 'LOGIN_SUCCESSFUL':
-      localStorage.setItem("token", action.data.token);
+      // localStorage.setItem("token", action.data.token);
       setAuthToken(action.data.token);
       return {...state, ...action.data, isAuthenticated: true, isLoading: false, errors: null};
 
@@ -28,7 +28,7 @@ function auth_reducer(state, action) {
     case 'LOGIN_FAILED':
     case 'LOGOUT_SUCCESSFUL':
     case 'LOGOUT_FAILED':
-      localStorage.removeItem("token");
+      // localStorage.removeItem("token");
       setAuthToken();
       return {...state, errors: action.data, token: null, user: null,
         isAuthenticated: false, isLoading: false};
@@ -43,7 +43,7 @@ const AuthContext = React.createContext(initialState);
 function AuthProvider(props) {
   const [state, dispatch] = useReducer(auth_reducer, initialState);
   return (
-   <AuthContext.Provider value={{ state, dispatch }}>
+    <AuthContext.Provider value={{ state, dispatch }}>
       {props.children}
     </AuthContext.Provider>
   );

@@ -2,6 +2,7 @@ import React, {Fragment, useContext, useEffect} from "react";
 import {A, navigate, useRoutes} from "hookrouter";
 import routes from "./router";
 import PageNotFound from "./components/PageNotFound";
+import {useCookies, withCookies} from 'react-cookie';
 import {AuthContext} from "./accounts/AccountsReducer";
 import {loadUser, logoutUser, setAuthToken} from "./accounts/AccountsUtils";
 import logo from "./static/images/nvadg_logo.png"
@@ -12,19 +13,22 @@ const header_style = {
 
 function Shelterly() {
 
-  // Initial login state.
+  // Initial state.
   const { state, dispatch } = useContext(AuthContext);
-  if (localStorage.getItem('token')) setAuthToken(localStorage.getItem('token'));
+  const [cookies, setCookie, removeCookie] = useCookies(['token']);
 
   useEffect(() => {
+    if (cookies.token) setAuthToken(cookies.token);
+
     // If we have a token but no user, attempt to authenticate them.
-    if (!state.user && localStorage.getItem('token')) {
+    if (!state.user && cookies.token) {
       loadUser({dispatch});
     }
-  }, [state.user, dispatch]);
+  }, [state.user, dispatch, cookies]);
 
   // Redirect to login page if no authenticated user object is present.
-  if (!state.user && !localStorage.getItem('token')) {
+  if (!state.user && !cookies.token) {
+    console.log(cookies);
     navigate('/login');
   }
   const routeResult = useRoutes(routes);
@@ -39,10 +43,10 @@ function Shelterly() {
         {routeResult || <PageNotFound />}
       </Fragment>
       <div style={{textAlign: "right"}}>
-        {state.user ? <button className="btn btn-danger" onClick={() => logoutUser({dispatch})}>Logout {state.user.username}</button> : ''}
+        {state.user ? <button className="btn btn-danger" onClick={() => logoutUser({dispatch}, {removeCookie})}>Logout {state.user.username}</button> : ''}
       </div>
     </div>
   );
 }
 
-export default Shelterly;
+export default withCookies(Shelterly);

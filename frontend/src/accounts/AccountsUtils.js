@@ -3,8 +3,6 @@ import {navigate} from "hookrouter";
 
 // Authenticate the user with the backnd to obtain a user.
 export function loadUser({dispatch}) {
-  // Set token for axios requests.
-  if (localStorage.getItem('token')) setAuthToken(localStorage.getItem('token'));
 
   // Set user loading state.
   dispatch({ type: 'USER_LOADING' });
@@ -29,7 +27,7 @@ export function loadUser({dispatch}) {
 }
 
 // Log the user out of the system.
-export function logoutUser({dispatch}) {
+export function logoutUser({dispatch}, {removeCookie}) {
   let headers = {
     "Content-Type": "application/json",
   };
@@ -41,11 +39,13 @@ export function logoutUser({dispatch}) {
   .then(function() {
     // Logout user out of frontend by removing the token.
     dispatch({ type: 'LOGOUT_SUCCESSFUL' });
+    removeCookie("token", {httpOnly:true});
     // Redirect to login page.
     navigate('/login');
   })
   .catch(e => {
     console.log(e);
+    removeCookie("token", {httpOnly:true});
     // Raise error.
     dispatch({type: "LOGOUT_FAILED", data: e});
   });
