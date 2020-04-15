@@ -22,7 +22,6 @@ function Shelterly() {
 
     // If we have a token but no user, attempt to authenticate them.
     if (!state.user && cookies.token) {
-      console.log(cookies);
       loadUser({dispatch});
     }
   }, [state.user, dispatch, cookies]);

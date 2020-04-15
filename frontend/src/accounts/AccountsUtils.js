@@ -7,14 +7,8 @@ export function loadUser({dispatch}) {
   // Set user loading state.
   dispatch({ type: 'USER_LOADING' });
 
-  let headers = {
-    "Content-Type": "application/json",
-  };
-
   // Check backend for authentication and return user information if valid.
-  axios.get("http://localhost:8000/accounts/auth/user/", {
-    headers: headers
-  })
+  axios.get("http://localhost:3000/accounts/auth/user/")
   .then(function(results){
     // Set the user state.
     dispatch({type: 'USER_LOADED', user: results.data });
@@ -28,17 +22,11 @@ export function loadUser({dispatch}) {
 
 // Log the user out of the system.
 export function logoutUser({dispatch}, {removeCookie}) {
-  let headers = {
-    "Content-Type": "application/json",
-  };
 
   // Log the user out of Django invalidating the token.
-  axios.post("http://localhost:8000/logout/", {}, {
-    headers: headers
-  })
+  axios.post("http://localhost:3000/logout/")
   .then(function() {
     // Logout user out of frontend by removing the token.
-
     removeCookie("token", {path: '/'});
     setAuthToken();
     dispatch({ type: 'LOGOUT_SUCCESSFUL' });

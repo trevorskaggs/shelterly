@@ -13,7 +13,7 @@ import { ReactstrapInput } from 'reactstrap-formik';
 import * as Yup from "yup";
 import {useCookies} from 'react-cookie';
 import {AuthContext} from "./AccountsReducer";
-import {loadUser, setAuthToken} from "./AccountsUtils";
+import {setAuthToken} from "./AccountsUtils";
 
 export const LoginForm = () => {
   const { state, dispatch } = useContext(AuthContext);
@@ -38,12 +38,11 @@ export const LoginForm = () => {
         })}
         onSubmit={(values, { setSubmitting }) => {
           setTimeout(() => {
-            axios.post('http://localhost:8000/login/', values)
+            axios.post('http://localhost:3000/login/', values)
             .then(response => {
               setAuthToken(response.data.token);
-              dispatch({type: 'LOGIN_SUCCESSFUL', data: response.data });
-              loadUser({dispatch});
               setCookie("token", response.data.token, {path: '/'});
+              dispatch({type: 'LOGIN_SUCCESSFUL', data: response.data });
               navigate('/');
             })
             .catch(e => {
