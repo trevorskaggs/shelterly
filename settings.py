@@ -140,4 +140,5 @@ STATICFILES_DIRS = [
 # REST
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': ('knox.auth.TokenAuthentication',),
+    'USER_SERIALIZER': 'accounts.serializers.UserSerializer',
 }

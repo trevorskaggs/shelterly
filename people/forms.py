@@ -1,6 +1,6 @@
 import re
 from django import forms
-from people.models import Person, TeamMember
+from people.models import Person
 from form_utils import NAME_VALIDATOR, PHONE_VALIDATOR, ZIP_VALIDATOR
 
 class PersonForm(forms.ModelForm):
@@ -37,9 +37,3 @@ class OwnerForm(forms.ModelForm):
             'work_phone', 'cell_phone', 'best_contact', \
             'drivers_license', 'address', 'apartment', 'city', \
             'state', 'zip_code', ]
-
-class TeamMemberForm(forms.ModelForm):
-
-    class Meta:
-        model = TeamMember
-        fields = ['first_name', 'last_name', 'cell_phone', 'agency_id']

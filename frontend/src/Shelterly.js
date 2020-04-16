@@ -1,10 +1,10 @@
-import React, {Fragment, useContext, useEffect} from "react";
-import {A, navigate, useRoutes} from "hookrouter";
+import React, { Fragment, useContext, useEffect } from "react";
+import { A, navigate, useRoutes } from "hookrouter";
 import routes from "./router";
 import PageNotFound from "./components/PageNotFound";
-import {useCookies, withCookies} from 'react-cookie';
-import {AuthContext} from "./accounts/AccountsReducer";
-import {loadUser, logoutUser, setAuthToken} from "./accounts/AccountsUtils";
+import { useCookies, withCookies } from 'react-cookie';
+import { AuthContext } from "./accounts/AccountsReducer";
+import { loadUser, logoutUser, setAuthToken } from "./accounts/AccountsUtils";
 import logo from "./static/images/nvadg_logo.png"
 
 const header_style = {
@@ -17,9 +17,9 @@ function Shelterly() {
   const { state, dispatch } = useContext(AuthContext);
   const [cookies, , removeCookie] = useCookies(['token']);
 
-  useEffect(() => {
-    if (cookies.token) setAuthToken(cookies.token);
+  if (cookies.token) setAuthToken(cookies.token);
 
+  useEffect(() => {
     // If we have a token but no user, attempt to authenticate them.
     if (!state.user && cookies.token) {
       loadUser({dispatch});

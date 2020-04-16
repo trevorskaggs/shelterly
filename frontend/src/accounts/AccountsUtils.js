@@ -1,5 +1,5 @@
 import axios from "axios";
-import {navigate} from "hookrouter";
+import { navigate } from "hookrouter";
 
 // Authenticate the user with the backnd to obtain a user.
 export function loadUser({dispatch}) {
@@ -8,7 +8,7 @@ export function loadUser({dispatch}) {
   dispatch({ type: 'USER_LOADING' });
 
   // Check backend for authentication and return user information if valid.
-  axios.get("http://localhost:3000/accounts/auth/user/")
+  axios.get("http://localhost:3000/accounts/api/user/auth/")
   .then(function(results){
     // Set the user state.
     dispatch({type: 'USER_LOADED', user: results.data });

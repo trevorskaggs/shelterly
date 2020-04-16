@@ -1,9 +1,12 @@
-from django.contrib.auth import login
+from django.contrib.auth import get_user_model, login
 from knox.views import LoginView as KnoxLoginView
-from rest_framework import generics, permissions
+from rest_framework import generics, permissions, viewsets
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 
 from accounts.serializers import UserSerializer
+
+User = get_user_model()
+
 
 class LoginView(KnoxLoginView):
     permission_classes = (permissions.AllowAny,)
@@ -15,9 +18,18 @@ class LoginView(KnoxLoginView):
         login(request, user)
         return super(LoginView, self).post(request, format=None)
 
-class UserAPI(generics.RetrieveAPIView):
+
+# Provides user auth view.
+class UserAuth(generics.RetrieveAPIView):
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = UserSerializer
 
     def get_object(self):
         return self.request.user
+
+
+# Provides view for User API calls.
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    permission_classes = [permissions.IsAuthenticated, ]
+    serializer_class = UserSerializer

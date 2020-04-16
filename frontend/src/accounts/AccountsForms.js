@@ -1,6 +1,6 @@
-import React, {useContext, useEffect} from "react";
+import React, { useContext, useEffect } from "react";
 import axios from "axios";
-import {navigate} from "hookrouter";
+import { navigate } from "hookrouter";
 import { Field, Form, Formik } from 'formik';
 import {
   Button,
@@ -11,9 +11,9 @@ import {
 } from 'reactstrap';
 import { ReactstrapInput } from 'reactstrap-formik';
 import * as Yup from "yup";
-import {useCookies} from 'react-cookie';
-import {AuthContext} from "./AccountsReducer";
-import {setAuthToken} from "./AccountsUtils";
+import { useCookies } from 'react-cookie';
+import { AuthContext } from "./AccountsReducer";
+import { setAuthToken } from "./AccountsUtils";
 
 export const LoginForm = () => {
   const { state, dispatch } = useContext(AuthContext);
