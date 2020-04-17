@@ -4,9 +4,11 @@ from django.db.models import Q
 from rest_framework import permissions, viewsets
 
 from animals.models import Animal
-from people.models import Person
 from hotline.models import ServiceRequest
 from people.forms import PersonForm
+from people.models import Person
+from people.serializers import PersonSerializer
+
 
 def owner(request, pk=None):
     owner = get_object_or_404(Person, pk=pk) if pk else None
@@ -29,3 +31,9 @@ def owner_delete(request, pk):
 def owner_detail(request, pk):
     owner = get_object_or_404(Person, pk=pk)
     return render(request, 'owner_detail.html', {'owner':owner})
+
+# Provides view for Person API calls.
+class PersonViewSet(viewsets.ModelViewSet):
+    queryset = Person.objects.all()
+    permission_classes = [permissions.IsAuthenticated, ]
+    serializer_class = PersonSerializer

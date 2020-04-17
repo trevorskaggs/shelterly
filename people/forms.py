@@ -27,13 +27,13 @@ class OwnerForm(forms.ModelForm):
     first_name = forms.CharField(required=False, validators=[NAME_VALIDATOR])
     last_name = forms.CharField(required=False, validators=[NAME_VALIDATOR])
     home_phone = forms.CharField(required=False, validators=[PHONE_VALIDATOR])
-    cell_phone = forms.CharField(required=False, validators=[PHONE_VALIDATOR])
+    phone = forms.CharField(required=False, validators=[PHONE_VALIDATOR])
     city = forms.CharField(required=False, validators=[NAME_VALIDATOR])
     zip_code = forms.CharField(required=False, validators=[ZIP_VALIDATOR])
 
     class Meta:
         model = Person
-        fields = [ 'first_name', 'last_name', 'home_phone', \
+        fields = [ 'first_name', 'last_name', \
            'phone', 'best_contact', \
             'drivers_license', 'address', 'apartment', 'city', \
             'state', 'zip_code', ]
