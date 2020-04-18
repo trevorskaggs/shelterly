@@ -29,11 +29,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MEDIA_URL = '/media/'
 MEDIA_ROOT = 'media'
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
-
-
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = get_secret('SECRET_KEY')
 
@@ -41,6 +36,8 @@ SECRET_KEY = get_secret('SECRET_KEY')
 DEBUG = True
 CORS_ORIGIN_ALLOW_ALL = True
 ALLOWED_HOSTS = ['*']
+
+AUTH_USER_MODEL = 'accounts.ShelterlyUser'
 
 
 # Application definition
@@ -56,6 +53,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'crispy_forms',
     'coverage',
+    'accounts',
     'animals',
     'evac',
     'hotline',
@@ -63,6 +61,7 @@ INSTALLED_APPS = [
     'location',
     'people',
     'rest_framework',
+    'knox',
     'shelter',
 ]
 
@@ -101,7 +100,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'wsgi.application'
 
 
-
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
@@ -115,24 +113,6 @@ DATABASES = {
         'PORT': 5432,
     }
 }
-
-# Password validation
-# https://docs.djangoproject.com/en/2.1/ref/settings/#auth-password-validators
-
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
-]
 
 
 # Internationalization
@@ -156,3 +136,10 @@ STATICFILES_DIRS = [
     "static",
     "frontend/src/static"
 ]
+
+
+# REST
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': ('knox.auth.TokenAuthentication',),
+    'USER_SERIALIZER': 'accounts.serializers.UserSerializer',
+}

@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import BootstrapTable from 'react-bootstrap-table-next'
 import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
@@ -25,7 +25,7 @@ export function EvacTeamTable() {
   useEffect(() => {
     let source = axios.CancelToken.source();
     const fetchEvacTeams = async () => {
-      setData({evac_teams: data.evac_teams, isFetching: true});
+      setData({evac_teams: [], isFetching: true});
       // Fetch EvacTeam data.
       await axios.get('http://localhost:8000/evac/api/evacteam/', {
         cancelToken: source.token,
@@ -35,7 +35,7 @@ export function EvacTeamTable() {
       })
       .catch(e => {
         console.log(e);
-        setData({evac_teams: data.evac_teams, isFetching: false});
+        setData({evac_teams: [], isFetching: false});
       });
     };
     fetchEvacTeams();
