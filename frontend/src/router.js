@@ -1,7 +1,7 @@
 import React from "react";
 import Home from "./Home";
 import Evac, { NewTeam, TeamList } from "./evac/Evac";
-import Hotline, { NewOwner } from "./hotline/Hotline";
+import Hotline, { NewOwner, NewReporter } from "./hotline/Hotline";
 import { Login } from "./accounts/Accounts"
 
 const routes = {
@@ -11,6 +11,7 @@ const routes = {
   "/evac/evacteam/list": () => <TeamList />,
   "/hotline": () => <Hotline />,
   "/hotline/owner/new": () => <NewOwner />,
+  "/hotline/reporter/new": () => <NewReporter />,
   "/login": () => <Login />,
 };
 
