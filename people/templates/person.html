@@ -3,27 +3,33 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-  <h1>Reporter Information</h1>
+  <h1>{{ person_type }} Information</h1>
 <div id="app">
   <form action="" method="post">{% csrf_token %}
     <div class='section-1'>
       <div class="row">
-        <div class="col-6">
+        <div class="col-12">
           {{ form.first_name|as_crispy_field }}
         </div>
-        <div class="col-6">
+      </div>
+      <div class="row">
+        <div class="col-12">
           {{ form.last_name|as_crispy_field }}
         </div>
-    </div>
-    <div class='section-2'>
+      </div>
       <div class="row">
-        <div class="col-6">
+        <div class="col-4">
+          {{ form.phone|as_crispy_field }}
+        </div>
+        <div class="col-4">
           {{ form.best_contact|as_crispy_field }}
         </div>
-        <div class="col-6">
+        <div class="col-4">
           {{ form.drivers_license|as_crispy_field }}
         </div>
       </div>
+    </div>
+    <div class='section-2'>
       <div class="row">
         <div class="col-6">
           {{ form.address|as_crispy_field }}
@@ -47,6 +53,8 @@
       <input class='btn btn-secondary btn-lg btn-block'  type=button value="Cancel" onClick="javascript:history.go(-1);">
       <br>
       <br>
+    </div>
+    <div>
     </div>
   </form>
 </div>

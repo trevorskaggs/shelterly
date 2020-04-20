@@ -14,7 +14,7 @@ def owner(request, pk=None):
     if form.is_valid():
         form.save()
         return redirect('people:owner_detail', owner.pk)
-    return render(request, 'owner.html', {'form':form})
+    return render(request, 'person.html', {'form':form, 'person_type': 'Owner'})
 
 def owner_delete(request, pk):
     owner = get_object_or_404(Person, pk=pk)
