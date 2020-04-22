@@ -1,24 +1,22 @@
 import React, {useEffect, useState} from 'react';
 import axios from "axios";
 import { A, navigate } from "hookrouter";
-import { Field, Form, useField, Formik } from 'formik';
+import { Field, Form, Formik } from 'formik';
 import {
   Button,
   Col,
   FormGroup,
   Label,
   Row,
-  Input,
   Container,
 } from 'reactstrap';
 import { ReactstrapInput } from 'reactstrap-formik';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import * as Yup from 'yup';
 import { Switch } from 'formik-material-ui';
-import { TextInput, Checkbox } from '.././components/Form';
 
 // Form for creating new owner and reporter Person objects.
-export const PersonForm = ({id}) => {
+export const PersonForm = ({id, reporter_id, servicerequest_id}) => {
 
   const [data, setData] = useState({
     first_name: '',
@@ -35,7 +33,6 @@ export const PersonForm = ({id}) => {
 
   // Hook for initializing data.
   useEffect(() => {
-    console.log(id);
     if (id) {
       let source = axios.CancelToken.source();
       const fetchPersonData = async () => {
@@ -58,6 +55,7 @@ export const PersonForm = ({id}) => {
     <>
       <Formik
         initialValues={data}
+        enableReinitialize={true}
         validationSchema={Yup.object({
           first_name: Yup.string()
             .max(50, 'Must be 50 characters or less')
@@ -77,8 +75,15 @@ export const PersonForm = ({id}) => {
         onSubmit={(values, { setSubmitting }) => {
           setTimeout(() => {
             axios.post('http://localhost:3000/people/api/person/', values)
-            .then(function() {
-              navigate('/hotline');
+            .then(response => {
+              if (servicerequest_id) {
+                axios.put('http://localhost:3000/hotline/api/servicerequests/' + servicerequest_id + '/', {owner:response.data.id})
+                navigate('/hotline/servicerequests/' + servicerequest_id);
+              }
+              if (reporter_id) {
+                // navigate('/hotline/servicerequests/new' + this.data.id + reporter_id);
+              }
+              // navigate('/hotline/servicerequests/new' + this.data.id);
             })
             .catch(e => {
               console.log(e);
@@ -201,10 +206,12 @@ export const PersonForm = ({id}) => {
   );
 };
 
-// Form for creating new owner and reporter Person objects.
-export function ServiceRequestForm({id}) {
+// Form for creating new Service Request objects.
+export function ServiceRequestForm({id, owner_id, reporter_id}) {
 
   const [data, setData] = useState({
+    owner: owner_id,
+    reporter: reporter_id,
     directions: '',
     verbal_permission: false,
     key_provided: false,
@@ -237,6 +244,7 @@ export function ServiceRequestForm({id}) {
     <>
       <Formik
         initialValues={data}
+        enableReinitialize={true}
         validationSchema={Yup.object({
           directions: Yup.string()
             .required('Required')
@@ -250,7 +258,7 @@ export function ServiceRequestForm({id}) {
           if (id) {
             axios.put('http://localhost:3000/hotline/api/servicerequests/' + id + '/', values)
             .then(function() {
-              navigate('/hotline/servicerequest/' + id + '/');
+              navigate('/hotline/servicerequest/' + id);
             })
             .catch(e => {
               console.log(e);
@@ -258,10 +266,9 @@ export function ServiceRequestForm({id}) {
             setSubmitting(false);
           }
           else {
-            console.log(values);
             axios.post('http://localhost:3000/hotline/api/servicerequests/', values)
             .then(response => {
-              navigate('/hotline/servicerequest/' + response.data.id + '/');
+              navigate('/hotline/servicerequest/' + response.data.id);
             })
             .catch(e => {
               console.log(e);
@@ -273,8 +280,11 @@ export function ServiceRequestForm({id}) {
         <Form>
           <Container>
             <FormGroup>
+              <Field type="hidden" value={owner_id||""} name="owner" id="owner"></Field>
+              <Field type="hidden" value={reporter_id||""} name="reporter" id="reporter"></Field>
               <Field
                 type="textarea"
+                rows={5}
                 label="Directions*"
                 name="directions"
                 id="directions"

@@ -28,17 +28,17 @@ const Hotline = () => (
   </div>
 )
 
-export const NewOwner = () => (
+export const NewOwner = ({servicerequest_id, reporter_id}) => (
   <div>
     <h1 style={header_style}>Owner Information</h1>
-    <PersonForm />
+    <PersonForm servicerequest_id={servicerequest_id} reporter_id={reporter_id} />
   </div>
 )
 
 export const UpdateOwner = ({id}) => (
   <div>
     <h1 style={header_style}>Owner Information</h1>
-    <PersonForm id={id}/>
+    <PersonForm id={id} />
   </div>
 )
 
@@ -57,11 +57,11 @@ export const ServiceRequestList = () => (
   </div>
 )
 
-export const NewServiceRequest = () => (
+export const NewServiceRequest = ({owner_id, reporter_id}) => (
   <div>
     <h1 style={header_style}>Service Request Form</h1>
     <br/>
-    <ServiceRequestForm />
+    <ServiceRequestForm id={null} owner_id={owner_id} reporter_id={reporter_id} />
   </div>
 )
 
@@ -69,7 +69,7 @@ export const UpdateServiceRequest = ({id}) => (
   <div>
     <h1 style={header_style}>Edit Service Request Form</h1>
     <br/>
-    <ServiceRequestForm id={id}/>
+    <ServiceRequestForm id={id} owner_id={null} reporter_id={null} />
   </div>
 )
 
@@ -77,7 +77,7 @@ export const ServiceRequestDetail = ({id}) => (
   <div>
     <h1 style={header_style}>Service Request</h1>
     <br/>
-    <ServiceRequestView id={id}/>
+    <ServiceRequestView id={id} />
   </div>
 )
 

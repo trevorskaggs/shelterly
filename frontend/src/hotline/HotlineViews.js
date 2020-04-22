@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import axios from "axios";
-import { A, navigate } from "hookrouter";
+import { A } from "hookrouter";
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const btn_style = {
@@ -33,7 +33,7 @@ export function ServiceRequestView({id}) {
       });
     };
     fetchServiceRequestData();
-  }, []);
+  }, [id]);
 
   return (
     <>
@@ -44,6 +44,7 @@ export function ServiceRequestView({id}) {
       <p><b>Key Provided:</b> {String(data.key_provided)}</p>
       <p><b>Accessible:</b> {String(data.accessible)}</p>
       <p><b>Turn Around:</b> {String(data.turn_around)}</p>
+      <hr/>
       <div style={btn_style}>
         <A href="/animals/dog/new" style={link_style} className="btn btn-success btn-lg btn-block mb-2">ADD DOG</A>
         <A href="/animals/cat/new" style={link_style} className="btn btn-success btn-lg btn-block mb-2">ADD CAT</A>
