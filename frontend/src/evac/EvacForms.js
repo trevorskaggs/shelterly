@@ -68,7 +68,7 @@ export function EvacTeamForm() {
             .of(Yup.string())
             .required('Required'),
           callsign: Yup.string()
-            .max(50, 'Must be 20 characters or less')
+            .max(20, 'Must be 20 characters or less')
             .required('Required'),
         })}
         onSubmit={(values, { setSubmitting }) => {

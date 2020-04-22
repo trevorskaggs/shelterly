@@ -22,9 +22,9 @@ function Shelterly() {
   useEffect(() => {
     // If we have a token but no user, attempt to authenticate them.
     if (!state.user && cookies.token) {
-      loadUser({dispatch});
+      loadUser({dispatch}, {removeCookie})
     }
-  }, [state.user, dispatch, cookies]);
+  }, [state.user, dispatch, removeCookie, cookies]);
 
   // Redirect to login page if no authenticated user object is present.
   if (!state.user && !cookies.token) {

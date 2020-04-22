@@ -2,7 +2,7 @@ import axios from "axios";
 import { navigate } from "hookrouter";
 
 // Authenticate the user with the backnd to obtain a user.
-export function loadUser({dispatch}) {
+export function loadUser({dispatch}, {removeCookie}) {
 
   // Set user loading state.
   dispatch({ type: 'USER_LOADING' });
@@ -17,6 +17,8 @@ export function loadUser({dispatch}) {
     console.log(e);
     // Raise error.
     dispatch({type: "AUTHENTICATION_ERROR", data: e});
+    removeCookie("token", {path: '/'});
+    navigate('/login');
   })
 }
 

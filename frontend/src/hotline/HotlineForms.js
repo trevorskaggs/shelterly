@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import axios from "axios";
 import { A, navigate } from "hookrouter";
 import { Field, Form, useField, Formik } from 'formik';
@@ -14,9 +14,11 @@ import {
 import { ReactstrapInput } from 'reactstrap-formik';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import * as Yup from 'yup';
+import { Switch } from 'formik-material-ui';
+import { TextInput, Checkbox } from '.././components/Form';
 
 // Form for creating new owner and reporter Person objects.
-export const NewPersonForm = () => {
+export const PersonForm = () => {
   return (
     <>
       <Formik
@@ -167,7 +169,7 @@ export const NewPersonForm = () => {
             </FormGroup>
 
             <Button type="submit" className="btn-success mr-1">Save</Button>
-            <A className="btn btn-secondary" href="/evac">Cancel</A>
+            <A className="btn btn-secondary" href="/hotline">Cancel</A>
           </Container>
         </Form>
       </Formik>
@@ -176,75 +178,111 @@ export const NewPersonForm = () => {
 };
 
 // Form for creating new owner and reporter Person objects.
-export function ServiceRequestForm() {
+export function ServiceRequestForm({id}) {
+
+  const [data, setData] = useState({
+    directions: '',
+    verbal_permission: false,
+    key_provided: false,
+    accessible: false,
+    turn_around: false,
+  });
   
   // Hook for initializing data.
-  // useEffect(() => {
-    // if (this.props.service_request) {
-    //   const { pk, address} = this.props.service_request;
-    //   this.setState({ pk, address});
-    // }
-  // }, []);
-  
-    // onChange = e => {
-    //   this.setState({ [e.target.name]: e.target.value });
-    // };
-  
-    // createServiceRequest = e => {
-    //   e.preventDefault();
-    //   axios.post("http://localhost:8000/hotline/api/servicerequests/", this.state).then(() => {
-    //     this.props.resetState();
-    //     this.props.toggle();
-    //   }).catch((error) => {
-    //       console.log(error) //Logs a string: Error: Request failed with status code 404
-    //   });
-    // };
-  
-    // editServiceRequest = e => {
-    //   e.preventDefault();
-    //   axios.put("http://localhost:8000/hotline/api/servicerequests/" + this.state.pk, this.state).then(() => {
-    //     this.props.resetState();
-    //     this.props.toggle();
-    //   }).catch((error) => {
-    //       console.log(error) //Logs a string: Error: Request failed with status code 404
-    //   });
-    // };
-  
-    // defaultIfEmpty = value => {
-    //   return value === "" ? "" : value;
-    // };
-  
+  useEffect(() => {
+    console.log(id);
+    if (id) {
+      let source = axios.CancelToken.source();
+      const fetchServiceRequestData = async () => {
+        // Fetch ServiceRequest data.
+        await axios.get('http://localhost:3000/hotline/api/servicerequests/' + id + '/', {
+          cancelToken: source.token,
+        })
+        .then(response => {
+          setData(response.data);
+        })
+        .catch(e => {
+          console.log(e);
+        });
+      };
+      fetchServiceRequestData();
+    }
+  }, []);
+
+  // const handleChange = (event) => {
+  //   setState({ ...state, [event.target.name]: event.target.checked });
+  // };
+
     return (
+      <>
       <Formik
-        initialValues={{
-          directions: '',
-          verbal_permission: false,
-          key_provided: false,
-          accessible: false,
-          turn_around: false,
-        }}
+        initialValues={data}
         validationSchema={Yup.object({
           directions: Yup.string()
             .required('Required')
-            .max(50, 'Must be 20 characters or less'),
+            .max(2000, 'Must be 2000 characters or less'),
           verbal_permission: Yup.boolean(),
           key_provided: Yup.boolean(),
           accessible: Yup.boolean(),
           turn_around: Yup.boolean(),
         })}
         onSubmit={(values, { setSubmitting }) => {
-          setTimeout(() => {
-            axios.post('http://localhost:3000/evac/api/evacteam/', values)
+          if (id) {
+            axios.put('http://localhost:3000/hotline/api/servicerequests/' + id + '/', values)
             .then(function() {
-              navigate('/evac');
+              navigate('/hotline/servicerequest/' + id + '/');
             })
             .catch(e => {
               console.log(e);
             });
             setSubmitting(false);
-          }, 500);
+          }
+          else {
+            console.log(values);
+            // axios.post('http://localhost:3000/hotline/api/servicerequests/', values)
+            // .then(response => {
+            //   navigate('/hotline/servicerequest/' + response.data.id + '/');
+            // })
+            // .catch(e => {
+            //   console.log(e);
+            // });
+            setSubmitting(false);
+          }
         }}
       >
+        <Form>
+          <Container>
+            <FormGroup>
+              <Field
+                type="textarea"
+                label="Directions*"
+                name="directions"
+                id="directions"
+                component={ReactstrapInput}
+              />
+              <Row>
+              <Label htmlFor="verbal_permission">Verbal Permission</Label>
+              <Field component={Switch} name="verbal_permission" type="checkbox" color="primary" />
+              </Row>
+              <Row>
+              <Label htmlFor="key_provided">Key Provided</Label>
+              <Field component={Switch} name="key_provided" type="checkbox" color="primary" />
+              </Row>
+              <Row>
+              <Label htmlFor="accessible">Accessible</Label>
+              <Field component={Switch} name="accessible" type="checkbox" color="primary" />
+              </Row>
+              <Row>
+              <Label htmlFor="turn_around">Turn Around</Label>
+              <Field component={Switch} name="turn_around" type="checkbox" color="primary" />
+              </Row>
+            </FormGroup>
+
+            <Button type="submit" className="btn-success mr-1">Save</Button>
+            <A className="btn btn-secondary" href="/hotline">Cancel</A>
+          </Container>
+        </Form>
       </Formik>
+      </>
     );
   }

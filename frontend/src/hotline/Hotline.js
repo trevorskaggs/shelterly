@@ -1,6 +1,6 @@
 import React from "react";
 import { A } from "hookrouter";
-import { NewPersonForm} from "./HotlineForms";
+import { PersonForm, ServiceRequestForm } from "./HotlineForms";
 
 const header_style = {
   textAlign: "center",
@@ -29,22 +29,46 @@ const Hotline = () => (
 export const NewOwner = () => (
   <div>
     <h1 style={header_style}>Owner Information</h1>
-    <NewPersonForm />
+    <PersonForm />
   </div>
 )
 
 export const NewReporter = () => (
   <div>
     <h1 style={header_style}>Reporter Information</h1>
-    <NewPersonForm />
+    <PersonForm />
+  </div>
+)
+
+export const ServiceRequestList = () => (
+  <div>
+    <h1 style={header_style}>Service Requests</h1>
+    <br/>
+    {/* <ServiceRequestTable /> */}
   </div>
 )
 
 export const NewServiceRequest = () => (
   <div>
-    <h1 style={header_style}>Evac Teams</h1>
+    <h1 style={header_style}>Service Request Form</h1>
     <br/>
-    <EvacTeamTable />
+    <ServiceRequestForm />
+  </div>
+)
+
+export const UpdateServiceRequest = ({id}) => (
+  <div>
+    <h1 style={header_style}>Edit Service Request Form</h1>
+    <br/>
+    <ServiceRequestForm id={id}/>
+  </div>
+)
+
+export const ServiceRequestDetail = ({id}) => (
+  <div>
+    <h1 style={header_style}>Service Request</h1>
+    <br/>
+    id: {id}
   </div>
 )
 
