@@ -1,6 +1,8 @@
 import React from "react";
 import { A } from "hookrouter";
 import { PersonForm, ServiceRequestForm } from "./HotlineForms";
+import { ServiceRequestView } from "./HotlineViews";
+
 
 const header_style = {
   textAlign: "center",
@@ -30,6 +32,13 @@ export const NewOwner = () => (
   <div>
     <h1 style={header_style}>Owner Information</h1>
     <PersonForm />
+  </div>
+)
+
+export const UpdateOwner = ({id}) => (
+  <div>
+    <h1 style={header_style}>Owner Information</h1>
+    <PersonForm id={id}/>
   </div>
 )
 
@@ -68,7 +77,7 @@ export const ServiceRequestDetail = ({id}) => (
   <div>
     <h1 style={header_style}>Service Request</h1>
     <br/>
-    id: {id}
+    <ServiceRequestView id={id}/>
   </div>
 )
 

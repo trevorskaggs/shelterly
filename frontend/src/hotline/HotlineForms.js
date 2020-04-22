@@ -18,22 +18,46 @@ import { Switch } from 'formik-material-ui';
 import { TextInput, Checkbox } from '.././components/Form';
 
 // Form for creating new owner and reporter Person objects.
-export const PersonForm = () => {
+export const PersonForm = ({id}) => {
+
+  const [data, setData] = useState({
+    first_name: '',
+    last_name: '',
+    phone: '',
+    best_contact: '',
+    drivers_license: '',
+    address: '',
+    apartment: '',
+    city: '',
+    state: '',
+    zip_code: '',
+  });
+
+  // Hook for initializing data.
+  useEffect(() => {
+    console.log(id);
+    if (id) {
+      let source = axios.CancelToken.source();
+      const fetchPersonData = async () => {
+        // Fetch ServiceRequest data.
+        await axios.get('http://localhost:3000/people/api/person/' + id + '/', {
+          cancelToken: source.token,
+        })
+        .then(response => {
+          setData(response.data);
+        })
+        .catch(e => {
+          console.log(e);
+        });
+      };
+      fetchPersonData();
+    }
+  }, []);
+
   return (
     <>
       <Formik
-        initialValues={{
-          first_name: '',
-          last_name: '',
-          phone: '',
-          best_contact: '',
-          drivers_license: '',
-          address: '',
-          apartment: '',
-          city: '',
-          state: '',
-          zip_code: '',
-        }}
+        initialValues={data}
         validationSchema={Yup.object({
           first_name: Yup.string()
             .max(50, 'Must be 50 characters or less')
@@ -187,7 +211,7 @@ export function ServiceRequestForm({id}) {
     accessible: false,
     turn_around: false,
   });
-  
+
   // Hook for initializing data.
   useEffect(() => {
     console.log(id);
@@ -209,12 +233,8 @@ export function ServiceRequestForm({id}) {
     }
   }, []);
 
-  // const handleChange = (event) => {
-  //   setState({ ...state, [event.target.name]: event.target.checked });
-  // };
-
-    return (
-      <>
+  return (
+    <>
       <Formik
         initialValues={data}
         validationSchema={Yup.object({
@@ -239,13 +259,13 @@ export function ServiceRequestForm({id}) {
           }
           else {
             console.log(values);
-            // axios.post('http://localhost:3000/hotline/api/servicerequests/', values)
-            // .then(response => {
-            //   navigate('/hotline/servicerequest/' + response.data.id + '/');
-            // })
-            // .catch(e => {
-            //   console.log(e);
-            // });
+            axios.post('http://localhost:3000/hotline/api/servicerequests/', values)
+            .then(response => {
+              navigate('/hotline/servicerequest/' + response.data.id + '/');
+            })
+            .catch(e => {
+              console.log(e);
+            });
             setSubmitting(false);
           }
         }}
@@ -283,6 +303,6 @@ export function ServiceRequestForm({id}) {
           </Container>
         </Form>
       </Formik>
-      </>
-    );
-  }
+    </>
+  );
+}
