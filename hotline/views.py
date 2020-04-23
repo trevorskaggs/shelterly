@@ -104,3 +104,6 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
 
     queryset = ServiceRequest.objects.all()
     serializer_class = ServiceRequestSerializer
+
+    def put(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)

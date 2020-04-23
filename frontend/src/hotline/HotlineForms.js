@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import axios from "axios";
-import { A, navigate } from "hookrouter";
+import { A, navigate, useQueryParams } from "hookrouter";
 import { Field, Form, Formik } from 'formik';
 import {
   Button,
@@ -14,9 +14,13 @@ import { ReactstrapInput } from 'reactstrap-formik';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import * as Yup from 'yup';
 import { Switch } from 'formik-material-ui';
+// import { useQueryParam, NumberParam, StringParam } from 'use-query-params';
 
 // Form for creating new owner and reporter Person objects.
-export const PersonForm = ({id, reporter_id, servicerequest_id}) => {
+export const PersonForm = ({id}) => {
+
+  // Identify if this is an owner or reporter.
+  var person_type = window.location.pathname.split("/hotline/")[1].split("/new")[0];
 
   const [data, setData] = useState({
     first_name: '',
@@ -30,6 +34,18 @@ export const PersonForm = ({id, reporter_id, servicerequest_id}) => {
     state: '',
     zip_code: '',
   });
+
+  const [queryParams] = useQueryParams();
+
+  const {
+    // Use object destructuring and a default value
+    // if the param is not yet present in the URL.
+    reporter_id = '',
+    servicerequest_id = ''
+  } = queryParams;
+
+  console.log(queryParams);
+  console.log(servicerequest_id);
 
   // Hook for initializing data.
   useEffect(() => {
@@ -73,23 +89,41 @@ export const PersonForm = ({id, reporter_id, servicerequest_id}) => {
           zip_code: Yup.string(),
         })}
         onSubmit={(values, { setSubmitting }) => {
-          setTimeout(() => {
+          if (id) {
+            axios.put('http://localhost:3000/people/api/person/' + id + '/', values)
+            .then(function() {
+              navigate('/hotline/servicerequests/' + servicerequest_id);
+            })
+            .catch(e => {
+              console.log(e);
+            });
+          }
+          else {
             axios.post('http://localhost:3000/people/api/person/', values)
             .then(response => {
+              // If SR already exists, update it with owner info and redirect to the SR details.
               if (servicerequest_id) {
                 axios.put('http://localhost:3000/hotline/api/servicerequests/' + servicerequest_id + '/', {owner:response.data.id})
                 navigate('/hotline/servicerequests/' + servicerequest_id);
               }
-              if (reporter_id) {
-                // navigate('/hotline/servicerequests/new' + this.data.id + reporter_id);
+              // If we have a reporter ID, redirect to create a new SR with owner + reporter IDs.
+              else if (reporter_id) {
+                navigate('/hotline/servicerequest/new', false, {owner_id:response.data.id, reporter_id:reporter_id}, false);
               }
-              // navigate('/hotline/servicerequests/new' + this.data.id);
+              // If we're creating an owner without a reporter ID, redirect to create new SR with owner ID.
+              else if (person_type === "owner") {
+                navigate('/hotline/servicerequest/new', false, {owner_id:response.data.id}, false);
+              }
+              // Else create a reporter and redirect to create an owner.
+              else {
+                navigate('/hotline/owner/new', false, {reporter_id:response.data.id}, false);
+              }
             })
             .catch(e => {
               console.log(e);
             });
             setSubmitting(false);
-          }, 500);
+          }
         }}
       >
         <Form>
@@ -198,6 +232,7 @@ export const PersonForm = ({id, reporter_id, servicerequest_id}) => {
             </FormGroup>
 
             <Button type="submit" className="btn-success mr-1">Save</Button>
+            {reporter_id ? <A href={"/hotline/servicerequests/new?reporter_id=" + reporter_id} className="btn btn-primary mr-1">Skip Owner</A> : ""}
             <A className="btn btn-secondary" href="/hotline">Cancel</A>
           </Container>
         </Form>
@@ -207,7 +242,16 @@ export const PersonForm = ({id, reporter_id, servicerequest_id}) => {
 };
 
 // Form for creating new Service Request objects.
-export function ServiceRequestForm({id, owner_id, reporter_id}) {
+export function ServiceRequestForm({id}) {
+
+  const [queryParams] = useQueryParams();
+
+  const {
+    // Use object destructuring and a default value
+    // if the param is not yet present in the URL.
+    owner_id = '',
+    reporter_id = ''
+  } = queryParams;
 
   const [data, setData] = useState({
     owner: owner_id,
@@ -221,7 +265,6 @@ export function ServiceRequestForm({id, owner_id, reporter_id}) {
 
   // Hook for initializing data.
   useEffect(() => {
-    console.log(id);
     if (id) {
       let source = axios.CancelToken.source();
       const fetchServiceRequestData = async () => {

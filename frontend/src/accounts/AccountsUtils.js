@@ -16,8 +16,9 @@ export function loadUser({dispatch}, {removeCookie}) {
   .catch(e => {
     console.log(e);
     // Raise error.
-    dispatch({type: "AUTHENTICATION_ERROR", data: e});
     removeCookie("token", {path: '/'});
+    setAuthToken();
+    dispatch({type: "AUTHENTICATION_ERROR", data: e});
     navigate('/login');
   })
 }

@@ -37,8 +37,8 @@ export function ServiceRequestView({id}) {
 
   return (
     <>
-      {data.reporter ? <p><b>Reporter:</b> {data.reporter}</p> : ''}
-      {data.owner ? <p><b>Owner:</b> {data.owner}</p> : ''}
+      {data.reporter ? <p><b>Reporter:</b> {data.reporter.first_name} {data.reporter.last_name}</p> : ''}
+      {data.owner ? <p><b>Owner:</b> {data.owner.first_name} {data.owner.last_name}</p> : ''}
       <p><b>Directions:</b> {data.directions}</p>
       <p><b>Verbal Permission:</b> {String(data.verbal_permission)}</p>
       <p><b>Key Provided:</b> {String(data.key_provided)}</p>
@@ -51,7 +51,7 @@ export function ServiceRequestView({id}) {
         <A href="/animals/horse/new" style={link_style} className="btn btn-success btn-lg btn-block mb-2">ADD HORSE</A>
         <A href="/animals/other/new" style={link_style} className="btn btn-success btn-lg btn-block mb-2">ADD OTHER</A>
         <br/>
-        {data.owner ? <A href={"/hotline/owner/edit/" + data.owner.id} style={link_style} className="btn btn-success btn-lg btn-block mb-2">EDIT OWNER</A> : <A href="/hotline/owner/new" style={link_style} className="btn btn-success btn-lg btn-block mb-2">ADD OWNER</A>}
+        {data.owner ? <A href={"/hotline/owner/edit/" + data.owner.id +"?servicerequest_id=" + id} style={link_style} className="btn btn-success btn-lg btn-block mb-2">EDIT OWNER</A> : <A href={"/hotline/owner/new?servicerequest_id=" + id} style={link_style} className="btn btn-success btn-lg btn-block mb-2">ADD OWNER</A>}
         <A href={"/hotline/servicerequest/edit/" + data.id} style={link_style} className="btn btn-primary btn-lg btn-block mb-2">UPDATE REQUEST</A>
         <br/>
         <br/>
