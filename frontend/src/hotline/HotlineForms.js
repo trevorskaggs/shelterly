@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import axios from "axios";
-import { A, navigate, useQueryParams } from "hookrouter";
+import { Link, navigate, useQueryParams } from 'raviger';
 import { Field, Form, Formik } from 'formik';
 import {
   Button,
@@ -45,7 +45,6 @@ export const PersonForm = ({id}) => {
   } = queryParams;
 
   console.log(queryParams);
-  console.log(servicerequest_id);
 
   // Hook for initializing data.
   useEffect(() => {
@@ -92,7 +91,7 @@ export const PersonForm = ({id}) => {
           if (id) {
             axios.put('http://localhost:3000/people/api/person/' + id + '/', values)
             .then(function() {
-              navigate('/hotline/servicerequests/' + servicerequest_id);
+              navigate('/hotline/servicerequest/' + servicerequest_id);
             })
             .catch(e => {
               console.log(e);
@@ -108,15 +107,16 @@ export const PersonForm = ({id}) => {
               }
               // If we have a reporter ID, redirect to create a new SR with owner + reporter IDs.
               else if (reporter_id) {
-                navigate('/hotline/servicerequest/new', false, {owner_id:response.data.id, reporter_id:reporter_id}, false);
+                console.log(reporter_id);
+                navigate('/hotline/servicerequest/new?owner_id=' + response.data.id + '&reporter_id=' + reporter_id);
               }
               // If we're creating an owner without a reporter ID, redirect to create new SR with owner ID.
               else if (person_type === "owner") {
-                navigate('/hotline/servicerequest/new', false, {owner_id:response.data.id}, false);
+                navigate('/hotline/servicerequest/new?owner_id=' + response.data.id);
               }
               // Else create a reporter and redirect to create an owner.
               else {
-                navigate('/hotline/owner/new', false, {reporter_id:response.data.id}, false);
+                navigate('/hotline/owner/new?reporter_id=' + response.data.id);
               }
             })
             .catch(e => {
@@ -232,8 +232,8 @@ export const PersonForm = ({id}) => {
             </FormGroup>
 
             <Button type="submit" className="btn-success mr-1">Save</Button>
-            {reporter_id ? <A href={"/hotline/servicerequests/new?reporter_id=" + reporter_id} className="btn btn-primary mr-1">Skip Owner</A> : ""}
-            <A className="btn btn-secondary" href="/hotline">Cancel</A>
+            {reporter_id ? <Link href={"/hotline/servicerequest/new?reporter_id=" + reporter_id} className="btn btn-primary mr-1">Skip Owner</Link> : ""}
+            <Link className="btn btn-secondary" href="/hotline">Cancel</Link>
           </Container>
         </Form>
       </Formik>
@@ -247,15 +247,15 @@ export function ServiceRequestForm({id}) {
   const [queryParams] = useQueryParams();
 
   const {
-    // Use object destructuring and a default value
-    // if the param is not yet present in the URL.
     owner_id = '',
     reporter_id = ''
   } = queryParams;
 
+  console.log(queryParams)
+
   const [data, setData] = useState({
-    owner: owner_id,
-    reporter: reporter_id,
+    owner: parseInt(owner_id),
+    reporter: parseInt(reporter_id),
     directions: '',
     verbal_permission: false,
     key_provided: false,
@@ -298,6 +298,7 @@ export function ServiceRequestForm({id}) {
           turn_around: Yup.boolean(),
         })}
         onSubmit={(values, { setSubmitting }) => {
+          console.log(values);
           if (id) {
             axios.put('http://localhost:3000/hotline/api/servicerequests/' + id + '/', values)
             .then(function() {
@@ -352,7 +353,7 @@ export function ServiceRequestForm({id}) {
             </FormGroup>
 
             <Button type="submit" className="btn-success mr-1">Save</Button>
-            <A className="btn btn-secondary" href="/hotline">Cancel</A>
+            <Link className="btn btn-secondary" href="/hotline">Cancel</Link>
           </Container>
         </Form>
       </Formik>

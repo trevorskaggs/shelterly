@@ -1,3 +1,4 @@
+from django.core.files.storage import FileSystemStorage
 from django.db.models import Q
 from django.shortcuts import render, redirect
 from django.shortcuts import get_object_or_404
@@ -9,7 +10,9 @@ from hotline.forms import ServiceRequestForm, ServiceRequestSearchForm
 from people.models import Person
 from people.forms import PersonForm
 from rest_framework import viewsets
-from django.core.files.storage import FileSystemStorage
+from rest_framework.decorators import action
+from rest_framework.mixins import UpdateModelMixin
+
 
 # Create your views here.
 def hotline_landing(request):
@@ -100,10 +103,13 @@ def service_request_list(request, status='all'):
     data = {'service_requests':service_requests, 'status': status}
     return render(request, 'service_request_list.html', data)
 
+
 class ServiceRequestViewSet(viewsets.ModelViewSet):
 
     queryset = ServiceRequest.objects.all()
     serializer_class = ServiceRequestSerializer
 
-    def put(self, request, *args, **kwargs):
-        return self.partial_update(request, *args, **kwargs)
+    def get_serializer_class(self):
+        if self.request.method in ['POST', 'PUT']:
+            return ServiceRequestSerializer
+        return ServiceRequestSerializer
