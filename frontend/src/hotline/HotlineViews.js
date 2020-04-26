@@ -51,7 +51,7 @@ export function ServiceRequestView({id}) {
         <Link href="/animals/horse/new" style={link_style} className="btn btn-success btn-lg btn-block mb-2">ADD HORSE</Link>
         <Link href="/animals/other/new" style={link_style} className="btn btn-success btn-lg btn-block mb-2">ADD OTHER</Link>
         <br/>
-        {data.owner ? <Link href={"/hotline/owner/edit/" + data.owner.id +"?servicerequest_id=" + id} style={link_style} className="btn btn-success btn-lg btn-block mb-2">EDIT OWNER</Link> : <Link href={"/hotline/owner/new?servicerequest_id=" + id} style={link_style} className="btn btn-success btn-lg btn-block mb-2">ADD OWNER</Link>}
+        {data.owner ? <Link href={"/hotline/owner/edit/" + data.owner +"?servicerequest_id=" + id} style={link_style} className="btn btn-success btn-lg btn-block mb-2">EDIT OWNER</Link> : <Link href={"/hotline/owner/new?servicerequest_id=" + id} style={link_style} className="btn btn-success btn-lg btn-block mb-2">ADD OWNER</Link>}
         <Link href={"/hotline/servicerequest/edit/" + data.id} style={link_style} className="btn btn-primary btn-lg btn-block mb-2">UPDATE REQUEST</Link>
         <br/>
         <br/>

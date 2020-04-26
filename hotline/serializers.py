@@ -9,10 +9,14 @@ class ServiceRequestSerializer(serializers.ModelSerializer):
     owner_name = serializers.SerializerMethodField()
 
     def get_owner_name(self, obj):
-        return obj.owner.first_name + " " + obj.owner.last_name
+        if obj.owner:
+            return obj.owner.first_name + " " + obj.owner.last_name
+        return ""
 
     def get_reporter_name(self, obj):
-        return obj.reporter.first_name + " " + obj.reporter.last_name
+        if obj.reporter:
+            return obj.reporter.first_name + " " + obj.reporter.last_name
+        return ""
 
     class Meta:
         model = ServiceRequest

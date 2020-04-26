@@ -48,8 +48,8 @@ export const PersonForm = ({id}) => {
 
   // Hook for initializing data.
   useEffect(() => {
+    let source = axios.CancelToken.source();
     if (id) {
-      let source = axios.CancelToken.source();
       const fetchPersonData = async () => {
         // Fetch ServiceRequest data.
         await axios.get('http://localhost:3000/people/api/person/' + id + '/', {
@@ -64,7 +64,11 @@ export const PersonForm = ({id}) => {
       };
       fetchPersonData();
     }
-  }, []);
+    // Cleanup.
+    return () => {
+      source.cancel();
+    };
+  }, [id]);
 
   return (
     <>
@@ -102,12 +106,11 @@ export const PersonForm = ({id}) => {
             .then(response => {
               // If SR already exists, update it with owner info and redirect to the SR details.
               if (servicerequest_id) {
-                axios.put('http://localhost:3000/hotline/api/servicerequests/' + servicerequest_id + '/', {owner:response.data.id})
-                navigate('/hotline/servicerequests/' + servicerequest_id);
+                axios.patch('http://localhost:3000/hotline/api/servicerequests/' + servicerequest_id + '/', {owner:response.data.id})
+                navigate('/hotline/servicerequest/' + servicerequest_id);
               }
               // If we have a reporter ID, redirect to create a new SR with owner + reporter IDs.
               else if (reporter_id) {
-                console.log(reporter_id);
                 navigate('/hotline/servicerequest/new?owner_id=' + response.data.id + '&reporter_id=' + reporter_id);
               }
               // If we're creating an owner without a reporter ID, redirect to create new SR with owner ID.
@@ -265,8 +268,8 @@ export function ServiceRequestForm({id}) {
 
   // Hook for initializing data.
   useEffect(() => {
+    let source = axios.CancelToken.source();
     if (id) {
-      let source = axios.CancelToken.source();
       const fetchServiceRequestData = async () => {
         // Fetch ServiceRequest data.
         await axios.get('http://localhost:3000/hotline/api/servicerequests/' + id + '/', {
@@ -281,7 +284,11 @@ export function ServiceRequestForm({id}) {
       };
       fetchServiceRequestData();
     }
-  }, []);
+    // Cleanup.
+    return () => {
+      source.cancel();
+    };
+  }, [id]);
 
   return (
     <>
