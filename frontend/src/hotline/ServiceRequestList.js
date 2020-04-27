@@ -22,6 +22,7 @@ class ServiceRequestList extends Component {
             ) : (
                 service_requests.map(sr => (
                 <tr key={sr.id}>
+                  <td>{sr.id}</td>
                   <td>{sr.address}</td>
                 </tr>
               ))

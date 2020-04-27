@@ -22,14 +22,14 @@ def hotline_new_owner(request, rep_pk=None):
         if rep_pk:
             return redirect('hotline:service_request_new', owner_pk=owner.pk, rep_pk=rep_pk)
         return redirect('hotline:service_request_new', owner_pk=owner.pk)
-    return render(request, 'owner.html', {'form':form})
+    return render(request, 'person.html', {'form':form, 'person_type':'Owner'})
 
 def hotline_new_reporter(request):
     form = PersonForm(request.POST or None)
     if form.is_valid():
         reporter = form.save()
         return redirect('hotline:hotline_new_owner', rep_pk=reporter.pk)
-    return render(request, 'hotline_new_reporter.html', {'form':form})
+    return render(request, 'person.html', {'form':form, 'person_type':'Reporter'})
 
 def service_request_detail(request, service_request_pk):
     service_request = get_object_or_404(ServiceRequest, pk=service_request_pk)

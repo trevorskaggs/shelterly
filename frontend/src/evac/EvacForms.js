@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import { A, navigate } from "hookrouter";
 import { Field, Form, useField, Formik } from 'formik';
@@ -25,7 +25,7 @@ export function EvacTeamForm() {
     const fetchTeamMembers = async () => {
       setData({options: data.options, isFetching: true});
       // Fetch TeamMember data.
-      await axios.get('http://localhost:8000/people/api/teammember/', {
+      await axios.get('http://localhost:3000/accounts/api/user/', {
         cancelToken: source.token,
       })
       .then(response => {
@@ -64,14 +64,16 @@ export function EvacTeamForm() {
             .required('Required'),
         })}
         onSubmit={(values, { setSubmitting }) => {
-          axios.post('http://localhost:8000/evac/api/evacteam/', values)
-          .then(function() {
-            navigate('/evac');
-          })
-          .catch(e => {
-            console.log(e);
-          });
-          setSubmitting(false);
+          setTimeout(() => {
+            axios.post('http://localhost:3000/evac/api/evacteam/', values)
+            .then(function() {
+              navigate('/evac');
+            })
+            .catch(e => {
+              console.log(e);
+            });
+            setSubmitting(false);
+          }, 500);
         }}
       >
         <Form>
@@ -98,6 +100,7 @@ export function EvacTeamForm() {
   );
 };
 
+// No longer used but may still provide a good example for the time being.
 export const TeamMemberForm = () => {
     return (
       <>
@@ -119,14 +122,16 @@ export const TeamMemberForm = () => {
             agency_id: Yup.string(),
           })}
           onSubmit={(values, { setSubmitting }) => {
-            axios.post('http://localhost:8000/people/api/teammember/', values)
-            .then(function() {
-              navigate('/evac');
-            })
-            .catch(e => {
-              console.log(e);
-            });
-            setSubmitting(false);
+            setTimeout(() => {
+              axios.post('http://localhost:3000/accounts/api/user/', values)
+              .then(function() {
+                navigate('/evac');
+              })
+              .catch(e => {
+                console.log(e);
+              });
+              setSubmitting(false);
+            }, 500);
           }}
         >
           <Form>

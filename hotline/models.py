@@ -13,6 +13,8 @@ class ServiceRequest(Location):
     directions = models.TextField(blank=True, null=True)
     verbal_permission = models.BooleanField(blank=True, null=True)
     key_provided = models.BooleanField(blank=True, null=True)
+    accessible = models.BooleanField(blank=True, null=True)
+    turn_around = models.BooleanField(blank=True, null=True)
 
     #post_field
     forced_entry = models.BooleanField(blank=True, null=True)
