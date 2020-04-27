@@ -4,7 +4,9 @@ import Animals, { AnimalDetail, NewAnimal, UpdateAnimal } from "./animals/Animal
 import { AnimalSearch } from "./animals/AnimalTables"
 import Evac, { NewTeam, TeamList } from "./evac/Evac";
 import Hotline, { NewOwner, NewReporter, NewServiceRequest, OwnerDetail, ReporterDetail, ServiceRequestDetail, ServiceRequestList, UpdateOwner, UpdateReporter, UpdateServiceRequest } from "./hotline/Hotline";
-import { Login } from "./accounts/Accounts"
+import { Login } from "./accounts/Accounts";
+import Shelter, { NewShelter, ShelterList } from "./shelter/Shelter";
+import { ShelterDetails } from "./shelter/ShelterTables";
 
 const routes = {
   "/": () => <Home />,
@@ -27,6 +29,10 @@ const routes = {
   "/hotline/servicerequest/list": () => <ServiceRequestList />,
   "/hotline/servicerequest/new": () => <NewServiceRequest />,
   "/hotline/servicerequest/:id": ({id}) => <ServiceRequestDetail id={id}/>,
+  "/shelter": () => <Shelter />,
+  "/shelter/new": () => <NewShelter />,
+  "/shelter/list": () => <ShelterList />,
+  "/shelter/:id": ({id}) => <ShelterDetails id={id} />,
   "/login": () => <Login />,
 };
 
