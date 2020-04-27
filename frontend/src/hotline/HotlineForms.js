@@ -14,12 +14,13 @@ import { ReactstrapInput } from 'reactstrap-formik';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import * as Yup from 'yup';
 import { Switch } from 'formik-material-ui';
-// import { useQueryParam, NumberParam, StringParam } from 'use-query-params';
+import 'flatpickr/dist/themes/light.css';
+import { FlatpickrField } from '../components/Form';
 
 // Form for creating new owner and reporter Person objects.
 export const PersonForm = ({id}) => {
 
-  // Identify if this is an owner or reporter.
+  // Identify if this is an owner or reporter when creating a Person.
   var person_type = window.location.pathname.split("/hotline/")[1].split("/new")[0];
 
   const [data, setData] = useState({
@@ -43,8 +44,6 @@ export const PersonForm = ({id}) => {
     reporter_id = '',
     servicerequest_id = ''
   } = queryParams;
-
-  console.log(queryParams);
 
   // Hook for initializing data.
   useEffect(() => {
@@ -254,8 +253,6 @@ export function ServiceRequestForm({id}) {
     reporter_id = ''
   } = queryParams;
 
-  console.log(queryParams)
-
   const [data, setData] = useState({
     owner: parseInt(owner_id),
     reporter: parseInt(reporter_id),
@@ -264,6 +261,11 @@ export function ServiceRequestForm({id}) {
     key_provided: false,
     accessible: false,
     turn_around: false,
+    forced_entry: false,
+    outcome: '',
+    owner_notification_notes: '',
+    recovery_time: null,
+    owner_notification_tstamp: null,
   });
 
   // Hook for initializing data.
@@ -290,8 +292,9 @@ export function ServiceRequestForm({id}) {
     };
   }, [id]);
 
+  console.log(data);
+
   return (
-    <>
       <Formik
         initialValues={data}
         enableReinitialize={true}
@@ -303,6 +306,15 @@ export function ServiceRequestForm({id}) {
           key_provided: Yup.boolean(),
           accessible: Yup.boolean(),
           turn_around: Yup.boolean(),
+          forced_entry: Yup.boolean(),
+          outcome: Yup.string()
+            .max(2000, 'Must be 2000 characters or less'),
+          owner_notification_notes: Yup.string()
+            .max(2000, 'Must be 2000 characters or less'),
+          recovery_time: Yup.date()
+           .nullable(),
+          owner_notification_tstamp: Yup.date()
+            .nullable(),
         })}
         onSubmit={(values, { setSubmitting }) => {
           console.log(values);
@@ -328,11 +340,54 @@ export function ServiceRequestForm({id}) {
           }
         }}
       >
+        {props => (
         <Form>
           <Container>
             <FormGroup>
               <Field type="hidden" value={owner_id||""} name="owner" id="owner"></Field>
               <Field type="hidden" value={reporter_id||""} name="reporter" id="reporter"></Field>
+              <Field
+                type="textarea"
+                rows={5}
+                label="Outcome"
+                name="outcome"
+                id="outcome"
+                component={ReactstrapInput}
+              />
+              <Field
+                type="textarea"
+                rows={5}
+                label="Owner Notification Notes"
+                name="owner_notification_notes"
+                id="owner_notification_notes"
+                component={ReactstrapInput}
+              />
+              <Row>
+                <Label htmlFor="forced_entry">Forced Entry</Label>
+                <Field component={Switch} name="forced_entry" type="checkbox" color="primary" />
+              </Row>
+              <Row>
+                <FlatpickrField
+                  label="Recovery Time"
+                  name="recovery_time"
+                  id="recovery_time"
+                  onChange={(date, dateStr) => {
+                    props.setFieldValue("recovery_time", dateStr)
+                  }}
+                  value={data.recovery_time||null}
+                />
+              </Row>
+              <Row>
+                <FlatpickrField
+                  label="Owner Notified Time"
+                  name="owner_notification_tstamp"
+                  id="owner_notification_tstamp"
+                  onChange={(date, dateStr) => {
+                    props.setFieldValue("owner_notification_tstamp", dateStr)
+                  }}
+                  value={data.owner_notification_tstamp||null}
+                />
+              </Row>
               <Field
                 type="textarea"
                 rows={5}
@@ -363,7 +418,7 @@ export function ServiceRequestForm({id}) {
             <Link className="btn btn-secondary" href="/hotline">Cancel</Link>
           </Container>
         </Form>
+        )}
       </Formik>
-    </>
   );
 }

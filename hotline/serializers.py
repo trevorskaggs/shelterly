@@ -18,6 +18,14 @@ class ServiceRequestSerializer(serializers.ModelSerializer):
             return obj.reporter.first_name + " " + obj.reporter.last_name
         return ""
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        if not data['outcome']:
+            data['outcome'] = ""
+        if not data['owner_notification_notes']:
+            data['owner_notification_notes'] = ""
+        return data
+
     class Meta:
         model = ServiceRequest
         fields = '__all__'

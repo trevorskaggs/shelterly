@@ -11,13 +11,13 @@ class ServiceRequest(Location):
     #pre_field
     timestamp = models.DateTimeField(auto_now_add=True)
     directions = models.TextField(blank=True, null=True)
-    verbal_permission = models.BooleanField(blank=True, null=True)
-    key_provided = models.BooleanField(blank=True, null=True)
-    accessible = models.BooleanField(blank=True, null=True)
-    turn_around = models.BooleanField(blank=True, null=True)
+    verbal_permission = models.BooleanField(default=False)
+    key_provided = models.BooleanField(default=False)
+    accessible = models.BooleanField(default=False)
+    turn_around = models.BooleanField(default=False)
 
     #post_field
-    forced_entry = models.BooleanField(blank=True, null=True)
+    forced_entry = models.BooleanField(default=False)
     outcome = models.TextField(blank=True, null=True)
     owner_notification_notes = models.TextField(blank=True, null=True)
     recovery_time = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)

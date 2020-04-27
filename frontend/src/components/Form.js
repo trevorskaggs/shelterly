@@ -2,6 +2,19 @@ import React from 'react';
 import { useField } from 'formik';
 import { Label, Input } from 'reactstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import Flatpickr from 'react-flatpickr';
+
+const FlatpickrField = ({ label, ...props }) => {
+  // useField() returns [formik.getFieldProps(), formik.getFieldMeta()]
+  // which we can spread on <input> and also replace ErrorMessage entirely.
+  const [field] = useField(props);
+  return (
+    <>
+      <label className="mr-2" htmlFor={props.id || props.name}>{label}</label>
+      <Flatpickr data-enable-time options={{allowInput:true}} {...field} {...props} />
+    </>
+  );
+};
 
 // ...props is shorthand for "rest of the items in this array". So the 1st item is
 // assigned to label and the rest are assigned to props
@@ -39,26 +52,23 @@ const Checkbox = ({ children, ...props }) => {
 };
 
 const Select = ({ label, ...props }) => {
-  const [field, meta] = useField(props);
+  const [field] = useField(props);
   return (
     <>
       <Label htmlFor={props.id || props.name}>{label}</Label>
       <Input type="select" {...field} {...props} />
-      {/* {meta.touched && meta.error ? (
-        <StyledErrorMessage>{meta.error}</StyledErrorMessage>
-      ) : null} */}
     </>
   );
 };
 
 const MultiSelect = ({ label, ...props }) => {
-    const [field] = useField(props);
-    return (
-      <>
-        <Label htmlFor={props.id || props.name}>{label}</Label>
-        <Input type="select" {...field} {...props} multiple={true}/>
-      </>
-    );
-  };
+  const [field] = useField(props);
+  return (
+    <>
+      <Label htmlFor={props.id || props.name}>{label}</Label>
+      <Input type="select" {...field} {...props} multiple={true}/>
+    </>
+  );
+};
   
-export { TextInput, Checkbox, Select, MultiSelect };
+export { TextInput, Checkbox, Select, MultiSelect, FlatpickrField };
