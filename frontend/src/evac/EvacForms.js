@@ -14,7 +14,7 @@ import {
 import { ReactstrapInput } from 'reactstrap-formik';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import * as Yup from 'yup';
-import { MultiSelect } from '.././components/Form';
+import { MultiSelect, TextInput} from '.././components/Form';
 
 
 export function EvacTeamForm() {
@@ -82,12 +82,11 @@ export function EvacTeamForm() {
               <MultiSelect label="Evac Team Members*" name="evac_team_members" className="mb-3">
                 {data.options.map(({ value, label }, index) => <option value={value} key={value} >{label}</option>)}
               </MultiSelect>
-              <Field
+              <TextInput
                 type="text"
                 label="Callsign*"
                 name="callsign"
                 id="callsign"
-                component={ReactstrapInput}
               />
             </FormGroup>
 
@@ -139,21 +138,19 @@ export const TeamMemberForm = () => {
               <FormGroup>
                 <Row>
                   <Col xs={{size: 5, offset: 1}}>
-                    <Field
+                    <TextInput
                       type="text"
                       label="First Name*"
                       name="first_name"
                       id="first_name"
-                      component={ReactstrapInput}
                     />
                   </Col>
                   <Col xs="5">
-                    <Field
+                    <TextInput
                       type="text"
                       label="Last Name*"
                       name="last_name"
                       id="last_name"
-                      component={ReactstrapInput}
                     />
                   </Col>
                 </Row>
@@ -162,21 +159,19 @@ export const TeamMemberForm = () => {
               <FormGroup>
                 <Row>
                   <Col xs={{size: 5, offset: 1}}>
-                    <Field
+                    <TextInput
                       type="text"
                       label="Cell Phone*"
                       name="cell_phone"
                       id="cell_phone"
-                      component={ReactstrapInput}
                     />
                   </Col>
                   <Col xs="5">
-                    <Field
+                    <TextInput
                       type="text"
                       label="Agency ID"
                       name="agency_id"
                       id="agency_id"
-                      component={ReactstrapInput}
                     />
                   </Col>
                 </Row>
