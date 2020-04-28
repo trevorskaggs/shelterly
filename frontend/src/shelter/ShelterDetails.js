@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
 import { A } from "hookrouter";
+import { BuildingList } from "./Building";
 
 
 export function ShelterDetailsTable({id}) {
@@ -37,7 +38,10 @@ export function ShelterDetailsTable({id}) {
       <p><b>Description:</b> {String(data.description)}</p>
       <p><b>Image:</b> {String(data.image)}</p>
       <hr/>
-      <A className="btn btn-secondary btn-lg btn-block"  href="http://localhost:3000/shelter/list">BACK</A>
+      <h3>Shelter Buildings</h3>
+      <BuildingList s_id={data.id} />
+      <hr/>
+      <A className="btn btn-secondary btn-lg btn-block"  href="/shelter/list">BACK</A>
     </>
   );
 };

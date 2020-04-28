@@ -57,7 +57,7 @@ export function ShelterTable() {
       <p>{data.isFetching ? 'Fetching shelters...' : ''}</p>
       <br/>
       <br/>
-      <A className="btn btn-secondary btn-lg btn-block"  href="/">BACK</A>
+      <A className="btn btn-secondary btn-lg btn-block"  href="/shelter">BACK</A>
     </div>
   )
 }
