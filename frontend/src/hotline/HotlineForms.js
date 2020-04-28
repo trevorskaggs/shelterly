@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import { Link, navigate, useQueryParams } from 'raviger';
 import { Field, Form, Formik } from 'formik';
@@ -23,6 +23,7 @@ export const PersonForm = ({id}) => {
   // Identify if this is an owner or reporter when creating a Person.
   var is_owner = window.location.pathname.includes("owner")//.split("/hotline/")[1].split("/new")[0];
 
+  // Initial Person data.
   const [data, setData] = useState({
     first_name: '',
     last_name: '',
@@ -246,15 +247,17 @@ export const PersonForm = ({id}) => {
 // Form for creating new Service Request objects.
 export function ServiceRequestForm({id}) {
 
+  // Determines if this is a brand new SR to control which fields to display.
   var is_new = window.location.pathname.includes("new")
 
+  // Identify any query param data.
   const [queryParams] = useQueryParams();
-
   const {
     owner_id = '',
     reporter_id = ''
   } = queryParams;
 
+  // Initial ServiceRequest data.
   const [data, setData] = useState({
     owner: owner_id,
     reporter: reporter_id,
@@ -294,8 +297,6 @@ export function ServiceRequestForm({id}) {
     };
   }, [id]);
 
-  console.log(data);
-
   return (
       <Formik
         initialValues={data}
@@ -319,7 +320,6 @@ export function ServiceRequestForm({id}) {
             .nullable(),
         })}
         onSubmit={(values, { setSubmitting }) => {
-          console.log(values);
           if (id) {
             axios.put('http://localhost:3000/hotline/api/servicerequests/' + id + '/', values)
             .then(function() {
