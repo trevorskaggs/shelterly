@@ -8,10 +8,11 @@ const FlatpickrField = ({ label, ...props }) => {
   // useField() returns [formik.getFieldProps(), formik.getFieldMeta()]
   // which we can spread on <input> and also replace ErrorMessage entirely.
   const [field] = useField(props);
+  var options = {allowInput:true, altInput: true, altFormat: "F j, Y h:i K",}
   return (
     <>
       <label className="mr-2" htmlFor={props.id || props.name}>{label}</label>
-      <Flatpickr data-enable-time options={{allowInput:true}} {...field} {...props} />
+      <Flatpickr data-enable-time options={options} {...field} {...props} />
     </>
   );
 };

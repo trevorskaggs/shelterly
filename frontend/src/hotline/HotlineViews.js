@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 import axios from "axios";
 import { Link } from 'raviger';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import Moment from 'react-moment';
 
 const btn_style = {
   width: "50%",
@@ -39,6 +40,11 @@ export function ServiceRequestView({id}) {
     <>
       {data.reporter ? <p><b>Reporter:</b> {data.reporter_name}</p> : ''}
       {data.owner ? <p><b>Owner:</b> {data.owner_name}</p> : ''}
+      {data.outcome ? <p><b>Outcome:</b> {data.outcome}</p> : ''}
+      {data.outcome ? <p><b>Forced Entry:</b> {String(data.forced_entry)}</p> : ''}
+      {data.owner_notification_notes ? <p><b>Owner Notification Notes:</b> {data.owner_notification_notes}</p> : ''}
+      {data.recovery_time ? <p><b>Recovery Time:</b> <Moment format="LLL">{data.recovery_time}</Moment></p> : ''}
+      {data.owner_notification_tstamp ? <p><b>Owner Notified:</b> <Moment format="LLL">{data.owner_notification_tstamp}</Moment></p> : ''}
       <p><b>Directions:</b> {data.directions}</p>
       <p><b>Verbal Permission:</b> {String(data.verbal_permission)}</p>
       <p><b>Key Provided:</b> {String(data.key_provided)}</p>

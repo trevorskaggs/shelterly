@@ -21,7 +21,7 @@ import { FlatpickrField } from '../components/Form';
 export const PersonForm = ({id}) => {
 
   // Identify if this is an owner or reporter when creating a Person.
-  var person_type = window.location.pathname.split("/hotline/")[1].split("/new")[0];
+  var is_owner = window.location.pathname.includes("owner")//.split("/hotline/")[1].split("/new")[0];
 
   const [data, setData] = useState({
     first_name: '',
@@ -113,7 +113,7 @@ export const PersonForm = ({id}) => {
                 navigate('/hotline/servicerequest/new?owner_id=' + response.data.id + '&reporter_id=' + reporter_id);
               }
               // If we're creating an owner without a reporter ID, redirect to create new SR with owner ID.
-              else if (person_type === "owner") {
+              else if (is_owner) {
                 navigate('/hotline/servicerequest/new?owner_id=' + response.data.id);
               }
               // Else create a reporter and redirect to create an owner.
@@ -246,6 +246,8 @@ export const PersonForm = ({id}) => {
 // Form for creating new Service Request objects.
 export function ServiceRequestForm({id}) {
 
+  var is_new = window.location.pathname.includes("new")
+
   const [queryParams] = useQueryParams();
 
   const {
@@ -254,8 +256,8 @@ export function ServiceRequestForm({id}) {
   } = queryParams;
 
   const [data, setData] = useState({
-    owner: parseInt(owner_id),
-    reporter: parseInt(reporter_id),
+    owner: owner_id,
+    reporter: reporter_id,
     directions: '',
     verbal_permission: false,
     key_provided: false,
@@ -343,9 +345,9 @@ export function ServiceRequestForm({id}) {
         {props => (
         <Form>
           <Container>
-            <FormGroup>
-              <Field type="hidden" value={owner_id||""} name="owner" id="owner"></Field>
-              <Field type="hidden" value={reporter_id||""} name="reporter" id="reporter"></Field>
+            <Field type="hidden" value={owner_id||""} name="owner" id="owner"></Field>
+            <Field type="hidden" value={reporter_id||""} name="reporter" id="reporter"></Field>
+            <FormGroup hidden={is_new}>
               <Field
                 type="textarea"
                 rows={5}
@@ -379,7 +381,7 @@ export function ServiceRequestForm({id}) {
               </Row>
               <Row>
                 <FlatpickrField
-                  label="Owner Notified Time"
+                  label="Owner Notified"
                   name="owner_notification_tstamp"
                   id="owner_notification_tstamp"
                   onChange={(date, dateStr) => {
@@ -388,6 +390,9 @@ export function ServiceRequestForm({id}) {
                   value={data.owner_notification_tstamp||null}
                 />
               </Row>
+              <hr/>
+            </FormGroup>
+            <FormGroup>
               <Field
                 type="textarea"
                 rows={5}
@@ -397,20 +402,20 @@ export function ServiceRequestForm({id}) {
                 component={ReactstrapInput}
               />
               <Row>
-              <Label htmlFor="verbal_permission">Verbal Permission</Label>
-              <Field component={Switch} name="verbal_permission" type="checkbox" color="primary" />
+                <Label htmlFor="verbal_permission">Verbal Permission</Label>
+                <Field component={Switch} name="verbal_permission" type="checkbox" color="primary" />
               </Row>
               <Row>
-              <Label htmlFor="key_provided">Key Provided</Label>
-              <Field component={Switch} name="key_provided" type="checkbox" color="primary" />
+                <Label htmlFor="key_provided">Key Provided</Label>
+                <Field component={Switch} name="key_provided" type="checkbox" color="primary" />
               </Row>
               <Row>
-              <Label htmlFor="accessible">Accessible</Label>
-              <Field component={Switch} name="accessible" type="checkbox" color="primary" />
+                <Label htmlFor="accessible">Accessible</Label>
+                <Field component={Switch} name="accessible" type="checkbox" color="primary" />
               </Row>
               <Row>
-              <Label htmlFor="turn_around">Turn Around</Label>
-              <Field component={Switch} name="turn_around" type="checkbox" color="primary" />
+                <Label htmlFor="turn_around">Turn Around</Label>
+                <Field component={Switch} name="turn_around" type="checkbox" color="primary" />
               </Row>
             </FormGroup>
 

@@ -37,7 +37,7 @@ export const NewOwner = () => (
 
 export const UpdateOwner = ({id}) => (
   <div>
-    <h1 style={header_style}>Owner Information</h1>
+    <h1 style={header_style}>Update Owner Information</h1>
     <PersonForm id={id} />
   </div>
 )
@@ -67,7 +67,7 @@ export const NewServiceRequest = () => (
 
 export const UpdateServiceRequest = ({id}) => (
   <div>
-    <h1 style={header_style}>Edit Service Request Form</h1>
+    <h1 style={header_style}>Update Service Request Form</h1>
     <br/>
     <ServiceRequestForm id={id} />
   </div>
