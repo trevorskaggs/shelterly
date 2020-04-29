@@ -33,8 +33,8 @@ export function EvacTeamTable() {
       .then(response => {
         setData({evac_teams: response.data, isFetching: false});
       })
-      .catch(e => {
-        console.log(e);
+      .catch(error => {
+        console.log(error.response);
         setData({evac_teams: [], isFetching: false});
       });
     };

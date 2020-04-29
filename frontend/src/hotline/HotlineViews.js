@@ -29,8 +29,8 @@ export function ServiceRequestView({id}) {
         setData(response.data);
         console.log(response.data);
       })
-      .catch(e => {
-        console.log(e);
+      .catch(error => {
+        console.log(error.response);
       });
     };
     fetchServiceRequestData();

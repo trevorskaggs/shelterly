@@ -44,8 +44,8 @@ export function EvacTeamForm() {
         });
         setData({options: data.options, isFetching: false});
       })
-      .catch(e => {
-        console.log(e);
+      .catch(error => {
+        console.log(error.response);
         setData({options: data.options, isFetching: false});
       });
     };
@@ -77,8 +77,8 @@ export function EvacTeamForm() {
             .then(function() {
               navigate('/evac');
             })
-            .catch(e => {
-              console.log(e);
+            .catch(error => {
+              console.log(error.response);
             });
             setSubmitting(false);
           }, 500);
@@ -135,8 +135,8 @@ export const TeamMemberForm = () => {
               .then(function() {
                 navigate('/evac');
               })
-              .catch(e => {
-                console.log(e);
+              .catch(error => {
+                console.log(error.response);
               });
               setSubmitting(false);
             }, 500);

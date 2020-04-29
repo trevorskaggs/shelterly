@@ -20,8 +20,12 @@ import { FlatpickrField } from '../components/Form';
 // Form for creating new owner and reporter Person objects.
 export const PersonForm = ({id}) => {
 
-  // Identify if this is an owner or reporter when creating a Person.
-  var is_owner = window.location.pathname.includes("owner")//.split("/hotline/")[1].split("/new")[0];
+  // Determine if this is an owner or reporter when creating a Person.
+  var is_owner = window.location.pathname.includes("owner")
+
+  // Regex validators.
+  const phoneRegex = /^((\+\d{1,3}(-| )?\(?\d\)?(-| )?\d{1,3})|(\(?\d{2,3}\)?))(-| )?(\d{3,4})(-| )?(\d{4})(( x| ext)\d{1,5}){0,1}$/
+  const nameRegex = /^[a-z ,.'-]+$/i
 
   // Initial Person data.
   const [data, setData] = useState({
@@ -37,8 +41,8 @@ export const PersonForm = ({id}) => {
     zip_code: '',
   });
 
+  // Identify any query param data.
   const [queryParams] = useQueryParams();
-
   const {
     // Use object destructuring and a default value
     // if the param is not yet present in the URL.
@@ -58,8 +62,8 @@ export const PersonForm = ({id}) => {
         .then(response => {
           setData(response.data);
         })
-        .catch(e => {
-          console.log(e);
+        .catch(error => {
+          console.log(error.response);
         });
       };
       fetchPersonData();
@@ -78,18 +82,23 @@ export const PersonForm = ({id}) => {
         validationSchema={Yup.object({
           first_name: Yup.string()
             .max(50, 'Must be 50 characters or less')
+            .matches(nameRegex, "Name is not valid")
             .required('Required'),
           last_name: Yup.string()
             .max(50, 'Must be 50 characters or less')
+            .matches(nameRegex, "Name is not valid")
             .required('Required'),
-          phone: Yup.string(),
+          phone: Yup.string()
+            .matches(phoneRegex, "Phone number is not valid"),
           best_contact: Yup.string(),
           drivers_license: Yup.string(),
           address: Yup.string(),
-          apartment: Yup.string(),
+          apartment: Yup.string()
+            .max(10, 'Must be 10 characters or less'),
           city: Yup.string(),
           state: Yup.string(),
-          zip_code: Yup.string(),
+          zip_code: Yup.string()
+            .max(10, 'Must be 10 characters or less'),
         })}
         onSubmit={(values, { setSubmitting }) => {
           if (id) {
@@ -97,8 +106,8 @@ export const PersonForm = ({id}) => {
             .then(function() {
               navigate('/hotline/servicerequest/' + servicerequest_id);
             })
-            .catch(e => {
-              console.log(e);
+            .catch(error => {
+              console.log(error.response);
             });
           }
           else {
@@ -107,7 +116,12 @@ export const PersonForm = ({id}) => {
               // If SR already exists, update it with owner info and redirect to the SR details.
               if (servicerequest_id) {
                 axios.patch('http://localhost:3000/hotline/api/servicerequests/' + servicerequest_id + '/', {owner:response.data.id})
-                navigate('/hotline/servicerequest/' + servicerequest_id);
+                .then(function() {
+                  navigate('/hotline/servicerequest/' + servicerequest_id);
+                })
+                .catch(error => {
+                  console.log(error.response);
+                });
               }
               // If we have a reporter ID, redirect to create a new SR with owner + reporter IDs.
               else if (reporter_id) {
@@ -122,8 +136,8 @@ export const PersonForm = ({id}) => {
                 navigate('/hotline/owner/new?reporter_id=' + response.data.id);
               }
             })
-            .catch(e => {
-              console.log(e);
+            .catch(error => {
+              console.log(error.response);
             });
             setSubmitting(false);
           }
@@ -285,8 +299,8 @@ export function ServiceRequestForm({id}) {
         .then(response => {
           setData(response.data);
         })
-        .catch(e => {
-          console.log(e);
+        .catch(error => {
+          console.log(error.response);
         });
       };
       fetchServiceRequestData();
@@ -325,8 +339,8 @@ export function ServiceRequestForm({id}) {
             .then(function() {
               navigate('/hotline/servicerequest/' + id);
             })
-            .catch(e => {
-              console.log(e);
+            .catch(error => {
+              console.log(error.response);
             });
             setSubmitting(false);
           }
@@ -335,8 +349,8 @@ export function ServiceRequestForm({id}) {
             .then(response => {
               navigate('/hotline/servicerequest/' + response.data.id);
             })
-            .catch(e => {
-              console.log(e);
+            .catch(error => {
+              console.log(error.response);
             });
             setSubmitting(false);
           }
@@ -355,6 +369,7 @@ export function ServiceRequestForm({id}) {
                 name="outcome"
                 id="outcome"
                 component={ReactstrapInput}
+                value={data.outcome||""}
               />
               <Field
                 type="textarea"
@@ -363,6 +378,7 @@ export function ServiceRequestForm({id}) {
                 name="owner_notification_notes"
                 id="owner_notification_notes"
                 component={ReactstrapInput}
+                value={data.owner_notification_notes||""}
               />
               <Row>
                 <Label htmlFor="forced_entry">Forced Entry</Label>
