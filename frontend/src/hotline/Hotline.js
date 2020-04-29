@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from 'raviger';
 import { PersonForm, ServiceRequestForm } from "./HotlineForms";
+import { ServiceRequestTable } from "./HotlineTables"
 import { ServiceRequestView } from "./HotlineViews";
 
 
@@ -21,7 +22,7 @@ const Hotline = () => (
   <div style={btn_style}>
     <Link href="/hotline/owner/new" style={link_style} className="btn btn-warning btn-lg btn-block mb-2">OWNER CALLING</Link>
     <Link href="/hotline/reporter/new" style={link_style} className="btn btn-warning btn-lg btn-block mb-2">NON-OWNER CALLING</Link>
-    <Link href="/hotline/request/list/search" style={link_style} className="btn btn-warning btn-lg btn-block mb-2">SEARCH SERVICE REQUESTS</Link>
+    <Link href="/hotline/servicerequest/list" style={link_style} className="btn btn-warning btn-lg btn-block mb-2">SEARCH SERVICE REQUESTS</Link>
     <br/>
     <br/>
     <Link className="btn btn-secondary btn-lg btn-block"  href="/">BACK</Link>
@@ -53,7 +54,7 @@ export const ServiceRequestList = () => (
   <div>
     <h1 style={header_style}>Service Requests</h1>
     <br/>
-    {/* <ServiceRequestTable /> */}
+    <ServiceRequestTable />
   </div>
 )
 

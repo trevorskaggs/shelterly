@@ -44,8 +44,6 @@ export const PersonForm = ({id}) => {
   // Identify any query param data.
   const [queryParams] = useQueryParams();
   const {
-    // Use object destructuring and a default value
-    // if the param is not yet present in the URL.
     reporter_id = '',
     servicerequest_id = ''
   } = queryParams;

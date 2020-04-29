@@ -9,7 +9,7 @@ from hotline.models import ServiceRequest
 from hotline.forms import ServiceRequestForm, ServiceRequestSearchForm
 from people.models import Person
 from people.forms import PersonForm
-from rest_framework import permissions, viewsets
+from rest_framework import filters, permissions, viewsets
 from rest_framework.decorators import action
 from rest_framework.mixins import UpdateModelMixin
 
@@ -105,8 +105,9 @@ def service_request_list(request, status='all'):
 
 
 class ServiceRequestViewSet(viewsets.ModelViewSet):
-
     queryset = ServiceRequest.objects.all()
+    search_fields = ['animal__name', 'owner__first_name', 'owner__last_name', 'owner__address', 'owner__city', 'reporter__first_name', 'reporter__last_name']
+    filter_backends = (filters.SearchFilter,)
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = ServiceRequestSerializer
 
