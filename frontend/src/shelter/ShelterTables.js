@@ -62,10 +62,10 @@ export function ShelterTable() {
   )
 }
 
-export const ShelterDetails = ({id}) => (
+export const ShelterDetails = ({sid}) => (
   <div>
     <h1 style={header_style}>Shelters</h1>
     <br/>
-    <ShelterDetailsTable id={id} />
+    <ShelterDetailsTable sid={sid} />
   </div>
 )

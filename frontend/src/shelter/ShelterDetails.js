@@ -5,16 +5,16 @@ import { A } from "hookrouter";
 import { BuildingList } from "./Building";
 
 
-export function ShelterDetailsTable({id}) {
+export function ShelterDetailsTable({sid}) {
   const [data, setData] = useState({});
 
   // Hook for initializing data.
   useEffect(() => {
-    console.log('react url: ' + id)
+    console.log('shelter: ' + sid)
     let source = axios.CancelToken.source();
     const fetchShelterData = async () => {
     // Fetch Shelter Details data.
-    await axios.get('http://localhost:8000/shelter/api/shelter/' + id + '/', {
+    await axios.get('http://localhost:8000/shelter/api/shelter/' + sid + '/', {
         cancelToken: source.token,
     })
     .then(response => {
@@ -26,7 +26,7 @@ export function ShelterDetailsTable({id}) {
     });
     };
     fetchShelterData();
-  }, [id]);
+  }, [sid]);
 
   return (
     <>
@@ -39,7 +39,43 @@ export function ShelterDetailsTable({id}) {
       <p><b>Image:</b> {String(data.image)}</p>
       <hr/>
       <h3>Shelter Buildings</h3>
-      <BuildingList s_id={data.id} />
+      <BuildingList sid={data.id} />
+      <hr/>
+      <A className="btn btn-secondary btn-lg btn-block"  href="/shelter/list">BACK</A>
+    </>
+  );
+};
+
+export function BuildingDetailsTable({bid}) {
+  const [data, setData] = useState({});
+
+  // Hook for initializing data.
+  useEffect(() => {
+    console.log('builing: ' + bid)
+    let source = axios.CancelToken.source();
+    const fetchShelterData = async () => {
+    // Fetch Shelter Details data.
+    await axios.get('http://localhost:8000/shelter/api/building/' + bid, {
+        cancelToken: source.token,
+    })
+    .then(response => {
+        setData(response.data);
+        console.log(response.data);
+    })
+    .catch(e => {
+        console.log(e);
+    });
+    };
+    fetchShelterData();
+  }, [bid]);
+
+  return (
+    <>
+      <p><b>Name:</b> {String(data.name)}</p>
+      <p><b>Shelter:</b> {String(data.shelter)}</p>
+      <p><b>Description:</b> {String(data.description)}</p>
+      <hr/>
+      <h3>Building Rooms</h3>
       <hr/>
       <A className="btn btn-secondary btn-lg btn-block"  href="/shelter/list">BACK</A>
     </>

@@ -1,18 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
+import {BuildingDetailsTable} from "./ShelterDetails";
 
-export function BuildingList({s_id}) {
+const header_style = {
+  textAlign: "center",
+};
+
+export function BuildingList({sid}) {
 
     const [data, setData] = useState({buildings: [], isFetching: false});
     
     // Hook for initializing data.
     useEffect(() => {
-      console.log('shelter id: ' + s_id)
+      console.log('shelter id: ' + sid)
       let source = axios.CancelToken.source();
       const fetchShelterBuildings = async () => {
         setData({buildings: [], isFetching: true});
         // Fetch EvacTeam data.
-        await axios.get('http://localhost:8000/shelter/api/building/?shelter=' + s_id, {
+        await axios.get('http://localhost:8000/shelter/api/building/?shelter=' + sid, {
           cancelToken: source.token,
         })
         .then(response => {
@@ -28,13 +33,22 @@ export function BuildingList({s_id}) {
       return () => {
         source.cancel();
       };
-    }, [s_id]);
+    }, [sid]);
   
     return (
         <ul>
         {data.buildings.map(r => (
-            <li>{r.name}</li>
+            <li><a href={"/shelter/building/"+r.id}>{r.name}</a></li>
         ))}
       </ul>
     )
   }
+
+
+export const BuildingDetails = ({bid}) => (
+  <div>
+    <h1 style={header_style}>Shelters</h1>
+    <br/>
+    <BuildingDetailsTable bid={bid} />
+  </div>
+)

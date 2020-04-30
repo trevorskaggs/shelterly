@@ -7,6 +7,7 @@ import Hotline, { NewOwner, NewReporter, NewServiceRequest, OwnerDetail, Reporte
 import { Login } from "./accounts/Accounts";
 import Shelter, { NewShelter, ShelterList } from "./shelter/Shelter";
 import { ShelterDetails } from "./shelter/ShelterTables";
+import { BuildingDetails } from "./shelter/Building";
 
 const routes = {
   "/": () => <Home />,
@@ -32,7 +33,9 @@ const routes = {
   "/shelter": () => <Shelter />,
   "/shelter/new": () => <NewShelter />,
   "/shelter/list": () => <ShelterList />,
-  "/shelter/:id": ({id}) => <ShelterDetails id={id} />,
+  "/shelter/:sid": ({sid}) => <ShelterDetails sid={sid} />,
+  "/shelter/building/:bid": ({bid}) => <BuildingDetails bid={bid} />,
+  // "/shelter/room/:rid": ({rid}) => <RoomDetails rid={rid} />,
   "/login": () => <Login />,
 };
 

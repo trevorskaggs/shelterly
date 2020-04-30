@@ -10,6 +10,7 @@ class BuildingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Building
         fields = (
+            'id',
             'name',
             'shelter',
             'description',
@@ -19,6 +20,7 @@ class RoomSerializer(serializers.ModelSerializer):
     class Meta:
         model = Room
         fields = (
+            'id',
             'name',
             'shelter',
             'building',
