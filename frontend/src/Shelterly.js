@@ -26,7 +26,7 @@ function Shelterly() {
     }
   }, [state.user, dispatch, cookies]);
 
-  // Redirect to login page if no authenticated user object is present.
+  Redirect to login page if no authenticated user object is present.
   if (!state.user && !cookies.token) {
     navigate('/login');
   }
