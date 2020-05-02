@@ -59,7 +59,7 @@ function Table({ columns, data }) {
           return (
             <tr {...row.getRowProps()}>
               {row.cells.map(cell => {
-                return <th {...cell.getCellProps()}>{cell.render('Cell')}</th>;
+                return <tr {...cell.getCellProps()}>{cell.render('Cell')}</th>;
               })}
             </tr>
           );

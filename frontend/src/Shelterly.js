@@ -26,10 +26,10 @@ function Shelterly() {
     }
   }, [state.user, dispatch, cookies]);
 
-  // Redirect to login page if no authenticated user object is present.
-  // if (!state.user && !cookies.token) {
-  //   navigate('/login');
-  // }
+  Redirect to login page if no authenticated user object is present.
+  if (!state.user && !cookies.token) {
+    navigate('/login');
+  }
 
   const routeResult = useRoutes(routes);
 
