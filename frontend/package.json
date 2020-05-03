@@ -8,6 +8,7 @@
     "@testing-library/user-event": "^7.2.1",
     "axios": "^0.19.2",
     "bootstrap": "^4.4.1",
+    "file-loader": "^6.0.0",
     "formik": "^2.1.4",
     "hookrouter": "^1.2.3",
     "react": "^16.12.0",
@@ -24,7 +25,9 @@
     "start": "HOST=0.0.0.0 react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "dev": "webpack --mode development ./src/index.js --output /home/shelterly/frontend/static/js/main.js",
+    "wp_build": "webpack --mode production ./src/index.js --output /home/shelterly/frontend/static/js/main.js"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -41,5 +44,13 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "http://localhost:8000"
+  "proxy": "http://localhost:8000",
+  "devDependencies": {
+    "@babel/core": "^7.9.6",
+    "@babel/preset-env": "^7.9.6",
+    "@babel/preset-react": "^7.9.4",
+    "babel-loader": "^8.1.0",
+    "webpack": "^4.43.0",
+    "webpack-cli": "^3.3.11"
+  }
 }
