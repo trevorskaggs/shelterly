@@ -31,9 +31,8 @@ MEDIA_ROOT = 'media'
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-CORS_ORIGIN_ALLOW_ALL = True
-ALLOWED_HOSTS = ['*']
+DEBUG = False
+ALLOWED_HOSTS = ['725rgosijg.execute-api.us-east-2.amazonaws.com']
 
 AUTH_USER_MODEL = 'accounts.ShelterlyUser'
 
@@ -49,8 +48,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_filters',
     'corsheaders',
-    'crispy_forms',
-    'coverage',
     'accounts',
     'animals',
     'evac',
@@ -61,6 +58,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'knox',
     'shelter',
+    'frontend',
 ]
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
@@ -104,10 +102,10 @@ WSGI_APPLICATION = 'wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': os.environ.get('DATABASE_NAME'),
-        'USER': os.environ.get('DATABASE_USER'),
-        'PASSWORD': os.environ.get('DATABASE_PASSWORD'),
-        'HOST': os.environ.get('DATABASE_HOSTNAME'),
+        'NAME': os.environ.get('DATABASE_NAME', get_secret('DATABASE_NAME')),
+        'USER': os.environ.get('DATABASE_USER', get_secret('DATABASE_USER')),
+        'PASSWORD': os.environ.get('DATABASE_PASSWORD', get_secret('DATABASE_PASSWORD')),
+        'HOST': os.environ.get('DATABASE_HOST', get_secret('DATABASE_HOST')),
         'PORT': 5432,
     }
 }
@@ -133,9 +131,10 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     "/home/shelterly/frontend/static/"
 ]
-STATIC_ROOT = "static"
-
-
+STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+AWS_STORAGE_BUCKET_NAME = 'shelterly-statics'
+AWS_S3_REGION_NAME = 'us-east-2'
+AWS_AUTO_CREATE_BUCKET = True
 # REST
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': ('knox.auth.TokenAuthentication',),
