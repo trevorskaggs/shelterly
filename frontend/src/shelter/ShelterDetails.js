@@ -3,6 +3,7 @@ import axios from "axios";
 import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
 import { A } from "hookrouter";
 import { BuildingList } from "./Building";
+import { RoomList } from "./Room";
 
 
 export function ShelterDetailsTable({sid}) {
@@ -76,6 +77,41 @@ export function BuildingDetailsTable({bid}) {
       <p><b>Description:</b> {String(data.description)}</p>
       <hr/>
       <h3>Building Rooms</h3>
+      <RoomList bid={data.id} />
+      <hr/>
+      <A className="btn btn-secondary btn-lg btn-block"  href="/shelter/list">BACK</A>
+    </>
+  );
+};
+
+export function RoomDetailsTable({rid}) {
+  const [data, setData] = useState({});
+
+  // Hook for initializing data.
+  useEffect(() => {
+    console.log('builing: ' + rid)
+    let source = axios.CancelToken.source();
+    const fetchShelterData = async () => {
+    // Fetch Shelter Details data.
+    await axios.get('http://localhost:8000/shelter/api/room/' + rid, {
+        cancelToken: source.token,
+    })
+    .then(response => {
+        setData(response.data);
+        console.log(response.data);
+    })
+    .catch(e => {
+        console.log(e);
+    });
+    };
+    fetchShelterData();
+  }, [rid]);
+
+  return (
+    <>
+      <p><b>Name:</b> {String(data.name)}</p>
+      <p><b>Shelter:</b> {String(data.shelter)}</p>
+      <p><b>Description:</b> {String(data.description)}</p>
       <hr/>
       <A className="btn btn-secondary btn-lg btn-block"  href="/shelter/list">BACK</A>
     </>

@@ -8,6 +8,7 @@ import { Login } from "./accounts/Accounts";
 import Shelter, { NewShelter, ShelterList } from "./shelter/Shelter";
 import { ShelterDetails } from "./shelter/ShelterTables";
 import { BuildingDetails } from "./shelter/Building";
+import { RoomDetails } from "./shelter/Room";
 
 const routes = {
   "/": () => <Home />,
@@ -35,7 +36,7 @@ const routes = {
   "/shelter/list": () => <ShelterList />,
   "/shelter/:sid": ({sid}) => <ShelterDetails sid={sid} />,
   "/shelter/building/:bid": ({bid}) => <BuildingDetails bid={bid} />,
-  // "/shelter/room/:rid": ({rid}) => <RoomDetails rid={rid} />,
+  "/shelter/room/:rid": ({rid}) => <RoomDetails rid={rid} />,
   "/login": () => <Login />,
 };
 
