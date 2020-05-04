@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useRef } from 'react';
 import { useFormikContext, useField } from 'formik';
 import { FormFeedback, Label, Input } from 'reactstrap';
 import Select from 'react-select';
@@ -67,7 +67,7 @@ const Checkbox = ({ children, ...props }) => {
 
 const DropDown = ({ options, label, ...props }) => {
   const { setFieldValue, setFieldTouched } = useFormikContext();
-  const [field, meta] = useField(props);
+  const [field] = useField(props);
 
   function handleOptionChange(selection) {
     setFieldValue(props.name, selection);
@@ -81,9 +81,6 @@ const DropDown = ({ options, label, ...props }) => {
     <>
       <Label htmlFor={props.id || props.name}>{label}</Label>
       <Select options={options} {...field} {...props} onBlur={updateBlur} onChange={handleOptionChange}/>
-      {/* {meta.touched && meta.error ? (
-        <span>{meta.error}</span>
-      ) : null} */}
     </>
   );
 };

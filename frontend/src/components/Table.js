@@ -13,7 +13,7 @@ function Table({ columns, data }) {
   // Use the state and functions returned from useTable to build your UI
   const {
     getTableProps,
-    getTableBodyProps,
+    // getTableBodyProps,
     headerGroups,
     rows,
     prepareRow,
@@ -59,7 +59,7 @@ function Table({ columns, data }) {
           return (
             <tr {...row.getRowProps()}>
               {row.cells.map(cell => {
-                return <tr {...cell.getCellProps()}>{cell.render('Cell')}</th>;
+                return <tr {...cell.getCellProps()}>{cell.render('Cell')}</tr>;
               })}
             </tr>
           );

@@ -1,17 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import { A, navigate } from "hookrouter";
-import { Field, Form, useField, Formik } from 'formik';
+import { Form, Formik } from 'formik';
 import {
   Button,
   Col,
   FormGroup,
-  Label,
   Row,
-  Input,
   Container,
 } from 'reactstrap';
-import { ReactstrapInput } from 'reactstrap-formik';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import * as Yup from 'yup';
 import { MultiSelect, TextInput} from '.././components/Form';
