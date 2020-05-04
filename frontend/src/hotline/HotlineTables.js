@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
+import { Link, } from 'raviger';
 import Table from '../components/Table';
 import { Input } from 'reactstrap';
+import Moment from 'react-moment';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 export function ServiceRequestTable() {
@@ -9,23 +11,33 @@ export function ServiceRequestTable() {
   const columns = React.useMemo(
     () => [
       {
-        Header: 'SR',
-        accessor: 'id'
+        accessor: 'id',
+        Cell: ({ cell: { value } }) =>
+          <Link href={"/hotline/servicerequest/" + value} className="btn btn-primary">SR Details</Link>
       },
       {
-        Header: 'Owner',
-        accessor: 'owner_name'
+        accessor: 'timestamp',
+        Cell: ({ cell: { value } }) =>
+          <Moment format="LLL">{value}</Moment>
       },
       {
-        Header: 'Reporter',
-        accessor: 'reporter_name'
+        accessor: 'owner_name',
+        Cell: props =>
+        <>
+            {props.data[props.row.index].owner ? <div className='owner'>Owner: <Link href={"/people/person/" + props.data[props.row.index].owner} className="btn btn-sm btn-success mb-1">{props.data[props.row.index].owner_name}</Link></div> : ""}
+            {props.data[props.row.index].reporter ? <div className='reporter'>Reporter: <Link href={"/people/person/" + props.data[props.row.index].owner} className="btn btn-sm btn-success">{props.data[props.row.index].reporter_name}</Link></div> : ""}
+        </>
       },
       // {
-      //   Header: 'Team Members',
-      //   accessor: 'evac_team_member_names',
-      //   Cell: ({ cell: { value } }) =>
-      //     <div><a href={"/evac/evacteam/"+value+"/"}>Evac Team {value}</a></div>
-      // }
+      //   accessor: 'full_address',
+      // },
+      {
+        accessor: 'animals',
+        Cell: props =>
+        <>
+          {props.data[props.row.index].animals.map(animal => (<span key={animal.id}>{<Link href={"/animals/animal/" + animal.id} className="btn btn-sm btn-danger">{animal.name}</Link>}</span>))}
+        </>
+      },
     ],
     []
   )
@@ -81,6 +93,8 @@ export function ServiceRequestTable() {
     };
   }, []);
 
+  // const TheadComponent = props => null;
+
   return (
     <div>
         <form onSubmit={handleSubmit}>
@@ -93,7 +107,7 @@ export function ServiceRequestTable() {
           />
         <button className="btn btn-warning btn-lg btn-block mb-2">Search!</button>
         </form>
-      <Table data={data.service_requests} columns={columns}/>
+      <Table data={data.service_requests} columns={columns} />
       <p>{data.isFetching ? 'Fetching teams...' : ''}</p>
     </div>
   )

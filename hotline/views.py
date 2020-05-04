@@ -110,8 +110,3 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
     filter_backends = (filters.SearchFilter,)
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = ServiceRequestSerializer
-
-    def get_serializer_class(self):
-        if self.request.method in ['POST', 'PUT']:
-            return ServiceRequestSerializer
-        return ServiceRequestSerializer
