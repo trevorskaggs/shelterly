@@ -5,38 +5,39 @@ import Table from '../components/Table';
 import { Input } from 'reactstrap';
 import Moment from 'react-moment';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import './HotlineStyles.css'
+
+const input_style = {
+  width: "40%",
+  display: "inline-block",
+  position: 'relative',
+  top: '3px'
+}
 
 export function ServiceRequestTable() {
 
   const columns = React.useMemo(
     () => [
       {
-        accessor: 'id',
-        Cell: ({ cell: { value } }) =>
-          <Link href={"/hotline/servicerequest/" + value} className="btn btn-primary">SR Details</Link>
-      },
-      {
-        accessor: 'timestamp',
-        Cell: ({ cell: { value } }) =>
-          <Moment format="LLL">{value}</Moment>
-      },
-      {
         accessor: 'owner_name',
         Cell: props =>
-        <>
-            {props.data[props.row.index].owner ? <div className='owner'>Owner: <Link href={"/people/person/" + props.data[props.row.index].owner} className="btn btn-sm btn-success mb-1">{props.data[props.row.index].owner_name}</Link></div> : ""}
-            {props.data[props.row.index].reporter ? <div className='reporter'>Reporter: <Link href={"/people/person/" + props.data[props.row.index].owner} className="btn btn-sm btn-success">{props.data[props.row.index].reporter_name}</Link></div> : ""}
-        </>
-      },
-      // {
-      //   accessor: 'full_address',
-      // },
-      {
-        accessor: 'animals',
-        Cell: props =>
-        <>
-          {props.data[props.row.index].animals.map(animal => (<span key={animal.id}>{<Link href={"/animals/animal/" + animal.id} className="btn btn-sm btn-danger">{animal.name}</Link>}</span>))}
-        </>
+        <div className="container-fluid">
+          <div className="row">
+            <div className="col-sm-2">
+              <b>Service Request #{props.data[props.row.index].id}</b>
+              <div className="mt-1 mb-1"><Moment format="LLL">{props.data[props.row.index].timestamp}</Moment></div>
+              <Link href={"/hotline/servicerequest/" + props.data[props.row.index].id} className="btn btn-sm btn-primary">Details</Link>
+            </div>
+            <div className="col-sm">
+            <b>Contacts:</b>
+              <li className='owner'>Owner: {props.data[props.row.index].owner ? <span>{props.data[props.row.index].owner_name} (555) 555 5555<Link href={"/people/person/" + props.data[props.row.index].owner} className="btn btn-sm btn-success ml-1 mb-1">Details</Link></span> : ""}</li>
+              <li className='reporter'>Reporter: {props.data[props.row.index].reporter ? <span>{props.data[props.row.index].reporter_name} (555) 555 5555<Link href={"/people/person/" + props.data[props.row.index].owner} className="btn btn-sm btn-success ml-1">Details</Link></span> : <span>N/A</span>}</li>
+            </div>
+            <div className="col-sm">
+            <b>Animals:</b> {props.data[props.row.index].animals ? <span>{props.data[props.row.index].animals.map(animal => (<li key={animal.id}>{animal.name} ({animal.species}) - {animal.status}<Link href={"/animals/animal/" + animal.id} className="btn btn-sm btn-danger ml-1 mb-1">Details</Link></li>))}</span> : <span><li>None</li></span>}
+            </div>
+          </div>
+        </div>
       },
     ],
     []
@@ -93,10 +94,8 @@ export function ServiceRequestTable() {
     };
   }, []);
 
-  // const TheadComponent = props => null;
-
   return (
-    <div>
+    <div className="ml-2 mr-2">
         <form onSubmit={handleSubmit}>
           <Input
             type="text"
@@ -104,11 +103,13 @@ export function ServiceRequestTable() {
             name="searchTerm"
             value={searchTerm}
             onChange={handleChange}
+            style={input_style}
           />
-        <button className="btn btn-warning btn-lg btn-block mb-2">Search!</button>
+          <button className="btn btn-warning ml-1">Search!</button>
         </form>
+        <hr/>
       <Table data={data.service_requests} columns={columns} />
-      <p>{data.isFetching ? 'Fetching teams...' : ''}</p>
+      <p>{data.isFetching ? 'Fetching service requests...' : ''}</p>
     </div>
   )
 }

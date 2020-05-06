@@ -29,8 +29,8 @@ function Table({ columns, data }) {
 
   // Render the UI for your table
   return (
-    <BootstrapTable striped bordered hover size="sm" {...getTableProps()}>
-      <thead>
+    <BootstrapTable borderless hover size="sm" {...getTableProps()}>
+      <thead hidden={true}>
         {headerGroups.map(headerGroup => (
           <tr {...headerGroup.getHeaderGroupProps()}>
             {headerGroup.headers.map(column => (

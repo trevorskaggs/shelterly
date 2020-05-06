@@ -8,7 +8,7 @@ class ServiceRequestSerializer(serializers.ModelSerializer):
     reporter_name = serializers.SerializerMethodField()
     owner_name = serializers.SerializerMethodField()
     full_address = serializers.SerializerMethodField()
-    animals = AnimalSerializer(source='animal_set', many=True)
+    animals = AnimalSerializer(source='animal_set', many=True, required=False)
 
     # Custom field for the owner name.
     def get_owner_name(self, obj):

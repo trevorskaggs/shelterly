@@ -4,7 +4,7 @@ SPECIES_CHOICES = (
     ('cat', "Cat"),
     ('dog', "Dog"),
     ('horse', 'Horse'),
-    ('oth', "Other"),
+    ('other', "Other"),
 )
 
 BREED_CHOICES = (
