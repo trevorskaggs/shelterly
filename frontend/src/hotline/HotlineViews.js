@@ -40,6 +40,7 @@ export function ServiceRequestView({id}) {
     <>
       {data.reporter ? <p><b>Reporter:</b> {data.reporter_name}</p> : ''}
       {data.owner ? <p><b>Owner:</b> {data.owner_name}</p> : ''}
+      <p><b>Address:</b> {data.address ? <span>{data.full_address}</span>: 'N/A'}</p>
       {data.outcome ? <p><b>Outcome:</b> {data.outcome}</p> : ''}
       {data.outcome ? <p><b>Forced Entry:</b> {String(data.forced_entry)}</p> : ''}
       {data.owner_notification_notes ? <p><b>Owner Notification Notes:</b> {data.owner_notification_notes}</p> : ''}

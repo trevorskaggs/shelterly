@@ -8,6 +8,7 @@ class Person(Location):
     phone = models.CharField(max_length=50, blank=True, null=True)
     best_contact = models.TextField(blank=True, null=True)
     drivers_license = models.CharField(max_length=50, blank=True, null=True)
+    email = models.CharField(max_length=200, blank=True, null=True)
 
     @property
     def location_type(self):

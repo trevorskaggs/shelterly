@@ -5,7 +5,7 @@ import Select from 'react-select';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Flatpickr from 'react-flatpickr';
 
-const FlatpickrField = ({ label, ...props }) => {
+const DateTimePicker = ({ label, ...props }) => {
   // useField() returns [formik.getFieldProps(), formik.getFieldMeta()]
   // which we can spread on <input> and also replace ErrorMessage entirely.
   const [field] = useField(props);
@@ -38,7 +38,7 @@ const TextInput = ({ label, ...props }) => {
   const [field, meta] = useField(props);
   return (
     <>
-      <Label htmlFor={props.id || props.name}>{label}</Label>
+      <Label htmlFor={props.id || props.name} className="mt-3">{label}</Label>
       <Input className={meta.touched && meta.error ? "is-invalid" : null} {...field} {...props} />
       {meta.touched && meta.error ? (
         <FormFeedback>{meta.error}</FormFeedback>
@@ -79,7 +79,7 @@ const DropDown = ({ options, label, ...props }) => {
 
   return (
     <>
-      <Label htmlFor={props.id || props.name}>{label}</Label>
+      <Label htmlFor={props.id || props.name} className="mt-3">{label}</Label>
       <Select options={options} {...field} {...props} onBlur={updateBlur} onChange={handleOptionChange}/>
     </>
   );
@@ -95,4 +95,4 @@ const MultiSelect = ({ label, ...props }) => {
     );
   };
 
-export { TextInput, Checkbox, DropDown, MultiSelect, FlatpickrField };
+export { TextInput, Checkbox, DropDown, MultiSelect, DateTimePicker };

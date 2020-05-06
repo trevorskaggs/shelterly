@@ -10,12 +10,19 @@ import {
   Row,
   Container,
 } from 'reactstrap';
-import { ReactstrapInput } from 'reactstrap-formik';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import * as Yup from 'yup';
 import { Switch } from 'formik-material-ui';
 import 'flatpickr/dist/themes/light.css';
-import { FlatpickrField } from '../components/Form';
+import { DateTimePicker, DropDown, TextInput } from '../components/Form';
+
+const state_options = [{value:'AL', label:"AL"},{value:'AK', label:"AK"},{value:'AZ', label:"AZ"},{value:'AR', label:"AR"},{value:'CA', label:"CA"},{value:'CO', label:"CO"},{value:'CT', label:"CT"},
+{value:'DE', label:"DE"},{value:'FL', label:"FL"},{value:'GA', label:"GA"},{value:'HI', label:"HI"},{value:'ID', label:"ID"},{value:'IL', label:"IL"},{value:'IN', label:"IN"},
+{value:'IA', label:"IA"},{value:'KS', label:"KS"},{value:'KY', label:"KY"},{value:'LA', label:"LA"},{value:'ME', label:"ME"},{value:'MD', label:"MD"},{value:'MA', label:"MA"},
+{value:'MI', label:"MI"},{value:'MN', label:"MN"},{value:'MS', label:"MS"},{value:'MO', label:"MO"},{value:'MT', label:"MT"},{value:'NE', label:"NE"},{value:'NV', label:"NV"},
+{value:'NH', label:"NH"},{value:'NJ', label:"NJ"},{value:'NM', label:"NM"},{value:'NY', label:"NY"},{value:'NC', label:"NC"},{value:'ND', label:"ND"},{value:'OH', label:"OH"},
+{value:'OK', label:"OK"},{value:'PA', label:"PA"},{value:'RI', label:"RI"},{value:'SC', label:"SC"},{value:'SD', label:"SD"},{value:'TN', label:"TN"},{value:'TX', label:"TX"},
+{value:'VA', label:"VA"},{value:"VT", label:"VT"},{value:'WA', label:"WA"},{value:'WV', label:"WV"},{value:'WI', label:"WI"},{value:'WY', label:"WY"},]
 
 // Form for creating new owner and reporter Person objects.
 export const PersonForm = ({id}) => {
@@ -26,12 +33,14 @@ export const PersonForm = ({id}) => {
   // Regex validators.
   const phoneRegex = /^((\+\d{1,3}(-| )?\(?\d\)?(-| )?\d{1,3})|(\(?\d{2,3}\)?))(-| )?(\d{3,4})(-| )?(\d{4})(( x| ext)\d{1,5}){0,1}$/
   const nameRegex = /^[a-z ,.'-]+$/i
+  const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
 
   // Initial Person data.
   const [data, setData] = useState({
     first_name: '',
     last_name: '',
     phone: '',
+    email: '',
     best_contact: '',
     drivers_license: '',
     address: '',
@@ -88,6 +97,9 @@ export const PersonForm = ({id}) => {
             .required('Required'),
           phone: Yup.string()
             .matches(phoneRegex, "Phone number is not valid"),
+          email: Yup.string()
+            .max(200, 'Must be 200 characters or less')
+            .matches(emailRegex, "Email is not valid"),
           best_contact: Yup.string(),
           drivers_license: Yup.string(),
           address: Yup.string(),
@@ -99,8 +111,14 @@ export const PersonForm = ({id}) => {
             .max(10, 'Must be 10 characters or less'),
         })}
         onSubmit={(values, { setSubmitting }) => {
+          // Set state to just be the value.
+          const payload = {
+            ...values,
+            state: values.state.value,
+          };
+
           if (id) {
-            axios.put('http://localhost:3000/people/api/person/' + id + '/', values)
+            axios.put('http://localhost:3000/people/api/person/' + id + '/', payload)
             .then(function() {
               navigate('/hotline/servicerequest/' + servicerequest_id);
             })
@@ -109,7 +127,7 @@ export const PersonForm = ({id}) => {
             });
           }
           else {
-            axios.post('http://localhost:3000/people/api/person/', values)
+            axios.post('http://localhost:3000/people/api/person/', payload)
             .then(response => {
               // If SR already exists, update it with owner info and redirect to the SR details.
               if (servicerequest_id) {
@@ -146,101 +164,100 @@ export const PersonForm = ({id}) => {
             <FormGroup>
               <Row>
                 <Col xs="5">
-                  <Field
+                  <TextInput
                     type="text"
                     label="First Name*"
                     name="first_name"
                     id="first_name"
-                    component={ReactstrapInput}
                   />
                 </Col>
                 <Col xs="5">
-                  <Field
+                  <TextInput
                     type="text"
                     label="Last Name*"
                     name="last_name"
                     id="last_name"
-                    component={ReactstrapInput}
                   />
                 </Col>
               </Row>
               <Row>
-                <Col xs="5">
-                  <Field
+                <Col xs="3">
+                  <TextInput
                     type="text"
                     label="Phone"
                     name="phone"
                     id="phone"
-                    component={ReactstrapInput}
                   />
                 </Col>
-                <Col xs="5">
-                  <Field
+                <Col xs="7">
+                  <TextInput
+                    type="text"
+                    label="Email"
+                    name="email"
+                    id="email"
+                  />
+                </Col>
+                {/* <Col xs="3">
+                  <TextInput
                     type="text"
                     label="Drivers License"
                     name="drivers_license"
                     id="drivers_license"
-                    component={ReactstrapInput}
                   />
-                </Col>
+                </Col> */}
               </Row>
               <Row>
                 <Col xs="10">
-                  <Field
+                  <TextInput
                     type="textarea"
                     label="Best Contact"
                     name="best_contact"
                     id="best_contact"
-                    component={ReactstrapInput}
                   />
                 </Col>
               </Row>
-              <Row>
+              <Row hidden={!is_owner}>
                 <Col xs="8">
-                  <Field
+                  <TextInput
                     type="text"
                     label="Address"
                     name="address"
                     id="address"
-                    component={ReactstrapInput}
                   />
                 </Col>
                 <Col xs="2">
-                  <Field
+                  <TextInput
                     type="text"
                     label="Apartment"
                     name="apartment"
                     id="apartment"
-                    component={ReactstrapInput}
                   />
                 </Col>
               </Row>
-              <Row>
-                <Col xs="5">
-                  <Field
+              <Row hidden={!is_owner}>
+                <Col xs="6">
+                  <TextInput
                     type="text"
                     label="City"
                     name="city"
                     id="city"
-                    component={ReactstrapInput}
-                  />
-                </Col>
-                <Col xs="3">
-                  <Field
-                    type="text"
-                    label="State"
-                    name="state"
-                    id="state"
-                    component={ReactstrapInput}
                   />
                 </Col>
                 <Col xs="2">
-                  <Field
+                  <DropDown
+                    label="State"
+                    name="state"
+                    id="state"
+                    options={state_options}
+                    isClearable={true}
+                  />
+                </Col>
+                <Col xs="2">
+                  <TextInput
                     type="text"
                     label="Zip Code"
                     name="zip_code"
                     id="zip_code"
-                    component={ReactstrapInput}
                   />
                 </Col>
               </Row>
@@ -274,6 +291,11 @@ export function ServiceRequestForm({id}) {
     owner: owner_id,
     reporter: reporter_id,
     directions: '',
+    address: '',
+    apartment: '',
+    city: '',
+    state: '',
+    zip_code: '',
     verbal_permission: false,
     key_provided: false,
     accessible: false,
@@ -327,13 +349,19 @@ export function ServiceRequestForm({id}) {
           owner_notification_notes: Yup.string()
             .max(2000, 'Must be 2000 characters or less'),
           recovery_time: Yup.date()
-           .nullable(),
+            .nullable(),
           owner_notification_tstamp: Yup.date()
             .nullable(),
         })}
         onSubmit={(values, { setSubmitting }) => {
+          // Set state to just be the value.
+          const payload = {
+            ...values,
+            state: values.state.value,
+          };
+
           if (id) {
-            axios.put('http://localhost:3000/hotline/api/servicerequests/' + id + '/', values)
+            axios.put('http://localhost:3000/hotline/api/servicerequests/' + id + '/', payload)
             .then(function() {
               navigate('/hotline/servicerequest/' + id);
             })
@@ -343,7 +371,7 @@ export function ServiceRequestForm({id}) {
             setSubmitting(false);
           }
           else {
-            axios.post('http://localhost:3000/hotline/api/servicerequests/', values)
+            axios.post('http://localhost:3000/hotline/api/servicerequests/', payload)
             .then(response => {
               navigate('/hotline/servicerequest/' + response.data.id);
             })
@@ -355,88 +383,132 @@ export function ServiceRequestForm({id}) {
         }}
       >
         {props => (
-        <Form>
-          <Container>
-            <Field type="hidden" value={owner_id||""} name="owner" id="owner"></Field>
-            <Field type="hidden" value={reporter_id||""} name="reporter" id="reporter"></Field>
-            <FormGroup hidden={is_new}>
-              <Field
-                type="textarea"
-                rows={5}
-                label="Outcome"
-                name="outcome"
-                id="outcome"
-                component={ReactstrapInput}
-                value={data.outcome||""}
-              />
-              <Field
-                type="textarea"
-                rows={5}
-                label="Owner Notification Notes"
-                name="owner_notification_notes"
-                id="owner_notification_notes"
-                component={ReactstrapInput}
-                value={data.owner_notification_notes||""}
-              />
-              <Row>
-                <Label htmlFor="forced_entry">Forced Entry</Label>
-                <Field component={Switch} name="forced_entry" type="checkbox" color="primary" />
-              </Row>
-              <Row>
-                <FlatpickrField
-                  label="Recovery Time"
-                  name="recovery_time"
-                  id="recovery_time"
-                  onChange={(date, dateStr) => {
-                    props.setFieldValue("recovery_time", dateStr)
-                  }}
-                  value={data.recovery_time||null}
+          <Form>
+            <Container>
+              <Field type="hidden" value={owner_id||""} name="owner" id="owner"></Field>
+              <Field type="hidden" value={reporter_id||""} name="reporter" id="reporter"></Field>
+              <FormGroup hidden={is_new}>
+                <TextInput
+                  type="textarea"
+                  rows={5}
+                  label="Outcome"
+                  name="outcome"
+                  id="outcome"
                 />
-              </Row>
-              <Row>
-                <FlatpickrField
-                  label="Owner Notified"
-                  name="owner_notification_tstamp"
-                  id="owner_notification_tstamp"
-                  onChange={(date, dateStr) => {
-                    props.setFieldValue("owner_notification_tstamp", dateStr)
-                  }}
-                  value={data.owner_notification_tstamp||null}
+                <TextInput
+                  type="textarea"
+                  rows={5}
+                  label="Owner Notification Notes"
+                  name="owner_notification_notes"
+                  id="owner_notification_notes"
                 />
-              </Row>
-              <hr/>
-            </FormGroup>
-            <FormGroup>
-              <Field
-                type="textarea"
-                rows={5}
-                label="Directions*"
-                name="directions"
-                id="directions"
-                component={ReactstrapInput}
-              />
-              <Row>
-                <Label htmlFor="verbal_permission">Verbal Permission</Label>
-                <Field component={Switch} name="verbal_permission" type="checkbox" color="primary" />
-              </Row>
-              <Row>
-                <Label htmlFor="key_provided">Key Provided</Label>
-                <Field component={Switch} name="key_provided" type="checkbox" color="primary" />
-              </Row>
-              <Row>
-                <Label htmlFor="accessible">Accessible</Label>
-                <Field component={Switch} name="accessible" type="checkbox" color="primary" />
-              </Row>
-              <Row>
-                <Label htmlFor="turn_around">Turn Around</Label>
-                <Field component={Switch} name="turn_around" type="checkbox" color="primary" />
-              </Row>
-            </FormGroup>
+                <Row>
+                  <Label htmlFor="forced_entry" className="mt-3">Forced Entry</Label>
+                  <Field component={Switch} name="forced_entry" type="checkbox" color="primary" className="mt-3" />
+                </Row>
+                <Row>
+                  <DateTimePicker
+                    label="Recovery Time"
+                    name="recovery_time"
+                    id="recovery_time"
+                    onChange={(date, dateStr) => {
+                      props.setFieldValue("recovery_time", dateStr)
+                    }}
+                    value={data.recovery_time||null}
+                  />
+                </Row>
+                <Row>
+                  <DateTimePicker
+                    label="Owner Notified"
+                    name="owner_notification_tstamp"
+                    id="owner_notification_tstamp"
+                    onChange={(date, dateStr) => {
+                      props.setFieldValue("owner_notification_tstamp", dateStr)
+                    }}
+                    value={data.owner_notification_tstamp||null}
+                  />
+                </Row>
+                <hr/>
+              </FormGroup>
+              <FormGroup>
+                <Row>
+                  <Col xs="8">
+                    <TextInput
+                      type="text"
+                      label="Address"
+                      name="address"
+                      id="address"
+                    />
+                  </Col>
+                  <Col xs="2">
+                    <TextInput
+                      type="text"
+                      label="Apartment"
+                      name="apartment"
+                      id="apartment"
+                    />
+                  </Col>
+                </Row>
+                <Row>
+                  <Col xs="6">
+                    <TextInput
+                      type="text"
+                      label="City"
+                      name="city"
+                      id="city"
+                    />
+                  </Col>
+                  <Col xs="2">
+                    <DropDown
+                      label="State"
+                      name="state"
+                      id="state"
+                      options={state_options}
+                      isClearable={true}
+                    />
+                  </Col>
+                  <Col xs="2">
+                    <TextInput
+                      type="text"
+                      label="Zip Code"
+                      name="zip_code"
+                      id="zip_code"
+                    />
+                  </Col>
+                </Row>
+                <Row>
+                  <Col xs="10">
+                    <TextInput
+                      type="textarea"
+                      rows={5}
+                      label="Directions*"
+                      name="directions"
+                      id="directions"
+                    />
+                  </Col>
+                </Row>
+                <Row>
+                  <Label htmlFor="verbal_permission" className="mt-3">Verbal Permission</Label>
+                  <Field component={Switch} name="verbal_permission" type="checkbox" color="primary" className="mt-3" />
+                </Row>
+                <Row>
+                  <Label htmlFor="key_provided">Key Provided</Label>
+                  <Field component={Switch} name="key_provided" type="checkbox" color="primary" />
+                </Row>
+                <Row>
+                  <Label htmlFor="accessible">Accessible</Label>
+                  <Field component={Switch} name="accessible" type="checkbox" color="primary" />
+                </Row>
+                <Row>
+                  <Label htmlFor="turn_around">Turn Around</Label>
+                  <Field component={Switch} name="turn_around" type="checkbox" color="primary" />
+                </Row>
+              </FormGroup>
 
-            <Button type="submit" className="btn-success mr-1">Save</Button>
-            <Link className="btn btn-secondary" href="/hotline">Cancel</Link>
-          </Container>
-        </Form>
+              <Button type="submit" className="btn-success mr-1">Save</Button>
+              <Link className="btn btn-secondary" href="/hotline">Cancel</Link>
+            </Container>
+          </Form>
         )}
       </Formik>
   );

@@ -114,7 +114,8 @@ export const TeamMemberForm = () => {
             last_name: Yup.string()
               .max(50, 'Must be 50 characters or less')
               .required('Required'),
-            cell_phone: Yup.string().required('Required'),
+            cell_phone: Yup.string()
+              .required('Required'),
             agency_id: Yup.string(),
           })}
           onSubmit={(values, { setSubmitting }) => {
