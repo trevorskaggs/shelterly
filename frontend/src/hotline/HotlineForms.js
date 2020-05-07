@@ -360,7 +360,6 @@ export function ServiceRequestForm({id}) {
             .max(10, 'Must be 10 characters or less'),
         })}
         onSubmit={(values, { setSubmitting }) => {
-
           if (id) {
             axios.put('http://localhost:3000/hotline/api/servicerequests/' + id + '/', values)
             .then(function() {
