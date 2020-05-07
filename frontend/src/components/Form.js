@@ -2,6 +2,7 @@ import React, { useCallback, useRef } from 'react';
 import { useFormikContext, useField } from 'formik';
 import { FormFeedback, Label, Input } from 'reactstrap';
 import Select from 'react-select';
+import SimpleValue from 'react-select-simple-value';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Flatpickr from 'react-flatpickr';
 
@@ -65,12 +66,17 @@ const Checkbox = ({ children, ...props }) => {
   );
 };
 
-const DropDown = ({ options, label, ...props }) => {
+const DropDown = ({ options, value, label, ...props }) => {
   const { setFieldValue, setFieldTouched } = useFormikContext();
   const [field] = useField(props);
 
   function handleOptionChange(selection) {
-    setFieldValue(props.name, selection);
+    if (selection) {
+      setFieldValue(props.name, selection.value);
+    }
+    else {
+      setFieldValue(props.name, null);
+    }
   }
 
   function updateBlur() {
@@ -80,7 +86,9 @@ const DropDown = ({ options, label, ...props }) => {
   return (
     <>
       <Label htmlFor={props.id || props.name} className="mt-3">{label}</Label>
-      <Select options={options} {...field} {...props} onBlur={updateBlur} onChange={handleOptionChange}/>
+      <SimpleValue {...field} options={options} value={value}>
+         {simpleProps => <Select onBlur={updateBlur} onChange={handleOptionChange} {...props} {...simpleProps} />}
+      </SimpleValue>
     </>
   );
 };

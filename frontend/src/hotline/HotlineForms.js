@@ -106,19 +106,14 @@ export const PersonForm = ({id}) => {
           apartment: Yup.string()
             .max(10, 'Must be 10 characters or less'),
           city: Yup.string(),
-          state: Yup.string(),
+          state: Yup.string()
+            .nullable(),
           zip_code: Yup.string()
             .max(10, 'Must be 10 characters or less'),
         })}
         onSubmit={(values, { setSubmitting }) => {
-          // Set state to just be the value.
-          const payload = {
-            ...values,
-            state: values.state.value,
-          };
-
           if (id) {
-            axios.put('http://localhost:3000/people/api/person/' + id + '/', payload)
+            axios.put('http://localhost:3000/people/api/person/' + id + '/', values)
             .then(function() {
               navigate('/hotline/servicerequest/' + servicerequest_id);
             })
@@ -127,7 +122,7 @@ export const PersonForm = ({id}) => {
             });
           }
           else {
-            axios.post('http://localhost:3000/people/api/person/', payload)
+            axios.post('http://localhost:3000/people/api/person/', values)
             .then(response => {
               // If SR already exists, update it with owner info and redirect to the SR details.
               if (servicerequest_id) {
@@ -159,6 +154,7 @@ export const PersonForm = ({id}) => {
           }
         }}
       >
+        {props => (
         <Form>
           <Container>
             <FormGroup>
@@ -250,6 +246,7 @@ export const PersonForm = ({id}) => {
                     id="state"
                     options={state_options}
                     isClearable={true}
+                    value={props.values.state||null}
                   />
                 </Col>
                 <Col xs="2">
@@ -268,6 +265,7 @@ export const PersonForm = ({id}) => {
             <Link className="btn btn-secondary" href="/hotline">Cancel</Link>
           </Container>
         </Form>
+        )}
       </Formik>
     </>
   );
@@ -352,16 +350,19 @@ export function ServiceRequestForm({id}) {
             .nullable(),
           owner_notification_tstamp: Yup.date()
             .nullable(),
+          address: Yup.string(),
+          apartment: Yup.string()
+            .max(10, 'Must be 10 characters or less'),
+          city: Yup.string(),
+          state: Yup.string()
+            .nullable(),
+          zip_code: Yup.string()
+            .max(10, 'Must be 10 characters or less'),
         })}
         onSubmit={(values, { setSubmitting }) => {
-          // Set state to just be the value.
-          const payload = {
-            ...values,
-            state: values.state.value,
-          };
 
           if (id) {
-            axios.put('http://localhost:3000/hotline/api/servicerequests/' + id + '/', payload)
+            axios.put('http://localhost:3000/hotline/api/servicerequests/' + id + '/', values)
             .then(function() {
               navigate('/hotline/servicerequest/' + id);
             })
@@ -371,7 +372,7 @@ export function ServiceRequestForm({id}) {
             setSubmitting(false);
           }
           else {
-            axios.post('http://localhost:3000/hotline/api/servicerequests/', payload)
+            axios.post('http://localhost:3000/hotline/api/servicerequests/', values)
             .then(response => {
               navigate('/hotline/servicerequest/' + response.data.id);
             })
@@ -465,6 +466,7 @@ export function ServiceRequestForm({id}) {
                       id="state"
                       options={state_options}
                       isClearable={true}
+                      value={props.values.state||null}
                     />
                   </Col>
                   <Col xs="2">
