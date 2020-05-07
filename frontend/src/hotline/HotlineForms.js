@@ -51,6 +51,9 @@ export const PersonForm = ({id}) => {
     zip_code: '',
   });
 
+  // Whether or not to skip Owner creation.
+  const [skipOwner, setSkipOwner] = useState(false);
+
   // Identify any query param data.
   const [queryParams] = useQueryParams();
   const {
@@ -147,6 +150,10 @@ export const PersonForm = ({id}) => {
               // If we're creating an owner without a reporter ID, redirect to create new SR with owner ID.
               else if (is_owner) {
                 navigate('/hotline/servicerequest/new?owner_id=' + response.data.id);
+              }
+              // If we're creating a reporter and choose to skip owner, redirect to create new SR with reporter ID.
+              else if (skipOwner) {
+                navigate('/hotline/servicerequest/new?reporter_id=' + response.data.id);
               }
               // Else create a reporter and redirect to create an owner.
               else {
@@ -272,7 +279,7 @@ export const PersonForm = ({id}) => {
               </FormGroup>
 
               <Button type="submit" className="btn-success mr-1">Save</Button>
-              {reporter_id ? <Link href={"/hotline/servicerequest/new?reporter_id=" + reporter_id} className="btn btn-primary mr-1">Skip Owner</Link> : ""}
+              {!is_owner ? <button type="button" className="btn btn-primary mr-1" onClick={() => {setSkipOwner(true); props.submitForm()}}>Skip Owner</button> : ""}
               <Link className="btn btn-secondary" href="/hotline">Cancel</Link>
             </Container>
           </Form>
