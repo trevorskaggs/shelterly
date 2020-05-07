@@ -24,9 +24,9 @@ const DateTimePicker = ({ label, ...props }) => {
 
   return (
     <>
-      <label className="mr-2 mt-3" htmlFor={props.id || props.name}>{label}</label>
-      <Flatpickr className="w-50 mt-3" ref={datetime} data-enable-time options={options} {...field} {...props} />
-      <button type="button" className="btn btn-primary ml-1 mt-3 h-50" onClick={clearDate}>Clear</button>
+      <label className="mr-2" htmlFor={props.id || props.name}>{label}</label>
+      <Flatpickr className="w-25" ref={datetime} data-enable-time options={options} {...field} {...props} />
+      <button type="button" className="btn btn-primary ml-1" onClick={clearDate}>Clear</button>
     </>
   );
 };

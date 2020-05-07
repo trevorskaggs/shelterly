@@ -12,7 +12,8 @@ import {
 } from 'reactstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import * as Yup from 'yup';
-import { Switch } from 'formik-material-ui';
+import { Switch as FormikSwitch } from 'formik-material-ui';
+import Switch from '@material-ui/core/Switch';
 import 'flatpickr/dist/themes/light.css';
 import { DateTimePicker, DropDown, TextInput } from '../components/Form';
 
@@ -284,6 +285,12 @@ export function ServiceRequestForm({id}) {
     reporter_id = ''
   } = queryParams;
 
+  // Address checkbox state.
+  const [state, setState] = useState({checked:true});
+  function handleChange() {
+    setState({checked:!state.checked})
+  }
+
   // Initial ServiceRequest data.
   const [data, setData] = useState({
     owner: owner_id,
@@ -323,11 +330,32 @@ export function ServiceRequestForm({id}) {
       };
       fetchServiceRequestData();
     }
+    else if (owner_id) {
+      const fetchOwnerData = async () => {
+        // Fetch Owner data.
+        await axios.get('http://localhost:3000/people/api/person/' + owner_id + '/', {
+          cancelToken: source.token,
+        })
+        .then(response => {
+          // Update relevant address fields.
+          data.address = response.data.address
+          data.apartment = response.data.apartment
+          data.city = response.data.city
+          data.state = response.data.state
+          data.zip_code = response.data.zip_code
+          setData(data)
+        })
+        .catch(error => {
+          console.log(error.response);
+        });
+      };
+      fetchOwnerData();
+    }
     // Cleanup.
     return () => {
       source.cancel();
     };
-  }, [id]);
+  }, [id, owner_id]);
 
   return (
       <Formik
@@ -404,9 +432,9 @@ export function ServiceRequestForm({id}) {
                 />
                 <Row>
                   <Label htmlFor="forced_entry" className="mt-3">Forced Entry</Label>
-                  <Field component={Switch} name="forced_entry" type="checkbox" color="primary" className="mt-3" />
+                  <Field component={FormikSwitch} name="forced_entry" type="checkbox" color="primary" className="mt-3" />
                 </Row>
-                <Row>
+                <Row className="mt-3">
                   <DateTimePicker
                     label="Recovery Time"
                     name="recovery_time"
@@ -417,7 +445,7 @@ export function ServiceRequestForm({id}) {
                     value={data.recovery_time||null}
                   />
                 </Row>
-                <Row>
+                <Row className="mt-3">
                   <DateTimePicker
                     label="Owner Notified"
                     name="owner_notification_tstamp"
@@ -430,7 +458,10 @@ export function ServiceRequestForm({id}) {
                 </Row>
                 <hr/>
               </FormGroup>
+              <label>Address Same as Owner:</label>
+              <Field component={Switch} type="checkbox" color="primary" checked={state.checked} onChange={handleChange} />
               <FormGroup>
+              {!state.checked ? <div>
                 <Row>
                   <Col xs="8">
                     <TextInput
@@ -477,6 +508,7 @@ export function ServiceRequestForm({id}) {
                     />
                   </Col>
                 </Row>
+                </div> : ""}
                 <Row>
                   <Col xs="10">
                     <TextInput
@@ -490,19 +522,19 @@ export function ServiceRequestForm({id}) {
                 </Row>
                 <Row>
                   <Label htmlFor="verbal_permission" className="mt-3">Verbal Permission</Label>
-                  <Field component={Switch} name="verbal_permission" type="checkbox" color="primary" className="mt-3" />
+                  <Field component={FormikSwitch} name="verbal_permission" type="checkbox" color="primary" className="mt-3" />
                 </Row>
                 <Row>
                   <Label htmlFor="key_provided">Key Provided</Label>
-                  <Field component={Switch} name="key_provided" type="checkbox" color="primary" />
+                  <Field component={FormikSwitch} name="key_provided" type="checkbox" color="primary" />
                 </Row>
                 <Row>
                   <Label htmlFor="accessible">Accessible</Label>
-                  <Field component={Switch} name="accessible" type="checkbox" color="primary" />
+                  <Field component={FormikSwitch} name="accessible" type="checkbox" color="primary" />
                 </Row>
                 <Row>
                   <Label htmlFor="turn_around">Turn Around</Label>
-                  <Field component={Switch} name="turn_around" type="checkbox" color="primary" />
+                  <Field component={FormikSwitch} name="turn_around" type="checkbox" color="primary" />
                 </Row>
               </FormGroup>
 
