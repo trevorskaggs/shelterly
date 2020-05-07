@@ -31,7 +31,6 @@ export function ServiceRequestView({id}) {
       })
       .then(response => {
         setData(response.data);
-        console.log(response.data);
       })
       .catch(error => {
         console.log(error.response);
@@ -45,9 +44,9 @@ export function ServiceRequestView({id}) {
       <div style={card_style} className="card card-body bg-light mb-2">
         <div className="row">
           <div className="col-8">
-            {data.reporter ? <p><b>Reporter:</b> {data.reporter_name}</p> : ''}
-            {data.owner ? <p><b>Owner:</b> {data.owner_name}</p> : ''}
-            <p><b>Address:</b> {data.address ? <span>{data.full_address}</span>: 'N/A'}</p>
+            <p><b>Reporter:</b> {data.reporter ? <span>{data.reporter_name}</span> : 'N/A'}</p>
+            <p><b>Owner:</b> {data.owner ? <span>{data.owner_name}</span> : 'N/A'}</p>
+            <p><b>Address:</b> {data.address ? <span>{data.full_address}</span> : 'N/A'}</p>
             <p><b>Directions:</b> {data.directions}</p>
           </div>
           <div className="col-4">
@@ -74,7 +73,7 @@ export function ServiceRequestView({id}) {
       </div> : ""}
       <div style={card_style} className="card card-body bg-light">
         <p><b>Animals:</b></p>
-        {data.animals ? <span>{data.animals.map(animal => (<li key={animal.id}>{animal.name} ({animal.species}) - {animal.status}<Link href={"/animals/animal/" + animal.id} className="btn btn-sm btn-danger ml-1 mb-1">Details</Link></li>))}</span> : <span><li>None</li></span>}
+        {data.animals && data.animals.length ? <span>{data.animals.map(animal => (<li key={animal.id}>{animal.name} ({animal.species}) - {animal.status}<Link href={"/animals/animal/" + animal.id} className="btn btn-sm btn-danger ml-1 mb-1">Details</Link></li>))}</span> : <span><li>None</li></span>}
       </div>
       <hr/>
       <div style={btn_style}>

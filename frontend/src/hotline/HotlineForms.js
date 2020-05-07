@@ -43,7 +43,7 @@ export const PersonForm = ({id}) => {
     phone: '',
     email: '',
     best_contact: '',
-    drivers_license: '',
+    // drivers_license: '',
     address: '',
     apartment: '',
     city: '',
@@ -100,16 +100,21 @@ export const PersonForm = ({id}) => {
             .matches(phoneRegex, "Phone number is not valid"),
           email: Yup.string()
             .max(200, 'Must be 200 characters or less')
+            .nullable()
             .matches(emailRegex, "Email is not valid"),
           best_contact: Yup.string(),
-          drivers_license: Yup.string(),
-          address: Yup.string(),
+          // drivers_license: Yup.string(),
+          address: Yup.string()
+            .nullable(),
           apartment: Yup.string()
+            .nullable()
             .max(10, 'Must be 10 characters or less'),
-          city: Yup.string(),
+          city: Yup.string()
+            .nullable(),
           state: Yup.string()
             .nullable(),
           zip_code: Yup.string()
+            .nullable()
             .max(10, 'Must be 10 characters or less'),
         })}
         onSubmit={(values, { setSubmitting }) => {
@@ -156,116 +161,121 @@ export const PersonForm = ({id}) => {
         }}
       >
         {props => (
-        <Form>
-          <Container>
-            <FormGroup>
-              <Row>
-                <Col xs="5">
-                  <TextInput
-                    type="text"
-                    label="First Name*"
-                    name="first_name"
-                    id="first_name"
-                  />
-                </Col>
-                <Col xs="5">
-                  <TextInput
-                    type="text"
-                    label="Last Name*"
-                    name="last_name"
-                    id="last_name"
-                  />
-                </Col>
-              </Row>
-              <Row>
-                <Col xs="3">
-                  <TextInput
-                    type="text"
-                    label="Phone"
-                    name="phone"
-                    id="phone"
-                  />
-                </Col>
-                <Col xs="7">
-                  <TextInput
-                    type="text"
-                    label="Email"
-                    name="email"
-                    id="email"
-                  />
-                </Col>
-                {/* <Col xs="3">
-                  <TextInput
-                    type="text"
-                    label="Drivers License"
-                    name="drivers_license"
-                    id="drivers_license"
-                  />
-                </Col> */}
-              </Row>
-              <Row>
-                <Col xs="10">
-                  <TextInput
-                    type="textarea"
-                    label="Best Contact"
-                    name="best_contact"
-                    id="best_contact"
-                  />
-                </Col>
-              </Row>
-              <Row hidden={!is_owner}>
-                <Col xs="8">
-                  <TextInput
-                    type="text"
-                    label="Address"
-                    name="address"
-                    id="address"
-                  />
-                </Col>
-                <Col xs="2">
-                  <TextInput
-                    type="text"
-                    label="Apartment"
-                    name="apartment"
-                    id="apartment"
-                  />
-                </Col>
-              </Row>
-              <Row hidden={!is_owner}>
-                <Col xs="6">
-                  <TextInput
-                    type="text"
-                    label="City"
-                    name="city"
-                    id="city"
-                  />
-                </Col>
-                <Col xs="2">
-                  <DropDown
-                    label="State"
-                    name="state"
-                    id="state"
-                    options={state_options}
-                    isClearable={true}
-                    value={props.values.state||null}
-                  />
-                </Col>
-                <Col xs="2">
-                  <TextInput
-                    type="text"
-                    label="Zip Code"
-                    name="zip_code"
-                    id="zip_code"
-                  />
-                </Col>
-              </Row>
-            </FormGroup>
+          <Form>
+            <Container>
+              <FormGroup>
+                <Row>
+                  <Col xs="5">
+                    <TextInput
+                      type="text"
+                      label="First Name*"
+                      name="first_name"
+                      id="first_name"
+                    />
+                  </Col>
+                  <Col xs="5">
+                    <TextInput
+                      type="text"
+                      label="Last Name*"
+                      name="last_name"
+                      id="last_name"
+                    />
+                  </Col>
+                </Row>
+                <Row>
+                  <Col xs="3">
+                    <TextInput
+                      type="text"
+                      label="Phone"
+                      name="phone"
+                      id="phone"
+                    />
+                  </Col>
+                  <Col xs="7">
+                    <TextInput
+                      type="text"
+                      label="Email"
+                      name="email"
+                      id="email"
+                      value={data.email||""}
+                    />
+                  </Col>
+                  {/* <Col xs="3">
+                    <TextInput
+                      type="text"
+                      label="Drivers License"
+                      name="drivers_license"
+                      id="drivers_license"
+                    />
+                  </Col> */}
+                </Row>
+                <Row>
+                  <Col xs="10">
+                    <TextInput
+                      type="textarea"
+                      label="Best Contact"
+                      name="best_contact"
+                      id="best_contact"
+                    />
+                  </Col>
+                </Row>
+                <Row hidden={!is_owner}>
+                  <Col xs="8">
+                    <TextInput
+                      type="text"
+                      label="Address"
+                      name="address"
+                      id="address"
+                      value={data.address||""}
+                    />
+                  </Col>
+                  <Col xs="2">
+                    <TextInput
+                      type="text"
+                      label="Apartment"
+                      name="apartment"
+                      id="apartment"
+                      value={data.apartment||""}
+                    />
+                  </Col>
+                </Row>
+                <Row hidden={!is_owner}>
+                  <Col xs="6">
+                    <TextInput
+                      type="text"
+                      label="City"
+                      name="city"
+                      id="city"
+                      value={data.city||""}
+                    />
+                  </Col>
+                  <Col xs="2">
+                    <DropDown
+                      label="State"
+                      name="state"
+                      id="state"
+                      options={state_options}
+                      isClearable={true}
+                      value={props.values.state||''}
+                    />
+                  </Col>
+                  <Col xs="2">
+                    <TextInput
+                      type="text"
+                      label="Zip Code"
+                      name="zip_code"
+                      id="zip_code"
+                      value={data.zip_code||""}
+                    />
+                  </Col>
+                </Row>
+              </FormGroup>
 
-            <Button type="submit" className="btn-success mr-1">Save</Button>
-            {reporter_id ? <Link href={"/hotline/servicerequest/new?reporter_id=" + reporter_id} className="btn btn-primary mr-1">Skip Owner</Link> : ""}
-            <Link className="btn btn-secondary" href="/hotline">Cancel</Link>
-          </Container>
-        </Form>
+              <Button type="submit" className="btn-success mr-1">Save</Button>
+              {reporter_id ? <Link href={"/hotline/servicerequest/new?reporter_id=" + reporter_id} className="btn btn-primary mr-1">Skip Owner</Link> : ""}
+              <Link className="btn btn-secondary" href="/hotline">Cancel</Link>
+            </Container>
+          </Form>
         )}
       </Formik>
     </>
@@ -286,7 +296,7 @@ export function ServiceRequestForm({id}) {
   } = queryParams;
 
   // Address checkbox state.
-  const [state, setState] = useState({checked:true});
+  const [state, setState] = useState({checked:owner_id ? true : false});
   function handleChange() {
     setState({checked:!state.checked})
   }
@@ -338,12 +348,7 @@ export function ServiceRequestForm({id}) {
         })
         .then(response => {
           // Update relevant address fields.
-          data.address = response.data.address
-          data.apartment = response.data.apartment
-          data.city = response.data.city
-          data.state = response.data.state
-          data.zip_code = response.data.zip_code
-          setData(data)
+          setData(Object.assign(data, { 'address': response.data.address, 'apartment':response.data.apartment, 'city':response.data.city, 'state':response.data.state, 'zip_code':response.data.zip_code } ))
         })
         .catch(error => {
           console.log(error.response);
@@ -355,7 +360,7 @@ export function ServiceRequestForm({id}) {
     return () => {
       source.cancel();
     };
-  }, [id, owner_id]);
+  }, [id, owner_id, data]);
 
   return (
       <Formik
@@ -458,8 +463,11 @@ export function ServiceRequestForm({id}) {
                 </Row>
                 <hr/>
               </FormGroup>
-              <label>Address Same as Owner:</label>
-              <Field component={Switch} type="checkbox" color="primary" checked={state.checked} onChange={handleChange} />
+              { owner_id ?
+                <span>
+                  <label>Address Same as Owner:</label>
+                  <Field component={Switch} type="checkbox" color="primary" checked={state.checked} onChange={handleChange} />
+                </span> : ""}
               <FormGroup>
               {!state.checked ? <div>
                 <Row>
@@ -496,7 +504,7 @@ export function ServiceRequestForm({id}) {
                       id="state"
                       options={state_options}
                       isClearable={true}
-                      value={props.values.state||null}
+                      value={props.values.state||''}
                     />
                   </Col>
                   <Col xs="2">

@@ -33,14 +33,14 @@ const DateTimePicker = ({ label, ...props }) => {
 
 // ...props is shorthand for "rest of the items in this array". So the 1st item is
 // assigned to label and the rest are assigned to props
-const TextInput = ({ label, ...props }) => {
+const TextInput = ({ label, value, ...props }) => {
   // useField() returns [formik.getFieldProps(), formik.getFieldMeta()]
   // which we can spread on <input> and also replace ErrorMessage entirely.
   const [field, meta] = useField(props);
   return (
     <>
       <Label htmlFor={props.id || props.name} className="mt-3">{label}</Label>
-      <Input className={meta.touched && meta.error ? "is-invalid" : null} {...field} {...props} />
+      <Input value={value} className={meta.touched && meta.error ? "is-invalid" : null} {...field} {...props} />
       {meta.touched && meta.error ? (
         <FormFeedback>{meta.error}</FormFeedback>
       ) : null}
