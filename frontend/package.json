@@ -14,7 +14,6 @@
     "bootstrap": "^4.4.1",
     "formik": "^2.1.4",
     "formik-material-ui": "^2.0.0-beta.1",
-    "hookrouter": "^1.2.3",
     "moment": "^2.24.0",
     "raviger": "^1.4.0",
     "react": "^16.12.0",

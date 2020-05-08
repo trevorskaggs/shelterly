@@ -34,7 +34,7 @@ export function ServiceRequestTable() {
               <li className='reporter'>Reporter: {props.data[props.row.index].reporter ? <span>{props.data[props.row.index].reporter_name} (555) 555 5555<Link href={"/people/person/" + props.data[props.row.index].owner} className="btn btn-sm btn-success ml-1">Details</Link></span> : <span>N/A</span>}</li>
             </div>
             <div className="col-sm">
-            <b>Animals:</b> {props.data[props.row.index].animals ? <span>{props.data[props.row.index].animals.map(animal => (<li key={animal.id}>{animal.name} ({animal.species}) - {animal.status}<Link href={"/animals/animal/" + animal.id} className="btn btn-sm btn-danger ml-1 mb-1">Details</Link></li>))}</span> : <span><li>None</li></span>}
+            <b>Animals:</b> {props.data[props.row.index].animals && props.data[props.row.index].animals.length ? <span>{props.data[props.row.index].animals.map(animal => (<li key={animal.id}>{animal.name} ({animal.species}) - {animal.status}<Link href={"/animals/animal/" + animal.id} className="btn btn-sm btn-danger ml-1 mb-1">Details</Link></li>))}</span> : <span><li>None</li></span>}
             </div>
           </div>
         </div>
@@ -95,7 +95,7 @@ export function ServiceRequestTable() {
   }, []);
 
   return (
-    <div className="ml-2 mr-2">
+    <div className="ml-2 mr-2 search_table">
         <form onSubmit={handleSubmit}>
           <Input
             type="text"
@@ -108,7 +108,7 @@ export function ServiceRequestTable() {
           <button className="btn btn-warning ml-1">Search!</button>
         </form>
         <hr/>
-      <Table data={data.service_requests} columns={columns} />
+      <Table hide_thead={true} show_border={false} data={data.service_requests} columns={columns} />
       <p>{data.isFetching ? 'Fetching service requests...' : ''}</p>
     </div>
   )

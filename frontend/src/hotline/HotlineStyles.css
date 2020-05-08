@@ -1,19 +1,15 @@
-table {
+div.search_table > table {
   border-collapse: separate;
-  overflow: hidden;
   border-spacing: 0 15px;
   max-width: 1250px;
-  /* margin-left:auto; 
-  margin-right:auto; */
 }
 
-td {
+div.search_table > table > tbody > tr > td {
   background: #ddd;
-  border-bottom: 2px solid white; 
   padding: 5px 15px;
   border-radius: 1em;
 }
 
-hr {
+div.search_table > hr {
   margin-bottom: 0;
 }

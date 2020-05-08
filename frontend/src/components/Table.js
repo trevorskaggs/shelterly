@@ -9,7 +9,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 // This is a new component. Why a function and not a const?
-function Table({ columns, data }) {
+function Table({ columns, data, hide_thead, show_border }) {
   // Use the state and functions returned from useTable to build your UI
   const {
     getTableProps,
@@ -27,10 +27,15 @@ function Table({ columns, data }) {
     useSortBy,
   );
 
+  // Show border by default if show_border isn't passed in.
+  if (show_border === undefined) {
+    show_border = true;
+  }
+
   // Render the UI for your table
   return (
-    <BootstrapTable borderless hover size="sm" {...getTableProps()}>
-      <thead hidden={true}>
+    <BootstrapTable bordered={show_border} hover size="sm" {...getTableProps()}>
+      <thead hidden={hide_thead}>
         {headerGroups.map(headerGroup => (
           <tr {...headerGroup.getHeaderGroupProps()}>
             {headerGroup.headers.map(column => (

@@ -1,5 +1,5 @@
 import React, { Fragment, useContext, useEffect } from "react";
-import { A, navigate, useRoutes } from "hookrouter";
+import { Link, navigate, useRoutes } from 'raviger';
 import routes from "./router";
 import PageNotFound from "./components/PageNotFound";
 import { useCookies, withCookies } from 'react-cookie';
@@ -36,7 +36,7 @@ function Shelterly() {
   return (
     <div>
       <h1 style={header_style} className="col-12">
-        <A href="/"><img src={logo} alt=""/></A>
+        <Link href="/"><img src={logo} alt=""/></Link>
       </h1>
       <hr className="mt-0 mb-4"/>
       <Fragment>

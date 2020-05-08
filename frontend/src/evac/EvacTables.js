@@ -9,13 +9,13 @@ export function EvacTeamTable() {
     () => [
       {
         Header: 'Evac Team',
-        accessor: 'id'
+        accessor: 'id',
+        Cell: ({ cell: { value } }) =>
+          <div><a href={"/evac/evacteam/"+value+"/"}>Evac Team {value}</a></div>
       },
       {
         Header: 'Team Members',
         accessor: 'evac_team_member_names',
-        Cell: ({ cell: { value } }) =>
-          <div><a href={"/evac/evacteam/"+value+"/"}>Evac Team {value}</a></div>
       }
     ],
     []

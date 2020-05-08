@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
-import { A, navigate } from "hookrouter";
+import { Link, navigate } from "raviger";
 import { Form, Formik } from 'formik';
 import {
   Button,
@@ -88,7 +88,7 @@ export function EvacTeamForm() {
             </FormGroup>
 
             <Button type="submit" className="btn-success mr-1">Save</Button>
-            <A className="btn btn-secondary" href="/evac">Cancel</A>
+            <Link className="btn btn-secondary" href="/evac">Cancel</Link>
           </Container>
         </Form>
       </Formik>
@@ -176,7 +176,7 @@ export const TeamMemberForm = () => {
               </FormGroup>
 
               <Button type="submit" className="btn-success mr-1">Save</Button>
-              <A className="btn btn-secondary" href="/evac">Cancel</A>
+              <Link className="btn btn-secondary" href="/evac">Cancel</Link>
             </Container>
           </Form>
         </Formik>

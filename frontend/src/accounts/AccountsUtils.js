@@ -1,5 +1,5 @@
 import axios from "axios";
-import { navigate } from "hookrouter";
+import { navigate } from "raviger";
 
 // Authenticate the user with the backnd to obtain a user.
 export function loadUser({dispatch}, {removeCookie}) {
