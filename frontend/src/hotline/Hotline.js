@@ -76,8 +76,6 @@ export const UpdateServiceRequest = ({id}) => (
 
 export const ServiceRequestDetail = ({id}) => (
   <div>
-    <h1 style={header_style}>Service Request #{id}</h1>
-    <br/>
     <ServiceRequestView id={id} />
   </div>
 )

@@ -17,9 +17,32 @@ const card_style = {
   width: "90%",
 }
 
+const header_style = {
+  textAlign: "center",
+}
+
 export function ServiceRequestView({id}) {
 
-  const [data, setData] = useState({});
+  const [data, setData] = useState({
+    owner: '',
+    reporter: '',
+    directions: '',
+    address: '',
+    apartment: '',
+    city: '',
+    state: '',
+    zip_code: '',
+    verbal_permission: false,
+    key_provided: false,
+    accessible: false,
+    turn_around: false,
+    forced_entry: false,
+    outcome: '',
+    owner_notification_notes: '',
+    recovery_time: null,
+    owner_notification_tstamp: null,
+    status:'',
+  });
 
   // Hook for initializing data.
   useEffect(() => {
@@ -38,10 +61,12 @@ export function ServiceRequestView({id}) {
     };
     fetchServiceRequestData();
   }, [id]);
-
+  console.log(data);
   return (
     <>
-      <div style={card_style} className="card card-body bg-light mb-2">
+      <h1 style={header_style}>Service Request #{data.id} - {data.status}</h1>
+      <br/>
+      <div style={card_style} className="card card-body bg-light mb-2 mx-auto">
         <div className="row">
           <div className="col-8">
             <p><b>Reporter:</b> {data.reporter ? <span>{data.reporter_name}</span> : 'N/A'}</p>
@@ -58,7 +83,7 @@ export function ServiceRequestView({id}) {
         </div>
       </div>
       {data.outcome ?
-      <div style={card_style} className="card card-body bg-light mb-2">
+      <div style={card_style} className="card card-body bg-light mb-2 mx-auto">
         <div className="row">
           <div className="col-8">
             <p><b>Outcome:</b> {data.outcome}</p>
@@ -71,7 +96,7 @@ export function ServiceRequestView({id}) {
           </div>
         </div>
       </div> : ""}
-      <div style={card_style} className="card card-body bg-light">
+      <div style={card_style} className="card card-body bg-light mx-auto">
         <p><b>Animals:</b></p>
         {data.animals && data.animals.length ? <span>{data.animals.map(animal => (<li key={animal.id}>{animal.name} ({animal.species}) - {animal.status}<Link href={"/animals/animal/" + animal.id} className="btn btn-sm btn-danger ml-1 mb-1">Details</Link></li>))}</span> : <span><li>None</li></span>}
       </div>

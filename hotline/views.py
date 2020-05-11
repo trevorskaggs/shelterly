@@ -106,7 +106,17 @@ def service_request_list(request, status='all'):
 
 class ServiceRequestViewSet(viewsets.ModelViewSet):
     queryset = ServiceRequest.objects.all()
-    search_fields = ['animal__name', 'owner__first_name', 'owner__last_name', 'owner__address', 'owner__city', 'reporter__first_name', 'reporter__last_name']
+    search_fields = ['address', 'city', 'animal__name', 'owner__first_name', 'owner__last_name', 'owner__address', 'owner__city', 'reporter__first_name', 'reporter__last_name']
     filter_backends = (filters.SearchFilter,)
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = ServiceRequestSerializer
+
+    def get_queryset(self):
+        queryset = ServiceRequest.objects.all()
+        status = self.request.query_params.get('status', None)
+        status_filter = Q(animal__status__in=['REPORTED', 'ASSIGNED']) | Q(animal=None)
+        if status == 'open':
+            queryset = queryset.filter(status_filter).distinct()
+        elif status == 'closed':
+            queryset = queryset.exclude(status_filter).distinct()
+        return queryset

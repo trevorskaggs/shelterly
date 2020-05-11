@@ -6,14 +6,13 @@ import {
   Button,
   Col,
   FormGroup,
+  CustomInput,
   Label,
   Row,
   Container,
 } from 'reactstrap';
-import 'bootstrap/dist/css/bootstrap.min.css';
 import * as Yup from 'yup';
-import { Switch as FormikSwitch } from 'formik-material-ui';
-import Switch from '@material-ui/core/Switch';
+import { Switch } from 'formik-material-ui';
 import 'flatpickr/dist/themes/light.css';
 import { DateTimePicker, DropDown, TextInput } from '../components/Form';
 
@@ -444,7 +443,7 @@ export function ServiceRequestForm({id}) {
                 />
                 <Row>
                   <Label htmlFor="forced_entry" className="mt-3">Forced Entry</Label>
-                  <Field component={FormikSwitch} name="forced_entry" type="checkbox" color="primary" className="mt-3" />
+                  <Field component={Switch} name="forced_entry" type="checkbox" color="primary" className="mt-3" />
                 </Row>
                 <Row className="mt-3">
                   <DateTimePicker
@@ -471,9 +470,9 @@ export function ServiceRequestForm({id}) {
                 <hr/>
               </FormGroup>
               { owner_id ?
-                <span>
-                  <label>Address Same as Owner:</label>
-                  <Field component={Switch} type="checkbox" color="primary" checked={state.checked} onChange={handleChange} />
+                <span className="form-row">
+                  <Label>Address Same as Owner: </Label>
+                  <CustomInput id="same_address" type="checkbox" className="ml-2" checked={state.checked} onChange={handleChange} />
                 </span> : ""}
               <FormGroup>
               {!state.checked ? <div>
@@ -537,19 +536,19 @@ export function ServiceRequestForm({id}) {
                 </Row>
                 <Row>
                   <Label htmlFor="verbal_permission" className="mt-3">Verbal Permission</Label>
-                  <Field component={FormikSwitch} name="verbal_permission" type="checkbox" color="primary" className="mt-3" />
+                  <Field component={Switch} name="verbal_permission" type="checkbox" color="primary" className="mt-3" />
                 </Row>
                 <Row>
                   <Label htmlFor="key_provided">Key Provided</Label>
-                  <Field component={FormikSwitch} name="key_provided" type="checkbox" color="primary" />
+                  <Field component={Switch} name="key_provided" type="checkbox" color="primary" />
                 </Row>
                 <Row>
                   <Label htmlFor="accessible">Accessible</Label>
-                  <Field component={FormikSwitch} name="accessible" type="checkbox" color="primary" />
+                  <Field component={Switch} name="accessible" type="checkbox" color="primary" />
                 </Row>
                 <Row>
                   <Label htmlFor="turn_around">Turn Around</Label>
-                  <Field component={FormikSwitch} name="turn_around" type="checkbox" color="primary" />
+                  <Field component={Switch} name="turn_around" type="checkbox" color="primary" />
                 </Row>
               </FormGroup>
 

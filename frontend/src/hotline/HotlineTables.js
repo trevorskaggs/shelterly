@@ -2,16 +2,15 @@ import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import { Link, } from 'raviger';
 import Table from '../components/Table';
-import { Input } from 'reactstrap';
+import { Button, ButtonGroup, Input, Form } from 'reactstrap';
+
 import Moment from 'react-moment';
-import 'bootstrap/dist/css/bootstrap.min.css';
 import './HotlineStyles.css'
 
 const input_style = {
   width: "40%",
   display: "inline-block",
   position: 'relative',
-  top: '3px'
 }
 
 export function ServiceRequestTable() {
@@ -45,6 +44,8 @@ export function ServiceRequestTable() {
 
   const [data, setData] = useState({service_requests: [], isFetching: false});
   const [searchTerm, setSearchTerm] = useState("");
+  const [status, setStatus] = useState("open");
+  const [color, setColor] = useState({openColor:"primary", closedColor:"secondary"});
 
   // Update searchTerm when field input changes.
   const handleChange = event => {
@@ -58,7 +59,7 @@ export function ServiceRequestTable() {
     let source = axios.CancelToken.source();
     setData({service_requests: [], isFetching: true});
     // Fetch ServiceRequest data filtered searchTerm.
-    await axios.get('http://localhost:8000/hotline/api/servicerequests/?search=' + searchTerm, {
+    await axios.get('http://localhost:8000/hotline/api/servicerequests/?search=' + searchTerm + '&status=' + status, {
       cancelToken: source.token,
     })
     .then(response => {
@@ -76,7 +77,7 @@ export function ServiceRequestTable() {
     const fetchServiceRequests = async () => {
       setData({service_requests: [], isFetching: true});
       // Fetch ServiceRequest data.
-      await axios.get('http://localhost:8000/hotline/api/servicerequests/', {
+      await axios.get('http://localhost:8000/hotline/api/servicerequests/?search=' + searchTerm + '&status=' + status, {
         cancelToken: source.token,
       })
       .then(response => {
@@ -92,21 +93,29 @@ export function ServiceRequestTable() {
     return () => {
       source.cancel();
     };
-  }, []);
+  }, [status]);
 
   return (
     <div className="ml-2 mr-2 search_table">
-        <form onSubmit={handleSubmit}>
-          <Input
-            type="text"
-            placeholder="Search"
-            name="searchTerm"
-            value={searchTerm}
-            onChange={handleChange}
-            style={input_style}
-          />
-          <button className="btn btn-warning ml-1">Search!</button>
-        </form>
+        <Form onSubmit={handleSubmit}>
+          <div className="form-row">
+            <Input
+              type="text"
+              placeholder="Search"
+              name="searchTerm"
+              value={searchTerm}
+              onChange={handleChange}
+              style={input_style}
+            />
+            <button className="btn btn-warning ml-1">Search!</button>
+            <div className="ml-auto">
+              <ButtonGroup>
+                <Button color={color.openColor} onClick={() => {setStatus("open"); setColor({openColor:"primary", closedColor:"secondary"})}}>Open</Button>
+                <Button color={color.closedColor} onClick={() => {setStatus("closed"); setColor({openColor:"secondary", closedColor:"danger"})}}>Closed</Button>
+              </ButtonGroup>
+            </div>
+          </div>
+        </Form>
         <hr/>
       <Table hide_thead={true} show_border={false} data={data.service_requests} columns={columns} />
       <p>{data.isFetching ? 'Fetching service requests...' : ''}</p>

@@ -1,7 +1,6 @@
 div.search_table > table {
   border-collapse: separate;
   border-spacing: 0 15px;
-  max-width: 1250px;
 }
 
 div.search_table > table > tbody > tr > td {

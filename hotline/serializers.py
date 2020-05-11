@@ -9,6 +9,7 @@ class ServiceRequestSerializer(serializers.ModelSerializer):
     owner_name = serializers.SerializerMethodField()
     full_address = serializers.SerializerMethodField()
     animals = AnimalSerializer(source='animal_set', many=True, required=False, read_only=True)
+    status = serializers.SerializerMethodField()
 
     # Custom field for the owner name.
     def get_owner_name(self, obj):
@@ -28,6 +29,12 @@ class ServiceRequestSerializer(serializers.ModelSerializer):
         if obj.address:
             return obj.address + " " + apartment + obj.city + ", " + obj.state + " " + obj.zip_code
         return ""
+
+    # Custom field for current status.
+    def get_status(self, obj):
+        # SR is Open if it doesn't have any animals yet or any one animal has an ASSIGNED OR REPORTED status.
+        status = 'Open' if not obj.animal_set.exists() or obj.animal_set.filter(status__in=['REPORTED', 'ASSIGNED']).exists() else 'Closed'
+        return status
 
     # Updates datetime fields to null when receiving an empty string submission.
     def to_internal_value(self, data):

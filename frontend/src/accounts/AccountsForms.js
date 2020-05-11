@@ -41,7 +41,7 @@ export const LoginForm = () => {
             axios.post('http://localhost:3000/login/', values)
             .then(response => {
               setAuthToken(response.data.token);
-              setCookie("token", response.data.token, {path: '/'});
+              setCookie("token", response.data.token);
               dispatch({type: 'LOGIN_SUCCESSFUL', data: response.data });
               navigate('/');
             })
