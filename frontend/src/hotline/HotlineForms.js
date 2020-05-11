@@ -10,6 +10,7 @@ import {
   Label,
   Row,
   Container,
+  Fade,
 } from 'reactstrap';
 import * as Yup from 'yup';
 import { Switch } from 'formik-material-ui';
@@ -290,10 +291,10 @@ export function ServiceRequestForm({id}) {
     reporter_id = ''
   } = queryParams;
 
-  // Address checkbox state.
-  const [state, setState] = useState({checked:owner_id ? true : false});
+  // Track checkbox state with Fade.
+  const [fadeIn, setFadeIn] = useState(owner_id ? false : true);
   function handleChange() {
-    setState({checked:!state.checked})
+    setFadeIn(!fadeIn)
   }
 
   // Initial ServiceRequest data.
@@ -461,57 +462,58 @@ export function ServiceRequestForm({id}) {
               { owner_id ?
                 <span className="form-row">
                   <Label>Address Same as Owner: </Label>
-                  <CustomInput id="same_address" type="checkbox" className="ml-2" checked={state.checked} onChange={handleChange} />
-                </span> : ""}
+                  <CustomInput id="same_address" type="checkbox" className="ml-2" checked={!fadeIn} onChange={handleChange} />
+                </span> : ""
+              }
               <FormGroup>
-              {!state.checked ? <div>
-                <Row>
-                  <Col xs="8">
-                    <TextInput
-                      type="text"
-                      label="Address"
-                      name="address"
-                      id="address"
-                    />
-                  </Col>
-                  <Col xs="2">
-                    <TextInput
-                      type="text"
-                      label="Apartment"
-                      name="apartment"
-                      id="apartment"
-                    />
-                  </Col>
-                </Row>
-                <Row>
-                  <Col xs="6">
-                    <TextInput
-                      type="text"
-                      label="City"
-                      name="city"
-                      id="city"
-                    />
-                  </Col>
-                  <Col xs="2">
-                    <DropDown
-                      label="State"
-                      name="state"
-                      id="state"
-                      options={state_options}
-                      isClearable={true}
-                      value={props.values.state||''}
-                    />
-                  </Col>
-                  <Col xs="2">
-                    <TextInput
-                      type="text"
-                      label="Zip Code"
-                      name="zip_code"
-                      id="zip_code"
-                    />
-                  </Col>
-                </Row>
-                </div> : ""}
+                <Fade in={fadeIn} hidden={!fadeIn}>
+                  <Row>
+                    <Col xs="8">
+                      <TextInput
+                        type="text"
+                        label="Address"
+                        name="address"
+                        id="address"
+                      />
+                    </Col>
+                    <Col xs="2">
+                      <TextInput
+                        type="text"
+                        label="Apartment"
+                        name="apartment"
+                        id="apartment"
+                      />
+                    </Col>
+                  </Row>
+                  <Row>
+                    <Col xs="6">
+                      <TextInput
+                        type="text"
+                        label="City"
+                        name="city"
+                        id="city"
+                      />
+                    </Col>
+                    <Col xs="2">
+                      <DropDown
+                        label="State"
+                        name="state"
+                        id="state"
+                        options={state_options}
+                        isClearable={true}
+                        value={props.values.state||''}
+                      />
+                    </Col>
+                    <Col xs="2">
+                      <TextInput
+                        type="text"
+                        label="Zip Code"
+                        name="zip_code"
+                        id="zip_code"
+                      />
+                    </Col>
+                  </Row>
+                </Fade>
                 <Row>
                   <Col xs="10">
                     <TextInput
