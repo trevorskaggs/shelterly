@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from 'raviger';
 import { PersonForm, ServiceRequestForm } from "./HotlineForms";
 import { ServiceRequestTable } from "./HotlineTables"
-import { ServiceRequestView } from "./HotlineViews";
+import { PersonView, ServiceRequestView } from "./HotlineViews";
 
 
 const header_style = {
@@ -47,6 +47,18 @@ export const NewReporter = () => (
   <div>
     <h1 style={header_style}>Reporter Information</h1>
     <PersonForm />
+  </div>
+)
+
+export const OwnerDetail = ({id}) => (
+  <div>
+    <PersonView id={id} />
+  </div>
+)
+
+export const ReporterDetail = ({id}) => (
+  <div>
+    <PersonView id={id} />
   </div>
 )
 

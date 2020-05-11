@@ -42,7 +42,7 @@ export const PersonForm = ({id}) => {
     phone: '',
     email: '',
     best_contact: '',
-    // drivers_license: '',
+    drivers_license: '',
     address: '',
     apartment: '',
     city: '',
@@ -102,21 +102,15 @@ export const PersonForm = ({id}) => {
             .matches(phoneRegex, "Phone number is not valid"),
           email: Yup.string()
             .max(200, 'Must be 200 characters or less')
-            .nullable()
             .matches(emailRegex, "Email is not valid"),
           best_contact: Yup.string(),
           // drivers_license: Yup.string(),
-          address: Yup.string()
-            .nullable(),
+          address: Yup.string(),
           apartment: Yup.string()
-            .nullable()
             .max(10, 'Must be 10 characters or less'),
-          city: Yup.string()
-            .nullable(),
-          state: Yup.string()
-            .nullable(),
+          city: Yup.string(),
+          state: Yup.string(),
           zip_code: Yup.string()
-            .nullable()
             .max(10, 'Must be 10 characters or less'),
         })}
         onSubmit={(values, { setSubmitting }) => {
@@ -203,7 +197,6 @@ export const PersonForm = ({id}) => {
                       label="Email"
                       name="email"
                       id="email"
-                      value={data.email||""}
                     />
                   </Col>
                   {/* <Col xs="3">
@@ -232,7 +225,6 @@ export const PersonForm = ({id}) => {
                       label="Address"
                       name="address"
                       id="address"
-                      value={data.address||""}
                     />
                   </Col>
                   <Col xs="2">
@@ -241,7 +233,6 @@ export const PersonForm = ({id}) => {
                       label="Apartment"
                       name="apartment"
                       id="apartment"
-                      value={data.apartment||""}
                     />
                   </Col>
                 </Row>
@@ -252,7 +243,6 @@ export const PersonForm = ({id}) => {
                       label="City"
                       name="city"
                       id="city"
-                      value={data.city||""}
                     />
                   </Col>
                   <Col xs="2">
@@ -271,7 +261,6 @@ export const PersonForm = ({id}) => {
                       label="Zip Code"
                       name="zip_code"
                       id="zip_code"
-                      value={data.zip_code||""}
                     />
                   </Col>
                 </Row>

@@ -10,7 +10,7 @@ class ServiceRequest(Location):
 
     #pre_field
     timestamp = models.DateTimeField(auto_now_add=True)
-    directions = models.TextField(blank=True, null=True)
+    directions = models.TextField(blank=True)
     verbal_permission = models.BooleanField(default=False)
     key_provided = models.BooleanField(default=False)
     accessible = models.BooleanField(default=False)
@@ -18,8 +18,8 @@ class ServiceRequest(Location):
 
     #post_field
     forced_entry = models.BooleanField(default=False)
-    outcome = models.TextField(blank=True, null=True)
-    owner_notification_notes = models.TextField(blank=True, null=True)
+    outcome = models.TextField(blank=True)
+    owner_notification_notes = models.TextField(blank=True)
     recovery_time = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
     owner_notification_tstamp = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
 

@@ -25,9 +25,10 @@ class ServiceRequestSerializer(serializers.ModelSerializer):
 
     # Custom field for the full address.
     def get_full_address(self, obj):
-        apartment = " " + obj.apartment + ", " if obj.apartment else ", "
+        region = obj.city + ", " + obj.state + " " + obj.zip_code if obj.city else ""
+        apartment = " " + obj.apartment + ", " if obj.apartment else ", " if region else ""
         if obj.address:
-            return obj.address + " " + apartment + obj.city + ", " + obj.state + " " + obj.zip_code
+            return obj.address + " " + apartment + region
         return ""
 
     # Custom field for current status.

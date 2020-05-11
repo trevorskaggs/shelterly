@@ -29,8 +29,8 @@ export function ServiceRequestTable() {
             </div>
             <div className="col-sm">
             <b>Contacts:</b>
-              <li className='owner'>Owner: {props.data[props.row.index].owner ? <span>{props.data[props.row.index].owner_name} (555) 555 5555<Link href={"/people/person/" + props.data[props.row.index].owner} className="btn btn-sm btn-success ml-1 mb-1">Details</Link></span> : ""}</li>
-              <li className='reporter'>Reporter: {props.data[props.row.index].reporter ? <span>{props.data[props.row.index].reporter_name} (555) 555 5555<Link href={"/people/person/" + props.data[props.row.index].owner} className="btn btn-sm btn-success ml-1">Details</Link></span> : <span>N/A</span>}</li>
+              <li className='owner'>Owner: {props.data[props.row.index].owner ? <span>{props.data[props.row.index].owner_name} (555) 555 5555<Link href={"/hotline/owner/" + props.data[props.row.index].owner} className="btn btn-sm btn-success ml-1 mb-1">Details</Link></span> : "N/A"}</li>
+              <li className='reporter'>Reporter: {props.data[props.row.index].reporter ? <span>{props.data[props.row.index].reporter_name} (555) 555 5555<Link href={"/hotline/reporter/" + props.data[props.row.index].reporter} className="btn btn-sm btn-success ml-1">Details</Link></span> : "N/A"}</li>
             </div>
             <div className="col-sm">
             <b>Animals:</b> {props.data[props.row.index].animals && props.data[props.row.index].animals.length ? <span>{props.data[props.row.index].animals.map(animal => (<li key={animal.id}>{animal.name} ({animal.species}) - {animal.status}<Link href={"/animals/animal/" + animal.id} className="btn btn-sm btn-danger ml-1 mb-1">Details</Link></li>))}</span> : <span><li>None</li></span>}
@@ -44,8 +44,7 @@ export function ServiceRequestTable() {
 
   const [data, setData] = useState({service_requests: [], isFetching: false});
   const [searchTerm, setSearchTerm] = useState("");
-  const [status, setStatus] = useState("open");
-  const [color, setColor] = useState({openColor:"primary", closedColor:"secondary"});
+  const [statusOptions, setStatusOptions] = useState({status:"open", openColor:"primary", closedColor:"secondary"});
 
   // Update searchTerm when field input changes.
   const handleChange = event => {
@@ -59,7 +58,7 @@ export function ServiceRequestTable() {
     let source = axios.CancelToken.source();
     setData({service_requests: [], isFetching: true});
     // Fetch ServiceRequest data filtered searchTerm.
-    await axios.get('http://localhost:8000/hotline/api/servicerequests/?search=' + searchTerm + '&status=' + status, {
+    await axios.get('http://localhost:8000/hotline/api/servicerequests/?search=' + searchTerm + '&status=' + statusOptions.status, {
       cancelToken: source.token,
     })
     .then(response => {
@@ -77,7 +76,7 @@ export function ServiceRequestTable() {
     const fetchServiceRequests = async () => {
       setData({service_requests: [], isFetching: true});
       // Fetch ServiceRequest data.
-      await axios.get('http://localhost:8000/hotline/api/servicerequests/?search=' + searchTerm + '&status=' + status, {
+      await axios.get('http://localhost:8000/hotline/api/servicerequests/?search=' + searchTerm + '&status=' + statusOptions.status, {
         cancelToken: source.token,
       })
       .then(response => {
@@ -93,7 +92,7 @@ export function ServiceRequestTable() {
     return () => {
       source.cancel();
     };
-  }, [status]);
+  }, [statusOptions.status]);
 
   return (
     <div className="ml-2 mr-2 search_table">
@@ -110,8 +109,8 @@ export function ServiceRequestTable() {
             <button className="btn btn-warning ml-1">Search!</button>
             <div className="ml-auto">
               <ButtonGroup>
-                <Button color={color.openColor} onClick={() => {setStatus("open"); setColor({openColor:"primary", closedColor:"secondary"})}}>Open</Button>
-                <Button color={color.closedColor} onClick={() => {setStatus("closed"); setColor({openColor:"secondary", closedColor:"danger"})}}>Closed</Button>
+                <Button color={statusOptions.openColor} onClick={() => setStatusOptions({status:"open", openColor:"primary", closedColor:"secondary"})}>Open</Button>
+                <Button color={statusOptions.closedColor} onClick={() => setStatusOptions({status:"closed", openColor:"secondary", closedColor:"danger"})}>Closed</Button>
               </ButtonGroup>
             </div>
           </div>
