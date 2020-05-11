@@ -5,19 +5,27 @@ import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
 import { A } from "hookrouter";
 import { ShelterDetailsTable } from "./ShelterDetails";
 
-function CellFormatter(cell) {
-  return (<div><a href={"/shelter/"+cell}>shelter {cell}</a></div>);
-}
-
 const header_style = {
   textAlign: "center",
 };
+
+const link_style = {
+  textDecoration: "none",
+};
+
+function CellFormatter(cell) {
+  return (<div><a href={"/shelter/"+cell}>shelter {cell}</a></div>);
+}
 
 const columns = [
   {
     dataField: 'id',
     text: 'Shelter Id',
     formatter: CellFormatter
+  },
+  {
+    dataField: 'name',
+    text: 'Name',
   }, 
   {
     dataField: 'address',
@@ -57,6 +65,7 @@ export function ShelterTable() {
       <p>{data.isFetching ? 'Fetching shelters...' : ''}</p>
       <br/>
       <br/>
+      <A href="/shelter/new" style={link_style} className="btn btn-warning btn-lg btn-block mb-2">CREATE NEW SHELTER</A>
       <A className="btn btn-secondary btn-lg btn-block"  href="/shelter">BACK</A>
     </div>
   )

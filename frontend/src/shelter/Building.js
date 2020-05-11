@@ -47,8 +47,6 @@ export function BuildingList({sid}) {
 
 export const BuildingDetails = ({bid}) => (
   <div>
-    <h1 style={header_style}>Shelters</h1>
-    <br/>
     <BuildingDetailsTable bid={bid} />
   </div>
 )

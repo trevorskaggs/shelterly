@@ -47,8 +47,6 @@ export function RoomList({bid}) {
 
 export const RoomDetails = ({rid}) => (
   <div>
-    <h1 style={header_style}>Shelters</h1>
-    <br/>
     <RoomDetailsTable rid={rid} />
   </div>
 )
