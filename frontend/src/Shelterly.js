@@ -24,11 +24,13 @@ function Shelterly() {
     if (!state.user && cookies.token) {
       loadUser({dispatch}, {removeCookie})
     }
-  }, [state.user, dispatch, removeCookie, cookies]);
+  }, [dispatch, removeCookie, cookies.token]);
 
   // Redirect to login page if no authenticated user object is present.
   if (!state.user && !cookies.token) {
-    navigate('/login');
+    if (!window.location.pathname.includes("login")) {
+      navigate('/login');
+    }
   }
 
   const routeResult = useRoutes(routes);

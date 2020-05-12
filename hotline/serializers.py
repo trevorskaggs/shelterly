@@ -28,13 +28,13 @@ class ServiceRequestSerializer(serializers.ModelSerializer):
         region = obj.city + ", " + obj.state + " " + obj.zip_code if obj.city else ""
         apartment = " " + obj.apartment + ", " if obj.apartment else ", " if region else ""
         if obj.address:
-            return obj.address + " " + apartment + region
+            return obj.address + apartment + region
         return ""
 
     # Custom field for current status.
     def get_status(self, obj):
         # SR is Open if it doesn't have any animals yet or any one animal has an ASSIGNED OR REPORTED status.
-        status = 'Open' if not obj.animal_set.exists() or obj.animal_set.filter(status__in=['REPORTED', 'ASSIGNED']).exists() else 'Closed'
+        status = 'Open' if obj.animal_set.filter(status__in=['REPORTED', 'ASSIGNED']).exists() else 'Closed'
         return status
 
     # Updates datetime fields to null when receiving an empty string submission.

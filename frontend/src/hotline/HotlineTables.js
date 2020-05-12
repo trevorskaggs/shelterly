@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
-import { Link, } from 'raviger';
 import Table from '../components/Table';
 import { Button, ButtonGroup, Input, Form } from 'reactstrap';
-
 import Moment from 'react-moment';
+import { Fab } from '@material-ui/core';
+import AssignmentIcon from '@material-ui/icons/Assignment';
 import './HotlineStyles.css'
 
 const input_style = {
@@ -23,17 +23,16 @@ export function ServiceRequestTable() {
         <div className="container-fluid">
           <div className="row">
             <div className="col-sm-2">
-              <b>Service Request #{props.data[props.row.index].id}</b>
+              <b>Service Request #{props.data[props.row.index].id}</b> <Fab color="primary" href={"/hotline/servicerequest/" + props.data[props.row.index].id} className="mb-1" style={{width:23,height:23, minHeight:23}} title="Service Request details" aria-label="details"><AssignmentIcon style={{fontSize:10}} /></Fab>
               <div className="mt-1 mb-1"><Moment format="LLL">{props.data[props.row.index].timestamp}</Moment></div>
-              <Link href={"/hotline/servicerequest/" + props.data[props.row.index].id} className="btn btn-sm btn-primary">Details</Link>
             </div>
             <div className="col-sm">
             <b>Contacts:</b>
-              <li className='owner'>Owner: {props.data[props.row.index].owner ? <span>{props.data[props.row.index].owner_name} (555) 555 5555<Link href={"/hotline/owner/" + props.data[props.row.index].owner} className="btn btn-sm btn-success ml-1 mb-1">Details</Link></span> : "N/A"}</li>
-              <li className='reporter'>Reporter: {props.data[props.row.index].reporter ? <span>{props.data[props.row.index].reporter_name} (555) 555 5555<Link href={"/hotline/reporter/" + props.data[props.row.index].reporter} className="btn btn-sm btn-success ml-1">Details</Link></span> : "N/A"}</li>
+              <li className='owner'>Owner: {props.data[props.row.index].owner ? <span>{props.data[props.row.index].owner_name} (555) 555 5555 <Fab color="primary" href={"/hotline/owner/" + props.data[props.row.index].owner} className="mb-1" style={{width:23,height:23, minHeight:23, color:"#fff", backgroundColor: "#28a745"}} title="Owner details" aria-label="owner_details"><AssignmentIcon style={{fontSize:10}} /></Fab></span> : "N/A"}</li>
+              <li className='reporter '>Reporter: {props.data[props.row.index].reporter ? <span>{props.data[props.row.index].reporter_name} (555) 555 5555 <Fab href={"/hotline/reporter/" + props.data[props.row.index].reporter} className="mb-1" style={{width:23,height:23, minHeight:23, color:"#fff", backgroundColor: "#28a745"}} title="Reporter details" aria-label="reporter_details"><AssignmentIcon style={{fontSize:10}} /></Fab></span> : "N/A"}</li>
             </div>
             <div className="col-sm">
-            <b>Animals:</b> {props.data[props.row.index].animals && props.data[props.row.index].animals.length ? <span>{props.data[props.row.index].animals.map(animal => (<li key={animal.id}>{animal.name} ({animal.species}) - {animal.status}<Link href={"/animals/animal/" + animal.id} className="btn btn-sm btn-danger ml-1 mb-1">Details</Link></li>))}</span> : <span><li>None</li></span>}
+            <b>Animals:</b> {props.data[props.row.index].animals && props.data[props.row.index].animals.length ? <span>{props.data[props.row.index].animals.map(animal => (<li key={animal.id}>{animal.name} ({animal.species}) - {animal.status} <Fab color="primary" href={"/animals/animal/" + animal.id} className="mb-1" style={{width:23,height:23, minHeight:23, color:"#fff", backgroundColor: "#c82333"}} title="Animal details" aria-label="animal_details"><AssignmentIcon style={{fontSize:10}} /></Fab></li>))}</span> : <span><li>None</li></span>}
             </div>
           </div>
         </div>
@@ -117,7 +116,8 @@ export function ServiceRequestTable() {
         </Form>
         <hr/>
       <Table hide_thead={true} show_border={false} data={data.service_requests} columns={columns} />
-      <p>{data.isFetching ? 'Fetching service requests...' : ''}</p>
+      <p>{data.isFetching ? 'Fetching service requests...' : <p>{data.service_requests && data.service_requests.length ? '' : 'No Service Requests found.'}</p>}</p>
+      {/* <p>{!data.isFetching && data.service_requests && data.service_requests.length ? '' : 'No Service Requests found.'}</p> */}
     </div>
   )
 }

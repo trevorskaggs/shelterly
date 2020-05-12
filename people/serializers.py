@@ -9,7 +9,7 @@ class PersonSerializer(serializers.ModelSerializer):
         region = obj.city + ", " + obj.state + " " + obj.zip_code if obj.city else ""
         apartment = " " + obj.apartment + ", " if obj.apartment else ", " if region else ""
         if obj.address:
-            return obj.address + " " + apartment + region
+            return obj.address + apartment + region
         return ""
 
     class Meta:

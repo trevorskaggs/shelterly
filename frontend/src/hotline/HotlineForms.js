@@ -118,7 +118,17 @@ export const PersonForm = ({id}) => {
           if (id) {
             axios.put('http://localhost:3000/people/api/person/' + id + '/', values)
             .then(function() {
-              navigate('/hotline/servicerequest/' + servicerequest_id);
+              // If we have an SR ID, redirect back to the SR.
+              if (servicerequest_id) {
+                navigate('/hotline/servicerequest/' + servicerequest_id);
+              }
+              // Else return to the Person details.
+              else if (is_owner) {
+                navigate('/hotline/owner/' + id);
+              }
+              else {
+                navigate('/hotline/reporter/' + id);
+              }
             })
             .catch(error => {
               console.log(error.response);

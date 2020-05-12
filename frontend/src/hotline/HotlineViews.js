@@ -3,6 +3,10 @@ import axios from "axios";
 import { Link } from 'raviger';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Moment from 'react-moment';
+import { Fab } from '@material-ui/core';
+import AddIcon from '@material-ui/icons/Add';
+import AssignmentIcon from '@material-ui/icons/Assignment';
+import EditIcon from '@material-ui/icons/Edit';
 
 const btn_style = {
   width: "50%",
@@ -43,7 +47,7 @@ export function PersonView({id}) {
   // Hook for initializing data.
   useEffect(() => {
     let source = axios.CancelToken.source();
-    const fetchOwnerData = async () => {
+    const fetchPersonData = async () => {
       // Fetch Person data.
       await axios.get('http://localhost:3000/people/api/person/' + id + '/', {
         cancelToken: source.token,
@@ -55,12 +59,17 @@ export function PersonView({id}) {
         console.log(error.response);
       });
     };
-    fetchOwnerData();
+    fetchPersonData();
   }, [id]);
 
   return (
     <>
-      <h1 style={header_style}>{is_owner ? "Owner" : "Reporter"} Details</h1>
+      <h1 style={header_style}>{is_owner ?
+        <span>Owner Details <Fab color="primary" size="small" href={"/hotline/owner/edit/" + id} className="mb-1" title="Edit owner" aria-label="edit"><EditIcon /></Fab></span>
+        :
+        <span>Reporter Details <Fab color="primary" size="small" href={"/hotline/reporter/edit/" + id} className="mb-1" title="Edit reporter" aria-label="edit"><EditIcon /></Fab></span>
+        }
+      </h1>
       <br/>
       <div style={card_style} className="card card-body bg-light mb-2 mx-auto">
         <div className="row">
@@ -68,7 +77,7 @@ export function PersonView({id}) {
             <p><b>Name:</b> {data.first_name} {data.last_name}</p>
             <p><b>Phone:</b> {data.phone ? <span>{data.phone}</span> : 'N/A'}</p>
             <p><b>Email:</b> {data.email ? <span>{data.email}</span> : 'N/A'}</p>
-            <p><b>Best Contact:</b> {data.best_contact ? <span>{data.best_contact}</span> : 'N/A'}</p>
+            {data.best_contact ? <p><b>Best Contact:</b> <span>{data.best_contact}</span></p>: ''}
             <p><b>Address:</b> {data.address ? <span>{data.full_address}</span> : 'N/A'}</p>
           </div>
           <div className="col-4">
@@ -78,11 +87,12 @@ export function PersonView({id}) {
       <hr/>
       <div style={btn_style}>
         {is_owner ?
-        <Link href={"/hotline/owner/edit/" + data.id} style={link_style} className="btn btn-primary btn-lg btn-block mb-2">EDIT OWNER</Link> :
-        <Link href={"/hotline/reporter/edit/" + data.id} style={link_style} className="btn btn-primary btn-lg btn-block mb-2">EDIT REPORTER</Link>}
+          <Link href={"/hotline/owner/edit/" + data.id} style={link_style} className="btn btn-primary btn-lg btn-block mb-2">EDIT OWNER</Link> :
+          <Link href={"/hotline/reporter/edit/" + data.id} style={link_style} className="btn btn-primary btn-lg btn-block mb-2">EDIT REPORTER</Link>
+        }
         <br/>
         <br/>
-        <Link className="btn btn-secondary btn-lg btn-block"  href="/hotline/servicerequest/">BACK</Link>
+        <Link className="btn btn-secondary btn-lg btn-block" href="/hotline/">BACK</Link>
       </div>
     </>
   );
@@ -136,7 +146,7 @@ export function ServiceRequestView({id}) {
       <div style={card_style} className="card card-body bg-light mb-2 mx-auto">
         <div className="row">
           <div className="col-8">
-            <p><b>Owner:</b> {data.owner ? <span>{data.owner_name}</span> : 'N/A'}</p>
+            <p className="mb-1"><b>Owner:</b> {data.owner ? <span>{data.owner_name} <Fab color="primary" href={"/hotline/owner/" + data.owner} className="mb-1" style={{width:30,height:30, minHeight:30}} title="Owner details" className="mr-1" aria-label="owner_details"><AssignmentIcon style={{fontSize:16}} /></Fab><Fab color="primary" href={"/hotline/owner/edit/" + data.owner +"?servicerequest_id=" + id} className="mb-1" style={{width:30,height:30, minHeight:30}} title="Edit owner" aria-label="edit"><EditIcon style={{fontSize:16}} /></Fab></span> : <Fab color="primary" href={"/hotline/owner/new?servicerequest_id=" + id} style={{width:30,height:30,minHeight:30}} title="Add owner" aria-label="add"><AddIcon style={{fontSize:16}}/></Fab>}</p>
             <p><b>Reporter:</b> {data.reporter ? <span>{data.reporter_name}</span> : 'N/A'}</p>
             <p><b>Address:</b> {data.address ? <span>{data.full_address}</span> : 'N/A'}</p>
             <p><b>Directions:</b> {data.directions}</p>
@@ -166,7 +176,7 @@ export function ServiceRequestView({id}) {
       {data.animals && data.animals.length ?
       <div style={card_style} className="card card-body bg-light mx-auto">
         <p><b>Animals:</b></p>
-         <span>{data.animals.map(animal => (<li key={animal.id}>{animal.name} ({animal.species}) - {animal.status}<Link href={"/animals/animal/" + animal.id} className="btn btn-sm btn-danger ml-1 mb-1">Details</Link></li>))}</span> 
+         <span>{data.animals.map(animal => (<li key={animal.id}>{animal.name} ({animal.species}) - {animal.status} <Fab color="primary" href={"/animals/animal/" + animal.id} className="mb-1" style={{width:30, height:30, minHeight:30, color:"#fff", backgroundColor: "#c82333"}} title="Animal details" aria-label="animal_details"><AssignmentIcon style={{fontSize:16}} /></Fab></li>))}</span>
       </div> : ""}
       <hr/>
       <div style={btn_style}>
