@@ -31,6 +31,9 @@ export const PersonForm = ({id}) => {
   // Determine if this is an owner or reporter when creating a Person.
   var is_owner = window.location.pathname.includes("owner")
 
+  // Determines if this is a brand new Person to control which buttons to display.
+  var is_new = window.location.pathname.includes("new")
+
   // Regex validators.
   const phoneRegex = /^((\+\d{1,3}(-| )?\(?\d\)?(-| )?\d{1,3})|(\(?\d{2,3}\)?))(-| )?(\d{3,4})(-| )?(\d{4})(( x| ext)\d{1,5}){0,1}$/
   const nameRegex = /^[a-z ,.'-]+$/i
@@ -278,7 +281,7 @@ export const PersonForm = ({id}) => {
               </FormGroup>
 
               <Button type="submit" className="btn-success mr-1">Save</Button>
-              {!is_owner ? <button type="button" className="btn btn-primary mr-1" onClick={() => {setSkipOwner(true); props.submitForm()}}>Skip Owner</button> : ""}
+              {!is_owner & is_new ? <button type="button" className="btn btn-primary mr-1" onClick={() => {setSkipOwner(true); props.submitForm()}}>Skip Owner</button> : ""}
               <Link className="btn btn-secondary" href="/hotline">Cancel</Link>
             </Container>
           </Form>

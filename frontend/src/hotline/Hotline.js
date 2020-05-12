@@ -50,6 +50,13 @@ export const NewReporter = () => (
   </div>
 )
 
+export const UpdateReporter = ({id}) => (
+  <div>
+    <h1 style={header_style}>Reporter Information</h1>
+    <PersonForm id={id} />
+  </div>
+)
+
 export const OwnerDetail = ({id}) => (
   <div>
     <PersonView id={id} />

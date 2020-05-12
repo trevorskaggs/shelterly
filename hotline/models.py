@@ -10,7 +10,7 @@ class ServiceRequest(Location):
 
     #pre_field
     timestamp = models.DateTimeField(auto_now_add=True)
-    directions = models.TextField(blank=True)
+    directions = models.TextField()
     verbal_permission = models.BooleanField(default=False)
     key_provided = models.BooleanField(default=False)
     accessible = models.BooleanField(default=False)

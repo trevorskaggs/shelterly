@@ -24,7 +24,7 @@ function Shelterly() {
     if (!state.user && cookies.token) {
       loadUser({dispatch}, {removeCookie})
     }
-  }, [dispatch, removeCookie, cookies.token]);
+  }, [state.user, cookies.token]);
 
   // Redirect to login page if no authenticated user object is present.
   if (!state.user && !cookies.token) {

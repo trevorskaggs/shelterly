@@ -88,7 +88,7 @@ export function ServiceRequestTable() {
       </Form>
       <hr/>
       {data.service_requests.map(service_request => (
-        <div style={{width:"90%"}} className="card card-body bg-light mb-2">
+        <div key={service_request.id} style={{width:"90%"}} className="card card-body bg-light mb-2">
           <div className="row">
             <div className="col-sm-2">
               <b>Service Request #{service_request.id}</b> <Fab color="primary" href={"/hotline/servicerequest/" + service_request.id} className="mb-1" style={{width:23,height:23, minHeight:23}} title="Service Request details" aria-label="details"><AssignmentIcon style={{fontSize:10}} /></Fab>
@@ -105,7 +105,7 @@ export function ServiceRequestTable() {
           </div>
         </div>
       ))}
-      <p>{data.isFetching ? 'Fetching service requests...' : <p>{data.service_requests && data.service_requests.length ? '' : 'No Service Requests found.'}</p>}</p>
+      <p>{data.isFetching ? 'Fetching service requests...' : <span>{data.service_requests && data.service_requests.length ? '' : 'No Service Requests found.'}</span>}</p>
     </div>
   )
 }

@@ -3,6 +3,7 @@ from rest_framework.decorators import action
 from .models import ServiceRequest
 from animals.serializers import AnimalSerializer
 from people.serializers import PersonSerializer
+from location.utils import build_full_address
 
 class ServiceRequestSerializer(serializers.ModelSerializer):
     owner_object = PersonSerializer(source='owner', required=False, read_only=True)
@@ -13,11 +14,7 @@ class ServiceRequestSerializer(serializers.ModelSerializer):
 
     # Custom field for the full address.
     def get_full_address(self, obj):
-        region = obj.city + ", " + obj.state + " " + obj.zip_code if obj.city else ""
-        apartment = " " + obj.apartment + ", " if obj.apartment else ", " if region else ""
-        if obj.address:
-            return obj.address + apartment + region
-        return ""
+        return build_full_address(obj)
 
     # Custom field for current status.
     def get_status(self, obj):

@@ -29,7 +29,7 @@ function Table({ columns, data }) {
 
   // Render the UI for your table
   return (
-    <BootstrapTable hover size="sm" {...getTableProps()}>
+    <BootstrapTable striped bordered hover size="sm" {...getTableProps()}>
       <thead>
         {headerGroups.map(headerGroup => (
           <tr {...headerGroup.getHeaderGroupProps()}>
