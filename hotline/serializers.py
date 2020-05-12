@@ -5,23 +5,11 @@ from animals.serializers import AnimalSerializer
 from people.serializers import PersonSerializer
 
 class ServiceRequestSerializer(serializers.ModelSerializer):
-    reporter_name = serializers.SerializerMethodField()
-    owner_name = serializers.SerializerMethodField()
+    owner_object = PersonSerializer(source='owner', required=False, read_only=True)
+    reporter_object = PersonSerializer(source='reporter', required=False, read_only=True)
     full_address = serializers.SerializerMethodField()
     animals = AnimalSerializer(source='animal_set', many=True, required=False, read_only=True)
     status = serializers.SerializerMethodField()
-
-    # Custom field for the owner name.
-    def get_owner_name(self, obj):
-        if obj.owner:
-            return obj.owner.first_name + " " + obj.owner.last_name
-        return ""
-
-    # Custom field for the reporter name.
-    def get_reporter_name(self, obj):
-        if obj.reporter:
-            return obj.reporter.first_name + " " + obj.reporter.last_name
-        return ""
 
     # Custom field for the full address.
     def get_full_address(self, obj):
