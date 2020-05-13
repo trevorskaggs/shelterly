@@ -17,7 +17,7 @@ import { loadUser, setAuthToken } from "./AccountsUtils";
 
 export const LoginForm = () => {
   const { state, dispatch } = useContext(AuthContext);
-  const [, setCookie, removeCookie] = useCookies(['token']);
+  const [cookies, setCookie, removeCookie] = useCookies(['token']);
   useEffect(() => {
     // If user is logged in, redirect to Home.
     if (state.user) {
@@ -41,13 +41,15 @@ export const LoginForm = () => {
             axios.post('http://localhost:3000/login/', values)
             .then(response => {
               setAuthToken(response.data.token);
-              setCookie("token", response.data.token);
+              setCookie("token", response.data.token, {path: '/'});
               dispatch({type: 'LOGIN_SUCCESSFUL', data: response.data });
               loadUser({dispatch}, {removeCookie})
               navigate('/');
             })
             .catch(e => {
               console.log(e);
+              removeCookie("token", {path: '/'});
+              setAuthToken();
               dispatch({type: "LOGIN_FAILED", data: e});
             });
             setSubmitting(false);
