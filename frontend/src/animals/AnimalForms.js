@@ -6,7 +6,7 @@ import { Button, Col, FormGroup, Label, Input, Option, Container, Row } from "re
 import {Form as ReactstrapForm} from "reactstrap";
 import * as Yup from 'yup';
 import { DropDown, TextInput } from '.././components/Form.js';
-import { speciesChoices, sexChoices, dogSizeChoices, catSizeChoices } from './constants'
+import { catAgeChoices, dogAgeChoices, catColorChoices, dogColorChoices, speciesChoices, sexChoices, dogSizeChoices, catSizeChoices } from './constants'
 
 
 const AnimalForm = ({id}) => {
@@ -32,6 +32,10 @@ const AnimalForm = ({id}) => {
     species: '',
     sex: '',
     size: '',
+    age:'',
+    pcolor:'',
+    scolor:'',
+    color_notes:'',
   });
   
   return (
@@ -47,9 +51,14 @@ const AnimalForm = ({id}) => {
           size: Yup.string()
             .max(10, 'Must be 10 characters or less'),
             // .required('Required'),
+          age: Yup.string(),
           sex: Yup.string()
             // .required('Required')
             .oneOf(['M', 'F']),
+          pcolor: Yup.string(),
+          scolor: Yup.string(),
+          color_notes: Yup.string()
+            .max(200, 'Must be 200 characters or less'),
         })}
         onSubmit={(values, { setSubmitting }) => {
           // console.log(values);
@@ -102,40 +111,91 @@ const AnimalForm = ({id}) => {
       >
         {props => (
           <Form>
-            <Container>
+            <Container fluid={true}>
               <Field type="hidden" value={owner_id||""} name="owner" id="owner"></Field>
               <Field type="hidden" value={servicerequest_id||""} name="request" id="request"></Field>
               <FormGroup>
-                <TextInput
-                  id="name"
-                  name="name"
-                  type="text"
-                  label="Name"
-                />
-                <DropDown 
-                  label="Species"
-                  id="speciesDropdown"
-                  name="species"
-                  type="text"
-                  options={speciesChoices}
-                  value={props.values.species||''}
-                />
-                <DropDown
-                  label="Sex"
-                  id="sexDropDown"
-                  name="sex"
-                  type="text"
-                  options={sexChoices}
-                  value={props.values.sex||''}
-                />
-                <DropDown 
-                  label="Size"
-                  id="sizeDropdown"
-                  name="size"
-                  type="text"
-                  options={props.values.species == 'dog' ? dogSizeChoices : catSizeChoices }
-                  value={props.values.size||''}
-                />
+                <Row>
+                  <Col xs="10">
+                    <TextInput
+                      id="name"
+                      name="name"
+                      type="text"
+                      label="Name"
+                    />
+                  </Col>
+                </Row>
+                <Row>
+                  <Col xs="2">
+                    <DropDown
+                      label="Species"
+                      id="speciesDropdown"
+                      name="species"
+                      type="text"
+                      options={speciesChoices}
+                      value={props.values.species||''}
+                    />
+                  </Col>
+                  <Col xs="2">
+                    <DropDown
+                      label="Sex"
+                      id="sexDropDown"
+                      name="sex"
+                      type="text"
+                      options={sexChoices}
+                      value={props.values.sex||''}
+                    />
+                  </Col>
+                  <Col xs="3">
+                    <DropDown
+                      label="Size"
+                      id="sizeDropdown"
+                      name="size"
+                      type="text"
+                      options={props.values.species == 'dog' ? dogSizeChoices : catSizeChoices }
+                      value={props.values.size||''}
+                    />
+                  </Col>
+                  <Col xs="3">
+                    <DropDown
+                      label="Age"
+                      id="age"
+                      name="age"
+                      type="text"
+                      options={props.values.species == 'dog' ? dogAgeChoices : catAgeChoices }
+                      value={props.values.age||''}
+                    />
+                  </Col>
+                </Row>
+                <Row>
+                  <Col xs="3">
+                    <DropDown
+                      label="Primary Color"
+                      id="pcolor"
+                      name="pcolor"
+                      type="text"
+                      options={props.values.species == 'dog' ? dogColorChoices : catColorChoices }
+                      value={props.values.pcolor||''}
+                    />
+                    <DropDown
+                      label="Secondary Color"
+                      id="scolor"
+                      name="scolor"
+                      type="text"
+                      options={props.values.species == 'dog' ? dogColorChoices : catColorChoices }
+                      value={props.values.scolor||''}
+                    />
+                  </Col>
+                  <Col xs="7">
+                    <TextInput
+                      id="color_notes"
+                      name="color_notes"
+                      type="textarea"
+                      rows={5}
+                      label="Description"
+                    />
+                  </Col>
+                </Row>
               </FormGroup>
 
               <Button type="submit" className="btn-success mr-1">Save</Button>
