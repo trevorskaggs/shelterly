@@ -5,7 +5,7 @@ from . import views
 
 app_name = 'animals'
 router = DefaultRouter()
-router.register(r'animals', views.AnimalViewSet)
+router.register(r'animal', views.AnimalViewSet)
 
 urlpatterns = [
     path('api/', include(router.urls)),

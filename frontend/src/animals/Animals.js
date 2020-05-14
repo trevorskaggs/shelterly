@@ -1,11 +1,5 @@
 import React from "react";
-import { A } from "hookrouter";
-import {AnimalForm} from "./AnimalForms";
-import {AnimalTable} from "./AnimalTables";
-
-const header_style = {
-  textAlign: "center",
-};
+import { Link } from "raviger";
 
 const link_style = {
   textDecoration: "none",
@@ -18,11 +12,17 @@ const btn_style = {
 
 const Animals = () => (
   <div style={btn_style}>
-    <A href="/animals/list" style={link_style} className="btn btn-warning btn-lg btn-block mb-2">ANIMALS LIST</A>
-    <A href="/animals/add" style={link_style} className="btn btn-warning btn-lg btn-block mb-2">ADD ANIMAL</A>
+    <Link href="/animals/animal/list" style={link_style} className="btn btn-warning btn-lg btn-block mb-2">ANIMALS LIST</Link>
+    <Link href="/animals/animal/new" style={link_style} className="btn btn-warning btn-lg btn-block mb-2">ADD ANIMAL</Link>
     <br/>
     <br/>
-    <A className="btn btn-secondary btn-lg btn-block"  href="/">BACK</A>
+    <Link className="btn btn-secondary btn-lg btn-block"  href="/">BACK</Link>
+  </div>
+)
+
+export const AnimalDetail = ({id}) => (
+  <div>
+    {/* <AnimalView id={id} /> */}
   </div>
 )
 

@@ -6,17 +6,17 @@ export const speciesChoices = [
   ]
 
   export const sexChoices = [
-    { value: 'male', label: 'Male' },
-    { value: 'female', label: 'Female' },
+    { value: 'M', label: 'Male' },
+    { value: 'F', label: 'Female' },
   ]
 
 export const dogSizeChoices = [
-    {value:'small', label:"Small (< 20 lbs)"},
-    {value:'medium', label:"Medium (21 - 60 lbs)"},
-    {value:'large', label:"Large (61 - 110 lbs)"},
-    {value:'giant', label:"Giant (111+ lbs)"},
+    {value:'Small', label:"Small (< 20 lbs)"},
+    {value:'Medium', label:"Medium (21 - 60 lbs)"},
+    {value:'Large', label:"Large (61 - 110 lbs)"},
+    {value:'Giant', label:"Giant (111+ lbs)"},
 ]
 export const catSizeChoices = [
-  {value:'small', label:'Small ( < 10 lbs)'},
-  {value:'full', label:'Full Size (10+ lbs)'},
+  {value:'Small', label:'Small ( < 10 lbs)'},
+  {value:'Full', label:'Full Size (10+ lbs)'},
 ]

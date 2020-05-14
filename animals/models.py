@@ -12,7 +12,7 @@ class Animal(Location):
 
     request = models.ForeignKey(ServiceRequest, on_delete=models.SET_NULL, blank=True, null=True)
     owner = models.ForeignKey(Person, on_delete=models.SET_NULL, blank=True, null=True)
-    name = models.CharField(max_length=50, blank=True, null=True)
+    name = models.CharField(max_length=50, blank=True)
     image = models.ImageField(upload_to='images/', null=True)
 
     #choice fields
@@ -20,7 +20,7 @@ class Animal(Location):
     sex = models.CharField(max_length=1, choices=SEX_CHOICES, blank=True, null=True)
     pcolor = models.CharField(max_length=50, choices=ALL_COLOR_CHOICES, verbose_name='Primary Color' , blank=True, null=True)
     scolor = models.CharField(max_length=50, choices=ALL_COLOR_CHOICES, verbose_name='Secondary Color', blank=True, null=True)
-    color_notes = models.CharField(max_length=200, blank=True, null=True)
+    color_notes = models.CharField(max_length=200, blank=True)
     size = models.CharField(max_length=10, choices=ALL_SIZE_CHOICES, blank=True, null=True)
     age = models.CharField(max_length=10, choices=ALL_COLOR_CHOICES, blank=True, null=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='REPORTED')
@@ -33,7 +33,7 @@ class Animal(Location):
     collared = models.BooleanField(blank=True, null=True)
 
     #text fields
-    behavior_notes = models.TextField(blank=True, null=True)
+    behavior_notes = models.TextField(blank=True)
     last_seen = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
 
     @property

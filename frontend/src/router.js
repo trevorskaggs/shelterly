@@ -1,6 +1,6 @@
 import React from "react";
 import Home from "./Home";
-import Animals from "./animals/Animals"
+import Animals, { AnimalDetail } from "./animals/Animals"
 import AnimalForm from "./animals/AnimalForms"
 import AnimalTable from "./animals/AnimalTables"
 import Evac, { NewTeam, TeamList } from "./evac/Evac";
@@ -10,8 +10,9 @@ import { Login } from "./accounts/Accounts"
 const routes = {
   "/": () => <Home />,
   "/animals": () => <Animals />,
-  "/animals/add": () => <AnimalForm />,
-  "/animals/list": () => <AnimalTable />,
+  "/animals/animal/new": () => <AnimalForm />,
+  "/animals/animal/list": () => <AnimalTable />,
+  "/animals/animal/:id": ({id}) => <AnimalDetail id={id} />,
   "/evac": () => <Evac />,
   "/evac/evacteam/new": () => <NewTeam />,
   "/evac/evacteam/list": () => <TeamList />,
