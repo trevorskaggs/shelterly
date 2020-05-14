@@ -6,7 +6,7 @@ from people import views
 
 app_name = 'people'
 router = DefaultRouter()
-router.register(r'teammember', views.TeamMemberViewSet)
+router.register(r'person', views.PersonViewSet)
 
 urlpatterns = [
     path('api/', include(router.urls)),

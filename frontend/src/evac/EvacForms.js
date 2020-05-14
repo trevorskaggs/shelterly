@@ -1,20 +1,17 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from "axios";
-import { A, navigate } from "hookrouter";
-import { Field, Form, useField, Formik } from 'formik';
+import { Link, navigate } from "raviger";
+import { Form, Formik } from 'formik';
 import {
   Button,
   Col,
   FormGroup,
-  Label,
   Row,
-  Input,
   Container,
 } from 'reactstrap';
-import { ReactstrapInput } from 'reactstrap-formik';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import * as Yup from 'yup';
-import { MultiSelect } from '.././components/Form';
+import { MultiSelect, TextInput} from '.././components/Form';
 
 
 export function EvacTeamForm() {
@@ -25,7 +22,7 @@ export function EvacTeamForm() {
     const fetchTeamMembers = async () => {
       setData({options: data.options, isFetching: true});
       // Fetch TeamMember data.
-      await axios.get('http://localhost:8000/people/api/teammember/', {
+      await axios.get('http://localhost:3000/accounts/api/user/', {
         cancelToken: source.token,
       })
       .then(response => {
@@ -36,8 +33,8 @@ export function EvacTeamForm() {
         });
         setData({options: data.options, isFetching: false});
       })
-      .catch(e => {
-        console.log(e);
+      .catch(error => {
+        console.log(error.response);
         setData({options: data.options, isFetching: false});
       });
     };
@@ -60,18 +57,20 @@ export function EvacTeamForm() {
             .of(Yup.string())
             .required('Required'),
           callsign: Yup.string()
-            .max(50, 'Must be 20 characters or less')
+            .max(20, 'Must be 20 characters or less')
             .required('Required'),
         })}
         onSubmit={(values, { setSubmitting }) => {
-          axios.post('http://localhost:8000/evac/api/evacteam/', values)
-          .then(function() {
-            navigate('/evac');
-          })
-          .catch(e => {
-            console.log(e);
-          });
-          setSubmitting(false);
+          setTimeout(() => {
+            axios.post('http://localhost:3000/evac/api/evacteam/', values)
+            .then(function() {
+              navigate('/evac');
+            })
+            .catch(error => {
+              console.log(error.response);
+            });
+            setSubmitting(false);
+          }, 500);
         }}
       >
         <Form>
@@ -80,17 +79,16 @@ export function EvacTeamForm() {
               <MultiSelect label="Evac Team Members*" name="evac_team_members" className="mb-3">
                 {data.options.map(({ value, label }, index) => <option value={value} key={value} >{label}</option>)}
               </MultiSelect>
-              <Field
+              <TextInput
                 type="text"
                 label="Callsign*"
                 name="callsign"
                 id="callsign"
-                component={ReactstrapInput}
               />
             </FormGroup>
 
             <Button type="submit" className="btn-success mr-1">Save</Button>
-            <A className="btn btn-secondary" href="/evac">Cancel</A>
+            <Link className="btn btn-secondary" href="/evac">Cancel</Link>
           </Container>
         </Form>
       </Formik>
@@ -98,6 +96,7 @@ export function EvacTeamForm() {
   );
 };
 
+// No longer used but may still provide a good example for the time being.
 export const TeamMemberForm = () => {
     return (
       <>
@@ -115,18 +114,21 @@ export const TeamMemberForm = () => {
             last_name: Yup.string()
               .max(50, 'Must be 50 characters or less')
               .required('Required'),
-            cell_phone: Yup.string().required('Required'),
+            cell_phone: Yup.string()
+              .required('Required'),
             agency_id: Yup.string(),
           })}
           onSubmit={(values, { setSubmitting }) => {
-            axios.post('http://localhost:8000/people/api/teammember/', values)
-            .then(function() {
-              navigate('/evac');
-            })
-            .catch(e => {
-              console.log(e);
-            });
-            setSubmitting(false);
+            setTimeout(() => {
+              axios.post('http://localhost:3000/accounts/api/user/', values)
+              .then(function() {
+                navigate('/evac');
+              })
+              .catch(error => {
+                console.log(error.response);
+              });
+              setSubmitting(false);
+            }, 500);
           }}
         >
           <Form>
@@ -134,21 +136,19 @@ export const TeamMemberForm = () => {
               <FormGroup>
                 <Row>
                   <Col xs={{size: 5, offset: 1}}>
-                    <Field
+                    <TextInput
                       type="text"
                       label="First Name*"
                       name="first_name"
                       id="first_name"
-                      component={ReactstrapInput}
                     />
                   </Col>
                   <Col xs="5">
-                    <Field
+                    <TextInput
                       type="text"
                       label="Last Name*"
                       name="last_name"
                       id="last_name"
-                      component={ReactstrapInput}
                     />
                   </Col>
                 </Row>
@@ -157,28 +157,26 @@ export const TeamMemberForm = () => {
               <FormGroup>
                 <Row>
                   <Col xs={{size: 5, offset: 1}}>
-                    <Field
+                    <TextInput
                       type="text"
                       label="Cell Phone*"
                       name="cell_phone"
                       id="cell_phone"
-                      component={ReactstrapInput}
                     />
                   </Col>
                   <Col xs="5">
-                    <Field
+                    <TextInput
                       type="text"
                       label="Agency ID"
                       name="agency_id"
                       id="agency_id"
-                      component={ReactstrapInput}
                     />
                   </Col>
                 </Row>
               </FormGroup>
 
               <Button type="submit" className="btn-success mr-1">Save</Button>
-              <A className="btn btn-secondary" href="/evac">Cancel</A>
+              <Link className="btn btn-secondary" href="/evac">Cancel</Link>
             </Container>
           </Form>
         </Formik>

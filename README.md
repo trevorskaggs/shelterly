@@ -1,5 +1,4 @@
-# RAMS
-Rescued Animal Management System
+# Shelterly
 
 Web Framework: Django 2.1.7
 Back-End Server: PostgreSQL 11.2

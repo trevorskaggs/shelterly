@@ -1,3 +1,4 @@
+from django.core.files.storage import FileSystemStorage
 from django.db.models import Q
 from django.shortcuts import render, redirect
 from django.shortcuts import get_object_or_404
@@ -8,8 +9,10 @@ from hotline.models import ServiceRequest
 from hotline.forms import ServiceRequestForm, ServiceRequestSearchForm
 from people.models import Person
 from people.forms import PersonForm
-from rest_framework import viewsets
-from django.core.files.storage import FileSystemStorage
+from rest_framework import filters, permissions, viewsets
+from rest_framework.decorators import action
+from rest_framework.mixins import UpdateModelMixin
+
 
 # Create your views here.
 def hotline_landing(request):
@@ -22,14 +25,14 @@ def hotline_new_owner(request, rep_pk=None):
         if rep_pk:
             return redirect('hotline:service_request_new', owner_pk=owner.pk, rep_pk=rep_pk)
         return redirect('hotline:service_request_new', owner_pk=owner.pk)
-    return render(request, 'owner.html', {'form':form})
+    return render(request, 'person.html', {'form':form, 'person_type':'Owner'})
 
 def hotline_new_reporter(request):
     form = PersonForm(request.POST or None)
     if form.is_valid():
         reporter = form.save()
         return redirect('hotline:hotline_new_owner', rep_pk=reporter.pk)
-    return render(request, 'hotline_new_reporter.html', {'form':form})
+    return render(request, 'person.html', {'form':form, 'person_type':'Reporter'})
 
 def service_request_detail(request, service_request_pk):
     service_request = get_object_or_404(ServiceRequest, pk=service_request_pk)
@@ -100,7 +103,19 @@ def service_request_list(request, status='all'):
     data = {'service_requests':service_requests, 'status': status}
     return render(request, 'service_request_list.html', data)
 
-class ServiceRequestViewSet(viewsets.ModelViewSet):
 
+class ServiceRequestViewSet(viewsets.ModelViewSet):
     queryset = ServiceRequest.objects.all()
+    search_fields = ['address', 'city', 'animal__name', 'owner__first_name', 'owner__last_name', 'owner__address', 'owner__city', 'reporter__first_name', 'reporter__last_name']
+    filter_backends = (filters.SearchFilter,)
+    permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = ServiceRequestSerializer
+
+    def get_queryset(self):
+        queryset = ServiceRequest.objects.all()
+        status = self.request.query_params.get('status', '')
+        if status == 'open':
+            queryset = queryset.filter(animal__status__in=['REPORTED', 'ASSIGNED']).distinct()
+        elif status == 'closed':
+            queryset = queryset.exclude(animal__status__in=['REPORTED', 'ASSIGNED']).distinct()
+        return queryset

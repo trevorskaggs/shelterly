@@ -1,19 +1,46 @@
-import React from 'react';
+import React, { useCallback, useRef } from 'react';
 import { useFormikContext, useField } from 'formik';
 import { FormFeedback, Label, Input } from 'reactstrap';
 import Select from 'react-select';
+import SimpleValue from 'react-select-simple-value';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import Flatpickr from 'react-flatpickr';
+
+const DateTimePicker = ({ label, ...props }) => {
+  // useField() returns [formik.getFieldProps(), formik.getFieldMeta()]
+  // which we can spread on <input> and also replace ErrorMessage entirely.
+  const [field] = useField(props);
+
+  // Ref and function to clear field.
+  const datetime = useRef(null);
+  const clearDate = useCallback(() => {
+    if (datetime.current) {
+      datetime.current.flatpickr.clear();
+    }
+  }, [datetime]);
+
+  // Flatpickr options
+  var options = {allowInput:true, altInput: true, altFormat: "F j, Y h:i K",}
+
+  return (
+    <>
+      <label className="mr-2" htmlFor={props.id || props.name}>{label}</label>
+      <Flatpickr className="w-25" ref={datetime} data-enable-time options={options} {...field} {...props} />
+      <button type="button" className="btn btn-primary ml-1" onClick={clearDate}>Clear</button>
+    </>
+  );
+};
 
 // ...props is shorthand for "rest of the items in this array". So the 1st item is
 // assigned to label and the rest are assigned to props
-const TextInput = ({ label, ...props }) => {
+const TextInput = ({ label, value, ...props }) => {
   // useField() returns [formik.getFieldProps(), formik.getFieldMeta()]
   // which we can spread on <input> and also replace ErrorMessage entirely.
   const [field, meta] = useField(props);
   return (
     <>
-      <Label htmlFor={props.id || props.name}>{label}</Label>
-      <Input className={meta.touched && meta.error ? "is-invalid" : null} {...field} {...props} />
+      <Label htmlFor={props.id || props.name} className="mt-3">{label}</Label>
+      <Input value={value} className={meta.touched && meta.error ? "is-invalid" : null} {...field} {...props} />
       {meta.touched && meta.error ? (
         <FormFeedback>{meta.error}</FormFeedback>
       ) : null}
@@ -39,12 +66,17 @@ const Checkbox = ({ children, ...props }) => {
   );
 };
 
-const DropDown = ({ options, label, ...props }) => {
+const DropDown = ({ options, value, label, ...props }) => {
   const { setFieldValue, setFieldTouched } = useFormikContext();
-  const [field, meta] = useField(props);
+  const [field] = useField(props);
 
   function handleOptionChange(selection) {
-    setFieldValue(props.name, selection);
+    if (selection) {
+      setFieldValue(props.name, selection.value);
+    }
+    else {
+      setFieldValue(props.name, null);
+    }
   }
 
   function updateBlur() {
@@ -53,11 +85,10 @@ const DropDown = ({ options, label, ...props }) => {
 
   return (
     <>
-      <Label htmlFor={props.id || props.name}>{label}</Label>
-      <Select options={options} {...field} {...props} onBlur={updateBlur} onChange={handleOptionChange}/>
-      {/* {meta.touched && meta.error ? (
-        <span>{meta.error}</span>
-      ) : null} */}
+      <Label htmlFor={props.id || props.name} className="mt-3">{label}</Label>
+      <SimpleValue {...field} options={options} value={value}>
+         {simpleProps => <Select onBlur={updateBlur} onChange={handleOptionChange} {...props} {...simpleProps} />}
+      </SimpleValue>
     </>
   );
 };
@@ -71,5 +102,5 @@ const MultiSelect = ({ label, ...props }) => {
       </>
     );
   };
-  
-export { TextInput, Checkbox, DropDown, MultiSelect };
+
+export { TextInput, Checkbox, DropDown, MultiSelect, DateTimePicker };
