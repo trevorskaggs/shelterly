@@ -1,17 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
-import { A, navigate } from "hookrouter";
-import { Field, Form, useField, Formik } from 'formik';
+import { Link, navigate } from "raviger";
+import { Form, Formik } from 'formik';
 import {
   Button,
   Col,
   FormGroup,
-  Label,
   Row,
-  Input,
   Container,
 } from 'reactstrap';
-import { ReactstrapInput } from 'reactstrap-formik';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import * as Yup from 'yup';
 import { MultiSelect, TextInput} from '.././components/Form';
@@ -36,8 +33,8 @@ export function EvacTeamForm() {
         });
         setData({options: data.options, isFetching: false});
       })
-      .catch(e => {
-        console.log(e);
+      .catch(error => {
+        console.log(error.response);
         setData({options: data.options, isFetching: false});
       });
     };
@@ -60,7 +57,7 @@ export function EvacTeamForm() {
             .of(Yup.string())
             .required('Required'),
           callsign: Yup.string()
-            .max(50, 'Must be 20 characters or less')
+            .max(20, 'Must be 20 characters or less')
             .required('Required'),
         })}
         onSubmit={(values, { setSubmitting }) => {
@@ -69,8 +66,8 @@ export function EvacTeamForm() {
             .then(function() {
               navigate('/evac');
             })
-            .catch(e => {
-              console.log(e);
+            .catch(error => {
+              console.log(error.response);
             });
             setSubmitting(false);
           }, 500);
@@ -91,7 +88,7 @@ export function EvacTeamForm() {
             </FormGroup>
 
             <Button type="submit" className="btn-success mr-1">Save</Button>
-            <A className="btn btn-secondary" href="/evac">Cancel</A>
+            <Link className="btn btn-secondary" href="/evac">Cancel</Link>
           </Container>
         </Form>
       </Formik>
@@ -117,7 +114,8 @@ export const TeamMemberForm = () => {
             last_name: Yup.string()
               .max(50, 'Must be 50 characters or less')
               .required('Required'),
-            cell_phone: Yup.string().required('Required'),
+            cell_phone: Yup.string()
+              .required('Required'),
             agency_id: Yup.string(),
           })}
           onSubmit={(values, { setSubmitting }) => {
@@ -126,8 +124,8 @@ export const TeamMemberForm = () => {
               .then(function() {
                 navigate('/evac');
               })
-              .catch(e => {
-                console.log(e);
+              .catch(error => {
+                console.log(error.response);
               });
               setSubmitting(false);
             }, 500);
@@ -178,7 +176,7 @@ export const TeamMemberForm = () => {
               </FormGroup>
 
               <Button type="submit" className="btn-success mr-1">Save</Button>
-              <A className="btn btn-secondary" href="/evac">Cancel</A>
+              <Link className="btn btn-secondary" href="/evac">Cancel</Link>
             </Container>
           </Form>
         </Formik>

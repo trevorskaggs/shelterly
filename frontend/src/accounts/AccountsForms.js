@@ -1,6 +1,6 @@
 import React, { useContext, useEffect } from "react";
 import axios from "axios";
-import { navigate } from "hookrouter";
+import { navigate } from "raviger";
 import { Field, Form, Formik } from 'formik';
 import {
   Button,
@@ -13,11 +13,11 @@ import { ReactstrapInput } from 'reactstrap-formik';
 import * as Yup from "yup";
 import { useCookies } from 'react-cookie';
 import { AuthContext } from "./AccountsReducer";
-import { setAuthToken } from "./AccountsUtils";
+import { loadUser, setAuthToken } from "./AccountsUtils";
 
 export const LoginForm = () => {
   const { state, dispatch } = useContext(AuthContext);
-  const [, setCookie, ] = useCookies(['token']);
+  const [cookies, setCookie, removeCookie] = useCookies(['token']);
   useEffect(() => {
     // If user is logged in, redirect to Home.
     if (state.user) {
@@ -43,10 +43,13 @@ export const LoginForm = () => {
               setAuthToken(response.data.token);
               setCookie("token", response.data.token, {path: '/'});
               dispatch({type: 'LOGIN_SUCCESSFUL', data: response.data });
+              loadUser({dispatch}, {removeCookie})
               navigate('/');
             })
             .catch(e => {
               console.log(e);
+              removeCookie("token", {path: '/'});
+              setAuthToken();
               dispatch({type: "LOGIN_FAILED", data: e});
             });
             setSubmitting(false);
