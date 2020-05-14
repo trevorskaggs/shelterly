@@ -12,7 +12,6 @@ export function loadUser({dispatch}, {removeCookie}) {
   .then(function(results){
     // Set the user state.
     dispatch({type: 'USER_LOADED', user: results.data });
-    // navigate("/");
   })
   .catch(e => {
     console.log(e);
