@@ -265,7 +265,6 @@ export const PersonForm = ({id}) => {
                       name="state"
                       id="state"
                       options={state_options}
-                      isClearable={true}
                       value={props.values.state||''}
                     />
                   </Col>
@@ -513,7 +512,6 @@ export function ServiceRequestForm({id}) {
                         name="state"
                         id="state"
                         options={state_options}
-                        isClearable={true}
                         value={props.values.state||''}
                       />
                     </Col>

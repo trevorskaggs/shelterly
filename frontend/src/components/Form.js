@@ -66,7 +66,8 @@ const Checkbox = ({ children, ...props }) => {
   );
 };
 
-const DropDown = ({ options, value, label, ...props }) => {
+// const DropDown = ({ options, value, label, ...props }) => {
+const DropDown = React.forwardRef((props, ref) => {
   const { setFieldValue, setFieldTouched } = useFormikContext();
   const [field] = useField(props);
 
@@ -85,13 +86,13 @@ const DropDown = ({ options, value, label, ...props }) => {
 
   return (
     <>
-      <Label htmlFor={props.id || props.name} className="mt-3">{label}</Label>
-      <SimpleValue {...field} options={options} value={value}>
-         {simpleProps => <Select onBlur={updateBlur} onChange={handleOptionChange} {...props} {...simpleProps} />}
+      <Label htmlFor={props.id || props.name} className="mt-3">{props.label}</Label>
+      <SimpleValue {...field} options={props.options} value={props.value}>
+         {simpleProps => <Select ref={ref} isClearable={true} onBlur={updateBlur} onChange={handleOptionChange} {...props} {...simpleProps} />}
       </SimpleValue>
     </>
   );
-};
+});
 
 const MultiSelect = ({ label, ...props }) => {
     const [field] = useField(props);

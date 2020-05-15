@@ -1,11 +1,10 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import axios from "axios";
 import { Link, navigate, useQueryParams } from 'raviger';
 import { Field, Form, Formik } from "formik";
 import { Button, Col, FormGroup, Label, Input, Option, Container, Row } from "reactstrap";
-import {Form as ReactstrapForm} from "reactstrap";
 import * as Yup from 'yup';
-import { DropDown, TextInput } from '.././components/Form.js';
+import { DateTimePicker, DropDown, TextInput } from '.././components/Form.js';
 import { catAgeChoices, dogAgeChoices, catColorChoices, dogColorChoices, speciesChoices, sexChoices, dogSizeChoices, catSizeChoices } from './constants'
 
 
@@ -18,8 +17,12 @@ const AnimalForm = ({id}) => {
     servicerequest_id = '',
   } = queryParams;
 
-  // Track species selected.
+  // Track species selected and update choice lists accordingly.
   const [species, setSpecies] = useState('');
+  const selectRef = useRef(null);
+  const ageChoices = {'':[], 'dog':dogAgeChoices, 'cat':catAgeChoices}
+  const colorChoices = {'':[], 'dog':dogColorChoices, 'cat':catColorChoices}
+  const sizeChoices = {'':[], 'dog':dogSizeChoices, 'cat':catSizeChoices}
 
   // Track whether or not to add another animal after saving.
   const [addAnother, setAddAnother] = useState(false);
@@ -32,10 +35,12 @@ const AnimalForm = ({id}) => {
     species: '',
     sex: '',
     size: '',
-    age:'',
-    pcolor:'',
-    scolor:'',
-    color_notes:'',
+    age: '',
+    pcolor: '',
+    scolor: '',
+    color_notes: '',
+    behavior_notes: '',
+    last_seen: null,
   });
   
   return (
@@ -45,20 +50,21 @@ const AnimalForm = ({id}) => {
         validationSchema={Yup.object({
           name: Yup.string()
             .max(50, 'Must be 50 characters or less.'),
-            // .required('Required'),
           species: Yup.string(),
             // .oneOf(speciesChoices.map(x => x['value'])),
           size: Yup.string()
             .max(10, 'Must be 10 characters or less'),
-            // .required('Required'),
           age: Yup.string(),
           sex: Yup.string()
-            // .required('Required')
             .oneOf(['M', 'F']),
           pcolor: Yup.string(),
           scolor: Yup.string(),
           color_notes: Yup.string()
             .max(200, 'Must be 200 characters or less'),
+          behavior_notes: Yup.string()
+            .max(200, 'Must be 200 characters or less'),
+          last_seen: Yup.date()
+            .nullable(),
         })}
         onSubmit={(values, { setSubmitting }) => {
           // console.log(values);
@@ -111,7 +117,7 @@ const AnimalForm = ({id}) => {
       >
         {props => (
           <Form>
-            <Container fluid={true}>
+            <Container>
               <Field type="hidden" value={owner_id||""} name="owner" id="owner"></Field>
               <Field type="hidden" value={servicerequest_id||""} name="request" id="request"></Field>
               <FormGroup>
@@ -133,7 +139,12 @@ const AnimalForm = ({id}) => {
                       name="species"
                       type="text"
                       options={speciesChoices}
-                      value={props.values.species||''}
+                      // value={props.values.species||''}
+                      isClearable={false}
+                      onChange={(instance) => {
+                        selectRef.current.select.clearValue();
+                        props.setFieldValue("species", instance.value);
+                      }}
                     />
                   </Col>
                   <Col xs="2">
@@ -152,8 +163,9 @@ const AnimalForm = ({id}) => {
                       id="sizeDropdown"
                       name="size"
                       type="text"
-                      options={props.values.species == 'dog' ? dogSizeChoices : catSizeChoices }
-                      value={props.values.size||''}
+                      ref={selectRef}
+                      options={sizeChoices[props.values.species]}
+                      // value={props.values.size||''}
                     />
                   </Col>
                   <Col xs="3">
@@ -162,7 +174,8 @@ const AnimalForm = ({id}) => {
                       id="age"
                       name="age"
                       type="text"
-                      options={props.values.species == 'dog' ? dogAgeChoices : catAgeChoices }
+                      ref={selectRef}
+                      options={ageChoices[props.values.species]}
                       value={props.values.age||''}
                     />
                   </Col>
@@ -174,7 +187,8 @@ const AnimalForm = ({id}) => {
                       id="pcolor"
                       name="pcolor"
                       type="text"
-                      options={props.values.species == 'dog' ? dogColorChoices : catColorChoices }
+                      ref={selectRef}
+                      options={colorChoices[props.values.species]}
                       value={props.values.pcolor||''}
                     />
                     <DropDown
@@ -182,7 +196,8 @@ const AnimalForm = ({id}) => {
                       id="scolor"
                       name="scolor"
                       type="text"
-                      options={props.values.species == 'dog' ? dogColorChoices : catColorChoices }
+                      ref={selectRef}
+                      options={colorChoices[props.values.species]}
                       value={props.values.scolor||''}
                     />
                   </Col>
@@ -195,6 +210,28 @@ const AnimalForm = ({id}) => {
                       label="Description"
                     />
                   </Col>
+                </Row>
+                <Row>
+                  <Col xs="7">
+                    <TextInput
+                      id="behavior_notes"
+                      name="behavior_notes"
+                      type="textarea"
+                      rows={5}
+                      label="Behavior Notes"
+                    />
+                  </Col>
+                </Row>
+                <Row className="mt-3">
+                  <DateTimePicker
+                    label="Last Seen"
+                    name="last_seen"
+                    id="last_seen"
+                    onChange={(date, dateStr) => {
+                      props.setFieldValue("last_seen", dateStr)
+                    }}
+                    value={data.last_seen||null}
+                  />
                 </Row>
               </FormGroup>
 
