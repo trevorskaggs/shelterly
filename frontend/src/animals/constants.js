@@ -60,3 +60,9 @@ export const catAgeChoices = [
   {value:'Elderly', label:'Elderly (8 Years - 15 Years)'},
   {value:'Geriatric', label:'Geriatric (15+ years)'},
 ]
+
+export const unknownChoices = [
+  {value:'Unknown', label:'Unknown'},
+  {value:'Yes', label:'Yes'},
+  {value:'No', label:'No'},
+]

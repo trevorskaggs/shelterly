@@ -66,7 +66,6 @@ const Checkbox = ({ children, ...props }) => {
   );
 };
 
-// const DropDown = ({ options, value, label, ...props }) => {
 const DropDown = React.forwardRef((props, ref) => {
   const { setFieldValue, setFieldTouched } = useFormikContext();
   const [field] = useField(props);

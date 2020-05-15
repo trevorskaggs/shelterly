@@ -1,14 +1,16 @@
 from animals.colors import CAT_COLOR_CHOICES, CAT_PATTERN_CHOICES, DOG_COLOR_CHOICES, DOG_PATTERN_CHOICES, UNKNOWN_CHOICE
 
+UNKNOWN_CHOICES = (
+  ('unknown', 'Unknown'),
+  ('yes', 'Yes'),
+  ('no', 'No')
+)
+
 SPECIES_CHOICES = (
     ('cat', "Cat"),
     ('dog', "Dog"),
     ('horse', 'Horse'),
     ('other', "Other"),
-)
-
-BREED_CHOICES = (
-    UNKNOWN_CHOICE,
 )
 
 SEX_CHOICES = (

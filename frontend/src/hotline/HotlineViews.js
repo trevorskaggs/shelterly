@@ -1,7 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import axios from "axios";
 import { Link } from 'raviger';
-import 'bootstrap/dist/css/bootstrap.min.css';
 import Moment from 'react-moment';
 import { Fab } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
@@ -176,7 +175,7 @@ export function ServiceRequestView({id}) {
       {data.animals && data.animals.length ?
       <div style={card_style} className="card card-body bg-light mx-auto">
         <p><b>Animals:</b></p>
-         <span>{data.animals.map(animal => (<li key={animal.id}>{animal.name} ({animal.species}) - {animal.status} <Fab color="primary" href={"/animals/animal/" + animal.id} className="mb-1" style={{width:30, height:30, minHeight:30, color:"#fff", backgroundColor: "#c82333"}} title="Animal details" aria-label="animal_details"><AssignmentIcon style={{fontSize:16}} /></Fab></li>))}</span>
+         <span>{data.animals.map(animal => (<li key={animal.id}>{animal.name} (<span style={{textTransform:"capitalize"}}>{animal.species}</span>) - {animal.status} <Fab color="primary" href={"/animals/animal/" + animal.id} className="mb-1" style={{width:30, height:30, minHeight:30, color:"#fff", backgroundColor: "#c82333"}} title="Animal details" aria-label="animal_details"><AssignmentIcon style={{fontSize:16}} /></Fab></li>))}</span>
       </div> : ""}
       <hr/>
       <div style={btn_style}>
