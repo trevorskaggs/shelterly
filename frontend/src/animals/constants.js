@@ -11,14 +11,14 @@ export const speciesChoices = [
   ]
 
 export const dogSizeChoices = [
-    {value:'Small', label:"Small (< 20 lbs)"},
-    {value:'Medium', label:"Medium (21 - 60 lbs)"},
-    {value:'Large', label:"Large (61 - 110 lbs)"},
-    {value:'Giant', label:"Giant (111+ lbs)"},
+    {value:'small', label:"Small (< 20 lbs)"},
+    {value:'medium', label:"Medium (21 - 60 lbs)"},
+    {value:'large', label:"Large (61 - 110 lbs)"},
+    {value:'giant', label:"Giant (111+ lbs)"},
 ]
 export const catSizeChoices = [
-  {value:'Small', label:'Small ( < 10 lbs)'},
-  {value:'Full', label:'Full Size (10+ lbs)'},
+  {value:'small', label:'Small ( < 10 lbs)'},
+  {value:'full', label:'Full Size (10+ lbs)'},
 ]
 
 // Source: https://en.wikipedia.org/wiki/Coat_(dog)#Colors
@@ -48,21 +48,21 @@ export const catColorChoices = [
 ]
 
 export const dogAgeChoices = [
-  {value:'Youth', label:"Youth (< 2 Years)"},
-  {value:'Adult', label:"Adult (2 - 8 Years)"},
-  {value:'Elerly', label:"Elderly (8+ Years)"},
+  {value:'youth', label:"Youth (< 2 Years)"},
+  {value:'adult', label:"Adult (2 - 8 Years)"},
+  {value:'elderly', label:"Elderly (8+ Years)"},
 ]
 
 export const catAgeChoices = [
-  {value:'Kitten', label:'Kitten (<6 Months)'},
-  {value:'Youth', label:'Youth (6 Months - 2 Years)'},
-  {value:'Adult', label:'Adult (2 Years - 8 Years)'},
-  {value:'Elderly', label:'Elderly (8 Years - 15 Years)'},
-  {value:'Geriatric', label:'Geriatric (15+ years)'},
+  {value:'kitten', label:'Kitten (<6 Months)'},
+  {value:'youth', label:'Youth (6 Months - 2 Years)'},
+  {value:'adult', label:'Adult (2 Years - 8 Years)'},
+  {value:'elderly', label:'Elderly (8 Years - 15 Years)'},
+  {value:'geriatric', label:'Geriatric (15+ years)'},
 ]
 
 export const unknownChoices = [
-  {value:'Unknown', label:'Unknown'},
-  {value:'Yes', label:'Yes'},
-  {value:'No', label:'No'},
+  {value:'unknown', label:'Unknown'},
+  {value:'yes', label:'Yes'},
+  {value:'no', label:'No'},
 ]

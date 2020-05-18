@@ -86,8 +86,8 @@ export function PersonView({id}) {
       <hr/>
       <div style={btn_style}>
         {is_owner ?
-          <Link href={"/hotline/owner/edit/" + data.id} style={link_style} className="btn btn-primary btn-lg btn-block mb-2">EDIT OWNER</Link> :
-          <Link href={"/hotline/reporter/edit/" + data.id} style={link_style} className="btn btn-primary btn-lg btn-block mb-2">EDIT REPORTER</Link>
+          <Link href={"/hotline/owner/edit/" + id} style={link_style} className="btn btn-primary btn-lg btn-block mb-2">EDIT OWNER</Link> :
+          <Link href={"/hotline/reporter/edit/" + id} style={link_style} className="btn btn-primary btn-lg btn-block mb-2">EDIT REPORTER</Link>
         }
         <br/>
         <br/>
@@ -181,7 +181,7 @@ export function ServiceRequestView({id}) {
       <div style={btn_style}>
         <Link href={"/animals/animal/new?servicerequest_id=" + id} style={link_style} className="btn btn-success btn-lg btn-block mb-2">ADD ANIMAL</Link>
         <br/>
-        <Link href={"/hotline/servicerequest/edit/" + data.id} style={link_style} className="btn btn-primary btn-lg btn-block mb-2">UPDATE REQUEST</Link>
+        <Link href={"/hotline/servicerequest/edit/" + id} style={link_style} className="btn btn-primary btn-lg btn-block mb-2">UPDATE REQUEST</Link>
         <br/>
         <br/>
         <Link className="btn btn-secondary btn-lg btn-block"  href="/hotline">BACK</Link>

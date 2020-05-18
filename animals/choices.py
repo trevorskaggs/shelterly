@@ -19,27 +19,27 @@ SEX_CHOICES = (
 )
 
 DOG_SIZE_CHOICES = (
-    ('Small', "Small (< 20 lbs)"),
-    ('Medium', "Medium (21 - 60 lbs)"),
-    ('Large', "Large (61 - 110 lbs)"),
-    ('Giant', "Giant (111+ lbs)"),
+    ('small', "Small (< 20 lbs)"),
+    ('medium', "Medium (21 - 60 lbs)"),
+    ('large', "Large (61 - 110 lbs)"),
+    ('giant', "Giant (111+ lbs)"),
 )
 
 DOG_AGE_CHOICES = (
-    ('Youth', "Youth (< 2 Years)"),
-    ('Adult', "Adult (2 - 8 Years)"),
-    ('Elerly', "Elderly (8+ Years)"),
+    ('youth', "Youth (< 2 Years)"),
+    ('adult', "Adult (2 - 8 Years)"),
+    ('elderly', "Elderly (8+ Years)"),
 )
 CAT_SIZE_CHOICES = (
-    ('Small', 'Small ( < 10 lbs)'),
-    ('Full Size', 'Full Size (10+ lbs)'),
+    ('small', 'Small ( < 10 lbs)'),
+    ('full', 'Full Size (10+ lbs)'),
 )
 CAT_AGE_CHOICES = (
-    ('Kitten', 'Kitten (<6 Months)'),
-    ('Youth', 'Youth (6 Months - 2 Years)'),
-    ('Adult', 'Adult (2 Years - 8 Years)'),
-    ('Elderly', 'Elderly (8 Years - 15 Years)'),
-    ('Geriatric', 'Geriatric (15+ years)'),
+    ('kitten', 'Kitten (<6 Months)'),
+    ('youth', 'Youth (6 Months - 2 Years)'),
+    ('adult', 'Adult (2 Years - 8 Years)'),
+    ('elderly', 'Elderly (8 Years - 15 Years)'),
+    ('geriatric', 'Geriatric (15+ years)'),
 )
 
 STATUS_CHOICES = (

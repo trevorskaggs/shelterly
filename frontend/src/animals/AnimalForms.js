@@ -1,11 +1,11 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { Link, navigate, useQueryParams } from 'raviger';
 import { Field, Form, Formik } from "formik";
-import { Button, Col, FormGroup, Label, Input, Option, Container, Row } from "reactstrap";
+import { Button, Col, FormGroup, Container, Row } from "reactstrap";
 import * as Yup from 'yup';
 import { DateTimePicker, DropDown, TextInput } from '.././components/Form.js';
-import { catAgeChoices, dogAgeChoices, catColorChoices, dogColorChoices, speciesChoices, sexChoices, dogSizeChoices, catSizeChoices } from './constants'
+import { catAgeChoices, dogAgeChoices, catColorChoices, dogColorChoices, speciesChoices, sexChoices, dogSizeChoices, catSizeChoices, unknownChoices } from './constants'
 
 
 const AnimalForm = ({id}) => {
@@ -13,16 +13,15 @@ const AnimalForm = ({id}) => {
   // Identify any query param data.
   const [queryParams] = useQueryParams();
   const {
-    owner_id = '',
-    servicerequest_id = '',
+    owner_id = null,
+    servicerequest_id = null,
   } = queryParams;
 
   // Track species selected and update choice lists accordingly.
-  const [species, setSpecies] = useState('');
   const selectRef = useRef(null);
-  const ageChoices = {'':[], 'dog':dogAgeChoices, 'cat':catAgeChoices}
-  const colorChoices = {'':[], 'dog':dogColorChoices, 'cat':catColorChoices}
-  const sizeChoices = {'':[], 'dog':dogSizeChoices, 'cat':catSizeChoices}
+  const ageChoices = {'':[], 'dog':dogAgeChoices, 'cat':catAgeChoices, 'horse':[], 'other':[]}
+  const colorChoices = {'':[], 'dog':dogColorChoices, 'cat':catColorChoices, 'horse':[], 'other':[]}
+  const sizeChoices = {'':[], 'dog':dogSizeChoices, 'cat':catSizeChoices, 'horse':[], 'other':[]}
 
   // Track whether or not to add another animal after saving.
   const [addAnother, setAddAnother] = useState(false);
@@ -39,14 +38,45 @@ const AnimalForm = ({id}) => {
     pcolor: '',
     scolor: '',
     color_notes: '',
+    fixed: 'unknown',
+    aggressive: 'unknown',
+    confined: 'unknown',
+    attended_to: 'unknown',
+    collared: 'unknown',
     behavior_notes: '',
     last_seen: null,
   });
+
+  // Hook for initializing data.
+  useEffect(() => {
+    let source = axios.CancelToken.source();
+    if (id) {
+      const fetchAnimalData = async () => {
+        // Fetch Animal data.
+        await axios.get('http://localhost:3000/animals/api/animal/' + id + '/', {
+          cancelToken: source.token,
+        })
+        .then(response => {
+          console.log(response.data);
+          setData(response.data);
+        })
+        .catch(error => {
+          console.log(error.response);
+        });
+      };
+      fetchAnimalData();
+    }
+    // Cleanup.
+    return () => {
+      source.cancel();
+    };
+  }, [id]);
   
   return (
     <>
       <Formik
         initialValues={data}
+        enableReinitialize={true}
         validationSchema={Yup.object({
           name: Yup.string()
             .max(50, 'Must be 50 characters or less.'),
@@ -55,11 +85,21 @@ const AnimalForm = ({id}) => {
           size: Yup.string()
             .max(10, 'Must be 10 characters or less'),
           age: Yup.string(),
-          sex: Yup.string()
-            .oneOf(['M', 'F']),
+          sex: Yup.string(),
+            // .oneOf(['M', 'F']),
           pcolor: Yup.string(),
           scolor: Yup.string(),
           color_notes: Yup.string()
+            .max(200, 'Must be 200 characters or less'),
+          fixed: Yup.string()
+            .max(200, 'Must be 200 characters or less'),
+          aggressive: Yup.string()
+            .max(200, 'Must be 200 characters or less'),
+          confined: Yup.string()
+           .max(200, 'Must be 200 characters or less'),
+          attended_to: Yup.string()
+           .max(200, 'Must be 200 characters or less'),
+          collared: Yup.string()
             .max(200, 'Must be 200 characters or less'),
           behavior_notes: Yup.string()
             .max(200, 'Must be 200 characters or less'),
@@ -67,7 +107,6 @@ const AnimalForm = ({id}) => {
             .nullable(),
         })}
         onSubmit={(values, { setSubmitting }) => {
-          // console.log(values);
           if (id) {
             axios.put('http://localhost:3000/animals/api/animal/' + id + '/', values)
             .then(function() {
@@ -121,30 +160,13 @@ const AnimalForm = ({id}) => {
               <Field type="hidden" value={owner_id||""} name="owner" id="owner"></Field>
               <Field type="hidden" value={servicerequest_id||""} name="request" id="request"></Field>
               <FormGroup>
-                <Row>
-                  <Col xs="10">
+               <Row>
+                  <Col xs="8" className="mt-3">
                     <TextInput
                       id="name"
                       name="name"
                       type="text"
                       label="Name"
-                    />
-                  </Col>
-                </Row>
-                <Row>
-                  <Col xs="2">
-                    <DropDown
-                      label="Species"
-                      id="speciesDropdown"
-                      name="species"
-                      type="text"
-                      options={speciesChoices}
-                      // value={props.values.species||''}
-                      isClearable={false}
-                      onChange={(instance) => {
-                        selectRef.current.select.clearValue();
-                        props.setFieldValue("species", instance.value);
-                      }}
                     />
                   </Col>
                   <Col xs="2">
@@ -157,7 +179,24 @@ const AnimalForm = ({id}) => {
                       value={props.values.sex||''}
                     />
                   </Col>
-                  <Col xs="3">
+                </Row>
+                <Row>
+                  <Col xs="2">
+                    <DropDown
+                      label="Species"
+                      id="speciesDropdown"
+                      name="species"
+                      type="text"
+                      options={speciesChoices}
+                      value={props.values.species||data.species}
+                      isClearable={false}
+                      onChange={(instance) => {
+                        selectRef.current.select.clearValue();
+                        props.setFieldValue("species", instance.value);
+                      }}
+                    />
+                  </Col>
+                  <Col xs="4">
                     <DropDown
                       label="Size"
                       id="sizeDropdown"
@@ -165,10 +204,10 @@ const AnimalForm = ({id}) => {
                       type="text"
                       ref={selectRef}
                       options={sizeChoices[props.values.species]}
-                      // value={props.values.size||''}
+                      value={props.values.size||''}
                     />
                   </Col>
-                  <Col xs="3">
+                  <Col xs="4">
                     <DropDown
                       label="Age"
                       id="age"
@@ -201,7 +240,7 @@ const AnimalForm = ({id}) => {
                       value={props.values.scolor||''}
                     />
                   </Col>
-                  <Col xs="7">
+                  <Col xs="7" className="mt-3">
                     <TextInput
                       id="color_notes"
                       name="color_notes"
@@ -212,7 +251,77 @@ const AnimalForm = ({id}) => {
                   </Col>
                 </Row>
                 <Row>
-                  <Col xs="7">
+                  <Col>
+                    <DropDown
+                      label="Fixed"
+                      id="fixed"
+                      name="fixed"
+                      type="text"
+                      options={unknownChoices}
+                      value={props.values.fixed||'unknown'}
+                      isClearable={false}
+                    />
+                  </Col>
+                  <Col>
+                    <DropDown
+                      label="Aggressive"
+                      id="aggressive"
+                      name="aggressive"
+                      type="text"
+                      options={unknownChoices}
+                      value={props.values.aggressive||'unknown'}
+                      isClearable={false}
+                    />
+                  </Col>
+                  <Col>
+                    <DropDown
+                      label="Confined"
+                      id="confined"
+                      name="confined"
+                      type="text"
+                      options={unknownChoices}
+                      value={props.values.confined||'unknown'}
+                      isClearable={false}
+                    />
+                  </Col>
+                </Row>
+                <Row>
+                  <Col>
+                    <DropDown
+                      label="Attended To"
+                      id="attended_to"
+                      name="attended_to"
+                      type="text"
+                      options={unknownChoices}
+                      value={props.values.attended_to||'unknown'}
+                      isClearable={false}
+                    />
+                  </Col>
+                  <Col>
+                    <DropDown
+                      label="Collared"
+                      id="collared"
+                      name="collared"
+                      type="text"
+                      options={unknownChoices}
+                      value={props.values.collared||'unknown'}
+                      isClearable={false}
+                    />
+                  </Col>
+                  <Col>
+                    <DateTimePicker
+                      label="Last Seen"
+                      name="last_seen"
+                      id="last_seen"
+                      onChange={(date, dateStr) => {
+                        props.setFieldValue("last_seen", dateStr)
+                      }}
+                      value={data.last_seen||null}
+                    />
+                  </Col>
+                </Row>
+                <Row>
+                  <Col xs="10">
                     <TextInput
                       id="behavior_notes"
                       name="behavior_notes"
@@ -221,17 +330,6 @@ const AnimalForm = ({id}) => {
                       label="Behavior Notes"
                     />
                   </Col>
-                </Row>
-                <Row className="mt-3">
-                  <DateTimePicker
-                    label="Last Seen"
-                    name="last_seen"
-                    id="last_seen"
-                    onChange={(date, dateStr) => {
-                      props.setFieldValue("last_seen", dateStr)
-                    }}
-                    value={data.last_seen||null}
-                  />
                 </Row>
               </FormGroup>
 

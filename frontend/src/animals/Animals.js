@@ -1,5 +1,11 @@
 import React from "react";
 import { Link } from "raviger";
+import {AnimalView} from "./AnimalViews";
+import AnimalForm from "./AnimalForms";
+
+const header_style = {
+  textAlign: "center",
+};
 
 const link_style = {
   textDecoration: "none",
@@ -22,7 +28,14 @@ const Animals = () => (
 
 export const AnimalDetail = ({id}) => (
   <div>
-    {/* <AnimalView id={id} /> */}
+    <AnimalView id={id} />
+  </div>
+)
+
+export const UpdateAnimal = ({id}) => (
+  <div>
+    <h1 style={header_style}>Update Animal</h1>
+    <AnimalForm id={id} />
   </div>
 )
 

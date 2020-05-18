@@ -299,8 +299,8 @@ export function ServiceRequestForm({id}) {
   // Identify any query param data.
   const [queryParams] = useQueryParams();
   const {
-    owner_id = '',
-    reporter_id = ''
+    owner_id = null,
+    reporter_id = null
   } = queryParams;
 
   // Track checkbox state with Fade.
@@ -429,45 +429,55 @@ export function ServiceRequestForm({id}) {
               <Field type="hidden" value={owner_id||""} name="owner" id="owner"></Field>
               <Field type="hidden" value={reporter_id||""} name="reporter" id="reporter"></Field>
               <FormGroup hidden={is_new}>
-                <TextInput
-                  type="textarea"
-                  rows={5}
-                  label="Outcome"
-                  name="outcome"
-                  id="outcome"
-                />
-                <TextInput
-                  type="textarea"
-                  rows={5}
-                  label="Owner Notification Notes"
-                  name="owner_notification_notes"
-                  id="owner_notification_notes"
-                />
                 <Row>
-                  <Label htmlFor="forced_entry" className="mt-3">Forced Entry</Label>
-                  <Field component={Switch} name="forced_entry" type="checkbox" color="primary" className="mt-3" />
+                  <Col xs="10">
+                    <TextInput
+                      type="textarea"
+                      rows={5}
+                      label="Outcome"
+                      name="outcome"
+                      id="outcome"
+                    />
+                  </Col>
                 </Row>
-                <Row className="mt-3">
-                  <DateTimePicker
-                    label="Recovery Time"
-                    name="recovery_time"
-                    id="recovery_time"
-                    onChange={(date, dateStr) => {
-                      props.setFieldValue("recovery_time", dateStr)
-                    }}
-                    value={data.recovery_time||null}
-                  />
+                <Row>
+                  <Col xs="10" className="mt-3">
+                    <TextInput
+                      type="textarea"
+                      rows={5}
+                      label="Owner Notification Notes"
+                      name="owner_notification_notes"
+                      id="owner_notification_notes"
+                    />
+                  </Col>
                 </Row>
-                <Row className="mt-3">
-                  <DateTimePicker
-                    label="Owner Notified"
-                    name="owner_notification_tstamp"
-                    id="owner_notification_tstamp"
-                    onChange={(date, dateStr) => {
-                      props.setFieldValue("owner_notification_tstamp", dateStr)
-                    }}
-                    value={data.owner_notification_tstamp||null}
-                  />
+                <Row className="mt-1">
+                  <Label htmlFor="forced_entry" className="mt-3 ml-3">Forced Entry</Label>
+                  <Field component={Switch} name="forced_entry" type="checkbox" color="primary" className="mt-2" />
+                </Row>
+                <Row>
+                  <Col xs="5">
+                    <DateTimePicker
+                      label="Recovery Time"
+                      name="recovery_time"
+                      id="recovery_time"
+                      onChange={(date, dateStr) => {
+                        props.setFieldValue("recovery_time", dateStr)
+                      }}
+                      value={data.recovery_time||null}
+                    />
+                  </Col>
+                  <Col xs="5">
+                    <DateTimePicker
+                      label="Owner Notified"
+                      name="owner_notification_tstamp"
+                      id="owner_notification_tstamp"
+                      onChange={(date, dateStr) => {
+                        props.setFieldValue("owner_notification_tstamp", dateStr)
+                      }}
+                      value={data.owner_notification_tstamp||null}
+                    />
+                  </Col>
                 </Row>
                 <hr/>
               </FormGroup>
@@ -498,7 +508,7 @@ export function ServiceRequestForm({id}) {
                     </Col>
                   </Row>
                   <Row>
-                    <Col xs="6">
+                    <Col xs="6" className="mt-3">
                       <TextInput
                         type="text"
                         label="City"
@@ -515,7 +525,7 @@ export function ServiceRequestForm({id}) {
                         value={props.values.state||''}
                       />
                     </Col>
-                    <Col xs="2">
+                    <Col xs="2" className="mt-3">
                       <TextInput
                         type="text"
                         label="Zip Code"
@@ -526,7 +536,7 @@ export function ServiceRequestForm({id}) {
                   </Row>
                 </Fade>
                 <Row>
-                  <Col xs="10">
+                  <Col xs="10" className="mt-3">
                     <TextInput
                       type="textarea"
                       rows={5}
