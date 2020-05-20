@@ -111,6 +111,13 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = ServiceRequestSerializer
 
+    # When creating, update any animals associated with the SR owner with the created service request.
+    def perform_create(self, serializer):
+        if serializer.is_valid():
+            serializer = serializer.save()
+            if serializer.owner:
+                serializer.owner.animal_set.update(request=serializer.id)
+
     def get_queryset(self):
         queryset = ServiceRequest.objects.all()
         status = self.request.query_params.get('status', '')

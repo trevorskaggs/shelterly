@@ -1,12 +1,15 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { forceUpdate, useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { Link, navigate, useQueryParams } from 'raviger';
 import { Field, Form, Formik } from "formik";
-import { Button, Col, FormGroup, Container, Row } from "reactstrap";
+import { Button, Col, FormGroup, Container, Input, Label, Row } from "reactstrap";
 import * as Yup from 'yup';
 import { DateTimePicker, DropDown, TextInput } from '.././components/Form.js';
 import { catAgeChoices, dogAgeChoices, catColorChoices, dogColorChoices, speciesChoices, sexChoices, dogSizeChoices, catSizeChoices, unknownChoices } from './constants'
 
+const header_style = {
+  textAlign: "center",
+}
 
 const AnimalForm = ({id}) => {
 
@@ -15,16 +18,22 @@ const AnimalForm = ({id}) => {
   const {
     owner_id = null,
     servicerequest_id = null,
+    reporter_id = null,
   } = queryParams;
 
   // Track species selected and update choice lists accordingly.
-  const selectRef = useRef(null);
+  const sizeRef = useRef(null);
+  const ageRef = useRef(null);
+  const pcolorRef = useRef(null);
+  const scolorRef = useRef(null);
   const ageChoices = {'':[], 'dog':dogAgeChoices, 'cat':catAgeChoices, 'horse':[], 'other':[]}
   const colorChoices = {'':[], 'dog':dogColorChoices, 'cat':catColorChoices, 'horse':[], 'other':[]}
   const sizeChoices = {'':[], 'dog':dogSizeChoices, 'cat':catSizeChoices, 'horse':[], 'other':[]}
 
   // Track whether or not to add another animal after saving.
   const [addAnother, setAddAnother] = useState(false);
+  // Unique key used to re-render the same page if adding another animal.
+  const [key, setKey] = useState(Math.random());
 
   // Initial Animal data.
   const [data, setData] = useState({
@@ -45,6 +54,7 @@ const AnimalForm = ({id}) => {
     collared: 'unknown',
     behavior_notes: '',
     last_seen: null,
+    image: null,
   });
 
   // Hook for initializing data.
@@ -57,7 +67,6 @@ const AnimalForm = ({id}) => {
           cancelToken: source.token,
         })
         .then(response => {
-          console.log(response.data);
           setData(response.data);
         })
         .catch(error => {
@@ -71,9 +80,16 @@ const AnimalForm = ({id}) => {
       source.cancel();
     };
   }, [id]);
+
+  const [image, setImage] = useState(null);
+  function handleImageChange(e) {
+    console.log(e);
+    setImage(e.target.files[0]);
+  };
   
   return (
-    <>
+    <span key={key}>
+      <h1 style={header_style}>Animal Form</h1>
       <Formik
         initialValues={data}
         enableReinitialize={true}
@@ -105,6 +121,8 @@ const AnimalForm = ({id}) => {
             .max(200, 'Must be 200 characters or less'),
           last_seen: Yup.date()
             .nullable(),
+          // image: Yup.string()
+          //   .nullable(),
         })}
         onSubmit={(values, { setSubmitting }) => {
           if (id) {
@@ -130,20 +148,25 @@ const AnimalForm = ({id}) => {
             axios.post('http://localhost:3000/animals/api/animal/', values)
             .then(response => {
               if (addAnother) {
-                navigate('/animals/animal/new?servicerequest_id=' + servicerequest_id + '&owner=' + owner_id)
+                // If SR already exists, pass along the request ID.
+                if (servicerequest_id) {
+                  navigate('/animals/animal/new?servicerequest_id=' + servicerequest_id)
+                }
+                // Else pass along the owner and reporter IDs used for SR creation downstream.
+                else {
+                  navigate('/animals/animal/new?owner_id=' + (response.data.owner||'') + '&reporter_id=' + reporter_id||'');
+                  setKey(Math.random());
+                }
               }
               else {
-                // If SR already exists, update it with animal info and redirect to the SR details.
+                // If SR already exists, redirect to the SR details.
                 if (servicerequest_id) {
                   navigate('/hotline/servicerequest/' + servicerequest_id);
                 }
-                // If we have a owner ID, redirect to the owner details.
-                else if (owner_id) {
-                  navigate('/hotline/owner/' + owner_id);
-                }
-                // Else redirect to animal details.
+                // Else redirect to create a new SR.
                 else {
-                  navigate('/animals/animal/' + response.data.id);
+                  console.log("wwhy");
+                  navigate('/hotline/servicerequest/new?owner_id=' + (response.data.owner||'') + '&reporter_id=' + reporter_id||'');
                 }
               }
             })
@@ -161,7 +184,7 @@ const AnimalForm = ({id}) => {
               <Field type="hidden" value={servicerequest_id||""} name="request" id="request"></Field>
               <FormGroup>
                <Row>
-                  <Col xs="8" className="mt-3">
+                  <Col xs="8">
                     <TextInput
                       id="name"
                       name="name"
@@ -191,7 +214,10 @@ const AnimalForm = ({id}) => {
                       value={props.values.species||data.species}
                       isClearable={false}
                       onChange={(instance) => {
-                        selectRef.current.select.clearValue();
+                        sizeRef.current.select.clearValue();
+                        ageRef.current.select.clearValue();
+                        pcolorRef.current.select.clearValue();
+                        scolorRef.current.select.clearValue();
                         props.setFieldValue("species", instance.value);
                       }}
                     />
@@ -202,7 +228,7 @@ const AnimalForm = ({id}) => {
                       id="sizeDropdown"
                       name="size"
                       type="text"
-                      ref={selectRef}
+                      ref={sizeRef}
                       options={sizeChoices[props.values.species]}
                       value={props.values.size||''}
                     />
@@ -213,7 +239,7 @@ const AnimalForm = ({id}) => {
                       id="age"
                       name="age"
                       type="text"
-                      ref={selectRef}
+                      ref={ageRef}
                       options={ageChoices[props.values.species]}
                       value={props.values.age||''}
                     />
@@ -226,7 +252,7 @@ const AnimalForm = ({id}) => {
                       id="pcolor"
                       name="pcolor"
                       type="text"
-                      ref={selectRef}
+                      ref={pcolorRef}
                       options={colorChoices[props.values.species]}
                       value={props.values.pcolor||''}
                     />
@@ -235,12 +261,12 @@ const AnimalForm = ({id}) => {
                       id="scolor"
                       name="scolor"
                       type="text"
-                      ref={selectRef}
+                      ref={scolorRef}
                       options={colorChoices[props.values.species]}
                       value={props.values.scolor||''}
                     />
                   </Col>
-                  <Col xs="7" className="mt-3">
+                  <Col xs="7">
                     <TextInput
                       id="color_notes"
                       name="color_notes"
@@ -322,25 +348,31 @@ const AnimalForm = ({id}) => {
                 </Row>
                 <Row>
                   <Col xs="10">
+                    <Label htmlFor="behavior_notes">Behavior Notes</Label>
                     <TextInput
                       id="behavior_notes"
                       name="behavior_notes"
                       type="textarea"
                       rows={5}
-                      label="Behavior Notes"
                     />
+                  </Col>
+                </Row>
+                <Row>
+                  <Col className="mt-3">
+                  <Label for="image">Image File</Label>
+                  <Input type="file" name="image" id="image" onChange={handleImageChange} />
                   </Col>
                 </Row>
               </FormGroup>
 
-              <Button type="submit" className="btn-success mr-1">Save</Button>
-              <button type="button" className="btn btn-primary mr-1" onClick={() => {setAddAnother(true); props.submitForm()}}>Add Another</button>
+              <button type="button" className="btn btn-success mr-1" onClick={() => {setAddAnother(false); props.submitForm()}}>Save</button>
+              {!id ? <button type="button" className="btn btn-primary mr-1" onClick={() => {setAddAnother(true); props.submitForm()}}>Add Another</button> : ""}
               <Link className="btn btn-secondary" href={servicerequest_id ? "/hotline/servicerequest/" + servicerequest_id : "/"}>Cancel</Link>
             </Container>
           </Form>
         )}
       </Formik>
-    </>
+    </span>
   );
 };
   

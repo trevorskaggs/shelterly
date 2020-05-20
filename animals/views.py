@@ -62,3 +62,12 @@ class AnimalViewSet(viewsets.ModelViewSet):
 
     queryset = Animal.objects.all()
     serializer_class = AnimalSerializer
+
+    # When creating, if the animal does not have an owner, create a dummy known owner and assign it.
+    def perform_create(self, serializer):
+        if serializer.is_valid():
+            serializer = serializer.save()
+            if not serializer.owner:
+                owner = Person.objects.create(first_name="Unknown")
+                serializer.owner = owner
+                serializer.save()
