@@ -1,17 +1,17 @@
-import React, { forceUpdate, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { Link, navigate, useQueryParams } from 'raviger';
 import { Field, Form, Formik } from "formik";
-import { Button, Col, FormGroup, Container, Input, Label, Row } from "reactstrap";
+import { Col, FormGroup, Container, Input, Label, Row } from "reactstrap";
 import * as Yup from 'yup';
 import { DateTimePicker, DropDown, TextInput } from '.././components/Form.js';
-import { catAgeChoices, dogAgeChoices, catColorChoices, dogColorChoices, speciesChoices, sexChoices, dogSizeChoices, catSizeChoices, unknownChoices } from './constants'
+import { catAgeChoices, dogAgeChoices, catColorChoices, dogColorChoices, speciesChoices, sexChoices, dogSizeChoices, catSizeChoices, statusChoices, unknownChoices } from './constants'
 
 const header_style = {
   textAlign: "center",
 }
 
-const AnimalForm = ({id}) => {
+export const AnimalForm = ({id}) => {
 
   // Identify any query param data.
   const [queryParams] = useQueryParams();
@@ -39,6 +39,7 @@ const AnimalForm = ({id}) => {
   const [data, setData] = useState({
     owner: owner_id,
     request: servicerequest_id,
+    status:'',
     name: '',
     species: '',
     sex: '',
@@ -89,20 +90,20 @@ const AnimalForm = ({id}) => {
   
   return (
     <span key={key}>
-      <h1 style={header_style}>Animal Form</h1>
       <Formik
         initialValues={data}
         enableReinitialize={true}
         validationSchema={Yup.object({
+          status: Yup.string(),
           name: Yup.string()
             .max(50, 'Must be 50 characters or less.'),
-          species: Yup.string(),
-            // .oneOf(speciesChoices.map(x => x['value'])),
+          species: Yup.string()
+            .oneOf(speciesChoices.map(option => option['value'])),
           size: Yup.string()
             .max(10, 'Must be 10 characters or less'),
           age: Yup.string(),
-          sex: Yup.string(),
-            // .oneOf(['M', 'F']),
+          sex: Yup.string()
+            .oneOf(['M', 'F']),
           pcolor: Yup.string(),
           scolor: Yup.string(),
           color_notes: Yup.string()
@@ -128,13 +129,13 @@ const AnimalForm = ({id}) => {
           if (id) {
             axios.put('http://localhost:3000/animals/api/animal/' + id + '/', values)
             .then(function() {
-              // If we have an SR ID, redirect to the SR.
-              if (servicerequest_id) {
-                navigate('/hotline/servicerequest/' + servicerequest_id);
+              // If the animal has an SR, redirect to the SR.
+              if (values.request) {
+                navigate('/hotline/servicerequest/' + values.request);
               }
-              // If we have an owner ID, redirect to the owner details.
-              else if (owner_id) {
-                navigate('/hotline/owner/' + owner_id);
+              // If the animal has an owner ID, redirect to the owner details.
+              else if (values.owner) {
+                navigate('/hotline/owner/' + values.owner);
               }
               else {
                 navigate('/animals/animal/' + id);
@@ -165,7 +166,6 @@ const AnimalForm = ({id}) => {
                 }
                 // Else redirect to create a new SR.
                 else {
-                  console.log("wwhy");
                   navigate('/hotline/servicerequest/new?owner_id=' + (response.data.owner||'') + '&reporter_id=' + reporter_id||'');
                 }
               }
@@ -183,6 +183,22 @@ const AnimalForm = ({id}) => {
               <Field type="hidden" value={owner_id||""} name="owner" id="owner"></Field>
               <Field type="hidden" value={servicerequest_id||""} name="request" id="request"></Field>
               <FormGroup>
+               <Row>
+                  <Col xs="3">
+                    <DropDown
+                      id="status"
+                      status="name"
+                      type="text"
+                      label="Status"
+                      options={statusChoices}
+                      value={props.values.status||''}
+                      isClearable={false}
+                      onChange={(instance) => {
+                        props.setFieldValue("status", instance.value);
+                      }}
+                    />
+                  </Col>
+                </Row>
                <Row>
                   <Col xs="8">
                     <TextInput
@@ -375,5 +391,3 @@ const AnimalForm = ({id}) => {
     </span>
   );
 };
-  
-  export default AnimalForm;

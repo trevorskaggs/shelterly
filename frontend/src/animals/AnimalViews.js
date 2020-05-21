@@ -66,7 +66,7 @@ export function AnimalView({id}) {
   return (
     <>
       <h1 style={header_style}>
-        Animal Details <Fab color="primary" size="small" href={"/animals/animal/edit/" + id} className="mb-2" title="Edit animal" aria-label="edit"><EditIcon /></Fab>
+        Animal Details - {data.status} <Fab color="primary" size="small" href={"/animals/animal/edit/" + id} className="mb-2" title="Edit animal" aria-label="edit"><EditIcon /></Fab>
       </h1>
       <br/>
       <div style={card_style} className="card card-body bg-light mb-2 mx-auto">

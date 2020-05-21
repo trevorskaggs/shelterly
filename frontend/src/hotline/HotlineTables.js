@@ -90,7 +90,7 @@ export function ServiceRequestTable() {
       {data.service_requests.map(service_request => (
         <div key={service_request.id} style={{width:"90%"}} className="card card-body bg-light mb-2">
           <div className="row">
-            <div className="col-sm-2">
+            <div className="col-sm-3">
               <b>Service Request #{service_request.id}</b> <Fab color="primary" href={"/hotline/servicerequest/" + service_request.id} className="mb-1" style={{width:23,height:23, minHeight:23}} title="Service Request details" aria-label="details"><AssignmentIcon style={{fontSize:10}} /></Fab>
               <div className="mt-1 mb-1"><Moment format="LLL">{service_request.timestamp}</Moment></div>
             </div>

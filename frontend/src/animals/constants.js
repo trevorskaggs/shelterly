@@ -66,3 +66,12 @@ export const unknownChoices = [
   {value:'yes', label:'Yes'},
   {value:'no', label:'No'},
 ]
+
+export const statusChoices = [
+  {value:'REPORTED', label:'REPORTED'},
+  {value:'ASSIGNED', label:'ASSIGNED'},
+  {value:'SHELTERED', label:'SHELTERED'},
+  {value:'SHELTERED IN PLACE', label:'SHELTERED IN PLACE'},
+  {value:'NOT FOUND', label:'NOT FOUND'},
+  {value:'REST IN PEACE', label:'REST IN PEACE'},
+]
