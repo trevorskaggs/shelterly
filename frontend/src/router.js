@@ -7,8 +7,8 @@ import Hotline, { NewOwner, NewReporter, NewServiceRequest, OwnerDetail, Reporte
 import { Login } from "./accounts/Accounts";
 import Shelter, { NewShelter, ShelterList } from "./shelter/Shelter";
 import { ShelterDetails } from "./shelter/ShelterTables";
-import { BuildingDetails } from "./shelter/Building";
-import { RoomDetails } from "./shelter/Room";
+import { NewBuilding, BuildingDetails } from "./shelter/Building";
+import { NewRoom, RoomDetails } from "./shelter/Room";
 
 const routes = {
   "/": () => <Home />,
@@ -35,7 +35,9 @@ const routes = {
   "/shelter/new": () => <NewShelter />,
   "/shelter/list": () => <ShelterList />,
   "/shelter/:sid": ({sid}) => <ShelterDetails sid={sid} />,
+  "/shelter/:sid/building/new": ({sid}) => <NewBuilding sid={sid} />,
   "/shelter/building/:bid": ({bid}) => <BuildingDetails bid={bid} />,
+  "/shelter/:sid/building/:bid/room/new": ({sid, bid}) => <NewRoom sid={sid} bid={bid} />,
   "/shelter/room/:rid": ({rid}) => <RoomDetails rid={rid} />,
   "/login": () => <Login />,
 };

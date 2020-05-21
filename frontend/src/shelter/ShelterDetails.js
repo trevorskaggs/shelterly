@@ -45,7 +45,7 @@ export function ShelterDetailsTable({sid}) {
       <h3>Shelter Buildings</h3>
       <BuildingList sid={data.id} />
       <hr/>
-      <A href="/shelter/new" style={link_style} className="btn btn-warning btn-lg btn-block mb-2">CREATE NEW BUILDING</A>
+      <A href="/shelter/{data.id}/building/new" style={link_style} className="btn btn-warning btn-lg btn-block mb-2">CREATE NEW BUILDING</A>
       <A className="btn btn-secondary btn-lg btn-block"  href="/shelter/list">BACK</A>
     </>
   );
@@ -83,7 +83,7 @@ export function BuildingDetailsTable({bid}) {
       <h3>Building Rooms</h3>
       <RoomList bid={data.id} />
       <hr/>
-      <A href="/shelter/new" style={link_style} className="btn btn-warning btn-lg btn-block mb-2">NEW ROOM</A>
+      <A href="/shelter/:sid/building/:bid/room/new" style={link_style} className="btn btn-warning btn-lg btn-block mb-2">NEW ROOM</A>
       <A className="btn btn-secondary btn-lg btn-block"  href="/shelter/list">BACK</A>
     </>
   );

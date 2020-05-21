@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import {BuildingDetailsTable} from "./ShelterDetails";
+import { BuildingForm } from "./ShelterForms";
 
 const header_style = {
   textAlign: "center",
@@ -36,7 +37,7 @@ export function BuildingList({sid}) {
     }, [sid]);
   
     return (
-        <ul>
+      <ul>
         {data.buildings.map(r => (
             <li><a href={"/shelter/building/"+r.id}>{r.name}</a></li>
         ))}
@@ -48,5 +49,12 @@ export function BuildingList({sid}) {
 export const BuildingDetails = ({bid}) => (
   <div>
     <BuildingDetailsTable bid={bid} />
+  </div>
+)
+
+export const NewBuilding = ({sid}) => (
+  <div>
+    <h1 style={header_style}>Buildings</h1>
+    <BuildingForm sid={sid} />
   </div>
 )

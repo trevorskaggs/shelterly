@@ -88,3 +88,154 @@ export const ShelterForm = () => {
     </>
   );
 };
+
+export const BuildingForm = ({sid}) => {
+  return (
+    <>
+      <Formik
+        initialValues={{
+          name: '',
+          description: '',
+          shelter: sid,
+        }}
+        validationSchema={Yup.object({
+          name: Yup.string()
+            .max(50, 'Must be 50 characters or less')
+            .required('Required'),
+        })}
+        onSubmit={(values, { setSubmitting }) => {
+          setTimeout(() => {
+            axios.post('http://0.0.0.0:8000/shelter/api/building/', values)
+            .then(function() {
+              navigate('/shelter/list');
+            })
+            .catch(e => {
+              console.log(e);
+            });
+            setSubmitting(false);
+          }, 500);
+        }}
+      >
+        <Form>
+          <Container>
+            <FormGroup>
+              <Row>
+                <Col xs={{size: 5, offset: 1}}>
+                  <Field
+                    type="text"
+                    label="Name*"
+                    name="name"
+                    id="name"
+                    component={ReactstrapInput}
+                  />
+                </Col>
+                <Col xs="5">
+                  <Field
+                    type="text"
+                    label="Description*"
+                    name="description"
+                    id="description"
+                    component={ReactstrapInput}
+                  />
+                  </Col>
+              </Row>
+            </FormGroup>
+
+            <FormGroup>
+              <Row>
+                <Col xs={{size: 5, offset: 1}}>
+                  <Field
+                    type="text"
+                    label="Address"
+                    name="address"
+                    id="address"
+                    component={ReactstrapInput}
+                  />
+                </Col>
+              </Row>
+            </FormGroup>
+
+            <Button type="submit" className="btn-success mr-1">Save</Button>
+            <A className="btn btn-secondary" href="/shelter">Cancel</A>
+          </Container>
+        </Form>
+      </Formik>
+    </>
+  );
+};
+
+export const RoomForm = ({sid, bid}) => {
+  return (
+    <>
+      <Formik
+        initialValues={{
+          name: '',
+          description: '',
+          shelter: sid,
+          building: bid,
+        }}
+        validationSchema={Yup.object({
+          name: Yup.string()
+            .max(50, 'Must be 50 characters or less')
+            .required('Required'),
+        })}
+        onSubmit={(values, { setSubmitting }) => {
+          setTimeout(() => {
+            axios.post('http://0.0.0.0:8000/shelter/api/room/', values)
+            .then(function() {
+              navigate('/shelter/list');
+            })
+            .catch(e => {
+              console.log(e);
+            });
+            setSubmitting(false);
+          }, 500);
+        }}
+      >
+        <Form>
+          <Container>
+            <FormGroup>
+              <Row>
+                <Col xs={{size: 5, offset: 1}}>
+                  <Field
+                    type="text"
+                    label="Name*"
+                    name="name"
+                    id="name"
+                    component={ReactstrapInput}
+                  />
+                </Col>
+                <Col xs="5">
+                  <Field
+                    type="text"
+                    label="Description*"
+                    name="description"
+                    id="description"
+                    component={ReactstrapInput}
+                  />
+                  </Col>
+              </Row>
+            </FormGroup>
+
+            <FormGroup>
+              <Row>
+                <Col xs={{size: 5, offset: 1}}>
+                  <Field
+                    type="text"
+                    label="Address"
+                    name="address"
+                    id="address"
+                    component={ReactstrapInput}
+                  />
+                </Col>
+              </Row>
+            </FormGroup>
+
+            <Button type="submit" className="btn-success mr-1">Save</Button>
+            <A className="btn btn-secondary" href="/shelter">Cancel</A>
+          </Container>
+        </Form>
+      </Formik>
+    </>
+  );
+};
