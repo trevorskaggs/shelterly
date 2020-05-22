@@ -64,8 +64,8 @@ export function AnimalSearch() {
             </div>
             <div className="col-sm-3">
               <b>{animal.name} - {animal.status}</b> <Fab color="primary" href={"/animals/animal/" + animal.id} className="mb-1" style={{width:23,height:23, minHeight:23, color:"#fff", backgroundColor: "#c82333"}} title="Animal details" aria-label="details"><AssignmentIcon style={{fontSize:10}} /></Fab>
-              <div className="mt-1 mb-1">{animal.species}, {animal.sex}</div>
-              <div className="mt-1 mb-1">{animal.size}, {animal.age}</div>
+              <div className="mt-1 mb-1">{animal.species}{animal.species && animal.sex ? ", " : ""}{animal.sex}</div>
+              <div className="mt-1 mb-1">{animal.size}{animal.size && animal.age ? ", " : ""}{animal.age}</div>
             </div>
             <div className="col-sm">
               {animal.request ? <div><b>Request #{animal.request}</b> <Fab color="primary" href={"/hotline/servicerequest/" + animal.request} className="mb-1" style={{width:23,height:23, minHeight:23}} title="request details" aria-label="request_details"><AssignmentIcon style={{fontSize:10}} /></Fab></div> : ""}
