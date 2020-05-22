@@ -37,7 +37,7 @@ const routes = {
   "/shelter/:sid": ({sid}) => <ShelterDetails sid={sid} />,
   "/shelter/:sid/building/new": ({sid}) => <NewBuilding sid={sid} />,
   "/shelter/building/:bid": ({bid}) => <BuildingDetails bid={bid} />,
-  "/shelter/:sid/building/:bid/room/new": ({sid, bid}) => <NewRoom sid={sid} bid={bid} />,
+  "/shelter/building/:bid/room/new": ({bid}) => <NewRoom bid={bid} />,
   "/shelter/room/:rid": ({rid}) => <RoomDetails rid={rid} />,
   "/login": () => <Login />,
 };

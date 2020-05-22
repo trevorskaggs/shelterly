@@ -1,6 +1,6 @@
 import React from "react";
 import axios from "axios";
-import { A, navigate } from "hookrouter";
+import { Link, navigate } from 'raviger';
 import { Field, Form, Formik } from 'formik';
 import {
   Button,
@@ -81,7 +81,7 @@ export const ShelterForm = () => {
             </FormGroup>
 
             <Button type="submit" className="btn-success mr-1">Save</Button>
-            <A className="btn btn-secondary" href="/shelter">Cancel</A>
+            <Link className="btn btn-secondary" href="/shelter">Cancel</Link>
           </Container>
         </Form>
       </Formik>
@@ -156,7 +156,7 @@ export const BuildingForm = ({sid}) => {
             </FormGroup>
 
             <Button type="submit" className="btn-success mr-1">Save</Button>
-            <A className="btn btn-secondary" href="/shelter">Cancel</A>
+            <Link className="btn btn-secondary" href="/shelter">Cancel</Link>
           </Container>
         </Form>
       </Formik>
@@ -164,14 +164,13 @@ export const BuildingForm = ({sid}) => {
   );
 };
 
-export const RoomForm = ({sid, bid}) => {
+export const RoomForm = ({bid}) => {
   return (
     <>
       <Formik
         initialValues={{
           name: '',
           description: '',
-          shelter: sid,
           building: bid,
         }}
         validationSchema={Yup.object({
@@ -232,7 +231,7 @@ export const RoomForm = ({sid, bid}) => {
             </FormGroup>
 
             <Button type="submit" className="btn-success mr-1">Save</Button>
-            <A className="btn btn-secondary" href="/shelter">Cancel</A>
+            <Link className="btn btn-secondary" href="/shelter">Cancel</Link>
           </Container>
         </Form>
       </Formik>

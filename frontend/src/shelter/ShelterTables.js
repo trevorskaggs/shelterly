@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
-import BootstrapTable from 'react-bootstrap-table-next'
-import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
-import { A } from "hookrouter";
+import Table from '.././components/Table';
+import { Link } from 'raviger';
 import { ShelterDetailsTable } from "./ShelterDetails";
 
 const header_style = {
@@ -13,27 +12,18 @@ const link_style = {
   textDecoration: "none",
 };
 
-function CellFormatter(cell) {
-  return (<div><a href={"/shelter/"+cell}>shelter {cell}</a></div>);
-}
-
-const columns = [
-  {
-    dataField: 'id',
-    text: 'Shelter Id',
-    formatter: CellFormatter
-  },
-  {
-    dataField: 'name',
-    text: 'Name',
-  }, 
-  {
-    dataField: 'address',
-    text: 'Address'
-  },
-]
-
 export function ShelterTable() {
+  const columns = React.useMemo(
+    () => [
+      {
+        Header: 'Shelters',
+        accessor: 'id',
+        Cell: ({ cell: { value } }) =>
+          <div><a href={"/shelter/"+value}>{value}</a></div>
+      },
+    ],
+    []
+  )
   const [data, setData] = useState({shelters: [], isFetching: false});
   // Hook for initializing data.
   useEffect(() => {
@@ -47,8 +37,8 @@ export function ShelterTable() {
       .then(response => {
         setData({shelters: response.data, isFetching: false});
       })
-      .catch(e => {
-        console.log(e);
+      .catch(error => {
+        console.log(error.response);
         setData({shelters: [], isFetching: false});
       });
     };
@@ -61,12 +51,12 @@ export function ShelterTable() {
 
   return (
     <div>
-      <BootstrapTable keyField='id' data={ data.shelters } columns={columns}/>
+      <Table keyField='id' data={ data.shelters } columns={columns}/>
       <p>{data.isFetching ? 'Fetching shelters...' : ''}</p>
       <br/>
       <br/>
-      <A href="/shelter/new" style={link_style} className="btn btn-warning btn-lg btn-block mb-2">CREATE NEW SHELTER</A>
-      <A className="btn btn-secondary btn-lg btn-block"  href="/shelter">BACK</A>
+      <Link href="/shelter/new" style={link_style} className="btn btn-warning btn-lg btn-block mb-2">CREATE NEW SHELTER</Link>
+      <Link className="btn btn-secondary btn-lg btn-block"  href="/shelter">BACK</Link>
     </div>
   )
 }

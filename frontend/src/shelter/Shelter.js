@@ -1,5 +1,5 @@
 import React from "react";
-import { A } from "hookrouter";
+import { Link } from 'raviger';
 import { ShelterForm } from "./ShelterForms";
 import { ShelterTable } from "./ShelterTables";
 
@@ -18,11 +18,11 @@ const btn_style = {
 
 const Shelter = () => (
   <div style={btn_style}>
-    <A href="/shelter/new" style={link_style} className="btn btn-warning btn-lg btn-block mb-2">CREATE NEW SHELTER</A>
-    <A href="/shelter/list" style={link_style} className="btn btn-warning btn-lg btn-block mb-2">SEE ALL SHELTERS</A>
+    <Link href="/shelter/new" style={link_style} className="btn btn-warning btn-lg btn-block mb-2">CREATE NEW SHELTER</Link>
+    <Link href="/shelter/list" style={link_style} className="btn btn-warning btn-lg btn-block mb-2">SEE ALL SHELTERS</Link>
     <br/>
     <br/>
-    <A className="btn btn-secondary btn-lg btn-block"  href="/">BACK</A>
+    <Link className="btn btn-secondary btn-lg btn-block"  href="/">BACK</Link>
   </div>
 )
 

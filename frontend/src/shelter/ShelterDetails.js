@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
-import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
-import { A } from "hookrouter";
+import { Link } from 'raviger';
 import { BuildingList } from "./Building";
 import { RoomList } from "./Room";
 
@@ -45,8 +44,8 @@ export function ShelterDetailsTable({sid}) {
       <h3>Shelter Buildings</h3>
       <BuildingList sid={data.id} />
       <hr/>
-      <A href="/shelter/{data.id}/building/new" style={link_style} className="btn btn-warning btn-lg btn-block mb-2">CREATE NEW BUILDING</A>
-      <A className="btn btn-secondary btn-lg btn-block"  href="/shelter/list">BACK</A>
+      <Link href={"/shelter/" + data.id + "/building/new"} style={link_style} className="btn btn-warning btn-lg btn-block mb-2">CREATE NEW BUILDING</Link>
+      <Link className="btn btn-secondary btn-lg btn-block"  href="/shelter/list">BACK</Link>
     </>
   );
 };
@@ -83,8 +82,8 @@ export function BuildingDetailsTable({bid}) {
       <h3>Building Rooms</h3>
       <RoomList bid={data.id} />
       <hr/>
-      <A href="/shelter/:sid/building/:bid/room/new" style={link_style} className="btn btn-warning btn-lg btn-block mb-2">NEW ROOM</A>
-      <A className="btn btn-secondary btn-lg btn-block"  href="/shelter/list">BACK</A>
+      <Link href={"/shelter/building/" + data.id + "/room/new"} style={link_style} className="btn btn-warning btn-lg btn-block mb-2">NEW ROOM</Link>
+      <Link className="btn btn-secondary btn-lg btn-block"  href="/shelter/list">BACK</Link>
     </>
   );
 };
@@ -118,7 +117,7 @@ export function RoomDetailsTable({rid}) {
       <p><b>Shelter:</b> {String(data.shelter)}</p>
       <p><b>Description:</b> {String(data.description)}</p>
       <hr/>
-      <A className="btn btn-secondary btn-lg btn-block"  href="/shelter/list">BACK</A>
+      <Link className="btn btn-secondary btn-lg btn-block"  href="/shelter/list">BACK</Link>
     </>
   );
 };
