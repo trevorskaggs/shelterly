@@ -3,6 +3,7 @@ from django.db.models import Q
 from django.shortcuts import render, redirect
 from django.shortcuts import get_object_or_404
 from .serializers import ServiceRequestSerializer
+
 from animals.models import Animal
 from animals.forms import AnimalForm
 from hotline.models import ServiceRequest
@@ -10,8 +11,6 @@ from hotline.forms import ServiceRequestForm, ServiceRequestSearchForm
 from people.models import Person
 from people.forms import PersonForm
 from rest_framework import filters, permissions, viewsets
-from rest_framework.decorators import action
-from rest_framework.mixins import UpdateModelMixin
 
 
 # Create your views here.

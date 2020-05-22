@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
-from rest_framework import viewsets
+from rest_framework import filters, viewsets
 
 from people.models import Person
 from animals.models import Animal
@@ -61,6 +61,8 @@ def animal_image(request, pk):
 class AnimalViewSet(viewsets.ModelViewSet):
 
     queryset = Animal.objects.all()
+    search_fields = ['name', 'species', 'status', 'request__address', 'request__city', 'owner__first_name', 'owner__last_name', 'owner__address', 'owner__city']
+    filter_backends = (filters.SearchFilter,)
     serializer_class = AnimalSerializer
 
     # When creating, if the animal does not have an owner, create a dummy known owner and assign it.
