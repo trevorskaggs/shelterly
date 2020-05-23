@@ -52,9 +52,9 @@ export const RoomDetails = ({rid}) => (
   </div>
 )
 
-export const NewRoom = ({rid}) => (
+export const NewRoom = ({bid}) => (
   <div>
     <h1 style={header_style}>Buildings</h1>
-    <RoomForm rid={rid} />
+    <RoomForm bid={bid} />
   </div>
 )

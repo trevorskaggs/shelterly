@@ -22,7 +22,6 @@ class RoomSerializer(serializers.ModelSerializer):
         fields = (
             'id',
             'name',
-            'shelter',
             'building',
             'description',
         )

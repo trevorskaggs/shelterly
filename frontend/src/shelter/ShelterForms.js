@@ -141,20 +141,6 @@ export const BuildingForm = ({sid}) => {
               </Row>
             </FormGroup>
 
-            <FormGroup>
-              <Row>
-                <Col xs={{size: 5, offset: 1}}>
-                  <Field
-                    type="text"
-                    label="Address"
-                    name="address"
-                    id="address"
-                    component={ReactstrapInput}
-                  />
-                </Col>
-              </Row>
-            </FormGroup>
-
             <Button type="submit" className="btn-success mr-1">Save</Button>
             <Link className="btn btn-secondary" href="/shelter">Cancel</Link>
           </Container>
@@ -213,20 +199,6 @@ export const RoomForm = ({bid}) => {
                     component={ReactstrapInput}
                   />
                   </Col>
-              </Row>
-            </FormGroup>
-
-            <FormGroup>
-              <Row>
-                <Col xs={{size: 5, offset: 1}}>
-                  <Field
-                    type="text"
-                    label="Address"
-                    name="address"
-                    id="address"
-                    component={ReactstrapInput}
-                  />
-                </Col>
               </Row>
             </FormGroup>
 
