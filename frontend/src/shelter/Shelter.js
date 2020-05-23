@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from 'raviger';
-import { ShelterForm } from "./ShelterForms";
+import { ShelterForm, EditShelterForm } from "./ShelterForms";
 import { ShelterTable } from "./ShelterTables";
 
 const header_style = {
@@ -30,6 +30,12 @@ export const NewShelter = () => (
   <div>
     <h1 style={header_style}>Shelters</h1>
     <ShelterForm />
+  </div>
+)
+
+export const UpdateShelter = ({sid}) => (
+  <div>
+    <EditShelterForm sid={sid}/>
   </div>
 )
 

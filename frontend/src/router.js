@@ -5,10 +5,11 @@ import { AnimalSearch } from "./animals/AnimalTables"
 import Evac, { NewTeam, TeamList } from "./evac/Evac";
 import Hotline, { NewOwner, NewReporter, NewServiceRequest, OwnerDetail, ReporterDetail, ServiceRequestDetail, ServiceRequestList, UpdateOwner, UpdateReporter, UpdateServiceRequest } from "./hotline/Hotline";
 import { Login } from "./accounts/Accounts";
-import Shelter, { NewShelter, ShelterList } from "./shelter/Shelter";
-import { ShelterDetails } from "./shelter/ShelterTables";
+import Shelter, { NewShelter, UpdateShelter, ShelterList } from "./shelter/Shelter";
+import { ShelterDetails} from "./shelter/ShelterTables";
 import { NewBuilding, BuildingDetails } from "./shelter/Building";
 import { NewRoom, RoomDetails } from "./shelter/Room";
+import { EditShelterForm } from "./shelter/ShelterForms";
 
 const routes = {
   "/": () => <Home />,
@@ -33,11 +34,14 @@ const routes = {
   "/hotline/servicerequest/:id": ({id}) => <ServiceRequestDetail id={id}/>,
   "/shelter": () => <Shelter />,
   "/shelter/new": () => <NewShelter />,
+  "/shelter/edit/:sid": ({sid}) => <EditShelterForm sid={sid} />,
   "/shelter/list": () => <ShelterList />,
   "/shelter/:sid": ({sid}) => <ShelterDetails sid={sid} />,
-  "/shelter/:sid/building/new": ({sid}) => <NewBuilding sid={sid} />,
+  "/shelter/:sid/building/new": ({sid}) => <UpdateShelter sid={sid} />,
+  // "/shelter/building/edit/:bid": ({bid}) => <UpdateBuilding bid={bid} />,
   "/shelter/building/:bid": ({bid}) => <BuildingDetails bid={bid} />,
   "/shelter/building/:bid/room/new": ({bid}) => <NewRoom bid={bid} />,
+  // "/shelter/room/edit/:rid": ({rid}) => <UpdateRoom rid={rid} />,
   "/shelter/room/:rid": ({rid}) => <RoomDetails rid={rid} />,
   "/login": () => <Login />,
 };

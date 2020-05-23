@@ -41,6 +41,7 @@ export function ShelterDetailsTable({sid}) {
       <p><b>Description:</b> {String(data.description)}</p>
       <p><b>Image:</b> {String(data.image)}</p>
       <hr/>
+      <Link href={"/shelter/edit/" + data.id} style={link_style} className="btn btn-warning btn-lg btn-block mb-2">EDIT SHELTER</Link>
       <h3>Shelter Buildings</h3>
       <BuildingList sid={data.id} />
       <hr/>
