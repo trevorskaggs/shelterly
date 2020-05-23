@@ -7,9 +7,8 @@ import Hotline, { NewOwner, NewReporter, NewServiceRequest, OwnerDetail, Reporte
 import { Login } from "./accounts/Accounts";
 import Shelter, { NewShelter, UpdateShelter, ShelterList } from "./shelter/Shelter";
 import { ShelterDetails} from "./shelter/ShelterTables";
-import { NewBuilding, BuildingDetails } from "./shelter/Building";
-import { NewRoom, RoomDetails } from "./shelter/Room";
-import { EditShelterForm } from "./shelter/ShelterForms";
+import { NewBuilding, UpdateBuilding, BuildingDetails } from "./shelter/Building";
+import { NewRoom, UpdateRoom, RoomDetails } from "./shelter/Room";
 
 const routes = {
   "/": () => <Home />,
@@ -34,14 +33,14 @@ const routes = {
   "/hotline/servicerequest/:id": ({id}) => <ServiceRequestDetail id={id}/>,
   "/shelter": () => <Shelter />,
   "/shelter/new": () => <NewShelter />,
-  "/shelter/edit/:sid": ({sid}) => <EditShelterForm sid={sid} />,
+  "/shelter/edit/:sid": ({sid}) => <UpdateShelter sid={sid} />,
   "/shelter/list": () => <ShelterList />,
   "/shelter/:sid": ({sid}) => <ShelterDetails sid={sid} />,
-  "/shelter/:sid/building/new": ({sid}) => <UpdateShelter sid={sid} />,
-  // "/shelter/building/edit/:bid": ({bid}) => <UpdateBuilding bid={bid} />,
+  "/shelter/:sid/building/new": ({sid}) => <NewBuilding sid={sid} />,
+  "/shelter/building/edit/:bid": ({bid}) => <UpdateBuilding bid={bid} />,
   "/shelter/building/:bid": ({bid}) => <BuildingDetails bid={bid} />,
   "/shelter/building/:bid/room/new": ({bid}) => <NewRoom bid={bid} />,
-  // "/shelter/room/edit/:rid": ({rid}) => <UpdateRoom rid={rid} />,
+  "/shelter/room/edit/:rid": ({rid}) => <UpdateRoom rid={rid} />,
   "/shelter/room/:rid": ({rid}) => <RoomDetails rid={rid} />,
   "/login": () => <Login />,
 };

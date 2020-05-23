@@ -21,6 +21,10 @@ export function ShelterTable() {
         Cell: ({ cell: { value } }) =>
           <div><a href={"/shelter/"+value}>{value}</a></div>
       },
+      {
+        Header: 'Name',
+        accessor: 'name',
+      }
     ],
     []
   )

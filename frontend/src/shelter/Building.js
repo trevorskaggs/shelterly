@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import {BuildingDetailsTable} from "./ShelterDetails";
-import { BuildingForm } from "./ShelterForms";
+import { BuildingForm, EditBuildingForm } from "./ShelterForms";
 
 const header_style = {
   textAlign: "center",
@@ -56,5 +56,11 @@ export const NewBuilding = ({sid}) => (
   <div>
     <h1 style={header_style}>Buildings</h1>
     <BuildingForm sid={sid} />
+  </div>
+)
+
+export const UpdateBuilding = ({bid}) => (
+  <div>
+    <EditBuildingForm bid={bid}/>
   </div>
 )

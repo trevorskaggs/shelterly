@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import {RoomDetailsTable} from "./ShelterDetails";
-import { RoomForm } from "./ShelterForms";
+import { RoomForm, EditRoomForm } from "./ShelterForms";
 
 const header_style = {
   textAlign: "center",
@@ -56,5 +56,11 @@ export const NewRoom = ({bid}) => (
   <div>
     <h1 style={header_style}>Buildings</h1>
     <RoomForm bid={bid} />
+  </div>
+)
+
+export const UpdateRoom = ({rid}) => (
+  <div>
+    <EditRoomForm rid={rid}/>
   </div>
 )
