@@ -80,6 +80,7 @@ export function BuildingDetailsTable({bid}) {
       <p><b>Shelter:</b> {String(data.shelter)}</p>
       <p><b>Description:</b> {String(data.description)}</p>
       <hr/>
+      <Link href={"/shelter/building/edit/" + data.id} style={link_style} className="btn btn-warning btn-lg btn-block mb-2">EDIT BUILDING</Link>
       <h3>Building Rooms</h3>
       <RoomList bid={data.id} />
       <hr/>
@@ -118,6 +119,7 @@ export function RoomDetailsTable({rid}) {
       <p><b>Shelter:</b> {String(data.shelter)}</p>
       <p><b>Description:</b> {String(data.description)}</p>
       <hr/>
+      <Link href={"/shelter/room/edit/" + data.id} style={link_style} className="btn btn-warning btn-lg btn-block mb-2">EDIT ROOM</Link>
       <Link className="btn btn-secondary btn-lg btn-block"  href="/shelter/list">BACK</Link>
     </>
   );
