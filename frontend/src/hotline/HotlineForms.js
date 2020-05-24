@@ -251,7 +251,7 @@ export const PersonForm = ({id}) => {
                   </Col>
                 </Row>
                 <Row hidden={!is_owner}>
-                  <Col xs="6">
+                  <Col xs="6" className="mt-3">
                     <TextInput
                       type="text"
                       label="City"
@@ -268,7 +268,7 @@ export const PersonForm = ({id}) => {
                       value={props.values.state||''}
                     />
                   </Col>
-                  <Col xs="2">
+                  <Col xs="2" className="mt-3">
                     <TextInput
                       type="text"
                       label="Zip Code"
