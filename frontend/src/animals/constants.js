@@ -25,6 +25,7 @@ export const catSizeChoices = [
 export const dogColorChoices = [
   {value:'black', label:'Black'},
   {value:'blue', label:'Blue'},
+  {value:'brindle', label:'Brindle'},
   {value:'brown', label:'Brown'},
   {value:'tan', label:'Tan'},
   {value:'brindle', label:'Brindle'},

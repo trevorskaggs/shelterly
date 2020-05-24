@@ -300,7 +300,16 @@ export const AnimalForm = ({id}) => {
                   </Col>
                 </Row>
                 <Row>
-                  <Col>
+                  <Col xs="3">
+                    <DropDown
+                      label="Aggressive"
+                      id="aggressive"
+                      name="aggressive"
+                      type="text"
+                      options={unknownChoices}
+                      value={props.values.aggressive||'unknown'}
+                      isClearable={false}
+                    />
                     <DropDown
                       label="Fixed"
                       id="fixed"
@@ -311,18 +320,18 @@ export const AnimalForm = ({id}) => {
                       isClearable={false}
                     />
                   </Col>
-                  <Col>
-                    <DropDown
-                      label="Aggressive"
-                      id="aggressive"
-                      name="aggressive"
-                      type="text"
-                      options={unknownChoices}
-                      value={props.values.aggressive||'unknown'}
-                      isClearable={false}
+                  <Col xs="7" className="mt-3">
+                    <Label htmlFor="behavior_notes">Behavior Notes</Label>
+                    <TextInput
+                      id="behavior_notes"
+                      name="behavior_notes"
+                      type="textarea"
+                      rows={5}
                     />
                   </Col>
-                  <Col>
+                </Row>
+                <Row>
+                  <Col xs="3">
                     <DropDown
                       label="Confined"
                       id="confined"
@@ -333,20 +342,7 @@ export const AnimalForm = ({id}) => {
                       isClearable={false}
                     />
                   </Col>
-                </Row>
-                <Row>
-                  <Col>
-                    <DropDown
-                      label="Attended To"
-                      id="attended_to"
-                      name="attended_to"
-                      type="text"
-                      options={unknownChoices}
-                      value={props.values.attended_to||'unknown'}
-                      isClearable={false}
-                    />
-                  </Col>
-                  <Col>
+                  <Col xs="3">
                     <DropDown
                       label="Collared"
                       id="collared"
@@ -357,7 +353,7 @@ export const AnimalForm = ({id}) => {
                       isClearable={false}
                     />
                   </Col>
-                  <Col>
+                  <Col xs="4">
                     <DateTimePicker
                       label="Last Seen"
                       name="last_seen"
@@ -371,14 +367,18 @@ export const AnimalForm = ({id}) => {
                 </Row>
                 <Row>
                   <Col xs="10">
-                    <Label htmlFor="behavior_notes">Behavior Notes</Label>
-                    <TextInput
-                      id="behavior_notes"
-                      name="behavior_notes"
-                      type="textarea"
-                      rows={5}
+                    <DropDown
+                      label="Attended To"
+                      id="attended_to"
+                      name="attended_to"
+                      type="text"
+                      options={unknownChoices}
+                      value={props.values.attended_to||'unknown'}
+                      isClearable={false}
                     />
                   </Col>
+
+
                 </Row>
                 <Row>
                   <Col className="mt-3">
