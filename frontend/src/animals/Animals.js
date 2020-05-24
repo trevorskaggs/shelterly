@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "raviger";
-import {AnimalView} from "./AnimalViews";
-import AnimalForm from "./AnimalForms";
+import { AnimalView } from "./AnimalViews";
+import { AnimalForm } from "./AnimalForms";
 
 const header_style = {
   textAlign: "center",
@@ -23,6 +23,14 @@ const Animals = () => (
     <br/>
     <br/>
     <Link className="btn btn-secondary btn-lg btn-block"  href="/">BACK</Link>
+  </div>
+)
+
+export const NewAnimal = () => (
+  <div>
+    <h1 style={header_style}>Animal Form</h1>
+    <br/>
+    <AnimalForm />
   </div>
 )
 

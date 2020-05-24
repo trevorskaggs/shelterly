@@ -3,6 +3,7 @@ import axios from "axios";
 import { Link } from 'raviger';
 import Moment from 'react-moment';
 import { Fab } from '@material-ui/core';
+import AssignmentIcon from '@material-ui/icons/Assignment';
 import EditIcon from '@material-ui/icons/Edit';
 
 const btn_style = {
@@ -66,39 +67,38 @@ export function AnimalView({id}) {
   return (
     <>
       <h1 style={header_style}>
-        Animal Details <Fab color="primary" size="small" href={"/animals/animal/edit/" + id} className="mb-2" title="Edit animal" aria-label="edit"><EditIcon /></Fab>
+        Animal Details - {data.status} <Fab color="primary" size="small" href={"/animals/animal/edit/" + id} className="mb-2" title="Edit animal" aria-label="edit"><EditIcon /></Fab>
       </h1>
       <br/>
       <div style={card_style} className="card card-body bg-light mb-2 mx-auto">
         <div className="row">
-          <div className="col-8">
+          <div className="col-6">
             <p><b>Name:</b> {data.name}</p>
             <p><b>Species:</b> {data.species}</p>
-            <p><b>Age:</b> {data.age}</p>
-            <p><b>Sex:</b> {data.sex}</p>
-            <p><b>Size:</b> {data.size}</p>
-            <p><b>Last Seen:</b> <Moment format="LLL">{data.last_seen}</Moment></p>
-          </div>
-        </div>
-      </div>
-      <div style={card_style} className="card card-body bg-light mb-2 mx-auto">
-        <div className="row">
-          <div className="col-8">
-            <p><b>Primary Color:</b> {data.pcolor}</p>
+            <p><b>Age:</b> {data.age||"Unknown"}</p>
+            <p><b>Sex:</b> {data.sex||"Unknown"}</p>
+            <p><b>Size:</b> {data.size||"Unknown"}</p>
+            {data.last_seen ? <p><b>Last Seen:</b> <Moment format="LLL">{data.last_seen}</Moment></p> : ""}
+            {data.pcolor ? <p><b>Primary Color:</b> {data.pcolor}</p> : ""}
             {data.scolor ? <p><b>Secondary Color:</b> {data.scolor}</p> : ""}
-            <p><b>Color Notes:</b> {data.color_notes}</p>
+            {data.color_notes ? <p><b>Color Notes:</b> {data.color_notes}</p> : ""}
+            {data.behavior_notes ? <p><b>Behavior Notes:</b> {data.behavior_notes}</p> : ""}
           </div>
-        </div>
-      </div>
-      <div style={card_style} className="card card-body bg-light mb-2 mx-auto">
-        <div className="row">
-          <div className="col-8">
+          <div className="col-6">
             <p><b>Fixed:</b> {data.fixed}</p>
             <p><b>Aggressive:</b> {data.aggressive}</p>
             <p><b>Confined:</b> {data.confined}</p>
             <p><b>Attended To:</b> {data.attended_to}</p>
             <p><b>Collared:</b> {data.collared}</p>
-            <p><b>Behavior Notes:</b> {data.behavior_notes}</p>
+          </div>
+        </div>
+      </div>
+      <div style={card_style} className="card card-body bg-light mb-2 mx-auto">
+        <div className="row">
+          <div className="col-10">
+            {data.request ? <div><b>Request #{data.request}</b> <Fab color="primary" href={"/hotline/servicerequest/" + data.request} className="mb-1" style={{width:23,height:23, minHeight:23}} title="request details" aria-label="request_details"><AssignmentIcon style={{fontSize:10}} /></Fab></div> : ""}
+            {data.owner ? <div><b>Owner:</b> {data.owner_object.first_name} {data.owner_object.last_name} {data.owner_object.phone} {data.owner_object.first_name !== 'Unknown' ? <Fab href={"/hotline/owner/" + data.owner} className="mb-1" style={{width:23,height:23, minHeight:23, color:"#fff", backgroundColor: "#28a745"}} title="Owner details" aria-label="owner_details"><AssignmentIcon style={{fontSize:10}} /></Fab> : <Fab href={"/hotline/owner/edit/" + data.owner} className="mb-1" style={{width:23,height:23, minHeight:23, color:"#fff", backgroundColor: "#28a745"}} title="Edit Owner" aria-label="edit_owner"><EditIcon style={{fontSize:10}} /></Fab>}</div> : ""}
+            <div><b>Location:</b> {data.full_address ? data.full_address : "Unknown"}</div>
           </div>
         </div>
       </div>

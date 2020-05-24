@@ -28,10 +28,10 @@ const DateTimePicker = ({ label, ...props }) => {
 
   return (
     <>
-    <label className="mt-3" htmlFor={props.id || props.name}>{label}</label>
-    <span className="container">
-      <Flatpickr ref={datetime} data-enable-time options={options} {...field} {...props} />
-      {field.value ? <span className="float-right mr-4"><FontAwesomeIcon icon={faTimes} style={{position:"absolute", bottom:"34px", color:"#808080"}} onClick={clearDate} /></span> : ""}
+      <label className="mt-3" htmlFor={props.id || props.name}>{label}</label>
+      <span className="container">
+        <Flatpickr ref={datetime} data-enable-time options={options} {...field} {...props} />
+        {field.value ? <span className="float-right mr-4"><FontAwesomeIcon icon={faTimes} style={{position:"absolute", bottom:"34px", color:"#808080"}} onClick={clearDate} /></span> : ""}
       </span>
     </>
   );
@@ -45,7 +45,7 @@ const TextInput = ({ label, value, ...props }) => {
   const [field, meta] = useField(props);
   return (
     <>
-      <Label htmlFor={props.id || props.name}>{label}</Label>
+      <Label className="mt-3" htmlFor={props.id || props.name}>{label}</Label>
       <Input value={value} className={meta.touched && meta.error ? "is-invalid" : null} {...field} {...props} />
       {meta.touched && meta.error ? (
         <FormFeedback>{meta.error}</FormFeedback>

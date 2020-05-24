@@ -49,21 +49,30 @@ export const catColorChoices = [
 ]
 
 export const dogAgeChoices = [
-  {value:'youth', label:"Youth (< 2 Years)"},
-  {value:'adult', label:"Adult (2 - 8 Years)"},
-  {value:'elderly', label:"Elderly (8+ Years)"},
+  {value:'youth', label:"Youth"},
+  {value:'adult', label:"Adult"},
+  {value:'elderly', label:"Elderly"},
 ]
 
 export const catAgeChoices = [
-  {value:'kitten', label:'Kitten (<6 Months)'},
-  {value:'youth', label:'Youth (6 Months - 2 Years)'},
-  {value:'adult', label:'Adult (2 Years - 8 Years)'},
-  {value:'elderly', label:'Elderly (8 Years - 15 Years)'},
-  {value:'geriatric', label:'Geriatric (15+ years)'},
+  {value:'kitten', label:'Kitten'},
+  {value:'youth', label:'Youth'},
+  {value:'adult', label:'Adult'},
+  {value:'elderly', label:'Elderly'},
+  {value:'geriatric', label:'Geriatric'},
 ]
 
 export const unknownChoices = [
   {value:'unknown', label:'Unknown'},
   {value:'yes', label:'Yes'},
   {value:'no', label:'No'},
+]
+
+export const statusChoices = [
+  {value:'REPORTED', label:'REPORTED'},
+  {value:'ASSIGNED', label:'ASSIGNED'},
+  {value:'SHELTERED', label:'SHELTERED'},
+  {value:'SHELTERED IN PLACE', label:'SHELTERED IN PLACE'},
+  {value:'NOT FOUND', label:'NOT FOUND'},
+  {value:'REST IN PEACE', label:'REST IN PEACE'},
 ]

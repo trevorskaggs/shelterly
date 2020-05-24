@@ -1,8 +1,7 @@
 import React from "react";
 import Home from "./Home";
-import Animals, { AnimalDetail, UpdateAnimal } from "./animals/Animals"
-import AnimalForm from "./animals/AnimalForms"
-import AnimalTable from "./animals/AnimalTables"
+import Animals, { AnimalDetail, NewAnimal, UpdateAnimal } from "./animals/Animals"
+import { AnimalSearch } from "./animals/AnimalTables"
 import Evac, { NewTeam, TeamList } from "./evac/Evac";
 import Hotline, { NewOwner, NewReporter, NewServiceRequest, OwnerDetail, ReporterDetail, ServiceRequestDetail, ServiceRequestList, UpdateOwner, UpdateReporter, UpdateServiceRequest } from "./hotline/Hotline";
 import { Login } from "./accounts/Accounts"
@@ -11,8 +10,8 @@ const routes = {
   "/": () => <Home />,
   "/animals": () => <Animals />,
   "/animals/animal/edit/:id": ({id}) => <UpdateAnimal id={id} />,
-  "/animals/animal/new": () => <AnimalForm />,
-  "/animals/animal/list": () => <AnimalTable />,
+  "/animals/animal/new": () => <NewAnimal />,
+  "/animals/search": () => <AnimalSearch />,
   "/animals/animal/:id": ({id}) => <AnimalDetail id={id} />,
   "/evac": () => <Evac />,
   "/evac/evacteam/new": () => <NewTeam />,
