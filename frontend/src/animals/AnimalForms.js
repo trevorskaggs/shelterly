@@ -34,12 +34,14 @@ export const AnimalForm = ({id}) => {
   const [addAnother, setAddAnother] = useState(false);
   // Unique key used to re-render the same page if adding another animal.
   const [key, setKey] = useState(Math.random());
+  // Dynamic placeholder value for options.
+  const [placeholder, setPlaceholder] = useState("Select a species...");
 
   // Initial Animal data.
   const [data, setData] = useState({
     owner: owner_id,
     request: servicerequest_id,
-    status:'',
+    status:'REPORTED',
     name: '',
     species: '',
     sex: '',
@@ -183,11 +185,11 @@ export const AnimalForm = ({id}) => {
               <Field type="hidden" value={owner_id||""} name="owner" id="owner"></Field>
               <Field type="hidden" value={servicerequest_id||""} name="request" id="request"></Field>
               <FormGroup>
-               <Row>
+               <Row hidden={!id}>
                   <Col xs="3">
                     <DropDown
                       id="status"
-                      status="name"
+                      name="status"
                       type="text"
                       label="Status"
                       options={statusChoices}
@@ -230,6 +232,7 @@ export const AnimalForm = ({id}) => {
                       value={props.values.species||data.species}
                       isClearable={false}
                       onChange={(instance) => {
+                        setPlaceholder("Select...")
                         sizeRef.current.select.clearValue();
                         ageRef.current.select.clearValue();
                         pcolorRef.current.select.clearValue();
@@ -247,6 +250,7 @@ export const AnimalForm = ({id}) => {
                       ref={sizeRef}
                       options={sizeChoices[props.values.species]}
                       value={props.values.size||''}
+                      placeholder={placeholder}
                     />
                   </Col>
                   <Col xs="4">
@@ -258,6 +262,7 @@ export const AnimalForm = ({id}) => {
                       ref={ageRef}
                       options={ageChoices[props.values.species]}
                       value={props.values.age||''}
+                      placeholder={placeholder}
                     />
                   </Col>
                 </Row>
@@ -271,6 +276,7 @@ export const AnimalForm = ({id}) => {
                       ref={pcolorRef}
                       options={colorChoices[props.values.species]}
                       value={props.values.pcolor||''}
+                      placeholder={placeholder}
                     />
                     <DropDown
                       label="Secondary Color"
@@ -280,6 +286,7 @@ export const AnimalForm = ({id}) => {
                       ref={scolorRef}
                       options={colorChoices[props.values.species]}
                       value={props.values.scolor||''}
+                      placeholder={placeholder}
                     />
                   </Col>
                   <Col xs="7">
