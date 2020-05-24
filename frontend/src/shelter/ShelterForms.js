@@ -101,7 +101,7 @@ export const EditShelterForm = ({sid}) => {
   useEffect(() => {
     let source = axios.CancelToken.source();
     
-    const fetchPersonData = async () => {
+    const fetchShelterData = async () => {
       // Fetch ServiceRequest data.
       await axios.get('http://0.0.0.0:8000/shelter/api/shelter/' + sid + '/', {
         cancelToken: source.token,
@@ -113,7 +113,7 @@ export const EditShelterForm = ({sid}) => {
         console.log(error.response);
       });
     };
-    fetchPersonData();
+    fetchShelterData();
     
     // Cleanup.
     return () => {
@@ -132,17 +132,14 @@ export const EditShelterForm = ({sid}) => {
             .required('Required'),
         })}
         onSubmit={(values, { setSubmitting }) => {
-          setTimeout(() => {
-            console.log(values)
-            axios.put('http://localhost:8000/shelter/api/shelter/' + sid + '/', values)
-            .then(function() {
-              navigate('/shelter/list');
-            })
-            .catch(e => {
-              console.log(e);
-            });
-            setSubmitting(false);
-          }, 500);
+          axios.put('http://localhost:8000/shelter/api/shelter/' + sid + '/', values)
+          .then(function() {
+            navigate('/shelter/list');
+          })
+          .catch(e => {
+            console.log(e);
+          });
+          setSubmitting(false);
         }}
       >
         <Form>
