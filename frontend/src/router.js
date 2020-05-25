@@ -33,7 +33,7 @@ const routes = {
   "/hotline/servicerequest/:id": ({id}) => <ServiceRequestDetail id={id}/>,
   "/shelter": () => <Shelter />,
   "/shelter/new": () => <NewShelter />,
-  "/shelter/edit/:sid": ({sid}) => <UpdateShelter sid={sid} />,
+  "/shelter/edit/:sid": ({sid}) => <NewShelter sid={sid} />,
   "/shelter/list": () => <ShelterList />,
   "/shelter/:sid": ({sid}) => <ShelterDetails sid={sid} />,
   "/shelter/:sid/building/new": ({sid}) => <NewBuilding sid={sid} />,

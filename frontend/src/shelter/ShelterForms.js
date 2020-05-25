@@ -14,31 +14,71 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import * as Yup from 'yup';
 
 
-export const ShelterForm = () => {
+
+export const ShelterForm = ({sid}) => {
+
+  // Initial shelter data.
+  const [data, setData] = useState({
+    name: '',
+    description: '',
+    address: '',
+  });
+
+  // Hook for initializing data.
+  useEffect(() => {
+    let source = axios.CancelToken.source();
+    // determines if edit or new
+    if (sid) {
+      const fetchShelterData = async () => {
+        // Fetch ServiceRequest data.
+        await axios.get('http://0.0.0.0:8000/shelter/api/shelter/' + sid + '/', {
+          cancelToken: source.token,
+        })
+        .then(response => {
+          setData(response.data);
+        })
+        .catch(error => {
+          console.log(error.response);
+        });
+      };
+      fetchShelterData();
+    }
+    // Cleanup.
+    return () => {
+      source.cancel();
+    };
+  }, [sid]);
+
   return (
     <>
       <Formik
-        initialValues={{
-          name: '',
-          description: '',
-          address: '',
-        }}
+        initialValues={data}
+        enableReinitialize={true}
         validationSchema={Yup.object({
           name: Yup.string()
             .max(50, 'Must be 50 characters or less')
             .required('Required'),
         })}
         onSubmit={(values, { setSubmitting }) => {
-          setTimeout(() => {
-            axios.post('http://localhost:8000/shelter/api/shelter/', values)
+          if (sid) {
+            axios.put('http://0.0.0.0:8000/shelter/api/shelter/' + sid + '/', values)
             .then(function() {
-              navigate('/shelter/list');
+              navigate('/shelter/list')
             })
-            .catch(e => {
-              console.log(e);
+            .catch(error => {
+              console.log(error.response);
+            });
+          }
+          else {
+            axios.post('http://0.0.0.0:8000/shelter/api/shelter/', values)
+            .then(function() {
+              navigate('/shelter/list')
+            })
+            .catch(error => {
+              console.log(error.response);
             });
             setSubmitting(false);
-          }, 500);
+          }
         }}
       >
         <Form>
@@ -295,7 +335,7 @@ export const EditBuildingForm = ({bid}) => {
         onSubmit={(values, { setSubmitting }) => {
           setTimeout(() => {
             console.log(values)
-            axios.put('http://localhost:8000/shelter/api/shelter/' + bid + '/', values)
+            axios.put('http://localhost:8000/shelter/api/building/' + bid + '/', values)
             .then(function() {
               navigate('/shelter/list');
             })

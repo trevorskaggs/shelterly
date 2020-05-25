@@ -26,18 +26,18 @@ const Shelter = () => (
   </div>
 )
 
-export const NewShelter = () => (
+export const NewShelter = ({sid}) => (
   <div>
     <h1 style={header_style}>Shelters</h1>
-    <ShelterForm />
+    <ShelterForm sid={sid} />
   </div>
 )
 
-export const UpdateShelter = ({sid}) => (
-  <div>
-    <EditShelterForm sid={sid}/>
-  </div>
-)
+// export const UpdateShelter = ({sid}) => (
+//   <div>
+//     <EditShelterForm sid={sid}/>
+//   </div>
+// )
 
 export const ShelterList = () => (
   <div>
