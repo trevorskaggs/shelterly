@@ -71,6 +71,7 @@ export const AnimalForm = ({id}) => {
         })
         .then(response => {
           setData(response.data);
+          setPlaceholder("Select...")
         })
         .catch(error => {
           console.log(error.response);
@@ -201,7 +202,7 @@ export const AnimalForm = ({id}) => {
                     />
                   </Col>
                 </Row>
-               <Row>
+                <Row>
                   <Col xs="8">
                     <TextInput
                       id="name"
@@ -300,7 +301,7 @@ export const AnimalForm = ({id}) => {
                   </Col>
                 </Row>
                 <Row>
-                  <Col xs="3">
+                  <Col xs="3" className="mt-2">
                     <DropDown
                       label="Aggressive"
                       id="aggressive"
@@ -353,20 +354,9 @@ export const AnimalForm = ({id}) => {
                       isClearable={false}
                     />
                   </Col>
-                  <Col xs="4">
-                    <DateTimePicker
-                      label="Last Seen"
-                      name="last_seen"
-                      id="last_seen"
-                      onChange={(date, dateStr) => {
-                        props.setFieldValue("last_seen", dateStr)
-                      }}
-                      value={data.last_seen||null}
-                    />
-                  </Col>
                 </Row>
                 <Row>
-                  <Col xs="10">
+                  <Col xs="3">
                     <DropDown
                       label="Attended To"
                       id="attended_to"
@@ -377,8 +367,17 @@ export const AnimalForm = ({id}) => {
                       isClearable={false}
                     />
                   </Col>
-
-
+                  <Col xs="3">
+                    <DateTimePicker
+                      label="Last Seen"
+                      name="last_seen"
+                      id="last_seen"
+                      onChange={(date, dateStr) => {
+                        props.setFieldValue("last_seen", dateStr)
+                      }}
+                      value={data.last_seen||null}
+                    />
+                  </Col>
                 </Row>
                 <Row>
                   <Col className="mt-3">
