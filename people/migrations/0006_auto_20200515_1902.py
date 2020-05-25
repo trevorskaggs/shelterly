@@ -13,41 +13,41 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='person',
             name='address',
-            field=models.CharField(blank=True, max_length=50),
+            field=models.CharField(blank=True, default='', max_length=50),
         ),
         migrations.AlterField(
             model_name='person',
             name='apartment',
-            field=models.CharField(blank=True, max_length=50),
+            field=models.CharField(blank=True, default='', max_length=50),
         ),
         migrations.AlterField(
             model_name='person',
             name='best_contact',
-            field=models.TextField(blank=True),
+            field=models.TextField(blank=True, default=''),
         ),
         migrations.AlterField(
             model_name='person',
             name='city',
-            field=models.CharField(blank=True, max_length=50),
+            field=models.CharField(blank=True, default='', max_length=50),
         ),
         migrations.AlterField(
             model_name='person',
             name='drivers_license',
-            field=models.CharField(blank=True, max_length=50),
+            field=models.CharField(blank=True, default='', max_length=50),
         ),
         migrations.AlterField(
             model_name='person',
             name='email',
-            field=models.CharField(blank=True, max_length=200),
+            field=models.CharField(blank=True, default='', max_length=200),
         ),
         migrations.AlterField(
             model_name='person',
             name='phone',
-            field=models.CharField(blank=True, max_length=50),
+            field=models.CharField(blank=True, default='', max_length=50),
         ),
         migrations.AlterField(
             model_name='person',
             name='zip_code',
-            field=models.CharField(blank=True, max_length=50),
+            field=models.CharField(blank=True, default='', max_length=50),
         ),
     ]

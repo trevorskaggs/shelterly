@@ -40,11 +40,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterField(
             model_name='animal',
-            name='age',
-            field=models.CharField(blank=True, choices=[('none', 'None'), ('black', 'Black'), ('blue', 'Blue'), ('brown', 'Brown'), ('tan', 'Tan'), ('brindle', 'Brindle'), ('cream', 'Cream/Taupe'), ('gold', 'Gold'), ('gray', 'Gray'), ('red', 'Red'), ('white', 'White'), ('yellow', 'Yellow'), ('black', 'Black'), ('caramel', 'Caramel'), ('chocolate', 'Chocolate'), ('cinnamon', 'Cinnamon'), ('grey', 'Grey'), ('orange', 'Orange'), ('white', 'White')], max_length=10),
-        ),
-        migrations.AlterField(
-            model_name='animal',
             name='aggressive',
             field=models.CharField(choices=[('unknown', 'Unknown'), ('yes', 'Yes'), ('no', 'No')], default='unknown', max_length=10),
         ),
@@ -100,17 +95,22 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterField(
             model_name='animal',
+            name='age',
+            field=models.CharField(blank=True, choices=[('youth', 'Youth'), ('adult', 'Adult'), ('elderly', 'Elderly'), ('kitten', 'Kitten'), ('youth', 'Youth'), ('adult', 'Adult'), ('elderly', 'Elderly'), ('geriatric', 'Geriatric')], max_length=10),
+        ),
+        migrations.AlterField(
+            model_name='animal',
             name='size',
-            field=models.CharField(blank=True, choices=[('Small', 'Small (< 20 lbs)'), ('Medium', 'Medium (21 - 60 lbs)'), ('Large', 'Large (61 - 110 lbs)'), ('Giant', 'Giant (111+ lbs)'), ('Small', 'Small ( < 10 lbs)'), ('Full Size', 'Full Size (10+ lbs)')], max_length=10),
+            field=models.CharField(blank=True, choices=[('small', 'Small (< 20 lbs)'), ('medium', 'Medium (21 - 60 lbs)'), ('large', 'Large (61 - 110 lbs)'), ('giant', 'Giant (111+ lbs)'), ('small', 'Small ( < 10 lbs)'), ('full', 'Full Size (10+ lbs)')], max_length=10),
+        ),
+        migrations.AlterField(
+            model_name='animal',
+            name='status',
+            field=models.CharField(choices=[('REPORTED', 'REPORTED'), ('ASSIGNED', 'ASSIGNED'), ('SHELTERED', 'SHELTERED'), ('SHELTERED IN PLACE', 'SHELTERED IN PLACE'), ('NOT FOUND', 'NOT FOUND'), ('REST IN PEACE', 'REST IN PEACE')], default='REPORTED', max_length=20),
         ),
         migrations.AlterField(
             model_name='animal',
             name='species',
             field=models.CharField(blank=True, choices=[('cat', 'Cat'), ('dog', 'Dog'), ('horse', 'Horse'), ('other', 'Other')], max_length=50),
-        ),
-        migrations.AlterField(
-            model_name='animal',
-            name='status',
-            field=models.CharField(choices=[('REPORTED', 'REPORTED'), ('SHELTERED', 'SHELTERED'), ('SHELTERED IN PLACE', 'SHELTERED IN PLACE'), ('NOT FOUND', 'NOT FOUND'), ('REST IN PEACE', 'REST IN PEACE')], default='REPORTED', max_length=20),
         ),
     ]
