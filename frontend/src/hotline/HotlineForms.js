@@ -255,7 +255,7 @@ export const PersonForm = ({id}) => {
                       id="city"
                     />
                   </Col>
-                  <Col xs="2">
+                  <Col xs="2" className="mt-3">
                     <DropDown
                       label="State"
                       name="state"
@@ -510,7 +510,7 @@ export function ServiceRequestForm({id}) {
                         id="city"
                       />
                     </Col>
-                    <Col xs="2">
+                    <Col xs="2" className="mt-3">
                       <DropDown
                         label="State"
                         name="state"
