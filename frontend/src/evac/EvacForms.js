@@ -1,29 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
-import { A, navigate } from "hookrouter";
-import { Field, Form, useField, Formik } from 'formik';
+import { Link, navigate } from "raviger";
+import { Form, Formik } from 'formik';
 import {
   Button,
   Col,
   FormGroup,
-  Label,
   Row,
-  Input,
   Container,
 } from 'reactstrap';
-import { ReactstrapInput } from 'reactstrap-formik';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import * as Yup from 'yup';
+import { MultiSelect, TextInput} from '.././components/Form';
 
-const MyMultiSelect = ({ label, ...props }) => {
-  const [field] = useField(props);
-  return (
-    <>
-      <Label htmlFor={props.id || props.name}>{label}</Label>
-      <Input type="select" {...field} {...props} multiple={true}/>
-    </>
-  );
-};
 
 export function EvacTeamForm() {
   const [data, setData] = useState({options: [], isFetching: false});
@@ -44,8 +33,8 @@ export function EvacTeamForm() {
         });
         setData({options: data.options, isFetching: false});
       })
-      .catch(e => {
-        console.log(e);
+      .catch(error => {
+        console.log(error.response);
         setData({options: data.options, isFetching: false});
       });
     };
@@ -68,7 +57,7 @@ export function EvacTeamForm() {
             .of(Yup.string())
             .required('Required'),
           callsign: Yup.string()
-            .max(50, 'Must be 20 characters or less')
+            .max(20, 'Must be 20 characters or less')
             .required('Required'),
         })}
         onSubmit={(values, { setSubmitting }) => {
@@ -77,8 +66,8 @@ export function EvacTeamForm() {
             .then(function() {
               navigate('/evac');
             })
-            .catch(e => {
-              console.log(e);
+            .catch(error => {
+              console.log(error.response);
             });
             setSubmitting(false);
           }, 500);
@@ -87,20 +76,19 @@ export function EvacTeamForm() {
         <Form>
           <Container>
             <FormGroup>
-              <MyMultiSelect label="Evac Team Members*" name="evac_team_members" className="mb-3">
+              <MultiSelect label="Evac Team Members*" name="evac_team_members" className="mb-3">
                 {data.options.map(({ value, label }, index) => <option value={value} key={value} >{label}</option>)}
-              </MyMultiSelect>
-              <Field
+              </MultiSelect>
+              <TextInput
                 type="text"
                 label="Callsign*"
                 name="callsign"
                 id="callsign"
-                component={ReactstrapInput}
               />
             </FormGroup>
 
             <Button type="submit" className="btn-success mr-1">Save</Button>
-            <A className="btn btn-secondary" href="/evac">Cancel</A>
+            <Link className="btn btn-secondary" href="/evac">Cancel</Link>
           </Container>
         </Form>
       </Formik>
@@ -126,7 +114,8 @@ export const TeamMemberForm = () => {
             last_name: Yup.string()
               .max(50, 'Must be 50 characters or less')
               .required('Required'),
-            cell_phone: Yup.string().required('Required'),
+            cell_phone: Yup.string()
+              .required('Required'),
             agency_id: Yup.string(),
           })}
           onSubmit={(values, { setSubmitting }) => {
@@ -135,8 +124,8 @@ export const TeamMemberForm = () => {
               .then(function() {
                 navigate('/evac');
               })
-              .catch(e => {
-                console.log(e);
+              .catch(error => {
+                console.log(error.response);
               });
               setSubmitting(false);
             }, 500);
@@ -147,21 +136,19 @@ export const TeamMemberForm = () => {
               <FormGroup>
                 <Row>
                   <Col xs={{size: 5, offset: 1}}>
-                    <Field
+                    <TextInput
                       type="text"
                       label="First Name*"
                       name="first_name"
                       id="first_name"
-                      component={ReactstrapInput}
                     />
                   </Col>
                   <Col xs="5">
-                    <Field
+                    <TextInput
                       type="text"
                       label="Last Name*"
                       name="last_name"
                       id="last_name"
-                      component={ReactstrapInput}
                     />
                   </Col>
                 </Row>
@@ -170,28 +157,26 @@ export const TeamMemberForm = () => {
               <FormGroup>
                 <Row>
                   <Col xs={{size: 5, offset: 1}}>
-                    <Field
+                    <TextInput
                       type="text"
                       label="Cell Phone*"
                       name="cell_phone"
                       id="cell_phone"
-                      component={ReactstrapInput}
                     />
                   </Col>
                   <Col xs="5">
-                    <Field
+                    <TextInput
                       type="text"
                       label="Agency ID"
                       name="agency_id"
                       id="agency_id"
-                      component={ReactstrapInput}
                     />
                   </Col>
                 </Row>
               </FormGroup>
 
               <Button type="submit" className="btn-success mr-1">Save</Button>
-              <A className="btn btn-secondary" href="/evac">Cancel</A>
+              <Link className="btn btn-secondary" href="/evac">Cancel</Link>
             </Container>
           </Form>
         </Formik>

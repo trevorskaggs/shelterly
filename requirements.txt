@@ -2,8 +2,11 @@ coverage==4.5.4
 Django>=2.2.9
 django-cors-headers
 django-crispy-forms
+django-filter
 djangorestframework
+django-rest-knox
 geocoder==1.38.1
+ipython
 psycopg2==2.8.2
 python-dateutil==2.7.5
 pytz==2018.9
