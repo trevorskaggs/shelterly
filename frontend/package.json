@@ -28,6 +28,7 @@
     "react-table": "^7.0.4",
     "reactstrap": "^8.4.1",
     "reactstrap-formik": "^1.0.9",
+    "request": "^2.88.2",
     "yup": "^0.28.3"
   },
   "scripts": {
