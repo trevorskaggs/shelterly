@@ -7,9 +7,9 @@ import { Login } from "./accounts/Accounts"
 const routes = {
   "/": () => <Home />,
   "/evac": ({open}) => <Evac open={open} />,
-  "/evac/evacteam/new": () => <NewTeam />,
+  "/evac/evacteam/new": ({open}) => <NewTeam open={open} />,
   "/evac/evacteam/list": () => <TeamList />,
-  "/hotline": () => <Hotline />,
+  "/hotline": ({open}) => <Hotline open={open} />,
   "/hotline/owner/edit/:id": ({id}) => <UpdateOwner id={id}/>,
   "/hotline/owner/new": () => <NewOwner />,
   "/hotline/owner/:id": ({id}) => <OwnerDetail id={id}/>,

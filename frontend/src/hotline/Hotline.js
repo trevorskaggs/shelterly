@@ -1,9 +1,15 @@
 import React from "react";
+import styled from 'styled-components';
+
 import { Link } from 'raviger';
 import { PersonForm, ServiceRequestForm } from "./HotlineForms";
 import { ServiceRequestTable } from "./HotlineTables"
 import { PersonView, ServiceRequestView } from "./HotlineViews";
 
+export const StyledHotline = styled.div`
+  transform: ${({ open }) => open ? 'translateX(10%)' : 'translateX(0)'};
+  transition: transform 0.3s ease-in-out;
+`
 
 const header_style = {
   textAlign: "center",
@@ -18,7 +24,8 @@ const btn_style = {
   margin: "0 auto",
 };
 
-const Hotline = () => (
+const Hotline = ({open, ...props}) => (
+  <StyledHotline open={open} {...props}>
   <div style={btn_style}>
     <Link href="/hotline/owner/new" style={link_style} className="btn btn-warning btn-lg btn-block mb-2">OWNER CALLING</Link>
     <Link href="/hotline/reporter/new" style={link_style} className="btn btn-warning btn-lg btn-block mb-2">NON-OWNER CALLING</Link>
@@ -27,6 +34,7 @@ const Hotline = () => (
     <br/>
     <Link className="btn btn-secondary btn-lg btn-block"  href="/">BACK</Link>
   </div>
+  </StyledHotline>
 )
 
 export const NewOwner = () => (

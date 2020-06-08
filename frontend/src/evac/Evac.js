@@ -6,7 +6,7 @@ import { EvacTeamTable } from "./EvacTables";
 import styled from 'styled-components';
 
 export const StyledEvac = styled.div`
-  transform: ${({ open }) => open ? 'translateX(9%)' : 'translateX(0)'};
+  transform: ${({ open }) => open ? 'translateX(15%)' : 'translateX(0)'};
   transition: transform 0.3s ease-in-out;
 `
 
