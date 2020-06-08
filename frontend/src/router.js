@@ -6,7 +6,7 @@ import { Login } from "./accounts/Accounts"
 
 const routes = {
   "/": () => <Home />,
-  "/evac": () => <Evac />,
+  "/evac": ({open}) => <Evac open={open} />,
   "/evac/evacteam/new": () => <NewTeam />,
   "/evac/evacteam/list": () => <TeamList />,
   "/hotline": () => <Hotline />,

@@ -1,7 +1,8 @@
 import React, { useState, useRef } from 'react';
 import styled from 'styled-components';
 import { Link } from 'raviger';
-
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faUserCircle , faClipboardList, faHome, faBullhorn, faPhone} from '@fortawesome/free-solid-svg-icons';
 export const StyledBurger = styled.button`
   position: absolute;
   top: 5%;
@@ -39,9 +40,10 @@ export const StyledBurger = styled.button`
 
 export const StyledMenu = styled.nav`
   display: flex;
+  border-right: solid;
   flex-direction: column;
   justify-content: center;
-  background: ${({ theme }) => theme.primaryLight};
+  background: ${({ theme }) => theme.primaryDark};
   transform: ${({ open }) => open ? 'translateX(0)' : 'translateX(-100%)'};
   height: 100vh;
   text-align: left;
@@ -59,7 +61,7 @@ export const StyledMenu = styled.nav`
     padding: 2rem 0;
     font-weight: bold;
     letter-spacing: 0.5rem;
-    color: ${({ theme }) => theme.primaryDark};
+    color: ${({ theme }) => theme.primaryLight};
     text-decoration: none;
     transition: color 0.3s linear;
     @media (max-width: ${({ theme }) => theme.mobile}) {
@@ -91,17 +93,22 @@ const Menu = ({ open, ...props }) => {
     const tabIndex = isHidden ? 0 : -1;
   
     return (
+    <div>
+
     <StyledMenu open={open} aria-hidden={!isHidden} {...props}>
-      <Link href="/hotline" tabIndex={tabIndex}>HOTLINE</Link>
-      <Link href="/evac" tabIndex={tabIndex}>EVAC</Link>
-      <Link href="/intake" tabIndex={tabIndex}>INTAKE</Link>
-      <Link href="/shelter" tabIndex={tabIndex}>SHELTER MANAGEMENT</Link>
+    
+      <Link href="/hotline" tabIndex={tabIndex}><FontAwesomeIcon icon={faPhone} fixedWidth inverse/> HOTLINE</Link>
+      <Link href="/evac" tabIndex={tabIndex}><FontAwesomeIcon icon={faBullhorn} fixedWidth inverse/>  EVAC</Link>
+      <Link href="/intake" tabIndex={tabIndex}><FontAwesomeIcon icon={faClipboardList} fixedWidth inverse/>  INTAKE</Link>
+      <Link href="/shelter" tabIndex={tabIndex}><FontAwesomeIcon icon={faHome} fixedWidth inverse/> SHELTER MANAGEMENT</Link>
+      <FontAwesomeIcon icon={faUserCircle} size="4x" />
     </StyledMenu>
+    </ div>
     )
   }
 
-function Sidebar() {
-    const [open, setOpen] = useState(false);
+function Sidebar({ open, setOpen, ...props }) {
+    
     const node = useRef();
     const menuId = "main-menu";
 

@@ -1,11 +1,14 @@
-import React, { Fragment, useContext, useEffect } from "react";
+import React, { Fragment, useContext, useEffect, useState } from "react";
 import { Link, navigate, useRoutes } from 'raviger';
 import routes from "./router";
+import { ThemeProvider } from 'styled-components';
+import { theme } from './theme';
 import PageNotFound from "./components/PageNotFound";
 import { useCookies, withCookies } from 'react-cookie';
 import { AuthContext } from "./accounts/AccountsReducer";
 import { loadUser, logoutUser, setAuthToken } from "./accounts/AccountsUtils";
 import logo from "./static/images/nvadg_logo.png"
+import Sidebar from "./components/Sidebar"
 
 const header_style = {
   textAlign: "center",
@@ -16,6 +19,7 @@ function Shelterly() {
   // Initial state.
   const { state, dispatch } = useContext(AuthContext);
   const [cookies, setCookie, removeCookie] = useCookies(['token']);
+  const [open, setOpen] = useState(false);
 
   if (cookies.token) setAuthToken(cookies.token);
 
@@ -33,10 +37,13 @@ function Shelterly() {
     }
   }
 
-  const routeResult = useRoutes(routes);
+  const routeResult = useRoutes(routes, {routeProps: { open: open }});
 
   return (
+    <ThemeProvider theme={theme}>
     <div>
+    <Sidebar open={open} setOpen={setOpen} />
+
       <h1 style={header_style} className="col-12">
         <Link href="/"><img src={logo} alt=""/></Link>
       </h1>
@@ -44,10 +51,8 @@ function Shelterly() {
       <Fragment>
         {routeResult || <PageNotFound />}
       </Fragment>
-      <div style={{textAlign: "right"}}>
-        {state.user ? <button className="btn btn-danger" onClick={() => logoutUser({dispatch}, {removeCookie})}>Logout {state.user.username}</button> : ''}
-      </div>
     </div>
+    </ThemeProvider>
   );
 }
 
