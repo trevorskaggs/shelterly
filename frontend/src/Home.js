@@ -16,6 +16,7 @@ const Home = () => (
     <Link href="/evac" style={link_style} className="btn btn-warning btn-lg btn-block mb-2">EVAC</Link>
     <Link href="/intake" style={link_style} className="btn btn-warning btn-lg btn-block mb-2">INTAKE</Link>
     <Link href="/shelter" style={link_style} className="btn btn-warning btn-lg btn-block">SHELTER MANAGEMENT</Link>
+    <Link href="/animals/search" style={link_style} className="btn btn-danger btn-lg btn-block">SEARCH ANIMALS</Link>
   </div>
 )
 

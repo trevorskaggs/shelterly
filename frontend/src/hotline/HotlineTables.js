@@ -90,17 +90,17 @@ export function ServiceRequestTable() {
       {data.service_requests.map(service_request => (
         <div key={service_request.id} style={{width:"90%"}} className="card card-body bg-light mb-2">
           <div className="row">
-            <div className="col-sm-2">
+            <div className="col-sm-3">
               <b>Service Request #{service_request.id}</b> <Fab color="primary" href={"/hotline/servicerequest/" + service_request.id} className="mb-1" style={{width:23,height:23, minHeight:23}} title="Service Request details" aria-label="details"><AssignmentIcon style={{fontSize:10}} /></Fab>
               <div className="mt-1 mb-1"><Moment format="LLL">{service_request.timestamp}</Moment></div>
             </div>
             <div className="col-sm">
             <b>Contacts:</b>
-              <li className='owner'>Owner: {service_request.owner ? <span>{service_request.owner_object.first_name} {service_request.owner_object.last_name} {service_request.owner_object.phone} <Fab color="primary" href={"/hotline/owner/" + service_request.owner} className="mb-1" style={{width:23,height:23, minHeight:23, color:"#fff", backgroundColor: "#28a745"}} title="Owner details" aria-label="owner_details"><AssignmentIcon style={{fontSize:10}} /></Fab></span> : "N/A"}</li>
-              <li className='reporter '>Reporter: {service_request.reporter ? <span>{service_request.reporter_object.first_name} {service_request.reporter_object.last_name} {service_request.reporter_object.phone} <Fab href={"/hotline/reporter/" + service_request.reporter} className="mb-1" style={{width:23,height:23, minHeight:23, color:"#fff", backgroundColor: "#28a745"}} title="Reporter details" aria-label="reporter_details"><AssignmentIcon style={{fontSize:10}} /></Fab></span> : "N/A"}</li>
+              <li className='owner'>Owner: {service_request.owner ? <span>{service_request.owner_object.first_name} {service_request.owner_object.last_name} {service_request.owner_object.phone} <Fab href={"/hotline/owner/" + service_request.owner} className="mb-1" style={{width:23,height:23, minHeight:23, color:"#fff", backgroundColor: "#28a745"}} title="Owner details" aria-label="owner_details"><AssignmentIcon style={{fontSize:10}} /></Fab></span> : "N/A"}</li>
+              <li className='reporter'>Reporter: {service_request.reporter ? <span>{service_request.reporter_object.first_name} {service_request.reporter_object.last_name} {service_request.reporter_object.phone} <Fab href={"/hotline/reporter/" + service_request.reporter} className="mb-1" style={{width:23,height:23, minHeight:23, color:"#fff", backgroundColor: "#28a745"}} title="Reporter details" aria-label="reporter_details"><AssignmentIcon style={{fontSize:10}} /></Fab></span> : "N/A"}</li>
             </div>
             <div className="col-sm">
-            <b>Animals:</b> {service_request.animals && service_request.animals.length ? <span>{service_request.animals.map(animal => (<li key={animal.id}>{animal.name} ({animal.species}) - {animal.status} <Fab color="primary" href={"/animals/animal/" + animal.id} className="mb-1" style={{width:23,height:23, minHeight:23, color:"#fff", backgroundColor: "#c82333"}} title="Animal details" aria-label="animal_details"><AssignmentIcon style={{fontSize:10}} /></Fab></li>))}</span> : <span><li>None</li></span>}
+              <b>Animals:</b> {service_request.animals && service_request.animals.length ? <span>{service_request.animals.map(animal => (<li key={animal.id}>{animal.name} ({animal.species}) - {animal.status} <Fab href={"/animals/animal/" + animal.id} className="mb-1" style={{width:23,height:23, minHeight:23, color:"#fff", backgroundColor: "#c82333"}} title="Animal details" aria-label="animal_details"><AssignmentIcon style={{fontSize:10}} /></Fab></li>))}</span> : <span><li>None</li></span>}
             </div>
           </div>
         </div>

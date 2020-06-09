@@ -31,9 +31,6 @@ export const PersonForm = ({id}) => {
   // Determine if this is an owner or reporter when creating a Person.
   var is_owner = window.location.pathname.includes("owner")
 
-  // Determines if this is a brand new Person to control which buttons to display.
-  var is_new = window.location.pathname.includes("new")
-
   // Regex validators.
   const phoneRegex = /^((\+\d{1,3}(-| )?\(?\d\)?(-| )?\d{1,3})|(\(?\d{2,3}\)?))(-| )?(\d{3,4})(-| )?(\d{4})(( x| ext)\d{1,5}){0,1}$/
   const nameRegex = /^[a-z ,.'-]+$/i
@@ -100,8 +97,7 @@ export const PersonForm = ({id}) => {
             .required('Required'),
           last_name: Yup.string()
             .max(50, 'Must be 50 characters or less')
-            .matches(nameRegex, "Name is not valid")
-            .required('Required'),
+            .matches(nameRegex, "Name is not valid"),
           phone: Yup.string()
             .matches(phoneRegex, "Phone number is not valid"),
           email: Yup.string()
@@ -150,17 +146,17 @@ export const PersonForm = ({id}) => {
                   console.log(error.response);
                 });
               }
-              // If we have a reporter ID, redirect to create a new SR with owner + reporter IDs.
+              // If we have a reporter ID, redirect to create a new Animal with owner + reporter IDs.
               else if (reporter_id) {
-                navigate('/hotline/servicerequest/new?owner_id=' + response.data.id + '&reporter_id=' + reporter_id);
+                navigate('/animals/animal/new?owner_id=' + response.data.id + '&reporter_id=' + reporter_id);
               }
-              // If we're creating an owner without a reporter ID, redirect to create new SR with owner ID.
+              // If we're creating an owner without a reporter ID, redirect to create new Animal with owner ID.
               else if (is_owner) {
-                navigate('/hotline/servicerequest/new?owner_id=' + response.data.id);
+                navigate('/animals/animal/new?owner_id=' + response.data.id);
               }
-              // If we're creating a reporter and choose to skip owner, redirect to create new SR with reporter ID.
+              // If we're creating a reporter and choose to skip owner, redirect to create new Animal with reporter ID.
               else if (skipOwner) {
-                navigate('/hotline/servicerequest/new?reporter_id=' + response.data.id);
+                navigate('/animals/animal/new?reporter_id=' + response.data.id);
               }
               // Else create a reporter and redirect to create an owner.
               else {
@@ -259,13 +255,12 @@ export const PersonForm = ({id}) => {
                       id="city"
                     />
                   </Col>
-                  <Col xs="2">
+                  <Col xs="2" className="mt-3">
                     <DropDown
                       label="State"
                       name="state"
                       id="state"
                       options={state_options}
-                      isClearable={true}
                       value={props.values.state||''}
                     />
                   </Col>
@@ -280,8 +275,8 @@ export const PersonForm = ({id}) => {
                 </Row>
               </FormGroup>
 
-              <Button type="submit" className="btn-success mr-1">Save</Button>
-              {!is_owner & is_new ? <button type="button" className="btn btn-primary mr-1" onClick={() => {setSkipOwner(true); props.submitForm()}}>Skip Owner</button> : ""}
+              <button type="button" className="btn btn-success mr-1" onClick={() => {setSkipOwner(true); props.submitForm()}}>Save</button>
+              {!is_owner & !id ? <button type="button" className="btn btn-primary mr-1" onClick={() => {setSkipOwner(true); props.submitForm()}}>Skip Owner</button> : ""}
               <Link className="btn btn-secondary" href="/hotline">Cancel</Link>
             </Container>
           </Form>
@@ -294,18 +289,15 @@ export const PersonForm = ({id}) => {
 // Form for creating new Service Request objects.
 export function ServiceRequestForm({id}) {
 
-  // Determines if this is a brand new SR to control which fields to display.
-  var is_new = window.location.pathname.includes("new")
-
   // Identify any query param data.
   const [queryParams] = useQueryParams();
   const {
-    owner_id = '',
-    reporter_id = ''
+    owner_id = null,
+    reporter_id = null
   } = queryParams;
 
   // Track checkbox state with Fade.
-  const [fadeIn, setFadeIn] = useState(owner_id ? false : true);
+  const [fadeIn, setFadeIn] = useState(true);
   function handleChange() {
     setFadeIn(!fadeIn)
   }
@@ -358,6 +350,7 @@ export function ServiceRequestForm({id}) {
         .then(response => {
           // Update relevant address fields.
           setData(Object.assign(data, { 'address': response.data.address, 'apartment':response.data.apartment, 'city':response.data.city, 'state':response.data.state, 'zip_code':response.data.zip_code } ))
+          setFadeIn(response.data.address ? false : true)
         })
         .catch(error => {
           console.log(error.response);
@@ -429,50 +422,60 @@ export function ServiceRequestForm({id}) {
             <Container>
               <Field type="hidden" value={owner_id||""} name="owner" id="owner"></Field>
               <Field type="hidden" value={reporter_id||""} name="reporter" id="reporter"></Field>
-              <FormGroup hidden={is_new}>
-                <TextInput
-                  type="textarea"
-                  rows={5}
-                  label="Outcome"
-                  name="outcome"
-                  id="outcome"
-                />
-                <TextInput
-                  type="textarea"
-                  rows={5}
-                  label="Owner Notification Notes"
-                  name="owner_notification_notes"
-                  id="owner_notification_notes"
-                />
+              <FormGroup hidden={!id}>
                 <Row>
-                  <Label htmlFor="forced_entry" className="mt-3">Forced Entry</Label>
-                  <Field component={Switch} name="forced_entry" type="checkbox" color="primary" className="mt-3" />
+                  <Col xs="10">
+                    <TextInput
+                      type="textarea"
+                      rows={5}
+                      label="Outcome"
+                      name="outcome"
+                      id="outcome"
+                    />
+                  </Col>
                 </Row>
-                <Row className="mt-3">
-                  <DateTimePicker
-                    label="Recovery Time"
-                    name="recovery_time"
-                    id="recovery_time"
-                    onChange={(date, dateStr) => {
-                      props.setFieldValue("recovery_time", dateStr)
-                    }}
-                    value={data.recovery_time||null}
-                  />
+                <Row>
+                  <Col xs="10" className="mt-3">
+                    <TextInput
+                      type="textarea"
+                      rows={5}
+                      label="Owner Notification Notes"
+                      name="owner_notification_notes"
+                      id="owner_notification_notes"
+                    />
+                  </Col>
                 </Row>
-                <Row className="mt-3">
-                  <DateTimePicker
-                    label="Owner Notified"
-                    name="owner_notification_tstamp"
-                    id="owner_notification_tstamp"
-                    onChange={(date, dateStr) => {
-                      props.setFieldValue("owner_notification_tstamp", dateStr)
-                    }}
-                    value={data.owner_notification_tstamp||null}
-                  />
+                <Row className="mt-1">
+                  <Label htmlFor="forced_entry" className="mt-3 ml-3">Forced Entry</Label>
+                  <Field component={Switch} name="forced_entry" type="checkbox" color="primary" className="mt-2" />
+                </Row>
+                <Row>
+                  <Col xs="5">
+                    <DateTimePicker
+                      label="Recovery Time"
+                      name="recovery_time"
+                      id="recovery_time"
+                      onChange={(date, dateStr) => {
+                        props.setFieldValue("recovery_time", dateStr)
+                      }}
+                      value={data.recovery_time||null}
+                    />
+                  </Col>
+                  <Col xs="5">
+                    <DateTimePicker
+                      label="Owner Notified"
+                      name="owner_notification_tstamp"
+                      id="owner_notification_tstamp"
+                      onChange={(date, dateStr) => {
+                        props.setFieldValue("owner_notification_tstamp", dateStr)
+                      }}
+                      value={data.owner_notification_tstamp||null}
+                    />
+                  </Col>
                 </Row>
                 <hr/>
               </FormGroup>
-              { owner_id ?
+              { data.address ?
                 <span className="form-row">
                   <Label>Address Same as Owner: </Label>
                   <CustomInput id="same_address" type="checkbox" className="ml-2" checked={!fadeIn} onChange={handleChange} />
@@ -507,13 +510,12 @@ export function ServiceRequestForm({id}) {
                         id="city"
                       />
                     </Col>
-                    <Col xs="2">
+                    <Col xs="2" className="mt-3">
                       <DropDown
                         label="State"
                         name="state"
                         id="state"
                         options={state_options}
-                        isClearable={true}
                         value={props.values.state||''}
                       />
                     </Col>
