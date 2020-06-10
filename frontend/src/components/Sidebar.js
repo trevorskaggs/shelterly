@@ -1,8 +1,11 @@
 import React, { useState, useRef } from 'react';
 import styled from 'styled-components';
 import { Link } from 'raviger';
+import { Container, Media, Row} from 'reactstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUserCircle , faClipboardList, faHome, faBullhorn, faPhone} from '@fortawesome/free-solid-svg-icons';
+import logo from ".././static/images/shelterly.png"
+
 export const StyledBurger = styled.button`
   position: absolute;
   top: 5%;
@@ -47,7 +50,7 @@ export const StyledMenu = styled.nav`
   transform: ${({ open }) => open ? 'translateX(0)' : 'translateX(-100%)'};
   height: 100vh;
   text-align: left;
-  padding: 2rem;
+  padding: 4rem;
   position: absolute;
   top: 0;
   left: 0;
@@ -58,7 +61,7 @@ export const StyledMenu = styled.nav`
   a {
     font-size: 2rem;
     text-transform: uppercase;
-    padding: 2rem 0;
+    padding: 1rem 0;
     font-weight: bold;
     letter-spacing: 0.5rem;
     color: ${({ theme }) => theme.primaryLight};
@@ -71,6 +74,24 @@ export const StyledMenu = styled.nav`
     &:hover {
       color: ${({ theme }) => theme.primaryHover};
     }
+  }
+  img {
+    display: flex;
+    margin-left: auto;
+    margin-right: auto;
+    width: 10rem;
+    height: 10rem;
+
+  }
+  div.logo {
+    font-size: 2rem;
+    font-weight: bold;
+    display: block;
+    letter-spacing: 0.5rem;
+    margin-left: auto;
+    margin-right: auto;
+    padding-bottom: 1rem;
+    color: ${({ theme }) => theme.primaryLight};
   }
 `;
 
@@ -94,13 +115,13 @@ const Menu = ({ open, ...props }) => {
   
     return (
     <div>
-
     <StyledMenu open={open} aria-hidden={!isHidden} {...props}>
-    
+    <img src={logo} alt="logo" />
+    <div className="logo">SHELTERLY</div>
       <Link href="/hotline" tabIndex={tabIndex}><FontAwesomeIcon icon={faPhone} fixedWidth inverse/> HOTLINE</Link>
       <Link href="/evac" tabIndex={tabIndex}><FontAwesomeIcon icon={faBullhorn} fixedWidth inverse/>  EVAC</Link>
       <Link href="/intake" tabIndex={tabIndex}><FontAwesomeIcon icon={faClipboardList} fixedWidth inverse/>  INTAKE</Link>
-      <Link href="/shelter" tabIndex={tabIndex}><FontAwesomeIcon icon={faHome} fixedWidth inverse/> SHELTER MANAGEMENT</Link>
+      <Link href="/shelter" tabIndex={tabIndex}><FontAwesomeIcon icon={faHome} fixedWidth inverse/> SHELTER</Link>
       <FontAwesomeIcon icon={faUserCircle} size="4x" />
     </StyledMenu>
     </ div>

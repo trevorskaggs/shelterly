@@ -7,12 +7,14 @@ import PageNotFound from "./components/PageNotFound";
 import { useCookies, withCookies } from 'react-cookie';
 import { AuthContext } from "./accounts/AccountsReducer";
 import { loadUser, logoutUser, setAuthToken } from "./accounts/AccountsUtils";
-import logo from "./static/images/nvadg_logo.png"
 import Sidebar from "./components/Sidebar"
+import styled from 'styled-components';
 
-const header_style = {
-  textAlign: "center",
-};
+export const StyledShelterly = styled.div`
+  background: #444444;
+
+`
+
 
 function Shelterly() {
 
@@ -41,17 +43,14 @@ function Shelterly() {
 
   return (
     <ThemeProvider theme={theme}>
+    <StyledShelterly>
     <div>
     <Sidebar open={open} setOpen={setOpen} />
-
-      <h1 style={header_style} className="col-12">
-        <Link href="/"><img src={logo} alt=""/></Link>
-      </h1>
-      <hr className="mt-0 mb-4"/>
       <Fragment>
         {routeResult || <PageNotFound />}
       </Fragment>
     </div>
+    </StyledShelterly>
     </ThemeProvider>
   );
 }
