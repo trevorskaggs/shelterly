@@ -22,6 +22,10 @@ export const ShelterForm = ({sid}) => {
     name: '',
     description: '',
     address: '',
+    apartment: '',
+    city: '',
+    state: '',
+    zip_code: '',
   });
 
   // Hook for initializing data.
@@ -107,17 +111,52 @@ export const ShelterForm = ({sid}) => {
             </FormGroup>
 
             <FormGroup>
-              <Row>
-                <Col xs={{size: 5, offset: 1}}>
-                  <Field
-                    type="text"
-                    label="Address"
-                    name="address"
-                    id="address"
-                    component={ReactstrapInput}
-                  />
-                </Col>
-              </Row>
+            <Row>
+                  <Col xs="8">
+                    <TextInput
+                      type="text"
+                      label="Address"
+                      name="address"
+                      id="address"
+                    />
+                  </Col>
+                  <Col xs="2">
+                    <TextInput
+                      type="text"
+                      label="Apartment"
+                      name="apartment"
+                      id="apartment"
+                    />
+                  </Col>
+                </Row>
+            <Row>
+                  <Col xs="6">
+                    <TextInput
+                      type="text"
+                      label="City"
+                      name="city"
+                      id="city"
+                    />
+                  </Col>
+                  <Col xs="2">
+                    <DropDown
+                      label="State"
+                      name="state"
+                      id="state"
+                      options={state_options}
+                      isClearable={true}
+                      value={props.values.state||''}
+                    />
+                  </Col>
+                  <Col xs="2">
+                    <TextInput
+                      type="text"
+                      label="Zip Code"
+                      name="zip_code"
+                      id="zip_code"
+                    />
+                  </Col>
+                </Row>
             </FormGroup>
 
             <Button type="submit" className="btn-success mr-1">Save</Button>
@@ -135,6 +174,10 @@ export const EditShelterForm = ({sid}) => {
     name: '',
     description: '',
     address: '',
+    apartment: '',
+    city: '',
+    state: '',
+    zip_code: '',
   });
 
   // Hook for initializing data.
@@ -209,6 +252,24 @@ export const EditShelterForm = ({sid}) => {
 
             <FormGroup>
               <Row>
+                    <Col xs="8">
+                      <TextInput
+                        type="text"
+                        label="Address"
+                        name="address"
+                        id="address"
+                      />
+                    </Col>
+                    <Col xs="2">
+                      <TextInput
+                        type="text"
+                        label="Apartment"
+                        name="apartment"
+                        id="apartment"
+                      />
+                    </Col>
+                  </Row>
+              <Row>
                 <Col xs={{size: 5, offset: 1}}>
                   <Field
                     type="text"
@@ -248,7 +309,7 @@ export const BuildingForm = ({sid}) => {
           setTimeout(() => {
             axios.post('http://0.0.0.0:8000/shelter/api/building/', values)
             .then(function() {
-              navigate('/shelter/list');
+              navigate('/shelter/' + sid);
             })
             .catch(e => {
               console.log(e);
@@ -397,7 +458,7 @@ export const RoomForm = ({bid}) => {
           setTimeout(() => {
             axios.post('http://0.0.0.0:8000/shelter/api/room/', values)
             .then(function() {
-              navigate('/shelter/list');
+              navigate('/shelter/building/' + bid);
             })
             .catch(e => {
               console.log(e);
