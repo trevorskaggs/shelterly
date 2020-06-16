@@ -1,8 +1,8 @@
 import React, { useState, useRef } from 'react';
 import styled from 'styled-components';
 import { Link } from 'raviger';
-import { Container, Media, Row} from 'reactstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Nav, Button } from 'react-bootstrap';
 import { faUserCircle , faClipboardList, faHome, faBullhorn, faPhone} from '@fortawesome/free-solid-svg-icons';
 import logo from ".././static/images/shelterly.png"
 
@@ -41,17 +41,13 @@ export const StyledBurger = styled.button`
   }
 `;
 
-export const StyledMenu = styled.nav`
-  display: flex;
-  border-right: solid;
-  flex-direction: column;
-  justify-content: center;
+export const StyledMenu = styled(Nav)`
   background: ${({ theme }) => theme.primaryDark};
   transform: ${({ open }) => open ? 'translateX(0)' : 'translateX(-100%)'};
-  height: 100vh;
+  height: 100%;
   text-align: left;
   padding: 4rem;
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   transition: transform 0.3s ease-in-out;
@@ -115,7 +111,7 @@ const Menu = ({ open, ...props }) => {
   
     return (
     <div>
-    <StyledMenu open={open} aria-hidden={!isHidden} {...props}>
+    <StyledMenu open={open} aria-hidden={!isHidden} {...props} className="flex-column">
     <img src={logo} alt="logo" />
     <div className="logo">SHELTERLY</div>
       <Link href="/hotline" tabIndex={tabIndex}><FontAwesomeIcon icon={faPhone} fixedWidth inverse/> HOTLINE</Link>

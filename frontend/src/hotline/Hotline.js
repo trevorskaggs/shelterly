@@ -2,65 +2,36 @@ import React from "react";
 import styled from 'styled-components';
 
 import { Link } from 'raviger';
+import { Container, Tab, Tabs } from 'react-bootstrap';
 import { PersonForm, ServiceRequestForm } from "./HotlineForms";
 import { ServiceRequestTable } from "./HotlineTables"
 import { PersonView, ServiceRequestView } from "./HotlineViews";
 
-export const StyledHotline = styled.div`
-  transform: ${({ open }) => open ? 'translateX(10%)' : 'translateX(0)'};
+export const StyledHotline = styled(Container)`
+  transform: ${({ open }) => open ? 'translateX(50%)' : 'translateX(0)'};
   transition: transform 0.3s ease-in-out;
+  margin: flex;
+  width: 50%;
+  padding-top: 12rem;
 `
-
-const header_style = {
-  textAlign: "center",
-};
-
-const link_style = {
-  textDecoration: "none",
-};
-
-const btn_style = {
-  width: "50%",
-  margin: "0 auto",
-};
-
-const Hotline = ({open, ...props}) => (
-  <StyledHotline open={open} {...props}>
-  <div style={btn_style}>
-    <Link href="/hotline/owner/new" style={link_style} className="btn btn-warning btn-lg btn-block mb-2">OWNER CALLING</Link>
-    <Link href="/hotline/reporter/new" style={link_style} className="btn btn-warning btn-lg btn-block mb-2">NON-OWNER CALLING</Link>
-    <Link href="/hotline/servicerequest/list" style={link_style} className="btn btn-warning btn-lg btn-block mb-2">SEARCH SERVICE REQUESTS</Link>
-    <br/>
-    <br/>
-    <Link className="btn btn-secondary btn-lg btn-block"  href="/">BACK</Link>
-  </div>
-  </StyledHotline>
-)
-
-export const NewOwner = () => (
-  <div>
-    <h1 style={header_style}>Owner Information</h1>
-    <PersonForm />
-  </div>
-)
 
 export const UpdateOwner = ({id}) => (
   <div>
-    <h1 style={header_style}>Update Owner Information</h1>
+    <h1>Update Owner Information</h1>
     <PersonForm id={id} />
   </div>
 )
 
 export const NewReporter = () => (
   <div>
-    <h1 style={header_style}>Reporter Information</h1>
+    <h1>Reporter Information</h1>
     <PersonForm />
   </div>
 )
 
 export const UpdateReporter = ({id}) => (
   <div>
-    <h1 style={header_style}>Reporter Information</h1>
+    <h1>Reporter Information</h1>
     <PersonForm id={id} />
   </div>
 )
@@ -79,7 +50,7 @@ export const ReporterDetail = ({id}) => (
 
 export const ServiceRequestList = () => (
   <div>
-    <h1 style={header_style}>Service Requests</h1>
+    <h1>Service Requests</h1>
     <br/>
     <ServiceRequestTable />
   </div>
@@ -87,7 +58,7 @@ export const ServiceRequestList = () => (
 
 export const NewServiceRequest = () => (
   <div>
-    <h1 style={header_style}>Service Request Form</h1>
+    <h1>Service Request Form</h1>
     <br/>
     <ServiceRequestForm />
   </div>
@@ -95,7 +66,7 @@ export const NewServiceRequest = () => (
 
 export const UpdateServiceRequest = ({id}) => (
   <div>
-    <h1 style={header_style}>Update Service Request Form</h1>
+    <h1>Update Service Request Form</h1>
     <br/>
     <ServiceRequestForm id={id} />
   </div>
@@ -106,5 +77,24 @@ export const ServiceRequestDetail = ({id}) => (
     <ServiceRequestView id={id} />
   </div>
 )
+
+
+const Hotline = ({open, ...props}) => (
+  <StyledHotline open={open} {...props}>
+    <Tabs>
+      <Tab eventKey="new_owner" title="Owner Calling">
+        <PersonForm />
+      </Tab>
+      <Tab eventKey="new_reporter" title="Non-Owner Calling">
+        <PersonForm />
+      </Tab>
+      <Tab eventKey="service_requests" title="Search Service Requests">
+        <ServiceRequestTable />
+      </Tab>
+    </Tabs>
+    <Link className="btn btn-secondary btn-lg btn-block"  href="/">BACK</Link>
+  </StyledHotline>
+)
+
 
 export default Hotline
