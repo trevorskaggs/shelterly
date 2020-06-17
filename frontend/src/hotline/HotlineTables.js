@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
-import { Button, ButtonGroup, Input, Form } from 'reactstrap';
+import { Button, ButtonGroup, Form, FormControl, InputGroup} from 'react-bootstrap';
 import Moment from 'react-moment';
 import { Fab } from '@material-ui/core';
 import AssignmentIcon from '@material-ui/icons/Assignment';
@@ -68,23 +68,25 @@ export function ServiceRequestTable() {
   return (
     <div className="ml-2 mr-2">
       <Form onSubmit={handleSubmit}>
-        <div className="form-row">
-          <Input
+        <InputGroup className="mb-3">
+          <FormControl
             type="text"
             placeholder="Search"
             name="searchTerm"
             value={searchTerm}
             onChange={handleChange}
-            style={input_style}
           />
-          <button className="btn btn-warning ml-1">Search!</button>
+        <InputGroup.Append>
+          <Button variant="outline-secondary">Search</Button>
+        </InputGroup.Append>
+        </InputGroup>
+
           <div className="ml-auto">
             <ButtonGroup>
               <Button color={statusOptions.openColor} onClick={() => setStatusOptions({status:"open", openColor:"primary", closedColor:"secondary"})}>Open</Button>
               <Button color={statusOptions.closedColor} onClick={() => setStatusOptions({status:"closed", openColor:"secondary", closedColor:"danger"})}>Closed</Button>
             </ButtonGroup>
           </div>
-        </div>
       </Form>
       <hr/>
       {data.service_requests.map(service_request => (

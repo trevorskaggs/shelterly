@@ -8,7 +8,7 @@ import {
   FormGroup,
   Row,
   Container,
-} from 'reactstrap';
+} from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import * as Yup from 'yup';
 import { MultiSelect, TextInput} from '.././components/Form';
