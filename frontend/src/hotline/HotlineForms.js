@@ -16,6 +16,14 @@ import * as Yup from 'yup';
 import { Switch } from 'formik-material-ui';
 import 'flatpickr/dist/themes/light.css';
 import { DateTimePicker, DropDown, TextInput } from '../components/Form';
+import styled from 'styled-components';
+
+export const StyledForm = styled(Form)`
+background-color: #454d55;
+font-weight: bold;
+font-size: 1em;
+padding: 0.25em 1em;
+`
 
 const state_options = [{value:'AL', label:"AL"},{value:'AK', label:"AK"},{value:'AZ', label:"AZ"},{value:'AR', label:"AR"},{value:'CA', label:"CA"},{value:'CO', label:"CO"},{value:'CT', label:"CT"},
 {value:'DE', label:"DE"},{value:'FL', label:"FL"},{value:'GA', label:"GA"},{value:'HI', label:"HI"},{value:'ID', label:"ID"},{value:'IL', label:"IL"},{value:'IN', label:"IN"},
@@ -175,7 +183,7 @@ export const PersonForm = ({id}) => {
         }}
       >
         {props => (
-          <Form>
+          <StyledForm>
             <Container>
               <FormGroup>
                 <Row>
@@ -284,7 +292,7 @@ export const PersonForm = ({id}) => {
               {!is_owner & is_new ? <button type="button" className="btn btn-primary mr-1" onClick={() => {setSkipOwner(true); props.submitForm()}}>Skip Owner</button> : ""}
               <Link className="btn btn-secondary" href="/hotline">Cancel</Link>
             </Container>
-          </Form>
+          </StyledForm>
         )}
       </Formik>
     </>

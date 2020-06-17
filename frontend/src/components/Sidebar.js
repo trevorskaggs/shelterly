@@ -43,7 +43,7 @@ export const StyledBurger = styled.button`
 
 export const StyledMenu = styled(Nav)`
   background: ${({ theme }) => theme.primaryDark};
-  transform: ${({ open }) => open ? 'translateX(0)' : 'translateX(-100%)'};
+  transform: ${({ open }) => open ? 'translateX(-100%)' : 'translateX(0%)'};
   height: 100%;
   text-align: left;
   padding: 4rem;
@@ -51,6 +51,7 @@ export const StyledMenu = styled(Nav)`
   top: 0;
   left: 0;
   transition: transform 0.3s ease-in-out;
+  z-index 9;
   @media (max-width: ${({ theme }) => theme.mobile}) {
       width: 100%;
     }
@@ -118,7 +119,6 @@ const Menu = ({ open, ...props }) => {
       <Link href="/evac" tabIndex={tabIndex}><FontAwesomeIcon icon={faBullhorn} fixedWidth inverse/>  EVAC</Link>
       <Link href="/intake" tabIndex={tabIndex}><FontAwesomeIcon icon={faClipboardList} fixedWidth inverse/>  INTAKE</Link>
       <Link href="/shelter" tabIndex={tabIndex}><FontAwesomeIcon icon={faHome} fixedWidth inverse/> SHELTER</Link>
-      <FontAwesomeIcon icon={faUserCircle} size="4x" />
     </StyledMenu>
     </ div>
     )

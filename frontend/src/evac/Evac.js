@@ -7,17 +7,25 @@ import { Container, Row, Col, Tab,  Tabs } from 'react-bootstrap';
 import styled from 'styled-components';
 
 export const StyledEvac = styled(Container)`
-  transform: ${({ open }) => open ? 'translateX(50%)' : 'translateX(0)'};
   transition: transform 0.3s ease-in-out;
   margin: flex;
   width: 50%;
   padding-top: 12rem;
+  color: white;
+  a {
+    color: white !important;
+    background-color: #454d55 !important; 
+  }
   
+`
+export const StyledTabs = styled(Tabs)`
+  color: white;
+  background-color: #454d55;
 `
 
 const Evac = ({open, ...props}) => (
   <StyledEvac open={open} {...props}>
-    <Tabs>
+    <StyledTabs>
     <Tab eventKey="list" title="Evac Teams" >
       <EvacTeamTable />
     </Tab>
@@ -26,7 +34,7 @@ const Evac = ({open, ...props}) => (
     </Tab>
     <Link href="">DEPLOY EVAC TEAM</Link>
     <Link href="">EVAC TEAM DEBRIEF</Link>
-    </Tabs>
+    </StyledTabs>
     <br/>
     <br/>
     <Link className="btn btn-secondary btn-lg btn-block"  href="/">BACK</Link>

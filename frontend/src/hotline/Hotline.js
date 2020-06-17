@@ -8,11 +8,16 @@ import { ServiceRequestTable } from "./HotlineTables"
 import { PersonView, ServiceRequestView } from "./HotlineViews";
 
 export const StyledHotline = styled(Container)`
-  transform: ${({ open }) => open ? 'translateX(50%)' : 'translateX(0)'};
-  transition: transform 0.3s ease-in-out;
-  margin: flex;
-  width: 50%;
-  padding-top: 12rem;
+transition: transform 0.3s ease-in-out;
+margin: flex;
+width: 50%;
+padding-top: 12rem;
+color: white;
+a {
+  color: white !important;
+  background-color: #454d55 !important; 
+}
+
 `
 
 export const UpdateOwner = ({id}) => (
