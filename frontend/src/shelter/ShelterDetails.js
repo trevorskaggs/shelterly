@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import { Link } from 'raviger';
+import { Button } from 'reactstrap';
 import { BuildingList } from "./Building";
 import { RoomList } from "./Room";
 
@@ -41,12 +42,12 @@ export function ShelterDetailsTable({sid}) {
       <p><b>Description:</b> {String(data.description)}</p>
       <p><b>Image:</b> {String(data.image)}</p>
       <hr/>
-      <Link href={"/shelter/edit/" + data.id} style={link_style} className="btn btn-warning btn-lg btn-block mb-2">EDIT SHELTER</Link>
+      <Link href={"/shelter/edit/" + data.id}><Button color="warning">EDIT SHELTER</Button></Link>
       <h3>Shelter Buildings</h3>
       <BuildingList sid={data.id} />
       <hr/>
-      <Link href={"/shelter/" + data.id + "/building/new"} style={link_style} className="btn btn-warning btn-lg btn-block mb-2">CREATE NEW BUILDING</Link>
-      <Link className="btn btn-secondary btn-lg btn-block"  href="/shelter/list">BACK</Link>
+      <Link href={"/shelter/" + data.id + "/building/new"}><Button color="primary">CREATE NEW SHELTER</Button></Link>
+      <Link href="/shelter/list"><Button color="secondary">BACK</Button></Link>
     </>
   );
 };
@@ -80,12 +81,12 @@ export function BuildingDetailsTable({bid}) {
       <p><b>Shelter:</b> {String(data.shelter)}</p>
       <p><b>Description:</b> {String(data.description)}</p>
       <hr/>
-      <Link href={"/shelter/building/edit/" + data.id} style={link_style} className="btn btn-warning btn-lg btn-block mb-2">EDIT BUILDING</Link>
+      <Link href={"/shelter/building/edit/" + data.id}><Button color="warning">EDIT BUILDING</Button></Link>
       <h3>Building Rooms</h3>
       <RoomList bid={data.id} />
       <hr/>
-      <Link href={"/shelter/building/" + data.id + "/room/new"} style={link_style} className="btn btn-warning btn-lg btn-block mb-2">NEW ROOM</Link>
-      <Link className="btn btn-secondary btn-lg btn-block"  href="/shelter/list">BACK</Link>
+      <Link href={"/shelter/building/" + data.id + "/room/new"}><Button color="primary">NEW ROOM</Button></Link>
+      <Link href="/shelter/list"><Button color="secondary">BACK</Button></Link>
     </>
   );
 };
@@ -119,8 +120,8 @@ export function RoomDetailsTable({rid}) {
       <p><b>Shelter:</b> {String(data.shelter)}</p>
       <p><b>Description:</b> {String(data.description)}</p>
       <hr/>
-      <Link href={"/shelter/room/edit/" + data.id} style={link_style} className="btn btn-warning btn-lg btn-block mb-2">EDIT ROOM</Link>
-      <Link className="btn btn-secondary btn-lg btn-block"  href="/shelter/list">BACK</Link>
+      <Link href={"/shelter/room/edit/" + data.id}><Button color="warning">EDIT ROOM</Button></Link>
+      <Link href="/shelter/list"><Button color="secondary">BACK</Button></Link>
     </>
   );
 };

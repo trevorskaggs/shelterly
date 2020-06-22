@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import Table from '.././components/Table';
 import { Link } from 'raviger';
+import { Button } from 'reactstrap';
 import { ShelterDetailsTable } from "./ShelterDetails";
 
 const header_style = {
@@ -59,8 +60,8 @@ export function ShelterTable() {
       <p>{data.isFetching ? 'Fetching shelters...' : ''}</p>
       <br/>
       <br/>
-      <Link href="/shelter/new" style={link_style} className="btn btn-warning btn-lg btn-block mb-2">CREATE NEW SHELTER</Link>
-      <Link className="btn btn-secondary btn-lg btn-block"  href="/shelter">BACK</Link>
+      <Link href="/shelter/new"><Button color="primary">CREATE NEW SHELTER</Button></Link>
+      <Link href="/shelter"><Button color="secondary">BACK</Button></Link>
     </div>
   )
 }
