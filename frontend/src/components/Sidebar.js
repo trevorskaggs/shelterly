@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { Link } from 'raviger';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Nav, Button } from 'react-bootstrap';
-import { faUserCircle , faClipboardList, faHome, faBullhorn, faPhone} from '@fortawesome/free-solid-svg-icons';
+import { faUserCircle , faClipboardList, faHome, faBullhorn, faPhone, faSignOutAlt} from '@fortawesome/free-solid-svg-icons';
 import logo from ".././static/images/shelterly.png"
 
 export const StyledBurger = styled.button`
@@ -119,6 +119,7 @@ const Menu = ({ open, ...props }) => {
       <Link href="/evac" tabIndex={tabIndex}><FontAwesomeIcon icon={faBullhorn} fixedWidth inverse/>  EVAC</Link>
       <Link href="/intake" tabIndex={tabIndex}><FontAwesomeIcon icon={faClipboardList} fixedWidth inverse/>  INTAKE</Link>
       <Link href="/shelter" tabIndex={tabIndex}><FontAwesomeIcon icon={faHome} fixedWidth inverse/> SHELTER</Link>
+      <Link href="/" tabIndex={tabIndex}><FontAwesomeIcon icon={faSignOutAlt} fixedWidth inverse/> SIGN OUT</Link>
     </StyledMenu>
     </ div>
     )

@@ -86,7 +86,7 @@ export const ServiceRequestDetail = ({id}) => (
 
 const Hotline = ({open, ...props}) => (
   <StyledHotline open={open} {...props}>
-    <Tabs>
+    <Tabs justify>
       <Tab eventKey="new_owner" title="Owner Calling">
         <PersonForm />
       </Tab>
@@ -97,7 +97,6 @@ const Hotline = ({open, ...props}) => (
         <ServiceRequestTable />
       </Tab>
     </Tabs>
-    <Link className="btn btn-secondary btn-lg btn-block"  href="/">BACK</Link>
   </StyledHotline>
 )
 

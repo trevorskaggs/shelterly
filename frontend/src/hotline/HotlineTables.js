@@ -83,7 +83,7 @@ export function ServiceRequestTable() {
 
           <div className="ml-auto">
             <ButtonGroup>
-              <Button color={statusOptions.openColor} onClick={() => setStatusOptions({status:"open", openColor:"primary", closedColor:"secondary"})}>Open</Button>
+              <Button color={statusOptions.openColor} onClick={() => setStatusOptions({status:"open", openColor:"#79B791", closedColor:"#782F39"})}>Open</Button>
               <Button color={statusOptions.closedColor} onClick={() => setStatusOptions({status:"closed", openColor:"secondary", closedColor:"danger"})}>Closed</Button>
             </ButtonGroup>
           </div>

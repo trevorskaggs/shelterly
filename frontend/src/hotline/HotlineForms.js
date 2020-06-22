@@ -25,6 +25,14 @@ font-size: 1em;
 padding: 0.25em 1em;
 `
 
+export const SaveButton = styled(Button)`
+background-color: #79B791;
+`
+
+export const CancelButton = styled(Button)`
+background-color: #782F39;
+`
+
 const state_options = [{value:'AL', label:"AL"},{value:'AK', label:"AK"},{value:'AZ', label:"AZ"},{value:'AR', label:"AR"},{value:'CA', label:"CA"},{value:'CO', label:"CO"},{value:'CT', label:"CT"},
 {value:'DE', label:"DE"},{value:'FL', label:"FL"},{value:'GA', label:"GA"},{value:'HI', label:"HI"},{value:'ID', label:"ID"},{value:'IL', label:"IL"},{value:'IN', label:"IN"},
 {value:'IA', label:"IA"},{value:'KS', label:"KS"},{value:'KY', label:"KY"},{value:'LA', label:"LA"},{value:'ME', label:"ME"},{value:'MD', label:"MD"},{value:'MA', label:"MA"},
@@ -288,9 +296,9 @@ export const PersonForm = ({id}) => {
                 </Row>
               </FormGroup>
 
-              <Button type="submit" className="btn-success mr-1">Save</Button>
+              <SaveButton type="submit" className="mr-1">Save</SaveButton>
               {!is_owner & is_new ? <button type="button" className="btn btn-primary mr-1" onClick={() => {setSkipOwner(true); props.submitForm()}}>Skip Owner</button> : ""}
-              <Link className="btn btn-secondary" href="/hotline">Cancel</Link>
+              <CancelButton className="btn" href="/hotline">Cancel</CancelButton>
             </Container>
           </StyledForm>
         )}
@@ -564,8 +572,8 @@ export function ServiceRequestForm({id}) {
                 </Row>
               </FormGroup>
 
-              <Button type="submit" className="btn-success mr-1">Save</Button>
-              <Link className="btn btn-secondary" href="/hotline">Cancel</Link>
+              <SaveButton type="submit" className="mr-1">Save</SaveButton>
+              <CancelButton >Cancel</CancelButton>
             </Container>
           </Form>
         )}

@@ -37,7 +37,6 @@ const Evac = ({open, ...props}) => (
     </StyledTabs>
     <br/>
     <br/>
-    <Link className="btn btn-secondary btn-lg btn-block"  href="/">BACK</Link>
   </StyledEvac>
 )
 
