@@ -6,17 +6,10 @@ import { theme } from './theme';
 import PageNotFound from "./components/PageNotFound";
 import { useCookies, withCookies } from 'react-cookie';
 import { AuthContext } from "./accounts/AccountsReducer";
-import { Container, Row, Col} from "react-bootstrap";
+import { Container, Row, Col, TabContainer} from "react-bootstrap";
 import { loadUser, logoutUser, setAuthToken } from "./accounts/AccountsUtils";
 import Sidebar from "./components/Sidebar"
 import styled from 'styled-components';
-
-export const StyledShelterly = styled(Container)`
-  background: #444444;
-  display: flex;
-  height: 100vh;
-
-`
 
 
 function Shelterly() {
@@ -45,16 +38,18 @@ function Shelterly() {
 
   return (
     <ThemeProvider theme={theme}>
-    <StyledShelterly fluid>
-    <Col xl="2">
-    <Sidebar />
+    <Container classname="d-flex h-100" fluid>
+    <Row>
+    <Col xs="3">
+    <Sidebar/>
     </Col>
     <Col> 
       <Fragment>
         {routeResult || <PageNotFound />}
       </Fragment>
       </Col>
-    </StyledShelterly>
+      </Row>
+    </Container>
     </ThemeProvider>
   );
 }

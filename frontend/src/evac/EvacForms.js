@@ -9,19 +9,8 @@ import {
   Row,
   Container,
 } from 'react-bootstrap';
-import 'bootstrap/dist/css/bootstrap.min.css';
 import * as Yup from 'yup';
 import { MultiSelect, TextInput} from '.././components/Form';
-import styled from 'styled-components';
-
-
-export const StyledForm = styled(Form)`
-background-color: #454d55;
-font-weight: bold;
-font-size: 1em;
-padding: 0.25em 1em;
-border: 2px solid palevioletred;
-`
 
 
 export function EvacTeamForm() {
@@ -83,7 +72,7 @@ export function EvacTeamForm() {
           }, 500);
         }}
       >
-        <StyledForm>
+        <Form>
           <Container>
             <FormGroup>
               <MultiSelect label="Evac Team Members*" name="evac_team_members" className="mb-3">
@@ -100,7 +89,7 @@ export function EvacTeamForm() {
             <Button type="submit" className="btn-success mr-1">Save</Button>
             <Link className="btn btn-secondary" href="/evac">Cancel</Link>
           </Container>
-        </StyledForm>
+        </Form>
       </Formik>
     </>
   );

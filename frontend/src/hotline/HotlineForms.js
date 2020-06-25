@@ -9,7 +9,6 @@ import {
   CustomInput,
   Label,
   Row,
-  Container,
   Fade,
 } from 'reactstrap';
 import * as Yup from 'yup';
@@ -18,20 +17,6 @@ import 'flatpickr/dist/themes/light.css';
 import { DateTimePicker, DropDown, TextInput } from '../components/Form';
 import styled from 'styled-components';
 
-export const StyledForm = styled(Form)`
-background-color: #454d55;
-font-weight: bold;
-font-size: 1em;
-padding: 0.25em 1em;
-`
-
-export const SaveButton = styled(Button)`
-background-color: #79B791;
-`
-
-export const CancelButton = styled(Button)`
-background-color: #782F39;
-`
 
 const state_options = [{value:'AL', label:"AL"},{value:'AK', label:"AK"},{value:'AZ', label:"AZ"},{value:'AR', label:"AR"},{value:'CA', label:"CA"},{value:'CO', label:"CO"},{value:'CT', label:"CT"},
 {value:'DE', label:"DE"},{value:'FL', label:"FL"},{value:'GA', label:"GA"},{value:'HI', label:"HI"},{value:'ID', label:"ID"},{value:'IL', label:"IL"},{value:'IN', label:"IN"},
@@ -187,8 +172,7 @@ export const PersonForm = ({id}) => {
         }}
       >
         {props => (
-          <StyledForm>
-            <Container>
+          <Form>
               <FormGroup>
                 <Row>
                   <Col xs="5">
@@ -294,8 +278,7 @@ export const PersonForm = ({id}) => {
               <button type="button" className="btn btn-success mr-1" onClick={() => {setSkipOwner(true); props.submitForm()}}>Save</button>
               {!is_owner & !id ? <button type="button" className="btn btn-primary mr-1" onClick={() => {setSkipOwner(true); props.submitForm()}}>Skip Owner</button> : ""}
               <Link className="btn btn-secondary" href="/hotline">Cancel</Link>
-            </Container>
-          </StyledForm>
+          </Form>
         )}
       </Formik>
     </>
@@ -435,7 +418,6 @@ export function ServiceRequestForm({id}) {
       >
         {props => (
           <Form>
-            <Container>
               <Field type="hidden" value={owner_id||""} name="owner" id="owner"></Field>
               <Field type="hidden" value={reporter_id||""} name="reporter" id="reporter"></Field>
               <FormGroup hidden={!id}>
@@ -574,9 +556,8 @@ export function ServiceRequestForm({id}) {
                 </Row>
               </FormGroup>
 
-              <SaveButton type="submit" className="mr-1">Save</SaveButton>
-              <CancelButton >Cancel</CancelButton>
-            </Container>
+              <Button type="submit" className="mr-1">Save</Button>
+              <Button >Cancel</Button>
           </Form>
         )}
       </Formik>

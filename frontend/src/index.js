@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import "bootswatch/dist/darkly/bootstrap.min.css"
 import * as serviceWorker from './serviceWorker';
 import { CookiesProvider } from 'react-cookie';
 import Shelterly from './Shelterly';

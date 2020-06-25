@@ -3,7 +3,6 @@ import { useFormikContext, useField } from 'formik';
 import { FormFeedback, Label, Input } from 'reactstrap';
 import Select from 'react-select';
 import SimpleValue from 'react-select-simple-value';
-import 'bootstrap/dist/css/bootstrap.min.css';
 import Flatpickr from 'react-flatpickr';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
