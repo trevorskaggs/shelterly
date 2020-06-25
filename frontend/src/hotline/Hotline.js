@@ -84,8 +84,8 @@ export const ServiceRequestDetail = ({id}) => (
 )
 
 
-const Hotline = ({open, ...props}) => (
-  <StyledHotline open={open} {...props}>
+const Hotline = ({...props}) => (
+  <StyledHotline {...props}>
     <Tabs justify>
       <Tab eventKey="new_owner" title="Owner Calling">
         <PersonForm />
