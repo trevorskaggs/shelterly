@@ -1,7 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import axios from "axios";
 import { Link } from 'raviger';
-import 'bootstrap/dist/css/bootstrap.min.css';
 import Moment from 'react-moment';
 import { Fab } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
@@ -87,8 +86,8 @@ export function PersonView({id}) {
       <hr/>
       <div style={btn_style}>
         {is_owner ?
-          <Link href={"/hotline/owner/edit/" + data.id} style={link_style} className="btn btn-primary btn-lg btn-block mb-2">EDIT OWNER</Link> :
-          <Link href={"/hotline/reporter/edit/" + data.id} style={link_style} className="btn btn-primary btn-lg btn-block mb-2">EDIT REPORTER</Link>
+          <Link href={"/hotline/owner/edit/" + id} style={link_style} className="btn btn-primary btn-lg btn-block mb-2">EDIT OWNER</Link> :
+          <Link href={"/hotline/reporter/edit/" + id} style={link_style} className="btn btn-primary btn-lg btn-block mb-2">EDIT REPORTER</Link>
         }
         <br/>
         <br/>
@@ -146,8 +145,8 @@ export function ServiceRequestView({id}) {
       <div style={card_style} className="card card-body bg-light mb-2 mx-auto">
         <div className="row">
           <div className="col-8">
-            <p className="mb-2"><b>Owner:</b> {data.owner ? <span>{data.owner_object.first_name} {data.owner_object.last_name} <Fab href={"/hotline/owner/" + data.owner} style={{width:30,height:30, minHeight:30, color:"#fff", backgroundColor: "#28a745"}} title="Owner details" className="mr-1 mb-1" aria-label="owner_details"><AssignmentIcon style={{fontSize:16}} /></Fab><Fab href={"/hotline/owner/edit/" + data.owner +"?servicerequest_id=" + id} className="mb-1" style={{width:30,height:30, minHeight:30, color:"#fff", backgroundColor: "#28a745"}} title="Edit owner" aria-label="edit"><EditIcon style={{fontSize:16}} /></Fab></span> : <Fab color="primary" href={"/hotline/owner/new?servicerequest_id=" + id} className="mb-1" style={{width:30,height:30,minHeight:30}} title="Add owner" aria-label="add"><AddIcon style={{fontSize:16}}/></Fab>}</p>
-            <p className="mb-2"><b>Reporter:</b> {data.reporter ? <span>{data.reporter_object.first_name} {data.reporter_object.last_name} <Fab href={"/hotline/reporter/" + data.reporter} className="mb-1" style={{width:30,height:30, minHeight:30, color:"#fff", backgroundColor: "#28a745"}} title="Reporter details" aria-label="reporter_details"><AssignmentIcon style={{fontSize:16}} /></Fab></span> : 'N/A'}</p>
+            <p className="mb-2"><b>Owner:</b> {data.owner ? <span>{data.owner_object.first_name} {data.owner_object.last_name} {data.owner_object.first_name === 'Unknown' ? "":<Fab href={"/hotline/owner/" + data.owner} style={{width:30,height:30, minHeight:30, color:"#fff", backgroundColor: "#28a745"}} title="Owner details" className="mr-1 mb-1" aria-label="owner_details"><AssignmentIcon style={{fontSize:16}} /></Fab>}<Fab href={"/hotline/owner/edit/" + data.owner +"?servicerequest_id=" + id} className="mb-1" style={{width:30,height:30, minHeight:30, color:"#fff", backgroundColor: "#28a745"}} title="Edit owner" aria-label="edit"><EditIcon style={{fontSize:16}} /></Fab></span>:""}</p>
+            <p className="mb-3"><b>Reporter:</b> {data.reporter ? <span>{data.reporter_object.first_name} {data.reporter_object.last_name} <Fab href={"/hotline/reporter/" + data.reporter} className="mb-1" style={{width:30,height:30, minHeight:30, color:"#fff", backgroundColor: "#28a745"}} title="Reporter details" aria-label="reporter_details"><AssignmentIcon style={{fontSize:16}} /></Fab></span> : 'N/A'}</p>
             <p><b>Address:</b> {data.address ? <span>{data.full_address}</span> : 'N/A'}</p>
             <p><b>Directions:</b> {data.directions}</p>
           </div>
@@ -175,17 +174,21 @@ export function ServiceRequestView({id}) {
       </div> : ""}
       {data.animals && data.animals.length ?
       <div style={card_style} className="card card-body bg-light mx-auto">
-        <p><b>Animals:</b></p>
-         <span>{data.animals.map(animal => (<li key={animal.id}>{animal.name} ({animal.species}) - {animal.status} <Fab color="primary" href={"/animals/animal/" + animal.id} className="mb-1" style={{width:30, height:30, minHeight:30, color:"#fff", backgroundColor: "#c82333"}} title="Animal details" aria-label="animal_details"><AssignmentIcon style={{fontSize:16}} /></Fab></li>))}</span>
+        <p><b>Animals:</b> <Fab href={"/animals/animal/new?servicerequest_id=" + id} className="mb-1" style={{width:30,height:30, minHeight:30, color:"#fff", backgroundColor: "#c82333"}} title="Add animal" aria-label="add_animal"><AddIcon style={{fontSize:16}} /></Fab></p>
+         <span>
+          {data.animals.map(animal => (
+            <li key={animal.id}>{animal.name} (<span style={{textTransform:"capitalize"}}>{animal.species}</span>) - {animal.status}
+              <Fab href={"/animals/animal/" + animal.id} className="mb-1 mr-1 ml-1" style={{width:30, height:30, minHeight:30, color:"#fff", backgroundColor: "#c82333"}} title="Animal details" aria-label="animal_details"><AssignmentIcon style={{fontSize:16}} /></Fab>
+              <Fab href={"/animals/animal/edit/" + animal.id} className="mb-1" style={{width:30, height:30, minHeight:30, color:"#fff", backgroundColor: "#c82333"}} title="Edit animal" aria-label="animal_details"><EditIcon style={{fontSize:16}} /></Fab>
+            </li>
+          ))}
+        </span>
       </div> : ""}
       <hr/>
       <div style={btn_style}>
-        <Link href="/animals/dog/new" style={link_style} className="btn btn-success btn-lg btn-block mb-2">ADD DOG</Link>
-        <Link href="/animals/cat/new" style={link_style} className="btn btn-success btn-lg btn-block mb-2">ADD CAT</Link>
-        <Link href="/animals/horse/new" style={link_style} className="btn btn-success btn-lg btn-block mb-2">ADD HORSE</Link>
-        <Link href="/animals/other/new" style={link_style} className="btn btn-success btn-lg btn-block mb-2">ADD OTHER</Link>
+        <Link href={"/animals/animal/new?servicerequest_id=" + id} style={link_style} className="btn btn-success btn-lg btn-block mb-2">ADD ANIMAL</Link>
         <br/>
-        <Link href={"/hotline/servicerequest/edit/" + data.id} style={link_style} className="btn btn-primary btn-lg btn-block mb-2">UPDATE REQUEST</Link>
+        <Link href={"/hotline/servicerequest/edit/" + id} style={link_style} className="btn btn-primary btn-lg btn-block mb-2">UPDATE REQUEST</Link>
         <br/>
         <br/>
         <Link className="btn btn-secondary btn-lg btn-block"  href="/hotline">BACK</Link>
