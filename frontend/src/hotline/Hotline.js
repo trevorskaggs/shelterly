@@ -41,10 +41,7 @@ export const NewOwner = () => (
 )
 
 export const UpdateOwner = ({id}) => (
-  <div>
-    <h1 style={header_style}>Update Owner Information</h1>
     <PersonForm id={id} />
-  </div>
 )
 
 export const NewReporter = () => (

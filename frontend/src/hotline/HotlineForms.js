@@ -4,13 +4,12 @@ import { Link, navigate, useQueryParams } from 'raviger';
 import { Field, Form, Formik } from 'formik';
 import {
   Button,
-  Col,
   FormGroup,
   CustomInput,
   Label,
-  Row,
   Fade,
 } from 'reactstrap';
+import { Form as BootstrapForm, Col, Row } from "react-bootstrap";
 import * as Yup from 'yup';
 import { Switch } from 'formik-material-ui';
 import 'flatpickr/dist/themes/light.css';
@@ -172,15 +171,13 @@ export const PersonForm = ({id}) => {
         }}
       >
         {props => (
-          <Form>
-              <FormGroup>
+          <BootstrapForm noValidate>
                 <Row>
                   <Col xs="5">
                     <TextInput
                       type="text"
                       label="First Name*"
                       name="first_name"
-                      id="first_name"
                     />
                   </Col>
                   <Col xs="5">
@@ -188,7 +185,6 @@ export const PersonForm = ({id}) => {
                       type="text"
                       label="Last Name*"
                       name="last_name"
-                      id="last_name"
                     />
                   </Col>
                 </Row>
@@ -198,7 +194,6 @@ export const PersonForm = ({id}) => {
                       type="text"
                       label="Phone"
                       name="phone"
-                      id="phone"
                     />
                   </Col>
                   <Col xs="7">
@@ -206,7 +201,6 @@ export const PersonForm = ({id}) => {
                       type="text"
                       label="Email"
                       name="email"
-                      id="email"
                     />
                   </Col>
                   {/* <Col xs="3">
@@ -224,7 +218,6 @@ export const PersonForm = ({id}) => {
                       type="textarea"
                       label="Best Contact"
                       name="best_contact"
-                      id="best_contact"
                     />
                   </Col>
                 </Row>
@@ -234,7 +227,6 @@ export const PersonForm = ({id}) => {
                       type="text"
                       label="Address"
                       name="address"
-                      id="address"
                     />
                   </Col>
                   <Col xs="2">
@@ -242,7 +234,6 @@ export const PersonForm = ({id}) => {
                       type="text"
                       label="Apartment"
                       name="apartment"
-                      id="apartment"
                     />
                   </Col>
                 </Row>
@@ -252,7 +243,6 @@ export const PersonForm = ({id}) => {
                       type="text"
                       label="City"
                       name="city"
-                      id="city"
                     />
                   </Col>
                   <Col xs="2" className="mt-3">
@@ -269,16 +259,14 @@ export const PersonForm = ({id}) => {
                       type="text"
                       label="Zip Code"
                       name="zip_code"
-                      id="zip_code"
                     />
                   </Col>
                 </Row>
-              </FormGroup>
 
               <button type="button" className="btn btn-success mr-1" onClick={() => {setSkipOwner(true); props.submitForm()}}>Save</button>
               {!is_owner & !id ? <button type="button" className="btn btn-primary mr-1" onClick={() => {setSkipOwner(true); props.submitForm()}}>Skip Owner</button> : ""}
               <Link className="btn btn-secondary" href="/hotline">Cancel</Link>
-          </Form>
+          </BootstrapForm>
         )}
       </Formik>
     </>
