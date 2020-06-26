@@ -17,19 +17,16 @@ const btn_style = {
 };
 
 const Hotline = () => (
-  <ListGroup className="flex-fill align-self-center">
-    <ListGroup.Item action>
-    <Link href="/hotline/owner/new">OWNER CALLING</Link>
-    </ListGroup.Item>
-    <ListGroup.Item action>
-    <Link href="/hotline/reporter/new">NON-OWNER CALLING</Link>
-    </ListGroup.Item>
-    <ListGroup.Item action>
-    <Link href="/hotline/servicerequest/list">SEARCH SERVICE REQUESTS</Link>
-    </ListGroup.Item>
-    <ListGroup.Item action>
-    <Link href="/">BACK</Link>
-    </ListGroup.Item>
+  <ListGroup className="flex-fill p-5 h-50">
+    <Link href="/hotline/owner/new">
+    <ListGroup.Item action>OWNER CALLING</ListGroup.Item>
+    </Link>
+    <Link href="/hotline/reporter/new">
+    <ListGroup.Item action>NON-OWNER CALLING</ListGroup.Item>
+    </Link>
+    <Link href="/hotline/servicerequest/list">
+    <ListGroup.Item action>SEARCH SERVICE REQUEST</ListGroup.Item>
+    </Link>
   </ListGroup>
 )
 

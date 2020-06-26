@@ -60,17 +60,15 @@ export const StyledMenu = styled(Nav)`
 const Menu = ({ ...props }) => {
     
     return (
-    <div>
     <StyledMenu  {...props} className="flex-column">
     <img src={logo} alt="logo" />
-    <div className="logo">SHELTERLY</div>
+    <div className="logo border-bottom">SHELTERLY</div>
       <Link href="/hotline" ><FontAwesomeIcon icon={faPhone} fixedWidth inverse/> HOTLINE</Link>
       <Link href="/evac"><FontAwesomeIcon icon={faBullhorn} fixedWidth inverse/>  EVAC</Link>
       <Link href="/intake"><FontAwesomeIcon icon={faClipboardList} fixedWidth inverse/>  INTAKE</Link>
       <Link href="/shelter"><FontAwesomeIcon icon={faHome} fixedWidth inverse/> SHELTER</Link>
       <Link href="/"><FontAwesomeIcon icon={faSignOutAlt} fixedWidth inverse/> SIGN OUT</Link>
     </StyledMenu>
-    </ div>
     )
   }
 

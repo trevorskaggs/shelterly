@@ -8,22 +8,32 @@ import styled from 'styled-components';
 
 
   const Evac = () => (
-    <ListGroup className="flex-fill align-self-center">
+    <ListGroup className="flex-fill p-5 h-50">
+      <Link href="/evac/evacteam/new">
       <ListGroup.Item action>
-      <Link href="/evac/evacteam/new">NEW TEAM</Link>
+      NEW TEAM
       </ListGroup.Item>
+      </Link>
+      <Link href="/evac/evacteam/list">
       <ListGroup.Item action>
-      <Link href="/evac/evacteam/list">TEAM LIST</Link>
+      TEAM LIST
       </ListGroup.Item>
+      </Link>
+      <Link href="">
       <ListGroup.Item action>
-      <Link href="">DEPLOY</Link>
+      DEPLOY
       </ListGroup.Item>
+      </Link>
+      <Link href="">
       <ListGroup.Item action>
-      <Link href="">DEBRIEF</Link>
+      DEBRIEF
       </ListGroup.Item>
+      </Link>
+      <Link href="/">
       <ListGroup.Item action>
-      <Link href="/">BACK</Link>
+      BACK
       </ListGroup.Item>
+      </Link>
     </ListGroup>
   )
 
