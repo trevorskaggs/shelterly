@@ -1,7 +1,7 @@
 FROM python:3
 
 RUN curl -sL https://deb.nodesource.com/setup_13.x | bash - \ 
-    && apt-get update && apt-get install -y nodejs\
+    && apt-get update && apt-get install -y nodejs vim sudo\
     && mkdir /home/shelterly
 RUN useradd shelterly --user-group -d /home/shelterly \
     && chown shelterly:shelterly /home/shelterly
@@ -19,6 +19,6 @@ RUN git clone https://github.com/magicmonty/bash-git-prompt.git .bash-git-prompt
     && echo 'source ~/.bash-git-prompt/gitprompt.sh' >> ~/.bashrc \
     && echo 'source /home/shelterly/venv/bin/activate' >> ~/.bashrc \
     && . /home/shelterly/venv/bin/activate \
-    && pip install --no-cache-dir -r /home/shelterly/config/requirements.txt
+    && pip install --no-cache-dir -r /home/shelterly/requirements.txt
 SHELL ["/bin/bash", "-c"]
 CMD tail -f /dev/null

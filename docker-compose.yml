@@ -6,11 +6,10 @@ services:
     image: mdillon/postgis
     container_name: db
   shelterly:
-    image: freeradical3/rams:latest
+    image: trevorskaggs/shelterly:latest
     container_name: shelterly
     volumes:
       - ./config:/home/shelterly/config
-      - node_modules:/home/shelterly/frontend/node_modules
     ports:
       - "8000:8000"
       - "3000:3000"
