@@ -13,6 +13,13 @@ import { ReactstrapInput } from 'reactstrap-formik';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import * as Yup from 'yup';
 
+const state_options = [{value:'AL', label:"AL"},{value:'AK', label:"AK"},{value:'AZ', label:"AZ"},{value:'AR', label:"AR"},{value:'CA', label:"CA"},{value:'CO', label:"CO"},{value:'CT', label:"CT"},
+{value:'DE', label:"DE"},{value:'FL', label:"FL"},{value:'GA', label:"GA"},{value:'HI', label:"HI"},{value:'ID', label:"ID"},{value:'IL', label:"IL"},{value:'IN', label:"IN"},
+{value:'IA', label:"IA"},{value:'KS', label:"KS"},{value:'KY', label:"KY"},{value:'LA', label:"LA"},{value:'ME', label:"ME"},{value:'MD', label:"MD"},{value:'MA', label:"MA"},
+{value:'MI', label:"MI"},{value:'MN', label:"MN"},{value:'MS', label:"MS"},{value:'MO', label:"MO"},{value:'MT', label:"MT"},{value:'NE', label:"NE"},{value:'NV', label:"NV"},
+{value:'NH', label:"NH"},{value:'NJ', label:"NJ"},{value:'NM', label:"NM"},{value:'NY', label:"NY"},{value:'NC', label:"NC"},{value:'ND', label:"ND"},{value:'OH', label:"OH"},
+{value:'OK', label:"OK"},{value:'PA', label:"PA"},{value:'RI', label:"RI"},{value:'SC', label:"SC"},{value:'SD', label:"SD"},{value:'TN', label:"TN"},{value:'TX', label:"TX"},
+{value:'VA', label:"VA"},{value:"VT", label:"VT"},{value:'WA', label:"WA"},{value:'WV', label:"WV"},{value:'WI', label:"WI"},{value:'WY', label:"WY"},]
 
 
 export const ShelterForm = ({sid}) => {
@@ -357,6 +364,7 @@ export const EditBuildingForm = ({bid}) => {
   const [data, setData] = useState({
     name: '',
     description: '',
+    shelter: '',
   });
 
   // Hook for initializing data.
@@ -398,7 +406,7 @@ export const EditBuildingForm = ({bid}) => {
             console.log(values)
             axios.put('http://localhost:8000/shelter/api/building/' + bid + '/', values)
             .then(function() {
-              navigate('/shelter/list');
+              navigate('/shelter/' + data.shelter.id + '/');
             })
             .catch(e => {
               console.log(e);
@@ -506,6 +514,7 @@ export const EditRoomForm = ({rid}) => {
   const [data, setData] = useState({
     name: '',
     description: '',
+    building: '',
   });
 
   // Hook for initializing data.
@@ -547,7 +556,7 @@ export const EditRoomForm = ({rid}) => {
             console.log(values)
             axios.put('http://localhost:8000/shelter/api/room/' + rid + '/', values)
             .then(function() {
-              navigate('/shelter/list');
+              navigate('/shelter/building/' + data.building.id +  '/');
             })
             .catch(e => {
               console.log(e);
