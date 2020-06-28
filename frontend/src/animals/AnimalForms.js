@@ -3,6 +3,8 @@ import axios from "axios";
 import { Link, navigate, useQueryParams } from 'raviger';
 import { Field, Form, Formik } from "formik";
 import { Col, FormGroup, Container, Input, Label, Row } from "reactstrap";
+import { Button, ButtonGroup, Form as BootstrapForm } from "react-bootstrap";
+import { Card } from 'react-bootstrap';
 import * as Yup from 'yup';
 import { DateTimePicker, DropDown, TextInput } from '.././components/Form.js';
 import { catAgeChoices, dogAgeChoices, catColorChoices, dogColorChoices, speciesChoices, sexChoices, dogSizeChoices, catSizeChoices, statusChoices, unknownChoices } from './constants'
@@ -181,12 +183,13 @@ export const AnimalForm = ({id}) => {
         }}
       >
         {props => (
-          <Form>
-            <Container>
+          <Card border="secondary" className="mt-5">
+            <Card.Header as="h5">Update Animal</Card.Header>
+            <Card.Body>
+          <BootstrapForm as={Form}>
               <Field type="hidden" value={owner_id||""} name="owner" id="owner"></Field>
               <Field type="hidden" value={servicerequest_id||""} name="request" id="request"></Field>
-              <FormGroup>
-               <Row hidden={!id}>
+               <BootstrapForm.Row hidden={!id}>
                   <Col xs="3">
                     <DropDown
                       id="status"
@@ -201,17 +204,16 @@ export const AnimalForm = ({id}) => {
                       }}
                     />
                   </Col>
-                </Row>
-                <Row>
-                  <Col xs="8">
+                </BootstrapForm.Row>
+                <BootstrapForm.Row>
                     <TextInput
                       id="name"
+                      xs="auto"
                       name="name"
                       type="text"
                       label="Name"
                     />
-                  </Col>
-                  <Col xs="2">
+                    <Col>
                     <DropDown
                       label="Sex"
                       id="sexDropDown"
@@ -220,9 +222,21 @@ export const AnimalForm = ({id}) => {
                       options={sexChoices}
                       value={props.values.sex||''}
                     />
+                    </Col>
+                  <Col >
+                    <DropDown
+                      label="Age"
+                      id="age"
+                      name="age"
+                      type="text"
+                      ref={ageRef}
+                      options={ageChoices[props.values.species]}
+                      value={props.values.age||''}
+                      placeholder={placeholder}
+                    />
                   </Col>
-                </Row>
-                <Row>
+                </BootstrapForm.Row>
+                <BootstrapForm.Row>
                   <Col xs="2">
                     <DropDown
                       label="Species"
@@ -254,20 +268,9 @@ export const AnimalForm = ({id}) => {
                       placeholder={placeholder}
                     />
                   </Col>
-                  <Col xs="4">
-                    <DropDown
-                      label="Age"
-                      id="age"
-                      name="age"
-                      type="text"
-                      ref={ageRef}
-                      options={ageChoices[props.values.species]}
-                      value={props.values.age||''}
-                      placeholder={placeholder}
-                    />
-                  </Col>
-                </Row>
-                <Row>
+
+                </BootstrapForm.Row>
+                <BootstrapForm.Row>
                   <Col xs="3">
                     <DropDown
                       label="Primary Color"
@@ -290,7 +293,6 @@ export const AnimalForm = ({id}) => {
                       placeholder={placeholder}
                     />
                   </Col>
-                  <Col xs="7">
                     <TextInput
                       id="color_notes"
                       name="color_notes"
@@ -298,10 +300,9 @@ export const AnimalForm = ({id}) => {
                       rows={5}
                       label="Description"
                     />
-                  </Col>
-                </Row>
-                <Row>
-                  <Col xs="3" className="mt-2">
+                </BootstrapForm.Row>
+                <BootstrapForm.Row>
+                  <Col>
                     <DropDown
                       label="Aggressive"
                       id="aggressive"
@@ -311,6 +312,8 @@ export const AnimalForm = ({id}) => {
                       value={props.values.aggressive||'unknown'}
                       isClearable={false}
                     />
+                  </Col>
+                  <Col>
                     <DropDown
                       label="Fixed"
                       id="fixed"
@@ -321,18 +324,7 @@ export const AnimalForm = ({id}) => {
                       isClearable={false}
                     />
                   </Col>
-                  <Col xs="7" className="mt-3">
-                    <Label htmlFor="behavior_notes">Behavior Notes</Label>
-                    <TextInput
-                      id="behavior_notes"
-                      name="behavior_notes"
-                      type="textarea"
-                      rows={5}
-                    />
-                  </Col>
-                </Row>
-                <Row>
-                  <Col xs="3">
+                  <Col>
                     <DropDown
                       label="Confined"
                       id="confined"
@@ -343,7 +335,7 @@ export const AnimalForm = ({id}) => {
                       isClearable={false}
                     />
                   </Col>
-                  <Col xs="3">
+                  <Col>
                     <DropDown
                       label="Collared"
                       id="collared"
@@ -354,8 +346,17 @@ export const AnimalForm = ({id}) => {
                       isClearable={false}
                     />
                   </Col>
-                </Row>
-                <Row>
+                </BootstrapForm.Row>
+                <BootstrapForm.Row>
+                <TextInput
+                      label="Behavior Notes"
+                      id="behavior_notes"
+                      name="behavior_notes"
+                      type="textarea"
+                      rows={5}
+                    />
+                </BootstrapForm.Row>
+                <BootstrapForm.Row>
                   <Col xs="3">
                     <DropDown
                       label="Attended To"
@@ -378,20 +379,22 @@ export const AnimalForm = ({id}) => {
                       value={data.last_seen||null}
                     />
                   </Col>
-                </Row>
-                <Row>
+                </BootstrapForm.Row>
+                <BootstrapForm.Row>
                   <Col className="mt-3">
                   <Label for="image">Image File</Label>
                   <Input type="file" name="image" id="image" onChange={handleImageChange} />
                   </Col>
-                </Row>
-              </FormGroup>
+                </BootstrapForm.Row>
 
-              <button type="button" className="btn btn-success mr-1" onClick={() => {setAddAnother(false); props.submitForm()}}>Save</button>
-              {!id ? <button type="button" className="btn btn-primary mr-1" onClick={() => {setAddAnother(true); props.submitForm()}}>Add Another</button> : ""}
+          </BootstrapForm>
+          </Card.Body>
+          <ButtonGroup>
+              <Button type="button" className="btn btn-success mr-1" onClick={() => {setAddAnother(false); props.submitForm()}}>Save</Button>
+              {!id ? <Button type="button" className="btn btn-primary mr-1" onClick={() => {setAddAnother(true); props.submitForm()}}>Add Another</Button> : ""}
               <Link className="btn btn-secondary" href={servicerequest_id ? "/hotline/servicerequest/" + servicerequest_id : "/"}>Cancel</Link>
-            </Container>
-          </Form>
+              </ButtonGroup>
+          </Card>
         )}
       </Formik>
     </span>
