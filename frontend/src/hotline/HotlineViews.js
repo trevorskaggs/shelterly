@@ -68,7 +68,7 @@ export function PersonView({id}) {
       <Card className="d-flex" border="primary">
       <Card.Body>
         {is_owner ?
-        <Card.Title>Owner Details<Link href={"/hotline/owner/edit/" + id}> <FontAwesomeIcon  icon={faEdit}  /></Link></Card.Title>
+        <Card.Title>Owner Details<Link href={"/hotline/owner/edit/" + id}> <FontAwesomeIcon  icon={faEdit} inverse  /></Link></Card.Title>
         :
         <Card.Title>Reporter Details <Fab color="primary" size="small" href={"/hotline/reporter/edit/" + id} className="mb-1" title="Edit reporter" aria-label="edit"><faUserEdit /></Fab></ Card.Title>
         }
@@ -131,7 +131,6 @@ export function ServiceRequestView({id}) {
 
   return (
     <>
-      <h1 style={header_style}>Service Request #{data.id} - {data.status}</h1>
       <br/>
       <div style={card_style} className="card card-body bg-light mb-2 mx-auto">
         <div className="row">

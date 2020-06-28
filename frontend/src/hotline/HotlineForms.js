@@ -3,13 +3,12 @@ import axios from "axios";
 import { Link, navigate, useQueryParams } from 'raviger';
 import { Field, Form, Formik } from 'formik';
 import {
-  Button,
   FormGroup,
   CustomInput,
   Label,
   Fade,
 } from 'reactstrap';
-import { Form as BootstrapForm, Col, Row } from "react-bootstrap";
+import { Form as BootstrapForm, Button, ButtonGroup, Col, Row } from "react-bootstrap";
 import * as Yup from 'yup';
 import { Switch } from 'formik-material-ui';
 import 'flatpickr/dist/themes/light.css';
@@ -171,7 +170,7 @@ export const PersonForm = ({id}) => {
         }}
       >
         {props => (
-          <BootstrapForm noValidate>
+          <BootstrapForm noValidate className="p-5 border">
                 <Row>
                   <Col xs="5">
                     <TextInput
@@ -245,7 +244,7 @@ export const PersonForm = ({id}) => {
                       name="city"
                     />
                   </Col>
-                  <Col xs="2" className="mt-3">
+                  <Col xs="2">
                     <DropDown
                       label="State"
                       name="state"
@@ -262,10 +261,12 @@ export const PersonForm = ({id}) => {
                     />
                   </Col>
                 </Row>
-
-              <button type="button" className="btn btn-success mr-1" onClick={() => {setSkipOwner(true); props.submitForm()}}>Save</button>
-              {!is_owner & !id ? <button type="button" className="btn btn-primary mr-1" onClick={() => {setSkipOwner(true); props.submitForm()}}>Skip Owner</button> : ""}
-              <Link className="btn btn-secondary" href="/hotline">Cancel</Link>
+              <ButtonGroup size="lg" className="ml-3 mt-3">
+              <Button type="button" className="mr-1 pl-5 pr-5" onClick={() => {setSkipOwner(true); props.submitForm()}}>Save</Button>
+              {!is_owner & !id ? <button type="button" className="btn btn-primary mr-1  border" onClick={() => {setSkipOwner(true); props.submitForm()}}>Skip Owner</button> : ""}
+              <Button variant="secondary" className="mr-1 pl-4 pr-4" type="button">Reset</Button>
+              <Button as={Link} className="mr-1 pl-4 pr-4" variant="info" href="/hotline">Back</Button>
+              </ButtonGroup>
           </BootstrapForm>
         )}
       </Formik>
@@ -405,7 +406,7 @@ export function ServiceRequestForm({id}) {
         }}
       >
         {props => (
-          <Form>
+          <BootstrapForm as={Form}>
               <Field type="hidden" value={owner_id||""} name="owner" id="owner"></Field>
               <Field type="hidden" value={reporter_id||""} name="reporter" id="reporter"></Field>
               <FormGroup hidden={!id}>
@@ -527,26 +528,27 @@ export function ServiceRequestForm({id}) {
                   </Col>
                 </Row>
                 <Row>
+                  <Col>
                   <Label htmlFor="verbal_permission" className="mt-3">Verbal Permission</Label>
                   <Field component={Switch} name="verbal_permission" type="checkbox" color="primary" className="mt-3" />
-                </Row>
-                <Row>
+
                   <Label htmlFor="key_provided">Key Provided</Label>
                   <Field component={Switch} name="key_provided" type="checkbox" color="primary" />
-                </Row>
-                <Row>
+
                   <Label htmlFor="accessible">Accessible</Label>
                   <Field component={Switch} name="accessible" type="checkbox" color="primary" />
-                </Row>
-                <Row>
+
                   <Label htmlFor="turn_around">Turn Around</Label>
                   <Field component={Switch} name="turn_around" type="checkbox" color="primary" />
+                  </Col>
                 </Row>
               </FormGroup>
+              <ButtonGroup size="lg" className="ml-3 mt-3">
+              <Button type="submit" className="mr-1 pl-5 pr-5">Save</Button>
+              <Button className="mr-1 pl-4 pr-4" variant="info">Cancel</Button>
+              </ButtonGroup>
 
-              <Button type="submit" className="mr-1">Save</Button>
-              <Button >Cancel</Button>
-          </Form>
+          </BootstrapForm>
         )}
       </Formik>
   );
