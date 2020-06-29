@@ -8,5 +8,6 @@ django-storages
 ipython
 pillow
 psycopg2==2.8.2
+python-dateutil==2.7.5
 pytz==2018.9
 zappa

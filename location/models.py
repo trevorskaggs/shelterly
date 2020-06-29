@@ -4,7 +4,6 @@ from django.conf import settings
 from django.db import models
 
 
-
 STATE_CHOICES = (
     ('AL', "AL"),('AK', "AK"),('AZ', "AZ"),('AR', "AR"),('CA', "CA"),('CO', "CO"),('CT', "CT"),
     ('DE', "DE"),('FL', "FL"),('GA', "GA"),('HI', "HI"),('ID', "ID"),('IL', "IL"),('IN', "IN"),
@@ -18,11 +17,11 @@ STATE_CHOICES = (
 # Create your models here.
 class Location(models.Model):
 
-    address = models.CharField(max_length=50, blank=True, null=True)
-    apartment = models.CharField(max_length=50, blank=True, null=True)
-    city = models.CharField(max_length=50, blank=True, null=True)
-    state = models.CharField(max_length=2, choices=STATE_CHOICES, blank=True, null=True)
-    zip_code = models.CharField(max_length=50, blank=True, null=True)
+    address = models.CharField(max_length=50, blank=True)
+    apartment = models.CharField(max_length=50, blank=True)
+    city = models.CharField(max_length=50, blank=True)
+    state = models.CharField(max_length=2, choices=STATE_CHOICES, blank=True)
+    zip_code = models.CharField(max_length=50, blank=True)
     latitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
     longitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
 

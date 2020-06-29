@@ -1,51 +1,56 @@
-import React, { Fragment, useContext, useEffect } from "react";
-import { A, navigate, useRoutes } from "hookrouter";
+import React, { Fragment, useContext, useEffect, useState } from "react";
+import { Link, navigate, useRoutes } from 'raviger';
 import routes from "./router";
+import { ThemeProvider } from 'styled-components';
+import { theme } from './theme';
 import PageNotFound from "./components/PageNotFound";
 import { useCookies, withCookies } from 'react-cookie';
 import { AuthContext } from "./accounts/AccountsReducer";
+import { Container, Row, Col, TabContainer} from "react-bootstrap";
 import { loadUser, logoutUser, setAuthToken } from "./accounts/AccountsUtils";
-import logo from "./static/images/nvadg_logo.png"
+import Sidebar from "./components/Sidebar"
+import styled from 'styled-components';
 
-const header_style = {
-  textAlign: "center",
-};
 
 function Shelterly() {
 
   // Initial state.
   const { state, dispatch } = useContext(AuthContext);
-  const [cookies, , removeCookie] = useCookies(['token']);
+  const [cookies, setCookie, removeCookie] = useCookies(['token']);
 
   if (cookies.token) setAuthToken(cookies.token);
 
   useEffect(() => {
     // If we have a token but no user, attempt to authenticate them.
     if (!state.user && cookies.token) {
-      loadUser({dispatch});
+      loadUser({dispatch}, {removeCookie})
     }
-  }, [state.user, dispatch, cookies]);
+  }, []);
 
   // Redirect to login page if no authenticated user object is present.
   if (!state.user && !cookies.token) {
-    navigate('/login');
+    if (!window.location.pathname.includes("login")) {
+      navigate('/login');
+    }
   }
 
   const routeResult = useRoutes(routes);
 
   return (
-    <div>
-      <h1 style={header_style} className="col-12">
-        <A href="/"><img src={logo} alt=""/></A>
-      </h1>
-      <hr className="mt-0 mb-4"/>
+    <ThemeProvider theme={theme}>
+    <Container classname="d-flex h-100" fluid>
+    <Row>
+    <Col xs="auto" className="pl-0">
+    <Sidebar/>
+    </Col>
+    <Col> 
       <Fragment>
         {routeResult || <PageNotFound />}
       </Fragment>
-      <div style={{textAlign: "right"}}>
-        {state.user ? <button className="btn btn-danger" onClick={() => logoutUser({dispatch}, {removeCookie})}>Logout {state.user.username}</button> : ''}
-      </div>
-    </div>
+      </Col>
+      </Row>
+    </Container>
+    </ThemeProvider>
   );
 }
 

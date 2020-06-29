@@ -1,3 +1,4 @@
 from django.contrib import admin
+from hotline.models import ServiceRequest
 
-# Register your models here.
+admin.site.register(ServiceRequest)
