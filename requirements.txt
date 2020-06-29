@@ -1,13 +1,11 @@
 awscli
-Django>=2.2.9
+Django
 django-cors-headers
 django-filter
 django-rest-knox
 djangorestframework
 django-storages
-ipython
 pillow
-psycopg2==2.8.2
-python-dateutil==2.7.5
+psycopg2-binary
 pytz==2018.9
 zappa

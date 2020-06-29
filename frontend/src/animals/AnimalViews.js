@@ -51,7 +51,7 @@ export function AnimalView({id}) {
     let source = axios.CancelToken.source();
     const fetchAnimalData = async () => {
       // Fetch Animal data.
-      await axios.get('http://localhost:3000/animals/api/animal/' + id + '/', {
+      await axios.get('/animals/api/animal/' + id + '/', {
         cancelToken: source.token,
       })
       .then(response => {

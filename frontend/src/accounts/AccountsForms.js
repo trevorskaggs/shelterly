@@ -38,7 +38,7 @@ export const LoginForm = () => {
         })}
         onSubmit={(values, { setSubmitting }) => {
           setTimeout(() => {
-            axios.post('http://localhost:3000/login/', values)
+            axios.post('/login/', values)
             .then(response => {
               setAuthToken(response.data.token);
               setCookie("token", response.data.token, {path: '/'});

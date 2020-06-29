@@ -65,7 +65,7 @@ export const PersonForm = ({ id }) => {
     if (id) {
       const fetchPersonData = async () => {
         // Fetch ServiceRequest data.
-        await axios.get('http://localhost:3000/people/api/person/' + id + '/', {
+        await axios.get('/people/api/person/' + id + '/', {
           cancelToken: source.token,
         })
           .then(response => {
@@ -113,7 +113,7 @@ export const PersonForm = ({ id }) => {
         })}
         onSubmit={(values, { setSubmitting }) => {
           if (id) {
-            axios.put('http://localhost:3000/people/api/person/' + id + '/', values)
+            axios.put('/people/api/person/' + id + '/', values)
               .then(function () {
                 // If we have an SR ID, redirect back to the SR.
                 if (servicerequest_id) {
@@ -132,11 +132,11 @@ export const PersonForm = ({ id }) => {
               });
           }
           else {
-            axios.post('http://localhost:3000/people/api/person/', values)
+            axios.post('/people/api/person/', values)
               .then(response => {
                 // If SR already exists, update it with owner info and redirect to the SR details.
                 if (servicerequest_id) {
-                  axios.patch('http://localhost:3000/hotline/api/servicerequests/' + servicerequest_id + '/', { owner: response.data.id })
+                  axios.patch('/hotline/api/servicerequests/' + servicerequest_id + '/', { owner: response.data.id })
                     .then(function () {
                       navigate('/hotline/servicerequest/' + servicerequest_id);
                     })
@@ -312,7 +312,7 @@ export function ServiceRequestForm({ id }) {
     if (id) {
       const fetchServiceRequestData = async () => {
         // Fetch ServiceRequest data.
-        await axios.get('http://localhost:3000/hotline/api/servicerequests/' + id + '/', {
+        await axios.get('/hotline/api/servicerequests/' + id + '/', {
           cancelToken: source.token,
         })
           .then(response => {
@@ -327,7 +327,7 @@ export function ServiceRequestForm({ id }) {
     else if (owner_id) {
       const fetchOwnerData = async () => {
         // Fetch Owner data.
-        await axios.get('http://localhost:3000/people/api/person/' + owner_id + '/', {
+        await axios.get('/people/api/person/' + owner_id + '/', {
           cancelToken: source.token,
         })
           .then(response => {
@@ -379,7 +379,7 @@ export function ServiceRequestForm({ id }) {
       })}
       onSubmit={(values, { setSubmitting }) => {
         if (id) {
-          axios.put('http://localhost:3000/hotline/api/servicerequests/' + id + '/', values)
+          axios.put('/hotline/api/servicerequests/' + id + '/', values)
             .then(function () {
               navigate('/hotline/servicerequest/' + id);
             })
@@ -389,7 +389,7 @@ export function ServiceRequestForm({ id }) {
           setSubmitting(false);
         }
         else {
-          axios.post('http://localhost:3000/hotline/api/servicerequests/', values)
+          axios.post('/hotline/api/servicerequests/', values)
             .then(response => {
               navigate('/hotline/servicerequest/' + response.data.id);
             })
