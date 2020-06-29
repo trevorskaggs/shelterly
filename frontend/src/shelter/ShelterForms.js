@@ -11,6 +11,7 @@ import {
 } from 'reactstrap';
 import { ReactstrapInput } from 'reactstrap-formik';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { TextInput, DropDown } from '.././components/Form';
 import * as Yup from 'yup';
 
 const state_options = [{value:'AL', label:"AL"},{value:'AK', label:"AK"},{value:'AZ', label:"AZ"},{value:'AR', label:"AR"},{value:'CA', label:"CA"},{value:'CO', label:"CO"},{value:'CT', label:"CT"},
@@ -92,7 +93,8 @@ export const ShelterForm = ({sid}) => {
           }
         }}
       >
-        <Form>
+        {props => (
+          <Form>
           <Container>
             <FormGroup>
               <Row>
@@ -170,6 +172,7 @@ export const ShelterForm = ({sid}) => {
             <Link className="btn btn-secondary" href="/shelter">Cancel</Link>
           </Container>
         </Form>
+        )}
       </Formik>
     </>
   );
