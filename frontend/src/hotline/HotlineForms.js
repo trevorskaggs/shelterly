@@ -257,10 +257,10 @@ export const PersonForm = ({ id }) => {
           </BootstrapForm>
           </Card.Body>
             <ButtonGroup size="lg" >
-              <Button type="button" className="mr-1 pl-5 pr-5" onClick={() => { setSkipOwner(true); props.submitForm() }}>Save</Button>
+              <Button type="button"  onClick={() => { setSkipOwner(true); props.submitForm() }}>Save</Button>
               {!is_owner & !id ? <button type="button" className="btn btn-primary mr-1  border" onClick={() => { setSkipOwner(true); props.submitForm() }}>Skip Owner</button> : ""}
-              <Button variant="secondary" className="mr-1 pl-4 pr-4" type="button">Reset</Button>
-              <Button as={Link} className="mr-1 pl-4 pr-4" variant="info" href="/hotline">Back</Button>
+              <Button variant="secondary" type="button">Reset</Button>
+              <Button as={Link} variant="info" href="/hotline">Back</Button>
             </ButtonGroup>
           </Card>
         )}
@@ -484,7 +484,7 @@ export function ServiceRequestForm({ id }) {
                     id="city"
                   />
                 </Col>
-                <Col xs="2" className="mt-3">
+                <Col xs="2">
                   <DropDown
                     label="State"
                     name="state"
@@ -516,8 +516,8 @@ export function ServiceRequestForm({ id }) {
             </BootstrapForm.Row>
             <BootstrapForm.Row>
               <Col>
-                <Label htmlFor="verbal_permission" className="mt-3">Verbal Permission</Label>
-                <Field component={Switch} name="verbal_permission" type="checkbox" color="primary" className="mt-3" />
+                <Label htmlFor="verbal_permission">Verbal Permission</Label>
+                <Field component={Switch} name="verbal_permission" type="checkbox" color="primary"/>
 
                 <Label htmlFor="key_provided">Key Provided</Label>
                 <Field component={Switch} name="key_provided" type="checkbox" color="primary" />
@@ -534,9 +534,9 @@ export function ServiceRequestForm({ id }) {
 
         </BootstrapForm>
         </Card.Body>
-        <ButtonGroup size="lg" className="ml-3 mt-3">
-            <Button type="submit" className="mr-1 pl-5 pr-5">Save</Button>
-            <Button className="mr-1 pl-4 pr-4" variant="info">Cancel</Button>
+        <ButtonGroup size="lg">
+            <Button type="submit">Save</Button>
+            <Button variant="info">Cancel</Button>
           </ButtonGroup>
         </Card>
       )}

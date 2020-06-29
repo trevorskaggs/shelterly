@@ -77,7 +77,7 @@ export function ServiceRequestTable() {
             onChange={handleChange}
           />
         <InputGroup.Append>
-          <Button variant="outline-secondary">Search</Button>
+          <Button variant="outline-light">Search</Button>
         </InputGroup.Append>
         </InputGroup>
 
