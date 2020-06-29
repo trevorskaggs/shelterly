@@ -3,7 +3,7 @@ import Home from "./Home";
 import Animals, { AnimalDetail, NewAnimal, UpdateAnimal } from "./animals/Animals"
 import { AnimalSearch } from "./animals/AnimalTables"
 import Evac, { NewTeam, TeamList } from "./evac/Evac";
-import Hotline, { NewReporter, NewServiceRequest, OwnerDetail, ReporterDetail, ServiceRequestDetail, ServiceRequestList, UpdateOwner, UpdateReporter, UpdateServiceRequest } from "./hotline/Hotline";
+import Hotline, { NewOwner, NewReporter, NewServiceRequest, OwnerDetail, ReporterDetail, ServiceRequestDetail, ServiceRequestList, UpdateOwner, UpdateReporter, UpdateServiceRequest } from "./hotline/Hotline";
 import { Login } from "./accounts/Accounts"
 import { EvacTeamTable } from "./evac/EvacTables";
 import { EvacTeamForm } from "./evac/EvacForms";
@@ -20,6 +20,7 @@ const routes = {
   "/evac/evacteam/list": () => <EvacTeamTable />,
   "/hotline": () => <Hotline />,
   "/hotline/owner/edit/:id": ({id}) => <UpdateOwner id={id}/>,
+  "/hotline/owner/new": () => <NewOwner />,
   "/hotline/owner/:id": ({id}) => <OwnerDetail id={id}/>,
   "/hotline/reporter/edit/:id": ({id}) => <UpdateReporter id={id}/>,
   "/hotline/reporter/new": () => <NewReporter />,

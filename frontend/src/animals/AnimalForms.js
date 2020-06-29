@@ -208,12 +208,12 @@ export const AnimalForm = ({id}) => {
                 <BootstrapForm.Row>
                     <TextInput
                       id="name"
-                      xs="auto"
+                      xs="8"
                       name="name"
                       type="text"
                       label="Name"
                     />
-                    <Col>
+                    <Col xs="2">
                     <DropDown
                       label="Sex"
                       id="sexDropDown"
@@ -223,18 +223,6 @@ export const AnimalForm = ({id}) => {
                       value={props.values.sex||''}
                     />
                     </Col>
-                  <Col >
-                    <DropDown
-                      label="Age"
-                      id="age"
-                      name="age"
-                      type="text"
-                      ref={ageRef}
-                      options={ageChoices[props.values.species]}
-                      value={props.values.age||''}
-                      placeholder={placeholder}
-                    />
-                  </Col>
                 </BootstrapForm.Row>
                 <BootstrapForm.Row>
                   <Col xs="2">
@@ -268,6 +256,18 @@ export const AnimalForm = ({id}) => {
                       placeholder={placeholder}
                     />
                   </Col>
+                  <Col xs="4">
+                    <DropDown
+                      label="Age"
+                      id="age"
+                      name="age"
+                      type="text"
+                      ref={ageRef}
+                      options={ageChoices[props.values.species]}
+                      value={props.values.age||''}
+                      placeholder={placeholder}
+                    />
+                  </Col>
 
                 </BootstrapForm.Row>
                 <BootstrapForm.Row>
@@ -293,16 +293,20 @@ export const AnimalForm = ({id}) => {
                       placeholder={placeholder}
                     />
                   </Col>
+                  <Col>
                     <TextInput
+                    xs="auto"
                       id="color_notes"
                       name="color_notes"
-                      type="textarea"
+                      as="textarea"
                       rows={5}
                       label="Description"
                     />
+                  </Col>
+
                 </BootstrapForm.Row>
                 <BootstrapForm.Row>
-                  <Col>
+                  <Col xs="3">
                     <DropDown
                       label="Aggressive"
                       id="aggressive"
@@ -312,8 +316,7 @@ export const AnimalForm = ({id}) => {
                       value={props.values.aggressive||'unknown'}
                       isClearable={false}
                     />
-                  </Col>
-                  <Col>
+
                     <DropDown
                       label="Fixed"
                       id="fixed"
@@ -323,9 +326,23 @@ export const AnimalForm = ({id}) => {
                       value={props.values.fixed||'unknown'}
                       isClearable={false}
                     />
+
+
                   </Col>
                   <Col>
-                    <DropDown
+                  <TextInput
+                      xs="auto"
+                      label="Behavior Notes"
+                      id="behavior_notes"
+                      name="behavior_notes"
+                      as="textarea"
+                      rows={5}
+                    /></Col>
+                </BootstrapForm.Row>
+
+                <BootstrapForm.Row>
+                  <Col xs="3">
+                  <DropDown
                       label="Confined"
                       id="confined"
                       name="confined"
@@ -334,30 +351,6 @@ export const AnimalForm = ({id}) => {
                       value={props.values.confined||'unknown'}
                       isClearable={false}
                     />
-                  </Col>
-                  <Col>
-                    <DropDown
-                      label="Collared"
-                      id="collared"
-                      name="collared"
-                      type="text"
-                      options={unknownChoices}
-                      value={props.values.collared||'unknown'}
-                      isClearable={false}
-                    />
-                  </Col>
-                </BootstrapForm.Row>
-                <BootstrapForm.Row>
-                <TextInput
-                      label="Behavior Notes"
-                      id="behavior_notes"
-                      name="behavior_notes"
-                      type="textarea"
-                      rows={5}
-                    />
-                </BootstrapForm.Row>
-                <BootstrapForm.Row>
-                  <Col xs="3">
                     <DropDown
                       label="Attended To"
                       id="attended_to"
@@ -367,18 +360,28 @@ export const AnimalForm = ({id}) => {
                       value={props.values.attended_to||'unknown'}
                       isClearable={false}
                     />
+                    </Col>
+                    <Col xs="3">
+                    <DropDown
+                      label="Collared"
+                      id="collared"
+                      name="collared"
+                      type="text"
+                      options={unknownChoices}
+                      value={props.values.collared||'unknown'}
+                      isClearable={false}
+                    />                    <DateTimePicker
+                    label="Last Seen"
+                    name="last_seen"
+                    id="last_seen"
+                    onChange={(date, dateStr) => {
+                      props.setFieldValue("last_seen", dateStr)
+                    }}
+                    value={data.last_seen||null}
+                  />
+
                   </Col>
-                  <Col xs="3">
-                    <DateTimePicker
-                      label="Last Seen"
-                      name="last_seen"
-                      id="last_seen"
-                      onChange={(date, dateStr) => {
-                        props.setFieldValue("last_seen", dateStr)
-                      }}
-                      value={data.last_seen||null}
-                    />
-                  </Col>
+
                 </BootstrapForm.Row>
                 <BootstrapForm.Row>
                   <Col className="mt-3">

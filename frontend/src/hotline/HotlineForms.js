@@ -175,11 +175,13 @@ export const PersonForm = ({ id }) => {
           <BootstrapForm noValidate>
             <BootstrapForm.Row>
                 <TextInput
+                  xs="5"
                   type="text"
                   label="First Name*"
                   name="first_name"
                 />
                 <TextInput
+                  xs="5"
                   type="text"
                   label="Last Name*"
                   name="last_name"
@@ -187,11 +189,13 @@ export const PersonForm = ({ id }) => {
             </BootstrapForm.Row>
             <BootstrapForm.Row>
                 <TextInput
+                  xs="3"
                   type="text"
                   label="Phone"
                   name="phone"
                 />
                 <TextInput
+                xs="7"
                   type="text"
                   label="Email"
                   name="email"
@@ -207,19 +211,21 @@ export const PersonForm = ({ id }) => {
           </BootstrapForm.Row>
             <BootstrapForm.Row>
                 <TextInput
-                xs={4}
-                  type="textarea"
+                xs="10"
+                  as="textarea"
                   label="Best Contact"
                   name="best_contact"
                 />
             </BootstrapForm.Row>
             <BootstrapForm.Row hidden={!is_owner}>
                 <TextInput
+                xs="8"
                   type="text"
                   label="Address"
                   name="address"
                 />
                 <TextInput
+                xs="2"
                   type="text"
                   label="Apartment"
                   name="apartment"
@@ -232,6 +238,7 @@ export const PersonForm = ({ id }) => {
                   label="City"
                   name="city"
                 />
+                <Col xs="2">
                 <DropDown
                   label="State"
                   name="state"
@@ -239,6 +246,7 @@ export const PersonForm = ({ id }) => {
                   options={state_options}
                   value={props.values.state || ''}
                 />
+                </Col>
                 <TextInput
                 xs="auto"
                   type="text"
@@ -401,7 +409,7 @@ export function ServiceRequestForm({ id }) {
           <Field type="hidden" value={reporter_id || ""} name="reporter" id="reporter"></Field>
           <BootstrapForm.Row hidden={!id}>
                 <TextInput
-                  type="textarea"
+                  as="textarea"
                   rows={5}
                   label="Outcome"
                   name="outcome"
@@ -410,7 +418,7 @@ export function ServiceRequestForm({ id }) {
             </BootstrapForm.Row>
             <BootstrapForm.Row hidden={!id}>
                 <TextInput
-                  type="textarea"
+                  as="textarea"
                   rows={5}
                   label="Owner Notification Notes"
                   name="owner_notification_notes"
@@ -449,7 +457,7 @@ export function ServiceRequestForm({ id }) {
           }
           <FormGroup>
             <Fade in={fadeIn} hidden={!fadeIn}>
-              <Row>
+              <BootstrapForm.Row>
                 <Col xs="8">
                   <TextInput
                     type="text"
@@ -466,8 +474,8 @@ export function ServiceRequestForm({ id }) {
                     id="apartment"
                   />
                 </Col>
-              </Row>
-              <Row>
+              </BootstrapForm.Row>
+              <BootstrapForm.Row>
                 <Col xs="6">
                   <TextInput
                     type="text"
@@ -493,20 +501,20 @@ export function ServiceRequestForm({ id }) {
                     id="zip_code"
                   />
                 </Col>
-              </Row>
+              </BootstrapForm.Row>
             </Fade>
-            <Row>
+            <BootstrapForm.Row>
               <Col xs="10">
                 <TextInput
-                  type="textarea"
+                  as="textarea"
                   rows={5}
                   label="Directions*"
                   name="directions"
                   id="directions"
                 />
               </Col>
-            </Row>
-            <Row>
+            </BootstrapForm.Row>
+            <BootstrapForm.Row>
               <Col>
                 <Label htmlFor="verbal_permission" className="mt-3">Verbal Permission</Label>
                 <Field component={Switch} name="verbal_permission" type="checkbox" color="primary" className="mt-3" />
@@ -520,7 +528,7 @@ export function ServiceRequestForm({ id }) {
                 <Label htmlFor="turn_around">Turn Around</Label>
                 <Field component={Switch} name="turn_around" type="checkbox" color="primary" />
               </Col>
-            </Row>
+            </BootstrapForm.Row>
           </FormGroup>
 
 

@@ -28,8 +28,6 @@ const Animals = () => (
 
 export const NewAnimal = () => (
   <div>
-    <h1 style={header_style}>Animal Form</h1>
-    <br/>
     <AnimalForm />
   </div>
 )
