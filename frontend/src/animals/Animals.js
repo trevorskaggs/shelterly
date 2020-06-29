@@ -27,9 +27,7 @@ const Animals = () => (
 )
 
 export const NewAnimal = () => (
-  <div>
     <AnimalForm />
-  </div>
 )
 
 export const AnimalDetail = ({id}) => (

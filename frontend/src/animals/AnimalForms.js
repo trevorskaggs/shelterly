@@ -184,7 +184,7 @@ export const AnimalForm = ({id}) => {
       >
         {props => (
           <Card border="secondary" className="mt-5">
-            <Card.Header as="h5">Update Animal</Card.Header>
+            <Card.Header as="h5">{!id ? "New" : "Update"} Animal</Card.Header>
             <Card.Body>
           <BootstrapForm as={Form}>
               <Field type="hidden" value={owner_id||""} name="owner" id="owner"></Field>

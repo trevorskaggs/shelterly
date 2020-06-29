@@ -32,7 +32,6 @@ const Hotline = () => (
 
 export const NewOwner = () => (
   <div>
-    <h1 style={header_style}>Owner Information</h1>
     <PersonForm />
   </div>
 )
@@ -42,9 +41,7 @@ export const UpdateOwner = ({id}) => (
 )
 
 export const NewReporter = () => (
-  <div>
     <PersonForm />
-  </div>
 )
 
 export const UpdateReporter = ({id}) => (

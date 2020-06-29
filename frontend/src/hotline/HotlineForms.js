@@ -170,7 +170,7 @@ export const PersonForm = ({ id }) => {
       >
         {props => (
           <Card border="secondary" className="mt-5">
-          <Card.Header as="h5">Update Owner Information</Card.Header>
+          <Card.Header as="h5">{is_owner ? "Owner" : "Reporter"} Information</Card.Header>
           <Card.Body>
           <BootstrapForm noValidate>
             <BootstrapForm.Row>
