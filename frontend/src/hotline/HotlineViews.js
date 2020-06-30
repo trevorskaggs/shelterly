@@ -51,7 +51,7 @@ export function PersonView({id}) {
     let source = axios.CancelToken.source();
     const fetchPersonData = async () => {
       // Fetch Person data.
-      await axios.get('http://localhost:3000/people/api/person/' + id + '/', {
+      await axios.get('/people/api/person/' + id + '/', {
         cancelToken: source.token,
       })
       .then(response => {
@@ -116,7 +116,7 @@ export function ServiceRequestView({id}) {
     let source = axios.CancelToken.source();
     const fetchServiceRequestData = async () => {
       // Fetch ServiceRequest data.
-      await axios.get('http://localhost:3000/hotline/api/servicerequests/' + id + '/', {
+      await axios.get('/hotline/api/servicerequests/' + id + '/', {
         cancelToken: source.token,
       })
       .then(response => {
