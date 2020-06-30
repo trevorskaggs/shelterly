@@ -36,4 +36,4 @@ RUN git clone https://github.com/magicmonty/bash-git-prompt.git .bash-git-prompt
     && python ./manage.py collectstatic --no-input
 
 SHELL ["/bin/bash", "-c"]
-CMD bash -c "sudo service nginx restart; sudo uwsgi --ini /home/shelterly/config/uwsgi_config.ini; tail -f /dev/null"
+CMD bash -c "sudo service nginx restart; sudo uwsgi --ini /home/shelterly/config/uwsgi_config.ini"
