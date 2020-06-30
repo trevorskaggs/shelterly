@@ -15,6 +15,7 @@ RUN git clone https://github.com/trevorskaggs/shelterly.git . \
     && python3 -m venv /home/shelterly/venv
 
 WORKDIR /home/shelterly/
+COPY secrets.json /home/shelterly/config/secrets.json
 RUN git clone https://github.com/magicmonty/bash-git-prompt.git .bash-git-prompt --depth=1 \
     && echo 'GIT_PROMPT_ONLY_IN_REPO=1' >> ~/.bashrc \
     && echo 'GIT_PROMPT_FETCH_REMOTE_STATUS=0' >> ~/.bashrc \
@@ -25,11 +26,14 @@ RUN git clone https://github.com/magicmonty/bash-git-prompt.git .bash-git-prompt
     && git checkout uwsgi-stack \
     && cd frontend \
     && npm install \
+    && npm run dev \
+    && rm -rf node_modules \
     && cd .. \ 
-    && python ./manage.py collectstatic \
     && sudo rm /etc/nginx/sites-enabled/default \
     && sudo mkdir /var/log/uwsgi \
     && sudo ln -s /home/shelterly/config/nginx_config.conf /etc/nginx/sites-enabled/ \
-    && pip install --no-cache-dir -r /home/shelterly/requirements.txt
+    && pip install --no-cache-dir -r /home/shelterly/requirements.txt \
+    && python ./manage.py collectstatic --no-input
+
 SHELL ["/bin/bash", "-c"]
 CMD bash -c "sudo service nginx restart; sudo uwsgi --ini /home/shelterly/config/uwsgi_config.ini; tail -f /dev/null"
