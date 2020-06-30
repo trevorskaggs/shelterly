@@ -33,7 +33,9 @@ RUN git clone https://github.com/magicmonty/bash-git-prompt.git .bash-git-prompt
     && sudo mkdir /var/log/uwsgi \
     && sudo ln -s /home/shelterly/config/nginx_config.conf /etc/nginx/sites-enabled/ \
     && pip install --no-cache-dir -r /home/shelterly/requirements.txt \
-    && python ./manage.py collectstatic --no-input
+    && python ./manage.py collectstatic --no-input \
+    && sudo chmod +x /home/shelterly/startup.sh \
+    && sudo chmod +x /home/shelterly/migrate.sh
 
-SHELL ["/bin/bash", "-c"]
-CMD bash -c "sudo service nginx restart; sudo uwsgi --ini /home/shelterly/config/uwsgi_config.ini"
+ENTRYPOINT ["/bin/bash", "-c"]
+CMD ["/home/shelterly/startup.sh"]
