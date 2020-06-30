@@ -367,7 +367,6 @@ export const EditBuildingForm = ({bid}) => {
   const [data, setData] = useState({
     name: '',
     description: '',
-    shelter: '',
   });
 
   // Hook for initializing data.
@@ -409,7 +408,7 @@ export const EditBuildingForm = ({bid}) => {
             console.log(values)
             axios.put('http://localhost:8000/shelter/api/building/' + bid + '/', values)
             .then(function() {
-              navigate('/shelter/' + data.shelter.id + '/');
+              navigate('/shelter/building/'+bid+'/');
             })
             .catch(e => {
               console.log(e);
@@ -517,7 +516,6 @@ export const EditRoomForm = ({rid}) => {
   const [data, setData] = useState({
     name: '',
     description: '',
-    building: '',
   });
 
   // Hook for initializing data.
@@ -559,7 +557,7 @@ export const EditRoomForm = ({rid}) => {
             console.log(values)
             axios.put('http://localhost:8000/shelter/api/room/' + rid + '/', values)
             .then(function() {
-              navigate('/shelter/building/' + data.building.id +  '/');
+              navigate('/shelter/room/' + rid +  '/');
             })
             .catch(e => {
               console.log(e);
