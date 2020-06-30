@@ -2,45 +2,39 @@ import React from "react";
 import { Link } from "raviger";
 import { EvacTeamForm } from "./EvacForms";
 import { EvacTeamTable } from "./EvacTables";
+import { Container, ListGroup,  Tabs } from 'react-bootstrap';
+// import EvacNavBar from "./EvacNavbar";
+import styled from 'styled-components';
 
-const header_style = {
-  textAlign: "center",
-};
 
-const link_style = {
-  textDecoration: "none",
-};
-
-const btn_style = {
-  width: "50%",
-  margin: "0 auto",
-};
-
-const Evac = () => (
-  <div style={btn_style}>
-    <Link href="/evac/evacteam/new" style={link_style} className="btn btn-warning btn-lg btn-block mb-2">CREATE NEW EVAC TEAM</Link>
-    <Link href="/evac/evacteam/list" style={link_style} className="btn btn-warning btn-lg btn-block mb-2">EVAC TEAM LIST</Link>
-    <Link href="" style={link_style} className="btn btn-warning btn-lg btn-block mb-2">DEPLOY EVAC TEAM</Link>
-    <Link href="" style={link_style} className="btn btn-warning btn-lg btn-block mb-2">EVAC TEAM DEBRIEF</Link>
-    <br/>
-    <br/>
-    <Link className="btn btn-secondary btn-lg btn-block"  href="/">BACK</Link>
-  </div>
-)
-
-export const NewTeam = () => (
-  <div>
-    <h1 style={header_style}>Evac Team</h1>
-    <EvacTeamForm />
-  </div>
-)
-
-export const TeamList = () => (
-  <div>
-    <h1 style={header_style}>Evac Teams</h1>
-    <br/>
-    <EvacTeamTable />
-  </div>
-)
+  const Evac = () => (
+    <ListGroup className="flex-fill p-5 h-50">
+      <Link href="/evac/evacteam/new">
+      <ListGroup.Item action>
+      NEW TEAM
+      </ListGroup.Item>
+      </Link>
+      <Link href="/evac/evacteam/list">
+      <ListGroup.Item action>
+      TEAM LIST
+      </ListGroup.Item>
+      </Link>
+      <Link href="">
+      <ListGroup.Item action>
+      DEPLOY
+      </ListGroup.Item>
+      </Link>
+      <Link href="">
+      <ListGroup.Item action>
+      DEBRIEF
+      </ListGroup.Item>
+      </Link>
+      <Link href="/">
+      <ListGroup.Item action>
+      BACK
+      </ListGroup.Item>
+      </Link>
+    </ListGroup>
+  )
 
 export default Evac

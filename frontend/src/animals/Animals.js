@@ -27,11 +27,7 @@ const Animals = () => (
 )
 
 export const NewAnimal = () => (
-  <div>
-    <h1 style={header_style}>Animal Form</h1>
-    <br/>
     <AnimalForm />
-  </div>
 )
 
 export const AnimalDetail = ({id}) => (
@@ -41,10 +37,7 @@ export const AnimalDetail = ({id}) => (
 )
 
 export const UpdateAnimal = ({id}) => (
-  <div>
-    <h1 style={header_style}>Update Animal</h1>
     <AnimalForm id={id} />
-  </div>
 )
 
 export default Animals;

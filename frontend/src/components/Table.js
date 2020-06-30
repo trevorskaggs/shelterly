@@ -1,6 +1,6 @@
 import React from 'react';
-import { useTable, useSortBy } from 'react-table';
-import { Table as BootstrapTable } from 'reactstrap';
+import { useTable, useSortBy, useResizeColumns, useFlexLayout } from 'react-table';
+import { Container, Row, Col, Table as BootstrapTable } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faSort,
@@ -11,6 +11,17 @@ import {
 // This is a new component. Why a function and not a const?
 function Table({ columns, data }) {
   // Use the state and functions returned from useTable to build your UI
+
+  const defaultColumn = React.useMemo(
+    () => ({
+      // When using the useFlexLayout:
+      minWidth: 30, // minWidth is only used as a limit for resizing
+      width: 150, // width is used for both the flex-basis and flex-grow
+      maxWidth: 200, // maxWidth is only used as a limit for resizing
+    }),
+    []
+  )
+
   const {
     getTableProps,
     getTableBodyProps,
@@ -23,13 +34,16 @@ function Table({ columns, data }) {
       columns,
       // An array of anything, memoized
       data,
+      defaultColumn,
     },
+    useResizeColumns,
+    useFlexLayout,
     useSortBy,
   );
 
   // Render the UI for your table
   return (
-    <BootstrapTable striped bordered hover size="sm" {...getTableProps()}>
+    <BootstrapTable responsive striped bordered hover variant="dark" {...getTableProps()}>
       <thead>
         {headerGroups.map(headerGroup => (
           <tr {...headerGroup.getHeaderGroupProps()}>
