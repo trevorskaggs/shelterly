@@ -5,13 +5,14 @@ services:
   db:
     image: mdillon/postgis
     container_name: db
-  shelterly:
-    image: trevorskaggs/shelterly:latest
-    container_name: shelterly
+  shelterly-dev:
+    image: freeradical3:wsgi
+    container_name: shelterly-dev
     volumes:
       - ./config:/home/shelterly/config
     ports:
-      - "8000:8000"
-      - "3000:3000"
+      - "80:80"
+      - "8001:8001"
+      - "3001:3001"
     depends_on:
       - db
