@@ -535,8 +535,8 @@ export function ServiceRequestForm({ id }) {
         </BootstrapForm>
         </Card.Body>
         <ButtonGroup size="lg">
-            <Button type="submit">Save</Button>
-            <Button variant="info">Cancel</Button>
+            <Button type="submit" onClick={() => { props.submitForm()}}>Save</Button>
+            <Button as={Link} href="/hotline/" variant="info">Cancel</Button>
           </ButtonGroup>
         </Card>
       )}

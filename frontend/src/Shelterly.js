@@ -38,7 +38,7 @@ function Shelterly() {
 
   return (
     <ThemeProvider theme={theme}>
-    <Container classname="d-flex h-100" fluid>
+    <Container fluid>
     <Row>
     <Col xs="auto" className="pl-0">
     <Sidebar/>

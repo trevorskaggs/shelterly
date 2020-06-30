@@ -70,7 +70,7 @@ export function PersonView({id}) {
         {is_owner ?
         <Card.Title>Owner Details<Link href={"/hotline/owner/edit/" + id}> <FontAwesomeIcon  icon={faEdit} inverse  /></Link></Card.Title>
         :
-        <Card.Title>Reporter Details <Fab color="primary" size="small" href={"/hotline/reporter/edit/" + id} className="mb-1" title="Edit reporter" aria-label="edit"><faUserEdit /></Fab></ Card.Title>
+        <Card.Title>Reporter Details <Fab color="primary" size="small" href={"/hotline/reporter/edit/" + id} className="mb-1" title="Edit reporter" aria-label="edit"></Fab></ Card.Title>
         }
         <ListGroup variant="flush">
             <ListGroup.Item>Name: {data.first_name} {data.last_name}</ListGroup.Item>
@@ -135,7 +135,7 @@ export function ServiceRequestView({id}) {
       <div style={card_style} className="card card-body bg-light mb-2 mx-auto">
         <div className="row">
           <div className="col-8">
-            <p className="mb-2"><b>Owner:</b> {data.owner ? <span>{data.owner_object.first_name} {data.owner_object.last_name} {data.owner_object.first_name === 'Unknown' ? "":<Fab href={"/hotline/owner/" + data.owner} style={{width:30,height:30, minHeight:30, color:"#fff", backgroundColor: "#28a745"}} title="Owner details" className="mr-1 mb-1" aria-label="owner_details"><AssignmentIcon style={{fontSize:16}} /></Fab>}<Fab href={"/hotline/owner/edit/" + data.owner +"?servicerequest_id=" + id} className="mb-1" style={{width:30,height:30, minHeight:30, color:"#fff", backgroundColor: "#28a745"}} title="Edit owner" aria-label="edit"><faUserEdit style={{fontSize:16}} /></Fab></span>:""}</p>
+            <p className="mb-2"><b>Owner:</b> {data.owner ? <span>{data.owner_object.first_name} {data.owner_object.last_name} {data.owner_object.first_name === 'Unknown' ? "":<Fab href={"/hotline/owner/" + data.owner} style={{width:30,height:30, minHeight:30, color:"#fff", backgroundColor: "#28a745"}} title="Owner details" className="mr-1 mb-1" aria-label="owner_details"><AssignmentIcon style={{fontSize:16}} /></Fab>}<Fab href={"/hotline/owner/edit/" + data.owner +"?servicerequest_id=" + id} className="mb-1" style={{width:30,height:30, minHeight:30, color:"#fff", backgroundColor: "#28a745"}} title="Edit owner" aria-label="edit"></Fab></span>:""}</p>
             <p className="mb-3"><b>Reporter:</b> {data.reporter ? <span>{data.reporter_object.first_name} {data.reporter_object.last_name} <Fab href={"/hotline/reporter/" + data.reporter} className="mb-1" style={{width:30,height:30, minHeight:30, color:"#fff", backgroundColor: "#28a745"}} title="Reporter details" aria-label="reporter_details"><AssignmentIcon style={{fontSize:16}} /></Fab></span> : 'N/A'}</p>
             <p><b>Address:</b> {data.address ? <span>{data.full_address}</span> : 'N/A'}</p>
             <p><b>Directions:</b> {data.directions}</p>
@@ -169,7 +169,7 @@ export function ServiceRequestView({id}) {
           {data.animals.map(animal => (
             <li key={animal.id}>{animal.name} (<span style={{textTransform:"capitalize"}}>{animal.species}</span>) - {animal.status}
               <Fab href={"/animals/animal/" + animal.id} className="mb-1 mr-1 ml-1" style={{width:30, height:30, minHeight:30, color:"#fff", backgroundColor: "#c82333"}} title="Animal details" aria-label="animal_details"><AssignmentIcon style={{fontSize:16}} /></Fab>
-              <Fab href={"/animals/animal/edit/" + animal.id} className="mb-1" style={{width:30, height:30, minHeight:30, color:"#fff", backgroundColor: "#c82333"}} title="Edit animal" aria-label="animal_details"><faUserEdit style={{fontSize:16}} /></Fab>
+              <Fab href={"/animals/animal/edit/" + animal.id} className="mb-1" style={{width:30, height:30, minHeight:30, color:"#fff", backgroundColor: "#c82333"}} title="Edit animal" aria-label="animal_details"></Fab>
             </li>
           ))}
         </span>
