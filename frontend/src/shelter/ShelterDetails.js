@@ -46,7 +46,7 @@ export function ShelterDetailsTable({sid}) {
       <h3>Shelter Buildings</h3>
       <BuildingList sid={data.id} />
       <hr/>
-      <Link href={"/shelter/" + data.id + "/building/new"}><Button color="primary">CREATE NEW SHELTER</Button></Link>
+      <Link href={"/shelter/" + data.id + "/building/new"}><Button color="primary">CREATE NEW BUILDING</Button></Link>
       <Link href="/shelter/list"><Button color="secondary">BACK</Button></Link>
     </>
   );
