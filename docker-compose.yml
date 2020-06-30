@@ -6,7 +6,8 @@ services:
     image: mdillon/postgis
     container_name: db
   shelterly-dev:
-    image: freeradical3:wsgi
+    image: 36b03b20742d
+    #image: freeradical3:wsgi
     container_name: shelterly-dev
     volumes:
       - ./config:/home/shelterly/config

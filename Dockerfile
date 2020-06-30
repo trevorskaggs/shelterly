@@ -2,6 +2,7 @@ FROM python:3
 
 RUN curl -sL https://deb.nodesource.com/setup_12.x | bash - \
     && apt-get update && apt-get install -y nodejs nginx vim sudo \
+    && pip install uwsgi \
     && mkdir /home/shelterly
 RUN useradd shelterly --user-group -d /home/shelterly \
     && chown shelterly:shelterly /home/shelterly \
@@ -10,7 +11,7 @@ RUN useradd shelterly --user-group -d /home/shelterly \
 USER shelterly
 WORKDIR /home/shelterly
 RUN git clone https://github.com/trevorskaggs/shelterly.git . \
-    && pip install --upgrade pip virtualenv uwsgi \
+    && pip install --upgrade pip virtualenv \
     && python3 -m venv /home/shelterly/venv
 
 WORKDIR /home/shelterly/
@@ -20,14 +21,15 @@ RUN git clone https://github.com/magicmonty/bash-git-prompt.git .bash-git-prompt
     && echo 'source ~/.bash-git-prompt/gitprompt.sh' >> ~/.bashrc \
     && echo 'source /home/shelterly/venv/bin/activate' >> ~/.bashrc \
     && . /home/shelterly/venv/bin/activate \
+    && git pull \
     && git checkout uwsgi-stack \
-    && rm /etc/nginx/sites-enabled/default \
-    && sudo ln -s config/nginx_config.conf /etc/nginx/sites-enabled/
-# WORKDIR /home/shelterly/frontend
-# RUN npm install
-# WORKDIR /home/shelterly/
-RUN pip install --no-cache-dir -r /home/shelterly/requirements.txt \
-    && sudo uwsgi --ini /home/shelterly/config/uwsgi_config.ini \
-    && sudo service nginx start
+    && cd frontend \
+    && npm install \
+    && cd .. \ 
+    && python ./manage.py collectstatic \
+    && sudo rm /etc/nginx/sites-enabled/default \
+    && sudo mkdir /var/log/uwsgi \
+    && sudo ln -s /home/shelterly/config/nginx_config.conf /etc/nginx/sites-enabled/ \
+    && pip install --no-cache-dir -r /home/shelterly/requirements.txt
 SHELL ["/bin/bash", "-c"]
-CMD tail -f /dev/null
+CMD bash -c "sudo service nginx restart; sudo uwsgi --ini /home/shelterly/config/uwsgi_config.ini; tail -f /dev/null"
