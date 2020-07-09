@@ -1,15 +1,16 @@
-import React, { Fragment, useContext, useEffect } from "react";
+import React, { Fragment, useContext, useEffect, useState } from "react";
 import { Link, navigate, useRoutes } from 'raviger';
 import routes from "./router";
+import { ThemeProvider } from 'styled-components';
+import { theme } from './theme';
 import PageNotFound from "./components/PageNotFound";
 import { useCookies, withCookies } from 'react-cookie';
 import { AuthContext } from "./accounts/AccountsReducer";
+import { Container, Row, Col, TabContainer} from "react-bootstrap";
 import { loadUser, logoutUser, setAuthToken } from "./accounts/AccountsUtils";
-import logo from "./static/images/nvadg_logo.png"
+import Sidebar from "./components/Sidebar"
+import styled from 'styled-components';
 
-const header_style = {
-  textAlign: "center",
-};
 
 function Shelterly() {
 
@@ -36,18 +37,20 @@ function Shelterly() {
   const routeResult = useRoutes(routes);
 
   return (
-    <div>
-      <h1 style={header_style} className="col-12">
-        <Link href="/"><img src={logo} alt=""/></Link>
-      </h1>
-      <hr className="mt-0 mb-4"/>
+    <ThemeProvider theme={theme}>
+    <Container fluid>
+    <Row>
+    <Col xs="auto" className="pl-0">
+    <Sidebar/>
+    </Col>
+    <Col> 
       <Fragment>
         {routeResult || <PageNotFound />}
       </Fragment>
-      <div style={{textAlign: "right"}}>
-        {state.user ? <button className="btn btn-danger" onClick={() => logoutUser({dispatch}, {removeCookie})}>Logout {state.user.username}</button> : ''}
-      </div>
-    </div>
+      </Col>
+      </Row>
+    </Container>
+    </ThemeProvider>
   );
 }
 

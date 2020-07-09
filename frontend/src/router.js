@@ -9,6 +9,8 @@ import Shelter, { NewShelter, UpdateShelter, ShelterList } from "./shelter/Shelt
 import { ShelterDetails} from "./shelter/ShelterTables";
 import { NewBuilding, UpdateBuilding, BuildingDetails } from "./shelter/Building";
 import { NewRoom, UpdateRoom, RoomDetails } from "./shelter/Room";
+import { EvacTeamTable } from "./evac/EvacTables";
+import { EvacTeamForm } from "./evac/EvacForms";
 
 const routes = {
   "/": () => <Home />,
@@ -18,8 +20,8 @@ const routes = {
   "/animals/search": () => <AnimalSearch />,
   "/animals/animal/:id": ({id}) => <AnimalDetail id={id} />,
   "/evac": () => <Evac />,
-  "/evac/evacteam/new": () => <NewTeam />,
-  "/evac/evacteam/list": () => <TeamList />,
+  "/evac/evacteam/new": () => <EvacTeamForm />,
+  "/evac/evacteam/list": () => <EvacTeamTable />,
   "/hotline": () => <Hotline />,
   "/hotline/owner/edit/:id": ({id}) => <UpdateOwner id={id}/>,
   "/hotline/owner/new": () => <NewOwner />,

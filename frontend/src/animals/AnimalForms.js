@@ -3,6 +3,8 @@ import axios from "axios";
 import { Link, navigate, useQueryParams } from 'raviger';
 import { Field, Form, Formik } from "formik";
 import { Col, FormGroup, Container, Input, Label, Row } from "reactstrap";
+import { Button, ButtonGroup, Form as BootstrapForm } from "react-bootstrap";
+import { Card } from 'react-bootstrap';
 import * as Yup from 'yup';
 import { DateTimePicker, DropDown, TextInput } from '.././components/Form.js';
 import { catAgeChoices, dogAgeChoices, catColorChoices, dogColorChoices, speciesChoices, sexChoices, dogSizeChoices, catSizeChoices, statusChoices, unknownChoices } from './constants'
@@ -181,12 +183,13 @@ export const AnimalForm = ({id}) => {
         }}
       >
         {props => (
-          <Form>
-            <Container>
+          <Card border="secondary" className="mt-5">
+            <Card.Header as="h5">{!id ? "New" : "Update"} Animal</Card.Header>
+            <Card.Body>
+          <BootstrapForm as={Form}>
               <Field type="hidden" value={owner_id||""} name="owner" id="owner"></Field>
               <Field type="hidden" value={servicerequest_id||""} name="request" id="request"></Field>
-              <FormGroup>
-               <Row hidden={!id}>
+               <BootstrapForm.Row hidden={!id}>
                   <Col xs="3">
                     <DropDown
                       id="status"
@@ -201,17 +204,16 @@ export const AnimalForm = ({id}) => {
                       }}
                     />
                   </Col>
-                </Row>
-                <Row>
-                  <Col xs="8">
+                </BootstrapForm.Row>
+                <BootstrapForm.Row>
                     <TextInput
                       id="name"
+                      xs="8"
                       name="name"
                       type="text"
                       label="Name"
                     />
-                  </Col>
-                  <Col xs="2">
+                    <Col xs="2">
                     <DropDown
                       label="Sex"
                       id="sexDropDown"
@@ -220,9 +222,9 @@ export const AnimalForm = ({id}) => {
                       options={sexChoices}
                       value={props.values.sex||''}
                     />
-                  </Col>
-                </Row>
-                <Row>
+                    </Col>
+                </BootstrapForm.Row>
+                <BootstrapForm.Row>
                   <Col xs="2">
                     <DropDown
                       label="Species"
@@ -266,8 +268,9 @@ export const AnimalForm = ({id}) => {
                       placeholder={placeholder}
                     />
                   </Col>
-                </Row>
-                <Row>
+
+                </BootstrapForm.Row>
+                <BootstrapForm.Row>
                   <Col xs="3">
                     <DropDown
                       label="Primary Color"
@@ -290,18 +293,20 @@ export const AnimalForm = ({id}) => {
                       placeholder={placeholder}
                     />
                   </Col>
-                  <Col xs="7">
+                  <Col>
                     <TextInput
+                    xs="auto"
                       id="color_notes"
                       name="color_notes"
-                      type="textarea"
+                      as="textarea"
                       rows={5}
                       label="Description"
                     />
                   </Col>
-                </Row>
-                <Row>
-                  <Col xs="3" className="mt-2">
+
+                </BootstrapForm.Row>
+                <BootstrapForm.Row>
+                  <Col xs="3">
                     <DropDown
                       label="Aggressive"
                       id="aggressive"
@@ -311,6 +316,7 @@ export const AnimalForm = ({id}) => {
                       value={props.values.aggressive||'unknown'}
                       isClearable={false}
                     />
+
                     <DropDown
                       label="Fixed"
                       id="fixed"
@@ -320,20 +326,23 @@ export const AnimalForm = ({id}) => {
                       value={props.values.fixed||'unknown'}
                       isClearable={false}
                     />
+
+
                   </Col>
-                  <Col xs="7" className="mt-3">
-                    <Label htmlFor="behavior_notes">Behavior Notes</Label>
-                    <TextInput
+                  <Col>
+                  <TextInput
+                      xs="auto"
+                      label="Behavior Notes"
                       id="behavior_notes"
                       name="behavior_notes"
-                      type="textarea"
+                      as="textarea"
                       rows={5}
-                    />
-                  </Col>
-                </Row>
-                <Row>
+                    /></Col>
+                </BootstrapForm.Row>
+
+                <BootstrapForm.Row>
                   <Col xs="3">
-                    <DropDown
+                  <DropDown
                       label="Confined"
                       id="confined"
                       name="confined"
@@ -342,21 +351,6 @@ export const AnimalForm = ({id}) => {
                       value={props.values.confined||'unknown'}
                       isClearable={false}
                     />
-                  </Col>
-                  <Col xs="3">
-                    <DropDown
-                      label="Collared"
-                      id="collared"
-                      name="collared"
-                      type="text"
-                      options={unknownChoices}
-                      value={props.values.collared||'unknown'}
-                      isClearable={false}
-                    />
-                  </Col>
-                </Row>
-                <Row>
-                  <Col xs="3">
                     <DropDown
                       label="Attended To"
                       id="attended_to"
@@ -366,32 +360,44 @@ export const AnimalForm = ({id}) => {
                       value={props.values.attended_to||'unknown'}
                       isClearable={false}
                     />
+                    </Col>
+                    <Col xs="3">
+                    <DropDown
+                      label="Collared"
+                      id="collared"
+                      name="collared"
+                      type="text"
+                      options={unknownChoices}
+                      value={props.values.collared||'unknown'}
+                      isClearable={false}
+                    />                    <DateTimePicker
+                    label="Last Seen"
+                    name="last_seen"
+                    id="last_seen"
+                    onChange={(date, dateStr) => {
+                      props.setFieldValue("last_seen", dateStr)
+                    }}
+                    value={data.last_seen||null}
+                  />
+
                   </Col>
-                  <Col xs="3">
-                    <DateTimePicker
-                      label="Last Seen"
-                      name="last_seen"
-                      id="last_seen"
-                      onChange={(date, dateStr) => {
-                        props.setFieldValue("last_seen", dateStr)
-                      }}
-                      value={data.last_seen||null}
-                    />
-                  </Col>
-                </Row>
-                <Row>
+
+                </BootstrapForm.Row>
+                <BootstrapForm.Row>
                   <Col className="mt-3">
                   <Label for="image">Image File</Label>
                   <Input type="file" name="image" id="image" onChange={handleImageChange} />
                   </Col>
-                </Row>
-              </FormGroup>
+                </BootstrapForm.Row>
 
-              <button type="button" className="btn btn-success mr-1" onClick={() => {setAddAnother(false); props.submitForm()}}>Save</button>
-              {!id ? <button type="button" className="btn btn-primary mr-1" onClick={() => {setAddAnother(true); props.submitForm()}}>Add Another</button> : ""}
+          </BootstrapForm>
+          </Card.Body>
+          <ButtonGroup>
+              <Button type="button" className="btn btn-success mr-1" onClick={() => {setAddAnother(false); props.submitForm()}}>Save</Button>
+              {!id ? <Button type="button" className="btn btn-primary mr-1" onClick={() => {setAddAnother(true); props.submitForm()}}>Add Another</Button> : ""}
               <Link className="btn btn-secondary" href={servicerequest_id ? "/hotline/servicerequest/" + servicerequest_id : "/"}>Cancel</Link>
-            </Container>
-          </Form>
+              </ButtonGroup>
+          </Card>
         )}
       </Formik>
     </span>
