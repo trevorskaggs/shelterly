@@ -21,7 +21,7 @@ class Person(Location):
 
 class OwnerContactNote(models.Model):
 
-    user = models.ForeignKey(ShelterlyUser)
+    user = models.ForeignKey(ShelterlyUser, on_delete=models.SET_NULL)
+    owner = models.ForeignKey(Person, on_delete=models.SET_NULL)
     timestamp = models.DateTimeField(auto_now_add=True)
     note = models.CharField(max_length=1000, blank=False)
-    owner = models.ForeignKey(Person)

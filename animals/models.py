@@ -50,8 +50,8 @@ class Animal(models.Model):
 
 class AnimalNote(models.Model):
 
-    user = models.ForeignKey(ShelterlyUser)
+    user = models.ForeignKey(ShelterlyUser, on_delete=models.SET_NULL)
+    animal = models.ForeignKey(Animal, on_delete=models.SET_NULL)
     timestamp = models.DateTimeField(auto_now_add=True)
     note = models.CharField(max_length=1000, blank=False)
-    animal = models.ForeignKey(Animal)
 
