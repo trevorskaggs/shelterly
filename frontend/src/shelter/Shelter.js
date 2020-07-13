@@ -1,14 +1,11 @@
 import React from "react";
 import { Link } from 'raviger';
+import { Row, ListGroup } from 'react-bootstrap'
 import { ShelterForm, EditShelterForm } from "./ShelterForms";
 import { ShelterTable } from "./ShelterTables";
 
 const header_style = {
   textAlign: "center",
-};
-
-const link_style = {
-  textDecoration: "none",
 };
 
 const btn_style = {
@@ -17,13 +14,14 @@ const btn_style = {
 };
 
 const Shelter = () => (
-  <div style={btn_style}>
-    <Link href="/shelter/new" style={link_style} className="btn btn-warning btn-lg btn-block mb-2">CREATE NEW SHELTER</Link>
-    <Link href="/shelter/list" style={link_style} className="btn btn-warning btn-lg btn-block mb-2">SEE ALL SHELTERS</Link>
-    <br/>
-    <br/>
-    <Link className="btn btn-secondary btn-lg btn-block"  href="/">BACK</Link>
-  </div>
+  <ListGroup className="flex-fill p-5 h-50">
+    <Link href="/shelter/new">
+      <ListGroup.Item action>CREATE NEW SHELTER</ListGroup.Item>
+    </Link>
+    <Link href="/shelter/list">
+      <ListGroup.Item action>SEE ALL SHELTERS</ListGroup.Item>
+    </Link>
+  </ListGroup>
 )
 
 export const NewShelter = ({sid}) => (
