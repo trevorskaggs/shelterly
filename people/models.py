@@ -1,4 +1,6 @@
 from django.db import models
+
+from accounts.models import ShelterlyUser
 from location.models import Location
 
 class Person(Location):
@@ -16,3 +18,10 @@ class Person(Location):
 
     def __str__(self):
         return '{} {}'.format(self.first_name, self.last_name)
+
+class OwnerContactNote(models.Model):
+
+    user = models.ForeignKey(ShelterlyUser)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    note = models.CharField(max_length=1000, blank=False)
+    owner = models.ForeignKey(Person)

@@ -1,5 +1,6 @@
 from django.db import models
 
+from accounts.models import ShelterlyUser
 from animals.choices import ALL_AGE_CHOICES, ALL_SIZE_CHOICES, SEX_CHOICES, SPECIES_CHOICES, STATUS_CHOICES, UNKNOWN_CHOICES
 from animals.colors import ALL_COLOR_CHOICES
 from location.models import Location
@@ -46,3 +47,11 @@ class Animal(models.Model):
 
     class Meta:
         ordering = []
+
+class AnimalNote(models.Model):
+
+    user = models.ForeignKey(ShelterlyUser)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    note = models.CharField(max_length=1000, blank=False)
+    animal = models.ForeignKey(Animal)
+
