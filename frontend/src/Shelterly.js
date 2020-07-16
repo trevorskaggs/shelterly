@@ -10,7 +10,6 @@ import { Container, Row, Col, TabContainer} from "react-bootstrap";
 import { loadUser, logoutUser, setAuthToken } from "./accounts/AccountsUtils";
 import Sidebar from "./components/Sidebar"
 import styled from 'styled-components';
-import { statusChoices } from "./animals/constants";
 
 
 function Shelterly() {
