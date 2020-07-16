@@ -10,6 +10,7 @@ services:
     container_name: shelterly
     volumes:
       - ./config:/home/shelterly/config
+      - /home/shelterly/venv
     ports:
       - "8000:8000"
       - "3000:3000"
