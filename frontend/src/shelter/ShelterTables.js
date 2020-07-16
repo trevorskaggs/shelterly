@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
-import Table from '.././components/Table';
 import { Link } from 'raviger';
 import { Button, CardGroup } from 'reactstrap';
 import { ShelterDetailsTable } from "./ShelterDetails";
@@ -23,7 +22,7 @@ export function ShelterTable() {
     let source = axios.CancelToken.source();
     const fetchShelters = async () => {
       setData({shelters: [], isFetching: true});
-      // Fetch EvacTeam data.
+      // Fetch Shelter data.
       await axios.get('http://localhost:8000/shelter/api/shelter', {
         cancelToken: source.token,
       })
@@ -43,13 +42,7 @@ export function ShelterTable() {
   }, []);
 
   return (
-    <div>
-      <Table keyField='id' data={ data.shelters } columns={columns}/>
-      <p>{data.isFetching ? 'Fetching shelters...' : ''}</p>
-      <br/>
-      <br/>
-      <Link href="/shelter/new"><Button color="primary">CREATE NEW SHELTER</Button></Link>
-      <Link href="/shelter"><Button color="secondary">BACK</Button></Link>
+    <div className="ml-2 mr-2">
       {data.shelters.map(shelter => (
         <div className="mt-5">
           <div className="card-header"> Shelter: {shelter.name} #{shelter.id}<Fab color="primary" href={"/shelter/" + shelter.id} className="mb-1" style={{width:23,height:23, minHeight:23}} title="Shelter Details" aria-label="details"><AssignmentIcon style={{fontSize:10}} /></Fab>
