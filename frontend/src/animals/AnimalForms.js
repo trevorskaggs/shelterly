@@ -2,12 +2,12 @@ import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { Link, navigate, useQueryParams } from 'raviger';
 import { Field, Form, Formik } from "formik";
-import { Col, FormGroup, Container, Input, Label, Row } from "reactstrap";
+import { Col, Input, Label } from "reactstrap";
 import { Button, ButtonGroup, Form as BootstrapForm } from "react-bootstrap";
 import { Card } from 'react-bootstrap';
 import * as Yup from 'yup';
 import { DateTimePicker, DropDown, TextInput } from '.././components/Form.js';
-import { catAgeChoices, dogAgeChoices, catColorChoices, dogColorChoices, speciesChoices, sexChoices, dogSizeChoices, catSizeChoices, statusChoices, unknownChoices } from './constants'
+import { catAgeChoices, dogAgeChoices, horseAgeChoices, otherAgeChoices, catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, speciesChoices, sexChoices, dogSizeChoices, catSizeChoices, horseSizeChoices, otherSizeChoices, statusChoices, unknownChoices } from './constants'
 
 const header_style = {
   textAlign: "center",
@@ -28,9 +28,9 @@ export const AnimalForm = ({id}) => {
   const ageRef = useRef(null);
   const pcolorRef = useRef(null);
   const scolorRef = useRef(null);
-  const ageChoices = {'':[], 'dog':dogAgeChoices, 'cat':catAgeChoices, 'horse':[], 'other':[]}
-  const colorChoices = {'':[], 'dog':dogColorChoices, 'cat':catColorChoices, 'horse':[], 'other':[]}
-  const sizeChoices = {'':[], 'dog':dogSizeChoices, 'cat':catSizeChoices, 'horse':[], 'other':[]}
+  const ageChoices = {'':[], 'dog':dogAgeChoices, 'cat':catAgeChoices, 'horse':horseAgeChoices, 'other':otherAgeChoices}
+  const colorChoices = {'':[], 'dog':dogColorChoices, 'cat':catColorChoices, 'horse':horseColorChoices, 'other':otherColorChoices}
+  const sizeChoices = {'':[], 'dog':dogSizeChoices, 'cat':catSizeChoices, 'horse':horseSizeChoices, 'other':otherSizeChoices}
 
   // Track whether or not to add another animal after saving.
   const [addAnother, setAddAnother] = useState(false);
@@ -211,7 +211,7 @@ export const AnimalForm = ({id}) => {
                       xs="8"
                       name="name"
                       type="text"
-                      label="Name"
+                      label="Animal Name"
                     />
                     <Col xs="2">
                     <DropDown
@@ -268,7 +268,6 @@ export const AnimalForm = ({id}) => {
                       placeholder={placeholder}
                     />
                   </Col>
-
                 </BootstrapForm.Row>
                 <BootstrapForm.Row>
                   <Col xs="3">
@@ -301,9 +300,9 @@ export const AnimalForm = ({id}) => {
                       as="textarea"
                       rows={5}
                       label="Description"
+                      xs="10"
                     />
                   </Col>
-
                 </BootstrapForm.Row>
                 <BootstrapForm.Row>
                   <Col xs="3">
@@ -316,7 +315,6 @@ export const AnimalForm = ({id}) => {
                       value={props.values.aggressive||'unknown'}
                       isClearable={false}
                     />
-
                     <DropDown
                       label="Fixed"
                       id="fixed"
@@ -326,23 +324,22 @@ export const AnimalForm = ({id}) => {
                       value={props.values.fixed||'unknown'}
                       isClearable={false}
                     />
-
-
                   </Col>
                   <Col>
-                  <TextInput
-                      xs="auto"
-                      label="Behavior Notes"
-                      id="behavior_notes"
-                      name="behavior_notes"
-                      as="textarea"
-                      rows={5}
-                    /></Col>
+                    <TextInput
+                        xs="auto"
+                        label="Behavior Notes"
+                        id="behavior_notes"
+                        name="behavior_notes"
+                        as="textarea"
+                        rows={5}
+                        xs="10"
+                      />
+                    </Col>
                 </BootstrapForm.Row>
-
                 <BootstrapForm.Row>
                   <Col xs="3">
-                  <DropDown
+                    <DropDown
                       label="Confined"
                       id="confined"
                       name="confined"
@@ -351,37 +348,31 @@ export const AnimalForm = ({id}) => {
                       value={props.values.confined||'unknown'}
                       isClearable={false}
                     />
+                  </Col>
+                  <Col xs="3">
                     <DropDown
-                      label="Attended To"
-                      id="attended_to"
-                      name="attended_to"
+                      label="Injured"
+                      id="injured"
+                      name="injured"
                       type="text"
                       options={unknownChoices}
-                      value={props.values.attended_to||'unknown'}
+                      value={props.values.injured||'unknown'}
                       isClearable={false}
                     />
-                    </Col>
-                    <Col xs="3">
-                    <DropDown
-                      label="Collared"
-                      id="collared"
-                      name="collared"
-                      type="text"
-                      options={unknownChoices}
-                      value={props.values.collared||'unknown'}
-                      isClearable={false}
-                    />                    <DateTimePicker
-                    label="Last Seen"
-                    name="last_seen"
-                    id="last_seen"
-                    onChange={(date, dateStr) => {
-                      props.setFieldValue("last_seen", dateStr)
-                    }}
-                    value={data.last_seen||null}
-                  />
-
                   </Col>
-
+                </BootstrapForm.Row>
+                <BootstrapForm.Row>
+                  <Col xs="3">
+                    <DateTimePicker
+                      label="Last Seen"
+                      name="last_seen"
+                      id="last_seen"
+                      onChange={(date, dateStr) => {
+                        props.setFieldValue("last_seen", dateStr)
+                      }}
+                      value={data.last_seen||null}
+                    />
+                  </Col>
                 </BootstrapForm.Row>
                 <BootstrapForm.Row>
                   <Col className="mt-3">
