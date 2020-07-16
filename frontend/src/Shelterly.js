@@ -10,6 +10,7 @@ import { Container, Row, Col, TabContainer} from "react-bootstrap";
 import { loadUser, logoutUser, setAuthToken } from "./accounts/AccountsUtils";
 import Sidebar from "./components/Sidebar"
 import styled from 'styled-components';
+import { statusChoices } from "./animals/constants";
 
 
 function Shelterly() {
@@ -41,7 +42,7 @@ function Shelterly() {
     <Container fluid>
     <Row>
     <Col xs="auto" className="pl-0">
-    <Sidebar/>
+    <Sidebar user={state.user} dispatch={dispatch} removeCookie={removeCookie} />
     </Col>
     <Col> 
       <Fragment>
