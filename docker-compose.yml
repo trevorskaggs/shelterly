@@ -9,7 +9,7 @@ services:
     image: trevorskaggs/shelterly:latest
     container_name: shelterly
     volumes:
-      - ./config:/home/shelterly/config
+      - .:/home/shelterly
       - /home/shelterly/venv
     ports:
       - "8000:8000"
