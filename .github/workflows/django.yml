@@ -37,8 +37,7 @@ jobs:
       env:
         DATABASE_USER: postgres
         DATABASE_PASSWORD: postgres
-        DATABASE_NAME: github_actions
-        DATABASE_HOSTNAME: postgres
+        DATABASE_HOSTNAME: github_actions
         SECRET_KEY: 895!jaglknm89fyu789&#
       run: |
         python manage.py test
