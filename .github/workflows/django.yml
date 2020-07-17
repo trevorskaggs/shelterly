@@ -32,7 +32,7 @@ jobs:
 
     - name: Run Migrations
       run: |
-      python manage.py migrate
+        python manage.py migrate
 
     - name: Run Tests
       env:
