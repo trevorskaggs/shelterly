@@ -30,10 +30,6 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Run Migrations
-      run: |
-        python manage.py migrate
-
     - name: Run Tests
       env:
         DATABASE_USER: postgres
@@ -42,4 +38,5 @@ jobs:
         DATABASE_NAME: github_actions
         SECRET_KEY: 895!jaglknm89fyu789&#
       run: |
+        python manage.py migrate
         python manage.py test
