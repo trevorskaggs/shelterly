@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import { Link } from 'raviger';
-import { Button, CardGroup } from 'reactstrap';
+import { Card, CardGroup } from 'reactstrap';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faClipboardList
+} from '@fortawesome/free-solid-svg-icons';
 import { ShelterDetailsTable } from "./ShelterDetails";
-import { Fab, Card } from '@material-ui/core';
-import AssignmentIcon from '@material-ui/icons/Assignment';
+
 
 const header_style = {
   textAlign: "center",
@@ -44,8 +47,8 @@ export function ShelterTable() {
   return (
     <div className="ml-2 mr-2">
       {data.shelters.map(shelter => (
-        <div className="mt-5">
-          <div className="card-header"> Shelter: {shelter.name} #{shelter.id}<Fab color="primary" href={"/shelter/" + shelter.id} className="mb-1" style={{width:23,height:23, minHeight:23}} title="Shelter Details" aria-label="details"><AssignmentIcon style={{fontSize:10}} /></Fab>
+        <div key={shelter.id} className="mt-5">
+          <div className="card-header"> Shelter: {shelter.name} #{shelter.id}<Link href={"/shelter/" + shelter.id}> <FontAwesomeIcon icon={faClipboardList} inverse/></Link>
           <div style={{width:23,height:23, minHeight:23}}> Address: {shelter.address} {shelter.apartment} {shelter.city} {shelter.state} {shelter.zip_code}</div></div>
         
           <CardGroup>
