@@ -26,7 +26,7 @@ export function ServiceRequestTable() {
     let source = axios.CancelToken.source();
     setData({service_requests: [], isFetching: true});
     // Fetch ServiceRequest data filtered searchTerm.
-    await axios.get('http://localhost:8000/hotline/api/servicerequests/?search=' + searchTerm + '&status=' + statusOptions.status, {
+    await axios.get('/hotline/api/servicerequests/?search=' + searchTerm + '&status=' + statusOptions.status, {
       cancelToken: source.token,
     })
     .then(response => {
