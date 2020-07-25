@@ -131,9 +131,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
-    "static",
-    "frontend/src/static"
+    "/home/shelterly/frontend/static/"
 ]
+STATIC_ROOT = "static"
 
 
 # REST
@@ -141,3 +141,20 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': ('knox.auth.TokenAuthentication',),
     'USER_SERIALIZER': 'accounts.serializers.UserSerializer',
 }
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler'
+        },
+    },
+    'loggers': {
+        '': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+    },
+}
+

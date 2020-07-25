@@ -68,7 +68,7 @@ export const AnimalForm = ({id}) => {
     if (id) {
       const fetchAnimalData = async () => {
         // Fetch Animal data.
-        await axios.get('http://localhost:3000/animals/api/animal/' + id + '/', {
+        await axios.get('/animals/api/animal/' + id + '/', {
           cancelToken: source.token,
         })
         .then(response => {
@@ -132,7 +132,7 @@ export const AnimalForm = ({id}) => {
         })}
         onSubmit={(values, { setSubmitting }) => {
           if (id) {
-            axios.put('http://localhost:3000/animals/api/animal/' + id + '/', values)
+            axios.put('/animals/api/animal/' + id + '/', values)
             .then(function() {
               // If the animal has an SR, redirect to the SR.
               if (values.request) {
@@ -151,7 +151,7 @@ export const AnimalForm = ({id}) => {
             });
           }
           else {
-            axios.post('http://localhost:3000/animals/api/animal/', values)
+            axios.post('/animals/api/animal/', values)
             .then(response => {
               if (addAnother) {
                 // If SR already exists, pass along the request ID.
