@@ -4,6 +4,7 @@ import { Link } from 'raviger';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Nav, Button } from 'react-bootstrap';
 import { faUserCircle , faClipboardList, faHome, faBullhorn, faPhone, faSignOutAlt} from '@fortawesome/free-solid-svg-icons';
+import { logoutUser} from ".././accounts/AccountsUtils";
 import logo from ".././static/images/shelterly.png"
 
 export const StyledMenu = styled(Nav)`
@@ -57,7 +58,7 @@ export const StyledMenu = styled(Nav)`
   }
 `;
 
-const Menu = ({ ...props }) => {
+const Menu = ({ dispatch, removeCookie, ...props }) => {
     
     return (
     <StyledMenu  {...props} className="flex-column">
@@ -67,19 +68,19 @@ const Menu = ({ ...props }) => {
       <Link href="/evac"><FontAwesomeIcon icon={faBullhorn} fixedWidth inverse/>  EVAC</Link>
       <Link href="/intake"><FontAwesomeIcon icon={faClipboardList} fixedWidth inverse/>  INTAKE</Link>
       <Link href="/shelter"><FontAwesomeIcon icon={faHome} fixedWidth inverse/> SHELTER</Link>
-      <Link href="/"><FontAwesomeIcon icon={faSignOutAlt} fixedWidth inverse/> SIGN OUT</Link>
+      <Link onClick={() => logoutUser({dispatch}, {removeCookie})} href="#"><FontAwesomeIcon icon={faSignOutAlt} fixedWidth inverse/> SIGN OUT</Link>
     </StyledMenu>
     )
   }
 
-function Sidebar({ ...props }) {
+function Sidebar({ dispatch, removeCookie, ...props }) {
     
     const node = useRef();
     const menuId = "main-menu";
 
     return (
         <div ref={node}>
-            <Menu id={menuId} />
+            <Menu id={menuId} dispatch={dispatch} removeCookie={removeCookie}/>
         </div>
     )
 }
