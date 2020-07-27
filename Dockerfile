@@ -23,7 +23,6 @@ RUN git clone https://github.com/trevorskaggs/shelterly.git . \
     && echo 'source ~/.bash-git-prompt/gitprompt.sh' >> ~/.bashrc \
     && echo 'source /home/shelterly/venv/bin/activate' >> ~/.bashrc \
     && . /home/shelterly/venv/bin/activate \
-    && git checkout uwsgi-stack \
     && cd frontend \
     && npm install \
     && npm run dev \
