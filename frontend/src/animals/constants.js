@@ -11,14 +11,28 @@ export const speciesChoices = [
   ]
 
 export const dogSizeChoices = [
-    {value:'small', label:"Small (< 20 lbs)"},
-    {value:'medium', label:"Medium (21 - 60 lbs)"},
-    {value:'large', label:"Large (61 - 110 lbs)"},
-    {value:'giant', label:"Giant (111+ lbs)"},
+    {value:'small', label:"Small"},
+    {value:'medium', label:"Medium"},
+    {value:'large', label:"Large"},
+    {value:'giant', label:"Giant"},
 ]
+
 export const catSizeChoices = [
-  {value:'small', label:'Small ( < 10 lbs)'},
-  {value:'full', label:'Full Size (10+ lbs)'},
+  {value:'small', label:'Small'},
+  {value:'full', label:'Full Size'},
+]
+
+export const horseSizeChoices = [
+  {value:'mini', label:'Mini'},
+  {value:'pony', label:'Pony'},
+  {value:'horse', label:'Horse'},
+  {value:'draft', label:'Draft'},
+]
+
+export const otherSizeChoices = [
+  {value:'small', label:'Small'},
+  {value:'medium', label:'Medium'},
+  {value:'large', label:'Large'},
 ]
 
 // Source: https://en.wikipedia.org/wiki/Coat_(dog)#Colors
@@ -28,7 +42,6 @@ export const dogColorChoices = [
   {value:'brindle', label:'Brindle'},
   {value:'brown', label:'Brown'},
   {value:'tan', label:'Tan'},
-  {value:'brindle', label:'Brindle'},
   {value:'cream', label:'Cream/Taupe'},
   {value:'gold', label:'Gold'},
   {value:'gray', label:'Gray'},
@@ -48,18 +61,52 @@ export const catColorChoices = [
   {value:'white', label:'White'},
 ]
 
+export const horseColorChoices = [
+  {value:'black', label:'Black'},
+  {value:'brown', label:'Brown'},
+  {value:'bay', label:'Bay'},
+  {value:'chestnut', label:'Chestnut'},
+  {value:'grey', label:'Grey'},
+  {value:'white', label:'White'},
+]
+
+export const otherColorChoices = [
+  {value:'black', label:'Black'},
+  {value:'blue', label:'Blue'},
+  {value:'brown', label:'Brown'},
+  {value:'tan', label:'Tan'},
+  {value:'white', label:'White'},
+  {value:'yellow', label:'Yellow'},
+  {value:'gray', label:'Gray'},
+  {value:'red', label:'Red'},
+  {value:'orange', label:'Orange'},
+  {value:'green', label:'Green'},
+]
+
 export const dogAgeChoices = [
-  {value:'youth', label:"Youth"},
+  {value:'youth', label:"Young"},
   {value:'adult', label:"Adult"},
   {value:'elderly', label:"Elderly"},
 ]
 
 export const catAgeChoices = [
   {value:'kitten', label:'Kitten'},
-  {value:'youth', label:'Youth'},
+  {value:'youth', label:'Young'},
   {value:'adult', label:'Adult'},
   {value:'elderly', label:'Elderly'},
   {value:'geriatric', label:'Geriatric'},
+]
+
+export const horseAgeChoices = [
+  {value:'young', label:"Young"},
+  {value:'adult', label:"Adult"},
+  {value:'elderly', label:"Elderly"},
+]
+
+export const otherAgeChoices = [
+  {value:'young', label:"Young"},
+  {value:'adult', label:"Adult"},
+  {value:'elderly', label:"Elderly"},
 ]
 
 export const unknownChoices = [

@@ -195,7 +195,7 @@ export const PersonForm = ({ id }) => {
                   name="phone"
                 />
                 <TextInput
-                xs="7"
+                  xs="7"
                   type="text"
                   label="Email"
                   name="email"
@@ -208,10 +208,10 @@ export const PersonForm = ({ id }) => {
                       id="drivers_license"
                     />
                   </Col> */}
-          </BootstrapForm.Row>
+            </BootstrapForm.Row>
             <BootstrapForm.Row>
                 <TextInput
-                xs="10"
+                  xs="10"
                   as="textarea"
                   label="Best Contact"
                   name="best_contact"
@@ -219,13 +219,13 @@ export const PersonForm = ({ id }) => {
             </BootstrapForm.Row>
             <BootstrapForm.Row hidden={!is_owner}>
                 <TextInput
-                xs="8"
+                  xs="8"
                   type="text"
                   label="Address"
                   name="address"
                 />
                 <TextInput
-                xs="2"
+                  xs="2"
                   type="text"
                   label="Apartment"
                   name="apartment"
@@ -233,7 +233,7 @@ export const PersonForm = ({ id }) => {
             </BootstrapForm.Row>
             <BootstrapForm.Row hidden={!is_owner}>
                 <TextInput
-                xs="auto"
+                  xs="6"
                   type="text"
                   label="City"
                   name="city"
@@ -248,7 +248,7 @@ export const PersonForm = ({ id }) => {
                 />
                 </Col>
                 <TextInput
-                xs="auto"
+                  xs="2"
                   type="text"
                   label="Zip Code"
                   name="zip_code"
@@ -257,8 +257,8 @@ export const PersonForm = ({ id }) => {
           </BootstrapForm>
           </Card.Body>
             <ButtonGroup size="lg" >
-              <Button type="button"  onClick={() => { setSkipOwner(true); props.submitForm() }}>Save</Button>
-              {!is_owner & !id ? <button type="button" className="btn btn-primary mr-1  border" onClick={() => { setSkipOwner(true); props.submitForm() }}>Skip Owner</button> : ""}
+              <Button type="button" onClick={() => { setSkipOwner(false); props.submitForm() }}>{!is_owner ? <span>{!id ? "Add Owner" : "Save"}</span> : <span>{!id ? "Add Animal(s)" : "Save"}</span>}</Button>
+              {!is_owner & !id ? <button type="button" className="btn btn-primary mr-1 border" onClick={() => { setSkipOwner(true); props.submitForm() }}>Add Animal(s)</button> : ""}
               <Button variant="secondary" type="button">Reset</Button>
               <Button as={Link} variant="info" href="/hotline">Back</Button>
             </ButtonGroup>

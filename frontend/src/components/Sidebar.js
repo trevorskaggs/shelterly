@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { Link } from 'raviger';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Nav, Button } from 'react-bootstrap';
-import { faUserCircle , faClipboardList, faHome, faBullhorn, faPhone, faSignOutAlt} from '@fortawesome/free-solid-svg-icons';
+import { faUserCircle , faRedo, faClipboardList, faHome, faBullhorn, faPhone, faSignOutAlt} from '@fortawesome/free-solid-svg-icons';
 import { logoutUser} from ".././accounts/AccountsUtils";
 import logo from ".././static/images/shelterly.png"
 
@@ -66,7 +66,7 @@ const Menu = ({ dispatch, removeCookie, ...props }) => {
     <div className="logo border-bottom">SHELTERLY</div>
       <Link href="/hotline" ><FontAwesomeIcon icon={faPhone} fixedWidth inverse/> HOTLINE</Link>
       <Link href="/evac"><FontAwesomeIcon icon={faBullhorn} fixedWidth inverse/>  EVAC</Link>
-      <Link href="/intake"><FontAwesomeIcon icon={faClipboardList} fixedWidth inverse/>  INTAKE</Link>
+      <Link href="/intake"><FontAwesomeIcon icon={faRedo} fixedWidth inverse/>  INTAKE</Link>
       <Link href="/shelter"><FontAwesomeIcon icon={faHome} fixedWidth inverse/> SHELTER</Link>
       <Link onClick={() => logoutUser({dispatch}, {removeCookie})} href="#"><FontAwesomeIcon icon={faSignOutAlt} fixedWidth inverse/> SIGN OUT</Link>
     </StyledMenu>
