@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { Link } from 'raviger';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Nav, Button } from 'react-bootstrap';
-import { faUserCircle , faClipboardList, faHome, faBullhorn, faPhone, faSignOutAlt} from '@fortawesome/free-solid-svg-icons';
+import { faUserCircle , faRedo, faClipboardList, faHome, faBullhorn, faPhone, faSignOutAlt} from '@fortawesome/free-solid-svg-icons';
 import { logoutUser} from ".././accounts/AccountsUtils";
 import logo from ".././static/images/shelterly.png"
 
