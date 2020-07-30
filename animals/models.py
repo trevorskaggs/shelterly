@@ -29,8 +29,7 @@ class Animal(models.Model):
     fixed = models.CharField(max_length=10, choices=UNKNOWN_CHOICES, default='unknown')
     aggressive = models.CharField(max_length=10, choices=UNKNOWN_CHOICES, default='unknown')
     confined = models.CharField(max_length=10, choices=UNKNOWN_CHOICES, default='unknown')
-    attended_to = models.CharField(max_length=10, choices=UNKNOWN_CHOICES, default='unknown')
-    collared = models.CharField(max_length=10, choices=UNKNOWN_CHOICES, default='unknown')
+    injured = models.CharField(max_length=10, choices=UNKNOWN_CHOICES, default='unknown')
 
     #text fields
     behavior_notes = models.TextField(blank=True, max_length=200)

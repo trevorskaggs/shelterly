@@ -65,7 +65,7 @@ export const PersonForm = ({ id }) => {
     if (id) {
       const fetchPersonData = async () => {
         // Fetch ServiceRequest data.
-        await axios.get('http://localhost:3000/people/api/person/' + id + '/', {
+        await axios.get('/people/api/person/' + id + '/', {
           cancelToken: source.token,
         })
           .then(response => {
@@ -113,57 +113,57 @@ export const PersonForm = ({ id }) => {
         })}
         onSubmit={(values, { setSubmitting }) => {
           if (id) {
-            axios.put('http://localhost:3000/people/api/person/' + id + '/', values)
-              .then(function () {
-                // If we have an SR ID, redirect back to the SR.
-                if (servicerequest_id) {
-                  navigate('/hotline/servicerequest/' + servicerequest_id);
-                }
-                // Else return to the Person details.
-                else if (is_owner) {
-                  navigate('/hotline/owner/' + id);
-                }
-                else {
-                  navigate('/hotline/reporter/' + id);
-                }
-              })
-              .catch(error => {
-                console.log(error.response);
-              });
+            axios.put('/people/api/person/' + id + '/', values)
+            .then(function() {
+              // If we have an SR ID, redirect back to the SR.
+              if (servicerequest_id) {
+                navigate('/hotline/servicerequest/' + servicerequest_id);
+              }
+              // Else return to the Person details.
+              else if (is_owner) {
+                navigate('/hotline/owner/' + id);
+              }
+              else {
+                navigate('/hotline/reporter/' + id);
+              }
+            })
+            .catch(error => {
+              console.log(error.response);
+            });
           }
           else {
-            axios.post('http://localhost:3000/people/api/person/', values)
-              .then(response => {
-                // If SR already exists, update it with owner info and redirect to the SR details.
-                if (servicerequest_id) {
-                  axios.patch('http://localhost:3000/hotline/api/servicerequests/' + servicerequest_id + '/', { owner: response.data.id })
-                    .then(function () {
-                      navigate('/hotline/servicerequest/' + servicerequest_id);
-                    })
-                    .catch(error => {
-                      console.log(error.response);
-                    });
-                }
-                // If we have a reporter ID, redirect to create a new Animal with owner + reporter IDs.
-                else if (reporter_id) {
-                  navigate('/animals/animal/new?owner_id=' + response.data.id + '&reporter_id=' + reporter_id);
-                }
-                // If we're creating an owner without a reporter ID, redirect to create new Animal with owner ID.
-                else if (is_owner) {
-                  navigate('/animals/animal/new?owner_id=' + response.data.id);
-                }
-                // If we're creating a reporter and choose to skip owner, redirect to create new Animal with reporter ID.
-                else if (skipOwner) {
-                  navigate('/animals/animal/new?reporter_id=' + response.data.id);
-                }
-                // Else create a reporter and redirect to create an owner.
-                else {
-                  navigate('/hotline/owner/new?reporter_id=' + response.data.id);
-                }
-              })
-              .catch(error => {
-                console.log(error.response);
-              });
+            axios.post('/people/api/person/', values)
+            .then(response => {
+              // If SR already exists, update it with owner info and redirect to the SR details.
+              if (servicerequest_id) {
+                axios.patch('/hotline/api/servicerequests/' + servicerequest_id + '/', {owner:response.data.id})
+                .then(function() {
+                  navigate('/hotline/servicerequest/' + servicerequest_id);
+                })
+                .catch(error => {
+                  console.log(error.response);
+                });
+              }
+              // If we have a reporter ID, redirect to create a new Animal with owner + reporter IDs.
+              else if (reporter_id) {
+                navigate('/animals/animal/new?owner_id=' + response.data.id + '&reporter_id=' + reporter_id);
+              }
+              // If we're creating an owner without a reporter ID, redirect to create new Animal with owner ID.
+              else if (is_owner) {
+                navigate('/animals/animal/new?owner_id=' + response.data.id);
+              }
+              // If we're creating a reporter and choose to skip owner, redirect to create new Animal with reporter ID.
+              else if (skipOwner) {
+                navigate('/animals/animal/new?reporter_id=' + response.data.id);
+              }
+              // Else create a reporter and redirect to create an owner.
+              else {
+                navigate('/hotline/owner/new?reporter_id=' + response.data.id);
+              }
+            })
+            .catch(error => {
+              console.log(error.response);
+            });
             setSubmitting(false);
           }
         }}
@@ -195,7 +195,7 @@ export const PersonForm = ({ id }) => {
                   name="phone"
                 />
                 <TextInput
-                xs="7"
+                  xs="7"
                   type="text"
                   label="Email"
                   name="email"
@@ -208,10 +208,10 @@ export const PersonForm = ({ id }) => {
                       id="drivers_license"
                     />
                   </Col> */}
-          </BootstrapForm.Row>
+            </BootstrapForm.Row>
             <BootstrapForm.Row>
                 <TextInput
-                xs="10"
+                  xs="10"
                   as="textarea"
                   label="Best Contact"
                   name="best_contact"
@@ -219,13 +219,13 @@ export const PersonForm = ({ id }) => {
             </BootstrapForm.Row>
             <BootstrapForm.Row hidden={!is_owner}>
                 <TextInput
-                xs="8"
+                  xs="8"
                   type="text"
                   label="Address"
                   name="address"
                 />
                 <TextInput
-                xs="2"
+                  xs="2"
                   type="text"
                   label="Apartment"
                   name="apartment"
@@ -233,7 +233,7 @@ export const PersonForm = ({ id }) => {
             </BootstrapForm.Row>
             <BootstrapForm.Row hidden={!is_owner}>
                 <TextInput
-                xs="auto"
+                  xs="6"
                   type="text"
                   label="City"
                   name="city"
@@ -248,7 +248,7 @@ export const PersonForm = ({ id }) => {
                 />
                 </Col>
                 <TextInput
-                xs="auto"
+                  xs="2"
                   type="text"
                   label="Zip Code"
                   name="zip_code"
@@ -257,8 +257,8 @@ export const PersonForm = ({ id }) => {
           </BootstrapForm>
           </Card.Body>
             <ButtonGroup size="lg" >
-              <Button type="button"  onClick={() => { setSkipOwner(true); props.submitForm() }}>Save</Button>
-              {!is_owner & !id ? <button type="button" className="btn btn-primary mr-1  border" onClick={() => { setSkipOwner(true); props.submitForm() }}>Skip Owner</button> : ""}
+              <Button type="button" onClick={() => { setSkipOwner(false); props.submitForm() }}>{!is_owner ? <span>{!id ? "Add Owner" : "Save"}</span> : <span>{!id ? "Add Animal(s)" : "Save"}</span>}</Button>
+              {!is_owner & !id ? <button type="button" className="btn btn-primary mr-1 border" onClick={() => { setSkipOwner(true); props.submitForm() }}>Add Animal(s)</button> : ""}
               <Button variant="secondary" type="button">Reset</Button>
               <Button as={Link} variant="info" href="/hotline">Back</Button>
             </ButtonGroup>
@@ -312,7 +312,7 @@ export function ServiceRequestForm({ id }) {
     if (id) {
       const fetchServiceRequestData = async () => {
         // Fetch ServiceRequest data.
-        await axios.get('http://localhost:3000/hotline/api/servicerequests/' + id + '/', {
+        await axios.get('/hotline/api/servicerequests/' + id + '/', {
           cancelToken: source.token,
         })
           .then(response => {
@@ -327,7 +327,7 @@ export function ServiceRequestForm({ id }) {
     else if (owner_id) {
       const fetchOwnerData = async () => {
         // Fetch Owner data.
-        await axios.get('http://localhost:3000/people/api/person/' + owner_id + '/', {
+        await axios.get('/people/api/person/' + owner_id + '/', {
           cancelToken: source.token,
         })
           .then(response => {
@@ -348,48 +348,48 @@ export function ServiceRequestForm({ id }) {
   }, [id, owner_id, data]);
 
   return (
-    <Formik
-      initialValues={data}
-      enableReinitialize={true}
-      validationSchema={Yup.object({
-        directions: Yup.string()
-          .required('Required')
-          .max(2000, 'Must be 2000 characters or less'),
-        verbal_permission: Yup.boolean(),
-        key_provided: Yup.boolean(),
-        accessible: Yup.boolean(),
-        turn_around: Yup.boolean(),
-        forced_entry: Yup.boolean(),
-        outcome: Yup.string()
-          .max(2000, 'Must be 2000 characters or less'),
-        owner_notification_notes: Yup.string()
-          .max(2000, 'Must be 2000 characters or less'),
-        recovery_time: Yup.date()
-          .nullable(),
-        owner_notification_tstamp: Yup.date()
-          .nullable(),
-        address: Yup.string(),
-        apartment: Yup.string()
-          .max(10, 'Must be 10 characters or less'),
-        city: Yup.string(),
-        state: Yup.string()
-          .nullable(),
-        zip_code: Yup.string()
-          .max(10, 'Must be 10 characters or less'),
-      })}
-      onSubmit={(values, { setSubmitting }) => {
-        if (id) {
-          axios.put('http://localhost:3000/hotline/api/servicerequests/' + id + '/', values)
-            .then(function () {
+      <Formik
+        initialValues={data}
+        enableReinitialize={true}
+        validationSchema={Yup.object({
+          directions: Yup.string()
+            .required('Required')
+            .max(2000, 'Must be 2000 characters or less'),
+          verbal_permission: Yup.boolean(),
+          key_provided: Yup.boolean(),
+          accessible: Yup.boolean(),
+          turn_around: Yup.boolean(),
+          forced_entry: Yup.boolean(),
+          outcome: Yup.string()
+            .max(2000, 'Must be 2000 characters or less'),
+          owner_notification_notes: Yup.string()
+            .max(2000, 'Must be 2000 characters or less'),
+          recovery_time: Yup.date()
+            .nullable(),
+          owner_notification_tstamp: Yup.date()
+            .nullable(),
+          address: Yup.string(),
+          apartment: Yup.string()
+            .max(10, 'Must be 10 characters or less'),
+          city: Yup.string(),
+          state: Yup.string()
+            .nullable(),
+          zip_code: Yup.string()
+            .max(10, 'Must be 10 characters or less'),
+        })}
+        onSubmit={(values, { setSubmitting }) => {
+          if (id) {
+            axios.put('/hotline/api/servicerequests/' + id + '/', values)
+            .then(function() {
               navigate('/hotline/servicerequest/' + id);
             })
             .catch(error => {
               console.log(error.response);
             });
-          setSubmitting(false);
-        }
-        else {
-          axios.post('http://localhost:3000/hotline/api/servicerequests/', values)
+            setSubmitting(false);
+          }
+          else {
+            axios.post('/hotline/api/servicerequests/', values)
             .then(response => {
               navigate('/hotline/servicerequest/' + response.data.id);
             })

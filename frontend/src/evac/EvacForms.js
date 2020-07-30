@@ -21,7 +21,7 @@ export function EvacTeamForm() {
     const fetchTeamMembers = async () => {
       setData({options: data.options, isFetching: true});
       // Fetch TeamMember data.
-      await axios.get('http://localhost:3000/accounts/api/user/', {
+      await axios.get('/accounts/api/user/', {
         cancelToken: source.token,
       })
       .then(response => {
@@ -61,7 +61,7 @@ export function EvacTeamForm() {
         })}
         onSubmit={(values, { setSubmitting }) => {
           setTimeout(() => {
-            axios.post('http://localhost:3000/evac/api/evacteam/', values)
+            axios.post('/evac/api/evacteam/', values)
             .then(function() {
               navigate('/evac');
             })
@@ -119,7 +119,7 @@ export const TeamMemberForm = () => {
           })}
           onSubmit={(values, { setSubmitting }) => {
             setTimeout(() => {
-              axios.post('http://localhost:3000/accounts/api/user/', values)
+              axios.post('/accounts/api/user/', values)
               .then(function() {
                 navigate('/evac');
               })

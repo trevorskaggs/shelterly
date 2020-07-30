@@ -12,14 +12,14 @@ afterEach(() => {
   mockAxios.reset();
 });
 
-it("Render evac home", () => {
-  const { container, getByText, getByLabelText, findByLabelText } = render(<Evac />)
-  expect(getByText(/CREATE NEW EVAC TEAM/)).toBeTruthy()
-  expect(getByText(/EVAC TEAM LIST/)).toBeTruthy()
-  expect(getByText(/DEPLOY EVAC TEAM/)).toBeTruthy()
-  expect(getByText(/EVAC TEAM DEBRIEF/)).toBeTruthy()
-  expect(getByText(/BACK/)).toBeTruthy()
-});
+// it("Render evac home", () => {
+//   const { container, getByText, getByLabelText, findByLabelText } = render(<Evac />)
+//   expect(getByText(/CREATE NEW EVAC TEAM/)).toBeTruthy()
+//   expect(getByText(/EVAC TEAM LIST/)).toBeTruthy()
+//   expect(getByText(/DEPLOY EVAC TEAM/)).toBeTruthy()
+//   expect(getByText(/EVAC TEAM DEBRIEF/)).toBeTruthy()
+//   expect(getByText(/BACK/)).toBeTruthy()
+// });
 
 it("Render evac team list", async () => {
   const CancelToken = mockAxios.CancelToken;
