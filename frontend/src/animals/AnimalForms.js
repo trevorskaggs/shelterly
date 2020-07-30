@@ -21,7 +21,11 @@ export const AnimalForm = ({id}) => {
     owner_id = null,
     servicerequest_id = null,
     reporter_id = null,
+    first_responder = 'false'
   } = queryParams;
+
+  // Determine if this is from a first responder when creating a SR.
+  var is_first_responder = (first_responder == 'true');
 
   // Track species selected and update choice lists accordingly.
   const sizeRef = useRef(null);
@@ -171,7 +175,7 @@ export const AnimalForm = ({id}) => {
                 }
                 // Else redirect to create a new SR.
                 else {
-                  navigate('/hotline/servicerequest/new?owner_id=' + (response.data.owner||'') + '&reporter_id=' + (reporter_id||''));
+                  navigate('/hotline/servicerequest/new?owner_id=' + (response.data.owner||'') + '&reporter_id=' + (reporter_id||'') + '&first_responder=' + is_first_responder);
                 }
               }
             })

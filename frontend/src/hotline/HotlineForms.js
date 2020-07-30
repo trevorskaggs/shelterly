@@ -29,6 +29,9 @@ export const PersonForm = ({ id }) => {
   // Determine if this is an owner or reporter when creating a Person.
   var is_owner = window.location.pathname.includes("owner")
 
+  // Determine if this is a first responder when creating a Person.
+  var is_first_responder = window.location.pathname.includes("first_responder")
+
   // Regex validators.
   const phoneRegex = /^((\+\d{1,3}(-| )?\(?\d\)?(-| )?\d{1,3})|(\(?\d{2,3}\)?))(-| )?(\d{3,4})(-| )?(\d{4})(( x| ext)\d{1,5}){0,1}$/
   const nameRegex = /^[a-z ,.'-]+$/i
@@ -41,7 +44,9 @@ export const PersonForm = ({ id }) => {
     phone: '',
     email: '',
     best_contact: '',
-    drivers_license: '',
+    showAgency: is_first_responder,
+    agency: '',
+    // drivers_license: '',
     address: '',
     apartment: '',
     city: '',
@@ -102,6 +107,10 @@ export const PersonForm = ({ id }) => {
             .max(200, 'Must be 200 characters or less')
             .matches(emailRegex, "Email is not valid"),
           best_contact: Yup.string(),
+          showAgency: Yup.boolean(),
+          agency: Yup.string().when('showAgency', {
+              is: true,
+              then: Yup.string().required('Required')}),
           // drivers_license: Yup.string(),
           address: Yup.string(),
           apartment: Yup.string()
@@ -154,7 +163,7 @@ export const PersonForm = ({ id }) => {
               }
               // If we're creating a reporter and choose to skip owner, redirect to create new Animal with reporter ID.
               else if (skipOwner) {
-                navigate('/animals/animal/new?reporter_id=' + response.data.id);
+                navigate('/animals/animal/new?reporter_id=' + response.data.id + '&first_responder=' + is_first_responder);
               }
               // Else create a reporter and redirect to create an owner.
               else {
@@ -187,7 +196,7 @@ export const PersonForm = ({ id }) => {
                   name="last_name"
                 />
             </BootstrapForm.Row>
-            <BootstrapForm.Row>
+            <BootstrapForm.Row  hidden={is_first_responder}>
                 <TextInput
                   xs="3"
                   type="text"
@@ -209,13 +218,21 @@ export const PersonForm = ({ id }) => {
                     />
                   </Col> */}
             </BootstrapForm.Row>
-            <BootstrapForm.Row>
-                <TextInput
-                  xs="10"
-                  as="textarea"
-                  label="Best Contact"
-                  name="best_contact"
-                />
+            <BootstrapForm.Row hidden={is_first_responder}>
+              <TextInput
+                xs="10"
+                as="textarea"
+                label="Best Contact"
+                name="best_contact"
+              />
+            </BootstrapForm.Row>
+            <BootstrapForm.Row hidden={!is_first_responder}>
+              <TextInput
+                xs="10"
+                as="textarea"
+                label= "Agency*"
+                name="agency"
+              />
             </BootstrapForm.Row>
             <BootstrapForm.Row hidden={!is_owner}>
                 <TextInput
@@ -257,8 +274,8 @@ export const PersonForm = ({ id }) => {
           </BootstrapForm>
           </Card.Body>
             <ButtonGroup size="lg" >
-              <Button type="button" onClick={() => { setSkipOwner(false); props.submitForm() }}>{!is_owner ? <span>{!id ? "Add Owner" : "Save"}</span> : <span>{!id ? "Add Animal(s)" : "Save"}</span>}</Button>
-              {!is_owner & !id ? <button type="button" className="btn btn-primary mr-1 border" onClick={() => { setSkipOwner(true); props.submitForm() }}>Add Animal(s)</button> : ""}
+              {!is_first_responder ? <Button type="button" onClick={() => { setSkipOwner(false); props.submitForm() }}>{!is_owner ? <span>{!id ? "Add Owner" : "Save"}</span> : <span>{!id ? "Add Animal(s)" : "Save"}</span>}</Button> : ""}
+              {!is_owner && !id ? <button type="button" className="btn btn-primary mr-1 border" onClick={() => { setSkipOwner(true); props.submitForm() }}>Add Animal(s)</button> : ""}
               <Button variant="secondary" type="button">Reset</Button>
               <Button as={Link} variant="info" href="/hotline">Back</Button>
             </ButtonGroup>
@@ -276,8 +293,12 @@ export function ServiceRequestForm({ id }) {
   const [queryParams] = useQueryParams();
   const {
     owner_id = null,
-    reporter_id = null
+    reporter_id = null,
+    first_responder = 'false'
   } = queryParams;
+
+  // Determine if this is from a first responder when creating a SR.
+  var is_first_responder = (first_responder == 'true');
 
   // Track checkbox state with Fade.
   const [fadeIn, setFadeIn] = useState(true);
@@ -461,7 +482,7 @@ export function ServiceRequestForm({ id }) {
                 <Col xs="8">
                   <TextInput
                     type="text"
-                    label="Address"
+                    label={!is_first_responder ? "Address" : "Address/Cross Streets"}
                     name="address"
                     id="address"
                   />
@@ -515,12 +536,12 @@ export function ServiceRequestForm({ id }) {
               </Col>
             </BootstrapForm.Row>
             <BootstrapForm.Row>
-              <Col>
-                <Label htmlFor="verbal_permission">Verbal Permission</Label>
+              <Col className="ml-3">
+                <span hidden={is_first_responder}><Label htmlFor="verbal_permission">Verbal Permission</Label>
                 <Field component={Switch} name="verbal_permission" type="checkbox" color="primary"/>
 
                 <Label htmlFor="key_provided">Key Provided</Label>
-                <Field component={Switch} name="key_provided" type="checkbox" color="primary" />
+                <Field component={Switch} name="key_provided" type="checkbox" color="primary" /></span>
 
                 <Label htmlFor="accessible">Accessible</Label>
                 <Field component={Switch} name="accessible" type="checkbox" color="primary" />
