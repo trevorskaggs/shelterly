@@ -196,7 +196,7 @@ export const PersonForm = ({ id }) => {
                   name="last_name"
                 />
             </BootstrapForm.Row>
-            <BootstrapForm.Row  hidden={is_first_responder}>
+            <BootstrapForm.Row hidden={is_first_responder}>
                 <TextInput
                   xs="3"
                   type="text"
@@ -218,7 +218,7 @@ export const PersonForm = ({ id }) => {
                     />
                   </Col> */}
             </BootstrapForm.Row>
-            <BootstrapForm.Row hidden={is_first_responder}>
+            <BootstrapForm.Row hidden={is_first_responder || data.agency}>
               <TextInput
                 xs="10"
                 as="textarea"
@@ -226,11 +226,11 @@ export const PersonForm = ({ id }) => {
                 name="best_contact"
               />
             </BootstrapForm.Row>
-            <BootstrapForm.Row hidden={!is_first_responder}>
+            <BootstrapForm.Row hidden={!is_first_responder && !data.agency}>
               <TextInput
                 xs="10"
                 as="textarea"
-                label= "Agency*"
+                label="Agency*"
                 name="agency"
               />
             </BootstrapForm.Row>

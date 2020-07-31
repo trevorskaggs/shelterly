@@ -164,7 +164,7 @@ export const AnimalForm = ({id}) => {
                 }
                 // Else pass along the owner and reporter IDs used for SR creation downstream.
                 else {
-                  navigate('/animals/animal/new?owner_id=' + (response.data.owner||'') + '&reporter_id=' + (reporter_id||''));
+                  navigate('/animals/animal/new?owner_id=' + (response.data.owner||'') + '&reporter_id=' + (reporter_id||'') + '&first_responder=' + is_first_responder);
                   setKey(Math.random());
                 }
               }
