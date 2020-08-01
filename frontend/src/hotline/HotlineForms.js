@@ -422,89 +422,91 @@ export function ServiceRequestForm({ id }) {
       }}
     >
       {props => (
-        <Card border="secondary" className="mt-5">
+        <Card border="secondary" className="mt-5" style={{width:"auto"}}>
         <Card.Header as="h5">Service Request Form</Card.Header>
         <Card.Body>
         <BootstrapForm as={Form}>
           <Field type="hidden" value={owner_id || ""} name="owner" id="owner"></Field>
           <Field type="hidden" value={reporter_id || ""} name="reporter" id="reporter"></Field>
           <BootstrapForm.Row hidden={!id}>
-                <TextInput
-                  as="textarea"
-                  rows={5}
-                  label="Outcome"
-                  name="outcome"
-                  id="outcome"
-                />
+            <TextInput
+              as="textarea"
+              rows={5}
+              label="Outcome"
+              name="outcome"
+              id="outcome"
+              xs="10"
+            />
             </BootstrapForm.Row>
             <BootstrapForm.Row hidden={!id}>
-                <TextInput
-                  as="textarea"
-                  rows={5}
-                  label="Owner Notification Notes"
-                  name="owner_notification_notes"
-                  id="owner_notification_notes"
-                />
+              <TextInput
+                as="textarea"
+                rows={5}
+                label="Owner Notification Notes"
+                name="owner_notification_notes"
+                id="owner_notification_notes"
+                xs="10"
+              />
             </BootstrapForm.Row>
-            <BootstrapForm.Row hidden={!id} className="mt-1">
-              <Label htmlFor="forced_entry" className="mt-3 ml-3">Forced Entry</Label>
-              <Field component={Switch} name="forced_entry" type="checkbox" color="primary" className="mt-2" />
+            <BootstrapForm.Row hidden={!id} className="mb-2">
+              <Label htmlFor="forced_entry" className="mt-2 ml-1">Forced Entry</Label>
+              <Field component={Switch} name="forced_entry" type="checkbox" color="primary" />
             </BootstrapForm.Row>
             <BootstrapForm.Row hidden={!id}>
                 <DateTimePicker
                   label="Recovery Time"
                   name="recovery_time"
                   id="recovery_time"
+                  xs="3"
                   onChange={(date, dateStr) => {
                     props.setFieldValue("recovery_time", dateStr)
                   }}
                   value={data.recovery_time || null}
                 />
+            </BootstrapForm.Row>
+            <BootstrapForm.Row hidden={!id}>
                 <DateTimePicker
                   label="Owner Notified"
                   name="owner_notification_tstamp"
                   id="owner_notification_tstamp"
+                  xs="3"
                   onChange={(date, dateStr) => {
                     props.setFieldValue("owner_notification_tstamp", dateStr)
                   }}
                   value={data.owner_notification_tstamp || null}
                 />
             </BootstrapForm.Row>
-          {data.address ?
-            <span className="form-row">
+          {data.address && !id ?
+            <span className="form-row ml-3">
               <Label>Address Same as Owner: </Label>
               <CustomInput id="same_address" type="checkbox" className="ml-2" checked={!fadeIn} onChange={handleChange} />
             </span> : ""
           }
-          <FormGroup>
             <Fade in={fadeIn} hidden={!fadeIn}>
               <BootstrapForm.Row>
-                <Col xs="8">
                   <TextInput
                     type="text"
                     label={!is_first_responder ? "Address" : "Address/Cross Streets"}
                     name="address"
                     id="address"
+                    xs="8"
                   />
-                </Col>
-                <Col xs="2">
                   <TextInput
                     type="text"
                     label="Apartment"
                     name="apartment"
                     id="apartment"
+                    xs="2"
                   />
-                </Col>
               </BootstrapForm.Row>
               <BootstrapForm.Row>
-                <Col xs="6">
-                  <TextInput
-                    type="text"
-                    label="City"
-                    name="city"
-                    id="city"
-                  />
-                </Col>
+                <TextInput
+                  type="text"
+                  label="City"
+                  name="city"
+                  id="city"
+                  xs="6"
+                />
                 <Col xs="2">
                   <DropDown
                     label="State"
@@ -514,44 +516,38 @@ export function ServiceRequestForm({ id }) {
                     value={props.values.state || ''}
                   />
                 </Col>
-                <Col xs="2">
                   <TextInput
                     type="text"
                     label="Zip Code"
                     name="zip_code"
                     id="zip_code"
+                    xs="2"
                   />
-                </Col>
               </BootstrapForm.Row>
             </Fade>
             <BootstrapForm.Row>
-              <Col xs="10">
                 <TextInput
                   as="textarea"
                   rows={5}
                   label="Directions*"
                   name="directions"
                   id="directions"
+                  xs="10"
                 />
-              </Col>
             </BootstrapForm.Row>
             <BootstrapForm.Row>
-              <Col className="ml-3">
                 <span hidden={is_first_responder}><Label htmlFor="verbal_permission">Verbal Permission</Label>
                 <Field component={Switch} name="verbal_permission" type="checkbox" color="primary"/>
 
                 <Label htmlFor="key_provided">Key Provided</Label>
                 <Field component={Switch} name="key_provided" type="checkbox" color="primary" /></span>
 
-                <Label htmlFor="accessible">Accessible</Label>
+                <span><Label htmlFor="accessible">Accessible</Label>
                 <Field component={Switch} name="accessible" type="checkbox" color="primary" />
 
                 <Label htmlFor="turn_around">Turn Around</Label>
-                <Field component={Switch} name="turn_around" type="checkbox" color="primary" />
-              </Col>
+                <Field component={Switch} name="turn_around" type="checkbox" color="primary" /></span>
             </BootstrapForm.Row>
-          </FormGroup>
-
 
         </BootstrapForm>
         </Card.Body>
