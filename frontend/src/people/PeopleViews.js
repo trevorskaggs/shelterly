@@ -35,6 +35,7 @@ export function PersonView({id}) {
     phone: '',
     email: '',
     best_contact: '',
+    agency: '',
     drivers_license: '',
     address: '',
     apartment: '',
@@ -75,6 +76,8 @@ export function PersonView({id}) {
             <ListGroup.Item>Email: {data.email ? data.email : 'N/A'}</ListGroup.Item>
             {data.best_contact ? 
               <ListGroup.Item>Best Contact: {data.best_contact}</ListGroup.Item>: ''}
+            {data.agency ? 
+              <ListGroup.Item>Agency: {data.agency}</ListGroup.Item>: ''}
             <ListGroup.Item>Address: {data.address ? data.full_address: 'N/A'}</ListGroup.Item>
           </ListGroup>
         <Card.Footer>

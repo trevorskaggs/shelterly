@@ -21,6 +21,7 @@ const routes = {
   "/evac/evacteam/new": () => <EvacTeamForm />,
   "/evac/evacteam/list": () => <EvacTeamTable />,
   "/hotline": () => <Hotline />,
+  "/hotline/first_responder/new": () => <NewReporter />,
   "/hotline/owner/edit/:id": ({id}) => <UpdateOwner id={id}/>,
   "/hotline/owner/new": () => <NewOwner />,
   "/hotline/owner/:id": ({id}) => <OwnerDetail id={id}/>,
