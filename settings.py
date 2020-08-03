@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
+    'django.contrib.gis',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
@@ -103,7 +104,7 @@ WSGI_APPLICATION = 'wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
         'NAME': os.environ.get('DATABASE_NAME', get_secret('DATABASE_NAME')),
         'USER': os.environ.get('DATABASE_USER', get_secret('DATABASE_USER')),
         'PASSWORD': os.environ.get('DATABASE_PASSWORD', get_secret('DATABASE_PASSWORD')),
@@ -144,3 +145,4 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': ('knox.auth.TokenAuthentication',),
     'USER_SERIALIZER': 'accounts.serializers.UserSerializer',
 }
+GDAL_LIBRARY_PATH = os.environ.get('GDAL_LIBRARY_PATH')
