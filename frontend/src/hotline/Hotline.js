@@ -24,6 +24,9 @@ const Hotline = () => (
     <Link href="/hotline/reporter/new">
     <ListGroup.Item action>NON-OWNER CALLING</ListGroup.Item>
     </Link>
+    <Link href="/hotline/first_responder/new">
+    <ListGroup.Item action>FIRST RESPONDER CALLIING</ListGroup.Item>
+    </Link>
     <Link href="/hotline/servicerequest/list">
     <ListGroup.Item action>SEARCH SERVICE REQUEST</ListGroup.Item>
     </Link>

@@ -35,6 +35,7 @@ export function PersonView({id}) {
     phone: '',
     email: '',
     best_contact: '',
+    agency: '',
     drivers_license: '',
     address: '',
     apartment: '',
@@ -75,6 +76,8 @@ export function PersonView({id}) {
             <ListGroup.Item>Email: {data.email ? data.email : 'N/A'}</ListGroup.Item>
             {data.best_contact ? 
               <ListGroup.Item>Best Contact: {data.best_contact}</ListGroup.Item>: ''}
+            {data.agency ? 
+              <ListGroup.Item>Agency: {data.agency}</ListGroup.Item>: ''}
             <ListGroup.Item>Address: {data.address ? data.full_address: 'N/A'}</ListGroup.Item>
           </ListGroup>
         <Card.Footer>
@@ -133,7 +136,7 @@ export function ServiceRequestView({id}) {
       <div style={card_style} className="card card-body bg-light mb-2 mx-auto">
         <div className="row">
           <div className="col-8">
-            <p className="mb-2"><b>Owner:</b> {data.owner ? <span>{data.owner_object.first_name} {data.owner_object.last_name} {data.owner_object.first_name === 'Unknown' ? "":<Link href={"/hotline/owner/" + data.owner}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>}<Link href={"/hotline/owner/edit/" + data.owner}> <FontAwesomeIcon icon={faEdit} inverse /></Link></span>:""}</p>
+            <p className="mb-3"><b>Owner:</b> {data.owner ? <span>{data.owner_object.first_name} {data.owner_object.last_name} {data.owner_object.first_name === 'Unknown' ? "":<Link href={"/hotline/owner/" + data.owner}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>}<Link href={"/hotline/owner/edit/" + data.owner}> <FontAwesomeIcon icon={faEdit} inverse /></Link></span>:""}</p>
             <p className="mb-3"><b>Reporter:</b> {data.reporter ? <span>{data.reporter_object.first_name} {data.reporter_object.last_name} <Link href={"/hotline/reporter/" + data.reporter}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link><Link href={"/hotline/reporter/edit/" + data.reporter}> <FontAwesomeIcon icon={faEdit} inverse /></Link></span> : 'N/A'}</p>
             <p><b>Address:</b> {data.address ? <span>{data.full_address}</span> : 'N/A'}</p>
             <p><b>Directions:</b> {data.directions}</p>
