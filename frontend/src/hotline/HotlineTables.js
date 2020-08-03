@@ -47,7 +47,7 @@ export function ServiceRequestTable() {
     const fetchServiceRequests = async () => {
       setData({service_requests: [], isFetching: true});
       // Fetch ServiceRequest data.
-      await axios.get('http://localhost:8000/hotline/api/servicerequests/?search=' + searchTerm + '&status=' + statusOptions.status, {
+      await axios.get('http://localhost:8000/hotline/api/servicerequests/', {
         cancelToken: source.token,
       })
       .then(response => {
