@@ -1,15 +1,13 @@
 import React from "react";
 import { Link } from 'raviger';
-import { Row, ListGroup } from 'react-bootstrap'
-import { PersonForm, ServiceRequestForm } from "./HotlineForms";
+import { ListGroup } from 'react-bootstrap'
+import { ServiceRequestForm } from "./HotlineForms";
 import { ServiceRequestTable } from "./HotlineTables"
-import { PersonView, ServiceRequestView } from "./HotlineViews";
-
+import { ServiceRequestView } from "./HotlineViews";
 
 const header_style = {
   textAlign: "center",
 };
-
 
 const btn_style = {
   width: "50%",
@@ -28,37 +26,6 @@ const Hotline = () => (
     <ListGroup.Item action>SEARCH SERVICE REQUEST</ListGroup.Item>
     </Link>
   </ListGroup>
-)
-
-export const NewOwner = () => (
-  <div>
-    <PersonForm />
-  </div>
-)
-
-export const UpdateOwner = ({id}) => (
-    <PersonForm id={id} />
-)
-
-export const NewReporter = () => (
-    <PersonForm />
-)
-
-export const UpdateReporter = ({id}) => (
-  <div>
-    <h1 style={header_style}>Reporter Information</h1>
-    <PersonForm id={id} />
-  </div>
-)
-
-export const OwnerDetail = ({id}) => (
-    <PersonView id={id} />
-)
-
-export const ReporterDetail = ({id}) => (
-  <div>
-    <PersonView id={id} />
-  </div>
 )
 
 export const ServiceRequestList = () => (
