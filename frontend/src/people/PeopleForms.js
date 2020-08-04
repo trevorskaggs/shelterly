@@ -29,6 +29,9 @@ export const PersonForm = ({ id }) => {
   // Determine if this is an owner or reporter when creating a Person.
   var is_owner = window.location.pathname.includes("owner")
 
+  // Determine if this is an intake workflow.
+  var is_intake = window.location.pathname.includes("intake")
+
   // Determine if this is a first responder when creating a Person.
   var is_first_responder = window.location.pathname.includes("first_responder")
 
@@ -155,15 +158,24 @@ export const PersonForm = ({ id }) => {
               }
               // If we have a reporter ID, redirect to create a new Animal with owner + reporter IDs.
               else if (reporter_id) {
-                navigate('/animals/animal/new?owner_id=' + response.data.id + '&reporter_id=' + reporter_id);
+                navigate('/hotline/animal/new?owner_id=' + response.data.id + '&reporter_id=' + reporter_id);
+              }
+              // If we're creating a person for intake, redirect to create new intake Animal with proper ID.
+              else if (is_intake) {
+                if (is_owner) {
+                  navigate('/intake/animal/new?owner_id=' + response.data.id);
+                }
+                else {
+                  navigate('/intake/animal/new?reporter_id=' + response.data.id);
+                }
               }
               // If we're creating an owner without a reporter ID, redirect to create new Animal with owner ID.
               else if (is_owner) {
-                navigate('/animals/animal/new?owner_id=' + response.data.id);
+                navigate('/hotline/animal/new?owner_id=' + response.data.id);
               }
               // If we're creating a reporter and choose to skip owner, redirect to create new Animal with reporter ID.
               else if (skipOwner) {
-                navigate('/animals/animal/new?reporter_id=' + response.data.id + '&first_responder=' + is_first_responder);
+                navigate('/hotline/animal/new?reporter_id=' + response.data.id + '&first_responder=' + is_first_responder);
               }
               // Else create a reporter and redirect to create an owner.
               else {
@@ -274,7 +286,7 @@ export const PersonForm = ({ id }) => {
           </BootstrapForm>
           </Card.Body>
             <ButtonGroup size="lg" >
-              {!is_first_responder ? <Button type="button" onClick={() => { setSkipOwner(false); props.submitForm() }}>{!is_owner ? <span>{!id ? "Add Owner" : "Save"}</span> : <span>{!id ? "Add Animal(s)" : "Save"}</span>}</Button> : ""}
+              {!is_first_responder && !is_intake ? <Button type="button" onClick={() => { setSkipOwner(false); props.submitForm() }}>{!is_owner ? <span>{!id ? "Add Owner" : "Save"}</span> : <span>{!id ? "Add Animal(s)" : "Save"}</span>}</Button> : ""}
               {!is_owner && !id ? <button type="button" className="btn btn-primary mr-1 border" onClick={() => { setSkipOwner(true); props.submitForm() }}>Add Animal(s)</button> : ""}
               <Button variant="secondary" type="button">Reset</Button>
               <Button as={Link} variant="info" href="/hotline">Back</Button>

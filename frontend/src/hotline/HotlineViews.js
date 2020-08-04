@@ -101,7 +101,7 @@ export function ServiceRequestView({id}) {
       </div> : ""}
       {data.animals && data.animals.length ?
       <div style={card_style} className="card card-body bg-light mx-auto">
-        <p><b>Animals:</b> <Link href={"/animals/animal/new?servicerequest_id=" + id}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link></p>
+        <p><b>Animals:</b> <Link href={"/hotline/animal/new?servicerequest_id=" + id}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link></p>
          <span>
           {data.animals.map(animal => (
             <li key={animal.id}>{animal.name} (<span style={{textTransform:"capitalize"}}>{animal.species}</span>) - {animal.status}
@@ -113,7 +113,7 @@ export function ServiceRequestView({id}) {
       </div> : ""}
       <hr/>
       <div style={btn_style}>
-        <Link href={"/animals/animal/new?servicerequest_id=" + id} style={link_style} className="btn btn-success btn-lg btn-block mb-2">ADD ANIMAL</Link>
+        <Link href={"/hotline/animal/new?servicerequest_id=" + id} style={link_style} className="btn btn-success btn-lg btn-block mb-2">ADD ANIMAL</Link>
         <br/>
         <Link href={"/hotline/servicerequest/edit/" + id} style={link_style} className="btn btn-primary btn-lg btn-block mb-2">UPDATE REQUEST</Link>
         <br/>

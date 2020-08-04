@@ -16,6 +16,9 @@ const header_style = {
 
 export const AnimalForm = ({id}) => {
 
+  // Determine if this is an intake workflow.
+  var is_intake = window.location.pathname.includes("intake")
+
   // Identify any query param data.
   const [queryParams] = useQueryParams();
   const {
@@ -158,11 +161,18 @@ export const AnimalForm = ({id}) => {
               if (addAnother) {
                 // If SR already exists, pass along the request ID.
                 if (servicerequest_id) {
-                  navigate('/animals/animal/new?servicerequest_id=' + servicerequest_id)
+                  navigate('/hotline/animal/new?servicerequest_id=' + servicerequest_id)
+                }
+                // Stay inside intake workflow if applicable.
+                else if (is_intake) {
+                  navigate('/intake/animal/new?owner_id=' + (response.data.owner||'') + '&reporter_id=' + (reporter_id||''));
+                  // This is a hack used to refresh when navigating to the same page.
+                  setKey(Math.random());
                 }
                 // Else pass along the owner and reporter IDs used for SR creation downstream.
                 else {
-                  navigate('/animals/animal/new?owner_id=' + (response.data.owner||'') + '&reporter_id=' + (reporter_id||'') + '&first_responder=' + is_first_responder);
+                  navigate('/hotline/animal/new?owner_id=' + (response.data.owner||'') + '&reporter_id=' + (reporter_id||'') + '&first_responder=' + is_first_responder);
+                  // This is a hack used to refresh when navigating to the same page.
                   setKey(Math.random());
                 }
               }
@@ -170,6 +180,10 @@ export const AnimalForm = ({id}) => {
                 // If SR already exists, redirect to the SR details.
                 if (servicerequest_id) {
                   navigate('/hotline/servicerequest/' + servicerequest_id);
+                }
+                // If in intake workflow, redirect to Intake Summary
+                else if (is_intake) {
+                  navigate('/intake/summary/');
                 }
                 // Else redirect to create a new SR.
                 else {
