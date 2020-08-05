@@ -286,8 +286,10 @@ export const PersonForm = ({ id }) => {
           </BootstrapForm>
           </Card.Body>
             <ButtonGroup size="lg" >
-              {!is_first_responder && !is_intake ? <Button type="button" onClick={() => { setSkipOwner(false); props.submitForm() }}>{!is_owner ? <span>{!id ? "Add Owner" : "Save"}</span> : <span>{!id ? "Add Animal(s)" : "Save"}</span>}</Button> : ""}
-              {!is_owner && !id ? <button type="button" className="btn btn-primary mr-1 border" onClick={() => { setSkipOwner(true); props.submitForm() }}>Add Animal(s)</button> : ""}
+              {/* form save buttons */}
+              {!is_first_responder ? <Button type="button" onClick={() => { setSkipOwner(false); props.submitForm() }}>{!is_owner && !is_intake ? <span>{!id ? "Add Owner" : "Save"}</span> : <span>{!id ? "Add Animal(s)" : "Save"}</span>}</Button> : ""}
+              {/* reporter form save buttons to skip owner */}
+              {!is_owner && !id && !is_intake ? <button type="button" className="btn btn-primary mr-1 border" onClick={() => { setSkipOwner(true); props.submitForm() }}>Add Animal(s)</button> : ""}
               <Button variant="secondary" type="button">Reset</Button>
               <Button as={Link} variant="info" href="/hotline">Back</Button>
             </ButtonGroup>
