@@ -26,7 +26,6 @@ class Location(models.Model):
     longitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
 
     def save(self, *args, **kwargs):
-        self.set_lat_lon()
         super(Location, self).save(*args, **kwargs)
 
     def set_lat_lon(self):
@@ -35,6 +34,7 @@ class Location(models.Model):
             g = geocoder.here(query_string, app_id=settings.HERE_APP_ID, app_code=settings.HERE_APP_CODE)
             self.latitude = g.json['lat']
             self.longitude = g.json['lng']
+            self.save()
         except:
             pass
 

@@ -19,7 +19,7 @@ import styled from 'styled-components';
       TEAM LIST
       </ListGroup.Item>
       </Link>
-      <Link href="">
+      <Link href="/evac/dispatch">
       <ListGroup.Item action>
       DEPLOY
       </ListGroup.Item>
