@@ -183,7 +183,7 @@ export const AnimalForm = ({id}) => {
                 }
                 // If in intake workflow, redirect to Intake Summary
                 else if (is_intake) {
-                  navigate('/intake/summary/');
+                  navigate('/intake/summary');
                 }
                 // Else redirect to create a new SR.
                 else {
