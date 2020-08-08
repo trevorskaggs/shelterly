@@ -113,9 +113,10 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
     # When creating, update any animals associated with the SR owner with the created service request.
     def perform_create(self, serializer):
         if serializer.is_valid():
-            serializer = serializer.save()
-            if serializer.owner:
-                serializer.owner.animal_set.update(request=serializer.id)
+            service_request = serializer.save()
+            service_request.set_lat_lon()
+            if service_request.owner:
+                service_request.owner.animal_set.update(request=service_request.id)
 
     def get_queryset(self):
         queryset = ServiceRequest.objects.all()

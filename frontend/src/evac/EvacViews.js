@@ -1,14 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import { Link } from 'raviger';
-import { Button, ButtonGroup, Card, CardGroup, Col, Form, FormControl, InputGroup, ListGroup} from 'react-bootstrap';
+import { Button, ButtonGroup, Card, CardGroup, Col, Form, FormCheck, FormControl, InputGroup, ListGroup} from 'react-bootstrap';
 import Moment from 'react-moment';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faClipboardList
 } from '@fortawesome/free-solid-svg-icons';
+import { Label } from 'reactstrap';
 import { Map, Marker, Popup, TileLayer } from "react-leaflet";
-import { Icon } from "leaflet";
+import L, { Icon } from "leaflet";
+
+import "../App.css";
+import 'leaflet/dist/leaflet.css';
 // import * as parkData from "./data/skateboard-parks.json";
 
 // export default function App() {
@@ -22,118 +26,81 @@ import { Icon } from "leaflet";
 //   );
 // }
 
+let icon = L.icon({
+  iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
+  iconUrl: require('leaflet/dist/images/marker-icon.png'),
+  shadowUrl: require('leaflet/dist/images/marker-shadow.png')
+})
+
 export function Dispatch() {
 
-  // const [data, setData] = useState({service_requests: [], isFetching: false});
+  const [data, setData] = useState({service_requests: [], isFetching: false, center:{lat:0, lng:0}});
   // const [searchTerm, setSearchTerm] = useState("");
-  // const [statusOptions, setStatusOptions] = useState({status:"open", openColor:"primary", closedColor:"secondary"});
+  const [statusOptions, setStatusOptions] = useState({status:"open", aco_required:"false"});
 
-  // // Update searchTerm when field input changes.
-  // const handleChange = event => {
-  //   setSearchTerm(event.target.value);
-  // };
-
-  // // Use searchTerm to filter service_requests.
-  // const handleSubmit = async event => {
-  //   event.preventDefault();
-
-  //   let source = axios.CancelToken.source();
-  //   setData({service_requests: [], isFetching: true});
-  //   // Fetch ServiceRequest data filtered searchTerm.
-  //   await axios.get('/hotline/api/servicerequests/?search=' + searchTerm + '&status=' + statusOptions.status, {
-  //     cancelToken: source.token,
-  //   })
-  //   .then(response => {
-  //     setData({service_requests: response.data, isFetching: false});
-  //   })
-  //   .catch(error => {
-  //     console.log(error.response);
-  //     setData({service_requests: [], isFetching: false});
-  //   });
-  // }
+  // Handle aco_required toggle.
+  const handleChange = async event => { 
+    setStatusOptions({status:statusOptions.status, aco_required:!statusOptions.aco_required})
+  }
 
   // // Hook for initializing data.
-  // useEffect(() => {
-  //   let source = axios.CancelToken.source();
-  //   const fetchServiceRequests = async () => {
-  //     setData({service_requests: [], isFetching: true});
-  //     // Fetch ServiceRequest data.
-  //     await axios.get('/hotline/api/servicerequests/?search=' + searchTerm + '&status=' + statusOptions.status, {
-  //       cancelToken: source.token,
-  //     })
-  //     .then(response => {
-  //       setData({service_requests: response.data, isFetching: false});
-  //     })
-  //     .catch(error => {
-  //       console.log(error.response);
-  //       setData({service_requests: [], isFetching: false});
-  //     });
-  //   };
-  //   fetchServiceRequests();
-  //   // Cleanup.
-  //   return () => {
-  //     source.cancel();
-  //   };
-  // }, [statusOptions.status]);
+  useEffect(() => {
+    let source = axios.CancelToken.source();
+    const fetchServiceRequests = async () => {
+      setData({service_requests: [], isFetching: true, center:{lat:0, lng:0}});
+      // Fetch ServiceRequest data.
+      await axios.get('/hotline/api/servicerequests/?status=' + statusOptions.status, {
+        cancelToken: source.token,
+      })
+      .then(response => {
+        setData({service_requests: response.data, isFetching: false, center:{lat:response.data[0].latitude, lng:response.data[0].longitude}});
+      })
+      .catch(error => {
+        console.log(error.response);
+        setData({service_requests: [], isFetching: false, center:{lat:0, lng:0}});
+      });
+    };
+    fetchServiceRequests();
+    // Cleanup.
+    return () => {
+      source.cancel();
+    };
+  }, [statusOptions]);
 
   return (
-    <div><Map center={[45.4, -75.7]} zoom={12}>
-      <TileLayer
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-      />
-    </Map></div>
-  );
-
-  // return (
-  //   <div className="ml-2 mr-2">
-  //     <Form onSubmit={handleSubmit}>
-  //       <InputGroup className="mb-3">
-  //         <FormControl
-  //           type="text"
-  //           placeholder="Search"
-  //           name="searchTerm"
-  //           value={searchTerm}
-  //           onChange={handleChange}
-  //         />
-  //         <InputGroup.Append>
-  //           <Button variant="outline-light">Search</Button>
-  //         </InputGroup.Append>
-  //           <ButtonGroup className="ml-3">
-  //             <Button variant={statusOptions.openColor} onClick={() => setStatusOptions({status:"open", openColor:"primary", closedColor:"secondary"})}>Open</Button>
-  //             <Button variant={statusOptions.closedColor} onClick={() => setStatusOptions({status:"closed", openColor:"secondary", closedColor:"primary"})}>Closed</Button>
-  //           </ButtonGroup>
-  //         </InputGroup>
-  //     </Form>
-
-  //     {data.service_requests.map(service_request => (
-  //       <div key={service_request.id} className="mt-3">
-  //         <div className="card-header"> Service Request #{service_request.id}<Link href={"/hotline/servicerequest/" + service_request.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
-  //           <div><Moment format="LLL">{service_request.timestamp}</Moment></div>
-  //         </div>
-  //       <CardGroup>
-  //         <Card key={service_request.id}>
-  //           <Card.Body>
-  //             <Card.Title>Contacts</Card.Title>
-  //             <ListGroup>
-  //               <ListGroup.Item className='owner'>Owner: {service_request.owner ? <span>{service_request.owner_object.first_name} {service_request.owner_object.last_name} {service_request.owner_object.phone} <Link href={"/hotline/owner/" + service_request.owner}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></span> : "N/A"}</ListGroup.Item>
-  //               <ListGroup.Item className='reporter'>Reporter: {service_request.reporter ? <span>{service_request.reporter_object.first_name} {service_request.reporter_object.last_name} {service_request.reporter_object.phone} <Link href={"/hotline/reporter/" + service_request.reporter}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></span> : "N/A"}</ListGroup.Item>
-  //             </ListGroup>
-  //           </Card.Body>
-  //         </Card>
-  //         <Card>
-  //           <Card.Body>
-  //             <Card.Title>Animals</Card.Title>
-  //             <ListGroup>
-  //             {service_request.animals && service_request.animals.length ? <span>{service_request.animals.map(animal => (<ListGroup.Item key={animal.id}>{animal.name} ({animal.species}) - {animal.status} <Link href={"/animals/animal/" + animal.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item>))}</span> : <span><li>None</li></span>}
-  //             </ListGroup>
-  //           </Card.Body>
-  //         </Card>
-  //       </CardGroup>
-  //       </div>
-
-  //     ))}
-  //     <p>{data.isFetching ? 'Fetching service requests...' : <span>{data.service_requests && data.service_requests.length ? '' : 'No Service Requests found.'}</span>}</p>
-  //   </div>
-  // )
+    <div className="container">
+      <div className="row">
+        <div className="col-12">
+          <Map className="mx-auto d-block" center={data.center} zoom={12}>
+            <TileLayer
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+            />
+            {data.service_requests.map(service_request => (
+              <Marker
+                key={service_request.id}
+                position={[
+                  service_request.latitude,
+                  service_request.longitude
+                ]}
+                icon={icon}
+                // onClick={() => {
+                //   setActivePark(park);
+                // }}
+              />
+            ))}
+          </Map>
+        </div>
+        <Form className="">
+          <FormCheck id="aco_required" name="aco_required" type="switch" label="ACO Required" checked={statusOptions.ACORequired} onChange={handleChange} />
+        </Form>
+      </div>
+      {data.service_requests.map(service_request => (
+        <div key={service_request.id} className="mt-3">
+          <div className="card-header"><input type="checkbox"/> {service_request.animals.length} Animals<Link href={"/hotline/servicerequest/" + service_request.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
 }

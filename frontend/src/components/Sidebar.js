@@ -11,7 +11,7 @@ export const StyledMenu = styled(Nav)`
   background: ${({ theme }) => theme.primaryDark};
   height: 100%;
   text-align: left;
-  padding: 4rem;
+  padding: 2rem;
   float: left;
   margin-left: 0;
   height: 100vh;
