@@ -7,6 +7,7 @@ class Person(Location):
     last_name = models.CharField(max_length=50, blank=True)
     phone = models.CharField(max_length=50, blank=True)
     best_contact = models.TextField(blank=True)
+    agency = models.TextField(blank=True)
     drivers_license = models.CharField(max_length=50, blank=True)
     email = models.CharField(max_length=200, blank=True)
 

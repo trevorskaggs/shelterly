@@ -29,6 +29,9 @@ export const PersonForm = ({ id }) => {
   // Determine if this is an owner or reporter when creating a Person.
   var is_owner = window.location.pathname.includes("owner")
 
+  // Determine if this is a first responder when creating a Person.
+  var is_first_responder = window.location.pathname.includes("first_responder")
+
   // Regex validators.
   const phoneRegex = /^((\+\d{1,3}(-| )?\(?\d\)?(-| )?\d{1,3})|(\(?\d{2,3}\)?))(-| )?(\d{3,4})(-| )?(\d{4})(( x| ext)\d{1,5}){0,1}$/
   const nameRegex = /^[a-z ,.'-]+$/i
@@ -41,7 +44,9 @@ export const PersonForm = ({ id }) => {
     phone: '',
     email: '',
     best_contact: '',
-    drivers_license: '',
+    showAgency: is_first_responder,
+    agency: '',
+    // drivers_license: '',
     address: '',
     apartment: '',
     city: '',
@@ -65,7 +70,7 @@ export const PersonForm = ({ id }) => {
     if (id) {
       const fetchPersonData = async () => {
         // Fetch ServiceRequest data.
-        await axios.get('http://localhost:3000/people/api/person/' + id + '/', {
+        await axios.get('/people/api/person/' + id + '/', {
           cancelToken: source.token,
         })
           .then(response => {
@@ -102,6 +107,10 @@ export const PersonForm = ({ id }) => {
             .max(200, 'Must be 200 characters or less')
             .matches(emailRegex, "Email is not valid"),
           best_contact: Yup.string(),
+          showAgency: Yup.boolean(),
+          agency: Yup.string().when('showAgency', {
+              is: true,
+              then: Yup.string().required('Required')}),
           // drivers_license: Yup.string(),
           address: Yup.string(),
           apartment: Yup.string()
@@ -113,57 +122,57 @@ export const PersonForm = ({ id }) => {
         })}
         onSubmit={(values, { setSubmitting }) => {
           if (id) {
-            axios.put('http://localhost:3000/people/api/person/' + id + '/', values)
-              .then(function () {
-                // If we have an SR ID, redirect back to the SR.
-                if (servicerequest_id) {
-                  navigate('/hotline/servicerequest/' + servicerequest_id);
-                }
-                // Else return to the Person details.
-                else if (is_owner) {
-                  navigate('/hotline/owner/' + id);
-                }
-                else {
-                  navigate('/hotline/reporter/' + id);
-                }
-              })
-              .catch(error => {
-                console.log(error.response);
-              });
+            axios.put('/people/api/person/' + id + '/', values)
+            .then(function() {
+              // If we have an SR ID, redirect back to the SR.
+              if (servicerequest_id) {
+                navigate('/hotline/servicerequest/' + servicerequest_id);
+              }
+              // Else return to the Person details.
+              else if (is_owner) {
+                navigate('/hotline/owner/' + id);
+              }
+              else {
+                navigate('/hotline/reporter/' + id);
+              }
+            })
+            .catch(error => {
+              console.log(error.response);
+            });
           }
           else {
-            axios.post('http://localhost:3000/people/api/person/', values)
-              .then(response => {
-                // If SR already exists, update it with owner info and redirect to the SR details.
-                if (servicerequest_id) {
-                  axios.patch('http://localhost:3000/hotline/api/servicerequests/' + servicerequest_id + '/', { owner: response.data.id })
-                    .then(function () {
-                      navigate('/hotline/servicerequest/' + servicerequest_id);
-                    })
-                    .catch(error => {
-                      console.log(error.response);
-                    });
-                }
-                // If we have a reporter ID, redirect to create a new Animal with owner + reporter IDs.
-                else if (reporter_id) {
-                  navigate('/animals/animal/new?owner_id=' + response.data.id + '&reporter_id=' + reporter_id);
-                }
-                // If we're creating an owner without a reporter ID, redirect to create new Animal with owner ID.
-                else if (is_owner) {
-                  navigate('/animals/animal/new?owner_id=' + response.data.id);
-                }
-                // If we're creating a reporter and choose to skip owner, redirect to create new Animal with reporter ID.
-                else if (skipOwner) {
-                  navigate('/animals/animal/new?reporter_id=' + response.data.id);
-                }
-                // Else create a reporter and redirect to create an owner.
-                else {
-                  navigate('/hotline/owner/new?reporter_id=' + response.data.id);
-                }
-              })
-              .catch(error => {
-                console.log(error.response);
-              });
+            axios.post('/people/api/person/', values)
+            .then(response => {
+              // If SR already exists, update it with owner info and redirect to the SR details.
+              if (servicerequest_id) {
+                axios.patch('/hotline/api/servicerequests/' + servicerequest_id + '/', {owner:response.data.id})
+                .then(function() {
+                  navigate('/hotline/servicerequest/' + servicerequest_id);
+                })
+                .catch(error => {
+                  console.log(error.response);
+                });
+              }
+              // If we have a reporter ID, redirect to create a new Animal with owner + reporter IDs.
+              else if (reporter_id) {
+                navigate('/animals/animal/new?owner_id=' + response.data.id + '&reporter_id=' + reporter_id);
+              }
+              // If we're creating an owner without a reporter ID, redirect to create new Animal with owner ID.
+              else if (is_owner) {
+                navigate('/animals/animal/new?owner_id=' + response.data.id);
+              }
+              // If we're creating a reporter and choose to skip owner, redirect to create new Animal with reporter ID.
+              else if (skipOwner) {
+                navigate('/animals/animal/new?reporter_id=' + response.data.id + '&first_responder=' + is_first_responder);
+              }
+              // Else create a reporter and redirect to create an owner.
+              else {
+                navigate('/hotline/owner/new?reporter_id=' + response.data.id);
+              }
+            })
+            .catch(error => {
+              console.log(error.response);
+            });
             setSubmitting(false);
           }
         }}
@@ -187,7 +196,7 @@ export const PersonForm = ({ id }) => {
                   name="last_name"
                 />
             </BootstrapForm.Row>
-            <BootstrapForm.Row>
+            <BootstrapForm.Row hidden={is_first_responder}>
                 <TextInput
                   xs="3"
                   type="text"
@@ -195,7 +204,7 @@ export const PersonForm = ({ id }) => {
                   name="phone"
                 />
                 <TextInput
-                xs="7"
+                  xs="7"
                   type="text"
                   label="Email"
                   name="email"
@@ -208,24 +217,32 @@ export const PersonForm = ({ id }) => {
                       id="drivers_license"
                     />
                   </Col> */}
-          </BootstrapForm.Row>
-            <BootstrapForm.Row>
-                <TextInput
+            </BootstrapForm.Row>
+            <BootstrapForm.Row hidden={is_first_responder || data.agency}>
+              <TextInput
                 xs="10"
-                  as="textarea"
-                  label="Best Contact"
-                  name="best_contact"
-                />
+                as="textarea"
+                label="Best Contact"
+                name="best_contact"
+              />
+            </BootstrapForm.Row>
+            <BootstrapForm.Row hidden={!is_first_responder && !data.agency}>
+              <TextInput
+                xs="10"
+                as="textarea"
+                label="Agency*"
+                name="agency"
+              />
             </BootstrapForm.Row>
             <BootstrapForm.Row hidden={!is_owner}>
                 <TextInput
-                xs="8"
+                  xs="8"
                   type="text"
                   label="Address"
                   name="address"
                 />
                 <TextInput
-                xs="2"
+                  xs="2"
                   type="text"
                   label="Apartment"
                   name="apartment"
@@ -233,7 +250,7 @@ export const PersonForm = ({ id }) => {
             </BootstrapForm.Row>
             <BootstrapForm.Row hidden={!is_owner}>
                 <TextInput
-                xs="auto"
+                  xs="6"
                   type="text"
                   label="City"
                   name="city"
@@ -248,7 +265,7 @@ export const PersonForm = ({ id }) => {
                 />
                 </Col>
                 <TextInput
-                xs="auto"
+                  xs="2"
                   type="text"
                   label="Zip Code"
                   name="zip_code"
@@ -257,8 +274,8 @@ export const PersonForm = ({ id }) => {
           </BootstrapForm>
           </Card.Body>
             <ButtonGroup size="lg" >
-              <Button type="button"  onClick={() => { setSkipOwner(true); props.submitForm() }}>Save</Button>
-              {!is_owner & !id ? <button type="button" className="btn btn-primary mr-1  border" onClick={() => { setSkipOwner(true); props.submitForm() }}>Skip Owner</button> : ""}
+              {!is_first_responder ? <Button type="button" onClick={() => { setSkipOwner(false); props.submitForm() }}>{!is_owner ? <span>{!id ? "Add Owner" : "Save"}</span> : <span>{!id ? "Add Animal(s)" : "Save"}</span>}</Button> : ""}
+              {!is_owner && !id ? <button type="button" className="btn btn-primary mr-1 border" onClick={() => { setSkipOwner(true); props.submitForm() }}>Add Animal(s)</button> : ""}
               <Button variant="secondary" type="button">Reset</Button>
               <Button as={Link} variant="info" href="/hotline">Back</Button>
             </ButtonGroup>
@@ -276,8 +293,12 @@ export function ServiceRequestForm({ id }) {
   const [queryParams] = useQueryParams();
   const {
     owner_id = null,
-    reporter_id = null
+    reporter_id = null,
+    first_responder = 'false'
   } = queryParams;
+
+  // Determine if this is from a first responder when creating a SR.
+  var is_first_responder = (first_responder == 'true');
 
   // Track checkbox state with Fade.
   const [fadeIn, setFadeIn] = useState(true);
@@ -312,7 +333,7 @@ export function ServiceRequestForm({ id }) {
     if (id) {
       const fetchServiceRequestData = async () => {
         // Fetch ServiceRequest data.
-        await axios.get('http://localhost:3000/hotline/api/servicerequests/' + id + '/', {
+        await axios.get('/hotline/api/servicerequests/' + id + '/', {
           cancelToken: source.token,
         })
           .then(response => {
@@ -327,7 +348,7 @@ export function ServiceRequestForm({ id }) {
     else if (owner_id) {
       const fetchOwnerData = async () => {
         // Fetch Owner data.
-        await axios.get('http://localhost:3000/people/api/person/' + owner_id + '/', {
+        await axios.get('/people/api/person/' + owner_id + '/', {
           cancelToken: source.token,
         })
           .then(response => {
@@ -348,48 +369,48 @@ export function ServiceRequestForm({ id }) {
   }, [id, owner_id, data]);
 
   return (
-    <Formik
-      initialValues={data}
-      enableReinitialize={true}
-      validationSchema={Yup.object({
-        directions: Yup.string()
-          .required('Required')
-          .max(2000, 'Must be 2000 characters or less'),
-        verbal_permission: Yup.boolean(),
-        key_provided: Yup.boolean(),
-        accessible: Yup.boolean(),
-        turn_around: Yup.boolean(),
-        forced_entry: Yup.boolean(),
-        outcome: Yup.string()
-          .max(2000, 'Must be 2000 characters or less'),
-        owner_notification_notes: Yup.string()
-          .max(2000, 'Must be 2000 characters or less'),
-        recovery_time: Yup.date()
-          .nullable(),
-        owner_notification_tstamp: Yup.date()
-          .nullable(),
-        address: Yup.string(),
-        apartment: Yup.string()
-          .max(10, 'Must be 10 characters or less'),
-        city: Yup.string(),
-        state: Yup.string()
-          .nullable(),
-        zip_code: Yup.string()
-          .max(10, 'Must be 10 characters or less'),
-      })}
-      onSubmit={(values, { setSubmitting }) => {
-        if (id) {
-          axios.put('http://localhost:3000/hotline/api/servicerequests/' + id + '/', values)
-            .then(function () {
+      <Formik
+        initialValues={data}
+        enableReinitialize={true}
+        validationSchema={Yup.object({
+          directions: Yup.string()
+            .required('Required')
+            .max(2000, 'Must be 2000 characters or less'),
+          verbal_permission: Yup.boolean(),
+          key_provided: Yup.boolean(),
+          accessible: Yup.boolean(),
+          turn_around: Yup.boolean(),
+          forced_entry: Yup.boolean(),
+          outcome: Yup.string()
+            .max(2000, 'Must be 2000 characters or less'),
+          owner_notification_notes: Yup.string()
+            .max(2000, 'Must be 2000 characters or less'),
+          recovery_time: Yup.date()
+            .nullable(),
+          owner_notification_tstamp: Yup.date()
+            .nullable(),
+          address: Yup.string(),
+          apartment: Yup.string()
+            .max(10, 'Must be 10 characters or less'),
+          city: Yup.string(),
+          state: Yup.string()
+            .nullable(),
+          zip_code: Yup.string()
+            .max(10, 'Must be 10 characters or less'),
+        })}
+        onSubmit={(values, { setSubmitting }) => {
+          if (id) {
+            axios.put('/hotline/api/servicerequests/' + id + '/', values)
+            .then(function() {
               navigate('/hotline/servicerequest/' + id);
             })
             .catch(error => {
               console.log(error.response);
             });
-          setSubmitting(false);
-        }
-        else {
-          axios.post('http://localhost:3000/hotline/api/servicerequests/', values)
+            setSubmitting(false);
+          }
+          else {
+            axios.post('/hotline/api/servicerequests/', values)
             .then(response => {
               navigate('/hotline/servicerequest/' + response.data.id);
             })
@@ -401,89 +422,91 @@ export function ServiceRequestForm({ id }) {
       }}
     >
       {props => (
-        <Card border="secondary" className="mt-5">
+        <Card border="secondary" className="mt-5" style={{width:"auto"}}>
         <Card.Header as="h5">Service Request Form</Card.Header>
         <Card.Body>
         <BootstrapForm as={Form}>
           <Field type="hidden" value={owner_id || ""} name="owner" id="owner"></Field>
           <Field type="hidden" value={reporter_id || ""} name="reporter" id="reporter"></Field>
           <BootstrapForm.Row hidden={!id}>
-                <TextInput
-                  as="textarea"
-                  rows={5}
-                  label="Outcome"
-                  name="outcome"
-                  id="outcome"
-                />
+            <TextInput
+              as="textarea"
+              rows={5}
+              label="Outcome"
+              name="outcome"
+              id="outcome"
+              xs="10"
+            />
             </BootstrapForm.Row>
             <BootstrapForm.Row hidden={!id}>
-                <TextInput
-                  as="textarea"
-                  rows={5}
-                  label="Owner Notification Notes"
-                  name="owner_notification_notes"
-                  id="owner_notification_notes"
-                />
+              <TextInput
+                as="textarea"
+                rows={5}
+                label="Owner Notification Notes"
+                name="owner_notification_notes"
+                id="owner_notification_notes"
+                xs="10"
+              />
             </BootstrapForm.Row>
-            <BootstrapForm.Row hidden={!id} className="mt-1">
-              <Label htmlFor="forced_entry" className="mt-3 ml-3">Forced Entry</Label>
-              <Field component={Switch} name="forced_entry" type="checkbox" color="primary" className="mt-2" />
+            <BootstrapForm.Row hidden={!id} className="mb-2">
+              <Label htmlFor="forced_entry" className="mt-2 ml-1">Forced Entry</Label>
+              <Field component={Switch} name="forced_entry" type="checkbox" color="primary" />
             </BootstrapForm.Row>
             <BootstrapForm.Row hidden={!id}>
                 <DateTimePicker
                   label="Recovery Time"
                   name="recovery_time"
                   id="recovery_time"
+                  xs="3"
                   onChange={(date, dateStr) => {
                     props.setFieldValue("recovery_time", dateStr)
                   }}
                   value={data.recovery_time || null}
                 />
+            </BootstrapForm.Row>
+            <BootstrapForm.Row hidden={!id}>
                 <DateTimePicker
                   label="Owner Notified"
                   name="owner_notification_tstamp"
                   id="owner_notification_tstamp"
+                  xs="3"
                   onChange={(date, dateStr) => {
                     props.setFieldValue("owner_notification_tstamp", dateStr)
                   }}
                   value={data.owner_notification_tstamp || null}
                 />
             </BootstrapForm.Row>
-          {data.address ?
-            <span className="form-row">
+          {data.address && !id ?
+            <span className="form-row ml-3">
               <Label>Address Same as Owner: </Label>
               <CustomInput id="same_address" type="checkbox" className="ml-2" checked={!fadeIn} onChange={handleChange} />
             </span> : ""
           }
-          <FormGroup>
             <Fade in={fadeIn} hidden={!fadeIn}>
               <BootstrapForm.Row>
-                <Col xs="8">
                   <TextInput
                     type="text"
-                    label="Address"
+                    label={!is_first_responder ? "Address" : "Address/Cross Streets"}
                     name="address"
                     id="address"
+                    xs="8"
                   />
-                </Col>
-                <Col xs="2">
                   <TextInput
                     type="text"
                     label="Apartment"
                     name="apartment"
                     id="apartment"
+                    xs="2"
                   />
-                </Col>
               </BootstrapForm.Row>
               <BootstrapForm.Row>
-                <Col xs="6">
-                  <TextInput
-                    type="text"
-                    label="City"
-                    name="city"
-                    id="city"
-                  />
-                </Col>
+                <TextInput
+                  type="text"
+                  label="City"
+                  name="city"
+                  id="city"
+                  xs="6"
+                />
                 <Col xs="2">
                   <DropDown
                     label="State"
@@ -493,44 +516,38 @@ export function ServiceRequestForm({ id }) {
                     value={props.values.state || ''}
                   />
                 </Col>
-                <Col xs="2">
                   <TextInput
                     type="text"
                     label="Zip Code"
                     name="zip_code"
                     id="zip_code"
+                    xs="2"
                   />
-                </Col>
               </BootstrapForm.Row>
             </Fade>
             <BootstrapForm.Row>
-              <Col xs="10">
                 <TextInput
                   as="textarea"
                   rows={5}
                   label="Directions*"
                   name="directions"
                   id="directions"
+                  xs="10"
                 />
-              </Col>
             </BootstrapForm.Row>
             <BootstrapForm.Row>
-              <Col>
-                <Label htmlFor="verbal_permission">Verbal Permission</Label>
+                <span hidden={is_first_responder}><Label htmlFor="verbal_permission">Verbal Permission</Label>
                 <Field component={Switch} name="verbal_permission" type="checkbox" color="primary"/>
 
                 <Label htmlFor="key_provided">Key Provided</Label>
-                <Field component={Switch} name="key_provided" type="checkbox" color="primary" />
+                <Field component={Switch} name="key_provided" type="checkbox" color="primary" /></span>
 
-                <Label htmlFor="accessible">Accessible</Label>
+                <span><Label htmlFor="accessible">Accessible</Label>
                 <Field component={Switch} name="accessible" type="checkbox" color="primary" />
 
                 <Label htmlFor="turn_around">Turn Around</Label>
-                <Field component={Switch} name="turn_around" type="checkbox" color="primary" />
-              </Col>
+                <Field component={Switch} name="turn_around" type="checkbox" color="primary" /></span>
             </BootstrapForm.Row>
-          </FormGroup>
-
 
         </BootstrapForm>
         </Card.Body>

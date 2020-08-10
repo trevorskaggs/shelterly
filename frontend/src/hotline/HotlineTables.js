@@ -1,15 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
+import { Link } from 'raviger';
 import { Button, ButtonGroup, Card, CardGroup, Col, Form, FormControl, InputGroup, ListGroup} from 'react-bootstrap';
 import Moment from 'react-moment';
-import { Fab } from '@material-ui/core';
-import AssignmentIcon from '@material-ui/icons/Assignment';
-
-const input_style = {
-  width: "40%",
-  display: "inline-block",
-  position: 'relative',
-}
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faClipboardList
+} from '@fortawesome/free-solid-svg-icons';
 
 export function ServiceRequestTable() {
 
@@ -29,7 +26,7 @@ export function ServiceRequestTable() {
     let source = axios.CancelToken.source();
     setData({service_requests: [], isFetching: true});
     // Fetch ServiceRequest data filtered searchTerm.
-    await axios.get('http://localhost:8000/hotline/api/servicerequests/?search=' + searchTerm + '&status=' + statusOptions.status, {
+    await axios.get('/hotline/api/servicerequests/?search=' + searchTerm + '&status=' + statusOptions.status, {
       cancelToken: source.token,
     })
     .then(response => {
@@ -47,7 +44,7 @@ export function ServiceRequestTable() {
     const fetchServiceRequests = async () => {
       setData({service_requests: [], isFetching: true});
       // Fetch ServiceRequest data.
-      await axios.get('http://localhost:8000/hotline/api/servicerequests/?search=' + searchTerm + '&status=' + statusOptions.status, {
+      await axios.get('/hotline/api/servicerequests/?search=' + searchTerm + '&status=' + statusOptions.status, {
         cancelToken: source.token,
       })
       .then(response => {
@@ -76,42 +73,37 @@ export function ServiceRequestTable() {
             value={searchTerm}
             onChange={handleChange}
           />
-        <InputGroup.Append>
-          <Button variant="outline-light">Search</Button>
-        </InputGroup.Append>
-        </InputGroup>
-
-          <div className="ml-auto">
-            <ButtonGroup>
-              <Button color={statusOptions.openColor} onClick={() => setStatusOptions({status:"open", openColor:"#79B791", closedColor:"#782F39"})}>Open</Button>
-              <Button color={statusOptions.closedColor} onClick={() => setStatusOptions({status:"closed", openColor:"secondary", closedColor:"danger"})}>Closed</Button>
+          <InputGroup.Append>
+            <Button variant="outline-light">Search</Button>
+          </InputGroup.Append>
+            <ButtonGroup className="ml-3">
+              <Button variant={statusOptions.openColor} onClick={() => setStatusOptions({status:"open", openColor:"primary", closedColor:"secondary"})}>Open</Button>
+              <Button variant={statusOptions.closedColor} onClick={() => setStatusOptions({status:"closed", openColor:"secondary", closedColor:"primary"})}>Closed</Button>
             </ButtonGroup>
-          </div>
+          </InputGroup>
       </Form>
 
       {data.service_requests.map(service_request => (
-        <div className="mt-5">
-                  <div className="card-header"> Service Request #{service_request.id}<Fab color="primary" href={"/hotline/servicerequest/" + service_request.id} className="mb-1" style={{width:23,height:23, minHeight:23}} title="Service Request details" aria-label="details"><AssignmentIcon style={{fontSize:10}} /></Fab>
-                  <div><Moment format="LLL">{service_request.timestamp}</Moment></div></div>
+        <div key={service_request.id} className="mt-3">
+          <div className="card-header"> Service Request #{service_request.id}<Link href={"/hotline/servicerequest/" + service_request.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
+            <div><Moment format="LLL">{service_request.timestamp}</Moment></div>
+          </div>
         <CardGroup>
-
-        <Card key={service_request.id}>
-
-          <Card.Body>
-            <Card.Title>Contacts</Card.Title>
-            <ListGroup>
-              <ListGroup.Item className='owner'>Owner: {service_request.owner ? <span>{service_request.owner_object.first_name} {service_request.owner_object.last_name} {service_request.owner_object.phone} <Fab href={"/hotline/owner/" + service_request.owner} className="mb-1" style={{width:23,height:23, minHeight:23, color:"#fff", backgroundColor: "#28a745"}} title="Owner details" aria-label="owner_details"><AssignmentIcon style={{fontSize:10}} /></Fab></span> : "N/A"}</ListGroup.Item>
-              <ListGroup.Item className='reporter'>Reporter: {service_request.reporter ? <span>{service_request.reporter_object.first_name} {service_request.reporter_object.last_name} {service_request.reporter_object.phone} <Fab href={"/hotline/reporter/" + service_request.reporter} className="mb-1" style={{width:23,height:23, minHeight:23, color:"#fff", backgroundColor: "#28a745"}} title="Reporter details" aria-label="reporter_details"><AssignmentIcon style={{fontSize:10}} /></Fab></span> : "N/A"}</ListGroup.Item>
-            </ListGroup>
+          <Card key={service_request.id}>
+            <Card.Body>
+              <Card.Title>Contacts</Card.Title>
+              <ListGroup>
+                <ListGroup.Item className='owner'>Owner: {service_request.owner ? <span>{service_request.owner_object.first_name} {service_request.owner_object.last_name} {service_request.owner_object.phone} <Link href={"/hotline/owner/" + service_request.owner}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></span> : "N/A"}</ListGroup.Item>
+                <ListGroup.Item className='reporter'>Reporter: {service_request.reporter ? <span>{service_request.reporter_object.first_name} {service_request.reporter_object.last_name} {service_request.reporter_object.phone} <Link href={"/hotline/reporter/" + service_request.reporter}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></span> : "N/A"}</ListGroup.Item>
+              </ListGroup>
             </Card.Body>
           </Card>
           <Card>
             <Card.Body>
-            <Card.Title>Animals</Card.Title>
-
+              <Card.Title>Animals</Card.Title>
               <ListGroup>
-            {service_request.animals && service_request.animals.length ? <span>{service_request.animals.map(animal => (<ListGroup.Item key={animal.id}>{animal.name} ({animal.species}) - {animal.status} <Fab href={"/animals/animal/" + animal.id} className="mb-1" style={{width:23,height:23, minHeight:23, color:"#fff", backgroundColor: "#c82333"}} title="Animal details" aria-label="animal_details"><AssignmentIcon style={{fontSize:10}} /></Fab></ListGroup.Item>))}</span> : <span><li>None</li></span>}
-            </ListGroup>
+              {service_request.animals && service_request.animals.length ? <span>{service_request.animals.map(animal => (<ListGroup.Item key={animal.id}>{animal.name} ({animal.species}) - {animal.status} <Link href={"/animals/animal/" + animal.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item>))}</span> : <span><li>None</li></span>}
+              </ListGroup>
             </Card.Body>
           </Card>
         </CardGroup>

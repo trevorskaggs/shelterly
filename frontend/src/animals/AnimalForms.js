@@ -2,12 +2,13 @@ import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { Link, navigate, useQueryParams } from 'raviger';
 import { Field, Form, Formik } from "formik";
-import { Col, FormGroup, Container, Input, Label, Row } from "reactstrap";
+import { Input, Label } from "reactstrap";
+import { Col } from 'react-bootstrap';
 import { Button, ButtonGroup, Form as BootstrapForm } from "react-bootstrap";
 import { Card } from 'react-bootstrap';
 import * as Yup from 'yup';
 import { DateTimePicker, DropDown, TextInput } from '.././components/Form.js';
-import { catAgeChoices, dogAgeChoices, catColorChoices, dogColorChoices, speciesChoices, sexChoices, dogSizeChoices, catSizeChoices, statusChoices, unknownChoices } from './constants'
+import { catAgeChoices, dogAgeChoices, horseAgeChoices, otherAgeChoices, catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, speciesChoices, sexChoices, dogSizeChoices, catSizeChoices, horseSizeChoices, otherSizeChoices, statusChoices, unknownChoices } from './constants'
 
 const header_style = {
   textAlign: "center",
@@ -21,16 +22,20 @@ export const AnimalForm = ({id}) => {
     owner_id = null,
     servicerequest_id = null,
     reporter_id = null,
+    first_responder = 'false'
   } = queryParams;
+
+  // Determine if this is from a first responder when creating a SR.
+  var is_first_responder = (first_responder == 'true');
 
   // Track species selected and update choice lists accordingly.
   const sizeRef = useRef(null);
   const ageRef = useRef(null);
   const pcolorRef = useRef(null);
   const scolorRef = useRef(null);
-  const ageChoices = {'':[], 'dog':dogAgeChoices, 'cat':catAgeChoices, 'horse':[], 'other':[]}
-  const colorChoices = {'':[], 'dog':dogColorChoices, 'cat':catColorChoices, 'horse':[], 'other':[]}
-  const sizeChoices = {'':[], 'dog':dogSizeChoices, 'cat':catSizeChoices, 'horse':[], 'other':[]}
+  const ageChoices = {'':[], 'dog':dogAgeChoices, 'cat':catAgeChoices, 'horse':horseAgeChoices, 'other':otherAgeChoices}
+  const colorChoices = {'':[], 'dog':dogColorChoices, 'cat':catColorChoices, 'horse':horseColorChoices, 'other':otherColorChoices}
+  const sizeChoices = {'':[], 'dog':dogSizeChoices, 'cat':catSizeChoices, 'horse':horseSizeChoices, 'other':otherSizeChoices}
 
   // Track whether or not to add another animal after saving.
   const [addAnother, setAddAnother] = useState(false);
@@ -55,8 +60,7 @@ export const AnimalForm = ({id}) => {
     fixed: 'unknown',
     aggressive: 'unknown',
     confined: 'unknown',
-    attended_to: 'unknown',
-    collared: 'unknown',
+    injured: 'unknown',
     behavior_notes: '',
     last_seen: null,
     image: null,
@@ -68,7 +72,7 @@ export const AnimalForm = ({id}) => {
     if (id) {
       const fetchAnimalData = async () => {
         // Fetch Animal data.
-        await axios.get('http://localhost:3000/animals/api/animal/' + id + '/', {
+        await axios.get('/animals/api/animal/' + id + '/', {
           cancelToken: source.token,
         })
         .then(response => {
@@ -119,10 +123,8 @@ export const AnimalForm = ({id}) => {
             .max(200, 'Must be 200 characters or less'),
           confined: Yup.string()
            .max(200, 'Must be 200 characters or less'),
-          attended_to: Yup.string()
+          injured: Yup.string()
            .max(200, 'Must be 200 characters or less'),
-          collared: Yup.string()
-            .max(200, 'Must be 200 characters or less'),
           behavior_notes: Yup.string()
             .max(200, 'Must be 200 characters or less'),
           last_seen: Yup.date()
@@ -132,7 +134,7 @@ export const AnimalForm = ({id}) => {
         })}
         onSubmit={(values, { setSubmitting }) => {
           if (id) {
-            axios.put('http://localhost:3000/animals/api/animal/' + id + '/', values)
+            axios.put('/animals/api/animal/' + id + '/', values)
             .then(function() {
               // If the animal has an SR, redirect to the SR.
               if (values.request) {
@@ -151,7 +153,7 @@ export const AnimalForm = ({id}) => {
             });
           }
           else {
-            axios.post('http://localhost:3000/animals/api/animal/', values)
+            axios.post('/animals/api/animal/', values)
             .then(response => {
               if (addAnother) {
                 // If SR already exists, pass along the request ID.
@@ -160,7 +162,7 @@ export const AnimalForm = ({id}) => {
                 }
                 // Else pass along the owner and reporter IDs used for SR creation downstream.
                 else {
-                  navigate('/animals/animal/new?owner_id=' + (response.data.owner||'') + '&reporter_id=' + (reporter_id||''));
+                  navigate('/animals/animal/new?owner_id=' + (response.data.owner||'') + '&reporter_id=' + (reporter_id||'') + '&first_responder=' + is_first_responder);
                   setKey(Math.random());
                 }
               }
@@ -171,7 +173,7 @@ export const AnimalForm = ({id}) => {
                 }
                 // Else redirect to create a new SR.
                 else {
-                  navigate('/hotline/servicerequest/new?owner_id=' + (response.data.owner||'') + '&reporter_id=' + (reporter_id||''));
+                  navigate('/hotline/servicerequest/new?owner_id=' + (response.data.owner||'') + '&reporter_id=' + (reporter_id||'') + '&first_responder=' + is_first_responder);
                 }
               }
             })
@@ -189,8 +191,8 @@ export const AnimalForm = ({id}) => {
           <BootstrapForm as={Form}>
               <Field type="hidden" value={owner_id||""} name="owner" id="owner"></Field>
               <Field type="hidden" value={servicerequest_id||""} name="request" id="request"></Field>
-               <BootstrapForm.Row hidden={!id}>
-                  <Col xs="3">
+               <BootstrapForm.Row hidden={!id} className="mb-3">
+                <Col xs="3">
                     <DropDown
                       id="status"
                       name="status"
@@ -206,14 +208,14 @@ export const AnimalForm = ({id}) => {
                   </Col>
                 </BootstrapForm.Row>
                 <BootstrapForm.Row>
-                    <TextInput
-                      id="name"
-                      xs="8"
-                      name="name"
-                      type="text"
-                      label="Name"
-                    />
-                    <Col xs="2">
+                  <TextInput
+                    id="name"
+                    xs="8"
+                    name="name"
+                    type="text"
+                    label="Animal Name"
+                  />
+                  <Col xs="2">
                     <DropDown
                       label="Sex"
                       id="sexDropDown"
@@ -222,7 +224,7 @@ export const AnimalForm = ({id}) => {
                       options={sexChoices}
                       value={props.values.sex||''}
                     />
-                    </Col>
+                  </Col>
                 </BootstrapForm.Row>
                 <BootstrapForm.Row>
                   <Col xs="2">
@@ -231,6 +233,7 @@ export const AnimalForm = ({id}) => {
                       id="speciesDropdown"
                       name="species"
                       type="text"
+                      xs="2"
                       options={speciesChoices}
                       value={props.values.species||data.species}
                       isClearable={false}
@@ -250,6 +253,7 @@ export const AnimalForm = ({id}) => {
                       id="sizeDropdown"
                       name="size"
                       type="text"
+                      xs="4"
                       ref={sizeRef}
                       options={sizeChoices[props.values.species]}
                       value={props.values.size||''}
@@ -262,21 +266,22 @@ export const AnimalForm = ({id}) => {
                       id="age"
                       name="age"
                       type="text"
+                      xs="4"
                       ref={ageRef}
                       options={ageChoices[props.values.species]}
                       value={props.values.age||''}
                       placeholder={placeholder}
                     />
                   </Col>
-
                 </BootstrapForm.Row>
-                <BootstrapForm.Row>
+                <BootstrapForm.Row className="mt-3">
                   <Col xs="3">
                     <DropDown
                       label="Primary Color"
                       id="pcolor"
                       name="pcolor"
                       type="text"
+                      className="mb-3"
                       ref={pcolorRef}
                       options={colorChoices[props.values.species]}
                       value={props.values.pcolor||''}
@@ -293,17 +298,14 @@ export const AnimalForm = ({id}) => {
                       placeholder={placeholder}
                     />
                   </Col>
-                  <Col>
                     <TextInput
-                    xs="auto"
                       id="color_notes"
                       name="color_notes"
                       as="textarea"
                       rows={5}
                       label="Description"
+                      xs="7"
                     />
-                  </Col>
-
                 </BootstrapForm.Row>
                 <BootstrapForm.Row>
                   <Col xs="3">
@@ -312,11 +314,11 @@ export const AnimalForm = ({id}) => {
                       id="aggressive"
                       name="aggressive"
                       type="text"
+                      className="mb-3"
                       options={unknownChoices}
                       value={props.values.aggressive||'unknown'}
                       isClearable={false}
                     />
-
                     <DropDown
                       label="Fixed"
                       id="fixed"
@@ -326,23 +328,19 @@ export const AnimalForm = ({id}) => {
                       value={props.values.fixed||'unknown'}
                       isClearable={false}
                     />
-
-
                   </Col>
-                  <Col>
-                  <TextInput
-                      xs="auto"
-                      label="Behavior Notes"
-                      id="behavior_notes"
-                      name="behavior_notes"
-                      as="textarea"
-                      rows={5}
-                    /></Col>
+                    <TextInput
+                        label="Behavior Notes"
+                        id="behavior_notes"
+                        name="behavior_notes"
+                        as="textarea"
+                        rows={5}
+                        xs="7"
+                      />
                 </BootstrapForm.Row>
-
                 <BootstrapForm.Row>
                   <Col xs="3">
-                  <DropDown
+                    <DropDown
                       label="Confined"
                       id="confined"
                       name="confined"
@@ -351,37 +349,30 @@ export const AnimalForm = ({id}) => {
                       value={props.values.confined||'unknown'}
                       isClearable={false}
                     />
+                  </Col>
+                  <Col xs="3">
                     <DropDown
-                      label="Attended To"
-                      id="attended_to"
-                      name="attended_to"
+                      label="Injured"
+                      id="injured"
+                      name="injured"
                       type="text"
                       options={unknownChoices}
-                      value={props.values.attended_to||'unknown'}
+                      value={props.values.injured||'unknown'}
                       isClearable={false}
                     />
-                    </Col>
-                    <Col xs="3">
-                    <DropDown
-                      label="Collared"
-                      id="collared"
-                      name="collared"
-                      type="text"
-                      options={unknownChoices}
-                      value={props.values.collared||'unknown'}
-                      isClearable={false}
-                    />                    <DateTimePicker
+                  </Col>
+                </BootstrapForm.Row>
+                <BootstrapForm.Row className="mt-3">
+                  <DateTimePicker
                     label="Last Seen"
                     name="last_seen"
                     id="last_seen"
+                    xs="3"
                     onChange={(date, dateStr) => {
                       props.setFieldValue("last_seen", dateStr)
                     }}
                     value={data.last_seen||null}
                   />
-
-                  </Col>
-
                 </BootstrapForm.Row>
                 <BootstrapForm.Row>
                   <Col className="mt-3">
