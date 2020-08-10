@@ -25,7 +25,6 @@ take_two
 .python_history
 .ssh
 package-lock.json
-.gitignore
 frontend/package-lock.json
 frontend/package.json
 .viminfo
