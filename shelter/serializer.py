@@ -1,7 +1,14 @@
 from rest_framework import serializers
 from .models import *
+from location.utils import build_full_address
 
 class ShelterSerializer(serializers.ModelSerializer):
+    full_address = serializers.SerializerMethodField()
+    
+    # Custom field for the full address.
+    def get_full_address(self, obj):
+        return build_full_address(obj)
+
     class Meta:
         model = Shelter
         fields = '__all__'
@@ -21,7 +28,8 @@ class RoomSerializer(serializers.ModelSerializer):
         model = Room
         fields = (
             'id',
-            'name',
+            'shelter',
             'building',
+            'name',
             'description',
         )

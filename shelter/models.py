@@ -35,6 +35,7 @@ class Building(BaseShelterModel):
 class Room(BaseShelterModel):
 
     building = models.ForeignKey(Building, on_delete=models.CASCADE)
+    shelter = models.ForeignKey(Shelter, on_delete=models.CASCADE)
 
     @property
     def parent(self):

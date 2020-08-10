@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import { Link } from 'raviger';
-import { Card, CardGroup } from 'reactstrap';
+import { Card, CardGroup, ListGroup } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faClipboardList
@@ -19,7 +19,8 @@ const link_style = {
 
 export function ShelterTable() {
 
-  const [data, setData] = useState({shelters: [], isFetching: false});
+  const [data, setData] = useState({shelters: [],  isFetching: false});
+
   // Hook for initializing data.
   useEffect(() => {
     let source = axios.CancelToken.source();
@@ -48,19 +49,25 @@ export function ShelterTable() {
     <div className="ml-2 mr-2">
       {data.shelters.map(shelter => (
         <div key={shelter.id} className="mt-5">
-          <div className="card-header"> Shelter: {shelter.name} #{shelter.id}<Link href={"/shelter/" + shelter.id}> <FontAwesomeIcon icon={faClipboardList} inverse/></Link>
-          <div style={{width:23,height:23, minHeight:23}}> Address: {shelter.address} {shelter.apartment} {shelter.city} {shelter.state} {shelter.zip_code}</div></div>
+          <div className="card-header">{shelter.name}<Link href={"/shelter/" + shelter.id}> <FontAwesomeIcon icon={faClipboardList} inverse/></Link>
+          <div style={{width:400,height:25, minHeight:25}}>{shelter.full_address}</div></div>
         
           <CardGroup>
             <Card key={shelter.id}>
               <Card.Body>
                 <Card.Title>Buildings</Card.Title>
+                  <ListGroup>
+                    {shelter.building ? <span>{shelter.buildings.map(building => (<ListGroup.Item key={building.id}>{building.name} <Link href={"/shelter/building/" + building.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item>))}</span> : <span><li>None</li></span>}
+                  </ListGroup>
               </Card.Body>
             </Card>
             <Card>
               <Card.Body>
                 <Card.Title>Rooms</Card.Title>
-              </Card.Body>
+                  <ListGroup>
+                    {shelter.room ? <span>{shelter.room.map(room => (<ListGroup.Item key={room.id}>{room.name} <Link href={"/shelter/room/" + room.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item>))}</span> : <span><li>None</li></span>}
+                  </ListGroup>
+                </Card.Body>
             </Card>
           </CardGroup>
           
