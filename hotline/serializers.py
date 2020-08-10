@@ -1,3 +1,4 @@
+from django.db.models import Q
 from rest_framework import serializers
 from rest_framework.decorators import action
 from .models import ServiceRequest
@@ -11,6 +12,7 @@ class ServiceRequestSerializer(serializers.ModelSerializer):
     full_address = serializers.SerializerMethodField()
     animals = AnimalSerializer(source='animal_set', many=True, required=False, read_only=True)
     status = serializers.SerializerMethodField()
+    aco_required = serializers.SerializerMethodField()
 
     # Custom field for the full address.
     def get_full_address(self, obj):
@@ -21,6 +23,10 @@ class ServiceRequestSerializer(serializers.ModelSerializer):
         # SR is Open if it doesn't have any animals yet or any one animal has an ASSIGNED OR REPORTED status.
         status = 'Open' if obj.animal_set.filter(status__in=['REPORTED', 'ASSIGNED']).exists() else 'Closed'
         return status
+
+    # Custom field for if any animal is ACO Required. If it is aggressive or "Other" species.
+    def get_aco_required(self, obj):
+        return obj.animal_set.filter(Q(aggressive='yes') | Q(species='other')).exists()
 
     # Updates datetime fields to null when receiving an empty string submission.
     def to_internal_value(self, data):

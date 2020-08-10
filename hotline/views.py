@@ -120,9 +120,14 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = ServiceRequest.objects.all()
+
         status = self.request.query_params.get('status', '')
         if status == 'open':
             queryset = queryset.filter(animal__status__in=['REPORTED', 'ASSIGNED']).distinct()
         elif status == 'closed':
             queryset = queryset.exclude(animal__status__in=['REPORTED', 'ASSIGNED']).distinct()
+
+        aco_required = self.request.query_params.get('aco_required', '')
+        if aco_required == 'true':
+            queryset = queryset.filter(Q(animal__aggressive='yes') | Q(animal__species='other'))
         return queryset

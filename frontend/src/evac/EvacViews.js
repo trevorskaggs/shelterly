@@ -5,7 +5,7 @@ import { Button, ButtonGroup, Card, CardGroup, Col, Form, FormCheck, FormControl
 import Moment from 'react-moment';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faClipboardList
+  faClipboardList, faShieldAlt
 } from '@fortawesome/free-solid-svg-icons';
 import { Label } from 'reactstrap';
 import { Map, Marker, Popup, TileLayer } from "react-leaflet";
@@ -36,7 +36,7 @@ export function Dispatch() {
 
   const [data, setData] = useState({service_requests: [], isFetching: false, center:{lat:0, lng:0}});
   // const [searchTerm, setSearchTerm] = useState("");
-  const [statusOptions, setStatusOptions] = useState({status:"open", aco_required:"false"});
+  const [statusOptions, setStatusOptions] = useState({status:"open", aco_required:false});
 
   // Handle aco_required toggle.
   const handleChange = async event => { 
@@ -49,7 +49,7 @@ export function Dispatch() {
     const fetchServiceRequests = async () => {
       setData({service_requests: [], isFetching: true, center:{lat:0, lng:0}});
       // Fetch ServiceRequest data.
-      await axios.get('/hotline/api/servicerequests/?status=' + statusOptions.status, {
+      await axios.get('/hotline/api/servicerequests/?status=' + statusOptions.status + '&aco_required=' + (statusOptions.aco_required + ""), {
         cancelToken: source.token,
       })
       .then(response => {
@@ -98,7 +98,7 @@ export function Dispatch() {
       {data.service_requests.map(service_request => (
         <div key={service_request.id} className="mt-3">
           <div className="card-header"><input type="checkbox"/> {service_request.animals.length} Animals<Link href={"/hotline/servicerequest/" + service_request.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
-          </div>
+          {service_request.aco_required ? <FontAwesomeIcon icon={faShieldAlt} inverse className="ml-1"/> : ""}</div>
         </div>
       ))}
     </div>
