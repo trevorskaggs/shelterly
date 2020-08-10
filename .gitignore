@@ -28,3 +28,4 @@ package-lock.json
 .gitignore
 frontend/package-lock.json
 frontend/package.json
+.viminfo
