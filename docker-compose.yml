@@ -4,20 +4,10 @@ services:
     image: mdillon/postgis
     container_name: db
   shelterly:
-    image: trevorskaggs/shelterly:dev
+    image: trevorskaggs/shelterly:new-dev
     container_name: shelterly
-    volumes:
-      - .:/home/shelterly/
-      - venv:/home/shelterly/venv
-      - scripts:/home/shelterly/scripts
-
     ports:
       - "80:80"
-      - "8000:8000"
-      - "3000:3000"
     depends_on:
       - db
 
-volumes:
-  venv:
-  scripts:
