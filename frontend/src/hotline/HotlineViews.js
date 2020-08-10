@@ -24,70 +24,6 @@ const header_style = {
   textAlign: "center",
 }
 
-export function PersonView({id}) {
-
-  // Determine if this is an owner or reporter when creating a Person.
-  var is_owner = window.location.pathname.includes("owner")
-
-  const [data, setData] = useState({
-    first_name: '',
-    last_name: '',
-    phone: '',
-    email: '',
-    best_contact: '',
-    agency: '',
-    drivers_license: '',
-    address: '',
-    apartment: '',
-    city: '',
-    state: '',
-    zip_code: '',
-  });
-
-  // Hook for initializing data.
-  useEffect(() => {
-    let source = axios.CancelToken.source();
-    const fetchPersonData = async () => {
-      // Fetch Person data.
-      await axios.get('/people/api/person/' + id + '/', {
-        cancelToken: source.token,
-      })
-      .then(response => {
-        setData(response.data);
-      })
-      .catch(error => {
-        console.log(error.response);
-      });
-    };
-    fetchPersonData();
-  }, [id]);
-
-  return (
-      <Card className="d-flex" border="primary">
-      <Card.Body>
-        {is_owner ?
-        <Card.Title>Owner Details<Link href={"/hotline/owner/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link></Card.Title>
-        :
-        <Card.Title>Reporter Details <Link href={"/hotline/reporter/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link></ Card.Title>
-        }
-        <ListGroup variant="flush">
-            <ListGroup.Item>Name: {data.first_name} {data.last_name}</ListGroup.Item>
-            <ListGroup.Item>Phone: {data.phone ? data.phone : 'N/A' }</ListGroup.Item>
-            <ListGroup.Item>Email: {data.email ? data.email : 'N/A'}</ListGroup.Item>
-            {data.best_contact ? 
-              <ListGroup.Item>Best Contact: {data.best_contact}</ListGroup.Item>: ''}
-            {data.agency ? 
-              <ListGroup.Item>Agency: {data.agency}</ListGroup.Item>: ''}
-            <ListGroup.Item>Address: {data.address ? data.full_address: 'N/A'}</ListGroup.Item>
-          </ListGroup>
-        <Card.Footer>
-        <Link href="/hotline/">BACK</Link>
-        </Card.Footer>
-      </Card.Body>
-      </Card>
-  );
-};
-
 export function ServiceRequestView({id}) {
 
   const [data, setData] = useState({
@@ -165,7 +101,7 @@ export function ServiceRequestView({id}) {
       </div> : ""}
       {data.animals && data.animals.length ?
       <div style={card_style} className="card card-body bg-light mx-auto">
-        <p><b>Animals:</b> <Link href={"/animals/animal/new?servicerequest_id=" + id}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link></p>
+        <p><b>Animals:</b> <Link href={"/hotline/animal/new?servicerequest_id=" + id}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link></p>
          <span>
           {data.animals.map(animal => (
             <li key={animal.id}>{animal.name} (<span style={{textTransform:"capitalize"}}>{animal.species}</span>) - {animal.status}
@@ -177,7 +113,7 @@ export function ServiceRequestView({id}) {
       </div> : ""}
       <hr/>
       <div style={btn_style}>
-        <Link href={"/animals/animal/new?servicerequest_id=" + id} style={link_style} className="btn btn-success btn-lg btn-block mb-2">ADD ANIMAL</Link>
+        <Link href={"/hotline/animal/new?servicerequest_id=" + id} style={link_style} className="btn btn-success btn-lg btn-block mb-2">ADD ANIMAL</Link>
         <br/>
         <Link href={"/hotline/servicerequest/edit/" + id} style={link_style} className="btn btn-primary btn-lg btn-block mb-2">UPDATE REQUEST</Link>
         <br/>
