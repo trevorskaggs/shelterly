@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "raviger";
 import { AnimalView } from "./AnimalViews";
 import { AnimalForm } from "./AnimalForms";
+import { AnimalRequestTable } from "./AnimalTables";
 
 const header_style = {
   textAlign: "center",
@@ -38,6 +39,14 @@ export const AnimalDetail = ({id}) => (
 
 export const UpdateAnimal = ({id}) => (
     <AnimalForm id={id} />
+)
+
+export const AnimalSearchList = () => (
+  <div>
+    <h1 style={header_style}>Animal Search</h1>
+    <br/>
+    <AnimalRequestTable />
+  </div>
 )
 
 export default Animals;
