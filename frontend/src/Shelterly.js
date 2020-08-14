@@ -1,16 +1,14 @@
-import React, { Fragment, useContext, useEffect, useState } from "react";
-import { Link, navigate, useRoutes } from 'raviger';
+import React, { Fragment, useContext, useEffect } from "react";
+import { navigate, useRoutes } from 'raviger';
 import routes from "./router";
 import { ThemeProvider } from 'styled-components';
 import { theme } from './theme';
 import PageNotFound from "./components/PageNotFound";
 import { useCookies, withCookies } from 'react-cookie';
 import { AuthContext } from "./accounts/AccountsReducer";
-import { Container, Row, Col, TabContainer} from "react-bootstrap";
-import { loadUser, logoutUser, setAuthToken } from "./accounts/AccountsUtils";
+import { Container, Row, Col } from "react-bootstrap";
+import { loadUser, setAuthToken } from "./accounts/AccountsUtils";
 import Sidebar from "./components/Sidebar"
-import styled from 'styled-components';
-
 
 function Shelterly() {
 

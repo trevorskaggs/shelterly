@@ -1,9 +1,9 @@
-import React, { useState, useRef } from 'react';
+import React, { useRef } from 'react';
 import styled from 'styled-components';
 import { Link } from 'raviger';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Nav, Button } from 'react-bootstrap';
-import { faUserCircle, faDoorOpen, faHome, faBullhorn, faPhone, faSignOutAlt} from '@fortawesome/free-solid-svg-icons';
+import { Nav } from 'react-bootstrap';
+import { faDoorOpen, faHome, faBullhorn, faPhone, faSignOutAlt} from '@fortawesome/free-solid-svg-icons';
 import { logoutUser} from ".././accounts/AccountsUtils";
 import logo from ".././static/images/shelterly.png"
 

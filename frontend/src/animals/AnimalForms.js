@@ -10,10 +10,6 @@ import * as Yup from 'yup';
 import { DateTimePicker, DropDown, TextInput } from '.././components/Form.js';
 import { catAgeChoices, dogAgeChoices, horseAgeChoices, otherAgeChoices, catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, speciesChoices, sexChoices, dogSizeChoices, catSizeChoices, horseSizeChoices, otherSizeChoices, statusChoices, unknownChoices } from './constants'
 
-const header_style = {
-  textAlign: "center",
-}
-
 export const AnimalForm = ({id}) => {
 
   // Determine if this is an intake workflow.
@@ -29,7 +25,7 @@ export const AnimalForm = ({id}) => {
   } = queryParams;
 
   // Determine if this is from a first responder when creating a SR.
-  var is_first_responder = (first_responder == 'true');
+  var is_first_responder = (first_responder === 'true');
 
   // Track species selected and update choice lists accordingly.
   const sizeRef = useRef(null);
