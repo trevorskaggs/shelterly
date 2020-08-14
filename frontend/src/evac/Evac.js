@@ -1,10 +1,6 @@
 import React from "react";
 import { Link } from "raviger";
-import { EvacTeamForm } from "./EvacForms";
-import { EvacTeamTable } from "./EvacTables";
-import { Container, ListGroup,  Tabs } from 'react-bootstrap';
-// import EvacNavBar from "./EvacNavbar";
-import styled from 'styled-components';
+import { ListGroup } from 'react-bootstrap';
 
 
   const Evac = () => (
