@@ -1,5 +1,5 @@
 from django.core.files.storage import FileSystemStorage
-from django.db.models import Q
+from django.db.models import Count, Exists, OuterRef, Q
 from django.shortcuts import render, redirect
 from django.shortcuts import get_object_or_404
 from .serializers import ServiceRequestSerializer
@@ -106,9 +106,11 @@ def service_request_list(request, status='all'):
 class ServiceRequestViewSet(viewsets.ModelViewSet):
     queryset = ServiceRequest.objects.all()
     search_fields = ['address', 'city', 'animal__name', 'owner__first_name', 'owner__last_name', 'owner__address', 'owner__city', 'reporter__first_name', 'reporter__last_name']
-    filter_backends = (filters.SearchFilter,)
+    filter_backends = (filters.SearchFilter, filters.OrderingFilter)
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = ServiceRequestSerializer
+    ordering_fields = ['injured', 'animal_count']
+    ordering = ['-injured', '-animal_count']
 
     # When creating, update any animals associated with the SR owner with the created service request.
     def perform_create(self, serializer):
@@ -119,7 +121,7 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
                 service_request.owner.animal_set.update(request=service_request.id)
 
     def get_queryset(self):
-        queryset = ServiceRequest.objects.all()
+        queryset = ServiceRequest.objects.all().annotate(animal_count=Count('animal')).annotate(injured=Exists(Animal.objects.filter(request_id=OuterRef('id'), injured='yes')))
 
         status = self.request.query_params.get('status', '')
         if status == 'open':

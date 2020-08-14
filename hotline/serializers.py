@@ -13,6 +13,8 @@ class ServiceRequestSerializer(serializers.ModelSerializer):
     animals = AnimalSerializer(source='animal_set', many=True, required=False, read_only=True)
     status = serializers.SerializerMethodField()
     aco_required = serializers.SerializerMethodField()
+    animal_count = serializers.IntegerField(read_only=True)
+    injured = serializers.BooleanField(read_only=True)
 
     # Custom field for the full address.
     def get_full_address(self, obj):

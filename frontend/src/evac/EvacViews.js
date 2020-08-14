@@ -4,7 +4,7 @@ import { Link } from 'raviger';
 import { Form, FormCheck, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faClipboardList, faShieldAlt
+  faBandAid, faClipboardList, faShieldAlt
 } from '@fortawesome/free-solid-svg-icons';
 import { Circle, Map, Marker, Popup, TileLayer } from "react-leaflet";
 import L from "leaflet";
@@ -137,6 +137,19 @@ export function Dispatch() {
               }
             >
               <FontAwesomeIcon icon={faShieldAlt} inverse className="ml-1"/>
+            </OverlayTrigger>
+             : ""}
+            {service_request.injured ?
+            <OverlayTrigger
+              key={"aco"}
+              placement="top"
+              overlay={
+                <Tooltip id={`tooltip-aco`}>
+                  Injured Animal
+                </Tooltip>
+              }
+            >
+              <FontAwesomeIcon icon={faBandAid} inverse className="ml-1"/>
             </OverlayTrigger>
              : ""}</div>
         </div>

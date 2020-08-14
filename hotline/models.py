@@ -31,9 +31,9 @@ class ServiceRequest(Location):
         output.append('Animal Count: %s' % self.animal_count)
         return ', '.join(output)
 
-    @property
-    def animal_count(self):
-        return self.animal_set.all().count()
+    # @property
+    # def animal_count(self):
+    #     return self.animal_set.all().count()
     
     @property
     def location_type(self):
