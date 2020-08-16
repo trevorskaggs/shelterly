@@ -41,7 +41,7 @@ function Shelterly() {
     <Container fluid>
     <Row>
     <Col xs="auto" className="pl-0">
-    <Sidebar/>
+    <Sidebar dispatch={dispatch} removeCookie={removeCookie} />
     </Col>
     <Col> 
       <Fragment>

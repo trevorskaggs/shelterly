@@ -27,4 +27,26 @@ CAT_COLOR_CHOICES = (
     ('white', 'White'),
 )
 
-ALL_COLOR_CHOICES = DOG_COLOR_CHOICES + CAT_COLOR_CHOICES
+HORSE_COLOR_CHOICES = (
+    ('black', 'Black'),
+    ('brown', 'Brown'),
+    ('bay', 'Bay'),
+    ('chestnut', 'Chestnut'),
+    ('grey', 'Grey'),
+    ('white', 'White'),
+)
+
+OTHER_COLOR_CHOICES = (
+    ('black', 'Black'),
+    ('blue', 'Blue'),
+    ('brown', 'Brown'),
+    ('tan', 'Tan'),
+    ('white', 'White'),
+    ('yellow', 'Yellow'),
+    ('gray', 'Gray'),
+    ('red', 'Red'),
+    ('orange', 'Orange'),
+    ('green', 'Green'),
+)
+
+ALL_COLOR_CHOICES = DOG_COLOR_CHOICES + CAT_COLOR_CHOICES + HORSE_COLOR_CHOICES + OTHER_COLOR_CHOICES

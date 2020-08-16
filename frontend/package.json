@@ -42,7 +42,9 @@
     "start": "HOST=0.0.0.0 react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "dev": "webpack --mode development ./src/index.js --output /home/shelterly/frontend/static/js/main.js",
+    "wp_build": "webpack --mode production ./src/index.js --output /home/shelterly/frontend/static/js/main.js"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -59,5 +61,10 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "http://localhost:8000"
+  "devDependencies": {
+    "@babel/preset-env": "^7.9.6",
+    "@babel/preset-react": "^7.9.4",
+    "babel-loader": "^8.0.6",
+    "webpack-cli": "^3.3.11"
+  }
 }

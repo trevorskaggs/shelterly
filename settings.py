@@ -14,15 +14,13 @@ import os
 import json
 from django.core.exceptions import ImproperlyConfigured
 
-with open('config/secrets.json') as f:
-    secrets = json.loads(f.read())
-
-def get_secret(setting, secrets=secrets):
-    try:
-        return secrets[setting]
-    except KeyError:
-        error_msg = f'Set the {setting} enviromental variable'
-        raise ImproperlyConfigured(error_msg)
+try:
+    with open('config/secrets.json') as f:
+        secrets = json.loads(f.read())
+        for item in secrets.items():
+            os.environ[item[0]] = item[1]
+except FileNotFoundError:
+    print("No secrets file found. Environmental variables must be set elsewhere.")
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -30,7 +28,7 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = 'media'
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = get_secret('SECRET_KEY')
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -106,10 +104,10 @@ WSGI_APPLICATION = 'wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': os.environ.get('DB_NAME', get_secret('DATABASE_NAME')),
-        'USER': os.environ.get('DB_USER', get_secret('DATABASE_USER')),
-        'PASSWORD': os.environ.get('DB_PASS', get_secret('DATABASE_PASSWORD')),
-        'HOST': os.environ.get('DB_HOST', get_secret('DATABASE_HOSTNAME')),
+        'NAME': os.environ.get('DATABASE_NAME'),
+        'USER': os.environ.get('DATABASE_USER'),
+        'PASSWORD': os.environ.get('DATABASE_PASSWORD'),
+        'HOST': os.environ.get('DATABASE_HOSTNAME'),
         'PORT': 5432,
     }
 }
@@ -133,9 +131,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
-    "static",
-    "frontend/src/static"
+    "/home/shelterly/frontend/static/"
 ]
+STATIC_ROOT = "static"
 
 
 # REST
@@ -143,3 +141,20 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': ('knox.auth.TokenAuthentication',),
     'USER_SERIALIZER': 'accounts.serializers.UserSerializer',
 }
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler'
+        },
+    },
+    'loggers': {
+        '': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+    },
+}
+
