@@ -59,9 +59,11 @@ export const StyledMenu = styled(Nav)`
 `;
 
 const Menu = ({ dispatch, removeCookie, ...props }) => {
+
+    const viewHeight = window.outerHeight;
     
     return (
-    <StyledMenu  {...props} className="flex-column">
+    <StyledMenu  {...props} className="flex-column" style={{ height: viewHeight }}>
     <img src={logo} alt="logo" />
     <div className="logo border-bottom">SHELTERLY</div>
       <Link href="/hotline" ><FontAwesomeIcon icon={faPhone} fixedWidth inverse/> HOTLINE</Link>
