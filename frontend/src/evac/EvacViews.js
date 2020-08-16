@@ -4,19 +4,12 @@ import { Link } from 'raviger';
 import { Form, FormCheck, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBandAid, faClipboardList, faShieldAlt
+  faBandAid, faCar, faClipboardList, faShieldAlt, faTrailer
 } from '@fortawesome/free-solid-svg-icons';
 import { Circle, Map, Marker, Popup, TileLayer } from "react-leaflet";
-import L from "leaflet";
 
 import "../App.css";
 import 'leaflet/dist/leaflet.css';
-
-// let icon = L.icon({
-//   iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
-//   iconUrl: require('leaflet/dist/images/marker-icon.png'),
-//   shadowUrl: require('leaflet/dist/images/marker-shadow.png')
-// })
 
 export function Dispatch() {
 
@@ -29,9 +22,9 @@ export function Dispatch() {
     setStatusOptions({status:statusOptions.status, aco_required:!statusOptions.aco_required})
   }
 
-  // Handle SR checkbox selections.
-  const handleCheckbox = (id, event) => {
-    if (event.target.checked) {
+  // Handle dynamic SR state and map display.
+  const handleMapState = (id) => {
+    if (fillColor[id].checked === false) {
       setFillColor(prevState => ({ ...prevState, [id]: {color:"green", checked:true} }));
     }
     else {
@@ -43,6 +36,7 @@ export function Dispatch() {
   useEffect(() => {
     let source = axios.CancelToken.source();
     const fetchServiceRequests = async () => {
+      // Use stored coords if we already have them, otherwise initialize coords.
       var coords = {}
       if (data.center.lat !== 0) {
         coords = data.center
@@ -96,10 +90,7 @@ export function Dispatch() {
                   service_request.latitude,
                   service_request.longitude
                 ]}
-                // icon={icon}
-                onClick={() => {
-                  setFillColor(prevState => ({ ...prevState, [service_request.id]: {color:"green", checked:true} }));
-                }}
+                onClick={() => handleMapState(service_request.id)}
               >
                 <Popup>
                   <span>
@@ -117,22 +108,25 @@ export function Dispatch() {
             ))}
           </Map>
         </div>
-        <Form className="">
+        <Form>
           <FormCheck id="aco_required" name="aco_required" type="switch" label="ACO Required" checked={statusOptions.ACORequired} onChange={handleACO} />
         </Form>
       </div>
       {data.service_requests.map(service_request => (
         <div key={service_request.id} className="mt-2">
           <div className="card-header">
-            <input type="checkbox" name={service_request.id} id={service_request.id} onChange={(event) => handleCheckbox(service_request.id, event)} checked={fillColor[service_request.id] ? fillColor[service_request.id].checked : false} />
-            &nbsp;{service_request.animals.length} Animals<Link href={"/hotline/servicerequest/" + service_request.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
+            <span style={{display:"inline"}} className="custom-control-lg custom-control custom-checkbox">
+              <input className="custom-control-input" type="checkbox" name={service_request.id} id={service_request.id} onChange={() => handleMapState(service_request.id)} checked={fillColor[service_request.id] ? fillColor[service_request.id].checked : false} />
+              <label className="custom-control-label" for={service_request.id}></label>
+            </span>
+            {service_request.animals.length} Animals<Link href={"/hotline/servicerequest/" + service_request.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
             {service_request.aco_required ?
             <OverlayTrigger
               key={"aco"}
               placement="top"
               overlay={
                 <Tooltip id={`tooltip-aco`}>
-                  ACO Required
+                  ACO required
                 </Tooltip>
               }
             >
@@ -141,17 +135,44 @@ export function Dispatch() {
              : ""}
             {service_request.injured ?
             <OverlayTrigger
-              key={"aco"}
+              key={"injured"}
               placement="top"
               overlay={
-                <Tooltip id={`tooltip-aco`}>
-                  Injured Animal
+                <Tooltip id={`tooltip-injured`}>
+                  Injured animal
                 </Tooltip>
               }
             >
               <FontAwesomeIcon icon={faBandAid} inverse className="ml-1"/>
             </OverlayTrigger>
-             : ""}</div>
+             : ""}
+            {service_request.accessible ?
+            <OverlayTrigger
+              key={"accessible"}
+              placement="top"
+              overlay={
+                <Tooltip id={`tooltip-accessible`}>
+                  Easily accessible
+                </Tooltip>
+              }
+            >
+              <FontAwesomeIcon icon={faCar} inverse className="ml-1"/>
+            </OverlayTrigger>
+             : ""}
+            {service_request.turn_around ?
+            <OverlayTrigger
+              key={"turnaround"}
+              placement="top"
+              overlay={
+                <Tooltip id={`tooltip-turnaround`}>
+                  Room to turn around
+                </Tooltip>
+              }
+            >
+              <FontAwesomeIcon icon={faTrailer} inverse className="ml-1"/>
+            </OverlayTrigger>
+             : ""}
+          </div>
         </div>
       ))}
     </div>
