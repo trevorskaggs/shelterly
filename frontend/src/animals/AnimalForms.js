@@ -106,9 +106,10 @@ export const AnimalForm = ({id}) => {
           name: Yup.string()
             .max(50, 'Must be 50 characters or less.'),
           species: Yup.string()
+            .required('Required')
             .oneOf(speciesChoices.map(option => option['value'])),
           size: Yup.string()
-            .max(10, 'Must be 10 characters or less'),
+            .required('Required'),
           age: Yup.string(),
           sex: Yup.string()
             .oneOf(['M', 'F']),

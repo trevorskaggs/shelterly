@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import { Link } from 'raviger';
-import { Form, FormCheck, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Button, Form, FormCheck, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBandAid, faCar, faClipboardList, faShieldAlt, faTrailer
@@ -32,7 +32,22 @@ export function Dispatch() {
     }
   }
 
-  // // Hook for initializing data.
+  // Count animals of the same species and the same size for an SR.
+  const countMatching = (service_request, size, species) => {
+    const countMatches = service_request.animals.filter(animal => animal.size === size && animal.species === species);
+    var size_and_species = species;
+    if (species !== 'horse') {
+      size_and_species = size + " " + species;
+    }
+    var plural = ""
+    if (countMatches.length > 1) {
+      plural = "s"
+    }
+    var text = countMatches.length + " " + size_and_species + plural;
+    return text;
+  }
+
+  // Hook for initializing data.
   useEffect(() => {
     let source = axios.CancelToken.source();
     const fetchServiceRequests = async () => {
@@ -56,7 +71,8 @@ export function Dispatch() {
         if (Object.keys(fillColor).length === 0) {
           const map_dict = {};
           for (const service_request of response.data) {
-            map_dict[service_request.id] = {color:"red", checked:false}
+            map_dict[service_request.id] = {color:"red", checked:false};
+
           }
           setFillColor(map_dict);
         }
@@ -95,7 +111,11 @@ export function Dispatch() {
                 <Popup>
                   <span>
                     {service_request.full_address}<br />
-                    {service_request.animals.length} Animals
+                    {service_request.animals.map(animal => (
+                      <span key={animal.id}>
+                        {animal.size} {animal.species}
+                      </span>
+                    ))}
                   </span>
                 </Popup>
                 <Circle 
@@ -110,6 +130,7 @@ export function Dispatch() {
         </div>
         <Form>
           <FormCheck id="aco_required" name="aco_required" type="switch" label="ACO Required" checked={statusOptions.ACORequired} onChange={handleACO} />
+          <Button type="submit" className="mt-2 mb-1">Deploy!</Button>
         </Form>
       </div>
       {data.service_requests.map(service_request => (
@@ -117,9 +138,14 @@ export function Dispatch() {
           <div className="card-header">
             <span style={{display:"inline"}} className="custom-control-lg custom-control custom-checkbox">
               <input className="custom-control-input" type="checkbox" name={service_request.id} id={service_request.id} onChange={() => handleMapState(service_request.id)} checked={fillColor[service_request.id] ? fillColor[service_request.id].checked : false} />
-              <label className="custom-control-label" for={service_request.id}></label>
+              <label className="custom-control-label" htmlFor={service_request.id}></label>
             </span>
-            {service_request.animals.length} Animals<Link href={"/hotline/servicerequest/" + service_request.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
+            {service_request.animals.filter((v,i,a)=>a.findIndex(t=>(t.species === v.species && t.size===v.size))===i).map((animal, i) => (
+              <span key={animal.id} style={{textTransform:"capitalize"}}>
+                {i > 0 && ", "}{countMatching(service_request, animal.size, animal.species)}
+              </span>
+            ))}
+            <Link href={"/hotline/servicerequest/" + service_request.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
             {service_request.aco_required ?
             <OverlayTrigger
               key={"aco"}

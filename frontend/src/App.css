@@ -37,7 +37,7 @@
   }
 } */
 
-.leaflet-container {  width: 50%;  height: 55vh; margin-top:2vw;}
+.leaflet-container {  width: 45vw;  height: 55vh; margin-top:2vw;}
 
 .custom-control-lg .custom-control-label::before,
 .custom-control-lg .custom-control-label::after {
