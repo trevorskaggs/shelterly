@@ -57,7 +57,7 @@ export function ShelterTable() {
               <Card.Body>
                 <Card.Title>Buildings</Card.Title>
                   <ListGroup>
-                    {shelter.building ? <span>{shelter.buildings.map(building => (<ListGroup.Item key={building.id}>{building.name} <Link href={"/shelter/building/" + building.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item>))}</span> : <span><li>None</li></span>}
+                    {shelter.buildings ? <span>{shelter.buildings.map(building => (<ListGroup.Item key={building.id}>{building.name} <Link href={"/shelter/building/" + building.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item>))}</span> : <span><li>None</li></span>}
                   </ListGroup>
               </Card.Body>
             </Card>
@@ -65,7 +65,7 @@ export function ShelterTable() {
               <Card.Body>
                 <Card.Title>Rooms</Card.Title>
                   <ListGroup>
-                    {shelter.room ? <span>{shelter.room.map(room => (<ListGroup.Item key={room.id}>{room.name} <Link href={"/shelter/room/" + room.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item>))}</span> : <span><li>None</li></span>}
+                    {shelter.rooms ? <span>{shelter.rooms.map(room => (<ListGroup.Item key={room.id}>{room.name} <Link href={"/shelter/room/" + room.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item>))}</span> : <span><li>None</li></span>}
                   </ListGroup>
                 </Card.Body>
             </Card>

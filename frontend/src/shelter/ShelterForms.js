@@ -10,7 +10,6 @@ import {
   Container,
 } from 'reactstrap';
 import { ReactstrapInput } from 'reactstrap-formik';
-import 'bootstrap/dist/css/bootstrap.min.css';
 import { TextInput, DropDown } from '.././components/Form';
 import * as Yup from 'yup';
 
