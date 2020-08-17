@@ -265,6 +265,7 @@ export const AnimalForm = ({id}) => {
                       name="size"
                       type="text"
                       xs="4"
+                      isClearable={false}
                       ref={sizeRef}
                       options={sizeChoices[props.values.species]}
                       value={props.values.size||''}
@@ -372,19 +373,18 @@ export const AnimalForm = ({id}) => {
                       isClearable={false}
                     />
                   </Col>
+                    <DateTimePicker
+                      label="Last Seen"
+                      name="last_seen"
+                      id="last_seen"
+                      xs="4"
+                      onChange={(date, dateStr) => {
+                        props.setFieldValue("last_seen", dateStr)
+                      }}
+                      value={data.last_seen||null}
+                    />
                 </BootstrapForm.Row>
-                <BootstrapForm.Row className="mt-3">
-                  <DateTimePicker
-                    label="Last Seen"
-                    name="last_seen"
-                    id="last_seen"
-                    xs="3"
-                    onChange={(date, dateStr) => {
-                      props.setFieldValue("last_seen", dateStr)
-                    }}
-                    value={data.last_seen||null}
-                  />
-                </BootstrapForm.Row>
+
                 <BootstrapForm.Row>
                   <Col className="mt-3">
                   <Label for="image">Image File</Label>

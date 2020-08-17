@@ -35,7 +35,7 @@ export function Dispatch() {
   // Count animals of the same species and the same size for an SR.
   const countMatching = (service_request, size, species) => {
     const countMatches = service_request.animals.filter(animal => animal.size === size && animal.species === species);
-    var size_and_species = species;
+    var size_and_species = size;
     if (species !== 'horse') {
       size_and_species = size + " " + species;
     }
@@ -140,7 +140,7 @@ export function Dispatch() {
               <input className="custom-control-input" type="checkbox" name={service_request.id} id={service_request.id} onChange={() => handleMapState(service_request.id)} checked={fillColor[service_request.id] ? fillColor[service_request.id].checked : false} />
               <label className="custom-control-label" htmlFor={service_request.id}></label>
             </span>
-            {service_request.animals.filter((v,i,a)=>a.findIndex(t=>(t.species === v.species && t.size===v.size))===i).map((animal, i) => (
+            {service_request.animals.filter((animal,i,animals)=>animals.findIndex(t=>(t.species === animal.species && t.size===animal.size))===i).map((animal, i) => (
               <span key={animal.id} style={{textTransform:"capitalize"}}>
                 {i > 0 && ", "}{countMatching(service_request, animal.size, animal.species)}
               </span>
