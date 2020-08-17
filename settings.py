@@ -31,8 +31,7 @@ MEDIA_ROOT = 'media'
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
-ALLOWED_HOSTS = ['725rgosijg.execute-api.us-east-2.amazonaws.com', 'localhost']
+ALLOWED_HOSTS = ['localhost']
 
 AUTH_USER_MODEL = 'accounts.ShelterlyUser'
 
@@ -131,13 +130,20 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     "/home/shelterly/frontend/static/"
 ]
-#TODO Change to envvars
-STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-AWS_STORAGE_BUCKET_NAME = 'shelterly-statics'
-AWS_S3_ADDRESSING_STYLE = "virtual"
-AWS_S3_REGION_NAME = 'us-east-2'
-AWS_AUTO_CREATE_BUCKET = True
-# REST
+# Dev settings. Remove when deploying to Zappa
+STATIC_ROOT='/home/shelterly/static'
+SECURE_CONTENT_TYPE_NOSNIFF = False
+DEBUG = True
+
+#TODO Change to envvars.
+# Zappa settings
+# STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+# AWS_STORAGE_BUCKET_NAME = 'shelterly-statics'
+# AWS_S3_ADDRESSING_STYLE = "virtual"
+# AWS_S3_REGION_NAME = 'us-east-2'
+# AWS_AUTO_CREATE_BUCKET = True
+# ALLOWED_HOSTS = ['725rgosijg.execute-api.us-east-2.amazonaws.com',]
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': ('knox.auth.TokenAuthentication',),
     'USER_SERIALIZER': 'accounts.serializers.UserSerializer',
