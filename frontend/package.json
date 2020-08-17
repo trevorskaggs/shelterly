@@ -42,6 +42,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "test:coverage": "npm test -- --coverage --watchAll",
+    "test:coverage-ci": "npm test -- --coverage",
     "test:debug": "react-scripts --inspect-brk test --runInBand --no-cache",
     "eject": "react-scripts eject",
     "dev": "webpack --mode development ./src/index.js --output /home/shelterly/frontend/static/js/main.js",
