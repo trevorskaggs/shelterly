@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBandAid, faCar, faClipboardList, faShieldAlt, faTrailer
 } from '@fortawesome/free-solid-svg-icons';
-import { Circle, Map, Marker, Popup, TileLayer } from "react-leaflet";
+import { CircleMarker, Map, Popup, TileLayer } from "react-leaflet";
 
 import "../App.css";
 import 'leaflet/dist/leaflet.css';
@@ -100,13 +100,14 @@ export function Dispatch() {
               attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
             />
             {data.service_requests.map(service_request => (
-              <Marker
+              <CircleMarker
                 key={service_request.id}
-                position={[
-                  service_request.latitude,
-                  service_request.longitude
-                ]}
+                center={{lat:service_request.latitude, lng: service_request.longitude}}
+                color={fillColor[service_request.id] ? fillColor[service_request.id].color : ""}
+                fill={true}
+                fillOpacity="1"
                 onClick={() => handleMapState(service_request.id)}
+                radius={5}
               >
                 <Popup>
                   <span>
@@ -118,13 +119,7 @@ export function Dispatch() {
                     ))}
                   </span>
                 </Popup>
-                <Circle 
-                  center={{lat:service_request.latitude, lng: service_request.longitude}}
-                  color={fillColor[service_request.id] ? fillColor[service_request.id].color : ""}
-                  fill={true}
-                  fillOpacity="1"
-                  radius={100}/>
-              </Marker>
+              </CircleMarker>
             ))}
           </Map>
         </div>
@@ -140,12 +135,11 @@ export function Dispatch() {
               <input className="custom-control-input" type="checkbox" name={service_request.id} id={service_request.id} onChange={() => handleMapState(service_request.id)} checked={fillColor[service_request.id] ? fillColor[service_request.id].checked : false} />
               <label className="custom-control-label" htmlFor={service_request.id}></label>
             </span>
-            {service_request.animals.filter((animal,i,animals)=>animals.findIndex(t=>(t.species === animal.species && t.size===animal.size))===i).map((animal, i) => (
+            {service_request.animals.filter((animal,i,animals)=>animals.findIndex(a=>(a.species === animal.species && a.size===animal.size))===i).map((animal, i) => (
               <span key={animal.id} style={{textTransform:"capitalize"}}>
                 {i > 0 && ", "}{countMatching(service_request, animal.size, animal.species)}
               </span>
             ))}
-            <Link href={"/hotline/servicerequest/" + service_request.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
             {service_request.aco_required ?
             <OverlayTrigger
               key={"aco"}
@@ -198,6 +192,8 @@ export function Dispatch() {
               <FontAwesomeIcon icon={faTrailer} inverse className="ml-1"/>
             </OverlayTrigger>
              : ""}
+            <span className="ml-2">| &nbsp;{service_request.full_address}</span>
+            <Link href={"/hotline/servicerequest/" + service_request.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
           </div>
         </div>
       ))}
