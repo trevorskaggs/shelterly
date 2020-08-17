@@ -101,7 +101,7 @@ WSGI_APPLICATION = 'wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.environ.get('DATABASE_NAME', get_secret('DATABASE_NAME')),
         'USER': os.environ.get('DATABASE_USER', get_secret('DATABASE_USER')),
         'PASSWORD': os.environ.get('DATABASE_PASSWORD', get_secret('DATABASE_PASSWORD')),
@@ -133,6 +133,7 @@ STATICFILES_DIRS = [
 ]
 STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 AWS_STORAGE_BUCKET_NAME = 'shelterly-statics'
+AWS_S3_ADDRESSING_STYLE = "virtual"
 AWS_S3_REGION_NAME = 'us-east-2'
 AWS_AUTO_CREATE_BUCKET = True
 # REST

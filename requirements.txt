@@ -7,6 +7,6 @@ djangorestframework
 django-storages
 ipython
 pillow
-psycopg2==2.8.2
+psycopg2-binary
 pytz==2018.9
 zappa

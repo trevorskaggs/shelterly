@@ -2,6 +2,7 @@
     "dev": {
         "aws_region": "us-east-2",
         "django_settings": "settings",
+        "exclude": ["node_modules", ".npm", ".vscode-server-insiders", ".ipython", ".vscode", "frontend/src" ],
         "profile_name": "default",
         "project_name": "shelterly",
         "runtime": "python3.8",
