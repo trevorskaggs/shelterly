@@ -4,11 +4,13 @@ import Animals, { AnimalDetail, NewAnimal, UpdateAnimal } from "./animals/Animal
 import { AnimalSearch } from "./animals/AnimalTables"
 import Evac, { NewTeam, TeamList } from "./evac/Evac";
 import Hotline, { NewOwner, NewReporter, NewServiceRequest, OwnerDetail, ReporterDetail, ServiceRequestDetail, ServiceRequestList, UpdateOwner, UpdateReporter, UpdateServiceRequest } from "./hotline/Hotline";
-import { Login } from "./accounts/Accounts";
+import Intake, { IntakeSummary } from "./intake/Intake";
+import { NewOwner, NewReporter, OwnerDetail, ReporterDetail,  UpdateOwner, UpdateReporter } from "./people/People";
 import Shelter, { NewShelter, UpdateShelter, ShelterList } from "./shelter/Shelter";
 import { ShelterDetails} from "./shelter/ShelterTables";
 import { NewBuilding, UpdateBuilding, BuildingDetails } from "./shelter/Building";
 import { NewRoom, UpdateRoom, RoomDetails } from "./shelter/Room";
+import { Login } from "./accounts/Accounts";
 import { EvacTeamTable } from "./evac/EvacTables";
 import { EvacTeamForm } from "./evac/EvacForms";
 
@@ -16,13 +18,14 @@ const routes = {
   "/": () => <Home />,
   "/animals": () => <Animals />,
   "/animals/animal/edit/:id": ({id}) => <UpdateAnimal id={id} />,
-  "/animals/animal/new": () => <NewAnimal />,
   "/animals/search": () => <AnimalSearch />,
   "/animals/animal/:id": ({id}) => <AnimalDetail id={id} />,
   "/evac": () => <Evac />,
   "/evac/evacteam/new": () => <EvacTeamForm />,
   "/evac/evacteam/list": () => <EvacTeamTable />,
   "/hotline": () => <Hotline />,
+  "/hotline/animal/new": () => <NewAnimal />,
+  "/hotline/first_responder/new": () => <NewReporter />,
   "/hotline/owner/edit/:id": ({id}) => <UpdateOwner id={id}/>,
   "/hotline/owner/new": () => <NewOwner />,
   "/hotline/owner/:id": ({id}) => <OwnerDetail id={id}/>,
@@ -44,6 +47,11 @@ const routes = {
   "/shelter/building/:bid/room/new": ({bid}) => <NewRoom bid={bid} />,
   "/shelter/room/edit/:rid": ({rid}) => <UpdateRoom rid={rid} />,
   "/shelter/room/:rid": ({rid}) => <RoomDetails rid={rid} />,
+  "/intake": () => <Intake />,
+  "/intake/animal/new": () => <NewAnimal />,
+  "/intake/owner/new": () => <NewOwner />,
+  "/intake/reporter/new": () => <NewReporter />,
+  "/intake/summary": () => <IntakeSummary />,
   "/login": () => <Login />,
 };
 

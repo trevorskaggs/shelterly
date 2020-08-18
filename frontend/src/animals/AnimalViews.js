@@ -41,8 +41,7 @@ export function AnimalView({id}) {
     fixed: 'unknown',
     aggressive: 'unknown',
     confined: 'unknown',
-    attended_to: 'unknown',
-    collared: 'unknown',
+    injured: 'unknown',
     behavior_notes: '',
     last_seen: null,
   });
