@@ -4,7 +4,7 @@ services:
     image: mdillon/postgis
     container_name: db
   shelterly:
-    image: trevorskaggs/shelterly:new-dev
+    image: trevorskaggs/shelterly:newdev
     container_name: shelterly
     ports:
       - "80:80"
