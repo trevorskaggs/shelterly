@@ -3,7 +3,7 @@ import Home from "./Home";
 import Animals, { AnimalDetail, NewAnimal, UpdateAnimal } from "./animals/Animals"
 import { AnimalSearch } from "./animals/AnimalTables"
 import Evac, { NewTeam, TeamList } from "./evac/Evac";
-import Hotline, { NewOwner, NewReporter, NewServiceRequest, OwnerDetail, ReporterDetail, ServiceRequestDetail, ServiceRequestList, UpdateOwner, UpdateReporter, UpdateServiceRequest } from "./hotline/Hotline";
+import Hotline, { NewServiceRequest, ServiceRequestDetail, ServiceRequestList, UpdateServiceRequest } from "./hotline/Hotline";
 import Intake, { IntakeSummary } from "./intake/Intake";
 import { NewOwner, NewReporter, OwnerDetail, ReporterDetail,  UpdateOwner, UpdateReporter } from "./people/People";
 import Shelter, { NewShelter, UpdateShelter, ShelterList } from "./shelter/Shelter";

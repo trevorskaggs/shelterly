@@ -151,7 +151,7 @@ export const ShelterForm = ({sid}) => {
           </BootstrapForm>
           </Card.Body>
           <ButtonGroup size="lg">
-            <Button type="submit" className="btn-success mr-1">Save</Button>
+            <Button type="button" className="btn-success mr-1" onClick={() => props.submitForm}>Save</Button>
             <Button as={Link} variant="info" href="/shelter">Cancel</Button>
           </ButtonGroup>
         </Card>
