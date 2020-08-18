@@ -3,12 +3,11 @@ import axios from "axios";
 import { Link, navigate } from 'raviger';
 import { Field, Form, Formik } from 'formik';
 import {
-  Button,
-  Col,
-  FormGroup,
-  Row,
-  Container,
+  CustomInput,
+  Label,
+  Fade,
 } from 'reactstrap';
+import { Form as BootstrapForm, Button, ButtonGroup, Card, Col, FormGroup, Row } from "react-bootstrap";
 import { ReactstrapInput } from 'reactstrap-formik';
 import { TextInput, DropDown } from '.././components/Form';
 import * as Yup from 'yup';
@@ -93,84 +92,69 @@ export const ShelterForm = ({sid}) => {
         }}
       >
         {props => (
-          <Form>
-          <Container>
-            <FormGroup>
-              <Row>
-                <Col xs={{size: 5, offset: 1}}>
-                  <Field
-                    type="text"
-                    label="Name*"
-                    name="name"
-                    id="name"
-                    component={ReactstrapInput}
-                  />
-                </Col>
-                <Col xs="5">
-                  <Field
-                    type="text"
-                    label="Description*"
-                    name="description"
-                    id="description"
-                    component={ReactstrapInput}
-                  />
-                  </Col>
-              </Row>
-            </FormGroup>
-
-            <FormGroup>
-            <Row>
-                  <Col xs="8">
-                    <TextInput
-                      type="text"
-                      label="Address"
-                      name="address"
-                      id="address"
-                    />
-                  </Col>
-                  <Col xs="2">
-                    <TextInput
-                      type="text"
-                      label="Apartment"
-                      name="apartment"
-                      id="apartment"
-                    />
-                  </Col>
-                </Row>
-            <Row>
-                  <Col xs="6">
-                    <TextInput
-                      type="text"
-                      label="City"
-                      name="city"
-                      id="city"
-                    />
-                  </Col>
-                  <Col xs="2">
-                    <DropDown
-                      label="State"
-                      name="state"
-                      id="state"
-                      options={state_options}
-                      isClearable={true}
-                      value={props.values.state||''}
-                    />
-                  </Col>
-                  <Col xs="2">
-                    <TextInput
-                      type="text"
-                      label="Zip Code"
-                      name="zip_code"
-                      id="zip_code"
-                    />
-                  </Col>
-                </Row>
-            </FormGroup>
-
+          <Card border="secondary" className="mt-5">
+          <Card.Header as="h5"> Shelter Information</Card.Header>
+          <Card.Body>
+          <BootstrapForm noValidate>
+            <BootstrapForm.Row>
+              <TextInput
+                xs="5"
+                type="text"
+                label="Name*"
+                name="name"
+                id="name"
+              />
+              <TextInput
+                xs="5"
+                type="text"
+                label="Description*"
+                name="description"
+              />
+            </BootstrapForm.Row>
+            <BootstrapForm.Row>
+              <TextInput
+                xs="8"
+                type="text"
+                label="Address*"
+                name="address"
+              />
+              <TextInput
+                xs="2"
+                type="text"
+                label="Apartment"
+                name="apartment"
+              />
+            </BootstrapForm.Row>
+            <BootstrapForm.Row>
+              <TextInput
+                xs="6"
+                type="text"
+                label="City"
+                name="city"
+              />
+              <Col xs="2">
+              <DropDown
+                label="State"
+                name="state"
+                id="state"
+                options={state_options}
+                value={props.values.state || ''}
+              />
+              </Col>
+              <TextInput
+                  xs="2"
+                  type="text"
+                  label="Zip Code"
+                  name="zip_code"
+                />
+            </BootstrapForm.Row>
+          </BootstrapForm>
+          </Card.Body>
+          <ButtonGroup size="lg">
             <Button type="submit" className="btn-success mr-1">Save</Button>
-            <Link className="btn btn-secondary" href="/shelter">Cancel</Link>
-          </Container>
-        </Form>
+            <Button as={Link} variant="info" href="/shelter">Cancel</Button>
+          </ButtonGroup>
+        </Card>
         )}
       </Formik>
     </>
@@ -234,68 +218,85 @@ export const EditShelterForm = ({sid}) => {
           setSubmitting(false);
         }}
       >
-        <Form>
-          <Container>
-            <FormGroup>
-              <Row>
-                <Col xs={{size: 5, offset: 1}}>
-                  <Field
-                    type="text"
-                    label="Name*"
-                    name="name"
-                    id="name"
-                    component={ReactstrapInput}
-                  />
-                </Col>
-                <Col xs="5">
-                  <Field
-                    type="text"
-                    label="Description*"
-                    name="description"
-                    id="description"
-                    component={ReactstrapInput}
-                  />
-                  </Col>
-              </Row>
-            </FormGroup>
-
-            <FormGroup>
-              <Row>
-                    <Col xs="8">
-                      <TextInput
-                        type="text"
-                        label="Address"
-                        name="address"
-                        id="address"
-                      />
-                    </Col>
-                    <Col xs="2">
-                      <TextInput
-                        type="text"
-                        label="Apartment"
-                        name="apartment"
-                        id="apartment"
-                      />
-                    </Col>
-                  </Row>
-              <Row>
-                <Col xs={{size: 5, offset: 1}}>
-                  <Field
-                    type="text"
-                    label="Address"
-                    name="address"
-                    id="address"
-                    component={ReactstrapInput}
-                  />
-                </Col>
-              </Row>
-            </FormGroup>
-
+        <Card border="secondary" className="mt-5">
+          <Card.Header as="h5"> Shelter Information</Card.Header>
+          <Card.Body>
+          <BootstrapForm noValidate>
+            <BootstrapForm.Row>
+              <TextInput
+                xs="5"
+                type="text"
+                label="Name*"
+                name="name"
+                id="name"
+              />
+              <TextInput
+                xs="5"
+                type="text"
+                label="Description*"
+                name="description"
+              />
+            </BootstrapForm.Row>
+            <BootstrapForm.Row>
+              <TextInput
+                xs="8"
+                type="text"
+                label="Address*"
+                name="address"
+              />
+              <TextInput
+                xs="2"
+                type="text"
+                label="Apartment"
+                name="apartment"
+              />
+            </BootstrapForm.Row>
+            <BootstrapForm.Row>
+              <TextInput
+                xs="8"
+                type="text"
+                label="Address*"
+                name="address"
+              />
+              <TextInput
+                xs="2"
+                type="text"
+                label="Apartment"
+                name="apartment"
+              />
+            </BootstrapForm.Row>
+            <BootstrapForm.Row>
+              <TextInput
+                xs="8"
+                type="text"
+                label="City"
+                name="city"
+              />
+              <Col xs="2">
+              <DropDown
+                label="State"
+                name="state"
+                id="state"
+                options={state_options}
+              />
+              </Col>
+              <TextInput
+                  xs="2"
+                  type="text"
+                  label="Zip Code"
+                  name="zip_code"
+                />
+            </BootstrapForm.Row>
+          </BootstrapForm>
+          </Card.Body>
+          <ButtonGroup size="lg">
             <Button type="submit" className="btn-success mr-1">Save</Button>
-            <Link className="btn btn-secondary" href="/shelter">Cancel</Link>
-          </Container>
-        </Form>
+            <Button as={Link} variant="info" href="/shelter">Cancel</Button>
+          </ButtonGroup>
+        </Card>
+        )
       </Formik>
+
     </>
   );
 };
@@ -327,35 +328,32 @@ export const BuildingForm = ({sid}) => {
           }, 500);
         }}
       >
-        <Form>
-          <Container>
-            <FormGroup>
-              <Row>
-                <Col xs={{size: 5, offset: 1}}>
-                  <Field
+        <Card border="secondary" className="mt-5">
+          <Card.Header as="h5"> Building Information</Card.Header>
+            <Card.Body>
+              <BootstrapForm noValidate>
+                <BootstrapForm.Row>
+                  <TextInput
+                    xs="5"
                     type="text"
                     label="Name*"
                     name="name"
                     id="name"
-                    component={ReactstrapInput}
                   />
-                </Col>
-                <Col xs="5">
-                  <Field
+                  <TextInput
+                    xs="5"
                     type="text"
                     label="Description*"
                     name="description"
-                    id="description"
-                    component={ReactstrapInput}
                   />
-                  </Col>
-              </Row>
-            </FormGroup>
-
-            <Button type="submit" className="btn-success mr-1">Save</Button>
-            <Link className="btn btn-secondary" href="/shelter">Cancel</Link>
-          </Container>
-        </Form>
+                </BootstrapForm.Row>
+              </BootstrapForm>
+            </Card.Body>
+              <ButtonGroup size="lg">
+                <Button type="submit" className="btn-success mr-1">Save</Button>
+                <Button as={Link} variant="info" href="/shelter">Cancel</Button>
+              </ButtonGroup>
+        </Card>
       </Formik>
     </>
   );
@@ -416,34 +414,32 @@ export const EditBuildingForm = ({bid}) => {
           }, 500);
         }}
       >
-        <Form>
-          <Container>
-            <FormGroup>
-              <Row>
-                <Col xs={{size: 5, offset: 1}}>
-                  <Field
+        <Card border="secondary" className="mt-5">
+          <Card.Header as="h5"> Building Information</Card.Header>
+            <Card.Body>
+              <BootstrapForm noValidate>
+                <BootstrapForm.Row>
+                  <TextInput
+                    xs="5"
                     type="text"
                     label="Name*"
                     name="name"
                     id="name"
-                    component={ReactstrapInput}
                   />
-                </Col>
-                <Col xs="5">
-                  <Field
+                  <TextInput
+                    xs="5"
                     type="text"
                     label="Description*"
                     name="description"
-                    id="description"
-                    component={ReactstrapInput}
                   />
-                  </Col>
-              </Row>
-            </FormGroup>
-            <Button type="submit" className="btn-success mr-1">Save</Button>
-            <Link className="btn btn-secondary" href="/shelter">Cancel</Link>
-          </Container>
-        </Form>
+                </BootstrapForm.Row>
+              </BootstrapForm>
+            </Card.Body>
+              <ButtonGroup size="lg">
+                <Button type="submit" className="btn-success mr-1">Save</Button>
+                <Button as={Link} variant="info" href="/shelter">Cancel</Button>
+              </ButtonGroup>
+        </Card>
       </Formik>
     </>
   );
@@ -476,35 +472,32 @@ export const RoomForm = ({bid}) => {
           }, 500);
         }}
       >
-        <Form>
-          <Container>
-            <FormGroup>
-              <Row>
-                <Col xs={{size: 5, offset: 1}}>
-                  <Field
+        <Card border="secondary" className="mt-5">
+          <Card.Header as="h5"> Room Information</Card.Header>
+            <Card.Body>
+              <BootstrapForm noValidate>
+                <BootstrapForm.Row>
+                  <TextInput
+                    xs="5"
                     type="text"
                     label="Name*"
                     name="name"
                     id="name"
-                    component={ReactstrapInput}
                   />
-                </Col>
-                <Col xs="5">
-                  <Field
+                  <TextInput
+                    xs="5"
                     type="text"
                     label="Description*"
                     name="description"
-                    id="description"
-                    component={ReactstrapInput}
                   />
-                  </Col>
-              </Row>
-            </FormGroup>
-
-            <Button type="submit" className="btn-success mr-1">Save</Button>
-            <Link className="btn btn-secondary" href="/shelter">Cancel</Link>
-          </Container>
-        </Form>
+                </BootstrapForm.Row>
+              </BootstrapForm>
+            </Card.Body>
+              <ButtonGroup size="lg">
+                <Button type="submit" className="btn-success mr-1">Save</Button>
+                <Button as={Link} variant="info" href="/shelter">Cancel</Button>
+              </ButtonGroup>
+        </Card>
       </Formik>
     </>
   );
@@ -565,34 +558,32 @@ export const EditRoomForm = ({rid}) => {
           }, 500);
         }}
       >
-        <Form>
-          <Container>
-            <FormGroup>
-              <Row>
-                <Col xs={{size: 5, offset: 1}}>
-                  <Field
+        <Card border="secondary" className="mt-5">
+          <Card.Header as="h5"> Room Information</Card.Header>
+            <Card.Body>
+              <BootstrapForm noValidate>
+                <BootstrapForm.Row>
+                  <TextInput
+                    xs="5"
                     type="text"
                     label="Name*"
                     name="name"
                     id="name"
-                    component={ReactstrapInput}
                   />
-                </Col>
-                <Col xs="5">
-                  <Field
+                  <TextInput
+                    xs="5"
                     type="text"
                     label="Description*"
                     name="description"
-                    id="description"
-                    component={ReactstrapInput}
                   />
-                  </Col>
-              </Row>
-            </FormGroup>
-            <Button type="submit" className="btn-success mr-1">Save</Button>
-            <Link className="btn btn-secondary" href="/shelter">Cancel</Link>
-          </Container>
-        </Form>
+                </BootstrapForm.Row>
+              </BootstrapForm>
+            </Card.Body>
+              <ButtonGroup size="lg">
+                <Button type="submit" className="btn-success mr-1">Save</Button>
+                <Button as={Link} variant="info" href="/shelter">Cancel</Button>
+              </ButtonGroup>
+        </Card>
       </Formik>
     </>
   );
