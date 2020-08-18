@@ -61,7 +61,8 @@ def animal_image(request, pk):
 class AnimalViewSet(viewsets.ModelViewSet):
 
     queryset = Animal.objects.all()
-    search_fields = ['name', 'species', 'status', 'request__address', 'request__city', 'owner__first_name', 'owner__last_name', 'owner__address', 'owner__city']
+    search_fields = ['name', 'owner__first_name', 'owner__last_name'] #need to add reporter first and last
+    # search_fields = ['name', 'species', 'status', 'request__address', 'request__city', 'owner__first_name', 'owner__last_name', 'owner__address', 'owner__city']
     filter_backends = (filters.SearchFilter,)
     serializer_class = AnimalSerializer
 
