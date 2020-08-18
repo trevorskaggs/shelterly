@@ -26,7 +26,6 @@ const Shelter = () => (
 
 export const NewShelter = ({sid}) => (
   <div>
-    <h1 style={header_style}>Shelters</h1>
     <ShelterForm sid={sid} />
   </div>
 )
@@ -40,7 +39,6 @@ export const NewShelter = ({sid}) => (
 export const ShelterList = () => (
   <div>
     <h1 style={header_style}>Shelters</h1>
-    <br/>
     <ShelterTable />
   </div>
 )
