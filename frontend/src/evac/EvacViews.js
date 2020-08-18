@@ -7,6 +7,7 @@ import {
   faBandAid, faCar, faClipboardList, faShieldAlt, faTrailer
 } from '@fortawesome/free-solid-svg-icons';
 import { CircleMarker, Map, Popup, TileLayer } from "react-leaflet";
+import L from "leaflet"
 
 import "../App.css";
 import 'leaflet/dist/leaflet.css';
@@ -25,10 +26,10 @@ export function Dispatch() {
   // Handle dynamic SR state and map display.
   const handleMapState = (id) => {
     if (fillColor[id].checked === false) {
-      setFillColor(prevState => ({ ...prevState, [id]: {color:"green", checked:true} }));
+      setFillColor(prevState => ({ ...prevState, [id]: {color:"green", checked:true, hidden:false} }));
     }
     else {
-      setFillColor(prevState => ({ ...prevState, [id]: {color:"red", checked:false} }));
+      setFillColor(prevState => ({ ...prevState, [id]: {color:"red", checked:false, hidden:false} }));
     }
   }
 
@@ -45,6 +46,20 @@ export function Dispatch() {
     }
     var text = countMatches.length + " " + size_and_species + plural;
     return text;
+  }
+
+  // Show/hide list of SRs based on current map zoom
+  const onMove = event => {
+    for (const service_request of data.service_requests) {
+      if (fillColor[service_request.id]) {
+        if (!event.target.getBounds().contains(L.latLng(service_request.latitude, service_request.longitude))) {
+          setFillColor(prevState => ({ ...prevState, [service_request.id]: {color:fillColor[service_request.id].color, checked:fillColor[service_request.id].checked, hidden:true} }));
+        }
+        else {
+          setFillColor(prevState => ({ ...prevState, [service_request.id]: {color:fillColor[service_request.id].color, checked:fillColor[service_request.id].checked, hidden:false} }));
+        }
+      }
+    }
   }
 
   // Hook for initializing data.
@@ -71,8 +86,7 @@ export function Dispatch() {
         if (Object.keys(fillColor).length === 0) {
           const map_dict = {};
           for (const service_request of response.data) {
-            map_dict[service_request.id] = {color:"red", checked:false};
-
+            map_dict[service_request.id] = {color:"red", checked:false, hidden:false};
           }
           setFillColor(map_dict);
         }
@@ -94,7 +108,7 @@ export function Dispatch() {
     <div className="container">
       <div className="row">
         <div className="col-12">
-          <Map className="mx-auto d-block" center={data.center} zoom={12}>
+          <Map className="mx-auto d-block" center={data.center} zoom={12} onMoveEnd={onMove}>
             <TileLayer
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
@@ -109,14 +123,14 @@ export function Dispatch() {
                 onClick={() => handleMapState(service_request.id)}
                 radius={5}
               >
-                <Popup>
+                <Popup autoPan={false}>
                   <span>
-                    {service_request.full_address}<br />
-                    {service_request.animals.map(animal => (
-                      <span key={animal.id}>
-                        {animal.size} {animal.species}
+                    {service_request.animals.filter((animal,i,animals)=>animals.findIndex(a=>(a.species === animal.species && a.size===animal.size))===i).map((animal, i) => (
+                      <span key={animal.id} style={{textTransform:"capitalize"}}>
+                        {i > 0 && ", "}{countMatching(service_request, animal.size, animal.species)}
                       </span>
-                    ))}
+                    ))}<br />
+                    {service_request.full_address}
                   </span>
                 </Popup>
               </CircleMarker>
@@ -129,7 +143,7 @@ export function Dispatch() {
         </Form>
       </div>
       {data.service_requests.map(service_request => (
-        <div key={service_request.id} className="mt-2">
+        <div key={service_request.id} className="mt-2" hidden={fillColor[service_request.id] ? fillColor[service_request.id].hidden : false}>
           <div className="card-header">
             <span style={{display:"inline"}} className="custom-control-lg custom-control custom-checkbox">
               <input className="custom-control-input" type="checkbox" name={service_request.id} id={service_request.id} onChange={() => handleMapState(service_request.id)} checked={fillColor[service_request.id] ? fillColor[service_request.id].checked : false} />
