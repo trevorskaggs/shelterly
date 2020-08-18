@@ -43,8 +43,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "dev": "webpack --mode development ./src/index.js --output /home/shelterly/frontend/static/js/main.js",
-    "wp_build": "webpack --mode production ./src/index.js --output /home/shelterly/frontend/static/js/main.js"
+    "dev": "webpack --mode development ./src/index.js --output /home/shelterly/frontend/src/static/js/main.js",
+    "wp_build": "webpack --mode production ./src/index.js --output /home/shelterly/frontend/src/static/js/main.js"
   },
   "eslintConfig": {
     "extends": "react-app"
