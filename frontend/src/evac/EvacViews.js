@@ -14,13 +14,13 @@ import 'leaflet/dist/leaflet.css';
 
 export function Dispatch() {
 
-  const [data, setData] = useState({service_requests: [], isFetching: false, center:{lat:0, lng:0}});
+  const [data, setData] = useState({service_requests: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
   const [fillColor, setFillColor] = useState({});
-  const [statusOptions, setStatusOptions] = useState({status:"open", aco_required:false});
+  const [statusOptions, setStatusOptions] = useState({aco_required:false});
 
   // Handle aco_required toggle.
-  const handleACO = async event => { 
-    setStatusOptions({status:statusOptions.status, aco_required:!statusOptions.aco_required})
+  const handleACO = async event => {
+    setStatusOptions({aco_required:!statusOptions.aco_required})
   }
 
   // Handle dynamic SR state and map display.
@@ -66,34 +66,28 @@ export function Dispatch() {
   useEffect(() => {
     let source = axios.CancelToken.source();
     const fetchServiceRequests = async () => {
-      // Use stored coords if we already have them, otherwise initialize coords.
-      var coords = {}
-      if (data.center.lat !== 0) {
-        coords = data.center
-      }
-      else {
-        coords = {lat:0, lng:0}
-      }
-      setData({service_requests: [], isFetching: true, center:coords});
       // Fetch ServiceRequest data.
-      await axios.get('/hotline/api/servicerequests/?status=' + statusOptions.status + '&aco_required=' + (statusOptions.aco_required + ""), {
+      await axios.get('/hotline/api/servicerequests/?status=open' + '&aco_required=' + (statusOptions.aco_required + ""), {
         cancelToken: source.token,
       })
       .then(response => {
-        setData({service_requests: response.data, isFetching: false, center:{lat:response.data[0].latitude, lng:response.data[0].longitude}});
+        setData({service_requests: response.data, isFetching: false, bounds:data.bounds});
 
         // Initialize map options dict with all SRs on first load.
         if (Object.keys(fillColor).length === 0) {
           const map_dict = {};
+          const bounds = [];
           for (const service_request of response.data) {
             map_dict[service_request.id] = {color:"red", checked:false, hidden:false};
+            bounds.push([service_request.latitude, service_request.longitude])
           }
           setFillColor(map_dict);
+          setData(prevState => ({ ...prevState, ["bounds"]:L.latLngBounds(bounds) }));
         }
       })
       .catch(error => {
         console.log(error.response);
-        setData({service_requests: [], isFetching: false, center:{lat:0, lng:0}});
+        setData({service_requests: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
       });
     };
     fetchServiceRequests();
@@ -108,7 +102,7 @@ export function Dispatch() {
     <div className="container">
       <div className="row">
         <div className="col-12">
-          <Map className="mx-auto d-block" center={data.center} zoom={12} onMoveEnd={onMove}>
+          <Map className="mx-auto d-block" bounds={data.bounds} onMoveEnd={onMove}>
             <TileLayer
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
