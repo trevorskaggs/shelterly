@@ -1,9 +1,0 @@
-{% extends 'base.html' %}
-
-{% load crispy_forms_tags %}
-
-{% block content %}
-<h1>Evac Teams</h1>
-{% for evac_team in evac_teams %}
-<a href="{% url 'evac:edit_evac_team' evac_team.pk %}">Evac Team {{ evac_team.pk }}</a> - {% for team_member in evac_team.evac_team_members.all %}{{team_member}},{% endfor %}{% endfor %}
-{% endblock content %}
