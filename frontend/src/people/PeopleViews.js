@@ -86,4 +86,4 @@ export function PersonView({id}) {
       </Card.Body>
       </Card>
   );
-};
+}
