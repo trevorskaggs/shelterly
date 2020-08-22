@@ -240,7 +240,7 @@ export const AnimalForm = ({id}) => {
                 <BootstrapForm.Row>
                   <Col xs="2">
                     <DropDown
-                      label="Species"
+                      label="Species*"
                       id="speciesDropdown"
                       name="species"
                       type="text"
@@ -260,7 +260,7 @@ export const AnimalForm = ({id}) => {
                   </Col>
                   <Col xs="4">
                     <DropDown
-                      label="Size"
+                      label="Size*"
                       id="sizeDropdown"
                       name="size"
                       type="text"
