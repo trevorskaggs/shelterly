@@ -1,6 +1,5 @@
 import re
 from django import forms
-from django.core.exceptions import ValidationError
 
 NAME_REGEX = re.compile(r'[^A-Za-z]')
 NAME_ERROR = "Invalid Input: Non-Letter Characters Found"

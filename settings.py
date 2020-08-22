@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 
 import os
 import json
-from django.core.exceptions import ImproperlyConfigured
 
 try:
     with open('config/secrets.json') as f:

@@ -1,11 +1,7 @@
-from django.shortcuts import get_object_or_404, render, redirect
 
-from animals.models import Animal
 from shelter.models import Shelter, Building, Room
-from shelter.forms import ShelterForm, BuildingForm, RoomForm
-from rest_framework import viewsets, generics
+from rest_framework import viewsets
 from .serializer import ShelterSerializer, BuildingSerializer, RoomSerializer
-from django_filters.rest_framework import DjangoFilterBackend
 from django_filters import rest_framework as filters
 
 

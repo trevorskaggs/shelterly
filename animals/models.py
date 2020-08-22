@@ -2,7 +2,6 @@ from django.db import models
 
 from animals.choices import ALL_AGE_CHOICES, ALL_SIZE_CHOICES, SEX_CHOICES, SPECIES_CHOICES, STATUS_CHOICES, UNKNOWN_CHOICES
 from animals.colors import ALL_COLOR_CHOICES
-from location.models import Location
 from hotline.models import ServiceRequest
 from people.models import Person
 
