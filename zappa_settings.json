@@ -1,0 +1,20 @@
+{
+    "dev": {
+        "aws_region": "us-east-2",
+        "django_settings": "settings",
+        "exclude": ["node_modules", ".npm", ".vscode-server-insiders", ".ipython", ".vscode", "frontend/src" ],
+        "profile_name": "default",
+        "project_name": "shelterly",
+        "runtime": "python3.8",
+        "s3_bucket": "shelterly",
+        "slim_handler": true,
+        "timeout_seconds": 900,
+        "manage_roles": false,
+        "role_name": "ZappoShelterly",
+        "role_arn": "arn:aws:iam::363875932628:role/ZappoShelterly",
+        "vpc_config": {
+            "SubnetIds": ["subnet-096d0390725a021d4", "subnet-0d600acd5473461ab", "subnet-03a18c8e8fb91d047"],
+            "SecurityGroupIds": [ "sg-0b78f8e3fd5fb767d" ]
+        }
+    }
+}

@@ -5,7 +5,8 @@ import { Formik } from 'formik';
 import { Form as BootstrapForm, Button, ButtonGroup, Card, Col } from "react-bootstrap";
 import * as Yup from 'yup';
 import { DropDown, TextInput } from '../components/Form';
-
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faArrowAltCircleLeft } from '@fortawesome/free-solid-svg-icons';
 
 const state_options = [{ value: 'AL', label: "AL" }, { value: 'AK', label: "AK" }, { value: 'AZ', label: "AZ" }, { value: 'AR', label: "AR" }, { value: 'CA', label: "CA" }, { value: 'CO', label: "CO" }, { value: 'CT', label: "CT" },
 { value: 'DE', label: "DE" }, { value: 'FL', label: "FL" }, { value: 'GA', label: "GA" }, { value: 'HI', label: "HI" }, { value: 'ID', label: "ID" }, { value: 'IL', label: "IL" }, { value: 'IN', label: "IN" },
@@ -183,7 +184,8 @@ export const PersonForm = ({ id }) => {
       >
         {props => (
           <Card border="secondary" className="mt-5">
-          <Card.Header as="h5">{is_owner ? "Owner" : "Reporter"} Information</Card.Header>
+          <Card.Header as="h5" className="pl-3"> <Link href={"/hotline"} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></Link>
+{is_owner ? "Owner" : "Reporter"} Information</Card.Header>
           <Card.Body>
           <BootstrapForm noValidate>
             <BootstrapForm.Row>
@@ -283,7 +285,6 @@ export const PersonForm = ({ id }) => {
               {/* reporter form save buttons to skip owner */}
               {!is_owner && !id && !is_intake ? <button type="button" className="btn btn-primary mr-1 border" onClick={() => { setSkipOwner(true); props.submitForm() }}>Add Animal(s)</button> : ""}
               <Button variant="secondary" type="button">Reset</Button>
-              <Button as={Link} variant="info" href="/hotline">Back</Button>
             </ButtonGroup>
           </Card>
         )}
