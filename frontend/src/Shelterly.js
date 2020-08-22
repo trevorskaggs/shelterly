@@ -1,19 +1,20 @@
-import React, { Fragment, useContext, useEffect, useState } from "react";
+import React, {
+  Fragment, useContext, useEffect, useState,
+} from 'react';
 import { Link, navigate, useRoutes } from 'raviger';
-import routes from "./router";
-import { ThemeProvider } from 'styled-components';
-import { theme } from './theme';
-import PageNotFound from "./components/PageNotFound";
+import styled, { ThemeProvider } from 'styled-components';
 import { useCookies, withCookies } from 'react-cookie';
-import { AuthContext } from "./accounts/AccountsReducer";
-import { Container, Row, Col, TabContainer} from "react-bootstrap";
-import { loadUser, logoutUser, setAuthToken } from "./accounts/AccountsUtils";
-import Sidebar from "./components/Sidebar"
-import styled from 'styled-components';
-
+import {
+  Container, Row, Col, TabContainer,
+} from 'react-bootstrap';
+import routes from './router';
+import { theme } from './theme';
+import PageNotFound from './components/PageNotFound';
+import { AuthContext } from './accounts/AccountsReducer';
+import { loadUser, logoutUser, setAuthToken } from './accounts/AccountsUtils';
+import Sidebar from './components/Sidebar';
 
 function Shelterly() {
-
   // Initial state.
   const { state, dispatch } = useContext(AuthContext);
   const [cookies, setCookie, removeCookie] = useCookies(['token']);
@@ -23,13 +24,13 @@ function Shelterly() {
   useEffect(() => {
     // If we have a token but no user, attempt to authenticate them.
     if (!state.user && cookies.token) {
-      loadUser({dispatch}, {removeCookie})
+      loadUser({ dispatch }, { removeCookie });
     }
   }, []);
 
   // Redirect to login page if no authenticated user object is present.
   if (!state.user && !cookies.token) {
-    if (!window.location.pathname.includes("login")) {
+    if (!window.location.pathname.includes('login')) {
       navigate('/login');
     }
   }
@@ -38,18 +39,18 @@ function Shelterly() {
 
   return (
     <ThemeProvider theme={theme}>
-    <Container fluid>
-    <Row>
-    <Col xs="auto" className="pl-0">
-    <Sidebar dispatch={dispatch} removeCookie={removeCookie} />
-    </Col>
-    <Col> 
-      <Fragment>
-        {routeResult || <PageNotFound />}
-      </Fragment>
-      </Col>
-      </Row>
-    </Container>
+      <Container fluid>
+        <Row>
+          <Col xs="auto" className="pl-0">
+            <Sidebar dispatch={dispatch} removeCookie={removeCookie} />
+          </Col>
+          <Col>
+            <>
+              {routeResult || <PageNotFound />}
+            </>
+          </Col>
+        </Row>
+      </Container>
     </ThemeProvider>
   );
 }
