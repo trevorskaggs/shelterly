@@ -5,6 +5,7 @@ django-filter
 django-rest-knox
 djangorestframework
 django-storages
+geocoder==1.38.1
 ipython
 pillow
 psycopg2-binary
