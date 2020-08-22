@@ -1,11 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import 'bootswatch/dist/darkly/bootstrap.min.css';
-import { CookiesProvider } from 'react-cookie';
+import "bootswatch/dist/darkly/bootstrap.min.css"
 import * as serviceWorker from './serviceWorker';
+import { CookiesProvider } from 'react-cookie';
 import Shelterly from './Shelterly';
-import { AuthProvider } from './accounts/AccountsReducer';
+import { AuthProvider } from "./accounts/AccountsReducer";
 
 ReactDOM.render(<CookiesProvider><AuthProvider><Shelterly /></AuthProvider></CookiesProvider>, document.getElementById('root'));
 

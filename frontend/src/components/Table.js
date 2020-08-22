@@ -1,10 +1,6 @@
 import React from 'react';
-import {
-  useTable, useSortBy, useResizeColumns, useFlexLayout,
-} from 'react-table';
-import {
-  Container, Row, Col, Table as BootstrapTable,
-} from 'react-bootstrap';
+import { useTable, useSortBy, useResizeColumns, useFlexLayout } from 'react-table';
+import { Container, Row, Col, Table as BootstrapTable } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faSort,
@@ -23,8 +19,8 @@ function Table({ columns, data }) {
       width: 150, // width is used for both the flex-basis and flex-grow
       maxWidth: 200, // maxWidth is only used as a limit for resizing
     }),
-    [],
-  );
+    []
+  )
 
   const {
     getTableProps,
@@ -49,13 +45,13 @@ function Table({ columns, data }) {
   return (
     <BootstrapTable responsive striped bordered hover variant="dark" {...getTableProps()}>
       <thead>
-        {headerGroups.map((headerGroup) => (
+        {headerGroups.map(headerGroup => (
           <tr {...headerGroup.getHeaderGroupProps()}>
-            {headerGroup.headers.map((column) => (
+            {headerGroup.headers.map(column => (
               <th {...column.getHeaderProps(column.getSortByToggleProps())}>
                 {column.render('Header')}
                 <span>
-                  {/* Series of if checks. Display fa-sort if unsorted, fa-sort-down if isSortedDesc, and fa-sort-up if isSortedAsc */}
+                  {/* Series of if checks. Display fa-sort if unsorted, fa-sort-down if isSortedDesc, and fa-sort-up if isSortedAsc*/}
                   {column.isSorted ? (
                     column.isSortedDesc ? (
                       <FontAwesomeIcon icon={faSortDown} />
@@ -76,7 +72,9 @@ function Table({ columns, data }) {
           prepareRow(row);
           return (
             <tr {...row.getRowProps()}>
-              {row.cells.map((cell) => <td {...cell.getCellProps()}>{cell.render('Cell')}</td>)}
+              {row.cells.map(cell => {
+                return <td {...cell.getCellProps()}>{cell.render('Cell')}</td>;
+              })}
             </tr>
           );
         })}

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { Link, navigate } from 'raviger';
+import axios from "axios";
+import { Link, navigate } from "raviger";
 import { Form, Formik } from 'formik';
 import {
   Button,
@@ -10,31 +10,32 @@ import {
   Container,
 } from 'react-bootstrap';
 import * as Yup from 'yup';
-import { MultiSelect, TextInput } from '../components/Form';
+import { MultiSelect, TextInput} from '.././components/Form';
+
 
 export function EvacTeamForm() {
-  const [data, setData] = useState({ options: [], isFetching: false });
+  const [data, setData] = useState({options: [], isFetching: false});
   // Hook for initializing data.
   useEffect(() => {
-    const source = axios.CancelToken.source();
+    let source = axios.CancelToken.source();
     const fetchTeamMembers = async () => {
-      setData({ options: data.options, isFetching: true });
+      setData({options: data.options, isFetching: true});
       // Fetch TeamMember data.
       await axios.get('/accounts/api/user/', {
         cancelToken: source.token,
       })
-        .then((response) => {
-          response.data.forEach((teammember) => {
+      .then(response => {
+        response.data.forEach(function(teammember){
           // Store relevant information for creating valid options.
-            const obj = { value: teammember.id, label: teammember.first_name };
-            data.options.push(obj);
-          });
-          setData({ options: data.options, isFetching: false });
-        })
-        .catch((error) => {
-          console.log(error.response);
-          setData({ options: data.options, isFetching: false });
+          const obj = {value: teammember.id, label: teammember.first_name};
+          data.options.push(obj)
         });
+        setData({options: data.options, isFetching: false});
+      })
+      .catch(error => {
+        console.log(error.response);
+        setData({options: data.options, isFetching: false});
+      });
     };
     fetchTeamMembers();
     // Cleanup.
@@ -61,12 +62,12 @@ export function EvacTeamForm() {
         onSubmit={(values, { setSubmitting }) => {
           setTimeout(() => {
             axios.post('/evac/api/evacteam/', values)
-              .then(() => {
-                navigate('/evac');
-              })
-              .catch((error) => {
-                console.log(error.response);
-              });
+            .then(function() {
+              navigate('/evac');
+            })
+            .catch(error => {
+              console.log(error.response);
+            });
             setSubmitting(false);
           }, 500);
         }}
@@ -75,7 +76,7 @@ export function EvacTeamForm() {
           <Container>
             <FormGroup>
               <MultiSelect label="Evac Team Members*" name="evac_team_members" className="mb-3">
-                {data.options.map(({ value, label }, index) => <option value={value} key={value}>{label}</option>)}
+                {data.options.map(({ value, label }, index) => <option value={value} key={value} >{label}</option>)}
               </MultiSelect>
               <TextInput
                 type="text"
@@ -92,90 +93,92 @@ export function EvacTeamForm() {
       </Formik>
     </>
   );
-}
+};
 
 // No longer used but may still provide a good example for the time being.
-export const TeamMemberForm = () => (
-  <>
-    <Formik
-      initialValues={{
-        first_name: '',
-        last_name: '',
-        cell_phone: '',
-        agency_id: '',
-      }}
-      validationSchema={Yup.object({
-        first_name: Yup.string()
-          .max(50, 'Must be 50 characters or less')
-          .required('Required'),
-        last_name: Yup.string()
-          .max(50, 'Must be 50 characters or less')
-          .required('Required'),
-        cell_phone: Yup.string()
-          .required('Required'),
-        agency_id: Yup.string(),
-      })}
-      onSubmit={(values, { setSubmitting }) => {
-        setTimeout(() => {
-          axios.post('/accounts/api/user/', values)
-            .then(() => {
-              navigate('/evac');
-            })
-            .catch((error) => {
-              console.log(error.response);
-            });
-          setSubmitting(false);
-        }, 500);
-      }}
-    >
-      <Form>
-        <Container>
-          <FormGroup>
-            <Row>
-              <Col xs={{ size: 5, offset: 1 }}>
-                <TextInput
+export const TeamMemberForm = () => {
+    return (
+      <>
+        <Formik
+          initialValues={{
+            first_name: '',
+            last_name: '',
+            cell_phone: '',
+            agency_id: '',
+          }}
+          validationSchema={Yup.object({
+            first_name: Yup.string()
+              .max(50, 'Must be 50 characters or less')
+              .required('Required'),
+            last_name: Yup.string()
+              .max(50, 'Must be 50 characters or less')
+              .required('Required'),
+            cell_phone: Yup.string()
+              .required('Required'),
+            agency_id: Yup.string(),
+          })}
+          onSubmit={(values, { setSubmitting }) => {
+            setTimeout(() => {
+              axios.post('/accounts/api/user/', values)
+              .then(function() {
+                navigate('/evac');
+              })
+              .catch(error => {
+                console.log(error.response);
+              });
+              setSubmitting(false);
+            }, 500);
+          }}
+        >
+          <Form>
+            <Container>
+              <FormGroup>
+                <Row>
+                  <Col xs={{size: 5, offset: 1}}>
+                    <TextInput
                       type="text"
                       label="First Name*"
                       name="first_name"
                       id="first_name"
                     />
-              </Col>
-              <Col xs="5">
-                <TextInput
+                  </Col>
+                  <Col xs="5">
+                    <TextInput
                       type="text"
                       label="Last Name*"
                       name="last_name"
                       id="last_name"
                     />
-              </Col>
-            </Row>
-          </FormGroup>
+                  </Col>
+                </Row>
+              </FormGroup>
 
-          <FormGroup>
-            <Row>
-              <Col xs={{ size: 5, offset: 1 }}>
-                <TextInput
+              <FormGroup>
+                <Row>
+                  <Col xs={{size: 5, offset: 1}}>
+                    <TextInput
                       type="text"
                       label="Cell Phone*"
                       name="cell_phone"
                       id="cell_phone"
                     />
-              </Col>
-              <Col xs="5">
-                <TextInput
+                  </Col>
+                  <Col xs="5">
+                    <TextInput
                       type="text"
                       label="Agency ID"
                       name="agency_id"
                       id="agency_id"
                     />
-              </Col>
-            </Row>
-          </FormGroup>
+                  </Col>
+                </Row>
+              </FormGroup>
 
-          <Button type="submit" className="btn-success mr-1">Save</Button>
-          <Link className="btn btn-secondary" href="/evac">Cancel</Link>
-        </Container>
-      </Form>
-    </Formik>
-  </>
-);
+              <Button type="submit" className="btn-success mr-1">Save</Button>
+              <Link className="btn btn-secondary" href="/evac">Cancel</Link>
+            </Container>
+          </Form>
+        </Formik>
+      </>
+    );
+  };

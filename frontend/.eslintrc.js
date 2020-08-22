@@ -1,27 +1,30 @@
 module.exports = {
-  env: {
-    browser: true,
-    es2020: true,
-  },
-  extends: [
-    'plugin:react/recommended',
-    'airbnb',
-  ],
-  overrides: [
-    {
-      files: ['src/'],
+    "env": {
+        "browser": true,
+        "es6": true
     },
-  ],
-  parserOptions: {
-    ecmaFeatures: {
-      jsx: true,
+    "extends": [
+        "eslint:recommended",
+        "plugin:react/recommended",
+        "plugin:jest-dom/recommended",
+        "plugin:testing-library/react"
+    ],
+    "globals": {
+        "Atomics": "readonly",
+        "SharedArrayBuffer": "readonly"
     },
-    ecmaVersion: 11,
-    sourceType: 'module',
-  },
-  plugins: [
-    'react',
-  ],
-  rules: {
-  },
+    "parserOptions": {
+        "ecmaFeatures": {
+            "jsx": true
+        },
+        "ecmaVersion": 2018,
+        "sourceType": "module"
+    },
+    "plugins": [
+        "react",
+        "jest-dom",
+        "testing-library"
+    ],
+    "rules": {
+    }
 };

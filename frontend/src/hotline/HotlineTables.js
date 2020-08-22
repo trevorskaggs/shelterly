@@ -1,60 +1,59 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import axios from "axios";
 import { Link } from 'raviger';
-import {
-  Button, ButtonGroup, Card, CardGroup, Col, Form, FormControl, InputGroup, ListGroup,
-} from 'react-bootstrap';
+import { Button, ButtonGroup, Card, CardGroup, Col, Form, FormControl, InputGroup, ListGroup} from 'react-bootstrap';
 import Moment from 'react-moment';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faClipboardList,
+  faClipboardList
 } from '@fortawesome/free-solid-svg-icons';
 
 export function ServiceRequestTable() {
-  const [data, setData] = useState({ service_requests: [], isFetching: false });
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusOptions, setStatusOptions] = useState({ status: 'open', openColor: 'primary', closedColor: 'secondary' });
+
+  const [data, setData] = useState({service_requests: [], isFetching: false});
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusOptions, setStatusOptions] = useState({status:"open", openColor:"primary", closedColor:"secondary"});
 
   // Update searchTerm when field input changes.
-  const handleChange = (event) => {
+  const handleChange = event => {
     setSearchTerm(event.target.value);
   };
 
   // Use searchTerm to filter service_requests.
-  const handleSubmit = async (event) => {
+  const handleSubmit = async event => {
     event.preventDefault();
 
-    const source = axios.CancelToken.source();
-    setData({ service_requests: [], isFetching: true });
+    let source = axios.CancelToken.source();
+    setData({service_requests: [], isFetching: true});
     // Fetch ServiceRequest data filtered searchTerm.
-    await axios.get(`/hotline/api/servicerequests/?search=${searchTerm}&status=${statusOptions.status}`, {
+    await axios.get('/hotline/api/servicerequests/?search=' + searchTerm + '&status=' + statusOptions.status, {
       cancelToken: source.token,
     })
-      .then((response) => {
-        setData({ service_requests: response.data, isFetching: false });
-      })
-      .catch((error) => {
-        console.log(error.response);
-        setData({ service_requests: [], isFetching: false });
-      });
-  };
+    .then(response => {
+      setData({service_requests: response.data, isFetching: false});
+    })
+    .catch(error => {
+      console.log(error.response);
+      setData({service_requests: [], isFetching: false});
+    });
+  }
 
   // Hook for initializing data.
   useEffect(() => {
-    const source = axios.CancelToken.source();
+    let source = axios.CancelToken.source();
     const fetchServiceRequests = async () => {
-      setData({ service_requests: [], isFetching: true });
+      setData({service_requests: [], isFetching: true});
       // Fetch ServiceRequest data.
-      await axios.get(`/hotline/api/servicerequests/?search=${searchTerm}&status=${statusOptions.status}`, {
+      await axios.get('/hotline/api/servicerequests/?search=' + searchTerm + '&status=' + statusOptions.status, {
         cancelToken: source.token,
       })
-        .then((response) => {
-          setData({ service_requests: response.data, isFetching: false });
-        })
-        .catch((error) => {
-          console.log(error.response);
-          setData({ service_requests: [], isFetching: false });
-        });
+      .then(response => {
+        setData({service_requests: response.data, isFetching: false});
+      })
+      .catch(error => {
+        console.log(error.response);
+        setData({service_requests: [], isFetching: false});
+      });
     };
     fetchServiceRequests();
     // Cleanup.
@@ -77,99 +76,41 @@ export function ServiceRequestTable() {
           <InputGroup.Append>
             <Button variant="outline-light">Search</Button>
           </InputGroup.Append>
-          <ButtonGroup className="ml-3">
-            <Button variant={statusOptions.openColor} onClick={() => setStatusOptions({ status: 'open', openColor: 'primary', closedColor: 'secondary' })}>Open</Button>
-            <Button variant={statusOptions.closedColor} onClick={() => setStatusOptions({ status: 'closed', openColor: 'secondary', closedColor: 'primary' })}>Closed</Button>
-          </ButtonGroup>
-        </InputGroup>
+            <ButtonGroup className="ml-3">
+              <Button variant={statusOptions.openColor} onClick={() => setStatusOptions({status:"open", openColor:"primary", closedColor:"secondary"})}>Open</Button>
+              <Button variant={statusOptions.closedColor} onClick={() => setStatusOptions({status:"closed", openColor:"secondary", closedColor:"primary"})}>Closed</Button>
+            </ButtonGroup>
+          </InputGroup>
       </Form>
 
-      {data.service_requests.map((service_request) => (
+      {data.service_requests.map(service_request => (
         <div key={service_request.id} className="mt-3">
-          <div className="card-header">
-            {' '}
-            Service Request #
-            {service_request.id}
-            <Link href={`/hotline/servicerequest/${service_request.id}`}>
-              {' '}
-              <FontAwesomeIcon icon={faClipboardList} inverse />
-            </Link>
+          <div className="card-header"> Service Request #{service_request.id}<Link href={"/hotline/servicerequest/" + service_request.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
             <div><Moment format="LLL">{service_request.timestamp}</Moment></div>
           </div>
-          <CardGroup>
-            <Card key={service_request.id}>
-              <Card.Body>
-                <Card.Title>Contacts</Card.Title>
-                <ListGroup>
-                  <ListGroup.Item className="owner">
-                    Owner:
-                    {service_request.owner ? (
-                      <span>
-                        {service_request.owner_object.first_name}
-                        {' '}
-                        {service_request.owner_object.last_name}
-                        {' '}
-                        {service_request.owner_object.phone}
-                        {' '}
-                        <Link href={`/hotline/owner/${service_request.owner}`}>
-                        {' '}
-                        <FontAwesomeIcon icon={faClipboardList} inverse />
-                      </Link>
-                      </span>
-                    ) : 'N/A'}
-                  </ListGroup.Item>
-                  <ListGroup.Item className="reporter">
-                    Reporter:
-                    {service_request.reporter ? (
-                      <span>
-                        {service_request.reporter_object.first_name}
-                        {' '}
-                        {service_request.reporter_object.last_name}
-                        {' '}
-                        {service_request.reporter_object.phone}
-                        {' '}
-                        <Link href={`/hotline/reporter/${service_request.reporter}`}>
-                        {' '}
-                        <FontAwesomeIcon icon={faClipboardList} inverse />
-                      </Link>
-                      </span>
-                    ) : 'N/A'}
-                  </ListGroup.Item>
-                </ListGroup>
-              </Card.Body>
-            </Card>
-            <Card>
-              <Card.Body>
-                <Card.Title>Animals</Card.Title>
-                <ListGroup>
-                  {service_request.animals && service_request.animals.length ? (
-                    <span>
-                      {service_request.animals.map((animal) => (
-                        <ListGroup.Item key={animal.id}>
-                          {animal.name}
-                          {' '}
-                          (
-                        {animal.species}
-                          ) -
-                        {' '}
-                          {animal.status}
-                          {' '}
-                          <Link href={`/animals/animal/${animal.id}`}>
-                          {' '}
-                          <FontAwesomeIcon icon={faClipboardList} inverse />
-                        </Link>
-                        </ListGroup.Item>
-                      ))}
-                    </span>
-                  ) : <span><li>None</li></span>}
-                </ListGroup>
-              </Card.Body>
-            </Card>
-          </CardGroup>
+        <CardGroup>
+          <Card key={service_request.id}>
+            <Card.Body>
+              <Card.Title>Contacts</Card.Title>
+              <ListGroup>
+                <ListGroup.Item className='owner'>Owner: {service_request.owner ? <span>{service_request.owner_object.first_name} {service_request.owner_object.last_name} {service_request.owner_object.phone} <Link href={"/hotline/owner/" + service_request.owner}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></span> : "N/A"}</ListGroup.Item>
+                <ListGroup.Item className='reporter'>Reporter: {service_request.reporter ? <span>{service_request.reporter_object.first_name} {service_request.reporter_object.last_name} {service_request.reporter_object.phone} <Link href={"/hotline/reporter/" + service_request.reporter}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></span> : "N/A"}</ListGroup.Item>
+              </ListGroup>
+            </Card.Body>
+          </Card>
+          <Card>
+            <Card.Body>
+              <Card.Title>Animals</Card.Title>
+              <ListGroup>
+              {service_request.animals && service_request.animals.length ? <span>{service_request.animals.map(animal => (<ListGroup.Item key={animal.id}>{animal.name} ({animal.species}) - {animal.status} <Link href={"/animals/animal/" + animal.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item>))}</span> : <span><li>None</li></span>}
+              </ListGroup>
+            </Card.Body>
+          </Card>
+        </CardGroup>
         </div>
 
       ))}
       <p>{data.isFetching ? 'Fetching service requests...' : <span>{data.service_requests && data.service_requests.length ? '' : 'No Service Requests found.'}</span>}</p>
     </div>
-  );
+  )
 }

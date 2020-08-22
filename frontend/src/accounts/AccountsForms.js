@@ -1,6 +1,6 @@
-import React, { useContext, useEffect } from 'react';
-import axios from 'axios';
-import { navigate } from 'raviger';
+import React, { useContext, useEffect } from "react";
+import axios from "axios";
+import { navigate } from "raviger";
 import { Field, Form, Formik } from 'formik';
 import {
   Button,
@@ -10,10 +10,10 @@ import {
   Row,
 } from 'reactstrap';
 import { ReactstrapInput } from 'reactstrap-formik';
-import * as Yup from 'yup';
+import * as Yup from "yup";
 import { useCookies } from 'react-cookie';
-import { AuthContext } from './AccountsReducer';
-import { loadUser, setAuthToken } from './AccountsUtils';
+import { AuthContext } from "./AccountsReducer";
+import { loadUser, setAuthToken } from "./AccountsUtils";
 
 export const LoginForm = () => {
   const { state, dispatch } = useContext(AuthContext);
@@ -21,14 +21,14 @@ export const LoginForm = () => {
   useEffect(() => {
     // If user is logged in, redirect to Home.
     if (state.user) {
-      navigate('/');
+      navigate("/");
     }
   }, [state.user]);
 
   return (
     <div>
       <Formik
-        initialValues={{ username: '', password: '' }}
+        initialValues={{ username: "", password: "" }}
         validationSchema={Yup.object({
           username: Yup.string()
             .required('A Username is required.'),
@@ -39,19 +39,19 @@ export const LoginForm = () => {
         onSubmit={(values, { setSubmitting }) => {
           setTimeout(() => {
             axios.post('/login/', values)
-              .then((response) => {
-                setAuthToken(response.data.token);
-                setCookie('token', response.data.token, { path: '/' });
-                dispatch({ type: 'LOGIN_SUCCESSFUL', data: response.data });
-                loadUser({ dispatch }, { removeCookie });
-                navigate('/');
-              })
-              .catch((e) => {
-                console.log(e);
-                removeCookie('token', { path: '/' });
-                setAuthToken();
-                dispatch({ type: 'LOGIN_FAILED', data: e });
-              });
+            .then(response => {
+              setAuthToken(response.data.token);
+              setCookie("token", response.data.token, {path: '/'});
+              dispatch({type: 'LOGIN_SUCCESSFUL', data: response.data });
+              loadUser({dispatch}, {removeCookie})
+              navigate('/');
+            })
+            .catch(e => {
+              console.log(e);
+              removeCookie("token", {path: '/'});
+              setAuthToken();
+              dispatch({type: "LOGIN_FAILED", data: e});
+            });
             setSubmitting(false);
           }, 500);
         }}
@@ -84,5 +84,5 @@ export const LoginForm = () => {
         </Form>
       </Formik>
     </div>
-  );
-};
+  )
+}

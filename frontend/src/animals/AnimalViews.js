@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React, {useEffect, useState} from 'react';
+import axios from "axios";
 import { Link } from 'raviger';
 import Moment from 'react-moment';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -8,23 +8,24 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 const btn_style = {
-  width: '50%',
-  margin: '0 auto',
+  width: "50%",
+  margin: "0 auto",
 };
 
 const link_style = {
-  textDecoration: 'none',
+  textDecoration: "none",
 };
 
 const card_style = {
-  width: '90%',
-};
+  width: "90%",
+}
 
 const header_style = {
-  textAlign: 'center',
-};
+  textAlign: "center",
+}
 
-export function AnimalView({ id }) {
+export function AnimalView({id}) {
+
   // Initial animal data.
   const [data, setData] = useState({
     owner: null,
@@ -47,18 +48,18 @@ export function AnimalView({ id }) {
 
   // Hook for initializing data.
   useEffect(() => {
-    const source = axios.CancelToken.source();
+    let source = axios.CancelToken.source();
     const fetchAnimalData = async () => {
       // Fetch Animal data.
-      await axios.get(`/animals/api/animal/${id}/`, {
+      await axios.get('/animals/api/animal/' + id + '/', {
         cancelToken: source.token,
       })
-        .then((response) => {
-          setData(response.data);
-        })
-        .catch((error) => {
-          console.log(error.response);
-        });
+      .then(response => {
+        setData(response.data);
+      })
+      .catch(error => {
+        console.log(error.response);
+      });
     };
     fetchAnimalData();
   }, [id]);
@@ -66,156 +67,47 @@ export function AnimalView({ id }) {
   return (
     <>
       <h1 style={header_style}>
-        Animal Details -
-        {' '}
-        {data.status}
-        <Link href={`/animals/animal/edit/${id}`}>
-          {' '}
-          <FontAwesomeIcon icon={faEdit} inverse />
-        </Link>
+        Animal Details - {data.status}<Link href={"/animals/animal/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
       </h1>
-      <br />
+      <br/>
       <div style={card_style} className="card card-body bg-light mb-2 mx-auto">
         <div className="row">
           <div className="col-6">
-            <p>
-              <b>Name:</b>
-              {' '}
-              {data.name}
-            </p>
-            <p>
-              <b>Species:</b>
-              {' '}
-              {data.species}
-            </p>
-            <p>
-              <b>Age:</b>
-              {' '}
-              {data.age || 'Unknown'}
-            </p>
-            <p>
-              <b>Sex:</b>
-              {' '}
-              {data.sex || 'Unknown'}
-            </p>
-            <p>
-              <b>Size:</b>
-              {' '}
-              {data.size || 'Unknown'}
-            </p>
-            {data.last_seen ? (
-              <p>
-                <b>Last Seen:</b>
-                {' '}
-                <Moment format="LLL">{data.last_seen}</Moment>
-              </p>
-            ) : ''}
-            {data.pcolor ? (
-              <p>
-                <b>Primary Color:</b>
-                {' '}
-                {data.pcolor}
-              </p>
-            ) : ''}
-            {data.scolor ? (
-              <p>
-                <b>Secondary Color:</b>
-                {' '}
-                {data.scolor}
-              </p>
-            ) : ''}
-            {data.color_notes ? (
-              <p>
-                <b>Color Notes:</b>
-                {' '}
-                {data.color_notes}
-              </p>
-            ) : ''}
-            {data.behavior_notes ? (
-              <p>
-                <b>Behavior Notes:</b>
-                {' '}
-                {data.behavior_notes}
-              </p>
-            ) : ''}
+            <p><b>Name:</b> {data.name}</p>
+            <p><b>Species:</b> {data.species}</p>
+            <p><b>Age:</b> {data.age||"Unknown"}</p>
+            <p><b>Sex:</b> {data.sex||"Unknown"}</p>
+            <p><b>Size:</b> {data.size||"Unknown"}</p>
+            {data.last_seen ? <p><b>Last Seen:</b> <Moment format="LLL">{data.last_seen}</Moment></p> : ""}
+            {data.pcolor ? <p><b>Primary Color:</b> {data.pcolor}</p> : ""}
+            {data.scolor ? <p><b>Secondary Color:</b> {data.scolor}</p> : ""}
+            {data.color_notes ? <p><b>Color Notes:</b> {data.color_notes}</p> : ""}
+            {data.behavior_notes ? <p><b>Behavior Notes:</b> {data.behavior_notes}</p> : ""}
           </div>
           <div className="col-6">
-            <p>
-              <b>Fixed:</b>
-              {' '}
-              {data.fixed}
-            </p>
-            <p>
-              <b>Aggressive:</b>
-              {' '}
-              {data.aggressive}
-            </p>
-            <p>
-              <b>Confined:</b>
-              {' '}
-              {data.confined}
-            </p>
-            <p>
-              <b>Injured:</b>
-              {' '}
-              {data.injured}
-            </p>
+            <p><b>Fixed:</b> {data.fixed}</p>
+            <p><b>Aggressive:</b> {data.aggressive}</p>
+            <p><b>Confined:</b> {data.confined}</p>
+            <p><b>Injured:</b> {data.injured}</p>
           </div>
         </div>
       </div>
       <div style={card_style} className="card card-body bg-light mb-2 mx-auto">
         <div className="row">
           <div className="col-10">
-            {data.request ? (
-              <div>
-                <b>
-                  Request #
-                  {data.request}
-                </b>
-                <Link href={`/hotline/servicerequest/${data.request}`}>
-                  {' '}
-                  <FontAwesomeIcon icon={faClipboardList} inverse />
-                </Link>
-              </div>
-            ) : ''}
-            {data.owner ? (
-              <div>
-                <b>Owner:</b>
-                {' '}
-                {data.owner_object.first_name}
-                {' '}
-                {data.owner_object.last_name}
-                {' '}
-                {data.owner_object.phone}
-                {' '}
-                {data.owner_object.first_name !== 'Unknown' ? (
-                  <Link href={`/hotline/owner/${data.owner}`}>
-                    {' '}
-                    <FontAwesomeIcon icon={faClipboardList} inverse />
-                  </Link>
-                ) : (
-                  <Link href={`/hotline/owner/edit/${data.owner}`}>
-                    {' '}
-                    <FontAwesomeIcon icon={faEdit} inverse />
-                  </Link>
-                )}
-              </div>
-            ) : ''}
-            <div>
-              <b>Location:</b>
-              {' '}
-              {data.full_address ? data.full_address : 'Unknown'}
-            </div>
+            {data.request ? <div><b>Request #{data.request}</b><Link href={"/hotline/servicerequest/" + data.request}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></div> : ""}
+            {data.owner ? <div><b>Owner:</b> {data.owner_object.first_name} {data.owner_object.last_name} {data.owner_object.phone} {data.owner_object.first_name !== 'Unknown' ? <Link href={"/hotline/owner/" + data.owner}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link> : <Link href={"/hotline/owner/edit/" + data.owner}> <FontAwesomeIcon icon={faEdit} inverse /></Link>}</div> : ""}
+            <div><b>Location:</b> {data.full_address ? data.full_address : "Unknown"}</div>
           </div>
         </div>
       </div>
-      <hr />
+      <hr/>
       <div style={btn_style}>
-        <Link href={`/animals/animal/edit/${id}`} style={link_style} className="btn btn-primary btn-lg btn-block mb-2">EDIT ANIMAL</Link>
-        <br />
-        <br />
+        <Link href={"/animals/animal/edit/" + id} style={link_style} className="btn btn-primary btn-lg btn-block mb-2">EDIT ANIMAL</Link>
+        <br/>
+        <br/>
         <Link className="btn btn-secondary btn-lg btn-block" href="/hotline/">BACK</Link>
       </div>
     </>
   );
-}
+};

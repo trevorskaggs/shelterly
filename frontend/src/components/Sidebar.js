@@ -3,10 +3,8 @@ import styled from 'styled-components';
 import { Link } from 'raviger';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Nav, Button } from 'react-bootstrap';
-import {
-  faUserCircle, faRedo, faClipboardList, faHome, faBullhorn, faPhone, faSignOutAlt,
-} from '@fortawesome/free-solid-svg-icons';
-import { logoutUser } from '../accounts/AccountsUtils';
+import { faUserCircle , faRedo, faClipboardList, faHome, faBullhorn, faPhone, faSignOutAlt} from '@fortawesome/free-solid-svg-icons';
+import { logoutUser} from ".././accounts/AccountsUtils";
 
 export const StyledMenu = styled(Nav)`
   background: ${({ theme }) => theme.primaryDark};
@@ -59,46 +57,30 @@ export const StyledMenu = styled(Nav)`
   }
 `;
 
-const Menu = ({ dispatch, removeCookie, ...props }) => (
-  <StyledMenu {...props} className="flex-column">
+const Menu = ({ dispatch, removeCookie, ...props }) => {
+    
+    return (
+    <StyledMenu  {...props} className="flex-column">
     <img src="/static/images/shelterly.png" alt="logo" />
     <div className="logo border-bottom">SHELTERLY</div>
-    <Link href="/hotline">
-      <FontAwesomeIcon icon={faPhone} fixedWidth inverse />
-      {' '}
-      HOTLINE
-    </Link>
-    <Link href="/evac">
-      <FontAwesomeIcon icon={faBullhorn} fixedWidth inverse />
-      {' '}
-      EVAC
-    </Link>
-    <Link href="/intake">
-      <FontAwesomeIcon icon={faRedo} fixedWidth inverse />
-      {' '}
-      INTAKE
-    </Link>
-    <Link href="/shelter">
-      <FontAwesomeIcon icon={faHome} fixedWidth inverse />
-      {' '}
-      SHELTER
-    </Link>
-    <Link onClick={() => logoutUser({ dispatch }, { removeCookie })} href="#">
-      <FontAwesomeIcon icon={faSignOutAlt} fixedWidth inverse />
-      {' '}
-      SIGN OUT
-    </Link>
-  </StyledMenu>
-);
+      <Link href="/hotline" ><FontAwesomeIcon icon={faPhone} fixedWidth inverse/> HOTLINE</Link>
+      <Link href="/evac"><FontAwesomeIcon icon={faBullhorn} fixedWidth inverse/>  EVAC</Link>
+      <Link href="/intake"><FontAwesomeIcon icon={faRedo} fixedWidth inverse/>  INTAKE</Link>
+      <Link href="/shelter"><FontAwesomeIcon icon={faHome} fixedWidth inverse/> SHELTER</Link>
+      <Link onClick={() => logoutUser({dispatch}, {removeCookie})} href="#"><FontAwesomeIcon icon={faSignOutAlt} fixedWidth inverse/> SIGN OUT</Link>
+    </StyledMenu>
+    )
+  }
 
 function Sidebar({ dispatch, removeCookie, ...props }) {
-  const node = useRef();
-  const menuId = 'main-menu';
+    
+    const node = useRef();
+    const menuId = "main-menu";
 
-  return (
-    <div ref={node}>
-      <Menu id={menuId} dispatch={dispatch} removeCookie={removeCookie} />
-    </div>
-  );
+    return (
+        <div ref={node}>
+            <Menu id={menuId} dispatch={dispatch} removeCookie={removeCookie}/>
+        </div>
+    )
 }
 export default Sidebar;

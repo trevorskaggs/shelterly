@@ -1,4 +1,4 @@
-import React, { useReducer } from 'react';
+import React, { useReducer } from "react";
 
 const initialState = {
   token: null,
@@ -9,32 +9,24 @@ const initialState = {
 };
 
 function auth_reducer(state, action) {
+
   switch (action.type) {
+
     case 'USER_LOADING':
-      return { ...state, isLoading: true };
+      return {...state, isLoading: true};
 
     case 'USER_LOADED':
-      return {
-        ...state, isAuthenticated: true, isLoading: false, user: action.user,
-      };
+      return {...state, isAuthenticated: true, isLoading: false, user: action.user};
 
     case 'LOGIN_SUCCESSFUL':
-      return {
-        ...state, ...action.data, isAuthenticated: true, isLoading: false, errors: null,
-      };
+      return {...state, ...action.data, isAuthenticated: true, isLoading: false, errors: null};
 
     case 'AUTHENTICATION_ERROR':
     case 'LOGIN_FAILED':
     case 'LOGOUT_SUCCESSFUL':
     case 'LOGOUT_FAILED':
-      return {
-        ...state,
-        errors: action.data,
-        token: null,
-        user: null,
-        isAuthenticated: false,
-        isLoading: false,
-      };
+      return {...state, errors: action.data, token: null, user: null,
+        isAuthenticated: false, isLoading: false};
 
     default:
       return state;
@@ -52,4 +44,4 @@ function AuthProvider(props) {
   );
 }
 
-export { AuthContext, AuthProvider };
+export {AuthContext, AuthProvider}
