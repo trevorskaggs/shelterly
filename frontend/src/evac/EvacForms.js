@@ -93,7 +93,7 @@ export function EvacTeamForm() {
       </Formik>
     </>
   );
-}
+};
 
 // No longer used but may still provide a good example for the time being.
 export const TeamMemberForm = () => {

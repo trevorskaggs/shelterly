@@ -6,7 +6,6 @@ module.exports = {
     "extends": [
         "eslint:recommended",
         "plugin:react/recommended",
-        "plugin:jest/recommended",
         "plugin:jest-dom/recommended",
         "plugin:testing-library/react"
     ],
@@ -23,7 +22,6 @@ module.exports = {
     },
     "plugins": [
         "react",
-        "jest",
         "jest-dom",
         "testing-library"
     ],

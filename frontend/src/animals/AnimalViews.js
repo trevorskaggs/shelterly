@@ -110,4 +110,4 @@ export function AnimalView({id}) {
       </div>
     </>
   );
-}
+};

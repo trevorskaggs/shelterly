@@ -98,7 +98,7 @@ export const AnimalForm = ({id}) => {
   function handleImageChange(e) {
     console.log(e);
     setImage(e.target.files[0]);
-  }
+  };
   
   return (
     <span key={key}>

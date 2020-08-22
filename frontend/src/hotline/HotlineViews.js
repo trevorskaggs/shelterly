@@ -122,4 +122,4 @@ export function ServiceRequestView({id}) {
       </div>
     </>
   );
-}
+};
