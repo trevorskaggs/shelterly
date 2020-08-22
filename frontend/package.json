@@ -1,6 +1,7 @@
 {
   "name": "frontend",
   "version": "0.1.0",
+  "proxy": "http://0.0.0.0:8000",
   "private": true,
   "dependencies": {
     "@babel/runtime": "^7.11.0",
@@ -15,6 +16,7 @@
     "axios": "^0.19.2",
     "bootstrap": "^4.4.1",
     "bootswatch": "^4.5.0",
+    "file-loader": "^6.0.0",
     "formik": "^2.1.4",
     "formik-material-ui": "^2.0.0-beta.1",
     "moment": "^2.24.0",
@@ -45,8 +47,8 @@
     "test:coverage-ci": "npm test -- --coverage",
     "test:debug": "react-scripts --inspect-brk test --runInBand --no-cache",
     "eject": "react-scripts eject",
-    "dev": "webpack --mode development ./src/index.js --output /home/shelterly/frontend/static/js/main.js",
-    "wp_build": "webpack --mode production ./src/index.js --output /home/shelterly/frontend/static/js/main.js"
+    "dev": "webpack --mode development ./src/index.js --output /home/shelterly/frontend/src/static/js/main.js",
+    "wp_build": "webpack --mode production ./src/index.js --output /home/shelterly/frontend/src/static/js/main.js"
   },
   "eslintConfig": {
     "extends": "react-app"
