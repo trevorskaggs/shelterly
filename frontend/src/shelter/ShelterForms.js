@@ -64,11 +64,7 @@ export const ShelterForm = ({sid}) => {
       <Formik
         initialValues={data}
         enableReinitialize={true}
-        validationSchema={Yup.object({
-          name: Yup.string()
-            .max(50, 'Must be 50 characters or less')
-            .required('Required'),
-        })}
+
         onSubmit={(values, { setSubmitting }) => {
           if (sid) {
             axios.put('http://0.0.0.0:8000/shelter/api/shelter/' + sid + '/', values)
@@ -151,7 +147,7 @@ export const ShelterForm = ({sid}) => {
           </BootstrapForm>
           </Card.Body>
           <ButtonGroup size="lg">
-            <Button type="button" className="btn-success mr-1" onClick={() => props.submitForm}>Save</Button>
+            <Button type="submit" onClick={() => { props.submitForm()}}>Save</Button>
             <Button as={Link} variant="info" href="/shelter">Cancel</Button>
           </ButtonGroup>
         </Card>
@@ -202,11 +198,6 @@ export const EditShelterForm = ({sid}) => {
       <Formik
         initialValues={data}
         enableReinitialize={true}
-        validationSchema={Yup.object({
-          name: Yup.string()
-            .max(50, 'Must be 50 characters or less')
-            .required('Required'),
-        })}
         onSubmit={(values, { setSubmitting }) => {
           axios.put('http://localhost:8000/shelter/api/shelter/' + sid + '/', values)
           .then(function() {
@@ -218,7 +209,8 @@ export const EditShelterForm = ({sid}) => {
           setSubmitting(false);
         }}
       >
-        <Card border="secondary" className="mt-5">
+        {props => (
+          <Card border="secondary" className="mt-5">
           <Card.Header as="h5"> Shelter Information</Card.Header>
           <Card.Body>
           <BootstrapForm noValidate>
@@ -290,11 +282,11 @@ export const EditShelterForm = ({sid}) => {
           </BootstrapForm>
           </Card.Body>
           <ButtonGroup size="lg">
-            <Button type="submit" className="btn-success mr-1">Save</Button>
+            <Button type="submit" onClick={() => { props.submitForm()}}>Save</Button>
             <Button as={Link} variant="info" href="/shelter">Cancel</Button>
           </ButtonGroup>
         </Card>
-        )
+        )}
       </Formik>
 
     </>
@@ -310,11 +302,6 @@ export const BuildingForm = ({sid}) => {
           description: '',
           shelter: sid,
         }}
-        validationSchema={Yup.object({
-          name: Yup.string()
-            .max(50, 'Must be 50 characters or less')
-            .required('Required'),
-        })}
         onSubmit={(values, { setSubmitting }) => {
           setTimeout(() => {
             axios.post('http://0.0.0.0:8000/shelter/api/building/', values)
@@ -328,7 +315,8 @@ export const BuildingForm = ({sid}) => {
           }, 500);
         }}
       >
-        <Card border="secondary" className="mt-5">
+        {props => (
+          <Card border="secondary" className="mt-5">
           <Card.Header as="h5"> Building Information</Card.Header>
             <Card.Body>
               <BootstrapForm noValidate>
@@ -350,10 +338,11 @@ export const BuildingForm = ({sid}) => {
               </BootstrapForm>
             </Card.Body>
               <ButtonGroup size="lg">
-                <Button type="submit" className="btn-success mr-1">Save</Button>
+                <Button type="submit" onClick={() => { props.submitForm()}}>Save</Button>
                 <Button as={Link} variant="info" href="/shelter">Cancel</Button>
               </ButtonGroup>
         </Card>
+        )}
       </Formik>
     </>
   );
@@ -395,11 +384,6 @@ export const EditBuildingForm = ({bid}) => {
       <Formik
         initialValues={data}
         enableReinitialize={true}
-        validationSchema={Yup.object({
-          name: Yup.string()
-            .max(50, 'Must be 50 characters or less')
-            .required('Required'),
-        })}
         onSubmit={(values, { setSubmitting }) => {
           setTimeout(() => {
             console.log(values)
@@ -414,7 +398,8 @@ export const EditBuildingForm = ({bid}) => {
           }, 500);
         }}
       >
-        <Card border="secondary" className="mt-5">
+        {props => (
+          <Card border="secondary" className="mt-5">
           <Card.Header as="h5"> Building Information</Card.Header>
             <Card.Body>
               <BootstrapForm noValidate>
@@ -436,16 +421,46 @@ export const EditBuildingForm = ({bid}) => {
               </BootstrapForm>
             </Card.Body>
               <ButtonGroup size="lg">
-                <Button type="submit" className="btn-success mr-1">Save</Button>
+                <Button type="submit" onClick={() => { props.submitForm()}}>Save</Button>
                 <Button as={Link} variant="info" href="/shelter">Cancel</Button>
               </ButtonGroup>
         </Card>
+        )}
       </Formik>
     </>
   );
 };
 
 export const RoomForm = ({bid}) => {
+    // Initial Person data.
+    const [data, setData] = useState({
+      shelter: '',
+    });
+  
+    // Hook for initializing data.
+    useEffect(() => {
+      let source = axios.CancelToken.source();
+      
+      const fetchBuildingShelterData = async () => {
+        // Fetch ServiceRequest data.
+        await axios.get('http://0.0.0.0:8000/shelter/api/building/' + bid + '/', {
+          cancelToken: source.token,
+        })
+        .then(response => {
+          setData(response.data);
+        })
+        .catch(error => {
+          console.log(error.response);
+        });
+      };
+      fetchBuildingShelterData();
+      console.log(data)
+      
+      // Cleanup.
+      return () => {
+        source.cancel();
+      };
+    }, [bid]);
   return (
     <>
       <Formik
@@ -453,12 +468,8 @@ export const RoomForm = ({bid}) => {
           name: '',
           description: '',
           building: bid,
+          shelter: data.shelter,
         }}
-        validationSchema={Yup.object({
-          name: Yup.string()
-            .max(50, 'Must be 50 characters or less')
-            .required('Required'),
-        })}
         onSubmit={(values, { setSubmitting }) => {
           setTimeout(() => {
             axios.post('http://0.0.0.0:8000/shelter/api/room/', values)
@@ -472,7 +483,8 @@ export const RoomForm = ({bid}) => {
           }, 500);
         }}
       >
-        <Card border="secondary" className="mt-5">
+        {props => (
+          <Card border="secondary" className="mt-5">
           <Card.Header as="h5"> Room Information</Card.Header>
             <Card.Body>
               <BootstrapForm noValidate>
@@ -494,10 +506,11 @@ export const RoomForm = ({bid}) => {
               </BootstrapForm>
             </Card.Body>
               <ButtonGroup size="lg">
-                <Button type="submit" className="btn-success mr-1">Save</Button>
+                <Button type="submit" onClick={() => { props.submitForm()}}>Save</Button>
                 <Button as={Link} variant="info" href="/shelter">Cancel</Button>
               </ButtonGroup>
         </Card>
+        )}
       </Formik>
     </>
   );
@@ -539,11 +552,6 @@ export const EditRoomForm = ({rid}) => {
       <Formik
         initialValues={data}
         enableReinitialize={true}
-        validationSchema={Yup.object({
-          name: Yup.string()
-            .max(50, 'Must be 50 characters or less')
-            .required('Required'),
-        })}
         onSubmit={(values, { setSubmitting }) => {
           setTimeout(() => {
             console.log(values)
@@ -558,7 +566,8 @@ export const EditRoomForm = ({rid}) => {
           }, 500);
         }}
       >
-        <Card border="secondary" className="mt-5">
+        {props => (
+          <Card border="secondary" className="mt-5">
           <Card.Header as="h5"> Room Information</Card.Header>
             <Card.Body>
               <BootstrapForm noValidate>
@@ -580,10 +589,11 @@ export const EditRoomForm = ({rid}) => {
               </BootstrapForm>
             </Card.Body>
               <ButtonGroup size="lg">
-                <Button type="submit" className="btn-success mr-1">Save</Button>
+                <Button type="submit" onClick={() => { props.submitForm()}}>Save</Button>
                 <Button as={Link} variant="info" href="/shelter">Cancel</Button>
               </ButtonGroup>
         </Card>
+        )}
       </Formik>
     </>
   );
