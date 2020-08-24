@@ -1,0 +1,14 @@
+version: '3'
+services:
+  shelterly:
+    volumes:
+      # Required for local development with repo outside docker container
+      - .:/home/shelterly/shelterly
+      - venv:/home/shelterly/venv
+    ports:
+      - "80:80"
+      - "8000:8000"
+      - "3000:3000"
+    entrypoint: tail -f /dev/null
+volumes:
+  venv:

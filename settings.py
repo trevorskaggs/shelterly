@@ -31,8 +31,6 @@ MEDIA_ROOT = 'media'
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-CORS_ORIGIN_ALLOW_ALL = True
 ALLOWED_HOSTS = ['*']
 
 AUTH_USER_MODEL = 'accounts.ShelterlyUser'
@@ -49,8 +47,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_filters',
     'corsheaders',
-    'crispy_forms',
-    'coverage',
     'accounts',
     'animals',
     'evac',
@@ -61,6 +57,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'knox',
     'shelter',
+    'frontend',
 ]
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
@@ -103,11 +100,11 @@ WSGI_APPLICATION = 'wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.environ.get('DATABASE_NAME'),
         'USER': os.environ.get('DATABASE_USER'),
         'PASSWORD': os.environ.get('DATABASE_PASSWORD'),
-        'HOST': os.environ.get('DATABASE_HOSTNAME'),
+        'HOST': os.environ.get('DATABASE_HOST'),
         'PORT': 5432,
     }
 }
@@ -131,12 +128,22 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
-    "/home/shelterly/frontend/static/"
+    "/home/shelterly/frontend/src/static/"
 ]
-STATIC_ROOT = "static"
+# Dev settings. Remove when deploying to Zappa
+STATIC_ROOT='/home/shelterly/static'
+SECURE_CONTENT_TYPE_NOSNIFF = False
+DEBUG = True
 
+#TODO Change to envvars.
+# Zappa settings
+# STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+# AWS_STORAGE_BUCKET_NAME = 'shelterly-statics'
+# AWS_S3_ADDRESSING_STYLE = "virtual"
+# AWS_S3_REGION_NAME = 'us-east-2'
+# AWS_AUTO_CREATE_BUCKET = True
+# ALLOWED_HOSTS = ['725rgosijg.execute-api.us-east-2.amazonaws.com',]
 
-# REST
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': ('knox.auth.TokenAuthentication',),
     'USER_SERIALIZER': 'accounts.serializers.UserSerializer',

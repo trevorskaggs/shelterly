@@ -5,7 +5,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Nav, Button } from 'react-bootstrap';
 import { faUserCircle , faRedo, faClipboardList, faHome, faBullhorn, faPhone, faSignOutAlt} from '@fortawesome/free-solid-svg-icons';
 import { logoutUser} from ".././accounts/AccountsUtils";
-import logo from ".././static/images/shelterly.png"
 
 export const StyledMenu = styled(Nav)`
   background: ${({ theme }) => theme.primaryDark};
@@ -62,7 +61,7 @@ const Menu = ({ dispatch, removeCookie, ...props }) => {
     
     return (
     <StyledMenu  {...props} className="flex-column">
-    <img src={logo} alt="logo" />
+    <img src="/static/images/shelterly.png" alt="logo" />
     <div className="logo border-bottom">SHELTERLY</div>
       <Link href="/hotline" ><FontAwesomeIcon icon={faPhone} fixedWidth inverse/> HOTLINE</Link>
       <Link href="/evac"><FontAwesomeIcon icon={faBullhorn} fixedWidth inverse/>  EVAC</Link>
