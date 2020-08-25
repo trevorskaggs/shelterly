@@ -120,5 +120,6 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = ServiceRequest.objects.all()
         status = self.request.query_params.get('status', '')
-        queryset = queryset.filter(status=status).distinct()
+        if status in ('open', 'assigned', 'closed'):
+            queryset = queryset.filter(status=status).distinct()
         return queryset

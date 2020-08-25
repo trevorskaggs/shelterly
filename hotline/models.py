@@ -47,4 +47,4 @@ class ServiceRequest(Location):
         return 'service_request'
 
     class Meta:
-        ordering = []
+        ordering = ['timestamp']
