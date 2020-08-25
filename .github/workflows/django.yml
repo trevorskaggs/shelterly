@@ -34,7 +34,7 @@ jobs:
       env:
         DATABASE_USER: postgres
         DATABASE_PASSWORD: postgres
-        DATABASE_HOSTNAME: 127.0.0.1
+        DATABASE_HOST: 127.0.0.1
         DATABASE_NAME: github_actions
         SECRET_KEY: 895!jaglknm89fyu789&#
       run: |

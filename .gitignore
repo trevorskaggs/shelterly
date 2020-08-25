@@ -8,3 +8,4 @@ frontend/node_modules
 .local/
 .npm/
 .ssh/
+docker-compose.override.yml
