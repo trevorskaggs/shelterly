@@ -44,20 +44,20 @@ export function ShelterTable() {
       source.cancel();
     };
   }, []);
-
+  console.log(data.shelters)
   return (
     <div className="ml-2 mr-2">
       {data.shelters.map(shelter => (
-        <div key={shelter.id} className="mt-5">
+        <div key={shelter.id} className="mt-3">
           <div className="card-header">{shelter.name}<Link href={"/shelter/" + shelter.id}> <FontAwesomeIcon icon={faClipboardList} inverse/></Link>
-          <div style={{width:400,height:25, minHeight:25}}>{shelter.full_address}</div></div>
+        <div style={{width:400,height:25, minHeight:25}}>{shelter.full_address}</div></div>
         
           <CardGroup>
             <Card key={shelter.id}>
               <Card.Body>
                 <Card.Title>Buildings</Card.Title>
                   <ListGroup>
-                    {shelter.buildings ? <span>{shelter.buildings.map(building => (<ListGroup.Item key={building.id}>{building.name} <Link href={"/shelter/building/" + building.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item>))}</span> : <span><li>None</li></span>}
+                    {shelter.buildings == '' ? <span><ListGroup.Item><p>No Buildings Found</p></ListGroup.Item></span> : <span>{shelter.buildings.map(building => (<ListGroup.Item key={building.id}>{building.name} <Link href={"/shelter/building/" + building.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item>))}</span>}
                   </ListGroup>
               </Card.Body>
             </Card>
@@ -65,7 +65,7 @@ export function ShelterTable() {
               <Card.Body>
                 <Card.Title>Rooms</Card.Title>
                   <ListGroup>
-                    {shelter.rooms ? <span>{shelter.rooms.map(room => (<ListGroup.Item key={room.id}>{room.name} <Link href={"/shelter/room/" + room.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item>))}</span> : <span><li>None</li></span>}
+                    {shelter.rooms == '' ? <ListGroup.Item><p>No Rooms Found</p></ListGroup.Item> : <span>{shelter.rooms.map(room => (<ListGroup.Item key={room.id}>{room.name} <Link href={"/shelter/room/" + room.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item>))}</span>}
                   </ListGroup>
                 </Card.Body>
             </Card>
