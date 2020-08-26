@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBandAid, faCar, faClipboardList, faShieldAlt, faTrailer
 } from '@fortawesome/free-solid-svg-icons';
-import { CircleMarker, Map, Popup, TileLayer } from "react-leaflet";
+import { CircleMarker, Map, TileLayer, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet"
 
 import "../App.css";
@@ -15,7 +15,7 @@ import 'leaflet/dist/leaflet.css';
 export function Dispatch() {
 
   const [data, setData] = useState({service_requests: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
-  const [fillColor, setFillColor] = useState({});
+  const [mapState, setMapState] = useState({});
   const [statusOptions, setStatusOptions] = useState({aco_required:false});
 
   // Handle aco_required toggle.
@@ -25,38 +25,60 @@ export function Dispatch() {
 
   // Handle dynamic SR state and map display.
   const handleMapState = (id) => {
-    if (fillColor[id].checked === false) {
-      setFillColor(prevState => ({ ...prevState, [id]: {color:"green", checked:true, hidden:false} }));
+    if (mapState[id].checked === false) {
+      setMapState(prevState => ({ ...prevState, [id]: {color:"green", checked:true, hidden:false, matches:mapState[id].matches} }));
     }
     else {
-      setFillColor(prevState => ({ ...prevState, [id]: {color:"red", checked:false, hidden:false} }));
+      setMapState(prevState => ({ ...prevState, [id]: {color:"red", checked:false, hidden:false, matches:mapState[id].matches} }));
     }
   }
 
-  // Count animals of the same species and the same size for an SR.
-  const countMatching = (service_request, size, species) => {
-    const countMatches = service_request.animals.filter(animal => animal.size === size && animal.species === species);
-    var size_and_species = size;
-    if (species !== 'horse') {
-      size_and_species = size + " " + species;
-    }
+  // Takes in animal size, species, and count and returns a pretty string combination.
+  const prettyText = (size, species, count) => {
     var plural = ""
-    if (countMatches.length > 1) {
+    if (count > 1) {
       plural = "s"
     }
-    var text = countMatches.length + " " + size_and_species + plural;
+
+    var size_and_species = size + " " + species + plural;
+    // Exception for horses since they don't need an extra species output.
+    if (species === 'horse') {
+      // Exception for pluralizing ponies.
+      if (size === 'pony' && count > 1) {
+        size_and_species = 'ponies'
+      }
+      else {
+        size_and_species = size + plural;
+      }
+    }
+
+    var text = count + " " + size_and_species;
     return text;
   }
 
-  // Show/hide list of SRs based on current map zoom
+  // Counts the number of size/species matches for a service request.
+  const countMatches = (service_request) => {
+    var matches = {};
+
+    service_request.animals.forEach((animal) => {
+      if (!matches[[animal.species,animal.size]]) {
+          matches[[animal.species,animal.size]] = 1;
+      } else {
+          matches[[animal.species,animal.size]] += 1;
+      }
+    });
+    return matches
+  }
+
+  // Show or hide list of SRs based on current map zoom
   const onMove = event => {
     for (const service_request of data.service_requests) {
-      if (fillColor[service_request.id]) {
+      if (mapState[service_request.id]) {
         if (!event.target.getBounds().contains(L.latLng(service_request.latitude, service_request.longitude))) {
-          setFillColor(prevState => ({ ...prevState, [service_request.id]: {color:fillColor[service_request.id].color, checked:fillColor[service_request.id].checked, hidden:true} }));
+          setMapState(prevState => ({ ...prevState, [service_request.id]: {color:mapState[service_request.id].color, checked:mapState[service_request.id].checked, hidden:true, matches:mapState[service_request.id].matches} }));
         }
         else {
-          setFillColor(prevState => ({ ...prevState, [service_request.id]: {color:fillColor[service_request.id].color, checked:fillColor[service_request.id].checked, hidden:false} }));
+          setMapState(prevState => ({ ...prevState, [service_request.id]: {color:mapState[service_request.id].color, checked:mapState[service_request.id].checked, hidden:false, matches:mapState[service_request.id].matches} }));
         }
       }
     }
@@ -74,14 +96,15 @@ export function Dispatch() {
         setData({service_requests: response.data, isFetching: false, bounds:data.bounds});
 
         // Initialize map options dict with all SRs on first load.
-        if (Object.keys(fillColor).length === 0) {
+        if (Object.keys(mapState).length === 0) {
           const map_dict = {};
           const bounds = [];
           for (const service_request of response.data) {
-            map_dict[service_request.id] = {color:"red", checked:false, hidden:false};
-            bounds.push([service_request.latitude, service_request.longitude])
+            const matches = countMatches(service_request);
+            map_dict[service_request.id] = {color:"red", checked:false, hidden:false, matches:matches};
+            bounds.push([service_request.latitude, service_request.longitude]);
           }
-          setFillColor(map_dict);
+          setMapState(map_dict);
           setData(prevState => ({ ...prevState, ["bounds"]:L.latLngBounds(bounds) }));
         }
       })
@@ -111,22 +134,23 @@ export function Dispatch() {
               <CircleMarker
                 key={service_request.id}
                 center={{lat:service_request.latitude, lng: service_request.longitude}}
-                color={fillColor[service_request.id] ? fillColor[service_request.id].color : ""}
+                color={mapState[service_request.id] ? mapState[service_request.id].color : ""}
                 fill={true}
                 fillOpacity="1"
                 onClick={() => handleMapState(service_request.id)}
                 radius={5}
               >
-                <Popup autoPan={false}>
+                <MapTooltip autoPan={false}>
                   <span>
-                    {service_request.animals.filter((animal,i,animals)=>animals.findIndex(a=>(a.species === animal.species && a.size===animal.size))===i).map((animal, i) => (
-                      <span key={animal.id} style={{textTransform:"capitalize"}}>
-                        {i > 0 && ", "}{countMatching(service_request, animal.size, animal.species)}
+                    {mapState[service_request.id] ? <span>{Object.keys(mapState[service_request.id].matches).map((key,i) => (
+                      <span key={key} style={{textTransform:"capitalize"}}>
+                        {i > 0 && ", "}{prettyText(key.split(',')[1], key.split(',')[0], mapState[service_request.id].matches[key])}
                       </span>
-                    ))}<br />
+                    ))}</span>:""}
+                    <br />
                     {service_request.full_address}
                   </span>
-                </Popup>
+                </MapTooltip>
               </CircleMarker>
             ))}
           </Map>
@@ -137,17 +161,18 @@ export function Dispatch() {
         </Form>
       </div>
       {data.service_requests.map(service_request => (
-        <div key={service_request.id} className="mt-2" hidden={fillColor[service_request.id] ? fillColor[service_request.id].hidden : false}>
+        <div key={service_request.id} className="mt-2" hidden={mapState[service_request.id] ? mapState[service_request.id].hidden : false}>
           <div className="card-header">
             <span style={{display:"inline"}} className="custom-control-lg custom-control custom-checkbox">
-              <input className="custom-control-input" type="checkbox" name={service_request.id} id={service_request.id} onChange={() => handleMapState(service_request.id)} checked={fillColor[service_request.id] ? fillColor[service_request.id].checked : false} />
+              <input className="custom-control-input" type="checkbox" name={service_request.id} id={service_request.id} onChange={() => handleMapState(service_request.id)} checked={mapState[service_request.id] ? mapState[service_request.id].checked : false} />
               <label className="custom-control-label" htmlFor={service_request.id}></label>
             </span>
-            {service_request.animals.filter((animal,i,animals)=>animals.findIndex(a=>(a.species === animal.species && a.size===animal.size))===i).map((animal, i) => (
-              <span key={animal.id} style={{textTransform:"capitalize"}}>
-                {i > 0 && ", "}{countMatching(service_request, animal.size, animal.species)}
+            {mapState[service_request.id] ?
+            <span>{Object.keys(mapState[service_request.id].matches).map((key,i) => (
+              <span key={key} style={{textTransform:"capitalize"}}>
+                {i > 0 && ", "}{prettyText(key.split(',')[1], key.split(',')[0], mapState[service_request.id].matches[key])}
               </span>
-            ))}
+            ))}</span>:""}
             {service_request.aco_required ?
             <OverlayTrigger
               key={"aco"}

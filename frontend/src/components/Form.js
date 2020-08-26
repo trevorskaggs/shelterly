@@ -106,7 +106,7 @@ const DropDown = React.forwardRef((props, ref) => {
       <SimpleValue {...field} options={props.options} value={props.value}>
          {simpleProps => <Select ref={ref} styles={customStyles} isClearable={true} onBlur={updateBlur} onChange={handleOptionChange} {...props} {...simpleProps} />}
       </SimpleValue>
-      <div style={{ color: "red", marginTop: ".5rem", fontSize: "80%" }}>{meta.error}</div>
+      {meta.touched && meta.error ? <div style={{ color: "red", marginTop: ".5rem", fontSize: "80%" }}>{meta.error}</div> : ""}
     </>
   );
 });

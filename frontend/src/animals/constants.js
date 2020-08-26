@@ -19,7 +19,7 @@ export const dogSizeChoices = [
 
 export const catSizeChoices = [
   {value:'small', label:'Small'},
-  {value:'full', label:'Full Size'},
+  {value:'large', label:'Large'},
 ]
 
 export const horseSizeChoices = [
