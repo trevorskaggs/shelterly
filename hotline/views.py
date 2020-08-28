@@ -120,16 +120,30 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
             if service_request.owner:
                 service_request.owner.animal_set.update(request=service_request.id)
 
+    # When updating, make sure geolocation is also updated.
+    def perform_update(self, serializer):
+        if serializer.is_valid():
+            service_request = serializer.save()
+            service_request.set_lat_lon()
+
     def get_queryset(self):
         queryset = ServiceRequest.objects.all().annotate(animal_count=Count('animal')).annotate(injured=Exists(Animal.objects.filter(request_id=OuterRef('id'), injured='yes')))
 
+        # Status filter.
         status = self.request.query_params.get('status', '')
         if status == 'open':
             queryset = queryset.filter(animal__status__in=['REPORTED', 'ASSIGNED']).distinct()
         elif status == 'closed':
             queryset = queryset.exclude(animal__status__in=['REPORTED', 'ASSIGNED']).distinct()
 
+        # Filter on aco_required option for the map.
         aco_required = self.request.query_params.get('aco_required', '')
         if aco_required == 'true':
             queryset = queryset.filter(Q(animal__aggressive='yes') | Q(animal__species='other'))
+
+        # Exclude SRs without a geolocation when fetching for a map.
+        is_map = self.request.query_params.get('map', '')
+        if is_map == 'true':
+            queryset = queryset.exclude(Q(latitude=None) | Q(longitude=None))
+
         return queryset
