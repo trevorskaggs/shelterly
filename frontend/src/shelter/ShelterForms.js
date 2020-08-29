@@ -468,7 +468,6 @@ export const RoomForm = ({bid}) => {
           name: '',
           description: '',
           building: bid,
-          shelter: data.shelter,
         }}
         onSubmit={(values, { setSubmitting }) => {
           setTimeout(() => {

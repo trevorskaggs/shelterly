@@ -61,14 +61,6 @@ export function ShelterTable() {
                   </ListGroup>
               </Card.Body>
             </Card>
-            <Card>
-              <Card.Body>
-                <Card.Title>Rooms</Card.Title>
-                  <ListGroup>
-                    {shelter.rooms == '' ? <ListGroup.Item><p>No Rooms Found</p></ListGroup.Item> : <span>{shelter.rooms.map(room => (<ListGroup.Item key={room.id}>{room.name} <Link href={"/shelter/room/" + room.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item>))}</span>}
-                  </ListGroup>
-                </Card.Body>
-            </Card>
           </CardGroup>
           
         </div>

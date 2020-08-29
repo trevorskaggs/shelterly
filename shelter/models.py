@@ -21,6 +21,10 @@ class Shelter(BaseShelterModel, Location):
     @property
     def location_type(self):
         return 'shelter'
+
+    @property
+    def rooms(self):
+        return Room.objects.filter(building__shelter=self)
     
 
 class Building(BaseShelterModel):
@@ -35,7 +39,6 @@ class Building(BaseShelterModel):
 class Room(BaseShelterModel):
 
     building = models.ForeignKey(Building, on_delete=models.CASCADE)
-    shelter = models.ForeignKey(Shelter, on_delete=models.CASCADE)
 
     @property
     def parent(self):
