@@ -27,7 +27,7 @@ export function ShelterTable() {
     const fetchShelters = async () => {
       setData({shelters: [], isFetching: true});
       // Fetch Shelter data.
-      await axios.get('http://localhost:8000/shelter/api/shelter', {
+      await axios.get('/shelter/api/shelter', {
         cancelToken: source.token,
       })
       .then(response => {

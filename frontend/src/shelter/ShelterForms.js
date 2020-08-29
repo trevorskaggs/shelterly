@@ -41,7 +41,7 @@ export const ShelterForm = ({sid}) => {
     if (sid) {
       const fetchShelterData = async () => {
         // Fetch ServiceRequest data.
-        await axios.get('http://0.0.0.0:8000/shelter/api/shelter/' + sid + '/', {
+        await axios.get('/shelter/api/shelter/' + sid + '/', {
           cancelToken: source.token,
         })
         .then(response => {
@@ -67,7 +67,7 @@ export const ShelterForm = ({sid}) => {
 
         onSubmit={(values, { setSubmitting }) => {
           if (sid) {
-            axios.put('http://0.0.0.0:8000/shelter/api/shelter/' + sid + '/', values)
+            axios.put('/shelter/api/shelter/' + sid + '/', values)
             .then(function() {
               navigate('/shelter/list')
             })
@@ -76,7 +76,7 @@ export const ShelterForm = ({sid}) => {
             });
           }
           else {
-            axios.post('http://0.0.0.0:8000/shelter/api/shelter/', values)
+            axios.post('/shelter/api/shelter/', values)
             .then(function() {
               navigate('/shelter/list')
             })
@@ -175,7 +175,7 @@ export const EditShelterForm = ({sid}) => {
     
     const fetchShelterData = async () => {
       // Fetch ServiceRequest data.
-      await axios.get('http://0.0.0.0:8000/shelter/api/shelter/' + sid + '/', {
+      await axios.get('/shelter/api/shelter/' + sid + '/', {
         cancelToken: source.token,
       })
       .then(response => {
@@ -199,7 +199,7 @@ export const EditShelterForm = ({sid}) => {
         initialValues={data}
         enableReinitialize={true}
         onSubmit={(values, { setSubmitting }) => {
-          axios.put('http://localhost:8000/shelter/api/shelter/' + sid + '/', values)
+          axios.put('/shelter/api/shelter/' + sid + '/', values)
           .then(function() {
             navigate('/shelter/list');
           })
@@ -304,7 +304,7 @@ export const BuildingForm = ({sid}) => {
         }}
         onSubmit={(values, { setSubmitting }) => {
           setTimeout(() => {
-            axios.post('http://0.0.0.0:8000/shelter/api/building/', values)
+            axios.post('/shelter/api/building/', values)
             .then(function() {
               navigate('/shelter/' + sid);
             })
@@ -361,7 +361,7 @@ export const EditBuildingForm = ({bid}) => {
     
     const fetchPersonData = async () => {
       // Fetch ServiceRequest data.
-      await axios.get('http://0.0.0.0:8000/shelter/api/building/' + bid + '/', {
+      await axios.get('/shelter/api/building/' + bid + '/', {
         cancelToken: source.token,
       })
       .then(response => {
@@ -387,7 +387,7 @@ export const EditBuildingForm = ({bid}) => {
         onSubmit={(values, { setSubmitting }) => {
           setTimeout(() => {
             console.log(values)
-            axios.put('http://localhost:8000/shelter/api/building/' + bid + '/', values)
+            axios.put('/shelter/api/building/' + bid + '/', values)
             .then(function() {
               navigate('/shelter/building/'+bid+'/');
             })
@@ -443,7 +443,7 @@ export const RoomForm = ({bid}) => {
       
       const fetchBuildingShelterData = async () => {
         // Fetch ServiceRequest data.
-        await axios.get('http://0.0.0.0:8000/shelter/api/building/' + bid + '/', {
+        await axios.get('/shelter/api/building/' + bid + '/', {
           cancelToken: source.token,
         })
         .then(response => {
@@ -472,7 +472,7 @@ export const RoomForm = ({bid}) => {
         }}
         onSubmit={(values, { setSubmitting }) => {
           setTimeout(() => {
-            axios.post('http://0.0.0.0:8000/shelter/api/room/', values)
+            axios.post('/shelter/api/room/', values)
             .then(function() {
               navigate('/shelter/building/' + bid);
             })
@@ -529,7 +529,7 @@ export const EditRoomForm = ({rid}) => {
     
     const fetchPersonData = async () => {
       // Fetch ServiceRequest data.
-      await axios.get('http://0.0.0.0:8000/shelter/api/room/' + rid + '/', {
+      await axios.get('/shelter/api/room/' + rid + '/', {
         cancelToken: source.token,
       })
       .then(response => {
@@ -555,7 +555,7 @@ export const EditRoomForm = ({rid}) => {
         onSubmit={(values, { setSubmitting }) => {
           setTimeout(() => {
             console.log(values)
-            axios.put('http://localhost:8000/shelter/api/room/' + rid + '/', values)
+            axios.put('/shelter/api/room/' + rid + '/', values)
             .then(function() {
               navigate('/shelter/room/' + rid +  '/');
             })

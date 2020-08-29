@@ -36,7 +36,7 @@ export function RoomList({bid}) {
       const fetchShelterRooms = async () => {
         setData({rooms: [], isFetching: true});
         // Fetch EvacTeam data.
-        await axios.get('http://0.0.0.0:8000/shelter/api/room/?building=' + bid, {
+        await axios.get('/shelter/api/room/?building=' + bid, {
           cancelToken: source.token,
         })
         .then(response => {
@@ -83,7 +83,7 @@ export function RoomList({bid}) {
       const fetchShelterRooms = async () => {
         setData({rooms: [], isFetching: true});
         // Fetch EvacTeam data.
-        await axios.get('http://0.0.0.0:8000/shelter/api/room/?shelter=' + sid, {
+        await axios.get('/shelter/api/room/?shelter=' + sid, {
           cancelToken: source.token,
         })
         .then(response => {

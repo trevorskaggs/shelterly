@@ -36,7 +36,7 @@ export function ShelterDetailsTable({sid}) {
     let source = axios.CancelToken.source();
     const fetchShelterData = async () => {
     // Fetch Shelter Details data.
-    await axios.get('http://localhost:8000/shelter/api/shelter/' + sid + '/', {
+    await axios.get('/shelter/api/shelter/' + sid + '/', {
         cancelToken: source.token,
     })
     .then(response => {
@@ -92,7 +92,7 @@ export function BuildingDetailsTable({bid}) {
     let source = axios.CancelToken.source();
     const fetchShelterData = async () => {
     // Fetch Shelter Details data.
-    await axios.get('http://localhost:8000/shelter/api/building/' + bid, {
+    await axios.get('/shelter/api/building/' + bid, {
         cancelToken: source.token,
     })
     .then(response => {
@@ -141,7 +141,7 @@ export function RoomDetailsTable({rid}) {
     let source = axios.CancelToken.source();
     const fetchShelterData = async () => {
     // Fetch Shelter Details data.
-    await axios.get('http://localhost:8000/shelter/api/room/' + rid, {
+    await axios.get('/shelter/api/room/' + rid, {
         cancelToken: source.token,
     })
     .then(response => {

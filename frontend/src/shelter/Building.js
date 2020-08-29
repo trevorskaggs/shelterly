@@ -37,7 +37,7 @@ export function BuildingList({sid}) {
       const fetchShelterBuildings = async () => {
         setData({buildings: [], isFetching: true});
         // Fetch EvacTeam data.
-        await axios.get('http://localhost:8000/shelter/api/building/?shelter=' + sid, {
+        await axios.get('/shelter/api/building/?shelter=' + sid, {
           cancelToken: source.token,
         })
         .then(response => {
