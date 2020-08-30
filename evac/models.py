@@ -7,8 +7,10 @@ User = get_user_model()
 
 class EvacTeamMember(models.Model):
 
-    name = models.CharField(max_length=50, blank=False)
+    first_name = models.CharField(max_length=50, blank=False)
+    last_name = models.CharField(max_length=50, blank=False)
     phone = models.CharField(max_length=50, blank=True)
+    agency_id = models.CharField(max_length=50, blank=False)
 
 class EvacAssignment(models.Model):
 

@@ -1,17 +1,20 @@
 import React from "react";
 import { Link } from "raviger";
-import { EvacTeamForm } from "./EvacForms";
+import { EvacTeamMemberForm } from "./EvacForms";
 import { EvacTeamTable } from "./EvacTables";
 import { Container, ListGroup,  Tabs } from 'react-bootstrap';
 // import EvacNavBar from "./EvacNavbar";
 import styled from 'styled-components';
 
+const header_style = {
+  textAlign: "center",
+};
 
   const Evac = () => (
     <ListGroup className="flex-fill p-5 h-50">
-      <Link href="/evac/evacteam/new">
+      <Link href="/evac/evacteammember/new">
       <ListGroup.Item action>
-      NEW TEAM
+      NEW TEAM MEMBER
       </ListGroup.Item>
       </Link>
       <Link href="/evac/evacteam/list">
@@ -36,5 +39,14 @@ import styled from 'styled-components';
       </Link>
     </ListGroup>
   )
+
+
+  export const NewEvacTeamMember = () => (
+    <div>
+      <h1 style={header_style}>Add Evacuation Team Member</h1>
+      <EvacTeamMemberForm />
+    </div>
+  )
+
 
 export default Evac

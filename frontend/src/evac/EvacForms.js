@@ -96,7 +96,8 @@ export function EvacTeamForm() {
 };
 
 // No longer used but may still provide a good example for the time being.
-export const TeamMemberForm = () => {
+
+export const EvacTeamMemberForm = () => {
     return (
       <>
         <Formik
@@ -119,7 +120,7 @@ export const TeamMemberForm = () => {
           })}
           onSubmit={(values, { setSubmitting }) => {
             setTimeout(() => {
-              axios.post('/accounts/api/user/', values)
+              axios.post('/evac/api/evacteammember/', values)
               .then(function() {
                 navigate('/evac');
               })
