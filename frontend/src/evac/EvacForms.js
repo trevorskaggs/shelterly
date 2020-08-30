@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { render } from "react-dom";
 import axios from "axios";
 import { Link, navigate } from "raviger";
 import { Form, Formik } from 'formik';
@@ -11,6 +12,31 @@ import {
 } from 'react-bootstrap';
 import * as Yup from 'yup';
 import { MultiSelect, TextInput} from '.././components/Form';
+
+
+import AutoComplete from "./AutoComplete";
+
+export function EvacTeamMemberSelectionForm() {
+  return (
+    <div>
+      <AutoComplete
+        suggestions={[
+          "Trevor",
+          "John",
+          "Steve",
+          "Death Roll",
+          "Eggs",
+          "Jaws",
+          "Reptile",
+          "Solitary",
+          "Tail",
+          "Wetlands"
+        ]}
+      />
+    </div>
+  );
+};
+
 
 
 export function EvacTeamForm() {

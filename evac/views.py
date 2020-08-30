@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from datetime import datetime
 from rest_framework import filters, permissions, viewsets
 
@@ -7,7 +8,6 @@ from evac.serializers import EvacTeamMemberSerializer
 class EvacTeamMemberViewSet(viewsets.ModelViewSet):
 
     queryset = EvacTeamMember.objects.all()
-    search_fields = ['name',]
     filter_backends = (filters.SearchFilter,)
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = EvacTeamMemberSerializer
@@ -20,3 +20,12 @@ class EvacTeamMemberViewSet(viewsets.ModelViewSet):
         elif status == 'closed':
             queryset = queryset.filter(start_time__isnull=False, end_time__isnull=False).distinct()
         return queryset
+
+def EvacTeamMemberSelectionList(request):
+
+    json_data = {}
+
+    for etm in EvacTeamMember.objects.all():
+        json_data[etm.pk] = "%s, %s" % (etm.last_name, etm.first_name)
+
+    return JsonResponse(json_data)

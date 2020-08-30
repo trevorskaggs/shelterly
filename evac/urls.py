@@ -10,4 +10,5 @@ router.register(r'evacteammember', views.EvacTeamMemberViewSet)
 
 urlpatterns = [
     path('api/', include(router.urls)),
+    path('api/evacteammember/list', views.EvacTeamMemberSelectionList)
 ]

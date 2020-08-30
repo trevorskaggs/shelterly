@@ -5,9 +5,6 @@ from hotline.serializers import ServiceRequestSerializer
 
 class EvacTeamMemberSerializer(serializers.ModelSerializer):
 
-    name = serializers.SerializerMethodField()
-    phone = serializers.SerializerMethodField()
-
     class Meta:
         model = EvacTeamMember
         fields = '__all__'
