@@ -21,7 +21,7 @@ export function EvacTeamForm() {
     const fetchTeamMembers = async () => {
       setData({options: data.options, isFetching: true});
       // Fetch TeamMember data.
-      await axios.get('/accounts/api/user/', {
+      await axios.get('/evac/api/evacteammember/', {
         cancelToken: source.token,
       })
       .then(response => {

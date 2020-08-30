@@ -1,11 +1,22 @@
 from datetime import datetime
-from rest_framework import permissions, viewsets
+from rest_framework import filters, permissions, viewsets
 
-from evac.models import EvacTeam
-from evac.serializers import EvacTeamSerializer
+from evac.models import EvacTeamMember
+from evac.serializers import EvacTeamMemberSerializer
 
-# Provides view for EvacTeam API calls.
-class EvacTeamViewSet(viewsets.ModelViewSet):
-    queryset = EvacTeam.objects.filter(team_date=datetime.now().date())
+class EvacTeamMemberViewSet(viewsets.ModelViewSet):
+
+    queryset = EvacTeamMember.objects.all()
+    search_fields = ['name',]
+    filter_backends = (filters.SearchFilter,)
     permission_classes = [permissions.IsAuthenticated, ]
-    serializer_class = EvacTeamSerializer
+    serializer_class = EvacTeamMemberSerializer
+
+    def get_queryset(self):
+        queryset = EvacTeamMember.objects.all()
+        status = self.request.query_params.get('status', '')
+        if status == 'open':
+            queryset = queryset.filter(end_time__isnull=True).distinct()
+        elif status == 'closed':
+            queryset = queryset.filter(start_time__isnull=False, end_time__isnull=False).distinct()
+        return queryset

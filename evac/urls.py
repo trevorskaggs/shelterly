@@ -6,7 +6,7 @@ from evac import views
 
 app_name = 'evac'
 router = DefaultRouter()
-router.register(r'evacteam', views.EvacTeamViewSet)
+router.register(r'evacteammember', views.EvacTeamMemberViewSet)
 
 urlpatterns = [
     path('api/', include(router.urls)),

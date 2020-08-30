@@ -1,13 +1,18 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 
+from hotline.models import ServiceRequest
+
 User = get_user_model()
 
-class EvacTeam(models.Model):
+class EvacTeamMember(models.Model):
 
-    evac_team_members = models.ManyToManyField(User)
-    team_date = models.DateField(auto_now_add=True)
-    callsign = models.CharField(max_length=20)
+    name = models.CharField(max_length=50, blank=False)
+    phone = models.CharField(max_length=50, blank=True)
 
-    def str(self):
-        return '%s (%s)' % (self.callsign, self.evac_team_members.all().count())
+class EvacAssignment(models.Model):
+
+    team_members = models.ManyToManyField(EvacTeamMember)
+    service_requests = models.ManyToManyField(ServiceRequest)
+    start_time = models.DateTimeField(auto_now_add=True)
+    end_time = models.DateTimeField()

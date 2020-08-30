@@ -1,16 +1,24 @@
 from datetime import datetime
 from rest_framework import serializers
-from .models import EvacTeam
+from evac.models import EvacAssignment, EvacTeamMember
+from hotline.serializers import ServiceRequestSerializer
 
-class EvacTeamSerializer(serializers.ModelSerializer):
-    evac_team_member_names = serializers.SerializerMethodField()
+class EvacTeamMemberSerializer(serializers.ModelSerializer):
 
-    def get_evac_team_member_names(self, instance):
-        names = []
-        for team_member in instance.evac_team_members.get_queryset():
-            names.append(team_member.first_name + " " + team_member.last_name)
-        return ', '.join(names)
+    name = serializers.SerializerMethodField()
+    phone = serializers.SerializerMethodField()
 
     class Meta:
-        model = EvacTeam
-        fields = ('id', 'evac_team_members', 'evac_team_member_names')
+        model = EvacTeamMember
+        fields = '__all__'
+
+class EvacAssignmentSerializer(serializers.ModelSerializer):
+
+    team_members = EvacTeamMemberSerializer(source='evacteammember_set', many=True, required=True)
+    service_requests =ServiceRequestSerializer(source='servicerequest_set', many=True, required=True)
+    start_time = serializers.SerializerMethodField()
+    end_time = serializers.SerializerMethodField()
+
+    class Meta:
+        model = EvacAssignment
+        fields = '__all__'
