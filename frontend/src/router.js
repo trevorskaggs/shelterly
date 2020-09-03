@@ -2,7 +2,7 @@ import React from "react";
 import Home from "./Home";
 import Animals, { AnimalDetail, NewAnimal, UpdateAnimal } from "./animals/Animals"
 import { AnimalSearch } from "./animals/AnimalTables"
-import Evac, { NewEvacTeamMember, TeamList } from "./evac/Evac";
+import Evac, { NewEvacTeamMember, TeamMemberSelectorList } from "./evac/Evac";
 import Hotline, { NewServiceRequest, ServiceRequestDetail, ServiceRequestList, UpdateServiceRequest } from "./hotline/Hotline";
 import Intake, { IntakeSummary } from "./intake/Intake";
 import { NewOwner, NewReporter, OwnerDetail, ReporterDetail,  UpdateOwner, UpdateReporter } from "./people/People";
@@ -18,7 +18,7 @@ const routes = {
   "/animals/animal/:id": ({id}) => <AnimalDetail id={id} />,
   "/evac": () => <Evac />,
   "/evac/evacteammember/new": () => <NewEvacTeamMember />,
-  "/evac/evacteam/list": () => <EvacTeamTable />,
+  "/evac/evacteam/list": () => <TeamMemberSelectorList />,
   "/hotline": () => <Hotline />,
   "/hotline/animal/new": () => <NewAnimal />,
   "/hotline/first_responder/new": () => <NewReporter />,

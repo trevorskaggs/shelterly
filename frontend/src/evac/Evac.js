@@ -41,12 +41,18 @@ const header_style = {
   )
 
 
-  export const NewEvacTeamMember = () => (
+  export const TeamMemberSelectorList = () => (
     <div>
-      <h1 style={header_style}>Add Evacuation Team Member</h1>
+      <h1 style={header_style}>Select Evacuation Team Member</h1>
       <TeamMemberSelector />
     </div>
   )
 
+  export const NewEvacTeamMember = () => (
+    <div>
+      <h1 style={header_style}>Add Evacuation Team Member</h1>
+      <EvacTeamMemberForm />
+    </div>
+  )
 
 export default Evac
