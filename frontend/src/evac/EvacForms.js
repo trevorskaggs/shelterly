@@ -30,7 +30,7 @@ export function TeamMemberSelector() {
       .then(response => {
         response.data.forEach(function(teammember){
           // Store relevant information for creating valid options.
-          const obj = {id: teammember.id, label: teammember.last_name + ', ' + teammember.first_name};
+          const obj = {id: teammember.id, label: teammember.display_name};
           data.options.push(obj)
           setData({options: data.options, isFetching: false});
         });
