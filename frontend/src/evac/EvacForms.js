@@ -12,32 +12,53 @@ import {
 } from 'react-bootstrap';
 import * as Yup from 'yup';
 import { MultiSelect, TextInput} from '.././components/Form';
+import { Typeahead } from 'react-bootstrap-typeahead';
+import 'react-bootstrap-typeahead/css/Typeahead.css';
 
+export function TeamMemberSelector() {
+  const [multiSelections, setMultiSelections] = useState([]);
+  const [data, setData] = useState({options: [], isFetching: false});
 
-import AutoComplete from "./AutoComplete";
+  useEffect(() => {
+    let source = axios.CancelToken.source();
+    const fetchTeamMembers = async () => {
+      setData({options: data.options, isFetching: true});
+      // Fetch TeamMember data.
+      await axios.get('/evac/api/evacteammember/', {
+        cancelToken: source.token,
+      })
+      .then(response => {
+        response.data.forEach(function(teammember){
+          // Store relevant information for creating valid options.
+          const obj = {id: teammember.id, label: teammember.last_name + ', ' + teammember.first_name};
+          data.options.push(obj)
+          setData({options: data.options, isFetching: false});
+        });
+      })
+      .catch(error => {
+        console.log(error.response);
+        setData({options: data.options, isFetching: false});
+      });
+    };
+    fetchTeamMembers();
+    return () => {
+      source.cancel();
+    };
+  }, [])
 
-export function EvacTeamMemberSelectionForm() {
   return (
-    <div>
-      <AutoComplete
-        suggestions={[
-          "Trevor",
-          "John",
-          "Steve",
-          "Death Roll",
-          "Eggs",
-          "Jaws",
-          "Reptile",
-          "Solitary",
-          "Tail",
-          "Wetlands"
-        ]}
-      />
-    </div>
+      <FormGroup style={{ marginTop: '20px' }}>
+        <Typeahead
+          id="basic-typeahead-multiple"
+          multiple
+          onChange={setMultiSelections}
+          options={data.options}
+          placeholder="Choose team members..."
+          selected={multiSelections}
+        />
+      </FormGroup>
   );
 };
-
-
 
 export function EvacTeamForm() {
   const [data, setData] = useState({options: [], isFetching: false});

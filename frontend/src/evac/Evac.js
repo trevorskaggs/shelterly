@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "raviger";
-import { EvacTeamMemberForm, EvacTeamMemberSelectionForm } from "./EvacForms";
+import { EvacTeamMemberForm, TeamMemberSelector } from "./EvacForms";
 import { EvacTeamTable } from "./EvacTables";
 import { Container, ListGroup,  Tabs } from 'react-bootstrap';
 // import EvacNavBar from "./EvacNavbar";
@@ -44,7 +44,7 @@ const header_style = {
   export const NewEvacTeamMember = () => (
     <div>
       <h1 style={header_style}>Add Evacuation Team Member</h1>
-      <EvacTeamMemberSelectionForm />
+      <TeamMemberSelector />
     </div>
   )
 

@@ -24,6 +24,7 @@
     "raviger": "^1.4.0",
     "react": "^16.12.0",
     "react-bootstrap": "^1.0.1",
+    "react-bootstrap-typeahead": "^5.1.1",
     "react-cookie": "^4.0.3",
     "react-dom": "^16.12.0",
     "react-flatpickr": "^3.10.0",
