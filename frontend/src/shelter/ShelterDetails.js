@@ -3,7 +3,7 @@ import axios from "axios";
 import { Link } from 'raviger';
 import { Button } from 'reactstrap';
 import { BuildingList } from "./Building";
-import { RoomList, ShelterRoomList } from "./Room";
+import { RoomList } from "./Room";
 import { Card, ListGroup } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -70,7 +70,6 @@ export function ShelterDetailsTable({sid}) {
         </div>
       </div>
       <BuildingList sid={data.id} />
-      <ShelterRoomList sid={data.id} />
       <hr/>
       <div style={btn_style}>
         <Link href={"/shelter/" + data.id + "/building/new"} style={link_style} className="btn btn-success btn-lg btn-block mb-2">ADD BUILDING</Link>
