@@ -16,11 +16,6 @@ class EvacTeamMemberSerializer(serializers.ModelSerializer):
 
 class EvacAssignmentSerializer(serializers.ModelSerializer):
 
-    team_members = EvacTeamMemberSerializer(source='evacteammember_set', many=True, required=True)
-    service_requests =ServiceRequestSerializer(source='servicerequest_set', many=True, required=True)
-    start_time = serializers.SerializerMethodField()
-    end_time = serializers.SerializerMethodField()
-
     class Meta:
         model = EvacAssignment
         fields = '__all__'

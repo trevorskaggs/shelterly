@@ -16,28 +16,34 @@ import { Typeahead } from 'react-bootstrap-typeahead';
 import 'react-bootstrap-typeahead/css/Typeahead.css';
 
 export function TeamMemberSelector() {
-  const [multiSelections, setMultiSelections] = useState([]);
+  const [selected, setSelected] = useState([]);
   const [data, setData] = useState({options: [], isFetching: false});
+
+  function getSelected(){
+    var selectedIds = Array();
+    selected.forEach(function(item){
+      selectedIds.push(item.id);
+    })
+    return selectedIds;
+  }
 
   useEffect(() => {
     let source = axios.CancelToken.source();
     const fetchTeamMembers = async () => {
-      setData({options: data.options, isFetching: true});
-      // Fetch TeamMember data.
+      setData({options: [], isFetching: true});
       await axios.get('/evac/api/evacteammember/', {
         cancelToken: source.token,
       })
       .then(response => {
+        var options = Array()
         response.data.forEach(function(teammember){
-          // Store relevant information for creating valid options.
-          const obj = {id: teammember.id, label: teammember.display_name};
-          data.options.push(obj)
-          setData({options: data.options, isFetching: false});
+          options.push({id: teammember.id, label: teammember.display_name})
         });
+        setData({options: options, isFetching: false});
       })
       .catch(error => {
         console.log(error.response);
-        setData({options: data.options, isFetching: false});
+        setData({options: [], isFetching: false});
       });
     };
     fetchTeamMembers();
@@ -47,49 +53,46 @@ export function TeamMemberSelector() {
   }, [])
 
   return (
-      <FormGroup style={{ marginTop: '20px' }}>
-        <Typeahead
-          id="basic-typeahead-multiple"
-          multiple
-          onChange={setMultiSelections}
-          options={data.options}
-          placeholder="Choose team members..."
-          selected={multiSelections}
-        />
-      </FormGroup>
+    <Formik
+      initialValues={{
+        team_members: '',
+      }}
+      onSubmit={(values, { setSubmitting }) => {
+        values.team_members = getSelected();
+        setTimeout(() => {
+          axios.post('/evac/api/evacassignment/', values)
+          .then(function() {
+            navigate('/evac');
+          })
+          .catch(error => {
+            console.log(error.response);
+          });
+          setSubmitting(false);
+        }, 500);
+      }}
+    >
+    <Form>
+      <Container>
+        <FormGroup style={{ marginTop: '20px' }}>
+          <Typeahead
+            id="team-members"
+            multiple
+            onChange={setSelected}
+            options={data.options}
+            placeholder="Choose team members..."
+            selected={selected}
+          />
+        </FormGroup>
+        <Button type="submit" className="mt-2 mb-1">Deploy!</Button>
+      </Container>
+    </Form>
+  </Formik>
   );
 };
 
 export function EvacTeamForm() {
   const [data, setData] = useState({options: [], isFetching: false});
   // Hook for initializing data.
-  useEffect(() => {
-    let source = axios.CancelToken.source();
-    const fetchTeamMembers = async () => {
-      setData({options: data.options, isFetching: true});
-      // Fetch TeamMember data.
-      await axios.get('/evac/api/evacteammember/', {
-        cancelToken: source.token,
-      })
-      .then(response => {
-        response.data.forEach(function(teammember){
-          // Store relevant information for creating valid options.
-          const obj = {value: teammember.id, label: teammember.first_name};
-          data.options.push(obj)
-        });
-        setData({options: data.options, isFetching: false});
-      })
-      .catch(error => {
-        console.log(error.response);
-        setData({options: data.options, isFetching: false});
-      });
-    };
-    fetchTeamMembers();
-    // Cleanup.
-    return () => {
-      source.cancel();
-    };
-  }, [data.options]);
 
   return (
     <>
@@ -151,7 +154,7 @@ export const EvacTeamMemberForm = () => {
           initialValues={{
             first_name: '',
             last_name: '',
-            cell_phone: '',
+            phone: '',
             agency_id: '',
           }}
           validationSchema={Yup.object({
@@ -161,7 +164,7 @@ export const EvacTeamMemberForm = () => {
             last_name: Yup.string()
               .max(50, 'Must be 50 characters or less')
               .required('Required'),
-            cell_phone: Yup.string()
+            phone: Yup.string()
               .required('Required'),
             agency_id: Yup.string(),
           })}
@@ -206,9 +209,9 @@ export const EvacTeamMemberForm = () => {
                   <Col xs={{size: 5, offset: 1}}>
                     <TextInput
                       type="text"
-                      label="Cell Phone*"
-                      name="cell_phone"
-                      id="cell_phone"
+                      label="Phone*"
+                      name="phone"
+                      id="phone"
                     />
                   </Col>
                   <Col xs="5">
