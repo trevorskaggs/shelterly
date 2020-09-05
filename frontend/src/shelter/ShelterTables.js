@@ -55,9 +55,22 @@ export function ShelterTable() {
           <CardGroup>
             <Card key={shelter.id}>
               <Card.Body>
-                <Card.Title>Buildings</Card.Title>
                   <ListGroup>
-                    {shelter.buildings == '' ? <span><ListGroup.Item><p>No Buildings Found</p></ListGroup.Item></span> : <span>{shelter.buildings.map(building => (<ListGroup.Item key={building.id}>{building.name} <Link href={"/shelter/building/" + building.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item>))}</span>}
+                    {shelter.buildings == '' ? <span><ListGroup.Item><p>No Buildings Found</p></ListGroup.Item></span> : 
+                      <span>{shelter.buildings.map(building => (
+                        <ListGroup.Item key={building.id}><b>Building:</b> {building.name} 
+                          <Link href={"/shelter/building/" + building.id}> <FontAwesomeIcon icon={faClipboardList} inverse />
+                          </Link>
+                          {building.rooms == '' ? <span><ListGroup.Item><p>No Rooms Found</p></ListGroup.Item></span> :
+                            <span>{building.rooms.map(room => (
+                              <ListGroup.Item key={room.id}><b>Room:</b> {room.name}
+                                <Link href={"/shelter/room/" + room.id}> <FontAwesomeIcon icon={faClipboardList} inverse />
+                                </Link>
+                              </ListGroup.Item>
+                            ))}
+                            </span>}
+                        </ListGroup.Item>))}
+                      </span>}
                   </ListGroup>
               </Card.Body>
             </Card>

@@ -119,7 +119,9 @@ export function BuildingDetailsTable({bid}) {
           </div>
         </div>
       </div>
-      <RoomList bid={data.id} />
+      {data.rooms == '' ? <div style={card_style} className="card card-body bg-light mb-2 mx-auto"><p><b>No Rooms Found</b></p></div> :
+        <RoomList bid={data.id} />
+      }
       <hr/>
       <div style={btn_style}>
         <Link href={"/shelter/building/" + data.id + "/room/new"} style={link_style} className="btn btn-success btn-lg btn-block mb-2">ADD ROOM</Link>
