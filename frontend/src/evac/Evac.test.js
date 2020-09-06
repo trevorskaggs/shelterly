@@ -1,8 +1,7 @@
 import React from "react";
 import { render, waitForElementToBeRemoved } from "@testing-library/react";
 import Evac from "./Evac";
-import { EvacTeamForm } from "./EvacForms";
-import { EvacTeamTable } from "./EvacTables";
+import { EvacTeamMemberForm, TeamMemberSelector } from "./EvacForms";
 
 describe("Render evac", () => {
   it("Render Evac", () => {
@@ -14,18 +13,17 @@ describe("Render evac", () => {
     expect(getByText(/BACK/)).toBeTruthy();
   });
 
-  it("Render new team form", async () => {
-    const { getByText, findByText } = render(<EvacTeamForm />);
-    expect(getByText(/Evac Team Members*/)).toBeTruthy();
-    expect(getByText(/Callsign*/)).toBeTruthy();
-    expect(getByText(/Save/)).toBeTruthy();
-    expect(getByText(/Cancel/)).toBeTruthy();
+  it("Render evac team selectiong form", async () => {
+    const { getByText, findByText } = render(<TeamMemberSelector />);
+    expect(getByText(/Select Evacuation Team Member/)).toBeTruthy();
+    expect(getByText(/Deploy!/)).toBeTruthy();
   });
 
-  it("Render team list table", async () => {
-    const { getByText, findByText } = render(<EvacTeamTable />);
-    expect(getByText(/Evac Team/)).toBeTruthy();
-    expect(getByText(/Team Members/)).toBeTruthy();
-    await waitForElementToBeRemoved(() => getByText("Fetching teams..."));
+  it("Render new evac team member form", async () => {
+    const { getByText, findByText } = render(<EvacTeamMemberForm />);
+    expect(getByText(/First Name*/)).toBeTruthy();
+    expect(getByText(/Last Name*/)).toBeTruthy();
+    expect(getByText(/Phone*/)).toBeTruthy();
+    expect(getByText(/Agency ID/)).toBeTruthy();
   });
 });
