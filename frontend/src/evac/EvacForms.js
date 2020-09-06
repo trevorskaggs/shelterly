@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { render } from "react-dom";
 import axios from "axios";
 import { Link, navigate } from "raviger";
 import { Form, Formik } from 'formik';
@@ -11,7 +10,7 @@ import {
   Container,
 } from 'react-bootstrap';
 import * as Yup from 'yup';
-import { MultiSelect, TextInput} from '.././components/Form';
+import { TextInput} from '.././components/Form';
 import { Typeahead } from 'react-bootstrap-typeahead';
 import 'react-bootstrap-typeahead/css/Typeahead.css';
 
@@ -20,7 +19,7 @@ export function TeamMemberSelector() {
   const [data, setData] = useState({options: [], isFetching: false});
 
   function getSelected(){
-    var selectedIds = Array();
+    var selectedIds = [];
     selected.forEach(function(item){
       selectedIds.push(item.id);
     })
@@ -35,7 +34,7 @@ export function TeamMemberSelector() {
         cancelToken: source.token,
       })
       .then(response => {
-        var options = Array()
+        var options = []
         response.data.forEach(function(teammember){
           options.push({id: teammember.id, label: teammember.display_name})
         });
@@ -89,63 +88,6 @@ export function TeamMemberSelector() {
   </Formik>
   );
 };
-
-export function EvacTeamForm() {
-  const [data, setData] = useState({options: [], isFetching: false});
-  // Hook for initializing data.
-
-  return (
-    <>
-      <Formik
-        initialValues={{
-          evac_team_members: [],
-          callsign: '',
-        }}
-        validationSchema={Yup.object({
-          evac_team_members: Yup.array()
-            .of(Yup.string())
-            .required('Required'),
-          callsign: Yup.string()
-            .max(20, 'Must be 20 characters or less')
-            .required('Required'),
-        })}
-        onSubmit={(values, { setSubmitting }) => {
-          setTimeout(() => {
-            axios.post('/evac/api/evacteam/', values)
-            .then(function() {
-              navigate('/evac');
-            })
-            .catch(error => {
-              console.log(error.response);
-            });
-            setSubmitting(false);
-          }, 500);
-        }}
-      >
-        <Form>
-          <Container>
-            <FormGroup>
-              <MultiSelect label="Evac Team Members*" name="evac_team_members" className="mb-3">
-                {data.options.map(({ value, label }, index) => <option value={value} key={value} >{label}</option>)}
-              </MultiSelect>
-              <TextInput
-                type="text"
-                label="Callsign*"
-                name="callsign"
-                id="callsign"
-              />
-            </FormGroup>
-
-            <Button type="submit" className="btn-success mr-1">Save</Button>
-            <Link className="btn btn-secondary" href="/evac">Cancel</Link>
-          </Container>
-        </Form>
-      </Formik>
-    </>
-  );
-};
-
-// No longer used but may still provide a good example for the time being.
 
 export const EvacTeamMemberForm = () => {
     return (

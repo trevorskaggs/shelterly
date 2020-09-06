@@ -3,10 +3,6 @@ import { Link } from "raviger";
 import { AnimalView } from "./AnimalViews";
 import { AnimalForm } from "./AnimalForms";
 
-const header_style = {
-  textAlign: "center",
-};
-
 const link_style = {
   textDecoration: "none",
 };

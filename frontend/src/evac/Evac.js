@@ -1,10 +1,8 @@
 import React from "react";
 import { Link } from "raviger";
 import { EvacTeamMemberForm, TeamMemberSelector } from "./EvacForms";
-import { EvacTeamTable } from "./EvacTables";
-import { Container, ListGroup,  Tabs } from 'react-bootstrap';
+import { ListGroup } from 'react-bootstrap';
 // import EvacNavBar from "./EvacNavbar";
-import styled from 'styled-components';
 
 const header_style = {
   textAlign: "center",
@@ -17,7 +15,7 @@ const header_style = {
       NEW TEAM MEMBER
       </ListGroup.Item>
       </Link>
-      <Link href="/evac/evacteam/list">
+      <Link href="/evac/evacteam/select">
       <ListGroup.Item action>
       TEAM LIST
       </ListGroup.Item>
