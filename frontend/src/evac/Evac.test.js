@@ -15,7 +15,6 @@ describe("Render evac", () => {
 
   it("Render evac team selectiong form", async () => {
     const { getByText, findByText } = render(<TeamMemberSelector />);
-    expect(getByText(/Select Evacuation Team Member/)).toBeTruthy();
     expect(getByText(/Deploy!/)).toBeTruthy();
   });
 
