@@ -2,11 +2,18 @@ from django.db import models
 from location.models import Location
 from people.models import Person
 
+STATUS_CHOICES = (
+  ('open', 'Open'),
+  ('assigned', 'Assigned'),
+  ('closed', 'Closed')
+)
+
 class ServiceRequest(Location):
     
     #keys
     owner = models.OneToOneField(Person, on_delete=models.SET_NULL, blank=True, null=True)
     reporter = models.ForeignKey(Person, on_delete=models.SET_NULL, blank=True, null=True, related_name='reported_servicerequest')
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, blank=False, default='open')
 
     #pre_field
     timestamp = models.DateTimeField(auto_now_add=True)
@@ -40,4 +47,4 @@ class ServiceRequest(Location):
         return 'service_request'
 
     class Meta:
-        ordering = []
+        ordering = ['timestamp']

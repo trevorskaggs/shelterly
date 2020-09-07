@@ -2,4 +2,10 @@
 *._*
 config/secrets.json
 frontend/node_modules
+.DS_Store
+.cache/
+.config/
+.local/
+.npm/
+.ssh/
 docker-compose.override.yml

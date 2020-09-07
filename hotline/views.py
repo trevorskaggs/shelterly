@@ -131,10 +131,8 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
 
         # Status filter.
         status = self.request.query_params.get('status', '')
-        if status == 'open':
-            queryset = queryset.filter(animal__status__in=['REPORTED', 'ASSIGNED']).distinct()
-        elif status == 'closed':
-            queryset = queryset.exclude(animal__status__in=['REPORTED', 'ASSIGNED']).distinct()
+        if status in ('open', 'assigned', 'closed'):
+            queryset = queryset.filter(status=status).distinct()
 
         # Filter on aco_required option for the map.
         aco_required = self.request.query_params.get('aco_required', '')
@@ -145,5 +143,4 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
         is_map = self.request.query_params.get('map', '')
         if is_map == 'true':
             queryset = queryset.exclude(Q(latitude=None) | Q(longitude=None))
-
         return queryset
