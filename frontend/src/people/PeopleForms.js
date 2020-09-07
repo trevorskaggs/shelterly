@@ -7,13 +7,14 @@ import {
   Label,
   Fade,
 } from 'reactstrap';
-import { Form as BootstrapForm, Button, ButtonGroup, Card, Col, FormGroup, Row } from "react-bootstrap";
+import { Form as BootstrapForm, Button, ButtonGroup, Card, Col, Container, FormGroup, Row } from "react-bootstrap";
 import * as Yup from 'yup';
 import { Switch } from 'formik-material-ui';
 import 'flatpickr/dist/themes/light.css';
 import { DateTimePicker, DropDown, TextInput } from '../components/Form';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft } from '@fortawesome/free-solid-svg-icons';
+import Autocomplete from 'react-google-autocomplete';
 
 import styled from 'styled-components';
 
@@ -59,6 +60,25 @@ export const PersonForm = ({ id }) => {
     state: '',
     zip_code: '',
   });
+
+  const updateAddr = suggestion => {
+    // Extract location information from the return. Use short_name for the state.
+    var components={};
+    suggestion.address_components.forEach(function(k,v1) {k.types.forEach(function(v2, k2){v2 !== "administrative_area_level_1" ? components[v2]=k.long_name : components[v2]=k.short_name});});
+
+    if (components.street_number) {
+      var address = components.street_number + " " + components.route;
+    }
+    else {
+      var address = components.route;
+    }
+
+    setData(prevState => ({ ...prevState,
+                          ["address"]:address,
+                          ["city"]:components.locality,
+                          ["state"]:components.administrative_area_level_1,
+                          ["zip_code"]:components.postal_code }));
+  }
 
   // Whether or not to skip Owner creation.
   const [skipOwner, setSkipOwner] = useState(false);
@@ -251,18 +271,32 @@ export const PersonForm = ({ id }) => {
               />
             </BootstrapForm.Row>
             <BootstrapForm.Row hidden={!is_owner}>
-                <TextInput
-                  xs="8"
-                  type="text"
-                  label="Address"
-                  name="address"
+              <BootstrapForm.Group as={Col} xs="10">
+                <BootstrapForm.Label>Search</BootstrapForm.Label>
+                <Autocomplete
+                  style={{width: '100%'}}
+                  onPlaceSelected={(place) => {
+                    updateAddr(place);
+                  }}
+                  types={['address']}
+                  componentRestrictions={{country: "us"}}
+                  className="form-control"
                 />
-                <TextInput
-                  xs="2"
-                  type="text"
-                  label="Apartment"
-                  name="apartment"
-                />
+              </BootstrapForm.Group>
+            </BootstrapForm.Row>
+            <BootstrapForm.Row hidden={!is_owner}>
+              <TextInput
+                xs="8"
+                type="text"
+                label="Address"
+                name="address"
+              />
+              <TextInput
+                xs="2"
+                type="text"
+                label="Apartment"
+                name="apartment"
+              />
             </BootstrapForm.Row>
             <BootstrapForm.Row hidden={!is_owner}>
                 <TextInput

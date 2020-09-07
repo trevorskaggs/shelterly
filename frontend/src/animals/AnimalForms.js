@@ -202,7 +202,7 @@ export const AnimalForm = ({id}) => {
           <Card border="secondary" className="mt-5">
             <Card.Header as="h5">{!id ? "New" : "Update"} Animal</Card.Header>
             <Card.Body>
-          <BootstrapForm as={Form}>
+            <BootstrapForm as={Form}>
               <Field type="hidden" value={owner_id||""} name="owner" id="owner"></Field>
               <Field type="hidden" value={servicerequest_id||""} name="request" id="request"></Field>
                <BootstrapForm.Row hidden={!id} className="mb-3">

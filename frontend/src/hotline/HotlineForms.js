@@ -12,6 +12,7 @@ import * as Yup from 'yup';
 import { Switch } from 'formik-material-ui';
 import 'flatpickr/dist/themes/light.css';
 import { DateTimePicker, DropDown, TextInput } from '../components/Form';
+import Autocomplete from 'react-google-autocomplete';
 
 const state_options = [{ value: 'AL', label: "AL" }, { value: 'AK', label: "AK" }, { value: 'AZ', label: "AZ" }, { value: 'AR', label: "AR" }, { value: 'CA', label: "CA" }, { value: 'CO', label: "CO" }, { value: 'CT', label: "CT" },
 { value: 'DE', label: "DE" }, { value: 'FL', label: "FL" }, { value: 'GA', label: "GA" }, { value: 'HI', label: "HI" }, { value: 'ID', label: "ID" }, { value: 'IL', label: "IL" }, { value: 'IN', label: "IN" },
@@ -62,6 +63,25 @@ export function ServiceRequestForm({ id }) {
     owner_notification_tstamp: null,
   });
 
+  const updateAddr = suggestion => {
+    // Extract location information from the return. Use short_name for the state.
+    var components={};
+    suggestion.address_components.forEach(function(k,v1) {k.types.forEach(function(v2, k2){v2 !== "administrative_area_level_1" ? components[v2]=k.long_name : components[v2]=k.short_name});});
+
+    if (components.street_number) {
+      var address = components.street_number + " " + components.route;
+    }
+    else {
+      var address = components.route;
+    }
+
+    setData(prevState => ({ ...prevState,
+                          ["address"]:address,
+                          ["city"]:components.locality,
+                          ["state"]:components.administrative_area_level_1,
+                          ["zip_code"]:components.postal_code }));
+  }
+
   // Hook for initializing data.
   useEffect(() => {
     let source = axios.CancelToken.source();
@@ -101,7 +121,7 @@ export function ServiceRequestForm({ id }) {
     return () => {
       source.cancel();
     };
-  }, [id, owner_id, data]);
+  }, []);
 
   return (
       <Formik
@@ -219,20 +239,34 @@ export function ServiceRequestForm({ id }) {
           }
             <Fade in={fadeIn} hidden={!fadeIn}>
               <BootstrapForm.Row>
-                  <TextInput
-                    type="text"
-                    label={!is_first_responder ? "Address" : "Address/Cross Streets"}
-                    name="address"
-                    id="address"
-                    xs="8"
+                <BootstrapForm.Group as={Col} xs="10">
+                  <BootstrapForm.Label>Search</BootstrapForm.Label>
+                  <Autocomplete
+                    style={{width: '100%'}}
+                    onPlaceSelected={(place) => {
+                      updateAddr(place);
+                    }}
+                    types={['address']}
+                    componentRestrictions={{country: "us"}}
+                    className="form-control"
                   />
-                  <TextInput
-                    type="text"
-                    label="Apartment"
-                    name="apartment"
-                    id="apartment"
-                    xs="2"
-                  />
+                </BootstrapForm.Group>
+              </BootstrapForm.Row>
+              <BootstrapForm.Row>
+                <TextInput
+                  type="text"
+                  label={!is_first_responder ? "Address" : "Address/Cross Streets"}
+                  name="address"
+                  id="address"
+                  xs="8"
+                />
+                <TextInput
+                  type="text"
+                  label="Apartment"
+                  name="apartment"
+                  id="apartment"
+                  xs="2"
+                />
               </BootstrapForm.Row>
               <BootstrapForm.Row>
                 <TextInput
