@@ -20,4 +20,4 @@ class EvacAssignment(models.Model):
     team_members = models.ManyToManyField(EvacTeamMember)
     service_requests = models.ManyToManyField(ServiceRequest)
     start_time = models.DateTimeField(auto_now_add=True)
-    end_time = models.DateTimeField(blank=True)
+    end_time = models.DateTimeField(blank=True, null=True)

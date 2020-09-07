@@ -90,6 +90,10 @@ export function TeamMemberSelector() {
 };
 
 export const EvacTeamMemberForm = () => {
+
+  // Regex validators.
+  const phoneRegex = /^((\+\d{1,3}(-| )?\(?\d\)?(-| )?\d{1,3})|(\(?\d{2,3}\)?))(-| )?(\d{3,4})(-| )?(\d{4})(( x| ext)\d{1,5}){0,1}$/
+
     return (
       <>
         <Formik
@@ -107,6 +111,7 @@ export const EvacTeamMemberForm = () => {
               .max(50, 'Must be 50 characters or less')
               .required('Required'),
             phone: Yup.string()
+              .matches(phoneRegex, "Phone number is not valid")
               .required('Required'),
             agency_id: Yup.string(),
           })}
