@@ -7,7 +7,7 @@ import {
   Label,
   Fade,
 } from 'reactstrap';
-import { Form as BootstrapForm, Button, ButtonGroup, Card, Col, FormGroup, Row } from "react-bootstrap";
+import { Form as BootstrapForm, Button, ButtonGroup, Card, Col } from "react-bootstrap";
 import * as Yup from 'yup';
 import { Switch } from 'formik-material-ui';
 import 'flatpickr/dist/themes/light.css';
@@ -33,7 +33,7 @@ export function ServiceRequestForm({ id }) {
   } = queryParams;
 
   // Determine if this is from a first responder when creating a SR.
-  var is_first_responder = (first_responder == 'true');
+  var is_first_responder = (first_responder === 'true');
 
   // Track checkbox state with Fade.
   const [fadeIn, setFadeIn] = useState(true);
@@ -101,7 +101,7 @@ export function ServiceRequestForm({ id }) {
     return () => {
       source.cancel();
     };
-  }, [id, owner_id, data]);
+  }, []);
 
   return (
       <Formik
@@ -212,8 +212,8 @@ export function ServiceRequestForm({ id }) {
                 />
             </BootstrapForm.Row>
           {data.address && !id ?
-            <span className="form-row ml-3">
-              <Label>Address Same as Owner: </Label>
+            <span className="form-row mb-2">
+              <Label>&nbsp;&nbsp;Address Same as Owner: </Label>
               <CustomInput id="same_address" type="checkbox" className="ml-2" checked={!fadeIn} onChange={handleChange} />
             </span> : ""
           }
@@ -271,7 +271,7 @@ export function ServiceRequestForm({ id }) {
                 />
             </BootstrapForm.Row>
             <BootstrapForm.Row>
-                <span hidden={is_first_responder}><Label htmlFor="verbal_permission">Verbal Permission</Label>
+                <span hidden={is_first_responder}><Label htmlFor="verbal_permission" className="ml-1">Verbal Permission</Label>
                 <Field component={Switch} name="verbal_permission" type="checkbox" color="primary"/>
 
                 <Label htmlFor="key_provided">Key Provided</Label>

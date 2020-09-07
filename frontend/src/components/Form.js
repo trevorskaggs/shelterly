@@ -85,7 +85,7 @@ const customStyles = {
 
 const DropDown = React.forwardRef((props, ref) => {
   const { setFieldValue, setFieldTouched } = useFormikContext();
-  const [field] = useField(props);
+  const [field, meta] = useField(props);
 
   function handleOptionChange(selection) {
     if (selection) {
@@ -102,12 +102,11 @@ const DropDown = React.forwardRef((props, ref) => {
 
   return (
     <>
-    {/* <Form.Group as={Col} xs={props.xs}> */}
       <Form.Label >{props.label}</Form.Label>
       <SimpleValue {...field} options={props.options} value={props.value}>
          {simpleProps => <Select ref={ref} styles={customStyles} isClearable={true} onBlur={updateBlur} onChange={handleOptionChange} {...props} {...simpleProps} />}
       </SimpleValue>
-      {/* </Form.Group> */}
+      {meta.touched && meta.error ? <div style={{ color: "red", marginTop: ".5rem", fontSize: "80%" }}>{meta.error}</div> : ""}
     </>
   );
 });
