@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import { Link } from 'raviger';
-import { Button, Form, FormCheck, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Button, Col, Container, Form, FormCheck, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBandAid, faCar, faClipboardList, faShieldAlt, faTrailer
@@ -127,9 +127,9 @@ export function Dispatch() {
   }, [statusOptions]);
 
   return (
-    <div className="container">
-      <div className="row">
-        <div className="col-12">
+    <Container>
+      <Row>
+        <Col xs={12}>
           <Map className="mx-auto d-block" bounds={data.bounds} onMoveEnd={onMove}>
             <TileLayer
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -159,12 +159,13 @@ export function Dispatch() {
               </CircleMarker>
             ))}
           </Map>
-        </div>
-        <Form>
+        </Col>
+
+      </Row>
+      <Form>
           <FormCheck id="aco_required" name="aco_required" type="switch" label="ACO Required" checked={statusOptions.ACORequired} onChange={handleACO} />
           <Button type="submit" className="mt-2 mb-1">Deploy!</Button>
         </Form>
-      </div>
       {data.service_requests.map(service_request => (
         <div key={service_request.id} className="mt-2" hidden={mapState[service_request.id] ? mapState[service_request.id].hidden : false}>
           <div className="card-header">
@@ -235,6 +236,6 @@ export function Dispatch() {
           </div>
         </div>
       ))}
-    </div>
+    </Container>
   )
 }
