@@ -89,7 +89,12 @@ export function Dispatch() {
     let source = axios.CancelToken.source();
     const fetchServiceRequests = async () => {
       // Fetch ServiceRequest data.
-      await axios.get('/hotline/api/servicerequests/?status=open' + '&aco_required=' + (statusOptions.aco_required + "&map=true"), {
+      await axios.get('/hotline/api/servicerequests/', {
+        params: {
+          status: 'open',
+          aco_required: statusOptions.aco_required,
+          map: true
+        },
         cancelToken: source.token,
       })
       .then(response => {
