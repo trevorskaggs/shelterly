@@ -33,7 +33,7 @@ DOG_AGE_CHOICES = (
 
 CAT_SIZE_CHOICES = (
     ('small', 'Small ( < 10 lbs)'),
-    ('full', 'Full Size (10+ lbs)'),
+    ('large', 'Large (10+ lbs)'),
 )
 CAT_AGE_CHOICES = (
     ('kitten', 'Kitten'),

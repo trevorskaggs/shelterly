@@ -1,16 +1,16 @@
-import React, { useState, useRef } from 'react';
+import React, { useRef } from 'react';
 import styled from 'styled-components';
 import { Link } from 'raviger';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Nav, Button } from 'react-bootstrap';
-import { faUserCircle , faRedo, faClipboardList, faHome, faBullhorn, faPhone, faSignOutAlt} from '@fortawesome/free-solid-svg-icons';
-import { logoutUser} from ".././accounts/AccountsUtils";
+import { Nav } from 'react-bootstrap';
+import { faDoorOpen, faHome, faBullhorn, faPhone, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
+import { logoutUser } from ".././accounts/AccountsUtils";
 
 export const StyledMenu = styled(Nav)`
   background: ${({ theme }) => theme.primaryDark};
   height: 100%;
   text-align: left;
-  padding: 4rem;
+  padding: 2rem;
   float: left;
   margin-left: 0;
   height: 100vh;
@@ -58,14 +58,16 @@ export const StyledMenu = styled(Nav)`
 `;
 
 const Menu = ({ dispatch, removeCookie, ...props }) => {
+
+    const viewHeight = window.outerHeight;
     
     return (
-    <StyledMenu  {...props} className="flex-column">
-    <img src="/static/images/shelterly.png" alt="logo" />
+    <StyledMenu  {...props} className="flex-column" style={{ height: viewHeight }}>
+    <img src="https://sheltelry-app-static.s3-us-west-2.amazonaws.com/shelterly.png" alt="logo" />
     <div className="logo border-bottom">SHELTERLY</div>
       <Link href="/hotline" ><FontAwesomeIcon icon={faPhone} fixedWidth inverse/> HOTLINE</Link>
       <Link href="/evac"><FontAwesomeIcon icon={faBullhorn} fixedWidth inverse/>  EVAC</Link>
-      <Link href="/intake"><FontAwesomeIcon icon={faRedo} fixedWidth inverse/>  INTAKE</Link>
+      <Link href="/intake"><FontAwesomeIcon icon={faDoorOpen} fixedWidth inverse/>  INTAKE</Link>
       <Link href="/shelter"><FontAwesomeIcon icon={faHome} fixedWidth inverse/> SHELTER</Link>
       <Link onClick={() => logoutUser({dispatch}, {removeCookie})} href="#"><FontAwesomeIcon icon={faSignOutAlt} fixedWidth inverse/> SIGN OUT</Link>
     </StyledMenu>

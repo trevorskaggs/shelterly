@@ -1,23 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import { Link, navigate, useQueryParams } from 'raviger';
-import { Field, Form, Formik } from 'formik';
-import {
-  CustomInput,
-  Label,
-  Fade,
-} from 'reactstrap';
-import { Form as BootstrapForm, Button, ButtonGroup, Card, Col, Container, FormGroup, Row } from "react-bootstrap";
+import { Formik } from 'formik';
+import { Form as BootstrapForm, Button, ButtonGroup, Card, Col } from "react-bootstrap";
 import * as Yup from 'yup';
-import { Switch } from 'formik-material-ui';
-import 'flatpickr/dist/themes/light.css';
-import { DateTimePicker, DropDown, TextInput } from '../components/Form';
+import { DropDown, TextInput } from '../components/Form';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft } from '@fortawesome/free-solid-svg-icons';
 import Autocomplete from 'react-google-autocomplete';
-
-import styled from 'styled-components';
-
 
 const state_options = [{ value: 'AL', label: "AL" }, { value: 'AK', label: "AK" }, { value: 'AZ', label: "AZ" }, { value: 'AR', label: "AR" }, { value: 'CA', label: "CA" }, { value: 'CO', label: "CO" }, { value: 'CT', label: "CT" },
 { value: 'DE', label: "DE" }, { value: 'FL', label: "FL" }, { value: 'GA', label: "GA" }, { value: 'HI', label: "HI" }, { value: 'ID', label: "ID" }, { value: 'IL', label: "IL" }, { value: 'IN', label: "IN" },

@@ -9,11 +9,6 @@ const header_style = {
   textAlign: "center",
 };
 
-const btn_style = {
-  width: "50%",
-  margin: "0 auto",
-};
-
 const Hotline = () => (
   <ListGroup className="flex-fill p-5 h-50">
     <Link href="/hotline/owner/new">
