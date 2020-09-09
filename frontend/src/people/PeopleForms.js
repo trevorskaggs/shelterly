@@ -1,13 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import axios from "axios";
 import { Link, navigate, useQueryParams } from 'raviger';
 import { Field, Formik } from 'formik';
 import { Form as BootstrapForm, Button, ButtonGroup, Card, Col } from "react-bootstrap";
 import * as Yup from 'yup';
-import { DropDown, TextInput } from '../components/Form';
+import { AddressLookup, DropDown, TextInput } from '../components/Form';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft } from '@fortawesome/free-solid-svg-icons';
-import Autocomplete from 'react-google-autocomplete';
 
 const state_options = [{ value: 'AL', label: "AL" }, { value: 'AK', label: "AK" }, { value: 'AZ', label: "AZ" }, { value: 'AR', label: "AR" }, { value: 'CA', label: "CA" }, { value: 'CO', label: "CO" }, { value: 'CT', label: "CT" },
 { value: 'DE', label: "DE" }, { value: 'FL', label: "FL" }, { value: 'GA', label: "GA" }, { value: 'HI', label: "HI" }, { value: 'ID', label: "ID" }, { value: 'IL', label: "IL" }, { value: 'IN', label: "IN" },
@@ -43,36 +42,14 @@ export const PersonForm = ({ id }) => {
     best_contact: '',
     showAgency: is_first_responder,
     agency: '',
-    // drivers_license: '',
     address: '',
     apartment: '',
     city: '',
     state: '',
     zip_code: '',
-    latitude: '',
-    longitude: '',
+    latitude: null,
+    longitude: null,
   });
-
-  const updateAddr = suggestion => {
-    // Extract location information from the return. Use short_name for the state.
-    var components={};
-    suggestion.address_components.forEach(function(k,v1) {k.types.forEach(function(v2, k2){v2 !== "administrative_area_level_1" ? components[v2]=k.long_name : components[v2]=k.short_name});});
-
-    if (components.street_number) {
-      var address = components.street_number + " " + components.route;
-    }
-    else {
-      var address = components.route;
-    }
-
-    setData(prevState => ({ ...prevState,
-                          ["address"]:address,
-                          ["city"]:components.locality,
-                          ["state"]:components.administrative_area_level_1,
-                          ["zip_code"]:components.postal_code,
-                          ["latitude"]:suggestion.geometry.location.lat(),
-                          ["longitude"]:suggestion.geometry.location.lng() }));
-  }
 
   // Whether or not to skip Owner creation.
   const [skipOwner, setSkipOwner] = useState(false);
@@ -83,6 +60,19 @@ export const PersonForm = ({ id }) => {
     reporter_id = '',
     servicerequest_id = ''
   } = queryParams;
+
+  // Callback that sets the state address values returned by AddressLookup child component.
+  const wrapperSetAddress = useCallback(val => {
+    if (val !== 0){
+      setData(prevState => ({ ...prevState,
+        ["address"]:val.address,
+        ["city"]:val.city,
+        ["state"]:val.state,
+        ["zip_code"]:val.zip_code,
+        ["latitude"]:val.latitude,
+        ["longitude"]:val.longitude }));
+    }
+  }, [setData]);
 
   // Hook for initializing data.
   useEffect(() => {
@@ -139,8 +129,10 @@ export const PersonForm = ({ id }) => {
           state: Yup.string(),
           zip_code: Yup.string()
             .max(10, 'Must be 10 characters or less'),
-          latitude: Yup.number(),
-          longitude: Yup.number(),
+          latitude: Yup.number()
+            .nullable(),
+          longitude: Yup.number()
+            .nullable(),
         })}
         onSubmit={(values, { setSubmitting }) => {
           if (id) {
@@ -214,43 +206,36 @@ export const PersonForm = ({ id }) => {
 {is_owner ? "Owner" : "Reporter"} Information</Card.Header>
           <Card.Body>
           <BootstrapForm noValidate>
-            <Field type="hidden" value={data.latitude} name="latitude" id="latitude"></Field>
-            <Field type="hidden" value={data.longitude} name="longitude" id="longitude"></Field>
+            <Field type="hidden" value={data.latitude || ""} name="latitude" id="latitude"></Field>
+            <Field type="hidden" value={data.longitude || ""} name="longitude" id="longitude"></Field>
+
             <BootstrapForm.Row>
-                <TextInput
-                  xs="5"
-                  type="text"
-                  label="First Name*"
-                  name="first_name"
-                />
-                <TextInput
-                  xs="5"
-                  type="text"
-                  label="Last Name*"
-                  name="last_name"
-                />
+              <TextInput
+                xs="5"
+                type="text"
+                label="First Name*"
+                name="first_name"
+              />
+              <TextInput
+                xs="5"
+                type="text"
+                label="Last Name*"
+                name="last_name"
+              />
             </BootstrapForm.Row>
             <BootstrapForm.Row hidden={is_first_responder}>
-                <TextInput
-                  xs="3"
-                  type="text"
-                  label="Phone"
-                  name="phone"
-                />
-                <TextInput
-                  xs="7"
-                  type="text"
-                  label="Email"
-                  name="email"
-                />
-              {/* <Col xs="3">
-                    <TextInput
-                      type="text"
-                      label="Drivers License"
-                      name="drivers_license"
-                      id="drivers_license"
-                    />
-                  </Col> */}
+              <TextInput
+                xs="3"
+                type="text"
+                label="Phone"
+                name="phone"
+              />
+              <TextInput
+                xs="7"
+                type="text"
+                label="Email"
+                name="email"
+              />
             </BootstrapForm.Row>
             <BootstrapForm.Row hidden={is_first_responder || data.agency}>
               <TextInput
@@ -270,15 +255,11 @@ export const PersonForm = ({ id }) => {
             </BootstrapForm.Row>
             <BootstrapForm.Row hidden={!is_owner}>
               <BootstrapForm.Group as={Col} xs="10">
-                <BootstrapForm.Label>Search</BootstrapForm.Label>
-                <Autocomplete
+                <AddressLookup
+                  label="Search"
                   style={{width: '100%'}}
-                  onPlaceSelected={(place) => {
-                    updateAddr(place);
-                  }}
-                  types={['address']}
-                  componentRestrictions={{country: "us"}}
                   className="form-control"
+                  parentStateSetter={wrapperSetAddress}
                 />
               </BootstrapForm.Group>
             </BootstrapForm.Row>
@@ -298,31 +279,31 @@ export const PersonForm = ({ id }) => {
               />
             </BootstrapForm.Row>
             <BootstrapForm.Row hidden={!is_owner}>
-                <TextInput
-                  xs="6"
-                  type="text"
-                  label="City"
-                  name="city"
-                  disabled
-                />
-                <Col xs="2" disabled>
-                <DropDown
-                  label="State"
-                  name="state"
-                  id="state"
-                  options={state_options}
-                  value={props.values.state || ''}
-                  placeholder=''
-                  disabled
-                />
-                </Col>
-                <TextInput
-                  xs="2"
-                  type="text"
-                  label="Zip Code"
-                  name="zip_code"
-                  disabled
-                />
+              <TextInput
+                xs="6"
+                type="text"
+                label="City"
+                name="city"
+                disabled
+              />
+              <Col xs="2">
+              <DropDown
+                label="State"
+                name="state"
+                id="state"
+                options={state_options}
+                value={props.values.state || ''}
+                placeholder=''
+                disabled
+              />
+              </Col>
+              <TextInput
+                xs="2"
+                type="text"
+                label="Zip Code"
+                name="zip_code"
+                disabled
+              />
             </BootstrapForm.Row>
           </BootstrapForm>
           </Card.Body>

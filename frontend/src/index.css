@@ -14,9 +14,8 @@ code {
 
 /* Grey out disabled fields CSS */
 input[disabled] {
+  color: #999999;
   background-color: #DFDDDD !important;
-  padding: 2px;
-  margin: 0 0 0 0;
   background-image: none;
 }
 

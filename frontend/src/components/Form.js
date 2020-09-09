@@ -1,6 +1,6 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useFormikContext, useField } from 'formik';
-import { FormFeedback, Label, Input } from 'reactstrap';
+import { Label, Input } from 'reactstrap';
 import { Col, Form } from 'react-bootstrap';
 import Select from 'react-select';
 import SimpleValue from 'react-select-simple-value';
@@ -9,6 +9,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faTimes,
 } from '@fortawesome/free-solid-svg-icons';
+import Autocomplete from 'react-google-autocomplete';
 
 const DateTimePicker = ({ label, xs, ...props }) => {
   // useField() returns [formik.getFieldProps(), formik.getFieldMeta()]
@@ -74,15 +75,6 @@ const Checkbox = ({ children, ...props }) => {
   );
 };
 
-const customStyles = {
-  option: (provided, state) => ({
-    ...provided,
-    color: 'black',
-  }),
-
-}
-
-
 const DropDown = React.forwardRef((props, ref) => {
   const { setFieldValue, setFieldTouched } = useFormikContext();
   const [field, meta] = useField(props);
@@ -92,21 +84,17 @@ const DropDown = React.forwardRef((props, ref) => {
     control: (styles, { isDisabled}) => {
       return {
         ...styles,
-        cursor: isDisabled ? 'not-allowed' : 'default',
-        backgroundColor: isDisabled ? '#DFDDDD' : 'white',
-        color: isDisabled ? 'blue' : 'red'
-      }
-    },
-    // For the options
-    option: (styles, { isDisabled}) => {
-      const color = '#DFDDDD';
-      return {
-        ...styles,
-        backgroundColor: isDisabled ? 'red' : 'blue',
         color: '#FFF',
         cursor: isDisabled ? 'not-allowed' : 'default',
-      };
+        backgroundColor: isDisabled ? '#DFDDDD' : 'white',
+        height: 35,
+        minHeight: 35
+      }
     },
+    option: provided => ({
+      ...provided,
+      color: 'black'
+    }),
   };
 
   function handleOptionChange(selection) {
@@ -126,7 +114,7 @@ const DropDown = React.forwardRef((props, ref) => {
     <>
       <Form.Label >{props.label}</Form.Label>
       <SimpleValue {...field} options={props.options} value={props.value}>
-         {simpleProps => <Select styles={customStyles} isDisabled={props.disabled} ref={ref} styles={customStyles} isClearable={true} onBlur={updateBlur} onChange={handleOptionChange} {...props} {...simpleProps} />}
+         {simpleProps => <Select isDisabled={props.disabled} ref={ref} styles={customStyles} isClearable={true} onBlur={updateBlur} onChange={handleOptionChange} {...props} {...simpleProps} />}
       </SimpleValue>
       {meta.touched && meta.error ? <div style={{ color: "red", marginTop: ".5rem", fontSize: "80%" }}>{meta.error}</div> : ""}
     </>
@@ -134,13 +122,65 @@ const DropDown = React.forwardRef((props, ref) => {
 });
 
 const MultiSelect = ({ label, ...props }) => {
-    const [field] = useField(props);
-    return (
-      <>
-        <Label htmlFor={props.id || props.name}>{label}</Label>
-        <Input type="select" {...field} {...props} multiple={true} />
-      </>
-    );
-  };
+  const [field] = useField(props);
+  return (
+    <>
+      <Label htmlFor={props.id || props.name}>{label}</Label>
+      <Input type="select" {...field} {...props} multiple={true} />
+    </>
+  );
+};
 
-export { TextInput, Checkbox, DropDown, MultiSelect, DateTimePicker };
+const AddressLookup = ({ parentStateSetter, ...props }) => {
+
+  const childRef = useRef();
+  const [childState, setChildState] = useState(0);
+
+  const updateAddr = suggestion => {
+    // Extract location information from the return. Use short_name for the state.
+    var components={};
+    suggestion.address_components.forEach(function(k,v1) {k.types.forEach(function(v2, k2){v2 !== "administrative_area_level_1" ? components[v2]=k.long_name : components[v2]=k.short_name});});
+
+    // Build formatted street number + name string.
+    var address = "";
+    if (components.street_number) {
+      address = components.street_number + " " + components.route;
+    }
+    else {
+      address = components.route;
+    }
+
+    // Store address values used to update the state.
+    var addr_dict = {
+      address:address,
+      city:components.locality,
+      state:components.administrative_area_level_1,
+      zip_code:components.postal_code,
+      latitude:suggestion.geometry.location.lat(),
+      longitude:suggestion.geometry.location.lng()
+    }
+    setChildState(addr_dict);
+  }
+
+  useEffect(() => {
+    // Call parent function to update parent state.
+    parentStateSetter(childState);
+  }, [parentStateSetter, childState]);
+
+  return (
+    <>
+      <Label>{props.label}</Label>
+      <Autocomplete
+        {...props}
+        onPlaceSelected={(place) => {
+          updateAddr(place);
+        }}
+        types={['address']}
+        componentRestrictions={{country: "us"}}
+        ref={childRef}
+      />
+    </>
+  );
+}
+
+export { AddressLookup, TextInput, Checkbox, DropDown, MultiSelect, DateTimePicker };

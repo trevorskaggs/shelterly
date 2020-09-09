@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import axios from "axios";
 import { Link, navigate, useQueryParams } from 'raviger';
 import { Field, Form, Formik } from 'formik';
@@ -11,8 +11,7 @@ import { Form as BootstrapForm, Button, ButtonGroup, Card, Col } from "react-boo
 import * as Yup from 'yup';
 import { Switch } from 'formik-material-ui';
 import 'flatpickr/dist/themes/light.css';
-import { DateTimePicker, DropDown, TextInput } from '../components/Form';
-import Autocomplete from 'react-google-autocomplete';
+import { AddressLookup, DateTimePicker, DropDown, TextInput } from '../components/Form';
 
 const state_options = [{ value: 'AL', label: "AL" }, { value: 'AK', label: "AK" }, { value: 'AZ', label: "AZ" }, { value: 'AR', label: "AR" }, { value: 'CA', label: "CA" }, { value: 'CO', label: "CO" }, { value: 'CT', label: "CT" },
 { value: 'DE', label: "DE" }, { value: 'FL', label: "FL" }, { value: 'GA', label: "GA" }, { value: 'HI', label: "HI" }, { value: 'ID', label: "ID" }, { value: 'IL', label: "IL" }, { value: 'IN', label: "IN" },
@@ -52,8 +51,8 @@ export function ServiceRequestForm({ id }) {
     city: '',
     state: '',
     zip_code: '',
-    latitude: '',
-    longitude: '',
+    latitude: null,
+    longitude: null,
     verbal_permission: false,
     key_provided: false,
     accessible: false,
@@ -65,26 +64,18 @@ export function ServiceRequestForm({ id }) {
     owner_notification_tstamp: null,
   });
 
-  const updateAddr = suggestion => {
-    // Extract location information from the return. Use short_name for the state.
-    var components={};
-    suggestion.address_components.forEach(function(k,v1) {k.types.forEach(function(v2, k2){v2 !== "administrative_area_level_1" ? components[v2]=k.long_name : components[v2]=k.short_name});});
-
-    if (components.street_number) {
-      var address = components.street_number + " " + components.route;
+  // Callback that sets the state address values returned by AddressLookup child component.
+  const wrapperSetAddress = useCallback(val => {
+    if (val !== 0){
+      setData(prevState => ({ ...prevState,
+        ["address"]:val.address,
+        ["city"]:val.city,
+        ["state"]:val.state,
+        ["zip_code"]:val.zip_code,
+        ["latitude"]:val.latitude,
+        ["longitude"]:val.longitude }));
     }
-    else {
-      var address = components.route;
-    }
-
-    setData(prevState => ({ ...prevState,
-                          ["address"]:address,
-                          ["city"]:components.locality,
-                          ["state"]:components.administrative_area_level_1,
-                          ["zip_code"]:components.postal_code,
-                          ["latitude"]:suggestion.geometry.location.lat(),
-                          ["longitude"]:suggestion.geometry.location.lng() }));
-  }
+  }, [setData]);
 
   // Hook for initializing data.
   useEffect(() => {
@@ -156,8 +147,10 @@ export function ServiceRequestForm({ id }) {
             .nullable(),
           zip_code: Yup.string()
             .max(10, 'Must be 10 characters or less'),
-          latitude: Yup.number(),
-          longitude: Yup.number(),
+          latitude: Yup.number()
+            .nullable(),
+          longitude: Yup.number()
+            .nullable(),
         })}
         onSubmit={(values, { setSubmitting }) => {
           if (id) {
@@ -189,8 +182,8 @@ export function ServiceRequestForm({ id }) {
         <BootstrapForm as={Form}>
           <Field type="hidden" value={owner_id || ""} name="owner" id="owner"></Field>
           <Field type="hidden" value={reporter_id || ""} name="reporter" id="reporter"></Field>
-          <Field type="hidden" value={data.latitude} name="latitude" id="latitude"></Field>
-            <Field type="hidden" value={data.longitude} name="longitude" id="longitude"></Field>
+          <Field type="hidden" value={data.latitude || ""} name="latitude" id="latitude"></Field>
+          <Field type="hidden" value={data.longitude || ""} name="longitude" id="longitude"></Field>
           <BootstrapForm.Row hidden={!id}>
             <TextInput
               as="textarea"
@@ -248,15 +241,11 @@ export function ServiceRequestForm({ id }) {
             <Fade in={fadeIn} hidden={!fadeIn}>
               <BootstrapForm.Row>
                 <BootstrapForm.Group as={Col} xs="10">
-                  <BootstrapForm.Label>Search</BootstrapForm.Label>
-                  <Autocomplete
+                  <AddressLookup
+                    label="Search"
                     style={{width: '100%'}}
-                    onPlaceSelected={(place) => {
-                      updateAddr(place);
-                    }}
-                    types={['address']}
-                    componentRestrictions={{country: "us"}}
                     className="form-control"
+                    parentStateSetter={wrapperSetAddress}
                   />
                 </BootstrapForm.Group>
               </BootstrapForm.Row>
