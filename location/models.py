@@ -27,15 +27,15 @@ class Location(models.Model):
     def save(self, *args, **kwargs):
         super(Location, self).save(*args, **kwargs)
 
-    def set_lat_lon(self):
-        try:
-            query_string = (',').join([self.address or '', self.apartment or '', self.city or '', self.state or '', self.zip_code or ''])
-            g = geocoder.here(query_string, app_id=settings.HERE_APP_ID, app_code=settings.HERE_APP_CODE)
-            self.latitude = g.json['lat']
-            self.longitude = g.json['lng']
-            self.save()
-        except:
-            pass
+    # def set_lat_lon(self):
+    #     try:
+    #         query_string = (',').join([self.address or '', self.apartment or '', self.city or '', self.state or '', self.zip_code or ''])
+    #         g = geocoder.here(query_string, app_id=settings.HERE_APP_ID, app_code=settings.HERE_APP_CODE)
+    #         self.latitude = g.json['lat']
+    #         self.longitude = g.json['lng']
+    #         self.save()
+    #     except:
+    #         pass
 
     def get_location_dict(self):
         return {

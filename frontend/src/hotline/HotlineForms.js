@@ -52,6 +52,8 @@ export function ServiceRequestForm({ id }) {
     city: '',
     state: '',
     zip_code: '',
+    latitude: '',
+    longitude: '',
     verbal_permission: false,
     key_provided: false,
     accessible: false,
@@ -79,7 +81,9 @@ export function ServiceRequestForm({ id }) {
                           ["address"]:address,
                           ["city"]:components.locality,
                           ["state"]:components.administrative_area_level_1,
-                          ["zip_code"]:components.postal_code }));
+                          ["zip_code"]:components.postal_code,
+                          ["latitude"]:suggestion.geometry.location.lat(),
+                          ["longitude"]:suggestion.geometry.location.lng() }));
   }
 
   // Hook for initializing data.
@@ -108,7 +112,7 @@ export function ServiceRequestForm({ id }) {
         })
           .then(response => {
             // Update relevant address fields.
-            setData(Object.assign(data, { 'address': response.data.address, 'apartment': response.data.apartment, 'city': response.data.city, 'state': response.data.state, 'zip_code': response.data.zip_code }))
+            setData(Object.assign(data, { 'address': response.data.address, 'apartment': response.data.apartment, 'city': response.data.city, 'state': response.data.state, 'zip_code': response.data.zip_code, 'latitude': response.data.latitude, 'longitude': response.data.longitude }))
             setFadeIn(response.data.address ? false : true)
           })
           .catch(error => {
@@ -152,6 +156,8 @@ export function ServiceRequestForm({ id }) {
             .nullable(),
           zip_code: Yup.string()
             .max(10, 'Must be 10 characters or less'),
+          latitude: Yup.number(),
+          longitude: Yup.number(),
         })}
         onSubmit={(values, { setSubmitting }) => {
           if (id) {
@@ -183,6 +189,8 @@ export function ServiceRequestForm({ id }) {
         <BootstrapForm as={Form}>
           <Field type="hidden" value={owner_id || ""} name="owner" id="owner"></Field>
           <Field type="hidden" value={reporter_id || ""} name="reporter" id="reporter"></Field>
+          <Field type="hidden" value={data.latitude} name="latitude" id="latitude"></Field>
+            <Field type="hidden" value={data.longitude} name="longitude" id="longitude"></Field>
           <BootstrapForm.Row hidden={!id}>
             <TextInput
               as="textarea"
@@ -259,6 +267,7 @@ export function ServiceRequestForm({ id }) {
                   name="address"
                   id="address"
                   xs="8"
+                  disabled
                 />
                 <TextInput
                   type="text"
@@ -275,6 +284,7 @@ export function ServiceRequestForm({ id }) {
                   name="city"
                   id="city"
                   xs="6"
+                  disabled
                 />
                 <Col xs="2">
                   <DropDown
@@ -283,6 +293,8 @@ export function ServiceRequestForm({ id }) {
                     id="state"
                     options={state_options}
                     value={props.values.state || ''}
+                    placeholder=''
+                    disabled
                   />
                 </Col>
                   <TextInput
@@ -291,6 +303,7 @@ export function ServiceRequestForm({ id }) {
                     name="zip_code"
                     id="zip_code"
                     xs="2"
+                    disabled
                   />
               </BootstrapForm.Row>
             </Fade>

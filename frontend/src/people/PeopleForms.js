@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import { Link, navigate, useQueryParams } from 'raviger';
-import { Formik } from 'formik';
+import { Field, Formik } from 'formik';
 import { Form as BootstrapForm, Button, ButtonGroup, Card, Col } from "react-bootstrap";
 import * as Yup from 'yup';
 import { DropDown, TextInput } from '../components/Form';
@@ -49,6 +49,8 @@ export const PersonForm = ({ id }) => {
     city: '',
     state: '',
     zip_code: '',
+    latitude: '',
+    longitude: '',
   });
 
   const updateAddr = suggestion => {
@@ -67,7 +69,9 @@ export const PersonForm = ({ id }) => {
                           ["address"]:address,
                           ["city"]:components.locality,
                           ["state"]:components.administrative_area_level_1,
-                          ["zip_code"]:components.postal_code }));
+                          ["zip_code"]:components.postal_code,
+                          ["latitude"]:suggestion.geometry.location.lat(),
+                          ["longitude"]:suggestion.geometry.location.lng() }));
   }
 
   // Whether or not to skip Owner creation.
@@ -135,6 +139,8 @@ export const PersonForm = ({ id }) => {
           state: Yup.string(),
           zip_code: Yup.string()
             .max(10, 'Must be 10 characters or less'),
+          latitude: Yup.number(),
+          longitude: Yup.number(),
         })}
         onSubmit={(values, { setSubmitting }) => {
           if (id) {
@@ -208,6 +214,8 @@ export const PersonForm = ({ id }) => {
 {is_owner ? "Owner" : "Reporter"} Information</Card.Header>
           <Card.Body>
           <BootstrapForm noValidate>
+            <Field type="hidden" value={data.latitude} name="latitude" id="latitude"></Field>
+            <Field type="hidden" value={data.longitude} name="longitude" id="longitude"></Field>
             <BootstrapForm.Row>
                 <TextInput
                   xs="5"
@@ -280,6 +288,7 @@ export const PersonForm = ({ id }) => {
                 type="text"
                 label="Address"
                 name="address"
+                disabled
               />
               <TextInput
                 xs="2"
@@ -294,14 +303,17 @@ export const PersonForm = ({ id }) => {
                   type="text"
                   label="City"
                   name="city"
+                  disabled
                 />
-                <Col xs="2">
+                <Col xs="2" disabled>
                 <DropDown
                   label="State"
                   name="state"
                   id="state"
                   options={state_options}
                   value={props.values.state || ''}
+                  placeholder=''
+                  disabled
                 />
                 </Col>
                 <TextInput
@@ -309,6 +321,7 @@ export const PersonForm = ({ id }) => {
                   type="text"
                   label="Zip Code"
                   name="zip_code"
+                  disabled
                 />
             </BootstrapForm.Row>
           </BootstrapForm>

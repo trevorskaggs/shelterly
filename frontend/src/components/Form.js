@@ -87,6 +87,28 @@ const DropDown = React.forwardRef((props, ref) => {
   const { setFieldValue, setFieldTouched } = useFormikContext();
   const [field, meta] = useField(props);
 
+  const customStyles = {
+    // For the select it self, not the options of the select
+    control: (styles, { isDisabled}) => {
+      return {
+        ...styles,
+        cursor: isDisabled ? 'not-allowed' : 'default',
+        backgroundColor: isDisabled ? '#DFDDDD' : 'white',
+        color: isDisabled ? 'blue' : 'red'
+      }
+    },
+    // For the options
+    option: (styles, { isDisabled}) => {
+      const color = '#DFDDDD';
+      return {
+        ...styles,
+        backgroundColor: isDisabled ? 'red' : 'blue',
+        color: '#FFF',
+        cursor: isDisabled ? 'not-allowed' : 'default',
+      };
+    },
+  };
+
   function handleOptionChange(selection) {
     if (selection) {
       setFieldValue(props.name, selection.value);
@@ -104,7 +126,7 @@ const DropDown = React.forwardRef((props, ref) => {
     <>
       <Form.Label >{props.label}</Form.Label>
       <SimpleValue {...field} options={props.options} value={props.value}>
-         {simpleProps => <Select ref={ref} styles={customStyles} isClearable={true} onBlur={updateBlur} onChange={handleOptionChange} {...props} {...simpleProps} />}
+         {simpleProps => <Select styles={customStyles} isDisabled={props.disabled} ref={ref} styles={customStyles} isClearable={true} onBlur={updateBlur} onChange={handleOptionChange} {...props} {...simpleProps} />}
       </SimpleValue>
       {meta.touched && meta.error ? <div style={{ color: "red", marginTop: ".5rem", fontSize: "80%" }}>{meta.error}</div> : ""}
     </>

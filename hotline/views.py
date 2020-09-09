@@ -116,7 +116,6 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         if serializer.is_valid():
             service_request = serializer.save()
-            service_request.set_lat_lon()
             if service_request.owner:
                 service_request.owner.animal_set.update(request=service_request.id)
 
