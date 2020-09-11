@@ -189,40 +189,32 @@ export const PersonForm = ({ id }) => {
           <Card.Body>
           <BootstrapForm noValidate>
             <BootstrapForm.Row>
-                <TextInput
-                  xs="5"
-                  type="text"
-                  label="First Name*"
-                  name="first_name"
-                />
-                <TextInput
-                  xs="5"
-                  type="text"
-                  label="Last Name*"
-                  name="last_name"
-                />
+              <TextInput
+                xs="5"
+                type="text"
+                label="First Name*"
+                name="first_name"
+              />
+              <TextInput
+                xs="5"
+                type="text"
+                label="Last Name*"
+                name="last_name"
+              />
             </BootstrapForm.Row>
             <BootstrapForm.Row hidden={is_first_responder}>
-                <TextInput
-                  xs="3"
-                  type="text"
-                  label="Phone"
-                  name="phone"
-                />
-                <TextInput
-                  xs="7"
-                  type="text"
-                  label="Email"
-                  name="email"
-                />
-              {/* <Col xs="3">
-                    <TextInput
-                      type="text"
-                      label="Drivers License"
-                      name="drivers_license"
-                      id="drivers_license"
-                    />
-                  </Col> */}
+              <TextInput
+                xs="3"
+                type="text"
+                label="Phone"
+                name="phone"
+              />
+              <TextInput
+                xs="7"
+                type="text"
+                label="Email"
+                name="email"
+              />
             </BootstrapForm.Row>
             <BootstrapForm.Row hidden={is_first_responder || data.agency}>
               <TextInput
@@ -241,41 +233,41 @@ export const PersonForm = ({ id }) => {
               />
             </BootstrapForm.Row>
             <BootstrapForm.Row hidden={!is_owner}>
-                <TextInput
-                  xs="8"
-                  type="text"
-                  label="Address"
-                  name="address"
-                />
-                <TextInput
-                  xs="2"
-                  type="text"
-                  label="Apartment"
-                  name="apartment"
-                />
+              <TextInput
+                xs="8"
+                type="text"
+                label="Address"
+                name="address"
+              />
+              <TextInput
+                xs="2"
+                type="text"
+                label="Apartment"
+                name="apartment"
+              />
             </BootstrapForm.Row>
             <BootstrapForm.Row hidden={!is_owner}>
-                <TextInput
-                  xs="6"
-                  type="text"
-                  label="City"
-                  name="city"
-                />
-                <Col xs="2">
-                <DropDown
-                  label="State"
-                  name="state"
-                  id="state"
-                  options={state_options}
-                  value={props.values.state || ''}
-                />
-                </Col>
-                <TextInput
-                  xs="2"
-                  type="text"
-                  label="Zip Code"
-                  name="zip_code"
-                />
+              <TextInput
+                xs="6"
+                type="text"
+                label="City"
+                name="city"
+              />
+              <Col xs="2">
+              <DropDown
+                label="State"
+                name="state"
+                id="state"
+                options={state_options}
+                value={props.values.state || ''}
+              />
+              </Col>
+              <TextInput
+                xs="2"
+                type="text"
+                label="Zip Code"
+                name="zip_code"
+              />
             </BootstrapForm.Row>
           </BootstrapForm>
           </Card.Body>

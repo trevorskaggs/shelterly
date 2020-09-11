@@ -7,8 +7,11 @@ import { Col } from 'react-bootstrap';
 import { Button, ButtonGroup, Form as BootstrapForm } from "react-bootstrap";
 import { Card } from 'react-bootstrap';
 import * as Yup from 'yup';
+import ImageUploading from "react-images-uploading";
 import { DateTimePicker, DropDown, TextInput } from '.././components/Form.js';
 import { catAgeChoices, dogAgeChoices, horseAgeChoices, otherAgeChoices, catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, speciesChoices, sexChoices, dogSizeChoices, catSizeChoices, horseSizeChoices, otherSizeChoices, statusChoices, unknownChoices } from './constants'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faMinusSquare, faPlusSquare } from '@fortawesome/free-solid-svg-icons';
 
 export const AnimalForm = ({id}) => {
 
@@ -43,6 +46,8 @@ export const AnimalForm = ({id}) => {
   // Dynamic placeholder value for options.
   const [placeholder, setPlaceholder] = useState("Select a species...");
 
+  const [images, setImages] = useState([]);
+
   // Initial Animal data.
   const [data, setData] = useState({
     owner: owner_id,
@@ -62,7 +67,7 @@ export const AnimalForm = ({id}) => {
     injured: 'unknown',
     behavior_notes: '',
     last_seen: null,
-    image: null,
+    images: [],
   });
 
   // Hook for initializing data.
@@ -89,12 +94,6 @@ export const AnimalForm = ({id}) => {
       source.cancel();
     };
   }, [id]);
-
-  const [image, setImage] = useState(null);
-  function handleImageChange(e) {
-    console.log(e);
-    setImage(e.target.files[0]);
-  };
   
   return (
     <span key={key}>
@@ -129,8 +128,8 @@ export const AnimalForm = ({id}) => {
             .max(200, 'Must be 200 characters or less'),
           last_seen: Yup.date()
             .nullable(),
-          // image: Yup.string()
-          //   .nullable(),
+          images: Yup.array()
+            .nullable(),
         })}
         onSubmit={(values, { setSubmitting }) => {
           if (id) {
@@ -153,7 +152,18 @@ export const AnimalForm = ({id}) => {
             });
           }
           else {
-            axios.post('/animals/api/animal/', values)
+            const formData = new FormData();
+            // Convert json to formData.
+            for ( var key in values ) {
+              if (values[key] !== null) {
+                formData.append(key, values[key]);
+              }
+            }
+            // Add images.
+            for (let i = 0; i < images.length; i++) {
+              formData.append('image' + (i + 1), images[i].file);
+            }
+            axios.post('/animals/api/animal/', formData)
             .then(response => {
               if (addAnother) {
                 // If SR already exists, pass along the request ID.
@@ -373,25 +383,56 @@ export const AnimalForm = ({id}) => {
                       isClearable={false}
                     />
                   </Col>
-                    <DateTimePicker
-                      label="Last Seen"
-                      name="last_seen"
-                      id="last_seen"
-                      xs="4"
-                      onChange={(date, dateStr) => {
-                        props.setFieldValue("last_seen", dateStr)
-                      }}
-                      value={data.last_seen||null}
-                    />
+                  <DateTimePicker
+                    label="Last Seen"
+                    name="last_seen"
+                    id="last_seen"
+                    xs="4"
+                    onChange={(date, dateStr) => {
+                      props.setFieldValue("last_seen", dateStr)
+                    }}
+                    value={data.last_seen||null}
+                  />
                 </BootstrapForm.Row>
-
                 <BootstrapForm.Row>
                   <Col className="mt-3">
-                  <Label for="image">Image File</Label>
-                  <Input type="file" name="image" id="image" onChange={handleImageChange} />
+                  <Label for="image">Image Files</Label>
+                  <ImageUploading
+                    multiple
+                    value={images}
+                    onChange={(imageList, addUpdateIndex) => {
+                      props.setFieldValue("images", props.values.images.concat(imageList[0].file));
+                      setImages(imageList);
+                    }}
+                    maxNumber={5}
+                    dataURLKey="data_url"
+                  >
+                    {({
+                      imageList,
+                      onImageUpload,
+                      onImageRemove,
+                      isDragging,
+                      dragProps
+                    }) => (
+                      // write your building UI
+                      <div className="upload__image-wrapper">
+                        &nbsp;
+                        {imageList.map((image, index) => (
+                          <div key={index} className="image-item">
+                            <img src={image.data_url} alt="" width="100" />
+                            <div className="image-item__btn-wrapper">
+                              <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => onImageRemove(index)} style={{backgroundColor:"red"}}
+                                {...dragProps} />
+                            </div>
+                          </div>
+                        ))}
+                        <FontAwesomeIcon icon={faPlusSquare} size="10x" inverse onClick={onImageUpload}
+                          {...dragProps} />
+                      </div>
+                    )}
+                  </ImageUploading>
                   </Col>
                 </BootstrapForm.Row>
-
           </BootstrapForm>
           </Card.Body>
           <ButtonGroup>
