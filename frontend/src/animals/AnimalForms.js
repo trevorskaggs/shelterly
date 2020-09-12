@@ -46,6 +46,8 @@ export const AnimalForm = ({id}) => {
   // Dynamic placeholder value for options.
   const [placeholder, setPlaceholder] = useState("Select a species...");
 
+  const [front_image, setFrontImage] = useState([]);
+  const [side_image, setSideImage] = useState([]);
   const [images, setImages] = useState([]);
 
   // Initial Animal data.
@@ -67,7 +69,8 @@ export const AnimalForm = ({id}) => {
     injured: 'unknown',
     behavior_notes: '',
     last_seen: null,
-    images: [],
+    front_image: null,
+    side_image: null,
   });
 
   // Hook for initializing data.
@@ -128,7 +131,9 @@ export const AnimalForm = ({id}) => {
             .max(200, 'Must be 200 characters or less'),
           last_seen: Yup.date()
             .nullable(),
-          images: Yup.array()
+          front_image: Yup.object()
+            .nullable(),
+          side_image: Yup.object()
             .nullable(),
         })}
         onSubmit={(values, { setSubmitting }) => {
@@ -209,11 +214,11 @@ export const AnimalForm = ({id}) => {
           <Card border="secondary" className="mt-5">
             <Card.Header as="h5">{!id ? "New" : "Update"} Animal</Card.Header>
             <Card.Body>
-          <BootstrapForm as={Form}>
-              <Field type="hidden" value={owner_id||""} name="owner" id="owner"></Field>
-              <Field type="hidden" value={servicerequest_id||""} name="request" id="request"></Field>
-               <BootstrapForm.Row hidden={!id} className="mb-3">
-                <Col xs="3">
+              <BootstrapForm as={Form}>
+                <Field type="hidden" value={owner_id||""} name="owner" id="owner"></Field>
+                <Field type="hidden" value={servicerequest_id||""} name="request" id="request"></Field>
+                <BootstrapForm.Row hidden={!id} className="mb-3">
+                  <Col xs="3">
                     <DropDown
                       id="status"
                       name="status"
@@ -320,14 +325,14 @@ export const AnimalForm = ({id}) => {
                       placeholder={placeholder}
                     />
                   </Col>
-                    <TextInput
-                      id="color_notes"
-                      name="color_notes"
-                      as="textarea"
-                      rows={5}
-                      label="Description"
-                      xs="7"
-                    />
+                  <TextInput
+                    id="color_notes"
+                    name="color_notes"
+                    as="textarea"
+                    rows={5}
+                    label="Description"
+                    xs="7"
+                  />
                 </BootstrapForm.Row>
                 <BootstrapForm.Row>
                   <Col xs="3">
@@ -351,14 +356,14 @@ export const AnimalForm = ({id}) => {
                       isClearable={false}
                     />
                   </Col>
-                    <TextInput
-                        label="Behavior Notes"
-                        id="behavior_notes"
-                        name="behavior_notes"
-                        as="textarea"
-                        rows={5}
-                        xs="7"
-                      />
+                  <TextInput
+                    label="Behavior Notes"
+                    id="behavior_notes"
+                    name="behavior_notes"
+                    as="textarea"
+                    rows={5}
+                    xs="7"
+                  />
                 </BootstrapForm.Row>
                 <BootstrapForm.Row>
                   <Col xs="3">
@@ -394,17 +399,55 @@ export const AnimalForm = ({id}) => {
                     value={data.last_seen||null}
                   />
                 </BootstrapForm.Row>
+                <p className="mb-0">Image Files</p>
                 <BootstrapForm.Row>
-                  <Col className="mt-3">
-                  <Label for="image">Image Files</Label>
                   <ImageUploading
-                    multiple
-                    value={images}
+                    value={front_image}
+                    id="front_image"
+                    name="front_image"
                     onChange={(imageList, addUpdateIndex) => {
-                      props.setFieldValue("images", props.values.images.concat(imageList[0].file));
-                      setImages(imageList);
+                      setFrontImage(imageList);
+                      if (imageList[0]) {
+                        props.setFieldValue("front_image", imageList[0].file)
+                      }
                     }}
-                    maxNumber={5}
+                    dataURLKey="data_url"
+                  >
+                    {({
+                      imageList,
+                      onImageUpload,
+                      onImageRemove,
+                      isDragging,
+                      dragProps
+                    }) => (
+                      <span className="upload__image-wrapper">
+                        {front_image[0] ?
+                          <span>{front_image.map((image, index) => (
+                            <span key={index} className="image-item">
+                              <img src={image.data_url} alt="" width="100" />
+                              <span className="image-item__btn-wrapper">
+                                <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => onImageRemove(index)} style={{backgroundColor:"red"}}
+                                  {...dragProps} />
+                              </span>
+                            </span>
+                          ))}</span> :
+                          <div className="row ml-0 mr-0"><span className="text-center"><FontAwesomeIcon icon={faPlusSquare} size="10x" inverse onClick={onImageUpload}
+                            {...dragProps} /><div>Front-Shot*</div></span></div>
+                        }
+                      </span>
+                    )}
+                  </ImageUploading>
+                  <span className="ml-3"></span>
+                  <ImageUploading
+                    id="side_image"
+                    name="side_image"
+                    value={side_image}
+                    onChange={(imageList, addUpdateIndex) => {
+                      setSideImage(imageList);
+                      if (imageList[0]) {
+                        props.setFieldValue("side_image", imageList[0].file)
+                      }
+                    }}
                     dataURLKey="data_url"
                   >
                     {({
@@ -415,31 +458,67 @@ export const AnimalForm = ({id}) => {
                       dragProps
                     }) => (
                       // write your building UI
-                      <div className="upload__image-wrapper">
-                        &nbsp;
-                        {imageList.map((image, index) => (
-                          <div key={index} className="image-item">
-                            <img src={image.data_url} alt="" width="100" />
-                            <div className="image-item__btn-wrapper">
-                              <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => onImageRemove(index)} style={{backgroundColor:"red"}}
-                                {...dragProps} />
-                            </div>
-                          </div>
-                        ))}
-                        <FontAwesomeIcon icon={faPlusSquare} size="10x" inverse onClick={onImageUpload}
-                          {...dragProps} />
-                      </div>
+                      <span className="upload__image-wrapper">
+                        {side_image[0] ?
+                          <span>{side_image.map((image, index) => (
+                            <span key={index} className="image-item">
+                              <img src={image.data_url} alt="" width="100" />
+                              <span className="image-item__btn-wrapper">
+                                <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => onImageRemove(index)} style={{backgroundColor:"red"}}
+                                  {...dragProps} />
+                              </span>
+                            </span>
+                          ))}</span> :
+                        <div className="row ml-0 mr-0"><span className="text-center"><FontAwesomeIcon icon={faPlusSquare} size="10x" inverse onClick={onImageUpload}
+                          {...dragProps} /><div>Side-Shot*</div></span></div>
+                        }
+                      </span>
                     )}
                   </ImageUploading>
-                  </Col>
+                  <span className="ml-3 mr-3"></span>
+                  {front_image[0] && side_image[0] ?
+                  <ImageUploading
+                    value={images}
+                    id="images"
+                    name="images"
+                    onChange={(imageList, addUpdateIndex) => {
+                      setImages(imageList);
+                    }}
+                    maxNumber={3}
+                    multiple
+                    dataURLKey="data_url"
+                  >
+                    {({
+                      imageList,
+                      onImageUpload,
+                      onImageRemove,
+                      isDragging,
+                      dragProps
+                    }) => (
+                      <span className="upload__image-wrapper row">
+                        {imageList.map((image, index) => (
+                          <span key={index} className="image-item">
+                            <img src={image.data_url} alt="" width="100" />
+                            <span className="image-item__btn-wrapper">
+                              <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => onImageRemove(index)} style={{backgroundColor:"red"}}
+                                {...dragProps} />
+                            </span>
+                            <span className="ml-3"></span>
+                          </span>
+                        ))}
+                        {images.length < 3 ? <span className="row ml-0 mr-0"><span className="text-center"><FontAwesomeIcon icon={faPlusSquare} size="10x" inverse onClick={onImageUpload}
+                          {...dragProps} /><div>Extra</div></span></span> : ""}
+                      </span>
+                    )}
+                  </ImageUploading> : ""}
                 </BootstrapForm.Row>
-          </BootstrapForm>
+            </BootstrapForm>
           </Card.Body>
           <ButtonGroup>
-              <Button type="button" className="btn btn-success mr-1" onClick={() => {setAddAnother(false); props.submitForm()}}>Save</Button>
-              {!id ? <Button type="button" className="btn btn-primary mr-1" onClick={() => {setAddAnother(true); props.submitForm()}}>Add Another</Button> : ""}
-              <Link className="btn btn-secondary" href={servicerequest_id ? "/hotline/servicerequest/" + servicerequest_id : "/"}>Cancel</Link>
-              </ButtonGroup>
+            <Button type="button" className="btn btn-success mr-1" onClick={() => {setAddAnother(false); props.submitForm()}}>Save</Button>
+            {!id ? <Button type="button" className="btn btn-primary mr-1" onClick={() => {setAddAnother(true); props.submitForm()}}>Add Another</Button> : ""}
+            <Link className="btn btn-secondary" href={servicerequest_id ? "/hotline/servicerequest/" + servicerequest_id : "/"}>Cancel</Link>
+          </ButtonGroup>
           </Card>
         )}
       </Formik>
