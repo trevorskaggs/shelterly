@@ -1,17 +1,13 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { Link, navigate, useQueryParams } from 'raviger';
 import { Field, Form, Formik } from "formik";
-import { Input, Label } from "reactstrap";
 import { Col } from 'react-bootstrap';
 import { Button, ButtonGroup, Form as BootstrapForm } from "react-bootstrap";
 import { Card } from 'react-bootstrap';
 import * as Yup from 'yup';
-import ImageUploading from "react-images-uploading";
-import { DateTimePicker, DropDown, TextInput } from '.././components/Form.js';
+import { DateTimePicker, DropDown, ImageUploader, TextInput } from '../components/Form.js';
 import { catAgeChoices, dogAgeChoices, horseAgeChoices, otherAgeChoices, catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, speciesChoices, sexChoices, dogSizeChoices, catSizeChoices, horseSizeChoices, otherSizeChoices, statusChoices, unknownChoices } from './constants'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMinusSquare, faPlusSquare } from '@fortawesome/free-solid-svg-icons';
 
 export const AnimalForm = ({id}) => {
 
@@ -48,7 +44,7 @@ export const AnimalForm = ({id}) => {
 
   const [front_image, setFrontImage] = useState([]);
   const [side_image, setSideImage] = useState([]);
-  const [images, setImages] = useState([]);
+  const [extra_images, setExtraImages] = useState([]);
 
   // Initial Animal data.
   const [data, setData] = useState({
@@ -72,6 +68,24 @@ export const AnimalForm = ({id}) => {
     front_image: null,
     side_image: null,
   });
+
+  const wrapperSetFrontImage = useCallback(val => {
+    if (val !== 0){
+      setFrontImage(val);
+    }
+  }, [setFrontImage]);
+
+  const wrapperSetSideImage = useCallback(val => {
+    if (val !== 0){
+      setSideImage(val);
+    }
+  }, [setSideImage]);
+
+  const wrapperSetExtraImages = useCallback(val => {
+    if (val !== 0){
+      setExtraImages(val);
+    }
+  }, [setExtraImages]);
 
   // Hook for initializing data.
   useEffect(() => {
@@ -164,9 +178,9 @@ export const AnimalForm = ({id}) => {
                 formData.append(key, values[key]);
               }
             }
-            // Add images.
-            for (let i = 0; i < images.length; i++) {
-              formData.append('image' + (i + 1), images[i].file);
+            // Add extra images.
+            for (let i = 0; i < extra_images.length; i++) {
+              formData.append('extra' + (i + 1), extra_images[i].file);
             }
             axios.post('/animals/api/animal/', formData)
             .then(response => {
@@ -400,117 +414,37 @@ export const AnimalForm = ({id}) => {
                   />
                 </BootstrapForm.Row>
                 <p className="mb-0">Image Files</p>
-                <BootstrapForm.Row>
-                  <ImageUploading
+                <BootstrapForm.Row className="ml-3">
+                  <ImageUploader
                     value={front_image}
                     id="front_image"
                     name="front_image"
-                    onChange={(imageList, addUpdateIndex) => {
-                      setFrontImage(imageList);
-                      if (imageList[0]) {
-                        props.setFieldValue("front_image", imageList[0].file)
-                      }
-                    }}
-                    dataURLKey="data_url"
-                  >
-                    {({
-                      imageList,
-                      onImageUpload,
-                      onImageRemove,
-                      isDragging,
-                      dragProps
-                    }) => (
-                      <span className="upload__image-wrapper">
-                        {front_image[0] ?
-                          <span>{front_image.map((image, index) => (
-                            <span key={index} className="image-item">
-                              <img src={image.data_url} alt="" width="100" />
-                              <span className="image-item__btn-wrapper">
-                                <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => onImageRemove(index)} style={{backgroundColor:"red"}}
-                                  {...dragProps} />
-                              </span>
-                            </span>
-                          ))}</span> :
-                          <div className="row ml-0 mr-0"><span className="text-center"><FontAwesomeIcon icon={faPlusSquare} size="10x" inverse onClick={onImageUpload}
-                            {...dragProps} /><div>Front-Shot*</div></span></div>
-                        }
-                      </span>
-                    )}
-                  </ImageUploading>
-                  <span className="ml-3"></span>
-                  <ImageUploading
+                    parentStateSetter={wrapperSetFrontImage}
+                    updateField={props.setFieldValue}
+                    label="Front-Shot*"
+                    maxNumber={1}
+                  />
+                  <span className="ml-4 mr-4"></span>
+                  <ImageUploader
+                    value={side_image}
                     id="side_image"
                     name="side_image"
-                    value={side_image}
-                    onChange={(imageList, addUpdateIndex) => {
-                      setSideImage(imageList);
-                      if (imageList[0]) {
-                        props.setFieldValue("side_image", imageList[0].file)
-                      }
-                    }}
-                    dataURLKey="data_url"
-                  >
-                    {({
-                      imageList,
-                      onImageUpload,
-                      onImageRemove,
-                      isDragging,
-                      dragProps
-                    }) => (
-                      // write your building UI
-                      <span className="upload__image-wrapper">
-                        {side_image[0] ?
-                          <span>{side_image.map((image, index) => (
-                            <span key={index} className="image-item">
-                              <img src={image.data_url} alt="" width="100" />
-                              <span className="image-item__btn-wrapper">
-                                <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => onImageRemove(index)} style={{backgroundColor:"red"}}
-                                  {...dragProps} />
-                              </span>
-                            </span>
-                          ))}</span> :
-                        <div className="row ml-0 mr-0"><span className="text-center"><FontAwesomeIcon icon={faPlusSquare} size="10x" inverse onClick={onImageUpload}
-                          {...dragProps} /><div>Side-Shot*</div></span></div>
-                        }
-                      </span>
-                    )}
-                  </ImageUploading>
-                  <span className="ml-3 mr-3"></span>
-                  {front_image[0] && side_image[0] ?
-                  <ImageUploading
-                    value={images}
-                    id="images"
-                    name="images"
-                    onChange={(imageList, addUpdateIndex) => {
-                      setImages(imageList);
-                    }}
+                    parentStateSetter={wrapperSetSideImage}
+                    updateField={props.setFieldValue}
+                    label="Side-Shot*"
+                    maxNumber={1}
+                  />
+                  <span className="ml-4 mr-4"></span>
+                  <ImageUploader
+                    value={extra_images}
+                    id="extra_images"
+                    name="extra_images"
+                    parentStateSetter={wrapperSetExtraImages}
+                    updateField={props.setFieldValue}
+                    label="Extra"
                     maxNumber={3}
                     multiple
-                    dataURLKey="data_url"
-                  >
-                    {({
-                      imageList,
-                      onImageUpload,
-                      onImageRemove,
-                      isDragging,
-                      dragProps
-                    }) => (
-                      <span className="upload__image-wrapper row">
-                        {imageList.map((image, index) => (
-                          <span key={index} className="image-item">
-                            <img src={image.data_url} alt="" width="100" />
-                            <span className="image-item__btn-wrapper">
-                              <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => onImageRemove(index)} style={{backgroundColor:"red"}}
-                                {...dragProps} />
-                            </span>
-                            <span className="ml-3"></span>
-                          </span>
-                        ))}
-                        {images.length < 3 ? <span className="row ml-0 mr-0"><span className="text-center"><FontAwesomeIcon icon={faPlusSquare} size="10x" inverse onClick={onImageUpload}
-                          {...dragProps} /><div>Extra</div></span></span> : ""}
-                      </span>
-                    )}
-                  </ImageUploading> : ""}
+                  />
                 </BootstrapForm.Row>
             </BootstrapForm>
           </Card.Body>

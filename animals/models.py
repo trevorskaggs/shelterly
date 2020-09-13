@@ -49,3 +49,4 @@ class AnimalImage(models.Model):
 
     image = models.ImageField(upload_to='images/')
     animal = models.ForeignKey(Animal, on_delete=models.SET_NULL, null=True)
+    category = models.CharField(max_length=20)

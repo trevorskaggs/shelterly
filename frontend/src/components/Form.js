@@ -1,13 +1,14 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useFormikContext, useField } from 'formik';
-import { FormFeedback, Label, Input } from 'reactstrap';
+import { Label, Input } from 'reactstrap';
 import { Col, Form } from 'react-bootstrap';
 import Select from 'react-select';
 import SimpleValue from 'react-select-simple-value';
 import Flatpickr from 'react-flatpickr';
+import ImageUploading from "react-images-uploading";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faTimes,
+  faTimes, faMinusSquare, faPlusSquare,
 } from '@fortawesome/free-solid-svg-icons';
 
 const DateTimePicker = ({ label, xs, ...props }) => {
@@ -112,13 +113,63 @@ const DropDown = React.forwardRef((props, ref) => {
 });
 
 const MultiSelect = ({ label, ...props }) => {
-    const [field] = useField(props);
-    return (
-      <>
-        <Label htmlFor={props.id || props.name}>{label}</Label>
-        <Input type="select" {...field} {...props} multiple={true} />
-      </>
-    );
-  };
+  const [field] = useField(props);
+  return (
+    <>
+      <Label htmlFor={props.id || props.name}>{label}</Label>
+      <Input type="select" {...field} {...props} multiple={true} />
+    </>
+  );
+};
 
-export { TextInput, Checkbox, DropDown, MultiSelect, DateTimePicker };
+const ImageUploader = ({ parentStateSetter, updateField, ...props }) => {
+
+  const childRef = useRef();
+  const [childState, setChildState] = useState(0);
+
+  useEffect(() => {
+    // Call parent function to update parent state.
+    parentStateSetter(childState);
+  }, [parentStateSetter, childState]);
+
+  return (
+    <>
+      <ImageUploading
+        {...props}
+        onChange={(imageList, addUpdateIndex) => {
+          setChildState(imageList);
+          if (props.maxNumber === 1 && imageList[0]) {
+            updateField(props.id, imageList[0].file)
+          }
+        }}
+        dataURLKey="data_url"
+        ref={childRef}
+      >
+        {({
+          imageList,
+          onImageUpload,
+          onImageRemove,
+          isDragging,
+          dragProps
+        }) => (
+          <span className="upload__image-wrapper row">
+            {imageList.map((image, index) => (
+              <span key={index} className="image-item">
+                <img src={image.data_url} alt="" width="100" />
+                <span className="image-item__btn-wrapper">
+                  <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => onImageRemove(index)} style={{backgroundColor:"red"}}
+                    {...dragProps} />
+                </span>
+                <span className="ml-3"></span>
+              </span>
+            ))}
+            {imageList.length < props.maxNumber ? <span className="row ml-0 mr-0"><span className="text-center"><FontAwesomeIcon icon={faPlusSquare} size="10x" inverse onClick={onImageUpload}
+              {...dragProps} /><div>{props.label}</div></span></span> : ""}
+          </span>
+        )}
+      </ImageUploading>
+    </>
+  );
+}
+
+export { TextInput, Checkbox, DropDown, ImageUploader, MultiSelect, DateTimePicker };

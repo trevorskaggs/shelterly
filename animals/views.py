@@ -65,15 +65,16 @@ class AnimalViewSet(viewsets.ModelViewSet):
     filter_backends = (filters.SearchFilter,)
     serializer_class = AnimalSerializer
 
-    # If the animal does not have an owner, create a dummy unknown owner and assign it.
-    # Create image objects.
     def perform_create(self, serializer):
         if serializer.is_valid():
             animal = serializer.save()
             images_data = self.request.FILES
             for key, image_data in images_data.items():
-                AnimalImage.objects.create(image=image_data, animal=animal)
-
+                # Strip out extra numbers from the key (e.g. "extra1" -> "extra")
+                category = key.translate({ord(num): None for num in '0123456789'})
+                # Create image object.
+                AnimalImage.objects.create(image=image_data, animal=animal, category=category)
+            # If the animal does not have an owner, create a dummy unknown owner and assign it.
             if not animal.owner:
                 owner = Person.objects.create(first_name="Unknown")
                 animal.owner = owner
