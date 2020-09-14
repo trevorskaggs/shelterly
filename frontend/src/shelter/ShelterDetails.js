@@ -3,6 +3,7 @@ import axios from "axios";
 import { Link } from 'raviger';
 import { Button } from 'reactstrap';
 import { BuildingList } from "./Building";
+import { Card, CardGroup, ListGroup } from 'react-bootstrap';
 import { RoomList } from "./Room";
 import { Card, ListGroup } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -69,7 +70,29 @@ export function ShelterDetailsTable({sid}) {
           </div>
         </div>
       </div>
-      <BuildingList sid={data.id} />
+      <CardGroup>
+            <Card key={shelter.id}>
+              <Card.Body>
+                  <ListGroup>
+                    {shelter.buildings == '' ? <span><ListGroup.Item><p>No Buildings Found</p></ListGroup.Item></span> : 
+                      <span>{shelter.buildings.map(building => (
+                        <ListGroup.Item key={building.id}><b>Building:</b> {building.name} 
+                          <Link href={"/shelter/building/" + building.id}> <FontAwesomeIcon icon={faClipboardList} inverse />
+                          </Link>
+                          {building.rooms == '' ? <span><ListGroup.Item><p>No Rooms Found</p></ListGroup.Item></span> :
+                            <span>{building.rooms.map(room => (
+                              <ListGroup.Item key={room.id}><b>Room:</b> {room.name}
+                                <Link href={"/shelter/room/" + room.id}> <FontAwesomeIcon icon={faClipboardList} inverse />
+                                </Link>
+                              </ListGroup.Item>
+                            ))}
+                            </span>}
+                        </ListGroup.Item>))}
+                      </span>}
+                  </ListGroup>
+              </Card.Body>
+            </Card>
+          </CardGroup>
       <hr/>
       <div style={btn_style}>
         <Link href={"/shelter/" + data.id + "/building/new"} style={link_style} className="btn btn-success btn-lg btn-block mb-2">ADD BUILDING</Link>
