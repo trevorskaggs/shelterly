@@ -124,8 +124,9 @@ const MultiSelect = ({ label, ...props }) => {
 
 const ImageUploader = ({ parentStateSetter, updateField, ...props }) => {
 
-  const childRef = useRef();
+  // const childRef = useRef();
   const [childState, setChildState] = useState(0);
+  const [field, meta] = useField(props);
 
   useEffect(() => {
     // Call parent function to update parent state.
@@ -136,14 +137,16 @@ const ImageUploader = ({ parentStateSetter, updateField, ...props }) => {
     <>
       <ImageUploading
         {...props}
+        // {...field}
         onChange={(imageList, addUpdateIndex) => {
           setChildState(imageList);
+          // Only update field value if it's a single image input.
           if (props.maxNumber === 1 && imageList[0]) {
             updateField(props.id, imageList[0].file)
           }
         }}
         dataURLKey="data_url"
-        ref={childRef}
+        // ref={childRef}
       >
         {({
           imageList,
@@ -164,7 +167,7 @@ const ImageUploader = ({ parentStateSetter, updateField, ...props }) => {
               </span>
             ))}
             {imageList.length < props.maxNumber ? <span className="row ml-0 mr-0"><span className="text-center"><FontAwesomeIcon icon={faPlusSquare} size="10x" inverse onClick={onImageUpload}
-              {...dragProps} /><div>{props.label}</div></span></span> : ""}
+              {...dragProps} /><div className="mb-0">{props.label}</div>{meta.touched && meta.error ? <div style={{ color: "red", fontSize: "80%" }}><span className="text-left">{meta.error}</span></div> : ""}</span></span> : ""}
           </span>
         )}
       </ImageUploading>

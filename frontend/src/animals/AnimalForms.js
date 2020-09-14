@@ -145,10 +145,8 @@ export const AnimalForm = ({id}) => {
             .max(200, 'Must be 200 characters or less'),
           last_seen: Yup.date()
             .nullable(),
-          front_image: Yup.object()
-            .nullable(),
-          side_image: Yup.object()
-            .nullable(),
+          front_image: Yup.mixed().required('Required'),
+          side_image: Yup.mixed().required('Required'),
         })}
         onSubmit={(values, { setSubmitting }) => {
           if (id) {
