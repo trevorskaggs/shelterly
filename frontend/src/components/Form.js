@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useFormikContext, useField } from 'formik';
 import { Label, Input } from 'reactstrap';
-import { Col, Form } from 'react-bootstrap';
+import { Col, Image, Form } from 'react-bootstrap';
 import Select from 'react-select';
 import SimpleValue from 'react-select-simple-value';
 import Flatpickr from 'react-flatpickr';
@@ -124,7 +124,6 @@ const MultiSelect = ({ label, ...props }) => {
 
 const ImageUploader = ({ parentStateSetter, updateField, ...props }) => {
 
-  // const childRef = useRef();
   const [childState, setChildState] = useState(0);
   const [field, meta] = useField(props);
 
@@ -137,16 +136,21 @@ const ImageUploader = ({ parentStateSetter, updateField, ...props }) => {
     <>
       <ImageUploading
         {...props}
-        // {...field}
         onChange={(imageList, addUpdateIndex) => {
           setChildState(imageList);
           // Only update field value if it's a single image input.
-          if (props.maxNumber === 1 && imageList[0]) {
-            updateField(props.id, imageList[0].file)
+          if (props.maxNumber === 1) {
+            // Set file to field if it exists.
+            if (imageList[0]) {
+              updateField(props.id, imageList[0].file);
+            }
+            // Else reset to null.
+            else {
+              updateField(props.id, null);
+            }
           }
         }}
         dataURLKey="data_url"
-        // ref={childRef}
       >
         {({
           imageList,
@@ -157,17 +161,19 @@ const ImageUploader = ({ parentStateSetter, updateField, ...props }) => {
         }) => (
           <span className="upload__image-wrapper row">
             {imageList.map((image, index) => (
-              <span key={index} className="image-item">
-                <img src={image.data_url} alt="" width="100" />
-                <span className="image-item__btn-wrapper">
+              <span key={index} className="image-item mt-2">
+                {props.maxNumber === 1 ?
+                <Image width={131} src={image.data_url} alt="" thumbnail /> :
+                <span className="mr-3"><Image width={145} src={image.data_url} alt="" thumbnail /></span>}
+                <div className="image-item__btn-wrapper">
                   <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => onImageRemove(index)} style={{backgroundColor:"red"}}
                     {...dragProps} />
-                </span>
+                </div>
                 <span className="ml-3"></span>
               </span>
             ))}
-            {imageList.length < props.maxNumber ? <span className="row ml-0 mr-0"><span className="text-center"><FontAwesomeIcon icon={faPlusSquare} size="10x" inverse onClick={onImageUpload}
-              {...dragProps} /><div className="mb-0">{props.label}</div>{meta.touched && meta.error ? <div style={{ color: "red", fontSize: "80%" }}><span className="text-left">{meta.error}</span></div> : ""}</span></span> : ""}
+            {imageList.length < props.maxNumber ? <span className="row mr-0 ml-0"><span className="text-center"><FontAwesomeIcon icon={faPlusSquare} size="10x" inverse onClick={onImageUpload}
+              {...dragProps} /><div>{props.label}</div>{meta.touched && meta.error ? <div style={{ color: "red", fontSize: "80%" }}><span className="text-left">{meta.error}</span></div> : ""}</span></span> : ""}
           </span>
         )}
       </ImageUploading>
