@@ -2,10 +2,14 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { Link, navigate, useQueryParams } from 'raviger';
 import { Field, Form, Formik } from "formik";
-import { Col } from 'react-bootstrap';
+import { Col, Image } from 'react-bootstrap';
 import { Button, ButtonGroup, Form as BootstrapForm } from "react-bootstrap";
 import { Card } from 'react-bootstrap';
 import * as Yup from 'yup';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faMinusSquare,
+} from '@fortawesome/free-solid-svg-icons';
 import { DateTimePicker, DropDown, ImageUploader, TextInput } from '../components/Form.js';
 import { catAgeChoices, dogAgeChoices, horseAgeChoices, otherAgeChoices, catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, speciesChoices, sexChoices, dogSizeChoices, catSizeChoices, horseSizeChoices, otherSizeChoices, statusChoices, unknownChoices } from './constants'
 
@@ -45,6 +49,7 @@ export const AnimalForm = ({id}) => {
   const [front_image, setFrontImage] = useState([]);
   const [side_image, setSideImage] = useState([]);
   const [extra_images, setExtraImages] = useState([]);
+  const [reinitialize, setReinitialize] = useState(true);
 
   // Initial Animal data.
   const [data, setData] = useState({
@@ -67,6 +72,7 @@ export const AnimalForm = ({id}) => {
     last_seen: null,
     front_image: null,
     side_image: null,
+    extra_images: [],
   });
 
   const wrapperSetFrontImage = useCallback(val => {
@@ -87,6 +93,17 @@ export const AnimalForm = ({id}) => {
     }
   }, [setExtraImages]);
 
+  // Resets single file image fields to be null.
+  const clearImage = (image_name) => {
+    setData(prevState => ({ ...prevState, [image_name]:null }));
+  }
+
+  // Removes an image from a multi file image field array.
+  const clearImages = (image_url, setFieldValue) => {
+    setData(prevState => ({ ...prevState, ["extra_images"]:data.extra_images.filter(url => url !== image_url) }));
+    setFieldValue("extra_images", data.extra_images.filter(url => url !== image_url));
+  }
+
   // Hook for initializing data.
   useEffect(() => {
     let source = axios.CancelToken.source();
@@ -98,7 +115,9 @@ export const AnimalForm = ({id}) => {
         })
         .then(response => {
           setData(response.data);
-          setPlaceholder("Select...")
+          setPlaceholder("Select...");
+          // Turn off reinitialization after form load so that data can be modified for image tracking without causing a form reset.
+          setReinitialize(false);
         })
         .catch(error => {
           console.log(error.response);
@@ -116,7 +135,7 @@ export const AnimalForm = ({id}) => {
     <span key={key}>
       <Formik
         initialValues={data}
-        enableReinitialize={true}
+        enableReinitialize={reinitialize}
         validationSchema={Yup.object({
           status: Yup.string(),
           name: Yup.string()
@@ -145,12 +164,27 @@ export const AnimalForm = ({id}) => {
             .max(200, 'Must be 200 characters or less'),
           last_seen: Yup.date()
             .nullable(),
-          front_image: Yup.mixed().required('Required'),
-          side_image: Yup.mixed().required('Required'),
+          front_image: Yup.mixed()
+            .required('Required'),
+          side_image: Yup.mixed()
+            .required('Required'),
+          extra_images: Yup.array()
         })}
         onSubmit={(values, { setSubmitting }) => {
+          // Use FormData so that image files may also be included.
+          const formData = new FormData();
+          // Convert json to FormData.
+          for ( var key in values ) {
+            if (values[key] !== null) {
+              formData.append(key, values[key]);
+            }
+          }
+          // Add extra images.
+          for (let i = 0; i < extra_images.length; i++) {
+            formData.append('extra' + (i + 1), extra_images[i].file);
+          }
           if (id) {
-            axios.put('/animals/api/animal/' + id + '/', values)
+            axios.put('/animals/api/animal/' + id + '/', formData)
             .then(function() {
               // If the animal has an SR, redirect to the SR.
               if (values.request) {
@@ -169,17 +203,6 @@ export const AnimalForm = ({id}) => {
             });
           }
           else {
-            const formData = new FormData();
-            // Convert json to formData.
-            for ( var key in values ) {
-              if (values[key] !== null) {
-                formData.append(key, values[key]);
-              }
-            }
-            // Add extra images.
-            for (let i = 0; i < extra_images.length; i++) {
-              formData.append('extra' + (i + 1), extra_images[i].file);
-            }
             axios.post('/animals/api/animal/', formData)
             .then(response => {
               if (addAnother) {
@@ -413,36 +436,65 @@ export const AnimalForm = ({id}) => {
                 </BootstrapForm.Row>
                 <p className="mb-0">Image Files</p>
                 <BootstrapForm.Row className="ml-3">
-                  <ImageUploader
-                    value={front_image}
-                    id="front_image"
-                    name="front_image"
-                    parentStateSetter={wrapperSetFrontImage}
-                    updateField={props.setFieldValue}
-                    label="Front-Shot*"
-                    maxNumber={1}
-                  />
+                  {data.front_image ?
+                    <span style={{marginLeft:-15, marginRight:-15}} className="mt-2">
+                      <Image width={131} src={data.front_image} alt="" thumbnail />
+                      <div>
+                        <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => clearImage("front_image")} style={{backgroundColor:"red"}} /><span className="ml-1">Front-Shot*</span>
+                      </div>
+                    </span> :
+                    <ImageUploader
+                      value={front_image}
+                      id="front_image"
+                      name="front_image"
+                      parentStateSetter={wrapperSetFrontImage}
+                      setFieldValue={props.setFieldValue}
+                      label="Front-Shot*"
+                      maxNumber={1}
+                    />
+                  }
                   <span className="ml-4 mr-4"></span>
-                  <ImageUploader
-                    value={side_image}
-                    id="side_image"
-                    name="side_image"
-                    parentStateSetter={wrapperSetSideImage}
-                    updateField={props.setFieldValue}
-                    label="Side-Shot*"
-                    maxNumber={1}
-                  />
+                  {data.side_image ?
+                    <span style={{marginLeft:-15, marginRight:-15}} className="mt-2">
+                      <Image width={131} src={data.side_image} alt="" thumbnail />
+                      <div>
+                        <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => clearImage("side_image")} style={{backgroundColor:"red"}} /><span className="ml-1">Side-Shot*</span>
+                      </div>
+                    </span> :
+                    <ImageUploader
+                      value={side_image}
+                      id="side_image"
+                      name="side_image"
+                      parentStateSetter={wrapperSetSideImage}
+                      updateField={props.setFieldValue}
+                      label="Side-Shot*"
+                      maxNumber={1}
+                    />
+                  }
                   <span className="ml-4 mr-4"></span>
-                  <ImageUploader
-                    value={extra_images}
-                    id="extra_images"
-                    name="extra_images"
-                    parentStateSetter={wrapperSetExtraImages}
-                    updateField={props.setFieldValue}
-                    label="Extra"
-                    maxNumber={3}
-                    multiple
-                  />
+                  {data.extra_images.length > 0 ?
+                    <span className="mr-3">
+                      <span className="mt-2 row mr-0">
+                        {data.extra_images.map(extra_image => (
+                          <span key={extra_image} className="mr-3"><Image width={131} src={extra_image} alt="" thumbnail />
+                            <div className="mb-2">
+                              <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => clearImages(extra_image, props.setFieldValue)} style={{backgroundColor:"red"}} />
+                              <span className="ml-1">Extra</span>
+                            </div>
+                          </span>
+                        ))}
+                      </span>
+                    </span> : ""}
+                    <ImageUploader
+                      value={extra_images}
+                      id="extra_images"
+                      name="extra_images"
+                      parentStateSetter={wrapperSetExtraImages}
+                      updateField={props.setFieldValue}
+                      label="Extra"
+                      maxNumber={3 - data.extra_images.length}
+                      multiple
+                    />
                 </BootstrapForm.Row>
             </BootstrapForm>
           </Card.Body>

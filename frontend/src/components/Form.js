@@ -122,7 +122,7 @@ const MultiSelect = ({ label, ...props }) => {
   );
 };
 
-const ImageUploader = ({ parentStateSetter, updateField, ...props }) => {
+const ImageUploader = ({ parentStateSetter, setFieldValue, ...props }) => {
 
   const [childState, setChildState] = useState(0);
   const [field, meta] = useField(props);
@@ -138,15 +138,15 @@ const ImageUploader = ({ parentStateSetter, updateField, ...props }) => {
         {...props}
         onChange={(imageList, addUpdateIndex) => {
           setChildState(imageList);
-          // Only update field value if it's a single image input.
-          if (props.maxNumber === 1) {
+          // Update corresponding field when it's a single image input.
+          if (!props.multiple) {
             // Set file to field if it exists.
             if (imageList[0]) {
-              updateField(props.id, imageList[0].file);
+              setFieldValue(props.id, imageList[0].file);
             }
             // Else reset to null.
             else {
-              updateField(props.id, null);
+              setFieldValue(props.id, null);
             }
           }
         }}
@@ -159,21 +159,20 @@ const ImageUploader = ({ parentStateSetter, updateField, ...props }) => {
           isDragging,
           dragProps
         }) => (
-          <span className="upload__image-wrapper row">
+          <span className="row">
             {imageList.map((image, index) => (
               <span key={index} className="image-item mt-2">
                 {props.maxNumber === 1 ?
                 <Image width={131} src={image.data_url} alt="" thumbnail /> :
                 <span className="mr-3"><Image width={145} src={image.data_url} alt="" thumbnail /></span>}
                 <div className="image-item__btn-wrapper">
-                  <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => onImageRemove(index)} style={{backgroundColor:"red"}}
-                    {...dragProps} />
+                  <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => onImageRemove(index)} style={{backgroundColor:"red"}} />
+                  <span className="ml-1">{props.label}</span>
                 </div>
-                <span className="ml-3"></span>
               </span>
             ))}
             {imageList.length < props.maxNumber ? <span className="row mr-0 ml-0"><span className="text-center"><FontAwesomeIcon icon={faPlusSquare} size="10x" inverse onClick={onImageUpload}
-              {...dragProps} /><div>{props.label}</div>{meta.touched && meta.error ? <div style={{ color: "red", fontSize: "80%" }}><span className="text-left">{meta.error}</span></div> : ""}</span></span> : ""}
+              {...dragProps} /><div style={{marginTop:-8}}>{props.label}</div>{meta.touched && meta.error ? <div style={{ color: "red", fontSize: "80%" }}><span className="text-left">{meta.error}</span></div> : ""}</span></span> : ""}
           </span>
         )}
       </ImageUploading>

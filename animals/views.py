@@ -1,4 +1,4 @@
-
+from django.conf import settings
 from django.shortcuts import render, redirect
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponseRedirect
@@ -79,3 +79,24 @@ class AnimalViewSet(viewsets.ModelViewSet):
                 owner = Person.objects.create(first_name="Unknown")
                 animal.owner = owner
                 animal.save()
+
+    def perform_update(self, serializer):
+        if serializer.is_valid():
+            animal = serializer.save()
+            old_images = serializer.data['extra_images']
+            updated_images = self.request.data['extra_images'].split(',')
+            # Compare old vs updated extra images to identify ones that have been removed and should be deleted.
+            # Strip out MEDIA_URL so that we can compare to image filename using a filter().
+            images_to_delete = [image_to_delete.replace(settings.MEDIA_URL, '') for image_to_delete in set(old_images) - set(updated_images)]
+            AnimalImage.objects.filter(animal=animal, category="extra", image__in=images_to_delete).delete()
+
+            # Only brand new files should show up in request.FILES.
+            images_data = self.request.FILES
+            for key, image_data in images_data.items():
+                # If we have a new front or side image, delete the old one and create a new one.
+                if key in ("front_image", "side_image"):
+                    AnimalImage.objects.get(animal=animal, category=key).delete()
+                    AnimalImage.objects.create(image=image_data, animal=animal, category=key)
+                # Otherwise create a new extra image.
+                else:
+                    AnimalImage.objects.create(image=image_data, animal=animal, category="extra")
