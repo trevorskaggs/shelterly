@@ -12,12 +12,10 @@ code {
     monospace;
 }
 
-/* .carousel .thumb img {
-    width: 100% !important;
-    height: 100% !important;
+.carousel img {
+  height: 320px;
+  width: 320px;
+  /* object-fit: contain; */
+  object-fit: cover;
+  overflow: hidden;
 }
-
-.carousel .slide img {
-    max-height: 300px;
-    width: auto;
-} */

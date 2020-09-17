@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 import axios from "axios";
 import { Link } from 'raviger';
 import Moment from 'react-moment';
+import { Card, ListGroup } from 'react-bootstrap';
 import { Carousel } from 'react-responsive-carousel';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -29,6 +30,7 @@ const header_style = {
 export function AnimalView({id}) {
 
   const [images, setImages] = useState([]);
+  const [dim, setDim] = useState({});
 
   // Initial animal data.
   const [data, setData] = useState({
@@ -75,12 +77,23 @@ export function AnimalView({id}) {
     fetchAnimalData();
   }, [id]);
 
+  const handleOnLoad = event => {
+    console.log(event.target.naturalHeight);
+    console.log(event.target.naturalWidth);
+    if (event.target.naturalHeight > event.target.naturalWidth) {
+      setDim({height:322, width:240});
+    }
+    else {
+      setDim({height:240, width:322});
+    }
+  };
+
   return (
     <>
-      <h1 style={header_style}>
+      {/* <h1 style={header_style}>
         Animal Details - {data.status}<Link href={"/animals/animal/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
-      </h1>
-      <br/>
+      </h1> */}
+      <br/><br/>
       <div style={card_style} className="card card-body bg-light mb-2 mx-auto">
         <div className="row">
           <div className="col-6">
@@ -96,14 +109,11 @@ export function AnimalView({id}) {
             {data.behavior_notes ? <p><b>Behavior Notes:</b> {data.behavior_notes}</p> : ""}
           </div>
           <div className="col-6">
-          <div className="slide-container">
-          <Carousel showThumbs={false} showStatus={false} swipeable={true} dynamicHeight={true}>
+          <div className="slide-container float-right" style={{width:"323", height:"322px"}}>
+          <Carousel className="carousel-wrapper" showThumbs={false} showStatus={false}>
             {images.map((image, index) => (
-              <div key={image} className="slide">
-                <img src={image} />
-                {index === 0 ? <p className="legend">Front-Shot</p> : ""}
-                {index === 1 ? <p className="legend">Side-Shot</p> : ""}
-                {index > 1 ? <p className="legend">Extra {index - 1}</p> : ""}
+              <div key={image} className="image-container">
+                <img src={image} onLoad={(event) => handleOnLoad(event)} />
               </div>
             ))}
             </Carousel>
