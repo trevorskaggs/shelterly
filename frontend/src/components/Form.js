@@ -157,7 +157,8 @@ const ImageUploader = ({ parentStateSetter, setFieldValue, ...props }) => {
           onImageUpload,
           onImageRemove,
           isDragging,
-          dragProps
+          dragProps,
+          errors
         }) => (
           <span className="row">
             {imageList.map((image, index) => (
@@ -171,8 +172,26 @@ const ImageUploader = ({ parentStateSetter, setFieldValue, ...props }) => {
                 </div>
               </span>
             ))}
-            {imageList.length < props.maxNumber ? <span className="row mr-0 ml-0"><span className="text-center"><FontAwesomeIcon icon={faPlusSquare} size="10x" inverse onClick={onImageUpload}
-              {...dragProps} /><div style={{marginTop:-8}}>{props.label}</div>{meta.touched && meta.error ? <div style={{ color: "red", fontSize: "80%" }}><span className="text-left">{meta.error}</span></div> : ""}</span></span> : ""}
+            {imageList.length < props.maxNumber ?
+              <span className="row mr-0 ml-0">
+                <span className="text-center"><FontAwesomeIcon icon={faPlusSquare} size="10x" inverse onClick={onImageUpload}{...dragProps} />
+                  <div style={{marginTop:-8}}>{props.label}</div>
+                  {(meta.touched && meta.error) || errors ?
+                    <div style={{ color: "red", fontSize: "80%" }}>
+                      {meta.error ?
+                        <span className="text-left">{meta.error}</span> :
+                        <span style={{display:"block", width:"145px",wordWrap:"break-word"}}>
+                          {errors.maxNumber && <span>Number of selected images exceed maxNumber</span>}
+                          {errors.acceptType && <span>Your selected file type is not allow</span>}
+                          {errors.maxFileSize && <span>Selected file size exceed maxFileSize</span>}
+                          {errors.resolution && <span>Selected file is not match your desired resolution</span>}
+                        </span>
+                      }
+                    </div> : ""
+                  }
+                </span>
+              </span> : ""
+            }
           </span>
         )}
       </ImageUploading>
