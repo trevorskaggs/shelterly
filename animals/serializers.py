@@ -1,3 +1,4 @@
+from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import serializers
 
 from .models import Animal, AnimalImage
@@ -25,10 +26,16 @@ class AnimalSerializer(serializers.ModelSerializer):
         return (obj.aggressive or obj.species.other)
 
     def get_front_image(self, obj):
-        return AnimalImage.objects.get(animal=obj, category="front_image").image.url
+        try:
+            return AnimalImage.objects.get(animal=obj, category="front_image").image.url
+        except ObjectDoesNotExist:
+            return ''
 
     def get_side_image(self, obj):
-        return AnimalImage.objects.get(animal=obj, category="side_image").image.url
+        try:
+            return AnimalImage.objects.get(animal=obj, category="side_image").image.url
+        except ObjectDoesNotExist:
+            return ''
 
     def get_extra_images(self, obj):
         return [animal_image.image.url for animal_image in AnimalImage.objects.filter(animal=obj, category="extra")]

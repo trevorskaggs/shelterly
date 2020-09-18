@@ -30,7 +30,6 @@ const header_style = {
 export function AnimalView({id}) {
 
   const [images, setImages] = useState([]);
-  const [dim, setDim] = useState({});
 
   // Initial animal data.
   const [data, setData] = useState({
@@ -77,17 +76,6 @@ export function AnimalView({id}) {
     fetchAnimalData();
   }, [id]);
 
-  const handleOnLoad = event => {
-    console.log(event.target.naturalHeight);
-    console.log(event.target.naturalWidth);
-    if (event.target.naturalHeight > event.target.naturalWidth) {
-      setDim({height:322, width:240});
-    }
-    else {
-      setDim({height:240, width:322});
-    }
-  };
-
   return (
     <>
       {/* <h1 style={header_style}>
@@ -111,9 +99,9 @@ export function AnimalView({id}) {
           <div className="col-6">
           <div className="slide-container float-right" style={{width:"323", height:"322px"}}>
           <Carousel className="carousel-wrapper" showThumbs={false} showStatus={false}>
-            {images.map((image, index) => (
+            {images.map(image => (
               <div key={image} className="image-container">
-                <img src={image} onLoad={(event) => handleOnLoad(event)} />
+                <img src={image} />
               </div>
             ))}
             </Carousel>

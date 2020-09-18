@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, redirect
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponseRedirect
@@ -95,7 +96,10 @@ class AnimalViewSet(viewsets.ModelViewSet):
             for key, image_data in images_data.items():
                 # If we have a new front or side image, delete the old one and create a new one.
                 if key in ("front_image", "side_image"):
-                    AnimalImage.objects.get(animal=animal, category=key).delete()
+                    try:
+                        AnimalImage.objects.get(animal=animal, category=key).delete()
+                    except ObjectDoesNotExist:
+                        pass
                     AnimalImage.objects.create(image=image_data, animal=animal, category=key)
                 # Otherwise create a new extra image.
                 else:

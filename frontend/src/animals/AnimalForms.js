@@ -435,46 +435,52 @@ export const AnimalForm = ({id}) => {
                   />
                 </BootstrapForm.Row>
                 <p className="mb-0">Image Files</p>
-                <BootstrapForm.Row className="ml-3">
+                <BootstrapForm.Row className="ml-3 align-items-end">
                   {data.front_image ?
                     <span style={{marginLeft:-15, marginRight:-15}} className="mt-2">
                       <Image width={131} src={data.front_image} alt="" thumbnail />
-                      <div>
-                        <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => clearImage("front_image")} style={{backgroundColor:"red"}} /><span className="ml-1">Front-Shot*</span>
+                      <div className="mb-2">
+                        <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => clearImage("front_image")} style={{backgroundColor:"red"}} />
+                        <span className="ml-1">Front-Shot*</span>
                       </div>
                     </span> :
-                    <ImageUploader
-                      value={front_image}
-                      id="front_image"
-                      name="front_image"
-                      parentStateSetter={wrapperSetFrontImage}
-                      setFieldValue={props.setFieldValue}
-                      label="Front-Shot*"
-                      maxNumber={1}
-                    />
+                    <div className="mb-2">
+                      <ImageUploader
+                        value={front_image}
+                        id="front_image"
+                        name="front_image"
+                        parentStateSetter={wrapperSetFrontImage}
+                        setFieldValue={props.setFieldValue}
+                        label="Front-Shot*"
+                        maxNumber={1}
+                      />
+                    </div>
                   }
                   <span className="ml-4 mr-4"></span>
                   {data.side_image ?
                     <span style={{marginLeft:-15, marginRight:-15}} className="mt-2">
                       <Image width={131} src={data.side_image} alt="" thumbnail />
-                      <div>
-                        <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => clearImage("side_image")} style={{backgroundColor:"red"}} /><span className="ml-1">Side-Shot*</span>
+                      <div className="mb-2">
+                        <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => clearImage("side_image")} style={{backgroundColor:"red"}} />
+                        <span className="ml-1">Side-Shot*</span>
                       </div>
                     </span> :
-                    <ImageUploader
-                      value={side_image}
-                      id="side_image"
-                      name="side_image"
-                      parentStateSetter={wrapperSetSideImage}
-                      updateField={props.setFieldValue}
-                      label="Side-Shot*"
-                      maxNumber={1}
-                    />
+                    <div className="mb-2">
+                      <ImageUploader
+                        value={side_image}
+                        id="side_image"
+                        name="side_image"
+                        parentStateSetter={wrapperSetSideImage}
+                        setFieldValue={props.setFieldValue}
+                        label="Side-Shot*"
+                        maxNumber={1}
+                      />
+                    </div>
                   }
                   <span className="ml-4 mr-4"></span>
                   {data.extra_images.length > 0 ?
                     <span className="mr-3">
-                      <span className="mt-2 row mr-0">
+                      <span className="mt-2 row mr-0 align-items-end">
                         {data.extra_images.map(extra_image => (
                           <span key={extra_image} className="mr-3"><Image width={131} src={extra_image} alt="" thumbnail />
                             <div className="mb-2">
@@ -485,16 +491,18 @@ export const AnimalForm = ({id}) => {
                         ))}
                       </span>
                     </span> : ""}
-                    <ImageUploader
-                      value={extra_images}
-                      id="extra_images"
-                      name="extra_images"
-                      parentStateSetter={wrapperSetExtraImages}
-                      updateField={props.setFieldValue}
-                      label="Extra"
-                      maxNumber={3 - data.extra_images.length}
-                      multiple
-                    />
+                    <div className="mb-2">
+                      <ImageUploader
+                        value={extra_images}
+                        id="extra_images"
+                        name="extra_images"
+                        parentStateSetter={wrapperSetExtraImages}
+                        setFieldValue={props.setFieldValue}
+                        label="Extra"
+                        maxNumber={3 - data.extra_images.length}
+                        multiple
+                      />
+                    </div>
                 </BootstrapForm.Row>
             </BootstrapForm>
           </Card.Body>
