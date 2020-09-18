@@ -85,7 +85,7 @@ class AnimalViewSet(viewsets.ModelViewSet):
         if serializer.is_valid():
             animal = serializer.save()
             old_images = serializer.data['extra_images']
-            updated_images = self.request.data['extra_images'].split(',')
+            updated_images = self.request.data['extra_images'].split(',') if self.request.data.get('extra_images', None) else []
             # Compare old vs updated extra images to identify ones that have been removed and should be deleted.
             # Strip out MEDIA_URL so that we can compare to image filename using a filter().
             images_to_delete = [image_to_delete.replace(settings.MEDIA_URL, '') for image_to_delete in set(old_images) - set(updated_images)]

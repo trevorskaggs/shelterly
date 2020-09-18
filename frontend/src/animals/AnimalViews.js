@@ -85,11 +85,11 @@ export function AnimalView({id}) {
       <div style={card_style} className="card card-body bg-light mb-2 mx-auto">
         <div className="row">
           <div className="col-6">
-            <p><b>Name:</b> {data.name}</p>
+            <p><b>Name:</b> {data.name||"Unknown"}</p>
             <p><b>Species:</b> {data.species}</p>
             <p><b>Age:</b> {data.age||"Unknown"}</p>
             <p><b>Sex:</b> {data.sex||"Unknown"}</p>
-            <p><b>Size:</b> {data.size||"Unknown"}</p>
+            <p><b>Size:</b> {data.size}</p>
             {data.last_seen ? <p><b>Last Seen:</b> <Moment format="LLL">{data.last_seen}</Moment></p> : ""}
             {data.pcolor ? <p><b>Primary Color:</b> {data.pcolor}</p> : ""}
             {data.scolor ? <p><b>Secondary Color:</b> {data.scolor}</p> : ""}
