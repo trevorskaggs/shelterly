@@ -94,8 +94,9 @@ export const AnimalForm = ({id}) => {
   }, [setExtraImages]);
 
   // Resets single file image fields to be null.
-  const clearImage = (image_name) => {
+  const clearImage = (image_name, setFieldValue) => {
     setData(prevState => ({ ...prevState, [image_name]:null }));
+    setFieldValue(image_name, null);
   }
 
   // Removes an image from a multi file image field array.
@@ -435,16 +436,16 @@ export const AnimalForm = ({id}) => {
                   />
                 </BootstrapForm.Row>
                 <p className="mb-0">Image Files</p>
-                <BootstrapForm.Row className="ml-3 align-items-end">
+                <BootstrapForm.Row className="align-items-end">
                   {data.front_image ?
-                    <span style={{marginLeft:-15, marginRight:-15}} className="mt-2">
+                    <span className="mt-2 ml-1 mr-3">
                       <Image width={131} src={data.front_image} alt="" thumbnail />
                       <div className="mb-2">
-                        <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => clearImage("front_image")} style={{backgroundColor:"red"}} />
+                        <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => clearImage("front_image", props.setFieldValue)} style={{backgroundColor:"red"}} />
                         <span className="ml-1">Front-Shot*</span>
                       </div>
                     </span> :
-                    <div className="mb-2">
+                    <div className="mb-2 ml-1">
                       <ImageUploader
                         value={front_image}
                         id="front_image"
@@ -456,12 +457,11 @@ export const AnimalForm = ({id}) => {
                       />
                     </div>
                   }
-                  <span className="ml-4 mr-4"></span>
                   {data.side_image ?
-                    <span style={{marginLeft:-15, marginRight:-15}} className="mt-2">
+                    <span className="mt-2 mr-3">
                       <Image width={131} src={data.side_image} alt="" thumbnail />
                       <div className="mb-2">
-                        <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => clearImage("side_image")} style={{backgroundColor:"red"}} />
+                        <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => clearImage("side_image", props.setFieldValue)} style={{backgroundColor:"red"}} />
                         <span className="ml-1">Side-Shot*</span>
                       </div>
                     </span> :
@@ -477,20 +477,17 @@ export const AnimalForm = ({id}) => {
                       />
                     </div>
                   }
-                  <span className="ml-4 mr-4"></span>
                   {data.extra_images.length > 0 ?
-                    <span className="mr-3">
-                      <span className="mt-2 row mr-0 align-items-end">
-                        {data.extra_images.map(extra_image => (
-                          <span key={extra_image} className="mr-3"><Image width={131} src={extra_image} alt="" thumbnail />
-                            <div className="mb-2">
-                              <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => clearImages(extra_image, props.setFieldValue)} style={{backgroundColor:"red"}} />
-                              <span className="ml-1">Extra</span>
-                            </div>
-                          </span>
-                        ))}
-                      </span>
-                    </span> : ""}
+                    <span className="mt-2 d-flex flex-wrap align-items-end">
+                      {data.extra_images.map(extra_image => (
+                        <span key={extra_image} className="mr-3"><Image width={131} src={extra_image} alt="" thumbnail />
+                          <div className="mb-2">
+                            <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => clearImages(extra_image, props.setFieldValue)} style={{backgroundColor:"red"}} />
+                            <span className="ml-1">Extra</span>
+                          </div>
+                        </span>
+                      ))}
+                    </span>: ""}
                     <div className="mb-2">
                       <ImageUploader
                         value={extra_images}

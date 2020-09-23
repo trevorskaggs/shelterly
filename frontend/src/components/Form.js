@@ -138,17 +138,6 @@ const ImageUploader = ({ parentStateSetter, setFieldValue, ...props }) => {
         {...props}
         onChange={(imageList, addUpdateIndex) => {
           setChildState(imageList);
-          // Update corresponding field when it's a single image input.
-          if (!props.multiple) {
-            // Set file to field if it exists.
-            if (imageList[0]) {
-              setFieldValue(props.id, imageList[0].file);
-            }
-            // Else reset to null.
-            else {
-              setFieldValue(props.id, null);
-            }
-          }
         }}
         dataURLKey="data_url"
       >
@@ -160,12 +149,10 @@ const ImageUploader = ({ parentStateSetter, setFieldValue, ...props }) => {
           dragProps,
           errors
         }) => (
-          <span className="row">
+          <span className="d-flex flex-wrap align-items-end">
             {imageList.map((image, index) => (
-              <span key={index} className="image-item mt-2">
-                {props.maxNumber === 1 ?
-                <Image width={131} src={image.data_url} alt="" thumbnail /> :
-                <span className="mr-3"><Image width={145} src={image.data_url} alt="" thumbnail /></span>}
+              <span key={index} className="mt-2 mr-3">
+                <Image width={131} src={image.data_url} alt="" thumbnail />
                 <div className="image-item__btn-wrapper">
                   <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => onImageRemove(index)} style={{backgroundColor:"red"}} />
                   <span className="ml-1">{props.label}</span>
@@ -173,21 +160,20 @@ const ImageUploader = ({ parentStateSetter, setFieldValue, ...props }) => {
               </span>
             ))}
             {imageList.length < props.maxNumber ?
-              <span className="row mr-0 ml-0">
-                <span className="text-center"><FontAwesomeIcon icon={faPlusSquare} size="10x" inverse onClick={onImageUpload}{...dragProps} />
-                  <div style={{marginTop:-8}}>{props.label}</div>
+              <span className="d-flex flex-wrap m-0">
+                <span className="text-center ml-0 mr-3 p-0 align-items-end">
+                <FontAwesomeIcon icon={faPlusSquare} size="10x" inverse onClick={onImageUpload}{...dragProps} />
+                  <div style={{marginTop:-8, marginBottom:20}}>{props.label}</div>
                   {(meta.touched && meta.error) || errors ?
-                    <div style={{ color: "red", fontSize: "80%" }}>
+                    <div style={{ color:"red", fontSize:"80%", marginTop:"-20px", marginBottom:"-20px" }}>
                       {meta.error ?
                         <span className="text-left">{meta.error}</span> :
-                        <span style={{display:"block", width:"145px",wordWrap:"break-word"}}>
-                          {errors.maxNumber && <span>Number of selected images exceed maxNumber</span>}
-                          {errors.acceptType && <span>Your selected file type is not allow</span>}
-                          {errors.maxFileSize && <span>Selected file size exceed maxFileSize</span>}
-                          {errors.resolution && <span>Selected file is not match your desired resolution</span>}
+                        <span>
+                          {errors.maxNumber && <span>Maximum Exceeded</span>}
+                          {errors.acceptType && <span>Invalid file type</span>}
                         </span>
                       }
-                    </div> : ""
+                    </div> : <div style={{ marginBottom:"20px" }}></div>
                   }
                 </span>
               </span> : ""
