@@ -6,11 +6,21 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBandAid, faCar, faClipboardList, faShieldAlt, faTrailer
 } from '@fortawesome/free-solid-svg-icons';
-import { CircleMarker, Map, TileLayer, Tooltip as MapTooltip } from "react-leaflet";
+import { CircleMarker, Map, TileLayer, Tooltip as MapTooltip, useLeaflet } from "react-leaflet";
 import L from "leaflet"
 
 import "../App.css";
 import 'leaflet/dist/leaflet.css';
+
+const Legend = (props) => {
+  const { map } = useLeaflet();
+
+  useEffect(() => {
+    const legend = L.control.scale(props);
+    legend.addTo(map);
+  }, []);
+  return null;
+};
 
 export function Dispatch() {
 
@@ -26,10 +36,10 @@ export function Dispatch() {
   // Handle dynamic SR state and map display.
   const handleMapState = (id) => {
     if (mapState[id].checked === false) {
-      setMapState(prevState => ({ ...prevState, [id]: {color:"green", checked:true, hidden:false, matches:mapState[id].matches} }));
+      setMapState(prevState => ({ ...prevState, [id]: {color:"green", checked:true, hidden:mapState[id].hidden, matches:mapState[id].matches} }));
     }
     else {
-      setMapState(prevState => ({ ...prevState, [id]: {color:"red", checked:false, hidden:false, matches:mapState[id].matches} }));
+      setMapState(prevState => ({ ...prevState, [id]: {color:"red", checked:false, hidden:mapState[id].hidden, matches:mapState[id].matches} }));
     }
   }
 
@@ -131,6 +141,7 @@ export function Dispatch() {
       <Row>
         <Col xs={12}>
           <Map className="mx-auto d-block" bounds={data.bounds} onMoveEnd={onMove}>
+            <Legend position="bottomright" metric={false} />
             <TileLayer
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
@@ -167,7 +178,7 @@ export function Dispatch() {
           <Button type="submit" className="mt-2 mb-1">Deploy!</Button>
         </Form>
       {data.service_requests.map(service_request => (
-        <div key={service_request.id} className="mt-2" hidden={mapState[service_request.id] ? mapState[service_request.id].hidden : false}>
+        <div key={service_request.id} className="mt-2" hidden={mapState[service_request.id] && !mapState[service_request.id].checked ? mapState[service_request.id].hidden : false}>
           <div className="card-header">
             <span style={{display:"inline"}} className="custom-control-lg custom-control custom-checkbox">
               <input className="custom-control-input" type="checkbox" name={service_request.id} id={service_request.id} onChange={() => handleMapState(service_request.id)} checked={mapState[service_request.id] ? mapState[service_request.id].checked : false} />
