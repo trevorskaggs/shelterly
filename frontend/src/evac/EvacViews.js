@@ -26,6 +26,7 @@ export function Dispatch() {
 
   const [data, setData] = useState({service_requests: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
   const [mapState, setMapState] = useState({});
+  const [totalSelectedState, setTotalSelectedState] = useState({});
   const [statusOptions, setStatusOptions] = useState({aco_required:false});
 
   // Handle aco_required toggle.
@@ -33,18 +34,38 @@ export function Dispatch() {
     setStatusOptions({aco_required:!statusOptions.aco_required})
   }
 
-  // Handle dynamic SR state and map display.
+  // Handle dynamic SR state and map display when an SR is selected or deselected.
   const handleMapState = (id) => {
     if (mapState[id].checked === false) {
       setMapState(prevState => ({ ...prevState, [id]: {color:"green", checked:true, hidden:mapState[id].hidden, matches:mapState[id].matches} }));
+      var matches = {};
+      // Add each match count to the running total state tracker.
+      for (var key in mapState[id].matches) {
+        var total = 0;
+        if (!totalSelectedState[key]) {
+          total = mapState[id].matches[key];
+        } else {
+          total = totalSelectedState[key] += mapState[id].matches[key];
+        }
+        matches[key] = total;
+      }
+      setTotalSelectedState(Object.assign(totalSelectedState, matches));
     }
     else {
       setMapState(prevState => ({ ...prevState, [id]: {color:"red", checked:false, hidden:mapState[id].hidden, matches:mapState[id].matches} }));
+      // Remove matches from the running total state tracker.
+      for (var key in mapState[id].matches) {
+        var total = totalSelectedState[key] -= mapState[id].matches[key];;
+        setTotalSelectedState(prevState => ({ ...prevState, [key]:total}));
+      }
     }
   }
 
   // Takes in animal size, species, and count and returns a pretty string combination.
   const prettyText = (size, species, count) => {
+    if (count <= 0) {
+      return "";
+    }
     var plural = ""
     if (count > 1) {
       plural = "s"
@@ -138,9 +159,18 @@ export function Dispatch() {
 
   return (
     <Container>
-      <Row>
-        <Col xs={12}>
-          <Map className="mx-auto d-block" bounds={data.bounds} onMoveEnd={onMove}>
+      <Row className="d-flex flex-wrap">
+        <Col xs={2} className="mt-4">
+          <br/>
+          <FormCheck id="aco_required" name="aco_required" type="switch" label="ACO Required" checked={statusOptions.ACORequired} onChange={handleACO} />
+          <hr/>
+          {Object.keys(totalSelectedState).map(key => (
+            <div key={key} style={{textTransform:"capitalize"}}>{prettyText(key.split(',')[1], key.split(',')[0], totalSelectedState[key])}</div>
+          ))}
+          <Button type="submit" className="mt-2 mb-1 btn-block">DEPLOY</Button>
+        </Col>
+        <Col xs={10}>
+          <Map className="d-block" bounds={data.bounds} onMoveEnd={onMove}>
             <Legend position="bottomright" metric={false} />
             <TileLayer
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -171,12 +201,7 @@ export function Dispatch() {
             ))}
           </Map>
         </Col>
-
       </Row>
-      <Form>
-          <FormCheck id="aco_required" name="aco_required" type="switch" label="ACO Required" checked={statusOptions.ACORequired} onChange={handleACO} />
-          <Button type="submit" className="mt-2 mb-1">Deploy!</Button>
-        </Form>
       {data.service_requests.map(service_request => (
         <div key={service_request.id} className="mt-2" hidden={mapState[service_request.id] && !mapState[service_request.id].checked ? mapState[service_request.id].hidden : false}>
           <div className="card-header">
