@@ -7,7 +7,11 @@ import {
   faBandAid, faCar, faClipboardList, faShieldAlt, faTrailer
 } from '@fortawesome/free-solid-svg-icons';
 import { CircleMarker, Map, TileLayer, Tooltip as MapTooltip, useLeaflet } from "react-leaflet";
-import L from "leaflet"
+import L from "leaflet";
+import shield from "../static/images/shield-alt-solid.png";
+import bandaid from "../static/images/band-aid-solid.png";
+import car from "../static/images/car-solid.png";
+import trailer from "../static/images/trailer-solid.png";
 
 import "../App.css";
 import 'leaflet/dist/leaflet.css';
@@ -195,6 +199,12 @@ export function Dispatch() {
                     ))}</span>:""}
                     <br />
                     {service_request.full_address}
+                    <div>
+                      {service_request.aco_required ? <img width={16} height={16} src={shield} alt="" className="mr-1" /> : ""}
+                      {service_request.injured ? <img width={16} height={16} src={bandaid} alt="" className="mr-1" /> : ""}
+                      {service_request.accessible ? <img width={16} height={16} src={car} alt="" className="mr-1" /> : ""}
+                      {service_request.turn_around ? <img width={16} height={16} src={trailer} alt="" /> : ""}
+                    </div>
                   </span>
                 </MapTooltip>
               </CircleMarker>
@@ -225,7 +235,7 @@ export function Dispatch() {
                 </Tooltip>
               }
             >
-              <FontAwesomeIcon icon={faShieldAlt} inverse className="ml-1"/>
+              <FontAwesomeIcon icon={faShieldAlt} className="ml-1"/>
             </OverlayTrigger>
              : ""}
             {service_request.injured ?
@@ -238,7 +248,7 @@ export function Dispatch() {
                 </Tooltip>
               }
             >
-              <FontAwesomeIcon icon={faBandAid} inverse className="ml-1"/>
+              <FontAwesomeIcon icon={faBandAid} className="ml-1"/>
             </OverlayTrigger>
              : ""}
             {service_request.accessible ?
