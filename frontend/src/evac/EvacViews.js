@@ -31,6 +31,7 @@ export function Dispatch() {
   const [data, setData] = useState({service_requests: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
   const [mapState, setMapState] = useState({});
   const [totalSelectedState, setTotalSelectedState] = useState({});
+  const [selectedCount, setSelectedCount] = useState({count:0, disabled:true});
   const [statusOptions, setStatusOptions] = useState({aco_required:false});
 
   // Handle aco_required toggle.
@@ -40,6 +41,7 @@ export function Dispatch() {
 
   // Handle dynamic SR state and map display when an SR is selected or deselected.
   const handleMapState = (id) => {
+    // If selected.
     if (mapState[id].checked === false) {
       setMapState(prevState => ({ ...prevState, [id]: {color:"green", checked:true, hidden:mapState[id].hidden, matches:mapState[id].matches} }));
       var matches = {};
@@ -54,7 +56,10 @@ export function Dispatch() {
         matches[key] = total;
       }
       setTotalSelectedState(Object.assign(totalSelectedState, matches));
+      // Enable DEPLOY button.
+      setSelectedCount((prevState) => ({count: prevState.count + 1, disabled: false}))
     }
+    // Else deselect.
     else {
       setMapState(prevState => ({ ...prevState, [id]: {color:"red", checked:false, hidden:mapState[id].hidden, matches:mapState[id].matches} }));
       // Remove matches from the running total state tracker.
@@ -62,6 +67,12 @@ export function Dispatch() {
         var total = totalSelectedState[key] -= mapState[id].matches[key];;
         setTotalSelectedState(prevState => ({ ...prevState, [key]:total}));
       }
+      // Disable DEPLOY button is none selected.
+      var disabled = false;
+      if (selectedCount.count-1 === 0) {
+        disabled = true;
+      }
+      setSelectedCount((prevState) => ({count: prevState.count - 1, disabled: disabled}))
     }
   }
 
@@ -171,7 +182,7 @@ export function Dispatch() {
           {Object.keys(totalSelectedState).map(key => (
             <div key={key} style={{textTransform:"capitalize"}}>{prettyText(key.split(',')[1], key.split(',')[0], totalSelectedState[key])}</div>
           ))}
-          <Button type="submit" className="mt-2 mb-1 btn-block">DEPLOY</Button>
+          <Button type="submit" className="mt-2 mb-1 btn-block" disabled={selectedCount.disabled}>DEPLOY</Button>
         </Col>
         <Col xs={10}>
           <Map className="d-block" bounds={data.bounds} onMoveEnd={onMove}>
@@ -278,7 +289,7 @@ export function Dispatch() {
             </OverlayTrigger>
              : ""}
             <span className="ml-2">| &nbsp;{service_request.full_address}</span>
-            <Link href={"/hotline/servicerequest/" + service_request.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
+            <Link href={"/hotline/servicerequest/" + service_request.id} target="_blank"> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
           </div>
         </div>
       ))}
