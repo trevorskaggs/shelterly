@@ -31,9 +31,9 @@ class ServiceRequestSerializer(serializers.ModelSerializer):
         if data.get('owner_notification_tstamp') == '':
             data['owner_notification_tstamp'] = None
         if data.get('latitude'):
-            data['latitude'] = float("%.6f" % data.get('latitude'))
+            data['latitude'] = float("%.6f" % float(data.get('latitude')))
         if data.get('longitude'):
-            data['longitude'] = float("%.6f" % data.get('longitude'))
+            data['longitude'] = float("%.6f" % float(data.get('longitude')))
         return super().to_internal_value(data)
 
     class Meta:

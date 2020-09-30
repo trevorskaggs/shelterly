@@ -64,19 +64,6 @@ export function ServiceRequestForm({ id }) {
     owner_notification_tstamp: null,
   });
 
-  // Callback that sets the state address values returned by AddressLookup child component.
-  const wrapperSetAddress = useCallback(val => {
-    if (val !== 0){
-      setData(prevState => ({ ...prevState,
-        ["address"]:val.address,
-        ["city"]:val.city,
-        ["state"]:val.state,
-        ["zip_code"]:val.zip_code,
-        ["latitude"]:val.latitude,
-        ["longitude"]:val.longitude }));
-    }
-  }, [setData]);
-
   // Hook for initializing data.
   useEffect(() => {
     let source = axios.CancelToken.source();
@@ -245,7 +232,6 @@ export function ServiceRequestForm({ id }) {
                     label="Search"
                     style={{width: '100%'}}
                     className="form-control"
-                    parentStateSetter={wrapperSetAddress}
                   />
                 </BootstrapForm.Group>
               </BootstrapForm.Row>

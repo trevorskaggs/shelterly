@@ -61,19 +61,6 @@ export const PersonForm = ({ id }) => {
     servicerequest_id = ''
   } = queryParams;
 
-  // Callback that sets the state address values returned by AddressLookup child component.
-  const wrapperSetAddress = useCallback(val => {
-    if (val !== 0){
-      setData(prevState => ({ ...prevState,
-        ["address"]:val.address,
-        ["city"]:val.city,
-        ["state"]:val.state,
-        ["zip_code"]:val.zip_code,
-        ["latitude"]:val.latitude,
-        ["longitude"]:val.longitude }));
-    }
-  }, [setData]);
-
   // Hook for initializing data.
   useEffect(() => {
     let source = axios.CancelToken.source();
@@ -121,7 +108,6 @@ export const PersonForm = ({ id }) => {
           agency: Yup.string().when('showAgency', {
               is: true,
               then: Yup.string().required('Required')}),
-          // drivers_license: Yup.string(),
           address: Yup.string(),
           apartment: Yup.string()
             .max(10, 'Must be 10 characters or less'),
@@ -259,7 +245,6 @@ export const PersonForm = ({ id }) => {
                   label="Search"
                   style={{width: '100%'}}
                   className="form-control"
-                  parentStateSetter={wrapperSetAddress}
                 />
               </BootstrapForm.Group>
             </BootstrapForm.Row>

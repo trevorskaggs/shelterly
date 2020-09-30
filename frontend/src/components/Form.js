@@ -131,10 +131,10 @@ const MultiSelect = ({ label, ...props }) => {
   );
 };
 
-const AddressLookup = ({ parentStateSetter, ...props }) => {
+const AddressLookup = ({ ...props }) => {
 
   const childRef = useRef();
-  const [childState, setChildState] = useState(0);
+  const { setFieldValue, setFieldTouched } = useFormikContext();
 
   const updateAddr = suggestion => {
     // Extract location information from the return. Use short_name for the state.
@@ -150,22 +150,13 @@ const AddressLookup = ({ parentStateSetter, ...props }) => {
       address = components.route;
     }
 
-    // Store address values used to update the state.
-    var addr_dict = {
-      address:address,
-      city:components.locality,
-      state:components.administrative_area_level_1,
-      zip_code:components.postal_code,
-      latitude:suggestion.geometry.location.lat(),
-      longitude:suggestion.geometry.location.lng()
-    }
-    setChildState(addr_dict);
+    setFieldValue("address", address);
+    setFieldValue("city", components.locality);
+    setFieldValue("state", components.administrative_area_level_1);
+    setFieldValue("zip_code", components.postal_code);
+    setFieldValue("latitude", suggestion.geometry.location.lat());
+    setFieldValue("longitude", suggestion.geometry.location.lng());
   }
-
-  useEffect(() => {
-    // Call parent function to update parent state.
-    parentStateSetter(childState);
-  }, [parentStateSetter, childState]);
 
   return (
     <>
