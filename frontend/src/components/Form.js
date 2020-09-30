@@ -133,7 +133,7 @@ const MultiSelect = ({ label, ...props }) => {
 
 const AddressLookup = ({ ...props }) => {
 
-  const childRef = useRef();
+  const childRef = useRef(null);
   const { setFieldValue, setFieldTouched } = useFormikContext();
 
   const updateAddr = suggestion => {
@@ -169,6 +169,7 @@ const AddressLookup = ({ ...props }) => {
         types={['address']}
         componentRestrictions={{country: "us"}}
         ref={childRef}
+        apiKey={process.env.REACT_APP_GOOGLE_API_KEY}
       />
     </>
   );
