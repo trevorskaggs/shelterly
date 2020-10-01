@@ -24,11 +24,16 @@ class ServiceRequestSerializer(serializers.ModelSerializer):
         return obj.animal_set.filter(Q(aggressive='yes') | Q(species='other')).exists()
 
     # Updates datetime fields to null when receiving an empty string submission.
+    # Truncates latitude and longitude.
     def to_internal_value(self, data):
         if data.get('recovery_time') == '':
             data['recovery_time'] = None
         if data.get('owner_notification_tstamp') == '':
             data['owner_notification_tstamp'] = None
+        if data.get('latitude'):
+            data['latitude'] = float("%.6f" % float(data.get('latitude')))
+        if data.get('longitude'):
+            data['longitude'] = float("%.6f" % float(data.get('longitude')))
         return super().to_internal_value(data)
 
     class Meta:

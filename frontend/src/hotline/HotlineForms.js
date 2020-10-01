@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import axios from "axios";
 import { Link, navigate, useQueryParams } from 'raviger';
 import { Field, Form, Formik } from 'formik';
@@ -11,7 +11,7 @@ import { Form as BootstrapForm, Button, ButtonGroup, Card, Col } from "react-boo
 import * as Yup from 'yup';
 import { Switch } from 'formik-material-ui';
 import 'flatpickr/dist/themes/light.css';
-import { DateTimePicker, DropDown, TextInput } from '../components/Form';
+import { AddressLookup, DateTimePicker, DropDown, TextInput } from '../components/Form';
 
 const state_options = [{ value: 'AL', label: "AL" }, { value: 'AK', label: "AK" }, { value: 'AZ', label: "AZ" }, { value: 'AR', label: "AR" }, { value: 'CA', label: "CA" }, { value: 'CO', label: "CO" }, { value: 'CT', label: "CT" },
 { value: 'DE', label: "DE" }, { value: 'FL', label: "FL" }, { value: 'GA', label: "GA" }, { value: 'HI', label: "HI" }, { value: 'ID', label: "ID" }, { value: 'IL', label: "IL" }, { value: 'IN', label: "IN" },
@@ -51,6 +51,8 @@ export function ServiceRequestForm({ id }) {
     city: '',
     state: '',
     zip_code: '',
+    latitude: null,
+    longitude: null,
     verbal_permission: false,
     key_provided: false,
     accessible: false,
@@ -88,7 +90,7 @@ export function ServiceRequestForm({ id }) {
         })
           .then(response => {
             // Update relevant address fields.
-            setData(Object.assign(data, { 'address': response.data.address, 'apartment': response.data.apartment, 'city': response.data.city, 'state': response.data.state, 'zip_code': response.data.zip_code }))
+            setData(Object.assign(data, { 'address': response.data.address, 'apartment': response.data.apartment, 'city': response.data.city, 'state': response.data.state, 'zip_code': response.data.zip_code, 'latitude': response.data.latitude, 'longitude': response.data.longitude }))
             setFadeIn(response.data.address ? false : true)
           })
           .catch(error => {
@@ -132,6 +134,10 @@ export function ServiceRequestForm({ id }) {
             .nullable(),
           zip_code: Yup.string()
             .max(10, 'Must be 10 characters or less'),
+          latitude: Yup.number()
+            .nullable(),
+          longitude: Yup.number()
+            .nullable(),
         })}
         onSubmit={(values, { setSubmitting }) => {
           if (id) {
@@ -163,6 +169,8 @@ export function ServiceRequestForm({ id }) {
         <BootstrapForm as={Form}>
           <Field type="hidden" value={owner_id || ""} name="owner" id="owner"></Field>
           <Field type="hidden" value={reporter_id || ""} name="reporter" id="reporter"></Field>
+          <Field type="hidden" value={data.latitude || ""} name="latitude" id="latitude"></Field>
+          <Field type="hidden" value={data.longitude || ""} name="longitude" id="longitude"></Field>
           <BootstrapForm.Row hidden={!id}>
             <TextInput
               as="textarea"
@@ -219,20 +227,30 @@ export function ServiceRequestForm({ id }) {
           }
             <Fade in={fadeIn} hidden={!fadeIn}>
               <BootstrapForm.Row>
-                  <TextInput
-                    type="text"
-                    label={!is_first_responder ? "Address" : "Address/Cross Streets"}
-                    name="address"
-                    id="address"
-                    xs="8"
+                <BootstrapForm.Group as={Col} xs="10">
+                  <AddressLookup
+                    label="Search"
+                    style={{width: '100%'}}
+                    className="form-control"
                   />
-                  <TextInput
-                    type="text"
-                    label="Apartment"
-                    name="apartment"
-                    id="apartment"
-                    xs="2"
-                  />
+                </BootstrapForm.Group>
+              </BootstrapForm.Row>
+              <BootstrapForm.Row>
+                <TextInput
+                  type="text"
+                  label={!is_first_responder ? "Address" : "Address/Cross Streets"}
+                  name="address"
+                  id="address"
+                  xs="8"
+                  disabled
+                />
+                <TextInput
+                  type="text"
+                  label="Apartment"
+                  name="apartment"
+                  id="apartment"
+                  xs="2"
+                />
               </BootstrapForm.Row>
               <BootstrapForm.Row>
                 <TextInput
@@ -241,6 +259,7 @@ export function ServiceRequestForm({ id }) {
                   name="city"
                   id="city"
                   xs="6"
+                  disabled
                 />
                 <Col xs="2">
                   <DropDown
@@ -249,6 +268,8 @@ export function ServiceRequestForm({ id }) {
                     id="state"
                     options={state_options}
                     value={props.values.state || ''}
+                    placeholder=''
+                    disabled
                   />
                 </Col>
                   <TextInput
@@ -257,6 +278,7 @@ export function ServiceRequestForm({ id }) {
                     name="zip_code"
                     id="zip_code"
                     xs="2"
+                    disabled
                   />
               </BootstrapForm.Row>
             </Fade>
