@@ -116,15 +116,8 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         if serializer.is_valid():
             service_request = serializer.save()
-            service_request.set_lat_lon()
             if service_request.owner:
                 service_request.owner.animal_set.update(request=service_request.id)
-
-    # When updating, make sure geolocation is also updated.
-    def perform_update(self, serializer):
-        if serializer.is_valid():
-            service_request = serializer.save()
-            service_request.set_lat_lon()
 
     def get_queryset(self):
         queryset = ServiceRequest.objects.all().annotate(animal_count=Count('animal')).annotate(injured=Exists(Animal.objects.filter(request_id=OuterRef('id'), injured='yes')))

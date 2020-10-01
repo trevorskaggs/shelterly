@@ -451,7 +451,6 @@ export const AnimalForm = ({id}) => {
                         id="front_image"
                         name="front_image"
                         parentStateSetter={wrapperSetFrontImage}
-                        setFieldValue={props.setFieldValue}
                         label="Front-Shot*"
                         maxNumber={1}
                       />
@@ -471,7 +470,6 @@ export const AnimalForm = ({id}) => {
                         id="side_image"
                         name="side_image"
                         parentStateSetter={wrapperSetSideImage}
-                        setFieldValue={props.setFieldValue}
                         label="Side-Shot*"
                         maxNumber={1}
                       />
@@ -494,7 +492,6 @@ export const AnimalForm = ({id}) => {
                         id="extra_images"
                         name="extra_images"
                         parentStateSetter={wrapperSetExtraImages}
-                        setFieldValue={props.setFieldValue}
                         label="Extra"
                         maxNumber={3 - data.extra_images.length}
                         multiple

@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import axios from "axios";
 import { Link, navigate, useQueryParams } from 'raviger';
-import { Formik } from 'formik';
+import { Field, Formik } from 'formik';
 import { Form as BootstrapForm, Button, ButtonGroup, Card, Col } from "react-bootstrap";
 import * as Yup from 'yup';
-import { DropDown, TextInput } from '../components/Form';
+import { AddressLookup, DropDown, TextInput } from '../components/Form';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft } from '@fortawesome/free-solid-svg-icons';
 
@@ -42,12 +42,13 @@ export const PersonForm = ({ id }) => {
     best_contact: '',
     showAgency: is_first_responder,
     agency: '',
-    // drivers_license: '',
     address: '',
     apartment: '',
     city: '',
     state: '',
     zip_code: '',
+    latitude: null,
+    longitude: null,
   });
 
   // Whether or not to skip Owner creation.
@@ -107,7 +108,6 @@ export const PersonForm = ({ id }) => {
           agency: Yup.string().when('showAgency', {
               is: true,
               then: Yup.string().required('Required')}),
-          // drivers_license: Yup.string(),
           address: Yup.string(),
           apartment: Yup.string()
             .max(10, 'Must be 10 characters or less'),
@@ -115,6 +115,10 @@ export const PersonForm = ({ id }) => {
           state: Yup.string(),
           zip_code: Yup.string()
             .max(10, 'Must be 10 characters or less'),
+          latitude: Yup.number()
+            .nullable(),
+          longitude: Yup.number()
+            .nullable(),
         })}
         onSubmit={(values, { setSubmitting }) => {
           if (id) {
@@ -188,6 +192,8 @@ export const PersonForm = ({ id }) => {
 {is_owner ? "Owner" : "Reporter"} Information</Card.Header>
           <Card.Body>
           <BootstrapForm noValidate>
+            <Field type="hidden" value={data.latitude || ""} name="latitude" id="latitude"></Field>
+            <Field type="hidden" value={data.longitude || ""} name="longitude" id="longitude"></Field>
             <BootstrapForm.Row>
               <TextInput
                 xs="5"
@@ -233,11 +239,21 @@ export const PersonForm = ({ id }) => {
               />
             </BootstrapForm.Row>
             <BootstrapForm.Row hidden={!is_owner}>
+              <BootstrapForm.Group as={Col} xs="10">
+                <AddressLookup
+                  label="Search"
+                  style={{width: '100%'}}
+                  className="form-control"
+                />
+              </BootstrapForm.Group>
+            </BootstrapForm.Row>
+            <BootstrapForm.Row hidden={!is_owner}>
               <TextInput
                 xs="8"
                 type="text"
                 label="Address"
                 name="address"
+                disabled
               />
               <TextInput
                 xs="2"
@@ -252,6 +268,7 @@ export const PersonForm = ({ id }) => {
                 type="text"
                 label="City"
                 name="city"
+                disabled
               />
               <Col xs="2">
               <DropDown
@@ -260,6 +277,8 @@ export const PersonForm = ({ id }) => {
                 id="state"
                 options={state_options}
                 value={props.values.state || ''}
+                placeholder=''
+                disabled
               />
               </Col>
               <TextInput
@@ -267,6 +286,7 @@ export const PersonForm = ({ id }) => {
                 type="text"
                 label="Zip Code"
                 name="zip_code"
+                disabled
               />
             </BootstrapForm.Row>
           </BootstrapForm>

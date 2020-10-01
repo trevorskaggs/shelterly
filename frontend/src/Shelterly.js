@@ -8,7 +8,7 @@ import { useCookies, withCookies } from 'react-cookie';
 import { AuthContext } from "./accounts/AccountsReducer";
 import { Container, Row, Col } from "react-bootstrap";
 import { loadUser, setAuthToken } from "./accounts/AccountsUtils";
-import Sidebar from "./components/Sidebar"
+import Sidebar from "./components/Sidebar";
 
 function Shelterly() {
 

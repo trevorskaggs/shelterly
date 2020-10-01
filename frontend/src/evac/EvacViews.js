@@ -9,7 +9,6 @@ import {
 import { CircleMarker, Map, TileLayer, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet"
 
-import "../App.css";
 import 'leaflet/dist/leaflet.css';
 
 export function Dispatch() {
