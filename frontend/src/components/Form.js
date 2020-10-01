@@ -137,25 +137,27 @@ const AddressLookup = ({ ...props }) => {
   const { setFieldValue, setFieldTouched } = useFormikContext();
 
   const updateAddr = suggestion => {
-    // Extract location information from the return. Use short_name for the state.
-    var components={};
-    suggestion.address_components.forEach(function(k,v1) {k.types.forEach(function(v2, k2){v2 !== "administrative_area_level_1" ? components[v2]=k.long_name : components[v2]=k.short_name});});
+    if (suggestion.address_components) {
+      // Extract location information from the return. Use short_name for the state.
+      var components={};
+      suggestion.address_components.forEach(function(k,v1) {k.types.forEach(function(v2, k2){v2 !== "administrative_area_level_1" ? components[v2]=k.long_name : components[v2]=k.short_name});});
 
-    // Build formatted street number + name string.
-    var address = "";
-    if (components.street_number) {
-      address = components.street_number + " " + components.route;
-    }
-    else {
-      address = components.route;
-    }
+      // Build formatted street number + name string.
+      var address = "";
+      if (components.street_number) {
+        address = components.street_number + " " + components.route;
+      }
+      else {
+        address = components.route;
+      }
 
-    setFieldValue("address", address);
-    setFieldValue("city", components.locality);
-    setFieldValue("state", components.administrative_area_level_1);
-    setFieldValue("zip_code", components.postal_code);
-    setFieldValue("latitude", suggestion.geometry.location.lat());
-    setFieldValue("longitude", suggestion.geometry.location.lng());
+      setFieldValue("address", address);
+      setFieldValue("city", components.locality);
+      setFieldValue("state", components.administrative_area_level_1);
+      setFieldValue("zip_code", components.postal_code);
+      setFieldValue("latitude", suggestion.geometry.location.lat());
+      setFieldValue("longitude", suggestion.geometry.location.lng());
+    }
   }
 
   return (
