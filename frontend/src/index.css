@@ -16,8 +16,17 @@ hr { display: block; height: 1px;
   border: 0; border-top: 1px solid #ccc !important;
   margin: 1em 0; padding: 0; }
 
+/* Leaflet map CSS */
 .leaflet-container {  width: auto;  height: 55vh;}
 
+/* Grey out disabled fields CSS */
+input[disabled] {
+  color: #999999;
+  background-color: #DFDDDD !important;
+  background-image: none;
+}
+
+/* big checkbox CSS */
 .custom-control-lg .custom-control-label::before,
 .custom-control-lg .custom-control-label::after {
     top: 0.1rem !important;
