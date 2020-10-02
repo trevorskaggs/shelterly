@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import { Link, navigate, useQueryParams } from 'raviger';
 import { Field, Form, Formik } from 'formik';
@@ -7,7 +7,7 @@ import {
   Label,
   Fade,
 } from 'reactstrap';
-import { Form as BootstrapForm, Button, ButtonGroup, Card, Col } from "react-bootstrap";
+import { Form as BootstrapForm, Button, ButtonGroup, Card, Col, Modal } from "react-bootstrap";
 import * as Yup from 'yup';
 import { Switch } from 'formik-material-ui';
 import 'flatpickr/dist/themes/light.css';
@@ -40,6 +40,10 @@ export function ServiceRequestForm({ id }) {
   function handleChange() {
     setFadeIn(!fadeIn)
   }
+
+  // Track duplicate request address error.
+  const [error, setError] = useState({show:false, error:[]});
+  const handleClose = () => setError({show:false, error:[]});
 
   // Initial ServiceRequest data.
   const [data, setData] = useState({
@@ -147,6 +151,9 @@ export function ServiceRequestForm({ id }) {
             })
             .catch(error => {
               console.log(error.response);
+              if (error.response.data && error.response.data[0].includes('same address')) {
+                setError({show:true, error:error.response.data});
+              }
             });
             setSubmitting(false);
           }
@@ -157,6 +164,9 @@ export function ServiceRequestForm({ id }) {
             })
             .catch(error => {
               console.log(error.response);
+              if (error.response.data && error.response.data[0].includes('same address')) {
+                setError({show:true, error:error.response.data});
+              }
             });
           setSubmitting(false);
         }
@@ -305,13 +315,28 @@ export function ServiceRequestForm({ id }) {
                 <Label htmlFor="turn_around">Turn Around</Label>
                 <Field component={Switch} name="turn_around" type="checkbox" color="primary" /></span>
             </BootstrapForm.Row>
-
         </BootstrapForm>
         </Card.Body>
         <ButtonGroup size="lg">
             <Button type="submit" onClick={() => { props.submitForm()}}>Save</Button>
             <Button as={Link} href="/hotline/" variant="info">Cancel</Button>
           </ButtonGroup>
+          <Modal show={error.show} onHide={handleClose}>
+            <Modal.Header closeButton>
+              <Modal.Title>Duplicate Request Address Found</Modal.Title>
+            </Modal.Header>
+
+            <Modal.Body>
+              <p>
+                {error && error.error[0]}
+                &nbsp;Click <Link href={'/hotline/servicerequest/' + error.error[1]} target="_blank">here</Link> to view this Request.
+              </p>
+            </Modal.Body>
+
+            <Modal.Footer>
+              <Button variant="secondary" onClick={handleClose}>Close</Button>
+            </Modal.Footer>
+          </Modal>
         </Card>
       )}
     </Formik>
