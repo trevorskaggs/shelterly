@@ -38,3 +38,9 @@ input[disabled] {
 .custom-control-lg .custom-control-label {
     font-size: 1rem !important;
 }
+
+/*  */
+.datetime_picker {
+  width:205px;
+  min-width:205px;
+}

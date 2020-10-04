@@ -219,16 +219,16 @@ export function ServiceRequestForm({ id }) {
                 />
             </BootstrapForm.Row>
             <BootstrapForm.Row hidden={!id}>
-                <DateTimePicker
-                  label="Owner Notified"
-                  name="owner_notification_tstamp"
-                  id="owner_notification_tstamp"
-                  xs="3"
-                  onChange={(date, dateStr) => {
-                    props.setFieldValue("owner_notification_tstamp", dateStr)
-                  }}
-                  value={data.owner_notification_tstamp || null}
-                />
+              <DateTimePicker
+                label="Owner Notified"
+                name="owner_notification_tstamp"
+                id="owner_notification_tstamp"
+                xs="3"
+                onChange={(date, dateStr) => {
+                  props.setFieldValue("owner_notification_tstamp", dateStr)
+                }}
+                value={data.owner_notification_tstamp || null}
+              />
             </BootstrapForm.Row>
           {data.address && !id ?
             <span className="form-row mb-2">

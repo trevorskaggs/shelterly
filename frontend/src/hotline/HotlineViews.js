@@ -2,20 +2,11 @@ import React, {useEffect, useState} from 'react';
 import axios from "axios";
 import { Link } from 'raviger';
 import Moment from 'react-moment';
-import { Card, Fade, ListGroup, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Card, ListGroup, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBandAid, faCar, faClipboardList, faComment, faEdit, faHouseDamage, faKey, faPlusSquare, faShieldAlt, faTrailer
 } from '@fortawesome/free-solid-svg-icons';
-
-const btn_style = {
-  width: "50%",
-  margin: "0 auto",
-};
-
-const link_style = {
-  textDecoration: "none",
-};
 
 export function ServiceRequestView({id}) {
 
@@ -60,11 +51,12 @@ export function ServiceRequestView({id}) {
 
   return (
     <>
-      <div className="row mt-4 mb-3">
+      <div className="row mt-3" style={{marginBottom:"-8px"}}>
         <div className="col-12 d-flex">
-              <div className=""><h1>Request #{data.id}<Link href={"/hotline/servicerequest/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link> | <span style={{textTransform:"capitalize"}}>{data.status}</span></h1></div>
+          <h1>Service Request #{data.id}<Link href={"/hotline/servicerequest/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link> | <span style={{textTransform:"capitalize"}}>{data.status}</span></h1>
         </div>
       </div>
+      <hr/>
       <div className="row mb-2">
         <div className="col-6 d-flex">
           <Card className="mb-2 border rounded" style={{width:"100%"}}>
@@ -135,8 +127,7 @@ export function ServiceRequestView({id}) {
               {data.owner ?
               <span>
                 <Card.Title>
-                  <h4 className="mb-0">Owner: <span style={{fontSize:18}}>{data.owner_object.first_name} {data.owner_object.last_name} {data.owner_object.first_name !== 'Unknown' ? <Link href={"/hotline/owner/" + data.owner}> <FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link>:""}<Link href={"/hotline/owner/edit/" + data.owner}> <FontAwesomeIcon icon={faEdit} size="sm" inverse /></Link>
-                    </span></h4>
+                  <h4 className="mb-0">Owner: <span style={{fontSize:18}}>{data.owner_object.first_name} {data.owner_object.last_name} {data.owner_object.first_name !== 'Unknown' ? <Link href={"/hotline/owner/" + data.owner}> <FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link>:""}<Link href={"/hotline/owner/edit/" + data.owner}> <FontAwesomeIcon icon={faEdit} size="sm" inverse /></Link></span></h4>
                 </Card.Title>
                 <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
                   {data.owner_object.phone ? <ListGroup.Item><b>Telephone: </b>{data.owner_object.phone}</ListGroup.Item> : ""}
@@ -147,8 +138,7 @@ export function ServiceRequestView({id}) {
               <span>
                 <hr/>
                 <Card.Title>
-                  <h4 className="mb-0">Reporter: {data.reporter_object.first_name} {data.reporter_object.last_name} <Link href={"/hotline/reporter/" + data.reporter}> <FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link><Link href={"/hotline/reporter/edit/" + data.reporter}> <FontAwesomeIcon icon={faEdit} size="sm" inverse /></Link>
-                  </h4>
+                  <h4 className="mb-0">Reporter: <span style={{fontSize:18}}>{data.reporter_object.first_name} {data.reporter_object.last_name} <Link href={"/hotline/reporter/" + data.reporter}> <FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link><Link href={"/hotline/reporter/edit/" + data.reporter}> <FontAwesomeIcon icon={faEdit} size="sm" inverse /></Link></span></h4>
                 </Card.Title>
                 <ListGroup variant="flush" style={{marginTop:"-13px"}}>
                   {data.reporter_object.phone ? <ListGroup.Item><b>Telephone: </b>{data.reporter_object.phone}</ListGroup.Item> : ""}
@@ -207,15 +197,6 @@ export function ServiceRequestView({id}) {
           ))}
         </span>
       </div> : ""}
-      <hr/>
-      <div style={btn_style}>
-        <Link href={"/hotline/animal/new?servicerequest_id=" + id} style={link_style} className="btn btn-success btn-lg btn-block mb-2">ADD ANIMAL</Link>
-        <br/>
-        <Link href={"/hotline/servicerequest/edit/" + id} style={link_style} className="btn btn-primary btn-lg btn-block mb-2">UPDATE REQUEST</Link>
-        <br/>
-        <br/>
-        <Link className="btn btn-secondary btn-lg btn-block"  href="/hotline">BACK</Link>
-      </div>
     </>
   );
 };
