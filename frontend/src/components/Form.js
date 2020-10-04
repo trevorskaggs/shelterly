@@ -134,6 +134,7 @@ const MultiSelect = ({ label, ...props }) => {
 
 const ImageUploader = ({ parentStateSetter, ...props }) => {
 
+  const { setFieldValue, setFieldTouched } = useFormikContext();
   const [childState, setChildState] = useState(0);
   const [field, meta] = useField(props);
 
@@ -148,6 +149,12 @@ const ImageUploader = ({ parentStateSetter, ...props }) => {
         {...props}
         onChange={(imageList, addUpdateIndex) => {
           setChildState(imageList);
+          if (!props.multiple) {
+            // Set file to field if it exists.
+            if (imageList[0]) {
+              setFieldValue(props.id, imageList[0].file);
+            }
+          }
         }}
         dataURLKey="data_url"
       >
