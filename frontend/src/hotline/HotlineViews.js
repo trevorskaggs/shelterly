@@ -2,10 +2,12 @@ import React, {useEffect, useState} from 'react';
 import axios from "axios";
 import { Link } from 'raviger';
 import Moment from 'react-moment';
+import { Card, Fade, ListGroup, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faClipboardList, faEdit, faPlusSquare,
+  faBandAid, faCar, faClipboardList, faComment, faEdit, faHouseDamage, faKey, faPlusSquare, faShieldAlt, faTrailer
 } from '@fortawesome/free-solid-svg-icons';
+
 const btn_style = {
   width: "50%",
   margin: "0 auto",
@@ -14,14 +16,6 @@ const btn_style = {
 const link_style = {
   textDecoration: "none",
 };
-
-const card_style = {
-  width: "90%",
-}
-
-const header_style = {
-  textAlign: "center",
-}
 
 export function ServiceRequestView({id}) {
 
@@ -66,40 +60,143 @@ export function ServiceRequestView({id}) {
 
   return (
     <>
-      <h1 style={header_style}>Service Request #{data.id}<Link href={"/hotline/servicerequest/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link> - {data.status}</h1>
-      <br/>
-      <div style={card_style} className="card card-body bg-light mb-2 mx-auto">
-        <div className="row">
-          <div className="col-8">
-            <p className="mb-3"><b>Owner:</b> {data.owner ? <span>{data.owner_object.first_name} {data.owner_object.last_name} {data.owner_object.first_name === 'Unknown' ? "":<Link href={"/hotline/owner/" + data.owner}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>}<Link href={"/hotline/owner/edit/" + data.owner}> <FontAwesomeIcon icon={faEdit} inverse /></Link></span>:""}</p>
-            <p className="mb-3"><b>Reporter:</b> {data.reporter ? <span>{data.reporter_object.first_name} {data.reporter_object.last_name} <Link href={"/hotline/reporter/" + data.reporter}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link><Link href={"/hotline/reporter/edit/" + data.reporter}> <FontAwesomeIcon icon={faEdit} inverse /></Link></span> : 'N/A'}</p>
-            <p><b>Address:</b> {data.address ? <span>{data.full_address}</span> : 'N/A'}</p>
-            <p><b>Directions:</b> {data.directions}</p>
-          </div>
-          <div className="col-4">
-            <p><b>Verbal Permission:</b> {String(data.verbal_permission)}</p>
-            <p><b>Key Provided:</b> {String(data.key_provided)}</p>
-            <p><b>Accessible:</b> {String(data.accessible)}</p>
-            <p><b>Turn Around:</b> {String(data.turn_around)}</p>
-          </div>
+      <div className="row mt-4 mb-3">
+        <div className="col-12 d-flex">
+              <div className=""><h1>Request #{data.id}<Link href={"/hotline/servicerequest/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link> | <span style={{textTransform:"capitalize"}}>{data.status}</span></h1></div>
         </div>
       </div>
-      {data.outcome ?
-      <div style={card_style} className="card card-body bg-light mb-2 mx-auto">
-        <div className="row">
-          <div className="col-8">
-            <p><b>Outcome:</b> {data.outcome}</p>
-            {data.owner_notification_notes ? <p><b>Owner Notification Notes:</b> {data.owner_notification_notes}</p> : ''}
-            {data.recovery_time ? <p><b>Recovery Time:</b> <Moment format="LLL">{data.recovery_time}</Moment></p> : ''}
-            {data.owner_notification_tstamp ? <p><b>Owner Notified:</b> <Moment format="LLL">{data.owner_notification_tstamp}</Moment></p> : ''}
-          </div>
-          <div className="col-4">
-            <p><b>Forced Entry:</b> {String(data.forced_entry)}</p>
-          </div>
+      <div className="row mb-2">
+        <div className="col-6 d-flex">
+          <Card className="mb-2 border rounded" style={{width:"100%"}}>
+            <Card.Body>
+              <Card.Title>
+                <h4 className="mb-0">Location
+                  {data.verbal_permission ?
+                  <OverlayTrigger
+                    key={"verbal"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-verbal`}>
+                        Verbal permission granted
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon icon={faComment} size="sm" className="ml-1" />
+                  </OverlayTrigger> : ""}
+                  {data.key_provided ?
+                  <OverlayTrigger
+                    key={"key"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-key`}>
+                        Key provided
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon icon={faKey} size="sm" className="ml-1" />
+                  </OverlayTrigger> : ""}
+                  {data.accessible ?
+                  <OverlayTrigger
+                    key={"accessible"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-accessible`}>
+                        Easily accessible
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon icon={faCar} size="sm" className="ml-1" />
+                  </OverlayTrigger> : ""}
+                  {data.turn_around ?
+                  <OverlayTrigger
+                    key={"turnaround"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-turnaround`}>
+                        Room to turn around
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon icon={faTrailer} size="sm" className="ml-1" />
+                  </OverlayTrigger> : ""}
+                </h4>
+              </Card.Title>
+              <hr/>
+              <ListGroup variant="flush">
+                <ListGroup.Item style={{marginTop:"-13px"}}><b>Address:</b> {data.address ? <span>{data.full_address}</span> : 'N/A'}</ListGroup.Item>
+                <ListGroup.Item style={{marginBottom:"-13px"}}><b>Directions:</b> {data.directions}</ListGroup.Item>
+              </ListGroup>
+            </Card.Body>
+          </Card>
         </div>
-      </div> : ""}
+        <div className="col-6 d-flex pl-0">
+          <Card className="mb-2 border rounded" style={{width:"100%"}}>
+            <Card.Body style={{marginBottom:"-17px"}}>
+              {data.owner ?
+              <span>
+                <Card.Title>
+                  <h4 className="mb-0">Owner: <span style={{fontSize:18}}>{data.owner_object.first_name} {data.owner_object.last_name} {data.owner_object.first_name !== 'Unknown' ? <Link href={"/hotline/owner/" + data.owner}> <FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link>:""}<Link href={"/hotline/owner/edit/" + data.owner}> <FontAwesomeIcon icon={faEdit} size="sm" inverse /></Link>
+                    </span></h4>
+                </Card.Title>
+                <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
+                  {data.owner_object.phone ? <ListGroup.Item><b>Telephone: </b>{data.owner_object.phone}</ListGroup.Item> : ""}
+                  {data.owner_object.email ? <ListGroup.Item><b>Email: </b>{data.owner_object.email}</ListGroup.Item> : ""}
+                </ListGroup>
+              </span> : ""}
+              {data.reporter ?
+              <span>
+                <hr/>
+                <Card.Title>
+                  <h4 className="mb-0">Reporter: {data.reporter_object.first_name} {data.reporter_object.last_name} <Link href={"/hotline/reporter/" + data.reporter}> <FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link><Link href={"/hotline/reporter/edit/" + data.reporter}> <FontAwesomeIcon icon={faEdit} size="sm" inverse /></Link>
+                  </h4>
+                </Card.Title>
+                <ListGroup variant="flush" style={{marginTop:"-13px"}}>
+                  {data.reporter_object.phone ? <ListGroup.Item><b>Telephone: </b>{data.reporter_object.phone}</ListGroup.Item> : ""}
+                  {data.reporter_object.email ? <ListGroup.Item><b>Email: </b>{data.reporter_object.email}</ListGroup.Item> : ""}
+                </ListGroup>
+              </span>
+              : ""}
+            </Card.Body>
+          </Card>
+        </div>
+      </div>
+      {data.outcome || data.owner_notification_notes ?
+      <div className="row mb-2">
+        <div className="col-12 d-flex">
+          <Card className="mb-2 border rounded" style={{width:"100%"}}>
+            <Card.Body>
+              <Card.Title>
+                <h4 className="mb-0">Outcome
+                  {data.forced_entry ?
+                  <OverlayTrigger
+                    key={"forced"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-forced`}>
+                        Forced entry
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon icon={faHouseDamage} size="sm" className="ml-1" />
+                  </OverlayTrigger> : ""}
+                </h4>
+              </Card.Title>
+              <hr/>
+              <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
+                {data.recovery_time || data.outcome ? <ListGroup.Item>
+                  <b>Recovery Time:</b> <Moment format="LLL">{data.recovery_time||""}</Moment>
+                  <p className="mt-1 mb-0"><b>Outcome:</b> {data.outcome||"Not available."}</p></ListGroup.Item> : ""}
+                {data.owner_notification_tstamp || data.owner_notification_notes ? <ListGroup.Item>
+                  <b>Owner Notified:</b> <Moment format="LLL">{data.owner_notification_tstamp}</Moment>
+                  <p className="mt-1 mb-0"><b>Owner Notification Notes:</b> {data.owner_notification_notes||"Not available."}</p></ListGroup.Item> : ""}
+              </ListGroup>
+            </Card.Body>
+          </Card>
+        </div>
+      </div>
+      : ""}
       {data.animals && data.animals.length ?
-      <div style={card_style} className="card card-body bg-light mx-auto">
+      <div className="card card-body bg-light mx-auto">
         <p><b>Animals:</b> <Link href={"/hotline/animal/new?servicerequest_id=" + id}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link></p>
          <span>
           {data.animals.map(animal => (

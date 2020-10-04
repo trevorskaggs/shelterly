@@ -130,7 +130,8 @@ export function ServiceRequestForm({ id }) {
             .nullable(),
           owner_notification_tstamp: Yup.date()
             .nullable(),
-          address: Yup.string(),
+          address: Yup.string()
+            .required('Required'),
           apartment: Yup.string()
             .max(10, 'Must be 10 characters or less'),
           city: Yup.string(),
@@ -248,7 +249,7 @@ export function ServiceRequestForm({ id }) {
               <BootstrapForm.Row>
                 <TextInput
                   type="text"
-                  label={!is_first_responder ? "Address" : "Address/Cross Streets"}
+                  label={!is_first_responder ? "Address*" : "Address/Cross Streets*"}
                   name="address"
                   id="address"
                   xs="8"
