@@ -39,8 +39,8 @@ input[disabled] {
     font-size: 1rem !important;
 }
 
-/*  */
+/* DatetimePicker fixed min width CSS */
 .datetime_picker {
-  width:205px;
-  min-width:205px;
+  width:213px;
+  min-width:213px;
 }
