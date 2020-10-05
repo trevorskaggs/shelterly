@@ -50,8 +50,8 @@
     "test:coverage-ci": "npm test -- --coverage",
     "test:debug": "react-scripts --inspect-brk test --runInBand --no-cache",
     "eject": "react-scripts eject",
-    "dev": "webpack --mode development ./src/index.js --output /home/shelterly/frontend/src/static/js/main.js",
-    "wp_build": "webpack --mode production ./src/index.js --output /home/shelterly/frontend/src/static/js/main.js"
+    "dev": "webpack --mode development ./src/index.js --output /home/sheltuser/shelterly/frontend/src/static/js/main.js",
+    "wp_build": "webpack --mode production ./src/index.js --output /home/sheltuser/shelterly/frontend/src/static/js/main.js"
   },
   "eslintConfig": {
     "extends": "react-app"
