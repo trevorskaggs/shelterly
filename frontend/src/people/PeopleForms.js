@@ -1,6 +1,6 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from "axios";
-import { Link, navigate, useQueryParams } from 'raviger';
+import { navigate, useQueryParams } from 'raviger';
 import { Field, Formik } from 'formik';
 import { Form as BootstrapForm, Button, ButtonGroup, Card, Col } from "react-bootstrap";
 import * as Yup from 'yup';
@@ -188,7 +188,7 @@ export const PersonForm = ({ id }) => {
       >
         {props => (
           <Card border="secondary" className="mt-5">
-          <Card.Header as="h5" className="pl-3"> <Link href={"/hotline"} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></Link>
+          <Card.Header as="h5" className="pl-3"> <span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
 {is_owner ? "Owner" : "Reporter"} Information</Card.Header>
           <Card.Body>
           <BootstrapForm noValidate>
@@ -297,7 +297,7 @@ export const PersonForm = ({ id }) => {
               {!is_first_responder ? <Button type="button" onClick={() => { setSkipOwner(false); props.submitForm() }}>{!is_owner && !is_intake ? <span>{!id ? "Add Owner" : "Save"}</span> : <span>{!id ? "Add Animal(s)" : "Save"}</span>}</Button> : ""}
               {/* reporter form save buttons to skip owner */}
               {!is_owner && !id && !is_intake ? <button type="button" className="btn btn-primary mr-1 border" onClick={() => { setSkipOwner(true); props.submitForm() }}>Add Animal(s)</button> : ""}
-              <Button variant="secondary" type="button">Reset</Button>
+              <Button variant="secondary" type="button" onClick={() => {props.resetForm(data)}}>Reset</Button>
             </ButtonGroup>
           </Card>
         )}

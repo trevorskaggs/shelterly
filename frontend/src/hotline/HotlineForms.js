@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import { Link, navigate, useQueryParams } from 'raviger';
 import { Field, Form, Formik } from 'formik';
@@ -12,6 +12,8 @@ import * as Yup from 'yup';
 import { Switch } from 'formik-material-ui';
 import 'flatpickr/dist/themes/light.css';
 import { AddressLookup, DateTimePicker, DropDown, TextInput } from '../components/Form';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faArrowAltCircleLeft } from '@fortawesome/free-solid-svg-icons';
 
 const state_options = [{ value: 'AL', label: "AL" }, { value: 'AK', label: "AK" }, { value: 'AZ', label: "AZ" }, { value: 'AR', label: "AR" }, { value: 'CA', label: "CA" }, { value: 'CO', label: "CO" }, { value: 'CT', label: "CT" },
 { value: 'DE', label: "DE" }, { value: 'FL', label: "FL" }, { value: 'GA', label: "GA" }, { value: 'HI', label: "HI" }, { value: 'ID', label: "ID" }, { value: 'IL', label: "IL" }, { value: 'IN', label: "IN" },
@@ -164,7 +166,7 @@ export function ServiceRequestForm({ id }) {
     >
       {props => (
         <Card border="secondary" className="mt-5" style={{width:"auto"}}>
-        <Card.Header as="h5">Service Request Form</Card.Header>
+        <Card.Header as="h5"><span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>Service Request Form</Card.Header>
         <Card.Body>
         <BootstrapForm as={Form}>
           <Field type="hidden" value={owner_id || ""} name="owner" id="owner"></Field>
@@ -204,7 +206,8 @@ export function ServiceRequestForm({ id }) {
                   onChange={(date, dateStr) => {
                     props.setFieldValue("recovery_time", dateStr)
                   }}
-                  value={data.recovery_time || null}
+                  key={`my_unique_recovery_time_select_key__${props.values.recovery_time}`}
+                  value={props.values.recovery_time || null}
                 />
             </BootstrapForm.Row>
             <BootstrapForm.Row hidden={!id}>
@@ -216,7 +219,8 @@ export function ServiceRequestForm({ id }) {
                   onChange={(date, dateStr) => {
                     props.setFieldValue("owner_notification_tstamp", dateStr)
                   }}
-                  value={data.owner_notification_tstamp || null}
+                  key={`my_unique_owner_notification_tstamp_select_key__${props.values.owner_notification_tstamp}`}
+                  value={props.values.owner_notification_tstamp || null}
                 />
             </BootstrapForm.Row>
           {data.address && !id ?
@@ -305,13 +309,12 @@ export function ServiceRequestForm({ id }) {
                 <Label htmlFor="turn_around">Turn Around</Label>
                 <Field component={Switch} name="turn_around" type="checkbox" color="primary" /></span>
             </BootstrapForm.Row>
-
         </BootstrapForm>
         </Card.Body>
         <ButtonGroup size="lg">
-            <Button type="submit" onClick={() => { props.submitForm()}}>Save</Button>
-            <Button as={Link} href="/hotline/" variant="info">Cancel</Button>
-          </ButtonGroup>
+          <Button type="submit" className="btn btn-primary" onClick={() => { props.submitForm()}}>Save</Button>
+          <Button variant="secondary" type="button" onClick={() => {props.resetForm(data)}}>Reset</Button>
+        </ButtonGroup>
         </Card>
       )}
     </Formik>
