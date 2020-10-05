@@ -183,6 +183,18 @@ export function ServiceRequestForm({ id }) {
           <Field type="hidden" value={data.latitude || ""} name="latitude" id="latitude"></Field>
           <Field type="hidden" value={data.longitude || ""} name="longitude" id="longitude"></Field>
           <BootstrapForm.Row hidden={!id}>
+            <DateTimePicker
+              label="Recovery Time"
+              name="recovery_time"
+              id="recovery_time"
+              xs="3"
+              onChange={(date, dateStr) => {
+                props.setFieldValue("recovery_time", dateStr)
+              }}
+              value={data.recovery_time || null}
+            />
+          </BootstrapForm.Row>
+          <BootstrapForm.Row hidden={!id} className="mt-3">
             <TextInput
               as="textarea"
               rows={5}
@@ -191,32 +203,6 @@ export function ServiceRequestForm({ id }) {
               id="outcome"
               xs="10"
             />
-            </BootstrapForm.Row>
-            <BootstrapForm.Row hidden={!id}>
-              <TextInput
-                as="textarea"
-                rows={5}
-                label="Owner Notification Notes"
-                name="owner_notification_notes"
-                id="owner_notification_notes"
-                xs="10"
-              />
-            </BootstrapForm.Row>
-            <BootstrapForm.Row hidden={!id} className="mb-2">
-              <Label htmlFor="forced_entry" className="mt-2 ml-1">Forced Entry</Label>
-              <Field component={Switch} name="forced_entry" type="checkbox" color="primary" />
-            </BootstrapForm.Row>
-            <BootstrapForm.Row hidden={!id}>
-                <DateTimePicker
-                  label="Recovery Time"
-                  name="recovery_time"
-                  id="recovery_time"
-                  xs="3"
-                  onChange={(date, dateStr) => {
-                    props.setFieldValue("recovery_time", dateStr)
-                  }}
-                  value={data.recovery_time || null}
-                />
             </BootstrapForm.Row>
             <BootstrapForm.Row hidden={!id}>
               <DateTimePicker
@@ -229,6 +215,20 @@ export function ServiceRequestForm({ id }) {
                 }}
                 value={data.owner_notification_tstamp || null}
               />
+            </BootstrapForm.Row>
+            <BootstrapForm.Row hidden={!id} className="mt-3">
+              <TextInput
+                as="textarea"
+                rows={5}
+                label="Owner Notification Notes"
+                name="owner_notification_notes"
+                id="owner_notification_notes"
+                xs="10"
+              />
+            </BootstrapForm.Row>
+            <BootstrapForm.Row hidden={!id} className="mb-2">
+              <Label htmlFor="forced_entry" className="mt-2 ml-1">Forced Entry</Label>
+              <Field component={Switch} name="forced_entry" type="checkbox" color="primary" />
             </BootstrapForm.Row>
           {data.address && !id ?
             <span className="form-row mb-2">
