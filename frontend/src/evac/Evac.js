@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "raviger";
-import { EvacTeamMemberForm, TeamMemberSelector } from "./EvacForms";
+import { EvacTeamMemberForm } from "./EvacForms";
 import { ListGroup } from 'react-bootstrap';
 
 const header_style = {
@@ -12,11 +12,6 @@ const header_style = {
       <Link href="/evac/evacteammember/new">
       <ListGroup.Item action>
       NEW TEAM MEMBER
-      </ListGroup.Item>
-      </Link>
-      <Link href="/evac/evacteam/select">
-      <ListGroup.Item action>
-      TEAM LIST
       </ListGroup.Item>
       </Link>
       <Link href="/evac/dispatch">
@@ -37,13 +32,6 @@ const header_style = {
     </ListGroup>
   )
 
-
-  export const TeamMemberSelectorList = () => (
-    <div>
-      <h1 style={header_style}>Select Evacuation Team Member</h1>
-      <TeamMemberSelector />
-    </div>
-  )
 
   export const NewEvacTeamMember = () => (
     <div>

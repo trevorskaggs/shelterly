@@ -11,83 +11,6 @@ import {
 } from 'react-bootstrap';
 import * as Yup from 'yup';
 import { TextInput} from '.././components/Form';
-import { Typeahead } from 'react-bootstrap-typeahead';
-import 'react-bootstrap-typeahead/css/Typeahead.css';
-
-export function TeamMemberSelector() {
-  const [selected, setSelected] = useState([]);
-  const [data, setData] = useState({options: [], isFetching: false});
-
-  function getSelected(){
-    var selectedIds = [];
-    selected.forEach(function(item){
-      selectedIds.push(item.id);
-    })
-    return selectedIds;
-  }
-
-  useEffect(() => {
-    let source = axios.CancelToken.source();
-    const fetchTeamMembers = async () => {
-      setData({options: [], isFetching: true});
-      await axios.get('/evac/api/evacteammember/', {
-        cancelToken: source.token,
-      })
-      .then(response => {
-        var options = []
-        response.data.forEach(function(teammember){
-          options.push({id: teammember.id, label: teammember.display_name})
-        });
-        setData({options: options, isFetching: false});
-      })
-      .catch(error => {
-        console.log(error.response);
-        setData({options: [], isFetching: false});
-      });
-    };
-    fetchTeamMembers();
-    return () => {
-      source.cancel();
-    };
-  }, [])
-
-  return (
-    <Formik
-      initialValues={{
-        team_members: '',
-      }}
-      onSubmit={(values, { setSubmitting }) => {
-        values.team_members = getSelected();
-        setTimeout(() => {
-          axios.post('/evac/api/evacassignment/', values)
-          .then(function() {
-            navigate('/evac');
-          })
-          .catch(error => {
-            console.log(error.response);
-          });
-          setSubmitting(false);
-        }, 500);
-      }}
-    >
-    <Form>
-      <Container>
-        <FormGroup style={{ marginTop: '20px' }}>
-          <Typeahead
-            id="team-members"
-            multiple
-            onChange={setSelected}
-            options={data.options}
-            placeholder="Choose team members..."
-            selected={selected}
-          />
-        </FormGroup>
-        <Button type="submit" className="mt-2 mb-1">Deploy!</Button>
-      </Container>
-    </Form>
-  </Formik>
-  );
-};
 
 export const EvacTeamMemberForm = () => {
 
@@ -115,11 +38,11 @@ export const EvacTeamMemberForm = () => {
               .required('Required'),
             agency_id: Yup.string(),
           })}
-          onSubmit={(values, { setSubmitting }) => {
+          onSubmit={(values, { setSubmitting, resetForm }) => {
             setTimeout(() => {
               axios.post('/evac/api/evacteammember/', values)
               .then(function() {
-                navigate('/evac');
+                resetForm()
               })
               .catch(error => {
                 console.log(error.response);
