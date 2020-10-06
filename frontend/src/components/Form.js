@@ -178,7 +178,7 @@ const ImageUploader = ({ parentStateSetter, ...props }) => {
             ))}
             {imageList.length < props.maxNumber ?
               <span className="d-flex flex-wrap m-0">
-                <span className="text-center ml-0 mr-3 p-0 align-items-end">
+                <span className="text-center ml-0 mr-3 p-0 align-items-end" style={{marginBottom:"-20px"}}>
                 <FontAwesomeIcon icon={faPlusSquare} size="10x" inverse onClick={onImageUpload}{...dragProps} />
                   <div style={{marginTop:-8, marginBottom:20}}>{props.label}</div>
                   {(meta.touched && meta.error) || errors ?
