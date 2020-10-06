@@ -35,4 +35,5 @@ RUN git clone https://github.com/trevorskaggs/shelterly.git shelterly \
     && pip install --no-cache-dir -r ~/shelterly/requirements.txt
     && python ~/shelterly/manage.py collectstatic --noinput
     && cp ~/shelterly/static/* ~/frontend/src/static/ -r
+    && echo "from django.contrib.auth.models import User; User.objects.create_superuser('admin', 'admin@example.com', 'admin')" | python manage.py shell
 CMD tail -f /dev/null
