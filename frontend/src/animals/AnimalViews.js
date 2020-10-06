@@ -2,7 +2,6 @@ import React, {useEffect, useState} from 'react';
 import axios from "axios";
 import { Link } from 'raviger';
 import Moment from 'react-moment';
-import { Card, ListGroup } from 'react-bootstrap';
 import { Carousel } from 'react-responsive-carousel';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -64,9 +63,8 @@ export function AnimalView({id}) {
       })
       .then(response => {
         setData(response.data);
-        const image_urls = response.data.extra_images;
-        image_urls.unshift(response.data.side_image);
-        image_urls.unshift(response.data.front_image);
+        var image_urls = [];
+        image_urls = image_urls.concat(response.data.side_image||[]).concat(response.data.front_image||[]).concat(response.data.extra_images);
         setImages(image_urls);
       })
       .catch(error => {

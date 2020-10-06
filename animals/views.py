@@ -90,16 +90,18 @@ class AnimalViewSet(viewsets.ModelViewSet):
             # Strip out MEDIA_URL so that we can compare to image filename using a filter().
             images_to_delete = [image_to_delete.replace(settings.MEDIA_URL, '') for image_to_delete in set(old_images) - set(updated_images)]
             AnimalImage.objects.filter(animal=animal, category="extra", image__in=images_to_delete).delete()
+            for key in ['front_image', 'side_image']:
+                if serializer.data.get(key, '') != self.request.data.get(key, ''):
+                    try:
+                        AnimalImage.objects.get(animal=animal, category=key).delete()
+                    except ObjectDoesNotExist:
+                        pass
 
             # Only brand new files should show up in request.FILES.
             images_data = self.request.FILES
             for key, image_data in images_data.items():
                 # If we have a new front or side image, delete the old one and create a new one.
                 if key in ("front_image", "side_image"):
-                    try:
-                        AnimalImage.objects.get(animal=animal, category=key).delete()
-                    except ObjectDoesNotExist:
-                        pass
                     AnimalImage.objects.create(image=image_data, animal=animal, category=key)
                 # Otherwise create a new extra image.
                 else:

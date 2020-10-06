@@ -165,10 +165,8 @@ export const AnimalForm = ({id}) => {
             .max(200, 'Must be 200 characters or less'),
           last_seen: Yup.date()
             .nullable(),
-          front_image: Yup.mixed()
-            .required('Required'),
-          side_image: Yup.mixed()
-            .required('Required'),
+          front_image: Yup.mixed(),
+          side_image: Yup.mixed(),
           extra_images: Yup.array()
         })}
         onSubmit={(values, { setSubmitting }) => {
@@ -442,7 +440,7 @@ export const AnimalForm = ({id}) => {
                       <Image width={131} src={data.front_image} alt="" thumbnail />
                       <div className="mb-2">
                         <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => clearImage("front_image", props.setFieldValue)} style={{backgroundColor:"red"}} />
-                        <span className="ml-1">Front-Shot*</span>
+                        <span className="ml-1">Front-Shot</span>
                       </div>
                     </span> :
                     <div className="mb-2 ml-1">
@@ -451,7 +449,7 @@ export const AnimalForm = ({id}) => {
                         id="front_image"
                         name="front_image"
                         parentStateSetter={wrapperSetFrontImage}
-                        label="Front-Shot*"
+                        label="Front-Shot"
                         maxNumber={1}
                       />
                     </div>
@@ -461,7 +459,7 @@ export const AnimalForm = ({id}) => {
                       <Image width={131} src={data.side_image} alt="" thumbnail />
                       <div className="mb-2">
                         <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => clearImage("side_image", props.setFieldValue)} style={{backgroundColor:"red"}} />
-                        <span className="ml-1">Side-Shot*</span>
+                        <span className="ml-1">Side-Shot</span>
                       </div>
                     </span> :
                     <div className="mb-2">
@@ -470,7 +468,7 @@ export const AnimalForm = ({id}) => {
                         id="side_image"
                         name="side_image"
                         parentStateSetter={wrapperSetSideImage}
-                        label="Side-Shot*"
+                        label="Side-Shot"
                         maxNumber={1}
                       />
                     </div>
