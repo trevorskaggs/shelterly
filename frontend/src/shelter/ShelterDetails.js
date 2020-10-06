@@ -87,8 +87,8 @@ export function ShelterDetailsTable({sid}) {
                             </span>
                           }
                           </ListGroup.Item>
-                      </ListGroup.Item>))
-                    }</span>
+                      </ListGroup.Item>
+                    ))}</span>
                   }
             </Card.Body>
           </Card>
@@ -132,18 +132,27 @@ export function BuildingDetailsTable({bid}) {
     <>
       <h1 style={header_style}>{data.name}</h1>
       <br/>
-        <div style={card_style} className="card card-body bg-light mb-2 mx-auto">
-          <div className="row">
-            <div className="col-8">
+      <CardGroup>
+        <Card>
+          <ListGroup.Item>
               <p><b>Name:</b> {data.name}</p>
               <p><b>Shelter:</b> {data.shelter}</p>
               <p><b>Description:</b> {data.description}</p>
-          </div>
-        </div>
-      </div>
-      {data.rooms == '' ? <div style={card_style} className="card card-body bg-light mb-2 mx-auto"><p><b>No Rooms Found</b></p></div> :
-        <RoomList bid={data.id} />
-      }
+          </ListGroup.Item>
+        </Card>
+      </CardGroup>
+      <CardGroup>
+        <Card>
+          {data.rooms == undefined ? <span><ListGroup.Item><p>No Rooms Found</p></ListGroup.Item></span> :
+            <span>{data.rooms.map(room => (
+              <ListGroup.Item>
+                <b>Rooms:</b> {room.name}
+                <Link href={"/shelter/room/" + room.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
+              </ListGroup.Item>
+            ))}</span>
+          } 
+        </Card>
+      </CardGroup>
       <hr/>
       <div style={btn_style}>
         <Link href={"/shelter/building/" + data.id + "/room/new"} style={link_style} className="btn btn-success btn-lg btn-block mb-2">ADD ROOM</Link>
