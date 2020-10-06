@@ -4,7 +4,7 @@ import { Link } from 'raviger';
 import { Card, CardGroup, ListGroup } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faClipboardList
+  faClipboardList, faEdit, faPlusSquare,
 } from '@fortawesome/free-solid-svg-icons';
 import { ShelterDetailsTable } from "./ShelterDetails";
 
@@ -50,6 +50,7 @@ export function ShelterTable() {
       {data.shelters.map(shelter => (
         <div key={shelter.id} className="mt-3">
           <div className="card-header">{shelter.name}<Link href={"/shelter/" + shelter.id}> <FontAwesomeIcon icon={faClipboardList} inverse/></Link>
+          <Link href={"/shelter/edit/" + shelter.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
         <div style={{width:400,height:25, minHeight:25}}>{shelter.full_address}</div></div>
         
           <CardGroup>
@@ -58,13 +59,19 @@ export function ShelterTable() {
                   <ListGroup>
                     {shelter.buildings == '' ? <span><ListGroup.Item><p>No Buildings Found</p></ListGroup.Item></span> : 
                       <span>{shelter.buildings.map(building => (
-                        <ListGroup.Item key={building.id}><b>Building:</b> {building.name} 
+                        <ListGroup.Item key={building.id}>
+                          <Link href={"/shelter/" + shelter.id + "/building/new"}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link>
+                          &nbsp;<b>Building:</b> {building.name} 
                           <Link href={"/shelter/building/" + building.id}> <FontAwesomeIcon icon={faClipboardList} inverse />
+                          <Link href={"/shelter/building/edit/" + building.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
                           </Link>
                           {building.rooms == '' ? <span><ListGroup.Item><p>No Rooms Found</p></ListGroup.Item></span> :
                             <span>{building.rooms.map(room => (
-                              <ListGroup.Item key={room.id}><b>Room:</b> {room.name}
+                              <ListGroup.Item key={room.id}>
+                                <Link href={"/shelter/building/" + building.id + "/room/new"}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link>
+                                &nbsp;<b>Room:</b> {room.name}
                                 <Link href={"/shelter/room/" + room.id}> <FontAwesomeIcon icon={faClipboardList} inverse />
+                                <Link href={"/shelter/room/edit/" + room.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
                                 </Link>
                               </ListGroup.Item>
                             ))}

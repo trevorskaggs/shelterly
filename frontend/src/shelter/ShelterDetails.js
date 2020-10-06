@@ -75,6 +75,7 @@ export function ShelterDetailsTable({sid}) {
                       <ListGroup.Item>
                         <b>Building:</b> {building.name}
                         <Link href={"/shelter/building/" + building.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
+                        <Link href={"/shelter/building/edit/" + building.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
                           <ListGroup.Item>
                           {building.rooms == undefined ? <span><ListGroup.Item><p>No Rooms Found</p></ListGroup.Item></span>: 
                             <span>
@@ -82,6 +83,7 @@ export function ShelterDetailsTable({sid}) {
                                 <ListGroup.Item>
                                   <b>Rooms:</b> {room.name}
                                   <Link href={"/shelter/room/" + room.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
+                                  <Link href={"/shelter/room/edit/" + room.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
                                 </ListGroup.Item>
                               ))}
                             </span>
@@ -146,8 +148,10 @@ export function BuildingDetailsTable({bid}) {
           {data.rooms == undefined ? <span><ListGroup.Item><p>No Rooms Found</p></ListGroup.Item></span> :
             <span>{data.rooms.map(room => (
               <ListGroup.Item>
-                <b>Rooms:</b> {room.name}
+                <Link href={"/shelter/building/" + data.id + "/room/new"}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link>
+                &nbsp;<b>Room:</b> {room.name}
                 <Link href={"/shelter/room/" + room.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
+                <Link href={"/shelter/room/edit/" + room.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
               </ListGroup.Item>
             ))}</span>
           } 
