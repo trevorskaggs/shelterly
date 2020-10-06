@@ -1,22 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import axios from "axios";
 import { Link, navigate, useQueryParams } from 'raviger';
-import { Field, Form, Formik } from 'formik';
-import {
-  CustomInput,
-  Label,
-  Fade,
-} from 'reactstrap';
-import { Form as BootstrapForm, Button, ButtonGroup, Card, Col, FormGroup, Row } from "react-bootstrap";
+import { Field, Formik } from 'formik';
+import { Form as BootstrapForm, Button, ButtonGroup, Card, Col } from "react-bootstrap";
 import * as Yup from 'yup';
-import { Switch } from 'formik-material-ui';
-import 'flatpickr/dist/themes/light.css';
-import { DateTimePicker, DropDown, TextInput } from '../components/Form';
+import { AddressLookup, DropDown, TextInput } from '../components/Form';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft } from '@fortawesome/free-solid-svg-icons';
-
-import styled from 'styled-components';
-
 
 const state_options = [{ value: 'AL', label: "AL" }, { value: 'AK', label: "AK" }, { value: 'AZ', label: "AZ" }, { value: 'AR', label: "AR" }, { value: 'CA', label: "CA" }, { value: 'CO', label: "CO" }, { value: 'CT', label: "CT" },
 { value: 'DE', label: "DE" }, { value: 'FL', label: "FL" }, { value: 'GA', label: "GA" }, { value: 'HI', label: "HI" }, { value: 'ID', label: "ID" }, { value: 'IL', label: "IL" }, { value: 'IN', label: "IN" },
@@ -52,12 +42,13 @@ export const PersonForm = ({ id }) => {
     best_contact: '',
     showAgency: is_first_responder,
     agency: '',
-    // drivers_license: '',
     address: '',
     apartment: '',
     city: '',
     state: '',
     zip_code: '',
+    latitude: null,
+    longitude: null,
   });
 
   // Whether or not to skip Owner creation.
@@ -117,7 +108,6 @@ export const PersonForm = ({ id }) => {
           agency: Yup.string().when('showAgency', {
               is: true,
               then: Yup.string().required('Required')}),
-          // drivers_license: Yup.string(),
           address: Yup.string(),
           apartment: Yup.string()
             .max(10, 'Must be 10 characters or less'),
@@ -125,6 +115,10 @@ export const PersonForm = ({ id }) => {
           state: Yup.string(),
           zip_code: Yup.string()
             .max(10, 'Must be 10 characters or less'),
+          latitude: Yup.number()
+            .nullable(),
+          longitude: Yup.number()
+            .nullable(),
         })}
         onSubmit={(values, { setSubmitting }) => {
           if (id) {
@@ -198,41 +192,36 @@ export const PersonForm = ({ id }) => {
 {is_owner ? "Owner" : "Reporter"} Information</Card.Header>
           <Card.Body>
           <BootstrapForm noValidate>
+            <Field type="hidden" value={data.latitude || ""} name="latitude" id="latitude"></Field>
+            <Field type="hidden" value={data.longitude || ""} name="longitude" id="longitude"></Field>
+
             <BootstrapForm.Row>
-                <TextInput
-                  xs="5"
-                  type="text"
-                  label="First Name*"
-                  name="first_name"
-                />
-                <TextInput
-                  xs="5"
-                  type="text"
-                  label="Last Name*"
-                  name="last_name"
-                />
+              <TextInput
+                xs="5"
+                type="text"
+                label="First Name*"
+                name="first_name"
+              />
+              <TextInput
+                xs="5"
+                type="text"
+                label="Last Name*"
+                name="last_name"
+              />
             </BootstrapForm.Row>
             <BootstrapForm.Row hidden={is_first_responder}>
-                <TextInput
-                  xs="3"
-                  type="text"
-                  label="Phone"
-                  name="phone"
-                />
-                <TextInput
-                  xs="7"
-                  type="text"
-                  label="Email"
-                  name="email"
-                />
-              {/* <Col xs="3">
-                    <TextInput
-                      type="text"
-                      label="Drivers License"
-                      name="drivers_license"
-                      id="drivers_license"
-                    />
-                  </Col> */}
+              <TextInput
+                xs="3"
+                type="text"
+                label="Phone"
+                name="phone"
+              />
+              <TextInput
+                xs="7"
+                type="text"
+                label="Email"
+                name="email"
+              />
             </BootstrapForm.Row>
             <BootstrapForm.Row hidden={is_first_responder || data.agency}>
               <TextInput
@@ -251,41 +240,55 @@ export const PersonForm = ({ id }) => {
               />
             </BootstrapForm.Row>
             <BootstrapForm.Row hidden={!is_owner}>
-                <TextInput
-                  xs="8"
-                  type="text"
-                  label="Address"
-                  name="address"
+              <BootstrapForm.Group as={Col} xs="10">
+                <AddressLookup
+                  label="Search"
+                  style={{width: '100%'}}
+                  className="form-control"
                 />
-                <TextInput
-                  xs="2"
-                  type="text"
-                  label="Apartment"
-                  name="apartment"
-                />
+              </BootstrapForm.Group>
             </BootstrapForm.Row>
             <BootstrapForm.Row hidden={!is_owner}>
-                <TextInput
-                  xs="6"
-                  type="text"
-                  label="City"
-                  name="city"
-                />
-                <Col xs="2">
-                <DropDown
-                  label="State"
-                  name="state"
-                  id="state"
-                  options={state_options}
-                  value={props.values.state || ''}
-                />
-                </Col>
-                <TextInput
-                  xs="2"
-                  type="text"
-                  label="Zip Code"
-                  name="zip_code"
-                />
+              <TextInput
+                xs="8"
+                type="text"
+                label="Address"
+                name="address"
+                disabled
+              />
+              <TextInput
+                xs="2"
+                type="text"
+                label="Apartment"
+                name="apartment"
+              />
+            </BootstrapForm.Row>
+            <BootstrapForm.Row hidden={!is_owner}>
+              <TextInput
+                xs="6"
+                type="text"
+                label="City"
+                name="city"
+                disabled
+              />
+              <Col xs="2">
+              <DropDown
+                label="State"
+                name="state"
+                id="state"
+                options={state_options}
+                value={props.values.state || ''}
+                placeholder=''
+                disabled
+              />
+              </Col>
+              <TextInput
+                xs="2"
+                type="text"
+                label="Zip Code"
+                name="zip_code"
+                disabled
+              />
             </BootstrapForm.Row>
           </BootstrapForm>
           </Card.Body>

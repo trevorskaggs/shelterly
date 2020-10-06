@@ -10,10 +10,6 @@ import * as Yup from 'yup';
 import { DateTimePicker, DropDown, TextInput } from '.././components/Form.js';
 import { catAgeChoices, dogAgeChoices, horseAgeChoices, otherAgeChoices, catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, speciesChoices, sexChoices, dogSizeChoices, catSizeChoices, horseSizeChoices, otherSizeChoices, statusChoices, unknownChoices } from './constants'
 
-const header_style = {
-  textAlign: "center",
-}
-
 export const AnimalForm = ({id}) => {
 
   // Determine if this is an intake workflow.
@@ -29,7 +25,7 @@ export const AnimalForm = ({id}) => {
   } = queryParams;
 
   // Determine if this is from a first responder when creating a SR.
-  var is_first_responder = (first_responder == 'true');
+  var is_first_responder = (first_responder === 'true');
 
   // Track species selected and update choice lists accordingly.
   const sizeRef = useRef(null);
@@ -110,9 +106,10 @@ export const AnimalForm = ({id}) => {
           name: Yup.string()
             .max(50, 'Must be 50 characters or less.'),
           species: Yup.string()
+            .required('Required')
             .oneOf(speciesChoices.map(option => option['value'])),
           size: Yup.string()
-            .max(10, 'Must be 10 characters or less'),
+            .required('Required'),
           age: Yup.string(),
           sex: Yup.string()
             .oneOf(['M', 'F']),
@@ -202,7 +199,7 @@ export const AnimalForm = ({id}) => {
           <Card border="secondary" className="mt-5">
             <Card.Header as="h5">{!id ? "New" : "Update"} Animal</Card.Header>
             <Card.Body>
-          <BootstrapForm as={Form}>
+            <BootstrapForm as={Form}>
               <Field type="hidden" value={owner_id||""} name="owner" id="owner"></Field>
               <Field type="hidden" value={servicerequest_id||""} name="request" id="request"></Field>
                <BootstrapForm.Row hidden={!id} className="mb-3">
@@ -243,7 +240,7 @@ export const AnimalForm = ({id}) => {
                 <BootstrapForm.Row>
                   <Col xs="2">
                     <DropDown
-                      label="Species"
+                      label="Species*"
                       id="speciesDropdown"
                       name="species"
                       type="text"
@@ -263,11 +260,12 @@ export const AnimalForm = ({id}) => {
                   </Col>
                   <Col xs="4">
                     <DropDown
-                      label="Size"
+                      label="Size*"
                       id="sizeDropdown"
                       name="size"
                       type="text"
                       xs="4"
+                      isClearable={false}
                       ref={sizeRef}
                       options={sizeChoices[props.values.species]}
                       value={props.values.size||''}
@@ -375,19 +373,18 @@ export const AnimalForm = ({id}) => {
                       isClearable={false}
                     />
                   </Col>
+                    <DateTimePicker
+                      label="Last Seen"
+                      name="last_seen"
+                      id="last_seen"
+                      xs="4"
+                      onChange={(date, dateStr) => {
+                        props.setFieldValue("last_seen", dateStr)
+                      }}
+                      value={data.last_seen||null}
+                    />
                 </BootstrapForm.Row>
-                <BootstrapForm.Row className="mt-3">
-                  <DateTimePicker
-                    label="Last Seen"
-                    name="last_seen"
-                    id="last_seen"
-                    xs="3"
-                    onChange={(date, dateStr) => {
-                      props.setFieldValue("last_seen", dateStr)
-                    }}
-                    value={data.last_seen||null}
-                  />
-                </BootstrapForm.Row>
+
                 <BootstrapForm.Row>
                   <Col className="mt-3">
                   <Label for="image">Image File</Label>

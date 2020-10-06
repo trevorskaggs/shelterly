@@ -2,7 +2,6 @@ import React from "react";
 import { Link } from "raviger";
 import { EvacTeamMemberForm, TeamMemberSelector } from "./EvacForms";
 import { ListGroup } from 'react-bootstrap';
-// import EvacNavBar from "./EvacNavbar";
 
 const header_style = {
   textAlign: "center",
@@ -20,7 +19,7 @@ const header_style = {
       TEAM LIST
       </ListGroup.Item>
       </Link>
-      <Link href="">
+      <Link href="/evac/dispatch">
       <ListGroup.Item action>
       DEPLOY
       </ListGroup.Item>

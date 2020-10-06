@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTable, useSortBy, useResizeColumns, useFlexLayout } from 'react-table';
-import { Container, Row, Col, Table as BootstrapTable } from 'react-bootstrap';
+import { Table as BootstrapTable } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faSort,

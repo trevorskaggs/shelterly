@@ -2,11 +2,12 @@ import React from "react";
 import Home from "./Home";
 import Animals, { AnimalDetail, NewAnimal, UpdateAnimal } from "./animals/Animals"
 import { AnimalSearch } from "./animals/AnimalTables"
-import Evac, { NewEvacTeamMember, TeamMemberSelectorList } from "./evac/Evac";
+import Evac { NewEvacTeamMember, TeamMemberSelectorList } from "./evac/Evac";
 import Hotline, { NewServiceRequest, ServiceRequestDetail, ServiceRequestList, UpdateServiceRequest } from "./hotline/Hotline";
 import Intake, { IntakeSummary } from "./intake/Intake";
 import { NewOwner, NewReporter, OwnerDetail, ReporterDetail,  UpdateOwner, UpdateReporter } from "./people/People";
 import { Login } from "./accounts/Accounts"
+import { Dispatch } from "./evac/EvacViews";
 
 const routes = {
   "/": () => <Home />,
@@ -17,6 +18,7 @@ const routes = {
   "/evac": () => <Evac />,
   "/evac/evacteammember/new": () => <NewEvacTeamMember />,
   "/evac/evacteam/select": () => <TeamMemberSelectorList />,
+  "/evac/dispatch": () => <Dispatch />,
   "/hotline": () => <Hotline />,
   "/hotline/animal/new": () => <NewAnimal />,
   "/hotline/first_responder/new": () => <NewReporter />,
