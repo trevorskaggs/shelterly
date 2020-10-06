@@ -192,15 +192,14 @@ export function RoomDetailsTable({rid}) {
     <>
       <h1 style={header_style}>{data.name}</h1>
       <br/>
-        <div style={card_style} className="card card-body bg-light mb-2 mx-auto">
-          <div className="row">
-            <div className="col-8">
+      <CardGroup>
+        <Card>
+          <ListGroup.Item>
               <p><b>Name:</b> {data.name}</p>
-              <p><b>Shelter:</b> {data.shelter}</p>
               <p><b>Description:</b> {data.description}</p>
-          </div>
-        </div>
-      </div>
+          </ListGroup.Item>
+        </Card>
+      </CardGroup>
       <hr/>
       <div style={btn_style}>
         <Link href={"/shelter/room/edit/" + data.id} style={link_style} className="btn btn-primary btn-lg btn-block mb-2">EDIT BUILDING</Link>
