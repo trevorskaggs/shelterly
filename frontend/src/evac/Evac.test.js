@@ -7,7 +7,6 @@ describe("Render evac", () => {
   it("Render Evac", () => {
     const { getByText } = render(<Evac />);
     expect(getByText(/NEW TEAM/)).toBeTruthy();
-    expect(getByText(/TEAM LIST/)).toBeTruthy();
     expect(getByText(/DEPLOY/)).toBeTruthy();
     expect(getByText(/DEBRIEF/)).toBeTruthy();
     expect(getByText(/BACK/)).toBeTruthy();
