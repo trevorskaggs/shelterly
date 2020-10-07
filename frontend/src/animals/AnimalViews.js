@@ -64,7 +64,7 @@ export function AnimalView({id}) {
       .then(response => {
         setData(response.data);
         var image_urls = [];
-        image_urls = image_urls.concat(response.data.side_image||[]).concat(response.data.front_image||[]).concat(response.data.extra_images);
+        image_urls = image_urls.concat(response.data.front_image||[]).concat(response.data.side_image||[]).concat(response.data.extra_images);
         setImages(image_urls);
       })
       .catch(error => {
@@ -95,7 +95,7 @@ export function AnimalView({id}) {
             {data.behavior_notes ? <p><b>Behavior Notes:</b> {data.behavior_notes}</p> : ""}
           </div>
           <div className="col-6">
-          <div className="slide-container float-right" style={{width:"323", height:"322px"}}>
+          <div className="slide-container float-right" style={{width:"490px", height:"322px"}}>
           <Carousel className="carousel-wrapper" showThumbs={false} showStatus={false}>
             {images.map(image => (
               <div key={image} className="image-container">
