@@ -1,7 +1,7 @@
 import React from "react";
 import { render, waitForElementToBeRemoved } from "@testing-library/react";
 import Evac from "./Evac";
-import { EvacTeamMemberForm, TeamMemberSelector } from "./EvacForms";
+import { EvacTeamMemberForm } from "./EvacForms";
 
 describe("Render evac", () => {
   it("Render Evac", () => {
@@ -11,11 +11,6 @@ describe("Render evac", () => {
     expect(getByText(/DEPLOY/)).toBeTruthy();
     expect(getByText(/DEBRIEF/)).toBeTruthy();
     expect(getByText(/BACK/)).toBeTruthy();
-  });
-
-  it("Render evac team selectiong form", async () => {
-    const { getByText, findByText } = render(<TeamMemberSelector />);
-    expect(getByText(/Deploy!/)).toBeTruthy();
   });
 
   it("Render new evac team member form", async () => {
