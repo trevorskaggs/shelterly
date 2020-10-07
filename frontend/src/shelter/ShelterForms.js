@@ -69,7 +69,7 @@ export const ShelterForm = ({sid}) => {
           if (sid) {
             axios.put('/shelter/api/shelter/' + sid + '/', values)
             .then(function() {
-              navigate('/shelter/list')
+              navigate('/shelter/' + sid)
             })
             .catch(error => {
               console.log(error.response);
@@ -201,7 +201,7 @@ export const EditShelterForm = ({sid}) => {
         onSubmit={(values, { setSubmitting }) => {
           axios.put('/shelter/api/shelter/' + sid + '/', values)
           .then(function() {
-            navigate('/shelter/list');
+            navigate('/shelter/' + sid);
           })
           .catch(e => {
             console.log(e);
@@ -389,7 +389,7 @@ export const EditBuildingForm = ({bid}) => {
             console.log(values)
             axios.put('/shelter/api/building/' + bid + '/', values)
             .then(function() {
-              navigate('/shelter/building/'+bid+'/');
+              navigate('/shelter/' + values.shelter);
             })
             .catch(e => {
               console.log(e);
@@ -556,7 +556,7 @@ export const EditRoomForm = ({rid}) => {
             console.log(values)
             axios.put('/shelter/api/room/' + rid + '/', values)
             .then(function() {
-              navigate('/shelter/room/' + rid +  '/');
+              navigate('/shelter/room/' + rid);
             })
             .catch(e => {
               console.log(e);

@@ -57,7 +57,7 @@ export function ShelterTable() {
             <Card key={shelter.id}>
               <Card.Body>
                   <ListGroup>
-                    {shelter.buildings == '' ? <span><ListGroup.Item><p>No Buildings Found</p></ListGroup.Item></span> : 
+                    {! shelter.buildings.length ? <span><ListGroup.Item><Link href={"/shelter/" + shelter.id + "/building/new"}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link>&nbsp;<b>Add Building</b></ListGroup.Item></span> : 
                       <span>{shelter.buildings.map(building => (
                         <ListGroup.Item key={building.id}>
                           <Link href={"/shelter/" + shelter.id + "/building/new"}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link>
@@ -65,7 +65,7 @@ export function ShelterTable() {
                           <Link href={"/shelter/building/" + building.id}> <FontAwesomeIcon icon={faClipboardList} inverse />
                           <Link href={"/shelter/building/edit/" + building.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
                           </Link>
-                          {building.rooms == '' ? <span><ListGroup.Item><p>No Rooms Found</p></ListGroup.Item></span> :
+                          {! building.rooms.length ? <span><ListGroup.Item><Link href={"/shelter/building/" + building.id + "/room/new"}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link>&nbsp;<b>Add Room</b></ListGroup.Item></span> :
                             <span>{building.rooms.map(room => (
                               <ListGroup.Item key={room.id}>
                                 <Link href={"/shelter/building/" + building.id + "/room/new"}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link>
