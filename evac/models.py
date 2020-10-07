@@ -1,9 +1,7 @@
-from django.contrib.auth import get_user_model
 from django.db import models
 
 from hotline.models import ServiceRequest
 
-User = get_user_model()
 
 class EvacTeamMember(models.Model):
 
@@ -12,8 +10,12 @@ class EvacTeamMember(models.Model):
     phone = models.CharField(max_length=50, blank=False)
     agency_id = models.CharField(max_length=50, blank=True)
 
+    def __str__(self):
+        return "%s, %s" % (self.last_name, self.first_name)
+
     class Meta:
         ordering = ['last_name', 'first_name']
+
 
 class EvacAssignment(models.Model):
 
