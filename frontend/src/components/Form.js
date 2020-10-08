@@ -5,7 +5,7 @@ import { Col, Image, Form } from 'react-bootstrap';
 import Select from 'react-select';
 import SimpleValue from 'react-select-simple-value';
 import Flatpickr from 'react-flatpickr';
-import ImageUploading from "react-images-uploading";
+import ImageUploading from 'react-images-uploading';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faTimes, faMinusSquare, faPlusSquare,
