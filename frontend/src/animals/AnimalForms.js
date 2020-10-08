@@ -1,17 +1,16 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { navigate, useQueryParams } from 'raviger';
 import { Field, Form, Formik } from "formik";
-import { Input, Label } from "reactstrap";
-import { Col } from 'react-bootstrap';
+import { Col, Image } from 'react-bootstrap';
 import { Button, ButtonGroup, Form as BootstrapForm } from "react-bootstrap";
 import { Card } from 'react-bootstrap';
 import * as Yup from 'yup';
 import { AuthContext } from "../accounts/AccountsReducer";
-import { DateTimePicker, DropDown, TextInput } from '.././components/Form.js';
+import { DateTimePicker, DropDown, ImageUploader, TextInput } from '.././components/Form.js';
 import { catAgeChoices, dogAgeChoices, horseAgeChoices, otherAgeChoices, catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, speciesChoices, sexChoices, dogSizeChoices, catSizeChoices, horseSizeChoices, otherSizeChoices, statusChoices, unknownChoices } from './constants';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowAltCircleLeft } from '@fortawesome/free-solid-svg-icons';
+import { faArrowAltCircleLeft, faMinusSquare } from '@fortawesome/free-solid-svg-icons';
 
 export const AnimalForm = ({id}) => {
 
@@ -50,6 +49,11 @@ export const AnimalForm = ({id}) => {
   // Dynamic placeholder value for options.
   const [placeholder, setPlaceholder] = useState("Select a species...");
 
+  const [front_image, setFrontImage] = useState([]);
+  const [side_image, setSideImage] = useState([]);
+  const [extra_images, setExtraImages] = useState([]);
+  const [reinitialize, setReinitialize] = useState(true);
+
   // Initial Animal data.
   const [data, setData] = useState({
     owner: owner_id,
@@ -69,8 +73,40 @@ export const AnimalForm = ({id}) => {
     injured: 'unknown',
     behavior_notes: '',
     last_seen: null,
-    image: null,
+    front_image: null,
+    side_image: null,
+    extra_images: [],
   });
+
+  const wrapperSetFrontImage = useCallback(val => {
+    if (val !== 0){
+      setFrontImage(val);
+    }
+  }, [setFrontImage]);
+
+  const wrapperSetSideImage = useCallback(val => {
+    if (val !== 0){
+      setSideImage(val);
+    }
+  }, [setSideImage]);
+
+  const wrapperSetExtraImages = useCallback(val => {
+    if (val !== 0){
+      setExtraImages(val);
+    }
+  }, [setExtraImages]);
+
+  // Resets single file image fields to be null.
+  const clearImage = (image_name, setFieldValue) => {
+    setData(prevState => ({ ...prevState, [image_name]:null }));
+    setFieldValue(image_name, null);
+  }
+
+  // Removes an image from a multi file image field array.
+  const clearImages = (image_url, setFieldValue) => {
+    setData(prevState => ({ ...prevState, ["extra_images"]:data.extra_images.filter(url => url !== image_url) }));
+    setFieldValue("extra_images", data.extra_images.filter(url => url !== image_url));
+  }
 
   // Hook for initializing data.
   useEffect(() => {
@@ -83,7 +119,9 @@ export const AnimalForm = ({id}) => {
         })
         .then(response => {
           setData(response.data);
-          setPlaceholder("Select...")
+          setPlaceholder("Select...");
+          // Turn off reinitialization after form load so that data can be modified for image tracking without causing a form reset.
+          setReinitialize(false);
         })
         .catch(error => {
           console.log(error.response);
@@ -96,18 +134,12 @@ export const AnimalForm = ({id}) => {
       source.cancel();
     };
   }, [id]);
-
-  const [image, setImage] = useState(null);
-  function handleImageChange(e) {
-    console.log(e);
-    setImage(e.target.files[0]);
-  };
   
   return (
     <span key={key}>
       <Formik
         initialValues={data}
-        enableReinitialize={true}
+        enableReinitialize={reinitialize}
         validationSchema={Yup.object({
           status: Yup.string(),
           name: Yup.string()
@@ -136,12 +168,25 @@ export const AnimalForm = ({id}) => {
             .max(200, 'Must be 200 characters or less'),
           last_seen: Yup.date()
             .nullable(),
-          // image: Yup.string()
-          //   .nullable(),
+          front_image: Yup.mixed(),
+          side_image: Yup.mixed(),
+          extra_images: Yup.array()
         })}
         onSubmit={(values, { setSubmitting }) => {
+          // Use FormData so that image files may also be included.
+          const formData = new FormData();
+          // Convert json to FormData.
+          for ( var key in values ) {
+            if (values[key] !== null) {
+              formData.append(key, values[key]);
+            }
+          }
+          // Add extra images.
+          for (let i = 0; i < extra_images.length; i++) {
+            formData.append('extra' + (i + 1), extra_images[i].file);
+          }
           if (id) {
-            axios.put('/animals/api/animal/' + id + '/', values)
+            axios.put('/animals/api/animal/' + id + '/', formData)
             .then(function() {
               if (state.prevLocation) {
                 navigate(state.prevLocation);
@@ -155,7 +200,7 @@ export const AnimalForm = ({id}) => {
             });
           }
           else {
-            axios.post('/animals/api/animal/', values)
+            axios.post('/animals/api/animal/', formData)
             .then(response => {
               if (addAnother) {
                 // If SR already exists, pass along the request ID.
@@ -304,14 +349,14 @@ export const AnimalForm = ({id}) => {
                       placeholder={placeholder}
                     />
                   </Col>
-                    <TextInput
-                      id="color_notes"
-                      name="color_notes"
-                      as="textarea"
-                      rows={5}
-                      label="Description"
-                      xs="7"
-                    />
+                  <TextInput
+                    id="color_notes"
+                    name="color_notes"
+                    as="textarea"
+                    rows={5}
+                    label="Description"
+                    xs="7"
+                  />
                 </BootstrapForm.Row>
                 <BootstrapForm.Row>
                   <Col xs="3">
@@ -335,14 +380,14 @@ export const AnimalForm = ({id}) => {
                       isClearable={false}
                     />
                   </Col>
-                    <TextInput
-                        label="Behavior Notes"
-                        id="behavior_notes"
-                        name="behavior_notes"
-                        as="textarea"
-                        rows={5}
-                        xs="7"
-                      />
+                  <TextInput
+                    label="Behavior Notes"
+                    id="behavior_notes"
+                    name="behavior_notes"
+                    as="textarea"
+                    rows={5}
+                    xs="7"
+                  />
                 </BootstrapForm.Row>
                 <BootstrapForm.Row>
                   <Col xs="3">
@@ -367,32 +412,87 @@ export const AnimalForm = ({id}) => {
                       isClearable={false}
                     />
                   </Col>
-                    <DateTimePicker
-                      label="Last Seen"
-                      name="last_seen"
-                      id="last_seen"
-                      xs="4"
-                      key={`my_unique_last_seen_select_key__${props.values.last_seen}`}
-                      onChange={(date, dateStr) => {
-                        props.setFieldValue("last_seen", dateStr)
-                      }}
-                      value={props.values.last_seen||null}
-                    />
+                  <DateTimePicker
+                    label="Last Seen"
+                    name="last_seen"
+                    id="last_seen"
+                    xs="4"
+                    key={`my_unique_last_seen_select_key__${props.values.last_seen}`}
+                    onChange={(date, dateStr) => {
+                      props.setFieldValue("last_seen", dateStr)
+                    }}
+                    value={props.values.last_seen||null}
+                  />
                 </BootstrapForm.Row>
-                <BootstrapForm.Row>
-                  <Col className="mt-3">
-                  <Label for="image">Image File</Label>
-                  <Input type="file" name="image" id="image" onChange={handleImageChange} />
-                  </Col>
+                <p className="mb-0">Image Files</p>
+                <BootstrapForm.Row className="align-items-end">
+                  {data.front_image ?
+                    <span className="mt-2 ml-1 mr-3">
+                      <Image width={131} src={data.front_image} alt="" thumbnail />
+                      <div className="mb-2">
+                        <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => clearImage("front_image", props.setFieldValue)} style={{backgroundColor:"red"}} />
+                        <span className="ml-1">Front-Shot</span>
+                      </div>
+                    </span> :
+                    <div className="mb-2 ml-1">
+                      <ImageUploader
+                        value={front_image}
+                        id="front_image"
+                        name="front_image"
+                        parentStateSetter={wrapperSetFrontImage}
+                        label="Front-Shot"
+                        maxNumber={1}
+                      />
+                    </div>
+                  }
+                  {data.side_image ?
+                    <span className="mt-2 mr-3">
+                      <Image width={131} src={data.side_image} alt="" thumbnail />
+                      <div className="mb-2">
+                        <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => clearImage("side_image", props.setFieldValue)} style={{backgroundColor:"red"}} />
+                        <span className="ml-1">Side-Shot</span>
+                      </div>
+                    </span> :
+                    <div className="mb-2">
+                      <ImageUploader
+                        value={side_image}
+                        id="side_image"
+                        name="side_image"
+                        parentStateSetter={wrapperSetSideImage}
+                        label="Side-Shot"
+                        maxNumber={1}
+                      />
+                    </div>
+                  }
+                  {data.extra_images.length > 0 ?
+                    <span className="mt-2 d-flex flex-wrap align-items-end">
+                      {data.extra_images.map(extra_image => (
+                        <span key={extra_image} className="mr-3"><Image width={131} src={extra_image} alt="" thumbnail />
+                          <div className="mb-2">
+                            <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => clearImages(extra_image, props.setFieldValue)} style={{backgroundColor:"red"}} />
+                            <span className="ml-1">Extra</span>
+                          </div>
+                        </span>
+                      ))}
+                    </span>: ""}
+                    <div className="mb-2">
+                      <ImageUploader
+                        value={extra_images}
+                        id="extra_images"
+                        name="extra_images"
+                        parentStateSetter={wrapperSetExtraImages}
+                        label="Extra"
+                        maxNumber={3 - data.extra_images.length}
+                        multiple
+                      />
+                    </div>
                 </BootstrapForm.Row>
-          </BootstrapForm>
+            </BootstrapForm>
           </Card.Body>
           <ButtonGroup>
             <Button type="button" className="btn btn-primary" onClick={() => {setAddAnother(false); props.submitForm()}}>Save</Button>
             {!id ? <Button type="button" className="btn btn-success" onClick={() => {setAddAnother(true); props.submitForm()}}>Add Another</Button> : ""}
-            <Button variant="secondary" type="button" onClick={() => {props.resetForm(data);if (!data.species) {setPlaceholder("Select a species...");}}}>
-              Reset
-            </Button>
+            <Button variant="secondary" type="button" onClick={() => {props.resetForm(data);if (!data.species) {setPlaceholder("Select a species...");}}}>Reset</Button>
           </ButtonGroup>
           </Card>
         )}
