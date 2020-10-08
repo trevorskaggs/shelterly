@@ -12,6 +12,15 @@ code {
     monospace;
 }
 
+/* Image gallery display CSS */
+.carousel img {
+  height: 320px;
+  width: 320px;
+  /* object-fit: contain; */
+  object-fit: cover;
+  overflow: hidden;
+}
+
 /* Grey out disabled fields CSS */
 input[disabled] {
   color: #999999;
