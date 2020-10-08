@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
 import { navigate, useQueryParams } from 'raviger';
 import { Field, Formik } from 'formik';
 import { Form as BootstrapForm, Button, ButtonGroup, Card, Col } from "react-bootstrap";
 import * as Yup from 'yup';
 import { AddressLookup, DropDown, TextInput } from '../components/Form';
+import { AuthContext } from "../accounts/AccountsReducer";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft } from '@fortawesome/free-solid-svg-icons';
 
@@ -18,6 +19,8 @@ const state_options = [{ value: 'AL', label: "AL" }, { value: 'AK', label: "AK" 
 
 // Form for creating new owner and reporter Person objects.
 export const PersonForm = ({ id }) => {
+
+  const { state, dispatch } = useContext(AuthContext);
 
   // Determine if this is an owner or reporter when creating a Person.
   var is_owner = window.location.pathname.includes("owner")
@@ -124,13 +127,8 @@ export const PersonForm = ({ id }) => {
           if (id) {
             axios.put('/people/api/person/' + id + '/', values)
             .then(function() {
-              // If we have an SR ID, redirect back to the SR.
-              if (servicerequest_id) {
-                navigate('/hotline/servicerequest/' + servicerequest_id);
-              }
-              // Else return to the Person details.
-              else if (is_owner) {
-                navigate('/hotline/owner/' + id);
+              if (state.prevLocation) {
+                navigate(state.prevLocation);
               }
               else {
                 navigate('/hotline/reporter/' + id);

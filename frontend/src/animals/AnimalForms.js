@@ -1,18 +1,21 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import axios from "axios";
-import { Link, navigate, useQueryParams } from 'raviger';
+import { navigate, useQueryParams } from 'raviger';
 import { Field, Form, Formik } from "formik";
 import { Input, Label } from "reactstrap";
 import { Col } from 'react-bootstrap';
 import { Button, ButtonGroup, Form as BootstrapForm } from "react-bootstrap";
 import { Card } from 'react-bootstrap';
 import * as Yup from 'yup';
+import { AuthContext } from "../accounts/AccountsReducer";
 import { DateTimePicker, DropDown, TextInput } from '.././components/Form.js';
 import { catAgeChoices, dogAgeChoices, horseAgeChoices, otherAgeChoices, catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, speciesChoices, sexChoices, dogSizeChoices, catSizeChoices, horseSizeChoices, otherSizeChoices, statusChoices, unknownChoices } from './constants';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft } from '@fortawesome/free-solid-svg-icons';
 
 export const AnimalForm = ({id}) => {
+
+  const { state, dispatch } = useContext(AuthContext);
 
   // Determine if this is an intake workflow.
   var is_intake = window.location.pathname.includes("intake")
@@ -140,13 +143,8 @@ export const AnimalForm = ({id}) => {
           if (id) {
             axios.put('/animals/api/animal/' + id + '/', values)
             .then(function() {
-              // If the animal has an SR, redirect to the SR.
-              if (values.request) {
-                navigate('/hotline/servicerequest/' + values.request);
-              }
-              // If the animal has an owner ID, redirect to the owner details.
-              else if (values.owner) {
-                navigate('/hotline/owner/' + values.owner);
+              if (state.prevLocation) {
+                navigate(state.prevLocation);
               }
               else {
                 navigate('/animals/animal/' + id);

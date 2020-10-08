@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
-import { Link, navigate, useQueryParams } from 'raviger';
+import { navigate, useQueryParams } from 'raviger';
 import { Field, Form, Formik } from 'formik';
 import {
   CustomInput,
@@ -12,6 +12,7 @@ import * as Yup from 'yup';
 import { Switch } from 'formik-material-ui';
 import 'flatpickr/dist/themes/light.css';
 import { AddressLookup, DateTimePicker, DropDown, TextInput } from '../components/Form';
+import { AuthContext } from "../accounts/AccountsReducer";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft } from '@fortawesome/free-solid-svg-icons';
 
@@ -25,6 +26,8 @@ const state_options = [{ value: 'AL', label: "AL" }, { value: 'AK', label: "AK" 
 
 // Form for creating new Service Request objects.
 export function ServiceRequestForm({ id }) {
+
+  const { state, dispatch } = useContext(AuthContext);
 
   // Identify any query param data.
   const [queryParams] = useQueryParams();
@@ -145,7 +148,12 @@ export function ServiceRequestForm({ id }) {
           if (id) {
             axios.put('/hotline/api/servicerequests/' + id + '/', values)
             .then(function() {
-              navigate('/hotline/servicerequest/' + id);
+              if (state.prevLocation) {
+                navigate(state.prevLocation);
+              }
+              else {
+                navigate('/hotline/servicerequest/' + id);
+              }
             })
             .catch(error => {
               console.log(error.response);
