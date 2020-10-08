@@ -6,6 +6,8 @@ const initialState = {
   isLoading: false,
   user: null,
   errors: {},
+  location:'',
+  prevLocation: '',
 };
 
 function auth_reducer(state, action) {
@@ -27,6 +29,9 @@ function auth_reducer(state, action) {
     case 'LOGOUT_FAILED':
       return {...state, errors: action.data, token: null, user: null,
         isAuthenticated: false, isLoading: false};
+
+    case 'PAGE_CHANGED':
+      return {...state, prevLocation: state.location, location:action.data};
 
     default:
       return state;

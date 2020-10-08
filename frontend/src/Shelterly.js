@@ -1,5 +1,5 @@
-import React, { Fragment, useContext, useEffect } from "react";
-import { navigate, useRoutes } from 'raviger';
+import React, { Fragment, useCallback, useContext, useEffect } from "react";
+import { navigate, useLocationChange, useRoutes } from 'raviger';
 import routes from "./router";
 import { ThemeProvider } from 'styled-components';
 import { theme } from './theme';
@@ -17,6 +17,9 @@ function Shelterly() {
   const [cookies, setCookie, removeCookie] = useCookies(['token']);
 
   if (cookies.token) setAuthToken(cookies.token);
+
+  const onChange = useCallback(path => dispatch({type: "PAGE_CHANGED", data: path}), [])
+  useLocationChange(onChange)
 
   useEffect(() => {
     // If we have a token but no user, attempt to authenticate them.
