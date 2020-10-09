@@ -43,7 +43,7 @@ export const LoginForm = () => {
               setAuthToken(response.data.token);
               setCookie("token", response.data.token, {path: '/'});
               dispatch({type: 'LOGIN_SUCCESSFUL', data: response.data });
-              loadUser({dispatch}, {removeCookie});
+              loadUser({dispatch, removeCookie});
               navigate(next);
             })
             .catch(e => {
@@ -78,7 +78,6 @@ export const LoginForm = () => {
                 </Col>
               </Row>
             </FormGroup>
-
             <Button type="submit" className="btn-success mr-1">Login</Button>
           </Container>
         </Form>

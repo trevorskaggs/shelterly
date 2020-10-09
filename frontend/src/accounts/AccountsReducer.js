@@ -1,4 +1,8 @@
-import React, { useReducer } from "react";
+import React, { useCallback, useEffect, useReducer } from "react";
+import { navigate, useLocationChange, usePath } from 'raviger';
+import { useCookies } from 'react-cookie';
+import { loadUser, setAuthToken } from "./AccountsUtils";
+import { publicRoutes } from "../router";
 
 const initialState = {
   token: null,
@@ -41,7 +45,30 @@ function auth_reducer(state, action) {
 const AuthContext = React.createContext(initialState);
 
 function AuthProvider(props) {
+  const [cookies, setCookie, removeCookie] = useCookies(['token']);
   const [state, dispatch] = useReducer(auth_reducer, initialState);
+
+  if (cookies.token) setAuthToken(cookies.token);
+
+  const path = usePath();
+  // Keep track of current and previous locations.
+  const onChange = useCallback(path => dispatch({type: "PAGE_CHANGED", data: path}), []);
+  useLocationChange(onChange);
+
+  useEffect(() => {
+    // If we have a token but no user, attempt to authenticate them.
+    if (!state.user && cookies.token) {
+      loadUser({dispatch, removeCookie})
+    }
+    // Redirect to login page if no authenticated user object is present.
+    else if (!state.user) {
+      // Do not redirect is it's a public route.
+      if (!Object.keys(publicRoutes).includes(path)) {
+        navigate('/login?next=' + path);
+      }
+    }
+  }, [path]);
+
   return (
     <AuthContext.Provider value={{ state, dispatch }}>
       {props.children}
