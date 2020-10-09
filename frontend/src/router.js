@@ -1,4 +1,5 @@
 import React from "react";
+import { Redirect } from "raviger";
 import Home from "./Home";
 import Animals, { AnimalDetail, NewAnimal, UpdateAnimal } from "./animals/Animals"
 import { AnimalSearch } from "./animals/AnimalTables"
@@ -10,6 +11,10 @@ import { Login } from "./accounts/Accounts"
 import { EvacTeamTable } from "./evac/EvacTables";
 import { EvacTeamForm } from "./evac/EvacForms";
 import { Dispatch } from "./evac/EvacViews";
+
+export const publicRoutes = {
+  "/login": () => <Login />,
+}
 
 const routes = {
   "/": () => <Home />,
@@ -39,7 +44,7 @@ const routes = {
   "/intake/owner/new": () => <NewOwner />,
   "/intake/reporter/new": () => <NewReporter />,
   "/intake/summary": () => <IntakeSummary />,
-  "/login": () => <Login />,
+  "/login": () => <Redirect to='/' />
 };
 
 export default routes;

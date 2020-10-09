@@ -1,6 +1,6 @@
 import React, { Fragment, useCallback, useContext, useEffect } from "react";
-import { navigate, useLocationChange, useRoutes } from 'raviger';
-import routes from "./router";
+import { navigate, useLocationChange, usePath, useRoutes } from 'raviger';
+import routes, { publicRoutes } from "./router";
 import { ThemeProvider } from 'styled-components';
 import { theme } from './theme';
 import PageNotFound from "./components/PageNotFound";
@@ -18,8 +18,9 @@ function Shelterly() {
 
   if (cookies.token) setAuthToken(cookies.token);
 
-  const onChange = useCallback(path => dispatch({type: "PAGE_CHANGED", data: path}), [])
-  useLocationChange(onChange)
+  const path = usePath();
+  const onChange = useCallback(path => dispatch({type: "PAGE_CHANGED", data: path}), []);
+  useLocationChange(onChange);
 
   useEffect(() => {
     // If we have a token but no user, attempt to authenticate them.
@@ -31,18 +32,18 @@ function Shelterly() {
   // Redirect to login page if no authenticated user object is present.
   if (!state.user && !cookies.token) {
     if (!window.location.pathname.includes("login")) {
-      navigate('/login');
+      navigate('/login?next=' + path);
     }
   }
 
-  const routeResult = useRoutes(routes);
+  const routeResult = useRoutes(state.user ? routes : publicRoutes)
 
   return (
     <ThemeProvider theme={theme}>
     <Container fluid>
     <Row>
     <Col xs="auto" className="pl-0">
-    <Sidebar dispatch={dispatch} removeCookie={removeCookie} />
+    <Sidebar state={state} dispatch={dispatch} removeCookie={removeCookie} />
     </Col>
     <Col> 
       <Fragment>

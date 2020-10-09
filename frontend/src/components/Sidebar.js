@@ -57,7 +57,7 @@ export const StyledMenu = styled(Nav)`
   }
 `;
 
-const Menu = ({ dispatch, removeCookie, ...props }) => {
+const Menu = ({ state, dispatch, removeCookie, ...props }) => {
 
     const viewHeight = window.outerHeight;
     
@@ -69,19 +69,19 @@ const Menu = ({ dispatch, removeCookie, ...props }) => {
       <Link href="/evac"><FontAwesomeIcon icon={faBullhorn} fixedWidth inverse/>  EVAC</Link>
       <Link href="/intake"><FontAwesomeIcon icon={faDoorOpen} fixedWidth inverse/>  INTAKE</Link>
       <Link href="/shelter"><FontAwesomeIcon icon={faHome} fixedWidth inverse/> SHELTER</Link>
-      <Link onClick={() => logoutUser({dispatch}, {removeCookie})} href="#"><FontAwesomeIcon icon={faSignOutAlt} fixedWidth inverse/> SIGN OUT</Link>
+      {state.user ? <Link onClick={() => logoutUser({dispatch}, {removeCookie})} href="#"><FontAwesomeIcon icon={faSignOutAlt} fixedWidth inverse/> SIGN OUT</Link> : ""}
     </StyledMenu>
     )
   }
 
-function Sidebar({ dispatch, removeCookie, ...props }) {
+function Sidebar({ state, dispatch, removeCookie }) {
     
     const node = useRef();
     const menuId = "main-menu";
 
     return (
         <div ref={node}>
-            <Menu id={menuId} dispatch={dispatch} removeCookie={removeCookie}/>
+            <Menu id={menuId} state={state} dispatch={dispatch} removeCookie={removeCookie} />
         </div>
     )
 }
