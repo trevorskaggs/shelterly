@@ -14,11 +14,12 @@ import { TextInput} from '.././components/Form';
 
 export const EvacTeamMemberForm = () => {
 
+  // Track whether or not to add another evac team member after saving.
+  const [addAnother, setAddAnother] = useState(false);
   // Regex validators.
   const phoneRegex = /^((\+\d{1,3}(-| )?\(?\d\)?(-| )?\d{1,3})|(\(?\d{2,3}\)?))(-| )?(\d{3,4})(-| )?(\d{4})(( x| ext)\d{1,5}){0,1}$/
 
     return (
-      <>
         <Formik
           initialValues={{
             first_name: '',
@@ -42,7 +43,12 @@ export const EvacTeamMemberForm = () => {
             setTimeout(() => {
               axios.post('/evac/api/evacteammember/', values)
               .then(function() {
-                resetForm()
+                if (addAnother){
+                  resetForm();
+                }
+                else{
+                  navigate('/evac/');
+                }
               })
               .catch(error => {
                 console.log(error.response);
@@ -51,6 +57,7 @@ export const EvacTeamMemberForm = () => {
             }, 500);
           }}
         >
+        {form => (
           <Form>
             <Container>
               <FormGroup>
@@ -94,12 +101,12 @@ export const EvacTeamMemberForm = () => {
                   </Col>
                 </Row>
               </FormGroup>
-
-              <Button type="submit" className="btn-success mr-1">Save</Button>
+              <Button type="button" className="btn btn-success mr-1" onClick={() => {setAddAnother(false); form.submitForm()}}>Save</Button>
+              <Button type="button" className="btn btn-success mr-1" onClick={() => {setAddAnother(true); form.submitForm()}}>Add Another</Button>
               <Link className="btn btn-secondary" href="/evac">Cancel</Link>
             </Container>
           </Form>
+          )}
         </Formik>
-      </>
     );
   };
