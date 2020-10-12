@@ -55,14 +55,13 @@ export function Dispatch() {
   }
 
   // Handle dynamic SR state and map display.
-  const handleMapState = (id, form) => {
+  const handleMapState = (id) => {
     if (mapState[id].checked === false) {
       setMapState(prevState => ({ ...prevState, [id]: {color:"green", checked:true, hidden:false, matches:mapState[id].matches} }));
     }
     else {
       setMapState(prevState => ({ ...prevState, [id]: {color:"red", checked:false, hidden:false, matches:mapState[id].matches} }));
     }
-    form.setFieldValue('service_requests', Object.keys(mapState).filter(key => mapState[key].checked === true))
   }
 
   // Takes in animal size, species, and count and returns a pretty string combination.
@@ -165,6 +164,7 @@ export function Dispatch() {
         service_requests: [],
       }}
       onSubmit={(values, { setSubmitting }) => {
+        values.service_requests = Object.keys(mapState).filter(key => mapState[key].checked === true)
         setTimeout(() => {
           axios.post('/evac/api/evacassignment/', values)
           .then(function() {
@@ -205,7 +205,7 @@ export function Dispatch() {
                       color={mapState[service_request.id] ? mapState[service_request.id].color : ""}
                       fill={true}
                       fillOpacity="1"
-                      onClick={() => handleMapState(service_request.id, form)}
+                      onClick={() => handleMapState(service_request.id)}
                       radius={5}
                     >
                       <MapTooltip autoPan={false}>
@@ -231,7 +231,7 @@ export function Dispatch() {
               <div key={service_request.id} className="mt-2" hidden={mapState[service_request.id] ? mapState[service_request.id].hidden : false}>
                 <div className="card-header">
                   <span style={{display:"inline"}} className="custom-control-lg custom-control custom-checkbox">
-                    <input className="custom-control-input" type="checkbox" name={service_request.id} id={service_request.id} onChange={() => handleMapState(service_request.id, form)} checked={mapState[service_request.id] ? mapState[service_request.id].checked : false} />
+                    <input className="custom-control-input" type="checkbox" name={service_request.id} id={service_request.id} onChange={() => handleMapState(service_request.id)} checked={mapState[service_request.id] ? mapState[service_request.id].checked : false} />
                     <label className="custom-control-label" htmlFor={service_request.id}></label>
                   </span>
                   {mapState[service_request.id] ?
