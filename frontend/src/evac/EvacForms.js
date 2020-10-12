@@ -47,7 +47,7 @@ export const EvacTeamMemberForm = () => {
                   resetForm();
                 }
                 else{
-                  navigate('/evac/');
+                  navigate('/evac');
                 }
               })
               .catch(error => {
