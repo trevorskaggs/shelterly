@@ -194,7 +194,6 @@ export const PersonForm = ({ id }) => {
           <BootstrapForm noValidate>
             <Field type="hidden" value={data.latitude || ""} name="latitude" id="latitude"></Field>
             <Field type="hidden" value={data.longitude || ""} name="longitude" id="longitude"></Field>
-
             <BootstrapForm.Row>
               <TextInput
                 xs="5"

@@ -1,13 +1,14 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useFormikContext, useField } from 'formik';
 import { Label, Input } from 'reactstrap';
-import { Col, Form } from 'react-bootstrap';
+import { Col, Image, Form } from 'react-bootstrap';
 import Select from 'react-select';
 import SimpleValue from 'react-select-simple-value';
 import Flatpickr from 'react-flatpickr';
+import ImageUploading from 'react-images-uploading';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faTimes,
+  faTimes, faMinusSquare, faPlusSquare,
 } from '@fortawesome/free-solid-svg-icons';
 import Autocomplete from 'react-google-autocomplete';
 
@@ -130,6 +131,76 @@ const MultiSelect = ({ label, ...props }) => {
   );
 };
 
+const ImageUploader = ({ parentStateSetter, ...props }) => {
+
+  const { setFieldValue, setFieldTouched } = useFormikContext();
+  const [childState, setChildState] = useState(0);
+  const [field, meta] = useField(props);
+
+  useEffect(() => {
+    // Call parent function to update parent state.
+    parentStateSetter(childState);
+  }, [parentStateSetter, childState]);
+
+  return (
+    <>
+      <ImageUploading
+        {...props}
+        onChange={(imageList, addUpdateIndex) => {
+          setChildState(imageList);
+          if (!props.multiple) {
+            // Set file to field if it exists.
+            if (imageList[0]) {
+              setFieldValue(props.id, imageList[0].file);
+            }
+          }
+        }}
+        dataURLKey="data_url"
+      >
+        {({
+          imageList,
+          onImageUpload,
+          onImageRemove,
+          isDragging,
+          dragProps,
+          errors
+        }) => (
+          <span className="d-flex flex-wrap align-items-end">
+            {imageList.map((image, index) => (
+              <span key={index} className="mt-2 mr-3">
+                <Image width={131} src={image.data_url} alt="" thumbnail />
+                <div className="image-item__btn-wrapper">
+                  <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => onImageRemove(index)} style={{backgroundColor:"red"}} />
+                  <span className="ml-1">{props.label}</span>
+                </div>
+              </span>
+            ))}
+            {imageList.length < props.maxNumber ?
+              <span className="d-flex flex-wrap m-0">
+                <span className="text-center ml-0 mr-3 p-0 align-items-end" style={{marginBottom:"-20px"}}>
+                <FontAwesomeIcon icon={faPlusSquare} size="10x" inverse onClick={onImageUpload}{...dragProps} />
+                  <div style={{marginTop:-8, marginBottom:20}}>{props.label}</div>
+                  {(meta.touched && meta.error) || errors ?
+                    <div style={{ color:"red", fontSize:"80%", marginTop:"-20px", marginBottom:"-20px" }}>
+                      {meta.error ?
+                        <span className="text-left">{meta.error}</span> :
+                        <span>
+                          {errors.maxNumber && <span>Maximum Exceeded</span>}
+                          {errors.acceptType && <span>Invalid file type</span>}
+                        </span>
+                      }
+                    </div> : <div style={{ marginBottom:"20px" }}></div>
+                  }
+                </span>
+              </span> : ""
+            }
+          </span>
+        )}
+      </ImageUploading>
+    </>
+  );
+}
+
 const AddressLookup = ({ ...props }) => {
 
   const childRef = useRef(null);
@@ -176,4 +247,4 @@ const AddressLookup = ({ ...props }) => {
   );
 }
 
-export { AddressLookup, TextInput, Checkbox, DropDown, MultiSelect, DateTimePicker };
+export { AddressLookup, TextInput, Checkbox, DropDown, ImageUploader, MultiSelect, DateTimePicker };
