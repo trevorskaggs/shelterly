@@ -10,19 +10,6 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 
-const btn_style = {
-  width: "50%",
-  margin: "0 auto",
-};
-
-const link_style = {
-  textDecoration: "none",
-};
-
-const card_style = {
-  width: "90%",
-}
-
 const header_style = {
   textAlign: "center",
 }
@@ -159,19 +146,19 @@ export function AnimalView({id}) {
               </ListGroup>
             </Card.Body>
           </Card>
-          </div>
-          <Col xs={6} className="d-flex mb-2 pr-0">
-            <div className="slide-container flex-grow-1 border rounded pl-0 pr-0" style={{width:"490px", height:"322px"}}>
-              <Carousel className="carousel-wrapper" showThumbs={false} showStatus={false}>
-                {images.map(image => (
-                  <div key={image} className="image-container">
-                    <img src={image} />
-                  </div>
-                ))}
-              </Carousel>
-            </div>
-          </Col>
         </div>
+        <Col xs={6} className="d-flex mb-2 pr-0">
+          <div className="slide-container flex-grow-1 border rounded pl-0 pr-0" style={{width:"490px", height:"322px"}}>
+            <Carousel className="carousel-wrapper" showThumbs={false} showStatus={false}>
+              {images.map(image => (
+                <div key={image} className="image-container">
+                  <img src={image} />
+                </div>
+              ))}
+            </Carousel>
+          </div>
+        </Col>
+      </div>
       <div className="row mb-2">
         <div className="col-6 d-flex">
           <Card className="mb-2 border rounded" style={{width:"100%"}}>

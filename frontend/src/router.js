@@ -7,7 +7,7 @@ import Hotline, { NewServiceRequest, ServiceRequestDetail, ServiceRequestList, U
 import Intake, { IntakeSummary } from "./intake/Intake";
 import { NewOwner, NewReporter, OwnerDetail, ReporterDetail,  UpdateOwner, UpdateReporter } from "./people/People";
 import { Login } from "./accounts/Accounts"
-import { Dispatch } from "./evac/EvacViews";
+import { Dispatch, EvacSummary } from "./evac/EvacViews";
 
 const routes = {
   "/": () => <Home />,
@@ -17,6 +17,7 @@ const routes = {
   "/animals/animal/:id": ({id}) => <AnimalDetail id={id} />,
   "/evac": () => <Evac />,
   "/evac/evacteammember/new": () => <NewEvacTeamMember />,
+  "/evac/summary/:id": ({id}) => <EvacSummary id={id} />,
   "/evac/dispatch": () => <Dispatch />,
   "/hotline": () => <Hotline />,
   "/hotline/animal/new": () => <NewAnimal />,

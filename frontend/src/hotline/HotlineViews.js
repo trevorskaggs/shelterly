@@ -7,10 +7,13 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBandAid, faCar, faClipboardList, faComment, faEdit, faHouseDamage, faKey, faPlusSquare, faShieldAlt, faTrailer
 } from '@fortawesome/free-solid-svg-icons';
+import ReactImageFallback from "react-image-fallback";
+import noImageFound from "../static/images/image-not-found.png";
 
 export function ServiceRequestView({id}) {
 
   const [data, setData] = useState({
+    animals: [],
     owner: '',
     reporter: '',
     directions: '',
@@ -150,6 +153,34 @@ export function ServiceRequestView({id}) {
           </Card>
         </div>
       </div>
+      <div className="row mb-2">
+        <div className="col-12 d-flex">
+          <Card className="mb-2 border rounded" style={{width:"100%"}}>
+            <Card.Body>
+              <Card.Title>
+                <h4 className="mb-0">Animals<Link href={"/hotline/animal/new?servicerequest_id=" + id}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link></h4>
+              </Card.Title>
+              <hr/>
+              <span className="d-flex flex-wrap align-items-end">
+              {data.animals.map(animal => (
+                <Card className="mr-3" style={{border:"none"}}>
+                  <ReactImageFallback style={{width:"131px"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} />
+                  <Card.Text className="text-center">
+                    <div>
+                      {animal.name||"Unknown"}
+                      <Link href={"/animals/animal/" + animal.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
+                      <Link href={"/animals/animal/edit/" + animal.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
+                    </div>
+                    <div>{animal.status}</div>
+                    <div style={{textTransform:"capitalize"}}>{animal.size} {animal.species}</div>
+                  </Card.Text>
+                </Card>
+              ))}
+              </span>
+            </Card.Body>
+          </Card>
+        </div>
+      </div>
       {data.outcome || data.owner_notification_notes ?
       <div className="row mb-2">
         <div className="col-12 d-flex">
@@ -185,18 +216,6 @@ export function ServiceRequestView({id}) {
         </div>
       </div>
       : ""}
-      {data.animals && data.animals.length ?
-      <div className="card card-body bg-light mx-auto">
-        <p><b>Animals:</b> <Link href={"/hotline/animal/new?servicerequest_id=" + id}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link></p>
-         <span>
-          {data.animals.map(animal => (
-            <li key={animal.id}>{animal.name} (<span style={{textTransform:"capitalize"}}>{animal.species}</span>) - {animal.status}
-              <Link href={"/animals/animal/" + animal.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
-              <Link href={"/animals/animal/edit/" + animal.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
-            </li>
-          ))}
-        </span>
-      </div> : ""}
     </>
   );
 };
