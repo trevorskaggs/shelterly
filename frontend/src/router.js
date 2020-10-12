@@ -2,13 +2,11 @@ import React from "react";
 import Home from "./Home";
 import Animals, { AnimalDetail, NewAnimal, UpdateAnimal } from "./animals/Animals"
 import { AnimalSearch } from "./animals/AnimalTables"
-import Evac from "./evac/Evac";
+import Evac, { NewEvacTeamMember, TeamMemberSelectorList } from "./evac/Evac";
 import Hotline, { NewServiceRequest, ServiceRequestDetail, ServiceRequestList, UpdateServiceRequest } from "./hotline/Hotline";
 import Intake, { IntakeSummary } from "./intake/Intake";
 import { NewOwner, NewReporter, OwnerDetail, ReporterDetail,  UpdateOwner, UpdateReporter } from "./people/People";
 import { Login } from "./accounts/Accounts"
-import { EvacTeamTable } from "./evac/EvacTables";
-import { EvacTeamForm } from "./evac/EvacForms";
 import { Dispatch } from "./evac/EvacViews";
 
 const routes = {
@@ -18,9 +16,8 @@ const routes = {
   "/animals/search": () => <AnimalSearch />,
   "/animals/animal/:id": ({id}) => <AnimalDetail id={id} />,
   "/evac": () => <Evac />,
+  "/evac/evacteammember/new": () => <NewEvacTeamMember />,
   "/evac/dispatch": () => <Dispatch />,
-  "/evac/evacteam/new": () => <EvacTeamForm />,
-  "/evac/evacteam/list": () => <EvacTeamTable />,
   "/hotline": () => <Hotline />,
   "/hotline/animal/new": () => <NewAnimal />,
   "/hotline/first_responder/new": () => <NewReporter />,

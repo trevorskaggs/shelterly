@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
-import { Link } from 'raviger';
-import { Button, Col, Container, FormCheck, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
+import { Link, navigate } from 'raviger';
+import { Form, Formik } from 'formik';
+import { Button, Col, Container, FormGroup, FormCheck, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBandAid, faBullseye, faCar, faClipboardList, faShieldAlt, faTrailer
@@ -12,7 +13,8 @@ import shield from "../static/images/shield-alt-solid.png";
 import bandaid from "../static/images/band-aid-solid.png";
 import car from "../static/images/car-solid.png";
 import trailer from "../static/images/trailer-solid.png";
-
+import { Typeahead } from 'react-bootstrap-typeahead';
+import 'react-bootstrap-typeahead/css/Typeahead.css';
 import 'leaflet/dist/leaflet.css';
 
 const Legend = (props) => {
@@ -32,6 +34,35 @@ export function Dispatch() {
   const [totalSelectedState, setTotalSelectedState] = useState({});
   const [selectedCount, setSelectedCount] = useState({count:0, disabled:true});
   const [statusOptions, setStatusOptions] = useState({aco_required:false});
+
+  // Team Member Selector Code
+  const [teamData, setTeamData] = useState({options: [], isFetching: false});
+
+  useEffect(() => {
+    let source = axios.CancelToken.source();
+    const fetchTeamMembers = async () => {
+      setTeamData({options: [], isFetching: true});
+      await axios.get('/evac/api/evacteammember/', {
+        cancelToken: source.token,
+      })
+      .then(response => {
+        var options = []
+        response.data.forEach(function(teammember){
+          options.push({id: teammember.id, label: teammember.display_name})
+        });
+        setTeamData({options: options, isFetching: false});
+      })
+      .catch(error => {
+        console.log(error.response);
+        setTeamData({options: [], isFetching: false});
+      });
+    };
+    fetchTeamMembers();
+    return () => {
+      source.cancel();
+    };
+  }, [])
+  // End Team Selector Code
 
   // Handle aco_required toggle.
   const handleACO = async event => {
@@ -182,7 +213,39 @@ export function Dispatch() {
   }, [statusOptions]);
 
   return (
-    <Container>
+      <Formik
+        initialValues={{
+          team_members: [],
+          service_requests: [],
+        }}
+        onSubmit={(values, { setSubmitting }) => {
+          values.service_requests = Object.keys(mapState).filter(key => mapState[key].checked === true)
+          setTimeout(() => {
+            axios.post('/evac/api/evacassignment/', values)
+            .then(function() {
+              navigate('/evac');
+            })
+            .catch(error => {
+              console.log(error.response);
+            });
+            setSubmitting(false);
+          }, 500);
+        }}
+      >
+      {form => (
+      <Form>
+        <Container>
+          <Row>
+            <FormGroup style={{ marginTop: '20px' }}>
+              <Typeahead
+                id="team-members"
+                multiple
+                onChange={(values) => {form.setFieldValue('team_members', values.map(item => item.id))}}
+                options={teamData.options}
+                placeholder="Choose team members..."
+              />
+            </FormGroup>
+          </Row>
       <Row className="d-flex flex-wrap">
         <Col xs={12} className="mt-4 border rounded pl-0 pr-0"  style={{marginLeft:"-3px"}}>
           <Map className="d-block" bounds={data.bounds} onMoveEnd={onMove}>
@@ -217,6 +280,66 @@ export function Dispatch() {
                       {service_request.turn_around ? <img width={16} height={16} src={trailer} alt="" /> : ""}
                     </div>
                   </span>
+                  {mapState[service_request.id] ?
+                  <span>{Object.keys(mapState[service_request.id].matches).map((key,i) => (
+                    <span key={key} style={{textTransform:"capitalize"}}>
+                      {i > 0 && ", "}{prettyText(key.split(',')[1], key.split(',')[0], mapState[service_request.id].matches[key])}
+                    </span>
+                  ))}</span>:""}
+                  {service_request.aco_required ?
+                  <OverlayTrigger
+                    key={"aco"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-aco`}>
+                        ACO required
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon icon={faShieldAlt} inverse className="ml-1"/>
+                  </OverlayTrigger>
+                   : ""}
+                  {service_request.injured ?
+                  <OverlayTrigger
+                    key={"injured"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-injured`}>
+                        Injured animal
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon icon={faBandAid} inverse className="ml-1"/>
+                  </OverlayTrigger>
+                   : ""}
+                  {service_request.accessible ?
+                  <OverlayTrigger
+                    key={"accessible"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-accessible`}>
+                        Easily accessible
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon icon={faCar} inverse className="ml-1"/>
+                  </OverlayTrigger>
+                   : ""}
+                  {service_request.turn_around ?
+                  <OverlayTrigger
+                    key={"turnaround"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-turnaround`}>
+                        Room to turn around
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon icon={faTrailer} inverse className="ml-1"/>
+                  </OverlayTrigger>
+                   : ""}
+                  <span className="ml-2">| &nbsp;{service_request.full_address}</span>
+                  <Link href={"/hotline/servicerequest/" + service_request.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
                 </MapTooltip>
               </CircleMarker>
             ))}
@@ -308,7 +431,10 @@ export function Dispatch() {
             </div>
           ))}
         </Col>
-      </Row>
-    </Container>
+          </Row>
+        </Container>
+      </Form>
+    )}
+  </Formik>
   )
 }
