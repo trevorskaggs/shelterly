@@ -19,6 +19,10 @@ hr { display: block; height: 1px;
 /* Leaflet map CSS */
 .leaflet-container {  width: auto;  height: 55vh;}
 
+.leaflet-top, .leaflet-bottom {
+  z-index: 400 !important;
+}
+
 /* Image gallery display CSS */
 .carousel img {
   height: 320px;
@@ -55,6 +59,6 @@ input[disabled] {
 }
 
 /* Typeahead CSS */
-.rbt-token{
+.rbt-token {
   color: #222 !important;
 }

@@ -213,41 +213,40 @@ export function Dispatch() {
   }, [statusOptions]);
 
   return (
-      <Formik
-        initialValues={{
-          team_members: [],
-          service_requests: [],
-        }}
-        onSubmit={(values, { setSubmitting }) => {
-          values.service_requests = Object.keys(mapState).filter(key => mapState[key].checked === true)
-          setTimeout(() => {
-            axios.post('/evac/api/evacassignment/', values)
-            .then(function() {
-              navigate('/evac');
-            })
-            .catch(error => {
-              console.log(error.response);
-            });
-            setSubmitting(false);
-          }, 500);
-        }}
-      >
-      {form => (
+    <Formik
+      initialValues={{
+        team_members: [],
+        service_requests: [],
+      }}
+      onSubmit={(values, { setSubmitting }) => {
+        values.service_requests = Object.keys(mapState).filter(key => mapState[key].checked === true)
+        setTimeout(() => {
+          axios.post('/evac/api/evacassignment/', values)
+          .then(function() {
+            navigate('/evac');
+          })
+          .catch(error => {
+            console.log(error.response);
+          });
+          setSubmitting(false);
+        }, 500);
+      }}
+    >
+    {props => (
       <Form>
-        <Container>
-          <Row>
-            <FormGroup style={{ marginTop: '20px' }}>
-              <Typeahead
-                id="team-members"
-                multiple
-                onChange={(values) => {form.setFieldValue('team_members', values.map(item => item.id))}}
-                options={teamData.options}
-                placeholder="Choose team members..."
-              />
-            </FormGroup>
-          </Row>
+        <Row>
+          <Col xs={6} className="mt-2 mb-2" style={{marginLeft:"-18px"}}>
+            <Typeahead
+              id="team-members"
+              multiple
+              onChange={(values) => {props.setFieldValue('team_members', values.map(item => item.id))}}
+              options={teamData.options}
+              placeholder="Choose team members..."
+            />
+          </Col>
+        </Row>
       <Row className="d-flex flex-wrap">
-        <Col xs={12} className="mt-4 border rounded pl-0 pr-0"  style={{marginLeft:"-3px"}}>
+        <Col xs={12} className="border rounded pl-0 pr-0"  style={{marginLeft:"-3px"}}>
           <Map className="d-block" bounds={data.bounds} onMoveEnd={onMove}>
             <Legend position="bottomleft" metric={false} />
             <TileLayer
@@ -356,7 +355,7 @@ export function Dispatch() {
           {Object.keys(totalSelectedState).map(key => (
             <div key={key} style={{textTransform:"capitalize"}}>{prettyText(key.split(',')[1], key.split(',')[0], totalSelectedState[key])}</div>
           ))}
-          <Button type="submit" className="mt-2 mb-2 btn-block" disabled={selectedCount.disabled}>DEPLOY</Button>
+          <Button type="submit" className="mt-2 mb-2 btn-block" disabled={selectedCount.disabled || props.values.team_members.length === 0}>DEPLOY</Button>
         </Col>
         <Col xs={10} className="mt-4 border rounded" style={{marginLeft:"1px"}}>
           {data.service_requests.map(service_request => (
@@ -431,8 +430,7 @@ export function Dispatch() {
             </div>
           ))}
         </Col>
-          </Row>
-        </Container>
+        </Row>
       </Form>
     )}
   </Formik>
