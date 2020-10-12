@@ -21,7 +21,7 @@ RUN git clone https://github.com/trevorskaggs/shelterly.git shelterly \
     && echo 'GIT_PROMPT_FETCH_REMOTE_STATUS=0' >> ~/.bashrc \
     && echo 'alias djangoserver="python ~/shelterly/manage.py runserver 0.0.0.0:8000"' >> ~/.bashrc \
     && echo 'alias npmserver="cd ~/shelterly/frontend && npm start"' >> ~/.bashrc \
-    && echo 'alias deploy="cd ~/shelterly/frontend && npm run dev && cd .. && python ~/shelterly/manage.py collectstatic --noinput"' >> ~/.bashrc \
+    && echo 'alias deploy="cd ~/shelterly/frontend && npm run dev && cd .. && python ~/shelterly/manage.py collectstatic --noinput && cp ~/shelterly/static/* ~/frontend/src/static/"' >> ~/.bashrc \
     && echo 'GIT_PROMPT_FETCH_REMOTE_STATUS=0' >> ~/.bashrc \
     && echo 'source ~/.bash-git-prompt/gitprompt.sh' >> ~/.bashrc \
     && echo 'source ~/shelterly/venv/bin/activate' >> ~/.bashrc \
@@ -32,7 +32,5 @@ RUN git clone https://github.com/trevorskaggs/shelterly.git shelterly \
     && npm install \
     && cd .. \ 
     && pip install --upgrade pip \
-    && pip install --no-cache-dir -r ~/shelterly/requirements.txt \
-    && python ~/shelterly/manage.py collectstatic --noinput \
-    && cp ~/shelterly/static/* ~/frontend/src/static/ -r
+    && pip install --no-cache-dir -r ~/shelterly/requirements.txt
 CMD tail -f /dev/null
