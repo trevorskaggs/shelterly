@@ -32,7 +32,7 @@ RUN git clone https://github.com/trevorskaggs/shelterly.git shelterly \
     && npm install \
     && cd .. \ 
     && pip install --upgrade pip \
-    && pip install --no-cache-dir -r ~/shelterly/requirements.txt
-    && python ~/shelterly/manage.py collectstatic --noinput
+    && pip install --no-cache-dir -r ~/shelterly/requirements.txt \
+    && python ~/shelterly/manage.py collectstatic --noinput \
     && cp ~/shelterly/static/* ~/frontend/src/static/ -r
 CMD tail -f /dev/null
