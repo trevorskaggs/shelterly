@@ -12,6 +12,15 @@ code {
     monospace;
 }
 
+/* Image gallery display CSS */
+.carousel img {
+  height: 320px;
+  width: 320px;
+  /* object-fit: contain; */
+  object-fit: cover;
+  overflow: hidden;
+}
+
 /* Grey out disabled fields CSS */
 input[disabled] {
   color: #999999;
@@ -34,4 +43,8 @@ input[disabled] {
 .custom-control-lg .custom-control-label {
     margin-left: 0.5rem !important;
     font-size: 1rem !important;
+}
+
+.rbt-token{
+  color: #222 !important;
 }

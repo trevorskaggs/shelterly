@@ -35,12 +35,8 @@ class ServiceRequest(Location):
         output.append('Owner: %s' % self.owner or 'Unknown')
         if self.reporter:
             output.append('Reporter: %s' % self.reporter)
-        output.append('Animal Count: %s' % self.animal_count)
+        output.append('Animal Count: %s' % self.animal_set.all().count())
         return ', '.join(output)
-
-    # @property
-    # def animal_count(self):
-    #     return self.animal_set.all().count()
     
     @property
     def location_type(self):

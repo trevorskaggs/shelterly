@@ -133,7 +133,7 @@ STATICFILES_DIRS = [
 # Dev settings. Remove when deploying to Zappa
 STATIC_ROOT=os.path.join(BASE_DIR, 'static')
 SECURE_CONTENT_TYPE_NOSNIFF = False
-DEBUG = True
+DEBUG = False
 
 #TODO Change to envvars.
 # Zappa settings
