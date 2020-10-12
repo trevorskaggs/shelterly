@@ -1,11 +1,19 @@
+from django.http import JsonResponse
 from datetime import datetime
-from rest_framework import permissions, viewsets
+from rest_framework import filters, permissions, viewsets
 
-from evac.models import EvacTeam
-from evac.serializers import EvacTeamSerializer
+from evac.models import EvacAssignment, EvacTeamMember
+from evac.serializers import EvacAssignmentSerializer, EvacTeamMemberSerializer
 
-# Provides view for EvacTeam API calls.
-class EvacTeamViewSet(viewsets.ModelViewSet):
-    queryset = EvacTeam.objects.filter(team_date=datetime.now().date())
+class EvacTeamMemberViewSet(viewsets.ModelViewSet):
+
+    queryset = EvacTeamMember.objects.all()
+    filter_backends = (filters.SearchFilter,)
     permission_classes = [permissions.IsAuthenticated, ]
-    serializer_class = EvacTeamSerializer
+    serializer_class = EvacTeamMemberSerializer
+
+class EvacAssignmentViewSet(viewsets.ModelViewSet):
+
+    queryset = EvacAssignment.objects.all()
+    permission_classes = [permissions.IsAuthenticated, ]
+    serializer_class = EvacAssignmentSerializer
