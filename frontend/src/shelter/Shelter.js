@@ -1,17 +1,12 @@
 import React from "react";
 import { Link } from 'raviger';
 import { Row, ListGroup } from 'react-bootstrap'
-import { ShelterForm, EditShelterForm } from "./ShelterForms";
+import { ShelterForm } from "./ShelterForms";
 import { ShelterTable } from "./ShelterTables";
 
 
 const header_style = {
   textAlign: "center",
-};
-
-const btn_style = {
-  width: "50%",
-  margin: "0 auto",
 };
 
 const Shelter = () => (
@@ -25,17 +20,17 @@ const Shelter = () => (
   </ListGroup>
 )
 
-export const NewShelter = ({sid}) => (
+export const NewShelter = () => (
   <div>
-    <ShelterForm sid={sid} />
+    <ShelterForm />
   </div>
 )
 
-// export const UpdateShelter = ({sid}) => (
-//   <div>
-//     <EditShelterForm sid={sid}/>
-//   </div>
-// )
+export const UpdateShelter = ({id}) => (
+  <div>
+    <ShelterForm id={id}/>
+  </div>
+)
 
 export const ShelterList = () => (
   <div>

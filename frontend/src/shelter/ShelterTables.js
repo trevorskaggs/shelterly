@@ -8,13 +8,8 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { ShelterDetailsTable } from "./ShelterDetails";
 
-
 const header_style = {
   textAlign: "center",
-};
-
-const link_style = {
-  textDecoration: "none",
 };
 
 export function ShelterTable() {
@@ -44,7 +39,7 @@ export function ShelterTable() {
       source.cancel();
     };
   }, []);
-  console.log(data.shelters)
+
   return (
     <div className="ml-2 mr-2">
       {data.shelters.map(shelter => (
@@ -89,10 +84,10 @@ export function ShelterTable() {
   )
 }
 
-export const ShelterDetails = ({sid}) => (
+export const ShelterDetails = ({id}) => (
   <div>
     <h1 style={header_style}>Shelters</h1>
     <br/>
-    <ShelterDetailsTable sid={sid} />
+    <ShelterDetailsTable id={id} />
   </div>
 )

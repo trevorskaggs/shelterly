@@ -1,14 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
-import { Link, navigate } from 'raviger';
-import { Field, Form, Formik } from 'formik';
-import {
-  CustomInput,
-  Label,
-  Fade,
-} from 'reactstrap';
+import { Link, navigate, useQueryParams } from 'raviger';
+import { Formik } from 'formik';
 import { Form as BootstrapForm, Button, ButtonGroup, Card, Col, FormGroup, Row } from "react-bootstrap";
-import { ReactstrapInput } from 'reactstrap-formik';
 import { TextInput, DropDown } from '.././components/Form';
 import * as Yup from 'yup';
 
@@ -20,8 +14,7 @@ const state_options = [{value:'AL', label:"AL"},{value:'AK', label:"AK"},{value:
 {value:'OK', label:"OK"},{value:'PA', label:"PA"},{value:'RI', label:"RI"},{value:'SC', label:"SC"},{value:'SD', label:"SD"},{value:'TN', label:"TN"},{value:'TX', label:"TX"},
 {value:'VA', label:"VA"},{value:"VT", label:"VT"},{value:'WA', label:"WA"},{value:'WV', label:"WV"},{value:'WI', label:"WI"},{value:'WY', label:"WY"},]
 
-
-export const ShelterForm = ({sid}) => {
+export const ShelterForm = ({id}) => {
 
   // Initial shelter data.
   const [data, setData] = useState({
@@ -38,10 +31,10 @@ export const ShelterForm = ({sid}) => {
   useEffect(() => {
     let source = axios.CancelToken.source();
     // determines if edit or new
-    if (sid) {
+    if (id) {
       const fetchShelterData = async () => {
         // Fetch ServiceRequest data.
-        await axios.get('/shelter/api/shelter/' + sid + '/', {
+        await axios.get('/shelter/api/shelter/' + id + '/', {
           cancelToken: source.token,
         })
         .then(response => {
@@ -57,19 +50,18 @@ export const ShelterForm = ({sid}) => {
     return () => {
       source.cancel();
     };
-  }, [sid]);
+  }, [id]);
 
   return (
     <>
       <Formik
         initialValues={data}
         enableReinitialize={true}
-
         onSubmit={(values, { setSubmitting }) => {
-          if (sid) {
-            axios.put('/shelter/api/shelter/' + sid + '/', values)
+          if (id) {
+            axios.put('/shelter/api/shelter/' + id + '/', values)
             .then(function() {
-              navigate('/shelter/' + sid)
+              navigate('/shelter/' + id)
             })
             .catch(error => {
               console.log(error.response);
@@ -157,293 +149,28 @@ export const ShelterForm = ({sid}) => {
   );
 };
 
-export const EditShelterForm = ({sid}) => {
-  // Initial Person data.
+export const BuildingForm = ({id}) => {
+
+  // Identify any query param data.
+  const [queryParams] = useQueryParams();
+  const {
+    shelter_id = ''
+  } = queryParams;
+
+  // Initial Building data.
   const [data, setData] = useState({
     name: '',
     description: '',
-    address: '',
-    apartment: '',
-    city: '',
-    state: '',
-    zip_code: '',
+    shelter: shelter_id,
   });
 
   // Hook for initializing data.
   useEffect(() => {
     let source = axios.CancelToken.source();
-    
-    const fetchShelterData = async () => {
-      // Fetch ServiceRequest data.
-      await axios.get('/shelter/api/shelter/' + sid + '/', {
-        cancelToken: source.token,
-      })
-      .then(response => {
-        setData(response.data);
-      })
-      .catch(error => {
-        console.log(error.response);
-      });
-    };
-    fetchShelterData();
-    
-    // Cleanup.
-    return () => {
-      source.cancel();
-    };
-  }, [sid]);
-
-  return (
-    <>
-      <Formik
-        initialValues={data}
-        enableReinitialize={true}
-        onSubmit={(values, { setSubmitting }) => {
-          axios.put('/shelter/api/shelter/' + sid + '/', values)
-          .then(function() {
-            navigate('/shelter/' + sid);
-          })
-          .catch(e => {
-            console.log(e);
-          });
-          setSubmitting(false);
-        }}
-      >
-        {props => (
-          <Card border="secondary" className="mt-5">
-          <Card.Header as="h5"> Shelter Information</Card.Header>
-          <Card.Body>
-          <BootstrapForm noValidate>
-            <BootstrapForm.Row>
-              <TextInput
-                xs="5"
-                type="text"
-                label="Name*"
-                name="name"
-                id="name"
-              />
-              <TextInput
-                xs="5"
-                type="text"
-                label="Description*"
-                name="description"
-              />
-            </BootstrapForm.Row>
-            <BootstrapForm.Row>
-              <TextInput
-                xs="8"
-                type="text"
-                label="Address*"
-                name="address"
-              />
-              <TextInput
-                xs="2"
-                type="text"
-                label="Apartment"
-                name="apartment"
-              />
-            </BootstrapForm.Row>
-            <BootstrapForm.Row>
-              <TextInput
-                xs="8"
-                type="text"
-                label="Address*"
-                name="address"
-              />
-              <TextInput
-                xs="2"
-                type="text"
-                label="Apartment"
-                name="apartment"
-              />
-            </BootstrapForm.Row>
-            <BootstrapForm.Row>
-              <TextInput
-                xs="8"
-                type="text"
-                label="City"
-                name="city"
-              />
-              <Col xs="2">
-              <DropDown
-                label="State"
-                name="state"
-                id="state"
-                options={state_options}
-              />
-              </Col>
-              <TextInput
-                  xs="2"
-                  type="text"
-                  label="Zip Code"
-                  name="zip_code"
-                />
-            </BootstrapForm.Row>
-          </BootstrapForm>
-          </Card.Body>
-          <ButtonGroup size="lg">
-            <Button type="submit" onClick={() => { props.submitForm()}}>Save</Button>
-            <Button as={Link} variant="info" href="/shelter">Cancel</Button>
-          </ButtonGroup>
-        </Card>
-        )}
-      </Formik>
-
-    </>
-  );
-};
-
-export const BuildingForm = ({sid}) => {
-  return (
-    <>
-      <Formik
-        initialValues={{
-          name: '',
-          description: '',
-          shelter: sid,
-        }}
-        onSubmit={(values, { setSubmitting }) => {
-          setTimeout(() => {
-            axios.post('/shelter/api/building/', values)
-            .then(function() {
-              navigate('/shelter/' + sid);
-            })
-            .catch(e => {
-              console.log(e);
-            });
-            setSubmitting(false);
-          }, 500);
-        }}
-      >
-        {props => (
-          <Card border="secondary" className="mt-5">
-          <Card.Header as="h5"> Building Information</Card.Header>
-            <Card.Body>
-              <BootstrapForm noValidate>
-                <BootstrapForm.Row>
-                  <TextInput
-                    xs="5"
-                    type="text"
-                    label="Name*"
-                    name="name"
-                    id="name"
-                  />
-                  <TextInput
-                    xs="5"
-                    type="text"
-                    label="Description*"
-                    name="description"
-                  />
-                </BootstrapForm.Row>
-              </BootstrapForm>
-            </Card.Body>
-              <ButtonGroup size="lg">
-                <Button type="submit" onClick={() => { props.submitForm()}}>Save</Button>
-                <Button as={Link} variant="info" href="/shelter">Cancel</Button>
-              </ButtonGroup>
-        </Card>
-        )}
-      </Formik>
-    </>
-  );
-};
-
-export const EditBuildingForm = ({bid}) => {
-  // Initial Person data.
-  const [data, setData] = useState({
-    name: '',
-    description: '',
-  });
-
-  // Hook for initializing data.
-  useEffect(() => {
-    let source = axios.CancelToken.source();
-    
-    const fetchPersonData = async () => {
-      // Fetch ServiceRequest data.
-      await axios.get('/shelter/api/building/' + bid + '/', {
-        cancelToken: source.token,
-      })
-      .then(response => {
-        setData(response.data);
-      })
-      .catch(error => {
-        console.log(error.response);
-      });
-    };
-    fetchPersonData();
-    
-    // Cleanup.
-    return () => {
-      source.cancel();
-    };
-  }, [bid]);
-
-  return (
-    <>
-      <Formik
-        initialValues={data}
-        enableReinitialize={true}
-        onSubmit={(values, { setSubmitting }) => {
-          setTimeout(() => {
-            console.log(values)
-            axios.put('/shelter/api/building/' + bid + '/', values)
-            .then(function() {
-              navigate('/shelter/' + values.shelter);
-            })
-            .catch(e => {
-              console.log(e);
-            });
-            setSubmitting(false);
-          }, 500);
-        }}
-      >
-        {props => (
-          <Card border="secondary" className="mt-5">
-          <Card.Header as="h5"> Building Information</Card.Header>
-            <Card.Body>
-              <BootstrapForm noValidate>
-                <BootstrapForm.Row>
-                  <TextInput
-                    xs="5"
-                    type="text"
-                    label="Name*"
-                    name="name"
-                    id="name"
-                  />
-                  <TextInput
-                    xs="5"
-                    type="text"
-                    label="Description*"
-                    name="description"
-                  />
-                </BootstrapForm.Row>
-              </BootstrapForm>
-            </Card.Body>
-              <ButtonGroup size="lg">
-                <Button type="submit" onClick={() => { props.submitForm()}}>Save</Button>
-                <Button as={Link} variant="info" href="/shelter">Cancel</Button>
-              </ButtonGroup>
-        </Card>
-        )}
-      </Formik>
-    </>
-  );
-};
-
-export const RoomForm = ({bid}) => {
-    // Initial Person data.
-    const [data, setData] = useState({
-      shelter: '',
-    });
-  
-    // Hook for initializing data.
-    useEffect(() => {
-      let source = axios.CancelToken.source();
-      
-      const fetchBuildingShelterData = async () => {
+    if (id) {
+      const fetchBuildingData = async () => {
         // Fetch ServiceRequest data.
-        await axios.get('/shelter/api/building/' + bid + '/', {
+        await axios.get('/shelter/api/building/' + id + '/', {
           cancelToken: source.token,
         })
         .then(response => {
@@ -453,98 +180,14 @@ export const RoomForm = ({bid}) => {
           console.log(error.response);
         });
       };
-      fetchBuildingShelterData();
-      console.log(data)
-      
-      // Cleanup.
-      return () => {
-        source.cancel();
-      };
-    }, [bid]);
-  return (
-    <>
-      <Formik
-        initialValues={{
-          name: '',
-          description: '',
-          building: bid,
-        }}
-        onSubmit={(values, { setSubmitting }) => {
-          setTimeout(() => {
-            axios.post('/shelter/api/room/', values)
-            .then(function() {
-              navigate('/shelter/building/' + bid);
-            })
-            .catch(e => {
-              console.log(e);
-            });
-            setSubmitting(false);
-          }, 500);
-        }}
-      >
-        {props => (
-          <Card border="secondary" className="mt-5">
-          <Card.Header as="h5"> Room Information</Card.Header>
-            <Card.Body>
-              <BootstrapForm noValidate>
-                <BootstrapForm.Row>
-                  <TextInput
-                    xs="5"
-                    type="text"
-                    label="Name*"
-                    name="name"
-                    id="name"
-                  />
-                  <TextInput
-                    xs="5"
-                    type="text"
-                    label="Description*"
-                    name="description"
-                  />
-                </BootstrapForm.Row>
-              </BootstrapForm>
-            </Card.Body>
-              <ButtonGroup size="lg">
-                <Button type="submit" onClick={() => { props.submitForm()}}>Save</Button>
-                <Button as={Link} variant="info" href="/shelter">Cancel</Button>
-              </ButtonGroup>
-        </Card>
-        )}
-      </Formik>
-    </>
-  );
-};
-
-export const EditRoomForm = ({rid}) => {
-  // Initial Person data.
-  const [data, setData] = useState({
-    name: '',
-    description: '',
-  });
-
-  // Hook for initializing data.
-  useEffect(() => {
-    let source = axios.CancelToken.source();
-    
-    const fetchPersonData = async () => {
-      // Fetch ServiceRequest data.
-      await axios.get('/shelter/api/room/' + rid + '/', {
-        cancelToken: source.token,
-      })
-      .then(response => {
-        setData(response.data);
-      })
-      .catch(error => {
-        console.log(error.response);
-      });
-    };
-    fetchPersonData();
+      fetchBuildingData();
+    }
     
     // Cleanup.
     return () => {
       source.cancel();
     };
-  }, [rid]);
+  }, [id]);
 
   return (
     <>
@@ -553,14 +196,124 @@ export const EditRoomForm = ({rid}) => {
         enableReinitialize={true}
         onSubmit={(values, { setSubmitting }) => {
           setTimeout(() => {
-            console.log(values)
-            axios.put('/shelter/api/room/' + rid + '/', values)
-            .then(function() {
-              navigate('/shelter/room/' + rid);
-            })
-            .catch(e => {
-              console.log(e);
-            });
+            if (id) {
+              axios.put('/shelter/api/building/' + id + '/', values)
+              .then(function() {
+                navigate('/shelter/' + values.shelter);
+              })
+              .catch(e => {
+                console.log(e);
+              });
+            }
+            else {
+              axios.post('/shelter/api/building/', values)
+              .then(function() {
+                navigate('/shelter/' + shelter_id);
+              })
+              .catch(e => {
+                console.log(e);
+              });
+            }
+            setSubmitting(false);
+          }, 500);
+        }}
+      >
+        {props => (
+          <Card border="secondary" className="mt-5">
+          <Card.Header as="h5"> Building Information</Card.Header>
+          <Card.Body>
+            <BootstrapForm noValidate>
+              <BootstrapForm.Row>
+                <TextInput
+                  xs="5"
+                  type="text"
+                  label="Name*"
+                  name="name"
+                  id="name"
+                />
+                <TextInput
+                  xs="5"
+                  type="text"
+                  label="Description*"
+                  name="description"
+                />
+              </BootstrapForm.Row>
+            </BootstrapForm>
+          </Card.Body>
+          <ButtonGroup size="lg">
+            <Button type="submit" onClick={() => { props.submitForm()}}>Save</Button>
+            <Button as={Link} variant="info" href="/shelter">Cancel</Button>
+          </ButtonGroup>
+        </Card>
+        )}
+      </Formik>
+    </>
+  );
+};
+
+export const RoomForm = ({id}) => {
+    // Identify any query param data.
+    const [queryParams] = useQueryParams();
+    const {
+      building_id = ''
+    } = queryParams;
+
+    // Initial Building data.
+    const [data, setData] = useState({
+      name: '',
+      description: '',
+      building: building_id,
+    });
+  
+    // Hook for initializing data.
+    useEffect(() => {
+      let source = axios.CancelToken.source();
+      
+      const fetchRoomData = async () => {
+        // Fetch ServiceRequest data.
+        await axios.get('/shelter/api/room/' + id + '/', {
+          cancelToken: source.token,
+        })
+        .then(response => {
+          setData(response.data);
+        })
+        .catch(error => {
+          console.log(error.response);
+        });
+      };
+      fetchRoomData();
+      console.log(data)
+      
+      // Cleanup.
+      return () => {
+        source.cancel();
+      };
+    }, [id]);
+  return (
+    <>
+      <Formik
+        initialValues={data}
+        enableReinitialize={true}
+        onSubmit={(values, { setSubmitting }) => {
+          setTimeout(() => {
+            if (id) {
+              axios.put('/shelter/api/room/' + id + '/', values)
+              .then(function() {
+                navigate('/shelter/room/' + id);
+              })
+              .catch(e => {
+                console.log(e);
+              });
+            }
+            else {
+              axios.post('/shelter/api/room/', values)
+              .then(function() {
+                navigate('/shelter/building/' + building_id);
+              })
+              .catch(e => {
+                console.log(e);
+              });
+            }
             setSubmitting(false);
           }, 500);
         }}

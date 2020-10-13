@@ -1,10 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import { Link } from 'raviger';
-import { Button } from 'reactstrap';
-import { BuildingList } from "./Building";
 import { Card, CardGroup, ListGroup } from 'react-bootstrap';
-import { RoomList } from "./Room";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faClipboardList, faEdit, faPlusSquare,
@@ -19,26 +16,21 @@ const link_style = {
   textDecoration: "none",
 };
 
-const card_style = {
-  width: "90%",
-}
-
 const header_style = {
   textAlign: "center",
 }
 
-export function ShelterDetailsTable({sid}) {
+export function ShelterDetailsTable({id}) {
   const [data, setData] = useState({
     buildings: [],
   });
 
   // Hook for initializing data.
   useEffect(() => {
-    console.log('shelter: ' + sid)
     let source = axios.CancelToken.source();
     const fetchShelterData = async () => {
     // Fetch Shelter Details data.
-    await axios.get('/shelter/api/shelter/' + sid + '/', {
+    await axios.get('/shelter/api/shelter/' + id + '/', {
         cancelToken: source.token,
     })
     .then(response => {
@@ -49,12 +41,11 @@ export function ShelterDetailsTable({sid}) {
     });
     };
     fetchShelterData();
-  }, [sid]);
-  console.log(data)
+  }, [id]);
 
   return (
     <>
-      <h1 style={header_style}>Shelter #{data.id}</h1>
+      <h1 style={header_style}>Shelter #{id}</h1>
       <br/>
       <CardGroup>
         <Card>
@@ -72,10 +63,10 @@ export function ShelterDetailsTable({sid}) {
       <CardGroup>
           <Card>
             <Card.Body>
-                  {! data.buildings.length ? <span><ListGroup.Item><Link href={"/shelter/" + data.id + "/building/new"}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link>&nbsp;<b>Add Building</b></ListGroup.Item></span> :
+                  {! data.buildings.length ? <span><ListGroup.Item><Link href={"/shelter/" + id + "/building/new"}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link>&nbsp;<b>Add Building</b></ListGroup.Item></span> :
                     <span>{data.buildings.map(building => (
                       <ListGroup.Item>
-                        <Link href={"/shelter/" + data.id + "/building/new"}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link>
+                        <Link href={"/shelter/" + id + "/building/new"}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link>
                         &nbsp;<b>Building:</b> {building.name}
                         <Link href={"/shelter/building/" + building.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
                         <Link href={"/shelter/building/edit/" + building.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
@@ -101,9 +92,9 @@ export function ShelterDetailsTable({sid}) {
         </CardGroup>
       <hr/>
       <div style={btn_style}>
-        <Link href={"/shelter/" + data.id + "/building/new"} style={link_style} className="btn btn-success btn-lg btn-block mb-2">ADD BUILDING</Link>
+        <Link href={"/shelter/building/new?shelter_id=" + id} style={link_style} className="btn btn-success btn-lg btn-block mb-2">ADD BUILDING</Link>
         <br/>
-        <Link href={"/shelter/edit/" + data.id} style={link_style} className="btn btn-primary btn-lg btn-block mb-2">UPDATE SHELTER</Link>
+        <Link href={"/shelter/edit/" + id} style={link_style} className="btn btn-primary btn-lg btn-block mb-2">UPDATE SHELTER</Link>
         <br/>
         <Link href="/shelter/list" className="btn btn-secondary btn-lg btn-block" >BACK</Link>
       </div>
@@ -111,16 +102,15 @@ export function ShelterDetailsTable({sid}) {
   );
 };
 
-export function BuildingDetailsTable({bid}) {
+export function BuildingDetailsTable({id}) {
   const [data, setData] = useState({});
 
   // Hook for initializing data.
   useEffect(() => {
-    console.log('builing: ' + bid)
     let source = axios.CancelToken.source();
-    const fetchShelterData = async () => {
-    // Fetch Shelter Details data.
-    await axios.get('/shelter/api/building/' + bid, {
+    const fetchBuildingData = async () => {
+    // Fetch Building Details data.
+    await axios.get('/shelter/api/building/' + id, {
         cancelToken: source.token,
     })
     .then(response => {
@@ -131,8 +121,8 @@ export function BuildingDetailsTable({bid}) {
         console.log(e);
     });
     };
-    fetchShelterData();
-  }, [bid]);
+    fetchBuildingData();
+  }, [id]);
 
   return (
     <>
@@ -152,7 +142,7 @@ export function BuildingDetailsTable({bid}) {
           {data.rooms == undefined ? <span><ListGroup.Item><p>No Rooms Found</p></ListGroup.Item></span> :
             <span>{data.rooms.map(room => (
               <ListGroup.Item>
-                <Link href={"/shelter/building/" + data.id + "/room/new"}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link>
+                <Link href={"/shelter/building/room/new?building_id=" + id}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link>
                 &nbsp;<b>Room:</b> {room.name}
                 <Link href={"/shelter/room/" + room.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
                 <Link href={"/shelter/room/edit/" + room.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
@@ -163,9 +153,9 @@ export function BuildingDetailsTable({bid}) {
       </CardGroup>
       <hr/>
       <div style={btn_style}>
-        <Link href={"/shelter/building/" + data.id + "/room/new"} style={link_style} className="btn btn-success btn-lg btn-block mb-2">ADD ROOM</Link>
+        <Link href={"/shelter/building/" + id + "/room/new"} style={link_style} className="btn btn-success btn-lg btn-block mb-2">ADD ROOM</Link>
         <br/>
-        <Link href={"/shelter/building/edit/" + data.id} style={link_style} className="btn btn-primary btn-lg btn-block mb-2">EDIT BUILDING</Link>
+        <Link href={"/shelter/building/edit/" + id} style={link_style} className="btn btn-primary btn-lg btn-block mb-2">EDIT BUILDING</Link>
         <br/>
         <Link href="/shelter/list" className="btn btn-secondary btn-lg btn-block">BACK</Link>
       </div>
@@ -173,28 +163,26 @@ export function BuildingDetailsTable({bid}) {
   );
 };
 
-export function RoomDetailsTable({rid}) {
+export function RoomDetailsTable({id}) {
   const [data, setData] = useState({});
 
   // Hook for initializing data.
   useEffect(() => {
-    console.log('builing: ' + rid)
     let source = axios.CancelToken.source();
-    const fetchShelterData = async () => {
-    // Fetch Shelter Details data.
-    await axios.get('/shelter/api/room/' + rid, {
-        cancelToken: source.token,
-    })
-    .then(response => {
-        setData(response.data);
-        console.log(response.data);
-    })
-    .catch(e => {
-        console.log(e);
-    });
+    const fetchRoomData = async () => {
+      // Fetch Room Details data.
+      await axios.get('/shelter/api/room/' + id, {
+          cancelToken: source.token,
+      })
+      .then(response => {
+          setData(response.data);
+      })
+      .catch(e => {
+          console.log(e);
+      });
     };
-    fetchShelterData();
-  }, [rid]);
+    fetchRoomData();
+  }, [id]);
 
   return (
     <>
@@ -210,7 +198,7 @@ export function RoomDetailsTable({rid}) {
       </CardGroup>
       <hr/>
       <div style={btn_style}>
-        <Link href={"/shelter/room/edit/" + data.id} style={link_style} className="btn btn-primary btn-lg btn-block mb-2">EDIT BUILDING</Link>
+        <Link href={"/shelter/room/edit/" + id} style={link_style} className="btn btn-primary btn-lg btn-block mb-2">EDIT BUILDING</Link>
         <br/>
         <Link href="/shelter/list" className="btn btn-secondary btn-lg btn-block">BACK</Link>
       </div>
