@@ -44,10 +44,11 @@ export function ShelterTable() {
     <div className="ml-2 mr-2">
       {data.shelters.map(shelter => (
         <div key={shelter.id} className="mt-3">
-          <div className="card-header">{shelter.name}<Link href={"/shelter/" + shelter.id}> <FontAwesomeIcon icon={faClipboardList} inverse/></Link>
-          <Link href={"/shelter/edit/" + shelter.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
-        <div style={{width:400,height:25, minHeight:25}}>{shelter.full_address}</div></div>
-        
+          <div className="card-header">{shelter.name}
+            <Link href={"/shelter/" + shelter.id}> <FontAwesomeIcon icon={faClipboardList} inverse/></Link>
+            <Link href={"/shelter/edit/" + shelter.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
+            <div style={{width:400,height:25, minHeight:25}}>{shelter.full_address}</div>
+          </div>
           <CardGroup>
             <Card key={shelter.id}>
               <Card.Body>
@@ -77,7 +78,6 @@ export function ShelterTable() {
               </Card.Body>
             </Card>
           </CardGroup>
-          
         </div>
       ))}
     </div>
@@ -86,8 +86,6 @@ export function ShelterTable() {
 
 export const ShelterDetails = ({id}) => (
   <div>
-    <h1 style={header_style}>Shelters</h1>
-    <br/>
     <ShelterDetailsTable id={id} />
   </div>
 )

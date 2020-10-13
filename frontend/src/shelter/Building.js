@@ -1,11 +1,10 @@
 import React from 'react';
-import {BuildingDetailsTable} from "./ShelterDetails";
+import { BuildingDetailsTable } from "./ShelterDetails";
 import { BuildingForm } from "./ShelterForms";
 
 const header_style = {
   textAlign: "center",
 }
-
 
 export const BuildingDetails = ({id}) => (
   <div>

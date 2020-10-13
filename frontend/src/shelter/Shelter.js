@@ -1,9 +1,8 @@
 import React from "react";
 import { Link } from 'raviger';
-import { Row, ListGroup } from 'react-bootstrap'
+import { ListGroup } from 'react-bootstrap'
 import { ShelterForm } from "./ShelterForms";
 import { ShelterTable } from "./ShelterTables";
-
 
 const header_style = {
   textAlign: "center",

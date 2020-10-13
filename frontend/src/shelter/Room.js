@@ -1,5 +1,5 @@
 import React from 'react';
-import {RoomDetailsTable} from "./ShelterDetails";
+import { RoomDetailsTable } from "./ShelterDetails";
 import { RoomForm } from "./ShelterForms";
 
 const header_style = {

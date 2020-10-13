@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import { Link, navigate, useQueryParams } from 'raviger';
 import { Formik } from 'formik';
-import { Form as BootstrapForm, Button, ButtonGroup, Card, Col, FormGroup, Row } from "react-bootstrap";
-import { TextInput, DropDown } from '.././components/Form';
+import { Form as BootstrapForm, Button, ButtonGroup, Card, Col } from "react-bootstrap";
+import { AddressLookup, TextInput, DropDown } from '.././components/Form';
 import * as Yup from 'yup';
 
 const state_options = [{value:'AL', label:"AL"},{value:'AK', label:"AK"},{value:'AZ', label:"AZ"},{value:'AR', label:"AR"},{value:'CA', label:"CA"},{value:'CO', label:"CO"},{value:'CT', label:"CT"},
@@ -25,6 +25,8 @@ export const ShelterForm = ({id}) => {
     city: '',
     state: '',
     zip_code: '',
+    latitude: null,
+    longitude: null,
   });
 
   // Hook for initializing data.
@@ -86,18 +88,31 @@ export const ShelterForm = ({id}) => {
           <BootstrapForm noValidate>
             <BootstrapForm.Row>
               <TextInput
-                xs="5"
+                xs="8"
                 type="text"
                 label="Name*"
                 name="name"
                 id="name"
               />
+            </BootstrapForm.Row>
+            <BootstrapForm.Row>
               <TextInput
-                xs="5"
+                as="textarea"
+                rows={5}
+                xs="8"
                 type="text"
                 label="Description*"
                 name="description"
               />
+            </BootstrapForm.Row>
+            <BootstrapForm.Row>
+              <BootstrapForm.Group as={Col} xs="10">
+                <AddressLookup
+                  label="Search"
+                  style={{width: '100%'}}
+                  className="form-control"
+                />
+              </BootstrapForm.Group>
             </BootstrapForm.Row>
             <BootstrapForm.Row>
               <TextInput
@@ -105,6 +120,7 @@ export const ShelterForm = ({id}) => {
                 type="text"
                 label="Address*"
                 name="address"
+                disabled
               />
               <TextInput
                 xs="2"
@@ -119,6 +135,7 @@ export const ShelterForm = ({id}) => {
                 type="text"
                 label="City"
                 name="city"
+                disabled
               />
               <Col xs="2">
               <DropDown
@@ -127,14 +144,17 @@ export const ShelterForm = ({id}) => {
                 id="state"
                 options={state_options}
                 value={props.values.state || ''}
+                placeholder=""
+                disabled
               />
               </Col>
               <TextInput
-                  xs="2"
-                  type="text"
-                  label="Zip Code"
-                  name="zip_code"
-                />
+                xs="2"
+                type="text"
+                label="Zip Code"
+                name="zip_code"
+                disabled
+              />
             </BootstrapForm.Row>
           </BootstrapForm>
           </Card.Body>
@@ -182,7 +202,7 @@ export const BuildingForm = ({id}) => {
       };
       fetchBuildingData();
     }
-    
+
     // Cleanup.
     return () => {
       source.cancel();
@@ -252,43 +272,44 @@ export const BuildingForm = ({id}) => {
 };
 
 export const RoomForm = ({id}) => {
+
     // Identify any query param data.
     const [queryParams] = useQueryParams();
     const {
       building_id = ''
     } = queryParams;
 
-    // Initial Building data.
-    const [data, setData] = useState({
-      name: '',
-      description: '',
-      building: building_id,
-    });
-  
-    // Hook for initializing data.
-    useEffect(() => {
-      let source = axios.CancelToken.source();
-      
-      const fetchRoomData = async () => {
-        // Fetch ServiceRequest data.
-        await axios.get('/shelter/api/room/' + id + '/', {
-          cancelToken: source.token,
-        })
-        .then(response => {
-          setData(response.data);
-        })
-        .catch(error => {
-          console.log(error.response);
-        });
-      };
-      fetchRoomData();
-      console.log(data)
-      
-      // Cleanup.
-      return () => {
-        source.cancel();
-      };
-    }, [id]);
+  // Initial Room data.
+  const [data, setData] = useState({
+    name: '',
+    description: '',
+    building: building_id,
+  });
+
+  // Hook for initializing data.
+  useEffect(() => {
+    let source = axios.CancelToken.source();
+
+    const fetchRoomData = async () => {
+      // Fetch ServiceRequest data.
+      await axios.get('/shelter/api/room/' + id + '/', {
+        cancelToken: source.token,
+      })
+      .then(response => {
+        setData(response.data);
+      })
+      .catch(error => {
+        console.log(error.response);
+      });
+    };
+    fetchRoomData();
+
+    // Cleanup.
+    return () => {
+      source.cancel();
+    };
+  }, [id]);
+
   return (
     <>
       <Formik
@@ -321,29 +342,29 @@ export const RoomForm = ({id}) => {
         {props => (
           <Card border="secondary" className="mt-5">
           <Card.Header as="h5"> Room Information</Card.Header>
-            <Card.Body>
-              <BootstrapForm noValidate>
-                <BootstrapForm.Row>
-                  <TextInput
-                    xs="5"
-                    type="text"
-                    label="Name*"
-                    name="name"
-                    id="name"
-                  />
-                  <TextInput
-                    xs="5"
-                    type="text"
-                    label="Description*"
-                    name="description"
-                  />
-                </BootstrapForm.Row>
-              </BootstrapForm>
-            </Card.Body>
-              <ButtonGroup size="lg">
-                <Button type="submit" onClick={() => { props.submitForm()}}>Save</Button>
-                <Button as={Link} variant="info" href="/shelter">Cancel</Button>
-              </ButtonGroup>
+          <Card.Body>
+            <BootstrapForm noValidate>
+              <BootstrapForm.Row>
+                <TextInput
+                  xs="5"
+                  type="text"
+                  label="Name*"
+                  name="name"
+                  id="name"
+                />
+                <TextInput
+                  xs="5"
+                  type="text"
+                  label="Description*"
+                  name="description"
+                />
+              </BootstrapForm.Row>
+            </BootstrapForm>
+          </Card.Body>
+          <ButtonGroup size="lg">
+            <Button type="submit" onClick={() => { props.submitForm()}}>Save</Button>
+            <Button as={Link} variant="info" href="/shelter">Cancel</Button>
+          </ButtonGroup>
         </Card>
         )}
       </Formik>

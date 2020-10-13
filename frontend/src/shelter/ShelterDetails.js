@@ -21,6 +21,7 @@ const header_style = {
 }
 
 export function ShelterDetailsTable({id}) {
+
   const [data, setData] = useState({
     buildings: [],
   });
@@ -61,35 +62,35 @@ export function ShelterDetailsTable({id}) {
         </Card>
       </CardGroup>
       <CardGroup>
-          <Card>
-            <Card.Body>
-                  {! data.buildings.length ? <span><ListGroup.Item><Link href={"/shelter/" + id + "/building/new"}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link>&nbsp;<b>Add Building</b></ListGroup.Item></span> :
-                    <span>{data.buildings.map(building => (
-                      <ListGroup.Item>
-                        <Link href={"/shelter/" + id + "/building/new"}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link>
-                        &nbsp;<b>Building:</b> {building.name}
-                        <Link href={"/shelter/building/" + building.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
-                        <Link href={"/shelter/building/edit/" + building.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
-                          <ListGroup.Item>
-                          {! building.rooms.length ? <span><ListGroup.Item><Link href={"/shelter/building/" + building.id + "/room/new"}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link>&nbsp;<b>Add Rooms</b></ListGroup.Item></span>: 
-                            <span>
-                              {building.rooms.map(room => (
-                                <ListGroup.Item>
-                                  <Link href={"/shelter/building/" + building.id + "/room/new"}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link>
-                                  &nbsp;<b>Rooms:</b> {room.name}
-                                  <Link href={"/shelter/room/" + room.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
-                                  <Link href={"/shelter/room/edit/" + room.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
-                                </ListGroup.Item>
-                              ))}
-                            </span>
-                          }
+        <Card>
+          <Card.Body>
+            {!data.buildings.length ? <span><ListGroup.Item><Link href={"/shelter/building/new?shelter_id=" + id}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link>&nbsp;<b>Add Building</b></ListGroup.Item></span> :
+              <span>{data.buildings.map(building => (
+                <ListGroup.Item key={building.id}>
+                  <Link href={"/shelter//building/new?shelter_id=" + id}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link>
+                  &nbsp;<b>Building:</b> {building.name}
+                  <Link href={"/shelter/building/" + building.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
+                  <Link href={"/shelter/building/edit/" + building.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
+                    <ListGroup.Item>
+                    {!building.rooms.length ? <span><ListGroup.Item><Link href={"/shelter/building/" + building.id + "/room/new"}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link>&nbsp;<b>Add Rooms</b></ListGroup.Item></span>: 
+                      <span>
+                        {building.rooms.map(room => (
+                          <ListGroup.Item key={room.id}>
+                            <Link href={"/shelter/building/room/new?building_id=" + building.id}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link>
+                            &nbsp;<b>Rooms:</b> {room.name}
+                            <Link href={"/shelter/room/" + room.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
+                            <Link href={"/shelter/room/edit/" + room.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
                           </ListGroup.Item>
-                      </ListGroup.Item>
-                    ))}</span>
-                  }
-            </Card.Body>
-          </Card>
-        </CardGroup>
+                        ))}
+                      </span>
+                    }
+                    </ListGroup.Item>
+                </ListGroup.Item>
+              ))}</span>
+            }
+          </Card.Body>
+        </Card>
+      </CardGroup>
       <hr/>
       <div style={btn_style}>
         <Link href={"/shelter/building/new?shelter_id=" + id} style={link_style} className="btn btn-success btn-lg btn-block mb-2">ADD BUILDING</Link>
@@ -103,6 +104,7 @@ export function ShelterDetailsTable({id}) {
 };
 
 export function BuildingDetailsTable({id}) {
+
   const [data, setData] = useState({});
 
   // Hook for initializing data.
@@ -153,7 +155,7 @@ export function BuildingDetailsTable({id}) {
       </CardGroup>
       <hr/>
       <div style={btn_style}>
-        <Link href={"/shelter/building/" + id + "/room/new"} style={link_style} className="btn btn-success btn-lg btn-block mb-2">ADD ROOM</Link>
+        <Link href={"/shelter/building/room/new?building_id=" + id} style={link_style} className="btn btn-success btn-lg btn-block mb-2">ADD ROOM</Link>
         <br/>
         <Link href={"/shelter/building/edit/" + id} style={link_style} className="btn btn-primary btn-lg btn-block mb-2">EDIT BUILDING</Link>
         <br/>
@@ -164,6 +166,7 @@ export function BuildingDetailsTable({id}) {
 };
 
 export function RoomDetailsTable({id}) {
+
   const [data, setData] = useState({});
 
   // Hook for initializing data.
