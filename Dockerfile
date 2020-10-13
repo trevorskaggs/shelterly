@@ -33,4 +33,5 @@ RUN git clone https://github.com/trevorskaggs/shelterly.git shelterly \
     && cd .. \ 
     && pip install --upgrade pip \
     && pip install --no-cache-dir -r ~/shelterly/requirements.txt
+WORKDIR /home/sheltuser/shelterly
 CMD tail -f /dev/null
