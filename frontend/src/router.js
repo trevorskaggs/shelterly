@@ -2,7 +2,7 @@ import React from "react";
 import Home from "./Home";
 import Animals, { AnimalDetail, NewAnimal, UpdateAnimal } from "./animals/Animals"
 import { AnimalSearch } from "./animals/AnimalTables"
-import Evac, { NewTeam, TeamList } from "./evac/Evac";
+import Evac, { NewEvacTeamMember } from "./evac/Evac";
 import Hotline, { NewServiceRequest, ServiceRequestDetail, ServiceRequestList, UpdateServiceRequest } from "./hotline/Hotline";
 import Intake, { IntakeSummary } from "./intake/Intake";
 import { NewOwner, NewReporter, OwnerDetail, ReporterDetail,  UpdateOwner, UpdateReporter } from "./people/People";
@@ -11,8 +11,7 @@ import { ShelterDetails} from "./shelter/ShelterTables";
 import { NewBuilding, UpdateBuilding, BuildingDetails } from "./shelter/Building";
 import { NewRoom, UpdateRoom, RoomDetails } from "./shelter/Room";
 import { Login } from "./accounts/Accounts";
-import { EvacTeamTable } from "./evac/EvacTables";
-import { EvacTeamForm } from "./evac/EvacForms";
+import { Dispatch } from "./evac/EvacViews";
 
 const routes = {
   "/": () => <Home />,
@@ -21,8 +20,8 @@ const routes = {
   "/animals/search": () => <AnimalSearch />,
   "/animals/animal/:id": ({id}) => <AnimalDetail id={id} />,
   "/evac": () => <Evac />,
-  "/evac/evacteam/new": () => <EvacTeamForm />,
-  "/evac/evacteam/list": () => <EvacTeamTable />,
+  "/evac/evacteammember/new": () => <NewEvacTeamMember />,
+  "/evac/dispatch": () => <Dispatch />,
   "/hotline": () => <Hotline />,
   "/hotline/animal/new": () => <NewAnimal />,
   "/hotline/first_responder/new": () => <NewReporter />,

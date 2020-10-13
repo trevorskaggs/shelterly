@@ -133,7 +133,7 @@ STATICFILES_DIRS = [
 # Dev settings. Remove when deploying to Zappa
 STATIC_ROOT='/home/shelterly/static'
 SECURE_CONTENT_TYPE_NOSNIFF = False
-DEBUG = True
+DEBUG = False
 
 #TODO Change to envvars.
 # Zappa settings
@@ -158,10 +158,9 @@ LOGGING = {
         },
     },
     'loggers': {
-        '': {
+        'django': {
             'handlers': ['console'],
-            'level': 'DEBUG',
+            'level': 'INFO',
         },
     },
 }
-

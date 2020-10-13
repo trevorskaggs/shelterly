@@ -11,3 +11,40 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* Image gallery display CSS */
+.carousel img {
+  height: 320px;
+  width: 320px;
+  /* object-fit: contain; */
+  object-fit: cover;
+  overflow: hidden;
+}
+
+/* Grey out disabled fields CSS */
+input[disabled] {
+  color: #999999;
+  background-color: #DFDDDD !important;
+  background-image: none;
+}
+
+/* Leaflet map CSS */
+.leaflet-container {  width: 45vw;  height: 55vh; margin-top:2vw;}
+
+/* big checkbox CSS */
+.custom-control-lg .custom-control-label::before,
+.custom-control-lg .custom-control-label::after {
+    top: 0.1rem !important;
+    left: -2rem !important;
+    width: 1.25rem !important;
+    height: 1.25rem !important;
+}
+
+.custom-control-lg .custom-control-label {
+    margin-left: 0.5rem !important;
+    font-size: 1rem !important;
+}
+
+.rbt-token{
+  color: #222 !important;
+}
