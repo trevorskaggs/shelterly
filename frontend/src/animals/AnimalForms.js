@@ -1,19 +1,20 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
 import axios from "axios";
-import { Link, navigate, useQueryParams } from 'raviger';
+import { navigate, useQueryParams } from 'raviger';
 import { Field, Form, Formik } from "formik";
 import { Col, Image } from 'react-bootstrap';
 import { Button, ButtonGroup, Form as BootstrapForm } from "react-bootstrap";
 import { Card } from 'react-bootstrap';
 import * as Yup from 'yup';
+import { AuthContext } from "../accounts/AccountsReducer";
+import { DateTimePicker, DropDown, ImageUploader, TextInput } from '.././components/Form.js';
+import { catAgeChoices, dogAgeChoices, horseAgeChoices, otherAgeChoices, catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, speciesChoices, sexChoices, dogSizeChoices, catSizeChoices, horseSizeChoices, otherSizeChoices, statusChoices, unknownChoices } from './constants';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faMinusSquare,
-} from '@fortawesome/free-solid-svg-icons';
-import { DateTimePicker, DropDown, ImageUploader, TextInput } from '../components/Form.js';
-import { catAgeChoices, dogAgeChoices, horseAgeChoices, otherAgeChoices, catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, speciesChoices, sexChoices, dogSizeChoices, catSizeChoices, horseSizeChoices, otherSizeChoices, statusChoices, unknownChoices } from './constants'
+import { faArrowAltCircleLeft, faMinusSquare } from '@fortawesome/free-solid-svg-icons';
 
 export const AnimalForm = ({id}) => {
+
+  const { state, dispatch } = useContext(AuthContext);
 
   // Determine if this is an intake workflow.
   var is_intake = window.location.pathname.includes("intake")
@@ -31,6 +32,8 @@ export const AnimalForm = ({id}) => {
   var is_first_responder = (first_responder === 'true');
 
   // Track species selected and update choice lists accordingly.
+  const speciesRef = useRef(null);
+  const sexRef = useRef(null);
   const sizeRef = useRef(null);
   const ageRef = useRef(null);
   const pcolorRef = useRef(null);
@@ -185,13 +188,8 @@ export const AnimalForm = ({id}) => {
           if (id) {
             axios.put('/animals/api/animal/' + id + '/', formData)
             .then(function() {
-              // If the animal has an SR, redirect to the SR.
-              if (values.request) {
-                navigate('/hotline/servicerequest/' + values.request);
-              }
-              // If the animal has an owner ID, redirect to the owner details.
-              else if (values.owner) {
-                navigate('/hotline/owner/' + values.owner);
+              if (state.prevLocation) {
+                navigate(state.prevLocation);
               }
               else {
                 navigate('/animals/animal/' + id);
@@ -246,27 +244,11 @@ export const AnimalForm = ({id}) => {
       >
         {props => (
           <Card border="secondary" className="mt-5">
-            <Card.Header as="h5">{!id ? "New" : "Update"} Animal</Card.Header>
+            <Card.Header as="h5">{id ? <span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>: ""}{!id ? "New" : "Update"} Animal</Card.Header>
             <Card.Body>
-              <BootstrapForm as={Form}>
-                <Field type="hidden" value={owner_id||""} name="owner" id="owner"></Field>
-                <Field type="hidden" value={servicerequest_id||""} name="request" id="request"></Field>
-                <BootstrapForm.Row hidden={!id} className="mb-3">
-                  <Col xs="3">
-                    <DropDown
-                      id="status"
-                      name="status"
-                      type="text"
-                      label="Status"
-                      options={statusChoices}
-                      value={props.values.status||''}
-                      isClearable={false}
-                      onChange={(instance) => {
-                        props.setFieldValue("status", instance.value);
-                      }}
-                    />
-                  </Col>
-                </BootstrapForm.Row>
+            <BootstrapForm as={Form}>
+              <Field type="hidden" value={owner_id||""} name="owner" id="owner"></Field>
+              <Field type="hidden" value={servicerequest_id||""} name="request" id="request"></Field>
                 <BootstrapForm.Row>
                   <TextInput
                     id="name"
@@ -281,6 +263,8 @@ export const AnimalForm = ({id}) => {
                       id="sexDropDown"
                       name="sex"
                       type="text"
+                      key={`my_unique_sex_select_key__${props.values.sex}`}
+                      ref={sexRef}
                       options={sexChoices}
                       value={props.values.sex||''}
                     />
@@ -294,6 +278,8 @@ export const AnimalForm = ({id}) => {
                       name="species"
                       type="text"
                       xs="2"
+                      key={`my_unique_species_select_key__${props.values.species}`}
+                      ref={speciesRef}
                       options={speciesChoices}
                       value={props.values.species||data.species}
                       isClearable={false}
@@ -303,7 +289,7 @@ export const AnimalForm = ({id}) => {
                         ageRef.current.select.clearValue();
                         pcolorRef.current.select.clearValue();
                         scolorRef.current.select.clearValue();
-                        props.setFieldValue("species", instance.value);
+                        props.setFieldValue("species", instance === null ? '' : instance.value);
                       }}
                     />
                   </Col>
@@ -315,6 +301,7 @@ export const AnimalForm = ({id}) => {
                       type="text"
                       xs="4"
                       isClearable={false}
+                      key={`my_unique_size_select_key__${props.values.size}`}
                       ref={sizeRef}
                       options={sizeChoices[props.values.species]}
                       value={props.values.size||''}
@@ -328,6 +315,7 @@ export const AnimalForm = ({id}) => {
                       name="age"
                       type="text"
                       xs="4"
+                      key={`my_unique_age_select_key__${props.values.age}`}
                       ref={ageRef}
                       options={ageChoices[props.values.species]}
                       value={props.values.age||''}
@@ -343,6 +331,7 @@ export const AnimalForm = ({id}) => {
                       name="pcolor"
                       type="text"
                       className="mb-3"
+                      key={`my_unique_pcolor_select_key__${props.values.pcolor}`}
                       ref={pcolorRef}
                       options={colorChoices[props.values.species]}
                       value={props.values.pcolor||''}
@@ -353,6 +342,7 @@ export const AnimalForm = ({id}) => {
                       id="scolor"
                       name="scolor"
                       type="text"
+                      key={`my_unique_scolor_select_key__${props.values.scolor}`}
                       ref={scolorRef}
                       options={colorChoices[props.values.species]}
                       value={props.values.scolor||''}
@@ -427,10 +417,11 @@ export const AnimalForm = ({id}) => {
                     name="last_seen"
                     id="last_seen"
                     xs="4"
+                    key={`my_unique_last_seen_select_key__${props.values.last_seen}`}
                     onChange={(date, dateStr) => {
                       props.setFieldValue("last_seen", dateStr)
                     }}
-                    value={data.last_seen||null}
+                    value={props.values.last_seen||null}
                   />
                 </BootstrapForm.Row>
                 <p className="mb-0">Image Files</p>
@@ -499,9 +490,9 @@ export const AnimalForm = ({id}) => {
             </BootstrapForm>
           </Card.Body>
           <ButtonGroup>
-            <Button type="button" className="btn btn-success mr-1" onClick={() => {setAddAnother(false); props.submitForm()}}>Save</Button>
-            {!id ? <Button type="button" className="btn btn-primary mr-1" onClick={() => {setAddAnother(true); props.submitForm()}}>Add Another</Button> : ""}
-            <Link className="btn btn-secondary" href={servicerequest_id ? "/hotline/servicerequest/" + servicerequest_id : "/"}>Cancel</Link>
+            <Button type="button" className="btn btn-primary" onClick={() => {setAddAnother(false); props.submitForm()}}>Save</Button>
+            {!id ? <Button type="button" className="btn btn-success" onClick={() => {setAddAnother(true); props.submitForm()}}>Add Another</Button> : ""}
+            <Button variant="secondary" type="button" onClick={() => {props.resetForm(data);if (!data.species) {setPlaceholder("Select a species...");}}}>Reset</Button>
           </ButtonGroup>
           </Card>
         )}

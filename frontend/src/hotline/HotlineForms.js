@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
 import { Link, navigate, useQueryParams } from 'raviger';
 import { Field, Form, Formik } from 'formik';
@@ -12,6 +12,9 @@ import * as Yup from 'yup';
 import { Switch } from 'formik-material-ui';
 import 'flatpickr/dist/themes/light.css';
 import { AddressLookup, DateTimePicker, DropDown, TextInput } from '../components/Form';
+import { AuthContext } from "../accounts/AccountsReducer";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faArrowAltCircleLeft } from '@fortawesome/free-solid-svg-icons';
 
 const state_options = [{ value: 'AL', label: "AL" }, { value: 'AK', label: "AK" }, { value: 'AZ', label: "AZ" }, { value: 'AR', label: "AR" }, { value: 'CA', label: "CA" }, { value: 'CO', label: "CO" }, { value: 'CT', label: "CT" },
 { value: 'DE', label: "DE" }, { value: 'FL', label: "FL" }, { value: 'GA', label: "GA" }, { value: 'HI', label: "HI" }, { value: 'ID', label: "ID" }, { value: 'IL', label: "IL" }, { value: 'IN', label: "IN" },
@@ -23,6 +26,8 @@ const state_options = [{ value: 'AL', label: "AL" }, { value: 'AK', label: "AK" 
 
 // Form for creating new Service Request objects.
 export function ServiceRequestForm({ id }) {
+
+  const { state, dispatch } = useContext(AuthContext);
 
   // Identify any query param data.
   const [queryParams] = useQueryParams();
@@ -148,7 +153,12 @@ export function ServiceRequestForm({ id }) {
           if (id) {
             axios.put('/hotline/api/servicerequests/' + id + '/', values)
             .then(function() {
-              navigate('/hotline/servicerequest/' + id);
+              if (state.prevLocation) {
+                navigate(state.prevLocation);
+              }
+              else {
+                navigate('/hotline/servicerequest/' + id);
+              }
             })
             .catch(error => {
               console.log(error.response);
@@ -175,7 +185,7 @@ export function ServiceRequestForm({ id }) {
     >
       {props => (
         <Card border="secondary" className="mt-5" style={{width:"auto"}}>
-        <Card.Header as="h5">Service Request Form</Card.Header>
+        <Card.Header as="h5">{id ? <span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span> : ""}Service Request Form</Card.Header>
         <Card.Body>
         <BootstrapForm as={Form}>
           <Field type="hidden" value={owner_id || ""} name="owner" id="owner"></Field>
@@ -191,7 +201,8 @@ export function ServiceRequestForm({ id }) {
               onChange={(date, dateStr) => {
                 props.setFieldValue("recovery_time", dateStr)
               }}
-              value={data.recovery_time || null}
+              key={`my_unique_recovery_time_select_key__${props.values.recovery_time}`}
+              value={props.values.recovery_time || null}
             />
           </BootstrapForm.Row>
           <BootstrapForm.Row hidden={!id} className="mt-3">
@@ -213,7 +224,8 @@ export function ServiceRequestForm({ id }) {
                 onChange={(date, dateStr) => {
                   props.setFieldValue("owner_notification_tstamp", dateStr)
                 }}
-                value={data.owner_notification_tstamp || null}
+                key={`my_unique_owner_notification_tstamp_select_key__${props.values.owner_notification_tstamp}`}
+                value={props.values.owner_notification_tstamp || null}
               />
             </BootstrapForm.Row>
             <BootstrapForm.Row hidden={!id} className="mt-3">
@@ -319,26 +331,24 @@ export function ServiceRequestForm({ id }) {
         </BootstrapForm>
         </Card.Body>
         <ButtonGroup size="lg">
-            <Button type="submit" onClick={() => { props.submitForm()}}>Save</Button>
-            <Button as={Link} href="/hotline/" variant="info">Cancel</Button>
-          </ButtonGroup>
-          <Modal show={error.show} onHide={handleClose}>
-            <Modal.Header closeButton>
-              <Modal.Title>Duplicate Request Address Found</Modal.Title>
-            </Modal.Header>
-
-            <Modal.Body>
-              <p>
-                {error && error.error[0]}
-                &nbsp;Click <Link href={'/hotline/servicerequest/' + error.error[1]} target="_blank">here</Link> to view this Request.
-              </p>
-            </Modal.Body>
-
-            <Modal.Footer>
-              <Button variant="secondary" onClick={handleClose}>Close</Button>
-            </Modal.Footer>
-          </Modal>
-        </Card>
+          <Button type="submit" onClick={() => { props.submitForm()}}>Save</Button>
+          <Button variant="secondary" type="button" onClick={() => {props.resetForm(data)}}>Reset</Button>
+        </ButtonGroup>
+        <Modal show={error.show} onHide={handleClose}>
+          <Modal.Header closeButton>
+            <Modal.Title>Duplicate Request Address Found</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <p>
+              {error && error.error[0]}
+              &nbsp;Click <Link href={'/hotline/servicerequest/' + error.error[1]} target="_blank">here</Link> to view this Request.
+            </p>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={handleClose}>Close</Button>
+          </Modal.Footer>
+        </Modal>
+      </Card>
       )}
     </Formik>
   );
