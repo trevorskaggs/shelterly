@@ -23,6 +23,13 @@ const header_style = {
 export function ShelterDetailsTable({id}) {
 
   const [data, setData] = useState({
+    name: '',
+    address: '',
+    city: '',
+    state: '',
+    zip_code: '',
+    description: '',
+    image: '',
     buildings: [],
   });
 
@@ -30,16 +37,16 @@ export function ShelterDetailsTable({id}) {
   useEffect(() => {
     let source = axios.CancelToken.source();
     const fetchShelterData = async () => {
-    // Fetch Shelter Details data.
-    await axios.get('/shelter/api/shelter/' + id + '/', {
+      // Fetch Shelter Details data.
+      await axios.get('/shelter/api/shelter/' + id + '/', {
         cancelToken: source.token,
-    })
-    .then(response => {
+      })
+      .then(response => {
         setData(response.data);
-    })
-    .catch(e => {
+      })
+      .catch(e => {
         console.log(e);
-    });
+      });
     };
     fetchShelterData();
   }, [id]);
@@ -51,43 +58,44 @@ export function ShelterDetailsTable({id}) {
       <CardGroup>
         <Card>
           <ListGroup.Item>
-            <p><b>Name:</b> {String(data.name)}</p>
-            <p><b>Adress:</b> {String(data.address)}</p>
-            <p><b>City:</b> {String(data.city)}</p>
-            <p><b>State:</b> {String(data.state)}</p>
-            <p><b>Zip:</b> {String(data.zip_code)}</p>
-            <p><b>Description:</b> {String(data.description)}</p>
-            <p><b>Image:</b> {String(data.image)}</p>
+            <p><b>Name:</b> {data.name}</p>
+            <p><b>Adress:</b> {data.address}</p>
+            <p><b>City:</b> {data.city}</p>
+            <p><b>State:</b> {data.state}</p>
+            <p><b>Zip:</b> {data.zip_code}</p>
+            <p><b>Description:</b> {data.description}</p>
           </ListGroup.Item>  
         </Card>
       </CardGroup>
       <CardGroup>
         <Card>
           <Card.Body>
+          <Card.Title className="">
+            <h4 className="mb-0">Buildings<Link href={"/shelter/building/new?shelter_id=" + id}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link></h4>
+          </Card.Title>
+          <ListGroup variant="flush">
             {!data.buildings.length ? <span><ListGroup.Item><Link href={"/shelter/building/new?shelter_id=" + id}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link>&nbsp;<b>Add Building</b></ListGroup.Item></span> :
               <span>{data.buildings.map(building => (
                 <ListGroup.Item key={building.id}>
-                  <Link href={"/shelter//building/new?shelter_id=" + id}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link>
-                  &nbsp;<b>Building:</b> {building.name}
+                  &nbsp;<b>Name:</b> {building.name}
                   <Link href={"/shelter/building/" + building.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
                   <Link href={"/shelter/building/edit/" + building.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
-                    <ListGroup.Item>
-                    {!building.rooms.length ? <span><ListGroup.Item><Link href={"/shelter/building/" + building.id + "/room/new"}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link>&nbsp;<b>Add Rooms</b></ListGroup.Item></span>: 
-                      <span>
-                        {building.rooms.map(room => (
-                          <ListGroup.Item key={room.id}>
-                            <Link href={"/shelter/building/room/new?building_id=" + building.id}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link>
-                            &nbsp;<b>Rooms:</b> {room.name}
-                            <Link href={"/shelter/room/" + room.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
-                            <Link href={"/shelter/room/edit/" + room.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
-                          </ListGroup.Item>
-                        ))}
-                      </span>
-                    }
-                    </ListGroup.Item>
+                  {!building.rooms.length ? <span><ListGroup.Item><Link href={"/shelter/building/room/new?building_id=" + building.id}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link>&nbsp;<b>Add Rooms</b></ListGroup.Item></span>: 
+                    <span>
+                      {building.rooms.map(room => (
+                        <ListGroup.Item key={room.id}>
+                          <Link href={"/shelter/building/room/new?building_id=" + building.id}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link>
+                          &nbsp;<b>Rooms:</b> {room.name}
+                          <Link href={"/shelter/room/" + room.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
+                          <Link href={"/shelter/room/edit/" + room.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
+                        </ListGroup.Item>
+                      ))}
+                    </span>
+                  }
                 </ListGroup.Item>
               ))}</span>
             }
+            </ListGroup>
           </Card.Body>
         </Card>
       </CardGroup>
@@ -111,17 +119,16 @@ export function BuildingDetailsTable({id}) {
   useEffect(() => {
     let source = axios.CancelToken.source();
     const fetchBuildingData = async () => {
-    // Fetch Building Details data.
-    await axios.get('/shelter/api/building/' + id, {
+      // Fetch Building Details data.
+      await axios.get('/shelter/api/building/' + id, {
         cancelToken: source.token,
-    })
-    .then(response => {
+      })
+      .then(response => {
         setData(response.data);
-        console.log(response.data);
-    })
-    .catch(e => {
+      })
+      .catch(e => {
         console.log(e);
-    });
+      });
     };
     fetchBuildingData();
   }, [id]);
@@ -130,29 +137,31 @@ export function BuildingDetailsTable({id}) {
     <>
       <h1 style={header_style}>{data.name}</h1>
       <br/>
-      <CardGroup>
         <Card>
           <ListGroup.Item>
               <p><b>Name:</b> {data.name}</p>
-              <p><b>Shelter:</b> {data.shelter}</p>
+              <p><b>Shelter:</b> {data.shelter_name}<Link href={"/shelter/" + data.shelter}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></p>
               <p><b>Description:</b> {data.description}</p>
           </ListGroup.Item>
         </Card>
-      </CardGroup>
-      <CardGroup>
-        <Card>
-          {data.rooms == undefined ? <span><ListGroup.Item><p>No Rooms Found</p></ListGroup.Item></span> :
+        <Card className="mt-3">
+        <Card.Body>
+          <Card.Title className="">
+            <h4 className="mb-0">Rooms<Link href={"/shelter/building/room/new?building_id=" + id}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link></h4>
+          </Card.Title>
+          <ListGroup variant="flush">
+          {data.rooms === undefined ? <span><ListGroup.Item><p>No Rooms Found</p></ListGroup.Item></span> :
             <span>{data.rooms.map(room => (
-              <ListGroup.Item>
-                <Link href={"/shelter/building/room/new?building_id=" + id}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link>
-                &nbsp;<b>Room:</b> {room.name}
+              <ListGroup.Item key={room.id}>
+                &nbsp;<b>Name:</b> {room.name}
                 <Link href={"/shelter/room/" + room.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
                 <Link href={"/shelter/room/edit/" + room.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
               </ListGroup.Item>
             ))}</span>
           } 
+          </ListGroup>
+          </Card.Body>
         </Card>
-      </CardGroup>
       <hr/>
       <div style={btn_style}>
         <Link href={"/shelter/building/room/new?building_id=" + id} style={link_style} className="btn btn-success btn-lg btn-block mb-2">ADD ROOM</Link>

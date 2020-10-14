@@ -14,7 +14,13 @@ class RoomSerializer(serializers.ModelSerializer):
         )
 
 class BuildingSerializer(serializers.ModelSerializer):
+    shelter_name = serializers.SerializerMethodField()
     rooms = RoomSerializer(source='room_set', many=True, required=False, read_only=True)
+
+    # Custom field for the shelter name.
+    def get_shelter_name(self, obj):
+        return obj.shelter.name
+
 
     class Meta:
         model = Building
@@ -22,6 +28,7 @@ class BuildingSerializer(serializers.ModelSerializer):
             'id',
             'name',
             'shelter',
+            'shelter_name',
             'description',
             'rooms'
         )

@@ -290,19 +290,21 @@ export const RoomForm = ({id}) => {
   useEffect(() => {
     let source = axios.CancelToken.source();
 
-    const fetchRoomData = async () => {
-      // Fetch ServiceRequest data.
-      await axios.get('/shelter/api/room/' + id + '/', {
-        cancelToken: source.token,
-      })
-      .then(response => {
-        setData(response.data);
-      })
-      .catch(error => {
-        console.log(error.response);
-      });
-    };
-    fetchRoomData();
+    if (id) {
+      const fetchRoomData = async () => {
+        // Fetch ServiceRequest data.
+        await axios.get('/shelter/api/room/' + id + '/', {
+          cancelToken: source.token,
+        })
+        .then(response => {
+          setData(response.data);
+        })
+        .catch(error => {
+          console.log(error.response);
+        });
+      };
+      fetchRoomData();
+    }
 
     // Cleanup.
     return () => {
