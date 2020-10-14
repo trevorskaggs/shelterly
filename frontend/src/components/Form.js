@@ -99,12 +99,7 @@ const DropDown = React.forwardRef((props, ref) => {
   };
 
   function handleOptionChange(selection) {
-    if (selection) {
-      setFieldValue(props.name, selection.value);
-    }
-    else {
-      setFieldValue(props.name, '');
-    }
+    setFieldValue(props.name, selection === null ? '' : selection.value);
   }
 
   function updateBlur() {
@@ -114,7 +109,7 @@ const DropDown = React.forwardRef((props, ref) => {
   return (
     <>
       <Form.Label >{props.label}</Form.Label>
-      <SimpleValue {...field} options={props.options} value={props.value}>
+      <SimpleValue {...field} options={props.options}>
          {simpleProps => <Select isDisabled={props.disabled} ref={ref} styles={customStyles} isClearable={true} onBlur={updateBlur} onChange={handleOptionChange} {...props} {...simpleProps} />}
       </SimpleValue>
       {meta.touched && meta.error ? <div style={{ color: "red", marginTop: ".5rem", fontSize: "80%" }}>{meta.error}</div> : ""}
