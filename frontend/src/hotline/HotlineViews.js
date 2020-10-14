@@ -164,7 +164,7 @@ export function ServiceRequestView({id}) {
               <span className="d-flex flex-wrap align-items-end">
               {data.animals.map(animal => (
                 <Card className="mr-3" style={{border:"none"}}>
-                  <ReactImageFallback style={{width:"131px"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} />
+                  <ReactImageFallback style={{width:"151px"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} />
                   <Card.Text className="text-center">
                     <div>
                       {animal.name||"Unknown"}
