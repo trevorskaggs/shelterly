@@ -39,6 +39,8 @@ export function AnimalView({id}) {
     front_image: null,
     side_image: null,
     extra_images: [],
+    full_address:'',
+    owner_object: {first_name:'', last_name:'', phone:'', email:''}
   });
 
   // Hook for initializing data.
@@ -74,50 +76,11 @@ export function AnimalView({id}) {
     <hr/>
     <div className="row mb-2">
       <div className="col-6 d-flex" style={{marginRight:"-15px"}}>
-        <Card className="mb-2 border rounded" style={{width:"100%"}}>
+        <Card className="border rounded d-flex" style={{width:"100%"}}>
           <Card.Body>
             <Card.Title>
-              Information
-              {data.aggressive ?
-                <OverlayTrigger
-                  key={"aggressive"}
-                  placement="top"
-                  overlay={
-                    <Tooltip id={`tooltip-aggressive`}>
-                      Animal is aggressive
-                    </Tooltip>
-                  }
-                >
-                  <FontAwesomeIcon icon={faShieldAlt} size="sm" className="ml-1" />
-                </OverlayTrigger> :
-              ""}
-              {data.fixed ?
-                <OverlayTrigger
-                  key={"fixed"}
-                  placement="top"
-                  overlay={
-                    <Tooltip id={`tooltip-fixed`}>
-                      Animal is fixed or neutered
-                    </Tooltip>
-                  }
-                >
-                  <FontAwesomeIcon icon={faCut} size="sm" className="ml-1" />
-                </OverlayTrigger> :
-              ""}
-              {data.injured ?
-                <OverlayTrigger
-                  key={"injured"}
-                  placement="top"
-                  overlay={
-                    <Tooltip id={`tooltip-injured`}>
-                      Animal is injured
-                    </Tooltip>
-                  }
-                >
-                  <FontAwesomeIcon icon={faBandAid} size="sm" className="ml-1" />
-                </OverlayTrigger> :
-              ""}
-              {data.confined ?
+              <h4>Information
+              {data.confined === 'yes' ?
                 <OverlayTrigger
                   key={"confined"}
                   placement="top"
@@ -130,116 +93,117 @@ export function AnimalView({id}) {
                   <FontAwesomeIcon icon={faWarehouse} size="sm" className="ml-1" />
                 </OverlayTrigger> :
               ""}
+              {data.fixed === 'yes' ?
+                <OverlayTrigger
+                  key={"fixed"}
+                  placement="top"
+                  overlay={
+                    <Tooltip id={`tooltip-fixed`}>
+                      Animal is fixed or neutered
+                    </Tooltip>
+                  }
+                >
+                  <FontAwesomeIcon icon={faCut} size="sm" className="ml-1" />
+                </OverlayTrigger> :
+              ""}
+              {data.aggressive === 'yes' ?
+                <OverlayTrigger
+                  key={"aggressive"}
+                  placement="top"
+                  overlay={
+                    <Tooltip id={`tooltip-aggressive`}>
+                      Animal is aggressive
+                    </Tooltip>
+                  }
+                >
+                  <FontAwesomeIcon icon={faShieldAlt} size="sm" className="ml-1" />
+                </OverlayTrigger> :
+              ""}
+              {data.injured === 'yes' ?
+                <OverlayTrigger
+                  key={"injured"}
+                  placement="top"
+                  overlay={
+                    <Tooltip id={`tooltip-injured`}>
+                      Animal is injured
+                    </Tooltip>
+                  }
+                >
+                  <FontAwesomeIcon icon={faBandAid} size="sm" className="ml-1" />
+                </OverlayTrigger> :
+              ""}
+            </h4>
             </Card.Title>
-              <hr/>
-              <ListGroup variant="flush">
-                <ListGroup.Item><b>Name:</b> {data.name||"Unknown"}</ListGroup.Item>
-                <ListGroup.Item><b>Species:</b> {data.species}</ListGroup.Item>
-                <ListGroup.Item><b>Age:</b> {data.age||"Unknown"}</ListGroup.Item>
-                <ListGroup.Item><b>Sex:</b> {data.sex||"Unknown"}</ListGroup.Item>
-                <ListGroup.Item><b>Size:</b> {data.size}</ListGroup.Item>
-                {data.last_seen ? <ListGroup.Item><b>Last Seen:</b> <Moment format="LLL">{data.last_seen}</Moment></ListGroup.Item> : ""}
-                {data.pcolor ? <ListGroup.Item><b>Primary Color:</b> {data.pcolor}</ListGroup.Item> : ""}
-                {data.scolor ? <ListGroup.Item><b>Secondary Color:</b> {data.scolor}</ListGroup.Item> : ""}
-                {data.color_notes ? <ListGroup.Item><b>Color Notes:</b> {data.color_notes}</ListGroup.Item> : ""}
-                {data.behavior_notes ? <ListGroup.Item><b>Behavior Notes:</b> {data.behavior_notes}</ListGroup.Item> : ""}
-              </ListGroup>
-            </Card.Body>
-          </Card>
-        </div>
-        <Col xs={6} className="d-flex mb-2 pr-0">
-          <div className="slide-container flex-grow-1 border rounded pl-0 pr-0" style={{width:"490px", height:"322px"}}>
-            <Carousel className="carousel-wrapper" showThumbs={false} showStatus={false}>
-              {images.map(image => (
-                <div key={image} className="image-container">
-                  <img src={image} />
+            <hr/>
+            <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px", textTransform:"capitalize"}}>
+              <ListGroup.Item>
+                <div className="row">
+                  <span className="col"><b>Name:</b> {data.name||"Unknown"}</span>
                 </div>
-              ))}
-            </Carousel>
-          </div>
-        </Col>
+              </ListGroup.Item>
+              <ListGroup.Item>
+                <div className="row">
+                  <span className="col-6"><b>Species:</b> {data.species}</span>
+                  <span className="col-6"><b>Sex:</b> {data.sex||"Unknown"}</span>
+                </div>
+              </ListGroup.Item>
+              <ListGroup.Item>
+                <div className="row">
+                  <span className="col-6"><b>Age:</b> {data.age||"Unknown"}</span>
+                  <span className="col-6"><b>Size:</b> {data.size}</span>
+                </div>
+              </ListGroup.Item>
+              {data.last_seen ? <ListGroup.Item><b>Last Seen:</b> <Moment format="LLL">{data.last_seen}</Moment></ListGroup.Item> : ""}
+            </ListGroup>
+            <hr/>
+            <Card.Title>
+              <h4 className="mb-0">Owner<span style={{fontSize:18}}>{data.owner_object.first_name !== 'Unknown' ? <Link href={"/hotline/owner/" + data.owner}> <FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link>:""}<Link href={"/hotline/owner/edit/" + data.owner}> <FontAwesomeIcon icon={faEdit} size="sm" inverse /></Link></span></h4>
+            </Card.Title>
+            <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
+              <ListGroup.Item><b>Name: </b>{data.owner_object.first_name} {data.owner_object.last_name}</ListGroup.Item>
+              {data.owner_object.phone ? <ListGroup.Item><b>Telephone: </b>{data.owner_object.phone}</ListGroup.Item> : ""}
+              {data.owner_object.email ? <ListGroup.Item><b>Email: </b>{data.owner_object.email}</ListGroup.Item> : ""}
+            </ListGroup>
+            <hr/>
+            <Card.Title>
+              <h4 className="mb-0">Location</h4>
+            </Card.Title>
+            <ListGroup variant="flush">
+              <ListGroup.Item style={{marginTop:"-13px"}}><b>Address:</b> {data.full_address}</ListGroup.Item>
+            </ListGroup>
+          </Card.Body>
+        </Card>
       </div>
-      <div className="row mb-2">
-        <div className="col-6 d-flex">
-          <Card className="mb-2 border rounded" style={{width:"100%"}}>
-            <Card.Body>
-              <Card.Title>
-                <h4 className="mb-0">Location
-                  {/* {data.verbal_permission ?
-                  <OverlayTrigger
-                    key={"verbal"}
-                    placement="top"
-                    overlay={
-                      <Tooltip id={`tooltip-verbal`}>
-                        Verbal permission granted
-                      </Tooltip>
-                    }
-                  >
-                    <FontAwesomeIcon icon={faComment} size="sm" className="ml-1" />
-                  </OverlayTrigger> : ""}
-                  {data.key_provided ?
-                  <OverlayTrigger
-                    key={"key"}
-                    placement="top"
-                    overlay={
-                      <Tooltip id={`tooltip-key`}>
-                        Key provided
-                      </Tooltip>
-                    }
-                  >
-                    <FontAwesomeIcon icon={faKey} size="sm" className="ml-1" />
-                  </OverlayTrigger> : ""}
-                  {data.accessible ?
-                  <OverlayTrigger
-                    key={"accessible"}
-                    placement="top"
-                    overlay={
-                      <Tooltip id={`tooltip-accessible`}>
-                        Easily accessible
-                      </Tooltip>
-                    }
-                  >
-                    <FontAwesomeIcon icon={faCar} size="sm" className="ml-1" />
-                  </OverlayTrigger> : ""}
-                  {data.turn_around ?
-                  <OverlayTrigger
-                    key={"turnaround"}
-                    placement="top"
-                    overlay={
-                      <Tooltip id={`tooltip-turnaround`}>
-                        Room to turn around
-                      </Tooltip>
-                    }
-                  >
-                    <FontAwesomeIcon icon={faTrailer} size="sm" className="ml-1" />
-                  </OverlayTrigger> : ""} */}
-                </h4>
-              </Card.Title>
-              <hr/>
-              <ListGroup variant="flush">
-                {data.owner ? <ListGroup.Item style={{marginTop:"-13px"}}><b>Address:</b> {data.owner_object.address ? <span>{data.owner_object.full_address}</span> : 'N/A'}</ListGroup.Item> :""}
-                {/* <ListGroup.Item style={{marginBottom:"-13px"}}><b>Directions:</b> {data.directions}</ListGroup.Item> */}
-              </ListGroup>
-            </Card.Body>
-          </Card>
+      <Col xs={6} className="pr-0" style={{width:"100%"}}>
+        <div className="slide-container flex-grow-1 border rounded pl-0 pr-0" style={{width:"auto", height:"322px"}}>
+          <Carousel className="carousel-wrapper" showThumbs={false} showStatus={false}>
+            {images.map(image => (
+              <div key={image} className="image-container">
+                <img src={image} />
+              </div>
+            ))}
+          </Carousel>
         </div>
-        <div className="col-6 d-flex pl-0">
-          <Card className="mb-2 border rounded" style={{width:"100%"}}>
-            <Card.Body>
-              {data.owner ?
-              <span>
-                <Card.Title>
-                  <h4 className="mb-0">Owner: <span style={{fontSize:18}}>{data.owner_object.first_name} {data.owner_object.last_name} {data.owner_object.first_name !== 'Unknown' ? <Link href={"/hotline/owner/" + data.owner}> <FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link>:""}<Link href={"/hotline/owner/edit/" + data.owner}> <FontAwesomeIcon icon={faEdit} size="sm" inverse /></Link></span></h4>
-                </Card.Title>
-                <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
-                  {data.owner_object.phone ? <ListGroup.Item><b>Telephone: </b>{data.owner_object.phone}</ListGroup.Item> : ""}
-                  {data.owner_object.email ? <ListGroup.Item><b>Email: </b>{data.owner_object.email}</ListGroup.Item> : ""}
-                </ListGroup>
-              </span> : ""}
-            </Card.Body>
-          </Card>
-        </div>
-      </div>
+        <Card className="border rounded d-flex mt-3" style={{width:"100%"}}>
+          <Card.Body>
+            <Card.Title>
+              <h4>Description</h4>
+            </Card.Title>
+            <hr/>
+            <ListGroup variant="flush">
+              <ListGroup.Item style={{marginTop:"-13px", textTransform:"capitalize"}}>
+              <div className="row">
+                <span className="col-6"><b>Primary Color:</b> {data.pcolor||"N/A"}</span>
+                <span className="col-6"><b>Secondary Color:</b> {data.scolor||"N/A"}</span>
+              </div>
+              </ListGroup.Item>
+              {data.color_notes ? <ListGroup.Item><b>Color Notes:</b> {data.color_notes}</ListGroup.Item> : ""}
+              {data.behavior_notes ? <ListGroup.Item><b>Behavior Notes:</b> {data.behavior_notes}</ListGroup.Item> : ""}
+            </ListGroup>
+          </Card.Body>
+        </Card>
+      </Col>
+    </div>
     </>
   );
 };

@@ -424,7 +424,7 @@ export const AnimalForm = ({id}) => {
                     value={props.values.last_seen||null}
                   />
                 </BootstrapForm.Row>
-                <p className="mb-0">Image Files</p>
+                <p className="mb-0 mt-3">Image Files</p>
                 <BootstrapForm.Row className="align-items-end">
                   {data.front_image ?
                     <span className="mt-2 ml-1 mr-3">
