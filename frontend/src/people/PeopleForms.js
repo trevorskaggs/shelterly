@@ -186,7 +186,7 @@ export const PersonForm = ({ id }) => {
       >
         {props => (
           <Card border="secondary" className="mt-5">
-          <Card.Header as="h5" className="pl-3"> <span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
+          <Card.Header as="h5" className="pl-3"> {!is_owner || (is_owner && (id || !reporter_id)) ? <span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span> : ""}
 {is_owner ? "Owner" : "Reporter"} Information</Card.Header>
           <Card.Body>
           <BootstrapForm noValidate>

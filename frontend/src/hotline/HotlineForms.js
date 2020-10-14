@@ -174,7 +174,7 @@ export function ServiceRequestForm({ id }) {
     >
       {props => (
         <Card border="secondary" className="mt-5" style={{width:"auto"}}>
-        <Card.Header as="h5"><span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>Service Request Form</Card.Header>
+        <Card.Header as="h5">{id ? <span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span> : ""}Service Request Form</Card.Header>
         <Card.Body>
         <BootstrapForm as={Form}>
           <Field type="hidden" value={owner_id || ""} name="owner" id="owner"></Field>

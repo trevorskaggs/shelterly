@@ -244,7 +244,7 @@ export const AnimalForm = ({id}) => {
       >
         {props => (
           <Card border="secondary" className="mt-5">
-            <Card.Header as="h5"><span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>{!id ? "New" : "Update"} Animal</Card.Header>
+            <Card.Header as="h5">{id ? <span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>: ""}{!id ? "New" : "Update"} Animal</Card.Header>
             <Card.Body>
             <BootstrapForm as={Form}>
               <Field type="hidden" value={owner_id||""} name="owner" id="owner"></Field>
