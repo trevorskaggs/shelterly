@@ -14,6 +14,9 @@ const state_options = [{value:'AL', label:"AL"},{value:'AK', label:"AK"},{value:
 {value:'OK', label:"OK"},{value:'PA', label:"PA"},{value:'RI', label:"RI"},{value:'SC', label:"SC"},{value:'SD', label:"SD"},{value:'TN', label:"TN"},{value:'TX', label:"TX"},
 {value:'VA', label:"VA"},{value:"VT", label:"VT"},{value:'WA', label:"WA"},{value:'WV', label:"WV"},{value:'WI', label:"WI"},{value:'WY', label:"WY"},]
 
+// Regex validators.
+const nameRegex = /^[a-z ,.'-]+$/i
+
 export const ShelterForm = ({id}) => {
 
   // Initial shelter data.
@@ -59,6 +62,26 @@ export const ShelterForm = ({id}) => {
       <Formik
         initialValues={data}
         enableReinitialize={true}
+        validationSchema={Yup.object({
+          name: Yup.string()
+            .max(50, 'Must be 50 characters or less')
+            .matches(nameRegex, "Name is not valid")
+            .required('Required'),
+          description: Yup.string()
+            .max(400, 'Must be 400 characters or less'),
+          address: Yup.string()
+            .required('Required'),
+          apartment: Yup.string()
+            .max(10, 'Must be 10 characters or less'),
+          city: Yup.string(),
+          state: Yup.string(),
+          zip_code: Yup.string()
+            .max(10, 'Must be 10 characters or less'),
+          latitude: Yup.number()
+            .nullable(),
+          longitude: Yup.number()
+            .nullable(),
+        })}
         onSubmit={(values, { setSubmitting }) => {
           if (id) {
             axios.put('/shelter/api/shelter/' + id + '/', values)
@@ -214,6 +237,14 @@ export const BuildingForm = ({id}) => {
       <Formik
         initialValues={data}
         enableReinitialize={true}
+        validationSchema={Yup.object({
+          name: Yup.string()
+            .max(50, 'Must be 50 characters or less')
+            .matches(nameRegex, "Name is not valid")
+            .required('Required'),
+          description: Yup.string()
+            .max(400, 'Must be 400 characters or less'),
+        })}
         onSubmit={(values, { setSubmitting }) => {
           setTimeout(() => {
             if (id) {
@@ -317,6 +348,14 @@ export const RoomForm = ({id}) => {
       <Formik
         initialValues={data}
         enableReinitialize={true}
+        validationSchema={Yup.object({
+          name: Yup.string()
+            .max(50, 'Must be 50 characters or less')
+            .matches(nameRegex, "Name is not valid")
+            .required('Required'),
+          description: Yup.string()
+            .max(400, 'Must be 400 characters or less'),
+        })}
         onSubmit={(values, { setSubmitting }) => {
           setTimeout(() => {
             if (id) {
