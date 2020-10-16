@@ -3,11 +3,15 @@ import { Redirect } from "raviger";
 import Home from "./Home";
 import Animals, { AnimalDetail, NewAnimal, UpdateAnimal } from "./animals/Animals"
 import { AnimalSearch } from "./animals/AnimalTables"
-import Evac, { NewEvacTeamMember, TeamMemberSelectorList } from "./evac/Evac";
+import Evac, { NewEvacTeamMember } from "./evac/Evac";
 import Hotline, { NewServiceRequest, ServiceRequestDetail, ServiceRequestList, UpdateServiceRequest } from "./hotline/Hotline";
 import Intake, { IntakeSummary } from "./intake/Intake";
 import { NewOwner, NewReporter, OwnerDetail, ReporterDetail,  UpdateOwner, UpdateReporter } from "./people/People";
-import { Login } from "./accounts/Accounts"
+import Shelter, { NewShelter, UpdateShelter, ShelterList } from "./shelter/Shelter";
+import { ShelterDetails} from "./shelter/ShelterTables";
+import { NewBuilding, UpdateBuilding, BuildingDetails } from "./shelter/Building";
+import { NewRoom, UpdateRoom, RoomDetails } from "./shelter/Room";
+import { Login } from "./accounts/Accounts";
 import { Dispatch } from "./evac/EvacViews";
 
 export const publicRoutes = {
@@ -36,6 +40,17 @@ const routes = {
   "/hotline/servicerequest/list": () => <ServiceRequestList />,
   "/hotline/servicerequest/new": () => <NewServiceRequest />,
   "/hotline/servicerequest/:id": ({id}) => <ServiceRequestDetail id={id}/>,
+  "/shelter": () => <Shelter />,
+  "/shelter/new": () => <NewShelter />,
+  "/shelter/edit/:id": ({id}) => <UpdateShelter id={id} />,
+  "/shelter/list": () => <ShelterList />,
+  "/shelter/:id": ({id}) => <ShelterDetails id={id} />,
+  "/shelter/building/new": () => <NewBuilding />,
+  "/shelter/building/edit/:id": ({id}) => <UpdateBuilding id={id} />,
+  "/shelter/building/:id": ({id}) => <BuildingDetails id={id} />,
+  "/shelter/building/room/new": () => <NewRoom />,
+  "/shelter/room/edit/:id": ({id}) => <UpdateRoom id={id} />,
+  "/shelter/room/:id": ({id}) => <RoomDetails id={id} />,
   "/intake": () => <Intake />,
   "/intake/animal/new": () => <NewAnimal />,
   "/intake/owner/new": () => <NewOwner />,
