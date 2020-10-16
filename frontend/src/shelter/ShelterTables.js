@@ -52,19 +52,20 @@ export function ShelterTable() {
           <CardGroup>
             <Card key={shelter.id}>
               <Card.Body>
+                <b>Buildings</b><Link href={"/shelter/building/new?shelter_id=" + shelter.id}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link>&nbsp;
                   <ListGroup>
-                    {! shelter.buildings.length ? <span><ListGroup.Item><Link href={"/shelter/" + shelter.id + "/building/new"}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link>&nbsp;<b>Add Building</b></ListGroup.Item></span> : 
+                    {! shelter.buildings.length ? <span><ListGroup.Item><Link href={"/shelter/building/new?shelter_id=" + shelter.id}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link>&nbsp;<b>Add Building</b></ListGroup.Item></span> : 
                       <span>{shelter.buildings.map(building => (
                         <ListGroup.Item key={building.id}>
-                          <Link href={"/shelter/" + shelter.id + "/building/new"}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link>
-                          &nbsp;<b>Building:</b> {building.name} 
+                           <b>{building.name}</b>
                           <Link href={"/shelter/building/" + building.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
                           <Link href={"/shelter/building/edit/" + building.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
-                          {! building.rooms.length ? <span><ListGroup.Item><Link href={"/shelter/building/" + building.id + "/room/new"}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link>&nbsp;<b>Add Room</b></ListGroup.Item></span> :
+                          <br/>
+                          <b>Rooms</b><Link href={"/shelter/building/room/new?building_id=" + building.id}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link>&nbsp; 
+                          {! building.rooms.length ? <span><ListGroup.Item><Link href={"/shelter/building/room/new?building_id=" + building.id}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link>&nbsp;<b>Add Room</b></ListGroup.Item></span> :
                             <span>{building.rooms.map(room => (
                               <ListGroup.Item key={room.id}>
-                                <Link href={"/shelter/building/" + building.id + "/room/new"}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link>
-                                &nbsp;<b>Room:</b> {room.name}
+                                {room.name}
                                 <Link href={"/shelter/room/" + room.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
                                 <Link href={"/shelter/room/edit/" + room.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
                               </ListGroup.Item>

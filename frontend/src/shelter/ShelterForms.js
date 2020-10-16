@@ -101,7 +101,7 @@ export const ShelterForm = ({id}) => {
                 rows={5}
                 xs="8"
                 type="text"
-                label="Description*"
+                label="Description"
                 name="description"
               />
             </BootstrapForm.Row>
@@ -254,7 +254,7 @@ export const BuildingForm = ({id}) => {
                 <TextInput
                   xs="5"
                   type="text"
-                  label="Description*"
+                  label="Description"
                   name="description"
                 />
               </BootstrapForm.Row>
@@ -357,7 +357,7 @@ export const RoomForm = ({id}) => {
                 <TextInput
                   xs="5"
                   type="text"
-                  label="Description*"
+                  label="Description"
                   name="description"
                 />
               </BootstrapForm.Row>
