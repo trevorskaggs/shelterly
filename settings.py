@@ -143,9 +143,11 @@ DEBUG = True
 # AWS_S3_REGION_NAME = 'us-east-2'
 # AWS_AUTO_CREATE_BUCKET = True
 # ALLOWED_HOSTS = ['725rgosijg.execute-api.us-east-2.amazonaws.com',]
-
+COGNITO_AWS_REGION = 'us-east-2' # 'eu-central-1'
+COGNITO_USER_POOL = 'us-east-2_VwVQx6DJH'   # 'eu-central-1_xYzaq'
+COGNITO_AUDIENCE = '7irkv0otjr4rqclakeag7thp79'
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': ('knox.auth.TokenAuthentication',),
+    'DEFAULT_AUTHENTICATION_CLASSES': ('django_cognito_jwt.JSONWebTokenAuthentication',),
     'USER_SERIALIZER': 'accounts.serializers.UserSerializer',
 }
 

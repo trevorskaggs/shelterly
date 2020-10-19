@@ -4,7 +4,6 @@ import { Link } from 'raviger';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Nav } from 'react-bootstrap';
 import { faDoorOpen, faHome, faBullhorn, faPhone, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
-import { logoutUser } from ".././accounts/AccountsUtils";
 
 export const StyledMenu = styled(Nav)`
   background: ${({ theme }) => theme.primaryDark};
@@ -57,31 +56,31 @@ export const StyledMenu = styled(Nav)`
   }
 `;
 
-const Menu = ({ state, dispatch, removeCookie, ...props }) => {
+const Menu = ({ ...props }) => {
 
     const viewHeight = window.outerHeight;
     
     return (
     <StyledMenu  {...props} className="flex-column" style={{ height: viewHeight }}>
+    
     <img src="https://sheltelry-app-static.s3-us-west-2.amazonaws.com/shelterly.png" alt="logo" />
     <div className="logo border-bottom">SHELTERLY</div>
       <Link href="/hotline" ><FontAwesomeIcon icon={faPhone} fixedWidth inverse/> HOTLINE</Link>
       <Link href="/evac"><FontAwesomeIcon icon={faBullhorn} fixedWidth inverse/>  EVAC</Link>
       <Link href="/intake"><FontAwesomeIcon icon={faDoorOpen} fixedWidth inverse/>  INTAKE</Link>
       <Link href="/shelter"><FontAwesomeIcon icon={faHome} fixedWidth inverse/> SHELTER</Link>
-      {state.user ? <Link onClick={() => logoutUser({dispatch}, {removeCookie})} href="#"><FontAwesomeIcon icon={faSignOutAlt} fixedWidth inverse/> SIGN OUT</Link> : ""}
     </StyledMenu>
     )
   }
 
-function Sidebar({ state, dispatch, removeCookie }) {
+function Sidebar() {
     
     const node = useRef();
     const menuId = "main-menu";
 
     return (
         <div ref={node}>
-            <Menu id={menuId} state={state} dispatch={dispatch} removeCookie={removeCookie} />
+            <Menu id={menuId} />
         </div>
     )
 }
