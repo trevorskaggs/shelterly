@@ -210,7 +210,7 @@ export const AnimalForm = ({id}) => {
             formData.append('extra' + (i + 1), extra_images[i].file);
           }
           if (id) {
-            axios.put('/animals/api/animal/' + id + '/', formData)
+            axios.patch('/animals/api/animal/' + id + '/', formData)
             .then(function() {
               if (state.prevLocation) {
                 navigate(state.prevLocation);
@@ -497,48 +497,52 @@ export const AnimalForm = ({id}) => {
                           </div>
                         </span>
                       ))}
-                    </span>: ""}
-                    <div className="mb-2">
-                      <ImageUploader
-                        value={extra_images}
-                        id="extra_images"
-                        name="extra_images"
-                        parentStateSetter={wrapperSetExtraImages}
-                        label="Extra"
-                        maxNumber={3 - data.extra_images.length}
-                        multiple
-                      />
-                    </div>
+                    </span>
+                  :""}
+                  <div className="mb-2">
+                    <ImageUploader
+                      value={extra_images}
+                      id="extra_images"
+                      name="extra_images"
+                      parentStateSetter={wrapperSetExtraImages}
+                      label="Extra"
+                      maxNumber={3 - data.extra_images.length}
+                      multiple
+                    />
+                  </div>
                 </BootstrapForm.Row>
-                <p className="mb-2">Shelter</p>
+                {/* Only show Shelter selection on intake and update. */}
+                <span hidden={!Boolean(id)&&!is_intake}>
+                <p className="mb-2 mt-2">Shelter</p>
                 <BootstrapForm.Row>
                   <Col xs="8">
-                  <TreeSelect
-                    showSearch
-                    style={{ width: '100%' }}
-                    value={props.values.room}
-                    dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
-                    placeholder="Select a room..."
-                    allowClear
-                    treeDefaultExpandAll
-                    onChange={(value) => {
-                      props.setFieldValue("room", value);
-                    }}
-                  >
-                    {shelters.shelters.map(shelter => (
-                      <TreeNode title={shelter.name+' ('+shelter.buildings.length+' buildings, '+shelter.room_count+' rooms, '+shelter.animal_count+' animals)'} key={'shelter'+shelter.id} selectable={false} value={'shelter'+shelter.id}>
-                        {shelter.buildings.map(building => (
-                          <TreeNode title={building.name+' ('+building.rooms.length+' rooms, '+building.animal_count+' animals)'} key={'building'+building.id} selectable={false} value={'building'+building.id}>
-                            {building.rooms.map(room => (
-                              <TreeNode title={room.name+' ('+room.animals.length+' animals)'} key={room.id} value={room.id}/>
-                            ))}
-                          </TreeNode>
-                        ))}
-                      </TreeNode>
-                    ))}
-                  </TreeSelect>
+                    <TreeSelect
+                      showSearch
+                      style={{ width: '100%' }}
+                      value={props.values.room}
+                      dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
+                      placeholder="Select a room..."
+                      allowClear
+                      treeDefaultExpandAll
+                      onChange={(value) => {
+                        props.setFieldValue("room", value||null);
+                      }}
+                    >
+                      {shelters.shelters.map(shelter => (
+                        <TreeNode title={shelter.name+' ('+shelter.buildings.length+' buildings, '+shelter.room_count+' rooms, '+shelter.animal_count+' animals)'} key={'shelter'+shelter.id} selectable={false} value={'shelter'+shelter.id}>
+                          {shelter.buildings.map(building => (
+                            <TreeNode title={building.name+' ('+building.rooms.length+' rooms, '+building.animal_count+' animals)'} key={'building'+building.id} selectable={false} value={'building'+building.id}>
+                              {building.rooms.map(room => (
+                                <TreeNode title={room.name+' ('+room.animals.length+' animals)'} key={room.id} value={room.id}/>
+                              ))}
+                            </TreeNode>
+                          ))}
+                        </TreeNode>
+                      ))}
+                    </TreeSelect>
                   </Col>
                 </BootstrapForm.Row>
+                </span>
             </BootstrapForm>
           </Card.Body>
           <ButtonGroup>
