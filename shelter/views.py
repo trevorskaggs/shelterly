@@ -4,9 +4,10 @@ from animals.models import Animal
 from shelter.models import Shelter, Building, Room
 from shelter.forms import ShelterForm, BuildingForm, RoomForm
 from rest_framework import viewsets, generics
-from .serializer import ShelterSerializer, BuildingSerializer, RoomSerializer
+from actstream import action
 from django_filters.rest_framework import DjangoFilterBackend
 from django_filters import rest_framework as filters
+from .serializer import ShelterSerializer, BuildingSerializer, RoomSerializer
 
 
 OBJ_TYPE_DICT = {

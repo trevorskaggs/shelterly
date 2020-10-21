@@ -5,13 +5,14 @@ from animals.colors import ALL_COLOR_CHOICES
 from location.models import Location
 from hotline.models import ServiceRequest
 from people.models import Person
-
+from shelter.models import Room
 
 # Create your models here.
 class Animal(models.Model):
 
     request = models.ForeignKey(ServiceRequest, on_delete=models.SET_NULL, blank=True, null=True)
     owner = models.ForeignKey(Person, on_delete=models.SET_NULL, blank=True, null=True)
+    room = models.ForeignKey(Room, on_delete=models.SET_NULL, blank=True, null=True)
     name = models.CharField(max_length=50, blank=True)
 
     #choice fields

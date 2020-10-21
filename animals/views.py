@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404
 from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
 from rest_framework import filters, viewsets
+from actstream import action
 
 from people.models import Person
 from animals.models import Animal, AnimalImage
