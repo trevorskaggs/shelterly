@@ -2,10 +2,11 @@ import React, {useEffect, useState} from 'react';
 import axios from "axios";
 import { Link } from 'raviger';
 import Moment from 'react-moment';
+import { Button, Modal } from 'react-bootstrap';
 import { Carousel } from 'react-responsive-carousel';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faClipboardList, faEdit,
+  faClipboardList, faEdit, faHandHoldingHeart,
 } from '@fortawesome/free-solid-svg-icons';
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 
@@ -53,6 +54,23 @@ export function AnimalView({id}) {
     extra_images: [],
   });
 
+  const [show, setShow] = useState(false);
+  const handleClose = () => setShow(false);
+
+  const handleSubmit = async () => {
+    let source = axios.CancelToken.source();
+    await axios.patch('/animals/api/animal/' + id + '/', {status:'REUNITED', room:null
+      // cancelToken: source.token,
+    })
+    .then(response => {
+      setData(response.data);
+      handleClose()
+    })
+    .catch(error => {
+      console.log(error.response);
+    });
+  }
+
   // Hook for initializing data.
   useEffect(() => {
     let source = axios.CancelToken.source();
@@ -76,9 +94,9 @@ export function AnimalView({id}) {
 
   return (
     <>
-      {/* <h1 style={header_style}>
-        Animal Details - {data.status}<Link href={"/animals/animal/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
-      </h1> */}
+      <h1 style={header_style}>
+        Animal Details - {data.status}<Link href={"/animals/animal/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link> {data.status !== 'REUNITED' ? <FontAwesomeIcon icon={faHandHoldingHeart} onClick={() => setShow(true)} style={{cursor:'pointer'}} inverse /> : ""}
+      </h1>
       <br/><br/>
       <div style={card_style} className="card card-body bg-light mb-2 mx-auto">
         <div className="row">
@@ -127,6 +145,20 @@ export function AnimalView({id}) {
         <br/>
         <Link className="btn btn-secondary btn-lg btn-block" href="/hotline/">BACK</Link>
       </div>
+      <Modal show={show} onHide={handleClose}>
+        <Modal.Header closeButton>
+          <Modal.Title>Confirm Animal Reunification</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>
+            Has this animal been reunited with its owner?
+          </p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="primary" onClick={handleSubmit}>Yes</Button>
+          <Button variant="secondary" onClick={handleClose}>Close</Button>
+        </Modal.Footer>
+      </Modal>
     </>
   );
 };
