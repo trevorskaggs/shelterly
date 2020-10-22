@@ -51,6 +51,7 @@ export function AnimalView({id}) {
     front_image: null,
     side_image: null,
     extra_images: [],
+    action_history: [],
   });
 
   // Hook for initializing data.
@@ -127,6 +128,10 @@ export function AnimalView({id}) {
         <br/>
         <Link className="btn btn-secondary btn-lg btn-block" href="/hotline/">BACK</Link>
       </div>
+      <hr/>
+      {data.action_history.map(action => (
+        <p key={action}>{action}</p>
+      ))}
     </>
   );
 };

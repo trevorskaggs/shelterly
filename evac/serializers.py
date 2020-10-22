@@ -15,6 +15,10 @@ class EvacTeamMemberSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class EvacAssignmentSerializer(serializers.ModelSerializer):
+    action_history = serializers.SerializerMethodField()
+
+    def get_action_history(self, obj):
+        return [str(action).replace(f'Shelter object ({obj.id})', '') for action in target_stream(obj)]
 
     class Meta:
         model = EvacAssignment

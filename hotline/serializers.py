@@ -14,10 +14,14 @@ class ServiceRequestSerializer(serializers.ModelSerializer):
     aco_required = serializers.SerializerMethodField()
     animal_count = serializers.IntegerField(read_only=True)
     injured = serializers.BooleanField(read_only=True)
+    action_history = serializers.SerializerMethodField()
 
     # Custom field for the full address.
     def get_full_address(self, obj):
         return build_full_address(obj)
+
+    def get_action_history(self, obj):
+        return [str(action).replace(f'ServiceRequest object ({obj.id})', '') for action in target_stream(obj)]
 
     # Custom field for if any animal is ACO Required. If it is aggressive or "Other" species.
     def get_aco_required(self, obj):

@@ -4,10 +4,14 @@ from location.utils import build_full_address
 
 class PersonSerializer(serializers.ModelSerializer):
     full_address = serializers.SerializerMethodField()
+    action_history = serializers.SerializerMethodField()
 
     # Custom field for the full address.
     def get_full_address(self, obj):
         return build_full_address(obj)
+
+    def get_action_history(self, obj):
+        return [str(action).replace(f'Person object ({obj.id})', '') for action in target_stream(obj)]
 
     # Truncates latitude and longitude.
     def to_internal_value(self, data):

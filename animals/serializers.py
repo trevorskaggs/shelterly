@@ -1,5 +1,6 @@
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import serializers
+from actstream.models import target_stream
 
 from .models import Animal, AnimalImage
 from location.utils import build_full_address
@@ -12,6 +13,7 @@ class AnimalSerializer(serializers.ModelSerializer):
     front_image = serializers.SerializerMethodField()
     side_image = serializers.SerializerMethodField()
     extra_images = serializers.SerializerMethodField()
+    action_history = serializers.SerializerMethodField()
 
     # Custom field for the full address.
     def get_full_address(self, obj):
@@ -24,6 +26,9 @@ class AnimalSerializer(serializers.ModelSerializer):
     # An Animal is ACO Required if it is aggressive or "Other" species.
     def get_aco_required(self, obj):
         return (obj.aggressive or obj.species.other)
+
+    def get_action_history(self, obj):
+        return [str(action).replace(f'Animal object ({obj.id})', '') for action in target_stream(obj)]
 
     def get_front_image(self, obj):
         try:
