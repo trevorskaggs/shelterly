@@ -200,7 +200,7 @@ export function Dispatch() {
             bounds.push([service_request.latitude, service_request.longitude]);
           }
           setMapState(map_dict);
-          setData(prevState => ({ ...prevState, ["bounds"]:L.latLngBounds(bounds) }));
+          setData(prevState => ({ ...prevState, ["bounds"]:L.latLngBounds(bounds||[[0,0]]) }));
         }
       })
       .catch(error => {
@@ -272,66 +272,6 @@ export function Dispatch() {
                         {service_request.turn_around ? <img width={16} height={16} src={trailer} alt="" /> : ""}
                       </div>
                     </span>
-                    {mapState[service_request.id] ?
-                    <span>{Object.keys(mapState[service_request.id].matches).map((key,i) => (
-                      <span key={key} style={{textTransform:"capitalize"}}>
-                        {i > 0 && ", "}{prettyText(key.split(',')[1], key.split(',')[0], mapState[service_request.id].matches[key])}
-                      </span>
-                    ))}</span>:""}
-                    {service_request.aco_required ?
-                    <OverlayTrigger
-                      key={"aco"}
-                      placement="top"
-                      overlay={
-                        <Tooltip id={`tooltip-aco`}>
-                          ACO required
-                        </Tooltip>
-                      }
-                    >
-                      <FontAwesomeIcon icon={faShieldAlt} inverse className="ml-1"/>
-                    </OverlayTrigger>
-                    : ""}
-                    {service_request.injured ?
-                    <OverlayTrigger
-                      key={"injured"}
-                      placement="top"
-                      overlay={
-                        <Tooltip id={`tooltip-injured`}>
-                          Injured animal
-                        </Tooltip>
-                      }
-                    >
-                      <FontAwesomeIcon icon={faBandAid} inverse className="ml-1"/>
-                    </OverlayTrigger>
-                    : ""}
-                    {service_request.accessible ?
-                    <OverlayTrigger
-                      key={"accessible"}
-                      placement="top"
-                      overlay={
-                        <Tooltip id={`tooltip-accessible`}>
-                          Easily accessible
-                        </Tooltip>
-                      }
-                    >
-                      <FontAwesomeIcon icon={faCar} inverse className="ml-1"/>
-                    </OverlayTrigger>
-                    : ""}
-                    {service_request.turn_around ?
-                    <OverlayTrigger
-                      key={"turnaround"}
-                      placement="top"
-                      overlay={
-                        <Tooltip id={`tooltip-turnaround`}>
-                          Room to turn around
-                        </Tooltip>
-                      }
-                    >
-                      <FontAwesomeIcon icon={faTrailer} inverse className="ml-1"/>
-                    </OverlayTrigger>
-                    : ""}
-                    <span className="ml-2">| &nbsp;{service_request.full_address}</span>
-                    <Link href={"/hotline/servicerequest/" + service_request.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
                   </MapTooltip>
                 </CircleMarker>
               ))}
@@ -342,7 +282,7 @@ export function Dispatch() {
           </Col>
         </Row>
         <Row>
-          <Col xs={8} className="mt-2" style={{marginLeft:"-19px"}}>
+          <Col xs={12} className="mt-2" >
             <div className="form-row">
               <Typeahead
                 id="team_members"
@@ -350,7 +290,8 @@ export function Dispatch() {
                 onChange={(values) => {props.setFieldValue('team_members', values.map(item => item.id))}}
                 options={teamData.options}
                 placeholder="Choose team members..."
-                className="col-sm-9"
+                className="col-sm-10"
+                style={{marginLeft:"-19px"}}
               />
               <Button type="submit" className="btn-block col-sm-2" disabled={selectedCount.disabled || props.values.team_members.length === 0}>DEPLOY</Button>
             </div>

@@ -163,16 +163,18 @@ export function ServiceRequestView({id}) {
               <hr/>
               <span className="d-flex flex-wrap align-items-end">
               {data.animals.map(animal => (
-                <Card className="mr-3" style={{border:"none"}}>
+                <Card key={animal.id} className="mr-3" style={{border:"none"}}>
                   <ReactImageFallback style={{width:"151px"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} />
-                  <Card.Text className="text-center">
-                    <div>
-                      {animal.name||"Unknown"}
-                      <Link href={"/animals/animal/" + animal.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
-                      <Link href={"/animals/animal/edit/" + animal.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
-                    </div>
-                    <div>{animal.status}</div>
-                    <div style={{textTransform:"capitalize"}}>{animal.size} {animal.species}</div>
+                  <Card.Text className="text-center mb-0">
+                    {animal.name||"Unknown"}
+                    <Link href={"/animals/animal/" + animal.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
+                    <Link href={"/animals/animal/edit/" + animal.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
+                  </Card.Text>
+                  <Card.Text className="text-center mb-0">
+                    {animal.status}
+                  </Card.Text>
+                  <Card.Text className="text-center" style={{textTransform:"capitalize"}}>
+                    {animal.size} {animal.species}
                   </Card.Text>
                 </Card>
               ))}
@@ -206,10 +208,10 @@ export function ServiceRequestView({id}) {
               <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
                 {data.recovery_time || data.outcome ? <ListGroup.Item>
                   <b>Recovery Time:</b> <Moment format="LLL">{data.recovery_time||""}</Moment>
-                  <p className="mt-1 mb-0"><b>Outcome:</b> {data.outcome||"Not available."}</p></ListGroup.Item> : ""}
+                  <div className="mt-1 mb-0"><b>Outcome:</b> {data.outcome||"Not available."}</div></ListGroup.Item> : ""}
                 {data.owner_notification_tstamp || data.owner_notification_notes ? <ListGroup.Item>
                   <b>Owner Notified:</b> <Moment format="LLL">{data.owner_notification_tstamp}</Moment>
-                  <p className="mt-1 mb-0"><b>Owner Notification Notes:</b> {data.owner_notification_notes||"Not available."}</p></ListGroup.Item> : ""}
+                  <div className="mt-1 mb-0"><b>Owner Notification Notes:</b> {data.owner_notification_notes||"Not available."}</div></ListGroup.Item> : ""}
               </ListGroup>
             </Card.Body>
           </Card>
