@@ -200,7 +200,9 @@ export function Dispatch() {
             bounds.push([service_request.latitude, service_request.longitude]);
           }
           setMapState(map_dict);
-          setData(prevState => ({ ...prevState, ["bounds"]:L.latLngBounds(bounds||[[0,0]]) }));
+          if (bounds.length > 0) {
+            setData(prevState => ({ ...prevState, ["bounds"]:L.latLngBounds(bounds) }));
+          }
         }
       })
       .catch(error => {
@@ -281,8 +283,8 @@ export function Dispatch() {
             </Map>
           </Col>
         </Row>
-        <Row>
-          <Col xs={12} className="mt-2" >
+        <Row className="mt-2">
+          <Col xs={12} className="pl-0">
             <div className="form-row">
               <Typeahead
                 id="team_members"
@@ -290,16 +292,16 @@ export function Dispatch() {
                 onChange={(values) => {props.setFieldValue('team_members', values.map(item => item.id))}}
                 options={teamData.options}
                 placeholder="Choose team members..."
-                className="col-sm-10"
-                style={{marginLeft:"-19px"}}
+                className="col-sm-8 pl-0"
               />
               <Button type="submit" className="btn-block col-sm-2" disabled={selectedCount.disabled || props.values.team_members.length === 0}>DEPLOY</Button>
+              <FormCheck id="aco_required" className="col-sm-2 mt-2" style={{paddingLeft:"60px"}} name="aco_required" type="switch" label="ACO Required" checked={statusOptions.ACORequired} onChange={handleACO} />
             </div>
           </Col>
         </Row>
       <Row className="d-flex flex-wrap" style={{marginTop:"-15px", minHeight:"36vh"}}>
         <Col xs={2} className="mt-4 border rounded mr-1" style={{marginLeft:"-5px", height:"250", minHeight:"250"}}>
-          <FormCheck id="aco_required" name="aco_required" type="switch" label="ACO Required" checked={statusOptions.ACORequired} onChange={handleACO}  style={{marginTop:"13px"}} />
+          <p className="text-center mt-3 mb-2">Selected Animals</p>
           <hr/>
           {Object.keys(totalSelectedState).map(key => (
             <div key={key} style={{textTransform:"capitalize"}}>{prettyText(key.split(',')[1], key.split(',')[0], totalSelectedState[key])}</div>
@@ -377,6 +379,9 @@ export function Dispatch() {
               </div>
             </div>
           ))}
+          <div className="card-header mt-1 mb-1"  style={{marginLeft:"-10px", marginRight:"-10px"}} hidden={data.service_requests.length > 0}>
+            No open Service Requests found.
+          </div>
         </Col>
         </Row>
       </Form>
