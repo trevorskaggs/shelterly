@@ -19,6 +19,6 @@ describe("Animal tests", () => {
   });
   it("Render AnimalView", () => {
     render(<AnimalView id={1} />);
-    expect(screen.getByText("Name:"));
+    expect(screen.getByText(/Animal Details/));
   });
 });

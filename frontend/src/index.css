@@ -12,6 +12,17 @@ code {
     monospace;
 }
 
+hr { display: block; height: 1px;
+  border: 0; border-top: 1px solid #ccc !important;
+  margin: 1em 0; padding: 0; }
+
+/* Leaflet map CSS */
+.leaflet-container {  width: auto;  height: 55vh;}
+
+.leaflet-top, .leaflet-bottom {
+  z-index: 400 !important;
+}
+
 /* Image gallery display CSS */
 .carousel img {
   height: 320px;
@@ -28,9 +39,6 @@ input[disabled] {
   background-image: none;
 }
 
-/* Leaflet map CSS */
-.leaflet-container {  width: 45vw;  height: 55vh; margin-top:2vw;}
-
 /* big checkbox CSS */
 .custom-control-lg .custom-control-label::before,
 .custom-control-lg .custom-control-label::after {
@@ -41,10 +49,16 @@ input[disabled] {
 }
 
 .custom-control-lg .custom-control-label {
-    margin-left: 0.5rem !important;
     font-size: 1rem !important;
 }
 
-.rbt-token{
+/* DatetimePicker fixed min width CSS */
+.datetime_picker {
+  width:213px;
+  min-width:213px;
+}
+
+/* Typeahead CSS */
+.rbt-token {
   color: #222 !important;
 }
