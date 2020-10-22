@@ -49,11 +49,11 @@ class TestViews(APITestCase):
     def test_create_service_request_owner(self):
         # SR to Owner is 1:1, so need to create new Person object to create a new SR. 
         # Should this be ForeignKey?
-        self.new_person = Person.objects.create(first_name="Leroy", last_name="Jenkins")
+        self.new_person = Person.objects.create(first_name="Leroy", last_name="Jenkins", latitude=0, longitude=0)
         self.new_animal = Animal.objects.create(name='Henry', owner=self.new_person)
         self.client.force_authenticate(self.user)
         # Directions are currently a required field.
-        response = self.client.post(f'/hotline/api/servicerequests/', {'owner':self.new_person.pk, 'address':"123 Main St.", 'directions':"Turn left."})
+        response = self.client.post(f'/hotline/api/servicerequests/', {'owner':self.new_person.pk, 'address':"123 Main St.", 'directions':"Turn left.", 'latitude':self.new_person.latitude, 'longitude':self.new_person.longitude}, format='json')
         self.assertEqual(response.status_code, 201)
         self.assertTrue(ServiceRequest.objects.filter(owner=self.new_person.pk, address="123 Main St."))
 
@@ -64,6 +64,6 @@ class TestViews(APITestCase):
         self.new_animal = Animal.objects.create(name='Henry', owner=self.new_person)
         self.client.force_authenticate(self.user)
         # Should directions be required field?
-        response = self.client.post(f'/hotline/api/servicerequests/', {'reporter':self.person.pk, 'address':"123 Main St.", 'directions':"Turn left."})
+        response = self.client.post(f'/hotline/api/servicerequests/', {'reporter':self.person.pk, 'address':"123 Main St.", 'directions':"Turn left.", 'latitude':0, 'longitude':0}, format='json')
         self.assertEqual(response.status_code, 201)
         self.assertTrue(ServiceRequest.objects.filter(reporter=self.person.pk, address='123 Main St.', directions="Turn left.").exists())
