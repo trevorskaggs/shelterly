@@ -21,6 +21,9 @@ class AnimalViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         if serializer.is_valid():
+            if serializer.validated_data.get('room'):
+                serializer.validated_data['status'] = 'SHELTERED'
+
             animal = serializer.save()
             action.send(self.request.user, verb='created animal', target=animal)
 
@@ -42,6 +45,13 @@ class AnimalViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         if serializer.is_valid():
+            # Set room to null if not present
+            if not serializer.validated_data.get('room'):
+                serializer.validated_data['room'] = None
+
+            if serializer.validated_data.get('room') and not serializer.instance.room:
+                serializer.validated_data['status'] = 'SHELTERED'
+
             animal = serializer.save()
             action.send(self.request.user, verb='updated animal', target=animal)
             old_images = serializer.data['extra_images']

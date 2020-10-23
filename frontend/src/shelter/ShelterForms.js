@@ -15,7 +15,7 @@ const state_options = [{value:'AL', label:"AL"},{value:'AK', label:"AK"},{value:
 {value:'VA', label:"VA"},{value:"VT", label:"VT"},{value:'WA', label:"WA"},{value:'WV', label:"WV"},{value:'WI', label:"WI"},{value:'WY', label:"WY"},]
 
 // Regex validators.
-const nameRegex = /^[a-z ,.'-]+$/i
+const nameRegex = /^[a-z0-9 ,.'-]+$/i
 
 export const ShelterForm = ({id}) => {
 
