@@ -529,9 +529,9 @@ export const AnimalForm = ({id}) => {
                       }}
                     >
                       {shelters.shelters.map(shelter => (
-                        <TreeNode title={shelter.name+' ('+shelter.buildings.length+' buildings, '+shelter.room_count+' rooms, '+shelter.animal_count+' animals)'} key={'shelter'+shelter.id} selectable={false} value={'shelter'+shelter.id}>
+                        <TreeNode title={'Shelter: ' + shelter.name + ' ('+shelter.buildings.length+' buildings, ' + shelter.room_count + ' rooms, ' + shelter.animal_count + ' animals)'} key={'shelter'+shelter.id} selectable={false} value={'shelter'+shelter.id}>
                           {shelter.buildings.map(building => (
-                            <TreeNode title={building.name+' ('+building.rooms.length+' rooms, '+building.animal_count+' animals)'} key={'building'+building.id} selectable={false} value={'building'+building.id}>
+                            <TreeNode title={'Building: ' + building.name + ' (' + building.rooms.length + ' rooms, ' + building.animal_count + ' animals)'} key={'building'+building.id} selectable={false} value={'building'+building.id}>
                               {building.rooms.map(room => (
                                 <TreeNode title={room.name+' ('+room.animals.length+' animals)'} key={room.id} value={room.id}/>
                               ))}
