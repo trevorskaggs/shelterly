@@ -110,7 +110,6 @@ export function ServiceRequestTable() {
           </Card>
         </CardGroup>
         </div>
-
       ))}
       <p>{data.isFetching ? 'Fetching service requests...' : <span>{data.service_requests && data.service_requests.length ? '' : 'No Service Requests found.'}</span>}</p>
     </div>

@@ -21,6 +21,16 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
     # When creating, update any animals associated with the SR owner with the created service request.
     def perform_create(self, serializer):
         if serializer.is_valid():
+            for service_request in ServiceRequest.objects.filter(latitude=serializer.validated_data['latitude'], longitude=serializer.validated_data['longitude'], status='open'):
+                raise serializers.ValidationError(['Multiple open Requests may not exist with the same address.', service_request.id])
+            service_request = serializer.save()
+            if service_request.owner:
+                service_request.owner.animal_set.update(request=service_request.id)
+
+    def perform_update(self, serializer):
+        if serializer.is_valid():
+            for service_request in ServiceRequest.objects.filter(latitude=serializer.validated_data['latitude'], longitude=serializer.validated_data['longitude'], status='open').exclude(id=self.kwargs['pk']):
+                raise serializers.ValidationError(['Multiple open Requests may not exist with the same address.', service_request.id])
             service_request = serializer.save()
             action.send(self.request.user, verb='created service request', target=service_request)
             if service_request.owner:

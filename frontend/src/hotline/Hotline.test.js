@@ -12,7 +12,7 @@ import { ServiceRequestTable } from "./HotlineTables";
 const server = setupServer(
   rest.get("/hotline/api/servicerequests/1/", (req, res, ctx) => {
     return res(
-      ctx.json({ data: { id: 2, reporter: "Jane Doe", address: blah } })
+      ctx.json({ data: { id: 2, reporter: "Jane Doe", address: blah, latitude:0, longitude:0 } })
     );
   })
   // rest.get('/hotline/api/servicerequests/', (req, res, ctx) => {

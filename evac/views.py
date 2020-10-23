@@ -5,6 +5,7 @@ from actstream import action
 
 from evac.models import EvacAssignment, EvacTeamMember
 from evac.serializers import EvacAssignmentSerializer, EvacTeamMemberSerializer
+from hotline.models import ServiceRequest
 
 class EvacTeamMemberViewSet(viewsets.ModelViewSet):
 

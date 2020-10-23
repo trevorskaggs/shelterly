@@ -1,13 +1,13 @@
 import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
-import { navigate, useQueryParams } from 'raviger';
+import { Link, navigate, useQueryParams } from 'raviger';
 import { Field, Form, Formik } from 'formik';
 import {
   CustomInput,
   Label,
   Fade,
 } from 'reactstrap';
-import { Form as BootstrapForm, Button, ButtonGroup, Card, Col } from "react-bootstrap";
+import { Form as BootstrapForm, Button, ButtonGroup, Card, Col, Modal } from "react-bootstrap";
 import * as Yup from 'yup';
 import { Switch } from 'formik-material-ui';
 import 'flatpickr/dist/themes/light.css';
@@ -45,6 +45,10 @@ export function ServiceRequestForm({ id }) {
   function handleChange() {
     setFadeIn(!fadeIn)
   }
+
+  // Track duplicate request address error.
+  const [error, setError] = useState({show:false, error:[]});
+  const handleClose = () => setError({show:false, error:[]});
 
   // Initial ServiceRequest data.
   const [data, setData] = useState({
@@ -131,7 +135,8 @@ export function ServiceRequestForm({ id }) {
             .nullable(),
           owner_notification_tstamp: Yup.date()
             .nullable(),
-          address: Yup.string(),
+          address: Yup.string()
+            .required('Required'),
           apartment: Yup.string()
             .max(10, 'Must be 10 characters or less'),
           city: Yup.string(),
@@ -157,6 +162,9 @@ export function ServiceRequestForm({ id }) {
             })
             .catch(error => {
               console.log(error.response);
+              if (error.response.data && error.response.data[0].includes('same address')) {
+                setError({show:true, error:error.response.data});
+              }
             });
             setSubmitting(false);
           }
@@ -167,6 +175,9 @@ export function ServiceRequestForm({ id }) {
             })
             .catch(error => {
               console.log(error.response);
+              if (error.response.data && error.response.data[0].includes('same address')) {
+                setError({show:true, error:error.response.data});
+              }
             });
           setSubmitting(false);
         }
@@ -182,6 +193,19 @@ export function ServiceRequestForm({ id }) {
           <Field type="hidden" value={data.latitude || ""} name="latitude" id="latitude"></Field>
           <Field type="hidden" value={data.longitude || ""} name="longitude" id="longitude"></Field>
           <BootstrapForm.Row hidden={!id}>
+            <DateTimePicker
+              label="Recovery Time"
+              name="recovery_time"
+              id="recovery_time"
+              xs="3"
+              onChange={(date, dateStr) => {
+                props.setFieldValue("recovery_time", dateStr)
+              }}
+              key={`my_unique_recovery_time_select_key__${props.values.recovery_time}`}
+              value={props.values.recovery_time || null}
+            />
+          </BootstrapForm.Row>
+          <BootstrapForm.Row hidden={!id} className="mt-3">
             <TextInput
               as="textarea"
               rows={5}
@@ -192,6 +216,19 @@ export function ServiceRequestForm({ id }) {
             />
             </BootstrapForm.Row>
             <BootstrapForm.Row hidden={!id}>
+              <DateTimePicker
+                label="Owner Notified"
+                name="owner_notification_tstamp"
+                id="owner_notification_tstamp"
+                xs="3"
+                onChange={(date, dateStr) => {
+                  props.setFieldValue("owner_notification_tstamp", dateStr)
+                }}
+                key={`my_unique_owner_notification_tstamp_select_key__${props.values.owner_notification_tstamp}`}
+                value={props.values.owner_notification_tstamp || null}
+              />
+            </BootstrapForm.Row>
+            <BootstrapForm.Row hidden={!id} className="mt-3">
               <TextInput
                 as="textarea"
                 rows={5}
@@ -204,32 +241,6 @@ export function ServiceRequestForm({ id }) {
             <BootstrapForm.Row hidden={!id} className="mb-2">
               <Label htmlFor="forced_entry" className="mt-2 ml-1">Forced Entry</Label>
               <Field component={Switch} name="forced_entry" type="checkbox" color="primary" />
-            </BootstrapForm.Row>
-            <BootstrapForm.Row hidden={!id}>
-                <DateTimePicker
-                  label="Recovery Time"
-                  name="recovery_time"
-                  id="recovery_time"
-                  xs="3"
-                  onChange={(date, dateStr) => {
-                    props.setFieldValue("recovery_time", dateStr)
-                  }}
-                  key={`my_unique_recovery_time_select_key__${props.values.recovery_time}`}
-                  value={props.values.recovery_time || null}
-                />
-            </BootstrapForm.Row>
-            <BootstrapForm.Row hidden={!id}>
-                <DateTimePicker
-                  label="Owner Notified"
-                  name="owner_notification_tstamp"
-                  id="owner_notification_tstamp"
-                  xs="3"
-                  onChange={(date, dateStr) => {
-                    props.setFieldValue("owner_notification_tstamp", dateStr)
-                  }}
-                  key={`my_unique_owner_notification_tstamp_select_key__${props.values.owner_notification_tstamp}`}
-                  value={props.values.owner_notification_tstamp || null}
-                />
             </BootstrapForm.Row>
           {data.address && !id ?
             <span className="form-row mb-2">
@@ -250,7 +261,7 @@ export function ServiceRequestForm({ id }) {
               <BootstrapForm.Row>
                 <TextInput
                   type="text"
-                  label={!is_first_responder ? "Address" : "Address/Cross Streets"}
+                  label={!is_first_responder ? "Address*" : "Address/Cross Streets*"}
                   name="address"
                   id="address"
                   xs="8"
@@ -320,10 +331,24 @@ export function ServiceRequestForm({ id }) {
         </BootstrapForm>
         </Card.Body>
         <ButtonGroup size="lg">
-          <Button type="submit" className="btn btn-primary" onClick={() => { props.submitForm()}}>Save</Button>
+          <Button type="submit" onClick={() => { props.submitForm()}}>Save</Button>
           <Button variant="secondary" type="button" onClick={() => {props.resetForm(data)}}>Reset</Button>
         </ButtonGroup>
-        </Card>
+        <Modal show={error.show} onHide={handleClose}>
+          <Modal.Header closeButton>
+            <Modal.Title>Duplicate Request Address Found</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <p>
+              {error && error.error[0]}
+              &nbsp;Click <Link href={'/hotline/servicerequest/' + error.error[1]} target="_blank">here</Link> to view this Request.
+            </p>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={handleClose}>Close</Button>
+          </Modal.Footer>
+        </Modal>
+      </Card>
       )}
     </Formik>
   );

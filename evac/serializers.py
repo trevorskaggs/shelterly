@@ -1,5 +1,7 @@
 from datetime import datetime
 from rest_framework import serializers
+from actstream.models import target_stream
+
 from evac.models import EvacAssignment, EvacTeamMember
 from hotline.serializers import ServiceRequestSerializer
 
@@ -19,6 +21,9 @@ class EvacAssignmentSerializer(serializers.ModelSerializer):
 
     def get_action_history(self, obj):
         return [str(action).replace(f'Shelter object ({obj.id})', '') for action in target_stream(obj)]
+
+    team_member_objects = EvacTeamMemberSerializer(source='team_members', required=False, read_only=True, many=True)
+    service_request_objects = ServiceRequestSerializer(source='service_requests', required=False, read_only=True, many=True)
 
     class Meta:
         model = EvacAssignment

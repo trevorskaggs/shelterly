@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import *
 from location.utils import build_full_address
-
+from actstream.models import target_stream
 
 class RoomSerializer(serializers.ModelSerializer):
     action_history = serializers.SerializerMethodField()
@@ -16,6 +16,7 @@ class RoomSerializer(serializers.ModelSerializer):
             'building',
             'name',
             'description',
+            'action_history'
         )
 
 class BuildingSerializer(serializers.ModelSerializer):
@@ -38,7 +39,8 @@ class BuildingSerializer(serializers.ModelSerializer):
             'shelter',
             'shelter_name',
             'description',
-            'rooms'
+            'rooms',
+            'action_history'
         )
 
 class ShelterSerializer(serializers.ModelSerializer):

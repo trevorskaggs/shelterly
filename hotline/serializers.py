@@ -1,6 +1,8 @@
 from django.db.models import Q
 from rest_framework import serializers
 from rest_framework.decorators import action
+from actstream.models import target_stream
+
 from .models import ServiceRequest
 from animals.serializers import AnimalSerializer
 from people.serializers import PersonSerializer

@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from actstream.models import target_stream
 from .models import Person
 from location.utils import build_full_address
 
