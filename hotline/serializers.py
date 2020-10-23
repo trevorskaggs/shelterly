@@ -23,7 +23,7 @@ class ServiceRequestSerializer(serializers.ModelSerializer):
         return build_full_address(obj)
 
     def get_action_history(self, obj):
-        return [str(action).replace(f'ServiceRequest object ({obj.id})', '') for action in target_stream(obj)]
+        return [str(action) for action in target_stream(obj)]
 
     # Custom field for if any animal is ACO Required. If it is aggressive or "Other" species.
     def get_aco_required(self, obj):

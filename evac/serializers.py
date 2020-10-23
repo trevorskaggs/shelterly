@@ -20,7 +20,7 @@ class EvacAssignmentSerializer(serializers.ModelSerializer):
     action_history = serializers.SerializerMethodField()
 
     def get_action_history(self, obj):
-        return [str(action).replace(f'Shelter object ({obj.id})', '') for action in target_stream(obj)]
+        return [str(action).replace(f'EvacAssignment object ({obj.id})', '') for action in target_stream(obj)]
 
     team_member_objects = EvacTeamMemberSerializer(source='team_members', required=False, read_only=True, many=True)
     service_request_objects = ServiceRequestSerializer(source='service_requests', required=False, read_only=True, many=True)

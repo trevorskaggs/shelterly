@@ -28,7 +28,7 @@ class AnimalSerializer(serializers.ModelSerializer):
         return (obj.aggressive or obj.species.other)
 
     def get_action_history(self, obj):
-        return [str(action).replace(f'Animal object ({obj.id})', '') for action in target_stream(obj)]
+        return [str(action) for action in target_stream(obj)]
 
     def get_front_image(self, obj):
         try:

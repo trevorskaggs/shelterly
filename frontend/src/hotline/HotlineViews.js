@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import axios from "axios";
+import axios from 'axios';
 import { Link } from 'raviger';
 import Moment from 'react-moment';
 import { Card, ListGroup, OverlayTrigger, Tooltip } from 'react-bootstrap';
@@ -7,8 +7,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBandAid, faCar, faClipboardList, faComment, faEdit, faHouseDamage, faKey, faPlusSquare, faShieldAlt, faTrailer
 } from '@fortawesome/free-solid-svg-icons';
-import ReactImageFallback from "react-image-fallback";
-import noImageFound from "../static/images/image-not-found.png";
+import ReactImageFallback from 'react-image-fallback';
+import History from '../components/History';
+import noImageFound from '../static/images/image-not-found.png';
 
 export function ServiceRequestView({id}) {
 
@@ -32,6 +33,7 @@ export function ServiceRequestView({id}) {
     recovery_time: null,
     owner_notification_tstamp: null,
     status:'',
+    action_history: [],
   });
 
   // Hook for initializing data.
@@ -218,6 +220,7 @@ export function ServiceRequestView({id}) {
         </div>
       </div>
       : ""}
+      <History action_history={data.action_history} />
     </>
   );
 };

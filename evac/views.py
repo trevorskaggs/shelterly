@@ -24,7 +24,8 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         if serializer.is_valid():
             evac_assignment = serializer.save()
-            service_requests = ServiceRequest.objects.filter(pk__in=serializer.data['service_requests']).update(status="assigned")
+            service_requests = ServiceRequest.objects.filter(pk__in=serializer.data['service_requests'])
+            service_requests.update(status="assigned")
             action.send(self.request.user, verb='created evacuation assignment', target=evac_assignment)
             for service_request in service_requests:
                 action.send(self.request.user, verb='assigned service request', target=service_request)
