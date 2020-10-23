@@ -68,7 +68,7 @@ class AnimalViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         if serializer.is_valid():
-            if serializer.validated_data['room']:
+            if serializer.validated_data.get('room'):
                 serializer.validated_data['status'] = 'SHELTERED'
 
             animal = serializer.save()
@@ -90,7 +90,7 @@ class AnimalViewSet(viewsets.ModelViewSet):
             if not serializer.validated_data.get('room'):
                 serializer.validated_data['room'] = None
 
-            if serializer.validated_data['room'] and not serializer.instance.room:
+            if serializer.validated_data.get('room') and not serializer.instance.room:
                 serializer.validated_data['status'] = 'SHELTERED'
 
             animal = serializer.save()
