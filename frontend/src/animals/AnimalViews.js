@@ -8,11 +8,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBandAid, faClipboardList, faCut, faEdit, faShieldAlt, faWarehouse
 } from '@fortawesome/free-solid-svg-icons';
-import "react-responsive-carousel/lib/styles/carousel.min.css";
-
-const header_style = {
-  textAlign: "center",
-}
+import 'react-responsive-carousel/lib/styles/carousel.min.css';
+import History from '../components/History';
 
 export function AnimalView({id}) {
 
@@ -69,7 +66,7 @@ export function AnimalView({id}) {
     <>
     <div className="row mt-3" style={{marginBottom:"-8px"}}>
       <div className="col-12 d-flex">
-        <h1 style={header_style}>
+        <h1 style={{textAlign:"center"}}>
           Animal Details - {data.status}<Link href={"/animals/animal/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
         </h1>
       </div>
@@ -205,9 +202,7 @@ export function AnimalView({id}) {
         </Card>
       </Col>
     </div>
-    {data.action_history.map(action => (
-      <p key={action}>{action}</p>
-    ))}
+    <History action_history={data.action_history} />
     </>
   );
 };
