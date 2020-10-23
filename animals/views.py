@@ -68,6 +68,9 @@ class AnimalViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         if serializer.is_valid():
+            if serializer.validated_data.get('room'):
+                serializer.validated_data['status'] = 'SHELTERED'
+
             animal = serializer.save()
             images_data = self.request.FILES
             for key, image_data in images_data.items():
@@ -83,6 +86,13 @@ class AnimalViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         if serializer.is_valid():
+            # Set room to null if not present
+            if not serializer.validated_data.get('room'):
+                serializer.validated_data['room'] = None
+
+            if serializer.validated_data.get('room') and not serializer.instance.room:
+                serializer.validated_data['status'] = 'SHELTERED'
+
             animal = serializer.save()
             old_images = serializer.data['extra_images']
             updated_images = self.request.data['extra_images'].split(',') if self.request.data.get('extra_images', None) else []

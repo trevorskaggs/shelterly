@@ -7,14 +7,18 @@ import { Button, ButtonGroup, Form as BootstrapForm } from "react-bootstrap";
 import { Card } from 'react-bootstrap';
 import * as Yup from 'yup';
 import { AuthContext } from "../accounts/AccountsReducer";
+import { TreeSelect } from 'antd';
 import { DateTimePicker, DropDown, ImageUploader, TextInput } from '.././components/Form.js';
 import { catAgeChoices, dogAgeChoices, horseAgeChoices, otherAgeChoices, catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, speciesChoices, sexChoices, dogSizeChoices, catSizeChoices, horseSizeChoices, otherSizeChoices, statusChoices, unknownChoices } from './constants';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft, faMinusSquare } from '@fortawesome/free-solid-svg-icons';
+import 'antd/lib/tree-select/style/css';
 
 export const AnimalForm = ({id}) => {
 
   const { state, dispatch } = useContext(AuthContext);
+
+  const { TreeNode } = TreeSelect;
 
   // Determine if this is an intake workflow.
   var is_intake = window.location.pathname.includes("intake")
@@ -73,10 +77,13 @@ export const AnimalForm = ({id}) => {
     injured: 'unknown',
     behavior_notes: '',
     last_seen: null,
+    room: null,
     front_image: null,
     side_image: null,
     extra_images: [],
   });
+
+  const [shelters, setShelters] = useState({shelters: [],  isFetching: false});
 
   const wrapperSetFrontImage = useCallback(val => {
     if (val !== 0){
@@ -129,6 +136,23 @@ export const AnimalForm = ({id}) => {
       };
       fetchAnimalData();
     }
+
+    const fetchShelters = async () => {
+      setShelters({shelters: [], isFetching: true});
+      // Fetch Shelter data.
+      await axios.get('/shelter/api/shelter', {
+        cancelToken: source.token,
+      })
+      .then(response => {
+        setShelters({shelters: response.data, isFetching: false});
+      })
+      .catch(error => {
+        console.log(error.response);
+        setShelters({shelters: [], isFetching: false});
+      });
+    };
+    fetchShelters();
+
     // Cleanup.
     return () => {
       source.cancel();
@@ -186,7 +210,7 @@ export const AnimalForm = ({id}) => {
             formData.append('extra' + (i + 1), extra_images[i].file);
           }
           if (id) {
-            axios.put('/animals/api/animal/' + id + '/', formData)
+            axios.patch('/animals/api/animal/' + id + '/', formData)
             .then(function() {
               if (state.prevLocation) {
                 navigate(state.prevLocation);
@@ -252,12 +276,12 @@ export const AnimalForm = ({id}) => {
                 <BootstrapForm.Row>
                   <TextInput
                     id="name"
-                    xs="8"
+                    xs="9"
                     name="name"
                     type="text"
                     label="Animal Name"
                   />
-                  <Col xs="2">
+                  <Col xs="3">
                     <DropDown
                       label="Sex"
                       id="sexDropDown"
@@ -271,13 +295,12 @@ export const AnimalForm = ({id}) => {
                   </Col>
                 </BootstrapForm.Row>
                 <BootstrapForm.Row>
-                  <Col xs="2">
+                  <Col xs="4">
                     <DropDown
                       label="Species*"
                       id="speciesDropdown"
                       name="species"
                       type="text"
-                      xs="2"
                       key={`my_unique_species_select_key__${props.values.species}`}
                       ref={speciesRef}
                       options={speciesChoices}
@@ -324,7 +347,7 @@ export const AnimalForm = ({id}) => {
                   </Col>
                 </BootstrapForm.Row>
                 <BootstrapForm.Row className="mt-3">
-                  <Col xs="3">
+                  <Col xs="4">
                     <DropDown
                       label="Primary Color"
                       id="pcolor"
@@ -355,11 +378,11 @@ export const AnimalForm = ({id}) => {
                     as="textarea"
                     rows={5}
                     label="Description"
-                    xs="7"
+                    xs="8"
                   />
                 </BootstrapForm.Row>
                 <BootstrapForm.Row>
-                  <Col xs="3">
+                  <Col xs="4">
                     <DropDown
                       label="Aggressive"
                       id="aggressive"
@@ -386,11 +409,11 @@ export const AnimalForm = ({id}) => {
                     name="behavior_notes"
                     as="textarea"
                     rows={5}
-                    xs="7"
+                    xs="8"
                   />
                 </BootstrapForm.Row>
                 <BootstrapForm.Row>
-                  <Col xs="3">
+                  <Col xs="4">
                     <DropDown
                       label="Confined"
                       id="confined"
@@ -401,7 +424,7 @@ export const AnimalForm = ({id}) => {
                       isClearable={false}
                     />
                   </Col>
-                  <Col xs="3">
+                  <Col xs="4">
                     <DropDown
                       label="Injured"
                       id="injured"
@@ -474,19 +497,52 @@ export const AnimalForm = ({id}) => {
                           </div>
                         </span>
                       ))}
-                    </span>: ""}
-                    <div className="mb-2">
-                      <ImageUploader
-                        value={extra_images}
-                        id="extra_images"
-                        name="extra_images"
-                        parentStateSetter={wrapperSetExtraImages}
-                        label="Extra"
-                        maxNumber={3 - data.extra_images.length}
-                        multiple
-                      />
-                    </div>
+                    </span>
+                  :""}
+                  <div className="mb-2">
+                    <ImageUploader
+                      value={extra_images}
+                      id="extra_images"
+                      name="extra_images"
+                      parentStateSetter={wrapperSetExtraImages}
+                      label="Extra"
+                      maxNumber={3 - data.extra_images.length}
+                      multiple
+                    />
+                  </div>
                 </BootstrapForm.Row>
+                {/* Only show Shelter selection on intake and update. */}
+                <span hidden={!Boolean(id)&&!is_intake}>
+                <p className="mb-2 mt-2">Shelter</p>
+                <BootstrapForm.Row>
+                  <Col xs="8">
+                    <TreeSelect
+                      showSearch
+                      style={{ width: '100%' }}
+                      value={props.values.room}
+                      dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
+                      placeholder="Select a room..."
+                      allowClear
+                      treeDefaultExpandAll
+                      onChange={(value) => {
+                        props.setFieldValue("room", value||null);
+                      }}
+                    >
+                      {shelters.shelters.map(shelter => (
+                        <TreeNode title={'Shelter: ' + shelter.name + ' ('+shelter.buildings.length+' buildings, ' + shelter.room_count + ' rooms, ' + shelter.animal_count + ' animals)'} key={'shelter'+shelter.id} selectable={false} value={'shelter'+shelter.id}>
+                          {shelter.buildings.map(building => (
+                            <TreeNode title={'Building: ' + building.name + ' (' + building.rooms.length + ' rooms, ' + building.animal_count + ' animals)'} key={'building'+building.id} selectable={false} value={'building'+building.id}>
+                              {building.rooms.map(room => (
+                                <TreeNode title={room.name+' ('+room.animals.length+' animals)'} key={room.id} value={room.id}/>
+                              ))}
+                            </TreeNode>
+                          ))}
+                        </TreeNode>
+                      ))}
+                    </TreeSelect>
+                  </Col>
+                </BootstrapForm.Row>
+                </span>
             </BootstrapForm>
           </Card.Body>
           <ButtonGroup>
