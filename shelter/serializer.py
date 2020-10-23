@@ -7,6 +7,10 @@ from shelter.models import Room
 
 class RoomSerializer(serializers.ModelSerializer):
     animals = AnimalSerializer(source='animal_set', many=True, required=False, read_only=True)
+    shelter = serializers.SerializerMethodField()
+
+    def get_shelter(self, obj):
+        return obj.building.shelter.id
 
     class Meta:
         model = Room
@@ -15,7 +19,8 @@ class RoomSerializer(serializers.ModelSerializer):
             'building',
             'name',
             'description',
-            'animals'
+            'animals',
+            'shelter'
         )
 
 class BuildingSerializer(serializers.ModelSerializer):

@@ -10,6 +10,7 @@ import {
   faBandAid, faClipboardList, faCut, faEdit, faHandHoldingHeart, faShieldAlt, faWarehouse
 } from '@fortawesome/free-solid-svg-icons';
 import "react-responsive-carousel/lib/styles/carousel.min.css";
+import noImageFound from "../static/images/image-not-found.png";
 
 const header_style = {
   textAlign: "center",
@@ -39,8 +40,10 @@ export function AnimalView({id}) {
     last_seen: null,
     front_image: null,
     side_image: null,
+    room: null,
     extra_images: [],
     full_address:'',
+    shelter_name: '',
     owner_object: {first_name:'', last_name:'', phone:'', email:''}
   });
 
@@ -48,10 +51,7 @@ export function AnimalView({id}) {
   const handleClose = () => setShow(false);
 
   const handleSubmit = async () => {
-    let source = axios.CancelToken.source();
-    await axios.patch('/animals/api/animal/' + id + '/', {status:'REUNITED', room:null
-      // cancelToken: source.token,
-    })
+    await axios.patch('/animals/api/animal/' + id + '/', {status:'REUNITED', room:null})
     .then(response => {
       setData(response.data);
       handleClose()
@@ -92,7 +92,7 @@ export function AnimalView({id}) {
       </div>
     </div>
     <hr/>
-    <div className="row mb-2">
+    <div className="row">
       <div className="col-6 d-flex" style={{marginRight:"-15px"}}>
         <Card className="border rounded d-flex" style={{width:"100%"}}>
           <Card.Body>
@@ -187,7 +187,8 @@ export function AnimalView({id}) {
               <h4 className="mb-0">Location</h4>
             </Card.Title>
             <ListGroup variant="flush">
-              <ListGroup.Item style={{marginTop:"-13px"}}><b>Address:</b> {data.full_address}</ListGroup.Item>
+              {data.room ? <ListGroup.Item style={{marginTop:"-13px"}}><b>Shelter Name:</b> {data.shelter_name}<Link href={"/shelter/" + data.shelter}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item> : ""}
+              <ListGroup.Item style={{marginTop:"-13px"}}><b>{data.room ? "Shelter " : ""}Address:</b> {data.full_address}</ListGroup.Item>
             </ListGroup>
           </Card.Body>
         </Card>
@@ -200,9 +201,10 @@ export function AnimalView({id}) {
                 <img src={image} />
               </div>
             ))}
+            <img src={noImageFound} hidden={images.length > 0} />
           </Carousel>
         </div>
-        <Card className="border rounded d-flex mt-3" style={{width:"100%"}}>
+        <Card className="border rounded mt-3" style={{width:"100%"}}>
           <Card.Body>
             <Card.Title>
               <h4>Description</h4>

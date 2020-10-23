@@ -84,7 +84,7 @@ class AnimalViewSet(viewsets.ModelViewSet):
     def perform_update(self, serializer):
         if serializer.is_valid():
             # Set room to null if not present, or if status is changed to REUNITED
-            if not serializer.validated_data.get('room') or serializer.validated_data.get('status', '') == 'REUNITED':
+            if not serializer.validated_data.get('room'):
                 serializer.validated_data['room'] = None
             animal = serializer.save()
             old_images = serializer.data['extra_images']
