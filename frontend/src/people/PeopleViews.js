@@ -4,7 +4,7 @@ import { Link } from 'raviger';
 import { Card, ListGroup } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faClipboardList, faEdit,
+  faClipboardList, faEdit, faPlusSquare
 } from '@fortawesome/free-solid-svg-icons';
 import ReactImageFallback from 'react-image-fallback';
 import noImageFound from '../static/images/image-not-found.png';
@@ -88,12 +88,12 @@ export function PersonView({id}) {
         </Card>
       </div>
     </div>
-    {/* <div className="row mb-2">
+    <div className="row mb-2 mt-3">
       <div className="col-12 d-flex">
         <Card className="mb-2 border rounded" style={{width:"100%"}}>
           <Card.Body>
             <Card.Title>
-              <h4 className="mb-0">Animals</h4>
+              <h4 className="mb-0">Animals<Link href={"/hotline/animal/new?owner_id=" + id}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link></h4>
             </Card.Title>
             <hr/>
             <span className="d-flex flex-wrap align-items-end">
@@ -117,7 +117,7 @@ export function PersonView({id}) {
           </Card.Body>
         </Card>
       </div>
-    </div> */}
+    </div>
     <History action_history={data.action_history} />
     </>
   );

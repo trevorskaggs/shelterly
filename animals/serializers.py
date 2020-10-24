@@ -4,10 +4,9 @@ from actstream.models import target_stream
 
 from .models import Animal, AnimalImage
 from location.utils import build_full_address, build_action_string
-from people.serializers import PersonSerializer
 
 class AnimalSerializer(serializers.ModelSerializer):
-    owner_object = PersonSerializer(source='owner', required=False, read_only=True)
+    owner_object = serializers.SerializerMethodField()
     full_address = serializers.SerializerMethodField()
     aco_required = serializers.SerializerMethodField()
     front_image = serializers.SerializerMethodField()
@@ -17,9 +16,11 @@ class AnimalSerializer(serializers.ModelSerializer):
     shelter_name = serializers.SerializerMethodField()
     shelter = serializers.SerializerMethodField()
 
-    def get_shelter(self, obj):
-        if obj.room:
-            return obj.room.building.shelter.id
+    # Custom Owner object field that excludes animals to avoid a circular reference.
+    def get_owner_object(self, obj):
+        from people.serializers import SimplePersonSerializer
+        if obj.owner:
+            return SimplePersonSerializer(obj.owner).data
         return None
 
     # Custom field for the full address.
@@ -33,6 +34,13 @@ class AnimalSerializer(serializers.ModelSerializer):
         # Otherwise use the owner address.
         return build_full_address(obj.owner)
 
+    # Custom field to return shelter ID.
+    def get_shelter(self, obj):
+        if obj.room:
+            return obj.room.building.shelter.id
+        return None
+
+    # Custom field to return the shelter name.
     def get_shelter_name(self, obj):
         if obj.room:
             return obj.room.building.shelter.name
