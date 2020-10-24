@@ -170,6 +170,7 @@ export function AnimalView({id}) {
                 </div>
               </ListGroup.Item>
               {data.last_seen ? <ListGroup.Item><b>Last Seen:</b> <Moment format="LLL">{data.last_seen}</Moment></ListGroup.Item> : ""}
+              {data.request ? <ListGroup.Item><b>Service Request: </b>#{data.request}<Link href={"/hotline/servicerequest/" + data.request}> <FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link></ListGroup.Item>: ''}
             </ListGroup>
             <hr/>
             <Card.Title>
@@ -182,7 +183,7 @@ export function AnimalView({id}) {
             </ListGroup>
             <hr/>
             <Card.Title>
-              <h4 className="mb-0">Location{data.request ? <Link href={"/hotline/servicerequest/" + data.request} style={{fontSize:18}}> <FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link> : ""}</h4>
+               <h4 className="mb-0">Location</h4>
             </Card.Title>
             <ListGroup variant="flush">
               {data.room ? <ListGroup.Item style={{marginTop:"-13px"}}><b>Shelter Name:</b> {data.shelter_name}<Link href={"/shelter/" + data.shelter}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item> : ""}
