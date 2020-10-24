@@ -11,6 +11,7 @@ from people.models import Person
 from animals.models import Animal, AnimalImage
 from animals.forms import AnimalForm, ImageForm
 from animals.serializers import AnimalSerializer
+from hotline.models import ServiceRequest
 
 class AnimalViewSet(viewsets.ModelViewSet):
 
@@ -21,6 +22,12 @@ class AnimalViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         if serializer.is_valid():
+
+            # Add ServiceRequest Owner to new animals being added to an SR.
+            if serializer.validated_data.get('request'):
+                serializer.validated_data['owner'] = serializer.validated_data.get('request').owner
+
+            # Set status to SHELTERED if a room is added.
             if serializer.validated_data.get('room'):
                 serializer.validated_data['status'] = 'SHELTERED'
 

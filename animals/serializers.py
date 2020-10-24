@@ -3,7 +3,7 @@ from rest_framework import serializers
 from actstream.models import target_stream
 
 from .models import Animal, AnimalImage
-from location.utils import build_full_address
+from location.utils import build_full_address, build_action_string
 from people.serializers import PersonSerializer
 
 class AnimalSerializer(serializers.ModelSerializer):
@@ -43,7 +43,7 @@ class AnimalSerializer(serializers.ModelSerializer):
         return (obj.aggressive or obj.species.other)
 
     def get_action_history(self, obj):
-        return [str(action) for action in target_stream(obj)]
+        return [build_action_string(action) for action in target_stream(obj)]
 
     def get_front_image(self, obj):
         try:

@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from actstream.models import target_stream
 from .models import Person
-from location.utils import build_full_address
+from location.utils import build_full_address, build_action_string
 
 class PersonSerializer(serializers.ModelSerializer):
     full_address = serializers.SerializerMethodField()
@@ -12,7 +12,7 @@ class PersonSerializer(serializers.ModelSerializer):
         return build_full_address(obj)
 
     def get_action_history(self, obj):
-        return [str(action).replace(f'Person object ({obj.id})', '') for action in target_stream(obj)]
+        return [build_action_string(action).replace(f'Person object ({obj.id})', '') for action in target_stream(obj)]
 
     # Truncates latitude and longitude.
     def to_internal_value(self, data):

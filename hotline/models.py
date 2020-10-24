@@ -2,6 +2,7 @@ from django.db import models
 from location.models import Location
 from people.models import Person
 
+
 STATUS_CHOICES = (
   ('open', 'Open'),
   ('assigned', 'Assigned'),
@@ -31,13 +32,12 @@ class ServiceRequest(Location):
     owner_notification_tstamp = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
 
     def __str__(self):
-        return ''
-        # output = []
-        # output.append('Owner: %s' % self.owner or 'Unknown')
-        # if self.reporter:
-        #     output.append('Reporter: %s' % self.reporter)
-        # output.append('Animal Count: %s' % self.animal_set.all().count())
-        # return ', '.join(output)
+        output = []
+        output.append('Owner: %s' % self.owner or 'Unknown')
+        if self.reporter:
+            output.append('Reporter: %s' % self.reporter)
+        output.append('Animal Count: %s' % self.animal_set.all().count())
+        return ', '.join(output)
     
     @property
     def location_type(self):

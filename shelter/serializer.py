@@ -1,9 +1,11 @@
 from rest_framework import serializers
+
+from actstream.models import target_stream
+
 from .models import *
-from location.utils import build_full_address
+from location.utils import build_full_address, build_action_string
 from animals.models import Animal
 from animals.serializers import AnimalSerializer
-from shelter.models import Room
 
 class RoomSerializer(serializers.ModelSerializer):
     animals = AnimalSerializer(source='animal_set', many=True, required=False, read_only=True)
@@ -11,7 +13,7 @@ class RoomSerializer(serializers.ModelSerializer):
     action_history = serializers.SerializerMethodField()
 
     def get_action_history(self, obj):
-        return [str(action).replace(f'Room object ({obj.id})', '') for action in target_stream(obj)]
+        return [build_action_string(action) for action in target_stream(obj)]
 
     def get_shelter(self, obj):
         return obj.building.shelter.id
@@ -39,7 +41,7 @@ class BuildingSerializer(serializers.ModelSerializer):
         return obj.shelter.name
 
     def get_action_history(self, obj):
-        return [str(action).replace(f'Building object ({obj.id})', '') for action in target_stream(obj)]
+        return [build_action_string(action) for action in target_stream(obj)]
 
     # Custom field for total animals.
     def get_animal_count(self, obj):
@@ -70,7 +72,7 @@ class ShelterSerializer(serializers.ModelSerializer):
         return build_full_address(obj)
 
     def get_action_history(self, obj):
-        return [str(action).replace(f'Shelter object ({obj.id})', '') for action in target_stream(obj)]
+        return [build_action_string(action) for action in target_stream(obj)]
     # Custom field for total animals.
     def get_animal_count(self, obj):
         return Animal.objects.filter(room__building__in=obj.building_set.all()).count()
