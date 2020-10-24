@@ -10,6 +10,8 @@ from animals.serializers import AnimalSerializer
 class RoomSerializer(serializers.ModelSerializer):
     animals = AnimalSerializer(source='animal_set', many=True, required=False, read_only=True)
     shelter = serializers.SerializerMethodField()
+    shelter_name = serializers.SerializerMethodField()
+    building_name = serializers.SerializerMethodField()
     action_history = serializers.SerializerMethodField()
 
     def get_action_history(self, obj):
@@ -18,17 +20,15 @@ class RoomSerializer(serializers.ModelSerializer):
     def get_shelter(self, obj):
         return obj.building.shelter.id
 
+    def get_shelter_name(self, obj):
+        return obj.building.shelter.name
+
+    def get_building_name(self, obj):
+        return obj.building.name
+
     class Meta:
         model = Room
-        fields = (
-            'id',
-            'building',
-            'name',
-            'description',
-            'action_history',
-            'animals',
-            'shelter'
-        )
+        fields = '__all__'
 
 class BuildingSerializer(serializers.ModelSerializer):
     shelter_name = serializers.SerializerMethodField()

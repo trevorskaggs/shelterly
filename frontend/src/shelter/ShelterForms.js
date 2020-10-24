@@ -1,10 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
 import { Link, navigate, useQueryParams } from 'raviger';
 import { Formik } from 'formik';
 import { Form as BootstrapForm, Button, ButtonGroup, Card, Col } from "react-bootstrap";
 import { AddressLookup, TextInput, DropDown } from '.././components/Form';
 import * as Yup from 'yup';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faArrowAltCircleLeft } from '@fortawesome/free-solid-svg-icons';
+import { AuthContext } from "../accounts/AccountsReducer";
 
 const state_options = [{value:'AL', label:"AL"},{value:'AK', label:"AK"},{value:'AZ', label:"AZ"},{value:'AR', label:"AR"},{value:'CA', label:"CA"},{value:'CO', label:"CO"},{value:'CT', label:"CT"},
 {value:'DE', label:"DE"},{value:'FL', label:"FL"},{value:'GA', label:"GA"},{value:'HI', label:"HI"},{value:'ID', label:"ID"},{value:'IL', label:"IL"},{value:'IN', label:"IN"},
@@ -304,11 +307,13 @@ export const BuildingForm = ({id}) => {
 
 export const RoomForm = ({id}) => {
 
-    // Identify any query param data.
-    const [queryParams] = useQueryParams();
-    const {
-      building_id = ''
-    } = queryParams;
+  const { state, dispatch } = useContext(AuthContext);
+
+  // Identify any query param data.
+  const [queryParams] = useQueryParams();
+  const {
+    building_id = ''
+  } = queryParams;
 
   // Initial Room data.
   const [data, setData] = useState({
@@ -361,7 +366,12 @@ export const RoomForm = ({id}) => {
             if (id) {
               axios.put('/shelter/api/room/' + id + '/', values)
               .then(function() {
-                navigate('/shelter/room/' + id);
+                if (state.prevLocation) {
+                  navigate(state.prevLocation);
+                }
+                else {
+                  navigate('/shelter/room/' + id);
+                }
               })
               .catch(e => {
                 console.log(e);
@@ -382,7 +392,7 @@ export const RoomForm = ({id}) => {
       >
         {props => (
           <Card border="secondary" className="mt-5">
-          <Card.Header as="h5"> Room Information</Card.Header>
+          <Card.Header as="h5" className="pl-3"><span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>{!id ? "New" : "Update"} Room</Card.Header>
           <Card.Body>
             <BootstrapForm noValidate>
               <BootstrapForm.Row>
@@ -404,7 +414,6 @@ export const RoomForm = ({id}) => {
           </Card.Body>
           <ButtonGroup size="lg">
             <Button type="submit" onClick={() => { props.submitForm()}}>Save</Button>
-            <Button as={Link} variant="info" href="/shelter">Cancel</Button>
           </ButtonGroup>
         </Card>
         )}

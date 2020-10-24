@@ -33,7 +33,6 @@ export const UpdateShelter = ({id}) => (
 
 export const ShelterList = () => (
   <div>
-    <h1 style={header_style}>Shelters</h1>
     <ShelterTable />
   </div>
 )

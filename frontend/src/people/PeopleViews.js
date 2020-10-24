@@ -88,7 +88,7 @@ export function PersonView({id}) {
         </Card>
       </div>
     </div>
-    <div className="row mb-2 mt-3">
+    <div className="row mb-2 mt-3" hidden={data.animals.length === 0}>
       <div className="col-12 d-flex">
         <Card className="mb-2 border rounded" style={{width:"100%"}}>
           <Card.Body>
