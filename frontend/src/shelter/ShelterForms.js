@@ -274,7 +274,7 @@ export const BuildingForm = ({id}) => {
       >
         {props => (
           <Card border="secondary" className="mt-5">
-          <Card.Header as="h5"> Building Information</Card.Header>
+          <Card.Header as="h5" className="pl-3"><span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>{!id ? "New" : "Update"} Building</Card.Header>
           <Card.Body>
             <BootstrapForm noValidate>
               <BootstrapForm.Row>
@@ -296,7 +296,6 @@ export const BuildingForm = ({id}) => {
           </Card.Body>
           <ButtonGroup size="lg">
             <Button type="submit" onClick={() => { props.submitForm()}}>Save</Button>
-            <Button as={Link} variant="info" href="/shelter">Cancel</Button>
           </ButtonGroup>
         </Card>
         )}

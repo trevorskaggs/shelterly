@@ -116,7 +116,7 @@ export function ShelterDetailsTable({id}) {
 
 export function BuildingDetailsTable({id}) {
 
-  const [data, setData] = useState({});
+  const [data, setData] = useState({name:'', description: '', shelter: null, shelter_name:'', rooms:[], action_history:[]});
 
   // Hook for initializing data.
   useEffect(() => {
@@ -138,48 +138,61 @@ export function BuildingDetailsTable({id}) {
 
   return (
     <>
-      <h1 style={header_style}>{data.name}</h1>
-      <br/>
-        <Card>
+    <div className="row mt-3" style={{marginBottom:"-8px"}}>
+      <div className="col-12 d-flex">
+        <h1>Building Details<Link href={"/shelter/building/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link></h1>
+      </div>
+    </div>
+    <hr/>
+    <Card className="border rounded d-flex" style={{width:"100%"}}>
+      <Card.Body>
+        <Card.Title>
+          <h4>Information</h4>
+        </Card.Title>
+        <hr/>
+        <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
           <ListGroup.Item>
-              <p><b>Name:</b> {data.name}</p>
-              <p><b>Shelter:</b> {data.shelter_name}<Link href={"/shelter/" + data.shelter}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></p>
-              <p><b>Description:</b> {data.description}</p>
+            <b>Name:</b> {data.name}
           </ListGroup.Item>
-        </Card>
-        <Card className="mt-3">
-        <Card.Body>
-          <Card.Title className="">
-            <h4 className="mb-0">Rooms<Link href={"/shelter/building/room/new?building_id=" + id}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link></h4>
-          </Card.Title>
-          <ListGroup variant="flush">
-          {data.rooms === undefined ? <span><ListGroup.Item><p>No Rooms Found</p></ListGroup.Item></span> :
-            <span>{data.rooms.map(room => (
-              <ListGroup.Item key={room.id}>
-                &nbsp;<b>Name:</b> {room.name}
+          <ListGroup.Item>
+            <b>Description:</b> {data.description}
+          </ListGroup.Item>
+          <ListGroup.Item>
+            <b>Shelter:</b> {data.shelter_name}<Link href={"/shelter/" + data.shelter}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
+          </ListGroup.Item>
+        </ListGroup>
+      </Card.Body>
+    </Card>
+    <Card className="mt-3 border rounded d-flex">
+      <Card.Body>
+        <Card.Title>
+          <h4>Rooms<Link href={"/shelter/building/room/new?building_id=" + id}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link></h4>
+        </Card.Title>
+        <hr/>
+        <span className="d-flex flex-wrap align-items-end">
+          {data.rooms.map(room => (
+            <Card key={room.id} className="border rounded mr-3" style={{width:"100px", height:"100px"}}>
+              <Card.Text className="text-center mb-0">
+                {room.name}
                 <Link href={"/shelter/room/" + room.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
                 <Link href={"/shelter/room/edit/" + room.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
-              </ListGroup.Item>
-            ))}</span>
-          } 
-          </ListGroup>
-          </Card.Body>
-        </Card>
-      <hr/>
-      <div style={btn_style}>
-        <Link href={"/shelter/building/room/new?building_id=" + id} style={link_style} className="btn btn-success btn-lg btn-block mb-2">ADD ROOM</Link>
-        <br/>
-        <Link href={"/shelter/building/edit/" + id} style={link_style} className="btn btn-primary btn-lg btn-block mb-2">EDIT BUILDING</Link>
-        <br/>
-        <Link href="/shelter/list" className="btn btn-secondary btn-lg btn-block">BACK</Link>
-      </div>
+              </Card.Text>
+              <Card.Text className="text-center mb-0">
+                {room.animals.length} Animals
+              </Card.Text>
+            </Card>
+          ))}
+          </span>
+      </Card.Body>
+    </Card>
+    <History action_history={data.action_history} />
     </>
   );
 };
 
 export function RoomDetailsTable({id}) {
 
-  const [data, setData] = useState({name:'', description:'', building_name: '', shelter: null, animals:[], action_history:[]});
+  const [data, setData] = useState({name:'', description:'', building_name: '', shelter_name:'', shelter: null, animals:[], action_history:[]});
 
   // Hook for initializing data.
   useEffect(() => {
