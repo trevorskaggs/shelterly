@@ -109,7 +109,7 @@ export const ShelterForm = ({id}) => {
       >
         {props => (
           <Card border="secondary" className="mt-5">
-          <Card.Header as="h5"> Shelter Information</Card.Header>
+          <Card.Header as="h5" className="pl-3"><span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>{!id ? "New" : "Update"} Shelter</Card.Header>
           <Card.Body>
           <BootstrapForm noValidate>
             <BootstrapForm.Row>
@@ -186,7 +186,6 @@ export const ShelterForm = ({id}) => {
           </Card.Body>
           <ButtonGroup size="lg">
             <Button type="submit" onClick={() => { props.submitForm()}}>Save</Button>
-            <Button as={Link} variant="info" href="/shelter">Cancel</Button>
           </ButtonGroup>
         </Card>
         )}
@@ -196,6 +195,8 @@ export const ShelterForm = ({id}) => {
 };
 
 export const BuildingForm = ({id}) => {
+
+  const { state, dispatch } = useContext(AuthContext);
 
   // Identify any query param data.
   const [queryParams] = useQueryParams();
@@ -253,7 +254,12 @@ export const BuildingForm = ({id}) => {
             if (id) {
               axios.put('/shelter/api/building/' + id + '/', values)
               .then(function() {
-                navigate('/shelter/' + values.shelter);
+                if (state.prevLocation) {
+                  navigate(state.prevLocation);
+                }
+                else {
+                  navigate('/shelter/building/' + id);
+                }
               })
               .catch(e => {
                 console.log(e);
@@ -262,7 +268,12 @@ export const BuildingForm = ({id}) => {
             else {
               axios.post('/shelter/api/building/', values)
               .then(function() {
-                navigate('/shelter/' + shelter_id);
+                if (state.prevLocation) {
+                  navigate(state.prevLocation);
+                }
+                else {
+                  navigate('/shelter/' + shelter_id);
+                }
               })
               .catch(e => {
                 console.log(e);
@@ -379,7 +390,12 @@ export const RoomForm = ({id}) => {
             else {
               axios.post('/shelter/api/room/', values)
               .then(function() {
-                navigate('/shelter/building/' + building_id);
+                if (state.prevLocation) {
+                  navigate(state.prevLocation);
+                }
+                else {
+                  navigate('/shelter/building/' + building_id);
+                }
               })
               .catch(e => {
                 console.log(e);

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import { Link } from 'raviger';
-import { Card, CardGroup, ListGroup } from 'react-bootstrap';
+import { Card, Col, ListGroup, Row } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faClipboardList, faEdit, faPlusSquare,
@@ -28,12 +28,16 @@ export function ShelterDetailsTable({id}) {
   const [data, setData] = useState({
     name: '',
     address: '',
+    full_address: '',
     city: '',
     state: '',
     zip_code: '',
     description: '',
     image: '',
     buildings: [],
+    action_history: [],
+    animal_count: 0,
+    room_count: 0,
   });
 
   // Hook for initializing data.
@@ -56,60 +60,70 @@ export function ShelterDetailsTable({id}) {
 
   return (
     <>
-      <h1 style={header_style}>Shelter #{id}</h1>
-      <br/>
-      <CardGroup>
-        <Card>
-          <ListGroup.Item>
-            <p><b>Name:</b> {data.name}</p>
-            <p><b>Adress:</b> {data.address}</p>
-            <p><b>City:</b> {data.city}</p>
-            <p><b>State:</b> {data.state}</p>
-            <p><b>Zip:</b> {data.zip_code}</p>
-            <p><b>Description:</b> {data.description}</p>
-          </ListGroup.Item>  
-        </Card>
-      </CardGroup>
-      <CardGroup>
-        <Card>
-          <Card.Body>
+      <Row className="mt-3" style={{marginBottom:"-25px"}}>
+        <Col xs={12} className="d-flex">
+          <h1>Shelter Details<Link href={"/shelter/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link></h1>
+        </Col>
+      </Row>
+      <hr/>
+      <Card className="border rounded d-flex" style={{width:"100%"}}>
+        <Card.Body>
+          <Card.Title>
+            <h4>Information</h4>
+          </Card.Title>
+          <hr/>
+          <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
+            <ListGroup.Item>
+              <b>Name:</b> {data.name}
+            </ListGroup.Item>
+            <ListGroup.Item>
+              <b>Address:</b> {data.full_address}
+            </ListGroup.Item>
+            <ListGroup.Item>
+              <b>Description:</b> {data.description}
+            </ListGroup.Item>
+          </ListGroup>
+        </Card.Body>
+      </Card>
+      <Card className="border rounded d-flex mt-3" >
+        <Card.Body>
           <Card.Title className="">
             <h4 className="mb-0">Buildings<Link href={"/shelter/building/new?shelter_id=" + id}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link></h4>
           </Card.Title>
-          <ListGroup variant="flush">
-            {!data.buildings.length ? <span><ListGroup.Item><Link href={"/shelter/building/new?shelter_id=" + id}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link>&nbsp;<b>Add Building</b></ListGroup.Item></span> :
-              <span>{data.buildings.map(building => (
-                <ListGroup.Item key={building.id}>
+          <hr/>
+          <span className="d-flex flex-wrap align-items-end">
+            {data.buildings.map(building => (
+              <Card key={building.id} className="border rounded mr-3" style={{width:"202px"}}>
+                <Card.Title className="text-center mb-0 mt-3">
                   {building.name}
                   <Link href={"/shelter/building/" + building.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
                   <Link href={"/shelter/building/edit/" + building.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
-                  <br/>
-                  <b>Rooms</b><Link href={"/shelter/building/room/new?building_id=" + building.id}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link>&nbsp;
-                  {!building.rooms.length ? <span><ListGroup.Item><Link href={"/shelter/building/room/new?building_id=" + building.id}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link>&nbsp;<b>Add Rooms</b></ListGroup.Item></span>: 
-                    <span>
-                      {building.rooms.map(room => (
-                        <ListGroup.Item key={room.id}>{room.name}
-                          <Link href={"/shelter/room/" + room.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
-                          <Link href={"/shelter/room/edit/" + room.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
-                        </ListGroup.Item>
-                      ))}
-                    </span>
-                  }
-                </ListGroup.Item>
-              ))}</span>
-            }
-            </ListGroup>
-          </Card.Body>
-        </Card>
-      </CardGroup>
-      <hr/>
-      <div style={btn_style}>
-        <Link href={"/shelter/building/new?shelter_id=" + id} style={link_style} className="btn btn-success btn-lg btn-block mb-2">ADD BUILDING</Link>
-        <br/>
-        <Link href={"/shelter/edit/" + id} style={link_style} className="btn btn-primary btn-lg btn-block mb-2">UPDATE SHELTER</Link>
-        <br/>
-        <Link href="/shelter/list" className="btn btn-secondary btn-lg btn-block" >BACK</Link>
-      </div>
+                </Card.Title>
+                {/* <Card.Title style={{marginBtoom:"0px"}}>
+                  <h4>Rooms<Link href={"/shelter/building/room/new?building_id=" + building.id}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link></h4>
+                </Card.Title> */}
+                <hr style={{marginBottom:"0px"}} />
+                <span className="d-flex flex-wrap align-items-end">
+                  {building.rooms.map(room => (
+                    <Card key={room.id} className="border rounded" style={{width:"100px", height:"100px"}}>
+                      <Card.Text className="text-center mb-0">
+                        {room.name}
+                        <Link href={"/shelter/room/" + room.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
+                        <Link href={"/shelter/room/edit/" + room.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
+                      </Card.Text>
+                      <Card.Text className="text-center mb-0">
+                        {room.animals.length} Animals
+                      </Card.Text>
+                    </Card>
+                  ))}
+                  <Link href={"/shelter/building/room/new?building_id=" + building.id}> <FontAwesomeIcon icon={faPlusSquare} style={{width:"100px", height:"100px", verticalAlign:"middle"}} inverse /></Link>
+                </span>
+              </Card>
+            ))}
+          </span>
+        </Card.Body>
+      </Card>
+      <History action_history={data.action_history} />
     </>
   );
 };
@@ -182,7 +196,7 @@ export function BuildingDetailsTable({id}) {
               </Card.Text>
             </Card>
           ))}
-          </span>
+        </span>
       </Card.Body>
     </Card>
     <History action_history={data.action_history} />
