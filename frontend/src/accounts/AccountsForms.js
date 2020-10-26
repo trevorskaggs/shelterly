@@ -7,6 +7,7 @@ import {
   FormGroup,
   Row,
 } from 'reactstrap';
+import { Alert } from 'react-bootstrap';
 import * as Yup from "yup";
 import { useCookies } from 'react-cookie';
 import { TextInput } from '.././components/Form.js';
@@ -34,7 +35,7 @@ export const LoginForm = () => {
             .max(50, 'Must be 20 characters or less')
             .required('No password provided.'),
         })}
-        onSubmit={(values, { setSubmitting }) => {
+        onSubmit={(values, actions ) => {
           setTimeout(() => {
             axios.post('/login/', values)
             .then(response => {
@@ -48,12 +49,14 @@ export const LoginForm = () => {
               console.log(e);
               removeCookie("token", {path: '/'});
               setAuthToken();
+              actions.setStatus('Failed to log in with this username and password combination.')
               dispatch({type: "LOGIN_FAILED", data: e});
             });
-            setSubmitting(false);
+            actions.setSubmitting(false);
           }, 500);
         }}
       >
+      {({ isSubmitting, status }) => (
         <Form>
           <FormGroup>
             <Row>
@@ -74,9 +77,14 @@ export const LoginForm = () => {
                 xs="6"
               />
             </Row>
+
           </FormGroup>
-          <Button type="submit" className="btn-success mr-1">Login</Button>
+          { status && <Alert variant="danger">{status} </Alert>}
+
+         <Button type="submit" className="btn-success mr-1">Login</Button>
         </Form>
+          
+      )}
       </Formik>
     </div>
   )
