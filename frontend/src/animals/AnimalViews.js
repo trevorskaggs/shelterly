@@ -10,6 +10,7 @@ import {
   faBandAid, faClipboardList, faCut, faEdit, faHandHoldingHeart, faShieldAlt, faWarehouse
 } from '@fortawesome/free-solid-svg-icons';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
+import Header from '../components/Header';
 import History from '../components/History';
 import noImageFound from '../static/images/image-not-found.png';
 
@@ -82,13 +83,9 @@ export function AnimalView({id}) {
 
   return (
     <>
-    <div className="row mt-3" style={{marginBottom:"-8px"}}>
-      <div className="col-12 d-flex">
-        <h1 style={{textAlign:"center"}}>
-          Animal Details - {data.status}<Link href={"/animals/animal/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>{data.status !== 'REUNITED' ? <FontAwesomeIcon icon={faHandHoldingHeart} onClick={() => setShow(true)} style={{cursor:'pointer'}} inverse /> : ""}
-        </h1>
-      </div>
-    </div>
+    <Header>
+      Animal Details - {data.status}<Link href={"/animals/animal/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>{data.status !== 'REUNITED' ? <FontAwesomeIcon icon={faHandHoldingHeart} onClick={() => setShow(true)} style={{cursor:'pointer'}} inverse /> : ""}
+    </Header>
     <hr/>
     <div className="row">
       <div className="col-6 d-flex" style={{marginRight:"-15px"}}>

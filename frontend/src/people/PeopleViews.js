@@ -8,6 +8,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import ReactImageFallback from 'react-image-fallback';
 import noImageFound from '../static/images/image-not-found.png';
+import Header from '../components/Header';
 import History from '../components/History';
 
 export function PersonView({id}) {
@@ -53,16 +54,12 @@ export function PersonView({id}) {
 
   return (
     <>
-    <div className="row mt-3" style={{marginBottom:"-8px"}}>
-      <div className="col-12 d-flex">
-        <h1 style={{textAlign:"center"}}>
-        {is_owner ?
-          <span>Owner Details<Link href={"/hotline/owner/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link></span> :
-          <span>Reporter Details<Link href={"/hotline/reporter/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link></span>
-        }
-        </h1>
-      </div>
-    </div>
+    <Header>
+      {is_owner ?
+        <span>Owner Details<Link href={"/hotline/owner/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link></span> :
+        <span>Reporter Details<Link href={"/hotline/reporter/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link></span>
+      }
+    </Header>
     <hr/>
     <div className="row">
       <div className="col-6 d-flex" style={{marginRight:"-15px"}}>

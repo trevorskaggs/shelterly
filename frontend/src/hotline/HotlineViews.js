@@ -8,6 +8,7 @@ import {
   faBandAid, faCar, faClipboardList, faComment, faEdit, faHouseDamage, faKey, faPlusSquare, faShieldAlt, faTrailer
 } from '@fortawesome/free-solid-svg-icons';
 import ReactImageFallback from 'react-image-fallback';
+import Header from '../components/Header';
 import History from '../components/History';
 import noImageFound from '../static/images/image-not-found.png';
 
@@ -56,11 +57,9 @@ export function ServiceRequestView({id}) {
 
   return (
     <>
-      <div className="row mt-3" style={{marginBottom:"-8px"}}>
-        <div className="col-12 d-flex">
-          <h1>Service Request #{data.id}<Link href={"/hotline/servicerequest/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link> | <span style={{textTransform:"capitalize"}}>{data.status}</span></h1>
-        </div>
-      </div>
+      <Header>
+        Service Request #{data.id}<Link href={"/hotline/servicerequest/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link> | <span style={{textTransform:"capitalize"}}>{data.status}</span>
+      </Header>
       <hr/>
       <div className="row mb-2">
         <div className="col-6 d-flex">

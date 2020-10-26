@@ -8,6 +8,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import ReactImageFallback from 'react-image-fallback';
 import History from '../components/History';
+import Header from '../components/Header';
 import noImageFound from '../static/images/image-not-found.png';
 
 const btn_style = {
@@ -60,11 +61,9 @@ export function ShelterDetailsTable({id}) {
 
   return (
     <>
-      <Row className="mt-3" style={{marginBottom:"-25px"}}>
-        <Col xs={12} className="d-flex">
-          <h1>Shelter Details<Link href={"/shelter/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link></h1>
-        </Col>
-      </Row>
+      <Header>
+        Shelter Details<Link href={"/shelter/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
+      </Header>
       <hr/>
       <Card className="border rounded d-flex" style={{width:"100%"}}>
         <Card.Body>
@@ -152,11 +151,9 @@ export function BuildingDetailsTable({id}) {
 
   return (
     <>
-    <div className="row mt-3" style={{marginBottom:"-8px"}}>
-      <div className="col-12 d-flex">
-        <h1>Building Details<Link href={"/shelter/building/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link></h1>
-      </div>
-    </div>
+    <Header>
+      Building Details<Link href={"/shelter/building/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
+    </Header>
     <hr/>
     <Card className="border rounded d-flex" style={{width:"100%"}}>
       <Card.Body>
@@ -228,11 +225,9 @@ export function RoomDetailsTable({id}) {
 
   return (
     <>
-    <div className="row mt-3" style={{marginBottom:"-8px"}}>
-      <div className="col-12 d-flex">
-        <h1>Room Details<Link href={"/shelter/room/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link></h1>
-      </div>
-    </div>
+    <Header>
+      Room Details<Link href={"/shelter/room/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
+    </Header>
     <hr/>
     <Card className="border rounded d-flex" style={{width:"100%"}}>
       <Card.Body>
