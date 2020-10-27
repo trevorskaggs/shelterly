@@ -5,7 +5,7 @@ from location.models import Location
 class BaseShelterModel(models.Model):
 
     name = models.CharField(max_length=100, unique=True)
-    description = models.CharField(max_length=400, blank=True, null=True)
+    description = models.CharField(max_length=400, blank=True)
 
     def __str__(self):
         return self.name.upper()
@@ -21,6 +21,10 @@ class Shelter(BaseShelterModel, Location):
     @property
     def location_type(self):
         return 'shelter'
+
+    @property
+    def rooms(self):
+        return Room.objects.filter(building__shelter=self)
     
 
 class Building(BaseShelterModel):
@@ -35,7 +39,6 @@ class Building(BaseShelterModel):
 class Room(BaseShelterModel):
 
     building = models.ForeignKey(Building, on_delete=models.CASCADE)
-    shelter = models.ForeignKey(Shelter, null=True, blank=True, on_delete=models.CASCADE)
 
     @property
     def parent(self):

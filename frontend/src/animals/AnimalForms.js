@@ -1,20 +1,24 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
 import axios from "axios";
-import { Link, navigate, useQueryParams } from 'raviger';
+import { navigate, useQueryParams } from 'raviger';
 import { Field, Form, Formik } from "formik";
-import { Input, Label } from "reactstrap";
-import { Col } from 'react-bootstrap';
+import { Col, Image } from 'react-bootstrap';
 import { Button, ButtonGroup, Form as BootstrapForm } from "react-bootstrap";
 import { Card } from 'react-bootstrap';
 import * as Yup from 'yup';
-import { DateTimePicker, DropDown, TextInput } from '.././components/Form.js';
-import { catAgeChoices, dogAgeChoices, horseAgeChoices, otherAgeChoices, catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, speciesChoices, sexChoices, dogSizeChoices, catSizeChoices, horseSizeChoices, otherSizeChoices, statusChoices, unknownChoices } from './constants'
-
-const header_style = {
-  textAlign: "center",
-}
+import { AuthContext } from "../accounts/AccountsReducer";
+import { TreeSelect } from 'antd';
+import { DateTimePicker, DropDown, ImageUploader, TextInput } from '.././components/Form.js';
+import { catAgeChoices, dogAgeChoices, horseAgeChoices, otherAgeChoices, catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, speciesChoices, sexChoices, dogSizeChoices, catSizeChoices, horseSizeChoices, otherSizeChoices, statusChoices, unknownChoices } from './constants';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faArrowAltCircleLeft, faMinusSquare } from '@fortawesome/free-solid-svg-icons';
+import 'antd/lib/tree-select/style/css';
 
 export const AnimalForm = ({id}) => {
+
+  const { state, dispatch } = useContext(AuthContext);
+
+  const { TreeNode } = TreeSelect;
 
   // Determine if this is an intake workflow.
   var is_intake = window.location.pathname.includes("intake")
@@ -29,9 +33,11 @@ export const AnimalForm = ({id}) => {
   } = queryParams;
 
   // Determine if this is from a first responder when creating a SR.
-  var is_first_responder = (first_responder == 'true');
+  var is_first_responder = (first_responder === 'true');
 
   // Track species selected and update choice lists accordingly.
+  const speciesRef = useRef(null);
+  const sexRef = useRef(null);
   const sizeRef = useRef(null);
   const ageRef = useRef(null);
   const pcolorRef = useRef(null);
@@ -46,6 +52,11 @@ export const AnimalForm = ({id}) => {
   const [key, setKey] = useState(Math.random());
   // Dynamic placeholder value for options.
   const [placeholder, setPlaceholder] = useState("Select a species...");
+
+  const [front_image, setFrontImage] = useState([]);
+  const [side_image, setSideImage] = useState([]);
+  const [extra_images, setExtraImages] = useState([]);
+  const [reinitialize, setReinitialize] = useState(true);
 
   // Initial Animal data.
   const [data, setData] = useState({
@@ -66,8 +77,43 @@ export const AnimalForm = ({id}) => {
     injured: 'unknown',
     behavior_notes: '',
     last_seen: null,
-    image: null,
+    room: null,
+    front_image: null,
+    side_image: null,
+    extra_images: [],
   });
+
+  const [shelters, setShelters] = useState({shelters: [],  isFetching: false});
+
+  const wrapperSetFrontImage = useCallback(val => {
+    if (val !== 0){
+      setFrontImage(val);
+    }
+  }, [setFrontImage]);
+
+  const wrapperSetSideImage = useCallback(val => {
+    if (val !== 0){
+      setSideImage(val);
+    }
+  }, [setSideImage]);
+
+  const wrapperSetExtraImages = useCallback(val => {
+    if (val !== 0){
+      setExtraImages(val);
+    }
+  }, [setExtraImages]);
+
+  // Resets single file image fields to be null.
+  const clearImage = (image_name, setFieldValue) => {
+    setData(prevState => ({ ...prevState, [image_name]:null }));
+    setFieldValue(image_name, null);
+  }
+
+  // Removes an image from a multi file image field array.
+  const clearImages = (image_url, setFieldValue) => {
+    setData(prevState => ({ ...prevState, ["extra_images"]:data.extra_images.filter(url => url !== image_url) }));
+    setFieldValue("extra_images", data.extra_images.filter(url => url !== image_url));
+  }
 
   // Hook for initializing data.
   useEffect(() => {
@@ -80,7 +126,9 @@ export const AnimalForm = ({id}) => {
         })
         .then(response => {
           setData(response.data);
-          setPlaceholder("Select...")
+          setPlaceholder("Select...");
+          // Turn off reinitialization after form load so that data can be modified for image tracking without causing a form reset.
+          setReinitialize(false);
         })
         .catch(error => {
           console.log(error.response);
@@ -88,31 +136,43 @@ export const AnimalForm = ({id}) => {
       };
       fetchAnimalData();
     }
+
+    const fetchShelters = async () => {
+      setShelters({shelters: [], isFetching: true});
+      // Fetch Shelter data.
+      await axios.get('/shelter/api/shelter', {
+        cancelToken: source.token,
+      })
+      .then(response => {
+        setShelters({shelters: response.data, isFetching: false});
+      })
+      .catch(error => {
+        console.log(error.response);
+        setShelters({shelters: [], isFetching: false});
+      });
+    };
+    fetchShelters();
+
     // Cleanup.
     return () => {
       source.cancel();
     };
   }, [id]);
-
-  const [image, setImage] = useState(null);
-  function handleImageChange(e) {
-    console.log(e);
-    setImage(e.target.files[0]);
-  };
   
   return (
     <span key={key}>
       <Formik
         initialValues={data}
-        enableReinitialize={true}
+        enableReinitialize={reinitialize}
         validationSchema={Yup.object({
           status: Yup.string(),
           name: Yup.string()
             .max(50, 'Must be 50 characters or less.'),
           species: Yup.string()
+            .required('Required')
             .oneOf(speciesChoices.map(option => option['value'])),
           size: Yup.string()
-            .max(10, 'Must be 10 characters or less'),
+            .required('Required'),
           age: Yup.string(),
           sex: Yup.string()
             .oneOf(['M', 'F']),
@@ -132,20 +192,28 @@ export const AnimalForm = ({id}) => {
             .max(200, 'Must be 200 characters or less'),
           last_seen: Yup.date()
             .nullable(),
-          // image: Yup.string()
-          //   .nullable(),
+          front_image: Yup.mixed(),
+          side_image: Yup.mixed(),
+          extra_images: Yup.array()
         })}
         onSubmit={(values, { setSubmitting }) => {
+          // Use FormData so that image files may also be included.
+          const formData = new FormData();
+          // Convert json to FormData.
+          for ( var key in values ) {
+            if (values[key] !== null) {
+              formData.append(key, values[key]);
+            }
+          }
+          // Add extra images.
+          for (let i = 0; i < extra_images.length; i++) {
+            formData.append('extra' + (i + 1), extra_images[i].file);
+          }
           if (id) {
-            axios.put('/animals/api/animal/' + id + '/', values)
+            axios.patch('/animals/api/animal/' + id + '/', formData)
             .then(function() {
-              // If the animal has an SR, redirect to the SR.
-              if (values.request) {
-                navigate('/hotline/servicerequest/' + values.request);
-              }
-              // If the animal has an owner ID, redirect to the owner details.
-              else if (values.owner) {
-                navigate('/hotline/owner/' + values.owner);
+              if (state.prevLocation) {
+                navigate(state.prevLocation);
               }
               else {
                 navigate('/animals/animal/' + id);
@@ -156,7 +224,7 @@ export const AnimalForm = ({id}) => {
             });
           }
           else {
-            axios.post('/animals/api/animal/', values)
+            axios.post('/animals/api/animal/', formData)
             .then(response => {
               if (addAnother) {
                 // If SR already exists, pass along the request ID.
@@ -200,54 +268,41 @@ export const AnimalForm = ({id}) => {
       >
         {props => (
           <Card border="secondary" className="mt-5">
-            <Card.Header as="h5">{!id ? "New" : "Update"} Animal</Card.Header>
+            <Card.Header as="h5">{id ? <span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>: ""}{!id ? "New" : "Update"} Animal</Card.Header>
             <Card.Body>
-          <BootstrapForm as={Form}>
+            <BootstrapForm as={Form}>
               <Field type="hidden" value={owner_id||""} name="owner" id="owner"></Field>
               <Field type="hidden" value={servicerequest_id||""} name="request" id="request"></Field>
-               <BootstrapForm.Row hidden={!id} className="mb-3">
-                <Col xs="3">
-                    <DropDown
-                      id="status"
-                      name="status"
-                      type="text"
-                      label="Status"
-                      options={statusChoices}
-                      value={props.values.status||''}
-                      isClearable={false}
-                      onChange={(instance) => {
-                        props.setFieldValue("status", instance.value);
-                      }}
-                    />
-                  </Col>
-                </BootstrapForm.Row>
                 <BootstrapForm.Row>
                   <TextInput
                     id="name"
-                    xs="8"
+                    xs="9"
                     name="name"
                     type="text"
                     label="Animal Name"
                   />
-                  <Col xs="2">
+                  <Col xs="3">
                     <DropDown
                       label="Sex"
                       id="sexDropDown"
                       name="sex"
                       type="text"
+                      key={`my_unique_sex_select_key__${props.values.sex}`}
+                      ref={sexRef}
                       options={sexChoices}
                       value={props.values.sex||''}
                     />
                   </Col>
                 </BootstrapForm.Row>
                 <BootstrapForm.Row>
-                  <Col xs="2">
+                  <Col xs="4">
                     <DropDown
-                      label="Species"
+                      label="Species*"
                       id="speciesDropdown"
                       name="species"
                       type="text"
-                      xs="2"
+                      key={`my_unique_species_select_key__${props.values.species}`}
+                      ref={speciesRef}
                       options={speciesChoices}
                       value={props.values.species||data.species}
                       isClearable={false}
@@ -257,17 +312,19 @@ export const AnimalForm = ({id}) => {
                         ageRef.current.select.clearValue();
                         pcolorRef.current.select.clearValue();
                         scolorRef.current.select.clearValue();
-                        props.setFieldValue("species", instance.value);
+                        props.setFieldValue("species", instance === null ? '' : instance.value);
                       }}
                     />
                   </Col>
                   <Col xs="4">
                     <DropDown
-                      label="Size"
+                      label="Size*"
                       id="sizeDropdown"
                       name="size"
                       type="text"
                       xs="4"
+                      isClearable={false}
+                      key={`my_unique_size_select_key__${props.values.size}`}
                       ref={sizeRef}
                       options={sizeChoices[props.values.species]}
                       value={props.values.size||''}
@@ -281,6 +338,7 @@ export const AnimalForm = ({id}) => {
                       name="age"
                       type="text"
                       xs="4"
+                      key={`my_unique_age_select_key__${props.values.age}`}
                       ref={ageRef}
                       options={ageChoices[props.values.species]}
                       value={props.values.age||''}
@@ -289,13 +347,14 @@ export const AnimalForm = ({id}) => {
                   </Col>
                 </BootstrapForm.Row>
                 <BootstrapForm.Row className="mt-3">
-                  <Col xs="3">
+                  <Col xs="4">
                     <DropDown
                       label="Primary Color"
                       id="pcolor"
                       name="pcolor"
                       type="text"
                       className="mb-3"
+                      key={`my_unique_pcolor_select_key__${props.values.pcolor}`}
                       ref={pcolorRef}
                       options={colorChoices[props.values.species]}
                       value={props.values.pcolor||''}
@@ -306,23 +365,24 @@ export const AnimalForm = ({id}) => {
                       id="scolor"
                       name="scolor"
                       type="text"
+                      key={`my_unique_scolor_select_key__${props.values.scolor}`}
                       ref={scolorRef}
                       options={colorChoices[props.values.species]}
                       value={props.values.scolor||''}
                       placeholder={placeholder}
                     />
                   </Col>
-                    <TextInput
-                      id="color_notes"
-                      name="color_notes"
-                      as="textarea"
-                      rows={5}
-                      label="Description"
-                      xs="7"
-                    />
+                  <TextInput
+                    id="color_notes"
+                    name="color_notes"
+                    as="textarea"
+                    rows={5}
+                    label="Description"
+                    xs="8"
+                  />
                 </BootstrapForm.Row>
                 <BootstrapForm.Row>
-                  <Col xs="3">
+                  <Col xs="4">
                     <DropDown
                       label="Aggressive"
                       id="aggressive"
@@ -343,17 +403,17 @@ export const AnimalForm = ({id}) => {
                       isClearable={false}
                     />
                   </Col>
-                    <TextInput
-                        label="Behavior Notes"
-                        id="behavior_notes"
-                        name="behavior_notes"
-                        as="textarea"
-                        rows={5}
-                        xs="7"
-                      />
+                  <TextInput
+                    label="Behavior Notes"
+                    id="behavior_notes"
+                    name="behavior_notes"
+                    as="textarea"
+                    rows={5}
+                    xs="8"
+                  />
                 </BootstrapForm.Row>
                 <BootstrapForm.Row>
-                  <Col xs="3">
+                  <Col xs="4">
                     <DropDown
                       label="Confined"
                       id="confined"
@@ -364,7 +424,7 @@ export const AnimalForm = ({id}) => {
                       isClearable={false}
                     />
                   </Col>
-                  <Col xs="3">
+                  <Col xs="4">
                     <DropDown
                       label="Injured"
                       id="injured"
@@ -375,33 +435,121 @@ export const AnimalForm = ({id}) => {
                       isClearable={false}
                     />
                   </Col>
-                </BootstrapForm.Row>
-                <BootstrapForm.Row className="mt-3">
                   <DateTimePicker
                     label="Last Seen"
                     name="last_seen"
                     id="last_seen"
-                    xs="3"
+                    xs="4"
+                    key={`my_unique_last_seen_select_key__${props.values.last_seen}`}
                     onChange={(date, dateStr) => {
                       props.setFieldValue("last_seen", dateStr)
                     }}
-                    value={data.last_seen||null}
+                    value={props.values.last_seen||null}
                   />
                 </BootstrapForm.Row>
+                <p className="mb-0 mt-3">Image Files</p>
+                <BootstrapForm.Row className="align-items-end">
+                  {data.front_image ?
+                    <span className="mt-2 ml-1 mr-3">
+                      <Image width={131} src={data.front_image} alt="" thumbnail />
+                      <div className="mb-2">
+                        <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => clearImage("front_image", props.setFieldValue)} style={{backgroundColor:"red"}} />
+                        <span className="ml-1">Front-Shot</span>
+                      </div>
+                    </span> :
+                    <div className="mb-2 ml-1">
+                      <ImageUploader
+                        value={front_image}
+                        id="front_image"
+                        name="front_image"
+                        parentStateSetter={wrapperSetFrontImage}
+                        label="Front-Shot"
+                        maxNumber={1}
+                      />
+                    </div>
+                  }
+                  {data.side_image ?
+                    <span className="mt-2 mr-3">
+                      <Image width={131} src={data.side_image} alt="" thumbnail />
+                      <div className="mb-2">
+                        <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => clearImage("side_image", props.setFieldValue)} style={{backgroundColor:"red"}} />
+                        <span className="ml-1">Side-Shot</span>
+                      </div>
+                    </span> :
+                    <div className="mb-2">
+                      <ImageUploader
+                        value={side_image}
+                        id="side_image"
+                        name="side_image"
+                        parentStateSetter={wrapperSetSideImage}
+                        label="Side-Shot"
+                        maxNumber={1}
+                      />
+                    </div>
+                  }
+                  {data.extra_images.length > 0 ?
+                    <span className="mt-2 d-flex flex-wrap align-items-end">
+                      {data.extra_images.map(extra_image => (
+                        <span key={extra_image} className="mr-3"><Image width={131} src={extra_image} alt="" thumbnail />
+                          <div className="mb-2">
+                            <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => clearImages(extra_image, props.setFieldValue)} style={{backgroundColor:"red"}} />
+                            <span className="ml-1">Extra</span>
+                          </div>
+                        </span>
+                      ))}
+                    </span>
+                  :""}
+                  <div className="mb-2">
+                    <ImageUploader
+                      value={extra_images}
+                      id="extra_images"
+                      name="extra_images"
+                      parentStateSetter={wrapperSetExtraImages}
+                      label="Extra"
+                      maxNumber={3 - data.extra_images.length}
+                      multiple
+                    />
+                  </div>
+                </BootstrapForm.Row>
+                {/* Only show Shelter selection on intake and update. */}
+                <span hidden={!Boolean(id)&&!is_intake}>
+                <p className="mb-2 mt-2">Shelter</p>
                 <BootstrapForm.Row>
-                  <Col className="mt-3">
-                  <Label for="image">Image File</Label>
-                  <Input type="file" name="image" id="image" onChange={handleImageChange} />
+                  <Col xs="8">
+                    <TreeSelect
+                      showSearch
+                      style={{ width: '100%' }}
+                      value={props.values.room}
+                      dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
+                      placeholder="Select a room..."
+                      allowClear
+                      treeDefaultExpandAll
+                      onChange={(value) => {
+                        props.setFieldValue("room", value||null);
+                      }}
+                    >
+                      {shelters.shelters.map(shelter => (
+                        <TreeNode title={'Shelter: ' + shelter.name + ' ('+shelter.buildings.length+' buildings, ' + shelter.room_count + ' rooms, ' + shelter.animal_count + ' animals)'} key={'shelter'+shelter.id} selectable={false} value={'shelter'+shelter.id}>
+                          {shelter.buildings.map(building => (
+                            <TreeNode title={'Building: ' + building.name + ' (' + building.rooms.length + ' rooms, ' + building.animal_count + ' animals)'} key={'building'+building.id} selectable={false} value={'building'+building.id}>
+                              {building.rooms.map(room => (
+                                <TreeNode title={room.name+' ('+room.animals.length+' animals)'} key={room.id} value={room.id}/>
+                              ))}
+                            </TreeNode>
+                          ))}
+                        </TreeNode>
+                      ))}
+                    </TreeSelect>
                   </Col>
                 </BootstrapForm.Row>
-
-          </BootstrapForm>
+                </span>
+            </BootstrapForm>
           </Card.Body>
           <ButtonGroup>
-              <Button type="button" className="btn btn-success mr-1" onClick={() => {setAddAnother(false); props.submitForm()}}>Save</Button>
-              {!id ? <Button type="button" className="btn btn-primary mr-1" onClick={() => {setAddAnother(true); props.submitForm()}}>Add Another</Button> : ""}
-              <Link className="btn btn-secondary" href={servicerequest_id ? "/hotline/servicerequest/" + servicerequest_id : "/"}>Cancel</Link>
-              </ButtonGroup>
+            <Button type="button" className="btn btn-primary" onClick={() => {setAddAnother(false); props.submitForm()}}>Save</Button>
+            {!id ? <Button type="button" className="btn btn-success" onClick={() => {setAddAnother(true); props.submitForm()}}>Add Another</Button> : ""}
+            <Button variant="secondary" type="button" onClick={() => {props.resetForm(data);if (!data.species) {setPlaceholder("Select a species...");}}}>Reset</Button>
+          </ButtonGroup>
           </Card>
         )}
       </Formik>

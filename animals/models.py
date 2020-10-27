@@ -4,15 +4,15 @@ from animals.choices import ALL_AGE_CHOICES, ALL_SIZE_CHOICES, SEX_CHOICES, SPEC
 from animals.colors import ALL_COLOR_CHOICES
 from hotline.models import ServiceRequest
 from people.models import Person
-
+from shelter.models import Room
 
 # Create your models here.
 class Animal(models.Model):
 
     request = models.ForeignKey(ServiceRequest, on_delete=models.SET_NULL, blank=True, null=True)
     owner = models.ForeignKey(Person, on_delete=models.SET_NULL, blank=True, null=True)
+    room = models.ForeignKey(Room, on_delete=models.SET_NULL, blank=True, null=True)
     name = models.CharField(max_length=50, blank=True)
-    image = models.ImageField(upload_to='images/', null=True)
 
     #choice fields
     species = models.CharField(max_length=50, choices=SPECIES_CHOICES, blank=True)
@@ -34,13 +34,11 @@ class Animal(models.Model):
     behavior_notes = models.TextField(blank=True, max_length=200)
     last_seen = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
 
-    @property
-    def info(self):
-        return '%s (%s, %s, %s)' % (self.name.capitalize(), self.species.capitalize(), self.sex)
-
-    @property
-    def location_type(self):
-        return 'animal'
-
     class Meta:
         ordering = []
+
+class AnimalImage(models.Model):
+
+    image = models.ImageField(upload_to='images/')
+    animal = models.ForeignKey(Animal, on_delete=models.SET_NULL, null=True)
+    category = models.CharField(max_length=20)

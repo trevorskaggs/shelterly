@@ -10,100 +10,21 @@ import {
   Container,
 } from 'react-bootstrap';
 import * as Yup from 'yup';
-import { MultiSelect, TextInput} from '.././components/Form';
+import { TextInput} from '.././components/Form';
 
+export const EvacTeamMemberForm = () => {
 
-export function EvacTeamForm() {
-  const [data, setData] = useState({options: [], isFetching: false});
-  // Hook for initializing data.
-  useEffect(() => {
-    let source = axios.CancelToken.source();
-    const fetchTeamMembers = async () => {
-      setData({options: data.options, isFetching: true});
-      // Fetch TeamMember data.
-      await axios.get('/accounts/api/user/', {
-        cancelToken: source.token,
-      })
-      .then(response => {
-        response.data.forEach(function(teammember){
-          // Store relevant information for creating valid options.
-          const obj = {value: teammember.id, label: teammember.first_name};
-          data.options.push(obj)
-        });
-        setData({options: data.options, isFetching: false});
-      })
-      .catch(error => {
-        console.log(error.response);
-        setData({options: data.options, isFetching: false});
-      });
-    };
-    fetchTeamMembers();
-    // Cleanup.
-    return () => {
-      source.cancel();
-    };
-  }, [data.options]);
+  // Track whether or not to add another evac team member after saving.
+  const [addAnother, setAddAnother] = useState(false);
+  // Regex validators.
+  const phoneRegex = /^((\+\d{1,3}(-| )?\(?\d\)?(-| )?\d{1,3})|(\(?\d{2,3}\)?))(-| )?(\d{3,4})(-| )?(\d{4})(( x| ext)\d{1,5}){0,1}$/
 
-  return (
-    <>
-      <Formik
-        initialValues={{
-          evac_team_members: [],
-          callsign: '',
-        }}
-        validationSchema={Yup.object({
-          evac_team_members: Yup.array()
-            .of(Yup.string())
-            .required('Required'),
-          callsign: Yup.string()
-            .max(20, 'Must be 20 characters or less')
-            .required('Required'),
-        })}
-        onSubmit={(values, { setSubmitting }) => {
-          setTimeout(() => {
-            axios.post('/evac/api/evacteam/', values)
-            .then(function() {
-              navigate('/evac');
-            })
-            .catch(error => {
-              console.log(error.response);
-            });
-            setSubmitting(false);
-          }, 500);
-        }}
-      >
-        <Form>
-          <Container>
-            <FormGroup>
-              <MultiSelect label="Evac Team Members*" name="evac_team_members" className="mb-3">
-                {data.options.map(({ value, label }, index) => <option value={value} key={value} >{label}</option>)}
-              </MultiSelect>
-              <TextInput
-                type="text"
-                label="Callsign*"
-                name="callsign"
-                id="callsign"
-              />
-            </FormGroup>
-
-            <Button type="submit" className="btn-success mr-1">Save</Button>
-            <Link className="btn btn-secondary" href="/evac">Cancel</Link>
-          </Container>
-        </Form>
-      </Formik>
-    </>
-  );
-};
-
-// No longer used but may still provide a good example for the time being.
-export const TeamMemberForm = () => {
     return (
-      <>
         <Formik
           initialValues={{
             first_name: '',
             last_name: '',
-            cell_phone: '',
+            phone: '',
             agency_id: '',
           }}
           validationSchema={Yup.object({
@@ -113,15 +34,21 @@ export const TeamMemberForm = () => {
             last_name: Yup.string()
               .max(50, 'Must be 50 characters or less')
               .required('Required'),
-            cell_phone: Yup.string()
+            phone: Yup.string()
+              .matches(phoneRegex, "Phone number is not valid")
               .required('Required'),
             agency_id: Yup.string(),
           })}
-          onSubmit={(values, { setSubmitting }) => {
+          onSubmit={(values, { setSubmitting, resetForm }) => {
             setTimeout(() => {
-              axios.post('/accounts/api/user/', values)
+              axios.post('/evac/api/evacteammember/', values)
               .then(function() {
-                navigate('/evac');
+                if (addAnother){
+                  resetForm();
+                }
+                else{
+                  navigate('/evac');
+                }
               })
               .catch(error => {
                 console.log(error.response);
@@ -130,6 +57,7 @@ export const TeamMemberForm = () => {
             }, 500);
           }}
         >
+        {form => (
           <Form>
             <Container>
               <FormGroup>
@@ -158,9 +86,9 @@ export const TeamMemberForm = () => {
                   <Col xs={{size: 5, offset: 1}}>
                     <TextInput
                       type="text"
-                      label="Cell Phone*"
-                      name="cell_phone"
-                      id="cell_phone"
+                      label="Phone*"
+                      name="phone"
+                      id="phone"
                     />
                   </Col>
                   <Col xs="5">
@@ -173,12 +101,12 @@ export const TeamMemberForm = () => {
                   </Col>
                 </Row>
               </FormGroup>
-
-              <Button type="submit" className="btn-success mr-1">Save</Button>
+              <Button type="button" className="btn btn-success mr-1" onClick={() => {setAddAnother(false); form.submitForm()}}>Save</Button>
+              <Button type="button" className="btn btn-success mr-1" onClick={() => {setAddAnother(true); form.submitForm()}}>Add Another</Button>
               <Link className="btn btn-secondary" href="/evac">Cancel</Link>
             </Container>
           </Form>
+          )}
         </Formik>
-      </>
     );
   };

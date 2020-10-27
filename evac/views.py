@@ -1,11 +1,26 @@
+from django.http import JsonResponse
 from datetime import datetime
-from rest_framework import permissions, viewsets
+from rest_framework import filters, permissions, viewsets
 
-from evac.models import EvacTeam
-from evac.serializers import EvacTeamSerializer
+from evac.models import EvacAssignment, EvacTeamMember
+from evac.serializers import EvacAssignmentSerializer, EvacTeamMemberSerializer
+from hotline.models import ServiceRequest
 
-# Provides view for EvacTeam API calls.
-class EvacTeamViewSet(viewsets.ModelViewSet):
-    queryset = EvacTeam.objects.filter(team_date=datetime.now().date())
+class EvacTeamMemberViewSet(viewsets.ModelViewSet):
+
+    queryset = EvacTeamMember.objects.all()
+    filter_backends = (filters.SearchFilter,)
     permission_classes = [permissions.IsAuthenticated, ]
-    serializer_class = EvacTeamSerializer
+    serializer_class = EvacTeamMemberSerializer
+
+class EvacAssignmentViewSet(viewsets.ModelViewSet):
+
+    queryset = EvacAssignment.objects.all()
+    permission_classes = [permissions.IsAuthenticated, ]
+    serializer_class = EvacAssignmentSerializer
+
+    # When creating, update all service requests to be assigned status.
+    def perform_create(self, serializer):
+        if serializer.is_valid():
+            serializer.save()
+            ServiceRequest.objects.filter(pk__in=serializer.data['service_requests']).update(status="assigned")

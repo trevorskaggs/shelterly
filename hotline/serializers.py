@@ -1,3 +1,4 @@
+from django.db.models import Q
 from rest_framework import serializers
 from .models import ServiceRequest
 from animals.serializers import AnimalSerializer
@@ -9,24 +10,29 @@ class ServiceRequestSerializer(serializers.ModelSerializer):
     reporter_object = PersonSerializer(source='reporter', required=False, read_only=True)
     full_address = serializers.SerializerMethodField()
     animals = AnimalSerializer(source='animal_set', many=True, required=False, read_only=True)
-    status = serializers.SerializerMethodField()
+    aco_required = serializers.SerializerMethodField()
+    animal_count = serializers.IntegerField(read_only=True)
+    injured = serializers.BooleanField(read_only=True)
 
     # Custom field for the full address.
     def get_full_address(self, obj):
         return build_full_address(obj)
 
-    # Custom field for current status.
-    def get_status(self, obj):
-        # SR is Open if it doesn't have any animals yet or any one animal has an ASSIGNED OR REPORTED status.
-        status = 'Open' if obj.animal_set.filter(status__in=['REPORTED', 'ASSIGNED']).exists() else 'Closed'
-        return status
+    # Custom field for if any animal is ACO Required. If it is aggressive or "Other" species.
+    def get_aco_required(self, obj):
+        return obj.animal_set.filter(Q(aggressive='yes') | Q(species='other')).exists()
 
     # Updates datetime fields to null when receiving an empty string submission.
+    # Truncates latitude and longitude.
     def to_internal_value(self, data):
         if data.get('recovery_time') == '':
             data['recovery_time'] = None
         if data.get('owner_notification_tstamp') == '':
             data['owner_notification_tstamp'] = None
+        if data.get('latitude'):
+            data['latitude'] = float("%.6f" % float(data.get('latitude')))
+        if data.get('longitude'):
+            data['longitude'] = float("%.6f" % float(data.get('longitude')))
         return super().to_internal_value(data)
 
     class Meta:

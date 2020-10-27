@@ -33,7 +33,7 @@ DOG_AGE_CHOICES = (
 
 CAT_SIZE_CHOICES = (
     ('small', 'Small ( < 10 lbs)'),
-    ('full', 'Full Size (10+ lbs)'),
+    ('large', 'Large (10+ lbs)'),
 )
 CAT_AGE_CHOICES = (
     ('kitten', 'Kitten'),
@@ -68,7 +68,7 @@ OTHER_AGE_CHOICES = (
 
 STATUS_CHOICES = (
     ('REPORTED', 'REPORTED'),
-    ('ASSIGNED', 'ASSIGNED'),
+    ('REUNITED', 'REUNITED'),
     ('SHELTERED', 'SHELTERED'),
     ('SHELTERED IN PLACE', 'SHELTERED IN PLACE'),
     ('NOT FOUND', 'NOT FOUND'),

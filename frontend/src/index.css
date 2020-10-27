@@ -1,13 +1,72 @@
 body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+  margin: 0 !important;
+  color: #fff !important;
+  background-color: #222 !important;
+  /* font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+    sans-serif !important; */
+  font-family: "Lato", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol" !important;
+  font-size: 0.9375rem !important;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+    monospace !important;
+}
+
+h1, h2, h3, h4, h5 {
+  color: #fff !important;
+}
+
+hr { display: block; height: 1px;
+  border: 0; border-top: 1px solid #ccc !important;
+  margin: 1em 0; padding: 0; }
+
+/* Leaflet map CSS */
+.leaflet-container {  width: auto;  height: 55vh;}
+
+.leaflet-top, .leaflet-bottom {
+  z-index: 400 !important;
+}
+
+/* Image gallery display CSS */
+.carousel img {
+  height: 320px;
+  width: 320px;
+  /* object-fit: contain; */
+  object-fit: cover;
+  overflow: hidden;
+}
+
+/* Grey out disabled fields CSS */
+input[disabled] {
+  color: #999999;
+  background-color: #DFDDDD !important;
+  background-image: none;
+}
+
+/* big checkbox CSS */
+.custom-control-lg .custom-control-label::before,
+.custom-control-lg .custom-control-label::after {
+    top: 0.1rem !important;
+    left: -2rem !important;
+    width: 1.25rem !important;
+    height: 1.25rem !important;
+}
+
+.custom-control-lg .custom-control-label {
+    font-size: 1rem !important;
+}
+
+/* DatetimePicker fixed min width CSS */
+.datetime_picker {
+  width:213px;
+  min-width:213px;
+}
+
+/* Typeahead CSS */
+.rbt-token {
+  color: #222 !important;
 }

@@ -1,28 +1,12 @@
 import React, {useEffect, useState} from 'react';
 import axios from "axios";
 import { Link } from 'raviger';
-import Moment from 'react-moment';
 import { Card, ListGroup } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faClipboardList, faEdit, faPlusSquare,
+  faEdit,
 } from '@fortawesome/free-solid-svg-icons';
-const btn_style = {
-  width: "50%",
-  margin: "0 auto",
-};
 
-const link_style = {
-  textDecoration: "none",
-};
-
-const card_style = {
-  width: "90%",
-}
-
-const header_style = {
-  textAlign: "center",
-}
 
 export function PersonView({id}) {
 
