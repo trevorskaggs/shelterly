@@ -7,7 +7,7 @@ from rest_framework import viewsets, generics
 from actstream import action
 from django_filters.rest_framework import DjangoFilterBackend
 from django_filters import rest_framework as filters
-from .serializer import ShelterSerializer, BuildingSerializer, RoomSerializer
+from .serializers import ShelterSerializer, BuildingSerializer, RoomSerializer
 
 class ShelterViewSet(viewsets.ModelViewSet):
     queryset = Shelter.objects.all()
