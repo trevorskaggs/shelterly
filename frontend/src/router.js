@@ -7,8 +7,8 @@ import Evac, { NewEvacTeamMember } from "./evac/Evac";
 import Hotline, { NewServiceRequest, ServiceRequestDetail, ServiceRequestList, UpdateServiceRequest } from "./hotline/Hotline";
 import Intake, { IntakeSummary } from "./intake/Intake";
 import { NewOwner, NewReporter, OwnerDetail, ReporterDetail,  UpdateOwner, UpdateReporter } from "./people/People";
-import Shelter, { NewShelter, UpdateShelter, ShelterList } from "./shelter/Shelter";
-import { ShelterDetails} from "./shelter/ShelterTables";
+import Shelter, { NewShelter, UpdateShelter } from "./shelter/Shelter";
+import { ShelterDetails } from "./shelter/ShelterDetails"
 import { NewBuilding, UpdateBuilding, BuildingDetails } from "./shelter/Building";
 import { NewRoom, UpdateRoom, RoomDetails } from "./shelter/Room";
 import { Login } from "./accounts/Accounts";
@@ -44,7 +44,6 @@ const routes = {
   "/shelter": () => <Shelter />,
   "/shelter/new": () => <NewShelter />,
   "/shelter/edit/:id": ({id}) => <UpdateShelter id={id} />,
-  "/shelter/list": () => <ShelterList />,
   "/shelter/:id": ({id}) => <ShelterDetails id={id} />,
   "/shelter/building/new": () => <NewBuilding />,
   "/shelter/building/edit/:id": ({id}) => <UpdateBuilding id={id} />,

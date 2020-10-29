@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import { Link } from 'raviger';
-import { Card, Col, ListGroup, Row } from 'react-bootstrap';
+import { Card, ListGroup } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faClipboardList, faEdit, faPlusSquare,
@@ -11,20 +11,7 @@ import History from '../components/History';
 import Header from '../components/Header';
 import noImageFound from '../static/images/image-not-found.png';
 
-const btn_style = {
-  width: "50%",
-  margin: "0 auto",
-};
-
-const link_style = {
-  textDecoration: "none",
-};
-
-const header_style = {
-  textAlign: "center",
-}
-
-export function ShelterDetailsTable({id}) {
+export function ShelterDetails({id}) {
 
   const [data, setData] = useState({
     name: '',
@@ -98,9 +85,6 @@ export function ShelterDetailsTable({id}) {
                   <Link href={"/shelter/building/" + building.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
                   <Link href={"/shelter/building/edit/" + building.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
                 </Card.Title>
-                {/* <Card.Title style={{marginBtoom:"0px"}}>
-                  <h4>Rooms<Link href={"/shelter/building/room/new?building_id=" + building.id}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link></h4>
-                </Card.Title> */}
                 <hr style={{marginBottom:"0px"}} />
                 <span className="d-flex flex-wrap align-items-end">
                   {building.rooms.map(room => (
