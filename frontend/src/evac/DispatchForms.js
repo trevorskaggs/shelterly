@@ -10,11 +10,11 @@ import {
   Container,
 } from 'react-bootstrap';
 import * as Yup from 'yup';
-import { TextInput} from '.././components/Form';
+import { TextInput} from '../components/Form';
 
-export const EvacTeamMemberForm = () => {
+export const DispatchTeamMemberForm = () => {
 
-  // Track whether or not to add another evac team member after saving.
+  // Track whether or not to add another dispatch team member after saving.
   const [addAnother, setAddAnother] = useState(false);
   // Regex validators.
   const phoneRegex = /^((\+\d{1,3}(-| )?\(?\d\)?(-| )?\d{1,3})|(\(?\d{2,3}\)?))(-| )?(\d{3,4})(-| )?(\d{4})(( x| ext)\d{1,5}){0,1}$/
@@ -41,13 +41,13 @@ export const EvacTeamMemberForm = () => {
           })}
           onSubmit={(values, { setSubmitting, resetForm }) => {
             setTimeout(() => {
-              axios.post('/evac/api/evacteammember/', values)
+              axios.post('/dispatch/api/dispatchteammember/', values)
               .then(function() {
                 if (addAnother){
                   resetForm();
                 }
                 else{
-                  navigate('/evac');
+                  navigate('/dispatch');
                 }
               })
               .catch(error => {
@@ -103,7 +103,7 @@ export const EvacTeamMemberForm = () => {
               </FormGroup>
               <Button type="button" className="btn btn-success mr-1" onClick={() => {setAddAnother(false); form.submitForm()}}>Save</Button>
               <Button type="button" className="btn btn-success mr-1" onClick={() => {setAddAnother(true); form.submitForm()}}>Add Another</Button>
-              <Link className="btn btn-secondary" href="/evac">Cancel</Link>
+              <Link className="btn btn-secondary" href="/dispatch">Cancel</Link>
             </Container>
           </Form>
           )}

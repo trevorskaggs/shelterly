@@ -49,7 +49,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'accounts',
     'animals',
-    'evac',
+    'dispatch',
     'hotline',
     'intake',
     'location',

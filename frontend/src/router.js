@@ -3,7 +3,7 @@ import { Redirect } from "raviger";
 import Home from "./Home";
 import Animals, { AnimalDetail, NewAnimal, UpdateAnimal } from "./animals/Animals"
 import { AnimalSearch } from "./animals/AnimalTables"
-import Evac, { NewEvacTeamMember } from "./evac/Evac";
+import Dispatch, { NewDispatchTeamMember } from "./Dispatch/Dispatch";
 import Hotline, { NewServiceRequest, ServiceRequestDetail, ServiceRequestList, UpdateServiceRequest } from "./hotline/Hotline";
 import Intake, { IntakeSummary } from "./intake/Intake";
 import { NewOwner, NewReporter, OwnerDetail, ReporterDetail,  UpdateOwner, UpdateReporter } from "./people/People";
@@ -12,7 +12,7 @@ import { ShelterDetails} from "./shelter/ShelterTables";
 import { NewBuilding, UpdateBuilding, BuildingDetails } from "./shelter/Building";
 import { NewRoom, UpdateRoom, RoomDetails } from "./shelter/Room";
 import { Login } from "./accounts/Accounts";
-import { Dispatch, EvacSummary } from "./evac/EvacViews";
+import { Dispatch, DispatchSummary } from "./Dispatch/DispatchViews";
 
 export const publicRoutes = {
   "/login": () => <Login />,
@@ -24,10 +24,10 @@ const routes = {
   "/animals/animal/edit/:id": ({id}) => <UpdateAnimal id={id} />,
   "/animals/search": () => <AnimalSearch />,
   "/animals/animal/:id": ({id}) => <AnimalDetail id={id} />,
-  "/evac": () => <Evac />,
-  "/evac/evacteammember/new": () => <NewEvacTeamMember />,
-  "/evac/summary/:id": ({id}) => <EvacSummary id={id} />,
-  "/evac/dispatch": () => <Dispatch />,
+  "/dispatch": () => <Dispatch />,
+  "/dispatch/dispatchteammember/new": () => <NewDispatchTeamMember />,
+  "/dispatch/summary/:id": ({id}) => <DispatchSummary id={id} />,
+  "/dispatch/dispatch": () => <Dispatch />,
   "/hotline": () => <Hotline />,
   "/hotline/animal/new": () => <NewAnimal />,
   "/hotline/first_responder/new": () => <NewReporter />,

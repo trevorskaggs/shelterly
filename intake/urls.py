@@ -23,6 +23,6 @@ app_name = 'intake'
 urlpatterns = [
     path('', views.intake_landing, name ='intake_landing'),
     path('owned/', views.intake_owned, name='intake_owned'),
-    path('evacreq/select', views.select_evac_req, name='select_evac_req'),
+    path('dispatchreq/select', views.select_dispatch_req, name='select_dispatch_req'),
     path('owned/<owner_pk>/<species>/new', views.intake_new_animal, name='intake_new_animal'),
 ]

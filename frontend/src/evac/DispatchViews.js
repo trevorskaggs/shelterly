@@ -46,7 +46,7 @@ export function Dispatch() {
     let source = axios.CancelToken.source();
     const fetchTeamMembers = async () => {
       setTeamData({options: [], isFetching: true});
-      await axios.get('/evac/api/evacteammember/', {
+      await axios.get('/dispatch/api/dispatchteammember/', {
         cancelToken: source.token,
       })
       .then(response => {
@@ -227,9 +227,9 @@ export function Dispatch() {
       onSubmit={(values, { setSubmitting }) => {
         values.service_requests = Object.keys(mapState).filter(key => mapState[key].checked === true)
         setTimeout(() => {
-          axios.post('/evac/api/evacassignment/', values)
+          axios.post('/dispatch/api/dispatchassignment/', values)
           .then(response => {
-            navigate('/evac/summary/' + response.data.id);
+            navigate('/dispatch/summary/' + response.data.id);
           })
           .catch(error => {
             console.log(error.response);
@@ -390,7 +390,7 @@ export function Dispatch() {
   )
 }
 
-export function EvacSummary({id}) {
+export function DispatchSummary({id}) {
 
   // Initial animal data.
   const [data, setData] = useState({
@@ -405,9 +405,9 @@ export function EvacSummary({id}) {
   // Hook for initializing data.
   useEffect(() => {
     let source = axios.CancelToken.source();
-    const fetchEvacSummaryData = async () => {
+    const fetchDispatchSummaryData = async () => {
       // Fetch Animal data.
-      await axios.get('/evac/api/evacassignment/' + id + '/', {
+      await axios.get('/dispatch/api/dispatchassignment/' + id + '/', {
         cancelToken: source.token,
       })
       .then(response => {
@@ -417,7 +417,7 @@ export function EvacSummary({id}) {
         console.log(error.response);
       });
     };
-    fetchEvacSummaryData();
+    fetchDispatchSummaryData();
   }, [id]);
 
   return (
@@ -425,7 +425,7 @@ export function EvacSummary({id}) {
     <div className="row mt-3" style={{marginBottom:"-8px"}}>
       <div className="col-12 d-flex">
         <h1 style={header_style}>
-          Evac Summary
+          Dispatch Summary
         </h1>
       </div>
     </div>

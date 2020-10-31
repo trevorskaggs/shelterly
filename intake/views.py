@@ -25,6 +25,6 @@ def intake_new_animal(request, owner_pk, species):
         return redirect('people:owner_detail', owner.pk)
     return render(request, 'animal.html', {'form':form})
 
-def select_evac_req(request):
+def select_dispatch_req(request):
     service_requests = ServiceRequest.objects.all()
     return render(request, 'service_request_list.html', {'service_requests':service_requests})

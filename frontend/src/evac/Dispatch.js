@@ -1,20 +1,20 @@
 import React from "react";
 import { Link } from "raviger";
-import { EvacTeamMemberForm } from "./EvacForms";
+import { DispatchTeamMemberForm } from "./DispatchForms";
 import { ListGroup } from 'react-bootstrap';
 
 const header_style = {
   textAlign: "center",
 };
 
-  const Evac = () => (
+  const Dispatch = () => (
     <ListGroup className="flex-fill p-5 h-50">
-      <Link href="/evac/evacteammember/new">
+      <Link href="/dispatch/dispatchteammember/new">
       <ListGroup.Item action>
       NEW TEAM MEMBER
       </ListGroup.Item>
       </Link>
-      <Link href="/evac/dispatch">
+      <Link href="/dispatch/dispatch">
       <ListGroup.Item action>
       DEPLOY
       </ListGroup.Item>
@@ -33,11 +33,11 @@ const header_style = {
   )
 
 
-  export const NewEvacTeamMember = () => (
+  export const NewDispatchTeamMember = () => (
     <div>
-      <h1 style={header_style}>Add Evacuation Team Member</h1>
-      <EvacTeamMemberForm />
+      <h1 style={header_style}>Add Dispatch Team Member</h1>
+      <DispatchTeamMemberForm />
     </div>
   )
 
-export default Evac
+export default Dispatch

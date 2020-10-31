@@ -3,7 +3,7 @@ from django.db import models
 from hotline.models import ServiceRequest
 
 
-class EvacTeamMember(models.Model):
+class DispatchTeamMember(models.Model):
 
     first_name = models.CharField(max_length=50, blank=False)
     last_name = models.CharField(max_length=50, blank=False)
@@ -17,7 +17,7 @@ class EvacTeamMember(models.Model):
         ordering = ['last_name', 'first_name']
 
 
-class EvacAssignment(models.Model):
+class DispatchAssignment(models.Model):
 
     team_members = models.ManyToManyField(EvacTeamMember)
     service_requests = models.ManyToManyField(ServiceRequest)

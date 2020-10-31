@@ -15,7 +15,7 @@ urlpatterns = [
     path('', views.home, name="home"),
     path('accounts/', include('accounts.urls')),
     path('animals/', include('animals.urls')),
-    path('evac/', include('evac.urls')),
+    path('dispatch/', include('dispatch.urls')),
     path('hotline/', include('hotline.urls')),
     path('intake/', include('intake.urls')),
     path('location/', include('location.urls')),
