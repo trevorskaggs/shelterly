@@ -70,3 +70,8 @@ input[disabled] {
 .rbt-token {
   color: #222 !important;
 }
+
+.invalid-form {
+  display: block !important;
+  font-size: 100% !important;
+}

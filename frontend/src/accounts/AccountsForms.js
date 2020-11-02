@@ -1,13 +1,12 @@
-import React, { useContext } from "react";
+import React, { Fragment, useContext } from "react";
 import axios from "axios";
 import { navigate, useQueryParams } from "raviger";
 import { Form, Formik } from 'formik';
-import {
-  Button,
-  FormGroup,
-  Row,
-} from 'reactstrap';
-import { Alert } from 'react-bootstrap';
+import Alert from 'react-bootstrap/Alert';
+import Button from 'react-bootstrap/Button';
+import Col from 'react-bootstrap/Col';
+import { Form as BootstrapForm } from 'react-bootstrap';
+import Row from 'react-bootstrap/Row';
 import * as Yup from "yup";
 import { useCookies } from 'react-cookie';
 import { TextInput } from '.././components/Form.js';
@@ -25,7 +24,7 @@ export const LoginForm = () => {
   } = queryParams;
 
   return (
-    <div>
+    <Fragment>
       <Formik
         initialValues={{ username: "", password: "" }}
         validationSchema={Yup.object({
@@ -57,35 +56,31 @@ export const LoginForm = () => {
         }}
       >
       {({ isSubmitting, status }) => (
-        <Form>
-          <FormGroup>
-            <Row>
-              <TextInput
-                type="text"
-                label="Username*"
-                name="username"
-                id="username"
-                xs="6"
-              />
-            </Row>
-            <Row>
-              <TextInput
-                type="password"
-                label="Password*"
-                name="password"
-                id="password"
-                xs="6"
-              />
-            </Row>
-
-          </FormGroup>
-          { status && <Alert variant="danger">{status} </Alert>}
-
-         <Button type="submit" className="btn-success mr-1">Login</Button>
-        </Form>
+      <Col xs={{ span:5 }}
+      className="border border-light shadow-sm">
+      <div className='text-center mt-5'><h3 className='mb-0'>Login</h3></div>
+      <BootstrapForm as={Form}>
+          <TextInput
+            name="username"
+            id="username"
+            placeholder="Username"
+            formGroupClasses="mb-0"
+            size="lg"
+          />
+          <TextInput
+            type="password"
+            name="password"
+            id="password"
+            placeholder="Password"
+            size="lg"
+          />
+         <Button type="submit" size="lg" className="btn-primary mb-3 mr-5" block>Login</Button>
+         { status && <div className="invalid-feedback invalid-form" variant="warning">{status}</div>}
+        </BootstrapForm>
+        </Col>
           
       )}
       </Formik>
-    </div>
+      </Fragment>
   )
 }
