@@ -274,27 +274,6 @@ export const AnimalForm = ({id}) => {
               <Field type="hidden" value={owner_id||""} name="owner" id="owner"></Field>
               <Field type="hidden" value={servicerequest_id||""} name="request" id="request"></Field>
                 <BootstrapForm.Row>
-                  <TextInput
-                    id="name"
-                    xs="9"
-                    name="name"
-                    type="text"
-                    label="Animal Name"
-                  />
-                  <Col xs="3">
-                    <DropDown
-                      label="Sex"
-                      id="sexDropDown"
-                      name="sex"
-                      type="text"
-                      key={`my_unique_sex_select_key__${props.values.sex}`}
-                      ref={sexRef}
-                      options={sexChoices}
-                      value={props.values.sex||''}
-                    />
-                  </Col>
-                </BootstrapForm.Row>
-                <BootstrapForm.Row>
                   <Col xs="4">
                     <DropDown
                       label="Species*"
@@ -380,6 +359,27 @@ export const AnimalForm = ({id}) => {
                     label="Description"
                     xs="8"
                   />
+                </BootstrapForm.Row>
+                <BootstrapForm.Row>
+                  <TextInput
+                      id="name"
+                      xs="9"
+                      name="name"
+                      type="text"
+                      label="Animal Name"
+                  />
+                  <Col xs="3">
+                    <DropDown
+                        label="Sex"
+                        id="sexDropDown"
+                        name="sex"
+                        type="text"
+                        key={`my_unique_sex_select_key__${props.values.sex}`}
+                        ref={sexRef}
+                        options={sexChoices}
+                        value={props.values.sex||''}
+                    />
+                  </Col>
                 </BootstrapForm.Row>
                 <BootstrapForm.Row>
                   <Col xs="4">
