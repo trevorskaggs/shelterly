@@ -7,3 +7,11 @@ def build_full_address(obj):
         if obj.address:
             return obj.address + apartment + region
     return ""
+
+# Takes an action object and returns a combined string.
+def build_action_string(obj):
+    if obj.action_object:
+        name = obj.action_object.name or 'Unknown'
+        return f'{obj.actor} {obj.verb} {name} {obj.timesince()} ago'
+    custom_verb = obj.verb.replace('ed ','ed this ')
+    return f'{obj.actor} {custom_verb} {obj.timesince()} ago'

@@ -9,12 +9,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBandAid, faClipboardList, faCut, faEdit, faHandHoldingHeart, faShieldAlt, faWarehouse
 } from '@fortawesome/free-solid-svg-icons';
-import "react-responsive-carousel/lib/styles/carousel.min.css";
-import noImageFound from "../static/images/image-not-found.png";
-
-const header_style = {
-  textAlign: "center",
-}
+import 'react-responsive-carousel/lib/styles/carousel.min.css';
+import Header from '../components/Header';
+import History from '../components/History';
+import noImageFound from '../static/images/image-not-found.png';
 
 export function AnimalView({id}) {
 
@@ -42,6 +40,7 @@ export function AnimalView({id}) {
     side_image: null,
     room: null,
     extra_images: [],
+    action_history: [],
     full_address:'',
     shelter_name: '',
     owner_object: {first_name:'', last_name:'', phone:'', email:''}
@@ -84,13 +83,9 @@ export function AnimalView({id}) {
 
   return (
     <>
-    <div className="row mt-3" style={{marginBottom:"-8px"}}>
-      <div className="col-12 d-flex">
-        <h1 style={header_style}>
-          Animal Details - {data.status}<Link href={"/animals/animal/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>{data.status !== 'REUNITED' ? <FontAwesomeIcon icon={faHandHoldingHeart} onClick={() => setShow(true)} style={{cursor:'pointer'}} inverse /> : ""}
-        </h1>
-      </div>
-    </div>
+    <Header>
+      Animal Details - {data.status}<Link href={"/animals/animal/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>{data.status !== 'REUNITED' ? <FontAwesomeIcon icon={faHandHoldingHeart} onClick={() => setShow(true)} style={{cursor:'pointer'}} inverse /> : ""}
+    </Header>
     <hr/>
     <div className="row">
       <div className="col-6 d-flex" style={{marginRight:"-15px"}}>
@@ -172,6 +167,7 @@ export function AnimalView({id}) {
                 </div>
               </ListGroup.Item>
               {data.last_seen ? <ListGroup.Item><b>Last Seen:</b> <Moment format="LLL">{data.last_seen}</Moment></ListGroup.Item> : ""}
+              {data.request ? <ListGroup.Item><b>Service Request: </b>#{data.request}<Link href={"/hotline/servicerequest/" + data.request}> <FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link></ListGroup.Item>: ''}
             </ListGroup>
             <hr/>
             <Card.Title>
@@ -184,7 +180,7 @@ export function AnimalView({id}) {
             </ListGroup>
             <hr/>
             <Card.Title>
-              <h4 className="mb-0">Location</h4>
+               <h4 className="mb-0">Location</h4>
             </Card.Title>
             <ListGroup variant="flush">
               {data.room ? <ListGroup.Item style={{marginTop:"-13px"}}><b>Shelter Name:</b> {data.shelter_name}<Link href={"/shelter/" + data.shelter}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item> : ""}
@@ -224,6 +220,7 @@ export function AnimalView({id}) {
         </Card>
       </Col>
     </div>
+    <History action_history={data.action_history} />
     <Modal show={show} onHide={handleClose}>
       <Modal.Header closeButton>
         <Modal.Title>Confirm Animal Reunification</Modal.Title>

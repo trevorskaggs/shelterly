@@ -14,7 +14,6 @@ export const BuildingDetails = ({id}) => (
 
 export const NewBuilding = () => (
   <div>
-    <h1 style={header_style}>Buildings</h1>
     <BuildingForm />
   </div>
 )

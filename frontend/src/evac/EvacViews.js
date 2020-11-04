@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import { Link, navigate } from 'raviger';
 import { Form, Formik } from 'formik';
-import { Button, Card, CardGroup, Col, FormCheck, ListGroup, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
+import { Button, Card, Col, FormCheck, ListGroup, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBandAid, faBullseye, faCar, faClipboardList, faShieldAlt, faTrailer
