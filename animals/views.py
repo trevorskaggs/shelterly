@@ -1,11 +1,11 @@
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import filters, viewsets
+from actstream import action
 
 from people.models import Person
 from animals.models import Animal, AnimalImage
 from animals.serializers import AnimalSerializer
-
 
 class AnimalViewSet(viewsets.ModelViewSet):
 
@@ -16,10 +16,27 @@ class AnimalViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         if serializer.is_valid():
+
+            # Add ServiceRequest Owner to new animals being added to an SR.
+            if serializer.validated_data.get('request'):
+                serializer.validated_data['owner'] = serializer.validated_data.get('request').owner
+
+            # Set status to SHELTERED if a room is added.
             if serializer.validated_data.get('room'):
                 serializer.validated_data['status'] = 'SHELTERED'
 
+            # Set room to null if not present, or if status is changed to REUNITED
+            if not serializer.validated_data.get('room'):
+                serializer.validated_data['room'] = None
+
             animal = serializer.save()
+            action.send(self.request.user, verb='created animal', target=animal)
+
+            if animal.room:
+                action.send(self.request.user, verb='sheltered animal', target=animal.room, action_object=animal)
+                action.send(self.request.user, verb='sheltered animal', target=animal.room.building, action_object=animal)
+                action.send(self.request.user, verb='sheltered animal', target=animal.room.building.shelter, action_object=animal)
+
             images_data = self.request.FILES
             for key, image_data in images_data.items():
                 # Strip out extra numbers from the key (e.g. "extra1" -> "extra")
@@ -34,14 +51,27 @@ class AnimalViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         if serializer.is_valid():
+
             # Set room to null if not present
             if not serializer.validated_data.get('room'):
                 serializer.validated_data['room'] = None
 
-            if serializer.validated_data.get('room') and not serializer.instance.room:
+            # If animal had a room and now doesn't or has a different room.
+            if serializer.instance.room and (not serializer.validated_data.get('room') or serializer.instance.room != serializer.validated_data.get('room')):
+                action.send(self.request.user, verb='removed animal', target=serializer.instance.room, action_object=serializer.instance)
+                action.send(self.request.user, verb='removed animal', target=serializer.instance.room.building, action_object=serializer.instance)
+                action.send(self.request.user, verb='removed animal', target=serializer.instance.room.building.shelter, action_object=serializer.instance)
+
+            # If animal is added to a new room from no room or a different room.
+            if serializer.validated_data.get('room') and (serializer.instance.room != serializer.validated_data.get('room')):
                 serializer.validated_data['status'] = 'SHELTERED'
+                action.send(self.request.user, verb='sheltered animal', target=serializer.validated_data.get('room'), action_object=serializer.instance)
+                action.send(self.request.user, verb='sheltered animal', target=serializer.validated_data.get('room').building, action_object=serializer.instance)
+                action.send(self.request.user, verb='sheltered animal', target=serializer.validated_data.get('room').building.shelter, action_object=serializer.instance)
 
             animal = serializer.save()
+            action.send(self.request.user, verb='updated animal', target=animal)
+
             old_images = serializer.data['extra_images']
             updated_images = self.request.data['extra_images'].split(',') if self.request.data.get('extra_images', None) else []
             # Compare old vs updated extra images to identify ones that have been removed and should be deleted.
