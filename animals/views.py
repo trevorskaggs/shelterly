@@ -1,17 +1,11 @@
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
-from django.shortcuts import render, redirect
-from django.shortcuts import get_object_or_404
-from django.http import HttpResponseRedirect
-from django.urls import reverse_lazy
 from rest_framework import filters, viewsets
 from actstream import action
 
 from people.models import Person
 from animals.models import Animal, AnimalImage
-from animals.forms import AnimalForm, ImageForm
 from animals.serializers import AnimalSerializer
-from hotline.models import ServiceRequest
 
 class AnimalViewSet(viewsets.ModelViewSet):
 

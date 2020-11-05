@@ -1,4 +1,3 @@
-from datetime import datetime
 from rest_framework import serializers
 from actstream.models import target_stream
 
