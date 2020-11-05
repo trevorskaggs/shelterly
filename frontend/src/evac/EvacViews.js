@@ -38,35 +38,7 @@ export function Dispatch() {
   const [totalSelectedState, setTotalSelectedState] = useState({});
   const [selectedCount, setSelectedCount] = useState({count:0, disabled:true});
   const [statusOptions, setStatusOptions] = useState({aco_required:false});
-
-  // Team Member Selector Code
   const [teamData, setTeamData] = useState({options: [], isFetching: false});
-
-  useEffect(() => {
-    let source = axios.CancelToken.source();
-    const fetchTeamMembers = async () => {
-      setTeamData({options: [], isFetching: true});
-      await axios.get('/evac/api/evacteammember/', {
-        cancelToken: source.token,
-      })
-      .then(response => {
-        var options = []
-        response.data.forEach(function(teammember){
-          options.push({id: teammember.id, label: teammember.display_name})
-        });
-        setTeamData({options: options, isFetching: false});
-      })
-      .catch(error => {
-        console.log(error.response);
-        setTeamData({options: [], isFetching: false});
-      });
-    };
-    fetchTeamMembers();
-    return () => {
-      source.cancel();
-    };
-  }, [])
-  // End Team Selector Code
 
   // Handle aco_required toggle.
   const handleACO = async event => {
@@ -105,7 +77,11 @@ export function Dispatch() {
     }
     // Else deselect.
     else {
-      setMapState(prevState => ({ ...prevState, [id]: {...prevState[id], ["color"]:"red", ["checked"]:false} }));
+      let color = 'yellow';
+      if (mapState[id].has_reported_animals) {
+        color = 'red';
+      }
+      setMapState(prevState => ({ ...prevState, [id]: {...prevState[id], ["color"]:color, ["checked"]:false} }));
       // Remove matches from the running total state tracker.
       for (var key in mapState[id].matches) {
         var total = totalSelectedState[key] -= mapState[id].matches[key];;
@@ -177,6 +153,24 @@ export function Dispatch() {
   // Hook for initializing data.
   useEffect(() => {
     let source = axios.CancelToken.source();
+    const fetchTeamMembers = async () => {
+      setTeamData({options: [], isFetching: true});
+      await axios.get('/evac/api/evacteammember/', {
+        cancelToken: source.token,
+      })
+      .then(response => {
+        var options = []
+        response.data.forEach(function(teammember){
+          options.push({id: teammember.id, label: teammember.display_name})
+        });
+        setTeamData({options: options, isFetching: false});
+      })
+      .catch(error => {
+        console.log(error.response);
+        setTeamData({options: [], isFetching: false});
+      });
+    };
+
     const fetchServiceRequests = async () => {
       // Fetch ServiceRequest data.
       await axios.get('/hotline/api/servicerequests/', {
@@ -196,7 +190,11 @@ export function Dispatch() {
           const bounds = [];
           for (const service_request of response.data) {
             const matches = countMatches(service_request);
-            map_dict[service_request.id] = {color:"red", checked:false, hidden:false, matches:matches, radius:"disabled", latitude:service_request.latitude, longitude:service_request.longitude};
+            let color = 'yellow';
+            if (service_request.has_reported_animals) {
+              color = 'red';
+            }
+            map_dict[service_request.id] = {color:color, checked:false, hidden:false, matches:matches, radius:"disabled", has_reported_animals:service_request.has_reported_animals, latitude:service_request.latitude, longitude:service_request.longitude};
             bounds.push([service_request.latitude, service_request.longitude]);
           }
           setMapState(map_dict);
@@ -210,6 +208,8 @@ export function Dispatch() {
         setData({service_requests: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
       });
     };
+
+    fetchTeamMembers();
     fetchServiceRequests();
 
     // Cleanup.
@@ -252,7 +252,9 @@ export function Dispatch() {
                 <CircleMarker
                   key={service_request.id}
                   center={{lat:service_request.latitude, lng: service_request.longitude}}
-                  color={mapState[service_request.id] ? mapState[service_request.id].color : ""}
+                  color="black"
+                  weight="1"
+                  fillColor={mapState[service_request.id] ? mapState[service_request.id].color : ""}
                   fill={true}
                   fillOpacity="1"
                   onClick={() => handleMapState(service_request.id)}
