@@ -29,13 +29,13 @@ class ServiceRequestSerializer(serializers.ModelSerializer):
     def get_aco_required(self, obj):
         return obj.animal_set.filter(Q(aggressive='yes') | Q(species='other')).exists()
 
-    # Updates datetime fields to null when receiving an empty string submission.
-    # Truncates latitude and longitude.
     def to_internal_value(self, data):
-        if data.get('recovery_time') == '':
-            data['recovery_time'] = None
-        if data.get('owner_notification_tstamp') == '':
-            data['owner_notification_tstamp'] = None
+        # Updates datetime fields to null when receiving an empty string submission.
+        for key in ['recovery_time', 'owner_notification_tstamp', 'followup_date']:
+            if data.get(key) == '':
+                data[key] = None
+
+        # Truncates latitude and longitude.
         if data.get('latitude'):
             data['latitude'] = float("%.6f" % float(data.get('latitude')))
         if data.get('longitude'):

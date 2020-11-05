@@ -1,18 +1,24 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import axios from 'axios';
 import { Link } from 'raviger';
 import Moment from 'react-moment';
 import { Card, ListGroup, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBandAid, faCar, faClipboardList, faComment, faEdit, faHouseDamage, faKey, faPlusSquare, faShieldAlt, faTrailer
+  faBandAid, faCalendarDay, faCar, faClipboardList, faComment, faEdit, faHouseDamage, faKey, faPlusSquare, faShieldAlt, faTrailer
 } from '@fortawesome/free-solid-svg-icons';
 import ReactImageFallback from 'react-image-fallback';
 import Header from '../components/Header';
 import History from '../components/History';
 import noImageFound from '../static/images/image-not-found.png';
+import Flatpickr from 'react-flatpickr';
 
 export function ServiceRequestView({id}) {
+
+  const datetime = useRef(null);
+  const openCalendar = () => {
+    setTimeout(() => datetime.current.flatpickr.open(), 0);
+  }
 
   const [data, setData] = useState({
     animals: [],
@@ -33,6 +39,7 @@ export function ServiceRequestView({id}) {
     owner_notification_notes: '',
     recovery_time: null,
     owner_notification_tstamp: null,
+    followup_date: null,
     status:'',
     action_history: [],
   });
@@ -62,7 +69,7 @@ export function ServiceRequestView({id}) {
       </Header>
       <hr/>
       <div className="row mb-2">
-        <div className="col-6 d-flex">
+        <div className="col-5 d-flex">
           <Card className="mb-2 border rounded" style={{width:"100%"}}>
             <Card.Body>
               <Card.Title>
@@ -125,7 +132,7 @@ export function ServiceRequestView({id}) {
             </Card.Body>
           </Card>
         </div>
-        <div className="col-6 d-flex pl-0">
+        <div className="col-4 d-flex pl-0">
           <Card className="mb-2 border rounded" style={{width:"100%"}}>
             <Card.Body style={{marginBottom:"-17px"}}>
               {data.owner ?
@@ -150,6 +157,32 @@ export function ServiceRequestView({id}) {
                 </ListGroup>
               </span>
               : ""}
+            </Card.Body>
+          </Card>
+        </div>
+        <div className="col-3 d-flex pl-0">
+          <Card className="mb-2 border rounded" style={{width:"100%"}}>
+            <Card.Body style={{marginBottom:"-17px"}}>
+              <Card.Title>
+                <h4 className="mb-0">Followup Date</h4>
+              </Card.Title>
+              <hr/>
+              <FontAwesomeIcon icon={faCalendarDay} className="ml-1 mr-1" onClick={() => openCalendar()} />
+              {data.followup_date ? <Moment format="lll">{data.followup_date}</Moment> : "Set date"}
+              <Flatpickr
+                ref={datetime}
+                name="followup_date"
+                id="followup_date"
+                options={{clickOpens:false, altInput:true, altInputClass:"hide-input", altFormat:"F j, Y h:i K", positionElement:window.document.getElementById('test')}}
+                onChange={(date, dateStr) => {
+                  setData(prevState => ({ ...prevState, ["followup_date"]:dateStr }));
+                  axios.patch('/hotline/api/servicerequests/' + id + '/', {followup_date:date[0]})
+                  .catch(error => {
+                    console.log(error.response);
+                  });
+                }}
+                value={data.followup_date || null}>
+              </Flatpickr>
             </Card.Body>
           </Card>
         </div>

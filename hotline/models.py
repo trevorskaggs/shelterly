@@ -30,6 +30,7 @@ class ServiceRequest(Location):
     owner_notification_notes = models.TextField(blank=True)
     recovery_time = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
     owner_notification_tstamp = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
+    followup_date = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
 
     def __str__(self):
         output = []

@@ -66,6 +66,12 @@ input[disabled] {
   min-width:213px;
 }
 
+.hide-input {
+  visibility: hidden;
+  width: 0;
+  height: 0;
+}
+
 /* Typeahead CSS */
 .rbt-token {
   color: #222 !important;
