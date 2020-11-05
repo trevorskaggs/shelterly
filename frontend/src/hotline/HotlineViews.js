@@ -1,11 +1,11 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'raviger';
 import Moment from 'react-moment';
 import { Card, ListGroup, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBandAid, faCalendarDay, faCar, faClipboardList, faComment, faEdit, faHouseDamage, faKey, faPlusSquare, faShieldAlt, faTrailer
+  faBandAid, faCalendarDay, faCar, faClipboardList, faComment, faEdit, faHouseDamage, faKey, faPlusSquare, faShieldAlt, faTimes, faTrailer
 } from '@fortawesome/free-solid-svg-icons';
 import ReactImageFallback from 'react-image-fallback';
 import Header from '../components/Header';
@@ -19,11 +19,22 @@ export function ServiceRequestView({id}) {
   const openCalendar = () => {
     setTimeout(() => datetime.current.flatpickr.open(), 0);
   }
+  const clearDate = useCallback(() => {
+    if (datetime.current) {
+      datetime.current.flatpickr.clear();
+      axios.patch('/hotline/api/servicerequests/' + id + '/', {followup_date:null})
+      .catch(error => {
+        console.log(error.response);
+      });
+    }
+  }, [datetime]);
 
   const [data, setData] = useState({
     animals: [],
     owner: '',
+    owner_object: {first_name:'', last_name:''},
     reporter: '',
+    reporter_object: {first_name:'', last_name:''},
     directions: '',
     address: '',
     apartment: '',
@@ -134,29 +145,17 @@ export function ServiceRequestView({id}) {
         </div>
         <div className="col-4 d-flex pl-0">
           <Card className="mb-2 border rounded" style={{width:"100%"}}>
-            <Card.Body style={{marginBottom:"-17px"}}>
-              {data.owner ?
-              <span>
-                <Card.Title>
-                  <h4 className="mb-0">Owner: <span style={{fontSize:18}}>{data.owner_object.first_name} {data.owner_object.last_name} {data.owner_object.first_name !== 'Unknown' ? <Link href={"/hotline/owner/" + data.owner}> <FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link>:""}<Link href={"/hotline/owner/edit/" + data.owner}> <FontAwesomeIcon icon={faEdit} size="sm" inverse /></Link></span></h4>
-                </Card.Title>
-                <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
-                  {data.owner_object.phone ? <ListGroup.Item><b>Telephone: </b>{data.owner_object.phone}</ListGroup.Item> : ""}
-                  {data.owner_object.email ? <ListGroup.Item><b>Email: </b>{data.owner_object.email}</ListGroup.Item> : ""}
-                </ListGroup>
-              </span> : ""}
-              {data.reporter ?
-              <span>
-                <hr/>
-                <Card.Title>
-                  <h4 className="mb-0">Reporter: <span style={{fontSize:18}}>{data.reporter_object.first_name} {data.reporter_object.last_name} <Link href={"/hotline/reporter/" + data.reporter}> <FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link><Link href={"/hotline/reporter/edit/" + data.reporter}> <FontAwesomeIcon icon={faEdit} size="sm" inverse /></Link></span></h4>
-                </Card.Title>
-                <ListGroup variant="flush" style={{marginTop:"-13px"}}>
-                  {data.reporter_object.phone ? <ListGroup.Item><b>Telephone: </b>{data.reporter_object.phone}</ListGroup.Item> : ""}
-                  {data.reporter_object.email ? <ListGroup.Item><b>Email: </b>{data.reporter_object.email}</ListGroup.Item> : ""}
-                </ListGroup>
-              </span>
-              : ""}
+            <Card.Body style={{}}>
+              <Card.Title>
+                <h4 className="mb-0">Owner <Link href={"/hotline/owner/" + data.owner}><FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link><Link href={"/hotline/owner/edit/" + data.owner}> <FontAwesomeIcon icon={faEdit} size="sm" inverse /></Link></h4>
+              </Card.Title>
+              <hr/>
+              <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-20px"}}>
+                <ListGroup.Item><b>Name: </b>{data.owner_object.first_name} {data.owner_object.last_name}</ListGroup.Item>
+                {data.owner_object.phone ? <ListGroup.Item><b>Telephone: </b>{data.owner_object.phone}</ListGroup.Item> : ""}
+                {data.owner_object.email ? <ListGroup.Item><b>Email: </b>{data.owner_object.email}</ListGroup.Item> : ""}
+                {data.reporter ? <ListGroup.Item><b>Reporter: </b>{data.reporter_object.first_name} {data.reporter_object.last_name} <Link href={"/hotline/reporter/" + data.reporter}><FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link><Link href={"/hotline/reporter/edit/" + data.reporter}> <FontAwesomeIcon icon={faEdit} size="sm" inverse /></Link></ListGroup.Item> : ""}
+              </ListGroup>
             </Card.Body>
           </Card>
         </div>
@@ -167,8 +166,13 @@ export function ServiceRequestView({id}) {
                 <h4 className="mb-0">Followup Date</h4>
               </Card.Title>
               <hr/>
-              <FontAwesomeIcon icon={faCalendarDay} className="ml-1 mr-1" onClick={() => openCalendar()} />
-              {data.followup_date ? <Moment format="lll">{data.followup_date}</Moment> : "Set date"}
+              <FontAwesomeIcon icon={faCalendarDay} className="ml-1 mr-1" style={{cursor:'pointer'}} onClick={() => openCalendar()} />
+              {data.followup_date ?
+              <span>
+                <Moment format="lll">{data.followup_date}</Moment>
+                <FontAwesomeIcon icon={faTimes} className="ml-1" style={{cursor:'pointer'}} onClick={clearDate} />
+              </span>
+              : "Set date"}
               <Flatpickr
                 ref={datetime}
                 name="followup_date"

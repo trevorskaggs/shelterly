@@ -210,7 +210,7 @@ export const AnimalForm = ({id}) => {
             formData.append('extra' + (i + 1), extra_images[i].file);
           }
           if (id) {
-            axios.patch('/animals/api/animal/' + id + '/', formData)
+            axios.put('/animals/api/animal/' + id + '/', formData)
             .then(function() {
               if (state.prevLocation) {
                 navigate(state.prevLocation);

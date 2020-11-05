@@ -15,7 +15,7 @@ function History({action_history}) {
     <hr/>
     <h1 className="mb-3">History<FontAwesomeIcon icon={faChevronCircleRight} hidden={showHistory} onClick={() => setShowHistory(!showHistory)} className="ml-2" style={{verticalAlign:"middle"}} inverse /><FontAwesomeIcon icon={faChevronCircleDown} hidden={!showHistory} onClick={() => setShowHistory(!showHistory)} className="ml-2" style={{verticalAlign:"middle"}} inverse /></h1>
     {action_history.map(action => (
-    <Collapse key={action} in={showHistory}>
+    <Collapse key={action + Math.random()} in={showHistory}>
       <div>
         <Card className="border rounded d-flex mb-2" style={{width:"100%"}}>
           <Card.Body>

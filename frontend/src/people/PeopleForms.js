@@ -130,6 +130,9 @@ export const PersonForm = ({ id }) => {
               if (state.prevLocation) {
                 navigate(state.prevLocation);
               }
+              else if (is_owner) {
+                navigate('/hotline/owner/' + id);
+              }
               else {
                 navigate('/hotline/reporter/' + id);
               }
