@@ -35,7 +35,7 @@ export function Dispatch() {
 
   const [data, setData] = useState({service_requests: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
   const [mapState, setMapState] = useState({});
-  const [totalSelectedState, setTotalSelectedState] = useState({});
+  const [totalSelectedState, setTotalSelectedState] = useState({'REPORTED':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}});
   const [selectedCount, setSelectedCount] = useState({count:0, disabled:true});
   const [statusOptions, setStatusOptions] = useState({aco_required:false});
   const [teamData, setTeamData] = useState({options: [], isFetching: false});
@@ -60,20 +60,25 @@ export function Dispatch() {
     // If selected.
     if (mapState[id].checked === false) {
       setMapState(prevState => ({ ...prevState, [id]: {...prevState[id], ["color"]:"green", ["checked"]:true} }));
-      var matches = {};
+
       // Add each match count to the running total state tracker.
-      for (var key in mapState[id].matches) {
-        var total = 0;
-        if (!totalSelectedState[key]) {
-          total = mapState[id].matches[key];
-        } else {
-          total = totalSelectedState[key] += mapState[id].matches[key];
+      var status_matches = {};
+      for (var status in mapState[id].status_matches) {
+        var matches = totalSelectedState[status];
+        for (var key in mapState[id].status_matches[status]){
+          var total = 0;
+          if (!totalSelectedState[status][key]) {
+            total = mapState[id].status_matches[status][key];
+          } else {
+            total = totalSelectedState[status][key] += mapState[id].status_matches[status][key];
+          }
+          matches[key] = total;
         }
-        matches[key] = total;
+        status_matches[status] = matches;
       }
-      setTotalSelectedState(Object.assign(totalSelectedState, matches));
+      setTotalSelectedState(Object.assign(totalSelectedState, status_matches));
       // Enable DEPLOY button.
-      setSelectedCount((prevState) => ({count: prevState.count + 1, disabled: false}))
+      setSelectedCount((prevState) => ({count: prevState.count + 1, disabled: false}));
     }
     // Else deselect.
     else {
@@ -83,9 +88,11 @@ export function Dispatch() {
       }
       setMapState(prevState => ({ ...prevState, [id]: {...prevState[id], ["color"]:color, ["checked"]:false} }));
       // Remove matches from the running total state tracker.
-      for (var key in mapState[id].matches) {
-        var total = totalSelectedState[key] -= mapState[id].matches[key];;
-        setTotalSelectedState(prevState => ({ ...prevState, [key]:total}));
+      for (var status in mapState[id].status_matches) {
+        for (var key in mapState[id].status_matches[status]) {
+          var total = totalSelectedState[status][key] -= mapState[id].status_matches[status][key];
+          setTotalSelectedState(prevState => ({ ...prevState, [status]:{...prevState[status], [key]:total}}));
+        }
       }
       // Disable DEPLOY button is none selected.
       var disabled = false;
@@ -122,18 +129,26 @@ export function Dispatch() {
     return text;
   }
 
-  // Counts the number of size/species matches for a service request.
+  // Counts the number of size/species matches for a service request by status.
   const countMatches = (service_request) => {
     var matches = {};
+    var status_matches = {'REPORTED':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}};
 
     service_request.animals.forEach((animal) => {
       if (!matches[[animal.species,animal.size]]) {
-          matches[[animal.species,animal.size]] = 1;
-      } else {
-          matches[[animal.species,animal.size]] += 1;
+        matches[[animal.species,animal.size]] = 1;
+      }
+      else {
+        matches[[animal.species,animal.size]] += 1;
+      }
+      if (!status_matches[animal.status][[animal.species,animal.size]]) {
+        status_matches[animal.status][[animal.species,animal.size]] = 1;
+      }
+      else {
+        status_matches[animal.status][[animal.species,animal.size]] += 1;
       }
     });
-    return matches
+    return [matches, status_matches]
   }
 
   // Show or hide list of SRs based on current map zoom
@@ -189,12 +204,14 @@ export function Dispatch() {
           const map_dict = {};
           const bounds = [];
           for (const service_request of response.data) {
-            const matches = countMatches(service_request);
+            const total_matches = countMatches(service_request);
+            const matches = total_matches[0]
+            const status_matches = total_matches[1]
             let color = 'yellow';
             if (service_request.has_reported_animals) {
               color = 'red';
             }
-            map_dict[service_request.id] = {color:color, checked:false, hidden:false, matches:matches, radius:"disabled", has_reported_animals:service_request.has_reported_animals, latitude:service_request.latitude, longitude:service_request.longitude};
+            map_dict[service_request.id] = {color:color, checked:false, hidden:false, matches:matches, status_matches:status_matches, radius:"disabled", has_reported_animals:service_request.has_reported_animals, latitude:service_request.latitude, longitude:service_request.longitude};
             bounds.push([service_request.latitude, service_request.longitude]);
           }
           setMapState(map_dict);
@@ -262,11 +279,18 @@ export function Dispatch() {
                 >
                   <MapTooltip autoPan={false}>
                     <span>
-                      {mapState[service_request.id] ? <span>{Object.keys(mapState[service_request.id].matches).map((key,i) => (
-                        <span key={key} style={{textTransform:"capitalize"}}>
-                          {i > 0 && ", "}{prettyText(key.split(',')[1], key.split(',')[0], mapState[service_request.id].matches[key])}
-                        </span>
-                      ))}</span>:""}
+                      {mapState[service_request.id] ?
+                      <span>
+                        {Object.keys(mapState[service_request.id].matches).map((status) => (
+                          <span key={status}>
+                            {Object.keys(mapState[service_request.id].matches[status]).map((key,i) => (
+                              <span key={key} style={{textTransform:"capitalize"}}>
+                                {i > 0 && ", "}{prettyText(key.split(',')[1], key.split(',')[0], mapState[service_request.id].matches[status][key])}
+                              </span>
+                            ))}
+                          </span>
+                        ))}
+                      </span>:""}
                       <br />
                       {service_request.full_address}
                       <div>
@@ -301,116 +325,129 @@ export function Dispatch() {
             </div>
           </Col>
         </Row>
-      <Row className="d-flex flex-wrap" style={{marginTop:"-15px", minHeight:"36vh"}}>
-        <Col xs={2} className="mt-4 border rounded mr-1" style={{marginLeft:"-5px", height:"250", minHeight:"250"}}>
-          <p className="text-center mt-3 mb-2">Selected Animals</p>
-          <hr/>
-          {Object.keys(totalSelectedState).map(key => (
-            <div key={key} style={{textTransform:"capitalize"}}>{prettyText(key.split(',')[1], key.split(',')[0], totalSelectedState[key])}</div>
-          ))}
-        </Col>
-        <Col xs={10} className="mt-4 border rounded" style={{marginLeft:"1px"}}>
-          {data.service_requests.map(service_request => (
-            <div key={service_request.id} className="mt-1 mb-1" style={{marginLeft:"-10px", marginRight:"-10px"}} hidden={mapState[service_request.id] && !mapState[service_request.id].checked ? mapState[service_request.id].hidden : false}>
-              <div className="card-header">
-                <span style={{display:"inline"}} className="custom-control-lg custom-control custom-checkbox">
-                  <input className="custom-control-input" type="checkbox" name={service_request.id} id={service_request.id} onChange={() => handleMapState(service_request.id)} checked={mapState[service_request.id] ? mapState[service_request.id].checked : false} />
-                  <label className="custom-control-label" htmlFor={service_request.id}></label>
-                </span>
-                {mapState[service_request.id] ?
-                <span>{Object.keys(mapState[service_request.id].matches).map((key,i) => (
-                  <span key={key} style={{textTransform:"capitalize"}}>
-                    {i > 0 && ", "}{prettyText(key.split(',')[1], key.split(',')[0], mapState[service_request.id].matches[key])}
+        <Row className="d-flex flex-wrap" style={{marginTop:"-15px", minHeight:"36vh"}}>
+          <Col xs={2} className="mt-4 border rounded mr-1" style={{marginLeft:"-5px", height:"250", minHeight:"250"}}>
+            <p className="text-center mt-3 mb-2">Reported Animals</p>
+            <hr/>
+            {Object.keys(totalSelectedState["REPORTED"]).map(key => (
+              <div key={key} style={{textTransform:"capitalize"}}>{prettyText(key.split(',')[1], key.split(',')[0], totalSelectedState["REPORTED"][key])}</div>
+            ))}
+            <p className="text-center mt-3 mb-2">SIP Animals</p>
+            <hr/>
+            {Object.keys(totalSelectedState["SHELTERED IN PLACE"]).map(key => (
+              <div key={key} style={{textTransform:"capitalize"}}>{prettyText(key.split(',')[1], key.split(',')[0], totalSelectedState["SHELTERED IN PLACE"][key])}</div>
+            ))}
+            <p className="text-center mt-3 mb-2">UTL Animals</p>
+            <hr/>
+            {Object.keys(totalSelectedState["UNABLE TO LOCATE"]).map(key => (
+              <div key={key} style={{textTransform:"capitalize"}}>{prettyText(key.split(',')[1], key.split(',')[0], totalSelectedState["UNABLE TO LOCATE"][key])}</div>
+            ))}
+          </Col>
+          <Col xs={10} className="mt-4 border rounded" style={{marginLeft:"1px"}}>
+            {data.service_requests.map(service_request => (
+              <div key={service_request.id} className="mt-1 mb-1" style={{marginLeft:"-10px", marginRight:"-10px"}} hidden={mapState[service_request.id] && !mapState[service_request.id].checked ? mapState[service_request.id].hidden : false}>
+                <div className="card-header">
+                  <span style={{display:"inline"}} className="custom-control-lg custom-control custom-checkbox">
+                    <input className="custom-control-input" type="checkbox" name={service_request.id} id={service_request.id} onChange={() => handleMapState(service_request.id)} checked={mapState[service_request.id] ? mapState[service_request.id].checked : false} />
+                    <label className="custom-control-label" htmlFor={service_request.id}></label>
                   </span>
-                ))}</span>:""}
-                {service_request.sheltered_in_place > 0 ?
-                <OverlayTrigger
-                  key={"sip"}
-                  placement="top"
-                  overlay={
-                    <Tooltip id={`tooltip-sip`}>
-                      {service_request.sheltered_in_place} animal{service_request.sheltered_in_place > 1 ? "s are":" is"} sheltered in place
-                    </Tooltip>
-                  }
-                >
-                  <FontAwesomeIcon icon={faIgloo} className="ml-1"/>
-                </OverlayTrigger>
-                : ""}
-                {service_request.unable_to_locate > 0 ?
-                <OverlayTrigger
-                  key={"utl"}
-                  placement="top"
-                  overlay={
-                    <Tooltip id={`tooltip-utl`}>
-                      {service_request.unable_to_locate} animal{service_request.unable_to_locate > 1 ? "s are":" is"} unable to be located
-                    </Tooltip>
-                  }
-                >
-                  <FontAwesomeIcon icon={faQuestionCircle} className="ml-1"/>
-                </OverlayTrigger>
-                : ""}
-                {service_request.aco_required ?
-                <OverlayTrigger
-                  key={"aco"}
-                  placement="top"
-                  overlay={
-                    <Tooltip id={`tooltip-aco`}>
-                      ACO required
-                    </Tooltip>
-                  }
-                >
-                  <FontAwesomeIcon icon={faShieldAlt} className="ml-1"/>
-                </OverlayTrigger>
-                : ""}
-                {service_request.injured ?
-                <OverlayTrigger
-                  key={"injured"}
-                  placement="top"
-                  overlay={
-                    <Tooltip id={`tooltip-injured`}>
-                      Injured animal
-                    </Tooltip>
-                  }
-                >
-                  <FontAwesomeIcon icon={faBandAid} className="ml-1"/>
-                </OverlayTrigger>
-                : ""}
-                {service_request.accessible ?
-                <OverlayTrigger
-                  key={"accessible"}
-                  placement="top"
-                  overlay={
-                    <Tooltip id={`tooltip-accessible`}>
-                      Easily accessible
-                    </Tooltip>
-                  }
-                >
-                  <FontAwesomeIcon icon={faCar} className="ml-1"/>
-                </OverlayTrigger>
-                : ""}
-                {service_request.turn_around ?
-                <OverlayTrigger
-                  key={"turnaround"}
-                  placement="top"
-                  overlay={
-                    <Tooltip id={`tooltip-turnaround`}>
-                      Room to turn around
-                    </Tooltip>
-                  }
-                >
-                  <FontAwesomeIcon icon={faTrailer} className="ml-1"/>
-                </OverlayTrigger>
-                : ""}
-                <span className="ml-2">| &nbsp;{service_request.full_address}</span>
-                <FontAwesomeIcon icon={faBullseye} className="ml-1" onClick={() => handleRadius(service_request.id)} />
-                <Link href={"/hotline/servicerequest/" + service_request.id} target="_blank"> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
+                  {mapState[service_request.id] ?
+                  <span>
+                    {Object.keys(mapState[service_request.id].matches).map((key,i) => (
+                      <span key={key} style={{textTransform:"capitalize"}}>
+                        {i > 0 && ", "}{prettyText(key.split(',')[1], key.split(',')[0], mapState[service_request.id].matches[key])}
+                      </span>
+                    ))}
+                  </span>
+                  :""}
+                  {service_request.sheltered_in_place > 0 ?
+                  <OverlayTrigger
+                    key={"sip"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-sip`}>
+                        {service_request.sheltered_in_place} animal{service_request.sheltered_in_place > 1 ? "s are":" is"} sheltered in place
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon icon={faIgloo} className="ml-1"/>
+                  </OverlayTrigger>
+                  : ""}
+                  {service_request.unable_to_locate > 0 ?
+                  <OverlayTrigger
+                    key={"utl"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-utl`}>
+                        {service_request.unable_to_locate} animal{service_request.unable_to_locate > 1 ? "s are":" is"} unable to be located
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon icon={faQuestionCircle} className="ml-1"/>
+                  </OverlayTrigger>
+                  : ""}
+                  {service_request.aco_required ?
+                  <OverlayTrigger
+                    key={"aco"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-aco`}>
+                        ACO required
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon icon={faShieldAlt} className="ml-1"/>
+                  </OverlayTrigger>
+                  : ""}
+                  {service_request.injured ?
+                  <OverlayTrigger
+                    key={"injured"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-injured`}>
+                        Injured animal
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon icon={faBandAid} className="ml-1"/>
+                  </OverlayTrigger>
+                  : ""}
+                  {service_request.accessible ?
+                  <OverlayTrigger
+                    key={"accessible"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-accessible`}>
+                        Easily accessible
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon icon={faCar} className="ml-1"/>
+                  </OverlayTrigger>
+                  : ""}
+                  {service_request.turn_around ?
+                  <OverlayTrigger
+                    key={"turnaround"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-turnaround`}>
+                        Room to turn around
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon icon={faTrailer} className="ml-1"/>
+                  </OverlayTrigger>
+                  : ""}
+                  <span className="ml-2">| &nbsp;{service_request.full_address}</span>
+                  <FontAwesomeIcon icon={faBullseye} className="ml-1" onClick={() => handleRadius(service_request.id)} />
+                  <Link href={"/hotline/servicerequest/" + service_request.id} target="_blank"> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
+                </div>
               </div>
+            ))}
+            <div className="card-header mt-1 mb-1"  style={{marginLeft:"-10px", marginRight:"-10px"}} hidden={data.service_requests.length > 0}>
+              No open Service Requests found.
             </div>
-          ))}
-          <div className="card-header mt-1 mb-1"  style={{marginLeft:"-10px", marginRight:"-10px"}} hidden={data.service_requests.length > 0}>
-            No open Service Requests found.
-          </div>
-        </Col>
+          </Col>
         </Row>
       </Form>
     )}
