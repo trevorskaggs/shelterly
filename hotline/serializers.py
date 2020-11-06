@@ -15,6 +15,8 @@ class ServiceRequestSerializer(serializers.ModelSerializer):
     full_address = serializers.SerializerMethodField()
     animals = AnimalSerializer(source='animal_set', many=True, required=False, read_only=True)
     has_reported_animals = serializers.SerializerMethodField()
+    sheltered_in_place = serializers.SerializerMethodField()
+    unable_to_locate = serializers.SerializerMethodField()
     aco_required = serializers.SerializerMethodField()
     animal_count = serializers.IntegerField(read_only=True)
     injured = serializers.BooleanField(read_only=True)
@@ -35,6 +37,14 @@ class ServiceRequestSerializer(serializers.ModelSerializer):
     # Custom field for determining if an SR contains REPORTED animals.
     def get_has_reported_animals(self, obj):
         return Animal.objects.filter(request=obj, status='REPORTED').exists()
+
+    # Custom field for determining that count of SHELTERED IN PLACE animals.
+    def get_sheltered_in_place(self, obj):
+        return Animal.objects.filter(request=obj, status='SHELTERED IN PLACE').count()
+
+    # Custom field for determining that count of UNABLE TO LOCATE animals.
+    def get_unable_to_locate(self, obj):
+        return Animal.objects.filter(request=obj, status='UNABLE TO LOCATE').count()
 
     def to_internal_value(self, data):
         # Updates datetime fields to null when receiving an empty string submission.

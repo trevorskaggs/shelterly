@@ -5,7 +5,7 @@ import { Form, Formik } from 'formik';
 import { Button, Card, Col, FormCheck, ListGroup, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBandAid, faBullseye, faCar, faClipboardList, faShieldAlt, faTrailer
+  faBandAid, faBullseye, faCar, faClipboardList, faIgloo, faQuestionCircle, faShieldAlt, faTrailer
 } from '@fortawesome/free-solid-svg-icons';
 import { Circle, CircleMarker, Map, TileLayer, Tooltip as MapTooltip, useLeaflet } from "react-leaflet";
 import L from "leaflet";
@@ -323,6 +323,32 @@ export function Dispatch() {
                     {i > 0 && ", "}{prettyText(key.split(',')[1], key.split(',')[0], mapState[service_request.id].matches[key])}
                   </span>
                 ))}</span>:""}
+                {service_request.sheltered_in_place > 0 ?
+                <OverlayTrigger
+                  key={"sip"}
+                  placement="top"
+                  overlay={
+                    <Tooltip id={`tooltip-sip`}>
+                      {service_request.sheltered_in_place} animal{service_request.sheltered_in_place > 1 ? "s are":" is"} sheltered in place
+                    </Tooltip>
+                  }
+                >
+                  <FontAwesomeIcon icon={faIgloo} className="ml-1"/>
+                </OverlayTrigger>
+                : ""}
+                {service_request.unable_to_locate > 0 ?
+                <OverlayTrigger
+                  key={"utl"}
+                  placement="top"
+                  overlay={
+                    <Tooltip id={`tooltip-utl`}>
+                      {service_request.unable_to_locate} animal{service_request.unable_to_locate > 1 ? "s are":" is"} unable to be located
+                    </Tooltip>
+                  }
+                >
+                  <FontAwesomeIcon icon={faQuestionCircle} className="ml-1"/>
+                </OverlayTrigger>
+                : ""}
                 {service_request.aco_required ?
                 <OverlayTrigger
                   key={"aco"}
