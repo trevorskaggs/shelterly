@@ -327,21 +327,51 @@ export function Dispatch() {
         </Row>
         <Row className="d-flex flex-wrap" style={{marginTop:"-15px", minHeight:"36vh"}}>
           <Col xs={2} className="mt-4 border rounded mr-1" style={{marginLeft:"-5px", height:"250", minHeight:"250"}}>
-            <p className="text-center mt-3 mb-2">Reported Animals</p>
-            <hr/>
-            {Object.keys(totalSelectedState["REPORTED"]).map(key => (
-              <div key={key} style={{textTransform:"capitalize"}}>{prettyText(key.split(',')[1], key.split(',')[0], totalSelectedState["REPORTED"][key])}</div>
-            ))}
-            <p className="text-center mt-3 mb-2">SIP Animals</p>
-            <hr/>
-            {Object.keys(totalSelectedState["SHELTERED IN PLACE"]).map(key => (
-              <div key={key} style={{textTransform:"capitalize"}}>{prettyText(key.split(',')[1], key.split(',')[0], totalSelectedState["SHELTERED IN PLACE"][key])}</div>
-            ))}
-            <p className="text-center mt-3 mb-2">UTL Animals</p>
-            <hr/>
-            {Object.keys(totalSelectedState["UNABLE TO LOCATE"]).map(key => (
-              <div key={key} style={{textTransform:"capitalize"}}>{prettyText(key.split(',')[1], key.split(',')[0], totalSelectedState["UNABLE TO LOCATE"][key])}</div>
-            ))}
+            <div className="card-header border rounded mt-3 text-center">
+              <p className="mb-2" style={{marginTop:"-5px"}}>Reported</p>
+              <hr className="mt-1 mb-1"/>
+              {Object.keys(totalSelectedState["REPORTED"]).map(key => (
+                <div key={key} style={{textTransform:"capitalize", marginTop:"5px", marginBottom:"-5px"}}>{prettyText(key.split(',')[1], key.split(',')[0], totalSelectedState["REPORTED"][key])}</div>
+              ))}
+            </div>
+            <div className="card-header border rounded mt-3 text-center">
+              <p className="mb-2" style={{marginTop:"-5px"}}>SIP
+                <OverlayTrigger
+                  key={"selected-sip"}
+                  placement="top"
+                  overlay={
+                    <Tooltip id={`tooltip-selected-sip`}>
+                      Sheltered In Place
+                    </Tooltip>
+                  }
+                >
+                  <FontAwesomeIcon icon={faIgloo} className="ml-1"/>
+                </OverlayTrigger>
+              </p>
+              <hr className="mt-1 mb-1"/>
+              {Object.keys(totalSelectedState["SHELTERED IN PLACE"]).map(key => (
+                <div key={key} style={{textTransform:"capitalize", marginTop:"5px", marginBottom:"-5px"}}>{prettyText(key.split(',')[1], key.split(',')[0], totalSelectedState["SHELTERED IN PLACE"][key])}</div>
+              ))}
+            </div>
+            <div className="card-header border rounded mt-3 mb-3 text-center">
+              <p className="mb-2" style={{marginTop:"-5px"}}>UTL
+                <OverlayTrigger
+                  key={"selected-utl"}
+                  placement="top"
+                  overlay={
+                    <Tooltip id={`tooltip-selected-utl`}>
+                      Unable To Locate
+                    </Tooltip>
+                  }
+                >
+                  <FontAwesomeIcon icon={faIgloo} className="ml-1"/>
+                </OverlayTrigger>
+              </p>
+              <hr className="mt-1 mb-1"/>
+              {Object.keys(totalSelectedState["UNABLE TO LOCATE"]).map(key => (
+                <div key={key} style={{textTransform:"capitalize", marginTop:"5px", marginBottom:"-5px"}}>{prettyText(key.split(',')[1], key.split(',')[0], totalSelectedState["UNABLE TO LOCATE"][key])}</div>
+              ))}
+            </div>
           </Col>
           <Col xs={10} className="mt-4 border rounded" style={{marginLeft:"1px"}}>
             {data.service_requests.map(service_request => (
