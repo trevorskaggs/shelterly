@@ -280,17 +280,14 @@ export function Dispatch() {
                   <MapTooltip autoPan={false}>
                     <span>
                       {mapState[service_request.id] ?
-                      <span>
-                        {Object.keys(mapState[service_request.id].matches).map((status) => (
-                          <span key={status}>
-                            {Object.keys(mapState[service_request.id].matches[status]).map((key,i) => (
-                              <span key={key} style={{textTransform:"capitalize"}}>
-                                {i > 0 && ", "}{prettyText(key.split(',')[1], key.split(',')[0], mapState[service_request.id].matches[status][key])}
-                              </span>
-                            ))}
-                          </span>
-                        ))}
-                      </span>:""}
+                        <span>
+                          {Object.keys(mapState[service_request.id].matches).map((key,i) => (
+                            <span key={key} style={{textTransform:"capitalize"}}>
+                              {i > 0 && ", "}{prettyText(key.split(',')[1], key.split(',')[0], mapState[service_request.id].matches[key])}
+                            </span>
+                          ))}
+                        </span>
+                      :""}
                       <br />
                       {service_request.full_address}
                       <div>
@@ -364,7 +361,7 @@ export function Dispatch() {
                     </Tooltip>
                   }
                 >
-                  <FontAwesomeIcon icon={faIgloo} className="ml-1"/>
+                  <FontAwesomeIcon icon={faQuestionCircle} className="ml-1"/>
                 </OverlayTrigger>
               </p>
               <hr className="mt-1 mb-1"/>
