@@ -135,17 +135,19 @@ export function Dispatch() {
     var status_matches = {'REPORTED':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}};
 
     service_request.animals.forEach((animal) => {
-      if (!matches[[animal.species,animal.size]]) {
-        matches[[animal.species,animal.size]] = 1;
-      }
-      else {
-        matches[[animal.species,animal.size]] += 1;
-      }
-      if (!status_matches[animal.status][[animal.species,animal.size]]) {
-        status_matches[animal.status][[animal.species,animal.size]] = 1;
-      }
-      else {
-        status_matches[animal.status][[animal.species,animal.size]] += 1;
+      if (animal.status === 'REPORTED' || animal.status === 'SHELTERED IN PLACE' || animal.status === 'UNABLE TO LOCATE') {
+        if (!matches[[animal.species,animal.size]]) {
+          matches[[animal.species,animal.size]] = 1;
+        }
+        else {
+          matches[[animal.species,animal.size]] += 1;
+        }
+        if (!status_matches[animal.status][[animal.species,animal.size]]) {
+          status_matches[animal.status][[animal.species,animal.size]] = 1;
+        }
+        else {
+          status_matches[animal.status][[animal.species,animal.size]] += 1;
+        }
       }
     });
     return [matches, status_matches]
