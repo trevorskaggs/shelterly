@@ -135,7 +135,7 @@ export function Dispatch() {
     var status_matches = {'REPORTED':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}};
 
     service_request.animals.forEach((animal) => {
-      if (animal.status === 'REPORTED' || animal.status === 'SHELTERED IN PLACE' || animal.status === 'UNABLE TO LOCATE') {
+      if (['REPORTED', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE'].indexOf(animal.status) > -1) {
         if (!matches[[animal.species,animal.size]]) {
           matches[[animal.species,animal.size]] = 1;
         }
