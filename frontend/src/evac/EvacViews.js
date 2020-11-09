@@ -89,6 +89,7 @@ export function Dispatch() {
       setMapState(prevState => ({ ...prevState, [id]: {...prevState[id], ["color"]:color, ["checked"]:false} }));
       // Remove matches from the running total state tracker.
       for (var status in mapState[id].status_matches) {
+        var total = 0;
         for (var key in mapState[id].status_matches[status]) {
           var total = totalSelectedState[status][key] -= mapState[id].status_matches[status][key];
           setTotalSelectedState(prevState => ({ ...prevState, [status]:{...prevState[status], [key]:total}}));
