@@ -58,7 +58,7 @@ export const LoginForm = () => {
       {({ isSubmitting, status }) => (
       <Col xs={{ span:5 }}
       className="border border-light shadow-sm">
-      <div className='text-center mt-5'><h3 className='mb-0'>Login</h3></div>
+      <div className='text-center mt-5'><h3 className='mb-0'>Log-in</h3></div>
       <BootstrapForm as={Form}>
           <TextInput
             name="username"
