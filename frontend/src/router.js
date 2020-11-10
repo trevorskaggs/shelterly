@@ -12,7 +12,7 @@ import { ShelterDetails } from "./shelter/ShelterDetails"
 import { NewBuilding, UpdateBuilding, BuildingDetails } from "./shelter/Building";
 import { NewRoom, UpdateRoom, RoomDetails } from "./shelter/Room";
 import { Login } from "./accounts/Accounts";
-import { Dispatch, EvacSummary } from "./evac/EvacViews";
+import { Dispatch, EvacSummary, VisitNote } from "./evac/EvacViews";
 
 export const publicRoutes = {
   "/login": () => <Login />,
@@ -28,6 +28,7 @@ const routes = {
   "/evac/evacteammember/new": () => <NewEvacTeamMember />,
   "/evac/summary/:id": ({id}) => <EvacSummary id={id} />,
   "/evac/dispatch": () => <Dispatch />,
+  "/evac/assignment/note/:id": ({id}) => <VisitNote id={id} />,
   "/hotline": () => <Hotline />,
   "/hotline/animal/new": () => <NewAnimal />,
   "/hotline/first_responder/new": () => <NewReporter />,
