@@ -3,7 +3,7 @@ import { Redirect } from "raviger";
 import Home from "./Home";
 import Animals, { AnimalDetail, NewAnimal, UpdateAnimal } from "./animals/Animals"
 import { AnimalSearch } from "./animals/AnimalTables"
-import Evac, { NewEvacTeamMember } from "./evac/Evac";
+import Evac, {EvacuationAssignmentList, NewEvacTeamMember} from "./evac/Evac";
 import Hotline, { NewServiceRequest, ServiceRequestDetail, ServiceRequestList, UpdateServiceRequest } from "./hotline/Hotline";
 import Intake, { IntakeSummary } from "./intake/Intake";
 import { NewOwner, NewReporter, OwnerDetail, ReporterDetail,  UpdateOwner, UpdateReporter } from "./people/People";
@@ -25,6 +25,7 @@ const routes = {
   "/animals/search": () => <AnimalSearch />,
   "/animals/animal/:id": ({id}) => <AnimalDetail id={id} />,
   "/evac": () => <Evac />,
+  "/evac/evacuationassignment/list": () => <EvacuationAssignmentList />,
   "/evac/evacteammember/new": () => <NewEvacTeamMember />,
   "/evac/summary/:id": ({id}) => <EvacSummary id={id} />,
   "/evac/dispatch": () => <Dispatch />,

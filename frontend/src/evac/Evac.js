@@ -2,6 +2,8 @@ import React from "react";
 import { Link } from "raviger";
 import { EvacTeamMemberForm } from "./EvacForms";
 import { ListGroup } from 'react-bootstrap';
+import {ServiceRequestTable} from "../hotline/HotlineTables";
+import {EvacuationAssignmentTable} from "./EvacTables";
 
 const header_style = {
   textAlign: "center",
@@ -24,6 +26,9 @@ const header_style = {
       DEBRIEF
       </ListGroup.Item>
       </Link>
+      <Link href="/evac/evacuationassignment/list">
+          <ListGroup.Item action>SEARCH EVACUATION ASSIGNMENT</ListGroup.Item>
+      </Link>
       <Link href="/">
       <ListGroup.Item action>
       BACK
@@ -39,5 +44,17 @@ const header_style = {
       <EvacTeamMemberForm />
     </div>
   )
+
+  export const EvacuationAssignmentList = () => (
+    <div>
+        <h1 style={header_style}>Evacuation Assignments</h1>
+        <br/>
+        {/*<ServiceRequestTable/>*/}
+        {/*<EvacTeamTable/>*/}
+        <EvacuationAssignmentTable/>
+    </div>
+  )
+
+
 
 export default Evac
