@@ -54,34 +54,35 @@ export const LoginForm = () => {
         }}
       >
       {({ isSubmitting, status }) => (
-      <Col xs={{ span:5 }}
-      className="border border-light shadow-sm">
-      <div className='text-center mt-5'><h3 className='mb-0'>Log-in</h3></div>
-      <BootstrapForm as={Form}>
-          <TextInput
-            name="username"
-            id="username"
-            placeholder="Username"
-            formGroupClasses="mb-0"
-            size="lg"
-          />
-          <TextInput
-            type="password"
-            name="password"
-            id="password"
-            placeholder="Password"
-            formGroupClasses="mt-0"
-            size="lg"
-          />
-          <BootstrapForm.Group as={Col}>
-          <Button type="submit" size="lg" className="btn-primary" block>Login</Button>
-         { status && <div className="invalid-feedback invalid-form" variant="warning">{status}</div>}
-         </BootstrapForm.Group>
-        </BootstrapForm>
+        <>
+        <h1 className='text-center' style={{marginTop:"70px", fontSize:"100px"}}>Shelterly</h1>
+        <Col xs={{ span:5 }} className="border rounded border-light shadow-sm" style={{marginRight:"auto", marginLeft:"auto"}}>
+          <h3 className='mb-0 text-center mt-3'>Log-in</h3>
+          <BootstrapForm as={Form}>
+            <TextInput
+              name="username"
+              id="username"
+              placeholder="Username"
+              size="lg"
+              formGroupClasses="mb-0"
+            />
+            <TextInput
+              type="password"
+              name="password"
+              id="password"
+              placeholder="Password"
+              size="lg"
+              formGroupClasses="mt-0 mb-4"
+            />
+            <BootstrapForm.Group as={Col}>
+              <Button type="submit" size="lg" className="btn-primary" block>Login</Button>
+              {status && <div className="invalid-feedback invalid-form" variant="warning">{status}</div>}
+            </BootstrapForm.Group>
+          </BootstrapForm>
         </Col>
-          
+        </>
       )}
       </Formik>
-      </Fragment>
+    </Fragment>
   )
 }

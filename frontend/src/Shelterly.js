@@ -21,9 +21,13 @@ function Shelterly() {
     <ThemeProvider theme={theme}>
       <Container fluid>
         <Row>
-          <Col xs="auto" className="pl-0">
-            <Sidebar state={state} dispatch={dispatch} removeCookie={removeCookie} />
-          </Col>
+          {state.user ?
+          <span>
+            <Col xs="auto" className="pl-0">
+              <Sidebar state={state} dispatch={dispatch} removeCookie={removeCookie} />
+            </Col>
+          </span>
+          : ""}
           <Col className='d-flex flex-column'>
             <Fragment>
               {routeResult || <PageNotFound />}
