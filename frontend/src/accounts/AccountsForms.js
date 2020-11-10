@@ -72,10 +72,13 @@ export const LoginForm = () => {
             name="password"
             id="password"
             placeholder="Password"
+            formGroupClasses="mt-0"
             size="lg"
           />
-         <Button type="submit" size="lg" className="btn-primary mb-3 mr-5" block>Login</Button>
+          <BootstrapForm.Group as={Col}>
+          <Button type="submit" size="lg" className="btn-primary" block>Login</Button>
          { status && <div className="invalid-feedback invalid-form" variant="warning">{status}</div>}
+         </BootstrapForm.Group>
         </BootstrapForm>
         </Col>
           
