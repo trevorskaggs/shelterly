@@ -25,7 +25,13 @@ const DateTimePicker = ({ label, xs, ...props }) => {
   }, [datetime]);
 
   // Flatpickr options
-  var options = {allowInput:true, altInput: true, altFormat: "F j, Y h:i K",}
+  var options = {};
+  if (props["data-enable-time"] === false) {
+    options = {allowInput:true, altInput: true, altFormat: "F j, Y",}
+  }
+  else {
+    options = {allowInput:true, altInput: true, altFormat: "F j, Y h:i K",}
+  }
 
   return (
     <>
@@ -107,7 +113,7 @@ const DropDown = React.forwardRef((props, ref) => {
 
   return (
     <>
-      <Form.Label >{props.label}</Form.Label>
+      {props.label ? <Form.Label >{props.label}</Form.Label> : ""}
       <SimpleValue {...field} options={props.options}>
          {simpleProps => <Select isDisabled={props.disabled} ref={ref} styles={customStyles} isClearable={true} onBlur={updateBlur} onChange={handleOptionChange} {...props} {...simpleProps} />}
       </SimpleValue>

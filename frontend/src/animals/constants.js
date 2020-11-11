@@ -117,9 +117,9 @@ export const unknownChoices = [
 
 export const statusChoices = [
   {value:'REPORTED', label:'REPORTED'},
-  {value:'ASSIGNED', label:'ASSIGNED'},
+  {value:'REUNITED', label:'REUNITED'},
   {value:'SHELTERED', label:'SHELTERED'},
   {value:'SHELTERED IN PLACE', label:'SHELTERED IN PLACE'},
-  {value:'NOT FOUND', label:'NOT FOUND'},
-  {value:'REST IN PEACE', label:'REST IN PEACE'},
+  {value:'UNABLE TO LOCATE', label:'UNABLE TO LOCATE'},
+  {value:'DECEASED', label:'DECEASED'},
 ]
