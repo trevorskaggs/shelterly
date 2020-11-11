@@ -13,6 +13,7 @@ import { NewBuilding, UpdateBuilding, BuildingDetails } from "./shelter/Building
 import { NewRoom, UpdateRoom, RoomDetails } from "./shelter/Room";
 import { Login } from "./accounts/Accounts";
 import { Dispatch, EvacSummary } from "./evac/EvacViews";
+import { EvacResolution } from "./evac/EvacForms";
 
 export const publicRoutes = {
   "/login": () => <Login />,
@@ -27,6 +28,7 @@ const routes = {
   "/evac": () => <Evac />,
   "/evac/evacteammember/new": () => <NewEvacTeamMember />,
   "/evac/summary/:id": ({id}) => <EvacSummary id={id} />,
+  "/evac/resolution/:id": ({id}) => <EvacResolution id={id} />,
   "/evac/dispatch": () => <Dispatch />,
   "/hotline": () => <Hotline />,
   "/hotline/animal/new": () => <NewAnimal />,
