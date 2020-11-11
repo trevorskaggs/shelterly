@@ -6,8 +6,5 @@ const header_style = {
 };
 
 export const Login = () => (
-  <div>
-    <h1 style={header_style}>Login</h1>
-    <LoginForm />
-  </div>
+    <LoginForm/>
 )
