@@ -14,7 +14,7 @@ const header_style = {
       NEW TEAM MEMBER
       </ListGroup.Item>
       </Link>
-      <Link href="/evac/dispatch">
+      <Link href="/evac/deploy">
       <ListGroup.Item action>
       DEPLOY
       </ListGroup.Item>
