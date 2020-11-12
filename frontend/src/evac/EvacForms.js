@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import { Link, navigate } from "raviger";
-import { Form, Formik } from 'formik';
+import { Field, FieldArray, Form, Formik } from 'formik';
 import {
   Button,
   ButtonGroup,
@@ -144,6 +144,10 @@ export function EvacResolution({id}) {
         cancelToken: source.token,
       })
       .then(response => {
+        response.data["sr_updates"] = [];
+        response.data.service_request_objects.forEach((service_request, index) => {
+          response.data.sr_updates.push({id:service_request.id, followup_date: null, date_completed:new Date(), notes:'', owner_contacted:false, animals:service_request.animals})
+        });
         setData(response.data);
       })
       .catch(error => {
@@ -159,107 +163,107 @@ export function EvacResolution({id}) {
         enableReinitialize={true}
         validationSchema={Yup.object({
           start_time: Yup.date(),
-          end_time: Yup.date(),
+          end_time: Yup.date().nullable(),
           service_requests: Yup.array(),
           team_members: Yup.array(),
           sr_updates: Yup.array().of(
             Yup.object().shape({
-              id: Yup.string().required(),
-              followup_date: Yup.date(),
+              id: Yup.number().required(),
+              followup_date: Yup.date().nullable(),
               animals: Yup.array().of(
                 Yup.object().shape({
-                  id: Yup.string().required(),
-                  status: Yup.string().required('Required'),
+                  id: Yup.number().required(),
+                  status: Yup.string().required(),
                 })
               ),
               date_completed: Yup.date().required('Required'),
-              note: Yup.string().required('Required'),
-              owner_notified: Yup.boolean().required('The owner must be notified!'),
+              notes: Yup.string().required('Required'),
+              owner_contacted: Yup.boolean().required('The owner must be notified!'),
             })
           ),
         })}
         onSubmit={(values, { setSubmitting }) => {
-          setTimeout(() => {
-            axios.post('/evac/api/evacassignment/' + {id} + '/', values)
-            .then(response => {
-              navigate('/evac/summary/' + response.data.id);
-            })
-            .catch(error => {
-              console.log(error.response);
-            });
-            setSubmitting(false);
-          }, 500);
+          console.log(values);
+          // setTimeout(() => {
+          //   axios.post('/evac/api/evacassignment/' + {id} + '/', values)
+          //   .then(response => {
+          //     navigate('/evac/summary/' + response.data.id);
+          //   })
+          //   .catch(error => {
+          //     console.log(error.response);
+          //   });
+          //   setSubmitting(false);
+          // }, 500);
         }}
       >
         {props => (
           <>
+          <BootstrapForm as={Form}>
           <Header>Dispatch Assignment #{id} (<Moment format="L">{data.start_time}</Moment>) Resolution</Header>
           <hr/>
           <Card border="secondary" className="mt-3">
             <Card.Body>
-              <BootstrapForm as={Form}>
-                <Card.Title>
-                  <h4>Team Members</h4>
-                </Card.Title>
-                <hr/>
-                <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px", textTransform:"capitalize"}}>
-                  {data.team_member_objects.map(team_member => (
-                    <ListGroup.Item key={team_member.id}>
-                      {team_member.first_name + " " + team_member.last_name + " - " + team_member.phone}{team_member.agency ? <span>({team_member.agency})</span> : ""}
-                    </ListGroup.Item>
-                  ))}
-                </ListGroup>
-              </BootstrapForm>
+              <Card.Title>
+                <h4>Team Members</h4>
+              </Card.Title>
+              <hr/>
+              <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px", textTransform:"capitalize"}}>
+                {data.team_member_objects.map(team_member => (
+                  <ListGroup.Item key={team_member.id}>
+                    {team_member.first_name + " " + team_member.last_name + " - " + team_member.phone}{team_member.agency ? <span>({team_member.agency})</span> : ""}
+                  </ListGroup.Item>
+                ))}
+              </ListGroup>
             </Card.Body>
           </Card>
-          {data.service_request_objects.map(service_request => (
+          {data.service_request_objects.map((service_request, index) => (
           <Card key={service_request.id} border="secondary" className="mt-3">
             <Card.Body>
-              <BootstrapForm as={Form}>
-                <Card.Title>
-                  <h4>Service Request #{service_request.id} <Link href={"/hotline/servicerequest/" + id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link> | <span style={{textTransform:"capitalize"}}>{service_request.status}</span></h4>
-                </Card.Title>
-                <hr/>
-                <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px", textTransform:"capitalize"}}>
-                    <ListGroup.Item><b>Address: </b>{service_request.full_address}</ListGroup.Item>
-                    <ListGroup.Item><b>Owner: </b>{service_request.owner_object.first_name} {service_request.owner_object.last_name}</ListGroup.Item>
-                    <ListGroup.Item><b>Reporter: </b>{service_request.reporter ? <span>{service_request.reporter_object.first_name} {service_request.reporter_object.last_name}</span> : "N/A"}</ListGroup.Item>
-                    {service_request.animals.map(animal => (
-                      <ListGroup.Item key={animal.id}>
-                        <Row>
-                          <Col xs={3}>
-                            <DropDown
-                              id="status"
-                              name="status"
-                              type="text"
-                              className="mt-0"
-                              options={statusChoices}
-                              value={animal.status}
-                            />
-                        </Col>
-                        {animal.pcolor ? <span>{animal.pcolor}{animal.scolor ? "/" + animal.scolor : ""}</span> : ""} {animal.species} ({animal.name||"Unknown"})
-                      </Row>
-                    </ListGroup.Item>
-                    ))}
+              <Card.Title>
+                <h4>Service Request #{service_request.id} <Link href={"/hotline/servicerequest/" + id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link> | <span style={{textTransform:"capitalize"}}>{service_request.status}</span></h4>
+              </Card.Title>
+              <hr/>
+              <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px", textTransform:"capitalize"}}>
+                  <ListGroup.Item><b>Address: </b>{service_request.full_address}</ListGroup.Item>
+                  <ListGroup.Item><b>Owner: </b>{service_request.owner_object.first_name} {service_request.owner_object.last_name}</ListGroup.Item>
+                  <ListGroup.Item><b>Reporter: </b>{service_request.reporter ? <span>{service_request.reporter_object.first_name} {service_request.reporter_object.last_name}</span> : "N/A"}</ListGroup.Item>
+                  {service_request.animals.map((animal, inception) => (
+                    <ListGroup.Item key={animal.id}>
+                      <Row>
+                        <Col xs={3}>
+                          <DropDown
+                            id={`sr_updates.${index}.animals.${inception}.status`}
+                            name={`sr_updates.${index}.animals.${inception}.status`}
+                            type="text"
+                            className="mt-0"
+                            options={statusChoices}
+                            value={`sr_updates.${index}.animals.${inception}.status`}
+                            isClearable={false}
+                          />
+                      </Col>
+                      {animal.pcolor ? <span>{animal.pcolor}{animal.scolor ? "/" + animal.scolor + " " : ""}</span> : ""} {animal.species} ({animal.name||"Unknown"})
+                    </Row>
+                  </ListGroup.Item>
+                  ))}
                 </ListGroup>
                 <BootstrapForm.Row className="mt-3">
                   <DateTimePicker
                     label="Date Completed"
-                    name="end_date"
-                    id="end_date"
+                    name={`sr_updates.${index}.date_completed`}
+                    id={`sr_updates.${index}.date_completed`}
                     xs="4"
                     data-enable-time={false}
                     onChange={(date, dateStr) => {
-                      props.setFieldValue("end_date", dateStr)
+                      props.setFieldValue(`sr_updates.${index}.date_completed`, dateStr)
                     }}
-                    value={data.end_date||new Date(new Date().getFullYear(),new Date().getMonth() , new Date().getDate()).toJSON().substring(0,10)}
+                    value={props.values.sr_updates[index] ? props.values.sr_updates[index].date_completed : new Date()}
                   />
                 </BootstrapForm.Row>
                 <BootstrapForm.Row className="mt-3">
                   <TextInput
-                    id="note"
+                    id={`sr_updates.${index}.notes`}
+                    name={`sr_updates.${index}.notes`}
                     xs="9"
-                    name="note"
                     as="textarea"
                     rows={5}
                     label="Note"
@@ -268,27 +272,45 @@ export function EvacResolution({id}) {
                 <BootstrapForm.Row>
                   <DateTimePicker
                     label="Followup Date"
-                    name="followup_date"
-                    id="followup_date"
+                    name={`sr_updates.${index}.followup_date`}
+                    id={`sr_updates.${index}.followup_date`}
                     xs="4"
                     data-enable-time={false}
                     onChange={(date, dateStr) => {
-                      props.setFieldValue("followup_date", dateStr)
+                      props.setFieldValue(`sr_updates.${index}.followup_date`, dateStr)
                     }}
                     value={data.followup_date||null}
                   />
                 </BootstrapForm.Row>
                 <BootstrapForm.Row className="mt-3 ml-1">
-                  <label>Owner Notified: </label>
-                  <input type="checkbox" name="owner_notified" id="owner_notified" className="mt-1 ml-1" onChange={() => props.setFieldValue("owner_notified", true)} />
-                  </BootstrapForm.Row>
-              </BootstrapForm>
-            </Card.Body>
-          </Card>
-          ))}
-          <ButtonGroup>
-            <Button type="button" className="btn btn-primary" onClick={() => {props.submitForm()}}>Save</Button>
-          </ButtonGroup>
+                  <Field
+                    label={"Owner Notified: "}
+                    type="checkbox"
+                    component={Checkbox}
+                    name={`sr_updates.${index}.owner_contacted`}
+                    onChange={() => {
+                      if (props.values.sr_updates[index].owner_contacted) {
+                        props.setFieldValue(
+                          `sr_updates.${index}.owner_contacted`,
+                          false
+                        );
+                      }
+                      else {
+                        props.setFieldValue(
+                          `sr_updates.${index}.owner_contacted`,
+                          true
+                        );
+                      }
+                    }}
+                  />
+                </BootstrapForm.Row>
+              </Card.Body>
+            </Card>
+            ))}
+            <ButtonGroup>
+              <Button type="button" className="btn btn-primary" onClick={() => {props.submitForm()}}>Save</Button>
+            </ButtonGroup>
+          </BootstrapForm>
           </>
         )}
       </Formik>

@@ -14,7 +14,7 @@ import Autocomplete from 'react-google-autocomplete';
 
 const DateTimePicker = ({ label, xs, ...props }) => {
 
-  const [field] = useField(props);
+  const [field, meta] = useField(props);
 
   // Ref and function to clear field.
   const datetime = useRef(null);
@@ -41,6 +41,7 @@ const DateTimePicker = ({ label, xs, ...props }) => {
         <Flatpickr className="datetime_picker" ref={datetime} data-enable-time options={options} {...field} {...props} />
         {field.value ? <span className=""><FontAwesomeIcon icon={faTimes} style={{position:"relative", left: "-22px", marginTop:"11px",color:"#808080"}} onClick={clearDate} /></span> : ""}
       </span>
+      {meta.touched && meta.error ? <div style={{ color: "red", marginTop: ".5rem", fontSize: "80%" }}>{meta.error}</div> : ""}
       </Form.Group>
     </>
   );
@@ -57,26 +58,38 @@ const TextInput = ({ label, value, xs, controlId, ...props }) => {
     <Form.Group as={Col} xs={xs} controlId={controlId}>
       <Form.Label>{label}</Form.Label>
       <Form.Control type="text" value={value} isInvalid={meta.touched && meta.error} onChange={props.handleChange} {...field} {...props} />
-        <Form.Control.Feedback type="invalid"> {meta.error}</ Form.Control.Feedback>
+      <Form.Control.Feedback type="invalid"> {meta.error}</ Form.Control.Feedback>
     </Form.Group>
     </>
   );
 };
 
-const Checkbox = ({ children, ...props }) => {
-  // We need to tell useField what type of input this is
-  // since React treats radios and checkboxes differently
-  // than inputs/select/textarea.
-  const [field, meta] = useField({ ...props, type: 'checkbox' });
+// const Checkbox = ({ ...props }) => {
+//   // We need to tell useField what type of input this is
+//   // since React treats radios and checkboxes differently
+//   // than inputs/select/textarea.
+//   const [field, meta] = useField({...props, type: 'checkbox'});
+//   return (
+//     <>
+//       <Label>
+//         {props.label}
+//         <input type="checkbox" {...field} {...props} />
+//       </Label>
+//       {meta.touched && meta.error ? (
+//         <div className="error">{meta.error}</div>
+//       ) : null}
+//     </>
+//   );
+// };
+
+const Checkbox = ({ field, type, checked, label, value, onChange }) => {
+
   return (
     <>
-      <Label className="checkbox">
-        <input type="checkbox" {...field} {...props} />
-        {children}
-      </Label>
-      {meta.touched && meta.error ? (
-        <div className="error">{meta.error}</div>
-      ) : null}
+    <label>
+      {label}
+      <input {...field} type={type} checked={checked} onChange={onChange} />
+    </label>
     </>
   );
 };
