@@ -6,7 +6,6 @@ import {Link} from "raviger";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faClipboardList} from "@fortawesome/free-solid-svg-icons";
 import Moment from "react-moment";
-import {datetime} from "react-table/src/sortTypes";
 
 
 export function EvacTeamTable() {
@@ -76,8 +75,6 @@ export function EvacuationAssignmentTable() {
     let source = axios.CancelToken.source();
     setData({evacuation_assignments: [], isFetching: true});
     // Fetch EvacuationAssignments data filtered searchTerm.
-    // await axios.get('/hotline/api/servicerequests/?search=' + searchTerm + '&status=' + statusOptions.status, {
-    // await axios.get('/evac/api/evacassignment/?search=' + searchTerm, {
     await axios.get('/evac/api/evacassignment/?search=' + searchTerm + '&status=' + statusOptions.status, {
       cancelToken: source.token,
     })
@@ -97,13 +94,10 @@ export function EvacuationAssignmentTable() {
       setData({evacuation_assignments: [], isFetching: true});
       // Fetch ServiceRequest data.
       await axios.get('/evac/api/evacassignment/?search=' + searchTerm + '&status=' + statusOptions.status, {
-      // await axios.get('/evac/api/evacassignment/?search=' + searchTerm, {
         cancelToken: source.token,
       })
           .then(response => {
             setData({evacuation_assignments: response.data, isFetching: false});
-            //for testing purposes
-            console.log(response.data);
           })
           .catch(error => {
             console.log(error.response);
@@ -115,7 +109,6 @@ export function EvacuationAssignmentTable() {
     return () => {
       source.cancel();
     };
-  // }, []);
   }, [statusOptions.status]);
 
   return (
@@ -155,7 +148,6 @@ export function EvacuationAssignmentTable() {
                       {member.first_name} {member.last_name} &nbsp;
                     </span>))}
                 </span>
-                {/*<div>Team Member(s): <span>{evacuation_assignment.team_member_objects.map(member => (<ListGroup.Item key={member.id}>{member.first_name} {member.last_name} </ListGroup.Item>))} </span></div>*/}
               </div>
               <CardGroup>
                 <Card key={evacuation_assignment.id}>

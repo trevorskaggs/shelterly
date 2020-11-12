@@ -2,7 +2,6 @@ import React from "react";
 import { Link } from "raviger";
 import { EvacTeamMemberForm } from "./EvacForms";
 import { ListGroup } from 'react-bootstrap';
-import {ServiceRequestTable} from "../hotline/HotlineTables";
 import {EvacuationAssignmentTable} from "./EvacTables";
 
 const header_style = {
@@ -49,8 +48,6 @@ const header_style = {
     <div>
         <h1 style={header_style}>Evacuation Assignments</h1>
         <br/>
-        {/*<ServiceRequestTable/>*/}
-        {/*<EvacTeamTable/>*/}
         <EvacuationAssignmentTable/>
     </div>
   )

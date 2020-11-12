@@ -17,7 +17,6 @@ class EvacTeamMemberViewSet(viewsets.ModelViewSet):
 class EvacAssignmentViewSet(viewsets.ModelViewSet):
 
     queryset = EvacAssignment.objects.all()
-#     search_fields = ['start_time', 'address', 'city', 'team_members__first_name', 'team_members__last_name', 'service_requests__owner__first_name', 'service_requests__owner__last_name', 'owner__address', 'owner__city', 'reporter__first_name', 'reporter__last_name']
     search_fields = ['team_members__first_name', 'team_members__last_name', 'service_requests__owner__first_name', 'service_requests__owner__last_name', 'service_requests__address', 'service_requests__reporter__first_name', 'service_requests__reporter__last_name']
     filter_backends = (filters.SearchFilter,)
     permission_classes = [permissions.IsAuthenticated, ]
@@ -39,15 +38,7 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
         if status == "all":
             return queryset
         if status  == "open":
-            queryset = queryset.filter(end_time__isnull=True).distinct()
+            return queryset.filter(end_time__isnull=True).distinct()
         elif status == "closed":
-            queryset = queryset.filter(end_time__isnull=False).distinct()
-
+            return queryset.filter(end_time__isnull=False).distinct()
         return queryset
-
-        # end_time filter
-#         end_time = self.request.query_params.get('end_time', '')
-#         if end_time:
-#             return queryset.filter(end_time=end_time).distinct()
-#         else:
-#             return queryset.filter(end_time__isnull=True).distinct()
