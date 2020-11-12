@@ -173,12 +173,12 @@ export function EvacResolution({id}) {
               animals: Yup.array().of(
                 Yup.object().shape({
                   id: Yup.number().required(),
-                  status: Yup.string().required(),
+                  status: Yup.string().notOneOf(['REPORTED'], 'Animal cannot remain REPORTED.'),
                 })
               ),
               date_completed: Yup.date().required('Required'),
               notes: Yup.string().required('Required'),
-              owner_contacted: Yup.boolean().required('The owner must be notified!'),
+              owner_contacted: Yup.boolean().required().oneOf([true], 'The owner must be notified before resolution.'),
             })
           ),
         })}
@@ -223,7 +223,7 @@ export function EvacResolution({id}) {
                 <h4>Service Request #{service_request.id} <Link href={"/hotline/servicerequest/" + id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link> | <span style={{textTransform:"capitalize"}}>{service_request.status}</span></h4>
               </Card.Title>
               <hr/>
-              <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px", textTransform:"capitalize"}}>
+              <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
                   <ListGroup.Item><b>Address: </b>{service_request.full_address}</ListGroup.Item>
                   <ListGroup.Item><b>Owner: </b>{service_request.owner_object.first_name} {service_request.owner_object.last_name}</ListGroup.Item>
                   <ListGroup.Item><b>Reporter: </b>{service_request.reporter ? <span>{service_request.reporter_object.first_name} {service_request.reporter_object.last_name}</span> : "N/A"}</ListGroup.Item>
@@ -241,7 +241,7 @@ export function EvacResolution({id}) {
                             isClearable={false}
                           />
                       </Col>
-                      {animal.pcolor ? <span>{animal.pcolor}{animal.scolor ? "/" + animal.scolor + " " : ""}</span> : ""} {animal.species} ({animal.name||"Unknown"})
+                      {animal.pcolor ? <span style={{textTransform:"capitalize"}}>{animal.pcolor}{animal.scolor ? "/" + animal.scolor : ""}&nbsp;</span> : ""}<span style={{textTransform:"capitalize"}}>{animal.species}</span>&nbsp;({animal.name||"Unknown"})
                     </Row>
                   </ListGroup.Item>
                   ))}
@@ -253,6 +253,7 @@ export function EvacResolution({id}) {
                     id={`sr_updates.${index}.date_completed`}
                     xs="4"
                     data-enable-time={false}
+                    clearable={false}
                     onChange={(date, dateStr) => {
                       props.setFieldValue(`sr_updates.${index}.date_completed`, dateStr)
                     }}
@@ -282,14 +283,13 @@ export function EvacResolution({id}) {
                     value={data.followup_date||null}
                   />
                 </BootstrapForm.Row>
-                <BootstrapForm.Row className="mt-3 ml-1">
+                <BootstrapForm.Row className="mt-3 pl-1">
                   <Field
                     label={"Owner Notified: "}
-                    type="checkbox"
                     component={Checkbox}
                     name={`sr_updates.${index}.owner_contacted`}
                     onChange={() => {
-                      if (props.values.sr_updates[index].owner_contacted) {
+                      if (props.values.sr_updates[index] && props.values.sr_updates[index].owner_contacted) {
                         props.setFieldValue(
                           `sr_updates.${index}.owner_contacted`,
                           false
@@ -304,6 +304,11 @@ export function EvacResolution({id}) {
                     }}
                   />
                 </BootstrapForm.Row>
+                {props.errors.sr_updates && props.errors.sr_updates[index] && props.errors.sr_updates[index].owner_contacted &&
+                props.touched.sr_updates && props.touched.sr_updates[index] && props.touched.sr_updates[index].owner_contacted && (
+                  <div style={{ color: "#e74c3c", marginTop: "-8px", fontSize: "80%" }}>{props.errors.sr_updates[index].owner_contacted}</div>
+                  )
+                }
               </Card.Body>
             </Card>
             ))}
