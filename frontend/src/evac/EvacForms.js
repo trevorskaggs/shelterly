@@ -47,7 +47,7 @@ export const EvacTeamMemberForm = () => {
                   resetForm();
                 }
                 else{
-                  navigate('/dispatch');
+                  navigate('/evac');
                 }
               })
               .catch(error => {
@@ -103,7 +103,7 @@ export const EvacTeamMemberForm = () => {
               </FormGroup>
               <Button type="button" className="btn btn-success mr-1" onClick={() => {setAddAnother(false); form.submitForm()}}>Save</Button>
               <Button type="button" className="btn btn-success mr-1" onClick={() => {setAddAnother(true); form.submitForm()}}>Add Another</Button>
-              <Link className="btn btn-secondary" href="/dispatch">Cancel</Link>
+              <Link className="btn btn-secondary" href="/evac">Cancel</Link>
             </Container>
           </Form>
           )}

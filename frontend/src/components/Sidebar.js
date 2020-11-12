@@ -66,7 +66,7 @@ const Menu = ({ state, dispatch, removeCookie, ...props }) => {
     <img src="https://sheltelry-app-static.s3-us-west-2.amazonaws.com/shelterly.png" alt="logo" />
     <div className="logo border-bottom">SHELTERLY</div>
       <Link href="/hotline" ><FontAwesomeIcon icon={faPhone} fixedWidth inverse/> HOTLINE</Link>
-      <Link href="/dispatch"><FontAwesomeIcon icon={faBullhorn} fixedWidth inverse/>  DISPATCH</Link>
+      <Link href="/evac"><FontAwesomeIcon icon={faBullhorn} fixedWidth inverse/>  DISPATCH</Link>
       <Link href="/intake"><FontAwesomeIcon icon={faDoorOpen} fixedWidth inverse/>  INTAKE</Link>
       <Link href="/shelter"><FontAwesomeIcon icon={faHome} fixedWidth inverse/> SHELTER</Link>
       {state.user ? <Link onClick={() => logoutUser({dispatch}, {removeCookie})} href="#"><FontAwesomeIcon icon={faSignOutAlt} fixedWidth inverse/> SIGN OUT</Link> : ""}
