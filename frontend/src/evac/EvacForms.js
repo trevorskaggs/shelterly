@@ -122,7 +122,7 @@ export const EvacTeamMemberForm = () => {
     );
   };
 
-export function EvacResolution({id}) {
+export function EvacResolution({ id }) {
 
   // Initial animal data.
   const [data, setData] = useState({
@@ -183,17 +183,16 @@ export function EvacResolution({id}) {
           ),
         })}
         onSubmit={(values, { setSubmitting }) => {
-          console.log(values);
-          // setTimeout(() => {
-          //   axios.post('/evac/api/evacassignment/' + {id} + '/', values)
-          //   .then(response => {
-          //     navigate('/evac/summary/' + response.data.id);
-          //   })
-          //   .catch(error => {
-          //     console.log(error.response);
-          //   });
-          //   setSubmitting(false);
-          // }, 500);
+          setTimeout(() => {
+            axios.put('/evac/api/evacassignment/' + id + '/', values)
+            .then(response => {
+              navigate('/evac/summary/' + response.data.id);
+            })
+            .catch(error => {
+              console.log(error.response);
+            });
+            setSubmitting(false);
+          }, 500);
         }}
       >
         {props => (
@@ -220,7 +219,7 @@ export function EvacResolution({id}) {
           <Card key={service_request.id} border="secondary" className="mt-3">
             <Card.Body>
               <Card.Title>
-                <h4>Service Request #{service_request.id} <Link href={"/hotline/servicerequest/" + id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link> | <span style={{textTransform:"capitalize"}}>{service_request.status}</span></h4>
+                <h4>Service Request #{service_request.id} <Link href={"/hotline/servicerequest/" + service_request.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link> | <span style={{textTransform:"capitalize"}}>{service_request.status}</span></h4>
               </Card.Title>
               <hr/>
               <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>

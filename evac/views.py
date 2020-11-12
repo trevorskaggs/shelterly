@@ -3,6 +3,7 @@ from datetime import datetime
 from rest_framework import filters, permissions, viewsets
 from actstream import action
 
+from animals.models import Animal
 from evac.models import EvacAssignment, EvacTeamMember
 from evac.serializers import EvacAssignmentSerializer, EvacTeamMemberSerializer
 from hotline.models import ServiceRequest
@@ -29,3 +30,17 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
             action.send(self.request.user, verb='created evacuation assignment', target=evac_assignment)
             for service_request in service_requests:
                 action.send(self.request.user, verb='assigned service request', target=service_request)
+
+    def perform_update(self, serializer):
+        if serializer.is_valid():
+            serializer.validated_data['end_time'] = datetime.now()
+            evac_assignment = serializer.save()
+            for service_request in self.request.data['sr_updates']:
+                sr_status = 'closed'
+                for animal in service_request['animals']:
+                    Animal.objects.filter(id=animal['id']).update(status=animal['status'])
+                    if animal['status'] in ['SHELTERED IN PLACE', 'UNABLE TO LOCATE']:
+                        sr_status = 'open'
+                ServiceRequest.objects.filter(id=service_request['id']).update(status=sr_status, followup_date=service_request['followup_date'])
+                # VisitNote.objects.create(evac_assignment=evac_assignment, service_request=service_request['id'], date_completed=service_request['date_completed'], notes=service_request['notes'], owner_contacted=service_request['owner_contacted'])
+            action.send(self.request.user, verb='updated evacuation assignment', target=evac_assignment)
