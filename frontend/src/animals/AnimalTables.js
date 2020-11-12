@@ -9,10 +9,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faClipboardList
 } from '@fortawesome/free-solid-svg-icons';
-
-const header_style = {
-  textAlign: "center",
-};
+import Header from '../components/Header';
 
 const input_style = {
   width: "40%",
@@ -76,7 +73,7 @@ export function AnimalSearch() {
 
   return (
     <div className="ml-2 mr-2">
-      <h1 style={header_style}>Animal Search</h1>
+      <Header>Animal Search</Header>
       <Form onSubmit={handleSubmit}>
         <InputGroup className="mb-3">
           <FormControl

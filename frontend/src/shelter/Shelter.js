@@ -33,24 +33,27 @@ function Shelter() {
     };
   }, []);
 
-const Shelter = () => (
-<div>
-  <h1 style={header_style}>Shelters</h1>
-  <ListGroup className="flex-fill p-5 h-50">
-    <Link href="/shelter/new">
-      <ListGroup.Item action>CREATE NEW SHELTER</ListGroup.Item>
-    </Link>
-    <Link href="/shelter/list">
-      <ListGroup.Item action>SEE ALL SHELTERS</ListGroup.Item>
-    </Link>
-    <Link href="/animals/search">
-      <ListGroup.Item action>ANIMAL SEARCH</ListGroup.Item>
-    </Link>
-  </ListGroup>
-</div>
-)
-
-export const NewShelter = ({sid}) => (
+  return (
+    <>
+    <Header>Shelter</Header>
+    <hr/>
+    <ListGroup className="flex-fill p-5 h-50">
+      <Link href="/shelter/new">
+        <ListGroup.Item action>CREATE NEW SHELTER</ListGroup.Item>
+      </Link>
+      <Link href="/animals/search">
+        <ListGroup.Item action>ANIMAL SEARCH</ListGroup.Item>
+      </Link>
+      {data.shelters.map(shelter => (
+        <Link href={"/shelter/" + shelter.id}>
+          <ListGroup.Item action>{shelter.name} - {shelter.animal_count} Animals</ListGroup.Item>
+        </Link>
+      ))}
+    </ListGroup>
+    </>
+  )
+}
+export const NewShelter = () => (
   <div>
     <ShelterForm />
   </div>
