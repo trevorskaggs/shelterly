@@ -27,7 +27,7 @@ const routes = {
   "/evac": () => <Evac />,
   "/evac/evacteammember/new": () => <NewEvacTeamMember />,
   "/evac/summary/:id": ({id}) => <EvacSummary id={id} />,
-  "/evac/dispatch": () => <Dispatch />,
+  "/evac/deploy": () => <Dispatch />,
   "/hotline": () => <Hotline />,
   "/hotline/animal/new": () => <NewAnimal />,
   "/hotline/first_responder/new": () => <NewReporter />,

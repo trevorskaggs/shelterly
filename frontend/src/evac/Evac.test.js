@@ -6,10 +6,8 @@ import { EvacTeamMemberForm } from "./EvacForms";
 describe("Render evac", () => {
   it("Render Evac", () => {
     const { getByText } = render(<Evac />);
-    expect(getByText(/NEW TEAM/)).toBeTruthy();
+    expect(getByText(/ADD TEAM MEMBER/)).toBeTruthy();
     expect(getByText(/DEPLOY/)).toBeTruthy();
-    expect(getByText(/DEBRIEF/)).toBeTruthy();
-    expect(getByText(/BACK/)).toBeTruthy();
   });
 
   it("Render new evac team member form", async () => {
