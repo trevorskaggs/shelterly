@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('date_completed', models.DateTimeField()),
                 ('owner_contacted', models.BooleanField(default=False)),
-                ('notes', models.CharField(blank=True, max_length=200)),
+                ('notes', models.CharField(blank=True, max_length=500)),
                 ('evac_assignment', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='evac.evacassignment')),
                 ('service_request', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='hotline.servicerequest')),
             ],

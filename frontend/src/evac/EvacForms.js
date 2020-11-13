@@ -194,7 +194,7 @@ export const VisitNoteForm = ({id}) => {
                   <Col xs={{size: 2}}>
                     <TextInput
                       as="textarea"
-                      label="Notes*"
+                      label="Notes"
                       name="notes"
                       id="notes"
                       xs="9"

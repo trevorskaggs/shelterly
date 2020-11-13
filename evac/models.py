@@ -31,4 +31,4 @@ class VisitNote(models.Model):
     evac_assignment = models.ForeignKey(EvacAssignment, on_delete=models.CASCADE)
     service_request = models.ForeignKey(ServiceRequest, on_delete=models.CASCADE)
     owner_contacted = models.BooleanField(default=False)
-    notes = models.CharField(max_length=200, blank=True)
+    notes = models.CharField(max_length=500, blank=True)
