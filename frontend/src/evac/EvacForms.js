@@ -11,7 +11,7 @@ import {
   Container,
 } from 'react-bootstrap';
 import * as Yup from 'yup';
-import { StyleCheckbox, DateTimePicker, TextInput, DropDown} from '.././components/Form';
+import { DateTimePicker, TextInput, DropDown} from '.././components/Form';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft } from '@fortawesome/free-solid-svg-icons';
 
@@ -200,17 +200,6 @@ export const VisitNoteForm = ({id}) => {
                       id="notes"
                       xs="4"
                       rows={3}
-                    />
-                  </Col>
-                </Row>
-              </FormGroup>
-              <FormGroup>
-                <Row>
-                  <Col xs={{size: 2}}>
-                    <StyleCheckbox
-                      label="Owner Contacted*"
-                      name="owner_contacted"
-                      id="owner_contacted"
                     />
                   </Col>
                 </Row>
