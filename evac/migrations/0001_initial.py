@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
             name='EvacTeam',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('evac_team_members', models.ManyToManyField(to='people.TeamMember')),
+                #('evac_team_members', models.ManyToManyField(to='people.TeamMember')),
             ],
         ),
     ]
