@@ -23,3 +23,12 @@ class EvacAssignment(models.Model):
     service_requests = models.ManyToManyField(ServiceRequest)
     start_time = models.DateTimeField(auto_now_add=True)
     end_time = models.DateTimeField(blank=True, null=True)
+
+
+class VisitNote(models.Model):
+
+    date_completed = models.DateTimeField()
+    evac_assignment = models.ForeignKey(EvacAssignment, on_delete=models.CASCADE)
+    service_request = models.ForeignKey(ServiceRequest, on_delete=models.CASCADE)
+    owner_contacted = models.BooleanField(default=False)
+    notes = models.CharField(max_length=500, blank=True)

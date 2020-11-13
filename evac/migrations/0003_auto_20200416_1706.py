@@ -12,9 +12,9 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AlterField(
-            model_name='evacteam',
-            name='evac_team_members',
-            field=models.ManyToManyField(to=settings.AUTH_USER_MODEL),
-        ),
+        #migrations.AlterField(
+        #    model_name='evacteam',
+        #    name='evac_team_members',
+        #    field=models.ManyToManyField(to=settings.AUTH_USER_MODEL),
+        #),
     ]

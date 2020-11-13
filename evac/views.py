@@ -3,8 +3,8 @@ from datetime import datetime
 from rest_framework import filters, permissions, viewsets
 from actstream import action
 
-from evac.models import EvacAssignment, EvacTeamMember
-from evac.serializers import EvacAssignmentSerializer, EvacTeamMemberSerializer
+from evac.models import EvacAssignment, EvacTeamMember, VisitNote
+from evac.serializers import EvacAssignmentSerializer, EvacTeamMemberSerializer, VisitNoteSerializer
 from hotline.models import ServiceRequest
 
 class EvacTeamMemberViewSet(viewsets.ModelViewSet):
@@ -29,3 +29,9 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
             action.send(self.request.user, verb='created evacuation assignment', target=evac_assignment)
             for service_request in service_requests:
                 action.send(self.request.user, verb='assigned service request', target=service_request)
+
+class VisitNoteViewSet(viewsets.ModelViewSet):
+
+    queryset = VisitNote.objects.all()
+    permission_classes = [permissions.IsAuthenticated, ]
+    serializer_class = VisitNoteSerializer
