@@ -155,12 +155,11 @@ export const VisitNoteForm = ({id}) => {
           validationSchema={Yup.object({
             timestamp: Yup.date(),
             notes: Yup.string(),
-            owner_contacted: Yup.bool().required('Required'),
           })}
           onSubmit={(values, { setSubmitting }) => {
             console.log(values)
             setTimeout(() => {
-              axios.post('/evac/api/visitnote/', values)
+              axios.patch('/evac/api/visitnote/' + values.id + '/', values)
               .then(
                   navigate('/evac')
               )
