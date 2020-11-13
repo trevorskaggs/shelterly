@@ -187,7 +187,7 @@ export const VisitNoteForm = ({id}) => {
                     onChange={(date, dateStr) => {
                       form.setFieldValue("date_completed", dateStr)
                     }}
-                    value={form.values.timestamp||null}
+                    value={form.values.date_completed||null}
                   />
                   </Col>
                 </Row>
