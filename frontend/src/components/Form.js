@@ -75,6 +75,21 @@ const Checkbox = ({ children, ...props }) => {
   );
 };
 
+const StyleCheckbox = ({ label, value, xs, controlId, formGroupClasses, ...props }) => {
+  // We need to tell useField what type of input this is
+  // since React treats radios and checkboxes differently
+  // than inputs/select/textarea.
+  const [field, meta] = useField({ ...props, type: 'checkbox' });
+  return (
+    <>
+    <Form.Group as={Col} xs={xs} controlId={controlId} className={formGroupClasses}>
+      <Form.Label>{label}</Form.Label>
+        <input type="checkbox" {...field} {...props} />
+    </Form.Group>
+    </>
+  );
+};
+
 const DropDown = React.forwardRef((props, ref) => {
   const { setFieldValue, setFieldTouched } = useFormikContext();
   const [field, meta] = useField(props);
@@ -242,4 +257,4 @@ const AddressLookup = ({ ...props }) => {
   );
 }
 
-export { AddressLookup, TextInput, Checkbox, DropDown, ImageUploader, MultiSelect, DateTimePicker };
+export { AddressLookup, TextInput, Checkbox, DropDown, ImageUploader, MultiSelect, DateTimePicker, StyleCheckbox };

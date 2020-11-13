@@ -4,13 +4,16 @@ import { Link, navigate } from "raviger";
 import { Form, Formik } from 'formik';
 import {
   Button,
+  Card,
   Col,
   FormGroup,
   Row,
   Container,
 } from 'react-bootstrap';
 import * as Yup from 'yup';
-import { DateTimePicker, TextInput, DropDown} from '.././components/Form';
+import { StyleCheckbox, DateTimePicker, TextInput, DropDown} from '.././components/Form';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faArrowAltCircleLeft } from '@fortawesome/free-solid-svg-icons';
 
 
 export const EvacTeamMemberForm = () => {
@@ -115,12 +118,14 @@ export const EvacTeamMemberForm = () => {
 export const VisitNoteForm = ({id}) => {
 
     const [data, setData] = useState({
-      timestamp: '',
-      evac_assignment: '',
-      service_request: '',
+      date_completed: '',
       owner_contacted: '',
       notes: '',
+      service_request: '',
+      evac_assignment: '',
+      address: '',
     })
+
     useEffect(() => {
       let source = axios.CancelToken.source();
       if (id) {
@@ -136,19 +141,24 @@ export const VisitNoteForm = ({id}) => {
             console.log(error.response);
           });
         };
-        fetchVisitNote();
+      fetchVisitNote();
       };
-    });
+      return () => {
+        source.cancel();
+      };
+    }, [id]);
 
     return (
         <Formik
           initialValues={data}
+          enableReinitialize={true}
           validationSchema={Yup.object({
             timestamp: Yup.date(),
             notes: Yup.string(),
             owner_contacted: Yup.bool().required('Required'),
           })}
-          onSubmit={(values, { setSubmitting, resetForm }) => {
+          onSubmit={(values, { setSubmitting }) => {
+            console.log(values)
             setTimeout(() => {
               axios.post('/evac/api/visitnote/', values)
               .then(
@@ -157,45 +167,59 @@ export const VisitNoteForm = ({id}) => {
               .catch(error => {
                 console.log(error.response);
               });
-              setSubmitting(false);
+            setSubmitting(false);
             }, 500);
           }}
         >
         {form => (
+          <Card border="secondary" className="mt-5">
+          <Card.Header as="h5" className="pl-3"><span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>{!id ? "New" : "Update"} Visit Note - { form.values.address }</Card.Header>
+          <Card.Body>
           <Form>
-            <Container>
               <FormGroup>
                 <Row>
-                  <Col xs={{size: 5, offset: 1}}>
+                  <Col xs={{size: 2}}>
                   <DateTimePicker
-                    label="Timestamp"
-                    name="timestamp"
-                    id="timestamp"
+                    label="Date Completed"
+                    name="date_completed"
+                    id="date_completed"
                     xs="4"
                     onChange={(date, dateStr) => {
-                      form.setFieldValue("timestamp", dateStr)
+                      form.setFieldValue("date_completed", dateStr)
                     }}
                     value={form.values.timestamp||null}
                   />
                   </Col>
                 </Row>
-              </FormGroup>
-              <FormGroup>
                 <Row>
-                  <Col xs={{size: 5, offset: 1}}>
+                  <Col xs={{size: 2}}>
                     <TextInput
-                      type="text"
+                      as="textarea"
                       label="Notes*"
                       name="notes"
                       id="notes"
+                      xs="4"
+                      rows={3}
+                    />
+                  </Col>
+                </Row>
+              </FormGroup>
+              <FormGroup>
+                <Row>
+                  <Col xs={{size: 2}}>
+                    <StyleCheckbox
+                      label="Owner Contacted*"
+                      name="owner_contacted"
+                      id="owner_contacted"
                     />
                   </Col>
                 </Row>
               </FormGroup>
               <Button type="button" className="btn btn-success mr-1" onClick={() => form.submitForm()}>Save</Button>
               <Link className="btn btn-secondary" href="/evac">Cancel</Link>
-            </Container>
           </Form>
+          </Card.Body>
+          </Card>
           )}
         </Formik>
     );

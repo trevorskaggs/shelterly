@@ -31,6 +31,12 @@ class EvacAssignmentSerializer(serializers.ModelSerializer):
 
 class VisitNoteSerializer(serializers.ModelSerializer):
 
+    address = serializers.SerializerMethodField()
+    
+    def get_address(self, obj):
+        return obj.service_request.location_output
+
     class Meta:
         model = VisitNote
         fields = '__all__'
+
