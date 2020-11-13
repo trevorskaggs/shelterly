@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
             name='VisitNote',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('timestamp', models.DateTimeField(auto_now_add=True)),
+                ('date_completed', models.DateTimeField()),
                 ('owner_contacted', models.BooleanField(default=False)),
                 ('notes', models.CharField(blank=True, max_length=200)),
                 ('evac_assignment', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='evac.evacassignment')),

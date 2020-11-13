@@ -27,7 +27,7 @@ class EvacAssignment(models.Model):
 
 class VisitNote(models.Model):
 
-    timestamp = models.DateTimeField(auto_now_add=True)
+    date_completed = models.DateTimeField()
     evac_assignment = models.ForeignKey(EvacAssignment, on_delete=models.CASCADE)
     service_request = models.ForeignKey(ServiceRequest, on_delete=models.CASCADE)
     owner_contacted = models.BooleanField(default=False)
