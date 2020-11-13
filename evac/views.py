@@ -33,6 +33,5 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
 class VisitNoteViewSet(viewsets.ModelViewSet):
 
     queryset = VisitNote.objects.all()
-    filter_backends = (filters.SearchFilter,)
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = VisitNoteSerializer

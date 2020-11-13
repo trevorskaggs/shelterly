@@ -12,7 +12,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import Autocomplete from 'react-google-autocomplete';
 
-const DateTimePicker = ({ label, xs, ...props }) => {
+const DateTimePicker = ({ label, xs, clearable, ...props }) => {
 
   const [field] = useField(props);
 
@@ -33,7 +33,7 @@ const DateTimePicker = ({ label, xs, ...props }) => {
       <label htmlFor={props.id || props.name}>{label}</label>
       <span className="d-flex">
         <Flatpickr className="datetime_picker" ref={datetime} data-enable-time options={options} {...field} {...props} />
-        {field.value ? <span className=""><FontAwesomeIcon icon={faTimes} style={{position:"relative", left: "-22px", marginTop:"11px",color:"#808080"}} onClick={clearDate} /></span> : ""}
+        {clearable === false ? "" : <span>{field.value ? <FontAwesomeIcon icon={faTimes} style={{position:"relative", left: "-22px", marginTop:"11px",color:"#808080"}} onClick={clearDate} /> : ""}</span>}
       </span>
       </Form.Group>
     </>

@@ -119,10 +119,10 @@ export const VisitNoteForm = ({id}) => {
 
     const [data, setData] = useState({
       date_completed: '',
-      owner_contacted: '',
+      owner_contacted: false,
       notes: '',
-      service_request: '',
-      evac_assignment: '',
+      service_request: null,
+      evac_assignment: null,
       address: '',
     })
 
@@ -153,11 +153,10 @@ export const VisitNoteForm = ({id}) => {
           initialValues={data}
           enableReinitialize={true}
           validationSchema={Yup.object({
-            timestamp: Yup.date(),
+            date_completed: Yup.date(),
             notes: Yup.string(),
           })}
           onSubmit={(values, { setSubmitting }) => {
-            console.log(values)
             setTimeout(() => {
               axios.patch('/evac/api/visitnote/' + values.id + '/', values)
               .then(
@@ -183,6 +182,7 @@ export const VisitNoteForm = ({id}) => {
                     name="date_completed"
                     id="date_completed"
                     xs="4"
+                    clearable={false}
                     onChange={(date, dateStr) => {
                       form.setFieldValue("date_completed", dateStr)
                     }}
@@ -197,14 +197,13 @@ export const VisitNoteForm = ({id}) => {
                       label="Notes*"
                       name="notes"
                       id="notes"
-                      xs="4"
-                      rows={3}
+                      xs="9"
+                      rows={5}
                     />
                   </Col>
                 </Row>
               </FormGroup>
               <Button type="button" className="btn btn-success mr-1" onClick={() => form.submitForm()}>Save</Button>
-              <Link className="btn btn-secondary" href="/evac">Cancel</Link>
           </Form>
           </Card.Body>
           </Card>
