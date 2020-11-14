@@ -4,6 +4,7 @@ import { Link, navigate } from "raviger";
 import { Form, Formik } from 'formik';
 import {
   Button,
+  ButtonGroup,
   Card,
   Col,
   FormGroup,
@@ -16,7 +17,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft } from '@fortawesome/free-solid-svg-icons';
 
 
-export const EvacTeamMemberForm = () => {
+export const EvacTeamMemberForm = ({id}) => {
 
   // Track whether or not to add another evac team member after saving.
   const [addAnother, setAddAnother] = useState(false);
@@ -62,54 +63,58 @@ export const EvacTeamMemberForm = () => {
           }}
         >
         {form => (
-          <Form>
-            <Container>
-              <FormGroup>
-                <Row>
-                  <Col xs={{size: 5, offset: 1}}>
-                    <TextInput
-                      type="text"
-                      label="First Name*"
-                      name="first_name"
-                      id="first_name"
-                    />
-                  </Col>
-                  <Col xs="5">
-                    <TextInput
-                      type="text"
-                      label="Last Name*"
-                      name="last_name"
-                      id="last_name"
-                    />
-                  </Col>
-                </Row>
-              </FormGroup>
-
-              <FormGroup>
-                <Row>
-                  <Col xs={{size: 5, offset: 1}}>
-                    <TextInput
-                      type="text"
-                      label="Phone*"
-                      name="phone"
-                      id="phone"
-                    />
-                  </Col>
-                  <Col xs="5">
-                    <TextInput
-                      type="text"
-                      label="Agency ID"
-                      name="agency_id"
-                      id="agency_id"
-                    />
-                  </Col>
-                </Row>
-              </FormGroup>
-              <Button type="button" className="btn btn-success mr-1" onClick={() => {setAddAnother(false); form.submitForm()}}>Save</Button>
+          <Card border="secondary" className="mt-5">
+            <Card.Header as="h5" className="pl-3"><span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>{!id ? "New" : "Update"} Team Member</Card.Header>
+            <Card.Body>
+              <Form>
+                  <FormGroup>
+                    <Row>
+                      <Col xs={{size: 5, offset: 1}}>
+                        <TextInput
+                          type="text"
+                          label="First Name*"
+                          name="first_name"
+                          id="first_name"
+                        />
+                      </Col>
+                      <Col xs="5">
+                        <TextInput
+                          type="text"
+                          label="Last Name*"
+                          name="last_name"
+                          id="last_name"
+                        />
+                      </Col>
+                    </Row>
+                  </FormGroup>
+                  <FormGroup>
+                    <Row>
+                      <Col xs={{size: 5, offset: 1}}>
+                        <TextInput
+                          type="text"
+                          label="Phone*"
+                          name="phone"
+                          id="phone"
+                        />
+                      </Col>
+                      <Col xs="5">
+                        <TextInput
+                          type="text"
+                          label="Agency ID"
+                          name="agency_id"
+                          id="agency_id"
+                        />
+                      </Col>
+                    </Row>
+                  </FormGroup>
+              </Form>
+            </Card.Body>
+            <ButtonGroup>
+              <Button type="button" className="btn btn-primary mr-1" onClick={() => {setAddAnother(false); form.submitForm()}}>Save</Button>
               <Button type="button" className="btn btn-success mr-1" onClick={() => {setAddAnother(true); form.submitForm()}}>Add Another</Button>
               <Link className="btn btn-secondary" href="/evac">Cancel</Link>
-            </Container>
-          </Form>
+            </ButtonGroup>
+            </Card>
           )}
         </Formik>
     );
@@ -203,9 +208,11 @@ export const VisitNoteForm = ({id}) => {
                   </Col>
                 </Row>
               </FormGroup>
-              <Button type="button" className="btn btn-success mr-1" onClick={() => form.submitForm()}>Save</Button>
           </Form>
           </Card.Body>
+          <ButtonGroup>
+            <Button type="button" className="btn btn-primary" onClick={() => {form.submitForm()}}>Save</Button>
+          </ButtonGroup>
           </Card>
           )}
         </Formik>

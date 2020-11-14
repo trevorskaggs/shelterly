@@ -20,10 +20,7 @@ const header_style = {
 
 
   export const NewEvacTeamMember = () => (
-    <div>
-      <h1 style={header_style}>Add Evacuation Team Member</h1>
-      <EvacTeamMemberForm />
-    </div>
+    <EvacTeamMemberForm />
   )
 
 export default Evac
