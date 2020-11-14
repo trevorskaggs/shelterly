@@ -35,8 +35,6 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = EvacAssignment.objects.all()
         status = self.request.query_params.get('status', '')
-        if status == "all":
-            return queryset
         if status  == "open":
             return queryset.filter(end_time__isnull=True).distinct()
         elif status == "closed":

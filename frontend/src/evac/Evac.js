@@ -25,7 +25,7 @@ const header_style = {
       DEBRIEF
       </ListGroup.Item>
       </Link>
-      <Link href="/evac/evacuationassignment/list">
+      <Link href="/evac/evacuationassignment/search">
           <ListGroup.Item action>SEARCH EVACUATION ASSIGNMENT</ListGroup.Item>
       </Link>
       <Link href="/">
@@ -44,7 +44,7 @@ const header_style = {
     </div>
   )
 
-  export const EvacuationAssignmentList = () => (
+  export const EvacuationAssignmentSearch = () => (
     <div>
         <h1 style={header_style}>Evacuation Assignments</h1>
         <br/>

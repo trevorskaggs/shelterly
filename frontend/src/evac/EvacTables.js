@@ -137,29 +137,34 @@ export function EvacuationAssignmentTable() {
             <div key={evacuation_assignment.id} className="mt-3">
               <div className="card-header">
                 Evacuation Assignment #{evacuation_assignment.id}<Link href={"/evac/summary/" + evacuation_assignment.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
-                <div>Opened: <Moment format="LLL">{evacuation_assignment.start_time}</Moment></div>
-                <div>Closed: {evacuation_assignment.end_time ?
-                    <span>
-                      <Moment format="LLL">{evacuation_assignment.end_time}</Moment>
+                <div>
+                Opened: <Moment format="L">{evacuation_assignment.start_time}</Moment> |
+                Closed: {evacuation_assignment.end_time ?
+                  <span>
+                      <Moment format="L">{evacuation_assignment.end_time}</Moment>
                     </span> : "N/A"}
                 </div>
-                <span>Team Member(s): {evacuation_assignment.team_member_objects.map(member => (
-                    <span key={member.id}>
-                      {member.first_name} {member.last_name} &nbsp;
-                    </span>))}
+                <div>
+                <span>Team Member(s): {evacuation_assignment.team_member_objects.map((member, i) => (
+                    <span key={member.id}>{i > 0 && ", "}{member.first_name} {member.last_name}</span>))}
                 </span>
+                </div>
               </div>
               <CardGroup>
                 <Card key={evacuation_assignment.id}>
                   <Card.Body>
                     <Card.Title>Service Request(s)</Card.Title>
                     <ListGroup>
-                      <span>{evacuation_assignment.service_request_objects.map(service_request => (
+                      {evacuation_assignment.service_request_objects.map(service_request => (
                           <ListGroup.Item key={service_request.id}>
-                            Service Request #{service_request.id} <Link href={"/hotline/servicerequest/" + service_request.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link> |
+                            Service Request #{service_request.id} <Link
+                              href={"/hotline/servicerequest/" + service_request.id}> <FontAwesomeIcon
+                              icon={faClipboardList} inverse/></Link> |
                             Owner: {service_request.owner_object.first_name} {service_request.owner_object.last_name} |
-                            Animals: {service_request.animals.length}
-                          </ListGroup.Item>))}</span>
+                            Address: {service_request.address} <br/>
+                            Animals: {service_request.animals.map((animal, i) => (
+                              <span key={animal.id}>{i > 0 && ", "}{animal.name || "Unknown"} ({animal.species})</span>))}
+                          </ListGroup.Item>))}
                     </ListGroup>
                   </Card.Body>
                 </Card>
