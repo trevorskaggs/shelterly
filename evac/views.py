@@ -6,7 +6,7 @@ from actstream import action
 from animals.models import Animal
 from evac.models import EvacAssignment, EvacTeamMember
 from evac.serializers import EvacAssignmentSerializer, EvacTeamMemberSerializer
-from hotline.models import ServiceRequest
+from hotline.models import ServiceRequest, VisitNote
 
 class EvacTeamMemberViewSet(viewsets.ModelViewSet):
 
@@ -18,8 +18,19 @@ class EvacTeamMemberViewSet(viewsets.ModelViewSet):
 class EvacAssignmentViewSet(viewsets.ModelViewSet):
 
     queryset = EvacAssignment.objects.all()
+    search_fields = ['team_members__first_name', 'team_members__last_name', 'service_requests__owner__first_name', 'service_requests__owner__last_name', 'service_requests__address', 'service_requests__reporter__first_name', 'service_requests__reporter__last_name']
+    filter_backends = (filters.SearchFilter,)
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = EvacAssignmentSerializer
+
+    def get_queryset(self):
+        queryset = EvacAssignment.objects.all().order_by('-start_time')
+        status = self.request.query_params.get('status', '')
+        if status == "open":
+            return queryset.filter(end_time__isnull=True).distinct()
+        elif status == "closed":
+            return queryset.filter(end_time__isnull=False).distinct()
+        return queryset
 
     # When creating, update all service requests to be assigned status.
     def perform_create(self, serializer):
