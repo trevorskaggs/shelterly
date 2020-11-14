@@ -175,7 +175,7 @@ export function AnimalView({id}) {
             </Card.Title>
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
               <ListGroup.Item><b>Name: </b>{data.owner_object.first_name} {data.owner_object.last_name}</ListGroup.Item>
-              {data.owner_object.phone ? <ListGroup.Item><b>Telephone: </b>{data.owner_object.phone}</ListGroup.Item> : ""}
+              {data.owner_object.phone ? <ListGroup.Item><b>Telephone: </b>{data.owner_object.display_phone}</ListGroup.Item> : ""}
               {data.owner_object.email ? <ListGroup.Item><b>Email: </b>{data.owner_object.email}</ListGroup.Item> : ""}
             </ListGroup>
             <hr/>

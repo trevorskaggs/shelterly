@@ -152,7 +152,7 @@ export function ServiceRequestView({id}) {
               <hr/>
               <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-20px"}}>
                 <ListGroup.Item><b>Name: </b>{data.owner_object.first_name} {data.owner_object.last_name}</ListGroup.Item>
-                {data.owner_object.phone ? <ListGroup.Item><b>Telephone: </b>{data.owner_object.phone}</ListGroup.Item> : ""}
+                {data.owner_object.phone ? <ListGroup.Item><b>Telephone: </b>{data.owner_object.display_phone}</ListGroup.Item> : ""}
                 {data.owner_object.email ? <ListGroup.Item><b>Email: </b>{data.owner_object.email}</ListGroup.Item> : ""}
                 {data.reporter ? <ListGroup.Item><b>Reporter: </b>{data.reporter_object.first_name} {data.reporter_object.last_name} <Link href={"/hotline/reporter/" + data.reporter}><FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link><Link href={"/hotline/reporter/edit/" + data.reporter}> <FontAwesomeIcon icon={faEdit} size="sm" inverse /></Link></ListGroup.Item> : ""}
               </ListGroup>

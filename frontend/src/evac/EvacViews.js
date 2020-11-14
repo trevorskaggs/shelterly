@@ -535,7 +535,7 @@ export function EvacSummary({id}) {
             <hr/>
             <ListGroup variant="flush">
               {data.team_member_objects.map(team_member => (
-                <ListGroup.Item key={team_member.id}>{team_member.first_name} {team_member.last_name} - {team_member.phone} ({team_member.agency_id})</ListGroup.Item>
+                <ListGroup.Item key={team_member.id}>{team_member.first_name} {team_member.last_name} - {team_member.display_phone} {team_member.agency_id ? <span>(#{team_member.agency_id})</span> : ''}</ListGroup.Item>
               ))}
             </ListGroup>
           </Card.Body>
@@ -552,8 +552,8 @@ export function EvacSummary({id}) {
                 <hr/>
                 <ListGroup>
                   <ListGroup.Item><b>Address:</b> {service_request.address ? <span>{service_request.full_address}</span> : 'N/A'}</ListGroup.Item>
-                  <ListGroup.Item><b>Owner:</b> {service_request.owner ? <span>{service_request.owner_object.first_name} {service_request.owner_object.last_name} {service_request.owner_object.phone} <Link href={"/hotline/owner/" + service_request.owner}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></span> : "N/A"}</ListGroup.Item>
-                  <ListGroup.Item><b>Reporter:</b> {service_request.reporter ? <span>{service_request.reporter_object.first_name} {service_request.reporter_object.last_name} {service_request.reporter_object.phone} <Link href={"/hotline/reporter/" + service_request.reporter}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></span> : "N/A"}</ListGroup.Item>
+                  <ListGroup.Item><b>Owner:</b> {service_request.owner ? <span>{service_request.owner_object.first_name} {service_request.owner_object.last_name} {service_request.owner_object.display_phone} <Link href={"/hotline/owner/" + service_request.owner}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></span> : "N/A"}</ListGroup.Item>
+                  <ListGroup.Item><b>Reporter:</b> {service_request.reporter ? <span>{service_request.reporter_object.first_name} {service_request.reporter_object.last_name} {service_request.reporter_object.display_phone} <Link href={"/hotline/reporter/" + service_request.reporter}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></span> : "N/A"}</ListGroup.Item>
                 </ListGroup>
               </Card.Body>
             </Card>

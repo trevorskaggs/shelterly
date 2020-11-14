@@ -1,3 +1,5 @@
+import re
+
 from rest_framework import serializers
 from actstream.models import target_stream
 
@@ -8,9 +10,15 @@ from location.utils import build_action_string
 class EvacTeamMemberSerializer(serializers.ModelSerializer):
     
     display_name = serializers.SerializerMethodField()
+    display_phone = serializers.SerializerMethodField()
 
+    # Custome field for Name Output
     def get_display_name(self, obj):
         return '%s, %s' % (obj.last_name, obj.first_name)
+
+    # Custom field for Formated Phone Number
+    def get_display_phone(self, obj):
+        return re.sub(r'(\d{3})(\d{3})(\d{4})', r'(\1) \2-\3', obj.phone)
 
     class Meta:
         model = EvacTeamMember
