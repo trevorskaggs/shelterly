@@ -17,6 +17,8 @@ class EvacTeamMemberViewSet(viewsets.ModelViewSet):
 class EvacAssignmentViewSet(viewsets.ModelViewSet):
 
     queryset = EvacAssignment.objects.all()
+    search_fields = ['team_members__first_name', 'team_members__last_name', 'service_requests__owner__first_name', 'service_requests__owner__last_name', 'service_requests__address', 'service_requests__reporter__first_name', 'service_requests__reporter__last_name']
+    filter_backends = (filters.SearchFilter,)
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = EvacAssignmentSerializer
 
@@ -29,6 +31,15 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
             action.send(self.request.user, verb='created evacuation assignment', target=evac_assignment)
             for service_request in service_requests:
                 action.send(self.request.user, verb='assigned service request', target=service_request)
+
+    def get_queryset(self):
+        queryset = EvacAssignment.objects.all().order_by('-start_time')
+        status = self.request.query_params.get('status', '')
+        if status == "open":
+            return queryset.filter(end_time__isnull=True).distinct()
+        elif status == "closed":
+            return queryset.filter(end_time__isnull=False).distinct()
+        return queryset
 
 class VisitNoteViewSet(viewsets.ModelViewSet):
 
