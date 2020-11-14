@@ -52,10 +52,11 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
                     Animal.objects.filter(id=animal['id']).update(status=animal['status'])
                     if animal['status'] in ['SHELTERED IN PLACE', 'UNABLE TO LOCATE']:
                         sr_status = 'open'
-                ServiceRequest.objects.filter(id=service_request['id']).update(status=sr_status, followup_date=service_request['followup_date'])
+                service_requests = ServiceRequest.objects.filter(id=service_request['id'])
+                service_requests.update(status=sr_status, followup_date=service_request['followup_date'])
                 if sr_status == 'open':
-                    action.send(self.request.user, verb='opened service request', target=service_request)
+                    action.send(self.request.user, verb='opened service request', target=service_requests[0])
                 else:
-                    action.send(self.request.user, verb='closed service request', target=service_request)
-                VisitNote.objects.create(evac_assignment=evac_assignment, service_request=service_request['id'], date_completed=service_request['date_completed'], notes=service_request['notes'], owner_contacted=service_request['owner_contacted'], forced_entry=service_request['forced_entry'])
+                    action.send(self.request.user, verb='closed service request', target=service_requests[0])
+                VisitNote.objects.create(evac_assignment=evac_assignment, service_request=service_requests[0], date_completed=service_request['date_completed'], notes=service_request['notes'], owner_contacted=service_request['owner_contacted'], forced_entry=service_request['forced_entry'])
             action.send(self.request.user, verb='updated evacuation assignment', target=evac_assignment)

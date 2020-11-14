@@ -291,8 +291,8 @@ export function EvacResolution({ id }) {
                 </BootstrapForm.Row>
                 <BootstrapForm.Row className="mt-2">
                   <Col>
-                    <Label htmlFor="forced_entry" className="mt-2">Forced Entry</Label>
-                    <Field component={Switch} name="forced_entry" type="checkbox" color="primary" />
+                    <Label htmlFor={`sr_updates.${index}.forced_entry`} className="mt-2">Forced Entry</Label>
+                    <Field component={Switch} name={`sr_updates.${index}.forced_entry`} type="checkbox" color="primary" />
                   </Col>
                 </BootstrapForm.Row>
                 <BootstrapForm.Row className="mt-3 pl-1">
