@@ -1,6 +1,5 @@
 import React from "react";
 import { Link } from "raviger";
-import { EvacTeamMemberForm } from "./EvacForms";
 import { ListGroup } from 'react-bootstrap';
 
 const header_style = {
@@ -16,11 +15,6 @@ const header_style = {
         <ListGroup.Item action>DEPLOY</ListGroup.Item>
       </Link>
     </ListGroup>
-  )
-
-
-  export const NewEvacTeamMember = () => (
-    <EvacTeamMemberForm />
   )
 
 export default Evac

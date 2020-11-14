@@ -186,7 +186,7 @@ export const VisitNoteForm = ({id}) => {
                     label="Date Completed"
                     name="date_completed"
                     id="date_completed"
-                    xs="4"
+                    xs="7"
                     clearable={false}
                     onChange={(date, dateStr) => {
                       form.setFieldValue("date_completed", dateStr)
@@ -202,7 +202,7 @@ export const VisitNoteForm = ({id}) => {
                       label="Notes"
                       name="notes"
                       id="notes"
-                      xs="9"
+                      xs="7"
                       rows={5}
                     />
                   </Col>
