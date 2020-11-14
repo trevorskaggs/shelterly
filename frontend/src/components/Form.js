@@ -12,7 +12,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import Autocomplete from 'react-google-autocomplete';
 
-const DateTimePicker = ({ label, xs, ...props }) => {
+const DateTimePicker = ({ label, xs, clearable, ...props }) => {
 
   const [field] = useField(props);
 
@@ -33,7 +33,7 @@ const DateTimePicker = ({ label, xs, ...props }) => {
       <label htmlFor={props.id || props.name}>{label}</label>
       <span className="d-flex">
         <Flatpickr className="datetime_picker" ref={datetime} data-enable-time options={options} {...field} {...props} />
-        {field.value ? <span className=""><FontAwesomeIcon icon={faTimes} style={{position:"relative", left: "-22px", marginTop:"11px",color:"#808080"}} onClick={clearDate} /></span> : ""}
+        {clearable === false ? "" : <span>{field.value ? <FontAwesomeIcon icon={faTimes} style={{position:"relative", left: "-22px", marginTop:"11px",color:"#808080"}} onClick={clearDate} /> : ""}</span>}
       </span>
       </Form.Group>
     </>
@@ -42,13 +42,13 @@ const DateTimePicker = ({ label, xs, ...props }) => {
 
 // ...props is shorthand for "rest of the items in this array". So the 1st item is
 // assigned to label and the rest are assigned to props
-const TextInput = ({ label, value, xs, controlId, ...props }) => {
+const TextInput = ({ label, value, xs, controlId, formGroupClasses, ...props }) => {
   // useField() returns [formik.getFieldProps(), formik.getFieldMeta()]
   // which we can spread on <input> and also replace ErrorMessage entirely.
   const [field, meta] = useField(props);
   return (
     <>
-    <Form.Group as={Col} xs={xs} controlId={controlId}>
+    <Form.Group as={Col} xs={xs} controlId={controlId} className={formGroupClasses}>
       <Form.Label>{label}</Form.Label>
       <Form.Control type="text" value={value} isInvalid={meta.touched && meta.error} onChange={props.handleChange} {...field} {...props} />
         <Form.Control.Feedback type="invalid"> {meta.error}</ Form.Control.Feedback>

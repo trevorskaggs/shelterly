@@ -3,8 +3,8 @@ from datetime import datetime
 from rest_framework import filters, permissions, viewsets
 from actstream import action
 
-from evac.models import EvacAssignment, EvacTeamMember
-from evac.serializers import EvacAssignmentSerializer, EvacTeamMemberSerializer
+from evac.models import EvacAssignment, EvacTeamMember, VisitNote
+from evac.serializers import EvacAssignmentSerializer, EvacTeamMemberSerializer, VisitNoteSerializer
 from hotline.models import ServiceRequest
 
 class EvacTeamMemberViewSet(viewsets.ModelViewSet):
@@ -33,10 +33,16 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
                 action.send(self.request.user, verb='assigned service request', target=service_request)
 
     def get_queryset(self):
-        queryset = EvacAssignment.objects.all()
+        queryset = EvacAssignment.objects.all().order_by('-start_time')
         status = self.request.query_params.get('status', '')
         if status == "open":
             return queryset.filter(end_time__isnull=True).distinct()
         elif status == "closed":
             return queryset.filter(end_time__isnull=False).distinct()
         return queryset
+
+class VisitNoteViewSet(viewsets.ModelViewSet):
+
+    queryset = VisitNote.objects.all()
+    permission_classes = [permissions.IsAuthenticated, ]
+    serializer_class = VisitNoteSerializer

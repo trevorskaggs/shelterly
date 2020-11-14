@@ -4,13 +4,17 @@ import { Link, navigate } from "raviger";
 import { Form, Formik } from 'formik';
 import {
   Button,
+  Card,
   Col,
   FormGroup,
   Row,
   Container,
 } from 'react-bootstrap';
 import * as Yup from 'yup';
-import { TextInput} from '.././components/Form';
+import { DateTimePicker, TextInput, DropDown} from '.././components/Form';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faArrowAltCircleLeft } from '@fortawesome/free-solid-svg-icons';
+
 
 export const EvacTeamMemberForm = () => {
 
@@ -109,4 +113,102 @@ export const EvacTeamMemberForm = () => {
           )}
         </Formik>
     );
-  };
+};
+
+export const VisitNoteForm = ({id}) => {
+
+    const [data, setData] = useState({
+      date_completed: '',
+      owner_contacted: false,
+      notes: '',
+      service_request: null,
+      evac_assignment: null,
+      address: '',
+    })
+
+    useEffect(() => {
+      let source = axios.CancelToken.source();
+      if (id) {
+        const fetchVisitNote = async () => {
+          // Fetch Visit Note data.
+          await axios.get('/evac/api/visitnote/' + id + '/', {
+            cancelToken: source.token,
+          })
+          .then(response => {
+            setData(response.data);
+          })
+          .catch(error => {
+            console.log(error.response);
+          });
+        };
+      fetchVisitNote();
+      };
+      return () => {
+        source.cancel();
+      };
+    }, [id]);
+
+    return (
+        <Formik
+          initialValues={data}
+          enableReinitialize={true}
+          validationSchema={Yup.object({
+            date_completed: Yup.date(),
+            notes: Yup.string(),
+          })}
+          onSubmit={(values, { setSubmitting }) => {
+            setTimeout(() => {
+              axios.patch('/evac/api/visitnote/' + values.id + '/', values)
+              .then(
+                  navigate('/evac')
+              )
+              .catch(error => {
+                console.log(error.response);
+              });
+            setSubmitting(false);
+            }, 500);
+          }}
+        >
+        {form => (
+          <Card border="secondary" className="mt-5">
+          <Card.Header as="h5" className="pl-3"><span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>{!id ? "New" : "Update"} Visit Note - { form.values.address }</Card.Header>
+          <Card.Body>
+          <Form>
+              <FormGroup>
+                <Row>
+                  <Col xs={{size: 2}}>
+                  <DateTimePicker
+                    label="Date Completed"
+                    name="date_completed"
+                    id="date_completed"
+                    xs="4"
+                    clearable={false}
+                    onChange={(date, dateStr) => {
+                      form.setFieldValue("date_completed", dateStr)
+                    }}
+                    value={form.values.date_completed||null}
+                  />
+                  </Col>
+                </Row>
+                <Row>
+                  <Col xs={{size: 2}}>
+                    <TextInput
+                      as="textarea"
+                      label="Notes"
+                      name="notes"
+                      id="notes"
+                      xs="9"
+                      rows={5}
+                    />
+                  </Col>
+                </Row>
+              </FormGroup>
+              <Button type="button" className="btn btn-success mr-1" onClick={() => form.submitForm()}>Save</Button>
+          </Form>
+          </Card.Body>
+          </Card>
+          )}
+        </Formik>
+    );
+};
+

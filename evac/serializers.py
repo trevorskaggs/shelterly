@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from actstream.models import target_stream
 
-from evac.models import EvacAssignment, EvacTeamMember
+from evac.models import EvacAssignment, EvacTeamMember, VisitNote
 from hotline.serializers import ServiceRequestSerializer
 from location.utils import build_action_string
 
@@ -28,3 +28,15 @@ class EvacAssignmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = EvacAssignment
         fields = '__all__'
+
+class VisitNoteSerializer(serializers.ModelSerializer):
+
+    address = serializers.SerializerMethodField()
+    
+    def get_address(self, obj):
+        return obj.service_request.location_output
+
+    class Meta:
+        model = VisitNote
+        fields = '__all__'
+

@@ -21,6 +21,6 @@ class ServiceRequestAdmin(admin.ModelAdmin):
   owner_str.short_description = 'Owner'
   owner_str.admin_order_field = 'owner'
 
-  list_display = ('id', 'owner_str', 'address', 'animal_count')
+  list_display = ('id', 'owner_str', 'address', 'status', 'animal_count')
 
 admin.site.register(ServiceRequest, ServiceRequestAdmin)

@@ -11,9 +11,7 @@ const header_style = {
   const Evac = () => (
     <ListGroup className="flex-fill p-5 h-50">
       <Link href="/evac/evacteammember/new">
-      <ListGroup.Item action>
-      NEW TEAM MEMBER
-      </ListGroup.Item>
+        <ListGroup.Item action>ADD TEAM MEMBER</ListGroup.Item>
       </Link>
       <Link href="/evac/dispatch">
       <ListGroup.Item action>

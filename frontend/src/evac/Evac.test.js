@@ -7,7 +7,7 @@ import {EvacuationAssignmentTable} from "./EvacTables";
 describe("Render evac", () => {
   it("Render Evac", () => {
     const { getByText } = render(<Evac />);
-    expect(getByText(/NEW TEAM/)).toBeTruthy();
+    expect(getByText(/ADD TEAM MEMBER/)).toBeTruthy();
     expect(getByText(/DEPLOY/)).toBeTruthy();
     expect(getByText(/DEBRIEF/)).toBeTruthy();
     expect(getByText(/SEARCH EVACUATION ASSIGNMENT/)).toBeTruthy();
