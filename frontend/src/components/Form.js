@@ -233,7 +233,7 @@ const AddressLookup = ({ ...props }) => {
         onPlaceSelected={(place) => {
           updateAddr(place);
         }}
-        types={['address']}
+        types={['geocode']}
         componentRestrictions={{country: "us"}}
         ref={childRef}
         apiKey={process.env.REACT_APP_GOOGLE_API_KEY}

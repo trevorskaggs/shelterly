@@ -2,10 +2,6 @@ import React from "react";
 import { Link } from "raviger";
 import { ListGroup } from 'react-bootstrap';
 
-const header_style = {
-  textAlign: "center",
-};
-
   const Evac = () => (
     <ListGroup className="flex-fill p-5 h-50">
       <Link href="/evac/evacteammember/new">

@@ -12,7 +12,7 @@ import { ShelterDetails } from "./shelter/ShelterDetails"
 import { NewBuilding, UpdateBuilding, BuildingDetails } from "./shelter/Building";
 import { NewRoom, UpdateRoom, RoomDetails } from "./shelter/Room";
 import { Login } from "./accounts/Accounts";
-import { Dispatch, EvacSummary, VisitNote } from "./evac/EvacViews";
+import { Dispatch, EvacSummary } from "./evac/EvacViews";
 import { EvacTeamMemberForm, VisitNoteForm } from "./evac/EvacForms";
 
 export const publicRoutes = {
