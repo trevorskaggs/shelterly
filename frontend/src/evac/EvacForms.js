@@ -69,7 +69,7 @@ export const EvacTeamMemberForm = ({id}) => {
               <Form>
                   <FormGroup>
                     <Row>
-                      <Col xs={{size: 5, offset: 1}}>
+                      <Col>
                         <TextInput
                           type="text"
                           label="First Name*"
@@ -77,7 +77,7 @@ export const EvacTeamMemberForm = ({id}) => {
                           id="first_name"
                         />
                       </Col>
-                      <Col xs="5">
+                      <Col>
                         <TextInput
                           type="text"
                           label="Last Name*"
@@ -89,7 +89,7 @@ export const EvacTeamMemberForm = ({id}) => {
                   </FormGroup>
                   <FormGroup>
                     <Row>
-                      <Col xs={{size: 5, offset: 1}}>
+                      <Col>
                         <TextInput
                           type="text"
                           label="Phone*"
@@ -97,7 +97,7 @@ export const EvacTeamMemberForm = ({id}) => {
                           id="phone"
                         />
                       </Col>
-                      <Col xs="5">
+                      <Col>
                         <TextInput
                           type="text"
                           label="Agency ID"
