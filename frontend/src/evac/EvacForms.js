@@ -22,7 +22,7 @@ export const EvacTeamMemberForm = ({id}) => {
   // Track whether or not to add another evac team member after saving.
   const [addAnother, setAddAnother] = useState(false);
   // Regex validators.
-  const phoneRegex = /^((\+\d{1,3}(-| )?\(?\d\)?(-| )?\d{1,3})|(\(?\d{2,3}\)?))(-| )?(\d{3,4})(-| )?(\d{4})(( x| ext)\d{1,5}){0,1}$/
+  const phoneRegex = /^[0-9]{10}$/
 
     return (
         <Formik

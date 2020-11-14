@@ -32,7 +32,7 @@ export const PersonForm = ({ id }) => {
   var is_first_responder = window.location.pathname.includes("first_responder")
 
   // Regex validators.
-  const phoneRegex = /^((\+\d{1,3}(-| )?\(?\d\)?(-| )?\d{1,3})|(\(?\d{2,3}\)?))(-| )?(\d{3,4})(-| )?(\d{4})(( x| ext)\d{1,5}){0,1}$/
+  const phoneRegex = /^[0-9]{10}$/
   const nameRegex = /^[a-z ,.'-]+$/i
   const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
 
