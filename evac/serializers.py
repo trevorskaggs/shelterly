@@ -1,8 +1,8 @@
 from rest_framework import serializers
 from actstream.models import target_stream
 
-from evac.models import EvacAssignment, EvacTeamMember, VisitNote
-from hotline.serializers import ServiceRequestSerializer
+from evac.models import EvacAssignment, EvacTeamMember
+
 from location.utils import build_action_string
 
 class EvacTeamMemberSerializer(serializers.ModelSerializer):
@@ -17,10 +17,12 @@ class EvacTeamMemberSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class EvacAssignmentSerializer(serializers.ModelSerializer):
+    from hotline.serializers import ServiceRequestSerializer
+
     action_history = serializers.SerializerMethodField()
 
     def get_action_history(self, obj):
-        return [build_action_string(action).replace(f'EvacAssignment object ({obj.id})', '') for action in target_stream(obj)]
+        return [build_action_string(action) for action in target_stream(obj)]
 
     team_member_objects = EvacTeamMemberSerializer(source='team_members', required=False, read_only=True, many=True)
     service_request_objects = ServiceRequestSerializer(source='service_requests', required=False, read_only=True, many=True)
@@ -28,15 +30,3 @@ class EvacAssignmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = EvacAssignment
         fields = '__all__'
-
-class VisitNoteSerializer(serializers.ModelSerializer):
-
-    address = serializers.SerializerMethodField()
-    
-    def get_address(self, obj):
-        return obj.service_request.location_output
-
-    class Meta:
-        model = VisitNote
-        fields = '__all__'
-

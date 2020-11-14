@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import { Link, navigate } from "raviger";
-import { Field, FieldArray, Form, Formik } from 'formik';
+import { Field, Form, Formik, } from 'formik';
+import { Label } from 'reactstrap';
+import { Switch } from 'formik-material-ui';
 import {
   Button,
   ButtonGroup,
@@ -337,7 +339,7 @@ export const VisitNoteForm = ({id}) => {
       if (id) {
         const fetchVisitNote = async () => {
           // Fetch Visit Note data.
-          await axios.get('/evac/api/visitnote/' + id + '/', {
+          await axios.get('/hotline/api/visitnote/' + id + '/', {
             cancelToken: source.token,
           })
           .then(response => {
@@ -364,9 +366,9 @@ export const VisitNoteForm = ({id}) => {
           })}
           onSubmit={(values, { setSubmitting }) => {
             setTimeout(() => {
-              axios.patch('/evac/api/visitnote/' + values.id + '/', values)
+              axios.patch('/hotline/api/visitnote/' + values.id + '/', values)
               .then(
-                  navigate('/evac')
+                  navigate('/hotline/servicerequest/' + values.service_request)
               )
               .catch(error => {
                 console.log(error.response);
@@ -406,6 +408,12 @@ export const VisitNoteForm = ({id}) => {
                       xs="9"
                       rows={5}
                     />
+                  </Col>
+                </Row>
+                <Row>
+                  <Col>
+                    <Label htmlFor="forced_entry" className="mt-2">Forced Entry</Label>
+                    <Field component={Switch} name="forced_entry" type="checkbox" color="primary" />
                   </Col>
                 </Row>
               </FormGroup>

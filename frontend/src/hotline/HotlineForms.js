@@ -66,11 +66,6 @@ export function ServiceRequestForm({ id }) {
     key_provided: false,
     accessible: false,
     turn_around: false,
-    forced_entry: false,
-    outcome: '',
-    owner_notification_notes: '',
-    recovery_time: null,
-    owner_notification_tstamp: null,
   });
 
   // Hook for initializing data.
@@ -126,15 +121,6 @@ export function ServiceRequestForm({ id }) {
           key_provided: Yup.boolean(),
           accessible: Yup.boolean(),
           turn_around: Yup.boolean(),
-          forced_entry: Yup.boolean(),
-          outcome: Yup.string()
-            .max(2000, 'Must be 2000 characters or less'),
-          owner_notification_notes: Yup.string()
-            .max(2000, 'Must be 2000 characters or less'),
-          recovery_time: Yup.date()
-            .nullable(),
-          owner_notification_tstamp: Yup.date()
-            .nullable(),
           address: Yup.string()
             .required('Required'),
           apartment: Yup.string()
@@ -192,56 +178,6 @@ export function ServiceRequestForm({ id }) {
           <Field type="hidden" value={reporter_id || ""} name="reporter" id="reporter"></Field>
           <Field type="hidden" value={data.latitude || ""} name="latitude" id="latitude"></Field>
           <Field type="hidden" value={data.longitude || ""} name="longitude" id="longitude"></Field>
-          <BootstrapForm.Row hidden={!id}>
-            <DateTimePicker
-              label="Recovery Time"
-              name="recovery_time"
-              id="recovery_time"
-              xs="3"
-              onChange={(date, dateStr) => {
-                props.setFieldValue("recovery_time", dateStr)
-              }}
-              key={`my_unique_recovery_time_select_key__${props.values.recovery_time}`}
-              value={props.values.recovery_time || null}
-            />
-          </BootstrapForm.Row>
-          <BootstrapForm.Row hidden={!id} className="mt-3">
-            <TextInput
-              as="textarea"
-              rows={5}
-              label="Outcome"
-              name="outcome"
-              id="outcome"
-              xs="10"
-            />
-            </BootstrapForm.Row>
-            <BootstrapForm.Row hidden={!id}>
-              <DateTimePicker
-                label="Owner Notified"
-                name="owner_notification_tstamp"
-                id="owner_notification_tstamp"
-                xs="3"
-                onChange={(date, dateStr) => {
-                  props.setFieldValue("owner_notification_tstamp", dateStr)
-                }}
-                key={`my_unique_owner_notification_tstamp_select_key__${props.values.owner_notification_tstamp}`}
-                value={props.values.owner_notification_tstamp || null}
-              />
-            </BootstrapForm.Row>
-            <BootstrapForm.Row hidden={!id} className="mt-3">
-              <TextInput
-                as="textarea"
-                rows={5}
-                label="Owner Notification Notes"
-                name="owner_notification_notes"
-                id="owner_notification_notes"
-                xs="10"
-              />
-            </BootstrapForm.Row>
-            <BootstrapForm.Row hidden={!id} className="mb-2">
-              <Label htmlFor="forced_entry" className="mt-2 ml-1">Forced Entry</Label>
-              <Field component={Switch} name="forced_entry" type="checkbox" color="primary" />
-            </BootstrapForm.Row>
           {data.address && !id ?
             <span className="form-row mb-2">
               <Label>&nbsp;&nbsp;Address Same as Owner: </Label>

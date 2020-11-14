@@ -16,7 +16,7 @@ class ServiceRequest(Location):
     reporter = models.ForeignKey(Person, on_delete=models.SET_NULL, blank=True, null=True, related_name='reporter_service_request')
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, blank=False, default='open')
 
-    #pre_field
+    #pre_fields
     timestamp = models.DateTimeField(auto_now_add=True)
     directions = models.TextField()
     verbal_permission = models.BooleanField(default=False)
@@ -24,12 +24,7 @@ class ServiceRequest(Location):
     accessible = models.BooleanField(default=False)
     turn_around = models.BooleanField(default=False)
 
-    #post_field
-    forced_entry = models.BooleanField(default=False)
-    outcome = models.TextField(blank=True)
-    owner_notification_notes = models.TextField(blank=True)
-    recovery_time = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
-    owner_notification_tstamp = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
+    #post_fields
     followup_date = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
 
     def __str__(self):
@@ -46,3 +41,13 @@ class ServiceRequest(Location):
 
     class Meta:
         ordering = ['timestamp']
+
+class VisitNote(models.Model):
+    from evac.models import EvacAssignment
+
+    date_completed = models.DateTimeField()
+    evac_assignment = models.ForeignKey(EvacAssignment, on_delete=models.CASCADE)
+    service_request = models.ForeignKey(ServiceRequest, on_delete=models.CASCADE)
+    owner_contacted = models.BooleanField(default=False)
+    forced_entry = models.BooleanField(default=False)
+    notes = models.CharField(max_length=500, blank=True)

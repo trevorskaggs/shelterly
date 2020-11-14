@@ -4,8 +4,8 @@ from rest_framework import filters, permissions, viewsets
 from actstream import action
 
 from animals.models import Animal
-from evac.models import EvacAssignment, EvacTeamMember, VisitNote
-from evac.serializers import EvacAssignmentSerializer, EvacTeamMemberSerializer, VisitNoteSerializer
+from evac.models import EvacAssignment, EvacTeamMember
+from evac.serializers import EvacAssignmentSerializer, EvacTeamMemberSerializer
 from hotline.models import ServiceRequest
 
 class EvacTeamMemberViewSet(viewsets.ModelViewSet):
@@ -42,11 +42,9 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
                     if animal['status'] in ['SHELTERED IN PLACE', 'UNABLE TO LOCATE']:
                         sr_status = 'open'
                 ServiceRequest.objects.filter(id=service_request['id']).update(status=sr_status, followup_date=service_request['followup_date'])
-                # VisitNote.objects.create(evac_assignment=evac_assignment, service_request=service_request['id'], date_completed=service_request['date_completed'], notes=service_request['notes'], owner_contacted=service_request['owner_contacted'])
+                if sr_status == 'open':
+                    action.send(self.request.user, verb='opened service request', target=service_request)
+                else:
+                    action.send(self.request.user, verb='closed service request', target=service_request)
+                VisitNote.objects.create(evac_assignment=evac_assignment, service_request=service_request['id'], date_completed=service_request['date_completed'], notes=service_request['notes'], owner_contacted=service_request['owner_contacted'])
             action.send(self.request.user, verb='updated evacuation assignment', target=evac_assignment)
-
-class VisitNoteViewSet(viewsets.ModelViewSet):
-
-    queryset = VisitNote.objects.all()
-    permission_classes = [permissions.IsAuthenticated, ]
-    serializer_class = VisitNoteSerializer

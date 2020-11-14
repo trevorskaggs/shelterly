@@ -118,8 +118,8 @@ export const unknownChoices = [
 export const statusChoices = [
   {value:'REPORTED', label:'REPORTED'},
   {value:'EVACUATED', label:'EVACUATED'},
-  {value:'SHELTERED IN PLACE', label:'SHELTERED IN PLACE'},
-  {value:'UNABLE TO LOCATE', label:'UNABLE TO LOCATE'},
+  {value:'SHELTERED IN PLACE', label:'SHELTERED IN PLACE (SIP)'},
+  {value:'UNABLE TO LOCATE', label:'UNABLE TO LOCATE (UTL)'},
   {value:'SHELTERED', label:'SHELTERED'},
   {value:'REUNITED', label:'REUNITED'},
   {value:'DECEASED', label:'DECEASED'},

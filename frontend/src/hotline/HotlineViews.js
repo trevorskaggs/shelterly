@@ -45,14 +45,10 @@ export function ServiceRequestView({id}) {
     key_provided: false,
     accessible: false,
     turn_around: false,
-    forced_entry: false,
-    outcome: '',
-    owner_notification_notes: '',
-    recovery_time: null,
-    owner_notification_tstamp: null,
     followup_date: null,
     status:'',
     action_history: [],
+    visit_notes: [],
   });
 
   // Hook for initializing data.
@@ -221,35 +217,36 @@ export function ServiceRequestView({id}) {
           </Card>
         </div>
       </div>
-      {data.outcome || data.owner_notification_notes ?
+      {data.visit_notes.length > 0 ?
       <div className="row mb-2">
         <div className="col-12 d-flex">
           <Card className="mb-2 border rounded" style={{width:"100%"}}>
             <Card.Body>
               <Card.Title>
-                <h4 className="mb-0">Outcome
-                  {data.forced_entry ?
-                  <OverlayTrigger
-                    key={"forced"}
-                    placement="top"
-                    overlay={
-                      <Tooltip id={`tooltip-forced`}>
-                        Forced entry
-                      </Tooltip>
-                    }
-                  >
-                    <FontAwesomeIcon icon={faHouseDamage} size="sm" className="ml-1" />
-                  </OverlayTrigger> : ""}
-                </h4>
+                <h4 className="mb-0">Visit Log</h4>
               </Card.Title>
               <hr/>
               <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
-                {data.recovery_time || data.outcome ? <ListGroup.Item>
-                  <b>Recovery Time:</b> <Moment format="LLL">{data.recovery_time||""}</Moment>
-                  <div className="mt-1 mb-0"><b>Outcome:</b> {data.outcome||"Not available."}</div></ListGroup.Item> : ""}
-                {data.owner_notification_tstamp || data.owner_notification_notes ? <ListGroup.Item>
-                  <b>Owner Notified:</b> <Moment format="LLL">{data.owner_notification_tstamp}</Moment>
-                  <div className="mt-1 mb-0"><b>Owner Notification Notes:</b> {data.owner_notification_notes||"Not available."}</div></ListGroup.Item> : ""}
+                {data.visit_notes.map(visit_note => (
+                  <ListGroup.Item key={visit_note.id}>
+                    <b>Evacuation Assignment:</b> #{visit_note.evac_assignment} <Link href={"/evac/summary/" + visit_note.evac_assignment}><FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link><Link href={"/evac/assignment/note/" + visit_note.id}> <FontAwesomeIcon icon={faEdit} size="sm" inverse /></Link>
+                    <div className="mt-1"><b>Date Completed:</b> <Moment format="LLL">{visit_note.date_completed}</Moment>
+                      {visit_note.forced_entry ?
+                        <OverlayTrigger
+                          key={"forced"}
+                          placement="top"
+                          overlay={
+                            <Tooltip id={`tooltip-forced`}>
+                              Forced entry
+                            </Tooltip>
+                          }
+                        >
+                          <FontAwesomeIcon icon={faHouseDamage} size="sm" className="ml-1" style={{marginBottom:"1px"}} />
+                        </OverlayTrigger> : ""}
+                    </div>
+                    <div className="mt-1 mb-0"><b>Outcome:</b> {visit_note.notes||"No information available."}</div>
+                  </ListGroup.Item>
+                ))}
               </ListGroup>
             </Card.Body>
           </Card>

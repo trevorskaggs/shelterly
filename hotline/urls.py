@@ -6,6 +6,7 @@ from rest_framework.routers import DefaultRouter
 app_name = 'hotline'
 router = DefaultRouter()
 router.register(r'servicerequests', views.ServiceRequestViewSet)
+router.register(r'visitnote', views.VisitNoteViewSet)
 
 urlpatterns = [
     path('api/', include(router.urls)),
