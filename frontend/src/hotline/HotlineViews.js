@@ -230,7 +230,7 @@ export function ServiceRequestView({id}) {
                 {data.visit_notes.map(visit_note => (
                   <ListGroup.Item key={visit_note.id}>
                     <b>Evacuation Assignment:</b> #{visit_note.evac_assignment} <Link href={"/evac/summary/" + visit_note.evac_assignment}><FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link><Link href={"/evac/assignment/note/" + visit_note.id}> <FontAwesomeIcon icon={faEdit} size="sm" inverse /></Link>
-                    <div className="mt-1"><b>Date Completed:</b> <Moment format="LLL">{visit_note.date_completed}</Moment>
+                    <div className="mt-1"><b>Date Completed:</b> <Moment format="LL">{visit_note.date_completed}</Moment>
                       {visit_note.forced_entry ?
                         <OverlayTrigger
                           key={"forced"}

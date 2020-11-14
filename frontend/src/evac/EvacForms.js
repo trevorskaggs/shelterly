@@ -148,7 +148,7 @@ export function EvacResolution({ id }) {
       .then(response => {
         response.data["sr_updates"] = [];
         response.data.service_request_objects.forEach((service_request, index) => {
-          response.data.sr_updates.push({id:service_request.id, followup_date: null, date_completed:new Date(), notes:'', owner_contacted:false, animals:service_request.animals})
+          response.data.sr_updates.push({id:service_request.id, followup_date: null, date_completed:new Date(), notes:'', owner_contacted:false, forced_entry: false, animals:service_request.animals})
         });
         setData(response.data);
       })
@@ -180,6 +180,7 @@ export function EvacResolution({ id }) {
               ),
               date_completed: Yup.date().required('Required'),
               notes: Yup.string().required('Required'),
+              forced_entry: Yup.boolean(),
               owner_contacted: Yup.boolean().required().oneOf([true], 'The owner must be notified before resolution.'),
             })
           ),
@@ -225,28 +226,32 @@ export function EvacResolution({ id }) {
               </Card.Title>
               <hr/>
               <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
-                  <ListGroup.Item><b>Address: </b>{service_request.full_address}</ListGroup.Item>
-                  <ListGroup.Item><b>Owner: </b>{service_request.owner_object.first_name} {service_request.owner_object.last_name}</ListGroup.Item>
-                  <ListGroup.Item><b>Reporter: </b>{service_request.reporter ? <span>{service_request.reporter_object.first_name} {service_request.reporter_object.last_name}</span> : "N/A"}</ListGroup.Item>
-                  {service_request.animals.map((animal, inception) => (
-                    <ListGroup.Item key={animal.id}>
-                      <Row>
-                        <Col xs={3}>
-                          <DropDown
-                            id={`sr_updates.${index}.animals.${inception}.status`}
-                            name={`sr_updates.${index}.animals.${inception}.status`}
-                            type="text"
-                            className="mt-0"
-                            options={statusChoices}
-                            value={`sr_updates.${index}.animals.${inception}.status`}
-                            isClearable={false}
-                          />
-                      </Col>
-                      {animal.pcolor ? <span style={{textTransform:"capitalize"}}>{animal.pcolor}{animal.scolor ? "/" + animal.scolor : ""}&nbsp;</span> : ""}<span style={{textTransform:"capitalize"}}>{animal.species}</span>&nbsp;({animal.name||"Unknown"})
-                    </Row>
-                  </ListGroup.Item>
-                  ))}
-                </ListGroup>
+                <ListGroup.Item><b>Address: </b>{service_request.full_address}</ListGroup.Item>
+                <ListGroup.Item><b>Owner: </b>{service_request.owner_object.first_name} {service_request.owner_object.last_name} <Link href={"/hotline/owner/" + service_request.owner}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item>
+              </ListGroup>
+              <hr/>
+              <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
+                <h4 className="mt-2" style={{marginBottom:"-2px"}}>Animals</h4>
+                {service_request.animals.map((animal, inception) => (
+                  <ListGroup.Item key={animal.id}>
+                    <Row>
+                      <Col xs={3} className="pl-0">
+                        <DropDown
+                          id={`sr_updates.${index}.animals.${inception}.status`}
+                          name={`sr_updates.${index}.animals.${inception}.status`}
+                          type="text"
+                          className="mt-0"
+                          options={statusChoices}
+                          value={`sr_updates.${index}.animals.${inception}.status`}
+                          isClearable={false}
+                        />
+                    </Col>
+                    <span style={{marginTop:"5px"}}>{animal.pcolor ? <span style={{marginTop:"5px", textTransform:"capitalize"}}>{animal.pcolor}{animal.scolor ? "/" + animal.scolor : ""}&nbsp;</span> : ""}<span style={{textTransform:"capitalize"}}>{animal.species}</span>&nbsp;({animal.name||"Unknown"})</span>
+                  </Row>
+                </ListGroup.Item>
+                ))}
+              </ListGroup>
+              <hr/>
                 <BootstrapForm.Row className="mt-3">
                   <DateTimePicker
                     label="Date Completed"
@@ -283,6 +288,12 @@ export function EvacResolution({ id }) {
                     }}
                     value={data.followup_date||null}
                   />
+                </BootstrapForm.Row>
+                <BootstrapForm.Row className="mt-2">
+                  <Col>
+                    <Label htmlFor="forced_entry" className="mt-2">Forced Entry</Label>
+                    <Field component={Switch} name="forced_entry" type="checkbox" color="primary" />
+                  </Col>
                 </BootstrapForm.Row>
                 <BootstrapForm.Row className="mt-3 pl-1">
                   <Field
@@ -332,6 +343,7 @@ export const VisitNoteForm = ({id}) => {
       service_request: null,
       evac_assignment: null,
       address: '',
+      forced_entry: false,
     })
 
     useEffect(() => {
