@@ -3,7 +3,7 @@ import { Redirect } from "raviger";
 import Home from "./Home";
 import Animals, { AnimalDetail, NewAnimal, UpdateAnimal } from "./animals/Animals"
 import { AnimalSearch } from "./animals/AnimalTables"
-import Evac from "./evac/Evac";
+import Evac, {EvacuationAssignmentSearch} from "./evac/Evac";
 import Hotline, { NewServiceRequest, ServiceRequestDetail, ServiceRequestList, UpdateServiceRequest } from "./hotline/Hotline";
 import Intake, { IntakeSummary } from "./intake/Intake";
 import { NewOwner, NewReporter, OwnerDetail, ReporterDetail,  UpdateOwner, UpdateReporter } from "./people/People";
@@ -13,7 +13,7 @@ import { NewBuilding, UpdateBuilding, BuildingDetails } from "./shelter/Building
 import { NewRoom, UpdateRoom, RoomDetails } from "./shelter/Room";
 import { Login } from "./accounts/Accounts";
 import { Dispatch, EvacSummary } from "./evac/EvacViews";
-import { EvacTeamMemberForm, VisitNoteForm } from "./evac/EvacForms";
+import { EvacResolution, EvacTeamMemberForm, VisitNoteForm } from "./evac/EvacForms";
 
 export const publicRoutes = {
   "/login": () => <Login />,
@@ -27,7 +27,9 @@ const routes = {
   "/animals/animal/:id": ({id}) => <AnimalDetail id={id} />,
   "/evac": () => <Evac />,
   "/evac/evacteammember/:id": ({id}) => <EvacTeamMemberForm id={id} />,
+  "/evac/evacuationassignment/search": () => <EvacuationAssignmentSearch />,
   "/evac/summary/:id": ({id}) => <EvacSummary id={id} />,
+  "/evac/resolution/:id": ({id}) => <EvacResolution id={id} />,
   "/evac/assignment/note/:id": ({id}) => <VisitNoteForm id={id} />,
   "/evac/deploy": () => <Dispatch />,
   "/hotline": () => <Hotline />,
