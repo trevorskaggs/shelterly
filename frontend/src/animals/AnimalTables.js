@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import { Link } from 'raviger';
 import { Button, ButtonGroup, Card, CardGroup, Col, Form, FormControl, InputGroup, ListGroup} from 'react-bootstrap';
+import ReactImageFallback from 'react-image-fallback';
+import noImageFound from '../static/images/image-not-found.png';
 import { Fab } from '@material-ui/core';
 import AssignmentIcon from '@material-ui/icons/Assignment';
 import EditIcon from '@material-ui/icons/Edit';
@@ -91,7 +93,7 @@ export function AnimalSearch() {
 
       {data.animals.map(animal => (
         <div key={animal.id} className="mt-3">
-          <div className="card-header"> Name: {animal.name} - {animal.status}
+          <div className="card-header"> {animal.name ? animal.name : "Name Unknown"} - {animal.species ? animal.species : "Species Unknown"} - {animal.status}
             <Link href={"/animals/animal/" + animal.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
           </div>
           <CardGroup>
@@ -99,8 +101,9 @@ export function AnimalSearch() {
               <Card.Body>
                 <Card.Title>Animal Info</Card.Title>
                 <ListGroup>
-                  <ListGroup.Item className='species-sex'>{animal.species}{animal.species && animal.sex ? ", " : ""}{animal.sex}</ListGroup.Item>
+                  <ListGroup.Item className='species-sex'>{animal.species}{animal.species && animal.sex ? ", " : ""}{animal.sex}{animal.sex && animal.age ? ", " : ""}{animal.age}</ListGroup.Item>
                   <ListGroup.Item className='size-age'>{animal.size}{animal.size && animal.age ? ", " : ""}{animal.age}</ListGroup.Item>
+                  <ListGroup.Item><ReactImageFallback style={{width:"151px"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} /></ListGroup.Item>
                 </ListGroup>
               </Card.Body>
             </Card>
@@ -110,7 +113,6 @@ export function AnimalSearch() {
                 <ListGroup>
                   <ListGroup.Item className='request'>{animal.request ? <span><b>Request #{animal.request}</b> <Link href={"/hotline/servicerequest/" + animal.request}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></span> : ""}</ListGroup.Item>
                   <ListGroup.Item className='owner'>{animal.owner ? <span><b>Owner:</b> {animal.owner_object.first_name} {animal.owner_object.last_name} <Link href={"/hotline/owner/" + animal.owner}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></span>  : ""}</ListGroup.Item>
-                  {/* <ListGroup.Item className='owner'>{animal.owner ? <span><b>Owner:</b> {animal.owner_object.first_name} {animal.owner_object.last_name} {animal.owner_object.phone} {animal.owner_object.first_name !== 'Unknown' ? <Link href={"/hotline/owner/" + animal.owner} className="mb-1" style={{width:23,height:23, minHeight:23, color:"#fff", backgroundColor: "#28a745"}} title="Owner details" aria-label="owner_details"><AssignmentIcon style={{fontSize:10}} /></Fab> : <Fab href={"/hotline/owner/edit/" + animal.owner} className="mb-1" style={{width:23,height:23, minHeight:23, color:"#fff", backgroundColor: "#28a745"}} title="Edit Owner" aria-label="edit_owner"><EditIcon style={{fontSize:10}} /></Fab>}</div> : ""}</ListGroup.Item> */}
                 </ListGroup>
               </Card.Body>
             </Card>
