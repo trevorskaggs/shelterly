@@ -14,6 +14,8 @@ import bandaid from "../static/images/band-aid-solid.png";
 import car from "../static/images/car-solid.png";
 import trailer from "../static/images/trailer-solid.png";
 import { Typeahead } from 'react-bootstrap-typeahead';
+import Moment from 'react-moment';
+import Header from '../components/Header';
 import 'react-bootstrap-typeahead/css/Typeahead.css';
 import 'leaflet/dist/leaflet.css';
 
@@ -517,50 +519,48 @@ export function EvacSummary({id}) {
 
   return (
     <>
-    <div className="row mt-3" style={{marginBottom:"-8px"}}>
-      <div className="col-12 d-flex">
-        <h1 style={header_style}>
-          Evac Summary
-        </h1>
-      </div>
-    </div>
+    <Header>Dispatch Assignment Summary #{id} <Link href={"/evac/resolution/" + id} className="btn btn-danger ml-1 mb-2" style={{paddingTop:"10px", paddingBottom:"10px"}}>Close</Link>
+    <div style={{fontSize:"16px", marginTop:"5px"}}><b>Opened: </b><Moment format="lll">{data.start_time}</Moment></div>
+    </Header>
     <hr/>
-    <div className="row mb-2">
-      <div className="col-10 d-flex" style={{marginRight:"-15px"}}>
-        <Card className="mb-2 border rounded" style={{width:"100%"}}>
-          <Card.Body>
-            <Card.Title>
-              Team Members
-            </Card.Title>
-            <hr/>
-            <ListGroup variant="flush">
-              {data.team_member_objects.map(team_member => (
-                <ListGroup.Item key={team_member.id}>{team_member.first_name} {team_member.last_name} - {team_member.phone} ({team_member.agency_id})</ListGroup.Item>
-              ))}
-            </ListGroup>
-          </Card.Body>
-        </Card>
-      </div>
-    </div>
-    <div className="row">
-      <div className="col-10" style={{marginRight:"-15px"}}>
-      {data.service_request_objects.map(service_request => (
-        <div key={service_request.id} className="mt-3">
-            <Card className="mb-2 border rounded">
-              <Card.Body>
-                <Card.Title>Service Request #{service_request.id}<Link href={"/hotline/servicerequest/" + service_request.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link> | {service_request.status}</Card.Title>
-                <hr/>
-                <ListGroup>
-                  <ListGroup.Item><b>Address:</b> {service_request.address ? <span>{service_request.full_address}</span> : 'N/A'}</ListGroup.Item>
-                  <ListGroup.Item><b>Owner:</b> {service_request.owner ? <span>{service_request.owner_object.first_name} {service_request.owner_object.last_name} {service_request.owner_object.phone} <Link href={"/hotline/owner/" + service_request.owner}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></span> : "N/A"}</ListGroup.Item>
-                  <ListGroup.Item><b>Reporter:</b> {service_request.reporter ? <span>{service_request.reporter_object.first_name} {service_request.reporter_object.last_name} {service_request.reporter_object.phone} <Link href={"/hotline/reporter/" + service_request.reporter}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></span> : "N/A"}</ListGroup.Item>
-                </ListGroup>
-              </Card.Body>
-            </Card>
-        </div>
+    <Card border="secondary" className="mt-1">
+      <Card.Body>
+        <Card.Title>
+          <h4>Team Members</h4>
+        </Card.Title>
+        <hr/>
+        <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px", textTransform:"capitalize"}}>
+          {data.team_member_objects.map(team_member => (
+            <ListGroup.Item key={team_member.id}>
+              {team_member.first_name + " " + team_member.last_name + " - " + team_member.phone}{team_member.agency ? <span>({team_member.agency})</span> : ""}
+            </ListGroup.Item>
+          ))}
+        </ListGroup>
+      </Card.Body>
+    </Card>
+    {data.service_request_objects.map((service_request, index) => (
+    <Card key={service_request.id} border="secondary" className="mt-3">
+      <Card.Body>
+        <Card.Title>
+          <h4>Service Request #{service_request.id} <Link href={"/hotline/servicerequest/" + service_request.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link> | <span style={{textTransform:"capitalize"}}>{service_request.status}</span></h4>
+        </Card.Title>
+        <hr/>
+        <ListGroup variant="flush" style={{marginTop:"-5px", marginBottom:"-13px"}}>
+          <ListGroup.Item><b>Address: </b>{service_request.full_address}</ListGroup.Item>
+          <ListGroup.Item><b>Owner: </b>{service_request.owner_object.first_name} {service_request.owner_object.last_name} <Link href={"/hotline/owner/" + service_request.owner}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link> | {service_request.owner_object.phone||service_request.owner_object.email||"No Contact"}</ListGroup.Item>
+        </ListGroup>
+        <hr/>
+        <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
+          <h4 className="mt-2" style={{marginBottom:"-2px"}}>Animals</h4>
+          {service_request.animals.map((animal, inception) => (
+            <ListGroup.Item key={animal.id}>
+              <span style={{textTransform:"capitalize"}}>{animal.name||"Unknown"} ({animal.pcolor ? <span>{animal.pcolor}{animal.scolor ? "/" + animal.scolor : ""}&nbsp;</span> : ""}<span style={{textTransform:"capitalize"}}>{animal.species}</span></span>) - {animal.status}
+          </ListGroup.Item>
+          ))}
+        </ListGroup>
+        </Card.Body>
+      </Card>
       ))}
-      </div>
-    </div>
     </>
   )
 }

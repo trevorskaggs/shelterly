@@ -46,6 +46,7 @@ export function ServiceRequestView({id}) {
     accessible: false,
     turn_around: false,
     followup_date: null,
+    assigned_evac: null,
     status:'',
     action_history: [],
     visit_notes: [],
@@ -72,7 +73,7 @@ export function ServiceRequestView({id}) {
   return (
     <>
       <Header>
-        Service Request #{data.id}<Link href={"/hotline/servicerequest/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link> | <span style={{textTransform:"capitalize"}}>{data.status}</span>
+        Service Request #{data.id}<Link href={"/hotline/servicerequest/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link> | <span style={{textTransform:"capitalize"}}>{data.status} {data.status === 'assigned' ? <Link href={"/evac/summary/" + data.assigned_evac}><FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link> : ""}</span>
       </Header>
       <hr/>
       <div className="row mb-2">

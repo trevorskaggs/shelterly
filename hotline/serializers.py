@@ -34,6 +34,7 @@ class ServiceRequestSerializer(serializers.ModelSerializer):
     animal_count = serializers.IntegerField(read_only=True)
     injured = serializers.BooleanField(read_only=True)
     action_history = serializers.SerializerMethodField()
+    assigned_evac = serializers.SerializerMethodField()
 
     # Custom field for the full address.
     def get_full_address(self, obj):
@@ -58,6 +59,11 @@ class ServiceRequestSerializer(serializers.ModelSerializer):
     # Custom field for determining that count of UNABLE TO LOCATE animals.
     def get_unable_to_locate(self, obj):
         return Animal.objects.filter(request=obj, status='UNABLE TO LOCATE').count()
+
+    # Custom field for the current open evac assignment if it exists.
+    def get_assigned_evac(self, obj):
+        from evac.models import EvacAssignment
+        return EvacAssignment.objects.filter(service_requests=obj, end_time__isnull=True).values_list('id', flat=True).first()
 
     def to_internal_value(self, data):
         # Updates datetime fields to null when receiving an empty string submission.

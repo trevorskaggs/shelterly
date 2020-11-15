@@ -179,7 +179,7 @@ export function EvacResolution({ id }) {
                 })
               ),
               date_completed: Yup.date().required('Required'),
-              notes: Yup.string().required('Required'),
+              notes: Yup.string(),
               forced_entry: Yup.boolean(),
               owner_contacted: Yup.boolean().required().oneOf([true], 'The owner must be notified before resolution.'),
             })
@@ -201,7 +201,9 @@ export function EvacResolution({ id }) {
         {props => (
           <>
           <BootstrapForm as={Form}>
-          <Header>Dispatch Assignment #{id} (<Moment format="L">{data.start_time}</Moment>) Resolution</Header>
+          <Header>Dispatch Assignment #{id} Resolution
+          <div style={{fontSize:"16px", marginTop:"5px"}}><b>Opened: </b><Moment format="lll">{data.start_time}</Moment></div>
+          </Header>
           <hr/>
           <Card border="secondary" className="mt-3">
             <Card.Body>
@@ -273,7 +275,7 @@ export function EvacResolution({ id }) {
                     xs="9"
                     as="textarea"
                     rows={5}
-                    label="Note"
+                    label="Notes"
                   />
                 </BootstrapForm.Row>
                 <BootstrapForm.Row>
