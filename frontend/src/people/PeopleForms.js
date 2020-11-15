@@ -209,7 +209,7 @@ export const PersonForm = ({ id }) => {
                 name="last_name"
               />
             </BootstrapForm.Row>
-            <BootstrapForm.Row hidden={is_first_responder}>
+            <BootstrapForm.Row>
               <TextInput
                 xs="3"
                 type="text"

@@ -112,7 +112,7 @@ export const ShelterForm = ({id}) => {
           <Card.Header as="h5" className="pl-3"><span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>{!id ? "New" : "Update"} Shelter</Card.Header>
           <Card.Body>
           <BootstrapForm noValidate>
-            <BootstrapForm.Row>
+            <BootstrapForm.Row xs="8">
               <TextInput
                 xs="8"
                 type="text"
@@ -135,14 +135,14 @@ export const ShelterForm = ({id}) => {
               <BootstrapForm.Group as={Col} xs="10">
                 <AddressLookup
                   label="Search"
-                  style={{width: '100%'}}
+                  style={{width: '80%'}}
                   className="form-control"
                 />
               </BootstrapForm.Group>
             </BootstrapForm.Row>
-            <BootstrapForm.Row>
+            <BootstrapForm.Row xs="8">
               <TextInput
-                xs="8"
+                xs="6"
                 type="text"
                 label="Address*"
                 name="address"
@@ -153,11 +153,12 @@ export const ShelterForm = ({id}) => {
                 type="text"
                 label="Apartment"
                 name="apartment"
+                disabled
               />
             </BootstrapForm.Row>
             <BootstrapForm.Row>
               <TextInput
-                xs="6"
+                xs="4"
                 type="text"
                 label="City"
                 name="city"
