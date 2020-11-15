@@ -11,10 +11,11 @@ import {
   faTimes, faMinusSquare, faPlusSquare,
 } from '@fortawesome/free-solid-svg-icons';
 import Autocomplete from 'react-google-autocomplete';
+import flatten from 'flat';
 
 const DateTimePicker = ({ label, xs, clearable, ...props }) => {
 
-  const [field] = useField(props);
+  const [field, meta] = useField(props);
 
   // Ref and function to clear field.
   const datetime = useRef(null);
@@ -25,7 +26,13 @@ const DateTimePicker = ({ label, xs, clearable, ...props }) => {
   }, [datetime]);
 
   // Flatpickr options
-  var options = {allowInput:true, altInput: true, altFormat: "F j, Y h:i K",}
+  var options = {};
+  if (props["data-enable-time"] === false) {
+    options = {allowInput:true, altInput: true, altFormat: "F j, Y",}
+  }
+  else {
+    options = {allowInput:true, altInput: true, altFormat: "F j, Y h:i K",}
+  }
 
   return (
     <>
@@ -35,6 +42,7 @@ const DateTimePicker = ({ label, xs, clearable, ...props }) => {
         <Flatpickr className="datetime_picker" ref={datetime} data-enable-time options={options} {...field} {...props} />
         {clearable === false ? "" : <span>{field.value ? <FontAwesomeIcon icon={faTimes} style={{position:"relative", left: "-22px", marginTop:"11px",color:"#808080"}} onClick={clearDate} /> : ""}</span>}
       </span>
+      {meta.touched && meta.error ? <div style={{ color: "#e74c3c", marginTop: ".3rem", fontSize: "80%" }}>{meta.error}</div> : ""}
       </Form.Group>
     </>
   );
@@ -51,32 +59,31 @@ const TextInput = ({ label, value, xs, controlId, formGroupClasses, ...props }) 
     <Form.Group as={Col} xs={xs} controlId={controlId} className={formGroupClasses}>
       <Form.Label>{label}</Form.Label>
       <Form.Control type="text" value={value} isInvalid={meta.touched && meta.error} onChange={props.handleChange} {...field} {...props} />
-        <Form.Control.Feedback type="invalid"> {meta.error}</ Form.Control.Feedback>
+      <Form.Control.Feedback type="invalid"> {meta.error}</ Form.Control.Feedback>
     </Form.Group>
     </>
   );
 };
 
-const Checkbox = ({ children, ...props }) => {
-  // We need to tell useField what type of input this is
-  // since React treats radios and checkboxes differently
-  // than inputs/select/textarea.
-  const [field, meta] = useField({ ...props, type: 'checkbox' });
+const Checkbox = ({ field, checked, label, value, onChange }) => {
+
+  // const [field, meta] = useField({...props, type: 'checkbox'});
+
   return (
     <>
-      <Label className="checkbox">
-        <input type="checkbox" {...field} {...props} />
-        {children}
-      </Label>
-      {meta.touched && meta.error ? (
-        <div className="error">{meta.error}</div>
-      ) : null}
+    <label>
+      {label}
+      <input {...field} type="checkbox" checked={checked} onChange={onChange} />
+    </label>
+    {/* {meta.touched && meta.error ? (
+      <div className="error">{meta.error}</div>
+    ) : null} */}
     </>
   );
 };
 
 const DropDown = React.forwardRef((props, ref) => {
-  const { setFieldValue, setFieldTouched } = useFormikContext();
+  const { setFieldValue, errors, setFieldTouched, isSubmitting, isValidating } = useFormikContext();
   const [field, meta] = useField(props);
 
   const customStyles = {
@@ -97,7 +104,16 @@ const DropDown = React.forwardRef((props, ref) => {
     }),
   };
 
+  useEffect(() => {
+    if (isSubmitting && !isValidating) {
+      for (const path of Object.keys(flatten(errors))) {
+        setFieldTouched(path, true, false);
+      }
+    }
+  }, [errors, isSubmitting, isValidating, setFieldTouched]);
+
   function handleOptionChange(selection) {
+    setFieldTouched(props.name, true);
     setFieldValue(props.name, selection === null ? '' : selection.value);
   }
 
@@ -107,11 +123,11 @@ const DropDown = React.forwardRef((props, ref) => {
 
   return (
     <>
-      <Form.Label >{props.label}</Form.Label>
+      {props.label ? <Form.Label >{props.label}</Form.Label> : ""}
       <SimpleValue {...field} options={props.options}>
          {simpleProps => <Select isDisabled={props.disabled} ref={ref} styles={customStyles} isClearable={true} onBlur={updateBlur} onChange={handleOptionChange} {...props} {...simpleProps} />}
       </SimpleValue>
-      {meta.touched && meta.error ? <div style={{ color: "red", marginTop: ".5rem", fontSize: "80%" }}>{meta.error}</div> : ""}
+      {meta.touched && meta.error ? <div style={{ color: "#e74c3c", marginTop: ".5rem", fontSize: "80%" }}>{meta.error}</div> : ""}
     </>
   );
 });
@@ -176,7 +192,7 @@ const ImageUploader = ({ parentStateSetter, ...props }) => {
                 <FontAwesomeIcon icon={faPlusSquare} size="10x" inverse onClick={onImageUpload}{...dragProps} />
                   <div style={{marginTop:-8, marginBottom:20}}>{props.label}</div>
                   {(meta.touched && meta.error) || errors ?
-                    <div style={{ color:"red", fontSize:"80%", marginTop:"-20px", marginBottom:"-20px" }}>
+                    <div style={{ color:"#e74c3c", fontSize:"80%", marginTop:"-20px", marginBottom:"-20px" }}>
                       {meta.error ?
                         <span className="text-left">{meta.error}</span> :
                         <span>

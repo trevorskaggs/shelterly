@@ -1,9 +1,9 @@
 from django.db.models import Count, Exists, OuterRef, Q
 from actstream import action
-from .serializers import ServiceRequestSerializer
+from .serializers import ServiceRequestSerializer, VisitNoteSerializer
 
 from animals.models import Animal
-from hotline.models import ServiceRequest
+from hotline.models import ServiceRequest, VisitNote
 from rest_framework import filters, permissions, serializers, viewsets
 
 class ServiceRequestViewSet(viewsets.ModelViewSet):
@@ -56,3 +56,9 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
         if is_map == 'true':
             queryset = queryset.exclude(Q(latitude=None) | Q(longitude=None))
         return queryset
+
+class VisitNoteViewSet(viewsets.ModelViewSet):
+
+    queryset = VisitNote.objects.all()
+    permission_classes = [permissions.IsAuthenticated, ]
+    serializer_class = VisitNoteSerializer

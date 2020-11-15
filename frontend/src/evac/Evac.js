@@ -13,23 +13,13 @@ const header_style = {
       <Link href="/evac/evacteammember/new">
         <ListGroup.Item action>ADD TEAM MEMBER</ListGroup.Item>
       </Link>
-      <Link href="/evac/dispatch">
+      <Link href="/evac/deploy">
       <ListGroup.Item action>
       DEPLOY
       </ListGroup.Item>
       </Link>
-      <Link href="">
-      <ListGroup.Item action>
-      DEBRIEF
-      </ListGroup.Item>
-      </Link>
       <Link href="/evac/evacuationassignment/search">
-          <ListGroup.Item action>SEARCH EVACUATION ASSIGNMENT</ListGroup.Item>
-      </Link>
-      <Link href="/">
-      <ListGroup.Item action>
-      BACK
-      </ListGroup.Item>
+          <ListGroup.Item action>SEARCH EVACUATION ASSIGNMENTS</ListGroup.Item>
       </Link>
     </ListGroup>
   )
