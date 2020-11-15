@@ -19,7 +19,7 @@ import {EvacuationAssignmentTable} from "./EvacTables";
       </ListGroup.Item>
       </Link>
       <Link href="/evac/evacuationassignment/search">
-          <ListGroup.Item action>SEARCH EVACUATION ASSIGNMENTS</ListGroup.Item>
+          <ListGroup.Item action>EVACUATION ASSIGNMENTS</ListGroup.Item>
       </Link>
     </ListGroup>
   )
