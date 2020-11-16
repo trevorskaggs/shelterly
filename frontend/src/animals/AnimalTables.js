@@ -12,6 +12,7 @@ import {
   faClipboardList
 } from '@fortawesome/free-solid-svg-icons';
 import Header from '../components/Header';
+import { titleCase } from '../components/Utils';
 
 const input_style = {
   width: "40%",
@@ -93,7 +94,7 @@ export function AnimalSearch() {
 
       {data.animals.map(animal => (
         <div key={animal.id} className="mt-3">
-          <div className="card-header"> {animal.name ? animal.name : "Name Unknown"} - {animal.species ? animal.species : "Species Unknown"} - {animal.status}
+          <div className="card-header"> {animal.name ? titleCase(animal.name) : "Name Unknown"} - {animal.species ? titleCase(animal.species) : "Species Unknown"} - {titleCase(animal.status)}
             <Link href={"/animals/animal/" + animal.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
           </div>
           <CardGroup>
@@ -101,8 +102,7 @@ export function AnimalSearch() {
               <Card.Body>
                 <Card.Title>Animal Info</Card.Title>
                 <ListGroup>
-                  <ListGroup.Item className='species-sex'>{animal.species}{animal.species && animal.sex ? ", " : ""}{animal.sex}{animal.sex && animal.age ? ", " : ""}{animal.age}</ListGroup.Item>
-                  <ListGroup.Item className='size-age'>{animal.size}{animal.size && animal.age ? ", " : ""}{animal.age}</ListGroup.Item>
+                  <ListGroup.Item className='species-sex'>{titleCase(animal.species)}{animal.species && animal.sex ? ", " : ""}{titleCase(animal.sex)}{animal.sex && animal.age ? ", " : ""}{titleCase(animal.age)}{animal.age && animal.size ? ", " : ""}{titleCase(animal.size)}</ListGroup.Item>
                   <ListGroup.Item><ReactImageFallback style={{width:"151px"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} /></ListGroup.Item>
                 </ListGroup>
               </Card.Body>
