@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import { Link } from 'raviger';
-import { Button, ButtonGroup, Card, CardGroup, Form, FormControl, InputGroup, ListGroup} from 'react-bootstrap';
+import { Button, ButtonGroup, Card, CardGroup, Form, FormControl, InputGroup, ListGroup, Modal} from 'react-bootstrap';
 import Moment from 'react-moment';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faClipboardList
+  faClipboardList,
+  faBan
 } from '@fortawesome/free-solid-svg-icons';
 
 export function ServiceRequestTable() {
@@ -18,7 +19,12 @@ export function ServiceRequestTable() {
   const handleChange = event => {
     setSearchTerm(event.target.value);
   };
+  const [showModal, setShowModal] = useState(false);
+  const [activeServiceRequest, setactiveServiceRequest] = useState(0);
 
+  const handleCloseModal = () => setShowModal(false);
+  const handleShowModal = () => setShowModal(true);
+  const handleSelectServiceRequest = ({id}) => setactiveServiceRequest(id)
   // Use searchTerm to filter service_requests.
   const handleSubmit = async event => {
     event.preventDefault();
@@ -36,6 +42,18 @@ export function ServiceRequestTable() {
       console.log(error.response);
       setData({service_requests: [], isFetching: false});
     });
+  }
+
+  const openModal = ({id}) => {
+    handleSelectServiceRequest(id)
+    handleShowModal(true)
+    
+  }
+
+  const cancelServiceRequest = ({id}) => {
+    axios.patch('/hotline/api/servicerequests/' + id + '/', {status:'canceled'})
+    setactiveServiceRequest(0)
+    setShowModal(false)
   }
 
   // Hook for initializing data.
@@ -85,9 +103,24 @@ export function ServiceRequestTable() {
           </InputGroup>
       </Form>
 
+      <Modal show={showModal} onHide={handleCloseModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>Confirm Cancelation</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>Are you sure you want to cancel this Service Request  and associated animals?</Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCloseModal}>
+            Close
+          </Button>
+          <Button variant="primary" onClick={() => cancelServiceRequest(showModal)}>
+            Confirm
+          </Button>
+        </Modal.Footer>
+      </Modal>
       {data.service_requests.map(service_request => (
         <div key={service_request.id} className="mt-3">
           <div className="card-header"> Service Request #{service_request.id}<Link href={"/hotline/servicerequest/" + service_request.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
+          <Button onClick={() => openModal(service_request)}><FontAwesomeIcon icon={faBan} inverse /></Button>
             <div><Moment format="LLL">{service_request.timestamp}</Moment></div>
           </div>
         <CardGroup>

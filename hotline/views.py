@@ -26,21 +26,14 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         if serializer.is_valid():
-            for service_request in ServiceRequest.objects.filter(latitude=serializer.validated_data['latitude'], longitude=serializer.validated_data['longitude'], status='open').exclude(id=self.kwargs['pk']):
-                raise serializers.ValidationError(['Multiple open Requests may not exist with the same address.', service_request.id])
             service_request = serializer.save()
-            action.send(self.request.user, verb='created service request', target=service_request)
-            if service_request.owner:
-                service_request.owner.animal_set.update(request=service_request.id)
-
-    def perform_update(self, serializer):
-        if serializer.is_valid():
-            service_request = serializer.save()
+            # Change this so it only runs if status changes to canceled
+            if service_request.status == 'canceled':
+                service_request.animal_set.update(status='CANCELED')
             action.send(self.request.user, verb='updated service request', target=service_request)
 
     def get_queryset(self):
         queryset = ServiceRequest.objects.all().annotate(animal_count=Count('animal')).annotate(injured=Exists(Animal.objects.filter(request_id=OuterRef('id'), injured='yes')))
-
         # Status filter.
         status = self.request.query_params.get('status', '')
         if status in ('open', 'assigned', 'closed'):
