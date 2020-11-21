@@ -61,7 +61,7 @@ export function EvacuationAssignmentTable() {
 
   const [data, setData] = useState({evacuation_assignments: [], isFetching: false});
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusOptions, setStatusOptions] = useState({status: "all", allColor: "primary", openColor:"secondary", assignedColor:"secondary", closedColor:"secondary"});
+  const [statusOptions, setStatusOptions] = useState({status: "open", allColor:"secondary", openColor:"primary", assignedColor:"secondary", closedColor:"secondary"});
 
   // Update searchTerm when field input changes.
   const handleChange = event => {
@@ -139,10 +139,10 @@ export function EvacuationAssignmentTable() {
                 Evacuation Assignment #{evacuation_assignment.id}<Link href={"/evac/summary/" + evacuation_assignment.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
                 <div>
                 Opened: <Moment format="L">{evacuation_assignment.start_time}</Moment> |
-                Closed: {evacuation_assignment.end_time ?
-                  <span>
-                      <Moment format="L">{evacuation_assignment.end_time}</Moment>
-                    </span> : "N/A"}
+                {evacuation_assignment.end_time ?
+                  <span>Closed:
+                    <Moment format="L">{evacuation_assignment.end_time}</Moment>
+                  </span> : <Link href={"/evac/resolution/" + evacuation_assignment.id} className="btn btn-danger ml-1" style={{paddingTop:"0px", paddingBottom:"0px"}}>Close</Link>}
                 </div>
                 <div>
                 <span>Team Member(s): {evacuation_assignment.team_member_objects.map((member, i) => (

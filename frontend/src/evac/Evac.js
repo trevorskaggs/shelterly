@@ -9,19 +9,19 @@ const header_style = {
 };
 
   const Evac = () => (
-      <ListGroup className="flex-fill p-5 h-50">
-          <Link href="/evac/evacteammember/new">
-              <ListGroup.Item action>ADD TEAM MEMBER</ListGroup.Item>
-          </Link>
-          <Link href="/evac/deploy">
-              <ListGroup.Item action>
-                  DEPLOY
-              </ListGroup.Item>
-          </Link>
-          <Link href="/evac/evacuationassignment/search">
-              <ListGroup.Item action>SEARCH EVACUATION ASSIGNMENTS</ListGroup.Item>
-          </Link>
-      </ListGroup>
+    <ListGroup className="flex-fill p-5 h-50">
+      <Link href="/evac/evacteammember/new">
+        <ListGroup.Item action>ADD TEAM MEMBER</ListGroup.Item>
+      </Link>
+      <Link href="/evac/deploy">
+      <ListGroup.Item action>
+      DEPLOY
+      </ListGroup.Item>
+      </Link>
+      <Link href="/evac/evacuationassignment/search">
+          <ListGroup.Item action>SEARCH EVACUATION ASSIGNMENTS</ListGroup.Item>
+      </Link>
+    </ListGroup>
   )
 
 

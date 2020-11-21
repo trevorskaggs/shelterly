@@ -3,7 +3,7 @@ from rest_framework import serializers
 from rest_framework.decorators import action
 from actstream.models import target_stream
 
-from .models import ServiceRequest
+from .models import ServiceRequest, VisitNote
 from animals.models import Animal
 from animals.serializers import AnimalSerializer
 from people.serializers import PersonSerializer
@@ -11,11 +11,24 @@ from location.utils import build_full_address, build_action_string
 from django.http import JsonResponse
 import json
 
+class VisitNoteSerializer(serializers.ModelSerializer):
+
+    address = serializers.SerializerMethodField()
+
+    def get_address(self, obj):
+        return obj.service_request.location_output
+
+    class Meta:
+        model = VisitNote
+        fields = '__all__'
+
 class ServiceRequestSerializer(serializers.ModelSerializer):
+
     owner_object = PersonSerializer(source='owner', required=False, read_only=True)
     reporter_object = PersonSerializer(source='reporter', required=False, read_only=True)
     full_address = serializers.SerializerMethodField()
     animals = AnimalSerializer(source='animal_set', many=True, required=False, read_only=True)
+    visit_notes = VisitNoteSerializer(source='visitnote_set', many=True, required=False, read_only=True)
     has_reported_animals = serializers.SerializerMethodField()
     sheltered_in_place = serializers.SerializerMethodField()
     unable_to_locate = serializers.SerializerMethodField()
@@ -23,6 +36,7 @@ class ServiceRequestSerializer(serializers.ModelSerializer):
     animal_count = serializers.IntegerField(read_only=True)
     injured = serializers.BooleanField(read_only=True)
     action_history = serializers.SerializerMethodField()
+    assigned_evac = serializers.SerializerMethodField()
     evacuation_assignments = serializers.SerializerMethodField()
 
     # Custom field for the full address.
@@ -52,6 +66,11 @@ class ServiceRequestSerializer(serializers.ModelSerializer):
     # Custom field for determining that count of UNABLE TO LOCATE animals.
     def get_unable_to_locate(self, obj):
         return Animal.objects.filter(request=obj, status='UNABLE TO LOCATE').count()
+
+    # Custom field for the current open evac assignment if it exists.
+    def get_assigned_evac(self, obj):
+        from evac.models import EvacAssignment
+        return EvacAssignment.objects.filter(service_requests=obj, end_time__isnull=True).values_list('id', flat=True).first()
 
     def to_internal_value(self, data):
         # Updates datetime fields to null when receiving an empty string submission.

@@ -7,7 +7,6 @@ app_name = 'evac'
 router = DefaultRouter()
 router.register(r'evacteammember', views.EvacTeamMemberViewSet)
 router.register(r'evacassignment', views.EvacAssignmentViewSet)
-router.register(r'visitnote', views.VisitNoteViewSet)
 
 urlpatterns = [
     path('api/', include(router.urls)),
