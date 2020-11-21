@@ -8,8 +8,6 @@ from animals.models import Animal
 from animals.serializers import AnimalSerializer
 from people.serializers import PersonSerializer
 from location.utils import build_full_address, build_action_string
-from django.http import JsonResponse
-import json
 
 class VisitNoteSerializer(serializers.ModelSerializer):
 
