@@ -113,7 +113,7 @@ export function ServiceRequestTable() {
           <CardGroup>
             <Card>
               <Card.Body>
-                <Card.Title>Evacuation Assignments ({service_request.evacuation_assignments.length})</Card.Title>
+                <Card.Title>Evacuation Assignments</Card.Title>
                 <ListGroup>
                   {service_request.evacuation_assignments && service_request.evacuation_assignments.length ?
                       <span>
