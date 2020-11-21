@@ -8,6 +8,8 @@ from animals.models import Animal
 from animals.serializers import AnimalSerializer
 from people.serializers import PersonSerializer
 from location.utils import build_full_address, build_action_string
+from django.http import JsonResponse
+import json
 
 class ServiceRequestSerializer(serializers.ModelSerializer):
     owner_object = PersonSerializer(source='owner', required=False, read_only=True)
@@ -21,6 +23,7 @@ class ServiceRequestSerializer(serializers.ModelSerializer):
     animal_count = serializers.IntegerField(read_only=True)
     injured = serializers.BooleanField(read_only=True)
     action_history = serializers.SerializerMethodField()
+    evacuation_assignments = serializers.SerializerMethodField()
 
     # Custom field for the full address.
     def get_full_address(self, obj):
@@ -29,6 +32,10 @@ class ServiceRequestSerializer(serializers.ModelSerializer):
     # Custom field for the action history list.
     def get_action_history(self, obj):
         return [build_action_string(action) for action in target_stream(obj)]
+
+    # Custom field to get Evacuation Assignments.
+    def get_evacuation_assignments(self, obj):
+        return obj.evacuation_assignments.filter(service_requests=obj).values()
 
     # Custom field for if any animal is ACO Required. If it is aggressive or "Other" species.
     def get_aco_required(self, obj):

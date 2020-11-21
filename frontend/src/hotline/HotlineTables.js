@@ -7,6 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faClipboardList
 } from '@fortawesome/free-solid-svg-icons';
+import moment from "moment";
 
 export function ServiceRequestTable() {
 
@@ -49,6 +50,7 @@ export function ServiceRequestTable() {
       })
       .then(response => {
         setData({service_requests: response.data, isFetching: false});
+        console.log(response.data); // FOR TESTING
       })
       .catch(error => {
         console.log(error.response);
@@ -87,7 +89,7 @@ export function ServiceRequestTable() {
 
       {data.service_requests.map(service_request => (
         <div key={service_request.id} className="mt-3">
-          <div className="card-header"> Service Request #{service_request.id}<Link href={"/hotline/servicerequest/" + service_request.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
+          <div className="card-header"> Service Request #{service_request.id} ({service_request.status}) | {service_request.address}<Link href={"/hotline/servicerequest/" + service_request.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
             <div><Moment format="LLL">{service_request.timestamp}</Moment></div>
           </div>
         <CardGroup>
@@ -109,6 +111,23 @@ export function ServiceRequestTable() {
             </Card.Body>
           </Card>
         </CardGroup>
+          <CardGroup>
+            <Card>
+              <Card.Body>
+                <Card.Title>Evacuation Assignments ({service_request.evacuation_assignments.length})</Card.Title>
+                <ListGroup>
+                  {service_request.evacuation_assignments && service_request.evacuation_assignments.length ?
+                      <span>
+                        {service_request.evacuation_assignments.map(evacuation_assignment => (<ListGroup.Item key={evacuation_assignment.id}>
+                          Evacuation Assignment #{evacuation_assignment.id} <Link href={"/evac/summary/" + evacuation_assignment.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link> |
+                          Started: {evacuation_assignment.start_time ? <span>{moment(evacuation_assignment.start_time).format('lll')}</span> : "N/A"} |
+                          Closed: {evacuation_assignment.end_time ? <span>{moment(evacuation_assignment.end_time).format('lll')}</span> : "N/A"}
+                        </ListGroup.Item>))}</span> : <span><ListGroup.Item>None</ListGroup.Item>
+                      </span>}
+                </ListGroup>
+              </Card.Body>
+            </Card>
+          </CardGroup>
         </div>
       ))}
       <p>{data.isFetching ? 'Fetching service requests...' : <span>{data.service_requests && data.service_requests.length ? '' : 'No Service Requests found.'}</span>}</p>
