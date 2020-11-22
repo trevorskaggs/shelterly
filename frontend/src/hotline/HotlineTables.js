@@ -88,7 +88,8 @@ export function ServiceRequestTable() {
 
       {data.service_requests.map(service_request => (
         <div key={service_request.id} className="mt-3">
-          <div className="card-header"> Service Request #{service_request.id} ({service_request.status}) | {service_request.address}<Link href={"/hotline/servicerequest/" + service_request.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
+          <div className="card-header"> Service Request #{service_request.id} ({service_request.status}) <Link href={"/hotline/servicerequest/" + service_request.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
+            <div>{service_request.address}</div>
             <div><Moment format="LLL">{service_request.timestamp}</Moment></div>
           </div>
         <CardGroup>
