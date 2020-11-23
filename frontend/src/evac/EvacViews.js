@@ -539,7 +539,7 @@ export function EvacSummary({id}) {
       </Card.Body>
     </Card>
     {data.service_request_objects.map((service_request, index) => (
-    <Card key={service_request.id} border="secondary" className="mt-3">
+    <Card key={service_request.id} border="secondary" className="mt-3 mb-2">
       <Card.Body>
         <Card.Title>
           <h4>Service Request #{service_request.id} <Link href={"/hotline/servicerequest/" + service_request.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link> | <span style={{textTransform:"capitalize"}}>{service_request.status}</span></h4>
