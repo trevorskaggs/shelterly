@@ -14,24 +14,15 @@ export function ServiceRequestTable() {
   const [data, setData] = useState({service_requests: [], isFetching: false});
   const [searchTerm, setSearchTerm] = useState("");
   const [statusOptions, setStatusOptions] = useState({status:"all", allColor: "primary", openColor:"secondary", assignedColor:"secondary", closedColor:"secondary"});
+  const [showModal, setShowModal] = useState(false);
+  const [activeServiceRequest, setactiveServiceRequest] = useState(0);
 
   // Update searchTerm when field input changes.
   const handleChange = event => {
     setSearchTerm(event.target.value);
   };
-  const [showModal, setShowModal] = useState(false);
-  const [activeServiceRequest, setactiveServiceRequest] = useState(0);
-
-  const handleCloseModal = () => setShowModal(false);
-  const handleShowModal = () => setShowModal(true);
-  const handleSelectServiceRequest = ({id}) => setactiveServiceRequest(id)
-  // Use searchTerm to filter service_requests.
-  const handleSubmit = async event => {
-    event.preventDefault();
-
+  const getServiceRequests = async () => {
     let source = axios.CancelToken.source();
-    setData({service_requests: [], isFetching: true});
-    // Fetch ServiceRequest data filtered searchTerm.
     await axios.get('/hotline/api/servicerequests/?search=' + searchTerm + '&status=' + statusOptions.status, {
       cancelToken: source.token,
     })
@@ -44,16 +35,20 @@ export function ServiceRequestTable() {
     });
   }
 
-  const openModal = ({id}) => {
-    handleSelectServiceRequest(id)
-    handleShowModal(true)
-    
+  // Use searchTerm to filter service_requests.
+  const handleSubmit = async event => {
+    event.preventDefault();
+    setData({service_requests: [], isFetching: true});
+    // Fetch ServiceRequest data filtered searchTerm.
+    getServiceRequests()
+
   }
 
-  const cancelServiceRequest = ({id}) => {
-    axios.patch('/hotline/api/servicerequests/' + id + '/', {status:'canceled'})
+  const cancelServiceRequest = () => {
+    axios.patch('/hotline/api/servicerequests/' + activeServiceRequest + '/', {status:'canceled'})
     setactiveServiceRequest(0)
     setShowModal(false)
+    getServiceRequests()
   }
 
   // Hook for initializing data.
@@ -103,13 +98,13 @@ export function ServiceRequestTable() {
           </InputGroup>
       </Form>
 
-      <Modal show={showModal} onHide={handleCloseModal}>
+      <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Confirm Cancelation</Modal.Title>
         </Modal.Header>
         <Modal.Body>Are you sure you want to cancel this Service Request  and associated animals?</Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={handleCloseModal}>
+          <Button variant="secondary" onClick={() => setShowModal(false)}>
             Close
           </Button>
           <Button variant="primary" onClick={() => cancelServiceRequest(showModal)}>
@@ -120,7 +115,7 @@ export function ServiceRequestTable() {
       {data.service_requests.map(service_request => (
         <div key={service_request.id} className="mt-3">
           <div className="card-header"> Service Request #{service_request.id}<Link href={"/hotline/servicerequest/" + service_request.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
-          <Button onClick={() => openModal(service_request)}><FontAwesomeIcon icon={faBan} inverse /></Button>
+          <span className='btn pl-1' onClick={() => {setactiveServiceRequest(service_request.id); setShowModal(true)}}><FontAwesomeIcon icon={faBan} color="red"/></span>
             <div><Moment format="LLL">{service_request.timestamp}</Moment></div>
           </div>
         <CardGroup>
