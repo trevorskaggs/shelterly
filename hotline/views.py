@@ -1,5 +1,6 @@
 from django.db.models import Count, Exists, OuterRef, Q
 from actstream import action
+from datetime import datetime
 from .serializers import ServiceRequestSerializer, VisitNoteSerializer
 
 from animals.models import Animal
@@ -54,7 +55,7 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
         # Exclude SRs without a geolocation when fetching for a map.
         is_map = self.request.query_params.get('map', '')
         if is_map == 'true':
-            queryset = queryset.exclude(Q(latitude=None) | Q(longitude=None))
+            queryset = queryset.exclude(Q(latitude=None) | Q(longitude=None)).filter(Q(followup_date__lte=datetime.today()) | Q(followup_date__isnull=True))
         return queryset
 
 class VisitNoteViewSet(viewsets.ModelViewSet):
