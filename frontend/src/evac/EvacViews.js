@@ -19,10 +19,6 @@ import Header from '../components/Header';
 import 'react-bootstrap-typeahead/css/Typeahead.css';
 import 'leaflet/dist/leaflet.css';
 
-const header_style = {
-  textAlign: "center",
-}
-
 const Legend = (props) => {
   const { map } = useLeaflet();
 
@@ -261,10 +257,10 @@ export function Dispatch() {
       }}
     >
     {props => (
-      <Form style={{paddingRight:"10px"}}>
-        <Row className="d-flex flex-wrap mt-3">
-          <Col xs={12} className="border rounded pl-0 pr-0"  style={{marginLeft:"-3px"}}>
-            <Map className="d-block" bounds={data.bounds} onMoveEnd={onMove}>
+      <Form>
+        <Row className="d-flex flex-wrap sticky" style={{paddingRight:"5px"}}>
+          <Col xs={12} className="border rounded pl-0" style={{marginLeft:"-5px", marginBottom:"10px", paddingRight:"9px"}}>
+            <Map className="d-block sticky" style={{marginTop:"-10px", marginBottom:"10px", marginRight:"-9px"}} bounds={data.bounds} onMoveEnd={onMove}>
               <Legend position="bottomleft" metric={false} />
               <TileLayer
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -311,7 +307,7 @@ export function Dispatch() {
             </Map>
           </Col>
         </Row>
-        <Row className="mt-2">
+        <Row className="mt-2" style={{paddingRight:"10px"}}>
           <Col xs={12} className="pl-0">
             <div className="form-row">
               <Typeahead
@@ -327,7 +323,7 @@ export function Dispatch() {
             </div>
           </Col>
         </Row>
-        <Row className="d-flex flex-wrap" style={{marginTop:"-15px", minHeight:"36vh"}}>
+        <Row className="d-flex flex-wrap" style={{marginTop:"-15px", minHeight:"36vh", paddingRight:"10px"}}>
           <Col xs={2} className="mt-4 border rounded mr-1" style={{marginLeft:"-5px", height:"250", minHeight:"250"}}>
             <div className="card-header border rounded mt-3 text-center">
               <p className="mb-2" style={{marginTop:"-5px"}}>Reported</p>
