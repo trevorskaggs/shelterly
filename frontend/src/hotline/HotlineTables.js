@@ -35,6 +35,7 @@ export function ServiceRequestTable() {
     })
     .then(response => {
       setData({service_requests: response.data, isFetching: false});
+      setNumPages(Math.ceil(response.data.length / ITEMS_PER_PAGE))
     })
     .catch(error => {
       console.log(error.response);
@@ -91,7 +92,7 @@ export function ServiceRequestTable() {
       </Form>
 
       {data.service_requests.map((service_request, index) => (
-        <div key={service_request.id} className="mt-3" hidden={page!= Math.ceil(index/ITEMS_PER_PAGE)}>
+        <div key={service_request.id} className="mt-3" hidden={page!= Math.ceil((index+1)/ITEMS_PER_PAGE)}>
           <div className="card-header"> Service Request #{service_request.id}<Link href={"/hotline/servicerequest/" + service_request.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
             <div><Moment format="LLL">{service_request.timestamp}</Moment></div>
           </div>
