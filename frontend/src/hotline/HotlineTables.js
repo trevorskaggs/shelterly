@@ -44,11 +44,24 @@ export function ServiceRequestTable() {
 
   }
 
+  const getServiceRequest = async (activeServiceRequest) => {
+    let source = axios.CancelToken.source();
+    await axios.get('/hotline/api/servicerequests/' + activeServiceRequest, {
+      cancelToken: source.token,
+    })
+    .then(response => {
+      setData((prevState) => ({service_requests: prevState.service_requests.map(
+        element => element.id === activeServiceRequest ? response.data: element
+      )}));
+    })
+
+  }
+
   const cancelServiceRequest = () => {
     axios.patch('/hotline/api/servicerequests/' + activeServiceRequest + '/', {status:'canceled'})
     setactiveServiceRequest(0)
     setShowModal(false)
-    getServiceRequests()
+    getServiceRequest(activeServiceRequest)
   }
 
   // Hook for initializing data.
