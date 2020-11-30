@@ -98,12 +98,21 @@ export function AnimalSearch() {
             <Link href={"/animals/animal/" + animal.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
           </div>
           <CardGroup>
-            <Card key={animal.id}>
+          <Card key={animal.id}>
+              <Card.Body>
+                <Card.Title>Animal Picture</Card.Title>
+                <ListGroup>
+                  <ListGroup.Item><ReactImageFallback style={{width:"151px"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} /></ListGroup.Item>
+                </ListGroup>
+              </Card.Body>
+            </Card>
+            <Card>
               <Card.Body>
                 <Card.Title>Animal Info</Card.Title>
                 <ListGroup>
-                  <ListGroup.Item className='species-sex'>{titleCase(animal.species)}{animal.species && animal.sex ? ", " : ""}{titleCase(animal.sex)}{animal.sex && animal.age ? ", " : ""}{titleCase(animal.age)}{animal.age && animal.size ? ", " : ""}{titleCase(animal.size)}</ListGroup.Item>
-                  <ListGroup.Item><ReactImageFallback style={{width:"151px"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} /></ListGroup.Item>
+                  <ListGroup.Item className='species-sex'>{titleCase(animal.species)}{animal.species && animal.sex ? ", " : ""}{titleCase(animal.sex)}{animal.sex && animal.age ? ", " : ""}{titleCase(animal.age)}{animal.age && animal.size ? ", " : ""}{titleCase(animal.size)}
+                    &nbsp;<Link href={"/hotline/servicerequest/" + animal.request}><FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item>
+                  <ListGroup.Item className='animal address'>{animal.full_address ? titleCase(animal.full_address) : ""} </ListGroup.Item>
                 </ListGroup>
               </Card.Body>
             </Card>
@@ -113,6 +122,14 @@ export function AnimalSearch() {
                 <ListGroup>
                   <ListGroup.Item className='request'>{animal.request ? <span><b>Request #{animal.request}</b> <Link href={"/hotline/servicerequest/" + animal.request}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></span> : ""}</ListGroup.Item>
                   <ListGroup.Item className='owner'>{animal.owner ? <span><b>Owner:</b> {animal.owner_object.first_name} {animal.owner_object.last_name} <Link href={"/hotline/owner/" + animal.owner}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></span>  : ""}</ListGroup.Item>
+                </ListGroup>
+              </Card.Body>
+            </Card>
+            <Card>
+              <Card.Body>
+                <Card.Title>Shelter Info</Card.Title>
+                <ListGroup>
+                  <ListGroup.Item className='Shelter'>{animal.shelter_name ? <span><b>Shelter {animal.request}</b> <Link href={"/shelter/" + animal.shelter}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></span> : "Not Sheltered"}</ListGroup.Item>
                 </ListGroup>
               </Card.Body>
             </Card>
