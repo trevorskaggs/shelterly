@@ -8,7 +8,7 @@ import {
   faClipboardList
 } from '@fortawesome/free-solid-svg-icons';
 
-
+const ITEMS_PER_PAGE = 2
 
 export function ServiceRequestTable() {
 
@@ -52,7 +52,7 @@ export function ServiceRequestTable() {
         cancelToken: source.token,
       })
       .then(response => {
-        setNumPages(response.data.length + 1)
+        setNumPages(Math.ceil(response.data.length / ITEMS_PER_PAGE))
         setData({service_requests: response.data, isFetching: false});
       })
       .catch(error => {
@@ -91,7 +91,7 @@ export function ServiceRequestTable() {
       </Form>
 
       {data.service_requests.map((service_request, index) => (
-        <div key={service_request.id} className="mt-3" hidden={page!= Math.floor(index)}>
+        <div key={service_request.id} className="mt-3" hidden={page!= Math.ceil(index/ITEMS_PER_PAGE)}>
           <div className="card-header"> Service Request #{service_request.id}<Link href={"/hotline/servicerequest/" + service_request.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
             <div><Moment format="LLL">{service_request.timestamp}</Moment></div>
           </div>
