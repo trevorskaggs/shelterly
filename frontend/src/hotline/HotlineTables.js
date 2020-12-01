@@ -97,8 +97,7 @@ export function ServiceRequestTable() {
 
       {data.service_requests.map(service_request => (
         <div key={service_request.id} className="mt-3">
-          <div className="card-header"> Service Request ({service_request.status}) <Link href={"/hotline/servicerequest/" + service_request.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
-            <div>{service_request.address}</div>
+          <div className="card-header">{service_request.full_address} ({service_request.status}) <Link href={"/hotline/servicerequest/" + service_request.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
           </div>
         <CardGroup>
           <Card key={service_request.id}>
@@ -138,37 +137,51 @@ export function ServiceRequestTable() {
                         {animal.status === "SHELTERED IN PLACE" ?
                             <OverlayTrigger key={"sip"} placement="top"
                                             overlay={<Tooltip id={`tooltip-sip`}>SHELTERED IN PLACE</Tooltip>}>
-                              <FontAwesomeIcon icon={faIgloo} className="ml-1"/>
+                              <Link href={"/animals/animal/" + animal.id}>
+                                <FontAwesomeIcon icon={faIgloo} className="ml-1"/>
+                              </Link>
                             </OverlayTrigger> : ""}
                         {animal.status === "REPORTED" ?
                             <OverlayTrigger key={"reported"} placement="top"
                                             overlay={<Tooltip id={`tooltip-reported`}>REPORTED</Tooltip>}>
-                              <FontAwesomeIcon icon={faExclamationCircle} className="ml-1"/>
+                              <Link href={"/animals/animal/" + animal.id}>
+                                <FontAwesomeIcon icon={faExclamationCircle} className="ml-1"/>
+                              </Link>
                             </OverlayTrigger> : ""}
                         {animal.status === "UNABLE TO LOCATE" ?
                             <OverlayTrigger key={"unable-to-locate"} placement="top"
                                             overlay={<Tooltip id={`tooltip-unable-to-locate`}>UNABLE TO LOCATE</Tooltip>}>
-                              <FontAwesomeIcon icon={faQuestionCircle} className="ml-1"/>
+                              <Link href={"/animals/animal/" + animal.id}>
+                                <FontAwesomeIcon icon={faQuestionCircle} className="ml-1"/>
+                              </Link>
                             </OverlayTrigger> : ""}
                         {animal.status === "EVACUATED" ?
                             <OverlayTrigger key={"evacuated"} placement="top"
                                             overlay={<Tooltip id={`tooltip-evacuated`}>EVACUATED</Tooltip>}>
-                              <FontAwesomeIcon icon={faHelicopter} className="ml-1"/>
+                              <Link href={"/animals/animal/" + animal.id}>
+                                <FontAwesomeIcon icon={faHelicopter} className="ml-1"/>
+                              </Link>
                             </OverlayTrigger> : ""}
                         {animal.status === "REUNITED" ?
                             <OverlayTrigger key={"reunited"} placement="top"
                                             overlay={<Tooltip id={`tooltip-reunited`}>REUNITED</Tooltip>}>
-                              <FontAwesomeIcon icon={faHeart} className="ml-1"/>
+                              <Link href={"/animals/animal/" + animal.id}>
+                                <FontAwesomeIcon icon={faHeart} className="ml-1"/>
+                              </Link>
                             </OverlayTrigger> : ""}
                         {animal.status === "SHELTERED" ?
                             <OverlayTrigger key={"sheltered"} placement="top"
                                             overlay={<Tooltip id={`tooltip-sheltered`}>SHELTERED</Tooltip>}>
-                              <FontAwesomeIcon icon={faHome} className="ml-1"/>
+                              <Link href={"/animals/animal/" + animal.id}>
+                                <FontAwesomeIcon icon={faHome} className="ml-1"/>
+                              </Link>
                             </OverlayTrigger> : ""}
                         {animal.status === "DECEASED" ?
                             <OverlayTrigger key={"deceased"} placement="top"
                                             overlay={<Tooltip id={`tooltip-deceased`}>DECEASED</Tooltip>}>
-                              <FontAwesomeIcon icon={faSkullCrossbones} className="ml-1"/>
+                              <Link href={"/animals/animal/" + animal.id}>
+                                <FontAwesomeIcon icon={faSkullCrossbones} className="ml-1"/>
+                              </Link>
                             </OverlayTrigger> : ""}
                       </span>))}
                 </ListGroup.Item>
