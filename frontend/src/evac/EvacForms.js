@@ -24,7 +24,7 @@ import Header from '../components/Header';
 import { Checkbox, DateTimePicker, DropDown, TextInput } from '.././components/Form';
 import { statusChoices } from '../animals/constants';
 
-export const EvacTeamMemberForm = ({id}) => {
+export const EvacTeamMemberForm = () => {
 
   // Track whether or not to add another evac team member after saving.
   const [addAnother, setAddAnother] = useState(false);
@@ -71,7 +71,7 @@ export const EvacTeamMemberForm = ({id}) => {
         >
         {form => (
           <Card border="secondary" className="mt-5">
-            <Card.Header as="h5" className="pl-3"><span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>{!id ? "New" : "Update"} Team Member</Card.Header>
+            <Card.Header as="h5" className="pl-3"><span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>New Team Member</Card.Header>
             <Card.Body>
               <Form>
                   <FormGroup>

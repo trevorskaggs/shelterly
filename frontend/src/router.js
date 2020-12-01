@@ -26,7 +26,7 @@ const routes = {
   "/animals/search": () => <AnimalSearch />,
   "/animals/animal/:id": ({id}) => <AnimalDetail id={id} />,
   "/evac": () => <Evac />,
-  "/evac/evacteammember/:id": ({id}) => <EvacTeamMemberForm id={id} />,
+  "/evac/evacteammember/new": () => <EvacTeamMemberForm />,
   "/evac/evacuationassignment/search": () => <EvacuationAssignmentSearch />,
   "/evac/summary/:id": ({id}) => <EvacSummary id={id} />,
   "/evac/resolution/:id": ({id}) => <EvacResolution id={id} />,
