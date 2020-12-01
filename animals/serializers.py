@@ -15,6 +15,7 @@ class AnimalSerializer(serializers.ModelSerializer):
     action_history = serializers.SerializerMethodField()
     shelter_name = serializers.SerializerMethodField()
     shelter = serializers.SerializerMethodField()
+    is_stray = serializers.SerializerMethodField()
 
     # Custom Owner object field that excludes animals to avoid a circular reference.
     def get_owner_object(self, obj):
@@ -67,6 +68,12 @@ class AnimalSerializer(serializers.ModelSerializer):
 
     def get_extra_images(self, obj):
         return [animal_image.image.url for animal_image in AnimalImage.objects.filter(animal=obj, category="extra")]
+
+    def get_is_stray(self, obj):
+        if obj.owner == None:
+            return True
+        else:
+            return False
 
     class Meta:
         model = Animal

@@ -89,6 +89,11 @@ export function AnimalSearch() {
           <InputGroup.Append>
             <Button variant="outline-light">Search</Button>
           </InputGroup.Append>
+          <ButtonGroup className="ml-3">
+              <Button variant={statusOptions.allColor} onClick={() => setStatusOptions({status:"REPORTED", allColor:"primary", openColor:"secondary", assignedColor:"secondary", closedColor:"secondary"})}>All</Button>
+              <Button variant={statusOptions.openColor} onClick={() => setStatusOptions({status:"REUNITED", allColor:"secondary", openColor:"primary", assignedColor:"secondary", closedColor:"secondary"})}>Stray</Button>
+              <Button variant={statusOptions.assignedColor} onClick={() => setStatusOptions({status:"EVACUATED", allColor:"secondary", openColor:"secondary", assignedColor:"primary", closedColor:"secondary"})}>Owned</Button>
+          </ButtonGroup>
         </InputGroup>
       </Form>
 
@@ -113,15 +118,16 @@ export function AnimalSearch() {
                   <ListGroup.Item className='species-sex'>{titleCase(animal.species)}{animal.species && animal.sex ? ", " : ""}{titleCase(animal.sex)}{animal.sex && animal.age ? ", " : ""}{titleCase(animal.age)}{animal.age && animal.size ? ", " : ""}{titleCase(animal.size)}
                     &nbsp;<Link href={"/hotline/servicerequest/" + animal.request}><FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item>
                   <ListGroup.Item className='animal address'>{animal.full_address ? titleCase(animal.full_address) : ""} </ListGroup.Item>
+                  <ListGroup.Items className='animal owner'>{animal.is_stray}</ListGroup.Items>
                 </ListGroup>
               </Card.Body>
             </Card>
             <Card>
               <Card.Body>
-                <Card.Title>Request Info</Card.Title>
+                <Card.Title>Owner Info</Card.Title>
                 <ListGroup>
-                  <ListGroup.Item className='request'>{animal.request ? <span><b>Request #{animal.request}</b> <Link href={"/hotline/servicerequest/" + animal.request}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></span> : ""}</ListGroup.Item>
                   <ListGroup.Item className='owner'>{animal.owner ? <span><b>Owner:</b> {animal.owner_object.first_name} {animal.owner_object.last_name} <Link href={"/hotline/owner/" + animal.owner}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></span>  : ""}</ListGroup.Item>
+                  <ListGroup.Item className='request'>{animal.request ? <span><b>Request #{animal.request}</b> <Link href={"/hotline/servicerequest/" + animal.request}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></span> : ""}</ListGroup.Item>
                 </ListGroup>
               </Card.Body>
             </Card>
