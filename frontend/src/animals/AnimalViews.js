@@ -43,7 +43,8 @@ export function AnimalView({id}) {
     action_history: [],
     full_address:'',
     shelter_name: '',
-    owner_object: {first_name:'', last_name:'', phone:'', email:''}
+    owner_object: {first_name:'', last_name:'', phone:'', email:''},
+    is_stray: ''
   });
 
   const [show, setShow] = useState(false);

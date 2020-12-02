@@ -38,7 +38,7 @@ export function AnimalSearch() {
     let source = axios.CancelToken.source();
     setData({animals: [], isFetching: true});
     // Fetch Animal data filtered searchTerm.
-    await axios.get('/animals/api/animal/?search=' + searchTerm, {
+    await axios.get('/animals/api/animal/?search=' + searchTerm + '&status=' + statusOptions.status, {
       cancelToken: source.token,
     })
     .then(response => {
@@ -56,7 +56,7 @@ export function AnimalSearch() {
       const fetchAnimals = async () => {
         setData({animals: [], isFetching: true});
         // Fetch ServiceRequest data.
-        await axios.get('/animals/api/animal/?search=' + searchTerm, {
+        await axios.get('/animals/api/animal/?search=' + searchTerm + '&status=' + statusOptions.status, {
           cancelToken: source.token,
         })
         .then(response => {
@@ -118,7 +118,6 @@ export function AnimalSearch() {
                   <ListGroup.Item className='species-sex'>{titleCase(animal.species)}{animal.species && animal.sex ? ", " : ""}{titleCase(animal.sex)}{animal.sex && animal.age ? ", " : ""}{titleCase(animal.age)}{animal.age && animal.size ? ", " : ""}{titleCase(animal.size)}
                     &nbsp;<Link href={"/hotline/servicerequest/" + animal.request}><FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item>
                   <ListGroup.Item className='animal address'>{animal.full_address ? titleCase(animal.full_address) : ""} </ListGroup.Item>
-                  <ListGroup.Items className='animal owner'>{animal.is_stray}</ListGroup.Items>
                 </ListGroup>
               </Card.Body>
             </Card>
