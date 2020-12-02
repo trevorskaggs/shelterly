@@ -125,6 +125,7 @@ export function AnimalSearch() {
               <Card.Body>
                 <Card.Title>Owner Info</Card.Title>
                 <ListGroup>
+                  <ListGroup.Item classNamne='stray'>{animal.is_stray ? <span><b>Stray Animal:</b> Yes</span> : <span><b>Stray Animal:</b> No</span>}</ListGroup.Item> 
                   <ListGroup.Item className='owner'>{animal.owner ? <span><b>Owner:</b> {animal.owner_object.first_name} {animal.owner_object.last_name} <Link href={"/hotline/owner/" + animal.owner}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></span>  : ""}</ListGroup.Item>
                   <ListGroup.Item className='request'>{animal.request ? <span><b>Request #{animal.request}</b> <Link href={"/hotline/servicerequest/" + animal.request}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></span> : ""}</ListGroup.Item>
                 </ListGroup>
