@@ -15,7 +15,7 @@ class AnimalSerializer(serializers.ModelSerializer):
     action_history = serializers.SerializerMethodField()
     shelter_name = serializers.SerializerMethodField()
     shelter = serializers.SerializerMethodField()
-    # is_stray = serializers.SerializerMethodField()
+    is_stray = serializers.SerializerMethodField()
 
     # Custom Owner object field that excludes animals to avoid a circular reference.
     def get_owner_object(self, obj):
