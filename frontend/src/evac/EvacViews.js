@@ -35,12 +35,17 @@ export function Dispatch() {
   const [mapState, setMapState] = useState({});
   const [totalSelectedState, setTotalSelectedState] = useState({'REPORTED':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}});
   const [selectedCount, setSelectedCount] = useState({count:0, disabled:true});
-  const [statusOptions, setStatusOptions] = useState({aco_required:false});
+  const [statusOptions, setStatusOptions] = useState({aco_required:false, pending_only: true});
   const [teamData, setTeamData] = useState({options: [], isFetching: false});
 
   // Handle aco_required toggle.
   const handleACO = async event => {
-    setStatusOptions({aco_required:!statusOptions.aco_required})
+    setStatusOptions({aco_required:!statusOptions.aco_required, pending_only:statusOptions.pending_only})
+  }
+
+  // Handle pending_only toggle.
+  const handlePendingOnly = async event => {
+    setStatusOptions({aco_required:statusOptions.aco_required, pending_only:!statusOptions.pending_only})
   }
 
   // Handle radius circle toggles.
@@ -193,28 +198,29 @@ export function Dispatch() {
         params: {
           status: 'open',
           aco_required: statusOptions.aco_required,
+          pending_only: statusOptions.pending_only,
           map: true
         },
         cancelToken: source.token,
       })
       .then(response => {
         setData({service_requests: response.data, isFetching: false, bounds:data.bounds});
-
-        // Initialize map options dict with all SRs on first load.
-        if (Object.keys(mapState).length === 0) {
-          const map_dict = {};
-          const bounds = [];
-          for (const service_request of response.data) {
+        const map_dict = mapState;
+        const bounds = [];
+        const current_ids = Object.keys(mapState);
+        for (const service_request of response.data) {
+          // Only add initial settings if we don't already have them.
+          if (!current_ids.includes(String(service_request.id))) {
             const total_matches = countMatches(service_request);
-            const matches = total_matches[0]
-            const status_matches = total_matches[1]
+            const matches = total_matches[0];
+            const status_matches = total_matches[1];
             let color = 'yellow';
             if (service_request.has_reported_animals) {
               color = 'red';
             }
             map_dict[service_request.id] = {color:color, checked:false, hidden:false, matches:matches, status_matches:status_matches, radius:"disabled", has_reported_animals:service_request.has_reported_animals, latitude:service_request.latitude, longitude:service_request.longitude};
-            bounds.push([service_request.latitude, service_request.longitude]);
           }
+          bounds.push([service_request.latitude, service_request.longitude]);
           setMapState(map_dict);
           if (bounds.length > 0) {
             setData(prevState => ({ ...prevState, ["bounds"]:L.latLngBounds(bounds) }));
@@ -319,7 +325,8 @@ export function Dispatch() {
                 className="col-sm-8 pl-0"
               />
               <Button type="submit" className="btn-block col-sm-2" disabled={selectedCount.disabled || props.values.team_members.length === 0}>DEPLOY</Button>
-              <FormCheck id="aco_required" className="col-sm-2 mt-2" style={{paddingLeft:"60px"}} name="aco_required" type="switch" label="ACO Required" checked={statusOptions.ACORequired} onChange={handleACO} />
+              <FormCheck id="aco_required" className="col-sm-2 mt-2" style={{paddingLeft:"60px"}} name="aco_required" type="switch" label="ACO Required" checked={statusOptions.aco_required} onChange={handleACO} />
+              <FormCheck id="pending_only" className="col-sm-2 mt-2" style={{paddingLeft:"60px"}} name="pending_only" type="switch" label="Pending Only" checked={statusOptions.pending_only} onChange={handlePendingOnly} />
             </div>
           </Col>
         </Row>

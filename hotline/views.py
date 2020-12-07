@@ -52,10 +52,15 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
         if aco_required == 'true':
             queryset = queryset.filter(Q(animal__aggressive='yes') | Q(animal__species='other'))
 
+        # Filter on pending_only option for the map.
+        pending_only = self.request.query_params.get('pending_only', '')
+        if pending_only == 'true':
+            queryset = queryset.filter(Q(followup_date__lte=datetime.today()) | Q(followup_date__isnull=True))
+
         # Exclude SRs without a geolocation when fetching for a map.
         is_map = self.request.query_params.get('map', '')
         if is_map == 'true':
-            queryset = queryset.exclude(Q(latitude=None) | Q(longitude=None)).filter(Q(followup_date__lte=datetime.today()) | Q(followup_date__isnull=True))
+            queryset = queryset.exclude(Q(latitude=None) | Q(longitude=None))
         return queryset
 
 class VisitNoteViewSet(viewsets.ModelViewSet):
