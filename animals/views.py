@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Case, BooleanField, Value, When
 from rest_framework import filters, viewsets
 from actstream import action
 
@@ -94,3 +95,13 @@ class AnimalViewSet(viewsets.ModelViewSet):
                 # Otherwise create a new extra image.
                 else:
                     AnimalImage.objects.create(image=image_data, animal=animal, category="extra")
+    
+    def get_queryset(self):
+        queryset = Animal.objects.all().annotate(
+            is_stray=Case(
+                When(owner__first_name='Unknown', then=True),
+                default=False,
+                output_field=BooleanField(),
+            ))
+        return queryset
+    

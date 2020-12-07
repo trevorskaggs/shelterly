@@ -38,7 +38,7 @@ export function AnimalSearch() {
     let source = axios.CancelToken.source();
     setData({animals: [], isFetching: true});
     // Fetch Animal data filtered searchTerm.
-    await axios.get('/animals/api/animal/?search=' + searchTerm + '&status=' + statusOptions.status, {
+    await axios.get('/animals/api/animal/?search=' + searchTerm + '&is_stray=' + statusOptions.status, {
       cancelToken: source.token,
     })
     .then(response => {
@@ -90,9 +90,9 @@ export function AnimalSearch() {
             <Button variant="outline-light">Search</Button>
           </InputGroup.Append>
           <ButtonGroup className="ml-3">
-              <Button variant={statusOptions.allColor} onClick={() => setStatusOptions({status:"REPORTED", allColor:"primary", openColor:"secondary", assignedColor:"secondary", closedColor:"secondary"})}>All</Button>
-              <Button variant={statusOptions.openColor} onClick={() => setStatusOptions({status:"REUNITED", allColor:"secondary", openColor:"primary", assignedColor:"secondary", closedColor:"secondary"})}>Stray</Button>
-              <Button variant={statusOptions.assignedColor} onClick={() => setStatusOptions({status:"EVACUATED", allColor:"secondary", openColor:"secondary", assignedColor:"primary", closedColor:"secondary"})}>Owned</Button>
+              <Button variant={statusOptions.allColor} onClick={() => setStatusOptions({status:"", allColor:"primary", openColor:"secondary", assignedColor:"secondary", closedColor:"secondary"})}>All</Button>
+              <Button variant={statusOptions.openColor} onClick={() => setStatusOptions({status:"TRUE", allColor:"secondary", openColor:"primary", assignedColor:"secondary", closedColor:"secondary"})}>Stray</Button>
+              <Button variant={statusOptions.assignedColor} onClick={() => setStatusOptions({status:"FALSE", allColor:"secondary", openColor:"secondary", assignedColor:"primary", closedColor:"secondary"})}>Owned</Button>
           </ButtonGroup>
         </InputGroup>
       </Form>
