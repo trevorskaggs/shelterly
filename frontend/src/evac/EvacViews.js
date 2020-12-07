@@ -265,7 +265,7 @@ export function Dispatch() {
     {props => (
       <Form>
         <Row className="d-flex flex-wrap sticky" style={{paddingRight:"5px"}}>
-          <Col xs={12} className="border rounded pl-0" style={{marginLeft:"-5px", marginBottom:"10px", paddingRight:"9px"}}>
+          <Col xs={10} className="border rounded pl-0" style={{marginLeft:"-5px", marginBottom:"10px", paddingRight:"9px"}}>
             <Map className="d-block sticky" style={{marginTop:"-10px", marginBottom:"10px", marginRight:"-9px"}} bounds={data.bounds} onMoveEnd={onMove}>
               <Legend position="bottomleft" metric={false} />
               <TileLayer
@@ -312,6 +312,15 @@ export function Dispatch() {
               ))}
             </Map>
           </Col>
+          <Col xs={2} style={{paddingLeft:"7px", paddingRight:"0px"}}>
+            <div className="card-header border rounded pl-3 pr-3">
+              <h5 className="mb-0 text-center">Options</h5>
+              <hr/>
+              <FormCheck id="aco_required" name="aco_required" type="switch" label="ACO Required" checked={statusOptions.aco_required} onChange={handleACO} />
+              <FormCheck id="pending_only" className="mt-3" name="pending_only" type="switch" label="Pending Only" checked={statusOptions.pending_only} onChange={handlePendingOnly} />
+            </div>
+            <Button type="submit" className="btn-block mt-2" disabled={selectedCount.disabled || props.values.team_members.length === 0}>DEPLOY</Button>
+          </Col>
         </Row>
         <Row className="mt-2" style={{paddingRight:"10px"}}>
           <Col xs={12} className="pl-0">
@@ -322,11 +331,9 @@ export function Dispatch() {
                 onChange={(values) => {props.setFieldValue('team_members', values.map(item => item.id))}}
                 options={teamData.options}
                 placeholder="Choose team members..."
-                className="col-sm-8 pl-0"
+                className="col-sm-11 pl-0"
+                style={{paddingRight:"80px"}}
               />
-              <Button type="submit" className="btn-block col-sm-2" disabled={selectedCount.disabled || props.values.team_members.length === 0}>DEPLOY</Button>
-              <FormCheck id="aco_required" className="col-sm-2 mt-2" style={{paddingLeft:"60px"}} name="aco_required" type="switch" label="ACO Required" checked={statusOptions.aco_required} onChange={handleACO} />
-              <FormCheck id="pending_only" className="col-sm-2 mt-2" style={{paddingLeft:"60px"}} name="pending_only" type="switch" label="Pending Only" checked={statusOptions.pending_only} onChange={handlePendingOnly} />
             </div>
           </Col>
         </Row>
