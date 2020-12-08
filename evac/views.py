@@ -44,7 +44,9 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         if serializer.is_valid():
-            serializer.validated_data['end_time'] = datetime.now()
+            # Only add end_time on first update.
+            if not serializer.instance.end_time:
+                serializer.validated_data['end_time'] = datetime.now()
             evac_assignment = serializer.save()
             for service_request in self.request.data['sr_updates']:
                 sr_status = 'closed'

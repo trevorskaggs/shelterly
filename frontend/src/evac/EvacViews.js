@@ -5,7 +5,7 @@ import { Form, Formik } from 'formik';
 import { Button, Card, Col, FormCheck, ListGroup, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBandAid, faBullseye, faCar, faClipboardList, faIgloo, faQuestionCircle, faShieldAlt, faTrailer
+  faBandAid, faBullseye, faCar, faClipboardList, faEdit, faIgloo, faQuestionCircle, faShieldAlt, faTrailer
 } from '@fortawesome/free-solid-svg-icons';
 import { Circle, CircleMarker, Map, TileLayer, Tooltip as MapTooltip, useLeaflet } from "react-leaflet";
 import L from "leaflet";
@@ -18,10 +18,6 @@ import Moment from 'react-moment';
 import Header from '../components/Header';
 import 'react-bootstrap-typeahead/css/Typeahead.css';
 import 'leaflet/dist/leaflet.css';
-
-const header_style = {
-  textAlign: "center",
-}
 
 const Legend = (props) => {
   const { map } = useLeaflet();
@@ -519,8 +515,8 @@ export function EvacSummary({id}) {
 
   return (
     <>
-    <Header>Dispatch Assignment Summary #{id} <Link href={"/evac/resolution/" + id} className="btn btn-danger ml-1 mb-2" style={{paddingTop:"10px", paddingBottom:"10px"}}>Close</Link>
-    <div style={{fontSize:"16px", marginTop:"5px"}}><b>Opened: </b><Moment format="lll">{data.start_time}</Moment></div>
+    <Header>Dispatch Assignment Summary | {data.end_time ? <span>Closed <Link href={"/evac/resolution/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link></span> : <Link href={"/evac/resolution/" + id} className="btn btn-danger ml-1 mb-2" style={{paddingTop:"10px", paddingBottom:"10px"}}>Close</Link>}
+      <div style={{fontSize:"16px", marginTop:"5px"}}><b>Opened: </b><Moment format="lll">{data.start_time}</Moment>{data.end_time ? <span style={{fontSize:"16px", marginTop:"5px"}}> | <b>Closed: </b><Moment format="lll">{data.end_time}</Moment></span> : ""}</div>
     </Header>
     <hr/>
     <Card border="secondary" className="mt-1">
@@ -546,7 +542,7 @@ export function EvacSummary({id}) {
         </Card.Title>
         <hr/>
         <ListGroup variant="flush" style={{marginTop:"-5px", marginBottom:"-13px"}}>
-          <ListGroup.Item><b>Address: </b>{service_request.full_address}</ListGroup.Item>
+          <ListGroup.Item style={{marginTop:"-8px"}}><b>Address: </b>{service_request.full_address}</ListGroup.Item>
           <ListGroup.Item><b>Owner: </b>{service_request.owner_object.first_name} {service_request.owner_object.last_name} <Link href={"/hotline/owner/" + service_request.owner}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link> | {service_request.owner_object.phone||service_request.owner_object.email||"No Contact"}</ListGroup.Item>
         </ListGroup>
         <hr/>
@@ -554,13 +550,22 @@ export function EvacSummary({id}) {
           <h4 className="mt-2" style={{marginBottom:"-2px"}}>Animals</h4>
           {service_request.animals.map((animal, inception) => (
             <ListGroup.Item key={animal.id}>
-              <span style={{textTransform:"capitalize"}}>{animal.name||"Unknown"} ({animal.pcolor ? <span>{animal.pcolor}{animal.scolor ? "/" + animal.scolor : ""}&nbsp;</span> : ""}<span style={{textTransform:"capitalize"}}>{animal.species}</span></span>) - {animal.status}
-          </ListGroup.Item>
+              <span style={{textTransform:"capitalize"}}>{animal.name||"Unknown"} ({animal.pcolor ? <span>{animal.pcolor}{animal.scolor ? "/" + animal.scolor : ""}&nbsp;</span> : ""}<span style={{textTransform:"capitalize"}}>{animal.species}</span></span>) - {animal.status}<Link href={"/animals/animal/" + animal.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
+            </ListGroup.Item>
           ))}
         </ListGroup>
-        </Card.Body>
-      </Card>
-      ))}
+        <hr/>
+        <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
+          <h4 className="mt-2" style={{marginBottom:"-2px"}}>Notes</h4>
+          {service_request.visit_notes.filter(note => String(note.evac_assignment) === String(id)).map((note) => (
+            <ListGroup.Item key={note.id}>
+              {note.notes || "None"}
+            </ListGroup.Item>
+          ))}
+        </ListGroup>
+      </Card.Body>
+    </Card>
+    ))}
     </>
   )
 }

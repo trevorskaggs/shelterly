@@ -140,7 +140,7 @@ export function EvacuationAssignmentTable() {
                 <div>
                 Opened: <Moment format="L">{evacuation_assignment.start_time}</Moment> |
                 {evacuation_assignment.end_time ?
-                  <span>Closed:
+                  <span> Closed: 
                     <Moment format="L">{evacuation_assignment.end_time}</Moment>
                   </span> : <Link href={"/evac/resolution/" + evacuation_assignment.id} className="btn btn-danger ml-1" style={{paddingTop:"0px", paddingBottom:"0px"}}>Close</Link>}
                 </div>
