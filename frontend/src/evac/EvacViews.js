@@ -297,6 +297,7 @@ export function Dispatch() {
                       :""}
                       <br />
                       {service_request.full_address}
+                      {service_request.followup_date ? <div>Followup Date: <Moment format="L">{service_request.followup_date}</Moment></div> : ""}
                       <div>
                         {service_request.aco_required ? <img width={16} height={16} src={shield} alt="" className="mr-1" /> : ""}
                         {service_request.injured ? <img width={16} height={16} src={bandaid} alt="" className="mr-1" /> : ""}
@@ -323,15 +324,15 @@ export function Dispatch() {
         </Row>
         <Row className="mt-2" style={{paddingRight:"10px"}}>
           <Col xs={10} className="pl-0">
-              <Typeahead
-                id="team_members"
-                multiple
-                onChange={(values) => {props.setFieldValue('team_members', values.map(item => item.id))}}
-                options={teamData.options}
-                placeholder="Choose team members..."
-                className=""
-                style={{marginLeft:"-5px", marginRight:"-15px"}}
-              />
+            <Typeahead
+              id="team_members"
+              multiple
+              onChange={(values) => {props.setFieldValue('team_members', values.map(item => item.id))}}
+              options={teamData.options}
+              placeholder="Choose team members..."
+              className=""
+              style={{marginLeft:"-5px", marginRight:"-15px"}}
+            />
           </Col>
           <Col xs={2} className="pl-0" style={{paddingRight:"5px"}}>
             <Button type="submit" className="btn-block mt-auto" style={{marginBottom:"-33px", marginLeft:"5px"}} disabled={selectedCount.disabled || props.values.team_members.length === 0}>DEPLOY</Button>
