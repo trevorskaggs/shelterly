@@ -97,11 +97,20 @@ class AnimalViewSet(viewsets.ModelViewSet):
                     AnimalImage.objects.create(image=image_data, animal=animal, category="extra")
     
     def get_queryset(self):
+        #annoatate is_valid
         queryset = Animal.objects.all().annotate(
             is_stray=Case(
                 When(owner__first_name='Unknown', then=True),
                 default=False,
                 output_field=BooleanField(),
             ))
+        
+        #filter by is_valid
+        is_stray = self.request.query_params.get('is_stray', '')
+        if is_stray == 'true':
+            queryset = queryset.filter(is_stray=True)
+        if is_stray == 'false':
+            queryset = queryset.filter(is_stray=False)
+            
         return queryset
     
