@@ -312,29 +312,29 @@ export function Dispatch() {
               ))}
             </Map>
           </Col>
-          <Col xs={2} style={{paddingLeft:"7px", paddingRight:"0px"}}>
+          <Col xs={2} className="d-flex flex-column" style={{paddingLeft:"7px", paddingRight:"0px"}}>
             <div className="card-header border rounded pl-3 pr-3">
               <h5 className="mb-0 text-center">Options</h5>
               <hr/>
               <FormCheck id="aco_required" name="aco_required" type="switch" label="ACO Required" checked={statusOptions.aco_required} onChange={handleACO} />
               <FormCheck id="pending_only" className="mt-3" name="pending_only" type="switch" label="Pending Only" checked={statusOptions.pending_only} onChange={handlePendingOnly} />
             </div>
-            <Button type="submit" className="btn-block mt-2" disabled={selectedCount.disabled || props.values.team_members.length === 0}>DEPLOY</Button>
           </Col>
         </Row>
         <Row className="mt-2" style={{paddingRight:"10px"}}>
-          <Col xs={12} className="pl-0">
-            <div className="form-row">
+          <Col xs={10} className="pl-0">
               <Typeahead
                 id="team_members"
                 multiple
                 onChange={(values) => {props.setFieldValue('team_members', values.map(item => item.id))}}
                 options={teamData.options}
                 placeholder="Choose team members..."
-                className="col-sm-11 pl-0"
-                style={{paddingRight:"80px"}}
+                className=""
+                style={{marginLeft:"-5px", marginRight:"-15px"}}
               />
-            </div>
+          </Col>
+          <Col xs={2} className="pl-0" style={{paddingRight:"5px"}}>
+            <Button type="submit" className="btn-block mt-auto" style={{marginBottom:"-33px", marginLeft:"5px"}} disabled={selectedCount.disabled || props.values.team_members.length === 0}>DEPLOY</Button>
           </Col>
         </Row>
         <Row className="d-flex flex-wrap" style={{marginTop:"-15px", minHeight:"36vh", paddingRight:"10px"}}>
