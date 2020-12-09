@@ -55,7 +55,7 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
                     if animal['status'] in ['SHELTERED IN PLACE', 'UNABLE TO LOCATE']:
                         sr_status = 'open'
                 service_requests = ServiceRequest.objects.filter(id=service_request['id'])
-                service_requests.update(status=sr_status, followup_date=service_request['followup_date'])
+                service_requests.update(status=sr_status, followup_date=service_request['followup_date'] or None)
                 if sr_status == 'open':
                     action.send(self.request.user, verb='opened service request', target=service_requests[0])
                 else:
