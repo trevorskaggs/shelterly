@@ -8,6 +8,7 @@ from location.utils import build_full_address, build_action_string
 class AnimalSerializer(serializers.ModelSerializer):
     owner_object = serializers.SerializerMethodField()
     full_address = serializers.SerializerMethodField()
+    request_address = serializers.SerializerMethodField()
     aco_required = serializers.SerializerMethodField()
     front_image = serializers.SerializerMethodField()
     side_image = serializers.SerializerMethodField()
@@ -33,6 +34,10 @@ class AnimalSerializer(serializers.ModelSerializer):
             return build_full_address(obj.request)
         # Otherwise use the owner address.
         return build_full_address(obj.owner)
+
+    # Custome field for request address.
+    def get_request_address(self, obj):
+        return build_full_address(obj.request)
 
     # Custom field to return shelter ID.
     def get_shelter(self, obj):

@@ -34,10 +34,6 @@ class ServiceRequest(Location):
             output.append('Reporter: %s' % self.reporter)
         output.append('Animal Count: %s' % self.animal_set.all().count())
         return ', '.join(output)
-    
-    @property
-    def location_type(self):
-        return 'service_request'
 
     class Meta:
         ordering = ['timestamp']
