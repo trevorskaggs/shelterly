@@ -60,5 +60,9 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
                     action.send(self.request.user, verb='opened service request', target=service_requests[0])
                 else:
                     action.send(self.request.user, verb='closed service request', target=service_requests[0])
-                VisitNote.objects.create(evac_assignment=evac_assignment, service_request=service_requests[0], date_completed=service_request['date_completed'], notes=service_request['notes'], owner_contacted=service_request['owner_contacted'], forced_entry=service_request['forced_entry'])
+                # Only create VisitNote on first update.
+                if not VisitNote.objects.filter(evac_assignment=evac_assignment, service_request=service_requests[0]).exists():
+                    VisitNote.objects.create(evac_assignment=evac_assignment, service_request=service_requests[0], date_completed=service_request['date_completed'], notes=service_request['notes'], owner_contacted=service_request['owner_contacted'], forced_entry=service_request['forced_entry'])
+                else:
+                    VisitNote.objects.filter(evac_assignment=evac_assignment, service_request=service_requests[0]).update(date_completed=service_request['date_completed'], notes=service_request['notes'], owner_contacted=service_request['owner_contacted'], forced_entry=service_request['forced_entry'])
             action.send(self.request.user, verb='updated evacuation assignment', target=evac_assignment)

@@ -148,7 +148,14 @@ export function EvacResolution({ id }) {
       .then(response => {
         response.data["sr_updates"] = [];
         response.data.service_request_objects.forEach((service_request, index) => {
-          response.data.sr_updates.push({id:service_request.id, followup_date: null, date_completed:new Date(), notes:'', owner_contacted:false, forced_entry: false, animals:service_request.animals})
+          // Use existing VisitNote to populate data if we're editing a closed Resolution.
+          const visit_note = service_request.visit_notes.filter(note => String(note.evac_assignment) === String(id))[0]
+          if (visit_note) {
+            response.data.sr_updates.push({id:service_request.id, followup_date: service_request.followup_date, date_completed:visit_note.date_completed||new Date(), notes:visit_note.notes, owner_contacted:visit_note.owner_contacted, forced_entry: visit_note.forced_entry, animals:service_request.animals})
+          }
+          else {
+            response.data.sr_updates.push({id:service_request.id, followup_date: service_request.followup_date, date_completed:new Date(), notes:'', owner_contacted:false, forced_entry: false, animals:service_request.animals})
+          }
         });
         setData(response.data);
       })
@@ -201,8 +208,8 @@ export function EvacResolution({ id }) {
         {props => (
           <>
           <BootstrapForm as={Form}>
-          <Header>Dispatch Assignment #{id} Resolution
-          <div style={{fontSize:"16px", marginTop:"5px"}}><b>Opened: </b><Moment format="lll">{data.start_time}</Moment></div>
+          <Header>Dispatch Assignment Resolution | {data.end_time ? "Closed" : "Open"}
+          <div style={{fontSize:"16px", marginTop:"5px"}}><b>Opened: </b><Moment format="lll">{data.start_time}</Moment>{data.end_time ? <span style={{fontSize:"16px", marginTop:"5px"}}> | <b>Closed: </b><Moment format="lll">{data.end_time}</Moment></span> : ""}</div>
           </Header>
           <hr/>
           <Card border="secondary" className="mt-3">
@@ -254,75 +261,76 @@ export function EvacResolution({ id }) {
                 ))}
               </ListGroup>
               <hr/>
-                <BootstrapForm.Row className="mt-3">
-                  <DateTimePicker
-                    label="Date Completed"
-                    name={`sr_updates.${index}.date_completed`}
-                    id={`sr_updates.${index}.date_completed`}
-                    xs="4"
-                    data-enable-time={false}
-                    clearable={false}
-                    onChange={(date, dateStr) => {
-                      props.setFieldValue(`sr_updates.${index}.date_completed`, dateStr)
-                    }}
-                    value={props.values.sr_updates[index] ? props.values.sr_updates[index].date_completed : new Date()}
-                  />
-                </BootstrapForm.Row>
-                <BootstrapForm.Row className="mt-3">
-                  <TextInput
-                    id={`sr_updates.${index}.notes`}
-                    name={`sr_updates.${index}.notes`}
-                    xs="9"
-                    as="textarea"
-                    rows={5}
-                    label="Notes"
-                  />
-                </BootstrapForm.Row>
-                <BootstrapForm.Row>
-                  <DateTimePicker
-                    label="Followup Date"
-                    name={`sr_updates.${index}.followup_date`}
-                    id={`sr_updates.${index}.followup_date`}
-                    xs="4"
-                    data-enable-time={false}
-                    onChange={(date, dateStr) => {
-                      props.setFieldValue(`sr_updates.${index}.followup_date`, dateStr)
-                    }}
-                    value={data.followup_date||null}
-                  />
-                </BootstrapForm.Row>
-                <BootstrapForm.Row className="mt-2">
-                  <Col>
-                    <Label htmlFor={`sr_updates.${index}.forced_entry`} className="mt-2">Forced Entry</Label>
-                    <Field component={Switch} name={`sr_updates.${index}.forced_entry`} type="checkbox" color="primary" />
-                  </Col>
-                </BootstrapForm.Row>
-                <BootstrapForm.Row className="mt-3 pl-1">
-                  <Field
-                    label={"Owner Notified: "}
-                    component={Checkbox}
-                    name={`sr_updates.${index}.owner_contacted`}
-                    onChange={() => {
-                      if (props.values.sr_updates[index] && props.values.sr_updates[index].owner_contacted) {
-                        props.setFieldValue(
-                          `sr_updates.${index}.owner_contacted`,
-                          false
-                        );
-                      }
-                      else {
-                        props.setFieldValue(
-                          `sr_updates.${index}.owner_contacted`,
-                          true
-                        );
-                      }
-                    }}
-                  />
-                </BootstrapForm.Row>
-                {props.errors.sr_updates && props.errors.sr_updates[index] && props.errors.sr_updates[index].owner_contacted &&
-                props.touched.sr_updates && props.touched.sr_updates[index] && props.touched.sr_updates[index].owner_contacted && (
-                  <div style={{ color: "#e74c3c", marginTop: "-8px", fontSize: "80%" }}>{props.errors.sr_updates[index].owner_contacted}</div>
-                  )
-                }
+              <BootstrapForm.Row className="mt-3">
+                <DateTimePicker
+                  label="Date Completed"
+                  name={`sr_updates.${index}.date_completed`}
+                  id={`sr_updates.${index}.date_completed`}
+                  xs="4"
+                  data-enable-time={false}
+                  clearable={false}
+                  onChange={(date, dateStr) => {
+                    props.setFieldValue(`sr_updates.${index}.date_completed`, dateStr)
+                  }}
+                  value={props.values.sr_updates[index] ? props.values.sr_updates[index].date_completed : new Date()}
+                />
+              </BootstrapForm.Row>
+              <BootstrapForm.Row className="mt-3">
+                <TextInput
+                  id={`sr_updates.${index}.notes`}
+                  name={`sr_updates.${index}.notes`}
+                  xs="9"
+                  as="textarea"
+                  rows={5}
+                  label="Notes"
+                />
+              </BootstrapForm.Row>
+              <BootstrapForm.Row>
+                <DateTimePicker
+                  label="Followup Date"
+                  name={`sr_updates.${index}.followup_date`}
+                  id={`sr_updates.${index}.followup_date`}
+                  xs="4"
+                  data-enable-time={false}
+                  onChange={(date, dateStr) => {
+                    props.setFieldValue(`sr_updates.${index}.followup_date`, dateStr)
+                  }}
+                  value={data.followup_date||null}
+                />
+              </BootstrapForm.Row>
+              <BootstrapForm.Row className="mt-2">
+                <Col>
+                  <Label htmlFor={`sr_updates.${index}.forced_entry`} className="mt-2">Forced Entry</Label>
+                  <Field component={Switch} name={`sr_updates.${index}.forced_entry`} type="checkbox" color="primary" />
+                </Col>
+              </BootstrapForm.Row>
+              <BootstrapForm.Row className="mt-3 pl-1">
+                <Field
+                  label={"Owner Notified: "}
+                  component={Checkbox}
+                  name={`sr_updates.${index}.owner_contacted`}
+                  checked={props.values.sr_updates[index] && props.values.sr_updates[index].owner_contacted}
+                  onChange={() => {
+                    if (props.values.sr_updates[index] && props.values.sr_updates[index].owner_contacted) {
+                      props.setFieldValue(
+                        `sr_updates.${index}.owner_contacted`,
+                        false
+                      );
+                    }
+                    else {
+                      props.setFieldValue(
+                        `sr_updates.${index}.owner_contacted`,
+                        true
+                      );
+                    }
+                  }}
+                />
+              </BootstrapForm.Row>
+              {props.errors.sr_updates && props.errors.sr_updates[index] && props.errors.sr_updates[index].owner_contacted &&
+              props.touched.sr_updates && props.touched.sr_updates[index] && props.touched.sr_updates[index].owner_contacted && (
+                <div style={{ color: "#e74c3c", marginTop: "-8px", fontSize: "80%" }}>{props.errors.sr_updates[index].owner_contacted}</div>
+                )
+              }
               </Card.Body>
             </Card>
             ))}
