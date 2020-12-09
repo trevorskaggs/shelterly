@@ -151,10 +151,10 @@ export function EvacResolution({ id }) {
           // Use existing VisitNote to populate data if we're editing a closed Resolution.
           const visit_note = service_request.visit_notes.filter(note => String(note.evac_assignment) === String(id))[0]
           if (visit_note) {
-            response.data.sr_updates.push({id:service_request.id, followup_date: service_request.followup_date, date_completed:visit_note.date_completed||new Date(), notes:visit_note.notes, owner_contacted:visit_note.owner_contacted, forced_entry: visit_note.forced_entry, animals:service_request.animals})
+            response.data.sr_updates.push({id:service_request.id, followup_date: service_request.followup_date, date_completed:visit_note.date_completed||new Date(), notes:visit_note.notes, owner_contacted:visit_note.owner_contacted, forced_entry: visit_note.forced_entry, animals:service_request.animals, owner:service_request.owner !== null})
           }
           else {
-            response.data.sr_updates.push({id:service_request.id, followup_date: service_request.followup_date, date_completed:new Date(), notes:'', owner_contacted:false, forced_entry: false, animals:service_request.animals})
+            response.data.sr_updates.push({id:service_request.id, followup_date: service_request.followup_date, date_completed:new Date(), notes:'', owner_contacted:false, forced_entry: false, animals:service_request.animals, owner:service_request.owner !== null})
           }
         });
         setData(response.data);
@@ -178,6 +178,7 @@ export function EvacResolution({ id }) {
           sr_updates: Yup.array().of(
             Yup.object().shape({
               id: Yup.number().required(),
+              owner: Yup.boolean(),
               followup_date: Yup.date().nullable(),
               animals: Yup.array().of(
                 Yup.object().shape({
@@ -188,7 +189,9 @@ export function EvacResolution({ id }) {
               date_completed: Yup.date().required('Required'),
               notes: Yup.string(),
               forced_entry: Yup.boolean(),
-              owner_contacted: Yup.boolean().required().oneOf([true], 'The owner must be notified before resolution.'),
+              owner_contacted: Yup.boolean().when('owner', {
+                is: true,
+                then: Yup.boolean().oneOf([true], 'The owner must be notified before resolution.').required()}),
             })
           ),
         })}
@@ -236,7 +239,7 @@ export function EvacResolution({ id }) {
               <hr/>
               <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
                 <ListGroup.Item><b>Address: </b>{service_request.full_address}</ListGroup.Item>
-                <ListGroup.Item><b>Owner: </b>{service_request.owner_object.first_name} {service_request.owner_object.last_name} <Link href={"/hotline/owner/" + service_request.owner}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item>
+                <ListGroup.Item><b>Owner: </b>{service_request.owner_object ? <span>{service_request.owner_object.first_name} {service_request.owner_object.last_name} <Link href={"/hotline/owner/" + service_request.owner}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></span> : "No Owner"}</ListGroup.Item>
               </ListGroup>
               <hr/>
               <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
@@ -295,7 +298,7 @@ export function EvacResolution({ id }) {
                   onChange={(date, dateStr) => {
                     props.setFieldValue(`sr_updates.${index}.followup_date`, dateStr)
                   }}
-                  value={data.followup_date||null}
+                  value={service_request.followup_date||null}
                 />
               </BootstrapForm.Row>
               <BootstrapForm.Row className="mt-2">
@@ -304,28 +307,30 @@ export function EvacResolution({ id }) {
                   <Field component={Switch} name={`sr_updates.${index}.forced_entry`} type="checkbox" color="primary" />
                 </Col>
               </BootstrapForm.Row>
-              <BootstrapForm.Row className="mt-3 pl-1">
-                <Field
-                  label={"Owner Notified: "}
-                  component={Checkbox}
-                  name={`sr_updates.${index}.owner_contacted`}
-                  checked={props.values.sr_updates[index] && props.values.sr_updates[index].owner_contacted}
-                  onChange={() => {
-                    if (props.values.sr_updates[index] && props.values.sr_updates[index].owner_contacted) {
-                      props.setFieldValue(
-                        `sr_updates.${index}.owner_contacted`,
-                        false
-                      );
-                    }
-                    else {
-                      props.setFieldValue(
-                        `sr_updates.${index}.owner_contacted`,
-                        true
-                      );
-                    }
-                  }}
-                />
-              </BootstrapForm.Row>
+              {service_request.owner ?
+                <BootstrapForm.Row className="mt-3 pl-1">
+                  <Field
+                    label={"Owner Notified: "}
+                    component={Checkbox}
+                    name={`sr_updates.${index}.owner_contacted`}
+                    checked={props.values.sr_updates[index] && props.values.sr_updates[index].owner_contacted}
+                    onChange={() => {
+                      if (props.values.sr_updates[index] && props.values.sr_updates[index].owner_contacted) {
+                        props.setFieldValue(
+                          `sr_updates.${index}.owner_contacted`,
+                          false
+                        );
+                      }
+                      else {
+                        props.setFieldValue(
+                          `sr_updates.${index}.owner_contacted`,
+                          true
+                        );
+                      }
+                    }}
+                  />
+                </BootstrapForm.Row>
+              : ""}
               {props.errors.sr_updates && props.errors.sr_updates[index] && props.errors.sr_updates[index].owner_contacted &&
               props.touched.sr_updates && props.touched.sr_updates[index] && props.touched.sr_updates[index].owner_contacted && (
                 <div style={{ color: "#e74c3c", marginTop: "-8px", fontSize: "80%" }}>{props.errors.sr_updates[index].owner_contacted}</div>
