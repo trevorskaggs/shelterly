@@ -520,7 +520,7 @@ export function EvacSummary({id}) {
   return (
     <>
     <Header>Dispatch Assignment Summary #{id} <Link href={"/evac/resolution/" + id} className="btn btn-danger ml-1 mb-2" style={{paddingTop:"10px", paddingBottom:"10px"}}>Close</Link>
-    <div style={{fontSize:"16px", marginTop:"5px"}}><b>Opened: </b><Moment format="lll">{data.start_time}</Moment></div>
+    <div style={{fontSize:"18px", marginTop:"14px"}}><b>Opened: </b><Moment format="lll">{data.start_time}</Moment></div>
     </Header>
     <hr/>
     <Card border="secondary" className="mt-1">

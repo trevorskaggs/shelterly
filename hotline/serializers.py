@@ -22,7 +22,7 @@ class VisitNoteSerializer(serializers.ModelSerializer):
 
 class ServiceRequestSerializer(serializers.ModelSerializer):
 
-    owner_object = PersonSerializer(source='owner', required=False, read_only=True)
+    owners = PersonSerializer(source='owner', many=True, required=False, read_only=True)
     reporter_object = PersonSerializer(source='reporter', required=False, read_only=True)
     full_address = serializers.SerializerMethodField()
     animals = AnimalSerializer(source='animal_set', many=True, required=False, read_only=True)

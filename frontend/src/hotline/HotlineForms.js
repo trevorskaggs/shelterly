@@ -52,7 +52,7 @@ export function ServiceRequestForm({ id }) {
 
   // Initial ServiceRequest data.
   const [data, setData] = useState({
-    owner: owner_id,
+    owner: [owner_id],
     reporter: reporter_id,
     directions: '',
     address: '',

@@ -18,7 +18,7 @@ class SimplePersonSerializer(serializers.ModelSerializer):
 
     # Custom field for the action history.
     def get_action_history(self, obj):
-        return [build_action_string(action).replace(f'Person object ({obj.id})', '') for action in target_stream(obj)]
+        return [build_action_string(action) for action in target_stream(obj)]
 
     # Custom field for the ServiceRequest ID.
     def get_request(self, obj):
