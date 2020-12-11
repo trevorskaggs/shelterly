@@ -90,11 +90,11 @@ export function Dispatch() {
       }
       setMapState(prevState => ({ ...prevState, [id]: {...prevState[id], ["color"]:color, ["checked"]:false} }));
       // Remove matches from the running total state tracker.
-      for (var status in mapState[id].status_matches) {
+      for (var st in mapState[id].status_matches) {
         var total = 0;
-        for (var key in mapState[id].status_matches[status]) {
-          var total = totalSelectedState[status][key] -= mapState[id].status_matches[status][key];
-          setTotalSelectedState(prevState => ({ ...prevState, [status]:{...prevState[status], [key]:total}}));
+        for (var key in mapState[id].status_matches[st]) {
+          var total = totalSelectedState[st][key] -= mapState[id].status_matches[st][key];
+          setTotalSelectedState(prevState => ({ ...prevState, [st]:{...prevState[st], [key]:total}}));
         }
       }
       // Disable DEPLOY button is none selected.
@@ -532,14 +532,14 @@ export function EvacSummary({id}) {
         <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px", textTransform:"capitalize"}}>
           {data.team_member_objects.map(team_member => (
             <ListGroup.Item key={team_member.id}>
-              {team_member.first_name + " " + team_member.last_name + " - " + team_member.phone}{team_member.agency ? <span>({team_member.agency})</span> : ""}
+              {team_member.first_name + " " + team_member.last_name + " - " + team_member.display_phone}{team_member.agency ? <span>({team_member.agency})</span> : ""}
             </ListGroup.Item>
           ))}
         </ListGroup>
       </Card.Body>
     </Card>
     {data.service_request_objects.map((service_request, index) => (
-    <Card key={service_request.id} border="secondary" className="mt-3">
+    <Card key={service_request.id} border="secondary" className="mt-3 mb-2">
       <Card.Body>
         <Card.Title>
           <h4>Service Request #{service_request.id} <Link href={"/hotline/servicerequest/" + service_request.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link> | <span style={{textTransform:"capitalize"}}>{service_request.status}</span></h4>
@@ -547,7 +547,7 @@ export function EvacSummary({id}) {
         <hr/>
         <ListGroup variant="flush" style={{marginTop:"-5px", marginBottom:"-13px"}}>
           <ListGroup.Item><b>Address: </b>{service_request.full_address}</ListGroup.Item>
-          <ListGroup.Item><b>Owner: </b>{service_request.owner_object.first_name} {service_request.owner_object.last_name} <Link href={"/hotline/owner/" + service_request.owner}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link> | {service_request.owner_object.phone||service_request.owner_object.email||"No Contact"}</ListGroup.Item>
+          <ListGroup.Item><b>Owner: </b>{service_request.owner_object.first_name} {service_request.owner_object.last_name} <Link href={"/hotline/owner/" + service_request.owner}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link> | {service_request.owner_object.display_phone||service_request.owner_object.email||"No Contact"}</ListGroup.Item>
         </ListGroup>
         <hr/>
         <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>

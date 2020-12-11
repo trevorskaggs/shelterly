@@ -71,7 +71,7 @@ export function PersonView({id}) {
             <hr/>
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
               <ListGroup.Item><b>Name: </b>{data.first_name} {data.last_name}</ListGroup.Item>
-              {data.phone ? <ListGroup.Item><b>Telephone: </b>{data.phone}</ListGroup.Item> : ""}
+              {data.phone ? <ListGroup.Item><b>Telephone: </b>{data.display_phone}</ListGroup.Item> : ""}
               {data.email ? <ListGroup.Item><b>Email: </b>{data.email}</ListGroup.Item> : ""}
               {data.best_contact ?
                 <ListGroup.Item><b>Best Contact: </b>{data.best_contact}</ListGroup.Item>: ''}

@@ -6,14 +6,13 @@ import { Label } from 'reactstrap';
 import { Switch } from 'formik-material-ui';
 import {
   Button,
+  Form as BootstrapForm,
   ButtonGroup,
   Card,
   Col,
   FormGroup,
   ListGroup,
   Row,
-  Container,
-  Form as BootstrapForm,
 } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -30,7 +29,7 @@ export const EvacTeamMemberForm = () => {
   // Track whether or not to add another evac team member after saving.
   const [addAnother, setAddAnother] = useState(false);
   // Regex validators.
-  const phoneRegex = /^((\+\d{1,3}(-| )?\(?\d\)?(-| )?\d{1,3})|(\(?\d{2,3}\)?))(-| )?(\d{3,4})(-| )?(\d{4})(( x| ext)\d{1,5}){0,1}$/
+  const phoneRegex = /^[0-9]{10}$/
 
     return (
         <Formik
@@ -71,54 +70,58 @@ export const EvacTeamMemberForm = () => {
           }}
         >
         {form => (
-          <Form>
-            <Container>
-              <FormGroup>
-                <Row>
-                  <Col xs={{size: 5, offset: 1}}>
-                    <TextInput
-                      type="text"
-                      label="First Name*"
-                      name="first_name"
-                      id="first_name"
-                    />
-                  </Col>
-                  <Col xs="5">
-                    <TextInput
-                      type="text"
-                      label="Last Name*"
-                      name="last_name"
-                      id="last_name"
-                    />
-                  </Col>
-                </Row>
-              </FormGroup>
-
-              <FormGroup>
-                <Row>
-                  <Col xs={{size: 5, offset: 1}}>
-                    <TextInput
-                      type="text"
-                      label="Phone*"
-                      name="phone"
-                      id="phone"
-                    />
-                  </Col>
-                  <Col xs="5">
-                    <TextInput
-                      type="text"
-                      label="Agency ID"
-                      name="agency_id"
-                      id="agency_id"
-                    />
-                  </Col>
-                </Row>
-              </FormGroup>
-              <Button type="button" className="btn btn-success mr-1" onClick={() => {setAddAnother(false); form.submitForm()}}>Save</Button>
+          <Card border="secondary" className="mt-5">
+            <Card.Header as="h5" className="pl-3"><span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>New Team Member</Card.Header>
+            <Card.Body>
+              <Form>
+                  <FormGroup>
+                    <Row>
+                      <Col>
+                        <TextInput
+                          type="text"
+                          label="First Name*"
+                          name="first_name"
+                          id="first_name"
+                        />
+                      </Col>
+                      <Col>
+                        <TextInput
+                          type="text"
+                          label="Last Name*"
+                          name="last_name"
+                          id="last_name"
+                        />
+                      </Col>
+                    </Row>
+                  </FormGroup>
+                  <FormGroup>
+                    <Row>
+                      <Col>
+                        <TextInput
+                          type="text"
+                          label="Phone*"
+                          name="phone"
+                          id="phone"
+                        />
+                      </Col>
+                      <Col>
+                        <TextInput
+                          type="text"
+                          label="Agency ID"
+                          name="agency_id"
+                          id="agency_id"
+                        />
+                      </Col>
+                    </Row>
+                  </FormGroup>
+              </Form>
+            </Card.Body>
+            <ButtonGroup>
+              <Button type="button" className="btn btn-primary mr-1" onClick={() => {setAddAnother(false); form.submitForm()}}>Save</Button>
               <Button type="button" className="btn btn-success mr-1" onClick={() => {setAddAnother(true); form.submitForm()}}>Add Another</Button>
               <Link className="btn btn-secondary" href="/evac">Cancel</Link>
-            </Container>
-          </Form>
+            </ButtonGroup>
+            </Card>
           )}
         </Formik>
     );
@@ -403,7 +406,7 @@ export const VisitNoteForm = ({id}) => {
                     label="Date Completed"
                     name="date_completed"
                     id="date_completed"
-                    xs="4"
+                    xs="7"
                     clearable={false}
                     onChange={(date, dateStr) => {
                       form.setFieldValue("date_completed", dateStr)
@@ -419,7 +422,7 @@ export const VisitNoteForm = ({id}) => {
                       label="Notes"
                       name="notes"
                       id="notes"
-                      xs="9"
+                      xs="7"
                       rows={5}
                     />
                   </Col>
@@ -431,9 +434,11 @@ export const VisitNoteForm = ({id}) => {
                   </Col>
                 </Row>
               </FormGroup>
-              <Button type="button" className="btn btn-success mr-1" onClick={() => form.submitForm()}>Save</Button>
           </Form>
           </Card.Body>
+          <ButtonGroup>
+            <Button type="button" className="btn btn-primary" onClick={() => {form.submitForm()}}>Save</Button>
+          </ButtonGroup>
           </Card>
           )}
         </Formik>

@@ -9,7 +9,7 @@ describe("Render evac", () => {
     const { getByText } = render(<Evac />);
     expect(getByText(/ADD TEAM MEMBER/)).toBeTruthy();
     expect(getByText(/DEPLOY/)).toBeTruthy();
-    expect(getByText(/SEARCH EVACUATION ASSIGNMENT/)).toBeTruthy();
+    expect(getByText(/EVACUATION ASSIGNMENT/)).toBeTruthy();
   });
 
   it("Render new evac team member form", async () => {
