@@ -22,9 +22,11 @@ class SimplePersonSerializer(serializers.ModelSerializer):
 
     # Custom field for the ServiceRequest ID.
     def get_request(self, obj):
+        from hotline.serializers import SimpleServiceRequestSerializer
+
         service_request = ServiceRequest.objects.filter(Q(owner=obj.id) | Q(reporter=obj.id)).first()
         if service_request:
-            return service_request.id
+            return SimpleServiceRequestSerializer(service_request).data
         return None
 
     # Custom field for Formated Phone Number

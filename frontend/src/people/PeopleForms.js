@@ -37,6 +37,7 @@ export const PersonForm = ({ id }) => {
     reporter_id = '',
     servicerequest_id = '',
     animal_id = '',
+    owner_id = '',
   } = queryParams;
 
   // Regex validators.
@@ -60,6 +61,7 @@ export const PersonForm = ({ id }) => {
     zip_code: '',
     request: servicerequest_id,
     animal: animal_id,
+    owner: owner_id,
     latitude: null,
     longitude: null,
   });
@@ -155,6 +157,10 @@ export const PersonForm = ({ id }) => {
               // If adding from an animal, redirect to the Animal details.
               else if (animal_id) {
                 navigate('/animals/animal/' + animal_id);
+              }
+              // If adding from an owner, redirect to the new Owner details.
+              else if (owner_id) {
+                navigate('/hotline/owner/' + response.data.id);
               }
               // If we have a reporter ID, redirect to create a new Animal with owner + reporter IDs.
               else if (reporter_id) {
@@ -296,7 +302,7 @@ export const PersonForm = ({ id }) => {
           </Card.Body>
             <ButtonGroup size="lg" >
               {/* form save buttons */}
-              {!is_first_responder ? <Button type="button" onClick={() => { setSkipOwner(false); props.submitForm() }}>{!is_owner && !is_intake ? <span>{!id ? "Add Owner" : "Save"}</span> : <span>{!id && (!servicerequest_id && !animal_id) ? "Add Animal(s)" : "Save"}</span>}</Button> : ""}
+              {!is_first_responder ? <Button type="button" onClick={() => { setSkipOwner(false); props.submitForm() }}>{!is_owner && !is_intake ? <span>{!id ? "Add Owner" : "Save"}</span> : <span>{!id && (!servicerequest_id && !animal_id && !owner_id) ? "Add Animal(s)" : "Save"}</span>}</Button> : ""}
               {/* reporter form save buttons to skip owner */}
               {!is_owner && !id && !is_intake ? <button type="button" className="btn btn-primary mr-1 border" onClick={() => { setSkipOwner(true); props.submitForm() }}>Add Animal(s)</button> : ""}
               <Button variant="secondary" type="button" onClick={() => {props.resetForm(data)}}>Reset</Button>

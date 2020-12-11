@@ -135,7 +135,7 @@ export function ServiceRequestView({id}) {
               </Card.Title>
               <hr/>
               <ListGroup variant="flush">
-                <ListGroup.Item>
+                <ListGroup.Item style={{marginTop:"-13px"}}>
                   <b>Followup Date: </b>
                   <FontAwesomeIcon icon={faCalendarDay} className="ml-1 mr-1" style={{cursor:'pointer'}} onClick={() => openCalendar()} />
                   {data.followup_date ?
