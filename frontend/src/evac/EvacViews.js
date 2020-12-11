@@ -538,7 +538,7 @@ export function EvacSummary({id}) {
     <Card key={service_request.id} border="secondary" className="mt-3 mb-2">
       <Card.Body>
         <Card.Title>
-          <h4>Service Request #{service_request.id} <Link href={"/hotline/servicerequest/" + service_request.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link> | <span style={{textTransform:"capitalize"}}>{service_request.status}</span></h4>
+          <h4>Service Request <Link href={"/hotline/servicerequest/" + service_request.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link> | <span style={{textTransform:"capitalize"}}>{service_request.status}</span></h4>
         </Card.Title>
         <hr/>
         <ListGroup variant="flush" style={{marginTop:"-5px", marginBottom:"-13px"}}>
@@ -558,14 +558,16 @@ export function EvacSummary({id}) {
           ))}
         </ListGroup>
         <hr/>
-        <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
-          <h4 className="mt-2" style={{marginBottom:"-2px"}}>Notes</h4>
-          {service_request.visit_notes.filter(note => String(note.evac_assignment) === String(id)).map((note) => (
-            <ListGroup.Item key={note.id}>
-              {note.notes || "None"}
-            </ListGroup.Item>
-          ))}
-        </ListGroup>
+        {service_request.visit_notes.filter(note => String(note.evac_assignment) === String(id)).length > 0 ?
+          <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
+            <h4 className="mt-2" style={{marginBottom:"-2px"}}>Notes</h4>
+            {service_request.visit_notes.filter(note => String(note.evac_assignment) === String(id)).map((note) => (
+              <ListGroup.Item key={note.id}>
+                {note.notes || "None"}
+              </ListGroup.Item>
+            ))}
+          </ListGroup>
+        : ""}
       </Card.Body>
     </Card>
     ))}
