@@ -71,6 +71,10 @@ class AnimalViewSet(viewsets.ModelViewSet):
             animal = serializer.save()
             action.send(self.request.user, verb='updated animal', target=animal)
 
+            # Remove Owner from animal.
+            if self.request.data.get('remove_owner'):
+                animal.owner.remove(self.request.data.get('remove_owner'))
+
             old_images = serializer.data['extra_images']
             updated_images = self.request.data['extra_images'].split(',') if self.request.data.get('extra_images', None) else []
             # Compare old vs updated extra images to identify ones that have been removed and should be deleted.

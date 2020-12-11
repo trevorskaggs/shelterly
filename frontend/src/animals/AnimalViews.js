@@ -7,7 +7,7 @@ import { Carousel } from 'react-responsive-carousel';
 import { Card, Col, ListGroup, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBandAid, faClipboardList, faCut, faEdit, faHandHoldingHeart, faShieldAlt, faPlusSquare, faWarehouse
+  faBandAid, faClipboardList, faCut, faEdit, faHandHoldingHeart, faMinusSquare, faShieldAlt, faPlusSquare, faWarehouse,
 } from '@fortawesome/free-solid-svg-icons';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import Header from '../components/Header';
@@ -48,12 +48,26 @@ export function AnimalView({id}) {
 
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
+  const [ownerToDelete, setOwnerToDelete] = useState({id:0, name:''});
+  const [showOwnerConfirm, setShowOwnerConfirm] = useState(false);
+  const handleOwnerClose = () => setShowOwnerConfirm(false);
 
   const handleSubmit = async () => {
     await axios.patch('/animals/api/animal/' + id + '/', {status:'REUNITED', room:null})
     .then(response => {
       setData(response.data);
       handleClose()
+    })
+    .catch(error => {
+      console.log(error.response);
+    });
+  }
+
+  const handleOwnerSubmit = async () => {
+    await axios.patch('/animals/api/animal/' + id + '/', {remove_owner:ownerToDelete.id})
+    .then(response => {
+      setData(prevState => ({ ...prevState, ["owners"]:prevState.owners.filter(owner => owner.id !== ownerToDelete.id) }));
+      handleOwnerClose();
     })
     .catch(error => {
       console.log(error.response);
@@ -176,7 +190,7 @@ export function AnimalView({id}) {
             <hr/>
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
               {data.owners.map(owner => (
-                <ListGroup.Item key={owner.id}><b>Owner: </b>{owner.first_name} {owner.last_name} <Link href={"/hotline/owner/" + owner.id}><FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link><Link href={"/hotline/owner/edit/" + owner.id}> <FontAwesomeIcon icon={faEdit} size="sm" inverse /></Link> | {owner.display_phone||owner.email||"No Contact"}</ListGroup.Item>
+                <ListGroup.Item key={owner.id}><b>Owner: </b>{owner.first_name} {owner.last_name} <Link href={"/hotline/owner/" + owner.id}><FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link><Link href={"/hotline/owner/edit/" + owner.id}> <FontAwesomeIcon icon={faEdit} size="sm" inverse /></Link> <FontAwesomeIcon icon={faMinusSquare} style={{cursor:'pointer'}} size="sm" onClick={() => {setOwnerToDelete({id:owner.id, name: owner.first_name + " " + owner.last_name});setShowOwnerConfirm(true);}} inverse /> | {owner.display_phone||owner.email||"No Contact"}</ListGroup.Item>
               ))}
               {data.reporter ? <ListGroup.Item><b>Reporter: </b>{data.reporter_object.first_name} {data.reporter_object.last_name} <Link href={"/hotline/reporter/" + data.reporter}><FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link><Link href={"/hotline/reporter/edit/" + data.reporter}> <FontAwesomeIcon icon={faEdit} size="sm" inverse /></Link></ListGroup.Item> : ""}
             </ListGroup>
@@ -236,6 +250,20 @@ export function AnimalView({id}) {
       <Modal.Footer>
         <Button variant="primary" onClick={handleSubmit}>Yes</Button>
         <Button variant="secondary" onClick={handleClose}>Close</Button>
+      </Modal.Footer>
+    </Modal>
+    <Modal show={showOwnerConfirm} onHide={handleOwnerClose}>
+      <Modal.Header closeButton>
+        <Modal.Title>Confirm Owner Removal</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <p>
+          Are you sure you would like to remove owner {ownerToDelete.name} from this animal?
+        </p>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="primary" onClick={handleOwnerSubmit}>Yes</Button>
+        <Button variant="secondary" onClick={handleOwnerClose}>Close</Button>
       </Modal.Footer>
     </Modal>
     </>
