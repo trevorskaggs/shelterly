@@ -9,6 +9,7 @@ class SimplePersonSerializer(serializers.ModelSerializer):
     full_address = serializers.SerializerMethodField()
     action_history = serializers.SerializerMethodField()
     request = serializers.SerializerMethodField()
+    service_request = serializers.SerializerMethodField()
 
     # Custom field for the full address.
     def get_full_address(self, obj):
@@ -24,6 +25,12 @@ class SimplePersonSerializer(serializers.ModelSerializer):
         if service_request:
             return service_request.id
         return None
+
+    # Custom field for the full ServiceRequest.
+    def get_service_request(self, obj):
+#             return ServiceRequest.objects.filter(Q(owner=obj) | Q(reporter=obj)).values()
+            return ServiceRequest.objects.filter(owner=obj).values()
+#             return ServiceRequest.objects.filter(reporter=obj.id).values()
 
     # Truncates latitude and longitude.
     def to_internal_value(self, data):

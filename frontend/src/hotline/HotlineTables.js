@@ -49,6 +49,7 @@ export function ServiceRequestTable() {
       })
       .then(response => {
         setData({service_requests: response.data, isFetching: false});
+        console.log(response.data)
       })
       .catch(error => {
         console.log(error.response);
