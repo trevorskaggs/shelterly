@@ -23,5 +23,9 @@ class ServiceRequestAdmin(admin.ModelAdmin):
 
   list_display = ('id', 'owner_str', 'address', 'status', 'animal_count')
 
+class VisitNoteAdmin(admin.ModelAdmin):
+
+  list_display = ('id', 'notes')
+
 admin.site.register(ServiceRequest, ServiceRequestAdmin)
-admin.site.register(VisitNote)
+admin.site.register(VisitNote, VisitNoteAdmin)
