@@ -1,3 +1,4 @@
+import re
 from django.db.models import Q
 from rest_framework import serializers
 from actstream.models import target_stream
@@ -10,6 +11,7 @@ class SimplePersonSerializer(serializers.ModelSerializer):
     action_history = serializers.SerializerMethodField()
     request = serializers.SerializerMethodField()
     service_request = serializers.SerializerMethodField()
+    display_phone = serializers.SerializerMethodField()
 
     # Custom field for the full address.
     def get_full_address(self, obj):
@@ -31,6 +33,10 @@ class SimplePersonSerializer(serializers.ModelSerializer):
 #             return ServiceRequest.objects.filter(Q(owner=obj) | Q(reporter=obj)).values()
             return ServiceRequest.objects.filter(owner=obj).values()
 #             return ServiceRequest.objects.filter(reporter=obj.id).values()
+
+    # Custom field for Formated Phone Number
+    def get_display_phone(self, obj):
+        return re.sub(r'(\d{3})(\d{3})(\d{4})', r'(\1) \2-\3', obj.phone)
 
     # Truncates latitude and longitude.
     def to_internal_value(self, data):

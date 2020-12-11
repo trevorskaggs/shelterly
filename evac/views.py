@@ -44,7 +44,9 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         if serializer.is_valid():
-            serializer.validated_data['end_time'] = datetime.now()
+            # Only add end_time on first update.
+            if not serializer.instance.end_time:
+                serializer.validated_data['end_time'] = datetime.now()
             evac_assignment = serializer.save()
             for service_request in self.request.data['sr_updates']:
                 sr_status = 'closed'
@@ -53,10 +55,14 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
                     if animal['status'] in ['SHELTERED IN PLACE', 'UNABLE TO LOCATE']:
                         sr_status = 'open'
                 service_requests = ServiceRequest.objects.filter(id=service_request['id'])
-                service_requests.update(status=sr_status, followup_date=service_request['followup_date'])
+                service_requests.update(status=sr_status, followup_date=service_request['followup_date'] or None)
                 if sr_status == 'open':
                     action.send(self.request.user, verb='opened service request', target=service_requests[0])
                 else:
                     action.send(self.request.user, verb='closed service request', target=service_requests[0])
-                VisitNote.objects.create(evac_assignment=evac_assignment, service_request=service_requests[0], date_completed=service_request['date_completed'], notes=service_request['notes'], owner_contacted=service_request['owner_contacted'], forced_entry=service_request['forced_entry'])
+                # Only create VisitNote on first update.
+                if not VisitNote.objects.filter(evac_assignment=evac_assignment, service_request=service_requests[0]).exists():
+                    VisitNote.objects.create(evac_assignment=evac_assignment, service_request=service_requests[0], date_completed=service_request['date_completed'], notes=service_request['notes'], owner_contacted=service_request['owner_contacted'], forced_entry=service_request['forced_entry'])
+                else:
+                    VisitNote.objects.filter(evac_assignment=evac_assignment, service_request=service_requests[0]).update(date_completed=service_request['date_completed'], notes=service_request['notes'], owner_contacted=service_request['owner_contacted'], forced_entry=service_request['forced_entry'])
             action.send(self.request.user, verb='updated evacuation assignment', target=evac_assignment)
