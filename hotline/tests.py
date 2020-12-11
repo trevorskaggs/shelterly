@@ -13,7 +13,8 @@ class TestViews(APITestCase):
         cls.person = Person.objects.create(first_name="Jane", last_name="Doe", phone="123-456-7890")
         cls.service_request = ServiceRequest.objects.create(directions="Turn left")
         cls.service_request.owner.set([cls.person])
-        cls.animal = Animal.objects.create(request=cls.service_request, owner=cls.person, name='bella')
+        cls.animal = Animal.objects.create(request=cls.service_request, name='bella')
+        cls.animal.owner.set([cls.person])
 
     def test_get_all_service_requests(self):
         self.client.force_authenticate(self.user)        
