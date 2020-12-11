@@ -136,7 +136,7 @@ export function EvacuationAssignmentTable() {
         {data.evacuation_assignments.map(evacuation_assignment => (
             <div key={evacuation_assignment.id} className="mt-3">
               <div className="card-header">
-                Evacuation Assignment #{evacuation_assignment.id}<Link href={"/evac/summary/" + evacuation_assignment.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
+                Dispatch Assignment #{evacuation_assignment.id}<Link href={"/evac/summary/" + evacuation_assignment.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
                 <div>
                 Opened: <Moment format="L">{evacuation_assignment.start_time}</Moment> |
                 {evacuation_assignment.end_time ?
