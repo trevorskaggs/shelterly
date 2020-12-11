@@ -84,3 +84,8 @@ class ServiceRequestSerializer(SimpleServiceRequestSerializer):
     owners = PersonSerializer(source='owner', many=True, required=False, read_only=True)
     reporter_object = PersonSerializer(source='reporter', required=False, read_only=True)
     animals = AnimalSerializer(source='animal_set', many=True, required=False, read_only=True)
+    evacuation_assignments = serializers.SerializerMethodField()
+
+    # Custom field to get Evacuation Assignments.
+    def get_evacuation_assignments(self, obj):
+        return obj.evacuation_assignments.filter(service_requests=obj).values()
