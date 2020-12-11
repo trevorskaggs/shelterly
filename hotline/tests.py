@@ -30,7 +30,7 @@ class TestViews(APITestCase):
         self.client.force_authenticate(self.user)
         response = self.client.get(f'/hotline/api/servicerequests/{self.service_request.pk}/', {'search':'Jane'})
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json().get('owner')[0].get('first_name'), 'Jane')
+        self.assertEqual(response.json().get('owners')[0].get('first_name'), 'Jane')
 
     def test_search_service_requests_no_results(self):
         self.client.force_authenticate(self.user)
@@ -49,20 +49,16 @@ class TestViews(APITestCase):
     #     self.assertEqual(response.status_code, 200)
 
     def test_create_service_request_owner(self):
-        # SR to Owner is 1:1, so need to create new Person object to create a new SR. 
-        # Should this be ForeignKey?
         self.new_person = Person.objects.create(first_name="Leroy", last_name="Jenkins", latitude=0, longitude=0)
         self.new_animal = Animal.objects.create(name='Henry')
         self.new_animal.owner.set([self.new_person])
         self.client.force_authenticate(self.user)
         # Directions are currently a required field.
-        response = self.client.post(f'/hotline/api/servicerequests/', {'owner':self.new_person.pk, 'address':"123 Main St.", 'directions':"Turn left.", 'latitude':self.new_person.latitude, 'longitude':self.new_person.longitude}, format='json')
+        response = self.client.post(f'/hotline/api/servicerequests/', {'owner':[self.new_person.pk], 'address':"123 Main St.", 'directions':"Turn left.", 'latitude':self.new_person.latitude, 'longitude':self.new_person.longitude}, format='json')
         self.assertEqual(response.status_code, 201)
         self.assertTrue(ServiceRequest.objects.filter(owner=self.new_person.pk, address="123 Main St."))
 
     def test_create_service_request_no_owner(self):
-        # SR to Owner is 1:1, so need to create new Person object to create a new SR. 
-        # Should this be ForeignKey?
         self.new_person = Person.objects.create(first_name="Leroy", last_name="Jenkins")
         self.new_animal = Animal.objects.create(name='Henry')
         self.new_animal.owner.set([self.new_person])
