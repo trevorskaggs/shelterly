@@ -9,7 +9,7 @@ import * as Yup from 'yup';
 import { AuthContext } from "../accounts/AccountsReducer";
 import { TreeSelect } from 'antd';
 import { DateTimePicker, DropDown, ImageUploader, TextInput } from '.././components/Form.js';
-import { catAgeChoices, dogAgeChoices, horseAgeChoices, otherAgeChoices, catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, speciesChoices, sexChoices, dogSizeChoices, catSizeChoices, horseSizeChoices, otherSizeChoices, statusChoices, unknownChoices } from './constants';
+import { catAgeChoices, dogAgeChoices, horseAgeChoices, otherAgeChoices, catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, speciesChoices, sexChoices, dogSizeChoices, catSizeChoices, horseSizeChoices, otherSizeChoices, unknownChoices } from './constants';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft, faMinusSquare } from '@fortawesome/free-solid-svg-icons';
 import 'antd/lib/tree-select/style/css';
@@ -274,27 +274,6 @@ export const AnimalForm = ({id}) => {
               <Field type="hidden" value={owner_id||""} name="owner" id="owner"></Field>
               <Field type="hidden" value={servicerequest_id||""} name="request" id="request"></Field>
                 <BootstrapForm.Row>
-                  <TextInput
-                    id="name"
-                    xs="9"
-                    name="name"
-                    type="text"
-                    label="Animal Name"
-                  />
-                  <Col xs="3">
-                    <DropDown
-                      label="Sex"
-                      id="sexDropDown"
-                      name="sex"
-                      type="text"
-                      key={`my_unique_sex_select_key__${props.values.sex}`}
-                      ref={sexRef}
-                      options={sexChoices}
-                      value={props.values.sex||''}
-                    />
-                  </Col>
-                </BootstrapForm.Row>
-                <BootstrapForm.Row>
                   <Col xs="4">
                     <DropDown
                       label="Species*"
@@ -380,6 +359,27 @@ export const AnimalForm = ({id}) => {
                     label="Description"
                     xs="8"
                   />
+                </BootstrapForm.Row>
+                <BootstrapForm.Row>
+                  <TextInput
+                      id="name"
+                      xs="9"
+                      name="name"
+                      type="text"
+                      label="Animal Name"
+                  />
+                  <Col xs="3">
+                    <DropDown
+                        label="Sex"
+                        id="sexDropDown"
+                        name="sex"
+                        type="text"
+                        key={`my_unique_sex_select_key__${props.values.sex}`}
+                        ref={sexRef}
+                        options={sexChoices}
+                        value={props.values.sex||''}
+                    />
+                  </Col>
                 </BootstrapForm.Row>
                 <BootstrapForm.Row>
                   <Col xs="4">
