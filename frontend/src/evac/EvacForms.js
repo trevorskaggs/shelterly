@@ -313,7 +313,7 @@ export function EvacResolution({ id }) {
                   <Field component={Switch} name={`sr_updates.${index}.forced_entry`} type="checkbox" color="primary" />
                 </Col>
               </BootstrapForm.Row>
-              {service_request.owner ?
+              {service_request.owners.length > 0 ?
                 <BootstrapForm.Row className="mt-3 pl-1">
                   <Field
                     label={"Owner Notified: "}

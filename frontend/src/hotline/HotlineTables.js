@@ -98,7 +98,7 @@ export function ServiceRequestTable() {
 
       {data.service_requests.map(service_request => (
         <div key={service_request.id} className="mt-3">
-          <div className="card-header">{service_request.full_address} | <span style={{textTransform:"capitalize"}}>{service_request.status}</span><Link href={"/hotline/servicerequest/" + service_request.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></div>
+          <div className="card-header">{service_request.full_address}<Link href={"/hotline/servicerequest/" + service_request.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>&nbsp;| <span style={{textTransform:"capitalize"}}>{service_request.status}</span></div>
           <CardGroup>
             <Card key={service_request.id}>
               <Card.Body>
