@@ -160,7 +160,9 @@ export function EvacuationAssignmentTable() {
                             Service Request #{service_request.id} <Link
                               href={"/hotline/servicerequest/" + service_request.id}> <FontAwesomeIcon
                               icon={faClipboardList} inverse/></Link> |
-                            Owner: {service_request.owner_object.first_name} {service_request.owner_object.last_name} |
+                            {service_request.owners.map(owner => (
+                              <span>Owner: {owner.first_name} {owner.last_name} |</span>
+                            ))}
                             Address: {service_request.address} <br/>
                             Animals: {service_request.animals.map((animal, i) => (
                               <span key={animal.id}>{i > 0 && ", "}{animal.name || "Unknown"} ({animal.species})</span>))}

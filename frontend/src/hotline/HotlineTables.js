@@ -87,15 +87,15 @@ export function ServiceRequestTable() {
 
       {data.service_requests.map(service_request => (
         <div key={service_request.id} className="mt-3">
-          <div className="card-header">{service_request.full_address} ({service_request.status})<Link href={"/hotline/servicerequest/" + service_request.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
-            <div><Moment format="LLL">{service_request.timestamp}</Moment></div>
-          </div>
+          <div className="card-header">{service_request.full_address} ({service_request.status})<Link href={"/hotline/servicerequest/" + service_request.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></div>
         <CardGroup>
           <Card key={service_request.id}>
             <Card.Body>
               <Card.Title>Contacts</Card.Title>
               <ListGroup>
-                <ListGroup.Item className='owner'>Owner: {service_request.owner ? <span>{service_request.owner_object.first_name} {service_request.owner_object.last_name} {service_request.owner_object.display_phone} <Link href={"/hotline/owner/" + service_request.owner}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></span> : "N/A"}</ListGroup.Item>
+                {service_request.owners.map(owner => (
+                  <ListGroup.Item className='owner'>Owner: <span>{owner.first_name} {owner.last_name} {owner.display_phone} <Link href={"/hotline/owner/" + owner.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></span></ListGroup.Item>
+                ))}
                 <ListGroup.Item className='reporter'>Reporter: {service_request.reporter ? <span>{service_request.reporter_object.first_name} {service_request.reporter_object.last_name} {service_request.reporter_object.phone} <Link href={"/hotline/reporter/" + service_request.reporter}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></span> : "N/A"}</ListGroup.Item>
               </ListGroup>
             </Card.Body>

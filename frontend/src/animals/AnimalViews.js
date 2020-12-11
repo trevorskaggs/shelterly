@@ -7,7 +7,7 @@ import { Carousel } from 'react-responsive-carousel';
 import { Card, Col, ListGroup, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBandAid, faClipboardList, faCut, faEdit, faHandHoldingHeart, faShieldAlt, faWarehouse
+  faBandAid, faClipboardList, faCut, faEdit, faHandHoldingHeart, faShieldAlt, faPlusSquare, faWarehouse
 } from '@fortawesome/free-solid-svg-icons';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import Header from '../components/Header';
@@ -43,7 +43,7 @@ export function AnimalView({id}) {
     action_history: [],
     full_address:'',
     shelter_name: '',
-    owner_object: {first_name:'', last_name:'', phone:'', email:''}
+    owners: [],
   });
 
   const [show, setShow] = useState(false);
@@ -171,25 +171,28 @@ export function AnimalView({id}) {
             </ListGroup>
             <hr/>
             <Card.Title>
-              <h4 className="mb-0">Owner<span style={{fontSize:18}}>{data.owner_object.first_name !== 'Unknown' ? <Link href={"/hotline/owner/" + data.owner}> <FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link>:""}<Link href={"/hotline/owner/edit/" + data.owner}> <FontAwesomeIcon icon={faEdit} size="sm" inverse /></Link></span></h4>
+              <h4 className="mb-0">Contacts <Link href={"/hotline/owner/new?animal_id=" + id}><FontAwesomeIcon icon={faPlusSquare} size="sm" inverse /></Link></h4>
             </Card.Title>
+            <hr/>
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
-              <ListGroup.Item><b>Name: </b>{data.owner_object.first_name} {data.owner_object.last_name}</ListGroup.Item>
-              {data.owner_object.phone ? <ListGroup.Item><b>Telephone: </b>{data.owner_object.display_phone}</ListGroup.Item> : ""}
-              {data.owner_object.email ? <ListGroup.Item><b>Email: </b>{data.owner_object.email}</ListGroup.Item> : ""}
+              {data.owners.map(owner => (
+                <ListGroup.Item key={owner.id}><b>Owner: </b>{owner.first_name} {owner.last_name} <Link href={"/hotline/owner/" + owner.id}><FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link><Link href={"/hotline/owner/edit/" + owner.id}> <FontAwesomeIcon icon={faEdit} size="sm" inverse /></Link> | {owner.display_phone||owner.email||"No Contact"}</ListGroup.Item>
+              ))}
+              {data.reporter ? <ListGroup.Item><b>Reporter: </b>{data.reporter_object.first_name} {data.reporter_object.last_name} <Link href={"/hotline/reporter/" + data.reporter}><FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link><Link href={"/hotline/reporter/edit/" + data.reporter}> <FontAwesomeIcon icon={faEdit} size="sm" inverse /></Link></ListGroup.Item> : ""}
             </ListGroup>
             <hr/>
             <Card.Title>
                <h4 className="mb-0">Location</h4>
             </Card.Title>
-            <ListGroup variant="flush">
+            <hr/>
+            <ListGroup variant="flush" style={{marginBottom:"-13px"}}>
               {data.room ? <ListGroup.Item style={{marginTop:"-13px"}}><b>Shelter Name:</b> {data.shelter_name}<Link href={"/shelter/" + data.shelter}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item> : ""}
               <ListGroup.Item style={{marginTop:"-13px"}}><b>{data.room ? "Shelter " : ""}Address:</b> {data.full_address}</ListGroup.Item>
             </ListGroup>
           </Card.Body>
         </Card>
       </div>
-      <Col xs={6} className="pr-0" style={{width:"100%"}}>
+      <Col xs={6} className="pr-0 d-flex flex-column" style={{width:"100%"}}>
         <div className="slide-container flex-grow-1 border rounded pl-0 pr-0" style={{width:"auto", height:"322px"}}>
           <Carousel className="carousel-wrapper" showThumbs={false} showStatus={false}>
             {images.map(image => (
@@ -200,7 +203,7 @@ export function AnimalView({id}) {
             <img src={noImageFound} hidden={images.length > 0} />
           </Carousel>
         </div>
-        <Card className="border rounded mt-3" style={{width:"100%"}}>
+        <Card className="border rounded mt-3" style={{width:"100%", height:"100%"}}>
           <Card.Body>
             <Card.Title>
               <h4>Description</h4>

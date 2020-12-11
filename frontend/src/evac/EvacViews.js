@@ -547,8 +547,10 @@ export function EvacSummary({id}) {
         <hr/>
         <ListGroup variant="flush" style={{marginTop:"-5px", marginBottom:"-13px"}}>
           <ListGroup.Item><b>Address: </b>{service_request.full_address}</ListGroup.Item>
-          <ListGroup.Item><b>Owner: </b>{service_request.owner_object.first_name} {service_request.owner_object.last_name} <Link href={"/hotline/owner/" + service_request.owner}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link> | {service_request.owner_object.display_phone||service_request.owner_object.email||"No Contact"}</ListGroup.Item>
-        </ListGroup>
+          {service_request.owners.map(owner => (
+            <ListGroup.Item><b>Owner: </b>{owner.first_name} {owner.last_name} <Link href={"/hotline/owner/" + owner}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link> | {owner.display_phone||owner.email||"No Contact"}</ListGroup.Item>
+          ))}
+          </ListGroup>
         <hr/>
         <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
           <h4 className="mt-2" style={{marginBottom:"-2px"}}>Animals</h4>

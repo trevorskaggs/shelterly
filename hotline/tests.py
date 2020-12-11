@@ -11,7 +11,7 @@ class TestViews(APITestCase):
     def setUpTestData(cls):
         cls.user = ShelterlyUser.objects.create_user(username='test_user', email="test@test.com", password="test", is_active=True)
         cls.person = Person.objects.create(first_name="Jane", last_name="Doe", phone="123-456-7890")
-        cls.service_request = ServiceRequest.objects.create(owner=cls.person, directions="Turn left")
+        cls.service_request = ServiceRequest.objects.create(owner=[cls.person], directions="Turn left")
         cls.animal = Animal.objects.create(request=cls.service_request, owner=cls.person, name='bella')
 
     def test_get_all_service_requests(self):
@@ -28,7 +28,7 @@ class TestViews(APITestCase):
         self.client.force_authenticate(self.user)
         response = self.client.get(f'/hotline/api/servicerequests/{self.service_request.pk}/', {'search':'Jane'})
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json().get('owner_object').get('first_name'), 'Jane')
+        self.assertEqual(response.json().get('owner')[0].get('first_name'), 'Jane')
 
     def test_search_service_requests_no_results(self):
         self.client.force_authenticate(self.user)

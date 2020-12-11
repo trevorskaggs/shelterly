@@ -1,6 +1,7 @@
 from rest_framework import permissions, viewsets
 from actstream import action
 
+from animals.models import Animal
 from hotline.models import ServiceRequest
 from people.models import Person
 from people.serializers import PersonSerializer
@@ -23,6 +24,11 @@ class PersonViewSet(viewsets.ModelViewSet):
                 service_request.owner.add(person)
                 for animal in service_request.animal_set.all():
                     animal.owner.add(person)
+
+            # If an owner is being added from an animal, update the animal with the new owner.
+            if self.request.data.get('animal'):
+                animal = Animal.objects.get(pk=self.request.data.get('animal'))
+                animal.owner.add(person)
 
     def perform_update(self, serializer):
         if serializer.is_valid():
