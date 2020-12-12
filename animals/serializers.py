@@ -23,7 +23,7 @@ class AnimalSerializer(serializers.ModelSerializer):
 
         if obj.owner.exists():
             return SimplePersonSerializer(obj.owner, many=True).data
-        return None
+        return []
 
     # Custom field for the full address.
     def get_full_address(self, obj):
