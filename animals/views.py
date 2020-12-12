@@ -35,8 +35,6 @@ class AnimalViewSet(viewsets.ModelViewSet):
             # Add ServiceRequest Owner and Reporter to new animals being added to an SR.
             if serializer.validated_data.get('request'):
                 animal.owner.add(*animal.request.owner.all())
-                # animal.reporter = animal.request.reporter
-                # animal.save()
 
             if animal.room:
                 action.send(self.request.user, verb='sheltered animal', target=animal.room, action_object=animal)
