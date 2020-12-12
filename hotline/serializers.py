@@ -6,7 +6,6 @@ from actstream.models import target_stream
 from .models import ServiceRequest, VisitNote
 from animals.models import Animal
 from animals.serializers import AnimalSerializer
-from people.serializers import PersonSerializer
 from location.utils import build_full_address, build_action_string
 
 class VisitNoteSerializer(serializers.ModelSerializer):
@@ -20,12 +19,9 @@ class VisitNoteSerializer(serializers.ModelSerializer):
         model = VisitNote
         fields = '__all__'
 
-class ServiceRequestSerializer(serializers.ModelSerializer):
+class SimpleServiceRequestSerializer(serializers.ModelSerializer):
 
-    owner_object = PersonSerializer(source='owner', required=False, read_only=True)
-    reporter_object = PersonSerializer(source='reporter', required=False, read_only=True)
     full_address = serializers.SerializerMethodField()
-    animals = AnimalSerializer(source='animal_set', many=True, required=False, read_only=True)
     visit_notes = VisitNoteSerializer(source='visitnote_set', many=True, required=False, read_only=True)
     has_reported_animals = serializers.SerializerMethodField()
     sheltered_in_place = serializers.SerializerMethodField()
@@ -35,7 +31,6 @@ class ServiceRequestSerializer(serializers.ModelSerializer):
     injured = serializers.BooleanField(read_only=True)
     action_history = serializers.SerializerMethodField()
     assigned_evac = serializers.SerializerMethodField()
-    evacuation_assignments = serializers.SerializerMethodField()
 
     # Custom field for the full address.
     def get_full_address(self, obj):
@@ -44,10 +39,6 @@ class ServiceRequestSerializer(serializers.ModelSerializer):
     # Custom field for the action history list.
     def get_action_history(self, obj):
         return [build_action_string(action) for action in target_stream(obj)]
-
-    # Custom field to get Evacuation Assignments.
-    def get_evacuation_assignments(self, obj):
-        return obj.evacuation_assignments.filter(service_requests=obj).values()
 
     # Custom field for if any animal is ACO Required. If it is aggressive or "Other" species.
     def get_aco_required(self, obj):
@@ -86,3 +77,15 @@ class ServiceRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = ServiceRequest
         fields = '__all__'
+
+class ServiceRequestSerializer(SimpleServiceRequestSerializer):
+    from people.serializers import PersonSerializer
+
+    owners = PersonSerializer(source='owner', many=True, required=False, read_only=True)
+    reporter_object = PersonSerializer(source='reporter', required=False, read_only=True)
+    animals = AnimalSerializer(source='animal_set', many=True, required=False, read_only=True)
+    evacuation_assignments = serializers.SerializerMethodField()
+
+    # Custom field to get Evacuation Assignments.
+    def get_evacuation_assignments(self, obj):
+        return obj.evacuation_assignments.filter(service_requests=obj).values()
