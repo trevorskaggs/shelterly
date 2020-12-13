@@ -516,7 +516,7 @@ export function EvacSummary({id}) {
   return (
     <>
     <Header>Dispatch Assignment Summary | {data.end_time ? <span>Closed <Link href={"/evac/resolution/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link></span> : <Link href={"/evac/resolution/" + id} className="btn btn-danger ml-1 mb-2" style={{paddingTop:"10px", paddingBottom:"10px"}}>Close</Link>}
-      <div style={{fontSize:"16px", marginTop:"5px"}}><b>Opened: </b><Moment format="lll">{data.start_time}</Moment>{data.end_time ? <span style={{fontSize:"16px", marginTop:"5px"}}> | <b>Closed: </b><Moment format="lll">{data.end_time}</Moment></span> : ""}</div>
+    <div style={{fontSize:"18px", marginTop:"14px"}}><b>Opened: </b><Moment format="lll">{data.start_time}</Moment>{data.end_time ? <span style={{fontSize:"16px", marginTop:"5px"}}> | <b>Closed: </b><Moment format="lll">{data.end_time}</Moment></span> : ""}</div>
     </Header>
     <hr/>
     <Card border="secondary" className="mt-1">
@@ -538,12 +538,15 @@ export function EvacSummary({id}) {
     <Card key={service_request.id} border="secondary" className="mt-3 mb-2">
       <Card.Body>
         <Card.Title>
-          <h4>Service Request #{service_request.id} <Link href={"/hotline/servicerequest/" + service_request.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link> | <span style={{textTransform:"capitalize"}}>{service_request.status}</span></h4>
+          <h4>Service Request <Link href={"/hotline/servicerequest/" + service_request.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link> | <span style={{textTransform:"capitalize"}}>{service_request.status}</span></h4>
         </Card.Title>
         <hr/>
         <ListGroup variant="flush" style={{marginTop:"-5px", marginBottom:"-13px"}}>
           <ListGroup.Item style={{marginTop:"-8px"}}><b>Address: </b>{service_request.full_address}</ListGroup.Item>
-          <ListGroup.Item><b>Owner: </b>{service_request.owner_object ? <span>{service_request.owner_object.first_name} {service_request.owner_object.last_name} <Link href={"/hotline/owner/" + service_request.owner}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link> | {service_request.owner_object.phone||service_request.owner_object.email||"No Contact"}</span> : "No Owner"}</ListGroup.Item>
+          {service_request.owners.map(owner => (
+            <ListGroup.Item><b>Owner: </b>{owner.first_name} {owner.last_name} <Link href={"/hotline/owner/" + owner}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link> | {owner.display_phone||owner.email||"No Contact"}</ListGroup.Item>
+          ))}
+          {service_request.owners.length < 1 ? <ListGroup.Item><b>Owner: </b>No Owner</ListGroup.Item> : ""}
         </ListGroup>
         <hr/>
         <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
@@ -555,14 +558,16 @@ export function EvacSummary({id}) {
           ))}
         </ListGroup>
         <hr/>
-        <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
-          <h4 className="mt-2" style={{marginBottom:"-2px"}}>Notes</h4>
-          {service_request.visit_notes.filter(note => String(note.evac_assignment) === String(id)).map((note) => (
-            <ListGroup.Item key={note.id}>
-              {note.notes || "None"}
-            </ListGroup.Item>
-          ))}
-        </ListGroup>
+        {service_request.visit_notes.filter(note => String(note.evac_assignment) === String(id)).length > 0 ?
+          <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
+            <h4 className="mt-2" style={{marginBottom:"-2px"}}>Notes</h4>
+            {service_request.visit_notes.filter(note => String(note.evac_assignment) === String(id)).map((note) => (
+              <ListGroup.Item key={note.id}>
+                {note.notes || "None"}
+              </ListGroup.Item>
+            ))}
+          </ListGroup>
+        : ""}
       </Card.Body>
     </Card>
     ))}

@@ -237,13 +237,16 @@ export function EvacResolution({ id }) {
           <Card key={service_request.id} border="secondary" className="mt-3">
             <Card.Body>
               <Card.Title>
-                <h4>Service Request #{service_request.id} <Link href={"/hotline/servicerequest/" + service_request.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link> | <span style={{textTransform:"capitalize"}}>{service_request.status}</span></h4>
+                <h4>Service Request <Link href={"/hotline/servicerequest/" + service_request.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link> | <span style={{textTransform:"capitalize"}}>{service_request.status}</span></h4>
               </Card.Title>
               <hr/>
               <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
                 <ListGroup.Item><b>Address: </b>{service_request.full_address}</ListGroup.Item>
-                <ListGroup.Item><b>Owner: </b>{service_request.owner_object ? <span>{service_request.owner_object.first_name} {service_request.owner_object.last_name} <Link href={"/hotline/owner/" + service_request.owner}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></span> : "No Owner"}</ListGroup.Item>
-              </ListGroup>
+                {service_request.owners.map(owner => (
+                  <ListGroup.Item><b>Owner: </b>{owner.first_name} {owner.last_name} <Link href={"/hotline/owner/" + owner.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item>
+                ))}
+                {service_request.owners.length < 1 ? <ListGroup.Item><b>Owner: </b>No Owner</ListGroup.Item> : ""}
+                </ListGroup>
               <hr/>
               <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
                 <h4 className="mt-2" style={{marginBottom:"-2px"}}>Animals</h4>
@@ -310,7 +313,7 @@ export function EvacResolution({ id }) {
                   <Field component={Switch} name={`sr_updates.${index}.forced_entry`} type="checkbox" color="primary" />
                 </Col>
               </BootstrapForm.Row>
-              {service_request.owner ?
+              {service_request.owners.length > 0 ?
                 <BootstrapForm.Row className="mt-3 pl-1">
                   <Field
                     label={"Owner Notified: "}

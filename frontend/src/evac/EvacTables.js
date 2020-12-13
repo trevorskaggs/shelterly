@@ -140,7 +140,7 @@ export function EvacuationAssignmentTable() {
                 <div>
                 Opened: <Moment format="L">{evacuation_assignment.start_time}</Moment> |
                 {evacuation_assignment.end_time ?
-                  <span> Closed: 
+                  <span> Closed:&nbsp;
                     <Moment format="L">{evacuation_assignment.end_time}</Moment>
                   </span> : <Link href={"/evac/resolution/" + evacuation_assignment.id} className="btn btn-danger ml-1" style={{paddingTop:"0px", paddingBottom:"0px"}}>Close</Link>}
                 </div>
@@ -157,11 +157,13 @@ export function EvacuationAssignmentTable() {
                     <ListGroup>
                       {evacuation_assignment.service_request_objects.map(service_request => (
                           <ListGroup.Item key={service_request.id}>
-                            Service Request #{service_request.id} <Link
+                            Service Request {service_request.address}
+                            <Link
                               href={"/hotline/servicerequest/" + service_request.id}> <FontAwesomeIcon
-                              icon={faClipboardList} inverse/></Link> |
-                            Owner: {service_request.owner_object.first_name} {service_request.owner_object.last_name} |
-                            Address: {service_request.address} <br/>
+                              icon={faClipboardList} inverse/></Link> |&nbsp;
+                            {service_request.owners.map(owner => (
+                              <span>Owner: {owner.first_name} {owner.last_name} |&nbsp;</span>
+                            ))}
                             Animals: {service_request.animals.map((animal, i) => (
                               <span key={animal.id}>{i > 0 && ", "}{animal.name || "Unknown"} ({animal.species})</span>))}
                           </ListGroup.Item>))}
