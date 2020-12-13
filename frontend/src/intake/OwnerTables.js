@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
     faClipboardList
 } from '@fortawesome/free-solid-svg-icons';
+import Moment from "react-moment";
 
 export function OwnerTable() {
 
@@ -104,11 +105,17 @@ export function OwnerTable() {
                                     {/*<ListGroup.Item className='service_request'>Owner: {owner.first_name ? <span>{owner.first_name} {owner.last_name} {owner.phone} <Link href={"/hotline/owner/" + owner.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></span> : "N/A"}</ListGroup.Item>*/}
                                 <ListGroup.Item>
 
-                                   {owner.service_request.map(sr => (
-                                       <span>
-                                           {sr.address}
-                                       </span>
-                                       ))}
+                                    {owner.service_request.length ?
+                                        <span>{
+                                            owner.service_request.map(service_request => (
+                                                <span>
+                                                    {service_request.address} ({service_request.status})
+                                                    <Link href={"/hotline/servicerequest/" + service_request.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link> | <Moment format="LLL">{service_request.timestamp}</Moment>
+                                                </span>
+
+                                            ))
+                                        }</span> : "None"
+                                    }
                                 </ListGroup.Item>
                                 </ListGroup>
                             </Card.Body>
