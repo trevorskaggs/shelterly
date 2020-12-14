@@ -7,6 +7,7 @@ app_name = 'hotline'
 router = DefaultRouter()
 router.register(r'servicerequests', views.ServiceRequestViewSet)
 router.register(r'visitnote', views.VisitNoteViewSet)
+router.register(r'ownercontact', views.OwnerContactViewSet)
 
 urlpatterns = [
     path('api/', include(router.urls)),

@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.urls import reverse
 from django.utils.html import escape, mark_safe
 
-from hotline.models import ServiceRequest, VisitNote
+from hotline.models import OwnerContact, ServiceRequest, VisitNote
 from location.utils import build_full_address
 from people.models import Person
 
@@ -24,5 +24,11 @@ class VisitNoteAdmin(admin.ModelAdmin):
 
   list_display = ('id', 'notes')
 
+
+class OwnerContactAdmin(admin.ModelAdmin):
+
+  list_display = ('time', 'owner', 'animal', 'notes')
+
 admin.site.register(ServiceRequest, ServiceRequestAdmin)
 admin.site.register(VisitNote, VisitNoteAdmin)
+admin.site.register(OwnerContact, OwnerContactAdmin)

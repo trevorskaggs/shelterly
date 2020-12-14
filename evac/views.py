@@ -6,7 +6,7 @@ from actstream import action
 from animals.models import Animal
 from evac.models import EvacAssignment, EvacTeamMember
 from evac.serializers import EvacAssignmentSerializer, EvacTeamMemberSerializer
-from hotline.models import ServiceRequest, VisitNote
+from hotline.models import OwnerContact, ServiceRequest, VisitNote
 
 class EvacTeamMemberViewSet(viewsets.ModelViewSet):
 
@@ -62,7 +62,10 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
                     action.send(self.request.user, verb='closed service request', target=service_requests[0])
                 # Only create VisitNote on first update.
                 if not VisitNote.objects.filter(evac_assignment=evac_assignment, service_request=service_requests[0]).exists():
-                    VisitNote.objects.create(evac_assignment=evac_assignment, service_request=service_requests[0], date_completed=service_request['date_completed'], notes=service_request['notes'], owner_contacted=service_request['owner_contacted'], forced_entry=service_request['forced_entry'])
+                    VisitNote.objects.create(evac_assignment=evac_assignment, service_request=service_requests[0], date_completed=service_request['date_completed'], notes=service_request['notes'], forced_entry=service_request['forced_entry'])
                 else:
-                    VisitNote.objects.filter(evac_assignment=evac_assignment, service_request=service_requests[0]).update(date_completed=service_request['date_completed'], notes=service_request['notes'], owner_contacted=service_request['owner_contacted'], forced_entry=service_request['forced_entry'])
+                    VisitNote.objects.filter(evac_assignment=evac_assignment, service_request=service_requests[0]).update(date_completed=service_request['date_completed'], notes=service_request['notes'], forced_entry=service_request['forced_entry'])
+                import pdb; pdb.set_trace()
+                for owner in service_requests[0].owner.all():
+                    OwnerContact.objects.create(owner=owner, notes=service_request['owner_contacted'], time=service_request['owner_contacted_time'])
             action.send(self.request.user, verb='updated evacuation assignment', target=evac_assignment)

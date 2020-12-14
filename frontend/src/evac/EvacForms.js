@@ -192,9 +192,10 @@ export function EvacResolution({ id }) {
               date_completed: Yup.date().required('Required'),
               notes: Yup.string(),
               forced_entry: Yup.boolean(),
-              owner_contacted: Yup.boolean().when('owner', {
+              owner_contacted: Yup.string().when('owner', {
                 is: true,
-                then: Yup.boolean().oneOf([true], 'The owner must be notified before resolution.').required()}),
+                then: Yup.string().required('The owner must be notified before resolution.')}),
+              owner_contacted_time: Yup.date().required('Please specify the date and time the owner was notified.'),
             })
           ),
         })}
@@ -291,7 +292,7 @@ export function EvacResolution({ id }) {
                   xs="9"
                   as="textarea"
                   rows={5}
-                  label="Notes"
+                  label="Visit Notes"
                 />
               </BootstrapForm.Row>
               <BootstrapForm.Row>
@@ -313,27 +314,27 @@ export function EvacResolution({ id }) {
                   <Field component={Switch} name={`sr_updates.${index}.forced_entry`} type="checkbox" color="primary" />
                 </Col>
               </BootstrapForm.Row>
-              {service_request.owners.length > 0 ?
+              { service_request.owners.length > 0 ?
                 <BootstrapForm.Row className="mt-3 pl-1">
-                  <Field
-                    label={"Owner Notified: "}
-                    component={Checkbox}
+                  <TextInput
+                    id={`sr_updates.${index}.owner_contacted`}
                     name={`sr_updates.${index}.owner_contacted`}
-                    checked={props.values.sr_updates[index] && props.values.sr_updates[index].owner_contacted}
-                    onChange={() => {
-                      if (props.values.sr_updates[index] && props.values.sr_updates[index].owner_contacted) {
-                        props.setFieldValue(
-                          `sr_updates.${index}.owner_contacted`,
-                          false
-                        );
-                      }
-                      else {
-                        props.setFieldValue(
-                          `sr_updates.${index}.owner_contacted`,
-                          true
-                        );
-                      }
+                    xs="9"
+                    as="textarea"
+                    rows={5}
+                    label="Owner Contact Note"
+                  />
+                  <DateTimePicker
+                    label="Owner Contacted Time"
+                    name={`sr_updates.${index}.owner_contacted_time`}
+                    id={`sr_updates.${index}.owner_contacted_time`}
+                    xs="4"
+                    data-enable-time={true}
+                    clearable={false}
+                    onChange={(date, dateStr) => {
+                      props.setFieldValue(`sr_updates.${index}.owner_contacted_time`, dateStr)
                     }}
+                    value={props.values.sr_updates[index] ? props.values.sr_updates[index].owner_contacted_time : new Date()}
                   />
                 </BootstrapForm.Row>
               : ""}
@@ -359,7 +360,6 @@ export const VisitNoteForm = ({id}) => {
 
     const [data, setData] = useState({
       date_completed: '',
-      owner_contacted: false,
       notes: '',
       service_request: null,
       evac_assignment: null,
