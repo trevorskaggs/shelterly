@@ -81,3 +81,19 @@ input[disabled] {
   display: block !important;
   font-size: 100% !important;
 }
+
+.custom-page-links .page-link {
+  background-color: #444!important;
+}
+
+.custom-page-links .page-link:hover {
+  background-color: #2b4764!important;
+}
+
+.custom-page-links .page-item.active .page-link {
+  background-color: #375a7f!important ;
+}
+
+.custom-page-links .page-item.disabled .page-link {
+  background-color: #444!important ;
+}

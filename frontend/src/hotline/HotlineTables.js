@@ -10,7 +10,9 @@ import {
   FormControl,
   InputGroup,
   ListGroup,
-  OverlayTrigger, Tooltip
+  OverlayTrigger,
+  Pagination,
+  Tooltip
 } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -18,11 +20,15 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import moment from "moment";
 
+import { ITEMS_PER_PAGE } from '.././constants'
+
 export function ServiceRequestTable() {
 
   const [data, setData] = useState({service_requests: [], isFetching: false});
   const [searchTerm, setSearchTerm] = useState("");
   const [statusOptions, setStatusOptions] = useState({status:"all", allColor: "primary", openColor:"secondary", assignedColor:"secondary", closedColor:"secondary"});
+  const [page, setPage] = useState(1)
+  const [numPages, setNumPages] = useState(1)
 
   // Update searchTerm when field input changes.
   const handleChange = event => {
@@ -41,6 +47,7 @@ export function ServiceRequestTable() {
     })
     .then(response => {
       setData({service_requests: response.data, isFetching: false});
+      setNumPages(Math.ceil(response.data.length / ITEMS_PER_PAGE))
     })
     .catch(error => {
       console.log(error.response);
@@ -58,6 +65,7 @@ export function ServiceRequestTable() {
         cancelToken: source.token,
       })
       .then(response => {
+        setNumPages(Math.ceil(response.data.length / ITEMS_PER_PAGE))
         setData({service_requests: response.data, isFetching: false});
         console.log(response.data)
       })
@@ -96,8 +104,8 @@ export function ServiceRequestTable() {
           </InputGroup>
       </Form>
 
-      {data.service_requests.map(service_request => (
-        <div key={service_request.id} className="mt-3">
+      {data.service_requests.map((service_request, index) => (
+        <div key={service_request.id} className="mt-3" hidden={page!= Math.ceil((index+1)/ITEMS_PER_PAGE)}>
           <div className="card-header">{service_request.full_address}<Link href={"/hotline/servicerequest/" + service_request.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>&nbsp;| <span style={{textTransform:"capitalize"}}>{service_request.status}</span></div>
           <CardGroup>
             <Card key={service_request.id}>
@@ -194,6 +202,14 @@ export function ServiceRequestTable() {
         </div>
       ))}
       <p>{data.isFetching ? 'Fetching service requests...' : <span>{data.service_requests && data.service_requests.length ? '' : 'No Service Requests found.'}</span>}</p>
+    <Pagination className="custom-page-links" size="lg" onClick={(e) => {setPage(parseInt(e.target.innerText))}}>
+      {[...Array(numPages).keys()].map(x => 
+      <Pagination.Item key={x+1} active={x+1 === page}>
+                {x+1}
+              </Pagination.Item>)
+      }
+    </Pagination>
     </div>
+    
   )
 }
