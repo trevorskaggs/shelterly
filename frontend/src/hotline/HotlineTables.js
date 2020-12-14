@@ -118,7 +118,7 @@ export function ServiceRequestTable() {
         </div>
       ))}
       <p>{data.isFetching ? 'Fetching service requests...' : <span>{data.service_requests && data.service_requests.length ? '' : 'No Service Requests found.'}</span>}</p>
-    <Pagination size="lg" onClick={(e) => {setPage(parseInt(e.target.innerText))}}>
+    <Pagination className="custom-page-links" size="lg" onClick={(e) => {setPage(parseInt(e.target.innerText))}}>
       {[...Array(numPages).keys()].map(x => 
       <Pagination.Item key={x+1} active={x+1 === page}>
                 {x+1}
