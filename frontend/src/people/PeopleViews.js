@@ -56,7 +56,7 @@ export function PersonView({id}) {
     <>
     <Header>
       {is_owner ?
-        <span>Owner Details<Link href={"/hotline/owner/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link></span> :
+        <span>Owner Details<Link href={"/hotline/owner/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link> <Link href={"/hotline/owner/new?owner_id=" + id}><FontAwesomeIcon icon={faPlusSquare} inverse /></Link></span> :
         <span>Reporter Details<Link href={"/hotline/reporter/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link></span>
       }
     </Header>
@@ -71,7 +71,7 @@ export function PersonView({id}) {
             <hr/>
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
               <ListGroup.Item><b>Name: </b>{data.first_name} {data.last_name}</ListGroup.Item>
-              {data.phone ? <ListGroup.Item><b>Telephone: </b>{data.phone}</ListGroup.Item> : ""}
+              {data.phone ? <ListGroup.Item><b>Telephone: </b>{data.display_phone}</ListGroup.Item> : ""}
               {data.email ? <ListGroup.Item><b>Email: </b>{data.email}</ListGroup.Item> : ""}
               {data.best_contact ?
                 <ListGroup.Item><b>Best Contact: </b>{data.best_contact}</ListGroup.Item>: ''}
@@ -79,7 +79,7 @@ export function PersonView({id}) {
                 <ListGroup.Item><b>Agency: </b>{data.agency}</ListGroup.Item>: ''}
               <ListGroup.Item><b>Address: </b>{data.address ? data.full_address : 'N/A'}</ListGroup.Item>
               {data.request ?
-                <ListGroup.Item><b>Service Request: </b>#{data.request}<Link href={"/hotline/servicerequest/" + data.request}> <FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link></ListGroup.Item>: ''}
+                <ListGroup.Item><b>Service Request: </b>{data.request.full_address}<Link href={"/hotline/servicerequest/" + data.request.id}> <FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link></ListGroup.Item>: ''}
             </ListGroup>
           </Card.Body>
         </Card>

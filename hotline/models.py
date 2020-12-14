@@ -12,7 +12,7 @@ STATUS_CHOICES = (
 class ServiceRequest(Location):
     
     #keys
-    owner = models.OneToOneField(Person, on_delete=models.SET_NULL, blank=True, null=True, related_name="owner_service_request")
+    owner = models.ManyToManyField(Person, blank=True)
     reporter = models.ForeignKey(Person, on_delete=models.SET_NULL, blank=True, null=True, related_name='reporter_service_request')
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, blank=False, default='open')
 
@@ -34,10 +34,6 @@ class ServiceRequest(Location):
             output.append('Reporter: %s' % self.reporter)
         output.append('Animal Count: %s' % self.animal_set.all().count())
         return ', '.join(output)
-    
-    @property
-    def location_type(self):
-        return 'service_request'
 
     class Meta:
         ordering = ['timestamp']
