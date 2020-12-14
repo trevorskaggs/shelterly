@@ -192,10 +192,10 @@ export function EvacResolution({ id }) {
               date_completed: Yup.date().required('Required'),
               notes: Yup.string(),
               forced_entry: Yup.boolean(),
-              owner_contacted: Yup.string().when('owner', {
+              owner_contact_note: Yup.string().when('owner', {
                 is: true,
                 then: Yup.string().required('The owner must be notified before resolution.')}),
-              owner_contacted_time: Yup.date().required('Please specify the date and time the owner was notified.'),
+              owner_contact_time: Yup.date().required('Please specify the date and time the owner was notified.'),
             })
           ),
         })}
@@ -317,8 +317,8 @@ export function EvacResolution({ id }) {
               { service_request.owners.length > 0 ?
                 <BootstrapForm.Row className="mt-3 pl-1">
                   <TextInput
-                    id={`sr_updates.${index}.owner_contacted`}
-                    name={`sr_updates.${index}.owner_contacted`}
+                    id={`sr_updates.${index}.owner_contact_note`}
+                    name={`sr_updates.${index}.owner_contact_note`}
                     xs="9"
                     as="textarea"
                     rows={5}
@@ -326,21 +326,21 @@ export function EvacResolution({ id }) {
                   />
                   <DateTimePicker
                     label="Owner Contacted Time"
-                    name={`sr_updates.${index}.owner_contacted_time`}
-                    id={`sr_updates.${index}.owner_contacted_time`}
+                    name={`sr_updates.${index}.owner_contact_time`}
+                    id={`sr_updates.${index}.owner_contact_time`}
                     xs="4"
                     data-enable-time={true}
                     clearable={false}
                     onChange={(date, dateStr) => {
-                      props.setFieldValue(`sr_updates.${index}.owner_contacted_time`, dateStr)
+                      props.setFieldValue(`sr_updates.${index}.owner_contact_time`, dateStr)
                     }}
-                    value={props.values.sr_updates[index] ? props.values.sr_updates[index].owner_contacted_time : new Date()}
+                    value={props.values.sr_updates[index] ? props.values.sr_updates[index].owner_contact_time : new Date()}
                   />
                 </BootstrapForm.Row>
               : ""}
-              {props.errors.sr_updates && props.errors.sr_updates[index] && props.errors.sr_updates[index].owner_contacted &&
-              props.touched.sr_updates && props.touched.sr_updates[index] && props.touched.sr_updates[index].owner_contacted && (
-                <div style={{ color: "#e74c3c", marginTop: "-8px", fontSize: "80%" }}>{props.errors.sr_updates[index].owner_contacted}</div>
+              {props.errors.sr_updates && props.errors.sr_updates[index] && props.errors.sr_updates[index].owner_contact_note &&
+              props.touched.sr_updates && props.touched.sr_updates[index] && props.touched.sr_updates[index].owner_contact_note && (
+                <div style={{ color: "#e74c3c", marginTop: "-8px", fontSize: "80%" }}>{props.errors.sr_updates[index].owner_contact_note}</div>
                 )
               }
               </Card.Body>

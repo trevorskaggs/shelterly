@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from 'raviger';
 import { ListGroup } from 'react-bootstrap'
-import { ServiceRequestForm } from "./HotlineForms";
+import { OwnerContactForm, ServiceRequestForm } from "./HotlineForms";
 import { ServiceRequestTable } from "./HotlineTables"
 import { ServiceRequestView } from "./HotlineViews";
 
@@ -51,6 +51,12 @@ export const UpdateServiceRequest = ({id}) => (
 export const ServiceRequestDetail = ({id}) => (
   <div>
     <ServiceRequestView id={id} />
+  </div>
+)
+
+export const UpdateOwnerContact = ({id}) => (
+  <div>
+    <OwnerContactForm id={id} />
   </div>
 )
 

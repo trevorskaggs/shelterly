@@ -27,7 +27,7 @@ class VisitNoteAdmin(admin.ModelAdmin):
 
 class OwnerContactAdmin(admin.ModelAdmin):
 
-  list_display = ('time', 'owner', 'animal', 'notes')
+  list_display = ('owner_contact_time', 'owner', 'animal', 'owner_contact_note')
 
 admin.site.register(ServiceRequest, ServiceRequestAdmin)
 admin.site.register(VisitNote, VisitNoteAdmin)

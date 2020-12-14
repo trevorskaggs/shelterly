@@ -7,7 +7,8 @@ import {
   Label,
   Fade,
 } from 'reactstrap';
-import { Form as BootstrapForm, Button, ButtonGroup, Card, Col, Modal } from "react-bootstrap";
+
+import {Button, ButtonGroup, Card, Col, Form as BootstrapForm, FormGroup, Modal, Row } from "react-bootstrap";
 import * as Yup from 'yup';
 import { Switch } from 'formik-material-ui';
 import 'flatpickr/dist/themes/light.css';
@@ -295,3 +296,102 @@ export function ServiceRequestForm({ id }) {
     </Formik>
   );
 }
+
+
+export const OwnerContactForm = ({id}) => {
+
+    const [data, setData] = useState({
+      owner_contact_time: '',
+      owner_contact_note: '',
+      owner: null,
+      animal: null,
+    })
+
+    useEffect(() => {
+      let source = axios.CancelToken.source();
+      if (id) {
+        const fetchOwnerContact = async () => {
+          // Fetch Owner Contact data.
+          await axios.get('/hotline/api/ownercontact/' + id + '/', {
+            cancelToken: source.token,
+          })
+          .then(response => {
+            setData(response.data);
+          })
+          .catch(error => {
+            console.log(error.response);
+          });
+        };
+      fetchOwnerContact();
+      };
+      return () => {
+        source.cancel();
+      };
+    }, [id]);
+
+    return (
+        <Formik
+          initialValues={data}
+          enableReinitialize={true}
+          validationSchema={Yup.object({
+            owner_contact_time: Yup.date().required(),
+            owner_contact_note: Yup.string().required(),
+          })}
+          onSubmit={(values, { setSubmitting }) => {
+            setTimeout(() => {
+              axios.patch('/hotline/api/ownercontact/' + values.id + '/', values)
+              .then(
+                  navigate('/hotline/owner/' + values.owner)
+              )
+              .catch(error => {
+                console.log(error.response);
+              });
+            setSubmitting(false);
+            }, 500);
+          }}
+        >
+        {form => (
+          <Card border="secondary" className="mt-5">
+          <Card.Header as="h5" className="pl-3"><span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>{!id ? "New" : "Update"} Owner Contact - { form.owner }</Card.Header>
+          <Card.Body>
+          <Form>
+              <FormGroup>
+                <Row>
+                  <Col xs={{size: 2}}>
+                  <DateTimePicker
+                    label="Owner Contact Time"
+                    name="owner_contact_time"
+                    id="owner_contact_time"
+                    xs="7"
+                    clearable={false}
+                    data-enable-time={true}
+                    onChange={(date, dateStr) => {
+                      form.setFieldValue("owner_contact_time", dateStr)
+                    }}
+                    value={form.values.owner_contact_time||null}
+                  />
+                  </Col>
+                </Row>
+                <Row>
+                  <Col xs={{size: 2}}>
+                    <TextInput
+                      as="textarea"
+                      label="Owner Contact Note"
+                      name="owner_contact_note"
+                      id="owner_contact_note"
+                      xs="7"
+                      rows={5}
+                    />
+                  </Col>
+                </Row>
+              </FormGroup>
+          </Form>
+          </Card.Body>
+          <ButtonGroup>
+            <Button type="button" className="btn btn-primary" onClick={() => {form.submitForm()}}>Save</Button>
+          </ButtonGroup>
+          </Card>
+          )}
+        </Formik>
+    );
+};
