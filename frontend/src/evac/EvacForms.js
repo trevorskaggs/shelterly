@@ -6,14 +6,13 @@ import { Label } from 'reactstrap';
 import { Switch } from 'formik-material-ui';
 import {
   Button,
+  Form as BootstrapForm,
   ButtonGroup,
   Card,
   Col,
   FormGroup,
   ListGroup,
   Row,
-  Container,
-  Form as BootstrapForm,
 } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -30,7 +29,7 @@ export const EvacTeamMemberForm = () => {
   // Track whether or not to add another evac team member after saving.
   const [addAnother, setAddAnother] = useState(false);
   // Regex validators.
-  const phoneRegex = /^((\+\d{1,3}(-| )?\(?\d\)?(-| )?\d{1,3})|(\(?\d{2,3}\)?))(-| )?(\d{3,4})(-| )?(\d{4})(( x| ext)\d{1,5}){0,1}$/
+  const phoneRegex = /^[0-9]{10}$/
 
     return (
         <Formik
@@ -71,54 +70,58 @@ export const EvacTeamMemberForm = () => {
           }}
         >
         {form => (
-          <Form>
-            <Container>
-              <FormGroup>
-                <Row>
-                  <Col xs={{size: 5, offset: 1}}>
-                    <TextInput
-                      type="text"
-                      label="First Name*"
-                      name="first_name"
-                      id="first_name"
-                    />
-                  </Col>
-                  <Col xs="5">
-                    <TextInput
-                      type="text"
-                      label="Last Name*"
-                      name="last_name"
-                      id="last_name"
-                    />
-                  </Col>
-                </Row>
-              </FormGroup>
-
-              <FormGroup>
-                <Row>
-                  <Col xs={{size: 5, offset: 1}}>
-                    <TextInput
-                      type="text"
-                      label="Phone*"
-                      name="phone"
-                      id="phone"
-                    />
-                  </Col>
-                  <Col xs="5">
-                    <TextInput
-                      type="text"
-                      label="Agency ID"
-                      name="agency_id"
-                      id="agency_id"
-                    />
-                  </Col>
-                </Row>
-              </FormGroup>
-              <Button type="button" className="btn btn-success mr-1" onClick={() => {setAddAnother(false); form.submitForm()}}>Save</Button>
+          <Card border="secondary" className="mt-5">
+            <Card.Header as="h5" className="pl-3"><span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>New Team Member</Card.Header>
+            <Card.Body>
+              <Form>
+                  <FormGroup>
+                    <Row>
+                      <Col>
+                        <TextInput
+                          type="text"
+                          label="First Name*"
+                          name="first_name"
+                          id="first_name"
+                        />
+                      </Col>
+                      <Col>
+                        <TextInput
+                          type="text"
+                          label="Last Name*"
+                          name="last_name"
+                          id="last_name"
+                        />
+                      </Col>
+                    </Row>
+                  </FormGroup>
+                  <FormGroup>
+                    <Row>
+                      <Col>
+                        <TextInput
+                          type="text"
+                          label="Phone*"
+                          name="phone"
+                          id="phone"
+                        />
+                      </Col>
+                      <Col>
+                        <TextInput
+                          type="text"
+                          label="Agency ID"
+                          name="agency_id"
+                          id="agency_id"
+                        />
+                      </Col>
+                    </Row>
+                  </FormGroup>
+              </Form>
+            </Card.Body>
+            <ButtonGroup>
+              <Button type="button" className="btn btn-primary mr-1" onClick={() => {setAddAnother(false); form.submitForm()}}>Save</Button>
               <Button type="button" className="btn btn-success mr-1" onClick={() => {setAddAnother(true); form.submitForm()}}>Add Another</Button>
               <Link className="btn btn-secondary" href="/evac">Cancel</Link>
-            </Container>
-          </Form>
+            </ButtonGroup>
+            </Card>
           )}
         </Formik>
     );
@@ -148,7 +151,14 @@ export function EvacResolution({ id }) {
       .then(response => {
         response.data["sr_updates"] = [];
         response.data.service_request_objects.forEach((service_request, index) => {
-          response.data.sr_updates.push({id:service_request.id, followup_date: null, date_completed:new Date(), notes:'', owner_contacted:false, forced_entry: false, animals:service_request.animals})
+          // Use existing VisitNote to populate data if we're editing a closed Resolution.
+          const visit_note = service_request.visit_notes.filter(note => String(note.evac_assignment) === String(id))[0]
+          if (visit_note) {
+            response.data.sr_updates.push({id:service_request.id, followup_date: service_request.followup_date, date_completed:visit_note.date_completed||new Date(), notes:visit_note.notes, owner_contacted:visit_note.owner_contacted, forced_entry: visit_note.forced_entry, animals:service_request.animals, owner:service_request.owner !== null})
+          }
+          else {
+            response.data.sr_updates.push({id:service_request.id, followup_date: service_request.followup_date, date_completed:new Date(), notes:'', owner_contacted:false, forced_entry: false, animals:service_request.animals, owner:service_request.owner !== null})
+          }
         });
         setData(response.data);
       })
@@ -171,6 +181,7 @@ export function EvacResolution({ id }) {
           sr_updates: Yup.array().of(
             Yup.object().shape({
               id: Yup.number().required(),
+              owner: Yup.boolean(),
               followup_date: Yup.date().nullable(),
               animals: Yup.array().of(
                 Yup.object().shape({
@@ -181,7 +192,9 @@ export function EvacResolution({ id }) {
               date_completed: Yup.date().required('Required'),
               notes: Yup.string(),
               forced_entry: Yup.boolean(),
-              owner_contacted: Yup.boolean().required().oneOf([true], 'The owner must be notified before resolution.'),
+              owner_contacted: Yup.boolean().when('owner', {
+                is: true,
+                then: Yup.boolean().oneOf([true], 'The owner must be notified before resolution.').required()}),
             })
           ),
         })}
@@ -201,8 +214,8 @@ export function EvacResolution({ id }) {
         {props => (
           <>
           <BootstrapForm as={Form}>
-          <Header>Dispatch Assignment #{id} Resolution
-          <div style={{fontSize:"16px", marginTop:"5px"}}><b>Opened: </b><Moment format="lll">{data.start_time}</Moment></div>
+          <Header>Dispatch Assignment Resolution | {data.end_time ? "Closed" : "Open"}
+          <div style={{fontSize:"16px", marginTop:"5px"}}><b>Opened: </b><Moment format="lll">{data.start_time}</Moment>{data.end_time ? <span style={{fontSize:"16px", marginTop:"5px"}}> | <b>Closed: </b><Moment format="lll">{data.end_time}</Moment></span> : ""}</div>
           </Header>
           <hr/>
           <Card border="secondary" className="mt-3">
@@ -224,13 +237,16 @@ export function EvacResolution({ id }) {
           <Card key={service_request.id} border="secondary" className="mt-3">
             <Card.Body>
               <Card.Title>
-                <h4>Service Request #{service_request.id} <Link href={"/hotline/servicerequest/" + service_request.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link> | <span style={{textTransform:"capitalize"}}>{service_request.status}</span></h4>
+                <h4>Service Request <Link href={"/hotline/servicerequest/" + service_request.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link> | <span style={{textTransform:"capitalize"}}>{service_request.status}</span></h4>
               </Card.Title>
               <hr/>
               <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
                 <ListGroup.Item><b>Address: </b>{service_request.full_address}</ListGroup.Item>
-                <ListGroup.Item><b>Owner: </b>{service_request.owner_object.first_name} {service_request.owner_object.last_name} <Link href={"/hotline/owner/" + service_request.owner}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item>
-              </ListGroup>
+                {service_request.owners.map(owner => (
+                  <ListGroup.Item><b>Owner: </b>{owner.first_name} {owner.last_name} <Link href={"/hotline/owner/" + owner.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item>
+                ))}
+                {service_request.owners.length < 1 ? <ListGroup.Item><b>Owner: </b>No Owner</ListGroup.Item> : ""}
+                </ListGroup>
               <hr/>
               <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
                 <h4 className="mt-2" style={{marginBottom:"-2px"}}>Animals</h4>
@@ -254,54 +270,56 @@ export function EvacResolution({ id }) {
                 ))}
               </ListGroup>
               <hr/>
-                <BootstrapForm.Row className="mt-3">
-                  <DateTimePicker
-                    label="Date Completed"
-                    name={`sr_updates.${index}.date_completed`}
-                    id={`sr_updates.${index}.date_completed`}
-                    xs="4"
-                    data-enable-time={false}
-                    clearable={false}
-                    onChange={(date, dateStr) => {
-                      props.setFieldValue(`sr_updates.${index}.date_completed`, dateStr)
-                    }}
-                    value={props.values.sr_updates[index] ? props.values.sr_updates[index].date_completed : new Date()}
-                  />
-                </BootstrapForm.Row>
-                <BootstrapForm.Row className="mt-3">
-                  <TextInput
-                    id={`sr_updates.${index}.notes`}
-                    name={`sr_updates.${index}.notes`}
-                    xs="9"
-                    as="textarea"
-                    rows={5}
-                    label="Notes"
-                  />
-                </BootstrapForm.Row>
-                <BootstrapForm.Row>
-                  <DateTimePicker
-                    label="Followup Date"
-                    name={`sr_updates.${index}.followup_date`}
-                    id={`sr_updates.${index}.followup_date`}
-                    xs="4"
-                    data-enable-time={false}
-                    onChange={(date, dateStr) => {
-                      props.setFieldValue(`sr_updates.${index}.followup_date`, dateStr)
-                    }}
-                    value={data.followup_date||null}
-                  />
-                </BootstrapForm.Row>
-                <BootstrapForm.Row className="mt-2">
-                  <Col>
-                    <Label htmlFor={`sr_updates.${index}.forced_entry`} className="mt-2">Forced Entry</Label>
-                    <Field component={Switch} name={`sr_updates.${index}.forced_entry`} type="checkbox" color="primary" />
-                  </Col>
-                </BootstrapForm.Row>
+              <BootstrapForm.Row className="mt-3">
+                <DateTimePicker
+                  label="Date Completed"
+                  name={`sr_updates.${index}.date_completed`}
+                  id={`sr_updates.${index}.date_completed`}
+                  xs="4"
+                  data-enable-time={false}
+                  clearable={false}
+                  onChange={(date, dateStr) => {
+                    props.setFieldValue(`sr_updates.${index}.date_completed`, dateStr)
+                  }}
+                  value={props.values.sr_updates[index] ? props.values.sr_updates[index].date_completed : new Date()}
+                />
+              </BootstrapForm.Row>
+              <BootstrapForm.Row className="mt-3">
+                <TextInput
+                  id={`sr_updates.${index}.notes`}
+                  name={`sr_updates.${index}.notes`}
+                  xs="9"
+                  as="textarea"
+                  rows={5}
+                  label="Notes"
+                />
+              </BootstrapForm.Row>
+              <BootstrapForm.Row>
+                <DateTimePicker
+                  label="Followup Date"
+                  name={`sr_updates.${index}.followup_date`}
+                  id={`sr_updates.${index}.followup_date`}
+                  xs="4"
+                  data-enable-time={false}
+                  onChange={(date, dateStr) => {
+                    props.setFieldValue(`sr_updates.${index}.followup_date`, dateStr)
+                  }}
+                  value={service_request.followup_date||null}
+                />
+              </BootstrapForm.Row>
+              <BootstrapForm.Row className="mt-2">
+                <Col>
+                  <Label htmlFor={`sr_updates.${index}.forced_entry`} className="mt-2">Forced Entry</Label>
+                  <Field component={Switch} name={`sr_updates.${index}.forced_entry`} type="checkbox" color="primary" />
+                </Col>
+              </BootstrapForm.Row>
+              {service_request.owners.length > 0 ?
                 <BootstrapForm.Row className="mt-3 pl-1">
                   <Field
                     label={"Owner Notified: "}
                     component={Checkbox}
                     name={`sr_updates.${index}.owner_contacted`}
+                    checked={props.values.sr_updates[index] && props.values.sr_updates[index].owner_contacted}
                     onChange={() => {
                       if (props.values.sr_updates[index] && props.values.sr_updates[index].owner_contacted) {
                         props.setFieldValue(
@@ -318,11 +336,12 @@ export function EvacResolution({ id }) {
                     }}
                   />
                 </BootstrapForm.Row>
-                {props.errors.sr_updates && props.errors.sr_updates[index] && props.errors.sr_updates[index].owner_contacted &&
-                props.touched.sr_updates && props.touched.sr_updates[index] && props.touched.sr_updates[index].owner_contacted && (
-                  <div style={{ color: "#e74c3c", marginTop: "-8px", fontSize: "80%" }}>{props.errors.sr_updates[index].owner_contacted}</div>
-                  )
-                }
+              : ""}
+              {props.errors.sr_updates && props.errors.sr_updates[index] && props.errors.sr_updates[index].owner_contacted &&
+              props.touched.sr_updates && props.touched.sr_updates[index] && props.touched.sr_updates[index].owner_contacted && (
+                <div style={{ color: "#e74c3c", marginTop: "-8px", fontSize: "80%" }}>{props.errors.sr_updates[index].owner_contacted}</div>
+                )
+              }
               </Card.Body>
             </Card>
             ))}
@@ -403,7 +422,7 @@ export const VisitNoteForm = ({id}) => {
                     label="Date Completed"
                     name="date_completed"
                     id="date_completed"
-                    xs="4"
+                    xs="7"
                     clearable={false}
                     onChange={(date, dateStr) => {
                       form.setFieldValue("date_completed", dateStr)
@@ -419,7 +438,7 @@ export const VisitNoteForm = ({id}) => {
                       label="Notes"
                       name="notes"
                       id="notes"
-                      xs="9"
+                      xs="7"
                       rows={5}
                     />
                   </Col>
@@ -431,9 +450,11 @@ export const VisitNoteForm = ({id}) => {
                   </Col>
                 </Row>
               </FormGroup>
-              <Button type="button" className="btn btn-success mr-1" onClick={() => form.submitForm()}>Save</Button>
           </Form>
           </Card.Body>
+          <ButtonGroup>
+            <Button type="button" className="btn btn-primary" onClick={() => {form.submitForm()}}>Save</Button>
+          </ButtonGroup>
           </Card>
           )}
         </Formik>

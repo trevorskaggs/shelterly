@@ -21,24 +21,6 @@ class Location(models.Model):
     latitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
     longitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
 
-    def save(self, *args, **kwargs):
-        super(Location, self).save(*args, **kwargs)
-
-    def get_location_dict(self):
-        return {
-            'address': self.address,
-            'apartment': self.apartment,
-            'city': self.city,
-            'state': self.state,
-            'zip_code': self.zip_code,
-            'longitude': self.longitude,
-            'latitude': self.latitude
-        }
-
-    def set_initial_location_fields(self, seed_location_obj):
-        self.update(**seed_location_obj.get_location_dict())
-        self.save()
-
     @property
     def location_output(self):
         valid_outputs = []
@@ -47,19 +29,6 @@ class Location(models.Model):
             if val:
                 valid_outputs.append(val)
         return (', ').join(valid_outputs)    
-
-    @property
-    def location_type(self):
-        pass
-
-    @property
-    def map_name(self):
-        return '{}_{}'.format(self.location_type, self.pk)
-
-    @property
-    def location_wkt(self):
-        if self.longitude and self.latitude:
-            return 'POINT({} {})'.format(self.longitude, self.latitude)
 
     class Meta:
         abstract=True
