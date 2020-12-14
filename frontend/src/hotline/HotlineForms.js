@@ -37,6 +37,12 @@ export function ServiceRequestForm({ id }) {
     first_responder = 'false'
   } = queryParams;
 
+  // Force owner to be an empty array if no owner.
+  let owner = [];
+  if (owner_id) {
+    owner = [owner_id]
+  }
+
   // Determine if this is from a first responder when creating a SR.
   var is_first_responder = (first_responder === 'true');
 
@@ -52,7 +58,7 @@ export function ServiceRequestForm({ id }) {
 
   // Initial ServiceRequest data.
   const [data, setData] = useState({
-    owner: owner_id,
+    owner: owner,
     reporter: reporter_id,
     directions: '',
     address: '',
@@ -174,7 +180,7 @@ export function ServiceRequestForm({ id }) {
         <Card.Header as="h5">{id ? <span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span> : ""}Service Request Form</Card.Header>
         <Card.Body>
         <BootstrapForm as={Form}>
-          <Field type="hidden" value={owner_id || ""} name="owner" id="owner"></Field>
+          <Field type="hidden" value={owner} name="owner" id="owner"></Field>
           <Field type="hidden" value={reporter_id || ""} name="reporter" id="reporter"></Field>
           <Field type="hidden" value={data.latitude || ""} name="latitude" id="latitude"></Field>
           <Field type="hidden" value={data.longitude || ""} name="longitude" id="longitude"></Field>

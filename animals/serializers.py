@@ -6,8 +6,9 @@ from .models import Animal, AnimalImage
 from location.utils import build_full_address, build_action_string
 
 class AnimalSerializer(serializers.ModelSerializer):
-    owner_object = serializers.SerializerMethodField()
+    owners = serializers.SerializerMethodField()
     full_address = serializers.SerializerMethodField()
+    request_address = serializers.SerializerMethodField()
     aco_required = serializers.SerializerMethodField()
     front_image = serializers.SerializerMethodField()
     side_image = serializers.SerializerMethodField()
@@ -18,11 +19,12 @@ class AnimalSerializer(serializers.ModelSerializer):
     is_stray = serializers.SerializerMethodField()
 
     # Custom Owner object field that excludes animals to avoid a circular reference.
-    def get_owner_object(self, obj):
+    def get_owners(self, obj):
         from people.serializers import SimplePersonSerializer
-        if obj.owner:
-            return SimplePersonSerializer(obj.owner).data
-        return None
+
+        if obj.owner.exists():
+            return SimplePersonSerializer(obj.owner, many=True).data
+        return []
 
     # Custom field for the full address.
     def get_full_address(self, obj):
@@ -32,8 +34,12 @@ class AnimalSerializer(serializers.ModelSerializer):
         # Then use the SR address if it exists.
         elif obj.request:
             return build_full_address(obj.request)
-        # Otherwise use the owner address.
-        return build_full_address(obj.owner)
+        # Otherwise return an empty string.
+        return ''
+
+    # Custome field for request address.
+    def get_request_address(self, obj):
+        return build_full_address(obj.request)
 
     # Custom field to return shelter ID.
     def get_shelter(self, obj):

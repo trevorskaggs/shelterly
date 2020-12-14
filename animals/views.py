@@ -18,10 +18,6 @@ class AnimalViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         if serializer.is_valid():
 
-            # Add ServiceRequest Owner to new animals being added to an SR.
-            if serializer.validated_data.get('request'):
-                serializer.validated_data['owner'] = serializer.validated_data.get('request').owner
-
             # Set status to SHELTERED if a room is added.
             if serializer.validated_data.get('room'):
                 serializer.validated_data['status'] = 'SHELTERED'
@@ -32,6 +28,14 @@ class AnimalViewSet(viewsets.ModelViewSet):
 
             animal = serializer.save()
             action.send(self.request.user, verb='created animal', target=animal)
+
+            # Add Owner to new animals if it is POSTed.
+            if self.request.data.get('owner'):
+                animal.owner.add(self.request.data['owner'])
+
+            # Add ServiceRequest Owner and Reporter to new animals being added to an SR.
+            if serializer.validated_data.get('request'):
+                animal.owner.add(*animal.request.owner.all())
 
             if animal.room:
                 action.send(self.request.user, verb='sheltered animal', target=animal.room, action_object=animal)
@@ -44,11 +48,6 @@ class AnimalViewSet(viewsets.ModelViewSet):
                 category = key.translate({ord(num): None for num in '0123456789'})
                 # Create image object.
                 AnimalImage.objects.create(image=image_data, animal=animal, category=category)
-            # If the animal does not have an owner, create a dummy unknown owner and assign it.
-            if not animal.owner:
-                owner = Person.objects.create(first_name="Unknown")
-                animal.owner = owner
-                animal.save()
 
     def perform_update(self, serializer):
         if serializer.is_valid():
@@ -72,6 +71,10 @@ class AnimalViewSet(viewsets.ModelViewSet):
 
             animal = serializer.save()
             action.send(self.request.user, verb='updated animal', target=animal)
+
+            # Remove Owner from animal.
+            if self.request.data.get('remove_owner'):
+                animal.owner.remove(self.request.data.get('remove_owner'))
 
             old_images = serializer.data['extra_images']
             updated_images = self.request.data['extra_images'].split(',') if self.request.data.get('extra_images', None) else []

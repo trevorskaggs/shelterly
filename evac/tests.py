@@ -10,7 +10,8 @@ class TestViews(APITestCase):
     def setUpTestData(cls):
         cls.user = ShelterlyUser.objects.create_user(username='test_user', email="test@test.com", password="test", is_active=True)
         cls.owner = Person.objects.create(first_name="Leroy", last_name="Jenkins")
-        cls.animal = Animal.objects.create(name='bella', owner=cls.owner)
+        cls.animal = Animal.objects.create(name='bella')
+        cls.animal.owner.set([cls.owner])
 
     def test_get_all_animals(self):
         self.client.force_authenticate(self.user)
@@ -34,6 +35,6 @@ class TestViews(APITestCase):
     def test_create_animals(self):
         self.new_owner = Person.objects.create(first_name="New", last_name="Person")
         self.client.force_authenticate(self.user)
-        response = self.client.post('/animals/api/animal/', {'owner':self.new_owner.pk, 'name':'Phineas'})
+        response = self.client.post('/animals/api/animal/', {'owner':[self.new_owner.pk], 'name':'Phineas'})
         self.assertEqual(response.status_code, 201)
         self.assertTrue(Animal.objects.filter(owner=self.new_owner, name='Phineas').exists())
