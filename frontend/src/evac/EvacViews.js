@@ -264,9 +264,56 @@ export function Dispatch() {
     >
     {props => (
       <Form>
-        <Row className="d-flex flex-wrap sticky" style={{paddingRight:"5px"}}>
-          <Col xs={10} className="border rounded pl-0" style={{marginLeft:"-5px", marginBottom:"10px", paddingRight:"9px"}}>
-            <Map className="d-block sticky" style={{marginTop:"-10px", marginBottom:"10px", marginRight:"-9px"}} bounds={data.bounds} onMoveEnd={onMove}>
+        <Row className="d-flex flex-wrap" style={{marginTop:"10px", marginRight:"-7px"}}>
+          <Col xs={2} className="border rounded" style={{marginLeft:"-5px", marginRight:"5px"}}>
+            <div className="card-header border rounded mt-3 text-center" style={{paddingRight:"15px", paddingLeft:"15px"}}>
+              <p className="mb-2" style={{marginTop:"-5px"}}>Reported</p>
+              <hr className="mt-1 mb-1"/>
+              {Object.keys(totalSelectedState["REPORTED"]).map(key => (
+                <div key={key} style={{textTransform:"capitalize", marginTop:"5px", marginBottom:"-5px"}}>{prettyText(key.split(',')[1], key.split(',')[0], totalSelectedState["REPORTED"][key])}</div>
+              ))}
+            </div>
+            <div className="card-header border rounded mt-3 text-center" style={{paddingRight:"15px", paddingLeft:"15px"}}>
+              <p className="mb-2" style={{marginTop:"-5px"}}>SIP
+                <OverlayTrigger
+                  key={"selected-sip"}
+                  placement="top"
+                  overlay={
+                    <Tooltip id={`tooltip-selected-sip`}>
+                      Sheltered In Place
+                    </Tooltip>
+                  }
+                >
+                  <FontAwesomeIcon icon={faIgloo} className="ml-1"/>
+                </OverlayTrigger>
+              </p>
+              <hr className="mt-1 mb-1"/>
+              {Object.keys(totalSelectedState["SHELTERED IN PLACE"]).map(key => (
+                <div key={key} style={{textTransform:"capitalize", marginTop:"5px", marginBottom:"-5px"}}>{prettyText(key.split(',')[1], key.split(',')[0], totalSelectedState["SHELTERED IN PLACE"][key])}</div>
+              ))}
+            </div>
+            <div className="card-header border rounded mt-3 mb-3 text-center" style={{paddingRight:"15px", paddingLeft:"15px"}}>
+              <p className="mb-2" style={{marginTop:"-5px"}}>UTL
+                <OverlayTrigger
+                  key={"selected-utl"}
+                  placement="top"
+                  overlay={
+                    <Tooltip id={`tooltip-selected-utl`}>
+                      Unable To Locate
+                    </Tooltip>
+                  }
+                >
+                  <FontAwesomeIcon icon={faQuestionCircle} className="ml-1"/>
+                </OverlayTrigger>
+              </p>
+              <hr className="mt-1 mb-1"/>
+              {Object.keys(totalSelectedState["UNABLE TO LOCATE"]).map(key => (
+                <div key={key} style={{textTransform:"capitalize", marginTop:"5px", marginBottom:"-5px"}}>{prettyText(key.split(',')[1], key.split(',')[0], totalSelectedState["UNABLE TO LOCATE"][key])}</div>
+              ))}
+            </div>
+          </Col>
+          <Col xs={10} className="border rounded pl-0 pr-0">
+            <Map className="d-block" style={{marginRight:"0px"}} bounds={data.bounds} onMoveEnd={onMove}>
               <Legend position="bottomleft" metric={false} />
               <TileLayer
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -313,16 +360,11 @@ export function Dispatch() {
               ))}
             </Map>
           </Col>
-          <Col xs={2} className="d-flex flex-column" style={{paddingLeft:"7px", paddingRight:"0px"}}>
-            <div className="card-header border rounded pl-3 pr-3">
-              <h5 className="mb-0 text-center">Options</h5>
-              <hr/>
-              <FormCheck id="aco_required" name="aco_required" type="switch" label="ACO Required" checked={statusOptions.aco_required} onChange={handleACO} />
-              <FormCheck id="pending_only" className="mt-3" name="pending_only" type="switch" label="Pending Only" checked={statusOptions.pending_only} onChange={handlePendingOnly} />
-            </div>
-          </Col>
         </Row>
-        <Row className="mt-2" style={{paddingRight:"10px"}}>
+        <Row className="mt-2" style={{}}>
+          <Col xs={2} className="pl-0" style={{marginLeft:"-7px", paddingRight:"2px"}}>
+            <Button type="submit" className="btn-block mt-auto" style={{marginBottom:"-33px"}} disabled={selectedCount.disabled || props.values.team_members.length === 0}>DEPLOY</Button>
+          </Col>
           <Col xs={10} className="pl-0">
             <Typeahead
               id="team_members"
@@ -331,62 +373,20 @@ export function Dispatch() {
               options={teamData.options}
               placeholder="Choose team members..."
               className=""
-              style={{marginLeft:"-5px", marginRight:"-15px"}}
+              style={{marginLeft:"3px", marginRight:"-13px"}}
             />
           </Col>
-          <Col xs={2} className="pl-0" style={{paddingRight:"5px"}}>
-            <Button type="submit" className="btn-block mt-auto" style={{marginBottom:"-33px", marginLeft:"5px"}} disabled={selectedCount.disabled || props.values.team_members.length === 0}>DEPLOY</Button>
-          </Col>
         </Row>
-        <Row className="d-flex flex-wrap" style={{marginTop:"-15px", minHeight:"36vh", paddingRight:"10px"}}>
-          <Col xs={2} className="mt-4 border rounded mr-1" style={{marginLeft:"-5px", height:"250", minHeight:"250"}}>
-            <div className="card-header border rounded mt-3 text-center">
-              <p className="mb-2" style={{marginTop:"-5px"}}>Reported</p>
-              <hr className="mt-1 mb-1"/>
-              {Object.keys(totalSelectedState["REPORTED"]).map(key => (
-                <div key={key} style={{textTransform:"capitalize", marginTop:"5px", marginBottom:"-5px"}}>{prettyText(key.split(',')[1], key.split(',')[0], totalSelectedState["REPORTED"][key])}</div>
-              ))}
-            </div>
-            <div className="card-header border rounded mt-3 text-center">
-              <p className="mb-2" style={{marginTop:"-5px"}}>SIP
-                <OverlayTrigger
-                  key={"selected-sip"}
-                  placement="top"
-                  overlay={
-                    <Tooltip id={`tooltip-selected-sip`}>
-                      Sheltered In Place
-                    </Tooltip>
-                  }
-                >
-                  <FontAwesomeIcon icon={faIgloo} className="ml-1"/>
-                </OverlayTrigger>
-              </p>
-              <hr className="mt-1 mb-1"/>
-              {Object.keys(totalSelectedState["SHELTERED IN PLACE"]).map(key => (
-                <div key={key} style={{textTransform:"capitalize", marginTop:"5px", marginBottom:"-5px"}}>{prettyText(key.split(',')[1], key.split(',')[0], totalSelectedState["SHELTERED IN PLACE"][key])}</div>
-              ))}
-            </div>
-            <div className="card-header border rounded mt-3 mb-3 text-center">
-              <p className="mb-2" style={{marginTop:"-5px"}}>UTL
-                <OverlayTrigger
-                  key={"selected-utl"}
-                  placement="top"
-                  overlay={
-                    <Tooltip id={`tooltip-selected-utl`}>
-                      Unable To Locate
-                    </Tooltip>
-                  }
-                >
-                  <FontAwesomeIcon icon={faQuestionCircle} className="ml-1"/>
-                </OverlayTrigger>
-              </p>
-              <hr className="mt-1 mb-1"/>
-              {Object.keys(totalSelectedState["UNABLE TO LOCATE"]).map(key => (
-                <div key={key} style={{textTransform:"capitalize", marginTop:"5px", marginBottom:"-5px"}}>{prettyText(key.split(',')[1], key.split(',')[0], totalSelectedState["UNABLE TO LOCATE"][key])}</div>
-              ))}
+        <Row className="d-flex flex-wrap" style={{marginTop:"8px", marginRight:"-20px", marginLeft:"-16px", minHeight:"36vh", paddingRight:"15px"}}>
+          <Col xs={2} className="d-flex flex-column pl-0 pr-0" style={{marginLeft:"-7px", marginRight:"5px"}}>
+            <div className="card-header border rounded pl-3 pr-3" style={{height:"100%"}}>
+              <h5 className="mb-0 text-center">Options</h5>
+              <hr/>
+              <FormCheck id="aco_required" name="aco_required" type="switch" label="ACO Required" checked={statusOptions.aco_required} onChange={handleACO} />
+              <FormCheck id="pending_only" className="mt-3" name="pending_only" type="switch" label="Pending Only" checked={statusOptions.pending_only} onChange={handlePendingOnly} />
             </div>
           </Col>
-          <Col xs={10} className="mt-4 border rounded" style={{marginLeft:"1px"}}>
+          <Col xs={10} className="border rounded" style={{marginLeft:"1px", height:"36vh", overflowY:"auto", paddingRight:"-1px"}}>
             {data.service_requests.map(service_request => (
               <div key={service_request.id} className="mt-1 mb-1" style={{marginLeft:"-10px", marginRight:"-10px"}} hidden={mapState[service_request.id] && !mapState[service_request.id].checked ? mapState[service_request.id].hidden : false}>
                 <div className="card-header">
