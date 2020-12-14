@@ -20,7 +20,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import moment from "moment";
 
-const ITEMS_PER_PAGE = 2
+import { ITEMS_PER_PAGE } from '.././constants'
 
 export function ServiceRequestTable() {
 
