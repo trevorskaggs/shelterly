@@ -7,8 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faClipboardList
 } from '@fortawesome/free-solid-svg-icons';
-
-const ITEMS_PER_PAGE = 2
+import { ITEMS_PER_PAGE } from '.././constants'
 
 export function ServiceRequestTable() {
 
