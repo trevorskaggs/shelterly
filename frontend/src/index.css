@@ -27,12 +27,6 @@ hr { display: block; height: 1px;
 /* Leaflet map CSS */
 .leaflet-container { width: auto; height: 55vh; }
 
-.sticky {
-  position: sticky;
-  top: 10px;
-  z-index: 100;
-}
-
 .leaflet-top, .leaflet-bottom {
   z-index: 400 !important;
 }

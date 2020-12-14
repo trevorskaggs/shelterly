@@ -15,18 +15,18 @@ import {EvacuationAssignmentTable} from "./EvacTables";
       </Link>
       <Link href="/evac/deploy">
       <ListGroup.Item action>
-      DEPLOY
+      DEPLOY TEAMS
       </ListGroup.Item>
       </Link>
       <Link href="/evac/evacuationassignment/search">
-          <ListGroup.Item action>EVACUATION ASSIGNMENTS</ListGroup.Item>
+          <ListGroup.Item action>DISPATCH ASSIGNMENTS</ListGroup.Item>
       </Link>
     </ListGroup>
   )
 
   export const EvacuationAssignmentSearch = () => (
     <div>
-        <h1 style={header_style}>Evacuation Assignments</h1>
+        <h1 style={header_style}>Dispatch Assignments</h1>
         <br/>
         <EvacuationAssignmentTable/>
     </div>

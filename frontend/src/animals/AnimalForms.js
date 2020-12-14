@@ -61,6 +61,7 @@ export const AnimalForm = ({id}) => {
   // Initial Animal data.
   const [data, setData] = useState({
     owner: owner_id,
+    reporter: reporter_id,
     request: servicerequest_id,
     status:'REPORTED',
     name: '',

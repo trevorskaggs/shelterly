@@ -31,6 +31,15 @@ export const PersonForm = ({ id }) => {
   // Determine if this is a first responder when creating a Person.
   var is_first_responder = window.location.pathname.includes("first_responder")
 
+  // Identify any query param data.
+  const [queryParams] = useQueryParams();
+  const {
+    reporter_id = '',
+    servicerequest_id = '',
+    animal_id = '',
+    owner_id = '',
+  } = queryParams;
+
   // Regex validators.
   const phoneRegex = /^[0-9]{10}$/
   const nameRegex = /^[a-z ,.'-]+$/i
@@ -43,26 +52,22 @@ export const PersonForm = ({ id }) => {
     phone: '',
     email: '',
     best_contact: '',
-    showAgency: is_first_responder,
+    show_agency: is_first_responder,
     agency: '',
     address: '',
     apartment: '',
     city: '',
     state: '',
     zip_code: '',
+    request: servicerequest_id,
+    animal: animal_id,
+    owner: owner_id,
     latitude: null,
     longitude: null,
   });
 
   // Whether or not to skip Owner creation.
   const [skipOwner, setSkipOwner] = useState(false);
-
-  // Identify any query param data.
-  const [queryParams] = useQueryParams();
-  const {
-    reporter_id = '',
-    servicerequest_id = ''
-  } = queryParams;
 
   // Hook for initializing data.
   useEffect(() => {
@@ -100,15 +105,16 @@ export const PersonForm = ({ id }) => {
             .required('Required'),
           last_name: Yup.string()
             .max(50, 'Must be 50 characters or less')
-            .matches(nameRegex, "Name is not valid"),
+            .matches(nameRegex, "Name is not valid")
+            .required('Required'),
           phone: Yup.string()
             .matches(phoneRegex, "Phone number is not valid"),
           email: Yup.string()
             .max(200, 'Must be 200 characters or less')
             .matches(emailRegex, "Email is not valid"),
           best_contact: Yup.string(),
-          showAgency: Yup.boolean(),
-          agency: Yup.string().when('showAgency', {
+          show_agency: Yup.boolean(),
+          agency: Yup.string().when('show_agency', {
               is: true,
               then: Yup.string().required('Required')}),
           address: Yup.string(),
@@ -144,15 +150,17 @@ export const PersonForm = ({ id }) => {
           else {
             axios.post('/people/api/person/', values)
             .then(response => {
-              // If SR already exists, update it with owner info and redirect to the SR details.
+              // If SR already exists, redirect to the SR details.
               if (servicerequest_id) {
-                axios.patch('/hotline/api/servicerequests/' + servicerequest_id + '/', {owner:response.data.id})
-                .then(function() {
-                  navigate('/hotline/servicerequest/' + servicerequest_id);
-                })
-                .catch(error => {
-                  console.log(error.response);
-                });
+                navigate('/hotline/servicerequest/' + servicerequest_id);
+              }
+              // If adding from an animal, redirect to the Animal details.
+              else if (animal_id) {
+                navigate('/animals/animal/' + animal_id);
+              }
+              // If adding from an owner, redirect to the new Owner details.
+              else if (owner_id) {
+                navigate('/hotline/owner/' + response.data.id);
               }
               // If we have a reporter ID, redirect to create a new Animal with owner + reporter IDs.
               else if (reporter_id) {
@@ -294,7 +302,7 @@ export const PersonForm = ({ id }) => {
           </Card.Body>
             <ButtonGroup size="lg" >
               {/* form save buttons */}
-              {!is_first_responder ? <Button type="button" onClick={() => { setSkipOwner(false); props.submitForm() }}>{!is_owner && !is_intake ? <span>{!id ? "Add Owner" : "Save"}</span> : <span>{!id ? "Add Animal(s)" : "Save"}</span>}</Button> : ""}
+              {!is_first_responder ? <Button type="button" onClick={() => { setSkipOwner(false); props.submitForm() }}>{!is_owner && !is_intake ? <span>{!id ? "Add Owner" : "Save"}</span> : <span>{!id && (!servicerequest_id && !animal_id && !owner_id) ? "Add Animal(s)" : "Save"}</span>}</Button> : ""}
               {/* reporter form save buttons to skip owner */}
               {!is_owner && !id && !is_intake ? <button type="button" className="btn btn-primary mr-1 border" onClick={() => { setSkipOwner(true); props.submitForm() }}>Add Animal(s)</button> : ""}
               <Button variant="secondary" type="button" onClick={() => {props.resetForm(data)}}>Reset</Button>
