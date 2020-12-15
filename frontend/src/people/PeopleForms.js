@@ -301,7 +301,7 @@ export const PersonForm = ({ id }) => {
                 disabled
               />
             </BootstrapForm.Row>
-            <BootstrapForm.Row hidden={!id}>
+            <BootstrapForm.Row hidden={!id || !is_owner}>
               <TextInput
                 xs="12"
                 type="text"

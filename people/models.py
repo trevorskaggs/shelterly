@@ -1,5 +1,8 @@
+from django.contrib.auth import get_user_model
 from django.db import models
 from location.models import Location
+
+User = get_user_model()
 
 class Person(Location):
     
@@ -17,3 +20,10 @@ class Person(Location):
 
     def __str__(self):
         return '{} {}'.format(self.first_name, self.last_name)
+
+class PersonChange(models.Model):
+    user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
+    person = models.ForeignKey(Person, null=True, on_delete=models.SET_NULL)
+    changes = models.JSONField()
+    reason = models.TextField(blank=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
