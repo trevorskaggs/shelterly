@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Case, BooleanField, Value, When
+from django.db.models import Case, BooleanField, Value, When, Exists
 from rest_framework import filters, viewsets
 from actstream import action
 
@@ -103,7 +103,7 @@ class AnimalViewSet(viewsets.ModelViewSet):
         #annoatate is_valid
         queryset = Animal.objects.all().annotate(
             is_stray=Case(
-                When(owner__first_name='Unknown', then=True),
+                When(owner=None, then=True),
                 default=False,
                 output_field=BooleanField(),
             ))

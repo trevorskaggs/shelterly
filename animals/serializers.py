@@ -76,10 +76,10 @@ class AnimalSerializer(serializers.ModelSerializer):
         return [animal_image.image.url for animal_image in AnimalImage.objects.filter(animal=obj, category="extra")]
 
     def get_is_stray(self, obj):
-        if obj.owner.first_name == 'Unknown':
-            return True
-        else:
+        if obj.owner.exists():
             return False
+        else:
+            return True
 
     class Meta:
         model = Animal
