@@ -42,4 +42,4 @@ class PersonViewSet(viewsets.ModelViewSet):
     def perform_update(self, serializer):
         if serializer.is_valid():
             person = serializer.save()
-            action.send(self.request.user, verb='updated person', target=person)
+            action.send(self.request.user, verb='updated person', target=person, reason=self.request.data.get('change_reason', ''))

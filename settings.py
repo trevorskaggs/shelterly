@@ -61,7 +61,11 @@ INSTALLED_APPS = [
     'actstream',
 ]
 
-CRISPY_TEMPLATE_PACK = 'bootstrap4'
+ACTSTREAM_SETTINGS = {
+    'FETCH_RELATIONS': True,
+    'USE_PREFETCH': True,
+    'USE_JSONFIELD': True,
+}
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
