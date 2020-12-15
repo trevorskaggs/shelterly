@@ -31,7 +31,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 ALLOWED_HOSTS = ['*']
-
+DEBUG = True
 AUTH_USER_MODEL = 'accounts.ShelterlyUser'
 
 
@@ -133,8 +133,8 @@ STATICFILES_DIRS = [
 ]
 # Dev settings. Remove when deploying to Zappa
 STATIC_ROOT=os.path.join(BASE_DIR, 'shelterly/static')
-SECURE_CONTENT_TYPE_NOSNIFF = False
-DEBUG = True
+# SECURE_CONTENT_TYPE_NOSNIFF = False
+# DEBUG = True
 
 #TODO Change to envvars.
 # Zappa settings
