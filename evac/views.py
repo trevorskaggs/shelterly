@@ -6,7 +6,8 @@ from actstream import action
 from animals.models import Animal
 from evac.models import EvacAssignment, EvacTeamMember
 from evac.serializers import EvacAssignmentSerializer, EvacTeamMemberSerializer
-from hotline.models import OwnerContact, ServiceRequest, VisitNote
+from hotline.models import ServiceRequest, VisitNote
+from people.models import OwnerContact
 
 class EvacTeamMemberViewSet(viewsets.ModelViewSet):
 

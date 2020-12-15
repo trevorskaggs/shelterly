@@ -17,3 +17,10 @@ class Person(Location):
 
     def __str__(self):
         return '{} {}'.format(self.first_name, self.last_name)
+
+class OwnerContact(models.Model):
+
+    owner = models.ForeignKey(Person, on_delete=models.CASCADE)
+    owner_contact_time = models.DateTimeField()
+    owner_contact_note = models.TextField(blank=False)
+    animal = models.ForeignKey('animals.Animal', blank=True, null=True, on_delete=models.CASCADE)

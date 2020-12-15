@@ -54,10 +54,4 @@ export const ServiceRequestDetail = ({id}) => (
   </div>
 )
 
-export const UpdateOwnerContact = ({id}) => (
-  <div>
-    <OwnerContactForm id={id} />
-  </div>
-)
-
 export default Hotline

@@ -4,7 +4,7 @@ import { Link } from 'raviger';
 import { Card, ListGroup } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faClipboardList, faEdit, faPlusSquare
+  faClipboardList, faEdit, faPhone, faPlusSquare
 } from '@fortawesome/free-solid-svg-icons';
 import ReactImageFallback from 'react-image-fallback';
 import noImageFound from '../static/images/image-not-found.png';
@@ -56,7 +56,7 @@ export function PersonView({id}) {
     <>
     <Header>
       {is_owner ?
-        <span>Owner Details<Link href={"/hotline/owner/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link> <Link href={"/hotline/owner/new?owner_id=" + id}><FontAwesomeIcon icon={faPlusSquare} inverse /></Link></span> :
+        <span>Owner Details<Link href={"/hotline/owner/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link> <Link href={"/hotline/owner/new?owner_id=" + id}><FontAwesomeIcon icon={faPlusSquare} inverse /></Link> <Link href={"/hotline/ownercontact/new?owner=" + id}><FontAwesomeIcon icon={faPhone} inverse /></Link></span> :
         <span>Reporter Details<Link href={"/hotline/reporter/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link></span>
       }
     </Header>
@@ -119,3 +119,4 @@ export function PersonView({id}) {
     </>
   );
 };
+

@@ -46,10 +46,3 @@ class VisitNote(models.Model):
     service_request = models.ForeignKey(ServiceRequest, on_delete=models.CASCADE)
     forced_entry = models.BooleanField(default=False)
     notes = models.CharField(max_length=500, blank=True)
-
-class OwnerContact(models.Model):
-
-    owner = models.ForeignKey(Person, on_delete=models.CASCADE)
-    owner_contact_time = models.DateTimeField()
-    owner_contact_note = models.TextField(blank=False)
-    animal = models.ForeignKey('animals.Animal', blank=True, null=True, on_delete=models.CASCADE)

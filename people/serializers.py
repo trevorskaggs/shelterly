@@ -2,11 +2,12 @@ import re
 from django.db.models import Q
 from rest_framework import serializers
 from actstream.models import target_stream
-from .models import Person
+from .models import OwnerContact, Person
 from location.utils import build_full_address, build_action_string
 from hotline.models import ServiceRequest
 
 class SimplePersonSerializer(serializers.ModelSerializer):
+
     full_address = serializers.SerializerMethodField()
     action_history = serializers.SerializerMethodField()
     request = serializers.SerializerMethodField()
@@ -48,3 +49,15 @@ class SimplePersonSerializer(serializers.ModelSerializer):
 class PersonSerializer(SimplePersonSerializer):
     from animals.serializers import AnimalSerializer
     animals = AnimalSerializer(source='animal_set', many=True, required=False, read_only=True)
+
+class OwnerContactSerializer(serializers.ModelSerializer):
+
+    owner_name = serializers.SerializerMethodField()
+
+    def get_owner_name(self, obj):
+
+        return str(obj.owner)
+
+    class Meta:
+        model = OwnerContact
+        fields = '__all__'

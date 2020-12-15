@@ -3,7 +3,7 @@ from rest_framework import serializers
 from rest_framework.decorators import action
 from actstream.models import target_stream
 
-from .models import OwnerContact, ServiceRequest, VisitNote
+from .models import ServiceRequest, VisitNote
 from animals.models import Animal
 from animals.serializers import AnimalSerializer
 from location.utils import build_full_address, build_action_string
@@ -90,8 +90,3 @@ class ServiceRequestSerializer(SimpleServiceRequestSerializer):
     def get_evacuation_assignments(self, obj):
         return obj.evacuation_assignments.filter(service_requests=obj).values()
 
-class OwnerContactSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = OwnerContact
-        fields = '__all__'

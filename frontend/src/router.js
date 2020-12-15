@@ -4,9 +4,9 @@ import Home from "./Home";
 import Animals, { AnimalDetail, NewAnimal, UpdateAnimal } from "./animals/Animals"
 import { AnimalSearch } from "./animals/AnimalTables"
 import Evac, {EvacuationAssignmentSearch} from "./evac/Evac";
-import Hotline, { NewServiceRequest, ServiceRequestDetail, ServiceRequestList, UpdateOwnerContact, UpdateServiceRequest } from "./hotline/Hotline";
+import Hotline, { NewServiceRequest, ServiceRequestDetail, ServiceRequestList, UpdateServiceRequest } from "./hotline/Hotline";
 import Intake, { IntakeSummary } from "./intake/Intake";
-import { NewOwner, NewReporter, OwnerDetail, ReporterDetail,  UpdateOwner, UpdateReporter } from "./people/People";
+import { NewOwner, NewOwnerContact, NewReporter, OwnerDetail, ReporterDetail,  UpdateOwner, UpdateOwnerContact, UpdateReporter } from "./people/People";
 import Shelter, { NewShelter, UpdateShelter } from "./shelter/Shelter";
 import { ShelterDetails } from "./shelter/ShelterDetails"
 import { NewBuilding, UpdateBuilding, BuildingDetails } from "./shelter/Building";
@@ -38,6 +38,7 @@ const routes = {
   "/hotline/owner/edit/:id": ({id}) => <UpdateOwner id={id}/>,
   "/hotline/owner/new": () => <NewOwner />,
   "/hotline/owner/:id": ({id}) => <OwnerDetail id={id}/>,
+  "/hotline/ownercontact/new": () => <NewOwnerContact />,
   "/hotline/ownercontact/:id": ({id}) => <UpdateOwnerContact id={id}/>,
   "/hotline/reporter/edit/:id": ({id}) => <UpdateReporter id={id}/>,
   "/hotline/reporter/new": () => <NewReporter />,

@@ -1,9 +1,9 @@
 from django.db.models import Count, Exists, OuterRef, Q
 from actstream import action
-from .serializers import OwnerContactSerializer, ServiceRequestSerializer, VisitNoteSerializer
+from .serializers import ServiceRequestSerializer, VisitNoteSerializer
 
 from animals.models import Animal
-from hotline.models import OwnerContact, ServiceRequest, VisitNote
+from hotline.models import ServiceRequest, VisitNote
 from rest_framework import filters, permissions, serializers, viewsets
 
 class ServiceRequestViewSet(viewsets.ModelViewSet):
@@ -60,8 +60,3 @@ class VisitNoteViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = VisitNoteSerializer
 
-class OwnerContactViewSet(viewsets.ModelViewSet):
-
-    queryset = OwnerContact.objects.all()
-    permission_classes = [permissions.IsAuthenticated, ]
-    serializer_class = OwnerContactSerializer
