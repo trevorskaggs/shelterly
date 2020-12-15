@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import { Link } from 'raviger';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -60,6 +60,9 @@ export const StyledMenu = styled(Nav)`
 const Menu = ({ state, dispatch, removeCookie, ...props }) => {
 
     const viewHeight = window.outerHeight;
+    useEffect(() => {
+       document.title = "Shelterly"
+    }, []);
     
     return (
     <StyledMenu  {...props} className="flex-column" style={{ height: viewHeight }}>
