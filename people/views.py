@@ -16,9 +16,7 @@ class PersonViewSet(viewsets.ModelViewSet):
     serializer_class = PersonSerializer
 
     def get_queryset(self):
-        queryset = Person.objects.all().order_by('-first_name')
-        queryset.select_related('owner').all()
-        return queryset
+        return Person.objects.all().order_by('-first_name')
 
     def perform_create(self, serializer):
         if serializer.is_valid():

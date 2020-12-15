@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from 'raviger';
 import { ListGroup } from 'react-bootstrap'
-import {OwnerTable} from "./OwnerTables";
+import {PeopleTable} from "../people/PeopleTables";
 
 const header_style = {
   textAlign: "center",
@@ -33,7 +33,7 @@ export const OwnerSearch = () => (
     <div>
         <h1 style={header_style}>Owner Search</h1>
         <br/>
-        <OwnerTable/>
+        <PeopleTable/>
     </div>
 )
 

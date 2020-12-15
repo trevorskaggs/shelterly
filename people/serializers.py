@@ -32,9 +32,7 @@ class SimplePersonSerializer(serializers.ModelSerializer):
 
     # Custom field for the full ServiceRequest.
     def get_service_request(self, obj):
-#             return ServiceRequest.objects.filter(Q(owner=obj) | Q(reporter=obj)).values()
             return ServiceRequest.objects.filter(owner=obj).values()
-#             return ServiceRequest.objects.filter(reporter=obj.id).values()
 
     # Custom field for Formated Phone Number
     def get_display_phone(self, obj):
@@ -53,5 +51,8 @@ class SimplePersonSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class PersonSerializer(SimplePersonSerializer):
-    from animals.serializers import AnimalSerializer
-    animals = AnimalSerializer(source='animal_set', many=True, required=False, read_only=True)
+    animals = serializers.SerializerMethodField()
+    def get_animals(self, obj):
+        from animals.serializers import AnimalSerializer
+#         import ipdb; ipdb.set_trace()
+        return AnimalSerializer(obj.animal_set.all(), many=True).data + AnimalSerializer(obj.animals.all(), many=True).data
