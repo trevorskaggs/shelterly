@@ -93,7 +93,7 @@ export function ServiceRequestTable() {
             onChange={handleChange}
           />
           <InputGroup.Append>
-            <Button variant="outline-light">Search</Button>
+            <Button variant="outline-light" type="submit">Search</Button>
           </InputGroup.Append>
             <ButtonGroup className="ml-3">
               <Button variant={statusOptions.allColor} onClick={() => setStatusOptions({status:"all", allColor:"primary", openColor:"secondary", assignedColor:"secondary", closedColor:"secondary"})}>All</Button>
