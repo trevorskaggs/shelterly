@@ -5,6 +5,7 @@ from actstream.models import target_stream
 from .models import Person
 from location.utils import build_full_address, build_action_string
 from hotline.models import ServiceRequest
+from animals.models import Animal
 
 class SimplePersonSerializer(serializers.ModelSerializer):
     full_address = serializers.SerializerMethodField()
@@ -12,6 +13,7 @@ class SimplePersonSerializer(serializers.ModelSerializer):
     request = serializers.SerializerMethodField()
     service_request = serializers.SerializerMethodField()
     display_phone = serializers.SerializerMethodField()
+    is_owner = serializers.SerializerMethodField()
 
     # Custom field for the full address.
     def get_full_address(self, obj):
@@ -37,6 +39,9 @@ class SimplePersonSerializer(serializers.ModelSerializer):
     # Custom field for Formated Phone Number
     def get_display_phone(self, obj):
         return re.sub(r'(\d{3})(\d{3})(\d{4})', r'(\1) \2-\3', obj.phone)
+
+    def get_is_owner(self, obj):
+        return ServiceRequest.objects.filter(owner=obj.id).exists() or Animal.objects.filter(owner=obj.id).exists()
 
     # Truncates latitude and longitude.
     def to_internal_value(self, data):

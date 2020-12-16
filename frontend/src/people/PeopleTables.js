@@ -82,9 +82,10 @@ export function PeopleTable() {
                 <div key={owner.id} className="mt-3">
                     <div className="mt-3">
                         <div className="card-header"> {owner.first_name ?
-                            <span>{owner.first_name} {owner.last_name} <Link
-                                href={"/hotline/owner/" + owner.id}> <FontAwesomeIcon icon={faClipboardList}
-                                                                                      inverse/></Link>
+                            <span>{owner.first_name} {owner.last_name}
+                                {owner.is_owner  ?
+                                    <Link href={"/hotline/owner/" + owner.id}> <FontAwesomeIcon icon={faClipboardList} inverse/></Link>
+                                    : <Link href={"/hotline/reporter/" + owner.id}> <FontAwesomeIcon icon={faClipboardList} inverse/></Link>}
                     <br/>
                         Phone: {owner.phone ? <span>{owner.phone} </span> : "N/A"}
                     </span> : "N/A"}
