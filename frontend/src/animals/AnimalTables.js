@@ -1,24 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import { Link } from 'raviger';
-import { Button, ButtonGroup, Card, CardGroup, Col, Form, FormControl, InputGroup, ListGroup} from 'react-bootstrap';
+import { Button, ButtonGroup, Card, CardGroup, Col, Form, FormControl, InputGroup, ListGroup } from 'react-bootstrap';
 import ReactImageFallback from 'react-image-fallback';
 import noImageFound from '../static/images/image-not-found.png';
-import { Fab } from '@material-ui/core';
-import AssignmentIcon from '@material-ui/icons/Assignment';
-import EditIcon from '@material-ui/icons/Edit';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faClipboardList
 } from '@fortawesome/free-solid-svg-icons';
 import Header from '../components/Header';
 import { titleCase } from '../components/Utils';
-
-const input_style = {
-  width: "40%",
-  display: "inline-block",
-  position: 'relative',
-}
 
 export function AnimalSearch() {
 
@@ -77,6 +68,7 @@ export function AnimalSearch() {
   return (
     <div className="ml-2 mr-2">
       <Header>Animal Search</Header>
+      <hr/>
       <Form onSubmit={handleSubmit}>
         <InputGroup className="mb-3">
           <FormControl
@@ -87,7 +79,7 @@ export function AnimalSearch() {
             onChange={handleChange}
           />
           <InputGroup.Append>
-            <Button variant="outline-light">Search!</Button>
+            <Button variant="outline-light" type="submit">Search</Button>
           </InputGroup.Append>
           <ButtonGroup className="ml-3">
               <Button variant={statusOptions.allColor} onClick={() => setStatusOptions({status:"", allColor:"primary", openColor:"secondary", assignedColor:"secondary", closedColor:"secondary"})}>All</Button>
@@ -107,7 +99,7 @@ export function AnimalSearch() {
               <Card.Body>
                 <Card.Title>Animal Picture</Card.Title>
                 <ListGroup>
-                  <ListGroup.Item><ReactImageFallback style={{width:"151px"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} /></ListGroup.Item>
+                  <ListGroup.Item style={{width:"194px"}}><ReactImageFallback style={{width:"151px"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} /></ListGroup.Item>
                 </ListGroup>
               </Card.Body>
             </Card>
@@ -115,9 +107,10 @@ export function AnimalSearch() {
               <Card.Body>
                 <Card.Title>Animal Info</Card.Title>
                 <ListGroup>
-                  <ListGroup.Item className='species-sex'>{titleCase(animal.species)}{animal.species && animal.sex ? ", " : ""}{titleCase(animal.sex)}{animal.sex && animal.age ? ", " : ""}{titleCase(animal.age)}{animal.age && animal.size ? ", " : ""}{titleCase(animal.size)}
-                    &nbsp;<Link href={"/hotline/servicerequest/" + animal.request}><FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item>
-                  <ListGroup.Item className='animal address'>{animal.full_address ? titleCase(animal.full_address) : "NO REGISTERED ADDRESS"} </ListGroup.Item>
+                  <ListGroup.Item className='stray'>{animal.is_stray ? <span><b>Stray Animal:</b> Yes</span> : <span><b>Stray Animal:</b> No</span>}</ListGroup.Item>
+                  <ListGroup.Item>{titleCase(animal.species)}{animal.sex ? <span>, {titleCase(animal.sex)}</span> : ""}{animal.age ? <span>, {titleCase(animal.age)}</span> : ""}{animal.size ? <span>, {titleCase(animal.size)}</span> : ""}
+                    &nbsp;{animal.request ? <Link href={"/hotline/servicerequest/" + animal.request}><FontAwesomeIcon icon={faClipboardList} inverse /></Link> : ""}</ListGroup.Item>
+                  <ListGroup.Item><b>Address: </b>{animal.full_address ? <span>{titleCase(animal.full_address)}</span> : "Unknown"} </ListGroup.Item>
                 </ListGroup>
               </Card.Body>
             </Card>
@@ -125,11 +118,12 @@ export function AnimalSearch() {
               <Card.Body>
                 <Card.Title>Owner Info</Card.Title>
                 <ListGroup>
-                  <ListGroup.Item classNamne='stray'>{animal.is_stray ? <span><b>Stray Animal:</b> Yes</span> : <span><b>Stray Animal:</b> No</span>}</ListGroup.Item> 
                   {animal.owners.map(owner => (
-                    <ListGroup.Item><b>Owner:</b> {owner.first_name} {owner.last_name} {owner.display_phone} <Link href={"/hotline/owner/" + owner.id}><FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item>
+                    <ListGroup.Item key={owner.id}><b>Owner:</b> {owner.first_name} {owner.last_name} {owner.display_phone} <Link href={"/hotline/owner/" + owner.id}><FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item>
                   ))}
-                  <ListGroup.Item className='request'>{animal.request ? <span><b>Request #{animal.request}</b> <Link href={"/hotline/servicerequest/" + animal.request}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></span> : ""}</ListGroup.Item>
+                  {animal.owners < 1 && animal.reporter ? <ListGroup.Item><b>Reporter: </b> {animal.reporter.first_name} {animal.reporter.last_name} {animal.reporter.display_phone} <Link href={"/hotline/reporter/" + animal.reporter.id}><FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item> : ""}
+                  {animal.owners < 1 && !animal.reporter ? <ListGroup.Item>No Owner</ListGroup.Item> : ""}
+                  {animal.request ? <ListGroup.Item className='request'><b>Service Request #{animal.request}</b> <Link href={"/hotline/servicerequest/" + animal.request}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item> : ""}
                 </ListGroup>
               </Card.Body>
             </Card>

@@ -44,7 +44,6 @@ export function AnimalView({id}) {
     full_address:'',
     shelter_name: '',
     owners: [],
-    is_stray: '',
   });
 
   const [show, setShow] = useState(false);
