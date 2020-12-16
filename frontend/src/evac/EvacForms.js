@@ -154,10 +154,10 @@ export function EvacResolution({ id }) {
           // Use existing VisitNote to populate data if we're editing a closed Resolution.
           const visit_note = service_request.visit_notes.filter(note => String(note.evac_assignment) === String(id))[0]
           if (visit_note) {
-            response.data.sr_updates.push({id:service_request.id, followup_date: service_request.followup_date, date_completed:visit_note.date_completed||new Date(), notes:visit_note.notes, owner_contacted:visit_note.owner_contacted, forced_entry: visit_note.forced_entry, animals:service_request.animals, owner:service_request.owner !== null})
+            response.data.sr_updates.push({id:service_request.id, followup_date: service_request.followup_date, date_completed:visit_note.date_completed||new Date(), notes:visit_note.notes, owner_contacted:visit_note.owner_contacted, forced_entry: visit_note.forced_entry, animals:service_request.animals, owner:service_request.owner.length > 0})
           }
           else {
-            response.data.sr_updates.push({id:service_request.id, followup_date: service_request.followup_date, date_completed:new Date(), notes:'', owner_contacted:false, forced_entry: false, animals:service_request.animals, owner:service_request.owner !== null})
+            response.data.sr_updates.push({id:service_request.id, followup_date: service_request.followup_date, date_completed:new Date(), notes:'', owner_contacted:false, forced_entry: false, animals:service_request.animals, owner:service_request.owner.length > 0})
           }
         });
         setData(response.data);

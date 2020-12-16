@@ -63,7 +63,7 @@ export const AnimalForm = ({id}) => {
     new_owner: owner_id,
     reporter: reporter_id,
     request: servicerequest_id,
-    status:'REPORTED',
+    status: 'REPORTED',
     name: '',
     species: '',
     sex: '',
@@ -199,7 +199,7 @@ export const AnimalForm = ({id}) => {
         })}
         onSubmit={(values, { setSubmitting }) => {
           // Remove owner if animal has none.
-          if (values["owner"].length < 1) {
+          if (values["owner"] && values["owner"].length < 1) {
             delete values["owner"];
           }
 
