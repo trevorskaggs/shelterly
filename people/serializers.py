@@ -11,6 +11,7 @@ class SimplePersonSerializer(serializers.ModelSerializer):
     action_history = serializers.SerializerMethodField()
     request = serializers.SerializerMethodField()
     display_phone = serializers.SerializerMethodField()
+    display_alt_phone = serializers.SerializerMethodField()
 
     # Custom field for the full address.
     def get_full_address(self, obj):
@@ -32,6 +33,10 @@ class SimplePersonSerializer(serializers.ModelSerializer):
     # Custom field for Formated Phone Number
     def get_display_phone(self, obj):
         return re.sub(r'(\d{3})(\d{3})(\d{4})', r'(\1) \2-\3', obj.phone)
+
+    # Custom field for Formated Alt Phone Number
+    def get_display_alt_phone(self, obj):
+        return re.sub(r'(\d{3})(\d{3})(\d{4})', r'(\1) \2-\3', obj.alt_phone)
 
     # Truncates latitude and longitude.
     def to_internal_value(self, data):
