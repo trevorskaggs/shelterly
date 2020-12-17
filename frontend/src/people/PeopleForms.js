@@ -336,6 +336,7 @@ export const OwnerContactForm = ({id}) => {
     useEffect(() => {
       let source = axios.CancelToken.source();
       if (id) {
+        // Get OwnerContact if editing existing
         const fetchOwnerContact = async () => {
           // Fetch Owner Contact data.
           await axios.get('/people/api/ownercontact/' + id + '/', {
@@ -351,6 +352,7 @@ export const OwnerContactForm = ({id}) => {
         fetchOwnerContact();
       }
       else {
+        // Get Owner details for new OwnerContact
         const fetchOwner = async () => {
         // Fetch Owner Data.
         axios.get('/people/api/person/' + owner, {
