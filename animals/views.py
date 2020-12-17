@@ -70,8 +70,8 @@ class AnimalViewSet(viewsets.ModelViewSet):
                 action.send(self.request.user, verb='sheltered animal', target=serializer.validated_data.get('room').building.shelter, action_object=serializer.instance)
 
             # Record status change if appplicable.
-            if serializer.instance.status != serializer.validated_data['status']:
-                new_status = serializer.validated_data['status']
+            if serializer.instance.status != serializer.validated_data.get('status', ''):
+                new_status = serializer.validated_data.get('status')
                 action.send(self.request.user, verb=f'changed animal status to {new_status}', target=serializer.instance)
 
             # Identify if there were any animal changes that aren't status, room, or owner.

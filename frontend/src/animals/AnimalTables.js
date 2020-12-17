@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import { Link } from 'raviger';
-import { Button, ButtonGroup, Card, CardGroup, Col, Form, FormControl, InputGroup, ListGroup } from 'react-bootstrap';
+import { Button, ButtonGroup, Card, CardGroup, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import ReactImageFallback from 'react-image-fallback';
 import noImageFound from '../static/images/image-not-found.png';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faClipboardList
+  faClipboardList, faUserAltSlash
 } from '@fortawesome/free-solid-svg-icons';
 import Header from '../components/Header';
 import { titleCase } from '../components/Utils';
@@ -91,53 +91,56 @@ export function AnimalSearch() {
 
       {data.animals.map(animal => (
         <div key={animal.id} className="mt-3">
-          <div className="card-header"> {animal.name ? titleCase(animal.name) : "Name Unknown"} - {animal.species ? titleCase(animal.species) : "Species Unknown"} - {titleCase(animal.status)}
+          <div className="card-header"> {animal.name ? titleCase(animal.name) : "Unknown"} - {titleCase(animal.species)} | {titleCase(animal.status)}
             <Link href={"/animals/animal/" + animal.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
           </div>
           <CardGroup>
-          <Card key={animal.id}>
-              <Card.Body>
-                <Card.Title>Animal Picture</Card.Title>
-                <ListGroup>
-                  <ListGroup.Item style={{width:"194px"}}><ReactImageFallback style={{width:"151px"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} /></ListGroup.Item>
-                </ListGroup>
+            <Card key={animal.id} style={{maxWidth:"196px"}}>
+              <Card.Body className="p-0 m-0">
+                <ReactImageFallback style={{width:"auto", maxHeight:"196px"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} />
               </Card.Body>
             </Card>
             <Card>
               <Card.Body>
-                <Card.Title>Animal Info</Card.Title>
+                <Card.Title>Animal Information
+                  {animal.is_stray ?
+                    <OverlayTrigger
+                      key={"stray"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-stray`}>
+                          Animal is stray
+                        </Tooltip>
+                      }
+                    >
+                      <FontAwesomeIcon icon={faUserAltSlash} size="sm" className="ml-1" />
+                    </OverlayTrigger> :
+                  ""}
+                </Card.Title>
                 <ListGroup>
-                  <ListGroup.Item className='stray'>{animal.is_stray ? <span><b>Stray Animal:</b> Yes</span> : <span><b>Stray Animal:</b> No</span>}</ListGroup.Item>
-                  <ListGroup.Item>{titleCase(animal.species)}{animal.sex ? <span>, {titleCase(animal.sex)}</span> : ""}{animal.age ? <span>, {titleCase(animal.age)}</span> : ""}{animal.size ? <span>, {titleCase(animal.size)}</span> : ""}
-                    &nbsp;{animal.request ? <Link href={"/hotline/servicerequest/" + animal.request}><FontAwesomeIcon icon={faClipboardList} inverse /></Link> : ""}</ListGroup.Item>
-                  <ListGroup.Item><b>Address: </b>{animal.full_address ? <span>{titleCase(animal.full_address)}</span> : "Unknown"} </ListGroup.Item>
-                </ListGroup>
-              </Card.Body>
-            </Card>
-            <Card>
-              <Card.Body>
-                <Card.Title>Owner Info</Card.Title>
-                <ListGroup>
+                  <ListGroup.Item>{titleCase(animal.species)}{animal.sex ? <span>, {titleCase(animal.sex)}</span> : ""}{animal.age ? <span>, {titleCase(animal.age)}</span> : ""}{animal.size ? <span>, {titleCase(animal.size)}</span> : ""}</ListGroup.Item>
                   {animal.owners.map(owner => (
                     <ListGroup.Item key={owner.id}><b>Owner:</b> {owner.first_name} {owner.last_name} {owner.display_phone} <Link href={"/hotline/owner/" + owner.id}><FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item>
                   ))}
                   {animal.owners < 1 && animal.reporter ? <ListGroup.Item><b>Reporter: </b> {animal.reporter.first_name} {animal.reporter.last_name} {animal.reporter.display_phone} <Link href={"/hotline/reporter/" + animal.reporter.id}><FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item> : ""}
-                  {animal.owners < 1 && !animal.reporter ? <ListGroup.Item>No Owner</ListGroup.Item> : ""}
-                  {animal.request ? <ListGroup.Item className='request'><b>Service Request #{animal.request}</b> <Link href={"/hotline/servicerequest/" + animal.request}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item> : ""}
+                  {animal.owners < 1 && !animal.reporter ? <ListGroup.Item><b>Owner: </b>No Owner</ListGroup.Item> : ""}
                 </ListGroup>
               </Card.Body>
             </Card>
             <Card>
               <Card.Body>
-                <Card.Title>Shelter Info</Card.Title>
+                <Card.Title>Related Information</Card.Title>
                 <ListGroup>
-                  <ListGroup.Item className='Shelter'>{animal.shelter_name ? <span><b>Shelter {animal.request}</b> <Link href={"/shelter/" + animal.shelter}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></span> : "Not Sheltered"}</ListGroup.Item>
+                  {animal.request ? <ListGroup.Item className='request'><b>Service Request: </b>{animal.request_address} <Link href={"/hotline/servicerequest/" + animal.request}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item> : <ListGroup.Item><b>Service Request: </b>No Service Request</ListGroup.Item>}
+                  {animal.shelter ? <span>
+                    <ListGroup.Item><b>Shelter: </b>{animal.shelter_name} <Link href={"/shelter/" + animal.shelter}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item>
+                    <ListGroup.Item><b>Address: </b>{animal.full_address}</ListGroup.Item></span> : 
+                    <ListGroup.Item><b>Shelter: </b>No Shelter</ListGroup.Item>}
                 </ListGroup>
               </Card.Body>
             </Card>
           </CardGroup>
           </div>
-
       ))}
       <p>{data.isFetching ? 'Fetching Animals...' : <span>{!data.animals.length && searchTerm ? 'No Animals found.' : ''}</span>}</p>
     </div>
