@@ -28,12 +28,11 @@ class EvacAssignmentSerializer(serializers.ModelSerializer):
     from hotline.serializers import ServiceRequestSerializer
 
     action_history = serializers.SerializerMethodField()
+    team_member_objects = EvacTeamMemberSerializer(source='team_members', required=False, read_only=True, many=True)
+    service_request_objects = ServiceRequestSerializer(source='service_requests', required=False, read_only=True, many=True)
 
     def get_action_history(self, obj):
         return [build_action_string(action) for action in target_stream(obj)]
-
-    team_member_objects = EvacTeamMemberSerializer(source='team_members', required=False, read_only=True, many=True)
-    service_request_objects = ServiceRequestSerializer(source='service_requests', required=False, read_only=True, many=True)
 
     class Meta:
         model = EvacAssignment
