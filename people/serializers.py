@@ -58,6 +58,4 @@ class SimplePersonSerializer(serializers.ModelSerializer):
 class PersonSerializer(SimplePersonSerializer):
     animals = serializers.SerializerMethodField()
     def get_animals(self, obj):
-        from animals.serializers import AnimalSerializer
-#         import ipdb; ipdb.set_trace()
-        return AnimalSerializer(obj.animal_set.all(), many=True).data + AnimalSerializer(obj.animals.all(), many=True).data
+        return  obj.animal_set.all().values() | obj.animals.all().values()
