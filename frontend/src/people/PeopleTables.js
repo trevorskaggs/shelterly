@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import axios from "axios";
 import {Link} from 'raviger';
-import {Button, ButtonGroup, Card, CardGroup, Form, FormControl, InputGroup, ListGroup} from 'react-bootstrap';
+import {Button, Card, CardGroup, Form, FormControl, InputGroup, ListGroup} from 'react-bootstrap';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {
     faClipboardList
@@ -42,13 +42,12 @@ export function PeopleTable() {
         let source = axios.CancelToken.source();
         const fetchOwners = async () => {
             setData({owners: [], isFetching: true});
-            // Fetch ServiceRequest data.
+            // Fetch People data.
             await axios.get('/people/api/person/?search=' + searchTerm, {
                 cancelToken: source.token,
             })
                 .then(response => {
                     setData({owners: response.data, isFetching: false});
-                    console.log(response.data); //TESTING
                 })
                 .catch(error => {
                     console.log(error.response);
@@ -105,8 +104,7 @@ export function PeopleTable() {
                                                         href={"/hotline/servicerequest/" + service_request.id}> <FontAwesomeIcon
                                                         icon={faClipboardList} inverse/></Link> | <Moment
                                                             format="LLL">{service_request.timestamp}</Moment>
-                                                </span>
-                                                    ))
+                                                </span>))
                                                 }</span> : "None"
                                             }
                                         </ListGroup.Item>
