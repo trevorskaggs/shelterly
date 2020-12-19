@@ -23,8 +23,6 @@ except FileNotFoundError:
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'shelterly/media')
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('SECRET_KEY')
@@ -141,7 +139,12 @@ DEBUG = True
 # STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 # AWS_STORAGE_BUCKET_NAME = 'shelterly-statics'
 # AWS_S3_ADDRESSING_STYLE = "virtual"
-# AWS_S3_REGION_NAME = 'us-east-2'
+MEDIA_URL = '/media/'
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+AWS_STORAGE_BUCKET_NAME = 'shelterly'
+AWS_S3_SIGNATURE_VERSION = 's3v4'
+# Use envvar?
+AWS_S3_REGION_NAME = 'us-east-2'
 # AWS_AUTO_CREATE_BUCKET = True
 # ALLOWED_HOSTS = ['725rgosijg.execute-api.us-east-2.amazonaws.com',]
 
