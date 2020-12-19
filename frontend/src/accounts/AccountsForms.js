@@ -33,22 +33,23 @@ export const LoginForm = () => {
             .required('No password provided.'),
         })}
         onSubmit={(values, actions ) => {
-          setTimeout(() => {
-            axios.post('/login/', values)
-            .then(response => {
+          setTimeout(async () => {
+            try {
+              const response = await axios.post('/login/', values)
               setAuthToken(response.data.token);
               setCookie("token", response.data.token, {path: '/'});
               dispatch({type: 'LOGIN_SUCCESSFUL', data: response.data });
               loadUser({dispatch, removeCookie});
               navigate(next);
-            })
-            .catch(e => {
+            }
+            catch (e) {
               console.log(e);
               removeCookie("token", {path: '/'});
               setAuthToken();
               actions.setStatus('Failed to log in with this username and password combination.')
               dispatch({type: "LOGIN_FAILED", data: e});
-            });
+
+            }
             actions.setSubmitting(false);
           }, 500);
         }}
