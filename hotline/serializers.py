@@ -26,7 +26,7 @@ class SimpleServiceRequestSerializer(serializers.ModelSerializer):
     has_reported_animals = serializers.SerializerMethodField()
     sheltered_in_place = serializers.SerializerMethodField()
     unable_to_locate = serializers.SerializerMethodField()
-    aco_required = serializers.SerializerMethodField()
+    aco_required = serializers.SerializerMethodField(read_only=True)
     animal_count = serializers.IntegerField(read_only=True)
     injured = serializers.BooleanField(read_only=True)
     action_history = serializers.SerializerMethodField()
@@ -38,23 +38,27 @@ class SimpleServiceRequestSerializer(serializers.ModelSerializer):
 
     # Custom field for the action history list.
     def get_action_history(self, obj):
-        return [build_action_string(action) for action in target_stream(obj)]
+        return [build_action_string(action) for action in obj.target_actions.all()]
 
     # Custom field for if any animal is ACO Required. If it is aggressive or "Other" species.
     def get_aco_required(self, obj):
-        return obj.animal_set.filter(Q(aggressive='yes') | Q(species='other')).exists()
+        # Performs list comp. on prefetched queryset of animals for this SR to avoid hitting db again.
+        return bool([animal for animal in obj.animals if animal.aggressive == 'yes' or animal.species == 'other'])
 
     # Custom field for determining if an SR contains REPORTED animals.
     def get_has_reported_animals(self, obj):
-        return Animal.objects.filter(request=obj, status='REPORTED').exists()
+        # Performs list comp. on prefetched queryset of animals for this SR to avoid hitting db again.
+        return bool([animal for animal in obj.animals if animal.status == 'REPORTED'])
 
     # Custom field for determining that count of SHELTERED IN PLACE animals.
     def get_sheltered_in_place(self, obj):
-        return Animal.objects.filter(request=obj, status='SHELTERED IN PLACE').count()
+        # Performs list comp. on prefetched queryset of animals for this SR to avoid hitting db again.
+        return len([animal for animal in obj.animals if animal.status == 'SHELTERED IN PLACE'])
 
     # Custom field for determining that count of UNABLE TO LOCATE animals.
     def get_unable_to_locate(self, obj):
-        return Animal.objects.filter(request=obj, status='UNABLE TO LOCATE').count()
+        # Performs list comp. on prefetched queryset of animals for this SR to avoid hitting db again.
+        return len([animal for animal in obj.animals if animal.status == 'UNABLE TO LOCATE'])
 
     # Custom field for the current open evac assignment if it exists.
     def get_assigned_evac(self, obj):
@@ -84,8 +88,8 @@ class ServiceRequestSerializer(SimpleServiceRequestSerializer):
     owners = PersonSerializer(source='owner', many=True, required=False, read_only=True)
     reporter_object = PersonSerializer(source='reporter', required=False, read_only=True)
     animals = AnimalSerializer(source='animal_set', many=True, required=False, read_only=True)
-    evacuation_assignments = serializers.SerializerMethodField()
+    # evacuation_assignments = serializers.SerializerMethodField()
 
     # Custom field to get Evacuation Assignments.
-    def get_evacuation_assignments(self, obj):
-        return obj.evacuation_assignments.filter(service_requests=obj).values()
+    # def get_evacuation_assignments(self, obj):
+    #     return obj.evacuation_assignments.filter(service_requests=obj).values()
