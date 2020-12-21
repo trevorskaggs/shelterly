@@ -20,5 +20,6 @@ class EvacAssignment(models.Model):
 
     team_members = models.ManyToManyField(EvacTeamMember)
     service_requests = models.ManyToManyField(ServiceRequest, related_name='evacuation_assignments')
+    animals = models.ManyToManyField('animals.Animal', blank=True, related_name='evacuation_assignments')
     start_time = models.DateTimeField(auto_now_add=True)
     end_time = models.DateTimeField(blank=True, null=True)

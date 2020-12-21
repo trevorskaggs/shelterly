@@ -124,3 +124,11 @@ export const statusChoices = [
   {value:'REUNITED', label:'REUNITED'},
   {value:'DECEASED', label:'DECEASED'},
 ]
+
+export const dispatchStatusChoices = [
+  {value:'REPORTED', label:'REPORTED'},
+  {value:'EVACUATED', label:'EVACUATED'},
+  {value:'SHELTERED IN PLACE', label:'SHELTERED IN PLACE (SIP)'},
+  {value:'UNABLE TO LOCATE', label:'UNABLE TO LOCATE (UTL)'},
+  {value:'DECEASED', label:'DECEASED'},
+]

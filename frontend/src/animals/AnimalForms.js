@@ -199,9 +199,9 @@ export const AnimalForm = ({id}) => {
         })}
         onSubmit={(values, { setSubmitting }) => {
           // Remove owner if animal has none.
-          // if (values["owner"].length < 1) {
-          //   delete values["owner"];
-          // }
+          if (values["owner"] && values["owner"].length < 1) {
+            delete values["owner"];
+          }
 
           // Use FormData so that image files may also be included.
           const formData = new FormData();
