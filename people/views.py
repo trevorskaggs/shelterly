@@ -56,4 +56,4 @@ class PersonViewSet(viewsets.ModelViewSet):
                 PersonChange.objects.create(user=self.request.user, person=person, changes=change_dict, reason=self.request.data.get('change_reason', ''))
 
             # Record update action.
-            action.send(self.request.user, verb='updated person', target=person, reason=self.request.data.get('change_reason', ''))
+            action.send(self.request.user, verb='updated person', target=person)

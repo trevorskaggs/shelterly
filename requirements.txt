@@ -6,8 +6,6 @@ django-filter
 django-rest-knox
 djangorestframework
 django-storages
-django-jsonfield
-django-jsonfield-compat
 geocoder==1.38.1
 ipython
 pillow
