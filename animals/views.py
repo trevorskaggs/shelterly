@@ -52,6 +52,9 @@ class AnimalViewSet(viewsets.ModelViewSet):
     def perform_update(self, serializer):
         if serializer.is_valid():
 
+            # Keep owner the same when editing an animal.
+            serializer.validated_data['owner'] = serializer.instance.owner.values_list('id', flat=True)
+
             # Set room to null if not present
             if not serializer.validated_data.get('room'):
                 serializer.validated_data['room'] = None
@@ -70,7 +73,7 @@ class AnimalViewSet(viewsets.ModelViewSet):
                 action.send(self.request.user, verb='sheltered animal', target=serializer.validated_data.get('room').building.shelter, action_object=serializer.instance)
 
             # Record status change if appplicable.
-            if serializer.instance.status != serializer.validated_data.get('status', ''):
+            if serializer.instance.status != serializer.validated_data.get('status', serializer.instance.status):
                 new_status = serializer.validated_data.get('status')
                 action.send(self.request.user, verb=f'changed animal status to {new_status}', target=serializer.instance)
 

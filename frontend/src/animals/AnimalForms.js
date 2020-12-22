@@ -199,7 +199,7 @@ export const AnimalForm = ({id}) => {
         })}
         onSubmit={(values, { setSubmitting }) => {
           // Remove owner if animal has none.
-          if (values["owner"] && values["owner"].length < 1) {
+          if (values["owner"]) {
             delete values["owner"];
           }
 
