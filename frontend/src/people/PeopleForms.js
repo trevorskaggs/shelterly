@@ -50,6 +50,7 @@ export const PersonForm = ({ id }) => {
     first_name: '',
     last_name: '',
     phone: '',
+    alt_phone: '',
     email: '',
     best_contact: '',
     show_agency: is_first_responder,
@@ -109,6 +110,8 @@ export const PersonForm = ({ id }) => {
             .matches(nameRegex, "Name is not valid")
             .required('Required'),
           phone: Yup.string()
+            .matches(phoneRegex, "Phone number is not valid"),
+          alt_phone: Yup.string()
             .matches(phoneRegex, "Phone number is not valid"),
           email: Yup.string()
             .max(200, 'Must be 200 characters or less')
@@ -222,13 +225,19 @@ export const PersonForm = ({ id }) => {
             </BootstrapForm.Row>
             <BootstrapForm.Row>
               <TextInput
-                xs="4"
+                xs="3"
                 type="text"
                 label="Phone"
                 name="phone"
               />
               <TextInput
-                xs="8"
+                xs="3"
+                type="text"
+                label="Alternate Phone"
+                name="alt_phone"
+              />
+              <TextInput
+                xs="6"
                 type="text"
                 label="Email"
                 name="email"
