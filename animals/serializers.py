@@ -5,8 +5,7 @@ from actstream.models import target_stream
 from .models import Animal, AnimalImage
 from location.utils import build_full_address, build_action_string
 
-class AnimalSerializer(serializers.ModelSerializer):
-    owners = serializers.SerializerMethodField()
+class SimpleAnimalSerializer(serializers.ModelSerializer):
     full_address = serializers.SerializerMethodField()
     request_address = serializers.SerializerMethodField()
     aco_required = serializers.SerializerMethodField()
@@ -16,7 +15,7 @@ class AnimalSerializer(serializers.ModelSerializer):
     action_history = serializers.SerializerMethodField()
     shelter_name = serializers.SerializerMethodField()
     shelter = serializers.SerializerMethodField()
-    is_stray = serializers.SerializerMethodField()
+    # is_stray = serializers.BooleanField()
 
     # Custom Owner object field that excludes animals to avoid a circular reference.
     def get_owners(self, obj):
@@ -75,9 +74,9 @@ class AnimalSerializer(serializers.ModelSerializer):
     def get_extra_images(self, obj):
         return [animal_image.image.url for animal_image in AnimalImage.objects.filter(animal=obj, category="extra")]
 
-    def get_is_stray(self, obj):
-        return not obj.owner.exists()
-
     class Meta:
         model = Animal
         fields = '__all__'
+
+class AnimalSerializer(SimpleAnimalSerializer):
+    owners = serializers.SerializerMethodField()

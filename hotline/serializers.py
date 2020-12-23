@@ -1,11 +1,11 @@
 from django.db.models import Q
 from rest_framework import serializers
 from rest_framework.decorators import action
-from actstream.models import target_stream
 
 from .models import ServiceRequest, VisitNote
 from animals.models import Animal
-from animals.serializers import AnimalSerializer
+from animals.serializers import SimpleAnimalSerializer
+from evac.models import EvacAssignment
 from location.utils import build_full_address, build_action_string
 
 class VisitNoteSerializer(serializers.ModelSerializer):
@@ -13,6 +13,7 @@ class VisitNoteSerializer(serializers.ModelSerializer):
     address = serializers.SerializerMethodField()
 
     def get_address(self, obj):
+        # does this kick off another query?
         return obj.service_request.location_output
 
     class Meta:
@@ -82,14 +83,17 @@ class SimpleServiceRequestSerializer(serializers.ModelSerializer):
         model = ServiceRequest
         fields = '__all__'
 
+class SimpleEvacAssignmentSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = EvacAssignment
+        fields = ['id', 'start_time', 'end_time']
+
+
 class ServiceRequestSerializer(SimpleServiceRequestSerializer):
-    from people.serializers import PersonSerializer
+    from people.serializers import SimplePersonSerializer
 
-    owners = PersonSerializer(source='owner', many=True, required=False, read_only=True)
-    reporter_object = PersonSerializer(source='reporter', required=False, read_only=True)
-    animals = AnimalSerializer(source='animal_set', many=True, required=False, read_only=True)
-    # evacuation_assignments = serializers.SerializerMethodField()
-
-    # Custom field to get Evacuation Assignments.
-    # def get_evacuation_assignments(self, obj):
-    #     return obj.evacuation_assignments.filter(service_requests=obj).values()
+    owners = SimplePersonSerializer(source='owner', many=True, required=False, read_only=True)
+    reporter_object = SimplePersonSerializer(source='reporter', required=False, read_only=True)
+    animals = SimpleAnimalSerializer(source='animal_set', many=True, required=False, read_only=True)
+    evacuation_assignments = SimpleEvacAssignmentSerializer(many=True, required=False, read_only=True)
