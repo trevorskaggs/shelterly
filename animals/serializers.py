@@ -16,6 +16,8 @@ class AnimalSerializer(serializers.ModelSerializer):
     action_history = serializers.SerializerMethodField()
     shelter_name = serializers.SerializerMethodField()
     shelter = serializers.SerializerMethodField()
+    is_stray = serializers.SerializerMethodField()
+    evacuation_assignments = serializers.SerializerMethodField()
 
     # Custom Owner object field that excludes animals to avoid a circular reference.
     def get_owners(self, obj):
@@ -24,6 +26,10 @@ class AnimalSerializer(serializers.ModelSerializer):
         if obj.owner.exists():
             return SimplePersonSerializer(obj.owner, many=True).data
         return []
+
+    # Custom Evac Assignment field to avoid a circular reference.
+    def get_evacuation_assignments(self, obj):
+        return obj.evacuation_assignments.values_list('id', flat=True)
 
     # Custom field for the full address.
     def get_full_address(self, obj):
@@ -73,6 +79,9 @@ class AnimalSerializer(serializers.ModelSerializer):
 
     def get_extra_images(self, obj):
         return [animal_image.image.url for animal_image in AnimalImage.objects.filter(animal=obj, category="extra")]
+
+    def get_is_stray(self, obj):
+        return not obj.owner.exists()
 
     class Meta:
         model = Animal

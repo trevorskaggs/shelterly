@@ -41,6 +41,7 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
             action.send(self.request.user, verb='created evacuation assignment', target=evac_assignment)
             for service_request in service_requests:
                 action.send(self.request.user, verb='assigned service request', target=service_request)
+                evac_assignment.animals.add(*Animal.objects.filter(request=service_request, status__in=['REPORTED', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE']))
 
     def perform_update(self, serializer):
         if serializer.is_valid():

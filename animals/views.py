@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Case, BooleanField, Value, When, Exists
 from rest_framework import filters, viewsets
 from actstream import action
 
@@ -29,8 +30,8 @@ class AnimalViewSet(viewsets.ModelViewSet):
             action.send(self.request.user, verb='created animal', target=animal)
 
             # Add Owner to new animals if it is POSTed.
-            if self.request.data.get('owner'):
-                animal.owner.add(self.request.data['owner'])
+            if self.request.data.get('new_owner'):
+                animal.owner.add(self.request.data['new_owner'])
 
             # Add ServiceRequest Owner and Reporter to new animals being added to an SR.
             if serializer.validated_data.get('request'):
@@ -97,3 +98,23 @@ class AnimalViewSet(viewsets.ModelViewSet):
                 # Otherwise create a new extra image.
                 else:
                     AnimalImage.objects.create(image=image_data, animal=animal, category="extra")
+    
+    def get_queryset(self):
+        #annoatate is_stray
+        queryset = Animal.objects.all().annotate(
+            is_stray=Case(
+                When(owner=None, then=True),
+                default=False,
+                output_field=BooleanField(),
+            )
+        ).distinct()
+        
+        #filter by is_stray
+        is_stray = self.request.query_params.get('is_stray', '')
+        if is_stray == 'true':
+            queryset = queryset.filter(is_stray=True)
+        elif is_stray == 'false':
+            queryset = queryset.filter(is_stray=False)
+            
+        return queryset
+    

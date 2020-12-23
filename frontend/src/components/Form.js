@@ -65,7 +65,7 @@ const TextInput = ({ label, value, xs, controlId, formGroupClasses, ...props }) 
   );
 };
 
-const Checkbox = ({ field, checked, label, value, onChange }) => {
+const Checkbox = ({ field, checked, label, onChange }) => {
 
   // const [field, meta] = useField({...props, type: 'checkbox'});
 

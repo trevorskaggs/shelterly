@@ -14,6 +14,7 @@ class SimplePersonSerializer(serializers.ModelSerializer):
     service_request = serializers.SerializerMethodField()
     display_phone = serializers.SerializerMethodField()
     is_owner = serializers.SerializerMethodField()
+    display_alt_phone = serializers.SerializerMethodField()
 
     # Custom field for the full address.
     def get_full_address(self, obj):
@@ -42,6 +43,10 @@ class SimplePersonSerializer(serializers.ModelSerializer):
 
     def get_is_owner(self, obj):
         return ServiceRequest.objects.filter(owner=obj.id).exists() or Animal.objects.filter(owner=obj.id).exists()
+
+    # Custom field for Formated Alt Phone Number
+    def get_display_alt_phone(self, obj):
+        return re.sub(r'(\d{3})(\d{3})(\d{4})', r'(\1) \2-\3', obj.alt_phone)
 
     # Truncates latitude and longitude.
     def to_internal_value(self, data):
