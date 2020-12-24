@@ -95,5 +95,5 @@ class ServiceRequestSerializer(SimpleServiceRequestSerializer):
 
     owners = SimplePersonSerializer(source='owner', many=True, required=False, read_only=True)
     reporter_object = SimplePersonSerializer(source='reporter', required=False, read_only=True)
-    animals = SimpleAnimalSerializer(source='animal_set', many=True, required=False, read_only=True)
+    animals = SimpleAnimalSerializer(many=True, required=False, read_only=True)
     evacuation_assignments = SimpleEvacAssignmentSerializer(many=True, required=False, read_only=True)

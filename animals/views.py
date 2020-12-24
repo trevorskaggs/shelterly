@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Case, BooleanField, Value, When, Exists
+from django.db.models import Case, BooleanField, Prefetch, Value, When, Exists
 from rest_framework import filters, viewsets
 from actstream import action
 
@@ -10,7 +10,8 @@ from animals.serializers import AnimalSerializer
 
 class AnimalViewSet(viewsets.ModelViewSet):
 
-    queryset = Animal.objects.all()
+    queryset = Animal.objects.all().prefetch_related(Prefetch('animalimage_set', to_attr='images'))
+
     search_fields = ['name', 'species', 'status', 'request__address', 'request__city', 'owner__first_name', 'owner__last_name', 'owner__address', 'owner__city']
     filter_backends = (filters.SearchFilter,)
     serializer_class = AnimalSerializer
@@ -107,7 +108,7 @@ class AnimalViewSet(viewsets.ModelViewSet):
                 default=False,
                 output_field=BooleanField(),
             )
-        ).distinct()
+        ).prefetch_related(Prefetch('animalimage_set', to_attr='images')).distinct()
         
         #filter by is_stray
         is_stray = self.request.query_params.get('is_stray', '')

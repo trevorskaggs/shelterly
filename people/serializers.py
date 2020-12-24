@@ -38,7 +38,7 @@ class SimplePersonSerializer(serializers.ModelSerializer):
 
 class PersonSerializer(SimplePersonSerializer):
     from animals.serializers import AnimalSerializer
-    # animals = AnimalSerializer(source='animal_set', many=True, required=False, read_only=True)
+    animals = AnimalSerializer(many=True, required=False, read_only=True)
     request = serializers.SerializerMethodField()
 
     # Custom field for the ServiceRequest ID.
@@ -50,7 +50,7 @@ class PersonSerializer(SimplePersonSerializer):
         .annotate(
             injured=Exists(Animal.objects.filter(request_id=OuterRef("id"), injured="yes"))
         )
-        .prefetch_related(Prefetch('animal_set', to_attr='animals'))
+        .prefetch_related(Prefetch('animal_set', queryset=Animal.objects.prefetch_related(Prefetch('animalimage_set', to_attr='images')), to_attr='animals'))
         .prefetch_related('target_actions')
         .prefetch_related('owner')
         .prefetch_related('visitnote_set')
@@ -60,4 +60,3 @@ class PersonSerializer(SimplePersonSerializer):
         if service_request:
             return SimpleServiceRequestSerializer(service_request).data
         return None
-

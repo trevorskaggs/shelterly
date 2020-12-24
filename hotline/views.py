@@ -42,7 +42,7 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
             .annotate(animal_count=Count("animal"))
             .annotate(
                 injured=Exists(Animal.objects.filter(request_id=OuterRef("id"), injured="yes"))
-            ).prefetch_related(Prefetch('animal_set', to_attr='animals'))
+            ).prefetch_related(Prefetch('animal_set', queryset=Animal.objects.prefetch_related(Prefetch('animalimage_set', to_attr='images')), to_attr='animals'))
             .prefetch_related('target_actions')
             .prefetch_related('owner')
             .prefetch_related('visitnote_set')

@@ -9,6 +9,7 @@ export async function loadUser({dispatch, removeCookie}) {
 
   // Check backend for authentication and return user information if valid.
   try {
+    // hit auth endpoint after token cookie is set
   const response = await axios.get("/accounts/api/user/auth/")
   // Set the user state.
   dispatch({type: 'USER_LOADED', user: response.data });
@@ -47,6 +48,7 @@ export function logoutUser({dispatch}, {removeCookie}) {
 
 export function setAuthToken(token) {
   if (token) {
+    // if we have a token, set as default axios token
     axios.defaults.headers.common['Authorization'] = `Token ${token}`;
   } else {
     delete axios.defaults.headers.common['Authorization'];

@@ -61,18 +61,19 @@ class SimpleAnimalSerializer(serializers.ModelSerializer):
 
     def get_front_image(self, obj):
         try:
-            return AnimalImage.objects.get(animal=obj, category="front_image").image.url
-        except ObjectDoesNotExist:
+            return [image.url for image in obj.images if image.category == 'front_image'][0]
+            # change this exception
+        except IndexError:
             return ''
 
     def get_side_image(self, obj):
         try:
-            return AnimalImage.objects.get(animal=obj, category="side_image").image.url
-        except ObjectDoesNotExist:
+            return [image.url for image in obj.images if image.category == 'side_image'][0]
+        except IndexError:
             return ''
 
     def get_extra_images(self, obj):
-        return [animal_image.image.url for animal_image in AnimalImage.objects.filter(animal=obj, category="extra")]
+        return [image.url for image in obj.images if image.category == 'extra']
 
     class Meta:
         model = Animal

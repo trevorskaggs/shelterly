@@ -35,10 +35,14 @@ export const LoginForm = () => {
         onSubmit={(values, actions ) => {
           setTimeout(async () => {
             try {
+              // query login endpoint with username and password
               const response = await axios.post('/login/', values)
               setAuthToken(response.data.token);
+              //set token as cookie 
               setCookie("token", response.data.token, {path: '/'});
+              //set authcontext
               dispatch({type: 'LOGIN_SUCCESSFUL', data: response.data });
+              //called once
               loadUser({dispatch, removeCookie});
               navigate(next);
             }
