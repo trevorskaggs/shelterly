@@ -116,11 +116,11 @@ export function PeopleTable() {
                                     <Card.Title>Animals</Card.Title>
                                     <ListGroup>
                                         <ListGroup.Item>
-                                            {owner.animals.map((animal, i) => (
-                                                <span
-                                                    key={animal.id}>{i > 0 && ", "}{animal.name || "Unknown"} ({animal.species})
-                                                    </span>
-                                            ))}
+                                            {owner.animals.length ?
+                                                <span>
+                                                    {owner.animals.map((animal, i) => (
+                                                        <span key={animal.id}>{i > 0 && ", "}{animal.name || "Unknown"} ({animal.species})</span>))}
+                                                </span> : "None"}
                                         </ListGroup.Item>
                                     </ListGroup>
                                 </Card.Body>
