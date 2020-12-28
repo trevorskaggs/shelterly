@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('animals', '0013_auto_20201218_0618'),
+        ('animals', '0011_auto_20201114_1439'),
         ('hotline', '0010_auto_20201210_1008'),
         ('evac', '0006_delete_visitnote'),
     ]
