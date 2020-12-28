@@ -52,6 +52,9 @@ class AnimalViewSet(viewsets.ModelViewSet):
     def perform_update(self, serializer):
         if serializer.is_valid():
 
+            # Keep owner the same when editing an animal.
+            serializer.validated_data['owner'] = serializer.instance.owner.values_list('id', flat=True)
+
             # Set room to null if not present
             if not serializer.validated_data.get('room'):
                 serializer.validated_data['room'] = None
@@ -69,8 +72,24 @@ class AnimalViewSet(viewsets.ModelViewSet):
                 action.send(self.request.user, verb='sheltered animal', target=serializer.validated_data.get('room').building, action_object=serializer.instance)
                 action.send(self.request.user, verb='sheltered animal', target=serializer.validated_data.get('room').building.shelter, action_object=serializer.instance)
 
+            # Record status change if appplicable.
+            if serializer.instance.status != serializer.validated_data.get('status', serializer.instance.status):
+                new_status = serializer.validated_data.get('status')
+                action.send(self.request.user, verb=f'changed animal status to {new_status}', target=serializer.instance)
+
+            # Identify if there were any animal changes that aren't status, room, or owner.
+            changed_fields = []
+            for field, value in serializer.validated_data.items():
+                new_value = value
+                old_value = getattr(serializer.instance, field)
+                if field not in ['status', 'room', 'owner'] and new_value != old_value:
+                    changed_fields.append(field)
+
             animal = serializer.save()
-            action.send(self.request.user, verb='updated animal', target=animal)
+
+            # Only record animal update if a field other than status, room, or owner has changed.
+            if len(changed_fields) > 0:
+                action.send(self.request.user, verb='updated animal', target=animal)
 
             # Remove Owner from animal.
             if self.request.data.get('remove_owner'):

@@ -65,6 +65,7 @@ export const PersonForm = ({ id }) => {
     owner: owner_id,
     latitude: null,
     longitude: null,
+    change_reason: '',
   });
 
   // Whether or not to skip Owner creation.
@@ -131,6 +132,8 @@ export const PersonForm = ({ id }) => {
             .nullable(),
           longitude: Yup.number()
             .nullable(),
+          change_reason: Yup.string()
+            .max(50, 'Must be 50 characters or less'),
         })}
         onSubmit={(values, { setSubmitting }) => {
           if (id) {
@@ -305,6 +308,14 @@ export const PersonForm = ({ id }) => {
                 label="Zip Code"
                 name="zip_code"
                 disabled
+              />
+            </BootstrapForm.Row>
+            <BootstrapForm.Row hidden={!id || !is_owner}>
+              <TextInput
+                xs="12"
+                type="text"
+                label="Change Reason"
+                name="change_reason"
               />
             </BootstrapForm.Row>
           </BootstrapForm>

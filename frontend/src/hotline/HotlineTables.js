@@ -113,7 +113,7 @@ export function ServiceRequestTable() {
                 <Card.Title>Information</Card.Title>
                 <ListGroup>
                   {service_request.owners.map(owner => (
-                    <ListGroup.Item key={owner.id}>Owner: {owner.first_name} {owner.last_name} {owner.display_phone} <Link href={"/hotline/owner/" + service_request.owner}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item>
+                    <ListGroup.Item key={owner.id}>Owner: {owner.first_name} {owner.last_name} {owner.display_phone} <Link href={"/hotline/owner/" + owner.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item>
                   ))}
                   {service_request.owners.length < 1 ? <ListGroup.Item>Owner: No Owner</ListGroup.Item> : ""}
                   <ListGroup.Item>Reporter: {service_request.reporter ? <span>{service_request.reporter_object.first_name} {service_request.reporter_object.last_name} {service_request.reporter_object.phone} <Link href={"/hotline/reporter/" + service_request.reporter}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></span> : "No Reporter"}</ListGroup.Item>
