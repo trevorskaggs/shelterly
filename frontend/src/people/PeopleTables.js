@@ -1,12 +1,12 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from "axios";
-import {Link} from 'raviger';
-import {Button, Card, CardGroup, Form, FormControl, InputGroup, ListGroup} from 'react-bootstrap';
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import { Link } from 'raviger';
+import { Button, Card, CardGroup, Form, FormControl, InputGroup, ListGroup } from 'react-bootstrap';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
     faClipboardList
 } from '@fortawesome/free-solid-svg-icons';
-import Moment from "react-moment";
+import Header from '../components/Header';
 
 export function PeopleTable() {
 
@@ -28,13 +28,13 @@ export function PeopleTable() {
         await axios.get('/people/api/person/?search=' + searchTerm, {
             cancelToken: source.token,
         })
-            .then(response => {
-                setData({owners: response.data, isFetching: false});
-            })
-            .catch(error => {
-                console.log(error.response);
-                setData({owners: [], isFetching: false});
-            });
+        .then(response => {
+            setData({owners: response.data, isFetching: false});
+        })
+        .catch(error => {
+            console.log(error.response);
+            setData({owners: [], isFetching: false});
+        });
     }
 
     // Hook for initializing data.
@@ -46,13 +46,13 @@ export function PeopleTable() {
             await axios.get('/people/api/person/?search=' + searchTerm, {
                 cancelToken: source.token,
             })
-                .then(response => {
-                    setData({owners: response.data, isFetching: false});
-                })
-                .catch(error => {
-                    console.log(error.response);
-                    setData({owners: [], isFetching: false});
-                });
+            .then(response => {
+                setData({owners: response.data, isFetching: false});
+            })
+            .catch(error => {
+                console.log(error.response);
+                setData({owners: [], isFetching: false});
+            });
         };
         fetchOwners();
         // Cleanup.
@@ -62,6 +62,9 @@ export function PeopleTable() {
     }, []);
 
     return (
+        <>
+        <Header>Owner Search</Header>
+        <hr/>
         <div className="ml-2 mr-2">
             <Form onSubmit={handleSubmit}>
                 <InputGroup className="mb-3">
@@ -73,7 +76,7 @@ export function PeopleTable() {
                         onChange={handleChange}
                     />
                     <InputGroup.Append>
-                        <Button variant="outline-light">Search</Button>
+                        <Button variant="outline-light" type="submit">Search</Button>
                     </InputGroup.Append>
                 </InputGroup>
             </Form>
@@ -81,31 +84,28 @@ export function PeopleTable() {
                 <div key={owner.id} className="mt-3">
                     <div className="mt-3">
                         <div className="card-header"> {owner.first_name ?
-                            <span>{owner.first_name} {owner.last_name}
+                            <h3 style={{marginBottom:"-2px"}}>{owner.first_name} {owner.last_name}
                                 {owner.is_owner  ?
                                     <Link href={"/hotline/owner/" + owner.id}> <FontAwesomeIcon icon={faClipboardList} inverse/></Link>
                                     : <Link href={"/hotline/reporter/" + owner.id}> <FontAwesomeIcon icon={faClipboardList} inverse/></Link>}
-                    <br/>
-                        Phone: {owner.phone ? <span>{owner.phone} </span> : "N/A"}
-                    </span> : "N/A"}
+                    </h3> : "Unknown"}
                         </div>
                         <CardGroup>
                             <Card>
                                 <Card.Body>
-                                    <Card.Title>Service Requests</Card.Title>
+                                    <Card.Title>Information</Card.Title>
                                     <ListGroup>
-                                        <ListGroup.Item>
-                                            {owner.service_request.length ?
-                                                <span>{
-                                                    owner.service_request.map(service_request => (
-                                                        <span>
-                                                    {service_request.address} ({service_request.status})
+                                        <ListGroup.Item><b>Phone: </b>{owner.phone ? <span>{owner.display_phone} </span> : "None"}</ListGroup.Item>
+                                        <ListGroup.Item><b>Email: </b>{owner.email ? <span>{owner.email} </span> : "None"}</ListGroup.Item>
+                                        <ListGroup.Item><b>Service Request: </b>
+                                            {owner.request ?
+                                                <span>
+                                                    {owner.request.full_address}
                                                     <Link
-                                                        href={"/hotline/servicerequest/" + service_request.id}> <FontAwesomeIcon
-                                                        icon={faClipboardList} inverse/></Link> | <Moment
-                                                            format="LLL">{service_request.timestamp}</Moment>
-                                                </span>))
-                                                }</span> : "None"
+                                                        href={"/hotline/servicerequest/" + owner.request.id}> <FontAwesomeIcon
+                                                        icon={faClipboardList} inverse/></Link> | <span style={{textTransform:"capitalize"}}>{owner.request.status}</span>
+                                                </span>
+                                                : "None"
                                             }
                                         </ListGroup.Item>
                                     </ListGroup>
@@ -132,5 +132,6 @@ export function PeopleTable() {
             <p>{data.isFetching ? 'Fetching Owners...' :
                 <span>{data.owners && data.owners.length ? '' : 'No Owners found.'}</span>}</p>
         </div>
+    </>
     )
 }

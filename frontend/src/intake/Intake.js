@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from 'raviger';
 import { ListGroup } from 'react-bootstrap'
-import {PeopleTable} from "../people/PeopleTables";
+import { PeopleTable } from "../people/PeopleTables";
 
 const header_style = {
   textAlign: "center",
@@ -16,7 +16,7 @@ const Intake = () => (
             <ListGroup.Item action>FROM WALK-IN (NON-OWNER)</ListGroup.Item>
         </Link>
         <Link href="/intake/owner/search">
-            <ListGroup.Item action>OWNERS</ListGroup.Item>
+            <ListGroup.Item action>SEARCH OWNERS</ListGroup.Item>
         </Link>
     </ListGroup>
 )
@@ -31,8 +31,6 @@ export const IntakeSummary = () => (
 
 export const OwnerSearch = () => (
     <div>
-        <h1 style={header_style}>Owner Search</h1>
-        <br/>
         <PeopleTable/>
     </div>
 )

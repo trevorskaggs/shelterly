@@ -11,7 +11,6 @@ class SimplePersonSerializer(serializers.ModelSerializer):
     full_address = serializers.SerializerMethodField()
     action_history = serializers.SerializerMethodField()
     request = serializers.SerializerMethodField()
-    service_request = serializers.SerializerMethodField()
     display_phone = serializers.SerializerMethodField()
     is_owner = serializers.SerializerMethodField()
     display_alt_phone = serializers.SerializerMethodField()
@@ -32,10 +31,6 @@ class SimplePersonSerializer(serializers.ModelSerializer):
         if service_request:
             return SimpleServiceRequestSerializer(service_request).data
         return None
-
-    # Custom field for the full ServiceRequest.
-    def get_service_request(self, obj):
-            return ServiceRequest.objects.filter(owner=obj).values()
 
     # Custom field for Formated Phone Number
     def get_display_phone(self, obj):
