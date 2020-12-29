@@ -171,37 +171,37 @@ export function EvacResolution({ id }) {
 
   return (
     <Formik
-        initialValues={data}
-        enableReinitialize={true}
-        validationSchema={Yup.object({
-          start_time: Yup.date(),
-          end_time: Yup.date().nullable(),
-          service_requests: Yup.array(),
-          team_members: Yup.array(),
-          sr_updates: Yup.array().of(
-            Yup.object().shape({
-              id: Yup.number().required(),
-              owner: Yup.boolean(),
-              followup_date: Yup.date().nullable(),
-              animals: Yup.array().of(
-                Yup.object().shape({
-                  id: Yup.number().required(),
-                  status: Yup.string().notOneOf(['REPORTED'], 'Animal cannot remain REPORTED.'),
-                })
-              ),
-              date_completed: Yup.date().required('Required'),
-              notes: Yup.string(),
-              forced_entry: Yup.boolean(),
-              owner_contact_note: Yup.string().when('owner', {
-                is: true,
-                then: Yup.boolean().oneOf([true], 'The owner must be notified before resolution.').required()}),
-              owner_contact_time: Yup.date().required('Please specify the date and time the owner was notified.'),
-            })
-          ),
-        })}
-        onSubmit={(values, { setSubmitting }) => {
-          setTimeout(() => {
-            axios.put('/evac/api/evacassignment/' + id + '/', values)
+      initialValues={data}
+      enableReinitialize={true}
+      validationSchema={Yup.object({
+        start_time: Yup.date(),
+        end_time: Yup.date().nullable(),
+        service_requests: Yup.array(),
+        team_members: Yup.array(),
+        sr_updates: Yup.array().of(
+          Yup.object().shape({
+            id: Yup.number().required(),
+            owner: Yup.boolean(),
+            followup_date: Yup.date().nullable(),
+            animals: Yup.array().of(
+              Yup.object().shape({
+                id: Yup.number().required(),
+                status: Yup.string().notOneOf(['REPORTED'], 'Animal cannot remain REPORTED.'),
+              })
+            ),
+            date_completed: Yup.date().required('Required'),
+            notes: Yup.string(),
+            forced_entry: Yup.boolean(),
+            owner_contact_note: Yup.string().when('owner', {
+              is: true,
+              then: Yup.boolean().oneOf([true], 'The owner must be notified before resolution.').required()}),
+            owner_contact_time: Yup.date().required('Please specify the date and time the owner was notified.'),
+          })
+        ),
+      })}
+      onSubmit={(values, { setSubmitting }) => {
+        setTimeout(() => {
+          axios.put('/evac/api/evacassignment/' + id + '/', values)
             .then(response => {
               navigate('/evac/summary/' + response.data.id);
             })
