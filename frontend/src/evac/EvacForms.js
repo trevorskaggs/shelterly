@@ -194,12 +194,12 @@ export function EvacResolution({ id }) {
             forced_entry: Yup.boolean(),
             owner_contacted: Yup.boolean().when('owner', {
               is: true,
-              then: Yup.boolean().oneOf([true], 'The owner must be notified before resolution.').required(),
-              owner_contact_time: Yup.date().required('Please specify the date and time the owner was notified.')
+              then: Yup.boolean().oneOf([true], 'The owner must be notified before resolution.').required()
             }),
+            owner_contact_time: Yup.date().required('Please specify the date and time the owner was notified.')
           })
-        )
-      })}  
+        ),
+      })}
       onSubmit={(values, { setSubmitting }) => {
         setTimeout(() => {
           axios.put('/evac/api/evacassignment/' + id + '/', values)
