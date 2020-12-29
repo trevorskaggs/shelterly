@@ -14,12 +14,10 @@ import {EvacuationAssignmentTable} from "./EvacTables";
         <ListGroup.Item action>ADD TEAM MEMBER</ListGroup.Item>
       </Link>
       <Link href="/evac/deploy">
-      <ListGroup.Item action>
-      DEPLOY TEAMS
-      </ListGroup.Item>
+        <ListGroup.Item action>DEPLOY TEAMS</ListGroup.Item>
       </Link>
       <Link href="/evac/evacuationassignment/search">
-          <ListGroup.Item action>DISPATCH ASSIGNMENTS</ListGroup.Item>
+        <ListGroup.Item action>SEARCH DISPATCH ASSIGNMENTS</ListGroup.Item>
       </Link>
     </ListGroup>
   )

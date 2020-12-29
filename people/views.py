@@ -1,17 +1,22 @@
-from rest_framework import permissions, viewsets
+from rest_framework import filters, permissions, viewsets
 from actstream import action
 
 from animals.models import Animal
 from hotline.models import ServiceRequest
-from people.models import OwnerContact, Person
+from people.models import OwnerContact, Person, PersonChange
 from people.serializers import OwnerContactSerializer, PersonSerializer
 
 
 # Provides view for Person API calls.
 class PersonViewSet(viewsets.ModelViewSet):
     queryset = Person.objects.all()
+    search_fields = ['first_name', 'last_name', 'address', 'animals__name', 'animal__name']
+    filter_backends = (filters.SearchFilter,)
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = PersonSerializer
+
+    def get_queryset(self):
+        return Person.objects.all().order_by('-first_name')
 
     def perform_create(self, serializer):
         if serializer.is_valid():
@@ -41,7 +46,21 @@ class PersonViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         if serializer.is_valid():
+            # Identify which fields changed on update.
+            change_dict = {}
+            for field, value in serializer.validated_data.items():
+                new_value = value
+                old_value = getattr(serializer.instance, field)
+                if new_value != old_value:
+                    change_dict[field] = f'{old_value} changed to {new_value}'
+
             person = serializer.save()
+
+            # Store Person changes for investigation purposes.
+            if change_dict:
+                PersonChange.objects.create(user=self.request.user, person=person, changes=change_dict, reason=self.request.data.get('change_reason', ''))
+
+            # Record update action.
             action.send(self.request.user, verb='updated person', target=person)
 
 class OwnerContactViewSet(viewsets.ModelViewSet):

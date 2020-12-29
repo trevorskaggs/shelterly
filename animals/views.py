@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Case, BooleanField, Value, When, Exists
 from rest_framework import filters, viewsets
 from actstream import action
 
@@ -29,8 +30,8 @@ class AnimalViewSet(viewsets.ModelViewSet):
             action.send(self.request.user, verb='created animal', target=animal)
 
             # Add Owner to new animals if it is POSTed.
-            if self.request.data.get('owner'):
-                animal.owner.add(self.request.data['owner'])
+            if self.request.data.get('new_owner'):
+                animal.owner.add(self.request.data['new_owner'])
 
             # Add ServiceRequest Owner and Reporter to new animals being added to an SR.
             if serializer.validated_data.get('request'):
@@ -51,6 +52,9 @@ class AnimalViewSet(viewsets.ModelViewSet):
     def perform_update(self, serializer):
         if serializer.is_valid():
 
+            # Keep owner the same when editing an animal.
+            serializer.validated_data['owner'] = serializer.instance.owner.values_list('id', flat=True)
+
             # Set room to null if not present
             if not serializer.validated_data.get('room'):
                 serializer.validated_data['room'] = None
@@ -68,8 +72,24 @@ class AnimalViewSet(viewsets.ModelViewSet):
                 action.send(self.request.user, verb='sheltered animal', target=serializer.validated_data.get('room').building, action_object=serializer.instance)
                 action.send(self.request.user, verb='sheltered animal', target=serializer.validated_data.get('room').building.shelter, action_object=serializer.instance)
 
+            # Record status change if appplicable.
+            if serializer.instance.status != serializer.validated_data.get('status', serializer.instance.status):
+                new_status = serializer.validated_data.get('status')
+                action.send(self.request.user, verb=f'changed animal status to {new_status}', target=serializer.instance)
+
+            # Identify if there were any animal changes that aren't status, room, or owner.
+            changed_fields = []
+            for field, value in serializer.validated_data.items():
+                new_value = value
+                old_value = getattr(serializer.instance, field)
+                if field not in ['status', 'room', 'owner'] and new_value != old_value:
+                    changed_fields.append(field)
+
             animal = serializer.save()
-            action.send(self.request.user, verb='updated animal', target=animal)
+
+            # Only record animal update if a field other than status, room, or owner has changed.
+            if len(changed_fields) > 0:
+                action.send(self.request.user, verb='updated animal', target=animal)
 
             # Remove Owner from animal.
             if self.request.data.get('remove_owner'):
@@ -97,3 +117,23 @@ class AnimalViewSet(viewsets.ModelViewSet):
                 # Otherwise create a new extra image.
                 else:
                     AnimalImage.objects.create(image=image_data, animal=animal, category="extra")
+    
+    def get_queryset(self):
+        #annoatate is_stray
+        queryset = Animal.objects.all().annotate(
+            is_stray=Case(
+                When(owner=None, then=True),
+                default=False,
+                output_field=BooleanField(),
+            )
+        ).distinct()
+        
+        #filter by is_stray
+        is_stray = self.request.query_params.get('is_stray', '')
+        if is_stray == 'true':
+            queryset = queryset.filter(is_stray=True)
+        elif is_stray == 'false':
+            queryset = queryset.filter(is_stray=False)
+            
+        return queryset
+    

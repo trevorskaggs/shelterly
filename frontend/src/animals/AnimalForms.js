@@ -60,10 +60,10 @@ export const AnimalForm = ({id}) => {
 
   // Initial Animal data.
   const [data, setData] = useState({
-    owner: owner_id,
+    new_owner: owner_id,
     reporter: reporter_id,
     request: servicerequest_id,
-    status:'REPORTED',
+    status: 'REPORTED',
     name: '',
     species: '',
     sex: '',
@@ -198,6 +198,11 @@ export const AnimalForm = ({id}) => {
           extra_images: Yup.array()
         })}
         onSubmit={(values, { setSubmitting }) => {
+          // Remove owner if animal has none.
+          if (values["owner"]) {
+            delete values["owner"];
+          }
+
           // Use FormData so that image files may also be included.
           const formData = new FormData();
           // Convert json to FormData.
@@ -272,7 +277,6 @@ export const AnimalForm = ({id}) => {
             <Card.Header as="h5" className="pl-3">{id ? <span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>: ""}{!id ? "New" : "Update"} Animal</Card.Header>
             <Card.Body>
             <BootstrapForm as={Form}>
-              <Field type="hidden" value={owner_id||""} name="owner" id="owner"></Field>
               <Field type="hidden" value={servicerequest_id||""} name="request" id="request"></Field>
                 <BootstrapForm.Row>
                   <Col xs="4">

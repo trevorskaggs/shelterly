@@ -1,11 +1,15 @@
+from django.contrib.auth import get_user_model
 from django.db import models
 from location.models import Location
+
+User = get_user_model()
 
 class Person(Location):
     
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50, blank=True)
     phone = models.CharField(max_length=50, blank=True)
+    alt_phone = models.CharField(max_length=50, blank=True)
     best_contact = models.TextField(blank=True)
     agency = models.TextField(blank=True)
     drivers_license = models.CharField(max_length=50, blank=True)
@@ -24,3 +28,10 @@ class OwnerContact(models.Model):
     owner_contact_time = models.DateTimeField()
     owner_contact_note = models.TextField(blank=False)
     animal = models.ForeignKey('animals.Animal', blank=True, null=True, on_delete=models.CASCADE)
+
+class PersonChange(models.Model):
+    user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
+    person = models.ForeignKey(Person, null=True, on_delete=models.SET_NULL)
+    changes = models.JSONField()
+    reason = models.TextField(blank=True)
+    timestamp = models.DateTimeField(auto_now_add=True)

@@ -5,7 +5,7 @@ import Animals, { AnimalDetail, NewAnimal, UpdateAnimal } from "./animals/Animal
 import { AnimalSearch } from "./animals/AnimalTables"
 import Evac, {EvacuationAssignmentSearch} from "./evac/Evac";
 import Hotline, { NewServiceRequest, ServiceRequestDetail, ServiceRequestList, UpdateServiceRequest } from "./hotline/Hotline";
-import Intake, { IntakeSummary } from "./intake/Intake";
+import Intake, { IntakeSummary, OwnerSearch } from "./intake/Intake";
 import { NewOwner, NewOwnerContact, NewReporter, OwnerDetail, ReporterDetail,  UpdateOwner, UpdateOwnerContact, UpdateReporter } from "./people/People";
 import Shelter, { NewShelter, UpdateShelter } from "./shelter/Shelter";
 import { ShelterDetails } from "./shelter/ShelterDetails"
@@ -60,6 +60,7 @@ const routes = {
   "/intake": () => <Intake />,
   "/intake/animal/new": () => <NewAnimal />,
   "/intake/owner/new": () => <NewOwner />,
+  "/intake/owner/search": () => <OwnerSearch />,
   "/intake/reporter/new": () => <NewReporter />,
   "/intake/summary": () => <IntakeSummary />,
   "/login": () => <Redirect to='/' />

@@ -50,6 +50,7 @@ export const PersonForm = ({ id }) => {
     first_name: '',
     last_name: '',
     phone: '',
+    alt_phone: '',
     email: '',
     best_contact: '',
     show_agency: is_first_responder,
@@ -64,6 +65,7 @@ export const PersonForm = ({ id }) => {
     owner: owner_id,
     latitude: null,
     longitude: null,
+    change_reason: '',
   });
 
   // Whether or not to skip Owner creation.
@@ -109,6 +111,8 @@ export const PersonForm = ({ id }) => {
             .required('Required'),
           phone: Yup.string()
             .matches(phoneRegex, "Phone number is not valid"),
+          alt_phone: Yup.string()
+            .matches(phoneRegex, "Phone number is not valid"),
           email: Yup.string()
             .max(200, 'Must be 200 characters or less')
             .matches(emailRegex, "Email is not valid"),
@@ -128,6 +132,8 @@ export const PersonForm = ({ id }) => {
             .nullable(),
           longitude: Yup.number()
             .nullable(),
+          change_reason: Yup.string()
+            .max(50, 'Must be 50 characters or less'),
         })}
         onSubmit={(values, { setSubmitting }) => {
           if (id) {
@@ -205,13 +211,13 @@ export const PersonForm = ({ id }) => {
             <Field type="hidden" value={data.longitude || ""} name="longitude" id="longitude"></Field>
             <BootstrapForm.Row>
               <TextInput
-                xs="5"
+                xs="6"
                 type="text"
                 label="First Name*"
                 name="first_name"
               />
               <TextInput
-                xs="5"
+                xs="6"
                 type="text"
                 label="Last Name*"
                 name="last_name"
@@ -225,7 +231,13 @@ export const PersonForm = ({ id }) => {
                 name="phone"
               />
               <TextInput
-                xs="7"
+                xs="3"
+                type="text"
+                label="Alternate Phone"
+                name="alt_phone"
+              />
+              <TextInput
+                xs="6"
                 type="text"
                 label="Email"
                 name="email"
@@ -233,7 +245,7 @@ export const PersonForm = ({ id }) => {
             </BootstrapForm.Row>
             <BootstrapForm.Row hidden={is_first_responder || data.agency}>
               <TextInput
-                xs="10"
+                xs="12"
                 as="textarea"
                 label="Best Contact"
                 name="best_contact"
@@ -241,14 +253,14 @@ export const PersonForm = ({ id }) => {
             </BootstrapForm.Row>
             <BootstrapForm.Row hidden={!is_first_responder && !data.agency}>
               <TextInput
-                xs="10"
+                xs="12"
                 as="textarea"
                 label="Agency*"
                 name="agency"
               />
             </BootstrapForm.Row>
             <BootstrapForm.Row hidden={!is_owner}>
-              <BootstrapForm.Group as={Col} xs="10">
+              <BootstrapForm.Group as={Col} xs="12">
                 <AddressLookup
                   label="Search"
                   style={{width: '100%'}}
@@ -258,7 +270,7 @@ export const PersonForm = ({ id }) => {
             </BootstrapForm.Row>
             <BootstrapForm.Row hidden={!is_owner}>
               <TextInput
-                xs="8"
+                xs="10"
                 type="text"
                 label="Address"
                 name="address"
@@ -273,7 +285,7 @@ export const PersonForm = ({ id }) => {
             </BootstrapForm.Row>
             <BootstrapForm.Row hidden={!is_owner}>
               <TextInput
-                xs="6"
+                xs="8"
                 type="text"
                 label="City"
                 name="city"
@@ -296,6 +308,14 @@ export const PersonForm = ({ id }) => {
                 label="Zip Code"
                 name="zip_code"
                 disabled
+              />
+            </BootstrapForm.Row>
+            <BootstrapForm.Row hidden={!id || !is_owner}>
+              <TextInput
+                xs="12"
+                type="text"
+                label="Change Reason"
+                name="change_reason"
               />
             </BootstrapForm.Row>
           </BootstrapForm>

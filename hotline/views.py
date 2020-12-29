@@ -1,5 +1,6 @@
 from django.db.models import Count, Exists, OuterRef, Q
 from actstream import action
+from datetime import datetime
 from .serializers import ServiceRequestSerializer, VisitNoteSerializer
 
 from animals.models import Animal
@@ -47,6 +48,11 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
         aco_required = self.request.query_params.get('aco_required', '')
         if aco_required == 'true':
             queryset = queryset.filter(Q(animal__aggressive='yes') | Q(animal__species='other'))
+
+        # Filter on pending_only option for the map.
+        pending_only = self.request.query_params.get('pending_only', '')
+        if pending_only == 'true':
+            queryset = queryset.filter(Q(followup_date__lte=datetime.today()) | Q(followup_date__isnull=True))
 
         # Exclude SRs without a geolocation when fetching for a map.
         is_map = self.request.query_params.get('map', '')

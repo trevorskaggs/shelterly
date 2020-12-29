@@ -5,6 +5,7 @@ from actstream.models import target_stream
 from .models import OwnerContact, Person
 from location.utils import build_full_address, build_action_string
 from hotline.models import ServiceRequest
+from animals.models import Animal
 
 class SimplePersonSerializer(serializers.ModelSerializer):
 
@@ -12,6 +13,8 @@ class SimplePersonSerializer(serializers.ModelSerializer):
     action_history = serializers.SerializerMethodField()
     request = serializers.SerializerMethodField()
     display_phone = serializers.SerializerMethodField()
+    is_owner = serializers.SerializerMethodField()
+    display_alt_phone = serializers.SerializerMethodField()
 
     # Custom field for the full address.
     def get_full_address(self, obj):
@@ -34,6 +37,13 @@ class SimplePersonSerializer(serializers.ModelSerializer):
     def get_display_phone(self, obj):
         return re.sub(r'(\d{3})(\d{3})(\d{4})', r'(\1) \2-\3', obj.phone)
 
+    def get_is_owner(self, obj):
+        return ServiceRequest.objects.filter(owner=obj.id).exists() or Animal.objects.filter(owner=obj.id).exists()
+
+    # Custom field for Formated Alt Phone Number
+    def get_display_alt_phone(self, obj):
+        return re.sub(r'(\d{3})(\d{3})(\d{4})', r'(\1) \2-\3', obj.alt_phone)
+
     # Truncates latitude and longitude.
     def to_internal_value(self, data):
         if data.get('latitude'):
@@ -47,8 +57,11 @@ class SimplePersonSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class PersonSerializer(SimplePersonSerializer):
-    from animals.serializers import AnimalSerializer
-    animals = AnimalSerializer(source='animal_set', many=True, required=False, read_only=True)
+
+    animals = serializers.SerializerMethodField()
+    
+    def get_animals(self, obj):
+        return  obj.animal_set.all().values() | obj.animals.all().values()
 
 class OwnerContactSerializer(serializers.ModelSerializer):
 
@@ -61,3 +74,4 @@ class OwnerContactSerializer(serializers.ModelSerializer):
     class Meta:
         model = OwnerContact
         fields = '__all__'
+
