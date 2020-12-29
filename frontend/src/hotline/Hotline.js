@@ -62,25 +62,16 @@ function Hotline() {
   // Counts the number of size/species matches for a service request by status.
   const countMatches = (service_request) => {
     var matches = {};
-    var status_matches = {'REPORTED':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}};
 
     service_request.animals.forEach((animal) => {
-      if (['REPORTED', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE'].indexOf(animal.status) > -1) {
-        if (!matches[[animal.species,animal.size]]) {
-          matches[[animal.species,animal.size]] = 1;
-        }
-        else {
-          matches[[animal.species,animal.size]] += 1;
-        }
-        if (!status_matches[animal.status][[animal.species,animal.size]]) {
-          status_matches[animal.status][[animal.species,animal.size]] = 1;
-        }
-        else {
-          status_matches[animal.status][[animal.species,animal.size]] += 1;
-        }
+      if (!matches[[animal.species,animal.size]]) {
+        matches[[animal.species,animal.size]] = 1;
+      }
+      else {
+        matches[[animal.species,animal.size]] += 1;
       }
     });
-    return [matches, status_matches]
+    return matches
   }
 
   // Show or hide list of SRs based on current map zoom
@@ -115,8 +106,7 @@ function Hotline() {
         const map_dict = mapState;
         const bounds = [];
         for (const service_request of response.data) {
-            const total_matches = countMatches(service_request);
-            const matches = total_matches[0];
+            const matches = countMatches(service_request);
             let color = 'green';
             if  (service_request.status === 'assigned') {
               color = 'yellow';
@@ -159,7 +149,7 @@ function Hotline() {
       <ListGroup.Item action>FIRST RESPONDER CALLIING</ListGroup.Item>
       </Link>
       <Link href="/hotline/servicerequest/list">
-      <ListGroup.Item action>SEARCH SERVICE REQUEST</ListGroup.Item>
+      <ListGroup.Item action>SEARCH SERVICE REQUESTS</ListGroup.Item>
       </Link>
     </ListGroup>
     <Row className="d-flex flex-wrap">
