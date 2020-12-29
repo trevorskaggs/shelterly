@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link } from 'raviger';
-import { Col, ListGroup, Row } from 'react-bootstrap'
+import { Button, ButtonGroup, Col, ListGroup, Row } from 'react-bootstrap'
 import { Circle, CircleMarker, Map, TileLayer, Tooltip as MapTooltip, useLeaflet } from "react-leaflet";
 import L from "leaflet";
 import Moment from 'react-moment';
@@ -31,7 +31,7 @@ function Hotline() {
 
   const [data, setData] = useState({service_requests: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
   const [mapState, setMapState] = useState({});
-  const [statusOptions, setStatusOptions] = useState({status:'open'});
+  const [statusOptions, setStatusOptions] = useState({status:"open", allColor: "secondary", openColor:"primary", assignedColor:"secondary", closedColor:"secondary"});
 
   // Takes in animal size, species, and count and returns a pretty string combination.
   const prettyText = (size, species, count) => {
@@ -105,7 +105,7 @@ function Hotline() {
       // Fetch ServiceRequest data.
       await axios.get('/hotline/api/servicerequests/', {
         params: {
-          status: 'open',
+          status: statusOptions.status,
           map: true
         },
         cancelToken: source.token,
@@ -163,54 +163,60 @@ function Hotline() {
       </Link>
     </ListGroup>
     <Row className="d-flex flex-wrap">
-    <Col xs={10} className="border rounded pl-0 pr-0 m-auto">
-      <Map className="d-block" style={{marginRight:"0px"}} bounds={data.bounds} onMoveEnd={onMove}>
-        <Legend position="bottomleft" metric={false} />
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-        />
-        {data.service_requests.map(service_request => (
-          <CircleMarker
-            key={service_request.id}
-            center={{lat:service_request.latitude, lng: service_request.longitude}}
-            color="black"
-            weight="1"
-            fillColor={mapState[service_request.id] ? mapState[service_request.id].color : ""}
-            fill={true}
-            fillOpacity="1"
-            // onClick={() => handleMapState(service_request.id)}
-            radius={5}
-          >
-            <MapTooltip autoPan={false}>
-              <span>
-                {mapState[service_request.id] ?
-                  <span>
-                    {Object.keys(mapState[service_request.id].matches).map((key,i) => (
-                      <span key={key} style={{textTransform:"capitalize"}}>
-                        {i > 0 && ", "}{prettyText(key.split(',')[1], key.split(',')[0], mapState[service_request.id].matches[key])}
-                      </span>
-                    ))}
-                  </span>
-                :""}
-                <br />
-                {service_request.full_address}
-                {service_request.followup_date ? <div>Followup Date: <Moment format="L">{service_request.followup_date}</Moment></div> : ""}
-                <div>
-                  {service_request.aco_required ? <img width={16} height={16} src={shield} alt="" className="mr-1" /> : ""}
-                  {service_request.injured ? <img width={16} height={16} src={bandaid} alt="" className="mr-1" /> : ""}
-                  {service_request.accessible ? <img width={16} height={16} src={car} alt="" className="mr-1" /> : ""}
-                  {service_request.turn_around ? <img width={16} height={16} src={trailer} alt="" /> : ""}
-                </div>
-              </span>
-            </MapTooltip>
-          </CircleMarker>
-        ))}
-        {Object.entries(mapState).filter(([key, value]) => value.radius === "enabled").map(([key, value]) => (
-          <Circle key={key} center={{lat:value.latitude, lng: value.longitude}} radius={805} interactive={false} />
-        ))}
-      </Map>
-    </Col>
+      <Col xs={10} className="border rounded pl-0 pr-0 m-auto">
+        <Map className="d-block" style={{marginRight:"0px"}} bounds={data.bounds} onMoveEnd={onMove}>
+          <Legend position="bottomleft" metric={false} />
+          <TileLayer
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+          />
+          {data.service_requests.map(service_request => (
+            <CircleMarker
+              key={service_request.id}
+              center={{lat:service_request.latitude, lng: service_request.longitude}}
+              color="black"
+              weight="1"
+              fillColor={mapState[service_request.id] ? mapState[service_request.id].color : ""}
+              fill={true}
+              fillOpacity="1"
+              onClick={() => window.open("/hotline/servicerequest/" + service_request.id, "_blank")}
+              radius={5}
+            >
+              <MapTooltip autoPan={false}>
+                <span>
+                  {mapState[service_request.id] ?
+                    <span>
+                      {Object.keys(mapState[service_request.id].matches).map((key,i) => (
+                        <span key={key} style={{textTransform:"capitalize"}}>
+                          {i > 0 && ", "}{prettyText(key.split(',')[1], key.split(',')[0], mapState[service_request.id].matches[key])}
+                        </span>
+                      ))}
+                    </span>
+                  :""}
+                  <br />
+                  {service_request.full_address}
+                  {service_request.followup_date ? <div>Followup Date: <Moment format="L">{service_request.followup_date}</Moment></div> : ""}
+                  <div>
+                    {service_request.aco_required ? <img width={16} height={16} src={shield} alt="" className="mr-1" /> : ""}
+                    {service_request.injured ? <img width={16} height={16} src={bandaid} alt="" className="mr-1" /> : ""}
+                    {service_request.accessible ? <img width={16} height={16} src={car} alt="" className="mr-1" /> : ""}
+                    {service_request.turn_around ? <img width={16} height={16} src={trailer} alt="" /> : ""}
+                  </div>
+                </span>
+              </MapTooltip>
+            </CircleMarker>
+          ))}
+          {Object.entries(mapState).filter(([key, value]) => value.radius === "enabled").map(([key, value]) => (
+            <Circle key={key} center={{lat:value.latitude, lng: value.longitude}} radius={805} interactive={false} />
+          ))}
+        </Map>
+        <ButtonGroup>
+          <Button variant={statusOptions.allColor} onClick={() => setStatusOptions({status:"all", allColor:"primary", openColor:"secondary", assignedColor:"secondary", closedColor:"secondary"})}>All</Button>
+          <Button variant={statusOptions.openColor} onClick={() => setStatusOptions({status:"open", allColor:"secondary", openColor:"primary", assignedColor:"secondary", closedColor:"secondary"})}>Open</Button>
+          <Button variant={statusOptions.assignedColor} onClick={() => setStatusOptions({status:"assigned", allColor:"secondary", openColor:"secondary", assignedColor:"primary", closedColor:"secondary"})}>Assigned</Button>
+          <Button variant={statusOptions.closedColor} onClick={() => setStatusOptions({status:"closed", allColor:"secondary", openColor:"secondary", assignedColor:"secondary", closedColor:"primary"})}>Closed</Button>
+        </ButtonGroup>
+      </Col>
     </Row>
   </>
   )
