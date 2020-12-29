@@ -6,7 +6,7 @@ import {Link} from "raviger";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faClipboardList} from "@fortawesome/free-solid-svg-icons";
 import Moment from "react-moment";
-
+import Header from '../components/Header';
 
 export function EvacTeamTable() {
   const columns = React.useMemo(
@@ -113,6 +113,8 @@ export function EvacuationAssignmentTable() {
 
   return (
       <div className="ml-2 mr-2">
+        <Header>Dispatch Assignment Search</Header>
+        <hr/>
         <Form onSubmit={handleSubmit}>
           <InputGroup className="mb-3">
             <FormControl
@@ -132,46 +134,46 @@ export function EvacuationAssignmentTable() {
             </ButtonGroup>
           </InputGroup>
         </Form>
-
         {data.evacuation_assignments.map(evacuation_assignment => (
-            <div key={evacuation_assignment.id} className="mt-3">
-              <div className="card-header">
-                Dispatch Assignment #{evacuation_assignment.id}<Link href={"/evac/summary/" + evacuation_assignment.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
-                <div>
-                Opened: <Moment format="L">{evacuation_assignment.start_time}</Moment> |
-                {evacuation_assignment.end_time ?
-                  <span> Closed:&nbsp;
-                    <Moment format="L">{evacuation_assignment.end_time}</Moment>
-                  </span> : <Link href={"/evac/resolution/" + evacuation_assignment.id} className="btn btn-danger ml-1" style={{paddingTop:"0px", paddingBottom:"0px"}}>Close</Link>}
-                </div>
-                <div>
-                <span>Team Member(s): {evacuation_assignment.team_member_objects.map((member, i) => (
-                    <span key={member.id}>{i > 0 && ", "}{member.first_name} {member.last_name}</span>))}
-                </span>
-                </div>
+          <div key={evacuation_assignment.id} className="mt-3">
+            <div className="card-header">
+              <b>Opened: </b><Moment format="L">{evacuation_assignment.start_time}</Moment> <Link href={"/evac/summary/" + evacuation_assignment.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} inverse /></Link> |
+              {evacuation_assignment.end_time ?
+                <span> <b>Closed: </b>
+                  <Moment format="L">{evacuation_assignment.end_time}</Moment>
+                </span> : <Link href={"/evac/resolution/" + evacuation_assignment.id} className="btn btn-danger ml-1" style={{paddingTop:"0px", paddingBottom:"0px"}}>Close</Link>}
+              <div><b>Team Member(s): </b>{evacuation_assignment.team_member_objects.map((member, i) => (
+                  <span key={member.id}>{i > 0 && ", "}{member.first_name} {member.last_name}</span>))}
               </div>
-              <CardGroup>
-                <Card key={evacuation_assignment.id}>
-                  <Card.Body>
-                    <Card.Title>Service Request(s)</Card.Title>
-                    <ListGroup>
-                      {evacuation_assignment.service_request_objects.map(service_request => (
-                          <ListGroup.Item key={service_request.id}>
-                            Service Request {service_request.address}
-                            <Link
-                              href={"/hotline/servicerequest/" + service_request.id}> <FontAwesomeIcon
-                              icon={faClipboardList} inverse/></Link> |&nbsp;
-                            {service_request.owners.map(owner => (
-                              <span>Owner: {owner.first_name} {owner.last_name} |&nbsp;</span>
-                            ))}
-                            Animals: {service_request.animals.map((animal, i) => (
-                              <span key={animal.id}>{i > 0 && ", "}{animal.name || "Unknown"} ({animal.species})</span>))}
-                          </ListGroup.Item>))}
-                    </ListGroup>
-                  </Card.Body>
-                </Card>
-              </CardGroup>
             </div>
+            <CardGroup>
+              <Card key={evacuation_assignment.id}>
+                <Card.Body>
+                  <Card.Title>Service Request(s)</Card.Title>
+                  <ListGroup>
+                    {evacuation_assignment.service_request_objects.map(service_request => (
+                      <span>
+                        <ListGroup.Item key={service_request.id}>
+                          <b>Address: </b>{service_request.full_address}
+                          <Link
+                            href={"/hotline/servicerequest/" + service_request.id} target="_blank"> <FontAwesomeIcon
+                            icon={faClipboardList} inverse/></Link> |&nbsp;
+                          {service_request.owners.map((owner, i) => (
+                            <span><b>{i > 0 && " | "}Owner: </b>{owner.first_name} {owner.last_name}</span>
+                          ))}
+                          {service_request.owners.length < 1 ? "No Owner" : ""}
+                          <div>
+                          <b>Animals: </b>{service_request.animals.filter(animal => animal.evacuation_assignments.includes(evacuation_assignment.id)).map((animal, i) => (
+                            <span key={animal.id}>{i > 0 && ", "}{animal.name || "Unknown"} ({animal.species})</span>))}
+                          </div>
+                        </ListGroup.Item>
+                      </span>
+                    ))}
+                  </ListGroup>
+                </Card.Body>
+              </Card>
+            </CardGroup>
+          </div>
         ))}
         <p>{data.isFetching ? 'Fetching evacuation requests...' : <span>{data.evacuation_assignments && data.evacuation_assignments.length ? '' : 'No Evacuation Assignments found.'}</span>}</p>
       </div>

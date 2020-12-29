@@ -28,8 +28,6 @@ const Hotline = () => (
 
 export const ServiceRequestList = () => (
   <div>
-    <h1 style={header_style}>Service Requests</h1>
-    <br/>
     <ServiceRequestTable />
   </div>
 )
