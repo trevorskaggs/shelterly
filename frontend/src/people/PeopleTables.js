@@ -84,11 +84,11 @@ export function PeopleTable() {
                 <div key={owner.id} className="mt-3">
                     <div className="mt-3">
                         <div className="card-header"> {owner.first_name ?
-                            <h3 style={{marginBottom:"-2px"}}>{owner.first_name} {owner.last_name}
+                            <h4 style={{marginBottom:"-2px"}}>{owner.first_name} {owner.last_name}
                                 {owner.is_owner  ?
-                                    <Link href={"/hotline/owner/" + owner.id}> <FontAwesomeIcon icon={faClipboardList} inverse/></Link>
-                                    : <Link href={"/hotline/reporter/" + owner.id}> <FontAwesomeIcon icon={faClipboardList} inverse/></Link>}
-                    </h3> : "Unknown"}
+                                    <Link href={"/hotline/owner/" + owner.id} target="_blank"> <FontAwesomeIcon icon={faClipboardList} inverse/></Link>
+                                    : <Link href={"/hotline/reporter/" + owner.id} target="_blank"> <FontAwesomeIcon icon={faClipboardList} inverse/></Link>}
+                    </h4> : "Unknown"}
                         </div>
                         <CardGroup>
                             <Card>
@@ -100,10 +100,11 @@ export function PeopleTable() {
                                         <ListGroup.Item><b>Service Request: </b>
                                             {owner.request ?
                                                 <span>
-                                                    {owner.request.full_address}
-                                                    <Link
-                                                        href={"/hotline/servicerequest/" + owner.request.id}> <FontAwesomeIcon
-                                                        icon={faClipboardList} inverse/></Link> | <span style={{textTransform:"capitalize"}}>{owner.request.status}</span>
+                                                    {owner.request.full_address}&nbsp;
+                                                    <Link href={"/hotline/servicerequest/" + owner.request.id} target="_blank">
+                                                        <FontAwesomeIcon
+                                                        icon={faClipboardList} inverse/>
+                                                    </Link> | <span style={{textTransform:"capitalize"}}>{owner.request.status}</span>
                                                 </span>
                                                 : "None"
                                             }
