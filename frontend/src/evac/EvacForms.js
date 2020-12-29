@@ -171,38 +171,37 @@ export function EvacResolution({ id }) {
 
   return (
     <Formik
-      initialValues={data}
-      enableReinitialize={true}
-      validationSchema={Yup.object({
-        start_time: Yup.date(),
-        end_time: Yup.date().nullable(),
-        service_requests: Yup.array(),
-        team_members: Yup.array(),
-        sr_updates: Yup.array().of(
-          Yup.object().shape({
-            id: Yup.number().required(),
-            owner: Yup.boolean(),
-            followup_date: Yup.date().nullable(),
-            animals: Yup.array().of(
-              Yup.object().shape({
-                id: Yup.number().required(),
-                status: Yup.string().notOneOf(['REPORTED'], 'Animal cannot remain REPORTED.'),
-              })
-            ),
-            date_completed: Yup.date().required('Required'),
-            notes: Yup.string(),
-            forced_entry: Yup.boolean(),
-            owner_contacted: Yup.boolean().when('owner', {
-              is: true,
-              then: Yup.boolean().oneOf([true], 'The owner must be notified before resolution.').required()
-            }),
-            owner_contact_time: Yup.date().required('Please specify the date and time the owner was notified.')
-          })
-        ),
-      })}
-      onSubmit={(values, { setSubmitting }) => {
-        setTimeout(() => {
-          axios.put('/evac/api/evacassignment/' + id + '/', values)
+        initialValues={data}
+        enableReinitialize={true}
+        validationSchema={Yup.object({
+          start_time: Yup.date(),
+          end_time: Yup.date().nullable(),
+          service_requests: Yup.array(),
+          team_members: Yup.array(),
+          sr_updates: Yup.array().of(
+            Yup.object().shape({
+              id: Yup.number().required(),
+              owner: Yup.boolean(),
+              followup_date: Yup.date().nullable(),
+              animals: Yup.array().of(
+                Yup.object().shape({
+                  id: Yup.number().required(),
+                  status: Yup.string().notOneOf(['REPORTED'], 'Animal cannot remain REPORTED.'),
+                })
+              ),
+              date_completed: Yup.date().required('Required'),
+              notes: Yup.string(),
+              forced_entry: Yup.boolean(),
+              owner_contact_note: Yup.string().when('owner', {
+                is: true,
+                then: Yup.boolean().oneOf([true], 'The owner must be notified before resolution.').required()}),
+              owner_contact_time: Yup.date().required('Please specify the date and time the owner was notified.'),
+            })
+          ),
+        })}
+        onSubmit={(values, { setSubmitting }) => {
+          setTimeout(() => {
+            axios.put('/evac/api/evacassignment/' + id + '/', values)
             .then(response => {
               navigate('/evac/summary/' + response.data.id);
             })
@@ -233,101 +232,6 @@ export function EvacResolution({ id }) {
                     </ListGroup.Item>
                   ))}
                 </ListGroup>
-              <hr/>
-              <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
-                <h4 className="mt-2" style={{marginBottom:"-2px"}}>Animals</h4>
-                {service_request.animals.map((animal, inception) => (
-                  <ListGroup.Item key={animal.id}>
-                    <Row>
-                      <Col xs={3} className="pl-0">
-                        <DropDown
-                          id={`sr_updates.${index}.animals.${inception}.status`}
-                          name={`sr_updates.${index}.animals.${inception}.status`}
-                          type="text"
-                          className="mt-0"
-                          options={statusChoices}
-                          value={`sr_updates.${index}.animals.${inception}.status`}
-                          isClearable={false}
-                        />
-                    </Col>
-                    <span style={{marginTop:"5px"}}>{animal.pcolor ? <span style={{marginTop:"5px", textTransform:"capitalize"}}>{animal.pcolor}{animal.scolor ? "/" + animal.scolor : ""}&nbsp;</span> : ""}<span style={{textTransform:"capitalize"}}>{animal.species}</span>&nbsp;({animal.name||"Unknown"})</span>
-                  </Row>
-                </ListGroup.Item>
-                ))}
-              </ListGroup>
-              <hr/>
-              <BootstrapForm.Row className="mt-3">
-                <DateTimePicker
-                  label="Date Completed"
-                  name={`sr_updates.${index}.date_completed`}
-                  id={`sr_updates.${index}.date_completed`}
-                  xs="4"
-                  data-enable-time={false}
-                  clearable={false}
-                  onChange={(date, dateStr) => {
-                    props.setFieldValue(`sr_updates.${index}.date_completed`, dateStr)
-                  }}
-                  value={props.values.sr_updates[index] ? props.values.sr_updates[index].date_completed : new Date()}
-                />
-              </BootstrapForm.Row>
-              <BootstrapForm.Row className="mt-3">
-                <TextInput
-                  id={`sr_updates.${index}.notes`}
-                  name={`sr_updates.${index}.notes`}
-                  xs="9"
-                  as="textarea"
-                  rows={5}
-                  label="Visit Notes"
-                />
-              </BootstrapForm.Row>
-              <BootstrapForm.Row>
-                <DateTimePicker
-                  label="Followup Date"
-                  name={`sr_updates.${index}.followup_date`}
-                  id={`sr_updates.${index}.followup_date`}
-                  xs="4"
-                  data-enable-time={false}
-                  onChange={(date, dateStr) => {
-                    props.setFieldValue(`sr_updates.${index}.followup_date`, dateStr)
-                  }}
-                  value={service_request.followup_date||null}
-                />
-              </BootstrapForm.Row>
-              <BootstrapForm.Row className="mt-2">
-                <Col>
-                  <Label htmlFor={`sr_updates.${index}.forced_entry`} className="mt-2">Forced Entry</Label>
-                  <Field component={Switch} name={`sr_updates.${index}.forced_entry`} type="checkbox" color="primary" />
-                </Col>
-              </BootstrapForm.Row>
-              { service_request.owners.length > 0 ?
-                <BootstrapForm.Row className="mt-3 pl-1">
-                  <TextInput
-                    id={`sr_updates.${index}.owner_contact_note`}
-                    name={`sr_updates.${index}.owner_contact_note`}
-                    xs="9"
-                    as="textarea"
-                    rows={5}
-                    label="Owner Contact Note"
-                  />
-                  <DateTimePicker
-                    label="Owner Contacted Time"
-                    name={`sr_updates.${index}.owner_contact_time`}
-                    id={`sr_updates.${index}.owner_contact_time`}
-                    xs="4"
-                    data-enable-time={true}
-                    clearable={false}
-                    onChange={(date, dateStr) => {
-                      props.setFieldValue(`sr_updates.${index}.owner_contact_time`, dateStr)
-                    }}
-                    value={props.values.sr_updates[index] ? props.values.sr_updates[index].owner_contact_time : new Date()}
-                  />
-                </BootstrapForm.Row>
-              : ""}
-              {props.errors.sr_updates && props.errors.sr_updates[index] && props.errors.sr_updates[index].owner_contact_note &&
-              props.touched.sr_updates && props.touched.sr_updates[index] && props.touched.sr_updates[index].owner_contact_note && (
-                <div style={{ color: "#e74c3c", marginTop: "-8px", fontSize: "80%" }}>{props.errors.sr_updates[index].owner_contact_note}</div>
-                )
-              }
               </Card.Body>
             </Card>
             {data.service_request_objects.map((service_request, index) => (
@@ -454,14 +358,14 @@ export function EvacResolution({ id }) {
 
 export const VisitNoteForm = ({ id }) => {
 
-  const [data, setData] = useState({
-    date_completed: '',
-    notes: '',
-    service_request: null,
-    evac_assignment: null,
-    address: '',
-    forced_entry: false,
-  })
+    const [data, setData] = useState({
+      date_completed: '',
+      notes: '',
+      service_request: null,
+      evac_assignment: null,
+      address: '',
+      forced_entry: false,
+    })
 
   useEffect(() => {
     let source = axios.CancelToken.source();
