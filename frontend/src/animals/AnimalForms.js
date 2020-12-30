@@ -78,6 +78,7 @@ export const AnimalForm = ({id}) => {
     injured: 'unknown',
     behavior_notes: '',
     last_seen: null,
+    number_of_animals: 1,
     room: null,
     front_image: null,
     side_image: null,
@@ -177,6 +178,7 @@ export const AnimalForm = ({id}) => {
           age: Yup.string(),
           sex: Yup.string()
             .oneOf(['M', 'F']),
+          number_of_animals: Yup.number().required('Required').positive('Value must be positive').integer('Value must be a whole number'),
           pcolor: Yup.string(),
           scolor: Yup.string(),
           color_notes: Yup.string()
@@ -367,24 +369,32 @@ export const AnimalForm = ({id}) => {
                 </BootstrapForm.Row>
                 <BootstrapForm.Row>
                   <TextInput
-                      id="name"
-                      xs="9"
-                      name="name"
-                      type="text"
-                      label="Animal Name"
+                    id="name"
+                    xs="7"
+                    name="name"
+                    type="text"
+                    label="Animal Name"
                   />
                   <Col xs="3">
                     <DropDown
-                        label="Sex"
-                        id="sexDropDown"
-                        name="sex"
-                        type="text"
-                        key={`my_unique_sex_select_key__${props.values.sex}`}
-                        ref={sexRef}
-                        options={sexChoices}
-                        value={props.values.sex||''}
+                      label="Sex"
+                      id="sexDropDown"
+                      name="sex"
+                      type="text"
+                      key={`my_unique_sex_select_key__${props.values.sex}`}
+                      ref={sexRef}
+                      options={sexChoices}
+                      value={props.values.sex||''}
                     />
                   </Col>
+                  <TextInput
+                    id="number_of_animals"
+                    xs="2"
+                    name="number_of_animals"
+                    type="text"
+                    label="No. of Animals"
+                    disabled={id}
+                  />
                 </BootstrapForm.Row>
                 <BootstrapForm.Row>
                   <Col xs="4">

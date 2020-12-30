@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Case, BooleanField, Value, When, Exists
+from copy import deepcopy
 from rest_framework import filters, viewsets
 from actstream import action
 
@@ -28,6 +29,12 @@ class AnimalViewSet(viewsets.ModelViewSet):
 
             animal = serializer.save()
             action.send(self.request.user, verb='created animal', target=animal)
+
+            # Create multiple copies of animal if specified.
+            for i in range(int(self.request.data.get('number_of_animals', 1)) -1):
+                new_animal = deepcopy(animal)
+                new_animal.id = None
+                new_animal.save()
 
             # Add Owner to new animals if it is POSTed.
             if self.request.data.get('new_owner'):
