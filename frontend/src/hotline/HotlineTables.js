@@ -68,7 +68,6 @@ export function ServiceRequestSearch() {
       .then(response => {
         setNumPages(Math.ceil(response.data.length / ITEMS_PER_PAGE))
         setData({service_requests: response.data, isFetching: false});
-        console.log(response.data)
       })
       .catch(error => {
         console.log(error.response);
@@ -144,7 +143,7 @@ export function ServiceRequestSearch() {
               <Card.Body>
                 <Card.Title>Animals</Card.Title>
                 {['cats', 'dogs', 'horses', 'other'].map(species => (
-                  <ListGroup>
+                  <ListGroup key={species}>
                     {service_request.animals.filter(animal => species.includes(animal.species)).length > 0 ?
                     <ListGroup.Item style={{borderRadius: 0}}><b style={{textTransform:"capitalize"}}>{species}: </b>
                     {service_request.animals.filter(animal => species.includes(animal.species)).map((animal, i) => (

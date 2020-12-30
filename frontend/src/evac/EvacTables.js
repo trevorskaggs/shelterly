@@ -182,7 +182,7 @@ export function EvacuationAssignmentTable() {
                             </Col>
                             <Col>
                               {['cats', 'dogs', 'horses', 'other'].map(species => (
-                                <div>
+                                <div key={species}>
                                   {service_request.animals.filter(animal => animal.evacuation_assignments.includes(evacuation_assignment.id)).filter(animal => species.includes(animal.species)).length > 0 ?
                                   <span><b style={{textTransform:"capitalize"}}>{species}: </b>
                                   {service_request.animals.filter(animal => animal.evacuation_assignments.includes(evacuation_assignment.id)).filter(animal => species.includes(animal.species)).map((animal, i) => (

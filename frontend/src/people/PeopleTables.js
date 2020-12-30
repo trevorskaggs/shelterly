@@ -116,7 +116,7 @@ export function PeopleTable() {
                                 <Card.Body>
                                     <Card.Title>Animals</Card.Title>
                                     {['cats', 'dogs', 'horses', 'other'].map(species => (
-                                        <ListGroup>
+                                        <ListGroup key={species}>
                                             {owner.animals.filter(animal => species.includes(animal.species)).length > 0 ?
                                             <ListGroup.Item style={{borderRadius: 0}}><b style={{textTransform:"capitalize"}}>{species}: </b>
                                             {owner.animals.filter(animal => species.includes(animal.species)).map((animal, i) => (
