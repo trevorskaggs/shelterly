@@ -78,7 +78,7 @@ export const AnimalForm = ({id}) => {
     injured: 'unknown',
     behavior_notes: '',
     last_seen: null,
-    number_of_animals: 1,
+    number_of_copies: 0,
     room: null,
     front_image: null,
     side_image: null,
@@ -127,6 +127,7 @@ export const AnimalForm = ({id}) => {
           cancelToken: source.token,
         })
         .then(response => {
+          response.data['number_of_copies'] = 0;
           setData(response.data);
           setPlaceholder("Select...");
           // Turn off reinitialization after form load so that data can be modified for image tracking without causing a form reset.
@@ -178,7 +179,7 @@ export const AnimalForm = ({id}) => {
           age: Yup.string(),
           sex: Yup.string()
             .oneOf(['M', 'F']),
-          number_of_animals: Yup.number().required('Required').positive('Value must be positive').integer('Value must be a whole number'),
+          number_of_copies: Yup.number().required('Required').integer('Value must be a whole number'),
           pcolor: Yup.string(),
           scolor: Yup.string(),
           color_notes: Yup.string()
@@ -388,12 +389,11 @@ export const AnimalForm = ({id}) => {
                     />
                   </Col>
                   <TextInput
-                    id="number_of_animals"
+                    id="number_of_copies"
                     xs="2"
-                    name="number_of_animals"
+                    name="number_of_copies"
                     type="text"
-                    label="No. of Animals"
-                    disabled={id}
+                    label="No. of Copies"
                   />
                 </BootstrapForm.Row>
                 <BootstrapForm.Row>

@@ -31,7 +31,7 @@ class AnimalViewSet(viewsets.ModelViewSet):
             action.send(self.request.user, verb='created animal', target=animal)
 
             # Create multiple copies of animal if specified.
-            for i in range(int(self.request.data.get('number_of_animals', 1)) -1):
+            for i in range(int(self.request.data.get('number_of_copies', 0))):
                 new_animal = deepcopy(animal)
                 new_animal.id = None
                 new_animal.save()
@@ -93,6 +93,12 @@ class AnimalViewSet(viewsets.ModelViewSet):
                     changed_fields.append(field)
 
             animal = serializer.save()
+
+            # Create multiple copies of animal if specified.
+            for i in range(int(self.request.data.get('number_of_copies', 0))):
+                new_animal = deepcopy(animal)
+                new_animal.id = None
+                new_animal.save()
 
             # Only record animal update if a field other than status, room, or owner has changed.
             if len(changed_fields) > 0:
