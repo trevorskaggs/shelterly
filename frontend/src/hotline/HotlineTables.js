@@ -23,7 +23,7 @@ import Header from '../components/Header';
 
 import { ITEMS_PER_PAGE } from '.././constants'
 
-export function ServiceRequestTable() {
+export function ServiceRequestSearch() {
 
   const [data, setData] = useState({service_requests: [], isFetching: false});
   const [searchTerm, setSearchTerm] = useState("");
@@ -109,7 +109,7 @@ export function ServiceRequestTable() {
 
       {data.service_requests.map((service_request, index) => (
         <div key={service_request.id} className="mt-3" hidden={page!= Math.ceil((index+1)/ITEMS_PER_PAGE)}>
-          <div className="card-header">{service_request.full_address}<Link href={"/hotline/servicerequest/" + service_request.id} target="_blank"> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>&nbsp;| <span style={{textTransform:"capitalize"}}>{service_request.status}</span></div>
+          <div className="card-header"><h4 style={{marginBottom:"-2px"}}>{service_request.full_address}<Link href={"/hotline/servicerequest/" + service_request.id} target="_blank"> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>&nbsp;| <span style={{textTransform:"capitalize"}}>{service_request.status}</span></h4></div>
           <CardGroup>
             <Card key={service_request.id}>
               <Card.Body>

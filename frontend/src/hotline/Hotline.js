@@ -2,7 +2,6 @@ import React from "react";
 import { Link } from 'raviger';
 import { ListGroup } from 'react-bootstrap'
 import { ServiceRequestForm } from "./HotlineForms";
-import { ServiceRequestTable } from "./HotlineTables"
 import { ServiceRequestView } from "./HotlineViews";
 
 const header_style = {
@@ -18,18 +17,12 @@ const Hotline = () => (
     <ListGroup.Item action>NON-OWNER CALLING</ListGroup.Item>
     </Link>
     <Link href="/hotline/first_responder/new">
-    <ListGroup.Item action>FIRST RESPONDER CALLIING</ListGroup.Item>
+    <ListGroup.Item action>FIRST RESPONDER CALLING</ListGroup.Item>
     </Link>
-    <Link href="/hotline/servicerequest/list">
-    <ListGroup.Item action>SEARCH SERVICE REQUEST</ListGroup.Item>
+    <Link href="/hotline/servicerequest/search">
+    <ListGroup.Item action>SEARCH SERVICE REQUESTS</ListGroup.Item>
     </Link>
   </ListGroup>
-)
-
-export const ServiceRequestList = () => (
-  <div>
-    <ServiceRequestTable />
-  </div>
 )
 
 export const NewServiceRequest = () => (
