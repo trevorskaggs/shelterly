@@ -247,31 +247,31 @@ export const PersonForm = ({ id }) => {
             </BootstrapForm.Row>
             <BootstrapForm.Row hidden={!is_owner}>
               <TextInput
-                  xs="6"
-                  type="text"
-                  label="Phone"
-                  name="phone"
+                xs="6"
+                type="text"
+                label="Phone"
+                name="phone"
               />
               <TextInput
-                  xs="6"
-                  type="text"
-                  label="Alternate Phone"
-                  name="alt_phone"
+                xs="6"
+                type="text"
+                label="Alternate Phone"
+                name="alt_phone"
               />
             </BootstrapForm.Row>
             <BootstrapForm.Row hidden={!is_owner}>
               <TextInput
-                  xs="6"
-                  type="text"
-                  label="Email"
-                  name="email"
+                xs="6"
+                type="text"
+                label="Email"
+                name="email"
               />
               <TextInput
-                  xs="6"
-                  type="text"
-                  label="Drivers License"
-                  name="drivers_license"
-                  id="drivers_license"
+                xs="6"
+                type="text"
+                label="Drivers License"
+                name="drivers_license"
+                id="drivers_license"
               />
             </BootstrapForm.Row>
             <BootstrapForm.Row hidden={is_first_responder || data.agency}>
