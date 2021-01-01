@@ -258,6 +258,8 @@ export const PersonForm = ({ id }) => {
                   label="Alternate Phone"
                   name="alt_phone"
               />
+            </BootstrapForm.Row>
+            <BootstrapForm.Row hidden={!is_owner}>
               <TextInput
                   xs="6"
                   type="text"
