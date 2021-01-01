@@ -292,7 +292,7 @@ export const AnimalForm = (props, {id}) => {
             <Card.Header as="h5" className="pl-3">{id ?
               <span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
               :
-              <span>{state.steps && state.steps.animals.length > 0 ? <span style={{cursor:'pointer'}} onClick={() => props.handleBack('animals')} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
+              <span>{props.state.steps.animals.length > 0 ? <span style={{cursor:'pointer'}} onClick={() => props.handleBack('animals')} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
               :
               <span style={{cursor:'pointer'}} onClick={() => props.handleBack('backward')} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}</span>}{!id ? "New" : "Update"} Animal</Card.Header>
             <Card.Body>

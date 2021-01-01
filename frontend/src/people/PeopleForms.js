@@ -52,7 +52,7 @@ export const PersonForm = (props, { id }) => {
 
   // Whether or not to skip Owner creation.
   const [skipOwner, setSkipOwner] = useState(false);
-  const [isOwner, setIsOwner] = useState(is_owner);
+  const [isOwner, setIsOwner] = useState(props.state.hasOwner || is_owner);
 
   const initialData = {
     first_name: '',
@@ -166,8 +166,7 @@ export const PersonForm = (props, { id }) => {
               else {
                 props.onSubmit('reporter', values, 'owner');
                 setIsOwner(true);
-                // setData(props.state.steps.owner);
-                resetForm({values:initialData});
+                resetForm({values:props.state.steps.owner});
               }
             }
           }

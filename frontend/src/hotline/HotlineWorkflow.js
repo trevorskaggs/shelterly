@@ -46,6 +46,7 @@ export default function HotlineWorkflow() {
   const steps = getSteps();
   const [state, setState] = useState({
     activeStep: 0,
+    hasOwner: false,
     steps: {
       reporter: {first_name: '',
         last_name: '',
@@ -100,12 +101,15 @@ export default function HotlineWorkflow() {
 
     if (stepIndex === 'animals') {
       setState((prevState) => ({
+        ...prevState,
         activeStep: prevState.activeStep + 1,
         steps: { ...prevState.steps, [stepIndex]:[...prevState.steps.animals, data] }
       }))
     }
     else {
       setState((prevState) => ({
+        ...prevState,
+        hasOwner: stepIndex === 'owner',
         activeStep: prevState.activeStep + 1,
         steps: { ...prevState.steps, [stepIndex]:data }
       }))
