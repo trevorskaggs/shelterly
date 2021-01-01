@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
 import { navigate, useQueryParams } from 'raviger';
-import { Field, Formik } from 'formik';
+import { Field, Formik, useFormikContext } from 'formik';
 import { Form as BootstrapForm, Button, ButtonGroup, Card, Col } from "react-bootstrap";
 import * as Yup from 'yup';
 import { AddressLookup, DropDown, TextInput } from '../components/Form';
@@ -50,8 +50,11 @@ export const PersonForm = (props, { id }) => {
   const nameRegex = /^[a-z ,.'-]+$/i
   const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
 
-  // Initial Person data.
-  const [data, setData] = useState({
+  // Whether or not to skip Owner creation.
+  const [skipOwner, setSkipOwner] = useState(false);
+  const [isOwner, setIsOwner] = useState(is_owner);
+
+  const initialData = {
     first_name: '',
     last_name: '',
     phone: '',
@@ -71,11 +74,19 @@ export const PersonForm = (props, { id }) => {
     latitude: null,
     longitude: null,
     change_reason: '',
-  });
+  }
+  let current_data = initialData;
+  if (is_workflow) {
+    if (isOwner) {
+      current_data = props.state.steps.owner
+    }
+    else {
+      current_data = props.state.steps.reporter
+    }
+  }
 
-  // Whether or not to skip Owner creation.
-  const [skipOwner, setSkipOwner] = useState(false);
-  const [isOwner, setIsOwner] = useState(is_owner);
+  // Initial Person data.
+  const [data, setData] = useState(current_data);
 
   // Hook for initializing data.
   useEffect(() => {
@@ -100,6 +111,8 @@ export const PersonForm = (props, { id }) => {
       source.cancel();
     };
   }, [id]);
+
+  console.log(props.state);
 
   return (
     <>
@@ -153,7 +166,8 @@ export const PersonForm = (props, { id }) => {
               else {
                 props.onSubmit('reporter', values, 'owner');
                 setIsOwner(true);
-                resetForm(data);
+                // setData(props.state.steps.owner);
+                resetForm({values:initialData});
               }
             }
           }
@@ -222,10 +236,13 @@ export const PersonForm = (props, { id }) => {
           }
         }}
       >
-        {props => (
-          <Card border="secondary" className="mt-5">
-          <Card.Header as="h5" className="pl-3"> {!isOwner || (isOwner && (id || !reporter_id)) ? <span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span> : <span style={{cursor:'pointer'}} onClick={() => props.handleBack()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}
-{isOwner ? "Owner" : "Reporter"} Information</Card.Header>
+        {formikProps => (
+          <Card border="secondary" className={is_workflow ? "mt-3" : "mt-5"}>
+          <Card.Header as="h5" className="pl-3"> {id || props.state.activeStep === 0 ?
+            <span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
+            :
+            <span style={{cursor:'pointer'}} onClick={() => {setIsOwner(false); formikProps.resetForm({values:props.state.steps.reporter}); props.handleBack('reporter')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}
+          {isOwner ? "Owner" : "Reporter"} Information</Card.Header>
           <Card.Body>
           <BootstrapForm noValidate>
             <Field type="hidden" value={data.latitude || ""} name="latitude" id="latitude"></Field>
@@ -318,7 +335,7 @@ export const PersonForm = (props, { id }) => {
                 name="state"
                 id="state"
                 options={state_options}
-                value={props.values.state || ''}
+                value={formikProps.values.state || ''}
                 placeholder=''
                 disabled
               />
@@ -343,9 +360,9 @@ export const PersonForm = (props, { id }) => {
           </Card.Body>
             <ButtonGroup size="lg" >
               {/* form save buttons */}
-              {!is_first_responder ? <Button type="button" onClick={() => { setSkipOwner(false); props.submitForm() }}>{!isOwner && !is_intake ? <span>{!id ? "Add Owner" : "Save"}</span> : <span>{!id && (!servicerequest_id && !animal_id && !owner_id) ? "Add Animal(s)" : "Save"}</span>}</Button> : ""}
+              {!is_first_responder ? <Button type="button" onClick={() => { setSkipOwner(false); formikProps.submitForm() }}>{!isOwner && !is_intake ? <span>{!id ? "Add Owner" : "Save"}</span> : <span>{!id && (!servicerequest_id && !animal_id && !owner_id) ? "Add Animal(s)" : "Save"}</span>}</Button> : ""}
               {/* reporter form save buttons to skip owner */}
-              {!isOwner && !id && !is_intake ? <button type="button" className="btn btn-primary mr-1 border" onClick={() => { setSkipOwner(true); props.submitForm() }}>Add Animal(s)</button> : ""}
+              {!isOwner && !id && !is_intake ? <button type="button" className="btn btn-primary mr-1 border" onClick={() => { setSkipOwner(true); formikProps.submitForm() }}>Add Animal(s)</button> : ""}
               {/* <Button variant="secondary" type="button" onClick={() => {resetForm(data)}}>Reset</Button> */}
             </ButtonGroup>
           </Card>

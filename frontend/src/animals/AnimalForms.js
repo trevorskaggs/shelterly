@@ -202,7 +202,7 @@ export const AnimalForm = (props, {id}) => {
           side_image: Yup.mixed(),
           extra_images: Yup.array()
         })}
-        onSubmit={(values, { setSubmitting }) => {
+        onSubmit={(values, { setSubmitting, resetForm }) => {
           // Remove owner if animal has none.
           if (values["owner"]) {
             delete values["owner"];
@@ -223,10 +223,11 @@ export const AnimalForm = (props, {id}) => {
 
           if (is_workflow) {
             if (addAnother) {
-              props.onSubmit('animals', formData, 'animals');
+              props.onSubmit('animals', values, 'animals');
+              resetForm(data);
             }
             else {
-              props.onSubmit('animals', formData, 'forward');
+              props.onSubmit('animals', values, 'forward');
             }
           }
           else if (id) {
@@ -286,9 +287,14 @@ export const AnimalForm = (props, {id}) => {
           }
         }}
       >
-        {({values, setFieldValue}) => (
-          <Card border="secondary" className="mt-5">
-            <Card.Header as="h5" className="pl-3">{id ? <span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>: <span style={{cursor:'pointer'}} onClick={() => props.handleBack()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}{!id ? "New" : "Update"} Animal</Card.Header>
+        {formikProps => (
+          <Card border="secondary" className={is_workflow ? "mt-3" : "mt-5"}>
+            <Card.Header as="h5" className="pl-3">{id ?
+              <span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
+              :
+              <span>{state.steps && state.steps.animals.length > 0 ? <span style={{cursor:'pointer'}} onClick={() => props.handleBack('animals')} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
+              :
+              <span style={{cursor:'pointer'}} onClick={() => props.handleBack('backward')} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}</span>}{!id ? "New" : "Update"} Animal</Card.Header>
             <Card.Body>
             <BootstrapForm as={Form}>
               <Field type="hidden" value={servicerequest_id||""} name="request" id="request"></Field>
@@ -299,10 +305,10 @@ export const AnimalForm = (props, {id}) => {
                       id="speciesDropdown"
                       name="species"
                       type="text"
-                      key={`my_unique_species_select_key__${values.species}`}
+                      key={`my_unique_species_select_key__${formikProps.values.species}`}
                       ref={speciesRef}
                       options={speciesChoices}
-                      value={values.species||data.species}
+                      value={formikProps.values.species||data.species}
                       isClearable={false}
                       onChange={(instance) => {
                         setPlaceholder("Select...")
@@ -310,7 +316,7 @@ export const AnimalForm = (props, {id}) => {
                         ageRef.current.select.clearValue();
                         pcolorRef.current.select.clearValue();
                         scolorRef.current.select.clearValue();
-                        setFieldValue("species", instance === null ? '' : instance.value);
+                        formikProps.setFieldValue("species", instance === null ? '' : instance.value);
                       }}
                     />
                   </Col>
@@ -322,10 +328,10 @@ export const AnimalForm = (props, {id}) => {
                       type="text"
                       xs="4"
                       isClearable={false}
-                      key={`my_unique_size_select_key__${values.size}`}
+                      key={`my_unique_size_select_key__${formikProps.values.size}`}
                       ref={sizeRef}
-                      options={sizeChoices[values.species]}
-                      value={values.size||''}
+                      options={sizeChoices[formikProps.values.species]}
+                      value={formikProps.values.size||''}
                       placeholder={placeholder}
                     />
                   </Col>
@@ -336,10 +342,10 @@ export const AnimalForm = (props, {id}) => {
                       name="age"
                       type="text"
                       xs="4"
-                      key={`my_unique_age_select_key__${values.age}`}
+                      key={`my_unique_age_select_key__${formikProps.values.age}`}
                       ref={ageRef}
-                      options={ageChoices[values.species]}
-                      value={values.age||''}
+                      options={ageChoices[formikProps.values.species]}
+                      value={formikProps.values.age||''}
                       placeholder={placeholder}
                     />
                   </Col>
@@ -352,10 +358,10 @@ export const AnimalForm = (props, {id}) => {
                       name="pcolor"
                       type="text"
                       className="mb-3"
-                      key={`my_unique_pcolor_select_key__${values.pcolor}`}
+                      key={`my_unique_pcolor_select_key__${formikProps.values.pcolor}`}
                       ref={pcolorRef}
-                      options={colorChoices[values.species]}
-                      value={values.pcolor||''}
+                      options={colorChoices[formikProps.values.species]}
+                      value={formikProps.values.pcolor||''}
                       placeholder={placeholder}
                     />
                     <DropDown
@@ -363,10 +369,10 @@ export const AnimalForm = (props, {id}) => {
                       id="scolor"
                       name="scolor"
                       type="text"
-                      key={`my_unique_scolor_select_key__${values.scolor}`}
+                      key={`my_unique_scolor_select_key__${formikProps.values.scolor}`}
                       ref={scolorRef}
-                      options={colorChoices[values.species]}
-                      value={values.scolor||''}
+                      options={colorChoices[formikProps.values.species]}
+                      value={formikProps.values.scolor||''}
                       placeholder={placeholder}
                     />
                   </Col>
@@ -393,10 +399,10 @@ export const AnimalForm = (props, {id}) => {
                         id="sexDropDown"
                         name="sex"
                         type="text"
-                        key={`my_unique_sex_select_key__${values.sex}`}
+                        key={`my_unique_sex_select_key__${formikProps.values.sex}`}
                         ref={sexRef}
                         options={sexChoices}
-                        value={values.sex||''}
+                        value={formikProps.values.sex||''}
                     />
                   </Col>
                 </BootstrapForm.Row>
@@ -409,7 +415,7 @@ export const AnimalForm = (props, {id}) => {
                       type="text"
                       className="mb-3"
                       options={unknownChoices}
-                      value={values.aggressive||'unknown'}
+                      value={formikProps.values.aggressive||'unknown'}
                       isClearable={false}
                     />
                     <DropDown
@@ -418,7 +424,7 @@ export const AnimalForm = (props, {id}) => {
                       name="fixed"
                       type="text"
                       options={unknownChoices}
-                      value={values.fixed||'unknown'}
+                      value={formikProps.values.fixed||'unknown'}
                       isClearable={false}
                     />
                   </Col>
@@ -439,7 +445,7 @@ export const AnimalForm = (props, {id}) => {
                       name="confined"
                       type="text"
                       options={unknownChoices}
-                      value={values.confined||'unknown'}
+                      value={formikProps.values.confined||'unknown'}
                       isClearable={false}
                     />
                   </Col>
@@ -450,7 +456,7 @@ export const AnimalForm = (props, {id}) => {
                       name="injured"
                       type="text"
                       options={unknownChoices}
-                      value={values.injured||'unknown'}
+                      value={formikProps.values.injured||'unknown'}
                       isClearable={false}
                     />
                   </Col>
@@ -459,11 +465,11 @@ export const AnimalForm = (props, {id}) => {
                     name="last_seen"
                     id="last_seen"
                     xs="4"
-                    key={`my_unique_last_seen_select_key__${values.last_seen}`}
+                    key={`my_unique_last_seen_select_key__${formikProps.values.last_seen}`}
                     onChange={(date, dateStr) => {
-                      setFieldValue("last_seen", dateStr)
+                      formikProps.setFieldValue("last_seen", dateStr)
                     }}
-                    value={values.last_seen||null}
+                    value={formikProps.values.last_seen||null}
                   />
                 </BootstrapForm.Row>
                 <p className="mb-0 mt-3">Image Files</p>
@@ -472,7 +478,7 @@ export const AnimalForm = (props, {id}) => {
                     <span className="mt-2 ml-1 mr-3">
                       <Image width={131} src={data.front_image} alt="" thumbnail />
                       <div className="mb-2">
-                        <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => clearImage("front_image", setFieldValue)} style={{backgroundColor:"red"}} />
+                        <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => clearImage("front_image", formikProps.setFieldValue)} style={{backgroundColor:"red"}} />
                         <span className="ml-1">Front-Shot</span>
                       </div>
                     </span> :
@@ -491,7 +497,7 @@ export const AnimalForm = (props, {id}) => {
                     <span className="mt-2 mr-3">
                       <Image width={131} src={data.side_image} alt="" thumbnail />
                       <div className="mb-2">
-                        <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => clearImage("side_image", setFieldValue)} style={{backgroundColor:"red"}} />
+                        <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => clearImage("side_image", formikProps.setFieldValue)} style={{backgroundColor:"red"}} />
                         <span className="ml-1">Side-Shot</span>
                       </div>
                     </span> :
@@ -511,7 +517,7 @@ export const AnimalForm = (props, {id}) => {
                       {data.extra_images.map(extra_image => (
                         <span key={extra_image} className="mr-3"><Image width={131} src={extra_image} alt="" thumbnail />
                           <div className="mb-2">
-                            <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => clearImages(extra_image, setFieldValue)} style={{backgroundColor:"red"}} />
+                            <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => clearImages(extra_image, formikProps.setFieldValue)} style={{backgroundColor:"red"}} />
                             <span className="ml-1">Extra</span>
                           </div>
                         </span>
@@ -538,13 +544,13 @@ export const AnimalForm = (props, {id}) => {
                     <TreeSelect
                       showSearch
                       style={{ width: '100%' }}
-                      value={values.room}
+                      value={formikProps.values.room}
                       dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
                       placeholder="Select a room..."
                       allowClear
                       treeDefaultExpandAll
                       onChange={(value) => {
-                        setFieldValue("room", value||null);
+                        formikProps.setFieldValue("room", value||null);
                       }}
                     >
                       {shelters.shelters.map(shelter => (
@@ -565,9 +571,8 @@ export const AnimalForm = (props, {id}) => {
             </BootstrapForm>
           </Card.Body>
           <ButtonGroup>
-            <Button type="button" className="btn btn-primary" onClick={() => {setAddAnother(false); props.submitForm()}}>Save</Button>
-            {!id ? <Button type="button" className="btn btn-success" onClick={() => {setAddAnother(true); props.submitForm()}}>Add Another</Button> : ""}
-            <Button variant="secondary" type="button" onClick={() => {props.resetForm(data);if (!data.species) {setPlaceholder("Select a species...");}}}>Reset</Button>
+            <Button type="button" className="btn btn-primary" onClick={() => {setAddAnother(false); formikProps.submitForm()}}>Save</Button>
+            {!id ? <Button type="button" className="btn btn-success" onClick={() => {setAddAnother(true); formikProps.submitForm()}}>Add Another</Button> : ""}
           </ButtonGroup>
           </Card>
         )}

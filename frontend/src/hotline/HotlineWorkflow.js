@@ -12,9 +12,10 @@ import { ServiceRequestForm } from './HotlineForms';
 const useStyles = makeStyles((theme) => ({
   root: {
     width: '100%',
+    marginTop: theme.spacing(2),
   },
-  button: {
-    marginRight: theme.spacing(1),
+  test: {
+    borderRadius: "0.25rem",
   },
   instructions: {
     marginTop: theme.spacing(1),
@@ -29,11 +30,11 @@ function getSteps() {
 function getStepContent(step, handleStepSubmit, handleBack, state) {
   switch (step) {
     case 0:
-      return <PersonForm onSubmit={handleStepSubmit} handleBack={handleBack} />;
+      return <PersonForm onSubmit={handleStepSubmit} handleBack={handleBack} state={state} />;
     case 1:
       return <AnimalForm onSubmit={handleStepSubmit} handleBack={handleBack} state={state} />;
     case 2:
-      return <ServiceRequestForm />;
+      return <ServiceRequestForm onSubmit={handleStepSubmit} handleBack={handleBack} state={state} />;
     default:
       return 'Unknown step';
   }
@@ -46,42 +47,78 @@ export default function HotlineWorkflow() {
   const [state, setState] = useState({
     activeStep: 0,
     steps: {
-      reporter: {},
-      owner: {},
+      reporter: {first_name: '',
+        last_name: '',
+        phone: '',
+        alt_phone: '',
+        email: '',
+        best_contact: '',
+        agency: '',
+        address: '',
+        apartment: '',
+        city: '',
+        state: '',
+        zip_code: '',
+        latitude: null,
+        longitude: null,
+        change_reason: '',},
+      owner: {first_name: '',
+        last_name: '',
+        phone: '',
+        alt_phone: '',
+        email: '',
+        best_contact: '',
+        agency: '',
+        address: '',
+        apartment: '',
+        city: '',
+        state: '',
+        zip_code: '',
+        latitude: null,
+        longitude: null,
+        change_reason: '',},
       animals: [],
       request: {},
     }
   });
   const [contactCount, setContactCount] = React.useState(0);
 
-  function handleBack () {
-    setActiveStep((prevActiveStep) => prevActiveStep - 1);
+  function handleBack (next) {
+    if (next === 'backward') {
+      setActiveStep((prevActiveStep) => prevActiveStep - 1);
+    }
+    setState((prevState) => ({
+      ...prevState,
+      activeStep: prevState.activeStep - 1,
+    }))
   };
 
   function handleStepSubmit (stepIndex, data, next) {
+    if ((stepIndex === 'reporter' && state.steps.reporter.first_name === '') || (stepIndex === 'owner' && state.steps.owner.first_name === '')) {
+      setContactCount((count) => count + 1);
+    }
+
     if (stepIndex === 'animals') {
       setState((prevState) => ({
-        ...prevState,
         activeStep: prevState.activeStep + 1,
-        steps: { ...prevState, [stepIndex]:[...prevState.animals, data] }
+        steps: { ...prevState.steps, [stepIndex]:[...prevState.steps.animals, data] }
       }))
     }
     else {
       setState((prevState) => ({
-        ...prevState,
         activeStep: prevState.activeStep + 1,
-        steps: { ...prevState, [stepIndex]:data }
+        steps: { ...prevState.steps, [stepIndex]:data }
       }))
     }
+
     if (next === 'forward'){
       setActiveStep((prevActiveStep) => prevActiveStep + 1);
     }
-    setContactCount((count) => count + 1);
   }
 
   return (
     <div className={classes.root}>
-      <Stepper activeStep={activeStep}>
+      <Stepper className={classes.test} activeStep={activeStep}>
         {steps.map((label, index) => {
           const stepProps = {};
           const labelProps = {};
@@ -89,7 +126,7 @@ export default function HotlineWorkflow() {
             labelProps.optional = <Typography variant="caption" component={'span'}>{contactCount} Contact{contactCount === 1 ? "" : "s"} Created</Typography>;
           }
           else if (index === 1) {
-            labelProps.optional = <Typography variant="caption" component={'span'}>0 Animals Created</Typography>;
+            labelProps.optional = <Typography variant="caption" component={'span'}>{state.steps.animals.length} Animal{state.steps.animals.length === 1 ? "" : "s"} Created</Typography>;
           }
           return (
             <Step key={label} {...stepProps}>
