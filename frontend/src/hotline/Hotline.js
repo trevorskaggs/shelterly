@@ -11,13 +11,13 @@ const header_style = {
 
 const Hotline = () => (
   <ListGroup className="flex-fill p-5 h-50">
-    <Link href="/hotline/owner/new">
+    <Link href="/hotline/workflow/owner">
     <ListGroup.Item action>OWNER CALLING</ListGroup.Item>
     </Link>
-    <Link href="/hotline/reporter/new">
+    <Link href="/hotline/workflow/reporter">
     <ListGroup.Item action>NON-OWNER CALLING</ListGroup.Item>
     </Link>
-    <Link href="/hotline/first_responder/new">
+    <Link href="/hotline/workflow/first_responder">
     <ListGroup.Item action>FIRST RESPONDER CALLIING</ListGroup.Item>
     </Link>
     <Link href="/hotline/servicerequest/list">

@@ -14,7 +14,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft, faMinusSquare } from '@fortawesome/free-solid-svg-icons';
 import 'antd/lib/tree-select/style/css';
 
-export const AnimalForm = ({id}) => {
+export const AnimalForm = (props, {id}) => {
 
   const { state, dispatch } = useContext(AuthContext);
 
@@ -34,6 +34,9 @@ export const AnimalForm = ({id}) => {
 
   // Determine if this is from a first responder when creating a SR.
   var is_first_responder = (first_responder === 'true');
+
+  // Determine if we're in the hotline workflow.
+  var is_workflow = window.location.pathname.includes("workflow")
 
   // Track species selected and update choice lists accordingly.
   const speciesRef = useRef(null);
@@ -159,6 +162,8 @@ export const AnimalForm = ({id}) => {
       source.cancel();
     };
   }, [id]);
+
+  console.log(props.state);
   
   return (
     <span key={key}>
@@ -215,7 +220,16 @@ export const AnimalForm = ({id}) => {
           for (let i = 0; i < extra_images.length; i++) {
             formData.append('extra' + (i + 1), extra_images[i].file);
           }
-          if (id) {
+
+          if (is_workflow) {
+            if (addAnother) {
+              props.onSubmit('animals', formData, 'animals');
+            }
+            else {
+              props.onSubmit('animals', formData, 'forward');
+            }
+          }
+          else if (id) {
             axios.put('/animals/api/animal/' + id + '/', formData)
             .then(function() {
               if (state.prevLocation) {
@@ -272,9 +286,9 @@ export const AnimalForm = ({id}) => {
           }
         }}
       >
-        {props => (
+        {({values, setFieldValue}) => (
           <Card border="secondary" className="mt-5">
-            <Card.Header as="h5" className="pl-3">{id ? <span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>: ""}{!id ? "New" : "Update"} Animal</Card.Header>
+            <Card.Header as="h5" className="pl-3">{id ? <span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>: <span style={{cursor:'pointer'}} onClick={() => props.handleBack()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}{!id ? "New" : "Update"} Animal</Card.Header>
             <Card.Body>
             <BootstrapForm as={Form}>
               <Field type="hidden" value={servicerequest_id||""} name="request" id="request"></Field>
@@ -285,10 +299,10 @@ export const AnimalForm = ({id}) => {
                       id="speciesDropdown"
                       name="species"
                       type="text"
-                      key={`my_unique_species_select_key__${props.values.species}`}
+                      key={`my_unique_species_select_key__${values.species}`}
                       ref={speciesRef}
                       options={speciesChoices}
-                      value={props.values.species||data.species}
+                      value={values.species||data.species}
                       isClearable={false}
                       onChange={(instance) => {
                         setPlaceholder("Select...")
@@ -296,7 +310,7 @@ export const AnimalForm = ({id}) => {
                         ageRef.current.select.clearValue();
                         pcolorRef.current.select.clearValue();
                         scolorRef.current.select.clearValue();
-                        props.setFieldValue("species", instance === null ? '' : instance.value);
+                        setFieldValue("species", instance === null ? '' : instance.value);
                       }}
                     />
                   </Col>
@@ -308,10 +322,10 @@ export const AnimalForm = ({id}) => {
                       type="text"
                       xs="4"
                       isClearable={false}
-                      key={`my_unique_size_select_key__${props.values.size}`}
+                      key={`my_unique_size_select_key__${values.size}`}
                       ref={sizeRef}
-                      options={sizeChoices[props.values.species]}
-                      value={props.values.size||''}
+                      options={sizeChoices[values.species]}
+                      value={values.size||''}
                       placeholder={placeholder}
                     />
                   </Col>
@@ -322,10 +336,10 @@ export const AnimalForm = ({id}) => {
                       name="age"
                       type="text"
                       xs="4"
-                      key={`my_unique_age_select_key__${props.values.age}`}
+                      key={`my_unique_age_select_key__${values.age}`}
                       ref={ageRef}
-                      options={ageChoices[props.values.species]}
-                      value={props.values.age||''}
+                      options={ageChoices[values.species]}
+                      value={values.age||''}
                       placeholder={placeholder}
                     />
                   </Col>
@@ -338,10 +352,10 @@ export const AnimalForm = ({id}) => {
                       name="pcolor"
                       type="text"
                       className="mb-3"
-                      key={`my_unique_pcolor_select_key__${props.values.pcolor}`}
+                      key={`my_unique_pcolor_select_key__${values.pcolor}`}
                       ref={pcolorRef}
-                      options={colorChoices[props.values.species]}
-                      value={props.values.pcolor||''}
+                      options={colorChoices[values.species]}
+                      value={values.pcolor||''}
                       placeholder={placeholder}
                     />
                     <DropDown
@@ -349,10 +363,10 @@ export const AnimalForm = ({id}) => {
                       id="scolor"
                       name="scolor"
                       type="text"
-                      key={`my_unique_scolor_select_key__${props.values.scolor}`}
+                      key={`my_unique_scolor_select_key__${values.scolor}`}
                       ref={scolorRef}
-                      options={colorChoices[props.values.species]}
-                      value={props.values.scolor||''}
+                      options={colorChoices[values.species]}
+                      value={values.scolor||''}
                       placeholder={placeholder}
                     />
                   </Col>
@@ -379,10 +393,10 @@ export const AnimalForm = ({id}) => {
                         id="sexDropDown"
                         name="sex"
                         type="text"
-                        key={`my_unique_sex_select_key__${props.values.sex}`}
+                        key={`my_unique_sex_select_key__${values.sex}`}
                         ref={sexRef}
                         options={sexChoices}
-                        value={props.values.sex||''}
+                        value={values.sex||''}
                     />
                   </Col>
                 </BootstrapForm.Row>
@@ -395,7 +409,7 @@ export const AnimalForm = ({id}) => {
                       type="text"
                       className="mb-3"
                       options={unknownChoices}
-                      value={props.values.aggressive||'unknown'}
+                      value={values.aggressive||'unknown'}
                       isClearable={false}
                     />
                     <DropDown
@@ -404,7 +418,7 @@ export const AnimalForm = ({id}) => {
                       name="fixed"
                       type="text"
                       options={unknownChoices}
-                      value={props.values.fixed||'unknown'}
+                      value={values.fixed||'unknown'}
                       isClearable={false}
                     />
                   </Col>
@@ -425,7 +439,7 @@ export const AnimalForm = ({id}) => {
                       name="confined"
                       type="text"
                       options={unknownChoices}
-                      value={props.values.confined||'unknown'}
+                      value={values.confined||'unknown'}
                       isClearable={false}
                     />
                   </Col>
@@ -436,7 +450,7 @@ export const AnimalForm = ({id}) => {
                       name="injured"
                       type="text"
                       options={unknownChoices}
-                      value={props.values.injured||'unknown'}
+                      value={values.injured||'unknown'}
                       isClearable={false}
                     />
                   </Col>
@@ -445,11 +459,11 @@ export const AnimalForm = ({id}) => {
                     name="last_seen"
                     id="last_seen"
                     xs="4"
-                    key={`my_unique_last_seen_select_key__${props.values.last_seen}`}
+                    key={`my_unique_last_seen_select_key__${values.last_seen}`}
                     onChange={(date, dateStr) => {
-                      props.setFieldValue("last_seen", dateStr)
+                      setFieldValue("last_seen", dateStr)
                     }}
-                    value={props.values.last_seen||null}
+                    value={values.last_seen||null}
                   />
                 </BootstrapForm.Row>
                 <p className="mb-0 mt-3">Image Files</p>
@@ -458,7 +472,7 @@ export const AnimalForm = ({id}) => {
                     <span className="mt-2 ml-1 mr-3">
                       <Image width={131} src={data.front_image} alt="" thumbnail />
                       <div className="mb-2">
-                        <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => clearImage("front_image", props.setFieldValue)} style={{backgroundColor:"red"}} />
+                        <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => clearImage("front_image", setFieldValue)} style={{backgroundColor:"red"}} />
                         <span className="ml-1">Front-Shot</span>
                       </div>
                     </span> :
@@ -477,7 +491,7 @@ export const AnimalForm = ({id}) => {
                     <span className="mt-2 mr-3">
                       <Image width={131} src={data.side_image} alt="" thumbnail />
                       <div className="mb-2">
-                        <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => clearImage("side_image", props.setFieldValue)} style={{backgroundColor:"red"}} />
+                        <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => clearImage("side_image", setFieldValue)} style={{backgroundColor:"red"}} />
                         <span className="ml-1">Side-Shot</span>
                       </div>
                     </span> :
@@ -497,7 +511,7 @@ export const AnimalForm = ({id}) => {
                       {data.extra_images.map(extra_image => (
                         <span key={extra_image} className="mr-3"><Image width={131} src={extra_image} alt="" thumbnail />
                           <div className="mb-2">
-                            <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => clearImages(extra_image, props.setFieldValue)} style={{backgroundColor:"red"}} />
+                            <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => clearImages(extra_image, setFieldValue)} style={{backgroundColor:"red"}} />
                             <span className="ml-1">Extra</span>
                           </div>
                         </span>
@@ -524,13 +538,13 @@ export const AnimalForm = ({id}) => {
                     <TreeSelect
                       showSearch
                       style={{ width: '100%' }}
-                      value={props.values.room}
+                      value={values.room}
                       dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
                       placeholder="Select a room..."
                       allowClear
                       treeDefaultExpandAll
                       onChange={(value) => {
-                        props.setFieldValue("room", value||null);
+                        setFieldValue("room", value||null);
                       }}
                     >
                       {shelters.shelters.map(shelter => (

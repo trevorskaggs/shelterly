@@ -46,7 +46,7 @@ const routes = {
   "/hotline/servicerequest/list": () => <ServiceRequestList />,
   "/hotline/servicerequest/new": () => <NewServiceRequest />,
   "/hotline/servicerequest/:id": ({id}) => <ServiceRequestDetail id={id}/>,
-  "/hotline/workflow": () => <HotlineWorkflow />,
+  "/hotline/workflow/*": () => <HotlineWorkflow />,
   "/shelter": () => <Shelter />,
   "/shelter/new": () => <NewShelter />,
   "/shelter/edit/:id": ({id}) => <UpdateShelter id={id} />,

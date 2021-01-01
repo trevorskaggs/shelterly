@@ -26,12 +26,12 @@ function getSteps() {
   return ['Create Contacts', 'Create Animals', 'Create Service Request'];
 }
 
-function getStepContent(step) {
+function getStepContent(step, handleStepSubmit, handleBack, state) {
   switch (step) {
     case 0:
-      return <PersonForm />;
+      return <PersonForm onSubmit={handleStepSubmit} handleBack={handleBack} />;
     case 1:
-      return <AnimalForm />;
+      return <AnimalForm onSubmit={handleStepSubmit} handleBack={handleBack} state={state} />;
     case 2:
       return <ServiceRequestForm />;
     default:
@@ -42,73 +42,41 @@ function getStepContent(step) {
 export default function HotlineWorkflow() {
   const classes = useStyles();
   const [activeStep, setActiveStep] = React.useState(0);
-  const [skipped, setSkipped] = React.useState(new Set());
   const steps = getSteps();
-  const [test, setTest] = useState({
+  const [state, setState] = useState({
     activeStep: 0,
-    steps: [
-      {data: {}},
-      {data: {}},
-      {data: {}},
-    ]
- })
-
-  const isStepOptional = (step) => {
-    return false;//step === 1;
-  };
-
-  const isStepSkipped = (step) => {
-    return skipped.has(step);
-  };
-
-  const handleNext = () => {
-    let newSkipped = skipped;
-    if (isStepSkipped(activeStep)) {
-      newSkipped = new Set(newSkipped.values());
-      newSkipped.delete(activeStep);
+    steps: {
+      reporter: {},
+      owner: {},
+      animals: [],
+      request: {},
     }
+  });
+  const [contactCount, setContactCount] = React.useState(0);
 
-    setActiveStep((prevActiveStep) => prevActiveStep + 1);
-    setSkipped(newSkipped);
-  };
-
-  const handleBack = () => {
+  function handleBack () {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
 
-  const handleSkip = () => {
-    if (!isStepOptional(activeStep)) {
-      // You probably want to guard against something like this,
-      // it should never occur unless someone's actively trying to break something.
-      throw new Error("You can't skip a step that isn't optional.");
+  function handleStepSubmit (stepIndex, data, next) {
+    if (stepIndex === 'animals') {
+      setState((prevState) => ({
+        ...prevState,
+        activeStep: prevState.activeStep + 1,
+        steps: { ...prevState, [stepIndex]:[...prevState.animals, data] }
+      }))
     }
-
-    setActiveStep((prevActiveStep) => prevActiveStep + 1);
-    setSkipped((prevSkipped) => {
-      const newSkipped = new Set(prevSkipped.values());
-      newSkipped.add(activeStep);
-      return newSkipped;
-    });
-  };
-
-  const handleReset = () => {
-    setActiveStep(0);
-  };
-
-  const handleStepSubmit = (stepIndex, data) => {
-    this.setState((prevState) => ({
-      ...prevState,
-      activeIndex: prevState.activeIndex + 1,
-      steps: prevState.map((step, index) => {
-        if(stepIndex !== index){
-          return step; 
-        }
-        return {
-          ...step,
-          data
-        }
-      })
-    }))
+    else {
+      setState((prevState) => ({
+        ...prevState,
+        activeStep: prevState.activeStep + 1,
+        steps: { ...prevState, [stepIndex]:data }
+      }))
+    }
+    if (next === 'forward'){
+      setActiveStep((prevActiveStep) => prevActiveStep + 1);
+    }
+    setContactCount((count) => count + 1);
   }
 
   return (
@@ -118,13 +86,10 @@ export default function HotlineWorkflow() {
           const stepProps = {};
           const labelProps = {};
           if (index === 0) {
-            labelProps.optional = <Typography variant="caption">0 Contacts Created</Typography>;
+            labelProps.optional = <Typography variant="caption" component={'span'}>{contactCount} Contact{contactCount === 1 ? "" : "s"} Created</Typography>;
           }
           else if (index === 1) {
-            labelProps.optional = <Typography variant="caption">0 Animals Created</Typography>;
-          }
-          if (isStepSkipped(index)) {
-            stepProps.completed = false;
+            labelProps.optional = <Typography variant="caption" component={'span'}>0 Animals Created</Typography>;
           }
           return (
             <Step key={label} {...stepProps}>
@@ -134,44 +99,9 @@ export default function HotlineWorkflow() {
         })}
       </Stepper>
       <div>
-        {activeStep === steps.length ? (
           <div>
-            <Typography className={classes.instructions}>
-              All steps completed - you&apos;re finished
-            </Typography>
-            <Button onClick={handleReset} className={classes.button}>
-              Reset
-            </Button>
+            <Typography className={classes.instructions} component={'span'}>{getStepContent(activeStep, handleStepSubmit, handleBack, state)}</Typography>
           </div>
-        ) : (
-          <div>
-            <Typography className={classes.instructions}>{getStepContent(activeStep)}</Typography>
-            <div>
-              <Button disabled={activeStep === 0} onClick={handleBack} className={classes.button}>
-                Back
-              </Button>
-              {isStepOptional(activeStep) && (
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={handleSkip}
-                  className={classes.button}
-                >
-                  Skip
-                </Button>
-              )}
-
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleNext}
-                className={classes.button}
-              >
-                {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
-              </Button>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
