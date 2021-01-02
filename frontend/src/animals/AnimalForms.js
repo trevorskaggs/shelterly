@@ -571,7 +571,7 @@ export const AnimalForm = (props, {id}) => {
             </BootstrapForm>
           </Card.Body>
           <ButtonGroup>
-            <Button type="button" className="btn btn-primary" onClick={() => {setAddAnother(false); formikProps.submitForm()}}>Save</Button>
+            <Button type="button" className="btn btn-primary" onClick={() => {setAddAnother(false); formikProps.submitForm()}}>{id ? "Save" : "Next"}</Button>
             {!id ? <Button type="button" className="btn btn-success" onClick={() => {setAddAnother(true); formikProps.submitForm()}}>Add Another</Button> : ""}
           </ButtonGroup>
           </Card>

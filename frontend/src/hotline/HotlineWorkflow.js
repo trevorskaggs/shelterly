@@ -91,7 +91,7 @@ export default function HotlineWorkflow() {
     }
 
     var track_index = state.animalIndex;
-    if (stepIndex === 'animals' && next === 'animals') {
+    if (next === 'animals' && stepIndex === 'animals') {
       track_index = state.animalIndex -1;
     }
     setState((prevState) => ({
@@ -102,30 +102,40 @@ export default function HotlineWorkflow() {
   };
 
   function handleStepSubmit (stepIndex, data, next) {
+    // Only count contacts the first time.
     if ((stepIndex === 'reporter' && state.steps.reporter.first_name === '') || (stepIndex === 'owner' && state.steps.owner.first_name === '')) {
       setContactCount((count) => count + 1);
     }
 
+    // Treat animals differently since we need an array of N animals.
     if (stepIndex === 'animals') {
+      // Only increase animal index on save if we're adding another animal.
+      var index = state.animalIndex;
+      if (next === 'animals') {
+        index = index + 1
+      }
+      // If we're not on the last animal, update the current animal based on the index.
       if (state.animalIndex !== state.steps.animals.length) {
         const animalList = [...state.steps.animals];
         animalList[state.animalIndex] = data;
         setState((prevState) => ({
           ...prevState,
           activeStep: prevState.activeStep + 1,
-          animalIndex: prevState.animalIndex + 1,
+          animalIndex: index,
           steps: { ...prevState.steps, [stepIndex]:animalList }
         }))
       }
+      // Otherwise add a new animal to the list.
       else {
         setState((prevState) => ({
           ...prevState,
           activeStep: prevState.activeStep + 1,
-          animalIndex: prevState.animalIndex + 1,
+          animalIndex: index,
           steps: { ...prevState.steps, [stepIndex]:[...prevState.steps.animals, data] }
         }))
       }
     }
+    // Otherwise update the data respective of the current step.
     else {
       setState((prevState) => ({
         ...prevState,
@@ -135,6 +145,7 @@ export default function HotlineWorkflow() {
       }))
     }
 
+    // Only bump up the active step when designated.
     if (next === 'forward'){
       setActiveStep((prevActiveStep) => prevActiveStep + 1);
     }

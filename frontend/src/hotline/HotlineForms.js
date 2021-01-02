@@ -25,7 +25,7 @@ const state_options = [{ value: 'AL', label: "AL" }, { value: 'AK', label: "AK" 
 { value: 'VA', label: "VA" }, { value: "VT", label: "VT" }, { value: 'WA', label: "WA" }, { value: 'WV', label: "WV" }, { value: 'WI', label: "WI" }, { value: 'WY', label: "WY" },]
 
 // Form for creating new Service Request objects.
-export function ServiceRequestForm({ id }) {
+export function ServiceRequestForm(props, { id }) {
 
   const { state, dispatch } = useContext(AuthContext);
 
@@ -178,9 +178,12 @@ export function ServiceRequestForm({ id }) {
         }
       }}
     >
-      {props => (
-        <Card border="secondary" className="mt-5" style={{width:"auto"}}>
-        <Card.Header as="h5">{id ? <span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span> : ""}Service Request Form</Card.Header>
+      {formikProps => (
+        <Card border="secondary" className={is_workflow ? "mt-3" : "mt-5"}>
+        <Card.Header as="h5">{id ?
+          <span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
+          :
+          <span style={{cursor:'pointer'}} onClick={() => {props.handleBack('request', 'backward')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}Service Request Information</Card.Header>
         <Card.Body>
         <BootstrapForm as={Form}>
           <Field type="hidden" value={owner} name="owner" id="owner"></Field>
@@ -235,7 +238,7 @@ export function ServiceRequestForm({ id }) {
                     name="state"
                     id="state"
                     options={state_options}
-                    value={props.values.state || ''}
+                    value={formikProps.values.state || ''}
                     placeholder=''
                     disabled
                   />
@@ -276,8 +279,7 @@ export function ServiceRequestForm({ id }) {
         </BootstrapForm>
         </Card.Body>
         <ButtonGroup size="lg">
-          <Button type="submit" onClick={() => { props.submitForm()}}>Save</Button>
-          <Button variant="secondary" type="button" onClick={() => {props.resetForm(data)}}>Reset</Button>
+          <Button type="submit" onClick={() => { formikProps.submitForm()}}>Save</Button>
         </ButtonGroup>
         <Modal show={error.show} onHide={handleClose}>
           <Modal.Header closeButton>
