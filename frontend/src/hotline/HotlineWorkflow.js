@@ -47,6 +47,7 @@ export default function HotlineWorkflow() {
   const [state, setState] = useState({
     activeStep: 0,
     hasOwner: false,
+    animalIndex: 0,
     steps: {
       reporter: {first_name: '',
         last_name: '',
@@ -84,13 +85,19 @@ export default function HotlineWorkflow() {
   });
   const [contactCount, setContactCount] = React.useState(0);
 
-  function handleBack (next) {
+  function handleBack (stepIndex, next) {
     if (next === 'backward') {
       setActiveStep((prevActiveStep) => prevActiveStep - 1);
+    }
+
+    var track_index = state.animalIndex;
+    if (stepIndex === 'animals' && next === 'animals') {
+      track_index = state.animalIndex -1;
     }
     setState((prevState) => ({
       ...prevState,
       activeStep: prevState.activeStep - 1,
+      animalIndex: track_index,
     }))
   };
 
@@ -100,11 +107,24 @@ export default function HotlineWorkflow() {
     }
 
     if (stepIndex === 'animals') {
-      setState((prevState) => ({
-        ...prevState,
-        activeStep: prevState.activeStep + 1,
-        steps: { ...prevState.steps, [stepIndex]:[...prevState.steps.animals, data] }
-      }))
+      if (state.animalIndex !== state.steps.animals.length) {
+        const animalList = [...state.steps.animals];
+        animalList[state.animalIndex] = data;
+        setState((prevState) => ({
+          ...prevState,
+          activeStep: prevState.activeStep + 1,
+          animalIndex: prevState.animalIndex + 1,
+          steps: { ...prevState.steps, [stepIndex]:animalList }
+        }))
+      }
+      else {
+        setState((prevState) => ({
+          ...prevState,
+          activeStep: prevState.activeStep + 1,
+          animalIndex: prevState.animalIndex + 1,
+          steps: { ...prevState.steps, [stepIndex]:[...prevState.steps.animals, data] }
+        }))
+      }
     }
     else {
       setState((prevState) => ({

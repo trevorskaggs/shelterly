@@ -25,16 +25,16 @@ export const PersonForm = (props, { id }) => {
   // const id = 0;
 
   // Determine if we're in the hotline workflow.
-  var is_workflow = window.location.pathname.includes("workflow")
+  var is_workflow = window.location.pathname.includes("workflow");
 
   // Determine if this is an owner or reporter when creating a Person.
-  var is_owner = window.location.pathname.includes("owner")
+  var is_owner = window.location.pathname.includes("owner");
 
   // Determine if this is an intake workflow.
-  var is_intake = window.location.pathname.includes("intake")
+  var is_intake = window.location.pathname.includes("intake");
 
   // Determine if this is a first responder when creating a Person.
-  var is_first_responder = window.location.pathname.includes("first_responder")
+  var is_first_responder = window.location.pathname.includes("first_responder");
 
   // Identify any query param data.
   const [queryParams] = useQueryParams();
@@ -111,8 +111,6 @@ export const PersonForm = (props, { id }) => {
       source.cancel();
     };
   }, [id]);
-
-  console.log(props.state);
 
   return (
     <>
@@ -240,7 +238,7 @@ export const PersonForm = (props, { id }) => {
           <Card.Header as="h5" className="pl-3"> {id || props.state.activeStep === 0 ?
             <span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
             :
-            <span style={{cursor:'pointer'}} onClick={() => {setIsOwner(false); formikProps.resetForm({values:props.state.steps.reporter}); props.handleBack('reporter')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}
+            <span style={{cursor:'pointer'}} onClick={() => {setIsOwner(false); formikProps.resetForm({values:props.state.steps.reporter}); props.handleBack('owner', 'reporter')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}
           {isOwner ? "Owner" : "Reporter"} Information</Card.Header>
           <Card.Body>
           <BootstrapForm noValidate>
@@ -362,7 +360,6 @@ export const PersonForm = (props, { id }) => {
               {!is_first_responder ? <Button type="button" onClick={() => { setSkipOwner(false); formikProps.submitForm() }}>{!isOwner && !is_intake ? <span>{!id ? "Add Owner" : "Save"}</span> : <span>{!id && (!servicerequest_id && !animal_id && !owner_id) ? "Add Animal(s)" : "Save"}</span>}</Button> : ""}
               {/* reporter form save buttons to skip owner */}
               {!isOwner && !id && !is_intake ? <button type="button" className="btn btn-primary mr-1 border" onClick={() => { setSkipOwner(true); formikProps.submitForm() }}>Add Animal(s)</button> : ""}
-              {/* <Button variant="secondary" type="button" onClick={() => {resetForm(data)}}>Reset</Button> */}
             </ButtonGroup>
           </Card>
         )}

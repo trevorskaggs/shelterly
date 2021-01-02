@@ -51,8 +51,7 @@ export const AnimalForm = (props, {id}) => {
 
   // Track whether or not to add another animal after saving.
   const [addAnother, setAddAnother] = useState(false);
-  // Unique key used to re-render the same page if adding another animal.
-  const [key, setKey] = useState(Math.random());
+
   // Dynamic placeholder value for options.
   const [placeholder, setPlaceholder] = useState("Select a species...");
 
@@ -61,8 +60,7 @@ export const AnimalForm = (props, {id}) => {
   const [extra_images, setExtraImages] = useState([]);
   const [reinitialize, setReinitialize] = useState(true);
 
-  // Initial Animal data.
-  const [data, setData] = useState({
+  const initialData = {
     new_owner: owner_id,
     reporter: reporter_id,
     request: servicerequest_id,
@@ -85,8 +83,14 @@ export const AnimalForm = (props, {id}) => {
     front_image: null,
     side_image: null,
     extra_images: [],
-  });
+  }
+  let current_data = initialData;
+  if (is_workflow && props.state.steps.animals[props.state.animalIndex]) {
+    current_data = props.state.steps.animals[props.state.animalIndex];
+  }
 
+  // Initial Animal data.
+  const [data, setData] = useState(current_data);
   const [shelters, setShelters] = useState({shelters: [],  isFetching: false});
 
   const wrapperSetFrontImage = useCallback(val => {
@@ -162,11 +166,9 @@ export const AnimalForm = (props, {id}) => {
       source.cancel();
     };
   }, [id]);
-
-  console.log(props.state);
   
   return (
-    <span key={key}>
+    <>
       <Formik
         initialValues={data}
         enableReinitialize={reinitialize}
@@ -224,7 +226,7 @@ export const AnimalForm = (props, {id}) => {
           if (is_workflow) {
             if (addAnother) {
               props.onSubmit('animals', values, 'animals');
-              resetForm(data);
+              resetForm({values:initialData});
             }
             else {
               props.onSubmit('animals', values, 'forward');
@@ -255,14 +257,10 @@ export const AnimalForm = (props, {id}) => {
                 // Stay inside intake workflow if applicable.
                 else if (is_intake) {
                   navigate('/intake/animal/new?owner_id=' + (response.data.owner||'') + '&reporter_id=' + (reporter_id||''));
-                  // This is a hack used to refresh when navigating to the same page.
-                  setKey(Math.random());
                 }
                 // Else pass along the owner and reporter IDs used for SR creation downstream.
                 else {
                   navigate('/hotline/animal/new?owner_id=' + (response.data.owner||'') + '&reporter_id=' + (reporter_id||'') + '&first_responder=' + is_first_responder);
-                  // This is a hack used to refresh when navigating to the same page.
-                  setKey(Math.random());
                 }
               }
               else {
@@ -292,9 +290,9 @@ export const AnimalForm = (props, {id}) => {
             <Card.Header as="h5" className="pl-3">{id ?
               <span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
               :
-              <span>{props.state.steps.animals.length > 0 ? <span style={{cursor:'pointer'}} onClick={() => props.handleBack('animals')} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
+              <span>{props.state && props.state.animalIndex > 0 ? <span style={{cursor:'pointer'}} onClick={() => {formikProps.resetForm({values:props.state.steps.animals[props.state.animalIndex-1]}); props.handleBack('animals', 'animals')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
               :
-              <span style={{cursor:'pointer'}} onClick={() => props.handleBack('backward')} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}</span>}{!id ? "New" : "Update"} Animal</Card.Header>
+              <span style={{cursor:'pointer'}} onClick={() => {props.handleBack('animals', 'backward')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}</span>}{!id ? "New" : "Update"} Animal</Card.Header>
             <Card.Body>
             <BootstrapForm as={Form}>
               <Field type="hidden" value={servicerequest_id||""} name="request" id="request"></Field>
@@ -472,6 +470,7 @@ export const AnimalForm = (props, {id}) => {
                     value={formikProps.values.last_seen||null}
                   />
                 </BootstrapForm.Row>
+                <span hidden={is_workflow}>
                 <p className="mb-0 mt-3">Image Files</p>
                 <BootstrapForm.Row className="align-items-end">
                   {data.front_image ?
@@ -536,6 +535,7 @@ export const AnimalForm = (props, {id}) => {
                     />
                   </div>
                 </BootstrapForm.Row>
+                </span>
                 {/* Only show Shelter selection on intake and update. */}
                 <span hidden={!Boolean(id)&&!is_intake}>
                 <p className="mb-2 mt-2">Shelter</p>
@@ -577,6 +577,6 @@ export const AnimalForm = (props, {id}) => {
           </Card>
         )}
       </Formik>
-    </span>
+    </>
   );
 };

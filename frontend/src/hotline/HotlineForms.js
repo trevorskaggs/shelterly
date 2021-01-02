@@ -43,6 +43,9 @@ export function ServiceRequestForm({ id }) {
     owner = [owner_id]
   }
 
+  // Determine if we're in the hotline workflow.
+  var is_workflow = window.location.pathname.includes("workflow");
+
   // Determine if this is from a first responder when creating a SR.
   var is_first_responder = (first_responder === 'true');
 
