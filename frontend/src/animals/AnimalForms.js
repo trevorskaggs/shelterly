@@ -29,11 +29,7 @@ export const AnimalForm = (props, {id}) => {
     owner_id = null,
     servicerequest_id = null,
     reporter_id = null,
-    first_responder = 'false'
   } = queryParams;
-
-  // Determine if this is from a first responder when creating a SR.
-  var is_first_responder = (first_responder === 'true');
 
   // Determine if we're in the hotline workflow.
   var is_workflow = window.location.pathname.includes("workflow")
@@ -255,12 +251,8 @@ export const AnimalForm = (props, {id}) => {
                   navigate('/hotline/animal/new?servicerequest_id=' + servicerequest_id)
                 }
                 // Stay inside intake workflow if applicable.
-                else if (is_intake) {
-                  navigate('/intake/animal/new?owner_id=' + (response.data.owner||'') + '&reporter_id=' + (reporter_id||''));
-                }
-                // Else pass along the owner and reporter IDs used for SR creation downstream.
                 else {
-                  navigate('/hotline/animal/new?owner_id=' + (response.data.owner||'') + '&reporter_id=' + (reporter_id||'') + '&first_responder=' + is_first_responder);
+                  navigate('/intake/animal/new?owner_id=' + (response.data.owner||'') + '&reporter_id=' + (reporter_id||''));
                 }
               }
               else {
@@ -269,12 +261,8 @@ export const AnimalForm = (props, {id}) => {
                   navigate('/hotline/servicerequest/' + servicerequest_id);
                 }
                 // If in intake workflow, redirect to Intake Summary
-                else if (is_intake) {
-                  navigate('/intake/summary');
-                }
-                // Else redirect to create a new SR.
                 else {
-                  navigate('/hotline/servicerequest/new?owner_id=' + (response.data.owner||'') + '&reporter_id=' + (reporter_id||'') + '&first_responder=' + is_first_responder);
+                  navigate('/intake/summary');
                 }
               }
             })
@@ -292,7 +280,7 @@ export const AnimalForm = (props, {id}) => {
               :
               <span>{props.state && props.state.animalIndex > 0 ? <span style={{cursor:'pointer'}} onClick={() => {formikProps.resetForm({values:props.state.steps.animals[props.state.animalIndex-1]}); props.handleBack('animals', 'animals')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
               :
-              <span style={{cursor:'pointer'}} onClick={() => {props.handleBack('animals', 'backward')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}</span>}{!id ? "New" : "Update"} Animal</Card.Header>
+              <span style={{cursor:'pointer'}} onClick={() => {props.handleBack('animals', 'backward')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}</span>}{!id ? "Animal Information" : "Update Animal"}</Card.Header>
             <Card.Body>
             <BootstrapForm as={Form}>
               <Field type="hidden" value={servicerequest_id||""} name="request" id="request"></Field>
@@ -570,9 +558,9 @@ export const AnimalForm = (props, {id}) => {
                 </span>
             </BootstrapForm>
           </Card.Body>
-          <ButtonGroup>
-            <Button type="button" className="btn btn-primary" onClick={() => {setAddAnother(false); formikProps.submitForm()}}>{id ? "Save" : "Next"}</Button>
-            {!id ? <Button type="button" className="btn btn-success" onClick={() => {setAddAnother(true); formikProps.submitForm()}}>Add Another</Button> : ""}
+          <ButtonGroup size="lg">
+            {!id ? <Button type="button" onClick={() => {setAddAnother(true); formikProps.submitForm()}}>Add Another</Button> : ""}
+            <Button type="button" className="btn btn-primary mr-1 border" onClick={() => {setAddAnother(false); formikProps.submitForm()}}>{id ? "Save" : "Next Step"}</Button>
           </ButtonGroup>
           </Card>
         )}

@@ -80,7 +80,6 @@ export default function HotlineWorkflow() {
         longitude: null,
         change_reason: '',},
       animals: [],
-      request: {},
     }
   });
   const [contactCount, setContactCount] = React.useState(0);
