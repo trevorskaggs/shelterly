@@ -222,7 +222,14 @@ export const AnimalForm = (props) => {
           if (is_workflow) {
             if (addAnother) {
               props.onSubmit('animals', values, 'animals');
-              resetForm({values:initialData});
+              // Reset form data with existing animal data if we have it.
+              if (props.state.steps.animals[props.state.animalIndex + 1]) {
+                resetForm({values:props.state.steps.animals[props.state.animalIndex + 1]});
+              }
+              // Otherwise reset form with blank data.
+              else {
+                resetForm({values:initialData});
+              }
             }
             else {
               props.onSubmit('animals', values, 'forward');
@@ -560,7 +567,7 @@ export const AnimalForm = (props) => {
           </Card.Body>
           <ButtonGroup size="lg">
             {!id ?
-              <Button type="button" onClick={() => {setAddAnother(true); formikProps.submitForm()}}>Add Another</Button>
+              <Button type="button" onClick={() => {setAddAnother(true); formikProps.submitForm()}}>{props.state.steps.animals.length -1 > props.state.animalIndex ? "Next Animal" : "Add Another"}</Button>
             :
               <Button type="button" onClick={() => {setAddAnother(false); formikProps.submitForm()}}>Save</Button>
             }
