@@ -1,7 +1,7 @@
 import React from "react";
 import { Redirect } from "raviger";
 import Home from "./Home";
-import Animals, { AnimalDetail, NewAnimal, UpdateAnimal } from "./animals/Animals"
+import { AnimalDetail, NewAnimal, UpdateAnimal } from "./animals/Animals"
 import { AnimalSearch } from "./animals/AnimalTables"
 import Evac, {EvacuationAssignmentSearch} from "./evac/Evac";
 import Hotline, { NewServiceRequest, ServiceRequestDetail, ServiceRequestList, UpdateServiceRequest } from "./hotline/Hotline";
@@ -22,10 +22,9 @@ export const publicRoutes = {
 
 const routes = {
   "/": () => <Home />,
-  "/animals": () => <Animals />,
-  "/animals/animal/edit/:id": ({id}) => <UpdateAnimal id={id} />,
+  "/animals/edit/:id": ({id}) => <UpdateAnimal id={id} />,
   "/animals/search": () => <AnimalSearch />,
-  "/animals/animal/:id": ({id}) => <AnimalDetail id={id} />,
+  "/animals/:id": ({id}) => <AnimalDetail id={id} />,
   "/evac": () => <Evac />,
   "/evac/evacteammember/new": () => <EvacTeamMemberForm />,
   "/evac/evacuationassignment/search": () => <EvacuationAssignmentSearch />,
@@ -36,16 +35,16 @@ const routes = {
   "/hotline": () => <Hotline />,
   "/hotline/animal/new": () => <NewAnimal />,
   "/hotline/first_responder/new": () => <NewReporter />,
-  "/hotline/owner/edit/:id": ({id}) => <UpdateOwner id={id}/>,
+  "/hotline/owner/edit/:id": ({id}) => <UpdateOwner id={id} />,
   "/hotline/owner/new": () => <NewOwner />,
-  "/hotline/owner/:id": ({id}) => <OwnerDetail id={id}/>,
-  "/hotline/reporter/edit/:id": ({id}) => <UpdateReporter id={id}/>,
+  "/hotline/owner/:id": ({id}) => <OwnerDetail id={id} />,
+  "/hotline/reporter/edit/:id": ({id}) => <UpdateReporter id={id} />,
   "/hotline/reporter/new": () => <NewReporter />,
-  "/hotline/reporter/:id": ({id}) => <ReporterDetail id={id}/>,
-  "/hotline/servicerequest/edit/:id": ({id}) => <UpdateServiceRequest id={id}/>,
+  "/hotline/reporter/:id": ({id}) => <ReporterDetail id={id} />,
+  "/hotline/servicerequest/edit/:id": ({id}) => <UpdateServiceRequest id={id} />,
   "/hotline/servicerequest/list": () => <ServiceRequestList />,
   "/hotline/servicerequest/new": () => <NewServiceRequest />,
-  "/hotline/servicerequest/:id": ({id}) => <ServiceRequestDetail id={id}/>,
+  "/hotline/servicerequest/:id": ({id}) => <ServiceRequestDetail id={id} />,
   "/hotline/workflow/*": () => <HotlineWorkflow />,
   "/shelter": () => <Shelter />,
   "/shelter/new": () => <NewShelter />,

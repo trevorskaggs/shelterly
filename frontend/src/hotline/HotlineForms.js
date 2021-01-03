@@ -25,23 +25,16 @@ const state_options = [{ value: 'AL', label: "AL" }, { value: 'AK', label: "AK" 
 { value: 'VA', label: "VA" }, { value: "VT", label: "VT" }, { value: 'WA', label: "WA" }, { value: 'WV', label: "WV" }, { value: 'WI', label: "WI" }, { value: 'WY', label: "WY" },]
 
 // Form for creating new Service Request objects.
-export function ServiceRequestForm(props, { id }) {
+export function ServiceRequestForm(props) {
 
   const { state, dispatch } = useContext(AuthContext);
-
-  // Identify any query param data.
-  const [queryParams] = useQueryParams();
-  const {
-    owner_id = null,
-    reporter_id = null,
-    first_responder = 'false'
-  } = queryParams;
+  const id = props.id;
 
   // Determine if we're in the hotline workflow.
   var is_workflow = window.location.pathname.includes("workflow");
 
   // Determine if this is from a first responder when creating a SR.
-  var is_first_responder = (props.state.steps.reporter.agency !== '');
+  var is_first_responder = window.location.pathname.includes("first_responder");
 
   // Track checkbox state with Fade.
   const [fadeIn, setFadeIn] = useState(props.state.steps.owner.address ? false : true);
@@ -152,17 +145,16 @@ export function ServiceRequestForm(props, { id }) {
             if (ownerResponse[0].data.id) {
               values['owner'] = [ownerResponse[0].data.id]
             }
-            console.log(values);
-            // axios.post('/hotline/api/servicerequests/', values)
-            // .then(response => {
-            //   navigate('/hotline/servicerequest/' + response.data.id);
-            // })
-            // .catch(error => {
-            //   console.log(error.response);
-            //   if (error.response.data && error.response.data[0].includes('same address')) {
-            //     setError({show:true, error:error.response.data});
-            //   }
-            // });
+            axios.post('/hotline/api/servicerequests/', values)
+            .then(response => {
+              navigate('/hotline/servicerequest/' + response.data.id);
+            })
+            .catch(error => {
+              console.log(error.response);
+              if (error.response.data && error.response.data[0].includes('same address')) {
+                setError({show:true, error:error.response.data});
+              }
+            });
           }
           else if (id) {
             axios.put('/hotline/api/servicerequests/' + id + '/', values)
@@ -189,13 +181,9 @@ export function ServiceRequestForm(props, { id }) {
         <Card.Header as="h5">{id ?
           <span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
           :
-          <span style={{cursor:'pointer'}} onClick={() => {props.handleBack('request', 'backward')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}Service Request Information</Card.Header>
+          <span style={{cursor:'pointer'}} onClick={() => {props.handleBack('request', 'backward')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}{id ? "Update " : ""}Service Request{is_workflow ? " Information" :""}</Card.Header>
         <Card.Body>
         <BootstrapForm as={Form}>
-          {/* <Field type="hidden" value={data.owner} name="owner" id="owner"></Field>
-          <Field type="hidden" value={data.reporter || null} name="reporter" id="reporter"></Field>
-          <Field type="hidden" value={data.latitude || ""} name="latitude" id="latitude"></Field>
-          <Field type="hidden" value={data.longitude || ""} name="longitude" id="longitude"></Field> */}
           {props.state.steps.owner.address && !id ?
             <span className="form-row mb-2">
               <Label>&nbsp;&nbsp;Address Same as Owner: </Label>
@@ -215,7 +203,7 @@ export function ServiceRequestForm(props, { id }) {
               <BootstrapForm.Row>
                 <TextInput
                   type="text"
-                  label={props.state && is_first_responder ? "Address/Cross Streets*" : "Address*"}
+                  label={is_first_responder ? "Address/Cross Streets*" : "Address*"}
                   name="address"
                   id="address"
                   xs="8"
@@ -270,7 +258,7 @@ export function ServiceRequestForm(props, { id }) {
                 />
             </BootstrapForm.Row>
             <BootstrapForm.Row>
-                <span hidden={props.state && is_first_responder}><Label htmlFor="verbal_permission" className="ml-1">Verbal Permission</Label>
+                <span hidden={is_first_responder}><Label htmlFor="verbal_permission" className="ml-1">Verbal Permission</Label>
                 <Field component={Switch} name="verbal_permission" type="checkbox" color="primary"/>
 
                 <Label htmlFor="key_provided">Key Provided</Label>
@@ -285,7 +273,10 @@ export function ServiceRequestForm(props, { id }) {
         </BootstrapForm>
         </Card.Body>
         <ButtonGroup size="lg">
-          <Button type="submit" onClick={() => { formikProps.submitForm()}}>Finish and Save</Button>
+          {is_workflow ?
+            <Button className="btn btn-primary border" type="submit" onClick={() => { formikProps.submitForm()}}>Finish and Create Service Request</Button> :
+            <Button type="submit" onClick={() => { formikProps.submitForm()}}>Save</Button>
+          }
         </ButtonGroup>
         <Modal show={error.show} onHide={handleClose}>
           <Modal.Header closeButton>

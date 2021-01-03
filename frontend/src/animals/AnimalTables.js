@@ -92,7 +92,7 @@ export function AnimalSearch() {
       {data.animals.map(animal => (
         <div key={animal.id} className="mt-3">
           <div className="card-header"> {animal.name ? titleCase(animal.name) : "Unknown"} - {titleCase(animal.species)} | {titleCase(animal.status)}
-            <Link href={"/animals/animal/" + animal.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
+            <Link href={"/animals/" + animal.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
           </div>
           <CardGroup>
             <Card key={animal.id} style={{maxWidth:"196px"}}>

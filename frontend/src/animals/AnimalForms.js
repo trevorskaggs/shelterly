@@ -14,11 +14,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft, faMinusSquare } from '@fortawesome/free-solid-svg-icons';
 import 'antd/lib/tree-select/style/css';
 
-export const AnimalForm = (props, {id}) => {
+export const AnimalForm = (props) => {
 
   const { state, dispatch } = useContext(AuthContext);
-
   const { TreeNode } = TreeSelect;
+  const id = props.id;
 
   // Determine if this is an intake workflow.
   var is_intake = window.location.pathname.includes("intake")
@@ -235,7 +235,7 @@ export const AnimalForm = (props, {id}) => {
                 navigate(state.prevLocation);
               }
               else {
-                navigate('/animals/animal/' + id);
+                navigate('/animals/' + id);
               }
             })
             .catch(error => {
@@ -559,8 +559,12 @@ export const AnimalForm = (props, {id}) => {
             </BootstrapForm>
           </Card.Body>
           <ButtonGroup size="lg">
-            {!id ? <Button type="button" onClick={() => {setAddAnother(true); formikProps.submitForm()}}>Add Another</Button> : ""}
-            <Button type="button" className="btn btn-primary mr-1 border" onClick={() => {setAddAnother(false); formikProps.submitForm()}}>{id ? "Save" : "Next Step"}</Button>
+            {!id ?
+              <Button type="button" onClick={() => {setAddAnother(true); formikProps.submitForm()}}>Add Another</Button>
+            :
+              <Button type="button" onClick={() => {setAddAnother(false); formikProps.submitForm()}}>Save</Button>
+            }
+            {is_workflow ? <Button type="button" className="btn btn-primary mr-1 border" onClick={() => {setAddAnother(false); formikProps.submitForm()}}>Next Step</Button> : ""}
           </ButtonGroup>
           </Card>
         )}

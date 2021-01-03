@@ -18,11 +18,10 @@ const state_options = [{ value: 'AL', label: "AL" }, { value: 'AK', label: "AK" 
 { value: 'VA', label: "VA" }, { value: "VT", label: "VT" }, { value: 'WA', label: "WA" }, { value: 'WV', label: "WV" }, { value: 'WI', label: "WI" }, { value: 'WY', label: "WY" },]
 
 // Form for creating new owner and reporter Person objects.
-export const PersonForm = (props, { id }) => {
+export const PersonForm = (props) => {
 
   const { state, dispatch } = useContext(AuthContext);
-
-  // const id = 0;
+  const id = props.id;
 
   // Determine if we're in the hotline workflow.
   var is_workflow = window.location.pathname.includes("workflow");
@@ -83,6 +82,7 @@ export const PersonForm = (props, { id }) => {
     else {
       current_data = props.state.steps.reporter
     }
+    current_data['show_agency'] = is_first_responder;
   }
 
   // Initial Person data.
@@ -98,6 +98,7 @@ export const PersonForm = (props, { id }) => {
           cancelToken: source.token,
         })
           .then(response => {
+            response.data['change_reason'] = '';
             setData(response.data);
           })
           .catch(error => {
@@ -194,7 +195,7 @@ export const PersonForm = (props, { id }) => {
               }
               // If adding from an animal, redirect to the Animal details.
               else if (animal_id) {
-                navigate('/animals/animal/' + animal_id);
+                navigate('/animals/' + animal_id);
               }
               // If adding from an owner, redirect to the new Owner details.
               else if (owner_id) {
@@ -239,7 +240,7 @@ export const PersonForm = (props, { id }) => {
             <span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
             :
             <span style={{cursor:'pointer'}} onClick={() => {setIsOwner(false); formikProps.resetForm({values:props.state.steps.reporter}); props.handleBack('owner', 'reporter')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}
-          {isOwner ? "Owner" : "Reporter"} Information</Card.Header>
+          {id ? "Update " : ""}{isOwner ? "Owner" : "Reporter"}{is_workflow ? " Information" : ""}</Card.Header>
           <Card.Body>
           <BootstrapForm noValidate>
             <Field type="hidden" value={data.latitude || ""} name="latitude" id="latitude"></Field>

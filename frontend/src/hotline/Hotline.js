@@ -4,6 +4,7 @@ import { ListGroup } from 'react-bootstrap'
 import { ServiceRequestForm } from "./HotlineForms";
 import { ServiceRequestTable } from "./HotlineTables"
 import { ServiceRequestView } from "./HotlineViews";
+import { initialData } from "./HotlineWorkflow";
 
 const header_style = {
   textAlign: "center",
@@ -44,7 +45,7 @@ export const NewServiceRequest = () => (
 
 export const UpdateServiceRequest = ({id}) => (
   <div>
-    <ServiceRequestForm id={id} />
+    <ServiceRequestForm id={id} state={initialData} />
   </div>
 )
 

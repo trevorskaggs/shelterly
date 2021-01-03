@@ -1,9 +1,8 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Stepper from '@material-ui/core/Stepper';
 import Step from '@material-ui/core/Step';
 import StepLabel from '@material-ui/core/StepLabel';
-import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import { AnimalForm } from '../animals/AnimalForms';
 import { PersonForm } from '../people/PeopleForms';
@@ -40,48 +39,52 @@ function getStepContent(step, handleStepSubmit, handleBack, state) {
   }
 }
 
+export const initialData = {
+  activeStep: 0,
+  hasOwner: false,
+  animalIndex: 0,
+  steps: {
+    reporter: {
+      first_name: '',
+      last_name: '',
+      phone: '',
+      alt_phone: '',
+      email: '',
+      best_contact: '',
+      agency: '',
+      address: '',
+      apartment: '',
+      city: '',
+      state: '',
+      zip_code: '',
+      latitude: null,
+      longitude: null,
+      change_reason: '',},
+    owner: {
+      first_name: '',
+      last_name: '',
+      phone: '',
+      alt_phone: '',
+      email: '',
+      best_contact: '',
+      agency: '',
+      address: '',
+      apartment: '',
+      city: '',
+      state: '',
+      zip_code: '',
+      latitude: null,
+      longitude: null,
+      change_reason: '',},
+    animals: [],
+  }
+}
+
 export default function HotlineWorkflow() {
   const classes = useStyles();
   const [activeStep, setActiveStep] = React.useState(0);
   const steps = getSteps();
-  const [state, setState] = useState({
-    activeStep: 0,
-    hasOwner: false,
-    animalIndex: 0,
-    steps: {
-      reporter: {first_name: '',
-        last_name: '',
-        phone: '',
-        alt_phone: '',
-        email: '',
-        best_contact: '',
-        agency: '',
-        address: '',
-        apartment: '',
-        city: '',
-        state: '',
-        zip_code: '',
-        latitude: null,
-        longitude: null,
-        change_reason: '',},
-      owner: {first_name: '',
-        last_name: '',
-        phone: '',
-        alt_phone: '',
-        email: '',
-        best_contact: '',
-        agency: '',
-        address: '',
-        apartment: '',
-        city: '',
-        state: '',
-        zip_code: '',
-        latitude: null,
-        longitude: null,
-        change_reason: '',},
-      animals: [],
-    }
-  });
+  const [state, setState] = useState(initialData);
   const [contactCount, setContactCount] = React.useState(0);
 
   function handleBack (stepIndex, next) {
