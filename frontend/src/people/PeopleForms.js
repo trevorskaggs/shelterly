@@ -1,8 +1,8 @@
 import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
 import { navigate, useQueryParams } from 'raviger';
-import { Field, Formik, useFormikContext } from 'formik';
-import { Form as BootstrapForm, Button, ButtonGroup, Card, Col } from "react-bootstrap";
+import { Field, Formik } from 'formik';
+import { Form as BootstrapForm, Button, ButtonGroup, Card, Col, Modal } from "react-bootstrap";
 import * as Yup from 'yup';
 import { AddressLookup, DropDown, TextInput } from '../components/Form';
 import { AuthContext } from "../accounts/AccountsReducer";
@@ -52,6 +52,11 @@ export const PersonForm = (props) => {
   // Whether or not to skip Owner creation.
   const [skipOwner, setSkipOwner] = useState(false);
   const [isOwner, setIsOwner] = useState(props.state.hasOwner || is_owner);
+
+  // Modal for exiting workflow.
+  const [show, setShow] = useState(false);
+  const handleClose = () => setShow(false);
+  const goBack = () => navigate('/hotline');
 
   const initialData = {
     first_name: '',
@@ -236,11 +241,15 @@ export const PersonForm = (props) => {
       >
         {formikProps => (
           <Card border="secondary" className={is_workflow ? "mt-3" : "mt-5"}>
-          <Card.Header as="h5" className="pl-3"> {id || props.state.activeStep === 0 ?
-            <span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
-            :
-            <span style={{cursor:'pointer'}} onClick={() => {setIsOwner(false); formikProps.resetForm({values:props.state.steps.reporter}); props.handleBack('owner', 'reporter')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}
-          {id ? "Update " : ""}{isOwner ? "Owner" : "Reporter"}{is_workflow ? " Information" : ""}</Card.Header>
+            {id ?
+              <Card.Header as="h5" className="pl-3"><span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>Update {isOwner ? "Owner" : "Reporter"}</Card.Header>
+              :
+              <Card.Header as="h5" className="pl-3">{props.state.activeStep === 0 ?
+                <span style={{cursor:'pointer'}} onClick={() => {setShow(true)}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
+                :
+                <span style={{cursor:'pointer'}} onClick={() => {setIsOwner(false); formikProps.resetForm({values:props.state.steps.reporter}); props.handleBack('owner', 'reporter')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}
+          {isOwner ? "Owner" : "Reporter"}{is_workflow ? " Information" : ""}
+          </Card.Header>}
           <Card.Body>
           <BootstrapForm noValidate>
             <Field type="hidden" value={data.latitude || ""} name="latitude" id="latitude"></Field>
@@ -366,6 +375,20 @@ export const PersonForm = (props) => {
           </Card>
         )}
       </Formik>
+      <Modal show={show} onHide={handleClose}>
+        <Modal.Header closeButton>
+          <Modal.Title>Leave Service Request Creation Workflow?</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>
+            Are you sure you would like to leave the Service Request creation workflow?&nbsp;&nbsp;No data will be saved.
+          </p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="primary" onClick={goBack}>Yes</Button>
+          <Button variant="secondary" onClick={handleClose}>Close</Button>
+        </Modal.Footer>
+      </Modal>
     </>
   );
 };

@@ -139,23 +139,23 @@ export const AnimalForm = (props) => {
         });
       };
       fetchAnimalData();
-    }
 
-    const fetchShelters = async () => {
-      setShelters({shelters: [], isFetching: true});
-      // Fetch Shelter data.
-      await axios.get('/shelter/api/shelter', {
-        cancelToken: source.token,
-      })
-      .then(response => {
-        setShelters({shelters: response.data, isFetching: false});
-      })
-      .catch(error => {
-        console.log(error.response);
-        setShelters({shelters: [], isFetching: false});
-      });
-    };
-    fetchShelters();
+      const fetchShelters = async () => {
+        setShelters({shelters: [], isFetching: true});
+        // Fetch Shelter data.
+        await axios.get('/shelter/api/shelter', {
+          cancelToken: source.token,
+        })
+        .then(response => {
+          setShelters({shelters: response.data, isFetching: false});
+        })
+        .catch(error => {
+          console.log(error.response);
+          setShelters({shelters: [], isFetching: false});
+        });
+      };
+      fetchShelters();
+    }
 
     // Cleanup.
     return () => {
