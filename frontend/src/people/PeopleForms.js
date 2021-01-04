@@ -52,7 +52,7 @@ export const PersonForm = ({ id }) => {
     phone: '',
     alt_phone: '',
     email: '',
-    best_contact: '',
+    comments: '',
     show_agency: is_first_responder,
     agency: '',
     drivers_license: '',
@@ -117,7 +117,7 @@ export const PersonForm = ({ id }) => {
           email: Yup.string()
             .max(200, 'Must be 200 characters or less')
             .matches(emailRegex, "Email is not valid"),
-          best_contact: Yup.string(),
+          comments: Yup.string(),
           show_agency: Yup.boolean(),
           agency: Yup.string().when('show_agency', {
               is: true,
@@ -278,8 +278,8 @@ export const PersonForm = ({ id }) => {
               <TextInput
                 xs="12"
                 as="textarea"
-                label="Best Contact"
-                name="best_contact"
+                label="Comments"
+                name="comments"
               />
             </BootstrapForm.Row>
             <BootstrapForm.Row hidden={!is_first_responder && !data.agency}>
