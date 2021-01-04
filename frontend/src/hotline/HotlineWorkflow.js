@@ -40,7 +40,7 @@ function getStepContent(step, handleStepSubmit, handleBack, state) {
 }
 
 export const initialData = {
-  activeStep: 0,
+  stepIndex: 0,
   hasOwner: false,
   animalIndex: 0,
   steps: {
@@ -82,38 +82,43 @@ export const initialData = {
 
 export default function HotlineWorkflow() {
   const classes = useStyles();
+  // The major overall step tracker.
   const [activeStep, setActiveStep] = React.useState(0);
   const steps = getSteps();
+  // Tracks the workflow state and data.
   const [state, setState] = useState(initialData);
+  // Counts number of reporter + owner
   const [contactCount, setContactCount] = React.useState(0);
 
-  function handleBack (stepIndex, next) {
-    if (next === 'backward') {
+  function handleBack (currentStep, nextStep) {
+    // Lower the active step if going backwards between major steps.
+    if (nextStep === 'backward') {
       setActiveStep((prevActiveStep) => prevActiveStep - 1);
     }
 
+    // Reduce the animal index when going backward from an animal to another animal.
     var track_index = state.animalIndex;
-    if (next === 'animals' && stepIndex === 'animals') {
+    if (nextStep === 'animals' && currentStep === 'animals') {
       track_index = state.animalIndex -1;
     }
     setState((prevState) => ({
       ...prevState,
-      activeStep: prevState.activeStep - 1,
+      stepIndex: prevState.stepIndex - 1,
       animalIndex: track_index,
     }))
   };
 
-  function handleStepSubmit (stepIndex, data, next) {
+  function handleStepSubmit (currentStep, data, nextStep) {
     // Only count contacts the first time.
-    if ((stepIndex === 'reporter' && state.steps.reporter.first_name === '') || (stepIndex === 'owner' && state.steps.owner.first_name === '')) {
+    if ((currentStep === 'reporter' && state.steps.reporter.first_name === '') || (currentStep === 'owner' && state.steps.owner.first_name === '')) {
       setContactCount((count) => count + 1);
     }
 
     // Treat animals differently since we need an array of N animals.
-    if (stepIndex === 'animals') {
+    if (currentStep === 'animals') {
       // Only increase animal index on save if we're adding another animal.
       var index = state.animalIndex;
-      if (next === 'animals') {
+      if (nextStep === 'animals') {
         index = index + 1
       }
       // If we're not on the last animal, update the current animal based on the index.
@@ -122,18 +127,18 @@ export default function HotlineWorkflow() {
         animalList[state.animalIndex] = data;
         setState((prevState) => ({
           ...prevState,
-          activeStep: prevState.activeStep + 1,
+          stepIndex: prevState.stepIndex + 1,
           animalIndex: index,
-          steps: { ...prevState.steps, [stepIndex]:animalList }
+          steps: { ...prevState.steps, [currentStep]:animalList }
         }))
       }
       // Otherwise add a new animal to the list.
       else {
         setState((prevState) => ({
           ...prevState,
-          activeStep: prevState.activeStep + 1,
+          stepIndex: prevState.stepIndex + 1,
           animalIndex: index,
-          steps: { ...prevState.steps, [stepIndex]:[...prevState.steps.animals, data] }
+          steps: { ...prevState.steps, [currentStep]:[...prevState.steps.animals, data] }
         }))
       }
     }
@@ -141,14 +146,14 @@ export default function HotlineWorkflow() {
     else {
       setState((prevState) => ({
         ...prevState,
-        hasOwner: stepIndex === 'owner',
-        activeStep: prevState.activeStep + 1,
-        steps: { ...prevState.steps, [stepIndex]:data }
+        hasOwner: currentStep === 'owner',
+        stepIndex: prevState.stepIndex + 1,
+        steps: { ...prevState.steps, [currentStep]:data }
       }))
     }
 
     // Only bump up the active step when designated.
-    if (next === 'forward'){
+    if (nextStep === 'forward'){
       setActiveStep((prevActiveStep) => prevActiveStep + 1);
     }
   }

@@ -244,7 +244,7 @@ export const PersonForm = (props) => {
             {id ?
               <Card.Header as="h5" className="pl-3"><span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>Update {isOwner ? "Owner" : "Reporter"}</Card.Header>
               :
-              <Card.Header as="h5" className="pl-3">{props.state.activeStep === 0 ?
+              <Card.Header as="h5" className="pl-3">{props.state.stepIndex === 0 ?
                 <span style={{cursor:'pointer'}} onClick={() => {setShow(true)}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
                 :
                 <span style={{cursor:'pointer'}} onClick={() => {setIsOwner(false); formikProps.resetForm({values:props.state.steps.reporter}); props.handleBack('owner', 'reporter')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}
