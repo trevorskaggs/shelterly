@@ -9,16 +9,11 @@ from hotline.models import ServiceRequest
 
 class SimplePersonSerializer(serializers.ModelSerializer):
     full_address = serializers.SerializerMethodField()
-    action_history = serializers.SerializerMethodField()
     display_phone = serializers.SerializerMethodField()
 
     # Custom field for the full address.
     def get_full_address(self, obj):
         return build_full_address(obj)
-
-    # Custom field for the action history.
-    def get_action_history(self, obj):
-        return [build_action_string(action) for action in obj.target_actions.all()]
 
     # Custom field for Formated Phone Number
     def get_display_phone(self, obj):
@@ -40,6 +35,13 @@ class PersonSerializer(SimplePersonSerializer):
     from animals.serializers import AnimalSerializer
     animals = AnimalSerializer(many=True, required=False, read_only=True)
     request = serializers.SerializerMethodField()
+    action_history = serializers.SerializerMethodField()
+
+
+    # Custom field for the action history.
+    def get_action_history(self, obj):
+        return [build_action_string(action) for action in obj.target_actions.all()]
+
 
     # Custom field for the ServiceRequest ID.
     def get_request(self, obj):

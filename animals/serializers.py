@@ -12,18 +12,9 @@ class SimpleAnimalSerializer(serializers.ModelSerializer):
     front_image = serializers.SerializerMethodField()
     side_image = serializers.SerializerMethodField()
     extra_images = serializers.SerializerMethodField()
-    action_history = serializers.SerializerMethodField()
     shelter_name = serializers.SerializerMethodField()
     shelter = serializers.SerializerMethodField()
     # is_stray = serializers.BooleanField()
-
-    # Custom Owner object field that excludes animals to avoid a circular reference.
-    def get_owners(self, obj):
-        from people.serializers import SimplePersonSerializer
-
-        if obj.owner.exists():
-            return SimplePersonSerializer(obj.owner, many=True).data
-        return []
 
     # Custom field for the full address.
     def get_full_address(self, obj):
@@ -77,7 +68,22 @@ class SimpleAnimalSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Animal
-        fields = '__all__'
+        exclude = ['owner']
 
 class AnimalSerializer(SimpleAnimalSerializer):
     owners = serializers.SerializerMethodField()
+    action_history = serializers.SerializerMethodField()
+
+    # Custom Owner object field that excludes animals to avoid a circular reference.
+    def get_owners(self, obj):
+        from people.serializers import SimplePersonSerializer
+        if obj.owner.exists():
+            return SimplePersonSerializer(obj.owner, many=True).data
+        return []
+    
+    class Meta:
+        model = Animal
+        fields = '__all__'
+    
+
+

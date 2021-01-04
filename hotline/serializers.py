@@ -30,8 +30,6 @@ class SimpleServiceRequestSerializer(serializers.ModelSerializer):
     aco_required = serializers.SerializerMethodField(read_only=True)
     animal_count = serializers.IntegerField(read_only=True)
     injured = serializers.BooleanField(read_only=True)
-    action_history = serializers.SerializerMethodField()
-    assigned_evac = serializers.SerializerMethodField()
 
     # Custom field for the full address.
     def get_full_address(self, obj):
@@ -93,7 +91,25 @@ class SimpleEvacAssignmentSerializer(serializers.ModelSerializer):
 class ServiceRequestSerializer(SimpleServiceRequestSerializer):
     from people.serializers import SimplePersonSerializer
 
+    action_history = serializers.SerializerMethodField()
+    assigned_evac = serializers.SerializerMethodField()
     owners = SimplePersonSerializer(source='owner', many=True, required=False, read_only=True)
     reporter_object = SimplePersonSerializer(source='reporter', required=False, read_only=True)
     animals = SimpleAnimalSerializer(many=True, required=False, read_only=True)
     evacuation_assignments = SimpleEvacAssignmentSerializer(many=True, required=False, read_only=True)
+
+
+    def __init__(self, *args, **kwargs):
+    
+        # Instantiate the superclass normally
+        super(SimpleServiceRequestSerializer, self).__init__(*args, **kwargs)
+        if self.context.get('request') and self.context.get('request').path == '/hotline/api/servicerequests/':
+            self.fields.pop('action_history')
+            self.fields.pop('assigned_evac')
+
+        # if fields is not None:
+        #     # Drop any fields that are not specified in the `fields` argument.
+        #     allowed = set(fields)
+        #     existing = set(self.fields)
+        #     for field_name in existing - allowed:
+        #         self.fields.pop(field_name)
