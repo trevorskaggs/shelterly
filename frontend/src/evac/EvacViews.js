@@ -573,12 +573,20 @@ export function EvacSummary({id}) {
           ))}
         </ListGroup>
         <hr/>
+        {!data.end_time && service_request.visit_notes.length ?
+          <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
+            <h4 className="mt-2" style={{marginBottom:"-2px"}}>Previous Note - <Moment format="L">{service_request.visit_notes.sort((a,b) => new Date(b.date_completed).getTime() - new Date(a.date_completed).getTime())[0].date_completed}</Moment></h4>
+              <ListGroup.Item>
+              {service_request.visit_notes.sort((a,b) => new Date(b.date_completed).getTime() - new Date(a.date_completed).getTime())[0].notes || "No Information available."}
+              </ListGroup.Item>
+          </ListGroup>
+        : "" }
         {service_request.visit_notes.filter(note => String(note.evac_assignment) === String(id)).length > 0 ?
           <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
             <h4 className="mt-2" style={{marginBottom:"-2px"}}>Notes</h4>
             {service_request.visit_notes.filter(note => String(note.evac_assignment) === String(id)).map((note) => (
               <ListGroup.Item key={note.id}>
-                {note.notes || "None"}
+                {note.notes || "No Information available."}
               </ListGroup.Item>
             ))}
           </ListGroup>
