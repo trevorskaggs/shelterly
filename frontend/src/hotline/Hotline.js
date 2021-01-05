@@ -10,7 +10,6 @@ import bandaid from "../static/images/band-aid-solid.png";
 import car from "../static/images/car-solid.png";
 import trailer from "../static/images/trailer-solid.png";
 import { ServiceRequestForm } from "./HotlineForms";
-import { ServiceRequestTable } from "./HotlineTables"
 import { ServiceRequestView } from "./HotlineViews";
 import { initialData } from "./HotlineWorkflow";
 
@@ -141,16 +140,16 @@ function Hotline() {
     <>
     <ListGroup className="p-5">
       <Link href="/hotline/workflow/owner">
-      <ListGroup.Item action>OWNER CALLING</ListGroup.Item>
+        <ListGroup.Item action>OWNER CALLING</ListGroup.Item>
       </Link>
       <Link href="/hotline/workflow/reporter">
-      <ListGroup.Item action>NON-OWNER CALLING</ListGroup.Item>
+        <ListGroup.Item action>NON-OWNER CALLING</ListGroup.Item>
       </Link>
       <Link href="/hotline/workflow/first_responder">
-      <ListGroup.Item action>FIRST RESPONDER CALLING</ListGroup.Item>
+        <ListGroup.Item action>FIRST RESPONDER CALLING</ListGroup.Item>
       </Link>
-      <Link href="/hotline/servicerequest/list">
-      <ListGroup.Item action>SEARCH SERVICE REQUEST</ListGroup.Item>
+      <Link href="/hotline/servicerequest/search">
+        <ListGroup.Item action>SEARCH SERVICE REQUESTS</ListGroup.Item>
       </Link>
     </ListGroup>
     <Row className="d-flex flex-wrap">
@@ -212,14 +211,6 @@ function Hotline() {
   </>
   )
 }
-
-export const ServiceRequestList = () => (
-  <div>
-    <h1 style={header_style}>Service Requests</h1>
-    <br/>
-    <ServiceRequestTable />
-  </div>
-)
 
 export const NewServiceRequest = () => (
   <div>

@@ -88,12 +88,9 @@ export function AnimalSearch() {
           </ButtonGroup>
         </InputGroup>
       </Form>
-
       {data.animals.map(animal => (
         <div key={animal.id} className="mt-3">
-          <div className="card-header"> {animal.name ? titleCase(animal.name) : "Unknown"} - {titleCase(animal.species)} | {titleCase(animal.status)}
-            <Link href={"/animals/" + animal.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
-          </div>
+          <div className="card-header"><h4 style={{marginBottom:"-2px"}}>{animal.name ? titleCase(animal.name) : "Unknown"} <Link href={"/animals/" + animal.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} inverse /></Link> | {titleCase(animal.status)}</h4></div>
           <CardGroup>
             <Card key={animal.id} style={{maxWidth:"196px"}}>
               <Card.Body className="p-0 m-0">
@@ -120,9 +117,9 @@ export function AnimalSearch() {
                 <ListGroup>
                   <ListGroup.Item>{titleCase(animal.species)}{animal.sex ? <span>, {titleCase(animal.sex)}</span> : ""}{animal.age ? <span>, {titleCase(animal.age)}</span> : ""}{animal.size ? <span>, {titleCase(animal.size)}</span> : ""}</ListGroup.Item>
                   {animal.owners.map(owner => (
-                    <ListGroup.Item key={owner.id}><b>Owner:</b> {owner.first_name} {owner.last_name} {owner.display_phone} <Link href={"/hotline/owner/" + owner.id}><FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item>
+                    <ListGroup.Item key={owner.id}><b>Owner:</b> {owner.first_name} {owner.last_name} {owner.display_phone} <Link href={"/hotline/owner/" + owner.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item>
                   ))}
-                  {animal.owners < 1 && animal.reporter ? <ListGroup.Item><b>Reporter: </b> {animal.reporter.first_name} {animal.reporter.last_name} {animal.reporter.display_phone} <Link href={"/hotline/reporter/" + animal.reporter.id}><FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item> : ""}
+                  {animal.owners < 1 && animal.reporter ? <ListGroup.Item><b>Reporter: </b> {animal.reporter.first_name} {animal.reporter.last_name} {animal.reporter.display_phone} <Link href={"/hotline/reporter/" + animal.reporter.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item> : ""}
                   {animal.owners < 1 && !animal.reporter ? <ListGroup.Item><b>Owner: </b>No Owner</ListGroup.Item> : ""}
                 </ListGroup>
               </Card.Body>
@@ -131,9 +128,9 @@ export function AnimalSearch() {
               <Card.Body>
                 <Card.Title>Related Information</Card.Title>
                 <ListGroup>
-                  {animal.request ? <ListGroup.Item className='request'><b>Service Request: </b>{animal.request_address} <Link href={"/hotline/servicerequest/" + animal.request}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item> : <ListGroup.Item><b>Service Request: </b>No Service Request</ListGroup.Item>}
+                  {animal.request ? <ListGroup.Item className='request'><b>Service Request: </b>{animal.request_address} <Link href={"/hotline/servicerequest/" + animal.request} target="_blank"> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item> : <ListGroup.Item><b>Service Request: </b>No Service Request</ListGroup.Item>}
                   {animal.shelter ? <span>
-                    <ListGroup.Item><b>Shelter: </b>{animal.shelter_name} <Link href={"/shelter/" + animal.shelter}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item>
+                    <ListGroup.Item><b>Shelter: </b>{animal.shelter_name} <Link href={"/shelter/" + animal.shelter} target="_blank"> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item>
                     <ListGroup.Item><b>Address: </b>{animal.full_address}</ListGroup.Item></span> : 
                     <ListGroup.Item><b>Shelter: </b>No Shelter</ListGroup.Item>}
                 </ListGroup>
