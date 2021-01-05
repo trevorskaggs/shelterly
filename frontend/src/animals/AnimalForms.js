@@ -19,6 +19,7 @@ export const AnimalForm = (props) => {
   const { state, dispatch } = useContext(AuthContext);
   const { TreeNode } = TreeSelect;
   const id = props.id;
+  const back_target = props.state.steps.owner ? 'owner' : 'reporter'
 
   // Determine if this is an intake workflow.
   var is_intake = window.location.pathname.includes("intake")
@@ -232,7 +233,7 @@ export const AnimalForm = (props) => {
               }
             }
             else {
-              props.onSubmit('animals', values, 'forward');
+              props.onSubmit('animals', values, 'request');
             }
           }
           else if (id) {
@@ -285,9 +286,9 @@ export const AnimalForm = (props) => {
             <Card.Header as="h5" className="pl-3">{id ?
               <span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
               :
-              <span>{props.state && props.state.animalIndex > 0 ? <span style={{cursor:'pointer'}} onClick={() => {formikProps.resetForm({values:props.state.steps.animals[props.state.animalIndex-1]}); props.handleBack('animals', 'animals')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
+              <span>{props.state.animalIndex > 0 ? <span style={{cursor:'pointer'}} onClick={() => {formikProps.resetForm({values:props.state.steps.animals[props.state.animalIndex-1]}); props.handleBack('animals', 'animals')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
               :
-              <span style={{cursor:'pointer'}} onClick={() => {props.handleBack('animals', 'backward')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}</span>}{!id ? "Animal Information" : "Update Animal"}</Card.Header>
+              <span style={{cursor:'pointer'}} onClick={() => {props.handleBack('animals', props.state.stepIndex > 1 ? 'owner' : 'reporter')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}</span>}{!id ? "Animal Information" : "Update Animal"}</Card.Header>
             <Card.Body>
             <BootstrapForm as={Form}>
               <Field type="hidden" value={servicerequest_id||""} name="request" id="request"></Field>

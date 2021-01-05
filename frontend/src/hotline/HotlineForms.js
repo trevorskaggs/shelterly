@@ -180,7 +180,7 @@ export function ServiceRequestForm(props) {
         <Card.Header as="h5">{id ?
           <span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
           :
-          <span style={{cursor:'pointer'}} onClick={() => {props.handleBack('request', 'backward')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}{id ? "Update " : ""}Service Request{is_workflow ? " Information" :""}</Card.Header>
+          <span style={{cursor:'pointer'}} onClick={() => {props.handleBack('request', 'animals')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}{id ? "Update " : ""}Service Request{is_workflow ? " Information" :""}</Card.Header>
         <Card.Body>
         <BootstrapForm as={Form}>
           {props.state.steps.owner.address && !id ?
@@ -191,7 +191,7 @@ export function ServiceRequestForm(props) {
           }
             <Fade in={fadeIn} hidden={!fadeIn}>
               <BootstrapForm.Row>
-                <BootstrapForm.Group as={Col} xs="10">
+                <BootstrapForm.Group as={Col} xs="12">
                   <AddressLookup
                     label="Search"
                     style={{width: '100%'}}
@@ -205,7 +205,7 @@ export function ServiceRequestForm(props) {
                   label={is_first_responder ? "Address/Cross Streets*" : "Address*"}
                   name="address"
                   id="address"
-                  xs="8"
+                  xs="10"
                   disabled
                 />
                 <TextInput
@@ -222,7 +222,7 @@ export function ServiceRequestForm(props) {
                   label="City"
                   name="city"
                   id="city"
-                  xs="6"
+                  xs="8"
                   disabled
                 />
                 <Col xs="2">
@@ -253,7 +253,7 @@ export function ServiceRequestForm(props) {
                   label="Directions"
                   name="directions"
                   id="directions"
-                  xs="10"
+                  xs="12"
                 />
             </BootstrapForm.Row>
             <BootstrapForm.Row>

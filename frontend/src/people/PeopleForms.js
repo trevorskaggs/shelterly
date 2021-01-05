@@ -51,12 +51,15 @@ export const PersonForm = (props) => {
 
   // Whether or not to skip Owner creation.
   const [skipOwner, setSkipOwner] = useState(false);
-  const [isOwner, setIsOwner] = useState(props.state.hasOwner || is_owner);
+  const [isOwner, setIsOwner] = useState(props.state.stepIndex > 0 || is_owner);
 
   // Modal for exiting workflow.
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
   const goBack = () => navigate('/hotline');
+
+  // Control Agency display.
+  const [showAgency, setShowAgency] = useState(props.state.stepIndex === 0 && is_first_responder);
 
   const initialData = {
     first_name: '',
@@ -65,7 +68,7 @@ export const PersonForm = (props) => {
     alt_phone: '',
     email: '',
     comments: '',
-    show_agency: is_first_responder,
+    show_agency: showAgency,
     agency: '',
     drivers_license: '',
     address: '',
@@ -88,7 +91,7 @@ export const PersonForm = (props) => {
     else {
       current_data = props.state.steps.reporter
     }
-    current_data['show_agency'] = is_first_responder;
+    current_data['show_agency'] = showAgency;
   }
 
   // Initial Person data.
@@ -163,15 +166,16 @@ export const PersonForm = (props) => {
         onSubmit={(values, { setSubmitting, resetForm }) => {
           if (is_workflow) {
             if (isOwner) {
-              props.onSubmit('owner', values, 'forward');
+              props.onSubmit('owner', values, 'animals');
             }
             else {
               if (skipOwner) {
-                props.onSubmit('reporter', values, 'forward');
+                props.onSubmit('reporter', values, 'animals');
               }
               else {
                 props.onSubmit('reporter', values, 'owner');
                 setIsOwner(true);
+                setShowAgency(false);
                 resetForm({values:props.state.steps.owner});
               }
             }
@@ -249,7 +253,7 @@ export const PersonForm = (props) => {
               <Card.Header as="h5" className="pl-3">{props.state.stepIndex === 0 ?
                 <span style={{cursor:'pointer'}} onClick={() => {setShow(true)}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
                 :
-                <span style={{cursor:'pointer'}} onClick={() => {setIsOwner(false); formikProps.resetForm({values:props.state.steps.reporter}); props.handleBack('owner', 'reporter')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}
+                <span style={{cursor:'pointer'}} onClick={() => {setIsOwner(false); setShowAgency(is_first_responder); formikProps.resetForm({values:props.state.steps.reporter}); props.handleBack('owner', 'reporter')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}
           {isOwner ? "Owner" : "Reporter"}{is_workflow ? " Information" : ""}
           </Card.Header>}
           <Card.Body>
@@ -270,56 +274,34 @@ export const PersonForm = (props) => {
                 name="last_name"
               />
             </BootstrapForm.Row>
-            <BootstrapForm.Row hidden={is_owner}>
+            <BootstrapForm.Row>
               <TextInput
-                xs="3"
+                xs={isOwner ? "2" : "3"}
                 type="text"
                 label="Phone"
                 name="phone"
               />
               <TextInput
-                xs="3"
+                xs={isOwner ? "2" : "3"}
                 type="text"
                 label="Alternate Phone"
                 name="alt_phone"
               />
-              <TextInput
-                xs="6"
-                type="text"
-                label="Email"
-                name="email"
-              />
-            </BootstrapForm.Row>
-            <BootstrapForm.Row hidden={!is_owner}>
-              <TextInput
-                xs="6"
-                type="text"
-                label="Phone"
-                name="phone"
-              />
-              <TextInput
-                xs="6"
-                type="text"
-                label="Alternate Phone"
-                name="alt_phone"
-              />
-            </BootstrapForm.Row>
-            <BootstrapForm.Row hidden={!is_owner}>
-              <TextInput
-                xs="6"
-                type="text"
-                label="Email"
-                name="email"
-              />
-              <TextInput
-                xs="6"
+              <TextInput hidden={!isOwner}
+                xs="2"
                 type="text"
                 label="Drivers License"
                 name="drivers_license"
                 id="drivers_license"
               />
+              <TextInput
+                xs="6"
+                type="text"
+                label="Email"
+                name="email"
+              />
             </BootstrapForm.Row>
-            <BootstrapForm.Row hidden={is_first_responder || data.agency}>
+            <BootstrapForm.Row hidden={(is_first_responder && !isOwner) || (data.agency && id)}>
               <TextInput
                 xs="12"
                 as="textarea"
@@ -327,7 +309,7 @@ export const PersonForm = (props) => {
                 name="comments"
               />
             </BootstrapForm.Row>
-            <BootstrapForm.Row hidden={!is_first_responder && !data.agency}>
+            <BootstrapForm.Row hidden={!showAgency && (!data.agency || !id)}>
               <TextInput
                 xs="12"
                 as="textarea"
@@ -400,7 +382,7 @@ export const PersonForm = (props) => {
               {/* form save buttons */}
               {!is_first_responder && !is_workflow ? <Button type="button" onClick={() => { setSkipOwner(false); formikProps.submitForm() }}>{!isOwner && !is_intake ? <span>{!id ? "Add Owner" : "Save"}</span> : "Save"}</Button> : ""}
               {/* workflow buttons */}
-              {is_workflow && !isOwner && !is_first_responder ? <Button type="button" onClick={() => { setSkipOwner(false); formikProps.submitForm() }}>{props.state.steps.owner.first_name ? "Change Owner" : "Add Owner"}</Button> : ""}
+              {is_workflow && !isOwner ? <Button type="button" onClick={() => { setSkipOwner(false); formikProps.submitForm(); }}>{props.state.steps.owner.first_name ? "Change Owner" : "Add Owner"}</Button> : ""}
               {is_workflow ? <button type="button" className="btn btn-primary mr-1 border" onClick={() => { setSkipOwner(true); formikProps.submitForm() }}>Next Step</button> : ""}
             </ButtonGroup>
           </Card>

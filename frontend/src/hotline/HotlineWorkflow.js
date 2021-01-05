@@ -50,7 +50,8 @@ export const initialData = {
       phone: '',
       alt_phone: '',
       email: '',
-      best_contact: '',
+      drivers_license: '',
+      comments: '',
       agency: '',
       address: '',
       apartment: '',
@@ -66,7 +67,8 @@ export const initialData = {
       phone: '',
       alt_phone: '',
       email: '',
-      best_contact: '',
+      drivers_license: '',
+      comments: '',
       agency: '',
       address: '',
       apartment: '',
@@ -90,9 +92,9 @@ export default function HotlineWorkflow() {
   // Counts number of reporter + owner
   const [contactCount, setContactCount] = React.useState(0);
 
-  function handleBack (currentStep, nextStep) {
+  function handleBack(currentStep, nextStep) {
     // Lower the active step if going backwards between major steps.
-    if (nextStep === 'backward') {
+    if ((currentStep === 'animals' && nextStep !== 'animals') || (currentStep === 'request' && nextStep === 'animals')) {
       setActiveStep((prevActiveStep) => prevActiveStep - 1);
     }
 
@@ -103,12 +105,13 @@ export default function HotlineWorkflow() {
     }
     setState((prevState) => ({
       ...prevState,
+      hasOwner: nextStep === 'owner',
       stepIndex: prevState.stepIndex - 1,
       animalIndex: track_index,
     }))
   };
 
-  function handleStepSubmit (currentStep, data, nextStep) {
+  function handleStepSubmit(currentStep, data, nextStep) {
     // Only count contacts the first time.
     if ((currentStep === 'reporter' && state.steps.reporter.first_name === '') || (currentStep === 'owner' && state.steps.owner.first_name === '')) {
       setContactCount((count) => count + 1);
@@ -146,14 +149,14 @@ export default function HotlineWorkflow() {
     else {
       setState((prevState) => ({
         ...prevState,
-        hasOwner: currentStep === 'owner',
+        hasOwner: nextStep === 'owner',
         stepIndex: prevState.stepIndex + 1,
         steps: { ...prevState.steps, [currentStep]:data }
       }))
     }
 
-    // Only bump up the active step when designated.
-    if (nextStep === 'forward'){
+    // Only bump up the major active step when moving to a new type of object creation.
+    if ((currentStep !== 'animals' && nextStep === 'animals') || (currentStep === 'animals' && nextStep === 'request')){
       setActiveStep((prevActiveStep) => prevActiveStep + 1);
     }
   }

@@ -4,9 +4,11 @@ from actstream.models import target_stream
 
 from .models import Animal, AnimalImage
 from location.utils import build_full_address, build_action_string
+from people.serializers import PersonSerializer
 
 class AnimalSerializer(serializers.ModelSerializer):
     owners = serializers.SerializerMethodField()
+    reporter_object = PersonSerializer(source='reporter', required=False, read_only=True)
     full_address = serializers.SerializerMethodField()
     request_address = serializers.SerializerMethodField()
     aco_required = serializers.SerializerMethodField()

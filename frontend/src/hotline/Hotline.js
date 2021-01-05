@@ -139,7 +139,7 @@ function Hotline() {
 
   return (
     <>
-    <ListGroup className="flex-fill p-5 h-50">
+    <ListGroup className="p-5">
       <Link href="/hotline/workflow/owner">
       <ListGroup.Item action>OWNER CALLING</ListGroup.Item>
       </Link>
@@ -155,7 +155,7 @@ function Hotline() {
     </ListGroup>
     <Row className="d-flex flex-wrap">
       <Col xs={10} className="border rounded pl-0 pr-0 m-auto">
-        <Map className="d-block" style={{marginRight:"0px"}} bounds={data.bounds} onMoveEnd={onMove}>
+        <Map className="d-block" bounds={data.bounds} onMoveEnd={onMove}>
           <Legend position="bottomleft" metric={false} />
           <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
