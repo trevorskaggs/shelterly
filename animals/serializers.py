@@ -11,10 +11,10 @@ class SimpleAnimalSerializer(serializers.ModelSerializer):
     aco_required = serializers.SerializerMethodField()
     front_image = serializers.SerializerMethodField()
     side_image = serializers.SerializerMethodField()
-    extra_images = serializers.SerializerMethodField()
+    extra_image = serializers.SerializerMethodField()
     shelter_name = serializers.SerializerMethodField()
     shelter = serializers.SerializerMethodField()
-    # is_stray = serializers.BooleanField()
+    is_stray = serializers.BooleanField(read_only=True)
 
     # Custom field for the full address.
     def get_full_address(self, obj):
@@ -52,19 +52,40 @@ class SimpleAnimalSerializer(serializers.ModelSerializer):
 
     def get_front_image(self, obj):
         try:
-            return [image.url for image in obj.images if image.category == 'front_image'][0]
+            return [animal_image.image.url for animal_image in obj.images if animal_image.category == 'front_image'][0]
             # change this exception
         except IndexError:
             return ''
+        except AttributeError:
+            # Should only hit this when returning a single object after create.
+            try:
+                return obj.animalimage_set.filter(category='front_image').first().url
+            except AttributeError:
+                return ''
 
     def get_side_image(self, obj):
         try:
-            return [image.url for image in obj.images if image.category == 'side_image'][0]
+            return [animal_image.image.url for animal_image in obj.images if animal_image.category == 'side_image'][0]
         except IndexError:
             return ''
+        except AttributeError:
+            try:
+                return obj.animalimage_set.filter(category='side_image').first().url
+            except AttributeError:
+                return ''
 
-    def get_extra_images(self, obj):
-        return [image.url for image in obj.images if image.category == 'extra']
+
+    def get_extra_image(self, obj):
+        try:
+            return [animal_image.image.url for animal_image in obj.images if animal_image.category == 'extra'][0]
+        except IndexError:
+            return ''
+        except AttributeError:
+            # Should only hit this when returning a single object after create.
+            try:
+                return obj.animalimage_set.filter(category='extra').first().url
+            except AttributeError:
+                return ''
 
     class Meta:
         model = Animal

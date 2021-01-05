@@ -101,7 +101,12 @@ class AnimalViewSet(viewsets.ModelViewSet):
                     AnimalImage.objects.create(image=image_data, animal=animal, category="extra")
     
     def get_queryset(self):
-        #annoatate is_stray
+        """
+        Returns: Queryset of distinct animals, each annotated with:
+            is_stray (boolean)
+            images (List of AnimalImages)
+        and filtered by is_stray.   
+        """        
         queryset = Animal.objects.all().annotate(
             is_stray=Case(
                 When(owner=None, then=True),
