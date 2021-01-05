@@ -11,6 +11,7 @@ class Animal(models.Model):
 
     request = models.ForeignKey(ServiceRequest, on_delete=models.SET_NULL, blank=True, null=True)
     owner = models.ManyToManyField(Person, blank=True)
+    reporter = models.ForeignKey(Person, on_delete=models.SET_NULL, blank=True, null=True, related_name="animals")
     room = models.ForeignKey(Room, on_delete=models.SET_NULL, blank=True, null=True)
     name = models.CharField(max_length=50, blank=True)
 

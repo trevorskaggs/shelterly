@@ -559,16 +559,16 @@ export function EvacSummary({id}) {
         <ListGroup variant="flush" style={{marginTop:"-5px", marginBottom:"-13px"}}>
           <ListGroup.Item style={{marginTop:"-8px"}}><b>Address: </b>{service_request.full_address}</ListGroup.Item>
           {service_request.owners.map(owner => (
-            <ListGroup.Item><b>Owner: </b>{owner.first_name} {owner.last_name} <Link href={"/hotline/owner/" + owner}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link> | {owner.display_phone||owner.email||"No Contact"}</ListGroup.Item>
+            <ListGroup.Item key={owner.id}><b>Owner: </b>{owner.first_name} {owner.last_name} <Link href={"/hotline/owner/" + owner}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link> | {owner.display_phone||owner.email||"No Contact"}</ListGroup.Item>
           ))}
           {service_request.owners.length < 1 ? <ListGroup.Item><b>Owner: </b>No Owner</ListGroup.Item> : ""}
         </ListGroup>
         <hr/>
         <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
           <h4 className="mt-2" style={{marginBottom:"-2px"}}>Animals</h4>
-          {service_request.animals.map((animal, inception) => (
+          {service_request.animals.filter(animal => animal.evacuation_assignments.includes(Number(id))).map((animal, inception) => (
             <ListGroup.Item key={animal.id}>
-              <span style={{textTransform:"capitalize"}}>{animal.name||"Unknown"} ({animal.pcolor ? <span>{animal.pcolor}{animal.scolor ? "/" + animal.scolor : ""}&nbsp;</span> : ""}<span style={{textTransform:"capitalize"}}>{animal.species}</span></span>) - {animal.status}<Link href={"/animals/animal/" + animal.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
+              <span style={{textTransform:"capitalize"}}>{animal.name||"Unknown"}</span> ({animal.species}) - {animal.status}<Link href={"/animals/animal/" + animal.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
             </ListGroup.Item>
           ))}
         </ListGroup>
