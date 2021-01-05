@@ -11,7 +11,7 @@ class SimpleAnimalSerializer(serializers.ModelSerializer):
     aco_required = serializers.SerializerMethodField()
     front_image = serializers.SerializerMethodField()
     side_image = serializers.SerializerMethodField()
-    extra_image = serializers.SerializerMethodField()
+    extra_images = serializers.SerializerMethodField()
     shelter_name = serializers.SerializerMethodField()
     shelter = serializers.SerializerMethodField()
     is_stray = serializers.BooleanField(read_only=True)
@@ -75,7 +75,7 @@ class SimpleAnimalSerializer(serializers.ModelSerializer):
                 return ''
 
 
-    def get_extra_image(self, obj):
+    def get_extra_images(self, obj):
         try:
             return [animal_image.image.url for animal_image in obj.images if animal_image.category == 'extra'][0]
         except IndexError:
