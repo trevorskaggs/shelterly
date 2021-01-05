@@ -12,10 +12,13 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-
-        # migrations.AddField(
-        #     model_name='animal',
-        #     name='owner',
-        #     field=models.ManyToManyField(blank=True, to='people.Person'),
-        # ),
+        migrations.RemoveField(
+            model_name='animal',
+            name='owner',
+        ),
+        migrations.AddField(
+            model_name='animal',
+            name='owner',
+            field=models.ManyToManyField(blank=True, to='people.Person'),
+        ),
     ]
