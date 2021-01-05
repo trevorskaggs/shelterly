@@ -2,26 +2,25 @@ import axios from "axios";
 import { navigate } from "raviger";
 
 // Authenticate the user with the backnd to obtain a user.
-export async function loadUser({dispatch, removeCookie}) {
+export function loadUser({dispatch, removeCookie}) {
 
   // Set user loading state.
   dispatch({ type: 'USER_LOADING' });
 
   // Check backend for authentication and return user information if valid.
-  try {
-    // hit auth endpoint after token cookie is set
-  const response = await axios.get("/accounts/api/user/auth/")
-  // Set the user state.
-  dispatch({type: 'USER_LOADED', user: response.data });
-  }
-  catch(e) {
+  axios.get("/accounts/api/user/auth/")
+  .then(function(results){
+    // Set the user state.
+    dispatch({type: 'USER_LOADED', user: results.data });
+  })
+  .catch(e => {
     console.log(e);
     // Raise error.
     removeCookie("token", {path: '/'});
     setAuthToken();
     dispatch({type: "AUTHENTICATION_ERROR", data: e});
     navigate('/login');
-  }
+  })
 }
 
 // Log the user out of the system.

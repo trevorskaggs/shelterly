@@ -33,10 +33,9 @@ export const LoginForm = () => {
             .required('No password provided.'),
         })}
         onSubmit={(values, actions ) => {
-          setTimeout(async () => {
-            try {
-              // query login endpoint with username and password
-              const response = await axios.post('/login/', values)
+          setTimeout(() => {
+            axios.post('/login/', values)
+            .then(response => {
               setAuthToken(response.data.token);
               //set token as cookie 
               setCookie("token", response.data.token, {path: '/'});
@@ -45,15 +44,14 @@ export const LoginForm = () => {
               //called once
               loadUser({dispatch, removeCookie});
               navigate(next);
-            }
-            catch (e) {
+            })
+            .catch(e => {
               console.log(e);
               removeCookie("token", {path: '/'});
               setAuthToken();
               actions.setStatus('Failed to log in with this username and password combination.')
               dispatch({type: "LOGIN_FAILED", data: e});
-
-            }
+            });
             actions.setSubmitting(false);
           }, 500);
         }}
