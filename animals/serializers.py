@@ -16,10 +16,6 @@ class SimpleAnimalSerializer(serializers.ModelSerializer):
     shelter = serializers.SerializerMethodField()
     is_stray = serializers.BooleanField(read_only=True)
 
-    # Custom Evac Assignment field to avoid a circular reference.
-    def get_evacuation_assignments(self, obj):
-        return obj.evacuation_assignments.values_list('id', flat=True)
-
     # Custom field for the full address.
     def get_full_address(self, obj):
         # Use the Room address first if it exists.
@@ -98,6 +94,7 @@ class SimpleAnimalSerializer(serializers.ModelSerializer):
 class AnimalSerializer(SimpleAnimalSerializer):
     owners = serializers.SerializerMethodField()
     action_history = serializers.SerializerMethodField()
+    evacuation_assignments = serializers.SerializerMethodField()
 
     # Custom Owner object field that excludes animals to avoid a circular reference.
     def get_owners(self, obj):
@@ -105,6 +102,10 @@ class AnimalSerializer(SimpleAnimalSerializer):
         if obj.owner.exists():
             return SimplePersonSerializer(obj.owner, many=True).data
         return []
+
+    # Custom Evac Assignment field to avoid a circular reference.
+    def get_evacuation_assignments(self, obj):
+        return [ea.id for ea in obj.evacuation_assignments.all()]
     
     class Meta:
         model = Animal

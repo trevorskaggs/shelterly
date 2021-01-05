@@ -108,21 +108,14 @@ class ServiceRequestSerializer(SimpleServiceRequestSerializer):
     assigned_evac = serializers.SerializerMethodField()
     owners = SimplePersonSerializer(source='owner', many=True, required=False, read_only=True)
     reporter_object = SimplePersonSerializer(source='reporter', required=False, read_only=True)
-    animals = SimpleAnimalSerializer(many=True, required=False, read_only=True)
+    animals = SimpleAnimalSerializer(many=True, read_only=True)
     evacuation_assignments = SimpleEvacAssignmentSerializer(many=True, required=False, read_only=True)
 
 
     def __init__(self, *args, **kwargs):
     
         # Instantiate the superclass normally
-        super(SimpleServiceRequestSerializer, self).__init__(*args, **kwargs)
+        super(ServiceRequestSerializer, self).__init__(*args, **kwargs)
         if self.context.get('request') and self.context.get('request').path == '/hotline/api/servicerequests/':
             self.fields.pop('action_history')
             self.fields.pop('assigned_evac')
-
-        # if fields is not None:
-        #     # Drop any fields that are not specified in the `fields` argument.
-        #     allowed = set(fields)
-        #     existing = set(self.fields)
-        #     for field_name in existing - allowed:
-        #         self.fields.pop(field_name)
