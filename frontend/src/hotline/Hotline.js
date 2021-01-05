@@ -10,7 +10,6 @@ import bandaid from "../static/images/band-aid-solid.png";
 import car from "../static/images/car-solid.png";
 import trailer from "../static/images/trailer-solid.png";
 import { ServiceRequestForm } from "./HotlineForms";
-import { ServiceRequestTable } from "./HotlineTables"
 import { ServiceRequestView } from "./HotlineViews";
 
 const header_style = {
@@ -148,7 +147,7 @@ function Hotline() {
       <Link href="/hotline/first_responder/new">
       <ListGroup.Item action>FIRST RESPONDER CALLING</ListGroup.Item>
       </Link>
-      <Link href="/hotline/servicerequest/list">
+      <Link href="/hotline/servicerequest/search">
       <ListGroup.Item action>SEARCH SERVICE REQUESTS</ListGroup.Item>
       </Link>
     </ListGroup>
@@ -211,14 +210,6 @@ function Hotline() {
   </>
   )
 }
-
-export const ServiceRequestList = () => (
-  <div>
-    <h1 style={header_style}>Service Requests</h1>
-    <br/>
-    <ServiceRequestTable />
-  </div>
-)
 
 export const NewServiceRequest = () => (
   <div>
