@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Case, BooleanField, Value, When, Exists
+from copy import deepcopy
 from rest_framework import filters, viewsets
 from actstream import action
 
@@ -27,27 +28,36 @@ class AnimalViewSet(viewsets.ModelViewSet):
                 serializer.validated_data['room'] = None
 
             animal = serializer.save()
+            animals = [animal]
             action.send(self.request.user, verb='created animal', target=animal)
 
-            # Add Owner to new animals if it is POSTed.
-            if self.request.data.get('new_owner'):
-                animal.owner.add(self.request.data['new_owner'])
+            # Create multiple copies of animal if specified.
+            for i in range(int(self.request.data.get('number_of_animals', 1)) -1):
+                new_animal = deepcopy(animal)
+                new_animal.id = None
+                new_animal.save()
+                animals.append(new_animal)
 
-            # Add ServiceRequest Owner and Reporter to new animals being added to an SR.
-            if serializer.validated_data.get('request'):
-                animal.owner.add(*animal.request.owner.all())
+            for animal in animals:
+                # Add Owner to new animals if it is POSTed.
+                if self.request.data.get('new_owner'):
+                    animal.owner.add(self.request.data['new_owner'])
 
-            if animal.room:
-                action.send(self.request.user, verb='sheltered animal', target=animal.room, action_object=animal)
-                action.send(self.request.user, verb='sheltered animal', target=animal.room.building, action_object=animal)
-                action.send(self.request.user, verb='sheltered animal', target=animal.room.building.shelter, action_object=animal)
+                # Add ServiceRequest Owner and Reporter to new animals being added to an SR.
+                if serializer.validated_data.get('request'):
+                    animal.owner.add(*animal.request.owner.all())
 
-            images_data = self.request.FILES
-            for key, image_data in images_data.items():
-                # Strip out extra numbers from the key (e.g. "extra1" -> "extra")
-                category = key.translate({ord(num): None for num in '0123456789'})
-                # Create image object.
-                AnimalImage.objects.create(image=image_data, animal=animal, category=category)
+                if animal.room:
+                    action.send(self.request.user, verb='sheltered animal', target=animal.room, action_object=animal)
+                    action.send(self.request.user, verb='sheltered animal', target=animal.room.building, action_object=animal)
+                    action.send(self.request.user, verb='sheltered animal', target=animal.room.building.shelter, action_object=animal)
+
+                images_data = self.request.FILES
+                for key, image_data in images_data.items():
+                    # Strip out extra numbers from the key (e.g. "extra1" -> "extra")
+                    category = key.translate({ord(num): None for num in '0123456789'})
+                    # Create image object.
+                    AnimalImage.objects.create(image=image_data, animal=animal, category=category)
 
     def perform_update(self, serializer):
         if serializer.is_valid():

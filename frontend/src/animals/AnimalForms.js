@@ -76,6 +76,7 @@ export const AnimalForm = (props) => {
     injured: 'unknown',
     behavior_notes: '',
     last_seen: null,
+    number_of_animals: 1,
     room: null,
     front_image: null,
     side_image: null,
@@ -130,6 +131,8 @@ export const AnimalForm = (props) => {
           cancelToken: source.token,
         })
         .then(response => {
+          // Initialize number_of_animals because it's not returned by the serializer.
+          response.data['number_of_animals'] = 1;
           setData(response.data);
           setPlaceholder("Select...");
           // Turn off reinitialization after form load so that data can be modified for image tracking without causing a form reset.
@@ -181,6 +184,7 @@ export const AnimalForm = (props) => {
           age: Yup.string(),
           sex: Yup.string()
             .oneOf(['M', 'F']),
+          number_of_animals: Yup.number().required('Required').positive('Value must be positive').integer('Value must be a whole number'),
           pcolor: Yup.string(),
           scolor: Yup.string(),
           color_notes: Yup.string()
@@ -293,7 +297,7 @@ export const AnimalForm = (props) => {
             <BootstrapForm as={Form}>
               <Field type="hidden" value={servicerequest_id||""} name="request" id="request"></Field>
                 <BootstrapForm.Row>
-                  <Col xs="4">
+                  <Col xs={id ? "6" : "5"}>
                     <DropDown
                       label="Species*"
                       id="speciesDropdown"
@@ -314,13 +318,12 @@ export const AnimalForm = (props) => {
                       }}
                     />
                   </Col>
-                  <Col xs="4">
+                  <Col xs={id ? "6" : "5"}>
                     <DropDown
                       label="Size*"
                       id="sizeDropdown"
                       name="size"
                       type="text"
-                      xs="4"
                       isClearable={false}
                       key={`my_unique_size_select_key__${formikProps.values.size}`}
                       ref={sizeRef}
@@ -329,20 +332,14 @@ export const AnimalForm = (props) => {
                       placeholder={placeholder}
                     />
                   </Col>
-                  <Col xs="4">
-                    <DropDown
-                      label="Age"
-                      id="age"
-                      name="age"
-                      type="text"
-                      xs="4"
-                      key={`my_unique_age_select_key__${formikProps.values.age}`}
-                      ref={ageRef}
-                      options={ageChoices[formikProps.values.species]}
-                      value={formikProps.values.age||''}
-                      placeholder={placeholder}
-                    />
-                  </Col>
+                  <TextInput
+                    id="number_of_animals"
+                    name="number_of_animals"
+                    type="text"
+                    xs="2"
+                    label="No. of Animals"
+                    hidden={id}
+                  />
                 </BootstrapForm.Row>
                 <BootstrapForm.Row className="mt-3">
                   <Col xs="4">
@@ -381,11 +378,11 @@ export const AnimalForm = (props) => {
                 </BootstrapForm.Row>
                 <BootstrapForm.Row>
                   <TextInput
-                      id="name"
-                      xs="9"
-                      name="name"
-                      type="text"
-                      label="Animal Name"
+                    id="name"
+                    xs="6"
+                    name="name"
+                    type="text"
+                    label="Animal Name"
                   />
                   <Col xs="3">
                     <DropDown
@@ -397,6 +394,20 @@ export const AnimalForm = (props) => {
                         ref={sexRef}
                         options={sexChoices}
                         value={formikProps.values.sex||''}
+                    />
+                  </Col>
+                  <Col xs="3">
+                    <DropDown
+                      label="Age"
+                      id="age"
+                      name="age"
+                      type="text"
+                      xs="4"
+                      key={`my_unique_age_select_key__${formikProps.values.age}`}
+                      ref={ageRef}
+                      options={ageChoices[formikProps.values.species]}
+                      value={formikProps.values.age||''}
+                      placeholder={placeholder}
                     />
                   </Col>
                 </BootstrapForm.Row>
