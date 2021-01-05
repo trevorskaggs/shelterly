@@ -21,7 +21,7 @@ export function PersonView({id}) {
     last_name: '',
     phone: '',
     email: '',
-    best_contact: '',
+    comments: '',
     agency: '',
     drivers_license: '',
     address: '',
@@ -72,12 +72,11 @@ export function PersonView({id}) {
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
               <ListGroup.Item><b>Name: </b>{data.first_name} {data.last_name}</ListGroup.Item>
               {data.phone ? <ListGroup.Item><b>Telephone: </b>{data.display_phone}</ListGroup.Item> : ""}
+              {data.alt_phone ? <ListGroup.Item><b>Alternate Telephone: </b>{data.display_alt_phone}</ListGroup.Item> : ""}
               {data.email ? <ListGroup.Item><b>Email: </b>{data.email}</ListGroup.Item> : ""}
-              {data.best_contact ?
-                <ListGroup.Item><b>Best Contact: </b>{data.best_contact}</ListGroup.Item>: ''}
-              {data.agency ?
-                <ListGroup.Item><b>Agency: </b>{data.agency}</ListGroup.Item>: ''}
-              <ListGroup.Item><b>Address: </b>{data.address ? data.full_address : 'N/A'}</ListGroup.Item>
+              {data.comments ? <ListGroup.Item><b>Comments: </b>{data.comments}</ListGroup.Item>: ''}
+              {data.agency ? <ListGroup.Item><b>Agency: </b>{data.agency}</ListGroup.Item>: ''}
+              <ListGroup.Item><b>Address: </b>{data.address ? data.full_address : 'No Address Listed'}</ListGroup.Item>
               {data.request ?
                 <ListGroup.Item><b>Service Request: </b>{data.request.full_address}<Link href={"/hotline/servicerequest/" + data.request.id}> <FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link></ListGroup.Item>: ''}
             </ListGroup>
@@ -85,9 +84,9 @@ export function PersonView({id}) {
         </Card>
       </div>
     </div>
-    <div className="row mb-2 mt-3" hidden={data.animals.length === 0}>
+    <div className="row mt-3" hidden={data.animals.length === 0}>
       <div className="col-12 d-flex">
-        <Card className="mb-2 border rounded" style={{width:"100%"}}>
+        <Card className="border rounded" style={{width:"100%"}}>
           <Card.Body>
             <Card.Title>
               <h4 className="mb-0">Animals<Link href={"/hotline/animal/new?owner_id=" + id}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link></h4>

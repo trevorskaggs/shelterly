@@ -18,7 +18,7 @@ class EvacTeamMemberViewSet(viewsets.ModelViewSet):
 class EvacAssignmentViewSet(viewsets.ModelViewSet):
 
     queryset = EvacAssignment.objects.all()
-    search_fields = ['team_members__first_name', 'team_members__last_name', 'service_requests__owner__first_name', 'service_requests__owner__last_name', 'service_requests__address', 'service_requests__reporter__first_name', 'service_requests__reporter__last_name']
+    search_fields = ['team_members__first_name', 'team_members__last_name', 'service_requests__owner__first_name', 'service_requests__owner__last_name', 'service_requests__address', 'service_requests__reporter__first_name', 'service_requests__reporter__last_name', 'animals__name']
     filter_backends = (filters.SearchFilter,)
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = EvacAssignmentSerializer
@@ -41,6 +41,7 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
             action.send(self.request.user, verb='created evacuation assignment', target=evac_assignment)
             for service_request in service_requests:
                 action.send(self.request.user, verb='assigned service request', target=service_request)
+                evac_assignment.animals.add(*Animal.objects.filter(request=service_request, status__in=['REPORTED', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE']))
 
     def perform_update(self, serializer):
         if serializer.is_valid():
@@ -50,17 +51,24 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
             evac_assignment = serializer.save()
             for service_request in self.request.data['sr_updates']:
                 sr_status = 'closed'
-                for animal in service_request['animals']:
-                    Animal.objects.filter(id=animal['id']).update(status=animal['status'])
-                    if animal['status'] in ['SHELTERED IN PLACE', 'UNABLE TO LOCATE']:
+                for animal_dict in service_request['animals']:
+                    # Record status change if applicable.
+                    new_status = animal_dict['status']
+                    animal = Animal.objects.get(pk=animal_dict['id'])
+                    if animal.status != new_status:
+                        action.send(self.request.user, verb=f'changed animal status to {new_status}', target=animal)
+                        Animal.objects.filter(id=animal_dict['id']).update(status=new_status)
+                    # Mark SR as open if any animal is SIP or UTL.
+                    if new_status in ['SHELTERED IN PLACE', 'UNABLE TO LOCATE']:
                         sr_status = 'open'
+                # Update the relevant SR fields.
                 service_requests = ServiceRequest.objects.filter(id=service_request['id'])
                 service_requests.update(status=sr_status, followup_date=service_request['followup_date'] or None)
                 if sr_status == 'open':
                     action.send(self.request.user, verb='opened service request', target=service_requests[0])
                 else:
                     action.send(self.request.user, verb='closed service request', target=service_requests[0])
-                # Only create VisitNote on first update.
+                # Only create VisitNote on first update, otherwise update existing VisitNote.
                 if not VisitNote.objects.filter(evac_assignment=evac_assignment, service_request=service_requests[0]).exists():
                     VisitNote.objects.create(evac_assignment=evac_assignment, service_request=service_requests[0], date_completed=service_request['date_completed'], notes=service_request['notes'], owner_contacted=service_request['owner_contacted'], forced_entry=service_request['forced_entry'])
                 else:

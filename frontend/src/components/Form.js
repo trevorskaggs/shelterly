@@ -56,7 +56,7 @@ const TextInput = ({ label, value, xs, controlId, formGroupClasses, ...props }) 
   const [field, meta] = useField(props);
   return (
     <>
-    <Form.Group as={Col} xs={xs} controlId={controlId} className={formGroupClasses}>
+    <Form.Group as={Col} xs={xs} controlId={controlId} className={formGroupClasses} hidden={props.hidden}>
       <Form.Label>{label}</Form.Label>
       <Form.Control type="text" value={value} isInvalid={meta.touched && meta.error} onChange={props.handleChange} {...field} {...props} />
       <Form.Control.Feedback type="invalid"> {meta.error}</ Form.Control.Feedback>
@@ -65,7 +65,7 @@ const TextInput = ({ label, value, xs, controlId, formGroupClasses, ...props }) 
   );
 };
 
-const Checkbox = ({ field, checked, label, value, onChange }) => {
+const Checkbox = ({ field, checked, label, onChange }) => {
 
   // const [field, meta] = useField({...props, type: 'checkbox'});
 
