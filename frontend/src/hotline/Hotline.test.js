@@ -7,7 +7,7 @@ import {
 } from "@testing-library/react";
 import Hotline from "./Hotline";
 import { ServiceRequestView } from "./HotlineViews";
-import { ServiceRequestTable } from "./HotlineTables";
+import { ServiceRequestSearch } from "./HotlineTables";
 
 const server = setupServer(
   rest.get("/hotline/api/servicerequests/1/", (req, res, ctx) => {
@@ -34,7 +34,7 @@ describe("Render hotline", () => {
     render(<Hotline />);
     expect(screen.getAllByText(/OWNER CALLING/)).toBeTruthy();
     expect(screen.getByText(/NON-OWNER CALLING/)).toBeTruthy();
-    expect(screen.getByText(/SEARCH SERVICE REQUEST/)).toBeTruthy();
+    expect(screen.getByText(/SEARCH SERVICE REQUESTS/)).toBeTruthy();
   });
 });
 
@@ -45,9 +45,9 @@ describe("Render ServiceRequestView", () => {
   });
 });
 
-describe("Render ServiceRequestTable", () => {
+describe("Render ServiceRequestSearch", () => {
   it("Empty table loads", async () => {
-    render(<ServiceRequestTable />);
+    render(<ServiceRequestSearch />);
     expect(await screen.getByText("Fetching service requests...")).toBeTruthy();
   });
 });

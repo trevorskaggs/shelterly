@@ -16,6 +16,10 @@ class SimpleAnimalSerializer(serializers.ModelSerializer):
     shelter = serializers.SerializerMethodField()
     is_stray = serializers.BooleanField(read_only=True)
 
+    # Custom Evac Assignment field to avoid a circular reference.
+    def get_evacuation_assignments(self, obj):
+        return obj.evacuation_assignments.values_list('id', flat=True)
+
     # Custom field for the full address.
     def get_full_address(self, obj):
         # Use the Room address first if it exists.

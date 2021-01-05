@@ -24,7 +24,7 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
             action.send(self.request.user, verb='created service request', target=service_request)
             # Update any animals associated with the SR reporter/owner with the created service request.
             if service_request.reporter:
-                service_request.reporter.animal_set.update(request=service_request.id)
+                service_request.reporter.animals.update(request=service_request.id)
             else:
                 for owner in service_request.owner.all():
                     owner.animal_set.update(request=service_request.id)
@@ -67,7 +67,7 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
         # Exclude SRs without a geolocation when fetching for a map.
         is_map = self.request.query_params.get('map', '')
         if is_map == 'true':
-            queryset = queryset.exclude(Q(latitude=None) | Q(longitude=None))
+            queryset = queryset.exclude(Q(latitude=None) | Q(longitude=None) | Q(animal=None))
         return queryset
 
 class VisitNoteViewSet(viewsets.ModelViewSet):
