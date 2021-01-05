@@ -21,7 +21,7 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
     queryset = EvacAssignment.objects.all()
     search_fields = ['team_members__first_name', 'team_members__last_name', 'service_requests__owner__first_name', 'service_requests__owner__last_name', 'service_requests__address', 'service_requests__reporter__first_name', 'service_requests__reporter__last_name', 'animals__name']
     filter_backends = (filters.SearchFilter,)
-    # permission_classes = [permissions.IsAuthenticated, ]
+    permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = EvacAssignmentSerializer
 
     def get_queryset(self):

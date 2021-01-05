@@ -8,7 +8,7 @@ from animals.models import Animal
 from animals.serializers import AnimalSerializer
 
 class RoomSerializer(serializers.ModelSerializer):
-    # animals = AnimalSerializer(source='animal_set', many=True, required=False, read_only=True)
+    animals = AnimalSerializer(source='animal_set', many=True, required=False, read_only=True)
     shelter = serializers.SerializerMethodField()
     shelter_name = serializers.SerializerMethodField()
     building_name = serializers.SerializerMethodField()
