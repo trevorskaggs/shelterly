@@ -1,10 +1,14 @@
+awscli
 Django>=2.2.9
 django-activity-stream
 django-cors-headers
 django-filter
 django-rest-knox
 djangorestframework
+django-storages
 geocoder==1.38.1
+ipython
 pillow
 psycopg2-binary
 pytz==2018.9
+zappa
