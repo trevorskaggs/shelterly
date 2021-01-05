@@ -21,7 +21,7 @@ export function PersonView({id}) {
     last_name: '',
     phone: '',
     email: '',
-    best_contact: '',
+    comments: '',
     agency: '',
     drivers_license: '',
     address: '',
@@ -73,7 +73,7 @@ export function PersonView({id}) {
               {data.phone ? <ListGroup.Item><b>Telephone: </b>{data.display_phone}</ListGroup.Item> : ""}
               {data.alt_phone ? <ListGroup.Item><b>Alternate Telephone: </b>{data.display_alt_phone}</ListGroup.Item> : ""}
               {data.email ? <ListGroup.Item><b>Email: </b>{data.email}</ListGroup.Item> : ""}
-              {data.best_contact ? <ListGroup.Item><b>Best Contact: </b>{data.best_contact}</ListGroup.Item>: ''}
+              {data.comments ? <ListGroup.Item><b>Comments: </b>{data.comments}</ListGroup.Item>: ''}
               {data.agency ? <ListGroup.Item><b>Agency: </b>{data.agency}</ListGroup.Item>: ''}
               <ListGroup.Item><b>Address: </b>{data.address ? data.full_address : 'No Address Listed'}</ListGroup.Item>
               {data.request ?

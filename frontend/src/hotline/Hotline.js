@@ -147,7 +147,7 @@ function Hotline() {
       <ListGroup.Item action>NON-OWNER CALLING</ListGroup.Item>
       </Link>
       <Link href="/hotline/workflow/first_responder">
-      <ListGroup.Item action>FIRST RESPONDER CALLIING</ListGroup.Item>
+      <ListGroup.Item action>FIRST RESPONDER CALLING</ListGroup.Item>
       </Link>
       <Link href="/hotline/servicerequest/list">
       <ListGroup.Item action>SEARCH SERVICE REQUEST</ListGroup.Item>

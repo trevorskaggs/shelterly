@@ -64,9 +64,10 @@ export const PersonForm = (props) => {
     phone: '',
     alt_phone: '',
     email: '',
-    best_contact: '',
+    comments: '',
     show_agency: is_first_responder,
     agency: '',
+    drivers_license: '',
     address: '',
     apartment: '',
     city: '',
@@ -139,11 +140,12 @@ export const PersonForm = (props) => {
           email: Yup.string()
             .max(200, 'Must be 200 characters or less')
             .matches(emailRegex, "Email is not valid"),
-          best_contact: Yup.string(),
+          comments: Yup.string(),
           show_agency: Yup.boolean(),
           agency: Yup.string().when('show_agency', {
               is: true,
               then: Yup.string().required('Required')}),
+          drivers_license: Yup.string(),
           address: Yup.string(),
           apartment: Yup.string()
             .max(10, 'Must be 10 characters or less'),
@@ -268,7 +270,7 @@ export const PersonForm = (props) => {
                 name="last_name"
               />
             </BootstrapForm.Row>
-            <BootstrapForm.Row>
+            <BootstrapForm.Row hidden={is_owner}>
               <TextInput
                 xs="3"
                 type="text"
@@ -288,12 +290,41 @@ export const PersonForm = (props) => {
                 name="email"
               />
             </BootstrapForm.Row>
+            <BootstrapForm.Row hidden={!is_owner}>
+              <TextInput
+                xs="6"
+                type="text"
+                label="Phone"
+                name="phone"
+              />
+              <TextInput
+                xs="6"
+                type="text"
+                label="Alternate Phone"
+                name="alt_phone"
+              />
+            </BootstrapForm.Row>
+            <BootstrapForm.Row hidden={!is_owner}>
+              <TextInput
+                xs="6"
+                type="text"
+                label="Email"
+                name="email"
+              />
+              <TextInput
+                xs="6"
+                type="text"
+                label="Drivers License"
+                name="drivers_license"
+                id="drivers_license"
+              />
+            </BootstrapForm.Row>
             <BootstrapForm.Row hidden={is_first_responder || data.agency}>
               <TextInput
                 xs="12"
                 as="textarea"
-                label="Best Contact"
-                name="best_contact"
+                label="Comments"
+                name="comments"
               />
             </BootstrapForm.Row>
             <BootstrapForm.Row hidden={!is_first_responder && !data.agency}>

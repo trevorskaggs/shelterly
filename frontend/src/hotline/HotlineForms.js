@@ -94,7 +94,6 @@ export function ServiceRequestForm(props) {
         enableReinitialize={true}
         validationSchema={Yup.object({
           directions: Yup.string()
-            .required('Required')
             .max(2000, 'Must be 2000 characters or less'),
           verbal_permission: Yup.boolean(),
           key_provided: Yup.boolean(),
@@ -251,7 +250,7 @@ export function ServiceRequestForm(props) {
                 <TextInput
                   as="textarea"
                   rows={5}
-                  label="Directions*"
+                  label="Directions"
                   name="directions"
                   id="directions"
                   xs="10"
