@@ -47,6 +47,7 @@ export function logoutUser({dispatch}, {removeCookie}) {
 
 export function setAuthToken(token) {
   if (token) {
+    // if we have a token, set as default axios token
     axios.defaults.headers.common['Authorization'] = `Token ${token}`;
   } else {
     delete axios.defaults.headers.common['Authorization'];

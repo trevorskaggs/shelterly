@@ -1,3 +1,4 @@
+from django.db.models import Prefetch
 from rest_framework import filters, permissions, viewsets
 from actstream import action
 
@@ -9,7 +10,7 @@ from people.serializers import PersonSerializer
 
 # Provides view for Person API calls.
 class PersonViewSet(viewsets.ModelViewSet):
-    queryset = Person.objects.all()
+    queryset = Person.objects.all().prefetch_related(Prefetch('animal_set', queryset=Animal.objects.prefetch_related(Prefetch('animalimage_set', to_attr='images')), to_attr='animals'))
     search_fields = ['first_name', 'last_name', 'address', 'animals__name', 'animal__name']
     filter_backends = (filters.SearchFilter,)
     permission_classes = [permissions.IsAuthenticated, ]
