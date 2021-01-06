@@ -45,7 +45,7 @@ function Shelter() {
         <ListGroup.Item action>ANIMAL SEARCH</ListGroup.Item>
       </Link>
       {data.shelters.map(shelter => (
-        <Link href={"/shelter/" + shelter.id}>
+        <Link href={"/shelter/" + shelter.id} key={shelter.id}>
           <ListGroup.Item action>{shelter.name} - {shelter.animal_count} Animals</ListGroup.Item>
         </Link>
       ))}
