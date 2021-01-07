@@ -1,10 +1,11 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import { Link } from 'raviger';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Nav } from 'react-bootstrap';
 import { faDoorOpen, faHome, faBullhorn, faPhone, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
 import { logoutUser } from ".././accounts/AccountsUtils";
+import logo from "../static/images/shelterly.png";
 
 export const StyledMenu = styled(Nav)`
   background: ${({ theme }) => theme.primaryDark};
@@ -60,10 +61,13 @@ export const StyledMenu = styled(Nav)`
 const Menu = ({ state, dispatch, removeCookie, ...props }) => {
 
     const viewHeight = window.outerHeight;
+    useEffect(() => {
+       document.title = "Shelterly"
+    }, []);
     
     return (
     <StyledMenu  {...props} className="flex-column" style={{ height: viewHeight }}>
-    <img src="https://sheltelry-app-static.s3-us-west-2.amazonaws.com/shelterly.png" alt="logo" />
+    <img src={logo} alt="logo" />
     <div className="logo border-bottom">SHELTERLY</div>
       <Link href="/hotline" ><FontAwesomeIcon icon={faPhone} fixedWidth inverse/> HOTLINE</Link>
       <Link href="/evac"><FontAwesomeIcon icon={faBullhorn} fixedWidth inverse/>  DISPATCH</Link>
