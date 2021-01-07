@@ -221,10 +221,10 @@ export function Dispatch() {
             map_dict[service_request.id] = {color:color, checked:false, hidden:false, matches:matches, status_matches:status_matches, radius:"disabled", has_reported_animals:service_request.has_reported_animals, latitude:service_request.latitude, longitude:service_request.longitude};
           }
           bounds.push([service_request.latitude, service_request.longitude]);
-          setMapState(map_dict);
-          if (bounds.length > 0) {
-            setData(prevState => ({ ...prevState, ["bounds"]:L.latLngBounds(bounds) }));
-          }
+        }
+        setMapState(map_dict);
+        if (bounds.length > 0) {
+          setData(prevState => ({ ...prevState, ["bounds"]:L.latLngBounds(bounds) }));
         }
       })
       .catch(error => {
