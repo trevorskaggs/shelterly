@@ -1,4 +1,5 @@
 from django.db import models
+from hotline.managers import ServiceRequestManager
 from location.models import Location
 from people.models import Person
 
@@ -26,6 +27,8 @@ class ServiceRequest(Location):
 
     #post_fields
     followup_date = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
+    objects = models.Manager()
+    related_objects = ServiceRequestManager()
 
     def __str__(self):
         output = []

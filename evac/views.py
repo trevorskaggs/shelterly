@@ -26,15 +26,7 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = EvacAssignment.objects.all().order_by('-start_time').prefetch_related(Prefetch('service_requests',
-                    ServiceRequest.objects
-            .annotate(animal_count=Count("animal"))
-            .annotate(
-                injured=Exists(Animal.objects.filter(request_id=OuterRef("id"), injured="yes"))
-            ).prefetch_related(Prefetch('animal_set', queryset=Animal.objects.prefetch_related(Prefetch('animalimage_set', to_attr='images')), to_attr='animals'))
-            .prefetch_related('owner')
-            .prefetch_related('visitnote_set')
-            .select_related('reporter')
-            .prefetch_related('evacuation_assignments')
+                    ServiceRequest.related_objects
         ))
         status = self.request.query_params.get('status', '')
         if status == "open":

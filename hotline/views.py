@@ -37,17 +37,7 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
             action.send(self.request.user, verb='updated service request', target=service_request)
 
     def get_queryset(self):
-        queryset = (
-            ServiceRequest.objects.all()
-            .annotate(animal_count=Count("animal"))
-            .annotate(
-                injured=Exists(Animal.objects.filter(request_id=OuterRef("id"), injured="yes"))
-            ).prefetch_related(Prefetch('animal_set', queryset=Animal.objects.prefetch_related('evacuation_assignments').prefetch_related(Prefetch('animalimage_set', to_attr='images')), to_attr='animals'))
-            .prefetch_related('owner')
-            .prefetch_related('visitnote_set')
-            .select_related('reporter')
-            .prefetch_related('evacuation_assignments')
-        )
+        queryset = ServiceRequest.related_objects.all()
 
         # Status filter.
         status = self.request.query_params.get('status', '')

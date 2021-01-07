@@ -56,18 +56,7 @@ class PersonSerializer(SimplePersonSerializer):
     # Custom field for the ServiceRequest ID.
     def get_request(self, obj):
         from hotline.serializers import SimpleServiceRequestSerializer
-        service_request = (
-            ServiceRequest.objects.filter(Q(owner=obj.id) | Q(reporter=obj.id))
-        .annotate(animal_count=Count("animal"))
-        .annotate(
-            injured=Exists(Animal.objects.filter(request_id=OuterRef("id"), injured="yes"))
-        )
-        .prefetch_related(Prefetch('animal_set', queryset=Animal.objects.prefetch_related(Prefetch('animalimage_set', to_attr='images')), to_attr='animals'))
-        .prefetch_related('owner')
-        .prefetch_related('visitnote_set')
-        .select_related('reporter')
-        .prefetch_related('evacuation_assignments')
-        ).first()
+        service_request = ServiceRequest.related_objects.filter(Q(owner=obj.id) | Q(reporter=obj.id)).first()
         if service_request:
             return SimpleServiceRequestSerializer(service_request).data
         return None
