@@ -159,16 +159,18 @@ export function Dispatch() {
 
   // Show or hide list of SRs based on current map zoom
   const onMove = event => {
+    let tempMapState = mapState;
     for (const service_request of data.service_requests) {
       if (mapState[service_request.id]) {
         if (!event.target.getBounds().contains(L.latLng(service_request.latitude, service_request.longitude))) {
-          setMapState(prevState => ({ ...prevState, [service_request.id]: {...prevState[service_request.id], hidden:true} }));
+          tempMapState[service_request.id].hidden=true;
         }
         else {
-          setMapState(prevState => ({ ...prevState, [service_request.id]: {...prevState[service_request.id], hidden:false} }));
+          tempMapState[service_request.id].hidden=false;
         }
       }
     }
+    setMapState(prevState => ({ ...prevState, tempMapState}));
   }
 
   // Hook for initializing data.
@@ -388,7 +390,8 @@ export function Dispatch() {
           </Col>
           <Col xs={10} className="border rounded" style={{marginLeft:"1px", height:"36vh", overflowY:"auto", paddingRight:"-1px"}}>
             {data.service_requests.map(service_request => (
-              <div key={service_request.id} className="mt-1 mb-1" style={{marginLeft:"-10px", marginRight:"-10px"}} hidden={mapState[service_request.id] && !mapState[service_request.id].checked ? mapState[service_request.id].hidden : false}>
+              <span key={service_request.id}>{mapState[service_request.id] && (mapState[service_request.id].checked || !mapState[service_request.id].hidden) ?
+              <div className="mt-1 mb-1" style={{marginLeft:"-10px", marginRight:"-10px"}}>
                 <div className="card-header">
                   <span style={{display:"inline"}} className="custom-control-lg custom-control custom-checkbox">
                     <input className="custom-control-input" type="checkbox" name={service_request.id} id={service_request.id} onChange={() => handleMapState(service_request.id)} checked={mapState[service_request.id] ? mapState[service_request.id].checked : false} />
@@ -486,6 +489,8 @@ export function Dispatch() {
                   <Link href={"/hotline/servicerequest/" + service_request.id} target="_blank"> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
                 </div>
               </div>
+              : ""}
+              </span>
             ))}
             <div className="card-header mt-1 mb-1"  style={{marginLeft:"-10px", marginRight:"-10px"}} hidden={data.service_requests.length > 0}>
               No open Service Requests found.
