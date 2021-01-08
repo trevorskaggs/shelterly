@@ -30,7 +30,6 @@ export function PeopleTable() {
         })
         .then(response => {
             setData({owners: response.data, isFetching: false});
-            console.log(response.data);
         })
         .catch(error => {
             console.log(error.response);
@@ -86,7 +85,7 @@ export function PeopleTable() {
                     <div className="mt-3">
                         <div className="card-header"> {owner.first_name ?
                           <h4 style={{marginBottom: "-2px"}}>{owner.first_name} {owner.last_name}
-                              {owner.agency ? <span> ({owner.agency})</span> : <span></span>}
+                              {owner.agency ? <span> ({owner.agency})</span> : ""}
                               {owner.is_owner ?
                                     <Link href={"/hotline/owner/" + owner.id} target="_blank"> <FontAwesomeIcon icon={faClipboardList} inverse/></Link>
                                     : <Link href={"/hotline/reporter/" + owner.id} target="_blank"> <FontAwesomeIcon icon={faClipboardList} inverse/></Link>}

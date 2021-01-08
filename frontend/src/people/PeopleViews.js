@@ -43,7 +43,6 @@ export function PersonView({id}) {
       })
       .then(response => {
         setData(response.data);
-        console.log(response.data);
       })
       .catch(error => {
         console.log(error.response);
@@ -70,7 +69,7 @@ export function PersonView({id}) {
             </Card.Title>
             <hr/>
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
-              <ListGroup.Item><b>Name: </b>{data.first_name} {data.last_name}</ListGroup.Item>
+              <ListGroup.Item><b>Name: </b>{data.first_name} {data.last_name} {data.agency ? <span>({data.agency})</span>: ""}</ListGroup.Item>
               {data.phone ? <ListGroup.Item><b>Telephone: </b>{data.display_phone}</ListGroup.Item> : ""}
               {data.alt_phone ? <ListGroup.Item><b>Alternate Telephone: </b>{data.display_alt_phone}</ListGroup.Item> : ""}
               {data.email ? <ListGroup.Item><b>Email: </b>{data.email}</ListGroup.Item> : ""}
