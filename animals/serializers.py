@@ -1,7 +1,6 @@
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import serializers
 from actstream.models import target_stream
-from copy import copy
 
 from .models import Animal, AnimalImage
 from location.utils import build_full_address, build_action_string
