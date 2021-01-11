@@ -82,6 +82,8 @@ export const PersonForm = ({ id }) => {
           cancelToken: source.token,
         })
           .then(response => {
+            // Initialize change_reason on fetch to avoid warning.
+            response.data['change_reason'] = '';
             setData(response.data);
           })
           .catch(error => {

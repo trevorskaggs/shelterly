@@ -144,7 +144,7 @@ export const AnimalForm = ({id}) => {
     const fetchShelters = async () => {
       setShelters({shelters: [], isFetching: true});
       // Fetch Shelter data.
-      await axios.get('/shelter/api/shelter', {
+      await axios.get('/shelter/api/shelter/', {
         cancelToken: source.token,
       })
       .then(response => {
