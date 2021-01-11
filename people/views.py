@@ -20,6 +20,9 @@ class PersonViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         if serializer.is_valid():
+            # Clean phone fields.
+            serializer.validated_data['phone'] = ''.join(char for char in serializer.validated_data.get('phone', '') if char.isdigit())
+            serializer.validated_data['alt_phone'] = ''.join(char for char in serializer.validated_data.get('alt_phone', '') if char.isdigit())
             person = serializer.save()
             action.send(self.request.user, verb='created person', target=person)
 
@@ -46,6 +49,9 @@ class PersonViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         if serializer.is_valid():
+            # Clean phone fields.
+            serializer.validated_data['phone'] = ''.join(char for char in serializer.validated_data.get('phone', '') if char.isdigit())
+            serializer.validated_data['alt_phone'] = ''.join(char for char in serializer.validated_data.get('alt_phone', '') if char.isdigit())
             # Identify which fields changed on update.
             change_dict = {}
             for field, value in serializer.validated_data.items():
