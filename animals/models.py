@@ -1,5 +1,5 @@
 from django.db import models
-
+from location.models import Location
 from animals.choices import ALL_AGE_CHOICES, ALL_SIZE_CHOICES, SEX_CHOICES, SPECIES_CHOICES, STATUS_CHOICES, UNKNOWN_CHOICES
 from animals.colors import ALL_COLOR_CHOICES
 from hotline.models import ServiceRequest
@@ -7,7 +7,7 @@ from people.models import Person
 from shelter.models import Room
 
 # Create your models here.
-class Animal(models.Model):
+class Animal(Location):
 
     request = models.ForeignKey(ServiceRequest, on_delete=models.SET_NULL, blank=True, null=True)
     owner = models.ManyToManyField(Person, blank=True)

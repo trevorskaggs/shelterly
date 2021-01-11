@@ -8,20 +8,21 @@ import { Card } from 'react-bootstrap';
 import * as Yup from 'yup';
 import { AuthContext } from "../accounts/AccountsReducer";
 import { TreeSelect } from 'antd';
-import { DateTimePicker, DropDown, ImageUploader, TextInput } from '.././components/Form.js';
+import {AddressLookup, DateTimePicker, DropDown, ImageUploader, TextInput} from '.././components/Form.js';
 import { catAgeChoices, dogAgeChoices, horseAgeChoices, otherAgeChoices, catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, speciesChoices, sexChoices, dogSizeChoices, catSizeChoices, horseSizeChoices, otherSizeChoices, unknownChoices } from './constants';
+import { STATE_OPTIONS } from '../constants'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft, faMinusSquare } from '@fortawesome/free-solid-svg-icons';
 import 'antd/lib/tree-select/style/css';
 
 export const AnimalForm = ({id}) => {
 
-  const { state, dispatch } = useContext(AuthContext);
+  const { state } = useContext(AuthContext);
 
   const { TreeNode } = TreeSelect;
 
   // Determine if this is an intake workflow.
-  var is_intake = window.location.pathname.includes("intake")
+  let is_intake = window.location.pathname.includes("intake")
 
   // Identify any query param data.
   const [queryParams] = useQueryParams();
@@ -33,7 +34,7 @@ export const AnimalForm = ({id}) => {
   } = queryParams;
 
   // Determine if this is from a first responder when creating a SR.
-  var is_first_responder = (first_responder === 'true');
+  let is_first_responder = (first_responder === 'true');
 
   // Track species selected and update choice lists accordingly.
   const speciesRef = useRef(null);
@@ -83,6 +84,13 @@ export const AnimalForm = ({id}) => {
     front_image: null,
     side_image: null,
     extra_images: [],
+    address: '',
+    apartment: '',
+    city: '',
+    state: '',
+    zip_code: '',
+    latitude: null,
+    longitude: null,
   });
 
   const [shelters, setShelters] = useState({shelters: [],  isFetching: false});
@@ -199,7 +207,18 @@ export const AnimalForm = ({id}) => {
             .nullable(),
           front_image: Yup.mixed(),
           side_image: Yup.mixed(),
-          extra_images: Yup.array()
+          extra_images: Yup.array(),
+          address: Yup.string(),
+          apartment: Yup.string()
+            .max(10, 'Must be 10 characters or less'),
+          city: Yup.string(),
+          state: Yup.string(),
+          zip_code: Yup.string()
+            .max(10, 'Must be 10 characters or less'),
+          latitude: Yup.number()
+            .nullable(),
+          longitude: Yup.number()
+            .nullable()
         })}
         onSubmit={(values, { setSubmitting }) => {
           // Remove owner if animal has none.
@@ -210,7 +229,7 @@ export const AnimalForm = ({id}) => {
           // Use FormData so that image files may also be included.
           const formData = new FormData();
           // Convert json to FormData.
-          for ( var key in values ) {
+          for ( let key in values ) {
             if (values[key] !== null) {
               formData.append(key, values[key]);
             }
@@ -282,6 +301,8 @@ export const AnimalForm = ({id}) => {
             <Card.Body>
             <BootstrapForm as={Form}>
               <Field type="hidden" value={servicerequest_id||""} name="request" id="request"></Field>
+              <Field type="hidden" value={data.latitude || ""} name="latitude" id="latitude"></Field>
+              <Field type="hidden" value={data.longitude || ""} name="longitude" id="longitude"></Field>
                 <BootstrapForm.Row>
                   <Col xs={id ? "6" : "5"}>
                     <DropDown
@@ -559,6 +580,58 @@ export const AnimalForm = ({id}) => {
                       ))}
                     </TreeSelect>
                   </Col>
+                </BootstrapForm.Row>
+                <p/>
+                <BootstrapForm.Row hidden={!reporter_id}>
+                  <BootstrapForm.Group as={Col} xs="12">
+                    <AddressLookup
+                      label="Found Location Search"
+                      style={{width: '100%'}}
+                      className="form-control"
+                    />
+                  </BootstrapForm.Group>
+                </BootstrapForm.Row>
+                <BootstrapForm.Row hidden={!reporter_id}>
+                  <TextInput
+                    xs="10"
+                    type="text"
+                    label="Address"
+                    name="address"
+                    disabled
+                  />
+                  <TextInput
+                    xs="2"
+                    type="text"
+                    label="Apartment"
+                    name="apartment"
+                  />
+                </BootstrapForm.Row>
+                <BootstrapForm.Row hidden={!reporter_id}>
+                  <TextInput
+                    xs="8"
+                    type="text"
+                    label="City"
+                    name="city"
+                    disabled
+                  />
+                  <Col xs="2">
+                  <DropDown
+                    label="State"
+                    name="state"
+                    id="state"
+                    options={STATE_OPTIONS}
+                    value={props.values.state || ''}
+                    placeholder=''
+                    disabled
+                  />
+                  </Col>
+                  <TextInput
+                    xs="2"
+                    type="text"
+                    label="Zip Code"
+                    name="zip_code"
+                    disabled
+                  />
                 </BootstrapForm.Row>
                 </span>
             </BootstrapForm>

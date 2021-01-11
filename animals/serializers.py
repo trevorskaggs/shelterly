@@ -1,6 +1,7 @@
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import serializers
 from actstream.models import target_stream
+from copy import copy
 
 from .models import Animal, AnimalImage
 from location.utils import build_full_address, build_action_string
@@ -27,7 +28,7 @@ class SimpleAnimalSerializer(serializers.ModelSerializer):
         # Otherwise return an empty string.
         return ''
 
-    # Custome field for request address.
+    # Custom field for request address.
     def get_request_address(self, obj):
         return build_full_address(obj.request)
 
@@ -87,6 +88,16 @@ class SimpleAnimalSerializer(serializers.ModelSerializer):
             except AttributeError:
                 return ''
 
+    # Truncates latitude and longitude.
+    def to_internal_value(self, data):
+        data._mutable = True
+        if data.get('latitude'):
+            data['latitude'] = float("%.6f" % float(data.get('latitude')))
+        if data.get('longitude'):
+            data['longitude'] = float("%.6f" % float(data.get('longitude')))
+        data._mutable = False
+        return super().to_internal_value(data)
+
     class Meta:
         model = Animal
         exclude = ['owner']
@@ -106,10 +117,7 @@ class AnimalSerializer(SimpleAnimalSerializer):
     # Custom Evac Assignment field to avoid a circular reference.
     def get_evacuation_assignments(self, obj):
         return [ea.id for ea in obj.evacuation_assignments.all()]
-    
+
     class Meta:
         model = Animal
         fields = '__all__'
-    
-
-
