@@ -1,4 +1,4 @@
-from django.db.models import Count, Exists, OuterRef, Q
+from django.db.models import Count, Exists, OuterRef, Prefetch, Q
 from actstream import action
 from datetime import datetime
 from .serializers import ServiceRequestSerializer, VisitNoteSerializer
@@ -37,7 +37,17 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
             action.send(self.request.user, verb='updated service request', target=service_request)
 
     def get_queryset(self):
-        queryset = ServiceRequest.objects.all().annotate(animal_count=Count('animal')).annotate(injured=Exists(Animal.objects.filter(request_id=OuterRef('id'), injured='yes')))
+        queryset = (
+            ServiceRequest.objects.all()
+            .annotate(animal_count=Count("animal"))
+            .annotate(
+                injured=Exists(Animal.objects.filter(request_id=OuterRef("id"), injured="yes"))
+            ).prefetch_related(Prefetch('animal_set', queryset=Animal.objects.prefetch_related('evacuation_assignments').prefetch_related(Prefetch('animalimage_set', to_attr='images')), to_attr='animals'))
+            .prefetch_related('owner')
+            .prefetch_related('visitnote_set')
+            .select_related('reporter')
+            .prefetch_related('evacuation_assignments')
+        )
 
         # Status filter.
         status = self.request.query_params.get('status', '')

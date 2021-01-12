@@ -42,6 +42,8 @@ function auth_reducer(state, action) {
   }
 }
 
+//create global state using react context so we dont have to pass
+// state everywhere
 const AuthContext = React.createContext(initialState);
 
 function AuthProvider(props) {
@@ -57,6 +59,7 @@ function AuthProvider(props) {
 
   useEffect(() => {
     // If we have a token but no user, attempt to authenticate them.
+    // this wraps login page too, 
     if (!state.user && cookies.token) {
       loadUser({dispatch, removeCookie})
     }

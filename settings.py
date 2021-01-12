@@ -31,7 +31,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 ALLOWED_HOSTS = ['*']
-
+DEBUG = False
 AUTH_USER_MODEL = 'accounts.ShelterlyUser'
 
 
@@ -86,7 +86,7 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
-                'django.template.context_processors.debug',
+                # 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
@@ -136,8 +136,8 @@ STATICFILES_DIRS = [
 ]
 # Dev settings. Remove when deploying to Zappa
 STATIC_ROOT=os.path.join(BASE_DIR, 'shelterly/static')
-SECURE_CONTENT_TYPE_NOSNIFF = False
-DEBUG = True
+# SECURE_CONTENT_TYPE_NOSNIFF = False
+# DEBUG = True
 
 #TODO Change to envvars.
 # Zappa settings
@@ -166,5 +166,10 @@ LOGGING = {
             'handlers': ['console'],
             'level': 'INFO',
         },
+        'django.db.backends': {
+            'level': 'DEBUG',
+            'handlers': ['console'],
+            'propagate': False
+        }
     },
 }

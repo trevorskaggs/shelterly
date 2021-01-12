@@ -85,6 +85,8 @@ export const PersonForm = ({ id }) => {
             // Set phone field to be the pretty version.
             response.data['phone'] = response.data['display_phone']
             response.data['alt_phone'] = response.data['display_alt_phone']
+            // Initialize change_reason on fetch to avoid warning.
+            response.data['change_reason'] = '';
             setData(response.data);
           })
           .catch(error => {
