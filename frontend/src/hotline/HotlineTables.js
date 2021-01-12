@@ -124,7 +124,7 @@ export function ServiceRequestTable() {
                           <span> Evacuation Assignment #{evacuation_assignment.id} <Link href={"/evac/summary/" + evacuation_assignment.id}>
                               <FontAwesomeIcon icon={faClipboardList} inverse/></Link>
                             <div>
-                              Opened: {moment(evacuation_assignment.start_time).format('lll')} |
+                              Opened: {moment(evacuation_assignment.start_time).format="MMMM Do YYYY, HH:mm:ss"} |
                               <Link href={"/evac/resolution/" + evacuation_assignment.id}
                                 className="btn btn-danger ml-1"
                                 style={{paddingTop: "0px", paddingBottom: "0px"}}>Close</Link>
