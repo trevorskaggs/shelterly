@@ -41,7 +41,7 @@ export const PersonForm = ({ id }) => {
   } = queryParams;
 
   // Regex validators.
-  const phoneRegex = /^[0-9]{10}$/
+  const phoneRegex = /^((\+\d{1,3}(-| )?\(?\d\)?(-| )?\d{1,3})|(\(?\d{2,3}\)?))(-| )?(\d{3,4})(-| )?(\d{4})(( x| ext)\d{1,5}){0,1}$/
   const nameRegex = /^[a-z ,.'-]+$/i
   const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
 
@@ -82,6 +82,9 @@ export const PersonForm = ({ id }) => {
           cancelToken: source.token,
         })
           .then(response => {
+            // Set phone field to be the pretty version.
+            response.data['phone'] = response.data['display_phone']
+            response.data['alt_phone'] = response.data['display_alt_phone']
             // Initialize change_reason on fetch to avoid warning.
             response.data['change_reason'] = '';
             setData(response.data);
