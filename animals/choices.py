@@ -19,12 +19,12 @@ SEX_CHOICES = (
 )
 
 DOG_SIZE_CHOICES = (
+    ('unknown', "Unknown"),
     ('small', "Small (< 20 lbs)"),
     ('medium', "Medium (21 - 60 lbs)"),
     ('large', "Large (61 - 110 lbs)"),
     ('giant', "Giant (111+ lbs)"),
 )
-
 DOG_AGE_CHOICES = (
     ('youth', "Youth"),
     ('adult', "Adult"),
@@ -32,6 +32,7 @@ DOG_AGE_CHOICES = (
 )
 
 CAT_SIZE_CHOICES = (
+    ('unknown', "Unknown"),
     ('small', 'Small ( < 10 lbs)'),
     ('large', 'Large (10+ lbs)'),
 )
@@ -44,6 +45,7 @@ CAT_AGE_CHOICES = (
 )
 
 HORSE_SIZE_CHOICES = (
+    ('unknown', "Unknown"),
     ('mini', 'Mini'),
     ('pony', 'Pony'),
     ('horse', 'Horse'),
@@ -56,6 +58,7 @@ HORSE_AGE_CHOICES = (
 )
 
 OTHER_SIZE_CHOICES = (
+    ('unknown', "Unknown"),
     ('small', 'Small'),
     ('medium', 'Medium'),
     ('large', 'Large'),
@@ -102,5 +105,6 @@ ANIMAL_LOOKUP_DICT = {
         'age': OTHER_AGE_CHOICES,
     },
 }
+
 ALL_AGE_CHOICES = DOG_AGE_CHOICES + CAT_AGE_CHOICES + HORSE_AGE_CHOICES + OTHER_AGE_CHOICES
 ALL_SIZE_CHOICES = DOG_SIZE_CHOICES + CAT_SIZE_CHOICES + HORSE_SIZE_CHOICES + OTHER_SIZE_CHOICES
