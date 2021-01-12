@@ -4,34 +4,17 @@ from actstream.models import target_stream
 
 from .models import Animal, AnimalImage
 from location.utils import build_full_address, build_action_string
-from people.serializers import PersonSerializer
 
-class AnimalSerializer(serializers.ModelSerializer):
-    owners = serializers.SerializerMethodField()
-    reporter_object = PersonSerializer(source='reporter', required=False, read_only=True)
+class SimpleAnimalSerializer(serializers.ModelSerializer):
     full_address = serializers.SerializerMethodField()
     request_address = serializers.SerializerMethodField()
     aco_required = serializers.SerializerMethodField()
     front_image = serializers.SerializerMethodField()
     side_image = serializers.SerializerMethodField()
     extra_images = serializers.SerializerMethodField()
-    action_history = serializers.SerializerMethodField()
     shelter_name = serializers.SerializerMethodField()
     shelter = serializers.SerializerMethodField()
-    is_stray = serializers.SerializerMethodField()
-    evacuation_assignments = serializers.SerializerMethodField()
-
-    # Custom Owner object field that excludes animals to avoid a circular reference.
-    def get_owners(self, obj):
-        from people.serializers import SimplePersonSerializer
-
-        if obj.owner.exists():
-            return SimplePersonSerializer(obj.owner, many=True).data
-        return []
-
-    # Custom Evac Assignment field to avoid a circular reference.
-    def get_evacuation_assignments(self, obj):
-        return obj.evacuation_assignments.values_list('id', flat=True)
+    is_stray = serializers.BooleanField(read_only=True)
 
     # Custom field for the full address.
     def get_full_address(self, obj):
@@ -69,22 +52,72 @@ class AnimalSerializer(serializers.ModelSerializer):
 
     def get_front_image(self, obj):
         try:
-            return AnimalImage.objects.get(animal=obj, category="front_image").image.url
-        except ObjectDoesNotExist:
+            return [animal_image.image.url for animal_image in obj.images if animal_image.category == 'front_image'][0]
+            # change this exception
+        except IndexError:
             return ''
+        except AttributeError:
+            # Should only hit this when returning a single object after create.
+            try:
+                return obj.animalimage_set.filter(category='front_image').first().url
+            except AttributeError:
+                return ''
 
     def get_side_image(self, obj):
         try:
-            return AnimalImage.objects.get(animal=obj, category="side_image").image.url
-        except ObjectDoesNotExist:
+            return [animal_image.image.url for animal_image in obj.images if animal_image.category == 'side_image'][0]
+        except IndexError:
             return ''
+        except AttributeError:
+            try:
+                return obj.animalimage_set.filter(category='side_image').first().url
+            except AttributeError:
+                return ''
+
 
     def get_extra_images(self, obj):
-        return [animal_image.image.url for animal_image in AnimalImage.objects.filter(animal=obj, category="extra")]
-
-    def get_is_stray(self, obj):
-        return not obj.owner.exists()
+        try:
+            return [animal_image.image.url for animal_image in obj.images if animal_image.category == 'extra'][0]
+        except IndexError:
+            return ''
+        except AttributeError:
+            # Should only hit this when returning a single object after create.
+            try:
+                return obj.animalimage_set.filter(category='extra').first().url
+            except AttributeError:
+                return ''
 
     class Meta:
         model = Animal
+        exclude = ['owner']
+
+class AnimalSerializer(SimpleAnimalSerializer):
+    owners = serializers.SerializerMethodField()
+    reporter_object = serializers.SerializerMethodField(read_only=True)
+    action_history = serializers.SerializerMethodField()
+    evacuation_assignments = serializers.SerializerMethodField()
+
+    # Custom Owner object field that excludes animals to avoid a circular reference.
+    def get_owners(self, obj):
+        from people.serializers import SimplePersonSerializer
+        if obj.owner.exists():
+            return SimplePersonSerializer(obj.owner, many=True).data
+        return []
+
+    # Custom Reporter object field that excludes animals to avoid a circular reference.
+    def get_reporter_object(self, obj):
+        from people.serializers import SimplePersonSerializer
+        if obj.reporter:
+            return SimplePersonSerializer(obj.reporter).data
+        return None
+
+    # Custom Evac Assignment field to avoid a circular reference.
+    def get_evacuation_assignments(self, obj):
+        return [ea.id for ea in obj.evacuation_assignments.all()]
+    
+    class Meta:
+        model = Animal
         fields = '__all__'
+    
+
+

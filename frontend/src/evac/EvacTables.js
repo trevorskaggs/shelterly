@@ -157,84 +157,90 @@ export function EvacuationAssignmentTable() {
                   </Row>
                   <ListGroup>
                     {evacuation_assignment.service_request_objects.map(service_request => (
-                      <span>
-                        <ListGroup.Item key={service_request.id}>
-                          <Row>
-                            <Col>
-                              <b>Address: </b>{service_request.full_address}
-                              <Link
-                                href={"/hotline/servicerequest/" + service_request.id} target="_blank"> <FontAwesomeIcon
-                                icon={faClipboardList} inverse/>
-                              </Link>
-                              <div>
-                                <b>Owners: </b>
-                                {service_request.owners.length < 1 ? "No Owners" : <span>
-                                {service_request.owners.map((owner, i) => (
-                                <span>
-                                  {i > 0 && " | "}{owner.first_name} {owner.last_name}
-                                  <Link
-                                    href={"/hotline/owner/" + owner.id} target="_blank"> <FontAwesomeIcon
-                                    icon={faClipboardList} inverse/>
-                                  </Link>
+                      <ListGroup.Item key={service_request.id}>
+                        <Row>
+                          <Col>
+                            <b>Address: </b>{service_request.full_address}
+                            <Link
+                              href={"/hotline/servicerequest/" + service_request.id} target="_blank"> <FontAwesomeIcon
+                              icon={faClipboardList} inverse/>
+                            </Link>
+                            <div>
+                              <b>Owners: </b>
+                              {service_request.owners.length < 1 ? "No Owners" : <span>
+                              {service_request.owners.map((owner, i) => (
+                              <span key={owner.id}>
+                                {i > 0 && " | "}{owner.first_name} {owner.last_name}
+                                <Link
+                                  href={"/hotline/owner/" + owner.id} target="_blank"> <FontAwesomeIcon
+                                  icon={faClipboardList} inverse/>
+                                </Link>
+                              </span>
+                              ))}</span>}
+                            </div>
+                            {evacuation_assignment.end_time ?
+                            <div>
+                              <b>Visit Note: </b>{service_request.visit_notes.filter(note => String(note.evac_assignment) === String(evacuation_assignment.id)).length && service_request.visit_notes.filter(note => String(note.evac_assignment) === String(evacuation_assignment.id))[0].notes || "No information available."}
+                            </div> :
+                            <div>
+                              <b>Previous Visit: </b>{service_request.visit_notes.sort((a,b) => new Date(b.date_completed).getTime() - new Date(a.date_completed).getTime()).length && service_request.visit_notes.sort((a,b) => new Date(b.date_completed).getTime() - new Date(a.date_completed).getTime())[0].notes || "No information available."}
+                            </div>
+                            }
+                          </Col>
+                          <Col>
+                            {['cats', 'dogs', 'horses', 'other'].map(species => (
+                              <div key={species}>
+                                {service_request.animals.filter(animal => animal.evacuation_assignments.includes(evacuation_assignment.id)).filter(animal => species.includes(animal.species)).length > 0 ?
+                                <span><b style={{textTransform:"capitalize"}}>{species}: </b>
+                                {service_request.animals.filter(animal => animal.evacuation_assignments.includes(evacuation_assignment.id)).filter(animal => species.includes(animal.species)).map((animal, i) => (
+                                <span key={animal.id}>{i > 0 && ", "}{animal.name || "Unknown"}
+                                  <Link href={"/animals/animal/" + animal.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1 mr-1" inverse/></Link>
+                                  (
+                                  {animal.status === "SHELTERED IN PLACE" ?
+                                      <OverlayTrigger key={"sip"} placement="top"
+                                                      overlay={<Tooltip id={`tooltip-sip`}>SHELTERED IN PLACE</Tooltip>}>
+                                          <FontAwesomeIcon icon={faIgloo} inverse/>
+                                      </OverlayTrigger> : ""}
+                                  {animal.status === "REPORTED" ?
+                                      <OverlayTrigger key={"reported"} placement="top"
+                                                      overlay={<Tooltip id={`tooltip-reported`}>REPORTED</Tooltip>}>
+                                          <FontAwesomeIcon icon={faExclamationCircle} inverse/>
+                                      </OverlayTrigger> : ""}
+                                  {animal.status === "UNABLE TO LOCATE" ?
+                                      <OverlayTrigger key={"unable-to-locate"} placement="top"
+                                                      overlay={<Tooltip id={`tooltip-unable-to-locate`}>UNABLE TO LOCATE</Tooltip>}>
+                                          <FontAwesomeIcon icon={faQuestionCircle} inverse/>
+                                      </OverlayTrigger> : ""}
+                                  {animal.status === "EVACUATED" ?
+                                      <OverlayTrigger key={"evacuated"} placement="top"
+                                                      overlay={<Tooltip id={`tooltip-evacuated`}>EVACUATED</Tooltip>}>
+                                          <FontAwesomeIcon icon={faHelicopter} inverse/>
+                                      </OverlayTrigger> : ""}
+                                  {animal.status === "REUNITED" ?
+                                      <OverlayTrigger key={"reunited"} placement="top"
+                                                      overlay={<Tooltip id={`tooltip-reunited`}>REUNITED</Tooltip>}>
+                                          <FontAwesomeIcon icon={faHeart} inverse/>
+                                      </OverlayTrigger> : ""}
+                                  {animal.status === "SHELTERED" ?
+                                      <OverlayTrigger key={"sheltered"} placement="top"
+                                                      overlay={<Tooltip id={`tooltip-sheltered`}>SHELTERED</Tooltip>}>
+                                          <FontAwesomeIcon icon={faHome} inverse/>
+                                      </OverlayTrigger> : ""}
+                                  {animal.status === "DECEASED" ?
+                                      <OverlayTrigger key={"deceased"} placement="top"
+                                                      overlay={<Tooltip id={`tooltip-deceased`}>DECEASED</Tooltip>}>
+                                          <FontAwesomeIcon icon={faSkullCrossbones} inverse/>
+                                      </OverlayTrigger> : ""}
+                                  )
                                 </span>
-                                ))}</span>}
-                              </div>
-                            </Col>
-                            <Col>
-                              {['cats', 'dogs', 'horses', 'other'].map(species => (
-                                <div key={species}>
-                                  {service_request.animals.filter(animal => animal.evacuation_assignments.includes(evacuation_assignment.id)).filter(animal => species.includes(animal.species)).length > 0 ?
-                                  <span><b style={{textTransform:"capitalize"}}>{species}: </b>
-                                  {service_request.animals.filter(animal => animal.evacuation_assignments.includes(evacuation_assignment.id)).filter(animal => species.includes(animal.species)).map((animal, i) => (
-                                  <span key={animal.id}>{i > 0 && ", "}{animal.name || "Unknown"}
-                                    <Link href={"/animals/animal/" + animal.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1 mr-1" inverse/></Link>
-                                    (
-                                    {animal.status === "SHELTERED IN PLACE" ?
-                                        <OverlayTrigger key={"sip"} placement="top"
-                                                        overlay={<Tooltip id={`tooltip-sip`}>SHELTERED IN PLACE</Tooltip>}>
-                                            <FontAwesomeIcon icon={faIgloo} inverse/>
-                                        </OverlayTrigger> : ""}
-                                    {animal.status === "REPORTED" ?
-                                        <OverlayTrigger key={"reported"} placement="top"
-                                                        overlay={<Tooltip id={`tooltip-reported`}>REPORTED</Tooltip>}>
-                                            <FontAwesomeIcon icon={faExclamationCircle} inverse/>
-                                        </OverlayTrigger> : ""}
-                                    {animal.status === "UNABLE TO LOCATE" ?
-                                        <OverlayTrigger key={"unable-to-locate"} placement="top"
-                                                        overlay={<Tooltip id={`tooltip-unable-to-locate`}>UNABLE TO LOCATE</Tooltip>}>
-                                            <FontAwesomeIcon icon={faQuestionCircle} inverse/>
-                                        </OverlayTrigger> : ""}
-                                    {animal.status === "EVACUATED" ?
-                                        <OverlayTrigger key={"evacuated"} placement="top"
-                                                        overlay={<Tooltip id={`tooltip-evacuated`}>EVACUATED</Tooltip>}>
-                                            <FontAwesomeIcon icon={faHelicopter} inverse/>
-                                        </OverlayTrigger> : ""}
-                                    {animal.status === "REUNITED" ?
-                                        <OverlayTrigger key={"reunited"} placement="top"
-                                                        overlay={<Tooltip id={`tooltip-reunited`}>REUNITED</Tooltip>}>
-                                            <FontAwesomeIcon icon={faHeart} inverse/>
-                                        </OverlayTrigger> : ""}
-                                    {animal.status === "SHELTERED" ?
-                                        <OverlayTrigger key={"sheltered"} placement="top"
-                                                        overlay={<Tooltip id={`tooltip-sheltered`}>SHELTERED</Tooltip>}>
-                                            <FontAwesomeIcon icon={faHome} inverse/>
-                                        </OverlayTrigger> : ""}
-                                    {animal.status === "DECEASED" ?
-                                        <OverlayTrigger key={"deceased"} placement="top"
-                                                        overlay={<Tooltip id={`tooltip-deceased`}>DECEASED</Tooltip>}>
-                                            <FontAwesomeIcon icon={faSkullCrossbones} inverse/>
-                                        </OverlayTrigger> : ""}
-                                    )
-                                  </span>
-                                ))}
-                                </span>
-                                : ""}
-                                </div>
                               ))}
-                            </Col>
-                          </Row>
-                        </ListGroup.Item>
-                      </span>
+                              </span>
+                              : ""}
+                              </div>
+                            ))}
+                          </Col>
+                        </Row>
+                      </ListGroup.Item>
                     ))}
                   </ListGroup>
                 </Card.Body>

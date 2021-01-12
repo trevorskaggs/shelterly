@@ -159,16 +159,18 @@ export function Dispatch() {
 
   // Show or hide list of SRs based on current map zoom
   const onMove = event => {
+    let tempMapState = mapState;
     for (const service_request of data.service_requests) {
       if (mapState[service_request.id]) {
         if (!event.target.getBounds().contains(L.latLng(service_request.latitude, service_request.longitude))) {
-          setMapState(prevState => ({ ...prevState, [service_request.id]: {...prevState[service_request.id], hidden:true} }));
+          tempMapState[service_request.id].hidden=true;
         }
         else {
-          setMapState(prevState => ({ ...prevState, [service_request.id]: {...prevState[service_request.id], hidden:false} }));
+          tempMapState[service_request.id].hidden=false;
         }
       }
     }
+    setMapState(prevState => ({ ...prevState, tempMapState}));
   }
 
   // Hook for initializing data.
@@ -221,10 +223,10 @@ export function Dispatch() {
             map_dict[service_request.id] = {color:color, checked:false, hidden:false, matches:matches, status_matches:status_matches, radius:"disabled", has_reported_animals:service_request.has_reported_animals, latitude:service_request.latitude, longitude:service_request.longitude};
           }
           bounds.push([service_request.latitude, service_request.longitude]);
-          setMapState(map_dict);
-          if (bounds.length > 0) {
-            setData(prevState => ({ ...prevState, ["bounds"]:L.latLngBounds(bounds) }));
-          }
+        }
+        setMapState(map_dict);
+        if (bounds.length > 0) {
+          setData(prevState => ({ ...prevState, ["bounds"]:L.latLngBounds(bounds) }));
         }
       })
       .catch(error => {
@@ -388,7 +390,8 @@ export function Dispatch() {
           </Col>
           <Col xs={10} className="border rounded" style={{marginLeft:"1px", height:"36vh", overflowY:"auto", paddingRight:"-1px"}}>
             {data.service_requests.map(service_request => (
-              <div key={service_request.id} className="mt-1 mb-1" style={{marginLeft:"-10px", marginRight:"-10px"}} hidden={mapState[service_request.id] && !mapState[service_request.id].checked ? mapState[service_request.id].hidden : false}>
+              <span key={service_request.id}>{mapState[service_request.id] && (mapState[service_request.id].checked || !mapState[service_request.id].hidden) ?
+              <div className="mt-1 mb-1" style={{marginLeft:"-10px", marginRight:"-10px"}}>
                 <div className="card-header">
                   <span style={{display:"inline"}} className="custom-control-lg custom-control custom-checkbox">
                     <input className="custom-control-input" type="checkbox" name={service_request.id} id={service_request.id} onChange={() => handleMapState(service_request.id)} checked={mapState[service_request.id] ? mapState[service_request.id].checked : false} />
@@ -486,6 +489,8 @@ export function Dispatch() {
                   <Link href={"/hotline/servicerequest/" + service_request.id} target="_blank"> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
                 </div>
               </div>
+              : ""}
+              </span>
             ))}
             <div className="card-header mt-1 mb-1"  style={{marginLeft:"-10px", marginRight:"-10px"}} hidden={data.service_requests.length > 0}>
               No open Service Requests found.
@@ -573,12 +578,20 @@ export function EvacSummary({id}) {
           ))}
         </ListGroup>
         <hr/>
+        {!data.end_time && service_request.visit_notes.length ?
+          <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
+            <h4 className="mt-2" style={{marginBottom:"-2px"}}>Previous Note - <Moment format="L">{service_request.visit_notes.sort((a,b) => new Date(b.date_completed).getTime() - new Date(a.date_completed).getTime())[0].date_completed}</Moment></h4>
+              <ListGroup.Item>
+              {service_request.visit_notes.sort((a,b) => new Date(b.date_completed).getTime() - new Date(a.date_completed).getTime())[0].notes || "No information available."}
+              </ListGroup.Item>
+          </ListGroup>
+        : "" }
         {service_request.visit_notes.filter(note => String(note.evac_assignment) === String(id)).length > 0 ?
           <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
             <h4 className="mt-2" style={{marginBottom:"-2px"}}>Notes</h4>
             {service_request.visit_notes.filter(note => String(note.evac_assignment) === String(id)).map((note) => (
               <ListGroup.Item key={note.id}>
-                {note.notes || "None"}
+                {note.notes || "No information available."}
               </ListGroup.Item>
             ))}
           </ListGroup>
