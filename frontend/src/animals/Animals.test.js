@@ -3,15 +3,15 @@ import {
   render,
   screen,
 } from "@testing-library/react";
-import Animals from "./Animals";
 import { AnimalForm } from "./AnimalForms";
 import { AnimalSearch } from "./AnimalTables";
 import { AnimalView } from "./AnimalViews";
+import { initialData } from "../hotline/HotlineWorkflow"
 
 describe("Animal tests", () => {
   it("Render AnimalForm", () => {
-    render(<AnimalForm />);
-    expect(screen.getByText("New Animal"));
+    render(<AnimalForm state={initialData} />);
+    expect(screen.getByText("Animal Information"));
   });
   it("Render AnimalSearch", () => {
     render(<AnimalSearch />);

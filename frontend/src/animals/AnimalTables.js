@@ -90,7 +90,7 @@ export function AnimalSearch() {
       </Form>
       {data.animals.map(animal => (
         <div key={animal.id} className="mt-3">
-          <div className="card-header"><h4 style={{marginBottom:"-2px"}}>{animal.name ? titleCase(animal.name) : "Unknown"} <Link href={"/animals/animal/" + animal.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} inverse /></Link> | {titleCase(animal.status)}</h4></div>
+          <div className="card-header"><h4 style={{marginBottom:"-2px"}}>{animal.name ? titleCase(animal.name) : "Unknown"} <Link href={"/animals/" + animal.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} inverse /></Link> | {titleCase(animal.status)}</h4></div>
           <CardGroup>
             <Card key={animal.id} style={{maxWidth:"196px"}}>
               <Card.Body className="p-0 m-0">

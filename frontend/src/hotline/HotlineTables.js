@@ -148,43 +148,43 @@ export function ServiceRequestSearch() {
                     <ListGroup.Item style={{borderRadius: 0}}><b style={{textTransform:"capitalize"}}>{species}: </b>
                     {service_request.animals.filter(animal => species.includes(animal.species)).map((animal, i) => (
                     <span key={animal.id}>{i > 0 && ", "}{animal.name || "Unknown"}
-                      <Link href={"/animals/animal/" + animal.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1 mr-1" inverse/></Link>
+                      <Link href={"/animals/" + animal.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1 mr-1" inverse/></Link>
                       (
                       {animal.status === "SHELTERED IN PLACE" ?
-                          <OverlayTrigger key={"sip"} placement="top"
-                                          overlay={<Tooltip id={`tooltip-sip`}>SHELTERED IN PLACE</Tooltip>}>
-                              <FontAwesomeIcon icon={faIgloo} inverse/>
-                          </OverlayTrigger> : ""}
+                        <OverlayTrigger key={"sip"} placement="top"
+                                        overlay={<Tooltip id={`tooltip-sip`}>SHELTERED IN PLACE</Tooltip>}>
+                            <FontAwesomeIcon icon={faIgloo} inverse/>
+                        </OverlayTrigger> : ""}
                       {animal.status === "REPORTED" ?
-                          <OverlayTrigger key={"reported"} placement="top"
-                                          overlay={<Tooltip id={`tooltip-reported`}>REPORTED</Tooltip>}>
-                              <FontAwesomeIcon icon={faExclamationCircle} inverse/>
-                          </OverlayTrigger> : ""}
+                        <OverlayTrigger key={"reported"} placement="top"
+                                        overlay={<Tooltip id={`tooltip-reported`}>REPORTED</Tooltip>}>
+                            <FontAwesomeIcon icon={faExclamationCircle} inverse/>
+                        </OverlayTrigger> : ""}
                       {animal.status === "UNABLE TO LOCATE" ?
-                          <OverlayTrigger key={"unable-to-locate"} placement="top"
-                                          overlay={<Tooltip id={`tooltip-unable-to-locate`}>UNABLE TO LOCATE</Tooltip>}>
-                              <FontAwesomeIcon icon={faQuestionCircle} inverse/>
-                          </OverlayTrigger> : ""}
+                        <OverlayTrigger key={"unable-to-locate"} placement="top"
+                                        overlay={<Tooltip id={`tooltip-unable-to-locate`}>UNABLE TO LOCATE</Tooltip>}>
+                            <FontAwesomeIcon icon={faQuestionCircle} inverse/>
+                        </OverlayTrigger> : ""}
                       {animal.status === "EVACUATED" ?
-                          <OverlayTrigger key={"evacuated"} placement="top"
-                                          overlay={<Tooltip id={`tooltip-evacuated`}>EVACUATED</Tooltip>}>
-                              <FontAwesomeIcon icon={faHelicopter} inverse/>
-                          </OverlayTrigger> : ""}
+                        <OverlayTrigger key={"evacuated"} placement="top"
+                                        overlay={<Tooltip id={`tooltip-evacuated`}>EVACUATED</Tooltip>}>
+                            <FontAwesomeIcon icon={faHelicopter} inverse/>
+                        </OverlayTrigger> : ""}
                       {animal.status === "REUNITED" ?
-                          <OverlayTrigger key={"reunited"} placement="top"
-                                          overlay={<Tooltip id={`tooltip-reunited`}>REUNITED</Tooltip>}>
-                              <FontAwesomeIcon icon={faHeart} inverse/>
-                          </OverlayTrigger> : ""}
+                        <OverlayTrigger key={"reunited"} placement="top"
+                                        overlay={<Tooltip id={`tooltip-reunited`}>REUNITED</Tooltip>}>
+                            <FontAwesomeIcon icon={faHeart} inverse/>
+                        </OverlayTrigger> : ""}
                       {animal.status === "SHELTERED" ?
-                          <OverlayTrigger key={"sheltered"} placement="top"
-                                          overlay={<Tooltip id={`tooltip-sheltered`}>SHELTERED</Tooltip>}>
-                              <FontAwesomeIcon icon={faHome} inverse/>
-                          </OverlayTrigger> : ""}
+                        <OverlayTrigger key={"sheltered"} placement="top"
+                                        overlay={<Tooltip id={`tooltip-sheltered`}>SHELTERED</Tooltip>}>
+                            <FontAwesomeIcon icon={faHome} inverse/>
+                        </OverlayTrigger> : ""}
                       {animal.status === "DECEASED" ?
-                          <OverlayTrigger key={"deceased"} placement="top"
-                                          overlay={<Tooltip id={`tooltip-deceased`}>DECEASED</Tooltip>}>
-                              <FontAwesomeIcon icon={faSkullCrossbones} inverse/>
-                          </OverlayTrigger> : ""}
+                        <OverlayTrigger key={"deceased"} placement="top"
+                                        overlay={<Tooltip id={`tooltip-deceased`}>DECEASED</Tooltip>}>
+                            <FontAwesomeIcon icon={faSkullCrossbones} inverse/>
+                        </OverlayTrigger> : ""}
                       )
                     </span>
                   ))}
