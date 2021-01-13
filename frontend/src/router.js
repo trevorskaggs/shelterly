@@ -44,9 +44,11 @@ const routes = {
   "/hotline/reporter/:id": ({id}) => <ReporterDetail id={id}/>,
   "/hotline/servicerequest/edit/:id": ({id}) => <UpdateServiceRequest id={id}/>,
   "/hotline/servicerequest/search": () => <ServiceRequestSearch />,
-  "/hotline/servicerequest/new": () => <NewServiceRequest />,
   "/hotline/servicerequest/:id": ({id}) => <ServiceRequestDetail id={id} />,
   "/hotline/workflow/*": () => <HotlineWorkflow />,
+  "/intake": () => <Intake />,
+  "/intake/owner/search": () => <OwnerSearch />,
+  "/intake/workflow/*": () => <HotlineWorkflow />,
   "/shelter": () => <Shelter />,
   "/shelter/new": () => <NewShelter />,
   "/shelter/edit/:id": ({id}) => <UpdateShelter id={id} />,
@@ -57,12 +59,6 @@ const routes = {
   "/shelter/building/room/new": () => <NewRoom />,
   "/shelter/room/edit/:id": ({id}) => <UpdateRoom id={id} />,
   "/shelter/room/:id": ({id}) => <RoomDetails id={id} />,
-  "/intake": () => <Intake />,
-  "/intake/animal/new": () => <NewAnimal />,
-  "/intake/owner/new": () => <NewOwner />,
-  "/intake/owner/search": () => <OwnerSearch />,
-  "/intake/reporter/new": () => <NewReporter />,
-  "/intake/summary": () => <IntakeSummary />,
   "/login": () => <Redirect to='/' />
 };
 
