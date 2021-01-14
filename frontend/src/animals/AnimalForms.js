@@ -584,7 +584,7 @@ export const AnimalForm = ({id}) => {
                 <p/>
                 <BootstrapForm.Row hidden={!reporter_id}>
                   <BootstrapForm.Group as={Col} xs="12">
-                    <AddressLookup
+                    <AddressLookup hidden={!process.env.REACT_APP_GOOGLE_API_KEY}
                       label="Found Location Search"
                       style={{width: '100%'}}
                       className="form-control"
@@ -593,17 +593,11 @@ export const AnimalForm = ({id}) => {
                 </BootstrapForm.Row>
                 <BootstrapForm.Row hidden={!reporter_id}>
                   <TextInput
-                    xs="10"
+                    xs="12"
                     type="text"
-                    label="Address"
+                    label="Found Location Address"
                     name="address"
                     disabled
-                  />
-                  <TextInput
-                    xs="2"
-                    type="text"
-                    label="Apartment"
-                    name="apartment"
                   />
                 </BootstrapForm.Row>
                 <BootstrapForm.Row hidden={!reporter_id}>

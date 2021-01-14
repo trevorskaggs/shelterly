@@ -3,7 +3,6 @@ import {
   render,
   screen,
 } from "@testing-library/react";
-import Animals from "./Animals";
 import { AnimalForm } from "./AnimalForms";
 import { AnimalSearch } from "./AnimalTables";
 import { AnimalView } from "./AnimalViews";
