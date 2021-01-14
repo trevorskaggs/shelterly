@@ -77,6 +77,7 @@ export const AnimalForm = (props) => {
     last_seen: null,
     number_of_animals: 1,
     room: null,
+    shelter: null,
     front_image: null,
     side_image: null,
     extra_images: [],
@@ -88,7 +89,7 @@ export const AnimalForm = (props) => {
 
   // Initial Animal data.
   const [data, setData] = useState(current_data);
-  const [shelters, setShelters] = useState({shelters: [],  isFetching: false});
+  const [shelters, setShelters] = useState({options: [],  isFetching: false});
 
   const wrapperSetFrontImage = useCallback(val => {
     if (val !== 0){
@@ -144,18 +145,23 @@ export const AnimalForm = (props) => {
       fetchAnimalData();
     }
 
-    const fetchShelters = async () => {
-      setShelters({shelters: [], isFetching: true});
+    const fetchShelters = () => {
+      setShelters({options: [], isFetching: true});
       // Fetch Shelter data.
-      await axios.get('/shelter/api/shelter/', {
+      axios.get('/shelter/api/shelter/', {
         cancelToken: source.token,
       })
       .then(response => {
-        setShelters({shelters: response.data, isFetching: false});
+        var options = []
+        response.data.forEach(function(shelter){
+          let display_name = shelter.name + ' ('+shelter.buildings.length+' buildings, ' + shelter.room_count + ' rooms, ' + shelter.animal_count + ' animals)'
+          options.push({id: shelter.id, label: display_name})
+        });
+        setShelters({options: options, isFetching: false});
       })
       .catch(error => {
         console.log(error.response);
-        setShelters({shelters: [], isFetching: false});
+        setShelters({options: [], isFetching: false});
       });
     };
     fetchShelters();
@@ -255,8 +261,15 @@ export const AnimalForm = (props) => {
                 });
               });
               // Navigate to shelter page.
-              // navigate('/shelter');
-              navigate('/hotline/owner/' + ownerResponse[0].data.id || reporterResponse[0].data.id)
+              if (values.shelter) {
+                navigate('/shelter/' + values.shelter);
+              }
+              else if (ownerResponse[0].data.id) {
+                navigate('/hotline/owner/' + ownerResponse[0].data.id)
+              }
+              else {
+                navigate('/hotline/reporter/' + reporterResponse[0].data.id)
+              }
             }
             else {
               props.onSubmit('animals', values, 'request');
@@ -573,10 +586,23 @@ export const AnimalForm = (props) => {
                 </BootstrapForm.Row>
                 </span>
                 {/* Only show Shelter selection on intake and update. */}
-                <span hidden={!Boolean(id)&&!is_intake}>
-                <p className="mb-2 mt-2">Shelter</p>
-                <BootstrapForm.Row>
+                <span hidden={!Boolean(id) && !is_intake}>
+                <BootstrapForm.Row className="mt-3">
                   <Col xs="8">
+                    <DropDown
+                      label="Shelter"
+                      id="shelter"
+                      type="text"
+                      name="shelter"
+                      options={shelters.options}
+                      onChange={(value) => {
+                        formikProps.setFieldValue("shelter", value.id);
+                      }}
+                      value={formikProps.values.shelter||data.shelter}
+                      isClearable={true}
+                    />
+                  </Col>
+                  {/* <Col xs="8">
                     <TreeSelect
                       showSearch
                       style={{ width: '100%' }}
@@ -589,7 +615,9 @@ export const AnimalForm = (props) => {
                         formikProps.setFieldValue("room", value||null);
                       }}
                     >
-                      {shelters.shelters.map(shelter => (
+                      {shelters.options.map(shelter => (
+                        <TreeNode title={shelter.name + ' ('+shelter.buildings.length+' buildings, ' + shelter.room_count + ' rooms, ' + shelter.animal_count + ' animals)'} key={shelter.id} selectable={false} value={shelter.id}>
+                        </TreeNode>
                         <TreeNode title={'Shelter: ' + shelter.name + ' ('+shelter.buildings.length+' buildings, ' + shelter.room_count + ' rooms, ' + shelter.animal_count + ' animals)'} key={'shelter'+shelter.id} selectable={false} value={'shelter'+shelter.id}>
                           {shelter.buildings.map(building => (
                             <TreeNode title={'Building: ' + building.name + ' (' + building.rooms.length + ' rooms, ' + building.animal_count + ' animals)'} key={'building'+building.id} selectable={false} value={'building'+building.id}>
@@ -601,7 +629,7 @@ export const AnimalForm = (props) => {
                         </TreeNode>
                       ))}
                     </TreeSelect>
-                  </Col>
+                  </Col> */}
                 </BootstrapForm.Row>
                 </span>
             </BootstrapForm>

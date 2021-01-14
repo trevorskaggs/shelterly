@@ -374,7 +374,6 @@ export function Dispatch() {
               onChange={(values) => {props.setFieldValue('team_members', values.map(item => item.id))}}
               options={teamData.options}
               placeholder="Choose team members..."
-              className=""
               style={{marginLeft:"3px", marginRight:"-13px"}}
             />
           </Col>

@@ -13,14 +13,13 @@ class SimpleAnimalSerializer(serializers.ModelSerializer):
     side_image = serializers.SerializerMethodField()
     extra_images = serializers.SerializerMethodField()
     shelter_name = serializers.SerializerMethodField()
-    shelter = serializers.SerializerMethodField()
     is_stray = serializers.BooleanField(read_only=True)
 
     # Custom field for the full address.
     def get_full_address(self, obj):
         # Use the Room address first if it exists.
         if obj.room:
-            return build_full_address(obj.room.building.shelter)
+            return build_full_address(obj.shelter)
         # Then use the SR address if it exists.
         elif obj.request:
             return build_full_address(obj.request)
@@ -31,16 +30,10 @@ class SimpleAnimalSerializer(serializers.ModelSerializer):
     def get_request_address(self, obj):
         return build_full_address(obj.request)
 
-    # Custom field to return shelter ID.
-    def get_shelter(self, obj):
-        if obj.room:
-            return obj.room.building.shelter.id
-        return None
-
     # Custom field to return the shelter name.
     def get_shelter_name(self, obj):
-        if obj.room:
-            return obj.room.building.shelter.name
+        if obj.shelter:
+            return obj.shelter.name
         return ''
 
     # An Animal is ACO Required if it is aggressive or "Other" species.
