@@ -125,6 +125,13 @@ export const AnimalForm = ({id}) => {
     setFieldValue("extra_images", data.extra_images.filter(url => url !== image_url));
   }
 
+  // Checks if Google API Key exists before rendering.
+  const renderAddressLookup = ()=>{
+    if(process.env.REACT_APP_GOOGLE_API_KEY){
+      return <AddressLookup label="Found Location Search" style={{width: '100%'}} className="form-control"/>
+    }
+  }
+
   // Hook for initializing data.
   useEffect(() => {
     let source = axios.CancelToken.source();
@@ -584,11 +591,12 @@ export const AnimalForm = ({id}) => {
                 <p/>
                 <BootstrapForm.Row hidden={!reporter_id}>
                   <BootstrapForm.Group as={Col} xs="12">
-                    <AddressLookup hidden={!process.env.REACT_APP_GOOGLE_API_KEY}
-                      label="Found Location Search"
-                      style={{width: '100%'}}
-                      className="form-control"
-                    />
+                    {renderAddressLookup()}
+                    {/*<AddressLookup*/}
+                    {/*  label="Found Location Search"*/}
+                    {/*  style={{width: '100%'}}*/}
+                    {/*  className="form-control"*/}
+                    {/*/>*/}
                   </BootstrapForm.Group>
                 </BootstrapForm.Row>
                 <BootstrapForm.Row hidden={!reporter_id}>
