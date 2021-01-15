@@ -43,7 +43,6 @@ export function PersonView({id}) {
       })
       .then(response => {
         setData(response.data);
-        console.log(response.data);
       })
       .catch(error => {
         console.log(error.response);
@@ -98,8 +97,8 @@ export function PersonView({id}) {
                 <ReactImageFallback style={{width:"151px"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} />
                 <Card.Text className="text-center mb-0">
                   {animal.name||"Unknown"}
-                  <Link href={"/animals/animal/" + animal.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
-                  <Link href={"/animals/animal/edit/" + animal.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
+                  <Link href={"/animals/" + animal.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
+                  <Link href={"/animals/edit/" + animal.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
                 </Card.Text>
                 <Card.Text className="text-center mb-0">
                   {animal.status}

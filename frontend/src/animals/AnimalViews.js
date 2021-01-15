@@ -2,9 +2,8 @@ import React, {useEffect, useState} from 'react';
 import axios from "axios";
 import { Link } from 'raviger';
 import Moment from 'react-moment';
-import { Button, Modal } from 'react-bootstrap';
 import { Carousel } from 'react-responsive-carousel';
-import { Card, Col, ListGroup, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Button, Card, Col, ListGroup, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBandAid, faClipboardList, faCut, faEdit, faHandHoldingHeart, faMinusSquare, faShieldAlt, faPlusSquare, faWarehouse,
@@ -98,7 +97,7 @@ export function AnimalView({id}) {
   return (
     <>
     <Header>
-      Animal Details - {data.status}<Link href={"/animals/animal/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>{data.status !== 'REUNITED' ? <FontAwesomeIcon icon={faHandHoldingHeart} onClick={() => setShow(true)} style={{cursor:'pointer'}} inverse /> : ""}
+      Animal Details - {data.status}<Link href={"/animals/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>{data.status !== 'REUNITED' ? <FontAwesomeIcon icon={faHandHoldingHeart} onClick={() => setShow(true)} style={{cursor:'pointer'}} inverse /> : ""}
     </Header>
     <hr/>
     <div className="row">

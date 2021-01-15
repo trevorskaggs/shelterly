@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
 import { navigate, useQueryParams } from 'raviger';
 import { Field, Formik } from 'formik';
-import { Form as BootstrapForm, Button, ButtonGroup, Card, Col } from "react-bootstrap";
+import { Form as BootstrapForm, Button, ButtonGroup, Card, Col, Modal } from "react-bootstrap";
 import * as Yup from 'yup';
 import { AddressLookup, DropDown, TextInput } from '../components/Form';
 import { AuthContext } from "../accounts/AccountsReducer";
@@ -11,11 +11,16 @@ import { faArrowAltCircleLeft } from '@fortawesome/free-solid-svg-icons';
 import { STATE_OPTIONS } from '../constants'
 
 // Form for creating new owner and reporter Person objects.
-export const PersonForm = ({ id }) => {
+export const PersonForm = (props) => {
 
   const { state, dispatch } = useContext(AuthContext);
+  const id = props.id;
+
+  // Determine if we're in the hotline workflow.
+  var is_workflow = window.location.pathname.includes("workflow");
 
   // Determine if this is an owner or reporter when creating a Person.
+
   let is_owner = window.location.pathname.includes("owner")
 
   // Determine if this is an intake workflow.
@@ -34,19 +39,30 @@ export const PersonForm = ({ id }) => {
   } = queryParams;
 
   // Regex validators.
-  const phoneRegex = /^[0-9]{10}$/
+  const phoneRegex = /^((\+\d{1,3}(-| )?\(?\d\)?(-| )?\d{1,3})|(\(?\d{2,3}\)?))(-| )?(\d{3,4})(-| )?(\d{4})(( x| ext)\d{1,5}){0,1}$/
   const nameRegex = /^[a-z ,.'-]+$/i
   const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
 
-  // Initial Person data.
-  const [data, setData] = useState({
+  // Whether or not to skip Owner creation.
+  const [skipOwner, setSkipOwner] = useState(false);
+  const [isOwner, setIsOwner] = useState(props.state.stepIndex > 0 || is_owner);
+
+  // Modal for exiting workflow.
+  const [show, setShow] = useState(false);
+  const handleClose = () => setShow(false);
+  const goBack = () => navigate('/hotline');
+
+  // Control Agency display.
+  const [showAgency, setShowAgency] = useState(props.state.stepIndex === 0 && is_first_responder);
+
+  const initialData = {
     first_name: '',
     last_name: '',
     phone: '',
     alt_phone: '',
     email: '',
     comments: '',
-    show_agency: is_first_responder,
+    show_agency: showAgency,
     agency: '',
     drivers_license: '',
     address: '',
@@ -60,10 +76,20 @@ export const PersonForm = ({ id }) => {
     latitude: null,
     longitude: null,
     change_reason: '',
-  });
+  }
+  let current_data = initialData;
+  if (is_workflow) {
+    if (isOwner) {
+      current_data = props.state.steps.owner
+    }
+    else {
+      current_data = props.state.steps.reporter
+    }
+    current_data['show_agency'] = showAgency;
+  }
 
-  // Whether or not to skip Owner creation.
-  const [skipOwner, setSkipOwner] = useState(false);
+  // Initial Person data.
+  const [data, setData] = useState(current_data);
 
   // Hook for initializing data.
   useEffect(() => {
@@ -75,6 +101,11 @@ export const PersonForm = ({ id }) => {
           cancelToken: source.token,
         })
           .then(response => {
+            // Set phone field to be the pretty version.
+            response.data['phone'] = response.data['display_phone']
+            response.data['alt_phone'] = response.data['display_alt_phone']
+            // Initialize change_reason on fetch to avoid warning.
+            response.data['change_reason'] = '';
             setData(response.data);
           })
           .catch(error => {
@@ -130,14 +161,30 @@ export const PersonForm = ({ id }) => {
           change_reason: Yup.string()
             .max(50, 'Must be 50 characters or less'),
         })}
-        onSubmit={(values, { setSubmitting }) => {
-          if (id) {
+        onSubmit={(values, { setSubmitting, resetForm }) => {
+          if (is_workflow) {
+            if (isOwner) {
+              props.onSubmit('owner', values, 'animals');
+            }
+            else {
+              if (skipOwner) {
+                props.onSubmit('reporter', values, 'animals');
+              }
+              else {
+                props.onSubmit('reporter', values, 'owner');
+                setIsOwner(true);
+                setShowAgency(false);
+                resetForm({values:props.state.steps.owner});
+              }
+            }
+          }
+          else if (id) {
             axios.put('/people/api/person/' + id + '/', values)
             .then(function() {
               if (state.prevLocation) {
                 navigate(state.prevLocation);
               }
-              else if (is_owner) {
+              else if (isOwner) {
                 navigate('/hotline/owner/' + id);
               }
               else {
@@ -157,7 +204,7 @@ export const PersonForm = ({ id }) => {
               }
               // If adding from an animal, redirect to the Animal details.
               else if (animal_id) {
-                navigate('/animals/animal/' + animal_id);
+                navigate('/animals/' + animal_id);
               }
               // If adding from an owner, redirect to the new Owner details.
               else if (owner_id) {
@@ -169,7 +216,7 @@ export const PersonForm = ({ id }) => {
               }
               // If we're creating a person for intake, redirect to create new intake Animal with proper ID.
               else if (is_intake) {
-                if (is_owner) {
+                if (isOwner) {
                   navigate('/intake/animal/new?owner_id=' + response.data.id);
                 }
                 else {
@@ -177,7 +224,7 @@ export const PersonForm = ({ id }) => {
                 }
               }
               // If we're creating an owner without a reporter ID, redirect to create new Animal with owner ID.
-              else if (is_owner) {
+              else if (isOwner) {
                 navigate('/hotline/animal/new?owner_id=' + response.data.id);
               }
               // If we're creating a reporter and choose to skip owner, redirect to create new Animal with reporter ID.
@@ -196,10 +243,17 @@ export const PersonForm = ({ id }) => {
           }
         }}
       >
-        {props => (
-          <Card border="secondary" className="mt-5">
-          <Card.Header as="h5" className="pl-3"> {!is_owner || (is_owner && (id || !reporter_id)) ? <span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span> : ""}
-{is_owner ? "Owner" : "Reporter"} Information</Card.Header>
+        {formikProps => (
+          <Card border="secondary" className={is_workflow ? "mt-3" : "mt-5"}>
+            {id ?
+              <Card.Header as="h5" className="pl-3"><span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>Update {isOwner ? "Owner" : "Reporter"}</Card.Header>
+              :
+              <Card.Header as="h5" className="pl-3">{props.state.stepIndex === 0 ?
+                <span style={{cursor:'pointer'}} onClick={() => {setShow(true)}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
+                :
+                <span style={{cursor:'pointer'}} onClick={() => {setIsOwner(false); setShowAgency(is_first_responder); formikProps.resetForm({values:props.state.steps.reporter}); props.handleBack('owner', 'reporter')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}
+          {isOwner ? "Owner" : "Reporter"}{is_workflow ? " Information" : ""}
+          </Card.Header>}
           <Card.Body>
           <BootstrapForm noValidate>
             <Field type="hidden" value={data.latitude || ""} name="latitude" id="latitude"></Field>
@@ -218,56 +272,34 @@ export const PersonForm = ({ id }) => {
                 name="last_name"
               />
             </BootstrapForm.Row>
-            <BootstrapForm.Row hidden={is_owner}>
+            <BootstrapForm.Row>
               <TextInput
-                xs="3"
+                xs={isOwner ? "2" : "3"}
                 type="text"
                 label="Phone"
                 name="phone"
               />
               <TextInput
-                xs="3"
+                xs={isOwner ? "2" : "3"}
                 type="text"
                 label="Alternate Phone"
                 name="alt_phone"
               />
-              <TextInput
-                xs="6"
-                type="text"
-                label="Email"
-                name="email"
-              />
-            </BootstrapForm.Row>
-            <BootstrapForm.Row hidden={!is_owner}>
-              <TextInput
-                xs="6"
-                type="text"
-                label="Phone"
-                name="phone"
-              />
-              <TextInput
-                xs="6"
-                type="text"
-                label="Alternate Phone"
-                name="alt_phone"
-              />
-            </BootstrapForm.Row>
-            <BootstrapForm.Row hidden={!is_owner}>
-              <TextInput
-                xs="6"
-                type="text"
-                label="Email"
-                name="email"
-              />
-              <TextInput
-                xs="6"
+              <TextInput hidden={!isOwner}
+                xs="2"
                 type="text"
                 label="Drivers License"
                 name="drivers_license"
                 id="drivers_license"
               />
+              <TextInput
+                xs="6"
+                type="text"
+                label="Email"
+                name="email"
+              />
             </BootstrapForm.Row>
-            <BootstrapForm.Row hidden={is_first_responder || data.agency}>
+            <BootstrapForm.Row hidden={(is_first_responder && !isOwner) || (data.agency && id)}>
               <TextInput
                 xs="12"
                 as="textarea"
@@ -275,7 +307,7 @@ export const PersonForm = ({ id }) => {
                 name="comments"
               />
             </BootstrapForm.Row>
-            <BootstrapForm.Row hidden={!is_first_responder && !data.agency}>
+            <BootstrapForm.Row hidden={!showAgency && (!data.agency || !id)}>
               <TextInput
                 xs="12"
                 as="textarea"
@@ -283,7 +315,7 @@ export const PersonForm = ({ id }) => {
                 name="agency"
               />
             </BootstrapForm.Row>
-            <BootstrapForm.Row hidden={!is_owner}>
+            <BootstrapForm.Row hidden={!isOwner}>
               <BootstrapForm.Group as={Col} xs="12">
                 <AddressLookup
                   label="Search"
@@ -292,7 +324,7 @@ export const PersonForm = ({ id }) => {
                 />
               </BootstrapForm.Group>
             </BootstrapForm.Row>
-            <BootstrapForm.Row hidden={!is_owner}>
+            <BootstrapForm.Row hidden={!isOwner}>
               <TextInput
                 xs="10"
                 type="text"
@@ -307,7 +339,7 @@ export const PersonForm = ({ id }) => {
                 name="apartment"
               />
             </BootstrapForm.Row>
-            <BootstrapForm.Row hidden={!is_owner}>
+            <BootstrapForm.Row hidden={!isOwner}>
               <TextInput
                 xs="8"
                 type="text"
@@ -334,7 +366,7 @@ export const PersonForm = ({ id }) => {
                 disabled
               />
             </BootstrapForm.Row>
-            <BootstrapForm.Row hidden={!id || !is_owner}>
+            <BootstrapForm.Row hidden={!id || !isOwner}>
               <TextInput
                 xs="12"
                 type="text"
@@ -346,14 +378,28 @@ export const PersonForm = ({ id }) => {
           </Card.Body>
             <ButtonGroup size="lg" >
               {/* form save buttons */}
-              {!is_first_responder ? <Button type="button" onClick={() => { setSkipOwner(false); props.submitForm() }}>{!is_owner && !is_intake ? <span>{!id ? "Add Owner" : "Save"}</span> : <span>{!id && (!servicerequest_id && !animal_id && !owner_id) ? "Add Animal(s)" : "Save"}</span>}</Button> : ""}
-              {/* reporter form save buttons to skip owner */}
-              {!is_owner && !id && !is_intake ? <button type="button" className="btn btn-primary mr-1 border" onClick={() => { setSkipOwner(true); props.submitForm() }}>Add Animal(s)</button> : ""}
-              <Button variant="secondary" type="button" onClick={() => {props.resetForm(data)}}>Reset</Button>
+              {!is_first_responder && !is_workflow ? <Button type="button" onClick={() => { setSkipOwner(false); formikProps.submitForm() }}>{!isOwner && !is_intake ? <span>{!id ? "Add Owner" : "Save"}</span> : "Save"}</Button> : ""}
+              {/* workflow buttons */}
+              {is_workflow && !isOwner ? <Button type="button" onClick={() => { setSkipOwner(false); formikProps.submitForm(); }}>{props.state.steps.owner.first_name ? "Change Owner" : "Add Owner"}</Button> : ""}
+              {is_workflow ? <button type="button" className="btn btn-primary mr-1 border" onClick={() => { setSkipOwner(true); formikProps.submitForm() }}>Next Step</button> : ""}
             </ButtonGroup>
           </Card>
         )}
       </Formik>
+      <Modal show={show} onHide={handleClose}>
+        <Modal.Header closeButton>
+          <Modal.Title>Leave Service Request Creation Workflow?</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>
+            Are you sure you would like to leave the Service Request creation workflow?&nbsp;&nbsp;No data will be saved.
+          </p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="primary" onClick={goBack}>Yes</Button>
+          <Button variant="secondary" onClick={handleClose}>Close</Button>
+        </Modal.Footer>
+      </Modal>
     </>
   );
 };

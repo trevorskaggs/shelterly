@@ -103,6 +103,7 @@ class SimpleAnimalSerializer(serializers.ModelSerializer):
 
 class AnimalSerializer(SimpleAnimalSerializer):
     owners = serializers.SerializerMethodField()
+    reporter_object = serializers.SerializerMethodField(read_only=True)
     action_history = serializers.SerializerMethodField()
     evacuation_assignments = serializers.SerializerMethodField()
 
@@ -112,6 +113,13 @@ class AnimalSerializer(SimpleAnimalSerializer):
         if obj.owner.exists():
             return SimplePersonSerializer(obj.owner, many=True).data
         return []
+
+    # Custom Reporter object field that excludes animals to avoid a circular reference.
+    def get_reporter_object(self, obj):
+        from people.serializers import SimplePersonSerializer
+        if obj.reporter:
+            return SimplePersonSerializer(obj.reporter).data
+        return None
 
     # Custom Evac Assignment field to avoid a circular reference.
     def get_evacuation_assignments(self, obj):
