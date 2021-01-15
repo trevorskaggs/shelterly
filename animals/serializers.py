@@ -18,7 +18,7 @@ class SimpleAnimalSerializer(serializers.ModelSerializer):
     # Custom field for the full address.
     def get_full_address(self, obj):
         # Use the Room address first if it exists.
-        if obj.room:
+        if obj.shelter:
             return build_full_address(obj.shelter)
         # Then use the SR address if it exists.
         elif obj.request:

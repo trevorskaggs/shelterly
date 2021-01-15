@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import { Link } from 'raviger';
-import { Card, ListGroup } from 'react-bootstrap';
+import { Card, ListGroup, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faClipboardList, faEdit, faPlusSquare,
+  faClipboardList, faEdit, faPlusSquare, faWarehouse,
 } from '@fortawesome/free-solid-svg-icons';
 import ReactImageFallback from 'react-image-fallback';
 import History from '../components/History';
@@ -111,23 +111,23 @@ export function ShelterDetails({id}) {
           <Card className="border rounded" style={{width:"100%"}}>
             <Card.Body>
               <Card.Title>
-                <h4 className="mb-0">Animals Needing Room</h4>
+                <h4 className="mb-0">Animals Needing Room
+                <OverlayTrigger key={"assign"} placement="top" overlay={<Tooltip id={`tooltip-assign`}>Assign Animals to Rooms</Tooltip>}>
+                  <Link href={"/shelter/" + id + "/assign"}><FontAwesomeIcon className="ml-1" icon={faWarehouse} inverse/></Link>
+                </OverlayTrigger></h4>
               </Card.Title>
               <hr/>
               <span className="d-flex flex-wrap align-items-end">
               {data.unroomed_animals.map(animal => (
-                <Card key={animal.id} className="mr-3" style={{border:"none"}}>
+                <Card key={animal.id} className="border rounded mr-3" style={{border:"none"}}>
                   <ReactImageFallback style={{width:"151px"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} />
                   <Card.Text className="text-center mb-0">
                     {animal.name||"Unknown"}
                     <Link href={"/animals/" + animal.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
                     <Link href={"/animals/edit/" + animal.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
                   </Card.Text>
-                  <Card.Text className="text-center mb-0">
-                    {animal.status}
-                  </Card.Text>
                   <Card.Text className="text-center" style={{textTransform:"capitalize"}}>
-                    {animal.size} {animal.species}
+                    {animal.size !== 'unknown' ? animal.size : ""} {animal.species}
                   </Card.Text>
                 </Card>
               ))}
@@ -150,7 +150,7 @@ export function BuildingDetailsTable({id}) {
     let source = axios.CancelToken.source();
     const fetchBuildingData = async () => {
       // Fetch Building Details data.
-      await axios.get('/shelter/api/building/' + id, {
+      await axios.get('/shelter/api/building/' + id + '/', {
         cancelToken: source.token,
       })
       .then(response => {
@@ -224,7 +224,7 @@ export function RoomDetailsTable({id}) {
     let source = axios.CancelToken.source();
     const fetchRoomData = async () => {
       // Fetch Room Details data.
-      await axios.get('/shelter/api/room/' + id, {
+      await axios.get('/shelter/api/room/' + id + '/', {
           cancelToken: source.token,
       })
       .then(response => {

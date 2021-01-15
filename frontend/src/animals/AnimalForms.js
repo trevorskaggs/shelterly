@@ -136,7 +136,7 @@ export const AnimalForm = (props) => {
           setData(response.data);
           setPlaceholder("Select...");
           // Turn off reinitialization after form load so that data can be modified for image tracking without causing a form reset.
-          setReinitialize(false);
+          // setReinitialize(false);
         })
         .catch(error => {
           console.log(error.response);
@@ -155,7 +155,7 @@ export const AnimalForm = (props) => {
         var options = []
         response.data.forEach(function(shelter){
           let display_name = shelter.name + ' ('+shelter.buildings.length+' buildings, ' + shelter.room_count + ' rooms, ' + shelter.animal_count + ' animals)'
-          options.push({id: shelter.id, label: display_name})
+          options.push({value: shelter.id, label: display_name})
         });
         setShelters({options: options, isFetching: false});
       })
@@ -595,10 +595,6 @@ export const AnimalForm = (props) => {
                       type="text"
                       name="shelter"
                       options={shelters.options}
-                      onChange={(value) => {
-                        formikProps.setFieldValue("shelter", value.id);
-                      }}
-                      value={formikProps.values.shelter||data.shelter}
                       isClearable={true}
                     />
                   </Col>
