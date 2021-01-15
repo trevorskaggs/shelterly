@@ -14,6 +14,7 @@ import { STATE_OPTIONS } from '../constants'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft, faMinusSquare } from '@fortawesome/free-solid-svg-icons';
 import 'antd/lib/tree-select/style/css';
+import Alert from 'react-bootstrap/Alert'
 
 export const AnimalForm = ({id}) => {
 
@@ -129,6 +130,8 @@ export const AnimalForm = ({id}) => {
   const renderAddressLookup = ()=>{
     if(process.env.REACT_APP_GOOGLE_API_KEY){
       return <AddressLookup label="Found Location Search" style={{width: '100%'}} className="form-control"/>
+    } else {
+      return <Alert variant="danger">Found Location Search is not available. Please contact support for assistance.</Alert>
     }
   }
 
@@ -592,11 +595,6 @@ export const AnimalForm = ({id}) => {
                 <BootstrapForm.Row hidden={!reporter_id}>
                   <BootstrapForm.Group as={Col} xs="12">
                     {renderAddressLookup()}
-                    {/*<AddressLookup*/}
-                    {/*  label="Found Location Search"*/}
-                    {/*  style={{width: '100%'}}*/}
-                    {/*  className="form-control"*/}
-                    {/*/>*/}
                   </BootstrapForm.Group>
                 </BootstrapForm.Row>
                 <BootstrapForm.Row hidden={!reporter_id}>
