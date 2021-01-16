@@ -29,7 +29,7 @@ export function ShelterAssignment({id}) {
     room_count: 0,
   });
 
-  function handleOnDragEnd(result) {
+  async function handleOnDragEnd(result) {
     console.log(result);
     const { destination, source, draggableId } = result;
 
@@ -66,32 +66,44 @@ export function ShelterAssignment({id}) {
       let dest_animals = [];
       let rooms = data.rooms;
       let unroomed_animals = data.unroomed_animals;
+      // Unroomed to room.
       if (source.droppableId === 'unroomed_animals') {
         source_animals = Array.from(data.unroomed_animals);
         dest_animals = Array.from(data.rooms[destination.droppableId].animals);
-        dest_animals = dest_animals.concat(source_animals.filter(animal => animal.id === Number(draggableId)))
-        const [reorderedItem] = dest_animals.splice(destination.index, 1);
+        const [reorderedItem] = source_animals.splice(source.index, 1);
         dest_animals.splice(destination.index, 0, reorderedItem);
         rooms[destination.droppableId].animals = dest_animals;
-        unroomed_animals = source_animals.filter(animal => animal.id !== Number(draggableId));
+        unroomed_animals = source_animals;
+        await axios.patch('/animals/api/animal/' + Number(draggableId) + '/', {room:data.rooms[destination.droppableId].id})
+        .catch(error => {
+          console.log(error.response);
+        });
       }
+      // Room to unroomed.
       else if (destination.droppableId === 'unroomed_animals') {
         source_animals = Array.from(data.rooms[source.droppableId].animals);
         dest_animals = Array.from(data.unroomed_animals);
-        dest_animals = dest_animals.concat(source_animals.filter(animal => animal.id === Number(draggableId)))
-        const [reorderedItem] = dest_animals.splice(destination.index, 1);
+        const [reorderedItem] = source_animals.splice(source.index, 1);
         dest_animals.splice(destination.index, 0, reorderedItem);
         unroomed_animals = dest_animals;
         rooms[source.droppableId].animals = source_animals.filter(animal => animal.id !== Number(draggableId));
+        await axios.patch('/animals/api/animal/' + Number(draggableId) + '/', {room:null})
+        .catch(error => {
+          console.log(error.response);
+        });
       }
+      // Room to room.
       else {
         dest_animals = Array.from(data.rooms[destination.droppableId].animals);
         source_animals = Array.from(data.rooms[source.droppableId].animals);
-        dest_animals = dest_animals.concat(source_animals.filter(animal => animal.id === Number(draggableId)))
-        const [reorderedItem] = dest_animals.splice(destination.index, 1);
+        const [reorderedItem] = source_animals.splice(source.index, 1);
         dest_animals.splice(destination.index, 0, reorderedItem);
         rooms[destination.droppableId].animals = dest_animals;
         rooms[source.droppableId].animals = source_animals.filter(animal => animal.id !== Number(draggableId));
+        await axios.patch('/animals/api/animal/' + Number(draggableId) + '/', {room:data.rooms[destination.droppableId].id})
+        .catch(error => {
+          console.log(error.response);
+        });
       }
       setData(prevState => ({ ...prevState, ['rooms']:rooms, ['unroomed_animals']:unroomed_animals }));
     }
@@ -126,8 +138,8 @@ export function ShelterAssignment({id}) {
         <div className="row mb-3">
           <div className="col-12">
             <span>Roomless Animals</span>
-            <Card className="border rounded" >
-              <Card.Body className="pb-0">
+            <Card className="border rounded">
+              <Card.Body style={{paddingBottom:"3px"}}>
                 <Droppable droppableId="unroomed_animals" direction="horizontal">
                   {(provided) => (
                     <ul className="unroomed_animals" {...provided.droppableProps} ref={provided.innerRef} style={{listStyleType:"none"}}>
@@ -163,10 +175,10 @@ export function ShelterAssignment({id}) {
               {data.rooms.map((room, index) => (
                 <span key={room.id}>{room.name}
                   <Card className="border rounded mr-3" style={{width:"190px", minHeight:"150px"}}>
-                    <Card.Body style={{paddingBottom:"0px"}}>
+                    <Card.Body style={{paddingBottom:"3px", display:"flex", flexDirection:"column"}}>
                       <Droppable droppableId={String(index)}>
                         {(provided) => (
-                          <ul className="animals mb-0" {...provided.droppableProps} ref={provided.innerRef} style={{listStyleType:"none"}}>
+                          <ul className="animals mb-0" {...provided.droppableProps} ref={provided.innerRef}>
                           {room.animals.map((animal, index) => (
                             <Draggable key={animal.id} draggableId={String(animal.id)} index={index}>
                               {(provided) => (

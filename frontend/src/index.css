@@ -116,11 +116,14 @@ input[disabled] {
 .animals {
   list-style: none;
   padding-left: 0;
+  /* display: flex;
+  flex-direction: column; */
+  flex-grow: 1;
 }
 
 
 .animals li {
-  /* display: inline; */
+  /* display: flex; */
   align-items: center;
   /* border: solid 1px #d0d0d0;
   border-radius: .2em; */
