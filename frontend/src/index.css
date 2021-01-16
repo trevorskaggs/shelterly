@@ -106,28 +106,17 @@ input[disabled] {
 .unroomed_animals li {
   display: inline-flex;
   align-items: center;
-  /* border: solid 1px #d0d0d0;
-  border-radius: .2em; */
-  /* padding: 0em .5em .4em 0em; */
-  /* padding: grid; */
   margin-right: 1em;
 }
 
 .animals {
   list-style: none;
   padding-left: 0;
-  /* display: flex;
-  flex-direction: column; */
   flex-grow: 1;
 }
 
 
 .animals li {
-  /* display: flex; */
   align-items: center;
-  /* border: solid 1px #d0d0d0;
-  border-radius: .2em; */
-  /* padding: 0em .5em .4em .5em; */
-  /* padding: grid; */
   margin-bottom: 1em;
 }
