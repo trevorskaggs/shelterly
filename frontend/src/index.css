@@ -97,3 +97,34 @@ input[disabled] {
 .custom-page-links .page-item.disabled .page-link {
   background-color: #444!important ;
 }
+
+.unroomed_animals {
+  list-style: none;
+  padding-left: 0;
+}
+
+.unroomed_animals li {
+  display: inline-flex;
+  align-items: center;
+  /* border: solid 1px #d0d0d0;
+  border-radius: .2em; */
+  /* padding: 0em .5em .4em 0em; */
+  /* padding: grid; */
+  margin-right: 1em;
+}
+
+.animals {
+  list-style: none;
+  padding-left: 0;
+}
+
+
+.animals li {
+  /* display: inline; */
+  align-items: center;
+  /* border: solid 1px #d0d0d0;
+  border-radius: .2em; */
+  /* padding: 0em .5em .4em .5em; */
+  /* padding: grid; */
+  margin-bottom: 1em;
+}

@@ -22,7 +22,7 @@ export function ShelterAssignment({id}) {
     zip_code: '',
     description: '',
     image: '',
-    buildings: [],
+    rooms: [],
     action_history: [],
     unroomed_animals: [],
     animal_count: 0,
@@ -30,10 +30,71 @@ export function ShelterAssignment({id}) {
   });
 
   function handleOnDragEnd(result) {
-    const animals = Array.from(data.unroomed_animals);
-    const [reorderedItem] = animals.splice(result.source.index, 1);
-    animals.splice(result.destination.index, 0, reorderedItem);
-    setData(prevState => ({ ...prevState, ['unroomed_animals']:animals }));
+    console.log(result);
+    const { destination, source, draggableId } = result;
+
+    // Bail if invalid destination.
+    if (!destination) return;
+
+    // Bail if no changes.
+    if (
+      destination.droppableId === source.droppableId &&
+      destination.index === source.index
+    ) {
+      return;
+    }
+
+    if (source.droppableId === destination.droppableId) {
+      let animals = [];
+      if (source.droppableId === 'unroomed_animals') {
+        animals = Array.from(data.unroomed_animals);
+        const [reorderedItem] = animals.splice(source.index, 1);
+        animals.splice(destination.index, 0, reorderedItem);
+        setData(prevState => ({ ...prevState, ['unroomed_animals']:animals }));
+      }
+      else {
+        animals = Array.from(data.rooms[source.droppableId].animals);
+        const [reorderedItem] = animals.splice(source.index, 1);
+        animals.splice(destination.index, 0, reorderedItem);
+        let rooms = data.rooms;
+        rooms[source.droppableId].animals = animals;
+        setData(prevState => ({ ...prevState, ['rooms']:rooms }));
+      }      
+    }
+    else {
+      let source_animals = [];
+      let dest_animals = [];
+      let rooms = data.rooms;
+      let unroomed_animals = data.unroomed_animals;
+      if (source.droppableId === 'unroomed_animals') {
+        source_animals = Array.from(data.unroomed_animals);
+        dest_animals = Array.from(data.rooms[destination.droppableId].animals);
+        dest_animals = dest_animals.concat(source_animals.filter(animal => animal.id === Number(draggableId)))
+        const [reorderedItem] = dest_animals.splice(destination.index, 1);
+        dest_animals.splice(destination.index, 0, reorderedItem);
+        rooms[destination.droppableId].animals = dest_animals;
+        unroomed_animals = source_animals.filter(animal => animal.id !== Number(draggableId));
+      }
+      else if (destination.droppableId === 'unroomed_animals') {
+        source_animals = Array.from(data.rooms[source.droppableId].animals);
+        dest_animals = Array.from(data.unroomed_animals);
+        dest_animals = dest_animals.concat(source_animals.filter(animal => animal.id === Number(draggableId)))
+        const [reorderedItem] = dest_animals.splice(destination.index, 1);
+        dest_animals.splice(destination.index, 0, reorderedItem);
+        unroomed_animals = dest_animals;
+        rooms[source.droppableId].animals = source_animals.filter(animal => animal.id !== Number(draggableId));
+      }
+      else {
+        dest_animals = Array.from(data.rooms[destination.droppableId].animals);
+        source_animals = Array.from(data.rooms[source.droppableId].animals);
+        dest_animals = dest_animals.concat(source_animals.filter(animal => animal.id === Number(draggableId)))
+        const [reorderedItem] = dest_animals.splice(destination.index, 1);
+        dest_animals.splice(destination.index, 0, reorderedItem);
+        rooms[destination.droppableId].animals = dest_animals;
+        rooms[source.droppableId].animals = source_animals.filter(animal => animal.id !== Number(draggableId));
+      }
+      setData(prevState => ({ ...prevState, ['rooms']:rooms, ['unroomed_animals']:unroomed_animals }));
+    }
   }
 
   // Hook for initializing data.
@@ -57,62 +118,35 @@ export function ShelterAssignment({id}) {
   return (
     <>
       <Header>
-        {data.name} - Assign Animal Rooms
+        {data.name} - Room Animals
       </Header>
       <hr/>
-      <Card className="border rounded d-flex">
-        <Card.Body>
-          <Card.Title>
-            <h4 className="mb-0">Rooms</h4>
-          </Card.Title>
-          <hr/>
-          <span className="d-flex flex-wrap align-items-end">
-            {data.buildings.map(building => (
-              <span key={building.id} className="d-flex flex-wrap align-items-end">
-                {building.rooms.map(room => (
-                  <Card key={room.id} className="border rounded mr-3" style={{width:"100px", height:"100px"}}>
-                    <Card.Text className="text-center mb-0">
-                      {room.name}
-                      <Link href={"/shelter/room/" + room.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
-                    </Card.Text>
-                    <Card.Text className="text-center mb-0">
-                      {room.animals.length} Animals
-                    </Card.Text>
-                  </Card>
-                ))}
-              </span>
-            ))}
-          </span>
-        </Card.Body>
-      </Card>
-      {data.unroomed_animals.length ?
-      <div className="row mt-3">
-        <div className="col-12 d-flex">
-          <Card className="border rounded" style={{width:"100%"}}>
-            <Card.Body>
-              <Card.Title>
-                <h4 className="mb-0">Animals</h4>
-              </Card.Title>
-              <hr/>
-              <DragDropContext onDragEnd={handleOnDragEnd}>
-                <Droppable droppableId="animals">
+      <DragDropContext onDragEnd={handleOnDragEnd}>
+      {data.unroomed_animals.length > 0 ?
+        <div className="row mb-3">
+          <div className="col-12">
+            <span>Roomless Animals</span>
+            <Card className="border rounded" >
+              <Card.Body className="pb-0">
+                <Droppable droppableId="unroomed_animals" direction="horizontal">
                   {(provided) => (
-                    <ul className="animals d-flex flex-wrap align-items-end pl-0" {...provided.droppableProps} ref={provided.innerRef} style={{listStyleType:"none"}}>
+                    <ul className="unroomed_animals" {...provided.droppableProps} ref={provided.innerRef} style={{listStyleType:"none"}}>
                     {data.unroomed_animals.map((animal, index) => (
                       <Draggable key={animal.id} draggableId={String(animal.id)} index={index}>
                         {(provided) => (
-                          <li style={{display:"inline"}} ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
-                          <Card className="border rounded mr-3" style={{border:"none"}}>
-                            <ReactImageFallback style={{width:"151px"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} />
-                            <Card.Text className="text-center mb-0">
-                              {animal.name||"Unknown"}
-                              <Link href={"/animals/" + animal.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
-                              <Link href={"/animals/edit/" + animal.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
-                            </Card.Text>
-                            <Card.Text className="text-center" style={{textTransform:"capitalize"}}>
-                              {animal.size} {animal.species}
-                            </Card.Text>
-                          </Card>
+                          <li ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
+                            <Card className="border rounded" style={{width:"150px"}}>
+                              <div className="row no-gutters">
+                                <div className="col-auto">
+                                  <ReactImageFallback style={{width:"47px", marginRight:"3px"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} />
+                                </div>
+                                <div className="col">
+                                  {animal.name||"Unknown"}
+                                <div>
+                                  {animal.size !== 'unknown' ? animal.size : ""} {animal.species}</div>
+                                </div>
+                              </div>
+                            </Card>
                           </li>
                         )}
                       </Draggable>
@@ -121,11 +155,48 @@ export function ShelterAssignment({id}) {
                     </ul>
                   )}
                 </Droppable>
-              </DragDropContext>
-            </Card.Body>
-          </Card>
-        </div>
-      </div> : ""}
+              </Card.Body>
+            </Card>
+          </div>
+        </div> : ""}
+            <span className="d-flex flex-wrap">
+              {data.rooms.map((room, index) => (
+                <span key={room.id}>{room.name}
+                  <Card className="border rounded mr-3" style={{width:"190px", minHeight:"150px"}}>
+                    <Card.Body style={{paddingBottom:"0px"}}>
+                      <Droppable droppableId={String(index)}>
+                        {(provided) => (
+                          <ul className="animals mb-0" {...provided.droppableProps} ref={provided.innerRef} style={{listStyleType:"none"}}>
+                          {room.animals.map((animal, index) => (
+                            <Draggable key={animal.id} draggableId={String(animal.id)} index={index}>
+                              {(provided) => (
+                                <li ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
+                                  <Card className="border rounded" style={{width:"150px"}}>
+                                    <div className="row no-gutters">
+                                      <div className="col-auto">
+                                        <ReactImageFallback style={{width:"47px", marginRight:"3px"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} />
+                                      </div>
+                                      <div className="col">
+                                        {animal.name||"Unknown"}
+                                      <div>
+                                        {animal.size !== 'unknown' ? animal.size : ""} {animal.species}</div>
+                                      </div>
+                                    </div>
+                                  </Card>
+                                </li>
+                              )}
+                            </Draggable>
+                          ))}
+                          {provided.placeholder}
+                          </ul>
+                        )}
+                      </Droppable>
+                    </Card.Body>
+                  </Card>
+                </span>
+              ))}
+            </span>
+      </DragDropContext>
     </>
   );
 };
