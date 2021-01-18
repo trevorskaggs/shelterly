@@ -194,8 +194,10 @@ export function EvacResolution({ id }) {
             forced_entry: Yup.boolean(),
             owner_contact_note: Yup.string().when('owner', {
               is: true,
-              then: Yup.boolean().oneOf([true], 'The owner must be notified before resolution.').required()}),
-            owner_contact_time: Yup.date().required('Please specify the date and time the owner was notified.'),
+              then: Yup.string().required('The owner must be notified before resolution.')}),
+            owner_contact_time: Yup.date().when('owner', {
+              is: true,
+              then: Yup.date().required('The owner must be notified before resolution.')}),
           })
         ),
       })}
@@ -295,7 +297,7 @@ export function EvacResolution({ id }) {
                       onChange={(date, dateStr) => {
                         props.setFieldValue(`sr_updates.${index}.followup_date`, dateStr)
                       }}
-                      value={props.values.sr_updates[index] ? props.values.sr_updates[index].followup_date : null}
+                      value={service_request.followup_date || null}
                     />
                   </BootstrapForm.Row>
                   <BootstrapForm.Row className="mt-3">
