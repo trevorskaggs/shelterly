@@ -353,7 +353,7 @@ export const PersonForm = (props) => {
                 name="state"
                 id="state"
                 options={STATE_OPTIONS}
-                value={props.values.state || ''}
+                value={formikProps.values.state || ''}
                 placeholder=''
                 disabled
               />
