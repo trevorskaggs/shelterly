@@ -2,12 +2,8 @@ import re
 from django.db.models import Count, Exists, OuterRef, Prefetch, Q
 from rest_framework import serializers
 from actstream.models import target_stream
-<<<<<<< HEAD
-from .models import OwnerContact, Person
-=======
 from animals.models import Animal
-from .models import Person
->>>>>>> master
+from .models import OwnerContact, Person
 from location.utils import build_full_address, build_action_string
 from hotline.models import ServiceRequest
 from animals.models import Animal

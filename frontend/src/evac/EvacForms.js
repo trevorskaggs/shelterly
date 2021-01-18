@@ -285,16 +285,6 @@ export function EvacResolution({ id }) {
                       value={props.values.sr_updates[index] ? props.values.sr_updates[index].date_completed : new Date()}
                     />
                   </BootstrapForm.Row>
-                  <BootstrapForm.Row className="mt-3">
-                    <TextInput
-                      id={`sr_updates.${index}.notes`}
-                      name={`sr_updates.${index}.notes`}
-                      xs="9"
-                      as="textarea"
-                      rows={5}
-                      label="Notes"
-                    />
-                  </BootstrapForm.Row>
                   <BootstrapForm.Row>
                     <DateTimePicker
                       label="Followup Date"
@@ -305,7 +295,17 @@ export function EvacResolution({ id }) {
                       onChange={(date, dateStr) => {
                         props.setFieldValue(`sr_updates.${index}.followup_date`, dateStr)
                       }}
-                      value={service_request.followup_date || null}
+                      value={props.values.sr_updates[index] ? props.values.sr_updates[index].followup_date : null}
+                    />
+                  </BootstrapForm.Row>
+                  <BootstrapForm.Row className="mt-3">
+                    <TextInput
+                      id={`sr_updates.${index}.notes`}
+                      name={`sr_updates.${index}.notes`}
+                      xs="9"
+                      as="textarea"
+                      rows={5}
+                      label="Visit Notes"
                     />
                   </BootstrapForm.Row>
                   <BootstrapForm.Row className="mt-2">
@@ -316,33 +316,27 @@ export function EvacResolution({ id }) {
                   </BootstrapForm.Row>
                   {service_request.owners.length > 0 ?
                     <BootstrapForm.Row className="mt-3 pl-1">
-                      <Field
-                        label={"Owner Notified: "}
-                        component={Checkbox}
-                        name={`sr_updates.${index}.owner_contacted`}
-                        checked={(props.values.sr_updates[index] && props.values.sr_updates[index].owner_contacted) || false}
-                        onChange={() => {
-                          if (props.values.sr_updates[index] && props.values.sr_updates[index].owner_contacted) {
-                            props.setFieldValue(
-                              `sr_updates.${index}.owner_contacted`,
-                              false
-                            );
-                          }
-                          else {
-                            props.setFieldValue(
-                              `sr_updates.${index}.owner_contacted`,
-                              true
-                            );
-                          }
+                      <DateTimePicker
+                        label="Owner Contact Time"
+                        name={`sr_updates.${index}.owner_contact_time`}
+                        id={`sr_updates.${index}.owner_contact_time`}
+                        xs="4"
+                        data-enable-time={true}
+                        onChange={(date, dateStr) => {
+                          props.setFieldValue(`sr_updates.${index}.owner_contact_time`, dateStr)
                         }}
+                        value={service_request.owner_contact_time || null}
+                      />
+                      <TextInput
+                        id={`sr_updates.${index}.owner_contact_note`}
+                        name={`sr_updates.${index}.owner_contact_note`}
+                        xs="9"
+                        as="textarea"
+                        rows={5}
+                        label="Owner Contact Note"
                       />
                     </BootstrapForm.Row>
                     : ""}
-                  {props.errors.sr_updates && props.errors.sr_updates[index] && props.errors.sr_updates[index].owner_contacted &&
-                    props.touched.sr_updates && props.touched.sr_updates[index] && props.touched.sr_updates[index].owner_contacted && (
-                      <div style={{ color: "#e74c3c", marginTop: "-8px", fontSize: "80%" }}>{props.errors.sr_updates[index].owner_contacted}</div>
-                    )
-                  }
                 </Card.Body>
               </Card>
             ))}

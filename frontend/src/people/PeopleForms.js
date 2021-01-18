@@ -440,6 +440,7 @@ export const OwnerContactForm = ({id}) => {
           })
           .then(response => {
             setData(response.data);
+            console.log(response.data)
           })
           .catch(error => {
             console.log(error.response);
@@ -451,11 +452,14 @@ export const OwnerContactForm = ({id}) => {
         // Get Owner details for new OwnerContact
         const fetchOwner = async () => {
         // Fetch Owner Data.
-        axios.get('/people/api/person/' + owner, {
+        axios.get('/people/api/person/' + owner +'/', {
           cancelToken: source.token,
         })
           .then(response => {
-            setData({'owner': owner, 'owner_name': response.data['first_name'] + ' ' + response.data['last_name']});
+            console.log(response)
+            setData({'owner': owner, 'owner_name': response.data['first_name'] + ' ' + response.data['last_name'],
+               'animal': animal, 'owner_contact_note': '',owner_contact_time: ''});
+            console.log(data)
           })
           .catch(error => {
             console.log(error.response);
