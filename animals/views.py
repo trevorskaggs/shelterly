@@ -11,7 +11,7 @@ from animals.serializers import AnimalSerializer
 
 class AnimalViewSet(viewsets.ModelViewSet):
 
-    queryset = Animal.objects.all().prefetch_related(Prefetch('animalimage_set', to_attr='images'))
+    queryset = Animal.objects.all().prefetch_related(Prefetch('animalimage_set', to_attr='images')).order_by('order')
 
     search_fields = ['name', 'species', 'status', 'request__address', 'request__city', 'owner__first_name', 'owner__last_name', 'owner__address', 'owner__city']
     filter_backends = (filters.SearchFilter,)
@@ -20,8 +20,8 @@ class AnimalViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         if serializer.is_valid():
 
-            # Set status to SHELTERED if a room is added.
-            if serializer.validated_data.get('room'):
+            # Set status to SHELTERED if a shelter is added.
+            if serializer.validated_data.get('shelter'):
                 serializer.validated_data['status'] = 'SHELTERED'
 
             # Set room to null if not present, or if status is changed to REUNITED
@@ -66,10 +66,6 @@ class AnimalViewSet(viewsets.ModelViewSet):
             # Keep owner the same when editing an animal.
             serializer.validated_data['owner'] = serializer.instance.owner.values_list('id', flat=True)
 
-            # Set room to null if not present
-            # if not serializer.validated_data.get('room'):
-            #     serializer.validated_data['room'] = None
-
             # Mark as SHELTERED if we receive shelter field and it's not already in a shelter.
             if serializer.validated_data.get('shelter') and not serializer.instance.shelter:
                 serializer.validated_data['status'] = 'SHELTERED'
@@ -96,12 +92,16 @@ class AnimalViewSet(viewsets.ModelViewSet):
             for field, value in serializer.validated_data.items():
                 new_value = value
                 old_value = getattr(serializer.instance, field)
-                if field not in ['status', 'room', 'shelter', 'owner'] and new_value != old_value:
+                if field not in ['status', 'room', 'shelter', 'order', 'owner'] and new_value != old_value:
                     changed_fields.append(field)
 
             animal = serializer.save()
 
-            # Only record animal update if a field other than status, shelter, room, or owner has changed.
+            # Set order if present, add 1 to avoid 0 index since order is a PositiveIntergerField.
+            if type(self.request.data.get('set_order', '')) == int:
+                animal.to(int(self.request.data.get('set_order'))+1)
+
+            # Only record animal update if a field other than status, shelter, room, order, or owner has changed.
             if len(changed_fields) > 0:
                 action.send(self.request.user, verb='updated animal', target=animal)
 

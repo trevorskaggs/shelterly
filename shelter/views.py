@@ -22,8 +22,6 @@ class ShelterViewSet(viewsets.ModelViewSet):
 class BuildingViewSet(viewsets.ModelViewSet):
     queryset = Building.objects.all()
     serializer_class = BuildingSerializer
-    filter_backends = (filters.DjangoFilterBackend,)
-    filterset_fields = ('shelter',)
 
     def perform_create(self, serializer):
         if serializer.is_valid():
@@ -38,8 +36,6 @@ class BuildingViewSet(viewsets.ModelViewSet):
 class RoomViewSet(viewsets.ModelViewSet):
     queryset = Room.objects.all()
     serializer_class = RoomSerializer
-    filter_backends = (filters.DjangoFilterBackend,)
-    filterset_fields = ('building',)
 
     def perform_create(self, serializer):
         if serializer.is_valid():

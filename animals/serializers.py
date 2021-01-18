@@ -13,6 +13,7 @@ class SimpleAnimalSerializer(serializers.ModelSerializer):
     side_image = serializers.SerializerMethodField()
     extra_images = serializers.SerializerMethodField()
     shelter_name = serializers.SerializerMethodField()
+    owner_names = serializers.SerializerMethodField()
     is_stray = serializers.BooleanField(read_only=True)
 
     # Custom field for the full address.
@@ -36,12 +37,14 @@ class SimpleAnimalSerializer(serializers.ModelSerializer):
             return obj.shelter.name
         return ''
 
+    def get_owner_names(self, obj):
+        if obj.owner.exists():
+            return [person.first_name + ' ' + person.last_name for person in obj.owner.all()]
+        return []
+
     # An Animal is ACO Required if it is aggressive or "Other" species.
     def get_aco_required(self, obj):
         return (obj.aggressive or obj.species.other)
-
-    def get_action_history(self, obj):
-        return [build_action_string(action) for action in target_stream(obj)]
 
     def get_front_image(self, obj):
         try:
@@ -107,10 +110,10 @@ class AnimalSerializer(SimpleAnimalSerializer):
     # Custom Evac Assignment field to avoid a circular reference.
     def get_evacuation_assignments(self, obj):
         return [ea.id for ea in obj.evacuation_assignments.all()]
+
+    def get_action_history(self, obj):
+        return [build_action_string(action) for action in target_stream(obj)]
     
     class Meta:
         model = Animal
         fields = '__all__'
-    
-
-

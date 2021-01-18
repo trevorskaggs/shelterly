@@ -1,4 +1,5 @@
 from django.db import models
+from ordered_model.models import OrderedModel
 
 from animals.choices import ALL_AGE_CHOICES, ALL_SIZE_CHOICES, SEX_CHOICES, SPECIES_CHOICES, STATUS_CHOICES, UNKNOWN_CHOICES
 from animals.colors import ALL_COLOR_CHOICES
@@ -7,7 +8,7 @@ from people.models import Person
 from shelter.models import Room, Shelter
 
 # Create your models here.
-class Animal(models.Model):
+class Animal(OrderedModel):
 
     request = models.ForeignKey(ServiceRequest, on_delete=models.SET_NULL, blank=True, null=True)
     owner = models.ManyToManyField(Person, blank=True)
@@ -36,8 +37,10 @@ class Animal(models.Model):
     behavior_notes = models.TextField(blank=True, max_length=200)
     last_seen = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
 
+    order_with_respect_to = 'shelter'
+
     class Meta:
-        ordering = []
+        ordering = ('order',)
 
 class AnimalImage(models.Model):
 

@@ -101,12 +101,14 @@ input[disabled] {
 .unroomed_animals {
   list-style: none;
   padding-left: 0;
+  margin-bottom: 0px;
 }
 
 .unroomed_animals li {
   display: inline-flex;
   align-items: center;
   margin-right: 1em;
+  margin-bottom: 1em;
 }
 
 .animals {

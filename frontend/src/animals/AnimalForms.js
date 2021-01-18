@@ -154,7 +154,7 @@ export const AnimalForm = (props) => {
       .then(response => {
         var options = []
         response.data.forEach(function(shelter){
-          let display_name = shelter.name + ' ('+shelter.buildings.length+' buildings, ' + shelter.room_count + ' rooms, ' + shelter.animal_count + ' animals)'
+          let display_name = shelter.name + ' ('+shelter.buildings.length+' buildings, ' + shelter.rooms.length + ' rooms, ' + shelter.animal_count + ' animals)'
           options.push({value: shelter.id, label: display_name})
         });
         setShelters({options: options, isFetching: false});
@@ -612,9 +612,9 @@ export const AnimalForm = (props) => {
                       }}
                     >
                       {shelters.options.map(shelter => (
-                        <TreeNode title={shelter.name + ' ('+shelter.buildings.length+' buildings, ' + shelter.room_count + ' rooms, ' + shelter.animal_count + ' animals)'} key={shelter.id} selectable={false} value={shelter.id}>
+                        <TreeNode title={shelter.name + ' ('+shelter.buildings.length+' buildings, ' + shelter.rooms.length + ' rooms, ' + shelter.animal_count + ' animals)'} key={shelter.id} selectable={false} value={shelter.id}>
                         </TreeNode>
-                        <TreeNode title={'Shelter: ' + shelter.name + ' ('+shelter.buildings.length+' buildings, ' + shelter.room_count + ' rooms, ' + shelter.animal_count + ' animals)'} key={'shelter'+shelter.id} selectable={false} value={'shelter'+shelter.id}>
+                        <TreeNode title={'Shelter: ' + shelter.name + ' ('+shelter.buildings.length+' buildings, ' + shelter.rooms.length + ' rooms, ' + shelter.animal_count + ' animals)'} key={'shelter'+shelter.id} selectable={false} value={'shelter'+shelter.id}>
                           {shelter.buildings.map(building => (
                             <TreeNode title={'Building: ' + building.name + ' (' + building.rooms.length + ' rooms, ' + building.animal_count + ' animals)'} key={'building'+building.id} selectable={false} value={'building'+building.id}>
                               {building.rooms.map(room => (
