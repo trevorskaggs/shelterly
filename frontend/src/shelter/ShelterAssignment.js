@@ -139,20 +139,20 @@ export function ShelterAssignment({id}) {
       </Header>
       <hr/>
       <DragDropContext onDragEnd={handleOnDragEnd}>
-        <div className="row mb-3">
+        <Row className="mb-3 d-flex" style={{height:"111px"}}>
           <div className="col-12">
             <span>Roomless Animals</span>
-            <Card className="border rounded" style={{minHeight:"91px"}}>
+            <Card className="border rounded" style={{height:"91px"}}>
               <Card.Body style={{paddingBottom:"3px"}}>
                 <Droppable droppableId="unroomed_animals" direction="horizontal">
                   {(provided) => (
-                    <ul className="unroomed_animals" {...provided.droppableProps} ref={provided.innerRef} style={{listStyleType:"none"}}>
+                    <ul className="unroomed_animals" {...provided.droppableProps} ref={provided.innerRef}>
                     {data.unroomed_animals.map((animal, index) => (
                       <Draggable key={animal.id} draggableId={String(animal.id)} index={index}>
                         {(provided) => (
                           <li ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
-                            <Card className="border rounded" style={{width:"150px"}}>
-                              <div className="row no-gutters" style={{ textTransform: "capitalize" }}>
+                            <Card className="border rounded" style={{width:"150px", height:"51"}}>
+                              <div className="row no-gutters" style={{textTransform: "capitalize"}}>
                                 <div className="col-auto">
                                   <ReactImageFallback style={{width:"47px", marginRight:"3px"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} />
                                 </div>
@@ -199,16 +199,16 @@ export function ShelterAssignment({id}) {
               </Card.Body>
             </Card>
           </div>
-        </div>
+        </Row>
         <Row className="d-flex ml-0">
           {data.rooms.map((room, index) => (
-            <span key={room.id} style={{marginBottom:"35px"}}>{room.name}<Link href={"/shelter/room/" + room.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
+            <span key={room.id}>{room.name}<Link href={"/shelter/room/" + room.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
             <span className="col">
-              <Card className="border rounded mr-3" style={{width:"190px", height: "100%"}}>
+              <Card className="border rounded mr-3" style={{width:"190px", minHeight: "45px", height: "100%"}}>
                 <Card.Body style={{paddingBottom:"3px", display:"flex", flexDirection:"column"}}>
                   <Droppable droppableId={String(index)}>
                     {(provided) => (
-                      <ul className="animals mb-0" {...provided.droppableProps} ref={provided.innerRef}>
+                      <ul className="animals" {...provided.droppableProps} ref={provided.innerRef}>
                       {room.animals.map((animal, index) => (
                         <Draggable key={animal.id} draggableId={String(animal.id)} index={index}>
                           {(provided) => (
@@ -220,6 +220,31 @@ export function ShelterAssignment({id}) {
                                   </div>
                                   <div className="col">
                                     {animal.name||"Unknown"}
+                                    {animal.owner_names.length === 0 ?
+                                    <OverlayTrigger
+                                      key={"stray"}
+                                      placement="top"
+                                      overlay={
+                                        <Tooltip id={`tooltip-stray`}>
+                                          Animal is stray
+                                        </Tooltip>
+                                      }
+                                    >
+                                      <FontAwesomeIcon icon={faUserAltSlash} size="sm" className="ml-1" />
+                                    </OverlayTrigger> :
+                                  <OverlayTrigger
+                                    key={"stray"}
+                                    placement="top"
+                                    overlay={
+                                      <Tooltip id={`tooltip-stray`}>
+                                        {animal.owner_names.map(owner_name => (
+                                          <div key={owner_name}>{owner_name}</div>
+                                        ))}
+                                      </Tooltip>
+                                    }
+                                  >
+                                    <FontAwesomeIcon icon={faUserAlt} size="sm" className="ml-1" />
+                                  </OverlayTrigger>}
                                   <div>
                                     {animal.size !== 'unknown' ? animal.size : ""} {animal.species}</div>
                                   </div>

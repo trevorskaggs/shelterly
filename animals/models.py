@@ -37,7 +37,7 @@ class Animal(OrderedModel):
     behavior_notes = models.TextField(blank=True, max_length=200)
     last_seen = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
 
-    order_with_respect_to = 'shelter'
+    order_with_respect_to = 'room'
 
     class Meta:
         ordering = ('order',)

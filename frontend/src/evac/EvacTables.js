@@ -180,10 +180,10 @@ export function EvacuationAssignmentTable() {
                             </div>
                             {evacuation_assignment.end_time ?
                             <div>
-                              <b>Visit Note: </b>{service_request.visit_notes.filter(note => String(note.evac_assignment) === String(evacuation_assignment.id)).length && service_request.visit_notes.filter(note => String(note.evac_assignment) === String(evacuation_assignment.id))[0].notes || "No information available."}
+                              <b>Visit Note: </b>{service_request.visit_notes.filter(note => (String(note.evac_assignment) === String(evacuation_assignment.id)).length > 0 && service_request.visit_notes.filter(note => String(note.evac_assignment) === String(evacuation_assignment.id))[0].notes) || "No information available."}
                             </div> :
                             <div>
-                              <b>Previous Visit: </b>{service_request.visit_notes.sort((a,b) => new Date(b.date_completed).getTime() - new Date(a.date_completed).getTime()).length && service_request.visit_notes.sort((a,b) => new Date(b.date_completed).getTime() - new Date(a.date_completed).getTime())[0].notes || "No information available."}
+                              <b>Previous Visit: </b>{service_request.visit_notes.sort((a,b) => (new Date(b.date_completed).getTime() - new Date(a.date_completed).getTime()).length > 0 && service_request.visit_notes.sort((a,b) => new Date(b.date_completed).getTime() - new Date(a.date_completed).getTime())[0].notes) || "No information available."}
                             </div>
                             }
                           </Col>
