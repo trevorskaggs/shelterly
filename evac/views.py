@@ -1,3 +1,4 @@
+from django.db.models import Count, Exists, OuterRef, Prefetch
 from django.http import JsonResponse
 from datetime import datetime
 from rest_framework import filters, permissions, viewsets
@@ -19,13 +20,23 @@ class EvacTeamMemberViewSet(viewsets.ModelViewSet):
 class EvacAssignmentViewSet(viewsets.ModelViewSet):
 
     queryset = EvacAssignment.objects.all()
-    search_fields = ['team_members__first_name', 'team_members__last_name', 'service_requests__owner__first_name', 'service_requests__owner__last_name', 'service_requests__address', 'service_requests__reporter__first_name', 'service_requests__reporter__last_name']
+    search_fields = ['team_members__first_name', 'team_members__last_name', 'service_requests__owner__first_name', 'service_requests__owner__last_name', 'service_requests__address', 'service_requests__reporter__first_name', 'service_requests__reporter__last_name', 'animals__name']
     filter_backends = (filters.SearchFilter,)
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = EvacAssignmentSerializer
 
     def get_queryset(self):
-        queryset = EvacAssignment.objects.all().order_by('-start_time')
+        queryset = EvacAssignment.objects.all().order_by('-start_time').prefetch_related(Prefetch('service_requests',
+                    ServiceRequest.objects
+            .annotate(animal_count=Count("animal"))
+            .annotate(
+                injured=Exists(Animal.objects.filter(request_id=OuterRef("id"), injured="yes"))
+            ).prefetch_related(Prefetch('animal_set', queryset=Animal.objects.prefetch_related(Prefetch('animalimage_set', to_attr='images')), to_attr='animals'))
+            .prefetch_related('owner')
+            .prefetch_related('visitnote_set')
+            .select_related('reporter')
+            .prefetch_related('evacuation_assignments')
+        ))
         status = self.request.query_params.get('status', '')
         if status == "open":
             return queryset.filter(end_time__isnull=True).distinct()

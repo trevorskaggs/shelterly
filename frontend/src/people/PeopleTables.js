@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import { Link } from 'raviger';
-import { Button, Card, CardGroup, Form, FormControl, InputGroup, ListGroup } from 'react-bootstrap';
+import { Button, Card, CardGroup, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-    faClipboardList
+  faClipboardList, faIgloo, faExclamationCircle, faQuestionCircle, faHome, faHelicopter, faHeart, faSkullCrossbones
 } from '@fortawesome/free-solid-svg-icons';
 import Header from '../components/Header';
 
@@ -84,11 +84,11 @@ export function PeopleTable() {
                 <div key={owner.id} className="mt-3">
                     <div className="mt-3">
                         <div className="card-header"> {owner.first_name ?
-                            <h3 style={{marginBottom:"-2px"}}>{owner.first_name} {owner.last_name}
+                            <h4 style={{marginBottom:"-2px"}}>{owner.first_name} {owner.last_name}
                                 {owner.is_owner  ?
-                                    <Link href={"/hotline/owner/" + owner.id}> <FontAwesomeIcon icon={faClipboardList} inverse/></Link>
-                                    : <Link href={"/hotline/reporter/" + owner.id}> <FontAwesomeIcon icon={faClipboardList} inverse/></Link>}
-                    </h3> : "Unknown"}
+                                    <Link href={"/hotline/owner/" + owner.id} target="_blank"> <FontAwesomeIcon icon={faClipboardList} inverse/></Link>
+                                    : <Link href={"/hotline/reporter/" + owner.id} target="_blank"> <FontAwesomeIcon icon={faClipboardList} inverse/></Link>}
+                    </h4> : "Unknown"}
                         </div>
                         <CardGroup>
                             <Card>
@@ -100,10 +100,11 @@ export function PeopleTable() {
                                         <ListGroup.Item><b>Service Request: </b>
                                             {owner.request ?
                                                 <span>
-                                                    {owner.request.full_address}
-                                                    <Link
-                                                        href={"/hotline/servicerequest/" + owner.request.id}> <FontAwesomeIcon
-                                                        icon={faClipboardList} inverse/></Link> | <span style={{textTransform:"capitalize"}}>{owner.request.status}</span>
+                                                    {owner.request.full_address}&nbsp;
+                                                    <Link href={"/hotline/servicerequest/" + owner.request.id} target="_blank">
+                                                        <FontAwesomeIcon
+                                                        icon={faClipboardList} inverse/>
+                                                    </Link>
                                                 </span>
                                                 : "None"
                                             }
@@ -114,15 +115,57 @@ export function PeopleTable() {
                             <Card>
                                 <Card.Body>
                                     <Card.Title>Animals</Card.Title>
-                                    <ListGroup>
-                                        <ListGroup.Item>
-                                            {owner.animals.length ?
-                                                <span>
-                                                    {owner.animals.map((animal, i) => (
-                                                        <span key={animal.id}>{i > 0 && ", "}{animal.name || "Unknown"} ({animal.species})</span>))}
-                                                </span> : "None"}
+                                    {['cats', 'dogs', 'horses', 'other'].map(species => (
+                                        <ListGroup key={species}>
+                                            {owner.animals.filter(animal => species.includes(animal.species)).length > 0 ?
+                                            <ListGroup.Item style={{borderRadius: 0}}><b style={{textTransform:"capitalize"}}>{species}: </b>
+                                            {owner.animals.filter(animal => species.includes(animal.species)).map((animal, i) => (
+                                            <span key={animal.id}>{i > 0 && ", "}{animal.name || "Unknown"}
+                                            <Link href={"/animals/animal/" + animal.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1 mr-1" inverse/></Link>
+                                            (
+                                            {animal.status === "SHELTERED IN PLACE" ?
+                                                <OverlayTrigger key={"sip"} placement="top"
+                                                                overlay={<Tooltip id={`tooltip-sip`}>SHELTERED IN PLACE</Tooltip>}>
+                                                    <FontAwesomeIcon icon={faIgloo} inverse/>
+                                                </OverlayTrigger> : ""}
+                                            {animal.status === "REPORTED" ?
+                                                <OverlayTrigger key={"reported"} placement="top"
+                                                                overlay={<Tooltip id={`tooltip-reported`}>REPORTED</Tooltip>}>
+                                                    <FontAwesomeIcon icon={faExclamationCircle} inverse/>
+                                                </OverlayTrigger> : ""}
+                                            {animal.status === "UNABLE TO LOCATE" ?
+                                                <OverlayTrigger key={"unable-to-locate"} placement="top"
+                                                                overlay={<Tooltip id={`tooltip-unable-to-locate`}>UNABLE TO LOCATE</Tooltip>}>
+                                                    <FontAwesomeIcon icon={faQuestionCircle} inverse/>
+                                                </OverlayTrigger> : ""}
+                                            {animal.status === "EVACUATED" ?
+                                                <OverlayTrigger key={"evacuated"} placement="top"
+                                                                overlay={<Tooltip id={`tooltip-evacuated`}>EVACUATED</Tooltip>}>
+                                                    <FontAwesomeIcon icon={faHelicopter} inverse/>
+                                                </OverlayTrigger> : ""}
+                                            {animal.status === "REUNITED" ?
+                                                <OverlayTrigger key={"reunited"} placement="top"
+                                                                overlay={<Tooltip id={`tooltip-reunited`}>REUNITED</Tooltip>}>
+                                                    <FontAwesomeIcon icon={faHeart} inverse/>
+                                                </OverlayTrigger> : ""}
+                                            {animal.status === "SHELTERED" ?
+                                                <OverlayTrigger key={"sheltered"} placement="top"
+                                                                overlay={<Tooltip id={`tooltip-sheltered`}>SHELTERED</Tooltip>}>
+                                                    <FontAwesomeIcon icon={faHome} inverse/>
+                                                </OverlayTrigger> : ""}
+                                            {animal.status === "DECEASED" ?
+                                                <OverlayTrigger key={"deceased"} placement="top"
+                                                                overlay={<Tooltip id={`tooltip-deceased`}>DECEASED</Tooltip>}>
+                                                    <FontAwesomeIcon icon={faSkullCrossbones} inverse/>
+                                                </OverlayTrigger> : ""}
+                                            )
+                                            </span>
+                                        ))}
                                         </ListGroup.Item>
-                                    </ListGroup>
+                                        : ""}
+                                        </ListGroup>
+                                    ))}
+                                    {owner.animals.length < 1 ? <ListGroup><ListGroup.Item>No Animals</ListGroup.Item></ListGroup> : ""}
                                 </Card.Body>
                             </Card>
                         </CardGroup>

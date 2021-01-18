@@ -26,29 +26,19 @@ const state_options = [{ value: 'AL', label: "AL" }, { value: 'AK', label: "AK" 
 { value: 'VA', label: "VA" }, { value: "VT", label: "VT" }, { value: 'WA', label: "WA" }, { value: 'WV', label: "WV" }, { value: 'WI', label: "WI" }, { value: 'WY', label: "WY" },]
 
 // Form for creating new Service Request objects.
-export function ServiceRequestForm({ id }) {
+export function ServiceRequestForm(props) {
 
   const { state, dispatch } = useContext(AuthContext);
+  const id = props.id;
 
-  // Identify any query param data.
-  const [queryParams] = useQueryParams();
-  const {
-    owner_id = null,
-    reporter_id = null,
-    first_responder = 'false'
-  } = queryParams;
-
-  // Force owner to be an empty array if no owner.
-  let owner = [];
-  if (owner_id) {
-    owner = [owner_id]
-  }
+  // Determine if we're in the hotline workflow.
+  var is_workflow = window.location.pathname.includes("workflow");
 
   // Determine if this is from a first responder when creating a SR.
-  var is_first_responder = (first_responder === 'true');
+  var is_first_responder = window.location.pathname.includes("first_responder");
 
   // Track checkbox state with Fade.
-  const [fadeIn, setFadeIn] = useState(true);
+  const [fadeIn, setFadeIn] = useState(props.state.steps.owner.address ? false : true);
   function handleChange() {
     setFadeIn(!fadeIn)
   }
@@ -59,16 +49,16 @@ export function ServiceRequestForm({ id }) {
 
   // Initial ServiceRequest data.
   const [data, setData] = useState({
-    owner: owner,
-    reporter: reporter_id,
+    owner: [],
+    reporter: null,
     directions: '',
-    address: '',
-    apartment: '',
-    city: '',
-    state: '',
-    zip_code: '',
-    latitude: null,
-    longitude: null,
+    address: props.state.steps.owner.address || '',
+    apartment: props.state.steps.owner.apartment || '',
+    city: props.state.steps.owner.city || '',
+    state: props.state.steps.owner.state || '',
+    zip_code: props.state.steps.owner.zip_code || '',
+    latitude: props.state.steps.owner.latitude || null,
+    longitude: props.state.steps.owner.longitude || null,
     verbal_permission: false,
     key_provided: false,
     accessible: false,
@@ -93,23 +83,6 @@ export function ServiceRequestForm({ id }) {
       };
       fetchServiceRequestData();
     }
-    else if (owner_id) {
-      const fetchOwnerData = async () => {
-        // Fetch Owner data.
-        await axios.get('/people/api/person/' + owner_id + '/', {
-          cancelToken: source.token,
-        })
-          .then(response => {
-            // Update relevant address fields.
-            setData(Object.assign(data, { 'address': response.data.address, 'apartment': response.data.apartment, 'city': response.data.city, 'state': response.data.state, 'zip_code': response.data.zip_code, 'latitude': response.data.latitude, 'longitude': response.data.longitude }))
-            setFadeIn(response.data.address ? false : true)
-          })
-          .catch(error => {
-            console.log(error.response);
-          });
-      };
-      fetchOwnerData();
-    }
     // Cleanup.
     return () => {
       source.cancel();
@@ -122,7 +95,6 @@ export function ServiceRequestForm({ id }) {
         enableReinitialize={true}
         validationSchema={Yup.object({
           directions: Yup.string()
-            .required('Required')
             .max(2000, 'Must be 2000 characters or less'),
           verbal_permission: Yup.boolean(),
           key_provided: Yup.boolean(),
@@ -142,8 +114,49 @@ export function ServiceRequestForm({ id }) {
           longitude: Yup.number()
             .nullable(),
         })}
-        onSubmit={(values, { setSubmitting }) => {
-          if (id) {
+        onSubmit={ async (values, { setSubmitting }) => {
+          if (is_workflow) {
+            // Create Reporter
+            let reporterResponse = [{data:{id:null}}];
+            if (props.state.steps.reporter.first_name) {
+              reporterResponse = await Promise.all([
+                axios.post('/people/api/person/', props.state.steps.reporter)
+              ]);
+            }
+            // Create Owner
+            let ownerResponse = [{data:{id:null}}];
+            if (props.state.steps.owner.first_name) {
+              ownerResponse = await Promise.all([
+                axios.post('/people/api/person/', props.state.steps.owner)
+              ]);
+            }
+            // Create Animals
+            props.state.steps.animals.forEach(animal => {
+              // Add owner and reporter to animal data.
+              animal['reporter'] = reporterResponse[0].data.id
+              animal['new_owner'] = ownerResponse[0].data.id
+              axios.post('/animals/api/animal/', animal)
+              .catch(error => {
+                console.log(error.response);
+              });
+            });
+            // Create Service Request
+            values['reporter'] = reporterResponse[0].data.id
+            if (ownerResponse[0].data.id) {
+              values['owner'] = [ownerResponse[0].data.id]
+            }
+            axios.post('/hotline/api/servicerequests/', values)
+            .then(response => {
+              navigate('/hotline/servicerequest/' + response.data.id);
+            })
+            .catch(error => {
+              console.log(error.response);
+              if (error.response.data && error.response.data[0].includes('same address')) {
+                setError({show:true, error:error.response.data});
+              }
+            });
+          }
+          else if (id) {
             axios.put('/hotline/api/servicerequests/' + id + '/', values)
             .then(function() {
               if (state.prevLocation) {
@@ -161,31 +174,17 @@ export function ServiceRequestForm({ id }) {
             });
             setSubmitting(false);
           }
-          else {
-            axios.post('/hotline/api/servicerequests/', values)
-            .then(response => {
-              navigate('/hotline/servicerequest/' + response.data.id);
-            })
-            .catch(error => {
-              console.log(error.response);
-              if (error.response.data && error.response.data[0].includes('same address')) {
-                setError({show:true, error:error.response.data});
-              }
-            });
-          setSubmitting(false);
-        }
       }}
     >
-      {props => (
-        <Card border="secondary" className="mt-5" style={{width:"auto"}}>
-        <Card.Header as="h5">{id ? <span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span> : ""}Service Request Form</Card.Header>
+      {formikProps => (
+        <Card border="secondary" className={is_workflow ? "mt-3" : "mt-5"}>
+        <Card.Header as="h5">{id ?
+          <span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
+          :
+          <span style={{cursor:'pointer'}} onClick={() => {props.handleBack('request', 'animals')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}{id ? "Update " : ""}Service Request{is_workflow ? " Information" :""}</Card.Header>
         <Card.Body>
         <BootstrapForm as={Form}>
-          <Field type="hidden" value={owner} name="owner" id="owner"></Field>
-          <Field type="hidden" value={reporter_id || ""} name="reporter" id="reporter"></Field>
-          <Field type="hidden" value={data.latitude || ""} name="latitude" id="latitude"></Field>
-          <Field type="hidden" value={data.longitude || ""} name="longitude" id="longitude"></Field>
-          {data.address && !id ?
+          {props.state.steps.owner.address && !id ?
             <span className="form-row mb-2">
               <Label>&nbsp;&nbsp;Address Same as Owner: </Label>
               <CustomInput id="same_address" type="checkbox" className="ml-2" checked={!fadeIn} onChange={handleChange} />
@@ -193,7 +192,7 @@ export function ServiceRequestForm({ id }) {
           }
             <Fade in={fadeIn} hidden={!fadeIn}>
               <BootstrapForm.Row>
-                <BootstrapForm.Group as={Col} xs="10">
+                <BootstrapForm.Group as={Col} xs="12">
                   <AddressLookup
                     label="Search"
                     style={{width: '100%'}}
@@ -204,10 +203,10 @@ export function ServiceRequestForm({ id }) {
               <BootstrapForm.Row>
                 <TextInput
                   type="text"
-                  label={!is_first_responder ? "Address*" : "Address/Cross Streets*"}
+                  label={is_first_responder ? "Address/Cross Streets*" : "Address*"}
                   name="address"
                   id="address"
-                  xs="8"
+                  xs="10"
                   disabled
                 />
                 <TextInput
@@ -224,7 +223,7 @@ export function ServiceRequestForm({ id }) {
                   label="City"
                   name="city"
                   id="city"
-                  xs="6"
+                  xs="8"
                   disabled
                 />
                 <Col xs="2">
@@ -233,7 +232,7 @@ export function ServiceRequestForm({ id }) {
                     name="state"
                     id="state"
                     options={state_options}
-                    value={props.values.state || ''}
+                    value={formikProps.values.state || ''}
                     placeholder=''
                     disabled
                   />
@@ -252,10 +251,10 @@ export function ServiceRequestForm({ id }) {
                 <TextInput
                   as="textarea"
                   rows={5}
-                  label="Directions*"
+                  label="Directions"
                   name="directions"
                   id="directions"
-                  xs="10"
+                  xs="12"
                 />
             </BootstrapForm.Row>
             <BootstrapForm.Row>
@@ -274,8 +273,10 @@ export function ServiceRequestForm({ id }) {
         </BootstrapForm>
         </Card.Body>
         <ButtonGroup size="lg">
-          <Button type="submit" onClick={() => { props.submitForm()}}>Save</Button>
-          <Button variant="secondary" type="button" onClick={() => {props.resetForm(data)}}>Reset</Button>
+          {is_workflow ?
+            <Button className="btn btn-primary border" type="submit" onClick={() => { formikProps.submitForm()}}>Finish and Create Service Request</Button> :
+            <Button type="submit" onClick={() => { formikProps.submitForm()}}>Save</Button>
+          }
         </ButtonGroup>
         <Modal show={error.show} onHide={handleClose}>
           <Modal.Header closeButton>

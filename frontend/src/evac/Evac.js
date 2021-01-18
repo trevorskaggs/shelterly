@@ -24,9 +24,7 @@ import {EvacuationAssignmentTable} from "./EvacTables";
 
   export const EvacuationAssignmentSearch = () => (
     <div>
-        <h1 style={header_style}>Dispatch Assignments</h1>
-        <br/>
-        <EvacuationAssignmentTable/>
+      <EvacuationAssignmentTable/>
     </div>
   )
 

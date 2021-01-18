@@ -1,3 +1,4 @@
+from django.db.models import Prefetch
 from rest_framework import filters, permissions, viewsets
 from actstream import action
 
@@ -9,7 +10,7 @@ from people.serializers import OwnerContactSerializer, PersonSerializer
 
 # Provides view for Person API calls.
 class PersonViewSet(viewsets.ModelViewSet):
-    queryset = Person.objects.all()
+    queryset = Person.objects.all().prefetch_related(Prefetch('animal_set', queryset=Animal.objects.prefetch_related(Prefetch('animalimage_set', to_attr='images')), to_attr='animals'))
     search_fields = ['first_name', 'last_name', 'address', 'animals__name', 'animal__name']
     filter_backends = (filters.SearchFilter,)
     permission_classes = [permissions.IsAuthenticated, ]
@@ -20,6 +21,9 @@ class PersonViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         if serializer.is_valid():
+            # Clean phone fields.
+            serializer.validated_data['phone'] = ''.join(char for char in serializer.validated_data.get('phone', '') if char.isdigit())
+            serializer.validated_data['alt_phone'] = ''.join(char for char in serializer.validated_data.get('alt_phone', '') if char.isdigit())
             person = serializer.save()
             action.send(self.request.user, verb='created person', target=person)
 
@@ -46,6 +50,9 @@ class PersonViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         if serializer.is_valid():
+            # Clean phone fields.
+            serializer.validated_data['phone'] = ''.join(char for char in serializer.validated_data.get('phone', '') if char.isdigit())
+            serializer.validated_data['alt_phone'] = ''.join(char for char in serializer.validated_data.get('alt_phone', '') if char.isdigit())
             # Identify which fields changed on update.
             change_dict = {}
             for field, value in serializer.validated_data.items():
