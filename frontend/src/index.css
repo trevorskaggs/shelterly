@@ -25,7 +25,7 @@ hr { display: block; height: 1px;
   margin: 1em 0; padding: 0; }
 
 /* Leaflet map CSS */
-.leaflet-container { width: auto; height: 55vh; }
+.leaflet-container { width: auto; height: 55vh; min-height:300px;}
 
 .leaflet-top, .leaflet-bottom {
   z-index: 400 !important;
@@ -104,6 +104,7 @@ input[disabled] {
   margin-bottom: 0px;
   display: flex;
 }
+::-webkit-scrollbar {display:none;}
 
 .unroomed_animals li {
   margin-right: 1em;

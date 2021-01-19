@@ -378,7 +378,7 @@ export function Dispatch() {
             />
           </Col>
         </Row>
-        <Row className="d-flex flex-wrap" style={{marginTop:"8px", marginRight:"-20px", marginLeft:"-16px", minHeight:"36vh", paddingRight:"15px"}}>
+        <Row className="d-flex flex-wrap" style={{marginTop:"8px", marginRight:"-20px", marginLeft:"-14px", minHeight:"36vh", paddingRight:"14px"}}>
           <Col xs={2} className="d-flex flex-column pl-0 pr-0" style={{marginLeft:"-7px", marginRight:"5px"}}>
             <div className="card-header border rounded pl-3 pr-3" style={{height:"100%"}}>
               <h5 className="mb-0 text-center">Options</h5>

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import { Link } from 'raviger';
-import { Card, Row, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Card, Col, Row, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faClipboardList, faUserAlt, faUserAltSlash
@@ -140,13 +140,13 @@ export function ShelterAssignment({id}) {
       <hr/>
       <DragDropContext onDragEnd={handleOnDragEnd}>
         <Row className="mb-3 d-flex" style={{height:"111px"}}>
-          <div className="col-12">
+          <div className="col">
             <span>Roomless Animals</span>
-            <Card className="border rounded" style={{height:"91px"}}>
-              <Card.Body style={{paddingBottom:"3px"}}>
+            <Card className="border rounded" style={{height:"91px", display:"flex", justifyContent:"space-around", overflowX:"scroll"}}>
+              <Card.Body style={{paddingBottom:"3px", display:"flex", flexDirection:"column"}}>
                 <Droppable droppableId="unroomed_animals" direction="horizontal">
                   {(provided) => (
-                    <ul className="unroomed_animals" {...provided.droppableProps} ref={provided.innerRef}>
+                    <ul className="unroomed_animals " {...provided.droppableProps} ref={provided.innerRef}>
                     {data.unroomed_animals.map((animal, index) => (
                       <Draggable key={animal.id} draggableId={String(animal.id)} index={index}>
                         {(provided) => (
@@ -202,7 +202,7 @@ export function ShelterAssignment({id}) {
         </Row>
         <Row className="d-flex ml-0">
           {data.rooms.map((room, index) => (
-            <span key={room.id}>{room.name}<Link href={"/shelter/room/" + room.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
+            <span key={room.id} style={{marginBottom:"32px"}}>{room.name}<Link href={"/shelter/room/" + room.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
             <span className="col">
               <Card className="border rounded mr-3" style={{width:"190px", minHeight: "45px", height: "100%"}}>
                 <Card.Body style={{paddingBottom:"3px", display:"flex", flexDirection:"column"}}>
