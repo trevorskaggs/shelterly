@@ -175,7 +175,7 @@ export function ServiceRequestView({id}) {
                 {data.owners.map(owner => (
                   <ListGroup.Item key={owner.id}><b>Owner: </b>{owner.first_name} {owner.last_name} <Link href={"/hotline/owner/" + owner.id}><FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link><Link href={"/hotline/owner/edit/" + owner.id}> <FontAwesomeIcon icon={faEdit} size="sm" inverse /></Link> | {owner.display_phone||owner.email||"No Contact"}</ListGroup.Item>
                 ))}
-                {data.reporter ? <ListGroup.Item><b>Reporter: </b>{data.reporter_object.first_name} {data.reporter_object.last_name} <Link href={"/hotline/reporter/" + data.reporter}><FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link><Link href={"/hotline/reporter/edit/" + data.reporter}> <FontAwesomeIcon icon={faEdit} size="sm" inverse /></Link></ListGroup.Item> : ""}
+                {data.reporter ? <ListGroup.Item><b>Reporter: </b>{data.reporter_object.first_name} {data.reporter_object.last_name} {data.reporter_object.agency ? <span>({data.reporter_object.agency})</span> : "" } <Link href={"/hotline/reporter/" + data.reporter}><FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link><Link href={"/hotline/reporter/edit/" + data.reporter}> <FontAwesomeIcon icon={faEdit} size="sm" inverse /></Link></ListGroup.Item> : ""}
               </ListGroup>
             </Card.Body>
           </Card>
@@ -188,21 +188,21 @@ export function ServiceRequestView({id}) {
               <Card.Title>
                 <h4 className="mb-0">Animals<Link href={"/hotline/animal/new?servicerequest_id=" + id}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link></h4>
               </Card.Title>
-              <hr/>
+              <hr style={{marginBottom:"-2px"}} />
               <span className="d-flex flex-wrap align-items-end">
               {data.animals.map(animal => (
-                <Card key={animal.id} className="mr-3" style={{border:"none"}}>
+                <Card key={animal.id} className="mr-3 mt-3" style={{border:"none"}}>
                   <ReactImageFallback style={{width:"151px"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} />
                   <Card.Text className="text-center mb-0">
                     {animal.name||"Unknown"}
-                    <Link href={"/animals/animal/" + animal.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
-                    <Link href={"/animals/animal/edit/" + animal.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
+                    <Link href={"/animals/" + animal.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
+                    <Link href={"/animals/edit/" + animal.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
                   </Card.Text>
                   <Card.Text className="text-center mb-0">
                     {animal.status}
                   </Card.Text>
                   <Card.Text className="text-center" style={{textTransform:"capitalize"}}>
-                    {animal.size} {animal.species}
+                    {animal.species === 'horse' ? <span>{animal.size}</span> : <span>{animal.size} {animal.species}</span>}
                   </Card.Text>
                 </Card>
               ))}

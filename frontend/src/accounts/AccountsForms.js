@@ -37,8 +37,11 @@ export const LoginForm = () => {
             axios.post('/login/', values)
             .then(response => {
               setAuthToken(response.data.token);
+              //set token as cookie 
               setCookie("token", response.data.token, {path: '/'});
+              //set authcontext
               dispatch({type: 'LOGIN_SUCCESSFUL', data: response.data });
+              //called once
               loadUser({dispatch, removeCookie});
               navigate(next);
             })
