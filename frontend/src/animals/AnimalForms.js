@@ -223,8 +223,6 @@ export const AnimalForm = (props) => {
           side_image: Yup.mixed(),
           extra_images: Yup.array(),
           address: Yup.string(),
-          apartment: Yup.string()
-            .max(10, 'Must be 10 characters or less'),
           city: Yup.string(),
           state: Yup.string(),
           zip_code: Yup.string()
