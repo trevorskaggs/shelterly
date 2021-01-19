@@ -136,7 +136,7 @@ export const AnimalForm = (props) => {
           setData(response.data);
           setPlaceholder("Select...");
           // Turn off reinitialization after form load so that data can be modified for image tracking without causing a form reset.
-          // setReinitialize(false);
+          setReinitialize(false);
         })
         .catch(error => {
           console.log(error.response);
