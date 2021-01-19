@@ -26,7 +26,7 @@ export function ShelterDetails({id}) {
     action_history: [],
     unroomed_animals: [],
     animal_count: 0,
-    rooms: [],
+    room_count: 0,
   });
 
   // Hook for initializing data.
