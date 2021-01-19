@@ -24,10 +24,6 @@ class AnimalViewSet(viewsets.ModelViewSet):
             if serializer.validated_data.get('shelter'):
                 serializer.validated_data['status'] = 'SHELTERED'
 
-            # Set room to null if not present, or if status is changed to REUNITED
-            if not serializer.validated_data.get('room'):
-                serializer.validated_data['room'] = None
-
             animal = serializer.save()
             animals = [animal]
             action.send(self.request.user, verb='created animal', target=animal)
@@ -48,10 +44,9 @@ class AnimalViewSet(viewsets.ModelViewSet):
                 if serializer.validated_data.get('request'):
                     animal.owner.add(*animal.request.owner.all())
 
-                if animal.room:
-                    action.send(self.request.user, verb='sheltered animal', target=animal.room, action_object=animal)
-                    action.send(self.request.user, verb='sheltered animal', target=animal.room.building, action_object=animal)
-                    action.send(self.request.user, verb='sheltered animal', target=animal.room.building.shelter, action_object=animal)
+                if animal.shelter:
+                    action.send(self.request.user, verb='sheltered animal', target=animal)
+                    action.send(self.request.user, verb='sheltered animal', target=animal.shelter, action_object=animal)
 
                 images_data = self.request.FILES
                 for key, image_data in images_data.items():
@@ -67,15 +62,18 @@ class AnimalViewSet(viewsets.ModelViewSet):
             serializer.validated_data['owner'] = serializer.instance.owner.values_list('id', flat=True)
 
             # Mark as SHELTERED if we receive shelter field and it's not already in a shelter.
-            if serializer.validated_data.get('shelter') and not serializer.instance.shelter:
+            if serializer.validated_data.get('shelter') and (not serializer.instance.shelter or serializer.instance.shelter != serializer.validated_data.get('shelter')) :
                 serializer.validated_data['status'] = 'SHELTERED'
                 action.send(self.request.user, verb='sheltered animal', target=serializer.validated_data.get('shelter'), action_object=serializer.instance)
+
+            # If animal had a shelter and now doesn't or has a different shelter.
+            if serializer.instance.shelter and (serializer.instance.shelter != serializer.validated_data.get('shelter', serializer.instance.shelter)):
+                action.send(self.request.user, verb='removed animal', target=serializer.instance.shelter, action_object=serializer.instance)
 
             # If animal had a room and now doesn't or has a different room.
             if serializer.instance.room and (not serializer.validated_data.get('room') or serializer.instance.room != serializer.validated_data.get('room')):
                 action.send(self.request.user, verb='removed animal', target=serializer.instance.room, action_object=serializer.instance)
                 action.send(self.request.user, verb='removed animal', target=serializer.instance.room.building, action_object=serializer.instance)
-                # action.send(self.request.user, verb='removed animal', target=serializer.instance.room.building.shelter, action_object=serializer.instance)
 
             # If animal is added to a new room from no room or a different room.
             if serializer.validated_data.get('room') and (serializer.instance.room != serializer.validated_data.get('room')):
