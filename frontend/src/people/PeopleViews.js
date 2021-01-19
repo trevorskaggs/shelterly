@@ -30,6 +30,7 @@ export function PersonView({id}) {
     state: '',
     zip_code: '',
     animals: [],
+    owner_contacts: [],
     action_history: [],
   });
 
@@ -78,6 +79,21 @@ export function PersonView({id}) {
               <ListGroup.Item><b>Address: </b>{data.address ? data.full_address : 'No Address Listed'}</ListGroup.Item>
               {data.request ?
                 <ListGroup.Item><b>Service Request: </b>{data.request.full_address}<Link href={"/hotline/servicerequest/" + data.request.id}> <FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link></ListGroup.Item>: ''}
+            </ListGroup>
+          </Card.Body>
+        </Card>
+      </div>
+      <div className="col-6 d-flex" style={{marginRight:"-15px"}}>
+        <Card className="border rounded d-flex" style={{width:"100%"}}>
+          <Card.Body>
+            <Card.Title>
+              <h4>Owner Contacts</h4>
+            </Card.Title>
+            <hr/>
+            <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
+              {data.owner_contacts.map(owner_contact => (
+              <ListGroup.Item><b>{owner_contact.owner_contact_time}</b>: {owner_contact.owner_contact_note}</ListGroup.Item>
+              ))}
             </ListGroup>
           </Card.Body>
         </Card>

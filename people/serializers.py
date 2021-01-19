@@ -42,15 +42,33 @@ class SimplePersonSerializer(serializers.ModelSerializer):
         model = Person
         fields = '__all__'
 
+
+class OwnerContactSerializer(serializers.ModelSerializer):
+
+    owner_name = serializers.SerializerMethodField()
+
+    def get_owner_name(self, obj):
+
+        return str(obj.owner)
+
+    class Meta:
+        model = OwnerContact
+        fields = '__all__'
+
+
 class PersonSerializer(SimplePersonSerializer):
 
     from animals.serializers import AnimalSerializer
-    animals = AnimalSerializer(many=True, required=False, read_only=True)
+    animals = serializers.SerializerMethodField()
+    owner_contacts = serializers.SerializerMethodField()
     request = serializers.SerializerMethodField()
     action_history = serializers.SerializerMethodField()
 
     def get_animals(self, obj):
-        return  obj.animal_set.all().values() | obj.animals.all().values()
+        return obj.animal_set.all().values() | obj.animals.all().values()
+
+    def get_owner_contacts(self, obj):
+        return obj.ownercontact_set.all().values()
 
     # Custom field for the action history.
     def get_action_history(self, obj):
@@ -76,15 +94,3 @@ class PersonSerializer(SimplePersonSerializer):
             return SimpleServiceRequestSerializer(service_request).data
         return None
 
-
-class OwnerContactSerializer(serializers.ModelSerializer):
-
-    owner_name = serializers.SerializerMethodField()
-
-    def get_owner_name(self, obj):
-
-        return str(obj.owner)
-
-    class Meta:
-        model = OwnerContact
-        fields = '__all__'

@@ -85,7 +85,6 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
                     VisitNote.objects.create(evac_assignment=evac_assignment, service_request=service_requests[0], date_completed=service_request['date_completed'], notes=service_request['notes'], forced_entry=service_request['forced_entry'])
                 else:
                     VisitNote.objects.filter(evac_assignment=evac_assignment, service_request=service_requests[0]).update(date_completed=service_request['date_completed'], notes=service_request['notes'], forced_entry=service_request['forced_entry'])
-                import pdb; pdb.set_trace()
                 for owner in service_requests[0].owner.all():
-                    OwnerContact.objects.create(owner=owner, owner_contact_note=service_request['owner_contacted'], owner_contacted_time=service_request['owner_contacted_time'])
+                    OwnerContact.objects.create(owner=owner, owner_contact_note=service_request['owner_contact_note'], owner_contact_time=service_request['owner_contact_time'])
             action.send(self.request.user, verb='updated evacuation assignment', target=evac_assignment)
