@@ -119,7 +119,7 @@ export function AnimalSearch() {
                   {animal.owners.map(owner => (
                     <ListGroup.Item key={owner.id}><b>Owner:</b> {owner.first_name} {owner.last_name} {owner.display_phone} <Link href={"/hotline/owner/" + owner.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item>
                   ))}
-                  {animal.owners < 1 && animal.reporter ? <ListGroup.Item><b>Reporter: </b> {animal.reporter.first_name} {animal.reporter.last_name} {animal.reporter.display_phone} <Link href={"/hotline/reporter/" + animal.reporter.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item> : ""}
+                  {animal.owners < 1 && animal.reporter ? <ListGroup.Item><b>Reporter: </b> {animal.reporter_object.first_name} {animal.reporter_object.last_name} {animal.reporter_object.display_phone} <Link href={"/hotline/reporter/" + animal.reporter_object.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item> : ""}
                   {animal.owners < 1 && !animal.reporter ? <ListGroup.Item><b>Owner: </b>No Owner</ListGroup.Item> : ""}
                 </ListGroup>
               </Card.Body>

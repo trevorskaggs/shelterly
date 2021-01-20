@@ -83,16 +83,6 @@ class SimpleAnimalSerializer(serializers.ModelSerializer):
             except AttributeError:
                 return ''
 
-    # Truncates latitude and longitude.
-    def to_internal_value(self, data):
-        data._mutable = True
-        if data.get('latitude'):
-            data['latitude'] = float("%.6f" % float(data.get('latitude')))
-        if data.get('longitude'):
-            data['longitude'] = float("%.6f" % float(data.get('longitude')))
-        data._mutable = False
-        return super().to_internal_value(data)
-
     class Meta:
         model = Animal
         exclude = ['owner']

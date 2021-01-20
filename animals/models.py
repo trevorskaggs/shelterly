@@ -1,10 +1,7 @@
 from django.db import models
-<<<<<<< HEAD
 from location.models import Location
-=======
 from ordered_model.models import OrderedModel
 
->>>>>>> master
 from animals.choices import ALL_AGE_CHOICES, ALL_SIZE_CHOICES, SEX_CHOICES, SPECIES_CHOICES, STATUS_CHOICES, UNKNOWN_CHOICES
 from animals.colors import ALL_COLOR_CHOICES
 from hotline.models import ServiceRequest

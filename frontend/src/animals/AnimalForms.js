@@ -643,7 +643,9 @@ export const AnimalForm = (props) => {
                   </Col>
                 </BootstrapForm.Row>
                 </span>
-                <BootstrapForm.Row className="mt-3" hidden={!Boolean(id)}>
+                {/* Only show Shelter selection on intake and update. */}
+                <span hidden={!Boolean(id) && !is_intake}>
+                <BootstrapForm.Row className="mt-3" >
                   <Col xs="8">
                     <TreeSelect
                       showSearch
@@ -672,12 +674,14 @@ export const AnimalForm = (props) => {
                   </Col>
                 </BootstrapForm.Row>
                 <p/>
-                <BootstrapForm.Row hidden={!reporter_id}>
+                </span>
+                <span hidden={!Boolean(id) && !is_intake && !reporter_id}>                
+                <BootstrapForm.Row>
                   <BootstrapForm.Group as={Col} xs="12">
                     {renderAddressLookup()}
                   </BootstrapForm.Group>
                 </BootstrapForm.Row>
-                <BootstrapForm.Row hidden={!reporter_id}>
+                <BootstrapForm.Row>
                   <TextInput
                     xs="12"
                     type="text"
@@ -686,7 +690,7 @@ export const AnimalForm = (props) => {
                     disabled
                   />
                 </BootstrapForm.Row>
-                <BootstrapForm.Row hidden={!reporter_id}>
+                <BootstrapForm.Row>
                   <TextInput
                     xs="8"
                     type="text"
