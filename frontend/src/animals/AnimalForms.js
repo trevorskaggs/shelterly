@@ -8,20 +8,23 @@ import { Card } from 'react-bootstrap';
 import * as Yup from 'yup';
 import { AuthContext } from "../accounts/AccountsReducer";
 import { TreeSelect } from 'antd';
-import { DateTimePicker, DropDown, ImageUploader, TextInput } from '.././components/Form.js';
+import {AddressLookup, DateTimePicker, DropDown, ImageUploader, TextInput} from '.././components/Form.js';
 import { catAgeChoices, dogAgeChoices, horseAgeChoices, otherAgeChoices, catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, speciesChoices, sexChoices, dogSizeChoices, catSizeChoices, horseSizeChoices, otherSizeChoices, unknownChoices } from './constants';
+import { STATE_OPTIONS } from '../constants'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft, faMinusSquare } from '@fortawesome/free-solid-svg-icons';
 import 'antd/lib/tree-select/style/css';
+import Alert from 'react-bootstrap/Alert'
 
 export const AnimalForm = (props) => {
 
-  const { state, dispatch } = useContext(AuthContext);
+  const { state } = useContext(AuthContext);
   const { TreeNode } = TreeSelect;
   const id = props.id;
 
   // Determine if this is an intake workflow.
-  var is_intake = window.location.pathname.includes("intake");
+  let is_intake = window.location.pathname.includes("intake")
+  let is_reporter = window.location.pathname.includes("reporter")
 
   // Identify any query param data.
   const [queryParams] = useQueryParams();
@@ -81,6 +84,13 @@ export const AnimalForm = (props) => {
     front_image: null,
     side_image: null,
     extra_images: [],
+    address: '',
+    apartment: '',
+    city: '',
+    state: '',
+    zip_code: '',
+    latitude: null,
+    longitude: null,
   }
   let current_data = initialData;
   if (is_workflow && props.state.steps.animals[props.state.animalIndex]) {
@@ -119,6 +129,15 @@ export const AnimalForm = (props) => {
   const clearImages = (image_url, setFieldValue) => {
     setData(prevState => ({ ...prevState, ["extra_images"]:data.extra_images.filter(url => url !== image_url) }));
     setFieldValue("extra_images", data.extra_images.filter(url => url !== image_url));
+  }
+
+  // Checks if Google API Key exists before rendering.
+  const renderAddressLookup = ()=>{
+    if(process.env.REACT_APP_GOOGLE_API_KEY){
+      return <AddressLookup label="Found Location Search" style={{width: '100%'}} className="form-control"/>
+    } else {
+      return <Alert variant="danger">Found Location Search is not available. Please contact support for assistance.</Alert>
+    }
   }
 
   // Hook for initializing data.
@@ -208,13 +227,36 @@ export const AnimalForm = (props) => {
             .nullable(),
           front_image: Yup.mixed(),
           side_image: Yup.mixed(),
-          extra_images: Yup.array()
+          extra_images: Yup.array(),
+          address: Yup.string(),
+          city: Yup.string(),
+          state: Yup.string(),
+          zip_code: Yup.string()
+            .max(10, 'Must be 10 characters or less'),
+          latitude: Yup.number()
+            .nullable(),
+          longitude: Yup.number()
+            .nullable()
         })}
         onSubmit={ async (values, { setSubmitting, resetForm }) => {
           // Remove owner if animal has none.
           if (values["owner"]) {
             delete values["owner"];
           }
+
+          // Use FormData so that image files may also be included.
+          const formData = new FormData();
+          // Convert json to FormData.
+          for ( let key in values ) {
+            if (values[key] !== null) {
+              formData.append(key, values[key]);
+            }
+          }
+          // Add extra images.
+          for (let i = 0; i < extra_images.length; i++) {
+            formData.append('extra' + (i + 1), extra_images[i].file);
+          }
+
 
           if (is_workflow) {
             if (addAnother) {
@@ -338,6 +380,8 @@ export const AnimalForm = (props) => {
             <Card.Body>
             <BootstrapForm as={Form}>
               <Field type="hidden" value={servicerequest_id||""} name="request" id="request"></Field>
+              <Field type="hidden" value={data.latitude || ""} name="latitude" id="latitude"></Field>
+              <Field type="hidden" value={data.longitude || ""} name="longitude" id="longitude"></Field>
                 <BootstrapForm.Row>
                   <Col xs={id ? "6" : "5"}>
                     <DropDown
@@ -600,7 +644,9 @@ export const AnimalForm = (props) => {
                   </Col>
                 </BootstrapForm.Row>
                 </span>
-                <BootstrapForm.Row className="mt-3" hidden={!Boolean(id)}>
+                {/* Only show Shelter selection on intake and update. */}
+                <span hidden={!Boolean(id) && !is_intake}>
+                <BootstrapForm.Row className="mt-3" >
                   <Col xs="8">
                     <TreeSelect
                       showSearch
@@ -628,6 +674,51 @@ export const AnimalForm = (props) => {
                     </TreeSelect>
                   </Col>
                 </BootstrapForm.Row>
+                <p/>
+                </span>
+                <span hidden={ is_intake ? !is_reporter: !Boolean(id)}>
+                <BootstrapForm.Row>
+                  <BootstrapForm.Group as={Col} xs="12">
+                    {renderAddressLookup()}
+                  </BootstrapForm.Group>
+                </BootstrapForm.Row>
+                <BootstrapForm.Row>
+                  <TextInput
+                    xs="12"
+                    type="text"
+                    label="Found Location Address"
+                    name="address"
+                    disabled
+                  />
+                </BootstrapForm.Row>
+                <BootstrapForm.Row>
+                  <TextInput
+                    xs="8"
+                    type="text"
+                    label="City"
+                    name="city"
+                    disabled
+                  />
+                  <Col xs="2">
+                  <DropDown
+                    label="State"
+                    name="state"
+                    id="state"
+                    options={STATE_OPTIONS}
+                    value={formikProps.values.state || ''}
+                    placeholder=''
+                    disabled
+                  />
+                  </Col>
+                  <TextInput
+                    xs="2"
+                    type="text"
+                    label="Zip Code"
+                    name="zip_code"
+                    disabled
+                  />
+                </BootstrapForm.Row>
+                </span>
             </BootstrapForm>
           </Card.Body>
           <ButtonGroup size="lg">

@@ -1,4 +1,5 @@
 from django.db import models
+from location.models import Location
 from ordered_model.models import OrderedModel
 
 from animals.choices import ALL_AGE_CHOICES, ALL_SIZE_CHOICES, SEX_CHOICES, SPECIES_CHOICES, STATUS_CHOICES, UNKNOWN_CHOICES
@@ -8,7 +9,7 @@ from people.models import Person
 from shelter.models import Room, Shelter
 
 # Create your models here.
-class Animal(OrderedModel):
+class Animal(Location, OrderedModel):
 
     request = models.ForeignKey(ServiceRequest, on_delete=models.SET_NULL, blank=True, null=True)
     owner = models.ManyToManyField(Person, blank=True)

@@ -8,6 +8,7 @@ from location.utils import build_full_address, build_action_string
 class SimpleAnimalSerializer(serializers.ModelSerializer):
     full_address = serializers.SerializerMethodField()
     request_address = serializers.SerializerMethodField()
+    found_location = serializers.SerializerMethodField()
     aco_required = serializers.SerializerMethodField()
     front_image = serializers.SerializerMethodField()
     side_image = serializers.SerializerMethodField()
@@ -27,9 +28,12 @@ class SimpleAnimalSerializer(serializers.ModelSerializer):
         # Otherwise return an empty string.
         return ''
 
-    # Custome field for request address.
+    # Custom field for request address.
     def get_request_address(self, obj):
         return build_full_address(obj.request)
+
+    def get_found_location(self, obj):
+        return build_full_address(obj)
 
     # Custom field to return the shelter name.
     def get_shelter_name(self, obj):
@@ -88,6 +92,7 @@ class SimpleAnimalSerializer(serializers.ModelSerializer):
         exclude = ['owner']
 
 class AnimalSerializer(SimpleAnimalSerializer):
+
     owners = serializers.SerializerMethodField()
     reporter_object = serializers.SerializerMethodField(read_only=True)
     action_history = serializers.SerializerMethodField()
