@@ -133,6 +133,9 @@ export function AnimalSearch() {
                     <ListGroup.Item><b>Shelter: </b>{animal.shelter_name} <Link href={"/shelter/" + animal.shelter} target="_blank"> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item>
                     <ListGroup.Item><b>Address: </b>{animal.full_address}</ListGroup.Item></span> : 
                     <ListGroup.Item><b>Shelter: </b>No Shelter</ListGroup.Item>}
+                  {animal.found_location ? 
+                    <span><ListGroup.Item><b>Found Location: </b>{animal.found_location}</ListGroup.Item></span>:
+                  ""}
                 </ListGroup>
               </Card.Body>
             </Card>
