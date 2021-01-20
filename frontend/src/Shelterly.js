@@ -23,16 +23,16 @@ function Shelterly() {
         <Row>
           {state.user ?
           <span>
-            <Col xs="auto" className="pl-0">
+            {/* <Col xs="auto" className="pl-0"> */}
               <Sidebar state={state} dispatch={dispatch} removeCookie={removeCookie} />
-            </Col>
+            {/* </Col> */}
           </span>
           : ""}
-          <Col className='d-flex flex-column'>
+          <span className='d-flex flex-column col-9' style={{position:"absolute", marginLeft:"335px"}}>
             <Fragment>
               {routeResult || <PageNotFound />}
             </Fragment>
-          </Col>
+          </span>
         </Row>
       </Container>
     </ThemeProvider>

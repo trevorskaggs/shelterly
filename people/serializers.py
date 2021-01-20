@@ -43,7 +43,7 @@ class SimplePersonSerializer(serializers.ModelSerializer):
 
 class PersonSerializer(SimplePersonSerializer):
     from animals.serializers import AnimalSerializer
-    animals = AnimalSerializer(many=True, required=False, read_only=True)
+    animals = AnimalSerializer(source='animal_set', many=True, required=False, read_only=True)
     request = serializers.SerializerMethodField()
     action_history = serializers.SerializerMethodField()
 

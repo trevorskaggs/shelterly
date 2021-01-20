@@ -6,7 +6,7 @@ import { Carousel } from 'react-responsive-carousel';
 import { Button, Card, Col, ListGroup, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBandAid, faClipboardList, faCut, faEdit, faHandHoldingHeart, faMinusSquare, faShieldAlt, faPlusSquare, faWarehouse,
+  faBandAid, faClipboardList, faCut, faEdit, faHandHoldingHeart, faMinusSquare, faShieldAlt, faPlusSquare, faDungeon,
 } from '@fortawesome/free-solid-svg-icons';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import Header from '../components/Header';
@@ -116,7 +116,7 @@ export function AnimalView({id}) {
                     </Tooltip>
                   }
                 >
-                  <FontAwesomeIcon icon={faWarehouse} size="sm" className="ml-1" />
+                  <FontAwesomeIcon icon={faDungeon} size="sm" className="ml-1" />
                 </OverlayTrigger> :
               ""}
               {data.fixed === 'yes' ?
@@ -200,7 +200,7 @@ export function AnimalView({id}) {
             </Card.Title>
             <hr/>
             <ListGroup variant="flush" style={{marginBottom:"-13px"}}>
-              {data.room ? <ListGroup.Item style={{marginTop:"-13px"}}><b>Shelter Name:</b> {data.shelter_name}<Link href={"/shelter/" + data.shelter}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item> : ""}
+              {data.shelter ? <ListGroup.Item style={{marginTop:"-13px"}}><b>Shelter Name:</b> {data.shelter_name}<Link href={"/shelter/" + data.shelter}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item> : ""}
               <ListGroup.Item style={{marginTop:"-13px"}}><b>{data.room ? "Shelter " : ""}Address:</b> {data.full_address}</ListGroup.Item>
             </ListGroup>
           </Card.Body>
