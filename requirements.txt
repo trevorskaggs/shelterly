@@ -4,6 +4,7 @@ django-activity-stream
 django-cors-headers
 django-filter
 django-rest-knox
+django-ordered-model
 djangorestframework
 django-storages
 geocoder==1.38.1

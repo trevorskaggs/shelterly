@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'knox',
     'shelter',
     'frontend',
+    'ordered_model',
     'actstream',
 ]
 
