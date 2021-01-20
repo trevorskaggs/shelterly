@@ -5,7 +5,7 @@ import { Form, Formik } from 'formik';
 import { Button, Card, Col, FormCheck, ListGroup, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBandAid, faBullseye, faCar, faClipboardList, faIgloo, faQuestionCircle, faShieldAlt, faTrailer
+  faBandAid, faBullseye, faCar, faClipboardList, faEdit, faIgloo, faQuestionCircle, faShieldAlt, faTrailer
 } from '@fortawesome/free-solid-svg-icons';
 import { Circle, CircleMarker, Map, TileLayer, Tooltip as MapTooltip, useLeaflet } from "react-leaflet";
 import L from "leaflet";
@@ -18,10 +18,6 @@ import Moment from 'react-moment';
 import Header from '../components/Header';
 import 'react-bootstrap-typeahead/css/Typeahead.css';
 import 'leaflet/dist/leaflet.css';
-
-const header_style = {
-  textAlign: "center",
-}
 
 const Legend = (props) => {
   const { map } = useLeaflet();
@@ -39,12 +35,17 @@ export function Dispatch() {
   const [mapState, setMapState] = useState({});
   const [totalSelectedState, setTotalSelectedState] = useState({'REPORTED':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}});
   const [selectedCount, setSelectedCount] = useState({count:0, disabled:true});
-  const [statusOptions, setStatusOptions] = useState({aco_required:false});
+  const [statusOptions, setStatusOptions] = useState({aco_required:false, pending_only: true});
   const [teamData, setTeamData] = useState({options: [], isFetching: false});
 
   // Handle aco_required toggle.
   const handleACO = async event => {
-    setStatusOptions({aco_required:!statusOptions.aco_required})
+    setStatusOptions({aco_required:!statusOptions.aco_required, pending_only:statusOptions.pending_only})
+  }
+
+  // Handle pending_only toggle.
+  const handlePendingOnly = async event => {
+    setStatusOptions({aco_required:statusOptions.aco_required, pending_only:!statusOptions.pending_only})
   }
 
   // Handle radius circle toggles.
@@ -90,11 +91,11 @@ export function Dispatch() {
       }
       setMapState(prevState => ({ ...prevState, [id]: {...prevState[id], ["color"]:color, ["checked"]:false} }));
       // Remove matches from the running total state tracker.
-      for (var status in mapState[id].status_matches) {
+      for (var st in mapState[id].status_matches) {
         var total = 0;
-        for (var key in mapState[id].status_matches[status]) {
-          var total = totalSelectedState[status][key] -= mapState[id].status_matches[status][key];
-          setTotalSelectedState(prevState => ({ ...prevState, [status]:{...prevState[status], [key]:total}}));
+        for (var key in mapState[id].status_matches[st]) {
+          var total = totalSelectedState[st][key] -= mapState[id].status_matches[st][key];
+          setTotalSelectedState(prevState => ({ ...prevState, [st]:{...prevState[st], [key]:total}}));
         }
       }
       // Disable DEPLOY button is none selected.
@@ -158,16 +159,18 @@ export function Dispatch() {
 
   // Show or hide list of SRs based on current map zoom
   const onMove = event => {
+    let tempMapState = mapState;
     for (const service_request of data.service_requests) {
       if (mapState[service_request.id]) {
         if (!event.target.getBounds().contains(L.latLng(service_request.latitude, service_request.longitude))) {
-          setMapState(prevState => ({ ...prevState, [service_request.id]: {...prevState[service_request.id], hidden:true} }));
+          tempMapState[service_request.id].hidden=true;
         }
         else {
-          setMapState(prevState => ({ ...prevState, [service_request.id]: {...prevState[service_request.id], hidden:false} }));
+          tempMapState[service_request.id].hidden=false;
         }
       }
     }
+    setMapState(prevState => ({ ...prevState, tempMapState}));
   }
 
   // Hook for initializing data.
@@ -197,32 +200,33 @@ export function Dispatch() {
         params: {
           status: 'open',
           aco_required: statusOptions.aco_required,
+          pending_only: statusOptions.pending_only,
           map: true
         },
         cancelToken: source.token,
       })
       .then(response => {
         setData({service_requests: response.data, isFetching: false, bounds:data.bounds});
-
-        // Initialize map options dict with all SRs on first load.
-        if (Object.keys(mapState).length === 0) {
-          const map_dict = {};
-          const bounds = [];
-          for (const service_request of response.data) {
+        const map_dict = mapState;
+        const bounds = [];
+        const current_ids = Object.keys(mapState);
+        for (const service_request of response.data) {
+          // Only add initial settings if we don't already have them.
+          if (!current_ids.includes(String(service_request.id))) {
             const total_matches = countMatches(service_request);
-            const matches = total_matches[0]
-            const status_matches = total_matches[1]
+            const matches = total_matches[0];
+            const status_matches = total_matches[1];
             let color = 'yellow';
             if (service_request.has_reported_animals) {
               color = 'red';
             }
             map_dict[service_request.id] = {color:color, checked:false, hidden:false, matches:matches, status_matches:status_matches, radius:"disabled", has_reported_animals:service_request.has_reported_animals, latitude:service_request.latitude, longitude:service_request.longitude};
-            bounds.push([service_request.latitude, service_request.longitude]);
           }
-          setMapState(map_dict);
-          if (bounds.length > 0) {
-            setData(prevState => ({ ...prevState, ["bounds"]:L.latLngBounds(bounds) }));
-          }
+          bounds.push([service_request.latitude, service_request.longitude]);
+        }
+        setMapState(map_dict);
+        if (bounds.length > 0) {
+          setData(prevState => ({ ...prevState, ["bounds"]:L.latLngBounds(bounds) }));
         }
       })
       .catch(error => {
@@ -261,10 +265,57 @@ export function Dispatch() {
       }}
     >
     {props => (
-      <Form style={{paddingRight:"10px"}}>
-        <Row className="d-flex flex-wrap mt-3">
-          <Col xs={12} className="border rounded pl-0 pr-0"  style={{marginLeft:"-3px"}}>
-            <Map className="d-block" bounds={data.bounds} onMoveEnd={onMove}>
+      <Form>
+        <Row className="d-flex flex-wrap" style={{marginTop:"10px", marginRight:"-7px"}}>
+          <Col xs={2} className="border rounded" style={{marginLeft:"-5px", marginRight:"5px"}}>
+            <div className="card-header border rounded mt-3 text-center" style={{paddingRight:"15px", paddingLeft:"15px"}}>
+              <p className="mb-2" style={{marginTop:"-5px"}}>Reported</p>
+              <hr className="mt-1 mb-1"/>
+              {Object.keys(totalSelectedState["REPORTED"]).map(key => (
+                <div key={key} style={{textTransform:"capitalize", marginTop:"5px", marginBottom:"-5px"}}>{prettyText(key.split(',')[1], key.split(',')[0], totalSelectedState["REPORTED"][key])}</div>
+              ))}
+            </div>
+            <div className="card-header border rounded mt-3 text-center" style={{paddingRight:"15px", paddingLeft:"15px"}}>
+              <p className="mb-2" style={{marginTop:"-5px"}}>SIP
+                <OverlayTrigger
+                  key={"selected-sip"}
+                  placement="top"
+                  overlay={
+                    <Tooltip id={`tooltip-selected-sip`}>
+                      Sheltered In Place
+                    </Tooltip>
+                  }
+                >
+                  <FontAwesomeIcon icon={faIgloo} className="ml-1"/>
+                </OverlayTrigger>
+              </p>
+              <hr className="mt-1 mb-1"/>
+              {Object.keys(totalSelectedState["SHELTERED IN PLACE"]).map(key => (
+                <div key={key} style={{textTransform:"capitalize", marginTop:"5px", marginBottom:"-5px"}}>{prettyText(key.split(',')[1], key.split(',')[0], totalSelectedState["SHELTERED IN PLACE"][key])}</div>
+              ))}
+            </div>
+            <div className="card-header border rounded mt-3 mb-3 text-center" style={{paddingRight:"15px", paddingLeft:"15px"}}>
+              <p className="mb-2" style={{marginTop:"-5px"}}>UTL
+                <OverlayTrigger
+                  key={"selected-utl"}
+                  placement="top"
+                  overlay={
+                    <Tooltip id={`tooltip-selected-utl`}>
+                      Unable To Locate
+                    </Tooltip>
+                  }
+                >
+                  <FontAwesomeIcon icon={faQuestionCircle} className="ml-1"/>
+                </OverlayTrigger>
+              </p>
+              <hr className="mt-1 mb-1"/>
+              {Object.keys(totalSelectedState["UNABLE TO LOCATE"]).map(key => (
+                <div key={key} style={{textTransform:"capitalize", marginTop:"5px", marginBottom:"-5px"}}>{prettyText(key.split(',')[1], key.split(',')[0], totalSelectedState["UNABLE TO LOCATE"][key])}</div>
+              ))}
+            </div>
+          </Col>
+          <Col xs={10} className="border rounded pl-0 pr-0">
+            <Map className="d-block" style={{marginRight:"0px"}} bounds={data.bounds} onMoveEnd={onMove}>
               <Legend position="bottomleft" metric={false} />
               <TileLayer
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -295,6 +346,7 @@ export function Dispatch() {
                       :""}
                       <br />
                       {service_request.full_address}
+                      {service_request.followup_date ? <div>Followup Date: <Moment format="L">{service_request.followup_date}</Moment></div> : ""}
                       <div>
                         {service_request.aco_required ? <img width={16} height={16} src={shield} alt="" className="mr-1" /> : ""}
                         {service_request.injured ? <img width={16} height={16} src={bandaid} alt="" className="mr-1" /> : ""}
@@ -311,73 +363,35 @@ export function Dispatch() {
             </Map>
           </Col>
         </Row>
-        <Row className="mt-2">
-          <Col xs={12} className="pl-0">
-            <div className="form-row">
-              <Typeahead
-                id="team_members"
-                multiple
-                onChange={(values) => {props.setFieldValue('team_members', values.map(item => item.id))}}
-                options={teamData.options}
-                placeholder="Choose team members..."
-                className="col-sm-8 pl-0"
-              />
-              <Button type="submit" className="btn-block col-sm-2" disabled={selectedCount.disabled || props.values.team_members.length === 0}>DEPLOY</Button>
-              <FormCheck id="aco_required" className="col-sm-2 mt-2" style={{paddingLeft:"60px"}} name="aco_required" type="switch" label="ACO Required" checked={statusOptions.ACORequired} onChange={handleACO} />
-            </div>
+        <Row className="mt-2" style={{}}>
+          <Col xs={2} className="pl-0" style={{marginLeft:"-7px", paddingRight:"2px"}}>
+            <Button type="submit" className="btn-block mt-auto" style={{marginBottom:"-33px"}} disabled={selectedCount.disabled || props.values.team_members.length === 0}>DEPLOY</Button>
+          </Col>
+          <Col xs={10} className="pl-0">
+            <Typeahead
+              id="team_members"
+              multiple
+              onChange={(values) => {props.setFieldValue('team_members', values.map(item => item.id))}}
+              options={teamData.options}
+              placeholder="Choose team members..."
+              className=""
+              style={{marginLeft:"3px", marginRight:"-13px"}}
+            />
           </Col>
         </Row>
-        <Row className="d-flex flex-wrap" style={{marginTop:"-15px", minHeight:"36vh"}}>
-          <Col xs={2} className="mt-4 border rounded mr-1" style={{marginLeft:"-5px", height:"250", minHeight:"250"}}>
-            <div className="card-header border rounded mt-3 text-center">
-              <p className="mb-2" style={{marginTop:"-5px"}}>Reported</p>
-              <hr className="mt-1 mb-1"/>
-              {Object.keys(totalSelectedState["REPORTED"]).map(key => (
-                <div key={key} style={{textTransform:"capitalize", marginTop:"5px", marginBottom:"-5px"}}>{prettyText(key.split(',')[1], key.split(',')[0], totalSelectedState["REPORTED"][key])}</div>
-              ))}
-            </div>
-            <div className="card-header border rounded mt-3 text-center">
-              <p className="mb-2" style={{marginTop:"-5px"}}>SIP
-                <OverlayTrigger
-                  key={"selected-sip"}
-                  placement="top"
-                  overlay={
-                    <Tooltip id={`tooltip-selected-sip`}>
-                      Sheltered In Place
-                    </Tooltip>
-                  }
-                >
-                  <FontAwesomeIcon icon={faIgloo} className="ml-1"/>
-                </OverlayTrigger>
-              </p>
-              <hr className="mt-1 mb-1"/>
-              {Object.keys(totalSelectedState["SHELTERED IN PLACE"]).map(key => (
-                <div key={key} style={{textTransform:"capitalize", marginTop:"5px", marginBottom:"-5px"}}>{prettyText(key.split(',')[1], key.split(',')[0], totalSelectedState["SHELTERED IN PLACE"][key])}</div>
-              ))}
-            </div>
-            <div className="card-header border rounded mt-3 mb-3 text-center">
-              <p className="mb-2" style={{marginTop:"-5px"}}>UTL
-                <OverlayTrigger
-                  key={"selected-utl"}
-                  placement="top"
-                  overlay={
-                    <Tooltip id={`tooltip-selected-utl`}>
-                      Unable To Locate
-                    </Tooltip>
-                  }
-                >
-                  <FontAwesomeIcon icon={faQuestionCircle} className="ml-1"/>
-                </OverlayTrigger>
-              </p>
-              <hr className="mt-1 mb-1"/>
-              {Object.keys(totalSelectedState["UNABLE TO LOCATE"]).map(key => (
-                <div key={key} style={{textTransform:"capitalize", marginTop:"5px", marginBottom:"-5px"}}>{prettyText(key.split(',')[1], key.split(',')[0], totalSelectedState["UNABLE TO LOCATE"][key])}</div>
-              ))}
+        <Row className="d-flex flex-wrap" style={{marginTop:"8px", marginRight:"-20px", marginLeft:"-16px", minHeight:"36vh", paddingRight:"15px"}}>
+          <Col xs={2} className="d-flex flex-column pl-0 pr-0" style={{marginLeft:"-7px", marginRight:"5px"}}>
+            <div className="card-header border rounded pl-3 pr-3" style={{height:"100%"}}>
+              <h5 className="mb-0 text-center">Options</h5>
+              <hr/>
+              <FormCheck id="aco_required" name="aco_required" type="switch" label="ACO Required" checked={statusOptions.aco_required} onChange={handleACO} />
+              <FormCheck id="pending_only" className="mt-3" name="pending_only" type="switch" label="Pending Only" checked={statusOptions.pending_only} onChange={handlePendingOnly} />
             </div>
           </Col>
-          <Col xs={10} className="mt-4 border rounded" style={{marginLeft:"1px"}}>
+          <Col xs={10} className="border rounded" style={{marginLeft:"1px", height:"36vh", overflowY:"auto", paddingRight:"-1px"}}>
             {data.service_requests.map(service_request => (
-              <div key={service_request.id} className="mt-1 mb-1" style={{marginLeft:"-10px", marginRight:"-10px"}} hidden={mapState[service_request.id] && !mapState[service_request.id].checked ? mapState[service_request.id].hidden : false}>
+              <span key={service_request.id}>{mapState[service_request.id] && (mapState[service_request.id].checked || !mapState[service_request.id].hidden) ?
+              <div className="mt-1 mb-1" style={{marginLeft:"-10px", marginRight:"-10px"}}>
                 <div className="card-header">
                   <span style={{display:"inline"}} className="custom-control-lg custom-control custom-checkbox">
                     <input className="custom-control-input" type="checkbox" name={service_request.id} id={service_request.id} onChange={() => handleMapState(service_request.id)} checked={mapState[service_request.id] ? mapState[service_request.id].checked : false} />
@@ -475,6 +489,8 @@ export function Dispatch() {
                   <Link href={"/hotline/servicerequest/" + service_request.id} target="_blank"> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
                 </div>
               </div>
+              : ""}
+              </span>
             ))}
             <div className="card-header mt-1 mb-1"  style={{marginLeft:"-10px", marginRight:"-10px"}} hidden={data.service_requests.length > 0}>
               No open Service Requests found.
@@ -519,8 +535,8 @@ export function EvacSummary({id}) {
 
   return (
     <>
-    <Header>Dispatch Assignment Summary #{id} <Link href={"/evac/resolution/" + id} className="btn btn-danger ml-1 mb-2" style={{paddingTop:"10px", paddingBottom:"10px"}}>Close</Link>
-    <div style={{fontSize:"16px", marginTop:"5px"}}><b>Opened: </b><Moment format="lll">{data.start_time}</Moment></div>
+    <Header>Dispatch Assignment Summary | {data.end_time ? <span>Closed <Link href={"/evac/resolution/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link></span> : <Link href={"/evac/resolution/" + id} className="btn btn-danger ml-1 mb-2" style={{paddingTop:"10px", paddingBottom:"10px"}}>Close</Link>}
+    <div style={{fontSize:"18px", marginTop:"14px"}}><b>Opened: </b><Moment format="lll">{data.start_time}</Moment>{data.end_time ? <span style={{fontSize:"16px", marginTop:"5px"}}> | <b>Closed: </b><Moment format="lll">{data.end_time}</Moment></span> : ""}</div>
     </Header>
     <hr/>
     <Card border="secondary" className="mt-1">
@@ -532,35 +548,57 @@ export function EvacSummary({id}) {
         <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px", textTransform:"capitalize"}}>
           {data.team_member_objects.map(team_member => (
             <ListGroup.Item key={team_member.id}>
-              {team_member.first_name + " " + team_member.last_name + " - " + team_member.phone}{team_member.agency ? <span>({team_member.agency})</span> : ""}
+              {team_member.first_name + " " + team_member.last_name + " - " + team_member.display_phone}{team_member.agency ? <span>({team_member.agency})</span> : ""}
             </ListGroup.Item>
           ))}
         </ListGroup>
       </Card.Body>
     </Card>
     {data.service_request_objects.map((service_request, index) => (
-    <Card key={service_request.id} border="secondary" className="mt-3">
+    <Card key={service_request.id} border="secondary" className="mt-3 mb-2">
       <Card.Body>
         <Card.Title>
-          <h4>Service Request #{service_request.id} <Link href={"/hotline/servicerequest/" + service_request.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link> | <span style={{textTransform:"capitalize"}}>{service_request.status}</span></h4>
+          <h4>Service Request <Link href={"/hotline/servicerequest/" + service_request.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link> | <span style={{textTransform:"capitalize"}}>{service_request.status}</span></h4>
         </Card.Title>
         <hr/>
         <ListGroup variant="flush" style={{marginTop:"-5px", marginBottom:"-13px"}}>
-          <ListGroup.Item><b>Address: </b>{service_request.full_address}</ListGroup.Item>
-          <ListGroup.Item><b>Owner: </b>{service_request.owner_object.first_name} {service_request.owner_object.last_name} <Link href={"/hotline/owner/" + service_request.owner}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link> | {service_request.owner_object.phone||service_request.owner_object.email||"No Contact"}</ListGroup.Item>
+          <ListGroup.Item style={{marginTop:"-8px"}}><b>Address: </b>{service_request.full_address}</ListGroup.Item>
+          {service_request.owners.map(owner => (
+            <ListGroup.Item key={owner.id}><b>Owner: </b>{owner.first_name} {owner.last_name} <Link href={"/hotline/owner/" + owner}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link> | {owner.display_phone||owner.email||"No Contact"}</ListGroup.Item>
+          ))}
+          {service_request.owners.length < 1 ? <ListGroup.Item><b>Owner: </b>No Owner</ListGroup.Item> : ""}
         </ListGroup>
         <hr/>
         <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
           <h4 className="mt-2" style={{marginBottom:"-2px"}}>Animals</h4>
-          {service_request.animals.map((animal, inception) => (
+          {service_request.animals.filter(animal => animal.evacuation_assignments.includes(Number(id))).map((animal, inception) => (
             <ListGroup.Item key={animal.id}>
-              <span style={{textTransform:"capitalize"}}>{animal.name||"Unknown"} ({animal.pcolor ? <span>{animal.pcolor}{animal.scolor ? "/" + animal.scolor : ""}&nbsp;</span> : ""}<span style={{textTransform:"capitalize"}}>{animal.species}</span></span>) - {animal.status}
-          </ListGroup.Item>
+              <span style={{textTransform:"capitalize"}}>{animal.name||"Unknown"}</span> ({animal.species}) - {animal.status}<Link href={"/animals/" + animal.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
+            </ListGroup.Item>
           ))}
         </ListGroup>
-        </Card.Body>
-      </Card>
-      ))}
+        <hr/>
+        {!data.end_time && service_request.visit_notes.length ?
+          <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
+            <h4 className="mt-2" style={{marginBottom:"-2px"}}>Previous Note - <Moment format="L">{service_request.visit_notes.sort((a,b) => new Date(b.date_completed).getTime() - new Date(a.date_completed).getTime())[0].date_completed}</Moment></h4>
+              <ListGroup.Item>
+              {service_request.visit_notes.sort((a,b) => new Date(b.date_completed).getTime() - new Date(a.date_completed).getTime())[0].notes || "No information available."}
+              </ListGroup.Item>
+          </ListGroup>
+        : "" }
+        {service_request.visit_notes.filter(note => String(note.evac_assignment) === String(id)).length > 0 ?
+          <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
+            <h4 className="mt-2" style={{marginBottom:"-2px"}}>Notes</h4>
+            {service_request.visit_notes.filter(note => String(note.evac_assignment) === String(id)).map((note) => (
+              <ListGroup.Item key={note.id}>
+                {note.notes || "No information available."}
+              </ListGroup.Item>
+            ))}
+          </ListGroup>
+        : ""}
+      </Card.Body>
+    </Card>
+    ))}
     </>
   )
 }

@@ -1,5 +1,6 @@
-from django.db.models import Count, Exists, OuterRef, Q
+from django.db.models import Count, Exists, OuterRef, Prefetch, Q
 from actstream import action
+from datetime import datetime
 from .serializers import ServiceRequestSerializer, VisitNoteSerializer
 
 from animals.models import Animal
@@ -15,25 +16,41 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
     ordering_fields = ['injured', 'animal_count']
     ordering = ['-injured', '-animal_count']
 
-    # When creating, update any animals associated with the SR owner with the created service request.
     def perform_create(self, serializer):
         if serializer.is_valid():
             for service_request in ServiceRequest.objects.filter(latitude=serializer.validated_data['latitude'], longitude=serializer.validated_data['longitude'], status='open'):
                 raise serializers.ValidationError(['Multiple open Requests may not exist with the same address.', service_request.id])
             service_request = serializer.save()
-            if service_request.owner:
-                service_request.owner.animal_set.update(request=service_request.id)
+            action.send(self.request.user, verb='created service request', target=service_request)
+            # Update any animals associated with the SR reporter/owner with the created service request.
+            if service_request.reporter:
+                service_request.reporter.animals.update(request=service_request.id)
+            else:
+                for owner in service_request.owner.all():
+                    owner.animal_set.update(request=service_request.id)
 
     def perform_update(self, serializer):
         if serializer.is_valid():
+            for service_request in ServiceRequest.objects.filter(latitude=serializer.validated_data['latitude'], longitude=serializer.validated_data['longitude'], status='open').exclude(id=self.kwargs['pk']):
+                raise serializers.ValidationError(['Multiple open Requests may not exist with the same address.', service_request.id])
             service_request = serializer.save()
-            # Change this so it only runs if status changes to canceled
             if service_request.status == 'canceled':
                 service_request.animal_set.update(status='CANCELED')
             action.send(self.request.user, verb='updated service request', target=service_request)
 
     def get_queryset(self):
-        queryset = ServiceRequest.objects.all().annotate(animal_count=Count('animal')).annotate(injured=Exists(Animal.objects.filter(request_id=OuterRef('id'), injured='yes')))
+        queryset = (
+            ServiceRequest.objects.all()
+            .annotate(animal_count=Count("animal"))
+            .annotate(
+                injured=Exists(Animal.objects.filter(request_id=OuterRef("id"), injured="yes"))
+            ).prefetch_related(Prefetch('animal_set', queryset=Animal.objects.prefetch_related('evacuation_assignments').prefetch_related(Prefetch('animalimage_set', to_attr='images')), to_attr='animals'))
+            .prefetch_related('owner')
+            .prefetch_related('visitnote_set')
+            .select_related('reporter')
+            .prefetch_related('evacuation_assignments')
+        )
+
         # Status filter.
         status = self.request.query_params.get('status', '')
         if status in ('open', 'assigned', 'closed'):
@@ -44,10 +61,15 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
         if aco_required == 'true':
             queryset = queryset.filter(Q(animal__aggressive='yes') | Q(animal__species='other'))
 
+        # Filter on pending_only option for the map.
+        pending_only = self.request.query_params.get('pending_only', '')
+        if pending_only == 'true':
+            queryset = queryset.filter(Q(followup_date__lte=datetime.today()) | Q(followup_date__isnull=True))
+
         # Exclude SRs without a geolocation when fetching for a map.
         is_map = self.request.query_params.get('map', '')
         if is_map == 'true':
-            queryset = queryset.exclude(Q(latitude=None) | Q(longitude=None))
+            queryset = queryset.exclude(Q(latitude=None) | Q(longitude=None) | Q(animal=None))
         return queryset
 
 class VisitNoteViewSet(viewsets.ModelViewSet):

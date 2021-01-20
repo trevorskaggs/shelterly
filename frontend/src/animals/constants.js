@@ -11,6 +11,7 @@ export const speciesChoices = [
   ]
 
 export const dogSizeChoices = [
+    {value:'unknown', label:"Unknown"},
     {value:'small', label:"Small"},
     {value:'medium', label:"Medium"},
     {value:'large', label:"Large"},
@@ -18,11 +19,13 @@ export const dogSizeChoices = [
 ]
 
 export const catSizeChoices = [
+  {value:'unknown', label:"Unknown"},
   {value:'small', label:'Small'},
   {value:'large', label:'Large'},
 ]
 
 export const horseSizeChoices = [
+  {value:'unknown', label:"Unknown"},
   {value:'mini', label:'Mini'},
   {value:'pony', label:'Pony'},
   {value:'horse', label:'Horse'},
@@ -30,6 +33,7 @@ export const horseSizeChoices = [
 ]
 
 export const otherSizeChoices = [
+  {value:'unknown', label:"Unknown"},
   {value:'small', label:'Small'},
   {value:'medium', label:'Medium'},
   {value:'large', label:'Large'},
@@ -122,5 +126,13 @@ export const statusChoices = [
   {value:'UNABLE TO LOCATE', label:'UNABLE TO LOCATE (UTL)'},
   {value:'SHELTERED', label:'SHELTERED'},
   {value:'REUNITED', label:'REUNITED'},
+  {value:'DECEASED', label:'DECEASED'},
+]
+
+export const dispatchStatusChoices = [
+  {value:'REPORTED', label:'REPORTED'},
+  {value:'EVACUATED', label:'EVACUATED'},
+  {value:'SHELTERED IN PLACE', label:'SHELTERED IN PLACE (SIP)'},
+  {value:'UNABLE TO LOCATE', label:'UNABLE TO LOCATE (UTL)'},
   {value:'DECEASED', label:'DECEASED'},
 ]

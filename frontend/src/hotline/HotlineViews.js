@@ -5,7 +5,7 @@ import Moment from 'react-moment';
 import { Card, ListGroup, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBandAid, faCalendarDay, faCar, faClipboardList, faComment, faEdit, faHouseDamage, faKey, faPlusSquare, faShieldAlt, faTimes, faTrailer
+  faCalendarDay, faCar, faClipboardList, faComment, faEdit, faHouseDamage, faKey, faPlusSquare, faTimes, faTrailer
 } from '@fortawesome/free-solid-svg-icons';
 import ReactImageFallback from 'react-image-fallback';
 import Header from '../components/Header';
@@ -31,12 +31,12 @@ export function ServiceRequestView({id}) {
 
   const [data, setData] = useState({
     animals: [],
-    owner: '',
-    owner_object: {first_name:'', last_name:''},
+    owners: [],
     reporter: '',
     reporter_object: {first_name:'', last_name:''},
     directions: '',
     address: '',
+    full_address: '',
     apartment: '',
     city: '',
     state: '',
@@ -73,15 +73,16 @@ export function ServiceRequestView({id}) {
   return (
     <>
       <Header>
-        Service Request #{data.id}<Link href={"/hotline/servicerequest/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link> | <span style={{textTransform:"capitalize"}}>{data.status} {data.status === 'assigned' ? <Link href={"/evac/summary/" + data.assigned_evac}><FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link> : ""}</span>
+        Service Request<Link href={"/hotline/servicerequest/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link> | <span style={{textTransform:"capitalize"}}>{data.status} {data.status === 'assigned' ? <Link href={"/evac/summary/" + data.assigned_evac}><FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link> : ""}</span>
       </Header>
+      <div style={{fontSize:"18px", marginTop:"14px"}}><b>Address: </b>{data.full_address}</div>
       <hr/>
       <div className="row mb-2">
-        <div className="col-5 d-flex">
+        <div className="col-6 d-flex">
           <Card className="mb-2 border rounded" style={{width:"100%"}}>
             <Card.Body>
               <Card.Title>
-                <h4 className="mb-0">Location
+                <h4 className="mb-0">Information
                   {data.verbal_permission ?
                   <OverlayTrigger
                     key={"verbal"}
@@ -134,56 +135,48 @@ export function ServiceRequestView({id}) {
               </Card.Title>
               <hr/>
               <ListGroup variant="flush">
-                <ListGroup.Item style={{marginTop:"-13px"}}><b>Address:</b> {data.address ? <span>{data.full_address}</span> : 'N/A'}</ListGroup.Item>
+                <ListGroup.Item style={{marginTop:"-13px"}}>
+                  <b>Followup Date: </b>
+                  <FontAwesomeIcon icon={faCalendarDay} className="ml-1 mr-1" style={{cursor:'pointer'}} onClick={() => openCalendar()} />
+                  {data.followup_date ?
+                  <span>
+                    <Moment format="ll">{data.followup_date}</Moment>
+                    <FontAwesomeIcon icon={faTimes} className="ml-1" style={{cursor:'pointer'}} onClick={clearDate} />
+                  </span>
+                  : "Set date"}
+                  <Flatpickr
+                    ref={datetime}
+                    name="followup_date"
+                    id="followup_date"
+                    options={{clickOpens:false, altInput:true, altInputClass:"hide-input", altFormat:"F j, Y h:i K"}}
+                    onChange={(date, dateStr) => {
+                      setData(prevState => ({ ...prevState, ["followup_date"]:dateStr }));
+                      axios.patch('/hotline/api/servicerequests/' + id + '/', {followup_date:date[0]})
+                      .catch(error => {
+                        console.log(error.response);
+                      });
+                    }}
+                    value={data.followup_date || null}>
+                  </Flatpickr>
+                </ListGroup.Item>
                 <ListGroup.Item style={{marginBottom:"-13px"}}><b>Directions:</b> {data.directions}</ListGroup.Item>
               </ListGroup>
             </Card.Body>
           </Card>
         </div>
-        <div className="col-4 d-flex pl-0">
+        <div className="col-6 d-flex pl-0">
           <Card className="mb-2 border rounded" style={{width:"100%"}}>
             <Card.Body style={{}}>
               <Card.Title>
-                <h4 className="mb-0">Owner <Link href={"/hotline/owner/" + data.owner}><FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link><Link href={"/hotline/owner/edit/" + data.owner}> <FontAwesomeIcon icon={faEdit} size="sm" inverse /></Link></h4>
+                <h4 className="mb-0">Contacts <Link href={"/hotline/owner/new?servicerequest_id=" + id}><FontAwesomeIcon icon={faPlusSquare} size="sm" inverse /></Link></h4>
               </Card.Title>
               <hr/>
               <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-20px"}}>
-                <ListGroup.Item><b>Name: </b>{data.owner_object.first_name} {data.owner_object.last_name}</ListGroup.Item>
-                {data.owner_object.phone ? <ListGroup.Item><b>Telephone: </b>{data.owner_object.phone}</ListGroup.Item> : ""}
-                {data.owner_object.email ? <ListGroup.Item><b>Email: </b>{data.owner_object.email}</ListGroup.Item> : ""}
+                {data.owners.map(owner => (
+                  <ListGroup.Item key={owner.id}><b>Owner: </b>{owner.first_name} {owner.last_name} <Link href={"/hotline/owner/" + owner.id}><FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link><Link href={"/hotline/owner/edit/" + owner.id}> <FontAwesomeIcon icon={faEdit} size="sm" inverse /></Link> | {owner.display_phone||owner.email||"No Contact"}</ListGroup.Item>
+                ))}
                 {data.reporter ? <ListGroup.Item><b>Reporter: </b>{data.reporter_object.first_name} {data.reporter_object.last_name} <Link href={"/hotline/reporter/" + data.reporter}><FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link><Link href={"/hotline/reporter/edit/" + data.reporter}> <FontAwesomeIcon icon={faEdit} size="sm" inverse /></Link></ListGroup.Item> : ""}
               </ListGroup>
-            </Card.Body>
-          </Card>
-        </div>
-        <div className="col-3 d-flex pl-0">
-          <Card className="mb-2 border rounded" style={{width:"100%"}}>
-            <Card.Body style={{marginBottom:"-17px"}}>
-              <Card.Title>
-                <h4 className="mb-0">Followup Date</h4>
-              </Card.Title>
-              <hr/>
-              <FontAwesomeIcon icon={faCalendarDay} className="ml-1 mr-1" style={{cursor:'pointer'}} onClick={() => openCalendar()} />
-              {data.followup_date ?
-              <span>
-                <Moment format="lll">{data.followup_date}</Moment>
-                <FontAwesomeIcon icon={faTimes} className="ml-1" style={{cursor:'pointer'}} onClick={clearDate} />
-              </span>
-              : "Set date"}
-              <Flatpickr
-                ref={datetime}
-                name="followup_date"
-                id="followup_date"
-                options={{clickOpens:false, altInput:true, altInputClass:"hide-input", altFormat:"F j, Y h:i K"}}
-                onChange={(date, dateStr) => {
-                  setData(prevState => ({ ...prevState, ["followup_date"]:dateStr }));
-                  axios.patch('/hotline/api/servicerequests/' + id + '/', {followup_date:date[0]})
-                  .catch(error => {
-                    console.log(error.response);
-                  });
-                }}
-                value={data.followup_date || null}>
-              </Flatpickr>
             </Card.Body>
           </Card>
         </div>
@@ -195,21 +188,21 @@ export function ServiceRequestView({id}) {
               <Card.Title>
                 <h4 className="mb-0">Animals<Link href={"/hotline/animal/new?servicerequest_id=" + id}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link></h4>
               </Card.Title>
-              <hr/>
+              <hr style={{marginBottom:"-2px"}} />
               <span className="d-flex flex-wrap align-items-end">
               {data.animals.map(animal => (
-                <Card key={animal.id} className="mr-3" style={{border:"none"}}>
+                <Card key={animal.id} className="mr-3 mt-3" style={{border:"none"}}>
                   <ReactImageFallback style={{width:"151px"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} />
                   <Card.Text className="text-center mb-0">
                     {animal.name||"Unknown"}
-                    <Link href={"/animals/animal/" + animal.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
-                    <Link href={"/animals/animal/edit/" + animal.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
+                    <Link href={"/animals/" + animal.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
+                    <Link href={"/animals/edit/" + animal.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
                   </Card.Text>
                   <Card.Text className="text-center mb-0">
                     {animal.status}
                   </Card.Text>
                   <Card.Text className="text-center" style={{textTransform:"capitalize"}}>
-                    {animal.size} {animal.species}
+                    {animal.species === 'horse' ? <span>{animal.size}</span> : <span>{animal.size} {animal.species}</span>}
                   </Card.Text>
                 </Card>
               ))}

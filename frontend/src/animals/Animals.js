@@ -1,29 +1,10 @@
 import React from "react";
-import { Link } from "raviger";
 import { AnimalView } from "./AnimalViews";
 import { AnimalForm } from "./AnimalForms";
-
-const link_style = {
-  textDecoration: "none",
-};
-
-const btn_style = {
-  width: "50%",
-  margin: "0 auto",
-};
-
-const Animals = () => (
-  <div style={btn_style}>
-    <Link href="/animals/animal/list" style={link_style} className="btn btn-warning btn-lg btn-block mb-2">ANIMALS LIST</Link>
-    {/* <Link href="/animals/animal/new" style={link_style} className="btn btn-warning btn-lg btn-block mb-2">ADD ANIMAL</Link> */}
-    <br/>
-    <br/>
-    <Link className="btn btn-secondary btn-lg btn-block"  href="/">BACK</Link>
-  </div>
-)
+import { initialData } from "../hotline/HotlineWorkflow";
 
 export const NewAnimal = () => (
-    <AnimalForm />
+    <AnimalForm state={initialData} />
 )
 
 export const AnimalDetail = ({id}) => (
@@ -33,7 +14,5 @@ export const AnimalDetail = ({id}) => (
 )
 
 export const UpdateAnimal = ({id}) => (
-    <AnimalForm id={id} />
+    <AnimalForm id={id} state={initialData} />
 )
-
-export default Animals;

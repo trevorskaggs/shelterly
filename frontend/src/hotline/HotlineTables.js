@@ -1,21 +1,37 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import { Link } from 'raviger';
-import { Button, ButtonGroup, Card, CardGroup, Form, FormControl, InputGroup, ListGroup, Modal} from 'react-bootstrap';
-import Moment from 'react-moment';
+import {
+  Button,
+  ButtonGroup,
+  Card,
+  CardGroup,
+  Form,
+  FormControl,
+  InputGroup,
+  ListGroup,
+  OverlayTrigger,
+  Pagination,
+  Tooltip
+} from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faClipboardList,
-  faBan
+  faClipboardList, faBan, faIgloo, faExclamationCircle, faQuestionCircle, faHome, faHelicopter, faHeart, faSkullCrossbones
 } from '@fortawesome/free-solid-svg-icons';
+import moment from "moment";
+import Header from '../components/Header';
 
-export function ServiceRequestTable() {
+import { ITEMS_PER_PAGE } from '.././constants'
+
+export function ServiceRequestSearch() {
 
   const [data, setData] = useState({service_requests: [], isFetching: false});
   const [searchTerm, setSearchTerm] = useState("");
   const [statusOptions, setStatusOptions] = useState({status:"all", allColor: "primary", openColor:"secondary", assignedColor:"secondary", closedColor:"secondary"});
   const [showModal, setShowModal] = useState(false);
   const [activeServiceRequest, setactiveServiceRequest] = useState(0);
+  const [page, setPage] = useState(1)
+  const [numPages, setNumPages] = useState(1)
 
   // Update searchTerm when field input changes.
   const handleChange = event => {
@@ -28,6 +44,7 @@ export function ServiceRequestTable() {
     })
     .then(response => {
       setData({service_requests: response.data, isFetching: false});
+      setNumPages(Math.ceil(response.data.length / ITEMS_PER_PAGE))
     })
     .catch(error => {
       console.log(error.response);
@@ -74,6 +91,7 @@ export function ServiceRequestTable() {
         cancelToken: source.token,
       })
       .then(response => {
+        setNumPages(Math.ceil(response.data.length / ITEMS_PER_PAGE))
         setData({service_requests: response.data, isFetching: false});
       })
       .catch(error => {
@@ -90,6 +108,8 @@ export function ServiceRequestTable() {
 
   return (
     <div className="ml-2 mr-2">
+      <Header>Service Request Search</Header>
+      <hr/>
       <Form onSubmit={handleSubmit}>
         <InputGroup className="mb-3">
           <FormControl
@@ -100,7 +120,7 @@ export function ServiceRequestTable() {
             onChange={handleChange}
           />
           <InputGroup.Append>
-            <Button variant="outline-light">Search</Button>
+            <Button variant="outline-light" type="submit">Search</Button>
           </InputGroup.Append>
             <ButtonGroup className="ml-3">
               <Button variant={statusOptions.allColor} onClick={() => setStatusOptions({status:"all", allColor:"primary", openColor:"secondary", assignedColor:"secondary", closedColor:"secondary"})}>All</Button>
@@ -110,7 +130,6 @@ export function ServiceRequestTable() {
             </ButtonGroup>
           </InputGroup>
       </Form>
-
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Confirm Cancelation</Modal.Title>
@@ -125,34 +144,106 @@ export function ServiceRequestTable() {
           </Button>
         </Modal.Footer>
       </Modal>
-      {data.service_requests.map(service_request => (
-        <div key={service_request.id} className="mt-3">
-          <div className="card-header"> Service Request #{service_request.id}<Link href={"/hotline/servicerequest/" + service_request.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
-          <span className='btn pl-1' onClick={() => {setactiveServiceRequest(service_request.id); setShowModal(true)}}><FontAwesomeIcon icon={faBan} color="red"/></span>
-            <div><Moment format="LLL">{service_request.timestamp}</Moment></div>
-          </div>
-        <CardGroup>
-          <Card key={service_request.id}>
-            <Card.Body>
-              <Card.Title>Contacts</Card.Title>
-              <ListGroup>
-                <ListGroup.Item className='owner'>Owner: {service_request.owner ? <span>{service_request.owner_object.first_name} {service_request.owner_object.last_name} {service_request.owner_object.phone} <Link href={"/hotline/owner/" + service_request.owner}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></span> : "N/A"}</ListGroup.Item>
-                <ListGroup.Item className='reporter'>Reporter: {service_request.reporter ? <span>{service_request.reporter_object.first_name} {service_request.reporter_object.last_name} {service_request.reporter_object.phone} <Link href={"/hotline/reporter/" + service_request.reporter}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></span> : "N/A"}</ListGroup.Item>
-              </ListGroup>
-            </Card.Body>
-          </Card>
-          <Card>
-            <Card.Body>
-              <Card.Title>Animals</Card.Title>
-              <ListGroup>
-              {service_request.animals && service_request.animals.length ? <span>{service_request.animals.map(animal => (<ListGroup.Item key={animal.id}>{animal.name} ({animal.species}) - {animal.status} <Link href={"/animals/animal/" + animal.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item>))}</span> : <span><li>None</li></span>}
-              </ListGroup>
-            </Card.Body>
-          </Card>
-        </CardGroup>
+      {data.service_requests.map((service_request, index) => (
+        <div key={service_request.id} className="mt-3" hidden={page!= Math.ceil((index+1)/ITEMS_PER_PAGE)}>
+          <div className="card-header"><h4 style={{marginBottom:"-2px"}}>{service_request.full_address}<Link href={"/hotline/servicerequest/" + service_request.id} target="_blank"> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>&nbsp;| <span style={{textTransform:"capitalize"}}>{service_request.status}</span></h4></div>
+          <CardGroup>
+            <Card key={service_request.id}>
+              <Card.Body>
+                <Card.Title>Information</Card.Title>
+                <ListGroup>
+                  {service_request.owners.map(owner => (
+                    <ListGroup.Item key={owner.id}><b>Owner: </b>{owner.first_name} {owner.last_name} {owner.display_phone} <Link href={"/hotline/owner/" + owner.id} target="_blank"> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item>
+                  ))}
+                  {service_request.owners.length < 1 ? <ListGroup.Item><b>Owner: </b>No Owner</ListGroup.Item> : ""}
+                  {service_request.reporter ? <ListGroup.Item><b>Reporter: </b>{service_request.reporter_object.first_name} {service_request.reporter_object.last_name} {service_request.reporter_object.phone} <Link href={"/hotline/reporter/" + service_request.reporter} target="_blank"> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item> : ""}
+                  {service_request.evacuation_assignments.map(evacuation_assignment => (
+                    <span key={evacuation_assignment.id}>
+                      {evacuation_assignment.end_time ? "" :
+                        <ListGroup.Item>
+                          <span><b>Dispatch Assignment </b><Link href={"/evac/summary/" + evacuation_assignment.id} target="_blank">
+                              <FontAwesomeIcon icon={faClipboardList} inverse/></Link>
+                            <div>
+                            <b>Opened: </b>{moment(evacuation_assignment.start_time).format('lll')} |
+                              <Link href={"/evac/resolution/" + evacuation_assignment.id}
+                                className="btn btn-danger ml-1"
+                                style={{paddingTop: "0px", paddingBottom: "0px"}} target="_blank">Close</Link>
+                            </div>
+                          </span>
+                        </ListGroup.Item>
+                      }
+                    </span>
+                  ))}
+                </ListGroup>
+              </Card.Body>
+            </Card>
+            <Card>
+              <Card.Body>
+                <Card.Title>Animals</Card.Title>
+                {['cats', 'dogs', 'horses', 'other'].map(species => (
+                  <ListGroup key={species}>
+                    {service_request.animals.filter(animal => species.includes(animal.species)).length > 0 ?
+                    <ListGroup.Item style={{borderRadius: 0}}><b style={{textTransform:"capitalize"}}>{species}: </b>
+                    {service_request.animals.filter(animal => species.includes(animal.species)).map((animal, i) => (
+                    <span key={animal.id}>{i > 0 && ", "}{animal.name || "Unknown"}
+                      <Link href={"/animals/" + animal.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1 mr-1" inverse/></Link>
+                      (
+                      {animal.status === "SHELTERED IN PLACE" ?
+                        <OverlayTrigger key={"sip"} placement="top"
+                                        overlay={<Tooltip id={`tooltip-sip`}>SHELTERED IN PLACE</Tooltip>}>
+                            <FontAwesomeIcon icon={faIgloo} inverse/>
+                        </OverlayTrigger> : ""}
+                      {animal.status === "REPORTED" ?
+                        <OverlayTrigger key={"reported"} placement="top"
+                                        overlay={<Tooltip id={`tooltip-reported`}>REPORTED</Tooltip>}>
+                            <FontAwesomeIcon icon={faExclamationCircle} inverse/>
+                        </OverlayTrigger> : ""}
+                      {animal.status === "UNABLE TO LOCATE" ?
+                        <OverlayTrigger key={"unable-to-locate"} placement="top"
+                                        overlay={<Tooltip id={`tooltip-unable-to-locate`}>UNABLE TO LOCATE</Tooltip>}>
+                            <FontAwesomeIcon icon={faQuestionCircle} inverse/>
+                        </OverlayTrigger> : ""}
+                      {animal.status === "EVACUATED" ?
+                        <OverlayTrigger key={"evacuated"} placement="top"
+                                        overlay={<Tooltip id={`tooltip-evacuated`}>EVACUATED</Tooltip>}>
+                            <FontAwesomeIcon icon={faHelicopter} inverse/>
+                        </OverlayTrigger> : ""}
+                      {animal.status === "REUNITED" ?
+                        <OverlayTrigger key={"reunited"} placement="top"
+                                        overlay={<Tooltip id={`tooltip-reunited`}>REUNITED</Tooltip>}>
+                            <FontAwesomeIcon icon={faHeart} inverse/>
+                        </OverlayTrigger> : ""}
+                      {animal.status === "SHELTERED" ?
+                        <OverlayTrigger key={"sheltered"} placement="top"
+                                        overlay={<Tooltip id={`tooltip-sheltered`}>SHELTERED</Tooltip>}>
+                            <FontAwesomeIcon icon={faHome} inverse/>
+                        </OverlayTrigger> : ""}
+                      {animal.status === "DECEASED" ?
+                        <OverlayTrigger key={"deceased"} placement="top"
+                                        overlay={<Tooltip id={`tooltip-deceased`}>DECEASED</Tooltip>}>
+                            <FontAwesomeIcon icon={faSkullCrossbones} inverse/>
+                        </OverlayTrigger> : ""}
+                      )
+                    </span>
+                  ))}
+                  </ListGroup.Item>
+                  : ""}
+                  </ListGroup>
+                ))}
+              </Card.Body>
+            </Card>
+          </CardGroup>
         </div>
       ))}
       <p>{data.isFetching ? 'Fetching service requests...' : <span>{data.service_requests && data.service_requests.length ? '' : 'No Service Requests found.'}</span>}</p>
+    <Pagination className="custom-page-links" size="lg" onClick={(e) => {setPage(parseInt(e.target.innerText))}}>
+      {[...Array(numPages).keys()].map(x => 
+      <Pagination.Item key={x+1} active={x+1 === page}>
+                {x+1}
+              </Pagination.Item>)
+      }
+    </Pagination>
     </div>
+    
   )
 }

@@ -1,20 +1,21 @@
 import React from "react";
 import { Redirect } from "raviger";
 import Home from "./Home";
-import Animals, { AnimalDetail, NewAnimal, UpdateAnimal } from "./animals/Animals"
+import { AnimalDetail, NewAnimal, UpdateAnimal } from "./animals/Animals"
 import { AnimalSearch } from "./animals/AnimalTables"
-import Evac, {EvacuationAssignmentSearch, NewEvacTeamMember} from "./evac/Evac";
-import Hotline, { NewServiceRequest, ServiceRequestDetail, ServiceRequestList, UpdateServiceRequest } from "./hotline/Hotline";
-import Intake, { IntakeSummary } from "./intake/Intake";
+import Evac, {EvacuationAssignmentSearch} from "./evac/Evac";
+import HotlineWorkflow from "./hotline/HotlineWorkflow";
+import Hotline, { NewServiceRequest, ServiceRequestDetail, UpdateServiceRequest } from "./hotline/Hotline";
+import { ServiceRequestSearch } from "./hotline/HotlineTables"
+import Intake, { IntakeSummary, OwnerSearch } from "./intake/Intake";
 import { NewOwner, NewReporter, OwnerDetail, ReporterDetail,  UpdateOwner, UpdateReporter } from "./people/People";
 import Shelter, { NewShelter, UpdateShelter } from "./shelter/Shelter";
 import { ShelterDetails } from "./shelter/ShelterDetails"
 import { NewBuilding, UpdateBuilding, BuildingDetails } from "./shelter/Building";
 import { NewRoom, UpdateRoom, RoomDetails } from "./shelter/Room";
 import { Login } from "./accounts/Accounts";
-import { EvacResolution } from "./evac/EvacForms";
 import { Dispatch, EvacSummary } from "./evac/EvacViews";
-import { VisitNoteForm } from "./evac/EvacForms";
+import { EvacResolution, EvacTeamMemberForm, VisitNoteForm } from "./evac/EvacForms";
 
 export const publicRoutes = {
   "/login": () => <Login />,
@@ -22,13 +23,12 @@ export const publicRoutes = {
 
 const routes = {
   "/": () => <Home />,
-  "/animals": () => <Animals />,
-  "/animals/animal/edit/:id": ({id}) => <UpdateAnimal id={id} />,
+  "/animals/edit/:id": ({id}) => <UpdateAnimal id={id} />,
   "/animals/search": () => <AnimalSearch />,
-  "/animals/animal/:id": ({id}) => <AnimalDetail id={id} />,
+  "/animals/:id": ({id}) => <AnimalDetail id={id} />,
   "/evac": () => <Evac />,
+  "/evac/evacteammember/new": () => <EvacTeamMemberForm />,
   "/evac/evacuationassignment/search": () => <EvacuationAssignmentSearch />,
-  "/evac/evacteammember/new": () => <NewEvacTeamMember />,
   "/evac/summary/:id": ({id}) => <EvacSummary id={id} />,
   "/evac/resolution/:id": ({id}) => <EvacResolution id={id} />,
   "/evac/assignment/note/:id": ({id}) => <VisitNoteForm id={id} />,
@@ -36,16 +36,17 @@ const routes = {
   "/hotline": () => <Hotline />,
   "/hotline/animal/new": () => <NewAnimal />,
   "/hotline/first_responder/new": () => <NewReporter />,
-  "/hotline/owner/edit/:id": ({id}) => <UpdateOwner id={id}/>,
+  "/hotline/owner/edit/:id": ({id}) => <UpdateOwner id={id} />,
   "/hotline/owner/new": () => <NewOwner />,
-  "/hotline/owner/:id": ({id}) => <OwnerDetail id={id}/>,
-  "/hotline/reporter/edit/:id": ({id}) => <UpdateReporter id={id}/>,
+  "/hotline/owner/:id": ({id}) => <OwnerDetail id={id} />,
+  "/hotline/reporter/edit/:id": ({id}) => <UpdateReporter id={id} />,
   "/hotline/reporter/new": () => <NewReporter />,
   "/hotline/reporter/:id": ({id}) => <ReporterDetail id={id}/>,
   "/hotline/servicerequest/edit/:id": ({id}) => <UpdateServiceRequest id={id}/>,
-  "/hotline/servicerequest/list": () => <ServiceRequestList />,
+  "/hotline/servicerequest/search": () => <ServiceRequestSearch />,
   "/hotline/servicerequest/new": () => <NewServiceRequest />,
-  "/hotline/servicerequest/:id": ({id}) => <ServiceRequestDetail id={id}/>,
+  "/hotline/servicerequest/:id": ({id}) => <ServiceRequestDetail id={id} />,
+  "/hotline/workflow/*": () => <HotlineWorkflow />,
   "/shelter": () => <Shelter />,
   "/shelter/new": () => <NewShelter />,
   "/shelter/edit/:id": ({id}) => <UpdateShelter id={id} />,
@@ -59,6 +60,7 @@ const routes = {
   "/intake": () => <Intake />,
   "/intake/animal/new": () => <NewAnimal />,
   "/intake/owner/new": () => <NewOwner />,
+  "/intake/owner/search": () => <OwnerSearch />,
   "/intake/reporter/new": () => <NewReporter />,
   "/intake/summary": () => <IntakeSummary />,
   "/login": () => <Redirect to='/' />
