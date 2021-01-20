@@ -16,7 +16,7 @@ import {
 } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faClipboardList, faBan, faIgloo, faExclamationCircle, faQuestionCircle, faHome, faHelicopter, faHeart, faSkullCrossbones
+  faClipboardList, faIgloo, faExclamationCircle, faQuestionCircle, faHome, faHelicopter, faHeart, faSkullCrossbones
 } from '@fortawesome/free-solid-svg-icons';
 import moment from "moment";
 import Header from '../components/Header';
@@ -28,8 +28,6 @@ export function ServiceRequestSearch() {
   const [data, setData] = useState({service_requests: [], isFetching: false});
   const [searchTerm, setSearchTerm] = useState("");
   const [statusOptions, setStatusOptions] = useState({status:"all", allColor: "primary", openColor:"secondary", assignedColor:"secondary", closedColor:"secondary"});
-  const [showModal, setShowModal] = useState(false);
-  const [activeServiceRequest, setactiveServiceRequest] = useState(0);
   const [page, setPage] = useState(1)
   const [numPages, setNumPages] = useState(1)
 
@@ -37,8 +35,14 @@ export function ServiceRequestSearch() {
   const handleChange = event => {
     setSearchTerm(event.target.value);
   };
-  const getServiceRequests = async () => {
+
+  // Use searchTerm to filter service_requests.
+  const handleSubmit = async event => {
+    event.preventDefault();
+
     let source = axios.CancelToken.source();
+    setData({service_requests: [], isFetching: true});
+    // Fetch ServiceRequest data filtered searchTerm.
     await axios.get('/hotline/api/servicerequests/?search=' + searchTerm + '&status=' + statusOptions.status, {
       cancelToken: source.token,
     })
@@ -50,35 +54,6 @@ export function ServiceRequestSearch() {
       console.log(error.response);
       setData({service_requests: [], isFetching: false});
     });
-  }
-
-  // Use searchTerm to filter service_requests.
-  const handleSubmit = async event => {
-    event.preventDefault();
-    setData({service_requests: [], isFetching: true});
-    // Fetch ServiceRequest data filtered searchTerm.
-    getServiceRequests()
-
-  }
-
-  const getServiceRequest = async (activeServiceRequest) => {
-    let source = axios.CancelToken.source();
-    await axios.get('/hotline/api/servicerequests/' + activeServiceRequest, {
-      cancelToken: source.token,
-    })
-    .then(response => {
-      setData((prevState) => ({service_requests: prevState.service_requests.map(
-        element => element.id === activeServiceRequest ? response.data: element
-      )}));
-    })
-
-  }
-
-  const cancelServiceRequest = () => {
-    axios.patch('/hotline/api/servicerequests/' + activeServiceRequest + '/', {status:'canceled'})
-    setactiveServiceRequest(0)
-    setShowModal(false)
-    getServiceRequest(activeServiceRequest)
   }
 
   // Hook for initializing data.
@@ -130,20 +105,7 @@ export function ServiceRequestSearch() {
             </ButtonGroup>
           </InputGroup>
       </Form>
-      <Modal show={showModal} onHide={() => setShowModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Confirm Cancelation</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>Are you sure you want to cancel this Service Request  and associated animals?</Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowModal(false)}>
-            Close
-          </Button>
-          <Button variant="primary" onClick={() => cancelServiceRequest(showModal)}>
-            Confirm
-          </Button>
-        </Modal.Footer>
-      </Modal>
+
       {data.service_requests.map((service_request, index) => (
         <div key={service_request.id} className="mt-3" hidden={page!= Math.ceil((index+1)/ITEMS_PER_PAGE)}>
           <div className="card-header"><h4 style={{marginBottom:"-2px"}}>{service_request.full_address}<Link href={"/hotline/servicerequest/" + service_request.id} target="_blank"> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>&nbsp;| <span style={{textTransform:"capitalize"}}>{service_request.status}</span></h4></div>
@@ -156,7 +118,7 @@ export function ServiceRequestSearch() {
                     <ListGroup.Item key={owner.id}><b>Owner: </b>{owner.first_name} {owner.last_name} {owner.display_phone} <Link href={"/hotline/owner/" + owner.id} target="_blank"> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item>
                   ))}
                   {service_request.owners.length < 1 ? <ListGroup.Item><b>Owner: </b>No Owner</ListGroup.Item> : ""}
-                  {service_request.reporter ? <ListGroup.Item><b>Reporter: </b>{service_request.reporter_object.first_name} {service_request.reporter_object.last_name} {service_request.reporter_object.phone} <Link href={"/hotline/reporter/" + service_request.reporter} target="_blank"> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item> : ""}
+                  {service_request.reporter ? <ListGroup.Item><b>Reporter: </b>{service_request.reporter_object.first_name} {service_request.reporter_object.last_name} {service_request.reporter_object.display_phone} {service_request.reporter_object.agency ? <span> ({service_request.reporter_object.agency})</span> : ""} <Link href={"/hotline/reporter/" + service_request.reporter} target="_blank"> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item> : ""}
                   {service_request.evacuation_assignments.map(evacuation_assignment => (
                     <span key={evacuation_assignment.id}>
                       {evacuation_assignment.end_time ? "" :
