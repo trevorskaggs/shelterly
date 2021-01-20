@@ -31,7 +31,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 ALLOWED_HOSTS = ['*']
-DEBUG = False
+DEBUG = True
 AUTH_USER_MODEL = 'accounts.ShelterlyUser'
 
 
@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     'shelter',
     'frontend',
     'actstream',
+    'webpack_loader'
 ]
 
 ACTSTREAM_SETTINGS = {
@@ -132,11 +133,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "shelterly/frontend/src/static/")
+    os.path.join(BASE_DIR, "shelterly/frontend/build/static/")
 ]
 # Dev settings. Remove when deploying to Zappa
 STATIC_ROOT=os.path.join(BASE_DIR, 'shelterly/static')
-# SECURE_CONTENT_TYPE_NOSNIFF = False
+SECURE_CONTENT_TYPE_NOSNIFF = False
 # DEBUG = True
 
 #TODO Change to envvars.
@@ -152,7 +153,12 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': ('knox.auth.TokenAuthentication',),
     'USER_SERIALIZER': 'accounts.serializers.UserSerializer',
 }
-
+WEBPACK_LOADER = {
+    'DEFAULT': {
+            'BUNDLE_DIR_NAME': '',
+            "STATS_FILE": os.path.join(BASE_DIR, "shelterly", "frontend", "build", "webpack-stats.prod.json"),
+        },
+}
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,

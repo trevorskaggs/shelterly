@@ -4,6 +4,7 @@ django-cors-headers
 django-filter
 django-rest-knox
 djangorestframework
+django-webpack-loader
 geocoder==1.38.1
 pillow
 psycopg2-binary
