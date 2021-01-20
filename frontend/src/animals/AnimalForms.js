@@ -24,6 +24,7 @@ export const AnimalForm = (props) => {
 
   // Determine if this is an intake workflow.
   let is_intake = window.location.pathname.includes("intake")
+  let is_reporter = window.location.pathname.includes("reporter")
 
   // Identify any query param data.
   const [queryParams] = useQueryParams();
@@ -675,7 +676,7 @@ export const AnimalForm = (props) => {
                 </BootstrapForm.Row>
                 <p/>
                 </span>
-                <span hidden={!Boolean(id) && !is_intake && !reporter_id}>                
+                <span hidden={ is_intake ? !is_reporter: !Boolean(id)}>
                 <BootstrapForm.Row>
                   <BootstrapForm.Group as={Col} xs="12">
                     {renderAddressLookup()}
