@@ -112,7 +112,7 @@ class AnimalSerializer(SimpleAnimalSerializer):
         return [ea.id for ea in obj.evacuation_assignments.all()]
 
     def get_action_history(self, obj):
-        return [build_action_string(action) for action in target_stream(obj)]
+        return [build_action_string(action) for action in obj.target_actions.all()]
     
     class Meta:
         model = Animal
