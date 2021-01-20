@@ -214,27 +214,6 @@ export const PersonForm = (props) => {
               else if (reporter_id) {
                 navigate('/hotline/animal/new?owner_id=' + response.data.id + '&reporter_id=' + reporter_id);
               }
-              // If we're creating a person for intake, redirect to create new intake Animal with proper ID.
-              else if (is_intake) {
-                if (isOwner) {
-                  navigate('/intake/animal/new?owner_id=' + response.data.id);
-                }
-                else {
-                  navigate('/intake/animal/new?reporter_id=' + response.data.id);
-                }
-              }
-              // If we're creating an owner without a reporter ID, redirect to create new Animal with owner ID.
-              else if (isOwner) {
-                navigate('/hotline/animal/new?owner_id=' + response.data.id);
-              }
-              // If we're creating a reporter and choose to skip owner, redirect to create new Animal with reporter ID.
-              else if (skipOwner) {
-                navigate('/hotline/animal/new?reporter_id=' + response.data.id + '&first_responder=' + is_first_responder);
-              }
-              // Else create a reporter and redirect to create an owner.
-              else {
-                navigate('/hotline/owner/new?reporter_id=' + response.data.id);
-              }
             })
             .catch(error => {
               console.log(error.response);

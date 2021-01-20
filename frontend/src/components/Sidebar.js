@@ -9,7 +9,6 @@ import logo from "../static/images/shelterly.png";
 
 export const StyledMenu = styled(Nav)`
   background: ${({ theme }) => theme.primaryDark};
-  height: 100%;
   text-align: left;
   padding: 1.5rem;
   float: left;

@@ -1,12 +1,16 @@
+secrets.json
 *.pyc
 *._*
 config/secrets.json
 frontend/node_modules
+frontend/.env
 .DS_Store
 .cache/
 .config/
 .local/
 .npm/
 .ssh/
+static/
+media/
 docker-compose.override.yml
 

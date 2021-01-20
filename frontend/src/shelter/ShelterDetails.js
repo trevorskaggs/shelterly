@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import { Link } from 'raviger';
-import { Card, ListGroup } from 'react-bootstrap';
+import { Card, ListGroup, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faClipboardList, faEdit, faPlusSquare,
+  faClipboardList, faEdit, faPlusSquare, faWarehouse,
 } from '@fortawesome/free-solid-svg-icons';
 import ReactImageFallback from 'react-image-fallback';
 import History from '../components/History';
@@ -24,6 +24,7 @@ export function ShelterDetails({id}) {
     image: '',
     buildings: [],
     action_history: [],
+    unroomed_animals: [],
     animal_count: 0,
     room_count: 0,
   });
@@ -65,9 +66,9 @@ export function ShelterDetails({id}) {
             <ListGroup.Item>
               <b>Address:</b> {data.full_address}
             </ListGroup.Item>
-            <ListGroup.Item>
-              <b>Description:</b> {data.description}
-            </ListGroup.Item>
+            {data.description ? <ListGroup.Item>
+            <b>Description: </b>{data.description}
+          </ListGroup.Item> : ""}
           </ListGroup>
         </Card.Body>
       </Card>
@@ -83,7 +84,6 @@ export function ShelterDetails({id}) {
                 <Card.Title className="text-center mb-0 mt-3">
                   {building.name}
                   <Link href={"/shelter/building/" + building.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
-                  <Link href={"/shelter/building/edit/" + building.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
                 </Card.Title>
                 <hr style={{marginBottom:"0px"}} />
                 <span className="d-flex flex-wrap align-items-end">
@@ -92,7 +92,6 @@ export function ShelterDetails({id}) {
                       <Card.Text className="text-center mb-0">
                         {room.name}
                         <Link href={"/shelter/room/" + room.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
-                        <Link href={"/shelter/room/edit/" + room.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
                       </Card.Text>
                       <Card.Text className="text-center mb-0">
                         {room.animals.length} Animals
@@ -106,6 +105,37 @@ export function ShelterDetails({id}) {
           </span>
         </Card.Body>
       </Card>
+      {data.unroomed_animals.length ?
+      <div className="row mt-3">
+        <div className="col-12 d-flex">
+          <Card className="border rounded" style={{width:"100%"}}>
+            <Card.Body style={{marginBottom:"-15px"}}>
+              <Card.Title>
+                <h4 className="mb-0">Animals Needing Room
+                <OverlayTrigger key={"assign"} placement="top" overlay={<Tooltip id={`tooltip-assign`}>Assign Animals to Rooms</Tooltip>}>
+                  <Link href={"/shelter/" + id + "/assign"}><FontAwesomeIcon className="ml-1" icon={faWarehouse} inverse/></Link>
+                </OverlayTrigger></h4>
+              </Card.Title>
+              <hr/>
+              <span className="d-flex flex-wrap align-items-end">
+              {data.unroomed_animals.map(animal => (
+                <Card key={animal.id} className="border rounded mr-3 mb-3" style={{border:"none"}}>
+                  <ReactImageFallback style={{width:"151px"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} />
+                  <Card.Text className="text-center mb-0">
+                    {animal.name||"Unknown"}
+                    <Link href={"/animals/" + animal.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
+                    <Link href={"/animals/edit/" + animal.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
+                  </Card.Text>
+                  <Card.Text className="text-center" style={{textTransform:"capitalize"}}>
+                    {animal.size !== 'unknown' ? animal.size : ""} {animal.species}
+                  </Card.Text>
+                </Card>
+              ))}
+              </span>
+            </Card.Body>
+          </Card>
+        </div>
+      </div> : ""}
       <History action_history={data.action_history} />
     </>
   );
@@ -120,7 +150,7 @@ export function BuildingDetailsTable({id}) {
     let source = axios.CancelToken.source();
     const fetchBuildingData = async () => {
       // Fetch Building Details data.
-      await axios.get('/shelter/api/building/' + id, {
+      await axios.get('/shelter/api/building/' + id + '/', {
         cancelToken: source.token,
       })
       .then(response => {
@@ -142,16 +172,20 @@ export function BuildingDetailsTable({id}) {
     <Card className="border rounded d-flex" style={{width:"100%"}}>
       <Card.Body>
         <Card.Title>
-          <h4>Information</h4>
+          <h4>Information
+            <OverlayTrigger key={"assign"} placement="top" overlay={<Tooltip id={`tooltip-assign`}>Assign Animals to Rooms</Tooltip>}>
+              <Link href={"/shelter/" + data.shelter + "/assign"}><FontAwesomeIcon className="ml-1" icon={faWarehouse} inverse/></Link>
+            </OverlayTrigger>
+          </h4>
         </Card.Title>
         <hr/>
         <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
           <ListGroup.Item>
             <b>Name:</b> {data.name}
           </ListGroup.Item>
-          <ListGroup.Item>
-            <b>Description:</b> {data.description}
-          </ListGroup.Item>
+          {data.description ? <ListGroup.Item>
+            <b>Description: </b>{data.description}
+          </ListGroup.Item> : ""}
           <ListGroup.Item>
             <b>Shelter:</b> {data.shelter_name}<Link href={"/shelter/" + data.shelter}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
           </ListGroup.Item>
@@ -194,7 +228,7 @@ export function RoomDetailsTable({id}) {
     let source = axios.CancelToken.source();
     const fetchRoomData = async () => {
       // Fetch Room Details data.
-      await axios.get('/shelter/api/room/' + id, {
+      await axios.get('/shelter/api/room/' + id + '/', {
           cancelToken: source.token,
       })
       .then(response => {
@@ -216,16 +250,20 @@ export function RoomDetailsTable({id}) {
     <Card className="border rounded d-flex" style={{width:"100%"}}>
       <Card.Body>
         <Card.Title>
-          <h4>Information</h4>
+          <h4>Information
+            <OverlayTrigger key={"assign"} placement="top" overlay={<Tooltip id={`tooltip-assign`}>Assign Animals to Rooms</Tooltip>}>
+              <Link href={"/shelter/" + data.shelter + "/assign"}><FontAwesomeIcon className="ml-1" icon={faWarehouse} inverse/></Link>
+            </OverlayTrigger>
+          </h4>
         </Card.Title>
         <hr/>
         <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
           <ListGroup.Item>
             <b>Name:</b> {data.name}
           </ListGroup.Item>
-          <ListGroup.Item>
-            <b>Description:</b> {data.description}
-          </ListGroup.Item>
+          {data.description ? <ListGroup.Item>
+            <b>Description: </b>{data.description}
+          </ListGroup.Item> : ""}
           <ListGroup.Item>
             <b>Building:</b> {data.building_name}<Link href={"/shelter/building/" + data.building}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
           </ListGroup.Item>
