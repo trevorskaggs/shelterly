@@ -3,7 +3,7 @@ WORKDIR /tmp
 RUN git clone https://github.com/trevorskaggs/shelterly.git shelterly
 WORKDIR /tmp/shelterly/frontend
 RUN npm install
-RUN npm run wp_build
+RUN npm run build
 FROM python:3
 #change to args
 ENV AWS_ACCESS_KEY_ID="" 
@@ -22,7 +22,7 @@ USER shelterly
 WORKDIR /home/shelterly/
 
 COPY .  /home/shelterly
-COPY --from=builder /home/sheltuser/shelterly/frontend/src/static/js /home/shelterly/frontend/src/static/js/
+COPY --from=builder /home/sheltuser/shelterly/frontend/src/static/build /home/shelterly/frontend/src/static/build/
 RUN python3 -m venv /home/shelterly/venv \
     && echo 'source /home/shelterly/venv/bin/activate' >> ~/.bashrc \
     && . /home/shelterly/venv/bin/activate \

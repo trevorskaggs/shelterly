@@ -14,6 +14,10 @@
       prompt: Enter path to secrets.json
       private: no
 
+    - name: node_vars
+      prompt: Enter path to .env file.
+      private: no
+
   hosts: localhost
   gather_facts: False
   tasks:
@@ -25,11 +29,15 @@
     git:
       repo: 'https://github.com/trevorskaggs/shelterly.git'
       dest: '{{ build_dir }}'
-      version: deploy
+      version: ansible-deployment
   - name: Copy secrets
     ansible.builtin.copy:
       src: '{{ secrets_path }}'
       dest: '{{ build_dir }}/config/secrets.json'
+  - name: Copy node vars
+    ansible.builtin.copy:
+      src: '{{ node_vars }}'
+      dest: '{{ build_dir }}/frontend/.env'
   - name: Build and push to docker hub
     community.general.docker_image:
       name: 'trevorskaggs/shelterly:{{ image_tag }}'
