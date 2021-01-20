@@ -11,6 +11,7 @@ import car from "../static/images/car-solid.png";
 import trailer from "../static/images/trailer-solid.png";
 import { ServiceRequestForm } from "./HotlineForms";
 import { ServiceRequestView } from "./HotlineViews";
+import { initialData } from "./HotlineWorkflow";
 
 const header_style = {
   textAlign: "center",
@@ -138,22 +139,22 @@ function Hotline() {
   return (
     <>
     <ListGroup className="p-5">
-      <Link href="/hotline/owner/new">
-      <ListGroup.Item action>OWNER CALLING</ListGroup.Item>
+      <Link href="/hotline/workflow/owner">
+        <ListGroup.Item action>OWNER CALLING</ListGroup.Item>
       </Link>
-      <Link href="/hotline/reporter/new">
-      <ListGroup.Item action>NON-OWNER CALLING</ListGroup.Item>
+      <Link href="/hotline/workflow/reporter">
+        <ListGroup.Item action>NON-OWNER CALLING</ListGroup.Item>
       </Link>
-      <Link href="/hotline/first_responder/new">
-      <ListGroup.Item action>FIRST RESPONDER CALLING</ListGroup.Item>
+      <Link href="/hotline/workflow/first_responder">
+        <ListGroup.Item action>FIRST RESPONDER CALLING</ListGroup.Item>
       </Link>
       <Link href="/hotline/servicerequest/search">
-      <ListGroup.Item action>SEARCH SERVICE REQUESTS</ListGroup.Item>
+        <ListGroup.Item action>SEARCH SERVICE REQUESTS</ListGroup.Item>
       </Link>
     </ListGroup>
     <Row className="d-flex flex-wrap">
       <Col xs={10} className="border rounded pl-0 pr-0 m-auto">
-        <Map className="d-block" style={{marginRight:"0px"}} bounds={data.bounds} onMoveEnd={onMove}>
+        <Map className="d-block" bounds={data.bounds} onMoveEnd={onMove}>
           <Legend position="bottomleft" metric={false} />
           <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -221,7 +222,7 @@ export const NewServiceRequest = () => (
 
 export const UpdateServiceRequest = ({id}) => (
   <div>
-    <ServiceRequestForm id={id} />
+    <ServiceRequestForm id={id} state={initialData} />
   </div>
 )
 

@@ -265,7 +265,7 @@ export function EvacResolution({ id }) {
                               isClearable={false}
                             />
                           </Col>
-                          <span style={{ marginTop:"5px" }}><span style={{ textTransform: "capitalize" }}>{animal.name || "Unknown"}</span>&nbsp;({animal.species}) <Link href={"/animals/animal/" + animal.id} target="_blank"> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></span> 
+                          <span style={{ marginTop:"5px" }}><span style={{ textTransform: "capitalize" }}>{animal.name || "Unknown"}</span>&nbsp;({animal.species}) <Link href={"/animals/" + animal.id} target="_blank"> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></span>
                         </Row>
                       </ListGroup.Item>
                     ))}
@@ -346,8 +346,8 @@ export function EvacResolution({ id }) {
                 </Card.Body>
               </Card>
             ))}
-            <ButtonGroup>
-              <Button type="button" className="btn btn-primary" onClick={() => { props.submitForm() }}>Save</Button>
+            <ButtonGroup size="lg" className="col-12 pl-0 pr-0">
+              <Button className="btn btn-block" type="button" onClick={() => { props.submitForm() }}>Save</Button>
             </ButtonGroup>
           </BootstrapForm>
         </>

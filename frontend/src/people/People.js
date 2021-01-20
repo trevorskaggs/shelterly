@@ -1,19 +1,16 @@
 import React from "react";
 import { PersonForm } from "./PeopleForms";
 import { PersonView } from "./PeopleViews";
-
-const header_style = {
-  textAlign: "center",
-};
+import { initialData } from "../hotline/HotlineWorkflow";
 
 export const NewOwner = () => (
     <div>
-      <PersonForm />
+      <PersonForm state={initialData} />
     </div>
 )
 
 export const UpdateOwner = ({id}) => (
-    <PersonForm id={id} />
+    <PersonForm id={id} state={initialData} />
 )
 
 export const OwnerDetail = ({id}) => (
@@ -21,13 +18,12 @@ export const OwnerDetail = ({id}) => (
 )
 
 export const NewReporter = () => (
-  <PersonForm />
+  <PersonForm state={initialData} />
 )
 
 export const UpdateReporter = ({id}) => (
 <div>
-  <h1 style={header_style}>Reporter Information</h1>
-  <PersonForm id={id} />
+  <PersonForm id={id} state={initialData} />
 </div>
 )
 
