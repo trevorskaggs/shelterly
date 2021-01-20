@@ -89,7 +89,7 @@ export const AnimalForm = (props) => {
 
   // Initial Animal data.
   const [data, setData] = useState(current_data);
-  const [shelters, setShelters] = useState({options: [],  isFetching: false});
+  const [shelters, setShelters] = useState({options: [], shelters: [], isFetching: false});
 
   const wrapperSetFrontImage = useCallback(val => {
     if (val !== 0){
@@ -146,7 +146,7 @@ export const AnimalForm = (props) => {
     }
 
     const fetchShelters = () => {
-      setShelters({options: [], isFetching: true});
+      setShelters({options: [], shelters: [], isFetching: true});
       // Fetch Shelter data.
       axios.get('/shelter/api/shelter/', {
         cancelToken: source.token,
@@ -157,11 +157,11 @@ export const AnimalForm = (props) => {
           let display_name = shelter.name + ' ('+shelter.buildings.length+' buildings, ' + shelter.room_count + ' rooms, ' + shelter.animal_count + ' animals)';
           options.push({value: shelter.id, label: display_name});
         });
-        setShelters({options: options, isFetching: false});
+        setShelters({options: options, shelters:response.data, isFetching: false});
       })
       .catch(error => {
         console.log(error.response);
-        setShelters({options: [], isFetching: false});
+        setShelters({options: [], shelters: [], isFetching: false});
       });
     };
     fetchShelters();
@@ -598,7 +598,10 @@ export const AnimalForm = (props) => {
                       isClearable={true}
                     />
                   </Col>
-                  {/* <Col xs="8">
+                </BootstrapForm.Row>
+                </span>
+                <BootstrapForm.Row className="mt-3" hidden={!Boolean(id)}>
+                  <Col xs="8">
                     <TreeSelect
                       showSearch
                       style={{ width: '100%' }}
@@ -611,9 +614,7 @@ export const AnimalForm = (props) => {
                         formikProps.setFieldValue("room", value||null);
                       }}
                     >
-                      {shelters.options.map(shelter => (
-                        <TreeNode title={shelter.name + ' ('+shelter.buildings.length+' buildings, ' + shelter.room_count + ' rooms, ' + shelter.animal_count + ' animals)'} key={shelter.id} selectable={false} value={shelter.id}>
-                        </TreeNode>
+                      {shelters.shelters.map(shelter => (
                         <TreeNode title={'Shelter: ' + shelter.name + ' ('+shelter.buildings.length+' buildings, ' + shelter.room_count + ' rooms, ' + shelter.animal_count + ' animals)'} key={'shelter'+shelter.id} selectable={false} value={'shelter'+shelter.id}>
                           {shelter.buildings.map(building => (
                             <TreeNode title={'Building: ' + building.name + ' (' + building.rooms.length + ' rooms, ' + building.animal_count + ' animals)'} key={'building'+building.id} selectable={false} value={'building'+building.id}>
@@ -625,9 +626,8 @@ export const AnimalForm = (props) => {
                         </TreeNode>
                       ))}
                     </TreeSelect>
-                  </Col> */}
+                  </Col>
                 </BootstrapForm.Row>
-                </span>
             </BootstrapForm>
           </Card.Body>
           <ButtonGroup size="lg">

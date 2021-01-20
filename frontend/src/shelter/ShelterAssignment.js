@@ -202,7 +202,7 @@ export function ShelterAssignment({id}) {
         </Row>
         <Row className="d-flex ml-0">
           {data.rooms.map((room, index) => (
-            <span key={room.id} style={{marginBottom:"32px"}}>{room.name}<Link href={"/shelter/room/" + room.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
+            <span key={room.id} style={{marginBottom:"32px"}}>{room.building_name} - {room.name}<Link href={"/shelter/room/" + room.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
             <span className="col">
               <Card className="border rounded mr-3" style={{width:"190px", minHeight: "45px", height: "100%"}}>
                 <Card.Body style={{paddingBottom:"3px", display:"flex", flexDirection:"column"}}>

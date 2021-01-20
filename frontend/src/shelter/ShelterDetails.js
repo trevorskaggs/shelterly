@@ -109,7 +109,7 @@ export function ShelterDetails({id}) {
       <div className="row mt-3">
         <div className="col-12 d-flex">
           <Card className="border rounded" style={{width:"100%"}}>
-            <Card.Body>
+            <Card.Body style={{marginBottom:"-15px"}}>
               <Card.Title>
                 <h4 className="mb-0">Animals Needing Room
                 <OverlayTrigger key={"assign"} placement="top" overlay={<Tooltip id={`tooltip-assign`}>Assign Animals to Rooms</Tooltip>}>
@@ -119,7 +119,7 @@ export function ShelterDetails({id}) {
               <hr/>
               <span className="d-flex flex-wrap align-items-end">
               {data.unroomed_animals.map(animal => (
-                <Card key={animal.id} className="border rounded mr-3" style={{border:"none"}}>
+                <Card key={animal.id} className="border rounded mr-3 mb-3" style={{border:"none"}}>
                   <ReactImageFallback style={{width:"151px"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} />
                   <Card.Text className="text-center mb-0">
                     {animal.name||"Unknown"}
@@ -172,7 +172,11 @@ export function BuildingDetailsTable({id}) {
     <Card className="border rounded d-flex" style={{width:"100%"}}>
       <Card.Body>
         <Card.Title>
-          <h4>Information</h4>
+          <h4>Information
+            <OverlayTrigger key={"assign"} placement="top" overlay={<Tooltip id={`tooltip-assign`}>Assign Animals to Rooms</Tooltip>}>
+              <Link href={"/shelter/" + data.shelter + "/assign"}><FontAwesomeIcon className="ml-1" icon={faWarehouse} inverse/></Link>
+            </OverlayTrigger>
+          </h4>
         </Card.Title>
         <hr/>
         <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
@@ -246,7 +250,11 @@ export function RoomDetailsTable({id}) {
     <Card className="border rounded d-flex" style={{width:"100%"}}>
       <Card.Body>
         <Card.Title>
-          <h4>Information</h4>
+          <h4>Information
+            <OverlayTrigger key={"assign"} placement="top" overlay={<Tooltip id={`tooltip-assign`}>Assign Animals to Rooms</Tooltip>}>
+              <Link href={"/shelter/" + data.shelter + "/assign"}><FontAwesomeIcon className="ml-1" icon={faWarehouse} inverse/></Link>
+            </OverlayTrigger>
+          </h4>
         </Card.Title>
         <hr/>
         <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>

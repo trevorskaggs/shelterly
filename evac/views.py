@@ -64,11 +64,15 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
                 sr_status = 'closed'
                 for animal_dict in service_request['animals']:
                     # Record status change if applicable.
-                    new_status = animal_dict['status']
                     animal = Animal.objects.get(pk=animal_dict['id'])
+                    new_status = animal_dict.get('status')
                     if animal.status != new_status:
                         action.send(self.request.user, verb=f'changed animal status to {new_status}', target=animal)
-                        Animal.objects.filter(id=animal_dict['id']).update(status=new_status)
+                    new_shelter = animal_dict.get('shelter', None)
+                    if animal.shelter != new_shelter:
+                        action.send(self.request.user, verb='sheltered animal', target=animal)
+                        action.send(self.request.user, verb='sheltered animal', target=animal.shelter, action_object=animal)
+                    Animal.objects.filter(id=animal_dict['id']).update(status=new_status, shelter=new_shelter)
                     # Mark SR as open if any animal is SIP or UTL.
                     if new_status in ['SHELTERED IN PLACE', 'UNABLE TO LOCATE']:
                         sr_status = 'open'
