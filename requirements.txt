@@ -1,11 +1,11 @@
 awscli
-Django>=2.2.9
+Django>=3.1
 django-activity-stream
 django-cors-headers
 django-filter
 django-rest-knox
 django-ordered-model
-djangorestframework
+djangorestframework>=3.12
 django-storages
 geocoder==1.38.1
 ipython
