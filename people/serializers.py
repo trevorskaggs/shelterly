@@ -58,13 +58,10 @@ class OwnerContactSerializer(serializers.ModelSerializer):
 
 class PersonSerializer(SimplePersonSerializer):
 
-    owner_contacts = serializers.SerializerMethodField()
+    owner_contacts = OwnerContactSerializer(source='ownercontact_set', many=True, required=False, read_only=True)
     animals = AnimalSerializer(source='animal_set', many=True, required=False, read_only=True)
     request = serializers.SerializerMethodField()
     action_history = serializers.SerializerMethodField()
-
-    def get_owner_contacts(self, obj):
-        return obj.ownercontact_set.all().values()
 
     # Custom field for the action history.
     def get_action_history(self, obj):

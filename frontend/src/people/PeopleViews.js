@@ -7,6 +7,7 @@ import {
   faClipboardList, faEdit, faPhone, faPlusSquare
 } from '@fortawesome/free-solid-svg-icons';
 import ReactImageFallback from 'react-image-fallback';
+import Moment from 'react-moment';
 import noImageFound from '../static/images/image-not-found.png';
 import Header from '../components/Header';
 import History from '../components/History';
@@ -56,7 +57,7 @@ export function PersonView({id}) {
     <>
     <Header>
       {is_owner ?
-        <span>Owner Details<Link href={"/hotline/owner/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link> <Link href={"/hotline/owner/new?owner_id=" + id}><FontAwesomeIcon icon={faPlusSquare} inverse /></Link> <Link href={"/hotline/ownercontact/new?owner=" + id}><FontAwesomeIcon icon={faPhone} inverse /></Link></span> :
+        <span>Owner Details<Link href={"/hotline/owner/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link> <Link href={"/hotline/owner/new?owner_id=" + id}><FontAwesomeIcon icon={faPlusSquare} inverse /></Link></span> :
         <span>Reporter Details<Link href={"/hotline/reporter/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link></span>
       }
     </Header>
@@ -87,12 +88,14 @@ export function PersonView({id}) {
         <Card className="border rounded d-flex" style={{width:"100%"}}>
           <Card.Body>
             <Card.Title>
-              <h4>Owner Contacts</h4>
+              <h4>Owner Contacts
+                <Link href={"/hotline/ownercontact/new?owner=" + id}><FontAwesomeIcon icon={faPhone} className="ml-1" inverse /></Link>
+              </h4>
             </Card.Title>
             <hr/>
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
               {data.owner_contacts.map(owner_contact => (
-              <ListGroup.Item><b>{owner_contact.owner_contact_time}</b>: {owner_contact.owner_contact_note}</ListGroup.Item>
+              <ListGroup.Item key={owner_contact.id}><b><Moment format="MMMM Do YYYY HH:mm">{owner_contact.owner_contact_time}</Moment></b>: {owner_contact.owner_contact_note}</ListGroup.Item>
               ))}
             </ListGroup>
           </Card.Body>

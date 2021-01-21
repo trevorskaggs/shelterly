@@ -105,8 +105,8 @@ class ServiceRequestSerializer(SimpleServiceRequestSerializer):
     from people.serializers import SimplePersonSerializer
 
     # Custom field to get Evacuation Assignments.
-    def get_evacuation_assignments(self, obj):
-        return obj.evacuation_assignments.filter(service_requests=obj).values()
+    # def get_evacuation_assignments(self, obj):
+    #     return obj.evacuation_assignments.filter(service_requests=obj).values()
 
     action_history = serializers.SerializerMethodField()
     assigned_evac = serializers.SerializerMethodField()

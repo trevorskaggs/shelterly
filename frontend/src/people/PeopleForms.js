@@ -390,16 +390,16 @@ export const OwnerContactForm = ({id}) => {
   var axios_method;
 
   const {
-    owner = '',
-    animal = ''
+    owner = null,
+    animal = null
   } = queryParams;
 
     const [data, setData] = useState({
+      owner_name: '',
       owner_contact_time: '',
       owner_contact_note: '',
       owner: owner,
       animal: animal,
-      owner_name: ''
     })
 
     useEffect(() => {
@@ -429,10 +429,7 @@ export const OwnerContactForm = ({id}) => {
           cancelToken: source.token,
         })
           .then(response => {
-            console.log(response)
-            setData({'owner': owner, 'owner_name': response.data['first_name'] + ' ' + response.data['last_name'],
-               'animal': animal, 'owner_contact_note': '',owner_contact_time: ''});
-            console.log(data)
+            setData(prevState => ({ ...prevState, ["owner_name"]:response.data['first_name'] + ' ' + response.data['last_name'] }));
           })
           .catch(error => {
             console.log(error.response);
@@ -476,12 +473,12 @@ export const OwnerContactForm = ({id}) => {
         >
         {form => (
           <Card border="secondary" className="mt-5">
-          <Card.Header as="h5" className="pl-3"><span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>{ form.values.owner_name } - {!id ? "New" : "Update"} Owner Contact</Card.Header>
+          <Card.Header as="h5" className="pl-3"><span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>{ data.owner_name } - {!id ? "New" : "Update"} Owner Contact</Card.Header>
           <Card.Body>
           <BootstrapForm>
               <FormGroup>
                 <Row>
-                  <Col xs={{size: 2}}>
+                  <Col >
                   <DateTimePicker
                     label="Owner Contact Time"
                     name="owner_contact_time"
@@ -496,8 +493,8 @@ export const OwnerContactForm = ({id}) => {
                   />
                   </Col>
                 </Row>
-                <Row>
-                  <Col xs={{size: 2}}>
+                <Row className="mt-3">
+                  <Col >
                     <TextInput
                       as="textarea"
                       label="Owner Contact Note"

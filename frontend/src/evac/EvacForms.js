@@ -156,10 +156,10 @@ export function EvacResolution({ id }) {
             // Use existing VisitNote to populate data if we're editing a closed Resolution.
             const visit_note = service_request.visit_notes.filter(note => String(note.evac_assignment) === String(id))[0]
             if (visit_note) {
-              response.data.sr_updates.push({ id: service_request.id, followup_date: service_request.followup_date, date_completed: visit_note.date_completed || new Date(), notes: visit_note.notes, owner_contacted: visit_note.owner_contacted, forced_entry: visit_note.forced_entry, animals: service_request.animals.filter(animal => animal.evacuation_assignments.includes(Number(id))), owner: service_request.owner.length > 0 })
+              response.data.sr_updates.push({ id: service_request.id, followup_date: service_request.followup_date, date_completed: visit_note.date_completed || new Date(), notes: visit_note.notes, forced_entry: visit_note.forced_entry, animals: service_request.animals.filter(animal => animal.evacuation_assignments.includes(Number(id))), owner: service_request.owner.length > 0 })
             }
             else {
-              response.data.sr_updates.push({ id: service_request.id, followup_date: service_request.followup_date, date_completed: new Date(), notes: '', owner_contacted: false, forced_entry: false, animals: service_request.animals.filter(animal => animal.evacuation_assignments.includes(Number(id))), owner: service_request.owner.length > 0 })
+              response.data.sr_updates.push({ id: service_request.id, followup_date: service_request.followup_date, date_completed: new Date(), notes: '', forced_entry: false, animals: service_request.animals.filter(animal => animal.evacuation_assignments.includes(Number(id))), owner: service_request.owner.length > 0 })
             }
           });
           setData(response.data);
@@ -327,7 +327,7 @@ export function EvacResolution({ id }) {
                       value={props.values.sr_updates[index] ? props.values.sr_updates[index].date_completed : new Date()}
                     />
                   </BootstrapForm.Row>
-                  <BootstrapForm.Row>
+                  <BootstrapForm.Row className="mt-3">
                     <DateTimePicker
                       label="Followup Date"
                       name={`sr_updates.${index}.followup_date`}
@@ -350,34 +350,38 @@ export function EvacResolution({ id }) {
                       label="Visit Notes"
                     />
                   </BootstrapForm.Row>
-                  <BootstrapForm.Row className="mt-2">
+                  <BootstrapForm.Row>
                     <Col>
-                      <Label htmlFor={`sr_updates.${index}.forced_entry`} className="mt-2">Forced Entry</Label>
+                      <Label htmlFor={`sr_updates.${index}.forced_entry`} className="mt-1">Forced Entry</Label>
                       <Field component={Switch} name={`sr_updates.${index}.forced_entry`} type="checkbox" color="primary" />
                     </Col>
                   </BootstrapForm.Row>
                   {service_request.owners.length > 0 ?
-                    <BootstrapForm.Row className="mt-3 pl-1">
-                      <DateTimePicker
-                        label="Owner Contact Time"
-                        name={`sr_updates.${index}.owner_contact_time`}
-                        id={`sr_updates.${index}.owner_contact_time`}
-                        xs="4"
-                        data-enable-time={true}
-                        onChange={(date, dateStr) => {
-                          props.setFieldValue(`sr_updates.${index}.owner_contact_time`, dateStr)
-                        }}
-                        value={service_request.owner_contact_time || null}
-                      />
-                      <TextInput
-                        id={`sr_updates.${index}.owner_contact_note`}
-                        name={`sr_updates.${index}.owner_contact_note`}
-                        xs="9"
-                        as="textarea"
-                        rows={5}
-                        label="Owner Contact Note"
-                      />
-                    </BootstrapForm.Row>
+                    <span>
+                      <BootstrapForm.Row className="mt-2">
+                        <DateTimePicker
+                          label="Owner Contact Time"
+                          name={`sr_updates.${index}.owner_contact_time`}
+                          id={`sr_updates.${index}.owner_contact_time`}
+                          xs="4"
+                          data-enable-time={true}
+                          onChange={(date, dateStr) => {
+                            props.setFieldValue(`sr_updates.${index}.owner_contact_time`, dateStr)
+                          }}
+                          value={service_request.owner_contact_time || null}
+                        />
+                      </BootstrapForm.Row>
+                      <BootstrapForm.Row className="mt-3" style={{marginBottom:"-15px"}}>
+                        <TextInput
+                          id={`sr_updates.${index}.owner_contact_note`}
+                          name={`sr_updates.${index}.owner_contact_note`}
+                          xs="9"
+                          as="textarea"
+                          rows={5}
+                          label="Owner Contact Note"
+                        />
+                      </BootstrapForm.Row>
+                    </span>
                     : ""}
                 </Card.Body>
               </Card>
