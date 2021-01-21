@@ -22,7 +22,7 @@ USER shelterly
 WORKDIR /home/shelterly/
 
 COPY .  /home/shelterly
-COPY --from=builder /tmp/shelterly/frontend/build/static /home/shelterly/frontend/build/static
+COPY --from=builder /tmp/shelterly/frontend/build /home/shelterly/frontend/build
 RUN python3 -m venv /home/shelterly/venv \
     && echo 'source /home/shelterly/venv/bin/activate' >> ~/.bashrc \
     && . /home/shelterly/venv/bin/activate \
