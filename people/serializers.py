@@ -6,7 +6,7 @@ from animals.models import Animal
 from .models import OwnerContact, Person
 from location.utils import build_full_address, build_action_string
 from hotline.models import ServiceRequest
-from animals.models import Animal
+from animals.serializers import AnimalSerializer
 
 class SimplePersonSerializer(serializers.ModelSerializer):
 
@@ -58,14 +58,10 @@ class OwnerContactSerializer(serializers.ModelSerializer):
 
 class PersonSerializer(SimplePersonSerializer):
 
-    from animals.serializers import AnimalSerializer
-    animals = serializers.SerializerMethodField()
     owner_contacts = serializers.SerializerMethodField()
+    animals = AnimalSerializer(source='animal_set', many=True, required=False, read_only=True)
     request = serializers.SerializerMethodField()
     action_history = serializers.SerializerMethodField()
-
-    def get_animals(self, obj):
-        return obj.animal_set.all().values() | obj.animals.all().values()
 
     def get_owner_contacts(self, obj):
         return obj.ownercontact_set.all().values()

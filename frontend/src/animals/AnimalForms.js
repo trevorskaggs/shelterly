@@ -8,21 +8,23 @@ import { Card } from 'react-bootstrap';
 import * as Yup from 'yup';
 import { AuthContext } from "../accounts/AccountsReducer";
 import { TreeSelect } from 'antd';
-import { DateTimePicker, DropDown, ImageUploader, TextInput } from '.././components/Form.js';
+import {AddressLookup, DateTimePicker, DropDown, ImageUploader, TextInput} from '.././components/Form.js';
 import { catAgeChoices, dogAgeChoices, horseAgeChoices, otherAgeChoices, catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, speciesChoices, sexChoices, dogSizeChoices, catSizeChoices, horseSizeChoices, otherSizeChoices, unknownChoices } from './constants';
+import { STATE_OPTIONS } from '../constants'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft, faMinusSquare } from '@fortawesome/free-solid-svg-icons';
 import 'antd/lib/tree-select/style/css';
+import Alert from 'react-bootstrap/Alert'
 
 export const AnimalForm = (props) => {
 
-  const { state, dispatch } = useContext(AuthContext);
+  const { state } = useContext(AuthContext);
   const { TreeNode } = TreeSelect;
   const id = props.id;
-  const back_target = props.state.steps.owner ? 'owner' : 'reporter'
 
   // Determine if this is an intake workflow.
-  var is_intake = window.location.pathname.includes("intake")
+  let is_intake = window.location.pathname.includes("intake")
+  let is_reporter = window.location.pathname.includes("reporter")
 
   // Identify any query param data.
   const [queryParams] = useQueryParams();
@@ -32,8 +34,8 @@ export const AnimalForm = (props) => {
     reporter_id = null,
   } = queryParams;
 
-  // Determine if we're in the hotline workflow.
-  var is_workflow = window.location.pathname.includes("workflow")
+  // Determine if we're in a multi-step workflow.
+  var is_workflow = window.location.pathname.includes("workflow");
 
   // Track species selected and update choice lists accordingly.
   const speciesRef = useRef(null);
@@ -78,9 +80,17 @@ export const AnimalForm = (props) => {
     last_seen: null,
     number_of_animals: 1,
     room: null,
+    shelter: null,
     front_image: null,
     side_image: null,
     extra_images: [],
+    address: '',
+    apartment: '',
+    city: '',
+    state: '',
+    zip_code: '',
+    latitude: null,
+    longitude: null,
   }
   let current_data = initialData;
   if (is_workflow && props.state.steps.animals[props.state.animalIndex]) {
@@ -89,7 +99,7 @@ export const AnimalForm = (props) => {
 
   // Initial Animal data.
   const [data, setData] = useState(current_data);
-  const [shelters, setShelters] = useState({shelters: [],  isFetching: false});
+  const [shelters, setShelters] = useState({options: [], shelters: [], isFetching: false});
 
   const wrapperSetFrontImage = useCallback(val => {
     if (val !== 0){
@@ -121,6 +131,15 @@ export const AnimalForm = (props) => {
     setFieldValue("extra_images", data.extra_images.filter(url => url !== image_url));
   }
 
+  // Checks if Google API Key exists before rendering.
+  const renderAddressLookup = ()=>{
+    if(process.env.REACT_APP_GOOGLE_API_KEY){
+      return <AddressLookup label="Found Location Search" style={{width: '100%'}} className="form-control"/>
+    } else {
+      return <Alert variant="danger">Found Location Search is not available. Please contact support for assistance.</Alert>
+    }
+  }
+
   // Hook for initializing data.
   useEffect(() => {
     let source = axios.CancelToken.source();
@@ -145,18 +164,23 @@ export const AnimalForm = (props) => {
       fetchAnimalData();
     }
 
-    const fetchShelters = async () => {
-      setShelters({shelters: [], isFetching: true});
+    const fetchShelters = () => {
+      setShelters({options: [], shelters: [], isFetching: true});
       // Fetch Shelter data.
-      await axios.get('/shelter/api/shelter/', {
+      axios.get('/shelter/api/shelter/', {
         cancelToken: source.token,
       })
       .then(response => {
-        setShelters({shelters: response.data, isFetching: false});
+        let options = []
+        response.data.forEach(shelter => {
+          let display_name = shelter.name + ' ('+shelter.buildings.length+' buildings, ' + shelter.room_count + ' rooms, ' + shelter.animal_count + ' animals)';
+          options.push({value: shelter.id, label: display_name});
+        });
+        setShelters({options: options, shelters:response.data, isFetching: false});
       })
       .catch(error => {
         console.log(error.response);
-        setShelters({shelters: [], isFetching: false});
+        setShelters({options: [], shelters: [], isFetching: false});
       });
     };
     fetchShelters();
@@ -203,9 +227,18 @@ export const AnimalForm = (props) => {
             .nullable(),
           front_image: Yup.mixed(),
           side_image: Yup.mixed(),
-          extra_images: Yup.array()
+          extra_images: Yup.array(),
+          address: Yup.string(),
+          city: Yup.string(),
+          state: Yup.string(),
+          zip_code: Yup.string()
+            .max(10, 'Must be 10 characters or less'),
+          latitude: Yup.number()
+            .nullable(),
+          longitude: Yup.number()
+            .nullable()
         })}
-        onSubmit={(values, { setSubmitting, resetForm }) => {
+        onSubmit={ async (values, { setSubmitting, resetForm }) => {
           // Remove owner if animal has none.
           if (values["owner"]) {
             delete values["owner"];
@@ -214,7 +247,7 @@ export const AnimalForm = (props) => {
           // Use FormData so that image files may also be included.
           const formData = new FormData();
           // Convert json to FormData.
-          for ( var key in values ) {
+          for ( let key in values ) {
             if (values[key] !== null) {
               formData.append(key, values[key]);
             }
@@ -223,6 +256,7 @@ export const AnimalForm = (props) => {
           for (let i = 0; i < extra_images.length; i++) {
             formData.append('extra' + (i + 1), extra_images[i].file);
           }
+
 
           if (is_workflow) {
             if (addAnother) {
@@ -236,52 +270,102 @@ export const AnimalForm = (props) => {
                 resetForm({values:initialData});
               }
             }
+            // If we're in intake, then create objects and navigate to shelter page.
+            else if (is_intake) {
+              // Create Reporter
+              let reporterResponse = [{data:{id:null}}];
+              if (props.state.steps.reporter.first_name) {
+                reporterResponse = await Promise.all([
+                  axios.post('/people/api/person/', props.state.steps.reporter)
+                ]);
+              }
+              // Create Owner
+              let ownerResponse = [{data:{id:null}}];
+              if (props.state.steps.owner.first_name) {
+                ownerResponse = await Promise.all([
+                  axios.post('/people/api/person/', props.state.steps.owner)
+                ]);
+              }
+              // Create Animals
+              values['reporter'] = reporterResponse[0].data.id
+              values['new_owner'] = ownerResponse[0].data.id
+              axios.post('/animals/api/animal/', values)
+              .catch(error => {
+                console.log(error.response);
+              });
+              props.state.steps.animals.forEach(animal => {
+                // Add owner and reporter to animal data.
+                animal['reporter'] = reporterResponse[0].data.id
+                animal['new_owner'] = ownerResponse[0].data.id
+                axios.post('/animals/api/animal/', animal)
+                .catch(error => {
+                  console.log(error.response);
+                });
+              });
+              // Navigate to shelter page.
+              if (values.shelter) {
+                navigate('/shelter/' + values.shelter);
+              }
+              else if (ownerResponse[0].data.id) {
+                navigate('/hotline/owner/' + ownerResponse[0].data.id)
+              }
+              else {
+                navigate('/hotline/reporter/' + reporterResponse[0].data.id)
+              }
+            }
             else {
               props.onSubmit('animals', values, 'request');
             }
           }
-          else if (id) {
-            axios.put('/animals/api/animal/' + id + '/', formData)
-            .then(function() {
-              if (state.prevLocation) {
-                navigate(state.prevLocation);
-              }
-              else {
-                navigate('/animals/' + id);
-              }
-            })
-            .catch(error => {
-              console.log(error.response);
-            });
-          }
           else {
-            axios.post('/animals/api/animal/', formData)
-            .then(response => {
-              if (addAnother) {
-                // If SR already exists, pass along the request ID.
-                if (servicerequest_id) {
-                  navigate('/hotline/animal/new?servicerequest_id=' + servicerequest_id)
-                }
-                // Stay inside intake workflow if applicable.
-                else {
-                  navigate('/intake/animal/new?owner_id=' + (response.data.owner||'') + '&reporter_id=' + (reporter_id||''));
-                }
+            // Use FormData so that image files may also be included.
+            const formData = new FormData();
+            // Convert json to FormData.
+            for ( var key in values ) {
+              if (values[key] !== null) {
+                formData.append(key, values[key]);
               }
-              else {
-                // If SR already exists, redirect to the SR details.
+            }
+            // Add extra images.
+            for (let i = 0; i < extra_images.length; i++) {
+              formData.append('extra' + (i + 1), extra_images[i].file);
+            }
+
+            if (id) {
+              axios.put('/animals/api/animal/' + id + '/', formData)
+              .then(function() {
+                if (state.prevLocation) {
+                  navigate(state.prevLocation);
+                }
+                else {
+                  navigate('/animals/' + id);
+                }
+              })
+              .catch(error => {
+                console.log(error.response);
+              });
+            }
+            else {
+              axios.post('/animals/api/animal/', formData)
+              .then(response => {
+                // If adding to an SR, redirect to the SR.
                 if (servicerequest_id) {
                   navigate('/hotline/servicerequest/' + servicerequest_id);
                 }
-                // If in intake workflow, redirect to Intake Summary
-                else {
-                  navigate('/intake/summary');
+                // If adding to an Owner, redirect to the owner.
+                else if (owner_id) {
+                  navigate('/hotline/owner/' + owner_id)
                 }
-              }
-            })
-            .catch(error => {
-              console.log(error.response);
-            });
-            setSubmitting(false);
+                // Else redirect to the animal.
+                else {
+                  navigate('/animals/' + response.data.id);
+                }
+              })
+              .catch(error => {
+                console.log(error.response);
+              });
+              setSubmitting(false);
+            }
           }
         }}
       >
@@ -296,6 +380,8 @@ export const AnimalForm = (props) => {
             <Card.Body>
             <BootstrapForm as={Form}>
               <Field type="hidden" value={servicerequest_id||""} name="request" id="request"></Field>
+              <Field type="hidden" value={data.latitude || ""} name="latitude" id="latitude"></Field>
+              <Field type="hidden" value={data.longitude || ""} name="longitude" id="longitude"></Field>
                 <BootstrapForm.Row>
                   <Col xs={id ? "6" : "5"}>
                     <DropDown
@@ -341,7 +427,7 @@ export const AnimalForm = (props) => {
                     hidden={id}
                   />
                 </BootstrapForm.Row>
-                <BootstrapForm.Row className="mt-3">
+                <BootstrapForm.Row>
                   <Col xs="4">
                     <DropDown
                       label="Primary Color"
@@ -544,9 +630,23 @@ export const AnimalForm = (props) => {
                 </BootstrapForm.Row>
                 </span>
                 {/* Only show Shelter selection on intake and update. */}
-                <span hidden={!Boolean(id)&&!is_intake}>
-                <p className="mb-2 mt-2">Shelter</p>
-                <BootstrapForm.Row>
+                <span hidden={!Boolean(id) && !is_intake}>
+                <BootstrapForm.Row className="mt-3">
+                  <Col xs="8">
+                    <DropDown
+                      label="Shelter"
+                      id="shelter"
+                      type="text"
+                      name="shelter"
+                      options={shelters.options}
+                      isClearable={true}
+                    />
+                  </Col>
+                </BootstrapForm.Row>
+                </span>
+                {/* Only show Shelter selection on intake and update. */}
+                <span hidden={!Boolean(id) && !is_intake}>
+                <BootstrapForm.Row className="mt-3" >
                   <Col xs="8">
                     <TreeSelect
                       showSearch
@@ -574,16 +674,61 @@ export const AnimalForm = (props) => {
                     </TreeSelect>
                   </Col>
                 </BootstrapForm.Row>
+                <p/>
+                </span>
+                <span hidden={ is_intake ? !is_reporter: !Boolean(id)}>
+                <BootstrapForm.Row>
+                  <BootstrapForm.Group as={Col} xs="12">
+                    {renderAddressLookup()}
+                  </BootstrapForm.Group>
+                </BootstrapForm.Row>
+                <BootstrapForm.Row>
+                  <TextInput
+                    xs="12"
+                    type="text"
+                    label="Found Location Address"
+                    name="address"
+                    disabled
+                  />
+                </BootstrapForm.Row>
+                <BootstrapForm.Row>
+                  <TextInput
+                    xs="8"
+                    type="text"
+                    label="City"
+                    name="city"
+                    disabled
+                  />
+                  <Col xs="2">
+                  <DropDown
+                    label="State"
+                    name="state"
+                    id="state"
+                    options={STATE_OPTIONS}
+                    value={formikProps.values.state || ''}
+                    placeholder=''
+                    disabled
+                  />
+                  </Col>
+                  <TextInput
+                    xs="2"
+                    type="text"
+                    label="Zip Code"
+                    name="zip_code"
+                    disabled
+                  />
+                </BootstrapForm.Row>
                 </span>
             </BootstrapForm>
           </Card.Body>
           <ButtonGroup size="lg">
-            {!id ?
+            {is_workflow ?
               <Button type="button" onClick={() => {setAddAnother(true); formikProps.submitForm()}}>{props.state.steps.animals.length -1 > props.state.animalIndex ? "Next Animal" : "Add Another"}</Button>
             :
               <Button type="button" onClick={() => {setAddAnother(false); formikProps.submitForm()}}>Save</Button>
             }
-            {is_workflow ? <Button type="button" className="btn btn-primary mr-1 border" onClick={() => {setAddAnother(false); formikProps.submitForm()}}>Next Step</Button> : ""}
+            {is_workflow && !is_intake ? <Button type="button" className="btn btn-primary mr-1 border" onClick={() => {setAddAnother(false); formikProps.submitForm()}}>Next Step</Button> : ""}
+            {is_workflow && is_intake ? <Button type="button" className="btn btn-primary mr-1 border" onClick={() => {setAddAnother(false); formikProps.submitForm()}}>Save and Finish</Button> : ""}
           </ButtonGroup>
           </Card>
         )}

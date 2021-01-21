@@ -118,7 +118,7 @@ export function ServiceRequestSearch() {
                     <ListGroup.Item key={owner.id}><b>Owner: </b>{owner.first_name} {owner.last_name} {owner.display_phone} <Link href={"/hotline/owner/" + owner.id} target="_blank"> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item>
                   ))}
                   {service_request.owners.length < 1 ? <ListGroup.Item><b>Owner: </b>No Owner</ListGroup.Item> : ""}
-                  {service_request.reporter ? <ListGroup.Item><b>Reporter: </b>{service_request.reporter_object.first_name} {service_request.reporter_object.last_name} {service_request.reporter_object.phone} <Link href={"/hotline/reporter/" + service_request.reporter} target="_blank"> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item> : ""}
+                  {service_request.reporter ? <ListGroup.Item><b>Reporter: </b>{service_request.reporter_object.first_name} {service_request.reporter_object.last_name} {service_request.reporter_object.display_phone} {service_request.reporter_object.agency ? <span> ({service_request.reporter_object.agency})</span> : ""} <Link href={"/hotline/reporter/" + service_request.reporter} target="_blank"> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item> : ""}
                   {service_request.evacuation_assignments.map(evacuation_assignment => (
                     <span key={evacuation_assignment.id}>
                       {evacuation_assignment.end_time ? "" :

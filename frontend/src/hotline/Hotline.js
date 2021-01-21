@@ -212,14 +212,6 @@ function Hotline() {
   )
 }
 
-export const NewServiceRequest = () => (
-  <div>
-    <h1 style={header_style}>Service Request Form</h1>
-    <br/>
-    <ServiceRequestForm />
-  </div>
-)
-
 export const UpdateServiceRequest = ({id}) => (
   <div>
     <ServiceRequestForm id={id} state={initialData} />

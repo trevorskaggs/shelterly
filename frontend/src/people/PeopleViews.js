@@ -71,11 +71,11 @@ export function PersonView({id}) {
             <hr/>
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
               <ListGroup.Item><b>Name: </b>{data.first_name} {data.last_name}</ListGroup.Item>
+              {data.agency ? <ListGroup.Item><b>Agency: </b>{data.agency}</ListGroup.Item>: ''}
               {data.phone ? <ListGroup.Item><b>Telephone: </b>{data.display_phone}</ListGroup.Item> : ""}
               {data.alt_phone ? <ListGroup.Item><b>Alternate Telephone: </b>{data.display_alt_phone}</ListGroup.Item> : ""}
               {data.email ? <ListGroup.Item><b>Email: </b>{data.email}</ListGroup.Item> : ""}
               {data.comments ? <ListGroup.Item><b>Comments: </b>{data.comments}</ListGroup.Item>: ''}
-              {data.agency ? <ListGroup.Item><b>Agency: </b>{data.agency}</ListGroup.Item>: ''}
               <ListGroup.Item><b>Address: </b>{data.address ? data.full_address : 'No Address Listed'}</ListGroup.Item>
               {data.request ?
                 <ListGroup.Item><b>Service Request: </b>{data.request.full_address}<Link href={"/hotline/servicerequest/" + data.request.id}> <FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link></ListGroup.Item>: ''}
