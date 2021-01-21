@@ -1,6 +1,7 @@
 FROM node:14.15.4 AS builder
 WORKDIR /tmp
-RUN git clone https://github.com/trevorskaggs/shelterly.git shelterly
+RUN git clone https://github.com/trevorskaggs/shelterly.git shelterly \
+&& cd shelterly && git checkout ansible-deployment
 WORKDIR /tmp/shelterly/frontend
 RUN npm install
 RUN npm run build
