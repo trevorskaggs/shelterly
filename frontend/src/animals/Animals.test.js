@@ -4,7 +4,7 @@ import {
   screen,
 } from "@testing-library/react";
 import { AnimalForm } from "./AnimalForms";
-import { AnimalSearch } from "./AnimalTables";
+import { AnimalSearch } from "./AnimalSearch";
 import { AnimalView } from "./AnimalViews";
 import { initialData } from "../hotline/HotlineWorkflow"
 

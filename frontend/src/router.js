@@ -2,7 +2,7 @@ import React from "react";
 import { Redirect } from "raviger";
 import Home from "./Home";
 import { AnimalDetail, NewAnimal, UpdateAnimal } from "./animals/Animals"
-import { AnimalSearch } from "./animals/AnimalTables"
+import { AnimalSearch } from "./animals/AnimalSearch"
 import Evac, { EvacuationAssignmentSearch } from "./evac/Evac";
 import HotlineWorkflow from "./hotline/HotlineWorkflow";
 import Hotline, { ServiceRequestDetail, UpdateServiceRequest } from "./hotline/Hotline";

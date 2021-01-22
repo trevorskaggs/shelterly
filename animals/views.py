@@ -13,7 +13,7 @@ class AnimalViewSet(viewsets.ModelViewSet):
 
     queryset = Animal.objects.all().prefetch_related(Prefetch('animalimage_set', to_attr='images')).order_by('order')
 
-    search_fields = ['name', 'species', 'status', 'request__address', 'request__city', 'owner__first_name', 'owner__last_name', 'owner__address', 'owner__city']
+    search_fields = ['name', 'species', 'status', 'request__address', 'request__city', 'owner__first_name', 'owner__last_name', 'owner__address', 'owner__city', 'reporter__first_name', 'reporter__last_name']
     filter_backends = (filters.SearchFilter,)
     serializer_class = AnimalSerializer
 
