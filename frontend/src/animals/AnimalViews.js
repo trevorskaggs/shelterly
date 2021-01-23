@@ -6,8 +6,9 @@ import { Carousel } from 'react-responsive-carousel';
 import { Button, Card, Col, ListGroup, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBandAid, faClipboardList, faCut, faEdit, faHandHoldingHeart, faMinusSquare, faShieldAlt, faPlusSquare, faDungeon,
+  faBandAid, faClipboardList, faCut, faEdit, faMinusSquare, faPlusSquare, faLink,
 } from '@fortawesome/free-solid-svg-icons';
+import { faClawMarks, faHomeHeart } from '@fortawesome/pro-solid-svg-icons';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import Header from '../components/Header';
 import History from '../components/History';
@@ -97,7 +98,31 @@ export function AnimalView({id}) {
   return (
     <>
     <Header>
-      Animal Details - {data.status}<Link href={"/animals/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>{data.status !== 'REUNITED' ? <FontAwesomeIcon icon={faHandHoldingHeart} onClick={() => setShow(true)} style={{cursor:'pointer'}} inverse /> : ""}
+      Animal Details - {data.status}
+      <OverlayTrigger
+        key={"edit"}
+        placement="bottom"
+        overlay={
+          <Tooltip id={`tooltip-edit`}>
+            Update animal
+          </Tooltip>
+        }
+      >
+        <Link href={"/animals/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
+      </OverlayTrigger>
+      {data.status !== 'REUNITED' ?
+      <OverlayTrigger
+        key={"reunite"}
+        placement="bottom"
+        overlay={
+          <Tooltip id={`tooltip-reunite`}>
+            Reunite animal
+          </Tooltip>
+        }
+      >
+        <FontAwesomeIcon icon={faHomeHeart} onClick={() => setShow(true)} style={{cursor:'pointer'}} inverse />
+      </OverlayTrigger>
+      : ""}
     </Header>
     <hr/>
     <div className="row">
@@ -116,7 +141,7 @@ export function AnimalView({id}) {
                     </Tooltip>
                   }
                 >
-                  <FontAwesomeIcon icon={faDungeon} size="sm" className="ml-1" />
+                  <FontAwesomeIcon icon={faLink} size="sm" className="ml-1" />
                 </OverlayTrigger> :
               ""}
               {data.fixed === 'yes' ?
@@ -142,7 +167,7 @@ export function AnimalView({id}) {
                     </Tooltip>
                   }
                 >
-                  <FontAwesomeIcon icon={faShieldAlt} size="sm" className="ml-1" />
+                  <FontAwesomeIcon icon={faClawMarks} size="sm" className="ml-1" />
                 </OverlayTrigger> :
               ""}
               {data.injured === 'yes' ?
@@ -180,16 +205,64 @@ export function AnimalView({id}) {
                 </div>
               </ListGroup.Item>
               {data.last_seen ? <ListGroup.Item><b>Last Seen:</b> <Moment format="LLL">{data.last_seen}</Moment></ListGroup.Item> : ""}
-              {data.request ? <ListGroup.Item><b>Service Request: </b>{data.request_address}<Link href={"/hotline/servicerequest/" + data.request}> <FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link></ListGroup.Item>: ''}
+              {data.request ?
+              <ListGroup.Item><b>Service Request: </b>{data.request_address}
+                <OverlayTrigger
+                  key={"service-request-details"}
+                  placement="top"
+                  overlay={
+                    <Tooltip id={`tooltip-service-request-details`}>
+                      Service request details
+                    </Tooltip>
+                  }
+                >
+                  <Link href={"/hotline/servicerequest/" + data.request}><FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1" inverse /></Link>
+                </OverlayTrigger>
+              </ListGroup.Item>: ''}
             </ListGroup>
             <hr/>
             <Card.Title>
-              <h4 className="mb-0">Contacts <Link href={"/hotline/owner/new?animal_id=" + id}><FontAwesomeIcon icon={faPlusSquare} size="sm" inverse /></Link></h4>
+              <h4 className="mb-0">Contacts
+                <OverlayTrigger
+                  key={"add-owner"}
+                  placement="top"
+                  overlay={
+                    <Tooltip id={`tooltip-add-owner`}>
+                      Add owner
+                    </Tooltip>
+                  }
+                >
+                  <Link href={"/hotline/owner/new?animal_id=" + id}><FontAwesomeIcon icon={faPlusSquare} size="sm" className="ml-1" inverse /></Link>
+                </OverlayTrigger>
+              </h4>
             </Card.Title>
             <hr/>
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
               {data.owners.map(owner => (
-                <ListGroup.Item key={owner.id}><b>Owner: </b>{owner.first_name} {owner.last_name} <Link href={"/hotline/owner/" + owner.id}><FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link><Link href={"/hotline/owner/edit/" + owner.id}> <FontAwesomeIcon icon={faEdit} size="sm" inverse /></Link> <FontAwesomeIcon icon={faMinusSquare} style={{cursor:'pointer'}} size="sm" onClick={() => {setOwnerToDelete({id:owner.id, name: owner.first_name + " " + owner.last_name});setShowOwnerConfirm(true);}} inverse /> | {owner.display_phone||owner.email||"No Contact"}</ListGroup.Item>
+                <ListGroup.Item key={owner.id}><b>Owner: </b>{owner.first_name} {owner.last_name}
+                  <OverlayTrigger
+                    key={"owner-details"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-owner-details`}>
+                        Owner details
+                      </Tooltip>
+                    }
+                  >
+                    <Link href={"/hotline/owner/" + owner.id}><FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1 mr-1" inverse /></Link>
+                  </OverlayTrigger>
+                  <OverlayTrigger
+                    key={"remove-owner"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-remove-owner`}>
+                        Remove owner
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon icon={faMinusSquare} style={{cursor:'pointer'}} size="sm" onClick={() => {setOwnerToDelete({id:owner.id, name: owner.first_name + " " + owner.last_name});setShowOwnerConfirm(true);}} inverse />
+                  </OverlayTrigger>
+                &nbsp;| {owner.display_phone||owner.email||"No Contact"}</ListGroup.Item>
               ))}
               {data.reporter ? <ListGroup.Item><b>Reporter: </b>{data.reporter_object.first_name} {data.reporter_object.last_name} <Link href={"/hotline/reporter/" + data.reporter}><FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link><Link href={"/hotline/reporter/edit/" + data.reporter}> <FontAwesomeIcon icon={faEdit} size="sm" inverse /></Link></ListGroup.Item> : ""}
               {data.owners.length < 1 && !data.reporter ? <ListGroup.Item>No Contacts</ListGroup.Item> : ""}

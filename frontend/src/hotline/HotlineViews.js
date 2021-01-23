@@ -73,7 +73,19 @@ export function ServiceRequestView({id}) {
   return (
     <>
       <Header>
-        Service Request<Link href={"/hotline/servicerequest/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link> | <span style={{textTransform:"capitalize"}}>{data.status} {data.status === 'assigned' ? <Link href={"/evac/summary/" + data.assigned_evac}><FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link> : ""}</span>
+        Service Request Details
+        <OverlayTrigger
+          key={"edit-service-request"}
+          placement="bottom"
+          overlay={
+            <Tooltip id={`tooltip-edit-service-request`}>
+              Update service request
+            </Tooltip>
+          }
+        >
+          <Link href={"/hotline/servicerequest/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
+        </OverlayTrigger>
+        &nbsp;| <span style={{textTransform:"capitalize"}}>{data.status} {data.status === 'assigned' ? <Link href={"/evac/summary/" + data.assigned_evac}><FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link> : ""}</span>
       </Header>
       <div style={{fontSize:"18px", marginTop:"14px"}}><b>Address: </b>{data.full_address}</div>
       <hr/>
@@ -166,14 +178,39 @@ export function ServiceRequestView({id}) {
         </div>
         <div className="col-6 d-flex pl-0">
           <Card className="mb-2 border rounded" style={{width:"100%"}}>
-            <Card.Body style={{}}>
+            <Card.Body>
               <Card.Title>
-                <h4 className="mb-0">Contacts <Link href={"/hotline/owner/new?servicerequest_id=" + id}><FontAwesomeIcon icon={faPlusSquare} size="sm" inverse /></Link></h4>
+                <h4 className="mb-0">Contacts
+                  <OverlayTrigger
+                    key={"add-owner"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-add-owner`}>
+                        Add owner
+                      </Tooltip>
+                    }
+                  >
+                    <Link href={"/hotline/owner/new?servicerequest_id=" + id}><FontAwesomeIcon icon={faPlusSquare} size="sm" className="ml-1" inverse /></Link>
+                  </OverlayTrigger>
+                </h4>
               </Card.Title>
               <hr/>
               <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-20px"}}>
                 {data.owners.map(owner => (
-                  <ListGroup.Item key={owner.id}><b>Owner: </b>{owner.first_name} {owner.last_name} <Link href={"/hotline/owner/" + owner.id}><FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link><Link href={"/hotline/owner/edit/" + owner.id}> <FontAwesomeIcon icon={faEdit} size="sm" inverse /></Link> | {owner.display_phone||owner.email||"No Contact"}</ListGroup.Item>
+                  <ListGroup.Item key={owner.id}><b>Owner: </b>{owner.first_name} {owner.last_name}
+                    <OverlayTrigger
+                      key={"owner-details"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-owner-details`}>
+                          Owner details
+                        </Tooltip>
+                      }
+                    >
+                      <Link href={"/hotline/owner/" + owner.id}><FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1" inverse /></Link>
+                    </OverlayTrigger>
+                    &nbsp;| {owner.display_phone||owner.email||"No Contact"}
+                  </ListGroup.Item>
                 ))}
                 {data.reporter ? <ListGroup.Item><b>Reporter: </b>{data.reporter_object.first_name} {data.reporter_object.last_name} {data.reporter_object.agency ? <span>({data.reporter_object.agency})</span> : "" } <Link href={"/hotline/reporter/" + data.reporter}><FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link><Link href={"/hotline/reporter/edit/" + data.reporter}> <FontAwesomeIcon icon={faEdit} size="sm" inverse /></Link></ListGroup.Item> : ""}
               </ListGroup>
@@ -186,7 +223,19 @@ export function ServiceRequestView({id}) {
           <Card className="mb-2 border rounded" style={{width:"100%"}}>
             <Card.Body>
               <Card.Title>
-                <h4 className="mb-0">Animals<Link href={"/hotline/animal/new?servicerequest_id=" + id}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link></h4>
+                <h4 className="mb-0">Animals
+                  <OverlayTrigger
+                    key={"add-animal"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-add-animal`}>
+                        Add animal
+                      </Tooltip>
+                    }
+                  >
+                    <Link href={"/hotline/animal/new?servicerequest_id=" + id}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
+                  </OverlayTrigger>
+                </h4>
               </Card.Title>
               <hr style={{marginBottom:"-2px"}} />
               <span className="d-flex flex-wrap align-items-end">
@@ -195,8 +244,17 @@ export function ServiceRequestView({id}) {
                   <ReactImageFallback style={{width:"151px"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} />
                   <Card.Text className="text-center mb-0">
                     {animal.name||"Unknown"}
-                    <Link href={"/animals/" + animal.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
-                    <Link href={"/animals/edit/" + animal.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
+                    <OverlayTrigger
+                      key={"animal-details"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-animal-details`}>
+                          Animal details
+                        </Tooltip>
+                      }
+                    >
+                      <Link href={"/animals/" + animal.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
+                    </OverlayTrigger>
                   </Card.Text>
                   <Card.Text className="text-center mb-0">
                     {animal.status}
@@ -223,7 +281,29 @@ export function ServiceRequestView({id}) {
               <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
                 {data.visit_notes.map(visit_note => (
                   <ListGroup.Item key={visit_note.id}>
-                    <b>Evacuation Assignment:</b> #{visit_note.evac_assignment} <Link href={"/evac/summary/" + visit_note.evac_assignment}><FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link><Link href={"/evac/assignment/note/" + visit_note.id}> <FontAwesomeIcon icon={faEdit} size="sm" inverse /></Link>
+                    <b>Dispatch Assignment:</b> #{visit_note.evac_assignment}
+                    <OverlayTrigger
+                      key={"dispatch-summary"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-dispatch-summary`}>
+                          Dispatch Assignment Summary
+                        </Tooltip>
+                      }
+                    >
+                      <Link href={"/evac/summary/" + visit_note.evac_assignment}><FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1" inverse /></Link>
+                    </OverlayTrigger>
+                    <OverlayTrigger
+                      key={"edit-visit-note"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-edit-visit-note`}>
+                          Update visit note
+                        </Tooltip>
+                      }
+                    >
+                      <Link href={"/evac/assignment/note/" + visit_note.id}> <FontAwesomeIcon icon={faEdit} size="sm" inverse /></Link>
+                    </OverlayTrigger>
                     <div className="mt-1"><b>Date Completed:</b> <Moment format="LL">{visit_note.date_completed}</Moment>
                       {visit_note.forced_entry ?
                         <OverlayTrigger

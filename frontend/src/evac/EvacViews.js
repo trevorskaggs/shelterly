@@ -5,8 +5,9 @@ import { Form, Formik } from 'formik';
 import { Button, Card, Col, FormCheck, ListGroup, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBandAid, faBullseye, faCar, faClipboardList, faEdit, faIgloo, faQuestionCircle, faShieldAlt, faTrailer
+  faBandAid, faBullseye, faCar, faClipboardList, faEdit, faIgloo, faQuestionCircle, faTrailer
 } from '@fortawesome/free-solid-svg-icons';
+import { faBadgeSheriff } from '@fortawesome/pro-solid-svg-icons';
 import { Circle, CircleMarker, Map, TileLayer, Tooltip as MapTooltip, useLeaflet } from "react-leaflet";
 import L from "leaflet";
 import shield from "../static/images/shield-alt-solid.png";
@@ -441,7 +442,7 @@ export function Dispatch() {
                       </Tooltip>
                     }
                   >
-                    <FontAwesomeIcon icon={faShieldAlt} className="ml-1"/>
+                    <FontAwesomeIcon icon={faBadgeSheriff} className="ml-1"/>
                   </OverlayTrigger>
                   : ""}
                   {service_request.injured ?
