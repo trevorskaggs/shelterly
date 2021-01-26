@@ -5,7 +5,7 @@ import { Form, Formik } from 'formik';
 import { Button, Card, Col, FormCheck, ListGroup, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBandAid, faBullseye, faCar, faClipboardList, faEdit, faIgloo, faQuestionCircle, faTrailer
+  faBandAid, faBullseye, faCar, faClipboardList, faEdit, faExclamationCircle, faIgloo, faQuestionCircle, faTrailer
 } from '@fortawesome/free-solid-svg-icons';
 import { faBadgeSheriff } from '@fortawesome/pro-solid-svg-icons';
 import { Circle, CircleMarker, Map, TileLayer, Tooltip as MapTooltip, useLeaflet } from "react-leaflet";
@@ -125,6 +125,9 @@ export function Dispatch() {
       if (size === 'pony' && count > 1) {
         size_and_species = 'ponies'
       }
+      if (size === 'unknown') {
+        size_and_species = 'horse' + plural
+      }
       else {
         size_and_species = size + plural;
       }
@@ -218,10 +221,10 @@ export function Dispatch() {
             const matches = total_matches[0];
             const status_matches = total_matches[1];
             let color = 'yellow';
-            if (service_request.has_reported_animals) {
+            if (service_request.reported_animals.length) {
               color = 'red';
             }
-            map_dict[service_request.id] = {color:color, checked:false, hidden:false, matches:matches, status_matches:status_matches, radius:"disabled", has_reported_animals:service_request.has_reported_animals, latitude:service_request.latitude, longitude:service_request.longitude};
+            map_dict[service_request.id] = {color:color, checked:false, hidden:false, matches:matches, status_matches:status_matches, radius:"disabled", has_reported_animals:service_request.reported_animals > 0, latitude:service_request.latitude, longitude:service_request.longitude};
           }
           bounds.push([service_request.latitude, service_request.longitude]);
         }
@@ -270,7 +273,19 @@ export function Dispatch() {
         <Row className="d-flex flex-wrap" style={{marginTop:"10px", marginRight:"-7px"}}>
           <Col xs={2} className="border rounded" style={{marginLeft:"-5px", marginRight:"5px"}}>
             <div className="card-header border rounded mt-3 text-center" style={{paddingRight:"15px", paddingLeft:"15px"}}>
-              <p className="mb-2" style={{marginTop:"-5px"}}>Reported</p>
+              <p className="mb-2" style={{marginTop:"-5px"}}>Reported
+                <OverlayTrigger
+                  key={"selected-reported"}
+                  placement="top"
+                  overlay={
+                    <Tooltip id={`tooltip-selected-reported`}>
+                      Reported
+                    </Tooltip>
+                  }
+                >
+                  <FontAwesomeIcon icon={faExclamationCircle} className="ml-1"/>
+                </OverlayTrigger>
+              </p>
               <hr className="mt-1 mb-1"/>
               {Object.keys(totalSelectedState["REPORTED"]).map(key => (
                 <div key={key} style={{textTransform:"capitalize", marginTop:"5px", marginBottom:"-5px"}}>{prettyText(key.split(',')[1], key.split(',')[0], totalSelectedState["REPORTED"][key])}</div>
@@ -350,6 +365,7 @@ export function Dispatch() {
                       {service_request.followup_date ? <div>Followup Date: <Moment format="L">{service_request.followup_date}</Moment></div> : ""}
                       <div>
                         {service_request.aco_required ? <img width={16} height={16} src={shield} alt="" className="mr-1" /> : ""}
+                        <i class="fas fa-id-badge"></i>
                         {service_request.injured ? <img width={16} height={16} src={bandaid} alt="" className="mr-1" /> : ""}
                         {service_request.accessible ? <img width={16} height={16} src={car} alt="" className="mr-1" /> : ""}
                         {service_request.turn_around ? <img width={16} height={16} src={trailer} alt="" /> : ""}
@@ -406,6 +422,19 @@ export function Dispatch() {
                     ))}
                   </span>
                   :""}
+                  {service_request.reported_animals > 0 ?
+                  <OverlayTrigger
+                    key={"reported"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-reported`}>
+                        {service_request.reported_animals} animal{service_request.reported_animals > 1 ? "s are":" is"} reported
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon icon={faExclamationCircle} className="ml-1"/>
+                  </OverlayTrigger>
+                  : ""}
                   {service_request.sheltered_in_place > 0 ?
                   <OverlayTrigger
                     key={"sip"}
@@ -485,8 +514,28 @@ export function Dispatch() {
                   </OverlayTrigger>
                   : ""}
                   <span className="ml-2">| &nbsp;{service_request.full_address}</span>
-                  <FontAwesomeIcon icon={faBullseye} className="ml-1" onClick={() => handleRadius(service_request.id)} />
-                  <Link href={"/hotline/servicerequest/" + service_request.id} target="_blank"> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
+                  <OverlayTrigger
+                    key={"radius-toggle"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-radius-toggle`}>
+                        Toggle 1 mile radius
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon icon={faBullseye} color={mapState[service_request.id].radius === "enabled" ? "red" : ""} className="ml-1 mr-1" style={{cursor:'pointer'}} onClick={() => handleRadius(service_request.id)} />
+                  </OverlayTrigger>
+                  <OverlayTrigger
+                    key={"request-details"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-request-details`}>
+                        Service request details
+                      </Tooltip>
+                    }
+                  >
+                    <Link href={"/hotline/servicerequest/" + service_request.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} inverse /></Link>
+                  </OverlayTrigger>
                 </div>
               </div>
               : ""}

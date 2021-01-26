@@ -458,31 +458,27 @@ export const VisitNoteForm = ({ id }) => {
             <Form>
               <FormGroup>
                 <Row>
-                  <Col xs={{ size: 2 }}>
-                    <DateTimePicker
-                      label="Date Completed"
-                      name="date_completed"
-                      id="date_completed"
-                      xs="7"
-                      clearable={false}
-                      onChange={(date, dateStr) => {
-                        form.setFieldValue("date_completed", dateStr)
-                      }}
-                      value={form.values.date_completed || null}
-                    />
-                  </Col>
+                  <DateTimePicker
+                    label="Date Completed"
+                    name="date_completed"
+                    id="date_completed"
+                    xs="7"
+                    clearable={false}
+                    onChange={(date, dateStr) => {
+                      form.setFieldValue("date_completed", dateStr)
+                    }}
+                    value={form.values.date_completed || null}
+                  />
                 </Row>
-                <Row>
-                  <Col xs={{ size: 2 }}>
-                    <TextInput
-                      as="textarea"
-                      label="Notes"
-                      name="notes"
-                      id="notes"
-                      xs="7"
-                      rows={5}
-                    />
-                  </Col>
+                <Row className="mt-3 pl-0">
+                  <TextInput
+                    as="textarea"
+                    label="Notes"
+                    name="notes"
+                    id="notes"
+                    xs="7"
+                    rows={5}
+                  />
                 </Row>
                 <Row>
                   <Col>

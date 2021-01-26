@@ -108,23 +108,74 @@ export function ServiceRequestSearch() {
 
       {data.service_requests.map((service_request, index) => (
         <div key={service_request.id} className="mt-3" hidden={page!= Math.ceil((index+1)/ITEMS_PER_PAGE)}>
-          <div className="card-header"><h4 style={{marginBottom:"-2px"}}>{service_request.full_address}<Link href={"/hotline/servicerequest/" + service_request.id} target="_blank"> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>&nbsp;| <span style={{textTransform:"capitalize"}}>{service_request.status}</span></h4></div>
+          <div className="card-header">
+            <h4 style={{marginBottom:"-2px"}}>{service_request.full_address}
+              <OverlayTrigger
+                key={"request-details"}
+                placement="top"
+                overlay={
+                  <Tooltip id={`tooltip-request-details`}>
+                    Service request details
+                  </Tooltip>
+                }
+              >
+                <Link href={"/hotline/servicerequest/" + service_request.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+              </OverlayTrigger>
+              &nbsp;| <span style={{textTransform:"capitalize"}}>{service_request.status}</span>
+            </h4>
+          </div>
           <CardGroup>
             <Card key={service_request.id}>
               <Card.Body>
                 <Card.Title>Information</Card.Title>
                 <ListGroup>
                   {service_request.owners.map(owner => (
-                    <ListGroup.Item key={owner.id}><b>Owner: </b>{owner.first_name} {owner.last_name} {owner.display_phone} <Link href={"/hotline/owner/" + owner.id} target="_blank"> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item>
+                    <ListGroup.Item key={owner.id}><b>Owner: </b>{owner.first_name} {owner.last_name}{owner.display_phone ? " " + owner.display_phone : ""}
+                      <OverlayTrigger
+                        key={"owner-details"}
+                        placement="top"
+                        overlay={
+                          <Tooltip id={`tooltip-owner-details`}>
+                            Owner details
+                          </Tooltip>
+                        }
+                      >
+                        <Link href={"/hotline/owner/" + owner.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+                      </OverlayTrigger>
+                    </ListGroup.Item>
                   ))}
                   {service_request.owners.length < 1 ? <ListGroup.Item><b>Owner: </b>No Owner</ListGroup.Item> : ""}
-                  {service_request.reporter ? <ListGroup.Item><b>Reporter: </b>{service_request.reporter_object.first_name} {service_request.reporter_object.last_name} {service_request.reporter_object.display_phone} {service_request.reporter_object.agency ? <span> ({service_request.reporter_object.agency})</span> : ""} <Link href={"/hotline/reporter/" + service_request.reporter} target="_blank"> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item> : ""}
+                  {service_request.reporter ?
+                    <ListGroup.Item><b>Reporter: </b>{service_request.reporter_object.first_name} {service_request.reporter_object.last_name}{service_request.reporter_object.agency ? <span>&nbsp;({service_request.reporter_object.agency})</span> : ""}{service_request.reporter_object.display_phone ? " " + service_request.reporter_object.display_phone : ""}
+                      <OverlayTrigger
+                        key={"reporter-details"}
+                        placement="top"
+                        overlay={
+                          <Tooltip id={`tooltip-reporter-details`}>
+                            Reporter details
+                          </Tooltip>
+                        }
+                      >
+                        <Link href={"/hotline/reporter/" + service_request.reporter} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+                      </OverlayTrigger>
+                    </ListGroup.Item> : ""}
                   {service_request.evacuation_assignments.map(evacuation_assignment => (
                     <span key={evacuation_assignment.id}>
                       {evacuation_assignment.end_time ? "" :
                         <ListGroup.Item>
-                          <span><b>Dispatch Assignment </b><Link href={"/evac/summary/" + evacuation_assignment.id} target="_blank">
-                              <FontAwesomeIcon icon={faClipboardList} inverse/></Link>
+                          <span>
+                            <b>Dispatch Assignment </b>
+                            <OverlayTrigger
+                              key={"dispatch-assignment-summary"}
+                              placement="top"
+                              overlay={
+                                <Tooltip id={`tooltip-dispatch-assignment-summary`}>
+                                  Dispatch assignment summary
+                                </Tooltip>
+                              }
+                            >
+                              <Link href={"/evac/summary/" + evacuation_assignment.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} inverse/></Link>
+                            </OverlayTrigger>
                             <div>
                             <b>Opened: </b>{moment(evacuation_assignment.start_time).format('lll')} |
                               <Link href={"/evac/resolution/" + evacuation_assignment.id}

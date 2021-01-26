@@ -24,7 +24,7 @@ class SimpleServiceRequestSerializer(serializers.ModelSerializer):
 
     full_address = serializers.SerializerMethodField()
     visit_notes = VisitNoteSerializer(source='visitnote_set', many=True, required=False, read_only=True)
-    has_reported_animals = serializers.SerializerMethodField()
+    reported_animals = serializers.SerializerMethodField()
     sheltered_in_place = serializers.SerializerMethodField()
     unable_to_locate = serializers.SerializerMethodField()
     aco_required = serializers.SerializerMethodField(read_only=True)
@@ -48,14 +48,12 @@ class SimpleServiceRequestSerializer(serializers.ModelSerializer):
             return obj.animal_set.filter(Q(aggressive='yes')|Q(species='other')).exists()
 
     # Custom field for determining if an SR contains REPORTED animals.
-    def get_has_reported_animals(self, obj):
+    def get_reported_animals(self, obj):
         # Performs list comp. on prefetched queryset of animals for this SR to avoid hitting db again.
         try:
-            return bool([animal for animal in obj.animals if animal.status == 'REPORTED'])
+            return len([animal for animal in obj.animals if animal.status == 'REPORTED'])
         except AttributeError:
-            # Not sure how to override queryset return from create, so just 
-            # deal w/ the extra query in that case
-            return obj.animal_set.filter(status='REPORTED').exists()
+            return obj.animal_set.filter(status='REPORTED').count()
 
     # Custom field for determining that count of SHELTERED IN PLACE animals.
     def get_sheltered_in_place(self, obj):

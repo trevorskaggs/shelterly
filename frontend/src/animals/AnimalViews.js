@@ -264,7 +264,20 @@ export function AnimalView({id}) {
                   </OverlayTrigger>
                 &nbsp;| {owner.display_phone||owner.email||"No Contact"}</ListGroup.Item>
               ))}
-              {data.reporter ? <ListGroup.Item><b>Reporter: </b>{data.reporter_object.first_name} {data.reporter_object.last_name} <Link href={"/hotline/reporter/" + data.reporter}><FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link><Link href={"/hotline/reporter/edit/" + data.reporter}> <FontAwesomeIcon icon={faEdit} size="sm" inverse /></Link></ListGroup.Item> : ""}
+              {data.reporter ?
+              <ListGroup.Item><b>Reporter: </b>{data.reporter_object.first_name} {data.reporter_object.last_name}
+                <OverlayTrigger
+                  key={"reporter-details"}
+                  placement="top"
+                  overlay={
+                    <Tooltip id={`tooltip-reporter-details`}>
+                      Reporter details
+                    </Tooltip>
+                  }
+                >
+                  <Link href={"/hotline/reporter/" + data.reporter}><FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1" inverse /></Link>
+                </OverlayTrigger>
+              </ListGroup.Item> : ""}
               {data.owners.length < 1 && !data.reporter ? <ListGroup.Item>No Contacts</ListGroup.Item> : ""}
             </ListGroup>
             <hr/>

@@ -212,7 +212,20 @@ export function ServiceRequestView({id}) {
                     &nbsp;| {owner.display_phone||owner.email||"No Contact"}
                   </ListGroup.Item>
                 ))}
-                {data.reporter ? <ListGroup.Item><b>Reporter: </b>{data.reporter_object.first_name} {data.reporter_object.last_name} {data.reporter_object.agency ? <span>({data.reporter_object.agency})</span> : "" } <Link href={"/hotline/reporter/" + data.reporter}><FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link><Link href={"/hotline/reporter/edit/" + data.reporter}> <FontAwesomeIcon icon={faEdit} size="sm" inverse /></Link></ListGroup.Item> : ""}
+                {data.reporter ?
+                <ListGroup.Item><b>Reporter: </b>{data.reporter_object.first_name} {data.reporter_object.last_name} {data.reporter_object.agency ? <span>({data.reporter_object.agency})</span> : "" }
+                <OverlayTrigger
+                  key={"reporter-details"}
+                  placement="top"
+                  overlay={
+                    <Tooltip id={`tooltip-reporter-details`}>
+                      Reporter details
+                    </Tooltip>
+                  }
+                >
+                  <Link href={"/hotline/reporter/" + data.reporter}><FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1" inverse /></Link>
+                </OverlayTrigger>
+                </ListGroup.Item> : ""}
               </ListGroup>
             </Card.Body>
           </Card>
@@ -287,7 +300,7 @@ export function ServiceRequestView({id}) {
                       placement="top"
                       overlay={
                         <Tooltip id={`tooltip-dispatch-summary`}>
-                          Dispatch Assignment Summary
+                          Dispatch assignment summary
                         </Tooltip>
                       }
                     >
