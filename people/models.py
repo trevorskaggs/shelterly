@@ -27,7 +27,6 @@ class OwnerContact(models.Model):
     owner = models.ForeignKey(Person, on_delete=models.CASCADE)
     owner_contact_time = models.DateTimeField()
     owner_contact_note = models.TextField(blank=False)
-    animal = models.ForeignKey('animals.Animal', blank=True, null=True, on_delete=models.CASCADE)
 
 class PersonChange(models.Model):
     user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)

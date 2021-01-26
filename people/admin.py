@@ -4,7 +4,7 @@ from people.models import OwnerContact, Person, PersonChange
 
 class OwnerContactAdmin(admin.ModelAdmin):
 
-    list_display = ('owner_contact_time', 'owner', 'animal', 'owner_contact_note')
+    list_display = ('owner_contact_time', 'owner', 'owner_contact_note')
 
 from people.models import Person, PersonChange
 

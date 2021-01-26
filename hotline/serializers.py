@@ -104,17 +104,12 @@ class SimpleEvacAssignmentSerializer(serializers.ModelSerializer):
 class ServiceRequestSerializer(SimpleServiceRequestSerializer):
     from people.serializers import SimplePersonSerializer
 
-    # Custom field to get Evacuation Assignments.
-    # def get_evacuation_assignments(self, obj):
-    #     return obj.evacuation_assignments.filter(service_requests=obj).values()
-
     action_history = serializers.SerializerMethodField()
     assigned_evac = serializers.SerializerMethodField()
     owners = SimplePersonSerializer(source='owner', many=True, required=False, read_only=True)
     reporter_object = SimplePersonSerializer(source='reporter', required=False, read_only=True)
     animals = SimpleAnimalSerializer(many=True, read_only=True)
     evacuation_assignments = SimpleEvacAssignmentSerializer(many=True, required=False, read_only=True)
-
 
     def __init__(self, *args, **kwargs):
     
