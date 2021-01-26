@@ -535,7 +535,7 @@ export function EvacSummary({id}) {
   return (
     <>
     <Header>Dispatch Assignment Summary | {data.end_time ? <span>Closed <Link href={"/evac/resolution/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link></span> : <Link href={"/evac/resolution/" + id} className="btn btn-danger ml-1 mb-2" style={{paddingTop:"10px", paddingBottom:"10px"}}>Close</Link>}
-    <div style={{fontSize:"18px", marginTop:"14px"}}><b>Opened: </b><Moment format="lll">{data.start_time}</Moment>{data.end_time ? <span style={{fontSize:"16px", marginTop:"5px"}}> | <b>Closed: </b><Moment format="lll">{data.end_time}</Moment></span> : ""}</div>
+    <div style={{fontSize:"18px", marginTop:"14px"}}><b>Opened: </b><Moment format="MMMM Do YYYY, HH:mm">{data.start_time}</Moment>{data.end_time ? <span style={{fontSize:"16px", marginTop:"5px"}}> | <b>Closed: </b><Moment fformat="MMMM Do YYYY, HH:mm:ss">{data.end_time}</Moment></span> : ""}</div>
     </Header>
     <hr/>
     <Card border="secondary" className="mt-1">
