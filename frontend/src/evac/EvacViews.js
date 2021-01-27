@@ -5,15 +5,18 @@ import { Form, Formik } from 'formik';
 import { Button, Card, Col, FormCheck, ListGroup, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBandAid, faBullseye, faCar, faClipboardList, faEdit, faExclamationCircle, faIgloo, faQuestionCircle, faTrailer
+  faBandAid, faBullseye, faCar, faCircle, faClipboardList, faEdit, faExclamationCircle, faQuestionCircle, faTrailer
 } from '@fortawesome/free-solid-svg-icons';
-import { faBadgeSheriff } from '@fortawesome/pro-solid-svg-icons';
+import { faBadgeSheriff, faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
 import { Circle, CircleMarker, Map, TileLayer, Tooltip as MapTooltip, useLeaflet } from "react-leaflet";
 import L from "leaflet";
-import shield from "../static/images/shield-alt-solid.png";
+import badge from "../static/images/badge-sheriff.png";
 import bandaid from "../static/images/band-aid-solid.png";
 import car from "../static/images/car-solid.png";
 import trailer from "../static/images/trailer-solid.png";
+import reported from "../static/images/exclamation-circle.png";
+import sip from "../static/images/house-circle.png";
+import utl from "../static/images/question-circle.png";
 import { Typeahead } from 'react-bootstrap-typeahead';
 import Moment from 'react-moment';
 import Header from '../components/Header';
@@ -221,7 +224,7 @@ export function Dispatch() {
             const matches = total_matches[0];
             const status_matches = total_matches[1];
             let color = 'yellow';
-            if (service_request.reported_animals.length) {
+            if (service_request.reported_animals > 0) {
               color = 'red';
             }
             map_dict[service_request.id] = {color:color, checked:false, hidden:false, matches:matches, status_matches:status_matches, radius:"disabled", has_reported_animals:service_request.reported_animals > 0, latitude:service_request.latitude, longitude:service_request.longitude};
@@ -302,7 +305,10 @@ export function Dispatch() {
                     </Tooltip>
                   }
                 >
-                  <FontAwesomeIcon icon={faIgloo} className="ml-1"/>
+                  <span className="fa-layers fa-fw ml-1">
+                    <FontAwesomeIcon icon={faCircle} transform={'grow-1'} />
+                    <FontAwesomeIcon icon={faHomeAlt} style={{color:"#444"}} transform={'shrink-3'} size="sm" inverse />
+                  </span>
                 </OverlayTrigger>
               </p>
               <hr className="mt-1 mb-1"/>
@@ -364,8 +370,10 @@ export function Dispatch() {
                       {service_request.full_address}
                       {service_request.followup_date ? <div>Followup Date: <Moment format="L">{service_request.followup_date}</Moment></div> : ""}
                       <div>
-                        {service_request.aco_required ? <img width={16} height={16} src={shield} alt="" className="mr-1" /> : ""}
-                        <i class="fas fa-id-badge"></i>
+                        {service_request.reported_animals > 0 ? <img width={16} height={16} src={reported} alt="" /> : ""}
+                        {service_request.sheltered_in_place > 0 ? <img width={16} height={16} src={sip} alt="" /> : ""}
+                        {service_request.unable_to_locate > 0 ? <img width={16} height={16} src={utl} alt="" /> : ""}
+                        {service_request.aco_required ? <img width={16} height={16} src={badge} alt="" className="mr-1" /> : ""}
                         {service_request.injured ? <img width={16} height={16} src={bandaid} alt="" className="mr-1" /> : ""}
                         {service_request.accessible ? <img width={16} height={16} src={car} alt="" className="mr-1" /> : ""}
                         {service_request.turn_around ? <img width={16} height={16} src={trailer} alt="" /> : ""}
@@ -445,7 +453,10 @@ export function Dispatch() {
                       </Tooltip>
                     }
                   >
-                    <FontAwesomeIcon icon={faIgloo} className="ml-1"/>
+                    <span className="fa-layers fa-fw ml-1">
+                      <FontAwesomeIcon icon={faCircle} transform={'grow-1'} />
+                      <FontAwesomeIcon icon={faHomeAlt} style={{color:"#444"}} transform={'shrink-3'} size="sm" inverse />
+                    </span>
                   </OverlayTrigger>
                   : ""}
                   {service_request.unable_to_locate > 0 ?
