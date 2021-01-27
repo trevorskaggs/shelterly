@@ -94,7 +94,7 @@ export function ShelterDetails({id}) {
                         <Link href={"/shelter/room/" + room.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
                       </Card.Text>
                       <Card.Text className="text-center mb-0">
-                        {room.animals.length} Animals
+                        {room.animal_count} Animals
                       </Card.Text>
                     </Card>
                   ))}
@@ -207,7 +207,7 @@ export function BuildingDetailsTable({id}) {
                 <Link href={"/shelter/room/edit/" + room.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
               </Card.Text>
               <Card.Text className="text-center mb-0">
-                {room.animals.length} Animals
+                {room.animal_count} Animals
               </Card.Text>
             </Card>
           ))}
