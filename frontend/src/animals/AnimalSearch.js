@@ -128,7 +128,7 @@ export function AnimalSearch() {
               <Card.Body>
                 <Card.Title>Related Information</Card.Title>
                 <ListGroup>
-                  {animal.request ? <ListGroup.Item className='request'><b>Service Request: </b>{animal.request_address} <Link href={"/hotline/servicerequest/" + animal.request} target="_blank"> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item> : <ListGroup.Item><b>Service Request: </b>No Service Request</ListGroup.Item>}
+                  {animal.request ? <ListGroup.Item className='request'><b>Service Request: </b>{animal.request_address} <Link href={"/hotline/servicerequest/" + animal.request} target="_blank"> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item> : ""}
                   {animal.shelter ? <span>
                     <ListGroup.Item><b>Shelter: </b>{animal.shelter_name} <Link href={"/shelter/" + animal.shelter} target="_blank"> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item>
                     <ListGroup.Item><b>Address: </b>{animal.full_address}</ListGroup.Item></span> : 
