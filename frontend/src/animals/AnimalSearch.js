@@ -90,7 +90,19 @@ export function AnimalSearch() {
       </Form>
       {data.animals.map(animal => (
         <div key={animal.id} className="mt-3">
-          <div className="card-header"><h4 style={{marginBottom:"-2px"}}>{animal.name ? titleCase(animal.name) : "Unknown"} <Link href={"/animals/" + animal.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} inverse /></Link> | {titleCase(animal.status)}</h4></div>
+          <div className="card-header"><h4 style={{marginBottom:"-2px"}}>{animal.name ? titleCase(animal.name) : "Unknown"}
+          <OverlayTrigger
+            key={"animal-details"}
+            placement="top"
+            overlay={
+              <Tooltip id={`tooltip-animal-details`}>
+                Animal details
+              </Tooltip>
+            }
+          >
+            <Link href={"/animals/" + animal.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+          </OverlayTrigger>
+          &nbsp;| {titleCase(animal.status)}</h4></div>
           <CardGroup>
             <Card key={animal.id} style={{maxWidth:"196px"}}>
               <Card.Body className="p-0 m-0">
@@ -117,9 +129,33 @@ export function AnimalSearch() {
                 <ListGroup>
                   <ListGroup.Item>{titleCase(animal.species)}{animal.sex ? <span>, {titleCase(animal.sex)}</span> : ""}{animal.age ? <span>, {titleCase(animal.age)}</span> : ""}{animal.size ? <span>, {titleCase(animal.size)}</span> : ""}</ListGroup.Item>
                   {animal.owners.map(owner => (
-                    <ListGroup.Item key={owner.id}><b>Owner:</b> {owner.first_name} {owner.last_name} {owner.display_phone} <Link href={"/hotline/owner/" + owner.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item>
+                    <ListGroup.Item key={owner.id}><b>Owner:</b> {owner.first_name} {owner.last_name} {owner.display_phone}
+                      <OverlayTrigger
+                        key={"owner-details"}
+                        placement="top"
+                        overlay={
+                          <Tooltip id={`tooltip-owner-details`}>
+                            Owner details
+                          </Tooltip>
+                        }
+                      >
+                        <Link href={"/hotline/owner/" + owner.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+                      </OverlayTrigger>
+                    </ListGroup.Item>
                   ))}
-                  {animal.owners < 1 && animal.reporter ? <ListGroup.Item><b>Reporter: </b> {animal.reporter_object.first_name} {animal.reporter_object.last_name} {animal.reporter_object.display_phone} <Link href={"/hotline/reporter/" + animal.reporter_object.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item> : ""}
+                  {animal.owners < 1 && animal.reporter ? <ListGroup.Item><b>Reporter: </b> {animal.reporter_object.first_name} {animal.reporter_object.last_name} {animal.reporter_object.display_phone}
+                  <OverlayTrigger
+                    key={"reporter-details"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-reporter-details`}>
+                        Reporter details
+                      </Tooltip>
+                    }
+                  >
+                    <Link href={"/hotline/reporter/" + animal.reporter_object.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+                  </OverlayTrigger>
+                  </ListGroup.Item> : ""}
                   {animal.owners < 1 && !animal.reporter ? <ListGroup.Item><b>Owner: </b>No Owner</ListGroup.Item> : ""}
                 </ListGroup>
               </Card.Body>
@@ -128,9 +164,34 @@ export function AnimalSearch() {
               <Card.Body>
                 <Card.Title>Related Information</Card.Title>
                 <ListGroup>
-                  {animal.request ? <ListGroup.Item className='request'><b>Service Request: </b>{animal.request_address} <Link href={"/hotline/servicerequest/" + animal.request} target="_blank"> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item> : ""}
+                  {animal.request ?
+                  <ListGroup.Item className='request'><b>Service Request: </b>{animal.request_address}
+                    <OverlayTrigger
+                      key={"service-request-details"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-service-request-details`}>
+                          Service request details
+                        </Tooltip>
+                      }
+                    >
+                      <Link href={"/hotline/servicerequest/" + animal.request} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+                    </OverlayTrigger>
+                  </ListGroup.Item> : ""}
                   {animal.shelter ? <span>
-                    <ListGroup.Item><b>Shelter: </b>{animal.shelter_name} <Link href={"/shelter/" + animal.shelter} target="_blank"> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item>
+                    <ListGroup.Item><b>Shelter: </b>{animal.shelter_name}
+                      <OverlayTrigger
+                        key={"shelter-details"}
+                        placement="top"
+                        overlay={
+                          <Tooltip id={`tooltip-shelter-details`}>
+                            Shelter details
+                          </Tooltip>
+                        }
+                      >
+                        <Link href={"/shelter/" + animal.shelter} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+                      </OverlayTrigger>
+                    </ListGroup.Item>
                     <ListGroup.Item><b>Address: </b>{animal.full_address}</ListGroup.Item></span> : 
                     <ListGroup.Item><b>Shelter: </b>No Shelter</ListGroup.Item>}
                   {animal.found_location ? 
