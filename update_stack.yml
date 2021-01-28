@@ -63,13 +63,13 @@
           logDriver: awslogs
           options:
             awslogs-group: /ecs/shelterly
-            awslogs-region: us-east-2
+            awslogs-region: us-west-2
             awslogs-stream-prefix: ecs
       launch_type: FARGATE
       cpu: "512"
       memory: "1024"
-      execution_role_arn: "arn:aws:iam::363875932628:role/ecsTaskExecutionRole"
-      task_role_arn: "arn:aws:iam::363875932628:role/ecsTaskExecutionRole"
+      execution_role_arn: ""
+      task_role_arn: ""
       state: present
       revision: '{{ task_definition_facts.revision + 1}}'
       network_mode: awsvpc
@@ -79,7 +79,7 @@
       name: shelterly
       launch_type: FARGATE
       load_balancers: 
-      - targetGroupArn: "arn:aws:elasticloadbalancing:us-east-2:363875932628:targetgroup/shelterly/2afba5e3da01e272"
+      - targetGroupArn: ""
         containerName: "shelterly"
         containerPort: "80"
       cluster: shelterly
@@ -88,11 +88,6 @@
       network_configuration:
         assign_public_ip: yes
         subnets:
-        - subnet-03a18c8e8fb91d047
-        - subnet-0d600acd5473461ab
-        - subnet-096d0390725a021d4
+
         security_groups:
-        - sg-018e52da071526267
-        - sg-02f93f3cd066a3931
-        - sg-086faa640c036bc60
-        - sg-0b78f8e3fd5fb767d
+
