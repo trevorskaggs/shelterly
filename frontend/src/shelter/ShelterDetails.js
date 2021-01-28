@@ -112,7 +112,7 @@ export function ShelterDetails({id}) {
             <Card.Body style={{marginBottom:"-15px"}}>
               <Card.Title>
                 <h4 className="mb-0">Animals Needing Room
-                <OverlayTrigger key={"assign"} placement="top" overlay={<Tooltip id={`tooltip-assign`}>Assign Animals to Rooms</Tooltip>}>
+                <OverlayTrigger key={"assign"} placement="top" overlay={<Tooltip id={`tooltip-assign`}>Assign animals to rooms</Tooltip>}>
                   <Link href={"/shelter/" + id + "/assign"}><FontAwesomeIcon className="ml-1" icon={faWarehouse} inverse/></Link>
                 </OverlayTrigger></h4>
               </Card.Title>
@@ -173,7 +173,7 @@ export function BuildingDetailsTable({id}) {
       <Card.Body>
         <Card.Title>
           <h4>Information
-            <OverlayTrigger key={"assign"} placement="top" overlay={<Tooltip id={`tooltip-assign`}>Assign Animals to Rooms</Tooltip>}>
+            <OverlayTrigger key={"assign"} placement="top" overlay={<Tooltip id={`tooltip-assign`}>Assign animals to rooms</Tooltip>}>
               <Link href={"/shelter/" + data.shelter + "/assign"}><FontAwesomeIcon className="ml-1" icon={faWarehouse} inverse/></Link>
             </OverlayTrigger>
           </h4>
@@ -251,7 +251,7 @@ export function RoomDetailsTable({id}) {
       <Card.Body>
         <Card.Title>
           <h4>Information
-            <OverlayTrigger key={"assign"} placement="top" overlay={<Tooltip id={`tooltip-assign`}>Assign Animals to Rooms</Tooltip>}>
+            <OverlayTrigger key={"assign"} placement="top" overlay={<Tooltip id={`tooltip-assign`}>Assign animals to rooms</Tooltip>}>
               <Link href={"/shelter/" + data.shelter + "/assign"}><FontAwesomeIcon className="ml-1" icon={faWarehouse} inverse/></Link>
             </OverlayTrigger>
           </h4>
