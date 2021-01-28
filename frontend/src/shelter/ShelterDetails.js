@@ -22,6 +22,8 @@ export function ShelterDetails({id}) {
     zip_code: '',
     description: '',
     image: '',
+    phone: '',
+    display_phone: '',
     buildings: [],
     action_history: [],
     unroomed_animals: [],
@@ -65,6 +67,9 @@ export function ShelterDetails({id}) {
             </ListGroup.Item>
             <ListGroup.Item>
               <b>Address:</b> {data.full_address}
+            </ListGroup.Item>
+            <ListGroup.Item>
+              <b>Phone:</b> {data.display_phone}
             </ListGroup.Item>
             {data.description ? <ListGroup.Item>
             <b>Description: </b>{data.description}

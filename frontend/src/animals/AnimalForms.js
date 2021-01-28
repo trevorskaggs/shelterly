@@ -458,7 +458,7 @@ export const AnimalForm = (props) => {
                     name="color_notes"
                     as="textarea"
                     rows={5}
-                    label="Description"
+                    label="Breed / Description"
                     xs="8"
                   />
                 </BootstrapForm.Row>
@@ -529,7 +529,7 @@ export const AnimalForm = (props) => {
                   />
                 </BootstrapForm.Row>
                 <BootstrapForm.Row>
-                  <Col xs="4">
+                  <Col xs="4" hidden={is_intake}>
                     <DropDown
                       label="Confined"
                       id="confined"
@@ -551,17 +551,19 @@ export const AnimalForm = (props) => {
                       isClearable={false}
                     />
                   </Col>
-                  <DateTimePicker
-                    label="Last Seen"
-                    name="last_seen"
-                    id="last_seen"
-                    xs="4"
-                    key={`my_unique_last_seen_select_key__${formikProps.values.last_seen}`}
-                    onChange={(date, dateStr) => {
-                      formikProps.setFieldValue("last_seen", dateStr)
-                    }}
-                    value={formikProps.values.last_seen||null}
-                  />
+                  <span hidden={is_intake}>
+                    <DateTimePicker
+                      label="Last Seen"
+                      name="last_seen"
+                      id="last_seen"
+                      xs="4"
+                      key={`my_unique_last_seen_select_key__${formikProps.values.last_seen}`}
+                      onChange={(date, dateStr) => {
+                        formikProps.setFieldValue("last_seen", dateStr)
+                      }}
+                      value={formikProps.values.last_seen||null}
+                    />
+                  </span>
                 </BootstrapForm.Row>
                 <span hidden={is_workflow}>
                 <p className="mb-0 mt-3">Image Files</p>

@@ -90,27 +90,27 @@ export const otherColorChoices = [
 export const dogAgeChoices = [
   {value:'youth', label:"Young"},
   {value:'adult', label:"Adult"},
-  {value:'elderly', label:"Elderly"},
+  {value:'senior', label:"Senior"},
 ]
 
 export const catAgeChoices = [
   {value:'kitten', label:'Kitten'},
   {value:'youth', label:'Young'},
   {value:'adult', label:'Adult'},
-  {value:'elderly', label:'Elderly'},
+  {value:'senior', label:'Senior'},
   {value:'geriatric', label:'Geriatric'},
 ]
 
 export const horseAgeChoices = [
   {value:'young', label:"Young"},
   {value:'adult', label:"Adult"},
-  {value:'elderly', label:"Elderly"},
+  {value:'senior', label:"Senior"},
 ]
 
 export const otherAgeChoices = [
   {value:'young', label:"Young"},
   {value:'adult', label:"Adult"},
-  {value:'elderly', label:"Elderly"},
+  {value:'senior', label:"Senior"},
 ]
 
 export const unknownChoices = [
