@@ -16,8 +16,9 @@ import {
 } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faClipboardList, faIgloo, faExclamationCircle, faQuestionCircle, faHome, faHelicopter, faHeart, faSkullCrossbones
+  faClipboardList, faCircle, faExclamationCircle, faQuestionCircle, faHome, faHelicopter, faHeart, faSkullCrossbones
 } from '@fortawesome/free-solid-svg-icons';
+import { faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
 import moment from "moment";
 import Header from '../components/Header';
 
@@ -204,7 +205,10 @@ export function ServiceRequestSearch() {
                       {animal.status === "SHELTERED IN PLACE" ?
                         <OverlayTrigger key={"sip"} placement="top"
                                         overlay={<Tooltip id={`tooltip-sip`}>SHELTERED IN PLACE</Tooltip>}>
-                            <FontAwesomeIcon icon={faIgloo} inverse/>
+                            <span className="fa-layers fa-fw">
+                              <FontAwesomeIcon icon={faCircle} transform={'grow-1'} />
+                              <FontAwesomeIcon icon={faHomeAlt} style={{color:"#444"}} transform={'shrink-3'} size="sm" inverse />
+                            </span>
                         </OverlayTrigger> : ""}
                       {animal.status === "REPORTED" ?
                         <OverlayTrigger key={"reported"} placement="top"
