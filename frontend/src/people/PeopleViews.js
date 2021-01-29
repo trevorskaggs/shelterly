@@ -95,7 +95,7 @@ export function PersonView({id}) {
             <hr/>
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
               {data.owner_contacts.map(owner_contact => (
-              <ListGroup.Item key={owner_contact.id}><b><Moment format="MMMM Do YYYY HH:mm">{owner_contact.owner_contact_time}</Moment></b>: {owner_contact.owner_contact_note}</ListGroup.Item>
+              <ListGroup.Item key={owner_contact.id}><b><Moment format="MMMM Do YYYY HH:mm">{owner_contact.owner_contact_time}</Moment></b><Link href={"/hotline/ownercontact/" + owner_contact.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>: {owner_contact.owner_contact_note}</ListGroup.Item>
               ))}
             </ListGroup>
           </Card.Body>
