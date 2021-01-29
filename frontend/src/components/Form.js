@@ -28,10 +28,10 @@ const DateTimePicker = ({ label, xs, clearable, ...props }) => {
   // Flatpickr options
   var options = {};
   if (props["data-enable-time"] === false) {
-    options = {allowInput:true, altInput: true, altFormat: "F j, Y", dateFormat: "M d Y H:i"}
+    options = {allowInput:true, altInput: true, altFormat: "F j, Y", dateFormat: "Y-m-d H:i"}
   }
   else {
-    options = {allowInput:true, altInput: true, altFormat: "F j, Y H:i", dateFormat: "M d Y H:i"}
+    options = {allowInput:true, altInput: true, altFormat: "F j, Y H:i", dateFormat: "Y-m-d H:i"}
   }
 
   return (

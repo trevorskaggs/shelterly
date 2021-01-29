@@ -6,6 +6,7 @@ from actstream.models import target_stream
 from animals.serializers import AnimalSerializer
 from evac.models import EvacAssignment, EvacTeamMember
 from hotline.serializers import ServiceRequestSerializer
+from people.serializers import SimplePersonSerializer
 
 from location.utils import build_action_string
 
@@ -27,8 +28,8 @@ class EvacTeamMemberSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class DispatchServiceRequestSerializer(ServiceRequestSerializer):
-    animals = AnimalSerializer(many=True, read_only=True)
 
+    animals = AnimalSerializer(many=True, read_only=True)
 
 class EvacAssignmentSerializer(serializers.ModelSerializer):
     from hotline.serializers import ServiceRequestSerializer

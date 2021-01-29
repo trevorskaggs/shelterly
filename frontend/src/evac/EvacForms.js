@@ -141,28 +141,37 @@ export function EvacResolution({ id }) {
   });
 
   const [shelters, setShelters] = useState({options: [], isFetching: false});
+  const [ownerChoices, setOwnerChoices] = useState({});
 
   // Hook for initializing data.
   useEffect(() => {
     let source = axios.CancelToken.source();
+
     const fetchEvacAssignmentData = async () => {
       // Fetch Animal data.
       await axios.get('/evac/api/evacassignment/' + id + '/', {
         cancelToken: source.token,
       })
         .then(response => {
+          let ownChoices = {}
           response.data["sr_updates"] = [];
+
           response.data.service_request_objects.forEach((service_request, index) => {
+            ownChoices[service_request.id] = []
+            service_request.owners.forEach(owner => {
+              ownChoices[service_request.id].push({value: owner.id, label: owner.first_name + ' ' + owner.last_name})
+            })
             // Use existing VisitNote to populate data if we're editing a closed Resolution.
             const visit_note = service_request.visit_notes.filter(note => String(note.evac_assignment) === String(id))[0]
             if (visit_note) {
-              response.data.sr_updates.push({ id: service_request.id, followup_date: service_request.followup_date, date_completed: visit_note.date_completed || new Date(), notes: visit_note.notes, forced_entry: visit_note.forced_entry, animals: service_request.animals.filter(animal => animal.evacuation_assignments.includes(Number(id))), owner: service_request.owner.length > 0 })
+              response.data.sr_updates.push({ id: service_request.id, followup_date: service_request.followup_date, date_completed: visit_note.date_completed || new Date(), notes: visit_note.notes, forced_entry: visit_note.forced_entry, animals: service_request.animals.filter(animal => animal.evacuation_assignments.includes(Number(id))), owner: service_request.owner.length > 0})
             }
             else {
-              response.data.sr_updates.push({ id: service_request.id, followup_date: service_request.followup_date, date_completed: new Date(), notes: '', forced_entry: false, animals: service_request.animals.filter(animal => animal.evacuation_assignments.includes(Number(id))), owner: service_request.owner.length > 0 })
+              response.data.sr_updates.push({ id: service_request.id, followup_date: service_request.followup_date, date_completed: new Date(), notes: '', forced_entry: false, animals: service_request.animals.filter(animal => animal.evacuation_assignments.includes(Number(id))), owner: service_request.owner.length > 0})
             }
           });
           setData(response.data);
+          setOwnerChoices(ownChoices);
         })
         .catch(error => {
           console.log(error.response);
@@ -216,6 +225,7 @@ export function EvacResolution({ id }) {
             date_completed: Yup.date().required('Required'),
             notes: Yup.string(),
             forced_entry: Yup.boolean(),
+            owner_contact_id: Yup.number().required('Please select the contacted owner'),
             owner_contact_note: Yup.string().when('owner', {
               is: true,
               then: Yup.string().required('The owner must be notified before resolution.')}),
@@ -358,6 +368,15 @@ export function EvacResolution({ id }) {
                   </BootstrapForm.Row>
                   {service_request.owners.length > 0 ?
                     <span>
+                         <DropDown
+                          label="Owner Contacted"
+                          id={`sr_updates.${index}.owner_contact_id`}
+                          name={`sr_updates.${index}.owner_contact_id`}
+                          type="text"
+                          options={ownerChoices[service_request.id]}
+                          value={`sr_updates.${index}.owner_contact_id`}
+                          isClearable={false}
+                        />
                       <BootstrapForm.Row className="mt-2">
                         <DateTimePicker
                           label="Owner Contact Time"

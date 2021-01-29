@@ -225,7 +225,6 @@ export function ServiceRequestForm(props) {
                     name="state"
                     id="state"
                     options={STATE_OPTIONS}
-                    value={props.values.state || ''}
                     placeholder=''
                     disabled
                   />
