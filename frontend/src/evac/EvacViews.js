@@ -15,7 +15,7 @@ import bandaid from "../static/images/band-aid-solid.png";
 import car from "../static/images/car-solid.png";
 import trailer from "../static/images/trailer-solid.png";
 import reported from "../static/images/exclamation-circle.png";
-import sip from "../static/images/question-circle.png";
+import sip from "../static/images/house-circle.png";
 import utl from "../static/images/question-circle.png";
 import { Typeahead } from 'react-bootstrap-typeahead';
 import Moment from 'react-moment';
