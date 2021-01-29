@@ -97,6 +97,7 @@ class AnimalSerializer(SimpleAnimalSerializer):
     reporter_object = serializers.SerializerMethodField(read_only=True)
     action_history = serializers.SerializerMethodField()
     evacuation_assignments = serializers.SerializerMethodField()
+    room_name = serializers.SerializerMethodField()
 
     # Custom Owner object field that excludes animals to avoid a circular reference.
     def get_owners(self, obj):
@@ -104,6 +105,12 @@ class AnimalSerializer(SimpleAnimalSerializer):
         if obj.owner.exists():
             return SimplePersonSerializer(obj.owner, many=True).data
         return []
+
+    # Custom field to return the shelter name.
+    def get_room_name(self, obj):
+        if obj.room:
+            return obj.room.name
+        return ''
 
     # Custom Reporter object field that excludes animals to avoid a circular reference.
     def get_reporter_object(self, obj):

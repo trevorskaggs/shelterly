@@ -182,9 +182,8 @@ export function AnimalView({id}) {
               {data.last_seen ? <ListGroup.Item><b>Last Seen:</b> <Moment format="MMMM Do YYYY, HH:mm">{data.last_seen}</Moment></ListGroup.Item> : ""}
               {data.request ? <ListGroup.Item><b>Service Request: </b>{data.request_address}<Link href={"/hotline/servicerequest/" + data.request}> <FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link></ListGroup.Item>: ''}
             </ListGroup>
-            <hr/>
             <Card.Title>
-              <h4 className="mb-0">Contacts <Link href={"/hotline/owner/new?animal_id=" + id}><FontAwesomeIcon icon={faPlusSquare} size="sm" inverse /></Link></h4>
+              <h4 className="mb-0 mt-3">Contacts <Link href={"/hotline/owner/new?animal_id=" + id}><FontAwesomeIcon icon={faPlusSquare} size="sm" inverse /></Link></h4>
             </Card.Title>
             <hr/>
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
@@ -194,14 +193,14 @@ export function AnimalView({id}) {
               {data.reporter ? <ListGroup.Item><b>Reporter: </b>{data.reporter_object.first_name} {data.reporter_object.last_name} <Link href={"/hotline/reporter/" + data.reporter}><FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link><Link href={"/hotline/reporter/edit/" + data.reporter}> <FontAwesomeIcon icon={faEdit} size="sm" inverse /></Link></ListGroup.Item> : ""}
               {data.owners.length < 1 && !data.reporter ? <ListGroup.Item>No Contacts</ListGroup.Item> : ""}
             </ListGroup>
-            <hr/>
             <Card.Title>
-               <h4 className="mb-0">Location</h4>
+               <h4 className="mb-0 mt-3">Location</h4>
             </Card.Title>
             <hr/>
             <ListGroup variant="flush" style={{marginBottom:"-13px"}}>
-              {data.shelter ? <ListGroup.Item style={{marginTop:"-13px"}}><b>Shelter Name:</b> {data.shelter_name}<Link href={"/shelter/" + data.shelter}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item> : ""}
-              <ListGroup.Item style={{marginTop:"-13px"}}><b>{data.room ? "Shelter " : ""}Address:</b> {data.full_address}</ListGroup.Item>
+              {data.shelter ? <ListGroup.Item style={{marginTop:"-13px"}}><b>Shelter:</b> {data.shelter_name}<Link href={"/shelter/" + data.shelter}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item> : ""}
+              <ListGroup.Item style={{marginTop:"-13px"}}><b>Address:</b> {data.full_address || "Unknown"}</ListGroup.Item>
+              {data.room ? <ListGroup.Item style={{marginTop:"-13px"}}><b>Room:</b> {data.room_name}<Link href={"/shelter/room" + data.room}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item> : ""}
               {data.found_location ? 
               <ListGroup.Item><b>Found Location: </b>{data.found_location}</ListGroup.Item>:
               ""}

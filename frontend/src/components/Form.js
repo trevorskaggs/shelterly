@@ -36,7 +36,7 @@ const DateTimePicker = ({ label, xs, clearable, ...props }) => {
 
   return (
     <>
-      <Form.Group as={Col} xs={xs} className="mb-0">
+      <Form.Group as={Col} xs={xs} hidden={props.hidden} className="mb-0">
       <label htmlFor={props.id || props.name}>{label}</label>
       <span className="d-flex">
         <Flatpickr className="datetime_picker" ref={datetime} data-enable-time options={options} {...field} {...props} />
