@@ -179,7 +179,7 @@ export function AnimalView({id}) {
                   <span className="col-6"><b>Size:</b> {data.size}</span>
                 </div>
               </ListGroup.Item>
-              {data.last_seen ? <ListGroup.Item><b>Last Seen:</b> <Moment format="LLL">{data.last_seen}</Moment></ListGroup.Item> : ""}
+              {data.last_seen ? <ListGroup.Item><b>Last Seen:</b> <Moment format="MMMM Do YYYY, HH:mm">{data.last_seen}</Moment></ListGroup.Item> : ""}
               {data.request ? <ListGroup.Item><b>Service Request: </b>{data.request_address}<Link href={"/hotline/servicerequest/" + data.request}> <FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link></ListGroup.Item>: ''}
             </ListGroup>
             <hr/>
@@ -235,6 +235,7 @@ export function AnimalView({id}) {
               </ListGroup.Item>
               {data.color_notes ? <ListGroup.Item><b>Color Notes:</b> {data.color_notes}</ListGroup.Item> : ""}
               {data.behavior_notes ? <ListGroup.Item><b>Behavior Notes:</b> {data.behavior_notes}</ListGroup.Item> : ""}
+              {data.last_seen ? <ListGroup.Item><b>Last Seen:</b> <Moment format="MMMM Do YYYY, HH:mm">{data.last_seen}</Moment></ListGroup.Item> : ""}
             </ListGroup>
           </Card.Body>
         </Card>

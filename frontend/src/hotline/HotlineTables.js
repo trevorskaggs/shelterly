@@ -126,7 +126,7 @@ export function ServiceRequestSearch() {
                           <span><b>Dispatch Assignment </b><Link href={"/evac/summary/" + evacuation_assignment.id} target="_blank">
                               <FontAwesomeIcon icon={faClipboardList} inverse/></Link>
                             <div>
-                            <b>Opened: </b>{moment(evacuation_assignment.start_time).format('lll')} |
+                              <b>Opened: </b>{moment(evacuation_assignment.start_time).format="MMMM Do YYYY, HH:mm:ss"} |
                               <Link href={"/evac/resolution/" + evacuation_assignment.id}
                                 className="btn btn-danger ml-1"
                                 style={{paddingTop: "0px", paddingBottom: "0px"}} target="_blank">Close</Link>
