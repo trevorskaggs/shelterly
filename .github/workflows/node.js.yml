@@ -25,6 +25,8 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - run: npm ci
+    - run: npm config set "@fortawesome:registry" https://npm.fontawesome.com/
+    - run: npm config set "//npm.fontawesome.com/:_authToken" ${{ secrets.FA_PRO_KEY }}
     - run: npm run build --if-present
     - run: npm run test:coverage-ci
     - name: Upload coverage to Codecov
