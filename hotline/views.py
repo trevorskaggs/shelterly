@@ -55,7 +55,7 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
 
         # Status filter.
         status = self.request.query_params.get('status', '')
-        if status in ('open', 'assigned', 'closed'):
+        if status in ('open', 'assigned', 'closed', 'canceled'):
             queryset = queryset.filter(status=status).distinct()
 
         # Filter on aco_required option for the map.
