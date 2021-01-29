@@ -368,15 +368,20 @@ export function EvacResolution({ id }) {
                   </BootstrapForm.Row>
                   {service_request.owners.length > 0 ?
                     <span>
+                      <BootstrapForm.Row className="mt-3 ">
+                        <Col xs="4">
                          <DropDown
                           label="Owner Contacted"
                           id={`sr_updates.${index}.owner_contact_id`}
                           name={`sr_updates.${index}.owner_contact_id`}
                           type="text"
+                          xs="4"
                           options={ownerChoices[service_request.id]}
                           value={`sr_updates.${index}.owner_contact_id`}
                           isClearable={false}
                         />
+                        </Col>
+                      </BootstrapForm.Row>
                       <BootstrapForm.Row className="mt-2">
                         <DateTimePicker
                           label="Owner Contact Time"
