@@ -123,7 +123,7 @@ const DropDown = React.forwardRef((props, ref) => {
 
   return (
     <>
-      {props.label ? <Form.Label >{props.label}</Form.Label> : ""}
+      {props.label ? <Form.Label style={props.style}>{props.label}</Form.Label> : ""}
       <SimpleValue {...field} options={props.options}>
          {simpleProps => <Select isDisabled={props.disabled} ref={ref} styles={customStyles} isClearable={true} onBlur={updateBlur} onChange={handleOptionChange} {...props} {...simpleProps} />}
       </SimpleValue>

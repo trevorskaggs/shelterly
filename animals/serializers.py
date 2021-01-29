@@ -52,7 +52,7 @@ class SimpleAnimalSerializer(serializers.ModelSerializer):
 
     def get_front_image(self, obj):
         try:
-            return [animal_image.image.url for animal_image in obj.images if animal_image.category == 'front_image'][0]
+            return [animal_image.image.url for animal_image in obj.animalimage_set.all() if animal_image.category == 'front_image'][0]
             # change this exception
         except IndexError:
             return ''
@@ -65,7 +65,7 @@ class SimpleAnimalSerializer(serializers.ModelSerializer):
 
     def get_side_image(self, obj):
         try:
-            return [animal_image.image.url for animal_image in obj.images if animal_image.category == 'side_image'][0]
+            return [animal_image.image.url for animal_image in obj.animalimage_set.all() if animal_image.category == 'side_image'][0]
         except IndexError:
             return ''
         except AttributeError:
@@ -77,7 +77,7 @@ class SimpleAnimalSerializer(serializers.ModelSerializer):
 
     def get_extra_images(self, obj):
         try:
-            return [animal_image.image.url for animal_image in obj.images if animal_image.category == 'extra'][0]
+            return [animal_image.image.url for animal_image in obj.animalimage_set.all() if animal_image.category == 'extra']
         except IndexError:
             return ''
         except AttributeError:

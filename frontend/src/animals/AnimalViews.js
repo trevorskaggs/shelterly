@@ -200,7 +200,7 @@ export function AnimalView({id}) {
             <ListGroup variant="flush" style={{marginBottom:"-13px"}}>
               {data.shelter ? <ListGroup.Item style={{marginTop:"-13px"}}><b>Shelter:</b> {data.shelter_name}<Link href={"/shelter/" + data.shelter}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item> : ""}
               <ListGroup.Item style={{marginTop:"-13px"}}><b>Address:</b> {data.full_address || "Unknown"}</ListGroup.Item>
-              {data.room ? <ListGroup.Item style={{marginTop:"-13px"}}><b>Room:</b> {data.room_name}<Link href={"/shelter/room" + data.room}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item> : ""}
+              {data.room ? <ListGroup.Item style={{marginTop:"-13px"}}><b>Room:</b> {data.room_name}<Link href={"/shelter/room/" + data.room}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item> : ""}
               {data.found_location ? 
               <ListGroup.Item><b>Found Location: </b>{data.found_location}</ListGroup.Item>:
               ""}

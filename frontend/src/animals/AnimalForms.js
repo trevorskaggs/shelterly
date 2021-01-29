@@ -441,9 +441,9 @@ export const AnimalForm = (props) => {
                       id="pcolor"
                       name="pcolor"
                       type="text"
-                      className="mb-3"
                       key={`my_unique_pcolor_select_key__${formikProps.values.pcolor}`}
                       ref={pcolorRef}
+                      style={{marginTop:"2px"}}
                       options={colorChoices[formikProps.values.species]}
                       value={formikProps.values.pcolor||''}
                       placeholder={placeholder}
@@ -455,6 +455,7 @@ export const AnimalForm = (props) => {
                       type="text"
                       key={`my_unique_scolor_select_key__${formikProps.values.scolor}`}
                       ref={scolorRef}
+                      style={{marginTop:"23px"}}
                       options={colorChoices[formikProps.values.species]}
                       value={formikProps.values.scolor||''}
                       placeholder={placeholder}
@@ -505,17 +506,18 @@ export const AnimalForm = (props) => {
                   </Col>
                 </BootstrapForm.Row>
                 <BootstrapForm.Row>
-                  <Col xs="4">
+                  <Col xs="3">
                     <DropDown
                       label="Aggressive"
                       id="aggressive"
                       name="aggressive"
                       type="text"
-                      className="mb-3"
                       options={unknownChoices}
                       value={formikProps.values.aggressive||'unknown'}
                       isClearable={false}
                     />
+                  </Col>
+                  <Col xs="3">
                     <DropDown
                       label="Fixed"
                       id="fixed"
@@ -526,17 +528,7 @@ export const AnimalForm = (props) => {
                       isClearable={false}
                     />
                   </Col>
-                  <TextInput
-                    label="Behavior Notes"
-                    id="behavior_notes"
-                    name="behavior_notes"
-                    as="textarea"
-                    rows={5}
-                    xs="8"
-                  />
-                </BootstrapForm.Row>
-                <BootstrapForm.Row>
-                  <Col xs="4" hidden={is_intake}>
+                  <Col xs="3" hidden={is_intake}>
                     <DropDown
                       label="Confined"
                       id="confined"
@@ -547,7 +539,7 @@ export const AnimalForm = (props) => {
                       isClearable={false}
                     />
                   </Col>
-                  <Col xs="4">
+                  <Col xs="3">
                     <DropDown
                       label="Injured"
                       id="injured"
@@ -558,6 +550,18 @@ export const AnimalForm = (props) => {
                       isClearable={false}
                     />
                   </Col>
+                </BootstrapForm.Row>
+                <BootstrapForm.Row className="mt-3">
+                  <TextInput
+                    label="Behavior Notes"
+                    id="behavior_notes"
+                    name="behavior_notes"
+                    as="textarea"
+                    rows={5}
+                    xs="12"
+                  />
+                </BootstrapForm.Row>
+                <BootstrapForm.Row>
                   <DateTimePicker
                     label="Last Seen"
                     name="last_seen"
@@ -573,7 +577,7 @@ export const AnimalForm = (props) => {
                 </BootstrapForm.Row>
                 {/* Only show Shelter selection on intake and update. */}
                 <span hidden={!Boolean(id) && !is_intake}>
-                  <BootstrapForm.Row className="mt-3">
+                  <BootstrapForm.Row className={is_intake ? "" : "mt-3"}>
                     <Col xs="6">
                       <DropDown
                         label="Shelter / Room"
@@ -646,7 +650,7 @@ export const AnimalForm = (props) => {
                   </BootstrapForm.Row>
                 </span>
                 <span hidden={is_workflow}>
-                  <p className="mb-0 mt-3">Image Files</p>
+                  <p className="mb-0">Image Files</p>
                   <BootstrapForm.Row className="align-items-end">
                     {data.front_image ?
                       <span className="mt-2 ml-1 mr-3">

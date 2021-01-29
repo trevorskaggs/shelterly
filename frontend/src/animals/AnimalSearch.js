@@ -92,9 +92,9 @@ export function AnimalSearch() {
         <div key={animal.id} className="mt-3">
           <div className="card-header"><h4 style={{marginBottom:"-2px"}}>{animal.name ? titleCase(animal.name) : "Unknown"} <Link href={"/animals/" + animal.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} inverse /></Link> | {titleCase(animal.status)}</h4></div>
           <CardGroup>
-            <Card key={animal.id} style={{maxWidth:"196px"}}>
+            <Card key={animal.id}>
               <Card.Body className="p-0 m-0">
-                <ReactImageFallback style={{width:"auto", maxHeight:"196px"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} />
+                <ReactImageFallback style={{width:"196px", height:"196px", objectFit: "cover", overflow: "hidden"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} />
               </Card.Body>
             </Card>
             <Card>
