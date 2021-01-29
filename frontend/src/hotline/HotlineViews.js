@@ -24,6 +24,7 @@ export function ServiceRequestView({id}) {
   const cancelServiceRequest = () => {
     axios.patch('/hotline/api/servicerequests/' + id + '/', {status:'canceled'})
     setShowModal(false)
+    window.location.reload(false);
   }
 
   const clearDate = useCallback(() => {
@@ -80,7 +81,7 @@ export function ServiceRequestView({id}) {
   return (
     <>
       <Header>
-        Service Request<span className='btn pl-1' onClick={() => {setShowModal(true)}}><FontAwesomeIcon icon={faBan} color="red"/></span><Link href={"/hotline/servicerequest/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link> | <span style={{textTransform:"capitalize"}}>{data.status} {data.status === 'assigned' ? <Link href={"/evac/summary/" + data.assigned_evac}><FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link> : ""}</span>
+        Service Request<Link href=""><FontAwesomeIcon icon={faBan} inverse onClick={() => {setShowModal(true)}}/></Link><Link href={"/hotline/servicerequest/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse className="mb-1" /></Link> | <span style={{textTransform:"capitalize"}}>{data.status} {data.status === 'assigned' ? <Link href={"/evac/summary/" + data.assigned_evac}><FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link> : ""}</span>
       </Header>
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
