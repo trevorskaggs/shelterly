@@ -8,47 +8,47 @@ from location.utils import build_full_address, build_action_string
 class SimpleAnimalSerializer(serializers.ModelSerializer):
     full_address = serializers.SerializerMethodField()
     request_address = serializers.SerializerMethodField()
+    found_location = serializers.SerializerMethodField()
     aco_required = serializers.SerializerMethodField()
     front_image = serializers.SerializerMethodField()
     side_image = serializers.SerializerMethodField()
     extra_images = serializers.SerializerMethodField()
     shelter_name = serializers.SerializerMethodField()
-    shelter = serializers.SerializerMethodField()
+    owner_names = serializers.SerializerMethodField()
     is_stray = serializers.BooleanField(read_only=True)
 
     # Custom field for the full address.
     def get_full_address(self, obj):
         # Use the Room address first if it exists.
-        if obj.room:
-            return build_full_address(obj.room.building.shelter)
+        if obj.shelter:
+            return build_full_address(obj.shelter)
         # Then use the SR address if it exists.
         elif obj.request:
             return build_full_address(obj.request)
         # Otherwise return an empty string.
         return ''
 
-    # Custome field for request address.
+    # Custom field for request address.
     def get_request_address(self, obj):
         return build_full_address(obj.request)
 
-    # Custom field to return shelter ID.
-    def get_shelter(self, obj):
-        if obj.room:
-            return obj.room.building.shelter.id
-        return None
+    def get_found_location(self, obj):
+        return build_full_address(obj)
 
     # Custom field to return the shelter name.
     def get_shelter_name(self, obj):
-        if obj.room:
-            return obj.room.building.shelter.name
+        if obj.shelter:
+            return obj.shelter.name
         return ''
+
+    def get_owner_names(self, obj):
+        if obj.owner.exists():
+            return [person.first_name + ' ' + person.last_name for person in obj.owner.all()]
+        return []
 
     # An Animal is ACO Required if it is aggressive or "Other" species.
     def get_aco_required(self, obj):
         return (obj.aggressive or obj.species.other)
-
-    def get_action_history(self, obj):
-        return [build_action_string(action) for action in target_stream(obj)]
 
     def get_front_image(self, obj):
         try:
@@ -92,6 +92,7 @@ class SimpleAnimalSerializer(serializers.ModelSerializer):
         exclude = ['owner']
 
 class AnimalSerializer(SimpleAnimalSerializer):
+
     owners = serializers.SerializerMethodField()
     reporter_object = serializers.SerializerMethodField(read_only=True)
     action_history = serializers.SerializerMethodField()
@@ -114,10 +115,10 @@ class AnimalSerializer(SimpleAnimalSerializer):
     # Custom Evac Assignment field to avoid a circular reference.
     def get_evacuation_assignments(self, obj):
         return [ea.id for ea in obj.evacuation_assignments.all()]
+
+    def get_action_history(self, obj):
+        return [build_action_string(action) for action in obj.target_actions.all()]
     
     class Meta:
         model = Animal
         fields = '__all__'
-    
-
-

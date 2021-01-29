@@ -8,14 +8,7 @@ import { AddressLookup, DropDown, TextInput } from '../components/Form';
 import { AuthContext } from "../accounts/AccountsReducer";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft } from '@fortawesome/free-solid-svg-icons';
-
-const state_options = [{ value: 'AL', label: "AL" }, { value: 'AK', label: "AK" }, { value: 'AZ', label: "AZ" }, { value: 'AR', label: "AR" }, { value: 'CA', label: "CA" }, { value: 'CO', label: "CO" }, { value: 'CT', label: "CT" },
-{ value: 'DE', label: "DE" }, { value: 'FL', label: "FL" }, { value: 'GA', label: "GA" }, { value: 'HI', label: "HI" }, { value: 'ID', label: "ID" }, { value: 'IL', label: "IL" }, { value: 'IN', label: "IN" },
-{ value: 'IA', label: "IA" }, { value: 'KS', label: "KS" }, { value: 'KY', label: "KY" }, { value: 'LA', label: "LA" }, { value: 'ME', label: "ME" }, { value: 'MD', label: "MD" }, { value: 'MA', label: "MA" },
-{ value: 'MI', label: "MI" }, { value: 'MN', label: "MN" }, { value: 'MS', label: "MS" }, { value: 'MO', label: "MO" }, { value: 'MT', label: "MT" }, { value: 'NE', label: "NE" }, { value: 'NV', label: "NV" },
-{ value: 'NH', label: "NH" }, { value: 'NJ', label: "NJ" }, { value: 'NM', label: "NM" }, { value: 'NY', label: "NY" }, { value: 'NC', label: "NC" }, { value: 'ND', label: "ND" }, { value: 'OH', label: "OH" },
-{ value: 'OK', label: "OK" }, { value: 'PA', label: "PA" }, { value: 'RI', label: "RI" }, { value: 'SC', label: "SC" }, { value: 'SD', label: "SD" }, { value: 'TN', label: "TN" }, { value: 'TX', label: "TX" },
-{ value: 'VA', label: "VA" }, { value: "VT", label: "VT" }, { value: 'WA', label: "WA" }, { value: 'WV', label: "WV" }, { value: 'WI', label: "WI" }, { value: 'WY', label: "WY" },]
+import { STATE_OPTIONS } from '../constants'
 
 // Form for creating new owner and reporter Person objects.
 export const PersonForm = (props) => {
@@ -27,13 +20,14 @@ export const PersonForm = (props) => {
   var is_workflow = window.location.pathname.includes("workflow");
 
   // Determine if this is an owner or reporter when creating a Person.
-  var is_owner = window.location.pathname.includes("owner");
+
+  let is_owner = window.location.pathname.includes("owner")
 
   // Determine if this is an intake workflow.
-  var is_intake = window.location.pathname.includes("intake");
+  let is_intake = window.location.pathname.includes("intake")
 
   // Determine if this is a first responder when creating a Person.
-  var is_first_responder = window.location.pathname.includes("first_responder");
+  let is_first_responder = window.location.pathname.includes("first_responder")
 
   // Identify any query param data.
   const [queryParams] = useQueryParams();
@@ -220,27 +214,6 @@ export const PersonForm = (props) => {
               else if (reporter_id) {
                 navigate('/hotline/animal/new?owner_id=' + response.data.id + '&reporter_id=' + reporter_id);
               }
-              // If we're creating a person for intake, redirect to create new intake Animal with proper ID.
-              else if (is_intake) {
-                if (isOwner) {
-                  navigate('/intake/animal/new?owner_id=' + response.data.id);
-                }
-                else {
-                  navigate('/intake/animal/new?reporter_id=' + response.data.id);
-                }
-              }
-              // If we're creating an owner without a reporter ID, redirect to create new Animal with owner ID.
-              else if (isOwner) {
-                navigate('/hotline/animal/new?owner_id=' + response.data.id);
-              }
-              // If we're creating a reporter and choose to skip owner, redirect to create new Animal with reporter ID.
-              else if (skipOwner) {
-                navigate('/hotline/animal/new?reporter_id=' + response.data.id + '&first_responder=' + is_first_responder);
-              }
-              // Else create a reporter and redirect to create an owner.
-              else {
-                navigate('/hotline/owner/new?reporter_id=' + response.data.id);
-              }
             })
             .catch(error => {
               console.log(error.response);
@@ -358,7 +331,7 @@ export const PersonForm = (props) => {
                 label="State"
                 name="state"
                 id="state"
-                options={state_options}
+                options={STATE_OPTIONS}
                 value={formikProps.values.state || ''}
                 placeholder=''
                 disabled

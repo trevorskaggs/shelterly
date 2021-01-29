@@ -7,6 +7,7 @@ import Typography from '@material-ui/core/Typography';
 import { AnimalForm } from '../animals/AnimalForms';
 import { PersonForm } from '../people/PeopleForms';
 import { ServiceRequestForm } from './HotlineForms';
+import PageNotFound from "../components/PageNotFound";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -22,7 +23,10 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function getSteps() {
+function getSteps(is_intake) {
+  if (is_intake) {
+    return ['Create Contacts', 'Create Animals'];
+  }
   return ['Create Contacts', 'Create Animals', 'Create Service Request'];
 }
 
@@ -35,7 +39,7 @@ function getStepContent(step, handleStepSubmit, handleBack, state) {
     case 2:
       return <ServiceRequestForm onSubmit={handleStepSubmit} handleBack={handleBack} state={state} />;
     default:
-      return 'Unknown step';
+      return <PageNotFound/>;
   }
 }
 
@@ -83,10 +87,13 @@ export const initialData = {
 }
 
 export default function HotlineWorkflow() {
+  // Determine if this is an intake workflow.
+  let is_intake = window.location.pathname.includes("intake")
+
   const classes = useStyles();
   // The major overall step tracker.
   const [activeStep, setActiveStep] = React.useState(0);
-  const steps = getSteps();
+  const steps = getSteps(is_intake);
   // Tracks the workflow state and data.
   const [state, setState] = useState(initialData);
   // Counts number of reporter + owner

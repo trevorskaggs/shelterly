@@ -140,6 +140,8 @@ export function EvacResolution({ id }) {
     sr_updates: [],
   });
 
+  const [shelters, setShelters] = useState({options: [], isFetching: false});
+
   // Hook for initializing data.
   useEffect(() => {
     let source = axios.CancelToken.source();
@@ -167,6 +169,27 @@ export function EvacResolution({ id }) {
         });
     };
     fetchEvacAssignmentData();
+
+    const fetchShelters = () => {
+      setShelters({options: [], isFetching: true});
+      // Fetch Shelter data.
+      axios.get('/shelter/api/shelter/', {
+        cancelToken: source.token,
+      })
+      .then(response => {
+        let options = []
+        response.data.forEach(shelter => {
+          let display_name = shelter.name + ' ('+shelter.buildings.length+' buildings, ' + shelter.room_count + ' rooms, ' + shelter.animal_count + ' animals)';
+          options.push({value: shelter.id, label: display_name});
+        });
+        setShelters({options: options, isFetching: false});
+      })
+      .catch(error => {
+        console.log(error.response);
+        setShelters({options: [], isFetching: false});
+      });
+    };
+    fetchShelters();
   }, [id]);
 
   return (
@@ -187,6 +210,7 @@ export function EvacResolution({ id }) {
               Yup.object().shape({
                 id: Yup.number().required(),
                 status: Yup.string().notOneOf(['REPORTED'], 'Animal cannot remain REPORTED.'),
+                shelter: Yup.number().nullable(),
               })
             ),
             date_completed: Yup.date().required('Required'),
@@ -216,7 +240,7 @@ export function EvacResolution({ id }) {
         <>
           <BootstrapForm as={Form}>
             <Header>Dispatch Assignment Resolution | {data.end_time ? "Closed" : "Open"}
-              <div style={{ fontSize: "16px", marginTop: "5px" }}><b>Opened: </b><Moment format="lll">{data.start_time}</Moment>{data.end_time ? <span style={{ fontSize: "16px", marginTop: "5px" }}> | <b>Closed: </b><Moment format="lll">{data.end_time}</Moment></span> : ""}</div>
+              <div style={{ fontSize: "16px", marginTop: "5px" }}><b>Opened: </b><Moment format="MMMM Do YYYY, HH:mm">{data.start_time}</Moment>{data.end_time ? <span style={{ fontSize: "16px", marginTop: "5px" }}> | <b>Closed: </b><Moment format="MMMM Do YYYY, HH:mm">{data.end_time}</Moment></span> : ""}</div>
             </Header>
             <hr />
             <Card border="secondary" className="mt-3">
@@ -267,6 +291,22 @@ export function EvacResolution({ id }) {
                           </Col>
                           <span style={{ marginTop:"5px" }}><span style={{ textTransform: "capitalize" }}>{animal.name || "Unknown"}</span>&nbsp;({animal.species}) <Link href={"/animals/" + animal.id} target="_blank"> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></span>
                         </Row>
+                        {props.values && props.values.sr_updates[index] && props.values.sr_updates[index].animals[inception].status === 'SHELTERED' ?
+                        <Row>
+                          <Col xs={4} className="pl-0">
+                            <DropDown
+                              id={`sr_updates.${index}.animals.${inception}.shelter`}
+                              name={`sr_updates.${index}.animals.${inception}.shelter`}
+                              type="text"
+                              className="mt-3"
+                              options={shelters.options}
+                              value={`sr_updates.${index}.animals.${inception}.shelter`}
+                              isClearable={false}
+                              placeholder="Select Shelter..."
+                            />
+                          </Col>
+                        </Row>
+                        : ""}
                       </ListGroup.Item>
                     ))}
                   </ListGroup>

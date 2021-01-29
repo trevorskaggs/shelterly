@@ -6,7 +6,7 @@ import { Carousel } from 'react-responsive-carousel';
 import { Button, Card, Col, ListGroup, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBandAid, faClipboardList, faCut, faEdit, faHandHoldingHeart, faMinusSquare, faShieldAlt, faPlusSquare, faWarehouse,
+  faBandAid, faClipboardList, faCut, faEdit, faHandHoldingHeart, faMinusSquare, faShieldAlt, faPlusSquare, faDungeon,
 } from '@fortawesome/free-solid-svg-icons';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import Header from '../components/Header';
@@ -116,7 +116,7 @@ export function AnimalView({id}) {
                     </Tooltip>
                   }
                 >
-                  <FontAwesomeIcon icon={faWarehouse} size="sm" className="ml-1" />
+                  <FontAwesomeIcon icon={faDungeon} size="sm" className="ml-1" />
                 </OverlayTrigger> :
               ""}
               {data.fixed === 'yes' ?
@@ -179,7 +179,7 @@ export function AnimalView({id}) {
                   <span className="col-6"><b>Size:</b> {data.size}</span>
                 </div>
               </ListGroup.Item>
-              {data.last_seen ? <ListGroup.Item><b>Last Seen:</b> <Moment format="LLL">{data.last_seen}</Moment></ListGroup.Item> : ""}
+              {data.last_seen ? <ListGroup.Item><b>Last Seen:</b> <Moment format="MMMM Do YYYY, HH:mm">{data.last_seen}</Moment></ListGroup.Item> : ""}
               {data.request ? <ListGroup.Item><b>Service Request: </b>{data.request_address}<Link href={"/hotline/servicerequest/" + data.request}> <FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link></ListGroup.Item>: ''}
             </ListGroup>
             <hr/>
@@ -200,8 +200,11 @@ export function AnimalView({id}) {
             </Card.Title>
             <hr/>
             <ListGroup variant="flush" style={{marginBottom:"-13px"}}>
-              {data.room ? <ListGroup.Item style={{marginTop:"-13px"}}><b>Shelter Name:</b> {data.shelter_name}<Link href={"/shelter/" + data.shelter}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item> : ""}
+              {data.shelter ? <ListGroup.Item style={{marginTop:"-13px"}}><b>Shelter Name:</b> {data.shelter_name}<Link href={"/shelter/" + data.shelter}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item> : ""}
               <ListGroup.Item style={{marginTop:"-13px"}}><b>{data.room ? "Shelter " : ""}Address:</b> {data.full_address}</ListGroup.Item>
+              {data.found_location ? 
+              <ListGroup.Item><b>Found Location: </b>{data.found_location}</ListGroup.Item>:
+              ""}
             </ListGroup>
           </Card.Body>
         </Card>
@@ -232,6 +235,7 @@ export function AnimalView({id}) {
               </ListGroup.Item>
               {data.color_notes ? <ListGroup.Item><b>Color Notes:</b> {data.color_notes}</ListGroup.Item> : ""}
               {data.behavior_notes ? <ListGroup.Item><b>Behavior Notes:</b> {data.behavior_notes}</ListGroup.Item> : ""}
+              {data.last_seen ? <ListGroup.Item><b>Last Seen:</b> <Moment format="MMMM Do YYYY, HH:mm">{data.last_seen}</Moment></ListGroup.Item> : ""}
             </ListGroup>
           </Card.Body>
         </Card>
