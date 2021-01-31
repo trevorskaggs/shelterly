@@ -7,19 +7,16 @@ import { Button, ButtonGroup, Form as BootstrapForm } from "react-bootstrap";
 import { Card } from 'react-bootstrap';
 import * as Yup from 'yup';
 import { AuthContext } from "../accounts/AccountsReducer";
-import { TreeSelect } from 'antd';
 import {AddressLookup, DateTimePicker, DropDown, ImageUploader, TextInput} from '.././components/Form.js';
 import { catAgeChoices, dogAgeChoices, horseAgeChoices, otherAgeChoices, catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, speciesChoices, sexChoices, dogSizeChoices, catSizeChoices, horseSizeChoices, otherSizeChoices, unknownChoices } from './constants';
 import { STATE_OPTIONS } from '../constants'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft, faMinusSquare } from '@fortawesome/free-solid-svg-icons';
-import 'antd/lib/tree-select/style/css';
 import Alert from 'react-bootstrap/Alert'
 
 export const AnimalForm = (props) => {
 
   const { state } = useContext(AuthContext);
-  const { TreeNode } = TreeSelect;
   const id = props.id;
 
   // Determine if this is an intake workflow.
@@ -44,6 +41,7 @@ export const AnimalForm = (props) => {
   const ageRef = useRef(null);
   const pcolorRef = useRef(null);
   const scolorRef = useRef(null);
+  const roomRef = useRef(null);
   const ageChoices = {'':[], 'dog':dogAgeChoices, 'cat':catAgeChoices, 'horse':horseAgeChoices, 'other':otherAgeChoices}
   const colorChoices = {'':[], 'dog':dogColorChoices, 'cat':catColorChoices, 'horse':horseColorChoices, 'other':otherColorChoices}
   const sizeChoices = {'':[], 'dog':dogSizeChoices, 'cat':catSizeChoices, 'horse':horseSizeChoices, 'other':otherSizeChoices}
@@ -99,7 +97,7 @@ export const AnimalForm = (props) => {
 
   // Initial Animal data.
   const [data, setData] = useState(current_data);
-  const [shelters, setShelters] = useState({options: [], shelters: [], isFetching: false});
+  const [shelters, setShelters] = useState({options: [], shelters: [], room_options: {}, isFetching: false});
 
   const wrapperSetFrontImage = useCallback(val => {
     if (val !== 0){
@@ -165,22 +163,31 @@ export const AnimalForm = (props) => {
     }
 
     const fetchShelters = () => {
-      setShelters({options: [], shelters: [], isFetching: true});
+      setShelters({options: [], shelters: [], room_options: {}, isFetching: true});
       // Fetch Shelter data.
       axios.get('/shelter/api/shelter/', {
         cancelToken: source.token,
       })
       .then(response => {
-        let options = []
+        let options = [];
+        let room_options = {};
         response.data.forEach(shelter => {
           let display_name = shelter.name + ' ('+shelter.buildings.length+' buildings, ' + shelter.room_count + ' rooms, ' + shelter.animal_count + ' animals)';
+          // Build shelter option list.
           options.push({value: shelter.id, label: display_name});
+          room_options[shelter.id] = [];
+          shelter.buildings.forEach(building => {
+            building.rooms.forEach(room => {
+              // Build room option list identified by shelter ID.
+              room_options[shelter.id].push({value: room.id, label: room.building_name + ' - ' + room.name + ' (' + room.animals.length + ' animals)'});
+            });
+          });
         });
-        setShelters({options: options, shelters:response.data, isFetching: false});
+        setShelters({options: options, shelters:response.data, room_options:room_options, isFetching:false});
       })
       .catch(error => {
         console.log(error.response);
-        setShelters({options: [], shelters: [], isFetching: false});
+        setShelters({options: [], shelters: [], room_options: {}, isFetching: false});
       });
     };
     fetchShelters();
@@ -427,16 +434,16 @@ export const AnimalForm = (props) => {
                     hidden={id}
                   />
                 </BootstrapForm.Row>
-                <BootstrapForm.Row>
+                <BootstrapForm.Row className={id ? "mt-3" : ""}>
                   <Col xs="4">
                     <DropDown
                       label="Primary Color"
                       id="pcolor"
                       name="pcolor"
                       type="text"
-                      className="mb-3"
                       key={`my_unique_pcolor_select_key__${formikProps.values.pcolor}`}
                       ref={pcolorRef}
+                      style={{marginTop:"2px"}}
                       options={colorChoices[formikProps.values.species]}
                       value={formikProps.values.pcolor||''}
                       placeholder={placeholder}
@@ -448,6 +455,7 @@ export const AnimalForm = (props) => {
                       type="text"
                       key={`my_unique_scolor_select_key__${formikProps.values.scolor}`}
                       ref={scolorRef}
+                      style={{marginTop:"23px"}}
                       options={colorChoices[formikProps.values.species]}
                       value={formikProps.values.scolor||''}
                       placeholder={placeholder}
@@ -458,7 +466,7 @@ export const AnimalForm = (props) => {
                     name="color_notes"
                     as="textarea"
                     rows={5}
-                    label="Description"
+                    label="Breed / Description"
                     xs="8"
                   />
                 </BootstrapForm.Row>
@@ -498,17 +506,18 @@ export const AnimalForm = (props) => {
                   </Col>
                 </BootstrapForm.Row>
                 <BootstrapForm.Row>
-                  <Col xs="4">
+                  <Col xs="3">
                     <DropDown
                       label="Aggressive"
                       id="aggressive"
                       name="aggressive"
                       type="text"
-                      className="mb-3"
                       options={unknownChoices}
                       value={formikProps.values.aggressive||'unknown'}
                       isClearable={false}
                     />
+                  </Col>
+                  <Col xs="3">
                     <DropDown
                       label="Fixed"
                       id="fixed"
@@ -519,17 +528,7 @@ export const AnimalForm = (props) => {
                       isClearable={false}
                     />
                   </Col>
-                  <TextInput
-                    label="Behavior Notes"
-                    id="behavior_notes"
-                    name="behavior_notes"
-                    as="textarea"
-                    rows={5}
-                    xs="8"
-                  />
-                </BootstrapForm.Row>
-                <BootstrapForm.Row>
-                  <Col xs="4">
+                  <Col xs="3" hidden={is_intake}>
                     <DropDown
                       label="Confined"
                       id="confined"
@@ -540,7 +539,7 @@ export const AnimalForm = (props) => {
                       isClearable={false}
                     />
                   </Col>
-                  <Col xs="4">
+                  <Col xs="3">
                     <DropDown
                       label="Injured"
                       id="injured"
@@ -551,6 +550,18 @@ export const AnimalForm = (props) => {
                       isClearable={false}
                     />
                   </Col>
+                </BootstrapForm.Row>
+                <BootstrapForm.Row className="mt-3">
+                  <TextInput
+                    label="Behavior Notes"
+                    id="behavior_notes"
+                    name="behavior_notes"
+                    as="textarea"
+                    rows={5}
+                    xs="12"
+                  />
+                </BootstrapForm.Row>
+                <BootstrapForm.Row>
                   <DateTimePicker
                     label="Last Seen"
                     name="last_seen"
@@ -561,163 +572,148 @@ export const AnimalForm = (props) => {
                       formikProps.setFieldValue("last_seen", dateStr)
                     }}
                     value={formikProps.values.last_seen||null}
+                    hidden={is_intake}
                   />
                 </BootstrapForm.Row>
-                <span hidden={is_workflow}>
-                <p className="mb-0 mt-3">Image Files</p>
-                <BootstrapForm.Row className="align-items-end">
-                  {data.front_image ?
-                    <span className="mt-2 ml-1 mr-3">
-                      <Image width={131} src={data.front_image} alt="" thumbnail />
-                      <div className="mb-2">
-                        <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => clearImage("front_image", formikProps.setFieldValue)} style={{backgroundColor:"red"}} />
-                        <span className="ml-1">Front-Shot</span>
-                      </div>
-                    </span> :
-                    <div className="mb-2 ml-1">
-                      <ImageUploader
-                        value={front_image}
-                        id="front_image"
-                        name="front_image"
-                        parentStateSetter={wrapperSetFrontImage}
-                        label="Front-Shot"
-                        maxNumber={1}
+                {/* Only show Shelter selection on intake and update. */}
+                <span hidden={!Boolean(id) && !is_intake}>
+                  <BootstrapForm.Row className={is_intake ? "" : "mt-3"}>
+                    <Col xs="6">
+                      <DropDown
+                        label="Shelter / Room"
+                        id="shelter"
+                        type="text"
+                        name="shelter"
+                        options={shelters.options}
+                        isClearable={true}
+                        onChange={(instance) => {
+                          roomRef.current.select.clearValue();
+                          formikProps.setFieldValue("shelter", instance === null ? '' : instance.value);
+                        }}
                       />
-                    </div>
-                  }
-                  {data.side_image ?
-                    <span className="mt-2 mr-3">
-                      <Image width={131} src={data.side_image} alt="" thumbnail />
-                      <div className="mb-2">
-                        <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => clearImage("side_image", formikProps.setFieldValue)} style={{backgroundColor:"red"}} />
-                        <span className="ml-1">Side-Shot</span>
+                    </Col>
+                  </BootstrapForm.Row>
+                  <BootstrapForm.Row className="mt-3">
+                    <Col xs="6">
+                      <DropDown
+                        id="room"
+                        type="text"
+                        name="room"
+                        ref={roomRef}
+                        options={shelters.room_options[formikProps.values.shelter] ? shelters.room_options[formikProps.values.shelter] : []}
+                        isClearable={true}
+                      />
+                    </Col>
+                  </BootstrapForm.Row>
+                </span>
+                <span hidden={is_intake ? !is_reporter: !Boolean(id)}>
+                  <BootstrapForm.Row className="mt-3">
+                    <BootstrapForm.Group as={Col} xs="12">
+                      {renderAddressLookup()}
+                    </BootstrapForm.Group>
+                  </BootstrapForm.Row>
+                  <BootstrapForm.Row>
+                    <TextInput
+                      xs="12"
+                      type="text"
+                      label="Found Location Address"
+                      name="address"
+                      disabled
+                    />
+                  </BootstrapForm.Row>
+                  <BootstrapForm.Row>
+                    <TextInput
+                      xs="8"
+                      type="text"
+                      label="City"
+                      name="city"
+                      disabled
+                    />
+                    <Col xs="2">
+                    <DropDown
+                      label="State"
+                      name="state"
+                      id="state"
+                      options={STATE_OPTIONS}
+                      value={formikProps.values.state || ''}
+                      placeholder=''
+                      disabled
+                    />
+                    </Col>
+                    <TextInput
+                      xs="2"
+                      type="text"
+                      label="Zip Code"
+                      name="zip_code"
+                      disabled
+                    />
+                  </BootstrapForm.Row>
+                </span>
+                <span hidden={is_workflow}>
+                  <p className="mb-0">Image Files</p>
+                  <BootstrapForm.Row className="align-items-end">
+                    {data.front_image ?
+                      <span className="mt-2 ml-1 mr-3">
+                        <Image width={131} src={data.front_image} alt="" thumbnail />
+                        <div className="mb-2">
+                          <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => clearImage("front_image", formikProps.setFieldValue)} style={{backgroundColor:"red"}} />
+                          <span className="ml-1">Front-Shot</span>
+                        </div>
+                      </span> :
+                      <div className="mb-2 ml-1">
+                        <ImageUploader
+                          value={front_image}
+                          id="front_image"
+                          name="front_image"
+                          parentStateSetter={wrapperSetFrontImage}
+                          label="Front-Shot"
+                          maxNumber={1}
+                        />
                       </div>
-                    </span> :
+                    }
+                    {data.side_image ?
+                      <span className="mt-2 mr-3">
+                        <Image width={131} src={data.side_image} alt="" thumbnail />
+                        <div className="mb-2">
+                          <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => clearImage("side_image", formikProps.setFieldValue)} style={{backgroundColor:"red"}} />
+                          <span className="ml-1">Side-Shot</span>
+                        </div>
+                      </span> :
+                      <div className="mb-2">
+                        <ImageUploader
+                          value={side_image}
+                          id="side_image"
+                          name="side_image"
+                          parentStateSetter={wrapperSetSideImage}
+                          label="Side-Shot"
+                          maxNumber={1}
+                        />
+                      </div>
+                    }
+                    {data.extra_images.length > 0 ?
+                      <span className="mt-2 d-flex flex-wrap align-items-end">
+                        {data.extra_images.map(extra_image => (
+                          <span key={extra_image} className="mr-3"><Image width={131} src={extra_image} alt="" thumbnail />
+                            <div className="mb-2">
+                              <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => clearImages(extra_image, formikProps.setFieldValue)} style={{backgroundColor:"red"}} />
+                              <span className="ml-1">Extra</span>
+                            </div>
+                          </span>
+                        ))}
+                      </span>
+                    :""}
                     <div className="mb-2">
                       <ImageUploader
-                        value={side_image}
-                        id="side_image"
-                        name="side_image"
-                        parentStateSetter={wrapperSetSideImage}
-                        label="Side-Shot"
-                        maxNumber={1}
+                        value={extra_images}
+                        id="extra_images"
+                        name="extra_images"
+                        parentStateSetter={wrapperSetExtraImages}
+                        label="Extra"
+                        maxNumber={3 - data.extra_images.length}
+                        multiple
                       />
                     </div>
-                  }
-                  {data.extra_images.length > 0 ?
-                    <span className="mt-2 d-flex flex-wrap align-items-end">
-                      {data.extra_images.map(extra_image => (
-                        <span key={extra_image} className="mr-3"><Image width={131} src={extra_image} alt="" thumbnail />
-                          <div className="mb-2">
-                            <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => clearImages(extra_image, formikProps.setFieldValue)} style={{backgroundColor:"red"}} />
-                            <span className="ml-1">Extra</span>
-                          </div>
-                        </span>
-                      ))}
-                    </span>
-                  :""}
-                  <div className="mb-2">
-                    <ImageUploader
-                      value={extra_images}
-                      id="extra_images"
-                      name="extra_images"
-                      parentStateSetter={wrapperSetExtraImages}
-                      label="Extra"
-                      maxNumber={3 - data.extra_images.length}
-                      multiple
-                    />
-                  </div>
-                </BootstrapForm.Row>
-                </span>
-                {/* Only show Shelter selection on intake and update. */}
-                <span hidden={!Boolean(id) && !is_intake}>
-                <BootstrapForm.Row className="mt-3">
-                  <Col xs="8">
-                    <DropDown
-                      label="Shelter"
-                      id="shelter"
-                      type="text"
-                      name="shelter"
-                      options={shelters.options}
-                      isClearable={true}
-                    />
-                  </Col>
-                </BootstrapForm.Row>
-                </span>
-                {/* Only show Shelter selection on intake and update. */}
-                <span hidden={!Boolean(id) && !is_intake}>
-                <BootstrapForm.Row className="mt-3" >
-                  <Col xs="8">
-                    <TreeSelect
-                      showSearch
-                      style={{ width: '100%' }}
-                      value={formikProps.values.room}
-                      dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
-                      placeholder="Select a room..."
-                      allowClear
-                      treeDefaultExpandAll
-                      onChange={(value) => {
-                        formikProps.setFieldValue("room", value||null);
-                      }}
-                    >
-                      {shelters.shelters.map(shelter => (
-                        <TreeNode title={'Shelter: ' + shelter.name + ' ('+shelter.buildings.length+' buildings, ' + shelter.room_count + ' rooms, ' + shelter.animal_count + ' animals)'} key={'shelter'+shelter.id} selectable={false} value={'shelter'+shelter.id}>
-                          {shelter.buildings.map(building => (
-                            <TreeNode title={'Building: ' + building.name + ' (' + building.rooms.length + ' rooms, ' + building.animal_count + ' animals)'} key={'building'+building.id} selectable={false} value={'building'+building.id}>
-                              {building.rooms.map(room => (
-                                <TreeNode title={room.name+' ('+room.animals.length+' animals)'} key={room.id} value={room.id}/>
-                              ))}
-                            </TreeNode>
-                          ))}
-                        </TreeNode>
-                      ))}
-                    </TreeSelect>
-                  </Col>
-                </BootstrapForm.Row>
-                <p/>
-                </span>
-                <span hidden={ is_intake ? !is_reporter: !Boolean(id)}>
-                <BootstrapForm.Row>
-                  <BootstrapForm.Group as={Col} xs="12">
-                    {renderAddressLookup()}
-                  </BootstrapForm.Group>
-                </BootstrapForm.Row>
-                <BootstrapForm.Row>
-                  <TextInput
-                    xs="12"
-                    type="text"
-                    label="Found Location Address"
-                    name="address"
-                    disabled
-                  />
-                </BootstrapForm.Row>
-                <BootstrapForm.Row>
-                  <TextInput
-                    xs="8"
-                    type="text"
-                    label="City"
-                    name="city"
-                    disabled
-                  />
-                  <Col xs="2">
-                  <DropDown
-                    label="State"
-                    name="state"
-                    id="state"
-                    options={STATE_OPTIONS}
-                    value={formikProps.values.state || ''}
-                    placeholder=''
-                    disabled
-                  />
-                  </Col>
-                  <TextInput
-                    xs="2"
-                    type="text"
-                    label="Zip Code"
-                    name="zip_code"
-                    disabled
-                  />
-                </BootstrapForm.Row>
+                  </BootstrapForm.Row>
                 </span>
             </BootstrapForm>
           </Card.Body>

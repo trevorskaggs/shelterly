@@ -45,8 +45,13 @@ class AnimalViewSet(viewsets.ModelViewSet):
                     animal.owner.add(*animal.request.owner.all())
 
                 if animal.shelter:
-                    action.send(self.request.user, verb='sheltered animal', target=animal)
+                    action.send(self.request.user, verb='sheltered animal in', target=animal, action_object=animal.shelter)
                     action.send(self.request.user, verb='sheltered animal', target=animal.shelter, action_object=animal)
+
+                if animal.room:
+                    action.send(self.request.user, verb='roomed animal in', target=animal, action_object=animal.room)
+                    action.send(self.request.user, verb='roomed animal', target=animal.room, action_object=animal)
+                    action.send(self.request.user, verb='roomed animal', target=animal.room.building, action_object=animal)
 
                 images_data = self.request.FILES
                 for key, image_data in images_data.items():
@@ -64,6 +69,7 @@ class AnimalViewSet(viewsets.ModelViewSet):
             # Mark as SHELTERED if we receive shelter field and it's not already in a shelter.
             if serializer.validated_data.get('shelter') and (not serializer.instance.shelter or serializer.instance.shelter != serializer.validated_data.get('shelter')) :
                 serializer.validated_data['status'] = 'SHELTERED'
+                action.send(self.request.user, verb='sheltered animal in', target=serializer.instance, action_object=serializer.validated_data.get('shelter'))
                 action.send(self.request.user, verb='sheltered animal', target=serializer.validated_data.get('shelter'), action_object=serializer.instance)
 
             # If animal had a shelter and now doesn't or has a different shelter.
@@ -77,6 +83,7 @@ class AnimalViewSet(viewsets.ModelViewSet):
 
             # If animal is added to a new room from no room or a different room.
             if serializer.validated_data.get('room') and (serializer.instance.room != serializer.validated_data.get('room')):
+                action.send(self.request.user, verb='roomed animal in', target=serializer.instance, action_object=serializer.validated_data.get('room'))
                 action.send(self.request.user, verb='roomed animal', target=serializer.validated_data.get('room'), action_object=serializer.instance)
                 action.send(self.request.user, verb='roomed animal', target=serializer.validated_data.get('room').building, action_object=serializer.instance)
 

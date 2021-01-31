@@ -19,6 +19,7 @@ export const ShelterForm = ({id}) => {
   const [data, setData] = useState({
     name: '',
     description: '',
+    phone: '',
     address: '',
     apartment: '',
     city: '',
@@ -27,6 +28,9 @@ export const ShelterForm = ({id}) => {
     latitude: null,
     longitude: null,
   });
+
+  // Regex validators.
+  const phoneRegex = /^((\+\d{1,3}(-| )?\(?\d\)?(-| )?\d{1,3})|(\(?\d{2,3}\)?))(-| )?(\d{3,4})(-| )?(\d{4})(( x| ext)\d{1,5}){0,1}$/
 
   // Hook for initializing data.
   useEffect(() => {
@@ -39,6 +43,8 @@ export const ShelterForm = ({id}) => {
           cancelToken: source.token,
         })
         .then(response => {
+          // Set phone field to be the pretty version.
+          response.data['phone'] = response.data['display_phone']
           setData(response.data);
         })
         .catch(error => {
@@ -65,6 +71,8 @@ export const ShelterForm = ({id}) => {
             .required('Required'),
           description: Yup.string()
             .max(400, 'Must be 400 characters or less'),
+          phone: Yup.string()
+            .matches(phoneRegex, "Phone number is not valid"),
           address: Yup.string()
             .required('Required'),
           apartment: Yup.string()
@@ -90,8 +98,8 @@ export const ShelterForm = ({id}) => {
           }
           else {
             axios.post('/shelter/api/shelter/', values)
-            .then(function() {
-              navigate('/shelter/list')
+            .then(response => {
+              navigate('/shelter/' + response.data.id)
             })
             .catch(error => {
               console.log(error.response);
@@ -105,68 +113,68 @@ export const ShelterForm = ({id}) => {
           <Card.Header as="h5" className="pl-3"><span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>{!id ? "New" : "Update"} Shelter</Card.Header>
           <Card.Body>
           <BootstrapForm noValidate>
-            <BootstrapForm.Row xs="8">
+            <BootstrapForm.Row xs="12">
               <TextInput
-                xs="8"
+                xs="12"
                 type="text"
                 label="Name*"
                 name="name"
                 id="name"
               />
             </BootstrapForm.Row>
+            <BootstrapForm.Row xs="12">
+              <TextInput
+                xs="12"
+                type="text"
+                label="Phone"
+                name="phone"
+              />
+            </BootstrapForm.Row>
             <BootstrapForm.Row>
               <TextInput
                 as="textarea"
                 rows={5}
-                xs="8"
+                xs="12"
                 type="text"
                 label="Description"
                 name="description"
               />
             </BootstrapForm.Row>
             <BootstrapForm.Row>
-              <BootstrapForm.Group as={Col} xs="10">
+              <BootstrapForm.Group as={Col} xs="12">
                 <AddressLookup
                   label="Search"
-                  style={{width: '80%'}}
                   className="form-control"
                 />
               </BootstrapForm.Group>
             </BootstrapForm.Row>
-            <BootstrapForm.Row xs="8">
+            <BootstrapForm.Row xs="12">
               <TextInput
-                xs="6"
+                xs="12"
                 type="text"
                 label="Address*"
                 name="address"
                 disabled
               />
-              <TextInput
-                xs="2"
-                type="text"
-                label="Apartment"
-                name="apartment"
-                disabled
-              />
             </BootstrapForm.Row>
             <BootstrapForm.Row>
               <TextInput
-                xs="4"
+                xs="8"
                 type="text"
                 label="City"
                 name="city"
                 disabled
               />
               <Col xs="2">
-              <DropDown
-                label="State"
-                name="state"
-                id="state"
-                options={STATE_OPTIONS}
-                value={props.values.state || ''}
-                placeholder=""
-                disabled
-              />
+                <DropDown
+                  label="State"
+                  name="state"
+                  id="state"
+                  options={STATE_OPTIONS}
+                  value={props.values.state || ''}
+                  placeholder=""
+                  disabled
+                />
               </Col>
               <TextInput
                 xs="2"

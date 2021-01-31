@@ -22,6 +22,8 @@ export function ShelterDetails({id}) {
     zip_code: '',
     description: '',
     image: '',
+    phone: '',
+    display_phone: '',
     buildings: [],
     action_history: [],
     unroomed_animals: [],
@@ -65,6 +67,9 @@ export function ShelterDetails({id}) {
             </ListGroup.Item>
             <ListGroup.Item>
               <b>Address:</b> {data.full_address}
+            </ListGroup.Item>
+            <ListGroup.Item>
+              <b>Phone:</b> {data.display_phone}
             </ListGroup.Item>
             {data.description ? <ListGroup.Item>
             <b>Description: </b>{data.description}
@@ -120,7 +125,7 @@ export function ShelterDetails({id}) {
               <span className="d-flex flex-wrap align-items-end">
               {data.unroomed_animals.map(animal => (
                 <Card key={animal.id} className="border rounded mr-3 mb-3" style={{border:"none"}}>
-                  <ReactImageFallback style={{width:"151px"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} />
+                  <ReactImageFallback style={{width:"151px", height:"151px", objectFit: "cover", overflow: "hidden"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} />
                   <Card.Text className="text-center mb-0">
                     {animal.name||"Unknown"}
                     <Link href={"/animals/" + animal.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
@@ -284,7 +289,7 @@ export function RoomDetailsTable({id}) {
             <span className="d-flex flex-wrap align-items-end">
             {data.animals.map(animal => (
               <Card key={animal.id} className="mr-3" style={{border:"none"}}>
-                <ReactImageFallback style={{width:"151px"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} />
+                <ReactImageFallback style={{width:"151px", height:"151px", objectFit: "cover", overflow: "hidden"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} />
                 <Card.Text className="text-center mb-0">
                   {animal.name||"Unknown"}
                   <Link href={"/animals/" + animal.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
