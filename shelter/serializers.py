@@ -1,5 +1,5 @@
+import re
 from rest_framework import serializers
-
 from actstream.models import target_stream
 
 from .models import *
@@ -65,10 +65,15 @@ class SimpleShelterSerializer(serializers.ModelSerializer):
     full_address = serializers.SerializerMethodField()
     animal_count = serializers.SerializerMethodField()
     buildings = SimpleBuildingSerializer(source='building_set', many=True, required=False, read_only=True)
+    display_phone = serializers.SerializerMethodField()
 
     # Custom field for the full address.
     def get_full_address(self, obj):
         return build_full_address(obj)
+
+    # Custom field for Formated Phone Number
+    def get_display_phone(self, obj):
+        return re.sub(r'(\d{3})(\d{3})(\d{4})', r'(\1) \2-\3', obj.phone)
 
     # Custom field for total animals.
     def get_animal_count(self, obj):

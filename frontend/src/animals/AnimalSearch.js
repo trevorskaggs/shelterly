@@ -104,9 +104,9 @@ export function AnimalSearch() {
           </OverlayTrigger>
           &nbsp;| {titleCase(animal.status)}</h4></div>
           <CardGroup>
-            <Card key={animal.id} style={{maxWidth:"196px"}}>
+            <Card key={animal.id}>
               <Card.Body className="p-0 m-0">
-                <ReactImageFallback style={{width:"auto", maxHeight:"196px"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} />
+                <ReactImageFallback style={{width:"196px", height:"196px", objectFit: "cover", overflow: "hidden"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} />
               </Card.Body>
             </Card>
             <Card>

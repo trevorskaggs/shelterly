@@ -36,7 +36,7 @@ const DateTimePicker = ({ label, xs, clearable, ...props }) => {
 
   return (
     <>
-      <Form.Group as={Col} xs={xs} className="mb-0">
+      <Form.Group as={Col} xs={xs} hidden={props.hidden} className="mb-0">
       <label htmlFor={props.id || props.name}>{label}</label>
       <span className="d-flex">
         <Flatpickr className="datetime_picker" ref={datetime} data-enable-time options={options} {...field} {...props} />
@@ -123,7 +123,7 @@ const DropDown = React.forwardRef((props, ref) => {
 
   return (
     <>
-      {props.label ? <Form.Label >{props.label}</Form.Label> : ""}
+      {props.label ? <Form.Label style={props.style}>{props.label}</Form.Label> : ""}
       <SimpleValue {...field} options={props.options}>
          {simpleProps => <Select isDisabled={props.disabled} ref={ref} styles={customStyles} isClearable={true} onBlur={updateBlur} onChange={handleOptionChange} {...props} {...simpleProps} />}
       </SimpleValue>

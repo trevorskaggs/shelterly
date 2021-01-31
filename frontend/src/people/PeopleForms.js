@@ -135,7 +135,8 @@ export const PersonForm = (props) => {
             .matches(nameRegex, "Name is not valid")
             .required('Required'),
           phone: Yup.string()
-            .matches(phoneRegex, "Phone number is not valid"),
+            .matches(phoneRegex, "Phone number is not valid")
+            .required('Required'),
           alt_phone: Yup.string()
             .matches(phoneRegex, "Phone number is not valid"),
           email: Yup.string()
@@ -282,7 +283,7 @@ export const PersonForm = (props) => {
               <TextInput
                 xs="12"
                 as="textarea"
-                label="Comments"
+                label="Comments / Alternate Contact"
                 name="comments"
               />
             </BootstrapForm.Row>
