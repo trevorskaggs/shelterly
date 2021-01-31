@@ -52,7 +52,7 @@ class SimpleAnimalSerializer(serializers.ModelSerializer):
 
     def get_front_image(self, obj):
         try:
-            return [animal_image.image.url for animal_image in obj.images if animal_image.category == 'front_image'][0]
+            return [animal_image.image.url for animal_image in obj.animalimage_set.all() if animal_image.category == 'front_image'][0]
             # change this exception
         except IndexError:
             return ''
@@ -65,7 +65,7 @@ class SimpleAnimalSerializer(serializers.ModelSerializer):
 
     def get_side_image(self, obj):
         try:
-            return [animal_image.image.url for animal_image in obj.images if animal_image.category == 'side_image'][0]
+            return [animal_image.image.url for animal_image in obj.animalimage_set.all() if animal_image.category == 'side_image'][0]
         except IndexError:
             return ''
         except AttributeError:
@@ -74,10 +74,9 @@ class SimpleAnimalSerializer(serializers.ModelSerializer):
             except AttributeError:
                 return ''
 
-
     def get_extra_images(self, obj):
         try:
-            return [animal_image.image.url for animal_image in obj.images if animal_image.category == 'extra']
+            return [animal_image.image.url for animal_image in obj.animalimage_set.all() if animal_image.category == 'extra']
         except IndexError:
             return ''
         except AttributeError:
@@ -97,6 +96,7 @@ class AnimalSerializer(SimpleAnimalSerializer):
     reporter_object = serializers.SerializerMethodField(read_only=True)
     action_history = serializers.SerializerMethodField()
     evacuation_assignments = serializers.SerializerMethodField()
+    room_name = serializers.SerializerMethodField()
 
     # Custom Owner object field that excludes animals to avoid a circular reference.
     def get_owners(self, obj):
@@ -104,6 +104,12 @@ class AnimalSerializer(SimpleAnimalSerializer):
         if obj.owner.exists():
             return SimplePersonSerializer(obj.owner, many=True).data
         return []
+
+    # Custom field to return the shelter name.
+    def get_room_name(self, obj):
+        if obj.room:
+            return obj.room.name
+        return ''
 
     # Custom Reporter object field that excludes animals to avoid a circular reference.
     def get_reporter_object(self, obj):

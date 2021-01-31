@@ -28,7 +28,7 @@ DOG_SIZE_CHOICES = (
 DOG_AGE_CHOICES = (
     ('youth', "Youth"),
     ('adult', "Adult"),
-    ('elderly', "Elderly"),
+    ('senior', "Senior"),
 )
 
 CAT_SIZE_CHOICES = (
@@ -40,7 +40,7 @@ CAT_AGE_CHOICES = (
     ('kitten', 'Kitten'),
     ('youth', 'Youth'),
     ('adult', 'Adult'),
-    ('elderly', 'Elderly'),
+    ('senior', 'Senior'),
     ('geriatric', 'Geriatric'),
 )
 
@@ -54,7 +54,7 @@ HORSE_SIZE_CHOICES = (
 HORSE_AGE_CHOICES = (
     ('young', "Young"),
     ('adult', "Adult"),
-    ('elderly', "Elderly"),
+    ('senior', "Senior"),
 )
 
 OTHER_SIZE_CHOICES = (
@@ -66,7 +66,7 @@ OTHER_SIZE_CHOICES = (
 OTHER_AGE_CHOICES = (
     ('young', "Young"),
     ('adult', "Adult"),
-    ('elderly', "Elderly"),
+    ('senior', "Senior"),
 )
 
 STATUS_CHOICES = (

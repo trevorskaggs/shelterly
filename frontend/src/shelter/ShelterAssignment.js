@@ -154,7 +154,7 @@ export function ShelterAssignment({id}) {
                             <Card className="border rounded" style={{width:"150px", height:"51"}}>
                               <div className="row no-gutters" style={{textTransform: "capitalize"}}>
                                 <div className="col-auto">
-                                  <ReactImageFallback style={{width:"47px", marginRight:"3px"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} />
+                                  <ReactImageFallback style={{width:"47px", height:"47px", marginRight:"3px", objectFit: "cover", overflow: "hidden"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} />
                                 </div>
                                 <div className="col">
                                   {animal.name||"Unknown"}
@@ -216,7 +216,7 @@ export function ShelterAssignment({id}) {
                               <Card className="border rounded" style={{width:"150px"}}>
                                 <div className="row no-gutters" style={{ textTransform: "capitalize" }}>
                                   <div className="col-auto">
-                                    <ReactImageFallback style={{width:"47px", marginRight:"3px"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} />
+                                    <ReactImageFallback style={{width:"47px", height:"47px", marginRight:"3px", objectFit: "cover", overflow: "hidden"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} />
                                   </div>
                                   <div className="col">
                                     {animal.name||"Unknown"}
