@@ -77,7 +77,7 @@ class SimpleAnimalSerializer(serializers.ModelSerializer):
 
     def get_extra_images(self, obj):
         try:
-            return [animal_image.image.url for animal_image in obj.images if animal_image.category == 'extra'][0]
+            return [animal_image.image.url for animal_image in obj.images if animal_image.category == 'extra']
         except IndexError:
             return ''
         except AttributeError:
