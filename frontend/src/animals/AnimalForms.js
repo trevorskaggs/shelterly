@@ -179,7 +179,7 @@ export const AnimalForm = (props) => {
           shelter.buildings.forEach(building => {
             building.rooms.forEach(room => {
               // Build room option list identified by shelter ID.
-              room_options[shelter.id].push({value: room.id, label: room.name + ' (' + room.animals.length + ' animals)'});
+              room_options[shelter.id].push({value: room.id, label: room.building_name + ' - ' + room.name + ' (' + room.animals.length + ' animals)'});
             });
           });
         });
