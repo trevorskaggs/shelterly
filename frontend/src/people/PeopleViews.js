@@ -4,9 +4,10 @@ import { Link } from 'raviger';
 import { Card, ListGroup } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faClipboardList, faEdit, faPlusSquare
+  faClipboardList, faEdit, faPhone, faPlusSquare
 } from '@fortawesome/free-solid-svg-icons';
 import ReactImageFallback from 'react-image-fallback';
+import Moment from 'react-moment';
 import noImageFound from '../static/images/image-not-found.png';
 import Header from '../components/Header';
 import History from '../components/History';
@@ -30,6 +31,7 @@ export function PersonView({id}) {
     state: '',
     zip_code: '',
     animals: [],
+    owner_contacts: [],
     action_history: [],
   });
 
@@ -82,6 +84,23 @@ export function PersonView({id}) {
           </Card.Body>
         </Card>
       </div>
+      <div className="col-6 d-flex" style={{marginRight:"-15px"}}>
+        <Card className="border rounded d-flex" style={{width:"100%"}}>
+          <Card.Body>
+            <Card.Title>
+              <h4>Owner Contacts
+                <Link href={"/hotline/ownercontact/new?owner=" + id}><FontAwesomeIcon icon={faPhone} className="ml-1" inverse /></Link>
+              </h4>
+            </Card.Title>
+            <hr/>
+            <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
+              {data.owner_contacts.map(owner_contact => (
+              <ListGroup.Item key={owner_contact.id}><b><Moment format="MMMM Do YYYY HH:mm">{owner_contact.owner_contact_time}</Moment></b><Link href={"/hotline/ownercontact/" + owner_contact.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>: {owner_contact.owner_contact_note}</ListGroup.Item>
+              ))}
+            </ListGroup>
+          </Card.Body>
+        </Card>
+      </div>
     </div>
     <div className="row mt-3" hidden={data.animals.length === 0}>
       <div className="col-12 d-flex">
@@ -117,3 +136,4 @@ export function PersonView({id}) {
     </>
   );
 };
+

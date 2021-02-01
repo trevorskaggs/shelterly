@@ -79,3 +79,4 @@ class VisitNoteViewSet(viewsets.ModelViewSet):
     queryset = VisitNote.objects.all()
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = VisitNoteSerializer
+

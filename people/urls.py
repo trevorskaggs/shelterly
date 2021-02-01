@@ -5,6 +5,7 @@ from people import views
 
 app_name = 'people'
 router = DefaultRouter()
+router.register(r'ownercontact', views.OwnerContactViewSet)
 router.register(r'person', views.PersonViewSet)
 
 urlpatterns = [

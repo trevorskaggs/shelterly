@@ -7,6 +7,7 @@ from animals.models import Animal
 from animals.serializers import SimpleAnimalSerializer
 from evac.models import EvacAssignment
 from location.utils import build_full_address, build_action_string
+from people.serializers import OwnerContactSerializer
 
 class VisitNoteSerializer(serializers.ModelSerializer):
 
@@ -24,6 +25,7 @@ class SimpleServiceRequestSerializer(serializers.ModelSerializer):
 
     full_address = serializers.SerializerMethodField()
     visit_notes = VisitNoteSerializer(source='visitnote_set', many=True, required=False, read_only=True)
+    owner_contacts = OwnerContactSerializer(source='ownercontact_set', many=True, required=False, read_only=True)
     has_reported_animals = serializers.SerializerMethodField()
     sheltered_in_place = serializers.SerializerMethodField()
     unable_to_locate = serializers.SerializerMethodField()
@@ -110,7 +112,6 @@ class ServiceRequestSerializer(SimpleServiceRequestSerializer):
     reporter_object = SimplePersonSerializer(source='reporter', required=False, read_only=True)
     animals = SimpleAnimalSerializer(many=True, read_only=True)
     evacuation_assignments = SimpleEvacAssignmentSerializer(many=True, required=False, read_only=True)
-
 
     def __init__(self, *args, **kwargs):
     

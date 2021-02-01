@@ -1,5 +1,5 @@
 import React from "react";
-import { PersonForm } from "./PeopleForms";
+import { OwnerContactForm, PersonForm } from "./PeopleForms";
 import { PersonView } from "./PeopleViews";
 import { initialData } from "../hotline/HotlineWorkflow";
 
@@ -30,5 +30,17 @@ export const UpdateReporter = ({id}) => (
 export const ReporterDetail = ({id}) => (
   <div>
     <PersonView id={id} />
+  </div>
+)
+
+export const NewOwnerContact = () => (
+  <div>
+    <OwnerContactForm />
+  </div>
+)
+
+export const UpdateOwnerContact = ({id}) => (
+  <div>
+    <OwnerContactForm id={id} />
   </div>
 )

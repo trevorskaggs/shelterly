@@ -4,8 +4,8 @@ from actstream import action
 
 from animals.models import Animal
 from hotline.models import ServiceRequest
-from people.models import Person, PersonChange
-from people.serializers import PersonSerializer
+from people.models import OwnerContact, Person, PersonChange
+from people.serializers import OwnerContactSerializer, PersonSerializer
 
 
 # Provides view for Person API calls.
@@ -69,3 +69,9 @@ class PersonViewSet(viewsets.ModelViewSet):
 
             # Record update action.
             action.send(self.request.user, verb='updated person', target=person)
+
+class OwnerContactViewSet(viewsets.ModelViewSet):
+
+    queryset = OwnerContact.objects.all()
+    permission_classes = [permissions.IsAuthenticated, ]
+    serializer_class = OwnerContactSerializer
