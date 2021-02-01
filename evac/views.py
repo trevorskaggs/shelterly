@@ -89,7 +89,11 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
                     VisitNote.objects.create(evac_assignment=evac_assignment, service_request=service_requests[0], date_completed=service_request['date_completed'], notes=service_request['notes'], forced_entry=service_request['forced_entry'])
                 else:
                     VisitNote.objects.filter(evac_assignment=evac_assignment, service_request=service_requests[0]).update(date_completed=service_request['date_completed'], notes=service_request['notes'], forced_entry=service_request['forced_entry'])
-                if 'owner_contact_id' in service_request:
-                    owner = Person.objects.get(id=service_request['owner_contact_id'])
-                    OwnerContact.objects.create(owner=owner, owner_contact_note=service_request['owner_contact_note'], owner_contact_time=service_request['owner_contact_time'])
+                # Only create OwnerContact on first update, otherwise update existing OwnerContact.
+                if service_request.get('owner_contact_id'):
+                    if not OwnerContact.objects.filter(evac_assignment=evac_assignment, service_request=service_requests[0]).exists():
+                        OwnerContact.objects.create(evac_assignment=evac_assignment, service_request=service_requests[0], owner=Person.objects.get(pk=service_request['owner_contact_id']), owner_contact_note=service_request['owner_contact_note'], owner_contact_time=service_request['owner_contact_time'])
+                    else:
+                        OwnerContact.objects.filter(evac_assignment=evac_assignment, service_request=service_requests[0]).update(owner=Person.objects.get(pk=service_request['owner_contact_id']), owner_contact_note=service_request['owner_contact_note'], owner_contact_time=service_request['owner_contact_time'])
+
             action.send(self.request.user, verb='updated evacuation assignment', target=evac_assignment)

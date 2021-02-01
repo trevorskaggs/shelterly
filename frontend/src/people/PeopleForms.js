@@ -391,7 +391,6 @@ export const OwnerContactForm = ({id}) => {
 
   const {
     owner = null,
-    animal = null
   } = queryParams;
 
     const [data, setData] = useState({
@@ -399,7 +398,6 @@ export const OwnerContactForm = ({id}) => {
       owner_contact_time: '',
       owner_contact_note: '',
       owner: owner,
-      animal: animal,
     })
 
     useEffect(() => {

@@ -147,31 +147,37 @@ export function EvacResolution({ id }) {
   useEffect(() => {
     let source = axios.CancelToken.source();
 
-    const fetchEvacAssignmentData = async () => {
+    const fetchEvacAssignmentData = () => {
       // Fetch Animal data.
-      await axios.get('/evac/api/evacassignment/' + id + '/', {
+      axios.get('/evac/api/evacassignment/' + id + '/', {
         cancelToken: source.token,
       })
         .then(response => {
-          let ownChoices = {}
+          let ownerChoices = {}
           response.data["sr_updates"] = [];
-
           response.data.service_request_objects.forEach((service_request, index) => {
-            ownChoices[service_request.id] = []
+            ownerChoices[service_request.id] = []
             service_request.owners.forEach(owner => {
-              ownChoices[service_request.id].push({value: owner.id, label: owner.first_name + ' ' + owner.last_name})
+              ownerChoices[service_request.id].push({value: owner.id, label: owner.first_name + ' ' + owner.last_name})
             })
-            // Use existing VisitNote to populate data if we're editing a closed Resolution.
-            const visit_note = service_request.visit_notes.filter(note => String(note.evac_assignment) === String(id))[0]
-            if (visit_note) {
-              response.data.sr_updates.push({ id: service_request.id, followup_date: service_request.followup_date, date_completed: visit_note.date_completed || new Date(), notes: visit_note.notes, forced_entry: visit_note.forced_entry, animals: service_request.animals.filter(animal => animal.evacuation_assignments.includes(Number(id))), owner: service_request.owner.length > 0})
-            }
-            else {
-              response.data.sr_updates.push({ id: service_request.id, followup_date: service_request.followup_date, date_completed: new Date(), notes: '', forced_entry: false, animals: service_request.animals.filter(animal => animal.evacuation_assignments.includes(Number(id))), owner: service_request.owner.length > 0})
-            }
+            // Use existing VisitNote/OwnerContact to populate data if we're editing a closed Resolution.
+            const visit_note = service_request.visit_notes.filter(note => String(note.evac_assignment) === String(id))[0] || {date_completed:new Date(), notes:'', forced_entry:false}
+            const owner_contact = service_request.owner_contacts.filter(contact => String(contact.evac_assignment) === String(id))[0] || {owner:null, owner_contact_time:'', owner_contact_note:''}
+            response.data.sr_updates.push({
+              id: service_request.id,
+              followup_date: service_request.followup_date,
+              date_completed: visit_note.date_completed || new Date(),
+              notes: visit_note.notes || '',
+              forced_entry: visit_note.forced_entry || false,
+              animals: service_request.animals.filter(animal => animal.evacuation_assignments.includes(Number(id))),
+              owner: service_request.owner.length > 0,
+              owner_contact_id: owner_contact.owner,
+              owner_contact_time: owner_contact.owner_contact_time || '',
+              owner_contact_note: owner_contact.owner_contact_note || ''
+            })
           });
+          setOwnerChoices(ownerChoices);
           setData(response.data);
-          setOwnerChoices(ownChoices);
         })
         .catch(error => {
           console.log(error.response);
@@ -368,21 +374,22 @@ export function EvacResolution({ id }) {
                   </BootstrapForm.Row>
                   {service_request.owners.length > 0 ?
                     <span>
-                      <BootstrapForm.Row className="mt-3 ">
+                      <BootstrapForm.Row className="mt-2">
                         <Col xs="4">
                          <DropDown
                           label="Owner Contacted"
                           id={`sr_updates.${index}.owner_contact_id`}
                           name={`sr_updates.${index}.owner_contact_id`}
+                          key={`my_unique_test_select_key__d}`}
                           type="text"
                           xs="4"
                           options={ownerChoices[service_request.id]}
-                          value={`sr_updates.${index}.owner_contact_id`}
+                          value={props.values.sr_updates[index] && props.values.sr_updates[index].owner_contact_id || null}
                           isClearable={false}
                         />
                         </Col>
                       </BootstrapForm.Row>
-                      <BootstrapForm.Row className="mt-2">
+                      <BootstrapForm.Row className="mt-3">
                         <DateTimePicker
                           label="Owner Contact Time"
                           name={`sr_updates.${index}.owner_contact_time`}
@@ -392,7 +399,7 @@ export function EvacResolution({ id }) {
                           onChange={(date, dateStr) => {
                             props.setFieldValue(`sr_updates.${index}.owner_contact_time`, dateStr)
                           }}
-                          value={service_request.owner_contact_time || null}
+                          value={props.values.sr_updates[index] ? props.values.sr_updates[index].owner_contact_time : null}
                         />
                       </BootstrapForm.Row>
                       <BootstrapForm.Row className="mt-3" style={{marginBottom:"-15px"}}>

@@ -5,7 +5,6 @@ from location.models import Location
 User = get_user_model()
 
 class Person(Location):
-    
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50, blank=True)
     phone = models.CharField(max_length=50, blank=True)
@@ -23,8 +22,9 @@ class Person(Location):
         return '{} {}'.format(self.first_name, self.last_name)
 
 class OwnerContact(models.Model):
-
     owner = models.ForeignKey(Person, on_delete=models.CASCADE)
+    evac_assignment = models.ForeignKey('evac.EvacAssignment', null=True, blank=True, on_delete=models.CASCADE)
+    service_request = models.ForeignKey('hotline.ServiceRequest', null=True, blank=True, on_delete=models.CASCADE)
     owner_contact_time = models.DateTimeField()
     owner_contact_note = models.TextField(blank=False)
 
