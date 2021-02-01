@@ -31,9 +31,13 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         if serializer.is_valid():
-            for service_request in ServiceRequest.objects.filter(latitude=serializer.validated_data['latitude'], longitude=serializer.validated_data['longitude'], status='open').exclude(id=self.kwargs['pk']):
-                raise serializers.ValidationError(['Multiple open Requests may not exist with the same address.', service_request.id])
+            # Check if lat/log are being passed,Lat/Lon are not included when canceling a service request.
+            if 'latitude' in serializer.validated_data and 'longitude' in serializer.validated_data:
+                for service_request in ServiceRequest.objects.filter(latitude=serializer.validated_data['latitude'], longitude=serializer.validated_data['longitude'], status='open').exclude(id=self.kwargs['pk']):
+                    raise serializers.ValidationError(['Multiple open Requests may not exist with the same address.', service_request.id])
             service_request = serializer.save()
+            if service_request.status == 'canceled':
+                service_request.animal_set.update(status='CANCELED')
             action.send(self.request.user, verb='updated service request', target=service_request)
 
     def get_queryset(self):
@@ -51,7 +55,7 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
 
         # Status filter.
         status = self.request.query_params.get('status', '')
-        if status in ('open', 'assigned', 'closed'):
+        if status in ('open', 'assigned', 'closed', 'canceled'):
             queryset = queryset.filter(status=status).distinct()
 
         # Filter on aco_required option for the map.

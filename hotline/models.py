@@ -6,7 +6,8 @@ from people.models import Person
 STATUS_CHOICES = (
   ('open', 'Open'),
   ('assigned', 'Assigned'),
-  ('closed', 'Closed')
+  ('closed', 'Closed'),
+  ('canceled','Canceled')
 )
 
 class ServiceRequest(Location):
