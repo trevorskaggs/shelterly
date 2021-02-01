@@ -256,7 +256,7 @@ export const PersonForm = (props) => {
               <TextInput
                 xs={isOwner ? "2" : "3"}
                 type="text"
-                label="Phone"
+                label="Phone*"
                 name="phone"
               />
               <TextInput
