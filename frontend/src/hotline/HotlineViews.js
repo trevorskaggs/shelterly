@@ -23,8 +23,8 @@ export function ServiceRequestView({id}) {
   const [showModal, setShowModal] = useState(false);
   const cancelServiceRequest = () => {
     axios.patch('/hotline/api/servicerequests/' + id + '/', {status:'canceled'})
+    setData(prevState => ({ ...prevState, ['status']:'Canceled', ['animals']:prevState['animals'].map(animal => ({...animal, status:'CANCELED'}))}));
     setShowModal(false)
-    window.location.reload(false);
   }
 
   const clearDate = useCallback(() => {
