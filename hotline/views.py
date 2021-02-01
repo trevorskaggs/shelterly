@@ -31,7 +31,7 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         if serializer.is_valid():
-            # Check if lat/log are being passed, this is not true if Canceling service request.
+            # Check if lat/log are being passed,Lat/Lon are not included when canceling a service request.
             if 'latitude' in serializer.validated_data and 'longitude' in serializer.validated_data:
                 for service_request in ServiceRequest.objects.filter(latitude=serializer.validated_data['latitude'], longitude=serializer.validated_data['longitude'], status='open').exclude(id=self.kwargs['pk']):
                     raise serializers.ValidationError(['Multiple open Requests may not exist with the same address.', service_request.id])

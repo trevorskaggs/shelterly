@@ -81,13 +81,13 @@ export function ServiceRequestView({id}) {
   return (
     <>
       <Header>
-        Service Request<Link href=""><FontAwesomeIcon icon={faBan} inverse onClick={() => {setShowModal(true)}}/></Link><Link href={"/hotline/servicerequest/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse className="mb-1" /></Link> | <span style={{textTransform:"capitalize"}}>{data.status} {data.status === 'assigned' ? <Link href={"/evac/summary/" + data.assigned_evac}><FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link> : ""}</span>
+        Service Request<FontAwesomeIcon icon={faBan} style={{cursor:'pointer'}} inverse onClick={() => {setShowModal(true)}}/><Link href={"/hotline/servicerequest/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse className="mb-1" /></Link> | <span style={{textTransform:"capitalize"}}>{data.status} {data.status === 'assigned' ? <Link href={"/evac/summary/" + data.assigned_evac}><FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link> : ""}</span>
       </Header>
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Confirm Cancelation</Modal.Title>
         </Modal.Header>
-        <Modal.Body>Are you sure you want to cancel this Service Request  and associated animals?</Modal.Body>
+        <Modal.Body>Are you sure you want to cancel this Service Request and associated animals?</Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowModal(false)}>
             Close
