@@ -22,9 +22,9 @@ import { faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
 import moment from "moment";
 import Header from '../components/Header';
 
-import { ITEMS_PER_PAGE } from '.././constants'
+import { ITEMS_PER_PAGE } from '../constants'
 
-export function ServiceRequestSearch() {
+function ServiceRequestSearch() {
 
   const [data, setData] = useState({service_requests: [], isFetching: false});
   const [searchTerm, setSearchTerm] = useState("");
@@ -142,7 +142,7 @@ export function ServiceRequestSearch() {
                           </Tooltip>
                         }
                       >
-                        <Link href={"/hotline/owner/" + owner.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+                        <Link href={"/people/owner/" + owner.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
                       </OverlayTrigger>
                     </ListGroup.Item>
                   ))}
@@ -158,7 +158,7 @@ export function ServiceRequestSearch() {
                           </Tooltip>
                         }
                       >
-                        <Link href={"/hotline/reporter/" + service_request.reporter} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+                        <Link href={"/people/reporter/" + service_request.reporter} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
                       </OverlayTrigger>
                     </ListGroup.Item> : ""}
                   {service_request.evacuation_assignments.map(evacuation_assignment => (
@@ -265,3 +265,5 @@ export function ServiceRequestSearch() {
     
   )
 }
+
+export default ServiceRequestSearch;

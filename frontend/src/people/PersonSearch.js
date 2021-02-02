@@ -9,7 +9,7 @@ import {
 import { faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
 import Header from '../components/Header';
 
-export function PeopleTable() {
+function PersonSearch() {
 
 	const [data, setData] = useState({owners: [], isFetching: false});
 	const [searchTerm, setSearchTerm] = useState("");
@@ -97,7 +97,7 @@ export function PeopleTable() {
 															</Tooltip>
 														}
 													>
-														<Link href={"/hotline/owner/" + owner.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse/></Link>
+														<Link href={"/people/owner/" + owner.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse/></Link>
 													</OverlayTrigger>
 													:
 													<OverlayTrigger
@@ -109,7 +109,7 @@ export function PeopleTable() {
 															</Tooltip>
 														}
 													>
-														<Link href={"/hotline/reporter/" + owner.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse/></Link>
+														<Link href={"/people/reporter/" + owner.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse/></Link>
 													</OverlayTrigger>
 													}
 												</h4> : "Unknown"}
@@ -205,3 +205,5 @@ export function PeopleTable() {
 	</>
 	)
 }
+
+export default PersonSearch;

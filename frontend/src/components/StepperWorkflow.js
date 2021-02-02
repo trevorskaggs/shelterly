@@ -5,8 +5,8 @@ import Step from '@material-ui/core/Step';
 import StepLabel from '@material-ui/core/StepLabel';
 import Typography from '@material-ui/core/Typography';
 import AnimalForm from '../animals/AnimalForm';
-import { PersonForm } from '../people/PeopleForms';
-import { ServiceRequestForm } from './HotlineForms';
+import PersonForm from '../people/PersonForm';
+import ServiceRequestForm from '../hotline/ServiceRequestForm';
 import PageNotFound from "../components/PageNotFound";
 
 const useStyles = makeStyles((theme) => ({
@@ -43,7 +43,7 @@ function getStepContent(step, handleStepSubmit, handleBack, state) {
   }
 }
 
-export const initialData = {
+export const initialWorkflowData = {
   stepIndex: 0,
   hasOwner: false,
   animalIndex: 0,
@@ -86,16 +86,16 @@ export const initialData = {
   }
 }
 
-export default function HotlineWorkflow() {
+function StepperWorkflow() {
   // Determine if this is an intake workflow.
-  let is_intake = window.location.pathname.includes("intake")
+  let is_intake = window.location.pathname.includes("intake");
 
   const classes = useStyles();
   // The major overall step tracker.
   const [activeStep, setActiveStep] = React.useState(0);
   const steps = getSteps(is_intake);
   // Tracks the workflow state and data.
-  const [state, setState] = useState(initialData);
+  const [state, setState] = useState(initialWorkflowData);
   // Counts number of reporter + owner
   const [contactCount, setContactCount] = React.useState(0);
 
@@ -195,3 +195,5 @@ export default function HotlineWorkflow() {
     </div>
   );
 }
+
+export default StepperWorkflow;

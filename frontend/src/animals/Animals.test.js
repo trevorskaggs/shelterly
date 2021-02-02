@@ -6,11 +6,11 @@ import {
 import AnimalForm from "./AnimalForm";
 import AnimalSearch from "./AnimalSearch";
 import AnimalDetails from "./AnimalDetails";
-import { initialData } from "../hotline/HotlineWorkflow"
+import { initialWorkflowData } from "../components/StepperWorkflow";
 
 describe("Animal tests", () => {
   it("Render AnimalForm", () => {
-    render(<AnimalForm state={initialData} />);
+    render(<AnimalForm state={initialWorkflowData} />);
     expect(screen.getByText("Animal Information"));
   });
   it("Render AnimalSearch", () => {

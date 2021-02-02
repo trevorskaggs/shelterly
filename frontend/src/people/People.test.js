@@ -1,10 +1,10 @@
 import React from "react";
 import {render, screen} from "@testing-library/react";
-import {PeopleTable} from "./PeopleTables";
+import PersonSearch from "./PersonSearch";
 
-describe("Render PeopleTable", () => {
+describe("Render PersonSearch", () => {
     it("Empty table loads", async () => {
-        render(<PeopleTable />);
+        render(<PersonSearch />);
         expect(await screen.getByText("Fetching Owners...")).toBeTruthy();
     });
 });

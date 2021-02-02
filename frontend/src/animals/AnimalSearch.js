@@ -139,7 +139,7 @@ function AnimalSearch() {
                           </Tooltip>
                         }
                       >
-                        <Link href={"/hotline/owner/" + owner.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+                        <Link href={"/people/owner/" + owner.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
                       </OverlayTrigger>
                     </ListGroup.Item>
                   ))}
@@ -153,7 +153,7 @@ function AnimalSearch() {
                       </Tooltip>
                     }
                   >
-                    <Link href={"/hotline/reporter/" + animal.reporter_object.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+                    <Link href={"/people/reporter/" + animal.reporter_object.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
                   </OverlayTrigger>
                   </ListGroup.Item> : ""}
                   {animal.owner_objects < 1 && !animal.reporter ? <ListGroup.Item><b>Owner: </b>No Owner</ListGroup.Item> : ""}

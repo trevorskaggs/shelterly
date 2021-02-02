@@ -1,28 +1,32 @@
 import React from "react";
 import { Redirect } from "raviger";
 import Home from "./Home";
-import AnimalForm from "./animals/AnimalForm"
-import AnimalDetails from "./animals/AnimalDetails"
-import AnimalSearch from "./animals/AnimalSearch"
+import AnimalForm from "./animals/AnimalForm";
+import AnimalDetails from "./animals/AnimalDetails";
+import AnimalSearch from "./animals/AnimalSearch";
+import Deploy from "./dispatch/DispatchMap";
+import DispatchSummary from "./dispatch/DispatchSummary";
+import DispatchResolutionForm from "./dispatch/DispatchResolutionForm";
+import DispatchTeamMemberForm from "./dispatch/DispatchTeamMemberForm";
 import Dispatch from "./dispatch/Dispatch";
 import DispatchAssignmentSearch from "./dispatch/DispatchAssignmentSearch"
-import HotlineWorkflow from "./hotline/HotlineWorkflow";
-import Hotline, { ServiceRequestDetail, UpdateServiceRequest } from "./hotline/Hotline";
-import { ServiceRequestSearch } from "./hotline/HotlineTables"
-import { NewOwner, NewOwnerContact, NewReporter, OwnerDetail, ReporterDetail,  UpdateOwner, UpdateOwnerContact, UpdateReporter } from "./people/People";
-import Intake, { OwnerSearch } from "./intake/Intake";
+import StepperWorkflow, { initialWorkflowData } from "./components/StepperWorkflow";
+import Hotline from "./hotline/Hotline";
+import ServiceRequestDetails from "./hotline/ServiceRequestDetails";
+import ServiceRequestForm from "./hotline/ServiceRequestForm";
+import ServiceRequestSearch from "./hotline/ServiceRequestSearch";
+import PersonDetails from "./people/PersonDetails";
+import PersonForm from "./people/PersonForm";
+import PersonSearch from "./people/PersonSearch";
+import OwnerContactForm from "./people/OwnerContactForm";
+import Intake from "./intake/Intake";
 import Shelter, { NewShelter, UpdateShelter } from "./shelter/Shelter";
 import { ShelterAssignment } from "./shelter/ShelterAssignment";
 import { ShelterDetails } from "./shelter/ShelterDetails"
 import { NewBuilding, UpdateBuilding, BuildingDetails } from "./shelter/Building";
 import { NewRoom, UpdateRoom, RoomDetails } from "./shelter/Room";
 import { Login } from "./accounts/Accounts";
-import Deploy from "./dispatch/DispatchMap";
-import DispatchSummary from "./dispatch/DispatchSummary";
-import DispatchResolutionForm from "./dispatch/DispatchResolutionForm";
-import DispatchTeamMemberForm from "./dispatch/DispatchTeamMemberForm";
 import VisitNoteForm from "./dispatch/VisitNoteForm";
-import { initialData } from "./hotline/HotlineWorkflow";
 
 export const publicRoutes = {
   "/login": () => <Login />,
@@ -30,8 +34,8 @@ export const publicRoutes = {
 
 const routes = {
   "/": () => <Home />,
-  "/animals/edit/:id": ({id}) => <AnimalForm id={id} state={initialData} />,
-  "/animals/new": () => <AnimalForm state={initialData} />,
+  "/animals/edit/:id": ({id}) => <AnimalForm id={id} state={initialWorkflowData} />,
+  "/animals/new": () => <AnimalForm state={initialWorkflowData} />,
   "/animals/search": () => <AnimalSearch />,
   "/animals/:id": ({id}) => <AnimalDetails id={id} />,
   "/dispatch": () => <Dispatch />,
@@ -42,23 +46,21 @@ const routes = {
   "/dispatch/assignment/note/:id": ({id}) => <VisitNoteForm id={id} />,
   "/dispatch/deploy": () => <Deploy />,
   "/hotline": () => <Hotline />,
-
-  "/hotline/first_responder/new": () => <NewReporter />,
-  "/hotline/owner/edit/:id": ({id}) => <UpdateOwner id={id} />,
-  "/hotline/owner/new": () => <NewOwner />,
-  "/hotline/owner/:id": ({id}) => <OwnerDetail id={id} />,
-  "/hotline/ownercontact/new": () => <NewOwnerContact />,
-  "/hotline/ownercontact/:id": ({id}) => <UpdateOwnerContact id={id}/>,
-  "/hotline/reporter/edit/:id": ({id}) => <UpdateReporter id={id} />,
-  "/hotline/reporter/new": () => <NewReporter />,
-  "/hotline/reporter/:id": ({id}) => <ReporterDetail id={id}/>,
-  "/hotline/servicerequest/edit/:id": ({id}) => <UpdateServiceRequest id={id}/>,
+  "/hotline/ownercontact/new": () => <OwnerContactForm />,
+  "/hotline/ownercontact/:id": ({id}) => <OwnerContactForm id={id} />,
+  "/hotline/servicerequest/edit/:id": ({id}) => <ServiceRequestForm id={id} state={initialWorkflowData} />,
   "/hotline/servicerequest/search": () => <ServiceRequestSearch />,
-  "/hotline/servicerequest/:id": ({id}) => <ServiceRequestDetail id={id} />,
-  "/hotline/workflow/*": () => <HotlineWorkflow />,
+  "/hotline/servicerequest/:id": ({id}) => <ServiceRequestDetails id={id} />,
+  "/hotline/workflow/*": () => <StepperWorkflow />,
   "/intake": () => <Intake />,
-  "/intake/owner/search": () => <OwnerSearch />,
-  "/intake/workflow/*": () => <HotlineWorkflow />,
+  "/intake/owner/search": () => <PersonSearch />,
+  "/intake/workflow/*": () => <StepperWorkflow />,
+  "/people/owner/edit/:id": ({id}) => <PersonForm id={id} state={initialWorkflowData} />,
+  "/people/owner/new": () => <PersonForm state={initialWorkflowData} />,
+  "/people/owner/:id": ({id}) => <PersonDetails id={id} />,
+  "/people/reporter/edit/:id": ({id}) => <PersonForm id={id} state={initialWorkflowData} />,
+  "/people/reporter/new": () => <PersonForm state={initialWorkflowData} />,
+  "/people/reporter/:id": ({id}) => <PersonDetails id={id}/>,
   "/shelter": () => <Shelter />,
   "/shelter/new": () => <NewShelter />,
   "/shelter/edit/:id": ({id}) => <UpdateShelter id={id} />,

@@ -6,8 +6,8 @@ import {
   screen,
 } from "@testing-library/react";
 import Hotline from "./Hotline";
-import { ServiceRequestView } from "./HotlineViews";
-import { ServiceRequestSearch } from "./HotlineTables";
+import ServiceRequestDetails from "./ServiceRequestDetails";
+import ServiceRequestSearch from "./ServiceRequestSearch";
 
 const server = setupServer(
   rest.get("/hotline/api/servicerequests/1/", (req, res, ctx) => {
@@ -38,9 +38,9 @@ describe("Render hotline", () => {
   });
 });
 
-describe("Render ServiceRequestView", () => {
+describe("Render ServiceRequestDetails", () => {
   it("Service request details loads", async () => {
-    render(<ServiceRequestView id={1} />);
+    render(<ServiceRequestDetails id={1} />);
     expect(screen.getByText(/Service Request/)).toBeTruthy();
   });
 });

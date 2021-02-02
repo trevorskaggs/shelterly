@@ -2,30 +2,14 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link } from 'raviger';
 import { Button, ButtonGroup, Col, ListGroup, Row } from 'react-bootstrap'
-import { Circle, CircleMarker, Map, TileLayer, Tooltip as MapTooltip, useLeaflet } from "react-leaflet";
+import { Circle, CircleMarker, Map, TileLayer, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
 import Moment from 'react-moment';
+import { Legend } from "../components/Map";
 import badge from "../static/images/badge-sheriff.png";
 import bandaid from "../static/images/band-aid-solid.png";
 import car from "../static/images/car-solid.png";
 import trailer from "../static/images/trailer-solid.png";
-import { OwnerContactForm, ServiceRequestForm } from "./HotlineForms";
-import { ServiceRequestView } from "./HotlineViews";
-import { initialData } from "./HotlineWorkflow";
-
-const header_style = {
-  textAlign: "center",
-};
-
-const Legend = (props) => {
-  const { map } = useLeaflet();
-
-  useEffect(() => {
-    const legend = L.control.scale(props);
-    legend.addTo(map);
-  }, []);
-  return null;
-};
 
 function Hotline() {
 
@@ -211,17 +195,5 @@ function Hotline() {
   </>
   )
 }
-
-export const UpdateServiceRequest = ({id}) => (
-  <div>
-    <ServiceRequestForm id={id} state={initialData} />
-  </div>
-)
-
-export const ServiceRequestDetail = ({id}) => (
-  <div>
-    <ServiceRequestView id={id} />
-  </div>
-)
 
 export default Hotline

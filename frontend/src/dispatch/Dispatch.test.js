@@ -1,7 +1,7 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import Dispatch from "./Dispatch";
-import DispatchTeamMemberForm from "./DispatchForms";
+import DispatchTeamMemberForm from "./DispatchTeamMemberForm";
 import DispatchAssignmentSearch from "./DispatchAssignmentSearch";
 
 describe("Render evac", () => {

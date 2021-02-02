@@ -13,7 +13,7 @@ import History from '../components/History';
 import noImageFound from '../static/images/image-not-found.png';
 import Flatpickr from 'react-flatpickr';
 
-export function ServiceRequestView({id}) {
+function ServiceRequestDetails({id}) {
 
   const datetime = useRef(null);
   const openCalendar = () => {
@@ -224,7 +224,7 @@ export function ServiceRequestView({id}) {
                       </Tooltip>
                     }
                   >
-                    <Link href={"/hotline/owner/new?servicerequest_id=" + id}><FontAwesomeIcon icon={faPlusSquare} size="sm" className="ml-1" inverse /></Link>
+                    <Link href={"/people/owner/new?servicerequest_id=" + id}><FontAwesomeIcon icon={faPlusSquare} size="sm" className="ml-1" inverse /></Link>
                   </OverlayTrigger>
                 </h4>
               </Card.Title>
@@ -241,7 +241,7 @@ export function ServiceRequestView({id}) {
                         </Tooltip>
                       }
                     >
-                      <Link href={"/hotline/owner/" + owner.id}><FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1" inverse /></Link>
+                      <Link href={"/people/owner/" + owner.id}><FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1" inverse /></Link>
                     </OverlayTrigger>
                     &nbsp;| {owner.display_phone||owner.email||"No Contact"}
                   </ListGroup.Item>
@@ -257,7 +257,7 @@ export function ServiceRequestView({id}) {
                     </Tooltip>
                   }
                 >
-                  <Link href={"/hotline/reporter/" + data.reporter}><FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1" inverse /></Link>
+                  <Link href={"/people/reporter/" + data.reporter}><FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1" inverse /></Link>
                 </OverlayTrigger>
                 </ListGroup.Item> : ""}
               </ListGroup>
@@ -378,3 +378,5 @@ export function ServiceRequestView({id}) {
     </>
   );
 };
+
+export default ServiceRequestDetails;

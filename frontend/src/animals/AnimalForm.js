@@ -314,10 +314,10 @@ const AnimalForm = (props) => {
                 navigate('/shelter/' + values.shelter);
               }
               else if (ownerResponse[0].data.id) {
-                navigate('/hotline/owner/' + ownerResponse[0].data.id)
+                navigate('/people/owner/' + ownerResponse[0].data.id)
               }
               else {
-                navigate('/hotline/reporter/' + reporterResponse[0].data.id)
+                navigate('/people/reporter/' + reporterResponse[0].data.id)
               }
             }
             else {
@@ -361,7 +361,7 @@ const AnimalForm = (props) => {
                 }
                 // If adding to an Owner, redirect to the owner.
                 else if (owner_id) {
-                  navigate('/hotline/owner/' + owner_id)
+                  navigate('/people/owner/' + owner_id)
                 }
                 // Else redirect to the animal.
                 else {

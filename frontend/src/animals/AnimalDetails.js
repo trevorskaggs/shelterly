@@ -231,7 +231,7 @@ function AnimalDetails({id}) {
                     </Tooltip>
                   }
                 >
-                  <Link href={"/hotline/owner/new?animal_id=" + id}><FontAwesomeIcon icon={faPlusSquare} size="sm" className="ml-1" inverse /></Link>
+                  <Link href={"/people/owner/new?animal_id=" + id}><FontAwesomeIcon icon={faPlusSquare} size="sm" className="ml-1" inverse /></Link>
                 </OverlayTrigger>
               </h4>
             </Card.Title>
@@ -248,7 +248,7 @@ function AnimalDetails({id}) {
                       </Tooltip>
                     }
                   >
-                    <Link href={"/hotline/owner/" + owner.id}><FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1 mr-1" inverse /></Link>
+                    <Link href={"/people/owner/" + owner.id}><FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1 mr-1" inverse /></Link>
                   </OverlayTrigger>
                   <OverlayTrigger
                     key={"remove-owner"}
@@ -274,7 +274,7 @@ function AnimalDetails({id}) {
                     </Tooltip>
                   }
                 >
-                  <Link href={"/hotline/reporter/" + data.reporter}><FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1" inverse /></Link>
+                  <Link href={"/people/reporter/" + data.reporter}><FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1" inverse /></Link>
                 </OverlayTrigger>
               </ListGroup.Item> : ""}
               {data.owner_objects.length < 1 && !data.reporter ? <ListGroup.Item>No Contacts</ListGroup.Item> : ""}

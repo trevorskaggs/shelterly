@@ -19,18 +19,9 @@ import sip from "../static/images/house-circle.png";
 import utl from "../static/images/question-circle.png";
 import { Typeahead } from 'react-bootstrap-typeahead';
 import Moment from 'react-moment';
+import { Legend } from "../components/Map";
 import 'react-bootstrap-typeahead/css/Typeahead.css';
 import 'leaflet/dist/leaflet.css';
-
-const Legend = (props) => {
-  const { map } = useLeaflet();
-
-  useEffect(() => {
-    const legend = L.control.scale(props);
-    legend.addTo(map);
-  }, []);
-  return null;
-};
 
 function Deploy() {
 

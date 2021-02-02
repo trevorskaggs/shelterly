@@ -135,7 +135,7 @@ function DispatchAssignmentSearch() {
                               <span key={owner.id}>
                                 {i > 0 && " | "}{owner.first_name} {owner.last_name}
                                 <Link
-                                  href={"/hotline/owner/" + owner.id} target="_blank"> <FontAwesomeIcon
+                                  href={"/people/owner/" + owner.id} target="_blank"> <FontAwesomeIcon
                                   icon={faClipboardList} inverse/>
                                 </Link>
                               </span>

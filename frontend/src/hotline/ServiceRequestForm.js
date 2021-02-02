@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
-import { Link, navigate, useQueryParams } from 'raviger';
+import { Link, navigate } from 'raviger';
 import { Field, Form, Formik } from 'formik';
 import {
   CustomInput,
@@ -18,8 +18,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft } from '@fortawesome/free-solid-svg-icons';
 import {STATE_OPTIONS} from "../constants";
 
-// Form for creating new Service Request objects.
-export function ServiceRequestForm(props) {
+// Form for Service Request objects.
+function ServiceRequestForm(props) {
 
   const { state, dispatch } = useContext(AuthContext);
   const id = props.id;
@@ -290,3 +290,5 @@ export function ServiceRequestForm(props) {
     </Formik>
   );
 }
+
+export default ServiceRequestForm;
