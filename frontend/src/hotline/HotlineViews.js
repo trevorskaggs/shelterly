@@ -81,8 +81,18 @@ export function ServiceRequestView({id}) {
   return (
     <>
       <Header>
-        Service Request Details
+        Service Request Details 
+        <OverlayTrigger
+          key={"cancel-service-request"}
+          placement="bottom"
+          overlay={
+            <Tooltip id={`tooltip-cancel-service-request`}>
+              Cancel service request
+            </Tooltip>
+          }
+        >
         <FontAwesomeIcon icon={faBan} style={{cursor:'pointer'}} inverse onClick={() => {setShowModal(true)}}/>
+        </OverlayTrigger>
         <OverlayTrigger
           key={"edit-service-request"}
           placement="bottom"
