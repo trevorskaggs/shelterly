@@ -52,7 +52,18 @@ export function ShelterDetails({id}) {
   return (
     <>
       <Header>
-        Shelter Details<Link href={"/shelter/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
+        Shelter Details
+        <OverlayTrigger
+        key={"edit-shelter"}
+        placement="bottom"
+        overlay={
+          <Tooltip id={`tooltip-edit-shelter`}>
+            Update shelter
+          </Tooltip>
+        }
+      >
+        <Link href={"/shelter/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-1" inverse /></Link>
+      </OverlayTrigger>
       </Header>
       <hr/>
       <Card className="border rounded d-flex" style={{width:"100%"}}>
@@ -80,7 +91,19 @@ export function ShelterDetails({id}) {
       <Card className="border rounded d-flex mt-3" >
         <Card.Body>
           <Card.Title className="">
-            <h4 className="mb-0">Buildings<Link href={"/shelter/building/new?shelter_id=" + id}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link></h4>
+            <h4 className="mb-0">Buildings
+              <OverlayTrigger
+                key={"add-building"}
+                placement="top"
+                overlay={
+                  <Tooltip id={`tooltip-add-building`}>
+                    Add a building
+                  </Tooltip>
+                }
+              >
+                <Link href={"/shelter/building/new?shelter_id=" + id}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
+              </OverlayTrigger>
+            </h4>
           </Card.Title>
           <hr/>
           <span className="d-flex flex-wrap align-items-end">
@@ -88,7 +111,17 @@ export function ShelterDetails({id}) {
               <Card key={building.id} className="border rounded mr-3" style={{width:"202px"}}>
                 <Card.Title className="text-center mb-0 mt-3">
                   {building.name}
-                  <Link href={"/shelter/building/" + building.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
+                  <OverlayTrigger
+                    key={"room-details"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-room-details`}>
+                        Room details
+                      </Tooltip>
+                    }
+                  >
+                    <Link href={"/shelter/building/" + building.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+                  </OverlayTrigger>
                 </Card.Title>
                 <hr style={{marginBottom:"0px"}} />
                 <span className="d-flex flex-wrap align-items-end">
@@ -96,14 +129,34 @@ export function ShelterDetails({id}) {
                     <Card key={room.id} className="border rounded" style={{width:"100px", height:"100px"}}>
                       <Card.Text className="text-center mb-0">
                         {room.name}
-                        <Link href={"/shelter/room/" + room.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
+                        <OverlayTrigger
+                          key={"room-details"}
+                          placement="top"
+                          overlay={
+                            <Tooltip id={`tooltip-room-details`}>
+                              Room details
+                            </Tooltip>
+                          }
+                        >
+                          <Link href={"/shelter/room/" + room.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+                        </OverlayTrigger>
                       </Card.Text>
                       <Card.Text className="text-center mb-0">
-                        {room.animals.length} Animals
+                        {room.animal_count} Animals
                       </Card.Text>
                     </Card>
                   ))}
-                  <Link href={"/shelter/building/room/new?building_id=" + building.id}> <FontAwesomeIcon icon={faPlusSquare} style={{width:"100px", height:"100px", verticalAlign:"middle"}} inverse /></Link>
+                  <OverlayTrigger
+                    key={"add-room"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-add-room`}>
+                        Add a room
+                      </Tooltip>
+                    }
+                  >
+                    <Link href={"/shelter/building/room/new?building_id=" + building.id}> <FontAwesomeIcon icon={faPlusSquare} style={{width:"100px", height:"100px", verticalAlign:"middle"}} inverse /></Link>
+                  </OverlayTrigger>
                 </span>
               </Card>
             ))}
@@ -117,7 +170,7 @@ export function ShelterDetails({id}) {
             <Card.Body style={{marginBottom:"-15px"}}>
               <Card.Title>
                 <h4 className="mb-0">Animals Needing Room
-                <OverlayTrigger key={"assign"} placement="top" overlay={<Tooltip id={`tooltip-assign`}>Assign Animals to Rooms</Tooltip>}>
+                <OverlayTrigger key={"assign"} placement="top" overlay={<Tooltip id={`tooltip-assign`}>Assign animals to rooms</Tooltip>}>
                   <Link href={"/shelter/" + id + "/assign"}><FontAwesomeIcon className="ml-1" icon={faWarehouse} inverse/></Link>
                 </OverlayTrigger></h4>
               </Card.Title>
@@ -128,8 +181,17 @@ export function ShelterDetails({id}) {
                   <ReactImageFallback style={{width:"151px", height:"151px", objectFit: "cover", overflow: "hidden"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} />
                   <Card.Text className="text-center mb-0">
                     {animal.name||"Unknown"}
-                    <Link href={"/animals/" + animal.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
-                    <Link href={"/animals/edit/" + animal.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
+                    <OverlayTrigger
+                      key={"animal-details"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-animal-details`}>
+                          Animal details
+                        </Tooltip>
+                      }
+                    >
+                      <Link href={"/animals/" + animal.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+                    </OverlayTrigger>
                   </Card.Text>
                   <Card.Text className="text-center" style={{textTransform:"capitalize"}}>
                     {animal.size !== 'unknown' ? animal.size : ""} {animal.species}
@@ -171,14 +233,25 @@ export function BuildingDetailsTable({id}) {
   return (
     <>
     <Header>
-      Building Details<Link href={"/shelter/building/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
+      Building Details
+      <OverlayTrigger
+        key={"edit-building"}
+        placement="bottom"
+        overlay={
+          <Tooltip id={`tooltip-edit-building`}>
+            Update building
+          </Tooltip>
+        }
+      >
+        <Link href={"/shelter/building/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-1" inverse /></Link>
+      </OverlayTrigger>
     </Header>
     <hr/>
     <Card className="border rounded d-flex" style={{width:"100%"}}>
       <Card.Body>
         <Card.Title>
           <h4>Information
-            <OverlayTrigger key={"assign"} placement="top" overlay={<Tooltip id={`tooltip-assign`}>Assign Animals to Rooms</Tooltip>}>
+            <OverlayTrigger key={"assign"} placement="top" overlay={<Tooltip id={`tooltip-assign`}>Assign animals to rooms</Tooltip>}>
               <Link href={"/shelter/" + data.shelter + "/assign"}><FontAwesomeIcon className="ml-1" icon={faWarehouse} inverse/></Link>
             </OverlayTrigger>
           </h4>
@@ -192,7 +265,18 @@ export function BuildingDetailsTable({id}) {
             <b>Description: </b>{data.description}
           </ListGroup.Item> : ""}
           <ListGroup.Item>
-            <b>Shelter:</b> {data.shelter_name}<Link href={"/shelter/" + data.shelter}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
+            <b>Shelter:</b> {data.shelter_name}
+            <OverlayTrigger
+              key={"shelter-details"}
+              placement="top"
+              overlay={
+                <Tooltip id={`tooltip-shelter-details`}>
+                  Shelter details
+                </Tooltip>
+              }
+            >
+              <Link href={"/shelter/" + data.shelter}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+            </OverlayTrigger>
           </ListGroup.Item>
         </ListGroup>
       </Card.Body>
@@ -200,7 +284,19 @@ export function BuildingDetailsTable({id}) {
     <Card className="mt-3 border rounded d-flex">
       <Card.Body>
         <Card.Title>
-          <h4>Rooms<Link href={"/shelter/building/room/new?building_id=" + id}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link></h4>
+          <h4>Rooms
+            <OverlayTrigger
+              key={"add-room"}
+              placement="top"
+              overlay={
+                <Tooltip id={`tooltip-add-room`}>
+                  Add a room
+                </Tooltip>
+              }
+            >
+            <Link href={"/shelter/building/room/new?building_id=" + id}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
+          </OverlayTrigger>
+          </h4>
         </Card.Title>
         <hr/>
         <span className="d-flex flex-wrap align-items-end">
@@ -208,11 +304,20 @@ export function BuildingDetailsTable({id}) {
             <Card key={room.id} className="border rounded mr-3" style={{width:"100px", height:"100px"}}>
               <Card.Text className="text-center mb-0">
                 {room.name}
-                <Link href={"/shelter/room/" + room.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
-                <Link href={"/shelter/room/edit/" + room.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
+                <OverlayTrigger
+                  key={"room-details"}
+                  placement="top"
+                  overlay={
+                    <Tooltip id={`tooltip-room-details`}>
+                      Room details
+                    </Tooltip>
+                  }
+                >
+                  <Link href={"/shelter/room/" + room.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+                </OverlayTrigger>
               </Card.Text>
               <Card.Text className="text-center mb-0">
-                {room.animals.length} Animals
+                {room.animal_count} Animals
               </Card.Text>
             </Card>
           ))}
@@ -249,14 +354,25 @@ export function RoomDetailsTable({id}) {
   return (
     <>
     <Header>
-      Room Details<Link href={"/shelter/room/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
+      Room Details
+      <OverlayTrigger
+        key={"edit-room"}
+        placement="bottom"
+        overlay={
+          <Tooltip id={`tooltip-edit-room`}>
+            Update room
+          </Tooltip>
+        }
+      >
+        <Link href={"/shelter/room/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-1" inverse /></Link>
+      </OverlayTrigger>
     </Header>
     <hr/>
     <Card className="border rounded d-flex" style={{width:"100%"}}>
       <Card.Body>
         <Card.Title>
           <h4>Information
-            <OverlayTrigger key={"assign"} placement="top" overlay={<Tooltip id={`tooltip-assign`}>Assign Animals to Rooms</Tooltip>}>
+            <OverlayTrigger key={"assign"} placement="top" overlay={<Tooltip id={`tooltip-assign`}>Assign animals to rooms</Tooltip>}>
               <Link href={"/shelter/" + data.shelter + "/assign"}><FontAwesomeIcon className="ml-1" icon={faWarehouse} inverse/></Link>
             </OverlayTrigger>
           </h4>
@@ -270,10 +386,32 @@ export function RoomDetailsTable({id}) {
             <b>Description: </b>{data.description}
           </ListGroup.Item> : ""}
           <ListGroup.Item>
-            <b>Building:</b> {data.building_name}<Link href={"/shelter/building/" + data.building}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
+            <b>Building:</b> {data.building_name}
+            <OverlayTrigger
+              key={"building-details"}
+              placement="top"
+              overlay={
+                <Tooltip id={`tooltip-building-details`}>
+                  Building details
+                </Tooltip>
+              }
+            >
+              <Link href={"/shelter/building/" + data.building}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+            </OverlayTrigger>
           </ListGroup.Item>
           <ListGroup.Item>
-            <b>Shelter:</b> {data.shelter_name}<Link href={"/shelter/" + data.shelter}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
+            <b>Shelter:</b> {data.shelter_name}
+            <OverlayTrigger
+              key={"shelter-details"}
+              placement="top"
+              overlay={
+                <Tooltip id={`tooltip-shelter-details`}>
+                  Shelter details
+                </Tooltip>
+              }
+            >
+              <Link href={"/shelter/" + data.shelter}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+            </OverlayTrigger>
           </ListGroup.Item>
         </ListGroup>
       </Card.Body>

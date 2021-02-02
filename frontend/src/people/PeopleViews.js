@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import axios from "axios";
 import { Link } from 'raviger';
-import { Card, ListGroup } from 'react-bootstrap';
+import { Card, ListGroup, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faClipboardList, faEdit, faPhone, faPlusSquare
@@ -57,8 +57,44 @@ export function PersonView({id}) {
     <>
     <Header>
       {is_owner ?
-        <span>Owner Details<Link href={"/hotline/owner/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link> <Link href={"/hotline/owner/new?owner_id=" + id}><FontAwesomeIcon icon={faPlusSquare} inverse /></Link></span> :
-        <span>Reporter Details<Link href={"/hotline/reporter/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link></span>
+        <span>Owner Details
+          <OverlayTrigger
+            key={"update-owner"}
+            placement="bottom"
+            overlay={
+              <Tooltip id={`tooltip-update-owner`}>
+                Update owner
+              </Tooltip>
+            }
+          >
+            <Link href={"/hotline/owner/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-1 mr-1" inverse /></Link>
+          </OverlayTrigger>
+          <OverlayTrigger
+            key={"add-owner"}
+            placement="bottom"
+            overlay={
+              <Tooltip id={`tooltip-add-owner`}>
+                Add another owner
+              </Tooltip>
+            }
+          >
+            <Link href={"/hotline/owner/new?owner_id=" + id}><FontAwesomeIcon icon={faPlusSquare} className="fa-move-down" inverse /></Link>
+          </OverlayTrigger>
+        </span>
+      :
+        <span>Reporter Details
+          <OverlayTrigger
+            key={"update-reporter"}
+            placement="bottom"
+            overlay={
+              <Tooltip id={`tooltip-update-reporter`}>
+                Update reporter
+              </Tooltip>
+            }
+          >
+            <Link href={"/hotline/reporter/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-1" inverse /></Link>
+          </OverlayTrigger>
+        </span>
       }
     </Header>
     <hr/>
@@ -79,7 +115,19 @@ export function PersonView({id}) {
               {data.comments ? <ListGroup.Item><b>Comments: </b>{data.comments}</ListGroup.Item>: ''}
               <ListGroup.Item><b>Address: </b>{data.address ? data.full_address : 'No Address Listed'}</ListGroup.Item>
               {data.request ?
-                <ListGroup.Item><b>Service Request: </b>{data.request.full_address}<Link href={"/hotline/servicerequest/" + data.request.id}> <FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link></ListGroup.Item>: ''}
+                <ListGroup.Item><b>Service Request: </b>{data.request.full_address}
+                  <OverlayTrigger
+                    key={"request-details"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-request-details`}>
+                        Service request details
+                      </Tooltip>
+                    }
+                  >
+                    <Link href={"/hotline/servicerequest/" + data.request.id}><FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1" inverse /></Link>
+                  </OverlayTrigger>
+                </ListGroup.Item>: ''}
             </ListGroup>
           </Card.Body>
         </Card>
@@ -107,7 +155,19 @@ export function PersonView({id}) {
         <Card className="border rounded" style={{width:"100%"}}>
           <Card.Body>
             <Card.Title>
-              <h4 className="mb-0">Animals<Link href={"/hotline/animal/new?owner_id=" + id}> <FontAwesomeIcon icon={faPlusSquare} inverse /></Link></h4>
+              <h4 className="mb-0">Animals
+                <OverlayTrigger
+                  key={"add-animal"}
+                  placement="top"
+                  overlay={
+                    <Tooltip id={`tooltip-add-animal`}>
+                      Add animal
+                    </Tooltip>
+                  }
+                >
+                  <Link href={"/hotline/animal/new?owner_id=" + id}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
+                </OverlayTrigger>
+              </h4>
             </Card.Title>
             <hr/>
             <span className="d-flex flex-wrap align-items-end">
@@ -116,8 +176,17 @@ export function PersonView({id}) {
                 <ReactImageFallback style={{width:"151px", height:"151px", objectFit: "cover", overflow: "hidden"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} />
                 <Card.Text className="text-center mb-0">
                   {animal.name||"Unknown"}
-                  <Link href={"/animals/" + animal.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
-                  <Link href={"/animals/edit/" + animal.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
+                  <OverlayTrigger
+                    key={"animal-details"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-animal-details`}>
+                        Animal details
+                      </Tooltip>
+                    }
+                  >
+                    <Link href={"/animals/" + animal.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+                  </OverlayTrigger>
                 </Card.Text>
                 <Card.Text className="text-center mb-0">
                   {animal.status}

@@ -225,6 +225,7 @@ export function ServiceRequestForm(props) {
                     name="state"
                     id="state"
                     options={STATE_OPTIONS}
+                    value={formikProps.values.state || ''}
                     placeholder=''
                     disabled
                   />
