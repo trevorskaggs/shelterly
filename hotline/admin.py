@@ -24,5 +24,6 @@ class VisitNoteAdmin(admin.ModelAdmin):
 
   list_display = ('id', 'notes')
 
+
 admin.site.register(ServiceRequest, ServiceRequestAdmin)
 admin.site.register(VisitNote, VisitNoteAdmin)

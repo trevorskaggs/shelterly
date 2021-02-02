@@ -3,12 +3,13 @@ from django.db.models import Count, Exists, OuterRef, Prefetch, Q
 from rest_framework import serializers
 from actstream.models import target_stream
 from animals.models import Animal
-from .models import Person
+from .models import OwnerContact, Person
 from location.utils import build_full_address, build_action_string
 from hotline.models import ServiceRequest
-from animals.models import Animal
+from animals.serializers import AnimalSerializer
 
 class SimplePersonSerializer(serializers.ModelSerializer):
+
     full_address = serializers.SerializerMethodField()
     display_phone = serializers.SerializerMethodField()
     is_owner = serializers.SerializerMethodField()
@@ -41,12 +42,26 @@ class SimplePersonSerializer(serializers.ModelSerializer):
         model = Person
         fields = '__all__'
 
+
+class OwnerContactSerializer(serializers.ModelSerializer):
+
+    owner_name = serializers.SerializerMethodField()
+
+    def get_owner_name(self, obj):
+
+        return str(obj.owner)
+
+    class Meta:
+        model = OwnerContact
+        fields = '__all__'
+
+
 class PersonSerializer(SimplePersonSerializer):
-    from animals.serializers import AnimalSerializer
+
+    owner_contacts = OwnerContactSerializer(source='ownercontact_set', many=True, required=False, read_only=True)
     animals = AnimalSerializer(source='animal_set', many=True, required=False, read_only=True)
     request = serializers.SerializerMethodField()
     action_history = serializers.SerializerMethodField()
-
 
     # Custom field for the action history.
     def get_action_history(self, obj):
@@ -71,3 +86,4 @@ class PersonSerializer(SimplePersonSerializer):
         if service_request:
             return SimpleServiceRequestSerializer(service_request).data
         return None
+

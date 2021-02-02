@@ -5,8 +5,9 @@ import { Button, ButtonGroup, Card, CardGroup, Col, Form, FormControl, InputGrou
 import { Link } from "raviger";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faClipboardList, faIgloo, faExclamationCircle, faQuestionCircle, faHome, faHelicopter, faHeart, faSkullCrossbones
+  faClipboardList, faCircle, faExclamationCircle, faQuestionCircle, faHome, faHelicopter, faHeart, faSkullCrossbones
 } from '@fortawesome/free-solid-svg-icons';
+import { faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
 import Moment from "react-moment";
 import Header from '../components/Header';
 
@@ -139,7 +140,19 @@ export function EvacuationAssignmentTable() {
         {data.evacuation_assignments.map(evacuation_assignment => (
           <div key={evacuation_assignment.id} className="mt-3">
             <div className="card-header"><h4 style={{marginBottom:"-2px"}}>
-              <Moment format="L">{evacuation_assignment.start_time}</Moment> <Link href={"/evac/summary/" + evacuation_assignment.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} inverse /></Link>&nbsp;&nbsp;|&nbsp;
+              <Moment format="L">{evacuation_assignment.start_time}</Moment>
+              <OverlayTrigger
+                key={"dispatch-assignment-summary"}
+                placement="top"
+                overlay={
+                  <Tooltip id={`tooltip-dispatch-assignment-summary`}>
+                    Dispatch assignment summary
+                  </Tooltip>
+                }
+              >
+                <Link href={"/evac/summary/" + evacuation_assignment.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+              </OverlayTrigger>
+              &nbsp;&nbsp;|&nbsp;
               Team Members: {evacuation_assignment.team_member_objects.map((member, i) => (
                   <span key={member.id}>{i > 0 && ", "}{member.first_name} {member.last_name}</span>))}
               {evacuation_assignment.end_time ? "" : <Link href={"/evac/resolution/" + evacuation_assignment.id} className="btn btn-danger ml-1" style={{paddingTop:"0px", paddingBottom:"0px"}}>Close</Link>}
@@ -199,7 +212,10 @@ export function EvacuationAssignmentTable() {
                                   {animal.status === "SHELTERED IN PLACE" ?
                                       <OverlayTrigger key={"sip"} placement="top"
                                                       overlay={<Tooltip id={`tooltip-sip`}>SHELTERED IN PLACE</Tooltip>}>
-                                          <FontAwesomeIcon icon={faIgloo} inverse/>
+                                          <span className="fa-layers fa-fw">
+                                            <FontAwesomeIcon icon={faCircle} transform={'grow-1'} />
+                                            <FontAwesomeIcon icon={faHomeAlt} style={{color:"#444"}} transform={'shrink-3'} size="sm" inverse />
+                                          </span>
                                       </OverlayTrigger> : ""}
                                   {animal.status === "REPORTED" ?
                                       <OverlayTrigger key={"reported"} placement="top"

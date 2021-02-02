@@ -141,27 +141,42 @@ export function EvacResolution({ id }) {
   });
 
   const [shelters, setShelters] = useState({options: [], isFetching: false});
+  const [ownerChoices, setOwnerChoices] = useState({});
 
   // Hook for initializing data.
   useEffect(() => {
     let source = axios.CancelToken.source();
-    const fetchEvacAssignmentData = async () => {
+
+    const fetchEvacAssignmentData = () => {
       // Fetch Animal data.
-      await axios.get('/evac/api/evacassignment/' + id + '/', {
+      axios.get('/evac/api/evacassignment/' + id + '/', {
         cancelToken: source.token,
       })
         .then(response => {
+          let ownerChoices = {}
           response.data["sr_updates"] = [];
           response.data.service_request_objects.forEach((service_request, index) => {
-            // Use existing VisitNote to populate data if we're editing a closed Resolution.
-            const visit_note = service_request.visit_notes.filter(note => String(note.evac_assignment) === String(id))[0]
-            if (visit_note) {
-              response.data.sr_updates.push({ id: service_request.id, followup_date: service_request.followup_date, date_completed: visit_note.date_completed || new Date(), notes: visit_note.notes, owner_contacted: visit_note.owner_contacted, forced_entry: visit_note.forced_entry, animals: service_request.animals.filter(animal => animal.evacuation_assignments.includes(Number(id))), owner: service_request.owner.length > 0 })
-            }
-            else {
-              response.data.sr_updates.push({ id: service_request.id, followup_date: service_request.followup_date, date_completed: new Date(), notes: '', owner_contacted: false, forced_entry: false, animals: service_request.animals.filter(animal => animal.evacuation_assignments.includes(Number(id))), owner: service_request.owner.length > 0 })
-            }
+            ownerChoices[service_request.id] = []
+            service_request.owners.forEach(owner => {
+              ownerChoices[service_request.id].push({value: owner.id, label: owner.first_name + ' ' + owner.last_name})
+            })
+            // Use existing VisitNote/OwnerContact to populate data if we're editing a closed Resolution.
+            const visit_note = service_request.visit_notes.filter(note => String(note.evac_assignment) === String(id))[0] || {date_completed:new Date(), notes:'', forced_entry:false}
+            const owner_contact = service_request.owner_contacts.filter(contact => String(contact.evac_assignment) === String(id))[0] || {owner:null, owner_contact_time:'', owner_contact_note:''}
+            response.data.sr_updates.push({
+              id: service_request.id,
+              followup_date: service_request.followup_date,
+              date_completed: visit_note.date_completed || new Date(),
+              notes: visit_note.notes || '',
+              forced_entry: visit_note.forced_entry || false,
+              animals: service_request.animals.filter(animal => animal.evacuation_assignments.includes(Number(id))),
+              owner: service_request.owner.length > 0,
+              owner_contact_id: owner_contact.owner,
+              owner_contact_time: owner_contact.owner_contact_time || '',
+              owner_contact_note: owner_contact.owner_contact_note || ''
+            })
           });
+          setOwnerChoices(ownerChoices);
           setData(response.data);
         })
         .catch(error => {
@@ -216,10 +231,13 @@ export function EvacResolution({ id }) {
             date_completed: Yup.date().required('Required'),
             notes: Yup.string(),
             forced_entry: Yup.boolean(),
-            owner_contacted: Yup.boolean().when('owner', {
+            owner_contact_id: Yup.number().required('Please select the contacted owner'),
+            owner_contact_note: Yup.string().when('owner', {
               is: true,
-              then: Yup.boolean().oneOf([true], 'The owner must be notified before resolution.').required()
-            }),
+              then: Yup.string().required('The owner must be notified before resolution.')}),
+            owner_contact_time: Yup.date().when('owner', {
+              is: true,
+              then: Yup.date().required('The owner must be notified before resolution.')}),
           })
         ),
       })}
@@ -326,16 +344,6 @@ export function EvacResolution({ id }) {
                     />
                   </BootstrapForm.Row>
                   <BootstrapForm.Row className="mt-3">
-                    <TextInput
-                      id={`sr_updates.${index}.notes`}
-                      name={`sr_updates.${index}.notes`}
-                      xs="9"
-                      as="textarea"
-                      rows={5}
-                      label="Notes"
-                    />
-                  </BootstrapForm.Row>
-                  <BootstrapForm.Row>
                     <DateTimePicker
                       label="Followup Date"
                       name={`sr_updates.${index}.followup_date`}
@@ -348,41 +356,64 @@ export function EvacResolution({ id }) {
                       value={service_request.followup_date || null}
                     />
                   </BootstrapForm.Row>
-                  <BootstrapForm.Row className="mt-2">
+                  <BootstrapForm.Row className="mt-3">
+                    <TextInput
+                      id={`sr_updates.${index}.notes`}
+                      name={`sr_updates.${index}.notes`}
+                      xs="9"
+                      as="textarea"
+                      rows={5}
+                      label="Visit Notes"
+                    />
+                  </BootstrapForm.Row>
+                  <BootstrapForm.Row>
                     <Col>
-                      <Label htmlFor={`sr_updates.${index}.forced_entry`} className="mt-2">Forced Entry</Label>
+                      <Label htmlFor={`sr_updates.${index}.forced_entry`} className="mt-1">Forced Entry</Label>
                       <Field component={Switch} name={`sr_updates.${index}.forced_entry`} type="checkbox" color="primary" />
                     </Col>
                   </BootstrapForm.Row>
                   {service_request.owners.length > 0 ?
-                    <BootstrapForm.Row className="mt-3 pl-1">
-                      <Field
-                        label={"Owner Notified: "}
-                        component={Checkbox}
-                        name={`sr_updates.${index}.owner_contacted`}
-                        checked={(props.values.sr_updates[index] && props.values.sr_updates[index].owner_contacted) || false}
-                        onChange={() => {
-                          if (props.values.sr_updates[index] && props.values.sr_updates[index].owner_contacted) {
-                            props.setFieldValue(
-                              `sr_updates.${index}.owner_contacted`,
-                              false
-                            );
-                          }
-                          else {
-                            props.setFieldValue(
-                              `sr_updates.${index}.owner_contacted`,
-                              true
-                            );
-                          }
-                        }}
-                      />
-                    </BootstrapForm.Row>
+                    <span>
+                      <BootstrapForm.Row className="mt-2">
+                        <Col xs="4">
+                         <DropDown
+                          label="Owner Contacted"
+                          id={`sr_updates.${index}.owner_contact_id`}
+                          name={`sr_updates.${index}.owner_contact_id`}
+                          key={`my_unique_test_select_key__d}`}
+                          type="text"
+                          xs="4"
+                          options={ownerChoices[service_request.id]}
+                          value={props.values.sr_updates[index] && props.values.sr_updates[index].owner_contact_id || null}
+                          isClearable={false}
+                        />
+                        </Col>
+                      </BootstrapForm.Row>
+                      <BootstrapForm.Row className="mt-3">
+                        <DateTimePicker
+                          label="Owner Contact Time"
+                          name={`sr_updates.${index}.owner_contact_time`}
+                          id={`sr_updates.${index}.owner_contact_time`}
+                          xs="4"
+                          data-enable-time={true}
+                          onChange={(date, dateStr) => {
+                            props.setFieldValue(`sr_updates.${index}.owner_contact_time`, dateStr)
+                          }}
+                          value={props.values.sr_updates[index] ? props.values.sr_updates[index].owner_contact_time : null}
+                        />
+                      </BootstrapForm.Row>
+                      <BootstrapForm.Row className="mt-3" style={{marginBottom:"-15px"}}>
+                        <TextInput
+                          id={`sr_updates.${index}.owner_contact_note`}
+                          name={`sr_updates.${index}.owner_contact_note`}
+                          xs="9"
+                          as="textarea"
+                          rows={5}
+                          label="Owner Contact Note"
+                        />
+                      </BootstrapForm.Row>
+                    </span>
                     : ""}
-                  {props.errors.sr_updates && props.errors.sr_updates[index] && props.errors.sr_updates[index].owner_contacted &&
-                    props.touched.sr_updates && props.touched.sr_updates[index] && props.touched.sr_updates[index].owner_contacted && (
-                      <div style={{ color: "#e74c3c", marginTop: "-8px", fontSize: "80%" }}>{props.errors.sr_updates[index].owner_contacted}</div>
-                    )
-                  }
                 </Card.Body>
               </Card>
             ))}
@@ -398,15 +429,14 @@ export function EvacResolution({ id }) {
 
 export const VisitNoteForm = ({ id }) => {
 
-  const [data, setData] = useState({
-    date_completed: '',
-    owner_contacted: false,
-    notes: '',
-    service_request: null,
-    evac_assignment: null,
-    address: '',
-    forced_entry: false,
-  })
+    const [data, setData] = useState({
+      date_completed: '',
+      notes: '',
+      service_request: null,
+      evac_assignment: null,
+      address: '',
+      forced_entry: false,
+    })
 
   useEffect(() => {
     let source = axios.CancelToken.source();
@@ -458,31 +488,27 @@ export const VisitNoteForm = ({ id }) => {
             <Form>
               <FormGroup>
                 <Row>
-                  <Col xs={{ size: 2 }}>
-                    <DateTimePicker
-                      label="Date Completed"
-                      name="date_completed"
-                      id="date_completed"
-                      xs="7"
-                      clearable={false}
-                      onChange={(date, dateStr) => {
-                        form.setFieldValue("date_completed", dateStr)
-                      }}
-                      value={form.values.date_completed || null}
-                    />
-                  </Col>
+                  <DateTimePicker
+                    label="Date Completed"
+                    name="date_completed"
+                    id="date_completed"
+                    xs="7"
+                    clearable={false}
+                    onChange={(date, dateStr) => {
+                      form.setFieldValue("date_completed", dateStr)
+                    }}
+                    value={form.values.date_completed || null}
+                  />
                 </Row>
-                <Row>
-                  <Col xs={{ size: 2 }}>
-                    <TextInput
-                      as="textarea"
-                      label="Notes"
-                      name="notes"
-                      id="notes"
-                      xs="7"
-                      rows={5}
-                    />
-                  </Col>
+                <Row className="mt-3 pl-0">
+                  <TextInput
+                    as="textarea"
+                    label="Notes"
+                    name="notes"
+                    id="notes"
+                    xs="7"
+                    rows={5}
+                  />
                 </Row>
                 <Row>
                   <Col>

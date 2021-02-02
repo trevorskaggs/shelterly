@@ -6,40 +6,16 @@ from .models import Animal, AnimalImage
 from location.utils import build_full_address, build_action_string
 
 class SimpleAnimalSerializer(serializers.ModelSerializer):
-    full_address = serializers.SerializerMethodField()
-    request_address = serializers.SerializerMethodField()
     found_location = serializers.SerializerMethodField()
     aco_required = serializers.SerializerMethodField()
     front_image = serializers.SerializerMethodField()
     side_image = serializers.SerializerMethodField()
     extra_images = serializers.SerializerMethodField()
-    shelter_name = serializers.SerializerMethodField()
     owner_names = serializers.SerializerMethodField()
     is_stray = serializers.BooleanField(read_only=True)
 
-    # Custom field for the full address.
-    def get_full_address(self, obj):
-        # Use the Room address first if it exists.
-        if obj.shelter:
-            return build_full_address(obj.shelter)
-        # Then use the SR address if it exists.
-        elif obj.request:
-            return build_full_address(obj.request)
-        # Otherwise return an empty string.
-        return ''
-
-    # Custom field for request address.
-    def get_request_address(self, obj):
-        return build_full_address(obj.request)
-
     def get_found_location(self, obj):
         return build_full_address(obj)
-
-    # Custom field to return the shelter name.
-    def get_shelter_name(self, obj):
-        if obj.shelter:
-            return obj.shelter.name
-        return ''
 
     def get_owner_names(self, obj):
         if obj.owner.exists():
@@ -93,7 +69,10 @@ class SimpleAnimalSerializer(serializers.ModelSerializer):
 class AnimalSerializer(SimpleAnimalSerializer):
 
     owners = serializers.SerializerMethodField()
+    full_address = serializers.SerializerMethodField()
+    shelter_name = serializers.SerializerMethodField()
     reporter_object = serializers.SerializerMethodField(read_only=True)
+    request_address = serializers.SerializerMethodField()
     action_history = serializers.SerializerMethodField()
     evacuation_assignments = serializers.SerializerMethodField()
     room_name = serializers.SerializerMethodField()
@@ -104,6 +83,26 @@ class AnimalSerializer(SimpleAnimalSerializer):
         if obj.owner.exists():
             return SimplePersonSerializer(obj.owner, many=True).data
         return []
+
+    # Custom field for the full address.
+    def get_full_address(self, obj):
+        # Use the Room address first if it exists.
+        if obj.shelter:
+            return build_full_address(obj.shelter)
+        # Then use the SR address if it exists.
+        elif obj.request:
+            return build_full_address(obj.request)
+        # Otherwise return an empty string.
+        return ''
+
+    # Custom field for request address.
+    def get_request_address(self, obj):
+        return build_full_address(obj.request)
+
+    # Custom field to return the shelter name.
+    def get_shelter_name(self, obj):
+        if obj.shelter:
+            return obj.shelter.name
 
     # Custom field to return the shelter name.
     def get_room_name(self, obj):

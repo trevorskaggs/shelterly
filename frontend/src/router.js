@@ -7,8 +7,8 @@ import Evac, { EvacuationAssignmentSearch } from "./evac/Evac";
 import HotlineWorkflow from "./hotline/HotlineWorkflow";
 import Hotline, { ServiceRequestDetail, UpdateServiceRequest } from "./hotline/Hotline";
 import { ServiceRequestSearch } from "./hotline/HotlineTables"
+import { NewOwner, NewOwnerContact, NewReporter, OwnerDetail, ReporterDetail,  UpdateOwner, UpdateOwnerContact, UpdateReporter } from "./people/People";
 import Intake, { OwnerSearch } from "./intake/Intake";
-import { NewOwner, NewReporter, OwnerDetail, ReporterDetail,  UpdateOwner, UpdateReporter } from "./people/People";
 import Shelter, { NewShelter, UpdateShelter } from "./shelter/Shelter";
 import { ShelterAssignment } from "./shelter/ShelterAssignment";
 import { ShelterDetails } from "./shelter/ShelterDetails"
@@ -40,6 +40,8 @@ const routes = {
   "/hotline/owner/edit/:id": ({id}) => <UpdateOwner id={id} />,
   "/hotline/owner/new": () => <NewOwner />,
   "/hotline/owner/:id": ({id}) => <OwnerDetail id={id} />,
+  "/hotline/ownercontact/new": () => <NewOwnerContact />,
+  "/hotline/ownercontact/:id": ({id}) => <UpdateOwnerContact id={id}/>,
   "/hotline/reporter/edit/:id": ({id}) => <UpdateReporter id={id} />,
   "/hotline/reporter/new": () => <NewReporter />,
   "/hotline/reporter/:id": ({id}) => <ReporterDetail id={id}/>,
