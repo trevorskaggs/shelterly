@@ -157,7 +157,7 @@ export function EvacResolution({ id }) {
           response.data["sr_updates"] = [];
           response.data.service_request_objects.forEach((service_request, index) => {
             ownerChoices[service_request.id] = []
-            service_request.owners.forEach(owner => {
+            service_request.owner_objects.forEach(owner => {
               ownerChoices[service_request.id].push({value: owner.id, label: owner.first_name + ' ' + owner.last_name})
             })
             // Use existing VisitNote/OwnerContact to populate data if we're editing a closed Resolution.
@@ -170,7 +170,7 @@ export function EvacResolution({ id }) {
               notes: visit_note.notes || '',
               forced_entry: visit_note.forced_entry || false,
               animals: service_request.animals.filter(animal => animal.evacuation_assignments.includes(Number(id))),
-              owner: service_request.owner.length > 0,
+              owner: service_request.owners.length > 0,
               owner_contact_id: owner_contact.owner,
               owner_contact_time: owner_contact.owner_contact_time || '',
               owner_contact_note: owner_contact.owner_contact_note || ''
@@ -285,7 +285,7 @@ export function EvacResolution({ id }) {
                   <hr />
                   <ListGroup variant="flush" style={{ marginTop: "-13px", marginBottom: "-13px" }}>
                     <ListGroup.Item><b>Address: </b>{service_request.full_address}</ListGroup.Item>
-                    {service_request.owners.map(owner => (
+                    {service_request.owner_objects.map(owner => (
                       <ListGroup.Item key={owner.id}><b>Owner: </b>{owner.first_name} {owner.last_name} <Link href={"/hotline/owner/" + owner.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item>
                     ))}
                     {service_request.owners.length < 1 ? <ListGroup.Item><b>Owner: </b>No Owner</ListGroup.Item> : ""}

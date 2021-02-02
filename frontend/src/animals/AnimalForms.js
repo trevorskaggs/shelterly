@@ -246,9 +246,9 @@ export const AnimalForm = (props) => {
             .nullable()
         })}
         onSubmit={ async (values, { setSubmitting, resetForm }) => {
-          // Remove owner if animal has none.
-          if (values["owner"]) {
-            delete values["owner"];
+          // Remove owners from form data.
+          if (values["owners"]) {
+            delete values["owners"];
           }
 
           // Use FormData so that image files may also be included.

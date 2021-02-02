@@ -128,7 +128,7 @@ export function AnimalSearch() {
                 </Card.Title>
                 <ListGroup>
                   <ListGroup.Item>{titleCase(animal.species)}{animal.sex ? <span>, {titleCase(animal.sex)}</span> : ""}{animal.age ? <span>, {titleCase(animal.age)}</span> : ""}{animal.size ? <span>, {titleCase(animal.size)}</span> : ""}</ListGroup.Item>
-                  {animal.owners.map(owner => (
+                  {animal.owner_objects.map(owner => (
                     <ListGroup.Item key={owner.id}><b>Owner:</b> {owner.first_name} {owner.last_name} {owner.display_phone}
                       <OverlayTrigger
                         key={"owner-details"}
@@ -143,7 +143,7 @@ export function AnimalSearch() {
                       </OverlayTrigger>
                     </ListGroup.Item>
                   ))}
-                  {animal.owners < 1 && animal.reporter ? <ListGroup.Item><b>Reporter: </b> {animal.reporter_object.first_name} {animal.reporter_object.last_name} {animal.reporter_object.display_phone}
+                  {animal.owner_objects < 1 && animal.reporter ? <ListGroup.Item><b>Reporter: </b> {animal.reporter_object.first_name} {animal.reporter_object.last_name} {animal.reporter_object.display_phone}
                   <OverlayTrigger
                     key={"reporter-details"}
                     placement="top"
@@ -156,7 +156,7 @@ export function AnimalSearch() {
                     <Link href={"/hotline/reporter/" + animal.reporter_object.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
                   </OverlayTrigger>
                   </ListGroup.Item> : ""}
-                  {animal.owners < 1 && !animal.reporter ? <ListGroup.Item><b>Owner: </b>No Owner</ListGroup.Item> : ""}
+                  {animal.owner_objects < 1 && !animal.reporter ? <ListGroup.Item><b>Owner: </b>No Owner</ListGroup.Item> : ""}
                 </ListGroup>
               </Card.Body>
             </Card>

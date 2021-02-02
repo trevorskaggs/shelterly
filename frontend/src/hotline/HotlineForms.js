@@ -42,7 +42,7 @@ export function ServiceRequestForm(props) {
 
   // Initial ServiceRequest data.
   const [data, setData] = useState({
-    owner: [],
+    owners: [],
     reporter: null,
     directions: '',
     address: props.state.steps.owner.address || '',
@@ -136,7 +136,7 @@ export function ServiceRequestForm(props) {
             // Create Service Request
             values['reporter'] = reporterResponse[0].data.id
             if (ownerResponse[0].data.id) {
-              values['owner'] = [ownerResponse[0].data.id]
+              values['owners'] = [ownerResponse[0].data.id]
             }
             axios.post('/hotline/api/servicerequests/', values)
             .then(response => {

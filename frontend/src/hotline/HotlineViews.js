@@ -40,6 +40,7 @@ export function ServiceRequestView({id}) {
   const [data, setData] = useState({
     animals: [],
     owners: [],
+    owner_objects: [],
     reporter: '',
     reporter_object: {first_name:'', last_name:''},
     directions: '',
@@ -229,7 +230,7 @@ export function ServiceRequestView({id}) {
               </Card.Title>
               <hr/>
               <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-20px"}}>
-                {data.owners.map(owner => (
+                {data.owner_objects.map(owner => (
                   <ListGroup.Item key={owner.id}><b>Owner: </b>{owner.first_name} {owner.last_name}
                     <OverlayTrigger
                       key={"owner-details"}

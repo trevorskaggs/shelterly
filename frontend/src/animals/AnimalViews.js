@@ -20,7 +20,7 @@ export function AnimalView({id}) {
 
   // Initial animal data.
   const [data, setData] = useState({
-    owner: null,
+    owners: null,
     request: null,
     name: '',
     species: '',
@@ -43,7 +43,7 @@ export function AnimalView({id}) {
     action_history: [],
     full_address:'',
     shelter_name: '',
-    owners: [],
+    owner_objects: [],
   });
 
   const [show, setShow] = useState(false);
@@ -66,7 +66,7 @@ export function AnimalView({id}) {
   const handleOwnerSubmit = async () => {
     await axios.patch('/animals/api/animal/' + id + '/', {remove_owner:ownerToDelete.id})
     .then(response => {
-      setData(prevState => ({ ...prevState, ["owners"]:prevState.owners.filter(owner => owner.id !== ownerToDelete.id) }));
+      setData(prevState => ({ ...prevState, ["owner_objects"]:prevState.owner_objects.filter(owner => owner.id !== ownerToDelete.id) }));
       handleOwnerClose();
     })
     .catch(error => {
@@ -237,7 +237,7 @@ export function AnimalView({id}) {
             </Card.Title>
             <hr/>
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
-              {data.owners.map(owner => (
+              {data.owner_objects.map(owner => (
                 <ListGroup.Item key={owner.id}><b>Owner: </b>{owner.first_name} {owner.last_name}
                   <OverlayTrigger
                     key={"owner-details"}
@@ -277,7 +277,7 @@ export function AnimalView({id}) {
                   <Link href={"/hotline/reporter/" + data.reporter}><FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1" inverse /></Link>
                 </OverlayTrigger>
               </ListGroup.Item> : ""}
-              {data.owners.length < 1 && !data.reporter ? <ListGroup.Item>No Contacts</ListGroup.Item> : ""}
+              {data.owner_objects.length < 1 && !data.reporter ? <ListGroup.Item>No Contacts</ListGroup.Item> : ""}
             </ListGroup>
             <Card.Title>
                <h4 className="mb-0 mt-3">Location</h4>

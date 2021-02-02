@@ -181,7 +181,7 @@ export function EvacuationAssignmentTable() {
                             <div>
                               <b>Owners: </b>
                               {service_request.owners.length < 1 ? "No Owners" : <span>
-                              {service_request.owners.map((owner, i) => (
+                              {service_request.owner_objects.map((owner, i) => (
                               <span key={owner.id}>
                                 {i > 0 && " | "}{owner.first_name} {owner.last_name}
                                 <Link

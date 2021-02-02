@@ -131,7 +131,7 @@ export function ServiceRequestSearch() {
               <Card.Body>
                 <Card.Title>Information</Card.Title>
                 <ListGroup>
-                  {service_request.owners.map(owner => (
+                  {service_request.owner_objects.map(owner => (
                     <ListGroup.Item key={owner.id}><b>Owner: </b>{owner.first_name} {owner.last_name}{owner.display_phone ? " " + owner.display_phone : ""}
                       <OverlayTrigger
                         key={"owner-details"}

@@ -13,7 +13,7 @@ class AnimalViewSet(viewsets.ModelViewSet):
 
     queryset = Animal.objects.all().prefetch_related(Prefetch('animalimage_set', to_attr='images')).order_by('order')
 
-    search_fields = ['name', 'species', 'status', 'request__address', 'request__city', 'owner__first_name', 'owner__last_name', 'owner__address', 'owner__city', 'reporter__first_name', 'reporter__last_name']
+    search_fields = ['name', 'species', 'status', 'request__address', 'request__city', 'owners__first_name', 'owners__last_name', 'owners__address', 'owners__city', 'reporter__first_name', 'reporter__last_name']
     filter_backends = (filters.SearchFilter,)
     serializer_class = AnimalSerializer
 
@@ -38,11 +38,11 @@ class AnimalViewSet(viewsets.ModelViewSet):
             for animal in animals:
                 # Add Owner to new animals if it is POSTed.
                 if self.request.data.get('new_owner'):
-                    animal.owner.add(self.request.data['new_owner'])
+                    animal.owners.add(self.request.data['new_owner'])
 
                 # Add ServiceRequest Owner and Reporter to new animals being added to an SR.
                 if serializer.validated_data.get('request'):
-                    animal.owner.add(*animal.request.owner.all())
+                    animal.owners.add(*animal.request.owners.all())
 
                 if animal.shelter:
                     action.send(self.request.user, verb='sheltered animal in', target=animal, action_object=animal.shelter)
@@ -64,7 +64,7 @@ class AnimalViewSet(viewsets.ModelViewSet):
         if serializer.is_valid():
 
             # Keep owner the same when editing an animal.
-            serializer.validated_data['owner'] = serializer.instance.owner.values_list('id', flat=True)
+            serializer.validated_data['owners'] = serializer.instance.owners.values_list('id', flat=True)
 
             # Mark as SHELTERED if we receive shelter field and it's not already in a shelter.
             if serializer.validated_data.get('shelter') and (not serializer.instance.shelter or serializer.instance.shelter != serializer.validated_data.get('shelter')) :
@@ -97,7 +97,7 @@ class AnimalViewSet(viewsets.ModelViewSet):
             for field, value in serializer.validated_data.items():
                 new_value = value
                 old_value = getattr(serializer.instance, field)
-                if field not in ['status', 'room', 'shelter', 'order', 'owner'] and new_value != old_value:
+                if field not in ['status', 'room', 'shelter', 'order', 'owners'] and new_value != old_value:
                     changed_fields.append(field)
 
             animal = serializer.save()
@@ -112,7 +112,7 @@ class AnimalViewSet(viewsets.ModelViewSet):
 
             # Remove Owner from animal.
             if self.request.data.get('remove_owner'):
-                animal.owner.remove(self.request.data.get('remove_owner'))
+                animal.owners.remove(self.request.data.get('remove_owner'))
 
             old_images = serializer.data['extra_images']
             updated_images = self.request.data['extra_images'].split(',') if self.request.data.get('extra_images', None) else []
@@ -146,7 +146,7 @@ class AnimalViewSet(viewsets.ModelViewSet):
         """        
         queryset = Animal.objects.all().annotate(
             is_stray=Case(
-                When(owner=None, then=True),
+                When(owners=None, then=True),
                 default=False,
                 output_field=BooleanField(),
             )
