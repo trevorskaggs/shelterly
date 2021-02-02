@@ -211,12 +211,14 @@ export function AnimalView({id}) {
       <Col xs={6} className="pr-0 d-flex flex-column" style={{width:"100%"}}>
         <div className="slide-container flex-grow-1 border rounded pl-0 pr-0" style={{width:"auto", height:"322px"}}>
           <Carousel className="carousel-wrapper" showThumbs={false} showStatus={false}>
-            {images.map(image => (
-              <div key={image} className="image-container">
-                <img src={image} />
-              </div>
-            ))}
-            <img src={noImageFound} hidden={images.length > 0} />
+            {images.length < 1 ? <img src={noImageFound} /> :
+              <span>
+                {images.map(image => (
+                  <div key={image} className="image-container">
+                    <img src={image} />
+                  </div>
+                ))}
+              </span>}
           </Carousel>
         </div>
         <Card className="border rounded mt-3" style={{width:"100%", height:"100%"}}>

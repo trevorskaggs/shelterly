@@ -42,6 +42,7 @@ export const AnimalForm = (props) => {
   const pcolorRef = useRef(null);
   const scolorRef = useRef(null);
   const roomRef = useRef(null);
+  const shelterRef = useRef(null);
   const ageChoices = {'':[], 'dog':dogAgeChoices, 'cat':catAgeChoices, 'horse':horseAgeChoices, 'other':otherAgeChoices}
   const colorChoices = {'':[], 'dog':dogColorChoices, 'cat':catColorChoices, 'horse':horseColorChoices, 'other':otherColorChoices}
   const sizeChoices = {'':[], 'dog':dogSizeChoices, 'cat':catSizeChoices, 'horse':horseSizeChoices, 'other':otherSizeChoices}
@@ -77,6 +78,7 @@ export const AnimalForm = (props) => {
     front_image: null,
     front_image_data_url: '',
     side_image: null,
+    side_image_data_url: '',
     extra_images: [],
     address: '',
     apartment: '',
@@ -91,9 +93,9 @@ export const AnimalForm = (props) => {
   if (is_workflow && props.state.steps.animals[props.state.animalIndex]) {
     for (let pair of props.state.steps.animals[props.state.animalIndex].entries()) {
       current_data[String(pair[0])] = pair[1];
-      if (pair[0] === 'front_image') {
+      if (['front_image', 'side_image'].includes(pair[0])) {
         current_data[String(pair[0])] = null;
-        imageList.push({data_url:props.state.steps.animals[props.state.animalIndex].get('front_image_data_url'), file:pair[1]})
+        imageList.push({data_url:props.state.steps.animals[props.state.animalIndex].get(pair[0] + '_data_url'), file:pair[1]})
       }
     }
   }
@@ -107,11 +109,16 @@ export const AnimalForm = (props) => {
   const populateBack = (formdata) => {
     let current_data = {...initialData};
     for (let pair of formdata.entries()) {
-      if (String(pair[0]) === 'front_image') {
+      if (['front_image', 'side_image'].includes(pair[0])) {
         current_data[String(pair[0])] = null;
         const imageList = [];
-        imageList.push({data_url:formdata.get('front_image_data_url'), file:pair[1]});
-        setFrontImage(imageList);
+        imageList.push({data_url:formdata.get(pair[0] + '_data_url'), file:pair[1]});
+        if (pair[0] === 'front_image') {
+          setFrontImage(imageList);
+        }
+        else {
+          setSideImage(imageList);
+        }
       }
       else {
         current_data[String(pair[0])] = pair[1];
@@ -293,61 +300,81 @@ export const AnimalForm = (props) => {
             if (addAnother) {
               props.onSubmit('animals', formData, 'animals');
               // Reset form data with existing animal data if we have it.
-              if (props.state.steps.animals[props.state.animalIndex + 1]) {
+              let formdata = props.state.steps.animals[props.state.animalIndex + 1];
+              if (formdata) {
                 let animal_json = {...initialData};
-                for (let pair of props.state.steps.animals[props.state.animalIndex + 1].entries()) {
-                  animal_json[String(pair[0])] = pair[1];
+                for (let pair of formdata.entries()) {
+                  if (['front_image', 'side_image'].includes(pair[0])) {
+                    animal_json[String(pair[0])] = null;
+                    const imageList = [];
+                    imageList.push({data_url:formdata.get(pair[0] + '_data_url'), file:pair[1]});
+                    if (pair[0] === 'front_image') {
+                      setFrontImage(imageList);
+                    }
+                    else {
+                      setSideImage(imageList);
+                    }
+                  }
+                  else {
+                    animal_json[String(pair[0])] = pair[1];
+                  }
                 }
                 resetForm({values:animal_json});
               }
               // Otherwise reset form with blank data.
               else {
                 resetForm({values:initialData});
+                roomRef.current.select.clearValue();
+                shelterRef.current.select.clearValue();
                 setFrontImage([]);
+                setSideImage([]);
               }
             }
             // If we're in intake, then create objects and navigate to shelter page.
             else if (is_intake) {
               // Create Reporter
-              let reporterResponse = [{data:{id:null}}];
+              let reporterResponse = [{data:{id:''}}];
               if (props.state.steps.reporter.first_name) {
                 reporterResponse = await Promise.all([
                   axios.post('/people/api/person/', props.state.steps.reporter)
                 ]);
               }
               // Create Owner
-              let ownerResponse = [{data:{id:null}}];
+              let ownerResponse = [{data:{id:''}}];
               if (props.state.steps.owner.first_name) {
                 ownerResponse = await Promise.all([
                   axios.post('/people/api/person/', props.state.steps.owner)
                 ]);
               }
-              // Create Animals
-              formData.append('reporter', reporterResponse[0].data.id);
-              formData.append('owner', ownerResponse[0].data.id);
-              axios.post('/animals/api/animal/', formData)
-              .catch(error => {
-                console.log(error.response);
-              });
+              // Create previous animals
               props.state.steps.animals.forEach(animal => {
                 // Add owner and reporter to animal data.
                 animal.append('reporter', reporterResponse[0].data.id);
-                animal.append('owner', ownerResponse[0].data.id);
+                animal.append('new_owner', ownerResponse[0].data.id);
                 axios.post('/animals/api/animal/', animal)
                 .catch(error => {
                   console.log(error.response);
                 });
               });
-              // Navigate to shelter page.
-              if (values.shelter) {
-                navigate('/shelter/' + values.shelter);
-              }
-              else if (ownerResponse[0].data.id) {
-                navigate('/hotline/owner/' + ownerResponse[0].data.id)
-              }
-              else {
-                navigate('/hotline/reporter/' + reporterResponse[0].data.id)
-              }
+              // Create current animal then navigate.
+              formData.append('reporter', reporterResponse[0].data.id);
+              formData.append('new_owner', ownerResponse[0].data.id);
+              axios.post('/animals/api/animal/', formData)
+              .then(function() {
+                // Navigate to shelter page.
+                if (values.shelter) {
+                  navigate('/shelter/' + values.shelter);
+                }
+                else if (ownerResponse[0].data.id) {
+                  navigate('/hotline/owner/' + ownerResponse[0].data.id)
+                }
+                else {
+                  navigate('/hotline/reporter/' + reporterResponse[0].data.id)
+                }
+              })
+              .catch(error => {
+                console.log(error.response);
+              });
             }
             else {
               props.onSubmit('animals', formData, 'request');
@@ -602,10 +629,13 @@ export const AnimalForm = (props) => {
                         name="shelter"
                         options={shelters.options}
                         isClearable={true}
+                        ref={shelterRef}
                         onChange={(instance) => {
                           roomRef.current.select.clearValue();
                           formikProps.setFieldValue("shelter", instance === null ? '' : instance.value);
                         }}
+                        value={formikProps.values.shelter||''}
+                        // value={data.shelter || ''}
                       />
                     </Col>
                   </BootstrapForm.Row>
@@ -618,11 +648,12 @@ export const AnimalForm = (props) => {
                         ref={roomRef}
                         options={shelters.room_options[formikProps.values.shelter] ? shelters.room_options[formikProps.values.shelter] : []}
                         isClearable={true}
+                        value={formikProps.values.room||null}
                       />
                     </Col>
                   </BootstrapForm.Row>
                 </span>
-                <span hidden={is_intake ? !is_reporter: !Boolean(id)}>
+                <span hidden={is_intake ? !is_reporter : !Boolean(id)}>
                   <BootstrapForm.Row className="mt-3">
                     <BootstrapForm.Group as={Col} xs="12">
                       {renderAddressLookup()}
@@ -666,7 +697,7 @@ export const AnimalForm = (props) => {
                   </BootstrapForm.Row>
                 </span>
                 <span hidden={is_workflow && !is_intake}>
-                  <p className="mb-0">Image Files</p>
+                  <p className={id || is_reporter ? "mb-0" : "mb-0 mt-3"}>Image Files</p>
                   <BootstrapForm.Row className="align-items-end">
                     {data.front_image ?
                       <span className="mt-2 ml-1 mr-3">
@@ -718,7 +749,7 @@ export const AnimalForm = (props) => {
                         ))}
                       </span>
                     :""}
-                    <div className="mb-2">
+                    <div className="mb-2" hidden={!id}>
                       <ImageUploader
                         value={extra_images}
                         id="extra_images"
