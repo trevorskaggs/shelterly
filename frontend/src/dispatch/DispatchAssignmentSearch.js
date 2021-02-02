@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
-import Table from '.././components/Table';
 import { Button, ButtonGroup, Card, CardGroup, Col, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Row, Tooltip } from "react-bootstrap";
 import { Link } from "raviger";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -11,56 +10,7 @@ import { faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
 import Moment from "react-moment";
 import Header from '../components/Header';
 
-export function EvacTeamTable() {
-  const columns = React.useMemo(
-    () => [
-      {
-        Header: 'Evac Team',
-        accessor: 'id',
-        Cell: ({ cell: { value } }) =>
-          <div><a href={"/evac/evacteam/"+value+"/"}>Evac Team {value}</a></div>
-      },
-      {
-        Header: 'Team Members',
-        accessor: 'evac_team_member_names',
-      }
-    ],
-    []
-  )
-  const [data, setData] = useState({evac_teams: [], isFetching: false});
-  // Hook for initializing data.
-  useEffect(() => {
-    let source = axios.CancelToken.source();
-    const fetchEvacTeams = async () => {
-      setData({evac_teams: [], isFetching: true});
-      // Fetch EvacTeam data.
-      await axios.get('http://localhost:8000/evac/api/evacteam/', {
-        cancelToken: source.token,
-      })
-      .then(response => {
-        setData({evac_teams: response.data, isFetching: false});
-      })
-      .catch(error => {
-        console.log(error.response);
-        setData({evac_teams: [], isFetching: false});
-      });
-    };
-    fetchEvacTeams();
-    // Cleanup.
-    return () => {
-      source.cancel();
-    };
-  }, []);
-
-  return (
-    <div>
-      <Table columns={columns} data={data.evac_teams}/>
-      <p>{data.isFetching ? 'Fetching teams...' : ''}</p>
-    </div>
-  )
-}
-
-export function EvacuationAssignmentTable() {
+function DispatchAssignmentSearch() {
 
   const [data, setData] = useState({evacuation_assignments: [], isFetching: false});
   const [searchTerm, setSearchTerm] = useState("");
@@ -264,7 +214,9 @@ export function EvacuationAssignmentTable() {
             </CardGroup>
           </div>
         ))}
-        <p>{data.isFetching ? 'Fetching evacuation requests...' : <span>{data.evacuation_assignments && data.evacuation_assignments.length ? '' : 'No Evacuation Assignments found.'}</span>}</p>
+        <p>{data.isFetching ? 'Fetching dispatch requests...' : <span>{data.evacuation_assignments && data.evacuation_assignments.length ? '' : 'No Dispatch Assignments found.'}</span>}</p>
       </div>
   )
 }
+
+export default DispatchAssignmentSearch;

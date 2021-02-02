@@ -213,7 +213,7 @@ export const PersonForm = (props) => {
               }
               // If we have a reporter ID, redirect to create a new Animal with owner + reporter IDs.
               else if (reporter_id) {
-                navigate('/hotline/animal/new?owner_id=' + response.data.id + '&reporter_id=' + reporter_id);
+                navigate('/animals/new?owner_id=' + response.data.id + '&reporter_id=' + reporter_id);
               }
             })
             .catch(error => {

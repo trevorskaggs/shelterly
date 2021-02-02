@@ -165,7 +165,7 @@ export function PersonView({id}) {
                     </Tooltip>
                   }
                 >
-                  <Link href={"/hotline/animal/new?owner_id=" + id}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
+                  <Link href={"/animals/new?owner_id=" + id}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
                 </OverlayTrigger>
               </h4>
             </Card.Title>

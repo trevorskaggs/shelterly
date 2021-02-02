@@ -1,9 +1,11 @@
 import React from "react";
 import { Redirect } from "raviger";
 import Home from "./Home";
-import { AnimalDetail, NewAnimal, UpdateAnimal } from "./animals/Animals"
-import { AnimalSearch } from "./animals/AnimalSearch"
-import Evac, { EvacuationAssignmentSearch } from "./evac/Evac";
+import AnimalForm from "./animals/AnimalForm"
+import AnimalDetails from "./animals/AnimalDetails"
+import AnimalSearch from "./animals/AnimalSearch"
+import Dispatch from "./dispatch/Dispatch";
+import DispatchAssignmentSearch from "./dispatch/DispatchAssignmentSearch"
 import HotlineWorkflow from "./hotline/HotlineWorkflow";
 import Hotline, { ServiceRequestDetail, UpdateServiceRequest } from "./hotline/Hotline";
 import { ServiceRequestSearch } from "./hotline/HotlineTables"
@@ -15,8 +17,12 @@ import { ShelterDetails } from "./shelter/ShelterDetails"
 import { NewBuilding, UpdateBuilding, BuildingDetails } from "./shelter/Building";
 import { NewRoom, UpdateRoom, RoomDetails } from "./shelter/Room";
 import { Login } from "./accounts/Accounts";
-import { Dispatch, EvacSummary } from "./evac/EvacViews";
-import { EvacResolution, EvacTeamMemberForm, VisitNoteForm } from "./evac/EvacForms";
+import Deploy from "./dispatch/DispatchMap";
+import DispatchSummary from "./dispatch/DispatchSummary";
+import DispatchResolutionForm from "./dispatch/DispatchResolutionForm";
+import DispatchTeamMemberForm from "./dispatch/DispatchTeamMemberForm";
+import VisitNoteForm from "./dispatch/VisitNoteForm";
+import { initialData } from "./hotline/HotlineWorkflow";
 
 export const publicRoutes = {
   "/login": () => <Login />,
@@ -24,18 +30,19 @@ export const publicRoutes = {
 
 const routes = {
   "/": () => <Home />,
-  "/animals/edit/:id": ({id}) => <UpdateAnimal id={id} />,
+  "/animals/edit/:id": ({id}) => <AnimalForm id={id} state={initialData} />,
+  "/animals/new": () => <AnimalForm state={initialData} />,
   "/animals/search": () => <AnimalSearch />,
-  "/animals/:id": ({id}) => <AnimalDetail id={id} />,
-  "/evac": () => <Evac />,
-  "/evac/evacteammember/new": () => <EvacTeamMemberForm />,
-  "/evac/evacuationassignment/search": () => <EvacuationAssignmentSearch />,
-  "/evac/summary/:id": ({id}) => <EvacSummary id={id} />,
-  "/evac/resolution/:id": ({id}) => <EvacResolution id={id} />,
-  "/evac/assignment/note/:id": ({id}) => <VisitNoteForm id={id} />,
-  "/evac/deploy": () => <Dispatch />,
+  "/animals/:id": ({id}) => <AnimalDetails id={id} />,
+  "/dispatch": () => <Dispatch />,
+  "/dispatch/dispatchteammember/new": () => <DispatchTeamMemberForm />,
+  "/dispatch/dispatchuationassignment/search": () => <DispatchAssignmentSearch />,
+  "/dispatch/summary/:id": ({id}) => <DispatchSummary id={id} />,
+  "/dispatch/resolution/:id": ({id}) => <DispatchResolutionForm id={id} />,
+  "/dispatch/assignment/note/:id": ({id}) => <VisitNoteForm id={id} />,
+  "/dispatch/deploy": () => <Deploy />,
   "/hotline": () => <Hotline />,
-  "/hotline/animal/new": () => <NewAnimal />,
+
   "/hotline/first_responder/new": () => <NewReporter />,
   "/hotline/owner/edit/:id": ({id}) => <UpdateOwner id={id} />,
   "/hotline/owner/new": () => <NewOwner />,

@@ -3,9 +3,9 @@ import {
   render,
   screen,
 } from "@testing-library/react";
-import { AnimalForm } from "./AnimalForms";
-import { AnimalSearch } from "./AnimalSearch";
-import { AnimalView } from "./AnimalViews";
+import AnimalForm from "./AnimalForm";
+import AnimalSearch from "./AnimalSearch";
+import AnimalDetails from "./AnimalDetails";
 import { initialData } from "../hotline/HotlineWorkflow"
 
 describe("Animal tests", () => {
@@ -18,7 +18,7 @@ describe("Animal tests", () => {
     expect(screen.getByText("Search"));
   });
   it("Render AnimalView", () => {
-    render(<AnimalView id={1} />);
+    render(<AnimalDetails id={1} />);
     expect(screen.getByText(/Animal Details/));
   });
 });

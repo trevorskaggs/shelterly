@@ -7,14 +7,14 @@ import { Button, ButtonGroup, Form as BootstrapForm } from "react-bootstrap";
 import { Card } from 'react-bootstrap';
 import * as Yup from 'yup';
 import { AuthContext } from "../accounts/AccountsReducer";
-import {AddressLookup, DateTimePicker, DropDown, ImageUploader, TextInput} from '.././components/Form.js';
+import {AddressLookup, DateTimePicker, DropDown, ImageUploader, TextInput} from '../components/Form.js';
 import { catAgeChoices, dogAgeChoices, horseAgeChoices, otherAgeChoices, catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, speciesChoices, sexChoices, dogSizeChoices, catSizeChoices, horseSizeChoices, otherSizeChoices, unknownChoices } from './constants';
 import { STATE_OPTIONS } from '../constants'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft, faMinusSquare } from '@fortawesome/free-solid-svg-icons';
 import Alert from 'react-bootstrap/Alert'
 
-export const AnimalForm = (props) => {
+const AnimalForm = (props) => {
 
   const { state } = useContext(AuthContext);
   const id = props.id;
@@ -732,3 +732,5 @@ export const AnimalForm = (props) => {
     </>
   );
 };
+
+export default AnimalForm

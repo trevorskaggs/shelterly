@@ -14,7 +14,7 @@ import Header from '../components/Header';
 import History from '../components/History';
 import noImageFound from '../static/images/image-not-found.png';
 
-export function AnimalView({id}) {
+function AnimalDetails({id}) {
 
   const [images, setImages] = useState([]);
 
@@ -358,3 +358,5 @@ export function AnimalView({id}) {
     </>
   );
 };
+
+export default AnimalDetails;

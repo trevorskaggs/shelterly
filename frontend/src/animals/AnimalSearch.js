@@ -11,7 +11,7 @@ import {
 import Header from '../components/Header';
 import { titleCase } from '../components/Utils';
 
-export function AnimalSearch() {
+function AnimalSearch() {
 
   const [data, setData] = useState({animals: [], isFetching: false});
   const [searchTerm, setSearchTerm] = useState("");
@@ -207,3 +207,5 @@ export function AnimalSearch() {
     </div>
   )
 }
+
+export default AnimalSearch;

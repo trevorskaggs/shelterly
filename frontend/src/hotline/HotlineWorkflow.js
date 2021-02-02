@@ -4,7 +4,7 @@ import Stepper from '@material-ui/core/Stepper';
 import Step from '@material-ui/core/Step';
 import StepLabel from '@material-ui/core/StepLabel';
 import Typography from '@material-ui/core/Typography';
-import { AnimalForm } from '../animals/AnimalForms';
+import AnimalForm from '../animals/AnimalForm';
 import { PersonForm } from '../people/PeopleForms';
 import { ServiceRequestForm } from './HotlineForms';
 import PageNotFound from "../components/PageNotFound";

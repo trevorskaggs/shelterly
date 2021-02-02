@@ -66,7 +66,7 @@ const Menu = ({ state, dispatch, removeCookie, ...props }) => {
     
     return (
     <StyledMenu  {...props} className="flex-column" style={{ height: viewHeight }}>
-    <img src={logo} alt="logo" />
+    <Link href="/"><img src={logo} alt="logo" /></Link>
     <div className="logo border-bottom">SHELTERLY</div>
       <Link href="/hotline" ><FontAwesomeIcon icon={faPhone} fixedWidth inverse/> HOTLINE</Link>
       <Link href="/evac"><FontAwesomeIcon icon={faBullhorn} fixedWidth inverse/>  DISPATCH</Link>

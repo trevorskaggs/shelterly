@@ -280,7 +280,7 @@ export function ServiceRequestView({id}) {
                       </Tooltip>
                     }
                   >
-                    <Link href={"/hotline/animal/new?servicerequest_id=" + id}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
+                    <Link href={"/animals/new?servicerequest_id=" + id}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
                   </OverlayTrigger>
                 </h4>
               </Card.Title>
