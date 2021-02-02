@@ -25,12 +25,8 @@ class SimpleServiceRequestSerializer(serializers.ModelSerializer):
 
     full_address = serializers.SerializerMethodField()
     visit_notes = VisitNoteSerializer(source='visitnote_set', many=True, required=False, read_only=True)
-<<<<<<< HEAD
     reported_animals = serializers.SerializerMethodField()
-=======
     owner_contacts = OwnerContactSerializer(source='ownercontact_set', many=True, required=False, read_only=True)
-    has_reported_animals = serializers.SerializerMethodField()
->>>>>>> master
     sheltered_in_place = serializers.SerializerMethodField()
     unable_to_locate = serializers.SerializerMethodField()
     aco_required = serializers.SerializerMethodField(read_only=True)
