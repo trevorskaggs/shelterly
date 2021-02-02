@@ -2,10 +2,10 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'raviger';
 import Moment from 'react-moment';
-import { Card, ListGroup, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Button, Card, ListGroup, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faCalendarDay, faCar, faClipboardList, faComment, faEdit, faHouseDamage, faKey, faPlusSquare, faTimes, faTrailer
+  faBan, faCalendarDay, faCar, faClipboardList, faComment, faEdit, faHouseDamage, faKey, faPlusSquare, faTimes, faTrailer
 } from '@fortawesome/free-solid-svg-icons';
 import ReactImageFallback from 'react-image-fallback';
 import Header from '../components/Header';
@@ -19,6 +19,14 @@ export function ServiceRequestView({id}) {
   const openCalendar = () => {
     setTimeout(() => datetime.current.flatpickr.open(), 0);
   }
+
+  const [showModal, setShowModal] = useState(false);
+  const cancelServiceRequest = () => {
+    axios.patch('/hotline/api/servicerequests/' + id + '/', {status:'canceled'})
+    setData(prevState => ({ ...prevState, ['status']:'Canceled', ['animals']:prevState['animals'].map(animal => ({...animal, status:'CANCELED'}))}));
+    setShowModal(false)
+  }
+
   const clearDate = useCallback(() => {
     if (datetime.current) {
       datetime.current.flatpickr.clear();
@@ -83,10 +91,25 @@ export function ServiceRequestView({id}) {
             </Tooltip>
           }
         >
-          <Link href={"/hotline/servicerequest/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
+        <FontAwesomeIcon icon={faBan} style={{cursor:'pointer'}} inverse onClick={() => {setShowModal(true)}}/>
+        <Link href={"/hotline/servicerequest/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
         </OverlayTrigger>
         &nbsp;| <span style={{textTransform:"capitalize"}}>{data.status} {data.status === 'assigned' ? <Link href={"/evac/summary/" + data.assigned_evac}><FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link> : ""}</span>
       </Header>
+      <Modal show={showModal} onHide={() => setShowModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Confirm Cancelation</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>Are you sure you want to cancel this Service Request and associated animals?</Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowModal(false)}>
+            Close
+          </Button>
+          <Button variant="primary" onClick={() => cancelServiceRequest(showModal)}>
+            Confirm
+          </Button>
+        </Modal.Footer>
+      </Modal>
       <div style={{fontSize:"18px", marginTop:"14px"}}><b>Address: </b>{data.full_address}</div>
       <hr/>
       <div className="row mb-2">

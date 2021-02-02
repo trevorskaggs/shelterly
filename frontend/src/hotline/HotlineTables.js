@@ -28,7 +28,7 @@ export function ServiceRequestSearch() {
 
   const [data, setData] = useState({service_requests: [], isFetching: false});
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusOptions, setStatusOptions] = useState({status:"all", allColor: "primary", openColor:"secondary", assignedColor:"secondary", closedColor:"secondary"});
+  const [statusOptions, setStatusOptions] = useState({status:"all", allColor: "primary", openColor:"secondary", assignedColor:"secondary", closedColor:"secondary", canceledColor:"secondary"});
   const [page, setPage] = useState(1)
   const [numPages, setNumPages] = useState(1)
 
@@ -99,10 +99,11 @@ export function ServiceRequestSearch() {
             <Button variant="outline-light" type="submit">Search</Button>
           </InputGroup.Append>
             <ButtonGroup className="ml-3">
-              <Button variant={statusOptions.allColor} onClick={() => setStatusOptions({status:"all", allColor:"primary", openColor:"secondary", assignedColor:"secondary", closedColor:"secondary"})}>All</Button>
-              <Button variant={statusOptions.openColor} onClick={() => setStatusOptions({status:"open", allColor:"secondary", openColor:"primary", assignedColor:"secondary", closedColor:"secondary"})}>Open</Button>
-              <Button variant={statusOptions.assignedColor} onClick={() => setStatusOptions({status:"assigned", allColor:"secondary", openColor:"secondary", assignedColor:"primary", closedColor:"secondary"})}>Assigned</Button>
-              <Button variant={statusOptions.closedColor} onClick={() => setStatusOptions({status:"closed", allColor:"secondary", openColor:"secondary", assignedColor:"secondary", closedColor:"primary"})}>Closed</Button>
+              <Button variant={statusOptions.allColor} onClick={() => setStatusOptions({status:"all", allColor:"primary", openColor:"secondary", assignedColor:"secondary", closedColor:"secondary", canceledColor:"secondary"})}>All</Button>
+              <Button variant={statusOptions.openColor} onClick={() => setStatusOptions({status:"open", allColor:"secondary", openColor:"primary", assignedColor:"secondary", closedColor:"secondary", canceledColor:"secondary"})}>Open</Button>
+              <Button variant={statusOptions.assignedColor} onClick={() => setStatusOptions({status:"assigned", allColor:"secondary", openColor:"secondary", assignedColor:"primary", closedColor:"secondary", canceledColor:"secondary"})}>Assigned</Button>
+              <Button variant={statusOptions.closedColor} onClick={() => setStatusOptions({status:"closed", allColor:"secondary", openColor:"secondary", assignedColor:"secondary", closedColor:"primary", canceledColor:"secondary"})}>Closed</Button>
+              <Button variant={statusOptions.canceledColor} onClick={() => setStatusOptions({status:"canceled", allColor:"secondary", openColor:"secondary", assignedColor:"secondary", closedColor:"secondary", canceledColor:"primary"})}>Canceled</Button>
             </ButtonGroup>
           </InputGroup>
       </Form>

@@ -8,6 +8,7 @@ from animals.models import Animal
 from evac.models import EvacAssignment, EvacTeamMember
 from evac.serializers import EvacAssignmentSerializer, EvacTeamMemberSerializer
 from hotline.models import ServiceRequest, VisitNote
+from people.models import OwnerContact, Person
 
 class EvacTeamMemberViewSet(viewsets.ModelViewSet):
 
@@ -85,7 +86,14 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
                     action.send(self.request.user, verb='closed service request', target=service_requests[0])
                 # Only create VisitNote on first update, otherwise update existing VisitNote.
                 if not VisitNote.objects.filter(evac_assignment=evac_assignment, service_request=service_requests[0]).exists():
-                    VisitNote.objects.create(evac_assignment=evac_assignment, service_request=service_requests[0], date_completed=service_request['date_completed'], notes=service_request['notes'], owner_contacted=service_request['owner_contacted'], forced_entry=service_request['forced_entry'])
+                    VisitNote.objects.create(evac_assignment=evac_assignment, service_request=service_requests[0], date_completed=service_request['date_completed'], notes=service_request['notes'], forced_entry=service_request['forced_entry'])
                 else:
-                    VisitNote.objects.filter(evac_assignment=evac_assignment, service_request=service_requests[0]).update(date_completed=service_request['date_completed'], notes=service_request['notes'], owner_contacted=service_request['owner_contacted'], forced_entry=service_request['forced_entry'])
+                    VisitNote.objects.filter(evac_assignment=evac_assignment, service_request=service_requests[0]).update(date_completed=service_request['date_completed'], notes=service_request['notes'], forced_entry=service_request['forced_entry'])
+                # Only create OwnerContact on first update, otherwise update existing OwnerContact.
+                if service_request.get('owner_contact_id'):
+                    if not OwnerContact.objects.filter(evac_assignment=evac_assignment, service_request=service_requests[0]).exists():
+                        OwnerContact.objects.create(evac_assignment=evac_assignment, service_request=service_requests[0], owner=Person.objects.get(pk=service_request['owner_contact_id']), owner_contact_note=service_request['owner_contact_note'], owner_contact_time=service_request['owner_contact_time'])
+                    else:
+                        OwnerContact.objects.filter(evac_assignment=evac_assignment, service_request=service_requests[0]).update(owner=Person.objects.get(pk=service_request['owner_contact_id']), owner_contact_note=service_request['owner_contact_note'], owner_contact_time=service_request['owner_contact_time'])
+
             action.send(self.request.user, verb='updated evacuation assignment', target=evac_assignment)

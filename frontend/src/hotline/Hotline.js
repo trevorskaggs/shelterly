@@ -9,7 +9,7 @@ import badge from "../static/images/badge-sheriff.png";
 import bandaid from "../static/images/band-aid-solid.png";
 import car from "../static/images/car-solid.png";
 import trailer from "../static/images/trailer-solid.png";
-import { ServiceRequestForm } from "./HotlineForms";
+import { OwnerContactForm, ServiceRequestForm } from "./HotlineForms";
 import { ServiceRequestView } from "./HotlineViews";
 import { initialData } from "./HotlineWorkflow";
 
