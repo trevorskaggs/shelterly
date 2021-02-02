@@ -82,6 +82,7 @@ export function ServiceRequestView({id}) {
     <>
       <Header>
         Service Request Details
+        <FontAwesomeIcon icon={faBan} style={{cursor:'pointer'}} inverse onClick={() => {setShowModal(true)}}/>
         <OverlayTrigger
           key={"edit-service-request"}
           placement="bottom"
@@ -91,8 +92,7 @@ export function ServiceRequestView({id}) {
             </Tooltip>
           }
         >
-        <FontAwesomeIcon icon={faBan} style={{cursor:'pointer'}} inverse onClick={() => {setShowModal(true)}}/>
-        <Link href={"/hotline/servicerequest/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
+        <Link href={"/hotline/servicerequest/edit/" + id}> <FontAwesomeIcon icon={faEdit} className="mb-1" inverse /></Link>
         </OverlayTrigger>
         &nbsp;| <span style={{textTransform:"capitalize"}}>{data.status} {data.status === 'assigned' ? <Link href={"/evac/summary/" + data.assigned_evac}><FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link> : ""}</span>
       </Header>
