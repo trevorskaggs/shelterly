@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'raviger';
 import { ListGroup } from 'react-bootstrap'
-import { ShelterForm } from './ShelterForms';
 import Header from '../components/Header';
 
 function Shelter() {
@@ -53,16 +52,5 @@ function Shelter() {
     </>
   )
 }
-export const NewShelter = () => (
-  <div>
-    <ShelterForm />
-  </div>
-)
-
-export const UpdateShelter = ({id}) => (
-  <div>
-    <ShelterForm id={id}/>
-  </div>
-)
 
 export default Shelter

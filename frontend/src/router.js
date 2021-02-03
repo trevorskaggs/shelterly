@@ -1,6 +1,7 @@
 import React from "react";
 import { Redirect } from "raviger";
 import Home from "./Home";
+import Login from "./accounts/LoginForm";
 import AnimalForm from "./animals/AnimalForm";
 import AnimalDetails from "./animals/AnimalDetails";
 import AnimalSearch from "./animals/AnimalSearch";
@@ -20,12 +21,14 @@ import PersonForm from "./people/PersonForm";
 import PersonSearch from "./people/PersonSearch";
 import OwnerContactForm from "./people/OwnerContactForm";
 import Intake from "./intake/Intake";
-import Shelter, { NewShelter, UpdateShelter } from "./shelter/Shelter";
-import { ShelterAssignment } from "./shelter/ShelterAssignment";
-import { ShelterDetails } from "./shelter/ShelterDetails"
-import { NewBuilding, UpdateBuilding, BuildingDetails } from "./shelter/Building";
-import { NewRoom, UpdateRoom, RoomDetails } from "./shelter/Room";
-import { Login } from "./accounts/Accounts";
+import Shelter from "./shelter/Shelter";
+import ShelterForm from "./shelter/ShelterForm";
+import ShelterRoomAssignment from "./shelter/ShelterRoomAssignment";
+import ShelterDetails from "./shelter/ShelterDetails";
+import BuildingForm from "./shelter/BuildingForm";
+import BuildingDetails from "./shelter/BuildingDetails";
+import RoomForm from "./shelter/RoomForm";
+import RoomDetails from "./shelter/RoomDetails";
 import VisitNoteForm from "./dispatch/VisitNoteForm";
 
 export const publicRoutes = {
@@ -62,15 +65,15 @@ const routes = {
   "/people/reporter/new": () => <PersonForm state={initialWorkflowData} />,
   "/people/reporter/:id": ({id}) => <PersonDetails id={id}/>,
   "/shelter": () => <Shelter />,
-  "/shelter/new": () => <NewShelter />,
-  "/shelter/edit/:id": ({id}) => <UpdateShelter id={id} />,
+  "/shelter/new": () => <ShelterForm />,
+  "/shelter/edit/:id": ({id}) => <ShelterForm id={id} />,
   "/shelter/:id": ({id}) => <ShelterDetails id={id} />,
-  "/shelter/:id/assign": ({id}) => <ShelterAssignment id={id} />,
-  "/shelter/building/new": () => <NewBuilding />,
-  "/shelter/building/edit/:id": ({id}) => <UpdateBuilding id={id} />,
+  "/shelter/:id/assign": ({id}) => <ShelterRoomAssignment id={id} />,
+  "/shelter/building/new": () => <BuildingForm />,
+  "/shelter/building/edit/:id": ({id}) => <BuildingForm id={id} />,
   "/shelter/building/:id": ({id}) => <BuildingDetails id={id} />,
-  "/shelter/building/room/new": () => <NewRoom />,
-  "/shelter/room/edit/:id": ({id}) => <UpdateRoom id={id} />,
+  "/shelter/building/room/new": () => <RoomForm />,
+  "/shelter/room/edit/:id": ({id}) => <RoomForm id={id} />,
   "/shelter/room/:id": ({id}) => <RoomDetails id={id} />,
   "/login": () => <Redirect to='/' />
 };

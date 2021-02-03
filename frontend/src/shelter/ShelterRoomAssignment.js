@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import { Link } from 'raviger';
-import { Card, Col, Row, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Card, Row, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faClipboardList, faUserAlt, faUserAltSlash
@@ -11,7 +11,7 @@ import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import Header from '../components/Header';
 import noImageFound from '../static/images/image-not-found.png';
 
-export function ShelterAssignment({id}) {
+function ShelterRoomAssignment({id}) {
 
   const [data, setData] = useState({
     name: '',
@@ -267,3 +267,5 @@ export function ShelterAssignment({id}) {
     </>
   );
 };
+
+export default ShelterRoomAssignment;
