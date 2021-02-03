@@ -14,30 +14,18 @@ function DispatchAssignmentSearch() {
 
   const [data, setData] = useState({evacuation_assignments: [], isFetching: false});
   const [searchTerm, setSearchTerm] = useState("");
+  const [tempSearchTerm, setTempSearchTerm] = useState("");
   const [statusOptions, setStatusOptions] = useState({status: "open", allColor:"secondary", openColor:"primary", assignedColor:"secondary", closedColor:"secondary"});
 
   // Update searchTerm when field input changes.
   const handleChange = event => {
-    setSearchTerm(event.target.value);
+    setTempSearchTerm(event.target.value);
   };
 
   // Use searchTerm to filter evacuation_assignments.
   const handleSubmit = async event => {
     event.preventDefault();
-
-    let source = axios.CancelToken.source();
-    setData({evacuation_assignments: [], isFetching: true});
-    // Fetch EvacuationAssignments data filtered searchTerm.
-    await axios.get('/evac/api/evacassignment/?search=' + searchTerm + '&status=' + statusOptions.status, {
-      cancelToken: source.token,
-    })
-        .then(response => {
-          setData({evacuation_assignments: response.data, isFetching: false});
-        })
-        .catch(error => {
-          console.log(error.response);
-          setData({evacuation_assignments: [], isFetching: false});
-        });
+    setSearchTerm(tempSearchTerm);
   }
 
   // Hook for initializing data.
@@ -62,7 +50,7 @@ function DispatchAssignmentSearch() {
     return () => {
       source.cancel();
     };
-  }, [statusOptions.status]);
+  }, [searchTerm, statusOptions.status]);
 
   return (
       <div className="ml-2 mr-2">
@@ -74,7 +62,7 @@ function DispatchAssignmentSearch() {
                 type="text"
                 placeholder="Search"
                 name="searchTerm"
-                value={searchTerm}
+                value={tempSearchTerm}
                 onChange={handleChange}
             />
             <InputGroup.Append>
@@ -100,12 +88,12 @@ function DispatchAssignmentSearch() {
                   </Tooltip>
                 }
               >
-                <Link href={"/evac/summary/" + evacuation_assignment.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+                <Link href={"/dispatch/summary/" + evacuation_assignment.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
               </OverlayTrigger>
               &nbsp;&nbsp;|&nbsp;
               Team Members: {evacuation_assignment.team_member_objects.map((member, i) => (
                   <span key={member.id}>{i > 0 && ", "}{member.first_name} {member.last_name}</span>))}
-              {evacuation_assignment.end_time ? "" : <Link href={"/evac/resolution/" + evacuation_assignment.id} className="btn btn-danger ml-1" style={{paddingTop:"0px", paddingBottom:"0px"}}>Close</Link>}
+              {evacuation_assignment.end_time ? "" : <Link href={"/dispatch/resolution/" + evacuation_assignment.id} className="btn btn-danger ml-1" style={{paddingTop:"0px", paddingBottom:"0px"}}>Close</Link>}
             </h4></div>
             <CardGroup>
               <Card key={evacuation_assignment.id}>
@@ -143,10 +131,10 @@ function DispatchAssignmentSearch() {
                             </div>
                             {evacuation_assignment.end_time ?
                             <div>
-                              <b>Visit Note: </b>{service_request.visit_notes.filter(note => String(note.evac_assignment) === String(evacuation_assignment.id)).length && service_request.visit_notes.filter(note => String(note.evac_assignment) === String(evacuation_assignment.id))[0].notes || "No information available."}
+                              <b>Visit Note: </b>{(service_request.visit_notes.filter(note => String(note.evac_assignment) === String(evacuation_assignment.id)).length && service_request.visit_notes.filter(note => String(note.evac_assignment) === String(evacuation_assignment.id))[0].notes) || "No information available."}
                             </div> :
                             <div>
-                              <b>Previous Visit: </b>{service_request.visit_notes.sort((a,b) => new Date(b.date_completed).getTime() - new Date(a.date_completed).getTime()).length && service_request.visit_notes.sort((a,b) => new Date(b.date_completed).getTime() - new Date(a.date_completed).getTime())[0].notes || "No information available."}
+                              <b>Previous Visit: </b>{(service_request.visit_notes.sort((a,b) => new Date(b.date_completed).getTime() - new Date(a.date_completed).getTime()).length && service_request.visit_notes.sort((a,b) => new Date(b.date_completed).getTime() - new Date(a.date_completed).getTime())[0].notes) || "No information available."}
                             </div>
                             }
                           </Col>

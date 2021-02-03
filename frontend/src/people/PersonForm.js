@@ -2,9 +2,9 @@ import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
 import { navigate, useQueryParams } from 'raviger';
 import { Field, Formik } from 'formik';
-import { Form as BootstrapForm, Button, ButtonGroup, Card, Col, FormGroup, Modal, Row } from "react-bootstrap";
+import { Form as BootstrapForm, Button, ButtonGroup, Card, Col, Modal } from "react-bootstrap";
 import * as Yup from 'yup';
-import { AddressLookup, DateTimePicker, DropDown, TextInput } from '../components/Form';
+import { AddressLookup, DropDown, TextInput } from '../components/Form';
 import { AuthContext } from "../accounts/AccountsReducer";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft } from '@fortawesome/free-solid-svg-icons';
@@ -13,7 +13,7 @@ import { STATE_OPTIONS } from '../constants';
 // Form for owner and reporter Person objects.
 const PersonForm = (props) => {
 
-  const { state, dispatch } = useContext(AuthContext);
+  const { state } = useContext(AuthContext);
   const id = props.id;
 
   // Determine if we're in the hotline workflow.

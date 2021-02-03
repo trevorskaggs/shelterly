@@ -14,7 +14,7 @@ const nameRegex = /^[a-z0-9 ,.'-]+$/i
 
 export const BuildingForm = ({id}) => {
 
-  const { state, dispatch } = useContext(AuthContext);
+  const { state } = useContext(AuthContext);
 
   // Identify any query param data.
   const [queryParams] = useQueryParams();

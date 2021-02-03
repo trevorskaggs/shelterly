@@ -1,14 +1,12 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import { navigate, useQueryParams } from 'raviger';
-import { Field, Formik } from 'formik';
-import { Form as BootstrapForm, Button, ButtonGroup, Card, Col, FormGroup, Modal, Row } from "react-bootstrap";
+import { Formik } from 'formik';
+import { Form as BootstrapForm, Button, ButtonGroup, Card, Col, FormGroup, Row } from "react-bootstrap";
 import * as Yup from 'yup';
-import { AddressLookup, DateTimePicker, DropDown, TextInput } from '../components/Form';
-import { AuthContext } from "../accounts/AccountsReducer";
+import { DateTimePicker, TextInput } from '../components/Form';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft } from '@fortawesome/free-solid-svg-icons';
-import { STATE_OPTIONS } from '../constants';
 
 const OwnerContactForm = ({id}) => {
 
@@ -54,7 +52,7 @@ const OwnerContactForm = ({id}) => {
           cancelToken: source.token,
         })
           .then(response => {
-            setData(prevState => ({ ...prevState, ["owner_name"]:response.data['first_name'] + ' ' + response.data['last_name'] }));
+            setData(prevState => ({ ...prevState, "owner_name":response.data['first_name'] + ' ' + response.data['last_name'] }));
           })
           .catch(error => {
             console.log(error.response);
@@ -65,7 +63,7 @@ const OwnerContactForm = ({id}) => {
       return () => {
         source.cancel();
       };
-    }, [id]);
+    }, [id, owner]);
 
     return (
         <Formik

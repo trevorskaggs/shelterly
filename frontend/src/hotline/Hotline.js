@@ -86,7 +86,7 @@ function Hotline() {
         cancelToken: source.token,
       })
       .then(response => {
-        setData({service_requests: response.data, isFetching: false, bounds:data.bounds});
+        // setData({service_requests: response.data, isFetching: false, bounds:L.latLngBounds([[0,0]])});
         const map_dict = mapState;
         const bounds = [];
         for (const service_request of response.data) {
@@ -103,7 +103,7 @@ function Hotline() {
         }
         setMapState(map_dict);
         if (bounds.length > 0) {
-          setData(prevState => ({ ...prevState, ["bounds"]:L.latLngBounds(bounds) }));
+          setData({service_requests: response.data, isFetching: false, bounds:L.latLngBounds(bounds)});
         }
       })
       .catch(error => {
@@ -118,7 +118,7 @@ function Hotline() {
     return () => {
       source.cancel();
     };
-  }, [statusOptions]);
+  }, [statusOptions.status]);
 
   return (
     <>

@@ -8,15 +8,15 @@ import {
   Fade,
 } from 'reactstrap';
 
-import {Button, ButtonGroup, Card, Col, Form as BootstrapForm, FormGroup, Modal, Row } from "react-bootstrap";
+import {Button, ButtonGroup, Card, Col, Form as BootstrapForm, Modal } from "react-bootstrap";
 import * as Yup from 'yup';
 import { Switch } from 'formik-material-ui';
 import 'flatpickr/dist/themes/light.css';
-import { AddressLookup, DateTimePicker, DropDown, TextInput } from '../components/Form';
+import { AddressLookup, DropDown, TextInput } from '../components/Form';
 import { AuthContext } from "../accounts/AccountsReducer";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft } from '@fortawesome/free-solid-svg-icons';
-import {STATE_OPTIONS} from "../constants";
+import { STATE_OPTIONS } from "../constants";
 
 // Form for Service Request objects.
 function ServiceRequestForm(props) {

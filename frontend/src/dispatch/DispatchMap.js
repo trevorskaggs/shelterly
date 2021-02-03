@@ -45,33 +45,36 @@ function Deploy() {
   // Handle radius circle toggles.
   const handleRadius = (id) => {
     if (mapState[id].radius === "disabled") {
-      setMapState(prevState => ({ ...prevState, [id]: {...prevState[id], ["radius"]:"enabled"} }));
+      setMapState(prevState => ({ ...prevState, [id]: {...prevState[id], "radius":"enabled"} }));
     }
     else {
-      setMapState(prevState => ({ ...prevState, [id]: {...prevState[id], ["radius"]:"disabled"} }));
+      setMapState(prevState => ({ ...prevState, [id]: {...prevState[id], "radius":"disabled"} }));
     }
   }
 
   // Handle dynamic SR state and map display when an SR is selected or deselected.
   const handleMapState = (id) => {
+    var status_matches = {};
+    var matches = {};
+    var total = 0;
+
     // If selected.
     if (mapState[id].checked === false) {
-      setMapState(prevState => ({ ...prevState, [id]: {...prevState[id], ["color"]:"green", ["checked"]:true} }));
+      setMapState(prevState => ({ ...prevState, [id]: {...prevState[id], "color":"green", "checked":true} }));
 
       // Add each match count to the running total state tracker.
-      var status_matches = {};
-      for (var status in mapState[id].status_matches) {
-        var matches = totalSelectedState[status];
-        for (var key in mapState[id].status_matches[status]){
-          var total = 0;
-          if (!totalSelectedState[status][key]) {
-            total = mapState[id].status_matches[status][key];
+      for (var select_status in mapState[id].status_matches) {
+        matches = {...totalSelectedState[select_status]};
+        for (var select_key in mapState[id].status_matches[select_status]){
+          // total = 0;
+          if (!totalSelectedState[select_status][select_key]) {
+            total = mapState[id].status_matches[select_status][select_key];
           } else {
-            total = totalSelectedState[status][key] += mapState[id].status_matches[status][key];
+            total = totalSelectedState[select_status][select_key] += mapState[id].status_matches[select_status][select_key];
           }
-          matches[key] = total;
+          matches[select_key] = total;
         }
-        status_matches[status] = matches;
+        status_matches[select_status] = matches;
       }
       setTotalSelectedState(Object.assign(totalSelectedState, status_matches));
       // Enable DEPLOY button.
@@ -83,15 +86,17 @@ function Deploy() {
       if (mapState[id].has_reported_animals) {
         color = 'red';
       }
-      setMapState(prevState => ({ ...prevState, [id]: {...prevState[id], ["color"]:color, ["checked"]:false} }));
+      setMapState(prevState => ({ ...prevState, [id]: {...prevState[id], "color":color, "checked":false} }));
       // Remove matches from the running total state tracker.
-      for (var st in mapState[id].status_matches) {
-        var total = 0;
-        for (var key in mapState[id].status_matches[st]) {
-          var total = totalSelectedState[st][key] -= mapState[id].status_matches[st][key];
-          setTotalSelectedState(prevState => ({ ...prevState, [st]:{...prevState[st], [key]:total}}));
+      for (var status in mapState[id].status_matches) {
+        matches = {...totalSelectedState[status]};
+        for (var key in mapState[id].status_matches[status]) {
+          total = totalSelectedState[status][key] -= mapState[id].status_matches[status][key];
+          matches[key] = total;
         }
+        status_matches[status] = matches;
       }
+      setTotalSelectedState(Object.assign(totalSelectedState, status_matches));
       // Disable DEPLOY button is none selected.
       var disabled = false;
       if (selectedCount.count-1 === 0) {
@@ -203,7 +208,7 @@ function Deploy() {
         cancelToken: source.token,
       })
       .then(response => {
-        setData({service_requests: response.data, isFetching: false, bounds:data.bounds});
+        setData({service_requests: response.data, isFetching: false, bounds:L.latLngBounds([[0,0]])});
         const map_dict = mapState;
         const bounds = [];
         const current_ids = Object.keys(mapState);
@@ -223,7 +228,7 @@ function Deploy() {
         }
         setMapState(map_dict);
         if (bounds.length > 0) {
-          setData(prevState => ({ ...prevState, ["bounds"]:L.latLngBounds(bounds) }));
+          setData(prevState => ({ ...prevState, "bounds":L.latLngBounds(bounds) }));
         }
       })
       .catch(error => {
@@ -252,7 +257,7 @@ function Deploy() {
         setTimeout(() => {
           axios.post('/evac/api/evacassignment/', values)
           .then(response => {
-            navigate('/evac/summary/' + response.data.id);
+            navigate('/dispatch/summary/' + response.data.id);
           })
           .catch(error => {
             console.log(error.response);

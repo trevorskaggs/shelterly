@@ -23,7 +23,7 @@ function ServiceRequestDetails({id}) {
   const [showModal, setShowModal] = useState(false);
   const cancelServiceRequest = () => {
     axios.patch('/hotline/api/servicerequests/' + id + '/', {status:'canceled'})
-    setData(prevState => ({ ...prevState, ['status']:'Canceled', ['animals']:prevState['animals'].map(animal => ({...animal, status:'CANCELED'}))}));
+    setData(prevState => ({ ...prevState, 'status':'Canceled', 'animals':prevState['animals'].map(animal => ({...animal, status:'CANCELED'}))}));
     setShowModal(false)
   }
 
@@ -35,7 +35,7 @@ function ServiceRequestDetails({id}) {
         console.log(error.response);
       });
     }
-  }, [datetime]);
+  }, [id, datetime]);
 
   const [data, setData] = useState({
     animals: [],
@@ -84,17 +84,6 @@ function ServiceRequestDetails({id}) {
       <Header>
         Service Request Details 
         <OverlayTrigger
-          key={"cancel-service-request"}
-          placement="bottom"
-          overlay={
-            <Tooltip id={`tooltip-cancel-service-request`}>
-              Cancel service request
-            </Tooltip>
-          }
-        >
-        <FontAwesomeIcon icon={faBan} style={{cursor:'pointer'}} inverse onClick={() => {setShowModal(true)}}/>
-        </OverlayTrigger>
-        <OverlayTrigger
           key={"edit-service-request"}
           placement="bottom"
           overlay={
@@ -103,7 +92,18 @@ function ServiceRequestDetails({id}) {
             </Tooltip>
           }
         >
-        <Link href={"/hotline/servicerequest/edit/" + id}> <FontAwesomeIcon icon={faEdit} className="mb-1" inverse /></Link>
+          <Link href={"/hotline/servicerequest/edit/" + id}> <FontAwesomeIcon icon={faEdit} className="mb-1" inverse /></Link>
+        </OverlayTrigger>
+        <OverlayTrigger
+          key={"cancel-service-request"}
+          placement="bottom"
+          overlay={
+            <Tooltip id={`tooltip-cancel-service-request`}>
+              Cancel service request
+            </Tooltip>
+          }
+        >
+          <FontAwesomeIcon icon={faBan} style={{cursor:'pointer'}} className="fa-move-up" inverse onClick={() => {setShowModal(true)}}/>
         </OverlayTrigger>
         &nbsp;| <span style={{textTransform:"capitalize"}}>{data.status} {data.status === 'assigned' ? <Link href={"/evac/summary/" + data.assigned_evac}><FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link> : ""}</span>
       </Header>
@@ -121,7 +121,6 @@ function ServiceRequestDetails({id}) {
           </Button>
         </Modal.Footer>
       </Modal>
-      <div style={{fontSize:"18px", marginTop:"14px"}}><b>Address: </b>{data.full_address}</div>
       <hr/>
       <div className="row mb-2">
         <div className="col-6 d-flex">
@@ -181,7 +180,8 @@ function ServiceRequestDetails({id}) {
               </Card.Title>
               <hr/>
               <ListGroup variant="flush">
-                <ListGroup.Item style={{marginTop:"-13px"}}>
+                <ListGroup.Item style={{marginTop:"-13px"}}><b>Address: </b>{data.full_address}</ListGroup.Item>
+                <ListGroup.Item>
                   <b>Followup Date: </b>
                   <FontAwesomeIcon icon={faCalendarDay} className="ml-1 mr-1" style={{cursor:'pointer'}} onClick={() => openCalendar()} />
                   {data.followup_date ?
@@ -196,7 +196,7 @@ function ServiceRequestDetails({id}) {
                     id="followup_date"
                     options={{clickOpens:false, altInput:true, altInputClass:"hide-input", altFormat:"F j, Y h:i K"}}
                     onChange={(date, dateStr) => {
-                      setData(prevState => ({ ...prevState, ["followup_date"]:dateStr }));
+                      setData(prevState => ({ ...prevState, "followup_date":dateStr }));
                       axios.patch('/hotline/api/servicerequests/' + id + '/', {followup_date:date[0]})
                       .catch(error => {
                         console.log(error.response);

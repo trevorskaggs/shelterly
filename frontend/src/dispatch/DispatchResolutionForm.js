@@ -10,18 +10,17 @@ import {
   ButtonGroup,
   Card,
   Col,
-  FormGroup,
   ListGroup,
   Row,
 } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faClipboardList, faArrowAltCircleLeft,
+  faClipboardList,
 } from '@fortawesome/free-solid-svg-icons';
 import * as Yup from 'yup';
 import Moment from 'react-moment';
 import Header from '../components/Header';
-import { Checkbox, DateTimePicker, DropDown, TextInput } from '../components/Form';
+import { DateTimePicker, DropDown, TextInput } from '../components/Form';
 import { dispatchStatusChoices } from '../animals/constants';
 
 function DispatchResolutionForm({ id }) {
@@ -142,7 +141,7 @@ function DispatchResolutionForm({ id }) {
         setTimeout(() => {
           axios.put('/evac/api/evacassignment/' + id + '/', values)
             .then(response => {
-              navigate('/evac/summary/' + response.data.id);
+              navigate('/dispatch/summary/' + response.data.id);
             })
             .catch(error => {
               console.log(error.response);
@@ -281,7 +280,7 @@ function DispatchResolutionForm({ id }) {
                           type="text"
                           xs="4"
                           options={ownerChoices[service_request.id]}
-                          value={props.values.sr_updates[index] && props.values.sr_updates[index].owner_contact_id || null}
+                          value={props.values.sr_updates[index] ? props.values.sr_updates[index].owner_contact_id : null}
                           isClearable={false}
                         />
                         </Col>

@@ -66,7 +66,7 @@ function AnimalDetails({id}) {
   const handleOwnerSubmit = async () => {
     await axios.patch('/animals/api/animal/' + id + '/', {remove_owner:ownerToDelete.id})
     .then(response => {
-      setData(prevState => ({ ...prevState, ["owner_objects"]:prevState.owner_objects.filter(owner => owner.id !== ownerToDelete.id) }));
+      setData(prevState => ({ ...prevState, "owner_objects":prevState.owner_objects.filter(owner => owner.id !== ownerToDelete.id) }));
       handleOwnerClose();
     })
     .catch(error => {
@@ -299,10 +299,10 @@ function AnimalDetails({id}) {
           <Carousel className="carousel-wrapper" showThumbs={false} showStatus={false}>
             {images.map(image => (
               <div key={image} className="image-container">
-                <img src={image} />
+                <img src={image} alt="" />
               </div>
             ))}
-            <img src={noImageFound} hidden={images.length > 0} />
+            <img src={noImageFound} alt="" hidden={images.length > 0} />
           </Carousel>
         </div>
         <Card className="border rounded mt-3" style={{width:"100%", height:"100%"}}>

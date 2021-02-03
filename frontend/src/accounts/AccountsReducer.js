@@ -70,7 +70,7 @@ function AuthProvider(props) {
         navigate('/login?next=' + path);
       }
     }
-  }, [path]);
+  }, [path, state.user, cookies.token, removeCookie]);
 
   return (
     <AuthContext.Provider value={{ state, dispatch }}>

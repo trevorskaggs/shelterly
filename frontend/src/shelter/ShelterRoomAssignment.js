@@ -50,7 +50,7 @@ function ShelterRoomAssignment({id}) {
         animals = Array.from(data.unroomed_animals);
         const [reorderedItem] = animals.splice(source.index, 1);
         animals.splice(destination.index, 0, reorderedItem);
-        setData(prevState => ({ ...prevState, ['unroomed_animals']:animals }));
+        setData(prevState => ({ ...prevState, 'unroomed_animals':animals }));
       }
       else {
         animals = Array.from(data.rooms[source.droppableId].animals);
@@ -58,7 +58,7 @@ function ShelterRoomAssignment({id}) {
         animals.splice(destination.index, 0, reorderedItem);
         let rooms = data.rooms;
         rooms[source.droppableId].animals = animals;
-        setData(prevState => ({ ...prevState, ['rooms']:rooms }));
+        setData(prevState => ({ ...prevState, 'rooms':rooms }));
       }
       axios.patch('/animals/api/animal/' + Number(draggableId) + '/', {set_order:destination.index})
       .catch(error => {
@@ -105,7 +105,7 @@ function ShelterRoomAssignment({id}) {
           console.log(error.response);
         });
       }
-      setData(prevState => ({ ...prevState, ['rooms']:rooms, ['unroomed_animals']:unroomed_animals }));
+      setData(prevState => ({ ...prevState, 'rooms':rooms, 'unroomed_animals':unroomed_animals }));
     }
   }
 

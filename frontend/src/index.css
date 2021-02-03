@@ -128,3 +128,7 @@ input[disabled] {
 .fa-move-down {
   transform: translateY(5%);
 }
+
+.fa-move-up {
+  transform: translateY(-5%);
+}

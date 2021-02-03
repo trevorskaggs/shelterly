@@ -125,7 +125,7 @@ const AnimalForm = (props) => {
 
   // Removes an image from a multi file image field array.
   const clearImages = (image_url, setFieldValue) => {
-    setData(prevState => ({ ...prevState, ["extra_images"]:data.extra_images.filter(url => url !== image_url) }));
+    setData(prevState => ({ ...prevState, "extra_images":data.extra_images.filter(url => url !== image_url) }));
     setFieldValue("extra_images", data.extra_images.filter(url => url !== image_url));
   }
 

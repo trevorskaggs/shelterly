@@ -144,7 +144,7 @@ const MultiSelect = ({ label, ...props }) => {
 
 const ImageUploader = ({ parentStateSetter, ...props }) => {
 
-  const { setFieldValue, setFieldTouched } = useFormikContext();
+  const { setFieldValue } = useFormikContext();
   const [childState, setChildState] = useState(0);
   const [field, meta] = useField(props);
 
@@ -157,7 +157,7 @@ const ImageUploader = ({ parentStateSetter, ...props }) => {
     <>
       <ImageUploading
         {...props}
-        onChange={(imageList, addUpdateIndex) => {
+        onChange={(imageList) => {
           setChildState(imageList);
           if (!props.multiple) {
             // Set file to field if it exists.
@@ -172,7 +172,6 @@ const ImageUploader = ({ parentStateSetter, ...props }) => {
           imageList,
           onImageUpload,
           onImageRemove,
-          isDragging,
           dragProps,
           errors
         }) => (
@@ -215,7 +214,7 @@ const ImageUploader = ({ parentStateSetter, ...props }) => {
 const AddressLookup = ({ ...props }) => {
 
   const childRef = useRef(null);
-  const { setFieldValue, setFieldTouched } = useFormikContext();
+  const { setFieldValue } = useFormikContext();
 
   const updateAddr = suggestion => {
     if (suggestion.address_components) {

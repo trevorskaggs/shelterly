@@ -8,6 +8,6 @@ export const Legend = (props) => {
   useEffect(() => {
     const legend = L.control.scale(props);
     legend.addTo(map);
-  }, []);
+  }, [map]);
   return null;
 };

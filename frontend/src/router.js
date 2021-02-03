@@ -43,7 +43,7 @@ const routes = {
   "/animals/:id": ({id}) => <AnimalDetails id={id} />,
   "/dispatch": () => <Dispatch />,
   "/dispatch/dispatchteammember/new": () => <DispatchTeamMemberForm />,
-  "/dispatch/dispatchuationassignment/search": () => <DispatchAssignmentSearch />,
+  "/dispatch/dispatchassignment/search": () => <DispatchAssignmentSearch />,
   "/dispatch/summary/:id": ({id}) => <DispatchSummary id={id} />,
   "/dispatch/resolution/:id": ({id}) => <DispatchResolutionForm id={id} />,
   "/dispatch/assignment/note/:id": ({id}) => <VisitNoteForm id={id} />,

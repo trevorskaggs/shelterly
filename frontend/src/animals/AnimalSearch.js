@@ -15,30 +15,18 @@ function AnimalSearch() {
 
   const [data, setData] = useState({animals: [], isFetching: false});
   const [searchTerm, setSearchTerm] = useState("");
+  const [tempSearchTerm, setTempSearchTerm] = useState("");
   const [statusOptions, setStatusOptions] = useState({status:"all", allColor: "primary", openColor:"secondary", assignedColor:"secondary", closedColor:"secondary"});
 
   // Update searchTerm when field input changes.
   const handleChange = event => {
-    setSearchTerm(event.target.value);
+    setTempSearchTerm(event.target.value);
   };
 
   // Use searchTerm to filter animals.
   const handleSubmit = async event => {
     event.preventDefault();
-
-    let source = axios.CancelToken.source();
-    setData({animals: [], isFetching: true});
-    // Fetch Animal data filtered searchTerm.
-    await axios.get('/animals/api/animal/?search=' + searchTerm + '&is_stray=' + statusOptions.status, {
-      cancelToken: source.token,
-    })
-    .then(response => {
-      setData({animals: response.data, isFetching: false});
-    })
-    .catch(error => {
-      console.log(error.response);
-      setData({animals: [], isFetching: false});
-    });
+    setSearchTerm(tempSearchTerm);
   }
 
     // Hook for initializing data.
@@ -63,7 +51,7 @@ function AnimalSearch() {
       return () => {
         source.cancel();
       };
-    }, [statusOptions.status]);
+    }, [searchTerm, statusOptions.status]);
 
   return (
     <div className="ml-2 mr-2">
@@ -75,7 +63,7 @@ function AnimalSearch() {
             type="text"
             placeholder="Search"
             name="searchTerm"
-            value={searchTerm}
+            value={tempSearchTerm}
             onChange={handleChange}
           />
           <InputGroup.Append>
