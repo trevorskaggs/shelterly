@@ -146,7 +146,7 @@ const ImageUploader = ({ parentStateSetter, ...props }) => {
 
   const { setFieldValue } = useFormikContext();
   const [childState, setChildState] = useState(0);
-  const [field, meta] = useField(props);
+  const [meta] = useField(props);
 
   useEffect(() => {
     // Call parent function to update parent state.

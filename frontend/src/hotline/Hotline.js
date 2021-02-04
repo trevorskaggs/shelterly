@@ -86,8 +86,8 @@ function Hotline() {
         cancelToken: source.token,
       })
       .then(response => {
-        // setData({service_requests: response.data, isFetching: false, bounds:L.latLngBounds([[0,0]])});
-        const map_dict = mapState;
+        setData({service_requests: response.data, isFetching: false, bounds:L.latLngBounds([[0,0]])});
+        const map_dict = {};
         const bounds = [];
         for (const service_request of response.data) {
             const matches = countMatches(service_request);

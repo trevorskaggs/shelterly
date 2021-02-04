@@ -105,7 +105,7 @@ function ServiceRequestDetails({id}) {
         >
           <FontAwesomeIcon icon={faBan} style={{cursor:'pointer'}} className="fa-move-up" inverse onClick={() => {setShowModal(true)}}/>
         </OverlayTrigger>
-        &nbsp;| <span style={{textTransform:"capitalize"}}>{data.status} {data.status === 'assigned' ? <Link href={"/evac/summary/" + data.assigned_evac}><FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link> : ""}</span>
+        &nbsp;| <span style={{textTransform:"capitalize"}}>{data.status} {data.status === 'assigned' ? <Link href={"/dispatch/summary/" + data.assigned_evac}><FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link> : ""}</span>
       </Header>
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
@@ -338,7 +338,7 @@ function ServiceRequestDetails({id}) {
                         </Tooltip>
                       }
                     >
-                      <Link href={"/evac/summary/" + visit_note.evac_assignment}><FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1" inverse /></Link>
+                      <Link href={"/dispatch/summary/" + visit_note.evac_assignment}><FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1" inverse /></Link>
                     </OverlayTrigger>
                     <OverlayTrigger
                       key={"edit-visit-note"}
@@ -349,7 +349,7 @@ function ServiceRequestDetails({id}) {
                         </Tooltip>
                       }
                     >
-                      <Link href={"/evac/assignment/note/" + visit_note.id}> <FontAwesomeIcon icon={faEdit} size="sm" inverse /></Link>
+                      <Link href={"/dispatch/assignment/note/" + visit_note.id}> <FontAwesomeIcon icon={faEdit} size="sm" inverse /></Link>
                     </OverlayTrigger>
                     <div className="mt-1"><b>Date Completed:</b> <Moment format="LL">{visit_note.date_completed}</Moment>
                       {visit_note.forced_entry ?

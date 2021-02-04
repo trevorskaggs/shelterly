@@ -8,6 +8,7 @@ export const Legend = (props) => {
   useEffect(() => {
     const legend = L.control.scale(props);
     legend.addTo(map);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map]);
   return null;
 };

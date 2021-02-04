@@ -21,7 +21,7 @@ import { STATE_OPTIONS } from "../constants";
 // Form for Service Request objects.
 function ServiceRequestForm(props) {
 
-  const { state, dispatch } = useContext(AuthContext);
+  const { state } = useContext(AuthContext);
   const id = props.id;
 
   // Determine if we're in the hotline workflow.
@@ -80,7 +80,7 @@ function ServiceRequestForm(props) {
     return () => {
       source.cancel();
     };
-  }, []);
+  }, [id]);
 
   return (
       <Formik

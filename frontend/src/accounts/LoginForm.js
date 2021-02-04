@@ -12,7 +12,7 @@ import { AuthContext } from "./AccountsReducer";
 import { loadUser, setAuthToken } from "./AccountsUtils";
 
 const Login = () => {
-  const { state, dispatch } = useContext(AuthContext);
+  const { dispatch } = useContext(AuthContext);
   const [cookies, setCookie, removeCookie] = useCookies(['token']);
 
   // Identify any query param data.
