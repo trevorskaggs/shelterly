@@ -172,14 +172,14 @@ const AnimalForm = (props) => {
         let options = [];
         let room_options = {};
         response.data.forEach(shelter => {
-          let display_name = shelter.name + ' ('+shelter.buildings.length+' buildings, ' + shelter.room_count + ' rooms, ' + shelter.animal_count + ' animals)';
+          let display_name = shelter.name + ' (' + shelter.buildings.length + ' buildings, ' + shelter.room_count + ' rooms, ' + shelter.animal_count + ' animals)';
           // Build shelter option list.
           options.push({value: shelter.id, label: display_name});
           room_options[shelter.id] = [];
           shelter.buildings.forEach(building => {
             building.rooms.forEach(room => {
               // Build room option list identified by shelter ID.
-              room_options[shelter.id].push({value: room.id, label: room.building_name + ' - ' + room.name + ' (' + room.animals.length + ' animals)'});
+              room_options[shelter.id].push({value: room.id, label: room.building_name + ' - ' + room.name + ' (' + room.animal_count + ' animals)'});
             });
           });
         });

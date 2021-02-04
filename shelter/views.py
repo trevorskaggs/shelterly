@@ -18,7 +18,6 @@ class ShelterViewSet(viewsets.ModelViewSet):
         if serializer.is_valid():
             # Clean phone fields.
             serializer.validated_data['phone'] = ''.join(char for char in serializer.validated_data.get('phone', '') if char.isdigit())
-            serializer.validated_data['alt_phone'] = ''.join(char for char in serializer.validated_data.get('alt_phone', '') if char.isdigit())
 
             shelter = serializer.save()
             action.send(self.request.user, verb='created shelter', target=shelter)
@@ -27,7 +26,6 @@ class ShelterViewSet(viewsets.ModelViewSet):
         if serializer.is_valid():
             # Clean phone fields.
             serializer.validated_data['phone'] = ''.join(char for char in serializer.validated_data.get('phone', '') if char.isdigit())
-            serializer.validated_data['alt_phone'] = ''.join(char for char in serializer.validated_data.get('alt_phone', '') if char.isdigit())
 
             shelter = serializer.save()
             action.send(self.request.user, verb='updated shelter', target=shelter)
