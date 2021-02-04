@@ -13,7 +13,7 @@ import History from '../components/History';
 import noImageFound from '../static/images/image-not-found.png';
 import Flatpickr from 'react-flatpickr';
 
-export function ServiceRequestView({id}) {
+function ServiceRequestDetails({id}) {
 
   const datetime = useRef(null);
   const openCalendar = () => {
@@ -23,7 +23,7 @@ export function ServiceRequestView({id}) {
   const [showModal, setShowModal] = useState(false);
   const cancelServiceRequest = () => {
     axios.patch('/hotline/api/servicerequests/' + id + '/', {status:'canceled'})
-    setData(prevState => ({ ...prevState, ['status']:'Canceled', ['animals']:prevState['animals'].map(animal => ({...animal, status:'CANCELED'}))}));
+    setData(prevState => ({ ...prevState, 'status':'Canceled', 'animals':prevState['animals'].map(animal => ({...animal, status:'CANCELED'}))}));
     setShowModal(false)
   }
 
@@ -35,11 +35,12 @@ export function ServiceRequestView({id}) {
         console.log(error.response);
       });
     }
-  }, [datetime]);
+  }, [id, datetime]);
 
   const [data, setData] = useState({
     animals: [],
     owners: [],
+    owner_objects: [],
     reporter: '',
     reporter_object: {first_name:'', last_name:''},
     directions: '',
@@ -83,17 +84,6 @@ export function ServiceRequestView({id}) {
       <Header>
         Service Request Details 
         <OverlayTrigger
-          key={"cancel-service-request"}
-          placement="bottom"
-          overlay={
-            <Tooltip id={`tooltip-cancel-service-request`}>
-              Cancel service request
-            </Tooltip>
-          }
-        >
-        <FontAwesomeIcon icon={faBan} style={{cursor:'pointer'}} inverse onClick={() => {setShowModal(true)}}/>
-        </OverlayTrigger>
-        <OverlayTrigger
           key={"edit-service-request"}
           placement="bottom"
           overlay={
@@ -102,9 +92,20 @@ export function ServiceRequestView({id}) {
             </Tooltip>
           }
         >
-        <Link href={"/hotline/servicerequest/edit/" + id}> <FontAwesomeIcon icon={faEdit} className="mb-1" inverse /></Link>
+          <Link href={"/hotline/servicerequest/edit/" + id}> <FontAwesomeIcon icon={faEdit} className="mb-1" inverse /></Link>
         </OverlayTrigger>
-        &nbsp;| <span style={{textTransform:"capitalize"}}>{data.status} {data.status === 'assigned' ? <Link href={"/evac/summary/" + data.assigned_evac}><FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link> : ""}</span>
+        <OverlayTrigger
+          key={"cancel-service-request"}
+          placement="bottom"
+          overlay={
+            <Tooltip id={`tooltip-cancel-service-request`}>
+              Cancel service request
+            </Tooltip>
+          }
+        >
+          <FontAwesomeIcon icon={faBan} style={{cursor:'pointer'}} className="fa-move-up" inverse onClick={() => {setShowModal(true)}}/>
+        </OverlayTrigger>
+        &nbsp;| <span style={{textTransform:"capitalize"}}>{data.status} {data.status === 'assigned' ? <Link href={"/dispatch/summary/" + data.assigned_evac}><FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link> : ""}</span>
       </Header>
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
@@ -120,7 +121,6 @@ export function ServiceRequestView({id}) {
           </Button>
         </Modal.Footer>
       </Modal>
-      <div style={{fontSize:"18px", marginTop:"14px"}}><b>Address: </b>{data.full_address}</div>
       <hr/>
       <div className="row mb-2">
         <div className="col-6 d-flex">
@@ -180,7 +180,8 @@ export function ServiceRequestView({id}) {
               </Card.Title>
               <hr/>
               <ListGroup variant="flush">
-                <ListGroup.Item style={{marginTop:"-13px"}}>
+                <ListGroup.Item style={{marginTop:"-13px"}}><b>Address: </b>{data.full_address}</ListGroup.Item>
+                <ListGroup.Item>
                   <b>Followup Date: </b>
                   <FontAwesomeIcon icon={faCalendarDay} className="ml-1 mr-1" style={{cursor:'pointer'}} onClick={() => openCalendar()} />
                   {data.followup_date ?
@@ -195,7 +196,7 @@ export function ServiceRequestView({id}) {
                     id="followup_date"
                     options={{clickOpens:false, altInput:true, altInputClass:"hide-input", altFormat:"F j, Y h:i K"}}
                     onChange={(date, dateStr) => {
-                      setData(prevState => ({ ...prevState, ["followup_date"]:dateStr }));
+                      setData(prevState => ({ ...prevState, "followup_date":dateStr }));
                       axios.patch('/hotline/api/servicerequests/' + id + '/', {followup_date:date[0]})
                       .catch(error => {
                         console.log(error.response);
@@ -223,13 +224,13 @@ export function ServiceRequestView({id}) {
                       </Tooltip>
                     }
                   >
-                    <Link href={"/hotline/owner/new?servicerequest_id=" + id}><FontAwesomeIcon icon={faPlusSquare} size="sm" className="ml-1" inverse /></Link>
+                    <Link href={"/people/owner/new?servicerequest_id=" + id}><FontAwesomeIcon icon={faPlusSquare} size="sm" className="ml-1" inverse /></Link>
                   </OverlayTrigger>
                 </h4>
               </Card.Title>
               <hr/>
               <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-20px"}}>
-                {data.owners.map(owner => (
+                {data.owner_objects.map(owner => (
                   <ListGroup.Item key={owner.id}><b>Owner: </b>{owner.first_name} {owner.last_name}
                     <OverlayTrigger
                       key={"owner-details"}
@@ -240,7 +241,7 @@ export function ServiceRequestView({id}) {
                         </Tooltip>
                       }
                     >
-                      <Link href={"/hotline/owner/" + owner.id}><FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1" inverse /></Link>
+                      <Link href={"/people/owner/" + owner.id}><FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1" inverse /></Link>
                     </OverlayTrigger>
                     &nbsp;| {owner.display_phone||owner.email||"No Contact"}
                   </ListGroup.Item>
@@ -256,7 +257,7 @@ export function ServiceRequestView({id}) {
                     </Tooltip>
                   }
                 >
-                  <Link href={"/hotline/reporter/" + data.reporter}><FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1" inverse /></Link>
+                  <Link href={"/people/reporter/" + data.reporter}><FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1" inverse /></Link>
                 </OverlayTrigger>
                 </ListGroup.Item> : ""}
               </ListGroup>
@@ -279,7 +280,7 @@ export function ServiceRequestView({id}) {
                       </Tooltip>
                     }
                   >
-                    <Link href={"/hotline/animal/new?servicerequest_id=" + id}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
+                    <Link href={"/animals/new?servicerequest_id=" + id}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
                   </OverlayTrigger>
                 </h4>
               </Card.Title>
@@ -337,7 +338,7 @@ export function ServiceRequestView({id}) {
                         </Tooltip>
                       }
                     >
-                      <Link href={"/evac/summary/" + visit_note.evac_assignment}><FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1" inverse /></Link>
+                      <Link href={"/dispatch/summary/" + visit_note.evac_assignment}><FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1" inverse /></Link>
                     </OverlayTrigger>
                     <OverlayTrigger
                       key={"edit-visit-note"}
@@ -348,7 +349,7 @@ export function ServiceRequestView({id}) {
                         </Tooltip>
                       }
                     >
-                      <Link href={"/evac/assignment/note/" + visit_note.id}> <FontAwesomeIcon icon={faEdit} size="sm" inverse /></Link>
+                      <Link href={"/dispatch/assignment/note/" + visit_note.id}> <FontAwesomeIcon icon={faEdit} size="sm" inverse /></Link>
                     </OverlayTrigger>
                     <div className="mt-1"><b>Date Completed:</b> <Moment format="LL">{visit_note.date_completed}</Moment>
                       {visit_note.forced_entry ?
@@ -377,3 +378,5 @@ export function ServiceRequestView({id}) {
     </>
   );
 };
+
+export default ServiceRequestDetails;

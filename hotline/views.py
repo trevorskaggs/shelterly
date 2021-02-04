@@ -9,7 +9,7 @@ from rest_framework import filters, permissions, serializers, viewsets
 
 class ServiceRequestViewSet(viewsets.ModelViewSet):
     queryset = ServiceRequest.objects.all()
-    search_fields = ['address', 'city', 'animal__name', 'owner__first_name', 'owner__last_name', 'owner__address', 'owner__city', 'reporter__first_name', 'reporter__last_name']
+    search_fields = ['address', 'city', 'animal__name', 'owners__first_name', 'owners__last_name', 'owners__address', 'owners__city', 'reporter__first_name', 'reporter__last_name']
     filter_backends = (filters.SearchFilter, filters.OrderingFilter)
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = ServiceRequestSerializer
@@ -26,7 +26,7 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
             if service_request.reporter:
                 service_request.reporter.animals.update(request=service_request.id)
             else:
-                for owner in service_request.owner.all():
+                for owner in service_request.owners.all():
                     owner.animal_set.update(request=service_request.id)
 
     def perform_update(self, serializer):
@@ -47,7 +47,7 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
             .annotate(
                 injured=Exists(Animal.objects.filter(request_id=OuterRef("id"), injured="yes"))
             ).prefetch_related(Prefetch('animal_set', queryset=Animal.objects.prefetch_related('evacuation_assignments').prefetch_related(Prefetch('animalimage_set', to_attr='images')), to_attr='animals'))
-            .prefetch_related('owner')
+            .prefetch_related('owners')
             .prefetch_related('visitnote_set')
             .select_related('reporter')
             .prefetch_related('evacuation_assignments')

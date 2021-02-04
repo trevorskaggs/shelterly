@@ -22,39 +22,26 @@ import { faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
 import moment from "moment";
 import Header from '../components/Header';
 
-import { ITEMS_PER_PAGE } from '.././constants'
+import { ITEMS_PER_PAGE } from '../constants'
 
-export function ServiceRequestSearch() {
+function ServiceRequestSearch() {
 
   const [data, setData] = useState({service_requests: [], isFetching: false});
   const [searchTerm, setSearchTerm] = useState("");
+  const [tempSearchTerm, setTempSearchTerm] = useState("");
   const [statusOptions, setStatusOptions] = useState({status:"all", allColor: "primary", openColor:"secondary", assignedColor:"secondary", closedColor:"secondary", canceledColor:"secondary"});
   const [page, setPage] = useState(1)
   const [numPages, setNumPages] = useState(1)
 
   // Update searchTerm when field input changes.
   const handleChange = event => {
-    setSearchTerm(event.target.value);
+    setTempSearchTerm(event.target.value);
   };
 
   // Use searchTerm to filter service_requests.
   const handleSubmit = async event => {
     event.preventDefault();
-
-    let source = axios.CancelToken.source();
-    setData({service_requests: [], isFetching: true});
-    // Fetch ServiceRequest data filtered searchTerm.
-    await axios.get('/hotline/api/servicerequests/?search=' + searchTerm + '&status=' + statusOptions.status, {
-      cancelToken: source.token,
-    })
-    .then(response => {
-      setData({service_requests: response.data, isFetching: false});
-      setNumPages(Math.ceil(response.data.length / ITEMS_PER_PAGE))
-    })
-    .catch(error => {
-      console.log(error.response);
-      setData({service_requests: [], isFetching: false});
-    });
+    setSearchTerm(tempSearchTerm);
   }
 
   // Hook for initializing data.
@@ -80,7 +67,7 @@ export function ServiceRequestSearch() {
     return () => {
       source.cancel();
     };
-  }, [statusOptions.status]);
+  }, [searchTerm, statusOptions.status]);
 
   return (
     <div className="ml-2 mr-2">
@@ -92,7 +79,7 @@ export function ServiceRequestSearch() {
             type="text"
             placeholder="Search"
             name="searchTerm"
-            value={searchTerm}
+            value={tempSearchTerm}
             onChange={handleChange}
           />
           <InputGroup.Append>
@@ -109,7 +96,7 @@ export function ServiceRequestSearch() {
       </Form>
 
       {data.service_requests.map((service_request, index) => (
-        <div key={service_request.id} className="mt-3" hidden={page!= Math.ceil((index+1)/ITEMS_PER_PAGE)}>
+        <div key={service_request.id} className="mt-3" hidden={page !== Math.ceil((index+1)/ITEMS_PER_PAGE)}>
           <div className="card-header">
             <h4 style={{marginBottom:"-2px"}}>{service_request.full_address}
               <OverlayTrigger
@@ -131,7 +118,7 @@ export function ServiceRequestSearch() {
               <Card.Body>
                 <Card.Title>Information</Card.Title>
                 <ListGroup>
-                  {service_request.owners.map(owner => (
+                  {service_request.owner_objects.map(owner => (
                     <ListGroup.Item key={owner.id}><b>Owner: </b>{owner.first_name} {owner.last_name}{owner.display_phone ? " " + owner.display_phone : ""}
                       <OverlayTrigger
                         key={"owner-details"}
@@ -142,7 +129,7 @@ export function ServiceRequestSearch() {
                           </Tooltip>
                         }
                       >
-                        <Link href={"/hotline/owner/" + owner.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+                        <Link href={"/people/owner/" + owner.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
                       </OverlayTrigger>
                     </ListGroup.Item>
                   ))}
@@ -158,7 +145,7 @@ export function ServiceRequestSearch() {
                           </Tooltip>
                         }
                       >
-                        <Link href={"/hotline/reporter/" + service_request.reporter} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+                        <Link href={"/people/reporter/" + service_request.reporter} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
                       </OverlayTrigger>
                     </ListGroup.Item> : ""}
                   {service_request.evacuation_assignments.map(evacuation_assignment => (
@@ -176,11 +163,11 @@ export function ServiceRequestSearch() {
                                 </Tooltip>
                               }
                             >
-                              <Link href={"/evac/summary/" + evacuation_assignment.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} inverse/></Link>
+                              <Link href={"/dispatch/summary/" + evacuation_assignment.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} inverse/></Link>
                             </OverlayTrigger>
                             <div>
                               <b>Opened: </b>{moment(evacuation_assignment.start_time).format="MMMM Do YYYY, HH:mm:ss"} |
-                              <Link href={"/evac/resolution/" + evacuation_assignment.id}
+                              <Link href={"/dispatch/resolution/" + evacuation_assignment.id}
                                 className="btn btn-danger ml-1"
                                 style={{paddingTop: "0px", paddingBottom: "0px"}} target="_blank">Close</Link>
                             </div>
@@ -201,8 +188,7 @@ export function ServiceRequestSearch() {
                     <ListGroup.Item style={{borderRadius: 0}}><b style={{textTransform:"capitalize"}}>{species}: </b>
                     {service_request.animals.filter(animal => species.includes(animal.species)).map((animal, i) => (
                     <span key={animal.id}>{i > 0 && ", "}{animal.name || "Unknown"}
-                      <Link href={"/animals/" + animal.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1 mr-1" inverse/></Link>
-                      (
+                      &nbsp;(
                       {animal.status === "SHELTERED IN PLACE" ?
                         <OverlayTrigger key={"sip"} placement="top"
                                         overlay={<Tooltip id={`tooltip-sip`}>SHELTERED IN PLACE</Tooltip>}>
@@ -265,3 +251,5 @@ export function ServiceRequestSearch() {
     
   )
 }
+
+export default ServiceRequestSearch;

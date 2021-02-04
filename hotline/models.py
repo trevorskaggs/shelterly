@@ -13,7 +13,7 @@ STATUS_CHOICES = (
 class ServiceRequest(Location):
     
     #keys
-    owner = models.ManyToManyField(Person, blank=True)
+    owners = models.ManyToManyField(Person, blank=True)
     reporter = models.ForeignKey(Person, on_delete=models.SET_NULL, blank=True, null=True, related_name='reporter_service_request')
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, blank=False, default='open')
 

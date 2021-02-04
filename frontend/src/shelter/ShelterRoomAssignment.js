@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import { Link } from 'raviger';
-import { Card, Col, Row, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Card, Row, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faClipboardList, faUserAlt, faUserAltSlash
@@ -11,7 +11,7 @@ import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import Header from '../components/Header';
 import noImageFound from '../static/images/image-not-found.png';
 
-export function ShelterAssignment({id}) {
+function ShelterRoomAssignment({id}) {
 
   const [data, setData] = useState({
     name: '',
@@ -50,7 +50,7 @@ export function ShelterAssignment({id}) {
         animals = Array.from(data.unroomed_animals);
         const [reorderedItem] = animals.splice(source.index, 1);
         animals.splice(destination.index, 0, reorderedItem);
-        setData(prevState => ({ ...prevState, ['unroomed_animals']:animals }));
+        setData(prevState => ({ ...prevState, 'unroomed_animals':animals }));
       }
       else {
         animals = Array.from(data.rooms[source.droppableId].animals);
@@ -58,7 +58,7 @@ export function ShelterAssignment({id}) {
         animals.splice(destination.index, 0, reorderedItem);
         let rooms = data.rooms;
         rooms[source.droppableId].animals = animals;
-        setData(prevState => ({ ...prevState, ['rooms']:rooms }));
+        setData(prevState => ({ ...prevState, 'rooms':rooms }));
       }
       axios.patch('/animals/api/animal/' + Number(draggableId) + '/', {set_order:destination.index})
       .catch(error => {
@@ -105,7 +105,7 @@ export function ShelterAssignment({id}) {
           console.log(error.response);
         });
       }
-      setData(prevState => ({ ...prevState, ['rooms']:rooms, ['unroomed_animals']:unroomed_animals }));
+      setData(prevState => ({ ...prevState, 'rooms':rooms, 'unroomed_animals':unroomed_animals }));
     }
   }
 
@@ -267,3 +267,5 @@ export function ShelterAssignment({id}) {
     </>
   );
 };
+
+export default ShelterRoomAssignment;

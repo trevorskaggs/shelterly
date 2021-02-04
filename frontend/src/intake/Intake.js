@@ -1,7 +1,6 @@
 import React from "react";
 import { Link } from 'raviger';
 import { ListGroup } from 'react-bootstrap'
-import { PeopleTable } from "../people/PeopleTables";
 
 const Intake = () => (
     <ListGroup className="flex-fill p-5 h-50">
@@ -15,12 +14,6 @@ const Intake = () => (
             <ListGroup.Item action>SEARCH OWNERS</ListGroup.Item>
         </Link>
     </ListGroup>
-)
-
-export const OwnerSearch = () => (
-    <div>
-        <PeopleTable/>
-    </div>
 )
 
 export default Intake

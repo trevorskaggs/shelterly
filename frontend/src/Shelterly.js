@@ -6,7 +6,7 @@ import { theme } from './theme';
 import PageNotFound from "./components/PageNotFound";
 import { useCookies, withCookies } from 'react-cookie';
 import { AuthContext } from "./accounts/AccountsReducer";
-import { Container, Row, Col } from "react-bootstrap";
+import { Container, Row } from "react-bootstrap";
 import Sidebar from "./components/Sidebar";
 
 function Shelterly() {

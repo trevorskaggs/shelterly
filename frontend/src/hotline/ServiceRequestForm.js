@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
-import { Link, navigate, useQueryParams } from 'raviger';
+import { Link, navigate } from 'raviger';
 import { Field, Form, Formik } from 'formik';
 import {
   CustomInput,
@@ -8,20 +8,20 @@ import {
   Fade,
 } from 'reactstrap';
 
-import {Button, ButtonGroup, Card, Col, Form as BootstrapForm, FormGroup, Modal, Row } from "react-bootstrap";
+import {Button, ButtonGroup, Card, Col, Form as BootstrapForm, Modal } from "react-bootstrap";
 import * as Yup from 'yup';
 import { Switch } from 'formik-material-ui';
 import 'flatpickr/dist/themes/light.css';
-import { AddressLookup, DateTimePicker, DropDown, TextInput } from '../components/Form';
+import { AddressLookup, DropDown, TextInput } from '../components/Form';
 import { AuthContext } from "../accounts/AccountsReducer";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft } from '@fortawesome/free-solid-svg-icons';
-import {STATE_OPTIONS} from "../constants";
+import { STATE_OPTIONS } from "../constants";
 
-// Form for creating new Service Request objects.
-export function ServiceRequestForm(props) {
+// Form for Service Request objects.
+function ServiceRequestForm(props) {
 
-  const { state, dispatch } = useContext(AuthContext);
+  const { state } = useContext(AuthContext);
   const id = props.id;
 
   // Determine if we're in the hotline workflow.
@@ -42,7 +42,7 @@ export function ServiceRequestForm(props) {
 
   // Initial ServiceRequest data.
   const [data, setData] = useState({
-    owner: [],
+    owners: [],
     reporter: null,
     directions: '',
     address: props.state.steps.owner.address || '',
@@ -80,7 +80,7 @@ export function ServiceRequestForm(props) {
     return () => {
       source.cancel();
     };
-  }, []);
+  }, [id]);
 
   return (
       <Formik
@@ -136,7 +136,7 @@ export function ServiceRequestForm(props) {
             // Create Service Request
             values['reporter'] = reporterResponse[0].data.id
             if (ownerResponse[0].data.id) {
-              values['owner'] = [ownerResponse[0].data.id]
+              values['owners'] = [ownerResponse[0].data.id]
             }
             axios.post('/hotline/api/servicerequests/', values)
             .then(response => {
@@ -290,3 +290,5 @@ export function ServiceRequestForm(props) {
     </Formik>
   );
 }
+
+export default ServiceRequestForm;

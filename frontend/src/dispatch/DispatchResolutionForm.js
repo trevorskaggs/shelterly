@@ -10,124 +10,20 @@ import {
   ButtonGroup,
   Card,
   Col,
-  FormGroup,
   ListGroup,
   Row,
 } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faClipboardList, faArrowAltCircleLeft,
+  faClipboardList,
 } from '@fortawesome/free-solid-svg-icons';
 import * as Yup from 'yup';
 import Moment from 'react-moment';
 import Header from '../components/Header';
-import { Checkbox, DateTimePicker, DropDown, TextInput } from '.././components/Form';
+import { DateTimePicker, DropDown, TextInput } from '../components/Form';
 import { dispatchStatusChoices } from '../animals/constants';
 
-export const EvacTeamMemberForm = () => {
-
-  // Track whether or not to add another evac team member after saving.
-  const [addAnother, setAddAnother] = useState(false);
-  // Regex validators.
-  const phoneRegex = /^[0-9]{10}$/
-
-  return (
-    <Formik
-      initialValues={{
-        first_name: '',
-        last_name: '',
-        phone: '',
-        agency_id: '',
-      }}
-      validationSchema={Yup.object({
-        first_name: Yup.string()
-          .max(50, 'Must be 50 characters or less')
-          .required('Required'),
-        last_name: Yup.string()
-          .max(50, 'Must be 50 characters or less')
-          .required('Required'),
-        phone: Yup.string()
-          .matches(phoneRegex, "Phone number is not valid")
-          .required('Required'),
-        agency_id: Yup.string(),
-      })}
-      onSubmit={(values, { setSubmitting, resetForm }) => {
-        setTimeout(() => {
-          axios.post('/evac/api/evacteammember/', values)
-            .then(function () {
-              if (addAnother) {
-                resetForm();
-              }
-              else {
-                navigate('/evac');
-              }
-            })
-            .catch(error => {
-              console.log(error.response);
-            });
-          setSubmitting(false);
-        }, 500);
-      }}
-    >
-      {form => (
-        <Card border="secondary" className="mt-5">
-          <Card.Header as="h5" className="pl-3"><span style={{ cursor: 'pointer' }} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>New Team Member</Card.Header>
-          <Card.Body>
-            <Form>
-              <FormGroup>
-                <Row>
-                  <Col>
-                    <TextInput
-                      type="text"
-                      label="First Name*"
-                      name="first_name"
-                      id="first_name"
-                    />
-                  </Col>
-                  <Col>
-                    <TextInput
-                      type="text"
-                      label="Last Name*"
-                      name="last_name"
-                      id="last_name"
-                    />
-                  </Col>
-                </Row>
-              </FormGroup>
-              <FormGroup>
-                <Row>
-                  <Col>
-                    <TextInput
-                      type="text"
-                      label="Phone*"
-                      name="phone"
-                      id="phone"
-                    />
-                  </Col>
-                  <Col>
-                    <TextInput
-                      type="text"
-                      label="Agency ID"
-                      name="agency_id"
-                      id="agency_id"
-                    />
-                  </Col>
-                </Row>
-              </FormGroup>
-            </Form>
-          </Card.Body>
-          <ButtonGroup>
-            <Button type="button" className="btn btn-primary mr-1" onClick={() => { setAddAnother(false); form.submitForm() }}>Save</Button>
-            <Button type="button" className="btn btn-success mr-1" onClick={() => { setAddAnother(true); form.submitForm() }}>Add Another</Button>
-            <Link className="btn btn-secondary" href="/evac">Cancel</Link>
-          </ButtonGroup>
-        </Card>
-      )}
-    </Formik>
-  );
-};
-
-export function EvacResolution({ id }) {
+function DispatchResolutionForm({ id }) {
 
   // Initial animal data.
   const [data, setData] = useState({
@@ -157,7 +53,7 @@ export function EvacResolution({ id }) {
           response.data["sr_updates"] = [];
           response.data.service_request_objects.forEach((service_request, index) => {
             ownerChoices[service_request.id] = []
-            service_request.owners.forEach(owner => {
+            service_request.owner_objects.forEach(owner => {
               ownerChoices[service_request.id].push({value: owner.id, label: owner.first_name + ' ' + owner.last_name})
             })
             // Use existing VisitNote/OwnerContact to populate data if we're editing a closed Resolution.
@@ -170,7 +66,7 @@ export function EvacResolution({ id }) {
               notes: visit_note.notes || '',
               forced_entry: visit_note.forced_entry || false,
               animals: service_request.animals.filter(animal => animal.evacuation_assignments.includes(Number(id))),
-              owner: service_request.owner.length > 0,
+              owner: service_request.owners.length > 0,
               owner_contact_id: owner_contact.owner,
               owner_contact_time: owner_contact.owner_contact_time || '',
               owner_contact_note: owner_contact.owner_contact_note || ''
@@ -245,7 +141,7 @@ export function EvacResolution({ id }) {
         setTimeout(() => {
           axios.put('/evac/api/evacassignment/' + id + '/', values)
             .then(response => {
-              navigate('/evac/summary/' + response.data.id);
+              navigate('/dispatch/summary/' + response.data.id);
             })
             .catch(error => {
               console.log(error.response);
@@ -285,8 +181,8 @@ export function EvacResolution({ id }) {
                   <hr />
                   <ListGroup variant="flush" style={{ marginTop: "-13px", marginBottom: "-13px" }}>
                     <ListGroup.Item><b>Address: </b>{service_request.full_address}</ListGroup.Item>
-                    {service_request.owners.map(owner => (
-                      <ListGroup.Item key={owner.id}><b>Owner: </b>{owner.first_name} {owner.last_name} <Link href={"/hotline/owner/" + owner.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item>
+                    {service_request.owner_objects.map(owner => (
+                      <ListGroup.Item key={owner.id}><b>Owner: </b>{owner.first_name} {owner.last_name} <Link href={"/people/owner/" + owner.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item>
                     ))}
                     {service_request.owners.length < 1 ? <ListGroup.Item><b>Owner: </b>No Owner</ListGroup.Item> : ""}
                   </ListGroup>
@@ -384,7 +280,7 @@ export function EvacResolution({ id }) {
                           type="text"
                           xs="4"
                           options={ownerChoices[service_request.id]}
-                          value={props.values.sr_updates[index] && props.values.sr_updates[index].owner_contact_id || null}
+                          value={props.values.sr_updates[index] ? props.values.sr_updates[index].owner_contact_id : null}
                           isClearable={false}
                         />
                         </Col>
@@ -427,103 +323,4 @@ export function EvacResolution({ id }) {
   )
 }
 
-export const VisitNoteForm = ({ id }) => {
-
-    const [data, setData] = useState({
-      date_completed: '',
-      notes: '',
-      service_request: null,
-      evac_assignment: null,
-      address: '',
-      forced_entry: false,
-    })
-
-  useEffect(() => {
-    let source = axios.CancelToken.source();
-    if (id) {
-      const fetchVisitNote = async () => {
-        // Fetch Visit Note data.
-        await axios.get('/hotline/api/visitnote/' + id + '/', {
-          cancelToken: source.token,
-        })
-          .then(response => {
-            setData(response.data);
-          })
-          .catch(error => {
-            console.log(error.response);
-          });
-      };
-      fetchVisitNote();
-    };
-    return () => {
-      source.cancel();
-    };
-  }, [id]);
-
-  return (
-    <Formik
-      initialValues={data}
-      enableReinitialize={true}
-      validationSchema={Yup.object({
-        date_completed: Yup.date(),
-        notes: Yup.string(),
-      })}
-      onSubmit={(values, { setSubmitting }) => {
-        setTimeout(() => {
-          axios.patch('/hotline/api/visitnote/' + values.id + '/', values)
-            .then(
-              navigate('/hotline/servicerequest/' + values.service_request)
-            )
-            .catch(error => {
-              console.log(error.response);
-            });
-          setSubmitting(false);
-        }, 500);
-      }}
-    >
-      {form => (
-        <Card border="secondary" className="mt-5">
-          <Card.Header as="h5" className="pl-3"><span style={{ cursor: 'pointer' }} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>{!id ? "New" : "Update"} Visit Note - {form.values.address}</Card.Header>
-          <Card.Body>
-            <Form>
-              <FormGroup>
-                <Row>
-                  <DateTimePicker
-                    label="Date Completed"
-                    name="date_completed"
-                    id="date_completed"
-                    xs="7"
-                    clearable={false}
-                    onChange={(date, dateStr) => {
-                      form.setFieldValue("date_completed", dateStr)
-                    }}
-                    value={form.values.date_completed || null}
-                  />
-                </Row>
-                <Row className="mt-3 pl-0">
-                  <TextInput
-                    as="textarea"
-                    label="Notes"
-                    name="notes"
-                    id="notes"
-                    xs="7"
-                    rows={5}
-                  />
-                </Row>
-                <Row>
-                  <Col>
-                    <Label htmlFor="forced_entry" className="mt-2">Forced Entry</Label>
-                    <Field component={Switch} name="forced_entry" type="checkbox" color="primary" />
-                  </Col>
-                </Row>
-              </FormGroup>
-            </Form>
-          </Card.Body>
-          <ButtonGroup>
-            <Button type="button" className="btn btn-primary" onClick={() => { form.submitForm() }}>Save</Button>
-          </ButtonGroup>
-        </Card>
-      )}
-    </Formik>
-  );
-};
+export default DispatchResolutionForm;

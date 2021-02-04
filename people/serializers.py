@@ -24,7 +24,7 @@ class SimplePersonSerializer(serializers.ModelSerializer):
         return re.sub(r'(\d{3})(\d{3})(\d{4})', r'(\1) \2-\3', obj.phone)
 
     def get_is_owner(self, obj):
-        return ServiceRequest.objects.filter(owner=obj.id).exists() or Animal.objects.filter(owner=obj.id).exists()
+        return ServiceRequest.objects.filter(owners=obj.id).exists() or Animal.objects.filter(owners=obj.id).exists()
 
     # Custom field for Formated Alt Phone Number
     def get_display_alt_phone(self, obj):
@@ -72,13 +72,13 @@ class PersonSerializer(SimplePersonSerializer):
     def get_request(self, obj):
         from hotline.serializers import SimpleServiceRequestSerializer
         service_request = (
-            ServiceRequest.objects.filter(Q(owner=obj.id) | Q(reporter=obj.id))
+            ServiceRequest.objects.filter(Q(owners=obj.id) | Q(reporter=obj.id))
         .annotate(animal_count=Count("animal"))
         .annotate(
             injured=Exists(Animal.objects.filter(request_id=OuterRef("id"), injured="yes"))
         )
         .prefetch_related(Prefetch('animal_set', queryset=Animal.objects.prefetch_related(Prefetch('animalimage_set', to_attr='images')), to_attr='animals'))
-        .prefetch_related('owner')
+        .prefetch_related('owners')
         .prefetch_related('visitnote_set')
         .select_related('reporter')
         .prefetch_related('evacuation_assignments')

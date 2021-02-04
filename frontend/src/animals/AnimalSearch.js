@@ -11,34 +11,22 @@ import {
 import Header from '../components/Header';
 import { titleCase } from '../components/Utils';
 
-export function AnimalSearch() {
+function AnimalSearch() {
 
   const [data, setData] = useState({animals: [], isFetching: false});
   const [searchTerm, setSearchTerm] = useState("");
+  const [tempSearchTerm, setTempSearchTerm] = useState("");
   const [statusOptions, setStatusOptions] = useState({status:"all", allColor: "primary", openColor:"secondary", assignedColor:"secondary", closedColor:"secondary"});
 
   // Update searchTerm when field input changes.
   const handleChange = event => {
-    setSearchTerm(event.target.value);
+    setTempSearchTerm(event.target.value);
   };
 
   // Use searchTerm to filter animals.
   const handleSubmit = async event => {
     event.preventDefault();
-
-    let source = axios.CancelToken.source();
-    setData({animals: [], isFetching: true});
-    // Fetch Animal data filtered searchTerm.
-    await axios.get('/animals/api/animal/?search=' + searchTerm + '&is_stray=' + statusOptions.status, {
-      cancelToken: source.token,
-    })
-    .then(response => {
-      setData({animals: response.data, isFetching: false});
-    })
-    .catch(error => {
-      console.log(error.response);
-      setData({animals: [], isFetching: false});
-    });
+    setSearchTerm(tempSearchTerm);
   }
 
     // Hook for initializing data.
@@ -63,7 +51,7 @@ export function AnimalSearch() {
       return () => {
         source.cancel();
       };
-    }, [statusOptions.status]);
+    }, [searchTerm, statusOptions.status]);
 
   return (
     <div className="ml-2 mr-2">
@@ -75,7 +63,7 @@ export function AnimalSearch() {
             type="text"
             placeholder="Search"
             name="searchTerm"
-            value={searchTerm}
+            value={tempSearchTerm}
             onChange={handleChange}
           />
           <InputGroup.Append>
@@ -128,7 +116,7 @@ export function AnimalSearch() {
                 </Card.Title>
                 <ListGroup>
                   <ListGroup.Item>{titleCase(animal.species)}{animal.sex ? <span>, {titleCase(animal.sex)}</span> : ""}{animal.age ? <span>, {titleCase(animal.age)}</span> : ""}{animal.size ? <span>, {titleCase(animal.size)}</span> : ""}</ListGroup.Item>
-                  {animal.owners.map(owner => (
+                  {animal.owner_objects.map(owner => (
                     <ListGroup.Item key={owner.id}><b>Owner:</b> {owner.first_name} {owner.last_name} {owner.display_phone}
                       <OverlayTrigger
                         key={"owner-details"}
@@ -139,11 +127,11 @@ export function AnimalSearch() {
                           </Tooltip>
                         }
                       >
-                        <Link href={"/hotline/owner/" + owner.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+                        <Link href={"/people/owner/" + owner.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
                       </OverlayTrigger>
                     </ListGroup.Item>
                   ))}
-                  {animal.owners < 1 && animal.reporter ? <ListGroup.Item><b>Reporter: </b> {animal.reporter_object.first_name} {animal.reporter_object.last_name} {animal.reporter_object.display_phone}
+                  {animal.owner_objects < 1 && animal.reporter ? <ListGroup.Item><b>Reporter: </b> {animal.reporter_object.first_name} {animal.reporter_object.last_name} {animal.reporter_object.display_phone}
                   <OverlayTrigger
                     key={"reporter-details"}
                     placement="top"
@@ -153,10 +141,10 @@ export function AnimalSearch() {
                       </Tooltip>
                     }
                   >
-                    <Link href={"/hotline/reporter/" + animal.reporter_object.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+                    <Link href={"/people/reporter/" + animal.reporter_object.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
                   </OverlayTrigger>
                   </ListGroup.Item> : ""}
-                  {animal.owners < 1 && !animal.reporter ? <ListGroup.Item><b>Owner: </b>No Owner</ListGroup.Item> : ""}
+                  {animal.owner_objects < 1 && !animal.reporter ? <ListGroup.Item><b>Owner: </b>No Owner</ListGroup.Item> : ""}
                 </ListGroup>
               </Card.Body>
             </Card>
@@ -207,3 +195,5 @@ export function AnimalSearch() {
     </div>
   )
 }
+
+export default AnimalSearch;
