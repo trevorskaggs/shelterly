@@ -79,7 +79,7 @@ class SimpleServiceRequestSerializer(serializers.ModelSerializer):
 
     def to_internal_value(self, data):
         # Updates datetime fields to null when receiving an empty string submission.
-        for key in ['recovery_time', 'owner_notification_tstamp', 'followup_date']:
+        for key in ['followup_date']:
             if data.get(key) == '':
                 data[key] = None
 
@@ -106,7 +106,7 @@ class ServiceRequestSerializer(SimpleServiceRequestSerializer):
 
     action_history = serializers.SerializerMethodField()
     assigned_evac = serializers.SerializerMethodField()
-    owners = SimplePersonSerializer(source='owner', many=True, required=False, read_only=True)
+    owner_objects = SimplePersonSerializer(source='owners', many=True, required=False, read_only=True)
     reporter_object = SimplePersonSerializer(source='reporter', required=False, read_only=True)
     animals = SimpleAnimalSerializer(many=True, read_only=True)
     evacuation_assignments = SimpleEvacAssignmentSerializer(many=True, required=False, read_only=True)

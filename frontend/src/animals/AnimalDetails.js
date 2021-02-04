@@ -14,13 +14,13 @@ import Header from '../components/Header';
 import History from '../components/History';
 import noImageFound from '../static/images/image-not-found.png';
 
-export function AnimalView({id}) {
+function AnimalDetails({id}) {
 
   const [images, setImages] = useState([]);
 
   // Initial animal data.
   const [data, setData] = useState({
-    owner: null,
+    owners: null,
     request: null,
     name: '',
     species: '',
@@ -43,7 +43,7 @@ export function AnimalView({id}) {
     action_history: [],
     full_address:'',
     shelter_name: '',
-    owners: [],
+    owner_objects: [],
   });
 
   const [show, setShow] = useState(false);
@@ -66,7 +66,7 @@ export function AnimalView({id}) {
   const handleOwnerSubmit = async () => {
     await axios.patch('/animals/api/animal/' + id + '/', {remove_owner:ownerToDelete.id})
     .then(response => {
-      setData(prevState => ({ ...prevState, ["owners"]:prevState.owners.filter(owner => owner.id !== ownerToDelete.id) }));
+      setData(prevState => ({ ...prevState, "owner_objects":prevState.owner_objects.filter(owner => owner.id !== ownerToDelete.id) }));
       handleOwnerClose();
     })
     .catch(error => {
@@ -231,13 +231,13 @@ export function AnimalView({id}) {
                     </Tooltip>
                   }
                 >
-                  <Link href={"/hotline/owner/new?animal_id=" + id}><FontAwesomeIcon icon={faPlusSquare} size="sm" className="ml-1" inverse /></Link>
+                  <Link href={"/people/owner/new?animal_id=" + id}><FontAwesomeIcon icon={faPlusSquare} size="sm" className="ml-1" inverse /></Link>
                 </OverlayTrigger>
               </h4>
             </Card.Title>
             <hr/>
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
-              {data.owners.map(owner => (
+              {data.owner_objects.map(owner => (
                 <ListGroup.Item key={owner.id}><b>Owner: </b>{owner.first_name} {owner.last_name}
                   <OverlayTrigger
                     key={"owner-details"}
@@ -248,7 +248,7 @@ export function AnimalView({id}) {
                       </Tooltip>
                     }
                   >
-                    <Link href={"/hotline/owner/" + owner.id}><FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1 mr-1" inverse /></Link>
+                    <Link href={"/people/owner/" + owner.id}><FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1 mr-1" inverse /></Link>
                   </OverlayTrigger>
                   <OverlayTrigger
                     key={"remove-owner"}
@@ -274,10 +274,10 @@ export function AnimalView({id}) {
                     </Tooltip>
                   }
                 >
-                  <Link href={"/hotline/reporter/" + data.reporter}><FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1" inverse /></Link>
+                  <Link href={"/people/reporter/" + data.reporter}><FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1" inverse /></Link>
                 </OverlayTrigger>
               </ListGroup.Item> : ""}
-              {data.owners.length < 1 && !data.reporter ? <ListGroup.Item>No Contacts</ListGroup.Item> : ""}
+              {data.owner_objects.length < 1 && !data.reporter ? <ListGroup.Item>No Contacts</ListGroup.Item> : ""}
             </ListGroup>
             <Card.Title>
                <h4 className="mb-0 mt-3">Location</h4>
@@ -299,10 +299,10 @@ export function AnimalView({id}) {
           <Carousel className="carousel-wrapper" showThumbs={false} showStatus={false}>
             {images.map(image => (
               <div key={image} className="image-container">
-                <img src={image} />
+                <img src={image} alt="" />
               </div>
             ))}
-            <img src={noImageFound} hidden={images.length > 0} />
+            <img src={noImageFound} alt="" hidden={images.length > 0} />
           </Carousel>
         </div>
         <Card className="border rounded mt-3" style={{width:"100%", height:"100%"}}>
@@ -358,3 +358,5 @@ export function AnimalView({id}) {
     </>
   );
 };
+
+export default AnimalDetails;

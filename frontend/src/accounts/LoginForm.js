@@ -7,12 +7,12 @@ import Col from 'react-bootstrap/Col';
 import { Form as BootstrapForm } from 'react-bootstrap';
 import * as Yup from "yup";
 import { useCookies } from 'react-cookie';
-import { TextInput } from '.././components/Form.js';
+import { TextInput } from '../components/Form.js';
 import { AuthContext } from "./AccountsReducer";
 import { loadUser, setAuthToken } from "./AccountsUtils";
 
-export const LoginForm = () => {
-  const { state, dispatch } = useContext(AuthContext);
+const Login = () => {
+  const { dispatch } = useContext(AuthContext);
   const [cookies, setCookie, removeCookie] = useCookies(['token']);
 
   // Identify any query param data.
@@ -89,3 +89,5 @@ export const LoginForm = () => {
     </Fragment>
   )
 }
+
+export default Login;

@@ -1,13 +1,13 @@
 import React from "react";
 import { render, fireEvent, screen } from "@testing-library/react";
-import { LoginForm } from "./AccountsForms";
+import Login from "./LoginForm";
 import { AuthProvider } from "./AccountsReducer";
 
 describe("Login form", () => {
   it("Logging in with incorrect credentials should show feedback", async () => {
     render(
       <AuthProvider>
-        <LoginForm />
+        <Login />
       </AuthProvider>
     );
     const username = screen.getByPlaceholderText(/Username/);
@@ -26,7 +26,7 @@ describe("Login form", () => {
   it("Touching username field without filling should show feedback", async () => {
     render(
       <AuthProvider>
-        <LoginForm />
+        <Login />
       </AuthProvider>
     );
     const username = screen.getByPlaceholderText(/Username/);
@@ -40,7 +40,7 @@ describe("Login form", () => {
   it("Touching password field without filling should show feedback", async () => {
     render(
       <AuthProvider>
-        <LoginForm />
+        <Login />
       </AuthProvider>
     );
     const password = screen.getByPlaceholderText(/Password/);

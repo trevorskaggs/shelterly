@@ -12,7 +12,7 @@ import noImageFound from '../static/images/image-not-found.png';
 import Header from '../components/Header';
 import History from '../components/History';
 
-export function PersonView({id}) {
+function PersonDetails({id}) {
 
   // Determine if this is an owner or reporter when creating a Person.
   var is_owner = window.location.pathname.includes("owner")
@@ -67,7 +67,7 @@ export function PersonView({id}) {
               </Tooltip>
             }
           >
-            <Link href={"/hotline/owner/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-1 mr-1" inverse /></Link>
+            <Link href={"/people/owner/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-1 mr-1" inverse /></Link>
           </OverlayTrigger>
           <OverlayTrigger
             key={"add-owner"}
@@ -78,7 +78,7 @@ export function PersonView({id}) {
               </Tooltip>
             }
           >
-            <Link href={"/hotline/owner/new?owner_id=" + id}><FontAwesomeIcon icon={faPlusSquare} className="fa-move-down" inverse /></Link>
+            <Link href={"/people/owner/new?owner_id=" + id}><FontAwesomeIcon icon={faPlusSquare} className="fa-move-down" inverse /></Link>
           </OverlayTrigger>
         </span>
       :
@@ -92,7 +92,7 @@ export function PersonView({id}) {
               </Tooltip>
             }
           >
-            <Link href={"/hotline/reporter/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-1" inverse /></Link>
+            <Link href={"/people/reporter/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-1" inverse /></Link>
           </OverlayTrigger>
         </span>
       }
@@ -165,7 +165,7 @@ export function PersonView({id}) {
                     </Tooltip>
                   }
                 >
-                  <Link href={"/hotline/animal/new?owner_id=" + id}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
+                  <Link href={"/animals/new?owner_id=" + id}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
                 </OverlayTrigger>
               </h4>
             </Card.Title>
@@ -206,3 +206,4 @@ export function PersonView({id}) {
   );
 };
 
+export default PersonDetails;

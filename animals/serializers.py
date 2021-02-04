@@ -18,8 +18,8 @@ class SimpleAnimalSerializer(serializers.ModelSerializer):
         return build_full_address(obj)
 
     def get_owner_names(self, obj):
-        if obj.owner.exists():
-            return [person.first_name + ' ' + person.last_name for person in obj.owner.all()]
+        if obj.owners.exists():
+            return [person.first_name + ' ' + person.last_name for person in obj.owners.all()]
         return []
 
     # An Animal is ACO Required if it is aggressive or "Other" species.
@@ -64,11 +64,11 @@ class SimpleAnimalSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Animal
-        exclude = ['owner']
+        fields = '__all__'
 
 class AnimalSerializer(SimpleAnimalSerializer):
 
-    owners = serializers.SerializerMethodField()
+    owner_objects = serializers.SerializerMethodField()
     full_address = serializers.SerializerMethodField()
     shelter_name = serializers.SerializerMethodField()
     reporter_object = serializers.SerializerMethodField(read_only=True)
@@ -78,10 +78,10 @@ class AnimalSerializer(SimpleAnimalSerializer):
     room_name = serializers.SerializerMethodField()
 
     # Custom Owner object field that excludes animals to avoid a circular reference.
-    def get_owners(self, obj):
+    def get_owner_objects(self, obj):
         from people.serializers import SimplePersonSerializer
-        if obj.owner.exists():
-            return SimplePersonSerializer(obj.owner, many=True).data
+        if obj.owners.exists():
+            return SimplePersonSerializer(obj.owners, many=True).data
         return []
 
     # Custom field for the full address.
@@ -123,7 +123,3 @@ class AnimalSerializer(SimpleAnimalSerializer):
 
     def get_action_history(self, obj):
         return [build_action_string(action) for action in obj.target_actions.all()]
-    
-    class Meta:
-        model = Animal
-        fields = '__all__'

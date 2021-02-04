@@ -30,23 +30,23 @@ class PersonViewSet(viewsets.ModelViewSet):
             # If an owner is being added to an existing SR, add the owner to the SR and update all SR animals with the owner.
             if self.request.data.get('request'):
                 service_request = ServiceRequest.objects.get(pk=self.request.data.get('request'))
-                service_request.owner.add(person)
+                service_request.owners.add(person)
                 for animal in service_request.animal_set.all():
-                    animal.owner.add(person)
+                    animal.owners.add(person)
 
             # If an owner is being added from an animal, update the animal with the new owner.
             if self.request.data.get('animal'):
                 animal = Animal.objects.get(pk=self.request.data.get('animal'))
-                animal.owner.add(person)
+                animal.owners.add(person)
 
             # If an owner is being added from an owner, update the original owner animals with the new owner.
             if self.request.data.get('owner'):
                 owner = Person.objects.get(pk=self.request.data.get('owner'))
                 for animal in owner.animal_set.all():
-                    animal.owner.add(person)
+                    animal.owners.add(person)
                 # If the original owner belongs to an SR, update the SR with the new owner.
-                for service_request in ServiceRequest.objects.filter(owner=owner):
-                    service_request.owner.add(person)
+                for service_request in ServiceRequest.objects.filter(owners=owner):
+                    service_request.owners.add(person)
 
     def perform_update(self, serializer):
         if serializer.is_valid():

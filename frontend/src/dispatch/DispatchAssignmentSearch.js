@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
-import Table from '.././components/Table';
 import { Button, ButtonGroup, Card, CardGroup, Col, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Row, Tooltip } from "react-bootstrap";
 import { Link } from "raviger";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -11,83 +10,22 @@ import { faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
 import Moment from "react-moment";
 import Header from '../components/Header';
 
-export function EvacTeamTable() {
-  const columns = React.useMemo(
-    () => [
-      {
-        Header: 'Evac Team',
-        accessor: 'id',
-        Cell: ({ cell: { value } }) =>
-          <div><a href={"/evac/evacteam/"+value+"/"}>Evac Team {value}</a></div>
-      },
-      {
-        Header: 'Team Members',
-        accessor: 'evac_team_member_names',
-      }
-    ],
-    []
-  )
-  const [data, setData] = useState({evac_teams: [], isFetching: false});
-  // Hook for initializing data.
-  useEffect(() => {
-    let source = axios.CancelToken.source();
-    const fetchEvacTeams = async () => {
-      setData({evac_teams: [], isFetching: true});
-      // Fetch EvacTeam data.
-      await axios.get('http://localhost:8000/evac/api/evacteam/', {
-        cancelToken: source.token,
-      })
-      .then(response => {
-        setData({evac_teams: response.data, isFetching: false});
-      })
-      .catch(error => {
-        console.log(error.response);
-        setData({evac_teams: [], isFetching: false});
-      });
-    };
-    fetchEvacTeams();
-    // Cleanup.
-    return () => {
-      source.cancel();
-    };
-  }, []);
-
-  return (
-    <div>
-      <Table columns={columns} data={data.evac_teams}/>
-      <p>{data.isFetching ? 'Fetching teams...' : ''}</p>
-    </div>
-  )
-}
-
-export function EvacuationAssignmentTable() {
+function DispatchAssignmentSearch() {
 
   const [data, setData] = useState({evacuation_assignments: [], isFetching: false});
   const [searchTerm, setSearchTerm] = useState("");
+  const [tempSearchTerm, setTempSearchTerm] = useState("");
   const [statusOptions, setStatusOptions] = useState({status: "open", allColor:"secondary", openColor:"primary", assignedColor:"secondary", closedColor:"secondary"});
 
   // Update searchTerm when field input changes.
   const handleChange = event => {
-    setSearchTerm(event.target.value);
+    setTempSearchTerm(event.target.value);
   };
 
   // Use searchTerm to filter evacuation_assignments.
   const handleSubmit = async event => {
     event.preventDefault();
-
-    let source = axios.CancelToken.source();
-    setData({evacuation_assignments: [], isFetching: true});
-    // Fetch EvacuationAssignments data filtered searchTerm.
-    await axios.get('/evac/api/evacassignment/?search=' + searchTerm + '&status=' + statusOptions.status, {
-      cancelToken: source.token,
-    })
-        .then(response => {
-          setData({evacuation_assignments: response.data, isFetching: false});
-        })
-        .catch(error => {
-          console.log(error.response);
-          setData({evacuation_assignments: [], isFetching: false});
-        });
+    setSearchTerm(tempSearchTerm);
   }
 
   // Hook for initializing data.
@@ -112,7 +50,7 @@ export function EvacuationAssignmentTable() {
     return () => {
       source.cancel();
     };
-  }, [statusOptions.status]);
+  }, [searchTerm, statusOptions.status]);
 
   return (
       <div className="ml-2 mr-2">
@@ -124,7 +62,7 @@ export function EvacuationAssignmentTable() {
                 type="text"
                 placeholder="Search"
                 name="searchTerm"
-                value={searchTerm}
+                value={tempSearchTerm}
                 onChange={handleChange}
             />
             <InputGroup.Append>
@@ -150,12 +88,12 @@ export function EvacuationAssignmentTable() {
                   </Tooltip>
                 }
               >
-                <Link href={"/evac/summary/" + evacuation_assignment.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+                <Link href={"/dispatch/summary/" + evacuation_assignment.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
               </OverlayTrigger>
               &nbsp;&nbsp;|&nbsp;
               Team Members: {evacuation_assignment.team_member_objects.map((member, i) => (
                   <span key={member.id}>{i > 0 && ", "}{member.first_name} {member.last_name}</span>))}
-              {evacuation_assignment.end_time ? "" : <Link href={"/evac/resolution/" + evacuation_assignment.id} className="btn btn-danger ml-1" style={{paddingTop:"0px", paddingBottom:"0px"}}>Close</Link>}
+              {evacuation_assignment.end_time ? "" : <Link href={"/dispatch/resolution/" + evacuation_assignment.id} className="btn btn-danger ml-1" style={{paddingTop:"0px", paddingBottom:"0px"}}>Close</Link>}
             </h4></div>
             <CardGroup>
               <Card key={evacuation_assignment.id}>
@@ -181,11 +119,11 @@ export function EvacuationAssignmentTable() {
                             <div>
                               <b>Owners: </b>
                               {service_request.owners.length < 1 ? "No Owners" : <span>
-                              {service_request.owners.map((owner, i) => (
+                              {service_request.owner_objects.map((owner, i) => (
                               <span key={owner.id}>
                                 {i > 0 && " | "}{owner.first_name} {owner.last_name}
                                 <Link
-                                  href={"/hotline/owner/" + owner.id} target="_blank"> <FontAwesomeIcon
+                                  href={"/people/owner/" + owner.id} target="_blank"> <FontAwesomeIcon
                                   icon={faClipboardList} inverse/>
                                 </Link>
                               </span>
@@ -193,10 +131,10 @@ export function EvacuationAssignmentTable() {
                             </div>
                             {evacuation_assignment.end_time ?
                             <div>
-                              <b>Visit Note: </b>{service_request.visit_notes.filter(note => String(note.evac_assignment) === String(evacuation_assignment.id)).length && service_request.visit_notes.filter(note => String(note.evac_assignment) === String(evacuation_assignment.id))[0].notes || "No information available."}
+                              <b>Visit Note: </b>{(service_request.visit_notes.filter(note => String(note.evac_assignment) === String(evacuation_assignment.id)).length && service_request.visit_notes.filter(note => String(note.evac_assignment) === String(evacuation_assignment.id))[0].notes) || "No information available."}
                             </div> :
                             <div>
-                              <b>Previous Visit: </b>{service_request.visit_notes.sort((a,b) => new Date(b.date_completed).getTime() - new Date(a.date_completed).getTime()).length && service_request.visit_notes.sort((a,b) => new Date(b.date_completed).getTime() - new Date(a.date_completed).getTime())[0].notes || "No information available."}
+                              <b>Previous Visit: </b>{(service_request.visit_notes.sort((a,b) => new Date(b.date_completed).getTime() - new Date(a.date_completed).getTime()).length && service_request.visit_notes.sort((a,b) => new Date(b.date_completed).getTime() - new Date(a.date_completed).getTime())[0].notes) || "No information available."}
                             </div>
                             }
                           </Col>
@@ -264,7 +202,9 @@ export function EvacuationAssignmentTable() {
             </CardGroup>
           </div>
         ))}
-        <p>{data.isFetching ? 'Fetching evacuation requests...' : <span>{data.evacuation_assignments && data.evacuation_assignments.length ? '' : 'No Evacuation Assignments found.'}</span>}</p>
+        <p>{data.isFetching ? 'Fetching dispatch requests...' : <span>{data.evacuation_assignments && data.evacuation_assignments.length ? '' : 'No Dispatch Assignments found.'}</span>}</p>
       </div>
   )
 }
+
+export default DispatchAssignmentSearch;

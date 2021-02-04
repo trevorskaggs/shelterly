@@ -9,58 +9,46 @@ import {
 import { faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
 import Header from '../components/Header';
 
-export function PeopleTable() {
+function PersonSearch() {
 
 	const [data, setData] = useState({owners: [], isFetching: false});
 	const [searchTerm, setSearchTerm] = useState("");
+	const [tempSearchTerm, setTempSearchTerm] = useState("");
 
 	// Update searchTerm when field input changes.
 	const handleChange = event => {
-			setSearchTerm(event.target.value);
+		setTempSearchTerm(event.target.value);
 	};
 
 	// Use searchTerm to filter owners.
 	const handleSubmit = async event => {
 			event.preventDefault();
-
-			let source = axios.CancelToken.source();
-			setData({owners: [], isFetching: true});
-			// Fetch Persons data filtered searchTerm.
-			await axios.get('/people/api/person/?search=' + searchTerm, {
-					cancelToken: source.token,
-			})
-			.then(response => {
-					setData({owners: response.data, isFetching: false});
-			})
-			.catch(error => {
-					console.log(error.response);
-					setData({owners: [], isFetching: false});
-			});
+			setSearchTerm(tempSearchTerm);
 	}
 
 	// Hook for initializing data.
 	useEffect(() => {
-			let source = axios.CancelToken.source();
-			const fetchOwners = async () => {
-					setData({owners: [], isFetching: true});
-					// Fetch People data.
-					await axios.get('/people/api/person/?search=' + searchTerm, {
-							cancelToken: source.token,
-					})
-					.then(response => {
-							setData({owners: response.data, isFetching: false});
-					})
-					.catch(error => {
-							console.log(error.response);
-							setData({owners: [], isFetching: false});
-					});
-			};
-			fetchOwners();
-			// Cleanup.
-			return () => {
-					source.cancel();
-			};
-	}, []);
+		let source = axios.CancelToken.source();
+		const fetchOwners = async () => {
+			setData({owners: [], isFetching: true});
+			// Fetch People data.
+			await axios.get('/people/api/person/?search=' + searchTerm, {
+				cancelToken: source.token,
+			})
+			.then(response => {
+				setData({owners: response.data, isFetching: false});
+			})
+			.catch(error => {
+				console.log(error.response);
+				setData({owners: [], isFetching: false});
+			});
+		};
+		fetchOwners();
+		// Cleanup.
+		return () => {
+			source.cancel();
+		};
+	}, [searchTerm]);
 
 	return (
 			<>
@@ -73,7 +61,7 @@ export function PeopleTable() {
 								type="text"
 								placeholder="Search"
 								name="searchTerm"
-								value={searchTerm}
+								value={tempSearchTerm}
 								onChange={handleChange}
 							/>
 							<InputGroup.Append>
@@ -97,7 +85,7 @@ export function PeopleTable() {
 															</Tooltip>
 														}
 													>
-														<Link href={"/hotline/owner/" + owner.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse/></Link>
+														<Link href={"/people/owner/" + owner.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse/></Link>
 													</OverlayTrigger>
 													:
 													<OverlayTrigger
@@ -109,7 +97,7 @@ export function PeopleTable() {
 															</Tooltip>
 														}
 													>
-														<Link href={"/hotline/reporter/" + owner.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse/></Link>
+														<Link href={"/people/reporter/" + owner.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse/></Link>
 													</OverlayTrigger>
 													}
 												</h4> : "Unknown"}
@@ -144,7 +132,6 @@ export function PeopleTable() {
 																				<ListGroup.Item style={{borderRadius: 0}}><b style={{textTransform:"capitalize"}}>{species}: </b>
 																				{owner.animals.filter(animal => species.includes(animal.species)).map((animal, i) => (
 																				<span key={animal.id}>{i > 0 && ", "}{animal.name || "Unknown"}
-																				<Link href={"/animals/animal/" + animal.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1 mr-1" inverse/></Link>
 																				(
 																				{animal.status === "SHELTERED IN PLACE" ?
 																						<OverlayTrigger key={"sip"} placement="top"
@@ -205,3 +192,5 @@ export function PeopleTable() {
 	</>
 	)
 }
+
+export default PersonSearch;

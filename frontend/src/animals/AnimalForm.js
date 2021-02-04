@@ -7,14 +7,14 @@ import { Button, ButtonGroup, Form as BootstrapForm } from "react-bootstrap";
 import { Card } from 'react-bootstrap';
 import * as Yup from 'yup';
 import { AuthContext } from "../accounts/AccountsReducer";
-import {AddressLookup, DateTimePicker, DropDown, ImageUploader, TextInput} from '.././components/Form.js';
+import {AddressLookup, DateTimePicker, DropDown, ImageUploader, TextInput} from '../components/Form.js';
 import { catAgeChoices, dogAgeChoices, horseAgeChoices, otherAgeChoices, catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, speciesChoices, sexChoices, dogSizeChoices, catSizeChoices, horseSizeChoices, otherSizeChoices, unknownChoices } from './constants';
 import { STATE_OPTIONS } from '../constants'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft, faMinusSquare } from '@fortawesome/free-solid-svg-icons';
 import Alert from 'react-bootstrap/Alert'
 
-export const AnimalForm = (props) => {
+const AnimalForm = (props) => {
 
   const { state } = useContext(AuthContext);
   const id = props.id;
@@ -125,7 +125,7 @@ export const AnimalForm = (props) => {
 
   // Removes an image from a multi file image field array.
   const clearImages = (image_url, setFieldValue) => {
-    setData(prevState => ({ ...prevState, ["extra_images"]:data.extra_images.filter(url => url !== image_url) }));
+    setData(prevState => ({ ...prevState, "extra_images":data.extra_images.filter(url => url !== image_url) }));
     setFieldValue("extra_images", data.extra_images.filter(url => url !== image_url));
   }
 
@@ -172,14 +172,14 @@ export const AnimalForm = (props) => {
         let options = [];
         let room_options = {};
         response.data.forEach(shelter => {
-          let display_name = shelter.name + ' ('+shelter.buildings.length+' buildings, ' + shelter.room_count + ' rooms, ' + shelter.animal_count + ' animals)';
+          let display_name = shelter.name + ' (' + shelter.buildings.length + ' buildings, ' + shelter.room_count + ' rooms, ' + shelter.animal_count + ' animals)';
           // Build shelter option list.
           options.push({value: shelter.id, label: display_name});
           room_options[shelter.id] = [];
           shelter.buildings.forEach(building => {
             building.rooms.forEach(room => {
               // Build room option list identified by shelter ID.
-              room_options[shelter.id].push({value: room.id, label: room.building_name + ' - ' + room.name + ' (' + room.animals.length + ' animals)'});
+              room_options[shelter.id].push({value: room.id, label: room.building_name + ' - ' + room.name + ' (' + room.animal_count + ' animals)'});
             });
           });
         });
@@ -246,9 +246,9 @@ export const AnimalForm = (props) => {
             .nullable()
         })}
         onSubmit={ async (values, { setSubmitting, resetForm }) => {
-          // Remove owner if animal has none.
-          if (values["owner"]) {
-            delete values["owner"];
+          // Remove owners from form data.
+          if (values["owners"]) {
+            delete values["owners"];
           }
 
           // Use FormData so that image files may also be included.
@@ -314,10 +314,10 @@ export const AnimalForm = (props) => {
                 navigate('/shelter/' + values.shelter);
               }
               else if (ownerResponse[0].data.id) {
-                navigate('/hotline/owner/' + ownerResponse[0].data.id)
+                navigate('/people/owner/' + ownerResponse[0].data.id)
               }
               else {
-                navigate('/hotline/reporter/' + reporterResponse[0].data.id)
+                navigate('/people/reporter/' + reporterResponse[0].data.id)
               }
             }
             else {
@@ -361,7 +361,7 @@ export const AnimalForm = (props) => {
                 }
                 // If adding to an Owner, redirect to the owner.
                 else if (owner_id) {
-                  navigate('/hotline/owner/' + owner_id)
+                  navigate('/people/owner/' + owner_id)
                 }
                 // Else redirect to the animal.
                 else {
@@ -732,3 +732,5 @@ export const AnimalForm = (props) => {
     </>
   );
 };
+
+export default AnimalForm

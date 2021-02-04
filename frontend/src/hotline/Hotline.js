@@ -2,30 +2,14 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link } from 'raviger';
 import { Button, ButtonGroup, Col, ListGroup, Row } from 'react-bootstrap'
-import { Circle, CircleMarker, Map, TileLayer, Tooltip as MapTooltip, useLeaflet } from "react-leaflet";
+import { Circle, CircleMarker, Map, TileLayer, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
 import Moment from 'react-moment';
+import { Legend } from "../components/Map";
 import badge from "../static/images/badge-sheriff.png";
 import bandaid from "../static/images/band-aid-solid.png";
 import car from "../static/images/car-solid.png";
 import trailer from "../static/images/trailer-solid.png";
-import { OwnerContactForm, ServiceRequestForm } from "./HotlineForms";
-import { ServiceRequestView } from "./HotlineViews";
-import { initialData } from "./HotlineWorkflow";
-
-const header_style = {
-  textAlign: "center",
-};
-
-const Legend = (props) => {
-  const { map } = useLeaflet();
-
-  useEffect(() => {
-    const legend = L.control.scale(props);
-    legend.addTo(map);
-  }, []);
-  return null;
-};
 
 function Hotline() {
 
@@ -102,8 +86,8 @@ function Hotline() {
         cancelToken: source.token,
       })
       .then(response => {
-        setData({service_requests: response.data, isFetching: false, bounds:data.bounds});
-        const map_dict = mapState;
+        setData({service_requests: response.data, isFetching: false, bounds:L.latLngBounds([[0,0]])});
+        const map_dict = {};
         const bounds = [];
         for (const service_request of response.data) {
             const matches = countMatches(service_request);
@@ -119,7 +103,7 @@ function Hotline() {
         }
         setMapState(map_dict);
         if (bounds.length > 0) {
-          setData(prevState => ({ ...prevState, ["bounds"]:L.latLngBounds(bounds) }));
+          setData({service_requests: response.data, isFetching: false, bounds:L.latLngBounds(bounds)});
         }
       })
       .catch(error => {
@@ -134,7 +118,7 @@ function Hotline() {
     return () => {
       source.cancel();
     };
-  }, [statusOptions]);
+  }, [statusOptions.status]);
 
   return (
     <>
@@ -211,17 +195,5 @@ function Hotline() {
   </>
   )
 }
-
-export const UpdateServiceRequest = ({id}) => (
-  <div>
-    <ServiceRequestForm id={id} state={initialData} />
-  </div>
-)
-
-export const ServiceRequestDetail = ({id}) => (
-  <div>
-    <ServiceRequestView id={id} />
-  </div>
-)
 
 export default Hotline
