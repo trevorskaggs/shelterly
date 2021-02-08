@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, Collapse } from 'react-bootstrap';
+import { Card, Collapse, Pagination } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faChevronCircleDown, faChevronCircleRight
@@ -22,6 +22,13 @@ function History({action_history}) {
           </Card.Body>
         </Card>
       </div>
+      <Pagination className="custom-page-links" size="lg" onClick={(e) => {setPage(parseInt(e.target.innerText))}}>
+        {[...Array(numPages).keys()].map(x => 
+        <Pagination.Item key={x+1} active={x+1 === page}>
+                  {x+1}
+                </Pagination.Item>)
+        }
+      </Pagination>
     </Collapse>
     ))}
     </>
