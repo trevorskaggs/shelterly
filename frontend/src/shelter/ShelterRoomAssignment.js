@@ -146,7 +146,7 @@ function ShelterRoomAssignment({id}) {
               <Card.Body style={{paddingBottom:"3px", display:"flex", flexDirection:"column"}}>
                 <Droppable droppableId="unroomed_animals" direction="horizontal">
                   {(provided) => (
-                    <ul className="unroomed_animals " {...provided.droppableProps} ref={provided.innerRef}>
+                    <ul className="unroomed_animals" {...provided.droppableProps} ref={provided.innerRef}>
                     {data.unroomed_animals.map((animal, index) => (
                       <Draggable key={animal.id} draggableId={String(animal.id)} index={index}>
                         {(provided) => (
