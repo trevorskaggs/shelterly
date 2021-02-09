@@ -80,7 +80,7 @@ function ShelterDetails({id}) {
               <b>Address:</b> {data.full_address}
             </ListGroup.Item>
             <ListGroup.Item>
-              <b>Phone:</b> {data.display_phone}
+              <b>Phone:</b> {data.display_phone || "No contact number listed"}
             </ListGroup.Item>
             {data.description ? <ListGroup.Item>
             <b>Description: </b>{data.description}
@@ -163,7 +163,6 @@ function ShelterDetails({id}) {
           </span>
         </Card.Body>
       </Card>
-      {data.unroomed_animals.length ?
       <div className="row mt-3">
         <div className="col-12 d-flex">
           <Card className="border rounded" style={{width:"100%"}}>
@@ -179,8 +178,8 @@ function ShelterDetails({id}) {
               {data.unroomed_animals.map(animal => (
                 <Card key={animal.id} className="border rounded mr-3 mb-3" style={{border:"none"}}>
                   <ReactImageFallback style={{width:"151px", height:"151px", objectFit: "cover", overflow: "hidden"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} />
-                  <Card.Text className="text-center mb-0">
-                    {animal.name||"Unknown"}
+                  <Card.Text className="text-center mb-0" style={{textTransform:"capitalize"}}>
+                  {animal.species === 'horse' ? animal.size : animal.species} - {animal.name||"Unknown"}
                     <OverlayTrigger
                       key={"animal-details"}
                       placement="top"
@@ -193,16 +192,14 @@ function ShelterDetails({id}) {
                       <Link href={"/animals/" + animal.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
                     </OverlayTrigger>
                   </Card.Text>
-                  <Card.Text className="text-center" style={{textTransform:"capitalize"}}>
-                    {animal.size !== 'unknown' ? animal.size : ""} {animal.species}
-                  </Card.Text>
                 </Card>
               ))}
+              {data.unroomed_animals.length < 1 ? <span className="mb-2">All animals are assigned rooms.</span> : ""}
               </span>
             </Card.Body>
           </Card>
         </div>
-      </div> : ""}
+      </div>
       <History action_history={data.action_history} />
     </>
   );

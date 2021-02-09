@@ -120,6 +120,9 @@ const AnimalForm = (props) => {
           setSideImage(imageList);
         }
       }
+      else if (['room', 'shelter'].includes(pair[0])) {
+        current_data[String(pair[0])] = Number(pair[1]);
+      }
       else {
         current_data[String(pair[0])] = pair[1];
       }
@@ -324,8 +327,6 @@ const AnimalForm = (props) => {
               // Otherwise reset form with blank data.
               else {
                 resetForm({values:initialData});
-                roomRef.current.select.clearValue();
-                shelterRef.current.select.clearValue();
                 setFrontImage([]);
                 setSideImage([]);
               }
@@ -630,12 +631,12 @@ const AnimalForm = (props) => {
                         options={shelters.options}
                         isClearable={true}
                         ref={shelterRef}
+                        key={`my_unique_shelter_select_key__${formikProps.values.shelter}`}
                         onChange={(instance) => {
                           roomRef.current.select.clearValue();
                           formikProps.setFieldValue("shelter", instance === null ? '' : instance.value);
                         }}
                         value={formikProps.values.shelter||''}
-                        // value={data.shelter || ''}
                       />
                     </Col>
                   </BootstrapForm.Row>
@@ -646,6 +647,7 @@ const AnimalForm = (props) => {
                         type="text"
                         name="room"
                         ref={roomRef}
+                        key={`my_unique_room_select_key__${formikProps.values.room}`}
                         options={shelters.room_options[formikProps.values.shelter] ? shelters.room_options[formikProps.values.shelter] : []}
                         isClearable={true}
                         value={formikProps.values.room||null}
