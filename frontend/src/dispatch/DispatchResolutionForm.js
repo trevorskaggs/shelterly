@@ -141,7 +141,7 @@ function DispatchResolutionForm({ id }) {
                 shelter: Yup.number().nullable(),
               })
             ),
-            date_completed: Yup.date().nullable().when('unable_to_complete', {
+            date_completed: Yup.date().nullable().when(['unable_to_complete', 'incomplete'], {
               is: false,
               then: Yup.date().required('Required.')}),
             notes: Yup.string(),
@@ -219,6 +219,7 @@ function DispatchResolutionForm({ id }) {
                             setData(prevState => ({...prevState, sr_updates: newItems}))
                             props.setFieldValue(`sr_updates.${index}.incomplete`, true);
                             props.setFieldValue(`sr_updates.${index}.unable_to_complete`, false);
+                            props.setFieldValue(`sr_updates.${index}.date_completed`, null);
                           }
                         }}
                         style={{

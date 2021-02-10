@@ -57,12 +57,12 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         if serializer.is_valid():
-            # Only add end_time on first update.
-            if not serializer.instance.end_time:
+            # Only add end_time on first update and if all SRs are complete.
+            if not serializer.instance.end_time and not any(sr_update['incomplete'] == True for sr_update in self.request.data['sr_updates']):
                 serializer.validated_data['end_time'] = datetime.now()
             evac_assignment = serializer.save()
             for service_request in self.request.data['sr_updates']:
-                sr_status = 'closed'
+                sr_status = 'open' if service_request['unable_to_complete'] else 'assigned' if service_request['incomplete'] else 'closed'
                 for animal_dict in service_request['animals']:
                     # Record status change if applicable.
                     animal = Animal.objects.get(pk=animal_dict['id'])
@@ -75,7 +75,7 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
                         action.send(self.request.user, verb='sheltered animal', target=animal.shelter, action_object=animal)
                     Animal.objects.filter(id=animal_dict['id']).update(status=new_status, shelter=new_shelter)
                     # Mark SR as open if any animal is SIP or UTL.
-                    if new_status in ['SHELTERED IN PLACE', 'UNABLE TO LOCATE']:
+                    if new_status in ['SHELTERED IN PLACE', 'UNABLE TO LOCATE'] and sr_status != 'assigned':
                         sr_status = 'open'
                 # Update the relevant SR fields.
                 service_requests = ServiceRequest.objects.filter(id=service_request['id'])
