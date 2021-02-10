@@ -118,6 +118,7 @@ function DispatchResolutionForm({ id }) {
           Yup.object().shape({
             id: Yup.number().required(),
             owner: Yup.boolean(),
+            unable_to_complete: Yup.boolean(),
             followup_date: Yup.date().nullable(),
             animals: Yup.array().of(
               Yup.object().shape({
@@ -126,10 +127,14 @@ function DispatchResolutionForm({ id }) {
                 shelter: Yup.number().nullable(),
               })
             ),
-            date_completed: Yup.date().required('Required'),
+            date_completed: Yup.date().nullable().when('unable_to_complete', {
+              is: false,
+              then: Yup.date().required('Required.')}),
             notes: Yup.string(),
             forced_entry: Yup.boolean(),
-            owner_contact_id: Yup.number().required('Please select the contacted owner.'),
+            owner_contact_id: Yup.number().when('owner', {
+              is: true,
+              then: Yup.number().required('Please select the contacted owner.')}),
             owner_contact_note: Yup.string().when('owner', {
               is: true,
               then: Yup.string().required('The owner must be notified before resolution.')}),
@@ -185,9 +190,11 @@ function DispatchResolutionForm({ id }) {
                         checked={(props.values.sr_updates[index] && props.values.sr_updates[index].incomplete) || false}
                         onChange={() => {
                           if (props.values.sr_updates[index] && props.values.sr_updates[index].incomplete) {
+                            props.setFieldValue(`sr_updates.${index}.owner`, service_request.owners.length > 0);
                             props.setFieldValue(`sr_updates.${index}.incomplete`, false);
                           }
                           else {
+                            props.setFieldValue(`sr_updates.${index}.owner`, false);
                             props.setFieldValue(`sr_updates.${index}.incomplete`, true);
                             props.setFieldValue(`sr_updates.${index}.unable_to_complete`, false);
                           }
@@ -204,11 +211,14 @@ function DispatchResolutionForm({ id }) {
                         checked={(props.values.sr_updates[index] && props.values.sr_updates[index].unable_to_complete) || false}
                         onChange={() => {
                           if (props.values.sr_updates[index] && props.values.sr_updates[index].unable_to_complete) {
+                            props.setFieldValue(`sr_updates.${index}.owner`, service_request.owners.length > 0);
                             props.setFieldValue(`sr_updates.${index}.unable_to_complete`, false);
                           }
                           else {
+                            props.setFieldValue(`sr_updates.${index}.owner`, false);
                             props.setFieldValue(`sr_updates.${index}.unable_to_complete`, true);
                             props.setFieldValue(`sr_updates.${index}.incomplete`, false);
+                            props.setFieldValue(`sr_updates.${index}.date_completed`, null);
                           }
                         }}
                         style={{
