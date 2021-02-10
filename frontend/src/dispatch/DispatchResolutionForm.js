@@ -119,11 +119,25 @@ function DispatchResolutionForm({ id }) {
             id: Yup.number().required(),
             owner: Yup.boolean(),
             unable_to_complete: Yup.boolean(),
+            incomplete: Yup.boolean(),
             followup_date: Yup.date().nullable(),
             animals: Yup.array().of(
               Yup.object().shape({
                 id: Yup.number().required(),
-                status: Yup.string().notOneOf(['REPORTED'], 'Animal cannot remain REPORTED.'),
+                status: Yup.string()
+                  .test('required-check', 'Animal cannot remain REPORTED.',
+                    function(value) {
+                      let required = true;
+                      data.sr_updates.filter(asdf => asdf.id === this.parent.request).forEach(sr_update => {
+                        if (sr_update.unable_to_complete || sr_update.incomplete) {
+                          required = false;
+                        }
+                      })
+                      if (value === 'REPORTED' && required) {
+                        return false
+                      }
+                      return true
+                    }),
                 shelter: Yup.number().nullable(),
               })
             ),
@@ -190,11 +204,19 @@ function DispatchResolutionForm({ id }) {
                         checked={(props.values.sr_updates[index] && props.values.sr_updates[index].incomplete) || false}
                         onChange={() => {
                           if (props.values.sr_updates[index] && props.values.sr_updates[index].incomplete) {
+                            const newItems = [...data.sr_updates];
+                            newItems[index].incomplete = false;
+                            setData(prevState => ({...prevState, sr_updates: newItems}))
                             props.setFieldValue(`sr_updates.${index}.owner`, service_request.owners.length > 0);
                             props.setFieldValue(`sr_updates.${index}.incomplete`, false);
+
                           }
                           else {
                             props.setFieldValue(`sr_updates.${index}.owner`, false);
+                            const newItems = [...data.sr_updates];
+                            newItems[index].incomplete = true;
+                            newItems[index].unable_to_complete = false;
+                            setData(prevState => ({...prevState, sr_updates: newItems}))
                             props.setFieldValue(`sr_updates.${index}.incomplete`, true);
                             props.setFieldValue(`sr_updates.${index}.unable_to_complete`, false);
                           }
@@ -212,10 +234,17 @@ function DispatchResolutionForm({ id }) {
                         onChange={() => {
                           if (props.values.sr_updates[index] && props.values.sr_updates[index].unable_to_complete) {
                             props.setFieldValue(`sr_updates.${index}.owner`, service_request.owners.length > 0);
+                            const newItems = [...data.sr_updates];
+                            newItems[index].unable_to_complete = false;
+                            setData(prevState => ({...prevState, sr_updates: newItems}))
                             props.setFieldValue(`sr_updates.${index}.unable_to_complete`, false);
                           }
                           else {
                             props.setFieldValue(`sr_updates.${index}.owner`, false);
+                            const newItems = [...data.sr_updates];
+                            newItems[index].unable_to_complete = true;
+                            newItems[index].incomplete = false;
+                            setData(prevState => ({...prevState, sr_updates: newItems}))
                             props.setFieldValue(`sr_updates.${index}.unable_to_complete`, true);
                             props.setFieldValue(`sr_updates.${index}.incomplete`, false);
                             props.setFieldValue(`sr_updates.${index}.date_completed`, null);
