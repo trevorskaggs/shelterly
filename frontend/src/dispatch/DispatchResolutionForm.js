@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import { Link, navigate } from "raviger";
-import { Field, Form, Formik, } from 'formik';
+import { Field, Form, Formik } from 'formik';
 import { Label } from 'reactstrap';
 import { Switch } from 'formik-material-ui';
 import {
@@ -20,7 +20,7 @@ import {
 import * as Yup from 'yup';
 import Moment from 'react-moment';
 import Header from '../components/Header';
-import { DateTimePicker, DropDown, TextInput } from '../components/Form';
+import { Checkbox, DateTimePicker, DropDown, TextInput } from '../components/Form';
 import { dispatchStatusChoices } from '../animals/constants';
 
 function DispatchResolutionForm({ id }) {
@@ -58,7 +58,7 @@ function DispatchResolutionForm({ id }) {
             })
             // Use existing VisitNote/OwnerContact to populate data if we're editing a closed Resolution.
             const visit_note = service_request.visit_notes.filter(note => String(note.evac_assignment) === String(id))[0] || {date_completed:new Date(), notes:'', forced_entry:false}
-            const owner_contact = service_request.owner_contacts.filter(contact => String(contact.evac_assignment) === String(id))[0] || {owner:null, owner_contact_time:'', owner_contact_note:''}
+            const owner_contact = service_request.owner_contacts.filter(contact => String(contact.evac_assignment) === String(id))[0] || {owner:'', owner_contact_time:'', owner_contact_note:''}
             response.data.sr_updates.push({
               id: service_request.id,
               followup_date: service_request.followup_date,
@@ -69,7 +69,9 @@ function DispatchResolutionForm({ id }) {
               owner: service_request.owners.length > 0,
               owner_contact_id: owner_contact.owner,
               owner_contact_time: owner_contact.owner_contact_time || '',
-              owner_contact_note: owner_contact.owner_contact_note || ''
+              owner_contact_note: owner_contact.owner_contact_note || '',
+              unable_to_complete: false,
+              incomplete: false
             })
           });
           setOwnerChoices(ownerChoices);
@@ -127,7 +129,7 @@ function DispatchResolutionForm({ id }) {
             date_completed: Yup.date().required('Required'),
             notes: Yup.string(),
             forced_entry: Yup.boolean(),
-            owner_contact_id: Yup.number().required('Please select the contacted owner'),
+            owner_contact_id: Yup.number().required('Please select the contacted owner.'),
             owner_contact_note: Yup.string().when('owner', {
               is: true,
               then: Yup.string().required('The owner must be notified before resolution.')}),
@@ -153,7 +155,7 @@ function DispatchResolutionForm({ id }) {
       {props => (
         <>
           <BootstrapForm as={Form}>
-            <Header>Dispatch Assignment Resolution | {data.end_time ? "Closed" : "Open"}
+            <Header>Dispatch Assignment Resolution
               <div style={{ fontSize: "16px", marginTop: "5px" }}><b>Opened: </b><Moment format="MMMM Do YYYY, HH:mm">{data.start_time}</Moment>{data.end_time ? <span style={{ fontSize: "16px", marginTop: "5px" }}> | <b>Closed: </b><Moment format="MMMM Do YYYY, HH:mm">{data.end_time}</Moment></span> : ""}</div>
             </Header>
             <hr />
@@ -175,14 +177,52 @@ function DispatchResolutionForm({ id }) {
             {data.service_request_objects.map((service_request, index) => (
               <Card key={service_request.id} border="secondary" className="mt-3">
                 <Card.Body>
-                  <Card.Title>
-                    <h4>Service Request <Link href={"/hotline/servicerequest/" + service_request.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link> | <span style={{ textTransform: "capitalize" }}>{service_request.status}</span></h4>
+                  <Card.Title style={{marginBottom:"-5px"}}>
+                    <h4>Service Request <Link href={"/hotline/servicerequest/" + service_request.id}><FontAwesomeIcon icon={faClipboardList} inverse /></Link> |&nbsp;
+                      <Checkbox
+                        label={"Not Completed:"}
+                        name={`sr_updates.${index}.incomplete`}
+                        checked={(props.values.sr_updates[index] && props.values.sr_updates[index].incomplete) || false}
+                        onChange={() => {
+                          if (props.values.sr_updates[index] && props.values.sr_updates[index].incomplete) {
+                            props.setFieldValue(`sr_updates.${index}.incomplete`, false);
+                          }
+                          else {
+                            props.setFieldValue(`sr_updates.${index}.incomplete`, true);
+                            props.setFieldValue(`sr_updates.${index}.unable_to_complete`, false);
+                          }
+                        }}
+                        style={{
+                          transform: "scale(1.5)",
+                          marginTop: "-4px"
+                        }}
+                      />
+                      |&nbsp;
+                      <Checkbox
+                        label={"Unable to Complete:"}
+                        name={`sr_updates.${index}.unable_to_complete`}
+                        checked={(props.values.sr_updates[index] && props.values.sr_updates[index].unable_to_complete) || false}
+                        onChange={() => {
+                          if (props.values.sr_updates[index] && props.values.sr_updates[index].unable_to_complete) {
+                            props.setFieldValue(`sr_updates.${index}.unable_to_complete`, false);
+                          }
+                          else {
+                            props.setFieldValue(`sr_updates.${index}.unable_to_complete`, true);
+                            props.setFieldValue(`sr_updates.${index}.incomplete`, false);
+                          }
+                        }}
+                        style={{
+                          transform: "scale(1.5)",
+                          marginTop: "-4px"
+                        }}
+                      />
+                    </h4>
                   </Card.Title>
                   <hr />
                   <ListGroup variant="flush" style={{ marginTop: "-13px", marginBottom: "-13px" }}>
                     <ListGroup.Item><b>Address: </b>{service_request.full_address}</ListGroup.Item>
                     {service_request.owner_objects.map(owner => (
-                      <ListGroup.Item key={owner.id}><b>Owner: </b>{owner.first_name} {owner.last_name} <Link href={"/people/owner/" + owner.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item>
+                      <ListGroup.Item key={owner.id}><b>Owner: </b>{owner.first_name} {owner.last_name}</ListGroup.Item>
                     ))}
                     {service_request.owners.length < 1 ? <ListGroup.Item><b>Owner: </b>No Owner</ListGroup.Item> : ""}
                   </ListGroup>
@@ -203,7 +243,7 @@ function DispatchResolutionForm({ id }) {
                               isClearable={false}
                             />
                           </Col>
-                          <span style={{ marginTop:"5px" }}><span style={{ textTransform: "capitalize" }}>{animal.name || "Unknown"}</span>&nbsp;({animal.species}) <Link href={"/animals/" + animal.id} target="_blank"> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></span>
+                          <span style={{ marginTop:"5px" }}><span style={{ textTransform: "capitalize" }}>{animal.name || "Unknown"}</span>&nbsp;({animal.species})</span>
                         </Row>
                         {props.values && props.values.sr_updates[index] && props.values.sr_updates[index].animals[inception].status === 'SHELTERED' ?
                         <Row>
