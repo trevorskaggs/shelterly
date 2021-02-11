@@ -108,8 +108,11 @@ class ServiceRequestSerializer(SimpleServiceRequestSerializer):
     assigned_evac = serializers.SerializerMethodField()
     owner_objects = SimplePersonSerializer(source='owners', many=True, required=False, read_only=True)
     reporter_object = SimplePersonSerializer(source='reporter', required=False, read_only=True)
-    animals = SimpleAnimalSerializer(many=True, read_only=True)
+    animals = serializers.SerializerMethodField()
     evacuation_assignments = SimpleEvacAssignmentSerializer(many=True, required=False, read_only=True)
+
+    def get_animals(self, obj):
+        return SimpleAnimalSerializer(obj.animal_set.exclude(status="CANCELED"), many=True, read_only=True).data
 
     def __init__(self, *args, **kwargs):
     
