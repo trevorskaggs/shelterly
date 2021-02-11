@@ -163,6 +163,7 @@ const ImageUploader = ({ parentStateSetter, ...props }) => {
             // Set file to field if it exists.
             if (imageList[0]) {
               setFieldValue(props.id, imageList[0].file);
+              setFieldValue(props.id + '_data_url', imageList[0].data_url);
             }
           }
         }}

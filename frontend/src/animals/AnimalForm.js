@@ -42,6 +42,7 @@ const AnimalForm = (props) => {
   const pcolorRef = useRef(null);
   const scolorRef = useRef(null);
   const roomRef = useRef(null);
+  const shelterRef = useRef(null);
   const ageChoices = {'':[], 'dog':dogAgeChoices, 'cat':catAgeChoices, 'horse':horseAgeChoices, 'other':otherAgeChoices}
   const colorChoices = {'':[], 'dog':dogColorChoices, 'cat':catColorChoices, 'horse':horseColorChoices, 'other':otherColorChoices}
   const sizeChoices = {'':[], 'dog':dogSizeChoices, 'cat':catSizeChoices, 'horse':horseSizeChoices, 'other':otherSizeChoices}
@@ -51,11 +52,6 @@ const AnimalForm = (props) => {
 
   // Dynamic placeholder value for options.
   const [placeholder, setPlaceholder] = useState("Select a species...");
-
-  const [front_image, setFrontImage] = useState([]);
-  const [side_image, setSideImage] = useState([]);
-  const [extra_images, setExtraImages] = useState([]);
-  const [reinitialize, setReinitialize] = useState(true);
 
   const initialData = {
     new_owner: owner_id,
@@ -80,7 +76,9 @@ const AnimalForm = (props) => {
     room: null,
     shelter: null,
     front_image: null,
+    front_image_data_url: '',
     side_image: null,
+    side_image_data_url: '',
     extra_images: [],
     address: '',
     apartment: '',
@@ -90,9 +88,46 @@ const AnimalForm = (props) => {
     latitude: null,
     longitude: null,
   }
-  let current_data = initialData;
+  let current_data = {...initialData};
+  let imageList = [];
   if (is_workflow && props.state.steps.animals[props.state.animalIndex]) {
-    current_data = props.state.steps.animals[props.state.animalIndex];
+    for (let pair of props.state.steps.animals[props.state.animalIndex].entries()) {
+      current_data[String(pair[0])] = pair[1];
+      if (['front_image', 'side_image'].includes(pair[0])) {
+        current_data[String(pair[0])] = null;
+        imageList.push({data_url:props.state.steps.animals[props.state.animalIndex].get(pair[0] + '_data_url'), file:pair[1]})
+      }
+    }
+  }
+
+  const [front_image, setFrontImage] = useState(imageList);
+  const [side_image, setSideImage] = useState([]);
+  const [extra_images, setExtraImages] = useState([]);
+  const [reinitialize, setReinitialize] = useState(true);
+
+  // Reset form with existing data when hitting back.
+  const populateBack = (formdata) => {
+    let current_data = {...initialData};
+    for (let pair of formdata.entries()) {
+      if (['front_image', 'side_image'].includes(pair[0])) {
+        current_data[String(pair[0])] = null;
+        const imageList = [];
+        imageList.push({data_url:formdata.get(pair[0] + '_data_url'), file:pair[1]});
+        if (pair[0] === 'front_image') {
+          setFrontImage(imageList);
+        }
+        else {
+          setSideImage(imageList);
+        }
+      }
+      else if (['room', 'shelter'].includes(pair[0])) {
+        current_data[String(pair[0])] = Number(pair[1]);
+      }
+      else {
+        current_data[String(pair[0])] = pair[1];
+      }
+    }
+    setData(current_data);
   }
 
   // Initial Animal data.
@@ -264,80 +299,89 @@ const AnimalForm = (props) => {
             formData.append('extra' + (i + 1), extra_images[i].file);
           }
 
-
           if (is_workflow) {
             if (addAnother) {
-              props.onSubmit('animals', values, 'animals');
+              props.onSubmit('animals', formData, 'animals');
               // Reset form data with existing animal data if we have it.
-              if (props.state.steps.animals[props.state.animalIndex + 1]) {
-                resetForm({values:props.state.steps.animals[props.state.animalIndex + 1]});
+              let formdata = props.state.steps.animals[props.state.animalIndex + 1];
+              if (formdata) {
+                let animal_json = {...initialData};
+                for (let pair of formdata.entries()) {
+                  if (['front_image', 'side_image'].includes(pair[0])) {
+                    animal_json[String(pair[0])] = null;
+                    const imageList = [];
+                    imageList.push({data_url:formdata.get(pair[0] + '_data_url'), file:pair[1]});
+                    if (pair[0] === 'front_image') {
+                      setFrontImage(imageList);
+                    }
+                    else {
+                      setSideImage(imageList);
+                    }
+                  }
+                  else {
+                    animal_json[String(pair[0])] = pair[1];
+                  }
+                }
+                resetForm({values:animal_json});
               }
               // Otherwise reset form with blank data.
               else {
                 resetForm({values:initialData});
+                setFrontImage([]);
+                setSideImage([]);
               }
             }
             // If we're in intake, then create objects and navigate to shelter page.
             else if (is_intake) {
               // Create Reporter
-              let reporterResponse = [{data:{id:null}}];
+              let reporterResponse = [{data:{id:''}}];
               if (props.state.steps.reporter.first_name) {
                 reporterResponse = await Promise.all([
                   axios.post('/people/api/person/', props.state.steps.reporter)
                 ]);
               }
               // Create Owner
-              let ownerResponse = [{data:{id:null}}];
+              let ownerResponse = [{data:{id:''}}];
               if (props.state.steps.owner.first_name) {
                 ownerResponse = await Promise.all([
                   axios.post('/people/api/person/', props.state.steps.owner)
                 ]);
               }
-              // Create Animals
-              values['reporter'] = reporterResponse[0].data.id
-              values['new_owner'] = ownerResponse[0].data.id
-              axios.post('/animals/api/animal/', values)
-              .catch(error => {
-                console.log(error.response);
-              });
+              // Create previous animals
               props.state.steps.animals.forEach(animal => {
                 // Add owner and reporter to animal data.
-                animal['reporter'] = reporterResponse[0].data.id
-                animal['new_owner'] = ownerResponse[0].data.id
+                animal.append('reporter', reporterResponse[0].data.id);
+                animal.append('new_owner', ownerResponse[0].data.id);
                 axios.post('/animals/api/animal/', animal)
                 .catch(error => {
                   console.log(error.response);
                 });
               });
-              // Navigate to shelter page.
-              if (values.shelter) {
-                navigate('/shelter/' + values.shelter);
-              }
-              else if (ownerResponse[0].data.id) {
-                navigate('/people/owner/' + ownerResponse[0].data.id)
-              }
-              else {
-                navigate('/people/reporter/' + reporterResponse[0].data.id)
-              }
+              // Create current animal then navigate.
+              formData.append('reporter', reporterResponse[0].data.id);
+              formData.append('new_owner', ownerResponse[0].data.id);
+              axios.post('/animals/api/animal/', formData)
+              .then(function() {
+                // Navigate to shelter page.
+                if (values.shelter) {
+                  navigate('/shelter/' + values.shelter);
+                }
+                else if (ownerResponse[0].data.id) {
+                  navigate('/people/owner/' + ownerResponse[0].data.id)
+                }
+                else {
+                  navigate('/people/reporter/' + reporterResponse[0].data.id)
+                }
+              })
+              .catch(error => {
+                console.log(error.response);
+              });
             }
             else {
-              props.onSubmit('animals', values, 'request');
+              props.onSubmit('animals', formData, 'request');
             }
           }
           else {
-            // Use FormData so that image files may also be included.
-            const formData = new FormData();
-            // Convert json to FormData.
-            for ( var key in values ) {
-              if (values[key] !== null) {
-                formData.append(key, values[key]);
-              }
-            }
-            // Add extra images.
-            for (let i = 0; i < extra_images.length; i++) {
-              formData.append('extra' + (i + 1), extra_images[i].file);
-            }
-
             if (id) {
               axios.put('/animals/api/animal/' + id + '/', formData)
               .then(function() {
@@ -381,7 +425,7 @@ const AnimalForm = (props) => {
             <Card.Header as="h5" className="pl-3">{id ?
               <span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
               :
-              <span>{props.state.animalIndex > 0 ? <span style={{cursor:'pointer'}} onClick={() => {formikProps.resetForm({values:props.state.steps.animals[props.state.animalIndex-1]}); props.handleBack('animals', 'animals')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
+              <span>{props.state.animalIndex > 0 ? <span style={{cursor:'pointer'}} onClick={() => {setAddAnother(false); populateBack(props.state.steps.animals[props.state.animalIndex-1]); props.handleBack('animals', 'animals')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
               :
               <span style={{cursor:'pointer'}} onClick={() => {props.handleBack('animals', props.state.stepIndex > 1 ? 'owner' : 'reporter')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}</span>}{!id ? "Animal Information" : "Update Animal"}</Card.Header>
             <Card.Body>
@@ -586,10 +630,13 @@ const AnimalForm = (props) => {
                         name="shelter"
                         options={shelters.options}
                         isClearable={true}
+                        ref={shelterRef}
+                        key={`my_unique_shelter_select_key__${formikProps.values.shelter}`}
                         onChange={(instance) => {
                           roomRef.current.select.clearValue();
                           formikProps.setFieldValue("shelter", instance === null ? '' : instance.value);
                         }}
+                        value={formikProps.values.shelter||''}
                       />
                     </Col>
                   </BootstrapForm.Row>
@@ -600,13 +647,15 @@ const AnimalForm = (props) => {
                         type="text"
                         name="room"
                         ref={roomRef}
+                        key={`my_unique_room_select_key__${formikProps.values.room}`}
                         options={shelters.room_options[formikProps.values.shelter] ? shelters.room_options[formikProps.values.shelter] : []}
                         isClearable={true}
+                        value={formikProps.values.room||null}
                       />
                     </Col>
                   </BootstrapForm.Row>
                 </span>
-                <span hidden={is_intake ? !is_reporter: !Boolean(id)}>
+                <span hidden={is_intake ? !is_reporter : !Boolean(id)}>
                   <BootstrapForm.Row className="mt-3">
                     <BootstrapForm.Group as={Col} xs="12">
                       {renderAddressLookup()}
@@ -649,8 +698,8 @@ const AnimalForm = (props) => {
                     />
                   </BootstrapForm.Row>
                 </span>
-                <span hidden={is_workflow}>
-                  <p className="mb-0">Image Files</p>
+                <span hidden={is_workflow && !is_intake}>
+                  <p className={id || is_reporter ? "mb-0" : "mb-0 mt-3"}>Image Files</p>
                   <BootstrapForm.Row className="align-items-end">
                     {data.front_image ?
                       <span className="mt-2 ml-1 mr-3">
@@ -702,7 +751,7 @@ const AnimalForm = (props) => {
                         ))}
                       </span>
                     :""}
-                    <div className="mb-2">
+                    <div className="mb-2" hidden={!id}>
                       <ImageUploader
                         value={extra_images}
                         id="extra_images"

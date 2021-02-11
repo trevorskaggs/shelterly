@@ -108,18 +108,21 @@ function RoomDetails({id}) {
             <hr/>
             <span className="d-flex flex-wrap align-items-end">
             {data.animals.map(animal => (
-              <Card key={animal.id} className="mr-3" style={{border:"none"}}>
+              <Card key={animal.id} className="border rounded mr-3 mb-3" style={{border:"none"}}>
                 <ReactImageFallback style={{width:"151px", height:"151px", objectFit: "cover", overflow: "hidden"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} />
-                <Card.Text className="text-center mb-0">
-                  {animal.name||"Unknown"}
-                  <Link href={"/animals/" + animal.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
-                  <Link href={"/animals/edit/" + animal.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
-                </Card.Text>
-                <Card.Text className="text-center mb-0">
-                  {animal.status}
-                </Card.Text>
-                <Card.Text className="text-center" style={{textTransform:"capitalize"}}>
-                  {animal.size} {animal.species}
+                <Card.Text className="text-center mb-0" style={{textTransform:"capitalize"}}>
+                {animal.species === 'horse' ? animal.size : animal.species} - {animal.name||"Unknown"}
+                  <OverlayTrigger
+                    key={"animal-details"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-animal-details`}>
+                        Animal details
+                      </Tooltip>
+                    }
+                  >
+                    <Link href={"/animals/" + animal.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+                  </OverlayTrigger>
                 </Card.Text>
               </Card>
             ))}
