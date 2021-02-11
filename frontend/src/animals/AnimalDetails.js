@@ -296,16 +296,18 @@ function AnimalDetails({id}) {
       </div>
       <Col xs={6} className="pr-0 d-flex flex-column" style={{width:"100%"}}>
         <div className="slide-container flex-grow-1 border rounded pl-0 pr-0" style={{width:"auto", height:"322px"}}>
-          <Carousel className="carousel-wrapper" showThumbs={false} showStatus={false}>
-            {images.length < 1 ? <img src={noImageFound} alt="" /> :
-              <span>
-                {images.map(image => (
-                  <div key={image} className="image-container">
-                    <img src={image} atl="" />
-                  </div>
-                ))}
-              </span>}
-          </Carousel>
+          {images.length < 1 ?
+            <Carousel className="carousel-wrapper" showThumbs={false} showStatus={false}>
+              <img src={noImageFound} alt="" />
+            </Carousel> :
+            <Carousel className="carousel-wrapper" showThumbs={false} showStatus={false}>
+              {images.map(image => (
+                <div key={image} className="image-container">
+                  <img src={image} alt="" />
+                </div>
+              ))}
+            </Carousel>
+          }
         </div>
         <Card className="border rounded mt-3" style={{width:"100%", height:"100%"}}>
           <Card.Body>
