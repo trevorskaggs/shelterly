@@ -20,9 +20,10 @@ import trailer from "../static/images/trailer-solid.png";
 
 function Hotline({id}) {
 
-  const [currentRequest, setCurrentRequest] = useState({id:'', matches: {}, latitude:0, longitude:0, followup_date:''})
+  const [currentRequest, setCurrentRequest] = useState({id:'', matches: {}, latitude:0, longitude:0, followup_date:''});
   const [data, setData] = useState({dispatch_assignments: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
   const [mapState, setMapState] = useState({});
+  const [selected, setSelected] = useState(null);
 
   // Takes in animal size, species, and count and returns a pretty string combination.
   const prettyText = (size, species, count) => {
@@ -84,32 +85,35 @@ function Hotline({id}) {
   // Handle dynamic SR state and map display when an SR is selected or deselected.
   const handleMapState = (id) => {
 
+    const testMapState = {...mapState};
+
     // If selected.
-    if (mapState[id].checked === false) {
-      let service_requests = {...mapState[id].service_requests};
+    if (testMapState[id].checked === false) {
+      let service_requests = testMapState[id].service_requests;
       Object.keys(service_requests).forEach(key => {
         service_requests[key].color = 'black';
       });
-      setMapState(prevState => ({ ...prevState, [id]: {...prevState[id], "checked":true, "service_requests":service_requests} }));
-
-      // Enable DEPLOY button.
-      // setSelected((prevState) => ({count: prevState.count + 1, disabled: false}));
+      // Deselect any other selected DA SRs.
+      Object.keys(testMapState).filter(key => testMapState[key].checked === true).forEach(key => {
+        let checked_service_requests = testMapState[key].service_requests;
+        Object.keys(checked_service_requests).forEach(checked_key => {
+          checked_service_requests[checked_key].color = testMapState[key].color;
+        });
+        testMapState[key] = {...testMapState[key], "checked":false, "service_requests":checked_service_requests};
+      });
+      testMapState[id] = {...testMapState[id], "checked":true, "service_requests":service_requests};
+      setMapState(testMapState)
+      setSelected(id);
     }
     // Else deselect.
     else {
       let service_requests = {...mapState[id].service_requests};
       Object.keys(service_requests).forEach(key => {
-        service_requests[key].color = 'white';
+        service_requests[key].color = mapState[id].color;
       });
 
       setMapState(prevState => ({ ...prevState, [id]: {...prevState[id], "checked":false, "service_requests":service_requests} }));
-
-      // Disable DEPLOY button is none selected.
-      var disabled = false;
-      // if (selectedCount.count-1 === 0) {
-      //   disabled = true;
-      // }
-      // setSelected((prevState) => ({count: prevState.count - 1, disabled: disabled}))
+      setSelected(null);
     }
   }
 
@@ -137,18 +141,16 @@ function Hotline({id}) {
           setData({dispatch_assignments: response.data, isFetching: false, bounds:L.latLngBounds([[0,0]])});
           const map_dict = {};
           const bounds = [];
-          // const unique_values = [...new Set(response.data.map((sr) => sr.assigned_evac))];
           const random_colors = randomColor({count:response.data.length});
-          const colors = response.data.reduce((map, dispatch, index) => (map[dispatch.id] = random_colors[index], map), {});
-          for (const dispatch_assignment of response.data) {
+          response.data.forEach((dispatch_assignment, index) => {
             let sr_dict = {}
             for (const service_request of dispatch_assignment.service_request_objects) {
               const matches = countMatches(service_request);
-              sr_dict[service_request.id] = {color:colors[service_request.assigned_evac], matches:matches, latitude:service_request.latitude, longitude:service_request.longitude};
+              sr_dict[service_request.id] = {color:random_colors[index], matches:matches, latitude:service_request.latitude, longitude:service_request.longitude};
               bounds.push([service_request.latitude, service_request.longitude]);
             }
-            map_dict[dispatch_assignment.id] = {checked:false, service_requests:sr_dict}
-          }
+            map_dict[dispatch_assignment.id] = {checked:false, color:random_colors[index], service_requests:sr_dict}
+          });
           const current_matches = countMatches(currentResponse.data);
           currentResponse.data['matches'] = current_matches;
           setCurrentRequest(currentResponse.data);
@@ -264,7 +266,15 @@ function Hotline({id}) {
         </Map>
       </Col>
     </Row>
-    <Row className="d-flex flex-wrap" style={{marginTop:"8px", marginRight:"-20px", marginLeft:"-17px", minHeight:"36vh", paddingRight:"14px"}}>
+    <Row className="mt-2 mb-3">
+      <Col xs={2} className="pl-0" style={{marginLeft:"-2px", paddingRight:"7px"}}>
+        <Button type="submit" className="btn-block" disabled={selected === null}>ASSIGN</Button>
+      </Col>
+      <Col xs={10} className="pl-0">
+        <div className="card-header d-flex align-items-center" style={{height:"37px"}}><b style={{marginLeft:"-10px"}}>Service Request:</b>&nbsp;{currentRequest.full_address}</div>
+      </Col>
+    </Row>
+    <Row className="d-flex flex-wrap" style={{marginTop:"-8px", marginRight:"-20px", marginLeft:"-17px", minHeight:"36vh", paddingRight:"14px"}}>
       <Col xs={12} className="border rounded" style={{marginLeft:"1px", height:"36vh", overflowY:"auto", paddingRight:"-1px"}}>
         {data.dispatch_assignments.map(dispatch_assignment => (
         <span key={dispatch_assignment.id}>
@@ -285,17 +295,15 @@ function Hotline({id}) {
                 }
               >
                 <Link href={"/dispatch/summary/" + dispatch_assignment.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
-              </OverlayTrigger>
+              </OverlayTrigger>&nbsp;&nbsp;|&nbsp;
+              Team Members: {dispatch_assignment.team_member_objects.map((member, i) => (
+                  <span key={member.id}>{i > 0 && ", "}{member.first_name} {member.last_name}</span>))}
             </div>
           </div>
           {/* {dispatch_assignment.service_request_objects.map(service_request => (
           <span key={service_request.id}>{mapState[dispatch_assignment.id].service_requests[service_request.id] ?
             <div className="mt-1 mb-1" style={{marginLeft:"-10px", marginRight:"-10px"}}>
               <div className="card-header">
-                <span style={{display:"inline"}} className="custom-control-lg custom-control custom-checkbox">
-                  <input className="custom-control-input" type="checkbox" name={service_request.id} id={service_request.id} onChange={() => handleMapState(service_request.id)} checked={mapState[dispatch_assignment.id].service_requests[service_request.id] ? mapState[dispatch_assignment.id].service_requests[service_request.id].checked : false} />
-                  <label className="custom-control-label" htmlFor={service_request.id}></label>
-                </span>
                 {mapState[dispatch_assignment.id].service_requests[service_request.id] ?
                 <span>
                   {Object.keys(mapState[dispatch_assignment.id].service_requests[service_request.id].matches).map((key,i) => (
