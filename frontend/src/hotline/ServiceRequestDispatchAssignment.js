@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from "react";
+import ReactDOMServer from 'react-dom/server';
 import axios from "axios";
-import { Link } from 'raviger';
-import { Button, ButtonGroup, Col, ListGroup, Row } from 'react-bootstrap'
-import { Circle, CircleMarker, Map, TileLayer, Tooltip as MapTooltip } from "react-leaflet";
+import { Col, Row } from 'react-bootstrap'
+import { Circle, CircleMarker, Map, Marker, TileLayer, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
 import Moment from 'react-moment';
 import randomColor from "randomcolor";
 import { Legend } from "../components/Map";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faStar
+} from '@fortawesome/free-solid-svg-icons';
 import badge from "../static/images/badge-sheriff.png";
 import bandaid from "../static/images/band-aid-solid.png";
 import car from "../static/images/car-solid.png";
@@ -14,6 +18,7 @@ import trailer from "../static/images/trailer-solid.png";
 
 function Hotline({id}) {
 
+  const [currentRequest, setCurrentRequest] = useState({id:'', latitude:0, longitude:0, followup_date:''})
   const [data, setData] = useState({service_requests: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
   const [mapState, setMapState] = useState({});
 
@@ -76,39 +81,64 @@ function Hotline({id}) {
   useEffect(() => {
     let source = axios.CancelToken.source();
 
+    // const fetchCurrentRequest = async () => {
+    //   // Fetch ServiceRequest data.
+    //   await axios.get('/hotline/api/servicerequests/' + id + '/', {
+    //     cancelToken: source.token,
+    //   })
+    //   .then(response => {
+    //     setCurrentRequest(response.data);
+    //   })
+    //   .catch(error => {
+    //     console.log(error.response);
+    //     setCurrentRequest({});
+    //   });
+    // };
+
     const fetchServiceRequests = async () => {
-      // Fetch ServiceRequest data.
-      await axios.get('/hotline/api/servicerequests/', {
-        params: {
-          status: 'assigned',
-          map: true
-        },
+
+      // Fetch current ServiceRequest data.
+      await axios.get('/hotline/api/servicerequests/' + id + '/', {
         cancelToken: source.token,
       })
-      .then(response => {
-        setData({service_requests: response.data, isFetching: false, bounds:L.latLngBounds([[0,0]])});
-        const map_dict = {};
-        const bounds = [];
-        const unique_values = [...new Set(response.data.map((sr) => sr.assigned_evac))];
-        const random_colors = randomColor({count:unique_values.length});
-        const colors = unique_values.reduce((map, evac, index) => (map[evac] = random_colors[index], map), {});
+      .then(currentResponse => {
+        setCurrentRequest(currentResponse.data);
 
-        for (const service_request of response.data) {
-          const matches = countMatches(service_request);
-          map_dict[service_request.id] = {color:colors[service_request.assigned_evac], matches:matches, latitude:service_request.latitude, longitude:service_request.longitude};
-          bounds.push([service_request.latitude, service_request.longitude]);
-        }
-        setMapState(map_dict);
-        if (bounds.length > 0) {
+        // Fetch assigned ServiceRequest data.
+        axios.get('/hotline/api/servicerequests/', {
+          params: {
+            status: 'assigned',
+            map: true
+          },
+          cancelToken: source.token,
+        })
+        .then(response => {
+          setData({service_requests: response.data, isFetching: false, bounds:L.latLngBounds([[0,0]])});
+          const map_dict = {};
+          const bounds = [];
+          const unique_values = [...new Set(response.data.map((sr) => sr.assigned_evac))];
+          const random_colors = randomColor({count:unique_values.length});
+          const colors = unique_values.reduce((map, evac, index) => (map[evac] = random_colors[index], map), {});
+
+          for (const service_request of response.data) {
+            const matches = countMatches(service_request);
+            map_dict[service_request.id] = {color:colors[service_request.assigned_evac], matches:matches, latitude:service_request.latitude, longitude:service_request.longitude};
+            bounds.push([service_request.latitude, service_request.longitude]);
+          }
+          const current_matches = countMatches(currentResponse.data);
+          map_dict[currentResponse.data.id] = {color:'black', matches:current_matches, latitude:currentResponse.data.latitude, longitude:currentResponse.data.longitude};
+          bounds.push([currentResponse.data.latitude, currentResponse.data.longitude]);
+          setMapState(map_dict);
           setData({service_requests: response.data, isFetching: false, bounds:L.latLngBounds(bounds)});
-        }
+        })
+        .catch(error => {
+          console.log(error.response);
+          setData({service_requests: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
+        });
       })
-      .catch(error => {
-        console.log(error.response);
-        setData({service_requests: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
-      });
     };
 
+    // fetchCurrentRequest();
     fetchServiceRequests();
 
     // Cleanup.
@@ -116,6 +146,17 @@ function Hotline({id}) {
       source.cancel();
     };
   }, []);
+
+  const iconHTML = ReactDOMServer.renderToString(<FontAwesomeIcon color="gold" size="lg" className="fa-border" icon={faStar} />)
+  const customMarkerIcon = new L.DivIcon({
+    html: iconHTML,
+    iconSize: [0,0],
+    iconAnchor: [32, 64],
+    popupAnchor: null,
+    shadowUrl: null,
+    shadowSize: null,
+    shadowAnchor: null
+  });
 
   return (
     <>
@@ -127,6 +168,34 @@ function Hotline({id}) {
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
           />
+          <Marker
+            position={[currentRequest.latitude, currentRequest.longitude]}
+            icon={customMarkerIcon}
+            onClick={() => window.open("/hotline/servicerequest/" + currentRequest.id, "_blank")}
+          >
+            <MapTooltip autoPan={false}>
+              <span>
+                {mapState[currentRequest.id] ?
+                  <span>
+                    {Object.keys(mapState[currentRequest.id].matches).map((key,i) => (
+                      <span key={key} style={{textTransform:"capitalize"}}>
+                        {i > 0 && ", "}{prettyText(key.split(',')[1], key.split(',')[0], mapState[currentRequest.id].matches[key])}
+                      </span>
+                    ))}
+                  </span>
+                :""}
+                <br />
+                {currentRequest.full_address}
+                {currentRequest.followup_date ? <div>Followup Date: <Moment format="L">{currentRequest.followup_date}</Moment></div> : ""}
+                <div>
+                  {currentRequest.aco_required ? <img width={16} height={16} src={badge} alt="" className="mr-1" /> : ""}
+                  {currentRequest.injured ? <img width={16} height={16} src={bandaid} alt="" className="mr-1" /> : ""}
+                  {currentRequest.accessible ? <img width={16} height={16} src={car} alt="" className="mr-1" /> : ""}
+                  {currentRequest.turn_around ? <img width={16} height={16} src={trailer} alt="" /> : ""}
+                </div>
+              </span>
+            </MapTooltip>
+          </Marker>
           {data.service_requests.map(service_request => (
             <CircleMarker
               key={service_request.id}
