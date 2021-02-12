@@ -180,9 +180,6 @@ function Hotline() {
               </MapTooltip>
             </CircleMarker>
           ))}
-          {Object.entries(mapState).filter(([key, value]) => value.radius === "enabled").map(([key, value]) => (
-            <Circle key={key} center={{lat:value.latitude, lng: value.longitude}} radius={805} interactive={false} />
-          ))}
         </Map>
         <ButtonGroup>
           <Button variant={statusOptions.allColor} onClick={() => setStatusOptions({status:"all", allColor:"primary", openColor:"secondary", assignedColor:"secondary", closedColor:"secondary"})}>All</Button>

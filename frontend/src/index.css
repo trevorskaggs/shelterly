@@ -134,7 +134,7 @@ input[disabled] {
   transform: translateY(-5%);
 }
 
-.fa-border {
+.icon-border {
   stroke: black;
   stroke-width: 30;
 }

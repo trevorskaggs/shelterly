@@ -37,11 +37,17 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
             .select_related('reporter')
             .prefetch_related('evacuation_assignments')
         ))
+        # Exclude EAs without animals when fetching for a map.
+        is_map = self.request.query_params.get('map', '')
+        if is_map == 'true':
+            queryset = queryset.exclude(service_requests=None)
+
         status = self.request.query_params.get('status', '')
         if status == "open":
             return queryset.filter(end_time__isnull=True).distinct()
         elif status == "closed":
             return queryset.filter(end_time__isnull=False).distinct()
+
         return queryset
 
     # When creating, update all service requests to be assigned status.
