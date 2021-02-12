@@ -117,4 +117,3 @@ class ServiceRequestSerializer(SimpleServiceRequestSerializer):
         super(ServiceRequestSerializer, self).__init__(*args, **kwargs)
         if self.context.get('request') and self.context.get('request').path == '/hotline/api/servicerequests/':
             self.fields.pop('action_history')
-            self.fields.pop('assigned_evac')

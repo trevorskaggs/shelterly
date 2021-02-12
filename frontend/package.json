@@ -24,6 +24,7 @@
     "leaflet": "^1.6.0",
     "moment": "^2.29.1",
     "msw": "^0.20.5",
+    "randomcolor": "^0.6.2",
     "raviger": "^1.5.1",
     "react": "^16.12.0",
     "react-beautiful-dnd": "^13.0.0",

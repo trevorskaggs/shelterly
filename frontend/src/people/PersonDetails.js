@@ -136,7 +136,7 @@ function PersonDetails({id}) {
         <Card className="border rounded d-flex" style={{width:"100%"}}>
           <Card.Body>
             <Card.Title>
-              <h4>Owner Contacts
+              <h4>Owner Contact Log
                 <Link href={"/hotline/ownercontact/new?owner=" + id}><FontAwesomeIcon icon={faPhone} className="ml-1" inverse /></Link>
               </h4>
             </Card.Title>

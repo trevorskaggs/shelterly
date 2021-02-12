@@ -5,7 +5,7 @@ import Moment from 'react-moment';
 import { Button, Card, ListGroup, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBan, faCalendarDay, faCar, faClipboardList, faComment, faEdit, faHouseDamage, faKey, faPlusSquare, faTimes, faTrailer
+  faBan, faCalendarDay, faCar, faClipboardList, faComment, faEdit, faHouseDamage, faKey, faMapMarkedAlt, faPlusSquare, faTimes, faTrailer
 } from '@fortawesome/free-solid-svg-icons';
 import ReactImageFallback from 'react-image-fallback';
 import Header from '../components/Header';
@@ -322,13 +322,25 @@ function ServiceRequestDetails({id}) {
           <Card className="mb-2 border rounded" style={{width:"100%"}}>
             <Card.Body>
               <Card.Title>
-                <h4 className="mb-0">Visit Log</h4>
+                <h4 className="mb-0">Visit Log
+                  {data.status === "open" ? <OverlayTrigger
+                    key={"add-to-dispatch"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-add-to-dispatch`}>
+                        Add service request to an open dispatch assignment
+                      </Tooltip>
+                    }
+                  >
+                    <Link href={"/hotline/servicerequest/" + id + "/assign"}><FontAwesomeIcon icon={faMapMarkedAlt} className="ml-1" inverse /></Link>
+                  </OverlayTrigger> : ""}
+                </h4>
               </Card.Title>
               <hr/>
               <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
-                {data.visit_notes.map(visit_note => (
+                {data.visit_notes.map((visit_note, index) => (
                   <ListGroup.Item key={visit_note.id}>
-                    <b>Dispatch Assignment:</b> #{visit_note.evac_assignment}
+                    <b>Dispatch Assignment:</b> #{index + 1}
                     <OverlayTrigger
                       key={"dispatch-summary"}
                       placement="top"
