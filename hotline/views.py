@@ -22,6 +22,7 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
                 raise serializers.ValidationError(['Multiple open Requests may not exist with the same address.', service_request.id])
             service_request = serializer.save()
             action.send(self.request.user, verb='created service request', target=service_request)
+
             # Update any animals associated with the SR reporter/owner with the created service request.
             if service_request.reporter:
                 service_request.reporter.animals.update(request=service_request.id)
@@ -36,6 +37,11 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
                 for service_request in ServiceRequest.objects.filter(latitude=serializer.validated_data['latitude'], longitude=serializer.validated_data['longitude'], status='open').exclude(id=self.kwargs['pk']):
                     raise serializers.ValidationError(['Multiple open Requests may not exist with the same address.', service_request.id])
             service_request = serializer.save()
+
+            # Remove animal from SR.
+            if self.request.data.get('remove_animal'):
+                Animal.objects.filter(id=self.request.data.get('remove_animal')).update(status='CANCELED')
+
             if service_request.status == 'canceled':
                 service_request.animal_set.update(status='CANCELED')
             action.send(self.request.user, verb='updated service request', target=service_request)
