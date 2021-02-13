@@ -384,7 +384,7 @@ function Deploy() {
           </Col>
         </Row>
         <Row className="mt-2" style={{}}>
-          <Col xs={2} className="pl-0" style={{marginLeft:"-7px", paddingRight:"2px"}}>
+          <Col xs={2} className="pl-0 pr-0" style={{marginLeft:"-7px", paddingRight:"2px"}}>
             <Button type="submit" className="btn-block mt-auto" style={{marginBottom:"-33px"}} disabled={selectedCount.disabled || props.values.team_members.length === 0}>DEPLOY</Button>
           </Col>
           <Col xs={10} className="pl-0">
@@ -411,7 +411,7 @@ function Deploy() {
             {data.service_requests.map(service_request => (
               <span key={service_request.id}>{mapState[service_request.id] && (mapState[service_request.id].checked || !mapState[service_request.id].hidden) ?
               <div className="mt-1 mb-1" style={{marginLeft:"-10px", marginRight:"-10px"}}>
-                <div className="card-header">
+                <div className="card-header rounded">
                   <span style={{display:"inline"}} className="custom-control-lg custom-control custom-checkbox">
                     <input className="custom-control-input" type="checkbox" name={service_request.id} id={service_request.id} onChange={() => handleMapState(service_request.id)} checked={mapState[service_request.id] ? mapState[service_request.id].checked : false} />
                     <label className="custom-control-label" htmlFor={service_request.id}></label>
@@ -547,7 +547,7 @@ function Deploy() {
               : ""}
               </span>
             ))}
-            <div className="card-header mt-1 mb-1"  style={{marginLeft:"-10px", marginRight:"-10px"}} hidden={data.service_requests.length > 0}>
+            <div className="card-header mt-1 mb-1 rounded"  style={{marginLeft:"-10px", marginRight:"-10px"}} hidden={data.service_requests.length > 0}>
               No open Service Requests found.
             </div>
           </Col>

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import ReactDOMServer from 'react-dom/server';
 import axios from "axios";
 import { Link, navigate } from 'raviger';
-import { Button, Col, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
+import { Button, Col, Collapse, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { CircleMarker, Map, Marker, TileLayer, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
 import Moment from 'react-moment';
@@ -10,7 +10,7 @@ import randomColor from "randomcolor";
 import { Legend } from "../components/Map";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faCheckCircle, faClipboardList, faStar
+  faCheckCircle, faChevronCircleDown, faChevronCircleRight, faClipboardList, faStar
 } from '@fortawesome/free-solid-svg-icons';
 import badge from "../static/images/badge-sheriff.png";
 import bandaid from "../static/images/band-aid-solid.png";
@@ -23,6 +23,14 @@ function ServiceRequestDispatchAssignment({id}) {
   const [data, setData] = useState({dispatch_assignments: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
   const [mapState, setMapState] = useState({});
   const [selected, setSelected] = useState(null);
+  const [showSRs, setShowSRs] = useState({});
+
+  // Takes in dispatch ID,
+  const updateShowSRs = (dispatch_id) => {
+    let tempSRs = {...showSRs};
+    tempSRs[dispatch_id] = !showSRs[dispatch_id];
+    setShowSRs(tempSRs);
+  }
 
   // Takes in animal size, species, and count and returns a pretty string combination.
   const prettyText = (size, species, count) => {
@@ -183,22 +191,24 @@ function ServiceRequestDispatchAssignment({id}) {
     };
   }, [id]);
 
-  const starIconHTML = ReactDOMServer.renderToString(<FontAwesomeIcon color="gold" size="lg" className="icon-border" icon={faStar} />)
+  const starIconHTML = ReactDOMServer.renderToString(<FontAwesomeIcon color="gold" size="lg" icon={faStar} />)
   const starMarkerIcon = new L.DivIcon({
     html: starIconHTML,
     iconSize: [0, 0],
-    iconAnchor: [10, 10],
+    iconAnchor: [9, 10],
+    className: "star-icon",
     popupAnchor: null,
     shadowUrl: null,
     shadowSize: null,
     shadowAnchor: null
   });
 
-  const checkIconHTML = ReactDOMServer.renderToString(<FontAwesomeIcon className="icon-border" icon={faCheckCircle} />)
+  const checkIconHTML = ReactDOMServer.renderToString(<FontAwesomeIcon icon={faCheckCircle} />)
   const checkMarkerIcon = new L.DivIcon({
     html: checkIconHTML,
     iconSize: [0, 0],
     iconAnchor: [7, 10],
+    className: "star-icon",
     popupAnchor: null,
     shadowUrl: null,
     shadowSize: null,
@@ -315,25 +325,32 @@ function ServiceRequestDispatchAssignment({id}) {
         </Map>
       </Col>
     </Row>
-    <Row className="mt-2 mb-3">
+    <Row className="mt-2 mb-3" style={{marginRight:"-18px"}}>
       <Col xs={2} className="pl-0" style={{marginLeft:"-2px", paddingRight:"7px"}}>
         <Button onClick={() => handleSubmit()} className="btn-block" disabled={selected === null}>ASSIGN</Button>
       </Col>
-      <Col xs={10} className="pl-0">
-        <div className="card-header d-flex align-items-center" style={{height:"37px"}}><b style={{marginLeft:"-10px"}}>Service Request:</b>&nbsp;{currentRequest.full_address}</div>
+      <Col xs={10} className="pl-0 pr-0">
+        <div className="card-header d-flex align-items-center rounded" style={{height:"37px"}}><b style={{marginLeft:"-10px"}}>
+          Service Request:</b>&nbsp;
+            {Object.keys(currentRequest.matches).map((key,i) => (
+              <span key={key} style={{textTransform:"capitalize"}}>
+                {i > 0 && ", "}{prettyText(key.split(',')[1], key.split(',')[0], currentRequest.matches[key])}
+              </span>
+            ))}
+          &nbsp;| {currentRequest.full_address}</div>
       </Col>
     </Row>
-    <Row className="d-flex flex-wrap" style={{marginTop:"-8px", marginRight:"-20px", marginLeft:"-17px", minHeight:"36vh", paddingRight:"14px"}}>
+    <Row className="d-flex flex-wrap" style={{marginTop:"-8px", marginRight:"-19px", marginLeft:"-17px", minHeight:"36vh", paddingRight:"4px"}}>
       <Col xs={12} className="border rounded" style={{marginLeft:"1px", height:"36vh", overflowY:"auto", paddingRight:"-1px"}}>
         {data.dispatch_assignments.map((dispatch_assignment, index) => (
         <span key={dispatch_assignment.id}>
           <div className="mt-1 mb-1" style={{marginLeft:"-10px", marginRight:"-10px"}}>
-            <div className="card-header">
+            <div className="card-header rounded" style={{height:""}}>
               <span style={{display:"inline"}} className="custom-control-lg custom-control custom-checkbox">
                 <input className="custom-control-input" type="checkbox" name={dispatch_assignment.id} id={dispatch_assignment.id} onChange={() => handleMapState(dispatch_assignment.id)} checked={mapState[dispatch_assignment.id] ? mapState[dispatch_assignment.id].checked : false} />
                 <label className="custom-control-label" htmlFor={dispatch_assignment.id}></label>
               </span>
-              <span>Dispatch Assignment #{index}</span>
+              <span>Dispatch Assignment #{index+1}</span>
               <OverlayTrigger
                 key={"assignment-summary"}
                 placement="top"
@@ -347,40 +364,43 @@ function ServiceRequestDispatchAssignment({id}) {
               </OverlayTrigger>&nbsp;&nbsp;|&nbsp;
               Team Members: {dispatch_assignment.team_member_objects.map((member, i) => (
                   <span key={member.id}>{i > 0 && ", "}{member.first_name} {member.last_name}</span>))}
+              &nbsp;|&nbsp;Service Requests<FontAwesomeIcon icon={faChevronCircleRight} hidden={showSRs[dispatch_assignment.id]} onClick={() => updateShowSRs(dispatch_assignment.id)} className="ml-1 fa-move-up" style={{verticalAlign:"middle"}} inverse /><FontAwesomeIcon icon={faChevronCircleDown} hidden={!showSRs[dispatch_assignment.id]} onClick={() => updateShowSRs(dispatch_assignment.id)} className="ml-1 fa-move-up" style={{verticalAlign:"middle"}} inverse />
+              {dispatch_assignment.service_request_objects.map(service_request => (
+              <Collapse key={service_request.id} in={showSRs[dispatch_assignment.id]}>
+                <span>
+                  {mapState[dispatch_assignment.id] ?
+                  <div className="mt-1 mb-1" style={{marginLeft:"15%", marginRight:"-10px"}}>
+                      {mapState[dispatch_assignment.id].service_requests[service_request.id] ?
+                      <span>
+                        {Object.keys(mapState[dispatch_assignment.id].service_requests[service_request.id].matches).map((key,i) => (
+                          <span key={key} style={{textTransform:"capitalize"}}>
+                            {i > 0 && ", "}{prettyText(key.split(',')[1], key.split(',')[0], mapState[dispatch_assignment.id].service_requests[service_request.id].matches[key])}
+                          </span>
+                        ))}
+                      </span>
+                      :""}
+                      &nbsp;|&nbsp;{service_request.full_address}
+                      <OverlayTrigger
+                        key={"request-details"}
+                        placement="top"
+                        overlay={
+                          <Tooltip id={`tooltip-request-details`}>
+                            Service request details
+                          </Tooltip>
+                        }
+                      >
+                        <Link href={"/hotline/servicerequest/" + service_request.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+                      </OverlayTrigger>
+                  </div>
+                  : ""}
+                </span>
+              </Collapse>
+              ))}
             </div>
           </div>
-          {/* {dispatch_assignment.service_request_objects.map(service_request => (
-          <span key={service_request.id}>{mapState[dispatch_assignment.id].service_requests[service_request.id] ?
-            <div className="mt-1 mb-1" style={{marginLeft:"-10px", marginRight:"-10px"}}>
-              <div className="card-header">
-                {mapState[dispatch_assignment.id].service_requests[service_request.id] ?
-                <span>
-                  {Object.keys(mapState[dispatch_assignment.id].service_requests[service_request.id].matches).map((key,i) => (
-                    <span key={key} style={{textTransform:"capitalize"}}>
-                      {i > 0 && ", "}{prettyText(key.split(',')[1], key.split(',')[0], mapState[dispatch_assignment.id].service_requests[service_request.id].matches[key])}
-                    </span>
-                  ))}
-                </span>
-                :""}
-                <OverlayTrigger
-                  key={"request-details"}
-                  placement="top"
-                  overlay={
-                    <Tooltip id={`tooltip-request-details`}>
-                      Service request details
-                    </Tooltip>
-                  }
-                >
-                  <Link href={"/hotline/servicerequest/" + service_request.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} inverse /></Link>
-                </OverlayTrigger>
-              </div>
-            </div>
-            : ""}
-          </span>
-          ))} */}
         </span>
         ))}
-        <div className="card-header mt-1 mb-1"  style={{marginLeft:"-10px", marginRight:"-10px"}} hidden={data.dispatch_assignments.length > 0}>
+        <div className="card-header mt-1 mb-1 rounded"  style={{marginLeft:"-10px", marginRight:"-10px"}} hidden={data.dispatch_assignments.length > 0}>
           No open Dispatch Assignments found.
         </div>
       </Col>
