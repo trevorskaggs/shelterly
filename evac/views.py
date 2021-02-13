@@ -80,10 +80,7 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
                 # Update the relevant SR fields.
                 service_requests = ServiceRequest.objects.filter(id=service_request['id'])
                 service_requests.update(status=sr_status, followup_date=service_request['followup_date'] or None)
-                if sr_status == 'open':
-                    action.send(self.request.user, verb='opened service request', target=service_requests[0])
-                else:
-                    action.send(self.request.user, verb='closed service request', target=service_requests[0])
+                action.send(self.request.user, verb=sr_status.replace('ed','') + 'ed service request', target=service_requests[0])
                 # Only create VisitNote on first update, otherwise update existing VisitNote.
                 if service_request.get('date_completed'):
                     if not VisitNote.objects.filter(evac_assignment=evac_assignment, service_request=service_requests[0]).exists():
@@ -96,5 +93,8 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
                         OwnerContact.objects.create(evac_assignment=evac_assignment, service_request=service_requests[0], owner=Person.objects.get(pk=service_request['owner_contact_id']), owner_contact_note=service_request['owner_contact_note'], owner_contact_time=service_request['owner_contact_time'])
                     else:
                         OwnerContact.objects.filter(evac_assignment=evac_assignment, service_request=service_requests[0]).update(owner=Person.objects.get(pk=service_request['owner_contact_id']), owner_contact_note=service_request['owner_contact_note'], owner_contact_time=service_request['owner_contact_time'])
+
+                if service_request['unable_to_complete']:
+                    evac_assignment.service_requests.remove(service_requests[0])
 
             action.send(self.request.user, verb='updated evacuation assignment', target=evac_assignment)
