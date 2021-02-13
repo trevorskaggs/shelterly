@@ -83,24 +83,29 @@ function DispatchSummary({id}) {
             </ListGroup.Item>
           ))}
         </ListGroup>
-        <hr/>
-        {!data.end_time && service_request.visit_notes.length ?
+        {!data.end_time && service_request.visit_notes.sort((a,b) => new Date(b.date_completed).getTime() - new Date(a.date_completed).getTime())[0].date_completed ?
+        <span>
+          <hr/>
           <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
-            <h4 className="mt-2" style={{marginBottom:"-2px"}}>Previous Note - <Moment format="L">{service_request.visit_notes.sort((a,b) => new Date(b.date_completed).getTime() - new Date(a.date_completed).getTime())[0].date_completed}</Moment></h4>
+            <h4 className="mt-2" style={{marginBottom:"-2px"}}>Previous Visit Notes on <Moment format="L">{service_request.visit_notes.sort((a,b) => new Date(b.date_completed).getTime() - new Date(a.date_completed).getTime())[0].date_completed}</Moment></h4>
               <ListGroup.Item>
               {service_request.visit_notes.sort((a,b) => new Date(b.date_completed).getTime() - new Date(a.date_completed).getTime())[0].notes || "No information available."}
               </ListGroup.Item>
           </ListGroup>
+        </span>
         : "" }
-        {service_request.visit_notes.filter(note => String(note.evac_assignment) === String(id)).length > 0 ?
+        {service_request.visit_notes.filter(note => String(note.evac_assignment) === String(id))[0].date_completed ?
+        <span>
+        <hr/>
           <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
-            <h4 className="mt-2" style={{marginBottom:"-2px"}}>Notes</h4>
+            <h4 className="mt-2" style={{marginBottom:"-2px"}}>Visit Notes</h4>
             {service_request.visit_notes.filter(note => String(note.evac_assignment) === String(id)).map((note) => (
               <ListGroup.Item key={note.id}>
                 {note.notes || "No information available."}
               </ListGroup.Item>
             ))}
           </ListGroup>
+        </span>
         : ""}
       </Card.Body>
     </Card>
