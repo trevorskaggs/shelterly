@@ -10,7 +10,7 @@ frontend/.env
 .local/
 .npm/
 .ssh/
-static/
+/static/
 media/
 docker-compose.override.yml
 

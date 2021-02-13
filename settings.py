@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',
+    'django_s3_storage',
     'django_filters',
     'corsheaders',
     'accounts',
@@ -148,6 +149,15 @@ STATIC_ROOT=os.path.join(BASE_DIR, 'static')
 # AWS_S3_REGION_NAME = 'us-east-2'
 # AWS_AUTO_CREATE_BUCKET = True
 # ALLOWED_HOSTS = ['725rgosijg.execute-api.us-east-2.amazonaws.com',]
+
+S3_BUCKET_NAME = "shelterly-data-static"
+STATICFILES_STORAGE = "django_s3_storage.storage.StaticS3Storage"
+AWS_S3_BUCKET_NAME_STATIC = S3_BUCKET_NAME
+# serve the static files directly from the specified s3 bucket
+AWS_S3_CUSTOM_DOMAIN = '%s.s3.amazonaws.com' % S3_BUCKET_NAME
+STATIC_URL = "https://%s/" % AWS_S3_CUSTOM_DOMAIN
+# if you have configured a custom domain for your static files use:
+#AWS_S3_PUBLIC_URL_STATIC = "https://static.yourdomain.com/"
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': ('knox.auth.TokenAuthentication',),
