@@ -199,7 +199,7 @@ function DispatchResolutionForm({ id }) {
                   <Card.Title style={{marginBottom:"-5px"}}>
                     <h4>Service Request <Link href={"/hotline/servicerequest/" + service_request.id}><FontAwesomeIcon icon={faClipboardList} inverse /></Link> |&nbsp;
                       <Checkbox
-                        label={"Not Completed:"}
+                        label={"Not Completed Yet:"}
                         name={`sr_updates.${index}.incomplete`}
                         checked={(props.values.sr_updates[index] && props.values.sr_updates[index].incomplete) || false}
                         onChange={() => {
