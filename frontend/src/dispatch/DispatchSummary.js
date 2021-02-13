@@ -83,7 +83,7 @@ function DispatchSummary({id}) {
             </ListGroup.Item>
           ))}
         </ListGroup>
-        {!data.end_time && service_request.visit_notes.sort((a,b) => new Date(b.date_completed).getTime() - new Date(a.date_completed).getTime())[0].date_completed ?
+        {!service_request.visit_notes.filter(note => String(note.evac_assignment) === String(id))[0].date_completed && service_request.visit_notes.sort((a,b) => new Date(b.date_completed).getTime() - new Date(a.date_completed).getTime())[0].date_completed ?
         <span>
           <hr/>
           <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>

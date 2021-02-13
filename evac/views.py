@@ -85,10 +85,11 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
                 else:
                     action.send(self.request.user, verb='closed service request', target=service_requests[0])
                 # Only create VisitNote on first update, otherwise update existing VisitNote.
-                if not VisitNote.objects.filter(evac_assignment=evac_assignment, service_request=service_requests[0]).exists():
-                    VisitNote.objects.create(evac_assignment=evac_assignment, service_request=service_requests[0], date_completed=service_request['date_completed'], notes=service_request['notes'], forced_entry=service_request['forced_entry'])
-                else:
-                    VisitNote.objects.filter(evac_assignment=evac_assignment, service_request=service_requests[0]).update(date_completed=service_request['date_completed'], notes=service_request['notes'], forced_entry=service_request['forced_entry'])
+                if service_request.get('date_completed'):
+                    if not VisitNote.objects.filter(evac_assignment=evac_assignment, service_request=service_requests[0]).exists():
+                        VisitNote.objects.create(evac_assignment=evac_assignment, service_request=service_requests[0], date_completed=service_request['date_completed'], notes=service_request['notes'], forced_entry=service_request['forced_entry'])
+                    else:
+                        VisitNote.objects.filter(evac_assignment=evac_assignment, service_request=service_requests[0]).update(date_completed=service_request['date_completed'], notes=service_request['notes'], forced_entry=service_request['forced_entry'])
                 # Only create OwnerContact on first update, otherwise update existing OwnerContact.
                 if service_request.get('owner_contact_id'):
                     if not OwnerContact.objects.filter(evac_assignment=evac_assignment, service_request=service_requests[0]).exists():
