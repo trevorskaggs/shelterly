@@ -63,11 +63,21 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         if serializer.is_valid():
-            # Only add end_time on first update.
-            if not serializer.instance.end_time:
+            # Only add end_time on first update that isn't adding a new SR.
+            if not serializer.instance.end_time and not self.request.data.get('new_service_request'):
                 serializer.validated_data['end_time'] = datetime.now()
             evac_assignment = serializer.save()
-            for service_request in self.request.data['sr_updates']:
+
+            # Add Service Request to DA if included.
+            if self.request.data.get('new_service_request'):
+                service_requests = ServiceRequest.objects.filter(pk=self.request.data.get('new_service_request'))
+                service_requests.update(status="assigned")
+                evac_assignment.service_requests.add(service_requests[0])
+                action.send(self.request.user, verb='assigned service request', target=service_requests[0])
+                evac_assignment.animals.add(*Animal.objects.filter(request=service_requests[0], status__in=['REPORTED', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE']))
+
+            # Update SR data during DA Resolution.
+            for service_request in self.request.data.get('sr_updates', []):
                 sr_status = 'closed'
                 for animal_dict in service_request['animals']:
                     # Record status change if applicable.

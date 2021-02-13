@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import ReactDOMServer from 'react-dom/server';
 import axios from "axios";
-import { Link } from 'raviger';
-import { Form } from 'formik';
+import { Link, navigate } from 'raviger';
 import { Button, Col, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { CircleMarker, Map, Marker, TileLayer, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
@@ -11,14 +10,14 @@ import randomColor from "randomcolor";
 import { Legend } from "../components/Map";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faClipboardList, faStar
+  faCheckCircle, faClipboardList, faStar
 } from '@fortawesome/free-solid-svg-icons';
 import badge from "../static/images/badge-sheriff.png";
 import bandaid from "../static/images/band-aid-solid.png";
 import car from "../static/images/car-solid.png";
 import trailer from "../static/images/trailer-solid.png";
 
-function Hotline({id}) {
+function ServiceRequestDispatchAssignment({id}) {
 
   const [currentRequest, setCurrentRequest] = useState({id:'', matches: {}, latitude:0, longitude:0, followup_date:''});
   const [data, setData] = useState({dispatch_assignments: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
@@ -85,24 +84,24 @@ function Hotline({id}) {
   // Handle dynamic SR state and map display when an SR is selected or deselected.
   const handleMapState = (id) => {
 
-    const testMapState = {...mapState};
+    const tempMapState = {...mapState};
 
     // If selected.
-    if (testMapState[id].checked === false) {
-      let service_requests = testMapState[id].service_requests;
+    if (tempMapState[id].checked === false) {
+      let service_requests = tempMapState[id].service_requests;
       Object.keys(service_requests).forEach(key => {
         service_requests[key].color = 'black';
       });
       // Deselect any other selected DA SRs.
-      Object.keys(testMapState).filter(key => testMapState[key].checked === true).forEach(key => {
-        let checked_service_requests = testMapState[key].service_requests;
+      Object.keys(tempMapState).filter(key => tempMapState[key].checked === true).forEach(key => {
+        let checked_service_requests = tempMapState[key].service_requests;
         Object.keys(checked_service_requests).forEach(checked_key => {
-          checked_service_requests[checked_key].color = testMapState[key].color;
+          checked_service_requests[checked_key].color = tempMapState[key].color;
         });
-        testMapState[key] = {...testMapState[key], "checked":false, "service_requests":checked_service_requests};
+        tempMapState[key] = {...tempMapState[key], "checked":false, "service_requests":checked_service_requests};
       });
-      testMapState[id] = {...testMapState[id], "checked":true, "service_requests":service_requests};
-      setMapState(testMapState)
+      tempMapState[id] = {...tempMapState[id], "checked":true, "service_requests":service_requests};
+      setMapState(tempMapState)
       setSelected(id);
     }
     // Else deselect.
@@ -115,6 +114,16 @@ function Hotline({id}) {
       setMapState(prevState => ({ ...prevState, [id]: {...prevState[id], "checked":false, "service_requests":service_requests} }));
       setSelected(null);
     }
+  }
+
+  const handleSubmit = () => {
+    axios.patch('/evac/api/evacassignment/' + selected + '/', {new_service_request:currentRequest.id})
+    .then(response => {
+      navigate('/dispatch/summary/' + selected)
+    })
+    .catch(error => {
+      console.log(error.response);
+    });
   }
 
   // Hook for initializing data.
@@ -146,7 +155,7 @@ function Hotline({id}) {
             let sr_dict = {}
             for (const service_request of dispatch_assignment.service_request_objects) {
               const matches = countMatches(service_request);
-              sr_dict[service_request.id] = {color:random_colors[index], matches:matches, latitude:service_request.latitude, longitude:service_request.longitude};
+              sr_dict[service_request.id] = {id:service_request.id, color:random_colors[index], matches:matches, latitude:service_request.latitude, longitude:service_request.longitude, assigned_evac:service_request.assigned_evac, full_address:service_request.full_address};
               bounds.push([service_request.latitude, service_request.longitude]);
             }
             map_dict[dispatch_assignment.id] = {checked:false, color:random_colors[index], service_requests:sr_dict}
@@ -172,13 +181,24 @@ function Hotline({id}) {
     return () => {
       source.cancel();
     };
-  }, []);
+  }, [id]);
 
-  const iconHTML = ReactDOMServer.renderToString(<FontAwesomeIcon color="gold" size="lg" className="icon-border" icon={faStar} />)
-  const customMarkerIcon = new L.DivIcon({
-    html: iconHTML,
+  const starIconHTML = ReactDOMServer.renderToString(<FontAwesomeIcon color="gold" size="lg" className="icon-border" icon={faStar} />)
+  const starMarkerIcon = new L.DivIcon({
+    html: starIconHTML,
     iconSize: [0, 0],
     iconAnchor: [10, 10],
+    popupAnchor: null,
+    shadowUrl: null,
+    shadowSize: null,
+    shadowAnchor: null
+  });
+
+  const checkIconHTML = ReactDOMServer.renderToString(<FontAwesomeIcon className="icon-border" icon={faCheckCircle} />)
+  const checkMarkerIcon = new L.DivIcon({
+    html: checkIconHTML,
+    iconSize: [0, 0],
+    iconAnchor: [7, 10],
     popupAnchor: null,
     shadowUrl: null,
     shadowSize: null,
@@ -197,7 +217,7 @@ function Hotline({id}) {
           />
           <Marker
             position={[currentRequest.latitude, currentRequest.longitude]}
-            icon={customMarkerIcon}
+            icon={starMarkerIcon}
             onClick={() => window.open("/hotline/servicerequest/" + currentRequest.id, "_blank")}
           >
             <MapTooltip autoPan={false}>
@@ -263,12 +283,41 @@ function Hotline({id}) {
             ))}
           </span>
           ))}
+          {Object.entries(mapState).filter(([key, value]) => value.checked === true).map(([key, value]) => (
+            <span key={key}>
+            {Object.entries(value.service_requests).map(([key, service_request]) => (
+              <Marker
+                key={service_request.id} 
+                position={[service_request.latitude, service_request.longitude]}
+                icon={checkMarkerIcon}
+                onClick={() => handleMapState(service_request.assigned_evac)}
+              >
+                <MapTooltip autoPan={false}>
+                  <span>
+                    {service_request.id ?
+                      <span>
+                        {Object.keys(service_request.matches).map((key,i) => (
+                          <span key={key} style={{textTransform:"capitalize"}}>
+                            {i > 0 && ", "}{prettyText(key.split(',')[1], key.split(',')[0], service_request.matches[key])}
+                          </span>
+                        ))}
+                      </span>
+                    :""}
+                    <br />
+                    {service_request.full_address}
+                    {service_request.followup_date ? <div>Followup Date: <Moment format="L">{service_request.followup_date}</Moment></div> : ""}
+                  </span>
+                </MapTooltip>
+              </Marker>
+            ))}
+            </span>
+          ))}
         </Map>
       </Col>
     </Row>
     <Row className="mt-2 mb-3">
       <Col xs={2} className="pl-0" style={{marginLeft:"-2px", paddingRight:"7px"}}>
-        <Button type="submit" className="btn-block" disabled={selected === null}>ASSIGN</Button>
+        <Button onClick={() => handleSubmit()} className="btn-block" disabled={selected === null}>ASSIGN</Button>
       </Col>
       <Col xs={10} className="pl-0">
         <div className="card-header d-flex align-items-center" style={{height:"37px"}}><b style={{marginLeft:"-10px"}}>Service Request:</b>&nbsp;{currentRequest.full_address}</div>
@@ -276,7 +325,7 @@ function Hotline({id}) {
     </Row>
     <Row className="d-flex flex-wrap" style={{marginTop:"-8px", marginRight:"-20px", marginLeft:"-17px", minHeight:"36vh", paddingRight:"14px"}}>
       <Col xs={12} className="border rounded" style={{marginLeft:"1px", height:"36vh", overflowY:"auto", paddingRight:"-1px"}}>
-        {data.dispatch_assignments.map(dispatch_assignment => (
+        {data.dispatch_assignments.map((dispatch_assignment, index) => (
         <span key={dispatch_assignment.id}>
           <div className="mt-1 mb-1" style={{marginLeft:"-10px", marginRight:"-10px"}}>
             <div className="card-header">
@@ -284,7 +333,7 @@ function Hotline({id}) {
                 <input className="custom-control-input" type="checkbox" name={dispatch_assignment.id} id={dispatch_assignment.id} onChange={() => handleMapState(dispatch_assignment.id)} checked={mapState[dispatch_assignment.id] ? mapState[dispatch_assignment.id].checked : false} />
                 <label className="custom-control-label" htmlFor={dispatch_assignment.id}></label>
               </span>
-              <span>Dispatch Assignment #{dispatch_assignment.id}</span>
+              <span>Dispatch Assignment #{index}</span>
               <OverlayTrigger
                 key={"assignment-summary"}
                 placement="top"
@@ -340,4 +389,4 @@ function Hotline({id}) {
   )
 }
 
-export default Hotline
+export default ServiceRequestDispatchAssignment

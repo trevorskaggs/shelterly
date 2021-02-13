@@ -36,7 +36,7 @@ class AnimalViewSet(viewsets.ModelViewSet):
                 animals.append(new_animal)
 
             for animal in animals:
-                # Add Owner to new animals if it is POSTed.
+                # Add Owner to new animals if included.
                 if self.request.data.get('new_owner'):
                     animal.owners.add(self.request.data['new_owner'])
 

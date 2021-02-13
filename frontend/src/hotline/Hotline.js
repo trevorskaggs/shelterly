@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link } from 'raviger';
 import { Button, ButtonGroup, Col, ListGroup, Row } from 'react-bootstrap'
-import { Circle, CircleMarker, Map, TileLayer, Tooltip as MapTooltip } from "react-leaflet";
+import { CircleMarker, Map, TileLayer, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
 import Moment from 'react-moment';
 import { Legend } from "../components/Map";
