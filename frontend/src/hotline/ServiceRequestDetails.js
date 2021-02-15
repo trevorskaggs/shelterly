@@ -105,7 +105,7 @@ function ServiceRequestDetails({id}) {
         >
           <FontAwesomeIcon icon={faBan} style={{cursor:'pointer'}} className="fa-move-up" inverse onClick={() => {setShowModal(true)}}/>
         </OverlayTrigger>
-        &nbsp;| <span style={{textTransform:"capitalize"}}>{data.status} {data.status === 'assigned' ? <Link href={"/dispatch/summary/" + data.assigned_evac}><FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link> : ""}</span>
+        &nbsp;| <span style={{textTransform:"capitalize"}}>{data.status}</span>
       </Header>
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
@@ -316,19 +316,18 @@ function ServiceRequestDetails({id}) {
           </Card>
         </div>
       </div>
-      {data.visit_notes.length > 0 ?
       <div className="row mb-2">
         <div className="col-12 d-flex">
           <Card className="mb-2 border rounded" style={{width:"100%"}}>
             <Card.Body>
               <Card.Title>
                 <h4 className="mb-0">Visit Log
-                  {data.status === "open" ? <OverlayTrigger
+                  {["open", "assigned"].includes(data.status) ? <OverlayTrigger
                     key={"add-to-dispatch"}
                     placement="top"
                     overlay={
                       <Tooltip id={`tooltip-add-to-dispatch`}>
-                        Add service request to an open dispatch assignment
+                        {data.assigned_evac ? "Reassign" : "Assign"} service request to an open dispatch assignment
                       </Tooltip>
                     }
                   >
@@ -338,6 +337,22 @@ function ServiceRequestDetails({id}) {
               </Card.Title>
               <hr/>
               <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
+                {data.assigned_evac ?
+                  <ListGroup.Item>
+                    <b>Active Dispatch Assignment:</b>
+                    <OverlayTrigger
+                      key={"dispatch-summary"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-dispatch-summary`}>
+                          Dispatch assignment summary
+                        </Tooltip>
+                      }
+                    >
+                      <Link href={"/dispatch/summary/" + data.assigned_evac}><FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1" inverse /></Link>
+                    </OverlayTrigger>
+                  </ListGroup.Item>
+                : ""}
                 {data.visit_notes.map((visit_note, index) => (
                   <ListGroup.Item key={visit_note.id}>
                     <b>Dispatch Assignment:</b> #{index + 1}
@@ -380,12 +395,12 @@ function ServiceRequestDetails({id}) {
                     <div className="mt-1 mb-0"><b>Outcome:</b> {visit_note.notes||"No information available."}</div>
                   </ListGroup.Item>
                 ))}
+                {data.visit_notes.length < 1 && !data.assigned_evac ? <div className="mt-2 mb-1">Service Request has not been visited yet.</div> : ""}
               </ListGroup>
             </Card.Body>
           </Card>
         </div>
       </div>
-      : ""}
       <History action_history={data.action_history} />
     </>
   );

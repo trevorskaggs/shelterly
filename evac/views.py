@@ -70,11 +70,18 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
 
             # Add Service Request to DA if included.
             if self.request.data.get('new_service_request'):
+                # Update SR status to assigned.
                 service_requests = ServiceRequest.objects.filter(pk=self.request.data.get('new_service_request'))
                 service_requests.update(status="assigned")
+                # Remove SR from any existing open DA if applicable.
+                old_da = EvacAssignment.objects.filter(service_requests=service_requests[0], end_time=None).first()
+                if old_da:
+                    old_da.service_requests.remove(service_requests[0])
+                    old_da.animals.remove(*Animal.objects.filter(request=service_requests[0]))
+                # Add SR to selected DA.
                 evac_assignment.service_requests.add(service_requests[0])
-                action.send(self.request.user, verb='assigned service request', target=service_requests[0])
                 evac_assignment.animals.add(*Animal.objects.filter(request=service_requests[0], status__in=['REPORTED', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE']))
+                action.send(self.request.user, verb='assigned service request', target=service_requests[0])
 
             # Update SR data during DA Resolution.
             for service_request in self.request.data.get('sr_updates', []):

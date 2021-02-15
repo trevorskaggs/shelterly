@@ -413,7 +413,7 @@ function Deploy() {
               <div className="mt-1 mb-1" style={{marginLeft:"-10px", marginRight:"-10px"}}>
                 <div className="card-header rounded">
                   <span style={{display:"inline"}} className="custom-control-lg custom-control custom-checkbox">
-                    <input className="custom-control-input" type="checkbox" name={service_request.id} id={service_request.id} onChange={() => handleMapState(service_request.id)} checked={mapState[service_request.id] ? mapState[service_request.id].checked : false} />
+                    <input className="custom-control-input disabled" type="checkbox" disabled={true} name={service_request.id} id={service_request.id} onChange={() => handleMapState(service_request.id)} checked={mapState[service_request.id] ? mapState[service_request.id].checked : false} />
                     <label className="custom-control-label" htmlFor={service_request.id}></label>
                   </span>
                   {mapState[service_request.id] ?

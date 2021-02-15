@@ -10,8 +10,9 @@ import randomColor from "randomcolor";
 import { Legend } from "../components/Map";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faCheckCircle, faChevronCircleDown, faChevronCircleRight, faClipboardList, faStar
+  faChevronCircleDown, faChevronCircleRight, faClipboardList, faStar
 } from '@fortawesome/free-solid-svg-icons';
+import { faCheckCircle } from '@fortawesome/pro-duotone-svg-icons';
 import badge from "../static/images/badge-sheriff.png";
 import bandaid from "../static/images/band-aid-solid.png";
 import car from "../static/images/car-solid.png";
@@ -155,7 +156,6 @@ function ServiceRequestDispatchAssignment({id}) {
           cancelToken: source.token,
         })
         .then(response => {
-          setData({dispatch_assignments: response.data, isFetching: false, bounds:L.latLngBounds([[0,0]])});
           const map_dict = {};
           const bounds = [];
           const random_colors = randomColor({count:response.data.length});
@@ -166,7 +166,7 @@ function ServiceRequestDispatchAssignment({id}) {
               sr_dict[service_request.id] = {id:service_request.id, color:random_colors[index], matches:matches, latitude:service_request.latitude, longitude:service_request.longitude, assigned_evac:service_request.assigned_evac, full_address:service_request.full_address};
               bounds.push([service_request.latitude, service_request.longitude]);
             }
-            map_dict[dispatch_assignment.id] = {checked:false, color:random_colors[index], service_requests:sr_dict}
+            map_dict[dispatch_assignment.id] = {checked:currentResponse.data.assigned_evac === dispatch_assignment.id, color:random_colors[index], service_requests:sr_dict}
           });
           const current_matches = countMatches(currentResponse.data);
           currentResponse.data['matches'] = current_matches;
@@ -191,7 +191,7 @@ function ServiceRequestDispatchAssignment({id}) {
     };
   }, [id]);
 
-  const starIconHTML = ReactDOMServer.renderToString(<FontAwesomeIcon color="gold" size="lg" icon={faStar} />)
+  const starIconHTML = ReactDOMServer.renderToString(<FontAwesomeIcon color="gold" size="lg" className="icon-border" icon={faStar} />)
   const starMarkerIcon = new L.DivIcon({
     html: starIconHTML,
     iconSize: [0, 0],
@@ -202,13 +202,26 @@ function ServiceRequestDispatchAssignment({id}) {
     shadowSize: null,
     shadowAnchor: null
   });
+  
 
-  const checkIconHTML = ReactDOMServer.renderToString(<FontAwesomeIcon icon={faCheckCircle} />)
+  const checkIconHTML = ReactDOMServer.renderToString(<FontAwesomeIcon icon={faCheckCircle} className="icon-border" style={{"--fa-primary-color":'white', "--fa-secondary-color":'green', "--fa-secondary-opacity": 1}} />)
   const checkMarkerIcon = new L.DivIcon({
     html: checkIconHTML,
     iconSize: [0, 0],
-    iconAnchor: [7, 10],
-    className: "star-icon",
+    iconAnchor: [6,9],
+    className: "check-icon",
+    popupAnchor: null,
+    shadowUrl: null,
+    shadowSize: null,
+    shadowAnchor: null
+  });
+
+  const checkIconHTMLGray = ReactDOMServer.renderToString(<FontAwesomeIcon icon={faCheckCircle} className="icon-border" style={{"--fa-primary-color":'white', "--fa-secondary-color":'gray', "--fa-secondary-opacity": 1}} />)
+  const checkMarkerIconGray = new L.DivIcon({
+    html: checkIconHTMLGray,
+    iconSize: [0, 0],
+    iconAnchor: [6,9],
+    className: "check-icon-gray",
     popupAnchor: null,
     shadowUrl: null,
     shadowSize: null,
@@ -253,7 +266,7 @@ function ServiceRequestDispatchAssignment({id}) {
               </span>
             </MapTooltip>
           </Marker>
-          {data.dispatch_assignments.map(dispatch_assignment => (
+          {data.dispatch_assignments.filter(dispatch_assignment => mapState[dispatch_assignment.id].checked === false && dispatch_assignment.id !== currentRequest.assigned_evac).map(dispatch_assignment => (
           <span key={dispatch_assignment.id}>
             {dispatch_assignment.service_request_objects.map(service_request => (
             <CircleMarker
@@ -293,14 +306,14 @@ function ServiceRequestDispatchAssignment({id}) {
             ))}
           </span>
           ))}
-          {Object.entries(mapState).filter(([key, value]) => value.checked === true).map(([key, value]) => (
+          {Object.entries(mapState).filter(([key, value]) => (value.checked === true || Number(key) === currentRequest.assigned_evac)).map(([key, value]) => (
             <span key={key}>
-            {Object.entries(value.service_requests).map(([key, service_request]) => (
+            {Object.entries(value.service_requests).filter(([sr_id, service_request]) => (Number(sr_id) !== currentRequest.id)).map(([sr_id, service_request]) => (
               <Marker
                 key={service_request.id} 
                 position={[service_request.latitude, service_request.longitude]}
-                icon={checkMarkerIcon}
-                onClick={() => handleMapState(service_request.assigned_evac)}
+                icon={Number(key) === currentRequest.assigned_evac ? checkMarkerIconGray : checkMarkerIcon}
+                onClick={Number(key) !== currentRequest.assigned_evac ? () => handleMapState(service_request.assigned_evac) : undefined}
               >
                 <MapTooltip autoPan={false}>
                   <span>
@@ -347,7 +360,7 @@ function ServiceRequestDispatchAssignment({id}) {
           <div className="mt-1 mb-1" style={{marginLeft:"-10px", marginRight:"-10px"}}>
             <div className="card-header rounded" style={{height:""}}>
               <span style={{display:"inline"}} className="custom-control-lg custom-control custom-checkbox">
-                <input className="custom-control-input" type="checkbox" name={dispatch_assignment.id} id={dispatch_assignment.id} onChange={() => handleMapState(dispatch_assignment.id)} checked={mapState[dispatch_assignment.id] ? mapState[dispatch_assignment.id].checked : false} />
+                <input className="custom-control-input" type="checkbox" disabled={currentRequest.assigned_evac === dispatch_assignment.id} name={dispatch_assignment.id} id={dispatch_assignment.id} onChange={() => handleMapState(dispatch_assignment.id)} checked={mapState[dispatch_assignment.id] ? mapState[dispatch_assignment.id].checked : false} />
                 <label className="custom-control-label" htmlFor={dispatch_assignment.id}></label>
               </span>
               <span>Dispatch Assignment #{index+1}</span>
@@ -369,7 +382,7 @@ function ServiceRequestDispatchAssignment({id}) {
               <Collapse key={service_request.id} in={showSRs[dispatch_assignment.id]}>
                 <span>
                   {mapState[dispatch_assignment.id] ?
-                  <div className="mt-1 mb-1" style={{marginLeft:"15%", marginRight:"-10px"}}>
+                  <li className="mt-1 mb-1" style={{marginLeft:"15%", marginRight:"-10px"}}>
                       {mapState[dispatch_assignment.id].service_requests[service_request.id] ?
                       <span>
                         {Object.keys(mapState[dispatch_assignment.id].service_requests[service_request.id].matches).map((key,i) => (
@@ -391,7 +404,7 @@ function ServiceRequestDispatchAssignment({id}) {
                       >
                         <Link href={"/hotline/servicerequest/" + service_request.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
                       </OverlayTrigger>
-                  </div>
+                  </li>
                   : ""}
                 </span>
               </Collapse>

@@ -19,7 +19,7 @@ import {
   faClipboardList, faCircle, faExclamationCircle, faQuestionCircle, faHome, faHelicopter, faHeart, faSkullCrossbones
 } from '@fortawesome/free-solid-svg-icons';
 import { faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
-import moment from "moment";
+import Moment from 'react-moment';
 import Header from '../components/Header';
 
 import { ITEMS_PER_PAGE } from '../constants'
@@ -166,7 +166,7 @@ function ServiceRequestSearch() {
                               <Link href={"/dispatch/summary/" + evacuation_assignment.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} inverse/></Link>
                             </OverlayTrigger>
                             <div>
-                              <b>Opened: </b>{moment(evacuation_assignment.start_time).format="MMMM Do YYYY, HH:mm:ss"} |
+                              <b>Opened: </b><Moment format="MMMM Do YYYY HH:mm">{evacuation_assignment.start_time}</Moment> |
                               <Link href={"/dispatch/resolution/" + evacuation_assignment.id}
                                 className="btn btn-danger ml-1"
                                 style={{paddingTop: "0px", paddingBottom: "0px"}} target="_blank">Close</Link>
