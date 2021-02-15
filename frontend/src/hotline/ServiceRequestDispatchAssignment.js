@@ -77,16 +77,15 @@ function ServiceRequestDispatchAssignment({id}) {
   // Show or hide list of SRs based on current map zoom
   const onMove = event => {
     for (const dispatch_assignment of data.dispatch_assignments) {
+      let hidden = true;
       for (const service_request of dispatch_assignment.service_request_objects) {
         if (mapState[dispatch_assignment.id].service_requests[service_request.id]) {
-          if (!event.target.getBounds().contains(L.latLng(service_request.latitude, service_request.longitude))) {
-            setMapState(prevState => ({ ...prevState, [service_request.id]: {...prevState[service_request.id], hidden:true} }));
-          }
-          else {
-            setMapState(prevState => ({ ...prevState, [service_request.id]: {...prevState[service_request.id], hidden:false} }));
+          if (event.target.getBounds().contains(L.latLng(service_request.latitude, service_request.longitude))) {
+            hidden = false;
           }
         }
       }
+      setMapState(prevState => ({ ...prevState, [dispatch_assignment.id]: {...prevState[dispatch_assignment.id], hidden:hidden} }));
     }
   }
 
@@ -166,7 +165,7 @@ function ServiceRequestDispatchAssignment({id}) {
               sr_dict[service_request.id] = {id:service_request.id, color:random_colors[index], matches:matches, latitude:service_request.latitude, longitude:service_request.longitude, assigned_evac:service_request.assigned_evac, full_address:service_request.full_address};
               bounds.push([service_request.latitude, service_request.longitude]);
             }
-            map_dict[dispatch_assignment.id] = {checked:currentResponse.data.assigned_evac === dispatch_assignment.id, color:random_colors[index], service_requests:sr_dict}
+            map_dict[dispatch_assignment.id] = {checked:currentResponse.data.assigned_evac === dispatch_assignment.id, hidden: false, color:random_colors[index], service_requests:sr_dict}
           });
           const current_matches = countMatches(currentResponse.data);
           currentResponse.data['matches'] = current_matches;
@@ -355,7 +354,7 @@ function ServiceRequestDispatchAssignment({id}) {
     </Row>
     <Row className="d-flex flex-wrap" style={{marginTop:"-8px", marginRight:"-19px", marginLeft:"-17px", minHeight:"36vh", paddingRight:"4px"}}>
       <Col xs={12} className="border rounded" style={{marginLeft:"1px", height:"36vh", overflowY:"auto", paddingRight:"-1px"}}>
-        {data.dispatch_assignments.map((dispatch_assignment, index) => (
+        {data.dispatch_assignments.filter(dispatch_assignment => mapState[dispatch_assignment.id].hidden === false || dispatch_assignment.id === currentRequest.assigned_evac).map((dispatch_assignment, index) => (
         <span key={dispatch_assignment.id}>
           <div className="mt-1 mb-1" style={{marginLeft:"-10px", marginRight:"-10px"}}>
             <div className="card-header rounded" style={{height:""}}>
