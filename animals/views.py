@@ -11,7 +11,7 @@ from animals.serializers import AnimalSerializer
 
 class AnimalViewSet(viewsets.ModelViewSet):
 
-    queryset = Animal.objects.all().prefetch_related(Prefetch('animalimage_set', to_attr='images')).order_by('order')
+    queryset = Animal.objects.exclude(status="CANCELED").prefetch_related(Prefetch('animalimage_set', to_attr='images')).order_by('order')
 
     search_fields = ['name', 'species', 'status', 'request__address', 'request__city', 'owners__first_name', 'owners__last_name', 'owners__address', 'owners__city', 'reporter__first_name', 'reporter__last_name']
     filter_backends = (filters.SearchFilter,)
@@ -144,7 +144,7 @@ class AnimalViewSet(viewsets.ModelViewSet):
             images (List of AnimalImages)
         and filtered by is_stray.   
         """        
-        queryset = Animal.objects.all().annotate(
+        queryset = Animal.objects.exclude(status="CANCELED").annotate(
             is_stray=Case(
                 When(owners=None, then=True),
                 default=False,

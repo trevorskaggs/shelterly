@@ -94,7 +94,7 @@ function DispatchSummary({id}) {
         : "" }
         {service_request.visit_notes.filter(note => String(note.evac_assignment) === String(id)).length > 0 ?
           <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
-            <h4 className="mt-2" style={{marginBottom:"-2px"}}>Notes</h4>
+            <h4 className="mt-2" style={{marginBottom:"-2px"}}>Visit Notes</h4>
             {service_request.visit_notes.filter(note => String(note.evac_assignment) === String(id)).map((note) => (
               <ListGroup.Item key={note.id}>
                 {note.notes || "No information available."}

@@ -29,10 +29,12 @@ class EvacTeamMemberSerializer(serializers.ModelSerializer):
 
 class DispatchServiceRequestSerializer(ServiceRequestSerializer):
 
-    animals = AnimalSerializer(many=True, read_only=True)
+    animals = serializers.SerializerMethodField()
+
+    def get_animals(self, obj):
+        return AnimalSerializer(obj.animal_set.exclude(status="CANCELED"), many=True, read_only=True).data
 
 class EvacAssignmentSerializer(serializers.ModelSerializer):
-    from hotline.serializers import ServiceRequestSerializer
 
     action_history = serializers.SerializerMethodField()
     team_member_objects = EvacTeamMemberSerializer(source='team_members', required=False, read_only=True, many=True)

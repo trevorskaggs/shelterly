@@ -5,7 +5,7 @@ import Moment from 'react-moment';
 import { Button, Card, ListGroup, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBan, faCalendarDay, faCar, faClipboardList, faComment, faEdit, faHouseDamage, faKey, faMapMarkedAlt, faPlusSquare, faTimes, faTrailer
+  faBan, faCalendarDay, faCar, faClipboardList, faComment, faEdit, faHouseDamage, faKey, faMapMarkedAlt, faMinusSquare, faPlusSquare, faTimes, faTrailer
 } from '@fortawesome/free-solid-svg-icons';
 import ReactImageFallback from 'react-image-fallback';
 import Header from '../components/Header';
@@ -60,6 +60,21 @@ function ServiceRequestDetails({id}) {
     action_history: [],
     visit_notes: [],
   });
+
+  const [animalToDelete, setAnimalToDelete] = useState({id:0, name:''});
+  const [showAnimalConfirm, setShowAnimalConfirm] = useState(false);
+  const handleAnimalClose = () => setShowAnimalConfirm(false);
+
+  const handleAnimalSubmit = async () => {
+    await axios.patch('/hotline/api/servicerequests/' + id + '/', {remove_animal:animalToDelete.id})
+    .then(response => {
+      setData(prevState => ({ ...prevState, "animals":prevState.animals.filter(animal => animal.id !== animalToDelete.id) }));
+      handleAnimalClose();
+    })
+    .catch(error => {
+      console.log(error.response);
+    });
+  }
 
   // Hook for initializing data.
   useEffect(() => {
@@ -302,6 +317,17 @@ function ServiceRequestDetails({id}) {
                     >
                       <Link href={"/animals/" + animal.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
                     </OverlayTrigger>
+                    <OverlayTrigger
+                      key={"remove-animal"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-remove-animal`}>
+                          Remove animal
+                        </Tooltip>
+                      }
+                    >
+                      <FontAwesomeIcon icon={faMinusSquare} style={{cursor:'pointer'}} size="sm" onClick={() => {setAnimalToDelete({id:animal.id, name: animal.name});setShowAnimalConfirm(true);}} className="ml-1" inverse />
+                    </OverlayTrigger>
                   </Card.Text>
                   <Card.Text className="text-center mb-0">
                     {animal.status}
@@ -402,6 +428,20 @@ function ServiceRequestDetails({id}) {
         </div>
       </div>
       <History action_history={data.action_history} />
+      <Modal show={showAnimalConfirm} onHide={handleAnimalClose}>
+        <Modal.Header closeButton>
+          <Modal.Title>Confirm Animal Removal</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>
+            Are you sure you would like to remove animal {animalToDelete.name || "Unknown"} from this service request?
+          </p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="primary" onClick={handleAnimalSubmit}>Yes</Button>
+          <Button variant="secondary" onClick={handleAnimalClose}>Close</Button>
+        </Modal.Footer>
+      </Modal>
     </>
   );
 };

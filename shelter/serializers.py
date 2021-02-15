@@ -23,10 +23,13 @@ class SimpleRoomSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class RoomSerializer(SimpleRoomSerializer):
-    animals = AnimalSerializer(source='animal_set', many=True, required=False, read_only=True)
+    animals = serializers.SerializerMethodField()
     shelter = serializers.SerializerMethodField()
     shelter_name = serializers.SerializerMethodField()
     action_history = serializers.SerializerMethodField()
+
+    def get_animals(self, obj):
+        return AnimalSerializer(obj.animal_set.exclude(status='CANCELED'), many=True, required=False, read_only=True).data
 
     def get_action_history(self, obj):
         return [build_action_string(action) for action in obj.target_actions.all()]
@@ -98,7 +101,7 @@ class ShelterSerializer(SimpleShelterSerializer):
     # Custom field for total animals.
     def get_unroomed_animals(self, obj):
         from animals.serializers import SimpleAnimalSerializer
-        return SimpleAnimalSerializer(obj.animal_set.filter(room=None), many=True).data
+        return SimpleAnimalSerializer(obj.animal_set.filter(room=None).exclude(status='CANCELED'), many=True).data
 
     # Truncates latitude and longitude.
     def to_internal_value(self, data):
