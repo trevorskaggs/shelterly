@@ -4,10 +4,13 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faChevronCircleDown, faChevronCircleRight
 } from '@fortawesome/free-solid-svg-icons';
+import { ITEMS_PER_PAGE } from '.././constants'
 
 function History({action_history}) {
 
   const [showHistory, setShowHistory] = useState(false);
+  const [page, setPage] = useState(1)
+  const numPages = Math.ceil(action_history.data.length / ITEMS_PER_PAGE)
 
   return (
     <>
