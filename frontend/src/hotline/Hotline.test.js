@@ -41,7 +41,7 @@ describe("Render hotline", () => {
 describe("Render ServiceRequestDetails", () => {
   it("Service request details loads", async () => {
     render(<ServiceRequestDetails id={1} />);
-    expect(screen.getByText(/Service Request/)).toBeTruthy();
+    expect(screen.getAllByText(/Service Request/)).toBeTruthy();
   });
 });
 
