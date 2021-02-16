@@ -138,3 +138,7 @@ input[disabled] {
   stroke: black;
   stroke-width: 30;
 }
+
+.icon-thin {
+  transform: scale(.5,1.30);
+}

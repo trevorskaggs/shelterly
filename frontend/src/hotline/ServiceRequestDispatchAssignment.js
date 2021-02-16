@@ -12,6 +12,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faChevronCircleDown, faChevronCircleRight, faClipboardList, faStar
 } from '@fortawesome/free-solid-svg-icons';
+import { faRectanglePortrait } from '@fortawesome/pro-solid-svg-icons';
 import { faCheckCircle } from '@fortawesome/pro-duotone-svg-icons';
 import badge from "../static/images/badge-sheriff.png";
 import bandaid from "../static/images/band-aid-solid.png";
@@ -92,34 +93,21 @@ function ServiceRequestDispatchAssignment({id}) {
   // Handle dynamic SR state and map display when an SR is selected or deselected.
   const handleMapState = (id) => {
 
-    const tempMapState = {...mapState};
-
     // If selected.
-    if (tempMapState[id].checked === false) {
-      let service_requests = tempMapState[id].service_requests;
-      Object.keys(service_requests).forEach(key => {
-        service_requests[key].color = 'black';
-      });
+    if (mapState[id].checked === false) {
+      const tempMapState = {...mapState};
+
       // Deselect any other selected DA SRs.
       Object.keys(tempMapState).filter(key => tempMapState[key].checked === true).forEach(key => {
-        let checked_service_requests = tempMapState[key].service_requests;
-        Object.keys(checked_service_requests).forEach(checked_key => {
-          checked_service_requests[checked_key].color = tempMapState[key].color;
-        });
-        tempMapState[key] = {...tempMapState[key], "checked":false, "service_requests":checked_service_requests};
+        tempMapState[key] = {...tempMapState[key], "checked":false};
       });
-      tempMapState[id] = {...tempMapState[id], "checked":true, "service_requests":service_requests};
+      tempMapState[id] = {...tempMapState[id], "checked":true};
       setMapState(tempMapState)
       setSelected(id);
     }
     // Else deselect.
     else {
-      let service_requests = {...mapState[id].service_requests};
-      Object.keys(service_requests).forEach(key => {
-        service_requests[key].color = mapState[id].color;
-      });
-
-      setMapState(prevState => ({ ...prevState, [id]: {...prevState[id], "checked":false, "service_requests":service_requests} }));
+      setMapState(prevState => ({ ...prevState, [id]: {...prevState[id], "checked":false} }));
       setSelected(null);
     }
   }
@@ -162,10 +150,10 @@ function ServiceRequestDispatchAssignment({id}) {
             let sr_dict = {}
             for (const service_request of dispatch_assignment.service_request_objects) {
               const matches = countMatches(service_request);
-              sr_dict[service_request.id] = {id:service_request.id, color:random_colors[index], matches:matches, latitude:service_request.latitude, longitude:service_request.longitude, assigned_evac:service_request.assigned_evac, full_address:service_request.full_address};
+              sr_dict[service_request.id] = {id:service_request.id, matches:matches, latitude:service_request.latitude, longitude:service_request.longitude, assigned_evac:service_request.assigned_evac.id, full_address:service_request.full_address};
               bounds.push([service_request.latitude, service_request.longitude]);
             }
-            map_dict[dispatch_assignment.id] = {checked:currentResponse.data.assigned_evac === dispatch_assignment.id, hidden: false, color:random_colors[index], service_requests:sr_dict}
+            map_dict[dispatch_assignment.id] = {checked:currentResponse.data.assigned_evac.id === dispatch_assignment.id, hidden: false, color:random_colors[index], service_requests:sr_dict}
           });
           const current_matches = countMatches(currentResponse.data);
           currentResponse.data['matches'] = current_matches;
@@ -265,7 +253,7 @@ function ServiceRequestDispatchAssignment({id}) {
               </span>
             </MapTooltip>
           </Marker>
-          {data.dispatch_assignments.filter(dispatch_assignment => mapState[dispatch_assignment.id].checked === false && dispatch_assignment.id !== currentRequest.assigned_evac).map(dispatch_assignment => (
+          {data.dispatch_assignments.filter(dispatch_assignment => mapState[dispatch_assignment.id].checked === false && dispatch_assignment.id !== currentRequest.assigned_evac.id).map(dispatch_assignment => (
           <span key={dispatch_assignment.id}>
             {dispatch_assignment.service_request_objects.map(service_request => (
             <CircleMarker
@@ -273,10 +261,10 @@ function ServiceRequestDispatchAssignment({id}) {
               center={{lat:service_request.latitude, lng: service_request.longitude}}
               color="black"
               weight="1"
-              fillColor={mapState[dispatch_assignment.id] ? mapState[dispatch_assignment.id].service_requests[service_request.id].color : ""}
+              fillColor={mapState[dispatch_assignment.id] ? mapState[dispatch_assignment.id].color : ""}
               fill={true}
               fillOpacity="1"
-              onClick={() => handleMapState(service_request.assigned_evac)}
+              onClick={() => handleMapState(service_request.assigned_evac.id)}
               radius={5}
             >
               <MapTooltip autoPan={false}>
@@ -305,14 +293,14 @@ function ServiceRequestDispatchAssignment({id}) {
             ))}
           </span>
           ))}
-          {Object.entries(mapState).filter(([key, value]) => (value.checked === true || Number(key) === currentRequest.assigned_evac)).map(([key, value]) => (
+          {Object.entries(mapState).filter(([key, value]) => (value.checked === true || Number(key) === currentRequest.assigned_evac.id)).map(([key, value]) => (
             <span key={key}>
             {Object.entries(value.service_requests).filter(([sr_id, service_request]) => (Number(sr_id) !== currentRequest.id)).map(([sr_id, service_request]) => (
               <Marker
                 key={service_request.id} 
                 position={[service_request.latitude, service_request.longitude]}
-                icon={Number(key) === currentRequest.assigned_evac ? checkMarkerIconGray : checkMarkerIcon}
-                onClick={Number(key) !== currentRequest.assigned_evac ? () => handleMapState(service_request.assigned_evac) : undefined}
+                icon={Number(key) === currentRequest.assigned_evac.id ? checkMarkerIconGray : checkMarkerIcon}
+                onClick={Number(key) !== currentRequest.assigned_evac.id ? () => handleMapState(service_request.assigned_evac) : undefined}
               >
                 <MapTooltip autoPan={false}>
                   <span>
@@ -354,14 +342,71 @@ function ServiceRequestDispatchAssignment({id}) {
     </Row>
     <Row className="d-flex flex-wrap" style={{marginTop:"-8px", marginRight:"-19px", marginLeft:"-17px", minHeight:"36vh", paddingRight:"4px"}}>
       <Col xs={12} className="border rounded" style={{marginLeft:"1px", height:"36vh", overflowY:"auto", paddingRight:"-1px"}}>
-        {data.dispatch_assignments.filter(dispatch_assignment => mapState[dispatch_assignment.id].hidden === false || dispatch_assignment.id === currentRequest.assigned_evac).map((dispatch_assignment, index) => (
+        {data.dispatch_assignments.filter(dispatch_assignment => dispatch_assignment.id === currentRequest.assigned_evac.id).map(dispatch_assignment => (
+        <div className="mt-1 mb-1" style={{marginLeft:"-10px", marginRight:"-10px"}}>
+          <div className="card-header rounded" style={{height:""}}>
+            <span style={{display:"inline"}} className="custom-control-lg custom-control custom-checkbox">
+              <input className="custom-control-input" type="checkbox" disabled={true} name={dispatch_assignment.id} id={dispatch_assignment.id} checked={mapState[dispatch_assignment.id] ? mapState[dispatch_assignment.id].checked : false} />
+              <label className="custom-control-label" htmlFor={dispatch_assignment.id}></label>
+            </span>
+            <span>Active Dispatch Assignment</span>
+            <OverlayTrigger
+              key={"assignment-summary"}
+              placement="top"
+              overlay={
+                <Tooltip id={`tooltip-assignment-summary`}>
+                  Dispatch assignment summary
+                </Tooltip>
+              }
+            >
+              <Link href={"/dispatch/summary/" + dispatch_assignment.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+            </OverlayTrigger>&nbsp;&nbsp;|&nbsp;
+            Team Members: {dispatch_assignment.team_member_objects.map((member, i) => (
+                <span key={member.id}>{i > 0 && ", "}{member.first_name} {member.last_name}</span>))}
+            &nbsp;|&nbsp;Service Requests<FontAwesomeIcon icon={faChevronCircleRight} hidden={showSRs[dispatch_assignment.id]} onClick={() => updateShowSRs(dispatch_assignment.id)} className="ml-1 fa-move-up" style={{verticalAlign:"middle"}} inverse /><FontAwesomeIcon icon={faChevronCircleDown} hidden={!showSRs[dispatch_assignment.id]} onClick={() => updateShowSRs(dispatch_assignment.id)} className="ml-1 fa-move-up" style={{verticalAlign:"middle"}} inverse />
+            {dispatch_assignment.service_request_objects.map(service_request => (
+            <Collapse key={service_request.id} in={showSRs[dispatch_assignment.id]}>
+              <span>
+                {mapState[dispatch_assignment.id] ?
+                <li className="mt-1 mb-1" style={{marginLeft:"15%", marginRight:"-10px"}}>
+                    {mapState[dispatch_assignment.id].service_requests[service_request.id] ?
+                    <span>
+                      {Object.keys(mapState[dispatch_assignment.id].service_requests[service_request.id].matches).map((key,i) => (
+                        <span key={key} style={{textTransform:"capitalize"}}>
+                          {i > 0 && ", "}{prettyText(key.split(',')[1], key.split(',')[0], mapState[dispatch_assignment.id].service_requests[service_request.id].matches[key])}
+                        </span>
+                      ))}
+                    </span>
+                    :""}
+                    &nbsp;|&nbsp;{service_request.full_address}
+                    <OverlayTrigger
+                      key={"request-details"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-request-details`}>
+                          Service request details
+                        </Tooltip>
+                      }
+                    >
+                      <Link href={"/hotline/servicerequest/" + service_request.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+                    </OverlayTrigger>
+                </li>
+                : ""}
+              </span>
+            </Collapse>
+            ))}
+          </div>
+        </div>
+        ))}
+        {data.dispatch_assignments.filter(dispatch_assignment => mapState[dispatch_assignment.id].hidden === false && dispatch_assignment.id !== currentRequest.assigned_evac.id).map((dispatch_assignment, index) => (
         <span key={dispatch_assignment.id}>
           <div className="mt-1 mb-1" style={{marginLeft:"-10px", marginRight:"-10px"}}>
             <div className="card-header rounded" style={{height:""}}>
               <span style={{display:"inline"}} className="custom-control-lg custom-control custom-checkbox">
-                <input className="custom-control-input" type="checkbox" disabled={currentRequest.assigned_evac === dispatch_assignment.id} name={dispatch_assignment.id} id={dispatch_assignment.id} onChange={() => handleMapState(dispatch_assignment.id)} checked={mapState[dispatch_assignment.id] ? mapState[dispatch_assignment.id].checked : false} />
+                <input className="custom-control-input" type="checkbox" disabled={currentRequest.assigned_evac.id === dispatch_assignment.id} name={dispatch_assignment.id} id={dispatch_assignment.id} onChange={() => handleMapState(dispatch_assignment.id)} checked={mapState[dispatch_assignment.id] ? mapState[dispatch_assignment.id].checked : false} />
                 <label className="custom-control-label" htmlFor={dispatch_assignment.id}></label>
               </span>
+              <FontAwesomeIcon icon={faRectanglePortrait} className="icon-thin mr-1" color={mapState[dispatch_assignment.id].color} style={{marginLeft:"-15px"}} />
               <span>Dispatch Assignment #{index+1}</span>
               <OverlayTrigger
                 key={"assignment-summary"}

@@ -55,7 +55,7 @@ function ServiceRequestDetails({id}) {
     accessible: false,
     turn_around: false,
     followup_date: null,
-    assigned_evac: null,
+    assigned_evac: {},
     status:'',
     action_history: [],
     visit_notes: [],
@@ -375,8 +375,9 @@ function ServiceRequestDetails({id}) {
                         </Tooltip>
                       }
                     >
-                      <Link href={"/dispatch/summary/" + data.assigned_evac}><FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1" inverse /></Link>
+                      <Link href={"/dispatch/summary/" + data.assigned_evac.id}><FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1" inverse /></Link>
                     </OverlayTrigger>
+                    <div><b>Date Opened: </b><Moment format="LL">{data.assigned_evac.start_time}</Moment></div>
                   </ListGroup.Item>
                 : ""}
                 {data.visit_notes.map((visit_note, index) => (
