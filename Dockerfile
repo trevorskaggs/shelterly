@@ -6,8 +6,8 @@ RUN npm run build
 
 FROM public.ecr.aws/lambda/python:3.8
 #change to args
-ENV AWS_ACCESS_KEY_ID="AKIAXJ4HZOOJGQTJ2WGU" 
-ENV AWS_SECRET_ACCESS_KEY="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"
+ENV AWS_ACCESS_KEY_ID="" 
+ENV AWS_SECRET_ACCESS_KEY=""
 COPY ./shelterly  ./
 # COPY --from=builder /tmp/shelterly/frontend/build  ./frontend/build
 
