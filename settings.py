@@ -133,27 +133,31 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "frontend/src/static/")
+    os.path.join(BASE_DIR, "frontend/build/static/")
 ]
 # Dev settings. Remove when deploying to Zappa
-STATIC_ROOT=os.path.join(BASE_DIR, 'static')
-# SECURE_CONTENT_TYPE_NOSNIFF = False
-# DEBUG = True
+# STATIC_ROOT=os.path.join(BASE_DIR, 'static')
+SECURE_CONTENT_TYPE_NOSNIFF = False
+DEBUG = True
 
 #TODO Change to envvars.
 # Zappa settings
-# STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-# AWS_STORAGE_BUCKET_NAME = 'shelterly-statics'
-# AWS_S3_ADDRESSING_STYLE = "virtual"
-# AWS_S3_REGION_NAME = 'us-east-2'
-# AWS_AUTO_CREATE_BUCKET = True
+STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+AWS_STORAGE_BUCKET_NAME = 'shelterly-staticfiles'
+AWS_S3_ADDRESSING_STYLE = "virtual"
+AWS_S3_REGION_NAME = 'us-west-2'
 # ALLOWED_HOSTS = ['725rgosijg.execute-api.us-east-2.amazonaws.com',]
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': ('knox.auth.TokenAuthentication',),
     'USER_SERIALIZER': 'accounts.serializers.UserSerializer',
 }
-
+# WEBPACK_LOADER = {
+#     'DEFAULT': {
+#             'BUNDLE_DIR_NAME': '',
+#             "STATS_FILE": os.path.join(BASE_DIR, "shelterly", "frontend", "build", "webpack-stats.prod.json"),
+#         },
+# }
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
