@@ -8,6 +8,7 @@ import L from "leaflet";
 import Moment from 'react-moment';
 import randomColor from "randomcolor";
 import { Legend } from "../components/Map";
+import { Checkbox } from "../components/Form"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faChevronCircleDown, faChevronCircleRight, faClipboardList, faStar
@@ -344,11 +345,19 @@ function ServiceRequestDispatchAssignment({id}) {
       <Col xs={12} className="border rounded" style={{marginLeft:"1px", height:"36vh", overflowY:"auto", paddingRight:"-1px"}}>
         {data.dispatch_assignments.filter(dispatch_assignment => dispatch_assignment.id === currentRequest.assigned_evac.id).map(dispatch_assignment => (
         <div className="mt-1 mb-1" style={{marginLeft:"-10px", marginRight:"-10px"}}>
-          <div className="card-header rounded" style={{height:""}}>
-            <span style={{display:"inline"}} className="custom-control-lg custom-control custom-checkbox">
-              <input className="custom-control-input" type="checkbox" disabled={true} name={dispatch_assignment.id} id={dispatch_assignment.id} checked={mapState[dispatch_assignment.id] ? mapState[dispatch_assignment.id].checked : false} />
-              <label className="custom-control-label" htmlFor={dispatch_assignment.id}></label>
-            </span>
+          <div className="card-header rounded">
+            <Checkbox
+              id={dispatch_assignment.id}
+              name={dispatch_assignment.id}
+              checked={mapState[dispatch_assignment.id] ? mapState[dispatch_assignment.id].checked : false}
+              style={{
+                transform: "scale(1.25)",
+                marginLeft: "-14px",
+                marginTop: "-5px",
+                marginBottom: "-5px"
+              }}
+              disabled={true}
+            />
             <span>Active Dispatch Assignment</span>
             <OverlayTrigger
               key={"assignment-summary"}
@@ -402,11 +411,19 @@ function ServiceRequestDispatchAssignment({id}) {
         <span key={dispatch_assignment.id}>
           <div className="mt-1 mb-1" style={{marginLeft:"-10px", marginRight:"-10px"}}>
             <div className="card-header rounded" style={{height:""}}>
-              <span style={{display:"inline"}} className="custom-control-lg custom-control custom-checkbox">
-                <input className="custom-control-input" type="checkbox" disabled={currentRequest.assigned_evac.id === dispatch_assignment.id} name={dispatch_assignment.id} id={dispatch_assignment.id} onChange={() => handleMapState(dispatch_assignment.id)} checked={mapState[dispatch_assignment.id] ? mapState[dispatch_assignment.id].checked : false} />
-                <label className="custom-control-label" htmlFor={dispatch_assignment.id}></label>
-              </span>
-              <FontAwesomeIcon icon={faRectanglePortrait} className="icon-thin mr-1" color={mapState[dispatch_assignment.id].color} style={{marginLeft:"-15px"}} />
+              <Checkbox
+                id={dispatch_assignment.id}
+                name={dispatch_assignment.id}
+                checked={mapState[dispatch_assignment.id] ? mapState[dispatch_assignment.id].checked : false}
+                onChange={() => handleMapState(dispatch_assignment.id)}
+                style={{
+                  transform: "scale(1.25)",
+                  marginLeft: "-14px",
+                  marginTop: "-5px",
+                  marginBottom: "-5px"
+                }}
+              />
+              <FontAwesomeIcon icon={faRectanglePortrait} className="icon-thin mr-1" color={mapState[dispatch_assignment.id].color} style={{marginLeft:"-9px", marginBottom:"-2px"}} />
               <span>Dispatch Assignment #{index+1}</span>
               <OverlayTrigger
                 key={"assignment-summary"}
