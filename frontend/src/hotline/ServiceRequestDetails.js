@@ -272,7 +272,7 @@ function ServiceRequestDetails({id}) {
                     </Tooltip>
                   }
                 >
-                  <Link href={"/people/reporter/" + data.reporter}><FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1" inverse /></Link>
+                  <Link href={"/people/reporter/" + data.reporter}><FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link>
                 </OverlayTrigger>
                 </ListGroup.Item> : ""}
               </ListGroup>

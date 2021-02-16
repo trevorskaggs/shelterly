@@ -76,7 +76,7 @@ function ServiceRequestDispatchAssignment({id}) {
     return matches
   }
 
-  // Show or hide list of SRs based on current map zoom
+  // Show or hide list of DAs based on current map zoom
   const onMove = event => {
     for (const dispatch_assignment of data.dispatch_assignments) {
       let hidden = true;
@@ -358,6 +358,7 @@ function ServiceRequestDispatchAssignment({id}) {
               }}
               disabled={true}
             />
+            <FontAwesomeIcon icon={faRectanglePortrait} className="icon-thin mr-1" color="gray" style={{marginLeft:"-9px", marginBottom:"-2px"}} />
             <span>Active Dispatch Assignment</span>
             <OverlayTrigger
               key={"assignment-summary"}
