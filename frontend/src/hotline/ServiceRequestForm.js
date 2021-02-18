@@ -170,6 +170,7 @@ function ServiceRequestForm(props) {
       }}
     >
       {formikProps => (
+        <>
         <Card border="secondary" className={is_workflow ? "mt-3" : "mt-5"}>
         <Card.Header as="h5">{id ?
           <span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
@@ -230,40 +231,40 @@ function ServiceRequestForm(props) {
                     disabled
                   />
                 </Col>
-                  <TextInput
-                    type="text"
-                    label="Zip Code"
-                    name="zip_code"
-                    id="zip_code"
-                    xs="2"
-                    disabled
-                  />
+                <TextInput
+                  type="text"
+                  label="Zip Code"
+                  name="zip_code"
+                  id="zip_code"
+                  xs="2"
+                  disabled
+                />
               </BootstrapForm.Row>
             </Fade>
             <BootstrapForm.Row>
-                <TextInput
-                  as="textarea"
-                  rows={5}
-                  label="Directions"
-                  name="directions"
-                  id="directions"
-                  xs="12"
-                />
+              <TextInput
+                as="textarea"
+                rows={5}
+                label="Directions"
+                name="directions"
+                id="directions"
+                xs="12"
+              />
             </BootstrapForm.Row>
             <BootstrapForm.Row>
-                <span hidden={is_first_responder}><Label htmlFor="verbal_permission" className="ml-1">Verbal Permission</Label>
-                <Field component={Switch} name="verbal_permission" type="checkbox" color="primary"/>
+              <span hidden={is_first_responder}><Label htmlFor="verbal_permission" className="ml-1">Verbal Permission</Label>
+              <Field component={Switch} name="verbal_permission" type="checkbox" color="primary"/>
 
-                <Label htmlFor="key_provided">Key Provided</Label>
-                <Field component={Switch} name="key_provided" type="checkbox" color="primary" /></span>
+              <Label htmlFor="key_provided">Key Provided</Label>
+              <Field component={Switch} name="key_provided" type="checkbox" color="primary" /></span>
 
-                <span><Label htmlFor="accessible">Accessible</Label>
-                <Field component={Switch} name="accessible" type="checkbox" color="primary" />
+              <span><Label htmlFor="accessible">Accessible</Label>
+              <Field component={Switch} name="accessible" type="checkbox" color="primary" />
 
-                <Label htmlFor="turn_around">Turn Around</Label>
-                <Field component={Switch} name="turn_around" type="checkbox" color="primary" /></span>
+              <Label htmlFor="turn_around">Turn Around</Label>
+              <Field component={Switch} name="turn_around" type="checkbox" color="primary" /></span>
             </BootstrapForm.Row>
-        </BootstrapForm>
+          </BootstrapForm>
         </Card.Body>
         <ButtonGroup size="lg">
           {is_workflow ?
@@ -271,21 +272,22 @@ function ServiceRequestForm(props) {
             <Button type="submit" onClick={() => { formikProps.submitForm()}}>Save</Button>
           }
         </ButtonGroup>
-        <Modal show={error.show} onHide={handleClose}>
-          <Modal.Header closeButton>
-            <Modal.Title>Duplicate Request Address Found</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <p>
-              {error && error.error[0]}
-              &nbsp;Click <Link href={'/hotline/servicerequest/' + error.error[1]} target="_blank">here</Link> to view this Request.
-            </p>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={handleClose}>Close</Button>
-          </Modal.Footer>
-        </Modal>
       </Card>
+      <Modal show={error.show} onHide={handleClose}>
+        <Modal.Header closeButton>
+          <Modal.Title>Duplicate Request Address Found</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>
+            {error && error.error[0]}
+            &nbsp;Click <Link href={'/hotline/servicerequest/' + error.error[1]} target="_blank">here</Link> to view this Request.
+          </p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleClose}>Close</Button>
+        </Modal.Footer>
+      </Modal>
+      </>
       )}
     </Formik>
   );
