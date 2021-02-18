@@ -141,7 +141,19 @@ function ShelterRoomAssignment({id}) {
   return (
     <>
       <Header>
-        {data.name} - Room Animals
+        {data.name}
+        <OverlayTrigger
+          key={"shelter-details"}
+          placement="bottom"
+          overlay={
+            <Tooltip id={`tooltip-shelter-details`}>
+              Shelter details
+            </Tooltip>
+          }
+        >
+          <Link href={"/shelter/" + id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+        </OverlayTrigger>
+        &nbsp;- Room Animals
       </Header>
       <hr/>
       <DragDropContext onDragEnd={handleOnDragEnd}>
@@ -157,14 +169,13 @@ function ShelterRoomAssignment({id}) {
                   <Draggable key={animal.id} draggableId={String(animal.id)} index={index}>
                     {(provided, snapshot) => (
                       <li ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
-                        <Card className={"border rounded" + (snapshot.isDragging ? " border-danger" : "")} style={{width:"150px", height:"51"}}>
-                          <div className="row no-gutters" style={{textTransform: "capitalize"}}>
-                            <div className="col-auto">
-                              <ReactImageFallback style={{width:"47px", height:"47px", marginRight:"3px", objectFit: "cover", overflow: "hidden"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} />
-                            </div>
-                            <div className="col">
-                              {animal.name||"Unknown"}
-                              {animal.owner_names.length === 0 ?
+                        <Card className={"border rounded" + (snapshot.isDragging ? " border-danger" : "")} style={{width:"150px", whiteSpace:"nowrap", overflow:"hidden"}}>
+                          <div className="row no-gutters" style={{ textTransform:"capitalize" }}>
+                            <p className="mb-0">
+                              <ReactImageFallback style={{width:"47px", height:"47px", marginRight:"3px", objectFit:"cover", overflow:"hidden", float:"left"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} />
+                              <span title={animal.name}>{animal.name||"Unknown"}</span>
+                              <div>
+                                {animal.owner_names.length === 0 ?
                                 <OverlayTrigger
                                   key={"stray"}
                                   placement="top"
@@ -174,24 +185,24 @@ function ShelterRoomAssignment({id}) {
                                     </Tooltip>
                                   }
                                 >
-                                  <FontAwesomeIcon icon={faUserAltSlash} size="sm" className="ml-1" />
+                                  <FontAwesomeIcon icon={faUserAltSlash} size="sm" />
                                 </OverlayTrigger> :
-                              <OverlayTrigger
-                                key={"stray"}
-                                placement="top"
-                                overlay={
-                                  <Tooltip id={`tooltip-stray`}>
-                                    {animal.owner_names.map(owner_name => (
-                                      <div key={owner_name}>{owner_name}</div>
-                                    ))}
-                                  </Tooltip>
-                                }
-                              >
-                                <FontAwesomeIcon icon={faUserAlt} size="sm" className="ml-1" />
-                              </OverlayTrigger>}
-                            <div>
-                              {animal.size !== 'unknown' ? animal.size : ""} {animal.species}</div>
-                            </div>
+                                <OverlayTrigger
+                                  key={"stray"}
+                                  placement="top"
+                                  overlay={
+                                    <Tooltip id={`tooltip-stray`}>
+                                      {animal.owner_names.map(owner_name => (
+                                        <div key={owner_name}>{owner_name}</div>
+                                      ))}
+                                    </Tooltip>
+                                  }
+                                >
+                                  <FontAwesomeIcon icon={faUserAlt} size="sm" />
+                                </OverlayTrigger>}
+                                {animal.size !== 'unknown' ? animal.size : ""} {animal.species}
+                              </div>
+                            </p>
                           </div>
                         </Card>
                       </li>
@@ -225,41 +236,40 @@ function ShelterRoomAssignment({id}) {
                       <Draggable key={animal.id} draggableId={String(animal.id)} index={index}>
                         {(provided, snapshot) => (
                           <li ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
-                            <Card className={"border rounded" + (snapshot.isDragging ? " border-danger" : "")} style={{width:"150px"}}>
-                              <div className="row no-gutters" style={{ textTransform: "capitalize" }}>
-                                <div className="col-auto">
-                                  <ReactImageFallback style={{width:"47px", height:"47px", marginRight:"3px", objectFit: "cover", overflow: "hidden"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} />
-                                </div>
-                                <div className="col">
-                                  {animal.name||"Unknown"}
-                                  {animal.owner_names.length === 0 ?
-                                  <OverlayTrigger
-                                    key={"stray"}
-                                    placement="top"
-                                    overlay={
-                                      <Tooltip id={`tooltip-stray`}>
-                                        Animal is stray
-                                      </Tooltip>
-                                    }
-                                  >
-                                    <FontAwesomeIcon icon={faUserAltSlash} size="sm" className="ml-1" />
-                                  </OverlayTrigger> :
-                                <OverlayTrigger
-                                  key={"stray"}
-                                  placement="top"
-                                  overlay={
-                                    <Tooltip id={`tooltip-stray`}>
-                                      {animal.owner_names.map(owner_name => (
-                                        <div key={owner_name}>{owner_name}</div>
-                                      ))}
-                                    </Tooltip>
-                                  }
-                                >
-                                  <FontAwesomeIcon icon={faUserAlt} size="sm" className="ml-1" />
-                                </OverlayTrigger>}
-                                <div>
-                                  {animal.size !== 'unknown' ? animal.size : ""} {animal.species}</div>
-                                </div>
+                            <Card className={"border rounded" + (snapshot.isDragging ? " border-danger" : "")} style={{width:"150px", whiteSpace:"nowrap", overflow:"hidden"}}>
+                              <div className="row no-gutters" style={{ textTransform:"capitalize" }}>
+                                <p className="mb-0">
+                                  <ReactImageFallback style={{width:"47px", height:"47px", marginRight:"3px", objectFit:"cover", overflow:"hidden", float:"left"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} />
+                                  <span title={animal.name}>{animal.name||"Unknown"}</span>
+                                  <div>
+                                    {animal.owner_names.length === 0 ?
+                                    <OverlayTrigger
+                                      key={"stray"}
+                                      placement="top"
+                                      overlay={
+                                        <Tooltip id={`tooltip-stray`}>
+                                          Animal is stray
+                                        </Tooltip>
+                                      }
+                                    >
+                                      <FontAwesomeIcon icon={faUserAltSlash} size="sm" />
+                                    </OverlayTrigger> :
+                                    <OverlayTrigger
+                                      key={"stray"}
+                                      placement="top"
+                                      overlay={
+                                        <Tooltip id={`tooltip-stray`}>
+                                          {animal.owner_names.map(owner_name => (
+                                            <div key={owner_name}>{owner_name}</div>
+                                          ))}
+                                        </Tooltip>
+                                      }
+                                    >
+                                      <FontAwesomeIcon icon={faUserAlt} size="sm" />
+                                    </OverlayTrigger>}
+                                    {animal.size !== 'unknown' ? animal.size : ""} {animal.species}
+                                  </div>
+                                </p>
                               </div>
                             </Card>
                           </li>

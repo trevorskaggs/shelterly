@@ -54,16 +54,16 @@ function ShelterDetails({id}) {
       <Header>
         Shelter Details
         <OverlayTrigger
-        key={"edit-shelter"}
-        placement="bottom"
-        overlay={
-          <Tooltip id={`tooltip-edit-shelter`}>
-            Update shelter
-          </Tooltip>
-        }
-      >
-        <Link href={"/shelter/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-1" inverse /></Link>
-      </OverlayTrigger>
+          key={"edit-shelter"}
+          placement="bottom"
+          overlay={
+            <Tooltip id={`tooltip-edit-shelter`}>
+              Update shelter
+            </Tooltip>
+          }
+        >
+          <Link href={"/shelter/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-1" inverse /></Link>
+        </OverlayTrigger>
       </Header>
       <hr/>
       <Card className="border rounded d-flex" style={{width:"100%"}}>
