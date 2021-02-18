@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import ReactDOMServer from 'react-dom/server';
 import axios from "axios";
 import { Link, navigate } from 'raviger';
 import { Form, Formik } from 'formik';
@@ -7,19 +8,19 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBandAid, faBullseye, faCar, faCircle, faClipboardList, faExclamationCircle, faQuestionCircle, faTrailer
 } from '@fortawesome/free-solid-svg-icons';
+import { faCheckCircle, faQuestionCircle as faQuestionCircleDuo } from '@fortawesome/pro-duotone-svg-icons';
 import { faBadgeSheriff, faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
-import { Circle, CircleMarker, Map, TileLayer, Tooltip as MapTooltip } from "react-leaflet";
+import { faHomeAlt as faHomeAltReg } from '@fortawesome/pro-regular-svg-icons';
+import { Circle, Map, Marker, TileLayer, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
 import badge from "../static/images/badge-sheriff.png";
 import bandaid from "../static/images/band-aid-solid.png";
 import car from "../static/images/car-solid.png";
 import trailer from "../static/images/trailer-solid.png";
-import reported from "../static/images/exclamation-circle.png";
-import sip from "../static/images/house-circle.png";
-import utl from "../static/images/question-circle.png";
 import { Typeahead } from 'react-bootstrap-typeahead';
 import Moment from 'react-moment';
 import { Legend } from "../components/Map";
+import { Checkbox } from "../components/Form";
 import 'react-bootstrap-typeahead/css/Typeahead.css';
 import 'leaflet/dist/leaflet.css';
 
@@ -60,7 +61,7 @@ function Deploy() {
 
     // If selected.
     if (mapState[id].checked === false) {
-      setMapState(prevState => ({ ...prevState, [id]: {...prevState[id], "color":"green", "checked":true} }));
+      setMapState(prevState => ({ ...prevState, [id]: {...prevState[id], "checked":true} }));
 
       // Add each match count to the running total state tracker.
       for (var select_status in mapState[id].status_matches) {
@@ -82,11 +83,7 @@ function Deploy() {
     }
     // Else deselect.
     else {
-      let color = 'yellow';
-      if (mapState[id].has_reported_animals) {
-        color = 'red';
-      }
-      setMapState(prevState => ({ ...prevState, [id]: {...prevState[id], "color":color, "checked":false} }));
+      setMapState(prevState => ({ ...prevState, [id]: {...prevState[id], "checked":false} }));
       // Remove matches from the running total state tracker.
       for (var status in mapState[id].status_matches) {
         matches = {...totalSelectedState[status]};
@@ -175,6 +172,60 @@ function Deploy() {
     setMapState(prevState => ({ ...prevState, tempMapState}));
   }
 
+  const reportedIconHTML = ReactDOMServer.renderToString(<FontAwesomeIcon className="icon-border" color="#ff4c4c" icon={faExclamationCircle} />);
+  const reportedMarkerIcon = new L.DivIcon({
+    html: reportedIconHTML,
+    iconSize: [0, 0],
+    iconAnchor: [6, 9],
+    className: "reported-icon",
+    popupAnchor: null,
+    shadowUrl: null,
+    shadowSize: null,
+    shadowAnchor: null
+  });
+
+  const SIPIconHTML = ReactDOMServer.renderToString(
+    <span className="fa-layers ml-1">
+      <FontAwesomeIcon icon={faCircle} className="icon-border" color="#f5ee0f" transform={'grow-1'} />
+      <FontAwesomeIcon icon={faHomeAlt} style={{color:"white"}} transform={'shrink-3'} size="sm" inverse />
+      <FontAwesomeIcon icon={faHomeAltReg} style={{color:"#444"}} transform={'shrink-3'} size="sm" inverse />
+    </span>
+  );
+  const SIPMarkerIcon = new L.DivIcon({
+    html: SIPIconHTML,
+    iconSize: [0, 0],
+    iconAnchor: [10, 9],
+    className: "SIP-icon",
+    popupAnchor: null,
+    shadowUrl: null,
+    shadowSize: null,
+    shadowAnchor: null
+  });
+
+  const UTLIconHTML = ReactDOMServer.renderToString(<FontAwesomeIcon icon={faQuestionCircleDuo} className="icon-border" style={{"--fa-primary-color":'white', "--fa-secondary-color":'#5f5fff', "--fa-secondary-opacity": 1}}  />);
+  const UTLMarkerIcon = new L.DivIcon({
+    html: UTLIconHTML,
+    iconSize: [0, 0],
+    iconAnchor: [7, 9],
+    className: "UTL-icon",
+    popupAnchor: null,
+    shadowUrl: null,
+    shadowSize: null,
+    shadowAnchor: null
+  });
+
+  const checkIconHTML = ReactDOMServer.renderToString(<FontAwesomeIcon icon={faCheckCircle} className="icon-border" style={{"--fa-primary-color":'white', "--fa-secondary-color":'green', "--fa-secondary-opacity": 1}} />);
+  const checkMarkerIcon = new L.DivIcon({
+    html: checkIconHTML,
+    iconSize: [0, 0],
+    iconAnchor: [6, 9],
+    className: "check-icon",
+    popupAnchor: null,
+    shadowUrl: null,
+    shadowSize: null,
+    shadowAnchor: null
+  });
+
   // Hook for initializing data.
   useEffect(() => {
     let source = axios.CancelToken.source();
@@ -209,7 +260,7 @@ function Deploy() {
       })
       .then(response => {
         setData({service_requests: response.data, isFetching: false, bounds:L.latLngBounds([[0,0]])});
-        const map_dict = mapState;
+        const map_dict = {...mapState};
         const bounds = [];
         const current_ids = Object.keys(mapState);
         for (const service_request of response.data) {
@@ -218,11 +269,8 @@ function Deploy() {
             const total_matches = countMatches(service_request);
             const matches = total_matches[0];
             const status_matches = total_matches[1];
-            let color = 'yellow';
-            if (service_request.reported_animals > 0) {
-              color = 'red';
-            }
-            map_dict[service_request.id] = {color:color, checked:false, hidden:false, matches:matches, status_matches:status_matches, radius:"disabled", has_reported_animals:service_request.reported_animals > 0, latitude:service_request.latitude, longitude:service_request.longitude};
+            const color = service_request.reported_animals > 0 ? '#ff4c4c' : service_request.unable_to_locate > 0 ? '#5f5fff' : '#f5ee0f';
+            map_dict[service_request.id] = {checked:false, hidden:false, color:color, matches:matches, status_matches:status_matches, radius:"disabled", has_reported_animals:service_request.reported_animals > 0, latitude:service_request.latitude, longitude:service_request.longitude};
           }
           bounds.push([service_request.latitude, service_request.longitude]);
         }
@@ -300,7 +348,7 @@ function Deploy() {
                     </Tooltip>
                   }
                 >
-                  <span className="fa-layers fa-fw ml-1">
+                  <span className="fa-layers ml-1">
                     <FontAwesomeIcon icon={faCircle} transform={'grow-1'} />
                     <FontAwesomeIcon icon={faHomeAlt} style={{color:"#444"}} transform={'shrink-3'} size="sm" inverse />
                   </span>
@@ -339,16 +387,10 @@ function Deploy() {
                 attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
               />
               {data.service_requests.map(service_request => (
-                <CircleMarker
-                  key={service_request.id}
-                  center={{lat:service_request.latitude, lng: service_request.longitude}}
-                  color="black"
-                  weight="1"
-                  fillColor={mapState[service_request.id] ? mapState[service_request.id].color : ""}
-                  fill={true}
-                  fillOpacity="1"
+                <Marker
+                  position={[service_request.latitude, service_request.longitude]}
+                  icon={mapState[service_request.id] && mapState[service_request.id].checked ? checkMarkerIcon : service_request.sheltered_in_place > 0 ? SIPMarkerIcon : service_request.unable_to_locate > 0 ? UTLMarkerIcon : reportedMarkerIcon}
                   onClick={() => handleMapState(service_request.id)}
-                  radius={5}
                 >
                   <MapTooltip autoPan={false}>
                     <span>
@@ -365,9 +407,6 @@ function Deploy() {
                       {service_request.full_address}
                       {service_request.followup_date ? <div>Followup Date: <Moment format="L">{service_request.followup_date}</Moment></div> : ""}
                       <div>
-                        {service_request.reported_animals > 0 ? <img width={16} height={16} src={reported} alt="" /> : ""}
-                        {service_request.sheltered_in_place > 0 ? <img width={16} height={16} src={sip} alt="" /> : ""}
-                        {service_request.unable_to_locate > 0 ? <img width={16} height={16} src={utl} alt="" /> : ""}
                         {service_request.aco_required ? <img width={16} height={16} src={badge} alt="" className="mr-1" /> : ""}
                         {service_request.injured ? <img width={16} height={16} src={bandaid} alt="" className="mr-1" /> : ""}
                         {service_request.accessible ? <img width={16} height={16} src={car} alt="" className="mr-1" /> : ""}
@@ -375,10 +414,10 @@ function Deploy() {
                       </div>
                     </span>
                   </MapTooltip>
-                </CircleMarker>
+                </Marker>
               ))}
               {Object.entries(mapState).filter(([key, value]) => value.radius === "enabled").map(([key, value]) => (
-                <Circle key={key} center={{lat:value.latitude, lng: value.longitude}} radius={805} interactive={false} />
+                <Circle key={key} center={{lat:value.latitude, lng: value.longitude}} color={value.color} radius={805} interactive={false} />
               ))}
             </Map>
           </Col>
@@ -412,10 +451,18 @@ function Deploy() {
               <span key={service_request.id}>{mapState[service_request.id] && (mapState[service_request.id].checked || !mapState[service_request.id].hidden) ?
               <div className="mt-1 mb-1" style={{marginLeft:"-10px", marginRight:"-10px"}}>
                 <div className="card-header rounded">
-                  <span style={{display:"inline"}} className="custom-control-lg custom-control custom-checkbox">
-                    <input className="custom-control-input disabled" type="checkbox" disabled={true} name={service_request.id} id={service_request.id} onChange={() => handleMapState(service_request.id)} checked={mapState[service_request.id] ? mapState[service_request.id].checked : false} />
-                    <label className="custom-control-label" htmlFor={service_request.id}></label>
-                  </span>
+                  <Checkbox
+                    id={service_request.id}
+                    name={service_request.id}
+                    checked={mapState[service_request.id] ? mapState[service_request.id].checked : false}
+                    style={{
+                      transform: "scale(1.25)",
+                      marginLeft: "-14px",
+                      marginTop: "-5px",
+                      marginBottom: "-5px"
+                    }}
+                    onChange={() => handleMapState(service_request.id)}
+                  />
                   {mapState[service_request.id] ?
                   <span>
                     {Object.keys(mapState[service_request.id].matches).map((key,i) => (
@@ -448,7 +495,7 @@ function Deploy() {
                       </Tooltip>
                     }
                   >
-                    <span className="fa-layers fa-fw ml-1">
+                    <span className="fa-layers ml-1">
                       <FontAwesomeIcon icon={faCircle} transform={'grow-1'} />
                       <FontAwesomeIcon icon={faHomeAlt} style={{color:"#444"}} transform={'shrink-3'} size="sm" inverse />
                     </span>
