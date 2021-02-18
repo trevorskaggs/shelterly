@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link } from 'raviger';
 import { Button, ButtonGroup, Col, ListGroup, Row } from 'react-bootstrap'
-import { Circle, CircleMarker, Map, TileLayer, Tooltip as MapTooltip } from "react-leaflet";
+import { CircleMarker, Map, TileLayer, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
 import Moment from 'react-moment';
 import { Legend } from "../components/Map";
@@ -179,9 +179,6 @@ function Hotline() {
                 </span>
               </MapTooltip>
             </CircleMarker>
-          ))}
-          {Object.entries(mapState).filter(([key, value]) => value.radius === "enabled").map(([key, value]) => (
-            <Circle key={key} center={{lat:value.latitude, lng: value.longitude}} radius={805} interactive={false} />
           ))}
         </Map>
         <ButtonGroup>

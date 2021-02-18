@@ -75,7 +75,7 @@ class SimpleServiceRequestSerializer(serializers.ModelSerializer):
     # Custom field for the current open evac assignment if it exists.
     def get_assigned_evac(self, obj):
         from evac.models import EvacAssignment
-        return EvacAssignment.objects.filter(service_requests=obj, end_time__isnull=True).values_list('id', flat=True).first()
+        return EvacAssignment.objects.filter(service_requests=obj, end_time__isnull=True).values('id', 'start_time').first()
 
     def to_internal_value(self, data):
         # Updates datetime fields to null when receiving an empty string submission.
@@ -120,4 +120,3 @@ class ServiceRequestSerializer(SimpleServiceRequestSerializer):
         super(ServiceRequestSerializer, self).__init__(*args, **kwargs)
         if self.context.get('request') and self.context.get('request').path == '/hotline/api/servicerequests/':
             self.fields.pop('action_history')
-            self.fields.pop('assigned_evac')

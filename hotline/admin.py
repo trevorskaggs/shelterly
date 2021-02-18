@@ -22,7 +22,7 @@ class ServiceRequestAdmin(admin.ModelAdmin):
 
 class VisitNoteAdmin(admin.ModelAdmin):
 
-  list_display = ('id', 'notes')
+  list_display = ('id', 'date_completed', 'notes')
 
 
 admin.site.register(ServiceRequest, ServiceRequestAdmin)

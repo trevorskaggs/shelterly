@@ -133,3 +133,12 @@ input[disabled] {
 .fa-move-up {
   transform: translateY(-5%);
 }
+
+.icon-border {
+  stroke: black;
+  stroke-width: 30;
+}
+
+.icon-thin {
+  transform: scale(.5,1.35);
+}

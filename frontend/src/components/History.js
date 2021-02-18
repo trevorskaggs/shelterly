@@ -7,7 +7,6 @@ import {
 
 function History({action_history}) {
 
-  // const [actionHistory, setActionHistory] = useState(action_history);
   const [showHistory, setShowHistory] = useState(false);
 
   return (

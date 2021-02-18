@@ -13,6 +13,7 @@ import Dispatch from "./dispatch/Dispatch";
 import DispatchAssignmentSearch from "./dispatch/DispatchAssignmentSearch"
 import StepperWorkflow, { initialWorkflowData } from "./components/StepperWorkflow";
 import Hotline from "./hotline/Hotline";
+import ServiceRequestDispatchAssignment from "./hotline/ServiceRequestDispatchAssignment"
 import ServiceRequestDetails from "./hotline/ServiceRequestDetails";
 import ServiceRequestForm from "./hotline/ServiceRequestForm";
 import ServiceRequestSearch from "./hotline/ServiceRequestSearch";
@@ -49,6 +50,7 @@ const routes = {
   "/dispatch/assignment/note/:id": ({id}) => <VisitNoteForm id={id} />,
   "/dispatch/deploy": () => <Deploy />,
   "/hotline": () => <Hotline />,
+  "/hotline/servicerequest/:id/assign": ({id}) => <ServiceRequestDispatchAssignment id={id} />,
   "/hotline/ownercontact/new": () => <OwnerContactForm />,
   "/hotline/ownercontact/:id": ({id}) => <OwnerContactForm id={id} />,
   "/hotline/servicerequest/edit/:id": ({id}) => <ServiceRequestForm id={id} state={initialWorkflowData} />,
