@@ -13,7 +13,7 @@ class SimpleRoomSerializer(serializers.ModelSerializer):
 
     # Custom field for total animals.
     def get_animal_count(self, obj):
-        return obj.animal_set.all().count()
+        return obj.animal_set.exclude(status="CANCELED").count()
 
     def get_building_name(self, obj):
         return obj.building.name
