@@ -4,7 +4,7 @@ from location.models import Location
 
 class BaseShelterModel(models.Model):
 
-    name = models.CharField(max_length=100, unique=True)
+    name = models.CharField(max_length=100)
     description = models.CharField(max_length=400, blank=True)
 
     def __str__(self):
@@ -16,6 +16,7 @@ class BaseShelterModel(models.Model):
 
 class Shelter(BaseShelterModel, Location):
 
+    name = models.CharField(max_length=100, unique=True)
     image = models.ImageField(upload_to='media/images/shelter', blank=True, null=True)
     phone = models.CharField(max_length=50, blank=True)
 
