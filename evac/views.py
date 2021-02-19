@@ -83,7 +83,7 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
                 evac_assignment.animals.add(*Animal.objects.filter(request=service_requests[0], status__in=['REPORTED', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE']))
                 action.send(self.request.user, verb='assigned service request', target=service_requests[0])
 
-            for service_request in self.request.data['sr_updates']:
+            for service_request in self.request.data.get('sr_updates', []):
                 sr_status = 'open' if service_request['unable_to_complete'] else 'assigned' if service_request['incomplete'] else 'closed'
                 for animal_dict in service_request['animals']:
                     # Record status change if applicable.
