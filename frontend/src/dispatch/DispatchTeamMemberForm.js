@@ -47,17 +47,17 @@ const DispatchTeamMemberForm = () => {
       onSubmit={(values, { setSubmitting, resetForm }) => {
         setTimeout(() => {
           axios.post('/evac/api/evacteammember/', values)
-            .then(function () {
-              if (addAnother) {
-                resetForm();
-              }
-              else {
-                navigate('/dispatch');
-              }
-            })
-            .catch(error => {
-              console.log(error.response);
-            });
+          .then(function () {
+            if (addAnother) {
+              resetForm();
+            }
+            else {
+              navigate('/dispatch');
+            }
+          })
+          .catch(error => {
+            console.log(error.response);
+          });
           setSubmitting(false);
         }, 500);
       }}

@@ -63,8 +63,8 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         if serializer.is_valid():
-            # Only add end_time on first update that isn't just adding a new SR and if all SRs are complete.
-            if not serializer.instance.end_time and not self.request.data.get('new_service_request') and not any(sr_update['incomplete'] == True for sr_update in self.request.data['sr_updates']):
+            # Only add end_time on first update if all SRs are complete.
+            if not serializer.instance.end_time and self.request.data.get('sr_updates') and not any(sr_update['incomplete'] == True for sr_update in self.request.data['sr_updates']):
                 serializer.validated_data['end_time'] = datetime.now()
             evac_assignment = serializer.save()
 
@@ -83,7 +83,15 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
                 evac_assignment.animals.add(*Animal.objects.filter(request=service_requests[0], status__in=['REPORTED', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE']))
                 action.send(self.request.user, verb='assigned service request', target=service_requests[0])
 
-            for service_request in self.request.data['sr_updates']:
+            # Add Team Members to DA if included.
+            if self.request.data.get('new_team_members'):
+                evac_assignment.team_members.add(*self.request.data.get('new_team_members'))
+
+            # Remove Team Member from DA if included.
+            if self.request.data.get('remove_team_member'):
+                evac_assignment.team_members.remove(self.request.data.get('remove_team_member'))
+
+            for service_request in self.request.data.get('sr_updates', []):
                 sr_status = 'open' if service_request['unable_to_complete'] else 'assigned' if service_request['incomplete'] else 'closed'
                 for animal_dict in service_request['animals']:
                     # Record status change if applicable.
