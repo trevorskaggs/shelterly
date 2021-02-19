@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import { Link } from 'raviger';
-import { Button, Card, ListGroup, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Button, Card, Col, ListGroup, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { Typeahead } from 'react-bootstrap-typeahead';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faClipboardCheck, faClipboardList, faEdit, faMinusSquare, faPlusSquare
 } from '@fortawesome/free-solid-svg-icons';
+import { CircleMarker, Map, TileLayer, Tooltip as MapTooltip } from "react-leaflet";
+import L from "leaflet";
 import Moment from 'react-moment';
+import { Legend } from "../components/Map";
 import Header from '../components/Header';
 
 function DispatchSummary({id}) {
@@ -20,8 +23,10 @@ function DispatchSummary({id}) {
     service_request_objects: [],
     start_time: null,
     end_time: null,
+    bounds:L.latLngBounds([[0,0]])
   });
 
+  const [mapState, setMapState] = useState({});
   const [teamData, setTeamData] = useState({options: [], isFetching: false});
   const [teamMembers, setNewTeamMembers] = useState(null);
   const [show, setShow] = useState(false);
@@ -54,6 +59,52 @@ function DispatchSummary({id}) {
     });
   }
 
+  // Takes in animal size, species, and count and returns a pretty string combination.
+  const prettyText = (size, species, count) => {
+    if (count <= 0) {
+      return "";
+    }
+    var plural = ""
+    if (count > 1) {
+      plural = "s"
+    }
+
+    var size_and_species = size + " " + species + plural;
+    // Exception for horses since they don't need an extra species output.
+    if (species === 'horse') {
+      // Exception for pluralizing ponies.
+      if (size === 'pony' && count > 1) {
+        size_and_species = 'ponies'
+      }
+      if (size === 'unknown') {
+        size_and_species = 'horse' + plural
+      }
+      else {
+        size_and_species = size + plural;
+      }
+    }
+
+    var text = count + " " + size_and_species;
+    return text;
+  }
+
+  // Counts the number of size/species matches for a service request by status.
+  const countMatches = (service_request) => {
+    var matches = {};
+
+    service_request.animals.forEach((animal) => {
+      if (['REPORTED', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE'].indexOf(animal.status) > -1) {
+        if (!matches[[animal.species,animal.size]]) {
+          matches[[animal.species,animal.size]] = 1;
+        }
+        else {
+          matches[[animal.species,animal.size]] += 1;
+        }
+      }
+    });
+    return matches
+  }
+
   // Hook for initializing data.
   useEffect(() => {
     let source = axios.CancelToken.source();
@@ -63,7 +114,16 @@ function DispatchSummary({id}) {
         cancelToken: source.token,
       })
       .then(response => {
+        const map_dict = {};
+        const bounds = [];
+        for (const service_request of response.data.service_request_objects) {
+          const matches = countMatches(service_request);
+          map_dict[service_request.id] = {matches:matches, has_reported_animals:service_request.reported_animals > 0, latitude:service_request.latitude, longitude:service_request.longitude};
+          bounds.push([service_request.latitude, service_request.longitude]);
+        }
+        response.data['bounds'] = bounds;
         setData(response.data);
+        setMapState(map_dict);
         setTeamData({options: [], isFetching: true});
         axios.get('/evac/api/evacteammember/', {
           cancelToken: source.token,
@@ -120,45 +180,87 @@ function DispatchSummary({id}) {
     <div style={{fontSize:"18px", marginTop:"12px"}}><b>Opened: </b><Moment format="MMMM Do YYYY, HH:mm">{data.start_time}</Moment>{data.end_time ? <span> | <b>Closed: </b><Moment format="MMMM Do YYYY, HH:mm:ss">{data.end_time}</Moment></span> : ""}</div>
     </Header>
     <hr/>
-    <Card border="secondary" className="mt-1">
-      <Card.Body>
-        <Card.Title>
-          <h4>Team Members
-          <OverlayTrigger
-            key={"add-team-member"}
-            placement="top"
-            overlay={
-              <Tooltip id={`tooltip-add-team-member`}>
-                Add team member
-              </Tooltip>
-            }
-          >
-            <FontAwesomeIcon icon={faPlusSquare} className="ml-1" onClick={() => {setShow(true)}} style={{cursor:'pointer'}} inverse />
-          </OverlayTrigger>
-          </h4>
-        </Card.Title>
-        <hr/>
-        <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px", textTransform:"capitalize"}}>
-          {data.team_member_objects.map(team_member => (
-            <ListGroup.Item key={team_member.id}>
-              {team_member.first_name + " " + team_member.last_name + " - " + team_member.display_phone}{team_member.agency ?
-              <span>({team_member.agency})</span> : ""}
+    <Row>
+      <Col>
+        <Card border="secondary" className="mt-1" style={{minHeight:"313px"}}>
+          <Card.Body>
+            <Card.Title>
+              <h4>Team Members
               <OverlayTrigger
-                key={"remove-team-member"}
+                key={"add-team-member"}
                 placement="top"
                 overlay={
-                  <Tooltip id={`tooltip-remove-team-member`}>
-                    Remove team member
+                  <Tooltip id={`tooltip-add-team-member`}>
+                    Add team member
                   </Tooltip>
                 }
               >
-                <FontAwesomeIcon icon={faMinusSquare} style={{cursor:'pointer'}} size="sm" className="ml-1" onClick={() => {setTeamMemberToDelete({id:team_member.id, name: team_member.first_name + " " + team_member.last_name, display_name: team_member.display_name});setShowTeamMemberConfirm(true);}} inverse />
+                <FontAwesomeIcon icon={faPlusSquare} className="ml-1" onClick={() => {setShow(true)}} style={{cursor:'pointer'}} inverse />
               </OverlayTrigger>
-            </ListGroup.Item>
+              </h4>
+            </Card.Title>
+            <hr/>
+            <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px", textTransform:"capitalize"}}>
+              {data.team_member_objects.map(team_member => (
+                <ListGroup.Item key={team_member.id}>
+                  {team_member.first_name + " " + team_member.last_name + " - " + team_member.display_phone}{team_member.agency ?
+                  <span>({team_member.agency})</span> : ""}
+                  <OverlayTrigger
+                    key={"remove-team-member"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-remove-team-member`}>
+                        Remove team member
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon icon={faMinusSquare} style={{cursor:'pointer'}} size="sm" className="ml-1" onClick={() => {setTeamMemberToDelete({id:team_member.id, name: team_member.first_name + " " + team_member.last_name, display_name: team_member.display_name});setShowTeamMemberConfirm(true);}} inverse />
+                  </OverlayTrigger>
+                </ListGroup.Item>
+              ))}
+            </ListGroup>
+          </Card.Body>
+        </Card>
+      </Col>
+      <Col className="border rounded pl-0 pr-0" style={{marginTop:"4px", marginRight:"15px", maxHeight:"311px"}}>
+        <Map className="d-block dispatch-leaflet-container" bounds={data.bounds}>
+          <Legend position="bottomleft" metric={false} />
+          <TileLayer
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+          />
+          {data.service_request_objects.map(service_request => (
+            <CircleMarker
+              key={service_request.id}
+              center={{lat:service_request.latitude, lng: service_request.longitude}}
+              color="black"
+              weight="1"
+              // fillColor={mapState[service_request.id] ? mapState[service_request.id].color : ""}
+              fill={true}
+              fillOpacity="1"
+              onClick={() => window.open("/hotline/servicerequest/" + service_request.id, "_blank")}
+              radius={5}
+            >
+              <MapTooltip autoPan={false}>
+                <span>
+                  {mapState[service_request.id] ?
+                    <span>
+                      {Object.keys(mapState[service_request.id].matches).map((key,i) => (
+                        <span key={key} style={{textTransform:"capitalize"}}>
+                          {i > 0 && ", "}{prettyText(key.split(',')[1], key.split(',')[0], mapState[service_request.id].matches[key])}
+                        </span>
+                      ))}
+                    </span>
+                  :""}
+                  <br />
+                  {service_request.full_address}
+                </span>
+              </MapTooltip>
+            </CircleMarker>
           ))}
-        </ListGroup>
-      </Card.Body>
-    </Card>
+        </Map>
+      </Col>
+    </Row>
     {data.service_request_objects.map((service_request, index) => (
     <Card key={service_request.id} border="secondary" className="mt-3 mb-2">
       <Card.Body>

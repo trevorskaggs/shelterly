@@ -17,6 +17,12 @@ class EvacTeamMemberViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = EvacTeamMemberSerializer
 
+    def perform_create(self, serializer):
+        if serializer.is_valid():
+            # Clean phone fields.
+            serializer.validated_data['phone'] = ''.join(char for char in serializer.validated_data.get('phone', '') if char.isdigit())
+            team_member = serializer.save()
+
 class EvacAssignmentViewSet(viewsets.ModelViewSet):
 
     queryset = EvacAssignment.objects.all()
