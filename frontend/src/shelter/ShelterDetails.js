@@ -112,11 +112,11 @@ function ShelterDetails({id}) {
                 <Card.Title className="text-center mb-0 mt-3">
                   {building.name}
                   <OverlayTrigger
-                    key={"room-details"}
+                    key={"building-details"}
                     placement="top"
                     overlay={
-                      <Tooltip id={`tooltip-room-details`}>
-                        Room details
+                      <Tooltip id={`tooltip-building-details`}>
+                        Building details
                       </Tooltip>
                     }
                   >
@@ -142,7 +142,7 @@ function ShelterDetails({id}) {
                         </OverlayTrigger>
                       </Card.Text>
                       <Card.Text className="text-center mb-0">
-                        {room.animal_count} Animals
+                        {room.animals.length} Animals
                       </Card.Text>
                     </Card>
                   ))}
