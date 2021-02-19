@@ -2,10 +2,10 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link } from 'raviger';
 import { Button, ButtonGroup, Col, ListGroup, Row } from 'react-bootstrap'
-import { CircleMarker, Map, TileLayer, Tooltip as MapTooltip } from "react-leaflet";
+import { Marker, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
 import Moment from 'react-moment';
-import { Legend } from "../components/Map";
+import Map, { countMatches, prettyText, reportedMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
 import badge from "../static/images/badge-sheriff.png";
 import bandaid from "../static/images/band-aid-solid.png";
 import car from "../static/images/car-solid.png";
@@ -16,61 +16,6 @@ function Hotline() {
   const [data, setData] = useState({service_requests: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
   const [mapState, setMapState] = useState({});
   const [statusOptions, setStatusOptions] = useState({status:"open", allColor: "secondary", openColor:"primary", assignedColor:"secondary", closedColor:"secondary"});
-
-  // Takes in animal size, species, and count and returns a pretty string combination.
-  const prettyText = (size, species, count) => {
-    if (count <= 0) {
-      return "";
-    }
-    var plural = ""
-    if (count > 1) {
-      plural = "s"
-    }
-
-    var size_and_species = size + " " + species + plural;
-    // Exception for horses since they don't need an extra species output.
-    if (species === 'horse') {
-      // Exception for pluralizing ponies.
-      if (size === 'pony' && count > 1) {
-        size_and_species = 'ponies'
-      }
-      else {
-        size_and_species = size + plural;
-      }
-    }
-
-    var text = count + " " + size_and_species;
-    return text;
-  }
-
-  // Counts the number of size/species matches for a service request by status.
-  const countMatches = (service_request) => {
-    var matches = {};
-
-    service_request.animals.forEach((animal) => {
-      if (!matches[[animal.species,animal.size]]) {
-        matches[[animal.species,animal.size]] = 1;
-      }
-      else {
-        matches[[animal.species,animal.size]] += 1;
-      }
-    });
-    return matches
-  }
-
-  // Show or hide list of SRs based on current map zoom
-  const onMove = event => {
-    for (const service_request of data.service_requests) {
-      if (mapState[service_request.id]) {
-        if (!event.target.getBounds().contains(L.latLng(service_request.latitude, service_request.longitude))) {
-          setMapState(prevState => ({ ...prevState, [service_request.id]: {...prevState[service_request.id], hidden:true} }));
-        }
-        else {
-          setMapState(prevState => ({ ...prevState, [service_request.id]: {...prevState[service_request.id], hidden:false} }));
-        }
-      }
-    }
-  }
 
   // Hook for initializing data.
   useEffect(() => {
@@ -90,7 +35,7 @@ function Hotline() {
         const map_dict = {};
         const bounds = [];
         for (const service_request of response.data) {
-            const matches = countMatches(service_request);
+            const matches = countMatches(service_request)[0];
             let color = 'green';
             if  (service_request.status === 'assigned') {
               color = 'yellow';
@@ -138,23 +83,12 @@ function Hotline() {
     </ListGroup>
     <Row className="d-flex flex-wrap">
       <Col xs={10} className="border rounded pl-0 pr-0 m-auto">
-        <Map className="d-block" bounds={data.bounds} onMoveEnd={onMove}>
-          <Legend position="bottomleft" metric={false} />
-          <TileLayer
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-          />
+        <Map bounds={data.bounds}>
           {data.service_requests.map(service_request => (
-            <CircleMarker
-              key={service_request.id}
-              center={{lat:service_request.latitude, lng: service_request.longitude}}
-              color="black"
-              weight="1"
-              fillColor={mapState[service_request.id] ? mapState[service_request.id].color : ""}
-              fill={true}
-              fillOpacity="1"
+            <Marker
+              position={[service_request.latitude, service_request.longitude]}
+              icon={service_request.sheltered_in_place > 0 ? SIPMarkerIcon : service_request.unable_to_locate > 0 ? UTLMarkerIcon : reportedMarkerIcon}
               onClick={() => window.open("/hotline/servicerequest/" + service_request.id, "_blank")}
-              radius={5}
             >
               <MapTooltip autoPan={false}>
                 <span>
@@ -178,7 +112,7 @@ function Hotline() {
                   </div>
                 </span>
               </MapTooltip>
-            </CircleMarker>
+            </Marker>
           ))}
         </Map>
         <ButtonGroup>
