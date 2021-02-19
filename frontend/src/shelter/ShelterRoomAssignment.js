@@ -217,6 +217,7 @@ function ShelterRoomAssignment({id}) {
             </Droppable>
           </div>
         </Row>
+        <span>Buildings</span>
         <Row className="d-flex ml-0 mr-0 mt-1 mb-3 border rounded">
           <ButtonGroup className="">
             {data.buildings.map(building => (
@@ -226,7 +227,7 @@ function ShelterRoomAssignment({id}) {
         </Row>
         <Row className="d-flex ml-0">
           {data.rooms.map((room, index) => (
-            <span key={room.id} hidden={room.building !== selectedBuilding} style={{marginBottom:"32px"}}>{room.name}<Link href={"/shelter/room/" + room.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
+            <span key={room.id} hidden={room.building !== selectedBuilding} style={{marginBottom:"32px"}}>Room: {room.name}<Link href={"/shelter/room/" + room.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
               <span className="col">
                 <Droppable droppableId={String(index)}>
                   {(provided, snapshot) => (
