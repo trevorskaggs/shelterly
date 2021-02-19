@@ -179,7 +179,7 @@ function ServiceRequestDispatchAssignment({id}) {
     };
   }, [id]);
 
-  const starIconHTML = ReactDOMServer.renderToString(<FontAwesomeIcon color="gold" size="lg" className="icon-border" icon={faStar} />)
+  const starIconHTML = ReactDOMServer.renderToString(<FontAwesomeIcon color="gold" size="lg" className="icon-border" icon={faStar} />);
   const starMarkerIcon = new L.DivIcon({
     html: starIconHTML,
     iconSize: [0, 0],
@@ -190,9 +190,8 @@ function ServiceRequestDispatchAssignment({id}) {
     shadowSize: null,
     shadowAnchor: null
   });
-  
 
-  const checkIconHTML = ReactDOMServer.renderToString(<FontAwesomeIcon icon={faCheckCircle} className="icon-border" style={{"--fa-primary-color":'white', "--fa-secondary-color":'green', "--fa-secondary-opacity": 1}} />)
+  const checkIconHTML = ReactDOMServer.renderToString(<FontAwesomeIcon icon={faCheckCircle} className="icon-border" style={{"--fa-primary-color":'white', "--fa-secondary-color":'green', "--fa-secondary-opacity": 1}} />);
   const checkMarkerIcon = new L.DivIcon({
     html: checkIconHTML,
     iconSize: [0, 0],
@@ -204,7 +203,7 @@ function ServiceRequestDispatchAssignment({id}) {
     shadowAnchor: null
   });
 
-  const checkIconHTMLGray = ReactDOMServer.renderToString(<FontAwesomeIcon icon={faCheckCircle} className="icon-border" style={{"--fa-primary-color":'white', "--fa-secondary-color":'gray', "--fa-secondary-opacity": 1}} />)
+  const checkIconHTMLGray = ReactDOMServer.renderToString(<FontAwesomeIcon icon={faCheckCircle} className="icon-border" style={{"--fa-primary-color":'white', "--fa-secondary-color":'gray', "--fa-secondary-opacity": 1}} />);
   const checkMarkerIconGray = new L.DivIcon({
     html: checkIconHTMLGray,
     iconSize: [0, 0],

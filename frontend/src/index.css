@@ -37,7 +37,6 @@ hr { display: block; height: 1px;
 .carousel img {
   height: 320px;
   width: 320px;
-  /* object-fit: contain; */
   object-fit: cover;
   overflow: hidden;
 }
@@ -47,19 +46,6 @@ input[disabled] {
   color: #999999;
   background-color: #DFDDDD !important;
   background-image: none;
-}
-
-/* big checkbox CSS */
-.custom-control-lg .custom-control-label::before,
-.custom-control-lg .custom-control-label::after {
-    top: 0.1rem !important;
-    left: -2rem !important;
-    width: 1.25rem !important;
-    height: 1.25rem !important;
-}
-
-.custom-control-lg .custom-control-label {
-    font-size: 1rem !important;
 }
 
 /* DatetimePicker fixed min width CSS */
