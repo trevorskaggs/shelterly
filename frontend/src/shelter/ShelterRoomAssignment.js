@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
-import { Link } from 'raviger';
+import { Link, useQueryParams } from 'raviger';
 import { Button, ButtonGroup, Card, Row, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -12,6 +12,12 @@ import Header from '../components/Header';
 import noImageFound from '../static/images/image-not-found.png';
 
 function ShelterRoomAssignment({id}) {
+
+  // Identify any query param data.
+  const [queryParams] = useQueryParams();
+  const {
+    building_id = null,
+  } = queryParams;
 
   const [data, setData] = useState({
     name: '',
@@ -29,7 +35,7 @@ function ShelterRoomAssignment({id}) {
     animal_count: 0,
   });
 
-  const [selectedBuilding, setSelectedBuilding] = useState(0);
+  const [selectedBuilding, setSelectedBuilding] = useState(Number(building_id));
 
   function handleOnDragEnd(result) {
 
@@ -127,7 +133,7 @@ function ShelterRoomAssignment({id}) {
         });
         response.data['rooms'] = rooms;
         setData(response.data);
-        if (response.data.buildings.length > 0) {
+        if (!selectedBuilding && response.data.buildings.length > 0) {
           setSelectedBuilding(response.data.buildings[0].id)
         }
       })
@@ -171,7 +177,7 @@ function ShelterRoomAssignment({id}) {
                       <li ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
                         <Card className={"border rounded" + (snapshot.isDragging ? " border-danger" : "")} style={{width:"150px", whiteSpace:"nowrap", overflow:"hidden"}}>
                           <div className="row no-gutters" style={{ textTransform:"capitalize" }}>
-                            <p className="mb-0">
+                            <div className="mb-0">
                               <ReactImageFallback style={{width:"47px", height:"47px", marginRight:"3px", objectFit:"cover", overflow:"hidden", float:"left"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} />
                               <span title={animal.name}>{animal.name||"Unknown"}</span>
                               <div>
@@ -202,7 +208,7 @@ function ShelterRoomAssignment({id}) {
                                 </OverlayTrigger>}
                                 {animal.size !== 'unknown' ? animal.size : ""} {animal.species}
                               </div>
-                            </p>
+                            </div>
                           </div>
                         </Card>
                       </li>
@@ -221,7 +227,7 @@ function ShelterRoomAssignment({id}) {
         <Row className="d-flex ml-0 mr-0 mt-1 mb-3 border rounded">
           <ButtonGroup className="">
             {data.buildings.map(building => (
-              <Button variant={selectedBuilding === building.id ? "primary" : "secondary"} onClick={() => setSelectedBuilding(building.id)}>{building.name}</Button>
+              <Button key={building.id} variant={selectedBuilding === building.id ? "primary" : "secondary"} onClick={() => setSelectedBuilding(building.id)}>{building.name}</Button>
             ))}
           </ButtonGroup>
         </Row>
@@ -239,7 +245,7 @@ function ShelterRoomAssignment({id}) {
                           <li ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
                             <Card className={"border rounded" + (snapshot.isDragging ? " border-danger" : "")} style={{width:"150px", whiteSpace:"nowrap", overflow:"hidden"}}>
                               <div className="row no-gutters" style={{ textTransform:"capitalize" }}>
-                                <p className="mb-0">
+                                <div className="mb-0">
                                   <ReactImageFallback style={{width:"47px", height:"47px", marginRight:"3px", objectFit:"cover", overflow:"hidden", float:"left"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} />
                                   <span title={animal.name}>{animal.name||"Unknown"}</span>
                                   <div>
@@ -270,7 +276,7 @@ function ShelterRoomAssignment({id}) {
                                     </OverlayTrigger>}
                                     {animal.size !== 'unknown' ? animal.size : ""} {animal.species}
                                   </div>
-                                </p>
+                                </div>
                               </div>
                             </Card>
                           </li>
@@ -285,6 +291,7 @@ function ShelterRoomAssignment({id}) {
               </span>
             </span>
           ))}
+          {data.rooms.filter(room => room.building === selectedBuilding).length < 1 ? "This building does not have any rooms yet." : ""}
         </Row>
       </DragDropContext>
     </>
