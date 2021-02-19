@@ -172,7 +172,7 @@ function Deploy() {
     setMapState(prevState => ({ ...prevState, tempMapState}));
   }
 
-  const reportedIconHTML = ReactDOMServer.renderToString(<FontAwesomeIcon className="icon-border" color="#ff4c4c" icon={faExclamationCircle} />);
+  const reportedIconHTML = ReactDOMServer.renderToString(<FontAwesomeIcon icon={faExclamationCircle} className="icon-border" color="#ff4c4c" size="lg" />);
   const reportedMarkerIcon = new L.DivIcon({
     html: reportedIconHTML,
     iconSize: [0, 0],
@@ -185,16 +185,16 @@ function Deploy() {
   });
 
   const SIPIconHTML = ReactDOMServer.renderToString(
-    <span className="fa-layers ml-1">
-      <FontAwesomeIcon icon={faCircle} className="icon-border" color="#f5ee0f" transform={'grow-1'} />
-      <FontAwesomeIcon icon={faHomeAlt} style={{color:"white"}} transform={'shrink-3'} size="sm" inverse />
-      <FontAwesomeIcon icon={faHomeAltReg} style={{color:"#444"}} transform={'shrink-3'} size="sm" inverse />
+    <span className="fa-layers">
+      <FontAwesomeIcon icon={faCircle} className="icon-border" color="#f5ee0f" size="lg" transform={'grow-2'} />
+      <FontAwesomeIcon icon={faHomeAlt} style={{color:"white"}} transform={'shrink-3 left-1'} size="lg" inverse />
+      <FontAwesomeIcon icon={faHomeAltReg} style={{color:"#444"}} transform={'shrink-3 left-1'} size="lg" inverse />
     </span>
   );
   const SIPMarkerIcon = new L.DivIcon({
     html: SIPIconHTML,
     iconSize: [0, 0],
-    iconAnchor: [10, 9],
+    iconAnchor: [5, 9],
     className: "SIP-icon",
     popupAnchor: null,
     shadowUrl: null,
@@ -202,11 +202,11 @@ function Deploy() {
     shadowAnchor: null
   });
 
-  const UTLIconHTML = ReactDOMServer.renderToString(<FontAwesomeIcon icon={faQuestionCircleDuo} className="icon-border" style={{"--fa-primary-color":'white', "--fa-secondary-color":'#5f5fff', "--fa-secondary-opacity": 1}}  />);
+  const UTLIconHTML = ReactDOMServer.renderToString(<FontAwesomeIcon icon={faQuestionCircleDuo} className="icon-border" size="lg" style={{"--fa-primary-color":'white', "--fa-secondary-color":'#5f5fff', "--fa-secondary-opacity": 1}}  />);
   const UTLMarkerIcon = new L.DivIcon({
     html: UTLIconHTML,
     iconSize: [0, 0],
-    iconAnchor: [7, 9],
+    iconAnchor: [6, 9],
     className: "UTL-icon",
     popupAnchor: null,
     shadowUrl: null,
@@ -214,7 +214,7 @@ function Deploy() {
     shadowAnchor: null
   });
 
-  const checkIconHTML = ReactDOMServer.renderToString(<FontAwesomeIcon icon={faCheckCircle} className="icon-border" style={{"--fa-primary-color":'white', "--fa-secondary-color":'green', "--fa-secondary-opacity": 1}} />);
+  const checkIconHTML = ReactDOMServer.renderToString(<FontAwesomeIcon icon={faCheckCircle} className="icon-border" size="lg" style={{"--fa-primary-color":'white', "--fa-secondary-color":'green', "--fa-secondary-opacity": 1}} />);
   const checkMarkerIcon = new L.DivIcon({
     html: checkIconHTML,
     iconSize: [0, 0],
