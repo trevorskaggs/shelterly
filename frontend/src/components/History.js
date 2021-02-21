@@ -10,7 +10,7 @@ function History({action_history}) {
 
   const [showHistory, setShowHistory] = useState(false);
   const [page, setPage] = useState(1)
-  const numPages = Math.ceil(action_history.data.length / ITEMS_PER_PAGE)
+  const numPages = Math.ceil(action_history.length / ITEMS_PER_PAGE)
 
   return (
     <>
