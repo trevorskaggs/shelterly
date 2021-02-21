@@ -61,6 +61,7 @@ function Hotline() {
 
   // Hook for initializing data.
   useEffect(() => {
+    let unmounted = false;
     let source = axios.CancelToken.source();
 
     const fetchServiceRequests = async () => {
@@ -73,29 +74,33 @@ function Hotline() {
         cancelToken: source.token,
       })
       .then(response => {
-        setData({service_requests: response.data, isFetching: false, bounds:L.latLngBounds([[0,0]])});
-        const map_dict = {};
-        const bounds = [];
-        for (const service_request of response.data) {
-            const matches = countMatches(service_request);
-            let color = 'green';
-            if  (service_request.status === 'assigned') {
-              color = 'yellow';
-            }
-            else if (service_request.status === 'closed') {
-              color = 'red';
-            }
-            map_dict[service_request.id] = {color:color, matches:matches, latitude:service_request.latitude, longitude:service_request.longitude};
-          bounds.push([service_request.latitude, service_request.longitude]);
-        }
-        setMapState(map_dict);
-        if (bounds.length > 0) {
-          setData({service_requests: response.data, isFetching: false, bounds:L.latLngBounds(bounds)});
+        if (!unmounted) {
+          setData({service_requests: response.data, isFetching: false, bounds:L.latLngBounds([[0,0]])});
+          const map_dict = {};
+          const bounds = [];
+          for (const service_request of response.data) {
+              const matches = countMatches(service_request);
+              let color = 'green';
+              if  (service_request.status === 'assigned') {
+                color = 'yellow';
+              }
+              else if (service_request.status === 'closed') {
+                color = 'red';
+              }
+              map_dict[service_request.id] = {color:color, matches:matches, latitude:service_request.latitude, longitude:service_request.longitude};
+            bounds.push([service_request.latitude, service_request.longitude]);
+          }
+          setMapState(map_dict);
+          if (bounds.length > 0) {
+            setData({service_requests: response.data, isFetching: false, bounds:L.latLngBounds(bounds)});
+          }
         }
       })
       .catch(error => {
-        console.log(error.response);
-        setData({service_requests: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
+        if (!unmounted) {
+          console.log(error.response);
+          setData({service_requests: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
+        }
       });
     };
 
@@ -103,6 +108,7 @@ function Hotline() {
 
     // Cleanup.
     return () => {
+      unmounted = true;
       source.cancel();
     };
   }, [statusOptions.status]);

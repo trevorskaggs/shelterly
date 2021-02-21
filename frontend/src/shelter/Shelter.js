@@ -15,7 +15,9 @@ function Shelter() {
 
   // Hook for initializing data.
   useEffect(() => {
+    let unmounted = false;
     let source = axios.CancelToken.source();
+
     const fetchShelters = async () => {
       setData({shelters: [], isFetching: true});
       // Fetch Shelter data.
@@ -23,20 +25,25 @@ function Shelter() {
         cancelToken: source.token,
       })
       .then(response => {
-        const bounds = [];
-        for (const shelter of response.data) {
-          bounds.push([shelter.latitude, shelter.longitude]);
+        if (!unmounted) {
+          const bounds = [];
+          for (const shelter of response.data) {
+            bounds.push([shelter.latitude, shelter.longitude]);
+          }
+          setData({shelters: response.data, isFetching: false, bounds:bounds});
         }
-        setData({shelters: response.data, isFetching: false, bounds:bounds});
       })
       .catch(error => {
-        console.log(error.response);
-        setData({shelters: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
+        if (!unmounted) {
+          console.log(error.response);
+          setData({shelters: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
+        }
       });
     };
     fetchShelters();
     // Cleanup.
     return () => {
+      unmounted = true;
       source.cancel();
     };
   }, []);
@@ -60,6 +67,7 @@ function Shelter() {
         <Map bounds={data.bounds} className="landing-leaflet-container">
           {data.shelters.map(shelter => (
             <Marker
+              key={shelter.id}
               position={[shelter.latitude, shelter.longitude]}
               icon={shelterMarkerIcon}
               onClick={() => window.open("/shelter/" + shelter.id, "_blank")}
@@ -79,8 +87,8 @@ function Shelter() {
     <hr/>
     <Row className="ml-0">
     {data.shelters.map(shelter => (
-      <Col xs="6" className="pl-0 pr-0">
-        <Card key={shelter.id} className="border rounded mr-3 mb-3" style={{whiteSpace:"nowrap", overflow:"hidden"}}>
+      <Col key={shelter.id} xs="6" className="pl-0 pr-0">
+        <Card className="border rounded mr-3 mb-3" style={{whiteSpace:"nowrap", overflow:"hidden"}}>
           <div className="row no-gutters" style={{ textTransform:"capitalize" }}>
             <div className="mb-0">
               <Row className="ml-0 mr-0">

@@ -61,6 +61,7 @@ function Dispatch() {
 
   // Hook for initializing data.
   useEffect(() => {
+    let unmounted = false;
     let source = axios.CancelToken.source();
 
     const fetchServiceRequests = async () => {
@@ -74,24 +75,28 @@ function Dispatch() {
         cancelToken: source.token,
       })
       .then(response => {
-        const map_dict = {};
-        const bounds = [];
-        const random_colors = randomColor({count:response.data.length});
-        response.data.forEach((dispatch_assignment, index) => {
-          let sr_dict = {}
-          for (const service_request of dispatch_assignment.service_request_objects) {
-            const matches = countMatches(service_request);
-            sr_dict[service_request.id] = {id:service_request.id, matches:matches, latitude:service_request.latitude, longitude:service_request.longitude, assigned_evac:service_request.assigned_evac.id, full_address:service_request.full_address};
-            bounds.push([service_request.latitude, service_request.longitude]);
-          }
-          map_dict[dispatch_assignment.id] = {color:random_colors[index], service_requests:sr_dict}
-        });
-        setMapState(map_dict);
-        setData({dispatch_assignments: response.data, isFetching: false, bounds:L.latLngBounds(bounds)});
+        if (!unmounted) {
+          const map_dict = {};
+          const bounds = [];
+          const random_colors = randomColor({count:response.data.length});
+          response.data.forEach((dispatch_assignment, index) => {
+            let sr_dict = {}
+            for (const service_request of dispatch_assignment.service_request_objects) {
+              const matches = countMatches(service_request);
+              sr_dict[service_request.id] = {id:service_request.id, matches:matches, latitude:service_request.latitude, longitude:service_request.longitude, assigned_evac:service_request.assigned_evac.id, full_address:service_request.full_address};
+              bounds.push([service_request.latitude, service_request.longitude]);
+            }
+            map_dict[dispatch_assignment.id] = {color:random_colors[index], service_requests:sr_dict}
+          });
+          setMapState(map_dict);
+          setData({dispatch_assignments: response.data, isFetching: false, bounds:L.latLngBounds(bounds)});
+        }
       })
       .catch(error => {
-        console.log(error.response);
-        setData({dispatch_assignments: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
+        if (!unmounted) {
+          console.log(error.response);
+          setData({dispatch_assignments: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
+        }
       });
     };
 
@@ -99,6 +104,7 @@ function Dispatch() {
 
     // Cleanup.
     return () => {
+      unmounted = true;
       source.cancel();
     };
   }, []);
