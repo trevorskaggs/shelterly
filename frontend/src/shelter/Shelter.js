@@ -106,7 +106,7 @@ function Shelter() {
                         </Tooltip>
                       }
                     >
-                      <Link href={"/shelter/" + data.shelter}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+                      <Link href={"/shelter/" + shelter.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
                     </OverlayTrigger>
                   </h4>
                   <div>
