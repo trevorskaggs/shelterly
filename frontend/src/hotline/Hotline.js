@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link } from 'raviger';
-import { Button, ButtonGroup, Col, ListGroup, Row } from 'react-bootstrap'
+import { Button, ButtonGroup, Col, ListGroup, Row } from 'react-bootstrap';
 import { CircleMarker, Map, TileLayer, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
 import Moment from 'react-moment';
 import { Legend } from "../components/Map";
+import Header from "../components/Header";
 import badge from "../static/images/badge-sheriff.png";
 import bandaid from "../static/images/band-aid-solid.png";
 import car from "../static/images/car-solid.png";
@@ -58,20 +59,6 @@ function Hotline() {
     return matches
   }
 
-  // Show or hide list of SRs based on current map zoom
-  const onMove = event => {
-    for (const service_request of data.service_requests) {
-      if (mapState[service_request.id]) {
-        if (!event.target.getBounds().contains(L.latLng(service_request.latitude, service_request.longitude))) {
-          setMapState(prevState => ({ ...prevState, [service_request.id]: {...prevState[service_request.id], hidden:true} }));
-        }
-        else {
-          setMapState(prevState => ({ ...prevState, [service_request.id]: {...prevState[service_request.id], hidden:false} }));
-        }
-      }
-    }
-  }
-
   // Hook for initializing data.
   useEffect(() => {
     let source = axios.CancelToken.source();
@@ -122,23 +109,27 @@ function Hotline() {
 
   return (
     <>
-    <ListGroup className="p-5">
-      <Link href="/hotline/workflow/owner">
-        <ListGroup.Item action>OWNER CALLING</ListGroup.Item>
-      </Link>
-      <Link href="/hotline/workflow/reporter">
-        <ListGroup.Item action>NON-OWNER CALLING</ListGroup.Item>
-      </Link>
-      <Link href="/hotline/workflow/first_responder">
-        <ListGroup.Item action>FIRST RESPONDER CALLING</ListGroup.Item>
-      </Link>
-      <Link href="/hotline/servicerequest/search">
-        <ListGroup.Item action>SEARCH SERVICE REQUESTS</ListGroup.Item>
-      </Link>
-    </ListGroup>
-    <Row className="d-flex flex-wrap">
-      <Col xs={10} className="border rounded pl-0 pr-0 m-auto">
-        <Map className="d-block" bounds={data.bounds} onMoveEnd={onMove}>
+    <Header>Hotline</Header>
+    <hr/>
+    <Row className="mr-0">
+      <Col xs={4}>
+        <ListGroup className="pb-3">
+          <Link href="/hotline/workflow/owner">
+            <ListGroup.Item className="rounded" action>OWNER CALLING</ListGroup.Item>
+          </Link>
+          <Link href="/hotline/workflow/reporter">
+            <ListGroup.Item className="rounded" action>NON-OWNER CALLING</ListGroup.Item>
+          </Link>
+          <Link href="/hotline/workflow/first_responder">
+            <ListGroup.Item className="rounded" action>FIRST RESPONDER CALLING</ListGroup.Item>
+          </Link>
+          <Link href="/hotline/servicerequest/search">
+            <ListGroup.Item className="rounded" action>SEARCH SERVICE REQUESTS</ListGroup.Item>
+          </Link>
+        </ListGroup>
+      </Col>
+      <Col xs={8} className="border rounded pl-0 pr-0">
+        <Map className="d-block" bounds={data.bounds} className="landing-leaflet-container">
           <Legend position="bottomleft" metric={false} />
           <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

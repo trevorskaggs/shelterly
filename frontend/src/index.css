@@ -25,7 +25,9 @@ hr { display: block; height: 1px;
   margin: 1em 0; padding: 0; }
 
 /* Leaflet map CSS */
-.leaflet-container { width: auto; height: 55vh; min-height:300px;}
+.leaflet-container { width: auto; height: 55vh;}
+
+.landing-leaflet-container { width: auto; height: 311px; min-height:311px;}
 
 .leaflet-top, .leaflet-bottom {
   z-index: 400 !important;

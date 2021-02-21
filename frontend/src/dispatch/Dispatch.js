@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link } from 'raviger';
-import {  Col, ListGroup, Row } from 'react-bootstrap'
+import { Col, ListGroup, Row } from 'react-bootstrap'
 import { CircleMarker, Map, TileLayer, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
 import Moment from 'react-moment';
 import randomColor from "randomcolor";
 import { Legend } from "../components/Map";
+import Header from "../components/Header";
 import badge from "../static/images/badge-sheriff.png";
 import bandaid from "../static/images/band-aid-solid.png";
 import car from "../static/images/car-solid.png";
@@ -58,21 +59,6 @@ function Dispatch() {
     return matches
   }
 
-  // Show or hide list of DAs based on current map zoom
-  const onMove = event => {
-    for (const dispatch_assignment of data.dispatch_assignments) {
-      let hidden = true;
-      for (const service_request of dispatch_assignment.service_request_objects) {
-        if (mapState[dispatch_assignment.id].service_requests[service_request.id]) {
-          if (event.target.getBounds().contains(L.latLng(service_request.latitude, service_request.longitude))) {
-            hidden = false;
-          }
-        }
-      }
-      setMapState(prevState => ({ ...prevState, [dispatch_assignment.id]: {...prevState[dispatch_assignment.id], hidden:hidden} }));
-    }
-  }
-
   // Hook for initializing data.
   useEffect(() => {
     let source = axios.CancelToken.source();
@@ -119,20 +105,24 @@ function Dispatch() {
 
   return (
     <>
-    <ListGroup className="flex-fill p-5 h-50">
-      <Link href="/dispatch/dispatchteammember/new">
-        <ListGroup.Item action>ADD TEAM MEMBER</ListGroup.Item>
-      </Link>
-      <Link href="/dispatch/deploy">
-        <ListGroup.Item action>DEPLOY TEAMS</ListGroup.Item>
-      </Link>
-      <Link href="/dispatch/dispatchassignment/search">
-        <ListGroup.Item action>SEARCH DISPATCH ASSIGNMENTS</ListGroup.Item>
-      </Link>
-    </ListGroup>
-    <Row className="d-flex flex-wrap">
-      <Col xs={10} className="border rounded pl-0 pr-0 m-auto">
-        <Map className="d-block" bounds={data.bounds} onMoveEnd={onMove}>
+    <Header>Dispatch</Header>
+    <hr/>
+    <Row className="mr-0">
+      <Col xs={4}>
+        <ListGroup className="flex-fill pb-3">
+          <Link href="/dispatch/dispatchteammember/new">
+            <ListGroup.Item className="rounded" action>ADD TEAM MEMBER</ListGroup.Item>
+          </Link>
+          <Link href="/dispatch/deploy">
+            <ListGroup.Item className="rounded" action>DEPLOY TEAMS</ListGroup.Item>
+          </Link>
+          <Link href="/dispatch/dispatchassignment/search">
+            <ListGroup.Item className="rounded" action>SEARCH DISPATCH ASSIGNMENTS</ListGroup.Item>
+          </Link>
+        </ListGroup>
+      </Col>
+      <Col xs={8} className="border rounded pl-0 pr-0">
+        <Map className="d-block" bounds={data.bounds} className="landing-leaflet-container">
           <Legend position="bottomleft" metric={false} />
           <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
