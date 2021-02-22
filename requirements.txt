@@ -7,11 +7,10 @@ django-cors-headers
 django-filter
 django-rest-knox
 django-ordered-model
-djangorestframework>=3.12django-storages
+djangorestframework>=3.12
+django-storages
 django-webpack-loader
 geocoder==1.38.1
-ipython
 pillow
 psycopg2-binary
 pytz==2018.9
-zappa

@@ -143,9 +143,9 @@ DEBUG = True
 #TODO Change to envvars.
 # Zappa settings
 STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-AWS_STORAGE_BUCKET_NAME = 'shelterly-staticfiles'
+AWS_STORAGE_BUCKET_NAME = 'shelterly-statics'
 AWS_S3_ADDRESSING_STYLE = "virtual"
-AWS_S3_REGION_NAME = 'us-west-2'
+AWS_S3_REGION_NAME = 'us-east-2'
 # ALLOWED_HOSTS = ['725rgosijg.execute-api.us-east-2.amazonaws.com',]
 
 REST_FRAMEWORK = {
