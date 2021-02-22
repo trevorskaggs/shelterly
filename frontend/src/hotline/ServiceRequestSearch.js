@@ -18,15 +18,16 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faClipboardList, faClipboardCheck, faCircle, faExclamationCircle, faQuestionCircle, faHome, faHelicopter, faHeart, faSkullCrossbones
 } from '@fortawesome/free-solid-svg-icons';
-import { faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
 import Moment from 'react-moment';
 import Header from '../components/Header';
+import Scrollbar from '../components/Scrollbars';
 
 import { ITEMS_PER_PAGE } from '../constants'
 
 function ServiceRequestSearch() {
 
   const [data, setData] = useState({service_requests: [], isFetching: false});
+  const [searchState, setSearchState] = useState({});
   const [searchTerm, setSearchTerm] = useState("");
   const [tempSearchTerm, setTempSearchTerm] = useState("");
   const [statusOptions, setStatusOptions] = useState({status:"open", allColor: "secondary", openColor:"primary", assignedColor:"secondary", closedColor:"secondary", canceledColor:"secondary"});
@@ -59,6 +60,17 @@ function ServiceRequestSearch() {
         if (!unmounted) {
           setNumPages(Math.ceil(response.data.length / ITEMS_PER_PAGE))
           setData({service_requests: response.data, isFetching: false});
+          let search_state = {};
+					response.data.forEach(service_request => {
+						let species = [];
+						service_request.animals.forEach(animal => {
+							if (!species.includes(animal.species)) {
+								species.push(animal.species)
+							}
+						})
+						search_state[service_request.id] = {species:species, selectedSpecies:species[0]}
+						})
+					setSearchState(search_state);
         }
       })
       .catch(error => {
@@ -120,136 +132,54 @@ function ServiceRequestSearch() {
             </h4>
           </div>
           <CardGroup>
-            <Card key={service_request.id}>
+            <Card style={{marginBottom:"6px"}}>
               <Card.Body>
-                <Card.Title>Information</Card.Title>
+                <Card.Title style={{marginTop:"-9px", marginBottom:"8px"}}>Information</Card.Title>
                 <ListGroup>
                   {service_request.owner_objects.map(owner => (
-                    <ListGroup.Item key={owner.id}><b>Owner: </b>{owner.first_name} {owner.last_name}{owner.display_phone ? " " + owner.display_phone : ""}
-                      <OverlayTrigger
-                        key={"owner-details"}
-                        placement="top"
-                        overlay={
-                          <Tooltip id={`tooltip-owner-details`}>
-                            Owner details
-                          </Tooltip>
-                        }
-                      >
-                        <Link href={"/people/owner/" + owner.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
-                      </OverlayTrigger>
-                    </ListGroup.Item>
+                    <ListGroup.Item key={owner.id}><b>Owner: </b>{owner.first_name} {owner.last_name}</ListGroup.Item>
                   ))}
                   {service_request.owners.length < 1 ? <ListGroup.Item><b>Owner: </b>No Owner</ListGroup.Item> : ""}
-                  {service_request.reporter ?
-                    <ListGroup.Item><b>Reporter: </b>{service_request.reporter_object.first_name} {service_request.reporter_object.last_name}{service_request.reporter_object.agency ? <span>&nbsp;({service_request.reporter_object.agency})</span> : ""}{service_request.reporter_object.display_phone ? " " + service_request.reporter_object.display_phone : ""}
-                      <OverlayTrigger
-                        key={"reporter-details"}
-                        placement="top"
-                        overlay={
-                          <Tooltip id={`tooltip-reporter-details`}>
-                            Reporter details
-                          </Tooltip>
-                        }
-                      >
-                        <Link href={"/people/reporter/" + service_request.reporter} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
-                      </OverlayTrigger>
-                    </ListGroup.Item> : ""}
-                  {service_request.evacuation_assignments.map(evacuation_assignment => (
-                    <span key={evacuation_assignment.id}>
-                      {evacuation_assignment.end_time ? "" :
-                        <ListGroup.Item>
-                          <span>
-                            <b>Active Dispatch Assignment </b>
-                            <OverlayTrigger
-                              key={"dispatch-assignment-summary"}
-                              placement="top"
-                              overlay={
-                                <Tooltip id={`tooltip-dispatch-assignment-summary`}>
-                                  Dispatch assignment summary
-                                </Tooltip>
-                              }
-                            >
-                              <Link href={"/dispatch/summary/" + evacuation_assignment.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} inverse/></Link>
-                            </OverlayTrigger>
-                            <OverlayTrigger
-                              key={"dispatch-assignment-resolution"}
-                              placement="top"
-                              overlay={
-                                <Tooltip id={`tooltip-dispatch-assignment-resolution`}>
-                                  Close dispatch assignment
-                                </Tooltip>
-                              }
-                            >
-                              <Link href={"/dispatch/resolution/" + evacuation_assignment.id} target="_blank"><FontAwesomeIcon icon={faClipboardCheck} className="ml-1" inverse/></Link>
-                            </OverlayTrigger>
-                            <div>
-                              <b>Opened: </b><Moment format="MMMM Do YYYY HH:mm">{evacuation_assignment.start_time}</Moment>
-                            </div>
-                          </span>
-                        </ListGroup.Item>
-                      }
+                  <ListGroup.Item><b>Reporter: </b>{service_request.reporter ? <span>{service_request.reporter_object.first_name} {service_request.reporter_object.last_name}</span> : "No Reporter"}</ListGroup.Item>
+                  <ListGroup.Item>
+                  {service_request.latest_evac ?
+                    <span>
+                      <b>{service_request.latest_evac.end_time ? "Last" : "Active"} Dispatch Assignment: </b>
+                      <Moment format="L">{service_request.latest_evac.start_time}</Moment>
                     </span>
-                  ))}
+                  :
+                    <span>
+                      <b>Dispatch Assignment: </b>
+                      Never Serviced
+                    </span>
+                  }
+                  </ListGroup.Item>
                 </ListGroup>
               </Card.Body>
             </Card>
-            <Card>
-              <Card.Body>
-                <Card.Title>Animals</Card.Title>
-                {['cats', 'dogs', 'horses', 'other'].map(species => (
-                  <ListGroup key={species}>
-                    {service_request.animals.filter(animal => species.includes(animal.species)).length > 0 ?
-                    <ListGroup.Item style={{borderRadius: 0}}><b style={{textTransform:"capitalize"}}>{species}: </b>
-                    {service_request.animals.filter(animal => species.includes(animal.species)).map((animal, i) => (
-                    <span key={animal.id}>{i > 0 && ", "}{animal.name || "Unknown"}
-                      &nbsp;(
-                      {animal.status === "SHELTERED IN PLACE" ?
-                        <OverlayTrigger key={"sip"} placement="top"
-                                        overlay={<Tooltip id={`tooltip-sip`}>SHELTERED IN PLACE</Tooltip>}>
-                            <span className="fa-layers fa-fw">
-                              <FontAwesomeIcon icon={faCircle} transform={'grow-1'} />
-                              <FontAwesomeIcon icon={faHomeAlt} style={{color:"#444"}} transform={'shrink-3'} size="sm" inverse />
-                            </span>
-                        </OverlayTrigger> : ""}
-                      {animal.status === "REPORTED" ?
-                        <OverlayTrigger key={"reported"} placement="top"
-                                        overlay={<Tooltip id={`tooltip-reported`}>REPORTED</Tooltip>}>
-                            <FontAwesomeIcon icon={faExclamationCircle} inverse/>
-                        </OverlayTrigger> : ""}
-                      {animal.status === "UNABLE TO LOCATE" ?
-                        <OverlayTrigger key={"unable-to-locate"} placement="top"
-                                        overlay={<Tooltip id={`tooltip-unable-to-locate`}>UNABLE TO LOCATE</Tooltip>}>
-                            <FontAwesomeIcon icon={faQuestionCircle} inverse/>
-                        </OverlayTrigger> : ""}
-                      {animal.status === "EVACUATED" ?
-                        <OverlayTrigger key={"evacuated"} placement="top"
-                                        overlay={<Tooltip id={`tooltip-evacuated`}>EVACUATED</Tooltip>}>
-                            <FontAwesomeIcon icon={faHelicopter} inverse/>
-                        </OverlayTrigger> : ""}
-                      {animal.status === "REUNITED" ?
-                        <OverlayTrigger key={"reunited"} placement="top"
-                                        overlay={<Tooltip id={`tooltip-reunited`}>REUNITED</Tooltip>}>
-                            <FontAwesomeIcon icon={faHeart} inverse/>
-                        </OverlayTrigger> : ""}
-                      {animal.status === "SHELTERED" ?
-                        <OverlayTrigger key={"sheltered"} placement="top"
-                                        overlay={<Tooltip id={`tooltip-sheltered`}>SHELTERED</Tooltip>}>
-                            <FontAwesomeIcon icon={faHome} inverse/>
-                        </OverlayTrigger> : ""}
-                      {animal.status === "DECEASED" ?
-                        <OverlayTrigger key={"deceased"} placement="top"
-                                        overlay={<Tooltip id={`tooltip-deceased`}>DECEASED</Tooltip>}>
-                            <FontAwesomeIcon icon={faSkullCrossbones} inverse/>
-                        </OverlayTrigger> : ""}
-                      )
-                    </span>
-                  ))}
-                  </ListGroup.Item>
-                  : ""}
+            {searchState[service_request.id] ?
+              <Card style={{marginBottom:"6px"}}>
+                <Card.Body>
+                  <Card.Title style={{marginTop:"-10px"}}>
+                    <ListGroup horizontal>
+                    {searchState[service_request.id].species.map(species => (
+                      <ListGroup.Item key={species} active={searchState[service_request.id].selectedSpecies === species ? true : false} style={{textTransform:"capitalize", cursor:'pointer', paddingTop:"4px", paddingBottom:"4px"}} onClick={() => setSearchState(prevState => ({ ...prevState, [service_request.id]:{...prevState[service_request.id], selectedSpecies:species} }))}>{species}{species !== "other" ? "s" : ""}</ListGroup.Item>
+                    ))}
+                    </ListGroup>
+                  </Card.Title>
+                  <ListGroup style={{height:"144px", overflowY:"auto", marginTop:"-12px"}}>
+                    <Scrollbar autoHeight autoHide autoHeightMax={144} renderThumbVertical={props => <div {...props} style={{...props.style, backgroundColor: 'rgba(226, 226, 226, 0.2)'}} />}>
+                      {service_request.animals.filter(animal => animal.species === searchState[service_request.id].selectedSpecies).map((animal, i) => (
+                        <ListGroup.Item key={animal.id}>
+                          {animal.name || "Unknown"} - {animal.status}
+                        </ListGroup.Item>
+                      ))}
+                    </Scrollbar>
+                    {service_request.animals.length < 1 ? <ListGroup.Item style={{marginTop:"32px"}}>No Animals</ListGroup.Item> : ""}
                   </ListGroup>
-                ))}
               </Card.Body>
             </Card>
+            : ""}
           </CardGroup>
         </div>
       ))}

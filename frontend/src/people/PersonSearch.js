@@ -4,9 +4,8 @@ import { Link } from 'raviger';
 import { Button, ButtonGroup, Card, CardGroup, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faClipboardList, faCircle, faExclamationCircle, faQuestionCircle, faHome, faHelicopter, faHeart, faSkullCrossbones
+  faClipboardList
 } from '@fortawesome/free-solid-svg-icons';
-import { faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
 
@@ -156,51 +155,11 @@ function PersonSearch() {
 														{owner.animals.filter(animal => animal.species === searchState[owner.id].selectedSpecies).map((animal, i) => (
 															<ListGroup.Item key={animal.id}>
 																{animal.name || "Unknown"} - {animal.status}
-																{/* (
-																{animal.status === "SHELTERED IN PLACE" ?
-																	<OverlayTrigger key={"sip"} placement="top"
-																									overlay={<Tooltip id={`tooltip-sip`}>SHELTERED IN PLACE</Tooltip>}>
-																		<span className="fa-layers fa-fw">
-																			<FontAwesomeIcon icon={faCircle} transform={'grow-1'} />
-																			<FontAwesomeIcon icon={faHomeAlt} style={{color:"#444"}} transform={'shrink-3'} size="sm" inverse />
-																		</span>
-																	</OverlayTrigger> : ""}
-																{animal.status === "REPORTED" ?
-																	<OverlayTrigger key={"reported"} placement="top"
-																									overlay={<Tooltip id={`tooltip-reported`}>REPORTED</Tooltip>}>
-																		<FontAwesomeIcon icon={faExclamationCircle} inverse/>
-																	</OverlayTrigger> : ""}
-																{animal.status === "UNABLE TO LOCATE" ?
-																	<OverlayTrigger key={"unable-to-locate"} placement="top"
-																									overlay={<Tooltip id={`tooltip-unable-to-locate`}>UNABLE TO LOCATE</Tooltip>}>
-																		<FontAwesomeIcon icon={faQuestionCircle} inverse/>
-																	</OverlayTrigger> : ""}
-																{animal.status === "EVACUATED" ?
-																	<OverlayTrigger key={"evacuated"} placement="top"
-																									overlay={<Tooltip id={`tooltip-evacuated`}>EVACUATED</Tooltip>}>
-																		<FontAwesomeIcon icon={faHelicopter} inverse/>
-																	</OverlayTrigger> : ""}
-																{animal.status === "REUNITED" ?
-																	<OverlayTrigger key={"reunited"} placement="top"
-																									overlay={<Tooltip id={`tooltip-reunited`}>REUNITED</Tooltip>}>
-																		<FontAwesomeIcon icon={faHeart} inverse/>
-																	</OverlayTrigger> : ""}
-																{animal.status === "SHELTERED" ?
-																	<OverlayTrigger key={"sheltered"} placement="top"
-																									overlay={<Tooltip id={`tooltip-sheltered`}>SHELTERED</Tooltip>}>
-																		<FontAwesomeIcon icon={faHome} inverse/>
-																	</OverlayTrigger> : ""}
-																{animal.status === "DECEASED" ?
-																	<OverlayTrigger key={"deceased"} placement="top"
-																									overlay={<Tooltip id={`tooltip-deceased`}>DECEASED</Tooltip>}>
-																		<FontAwesomeIcon icon={faSkullCrossbones} inverse/>
-																	</OverlayTrigger> : ""}
-																) */}
 															</ListGroup.Item>
 														))}
 													</Scrollbar>
+													{owner.animals.length < 1 ? <ListGroup.Item style={{marginTop:"32px"}}>No Animals</ListGroup.Item> : ""}
 												</ListGroup>
-											{owner.animals.length < 1 ? <ListGroup><ListGroup.Item>No Animals</ListGroup.Item></ListGroup> : ""}
 										</Card.Body>
 									</Card>
 									: ""}

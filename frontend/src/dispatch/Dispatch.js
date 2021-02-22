@@ -95,7 +95,7 @@ function Dispatch() {
           let sr_dict = {}
           for (const service_request of dispatch_assignment.service_request_objects) {
             const matches = countMatches(service_request);
-            sr_dict[service_request.id] = {id:service_request.id, matches:matches, latitude:service_request.latitude, longitude:service_request.longitude, assigned_evac:service_request.assigned_evac.id, full_address:service_request.full_address};
+            sr_dict[service_request.id] = {id:service_request.id, matches:matches, latitude:service_request.latitude, longitude:service_request.longitude, full_address:service_request.full_address};
             bounds.push([service_request.latitude, service_request.longitude]);
           }
           map_dict[dispatch_assignment.id] = {color:random_colors[index], service_requests:sr_dict}
