@@ -31,7 +31,9 @@ function AnimalSearch() {
 
     // Hook for initializing data.
     useEffect(() => {
+      let unmounted = false;
       let source = axios.CancelToken.source();
+
       const fetchAnimals = async () => {
         setData({animals: [], isFetching: true});
         // Fetch ServiceRequest data.
@@ -39,23 +41,28 @@ function AnimalSearch() {
           cancelToken: source.token,
         })
         .then(response => {
-          setData({animals: response.data, isFetching: false});
+          if (!unmounted) {
+            setData({animals: response.data, isFetching: false});
+          }
         })
         .catch(error => {
-          console.log(error.response);
-          setData({animals: [], isFetching: false});
+          if (!unmounted) {
+            console.log(error.response);
+            setData({animals: [], isFetching: false});
+          }
         });
       };
       fetchAnimals();
       // Cleanup.
       return () => {
+        unmounted = true;
         source.cancel();
       };
     }, [searchTerm, statusOptions.status]);
 
   return (
     <div className="ml-2 mr-2">
-      <Header>Animal Search</Header>
+      <Header>Search Animals</Header>
       <hr/>
       <Form onSubmit={handleSubmit}>
         <InputGroup className="mb-3">

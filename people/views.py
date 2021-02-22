@@ -1,4 +1,4 @@
-from django.db.models import Prefetch
+from django.db.models import Exists, OuterRef, Prefetch
 from rest_framework import filters, permissions, viewsets
 from actstream import action
 
@@ -17,7 +17,17 @@ class PersonViewSet(viewsets.ModelViewSet):
     serializer_class = PersonSerializer
 
     def get_queryset(self):
-        return Person.objects.all().order_by('-first_name')
+        queryset = Person.objects.all().annotate(
+            is_owner=Exists(Animal.objects.filter(owners=OuterRef("id")))
+        )
+
+        # Status filter.
+        status = self.request.query_params.get('status', '')
+        if status == 'owner':
+            queryset = queryset.filter(is_owner=True)
+        elif status == 'reporter':
+            queryset = queryset.filter(is_owner=False)
+        return queryset
 
     def perform_create(self, serializer):
         if serializer.is_valid():

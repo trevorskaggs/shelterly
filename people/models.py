@@ -21,6 +21,9 @@ class Person(Location):
     def __str__(self):
         return '{} {}'.format(self.first_name, self.last_name)
 
+    class Meta:
+        ordering = ('-first_name',)
+
 class OwnerContact(models.Model):
     owner = models.ForeignKey(Person, on_delete=models.CASCADE)
     evac_assignment = models.ForeignKey('evac.EvacAssignment', null=True, blank=True, on_delete=models.CASCADE)

@@ -92,7 +92,7 @@ input[disabled] {
   display: flex;
   min-height: 25px;
 }
-::-webkit-scrollbar {display:none;}
+/* ::-webkit-scrollbar {display:none;} */
 
 .unroomed_animals li {
   margin-right: 1em;

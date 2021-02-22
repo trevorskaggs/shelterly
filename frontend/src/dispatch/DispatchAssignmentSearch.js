@@ -30,31 +30,38 @@ function DispatchAssignmentSearch() {
 
   // Hook for initializing data.
   useEffect(() => {
+    let unmounted = false;
     let source = axios.CancelToken.source();
+
     const fetchServiceRequests = async () => {
       setData({evacuation_assignments: [], isFetching: true});
       // Fetch ServiceRequest data.
       await axios.get('/evac/api/evacassignment/?search=' + searchTerm + '&status=' + statusOptions.status, {
         cancelToken: source.token,
       })
-          .then(response => {
-            setData({evacuation_assignments: response.data, isFetching: false});
-          })
-          .catch(error => {
-            console.log(error.response);
-            setData({evacuation_assignments: [], isFetching: false});
-          });
+      .then(response => {
+        if (!unmounted) {
+          setData({evacuation_assignments: response.data, isFetching: false});
+        }
+      })
+      .catch(error => {
+        if (!unmounted) {
+          console.log(error.response);
+          setData({evacuation_assignments: [], isFetching: false});
+        }
+      });
     };
     fetchServiceRequests();
     // Cleanup.
     return () => {
+      unmounted = true;
       source.cancel();
     };
   }, [searchTerm, statusOptions.status]);
 
   return (
       <div className="ml-2 mr-2">
-        <Header>Dispatch Assignment Search</Header>
+        <Header>Search Dispatch Assignments</Header>
         <hr/>
         <Form onSubmit={handleSubmit}>
           <InputGroup className="mb-3">

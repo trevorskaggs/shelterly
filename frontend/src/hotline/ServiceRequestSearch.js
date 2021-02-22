@@ -16,7 +16,7 @@ import {
 } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faClipboardList, faCircle, faExclamationCircle, faQuestionCircle, faHome, faHelicopter, faHeart, faSkullCrossbones
+  faClipboardList, faClipboardCheck, faCircle, faExclamationCircle, faQuestionCircle, faHome, faHelicopter, faHeart, faSkullCrossbones
 } from '@fortawesome/free-solid-svg-icons';
 import { faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
 import Moment from 'react-moment';
@@ -29,7 +29,7 @@ function ServiceRequestSearch() {
   const [data, setData] = useState({service_requests: [], isFetching: false});
   const [searchTerm, setSearchTerm] = useState("");
   const [tempSearchTerm, setTempSearchTerm] = useState("");
-  const [statusOptions, setStatusOptions] = useState({status:"all", allColor: "primary", openColor:"secondary", assignedColor:"secondary", closedColor:"secondary", canceledColor:"secondary"});
+  const [statusOptions, setStatusOptions] = useState({status:"open", allColor: "secondary", openColor:"primary", assignedColor:"secondary", closedColor:"secondary", canceledColor:"secondary"});
   const [page, setPage] = useState(1)
   const [numPages, setNumPages] = useState(1)
 
@@ -46,7 +46,9 @@ function ServiceRequestSearch() {
 
   // Hook for initializing data.
   useEffect(() => {
+    let unmounted = false;
     let source = axios.CancelToken.source();
+
     const fetchServiceRequests = async () => {
       setData({service_requests: [], isFetching: true});
       // Fetch ServiceRequest data.
@@ -54,24 +56,29 @@ function ServiceRequestSearch() {
         cancelToken: source.token,
       })
       .then(response => {
-        setNumPages(Math.ceil(response.data.length / ITEMS_PER_PAGE))
-        setData({service_requests: response.data, isFetching: false});
+        if (!unmounted) {
+          setNumPages(Math.ceil(response.data.length / ITEMS_PER_PAGE))
+          setData({service_requests: response.data, isFetching: false});
+        }
       })
       .catch(error => {
-        console.log(error.response);
-        setData({service_requests: [], isFetching: false});
+        if (!unmounted) {
+          console.log(error.response);
+          setData({service_requests: [], isFetching: false});
+        }
       });
     };
     fetchServiceRequests();
     // Cleanup.
     return () => {
+      unmounted = true;
       source.cancel();
     };
   }, [searchTerm, statusOptions.status]);
 
   return (
     <div className="ml-2 mr-2">
-      <Header>Service Request Search</Header>
+      <Header>Search Service Requests</Header>
       <hr/>
       <Form onSubmit={handleSubmit}>
         <InputGroup className="mb-3">
@@ -85,16 +92,15 @@ function ServiceRequestSearch() {
           <InputGroup.Append>
             <Button variant="outline-light" type="submit">Search</Button>
           </InputGroup.Append>
-            <ButtonGroup className="ml-3">
-              <Button variant={statusOptions.allColor} onClick={() => setStatusOptions({status:"all", allColor:"primary", openColor:"secondary", assignedColor:"secondary", closedColor:"secondary", canceledColor:"secondary"})}>All</Button>
-              <Button variant={statusOptions.openColor} onClick={() => setStatusOptions({status:"open", allColor:"secondary", openColor:"primary", assignedColor:"secondary", closedColor:"secondary", canceledColor:"secondary"})}>Open</Button>
-              <Button variant={statusOptions.assignedColor} onClick={() => setStatusOptions({status:"assigned", allColor:"secondary", openColor:"secondary", assignedColor:"primary", closedColor:"secondary", canceledColor:"secondary"})}>Assigned</Button>
-              <Button variant={statusOptions.closedColor} onClick={() => setStatusOptions({status:"closed", allColor:"secondary", openColor:"secondary", assignedColor:"secondary", closedColor:"primary", canceledColor:"secondary"})}>Closed</Button>
-              <Button variant={statusOptions.canceledColor} onClick={() => setStatusOptions({status:"canceled", allColor:"secondary", openColor:"secondary", assignedColor:"secondary", closedColor:"secondary", canceledColor:"primary"})}>Canceled</Button>
-            </ButtonGroup>
-          </InputGroup>
+          <ButtonGroup className="ml-3">
+            <Button variant={statusOptions.allColor} onClick={() => setStatusOptions({status:"all", allColor:"primary", openColor:"secondary", assignedColor:"secondary", closedColor:"secondary", canceledColor:"secondary"})}>All</Button>
+            <Button variant={statusOptions.openColor} onClick={() => setStatusOptions({status:"open", allColor:"secondary", openColor:"primary", assignedColor:"secondary", closedColor:"secondary", canceledColor:"secondary"})}>Open</Button>
+            <Button variant={statusOptions.assignedColor} onClick={() => setStatusOptions({status:"assigned", allColor:"secondary", openColor:"secondary", assignedColor:"primary", closedColor:"secondary", canceledColor:"secondary"})}>Assigned</Button>
+            <Button variant={statusOptions.closedColor} onClick={() => setStatusOptions({status:"closed", allColor:"secondary", openColor:"secondary", assignedColor:"secondary", closedColor:"primary", canceledColor:"secondary"})}>Closed</Button>
+            <Button variant={statusOptions.canceledColor} onClick={() => setStatusOptions({status:"canceled", allColor:"secondary", openColor:"secondary", assignedColor:"secondary", closedColor:"secondary", canceledColor:"primary"})}>Canceled</Button>
+          </ButtonGroup>
+        </InputGroup>
       </Form>
-
       {data.service_requests.map((service_request, index) => (
         <div key={service_request.id} className="mt-3" hidden={page !== Math.ceil((index+1)/ITEMS_PER_PAGE)}>
           <div className="card-header">
@@ -153,7 +159,7 @@ function ServiceRequestSearch() {
                       {evacuation_assignment.end_time ? "" :
                         <ListGroup.Item>
                           <span>
-                            <b>Dispatch Assignment </b>
+                            <b>Active Dispatch Assignment </b>
                             <OverlayTrigger
                               key={"dispatch-assignment-summary"}
                               placement="top"
@@ -165,11 +171,19 @@ function ServiceRequestSearch() {
                             >
                               <Link href={"/dispatch/summary/" + evacuation_assignment.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} inverse/></Link>
                             </OverlayTrigger>
+                            <OverlayTrigger
+                              key={"dispatch-assignment-resolution"}
+                              placement="top"
+                              overlay={
+                                <Tooltip id={`tooltip-dispatch-assignment-resolution`}>
+                                  Close dispatch assignment
+                                </Tooltip>
+                              }
+                            >
+                              <Link href={"/dispatch/resolution/" + evacuation_assignment.id} target="_blank"><FontAwesomeIcon icon={faClipboardCheck} className="ml-1" inverse/></Link>
+                            </OverlayTrigger>
                             <div>
-                              <b>Opened: </b><Moment format="MMMM Do YYYY HH:mm">{evacuation_assignment.start_time}</Moment> |
-                              <Link href={"/dispatch/resolution/" + evacuation_assignment.id}
-                                className="btn btn-danger ml-1"
-                                style={{paddingTop: "0px", paddingBottom: "0px"}} target="_blank">Close</Link>
+                              <b>Opened: </b><Moment format="MMMM Do YYYY HH:mm">{evacuation_assignment.start_time}</Moment>
                             </div>
                           </span>
                         </ListGroup.Item>
