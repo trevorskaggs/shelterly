@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import ReactDOMServer from 'react-dom/server';
 import axios from "axios";
 import { Link } from 'raviger';
 import { Button, Card, Col, ListGroup, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { Typeahead } from 'react-bootstrap-typeahead';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faCircle, faClipboardCheck, faClipboardList, faEdit, faMinusSquare, faPlusSquare, faExclamationCircle
+  faClipboardCheck, faClipboardList, faEdit, faMinusSquare, faPlusSquare
 } from '@fortawesome/free-solid-svg-icons';
-import { Marker, TileLayer, Tooltip as MapTooltip } from "react-leaflet";
+import { Marker, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
 import Moment from 'react-moment';
 import Map, { countMatches, prettyText, reportedMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
@@ -209,7 +208,7 @@ function DispatchSummary({id}) {
     <Card key={service_request.id} border="secondary" className="mt-3 mb-2">
       <Card.Body>
         <Card.Title>
-          <h4>Service Request
+          <h4>{service_request.full_address}
           <OverlayTrigger
             key={"service-request-details"}
             placement="top"
@@ -223,9 +222,8 @@ function DispatchSummary({id}) {
           </OverlayTrigger>
             &nbsp;| <span style={{textTransform:"capitalize"}}>{service_request.status}</span></h4>
         </Card.Title>
-        <hr/>
+        <hr style={{marginBottom:"7px"}}/>
         <ListGroup variant="flush" style={{marginTop:"-5px", marginBottom:"-13px"}}>
-          <ListGroup.Item style={{marginTop:"-8px"}}><b>Address: </b>{service_request.full_address}</ListGroup.Item>
           {service_request.owner_objects.map(owner => (
             <ListGroup.Item key={owner.id}><b>Owner: </b>{owner.first_name} {owner.last_name} | {owner.display_phone||owner.email||"No Contact"}</ListGroup.Item>
           ))}
