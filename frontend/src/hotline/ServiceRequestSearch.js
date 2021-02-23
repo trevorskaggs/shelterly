@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
-import { Link } from 'raviger';
+import { Link, useQueryParams } from 'raviger';
 import {
   Button,
   ButtonGroup,
@@ -26,11 +26,18 @@ import { ITEMS_PER_PAGE } from '../constants';
 
 function ServiceRequestSearch() {
 
+  // Identify any query param data.
+  const [queryParams] = useQueryParams();
+  const {
+    search = '',
+    status = 'open',
+  } = queryParams;
+
   const [data, setData] = useState({service_requests: [], isFetching: false});
   const [searchState, setSearchState] = useState({});
-  const [searchTerm, setSearchTerm] = useState("");
-  const [tempSearchTerm, setTempSearchTerm] = useState("");
-  const [statusOptions, setStatusOptions] = useState({status:"open", allColor: "secondary", openColor:"primary", assignedColor:"secondary", closedColor:"secondary", canceledColor:"secondary"});
+  const [searchTerm, setSearchTerm] = useState(search);
+  const [tempSearchTerm, setTempSearchTerm] = useState(search);
+  const [statusOptions, setStatusOptions] = useState(status);
   const [page, setPage] = useState(1);
   const [numPages, setNumPages] = useState(1);
 
@@ -53,7 +60,7 @@ function ServiceRequestSearch() {
     const fetchServiceRequests = async () => {
       setData({service_requests: [], isFetching: true});
       // Fetch ServiceRequest data.
-      await axios.get('/hotline/api/servicerequests/?search=' + searchTerm + '&status=' + statusOptions.status, {
+      await axios.get('/hotline/api/servicerequests/?search=' + searchTerm + '&status=' + statusOptions, {
         cancelToken: source.token,
       })
       .then(response => {
@@ -67,9 +74,13 @@ function ServiceRequestSearch() {
 							if (!species.includes(animal.species)) {
 								species.push(animal.species)
 							}
-						})
-						search_state[service_request.id] = {species:species, selectedSpecies:species[0]}
-						})
+						});
+            let sortOrder = ['cat', 'dog', 'horse', 'other'];
+            species.sort(function(a, b) {
+              return sortOrder.indexOf(a) - sortOrder.indexOf(b);
+            });
+						search_state[service_request.id] = {species:species, selectedSpecies:species[0]};
+					});
 					setSearchState(search_state);
         }
       })
@@ -86,7 +97,7 @@ function ServiceRequestSearch() {
       unmounted = true;
       source.cancel();
     };
-  }, [searchTerm, statusOptions.status]);
+  }, [searchTerm, statusOptions]);
 
   return (
     <div className="ml-2 mr-2">
@@ -105,11 +116,10 @@ function ServiceRequestSearch() {
             <Button variant="outline-light" type="submit">Search</Button>
           </InputGroup.Append>
           <ButtonGroup className="ml-3">
-            <Button variant={statusOptions.allColor} onClick={() => setStatusOptions({status:"all", allColor:"primary", openColor:"secondary", assignedColor:"secondary", closedColor:"secondary", canceledColor:"secondary"})}>All</Button>
-            <Button variant={statusOptions.openColor} onClick={() => setStatusOptions({status:"open", allColor:"secondary", openColor:"primary", assignedColor:"secondary", closedColor:"secondary", canceledColor:"secondary"})}>Open</Button>
-            <Button variant={statusOptions.assignedColor} onClick={() => setStatusOptions({status:"assigned", allColor:"secondary", openColor:"secondary", assignedColor:"primary", closedColor:"secondary", canceledColor:"secondary"})}>Assigned</Button>
-            <Button variant={statusOptions.closedColor} onClick={() => setStatusOptions({status:"closed", allColor:"secondary", openColor:"secondary", assignedColor:"secondary", closedColor:"primary", canceledColor:"secondary"})}>Closed</Button>
-            <Button variant={statusOptions.canceledColor} onClick={() => setStatusOptions({status:"canceled", allColor:"secondary", openColor:"secondary", assignedColor:"secondary", closedColor:"secondary", canceledColor:"primary"})}>Canceled</Button>
+            <Button variant={statusOptions === "open" ? "primary" : "secondary"} onClick={statusOptions !== "open" ? () => setStatusOptions("open") : () => setStatusOptions("")}>Open</Button>
+            <Button variant={statusOptions === "assigned" ? "primary" : "secondary"} onClick={statusOptions !== "assigned" ? () => setStatusOptions("assigned") : () => setStatusOptions("")}>Assigned</Button>
+            <Button variant={statusOptions === "closed" ? "primary" : "secondary"} onClick={statusOptions !== "closed" ? () => setStatusOptions("closed") : () => setStatusOptions("")}>Closed</Button>
+            <Button variant={statusOptions === "canceled" ? "primary" : "secondary"} onClick={statusOptions !== "canceled" ? () => setStatusOptions("canceled") : () => setStatusOptions("")}>Canceled</Button>
           </ButtonGroup>
         </InputGroup>
       </Form>
@@ -135,26 +145,28 @@ function ServiceRequestSearch() {
             <Card style={{marginBottom:"6px"}}>
               <Card.Body>
                 <Card.Title style={{marginTop:"-9px", marginBottom:"8px"}}>Information</Card.Title>
-                <ListGroup>
-                  {service_request.owner_objects.map(owner => (
-                    <ListGroup.Item key={owner.id}><b>Owner: </b>{owner.first_name} {owner.last_name}</ListGroup.Item>
-                  ))}
-                  {service_request.owners.length < 1 ? <ListGroup.Item><b>Owner: </b>No Owner</ListGroup.Item> : ""}
-                  <ListGroup.Item><b>Reporter: </b>{service_request.reporter ? <span>{service_request.reporter_object.first_name} {service_request.reporter_object.last_name}</span> : "No Reporter"}</ListGroup.Item>
-                  <ListGroup.Item>
-                  {service_request.latest_evac ?
-                    <span>
-                      <b>{service_request.latest_evac.end_time ? "Last" : "Active"} Dispatch Assignment: </b>
-                      <Moment format="L">{service_request.latest_evac.start_time}</Moment>
-                    </span>
-                  :
-                    <span>
-                      <b>Dispatch Assignment: </b>
-                      Never Serviced
-                    </span>
-                  }
-                  </ListGroup.Item>
-                </ListGroup>
+                <Scrollbar autoHeight autoHide autoHeightMax={144} renderThumbVertical={props => <div {...props} style={{...props.style, backgroundColor: 'rgba(226, 226, 226, 0.2)'}} />}>
+                  <ListGroup>
+                    <ListGroup.Item>
+                    {service_request.latest_evac ?
+                      <span>
+                        <b>{service_request.latest_evac.end_time ? "Last" : "Active"} Dispatch Assignment: </b>
+                        <Moment format="L">{service_request.latest_evac.start_time}</Moment>
+                      </span>
+                    :
+                      <span>
+                        <b>Dispatch Assignment: </b>
+                        Never Serviced
+                      </span>
+                    }
+                    </ListGroup.Item>
+                    {service_request.owner_objects.map(owner => (
+                      <ListGroup.Item key={owner.id}><b>Owner: </b>{owner.first_name} {owner.last_name}</ListGroup.Item>
+                    ))}
+                    {service_request.owners.length < 1 ? <ListGroup.Item><b>Owner: </b>No Owner</ListGroup.Item> : ""}
+                    <ListGroup.Item><b>Reporter: </b>{service_request.reporter ? <span>{service_request.reporter_object.first_name} {service_request.reporter_object.last_name}</span> : "No Reporter"}</ListGroup.Item>
+                  </ListGroup>
+                </Scrollbar>
               </Card.Body>
             </Card>
             {searchState[service_request.id] ?

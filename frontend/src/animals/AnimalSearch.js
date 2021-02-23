@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
-import { Link } from 'raviger';
+import { Link, useQueryParams } from 'raviger';
 import { Button, ButtonGroup, Card, CardGroup, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Pagination, Tooltip } from 'react-bootstrap';
 import ReactImageFallback from 'react-image-fallback';
 import noImageFound from '../static/images/image-not-found.png';
@@ -17,10 +17,17 @@ import { ITEMS_PER_PAGE } from '../constants';
 
 function AnimalSearch() {
 
+  // Identify any query param data.
+  const [queryParams] = useQueryParams();
+  const {
+    search = '',
+    owned = 'owned',
+  } = queryParams;
+
   const [data, setData] = useState({animals: [], isFetching: false});
-  const [searchTerm, setSearchTerm] = useState("");
-  const [tempSearchTerm, setTempSearchTerm] = useState("");
-  const [statusOptions, setStatusOptions] = useState({status:"owned", ownedColor:"primary", strayColor:"secondary"});
+  const [searchTerm, setSearchTerm] = useState(search);
+  const [tempSearchTerm, setTempSearchTerm] = useState(search);
+  const [statusOptions, setStatusOptions] = useState(owned);
   const [page, setPage] = useState(1);
   const [numPages, setNumPages] = useState(1);
 
@@ -35,19 +42,6 @@ function AnimalSearch() {
     setSearchTerm(tempSearchTerm);
   }
 
-  const handleStatusOptions = (value) => {
-    if (value === 'owned') {
-      const status = statusOptions.status === 'owned' ? '' : 'owned';
-      const color = statusOptions.status === 'owned' ? 'secondary' : 'primary';
-      setStatusOptions({status:status, ownedColor:color, strayColor:"secondary"});
-    }
-    else if (value === 'stray') {
-      const status = statusOptions.status === 'stray' ? '' : 'stray';
-      const color = statusOptions.status === 'stray' ? 'secondary' : 'primary';
-      setStatusOptions({status:status, ownedColor:"secondary", strayColor:color});
-    }
-  }
-
   // Hook for initializing data.
   useEffect(() => {
     let unmounted = false;
@@ -56,7 +50,7 @@ function AnimalSearch() {
     const fetchAnimals = async () => {
       setData({animals: [], isFetching: true});
       // Fetch ServiceRequest data.
-      await axios.get('/animals/api/animal/?search=' + searchTerm + '&status=' + statusOptions.status, {
+      await axios.get('/animals/api/animal/?search=' + searchTerm + '&owned=' + statusOptions, {
         cancelToken: source.token,
       })
       .then(response => {
@@ -78,7 +72,7 @@ function AnimalSearch() {
       unmounted = true;
       source.cancel();
     };
-  }, [searchTerm, statusOptions.status]);
+  }, [searchTerm, statusOptions]);
 
   return (
     <div className="ml-2 mr-2">
@@ -97,8 +91,8 @@ function AnimalSearch() {
             <Button variant="outline-light" type="submit">Search</Button>
           </InputGroup.Append>
           <ButtonGroup className="ml-1">
-            <Button variant={statusOptions.ownedColor} onClick={() => handleStatusOptions("owned")}>Owned</Button>
-            <Button variant={statusOptions.strayColor} onClick={() => handleStatusOptions("stray")}>Stray</Button>
+            <Button variant={statusOptions === "owned" ? "primary" : "secondary"} onClick={statusOptions !== "owned" ? () => setStatusOptions("owned") : () => setStatusOptions("")}>Owned</Button>
+            <Button variant={statusOptions === "stray" ? "primary" : "secondary"} onClick={statusOptions !== "stray" ? () => setStatusOptions("stray") : () => setStatusOptions("")}>Stray</Button>
           </ButtonGroup>
         </InputGroup>
       </Form>

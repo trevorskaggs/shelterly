@@ -5,7 +5,7 @@ import Moment from 'react-moment';
 import { Button, Card, ListGroup, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBan, faCalendarDay, faCar, faClipboardList, faComment, faEdit, faHouseDamage, faKey, faMapMarkedAlt, faMinusSquare, faPlusSquare, faTimes, faTrailer
+  faBan, faCalendarDay, faCar, faClipboardCheck, faClipboardList, faComment, faEdit, faHouseDamage, faKey, faMapMarkedAlt, faMinusSquare, faPlusSquare, faTimes, faTrailer
 } from '@fortawesome/free-solid-svg-icons';
 import ReactImageFallback from 'react-image-fallback';
 import Header from '../components/Header';
@@ -376,6 +376,17 @@ function ServiceRequestDetails({id}) {
                       }
                     >
                       <Link href={"/dispatch/summary/" + data.latest_evac.id}><FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1" inverse /></Link>
+                    </OverlayTrigger>
+                    <OverlayTrigger
+                      key={"close-dispatch-assignment"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-close-dispatch-assignment`}>
+                          Close dispatch assignment
+                        </Tooltip>
+                      }
+                    >
+                      <Link href={"/dispatch/resolution/" + data.latest_evac.id}><FontAwesomeIcon icon={faClipboardCheck} className="ml-1" inverse /></Link>
                     </OverlayTrigger>
                     <div><b>Date Opened: </b><Moment format="LL">{data.latest_evac.start_time}</Moment></div>
                   </ListGroup.Item>

@@ -147,9 +147,9 @@ class AnimalViewSet(viewsets.ModelViewSet):
         queryset = Animal.objects.exclude(status="CANCELED").prefetch_related(Prefetch('animalimage_set', to_attr='images')).distinct()
         
         #filter by stray
-        if self.request.query_params.get('status', '') == 'stray':
+        if self.request.query_params.get('owned', '') == 'stray':
             queryset = queryset.filter(owners=None)
-        elif self.request.query_params.get('status', '') == 'owned':
+        elif self.request.query_params.get('owned', '') == 'owned':
             queryset = queryset.filter(owners__isnull=False)
             
         return queryset

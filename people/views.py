@@ -23,9 +23,9 @@ class PersonViewSet(viewsets.ModelViewSet):
 
         # Status filter.
         status = self.request.query_params.get('status', '')
-        if status == 'owner':
+        if status == 'owners':
             queryset = queryset.filter(is_owner=True)
-        elif status == 'reporter':
+        elif status == 'reporters':
             queryset = queryset.filter(is_owner=False)
         return queryset
 

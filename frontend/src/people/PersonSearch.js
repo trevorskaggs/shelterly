@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
-import { Link } from 'raviger';
+import { Link, useQueryParams } from 'raviger';
 import { Button, ButtonGroup, Card, CardGroup, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Pagination, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -13,11 +13,18 @@ import { ITEMS_PER_PAGE } from '../constants';
 
 function PersonSearch() {
 
+	// Identify any query param data.
+  const [queryParams] = useQueryParams();
+  const {
+    search = '',
+    person = 'owners',
+  } = queryParams;
+
 	const [data, setData] = useState({owners: [], isFetching: false});
 	const [searchState, setSearchState] = useState({});
-	const [statusOptions, setStatusOptions] = useState({status:"owner", ownerColor: "primary", reporterColor:"secondary"});
-	const [searchTerm, setSearchTerm] = useState("");
-	const [tempSearchTerm, setTempSearchTerm] = useState("");
+	const [statusOptions, setStatusOptions] = useState(person);
+	const [searchTerm, setSearchTerm] = useState(search);
+	const [tempSearchTerm, setTempSearchTerm] = useState(search);
 	const [page, setPage] = useState(1);
   const [numPages, setNumPages] = useState(1);
 
@@ -40,7 +47,7 @@ function PersonSearch() {
 		const fetchOwners = async () => {
 			setData({owners: [], isFetching: true});
 			// Fetch People data.
-			await axios.get('/people/api/person/?search=' + searchTerm + '&status=' + statusOptions.status, {
+			await axios.get('/people/api/person/?search=' + searchTerm + '&status=' + statusOptions, {
 				cancelToken: source.token,
 			})
 			.then(response => {
@@ -73,7 +80,7 @@ function PersonSearch() {
 			unmounted = true;
 			source.cancel();
 		};
-	}, [searchTerm, statusOptions.status]);
+	}, [searchTerm, statusOptions]);
 
 	return (
 			<div className="ml-2 mr-2">
@@ -92,8 +99,8 @@ function PersonSearch() {
 								<Button variant="outline-light" type="submit">Search</Button>
 							</InputGroup.Append>
 							<ButtonGroup className="ml-3">
-								<Button variant={statusOptions.ownerColor} onClick={() => setStatusOptions({status:"owner", ownerColor:"primary", reporterColor:"secondary"})}>Owners</Button>
-								<Button variant={statusOptions.reporterColor} onClick={() => setStatusOptions({status:"reporter", ownerColor:"secondary", reporterColor:"primary"})}>Reporters</Button>
+								<Button variant={statusOptions === "owners" ? "primary" : "secondary"} onClick={statusOptions !== "owners" ? () => setStatusOptions("owners") : () => setStatusOptions("")}>Owners</Button>
+								<Button variant={statusOptions === "reporters" ? "primary" : "secondary"} onClick={statusOptions !== "reporters" ? () => setStatusOptions("reporters") : () => setStatusOptions("")}>Reporters</Button>
 							</ButtonGroup>
 						</InputGroup>
 					</Form>
@@ -102,7 +109,7 @@ function PersonSearch() {
 									<div className="card-header"> {owner.first_name ?
 										<h4 style={{marginBottom: "-2px"}}>{owner.first_name} {owner.last_name}
 											{owner.agency ? <span> ({owner.agency})</span> : ""}
-											{statusOptions.status === 'owner' ?
+											{statusOptions === 'owners' ?
 											<OverlayTrigger
 												key={"owner-details"}
 												placement="top"
@@ -171,8 +178,8 @@ function PersonSearch() {
 								</CardGroup>
 						</div>
 					))}
-					<p>{data.isFetching ? 'Fetching ' + statusOptions.status + 's...' :
-						<span>{data.owners && data.owners.length ? '' : 'No ' + statusOptions.status + 's found.'}</span>}
+					<p>{data.isFetching ? 'Fetching ' + statusOptions + '...' :
+						<span>{data.owners && data.owners.length ? '' : 'No ' + statusOptions + ' found.'}</span>}
 					</p>
 					<Pagination className="custom-page-links" size="lg" onClick={(e) => {setPage(parseInt(e.target.innerText))}}>
 						{[...Array(numPages).keys()].map(x =>
