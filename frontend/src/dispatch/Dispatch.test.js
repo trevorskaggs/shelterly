@@ -2,7 +2,7 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import Dispatch from "./Dispatch";
 import DispatchTeamMemberForm from "./DispatchTeamMemberForm";
-import DispatchAssignmentSearch from "./DispatchAssignmentSearch";
+import DispatchSearch from "./DispatchSearch";
 
 describe("Render evac", () => {
   it("Render Dispatch", () => {
@@ -23,7 +23,7 @@ describe("Render evac", () => {
 
 describe("Render DispatchAssignmentSearch", () => {
   it("Empty table loads", async () => {
-    render(<DispatchAssignmentSearch />);
+    render(<DispatchSearch />);
     expect(await screen.getByText("Fetching dispatch requests...")).toBeTruthy();
   });
 });

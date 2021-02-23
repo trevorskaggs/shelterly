@@ -29,6 +29,8 @@ hr { display: block; height: 1px;
 
 .landing-leaflet-container { width: auto; height: 311px; min-height:311px;}
 
+.dispatch-leaflet-container { width: auto; height: 311px; min-height:311px;}
+
 .leaflet-top, .leaflet-bottom {
   z-index: 400 !important;
 }
@@ -92,7 +94,7 @@ input[disabled] {
   padding-left: 0;
   margin-bottom: 0px;
   display: flex;
-  min-height: 25px;
+  min-height: 67px;
 }
 ::-webkit-scrollbar {display:none;}
 
