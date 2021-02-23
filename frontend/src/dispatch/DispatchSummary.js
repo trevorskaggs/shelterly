@@ -280,7 +280,7 @@ function DispatchSummary({id}) {
         />
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="primary" onClick={handleAddTeamMemberSubmit}>Yes</Button>
+        <Button variant="primary" onClick={handleAddTeamMemberSubmit}>Add</Button>
         <Button variant="secondary" onClick={handleClose}>Cancel</Button>
       </Modal.Footer>
     </Modal>

@@ -93,7 +93,7 @@ function Shelter() {
             <div className="mb-0">
               <Row className="ml-0 mr-0">
                 <div className="border-right" style={{width:"100px"}}>
-                  <FontAwesomeIcon icon={faHome} style={{color:"white"}} size="6x" className="ml-1" style={{paddingRight:"10px"}} inverse />
+                  <FontAwesomeIcon icon={faHome} size="6x" className="ml-1" style={{paddingRight:"10px"}} inverse />
                 </div>
                 <Col style={{marginLeft:"-5px"}}>
                   <h4 className="mt-1">{shelter.name}

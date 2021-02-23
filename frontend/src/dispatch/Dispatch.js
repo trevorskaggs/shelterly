@@ -104,6 +104,11 @@ function Dispatch() {
             >
               <MapTooltip autoPan={false}>
                 <span>
+                  <div>Team:&nbsp;
+                  {dispatch_assignment.team_member_objects.map((team_member, i) => (
+                    <span key={team_member.id}>{i > 0 && ", "}{team_member.first_name + ' ' + team_member.last_name}</span>
+                  ))}
+                  </div>
                   {mapState[dispatch_assignment.id] ?
                     <span>
                       {Object.keys(mapState[dispatch_assignment.id].service_requests[service_request.id].matches).map((key,i) => (

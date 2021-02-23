@@ -142,7 +142,7 @@ function ShelterRoomAssignment({id}) {
       });
     };
     fetchShelterData();
-  }, [id]);
+  }, [id, selectedBuilding]);
 
   return (
     <>
