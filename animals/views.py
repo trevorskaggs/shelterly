@@ -144,20 +144,13 @@ class AnimalViewSet(viewsets.ModelViewSet):
             images (List of AnimalImages)
         and filtered by is_stray.   
         """        
-        queryset = Animal.objects.exclude(status="CANCELED").annotate(
-            is_stray=Case(
-                When(owners=None, then=True),
-                default=False,
-                output_field=BooleanField(),
-            )
-        ).prefetch_related(Prefetch('animalimage_set', to_attr='images')).distinct()
+        queryset = Animal.objects.exclude(status="CANCELED").prefetch_related(Prefetch('animalimage_set', to_attr='images')).distinct()
         
-        #filter by is_stray
-        is_stray = self.request.query_params.get('is_stray', '')
-        if is_stray == 'true':
-            queryset = queryset.filter(is_stray=True)
-        elif is_stray == 'false':
-            queryset = queryset.filter(is_stray=False)
+        #filter by stray
+        if self.request.query_params.get('status', '') == 'stray':
+            queryset = queryset.filter(owners=None)
+        elif self.request.query_params.get('status', '') == 'owned':
+            queryset = queryset.filter(owners__isnull=False)
             
         return queryset
     

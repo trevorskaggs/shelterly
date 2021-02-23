@@ -16,13 +16,13 @@ import {
 } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faClipboardList, faClipboardCheck, faCircle, faExclamationCircle, faQuestionCircle, faHome, faHelicopter, faHeart, faSkullCrossbones
+  faClipboardList
 } from '@fortawesome/free-solid-svg-icons';
 import Moment from 'react-moment';
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
 
-import { ITEMS_PER_PAGE } from '../constants'
+import { ITEMS_PER_PAGE } from '../constants';
 
 function ServiceRequestSearch() {
 
@@ -31,8 +31,8 @@ function ServiceRequestSearch() {
   const [searchTerm, setSearchTerm] = useState("");
   const [tempSearchTerm, setTempSearchTerm] = useState("");
   const [statusOptions, setStatusOptions] = useState({status:"open", allColor: "secondary", openColor:"primary", assignedColor:"secondary", closedColor:"secondary", canceledColor:"secondary"});
-  const [page, setPage] = useState(1)
-  const [numPages, setNumPages] = useState(1)
+  const [page, setPage] = useState(1);
+  const [numPages, setNumPages] = useState(1);
 
   // Update searchTerm when field input changes.
   const handleChange = event => {
@@ -58,7 +58,7 @@ function ServiceRequestSearch() {
       })
       .then(response => {
         if (!unmounted) {
-          setNumPages(Math.ceil(response.data.length / ITEMS_PER_PAGE))
+          setNumPages(Math.ceil(response.data.length / ITEMS_PER_PAGE));
           setData({service_requests: response.data, isFetching: false});
           let search_state = {};
 					response.data.forEach(service_request => {
@@ -185,10 +185,10 @@ function ServiceRequestSearch() {
       ))}
       <p>{data.isFetching ? 'Fetching service requests...' : <span>{data.service_requests && data.service_requests.length ? '' : 'No Service Requests found.'}</span>}</p>
     <Pagination className="custom-page-links" size="lg" onClick={(e) => {setPage(parseInt(e.target.innerText))}}>
-      {[...Array(numPages).keys()].map(x => 
+      {[...Array(numPages).keys()].map(x =>
       <Pagination.Item key={x+1} active={x+1 === page}>
-                {x+1}
-              </Pagination.Item>)
+        {x+1}
+      </Pagination.Item>)
       }
     </Pagination>
     </div>

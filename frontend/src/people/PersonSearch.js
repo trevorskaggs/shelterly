@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import { Link } from 'raviger';
-import { Button, ButtonGroup, Card, CardGroup, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Button, ButtonGroup, Card, CardGroup, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Pagination, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faClipboardList
 } from '@fortawesome/free-solid-svg-icons';
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
+
+import { ITEMS_PER_PAGE } from '../constants';
 
 function PersonSearch() {
 
@@ -16,6 +18,8 @@ function PersonSearch() {
 	const [statusOptions, setStatusOptions] = useState({status:"owner", ownerColor: "primary", reporterColor:"secondary"});
 	const [searchTerm, setSearchTerm] = useState("");
 	const [tempSearchTerm, setTempSearchTerm] = useState("");
+	const [page, setPage] = useState(1);
+  const [numPages, setNumPages] = useState(1);
 
 	// Update searchTerm when field input changes.
 	const handleChange = event => {
@@ -41,6 +45,7 @@ function PersonSearch() {
 			})
 			.then(response => {
 				if (!unmounted) {
+					setNumPages(Math.ceil(response.data.length / ITEMS_PER_PAGE));
 					setData({owners: response.data, isFetching: false});
 					let search_state = {};
 					response.data.forEach(owner => {
@@ -92,8 +97,8 @@ function PersonSearch() {
 							</ButtonGroup>
 						</InputGroup>
 					</Form>
-					{data.owners.map(owner => (
-							<div key={owner.id} className="mt-3">
+					{data.owners.map((owner, index) => (
+							<div key={owner.id} className="mt-3" hidden={page !== Math.ceil((index+1)/ITEMS_PER_PAGE)}>
 									<div className="card-header"> {owner.first_name ?
 										<h4 style={{marginBottom: "-2px"}}>{owner.first_name} {owner.last_name}
 											{owner.agency ? <span> ({owner.agency})</span> : ""}
@@ -169,6 +174,13 @@ function PersonSearch() {
 					<p>{data.isFetching ? 'Fetching ' + statusOptions.status + 's...' :
 						<span>{data.owners && data.owners.length ? '' : 'No ' + statusOptions.status + 's found.'}</span>}
 					</p>
+					<Pagination className="custom-page-links" size="lg" onClick={(e) => {setPage(parseInt(e.target.innerText))}}>
+						{[...Array(numPages).keys()].map(x =>
+						<Pagination.Item key={x+1} active={x+1 === page}>
+							{x+1}
+						</Pagination.Item>)
+						}
+					</Pagination>
 	</div>
 	)
 }
