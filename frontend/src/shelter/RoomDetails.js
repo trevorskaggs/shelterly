@@ -55,7 +55,7 @@ function RoomDetails({id}) {
         <Card.Title>
           <h4>Information
             <OverlayTrigger key={"assign"} placement="top" overlay={<Tooltip id={`tooltip-assign`}>Assign animals to rooms</Tooltip>}>
-              <Link href={"/shelter/" + data.shelter + "/assign"}><FontAwesomeIcon className="ml-1" icon={faWarehouse} inverse/></Link>
+              <Link href={"/shelter/" + data.shelter + "/assign?building_id=" + data.building}><FontAwesomeIcon className="ml-1" icon={faWarehouse} inverse/></Link>
             </OverlayTrigger>
           </h4>
         </Card.Title>

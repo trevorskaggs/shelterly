@@ -90,7 +90,7 @@ input[disabled] {
   padding-left: 0;
   margin-bottom: 0px;
   display: flex;
-  min-height: 25px;
+  min-height: 67px;
 }
 ::-webkit-scrollbar {display:none;}
 
