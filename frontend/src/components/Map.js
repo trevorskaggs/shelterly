@@ -4,7 +4,7 @@ import L from "leaflet";
 import { Map as LeafletMap, TileLayer, useLeaflet } from "react-leaflet";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faCircle, faExclamationCircle
+  faCircle, faExclamationCircle, faHome
 } from '@fortawesome/free-solid-svg-icons';
 import { faCheckCircle, faQuestionCircle as faQuestionCircleDuo } from '@fortawesome/pro-duotone-svg-icons';
 import { faHomeAlt as faHomeAltReg } from '@fortawesome/pro-regular-svg-icons';
@@ -79,6 +79,18 @@ export const checkMarkerIcon = new L.DivIcon({
   iconSize: [0, 0],
   iconAnchor: [6, 9],
   className: "check-icon",
+  popupAnchor: null,
+  shadowUrl: null,
+  shadowSize: null,
+  shadowAnchor: null
+});
+
+const shelterIconHTML = ReactDOMServer.renderToString(<FontAwesomeIcon icon={faHome} className="icon-border" size="lg" color="#b18662" />);
+export const shelterMarkerIcon = new L.DivIcon({
+  html: shelterIconHTML,
+  iconSize: [0, 0],
+  iconAnchor: [6, 9],
+  className: "shelter-icon",
   popupAnchor: null,
   shadowUrl: null,
   shadowSize: null,

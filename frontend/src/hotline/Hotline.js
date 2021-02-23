@@ -6,6 +6,7 @@ import { Marker, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
 import Moment from 'react-moment';
 import Map, { countMatches, prettyText, reportedMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
+import Header from "../components/Header";
 import badge from "../static/images/badge-sheriff.png";
 import bandaid from "../static/images/band-aid-solid.png";
 import car from "../static/images/car-solid.png";
@@ -19,6 +20,7 @@ function Hotline() {
 
   // Hook for initializing data.
   useEffect(() => {
+    let unmounted = false;
     let source = axios.CancelToken.source();
 
     const fetchServiceRequests = async () => {
@@ -31,29 +33,26 @@ function Hotline() {
         cancelToken: source.token,
       })
       .then(response => {
-        setData({service_requests: response.data, isFetching: false, bounds:L.latLngBounds([[0,0]])});
-        const map_dict = {};
-        const bounds = [];
-        for (const service_request of response.data) {
+        if (!unmounted) {
+          setData({service_requests: response.data, isFetching: false, bounds:L.latLngBounds([[0,0]])});
+          const map_dict = {};
+          const bounds = [];
+          for (const service_request of response.data) {
             const matches = countMatches(service_request)[0];
-            let color = 'green';
-            if  (service_request.status === 'assigned') {
-              color = 'yellow';
-            }
-            else if (service_request.status === 'closed') {
-              color = 'red';
-            }
-            map_dict[service_request.id] = {color:color, matches:matches, latitude:service_request.latitude, longitude:service_request.longitude};
-          bounds.push([service_request.latitude, service_request.longitude]);
-        }
-        setMapState(map_dict);
-        if (bounds.length > 0) {
-          setData({service_requests: response.data, isFetching: false, bounds:L.latLngBounds(bounds)});
+            map_dict[service_request.id] = {matches:matches, latitude:service_request.latitude, longitude:service_request.longitude};
+            bounds.push([service_request.latitude, service_request.longitude]);
+          }
+          setMapState(map_dict);
+          if (bounds.length > 0) {
+            setData({service_requests: response.data, isFetching: false, bounds:L.latLngBounds(bounds)});
+          }
         }
       })
       .catch(error => {
-        console.log(error.response);
-        setData({service_requests: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
+        if (!unmounted) {
+          console.log(error.response);
+          setData({service_requests: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
+        }
       });
     };
 
@@ -61,31 +60,37 @@ function Hotline() {
 
     // Cleanup.
     return () => {
+      unmounted = true;
       source.cancel();
     };
   }, [statusOptions.status]);
 
   return (
     <>
-    <ListGroup className="p-5">
-      <Link href="/hotline/workflow/owner">
-        <ListGroup.Item action>OWNER CALLING</ListGroup.Item>
-      </Link>
-      <Link href="/hotline/workflow/reporter">
-        <ListGroup.Item action>NON-OWNER CALLING</ListGroup.Item>
-      </Link>
-      <Link href="/hotline/workflow/first_responder">
-        <ListGroup.Item action>FIRST RESPONDER CALLING</ListGroup.Item>
-      </Link>
-      <Link href="/hotline/servicerequest/search">
-        <ListGroup.Item action>SEARCH SERVICE REQUESTS</ListGroup.Item>
-      </Link>
-    </ListGroup>
-    <Row className="d-flex flex-wrap">
-      <Col xs={10} className="border rounded pl-0 pr-0 m-auto">
-        <Map bounds={data.bounds}>
+    <Header>Hotline</Header>
+    <hr/>
+    <Row className="mr-0">
+      <Col xs={4}>
+        <ListGroup className="pb-3">
+          <Link href="/hotline/workflow/owner">
+            <ListGroup.Item className="rounded" action>OWNER CALLING</ListGroup.Item>
+          </Link>
+          <Link href="/hotline/workflow/reporter">
+            <ListGroup.Item className="rounded" action>NON-OWNER CALLING</ListGroup.Item>
+          </Link>
+          <Link href="/hotline/workflow/first_responder">
+            <ListGroup.Item className="rounded" action>FIRST RESPONDER CALLING</ListGroup.Item>
+          </Link>
+          <Link href="/hotline/servicerequest/search">
+            <ListGroup.Item className="rounded" action>SEARCH SERVICE REQUESTS</ListGroup.Item>
+          </Link>
+        </ListGroup>
+      </Col>
+      <Col xs={8} className="border rounded pl-0 pr-0">
+        <Map bounds={data.bounds} className="landing-leaflet-container">
           {data.service_requests.map(service_request => (
             <Marker
+              key={service_request.id}
               position={[service_request.latitude, service_request.longitude]}
               icon={service_request.sheltered_in_place > 0 ? SIPMarkerIcon : service_request.unable_to_locate > 0 ? UTLMarkerIcon : reportedMarkerIcon}
               onClick={() => window.open("/hotline/servicerequest/" + service_request.id, "_blank")}

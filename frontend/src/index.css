@@ -27,11 +27,13 @@ hr { display: block; height: 1px;
 /* Leaflet map CSS */
 .leaflet-container { width: auto; height: 55vh;}
 
+.landing-leaflet-container { width: auto; height: 311px; min-height:311px;}
+
+.dispatch-leaflet-container { width: auto; height: 311px; min-height:311px;}
+
 .leaflet-top, .leaflet-bottom {
   z-index: 400 !important;
 }
-
-.dispatch-leaflet-container { width: auto; height: 311px; min-height:311px;}
 
 /* Image gallery display CSS */
 .carousel img {

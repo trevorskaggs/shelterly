@@ -9,7 +9,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 import { faBadgeSheriff, faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
-import { Circle, Marker, TileLayer, Tooltip as MapTooltip } from "react-leaflet";
+import { Circle, Marker, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
 import badge from "../static/images/badge-sheriff.png";
 import bandaid from "../static/images/band-aid-solid.png";
@@ -17,7 +17,7 @@ import car from "../static/images/car-solid.png";
 import trailer from "../static/images/trailer-solid.png";
 import { Typeahead } from 'react-bootstrap-typeahead';
 import Moment from 'react-moment';
-import Map, { countMatches, Legend, prettyText, reportedMarkerIcon, SIPMarkerIcon, UTLMarkerIcon, checkMarkerIcon } from "../components/Map";
+import Map, { countMatches, prettyText, reportedMarkerIcon, SIPMarkerIcon, UTLMarkerIcon, checkMarkerIcon } from "../components/Map";
 import { Checkbox } from "../components/Form";
 import 'react-bootstrap-typeahead/css/Typeahead.css';
 import 'leaflet/dist/leaflet.css';
