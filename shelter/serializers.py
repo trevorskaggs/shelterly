@@ -84,7 +84,7 @@ class SimpleShelterSerializer(serializers.ModelSerializer):
 
     # Custom field for total animals.
     def get_animal_count(self, obj):
-        return obj.animal_set.all().count()
+        return obj.animal_set.exclude(status='CANCELED').count()
 
     class Meta:
         model = Shelter
