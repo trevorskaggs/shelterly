@@ -41,8 +41,8 @@ function DispatchSummary({id}) {
 
   return (
     <>
-    <Header>Dispatch Assignment Summary | {data.end_time ? <span>Closed <Link href={"/dispatch/resolution/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link></span> : <Link href={"/dispatch/resolution/" + id} className="btn btn-danger ml-1 mb-2" style={{paddingTop:"10px", paddingBottom:"10px"}}>Close</Link>}
-    <div style={{fontSize:"18px", marginTop:"14px"}}><b>Opened: </b><Moment format="MMMM Do YYYY, HH:mm">{data.start_time}</Moment>{data.end_time ? <span style={{fontSize:"16px", marginTop:"5px"}}> | <b>Closed: </b><Moment fformat="MMMM Do YYYY, HH:mm:ss">{data.end_time}</Moment></span> : ""}</div>
+    <Header>Dispatch Assignment Summary {data.end_time ? <span><Link href={"/dispatch/resolution/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link></span> : <Link href={"/dispatch/resolution/" + id} className="btn btn-danger ml-1" style={{paddingTop:"10px", paddingBottom:"10px"}}>Close</Link>}
+    <div style={{fontSize:"18px", marginTop:"12px"}}><b>Opened: </b><Moment format="MMMM Do YYYY, HH:mm">{data.start_time}</Moment>{data.end_time ? <span> | <b>Closed: </b><Moment format="MMMM Do YYYY, HH:mm:ss">{data.end_time}</Moment></span> : ""}</div>
     </Header>
     <hr/>
     <Card border="secondary" className="mt-1">
@@ -70,7 +70,7 @@ function DispatchSummary({id}) {
         <ListGroup variant="flush" style={{marginTop:"-5px", marginBottom:"-13px"}}>
           <ListGroup.Item style={{marginTop:"-8px"}}><b>Address: </b>{service_request.full_address}</ListGroup.Item>
           {service_request.owner_objects.map(owner => (
-            <ListGroup.Item key={owner.id}><b>Owner: </b>{owner.first_name} {owner.last_name} <Link href={"/people/owner/" + owner.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link> | {owner.display_phone||owner.email||"No Contact"}</ListGroup.Item>
+            <ListGroup.Item key={owner.id}><b>Owner: </b>{owner.first_name} {owner.last_name} | {owner.display_phone||owner.email||"No Contact"}</ListGroup.Item>
           ))}
           {service_request.owners.length < 1 ? <ListGroup.Item><b>Owner: </b>No Owner</ListGroup.Item> : ""}
         </ListGroup>
@@ -79,20 +79,24 @@ function DispatchSummary({id}) {
           <h4 className="mt-2" style={{marginBottom:"-2px"}}>Animals</h4>
           {service_request.animals.filter(animal => animal.evacuation_assignments.includes(Number(id))).map((animal, inception) => (
             <ListGroup.Item key={animal.id}>
-              <span style={{textTransform:"capitalize"}}>{animal.name||"Unknown"}</span> ({animal.species}) - {animal.status}<Link href={"/animals/" + animal.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
+              <span style={{textTransform:"capitalize"}}>{animal.name||"Unknown"}</span> ({animal.species}) - {animal.status}
             </ListGroup.Item>
           ))}
         </ListGroup>
-        <hr/>
-        {!data.end_time && service_request.visit_notes.length ?
+        {!service_request.visit_notes.filter(note => String(note.evac_assignment) === String(id))[0] && service_request.visit_notes.sort((a,b) => new Date(b.date_completed).getTime() - new Date(a.date_completed).getTime())[0] ?
+        <span>
+          <hr/>
           <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
-            <h4 className="mt-2" style={{marginBottom:"-2px"}}>Previous Note - <Moment format="L">{service_request.visit_notes.sort((a,b) => new Date(b.date_completed).getTime() - new Date(a.date_completed).getTime())[0].date_completed}</Moment></h4>
+            <h4 className="mt-2" style={{marginBottom:"-2px"}}>Previous Visit Notes on <Moment format="L">{service_request.visit_notes.sort((a,b) => new Date(b.date_completed).getTime() - new Date(a.date_completed).getTime())[0].date_completed}</Moment></h4>
               <ListGroup.Item>
               {service_request.visit_notes.sort((a,b) => new Date(b.date_completed).getTime() - new Date(a.date_completed).getTime())[0].notes || "No information available."}
               </ListGroup.Item>
           </ListGroup>
+        </span>
         : "" }
-        {service_request.visit_notes.filter(note => String(note.evac_assignment) === String(id)).length > 0 ?
+        {service_request.visit_notes.filter(note => String(note.evac_assignment) === String(id))[0] ?
+        <span>
+        <hr/>
           <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
             <h4 className="mt-2" style={{marginBottom:"-2px"}}>Visit Notes</h4>
             {service_request.visit_notes.filter(note => String(note.evac_assignment) === String(id)).map((note) => (
@@ -101,6 +105,7 @@ function DispatchSummary({id}) {
               </ListGroup.Item>
             ))}
           </ListGroup>
+        </span>
         : ""}
       </Card.Body>
     </Card>

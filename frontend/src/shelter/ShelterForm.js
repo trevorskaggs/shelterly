@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import { navigate } from 'raviger';
 import { Formik } from 'formik';
-import { Form as BootstrapForm, Button, ButtonGroup, Card, Col } from "react-bootstrap";
+import { Form as BootstrapForm, Button, ButtonGroup, Card, Col, Modal } from "react-bootstrap";
 import { AddressLookup, TextInput, DropDown } from '../components/Form';
 import * as Yup from 'yup';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -10,7 +10,7 @@ import { faArrowAltCircleLeft } from '@fortawesome/free-solid-svg-icons';
 import { STATE_OPTIONS } from "../constants";
 
 // Regex validators.
-const nameRegex = /^[a-z0-9 ,.'-]+$/i
+const nameRegex = /^[a-z0-9 ,.'-]+$/i;
 
 const ShelterForm = ({id}) => {
 
@@ -29,7 +29,11 @@ const ShelterForm = ({id}) => {
   });
 
   // Regex validators.
-  const phoneRegex = /^((\+\d{1,3}(-| )?\(?\d\)?(-| )?\d{1,3})|(\(?\d{2,3}\)?))(-| )?(\d{3,4})(-| )?(\d{4})(( x| ext)\d{1,5}){0,1}$/
+  const phoneRegex = /^((\+\d{1,3}(-| )?\(?\d\)?(-| )?\d{1,3})|(\(?\d{2,3}\)?))(-| )?(\d{3,4})(-| )?(\d{4})(( x| ext)\d{1,5}){0,1}$/;
+
+  // Track duplicate shelter name error.
+  const [show, setShow] = useState(false);
+  const handleClose = () => setShow(false);
 
   // Hook for initializing data.
   useEffect(() => {
@@ -93,6 +97,9 @@ const ShelterForm = ({id}) => {
             })
             .catch(error => {
               console.log(error.response);
+              if (error.response.data && error.response.data.name[0].includes('shelter with this name already exists')) {
+                setShow(true);
+              }
             });
           }
           else {
@@ -102,93 +109,111 @@ const ShelterForm = ({id}) => {
             })
             .catch(error => {
               console.log(error.response);
+              if (error.response.data && error.response.data.name[0].includes('shelter with this name already exists')) {
+                setShow(true);
+              }
             });
             setSubmitting(false);
           }
         }}
       >
         {props => (
+          <>
           <Card border="secondary" className="mt-5">
-          <Card.Header as="h5" className="pl-3"><span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>{!id ? "New" : "Update"} Shelter</Card.Header>
-          <Card.Body>
-          <BootstrapForm noValidate>
-            <BootstrapForm.Row xs="12">
-              <TextInput
-                xs="12"
-                type="text"
-                label="Name*"
-                name="name"
-                id="name"
-              />
-            </BootstrapForm.Row>
-            <BootstrapForm.Row xs="12">
-              <TextInput
-                xs="12"
-                type="text"
-                label="Phone"
-                name="phone"
-              />
-            </BootstrapForm.Row>
-            <BootstrapForm.Row>
-              <TextInput
-                as="textarea"
-                rows={5}
-                xs="12"
-                type="text"
-                label="Description"
-                name="description"
-              />
-            </BootstrapForm.Row>
-            <BootstrapForm.Row>
-              <BootstrapForm.Group as={Col} xs="12">
-                <AddressLookup
-                  label="Search"
-                  className="form-control"
-                />
-              </BootstrapForm.Group>
-            </BootstrapForm.Row>
-            <BootstrapForm.Row xs="12">
-              <TextInput
-                xs="12"
-                type="text"
-                label="Address*"
-                name="address"
-                disabled
-              />
-            </BootstrapForm.Row>
-            <BootstrapForm.Row>
-              <TextInput
-                xs="8"
-                type="text"
-                label="City"
-                name="city"
-                disabled
-              />
-              <Col xs="2">
-                <DropDown
-                  label="State"
-                  name="state"
-                  id="state"
-                  options={STATE_OPTIONS}
-                  value={props.values.state || ''}
-                  placeholder=""
-                  disabled
-                />
-              </Col>
-              <TextInput
-                xs="2"
-                type="text"
-                label="Zip Code"
-                name="zip_code"
-                disabled
-              />
-            </BootstrapForm.Row>
-          </BootstrapForm>
-          </Card.Body>
-          <ButtonGroup size="lg">
-            <Button type="submit" onClick={() => { props.submitForm()}}>Save</Button>
-          </ButtonGroup>
-        </Card>
+            <Card.Header as="h5" className="pl-3"><span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>{!id ? "New" : "Update"} Shelter</Card.Header>
+            <Card.Body>
+              <BootstrapForm noValidate>
+                <BootstrapForm.Row xs="12">
+                  <TextInput
+                    xs="12"
+                    type="text"
+                    label="Name*"
+                    name="name"
+                    id="name"
+                  />
+                </BootstrapForm.Row>
+                <BootstrapForm.Row xs="12">
+                  <TextInput
+                    xs="12"
+                    type="text"
+                    label="Phone"
+                    name="phone"
+                  />
+                </BootstrapForm.Row>
+                <BootstrapForm.Row>
+                  <TextInput
+                    as="textarea"
+                    rows={5}
+                    xs="12"
+                    type="text"
+                    label="Description"
+                    name="description"
+                  />
+                </BootstrapForm.Row>
+                <BootstrapForm.Row>
+                  <BootstrapForm.Group as={Col} xs="12">
+                    <AddressLookup
+                      label="Search"
+                      className="form-control"
+                    />
+                  </BootstrapForm.Group>
+                </BootstrapForm.Row>
+                <BootstrapForm.Row xs="12">
+                  <TextInput
+                    xs="12"
+                    type="text"
+                    label="Address*"
+                    name="address"
+                    disabled
+                  />
+                </BootstrapForm.Row>
+                <BootstrapForm.Row>
+                  <TextInput
+                    xs="8"
+                    type="text"
+                    label="City"
+                    name="city"
+                    disabled
+                  />
+                  <Col xs="2">
+                    <DropDown
+                      label="State"
+                      name="state"
+                      id="state"
+                      options={STATE_OPTIONS}
+                      value={props.values.state || ''}
+                      placeholder=""
+                      disabled
+                    />
+                  </Col>
+                  <TextInput
+                    xs="2"
+                    type="text"
+                    label="Zip Code"
+                    name="zip_code"
+                    disabled
+                  />
+                </BootstrapForm.Row>
+              </BootstrapForm>
+            </Card.Body>
+            <ButtonGroup size="lg">
+              <Button type="submit" onClick={() => { props.submitForm()}}>Save</Button>
+            </ButtonGroup>
+          </Card>
+          <Modal show={show} onHide={handleClose}>
+            <Modal.Header closeButton>
+              <Modal.Title>Duplicate Shelter Name Found</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <p>
+                A shelter with the name {props.values.name} already exists. Please enter a unique name.
+              </p>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="secondary" onClick={handleClose}>Close</Button>
+            </Modal.Footer>
+          </Modal>
+        </>
         )}
       </Formik>
     </>

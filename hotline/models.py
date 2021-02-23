@@ -30,7 +30,7 @@ class ServiceRequest(Location):
 
     def __str__(self):
         output = []
-        output.append('Owner: %s' % self.owner or 'Unknown')
+        output.append('Owner: %s' % self.owners.first() or 'Unknown')
         if self.reporter:
             output.append('Reporter: %s' % self.reporter)
         output.append('Animal Count: %s' % self.animal_set.all().count())
@@ -42,7 +42,7 @@ class ServiceRequest(Location):
 class VisitNote(models.Model):
     from evac.models import EvacAssignment
 
-    date_completed = models.DateTimeField()
+    date_completed = models.DateTimeField(blank=True, null=True)
     evac_assignment = models.ForeignKey(EvacAssignment, on_delete=models.CASCADE)
     service_request = models.ForeignKey(ServiceRequest, on_delete=models.CASCADE)
     forced_entry = models.BooleanField(default=False)
