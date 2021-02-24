@@ -7,12 +7,10 @@ import { Button, ButtonGroup, Form as BootstrapForm } from "react-bootstrap";
 import { Card } from 'react-bootstrap';
 import * as Yup from 'yup';
 import { AuthContext } from "../accounts/AccountsReducer";
-import {AddressLookup, DateTimePicker, DropDown, ImageUploader, TextInput} from '../components/Form.js';
+import { AddressSearch, DateTimePicker, DropDown, ImageUploader, TextInput } from '../components/Form.js';
 import { catAgeChoices, dogAgeChoices, horseAgeChoices, otherAgeChoices, catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, speciesChoices, sexChoices, dogSizeChoices, catSizeChoices, horseSizeChoices, otherSizeChoices, unknownChoices } from './constants';
-import { STATE_OPTIONS } from '../constants'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft, faMinusSquare } from '@fortawesome/free-solid-svg-icons';
-import Alert from 'react-bootstrap/Alert'
 
 const AnimalForm = (props) => {
 
@@ -165,13 +163,13 @@ const AnimalForm = (props) => {
   }
 
   // Checks if Google API Key exists before rendering.
-  const renderAddressLookup = ()=>{
-    if(process.env.REACT_APP_GOOGLE_API_KEY){
-      return <AddressLookup label="Found Location Search" style={{width: '100%'}} className="form-control"/>
-    } else {
-      return <Alert variant="danger">Found Location Search is not available. Please contact support for assistance.</Alert>
-    }
-  }
+  // const renderAddressLookup = ()=>{
+  //   if(process.env.REACT_APP_GOOGLE_API_KEY){
+  //     return <AddressLookup label="Found Location Search" style={{width: '100%'}} className="form-control"/>
+  //   } else {
+  //     return <Alert variant="danger">Found Location Search is not available. Please contact support for assistance.</Alert>
+  //   }
+  // }
 
   // Hook for initializing data.
   useEffect(() => {
@@ -655,10 +653,10 @@ const AnimalForm = (props) => {
                     </Col>
                   </BootstrapForm.Row>
                 </span>
-                <span hidden={is_intake ? !is_reporter : !Boolean(id)}>
+                {/* <span hidden={is_intake ? !is_reporter : !Boolean(id)}>
                   <BootstrapForm.Row className="mt-3">
                     <BootstrapForm.Group as={Col} xs="12">
-                      {renderAddressLookup()}
+                      {renderAddressLookup(formikProps.values.state)}
                     </BootstrapForm.Group>
                   </BootstrapForm.Row>
                   <BootstrapForm.Row>
@@ -697,7 +695,8 @@ const AnimalForm = (props) => {
                       disabled
                     />
                   </BootstrapForm.Row>
-                </span>
+                </span> */}
+                <AddressSearch formikProps={formikProps}></AddressSearch>
                 <span hidden={is_workflow && !is_intake}>
                   <p className={id || is_reporter ? "mb-0" : "mb-0 mt-3"}>Image Files</p>
                   <BootstrapForm.Row className="align-items-end">

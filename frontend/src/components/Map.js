@@ -4,7 +4,7 @@ import L from "leaflet";
 import { Map as LeafletMap, TileLayer, useLeaflet } from "react-leaflet";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faCircle, faExclamationCircle, faHome
+  faCircle, faExclamationCircle, faHome, faMapMarkerAlt, faStar
 } from '@fortawesome/free-solid-svg-icons';
 import { faCheckCircle, faQuestionCircle as faQuestionCircleDuo } from '@fortawesome/pro-duotone-svg-icons';
 import { faHomeAlt as faHomeAltReg } from '@fortawesome/pro-regular-svg-icons';
@@ -20,6 +20,30 @@ export const Legend = (props) => {
   }, [map]);
   return null;
 };
+
+const pinIconHTML = ReactDOMServer.renderToString(<FontAwesomeIcon color="red" size="lg" className="icon-border" icon={faMapMarkerAlt} />);
+export const pinMarkerIcon = new L.DivIcon({
+  html: pinIconHTML,
+  iconSize: [0, 0],
+  iconAnchor: [9, 10],
+  className: "pin-icon",
+  popupAnchor: null,
+  shadowUrl: null,
+  shadowSize: null,
+  shadowAnchor: null
+});
+
+const starIconHTML = ReactDOMServer.renderToString(<FontAwesomeIcon color="gold" size="lg" className="icon-border" icon={faStar} />);
+export const starMarkerIcon = new L.DivIcon({
+  html: starIconHTML,
+  iconSize: [0, 0],
+  iconAnchor: [9, 10],
+  className: "star-icon",
+  popupAnchor: null,
+  shadowUrl: null,
+  shadowSize: null,
+  shadowAnchor: null
+});
 
 const reportedIconHTML = ReactDOMServer.renderToString(
   <span className="fa-layers">
