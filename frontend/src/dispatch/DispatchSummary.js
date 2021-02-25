@@ -1,12 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import { Link } from 'raviger';
-import { Card, ListGroup } from 'react-bootstrap';
+import { Button, Card, Col, ListGroup, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
+import { Typeahead } from 'react-bootstrap-typeahead';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faClipboardList, faEdit
+  faClipboardCheck, faClipboardList, faEdit, faMinusSquare, faPlusSquare
 } from '@fortawesome/free-solid-svg-icons';
+import { Marker, Tooltip as MapTooltip } from "react-leaflet";
+import L from "leaflet";
 import Moment from 'react-moment';
+import Map, { countMatches, prettyText, reportedMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
 import Header from '../components/Header';
 
 function DispatchSummary({id}) {
@@ -19,7 +23,41 @@ function DispatchSummary({id}) {
     service_request_objects: [],
     start_time: null,
     end_time: null,
+    bounds:L.latLngBounds([[0,0]])
   });
+
+  const [mapState, setMapState] = useState({});
+  const [teamData, setTeamData] = useState({options: [], isFetching: false});
+  const [teamMembers, setNewTeamMembers] = useState(null);
+  const [show, setShow] = useState(false);
+  const handleClose = () => setShow(false);
+  const [teamMemberToDelete, setTeamMemberToDelete] = useState({id: 0, name: '', display_name: ''});
+  const [showTeamMemberConfirm, setShowTeamMemberConfirm] = useState(false);
+  const handleTeamMemberClose = () => setShowTeamMemberConfirm(false);
+
+  const handleAddTeamMemberSubmit = async () => {
+    await axios.patch('/evac/api/evacassignment/' + id + '/', {'new_team_members':teamMembers.map(item => item.id)})
+    .then(response => {
+      setData(prevState => ({ ...prevState, "team_member_objects":response.data.team_member_objects, "team_members":response.data.team_members }));
+      setTeamData(prevState => ({ ...prevState, "options":prevState.options.filter(option => !response.data.team_members.includes(option.id)) }));
+      handleClose()
+    })
+    .catch(error => {
+      console.log(error.response);
+    });
+  }
+
+  const handleRemoveTeamMemberSubmit = async () => {
+    await axios.patch('/evac/api/evacassignment/' + id + '/', {'remove_team_member':teamMemberToDelete.id})
+    .then(response => {
+      setData(prevState => ({ ...prevState, "team_member_objects":response.data.team_member_objects, "team_members":response.data.team_members }));
+      setTeamData(prevState => ({ ...prevState, "options":prevState.options.concat([{id: teamMemberToDelete.id, label: teamMemberToDelete.display_name}]) }));
+      handleTeamMemberClose();
+    })
+    .catch(error => {
+      console.log(error.response);
+    });
+  }
 
   // Hook for initializing data.
   useEffect(() => {
@@ -30,45 +68,162 @@ function DispatchSummary({id}) {
         cancelToken: source.token,
       })
       .then(response => {
+        const map_dict = {};
+        const bounds = [];
+        for (const service_request of response.data.service_request_objects) {
+          const matches = countMatches(service_request)[0];
+          map_dict[service_request.id] = {matches:matches, has_reported_animals:service_request.reported_animals > 0, latitude:service_request.latitude, longitude:service_request.longitude};
+          bounds.push([service_request.latitude, service_request.longitude]);
+        }
+        response.data['bounds'] = bounds;
         setData(response.data);
+        setMapState(map_dict);
+        setTeamData({options: [], isFetching: true});
+        axios.get('/evac/api/evacteammember/', {
+          cancelToken: source.token,
+        })
+        .then(teamResponse => {
+          var options = []
+          teamResponse.data.filter(team_member => !response.data.team_members.includes(team_member.id)).forEach(function(teammember){
+            options.push({id: teammember.id, label: teammember.display_name})
+          });
+          setTeamData({options: options, isFetching: false});
+        })
+        .catch(error => {
+          console.log(error.response);
+          setTeamData({options: [], isFetching: false});
+        });
       })
       .catch(error => {
         console.log(error.response);
       });
     };
+
     fetchDispatchSummaryData();
+
   }, [id]);
 
   return (
     <>
-    <Header>Dispatch Assignment Summary {data.end_time ? <span><Link href={"/dispatch/resolution/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link></span> : <Link href={"/dispatch/resolution/" + id} className="btn btn-danger ml-1" style={{paddingTop:"10px", paddingBottom:"10px"}}>Close</Link>}
+    <Header>Dispatch Assignment Summary
+      {data.end_time ?
+      <OverlayTrigger
+        key={"edit-dispatch-assignment"}
+        placement="bottom"
+        overlay={
+          <Tooltip id={`tooltip-edit-dispatch-assignment`}>
+            Update dispatch assignment
+          </Tooltip>
+        }
+      >
+        <Link href={"/dispatch/resolution/" + id}><FontAwesomeIcon icon={faEdit} className="ml-1" inverse /></Link>
+      </OverlayTrigger>
+      :
+      <OverlayTrigger
+        key={"close-dispatch-assignment"}
+        placement="bottom"
+        overlay={
+          <Tooltip id={`tooltip-close-dispatch-assignment`}>
+            Close dispatch assignment
+          </Tooltip>
+        }
+      >
+        <Link href={"/dispatch/resolution/" + id}><FontAwesomeIcon icon={faClipboardCheck} className="ml-1"  inverse /></Link>
+      </OverlayTrigger>
+      }
     <div style={{fontSize:"18px", marginTop:"12px"}}><b>Opened: </b><Moment format="MMMM Do YYYY, HH:mm">{data.start_time}</Moment>{data.end_time ? <span> | <b>Closed: </b><Moment format="MMMM Do YYYY, HH:mm:ss">{data.end_time}</Moment></span> : ""}</div>
     </Header>
     <hr/>
-    <Card border="secondary" className="mt-1">
-      <Card.Body>
-        <Card.Title>
-          <h4>Team Members</h4>
-        </Card.Title>
-        <hr/>
-        <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px", textTransform:"capitalize"}}>
-          {data.team_member_objects.map(team_member => (
-            <ListGroup.Item key={team_member.id}>
-              {team_member.first_name + " " + team_member.last_name + " - " + team_member.display_phone}{team_member.agency ? <span>({team_member.agency})</span> : ""}
-            </ListGroup.Item>
+    <Row>
+      <Col>
+        <Card border="secondary" className="mt-1" style={{minHeight:"313px"}}>
+          <Card.Body>
+            <Card.Title>
+              <h4>Team Members
+              <OverlayTrigger
+                key={"add-team-member"}
+                placement="top"
+                overlay={
+                  <Tooltip id={`tooltip-add-team-member`}>
+                    Add team member
+                  </Tooltip>
+                }
+              >
+                <FontAwesomeIcon icon={faPlusSquare} className="ml-1" onClick={() => {setShow(true)}} style={{cursor:'pointer'}} inverse />
+              </OverlayTrigger>
+              </h4>
+            </Card.Title>
+            <hr/>
+            <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px", textTransform:"capitalize"}}>
+              {data.team_member_objects.map(team_member => (
+                <ListGroup.Item key={team_member.id}>
+                  {team_member.first_name + " " + team_member.last_name + " - " + team_member.display_phone}{team_member.agency ?
+                  <span>({team_member.agency})</span> : ""}
+                  <OverlayTrigger
+                    key={"remove-team-member"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-remove-team-member`}>
+                        Remove team member
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon icon={faMinusSquare} style={{cursor:'pointer'}} size="sm" className="ml-1" onClick={() => {setTeamMemberToDelete({id:team_member.id, name: team_member.first_name + " " + team_member.last_name, display_name: team_member.display_name});setShowTeamMemberConfirm(true);}} inverse />
+                  </OverlayTrigger>
+                </ListGroup.Item>
+              ))}
+            </ListGroup>
+          </Card.Body>
+        </Card>
+      </Col>
+      <Col className="border rounded pl-0 pr-0" style={{marginTop:"4px", marginRight:"15px", maxHeight:"311px"}}>
+        <Map className="d-block dispatch-leaflet-container" bounds={data.bounds}>
+          {data.service_request_objects.map(service_request => (
+            <Marker
+              position={[service_request.latitude, service_request.longitude]}
+              icon={service_request.sheltered_in_place > 0 ? SIPMarkerIcon : service_request.unable_to_locate > 0 ? UTLMarkerIcon : reportedMarkerIcon}
+              // onClick={() => window.open("/hotline/servicerequest/" + service_request.id, "_blank")}
+            >
+              <MapTooltip autoPan={false}>
+                <span>
+                  {mapState[service_request.id] ?
+                    <span>
+                      {Object.keys(mapState[service_request.id].matches).map((key,i) => (
+                        <span key={key} style={{textTransform:"capitalize"}}>
+                          {i > 0 && ", "}{prettyText(key.split(',')[1], key.split(',')[0], mapState[service_request.id].matches[key])}
+                        </span>
+                      ))}
+                    </span>
+                  :""}
+                  <br />
+                  {service_request.full_address}
+                </span>
+              </MapTooltip>
+            </Marker>
           ))}
-        </ListGroup>
-      </Card.Body>
-    </Card>
+        </Map>
+      </Col>
+    </Row>
     {data.service_request_objects.map((service_request, index) => (
     <Card key={service_request.id} border="secondary" className="mt-3 mb-2">
       <Card.Body>
         <Card.Title>
-          <h4>Service Request <Link href={"/hotline/servicerequest/" + service_request.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link> | <span style={{textTransform:"capitalize"}}>{service_request.status}</span></h4>
+          <h4>{service_request.full_address}
+          <OverlayTrigger
+            key={"service-request-details"}
+            placement="top"
+            overlay={
+              <Tooltip id={`tooltip-service-request-details`}>
+                Service request details
+              </Tooltip>
+            }
+          >
+            <Link href={"/hotline/servicerequest/" + service_request.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+          </OverlayTrigger>
+            &nbsp;| <span style={{textTransform:"capitalize"}}>{service_request.status}</span></h4>
         </Card.Title>
-        <hr/>
+        <hr style={{marginBottom:"7px"}}/>
         <ListGroup variant="flush" style={{marginTop:"-5px", marginBottom:"-13px"}}>
-          <ListGroup.Item style={{marginTop:"-8px"}}><b>Address: </b>{service_request.full_address}</ListGroup.Item>
           {service_request.owner_objects.map(owner => (
             <ListGroup.Item key={owner.id}><b>Owner: </b>{owner.first_name} {owner.last_name} | {owner.display_phone||owner.email||"No Contact"}</ListGroup.Item>
           ))}
@@ -110,6 +265,39 @@ function DispatchSummary({id}) {
       </Card.Body>
     </Card>
     ))}
+    <Modal show={show} onHide={handleClose}>
+      <Modal.Header closeButton>
+        <Modal.Title>Add Team Members</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <Typeahead
+          id="team_members"
+          multiple
+          onChange={(values) => {setNewTeamMembers(values)}}
+          options={teamData.options}
+          placeholder="Choose team members..."
+          style={{marginLeft:"3px", marginRight:"-13px"}}
+        />
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="primary" onClick={handleAddTeamMemberSubmit}>Add</Button>
+        <Button variant="secondary" onClick={handleClose}>Cancel</Button>
+      </Modal.Footer>
+    </Modal>
+    <Modal show={showTeamMemberConfirm} onHide={handleTeamMemberClose}>
+      <Modal.Header closeButton>
+        <Modal.Title>Confirm Team Member Removal</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <p>
+          Are you sure you would like to remove team member {teamMemberToDelete.name} from this dispatch assignment?
+        </p>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="primary" onClick={handleRemoveTeamMemberSubmit}>Yes</Button>
+        <Button variant="secondary" onClick={handleTeamMemberClose}>Cancel</Button>
+      </Modal.Footer>
+    </Modal>
     </>
   )
 }

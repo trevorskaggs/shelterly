@@ -10,7 +10,7 @@ import DispatchSummary from "./dispatch/DispatchSummary";
 import DispatchResolutionForm from "./dispatch/DispatchResolutionForm";
 import DispatchTeamMemberForm from "./dispatch/DispatchTeamMemberForm";
 import Dispatch from "./dispatch/Dispatch";
-import DispatchAssignmentSearch from "./dispatch/DispatchAssignmentSearch"
+import DispatchAssignmentSearch from "./dispatch/DispatchSearch"
 import StepperWorkflow, { initialWorkflowData } from "./components/StepperWorkflow";
 import Hotline from "./hotline/Hotline";
 import ServiceRequestDispatchAssignment from "./hotline/ServiceRequestDispatchAssignment"
