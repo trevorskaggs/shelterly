@@ -653,49 +653,6 @@ const AnimalForm = (props) => {
                     </Col>
                   </BootstrapForm.Row>
                 </span>
-                {/* <span hidden={is_intake ? !is_reporter : !Boolean(id)}>
-                  <BootstrapForm.Row className="mt-3">
-                    <BootstrapForm.Group as={Col} xs="12">
-                      {renderAddressLookup(formikProps.values.state)}
-                    </BootstrapForm.Group>
-                  </BootstrapForm.Row>
-                  <BootstrapForm.Row>
-                    <TextInput
-                      xs="12"
-                      type="text"
-                      label="Found Location Address"
-                      name="address"
-                      disabled
-                    />
-                  </BootstrapForm.Row>
-                  <BootstrapForm.Row>
-                    <TextInput
-                      xs="8"
-                      type="text"
-                      label="City"
-                      name="city"
-                      disabled
-                    />
-                    <Col xs="2">
-                    <DropDown
-                      label="State"
-                      name="state"
-                      id="state"
-                      options={STATE_OPTIONS}
-                      value={formikProps.values.state || ''}
-                      placeholder=''
-                      disabled
-                    />
-                    </Col>
-                    <TextInput
-                      xs="2"
-                      type="text"
-                      label="Zip Code"
-                      name="zip_code"
-                      disabled
-                    />
-                  </BootstrapForm.Row>
-                </span> */}
                 <AddressSearch formikProps={formikProps} label="Found Location Search"></AddressSearch>
                 <span hidden={is_workflow && !is_intake}>
                   <p className={id || is_reporter ? "mb-0" : "mb-0 mt-3"}>Image Files</p>

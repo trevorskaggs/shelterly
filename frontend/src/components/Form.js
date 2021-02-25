@@ -285,8 +285,11 @@ const AddressLookup = ({ ...props }) => {
       if (components.street_number) {
         address = components.street_number + " " + components.route;
       }
-      else {
+      else if (components.route) {
         address = components.route;
+      }
+      else {
+        address = components.intersection;
       }
 
       setFieldValue("address", address);
@@ -309,7 +312,7 @@ const AddressLookup = ({ ...props }) => {
           let latlng = {lat:Number(lookup[0]), lng:Number(lookup[1])};
           new window.google.maps.Geocoder().geocode({ location: latlng }, function (results, status) {
             if (status === window.google.maps.GeocoderStatus.OK) {
-              updateAddr(results[0])
+              updateAddr(results[0]);
             } else {
               console.log(status);
             }
@@ -319,7 +322,7 @@ const AddressLookup = ({ ...props }) => {
         onPlaceSelected={(place) => {
           updateAddr(place);
         }}
-        types={['address']}
+        types={['geocode']}
         componentRestrictions={{country: "us"}}
         ref={childRef}
         apiKey={process.env.REACT_APP_GOOGLE_API_KEY}
@@ -336,6 +339,10 @@ const AddressSearch = (props) => {
     } else {
       return <Alert variant="danger">Found Location Search is not available. Please contact support for assistance.</Alert>
     }
+  }
+
+  const getBounds = () => {
+    return props.formikProps.values.latitude ? L.latLngBounds([[props.formikProps.values.latitude, props.formikProps.values.longitude]]) : L.latLngBounds([[0,0]])
   }
 
   return (
@@ -377,7 +384,6 @@ const AddressSearch = (props) => {
             name="state"
             id="state"
             options={STATE_OPTIONS}
-            value={props.formikProps.values.state || ''}
             placeholder=''
             disabled
           />
@@ -392,7 +398,7 @@ const AddressSearch = (props) => {
         </Form.Row>
       </Col>
       <Col className="border rounded pl-0 pr-0 mb-3 mt-5 mr-3" xs="4">
-        <Map bounds={props.formikProps.values.latitude ? [[props.formikProps.values.latitude, props.formikProps.values.longitude]] : L.latLngBounds([[0,0]])} className="search-leaflet-container">
+        <Map bounds={getBounds()} className="search-leaflet-container">
           {props.formikProps.values.latitude ?
           <Marker
             position={[props.formikProps.values.latitude, props.formikProps.values.longitude]}
@@ -400,8 +406,8 @@ const AddressSearch = (props) => {
           ></Marker>
           : ""}
         </Map>
-        </Col>
-        </Row>
+      </Col>
+    </Row>
     </>
   );
 }
