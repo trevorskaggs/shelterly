@@ -298,6 +298,7 @@ const AddressLookup = ({ ...props }) => {
       setFieldValue("zip_code", components.postal_code);
       setFieldValue("latitude", suggestion.geometry.location.lat());
       setFieldValue("longitude", suggestion.geometry.location.lng());
+      setFieldValue("full_address", suggestion.formatted_address.replace(', USA', ''));
     }
   }
 
@@ -333,12 +334,24 @@ const AddressLookup = ({ ...props }) => {
 
 const AddressSearch = (props) => {
 
+  const markerRef = useRef(null);
+  const { setFieldValue } = useFormikContext();
+
   const renderAddressLookup = () => {
     if(process.env.REACT_APP_GOOGLE_API_KEY){
       return <AddressLookup label={props.label} style={{width: '100%'}} className="form-control"/>
     } else {
       return <Alert variant="danger">Found Location Search is not available. Please contact support for assistance.</Alert>
     }
+  }
+
+  const updatePosition = () => {
+      const marker = markerRef.current;
+      if (marker !== null) {
+        const latLon = marker.leafletElement.getLatLng()
+        setFieldValue("latitude", +(Math.round(latLon.lat + "e+4") + "e-4"));
+        setFieldValue("longitude", +(Math.round(latLon.lng + "e+4") + "e-4"));
+      }
   }
 
   const getBounds = () => {
@@ -401,19 +414,21 @@ const AddressSearch = (props) => {
         <Map bounds={getBounds()} className="search-leaflet-container">
           {props.formikProps.values.latitude ?
           <Marker
+            draggable={true}
+            onDragEnd={updatePosition}
+            autoPan={true}
             position={[props.formikProps.values.latitude, props.formikProps.values.longitude]}
             icon={pinMarkerIcon}
+            ref={markerRef}
           >
-            {/* <MapTooltip autoPan={false}>
-                <span>
-                  <div>
-                    
-                  </div>
-                  <div>
-                    
-                  </div>
-                </span>
-              </MapTooltip> */}
+            <MapTooltip autoPan={false} direction="top">
+              <div>
+                {props.formikProps.values.full_address}
+              </div>
+              <div>
+                Lat: {props.formikProps.values.latitude}, Lon: {props.formikProps.values.longitude}
+              </div>
+            </MapTooltip>
           </Marker>
           : ""}
         </Map>
