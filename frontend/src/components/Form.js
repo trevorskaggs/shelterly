@@ -342,14 +342,14 @@ const AddressSearch = (props) => {
   }
 
   const getBounds = () => {
-    return props.formikProps.values.latitude ? L.latLngBounds([[props.formikProps.values.latitude, props.formikProps.values.longitude]]) : L.latLngBounds([[0,0]])
+    return props.formikProps.values.latitude ? L.latLngBounds([[props.formikProps.values.latitude, props.formikProps.values.longitude]]).pad(0.5) : L.latLngBounds([[0,0]])
   }
 
   return (
     <>
-    <Row>
+    <Row hidden={props.hidden}>
       <Col>
-        <Form.Row className="mt-3">
+        <Form.Row>
           <Form.Group as={Col} xs="12">
             {renderAddressLookup()}
           </Form.Group>
@@ -397,13 +397,24 @@ const AddressSearch = (props) => {
           />
         </Form.Row>
       </Col>
-      <Col className="border rounded pl-0 pr-0 mb-3 mt-5 mr-3" xs="4">
+      <Col className="border rounded pl-0 pr-0 mb-3 mr-3" xs="4" style={{marginTop:"31px"}}>
         <Map bounds={getBounds()} className="search-leaflet-container">
           {props.formikProps.values.latitude ?
           <Marker
             position={[props.formikProps.values.latitude, props.formikProps.values.longitude]}
             icon={pinMarkerIcon}
-          ></Marker>
+          >
+            {/* <MapTooltip autoPan={false}>
+                <span>
+                  <div>
+                    
+                  </div>
+                  <div>
+                    
+                  </div>
+                </span>
+              </MapTooltip> */}
+          </Marker>
           : ""}
         </Map>
       </Col>

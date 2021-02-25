@@ -8,15 +8,14 @@ import {
   Fade,
 } from 'reactstrap';
 
-import {Button, ButtonGroup, Card, Col, Form as BootstrapForm, Modal } from "react-bootstrap";
+import {Button, ButtonGroup, Card, Form as BootstrapForm, Modal } from "react-bootstrap";
 import * as Yup from 'yup';
 import { Switch } from 'formik-material-ui';
 import 'flatpickr/dist/themes/light.css';
-import { AddressLookup, DropDown, TextInput } from '../components/Form';
+import { AddressSearch, TextInput } from '../components/Form';
 import { AuthContext } from "../accounts/AccountsReducer";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft } from '@fortawesome/free-solid-svg-icons';
-import { STATE_OPTIONS } from "../constants";
 
 // Form for Service Request objects.
 function ServiceRequestForm(props) {
@@ -185,61 +184,7 @@ function ServiceRequestForm(props) {
             </span> : ""
           }
             <Fade in={fadeIn} hidden={!fadeIn}>
-              <BootstrapForm.Row>
-                <BootstrapForm.Group as={Col} xs="12">
-                  <AddressLookup
-                    label="Search"
-                    style={{width: '100%'}}
-                    className="form-control"
-                  />
-                </BootstrapForm.Group>
-              </BootstrapForm.Row>
-              <BootstrapForm.Row>
-                <TextInput
-                  type="text"
-                  label={is_first_responder ? "Address/Cross Streets*" : "Address*"}
-                  name="address"
-                  id="address"
-                  xs="10"
-                  disabled
-                />
-                <TextInput
-                  type="text"
-                  label="Apartment"
-                  name="apartment"
-                  id="apartment"
-                  xs="2"
-                />
-              </BootstrapForm.Row>
-              <BootstrapForm.Row>
-                <TextInput
-                  type="text"
-                  label="City"
-                  name="city"
-                  id="city"
-                  xs="8"
-                  disabled
-                />
-                <Col xs="2">
-                  <DropDown
-                    label="State"
-                    name="state"
-                    id="state"
-                    options={STATE_OPTIONS}
-                    value={formikProps.values.state || ''}
-                    placeholder=''
-                    disabled
-                  />
-                </Col>
-                <TextInput
-                  type="text"
-                  label="Zip Code"
-                  name="zip_code"
-                  id="zip_code"
-                  xs="2"
-                  disabled
-                />
-              </BootstrapForm.Row>
+              <AddressSearch formikProps={formikProps} label="Search" show_apt={true} />
             </Fade>
             <BootstrapForm.Row>
               <TextInput

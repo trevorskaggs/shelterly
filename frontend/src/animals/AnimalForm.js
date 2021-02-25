@@ -162,15 +162,6 @@ const AnimalForm = (props) => {
     setFieldValue("extra_images", data.extra_images.filter(url => url !== image_url));
   }
 
-  // Checks if Google API Key exists before rendering.
-  // const renderAddressLookup = ()=>{
-  //   if(process.env.REACT_APP_GOOGLE_API_KEY){
-  //     return <AddressLookup label="Found Location Search" style={{width: '100%'}} className="form-control"/>
-  //   } else {
-  //     return <Alert variant="danger">Found Location Search is not available. Please contact support for assistance.</Alert>
-  //   }
-  // }
-
   // Hook for initializing data.
   useEffect(() => {
     let source = axios.CancelToken.source();
@@ -608,7 +599,7 @@ const AnimalForm = (props) => {
                     label="Last Seen"
                     name="last_seen"
                     id="last_seen"
-                    xs="4"
+                    xs="6"
                     key={`my_unique_last_seen_select_key__${formikProps.values.last_seen}`}
                     onChange={(date, dateStr) => {
                       formikProps.setFieldValue("last_seen", dateStr)
@@ -638,7 +629,7 @@ const AnimalForm = (props) => {
                       />
                     </Col>
                   </BootstrapForm.Row>
-                  <BootstrapForm.Row className="mt-3">
+                  <BootstrapForm.Row className="mt-3 mb-3">
                     <Col xs="6">
                       <DropDown
                         id="room"
@@ -653,7 +644,7 @@ const AnimalForm = (props) => {
                     </Col>
                   </BootstrapForm.Row>
                 </span>
-                <AddressSearch formikProps={formikProps} label="Found Location Search"></AddressSearch>
+                <AddressSearch formikProps={formikProps} label="Found Location Search"/>
                 <span hidden={is_workflow && !is_intake}>
                   <p className={id || is_reporter ? "mb-0" : "mb-0 mt-3"}>Image Files</p>
                   <BootstrapForm.Row className="align-items-end">
