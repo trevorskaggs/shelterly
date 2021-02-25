@@ -594,7 +594,7 @@ const AnimalForm = (props) => {
                     xs="12"
                   />
                 </BootstrapForm.Row>
-                <BootstrapForm.Row>
+                <BootstrapForm.Row className={is_workflow ? "mb-3" : ""}>
                   <DateTimePicker
                     label="Last Seen"
                     name="last_seen"

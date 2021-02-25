@@ -2,13 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
 import { Link, navigate } from 'raviger';
 import { Field, Form, Formik } from 'formik';
-import {
-  CustomInput,
-  Label,
-  Fade,
-} from 'reactstrap';
-
-import {Button, ButtonGroup, Card, Form as BootstrapForm, Modal } from "react-bootstrap";
+import { Button, ButtonGroup, Card, Collapse, Form as BootstrapForm, Modal } from "react-bootstrap";
 import * as Yup from 'yup';
 import { Switch } from 'formik-material-ui';
 import 'flatpickr/dist/themes/light.css';
@@ -75,6 +69,7 @@ function ServiceRequestForm(props) {
       };
       fetchServiceRequestData();
     }
+
     // Cleanup.
     return () => {
       source.cancel();
@@ -179,13 +174,15 @@ function ServiceRequestForm(props) {
         <BootstrapForm as={Form}>
           {props.state.steps.owner.address && !id ?
             <span className="form-row mb-2">
-              <Label>&nbsp;&nbsp;Address Same as Owner: </Label>
-              <CustomInput id="same_address" type="checkbox" className="ml-2" checked={!fadeIn} onChange={handleChange} />
+              <BootstrapForm.Label>&nbsp;&nbsp;Address Same as Owner: </BootstrapForm.Label>
+              <input id="same_address" type="checkbox" className="ml-2" checked={!fadeIn} onChange={handleChange} style={{marginTop:"5px"}} />
             </span> : ""
           }
-            <Fade in={fadeIn} hidden={!fadeIn}>
-              <AddressSearch formikProps={formikProps} label="Search" show_apt={true} />
-            </Fade>
+            <Collapse in={fadeIn}>
+              <div>
+                <AddressSearch formikProps={formikProps} label="Search" show_apt={true} />
+              </div>
+            </Collapse>
             <BootstrapForm.Row>
               <TextInput
                 as="textarea"
@@ -197,16 +194,16 @@ function ServiceRequestForm(props) {
               />
             </BootstrapForm.Row>
             <BootstrapForm.Row>
-              <span hidden={is_first_responder}><Label htmlFor="verbal_permission" className="ml-1">Verbal Permission</Label>
+              <span hidden={is_first_responder}><BootstrapForm.Label htmlFor="verbal_permission" className="ml-1">Verbal Permission</BootstrapForm.Label>
               <Field component={Switch} name="verbal_permission" type="checkbox" color="primary"/>
 
-              <Label htmlFor="key_provided">Key Provided</Label>
+              <BootstrapForm.Label htmlFor="key_provided">Key Provided</BootstrapForm.Label>
               <Field component={Switch} name="key_provided" type="checkbox" color="primary" /></span>
 
-              <span><Label htmlFor="accessible">Accessible</Label>
+              <span><BootstrapForm.Label htmlFor="accessible">Accessible</BootstrapForm.Label>
               <Field component={Switch} name="accessible" type="checkbox" color="primary" />
 
-              <Label htmlFor="turn_around">Turn Around</Label>
+              <BootstrapForm.Label htmlFor="turn_around">Turn Around</BootstrapForm.Label>
               <Field component={Switch} name="turn_around" type="checkbox" color="primary" /></span>
             </BootstrapForm.Row>
           </BootstrapForm>

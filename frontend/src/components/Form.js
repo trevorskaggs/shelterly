@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useFormikContext, useField } from 'formik';
-import { Label, Input } from 'reactstrap';
 import { Col, Image, Form, Row } from 'react-bootstrap';
 import Select from 'react-select';
 import SimpleValue from 'react-select-simple-value';
@@ -188,16 +187,6 @@ const DropDown = React.forwardRef((props, ref) => {
   );
 });
 
-const MultiSelect = ({ label, ...props }) => {
-  const [field] = useField(props);
-  return (
-    <>
-      <Label htmlFor={props.id || props.name}>{label}</Label>
-      <Input type="select" {...field} {...props} multiple={true} />
-    </>
-  );
-};
-
 const ImageUploader = ({ parentStateSetter, ...props }) => {
 
   const { setFieldValue } = useFormikContext();
@@ -304,7 +293,7 @@ const AddressLookup = ({ ...props }) => {
 
   return (
     <>
-      <Label>{props.label}</Label>
+      <Form.Label>{props.label}</Form.Label>
       <Autocomplete
         {...props}
         onChange={(e) => {
@@ -339,7 +328,7 @@ const AddressSearch = (props) => {
 
   const renderAddressLookup = () => {
     if(process.env.REACT_APP_GOOGLE_API_KEY){
-      return <AddressLookup label={props.label} style={{width: '100%'}} className="form-control"/>
+      return <AddressLookup label={props.label} style={{width: '100%'}} className={"form-control"}/>
     } else {
       return <Alert variant="danger">Found Location Search is not available. Please contact support for assistance.</Alert>
     }
@@ -438,4 +427,4 @@ const AddressSearch = (props) => {
   );
 }
 
-export { AddressLookup, AddressSearch, TextInput, Checkbox, DropDown, ImageUploader, MultiSelect, DateTimePicker };
+export { AddressLookup, AddressSearch, TextInput, Checkbox, DropDown, ImageUploader, DateTimePicker };
