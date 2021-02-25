@@ -349,7 +349,7 @@ const AddressSearch = (props) => {
 
   return (
     <>
-    <Row hidden={props.hidden}>
+    <Row hidden={props.hidden} style={{fontSize:"15px"}}>
       <Col>
         <Form.Row>
           <Form.Group as={Col} xs="12">
