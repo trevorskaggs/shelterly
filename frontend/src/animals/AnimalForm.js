@@ -696,7 +696,7 @@ const AnimalForm = (props) => {
                     />
                   </BootstrapForm.Row>
                 </span> */}
-                <AddressSearch formikProps={formikProps}></AddressSearch>
+                <AddressSearch formikProps={formikProps} label="Found Location Search"></AddressSearch>
                 <span hidden={is_workflow && !is_intake}>
                   <p className={id || is_reporter ? "mb-0" : "mb-0 mt-3"}>Image Files</p>
                   <BootstrapForm.Row className="align-items-end">

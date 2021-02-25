@@ -274,7 +274,7 @@ const AddressLookup = ({ ...props }) => {
   const { setFieldValue } = useFormikContext();
 
   const updateAddr = suggestion => {
-    console.log(suggestion);
+
     if (suggestion.address_components) {
       // Extract location information from the return. Use short_name for the state.
       var components={};
@@ -303,6 +303,19 @@ const AddressLookup = ({ ...props }) => {
       <Label>{props.label}</Label>
       <Autocomplete
         {...props}
+        onChange={(e) => {
+          const lookup = e.target.value.replace(' ', '').split(',');
+          if (lookup[0] <= 90 && lookup[0] >= -90 && lookup[1] <= 180 && lookup[1] >= -180) {
+          let latlng = {lat:Number(lookup[0]), lng:Number(lookup[1])};
+          new window.google.maps.Geocoder().geocode({ location: latlng }, function (results, status) {
+            if (status === window.google.maps.GeocoderStatus.OK) {
+              updateAddr(results[0])
+            } else {
+              console.log(status);
+            }
+          });
+          }
+        }}
         onPlaceSelected={(place) => {
           updateAddr(place);
         }}
@@ -319,7 +332,7 @@ const AddressSearch = (props) => {
 
   const renderAddressLookup = () => {
     if(process.env.REACT_APP_GOOGLE_API_KEY){
-      return <AddressLookup label="Found Location Search" style={{width: '100%'}} className="form-control"/>
+      return <AddressLookup label={props.label} style={{width: '100%'}} className="form-control"/>
     } else {
       return <Alert variant="danger">Found Location Search is not available. Please contact support for assistance.</Alert>
     }
@@ -327,64 +340,65 @@ const AddressSearch = (props) => {
 
   return (
     <>
-    <Row><Col>
-      <Form.Row className="mt-3">
-        <Form.Group as={Col} xs="12">
-          {renderAddressLookup()}
-        </Form.Group>
-      </Form.Row>
-      <Form.Row>
-        <TextInput
-          xs="10"
-          type="text"
-          label="Address"
-          name="address"
-          disabled
-        />
-        {props.show_apt ? 
-        <TextInput
-          xs="2"
-          type="text"
-          label="Apartment"
-          name="apartment"
-        /> : ""}
-      </Form.Row>
-      <Form.Row>
-        <TextInput
-          xs="8"
-          type="text"
-          label="City"
-          name="city"
-          disabled
-        />
-        <Col xs="2">
-        <DropDown
-          label="State"
-          name="state"
-          id="state"
-          options={STATE_OPTIONS}
-          value={props.formikProps.values.state || ''}
-          placeholder=''
-          disabled
-        />
-        </Col>
-        <TextInput
-          xs="2"
-          type="text"
-          label="Zip Code"
-          name="zip_code"
-          disabled
-        />
-      </Form.Row>
+    <Row>
+      <Col>
+        <Form.Row className="mt-3">
+          <Form.Group as={Col} xs="12">
+            {renderAddressLookup()}
+          </Form.Group>
+        </Form.Row>
+        <Form.Row>
+          <TextInput
+            xs={props.show_apt ? "10" : "12"}
+            type="text"
+            label="Address"
+            name="address"
+            disabled
+          />
+          {props.show_apt ?
+          <TextInput
+            xs="2"
+            type="text"
+            label="Apartment"
+            name="apartment"
+          /> : ""}
+        </Form.Row>
+        <Form.Row>
+          <TextInput
+            xs="8"
+            type="text"
+            label="City"
+            name="city"
+            disabled
+          />
+          <Col xs="2">
+          <DropDown
+            label="State"
+            name="state"
+            id="state"
+            options={STATE_OPTIONS}
+            value={props.formikProps.values.state || ''}
+            placeholder=''
+            disabled
+          />
+          </Col>
+          <TextInput
+            xs="2"
+            type="text"
+            label="Zip Code"
+            name="zip_code"
+            disabled
+          />
+        </Form.Row>
       </Col>
       <Col className="border rounded pl-0 pr-0 mb-3 mt-5 mr-3" xs="4">
-      <Map bounds={props.formikProps.values.latitude ? [[props.formikProps.values.latitude, props.formikProps.values.longitude]] : L.latLngBounds([[0,0]])} className="search-leaflet-container">
-        {props.formikProps.values.latitude ?
-        <Marker
+        <Map bounds={props.formikProps.values.latitude ? [[props.formikProps.values.latitude, props.formikProps.values.longitude]] : L.latLngBounds([[0,0]])} className="search-leaflet-container">
+          {props.formikProps.values.latitude ?
+          <Marker
             position={[props.formikProps.values.latitude, props.formikProps.values.longitude]}
             icon={pinMarkerIcon}
-            // onClick={() => window.open("/hotline/servicerequest/" + currentRequest.id, "_blank")}
-          ></Marker> : ""}
+          ></Marker>
+          : ""}
         </Map>
         </Col>
         </Row>
