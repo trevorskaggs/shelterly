@@ -1,0 +1,80 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Description: Site resources for Shelterly deployment
+
+Parameters:
+
+  LambdaIAMRoleArn:
+    Type: String
+    Default: arn:aws:iam::502259086226:role/shelterly-base-LambdaIAMRole-LK2LR6O7Z1GW
+  DjangoSecretKey:
+    Type: String
+    Default: LMqi2Etsmmbmy96UWcdWG4o74HJq7t6XZEja
+  DatabaseName:
+    Type: String
+    Default: production
+  DatabaseUser:
+    Type: String
+    Default: postgres
+  DatabasePassword:
+    Type: String
+    Default: PPHbFwq#YgqG&n8#
+  DatabaseHost:
+    Type: String
+    Default: production.cluster-cl6t8ji3shyo.us-west-2.rds.amazonaws.com"
+
+Resources:
+
+  LambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      PackageType: Image
+      Code:
+        ImageUri: 502259086226.dkr.ecr.us-west-2.amazonaws.com/shelterly:latest
+      Environment:
+        Variables:
+          SECRET_KEY: !Ref DjangoSecretKey
+          DATABASE_NAME: !Ref DatabaseName
+          DATABASE_PASSWORD: !Ref DatabasePassword
+          DATABASE_HOST: !Ref DatabaseHost
+      ImageConfig:
+        Command: ["lambda_awsgi.lambda_handler"]
+      MemorySize: 128
+      Role: !Ref LambdaIAMRoleArn
+      Timeout: 20
+      VpcConfig:
+        SecurityGroupIds:
+          - sg-004b1b2f3f11c8db0
+        SubnetIds:
+          - subnet-029c350b9f38be490
+          - subnet-0222d10c5bd30db90
+          - subnet-0b737ca64b0811df0
+          - subnet-00bdf1f9dc85ad4fe
+
+
+  LambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt LambdaFunction.Arn
+      Principal: apigateway.amazonaws.com
+
+  HttpApi:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: shelterly-http-api
+      Description: HTTP API
+      ProtocolType: HTTP
+      Target: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaFunction.Arn}/invocations
+
+  HttpApiOverrides:
+    Type: AWS::ApiGatewayV2::ApiGatewayManagedOverrides
+    Properties:
+      ApiId: !Sub ${HttpApi}
+      Integration:
+        PayloadFormatVersion: "2.0"
+
+Outputs:
+
+  HttpApiUrl:
+    Value: !Sub https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com/
