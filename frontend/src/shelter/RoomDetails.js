@@ -6,10 +6,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faClipboardList, faEdit, faWarehouse,
 } from '@fortawesome/free-solid-svg-icons';
-import ReactImageFallback from 'react-image-fallback';
 import History from '../components/History';
 import Header from '../components/Header';
-import noImageFound from '../static/images/image-not-found.png';
 import AnimalCards from '../components/AnimalCards';
 
 function RoomDetails({id}) {
