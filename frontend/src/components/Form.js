@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useFormikContext, useField } from 'formik';
-import { Col, Image, Form, Row } from 'react-bootstrap';
+import { Col, Collapse, Image, Form, Row } from 'react-bootstrap';
 import Select from 'react-select';
 import SimpleValue from 'react-select-simple-value';
 import Flatpickr from 'react-flatpickr';
@@ -10,14 +10,14 @@ import {
   faTimes, faMinusSquare, faPlusSquare,
 } from '@fortawesome/free-solid-svg-icons';
 import Autocomplete from 'react-google-autocomplete';
-import { Marker, Tooltip as MapTooltip } from "react-leaflet";
+import { Map, Marker, Tooltip as MapTooltip, TileLayer } from "react-leaflet";
 import flatten from 'flat';
 import clsx from 'clsx';
 import MaterialCheckbox from '@material-ui/core/Checkbox';
 import { makeStyles } from '@material-ui/core/styles';
 import Alert from 'react-bootstrap/Alert';
 import L from "leaflet";
-import Map, { pinMarkerIcon } from "../components/Map";
+import { Legend, pinMarkerIcon } from "../components/Map";
 import { STATE_OPTIONS } from '../constants';
 
 const useStyles = makeStyles({
@@ -324,6 +324,7 @@ const AddressLookup = ({ ...props }) => {
 const AddressSearch = (props) => {
 
   const markerRef = useRef(null);
+  const mapRef = useRef(null);
   const { setFieldValue } = useFormikContext();
 
   const renderAddressLookup = () => {
@@ -343,86 +344,105 @@ const AddressSearch = (props) => {
       }
   }
 
-  const getBounds = () => {
-    return props.formikProps.values.latitude ? L.latLngBounds([[props.formikProps.values.latitude, props.formikProps.values.longitude]]).pad(0.5) : L.latLngBounds([[0,0]])
+  const [fadeIn, setFadeIn] = useState(props.show_same ? false : true);
+  function handleChange() {
+    setFadeIn(!fadeIn);
+    setTimeout(() => {
+      mapRef.current.leafletElement.invalidateSize();
+    }, 250)
   }
 
   return (
     <>
-    <Row hidden={props.hidden} style={{fontSize:"15px"}}>
-      <Col>
-        <Form.Row>
-          <Form.Group as={Col} xs="12">
-            {renderAddressLookup()}
-          </Form.Group>
-        </Form.Row>
-        <Form.Row>
-          <TextInput
-            xs={props.show_apt ? "10" : "12"}
-            type="text"
-            label="Address"
-            name="address"
-            disabled
-          />
-          {props.show_apt ?
-          <TextInput
-            xs="2"
-            type="text"
-            label="Apartment"
-            name="apartment"
-          /> : ""}
-        </Form.Row>
-        <Form.Row>
-          <TextInput
-            xs="8"
-            type="text"
-            label="City"
-            name="city"
-            disabled
-          />
-          <Col xs="2">
-          <DropDown
-            label="State"
-            name="state"
-            id="state"
-            options={STATE_OPTIONS}
-            placeholder=''
-            disabled
-          />
+    {props.show_same ?
+      <span className="form-row mb-2">
+        <Form.Label style={{marginLeft:"5px"}}>Address Same as Owner: </Form.Label>
+        <input id="same_address" type="checkbox" className="ml-2" checked={!fadeIn} onChange={handleChange} style={{marginTop:"5px"}} />
+      </span>
+    : ""}
+    <Collapse in={fadeIn}>
+      <div>
+        <Row hidden={props.hidden} style={{fontSize:"15px"}}>
+          <Col>
+            <Form.Row>
+              <Form.Group as={Col} xs="12">
+                {renderAddressLookup()}
+              </Form.Group>
+            </Form.Row>
+            <Form.Row>
+              <TextInput
+                xs={props.show_apt ? "10" : "12"}
+                type="text"
+                label="Address"
+                name="address"
+                disabled
+              />
+              {props.show_apt ?
+              <TextInput
+                xs="2"
+                type="text"
+                label="Apartment"
+                name="apartment"
+              /> : ""}
+            </Form.Row>
+            <Form.Row>
+              <TextInput
+                xs="8"
+                type="text"
+                label="City"
+                name="city"
+                disabled
+              />
+              <Col xs="2">
+              <DropDown
+                label="State"
+                name="state"
+                id="state"
+                options={STATE_OPTIONS}
+                placeholder=''
+                disabled
+              />
+              </Col>
+              <TextInput
+                xs="2"
+                type="text"
+                label="Zip Code"
+                name="zip_code"
+                disabled
+              />
+            </Form.Row>
           </Col>
-          <TextInput
-            xs="2"
-            type="text"
-            label="Zip Code"
-            name="zip_code"
-            disabled
-          />
-        </Form.Row>
-      </Col>
-      <Col className="border rounded pl-0 pr-0 mb-3 mr-3" xs="4" style={{marginTop:"31px"}}>
-        <Map bounds={getBounds()} className="search-leaflet-container">
-          {props.formikProps.values.latitude ?
-          <Marker
-            draggable={true}
-            onDragEnd={updatePosition}
-            autoPan={true}
-            position={[props.formikProps.values.latitude, props.formikProps.values.longitude]}
-            icon={pinMarkerIcon}
-            ref={markerRef}
-          >
-            <MapTooltip autoPan={false} direction="top">
-              <div>
-                {props.formikProps.values.full_address}
-              </div>
-              <div>
-                Lat: {props.formikProps.values.latitude}, Lon: {props.formikProps.values.longitude}
-              </div>
-            </MapTooltip>
-          </Marker>
-          : ""}
-        </Map>
-      </Col>
-    </Row>
+          <Col className="border rounded pl-0 pr-0 mb-3 mr-3" xs="4" style={{marginTop:"31px"}}>
+            <Map ref={mapRef} bounds={props.formikProps.values.latitude ? L.latLngBounds([[props.formikProps.values.latitude, props.formikProps.values.longitude]]) : L.latLngBounds([[0,0]])} className="search-leaflet-container" >
+            <Legend position="bottomleft" metric={false} />
+            <TileLayer
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+            />
+              {props.formikProps.values.latitude ?
+              <Marker
+                draggable={true}
+                onDragEnd={updatePosition}
+                autoPan={true}
+                position={[props.formikProps.values.latitude, props.formikProps.values.longitude]}
+                icon={pinMarkerIcon}
+                ref={markerRef}
+              >
+                <MapTooltip autoPan={false} direction="top">
+                  <div>
+                    {props.formikProps.values.full_address}
+                  </div>
+                  <div>
+                    Lat: {props.formikProps.values.latitude}, Lon: {props.formikProps.values.longitude}
+                  </div>
+                </MapTooltip>
+              </Marker>
+              : ""}
+            </Map>
+          </Col>
+        </Row>
+      </div>
+    </Collapse>
     </>
   );
 }

@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
 import { Link, navigate } from 'raviger';
 import { Field, Form, Formik } from 'formik';
-import { Button, ButtonGroup, Card, Collapse, Form as BootstrapForm, Modal } from "react-bootstrap";
+import { Button, ButtonGroup, Card, Form as BootstrapForm, Modal } from "react-bootstrap";
 import * as Yup from 'yup';
 import { Switch } from 'formik-material-ui';
 import 'flatpickr/dist/themes/light.css';
@@ -22,12 +22,6 @@ function ServiceRequestForm(props) {
 
   // Determine if this is from a first responder when creating a SR.
   var is_first_responder = window.location.pathname.includes("first_responder");
-
-  // Track checkbox state with Fade.
-  const [fadeIn, setFadeIn] = useState(props.state.steps.owner.address ? false : true);
-  function handleChange() {
-    setFadeIn(!fadeIn)
-  }
 
   // Track duplicate request address error.
   const [error, setError] = useState({show:false, error:[]});
@@ -172,17 +166,7 @@ function ServiceRequestForm(props) {
           <span style={{cursor:'pointer'}} onClick={() => {props.handleBack('request', 'animals')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}{id ? "Update " : ""}Service Request{is_workflow ? " Information" :""}</Card.Header>
         <Card.Body>
         <BootstrapForm as={Form}>
-          {props.state.steps.owner.address && !id ?
-            <span className="form-row mb-2">
-              <BootstrapForm.Label>&nbsp;&nbsp;Address Same as Owner: </BootstrapForm.Label>
-              <input id="same_address" type="checkbox" className="ml-2" checked={!fadeIn} onChange={handleChange} style={{marginTop:"5px"}} />
-            </span> : ""
-          }
-            <Collapse in={fadeIn}>
-              <div>
-                <AddressSearch formikProps={formikProps} label="Search" show_apt={true} />
-              </div>
-            </Collapse>
+            <AddressSearch formikProps={formikProps} label="Search" show_apt={true} show_same={props.state.steps.owner.address} />
             <BootstrapForm.Row>
               <TextInput
                 as="textarea"
