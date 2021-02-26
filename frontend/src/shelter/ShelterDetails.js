@@ -9,7 +9,8 @@ import {
 import ReactImageFallback from 'react-image-fallback';
 import History from '../components/History';
 import Header from '../components/Header';
-import noImageFound from '../static/images/image-not-found.png';
+import S3_BUCKET from '../constants';
+
 
 function ShelterDetails({id}) {
 
@@ -177,7 +178,7 @@ function ShelterDetails({id}) {
               <span className="d-flex flex-wrap align-items-end">
               {data.unroomed_animals.map(animal => (
                 <Card key={animal.id} className="border rounded mr-3 mb-3" style={{border:"none"}}>
-                  <ReactImageFallback style={{width:"151px", height:"151px", objectFit: "cover", overflow: "hidden"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} />
+                  <ReactImageFallback style={{width:"151px", height:"151px", objectFit: "cover", overflow: "hidden"}} src={animal.front_image} fallbackImage={[animal.side_image, `${S3_BUCKET}images/image-not-found.png`]} />
                   <Card.Text className="text-center mb-0" style={{textTransform:"capitalize"}}>
                   {animal.species === 'horse' ? animal.size : animal.species} - {animal.name||"Unknown"}
                     <OverlayTrigger

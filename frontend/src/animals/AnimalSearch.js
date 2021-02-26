@@ -3,13 +3,13 @@ import axios from "axios";
 import { Link } from 'raviger';
 import { Button, ButtonGroup, Card, CardGroup, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import ReactImageFallback from 'react-image-fallback';
-import noImageFound from '../static/images/image-not-found.png';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faClipboardList, faUserAltSlash
 } from '@fortawesome/free-solid-svg-icons';
 import Header from '../components/Header';
 import { titleCase } from '../components/Utils';
+import S3_BUCKET from '../constants';
 
 function AnimalSearch() {
 
@@ -94,7 +94,7 @@ function AnimalSearch() {
           <CardGroup>
             <Card key={animal.id}>
               <Card.Body className="p-0 m-0">
-                <ReactImageFallback style={{width:"196px", height:"196px", objectFit: "cover", overflow: "hidden"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} />
+                <ReactImageFallback style={{width:"196px", height:"196px", objectFit: "cover", overflow: "hidden"}} src={animal.front_image} fallbackImage={[animal.side_image, `${S3_BUCKET}images/image-not-found.png`]} />
               </Card.Body>
             </Card>
             <Card>

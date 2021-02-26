@@ -10,8 +10,8 @@ import {
 import ReactImageFallback from 'react-image-fallback';
 import Header from '../components/Header';
 import History from '../components/History';
-import noImageFound from '../static/images/image-not-found.png';
 import Flatpickr from 'react-flatpickr';
+import S3_BUCKET from '../constants';
 
 function ServiceRequestDetails({id}) {
 
@@ -303,7 +303,7 @@ function ServiceRequestDetails({id}) {
               <span className="d-flex flex-wrap align-items-end">
               {data.animals.map(animal => (
                 <Card key={animal.id} className="mr-3 mt-3" style={{border:"none"}}>
-                  <ReactImageFallback style={{width:"151px"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} />
+                  <ReactImageFallback style={{width:"151px"}} src={animal.front_image} fallbackImage={[animal.side_image, `${S3_BUCKET}images/image-not-found.png`]} />
                   <Card.Text className="text-center mb-0">
                     {animal.name||"Unknown"}
                     <OverlayTrigger
