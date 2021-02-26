@@ -1,10 +1,12 @@
 {% load static %}
+{% load render_bundle from webpack_loader %}
 
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <link rel="stylesheet" href="{% static 'css/main.82763a00.chunk.css' %}">
-    <link rel="stylesheet" href="{% static 'css/vendors.f57fa2eb.chunk.css' %}">
+    {% render_bundle 'vendors' 'css' %}
+    {% render_bundle 'main' 'css' %}
+    {% render_bundle 'runtime-main' 'css' %}
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
     <meta
@@ -39,9 +41,9 @@
       To begin the development, run `npm start` or `yarn start`.
       To create a production bundle, use `npm run build` or `yarn build`.
     -->
-    <script src="{% static 'js/main.4d519306.chunk.js' %}" ></script>
-    <script src="{% static 'js/runtime-main.c60b7f5c.js' %}" ></script>
-    <script src="{% static 'js/vendors.c84f3eae.chunk.js' %}" ></script>
+    {% render_bundle 'vendors' 'js' %}
+    {% render_bundle 'main' 'js' %}
+    {% render_bundle 'runtime-main' 'js' %}
 
   </body>
   <script  type="text/javascript" src="{% static 'js/main.js' %}"></script>

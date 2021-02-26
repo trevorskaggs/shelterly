@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     'frontend',
     'ordered_model',
     'actstream',
+    'webpack_loader'
 ]
 
 ACTSTREAM_SETTINGS = {
@@ -146,12 +147,12 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': ('knox.auth.TokenAuthentication',),
     'USER_SERIALIZER': 'accounts.serializers.UserSerializer',
 }
-# WEBPACK_LOADER = {
-#     'DEFAULT': {
-#             'BUNDLE_DIR_NAME': '',
-#             "STATS_FILE": os.path.join(BASE_DIR, "shelterly", "frontend", "build", "webpack-stats.prod.json"),
-#         },
-# }
+WEBPACK_LOADER = {
+    'DEFAULT': {
+            'BUNDLE_DIR_NAME': '',
+            "STATS_FILE": os.path.join(BASE_DIR, "shelterly", "frontend", "build", "webpack-stats.prod.json"),
+        },
+}
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
