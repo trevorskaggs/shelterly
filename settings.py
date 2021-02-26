@@ -30,8 +30,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-ALLOWED_HOSTS = ['ceuvhfhgn4.execute-api.us-west-2.amazonaws.com',]
-DEBUG = False
+ALLOWED_HOSTS = ['ceuvhfhgn4.execute-api.us-west-2.amazonaws.com']
 AUTH_USER_MODEL = 'accounts.ShelterlyUser'
 
 
@@ -59,8 +58,7 @@ INSTALLED_APPS = [
     'shelter',
     'frontend',
     'ordered_model',
-    'actstream',
-    'webpack_loader'
+    'actstream'
 ]
 
 ACTSTREAM_SETTINGS = {
@@ -134,7 +132,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "frontend/build/static/")
+    os.path.join(BASE_DIR, "frontend/build/static")
 ]
 
 #TODO Change to envvars.
@@ -147,12 +145,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': ('knox.auth.TokenAuthentication',),
     'USER_SERIALIZER': 'accounts.serializers.UserSerializer',
 }
-WEBPACK_LOADER = {
-    'DEFAULT': {
-            'BUNDLE_DIR_NAME': '',
-            "STATS_FILE": os.path.join(BASE_DIR, "shelterly", "frontend", "build", "webpack-stats.prod.json"),
-        },
-}
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,

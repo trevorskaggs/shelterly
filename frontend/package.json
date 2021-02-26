@@ -50,7 +50,6 @@
     "reactstrap": "^8.4.1",
     "request": "^2.88.2",
     "styled-components": "^5.1.1",
-    "webpack-bundle-tracker": "^1.0.0-alpha.1",
     "yup": "^0.28.3"
   },
   "scripts": {
