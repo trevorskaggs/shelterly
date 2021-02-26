@@ -6,11 +6,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faClipboardList, faEdit, faPhone, faPlusSquare
 } from '@fortawesome/free-solid-svg-icons';
-import ReactImageFallback from 'react-image-fallback';
 import Moment from 'react-moment';
-import noImageFound from '../static/images/image-not-found.png';
 import Header from '../components/Header';
 import History from '../components/History';
+import AnimalCards from '../components/AnimalCards';
 
 function PersonDetails({id}) {
 
@@ -99,7 +98,7 @@ function PersonDetails({id}) {
     </Header>
     <hr/>
     <div className="row">
-      <div className="col-6 d-flex" style={{marginRight:"-15px"}}>
+      <div className="col-6 d-flex" style={{paddingRight:"9px"}}>
         <Card className="border rounded d-flex" style={{width:"100%"}}>
           <Card.Body>
             <Card.Title>
@@ -132,11 +131,11 @@ function PersonDetails({id}) {
           </Card.Body>
         </Card>
       </div>
-      <div className="col-6 d-flex" style={{marginRight:"-15px"}}>
+      <div className="col-6 d-flex" style={{paddingLeft:"9px"}}>
         <Card className="border rounded d-flex" style={{width:"100%"}}>
           <Card.Body>
             <Card.Title>
-              <h4>Owner Contact Log
+              <h4>Contact Log
                 <Link href={"/hotline/ownercontact/new?owner=" + id}><FontAwesomeIcon icon={faPhone} className="ml-1" inverse /></Link>
               </h4>
             </Card.Title>
@@ -150,10 +149,10 @@ function PersonDetails({id}) {
         </Card>
       </div>
     </div>
-    <div className="row mt-3" hidden={data.animals.length === 0}>
+    <div className="row mt-3">
       <div className="col-12 d-flex">
         <Card className="border rounded" style={{width:"100%"}}>
-          <Card.Body>
+          <Card.Body style={{marginBottom:"-17px"}}>
             <Card.Title>
               <h4 className="mb-0">Animals
                 <OverlayTrigger
@@ -170,33 +169,8 @@ function PersonDetails({id}) {
               </h4>
             </Card.Title>
             <hr/>
-            <span className="d-flex flex-wrap align-items-end">
-            {data.animals.map(animal => (
-              <Card key={animal.id} className="mr-3" style={{border:"none"}}>
-                <ReactImageFallback style={{width:"151px", height:"151px", objectFit: "cover", overflow: "hidden"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} />
-                <Card.Text className="text-center mb-0">
-                  {animal.name||"Unknown"}
-                  <OverlayTrigger
-                    key={"animal-details"}
-                    placement="top"
-                    overlay={
-                      <Tooltip id={`tooltip-animal-details`}>
-                        Animal details
-                      </Tooltip>
-                    }
-                  >
-                    <Link href={"/animals/" + animal.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
-                  </OverlayTrigger>
-                </Card.Text>
-                <Card.Text className="text-center mb-0">
-                  {animal.status}
-                </Card.Text>
-                <Card.Text className="text-center" style={{textTransform:"capitalize"}}>
-                  {animal.size} {animal.species}
-                </Card.Text>
-              </Card>
-            ))}
-            </span>
+            <AnimalCards animals={data.animals} show_owner={false} show_status={true} />
+            {data.animals.length < 1 ? <p>This {is_owner ? "owner" : "reporter"} has no animals.</p> : ""}
           </Card.Body>
         </Card>
       </div>

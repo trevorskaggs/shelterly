@@ -6,10 +6,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faClipboardList, faEdit, faPlusSquare, faWarehouse,
 } from '@fortawesome/free-solid-svg-icons';
-import ReactImageFallback from 'react-image-fallback';
 import History from '../components/History';
 import Header from '../components/Header';
-import noImageFound from '../static/images/image-not-found.png';
+import AnimalCards from '../components/AnimalCards';
 
 function ShelterDetails({id}) {
 
@@ -174,28 +173,8 @@ function ShelterDetails({id}) {
                 </OverlayTrigger></h4>
               </Card.Title>
               <hr/>
-              <span className="d-flex flex-wrap align-items-end">
-              {data.unroomed_animals.map(animal => (
-                <Card key={animal.id} className="border rounded mr-3 mb-3" style={{border:"none"}}>
-                  <ReactImageFallback style={{width:"151px", height:"151px", objectFit: "cover", overflow: "hidden"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} />
-                  <Card.Text className="text-center mb-0" style={{textTransform:"capitalize"}}>
-                  {animal.species === 'horse' ? animal.size : animal.species} - {animal.name||"Unknown"}
-                    <OverlayTrigger
-                      key={"animal-details"}
-                      placement="top"
-                      overlay={
-                        <Tooltip id={`tooltip-animal-details`}>
-                          Animal details
-                        </Tooltip>
-                      }
-                    >
-                      <Link href={"/animals/" + animal.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
-                    </OverlayTrigger>
-                  </Card.Text>
-                </Card>
-              ))}
-              {data.unroomed_animals.length < 1 ? <span className="mb-2">All animals are assigned rooms.</span> : ""}
-              </span>
+              <AnimalCards animals={data.unroomed_animals} show_owner={true} />
+              {data.unroomed_animals.length < 1 ? <p>All animals are assigned rooms.</p> : ""}
             </Card.Body>
           </Card>
         </div>
