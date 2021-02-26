@@ -9,7 +9,7 @@ import {
 import ReactImageFallback from 'react-image-fallback';
 import History from '../components/History';
 import Header from '../components/Header';
-import S3_BUCKET from '../constants';
+import { S3_BUCKET } from '../constants';
 
 
 function RoomDetails({id}) {

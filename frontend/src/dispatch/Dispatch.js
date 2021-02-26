@@ -8,7 +8,7 @@ import Moment from 'react-moment';
 import randomColor from "randomcolor";
 import Map, { countMatches, prettyText } from "../components/Map";
 import Header from "../components/Header";
-import S3_BUCKET from '../constants';
+import { S3_BUCKET } from '../constants';
 
 
 function Dispatch() {

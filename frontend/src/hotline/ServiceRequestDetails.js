@@ -11,7 +11,7 @@ import ReactImageFallback from 'react-image-fallback';
 import Header from '../components/Header';
 import History from '../components/History';
 import Flatpickr from 'react-flatpickr';
-import S3_BUCKET from '../constants';
+import { S3_BUCKET } from '../constants';
 
 function ServiceRequestDetails({id}) {
 

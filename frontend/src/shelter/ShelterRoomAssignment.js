@@ -9,7 +9,7 @@ import {
 import ReactImageFallback from 'react-image-fallback';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import Header from '../components/Header';
-import S3_BUCKET from '../constants';
+import { S3_BUCKET } from '../constants';
 
 function ShelterRoomAssignment({id}) {
 
@@ -246,7 +246,7 @@ function ShelterRoomAssignment({id}) {
                             <Card className={"border rounded" + (snapshot.isDragging ? " border-danger" : "")} style={{width:"150px", whiteSpace:"nowrap", overflow:"hidden"}}>
                               <div className="row no-gutters" style={{ textTransform:"capitalize" }}>
                                 <div className="mb-0">
-                                  <ReactImageFallback style={{width:"47px", height:"47px", marginRight:"3px", objectFit:"cover", overflow:"hidden", float:"left"}} src={animal.front_image} fallbackImage={[animal.side_image, `${S3_BUCKET}images/image-not-found.png]} />
+                                  <ReactImageFallback style={{width:"47px", height:"47px", marginRight:"3px", objectFit:"cover", overflow:"hidden", float:"left"}} src={animal.front_image} fallbackImage={[animal.side_image, `${S3_BUCKET}images/image-not-found.png`]} />
                                   <span title={animal.name}>{animal.name||"Unknown"}</span>
                                   <div>
                                     {animal.owner_names.length === 0 ?

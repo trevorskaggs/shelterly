@@ -5,6 +5,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Nav } from 'react-bootstrap';
 import { faDoorOpen, faHome, faBullhorn, faPhone, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
 import { logoutUser } from ".././accounts/AccountsUtils";
+import { S3_BUCKET } from '../constants';
+
 
 export const StyledMenu = styled(Nav)`
   background: ${({ theme }) => theme.primaryDark};

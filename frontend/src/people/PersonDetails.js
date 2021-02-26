@@ -10,7 +10,7 @@ import ReactImageFallback from 'react-image-fallback';
 import Moment from 'react-moment';
 import Header from '../components/Header';
 import History from '../components/History';
-import S3_BUCKET from '../constants';
+import { S3_BUCKET } from '../constants';
 
 
 function PersonDetails({id}) {

@@ -9,7 +9,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import Header from '../components/Header';
 import { titleCase } from '../components/Utils';
-import S3_BUCKET from '../constants';
+import { S3_BUCKET } from '../constants';
 
 function AnimalSearch() {
 

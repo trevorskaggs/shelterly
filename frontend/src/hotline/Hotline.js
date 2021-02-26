@@ -7,7 +7,7 @@ import L from "leaflet";
 import Moment from 'react-moment';
 import Map, { countMatches, prettyText, reportedMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
 import Header from "../components/Header";
-import S3_BUCKET from '../constants';
+import { S3_BUCKET } from '../constants';
 
 
 function Hotline() {

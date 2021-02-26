@@ -17,7 +17,7 @@ import Map, { countMatches, prettyText, reportedMarkerIcon, SIPMarkerIcon, UTLMa
 import { Checkbox } from "../components/Form";
 import 'react-bootstrap-typeahead/css/Typeahead.css';
 import 'leaflet/dist/leaflet.css';
-import S3_BUCKET from '../constants';
+import { S3_BUCKET } from '../constants';
 
 
 function Deploy() {

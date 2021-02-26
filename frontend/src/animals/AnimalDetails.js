@@ -12,7 +12,7 @@ import { faClawMarks, faHomeHeart } from '@fortawesome/pro-solid-svg-icons';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import Header from '../components/Header';
 import History from '../components/History';
-import S3_BUCKET from '../constants';
+import { S3_BUCKET } from '../constants';
 
 function AnimalDetails({id}) {
 

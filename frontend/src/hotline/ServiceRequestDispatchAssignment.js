@@ -15,7 +15,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { faRectanglePortrait } from '@fortawesome/pro-solid-svg-icons';
 import { faCheckCircle } from '@fortawesome/pro-duotone-svg-icons';
-import S3_BUCKET from '../constants';
+import { S3_BUCKET } from '../constants';
 
 
 function ServiceRequestDispatchAssignment({id}) {
