@@ -21,6 +21,16 @@ hr { display: block; height: 1px;
   border: 0; border-top: 1px solid #ccc !important;
   margin: 1em 0; padding: 0; }
 
+.text-border {
+    margin-top: -15px;
+    margin-left: -8px;
+    color: white;
+    font-size: 22px;
+    font-weight: bold;
+    -webkit-text-stroke-width: 1px;
+    -webkit-text-stroke-color: black;
+}
+
 /* Leaflet map CSS */
 .leaflet-container { width: auto; height: 55vh;}
 

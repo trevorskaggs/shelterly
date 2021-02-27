@@ -16,22 +16,12 @@ function AnimalCards(props) {
     <span className="d-flex flex-wrap align-items-end" style={{marginLeft:"-15px"}}>
     {props.animals.map(animal => (
       <Card key={animal.id} className="border rounded ml-3 mb-3" style={{width:"153px", whiteSpace:"nowrap", overflow:"hidden"}}>
-        <ReactImageFallback style={{width:"153px", height:"153px", objectFit: "cover", overflow: "hidden"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} />
-        <Card.Text className="mb-0" style={{textTransform:"capitalize"}}>
-        <span title={animal.name} className="ml-1">#{animal.id}&nbsp;{animal.name||"Unknown"}</span>
+        <Card.Img variant="top" src={animal.front_image || animal.side_image || noImageFound} style={{width:"153px", height:"153px", objectFit: "cover", overflow: "hidden"}} />
+        <Card.ImgOverlay className="text-border" style={{height:"20px"}}>#{animal.id}</Card.ImgOverlay>
+        <Card.Text className="mb-0 border-top" style={{textTransform:"capitalize"}}>
+        <span title={animal.name} className="ml-1">{animal.name||"Unknown"}</span>
         <div className="ml-1">
-          {animal.species === 'horse' && animal.size !== 'unknown' ? animal.size : animal.species}
-          <OverlayTrigger
-            key={"animal-details"}
-            placement="top"
-            overlay={
-              <Tooltip id={`tooltip-animal-details`}>
-                Animal details
-              </Tooltip>
-            }
-          >
-            <Link href={"/animals/" + animal.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1 mr-1" inverse /></Link>
-          </OverlayTrigger>
+          {animal.species === 'horse' && animal.size !== 'unknown' ? animal.size : animal.species}&nbsp;
           {props.show_owner ? <span>
           {animal.owner_names.length === 0 ?
           <OverlayTrigger
@@ -100,6 +90,17 @@ function AnimalCards(props) {
                 <FontAwesomeIcon icon={faSkullCrossbones} inverse/>
             </OverlayTrigger> : ""}
           </span> : ""}
+          <OverlayTrigger
+            key={"animal-details"}
+            placement="top"
+            overlay={
+              <Tooltip id={`tooltip-animal-details`}>
+                Animal details
+              </Tooltip>
+            }
+          >
+            <Link href={"/animals/" + animal.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1 mr-1" inverse /></Link>
+          </OverlayTrigger>
         </div>
         </Card.Text>
       </Card>

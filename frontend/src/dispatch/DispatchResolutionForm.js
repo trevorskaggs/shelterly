@@ -283,7 +283,7 @@ function DispatchResolutionForm({ id }) {
                               isClearable={false}
                             />
                           </Col>
-                          <span style={{ marginTop:"5px" }}><span style={{ textTransform: "capitalize" }}>{animal.name || "Unknown"}</span>&nbsp;({animal.species})</span>
+                          <span style={{ marginTop:"5px" }}><span style={{ textTransform: "capitalize" }}>#{animal.id} - {animal.name || "Unknown"}</span>&nbsp;({animal.species})</span>
                         </Row>
                         {props.values && props.values.sr_updates[index] && props.values.sr_updates[index].animals[inception].status === 'SHELTERED' ?
                         <Row>

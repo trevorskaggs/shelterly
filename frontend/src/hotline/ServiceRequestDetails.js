@@ -303,48 +303,13 @@ function ServiceRequestDetails({id}) {
               <hr />
               <span className="d-flex flex-wrap align-items-end" style={{marginLeft:"-15px"}}>
               {data.animals.map(animal => (
-                <Card key={animal.id} className="border rounded ml-3 mb-3" style={{width:"153px", whiteSpace:"nowrap", overflow:"hidden"}}>
-                <ReactImageFallback style={{width:"153px", height:"153px", objectFit: "cover", overflow: "hidden"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} />
-                <Card.Text className="mb-0" style={{textTransform:"capitalize"}}>
-                <span title={animal.name} className="ml-1">#{animal.id}&nbsp;{animal.name||"Unknown"}</span>
+              <Card key={animal.id} className="border rounded ml-3 mb-3" style={{width:"153px", whiteSpace:"nowrap", overflow:"hidden"}}>
+                <Card.Img variant="top" src={animal.front_image || animal.side_image || noImageFound} style={{width:"153px", height:"153px", objectFit: "cover", overflow: "hidden"}} />
+                <Card.ImgOverlay className="text-border" style={{height:"20px"}}>#{animal.id}</Card.ImgOverlay>
+                <Card.Text className="mb-0 border-top" style={{textTransform:"capitalize"}}>
+                <span title={animal.name} className="ml-1">{animal.name||"Unknown"}</span>
                 <div className="ml-1">
-                  {animal.species === 'horse' && animal.size !== 'unknown' ? animal.size : animal.species}
-                  <OverlayTrigger
-                    key={"animal-details"}
-                    placement="top"
-                    overlay={
-                      <Tooltip id={`tooltip-animal-details`}>
-                        Animal details
-                      </Tooltip>
-                    }
-                  >
-                    <Link href={"/animals/" + animal.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1 mr-1" inverse /></Link>
-                  </OverlayTrigger>
-                  {animal.owner_names.length === 0 ?
-                  <OverlayTrigger
-                    key={"stray"}
-                    placement="top"
-                    overlay={
-                      <Tooltip id={`tooltip-stray`}>
-                        Animal is stray
-                      </Tooltip>
-                    }
-                  >
-                    <FontAwesomeIcon icon={faUserAltSlash} size="sm" />
-                  </OverlayTrigger> :
-                  <OverlayTrigger
-                    key={"stray"}
-                    placement="top"
-                    overlay={
-                      <Tooltip id={`tooltip-stray`}>
-                        {animal.owner_names.map(owner_name => (
-                          <div key={owner_name}>{owner_name}</div>
-                        ))}
-                      </Tooltip>
-                    }
-                  >
-                    <FontAwesomeIcon icon={faUserAlt} size="sm" />
-                  </OverlayTrigger>}
+                  {animal.species === 'horse' && animal.size !== 'unknown' ? animal.size : animal.species}&nbsp;
                   {animal.status === "SHELTERED IN PLACE" ?
                     <OverlayTrigger key={"sip"} placement="top"
                                     overlay={<Tooltip id={`tooltip-sip`}>SHELTERED IN PLACE</Tooltip>}>
@@ -366,7 +331,7 @@ function ServiceRequestDetails({id}) {
                   {animal.status === "EVACUATED" ?
                     <OverlayTrigger key={"evacuated"} placement="top"
                                     overlay={<Tooltip id={`tooltip-evacuated`}>EVACUATED</Tooltip>}>
-                        <FontAwesomeIcon icon={faHelicopter} inverse/>
+                        <FontAwesomeIcon icon={faHelicopter} size="sm" inverse/>
                     </OverlayTrigger> : ""}
                   {animal.status === "REUNITED" ?
                     <OverlayTrigger key={"reunited"} placement="top"
@@ -382,18 +347,30 @@ function ServiceRequestDetails({id}) {
                     <OverlayTrigger key={"deceased"} placement="top"
                                     overlay={<Tooltip id={`tooltip-deceased`}>DECEASED</Tooltip>}>
                         <FontAwesomeIcon icon={faSkullCrossbones} inverse/>
-                    </OverlayTrigger> : ""}
-                    <OverlayTrigger
-                      key={"remove-animal"}
-                      placement="top"
-                      overlay={
-                        <Tooltip id={`tooltip-remove-animal`}>
-                          Remove animal
-                        </Tooltip>
-                      }
-                    >
-                      <FontAwesomeIcon icon={faMinusSquare} style={{cursor:'pointer'}} size="sm" onClick={() => {setAnimalToDelete({id:animal.id, name: animal.name});setShowAnimalConfirm(true);}} className="ml-1" inverse />
                     </OverlayTrigger>
+                  : ""}
+                  <OverlayTrigger
+                    key={"animal-details"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-animal-details`}>
+                        Animal details
+                      </Tooltip>
+                    }
+                  >
+                    <Link href={"/animals/" + animal.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+                  </OverlayTrigger>
+                  <OverlayTrigger
+                    key={"remove-animal"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-remove-animal`}>
+                        Remove animal
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon icon={faMinusSquare} style={{cursor:'pointer'}} size="sm" onClick={() => {setAnimalToDelete({id:animal.id, name: animal.name});setShowAnimalConfirm(true);}} className="ml-1" inverse />
+                  </OverlayTrigger>
                 </div>
                 </Card.Text>
               </Card>
