@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import { Button, ButtonGroup, Card, CardGroup, Col, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Row, Tooltip } from "react-bootstrap";
-import { Link } from "raviger";
+import { Link, useQueryParams } from "raviger";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faClipboardList, faCircle, faExclamationCircle, faQuestionCircle, faHome, faHelicopter, faHeart, faSkullCrossbones
+  faClipboardCheck, faClipboardList, faCircle, faExclamationCircle, faQuestionCircle, faHome, faHelicopter, faHeart, faSkullCrossbones
 } from '@fortawesome/free-solid-svg-icons';
 import { faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
 import Moment from "react-moment";
@@ -12,10 +12,17 @@ import Header from '../components/Header';
 
 function DispatchAssignmentSearch() {
 
+  // Identify any query param data.
+  const [queryParams] = useQueryParams();
+  const {
+    search = '',
+    status = 'open',
+  } = queryParams;
+
   const [data, setData] = useState({evacuation_assignments: [], isFetching: false});
-  const [searchTerm, setSearchTerm] = useState("");
-  const [tempSearchTerm, setTempSearchTerm] = useState("");
-  const [statusOptions, setStatusOptions] = useState({status: "open", allColor:"secondary", openColor:"primary", assignedColor:"secondary", closedColor:"secondary"});
+  const [searchTerm, setSearchTerm] = useState(search);
+  const [tempSearchTerm, setTempSearchTerm] = useState(search);
+  const [statusOptions, setStatusOptions] = useState(status);
 
   // Update searchTerm when field input changes.
   const handleChange = event => {
@@ -30,31 +37,38 @@ function DispatchAssignmentSearch() {
 
   // Hook for initializing data.
   useEffect(() => {
+    let unmounted = false;
     let source = axios.CancelToken.source();
+
     const fetchServiceRequests = async () => {
       setData({evacuation_assignments: [], isFetching: true});
       // Fetch ServiceRequest data.
-      await axios.get('/evac/api/evacassignment/?search=' + searchTerm + '&status=' + statusOptions.status, {
+      await axios.get('/evac/api/evacassignment/?search=' + searchTerm + '&status=' + statusOptions, {
         cancelToken: source.token,
       })
-          .then(response => {
-            setData({evacuation_assignments: response.data, isFetching: false});
-          })
-          .catch(error => {
-            console.log(error.response);
-            setData({evacuation_assignments: [], isFetching: false});
-          });
+      .then(response => {
+        if (!unmounted) {
+          setData({evacuation_assignments: response.data, isFetching: false});
+        }
+      })
+      .catch(error => {
+        if (!unmounted) {
+          console.log(error.response);
+          setData({evacuation_assignments: [], isFetching: false});
+        }
+      });
     };
     fetchServiceRequests();
     // Cleanup.
     return () => {
+      unmounted = true;
       source.cancel();
     };
-  }, [searchTerm, statusOptions.status]);
+  }, [searchTerm, statusOptions]);
 
   return (
       <div className="ml-2 mr-2">
-        <Header>Dispatch Assignment Search</Header>
+        <Header>Search Dispatch Assignments</Header>
         <hr/>
         <Form onSubmit={handleSubmit}>
           <InputGroup className="mb-3">
@@ -69,9 +83,8 @@ function DispatchAssignmentSearch() {
               <Button variant="outline-light" type="submit">Search</Button>
             </InputGroup.Append>
             <ButtonGroup className="ml-3">
-              <Button variant={statusOptions.allColor} onClick={() => setStatusOptions({status: "all", allColor:"primary", openColor:"secondary", assignedColor:"secondary", closedColor:"secondary"})}>All</Button>
-              <Button variant={statusOptions.openColor} onClick={() => setStatusOptions({status: "open", allColor:"secondary", openColor:"primary", assignedColor:"secondary", closedColor:"secondary"})}>Open</Button>
-              <Button variant={statusOptions.closedColor} onClick={() => setStatusOptions({status: "closed", allColor:"secondary", openColor:"secondary", assignedColor:"secondary", closedColor:"primary"})}>Closed</Button>
+              <Button variant={statusOptions === "open" ? "primary" : "secondary"} onClick={statusOptions !== "open" ? () => setStatusOptions("open") : () => setStatusOptions("")}>Open</Button>
+              <Button variant={statusOptions === "closed" ? "primary" : "secondary"} onClick={statusOptions !== "closed" ? () => setStatusOptions("closed") : () => setStatusOptions("")}>Closed</Button>
             </ButtonGroup>
           </InputGroup>
         </Form>
@@ -90,10 +103,22 @@ function DispatchAssignmentSearch() {
               >
                 <Link href={"/dispatch/summary/" + evacuation_assignment.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
               </OverlayTrigger>
+              {evacuation_assignment.end_time ? "" :
+                <OverlayTrigger
+                  key={"close-dispatch-assignment"}
+                  placement="top"
+                  overlay={
+                    <Tooltip id={`tooltip-close-dispatch-assignment`}>
+                      Close dispatch assignment
+                    </Tooltip>
+                  }
+                >
+                  <Link href={"/dispatch/resolution/" + evacuation_assignment.id}><FontAwesomeIcon icon={faClipboardCheck} className="ml-1" inverse /></Link>
+                </OverlayTrigger>
+              }
               &nbsp;&nbsp;|&nbsp;
               Team Members: {evacuation_assignment.team_member_objects.map((member, i) => (
                   <span key={member.id}>{i > 0 && ", "}{member.first_name} {member.last_name}</span>))}
-              {evacuation_assignment.end_time ? "" : <Link href={"/dispatch/resolution/" + evacuation_assignment.id} className="btn btn-danger ml-1" style={{paddingTop:"0px", paddingBottom:"0px"}}>Close</Link>}
             </h4></div>
             <CardGroup>
               <Card key={evacuation_assignment.id}>
@@ -202,7 +227,7 @@ function DispatchAssignmentSearch() {
             </CardGroup>
           </div>
         ))}
-        <p>{data.isFetching ? 'Fetching dispatch requests...' : <span>{data.evacuation_assignments && data.evacuation_assignments.length ? '' : 'No Dispatch Assignments found.'}</span>}</p>
+        <p>{data.isFetching ? 'Fetching dispatch assignments...' : <span>{data.evacuation_assignments && data.evacuation_assignments.length ? '' : 'No dispatch assignments found.'}</span>}</p>
       </div>
   )
 }

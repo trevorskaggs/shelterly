@@ -178,7 +178,7 @@ const Map = (props) => {
 
   return (
     <>
-    <LeafletMap className={props.className || "d-block"} bounds={props.bounds}  whenCreated={props.whenCreated}>
+    <LeafletMap className={props.className || "d-block"} bounds={props.bounds} onMoveEnd={props.onMoveEnd}>
       <Legend position="bottomleft" metric={false} />
       <TileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
