@@ -53,7 +53,7 @@ function AnimalDetails({id}) {
   const handleOwnerClose = () => setShowOwnerConfirm(false);
 
   const handleSubmit = async () => {
-    await axios.patch('/animals/api/animal/' + id + '/', {status:'REUNITED', room:null})
+    await axios.patch('/animals/api/animal/' + id + '/', {status:'REUNITED', shelter:null, room:null})
     .then(response => {
       setData(response.data);
       handleClose()
