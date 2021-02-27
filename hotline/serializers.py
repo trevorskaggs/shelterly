@@ -24,14 +24,6 @@ class VisitNoteSerializer(serializers.ModelSerializer):
 class SimpleServiceRequestSerializer(serializers.ModelSerializer):
 
     full_address = serializers.SerializerMethodField()
-    visit_notes = VisitNoteSerializer(source='visitnote_set', many=True, required=False, read_only=True)
-    reported_animals = serializers.SerializerMethodField()
-    owner_contacts = OwnerContactSerializer(source='ownercontact_set', many=True, required=False, read_only=True)
-    sheltered_in_place = serializers.SerializerMethodField()
-    unable_to_locate = serializers.SerializerMethodField()
-    aco_required = serializers.SerializerMethodField(read_only=True)
-    animal_count = serializers.IntegerField(read_only=True)
-    injured = serializers.BooleanField(read_only=True)
 
     # Custom field for the full address.
     def get_full_address(self, obj):
@@ -72,10 +64,13 @@ class SimpleServiceRequestSerializer(serializers.ModelSerializer):
         except AttributeError:
             return obj.animal_set.filter(status='UNABLE TO LOCATE').count()
 
-    # Custom field for the current open evac assignment if it exists.
-    def get_assigned_evac(self, obj):
+    # Custom field for the current open DA if it exists, otherwise return the most recent DA if it exists.
+    def get_latest_evac(self, obj):
         from evac.models import EvacAssignment
-        return EvacAssignment.objects.filter(service_requests=obj, end_time__isnull=True).values('id', 'start_time').first()
+        assigned_evac = EvacAssignment.objects.filter(service_requests=obj, end_time__isnull=True).values('id', 'start_time', 'end_time').first()
+        if assigned_evac:
+            return assigned_evac
+        return EvacAssignment.objects.filter(service_requests=obj, end_time__isnull=False).values('id', 'start_time', 'end_time').first()
 
     def to_internal_value(self, data):
         # Updates datetime fields to null when receiving an empty string submission.
@@ -105,11 +100,19 @@ class ServiceRequestSerializer(SimpleServiceRequestSerializer):
     from people.serializers import SimplePersonSerializer
 
     action_history = serializers.SerializerMethodField()
-    assigned_evac = serializers.SerializerMethodField()
+    latest_evac = serializers.SerializerMethodField()
+    animal_count = serializers.IntegerField(read_only=True)
+    injured = serializers.BooleanField(read_only=True)
     owner_objects = SimplePersonSerializer(source='owners', many=True, required=False, read_only=True)
     reporter_object = SimplePersonSerializer(source='reporter', required=False, read_only=True)
     animals = serializers.SerializerMethodField()
     evacuation_assignments = SimpleEvacAssignmentSerializer(many=True, required=False, read_only=True)
+    visit_notes = VisitNoteSerializer(source='visitnote_set', many=True, required=False, read_only=True)
+    reported_animals = serializers.SerializerMethodField()
+    owner_contacts = OwnerContactSerializer(source='ownercontact_set', many=True, required=False, read_only=True)
+    sheltered_in_place = serializers.SerializerMethodField()
+    unable_to_locate = serializers.SerializerMethodField()
+    aco_required = serializers.SerializerMethodField(read_only=True)
 
     def get_animals(self, obj):
         return SimpleAnimalSerializer(obj.animal_set.exclude(status="CANCELED"), many=True, read_only=True).data

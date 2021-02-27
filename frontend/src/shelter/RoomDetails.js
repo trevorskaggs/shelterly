@@ -103,7 +103,7 @@ function RoomDetails({id}) {
         <Card className="mb-2 border rounded" style={{width:"100%"}}>
           <Card.Body>
             <Card.Title>
-              <h4 className="mb-0">Animals</h4>
+              <h4 className="mb-0">Animals ({data.animals.length})</h4>
             </Card.Title>
             <hr/>
             <span className="d-flex flex-wrap align-items-end">

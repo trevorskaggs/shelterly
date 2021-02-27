@@ -7,8 +7,7 @@ import {
   Label,
   Fade,
 } from 'reactstrap';
-
-import {Button, ButtonGroup, Card, Col, Form as BootstrapForm, Modal } from "react-bootstrap";
+import { Button, ButtonGroup, Card, Col, Form as BootstrapForm, Modal } from "react-bootstrap";
 import * as Yup from 'yup';
 import { Switch } from 'formik-material-ui';
 import 'flatpickr/dist/themes/light.css';

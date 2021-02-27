@@ -5,7 +5,7 @@ import Moment from 'react-moment';
 import { Button, Card, ListGroup, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBan, faCalendarDay, faCar, faClipboardList, faComment, faEdit, faHouseDamage, faKey, faMapMarkedAlt, faMinusSquare, faPlusSquare, faTimes, faTrailer
+  faBan, faCalendarDay, faCar, faClipboardCheck, faClipboardList, faComment, faEdit, faHouseDamage, faKey, faMapMarkedAlt, faMinusSquare, faPlusSquare, faTimes, faTrailer
 } from '@fortawesome/free-solid-svg-icons';
 import ReactImageFallback from 'react-image-fallback';
 import Header from '../components/Header';
@@ -55,7 +55,7 @@ function ServiceRequestDetails({id}) {
     accessible: false,
     turn_around: false,
     followup_date: null,
-    assigned_evac: {},
+    latest_evac: {},
     status:'',
     action_history: [],
     visit_notes: [],
@@ -353,7 +353,7 @@ function ServiceRequestDetails({id}) {
                     placement="top"
                     overlay={
                       <Tooltip id={`tooltip-add-to-dispatch`}>
-                        {data.assigned_evac ? "Reassign" : "Assign"} service request to an open dispatch assignment
+                        {data.latest_evac ? "Reassign" : "Assign"} service request to an open dispatch assignment
                       </Tooltip>
                     }
                   >
@@ -363,7 +363,7 @@ function ServiceRequestDetails({id}) {
               </Card.Title>
               <hr/>
               <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
-                {data.assigned_evac ?
+                {data.latest_evac && !data.latest_evac.end_time ?
                   <ListGroup.Item>
                     <b>Active Dispatch Assignment:</b>
                     <OverlayTrigger
@@ -375,9 +375,20 @@ function ServiceRequestDetails({id}) {
                         </Tooltip>
                       }
                     >
-                      <Link href={"/dispatch/summary/" + data.assigned_evac.id}><FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1" inverse /></Link>
+                      <Link href={"/dispatch/summary/" + data.latest_evac.id}><FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1" inverse /></Link>
                     </OverlayTrigger>
-                    <div><b>Date Opened: </b><Moment format="LL">{data.assigned_evac.start_time}</Moment></div>
+                    <OverlayTrigger
+                      key={"close-dispatch-assignment"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-close-dispatch-assignment`}>
+                          Close dispatch assignment
+                        </Tooltip>
+                      }
+                    >
+                      <Link href={"/dispatch/resolution/" + data.latest_evac.id}><FontAwesomeIcon icon={faClipboardCheck} className="ml-1" inverse /></Link>
+                    </OverlayTrigger>
+                    <div><b>Date Opened: </b><Moment format="LL">{data.latest_evac.start_time}</Moment></div>
                   </ListGroup.Item>
                 : ""}
                 {data.visit_notes.map((visit_note, index) => (
@@ -422,7 +433,7 @@ function ServiceRequestDetails({id}) {
                     <div className="mt-1 mb-0"><b>Outcome:</b> {visit_note.notes||"No information available."}</div>
                   </ListGroup.Item>
                 ))}
-                {data.visit_notes.length < 1 && !data.assigned_evac ? <div className="mt-2 mb-1">Service Request has not been visited yet.</div> : ""}
+                {data.visit_notes.length < 1 && !data.latest_evac ? <div className="mt-2 mb-1">Service Request has not been visited yet.</div> : ""}
               </ListGroup>
             </Card.Body>
           </Card>

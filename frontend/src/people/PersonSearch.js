@@ -1,19 +1,32 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
-import { Link } from 'raviger';
-import { Button, Card, CardGroup, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Link, useQueryParams } from 'raviger';
+import { Button, ButtonGroup, Card, CardGroup, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Pagination, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faClipboardList, faCircle, faExclamationCircle, faQuestionCircle, faHome, faHelicopter, faHeart, faSkullCrossbones
+  faClipboardList
 } from '@fortawesome/free-solid-svg-icons';
-import { faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
 import Header from '../components/Header';
+import Scrollbar from '../components/Scrollbars';
+
+import { ITEMS_PER_PAGE } from '../constants';
 
 function PersonSearch() {
 
+	// Identify any query param data.
+  const [queryParams] = useQueryParams();
+  const {
+    search = '',
+    person = 'owners',
+  } = queryParams;
+
 	const [data, setData] = useState({owners: [], isFetching: false});
-	const [searchTerm, setSearchTerm] = useState("");
-	const [tempSearchTerm, setTempSearchTerm] = useState("");
+	const [searchState, setSearchState] = useState({});
+	const [statusOptions, setStatusOptions] = useState(person);
+	const [searchTerm, setSearchTerm] = useState(search);
+	const [tempSearchTerm, setTempSearchTerm] = useState(search);
+	const [page, setPage] = useState(1);
+  const [numPages, setNumPages] = useState(1);
 
 	// Update searchTerm when field input changes.
 	const handleChange = event => {
@@ -28,33 +41,51 @@ function PersonSearch() {
 
 	// Hook for initializing data.
 	useEffect(() => {
+		let unmounted = false;
 		let source = axios.CancelToken.source();
+
 		const fetchOwners = async () => {
 			setData({owners: [], isFetching: true});
 			// Fetch People data.
-			await axios.get('/people/api/person/?search=' + searchTerm, {
+			await axios.get('/people/api/person/?search=' + searchTerm + '&status=' + statusOptions, {
 				cancelToken: source.token,
 			})
 			.then(response => {
-				setData({owners: response.data, isFetching: false});
+				if (!unmounted) {
+					setNumPages(Math.ceil(response.data.length / ITEMS_PER_PAGE));
+					setData({owners: response.data, isFetching: false});
+					let search_state = {};
+					response.data.forEach(owner => {
+						let species = [];
+						owner.animals.forEach(animal => {
+							if (!species.includes(animal.species)) {
+								species.push(animal.species)
+							}
+						})
+						search_state[owner.id] = {species:species, selectedSpecies:species[0]}
+						})
+					setSearchState(search_state);
+				}
 			})
 			.catch(error => {
-				console.log(error.response);
-				setData({owners: [], isFetching: false});
+				if (!unmounted) {
+					console.log(error.response);
+					setData({owners: [], isFetching: false});
+				}
 			});
 		};
 		fetchOwners();
 		// Cleanup.
 		return () => {
+			unmounted = true;
 			source.cancel();
 		};
-	}, [searchTerm]);
+	}, [searchTerm, statusOptions]);
 
 	return (
-			<>
-			<Header>Owner Search</Header>
-			<hr/>
 			<div className="ml-2 mr-2">
+			<Header>Search Owners and Reporters</Header>
+			<hr/>
 					<Form onSubmit={handleSubmit}>
 						<InputGroup className="mb-3">
 							<FormControl
@@ -67,129 +98,97 @@ function PersonSearch() {
 							<InputGroup.Append>
 								<Button variant="outline-light" type="submit">Search</Button>
 							</InputGroup.Append>
+							<ButtonGroup className="ml-3">
+								<Button variant={statusOptions === "owners" ? "primary" : "secondary"} onClick={statusOptions !== "owners" ? () => setStatusOptions("owners") : () => setStatusOptions("")}>Owners</Button>
+								<Button variant={statusOptions === "reporters" ? "primary" : "secondary"} onClick={statusOptions !== "reporters" ? () => setStatusOptions("reporters") : () => setStatusOptions("")}>Reporters</Button>
+							</ButtonGroup>
 						</InputGroup>
 					</Form>
-					{data.owners.map(owner => (
-							<div key={owner.id} className="mt-3">
-									<div className="mt-3">
-											<div className="card-header"> {owner.first_name ?
-												<h4 style={{marginBottom: "-2px"}}>{owner.first_name} {owner.last_name}
-													{owner.agency ? <span> ({owner.agency})</span> : ""}
-													{owner.is_owner ?
-													<OverlayTrigger
-														key={"owner-details"}
-														placement="top"
-														overlay={
-															<Tooltip id={`tooltip-owner-details`}>
-																Owner details
-															</Tooltip>
-														}
-													>
-														<Link href={"/people/owner/" + owner.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse/></Link>
-													</OverlayTrigger>
-													:
-													<OverlayTrigger
-														key={"reporter-details"}
-														placement="top"
-														overlay={
-															<Tooltip id={`tooltip-reporter-details`}>
-																Reporter details
-															</Tooltip>
-														}
-													>
-														<Link href={"/people/reporter/" + owner.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse/></Link>
-													</OverlayTrigger>
-													}
-												</h4> : "Unknown"}
-											</div>
-											<CardGroup>
-													<Card>
-															<Card.Body>
-																	<Card.Title>Information</Card.Title>
-																	<ListGroup>
-																		<ListGroup.Item><b>Phone: </b>{owner.phone ? <span>{owner.display_phone} </span> : "None"}</ListGroup.Item>
-																		<ListGroup.Item><b>Email: </b>{owner.email ? <span>{owner.email} </span> : "None"}</ListGroup.Item>
-																		<ListGroup.Item><b>Service Request: </b>
-																			{owner.request ?
-																				<span>
-																					{owner.request.full_address}&nbsp;
-																					<Link href={"/hotline/servicerequest/" + owner.request.id} target="_blank">
-																						<FontAwesomeIcon icon={faClipboardList} inverse />
-																					</Link>
-																				</span>
-																				: "None"
-																			}
-																		</ListGroup.Item>
-																	</ListGroup>
-															</Card.Body>
-													</Card>
-													<Card>
-														<Card.Body>
-																<Card.Title>Animals</Card.Title>
-																{['cats', 'dogs', 'horses', 'other'].map(species => (
-																		<ListGroup key={species}>
-																				{owner.animals.filter(animal => species.includes(animal.species)).length > 0 ?
-																				<ListGroup.Item style={{borderRadius: 0}}><b style={{textTransform:"capitalize"}}>{species}: </b>
-																				{owner.animals.filter(animal => species.includes(animal.species)).map((animal, i) => (
-																				<span key={animal.id}>{i > 0 && ", "}{animal.name || "Unknown"}
-																				(
-																				{animal.status === "SHELTERED IN PLACE" ?
-																						<OverlayTrigger key={"sip"} placement="top"
-																														overlay={<Tooltip id={`tooltip-sip`}>SHELTERED IN PLACE</Tooltip>}>
-																								<span className="fa-layers fa-fw">
-																									<FontAwesomeIcon icon={faCircle} transform={'grow-1'} />
-																									<FontAwesomeIcon icon={faHomeAlt} style={{color:"#444"}} transform={'shrink-3'} size="sm" inverse />
-																								</span>
-																						</OverlayTrigger> : ""}
-																				{animal.status === "REPORTED" ?
-																						<OverlayTrigger key={"reported"} placement="top"
-																														overlay={<Tooltip id={`tooltip-reported`}>REPORTED</Tooltip>}>
-																								<FontAwesomeIcon icon={faExclamationCircle} inverse/>
-																						</OverlayTrigger> : ""}
-																				{animal.status === "UNABLE TO LOCATE" ?
-																						<OverlayTrigger key={"unable-to-locate"} placement="top"
-																														overlay={<Tooltip id={`tooltip-unable-to-locate`}>UNABLE TO LOCATE</Tooltip>}>
-																								<FontAwesomeIcon icon={faQuestionCircle} inverse/>
-																						</OverlayTrigger> : ""}
-																				{animal.status === "EVACUATED" ?
-																						<OverlayTrigger key={"evacuated"} placement="top"
-																														overlay={<Tooltip id={`tooltip-evacuated`}>EVACUATED</Tooltip>}>
-																								<FontAwesomeIcon icon={faHelicopter} inverse/>
-																						</OverlayTrigger> : ""}
-																				{animal.status === "REUNITED" ?
-																						<OverlayTrigger key={"reunited"} placement="top"
-																														overlay={<Tooltip id={`tooltip-reunited`}>REUNITED</Tooltip>}>
-																								<FontAwesomeIcon icon={faHeart} inverse/>
-																						</OverlayTrigger> : ""}
-																				{animal.status === "SHELTERED" ?
-																						<OverlayTrigger key={"sheltered"} placement="top"
-																														overlay={<Tooltip id={`tooltip-sheltered`}>SHELTERED</Tooltip>}>
-																								<FontAwesomeIcon icon={faHome} inverse/>
-																						</OverlayTrigger> : ""}
-																				{animal.status === "DECEASED" ?
-																						<OverlayTrigger key={"deceased"} placement="top"
-																														overlay={<Tooltip id={`tooltip-deceased`}>DECEASED</Tooltip>}>
-																								<FontAwesomeIcon icon={faSkullCrossbones} inverse/>
-																						</OverlayTrigger> : ""}
-																				)
-																				</span>
-																		))}
-																		</ListGroup.Item>
-																		: ""}
-																		</ListGroup>
-																))}
-																{owner.animals.length < 1 ? <ListGroup><ListGroup.Item>No Animals</ListGroup.Item></ListGroup> : ""}
-														</Card.Body>
-													</Card>
-											</CardGroup>
+					{data.owners.map((owner, index) => (
+							<div key={owner.id} className="mt-3" hidden={page !== Math.ceil((index+1)/ITEMS_PER_PAGE)}>
+									<div className="card-header"> {owner.first_name ?
+										<h4 style={{marginBottom: "-2px"}}>{owner.first_name} {owner.last_name}
+											{owner.agency ? <span> ({owner.agency})</span> : ""}
+											{statusOptions === 'owners' ?
+											<OverlayTrigger
+												key={"owner-details"}
+												placement="top"
+												overlay={
+													<Tooltip id={`tooltip-owner-details`}>
+														Owner details
+													</Tooltip>
+												}
+											>
+												<Link href={"/people/owner/" + owner.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse/></Link>
+											</OverlayTrigger>
+											:
+											<OverlayTrigger
+												key={"reporter-details"}
+												placement="top"
+												overlay={
+													<Tooltip id={`tooltip-reporter-details`}>
+														Reporter details
+													</Tooltip>
+												}
+											>
+												<Link href={"/people/reporter/" + owner.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse/></Link>
+											</OverlayTrigger>
+											}
+										</h4> : "Unknown"}
 									</div>
-							</div>
+									<CardGroup>
+										<Card style={{marginBottom:"6px"}}>
+											<Card.Body>
+												<Card.Title style={{marginTop:"-9px", marginBottom:"8px"}}>Information</Card.Title>
+												<ListGroup>
+													<ListGroup.Item><b>Phone: </b>{owner.phone ? <span>{owner.display_phone} </span> : "None"}</ListGroup.Item>
+													<ListGroup.Item><b>Email: </b>{owner.email ? <span>{owner.email} </span> : "None"}</ListGroup.Item>
+													<ListGroup.Item><b>Service Request: </b>
+													{owner.request ?
+														<span>{owner.request.full_address}</span>
+													: "None"
+													}
+													</ListGroup.Item>
+												</ListGroup>
+											</Card.Body>
+										</Card>
+										{searchState[owner.id] ?
+										<Card style={{marginBottom:"6px"}}>
+											<Card.Body>
+												<Card.Title style={{marginTop:"-10px"}}>
+													<ListGroup horizontal>
+													{searchState[owner.id].species.map(species => (
+														<ListGroup.Item key={species} active={searchState[owner.id].selectedSpecies === species ? true : false} style={{textTransform:"capitalize", cursor:'pointer', paddingTop:"4px", paddingBottom:"4px"}} onClick={() => setSearchState(prevState => ({ ...prevState, [owner.id]:{...prevState[owner.id], selectedSpecies:species} }))}>{species}{species !== "other" ? "s" : ""}</ListGroup.Item>
+													))}
+													</ListGroup>
+												</Card.Title>
+												<ListGroup style={{height:"144px", overflowY:"auto", marginTop:"-12px"}}>
+													<Scrollbar autoHeight autoHide autoHeightMax={144} renderThumbVertical={props => <div {...props} style={{...props.style, backgroundColor: 'rgba(226, 226, 226, 0.2)'}} />}>
+														{owner.animals.filter(animal => animal.species === searchState[owner.id].selectedSpecies).map((animal, i) => (
+															<ListGroup.Item key={animal.id}>
+																{animal.name || "Unknown"} - {animal.status}
+															</ListGroup.Item>
+														))}
+													</Scrollbar>
+													{owner.animals.length < 1 ? <ListGroup.Item style={{marginTop:"32px"}}>No Animals</ListGroup.Item> : ""}
+												</ListGroup>
+										</Card.Body>
+									</Card>
+									: ""}
+								</CardGroup>
+						</div>
 					))}
-					<p>{data.isFetching ? 'Fetching Owners...' :
-						<span>{data.owners && data.owners.length ? '' : 'No Owners found.'}</span>}
+					<p>{data.isFetching ? 'Fetching ' + statusOptions + '...' :
+						<span>{data.owners && data.owners.length ? '' : 'No ' + statusOptions + ' found.'}</span>}
 					</p>
-			</div>
-	</>
+					<Pagination className="custom-page-links" size="lg" onClick={(e) => {setPage(parseInt(e.target.innerText))}}>
+						{[...Array(numPages).keys()].map(x =>
+						<Pagination.Item key={x+1} active={x+1 === page}>
+							{x+1}
+						</Pagination.Item>)
+						}
+					</Pagination>
+	</div>
 	)
 }
 
