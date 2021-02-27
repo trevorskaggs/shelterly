@@ -12,7 +12,6 @@ class SimpleAnimalSerializer(serializers.ModelSerializer):
     side_image = serializers.SerializerMethodField()
     extra_images = serializers.SerializerMethodField()
     owner_names = serializers.SerializerMethodField()
-    is_stray = serializers.BooleanField(read_only=True)
 
     def get_found_location(self, obj):
         return build_full_address(obj)
@@ -89,9 +88,6 @@ class AnimalSerializer(SimpleAnimalSerializer):
         # Use the Room address first if it exists.
         if obj.shelter:
             return build_full_address(obj.shelter)
-        # Then use the SR address if it exists.
-        elif obj.request:
-            return build_full_address(obj.request)
         # Otherwise return an empty string.
         return ''
 
@@ -119,7 +115,7 @@ class AnimalSerializer(SimpleAnimalSerializer):
 
     # Custom Evac Assignment field to avoid a circular reference.
     def get_evacuation_assignments(self, obj):
-        return [ea.id for ea in obj.evacuation_assignments.all()]
+        return obj.evacuation_assignments.all().values_list('id', flat=True)
 
     def get_action_history(self, obj):
         return [build_action_string(action) for action in obj.target_actions.all()]

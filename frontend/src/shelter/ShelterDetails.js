@@ -167,7 +167,7 @@ function ShelterDetails({id}) {
           <Card className="border rounded" style={{width:"100%"}}>
             <Card.Body style={{marginBottom:"-15px"}}>
               <Card.Title>
-                <h4 className="mb-0">Animals Needing Room
+                <h4 className="mb-0">Animals Needing Room ({data.unroomed_animals.length})
                 <OverlayTrigger key={"assign"} placement="top" overlay={<Tooltip id={`tooltip-assign`}>Assign animals to rooms</Tooltip>}>
                   <Link href={"/shelter/" + id + "/assign"}><FontAwesomeIcon className="ml-1" icon={faWarehouse} inverse/></Link>
                 </OverlayTrigger></h4>

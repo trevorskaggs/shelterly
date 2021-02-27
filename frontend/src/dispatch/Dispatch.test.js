@@ -24,6 +24,6 @@ describe("Render evac", () => {
 describe("Render DispatchAssignmentSearch", () => {
   it("Empty table loads", async () => {
     render(<DispatchSearch />);
-    expect(await screen.getByText("Fetching dispatch requests...")).toBeTruthy();
+    expect(await screen.getByText("Fetching dispatch assignments...")).toBeTruthy();
   });
 });
