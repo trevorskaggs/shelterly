@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import { Link } from 'raviger';
-import { Card, ListGroup, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Card, Col, ListGroup, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faClipboardList, faEdit, faPlusSquare, faWarehouse,
+  faClipboardList, faDoorOpen, faEdit, faPlusSquare, faWarehouse,
 } from '@fortawesome/free-solid-svg-icons';
 import ReactImageFallback from 'react-image-fallback';
 import History from '../components/History';
@@ -66,28 +66,55 @@ function ShelterDetails({id}) {
         </OverlayTrigger>
       </Header>
       <hr/>
-      <Card className="border rounded d-flex" style={{width:"100%"}}>
-        <Card.Body>
-          <Card.Title>
-            <h4>Information</h4>
-          </Card.Title>
-          <hr/>
-          <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
-            <ListGroup.Item>
-              <b>Name:</b> {data.name}
-            </ListGroup.Item>
-            <ListGroup.Item>
-              <b>Address:</b> {data.full_address}
-            </ListGroup.Item>
-            <ListGroup.Item>
-              <b>Phone:</b> {data.display_phone || "No contact number listed"}
-            </ListGroup.Item>
-            {data.description ? <ListGroup.Item>
-            <b>Description: </b>{data.description}
-          </ListGroup.Item> : ""}
-          </ListGroup>
-        </Card.Body>
-      </Card>
+      <Row className="d-flex">
+        <Col>
+          <Card className="border rounded d-flex" style={{width:"100%"}}>
+            <Card.Body>
+              <Card.Title>
+                <h4>Information</h4>
+              </Card.Title>
+              <hr/>
+              <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
+                <ListGroup.Item>
+                  <b>Name:</b> {data.name}
+                </ListGroup.Item>
+                <ListGroup.Item>
+                  <b>Address:</b> {data.full_address}
+                </ListGroup.Item>
+                <ListGroup.Item>
+                  <b>Phone:</b> {data.display_phone || "No contact number listed"}
+                </ListGroup.Item>
+                <ListGroup.Item>
+                  <b>Description: </b>{data.description || "None"}
+                </ListGroup.Item>
+              </ListGroup>
+            </Card.Body>
+          </Card>
+        </Col>
+        <Col className="d-flex flex-column pl-0">
+          <Card className="border rounded d-flex pl-0" style={{width:"100%", height:"100%"}}>
+            <Card.Body>
+              <Card.Title>
+                <h4>Intake</h4>
+              </Card.Title>
+              <hr/>
+              <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
+                <ListGroup.Item className="rounded" action><Link href="/intake/workflow/owner" style={{color:"#FFF"}}><FontAwesomeIcon icon={faDoorOpen} inverse/> <b>Intake from Walk-In (Owner)</b></Link></ListGroup.Item>
+                <ListGroup.Item className="rounded" action><Link href="/intake/workflow/reporter" style={{color:"#FFF"}}><FontAwesomeIcon icon={faDoorOpen} inverse/> <b>Intake from Walk-In (Non-Owner)</b></Link></ListGroup.Item>
+                <ListGroup.Item>
+                  <b>Currently Sheltering:</b> {data.animal_count} animal{data.animal_count === 1 ? "" : "s"}
+                </ListGroup.Item>
+                <ListGroup.Item>
+                  <b>Room Assignment:</b> {data.unroomed_animals.length} animal{data.unroomed_animals.length === 1 ? "" : "s"}
+                  <OverlayTrigger key={"assign"} placement="top" overlay={<Tooltip id={`tooltip-assign`}>Assign animals to rooms</Tooltip>}>
+                    <Link href={"/shelter/" + id + "/assign"}><FontAwesomeIcon className="ml-1" icon={faWarehouse} inverse/></Link>
+                  </OverlayTrigger>
+                </ListGroup.Item>
+              </ListGroup>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
       <Card className="border rounded d-flex mt-3" >
         <Card.Body>
           <Card.Title className="">
@@ -163,43 +190,6 @@ function ShelterDetails({id}) {
           </span>
         </Card.Body>
       </Card>
-      <div className="row mt-3">
-        <div className="col-12 d-flex">
-          <Card className="border rounded" style={{width:"100%"}}>
-            <Card.Body style={{marginBottom:"-15px"}}>
-              <Card.Title>
-                <h4 className="mb-0">Animals Needing Room ({data.unroomed_animals.length})
-                <OverlayTrigger key={"assign"} placement="top" overlay={<Tooltip id={`tooltip-assign`}>Assign animals to rooms</Tooltip>}>
-                  <Link href={"/shelter/" + id + "/assign"}><FontAwesomeIcon className="ml-1" icon={faWarehouse} inverse/></Link>
-                </OverlayTrigger></h4>
-              </Card.Title>
-              <hr/>
-              <span className="d-flex flex-wrap align-items-end">
-              {data.unroomed_animals.map(animal => (
-                <Card key={animal.id} className="border rounded mr-3 mb-3" style={{border:"none"}}>
-                  <ReactImageFallback style={{width:"151px", height:"151px", objectFit: "cover", overflow: "hidden"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} />
-                  <Card.Text className="text-center mb-0" style={{textTransform:"capitalize"}}>
-                  {animal.species === 'horse' ? animal.size : animal.species} - {animal.name||"Unknown"}
-                    <OverlayTrigger
-                      key={"animal-details"}
-                      placement="top"
-                      overlay={
-                        <Tooltip id={`tooltip-animal-details`}>
-                          Animal details
-                        </Tooltip>
-                      }
-                    >
-                      <Link href={"/animals/" + animal.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
-                    </OverlayTrigger>
-                  </Card.Text>
-                </Card>
-              ))}
-              {data.unroomed_animals.length < 1 ? <span className="mb-2">All animals are assigned rooms.</span> : ""}
-              </span>
-            </Card.Body>
-          </Card>
-        </div>
-      </div>
       <History action_history={data.action_history} />
     </>
   );
