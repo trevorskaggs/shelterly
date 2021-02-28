@@ -28,10 +28,9 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('SECRET_KEY')
-
+DEBUG = True
 # SECURITY WARNING: don't run with debug turned on in production!
 ALLOWED_HOSTS = ['*']
-DEBUG = False
 AUTH_USER_MODEL = 'accounts.ShelterlyUser'
 
 
@@ -60,6 +59,8 @@ INSTALLED_APPS = [
     'frontend',
     'ordered_model',
     'actstream',
+    'silk',
+    'drf_yasg'
 ]
 
 ACTSTREAM_SETTINGS = {
@@ -69,6 +70,7 @@ ACTSTREAM_SETTINGS = {
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
+    'silk.middleware.SilkyMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',

@@ -24,14 +24,25 @@ class VisitNoteSerializer(serializers.ModelSerializer):
 class SimpleServiceRequestSerializer(serializers.ModelSerializer):
 
     full_address = serializers.SerializerMethodField()
+    animals = SimpleAnimalSerializer(many=True, required=False, read_only=True)
+    # these method fields require animals queryset
+    reported_animals = serializers.SerializerMethodField()
+    sheltered_in_place = serializers.SerializerMethodField()
+    unable_to_locate = serializers.SerializerMethodField()
+    aco_required = serializers.SerializerMethodField(read_only=True)
+    injured = serializers.BooleanField(read_only=True)
+    animal_count = serializers.IntegerField(read_only=True)
+
+
+    class Meta:
+        model = ServiceRequest
+        fields = ['id', 'latitude', 'longitude', 'full_address', 'followup_date',
+        'animal_count','injured', 'accessible', 'turn_around', 'animals', 'reported_animals', 'sheltered_in_place', 'unable_to_locate', 'aco_required']
+
 
     # Custom field for the full address.
     def get_full_address(self, obj):
         return build_full_address(obj)
-
-    # Custom field for the action history list.
-    def get_action_history(self, obj):
-        return [build_action_string(action) for action in obj.target_actions.all()]
 
     # Custom field for if any animal is ACO Required. If it is aggressive or "Other" species.
     def get_aco_required(self, obj):
@@ -57,20 +68,13 @@ class SimpleServiceRequestSerializer(serializers.ModelSerializer):
         except AttributeError:
             return obj.animal_set.filter(status='SHELTERED IN PLACE').count()
     # Custom field for determining that count of UNABLE TO LOCATE animals.
+
     def get_unable_to_locate(self, obj):
         # Performs list comp. on prefetched queryset of animals for this SR to avoid hitting db again.
         try:
             return len([animal for animal in obj.animals if animal.status == 'UNABLE TO LOCATE'])
         except AttributeError:
             return obj.animal_set.filter(status='UNABLE TO LOCATE').count()
-
-    # Custom field for the current open DA if it exists, otherwise return the most recent DA if it exists.
-    def get_latest_evac(self, obj):
-        from evac.models import EvacAssignment
-        assigned_evac = EvacAssignment.objects.filter(service_requests=obj, end_time__isnull=True).values('id', 'start_time', 'end_time').first()
-        if assigned_evac:
-            return assigned_evac
-        return EvacAssignment.objects.filter(service_requests=obj, end_time__isnull=False).values('id', 'start_time', 'end_time').first()
 
     def to_internal_value(self, data):
         # Updates datetime fields to null when receiving an empty string submission.
@@ -85,9 +89,6 @@ class SimpleServiceRequestSerializer(serializers.ModelSerializer):
             data['longitude'] = float("%.6f" % float(data.get('longitude')))
         return super().to_internal_value(data)
 
-    class Meta:
-        model = ServiceRequest
-        fields = '__all__'
 
 class SimpleEvacAssignmentSerializer(serializers.ModelSerializer):
 
@@ -105,21 +106,20 @@ class ServiceRequestSerializer(SimpleServiceRequestSerializer):
     injured = serializers.BooleanField(read_only=True)
     owner_objects = SimplePersonSerializer(source='owners', many=True, required=False, read_only=True)
     reporter_object = SimplePersonSerializer(source='reporter', required=False, read_only=True)
-    animals = serializers.SerializerMethodField()
     evacuation_assignments = SimpleEvacAssignmentSerializer(many=True, required=False, read_only=True)
     visit_notes = VisitNoteSerializer(source='visitnote_set', many=True, required=False, read_only=True)
-    reported_animals = serializers.SerializerMethodField()
-    owner_contacts = OwnerContactSerializer(source='ownercontact_set', many=True, required=False, read_only=True)
-    sheltered_in_place = serializers.SerializerMethodField()
-    unable_to_locate = serializers.SerializerMethodField()
-    aco_required = serializers.SerializerMethodField(read_only=True)
 
-    def get_animals(self, obj):
-        return SimpleAnimalSerializer(obj.animal_set.exclude(status="CANCELED"), many=True, read_only=True).data
-
-    def __init__(self, *args, **kwargs):
-    
+    class Meta:
+        model = ServiceRequest
+        fields = ['id', 'latitude', 'longitude', 'full_address', 'followup_date',
         # Instantiate the superclass normally
         super(ServiceRequestSerializer, self).__init__(*args, **kwargs)
-        if self.context.get('request') and self.context.get('request').path == '/hotline/api/servicerequests/':
             self.fields.pop('action_history')
+
+    # Custom field for the current open evac assignment if it exists.
+        from evac.models import EvacAssignment
+        return EvacAssignment.objects.filter(service_requests=obj, end_time__isnull=True).values('id', 'start_time').first()
+
+    # Custom field for the action history list.
+    def get_action_history(self, obj):
+        return [build_action_string(action) for action in obj.target_actions.all()]
