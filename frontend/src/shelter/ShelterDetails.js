@@ -6,10 +6,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faClipboardList, faDoorOpen, faEdit, faPlusSquare, faWarehouse,
 } from '@fortawesome/free-solid-svg-icons';
-import ReactImageFallback from 'react-image-fallback';
 import History from '../components/History';
 import Header from '../components/Header';
-import noImageFound from '../static/images/image-not-found.png';
 
 function ShelterDetails({id}) {
 
@@ -99,8 +97,8 @@ function ShelterDetails({id}) {
               </Card.Title>
               <hr/>
               <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
-                <ListGroup.Item className="rounded" action><Link href="/intake/workflow/owner" style={{color:"#FFF"}}><FontAwesomeIcon icon={faDoorOpen} inverse/> <b>Intake from Walk-In (Owner)</b></Link></ListGroup.Item>
-                <ListGroup.Item className="rounded" action><Link href="/intake/workflow/reporter" style={{color:"#FFF"}}><FontAwesomeIcon icon={faDoorOpen} inverse/> <b>Intake from Walk-In (Non-Owner)</b></Link></ListGroup.Item>
+                <ListGroup.Item className="rounded" action><Link href={"/intake/workflow/owner?shelter_id=" + id} style={{color:"#FFF"}}><FontAwesomeIcon icon={faDoorOpen} inverse/> <b>Intake from Walk-In (Owner)</b></Link></ListGroup.Item>
+                <ListGroup.Item className="rounded" action><Link href={"/intake/workflow/reporter?shelter_id=" + id} style={{color:"#FFF"}}><FontAwesomeIcon icon={faDoorOpen} inverse/> <b>Intake from Walk-In (Non-Owner)</b></Link></ListGroup.Item>
                 <ListGroup.Item>
                   <b>Currently Sheltering:</b> {data.animal_count} animal{data.animal_count === 1 ? "" : "s"}
                 </ListGroup.Item>
