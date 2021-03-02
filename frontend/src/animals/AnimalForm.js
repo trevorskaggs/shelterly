@@ -72,7 +72,7 @@ const AnimalForm = (props) => {
     last_seen: null,
     number_of_animals: 1,
     room: null,
-    shelter: null,
+    shelter: props.state.shelter || null,
     front_image: null,
     front_image_data_url: '',
     side_image: null,
