@@ -20,6 +20,7 @@ function DispatchSummary({id}) {
   const [data, setData] = useState({
     team_members: [],
     team_member_objects: [],
+    team: {},
     service_requests: [],
     service_request_objects: [],
     start_time: null,
@@ -37,7 +38,7 @@ function DispatchSummary({id}) {
   const handleTeamMemberClose = () => setShowTeamMemberConfirm(false);
 
   const handleAddTeamMemberSubmit = async () => {
-    await axios.patch('/evac/api/evacassignment/' + id + '/', {'new_team_members':teamMembers.map(item => item.id)})
+    await axios.patch('/evac/api/dispatchteam/' + data.team + '/', {'new_team_members':teamMembers.map(item => item.id)})
     .then(response => {
       setData(prevState => ({ ...prevState, "team_member_objects":response.data.team_member_objects, "team_members":response.data.team_members }));
       setTeamData(prevState => ({ ...prevState, "options":prevState.options.filter(option => !response.data.team_members.includes(option.id)) }));
@@ -49,7 +50,7 @@ function DispatchSummary({id}) {
   }
 
   const handleRemoveTeamMemberSubmit = async () => {
-    await axios.patch('/evac/api/evacassignment/' + id + '/', {'remove_team_member':teamMemberToDelete.id})
+    await axios.patch('/evac/api/dispatchteam/' + data.team + '/', {'remove_team_member':teamMemberToDelete.id})
     .then(response => {
       setData(prevState => ({ ...prevState, "team_member_objects":response.data.team_member_objects, "team_members":response.data.team_members }));
       setTeamData(prevState => ({ ...prevState, "options":prevState.options.concat([{id: teamMemberToDelete.id, label: teamMemberToDelete.display_name}]) }));
@@ -77,6 +78,8 @@ function DispatchSummary({id}) {
           bounds.push([service_request.latitude, service_request.longitude]);
         }
         response.data['bounds'] = bounds;
+        response.data['team_members'] = response.data.team.team_members;
+        response.data['team_member_objects'] = response.data.team_object.team_member_objects
         setData(response.data);
         setMapState(map_dict);
         setTeamData({options: [], isFetching: true});
@@ -84,8 +87,10 @@ function DispatchSummary({id}) {
           cancelToken: source.token,
         })
         .then(teamResponse => {
-          var options = []
-          teamResponse.data.filter(team_member => !response.data.team_members.includes(team_member.id)).forEach(function(teammember){
+          var options = [];
+          console.log(teamResponse)
+          teamResponse.data.filter(team_member => !response.data.team_object.team_members.includes(team_member.id)).forEach(function(teammember){
+            console.log(teammember)
             options.push({id: teammember.id, label: teammember.display_name})
           });
           setTeamData({options: options, isFetching: false});
@@ -183,6 +188,7 @@ function DispatchSummary({id}) {
         <Map className="d-block dispatch-leaflet-container" bounds={data.bounds}>
           {data.service_request_objects.map(service_request => (
             <Marker
+              key={service_request.id}
               position={[service_request.latitude, service_request.longitude]}
               icon={service_request.sheltered_in_place > 0 ? SIPMarkerIcon : service_request.unable_to_locate > 0 ? UTLMarkerIcon : reportedMarkerIcon}
               // onClick={() => window.open("/hotline/servicerequest/" + service_request.id, "_blank")}

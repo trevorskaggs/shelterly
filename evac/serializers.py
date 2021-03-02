@@ -29,7 +29,7 @@ class EvacTeamMemberSerializer(serializers.ModelSerializer):
 
 class DispatchTeamSerializer(serializers.ModelSerializer):
 
-    # EvacTeamMemberSerializer(source='team_members', required=False, read_only=True, many=True)
+    team_member_objects = EvacTeamMemberSerializer(source='team_members', required=False, read_only=True, many=True)
     display_name = serializers.SerializerMethodField()
 
     # Custome field for Name Output
@@ -49,12 +49,12 @@ class DispatchServiceRequestSerializer(ServiceRequestSerializer):
 
 class EvacAssignmentSerializer(serializers.ModelSerializer):
 
-    action_history = serializers.SerializerMethodField()
+    # action_history = serializers.SerializerMethodField()
     team_object = DispatchTeamSerializer(source='team', required=False, read_only=True)
     service_request_objects = DispatchServiceRequestSerializer(source='service_requests', required=False, read_only=True, many=True)
 
-    def get_action_history(self, obj):
-        return [build_action_string(action) for action in obj.target_actions.all()]
+    # def get_action_history(self, obj):
+    #     return [build_action_string(action) for action in obj.target_actions.all()]
 
     class Meta:
         model = EvacAssignment

@@ -110,7 +110,7 @@ function Deploy() {
     else {
       setError('');
       setShow(false);
-      props.setFieldValue("team_name", props.values.temp_team_name)
+      props.setFieldValue("team_name", props.values.temp_team_name);
     }
   }
 

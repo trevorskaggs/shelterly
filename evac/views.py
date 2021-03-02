@@ -29,6 +29,19 @@ class DispatchTeamViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = DispatchTeamSerializer
 
+    def perform_update(self, serializer):
+
+        if serializer.is_valid():
+            team = serializer.save()
+
+            # Add Team Members to DA.
+            if self.request.data.get('new_team_members'):
+                team.team_members.add(*self.request.data.get('new_team_members'))
+
+            # Remove Team Member from DA.
+            if self.request.data.get('remove_team_member'):
+                team.team_members.remove(self.request.data.get('remove_team_member'))
+
 class EvacAssignmentViewSet(viewsets.ModelViewSet):
 
     queryset = EvacAssignment.objects.all()
@@ -65,6 +78,10 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
     # When creating, update all service requests to be assigned status.
     def perform_create(self, serializer):
         if serializer.is_valid():
+            if self.request.data.get('team_name'):
+                team = DispatchTeam.objects.create(name=self.request.data.get('team_name'))
+                team.team_members.set(self.request.data.get('team_members'))
+                serializer.validated_data['team'] = team
             evac_assignment = serializer.save()
             service_requests = ServiceRequest.objects.filter(pk__in=serializer.data['service_requests'])
             service_requests.update(status="assigned")
@@ -94,14 +111,6 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
                 evac_assignment.service_requests.add(service_requests[0])
                 evac_assignment.animals.add(*Animal.objects.filter(request=service_requests[0], status__in=['REPORTED', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE']))
                 action.send(self.request.user, verb='assigned service request', target=service_requests[0])
-
-            # Add Team Members to DA if included.
-            if self.request.data.get('new_team_members'):
-                evac_assignment.team_members.add(*self.request.data.get('new_team_members'))
-
-            # Remove Team Member from DA if included.
-            if self.request.data.get('remove_team_member'):
-                evac_assignment.team_members.remove(self.request.data.get('remove_team_member'))
 
             for service_request in self.request.data.get('sr_updates', []):
                 sr_status = 'open' if service_request['unable_to_complete'] else 'assigned' if service_request['incomplete'] else 'closed'
