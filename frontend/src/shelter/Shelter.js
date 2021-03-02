@@ -59,8 +59,11 @@ function Shelter() {
             <ListGroup.Item className="rounded" action>CREATE NEW SHELTER</ListGroup.Item>
           </Link>
           <Link href="/animals/search">
-            <ListGroup.Item className="rounded" action>ANIMAL SEARCH</ListGroup.Item>
+            <ListGroup.Item className="rounded" action>SEARCH ANIMALS</ListGroup.Item>
           </Link>
+          <Link href="/intake/owner/search">
+          <ListGroup.Item className="rounded" action>SEARCH OWNERS</ListGroup.Item>
+        </Link>
         </ListGroup>
       </Col>
       <Col xs={8} className="border rounded pl-0 pr-0">
