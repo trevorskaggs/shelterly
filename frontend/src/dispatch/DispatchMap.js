@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import { Link, navigate } from 'raviger';
 import { Form, Formik } from 'formik';
-import { Button, Col, FormCheck, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
+import { Button, Col, FormCheck, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBandAid, faBullseye, faCar, faCircle, faClipboardList, faExclamationCircle, faQuestionCircle, faTrailer
+  faBandAid, faBullseye, faCar, faCircle, faClipboardList, faExclamationCircle, faQuestionCircle, faPencilAlt, faTrailer
 } from '@fortawesome/free-solid-svg-icons';
 import { faBadgeSheriff, faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
 import { Circle, Marker, Tooltip as MapTooltip } from "react-leaflet";
@@ -17,7 +17,7 @@ import trailer from "../static/images/trailer-solid.png";
 import { Typeahead } from 'react-bootstrap-typeahead';
 import Moment from 'react-moment';
 import Map, { countMatches, prettyText, reportedMarkerIcon, SIPMarkerIcon, UTLMarkerIcon, checkMarkerIcon } from "../components/Map";
-import { Checkbox } from "../components/Form";
+import { Checkbox, TextInput } from "../components/Form";
 import 'react-bootstrap-typeahead/css/Typeahead.css';
 import 'leaflet/dist/leaflet.css';
 
@@ -30,6 +30,10 @@ function Deploy() {
   const [statusOptions, setStatusOptions] = useState({aco_required:false, pending_only: true});
   const [teamData, setTeamData] = useState({teams: [], options: [], isFetching: false});
   const [selected, setSelected] = useState([]);
+  const [teamName, setTeamName] = useState('');
+  const handleClose = () => setShow(false);
+  const [show, setShow] = useState(false);
+  const [error, setError] = useState('');
 
   // Handle aco_required toggle.
   const handleACO = async event => {
@@ -51,19 +55,22 @@ function Deploy() {
     }
   }
 
+  // Handle TeamMember selector onChange.
   const handleChange = (values, props) => {
-    let team_name = '';
+    let team_name = props.values.team_name;
     let id_list = [];
     let selected_list = [];
     values.forEach(value => {
       id_list = [...id_list, ...value.id];
       // Handle if Team.
       if (value.label.split(':').length > 1) {
+        // Parse out the team name.
         team_name = value.label.split(':')[0];
         value.label.split(':')[1].split(',').forEach((name, index) =>  {
-          let temp_dict = {id: [value.id[index]], label:name.replace(' ', '')};
-          if (!selected_list.some(option => option.id[0] === temp_dict.id[0])) {
-            selected_list.push(temp_dict);
+          let team_option = {id: [value.id[index]], label:name.replace(' ', '')};
+          // Add to list if not already selected.
+          if (!selected_list.some(option => option.id[0] === team_option.id[0])) {
+            selected_list.push(team_option);
           }
         });
       }
@@ -72,22 +79,39 @@ function Deploy() {
         selected_list.push({id: value.id, label:value.label})
       }
     });
-    // If deselecting
+    // If deselecting.
     if (selected.length > selected_list.length) {
       let team_options = [];
       teamData.teams.filter(team => team.team_members.filter(value => id_list.includes(value)).length === 0).forEach(function(team) {
+        // Add selectable options back if if not already available.
         if (!teamData.options.some(option => option.label === team.name + ": " + team.display_name)) {
           team_options.push({id: team.team_members, label: team.name + ": " + team.display_name});
         }
       });
-      setTeamData(prevState => ({ ...prevState, "options":teamData.options.concat(selected.filter(option => !id_list.includes(option.id[0]))).concat(team_options) }));
+      setTeamData(prevState => ({ ...prevState, "options":team_options.concat(teamData.options.concat(selected.filter(option => !id_list.includes(option.id[0])))) }));
     }
     else {
       setTeamData(prevState => ({ ...prevState, "options":teamData.options.filter(option => !id_list.includes(option.id[0])) }));
     }
     props.setFieldValue('team_members', id_list);
     props.setFieldValue('team_name', team_name);
+    props.setFieldValue('temp_team_name', team_name);
     setSelected(selected_list);
+  }
+
+  // Handle Team Name updating to reject names already in use.
+  const handleSubmit = (props) => {
+    if (teamData.teams.map(team => team.name.toLowerCase()).includes(props.values.temp_team_name.toLowerCase())) {
+      setError("This team name is already in use.");
+    }
+    else if (props.values.temp_team_name.length === 0) {
+      setError("Team name cannot be blank.");
+    }
+    else {
+      setError('');
+      setShow(false);
+      props.setFieldValue("team_name", props.values.temp_team_name)
+    }
   }
 
   // Handle dynamic SR state and map display when an SR is selected or deselected.
@@ -166,8 +190,10 @@ function Deploy() {
         cancelToken: source.token,
       })
       .then(response => {
-        var options = []
-        response.data.forEach(function(teammember){
+        let options = [];
+        let team_names = [];
+        let team_name = '';
+        response.data.forEach(function(teammember) {
           options.push({id: [teammember.id], label: teammember.display_name})
         });
         // Then fetch all recent Teams.
@@ -176,9 +202,20 @@ function Deploy() {
         })
         .then(response => {
           response.data.forEach(function(team) {
-            options.push({id: team.team_members, label: team.name + ": " + team.display_name})
+            options.unshift({id: team.team_members, label: team.name + ": " + team.display_name});
+            team_names.push(team.name);
           });
+          // Provide a default "TeamN" team name that hasn't already be used.
+          let i = 1;
+          do {
+            if (!team_names.includes("Team" + String(i))){
+              team_name = "Team" + String(i);
+            }
+            i++;
+          }
+          while (team_name === '');
           setTeamData({teams: response.data, options: options, isFetching: false});
+          setTeamName(team_name);
         })
         .catch(error => {
           console.log(error.response);
@@ -241,10 +278,12 @@ function Deploy() {
   return (
     <Formik
       initialValues={{
-        team_name: '',
+        team_name: teamName,
+        temp_team_name: teamName,
         team_members: [],
         service_requests: [],
       }}
+      enableReinitialize={true}
       onSubmit={(values, { setSubmitting }) => {
         values.service_requests = Object.keys(mapState).filter(key => mapState[key].checked === true)
         setTimeout(() => {
@@ -368,7 +407,19 @@ function Deploy() {
             <Button type="submit" className="btn-block mt-auto" style={{marginBottom:"-33px"}} disabled={selectedCount.disabled || props.values.team_members.length === 0}>DEPLOY</Button>
           </Col>
           <Col xs={2} className="pl-0 pr-0" style={{marginLeft:"-7px", paddingRight:"2px"}}>
-            <div className="card-header border rounded text-center" style={{height:"37px", marginLeft:"12px", paddingTop:"6px"}}>{props.values.team_name || "Team0"}</div>
+            <div className="card-header border rounded text-center" style={{height:"37px", marginLeft:"12px", paddingTop:"6px"}}>{props.values.team_name || teamName}
+            <OverlayTrigger
+              key={"edit-team-name"}
+              placement="top"
+              overlay={
+                <Tooltip id={`tooltip-edit-team-name`}>
+                  Update team name
+                </Tooltip>
+              }
+            >
+              <FontAwesomeIcon icon={faPencilAlt} className="ml-1" style={{cursor:'pointer'}} onClick={() => setShow(true)} />
+            </OverlayTrigger>
+            </div>
           </Col>
           <Col xs={8} className="pl-0">
             <Typeahead
@@ -544,6 +595,24 @@ function Deploy() {
             </div>
           </Col>
         </Row>
+        <Modal show={show} onHide={handleClose}>
+          <Modal.Header closeButton>
+            <Modal.Title>Update Team Name</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <TextInput
+              label="Team Name"
+              id="temp_team_name"
+              name="temp_team_name"
+              type="text"
+            />
+            {error ? <div style={{ color: "#e74c3c", marginTop: "-8px", marginLeft: "16px", fontSize: "80%" }}>{error}</div> : ""}
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="primary" onClick={() => handleSubmit(props)}>Save</Button>
+            <Button variant="secondary" onClick={handleClose}>Close</Button>
+          </Modal.Footer>
+        </Modal>
       </Form>
     )}
   </Formik>
