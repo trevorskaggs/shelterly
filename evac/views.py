@@ -5,8 +5,8 @@ from rest_framework import filters, permissions, viewsets
 from actstream import action
 
 from animals.models import Animal
-from evac.models import EvacAssignment, EvacTeamMember
-from evac.serializers import EvacAssignmentSerializer, EvacTeamMemberSerializer
+from evac.models import DispatchTeam, EvacAssignment, EvacTeamMember
+from evac.serializers import DispatchTeamSerializer, EvacAssignmentSerializer, EvacTeamMemberSerializer
 from hotline.models import ServiceRequest, VisitNote
 from people.models import OwnerContact, Person
 
@@ -22,6 +22,12 @@ class EvacTeamMemberViewSet(viewsets.ModelViewSet):
             # Clean phone fields.
             serializer.validated_data['phone'] = ''.join(char for char in serializer.validated_data.get('phone', '') if char.isdigit())
             team_member = serializer.save()
+
+class DispatchTeamViewSet(viewsets.ModelViewSet):
+
+    queryset = DispatchTeam.objects.all()
+    permission_classes = [permissions.IsAuthenticated, ]
+    serializer_class = DispatchTeamSerializer
 
 class EvacAssignmentViewSet(viewsets.ModelViewSet):
 

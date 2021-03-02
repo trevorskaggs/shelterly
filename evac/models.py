@@ -1,6 +1,5 @@
 from django.db import models
 
-
 class EvacTeamMember(models.Model):
 
     first_name = models.CharField(max_length=50, blank=False)
@@ -14,11 +13,15 @@ class EvacTeamMember(models.Model):
     class Meta:
         ordering = ['last_name', 'first_name']
 
+class DispatchTeam(models.Model):
+
+    name = models.CharField(max_length=50, blank=False)
+    team_members = models.ManyToManyField(EvacTeamMember)
 
 class EvacAssignment(models.Model):
     from hotline.models import ServiceRequest
 
-    team_members = models.ManyToManyField(EvacTeamMember)
+    team = models.ForeignKey(DispatchTeam, on_delete=models.SET_NULL, blank=True, null=True)
     service_requests = models.ManyToManyField(ServiceRequest, related_name='evacuation_assignments')
     animals = models.ManyToManyField('animals.Animal', blank=True, related_name='evacuation_assignments')
     start_time = models.DateTimeField(auto_now_add=True)

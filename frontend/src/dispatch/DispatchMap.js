@@ -7,7 +7,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBandAid, faBullseye, faCar, faCircle, faClipboardList, faExclamationCircle, faQuestionCircle, faTrailer
 } from '@fortawesome/free-solid-svg-icons';
-
 import { faBadgeSheriff, faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
 import { Circle, Marker, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
@@ -29,7 +28,8 @@ function Deploy() {
   const [totalSelectedState, setTotalSelectedState] = useState({'REPORTED':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}});
   const [selectedCount, setSelectedCount] = useState({count:0, disabled:true});
   const [statusOptions, setStatusOptions] = useState({aco_required:false, pending_only: true});
-  const [teamData, setTeamData] = useState({options: [], isFetching: false});
+  const [teamData, setTeamData] = useState({teams: [], options: [], isFetching: false});
+  const [selected, setSelected] = useState([]);
 
   // Handle aco_required toggle.
   const handleACO = async event => {
@@ -49,6 +49,45 @@ function Deploy() {
     else {
       setMapState(prevState => ({ ...prevState, [id]: {...prevState[id], "radius":"disabled"} }));
     }
+  }
+
+  const handleChange = (values, props) => {
+    let team_name = '';
+    let id_list = [];
+    let selected_list = [];
+    values.forEach(value => {
+      id_list = [...id_list, ...value.id];
+      // Handle if Team.
+      if (value.label.split(':').length > 1) {
+        team_name = value.label.split(':')[0];
+        value.label.split(':')[1].split(',').forEach((name, index) =>  {
+          let temp_dict = {id: [value.id[index]], label:name.replace(' ', '')};
+          if (!selected_list.some(option => option.id[0] === temp_dict.id[0])) {
+            selected_list.push(temp_dict);
+          }
+        });
+      }
+      // Else handle as an individual TeamMember.
+      else {
+        selected_list.push({id: value.id, label:value.label})
+      }
+    });
+    // If deselecting
+    if (selected.length > selected_list.length) {
+      let team_options = [];
+      teamData.teams.filter(team => team.team_members.filter(value => id_list.includes(value)).length === 0).forEach(function(team) {
+        if (!teamData.options.some(option => option.label === team.name + ": " + team.display_name)) {
+          team_options.push({id: team.team_members, label: team.name + ": " + team.display_name});
+        }
+      });
+      setTeamData(prevState => ({ ...prevState, "options":teamData.options.concat(selected.filter(option => !id_list.includes(option.id[0]))).concat(team_options) }));
+    }
+    else {
+      setTeamData(prevState => ({ ...prevState, "options":teamData.options.filter(option => !id_list.includes(option.id[0])) }));
+    }
+    props.setFieldValue('team_members', id_list);
+    props.setFieldValue('team_name', team_name);
+    setSelected(selected_list);
   }
 
   // Handle dynamic SR state and map display when an SR is selected or deselected.
@@ -121,20 +160,34 @@ function Deploy() {
   useEffect(() => {
     let source = axios.CancelToken.source();
     const fetchTeamMembers = async () => {
-      setTeamData({options: [], isFetching: true});
+      setTeamData({teams: [], options: [], isFetching: true});
+      // Fetch all TeamMembers.
       await axios.get('/evac/api/evacteammember/', {
         cancelToken: source.token,
       })
       .then(response => {
         var options = []
         response.data.forEach(function(teammember){
-          options.push({id: teammember.id, label: teammember.display_name})
+          options.push({id: [teammember.id], label: teammember.display_name})
         });
-        setTeamData({options: options, isFetching: false});
+        // Then fetch all recent Teams.
+        axios.get('/evac/api/dispatchteam/', {
+          cancelToken: source.token,
+        })
+        .then(response => {
+          response.data.forEach(function(team) {
+            options.push({id: team.team_members, label: team.name + ": " + team.display_name})
+          });
+          setTeamData({teams: response.data, options: options, isFetching: false});
+        })
+        .catch(error => {
+          console.log(error.response);
+          setTeamData({teams: [], options: [], isFetching: false});
+        });
       })
       .catch(error => {
         console.log(error.response);
-        setTeamData({options: [], isFetching: false});
+        setTeamData({teams: [], options: [], isFetching: false});
       });
     };
 
@@ -188,6 +241,7 @@ function Deploy() {
   return (
     <Formik
       initialValues={{
+        team_name: '',
         team_members: [],
         service_requests: [],
       }}
@@ -309,15 +363,19 @@ function Deploy() {
             </Map>
           </Col>
         </Row>
-        <Row className="mt-2" style={{}}>
+        <Row className="mt-2">
           <Col xs={2} className="pl-0 pr-0" style={{marginLeft:"-7px", paddingRight:"2px"}}>
             <Button type="submit" className="btn-block mt-auto" style={{marginBottom:"-33px"}} disabled={selectedCount.disabled || props.values.team_members.length === 0}>DEPLOY</Button>
           </Col>
-          <Col xs={10} className="pl-0">
+          <Col xs={2} className="pl-0 pr-0" style={{marginLeft:"-7px", paddingRight:"2px"}}>
+            <div className="card-header border rounded text-center" style={{height:"37px", marginLeft:"12px", paddingTop:"6px"}}>{props.values.team_name || "Team0"}</div>
+          </Col>
+          <Col xs={8} className="pl-0">
             <Typeahead
               id="team_members"
               multiple
-              onChange={(values) => {props.setFieldValue('team_members', values.map(item => item.id))}}
+              onChange={(values) => handleChange(values, props)}
+              selected={selected}
               options={teamData.options}
               placeholder="Choose team members..."
               style={{marginLeft:"3px", marginRight:"-13px"}}
