@@ -16,7 +16,6 @@ import clsx from 'clsx';
 import MaterialCheckbox from '@material-ui/core/Checkbox';
 import { makeStyles } from '@material-ui/core/styles';
 import Alert from 'react-bootstrap/Alert';
-import L from "leaflet";
 import { Legend, pinMarkerIcon } from "../components/Map";
 import { STATE_OPTIONS } from '../constants';
 
@@ -326,6 +325,7 @@ const AddressSearch = (props) => {
   const markerRef = useRef(null);
   const mapRef = useRef(null);
   const { setFieldValue } = useFormikContext();
+  const [initialLatLon, setInitialLatLon] = useState([0, 0]);
 
   const renderAddressLookup = () => {
     if(process.env.REACT_APP_GOOGLE_API_KEY){
@@ -337,10 +337,16 @@ const AddressSearch = (props) => {
 
   const updatePosition = () => {
       const marker = markerRef.current;
+      const map = mapRef.current
       if (marker !== null) {
-        const latLon = marker.leafletElement.getLatLng()
+        const latLon = marker.leafletElement.getLatLng();
+        // Preserve the original map center LatLon.
+        if (initialLatLon[0] === 0) {
+          setInitialLatLon([props.formikProps.values.latitude, props.formikProps.values.longitude])
+        }
         setFieldValue("latitude", +(Math.round(latLon.lat + "e+4") + "e-4"));
         setFieldValue("longitude", +(Math.round(latLon.lng + "e+4") + "e-4"));
+        map.leafletElement.setView(latLon);
       }
   }
 
@@ -413,7 +419,7 @@ const AddressSearch = (props) => {
             </Form.Row>
           </Col>
           <Col className="border rounded pl-0 pr-0 mb-3 mr-3" xs="4" style={{marginTop:"31px"}}>
-            <Map ref={mapRef} bounds={props.formikProps.values.latitude ? L.latLngBounds([[props.formikProps.values.latitude, props.formikProps.values.longitude]]) : L.latLngBounds([[0,0]])} className="search-leaflet-container" >
+            <Map zoom={15} ref={mapRef} center={[initialLatLon[0] || props.formikProps.values.latitude || 0, initialLatLon[1] || props.formikProps.values.longitude || 0]} className="search-leaflet-container" >
             <Legend position="bottomleft" metric={false} />
             <TileLayer
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
