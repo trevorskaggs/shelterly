@@ -7,12 +7,10 @@ import { Button, ButtonGroup, Form as BootstrapForm } from "react-bootstrap";
 import { Card } from 'react-bootstrap';
 import * as Yup from 'yup';
 import { AuthContext } from "../accounts/AccountsReducer";
-import {AddressLookup, DateTimePicker, DropDown, ImageUploader, TextInput} from '../components/Form.js';
+import { AddressSearch, DateTimePicker, DropDown, ImageUploader, TextInput } from '../components/Form.js';
 import { catAgeChoices, dogAgeChoices, horseAgeChoices, otherAgeChoices, catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, speciesChoices, sexChoices, dogSizeChoices, catSizeChoices, horseSizeChoices, otherSizeChoices, unknownChoices } from './constants';
-import { STATE_OPTIONS } from '../constants'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft, faMinusSquare } from '@fortawesome/free-solid-svg-icons';
-import Alert from 'react-bootstrap/Alert'
 
 const AnimalForm = (props) => {
 
@@ -162,15 +160,6 @@ const AnimalForm = (props) => {
   const clearImages = (image_url, setFieldValue) => {
     setData(prevState => ({ ...prevState, "extra_images":data.extra_images.filter(url => url !== image_url) }));
     setFieldValue("extra_images", data.extra_images.filter(url => url !== image_url));
-  }
-
-  // Checks if Google API Key exists before rendering.
-  const renderAddressLookup = ()=>{
-    if(process.env.REACT_APP_GOOGLE_API_KEY){
-      return <AddressLookup label="Found Location Search" style={{width: '100%'}} className="form-control"/>
-    } else {
-      return <Alert variant="danger">Found Location Search is not available. Please contact support for assistance.</Alert>
-    }
   }
 
   // Hook for initializing data.
@@ -605,12 +594,12 @@ const AnimalForm = (props) => {
                     xs="12"
                   />
                 </BootstrapForm.Row>
-                <BootstrapForm.Row>
+                <BootstrapForm.Row className={is_workflow ? "mb-3" : ""}>
                   <DateTimePicker
                     label="Last Seen"
                     name="last_seen"
                     id="last_seen"
-                    xs="4"
+                    xs="6"
                     key={`my_unique_last_seen_select_key__${formikProps.values.last_seen}`}
                     onChange={(date, dateStr) => {
                       formikProps.setFieldValue("last_seen", dateStr)
@@ -640,7 +629,7 @@ const AnimalForm = (props) => {
                       />
                     </Col>
                   </BootstrapForm.Row>
-                  <BootstrapForm.Row className="mt-3">
+                  <BootstrapForm.Row className="mt-3 mb-3">
                     <Col xs="6">
                       <DropDown
                         id="room"
@@ -655,49 +644,7 @@ const AnimalForm = (props) => {
                     </Col>
                   </BootstrapForm.Row>
                 </span>
-                <span hidden={is_intake ? !is_reporter : !Boolean(id)}>
-                  <BootstrapForm.Row className="mt-3">
-                    <BootstrapForm.Group as={Col} xs="12">
-                      {renderAddressLookup()}
-                    </BootstrapForm.Group>
-                  </BootstrapForm.Row>
-                  <BootstrapForm.Row>
-                    <TextInput
-                      xs="12"
-                      type="text"
-                      label="Found Location Address"
-                      name="address"
-                      disabled
-                    />
-                  </BootstrapForm.Row>
-                  <BootstrapForm.Row>
-                    <TextInput
-                      xs="8"
-                      type="text"
-                      label="City"
-                      name="city"
-                      disabled
-                    />
-                    <Col xs="2">
-                    <DropDown
-                      label="State"
-                      name="state"
-                      id="state"
-                      options={STATE_OPTIONS}
-                      value={formikProps.values.state || ''}
-                      placeholder=''
-                      disabled
-                    />
-                    </Col>
-                    <TextInput
-                      xs="2"
-                      type="text"
-                      label="Zip Code"
-                      name="zip_code"
-                      disabled
-                    />
-                  </BootstrapForm.Row>
-                </span>
+                <AddressSearch formikProps={formikProps} label="Found Location Search"/>
                 <span hidden={is_workflow && !is_intake}>
                   <p className={id || is_reporter ? "mb-0" : "mb-0 mt-3"}>Image Files</p>
                   <BootstrapForm.Row className="align-items-end">

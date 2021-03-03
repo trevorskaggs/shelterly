@@ -184,7 +184,7 @@ function DispatchSummary({id}) {
         </Card>
       </Col>
       <Col className="border rounded pl-0 pr-0" style={{marginTop:"4px", marginRight:"15px", maxHeight:"311px"}}>
-        <Map className="d-block dispatch-leaflet-container" bounds={data.bounds}>
+        <Map className="d-block landing-leaflet-container" bounds={data.bounds}>
           {data.service_request_objects.map(service_request => (
             <Marker
               key={service_request.id}

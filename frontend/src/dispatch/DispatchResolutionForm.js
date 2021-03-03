@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import { Link, navigate } from "raviger";
 import { Field, Form, Formik } from 'formik';
-import { Label } from 'reactstrap';
 import { Switch } from 'formik-material-ui';
 import {
   Button,
@@ -346,7 +345,7 @@ function DispatchResolutionForm({ id }) {
                   </BootstrapForm.Row>
                   <BootstrapForm.Row>
                     <Col>
-                      <Label htmlFor={`sr_updates.${index}.forced_entry`} className="mt-1">Forced Entry</Label>
+                      <BootstrapForm.Label htmlFor={`sr_updates.${index}.forced_entry`} className="mt-1">Forced Entry</BootstrapForm.Label>
                       <Field component={Switch} name={`sr_updates.${index}.forced_entry`} type="checkbox" color="primary" />
                     </Col>
                   </BootstrapForm.Row>
