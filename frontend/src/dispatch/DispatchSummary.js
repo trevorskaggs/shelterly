@@ -20,7 +20,8 @@ function DispatchSummary({id}) {
   const [data, setData] = useState({
     team_members: [],
     team_member_objects: [],
-    team: {},
+    team: null,
+    team_object: {name:''},
     service_requests: [],
     service_request_objects: [],
     start_time: null,
@@ -88,9 +89,7 @@ function DispatchSummary({id}) {
         })
         .then(teamResponse => {
           var options = [];
-          console.log(teamResponse)
           teamResponse.data.filter(team_member => !response.data.team_object.team_members.includes(team_member.id)).forEach(function(teammember){
-            console.log(teammember)
             options.push({id: teammember.id, label: teammember.display_name})
           });
           setTeamData({options: options, isFetching: false});
@@ -145,7 +144,7 @@ function DispatchSummary({id}) {
         <Card border="secondary" className="mt-1" style={{minHeight:"313px", maxHeight:"313px"}}>
           <Card.Body>
             <Card.Title>
-              <h4>Team Members
+              <h4>{data.team_object.name}
               <OverlayTrigger
                 key={"add-team-member"}
                 placement="top"
