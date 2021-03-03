@@ -4,6 +4,7 @@ import Stepper from '@material-ui/core/Stepper';
 import Step from '@material-ui/core/Step';
 import StepLabel from '@material-ui/core/StepLabel';
 import Typography from '@material-ui/core/Typography';
+import { useQueryParams } from 'raviger';
 import AnimalForm from '../animals/AnimalForm';
 import PersonForm from '../people/PersonForm';
 import ServiceRequestForm from '../hotline/ServiceRequestForm';
@@ -47,6 +48,7 @@ export const initialWorkflowData = {
   stepIndex: 0,
   hasOwner: false,
   animalIndex: 0,
+  shelter: null,
   steps: {
     reporter: {
       first_name: '',
@@ -87,6 +89,15 @@ export const initialWorkflowData = {
 }
 
 function StepperWorkflow() {
+
+  // Identify any query param data.
+  const [queryParams] = useQueryParams();
+  const {
+    shelter_id = null,
+  } = queryParams;
+  // Set shelter if present.
+  initialWorkflowData['shelter'] = Number(shelter_id);
+
   // Determine if this is an intake workflow.
   let is_intake = window.location.pathname.includes("intake");
 

@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useFormikContext, useField } from 'formik';
-import { Label, Input } from 'reactstrap';
-import { Col, Image, Form } from 'react-bootstrap';
+import { Col, Collapse, Image, Form, Row } from 'react-bootstrap';
 import Select from 'react-select';
 import SimpleValue from 'react-select-simple-value';
 import Flatpickr from 'react-flatpickr';
@@ -11,10 +10,14 @@ import {
   faTimes, faMinusSquare, faPlusSquare,
 } from '@fortawesome/free-solid-svg-icons';
 import Autocomplete from 'react-google-autocomplete';
+import { Map, Marker, Tooltip as MapTooltip, TileLayer } from "react-leaflet";
 import flatten from 'flat';
 import clsx from 'clsx';
 import MaterialCheckbox from '@material-ui/core/Checkbox';
 import { makeStyles } from '@material-ui/core/styles';
+import Alert from 'react-bootstrap/Alert';
+import { Legend, pinMarkerIcon } from "../components/Map";
+import { STATE_OPTIONS } from '../constants';
 
 const useStyles = makeStyles({
   root: {
@@ -183,16 +186,6 @@ const DropDown = React.forwardRef((props, ref) => {
   );
 });
 
-const MultiSelect = ({ label, ...props }) => {
-  const [field] = useField(props);
-  return (
-    <>
-      <Label htmlFor={props.id || props.name}>{label}</Label>
-      <Input type="select" {...field} {...props} multiple={true} />
-    </>
-  );
-};
-
 const ImageUploader = ({ parentStateSetter, ...props }) => {
 
   const { setFieldValue } = useFormikContext();
@@ -269,6 +262,7 @@ const AddressLookup = ({ ...props }) => {
   const { setFieldValue } = useFormikContext();
 
   const updateAddr = suggestion => {
+
     if (suggestion.address_components) {
       // Extract location information from the return. Use short_name for the state.
       var components={};
@@ -279,8 +273,11 @@ const AddressLookup = ({ ...props }) => {
       if (components.street_number) {
         address = components.street_number + " " + components.route;
       }
-      else {
+      else if (components.route) {
         address = components.route;
+      }
+      else {
+        address = components.intersection;
       }
 
       setFieldValue("address", address);
@@ -289,18 +286,32 @@ const AddressLookup = ({ ...props }) => {
       setFieldValue("zip_code", components.postal_code);
       setFieldValue("latitude", suggestion.geometry.location.lat());
       setFieldValue("longitude", suggestion.geometry.location.lng());
+      setFieldValue("full_address", suggestion.formatted_address.replace(', USA', ''));
     }
   }
 
   return (
     <>
-      <Label>{props.label}</Label>
+      <Form.Label>{props.label}</Form.Label>
       <Autocomplete
         {...props}
+        onChange={(e) => {
+          const lookup = e.target.value.replace(' ', '').split(',');
+          if (lookup[0] <= 90 && lookup[0] >= -90 && lookup[1] <= 180 && lookup[1] >= -180) {
+          let latlng = {lat:Number(lookup[0]), lng:Number(lookup[1])};
+          new window.google.maps.Geocoder().geocode({ location: latlng }, function (results, status) {
+            if (status === window.google.maps.GeocoderStatus.OK) {
+              updateAddr(results[0]);
+            } else {
+              console.log(status);
+            }
+          });
+          }
+        }}
         onPlaceSelected={(place) => {
           updateAddr(place);
         }}
-        types={['address']}
+        types={['geocode']}
         componentRestrictions={{country: "us"}}
         ref={childRef}
         apiKey={process.env.REACT_APP_GOOGLE_API_KEY}
@@ -309,4 +320,137 @@ const AddressLookup = ({ ...props }) => {
   );
 }
 
-export { AddressLookup, TextInput, Checkbox, DropDown, ImageUploader, MultiSelect, DateTimePicker };
+const AddressSearch = (props) => {
+
+  const markerRef = useRef(null);
+  const mapRef = useRef(null);
+  const { setFieldValue } = useFormikContext();
+  const [initialLatLon, setInitialLatLon] = useState([0, 0]);
+
+  const renderAddressLookup = () => {
+    if(process.env.REACT_APP_GOOGLE_API_KEY){
+      return <AddressLookup label={props.label} style={{width: '100%'}} className={"form-control"}/>
+    } else {
+      return <Alert variant="danger">Found Location Search is not available. Please contact support for assistance.</Alert>
+    }
+  }
+
+  const updatePosition = () => {
+      const marker = markerRef.current;
+      const map = mapRef.current
+      if (marker !== null) {
+        const latLon = marker.leafletElement.getLatLng();
+        // Preserve the original map center LatLon.
+        if (initialLatLon[0] === 0) {
+          setInitialLatLon([props.formikProps.values.latitude, props.formikProps.values.longitude])
+        }
+        setFieldValue("latitude", +(Math.round(latLon.lat + "e+4") + "e-4"));
+        setFieldValue("longitude", +(Math.round(latLon.lng + "e+4") + "e-4"));
+        map.leafletElement.setView(latLon);
+      }
+  }
+
+  const [fadeIn, setFadeIn] = useState(props.show_same ? false : true);
+  function handleChange() {
+    setFadeIn(!fadeIn);
+    setTimeout(() => {
+      mapRef.current.leafletElement.invalidateSize();
+    }, 250)
+  }
+
+  return (
+    <>
+    {props.show_same ?
+      <span className="form-row mb-2">
+        <Form.Label style={{marginLeft:"5px"}}>Address Same as Owner: </Form.Label>
+        <input id="same_address" type="checkbox" className="ml-2" checked={!fadeIn} onChange={handleChange} style={{marginTop:"5px"}} />
+      </span>
+    : ""}
+    <Collapse in={fadeIn}>
+      <div>
+        <Row hidden={props.hidden} style={{fontSize:"15px"}}>
+          <Col>
+            <Form.Row>
+              <Form.Group as={Col} xs="12">
+                {renderAddressLookup()}
+              </Form.Group>
+            </Form.Row>
+            <Form.Row>
+              <TextInput
+                xs={props.show_apt ? "10" : "12"}
+                type="text"
+                label="Address"
+                name="address"
+                disabled
+              />
+              {props.show_apt ?
+              <TextInput
+                xs="2"
+                type="text"
+                label="Apartment"
+                name="apartment"
+              /> : ""}
+            </Form.Row>
+            <Form.Row>
+              <TextInput
+                xs="8"
+                type="text"
+                label="City"
+                name="city"
+                disabled
+              />
+              <Col xs="2">
+              <DropDown
+                label="State"
+                name="state"
+                id="state"
+                options={STATE_OPTIONS}
+                placeholder=''
+                disabled
+              />
+              </Col>
+              <TextInput
+                xs="2"
+                type="text"
+                label="Zip Code"
+                name="zip_code"
+                disabled
+              />
+            </Form.Row>
+          </Col>
+          <Col className="border rounded pl-0 pr-0 mb-3 mr-3" xs="4" style={{marginTop:"31px"}}>
+            <Map zoom={15} ref={mapRef} center={[initialLatLon[0] || props.formikProps.values.latitude || 0, initialLatLon[1] || props.formikProps.values.longitude || 0]} className="search-leaflet-container" >
+            <Legend position="bottomleft" metric={false} />
+            <TileLayer
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+            />
+              {props.formikProps.values.latitude ?
+              <Marker
+                draggable={true}
+                onDragEnd={updatePosition}
+                autoPan={true}
+                position={[props.formikProps.values.latitude, props.formikProps.values.longitude]}
+                icon={pinMarkerIcon}
+                ref={markerRef}
+              >
+                <MapTooltip autoPan={false} direction="top">
+                  <div>
+                    {props.formikProps.values.full_address}
+                  </div>
+                  <div>
+                    Lat: {props.formikProps.values.latitude}, Lon: {props.formikProps.values.longitude}
+                  </div>
+                </MapTooltip>
+              </Marker>
+              : ""}
+            </Map>
+          </Col>
+        </Row>
+      </div>
+    </Collapse>
+    </>
+  );
+}
+
+export { AddressLookup, AddressSearch, TextInput, Checkbox, DropDown, ImageUploader, DateTimePicker };
