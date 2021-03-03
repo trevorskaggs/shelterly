@@ -1,6 +1,6 @@
 from django.db.models import Count, Exists, OuterRef, Prefetch
 from django.http import JsonResponse
-from datetime import datetime
+from datetime import datetime, timedelta
 from rest_framework import filters, permissions, viewsets
 from actstream import action
 
@@ -28,6 +28,13 @@ class DispatchTeamViewSet(viewsets.ModelViewSet):
     queryset = DispatchTeam.objects.all()
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = DispatchTeamSerializer
+
+    def get_queryset(self):
+        yesterday = datetime.today() - timedelta(days=1)
+        today = datetime.today()
+        y_mid = datetime.combine(yesterday,datetime.min.time())
+        queryset = DispatchTeam.objects.filter(dispatch_date__gte=y_mid).annotate(is_assigned=Exists(EvacAssignment.objects.filter(team_id=OuterRef("id"), end_time=None)))
+        return queryset
 
     def perform_update(self, serializer):
 

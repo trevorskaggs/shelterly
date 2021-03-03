@@ -82,7 +82,7 @@ function Deploy() {
     // If deselecting.
     if (selected.length > selected_list.length) {
       let team_options = [];
-      teamData.teams.filter(team => team.team_members.filter(value => id_list.includes(value)).length === 0).forEach(function(team) {
+      teamData.teams.filter(team => !team.is_assigned && team.team_members.filter(value => id_list.includes(value)).length === 0).forEach(function(team) {
         // Add selectable options back if if not already available.
         if (!teamData.options.some(option => option.label === team.name + ": " + team.display_name)) {
           team_options.push({id: team.team_members, label: team.name + ": " + team.display_name});
@@ -90,6 +90,7 @@ function Deploy() {
       });
       setTeamData(prevState => ({ ...prevState, "options":team_options.concat(teamData.options.concat(selected.filter(option => !id_list.includes(option.id[0])))) }));
     }
+    // Else we're selecting. Remove selection from option list.
     else {
       setTeamData(prevState => ({ ...prevState, "options":teamData.options.filter(option => !id_list.includes(option.id[0])) }));
     }
@@ -202,8 +203,11 @@ function Deploy() {
         })
         .then(response => {
           response.data.forEach(function(team) {
-            options.unshift({id: team.team_members, label: team.name + ": " + team.display_name});
             team_names.push(team.name);
+            // Only add to option list if not actively assigned.
+            if (!team.is_assigned) {
+              options.unshift({id: team.team_members, label: team.name + ": " + team.display_name});
+            }
           });
           // Provide a default "TeamN" team name that hasn't already be used.
           let i = 1;

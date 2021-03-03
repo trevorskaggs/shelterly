@@ -31,6 +31,7 @@ class DispatchTeamSerializer(serializers.ModelSerializer):
 
     team_member_objects = EvacTeamMemberSerializer(source='team_members', required=False, read_only=True, many=True)
     display_name = serializers.SerializerMethodField()
+    is_assigned = serializers.BooleanField(read_only=True)
 
     # Custome field for Name Output
     def get_display_name(self, obj):

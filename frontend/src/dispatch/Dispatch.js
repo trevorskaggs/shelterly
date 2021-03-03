@@ -41,7 +41,7 @@ function Dispatch() {
           response.data.forEach((dispatch_assignment, index) => {
             let sr_dict = {}
             for (const service_request of dispatch_assignment.service_request_objects) {
-              const matches = countMatches(service_request);
+              const matches = countMatches(service_request)[0];
               sr_dict[service_request.id] = {id:service_request.id, matches:matches, latitude:service_request.latitude, longitude:service_request.longitude, full_address:service_request.full_address};
               bounds.push([service_request.latitude, service_request.longitude]);
             }
@@ -104,7 +104,7 @@ function Dispatch() {
             >
               <MapTooltip autoPan={false}>
                 <span>
-                  <div>Team:&nbsp;
+                  <div>{dispatch_assignment.team_object.name}:&nbsp;
                   {dispatch_assignment.team && dispatch_assignment.team_object.team_member_objects.map((team_member, i) => (
                     <span key={team_member.id}>{i > 0 && ", "}{team_member.first_name + ' ' + team_member.last_name}</span>
                   ))}

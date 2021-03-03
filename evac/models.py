@@ -17,6 +17,7 @@ class DispatchTeam(models.Model):
 
     name = models.CharField(max_length=50, blank=False)
     team_members = models.ManyToManyField(EvacTeamMember)
+    dispatch_date = models.DateTimeField(auto_now_add=True)
 
 class EvacAssignment(models.Model):
     from hotline.models import ServiceRequest
