@@ -3,11 +3,11 @@ import ReactDOMServer from 'react-dom/server';
 import axios from "axios";
 import { Link, navigate } from 'raviger';
 import { Button, Col, Collapse, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
-import { CircleMarker, Map, Marker, TileLayer, Tooltip as MapTooltip } from "react-leaflet";
+import { CircleMarker, Marker, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
 import Moment from 'react-moment';
 import randomColor from "randomcolor";
-import { Legend } from "../components/Map";
+import Map from "../components/Map";
 import { Checkbox } from "../components/Form"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -220,11 +220,6 @@ function ServiceRequestDispatchAssignment({id}) {
     <Row className="d-flex flex-wrap mt-3">
       <Col xs={12} className="border rounded pl-0 pr-0">
         <Map className="d-block" bounds={data.bounds} onMoveEnd={onMove}>
-          <Legend position="bottomleft" metric={false} />
-          <TileLayer
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-          />
           <Marker
             position={[currentRequest.latitude, currentRequest.longitude]}
             icon={starMarkerIcon}
