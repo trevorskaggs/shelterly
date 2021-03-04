@@ -30,7 +30,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 SECRET_KEY = os.environ.get('SECRET_KEY')
 DEBUG = False
 # SECURITY WARNING: don't run with debug turned on in production!
-ALLOWED_HOSTS = ['ceuvhfhgn4.execute-api.us-west-2.amazonaws.com']
+ALLOWED_HOSTS = [os.environ.get('API_HOSTNAME')]
 AUTH_USER_MODEL = 'accounts.ShelterlyUser'
 
 
