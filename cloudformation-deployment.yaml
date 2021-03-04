@@ -3,40 +3,48 @@ AWSTemplateFormatVersion: 2010-09-09
 Description: Site resources for Shelterly deployment
 
 Parameters:
-
   LambdaIAMRoleArn:
     Type: String
-    Default: arn:aws:iam::502259086226:role/shelterly-base-LambdaIAMRole-LK2LR6O7Z1GW
+
   DjangoSecretKey:
     Type: String
-    Default: LMqi2Etsmmbmy96UWcdWG4o74HJq7t6XZEja
+
   DatabaseName:
     Type: String
-    Default: production
+
   DatabaseUser:
     Type: String
-    Default: postgres
+
   DatabasePassword:
     Type: String
-    Default: PPHbFwq#YgqG&n8#
+
   DatabaseHost:
     Type: String
-    Default: production.cluster-cl6t8ji3shyo.us-west-2.rds.amazonaws.com"
+
+  LambdaAliasName:
+    Type: String
+
+  ApiDomainName:
+    Type: String
+  
+  ImageUri:
+    Type: String
+
 
 Resources:
-
   LambdaFunction:
     Type: AWS::Lambda::Function
     Properties:
       PackageType: Image
       Code:
-        ImageUri: 502259086226.dkr.ecr.us-west-2.amazonaws.com/shelterly:latest
+        ImageUri: !Ref ImageUri
       Environment:
         Variables:
           SECRET_KEY: !Ref DjangoSecretKey
           DATABASE_NAME: !Ref DatabaseName
           DATABASE_PASSWORD: !Ref DatabasePassword
           DATABASE_HOST: !Ref DatabaseHost
+          API_HOSTNAME: !Ref ApiDomainName
       ImageConfig:
         Command: ["lambda_awsgi.lambda_handler"]
       MemorySize: 128
@@ -44,13 +52,7 @@ Resources:
       Timeout: 20
       VpcConfig:
         SecurityGroupIds:
-          - sg-004b1b2f3f11c8db0
         SubnetIds:
-          - subnet-029c350b9f38be490
-          - subnet-0222d10c5bd30db90
-          - subnet-0b737ca64b0811df0
-          - subnet-00bdf1f9dc85ad4fe
-
 
   LambdaPermission:
     Type: AWS::Lambda::Permission
@@ -59,22 +61,100 @@ Resources:
       FunctionName: !GetAtt LambdaFunction.Arn
       Principal: apigateway.amazonaws.com
 
+  LambdaVersion:
+    Type: AWS::Lambda::Version
+    Properties:
+      FunctionName: !Ref LambdaFunction
+      Description: dev testing
+
+  myLambdaAlias:
+    Type: AWS::Lambda::Alias
+    Properties:
+      FunctionName: !Ref LambdaFunction
+      FunctionVersion: !GetAtt LambdaVersion.Version
+      Name: !Ref LambdaAliasName
+
   HttpApi:
     Type: AWS::ApiGatewayV2::Api
     Properties:
-      Name: shelterly-http-api
+      Name: shelterly-dev
       Description: HTTP API
       ProtocolType: HTTP
-      Target: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaFunction.Arn}/invocations
-
-  HttpApiOverrides:
-    Type: AWS::ApiGatewayV2::ApiGatewayManagedOverrides
+ 
+  HttpApiIntegration:
+    Type: AWS::ApiGatewayV2::Integration
     Properties:
-      ApiId: !Sub ${HttpApi}
-      Integration:
-        PayloadFormatVersion: "2.0"
+      ApiId: !Ref HttpApi
+      IntegrationType: AWS_PROXY
+      PayloadFormatVersion: 2.0
+      IntegrationUri: !Join
+                        - ''
+                        - - 'arn:aws:apigateway:'
+                          - !Ref AWS::Region
+                          - ':lambda:path/2015-03-31/functions/'
+                          - !GetAtt LambdaFunction.Arn
+                          - :${stageVariables.org_name}_${stageVariables.incident_name}/invocations
 
-Outputs:
+  HttpApiRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref HttpApi
+      RouteKey: $default
+      Target: !Join
+                - /
+                - - integrations
+                  - !Ref HttpApiIntegration
 
-  HttpApiUrl:
-    Value: !Sub https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com/
+
+  DevStage:
+    Type: "AWS::ApiGatewayV2::Stage"
+    Properties:
+      StageName: dev
+      Description: dev stage
+      AutoDeploy: True
+      ApiId: !Ref HttpApi
+      StageVariables:
+        org_name: nvadg
+        incident_name: dev
+
+  ApiDomainName:
+    Type: "AWS::ApiGatewayV2::DomainName"
+    Properties:
+      DomainName: dev.shelterly.org
+      DomainNameConfigurations:
+        - EndpointType: REGIONAL
+          CertificateArn: !Sub arn:aws:acm:${AWS::Region}:${AWS::AccountId}:certificate/c761d629-703e-40dc-8233-5be3937008ea
+
+  MyApiMapping:
+    Type: "AWS::ApiGatewayV2::ApiMapping"
+    Properties:
+      DomainName: !Ref ApiDomainName
+      ApiId: !Ref HttpApi
+      Stage: !Ref DevStage
+
+  myDNSRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: 
+      Name: !Ref ApiDomainName
+      Type: A
+      AliasTarget:
+        DNSName: !GetAtt ApiDomainName.RegionalDomainName
+        HostedZoneId: !GetAtt ApiDomainName.RegionalHostedZoneId
+
+  myLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref myLambdaAlias
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${HttpApi}/*
+      SourceArn: !Join
+                  - ''
+                  - - 'arn:aws:execute-api:'
+                    - !Ref AWS::Region
+                    - ':'
+                    - !Ref AWS::AccountId
+                    - ':'
+                    - !Ref HttpApi
+                    - '/*'

@@ -1,0 +1,60 @@
+- name: Spin up new client
+  vars_prompt:
+    - name: org_name
+      prompt: Enter organization name.
+
+    - name: incident_name
+      prompt: Enter incident name.
+      private: no
+
+    - name: db_host
+      prompt: Enter db host.
+
+    - name: db_user
+      prompt: Enter db user.
+      private: yes
+
+    - name: db_password
+      prompt: Enter db maintenance password.
+      private: yes
+
+    - name: secret_key
+      prompt: Enter Django secret key.
+      private: yes
+      
+
+  hosts: localhost
+  gather_facts: False
+  tasks:
+- name: Create a new database for this org+incident combo.
+  community.postgresql.postgresql_db:
+    name: {{ org_name + '_' + incident_name }}
+    login_host: {{ db_host }}
+    login_user: {{ db_user }}
+    login_password: {{ db_password }}
+
+- name: Migrate database
+  community.docker.docker_container:
+    image: trevorskaggs/shelterly:dev
+    command: ["python", "./manage.py", "migrate", "--noinput"]  
+    env:
+      DATABASE_HOST: {{ db_host }}
+      DATABASE_NAME: {{ org_name + '_' + incident_name }}
+      DATABASE_PASSWORD: {{ db_password }}
+      DATABASE_USER: {{ db_user }}
+      SECRET_KEY: {{ secret_key }}
+
+- name: Deploy Cloudformation resources
+  amazon.aws.cloudformation:
+    stack_name: {{ org_name + "_" + incident_name + "lambda" }}
+    state: "present"
+    region: "us-west-2"
+    template_url: "files/cloudformation-example.json"
+    template_parameters:
+      DjangoSecretKey: {{ secret_key }}
+      DatabaseName: {{ org_name + '_' + incident_name }}
+      DatabaseUser: {{ db_user }}
+      DatabasePassword: {{ db_password }}
+      DatabaseHost: {{ db_host }}
+      LambdaAliasName: {{ org_name + '_' + incident_name }}
+
