@@ -3,11 +3,11 @@ import ReactDOMServer from 'react-dom/server';
 import axios from "axios";
 import { Link, navigate } from 'raviger';
 import { Button, Col, Collapse, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
-import { CircleMarker, Map, Marker, TileLayer, Tooltip as MapTooltip } from "react-leaflet";
+import { CircleMarker, Marker, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
 import Moment from 'react-moment';
 import randomColor from "randomcolor";
-import { Legend } from "../components/Map";
+import Map from "../components/Map";
 import { Checkbox } from "../components/Form"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -20,7 +20,7 @@ import { S3_BUCKET } from '../constants';
 
 function ServiceRequestDispatchAssignment({id}) {
 
-  const [currentRequest, setCurrentRequest] = useState({id:'', matches: {}, latitude:0, longitude:0, followup_date:''});
+  const [currentRequest, setCurrentRequest] = useState({id:'', matches: {}, latitude:0, longitude:0, followup_date:'', latest_evac:{id:0, start_time:null, end_time:null}});
   const [data, setData] = useState({dispatch_assignments: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
   const [mapState, setMapState] = useState({});
   const [selected, setSelected] = useState(null);
@@ -149,10 +149,10 @@ function ServiceRequestDispatchAssignment({id}) {
             let sr_dict = {}
             for (const service_request of dispatch_assignment.service_request_objects) {
               const matches = countMatches(service_request);
-              sr_dict[service_request.id] = {id:service_request.id, matches:matches, latitude:service_request.latitude, longitude:service_request.longitude, assigned_evac:service_request.assigned_evac.id, full_address:service_request.full_address};
+              sr_dict[service_request.id] = {id:service_request.id, matches:matches, latitude:service_request.latitude, longitude:service_request.longitude, latest_evac:service_request.latest_evac, full_address:service_request.full_address};
               bounds.push([service_request.latitude, service_request.longitude]);
             }
-            map_dict[dispatch_assignment.id] = {checked:currentResponse.data.assigned_evac.id === dispatch_assignment.id, hidden: false, color:random_colors[index], service_requests:sr_dict}
+            map_dict[dispatch_assignment.id] = {checked:(currentResponse.data.latest_evac !== null) && (currentResponse.data.latest_evac.end_time === null) && (currentResponse.data.latest_evac.id === dispatch_assignment.id), hidden: false, color:random_colors[index], service_requests:sr_dict}
           });
           const current_matches = countMatches(currentResponse.data);
           currentResponse.data['matches'] = current_matches;
@@ -218,11 +218,6 @@ function ServiceRequestDispatchAssignment({id}) {
     <Row className="d-flex flex-wrap mt-3">
       <Col xs={12} className="border rounded pl-0 pr-0">
         <Map className="d-block" bounds={data.bounds} onMoveEnd={onMove}>
-          <Legend position="bottomleft" metric={false} />
-          <TileLayer
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-          />
           <Marker
             position={[currentRequest.latitude, currentRequest.longitude]}
             icon={starMarkerIcon}
@@ -251,7 +246,7 @@ function ServiceRequestDispatchAssignment({id}) {
               </span>
             </MapTooltip>
           </Marker>
-          {data.dispatch_assignments.filter(dispatch_assignment => mapState[dispatch_assignment.id].checked === false && dispatch_assignment.id !== currentRequest.assigned_evac.id).map(dispatch_assignment => (
+          {data.dispatch_assignments.filter(dispatch_assignment => mapState[dispatch_assignment.id].checked === false && (currentRequest.latest_evac ? (dispatch_assignment.id !== currentRequest.latest_evac.id) : true)).map(dispatch_assignment => (
           <span key={dispatch_assignment.id}>
             {dispatch_assignment.service_request_objects.map(service_request => (
             <CircleMarker
@@ -262,7 +257,7 @@ function ServiceRequestDispatchAssignment({id}) {
               fillColor={mapState[dispatch_assignment.id] ? mapState[dispatch_assignment.id].color : ""}
               fill={true}
               fillOpacity="1"
-              onClick={() => handleMapState(service_request.assigned_evac.id)}
+              onClick={() => handleMapState(service_request.latest_evac.id)}
               radius={5}
             >
               <MapTooltip autoPan={false}>
@@ -291,14 +286,14 @@ function ServiceRequestDispatchAssignment({id}) {
             ))}
           </span>
           ))}
-          {Object.entries(mapState).filter(([key, value]) => (value.checked === true || Number(key) === currentRequest.assigned_evac.id)).map(([key, value]) => (
+          {Object.entries(mapState).filter(([key, value]) => (value.checked === true || (currentRequest.latest_evac && (Number(key) === currentRequest.latest_evac.id)))).map(([key, value]) => (
             <span key={key}>
             {Object.entries(value.service_requests).filter(([sr_id, service_request]) => (Number(sr_id) !== currentRequest.id)).map(([sr_id, service_request]) => (
               <Marker
                 key={service_request.id} 
                 position={[service_request.latitude, service_request.longitude]}
-                icon={Number(key) === currentRequest.assigned_evac.id ? checkMarkerIconGray : checkMarkerIcon}
-                onClick={Number(key) !== currentRequest.assigned_evac.id ? () => handleMapState(service_request.assigned_evac) : undefined}
+                icon={currentRequest.latest_evac && Number(key) === currentRequest.latest_evac.id ? checkMarkerIconGray : checkMarkerIcon}
+                onClick={currentRequest.latest_evac ? (Number(key) === currentRequest.latest_evac.id) : true ? () => handleMapState(service_request.latest_evac.id) : undefined}
               >
                 <MapTooltip autoPan={false}>
                   <span>
@@ -340,7 +335,7 @@ function ServiceRequestDispatchAssignment({id}) {
     </Row>
     <Row className="d-flex flex-wrap" style={{marginTop:"-8px", marginRight:"-19px", marginLeft:"-17px", minHeight:"36vh", paddingRight:"4px"}}>
       <Col xs={12} className="border rounded" style={{marginLeft:"1px", height:"36vh", overflowY:"auto", paddingRight:"-1px"}}>
-        {data.dispatch_assignments.filter(dispatch_assignment => dispatch_assignment.id === currentRequest.assigned_evac.id).map(dispatch_assignment => (
+        {currentRequest.latest_evac && data.dispatch_assignments.filter(dispatch_assignment => dispatch_assignment.id === currentRequest.latest_evac.id).map(dispatch_assignment => (
         <div className="mt-1 mb-1" style={{marginLeft:"-10px", marginRight:"-10px"}}>
           <div className="card-header rounded">
             <Checkbox
@@ -405,13 +400,13 @@ function ServiceRequestDispatchAssignment({id}) {
           </div>
         </div>
         ))}
-        {data.dispatch_assignments.filter(dispatch_assignment => mapState[dispatch_assignment.id].hidden === false && dispatch_assignment.id !== currentRequest.assigned_evac.id).map((dispatch_assignment, index) => (
+        {data.dispatch_assignments.filter(dispatch_assignment => (mapState[dispatch_assignment.id].hidden === false) && (currentRequest.latest_evac ? (dispatch_assignment.id !== currentRequest.latest_evac.id) : true)).map((dispatch_assignment, index) => (
         <span key={dispatch_assignment.id}>
           <div className="mt-1 mb-1" style={{marginLeft:"-10px", marginRight:"-10px"}}>
             <div className="card-header rounded" style={{height:""}}>
               <Checkbox
-                id={dispatch_assignment.id}
-                name={dispatch_assignment.id}
+                id={String(dispatch_assignment.id)}
+                name={String(dispatch_assignment.id)}
                 checked={mapState[dispatch_assignment.id] ? mapState[dispatch_assignment.id].checked : false}
                 onChange={() => handleMapState(dispatch_assignment.id)}
                 style={{
@@ -472,7 +467,7 @@ function ServiceRequestDispatchAssignment({id}) {
           </div>
         </span>
         ))}
-        <div className="card-header mt-1 mb-1 rounded"  style={{marginLeft:"-10px", marginRight:"-10px"}} hidden={data.dispatch_assignments.length > 0}>
+        <div className="card-header mt-1 mb-1 rounded" style={{marginLeft:"-10px", marginRight:"-10px"}} hidden={data.dispatch_assignments.length > 0}>
           No open Dispatch Assignments found.
         </div>
       </Col>

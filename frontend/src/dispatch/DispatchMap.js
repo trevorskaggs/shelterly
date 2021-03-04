@@ -101,7 +101,7 @@ function Deploy() {
 
   // Show or hide list of SRs based on current map zoom
   const onMove = event => {
-    let tempMapState = mapState;
+    let tempMapState = {...mapState};
     for (const service_request of data.service_requests) {
       if (mapState[service_request.id]) {
         if (!event.target.getBounds().contains(L.latLng(service_request.latitude, service_request.longitude))) {
@@ -272,6 +272,7 @@ function Deploy() {
             <Map style={{marginRight:"0px"}} bounds={data.bounds} onMoveEnd={onMove}>
               {data.service_requests.map(service_request => (
                 <Marker
+                  key={service_request.id}
                   position={[service_request.latitude, service_request.longitude]}
                   icon={mapState[service_request.id] && mapState[service_request.id].checked ? checkMarkerIcon : service_request.sheltered_in_place > 0 ? SIPMarkerIcon : service_request.unable_to_locate > 0 ? UTLMarkerIcon : reportedMarkerIcon}
                   onClick={() => handleMapState(service_request.id)}
@@ -336,8 +337,8 @@ function Deploy() {
               <div className="mt-1 mb-1" style={{marginLeft:"-10px", marginRight:"-10px"}}>
                 <div className="card-header rounded">
                   <Checkbox
-                    id={service_request.id}
-                    name={service_request.id}
+                    id={String(service_request.id)}
+                    name={String(service_request.id)}
                     checked={mapState[service_request.id] ? mapState[service_request.id].checked : false}
                     style={{
                       transform: "scale(1.25)",

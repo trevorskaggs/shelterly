@@ -12,6 +12,7 @@ import L from "leaflet";
 import Moment from 'react-moment';
 import Map, { countMatches, prettyText, reportedMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
 import Header from '../components/Header';
+import Scrollbar from '../components/Scrollbars';
 
 function DispatchSummary({id}) {
 
@@ -136,7 +137,7 @@ function DispatchSummary({id}) {
     <hr/>
     <Row>
       <Col>
-        <Card border="secondary" className="mt-1" style={{minHeight:"313px"}}>
+        <Card border="secondary" className="mt-1" style={{minHeight:"313px", maxHeight:"313px"}}>
           <Card.Body>
             <Card.Title>
               <h4>Team Members
@@ -154,30 +155,32 @@ function DispatchSummary({id}) {
               </h4>
             </Card.Title>
             <hr/>
-            <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px", textTransform:"capitalize"}}>
-              {data.team_member_objects.map(team_member => (
-                <ListGroup.Item key={team_member.id}>
-                  {team_member.first_name + " " + team_member.last_name + " - " + team_member.display_phone}{team_member.agency ?
-                  <span>({team_member.agency})</span> : ""}
-                  <OverlayTrigger
-                    key={"remove-team-member"}
-                    placement="top"
-                    overlay={
-                      <Tooltip id={`tooltip-remove-team-member`}>
-                        Remove team member
-                      </Tooltip>
-                    }
-                  >
-                    <FontAwesomeIcon icon={faMinusSquare} style={{cursor:'pointer'}} size="sm" className="ml-1" onClick={() => {setTeamMemberToDelete({id:team_member.id, name: team_member.first_name + " " + team_member.last_name, display_name: team_member.display_name});setShowTeamMemberConfirm(true);}} inverse />
-                  </OverlayTrigger>
-                </ListGroup.Item>
-              ))}
-            </ListGroup>
+            <Scrollbar autoHeight autoHide autoHeightMin={225} autoHeightMax={225} renderThumbVertical={props => <div {...props} style={{...props.style, backgroundColor: 'rgba(226, 226, 226, 0.2)'}} />}>
+              <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px", textTransform:"capitalize"}}>
+                {data.team_member_objects.map(team_member => (
+                  <ListGroup.Item key={team_member.id}>
+                    {team_member.first_name + " " + team_member.last_name + " - " + team_member.display_phone}{team_member.agency ?
+                    <span>({team_member.agency})</span> : ""}
+                    <OverlayTrigger
+                      key={"remove-team-member"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-remove-team-member`}>
+                          Remove team member
+                        </Tooltip>
+                      }
+                    >
+                      <FontAwesomeIcon icon={faMinusSquare} style={{cursor:'pointer'}} size="sm" className="ml-1" onClick={() => {setTeamMemberToDelete({id:team_member.id, name: team_member.first_name + " " + team_member.last_name, display_name: team_member.display_name});setShowTeamMemberConfirm(true);}} inverse />
+                    </OverlayTrigger>
+                  </ListGroup.Item>
+                ))}
+              </ListGroup>
+            </Scrollbar>
           </Card.Body>
         </Card>
       </Col>
       <Col className="border rounded pl-0 pr-0" style={{marginTop:"4px", marginRight:"15px", maxHeight:"311px"}}>
-        <Map className="d-block dispatch-leaflet-container" bounds={data.bounds}>
+        <Map className="d-block landing-leaflet-container" bounds={data.bounds}>
           {data.service_request_objects.map(service_request => (
             <Marker
               position={[service_request.latitude, service_request.longitude]}
