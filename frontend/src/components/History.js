@@ -17,7 +17,7 @@ function History({action_history}) {
     <hr/>
     <h1 className="mb-3">History<FontAwesomeIcon icon={faChevronCircleRight} hidden={showHistory} onClick={() => setShowHistory(!showHistory)} className="ml-2" style={{verticalAlign:"middle"}} inverse /><FontAwesomeIcon icon={faChevronCircleDown} hidden={!showHistory} onClick={() => setShowHistory(!showHistory)} className="ml-2" style={{verticalAlign:"middle"}} inverse /></h1>
     {action_history.map((action, index) => (
-    <div key={service_request.id} className="mt-3" hidden={page !== Math.ceil((index+1)/ITEMS_PER_PAGE)}>
+    <div key={action.id} className="mt-3" hidden={page !== Math.ceil((index+1)/ITEMS_PER_PAGE)}>
       <Collapse key={action + Math.random()} in={showHistory}>
         <div>
           <Card className="border rounded d-flex mb-2" style={{width:"100%"}}>
@@ -29,8 +29,8 @@ function History({action_history}) {
         <Pagination className="custom-page-links" size="lg" onClick={(e) => {setPage(parseInt(e.target.innerText))}}>
           {[...Array(numPages).keys()].map(x => 
           <Pagination.Item key={x+1} active={x+1 === page}>
-                    {x+1}
-                  </Pagination.Item>)
+            {x+1}
+          </Pagination.Item>)
           }
         </Pagination>
       </Collapse>
