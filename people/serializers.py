@@ -59,12 +59,12 @@ class PersonSerializer(SimplePersonSerializer):
     request = serializers.SerializerMethodField()
     action_history = serializers.SerializerMethodField()
 
+    def get_animals(self, obj):
+        return obj.animal_set.exclude(status='CANCELED').values() | obj.animals.exclude(status='CANCELED').values()
+
     # Custom field for the action history.
     def get_action_history(self, obj):
         return [build_action_string(action) for action in obj.target_actions.all()]
-
-    def get_animals(self, obj):
-        return  obj.animal_set.exclude(status='CANCELED').values() | obj.animals.exclude(status='CANCELED').values()
 
     # Custom field for the ServiceRequest ID.
     def get_request(self, obj):

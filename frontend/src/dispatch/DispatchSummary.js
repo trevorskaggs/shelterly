@@ -237,7 +237,7 @@ function DispatchSummary({id}) {
           <h4 className="mt-2" style={{marginBottom:"-2px"}}>Animals</h4>
           {service_request.animals.filter(animal => animal.evacuation_assignments.includes(Number(id))).map((animal, inception) => (
             <ListGroup.Item key={animal.id}>
-              <span style={{textTransform:"capitalize"}}>{animal.name||"Unknown"}</span> ({animal.species}) - {animal.status}
+              <span style={{textTransform:"capitalize"}}>#{animal.id} - {animal.name||"Unknown"}</span> ({animal.species}) - {animal.status}
             </ListGroup.Item>
           ))}
         </ListGroup>

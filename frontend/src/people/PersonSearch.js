@@ -166,7 +166,7 @@ function PersonSearch() {
 													<Scrollbar autoHeight autoHide autoHeightMax={144} renderThumbVertical={props => <div {...props} style={{...props.style, backgroundColor: 'rgba(226, 226, 226, 0.2)'}} />}>
 														{owner.animals.filter(animal => animal.species === searchState[owner.id].selectedSpecies).map((animal, i) => (
 															<ListGroup.Item key={animal.id}>
-																{animal.name || "Unknown"} - {animal.status}
+																<b>#{animal.id}:</b>&nbsp;&nbsp;{animal.name || "Unknown"} - {animal.status}
 															</ListGroup.Item>
 														))}
 													</Scrollbar>
