@@ -203,11 +203,11 @@ function Deploy() {
         })
         .then(response => {
           response.data.forEach(function(team) {
-            team_names.push(team.name);
-            // Only add to option list if not actively assigned.
-            if (!team.is_assigned) {
+            // Only add to option list if not actively assigned and not already in the list which is sorted by newest.
+            if (!team.is_assigned && !team_names.includes(team.name)) {
               options.unshift({id: team.team_members, label: team.name + ": " + team.display_name});
             }
+            team_names.push(team.name);
           });
           // Provide a default "TeamN" team name that hasn't already be used.
           let i = 1;
