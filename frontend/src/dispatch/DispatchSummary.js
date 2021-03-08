@@ -76,7 +76,7 @@ function DispatchSummary({id}) {
           map_dict[service_request.id] = {matches:matches, has_reported_animals:service_request.reported_animals > 0, latitude:service_request.latitude, longitude:service_request.longitude};
           bounds.push([service_request.latitude, service_request.longitude]);
         }
-        response.data['bounds'] = bounds;
+        response.data['bounds'] = bounds.length > 0 ? bounds : L.latLngBounds([[0,0]]);
         setData(response.data);
         setMapState(map_dict);
         setTeamData({options: [], isFetching: true});
