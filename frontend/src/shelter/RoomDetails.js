@@ -6,10 +6,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faClipboardList, faEdit, faWarehouse,
 } from '@fortawesome/free-solid-svg-icons';
-import ReactImageFallback from 'react-image-fallback';
 import History from '../components/History';
 import Header from '../components/Header';
-import noImageFound from '../static/images/image-not-found.png';
+import AnimalCards from '../components/AnimalCards';
 
 function RoomDetails({id}) {
 
@@ -98,35 +97,16 @@ function RoomDetails({id}) {
         </ListGroup>
       </Card.Body>
     </Card>
-    <div className="row mb-2 mt-3" hidden={data.animals.length === 0}>
+    <div className="row mt-3">
       <div className="col-12 d-flex">
         <Card className="mb-2 border rounded" style={{width:"100%"}}>
-          <Card.Body>
+          <Card.Body style={{marginBottom:"-17px"}}>
             <Card.Title>
               <h4 className="mb-0">Animals ({data.animals.length})</h4>
             </Card.Title>
             <hr/>
-            <span className="d-flex flex-wrap align-items-end">
-            {data.animals.map(animal => (
-              <Card key={animal.id} className="border rounded mr-3 mb-3" style={{border:"none"}}>
-                <ReactImageFallback style={{width:"151px", height:"151px", objectFit: "cover", overflow: "hidden"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} />
-                <Card.Text className="text-center mb-0" style={{textTransform:"capitalize"}}>
-                {animal.species === 'horse' ? animal.size : animal.species} - {animal.name||"Unknown"}
-                  <OverlayTrigger
-                    key={"animal-details"}
-                    placement="top"
-                    overlay={
-                      <Tooltip id={`tooltip-animal-details`}>
-                        Animal details
-                      </Tooltip>
-                    }
-                  >
-                    <Link href={"/animals/" + animal.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
-                  </OverlayTrigger>
-                </Card.Text>
-              </Card>
-            ))}
-            </span>
+            <AnimalCards animals={data.animals} show_owner={true} />
+            {data.animals.length < 1 ? <p>No animals have been assigned to this room.</p> : ""}
           </Card.Body>
         </Card>
       </div>
