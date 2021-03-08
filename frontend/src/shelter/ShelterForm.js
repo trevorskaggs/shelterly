@@ -2,12 +2,11 @@ import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import { navigate } from 'raviger';
 import { Formik } from 'formik';
-import { Form as BootstrapForm, Button, ButtonGroup, Card, Col, Modal } from "react-bootstrap";
-import { AddressLookup, TextInput, DropDown } from '../components/Form';
+import { Form as BootstrapForm, Button, ButtonGroup, Card, Modal } from "react-bootstrap";
+import { AddressSearch, TextInput } from '../components/Form';
 import * as Yup from 'yup';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft } from '@fortawesome/free-solid-svg-icons';
-import { STATE_OPTIONS } from "../constants";
 
 // Regex validators.
 const nameRegex = /^[a-z0-9 ,.'-]+$/i;
@@ -150,50 +149,7 @@ const ShelterForm = ({id}) => {
                     name="description"
                   />
                 </BootstrapForm.Row>
-                <BootstrapForm.Row>
-                  <BootstrapForm.Group as={Col} xs="12">
-                    <AddressLookup
-                      label="Search"
-                      className="form-control"
-                    />
-                  </BootstrapForm.Group>
-                </BootstrapForm.Row>
-                <BootstrapForm.Row xs="12">
-                  <TextInput
-                    xs="12"
-                    type="text"
-                    label="Address*"
-                    name="address"
-                    disabled
-                  />
-                </BootstrapForm.Row>
-                <BootstrapForm.Row>
-                  <TextInput
-                    xs="8"
-                    type="text"
-                    label="City"
-                    name="city"
-                    disabled
-                  />
-                  <Col xs="2">
-                    <DropDown
-                      label="State"
-                      name="state"
-                      id="state"
-                      options={STATE_OPTIONS}
-                      value={props.values.state || ''}
-                      placeholder=""
-                      disabled
-                    />
-                  </Col>
-                  <TextInput
-                    xs="2"
-                    type="text"
-                    label="Zip Code"
-                    name="zip_code"
-                    disabled
-                  />
-                </BootstrapForm.Row>
+                <AddressSearch formikProps={props} label="Search" show_apt={false}/>
               </BootstrapForm>
             </Card.Body>
             <ButtonGroup size="lg">

@@ -2,13 +2,12 @@ import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
 import { navigate, useQueryParams } from 'raviger';
 import { Field, Formik } from 'formik';
-import { Form as BootstrapForm, Button, ButtonGroup, Card, Col, Modal } from "react-bootstrap";
+import { Form as BootstrapForm, Button, ButtonGroup, Card, Modal } from "react-bootstrap";
 import * as Yup from 'yup';
-import { AddressLookup, DropDown, TextInput } from '../components/Form';
+import { AddressSearch, TextInput } from '../components/Form';
 import { AuthContext } from "../accounts/AccountsReducer";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft } from '@fortawesome/free-solid-svg-icons';
-import { STATE_OPTIONS } from '../constants';
 
 // Form for owner and reporter Person objects.
 const PersonForm = (props) => {
@@ -295,57 +294,7 @@ const PersonForm = (props) => {
                 name="agency"
               />
             </BootstrapForm.Row>
-            <BootstrapForm.Row hidden={!isOwner}>
-              <BootstrapForm.Group as={Col} xs="12">
-                <AddressLookup
-                  label="Search"
-                  style={{width: '100%'}}
-                  className="form-control"
-                />
-              </BootstrapForm.Group>
-            </BootstrapForm.Row>
-            <BootstrapForm.Row hidden={!isOwner}>
-              <TextInput
-                xs="10"
-                type="text"
-                label="Address"
-                name="address"
-                disabled
-              />
-              <TextInput
-                xs="2"
-                type="text"
-                label="Apartment"
-                name="apartment"
-              />
-            </BootstrapForm.Row>
-            <BootstrapForm.Row hidden={!isOwner}>
-              <TextInput
-                xs="8"
-                type="text"
-                label="City"
-                name="city"
-                disabled
-              />
-              <Col xs="2">
-              <DropDown
-                label="State"
-                name="state"
-                id="state"
-                options={STATE_OPTIONS}
-                value={formikProps.values.state || ''}
-                placeholder=''
-                disabled
-              />
-              </Col>
-              <TextInput
-                xs="2"
-                type="text"
-                label="Zip Code"
-                name="zip_code"
-                disabled
-              />
-            </BootstrapForm.Row>
+            <AddressSearch formikProps={formikProps} label="Search" show_apt={true} hidden={!isOwner}/>
             <BootstrapForm.Row hidden={!id || !isOwner}>
               <TextInput
                 xs="12"

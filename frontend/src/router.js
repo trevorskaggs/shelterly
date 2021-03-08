@@ -21,7 +21,6 @@ import PersonDetails from "./people/PersonDetails";
 import PersonForm from "./people/PersonForm";
 import PersonSearch from "./people/PersonSearch";
 import OwnerContactForm from "./people/OwnerContactForm";
-import Intake from "./intake/Intake";
 import Shelter from "./shelter/Shelter";
 import ShelterForm from "./shelter/ShelterForm";
 import ShelterRoomAssignment from "./shelter/ShelterRoomAssignment";
@@ -57,11 +56,10 @@ const routes = {
   "/hotline/servicerequest/search": () => <ServiceRequestSearch />,
   "/hotline/servicerequest/:id": ({id}) => <ServiceRequestDetails id={id} />,
   "/hotline/workflow/*": () => <StepperWorkflow />,
-  "/intake": () => <Intake />,
-  "/intake/owner/search": () => <PersonSearch />,
   "/intake/workflow/*": () => <StepperWorkflow />,
   "/people/owner/edit/:id": ({id}) => <PersonForm id={id} state={initialWorkflowData} />,
   "/people/owner/new": () => <PersonForm state={initialWorkflowData} />,
+  "/people/owner/search": () => <PersonSearch />,
   "/people/owner/:id": ({id}) => <PersonDetails id={id} />,
   "/people/reporter/edit/:id": ({id}) => <PersonForm id={id} state={initialWorkflowData} />,
   "/people/reporter/new": () => <PersonForm state={initialWorkflowData} />,

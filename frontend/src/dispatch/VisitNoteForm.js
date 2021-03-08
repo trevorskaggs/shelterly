@@ -2,13 +2,13 @@ import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import { navigate } from "raviger";
 import { Field, Form, Formik, } from 'formik';
-import { Label } from 'reactstrap';
 import { Switch } from 'formik-material-ui';
 import {
   Button,
   ButtonGroup,
   Card,
   Col,
+  Form as BootstrapForm,
   FormGroup,
   Row,
 } from 'react-bootstrap';
@@ -104,7 +104,7 @@ const VisitNoteForm = ({ id }) => {
                 </Row>
                 <Row>
                   <Col>
-                    <Label htmlFor="forced_entry" className="mt-2">Forced Entry</Label>
+                    <BootstrapForm.Label htmlFor="forced_entry" className="mt-2">Forced Entry</BootstrapForm.Label>
                     <Field component={Switch} name="forced_entry" type="checkbox" color="primary" />
                   </Col>
                 </Row>

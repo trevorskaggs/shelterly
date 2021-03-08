@@ -36,7 +36,7 @@ hr { display: block; height: 1px;
 
 .landing-leaflet-container { width: auto; height: 311px; min-height:311px;}
 
-.dispatch-leaflet-container { width: auto; height: 311px; min-height:311px;}
+.search-leaflet-container { width: auto; height: 200px; min-height:200px;}
 
 .leaflet-top, .leaflet-bottom {
   z-index: 400 !important;
