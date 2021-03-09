@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, Collapse, Pagination } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -11,6 +11,10 @@ function History({action_history}) {
   const [showHistory, setShowHistory] = useState(false);
   const [page, setPage] = useState(1)
   const [numPages, setNumPages] = useState(1)
+
+  useEffect(() => {
+    setNumPages(Math.ceil(action_history.length / ITEMS_PER_PAGE))
+  }, [action_history]);
 
   return (
     <>
@@ -26,16 +30,16 @@ function History({action_history}) {
             </Card.Body>
           </Card>
         </div>
-        <Pagination className="custom-page-links" size="lg" onClick={(e) => {setPage(parseInt(e.target.innerText))}}>
-          {[...Array(numPages).keys()].map(x => 
-          <Pagination.Item key={x+1} active={x+1 === page}>
-            {x+1}
-          </Pagination.Item>)
-          }
-        </Pagination>
       </Collapse>
     </div>
     ))}
+    <Pagination className="custom-page-links" size="lg" hidden={!showHistory} onClick={(e) => {setPage(parseInt(e.target.innerText))}}>
+        {[...Array(numPages).keys()].map(x => 
+      <Pagination.Item key={x+1} active={x+1 === page}>
+        {x+1}
+      </Pagination.Item>)
+        }
+     </Pagination>
     </>
   );
 };
