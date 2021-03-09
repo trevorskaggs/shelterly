@@ -169,38 +169,8 @@ function PersonDetails({id}) {
               </h4>
             </Card.Title>
             <hr/>
-<<<<<<< HEAD
-            <span className="d-flex flex-wrap align-items-end">
-            {data.animals.map(animal => (
-              <Card key={animal.id} className="mr-3" style={{border:"none"}}>
-                <ReactImageFallback style={{width:"151px", height:"151px", objectFit: "cover", overflow: "hidden"}} src={animal.front_image} fallbackImage={[animal.side_image, `${S3_BUCKET}images/image-not-found.png`]} />
-                <Card.Text className="text-center mb-0">
-                  {animal.name||"Unknown"}
-                  <OverlayTrigger
-                    key={"animal-details"}
-                    placement="top"
-                    overlay={
-                      <Tooltip id={`tooltip-animal-details`}>
-                        Animal details
-                      </Tooltip>
-                    }
-                  >
-                    <Link href={"/animals/" + animal.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
-                  </OverlayTrigger>
-                </Card.Text>
-                <Card.Text className="text-center mb-0">
-                  {animal.status}
-                </Card.Text>
-                <Card.Text className="text-center" style={{textTransform:"capitalize"}}>
-                  {animal.size} {animal.species}
-                </Card.Text>
-              </Card>
-            ))}
-            </span>
-=======
             <AnimalCards animals={data.animals} show_owner={false} show_status={true} />
             {data.animals.length < 1 ? <p>This {is_owner ? "owner" : "reporter"} has no animals.</p> : ""}
->>>>>>> master
           </Card.Body>
         </Card>
       </div>
