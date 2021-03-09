@@ -1,11 +1,12 @@
 import React, {useEffect, useState} from 'react';
 import axios from "axios";
 import { Link } from 'raviger';
-import { Card, ListGroup, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Button, Card, ListGroup, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faClipboardList, faEdit, faPhone, faPlusSquare
 } from '@fortawesome/free-solid-svg-icons';
+import { faHomeHeart } from '@fortawesome/pro-solid-svg-icons';
 import Moment from 'react-moment';
 import Header from '../components/Header';
 import History from '../components/History';
@@ -15,6 +16,21 @@ function PersonDetails({id}) {
 
   // Determine if this is an owner or reporter when creating a Person.
   var is_owner = window.location.pathname.includes("owner")
+
+  const [show, setShow] = useState(false);
+  const handleClose = () => setShow(false);
+
+  // Handle animal reunification submit.
+  const handleSubmit = async () => {
+    await axios.patch('/people/api/person/' + id + '/', {reunite_animals:true})
+    .then(response => {
+      setData(prevState => ({ ...prevState, "animals":prevState['animals'].map(animal => ({...animal, status:'REUNITED'})) }));
+      handleClose()
+    })
+    .catch(error => {
+      console.log(error.response);
+    });
+  }
 
   const [data, setData] = useState({
     first_name: '',
@@ -73,7 +89,7 @@ function PersonDetails({id}) {
             placement="bottom"
             overlay={
               <Tooltip id={`tooltip-add-owner`}>
-                Add another owner
+                Add another owner for all of these animals
               </Tooltip>
             }
           >
@@ -166,6 +182,19 @@ function PersonDetails({id}) {
                 >
                   <Link href={"/animals/new?owner_id=" + id}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
                 </OverlayTrigger>
+                {is_owner && data.animals.filter(animal => (animal.status !== 'REUNITED')).length > 0 ?
+                <OverlayTrigger
+                  key={"reunite"}
+                  placement="top"
+                  overlay={
+                    <Tooltip id={`tooltip-reunite`}>
+                      Reunite all owner animals
+                    </Tooltip>
+                  }
+                >
+                  <FontAwesomeIcon icon={faHomeHeart} onClick={() => setShow(true)} style={{cursor:'pointer'}} className="ml-1 fa-move-up" inverse />
+                </OverlayTrigger>
+                : ""}
               </h4>
             </Card.Title>
             <hr/>
@@ -176,6 +205,20 @@ function PersonDetails({id}) {
       </div>
     </div>
     <History action_history={data.action_history} />
+    <Modal show={show} onHide={handleClose}>
+      <Modal.Header closeButton>
+        <Modal.Title>Confirm Animal Reunification</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <p>
+          Have all of the animals been reunited with this owner?
+        </p>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="primary" onClick={handleSubmit}>Yes</Button>
+        <Button variant="secondary" onClick={handleClose}>Close</Button>
+      </Modal.Footer>
+    </Modal>
     </>
   );
 };

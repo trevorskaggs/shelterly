@@ -77,8 +77,18 @@ class PersonViewSet(viewsets.ModelViewSet):
             if change_dict:
                 PersonChange.objects.create(user=self.request.user, person=person, changes=change_dict, reason=self.request.data.get('change_reason', ''))
 
-            # Record update action.
-            action.send(self.request.user, verb='updated person', target=person)
+            if self.request.data.get('reunite_animals'):
+                person.animal_set.update(status='REUNITED', shelter=None, room=None)
+                for animal in person.animal_set.all():
+                    action.send(self.request.user, verb=f'changed animal status to reunited', target=animal)
+                if person.request.exists():
+                    service_request = person.request.first()
+                    service_request.status = 'closed'
+                    service_request.save()
+                    action.send(self.request.user, verb='closed service request', target=service_request)
+            else:
+                # Record update action.
+                action.send(self.request.user, verb='updated person', target=person)
 
 class OwnerContactViewSet(viewsets.ModelViewSet):
 
