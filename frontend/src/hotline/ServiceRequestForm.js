@@ -112,15 +112,6 @@ function ServiceRequestForm(props) {
               ]);
             }
             // Create Animals
-            props.state.steps.animals.forEach(animal => {
-              // Add owner and reporter to animal data.
-              animal['reporter'] = reporterResponse[0].data.id
-              animal['new_owner'] = ownerResponse[0].data.id
-              axios.post('/animals/api/animal/', animal)
-              .catch(error => {
-                console.log(error.response);
-              });
-            });
             // Create Service Request
             values['reporter'] = reporterResponse[0].data.id
             if (ownerResponse[0].data.id) {
@@ -128,6 +119,16 @@ function ServiceRequestForm(props) {
             }
             axios.post('/hotline/api/servicerequests/', values)
             .then(response => {
+              props.state.steps.animals.forEach(animal => {
+                // Add owner and reporter to animal data.
+                animal.append('reporter', reporterResponse[0].data.id);
+                animal.append('new_owner', ownerResponse[0].data.id);
+                animal.append('request', response.data.id);
+                axios.post('/animals/api/animal/', animal)
+                .catch(error => {
+                  console.log(error.response);
+                });
+              });
               navigate('/hotline/servicerequest/' + response.data.id);
             })
             .catch(error => {
@@ -206,7 +207,7 @@ function ServiceRequestForm(props) {
         <Modal.Body>
           <p>
             {error && error.error[0]}
-            &nbsp;Click <Link href={'/hotline/servicerequest/' + error.error[1]} target="_blank">here</Link> to view this Request.
+            &nbsp;Click <Link href={'/hotline/servicerequest/' + error.error[1]} target="_blank" style={{color:"#8d99d4"}}>here</Link> to view this Request.
           </p>
         </Modal.Body>
         <Modal.Footer>

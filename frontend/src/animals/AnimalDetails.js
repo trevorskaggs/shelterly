@@ -53,7 +53,7 @@ function AnimalDetails({id}) {
   const handleOwnerClose = () => setShowOwnerConfirm(false);
 
   const handleSubmit = async () => {
-    await axios.patch('/animals/api/animal/' + id + '/', {status:'REUNITED', room:null})
+    await axios.patch('/animals/api/animal/' + id + '/', {status:'REUNITED', shelter:null, room:null})
     .then(response => {
       setData(response.data);
       handleClose()
@@ -189,7 +189,8 @@ function AnimalDetails({id}) {
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px", textTransform:"capitalize"}}>
               <ListGroup.Item>
                 <div className="row">
-                  <span className="col"><b>Name:</b> {data.name||"Unknown"}</span>
+                  <span className="col-6"><b>ID:</b> #{data.id}</span>
+                  <span className="col-6"><b>Name:</b> {data.name||"Unknown"}</span>
                 </div>
               </ListGroup.Item>
               <ListGroup.Item>

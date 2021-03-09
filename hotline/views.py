@@ -5,6 +5,7 @@ from .serializers import ServiceRequestSerializer, VisitNoteSerializer
 
 from animals.models import Animal
 from hotline.models import ServiceRequest, VisitNote
+from people.models import Person
 from rest_framework import filters, permissions, serializers, viewsets
 
 class ServiceRequestViewSet(viewsets.ModelViewSet):
@@ -19,16 +20,12 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         if serializer.is_valid():
             for service_request in ServiceRequest.objects.filter(latitude=serializer.validated_data['latitude'], longitude=serializer.validated_data['longitude'], status='open'):
+                reporter_id = serializer.validated_data.get('reporter', {'id':None}).id
+                owner_id = serializer.validated_data.get('owners', [{'id':None}])[0].id
+                Person.objects.filter(id__in=[reporter_id, owner_id]).delete()
                 raise serializers.ValidationError(['Multiple open Requests may not exist with the same address.', service_request.id])
             service_request = serializer.save()
             action.send(self.request.user, verb='created service request', target=service_request)
-
-            # Update any animals associated with the SR reporter/owner with the created service request.
-            if service_request.reporter:
-                service_request.reporter.animals.update(request=service_request.id)
-            else:
-                for owner in service_request.owners.all():
-                    owner.animal_set.update(request=service_request.id)
 
     def perform_update(self, serializer):
         if serializer.is_valid():
@@ -40,7 +37,7 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
 
             # Remove animal from SR.
             if self.request.data.get('remove_animal'):
-                Animal.objects.filter(id=self.request.data.get('remove_animal')).update(status='CANCELED')
+                Animal.objects.filter(id=self.request.data.get('remove_animal')).update(status='CANCELED', shelter=None, room=None)
 
             if service_request.status == 'canceled':
                 service_request.animal_set.update(status='CANCELED')

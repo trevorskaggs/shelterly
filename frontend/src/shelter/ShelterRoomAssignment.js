@@ -181,6 +181,8 @@ function ShelterRoomAssignment({id}) {
                               <ReactImageFallback style={{width:"47px", height:"47px", marginRight:"3px", objectFit:"cover", overflow:"hidden", float:"left"}} src={animal.front_image} fallbackImage={[animal.side_image, `${S3_BUCKET}images/image-not-found.png`]} />
                               <span title={animal.name}>{animal.name||"Unknown"}</span>
                               <div>
+                                #{animal.id}&nbsp;
+                                {animal.species === 'horse' && animal.size !== 'unknown' ? animal.size : animal.species}&nbsp;
                                 {animal.owner_names.length === 0 ?
                                 <OverlayTrigger
                                   key={"stray"}
@@ -206,7 +208,6 @@ function ShelterRoomAssignment({id}) {
                                 >
                                   <FontAwesomeIcon icon={faUserAlt} size="sm" />
                                 </OverlayTrigger>}
-                                {animal.size !== 'unknown' ? animal.size : ""} {animal.species}
                               </div>
                             </div>
                           </div>
@@ -249,6 +250,8 @@ function ShelterRoomAssignment({id}) {
                                   <ReactImageFallback style={{width:"47px", height:"47px", marginRight:"3px", objectFit:"cover", overflow:"hidden", float:"left"}} src={animal.front_image} fallbackImage={[animal.side_image, `${S3_BUCKET}images/image-not-found.png`]} />
                                   <span title={animal.name}>{animal.name||"Unknown"}</span>
                                   <div>
+                                    #{animal.id}&nbsp;
+                                    {animal.species === 'horse' && animal.size !== 'unknown' ? animal.size : animal.species}&nbsp;
                                     {animal.owner_names.length === 0 ?
                                     <OverlayTrigger
                                       key={"stray"}
@@ -274,7 +277,6 @@ function ShelterRoomAssignment({id}) {
                                     >
                                       <FontAwesomeIcon icon={faUserAlt} size="sm" />
                                     </OverlayTrigger>}
-                                    {animal.size !== 'unknown' ? animal.size : ""} {animal.species}
                                   </div>
                                 </div>
                               </div>

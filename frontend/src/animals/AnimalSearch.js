@@ -98,7 +98,7 @@ function AnimalSearch() {
       </Form>
       {data.animals.map((animal, index) => (
         <div key={animal.id} className="mt-3" hidden={page !== Math.ceil((index+1)/ITEMS_PER_PAGE)}>
-          <div className="card-header"><h4 style={{marginBottom:"-2px"}}>{animal.name ? titleCase(animal.name) : "Unknown"}
+          <div className="card-header"><h4 style={{marginBottom:"-2px"}}>#{animal.id} {animal.name ? titleCase(animal.name) : "Unknown"}
           <OverlayTrigger
             key={"animal-details"}
             placement="top"
