@@ -21,6 +21,16 @@ const Login = () => {
     next = '/',
   } = queryParams;
 
+  const resetPassword = async () => {
+    await axios.post('/accounts/api/password_reset/', {email:"alexander.g.mountain@gmail.com"})
+    .then(response => {
+      console.log(response)
+    })
+    .catch(error => {
+      console.log(error.response);
+    });
+  }
+
   return (
     <Fragment>
       <Formik
@@ -46,7 +56,7 @@ const Login = () => {
               navigate(next);
             })
             .catch(e => {
-              console.log(e);
+              console.log(e.response);
               removeCookie("token", {path: '/'});
               setAuthToken();
               actions.setStatus('Failed to log in with this username and password combination.')
@@ -79,6 +89,7 @@ const Login = () => {
             />
             <BootstrapForm.Group as={Col}>
               <Button type="submit" size="lg" className="btn-primary" block>Login</Button>
+              <Button size="lg" className="btn-primary" onClick={() => resetPassword()} block>Reset Password</Button>
               {status && <div className="invalid-feedback invalid-form" variant="warning">{status}</div>}
             </BootstrapForm.Group>
           </BootstrapForm>

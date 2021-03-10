@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
+import datetime
 import os
 import json
 
@@ -56,6 +57,7 @@ INSTALLED_APPS = [
     'people',
     'rest_framework',
     'knox',
+    'django_rest_passwordreset',
     'shelter',
     'frontend',
     'ordered_model',
@@ -152,6 +154,10 @@ STATIC_ROOT=os.path.join(BASE_DIR, 'static')
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': ('knox.auth.TokenAuthentication',),
     'USER_SERIALIZER': 'accounts.serializers.UserSerializer',
+}
+
+REST_KNOX = {
+  'TOKEN_TTL': datetime.timedelta(hours=1),
 }
 
 LOGGING = {

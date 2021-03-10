@@ -2,6 +2,7 @@ import React from "react";
 import { Redirect } from "raviger";
 import Home from "./Home";
 import Login from "./accounts/LoginForm";
+import PasswordReset from "./accounts/PasswordReset";
 import AnimalForm from "./animals/AnimalForm";
 import AnimalDetails from "./animals/AnimalDetails";
 import AnimalSearch from "./animals/AnimalSearch";
@@ -33,6 +34,7 @@ import VisitNoteForm from "./dispatch/VisitNoteForm";
 
 export const publicRoutes = {
   "/login": () => <Login />,
+  "/password_reset": () => <PasswordReset />,
 }
 
 const routes = {
