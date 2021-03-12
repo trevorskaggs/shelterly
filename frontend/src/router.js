@@ -34,7 +34,7 @@ import VisitNoteForm from "./dispatch/VisitNoteForm";
 
 export const publicRoutes = {
   "/login": () => <Login />,
-  "/password_reset": () => <PasswordReset />,
+  "/reset_password": () => <PasswordReset />,
 }
 
 const routes = {

@@ -7,9 +7,8 @@ django-rest-knox
 django-ordered-model
 djangorestframework>=3.12
 django-storages
-geocoder==1.38.1
+django_rest_passwordreset
 ipython
 pillow
 psycopg2-binary
 pytz==2018.9
-zappa
