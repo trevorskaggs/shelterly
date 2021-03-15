@@ -21,17 +21,15 @@ function History({action_history}) {
     <hr/>
     <h1 className="mb-3">History<FontAwesomeIcon icon={faChevronCircleRight} hidden={showHistory} onClick={() => setShowHistory(!showHistory)} className="ml-2" style={{verticalAlign:"middle"}} inverse /><FontAwesomeIcon icon={faChevronCircleDown} hidden={!showHistory} onClick={() => setShowHistory(!showHistory)} className="ml-2" style={{verticalAlign:"middle"}} inverse /></h1>
     {action_history.map((action, index) => (
-    <div key={action.id} className="mt-3" hidden={page !== Math.ceil((index+1)/ITEMS_PER_PAGE)}>
-      <Collapse key={action + Math.random()} in={showHistory}>
+      <Collapse key={action + Math.random()} in={showHistory} className="mt-3" hidden={page !== Math.ceil((index+1)/ITEMS_PER_PAGE)}>
         <div>
-          <Card className="border rounded d-flex mb-2" style={{width:"100%"}}>
+          <Card className="border rounded d-flex mb-2">
             <Card.Body>
               {action}
             </Card.Body>
           </Card>
         </div>
       </Collapse>
-    </div>
     ))}
     <Pagination className="custom-page-links" size="lg" hidden={!showHistory} onClick={(e) => {setPage(parseInt(e.target.innerText))}}>
         {[...Array(numPages).keys()].map(x => 
