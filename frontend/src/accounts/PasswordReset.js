@@ -57,14 +57,15 @@ const ResetPassword = () => {
       >
       {({ isSubmitting, status }) => (
         <>
-        <Col xs={{ span:5 }} className="border rounded border-light shadow-sm" style={{margin:"auto"}}>
+        <h1 className='text-center' style={{marginTop:"70px", fontSize:"100px"}}>Shelterly</h1>
+        <Col xs={{ span:5 }} className="border rounded border-light shadow-sm" style={{marginRight:"auto", marginLeft:"auto"}}>
+          <h3 className='mb-0 text-center mt-3'>Reset Password</h3>
           <BootstrapForm as={Form}>
             <TextInput
               name="password"
               id="password"
               type="password"
               label="New Password"
-              // placeholder="Username"
               size="lg"
               formGroupClasses="mt-3 mb-0"
             />
@@ -73,7 +74,6 @@ const ResetPassword = () => {
               name="password2"
               id="password2"
               label="Confirm Password"
-              // placeholder="Password"
               size="lg"
               formGroupClasses="mt-3 mb-4"
             />

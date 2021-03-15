@@ -5,9 +5,10 @@ django-cors-headers
 django-filter
 django-rest-knox
 django-ordered-model
+django-ses
 djangorestframework>=3.12
 django-storages
-django_rest_passwordreset
+django-rest-passwordreset
 ipython
 pillow
 psycopg2-binary

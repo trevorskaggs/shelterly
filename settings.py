@@ -35,9 +35,18 @@ ALLOWED_HOSTS = ['*']
 DEBUG = False
 AUTH_USER_MODEL = 'accounts.ShelterlyUser'
 
+# AWS Config
+AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
+AWS_SES_REGION_NAME = 'us-west-2'
+AWS_SES_REGION_ENDPOINT = 'email.us-west-2.amazonaws.com'
+
+# Use to output emails in console.
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# AWS email backend
+EMAIL_BACKEND = 'django_ses.SESBackend'
 
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',

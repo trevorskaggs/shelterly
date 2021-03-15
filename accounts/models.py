@@ -6,6 +6,7 @@ from django_rest_passwordreset.signals import reset_password_token_created
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.contrib.auth.models import BaseUserManager
+from django.contrib.sites.models import Site
 from django.db.models.signals import post_save
 from django.contrib.auth.models import User
 from django.apps import apps
@@ -34,16 +35,25 @@ def email_new_user(sender, **kwargs):
             "User Registered for Shelterly",
             # message:
             render_to_string(
-                'registration_email.html',
+                'registration_email.txt',
                 {
-                'site': "http://localhost:3000",
+                'site': Site.objects.get_current(),
                 'token': token.key,
                 }
             ).strip(),
             # from:
-            "noreply@shelterly.org",
+            "alex@shelterly.org",
             # to:
-            [user.email]
+            [user.email],
+            fail_silently=False,
+            html_message = render_to_string(
+                'registration_email.html',
+                {
+                # 'site': "http://localhost:3000",
+                'site': Site.objects.get_current(),
+                'token': token.key,
+                }
+            ).strip()
         )
 post_save.connect(email_new_user, sender=ShelterlyUser)
 
@@ -57,14 +67,22 @@ def password_reset_token_created(sender, instance, reset_password_token, *args, 
         "Password Reset for Shelterly",
         # message:
         render_to_string(
-                'password_reset_email.html',
+                'password_reset_email.txt',
                 {
-                'site': "http://localhost:3000",
+                'site': Site.objects.get_current(),
                 'token': reset_password_token.key,
                 }
             ).strip(),
         # from:
-        "noreply@shelterly.org",
+        "alex@shelterly.org",
         # to:
-        [reset_password_token.user.email]
+        [reset_password_token.user.email],
+        fail_silently=False,
+        html_message = render_to_string(
+            'password_reset_email.html',
+            {
+            'site': "http://localhost:3000",
+            'token': token.key,
+            }
+        ).strip()
     )
