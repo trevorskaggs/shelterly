@@ -18,19 +18,6 @@ class LoginView(KnoxLoginView):
         login(request, user)
         return super(LoginView, self).post(request, format=None)
 
-    def get_post_response_data(self, request, token, instance):
-        data = {
-            'expiry': self.format_expiry_datetime(instance.expiry),
-            'token': token
-        }
-
-        if UserSerializer is not None:
-            data["user"] = UserSerializer(
-                request.user,
-                context=self.get_context()
-            ).data
-        return data
-
 
 # Provides user auth view.
 class UserAuth(generics.RetrieveAPIView):

@@ -167,6 +167,7 @@ REST_FRAMEWORK = {
 
 REST_KNOX = {
   'TOKEN_TTL': datetime.timedelta(hours=1),
+  'USER_SERIALIZER': 'accounts.serializers.UserSerializer'
 }
 
 LOGGING = {
