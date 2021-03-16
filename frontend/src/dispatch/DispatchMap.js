@@ -212,8 +212,8 @@ function Deploy() {
           // Provide a default "TeamN" team name that hasn't already be used.
           let i = 1;
           do {
-            if (!team_names.includes("Team" + String(i))){
-              team_name = "Team" + String(i);
+            if (!team_names.includes("Team " + String(i))){
+              team_name = "Team " + String(i);
             }
             i++;
           }
