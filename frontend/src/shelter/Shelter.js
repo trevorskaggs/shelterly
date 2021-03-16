@@ -30,7 +30,7 @@ function Shelter() {
           for (const shelter of response.data) {
             bounds.push([shelter.latitude, shelter.longitude]);
           }
-          setData({shelters: response.data, isFetching: false, bounds:bounds});
+          setData({shelters: response.data, isFetching: false, bounds:bounds.length > 0 ? bounds : L.latLngBounds([[0,0]])});
         }
       })
       .catch(error => {

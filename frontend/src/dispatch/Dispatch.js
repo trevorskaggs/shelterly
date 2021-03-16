@@ -48,7 +48,7 @@ function Dispatch() {
             map_dict[dispatch_assignment.id] = {color:random_colors[index], service_requests:sr_dict}
           });
           setMapState(map_dict);
-          setData({dispatch_assignments: response.data, isFetching: false, bounds:L.latLngBounds(bounds)});
+          setData({dispatch_assignments: response.data, isFetching: false, bounds:bounds.length > 0 ? bounds : L.latLngBounds([[0,0]])});
         }
       })
       .catch(error => {
