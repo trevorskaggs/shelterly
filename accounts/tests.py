@@ -6,7 +6,7 @@ class TestAuthentication(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.user = ShelterlyUser.objects.create_user(username='test_user', email="test@test.com", password="test", is_active=True)
+        cls.user = ShelterlyUser.objects.create_user(username='test_user', email="test@test.com", cell_phone="5555555", password="test", is_active=True)
 
     def test_login(self):
         response = self.client.post('/login/', {'username':'test_user', 'password':'test'})
@@ -16,5 +16,4 @@ class TestAuthentication(APITestCase):
 
     # def test_logout(self):
     #     response = self.client.post('/login/', {'username':'test_user', 'password':'test'})
-    #     import ipdb; ipdb.set_trace()
     #     response = self.client.post('/logout/', {}, HTTP_AUTHORIZATION=f"Token: {response.json().get('token')}")

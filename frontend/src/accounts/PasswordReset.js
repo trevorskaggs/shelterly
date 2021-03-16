@@ -1,4 +1,4 @@
-import React, { Fragment, useContext } from "react";
+import React from "react";
 import axios from "axios";
 import { navigate, useQueryParams } from "raviger";
 import { Form, Formik } from 'formik';
@@ -6,10 +6,7 @@ import Button from 'react-bootstrap/Button';
 import Col from 'react-bootstrap/Col';
 import { Form as BootstrapForm } from 'react-bootstrap';
 import * as Yup from "yup";
-import { useCookies } from 'react-cookie';
 import { TextInput } from '../components/Form.js';
-import { AuthContext } from "./AccountsReducer";
-import { loadUser, setAuthToken } from "./AccountsUtils";
 
 const ResetPassword = () => {
 
@@ -19,34 +16,28 @@ const ResetPassword = () => {
     token = '',
   } = queryParams;
 
-  // const resetPassword = async () => {
-  //   await axios.post('/accounts/api/password_reset/', {email:"alexander.g.mountain@gmail.com"})
-  //   .then(response => {
-  //     console.log(response)
-  //   })
-  //   .catch(error => {
-  //     console.log(error.response);
-  //   });
-  // }
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/
 
   return (
-    <Fragment>
+    <>
       <Formik
         initialValues={{ token: token, password: "", password2: "" }}
         validationSchema={Yup.object({
           password: Yup.string()
-            .max(50, 'Must be 20 characters or less')
-            .required('No password provided.'),
+            .min(8, 'Password must be at least 8 characters.')
+            .required('No password provided.')
+            .matches(
+              passwordRegex, "Password must contain one uppercase, one lowercase, one number, and one special case character."
+            ),
           password2: Yup.string()
-            .max(50, 'Must be 20 characters or less')
-            .required('No password provided.'),
+            .oneOf([Yup.ref('password'), null], 'Passwords must match.'),
         })}
         onSubmit={(values, actions ) => {
           console.log(values)
           setTimeout(() => {
             axios.post('/accounts/api/password_reset/confirm/', values)
             .then(response => {
-              console.log(response)
+              navigate('/login');
             })
             .catch(e => {
               console.log(e.response);
@@ -55,7 +46,7 @@ const ResetPassword = () => {
           }, 500);
         }}
       >
-      {({ isSubmitting, status }) => (
+      {({ isSubmitting }) => (
         <>
         <h1 className='text-center' style={{marginTop:"70px", fontSize:"100px"}}>Shelterly</h1>
         <Col xs={{ span:5 }} className="border rounded border-light shadow-sm" style={{marginRight:"auto", marginLeft:"auto"}}>
@@ -79,14 +70,14 @@ const ResetPassword = () => {
             />
             <BootstrapForm.Group as={Col}>
               <Button type="submit" size="lg" className="btn-primary" block>Reset Password</Button>
-              {status && <div className="invalid-feedback invalid-form" variant="warning">{status}</div>}
+              <Button size="lg" className="btn-primary" onClick={() => navigate('/login')} block>Return to Login</Button>
             </BootstrapForm.Group>
           </BootstrapForm>
         </Col>
         </>
       )}
       </Formik>
-    </Fragment>
+    </>
   )
 }
 

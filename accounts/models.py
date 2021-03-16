@@ -55,6 +55,7 @@ def email_new_user(sender, **kwargs):
                 }
             ).strip()
         )
+
 post_save.connect(email_new_user, sender=ShelterlyUser)
 
 # Send email to user when password reset is requested.
@@ -82,7 +83,7 @@ def password_reset_token_created(sender, instance, reset_password_token, *args, 
             'password_reset_email.html',
             {
             'site': "http://localhost:3000",
-            'token': token.key,
+            'token': reset_password_token.key,
             }
         ).strip()
     )
