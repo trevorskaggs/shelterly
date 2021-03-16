@@ -5,10 +5,11 @@ import Moment from 'react-moment';
 import { Button, Card, ListGroup, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBan, faCalendarDay, faCar, faCircle, faExclamationCircle, faQuestionCircle, faHome, faHelicopter, faHeart, faSkullCrossbones, faClipboardCheck, faClipboardList, faComment, faEdit, faHouseDamage, faKey, faMapMarkedAlt, faMinusSquare, faPlusSquare, faTimes, faTrailer, faUserAlt, faUserAltSlash
+  faBan, faCar, faCircle, faExclamationCircle, faQuestionCircle, faHome, faHelicopter, faHeart, faSkullCrossbones,
+  faClipboardCheck, faClipboardList, faComment, faEdit, faHouseDamage,
+  faKey, faMapMarkedAlt, faMinusSquare, faPlusSquare, faTimes, faTrailer, faUsers
 } from '@fortawesome/free-solid-svg-icons';
-import { faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
-import ReactImageFallback from 'react-image-fallback';
+import { faCalendarEdit, faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
 import Header from '../components/Header';
 import History from '../components/History';
 import noImageFound from '../static/images/image-not-found.png';
@@ -57,6 +58,7 @@ function ServiceRequestDetails({id}) {
     turn_around: false,
     followup_date: null,
     latest_evac: {},
+    evacuation_assignments: [],
     status:'',
     action_history: [],
     visit_notes: [],
@@ -199,7 +201,7 @@ function ServiceRequestDetails({id}) {
                 <ListGroup.Item style={{marginTop:"-13px"}}><b>Address: </b>{data.full_address}</ListGroup.Item>
                 <ListGroup.Item>
                   <b>Followup Date: </b>
-                  <FontAwesomeIcon icon={faCalendarDay} className="ml-1 mr-1" style={{cursor:'pointer'}} onClick={() => openCalendar()} />
+                  <FontAwesomeIcon icon={faCalendarEdit} className="ml-1 mr-1" style={{cursor:'pointer'}} onClick={() => openCalendar()} />
                   {data.followup_date ?
                   <span>
                     <Moment format="ll">{data.followup_date}</Moment>
@@ -401,9 +403,21 @@ function ServiceRequestDetails({id}) {
               </Card.Title>
               <hr/>
               <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
-                {data.latest_evac && !data.latest_evac.end_time ?
-                  <ListGroup.Item>
+                {data.evacuation_assignments.filter(da => !da.end_time).map(latest_dispatch => (
+                  <ListGroup.Item key={latest_dispatch.id}>
                     <b>Active Dispatch Assignment:</b>
+                    &nbsp;{latest_dispatch.team__name}
+                    <OverlayTrigger
+                      key={"team-names"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-team-names`}>
+                          {latest_dispatch.team_member_names}
+                        </Tooltip>
+                      }
+                    >
+                      <FontAwesomeIcon icon={faUsers} className="ml-1 fa-move-down" />
+                    </OverlayTrigger>
                     <OverlayTrigger
                       key={"dispatch-summary"}
                       placement="top"
@@ -413,7 +427,7 @@ function ServiceRequestDetails({id}) {
                         </Tooltip>
                       }
                     >
-                      <Link href={"/dispatch/summary/" + data.latest_evac.id}><FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1" inverse /></Link>
+                      <Link href={"/dispatch/summary/" + latest_dispatch.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
                     </OverlayTrigger>
                     <OverlayTrigger
                       key={"close-dispatch-assignment"}
@@ -424,14 +438,25 @@ function ServiceRequestDetails({id}) {
                         </Tooltip>
                       }
                     >
-                      <Link href={"/dispatch/resolution/" + data.latest_evac.id}><FontAwesomeIcon icon={faClipboardCheck} className="ml-1" inverse /></Link>
+                      <Link href={"/dispatch/resolution/" + latest_dispatch.id}><FontAwesomeIcon icon={faClipboardCheck} className="ml-1" inverse /></Link>
                     </OverlayTrigger>
-                    <div><b>Date Opened: </b><Moment format="LL">{data.latest_evac.start_time}</Moment></div>
+                    <div><b>Date Opened: </b><Moment format="LL">{latest_dispatch.start_time}</Moment></div>
                   </ListGroup.Item>
-                : ""}
+                ))}
                 {data.visit_notes.map((visit_note, index) => (
                   <ListGroup.Item key={visit_note.id}>
-                    <b>Dispatch Assignment:</b> #{index + 1}
+                    <b>Dispatch Assignment:</b> {visit_note.team_name}
+                    <OverlayTrigger
+                      key={"team-names-"+id}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-team-names` + id}>
+                          {visit_note.team_member_names}
+                        </Tooltip>
+                      }
+                    >
+                      <FontAwesomeIcon icon={faUsers} className="ml-1 fa-move-down" />
+                    </OverlayTrigger>
                     <OverlayTrigger
                       key={"dispatch-summary"}
                       placement="top"
