@@ -26,9 +26,7 @@ const ResetPassword = () => {
           password: Yup.string()
             .min(8, 'Password must be at least 8 characters.')
             .required('No password provided.')
-            .matches(
-              passwordRegex, "Password must contain one uppercase, one lowercase, one number, and one special case character."
-            ),
+            .matches(passwordRegex, "Password must contain one uppercase, one lowercase, one number, and one special case character."),
           password2: Yup.string()
             .oneOf([Yup.ref('password'), null], 'Passwords must match.'),
         })}

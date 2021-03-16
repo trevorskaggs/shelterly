@@ -29,9 +29,8 @@ const Login = () => {
         initialValues={{ username: "", password: "" }}
         validationSchema={Yup.object({
           username: Yup.string()
-            .required('A Username is required.'),
+            .required('An email address is required.'),
           password: Yup.string()
-            .max(50, 'Must be 20 characters or less')
             .required('No password provided.'),
         })}
         onSubmit={(values, actions ) => {
@@ -67,7 +66,7 @@ const Login = () => {
             <TextInput
               name="username"
               id="username"
-              placeholder="Username"
+              placeholder="Email"
               size="lg"
               formGroupClasses="mb-0"
             />

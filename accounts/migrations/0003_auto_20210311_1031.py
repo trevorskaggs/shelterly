@@ -13,6 +13,11 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='shelterlyuser',
             name='email',
-            field=models.EmailField(max_length=254),
+            field=models.EmailField(max_length=254, unique=True),
+        ),
+        migrations.AlterField(
+            model_name='shelterlyuser',
+            name='username',
+            field=models.CharField(blank=True, max_length=50, null=True),
         ),
     ]
