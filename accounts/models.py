@@ -48,7 +48,7 @@ def email_new_user(sender, **kwargs):
                 }
             ).strip(),
             # from:
-            "alex@shelterly.org",
+            "DoNotReply@shelterly.org",
             # to:
             [user.email],
             fail_silently=False,
@@ -79,14 +79,14 @@ def password_reset_token_created(sender, instance, reset_password_token, *args, 
                 }
             ).strip(),
         # from:
-        "alex@shelterly.org",
+        "DoNotReply@shelterly.org",
         # to:
         [reset_password_token.user.email],
         fail_silently=False,
         html_message = render_to_string(
             'password_reset_email.html',
             {
-            'site': "http://localhost:3000",
+            'site': Site.objects.get_current(),
             'token': reset_password_token.key,
             }
         ).strip()
