@@ -38,6 +38,8 @@ hr { display: block; height: 1px;
 
 .search-leaflet-container { width: auto; height: 200px; min-height:200px;}
 
+.da-search-leaflet-container { width: auto; height: 204px; min-height:204px;}
+
 .leaflet-top, .leaflet-bottom {
   z-index: 400 !important;
 }

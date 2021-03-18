@@ -129,7 +129,6 @@ function Deploy() {
       for (var select_status in mapState[id].status_matches) {
         matches = {...totalSelectedState[select_status]};
         for (var select_key in mapState[id].status_matches[select_status]){
-          // total = 0;
           if (!totalSelectedState[select_status][select_key]) {
             total = mapState[id].status_matches[select_status][select_key];
           } else {
@@ -199,6 +198,9 @@ function Deploy() {
         });
         // Then fetch all recent Teams.
         axios.get('/evac/api/dispatchteam/', {
+          params: {
+            map: true
+          },
           cancelToken: source.token,
         })
         .then(response => {
@@ -594,7 +596,7 @@ function Deploy() {
               : ""}
               </span>
             ))}
-            <div className="card-header mt-1 mb-1 rounded"  style={{marginLeft:"-10px", marginRight:"-10px"}} hidden={data.service_requests.length > 0}>
+            <div className="card-header mt-1 mb-1 rounded" style={{marginLeft:"-10px", marginRight:"-10px"}} hidden={data.service_requests.length > 0}>
               No open Service Requests found.
             </div>
           </Col>

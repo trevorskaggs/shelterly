@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
-import { Button, ButtonGroup, Card, CardGroup, Col, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Row, Tooltip } from "react-bootstrap";
+import { Button, ButtonGroup, Card, CardGroup, Col, Collapse, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Row, Tooltip } from "react-bootstrap";
 import { Link, useQueryParams } from "raviger";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faClipboardCheck, faClipboardList, faCircle, faExclamationCircle, faQuestionCircle, faHome, faHelicopter, faHeart, faSkullCrossbones
+  faChevronCircleDown, faChevronCircleRight, faClipboardCheck, faClipboardList, faCircle, faExclamationCircle, faQuestionCircle, faHome, faHelicopter, faHeart, faSkullCrossbones
 } from '@fortawesome/free-solid-svg-icons';
 import { faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
+import L from "leaflet";
+import Map, { prettyText, reportedMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
 import Moment from "react-moment";
 import Header from '../components/Header';
 
@@ -23,6 +25,15 @@ function DispatchAssignmentSearch() {
   const [searchTerm, setSearchTerm] = useState(search);
   const [tempSearchTerm, setTempSearchTerm] = useState(search);
   const [statusOptions, setStatusOptions] = useState(status);
+  const [mapState, setMapState] = useState({});
+  const [showSRs, setShowSRs] = useState({});
+
+  // Takes in dispatch ID,
+  const updateShowSRs = (service_request_id) => {
+    let tempSRs = {...showSRs};
+    tempSRs[service_request_id] = !showSRs[service_request_id];
+    setShowSRs(tempSRs);
+  }
 
   // Update searchTerm when field input changes.
   const handleChange = event => {
@@ -35,12 +46,29 @@ function DispatchAssignmentSearch() {
     setSearchTerm(tempSearchTerm);
   }
 
+  // Counts the number of species matches for a service request.
+  const countMatches = (service_request) => {
+    var matches = {};
+
+    service_request.animals.forEach((animal) => {
+      if (['REPORTED', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE'].indexOf(animal.status) > -1) {
+        if (!matches[[animal.species]]) {
+          matches[[animal.species]] = 1;
+        }
+        else {
+          matches[[animal.species]] += 1;
+        }
+      }
+    });
+    return matches
+  }
+
   // Hook for initializing data.
   useEffect(() => {
     let unmounted = false;
     let source = axios.CancelToken.source();
 
-    const fetchServiceRequests = async () => {
+    const fetchDispatchAssignments = async () => {
       setData({evacuation_assignments: [], isFetching: true});
       // Fetch ServiceRequest data.
       await axios.get('/evac/api/evacassignment/?search=' + searchTerm + '&status=' + statusOptions, {
@@ -49,6 +77,14 @@ function DispatchAssignmentSearch() {
       .then(response => {
         if (!unmounted) {
           setData({evacuation_assignments: response.data, isFetching: false});
+          let map_dict = {};
+          for (const dispatch_assignment of response.data) {
+            for (const service_request of dispatch_assignment.service_request_objects) {
+              const matches = countMatches(service_request);
+              map_dict[service_request.id] = {matches:matches};
+            }
+          }
+          setMapState(map_dict);
         }
       })
       .catch(error => {
@@ -58,7 +94,7 @@ function DispatchAssignmentSearch() {
         }
       });
     };
-    fetchServiceRequests();
+    fetchDispatchAssignments();
     // Cleanup.
     return () => {
       unmounted = true;
@@ -121,107 +157,80 @@ function DispatchAssignmentSearch() {
                   <span key={member.id}>{i > 0 && ", "}{member.first_name} {member.last_name}</span>))}
             </h4></div>
             <CardGroup>
-              <Card key={evacuation_assignment.id}>
+              <Card style={{maxWidth:"206px", height:"206px"}}>
+                <Card.Body className="p-0 m-0">
+                  <Map className="d-block da-search-leaflet-container" bounds={L.latLngBounds([[0,0]])}></Map>
+                </Card.Body>
+              </Card>
+              <Card style={{maxHeight:"206px"}}>
                 <Card.Body>
-                  <Row>
-                    <Col>
-                      <Card.Title>Service Requests</Card.Title>
-                    </Col>
-                    <Col>
-                      <Card.Title>Animals</Card.Title>
-                    </Col>
-                  </Row>
-                  <ListGroup>
-                    {evacuation_assignment.service_request_objects.map(service_request => (
-                      <ListGroup.Item key={service_request.id}>
-                        <Row>
-                          <Col>
-                            <b>Address: </b>{service_request.full_address}
-                            <Link
-                              href={"/hotline/servicerequest/" + service_request.id} target="_blank"> <FontAwesomeIcon
-                              icon={faClipboardList} inverse/>
-                            </Link>
-                            <div>
-                              <b>Owners: </b>
-                              {service_request.owners.length < 1 ? "No Owners" : <span>
-                              {service_request.owner_objects.map((owner, i) => (
-                              <span key={owner.id}>
-                                {i > 0 && " | "}{owner.first_name} {owner.last_name}
-                                <Link
-                                  href={"/people/owner/" + owner.id} target="_blank"> <FontAwesomeIcon
-                                  icon={faClipboardList} inverse/>
-                                </Link>
-                              </span>
-                              ))}</span>}
-                            </div>
-                            {evacuation_assignment.end_time ?
-                            <div>
-                              <b>Visit Note: </b>{(service_request.visit_notes.filter(note => String(note.evac_assignment) === String(evacuation_assignment.id)).length && service_request.visit_notes.filter(note => String(note.evac_assignment) === String(evacuation_assignment.id))[0].notes) || "No information available."}
-                            </div> :
-                            <div>
-                              <b>Previous Visit: </b>{(service_request.visit_notes.sort((a,b) => new Date(b.date_completed).getTime() - new Date(a.date_completed).getTime()).length && service_request.visit_notes.sort((a,b) => new Date(b.date_completed).getTime() - new Date(a.date_completed).getTime())[0].notes) || "No information available."}
-                            </div>
-                            }
-                          </Col>
-                          <Col>
-                            {['cats', 'dogs', 'horses', 'other'].map(species => (
-                              <div key={species}>
-                                {service_request.animals.filter(animal => animal.evacuation_assignments.includes(evacuation_assignment.id)).filter(animal => species.includes(animal.species)).length > 0 ?
-                                <span><b style={{textTransform:"capitalize"}}>{species}: </b>
-                                {service_request.animals.filter(animal => animal.evacuation_assignments.includes(evacuation_assignment.id)).filter(animal => species.includes(animal.species)).map((animal, i) => (
-                                <span key={animal.id}>{i > 0 && ", "}{animal.name || "Unknown"}
-                                  <Link href={"/animals/animal/" + animal.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1 mr-1" inverse/></Link>
-                                  (
-                                  {animal.status === "SHELTERED IN PLACE" ?
-                                      <OverlayTrigger key={"sip"} placement="top"
-                                                      overlay={<Tooltip id={`tooltip-sip`}>SHELTERED IN PLACE</Tooltip>}>
-                                          <span className="fa-layers fa-fw">
-                                            <FontAwesomeIcon icon={faCircle} transform={'grow-1'} />
-                                            <FontAwesomeIcon icon={faHomeAlt} style={{color:"#444"}} transform={'shrink-3'} size="sm" inverse />
-                                          </span>
-                                      </OverlayTrigger> : ""}
-                                  {animal.status === "REPORTED" ?
-                                      <OverlayTrigger key={"reported"} placement="top"
-                                                      overlay={<Tooltip id={`tooltip-reported`}>REPORTED</Tooltip>}>
-                                          <FontAwesomeIcon icon={faExclamationCircle} inverse/>
-                                      </OverlayTrigger> : ""}
-                                  {animal.status === "UNABLE TO LOCATE" ?
-                                      <OverlayTrigger key={"unable-to-locate"} placement="top"
-                                                      overlay={<Tooltip id={`tooltip-unable-to-locate`}>UNABLE TO LOCATE</Tooltip>}>
-                                          <FontAwesomeIcon icon={faQuestionCircle} inverse/>
-                                      </OverlayTrigger> : ""}
-                                  {animal.status === "EVACUATED" ?
-                                      <OverlayTrigger key={"evacuated"} placement="top"
-                                                      overlay={<Tooltip id={`tooltip-evacuated`}>EVACUATED</Tooltip>}>
-                                          <FontAwesomeIcon icon={faHelicopter} inverse/>
-                                      </OverlayTrigger> : ""}
-                                  {animal.status === "REUNITED" ?
-                                      <OverlayTrigger key={"reunited"} placement="top"
-                                                      overlay={<Tooltip id={`tooltip-reunited`}>REUNITED</Tooltip>}>
-                                          <FontAwesomeIcon icon={faHeart} inverse/>
-                                      </OverlayTrigger> : ""}
-                                  {animal.status === "SHELTERED" ?
-                                      <OverlayTrigger key={"sheltered"} placement="top"
-                                                      overlay={<Tooltip id={`tooltip-sheltered`}>SHELTERED</Tooltip>}>
-                                          <FontAwesomeIcon icon={faHome} inverse/>
-                                      </OverlayTrigger> : ""}
-                                  {animal.status === "DECEASED" ?
-                                      <OverlayTrigger key={"deceased"} placement="top"
-                                                      overlay={<Tooltip id={`tooltip-deceased`}>DECEASED</Tooltip>}>
-                                          <FontAwesomeIcon icon={faSkullCrossbones} inverse/>
-                                      </OverlayTrigger> : ""}
-                                  )
-                                </span>
-                              ))}
-                              </span>
-                              : ""}
-                              </div>
-                            ))}
-                          </Col>
-                        </Row>
-                      </ListGroup.Item>
-                    ))}
-                  </ListGroup>
+                <Card.Title style={{marginTop:"-9px", marginBottom:"8px", marginLeft:"-9px"}}>Service Requests</Card.Title>
+                {evacuation_assignment.service_request_objects.map(service_request => (
+                  <div key={service_request.id} className="mt-1 mb-1" style={{marginLeft:"-10px", marginRight:"-10px"}}>
+                    <div className="card-header rounded">
+                    <span style={{marginLeft:"-12px"}}>
+                    {service_request.reported_animals > 0 ?
+                      <OverlayTrigger
+                        key={"reported"}
+                        placement="top"
+                        overlay={
+                          <Tooltip id={`tooltip-reported`}>
+                            {service_request.reported_animals} animal{service_request.reported_animals > 1 ? "s are":" is"} reported
+                          </Tooltip>
+                        }
+                      >
+                        <FontAwesomeIcon icon={faExclamationCircle} className="mr-1"/>
+                      </OverlayTrigger>
+                      : ""}
+                      {service_request.sheltered_in_place > 0 ?
+                      <OverlayTrigger
+                        key={"sip"}
+                        placement="top"
+                        overlay={
+                          <Tooltip id={`tooltip-sip`}>
+                            {service_request.sheltered_in_place} animal{service_request.sheltered_in_place > 1 ? "s are":" is"} sheltered in place
+                          </Tooltip>
+                        }
+                      >
+                        <span className="fa-layers mr-1">
+                          <FontAwesomeIcon icon={faCircle} transform={'grow-1'} />
+                          <FontAwesomeIcon icon={faHomeAlt} style={{color:"#444"}} transform={'shrink-3'} size="sm" inverse />
+                        </span>
+                      </OverlayTrigger>
+                      : ""}
+                      {service_request.unable_to_locate > 0 ?
+                      <OverlayTrigger
+                        key={"utl"}
+                        placement="top"
+                        overlay={
+                          <Tooltip id={`tooltip-utl`}>
+                            {service_request.unable_to_locate} animal{service_request.unable_to_locate > 1 ? "s are":" is"} unable to be located
+                          </Tooltip>
+                        }
+                      >
+                        <FontAwesomeIcon icon={faQuestionCircle} className="mr-1"/>
+                      </OverlayTrigger>
+                      : ""}
+                      </span>
+                      <span>{service_request.full_address} |&nbsp;</span>
+                      {mapState[service_request.id] ?
+                      <span>
+                        {Object.keys(mapState[service_request.id].matches).map((key,i) => (
+                          <span key={key} style={{textTransform:"capitalize"}}>
+                            {i > 0 && ", "}{prettyText('', key.split(',')[0], mapState[service_request.id].matches[key])}
+                          </span>
+                        ))}
+                      </span>
+                      :""}
+                      <FontAwesomeIcon icon={faChevronCircleRight} hidden={showSRs[service_request.id]} onClick={() => updateShowSRs(service_request.id)} className="ml-1 fa-move-up" style={{verticalAlign:"middle"}} inverse /><FontAwesomeIcon icon={faChevronCircleDown} hidden={!showSRs[service_request.id]} onClick={() => updateShowSRs(service_request.id)} className="ml-1 fa-move-up" style={{verticalAlign:"middle"}} inverse />
+                      <Collapse in={showSRs[service_request.id]}>
+                        <div>
+                          Test
+                        </div>
+                      </Collapse>
+                    </div>
+                  </div>
+                ))}
                 </Card.Body>
               </Card>
             </CardGroup>
