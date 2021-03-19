@@ -145,7 +145,7 @@ function ServiceRequestSearch() {
             <Card style={{marginBottom:"6px"}}>
               <Card.Body>
                 <Card.Title style={{marginTop:"-9px", marginBottom:"8px"}}>Information</Card.Title>
-                <Scrollbar autoHeight autoHide autoHeightMax={144} renderThumbVertical={props => <div {...props} style={{...props.style, backgroundColor: 'rgba(226, 226, 226, 0.2)'}} />}>
+                <Scrollbar style={{height:"144px"}}>
                   <ListGroup>
                     <ListGroup.Item>
                     {service_request.latest_evac ?
@@ -202,7 +202,7 @@ function ServiceRequestSearch() {
                     </ListGroup>
                   </Card.Title>
                   <ListGroup style={{height:"144px", overflowY:"auto", marginTop:"-12px"}}>
-                    <Scrollbar autoHeight autoHide autoHeightMax={144} renderThumbVertical={props => <div {...props} style={{...props.style, backgroundColor: 'rgba(226, 226, 226, 0.2)'}} />}>
+                    <Scrollbar style={{height:"144px"}}>
                       {service_request.animals.filter(animal => animal.species === searchState[service_request.id].selectedSpecies).map((animal, i) => (
                         <ListGroup.Item key={animal.id}>
                           <b>#{animal.id}:</b>&nbsp;&nbsp;{animal.name || "Unknown"} - {animal.status}
