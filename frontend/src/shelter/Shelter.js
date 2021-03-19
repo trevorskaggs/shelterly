@@ -61,7 +61,7 @@ function Shelter() {
           <Link href="/animals/search">
             <ListGroup.Item className="rounded" action>SEARCH ANIMALS</ListGroup.Item>
           </Link>
-          <Link href="/intake/owner/search">
+          <Link href="/people/owner/search">
           <ListGroup.Item className="rounded" action>SEARCH OWNERS</ListGroup.Item>
         </Link>
         </ListGroup>
