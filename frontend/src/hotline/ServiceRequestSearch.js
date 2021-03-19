@@ -21,7 +21,6 @@ import {
 import Moment from 'react-moment';
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
-
 import { ITEMS_PER_PAGE } from '../constants';
 
 function ServiceRequestSearch() {
@@ -218,15 +217,14 @@ function ServiceRequestSearch() {
         </div>
       ))}
       <p>{data.isFetching ? 'Fetching service requests...' : <span>{data.service_requests && data.service_requests.length ? '' : 'No Service Requests found.'}</span>}</p>
-    <Pagination className="custom-page-links" size="lg" onClick={(e) => {setPage(parseInt(e.target.innerText))}}>
-      {[...Array(numPages).keys()].map(x =>
-      <Pagination.Item key={x+1} active={x+1 === page}>
-        {x+1}
-      </Pagination.Item>)
-      }
-    </Pagination>
+      <Pagination className="custom-page-links" size="lg" onClick={(e) => {setPage(parseInt(e.target.innerText))}}>
+        {[...Array(numPages).keys()].map(x =>
+        <Pagination.Item key={x+1} active={x+1 === page}>
+          {x+1}
+        </Pagination.Item>)
+        }
+      </Pagination>
     </div>
-    
   )
 }
 
