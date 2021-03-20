@@ -8,6 +8,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
 import L from "leaflet";
+import { Marker, Tooltip as MapTooltip } from "react-leaflet";
 import Map, { prettyText, reportedMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
 import Moment from "react-moment";
 import Header from '../components/Header';
@@ -27,7 +28,8 @@ function DispatchAssignmentSearch() {
   const [searchTerm, setSearchTerm] = useState(search);
   const [tempSearchTerm, setTempSearchTerm] = useState(search);
   const [statusOptions, setStatusOptions] = useState(status);
-  const [mapState, setMapState] = useState({});
+  const [matches, setMatches] = useState({});
+  const [bounds, setBounds] = useState({});
   const [page, setPage] = useState(1);
   const [numPages, setNumPages] = useState(1);
 
@@ -44,16 +46,16 @@ function DispatchAssignmentSearch() {
 
   // Counts the number of species matches for a service request.
   const countMatches = (service_request) => {
-    let matches = {};
+    let species_matches = {};
     let status_matches = {'REPORTED':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}};
 
     service_request.animals.forEach((animal) => {
       if (['REPORTED', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE'].indexOf(animal.status) > -1) {
-        if (!matches[[animal.species]]) {
-          matches[[animal.species]] = 1;
+        if (!species_matches[[animal.species]]) {
+          species_matches[[animal.species]] = 1;
         }
         else {
-          matches[[animal.species]] += 1;
+          species_matches[[animal.species]] += 1;
         }
         if (!status_matches[animal.status][[animal.species]]) {
           status_matches[animal.status][[animal.species]] = 1;
@@ -63,7 +65,7 @@ function DispatchAssignmentSearch() {
         }
       }
     });
-    return [matches, status_matches]
+    return [species_matches, status_matches]
   }
 
   // Hook for initializing data.
@@ -82,13 +84,18 @@ function DispatchAssignmentSearch() {
           setNumPages(Math.ceil(response.data.length / ITEMS_PER_PAGE));
           setData({evacuation_assignments: response.data, isFetching: false});
           let map_dict = {};
+          let bounds_dict = {};
           for (const dispatch_assignment of response.data) {
+            let sr_bounds = [];
             for (const service_request of dispatch_assignment.service_request_objects) {
-              const [matches, status_matches] = countMatches(service_request);
-              map_dict[service_request.id] = {matches:matches, status_matches:status_matches};
+              const [species_matches, status_matches] = countMatches(service_request);
+              map_dict[service_request.id] = {species_matches:species_matches, status_matches:status_matches};
+              sr_bounds.push([service_request.latitude, service_request.longitude]);
             }
+            bounds_dict[dispatch_assignment.id] = sr_bounds.length > 0 ? L.latLngBounds(sr_bounds).pad(.1) : L.latLngBounds([[0,0]]);;
           }
-          setMapState(map_dict);
+          setMatches(map_dict);
+          setBounds(bounds_dict);
         }
       })
       .catch(error => {
@@ -120,11 +127,11 @@ function DispatchAssignmentSearch() {
               onChange={handleChange}
           />
           <InputGroup.Append>
-            <Button variant="outline-light" type="submit">Search</Button>
+            <Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0"}}>Search</Button>
           </InputGroup.Append>
           <ButtonGroup className="ml-3">
-            <Button variant={statusOptions === "open" ? "primary" : "secondary"} onClick={statusOptions !== "open" ? () => setStatusOptions("open") : () => setStatusOptions("")}>Open</Button>
-            <Button variant={statusOptions === "closed" ? "primary" : "secondary"} onClick={statusOptions !== "closed" ? () => setStatusOptions("closed") : () => setStatusOptions("")}>Closed</Button>
+            <Button variant={statusOptions === "open" ? "primary" : "secondary"} onClick={statusOptions !== "open" ? () => {setPage(1);setStatusOptions("open")} : () => {setPage(1);setStatusOptions("")}}>Open</Button>
+            <Button variant={statusOptions === "closed" ? "primary" : "secondary"} onClick={statusOptions !== "closed" ? () => {setPage(1);setStatusOptions("closed")} : () => {setPage(1);setStatusOptions("")}}>Closed</Button>
           </ButtonGroup>
         </InputGroup>
       </Form>
@@ -164,116 +171,140 @@ function DispatchAssignmentSearch() {
           <CardGroup style={{overflowX:"hidden"}}>
             <Card style={{maxWidth:"206px", height:"206px"}}>
               <Card.Body className="p-0 m-0">
-                <Map className="d-block da-search-leaflet-container" bounds={L.latLngBounds([[0,0]])}></Map>
+                <Map className="d-block da-search-leaflet-container" bounds={bounds[evacuation_assignment.id]} zoomControl={false} legend_position="topleft">
+                  {evacuation_assignment.service_request_objects.map(service_request => (
+                  <Marker
+                    key={service_request.id}
+                    position={[service_request.latitude, service_request.longitude]}
+                    icon={service_request.sheltered_in_place > 0 ? SIPMarkerIcon : service_request.unable_to_locate > 0 ? UTLMarkerIcon : reportedMarkerIcon}
+                  >
+                    <MapTooltip autoPan={false}>
+                      <span>
+                        {matches[service_request.id] ?
+                          <span>
+                            {Object.keys(matches[service_request.id].species_matches).map((key,i) => (
+                              <span key={key} style={{textTransform:"capitalize"}}>
+                                {i > 0 && ", "}{prettyText('', key.split(',')[0], matches[service_request.id].species_matches[key])}
+                              </span>
+                            ))}
+                          </span>
+                        :""}
+                        <br />
+                        {service_request.full_address.split(',')[0]}
+                      </span>
+                    </MapTooltip>
+                  </Marker>
+                ))}
+                </Map>
               </Card.Body>
             </Card>
             <Card style={{maxHeight:"206px"}}>
-            <Scrollbar style={{height:"204px"}} renderView={props => <div {...props} style={{...props.style, overflow:"auto"}}/>} renderThumbHorizontal={props => <div {...props} style={{...props.style, display:"none"}} />}>
-              <Card.Body style={{marginBottom:"0px"}}>
-              <Card.Title style={{marginTop:"-9px", marginBottom:"11px", marginLeft:"-9px"}}>Service Requests</Card.Title>
-              {evacuation_assignment.service_request_objects.map(service_request => (
-                <div key={service_request.id} className="mt-1 mb-1" style={{marginLeft:"-10px", marginRight:"7px"}}>
-                  <div className="card-header rounded">
-                  <span style={{marginLeft:"-12px"}}>
-                  {mapState[service_request.id] && Object.keys(mapState[service_request.id].status_matches['REPORTED']).length > 0 ?
-                    <OverlayTrigger
-                      key={"reported"}
-                      placement="top"
-                      overlay={
-                        <Tooltip id={`tooltip-utl`}>
-                          {Object.keys(mapState[service_request.id].status_matches['REPORTED']).map((key,i) => (
-                            <span key={key} style={{textTransform:"capitalize"}}>
-                              {i > 0 && ", "}{prettyText('', key.split(',')[0], mapState[service_request.id].status_matches['REPORTED'][key])}
-                            </span>
-                          ))}
-                          {service_request.reported_animals > 1 ? " are":" is"} reported
-                        </Tooltip>
-                      }
-                    >
-                      <FontAwesomeIcon icon={faExclamationCircle} className="mr-1"/>
-                    </OverlayTrigger>
-                    : ""}
-                    {mapState[service_request.id] && Object.keys(mapState[service_request.id].status_matches['SHELTERED IN PLACE']).length > 0 ?
-                    <OverlayTrigger
-                      key={"sip"}
-                      placement="top"
-                      overlay={
-                        <Tooltip id={`tooltip-utl`}>
-                          {Object.keys(mapState[service_request.id].status_matches['SHELTERED IN PLACE']).map((key,i) => (
-                            <span key={key} style={{textTransform:"capitalize"}}>
-                              {i > 0 && ", "}{prettyText('', key.split(',')[0], mapState[service_request.id].status_matches['SHELTERED IN PLACE'][key])}
-                            </span>
-                          ))}
-                          {service_request.sheltered_in_place > 1 ? " are":" is"} sheltered in place
-                        </Tooltip>
-                      }
-                    >
-                      <span className="fa-layers mr-1">
-                        <FontAwesomeIcon icon={faCircle} transform={'grow-1'} />
-                        <FontAwesomeIcon icon={faHomeAlt} style={{color:"#444"}} transform={'shrink-3'} size="sm" inverse />
-                      </span>
-                    </OverlayTrigger>
-                    : ""}
-                    {mapState[service_request.id] && Object.keys(mapState[service_request.id].status_matches['UNABLE TO LOCATE']).length > 0 ?
-                    <OverlayTrigger
-                      key={"utl"}
-                      placement="top"
-                      overlay={
-                        <Tooltip id={`tooltip-utl`}>
-                          {Object.keys(mapState[service_request.id].status_matches['UNABLE TO LOCATE']).map((key,i) => (
-                            <span key={key} style={{textTransform:"capitalize"}}>
-                              {i > 0 && ", "}{prettyText('', key.split(',')[0], mapState[service_request.id].status_matches['UNABLE TO LOCATE'][key])}
-                            </span>
-                          ))}
-                          {service_request.unable_to_locate > 1 ? " are":" is"} unable to be located
-                        </Tooltip>
-                      }
-                    >
-                      <FontAwesomeIcon icon={faQuestionCircle} className="mr-1"/>
-                    </OverlayTrigger>
-                    : ""}
-                    </span>
-                    <span>{service_request.full_address} |
-                    {service_request.owner_objects.length === 0 ?
-                      <OverlayTrigger
-                        key={"stray"}
-                        placement="top"
-                        overlay={
-                          <Tooltip id={`tooltip-stray`}>
-                            No owner
-                          </Tooltip>
-                        }
-                      >
-                        <FontAwesomeIcon icon={faUserAltSlash} className="ml-1 mr-1" size="sm" />
-                      </OverlayTrigger> :
-                      <OverlayTrigger
-                        key={"stray"}
-                        placement="top"
-                        overlay={
-                          <Tooltip id={`tooltip-stray`}>
-                            {service_request.owner_objects.map(owner => (
-                              <div key={owner.id}>{owner.first_name} {owner.last_name}</div>
-                            ))}
-                          </Tooltip>
-                        }
-                      >
-                        <FontAwesomeIcon icon={faUserAlt} className="ml-1 mr-1" size="sm" />
-                      </OverlayTrigger>
-                    }
-                    </span>
-                    {mapState[service_request.id] ?
-                    <span>
-                      {Object.keys(mapState[service_request.id].matches).map((key,i) => (
-                        <span key={key} style={{textTransform:"capitalize"}}>
-                          {i > 0 && ", "}{prettyText('', key.split(',')[0], mapState[service_request.id].matches[key])}
+              <Scrollbar style={{height:"204px"}} renderView={props => <div {...props} style={{...props.style, overflow:"auto"}}/>} renderThumbHorizontal={props => <div {...props} style={{...props.style, display:"none"}} />}>
+                <Card.Body style={{marginBottom:"0px"}}>
+                  <Card.Title style={{marginTop:"-9px", marginBottom:"7px", marginLeft:"-9px"}}>Service Requests</Card.Title>
+                  {evacuation_assignment.service_request_objects.map(service_request => (
+                    <div key={service_request.id} className="" style={{marginLeft:"-10px", marginRight:"7px", marginTop: "7px", marginBottom:"0px"}}>
+                      <div className="card-header rounded">
+                      <span style={{marginLeft:"-12px"}}>
+                      {matches[service_request.id] && Object.keys(matches[service_request.id].status_matches['REPORTED']).length > 0 ?
+                        <OverlayTrigger
+                          key={"reported"}
+                          placement="top"
+                          overlay={
+                            <Tooltip id={`tooltip-utl`}>
+                              {Object.keys(matches[service_request.id].status_matches['REPORTED']).map((key,i) => (
+                                <span key={key} style={{textTransform:"capitalize"}}>
+                                  {i > 0 && ", "}{prettyText('', key.split(',')[0], matches[service_request.id].status_matches['REPORTED'][key])}
+                                </span>
+                              ))}
+                              {service_request.reported_animals > 1 ? " are":" is"} reported
+                            </Tooltip>
+                          }
+                        >
+                          <FontAwesomeIcon icon={faExclamationCircle} className="mr-1"/>
+                        </OverlayTrigger>
+                        : ""}
+                        {matches[service_request.id] && Object.keys(matches[service_request.id].status_matches['SHELTERED IN PLACE']).length > 0 ?
+                        <OverlayTrigger
+                          key={"sip"}
+                          placement="top"
+                          overlay={
+                            <Tooltip id={`tooltip-utl`}>
+                              {Object.keys(matches[service_request.id].status_matches['SHELTERED IN PLACE']).map((key,i) => (
+                                <span key={key} style={{textTransform:"capitalize"}}>
+                                  {i > 0 && ", "}{prettyText('', key.split(',')[0], matches[service_request.id].status_matches['SHELTERED IN PLACE'][key])}
+                                </span>
+                              ))}
+                              {service_request.sheltered_in_place > 1 ? " are":" is"} sheltered in place
+                            </Tooltip>
+                          }
+                        >
+                          <span className="fa-layers mr-1">
+                            <FontAwesomeIcon icon={faCircle} transform={'grow-1'} />
+                            <FontAwesomeIcon icon={faHomeAlt} style={{color:"#444"}} transform={'shrink-3'} size="sm" inverse />
+                          </span>
+                        </OverlayTrigger>
+                        : ""}
+                        {matches[service_request.id] && Object.keys(matches[service_request.id].status_matches['UNABLE TO LOCATE']).length > 0 ?
+                        <OverlayTrigger
+                          key={"utl"}
+                          placement="top"
+                          overlay={
+                            <Tooltip id={`tooltip-utl`}>
+                              {Object.keys(matches[service_request.id].status_matches['UNABLE TO LOCATE']).map((key,i) => (
+                                <span key={key} style={{textTransform:"capitalize"}}>
+                                  {i > 0 && ", "}{prettyText('', key.split(',')[0], matches[service_request.id].status_matches['UNABLE TO LOCATE'][key])}
+                                </span>
+                              ))}
+                              {service_request.unable_to_locate > 1 ? " are":" is"} unable to be located
+                            </Tooltip>
+                          }
+                        >
+                          <FontAwesomeIcon icon={faQuestionCircle} className="mr-1"/>
+                        </OverlayTrigger>
+                        : ""}
                         </span>
-                      ))}
-                    </span>
-                    :""}
-                  </div>
-                </div>
-              ))}
-              </Card.Body>
+                        <span>{service_request.full_address} |
+                        {service_request.owner_objects.length === 0 ?
+                          <OverlayTrigger
+                            key={"stray"}
+                            placement="top"
+                            overlay={
+                              <Tooltip id={`tooltip-stray`}>
+                                No owner
+                              </Tooltip>
+                            }
+                          >
+                            <FontAwesomeIcon icon={faUserAltSlash} className="ml-1 mr-1" size="sm" />
+                          </OverlayTrigger> :
+                          <OverlayTrigger
+                            key={"stray"}
+                            placement="top"
+                            overlay={
+                              <Tooltip id={`tooltip-stray`}>
+                                {service_request.owner_objects.map(owner => (
+                                  <div key={owner.id}>{owner.first_name} {owner.last_name}</div>
+                                ))}
+                              </Tooltip>
+                            }
+                          >
+                            <FontAwesomeIcon icon={faUserAlt} className="ml-1 mr-1" size="sm" />
+                          </OverlayTrigger>
+                        }
+                        </span>
+                        {matches[service_request.id] ?
+                        <span>
+                          {Object.keys(matches[service_request.id].species_matches).map((key,i) => (
+                            <span key={key} style={{textTransform:"capitalize"}}>
+                              {i > 0 && ", "}{prettyText('', key.split(',')[0], matches[service_request.id].species_matches[key])}
+                            </span>
+                          ))}
+                        </span>
+                        :""}
+                      </div>
+                    </div>
+                  ))}
+                </Card.Body>
               </Scrollbar>
             </Card>
           </CardGroup>

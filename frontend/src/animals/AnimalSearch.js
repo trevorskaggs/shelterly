@@ -88,17 +88,17 @@ function AnimalSearch() {
             onChange={handleChange}
           />
           <InputGroup.Append>
-            <Button variant="outline-light" type="submit">Search</Button>
+            <Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0"}}>Search</Button>
           </InputGroup.Append>
           <ButtonGroup className="ml-1">
-            <Button variant={statusOptions === "owned" ? "primary" : "secondary"} onClick={statusOptions !== "owned" ? () => setStatusOptions("owned") : () => setStatusOptions("")}>Owned</Button>
-            <Button variant={statusOptions === "stray" ? "primary" : "secondary"} onClick={statusOptions !== "stray" ? () => setStatusOptions("stray") : () => setStatusOptions("")}>Stray</Button>
+            <Button variant={statusOptions === "owned" ? "primary" : "secondary"} onClick={statusOptions !== "owned" ? () => {setPage(1);setStatusOptions("owned")} : () => {setPage(1);setStatusOptions("")}}>Owned</Button>
+            <Button variant={statusOptions === "stray" ? "primary" : "secondary"} onClick={statusOptions !== "stray" ? () => {setPage(1);setStatusOptions("stray")} : () => {setPage(1);setStatusOptions("")}}>Stray</Button>
           </ButtonGroup>
         </InputGroup>
       </Form>
       {data.animals.map((animal, index) => (
         <div key={animal.id} className="mt-3" hidden={page !== Math.ceil((index+1)/ITEMS_PER_PAGE)}>
-          <div className="card-header"><h4 style={{marginBottom:"-2px"}}>#{animal.id} {animal.name ? titleCase(animal.name) : "Unknown"}
+          <div className="card-header"><h4 style={{marginBottom:"-2px",  marginLeft:"-12px"}}>#{animal.id} {animal.name ? titleCase(animal.name) : "Unknown"}
           <OverlayTrigger
             key={"animal-details"}
             placement="top"

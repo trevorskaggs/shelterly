@@ -96,18 +96,18 @@ function PersonSearch() {
 								onChange={handleChange}
 							/>
 							<InputGroup.Append>
-								<Button variant="outline-light" type="submit">Search</Button>
+								<Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0"}}>Search</Button>
 							</InputGroup.Append>
 							<ButtonGroup className="ml-3">
-								<Button variant={statusOptions === "owners" ? "primary" : "secondary"} onClick={statusOptions !== "owners" ? () => setStatusOptions("owners") : () => setStatusOptions("")}>Owners</Button>
-								<Button variant={statusOptions === "reporters" ? "primary" : "secondary"} onClick={statusOptions !== "reporters" ? () => setStatusOptions("reporters") : () => setStatusOptions("")}>Reporters</Button>
+								<Button variant={statusOptions === "owners" ? "primary" : "secondary"} onClick={statusOptions !== "owners" ? () => {setPage(1);setStatusOptions("owners")} : () => {setPage(1);setStatusOptions("")}}>Owners</Button>
+								<Button variant={statusOptions === "reporters" ? "primary" : "secondary"} onClick={statusOptions !== "reporters" ? () => {setPage(1);setStatusOptions("reporters")} : () => {setPage(1);setStatusOptions("")}}>Reporters</Button>
 							</ButtonGroup>
 						</InputGroup>
 					</Form>
 					{data.owners.map((owner, index) => (
 							<div key={owner.id} className="mt-3" hidden={page !== Math.ceil((index+1)/ITEMS_PER_PAGE)}>
 									<div className="card-header"> {owner.first_name ?
-										<h4 style={{marginBottom: "-2px"}}>{owner.first_name} {owner.last_name}
+										<h4 style={{marginBottom: "-2px",  marginLeft:"-12px"}}>{owner.first_name} {owner.last_name}
 											{owner.agency ? <span> ({owner.agency})</span> : ""}
 											{statusOptions === 'owners' ?
 											<OverlayTrigger
@@ -169,8 +169,8 @@ function PersonSearch() {
 																<b>#{animal.id}:</b>&nbsp;&nbsp;{animal.name || "Unknown"} - {animal.status}
 															</ListGroup.Item>
 														))}
-													</Scrollbar>
 													{owner.animals.length < 1 ? <ListGroup.Item style={{marginTop:"32px"}}>No Animals</ListGroup.Item> : ""}
+													</Scrollbar>
 												</ListGroup>
 										</Card.Body>
 									</Card>
