@@ -5,7 +5,7 @@ import { Button, ButtonGroup, Col, ListGroup, Row } from 'react-bootstrap'
 import { Marker, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
 import Moment from 'react-moment';
-import Map, { countMatches, prettyText, reportedMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
+import Map, { prettyText, closedMarkerIcon, reportedMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
 import Header from "../components/Header";
 import badge from "../static/images/badge-sheriff.png";
 import bandaid from "../static/images/band-aid-solid.png";
@@ -16,7 +16,22 @@ function Hotline() {
 
   const [data, setData] = useState({service_requests: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
   const [mapState, setMapState] = useState({});
-  const [statusOptions, setStatusOptions] = useState({status:"open", allColor: "secondary", openColor:"primary", assignedColor:"secondary", closedColor:"secondary"});
+  const [statusOptions, setStatusOptions] = useState("open");
+
+  // Counts the number of species matches for a service request.
+  const countMatches = (service_request) => {
+    let species_matches = {};
+
+    service_request.animals.forEach((animal) => {
+      if (!species_matches[[animal.species]]) {
+        species_matches[[animal.species]] = 1;
+      }
+      else {
+        species_matches[[animal.species]] += 1;
+      }
+    });
+    return species_matches
+  }
 
   // Hook for initializing data.
   useEffect(() => {
@@ -27,7 +42,6 @@ function Hotline() {
       // Fetch ServiceRequest data.
       await axios.get('/hotline/api/servicerequests/', {
         params: {
-          status: statusOptions.status,
           map: true
         },
         cancelToken: source.token,
@@ -38,13 +52,13 @@ function Hotline() {
           const map_dict = {};
           const bounds = [];
           for (const service_request of response.data) {
-            const matches = countMatches(service_request)[0];
+            const matches = countMatches(service_request);
             map_dict[service_request.id] = {matches:matches, latitude:service_request.latitude, longitude:service_request.longitude};
             bounds.push([service_request.latitude, service_request.longitude]);
           }
           setMapState(map_dict);
           if (bounds.length > 0) {
-            setData({service_requests: response.data, isFetching: false, bounds:L.latLngBounds(bounds)});
+            setData({service_requests: response.data, isFetching: false, bounds:bounds});
           }
         }
       })
@@ -63,7 +77,7 @@ function Hotline() {
       unmounted = true;
       source.cancel();
     };
-  }, [statusOptions.status]);
+  }, []);
 
   return (
     <>
@@ -87,12 +101,12 @@ function Hotline() {
         </ListGroup>
       </Col>
       <Col xs={8} className="border rounded pl-0 pr-0">
-        <Map bounds={data.bounds} className="landing-leaflet-container">
-          {data.service_requests.map(service_request => (
+        <Map bounds={data.bounds} boundsOptions={{padding:[10,10]}} className="landing-leaflet-container">
+          {data.service_requests.filter(service_request => (service_request.status === statusOptions || statusOptions === "all")).map(service_request => (
             <Marker
               key={service_request.id}
               position={[service_request.latitude, service_request.longitude]}
-              icon={service_request.sheltered_in_place > 0 ? SIPMarkerIcon : service_request.unable_to_locate > 0 ? UTLMarkerIcon : reportedMarkerIcon}
+              icon={service_request.sheltered_in_place > 0 ? SIPMarkerIcon : service_request.unable_to_locate > 0 ? UTLMarkerIcon : service_request.reported_animals > 0 ? reportedMarkerIcon : closedMarkerIcon}
               onClick={() => window.open("/hotline/servicerequest/" + service_request.id, "_blank")}
             >
               <MapTooltip autoPan={false}>
@@ -101,7 +115,7 @@ function Hotline() {
                     <span>
                       {Object.keys(mapState[service_request.id].matches).map((key,i) => (
                         <span key={key} style={{textTransform:"capitalize"}}>
-                          {i > 0 && ", "}{prettyText(key.split(',')[1], key.split(',')[0], mapState[service_request.id].matches[key])}
+                          {i > 0 && ", "}{prettyText('', key.split(',')[0], mapState[service_request.id].matches[key])}
                         </span>
                       ))}
                     </span>
@@ -120,12 +134,15 @@ function Hotline() {
             </Marker>
           ))}
         </Map>
-        <ButtonGroup>
-          <Button variant={statusOptions.allColor} onClick={() => setStatusOptions({status:"all", allColor:"primary", openColor:"secondary", assignedColor:"secondary", closedColor:"secondary"})}>All</Button>
-          <Button variant={statusOptions.openColor} onClick={() => setStatusOptions({status:"open", allColor:"secondary", openColor:"primary", assignedColor:"secondary", closedColor:"secondary"})}>Open</Button>
-          <Button variant={statusOptions.assignedColor} onClick={() => setStatusOptions({status:"assigned", allColor:"secondary", openColor:"secondary", assignedColor:"primary", closedColor:"secondary"})}>Assigned</Button>
-          <Button variant={statusOptions.closedColor} onClick={() => setStatusOptions({status:"closed", allColor:"secondary", openColor:"secondary", assignedColor:"secondary", closedColor:"primary"})}>Closed</Button>
-        </ButtonGroup>
+        <Row style={{marginLeft:"0px", maxHeight:"37px"}}>
+          <h4 className="card-header text-center" style={{paddingTop:"4px", paddingLeft:"10px", paddingRight:"10px", height:"36px", backgroundColor:"#808080"}}>Service Requests</h4>
+          <ButtonGroup>
+            <Button variant={statusOptions === "all" ? "primary" : "secondary"} onClick={() => setStatusOptions("all")} style={{maxHeight:"36px"}}>All</Button>
+            <Button variant={statusOptions === "open" ? "primary" : "secondary"} onClick={() => setStatusOptions("open")} style={{maxHeight:"36px"}}>Open</Button>
+            <Button variant={statusOptions === "assigned" ? "primary" : "secondary"} onClick={() => setStatusOptions("assigned")} style={{maxHeight:"36px"}}>Assigned</Button>
+            <Button variant={statusOptions === "closed" ? "primary" : "secondary"} onClick={() => setStatusOptions("closed")} style={{maxHeight:"36px"}}>Closed</Button>
+          </ButtonGroup>
+        </Row>
       </Col>
     </Row>
   </>

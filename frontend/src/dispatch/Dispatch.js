@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link } from 'raviger';
-import { Col, ListGroup, Row } from 'react-bootstrap'
-import { CircleMarker, Tooltip as MapTooltip } from "react-leaflet";
+import { Button, ButtonGroup, Col, ListGroup, Row } from 'react-bootstrap'
+import { Marker, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
 import Moment from 'react-moment';
 import randomColor from "randomcolor";
-import Map, { countMatches, prettyText } from "../components/Map";
+import Map, { countMatches, prettyText, reportedMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
 import Header from "../components/Header";
 import badge from "../static/images/badge-sheriff.png";
 import bandaid from "../static/images/band-aid-solid.png";
@@ -17,6 +17,7 @@ function Dispatch() {
 
   const [data, setData] = useState({dispatch_assignments: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
   const [mapState, setMapState] = useState({});
+  const [selectedTeam, setSelectedTeam] = useState(null);
 
   // Hook for initializing data.
   useEffect(() => {
@@ -87,21 +88,16 @@ function Dispatch() {
         </ListGroup>
       </Col>
       <Col xs={8} className="border rounded pl-0 pr-0">
-        <Map bounds={data.bounds} className="landing-leaflet-container">
-          {data.dispatch_assignments.map(dispatch_assignment => (
+        <Map bounds={data.bounds} boundsOptions={{padding:[10,10]}} className="landing-leaflet-container">
+          {data.dispatch_assignments.filter(dispatch_assignment => (selectedTeam == null || dispatch_assignment.team === selectedTeam)).map(dispatch_assignment => (
           <span key={dispatch_assignment.id}>
             {dispatch_assignment.service_request_objects.map(service_request => (
-            <CircleMarker
-              key={service_request.id}
-              center={{lat:service_request.latitude, lng: service_request.longitude}}
-              color="black"
-              weight="1"
-              fillColor={mapState[dispatch_assignment.id] ? mapState[dispatch_assignment.id].color : ""}
-              fill={true}
-              fillOpacity="1"
-              onClick={() => window.open("/dispatch/summary/" + dispatch_assignment.id, "_blank")}
-              radius={5}
-            >
+              <Marker
+                key={service_request.id}
+                position={[service_request.latitude, service_request.longitude]}
+                icon={service_request.sheltered_in_place > 0 ? SIPMarkerIcon : service_request.unable_to_locate > 0 ? UTLMarkerIcon : reportedMarkerIcon}
+                onClick={() => window.open("/dispatch/summary/" + dispatch_assignment.id, "_blank")}
+              >
               <MapTooltip autoPan={false}>
                 <span>
                   <div>{dispatch_assignment.team_object ? dispatch_assignment.team_object.name : ""}:&nbsp;
@@ -129,11 +125,20 @@ function Dispatch() {
                   </div>
                 </span>
               </MapTooltip>
-            </CircleMarker>
+            </Marker>
             ))}
           </span>
           ))}
         </Map>
+        <Row style={{marginLeft:"0px", maxHeight:"37px"}}>
+          <h4 className="card-header text-center" style={{paddingTop:"4px", paddingLeft:"10px", paddingRight:"10px", height:"36px", backgroundColor:"#808080"}}>Active Assignments</h4>
+          <ButtonGroup>
+            <Button variant={selectedTeam === null ? "primary" : "secondary"} onClick={() => setSelectedTeam(null)} style={{maxHeight:"36px"}}>All</Button>
+            {data.dispatch_assignments.map(dispatch_assignment => (
+              <Button variant={dispatch_assignment.team === selectedTeam ? "primary" : "secondary"} onClick={() => setSelectedTeam(dispatch_assignment.team)} style={{maxHeight:"36px"}}>{dispatch_assignment.team ? dispatch_assignment.team_object.name : "Team"}</Button>
+            ))}
+          </ButtonGroup>
+        </Row>
       </Col>
     </Row>
     </>

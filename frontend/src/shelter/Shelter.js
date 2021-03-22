@@ -85,6 +85,9 @@ function Shelter() {
             </Marker>
           ))}
         </Map>
+        <Row style={{marginLeft:"0px", maxHeight:"37px"}}>
+          <h4 className="card-header text-center" style={{paddingTop:"4px", paddingLeft:"10px", paddingRight:"10px", height:"36px", backgroundColor:"#808080"}}>Shelters</h4>
+        </Row>
       </Col>
     </Row>
     <hr/>

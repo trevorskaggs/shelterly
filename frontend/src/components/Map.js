@@ -4,11 +4,11 @@ import L from "leaflet";
 import { Map as LeafletMap, TileLayer, useLeaflet } from "react-leaflet";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faCircle, faExclamationCircle, faHome, faMapMarkerAlt, faStar
+  faCircle, faExclamationCircle, faHome, faMapMarkerAlt, faStar,
 } from '@fortawesome/free-solid-svg-icons';
 import { faCheckCircle, faQuestionCircle as faQuestionCircleDuo } from '@fortawesome/pro-duotone-svg-icons';
 import { faHomeAlt as faHomeAltReg } from '@fortawesome/pro-regular-svg-icons';
-import { faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
+import { faHomeAlt, faDoNotEnter } from '@fortawesome/pro-solid-svg-icons';
 
 export const Legend = (props) => {
   const { map } = useLeaflet();
@@ -109,12 +109,29 @@ export const checkMarkerIcon = new L.DivIcon({
   shadowAnchor: null
 });
 
-const shelterIconHTML = ReactDOMServer.renderToString(<FontAwesomeIcon icon={faHome} className="icon-border" size="lg" color="#b18662" />);
+const shelterIconHTML = ReactDOMServer.renderToString(<FontAwesomeIcon icon={faHome} className="icon-border" size="lg" color="#af7051" />);
 export const shelterMarkerIcon = new L.DivIcon({
   html: shelterIconHTML,
   iconSize: [0, 0],
   iconAnchor: [6, 9],
   className: "shelter-icon",
+  popupAnchor: null,
+  shadowUrl: null,
+  shadowSize: null,
+  shadowAnchor: null
+});
+
+const closedIconHTML = ReactDOMServer.renderToString(
+  <span className="fa-layers">
+    <FontAwesomeIcon icon={faCircle} color="white" size="lg" />
+    <FontAwesomeIcon icon={faDoNotEnter} className="icon-border" size="lg" color="#af7051" />
+  </span>
+);
+export const closedMarkerIcon = new L.DivIcon({
+  html: closedIconHTML,
+  iconSize: [0, 0],
+  iconAnchor: [6, 9],
+  className: "closed-icon",
   popupAnchor: null,
   shadowUrl: null,
   shadowSize: null,
@@ -162,7 +179,7 @@ export const prettyText = (size, species, count) => {
     if (size === 'pony' && count > 1) {
       size_and_species = 'ponies'
     }
-    if (size === 'unknown') {
+    if (size === 'unknown' || size === '') {
       size_and_species = 'horse' + plural
     }
     else {
@@ -178,7 +195,7 @@ const Map = (props) => {
 
   return (
     <>
-    <LeafletMap className={props.className || "d-block"} bounds={props.bounds} onMoveEnd={props.onMoveEnd}>
+    <LeafletMap className={props.className || "d-block"} bounds={props.bounds} boundsOptions={props.boundsOptions} onMoveEnd={props.onMoveEnd}>
       <Legend position="bottomleft" metric={false} />
       <TileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
