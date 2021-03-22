@@ -135,7 +135,7 @@ function ServiceRequestSearch() {
                   </Tooltip>
                 }
               >
-                <Link href={"/hotline/servicerequest/" + service_request.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+                <Link href={"/hotline/servicerequest/" + service_request.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
               </OverlayTrigger>
               &nbsp;| <span style={{textTransform:"capitalize"}}>{service_request.status}</span>
             </h4>

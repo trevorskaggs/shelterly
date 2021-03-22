@@ -119,7 +119,7 @@ function PersonSearch() {
 													</Tooltip>
 												}
 											>
-												<Link href={"/people/owner/" + owner.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse/></Link>
+												<Link href={"/people/owner/" + owner.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse/></Link>
 											</OverlayTrigger>
 											:
 											<OverlayTrigger
@@ -131,7 +131,7 @@ function PersonSearch() {
 													</Tooltip>
 												}
 											>
-												<Link href={"/people/reporter/" + owner.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse/></Link>
+												<Link href={"/people/reporter/" + owner.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse/></Link>
 											</OverlayTrigger>
 											}
 										</h4> : "Unknown"}

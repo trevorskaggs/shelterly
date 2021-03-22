@@ -148,7 +148,7 @@ function DispatchAssignmentSearch() {
                 </Tooltip>
               }
             >
-              <Link href={"/dispatch/summary/" + evacuation_assignment.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+              <Link href={"/dispatch/summary/" + evacuation_assignment.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
             </OverlayTrigger>
             {evacuation_assignment.end_time ? "" :
               <OverlayTrigger
@@ -177,8 +177,9 @@ function DispatchAssignmentSearch() {
                     key={service_request.id}
                     position={[service_request.latitude, service_request.longitude]}
                     icon={service_request.sheltered_in_place > 0 ? SIPMarkerIcon : service_request.unable_to_locate > 0 ? UTLMarkerIcon : reportedMarkerIcon}
+                    onClick={() => window.open("/hotline/servicerequest/" + service_request.id, "_blank")}
                   >
-                    <MapTooltip autoPan={false}>
+                    <MapTooltip autoPan={false} direction={evacuation_assignment.service_request_objects.length > 1 ? "auto" : "top"}>
                       <span>
                         {matches[service_request.id] ?
                           <span>

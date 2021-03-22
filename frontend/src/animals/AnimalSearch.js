@@ -108,7 +108,7 @@ function AnimalSearch() {
               </Tooltip>
             }
           >
-            <Link href={"/animals/" + animal.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+            <Link href={"/animals/" + animal.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
           </OverlayTrigger>
           &nbsp;| {titleCase(animal.status)}</h4></div>
           <CardGroup>

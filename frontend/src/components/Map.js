@@ -162,7 +162,7 @@ export const prettyText = (size, species, count) => {
     if (size === 'pony' && count > 1) {
       size_and_species = 'ponies'
     }
-    if (size === 'unknown') {
+    else if (size === 'unknown' || size === '') {
       size_and_species = 'horse' + plural
     }
     else {
