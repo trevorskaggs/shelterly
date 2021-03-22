@@ -117,7 +117,7 @@ function DispatchAssignmentSearch() {
                 </OverlayTrigger>
               }
               &nbsp;&nbsp;|&nbsp;
-              Team Members: {evacuation_assignment.team_member_objects.map((member, i) => (
+              {evacuation_assignment.team && evacuation_assignment.team_object.name}: {evacuation_assignment.team && evacuation_assignment.team_object.team_member_objects.map((member, i) => (
                   <span key={member.id}>{i > 0 && ", "}{member.first_name} {member.last_name}</span>))}
             </h4></div>
             <CardGroup>

@@ -12,10 +12,26 @@ from people.serializers import OwnerContactSerializer
 class VisitNoteSerializer(serializers.ModelSerializer):
 
     address = serializers.SerializerMethodField()
+    team_name = serializers.SerializerMethodField()
+    team_member_names = serializers.SerializerMethodField()
 
     def get_address(self, obj):
         # does this kick off another query?
         return obj.service_request.location_output
+
+    def get_team_name(self, obj):
+        # does this kick off another query?
+        try:
+            return obj.evac_assignment.team.name
+        except AttributeError:
+            return ''
+
+    def get_team_member_names(self, obj):
+        # does this kick off another query?
+        try:
+            return ", ".join([team_member['first_name'] + " " + team_member['last_name'] for team_member in obj.evac_assignment.team.team_members.all().values('first_name', 'last_name')])
+        except AttributeError:
+            return ''
 
     class Meta:
         model = VisitNote
@@ -67,10 +83,10 @@ class SimpleServiceRequestSerializer(serializers.ModelSerializer):
     # Custom field for the current open DA if it exists, otherwise return the most recent DA if it exists.
     def get_latest_evac(self, obj):
         from evac.models import EvacAssignment
-        assigned_evac = EvacAssignment.objects.filter(service_requests=obj, end_time__isnull=True).values('id', 'start_time', 'end_time').first()
+        assigned_evac = EvacAssignment.objects.filter(service_requests=obj, end_time__isnull=True).values('id', 'start_time', 'end_time', 'team__name').first()
         if assigned_evac:
             return assigned_evac
-        return EvacAssignment.objects.filter(service_requests=obj, end_time__isnull=False).values('id', 'start_time', 'end_time').first()
+        return EvacAssignment.objects.filter(service_requests=obj, end_time__isnull=False).values('id', 'start_time', 'end_time', 'team__name').first()
 
     def to_internal_value(self, data):
         # Updates datetime fields to null when receiving an empty string submission.
@@ -91,9 +107,26 @@ class SimpleServiceRequestSerializer(serializers.ModelSerializer):
 
 class SimpleEvacAssignmentSerializer(serializers.ModelSerializer):
 
+    team_name = serializers.SerializerMethodField()
+    team_member_names = serializers.SerializerMethodField()
+
+    def get_team_name(self, obj):
+        # does this kick off another query?
+        try:
+            return obj.team.name
+        except AttributeError:
+            return ''
+
+    def get_team_member_names(self, obj):
+        # does this kick off another query?
+        try:
+            return ", ".join([team_member['first_name'] + " " + team_member['last_name'] for team_member in obj.team.team_members.all().values('first_name', 'last_name')])
+        except AttributeError:
+            return ''
+
     class Meta:
         model = EvacAssignment
-        fields = ['id', 'start_time', 'end_time']
+        fields = ['id', 'start_time', 'end_time', 'team_name', 'team_member_names']
 
 
 class ServiceRequestSerializer(SimpleServiceRequestSerializer):

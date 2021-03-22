@@ -16,7 +16,7 @@ import {
 } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faClipboardList
+  faCalendarDay, faClipboardList, faUsers
 } from '@fortawesome/free-solid-svg-icons';
 import Moment from 'react-moment';
 import Header from '../components/Header';
@@ -145,13 +145,35 @@ function ServiceRequestSearch() {
             <Card style={{marginBottom:"6px"}}>
               <Card.Body>
                 <Card.Title style={{marginTop:"-9px", marginBottom:"8px"}}>Information</Card.Title>
-                <Scrollbar autoHeight autoHide autoHeightMax={144} renderThumbVertical={props => <div {...props} style={{...props.style, backgroundColor: 'rgba(226, 226, 226, 0.2)'}} />}>
+                <Scrollbar style={{height:"144px"}}>
                   <ListGroup>
                     <ListGroup.Item>
                     {service_request.latest_evac ?
                       <span>
                         <b>{service_request.latest_evac.end_time ? "Last" : "Active"} Dispatch Assignment: </b>
-                        <Moment format="L">{service_request.latest_evac.start_time}</Moment>
+                        {service_request.evacuation_assignments.filter(da => da.id === service_request.latest_evac.id)[0].team_name}
+                        <OverlayTrigger
+                          key={"team-names"}
+                          placement="top"
+                          overlay={
+                            <Tooltip id={`tooltip-team-names`}>
+                              {service_request.evacuation_assignments.filter(da => da.id === service_request.latest_evac.id)[0].team_member_names}
+                            </Tooltip>
+                          }
+                        >
+                          <FontAwesomeIcon icon={faUsers} className="ml-1 mr-1 fa-move-down" />
+                        </OverlayTrigger>
+                        <OverlayTrigger
+                          key={"start-time"}
+                          placement="top"
+                          overlay={
+                            <Tooltip id={`tooltip-start-time`}>
+                              <Moment format="L">{service_request.latest_evac.start_time}</Moment>
+                            </Tooltip>
+                          }
+                        >
+                          <FontAwesomeIcon icon={faCalendarDay} className="" />
+                        </OverlayTrigger>
                       </span>
                     :
                       <span>
@@ -180,7 +202,7 @@ function ServiceRequestSearch() {
                     </ListGroup>
                   </Card.Title>
                   <ListGroup style={{height:"144px", overflowY:"auto", marginTop:"-12px"}}>
-                    <Scrollbar autoHeight autoHide autoHeightMax={144} renderThumbVertical={props => <div {...props} style={{...props.style, backgroundColor: 'rgba(226, 226, 226, 0.2)'}} />}>
+                    <Scrollbar style={{height:"144px"}}>
                       {service_request.animals.filter(animal => animal.species === searchState[service_request.id].selectedSpecies).map((animal, i) => (
                         <ListGroup.Item key={animal.id}>
                           <b>#{animal.id}:</b>&nbsp;&nbsp;{animal.name || "Unknown"} - {animal.status}
