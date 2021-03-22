@@ -59,7 +59,6 @@ INSTALLED_APPS = [
     'frontend',
     'ordered_model',
     'actstream',
-    'silk',
     'drf_yasg'
 ]
 
@@ -70,7 +69,6 @@ ACTSTREAM_SETTINGS = {
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
-    'silk.middleware.SilkyMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
