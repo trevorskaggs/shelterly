@@ -16,7 +16,7 @@ function Hotline() {
 
   const [data, setData] = useState({service_requests: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
   const [mapState, setMapState] = useState({});
-  const [statusOptions, setStatusOptions] = useState({status:"open", allColor: "secondary", openColor:"primary", assignedColor:"secondary", closedColor:"secondary"});
+  const [statusOptions, setStatusOptions] = useState({status:"open", openColor:"primary", assignedColor:"secondary"});
 
   // Hook for initializing data.
   useEffect(() => {
@@ -121,10 +121,8 @@ function Hotline() {
           ))}
         </Map>
         <ButtonGroup>
-          <Button variant={statusOptions.allColor} onClick={() => setStatusOptions({status:"all", allColor:"primary", openColor:"secondary", assignedColor:"secondary", closedColor:"secondary"})}>All</Button>
-          <Button variant={statusOptions.openColor} onClick={() => setStatusOptions({status:"open", allColor:"secondary", openColor:"primary", assignedColor:"secondary", closedColor:"secondary"})}>Open</Button>
-          <Button variant={statusOptions.assignedColor} onClick={() => setStatusOptions({status:"assigned", allColor:"secondary", openColor:"secondary", assignedColor:"primary", closedColor:"secondary"})}>Assigned</Button>
-          <Button variant={statusOptions.closedColor} onClick={() => setStatusOptions({status:"closed", allColor:"secondary", openColor:"secondary", assignedColor:"secondary", closedColor:"primary"})}>Closed</Button>
+          <Button variant={statusOptions.openColor} onClick={() => setStatusOptions({status:"open", openColor:"primary", assignedColor:"secondary"})}>Open</Button>
+          <Button variant={statusOptions.assignedColor} onClick={() => setStatusOptions({status:"assigned", openColor:"secondary", assignedColor:"primary"})}>Assigned</Button>
         </ButtonGroup>
       </Col>
     </Row>

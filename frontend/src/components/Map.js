@@ -162,7 +162,7 @@ export const prettyText = (size, species, count) => {
     if (size === 'pony' && count > 1) {
       size_and_species = 'ponies'
     }
-    if (size === 'unknown') {
+    else if (size === 'unknown' || size === '') {
       size_and_species = 'horse' + plural
     }
     else {
@@ -178,8 +178,8 @@ const Map = (props) => {
 
   return (
     <>
-    <LeafletMap className={props.className || "d-block"} bounds={props.bounds} onMoveEnd={props.onMoveEnd}>
-      <Legend position="bottomleft" metric={false} />
+    <LeafletMap className={props.className || "d-block"} bounds={props.bounds} zoomControl={props.zoomControl === false ? false : true} onMoveEnd={props.onMoveEnd}>
+      <Legend position={props.legend_position || "bottomleft"} metric={false} />
       <TileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
