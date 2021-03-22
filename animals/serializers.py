@@ -13,7 +13,7 @@ class SimpleAnimalSerializer(serializers.ModelSerializer):
         return (obj.aggressive or obj.species.other)
     class Meta:
         model = Animal
-        fields = ['id', 'species', 'aggressive', 'status', 'aco_required']
+        fields = ['id', 'species', 'aggressive', 'status', 'aco_required', 'name', 'sex', 'size', 'age', 'pcolor', 'scolor']
 
 class ModestAnimalSerializer(SimpleAnimalSerializer):
     evacuation_assignments = serializers.SerializerMethodField()
@@ -45,12 +45,12 @@ class AnimalSerializer(SimpleAnimalSerializer):
         model = Animal
         fields = ['id', 'species', 'aggressive', 'status', 'aco_required', 'is_stray', 'front_image', 'side_image', 'extra_images',
         'found_location', 'owner_names', 'owner_objects', 'full_address', 'shelter_name', 'reporter_object', 'request_address',
-        'action_history', 'evacuation_assignments', 'room_name']
+        'action_history', 'evacuation_assignments', 'room_name', 'name', 'sex', 'size', 'age', 'pcolor', 'scolor']
     
     def get_owner_names(self, obj):
         #TODO: optimize
-        # if obj.owners.exists():
-        #     return [person.first_name + ' ' + person.last_name for person in obj.owners.all()]
+        if obj.owners.exists():
+            return [person.first_name + ' ' + person.last_name for person in obj.owners.all()]
         return []
     # Custom Owner object field that excludes animals to avoid a circular reference.
     def get_owner_objects(self, obj):

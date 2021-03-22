@@ -3,23 +3,16 @@ import re
 from rest_framework import serializers
 from actstream.models import target_stream
 
-<<<<<<< HEAD
 from animals.serializers import ModestAnimalSerializer
-from evac.models import EvacAssignment, EvacTeamMember
+from evac.models import DispatchTeam, EvacAssignment, EvacTeamMember
 from hotline.models import ServiceRequest
 from hotline.serializers import SimpleServiceRequestSerializer, VisitNoteSerializer
 from people.serializers import OwnerContactSerializer, SimplePersonSerializer
-=======
-from animals.serializers import AnimalSerializer
-from evac.models import DispatchTeam, EvacAssignment, EvacTeamMember
-from hotline.serializers import ServiceRequestSerializer
-from people.serializers import SimplePersonSerializer
->>>>>>> master
 
 from location.utils import build_action_string
 
 class EvacTeamMemberSerializer(serializers.ModelSerializer):
-    
+
     display_name = serializers.SerializerMethodField()
     display_phone = serializers.SerializerMethodField()
 
