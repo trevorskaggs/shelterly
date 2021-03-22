@@ -74,7 +74,7 @@ function ServiceRequestDetails({id}) {
   const handleSubmit = async () => {
     await axios.patch('/hotline/api/servicerequests/' + id + '/', {reunite_animals:true})
     .then(response => {
-      setData(prevState => ({ ...prevState, "status":"Closed", "animals":prevState['animals'].map(animal => ({...animal, status:'REUNITED'})) }));
+      setData(prevState => ({ ...prevState, "status":"Closed", "animals":prevState['animals'].map(animal => ({...animal, status:animal.status !== 'DECEASED' ? 'REUNITED' : 'DECEASED'})) }));
       handleClose()
     })
     .catch(error => {
@@ -82,6 +82,7 @@ function ServiceRequestDetails({id}) {
     });
   }
 
+  // Handle animal removal submit.
   const handleAnimalSubmit = async () => {
     await axios.patch('/hotline/api/servicerequests/' + id + '/', {remove_animal:animalToDelete.id})
     .then(response => {

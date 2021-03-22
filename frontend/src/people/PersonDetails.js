@@ -24,7 +24,7 @@ function PersonDetails({id}) {
   const handleSubmit = async () => {
     await axios.patch('/people/api/person/' + id + '/', {reunite_animals:true})
     .then(response => {
-      setData(prevState => ({ ...prevState, "animals":prevState['animals'].map(animal => ({...animal, status:'REUNITED'})) }));
+      setData(prevState => ({ ...prevState, "animals":prevState['animals'].map(animal => ({...animal, status:animal.status !== 'DECEASED' ? 'REUNITED' : 'DECEASED'})) }));
       handleClose()
     })
     .catch(error => {
@@ -182,7 +182,7 @@ function PersonDetails({id}) {
                 >
                   <Link href={"/animals/new?owner_id=" + id}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
                 </OverlayTrigger>
-                {is_owner && data.animals.filter(animal => (animal.status !== 'REUNITED')).length > 0 ?
+                {is_owner && data.animals.filter(animal => (!['REUNITED', 'DECEASED'].includes(animal.status))).length > 0 ?
                 <OverlayTrigger
                   key={"reunite"}
                   placement="top"

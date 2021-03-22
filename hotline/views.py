@@ -43,8 +43,8 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
                 service_request.animal_set.update(status='CANCELED')
 
             if self.request.data.get('reunite_animals'):
-                service_request.animal_set.update(status='REUNITED', shelter=None, room=None)
-                for animal in service_request.animal_set.all():
+                service_request.animal_set.exclude(status='DECEASED').update(status='REUNITED', shelter=None, room=None)
+                for animal in service_request.animal_set.exclude(status='DECEASED'):
                     action.send(self.request.user, verb=f'changed animal status to reunited', target=animal)
                 service_request.status = 'closed'
                 service_request.save()

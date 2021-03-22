@@ -78,8 +78,8 @@ class PersonViewSet(viewsets.ModelViewSet):
                 PersonChange.objects.create(user=self.request.user, person=person, changes=change_dict, reason=self.request.data.get('change_reason', ''))
 
             if self.request.data.get('reunite_animals'):
-                person.animal_set.update(status='REUNITED', shelter=None, room=None)
-                for animal in person.animal_set.all():
+                person.animal_set.exclude(status='DECEASED').update(status='REUNITED', shelter=None, room=None)
+                for animal in person.animal_set.exclude(status='DECEASED'):
                     action.send(self.request.user, verb=f'changed animal status to reunited', target=animal)
                 if person.request.exists():
                     service_request = person.request.first()
