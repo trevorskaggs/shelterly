@@ -9,7 +9,7 @@ import {
   faClipboardCheck, faClipboardList, faComment, faEdit, faHouseDamage,
   faKey, faMapMarkedAlt, faMinusSquare, faPlusSquare, faTimes, faTrailer, faUsers
 } from '@fortawesome/free-solid-svg-icons';
-import { faCalendarEdit, faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
+import { faCalendarEdit, faHomeAlt, faHomeHeart } from '@fortawesome/pro-solid-svg-icons';
 import Header from '../components/Header';
 import History from '../components/History';
 import noImageFound from '../static/images/image-not-found.png';
@@ -64,10 +64,25 @@ function ServiceRequestDetails({id}) {
     visit_notes: [],
   });
 
+  const [show, setShow] = useState(false);
+  const handleClose = () => setShow(false);
   const [animalToDelete, setAnimalToDelete] = useState({id:0, name:''});
   const [showAnimalConfirm, setShowAnimalConfirm] = useState(false);
   const handleAnimalClose = () => setShowAnimalConfirm(false);
 
+  // Handle animal reunification submit.
+  const handleSubmit = async () => {
+    await axios.patch('/hotline/api/servicerequests/' + id + '/', {reunite_animals:true})
+    .then(response => {
+      setData(prevState => ({ ...prevState, "status":"Closed", "animals":prevState['animals'].map(animal => ({...animal, status:animal.status !== 'DECEASED' ? 'REUNITED' : 'DECEASED'})) }));
+      handleClose()
+    })
+    .catch(error => {
+      console.log(error.response);
+    });
+  }
+
+  // Handle animal removal submit.
   const handleAnimalSubmit = async () => {
     await axios.patch('/hotline/api/servicerequests/' + id + '/', {remove_animal:animalToDelete.id})
     .then(response => {
@@ -300,6 +315,19 @@ function ServiceRequestDetails({id}) {
                   >
                     <Link href={"/animals/new?servicerequest_id=" + id}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
                   </OverlayTrigger>
+                  {data.status.toLowerCase() !== 'closed' ?
+                    <OverlayTrigger
+                      key={"reunite"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-reunite`}>
+                          Reunite all service request animals
+                        </Tooltip>
+                      }
+                    >
+                      <FontAwesomeIcon icon={faHomeHeart} onClick={() => setShow(true)} style={{cursor:'pointer'}} className="ml-1 fa-move-up" inverse />
+                    </OverlayTrigger>
+                    : ""}
                 </h4>
               </Card.Title>
               <hr />
@@ -515,6 +543,20 @@ function ServiceRequestDetails({id}) {
         <Modal.Footer>
           <Button variant="primary" onClick={handleAnimalSubmit}>Yes</Button>
           <Button variant="secondary" onClick={handleAnimalClose}>Close</Button>
+        </Modal.Footer>
+      </Modal>
+      <Modal show={show} onHide={handleClose}>
+        <Modal.Header closeButton>
+          <Modal.Title>Confirm Animal Reunification</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>
+            Have all of the animals in this service request been reunited with their owner?
+          </p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="primary" onClick={handleSubmit}>Yes</Button>
+          <Button variant="secondary" onClick={handleClose}>Close</Button>
         </Modal.Footer>
       </Modal>
     </>
