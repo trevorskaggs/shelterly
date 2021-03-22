@@ -10,6 +10,7 @@ import {
 import { faBadgeSheriff, faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
 import { Circle, Marker, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
+import * as Yup from 'yup';
 import badge from "../static/images/badge-sheriff.png";
 import bandaid from "../static/images/band-aid-solid.png";
 import car from "../static/images/car-solid.png";
@@ -107,6 +108,9 @@ function Deploy() {
     }
     else if (props.values.temp_team_name.length === 0) {
       setError("Team name cannot be blank.");
+    }
+    else if (props.values.temp_team_name.length > 18) {
+      // Do nothing.
     }
     else {
       setError('');
@@ -287,6 +291,11 @@ function Deploy() {
         team_members: [],
         service_requests: [],
       }}
+      validationSchema={Yup.object({
+        temp_team_name: Yup.string()
+          .max(18, 'Must be 18 characters or less')
+          .required('Required'),
+      })}
       enableReinitialize={true}
       onSubmit={(values, { setSubmitting }) => {
         values.service_requests = Object.keys(mapState).filter(key => mapState[key].checked === true)
@@ -411,21 +420,23 @@ function Deploy() {
             <Button type="submit" className="btn-block mt-auto" style={{marginBottom:"-33px"}} disabled={selectedCount.disabled || props.values.team_members.length === 0}>DEPLOY</Button>
           </Col>
           <Col xs={2} className="pl-0 pr-0" style={{marginLeft:"-7px", paddingRight:"2px"}}>
-            <div className="card-header border rounded text-center" style={{height:"37px", marginLeft:"12px", paddingTop:"6px"}}>{props.values.team_name || teamName}
-            <OverlayTrigger
-              key={"edit-team-name"}
-              placement="top"
-              overlay={
-                <Tooltip id={`tooltip-edit-team-name`}>
-                  Update team name
-                </Tooltip>
-              }
-            >
-              <FontAwesomeIcon icon={faPencilAlt} className="ml-1" style={{cursor:'pointer'}} onClick={() => setShow(true)} />
-            </OverlayTrigger>
+            <div className="card-header border rounded text-center" style={{height:"37px", width:"188px", marginLeft:"12px", paddingTop:"6px", whiteSpace:"nowrap"}}>
+              <span style={{marginLeft:"-10px"}}>{props.values.team_name || teamName}
+                <OverlayTrigger
+                  key={"edit-team-name"}
+                  placement="top"
+                  overlay={
+                    <Tooltip id={`tooltip-edit-team-name`}>
+                      Update team name
+                    </Tooltip>
+                  }
+                >
+                  <FontAwesomeIcon icon={faPencilAlt} className="ml-1" style={{cursor:'pointer'}} onClick={() => setShow(true)} />
+                </OverlayTrigger>
+              </span>
             </div>
           </Col>
-          <Col xs={8} className="pl-0">
+          <Col xs={8} className="pl-0" style={{marginLeft:"26px", marginRight:"-13px"}}>
             <Typeahead
               id="team_members"
               multiple
@@ -433,7 +444,6 @@ function Deploy() {
               selected={selected}
               options={teamData.options}
               placeholder="Choose team members..."
-              style={{marginLeft:"3px", marginRight:"-13px"}}
             />
           </Col>
         </Row>

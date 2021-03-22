@@ -67,7 +67,7 @@ function Shelter() {
         </ListGroup>
       </Col>
       <Col xs={8} className="border rounded pl-0 pr-0">
-        <Map bounds={data.bounds} className="landing-leaflet-container">
+        <Map bounds={data.bounds} boundsOptions={{padding:[10,10]}} className="landing-leaflet-container">
           {data.shelters.map(shelter => (
             <Marker
               key={shelter.id}
@@ -85,8 +85,8 @@ function Shelter() {
             </Marker>
           ))}
         </Map>
-        <Row style={{marginLeft:"0px", maxHeight:"37px"}}>
-          <h4 className="card-header text-center" style={{paddingTop:"4px", paddingLeft:"10px", paddingRight:"10px", height:"36px", backgroundColor:"#808080"}}>Shelters</h4>
+        <Row style={{marginLeft:"0px", marginRight:"0px", maxHeight:"37px"}}>
+          <h4 className="card-header text-center" style={{paddingTop:"4px", paddingLeft:"10px", paddingRight:"10px", height:"36px", width:"100%", backgroundColor:"#808080"}}>Shelters</h4>
         </Row>
       </Col>
     </Row>

@@ -100,48 +100,52 @@ function Hotline() {
           </Link>
         </ListGroup>
       </Col>
-      <Col xs={8} className="border rounded pl-0 pr-0">
-        <Map bounds={data.bounds} boundsOptions={{padding:[10,10]}} className="landing-leaflet-container">
-          {data.service_requests.filter(service_request => (service_request.status === statusOptions || statusOptions === "all")).map(service_request => (
-            <Marker
-              key={service_request.id}
-              position={[service_request.latitude, service_request.longitude]}
-              icon={service_request.sheltered_in_place > 0 ? SIPMarkerIcon : service_request.unable_to_locate > 0 ? UTLMarkerIcon : service_request.reported_animals > 0 ? reportedMarkerIcon : closedMarkerIcon}
-              onClick={() => window.open("/hotline/servicerequest/" + service_request.id, "_blank")}
-            >
-              <MapTooltip autoPan={false}>
-                <span>
-                  {mapState[service_request.id] ?
+      <Col xs={8} className="ml-0 mr-0 pl-0 pr-0">
+        <Row xs={12} className="ml-0 mr-0 pl-0 pr-0" style={{marginBottom:"-1px"}}>
+          <Col xs={10} className="border rounded pl-0 pr-0">
+            <Map bounds={data.bounds} boundsOptions={{padding:[10,10]}} className="landing-leaflet-container">
+              {data.service_requests.filter(service_request => (service_request.status === statusOptions || statusOptions === "all")).map(service_request => (
+                <Marker
+                  key={service_request.id}
+                  position={[service_request.latitude, service_request.longitude]}
+                  icon={service_request.sheltered_in_place > 0 ? SIPMarkerIcon : service_request.unable_to_locate > 0 ? UTLMarkerIcon : service_request.reported_animals > 0 ? reportedMarkerIcon : closedMarkerIcon}
+                  onClick={() => window.open("/hotline/servicerequest/" + service_request.id, "_blank")}
+                >
+                  <MapTooltip autoPan={false}>
                     <span>
-                      {Object.keys(mapState[service_request.id].matches).map((key,i) => (
-                        <span key={key} style={{textTransform:"capitalize"}}>
-                          {i > 0 && ", "}{prettyText('', key.split(',')[0], mapState[service_request.id].matches[key])}
+                      {mapState[service_request.id] ?
+                        <span>
+                          {Object.keys(mapState[service_request.id].matches).map((key,i) => (
+                            <span key={key} style={{textTransform:"capitalize"}}>
+                              {i > 0 && ", "}{prettyText('', key.split(',')[0], mapState[service_request.id].matches[key])}
+                            </span>
+                          ))}
                         </span>
-                      ))}
+                      :""}
+                      <br />
+                      {service_request.full_address}
+                      {service_request.followup_date ? <div>Followup Date: <Moment format="L">{service_request.followup_date}</Moment></div> : ""}
+                      <div>
+                        {service_request.aco_required ? <img width={16} height={16} src={badge} alt="" className="mr-1" /> : ""}
+                        {service_request.injured ? <img width={16} height={16} src={bandaid} alt="" className="mr-1" /> : ""}
+                        {service_request.accessible ? <img width={16} height={16} src={car} alt="" className="mr-1" /> : ""}
+                        {service_request.turn_around ? <img width={16} height={16} src={trailer} alt="" /> : ""}
+                      </div>
                     </span>
-                  :""}
-                  <br />
-                  {service_request.full_address}
-                  {service_request.followup_date ? <div>Followup Date: <Moment format="L">{service_request.followup_date}</Moment></div> : ""}
-                  <div>
-                    {service_request.aco_required ? <img width={16} height={16} src={badge} alt="" className="mr-1" /> : ""}
-                    {service_request.injured ? <img width={16} height={16} src={bandaid} alt="" className="mr-1" /> : ""}
-                    {service_request.accessible ? <img width={16} height={16} src={car} alt="" className="mr-1" /> : ""}
-                    {service_request.turn_around ? <img width={16} height={16} src={trailer} alt="" /> : ""}
-                  </div>
-                </span>
-              </MapTooltip>
-            </Marker>
-          ))}
-        </Map>
-        <Row style={{marginLeft:"0px", maxHeight:"37px"}}>
-          <h4 className="card-header text-center" style={{paddingTop:"4px", paddingLeft:"10px", paddingRight:"10px", height:"36px", backgroundColor:"#808080"}}>Service Requests</h4>
-          <ButtonGroup>
-            <Button variant={statusOptions === "all" ? "primary" : "secondary"} onClick={() => setStatusOptions("all")} style={{maxHeight:"36px"}}>All</Button>
-            <Button variant={statusOptions === "open" ? "primary" : "secondary"} onClick={() => setStatusOptions("open")} style={{maxHeight:"36px"}}>Open</Button>
-            <Button variant={statusOptions === "assigned" ? "primary" : "secondary"} onClick={() => setStatusOptions("assigned")} style={{maxHeight:"36px"}}>Assigned</Button>
-            <Button variant={statusOptions === "closed" ? "primary" : "secondary"} onClick={() => setStatusOptions("closed")} style={{maxHeight:"36px"}}>Closed</Button>
-          </ButtonGroup>
+                  </MapTooltip>
+                </Marker>
+              ))}
+            </Map>
+          </Col>
+          <Col xs={2} className="ml-0 mr-0 pl-0 pr-0 border rounded">
+            <Button variant={statusOptions === "all" ? "primary" : "secondary"} className="border" onClick={() => setStatusOptions("all")} style={{maxHeight:"36px", width:"100%", marginTop:"-1px"}}>All</Button>
+            <Button variant={statusOptions === "open" ? "primary" : "secondary"} className="border" onClick={() => setStatusOptions("open")} style={{maxHeight:"36px", width:"100%", marginTop:"-1px"}}>Open</Button>
+            <Button variant={statusOptions === "assigned" ? "primary" : "secondary"} className="border" onClick={() => setStatusOptions("assigned")} style={{maxHeight:"36px", width:"100%", marginTop:"-1px"}}>Assigned</Button>
+            <Button variant={statusOptions === "closed" ? "primary" : "secondary"} className="border" onClick={() => setStatusOptions("closed")} style={{maxHeight:"36px", width:"100%", marginTop:"-1px"}}>Closed</Button>
+          </Col>
+        </Row>
+        <Row className="ml-0 mr-0 border rounded" style={{maxHeight:"38px"}}>
+          <h4 className="card-header text-center" style={{paddingTop:"4px", paddingLeft:"10px", paddingRight:"10px", height:"36px", width:"100%", backgroundColor:"#808080"}}>Service Requests</h4>
         </Row>
       </Col>
     </Row>

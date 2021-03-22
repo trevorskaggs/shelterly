@@ -21,11 +21,13 @@ class ShadowScrollbars extends Component {
   handleUpdate(values) {
     const { shadowTop, shadowBottom, shadowRight, shadowLeft } = this.refs;
     const { scrollTop, scrollHeight, clientHeight, scrollLeft, scrollWidth, clientWidth } = values;
-    const shadowTopOpacity = 1 / 20 * Math.min(scrollTop, 20);
-    const bottomScrollTop = scrollHeight - clientHeight;
-    const shadowBottomOpacity = 1 / 20 * (bottomScrollTop - Math.max(scrollTop, bottomScrollTop - 20));
-    css(shadowTop, { opacity: shadowTopOpacity });
-    css(shadowBottom, { opacity: shadowBottomOpacity });
+    if (this.props.no_shadow !== "true") {
+      const shadowTopOpacity = 1 / 20 * Math.min(scrollTop, 20);
+      const bottomScrollTop = scrollHeight - clientHeight;
+      const shadowBottomOpacity = 1 / 20 * (bottomScrollTop - Math.max(scrollTop, bottomScrollTop - 20));
+      css(shadowTop, { opacity: shadowTopOpacity });
+      css(shadowBottom, { opacity: shadowBottomOpacity });
+    }
 
     if (this.props.horizontal) {
       const shadowLeftOpacity = 1 / 20 * Math.min(scrollLeft, 20);
@@ -85,12 +87,14 @@ class ShadowScrollbars extends Component {
           renderThumbVertical={props => <div {...props} style={{...props.style, background: 'rgba(226, 226, 226, 0.6)'}} />}
           renderThumbHorizontal={props => <div {...props} style={{...props.style, background: 'rgba(226, 226, 226, 0.6)'}} />}
           {...props}/>
+        {props.no_shadow !== "true" ?
         <div
           ref="shadowTop"
-          style={shadowTopStyle}/>
+          style={shadowTopStyle}/> : ""}
+        {props.no_shadow !== "true" ?
         <div
           ref="shadowBottom"
-          style={shadowBottomStyle}/>
+          style={shadowBottomStyle}/> : ""}
         {props.horizontal ?
         <div
           ref="shadowRight"
