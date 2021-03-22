@@ -19,7 +19,7 @@ export function loadUser({dispatch, removeCookie}) {
     removeCookie("token", {path: '/'});
     setAuthToken();
     dispatch({type: "AUTHENTICATION_ERROR", data: e});
-    navigate('/login');
+    navigate('/');
   })
 }
 
@@ -34,7 +34,7 @@ export function logoutUser({dispatch}, {removeCookie}) {
     setAuthToken();
     dispatch({ type: 'LOGOUT_SUCCESSFUL' });
     // Redirect to login page.
-    navigate('/login');
+    navigate('/');
   })
   .catch(e => {
     console.log(e);
