@@ -144,7 +144,7 @@ function Dispatch() {
           </Col>
         </Row>
         <Row className="ml-0 mr-0 border rounded" style={{maxHeight:"38px"}}>
-          <h4 className="card-header text-center" style={{paddingTop:"4px", paddingLeft:"10px", paddingRight:"10px", height:"36px", width:"100%", backgroundColor:"#808080"}}>Active Assignments</h4>
+          <h4 className="card-header text-center" style={{paddingTop:"4px", paddingLeft:"10px", paddingRight:"10px", height:"36px", width:"100%", backgroundColor:"#808080"}}>Active Dispatch Assignments</h4>
         </Row>
       </Col>
     </Row>

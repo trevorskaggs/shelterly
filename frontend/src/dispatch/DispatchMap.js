@@ -19,6 +19,7 @@ import { Typeahead } from 'react-bootstrap-typeahead';
 import Moment from 'react-moment';
 import Map, { countMatches, prettyText, reportedMarkerIcon, SIPMarkerIcon, UTLMarkerIcon, checkMarkerIcon } from "../components/Map";
 import { Checkbox, TextInput } from "../components/Form";
+import Scrollbar from '../components/Scrollbars';
 import 'react-bootstrap-typeahead/css/Typeahead.css';
 import 'leaflet/dist/leaflet.css';
 
@@ -448,7 +449,7 @@ function Deploy() {
           </Col>
         </Row>
         <Row className="d-flex flex-wrap" style={{marginTop:"8px", marginRight:"-20px", marginLeft:"-14px", minHeight:"36vh", paddingRight:"14px"}}>
-          <Col xs={2} className="d-flex flex-column pl-0 pr-0" style={{marginLeft:"-7px", marginRight:"5px"}}>
+          <Col xs={2} className="d-flex flex-column pl-0 pr-0" style={{marginLeft:"-7px", marginRight:"5px", height:"277px"}}>
             <div className="card-header border rounded pl-3 pr-3" style={{height:"100%"}}>
               <h5 className="mb-0 text-center">Options</h5>
               <hr/>
@@ -456,157 +457,159 @@ function Deploy() {
               <FormCheck id="pending_only" className="mt-3" name="pending_only" type="switch" label="Pending Only" checked={statusOptions.pending_only} onChange={handlePendingOnly} />
             </div>
           </Col>
-          <Col xs={10} className="border rounded" style={{marginLeft:"1px", height:"36vh", overflowY:"auto", paddingRight:"-1px"}}>
-            {data.service_requests.map(service_request => (
-              <span key={service_request.id}>{mapState[service_request.id] && (mapState[service_request.id].checked || !mapState[service_request.id].hidden) ?
-              <div className="mt-1 mb-1" style={{marginLeft:"-10px", marginRight:"-10px"}}>
-                <div className="card-header rounded">
-                  <Checkbox
-                    id={String(service_request.id)}
-                    name={String(service_request.id)}
-                    checked={mapState[service_request.id] ? mapState[service_request.id].checked : false}
-                    style={{
-                      transform: "scale(1.25)",
-                      marginLeft: "-14px",
-                      marginTop: "-5px",
-                      marginBottom: "-5px"
-                    }}
-                    onChange={() => handleMapState(service_request.id)}
-                  />
-                  {mapState[service_request.id] ?
-                  <span>
-                    {Object.keys(mapState[service_request.id].matches).map((key,i) => (
-                      <span key={key} style={{textTransform:"capitalize"}}>
-                        {i > 0 && ", "}{prettyText(key.split(',')[1], key.split(',')[0], mapState[service_request.id].matches[key])}
-                      </span>
-                    ))}
-                  </span>
-                  :""}
-                  {service_request.reported_animals > 0 ?
-                  <OverlayTrigger
-                    key={"reported"}
-                    placement="top"
-                    overlay={
-                      <Tooltip id={`tooltip-reported`}>
-                        {service_request.reported_animals} animal{service_request.reported_animals > 1 ? "s are":" is"} reported
-                      </Tooltip>
-                    }
-                  >
-                    <FontAwesomeIcon icon={faExclamationCircle} className="ml-1"/>
-                  </OverlayTrigger>
-                  : ""}
-                  {service_request.sheltered_in_place > 0 ?
-                  <OverlayTrigger
-                    key={"sip"}
-                    placement="top"
-                    overlay={
-                      <Tooltip id={`tooltip-sip`}>
-                        {service_request.sheltered_in_place} animal{service_request.sheltered_in_place > 1 ? "s are":" is"} sheltered in place
-                      </Tooltip>
-                    }
-                  >
-                    <span className="fa-layers ml-1">
-                      <FontAwesomeIcon icon={faCircle} transform={'grow-1'} />
-                      <FontAwesomeIcon icon={faHomeAlt} style={{color:"#444"}} transform={'shrink-3'} size="sm" inverse />
+          <Col xs={10} className="border rounded" style={{marginLeft:"1px", height:"277px", overflowY:"auto", paddingRight:"-1px"}}>
+            <Scrollbar no_shadow="true" style={{height:"275px", marginLeft:"-10px", marginRight:"-10px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
+              {data.service_requests.map(service_request => (
+                <span key={service_request.id}>{mapState[service_request.id] && (mapState[service_request.id].checked || !mapState[service_request.id].hidden) ?
+                <div className="mt-1 mb-1" style={{}}>
+                  <div className="card-header rounded">
+                    <Checkbox
+                      id={String(service_request.id)}
+                      name={String(service_request.id)}
+                      checked={mapState[service_request.id] ? mapState[service_request.id].checked : false}
+                      style={{
+                        transform: "scale(1.25)",
+                        marginLeft: "-14px",
+                        marginTop: "-5px",
+                        marginBottom: "-5px"
+                      }}
+                      onChange={() => handleMapState(service_request.id)}
+                    />
+                    {mapState[service_request.id] ?
+                    <span>
+                      {Object.keys(mapState[service_request.id].matches).map((key,i) => (
+                        <span key={key} style={{textTransform:"capitalize"}}>
+                          {i > 0 && ", "}{prettyText(key.split(',')[1], key.split(',')[0], mapState[service_request.id].matches[key])}
+                        </span>
+                      ))}
                     </span>
-                  </OverlayTrigger>
-                  : ""}
-                  {service_request.unable_to_locate > 0 ?
-                  <OverlayTrigger
-                    key={"utl"}
-                    placement="top"
-                    overlay={
-                      <Tooltip id={`tooltip-utl`}>
-                        {service_request.unable_to_locate} animal{service_request.unable_to_locate > 1 ? "s are":" is"} unable to be located
-                      </Tooltip>
-                    }
-                  >
-                    <FontAwesomeIcon icon={faQuestionCircle} className="ml-1"/>
-                  </OverlayTrigger>
-                  : ""}
-                  {service_request.aco_required ?
-                  <OverlayTrigger
-                    key={"aco"}
-                    placement="top"
-                    overlay={
-                      <Tooltip id={`tooltip-aco`}>
-                        ACO required
-                      </Tooltip>
-                    }
-                  >
-                    <FontAwesomeIcon icon={faBadgeSheriff} className="ml-1"/>
-                  </OverlayTrigger>
-                  : ""}
-                  {service_request.injured ?
-                  <OverlayTrigger
-                    key={"injured"}
-                    placement="top"
-                    overlay={
-                      <Tooltip id={`tooltip-injured`}>
-                        Injured animal
-                      </Tooltip>
-                    }
-                  >
-                    <FontAwesomeIcon icon={faBandAid} className="ml-1"/>
-                  </OverlayTrigger>
-                  : ""}
-                  {service_request.accessible ?
-                  <OverlayTrigger
-                    key={"accessible"}
-                    placement="top"
-                    overlay={
-                      <Tooltip id={`tooltip-accessible`}>
-                        Easily accessible
-                      </Tooltip>
-                    }
-                  >
-                    <FontAwesomeIcon icon={faCar} className="ml-1"/>
-                  </OverlayTrigger>
-                  : ""}
-                  {service_request.turn_around ?
-                  <OverlayTrigger
-                    key={"turnaround"}
-                    placement="top"
-                    overlay={
-                      <Tooltip id={`tooltip-turnaround`}>
-                        Room to turn around
-                      </Tooltip>
-                    }
-                  >
-                    <FontAwesomeIcon icon={faTrailer} className="ml-1"/>
-                  </OverlayTrigger>
-                  : ""}
-                  <span className="ml-2">| &nbsp;{service_request.full_address}</span>
-                  <OverlayTrigger
-                    key={"radius-toggle"}
-                    placement="top"
-                    overlay={
-                      <Tooltip id={`tooltip-radius-toggle`}>
-                        Toggle 1 mile radius
-                      </Tooltip>
-                    }
-                  >
-                    <FontAwesomeIcon icon={faBullseye} color={mapState[service_request.id].radius === "enabled" ? "red" : ""} className="ml-1 mr-1" style={{cursor:'pointer'}} onClick={() => handleRadius(service_request.id)} />
-                  </OverlayTrigger>
-                  <OverlayTrigger
-                    key={"request-details"}
-                    placement="top"
-                    overlay={
-                      <Tooltip id={`tooltip-request-details`}>
-                        Service request details
-                      </Tooltip>
-                    }
-                  >
-                    <Link href={"/hotline/servicerequest/" + service_request.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} inverse /></Link>
-                  </OverlayTrigger>
+                    :""}
+                    {service_request.reported_animals > 0 ?
+                    <OverlayTrigger
+                      key={"reported"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-reported`}>
+                          {service_request.reported_animals} animal{service_request.reported_animals > 1 ? "s are":" is"} reported
+                        </Tooltip>
+                      }
+                    >
+                      <FontAwesomeIcon icon={faExclamationCircle} className="ml-1"/>
+                    </OverlayTrigger>
+                    : ""}
+                    {service_request.sheltered_in_place > 0 ?
+                    <OverlayTrigger
+                      key={"sip"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-sip`}>
+                          {service_request.sheltered_in_place} animal{service_request.sheltered_in_place > 1 ? "s are":" is"} sheltered in place
+                        </Tooltip>
+                      }
+                    >
+                      <span className="fa-layers ml-1">
+                        <FontAwesomeIcon icon={faCircle} transform={'grow-1'} />
+                        <FontAwesomeIcon icon={faHomeAlt} style={{color:"#444"}} transform={'shrink-3'} size="sm" inverse />
+                      </span>
+                    </OverlayTrigger>
+                    : ""}
+                    {service_request.unable_to_locate > 0 ?
+                    <OverlayTrigger
+                      key={"utl"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-utl`}>
+                          {service_request.unable_to_locate} animal{service_request.unable_to_locate > 1 ? "s are":" is"} unable to be located
+                        </Tooltip>
+                      }
+                    >
+                      <FontAwesomeIcon icon={faQuestionCircle} className="ml-1"/>
+                    </OverlayTrigger>
+                    : ""}
+                    {service_request.aco_required ?
+                    <OverlayTrigger
+                      key={"aco"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-aco`}>
+                          ACO required
+                        </Tooltip>
+                      }
+                    >
+                      <FontAwesomeIcon icon={faBadgeSheriff} className="ml-1"/>
+                    </OverlayTrigger>
+                    : ""}
+                    {service_request.injured ?
+                    <OverlayTrigger
+                      key={"injured"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-injured`}>
+                          Injured animal
+                        </Tooltip>
+                      }
+                    >
+                      <FontAwesomeIcon icon={faBandAid} className="ml-1"/>
+                    </OverlayTrigger>
+                    : ""}
+                    {service_request.accessible ?
+                    <OverlayTrigger
+                      key={"accessible"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-accessible`}>
+                          Easily accessible
+                        </Tooltip>
+                      }
+                    >
+                      <FontAwesomeIcon icon={faCar} className="ml-1"/>
+                    </OverlayTrigger>
+                    : ""}
+                    {service_request.turn_around ?
+                    <OverlayTrigger
+                      key={"turnaround"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-turnaround`}>
+                          Room to turn around
+                        </Tooltip>
+                      }
+                    >
+                      <FontAwesomeIcon icon={faTrailer} className="ml-1"/>
+                    </OverlayTrigger>
+                    : ""}
+                    <span className="ml-2">| &nbsp;{service_request.full_address}</span>
+                    <OverlayTrigger
+                      key={"radius-toggle"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-radius-toggle`}>
+                          Toggle 1 mile radius
+                        </Tooltip>
+                      }
+                    >
+                      <FontAwesomeIcon icon={faBullseye} color={mapState[service_request.id].radius === "enabled" ? "red" : ""} className="ml-1 mr-1" style={{cursor:'pointer'}} onClick={() => handleRadius(service_request.id)} />
+                    </OverlayTrigger>
+                    <OverlayTrigger
+                      key={"request-details"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-request-details`}>
+                          Service request details
+                        </Tooltip>
+                      }
+                    >
+                      <Link href={"/hotline/servicerequest/" + service_request.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} inverse /></Link>
+                    </OverlayTrigger>
+                  </div>
                 </div>
+                : ""}
+                </span>
+              ))}
+              <div className="card-header mt-1 mb-1 rounded"  style={{marginLeft:"-10px", marginRight:"-10px"}} hidden={data.service_requests.length > 0}>
+                No open Service Requests found.
               </div>
-              : ""}
-              </span>
-            ))}
-            <div className="card-header mt-1 mb-1 rounded"  style={{marginLeft:"-10px", marginRight:"-10px"}} hidden={data.service_requests.length > 0}>
-              No open Service Requests found.
-            </div>
+            </Scrollbar>
           </Col>
         </Row>
         <Modal show={show} onHide={handleClose}>
