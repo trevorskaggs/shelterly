@@ -9,6 +9,7 @@ import {
 import ReactImageFallback from 'react-image-fallback';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import Header from '../components/Header';
+import Scrollbar from '../components/Scrollbars';
 import noImageFound from '../static/images/image-not-found.png';
 
 function ShelterRoomAssignment({id}) {
@@ -168,79 +169,11 @@ function ShelterRoomAssignment({id}) {
             <span>Roomless Animals</span>
             <Droppable droppableId="unroomed_animals" direction="horizontal">
               {(provided, snapshot) => (
-              <Card className="border rounded" style={{height:"91px", display:"flex", justifyContent:"space-around", overflowX:"scroll", backgroundColor:snapshot.isDraggingOver ? "gray" : "#303030"}}>
-                <Card.Body style={{paddingBottom:"3px", display:"flex", flexDirection:"column"}}>
-                <ul className="unroomed_animals" {...provided.droppableProps} ref={provided.innerRef}>
-                {data.unroomed_animals.map((animal, index) => (
-                  <Draggable key={animal.id} draggableId={String(animal.id)} index={index}>
-                    {(provided, snapshot) => (
-                      <li ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
-                        <Card className={"border rounded" + (snapshot.isDragging ? " border-danger" : "")} style={{width:"150px", whiteSpace:"nowrap", overflow:"hidden"}}>
-                          <div className="row no-gutters" style={{ textTransform:"capitalize" }}>
-                            <div className="mb-0">
-                              <ReactImageFallback style={{width:"47px", height:"47px", marginRight:"3px", objectFit:"cover", overflow:"hidden", float:"left"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} />
-                              <span title={animal.name}>{animal.name||"Unknown"}</span>
-                              <div>
-                                #{animal.id}&nbsp;
-                                {animal.species === 'horse' && animal.size !== 'unknown' ? animal.size : animal.species}&nbsp;
-                                {animal.owner_names.length === 0 ?
-                                <OverlayTrigger
-                                  key={"stray"}
-                                  placement="top"
-                                  overlay={
-                                    <Tooltip id={`tooltip-stray`}>
-                                      Animal is stray
-                                    </Tooltip>
-                                  }
-                                >
-                                  <FontAwesomeIcon icon={faUserAltSlash} size="sm" />
-                                </OverlayTrigger> :
-                                <OverlayTrigger
-                                  key={"stray"}
-                                  placement="top"
-                                  overlay={
-                                    <Tooltip id={`tooltip-stray`}>
-                                      {animal.owner_names.map(owner_name => (
-                                        <div key={owner_name}>{owner_name}</div>
-                                      ))}
-                                    </Tooltip>
-                                  }
-                                >
-                                  <FontAwesomeIcon icon={faUserAlt} size="sm" />
-                                </OverlayTrigger>}
-                              </div>
-                            </div>
-                          </div>
-                        </Card>
-                      </li>
-                    )}
-                  </Draggable>
-                ))}
-                {provided.placeholder}
-                </ul>
-                </Card.Body>
-              </Card>
-              )}
-            </Droppable>
-          </div>
-        </Row>
-        <span>Buildings</span>
-        <Row className="d-flex ml-0 mr-0 mt-1 mb-3 border rounded">
-          <ButtonGroup className="">
-            {data.buildings.map(building => (
-              <Button key={building.id} variant={selectedBuilding === building.id ? "primary" : "secondary"} onClick={() => setSelectedBuilding(building.id)}>{building.name}</Button>
-            ))}
-          </ButtonGroup>
-        </Row>
-        <Row className="d-flex ml-0">
-          {data.rooms.map((room, index) => (
-            <span key={room.id} hidden={room.building !== selectedBuilding} style={{marginBottom:"32px"}}>Room: {room.name}<Link href={"/shelter/room/" + room.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
-              <span className="col">
-                <Droppable droppableId={String(index)}>
-                  {(provided, snapshot) => (
-                  <Card className="border rounded mr-3 animals" style={{width:"190px", minHeight: "343px", height: "343px", display:"flex", justifyContent:"space-around", overflowY:"scroll", backgroundColor:snapshot.isDraggingOver ? "gray" : "#303030"}} {...provided.droppableProps} ref={provided.innerRef}>
-                    <Card.Body style={{paddingBottom:"3px", display:"flex", flexDirection:"column"}}>
-                    {room.animals.map((animal, index) => (
+              <Card className="border rounded" style={{height:"91px", display:"flex", justifyContent:"space-around", overflow:"auto", backgroundColor:snapshot.isDraggingOver ? "gray" : "#303030"}}>
+                <Scrollbar style={{height:"89px", width:"99.99%"}} renderView={props => <div {...props} style={{...props.style, marginBottom:"-18px"}}/>}>
+                  <Card.Body style={{paddingBottom:"3px", display:"flex", flexDirection:"column"}}>
+                    <ul className="unroomed_animals" {...provided.droppableProps} ref={provided.innerRef}>
+                    {data.unroomed_animals.map((animal, index) => (
                       <Draggable key={animal.id} draggableId={String(animal.id)} index={index}>
                         {(provided, snapshot) => (
                           <li ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
@@ -286,7 +219,79 @@ function ShelterRoomAssignment({id}) {
                       </Draggable>
                     ))}
                     {provided.placeholder}
-                    </Card.Body>
+                    </ul>
+                  </Card.Body>
+                </Scrollbar>
+              </Card>
+              )}
+            </Droppable>
+          </div>
+        </Row>
+        <span>Buildings</span>
+        <Row className="d-flex ml-0 mr-0 mt-1 mb-3 border rounded">
+          <ButtonGroup className="">
+            {data.buildings.map(building => (
+              <Button key={building.id} variant={selectedBuilding === building.id ? "primary" : "secondary"} onClick={() => setSelectedBuilding(building.id)}>{building.name}</Button>
+            ))}
+          </ButtonGroup>
+        </Row>
+        <Row className="d-flex ml-0">
+          {data.rooms.map((room, index) => (
+            <span key={room.id} hidden={room.building !== selectedBuilding} style={{marginBottom:"32px"}}>Room: {room.name}<Link href={"/shelter/room/" + room.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
+              <span className="col">
+                <Droppable droppableId={String(index)}>
+                  {(provided, snapshot) => (
+                  <Card className="border rounded mr-3 animals" style={{width:"190px", minHeight: "348px", height: "348px", display:"flex", overflowY:"auto", backgroundColor:snapshot.isDraggingOver ? "gray" : "#303030"}} {...provided.droppableProps} ref={provided.innerRef}>
+                    <Scrollbar style={{height:"346px"}} renderView={props => <div {...props} style={{...props.style, marginBottom:"-19px"}}/>}>
+                      <Card.Body style={{paddingTop:"15px", paddingBottom:"0px", display:"flex", flexDirection:"column"}}>
+                      {room.animals.map((animal, index) => (
+                        <Draggable key={animal.id} draggableId={String(animal.id)} index={index}>
+                          {(provided, snapshot) => (
+                            <li ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
+                              <Card className={"border rounded" + (snapshot.isDragging ? " border-danger" : "")} style={{width:"150px", whiteSpace:"nowrap", overflow:"hidden"}}>
+                                <div className="row no-gutters" style={{ textTransform:"capitalize" }}>
+                                  <div className="mb-0">
+                                    <ReactImageFallback style={{width:"47px", height:"47px", marginRight:"3px", objectFit:"cover", overflow:"hidden", float:"left"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} />
+                                    <span title={animal.name}>{animal.name||"Unknown"}</span>
+                                    <div>
+                                      #{animal.id}&nbsp;
+                                      {animal.species === 'horse' && animal.size !== 'unknown' ? animal.size : animal.species}&nbsp;
+                                      {animal.owner_names.length === 0 ?
+                                      <OverlayTrigger
+                                        key={"stray"}
+                                        placement="top"
+                                        overlay={
+                                          <Tooltip id={`tooltip-stray`}>
+                                            Animal is stray
+                                          </Tooltip>
+                                        }
+                                      >
+                                        <FontAwesomeIcon icon={faUserAltSlash} size="sm" />
+                                      </OverlayTrigger> :
+                                      <OverlayTrigger
+                                        key={"stray"}
+                                        placement="top"
+                                        overlay={
+                                          <Tooltip id={`tooltip-stray`}>
+                                            {animal.owner_names.map(owner_name => (
+                                              <div key={owner_name}>{owner_name}</div>
+                                            ))}
+                                          </Tooltip>
+                                        }
+                                      >
+                                        <FontAwesomeIcon icon={faUserAlt} size="sm" />
+                                      </OverlayTrigger>}
+                                    </div>
+                                  </div>
+                                </div>
+                              </Card>
+                            </li>
+                          )}
+                        </Draggable>
+                      ))}
+                      {provided.placeholder}
+                      </Card.Body>
+                    </Scrollbar>
                   </Card>
                   )}
                 </Droppable>

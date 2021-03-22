@@ -103,23 +103,19 @@ input[disabled] {
   display: flex;
   min-height: 67px;
 }
-::-webkit-scrollbar {display:none;}
 
 .unroomed_animals li {
-  margin-right: 1em;
-  margin-bottom: 1em;
+  margin-right: 16px;
 }
 
 .animals {
   list-style: none;
   padding-left: 0;
-  flex-grow: 1;
-  margin-bottom: -45px;
 }
 
 .animals li {
   align-items: center;
-  margin-bottom: 1em;
+  margin-bottom: 17px;
 }
 
 /* Icon CSS */
