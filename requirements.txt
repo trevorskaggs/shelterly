@@ -7,6 +7,7 @@ django-rest-knox
 django-ordered-model
 djangorestframework>=3.12
 django-storages
+drf-yasg
 geocoder==1.38.1
 ipython
 pillow
