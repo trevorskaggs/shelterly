@@ -121,8 +121,12 @@ function ServiceRequestForm(props) {
             .then(response => {
               props.state.steps.animals.forEach(animal => {
                 // Add owner and reporter to animal data.
-                animal.append('reporter', reporterResponse[0].data.id);
-                animal.append('new_owner', ownerResponse[0].data.id);
+                if (reporterResponse[0].data.id) {
+                  animal.append('reporter', reporterResponse[0].data.id);
+                }
+                if (ownerResponse[0].data.id) {
+                  animal.append('new_owner', ownerResponse[0].data.id);
+                }
                 animal.append('request', response.data.id);
                 axios.post('/animals/api/animal/', animal)
                 .catch(error => {
