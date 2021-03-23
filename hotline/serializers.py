@@ -40,9 +40,9 @@ class VisitNoteSerializer(serializers.ModelSerializer):
 class SimpleServiceRequestSerializer(serializers.ModelSerializer):
     from people.serializers import SimplePersonSerializer
 
-
     full_address = serializers.SerializerMethodField()
     animals = SimpleAnimalSerializer(many=True, required=False, read_only=True)
+    latest_evac = serializers.SerializerMethodField()
     # these method fields require animals queryset
     reported_animals = serializers.SerializerMethodField()
     sheltered_in_place = serializers.SerializerMethodField()
@@ -51,18 +51,22 @@ class SimpleServiceRequestSerializer(serializers.ModelSerializer):
     injured = serializers.BooleanField(read_only=True)
     animal_count = serializers.IntegerField(read_only=True)
     owner_objects = SimplePersonSerializer(source='owners', many=True, required=False, read_only=True)
-
-
+    reporter_object = SimplePersonSerializer(source='reporter', required=False, read_only=True)
+    evacuation_assignments = serializers.SerializerMethodField()
 
     class Meta:
         model = ServiceRequest
-        fields = ['id', 'latitude', 'longitude', 'full_address', 'followup_date', 'owners', 'address', 'reporter', 'directions',
-        'animal_count','injured', 'accessible', 'turn_around', 'animals', 'reported_animals', 'owner_objects', 'sheltered_in_place', 'unable_to_locate', 'aco_required']
+        fields = ['id', 'latitude', 'longitude', 'full_address', 'followup_date', 'owners', 'address', 'reporter', 'directions', 'latest_evac', 'evacuation_assignments',
+        'animal_count','injured', 'accessible', 'turn_around', 'animals', 'status', 'reported_animals', 'reporter_object', 'owner_objects', 'sheltered_in_place', 'unable_to_locate', 'aco_required']
 
 
     # Custom field for the full address.
     def get_full_address(self, obj):
         return build_full_address(obj)
+
+    def get_evacuation_assignments(self, obj):
+        from evac.serializers import SimpleEvacAssignmentSerializer
+        return SimpleEvacAssignmentSerializer(obj.evacuation_assignments, many=True, required=False, read_only=True).data
 
     # Custom field for if any animal is ACO Required. If it is aggressive or "Other" species.
     def get_aco_required(self, obj):
@@ -102,6 +106,13 @@ class SimpleServiceRequestSerializer(serializers.ModelSerializer):
             if data.get(key) == '':
                 data[key] = None
 
+    def get_latest_evac(self, obj):
+        from evac.models import EvacAssignment
+        assigned_evac = EvacAssignment.objects.filter(service_requests=obj, end_time__isnull=True).values('id', 'start_time', 'end_time').first()
+        if assigned_evac:
+            return assigned_evac
+        return EvacAssignment.objects.filter(service_requests=obj, end_time__isnull=False).values('id', 'start_time', 'end_time').first()
+
         # Truncates latitude and longitude.
         if data.get('latitude'):
             data['latitude'] = float("%.6f" % float(data.get('latitude')))
@@ -110,47 +121,20 @@ class SimpleServiceRequestSerializer(serializers.ModelSerializer):
         return super().to_internal_value(data)
 
 
-class SimpleEvacAssignmentSerializer(serializers.ModelSerializer):
-
-    team_name = serializers.SerializerMethodField()
-    team_member_names = serializers.SerializerMethodField()
-
-    def get_team_name(self, obj):
-        # does this kick off another query?
-        try:
-            return obj.team.name
-        except AttributeError:
-            return ''
-
-    def get_team_member_names(self, obj):
-        # does this kick off another query?
-        try:
-            return ", ".join([team_member['first_name'] + " " + team_member['last_name'] for team_member in obj.team.team_members.all().values('first_name', 'last_name')])
-        except AttributeError:
-            return ''
-
-    class Meta:
-        model = EvacAssignment
-        fields = ['id', 'start_time', 'end_time', 'team_name', 'team_member_names']
-
-
 class ServiceRequestSerializer(SimpleServiceRequestSerializer):
     from people.serializers import SimplePersonSerializer
 
 
     action_history = serializers.SerializerMethodField()
-    latest_evac = serializers.SerializerMethodField()
     animal_count = serializers.IntegerField(read_only=True)
     injured = serializers.BooleanField(read_only=True)
-    reporter_object = SimplePersonSerializer(source='reporter', required=False, read_only=True)
-    evacuation_assignments = SimpleEvacAssignmentSerializer(many=True, required=False, read_only=True)
     visit_notes = VisitNoteSerializer(source='visitnote_set', many=True, required=False, read_only=True)
 
     class Meta:
         model = ServiceRequest
         fields = ['id', 'latitude', 'longitude', 'full_address', 'followup_date', 'status',
         'injured', 'accessible', 'turn_around', 'animals', 'reported_animals', 'sheltered_in_place', 'unable_to_locate', 'aco_required',
-        'animal_count', 'action_history', 'owner_objects', 'reporter_object', 'evacuation_assignments', 'visit_notes', 'latest_evac']
+        'animal_count', 'action_history', 'owner_objects', 'evacuation_assignments', 'visit_notes', 'latest_evac']
 
     # def __init__(self, *args, **kwargs):
     #     super(ServiceRequestSerializer, self).__init__(*args, **kwargs)
@@ -159,10 +143,3 @@ class ServiceRequestSerializer(SimpleServiceRequestSerializer):
     # Custom field for the action history list.
     def get_action_history(self, obj):
         return [build_action_string(action) for action in obj.target_actions.all()]
-
-    def get_latest_evac(self, obj):
-        from evac.models import EvacAssignment
-        assigned_evac = EvacAssignment.objects.filter(service_requests=obj, end_time__isnull=True).values('id', 'start_time', 'end_time').first()
-        if assigned_evac:
-            return assigned_evac
-        return EvacAssignment.objects.filter(service_requests=obj, end_time__isnull=False).values('id', 'start_time', 'end_time').first()

@@ -26,7 +26,6 @@ class ModestAnimalSerializer(SimpleAnimalSerializer):
         fields = ['id', 'species', 'aggressive', 'status', 'aco_required', 'evacuation_assignments']
 
 class AnimalSerializer(SimpleAnimalSerializer):
-    is_stray = serializers.BooleanField(read_only=True)
     front_image = serializers.SerializerMethodField()
     side_image = serializers.SerializerMethodField()
     extra_images = serializers.SerializerMethodField()
@@ -43,9 +42,9 @@ class AnimalSerializer(SimpleAnimalSerializer):
 
     class Meta:
         model = Animal
-        fields = ['id', 'species', 'aggressive', 'status', 'aco_required', 'is_stray', 'front_image', 'side_image', 'extra_images',
-        'found_location', 'owner_names', 'owner_objects', 'full_address', 'shelter_name', 'reporter_object', 'request_address',
-        'action_history', 'evacuation_assignments', 'room_name', 'name', 'sex', 'size', 'age', 'pcolor', 'scolor']
+        fields = ['id', 'species', 'aggressive', 'status', 'aco_required', 'front_image', 'side_image', 'extra_images',
+        'found_location', 'owner_names', 'owner_objects', 'full_address', 'shelter', 'shelter_name', 'reporter_object', 'request', 'request_address',
+        'action_history', 'evacuation_assignments', 'room', 'room_name', 'name', 'sex', 'size', 'age', 'pcolor', 'scolor']
     
     def get_owner_names(self, obj):
         #TODO: optimize

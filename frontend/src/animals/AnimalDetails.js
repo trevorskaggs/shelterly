@@ -206,20 +206,6 @@ function AnimalDetails({id}) {
                 </div>
               </ListGroup.Item>
               {data.last_seen ? <ListGroup.Item><b>Last Seen:</b> <Moment format="MMMM Do YYYY HH:mm">{data.last_seen}</Moment></ListGroup.Item> : ""}
-              {data.request ?
-              <ListGroup.Item><b>Service Request: </b>{data.request_address}
-                <OverlayTrigger
-                  key={"service-request-details"}
-                  placement="top"
-                  overlay={
-                    <Tooltip id={`tooltip-service-request-details`}>
-                      Service request details
-                    </Tooltip>
-                  }
-                >
-                  <Link href={"/hotline/servicerequest/" + data.request}><FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1" inverse /></Link>
-                </OverlayTrigger>
-              </ListGroup.Item>: ''}
             </ListGroup>
             <Card.Title>
               <h4 className="mb-0 mt-3">Contacts
@@ -285,8 +271,23 @@ function AnimalDetails({id}) {
             </Card.Title>
             <hr/>
             <ListGroup variant="flush" style={{marginBottom:"-13px"}}>
+              {data.request ?
+                <ListGroup.Item style={{marginTop:"-13px"}}><b>Service Request: </b>{data.request_address}
+                  <OverlayTrigger
+                    key={"service-request-details"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-service-request-details`}>
+                        Service request details
+                      </Tooltip>
+                    }
+                  >
+                    <Link href={"/hotline/servicerequest/" + data.request}><FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1" inverse /></Link>
+                  </OverlayTrigger>
+                </ListGroup.Item>
+              : ''}
               {data.shelter ? <ListGroup.Item style={{marginTop:"-13px"}}><b>Shelter:</b> {data.shelter_name}<Link href={"/shelter/" + data.shelter}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item> : ""}
-              <ListGroup.Item style={{marginTop:"-13px"}}><b>Address:</b> {data.full_address || "Unknown"}</ListGroup.Item>
+              {data.shelter ? <ListGroup.Item style={{marginTop:"-13px"}}><b>Address:</b> {data.full_address || "Unknown"}</ListGroup.Item> : ""}
               {data.room ? <ListGroup.Item style={{marginTop:"-13px"}}><b>Room:</b> {data.room_name}<Link href={"/shelter/room/" + data.room}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item> : ""}
               {data.found_location ? 
               <ListGroup.Item><b>Found Location: </b>{data.found_location}</ListGroup.Item>:
