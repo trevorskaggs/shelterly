@@ -21,6 +21,7 @@ class ShadowScrollbars extends Component {
   handleUpdate(values) {
     const { shadowTop, shadowBottom, shadowRight, shadowLeft } = this.refs;
     const { scrollTop, scrollHeight, clientHeight, scrollLeft, scrollWidth, clientWidth } = values;
+
     if (this.props.no_shadow !== "true") {
       const shadowTopOpacity = 1 / 20 * Math.min(scrollTop, 20);
       const bottomScrollTop = scrollHeight - clientHeight;

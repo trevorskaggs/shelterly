@@ -5,7 +5,7 @@ import { Form, Formik } from 'formik';
 import { Button, Col, FormCheck, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBandAid, faBullseye, faCar, faCircle, faClipboardList, faExclamationCircle, faQuestionCircle, faPencilAlt, faTrailer
+  faBandAid, faBullseye, faCalendarDay, faCar, faCircle, faClipboardList, faExclamationCircle, faQuestionCircle, faPencilAlt, faTrailer, faUserAlt, faUserAltSlash
 } from '@fortawesome/free-solid-svg-icons';
 import { faBadgeSheriff, faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
 import { Circle, Marker, Tooltip as MapTooltip } from "react-leaflet";
@@ -134,7 +134,6 @@ function Deploy() {
       for (var select_status in mapState[id].status_matches) {
         matches = {...totalSelectedState[select_status]};
         for (var select_key in mapState[id].status_matches[select_status]){
-          // total = 0;
           if (!totalSelectedState[select_status][select_key]) {
             total = mapState[id].status_matches[select_status][select_key];
           } else {
@@ -204,6 +203,9 @@ function Deploy() {
         });
         // Then fetch all recent Teams.
         axios.get('/evac/api/dispatchteam/', {
+          params: {
+            map: true
+          },
           cancelToken: source.token,
         })
         .then(response => {
@@ -416,7 +418,7 @@ function Deploy() {
             </Map>
           </Col>
         </Row>
-        <Row className="mt-2">
+        <Row className="mt-2" style={{marginRight:"-12px"}}>
           <Col xs={2} className="pl-0 pr-0" style={{marginLeft:"-7px", paddingRight:"2px"}}>
             <Button type="submit" className="btn-block mt-auto" style={{marginBottom:"-33px"}} disabled={selectedCount.disabled || props.values.team_members.length === 0}>DEPLOY</Button>
           </Col>
@@ -445,10 +447,11 @@ function Deploy() {
               selected={selected}
               options={teamData.options}
               placeholder="Choose team members..."
+              style={{height:"20px"}}
             />
           </Col>
         </Row>
-        <Row className="d-flex flex-wrap" style={{marginTop:"8px", marginRight:"-20px", marginLeft:"-14px", minHeight:"36vh", paddingRight:"14px"}}>
+        <Row className="d-flex flex-wrap" style={{marginTop:"8px", marginRight:"-23px", marginLeft:"-14px", minHeight:"36vh", paddingRight:"14px"}}>
           <Col xs={2} className="d-flex flex-column pl-0 pr-0" style={{marginLeft:"-7px", marginRight:"5px", height:"277px"}}>
             <div className="card-header border rounded pl-3 pr-3" style={{height:"100%"}}>
               <h5 className="mb-0 text-center">Options</h5>
@@ -483,7 +486,7 @@ function Deploy() {
                         </span>
                       ))}
                     </span>
-                    :""}
+                    : ""}
                     {service_request.reported_animals > 0 ?
                     <OverlayTrigger
                       key={"reported"}
@@ -578,7 +581,8 @@ function Deploy() {
                       <FontAwesomeIcon icon={faTrailer} className="ml-1"/>
                     </OverlayTrigger>
                     : ""}
-                    <span className="ml-2">| &nbsp;{service_request.full_address}</span>
+                    <span className="ml-2">|
+                    &nbsp;{service_request.full_address}</span>
                     <OverlayTrigger
                       key={"radius-toggle"}
                       placement="top"
@@ -590,6 +594,44 @@ function Deploy() {
                     >
                       <FontAwesomeIcon icon={faBullseye} color={mapState[service_request.id].radius === "enabled" ? "red" : ""} className="ml-1 mr-1" style={{cursor:'pointer'}} onClick={() => handleRadius(service_request.id)} />
                     </OverlayTrigger>
+                    {service_request.followup_date ?
+                    <OverlayTrigger
+                      key={"followup-date"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-followup-date`}>
+                          Followup date:&nbsp;<Moment format="L">{service_request.followup_date}</Moment>
+                        </Tooltip>
+                      }
+                    >
+                      <FontAwesomeIcon icon={faCalendarDay} className="mr-1" />
+                    </OverlayTrigger> : ""}
+                    {service_request.owner_objects.length === 0 ?
+                      <OverlayTrigger
+                        key={"stray"}
+                        placement="top"
+                        overlay={
+                          <Tooltip id={`tooltip-stray`}>
+                            No owner
+                          </Tooltip>
+                        }
+                      >
+                        <FontAwesomeIcon icon={faUserAltSlash} className="mr-1" size="sm" />
+                      </OverlayTrigger> :
+                      <OverlayTrigger
+                        key={"stray"}
+                        placement="top"
+                        overlay={
+                          <Tooltip id={`tooltip-stray`}>
+                            {service_request.owner_objects.map(owner => (
+                              <div key={owner.id}>{owner.first_name} {owner.last_name}</div>
+                            ))}
+                          </Tooltip>
+                        }
+                      >
+                        <FontAwesomeIcon icon={faUserAlt} className="mr-1" size="sm" />
+                      </OverlayTrigger>
+                    }
                     <OverlayTrigger
                       key={"request-details"}
                       placement="top"
@@ -600,7 +642,7 @@ function Deploy() {
                       }
                     >
                       <Link href={"/hotline/servicerequest/" + service_request.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} inverse /></Link>
-                    </OverlayTrigger>
+                      </OverlayTrigger>
                   </div>
                 </div>
                 : ""}
