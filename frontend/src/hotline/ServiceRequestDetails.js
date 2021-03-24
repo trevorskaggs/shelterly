@@ -338,7 +338,7 @@ function ServiceRequestDetails({id}) {
                 <Card.ImgOverlay className="text-border" style={{height:"20px"}}>#{animal.id}</Card.ImgOverlay>
                 <Card.Text className="mb-0 border-top" style={{textTransform:"capitalize"}}>
                 <span title={animal.name} className="ml-1">{animal.name||"Unknown"}</span>
-                <div className="ml-1">
+                <span className="ml-1" style={{display:"block"}}>
                   {animal.species === 'horse' && animal.size !== 'unknown' ? animal.size : animal.species}&nbsp;
                   {animal.status === "SHELTERED IN PLACE" ?
                     <OverlayTrigger key={"sip"} placement="top"
@@ -399,9 +399,9 @@ function ServiceRequestDetails({id}) {
                       </Tooltip>
                     }
                   >
-                    <FontAwesomeIcon icon={faMinusSquare} style={{cursor:'pointer'}} size="sm" onClick={() => {setAnimalToDelete({id:animal.id, name: animal.name});setShowAnimalConfirm(true);}} className="ml-1" inverse />
+                    <FontAwesomeIcon icon={faMinusSquare} style={{cursor:'pointer'}} onClick={() => {setAnimalToDelete({id:animal.id, name: animal.name});setShowAnimalConfirm(true);}} className="ml-1" inverse />
                   </OverlayTrigger>
-                </div>
+                </span>
                 </Card.Text>
               </Card>
               ))}

@@ -92,35 +92,22 @@ function Shelter() {
     {data.shelters.map(shelter => (
       <Col key={shelter.id} xs="6" className="pl-0 pr-0">
         <Card className="border rounded mr-3 mb-3" style={{whiteSpace:"nowrap", overflow:"hidden"}}>
-          <div className="row no-gutters" style={{ textTransform:"capitalize" }}>
-            <div className="mb-0">
-              <Row className="ml-0 mr-0">
-                <div className="border-right" style={{width:"100px"}}>
-                  <FontAwesomeIcon icon={faHome} size="6x" className="ml-1" style={{paddingRight:"10px"}} inverse />
+          <div className="row no-gutters" style={{textTransform:"capitalize", marginRight:"-2px"}}>
+            <Row className="ml-0 mr-0 w-100">
+              <div className="border-right" style={{width:"100px"}}>
+                <Link href={"/shelter/" + shelter.id}><FontAwesomeIcon icon={faHome} size="6x" className="ml-1" style={{paddingRight:"10px"}} inverse /></Link>
+              </div>
+              <Col style={{marginLeft:"-5px", marginRight:"-25px"}}>
+                <h4 className="card-header border" style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"10px", marginLeft:"-11px", marginTop: "-1px", width:"100%", backgroundColor:"#808080"}}>
+                  {shelter.name}</h4>
+                <div style={{marginTop:"2px"}}>
+                  {shelter.full_address}
                 </div>
-                <Col style={{marginLeft:"-5px"}}>
-                  <h4 className="mt-1">{shelter.name}
-                    <OverlayTrigger
-                      key={"shelter-details"}
-                      placement="top"
-                      overlay={
-                        <Tooltip id={`tooltip-shelter-details`}>
-                          Shelter details
-                        </Tooltip>
-                      }
-                    >
-                      <Link href={"/shelter/" + shelter.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
-                    </OverlayTrigger>
-                  </h4>
-                  <div>
-                    {shelter.full_address}
-                  </div>
-                  <div>
-                    {shelter.display_phone}
-                  </div>
-                </Col>
-              </Row>
-            </div>
+                <div>
+                  {shelter.display_phone}
+                </div>
+              </Col>
+            </Row>
           </div>
         </Card>
       </Col>

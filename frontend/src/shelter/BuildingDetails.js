@@ -4,7 +4,7 @@ import { Link } from 'raviger';
 import { Card, ListGroup, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faClipboardList, faEdit, faPlusSquare, faWarehouse,
+  faClipboardList, faEdit, faMinusSquare, faPlusSquare, faWarehouse,
 } from '@fortawesome/free-solid-svg-icons';
 import History from '../components/History';
 import Header from '../components/Header';
@@ -12,6 +12,9 @@ import Header from '../components/Header';
 function BuildingDetails({id}) {
 
   const [data, setData] = useState({name:'', description: '', shelter: null, shelter_name:'', rooms:[], action_history:[]});
+  const [roomToDelete, setRoomToDelete] = useState({id:0, name:''});
+  const [showRoomConfirm, setShowRoomConfirm] = useState(false);
+  const handleRoomClose = () => setShowRoomConfirm(false);
 
   // Hook for initializing data.
   useEffect(() => {
@@ -83,7 +86,7 @@ function BuildingDetails({id}) {
       </Card.Body>
     </Card>
     <Card className="mt-3 border rounded d-flex">
-      <Card.Body>
+      <Card.Body style={{marginBottom:"-15px"}}>
         <Card.Title>
           <h4>Rooms
             <OverlayTrigger
@@ -102,9 +105,16 @@ function BuildingDetails({id}) {
         <hr/>
         <span className="d-flex flex-wrap align-items-end">
           {data.rooms.map(room => (
-            <Card key={room.id} className="border rounded mr-3" style={{width:"100px", height:"100px"}}>
-              <Card.Text className="text-center mb-0">
+            <Card key={room.id} className="border rounded mr-3 mb-3" style={{width:"110px", height:"110px"}}>
+              <div style={{marginRight:"-2px"}}>
+              <h5 className="card-header border" title={room.name} style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"3px", marginLeft:"-1px", marginTop:"-1px", width:"100%", backgroundColor:"#808080", whiteSpace:"nowrap", overflow:"hidden"}}>
                 {room.name}
+              </h5>
+              </div>
+              <Card.Text className="mb-0 pl-1">
+                {room.animal_count} Animals
+              </Card.Text>
+              <Card.Text className="pl-1">
                 <OverlayTrigger
                   key={"room-details"}
                   placement="top"
@@ -114,11 +124,19 @@ function BuildingDetails({id}) {
                     </Tooltip>
                   }
                 >
-                  <Link href={"/shelter/room/" + room.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+                  <Link href={"/shelter/room/" + room.id}><FontAwesomeIcon icon={faClipboardList} inverse /></Link>
                 </OverlayTrigger>
-              </Card.Text>
-              <Card.Text className="text-center mb-0">
-                {room.animal_count} Animals
+                <OverlayTrigger
+                  key={"remove-room"}
+                  placement="top"
+                  overlay={
+                    <Tooltip id={`tooltip-remove-room`}>
+                      Remove room
+                    </Tooltip>
+                  }
+                >
+                  <FontAwesomeIcon icon={faMinusSquare} style={{cursor:'pointer'}} className="ml-1" onClick={() => {setRoomToDelete({id:room.id, name: room.name});setShowRoomConfirm(true);}} inverse />
+                </OverlayTrigger>
               </Card.Text>
             </Card>
           ))}
