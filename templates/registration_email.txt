@@ -1,1 +1,1 @@
-A user account has been created for you at shelterly.org. Click <h1><a href="{{ site }}/reset_password?token={{ token }}">here</a></h1> to set your password and get started.
+A user account has been created for you at {{ site }}. Click <h1><a href="{{ site }}/reset_password?token={{ token }}">here</a></h1> to set your password and get started.
