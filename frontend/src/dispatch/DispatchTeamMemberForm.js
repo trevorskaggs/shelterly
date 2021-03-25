@@ -69,50 +69,41 @@ const DispatchTeamMemberForm = () => {
             <Form>
               <FormGroup>
                 <Row>
-                  <Col>
-                    <TextInput
-                      type="text"
-                      label="First Name*"
-                      name="first_name"
-                      id="first_name"
-                    />
-                  </Col>
-                  <Col>
-                    <TextInput
-                      type="text"
-                      label="Last Name*"
-                      name="last_name"
-                      id="last_name"
-                    />
-                  </Col>
+                  <TextInput
+                    type="text"
+                    label="First Name*"
+                    name="first_name"
+                    id="first_name"
+                  />
+                  <TextInput
+                    type="text"
+                    label="Last Name*"
+                    name="last_name"
+                    id="last_name"
+                  />
                 </Row>
               </FormGroup>
               <FormGroup>
                 <Row>
-                  <Col>
-                    <TextInput
-                      type="text"
-                      label="Phone*"
-                      name="phone"
-                      id="phone"
-                    />
-                  </Col>
-                  <Col>
-                    <TextInput
-                      type="text"
-                      label="Agency ID"
-                      name="agency_id"
-                      id="agency_id"
-                    />
-                  </Col>
+                  <TextInput
+                    type="text"
+                    label="Phone*"
+                    name="phone"
+                    id="phone"
+                  />
+                  <TextInput
+                    type="text"
+                    label="Agency ID"
+                    name="agency_id"
+                    id="agency_id"
+                  />
                 </Row>
               </FormGroup>
             </Form>
           </Card.Body>
-          <ButtonGroup>
-            <Button type="button" className="btn btn-primary mr-1" onClick={() => { setAddAnother(false); form.submitForm() }}>Save</Button>
-            <Button type="button" className="btn btn-success mr-1" onClick={() => { setAddAnother(true); form.submitForm() }}>Add Another</Button>
-            <Link className="btn btn-secondary" href="/dispatch">Cancel</Link>
+          <ButtonGroup size="lg">
+            <Button type="button" onClick={() => { setAddAnother(true); form.submitForm() }}>Add Another</Button>
+            <Button type="button" className="btn btn-primary border" onClick={() => { setAddAnother(false); form.submitForm() }}>Save</Button>
           </ButtonGroup>
         </Card>
       )}

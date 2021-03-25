@@ -146,11 +146,11 @@ function ServiceRequestDetails({id}) {
         </Modal.Header>
         <Modal.Body>Are you sure you want to cancel this Service Request and associated animals?</Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowModal(false)}>
-            Close
+          <Button variant="primary" onClick={() => cancelServiceRequest()}>
+            Yes
           </Button>
-          <Button variant="primary" onClick={() => cancelServiceRequest(showModal)}>
-            Confirm
+          <Button variant="secondary" onClick={() => setShowModal(false)}>
+            Cancel
           </Button>
         </Modal.Footer>
       </Modal>
@@ -301,7 +301,7 @@ function ServiceRequestDetails({id}) {
       <div className="row mb-2">
         <div className="col-12 d-flex">
           <Card className="mb-2 border rounded" style={{width:"100%"}}>
-            <Card.Body style={{marginBottom:"-15px"}}>
+            <Card.Body style={{marginBottom:"-20px"}}>
               <Card.Title>
                 <h4 className="mb-0">Animals
                   <OverlayTrigger
