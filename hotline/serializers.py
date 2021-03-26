@@ -40,6 +40,7 @@ class VisitNoteSerializer(serializers.ModelSerializer):
 class SimpleServiceRequestSerializer(serializers.ModelSerializer):
 
     full_address = serializers.SerializerMethodField()
+    pending = serializers.BooleanField(read_only=True)
 
     # Custom field for the full address.
     def get_full_address(self, obj):

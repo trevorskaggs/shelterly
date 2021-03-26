@@ -28,7 +28,8 @@ function Deploy() {
   const [mapState, setMapState] = useState({});
   const [totalSelectedState, setTotalSelectedState] = useState({'REPORTED':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}});
   const [selectedCount, setSelectedCount] = useState({count:0, disabled:true});
-  const [statusOptions, setStatusOptions] = useState({aco_required:false, pending_only: true, trigger_refresh:false});
+  const [statusOptions, setStatusOptions] = useState({aco_required:false, pending_only: true});
+  const [triggerRefresh, setTriggerRefresh] = useState(false);
   const [teamData, setTeamData] = useState({teams: [], options: [], isFetching: false});
   const [selected, setSelected] = useState([]);
   const [teamName, setTeamName] = useState('');
@@ -41,12 +42,12 @@ function Deploy() {
 
   // Handle aco_required toggle.
   const handleACO = async event => {
-    setStatusOptions({aco_required:!statusOptions.aco_required, pending_only:statusOptions.pending_only})
+    setStatusOptions(prevState => ({ ...prevState, aco_required:!statusOptions.aco_required }));
   }
 
   // Handle pending_only toggle.
   const handlePendingOnly = async event => {
-    setStatusOptions({aco_required:statusOptions.aco_required, pending_only:!statusOptions.pending_only})
+    setStatusOptions(prevState => ({ ...prevState, pending_only:!statusOptions.pending_only }));
   }
 
   // Handle radius circle toggles.
@@ -122,7 +123,7 @@ function Deploy() {
   // Handle reselecting after hitting dupe assigned SR error.
   const handleReselect = async event => {
     // setData(prevState => ({ ...prevState, 'service_requests': prevState.service_requests.filter(sr => !duplicateSRs.includes(sr.id))}));
-    setStatusOptions(prevState => ({ ...prevState, 'trigger_refresh': !prevState.trigger_refresh}))
+    setTriggerRefresh(!triggerRefresh)
     setMapState(Object.keys(mapState).filter(key => !duplicateSRs.includes(key))
       .reduce((obj, key) => {
         obj[key] = mapState[key];
@@ -257,14 +258,12 @@ function Deploy() {
       await axios.get('/hotline/api/servicerequests/', {
         params: {
           status: 'open',
-          aco_required: statusOptions.aco_required,
-          pending_only: statusOptions.pending_only,
           map: true
         },
         cancelToken: source.token,
       })
       .then(response => {
-        setData({service_requests: response.data, isFetching: false, bounds:L.latLngBounds([[0,0]])});
+        setData(prevState => ({ ...prevState, service_requests: response.data, isFetching: false}));
         const map_dict = {...mapState};
         const bounds = [];
         const current_ids = Object.keys(mapState);
@@ -276,11 +275,12 @@ function Deploy() {
             const status_matches = total_matches[1];
             const color = service_request.reported_animals > 0 ? '#ff4c4c' : service_request.unable_to_locate > 0 ? '#5f5fff' : '#f5ee0f';
             map_dict[service_request.id] = {checked:false, hidden:false, color:color, matches:matches, status_matches:status_matches, radius:"disabled", has_reported_animals:service_request.reported_animals > 0, latitude:service_request.latitude, longitude:service_request.longitude};
+            bounds.push([service_request.latitude, service_request.longitude]);
           }
-          bounds.push([service_request.latitude, service_request.longitude]);
         }
         setMapState(map_dict);
-        if (bounds.length > 0) {
+
+        if (bounds.length > 0 && Object.keys(mapState).length < 1) {
           setData(prevState => ({ ...prevState, "bounds":L.latLngBounds(bounds) }));
         }
       })
@@ -297,7 +297,7 @@ function Deploy() {
     return () => {
       source.cancel();
     };
-  }, [statusOptions]);
+  }, [triggerRefresh]);
 
   return (
     <Formik
@@ -397,7 +397,10 @@ function Deploy() {
           </Col>
           <Col xs={10} className="border rounded pl-0 pr-0">
             <Map style={{marginRight:"0px"}} bounds={data.bounds} onMoveEnd={onMove}>
-              {data.service_requests.map(service_request => (
+              {data.service_requests
+              .filter(service_request => statusOptions.aco_required ? service_request.aco_required === statusOptions.aco_required : true)
+              .filter(service_request => statusOptions.pending_only ? service_request.pending === statusOptions.pending_only : true)
+              .map(service_request => (
                 <span key={service_request.id}> {mapState[service_request.id] ? 
                   <Marker
                     position={[service_request.latitude, service_request.longitude]}
@@ -476,7 +479,10 @@ function Deploy() {
             </div>
           </Col>
           <Col xs={10} className="border rounded" style={{marginLeft:"1px", height:"36vh", overflowY:"auto", paddingRight:"-1px"}}>
-            {data.service_requests.map(service_request => (
+            {data.service_requests
+            .filter(service_request => statusOptions.aco_required ? service_request.aco_required === statusOptions.aco_required : true)
+            .filter(service_request => statusOptions.pending_only ? service_request.pending === statusOptions.pending_only : true)
+            .map(service_request => (
               <span key={service_request.id}>{mapState[service_request.id] && (mapState[service_request.id].checked || !mapState[service_request.id].hidden) ?
               <div className="mt-1 mb-1" style={{marginLeft:"-10px", marginRight:"-10px"}}>
                 <div className="card-header rounded">

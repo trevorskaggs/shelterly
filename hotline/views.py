@@ -1,4 +1,4 @@
-from django.db.models import Count, Exists, OuterRef, Prefetch, Q
+from django.db.models import Case, Count, Exists, OuterRef, Prefetch, Q, When, Value, BooleanField
 from actstream import action
 from datetime import datetime
 from .serializers import ServiceRequestSerializer, VisitNoteSerializer
@@ -58,6 +58,9 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
             .annotate(animal_count=Count("animal"))
             .annotate(
                 injured=Exists(Animal.objects.filter(request_id=OuterRef("id"), injured="yes"))
+            )
+            .annotate(
+                pending=Case(When(Q(followup_date__lte=datetime.today()) | Q(followup_date__isnull=True), then=Value(True)), default=Value(False), output_field=BooleanField())
             ).prefetch_related(Prefetch('animal_set', queryset=Animal.objects.prefetch_related('evacuation_assignments').prefetch_related(Prefetch('animalimage_set', to_attr='images')), to_attr='animals'))
             .prefetch_related('owners')
             .prefetch_related('visitnote_set')
@@ -70,16 +73,6 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
         if status in ('open', 'assigned', 'closed', 'canceled'):
             queryset = queryset.filter(status=status).distinct()
 
-        # Filter on aco_required option for the map.
-        aco_required = self.request.query_params.get('aco_required', '')
-        if aco_required == 'true':
-            queryset = queryset.filter(Q(animal__aggressive='yes') | Q(animal__species='other'))
-
-        # Filter on pending_only option for the map.
-        pending_only = self.request.query_params.get('pending_only', '')
-        if pending_only == 'true':
-            queryset = queryset.filter(Q(followup_date__lte=datetime.today()) | Q(followup_date__isnull=True))
-
         # Exclude SRs without a geolocation when fetching for a map.
         is_map = self.request.query_params.get('map', '')
         if is_map == 'true':
@@ -91,4 +84,3 @@ class VisitNoteViewSet(viewsets.ModelViewSet):
     queryset = VisitNote.objects.all()
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = VisitNoteSerializer
-
