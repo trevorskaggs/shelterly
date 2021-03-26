@@ -18,6 +18,7 @@ import { Typeahead } from 'react-bootstrap-typeahead';
 import Moment from 'react-moment';
 import Map, { countMatches, prettyText, reportedMarkerIcon, SIPMarkerIcon, UTLMarkerIcon, checkMarkerIcon } from "../components/Map";
 import { Checkbox, TextInput } from "../components/Form";
+import { DispatchDuplicateSRModal } from "../components/Modals";
 import 'react-bootstrap-typeahead/css/Typeahead.css';
 import 'leaflet/dist/leaflet.css';
 
@@ -34,6 +35,9 @@ function Deploy() {
   const handleClose = () => setShow(false);
   const [show, setShow] = useState(false);
   const [error, setError] = useState('');
+  const [showDispatchDuplicateSRModal, setShowDispatchDuplicateSRModal] = useState(false);
+  const [duplicateSRs, setDuplicateSRs] = useState([]);
+  const handleCloseDispatchDuplicateSRModal = () => setShowDispatchDuplicateSRModal(false);
 
   // Handle aco_required toggle.
   const handleACO = async event => {
@@ -115,6 +119,19 @@ function Deploy() {
     }
   }
 
+  // Handle reselecting after hitting dupe assigned SR error.
+  const handleReselect = async event => {
+    setData(prevState => ({ ...prevState, 'service_requests': prevState.service_requests.filter(sr => !duplicateSRs.includes(sr.id))}));
+    setMapState(Object.keys(mapState).filter(key => !duplicateSRs.includes(key))
+      .reduce((obj, key) => {
+        obj[key] = mapState[key];
+        return obj;
+      }, {})
+    );
+    setDuplicateSRs([]);
+    setShowDispatchDuplicateSRModal(false);
+  }
+
   // Handle dynamic SR state and map display when an SR is selected or deselected.
   const handleMapState = (id) => {
     var status_matches = {};
@@ -177,7 +194,7 @@ function Deploy() {
         }
       }
     }
-    setMapState(prevState => ({ ...prevState, tempMapState}));
+    setMapState(tempMapState);
   }
 
   // Hook for initializing data.
@@ -291,7 +308,11 @@ function Deploy() {
       }}
       enableReinitialize={true}
       onSubmit={(values, { setSubmitting }) => {
-        values.service_requests = Object.keys(mapState).filter(key => mapState[key].checked === true)
+        values.service_requests = Object.keys(mapState).filter(key => mapState[key].checked === true);
+        // Remove duplicate assignments from POST values.
+        if (duplicateSRs.length > 0) {
+          values.service_requests = values.service_requests.filter(sr_id => !duplicateSRs.includes(sr_id));
+        }
         setTimeout(() => {
           axios.post('/evac/api/evacassignment/', values)
           .then(response => {
@@ -299,6 +320,10 @@ function Deploy() {
           })
           .catch(error => {
             console.log(error.response);
+            if (error.response.data && error.response.data[0].includes('Duplicate assigned service request error')) {
+              setDuplicateSRs(error.response.data[1]);
+              setShowDispatchDuplicateSRModal(true);
+            }
           });
           setSubmitting(false);
         }, 500);
@@ -372,35 +397,36 @@ function Deploy() {
           <Col xs={10} className="border rounded pl-0 pr-0">
             <Map style={{marginRight:"0px"}} bounds={data.bounds} onMoveEnd={onMove}>
               {data.service_requests.map(service_request => (
-                <Marker
-                  key={service_request.id}
-                  position={[service_request.latitude, service_request.longitude]}
-                  icon={mapState[service_request.id] && mapState[service_request.id].checked ? checkMarkerIcon : service_request.sheltered_in_place > 0 ? SIPMarkerIcon : service_request.unable_to_locate > 0 ? UTLMarkerIcon : reportedMarkerIcon}
-                  onClick={() => handleMapState(service_request.id)}
-                >
-                  <MapTooltip autoPan={false}>
-                    <span>
-                      {mapState[service_request.id] ?
-                        <span>
-                          {Object.keys(mapState[service_request.id].matches).map((key,i) => (
-                            <span key={key} style={{textTransform:"capitalize"}}>
-                              {i > 0 && ", "}{prettyText(key.split(',')[1], key.split(',')[0], mapState[service_request.id].matches[key])}
-                            </span>
-                          ))}
-                        </span>
-                      :""}
-                      <br />
-                      {service_request.full_address}
-                      {service_request.followup_date ? <div>Followup Date: <Moment format="L">{service_request.followup_date}</Moment></div> : ""}
-                      <div>
-                        {service_request.aco_required ? <img width={16} height={16} src={badge} alt="" className="mr-1" /> : ""}
-                        {service_request.injured ? <img width={16} height={16} src={bandaid} alt="" className="mr-1" /> : ""}
-                        {service_request.accessible ? <img width={16} height={16} src={car} alt="" className="mr-1" /> : ""}
-                        {service_request.turn_around ? <img width={16} height={16} src={trailer} alt="" /> : ""}
-                      </div>
-                    </span>
-                  </MapTooltip>
-                </Marker>
+                <span key={service_request.id}> {mapState[service_request.id] ? 
+                  <Marker
+                    position={[service_request.latitude, service_request.longitude]}
+                    icon={mapState[service_request.id] && mapState[service_request.id].checked ? checkMarkerIcon : service_request.sheltered_in_place > 0 ? SIPMarkerIcon : service_request.unable_to_locate > 0 ? UTLMarkerIcon : reportedMarkerIcon}
+                    onClick={() => handleMapState(service_request.id)}
+                  >
+                    <MapTooltip autoPan={false}>
+                      <span>
+                        {mapState[service_request.id] ?
+                          <span>
+                            {Object.keys(mapState[service_request.id].matches).map((key,i) => (
+                              <span key={key} style={{textTransform:"capitalize"}}>
+                                {i > 0 && ", "}{prettyText(key.split(',')[1], key.split(',')[0], mapState[service_request.id].matches[key])}
+                              </span>
+                            ))}
+                          </span>
+                        :""}
+                        <br />
+                        {service_request.full_address}
+                        {service_request.followup_date ? <div>Followup Date: <Moment format="L">{service_request.followup_date}</Moment></div> : ""}
+                        <div>
+                          {service_request.aco_required ? <img width={16} height={16} src={badge} alt="" className="mr-1" /> : ""}
+                          {service_request.injured ? <img width={16} height={16} src={bandaid} alt="" className="mr-1" /> : ""}
+                          {service_request.accessible ? <img width={16} height={16} src={car} alt="" className="mr-1" /> : ""}
+                          {service_request.turn_around ? <img width={16} height={16} src={trailer} alt="" /> : ""}
+                        </div>
+                      </span>
+                    </MapTooltip>
+                  </Marker> : ""}
+                </span>
               ))}
               {Object.entries(mapState).filter(([key, value]) => value.radius === "enabled").map(([key, value]) => (
                 <Circle key={key} center={{lat:value.latitude, lng: value.longitude}} color={value.color} radius={805} interactive={false} />
@@ -640,6 +666,7 @@ function Deploy() {
             </div>
           </Col>
         </Row>
+        <DispatchDuplicateSRModal sr_list={data.service_requests.filter(sr => duplicateSRs.includes(sr.id))} show={showDispatchDuplicateSRModal} handleClose={handleCloseDispatchDuplicateSRModal} handleSubmit={props.handleSubmit} handleReselect={handleReselect} />
         <Modal show={show} onHide={handleClose}>
           <Modal.Header closeButton>
             <Modal.Title>Update Team Name</Modal.Title>

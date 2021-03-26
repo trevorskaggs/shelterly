@@ -1,7 +1,7 @@
 from django.db.models import Count, Exists, OuterRef, Prefetch
 from django.http import JsonResponse
 from datetime import datetime, timedelta
-from rest_framework import filters, permissions, viewsets
+from rest_framework import filters, permissions, serializers, viewsets
 from actstream import action
 
 from animals.models import Animal
@@ -88,6 +88,8 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
     # When creating, update all service requests to be assigned status.
     def perform_create(self, serializer):
         if serializer.is_valid():
+            if ServiceRequest.objects.filter(pk__in=self.request.data['service_requests'], status='assigned').exists():
+                raise serializers.ValidationError(['Duplicate assigned service request error.', list(ServiceRequest.objects.filter(pk__in=self.request.data['service_requests'], status='assigned').values_list('id', flat=True))])
             if self.request.data.get('team_name'):
                 team = DispatchTeam.objects.create(name=self.request.data.get('team_name'))
                 team.team_members.set(self.request.data.get('team_members'))
