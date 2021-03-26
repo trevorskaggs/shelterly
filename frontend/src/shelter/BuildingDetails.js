@@ -133,30 +133,22 @@ function BuildingDetails({id}) {
         <hr/>
         <span className="d-flex flex-wrap align-items-end">
           {data.rooms.map(room => (
-            <Card key={room.id} className="border rounded mr-3 mb-3" style={{width:"110px", height:"110px"}}>
-              <div style={{marginRight:"-2px"}}>
-              <h5 className="card-header border" title={room.name} style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"3px", marginLeft:"-1px", marginTop:"-1px", width:"100%", backgroundColor:"#808080", fontSize:"16px", whiteSpace:"nowrap", overflow:"hidden"}}>
-                {room.name}
-              </h5>
-              </div>
-              <Card.Text className="mb-0 pl-1">
-                {room.animal_count} Animals
-              </Card.Text>
-              <Card.Text className="pl-1">
-                <OverlayTrigger
-                  key={"room-details"}
-                  placement="top"
-                  overlay={
-                    <Tooltip id={`tooltip-room-details`}>
-                      Room details
-                    </Tooltip>
-                  }
-                >
-                  <Link href={"/shelter/room/" + room.id}><FontAwesomeIcon icon={faClipboardList} inverse /></Link>
-                </OverlayTrigger>
-              </Card.Text>
-            </Card>
+            <span key={room.id} className="mr-3 mb-3">
+              <Link href={"/shelter/room/" + room.id} className="building-link" style={{textDecoration:"none", color:"white"}}>
+                <Card className="border rounded" style={{width:"110px", height:"110px"}}>
+                  <div style={{marginRight:"-2px"}}>
+                    <div className="card-header border" title={room.name} style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"3px", marginLeft:"-1px", marginTop:"-1px", width:"100%", backgroundColor:"#615e5e", fontSize:"16px", whiteSpace:"nowrap", overflow:"hidden"}}>
+                      {room.name}
+                    </div>
+                  </div>
+                  <Card.Text className="mb-0 pl-1">
+                    {room.animal_count} Animals
+                  </Card.Text>
+                </Card>
+              </Link>
+            </span>
           ))}
+          {data.rooms.length < 1 ? <p>No rooms have been created yet.</p> : ""}
         </span>
       </Card.Body>
     </Card>

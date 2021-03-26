@@ -158,7 +158,7 @@ function ShelterRoomAssignment({id}) {
             </Tooltip>
           }
         >
-          <Link href={"/shelter/" + id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+          <Link href={"/shelter/" + id}><FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1" inverse /></Link>
         </OverlayTrigger>
         &nbsp;- Room Animals
       </Header>
@@ -166,7 +166,7 @@ function ShelterRoomAssignment({id}) {
       <DragDropContext onDragEnd={handleOnDragEnd}>
         <Row className="mb-3 d-flex" style={{height:"111px"}}>
           <div className="col">
-            <span>Roomless Animals</span>
+            <h4 style={{marginBottom:"3px"}}>Roomless Animals</h4>
             <Droppable droppableId="unroomed_animals" direction="horizontal">
               {(provided, snapshot) => (
               <Card className="border rounded" style={{height:"91px", display:"flex", justifyContent:"space-around", overflow:"auto", backgroundColor:snapshot.isDraggingOver ? "gray" : "#303030"}}>
@@ -227,22 +227,25 @@ function ShelterRoomAssignment({id}) {
             </Droppable>
           </div>
         </Row>
-        <span>Buildings</span>
+        <h4 className="mt-3" style={{marginBottom:"1px"}}>Buildings</h4>
         <Row className="d-flex ml-0 mr-0 mt-1 mb-3 border rounded">
-          <ButtonGroup className="">
+          <ButtonGroup className="hide-scrollbars" style={{whiteSpace:"nowrap", overflow:"auto"}}>
             {data.buildings.map(building => (
               <Button key={building.id} variant={selectedBuilding === building.id ? "primary" : "secondary"} onClick={() => setSelectedBuilding(building.id)}>{building.name}</Button>
             ))}
           </ButtonGroup>
         </Row>
+        <h4 style={{marginBottom:"-13px"}}>Rooms</h4>
+        <hr style={{marginBottom:"5px"}} />
+        <Scrollbar style={{height:"509px"}} no_shadow="true" renderView={props => <div {...props} style={{...props.style, overflowX:"hidden", overflowY:"scroll"}}/>} renderThumbHorizontal={props => <div {...props} style={{...props.style, display:"none"}} />}>
         <Row className="d-flex ml-0">
           {data.rooms.map((room, index) => (
-            <span key={room.id} hidden={room.building !== selectedBuilding} style={{marginBottom:"32px"}}>Room: {room.name}<Link href={"/shelter/room/" + room.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
+            <span key={room.id} hidden={room.building !== selectedBuilding} style={{marginTop:"5px", marginBottom:"0px"}}>{room.name}<Link href={"/shelter/room/" + room.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
               <span className="col">
                 <Droppable droppableId={String(index)}>
                   {(provided, snapshot) => (
-                  <Card className="border rounded mr-3 animals" style={{width:"190px", minHeight: "348px", height: "348px", display:"flex", overflowY:"auto", backgroundColor:snapshot.isDraggingOver ? "gray" : "#303030"}} {...provided.droppableProps} ref={provided.innerRef}>
-                    <Scrollbar style={{height:"346px"}} renderView={props => <div {...props} style={{...props.style, marginBottom:"-19px"}}/>}>
+                  <Card className="border rounded mr-3 animals" style={{width:"190px", minHeight: "213px", height: "213px", display:"flex", overflowY:"auto", backgroundColor:snapshot.isDraggingOver ? "gray" : "#303030"}} {...provided.droppableProps} ref={provided.innerRef}>
+                    <Scrollbar style={{height:"211px"}} renderView={props => <div {...props} style={{...props.style, marginBottom:"-19px"}}/>}>
                       <Card.Body style={{paddingTop:"15px", paddingBottom:"0px", display:"flex", flexDirection:"column"}}>
                       {room.animals.map((animal, index) => (
                         <Draggable key={animal.id} draggableId={String(animal.id)} index={index}>
@@ -300,6 +303,7 @@ function ShelterRoomAssignment({id}) {
           ))}
           {data.rooms.filter(room => room.building === selectedBuilding).length < 1 ? "This building does not have any rooms yet." : ""}
         </Row>
+        </Scrollbar>
       </DragDropContext>
     </>
   );

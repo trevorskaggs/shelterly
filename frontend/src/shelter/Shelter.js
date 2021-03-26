@@ -90,27 +90,30 @@ function Shelter() {
     <hr/>
     <Row className="ml-0">
     {data.shelters.map(shelter => (
-      <Col key={shelter.id} xs="6" className="pl-0 pr-0">
-        <Card className="border rounded mr-3 mb-3" style={{whiteSpace:"nowrap", overflow:"hidden"}}>
-          <div className="row no-gutters" style={{textTransform:"capitalize", marginRight:"-2px"}}>
-            <Row className="ml-0 mr-0 w-100" style={{flexWrap:"nowrap"}}>
-              <div className="border-right hover-div" style={{width:"100px"}}>
-                <Link href={"/shelter/" + shelter.id}><FontAwesomeIcon icon={faHome} size="6x" className="ml-1 shelter-icon" style={{paddingRight:"10px"}} inverse /></Link>
-              </div>
-              <Col style={{marginLeft:"-5px", marginRight:"-25px"}}>
-                <h4 className="card-header border" style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"10px", marginLeft:"-11px", marginTop: "-1px", width:"100%", backgroundColor:"#808080"}}>
-                  {shelter.name}</h4>
-                <div style={{marginTop:"2px"}}>
-                  {shelter.full_address}
+      <span key={shelter.id} className="pl-0 pr-0 mr-3 mb-3">
+        <Link href={"/shelter/" + shelter.id} className="shelter-link" style={{textDecoration:"none", color:"white"}}>
+          <Card className="border rounded" style={{whiteSpace:"nowrap", overflow:"hidden"}}>
+            <div className="row no-gutters hover-div" style={{textTransform:"capitalize", marginRight:"-2px"}}>
+              <Row className="ml-0 mr-0 w-100" style={{minWidth:"485px", maxWidth:"485px", flexWrap:"nowrap"}}>
+                <div className="border-right" style={{width:"100px"}}>
+                  <FontAwesomeIcon icon={faHome} size="6x" className="ml-1 shelter-icon" style={{paddingRight:"10px"}} inverse />
                 </div>
-                <div>
-                  {shelter.display_phone}
-                </div>
-              </Col>
-            </Row>
-          </div>
-        </Card>
-      </Col>
+                <Col style={{marginLeft:"-5px", marginRight:"-25px"}}>
+                  <div className="border" style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"10px", marginLeft:"-11px", marginTop: "-1px", fontSize:"18px", width:"100%", backgroundColor:"#615e5e"}}>
+                    {shelter.name}
+                  </div>
+                  <div style={{marginTop:"2px"}}>
+                    {shelter.full_address}
+                  </div>
+                  <div>
+                    {shelter.display_phone}
+                  </div>
+                </Col>
+              </Row>
+            </div>
+          </Card>
+        </Link>
+      </span>
     ))}
     <p>{data.isFetching ? 'Fetching Shelters...' : <span>{!data.shelters.length ? 'No shelters have been created yet.' : ''}</span>}</p>
     </Row>
