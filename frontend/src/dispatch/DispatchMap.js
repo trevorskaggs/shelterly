@@ -28,7 +28,7 @@ function Deploy() {
   const [mapState, setMapState] = useState({});
   const [totalSelectedState, setTotalSelectedState] = useState({'REPORTED':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}});
   const [selectedCount, setSelectedCount] = useState({count:0, disabled:true});
-  const [statusOptions, setStatusOptions] = useState({aco_required:false, pending_only: true});
+  const [statusOptions, setStatusOptions] = useState({aco_required:false, pending_only: true, trigger_refresh:false});
   const [teamData, setTeamData] = useState({teams: [], options: [], isFetching: false});
   const [selected, setSelected] = useState([]);
   const [teamName, setTeamName] = useState('');
@@ -121,7 +121,8 @@ function Deploy() {
 
   // Handle reselecting after hitting dupe assigned SR error.
   const handleReselect = async event => {
-    setData(prevState => ({ ...prevState, 'service_requests': prevState.service_requests.filter(sr => !duplicateSRs.includes(sr.id))}));
+    // setData(prevState => ({ ...prevState, 'service_requests': prevState.service_requests.filter(sr => !duplicateSRs.includes(sr.id))}));
+    setStatusOptions(prevState => ({ ...prevState, 'trigger_refresh': !prevState.trigger_refresh}))
     setMapState(Object.keys(mapState).filter(key => !duplicateSRs.includes(key))
       .reduce((obj, key) => {
         obj[key] = mapState[key];
