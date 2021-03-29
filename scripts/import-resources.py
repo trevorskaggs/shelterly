@@ -1,10 +1,11 @@
+import sys
+sys.path.append('/home/sheltuser/shelterly/')
 import django
 from django.conf import settings
 from accounts.models import ShelterlyUser
 from evac.models import EvacTeamMember
 from django.db import IntegrityError
 import csv
-import sys
 
 django.setup()
 
