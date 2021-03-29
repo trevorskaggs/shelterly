@@ -1,13 +1,12 @@
 import sys
 sys.path.append('/home/sheltuser/shelterly/')
 import django
+django.setup()
 from django.conf import settings
 from accounts.models import ShelterlyUser
 from evac.models import EvacTeamMember
 from django.db import IntegrityError
 import csv
-
-django.setup()
 
 with open(sys.argv[1], newline='', encoding='utf-8-sig') as f:
     reader = csv.DictReader(f, fieldnames=['first_name','last_name','email','cell_phone','agency_id','shelterly_user', 'team_member'])
