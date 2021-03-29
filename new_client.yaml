@@ -2,59 +2,84 @@
   vars_prompt:
     - name: org_name
       prompt: Enter organization name.
+      private: no
 
     - name: incident_name
       prompt: Enter incident name.
       private: no
 
+
     - name: db_host
       prompt: Enter db host.
+      private: no
+
 
     - name: db_user
       prompt: Enter db user.
-      private: yes
+      private: no
+
 
     - name: db_password
       prompt: Enter db maintenance password.
-      private: yes
+      private: no
+
 
     - name: secret_key
       prompt: Enter Django secret key.
-      private: yes
+      private: no
+
+    - name: csv_path
+      prompt: Enter path to csv w/ users
+      private: no
+
       
 
   hosts: localhost
   gather_facts: False
   tasks:
-- name: Create a new database for this org+incident combo.
-  community.postgresql.postgresql_db:
-    name: {{ org_name + '_' + incident_name }}
-    login_host: {{ db_host }}
-    login_user: {{ db_user }}
-    login_password: {{ db_password }}
+    - name: Create a new database for this org+incident combo.
+      community.postgresql.postgresql_db:
+        name: "{{ org_name }}_{{ incident_name }}"
+        login_host: "{{ db_host }}"
+        login_user: "{{ db_user }}"
+        login_password: "{{ db_password }}"
 
-- name: Migrate database
+    - name: Migrate database
+      community.docker.docker_container:
+        name: shelterly-deploy
+        image: trevorskaggs/shelterly:dev
+        command: /bin/bash -c "source ~/shelterly/venv/bin/activate && python ./manage.py migrate --no-input"
+        env:
+          DATABASE_HOST: "{{ db_host }}"
+          DATABASE_NAME: "{{ org_name }}_{{ incident_name }}"
+          DATABASE_PASSWORD: "{{ db_password }}"
+          DATABASE_USER: "{{ db_user }}"
+          SECRET_KEY: "{{ secret_key }}"
+
+- name: Import resources
   community.docker.docker_container:
     image: trevorskaggs/shelterly:dev
-    command: ["python", "./manage.py", "migrate", "--noinput"]  
+    command: "/bin/bash -c 'source ~/shelterly/venv/bin/activate && python ~/shelterly/scripts/import_resources.py /tmp/people.csv'"
+    volumes:
+      - "{{csv_path}}:/tmp/people.csv"
     env:
-      DATABASE_HOST: {{ db_host }}
-      DATABASE_NAME: {{ org_name + '_' + incident_name }}
-      DATABASE_PASSWORD: {{ db_password }}
-      DATABASE_USER: {{ db_user }}
-      SECRET_KEY: {{ secret_key }}
+      DATABASE_HOST: "{{ db_host }}"
+      DATABASE_NAME: "{{ org_name }}_{{ incident_name }}"
+      DATABASE_PASSWORD: "{{ db_password }}"
+      DATABASE_USER: "{{ db_user }}"
+      SECRET_KEY: "{{ secret_key }}"
 
 - name: Deploy Cloudformation resources
   amazon.aws.cloudformation:
-    stack_name: {{ org_name + "_" + incident_name + "lambda" }}
+    stack_name: "{{ org_name }}_{{ incident_name }}_lambda}}"
     state: "present"
     region: "us-west-2"
     template_url: "files/cloudformation-example.json"
     template_parameters:
-      DjangoSecretKey: {{ secret_key }}
-      DatabaseName: {{ org_name + '_' + incident_name }}
-      DatabaseUser: {{ db_user }}
-      DatabasePassword: {{ db_password }}
-      DatabaseHost: {{ db_host }}
-      LambdaAliasName: {{ org_name + '_' + incident_name }}
+      DjangoSecretKey: "{{ secret_key }}"
+      DatabaseName: "{{ org_name }}_{{ incident_name }}"
+      DatabaseUser: "{{ db_user }}"
+      DatabasePassword: "{{ db_password }}"
+      DatabaseHost: "{{ db_host }}"
+      LambdaAliasName: "{{ org_name }}_{{ incident_name }}"
 
