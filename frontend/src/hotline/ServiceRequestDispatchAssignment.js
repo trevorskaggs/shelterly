@@ -7,7 +7,7 @@ import { CircleMarker, Marker, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
 import Moment from 'react-moment';
 import randomColor from "randomcolor";
-import Map from "../components/Map";
+import Map, { prettyText } from "../components/Map";
 import { Checkbox } from "../components/Form"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -33,32 +33,6 @@ function ServiceRequestDispatchAssignment({id}) {
     let tempSRs = {...showSRs};
     tempSRs[dispatch_id] = !showSRs[dispatch_id];
     setShowSRs(tempSRs);
-  }
-
-  // Takes in animal size, species, and count and returns a pretty string combination.
-  const prettyText = (size, species, count) => {
-    if (count <= 0) {
-      return "";
-    }
-    var plural = ""
-    if (count > 1) {
-      plural = "s"
-    }
-
-    var size_and_species = size + " " + species + plural;
-    // Exception for horses since they don't need an extra species output.
-    if (species === 'horse') {
-      // Exception for pluralizing ponies.
-      if (size === 'pony' && count > 1) {
-        size_and_species = 'ponies'
-      }
-      else {
-        size_and_species = size + plural;
-      }
-    }
-
-    var text = count + " " + size_and_species;
-    return text;
   }
 
   // Counts the number of size/species matches for a service request by status.

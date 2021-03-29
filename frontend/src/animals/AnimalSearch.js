@@ -188,7 +188,7 @@ function AnimalSearch() {
                 </Card.Title>
                 <Scrollbar style={{height:"144px"}}>
                   <ListGroup>
-                    <ListGroup.Item>{titleCase(animal.species)}{animal.size && animal.size !== 'unknown' && animal.size !== 'horse' ? <span>, {titleCase(animal.size)}</span> : ""}{animal.sex ? <span>,&nbsp;{titleCase(animal.sex)}</span> : ""}{animal.age ? <span>,&nbsp;{titleCase(animal.age)}</span> : ""}</ListGroup.Item>
+                    <ListGroup.Item>{titleCase(animal.species)}{animal.size ? <span>,&nbsp;{titleCase(animal.size)}</span> : ""}{animal.sex ? <span>,&nbsp;{titleCase(animal.sex)}</span> : ""}{animal.age ? <span>,&nbsp;{titleCase(animal.age)}</span> : ""}</ListGroup.Item>
                     <ListGroup.Item style={{textTransform:"capitalize"}}><b>Color: </b>{animal.pcolor ? <span>{animal.pcolor}{animal.scolor ? <span> / {animal.scolor}</span> : ""}</span> : "Unknown"}</ListGroup.Item>
                     {animal.owner_objects.map(owner => (
                       <ListGroup.Item key={owner.id}><b>Owner:</b> {owner.first_name} {owner.last_name}</ListGroup.Item>

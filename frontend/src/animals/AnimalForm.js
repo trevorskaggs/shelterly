@@ -234,8 +234,7 @@ const AnimalForm = (props) => {
           species: Yup.string()
             .required('Required')
             .oneOf(speciesChoices.map(option => option['value'])),
-          size: Yup.string()
-            .required('Required'),
+          size: Yup.string(),
           age: Yup.string(),
           sex: Yup.string()
             .oneOf(['M', 'F']),
@@ -446,11 +445,11 @@ const AnimalForm = (props) => {
                   </Col>
                   <Col xs={id ? "6" : "5"}>
                     <DropDown
-                      label="Size*"
+                      label="Size"
                       id="sizeDropdown"
                       name="size"
                       type="text"
-                      isClearable={false}
+                      isClearable={true}
                       key={`my_unique_size_select_key__${formikProps.values.size}`}
                       ref={sizeRef}
                       options={sizeChoices[formikProps.values.species]}

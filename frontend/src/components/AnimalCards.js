@@ -6,7 +6,6 @@ import {
   faUserAlt, faUserAltSlash, faClipboardList, faCircle, faExclamationCircle, faQuestionCircle, faHome, faHelicopter, faHeart, faSkullCrossbones
 } from '@fortawesome/free-solid-svg-icons';
 import { faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
-import ReactImageFallback from 'react-image-fallback';
 import noImageFound from '../static/images/image-not-found.png';
 
 function AnimalCards(props) {
@@ -21,7 +20,7 @@ function AnimalCards(props) {
         <Card.Text className="mb-0 border-top" style={{textTransform:"capitalize"}}>
         <span title={animal.name} className="ml-1">{animal.name||"Unknown"}</span>
         <div className="ml-1">
-          {animal.species === 'horse' && animal.size !== 'unknown' ? animal.size : animal.species}&nbsp;
+          {animal.species}&nbsp;
           {props.show_owner ? <span>
           {animal.owner_names.length === 0 ?
           <OverlayTrigger
