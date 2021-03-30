@@ -24,12 +24,20 @@ Parameters:
   LambdaAliasName:
     Type: String
 
-  ApiDomainName:
+  DomainName:
     Type: String
   
   ImageUri:
     Type: String
+  
+  HZoneId:
+    Type: String
 
+  SecurityGroups:
+    Type: CommaDelimitedList
+
+  Subnets:
+    Type: CommaDelimitedList
 
 Resources:
   LambdaFunction:
@@ -51,8 +59,8 @@ Resources:
       Role: !Ref LambdaIAMRoleArn
       Timeout: 20
       VpcConfig:
-        SecurityGroupIds:
-        SubnetIds:
+        SecurityGroupIds: !Ref SecurityGroups
+        SubnetIds: !Ref Subnets
 
   LambdaPermission:
     Type: AWS::Lambda::Permission
@@ -87,13 +95,7 @@ Resources:
       ApiId: !Ref HttpApi
       IntegrationType: AWS_PROXY
       PayloadFormatVersion: 2.0
-      IntegrationUri: !Join
-                        - ''
-                        - - 'arn:aws:apigateway:'
-                          - !Ref AWS::Region
-                          - ':lambda:path/2015-03-31/functions/'
-                          - !GetAtt LambdaFunction.Arn
-                          - :${stageVariables.org_name}_${stageVariables.incident_name}/invocations
+      IntegrationUri: !Ref myLambdaAlias
 
   HttpApiRoute:
     Type: AWS::ApiGatewayV2::Route
@@ -104,7 +106,6 @@ Resources:
                 - /
                 - - integrations
                   - !Ref HttpApiIntegration
-
 
   DefaultStage:
     Type: "AWS::ApiGatewayV2::Stage"
@@ -117,7 +118,7 @@ Resources:
   ApiDomainName:
     Type: "AWS::ApiGatewayV2::DomainName"
     Properties:
-      DomainName: dev.shelterly.org
+      DomainName: !Ref DomainName
       DomainNameConfigurations:
         - EndpointType: REGIONAL
           CertificateArn: !Sub arn:aws:acm:${AWS::Region}:${AWS::AccountId}:certificate/c761d629-703e-40dc-8233-5be3937008ea
@@ -132,7 +133,7 @@ Resources:
   myDNSRecord:
     Type: AWS::Route53::RecordSet
     Properties:
-      HostedZoneId: 
+      HostedZoneId: !Ref HZoneId
       Name: !Ref ApiDomainName
       Type: A
       AliasTarget:

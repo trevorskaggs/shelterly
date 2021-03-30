@@ -1,39 +1,6 @@
 - name: Spin up new client
-  vars_prompt:
-    - name: org_name
-      prompt: Enter organization name.
-      private: no
-
-    - name: incident_name
-      prompt: Enter incident name.
-      private: no
-
-
-    - name: db_host
-      prompt: Enter db host.
-      private: no
-
-
-    - name: db_user
-      prompt: Enter db user.
-      private: no
-
-
-    - name: db_password
-      prompt: Enter db maintenance password.
-      private: no
-
-
-    - name: secret_key
-      prompt: Enter Django secret key.
-      private: no
-
-    - name: csv_path
-      prompt: Enter path to csv w/ users
-      private: no
-
-      
-
+  vars_files:
+    - deploy_vars.yml
   hosts: localhost
   gather_facts: False
   tasks:
@@ -73,7 +40,7 @@
 
     - name: Deploy Cloudformation resources
       amazon.aws.cloudformation:
-        stack_name: dev-test-lambda
+        stack_name: "{{ org_name }}-{{ incident_name }}-stack"
         state: "present"
         region: "us-west-2"
         # replace with S3 url
@@ -84,7 +51,9 @@
           DatabaseUser: "{{ db_user }}"
           DatabasePassword: "{{ db_password }}"
           DatabaseHost: "{{ db_host }}"
-          LambdaAliasName: "{{ org_name }}_{{ incident_name }}"
-          DomainName: "{{ domain_name }}"
-          LambdaIAMRoleArn: "{{ role_arn }}"
-          ImageUri: "{{ image_uri }}""
+          LambdaAliasName: dev_test #"{{ org_name }}_{{ incident_name }}"
+          DomainName: "{{org_name}}{{incident_name}}.shelterly.org"
+          LambdaIAMRoleArn: "{{ iam_role }}"
+          ImageUri: "{{ image_uri }}"
+          HZoneId: "{{ hosted_zone_id }}"
+
