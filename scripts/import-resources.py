@@ -17,7 +17,7 @@ with open(sys.argv[1], newline='', encoding='utf-8-sig') as f:
 for item in a:
     if item['shelterly_user'] == 'yes':
         try:
-            user = ShelterlyUser.objects.create(
+            user = ShelterlyUser.objects.create_user(
                 first_name=item['first_name'],
                 last_name=item['last_name'],
                 email=item['email'],
