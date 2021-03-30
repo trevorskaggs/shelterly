@@ -56,4 +56,6 @@
           LambdaIAMRoleArn: "{{ iam_role }}"
           ImageUri: "{{ image_uri }}"
           HZoneId: "{{ hosted_zone_id }}"
+          Subnets: "{{ subnets }}"
+          SecurityGroups: "{{ security_groups }}"
 

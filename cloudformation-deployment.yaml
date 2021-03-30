@@ -50,6 +50,7 @@ Resources:
         Variables:
           SECRET_KEY: !Ref DjangoSecretKey
           DATABASE_NAME: !Ref DatabaseName
+          DATABASE_USER: !Ref DatabaseUser
           DATABASE_PASSWORD: !Ref DatabasePassword
           DATABASE_HOST: !Ref DatabaseHost
           API_HOSTNAME: !Ref ApiDomainName
