@@ -16,12 +16,11 @@ import {
 } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faCalendarDay, faClipboardList, faUsers
+  faClipboardList, faUsers
 } from '@fortawesome/free-solid-svg-icons';
 import Moment from 'react-moment';
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
-
 import { ITEMS_PER_PAGE } from '../constants';
 
 function ServiceRequestSearch() {
@@ -113,20 +112,20 @@ function ServiceRequestSearch() {
             onChange={handleChange}
           />
           <InputGroup.Append>
-            <Button variant="outline-light" type="submit">Search</Button>
+            <Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0"}}>Search</Button>
           </InputGroup.Append>
           <ButtonGroup className="ml-3">
-            <Button variant={statusOptions === "open" ? "primary" : "secondary"} onClick={statusOptions !== "open" ? () => setStatusOptions("open") : () => setStatusOptions("")}>Open</Button>
-            <Button variant={statusOptions === "assigned" ? "primary" : "secondary"} onClick={statusOptions !== "assigned" ? () => setStatusOptions("assigned") : () => setStatusOptions("")}>Assigned</Button>
-            <Button variant={statusOptions === "closed" ? "primary" : "secondary"} onClick={statusOptions !== "closed" ? () => setStatusOptions("closed") : () => setStatusOptions("")}>Closed</Button>
-            <Button variant={statusOptions === "canceled" ? "primary" : "secondary"} onClick={statusOptions !== "canceled" ? () => setStatusOptions("canceled") : () => setStatusOptions("")}>Canceled</Button>
+            <Button variant={statusOptions === "open" ? "primary" : "secondary"} onClick={statusOptions !== "open" ? () => {setPage(1);setStatusOptions("open")} : () => {setPage(1);setStatusOptions("")}}>Open</Button>
+            <Button variant={statusOptions === "assigned" ? "primary" : "secondary"} onClick={statusOptions !== "assigned" ? () => {setPage(1);setStatusOptions("assigned")} : () => {setPage(1);setStatusOptions("")}}>Assigned</Button>
+            <Button variant={statusOptions === "closed" ? "primary" : "secondary"} onClick={statusOptions !== "closed" ? () => {setPage(1);setStatusOptions("closed")} : () => {setPage(1);setStatusOptions("")}}>Closed</Button>
+            <Button variant={statusOptions === "canceled" ? "primary" : "secondary"} onClick={statusOptions !== "canceled" ? () => {setPage(1);setStatusOptions("canceled")} : () => {setPage(1);setStatusOptions("")}}>Canceled</Button>
           </ButtonGroup>
         </InputGroup>
       </Form>
       {data.service_requests.map((service_request, index) => (
         <div key={service_request.id} className="mt-3" hidden={page !== Math.ceil((index+1)/ITEMS_PER_PAGE)}>
           <div className="card-header">
-            <h4 style={{marginBottom:"-2px"}}>{service_request.full_address}
+            <h4 style={{marginBottom:"-2px",  marginLeft:"-12px"}}>{service_request.full_address}
               <OverlayTrigger
                 key={"request-details"}
                 placement="top"
@@ -136,7 +135,7 @@ function ServiceRequestSearch() {
                   </Tooltip>
                 }
               >
-                <Link href={"/hotline/servicerequest/" + service_request.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+                <Link href={"/hotline/servicerequest/" + service_request.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
               </OverlayTrigger>
               &nbsp;| <span style={{textTransform:"capitalize"}}>{service_request.status}</span>
             </h4>
@@ -151,7 +150,8 @@ function ServiceRequestSearch() {
                     {service_request.latest_evac ?
                       <span>
                         <b>{service_request.latest_evac.end_time ? "Last" : "Active"} Dispatch Assignment: </b>
-                        {service_request.evacuation_assignments.filter(da => da.id === service_request.latest_evac.id)[0].team_name}
+                        <Moment format="L">{service_request.latest_evac.start_time}</Moment>&nbsp;
+                        ({service_request.evacuation_assignments.filter(da => da.id === service_request.latest_evac.id)[0].team_name}
                         <OverlayTrigger
                           key={"team-names"}
                           placement="top"
@@ -161,19 +161,9 @@ function ServiceRequestSearch() {
                             </Tooltip>
                           }
                         >
-                          <FontAwesomeIcon icon={faUsers} className="ml-1 mr-1 fa-move-down" />
+                          <FontAwesomeIcon icon={faUsers} className="ml-1 fa-move-down" />
                         </OverlayTrigger>
-                        <OverlayTrigger
-                          key={"start-time"}
-                          placement="top"
-                          overlay={
-                            <Tooltip id={`tooltip-start-time`}>
-                              <Moment format="L">{service_request.latest_evac.start_time}</Moment>
-                            </Tooltip>
-                          }
-                        >
-                          <FontAwesomeIcon icon={faCalendarDay} className="" />
-                        </OverlayTrigger>
+                        )
                       </span>
                     :
                       <span>
@@ -208,8 +198,8 @@ function ServiceRequestSearch() {
                           <b>#{animal.id}:</b>&nbsp;&nbsp;{animal.name || "Unknown"} - {animal.status}
                         </ListGroup.Item>
                       ))}
-                    </Scrollbar>
                     {service_request.animals.length < 1 ? <ListGroup.Item style={{marginTop:"32px"}}>No Animals</ListGroup.Item> : ""}
+                    </Scrollbar>
                   </ListGroup>
               </Card.Body>
             </Card>
@@ -218,15 +208,14 @@ function ServiceRequestSearch() {
         </div>
       ))}
       <p>{data.isFetching ? 'Fetching service requests...' : <span>{data.service_requests && data.service_requests.length ? '' : 'No Service Requests found.'}</span>}</p>
-    <Pagination className="custom-page-links" size="lg" onClick={(e) => {setPage(parseInt(e.target.innerText))}}>
-      {[...Array(numPages).keys()].map(x =>
-      <Pagination.Item key={x+1} active={x+1 === page}>
-        {x+1}
-      </Pagination.Item>)
-      }
-    </Pagination>
+      <Pagination className="custom-page-links" size="lg" onClick={(e) => {setPage(parseInt(e.target.innerText))}}>
+        {[...Array(numPages).keys()].map(x =>
+        <Pagination.Item key={x+1} active={x+1 === page}>
+          {x+1}
+        </Pagination.Item>)
+        }
+      </Pagination>
     </div>
-    
   )
 }
 
