@@ -34,7 +34,7 @@ hr { display: block; height: 1px;
 /* Leaflet map CSS */
 .leaflet-container { width: auto; height: 55vh;}
 
-.landing-leaflet-container { width: auto; height: 311px; min-height:311px;}
+.landing-leaflet-container { width: auto; height: 350px; min-height:350px;}
 
 .search-leaflet-container { width: auto; height: 200px; min-height:200px;}
 
@@ -79,6 +79,10 @@ input[disabled] {
 .invalid-form {
   display: block !important;
   font-size: 100% !important;
+}
+
+.rbt-input-wrapper {
+  height: 29px;
 }
 
 .custom-page-links .page-link {
