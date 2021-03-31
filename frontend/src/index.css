@@ -80,7 +80,7 @@ input[disabled] {
 }
 
 .custom-page-links .page-link {
-  background-color: #444!important;
+  background-color: #444444 !important;
 }
 
 .custom-page-links .page-link:hover {
@@ -88,7 +88,7 @@ input[disabled] {
 }
 
 .custom-page-links .page-item.active .page-link {
-  background-color: #375a7f!important ;
+  background-color: #375a7f !important ;
 }
 
 .custom-page-links .page-item.disabled .page-link {

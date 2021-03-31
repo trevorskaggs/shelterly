@@ -15,9 +15,29 @@ const useStyles = makeStyles((theme) => ({
     width: '100%',
     marginTop: theme.spacing(2),
   },
-  test: {
+  stepper: {
     borderRadius: "0.25rem",
+    color: '#ffffff',
+    backgroundColor: '#444',
+    "&$active": {
+      color: '#ffffff'
+    },
+    "&$completed": {
+      color: '#ffffff',
+    },
   },
+  stepIcon: {
+    "&$active": {
+      color: '#375a7f',
+    },
+    "&$completed": {
+      color: '#375a7f',
+      // backgroundColor: 'white', //TODO: figure out how to make the checkmark white
+    },
+  },
+  active: {},
+  completed: {},
+
   instructions: {
     marginTop: theme.spacing(1),
     marginBottom: theme.spacing(1),
@@ -181,7 +201,7 @@ function StepperWorkflow() {
 
   return (
     <div className={classes.root}>
-      <Stepper className={classes.test} activeStep={activeStep}>
+      <Stepper className={classes.stepper} activeStep={activeStep}>
         {steps.map((label, index) => {
           const stepProps = {};
           const labelProps = {};
@@ -193,7 +213,23 @@ function StepperWorkflow() {
           }
           return (
             <Step key={label} {...stepProps}>
-              <StepLabel {...labelProps}>{label}</StepLabel>
+              <StepLabel
+                classes={{
+                  label: classes.stepper,
+                  text: classes.stepper,
+                  root: classes.stepper,
+                  active: classes.active,
+                  completed: classes.completed,
+                }}
+                StepIconProps={{
+                  classes: {
+                    root: classes.stepIcon,
+                    text: classes.stepper,
+                    completed: classes.completed,
+                    active: classes.active,
+                  }
+                }}
+                {...labelProps}>{label}</StepLabel>
             </Step>
           );
         })}
