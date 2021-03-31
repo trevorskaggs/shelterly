@@ -4,12 +4,13 @@ import { navigate, useQueryParams } from "raviger";
 import { Form, Formik } from 'formik';
 import Button from 'react-bootstrap/Button';
 import Col from 'react-bootstrap/Col';
-import { Form as BootstrapForm, Modal } from 'react-bootstrap';
+import { Form as BootstrapForm, Modal, Row } from 'react-bootstrap';
 import * as Yup from "yup";
 import { useCookies } from 'react-cookie';
 import { TextInput } from '../components/Form.js';
 import { AuthContext } from "./AccountsReducer";
 import { loadUser, setAuthToken } from "./AccountsUtils";
+import logo from "../static/images/shelterly.png";
 
 const Login = () => {
   const { dispatch } = useContext(AuthContext);
@@ -59,7 +60,10 @@ const Login = () => {
       >
       {({ isSubmitting, status }) => (
         <>
-        <h1 className='text-center' style={{marginTop:"70px", fontSize:"100px"}}>Shelterly</h1>
+        <Row className='ml-auto mr-auto align-bottom' style={{marginTop:"70px"}}>
+          <img src={logo} alt="logo" style={{height:"120px", width:"120px", marginTop:"-4px"}} />
+          <h1  style={{fontSize:"100px"}}>Shelterly</h1>
+        </Row>
         <Col xs={{ span:5 }} className="border rounded border-light shadow-sm" style={{marginRight:"auto", marginLeft:"auto"}}>
           <h3 className='mb-0 text-center mt-3'>Log-in</h3>
           <BootstrapForm as={Form}>

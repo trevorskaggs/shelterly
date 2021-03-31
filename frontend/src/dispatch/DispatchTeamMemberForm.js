@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
 import axios from "axios";
-import { Link, navigate } from "raviger";
-import { Form, Formik, } from 'formik';
+import { navigate } from "raviger";
+import { Formik, } from 'formik';
 import {
+  Form as BootstrapForm,
   Button,
   ButtonGroup,
   Card,
-  Col,
-  FormGroup,
-  Row,
 } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -66,53 +64,44 @@ const DispatchTeamMemberForm = () => {
         <Card border="secondary" className="mt-5">
           <Card.Header as="h5" className="pl-3"><span style={{ cursor: 'pointer' }} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>New Team Member</Card.Header>
           <Card.Body>
-            <Form>
-              <FormGroup>
-                <Row>
-                  <Col>
-                    <TextInput
-                      type="text"
-                      label="First Name*"
-                      name="first_name"
-                      id="first_name"
-                    />
-                  </Col>
-                  <Col>
-                    <TextInput
-                      type="text"
-                      label="Last Name*"
-                      name="last_name"
-                      id="last_name"
-                    />
-                  </Col>
-                </Row>
-              </FormGroup>
-              <FormGroup>
-                <Row>
-                  <Col>
-                    <TextInput
-                      type="text"
-                      label="Phone*"
-                      name="phone"
-                      id="phone"
-                    />
-                  </Col>
-                  <Col>
-                    <TextInput
-                      type="text"
-                      label="Agency ID"
-                      name="agency_id"
-                      id="agency_id"
-                    />
-                  </Col>
-                </Row>
-              </FormGroup>
-            </Form>
+            <BootstrapForm>
+              <BootstrapForm.Row>
+                <TextInput
+                  type="text"
+                  label="First Name*"
+                  name="first_name"
+                  id="first_name"
+                  xs="6"
+                />
+                <TextInput
+                  type="text"
+                  label="Last Name*"
+                  name="last_name"
+                  id="last_name"
+                  xs="6"
+                />
+              </BootstrapForm.Row>
+              <BootstrapForm.Row>
+                <TextInput
+                  type="text"
+                  label="Phone*"
+                  name="phone"
+                  id="phone"
+                  xs="6"
+                />
+                <TextInput
+                  type="text"
+                  label="Agency ID"
+                  name="agency_id"
+                  id="agency_id"
+                  xs="6"
+                />
+              </BootstrapForm.Row>
+            </BootstrapForm>
           </Card.Body>
-          <ButtonGroup>
-            <Button type="button" className="btn btn-primary mr-1" onClick={() => { setAddAnother(false); form.submitForm() }}>Save</Button>
-            <Button type="button" className="btn btn-success mr-1" onClick={() => { setAddAnother(true); form.submitForm() }}>Add Another</Button>
-            <Link className="btn btn-secondary" href="/dispatch">Cancel</Link>
+          <ButtonGroup size="lg">
+            <Button onClick={() => { setAddAnother(true); form.submitForm() }}>Add Another</Button>
+            <Button className="btn btn-primary border" onClick={() => { setAddAnother(false); form.submitForm() }} style={{paddingLeft:"78px"}}>Save</Button>
           </ButtonGroup>
         </Card>
       )}
