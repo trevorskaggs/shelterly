@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 import datetime
 import os
 import json
+import boto3
 
 try:
     with open('config/secrets.json') as f:
@@ -36,8 +37,9 @@ DEBUG = False
 AUTH_USER_MODEL = 'accounts.ShelterlyUser'
 
 # AWS Config
-AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
-AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
+credentials = boto3.Session().get_credentials()
+AWS_ACCESS_KEY_ID = credentials.access_key
+AWS_SECRET_ACCESS_KEY = credentials.secret_key
 AWS_SES_REGION_NAME = 'us-west-2'
 AWS_SES_REGION_ENDPOINT = 'email.us-west-2.amazonaws.com'
 
