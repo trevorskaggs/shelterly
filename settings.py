@@ -38,9 +38,10 @@ AUTH_USER_MODEL = 'accounts.ShelterlyUser'
 
 # AWS Config
 credentials = boto3.Session().get_credentials()
-AWS_ACCESS_KEY_ID = credentials.access_key
-AWS_SECRET_ACCESS_KEY = credentials.secret_key
-AWS_SES_REGION_NAME = 'us-west-2'
+if credentials:
+    AWS_ACCESS_KEY_ID = credentials.access_key
+    AWS_SECRET_ACCESS_KEY = credentials.secret_key
+    AWS_SES_REGION_NAME = credentials.region_name
 AWS_SES_REGION_ENDPOINT = 'email.us-west-2.amazonaws.com'
 
 # Use to output emails in console.
