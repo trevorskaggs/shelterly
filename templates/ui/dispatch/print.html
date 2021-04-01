@@ -1,0 +1,203 @@
+{% extends "./base.html" %}
+{% block content %}
+
+<style>
+    <!--Print CSS-->  
+    #container-fluid {height:auto;}
+    @media print {
+        div.page-break {
+            page-break-after: always;
+            page-break-inside: avoid;
+            position: relative;
+        }
+        #content
+            {
+            margin: 0px;
+            padding: 0px;
+            clear: both;
+            background-color: gray;
+            }
+    }
+    @page {margin:2cm;}
+
+    body {
+    color: #222 !important;
+    background-color: #fff !important;}
+    h1, h2, h3, h4, h5 {color: #222 !important;}
+    .card {background-color: #fff !important;}
+    .list-group-item { background-color: #fff !important; }   
+    .col-9 {flex: 0 0 100%; max-width: 100%;}
+</style>
+<div id="root">
+    <div class="container-fluid " id="content">
+        <div class="row page-break">
+            <span class="d-flex flex-column col-9" >
+                <div class="mt-3 row" style="margin-bottom: -15px;">
+                    <div class="d-flex col-12">
+                        <h1>Dispatch Assignment Summary
+                            <div style="font-size: 18px; margin-top: 12px;">
+                                <b>Opened: </b>
+                                <time>{{ evac_assignment.team.dispatch_date }}</time>
+                            </div>
+                        </h1>
+                    </div>
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col">
+                        <div class="mt-1 card border-secondary">
+                            <div class="card-body">
+                                <div class="card-title h5">
+                                    <h4>{{ evac_assignment.team.name }}</h4>
+                                </div>
+                                <hr>
+                                <div style="position: relative;">
+                                    <div style="position: relative; overflow: hidden; width: 100%; height: auto; ">
+                                        <div style="position: relative; overflow: scroll; margin-right: 0px; margin-bottom: 0px; ">
+                                            <div class="list-group list-group-flush" style="margin-top: -13px; margin-bottom: -13px; text-transform: capitalize;">
+                                                {% for ea_teammember in evac_assignment.team.team_members.all %}
+                                                <div class="list-group-item">{{ ea_teammember }}</div>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                        <div style="position: absolute; height: 6px; transition: opacity 200ms ease 0s; opacity: 0; display: none; right: 2px; bottom: 2px; left: 2px; border-radius: 3px;">
+                                            <div style="position: relative; display: block; height: 100%; cursor: pointer; border-radius: inherit; background-color: rgba(0, 0, 0, 0.2);"></div>
+                                        </div>
+                                        <div style="position: absolute; width: 6px; transition: opacity 200ms ease 0s; opacity: 0; display: none; right: 2px; bottom: 2px; top: 2px; border-radius: 3px;">
+                                            <div style="position: relative; display: block; width: 100%; background-color: rgba(226, 226, 226, 0.2);"></div>
+                                        </div>
+                                    </div>
+                                    <div style="position: absolute; top: 0px; left: 0px; right: 0px; height: 10px; background: linear-gradient(rgba(226, 226, 226, 0.2) 0%, rgba(0, 0, 0, 0) 100%); opacity: 0;"></div>
+                                    <div style="position: absolute; bottom: 0px; left: 0px; right: 0px; height: 10px; background: linear-gradient(to top, rgba(226, 226, 226, 0.2) 0%, rgba(0, 0, 0, 0) 100%); opacity: 0;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% for srs in evac_assignment.service_requests.all %}
+                    <div class="mt-3 mb-2 card border-secondary">
+                        <div class="card-body">
+                            <div class="card-title h5">
+                                <h4>
+                                    &#x25a2; {{ srs }}&nbsp; <span style="text-transform: capitalize;"></span>
+                                </h4>
+                            </div>
+                            <hr>
+                            {% for sr in srs.animals %}
+                            <div class="list-group list-group-flush" style="margin-top: -13px; margin-bottom: -13px;">
+                                <h4 class="mt-2" style="margin-bottom: -2px;">Animals</h4>
+                                <div class="list-group-item">
+                                    <span style="text-transform: capitalize;">#{{sr.id}} - {{sr.species}}</span> - {{sr.size}}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endfor %}        
+            </span>
+        </div>
+    
+        <br/>
+        {% for srs in evac_assignment.service_requests.all %}
+        <div class="mt-3 card border-secondary page-break col-9" >
+            <div class="card-body  " >
+                <div class="card-title h5" style="margin-bottom: -5px;">
+                    <h4>Service Request | Completed &#x25a2; | Not Completed Yet &#x25a2; | Unable to Complete &#x25a2;</h4>
+                </div>
+                <hr>
+                <div class="list-group list-group-flush" style="margin-top: -13px; margin-bottom: -13px;">
+                    <div class="list-group-item">
+                        <b>Address: </b>{{ srs.address }} {{ srs.city }}, {{ srs.state }}</div>
+                    <div class="list-group-item">
+                        <b>Owner: {% for sr_owner in srs.owners.all %}</b>{{ sr_owner }}{% endfor %}</br>
+                        <b>Reporter: </b>{{ srs.reporter }}
+                    </div>
+                </div>
+                
+                <hr>
+        
+                <div class="list-group list-group-flush" style="margin-top: -13px; margin-bottom: -13px;">
+                    <h4 class="mt-2" style="margin-bottom: -2px;">Animals</h4>
+                    {% for sr in srs.animals %}
+                    <span style="margin-top: 5px;">
+                        <span style="text-transform: capitalize;">#{{sr.id}} - {{sr.species}}</span> - {{sr.size}}
+                    </span>
+                    {% endfor %}
+                    <div class="list-group-item">
+                        <div class="row">
+                            <div class="pl-0 col-4">
+                                <div class="mt-0 css-2b097c-container" id="sr_updates.0.animals.0.status">
+                                    <div class=" css-1c7lcg3-control">
+                                        <div class=" css-g1d714-ValueContainer">
+                                            <div class=" css-1uccc91-singleValue">&#x25a2; REPORTED</div>
+                                            <div class=" css-1uccc91-singleValue">&#x25a2; EVACUATED</div>
+                                            <div class=" css-1uccc91-singleValue">&#x25a2; SHELTERED</div>
+                                        </div>    
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="pl-0 col-4">
+                                <div class="mt-0 css-2b097c-container" id="sr_updates.0.animals.0.status">
+                                    <div class=" css-1c7lcg3-control">
+                                        <div class=" css-g1d714-ValueContainer">
+                                            <div class=" css-1uccc91-singleValue">&#x25a2; SHELTER IN PLACE (SIP)</div>
+                                            <div class=" css-1uccc91-singleValue">&#x25a2; UNABLE TO LOCATE (UTL)</div>
+                                            <div class=" css-1uccc91-singleValue">&#x25a2; DECEASED</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <div class="mt-3 form-row">
+                    <div class="mb-0 form-group col-4">
+                        <label for="sr_updates.0.date_completed">Date Completed</label>
+                        <span class="d-flex">
+                            <input class="datetime_picker flatpickr-input" data-enable-time="false" name="sr_updates.0.date_completed" id="sr_updates.0.date_completed" value="2021-03-23 07:20" type="hidden">
+                            <input class="datetime_picker form-control input" placeholder="" tabindex="0" type="text">
+                        </span>
+                    </div>
+                </div>
+                <div class="mt-3 form-row">
+                    <div class="mb-0 form-group col-4">
+                        <label for="sr_updates.0.followup_date">Followup Date</label>
+                        <span class="d-flex">
+                            <input class="datetime_picker flatpickr-input" data-enable-time="false" name="sr_updates.0.followup_date" id="sr_updates.0.followup_date" value="" type="hidden">
+                            <input class="datetime_picker form-control input" placeholder="" tabindex="0" type="text">
+                            <span></span>
+                        </span>
+                    </div>
+                </div>
+                <div class="mt-3 form-row">
+                    <div class="form-group col-9">
+                        <label class="form-label">Visit Notes</label>
+                        <textarea name="sr_updates.0.notes" rows="5" type="text" id="sr_updates.0.notes" class="form-control"></textarea>
+                        <div class="invalid-feedback"></div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="col">
+                        <label class="mt-1 form-label" for="sr_updates.0.forced_entry">Forced Entry</label>
+                        <span class="MuiSwitch-root">
+                            <span class="MuiButtonBase-root MuiIconButton-root PrivateSwitchBase-root-4 MuiSwitch-switchBase MuiSwitch-colorPrimary" aria-disabled="false">
+                                <span class="MuiIconButton-label">
+                                    <input class="PrivateSwitchBase-input-7 MuiSwitch-input" name="sr_updates.0.forced_entry" type="checkbox" value="false">
+                                    <span class="MuiSwitch-thumb"></span>
+                                </span>
+                                <span class="MuiTouchRipple-root"></span>
+                            </span>
+                            <span class="MuiSwitch-track"></span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}        
+    </div>
+</div>
+{% endblock %} 
+
