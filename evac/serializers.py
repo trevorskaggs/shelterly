@@ -53,6 +53,14 @@ class EvacAssignmentSerializer(serializers.ModelSerializer):
     # action_history = serializers.SerializerMethodField()
     team_object = DispatchTeamSerializer(source='team', required=False, read_only=True)
     service_request_objects = DispatchServiceRequestSerializer(source='service_requests', required=False, read_only=True, many=True)
+    team_member_names = serializers.SerializerMethodField()
+
+    def get_team_member_names(self, obj):
+        # does this kick off another query?
+        try:
+            return ", ".join([team_member['first_name'] + " " + team_member['last_name'] for team_member in obj.team.team_members.all().values('first_name', 'last_name')])
+        except AttributeError:
+            return ''
 
     # def get_action_history(self, obj):
     #     return [build_action_string(action) for action in obj.target_actions.all()]

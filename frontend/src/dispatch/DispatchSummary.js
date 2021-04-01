@@ -159,7 +159,7 @@ function DispatchSummary({id}) {
               </h4>
             </Card.Title>
             <hr/>
-            <Scrollbar autoHeight autoHide autoHeightMin={225} autoHeightMax={225} renderThumbVertical={props => <div {...props} style={{...props.style, backgroundColor: 'rgba(226, 226, 226, 0.2)'}} />}>
+            <Scrollbar no_shadow="true" style={{height:"225px"}}>
               <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px", textTransform:"capitalize"}}>
                 {data.team_member_objects.map(team_member => (
                   <ListGroup.Item key={team_member.id}>

@@ -88,17 +88,17 @@ function AnimalSearch() {
             onChange={handleChange}
           />
           <InputGroup.Append>
-            <Button variant="outline-light" type="submit">Search</Button>
+            <Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0"}}>Search</Button>
           </InputGroup.Append>
           <ButtonGroup className="ml-1">
-            <Button variant={statusOptions === "owned" ? "primary" : "secondary"} onClick={statusOptions !== "owned" ? () => setStatusOptions("owned") : () => setStatusOptions("")}>Owned</Button>
-            <Button variant={statusOptions === "stray" ? "primary" : "secondary"} onClick={statusOptions !== "stray" ? () => setStatusOptions("stray") : () => setStatusOptions("")}>Stray</Button>
+            <Button variant={statusOptions === "owned" ? "primary" : "secondary"} onClick={statusOptions !== "owned" ? () => {setPage(1);setStatusOptions("owned")} : () => {setPage(1);setStatusOptions("")}}>Owned</Button>
+            <Button variant={statusOptions === "stray" ? "primary" : "secondary"} onClick={statusOptions !== "stray" ? () => {setPage(1);setStatusOptions("stray")} : () => {setPage(1);setStatusOptions("")}}>Stray</Button>
           </ButtonGroup>
         </InputGroup>
       </Form>
       {data.animals.map((animal, index) => (
         <div key={animal.id} className="mt-3" hidden={page !== Math.ceil((index+1)/ITEMS_PER_PAGE)}>
-          <div className="card-header"><h4 style={{marginBottom:"-2px"}}>#{animal.id} {animal.name ? titleCase(animal.name) : "Unknown"}
+          <div className="card-header"><h4 style={{marginBottom:"-2px",  marginLeft:"-12px"}}>#{animal.id} {animal.name ? titleCase(animal.name) : "Unknown"}
           <OverlayTrigger
             key={"animal-details"}
             placement="top"
@@ -108,11 +108,11 @@ function AnimalSearch() {
               </Tooltip>
             }
           >
-            <Link href={"/animals/" + animal.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+            <Link href={"/animals/" + animal.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
           </OverlayTrigger>
           &nbsp;| {titleCase(animal.status)}</h4></div>
           <CardGroup>
-            <Card key={animal.id} style={{maxWidth:"206px", maxHeight:"206px"}}>
+            <Card style={{maxWidth:"206px", maxHeight:"206px"}}>
               <Card.Body className="p-0 m-0">
                 <ReactImageFallback style={{width:"206px", height:"206px", objectFit: "cover", overflow: "hidden"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} />
               </Card.Body>
@@ -186,7 +186,7 @@ function AnimalSearch() {
                     </OverlayTrigger> :
                   ""}
                 </Card.Title>
-                <Scrollbar autoHeight autoHide autoHeightMax={144} renderThumbVertical={props => <div {...props} style={{...props.style, backgroundColor: 'rgba(226, 226, 226, 0.2)'}} />}>
+                <Scrollbar style={{height:"144px"}}>
                   <ListGroup>
                     <ListGroup.Item>{titleCase(animal.species)}{animal.size && animal.size !== 'unknown' && animal.size !== 'horse' ? <span>, {titleCase(animal.size)}</span> : ""}{animal.sex ? <span>,&nbsp;{titleCase(animal.sex)}</span> : ""}{animal.age ? <span>,&nbsp;{titleCase(animal.age)}</span> : ""}</ListGroup.Item>
                     <ListGroup.Item style={{textTransform:"capitalize"}}><b>Color: </b>{animal.pcolor ? <span>{animal.pcolor}{animal.scolor ? <span> / {animal.scolor}</span> : ""}</span> : "Unknown"}</ListGroup.Item>

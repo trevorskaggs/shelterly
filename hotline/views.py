@@ -41,7 +41,16 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
 
             if service_request.status == 'canceled':
                 service_request.animal_set.update(status='CANCELED')
-            action.send(self.request.user, verb='updated service request', target=service_request)
+
+            if self.request.data.get('reunite_animals'):
+                service_request.animal_set.exclude(status='DECEASED').update(status='REUNITED', shelter=None, room=None)
+                for animal in service_request.animal_set.exclude(status='DECEASED'):
+                    action.send(self.request.user, verb=f'changed animal status to reunited', target=animal)
+                service_request.status = 'closed'
+                service_request.save()
+                action.send(self.request.user, verb='closed service request', target=service_request)
+            else:
+                action.send(self.request.user, verb='updated service request', target=service_request)
 
     def get_queryset(self):
         queryset = (
@@ -74,7 +83,7 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
         # Exclude SRs without a geolocation when fetching for a map.
         is_map = self.request.query_params.get('map', '')
         if is_map == 'true':
-            queryset = queryset.exclude(Q(latitude=None) | Q(longitude=None) | Q(animal=None))
+            queryset = queryset.exclude(Q(latitude=None) | Q(longitude=None) | Q(animal=None)).exclude(status='canceled')
         return queryset
 
 class VisitNoteViewSet(viewsets.ModelViewSet):

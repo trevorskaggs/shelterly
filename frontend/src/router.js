@@ -1,7 +1,6 @@
 import React from "react";
-import { Redirect } from "raviger";
 import Home from "./Home";
-import Login from "./accounts/LoginForm";
+import PasswordReset from "./accounts/PasswordReset";
 import AnimalForm from "./animals/AnimalForm";
 import AnimalDetails from "./animals/AnimalDetails";
 import AnimalSearch from "./animals/AnimalSearch";
@@ -32,7 +31,8 @@ import RoomDetails from "./shelter/RoomDetails";
 import VisitNoteForm from "./dispatch/VisitNoteForm";
 
 export const publicRoutes = {
-  "/login": () => <Login />,
+  "/": () => <Home />,
+  "/reset_password": () => <PasswordReset />,
 }
 
 const routes = {
@@ -75,7 +75,6 @@ const routes = {
   "/shelter/building/room/new": () => <RoomForm />,
   "/shelter/room/edit/:id": ({id}) => <RoomForm id={id} />,
   "/shelter/room/:id": ({id}) => <RoomDetails id={id} />,
-  "/login": () => <Redirect to='/' />
 };
 
 export default routes;

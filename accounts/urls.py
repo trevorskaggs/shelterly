@@ -10,5 +10,6 @@ router.register(r'user', views.UserViewSet)
 
 urlpatterns = [
     url("^api/user/auth/$", views.UserAuth.as_view()),
+    url('^api/password_reset/', include('django_rest_passwordreset.urls', namespace='password_reset')),
     path('api/', include(router.urls)),
 ]

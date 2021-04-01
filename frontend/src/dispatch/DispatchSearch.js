@@ -1,14 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
-import { Button, ButtonGroup, Card, CardGroup, Col, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Row, Tooltip } from "react-bootstrap";
+import { Button, ButtonGroup, Card, CardGroup, Form, FormControl, InputGroup, OverlayTrigger, Pagination, Tooltip } from "react-bootstrap";
 import { Link, useQueryParams } from "raviger";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faClipboardCheck, faClipboardList, faCircle, faExclamationCircle, faQuestionCircle, faHome, faHelicopter, faHeart, faSkullCrossbones
+  faClipboardCheck, faClipboardList, faCircle, faExclamationCircle, faQuestionCircle, faUserAlt, faUserAltSlash
 } from '@fortawesome/free-solid-svg-icons';
 import { faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
+import L from "leaflet";
+import { Marker, Tooltip as MapTooltip } from "react-leaflet";
+import Map, { prettyText, reportedMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
 import Moment from "react-moment";
 import Header from '../components/Header';
+import Scrollbar from '../components/Scrollbars';
+import { ITEMS_PER_PAGE } from '../constants';
 
 function DispatchAssignmentSearch() {
 
@@ -23,6 +28,10 @@ function DispatchAssignmentSearch() {
   const [searchTerm, setSearchTerm] = useState(search);
   const [tempSearchTerm, setTempSearchTerm] = useState(search);
   const [statusOptions, setStatusOptions] = useState(status);
+  const [matches, setMatches] = useState({});
+  const [bounds, setBounds] = useState({});
+  const [page, setPage] = useState(1);
+  const [numPages, setNumPages] = useState(1);
 
   // Update searchTerm when field input changes.
   const handleChange = event => {
@@ -35,20 +44,58 @@ function DispatchAssignmentSearch() {
     setSearchTerm(tempSearchTerm);
   }
 
+  // Counts the number of species matches for a service request.
+  const countMatches = (service_request) => {
+    let species_matches = {};
+    let status_matches = {'REPORTED':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}};
+
+    service_request.animals.forEach((animal) => {
+      if (['REPORTED', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE'].indexOf(animal.status) > -1) {
+        if (!species_matches[[animal.species]]) {
+          species_matches[[animal.species]] = 1;
+        }
+        else {
+          species_matches[[animal.species]] += 1;
+        }
+        if (!status_matches[animal.status][[animal.species]]) {
+          status_matches[animal.status][[animal.species]] = 1;
+        }
+        else {
+          status_matches[animal.status][[animal.species]] += 1;
+        }
+      }
+    });
+    return [species_matches, status_matches]
+  }
+
   // Hook for initializing data.
   useEffect(() => {
     let unmounted = false;
     let source = axios.CancelToken.source();
 
-    const fetchServiceRequests = async () => {
+    const fetchDispatchAssignments = async () => {
       setData({evacuation_assignments: [], isFetching: true});
-      // Fetch ServiceRequest data.
+      // Fetch DispatchAssignment data.
       await axios.get('/evac/api/evacassignment/?search=' + searchTerm + '&status=' + statusOptions, {
         cancelToken: source.token,
       })
       .then(response => {
         if (!unmounted) {
+          setNumPages(Math.ceil(response.data.length / ITEMS_PER_PAGE));
           setData({evacuation_assignments: response.data, isFetching: false});
+          let map_dict = {};
+          let bounds_dict = {};
+          for (const dispatch_assignment of response.data) {
+            let sr_bounds = [];
+            for (const service_request of dispatch_assignment.service_request_objects) {
+              const [species_matches, status_matches] = countMatches(service_request);
+              map_dict[service_request.id] = {species_matches:species_matches, status_matches:status_matches};
+              sr_bounds.push([service_request.latitude, service_request.longitude]);
+            }
+            bounds_dict[dispatch_assignment.id] = sr_bounds.length > 0 ? L.latLngBounds(sr_bounds).pad(.1) : L.latLngBounds([[0,0]]);;
+          }
+          setMatches(map_dict);
+          setBounds(bounds_dict);
         }
       })
       .catch(error => {
@@ -58,7 +105,7 @@ function DispatchAssignmentSearch() {
         }
       });
     };
-    fetchServiceRequests();
+    fetchDispatchAssignments();
     // Cleanup.
     return () => {
       unmounted = true;
@@ -67,168 +114,212 @@ function DispatchAssignmentSearch() {
   }, [searchTerm, statusOptions]);
 
   return (
-      <div className="ml-2 mr-2">
-        <Header>Search Dispatch Assignments</Header>
-        <hr/>
-        <Form onSubmit={handleSubmit}>
-          <InputGroup className="mb-3">
-            <FormControl
-                type="text"
-                placeholder="Search"
-                name="searchTerm"
-                value={tempSearchTerm}
-                onChange={handleChange}
-            />
-            <InputGroup.Append>
-              <Button variant="outline-light" type="submit">Search</Button>
-            </InputGroup.Append>
-            <ButtonGroup className="ml-3">
-              <Button variant={statusOptions === "open" ? "primary" : "secondary"} onClick={statusOptions !== "open" ? () => setStatusOptions("open") : () => setStatusOptions("")}>Open</Button>
-              <Button variant={statusOptions === "closed" ? "primary" : "secondary"} onClick={statusOptions !== "closed" ? () => setStatusOptions("closed") : () => setStatusOptions("")}>Closed</Button>
-            </ButtonGroup>
-          </InputGroup>
-        </Form>
-        {data.evacuation_assignments.map(evacuation_assignment => (
-          <div key={evacuation_assignment.id} className="mt-3">
-            <div className="card-header"><h4 style={{marginBottom:"-2px"}}>
-              <Moment format="L">{evacuation_assignment.start_time}</Moment>
+    <div className="ml-2 mr-2">
+      <Header>Search Dispatch Assignments</Header>
+      <hr/>
+      <Form onSubmit={handleSubmit}>
+        <InputGroup className="mb-3">
+          <FormControl
+              type="text"
+              placeholder="Search"
+              name="searchTerm"
+              value={tempSearchTerm}
+              onChange={handleChange}
+          />
+          <InputGroup.Append>
+            <Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0"}}>Search</Button>
+          </InputGroup.Append>
+          <ButtonGroup className="ml-3">
+            <Button variant={statusOptions === "open" ? "primary" : "secondary"} onClick={statusOptions !== "open" ? () => {setPage(1);setStatusOptions("open")} : () => {setPage(1);setStatusOptions("")}}>Open</Button>
+            <Button variant={statusOptions === "closed" ? "primary" : "secondary"} onClick={statusOptions !== "closed" ? () => {setPage(1);setStatusOptions("closed")} : () => {setPage(1);setStatusOptions("")}}>Closed</Button>
+          </ButtonGroup>
+        </InputGroup>
+      </Form>
+      {data.evacuation_assignments.map((evacuation_assignment, index) => (
+        <div key={evacuation_assignment.id} className="mt-3" hidden={page !== Math.ceil((index+1)/ITEMS_PER_PAGE)}>
+          <div className="card-header d-flex hide-scrollbars" style={{whiteSpace:'nowrap', overflow:"auto"}}><h4 style={{marginBottom:"-2px", marginLeft:"-12px"}}>
+            <Moment format="L">{evacuation_assignment.start_time}</Moment>
+            <OverlayTrigger
+              key={"dispatch-assignment-summary"}
+              placement="top"
+              overlay={
+                <Tooltip id={`tooltip-dispatch-assignment-summary`}>
+                  Dispatch assignment summary
+                </Tooltip>
+              }
+            >
+              <Link href={"/dispatch/summary/" + evacuation_assignment.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+            </OverlayTrigger>
+            {evacuation_assignment.end_time ? "" :
               <OverlayTrigger
-                key={"dispatch-assignment-summary"}
+                key={"close-dispatch-assignment"}
                 placement="top"
                 overlay={
-                  <Tooltip id={`tooltip-dispatch-assignment-summary`}>
-                    Dispatch assignment summary
+                  <Tooltip id={`tooltip-close-dispatch-assignment`}>
+                    Close dispatch assignment
                   </Tooltip>
                 }
               >
-                <Link href={"/dispatch/summary/" + evacuation_assignment.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+                <Link href={"/dispatch/resolution/" + evacuation_assignment.id}><FontAwesomeIcon icon={faClipboardCheck} className="ml-1" inverse /></Link>
               </OverlayTrigger>
-              {evacuation_assignment.end_time ? "" :
-                <OverlayTrigger
-                  key={"close-dispatch-assignment"}
-                  placement="top"
-                  overlay={
-                    <Tooltip id={`tooltip-close-dispatch-assignment`}>
-                      Close dispatch assignment
-                    </Tooltip>
-                  }
-                >
-                  <Link href={"/dispatch/resolution/" + evacuation_assignment.id}><FontAwesomeIcon icon={faClipboardCheck} className="ml-1" inverse /></Link>
-                </OverlayTrigger>
-              }
-              &nbsp;&nbsp;|&nbsp;
-              {evacuation_assignment.team && evacuation_assignment.team_object.name}: {evacuation_assignment.team && evacuation_assignment.team_object.team_member_objects.map((member, i) => (
-                  <span key={member.id}>{i > 0 && ", "}{member.first_name} {member.last_name}</span>))}
-            </h4></div>
-            <CardGroup>
-              <Card key={evacuation_assignment.id}>
-                <Card.Body>
-                  <Row>
-                    <Col>
-                      <Card.Title>Service Requests</Card.Title>
-                    </Col>
-                    <Col>
-                      <Card.Title>Animals</Card.Title>
-                    </Col>
-                  </Row>
-                  <ListGroup>
-                    {evacuation_assignment.service_request_objects.map(service_request => (
-                      <ListGroup.Item key={service_request.id}>
-                        <Row>
-                          <Col>
-                            <b>Address: </b>{service_request.full_address}
-                            <Link
-                              href={"/hotline/servicerequest/" + service_request.id} target="_blank"> <FontAwesomeIcon
-                              icon={faClipboardList} inverse/>
-                            </Link>
-                            <div>
-                              <b>Owners: </b>
-                              {service_request.owners.length < 1 ? "No Owners" : <span>
-                              {service_request.owner_objects.map((owner, i) => (
-                              <span key={owner.id}>
-                                {i > 0 && " | "}{owner.first_name} {owner.last_name}
-                                <Link
-                                  href={"/people/owner/" + owner.id} target="_blank"> <FontAwesomeIcon
-                                  icon={faClipboardList} inverse/>
-                                </Link>
+            }
+            &nbsp;&nbsp;|&nbsp;
+            <span title={evacuation_assignment.team ? evacuation_assignment.team_object.name + ": " + evacuation_assignment.team_member_names : ""}>{evacuation_assignment.team && evacuation_assignment.team_object.name}: {evacuation_assignment.team && evacuation_assignment.team_object.team_member_objects.map((member, i) => (
+                <span key={member.id}>{i > 0 && ", "}{member.first_name} {member.last_name}</span>))}
+            </span>
+          </h4></div>
+          <CardGroup style={{overflowX:"hidden"}}>
+            <Card style={{maxWidth:"206px", height:"206px"}}>
+              <Card.Body className="p-0 m-0">
+                <Map className="d-block da-search-leaflet-container" bounds={bounds[evacuation_assignment.id]} zoomControl={false} legend_position="topleft">
+                  {evacuation_assignment.service_request_objects.map(service_request => (
+                  <Marker
+                    key={service_request.id}
+                    position={[service_request.latitude, service_request.longitude]}
+                    icon={service_request.sheltered_in_place > 0 ? SIPMarkerIcon : service_request.unable_to_locate > 0 ? UTLMarkerIcon : reportedMarkerIcon}
+                    onClick={() => window.open("/hotline/servicerequest/" + service_request.id, "_blank")}
+                  >
+                    <MapTooltip autoPan={false} direction={evacuation_assignment.service_request_objects.length > 1 ? "auto" : "top"}>
+                      <span>
+                        {matches[service_request.id] ?
+                          <span>
+                            {Object.keys(matches[service_request.id].species_matches).map((key,i) => (
+                              <span key={key} style={{textTransform:"capitalize"}}>
+                                {i > 0 && ", "}{prettyText('', key.split(',')[0], matches[service_request.id].species_matches[key])}
                               </span>
-                              ))}</span>}
-                            </div>
-                            {evacuation_assignment.end_time ?
-                            <div>
-                              <b>Visit Note: </b>{(service_request.visit_notes.filter(note => String(note.evac_assignment) === String(evacuation_assignment.id)).length && service_request.visit_notes.filter(note => String(note.evac_assignment) === String(evacuation_assignment.id))[0].notes) || "No information available."}
-                            </div> :
-                            <div>
-                              <b>Previous Visit: </b>{(service_request.visit_notes.sort((a,b) => new Date(b.date_completed).getTime() - new Date(a.date_completed).getTime()).length && service_request.visit_notes.sort((a,b) => new Date(b.date_completed).getTime() - new Date(a.date_completed).getTime())[0].notes) || "No information available."}
-                            </div>
-                            }
-                          </Col>
-                          <Col>
-                            {['cats', 'dogs', 'horses', 'other'].map(species => (
-                              <div key={species}>
-                                {service_request.animals.filter(animal => animal.evacuation_assignments.includes(evacuation_assignment.id)).filter(animal => species.includes(animal.species)).length > 0 ?
-                                <span><b style={{textTransform:"capitalize"}}>{species}: </b>
-                                {service_request.animals.filter(animal => animal.evacuation_assignments.includes(evacuation_assignment.id)).filter(animal => species.includes(animal.species)).map((animal, i) => (
-                                <span key={animal.id}>{i > 0 && ", "}{animal.name || "Unknown"}
-                                  <Link href={"/animals/animal/" + animal.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1 mr-1" inverse/></Link>
-                                  (
-                                  {animal.status === "SHELTERED IN PLACE" ?
-                                      <OverlayTrigger key={"sip"} placement="top"
-                                                      overlay={<Tooltip id={`tooltip-sip`}>SHELTERED IN PLACE</Tooltip>}>
-                                          <span className="fa-layers fa-fw">
-                                            <FontAwesomeIcon icon={faCircle} transform={'grow-1'} />
-                                            <FontAwesomeIcon icon={faHomeAlt} style={{color:"#444"}} transform={'shrink-3'} size="sm" inverse />
-                                          </span>
-                                      </OverlayTrigger> : ""}
-                                  {animal.status === "REPORTED" ?
-                                      <OverlayTrigger key={"reported"} placement="top"
-                                                      overlay={<Tooltip id={`tooltip-reported`}>REPORTED</Tooltip>}>
-                                          <FontAwesomeIcon icon={faExclamationCircle} inverse/>
-                                      </OverlayTrigger> : ""}
-                                  {animal.status === "UNABLE TO LOCATE" ?
-                                      <OverlayTrigger key={"unable-to-locate"} placement="top"
-                                                      overlay={<Tooltip id={`tooltip-unable-to-locate`}>UNABLE TO LOCATE</Tooltip>}>
-                                          <FontAwesomeIcon icon={faQuestionCircle} inverse/>
-                                      </OverlayTrigger> : ""}
-                                  {animal.status === "EVACUATED" ?
-                                      <OverlayTrigger key={"evacuated"} placement="top"
-                                                      overlay={<Tooltip id={`tooltip-evacuated`}>EVACUATED</Tooltip>}>
-                                          <FontAwesomeIcon icon={faHelicopter} inverse/>
-                                      </OverlayTrigger> : ""}
-                                  {animal.status === "REUNITED" ?
-                                      <OverlayTrigger key={"reunited"} placement="top"
-                                                      overlay={<Tooltip id={`tooltip-reunited`}>REUNITED</Tooltip>}>
-                                          <FontAwesomeIcon icon={faHeart} inverse/>
-                                      </OverlayTrigger> : ""}
-                                  {animal.status === "SHELTERED" ?
-                                      <OverlayTrigger key={"sheltered"} placement="top"
-                                                      overlay={<Tooltip id={`tooltip-sheltered`}>SHELTERED</Tooltip>}>
-                                          <FontAwesomeIcon icon={faHome} inverse/>
-                                      </OverlayTrigger> : ""}
-                                  {animal.status === "DECEASED" ?
-                                      <OverlayTrigger key={"deceased"} placement="top"
-                                                      overlay={<Tooltip id={`tooltip-deceased`}>DECEASED</Tooltip>}>
-                                          <FontAwesomeIcon icon={faSkullCrossbones} inverse/>
-                                      </OverlayTrigger> : ""}
-                                  )
+                            ))}
+                          </span>
+                        :""}
+                        <br />
+                        {service_request.full_address.split(',')[0]}
+                      </span>
+                    </MapTooltip>
+                  </Marker>
+                ))}
+                </Map>
+              </Card.Body>
+            </Card>
+            <Card style={{maxHeight:"206px"}}>
+              <Scrollbar style={{height:"204px"}} renderView={props => <div {...props} style={{...props.style, overflow:"auto"}}/>} renderThumbHorizontal={props => <div {...props} style={{...props.style, display:"none"}} />}>
+                <Card.Body style={{marginBottom:"0px"}}>
+                  <Card.Title style={{marginTop:"-9px", marginBottom:"7px", marginLeft:"-9px"}}>Service Requests</Card.Title>
+                  {evacuation_assignment.service_request_objects.map(service_request => (
+                    <div key={service_request.id} className="" style={{marginLeft:"-10px", marginRight:"7px", marginTop: "7px", marginBottom:"0px"}}>
+                      <div className="card-header rounded">
+                      <span style={{marginLeft:"-12px"}}>
+                      {matches[service_request.id] && Object.keys(matches[service_request.id].status_matches['REPORTED']).length > 0 ?
+                        <OverlayTrigger
+                          key={"reported"}
+                          placement="top"
+                          overlay={
+                            <Tooltip id={`tooltip-utl`}>
+                              {Object.keys(matches[service_request.id].status_matches['REPORTED']).map((key,i) => (
+                                <span key={key} style={{textTransform:"capitalize"}}>
+                                  {i > 0 && ", "}{prettyText('', key.split(',')[0], matches[service_request.id].status_matches['REPORTED'][key])}
                                 </span>
                               ))}
-                              </span>
-                              : ""}
-                              </div>
-                            ))}
-                          </Col>
-                        </Row>
-                      </ListGroup.Item>
-                    ))}
-                  </ListGroup>
+                              {service_request.reported_animals > 1 ? " are":" is"} reported
+                            </Tooltip>
+                          }
+                        >
+                          <FontAwesomeIcon icon={faExclamationCircle} className="mr-1"/>
+                        </OverlayTrigger>
+                        : ""}
+                        {matches[service_request.id] && Object.keys(matches[service_request.id].status_matches['SHELTERED IN PLACE']).length > 0 ?
+                        <OverlayTrigger
+                          key={"sip"}
+                          placement="top"
+                          overlay={
+                            <Tooltip id={`tooltip-utl`}>
+                              {Object.keys(matches[service_request.id].status_matches['SHELTERED IN PLACE']).map((key,i) => (
+                                <span key={key} style={{textTransform:"capitalize"}}>
+                                  {i > 0 && ", "}{prettyText('', key.split(',')[0], matches[service_request.id].status_matches['SHELTERED IN PLACE'][key])}
+                                </span>
+                              ))}
+                              {service_request.sheltered_in_place > 1 ? " are":" is"} sheltered in place
+                            </Tooltip>
+                          }
+                        >
+                          <span className="fa-layers mr-1">
+                            <FontAwesomeIcon icon={faCircle} transform={'grow-1'} />
+                            <FontAwesomeIcon icon={faHomeAlt} style={{color:"#444"}} transform={'shrink-3'} size="sm" inverse />
+                          </span>
+                        </OverlayTrigger>
+                        : ""}
+                        {matches[service_request.id] && Object.keys(matches[service_request.id].status_matches['UNABLE TO LOCATE']).length > 0 ?
+                        <OverlayTrigger
+                          key={"utl"}
+                          placement="top"
+                          overlay={
+                            <Tooltip id={`tooltip-utl`}>
+                              {Object.keys(matches[service_request.id].status_matches['UNABLE TO LOCATE']).map((key,i) => (
+                                <span key={key} style={{textTransform:"capitalize"}}>
+                                  {i > 0 && ", "}{prettyText('', key.split(',')[0], matches[service_request.id].status_matches['UNABLE TO LOCATE'][key])}
+                                </span>
+                              ))}
+                              {service_request.unable_to_locate > 1 ? " are":" is"} unable to be located
+                            </Tooltip>
+                          }
+                        >
+                          <FontAwesomeIcon icon={faQuestionCircle} className="mr-1"/>
+                        </OverlayTrigger>
+                        : ""}
+                        </span>
+                        <span>{service_request.full_address} |
+                        {service_request.owner_objects.length === 0 ?
+                          <OverlayTrigger
+                            key={"stray"}
+                            placement="top"
+                            overlay={
+                              <Tooltip id={`tooltip-stray`}>
+                                No owner
+                              </Tooltip>
+                            }
+                          >
+                            <FontAwesomeIcon icon={faUserAltSlash} className="ml-1 mr-1" size="sm" />
+                          </OverlayTrigger> :
+                          <OverlayTrigger
+                            key={"stray"}
+                            placement="top"
+                            overlay={
+                              <Tooltip id={`tooltip-stray`}>
+                                {service_request.owner_objects.map(owner => (
+                                  <div key={owner.id}>{owner.first_name} {owner.last_name}</div>
+                                ))}
+                              </Tooltip>
+                            }
+                          >
+                            <FontAwesomeIcon icon={faUserAlt} className="ml-1 mr-1" size="sm" />
+                          </OverlayTrigger>
+                        }
+                        </span>
+                        {matches[service_request.id] ?
+                        <span>
+                          {Object.keys(matches[service_request.id].species_matches).map((key,i) => (
+                            <span key={key} style={{textTransform:"capitalize"}}>
+                              {i > 0 && ", "}{prettyText('', key.split(',')[0], matches[service_request.id].species_matches[key])}
+                            </span>
+                          ))}
+                        </span>
+                        :""}
+                      </div>
+                    </div>
+                  ))}
                 </Card.Body>
-              </Card>
-            </CardGroup>
-          </div>
-        ))}
-        <p>{data.isFetching ? 'Fetching dispatch assignments...' : <span>{data.evacuation_assignments && data.evacuation_assignments.length ? '' : 'No dispatch assignments found.'}</span>}</p>
-      </div>
+              </Scrollbar>
+            </Card>
+          </CardGroup>
+        </div>
+      ))}
+      <p>{data.isFetching ? 'Fetching dispatch assignments...' : <span>{data.evacuation_assignments && data.evacuation_assignments.length ? '' : 'No dispatch assignments found.'}</span>}</p>
+      <Pagination className="custom-page-links" size="lg" onClick={(e) => {setPage(parseInt(e.target.innerText))}}>
+        {[...Array(numPages).keys()].map(x =>
+        <Pagination.Item key={x+1} active={x+1 === page}>
+          {x+1}
+        </Pagination.Item>)
+        }
+      </Pagination>
+    </div>
   )
 }
 
