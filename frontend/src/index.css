@@ -1,7 +1,7 @@
 body {
   margin: 0 !important;
   color: #fff !important;
-  background-color: #222 !important;
+  background-color: #222222 !important;
   font-family: "Lato", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol" !important;
   font-size: 0.9375rem !important;
   -webkit-font-smoothing: antialiased;
@@ -80,7 +80,7 @@ input[disabled] {
 }
 
 .custom-page-links .page-link {
-  background-color: #444444 !important;
+  background-color: #444!important;
 }
 
 .custom-page-links .page-link:hover {
@@ -88,7 +88,7 @@ input[disabled] {
 }
 
 .custom-page-links .page-item.active .page-link {
-  background-color: #375a7f !important ;
+  background-color: #375a7f!important ;
 }
 
 .custom-page-links .page-item.disabled .page-link {
