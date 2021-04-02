@@ -11,6 +11,5 @@ router.register(r'dispatchteam', views.DispatchTeamViewSet)
 
 urlpatterns = [
     path('api/', include(router.urls)),
-    #path('dispatch/<int:pk>/print', views.dispatch_print, name="print"),
     path('dispatch/print', views.dispatch_print, name="print"),
 ]

@@ -154,3 +154,9 @@ class AnimalViewSet(viewsets.ModelViewSet):
             
         return queryset
     
+from django.shortcuts import render
+def kennel_card_print(request):
+    id = request.GET.get('id', '')
+    animals = Animal.objects.exclude(status="CANCELED").prefetch_related('Shelter').prefetch_related(Prefetch('animalimage_set', to_attr='images')).distinct().get(pk=id)
+    context={"animals":animals}
+    return render(request, "ui/animals/print.html", context)    

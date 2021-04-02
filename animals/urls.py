@@ -9,4 +9,5 @@ router.register(r'animal', views.AnimalViewSet)
 
 urlpatterns = [
     path('api/', include(router.urls)),
+    path('print', views.kennel_card_print, name="print"),
 ]
