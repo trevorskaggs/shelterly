@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import axios from "axios";
 import { Link, useQueryParams } from 'raviger';
 import { Button, ButtonGroup, Card, CardGroup, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Pagination, Tooltip } from 'react-bootstrap';
@@ -27,6 +27,7 @@ function PersonSearch() {
 	const [tempSearchTerm, setTempSearchTerm] = useState(search);
 	const [page, setPage] = useState(1);
   const [numPages, setNumPages] = useState(1);
+	const topRef = useRef(null);
 
 	// Update searchTerm when field input changes.
 	const handleChange = event => {
@@ -38,6 +39,12 @@ function PersonSearch() {
 			event.preventDefault();
 			setSearchTerm(tempSearchTerm);
 	}
+
+	function setFocus(pageNum) {
+    if (pageNum !== page) {
+      topRef.current.focus();
+    }
+  }
 
 	// Hook for initializing data.
 	useEffect(() => {
@@ -94,6 +101,7 @@ function PersonSearch() {
 								name="searchTerm"
 								value={tempSearchTerm}
 								onChange={handleChange}
+								ref={topRef}
 							/>
 							<InputGroup.Append>
 								<Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0"}}>Search</Button>
@@ -181,7 +189,7 @@ function PersonSearch() {
 					<p>{data.isFetching ? 'Fetching ' + statusOptions + '...' :
 						<span>{data.owners && data.owners.length ? '' : 'No ' + statusOptions + ' found.'}</span>}
 					</p>
-					<Pagination className="custom-page-links" size="lg" onClick={(e) => {setPage(parseInt(e.target.innerText))}}>
+					<Pagination className="custom-page-links" size="lg" onClick={(e) => {setFocus(parseInt(e.target.innerText));setPage(parseInt(e.target.innerText))}}>
 						{[...Array(numPages).keys()].map(x =>
 						<Pagination.Item key={x+1} active={x+1 === page}>
 							{x+1}

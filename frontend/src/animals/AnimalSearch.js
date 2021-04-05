@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import axios from "axios";
 import { Link, useQueryParams } from 'raviger';
 import { Button, ButtonGroup, Card, CardGroup, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Pagination, Tooltip } from 'react-bootstrap';
@@ -30,6 +30,7 @@ function AnimalSearch() {
   const [statusOptions, setStatusOptions] = useState(owned);
   const [page, setPage] = useState(1);
   const [numPages, setNumPages] = useState(1);
+  const topRef = useRef(null);
 
   // Update searchTerm when field input changes.
   const handleChange = event => {
@@ -40,6 +41,12 @@ function AnimalSearch() {
   const handleSubmit = async event => {
     event.preventDefault();
     setSearchTerm(tempSearchTerm);
+  }
+
+  function setFocus(pageNum) {
+    if (pageNum !== page) {
+      topRef.current.focus();
+    }
   }
 
   // Hook for initializing data.
@@ -86,6 +93,7 @@ function AnimalSearch() {
             name="searchTerm"
             value={tempSearchTerm}
             onChange={handleChange}
+            ref={topRef}
           />
           <InputGroup.Append>
             <Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0"}}>Search</Button>
@@ -213,7 +221,7 @@ function AnimalSearch() {
           </div>
       ))}
       <p>{data.isFetching ? 'Fetching Animals...' : <span>{!data.animals.length && searchTerm ? 'No Animals found.' : ''}</span>}</p>
-      <Pagination className="custom-page-links" size="lg" onClick={(e) => {setPage(parseInt(e.target.innerText))}}>
+      <Pagination className="custom-page-links" size="lg" onClick={(e) => {setFocus(parseInt(e.target.innerText));setPage(parseInt(e.target.innerText))}}>
         {[...Array(numPages).keys()].map(x =>
         <Pagination.Item key={x+1} active={x+1 === page}>
           {x+1}
