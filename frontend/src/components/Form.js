@@ -14,6 +14,9 @@ import { Map, Marker, Tooltip as MapTooltip, TileLayer } from "react-leaflet";
 import flatten from 'flat';
 import clsx from 'clsx';
 import MaterialCheckbox from '@material-ui/core/Checkbox';
+import {
+  useRegisteredRef
+} from "react-register-nodes";
 import { makeStyles } from '@material-ui/core/styles';
 import Alert from 'react-bootstrap/Alert';
 import { Legend, pinMarkerIcon } from "../components/Map";
@@ -67,6 +70,8 @@ const DateTimePicker = ({ label, xs, clearable, ...props }) => {
 
   const [field, meta] = useField(props);
 
+  const registeredRef = useRegisteredRef(props.name);
+
   // Ref and function to clear field.
   const datetime = useRef(null);
   const clearDate = useCallback(() => {
@@ -86,7 +91,7 @@ const DateTimePicker = ({ label, xs, clearable, ...props }) => {
 
   return (
     <>
-      <Form.Group as={Col} xs={xs} hidden={props.hidden} className="mb-0">
+      <Form.Group as={Col} xs={xs} hidden={props.hidden} className="mb-0" ref={meta.error && registeredRef}>
       <label htmlFor={props.id || props.name}>{label}</label>
       <span className="d-flex">
         <Flatpickr className="datetime_picker" ref={datetime} data-enable-time options={options} {...field} {...props} />
@@ -101,9 +106,12 @@ const DateTimePicker = ({ label, xs, clearable, ...props }) => {
 const TextInput = ({ label, value, xs, controlId, formGroupClasses, ...props }) => {
 
   const [field, meta] = useField(props);
+
+  const registeredRef = useRegisteredRef(props.name);
+
   return (
     <>
-    <Form.Group as={Col} xs={xs} controlId={controlId} className={formGroupClasses} hidden={props.hidden}>
+    <Form.Group as={Col} xs={xs} controlId={controlId} className={formGroupClasses} hidden={props.hidden} ref={meta.error && registeredRef}>
       <Form.Label>{label}</Form.Label>
       <Form.Control type="text" value={value} isInvalid={meta.touched && meta.error} onChange={props.handleChange} {...field} {...props} />
       <Form.Control.Feedback type="invalid"> {meta.error}</ Form.Control.Feedback>
@@ -139,6 +147,8 @@ const Checkbox = (props) => {
 const DropDown = React.forwardRef((props, ref) => {
   const { setFieldValue, errors, setFieldTouched, isSubmitting, isValidating } = useFormikContext();
   const [field, meta] = useField(props);
+
+  const registeredRef = useRegisteredRef(props.name);
 
   const customStyles = {
     // For the select it self, not the options of the select
@@ -177,11 +187,13 @@ const DropDown = React.forwardRef((props, ref) => {
 
   return (
     <>
+    <div ref={meta.error && registeredRef}>
       {props.label ? <Form.Label style={props.style}>{props.label}</Form.Label> : ""}
       <SimpleValue {...field} options={props.options}>
          {simpleProps => <Select isDisabled={props.disabled} ref={ref} styles={customStyles} isClearable={true} onBlur={updateBlur} onChange={handleOptionChange} {...props} {...simpleProps} />}
       </SimpleValue>
       {meta.touched && meta.error ? <div style={{ color: "#e74c3c", marginTop: ".5rem", fontSize: "80%" }}>{meta.error}</div> : ""}
+    </div>
     </>
   );
 });
