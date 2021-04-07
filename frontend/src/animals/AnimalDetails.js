@@ -35,6 +35,7 @@ function AnimalDetails({id}) {
     confined: 'unknown',
     injured: 'unknown',
     behavior_notes: '',
+    medical_notes: '',
     last_seen: null,
     front_image: null,
     side_image: null,
@@ -205,6 +206,12 @@ function AnimalDetails({id}) {
                   <span className="col-6"><b>Size:</b> {data.size}</span>
                 </div>
               </ListGroup.Item>
+              <ListGroup.Item style={{textTransform:"capitalize"}}>
+                <div className="row">
+                  <span className="col-6"><b>Primary Color:</b> {data.pcolor||"N/A"}</span>
+                  <span className="col-6"><b>Secondary Color:</b> {data.scolor||"N/A"}</span>
+                </div>
+              </ListGroup.Item>
               {data.last_seen ? <ListGroup.Item><b>Last Seen:</b> <Moment format="MMMM Do YYYY HH:mm">{data.last_seen}</Moment></ListGroup.Item> : ""}
               {data.request ?
               <ListGroup.Item><b>Service Request: </b>{data.request_address}
@@ -316,15 +323,10 @@ function AnimalDetails({id}) {
               <h4>Description</h4>
             </Card.Title>
             <hr/>
-            <ListGroup variant="flush">
-              <ListGroup.Item style={{marginTop:"-13px", textTransform:"capitalize"}}>
-              <div className="row">
-                <span className="col-6"><b>Primary Color:</b> {data.pcolor||"N/A"}</span>
-                <span className="col-6"><b>Secondary Color:</b> {data.scolor||"N/A"}</span>
-              </div>
-              </ListGroup.Item>
+            <ListGroup variant="flush" style={{marginTop:"-13px"}}>
               {data.color_notes ? <ListGroup.Item><b>Color Notes:</b> {data.color_notes}</ListGroup.Item> : ""}
-              {data.behavior_notes ? <ListGroup.Item><b>Behavior Notes:</b> {data.behavior_notes}</ListGroup.Item> : ""}
+              {data.behavior_notes ? <ListGroup.Item style={{whiteSpace:"pre-line"}}><b>Behavior Notes:</b> {data.behavior_notes}</ListGroup.Item> : ""}
+              {data.medical_notes ? <ListGroup.Item style={{whiteSpace:"pre-line"}}><b>Medical Notes:</b> {data.medical_notes}</ListGroup.Item> : ""}
               {data.last_seen ? <ListGroup.Item><b>Last Seen:</b> <Moment format="MMMM Do YYYY HH:mm">{data.last_seen}</Moment></ListGroup.Item> : ""}
             </ListGroup>
           </Card.Body>

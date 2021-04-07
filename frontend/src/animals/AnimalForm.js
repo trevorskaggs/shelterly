@@ -69,6 +69,7 @@ const AnimalForm = (props) => {
     confined: 'unknown',
     injured: 'unknown',
     behavior_notes: '',
+    medical_notes: '',
     last_seen: null,
     number_of_animals: 1,
     room: null,
@@ -594,7 +595,17 @@ const AnimalForm = (props) => {
                     xs="12"
                   />
                 </BootstrapForm.Row>
-                <BootstrapForm.Row className={is_workflow ? "mb-3" : ""}>
+                <BootstrapForm.Row>
+                  <TextInput
+                    label="Medical Notes"
+                    id="medical_notes"
+                    name="medical_notes"
+                    as="textarea"
+                    rows={5}
+                    xs="12"
+                  />
+                </BootstrapForm.Row>
+                <BootstrapForm.Row className={is_workflow && !is_intake ? "mb-3" : ""}>
                   <DateTimePicker
                     label="Last Seen"
                     name="last_seen"
