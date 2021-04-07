@@ -28,7 +28,7 @@ function Shelterly() {
             <Sidebar state={state} dispatch={dispatch} removeCookie={removeCookie} />
           </span>
           : ""}
-          <span className='d-flex flex-column col-9' style={style}>
+          <span className='d-flex flex-column col-9 h-100' style={style}>
             <Fragment>
               {routeResult || <PageNotFound />}
             </Fragment>

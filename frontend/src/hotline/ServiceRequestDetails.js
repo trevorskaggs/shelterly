@@ -146,11 +146,11 @@ function ServiceRequestDetails({id}) {
         </Modal.Header>
         <Modal.Body>Are you sure you want to cancel this Service Request and associated animals?</Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowModal(false)}>
-            Close
+          <Button variant="primary" onClick={() => cancelServiceRequest()}>
+            Yes
           </Button>
-          <Button variant="primary" onClick={() => cancelServiceRequest(showModal)}>
-            Confirm
+          <Button variant="secondary" onClick={() => setShowModal(false)}>
+            Cancel
           </Button>
         </Modal.Footer>
       </Modal>
@@ -301,7 +301,7 @@ function ServiceRequestDetails({id}) {
       <div className="row mb-2">
         <div className="col-12 d-flex">
           <Card className="mb-2 border rounded" style={{width:"100%"}}>
-            <Card.Body style={{marginBottom:"-15px"}}>
+            <Card.Body style={{marginBottom:"-20px"}}>
               <Card.Title>
                 <h4 className="mb-0">Animals
                   <OverlayTrigger
@@ -338,7 +338,7 @@ function ServiceRequestDetails({id}) {
                 <Card.ImgOverlay className="text-border" style={{height:"20px"}}>#{animal.id}</Card.ImgOverlay>
                 <Card.Text className="mb-0 border-top" style={{textTransform:"capitalize"}}>
                 <span title={animal.name} className="ml-1">{animal.name||"Unknown"}</span>
-                <div className="ml-1">
+                <span className="ml-1" style={{display:"block"}}>
                   {animal.species}&nbsp;
                   {animal.status === "SHELTERED IN PLACE" ?
                     <OverlayTrigger key={"sip"} placement="top"
@@ -399,9 +399,9 @@ function ServiceRequestDetails({id}) {
                       </Tooltip>
                     }
                   >
-                    <FontAwesomeIcon icon={faMinusSquare} style={{cursor:'pointer'}} size="sm" onClick={() => {setAnimalToDelete({id:animal.id, name: animal.name});setShowAnimalConfirm(true);}} className="ml-1" inverse />
+                    <FontAwesomeIcon icon={faMinusSquare} style={{cursor:'pointer'}} onClick={() => {setAnimalToDelete({id:animal.id, name: animal.name});setShowAnimalConfirm(true);}} className="ml-1" inverse />
                   </OverlayTrigger>
-                </div>
+                </span>
                 </Card.Text>
               </Card>
               ))}

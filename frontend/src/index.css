@@ -34,7 +34,7 @@ hr { display: block; height: 1px;
 /* Leaflet map CSS */
 .leaflet-container { width: auto; height: 55vh;}
 
-.landing-leaflet-container { width: auto; height: 311px; min-height:311px;}
+.landing-leaflet-container { width: auto; height: 350px; min-height:350px;}
 
 .search-leaflet-container { width: auto; height: 200px; min-height:200px;}
 
@@ -81,6 +81,10 @@ input[disabled] {
   font-size: 100% !important;
 }
 
+.rbt-input-wrapper {
+  height: 29px;
+}
+
 .custom-page-links .page-link {
   background-color: #444!important;
 }
@@ -90,11 +94,11 @@ input[disabled] {
 }
 
 .custom-page-links .page-item.active .page-link {
-  background-color: #375a7f!important ;
+  background-color: #375a7f!important;
 }
 
 .custom-page-links .page-item.disabled .page-link {
-  background-color: #444!important ;
+  background-color: #444!important;
 }
 
 /* Shelter drag and drop CSS */
@@ -136,6 +140,22 @@ input[disabled] {
 
 .icon-thin {
   transform: scale(.5,1.35);
+}
+
+.hover-div:hover .shelter-icon {
+  color: #b18662;
+}
+
+.hover-div:hover .building-icon {
+  color: #b18662;
+}
+
+.shelter-link:hover {
+  color: #b18662!important;
+}
+
+.building-link:hover {
+  color: #b18662!important;
 }
 
 /* Hide scrollbar for Chrome, Safari and Opera */

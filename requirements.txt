@@ -5,11 +5,11 @@ django-cors-headers
 django-filter
 django-rest-knox
 django-ordered-model
+django-ses
 djangorestframework>=3.12
 django-storages
-geocoder==1.38.1
+django-rest-passwordreset
 ipython
 pillow
 psycopg2-binary
 pytz==2018.9
-zappa

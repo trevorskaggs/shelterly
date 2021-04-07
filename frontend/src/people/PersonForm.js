@@ -310,7 +310,7 @@ const PersonForm = (props) => {
               {!is_first_responder && !is_workflow ? <Button type="button" onClick={() => { setSkipOwner(false); formikProps.submitForm() }}>{!isOwner && !is_intake ? <span>{!id ? "Add Owner" : "Save"}</span> : "Save"}</Button> : ""}
               {/* workflow buttons */}
               {is_workflow && !isOwner ? <Button type="button" onClick={() => { setSkipOwner(false); formikProps.submitForm(); }}>{props.state.steps.owner.first_name ? "Change Owner" : "Add Owner"}</Button> : ""}
-              {is_workflow ? <button type="button" className="btn btn-primary mr-1 border" onClick={() => { setSkipOwner(true); formikProps.submitForm() }}>Next Step</button> : ""}
+              {is_workflow ? <button type="button" className="btn btn-primary border" onClick={() => { setSkipOwner(true); formikProps.submitForm() }}>Next Step</button> : ""}
             </ButtonGroup>
           </Card>
         )}

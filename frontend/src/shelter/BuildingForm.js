@@ -108,14 +108,14 @@ export const BuildingForm = ({id}) => {
             <BootstrapForm noValidate>
               <BootstrapForm.Row>
                 <TextInput
-                  xs="5"
+                  xs="6"
                   type="text"
                   label="Name*"
                   name="name"
                   id="name"
                 />
                 <TextInput
-                  xs="5"
+                  xs="6"
                   type="text"
                   label="Description"
                   name="description"

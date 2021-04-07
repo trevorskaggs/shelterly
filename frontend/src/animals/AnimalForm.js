@@ -718,7 +718,7 @@ const AnimalForm = (props) => {
             :
               <Button type="button" onClick={() => {setAddAnother(false); formikProps.submitForm()}}>Save</Button>
             }
-            {is_workflow && !is_intake ? <Button type="button" className="btn btn-primary mr-1 border" onClick={() => {setAddAnother(false); formikProps.submitForm()}}>Next Step</Button> : ""}
+            {is_workflow && !is_intake ? <Button type="button" className="btn btn-primary border" onClick={() => {setAddAnother(false); formikProps.submitForm()}}>Next Step</Button> : ""}
             {is_workflow && is_intake ? <Button type="button" className="btn btn-primary mr-1 border" onClick={() => {setAddAnother(false); formikProps.submitForm()}}>Save and Finish</Button> : ""}
           </ButtonGroup>
           </Card>
