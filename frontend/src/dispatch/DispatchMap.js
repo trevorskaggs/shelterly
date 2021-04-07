@@ -122,7 +122,7 @@ function Deploy() {
 
   // Handle reselecting after hitting dupe assigned SR error.
   const handleReselect = async event => {
-    // setData(prevState => ({ ...prevState, 'service_requests': prevState.service_requests.filter(sr => !duplicateSRs.includes(sr.id))}));
+    // Perform API update for most recent data and clean out the duplicate SRs.
     setTriggerRefresh(!triggerRefresh)
     setMapState(Object.keys(mapState).filter(key => !duplicateSRs.includes(key))
       .reduce((obj, key) => {
