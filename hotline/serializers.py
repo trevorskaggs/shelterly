@@ -105,6 +105,12 @@ class SimpleServiceRequestSerializer(serializers.ModelSerializer):
         for key in ['followup_date']:
             if data.get(key) == '':
                 data[key] = None
+        # Truncates latitude and longitude.
+        if data.get('latitude'):
+            data['latitude'] = float("%.6f" % float(data.get('latitude')))
+        if data.get('longitude'):
+            data['longitude'] = float("%.6f" % float(data.get('longitude')))
+        return super().to_internal_value(data)
 
     def get_latest_evac(self, obj):
         from evac.models import EvacAssignment
@@ -113,17 +119,8 @@ class SimpleServiceRequestSerializer(serializers.ModelSerializer):
             return assigned_evac
         return EvacAssignment.objects.filter(service_requests=obj, end_time__isnull=False).values('id', 'start_time', 'end_time').first()
 
-        # Truncates latitude and longitude.
-        if data.get('latitude'):
-            data['latitude'] = float("%.6f" % float(data.get('latitude')))
-        if data.get('longitude'):
-            data['longitude'] = float("%.6f" % float(data.get('longitude')))
-        return super().to_internal_value(data)
-
-
 class ServiceRequestSerializer(SimpleServiceRequestSerializer):
     from people.serializers import SimplePersonSerializer
-
 
     action_history = serializers.SerializerMethodField()
     animal_count = serializers.IntegerField(read_only=True)
@@ -134,7 +131,7 @@ class ServiceRequestSerializer(SimpleServiceRequestSerializer):
         model = ServiceRequest
         fields = ['id', 'latitude', 'longitude', 'full_address', 'followup_date', 'status',
         'injured', 'accessible', 'turn_around', 'animals', 'reported_animals', 'sheltered_in_place', 'unable_to_locate', 'aco_required',
-        'animal_count', 'action_history', 'owner_objects', 'evacuation_assignments', 'visit_notes', 'latest_evac']
+        'animal_count', 'action_history', 'owner_objects', 'reporter_object', 'evacuation_assignments', 'visit_notes', 'latest_evac']
 
     # def __init__(self, *args, **kwargs):
     #     super(ServiceRequestSerializer, self).__init__(*args, **kwargs)

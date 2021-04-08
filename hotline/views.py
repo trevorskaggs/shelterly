@@ -92,7 +92,7 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
         # Exclude SRs without a geolocation when fetching for a map.
         is_map = self.request.query_params.get('map', '')
         if is_map == 'true':
-            queryset = queryset.exclude(Q(latitude=None) | Q(longitude=None) | Q(animal=None))
+            queryset = queryset.exclude(Q(latitude=None) | Q(longitude=None) | Q(animal=None)).exclude(status='canceled')
         return queryset
 
 class VisitNoteViewSet(viewsets.ModelViewSet):
@@ -100,4 +100,3 @@ class VisitNoteViewSet(viewsets.ModelViewSet):
     queryset = VisitNote.objects.all()
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = VisitNoteSerializer
-
