@@ -128,7 +128,7 @@ function AnimalSearch() {
             <Card style={{marginBottom:"6px", maxWidth:"335px"}}>
               <Card.Body>
                 <Card.Title style={{marginTop:"-9px", marginBottom:"8px"}}>Information
-                  {animal.owners.length < 1 ?
+                  {animal.owner_objects.length < 1 ?
                     <OverlayTrigger
                       key={"stray"}
                       placement="top"

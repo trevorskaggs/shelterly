@@ -3,15 +3,16 @@ import re
 from rest_framework import serializers
 from actstream.models import target_stream
 
-from animals.serializers import AnimalSerializer
+from animals.serializers import ModestAnimalSerializer
 from evac.models import DispatchTeam, EvacAssignment, EvacTeamMember
-from hotline.serializers import ServiceRequestSerializer
-from people.serializers import SimplePersonSerializer
+from hotline.models import ServiceRequest
+from hotline.serializers import SimpleServiceRequestSerializer, VisitNoteSerializer
+from people.serializers import OwnerContactSerializer, SimplePersonSerializer
 
 from location.utils import build_action_string
 
 class EvacTeamMemberSerializer(serializers.ModelSerializer):
-    
+
     display_name = serializers.SerializerMethodField()
     display_phone = serializers.SerializerMethodField()
 
@@ -41,14 +42,42 @@ class DispatchTeamSerializer(serializers.ModelSerializer):
         model = DispatchTeam
         fields = '__all__'
 
-class DispatchServiceRequestSerializer(ServiceRequestSerializer):
+class DispatchServiceRequestSerializer(SimpleServiceRequestSerializer):
+    animals = ModestAnimalSerializer(many=True, read_only=True)
+    owner_contacts = OwnerContactSerializer(source='ownercontact_set', many=True, required=False, read_only=True)
+    owner_objects = SimplePersonSerializer(source='owners', many=True, required=False, read_only=True)
+    visit_notes = VisitNoteSerializer(source='visitnote_set', many=True, required=False, read_only=True)
 
-    animals = serializers.SerializerMethodField()
+    class Meta:
+        model = ServiceRequest
+        fields = ['id', 'latitude', 'longitude', 'full_address', 'followup_date',
+        'injured', 'accessible', 'turn_around', 'animals', 'reported_animals', 'sheltered_in_place', 'unable_to_locate', 'aco_required',
+        'owner_contacts', 'owner_objects', 'owners', 'visit_notes']
 
-    def get_animals(self, obj):
-        return AnimalSerializer(obj.animal_set.exclude(status="CANCELED"), many=True, read_only=True).data
+class SimpleEvacAssignmentSerializer(serializers.ModelSerializer):
 
-class EvacAssignmentSerializer(serializers.ModelSerializer):
+    team_name = serializers.SerializerMethodField()
+    team_member_names = serializers.SerializerMethodField()
+
+    def get_team_name(self, obj):
+        # does this kick off another query?
+        try:
+            return obj.team.name
+        except AttributeError:
+            return ''
+
+    def get_team_member_names(self, obj):
+        # does this kick off another query?
+        try:
+            return ", ".join([team_member['first_name'] + " " + team_member['last_name'] for team_member in obj.team.team_members.all().values('first_name', 'last_name')])
+        except AttributeError:
+            return ''
+
+    class Meta:
+        model = EvacAssignment
+        fields = ['id', 'start_time', 'end_time', 'team_name', 'team_member_names']
+
+class EvacAssignmentSerializer(SimpleEvacAssignmentSerializer):
 
     # action_history = serializers.SerializerMethodField()
     team_object = DispatchTeamSerializer(source='team', required=False, read_only=True)

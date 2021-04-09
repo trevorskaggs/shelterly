@@ -140,9 +140,7 @@ class AnimalViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """
         Returns: Queryset of distinct animals, each annotated with:
-            is_stray (boolean)
             images (List of AnimalImages)
-        and filtered by is_stray.   
         """        
         queryset = Animal.objects.exclude(status="CANCELED").prefetch_related(Prefetch('animalimage_set', to_attr='images')).distinct()
         

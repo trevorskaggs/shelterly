@@ -30,10 +30,9 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('SECRET_KEY')
-
+DEBUG = False
 # SECURITY WARNING: don't run with debug turned on in production!
 ALLOWED_HOSTS = ['*']
-DEBUG = False
 AUTH_USER_MODEL = 'accounts.ShelterlyUser'
 
 # AWS Config
@@ -74,6 +73,7 @@ INSTALLED_APPS = [
     'frontend',
     'ordered_model',
     'actstream',
+    'drf_yasg'
 ]
 
 ACTSTREAM_SETTINGS = {

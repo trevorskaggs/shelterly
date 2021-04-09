@@ -22,6 +22,12 @@ class SimplePersonSerializer(serializers.ModelSerializer):
     def get_display_phone(self, obj):
         return re.sub(r'(\d{3})(\d{3})(\d{4})', r'(\1) \2-\3', obj.phone)
 
+    def get_is_owner(self, obj):
+        try:
+            return obj.is_sr_owner or obj.is_animal_owner
+        except AttributeError:
+            return ServiceRequest.objects.filter(owners=obj.id).exists() or Animal.objects.filter(owners=obj.id).exists()
+
     # Custom field for Formated Alt Phone Number
     def get_display_alt_phone(self, obj):
         return re.sub(r'(\d{3})(\d{3})(\d{4})', r'(\1) \2-\3', obj.alt_phone)

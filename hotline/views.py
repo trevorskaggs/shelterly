@@ -1,7 +1,7 @@
 from django.db.models import Count, Exists, OuterRef, Prefetch, Q
 from actstream import action
 from datetime import datetime
-from .serializers import ServiceRequestSerializer, VisitNoteSerializer
+from .serializers import ServiceRequestSerializer, SimpleServiceRequestSerializer, VisitNoteSerializer
 
 from animals.models import Animal
 from hotline.models import ServiceRequest, VisitNote
@@ -13,9 +13,18 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
     search_fields = ['address', 'city', 'animal__name', 'owners__first_name', 'owners__last_name', 'owners__address', 'owners__city', 'reporter__first_name', 'reporter__last_name']
     filter_backends = (filters.SearchFilter, filters.OrderingFilter)
     permission_classes = [permissions.IsAuthenticated, ]
-    serializer_class = ServiceRequestSerializer
+    serializer_class = SimpleServiceRequestSerializer
+    detail_serializer_class = ServiceRequestSerializer
     ordering_fields = ['injured', 'animal_count']
     ordering = ['-injured', '-animal_count']
+
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            if hasattr(self, 'detail_serializer_class'):
+                return self.detail_serializer_class
+
+        return super(ServiceRequestViewSet, self).get_serializer_class()
+
 
     def perform_create(self, serializer):
         if serializer.is_valid():
@@ -58,7 +67,7 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
             .annotate(animal_count=Count("animal"))
             .annotate(
                 injured=Exists(Animal.objects.filter(request_id=OuterRef("id"), injured="yes"))
-            ).prefetch_related(Prefetch('animal_set', queryset=Animal.objects.prefetch_related('evacuation_assignments').prefetch_related(Prefetch('animalimage_set', to_attr='images')), to_attr='animals'))
+            ).prefetch_related(Prefetch('animal_set', queryset=Animal.objects.exclude(status='CANCELED').prefetch_related('evacuation_assignments').prefetch_related(Prefetch('animalimage_set', to_attr='images')), to_attr='animals'))
             .prefetch_related('owners')
             .prefetch_related('visitnote_set')
             .select_related('reporter')
@@ -91,4 +100,3 @@ class VisitNoteViewSet(viewsets.ModelViewSet):
     queryset = VisitNote.objects.all()
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = VisitNoteSerializer
-
