@@ -8,6 +8,7 @@ django-ordered-model
 django-ses
 djangorestframework>=3.12
 django-storages
+drf-yasg
 django-rest-passwordreset
 ipython
 pillow

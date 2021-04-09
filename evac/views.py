@@ -66,8 +66,13 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
             .annotate(animal_count=Count("animal"))
             .annotate(
                 injured=Exists(Animal.objects.filter(request_id=OuterRef("id"), injured="yes"))
-            ).prefetch_related(Prefetch('animal_set', queryset=Animal.objects.prefetch_related(Prefetch('animalimage_set', to_attr='images')), to_attr='animals'))
-            .prefetch_related('owners')
+            ).prefetch_related(Prefetch(
+                'animal_set', queryset=Animal.objects.exclude(status='CANCELED').prefetch_related('evacuation_assignments').prefetch_related(
+                    Prefetch('animalimage_set', to_attr='images')), to_attr='animals'))
+            .prefetch_related(
+                Prefetch('owners', queryset=Person.objects.annotate(
+                    is_sr_owner=Exists(ServiceRequest.objects.filter(owners__id=OuterRef('id')))).annotate(
+                    is_animal_owner=Exists(Animal.objects.filter(owners__id=OuterRef('id'))))))
             .prefetch_related('visitnote_set')
             .select_related('reporter')
             .prefetch_related('evacuation_assignments')

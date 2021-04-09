@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import axios from "axios";
 import { Button, ButtonGroup, Card, CardGroup, Form, FormControl, InputGroup, OverlayTrigger, Pagination, Tooltip } from "react-bootstrap";
 import { Link, useQueryParams } from "raviger";
@@ -32,6 +32,7 @@ function DispatchAssignmentSearch() {
   const [bounds, setBounds] = useState({});
   const [page, setPage] = useState(1);
   const [numPages, setNumPages] = useState(1);
+  const topRef = useRef(null);
 
   // Update searchTerm when field input changes.
   const handleChange = event => {
@@ -42,6 +43,12 @@ function DispatchAssignmentSearch() {
   const handleSubmit = async event => {
     event.preventDefault();
     setSearchTerm(tempSearchTerm);
+  }
+
+  function setFocus(pageNum) {
+    if (pageNum !== page) {
+      topRef.current.focus();
+    }
   }
 
   // Counts the number of species matches for a service request.
@@ -125,6 +132,7 @@ function DispatchAssignmentSearch() {
               name="searchTerm"
               value={tempSearchTerm}
               onChange={handleChange}
+              ref={topRef}
           />
           <InputGroup.Append>
             <Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0"}}>Search</Button>
@@ -312,7 +320,7 @@ function DispatchAssignmentSearch() {
         </div>
       ))}
       <p>{data.isFetching ? 'Fetching dispatch assignments...' : <span>{data.evacuation_assignments && data.evacuation_assignments.length ? '' : 'No dispatch assignments found.'}</span>}</p>
-      <Pagination className="custom-page-links" size="lg" onClick={(e) => {setPage(parseInt(e.target.innerText))}}>
+      <Pagination className="custom-page-links" size="lg" onClick={(e) => {setFocus(parseInt(e.target.innerText));setPage(parseInt(e.target.innerText))}}>
         {[...Array(numPages).keys()].map(x =>
         <Pagination.Item key={x+1} active={x+1 === page}>
           {x+1}

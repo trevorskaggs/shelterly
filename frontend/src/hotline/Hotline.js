@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link } from 'raviger';
-import { Button, ButtonGroup, Col, ListGroup, Row } from 'react-bootstrap'
+import { Button, Col, ListGroup, Row } from 'react-bootstrap';
 import { Marker, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
 import Moment from 'react-moment';

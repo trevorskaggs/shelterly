@@ -17,6 +17,10 @@ import {
   faClipboardList,
 } from '@fortawesome/free-solid-svg-icons';
 import * as Yup from 'yup';
+import {
+  useOrderedNodes
+} from "react-register-nodes";
+import smoothScrollIntoView from "smooth-scroll-into-view-if-needed";
 import Moment from 'react-moment';
 import Header from '../components/Header';
 import { Checkbox, DateTimePicker, DropDown, TextInput } from '../components/Form';
@@ -26,6 +30,7 @@ function DispatchResolutionForm({ id }) {
 
   // Initial animal data.
   const [data, setData] = useState({
+    id: null,
     team_members: [],
     team_member_objects: [],
     team: null,
@@ -39,6 +44,9 @@ function DispatchResolutionForm({ id }) {
 
   const [shelters, setShelters] = useState({options: [], isFetching: false});
   const [ownerChoices, setOwnerChoices] = useState({});
+
+  const ordered = useOrderedNodes();
+  const [shouldCheckForScroll, setShouldCheckForScroll] = React.useState(false);
 
   // Hook for initializing data.
   useEffect(() => {
@@ -82,7 +90,6 @@ function DispatchResolutionForm({ id }) {
           console.log(error.response);
         });
     };
-    fetchEvacAssignmentData();
 
     const fetchShelters = () => {
       setShelters({options: [], isFetching: true});
@@ -103,8 +110,26 @@ function DispatchResolutionForm({ id }) {
         setShelters({options: [], isFetching: false});
       });
     };
-    fetchShelters();
-  }, [id]);
+    // Only fetch data first time.
+    if (!data.id) {
+      fetchEvacAssignmentData();
+      fetchShelters();
+    }
+
+    // Scroll page to topmost error.
+    if (shouldCheckForScroll && ordered.length > 0) {
+      smoothScrollIntoView(ordered[0], {
+        scrollMode: "if-needed",
+        block: "center",
+        inline: "start"
+      }).then(() => {
+        if (ordered[0].querySelector("input")) {
+          ordered[0].querySelector("input").focus();
+        }
+        setShouldCheckForScroll(false);
+      });
+    }
+  }, [id, shouldCheckForScroll, ordered]);
 
   return (
     <Formik
@@ -395,7 +420,7 @@ function DispatchResolutionForm({ id }) {
               </Card>
             ))}
             <ButtonGroup size="lg" className="col-12 pl-0 pr-0">
-              <Button className="btn btn-block" type="button" onClick={() => { props.submitForm() }}>Save</Button>
+              <Button className="btn btn-block" type="submit" onClick={() => { setShouldCheckForScroll(true); }}>Save</Button>
             </ButtonGroup>
           </BootstrapForm>
         </>
