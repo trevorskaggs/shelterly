@@ -6,7 +6,7 @@ import ReactImageFallback from 'react-image-fallback';
 import noImageFound from '../static/images/image-not-found.png';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBandAid, faClipboardList, faCut, faLink, faUserAltSlash
+  faBandAid, faClipboardList, faCut, faLink, faNotesMedical, faStickyNote, faUserAltSlash
 } from '@fortawesome/free-solid-svg-icons';
 import { faClawMarks } from '@fortawesome/pro-solid-svg-icons';
 import Header from '../components/Header';
@@ -183,6 +183,32 @@ function AnimalSearch() {
                       }
                     >
                       <FontAwesomeIcon icon={faBandAid} size="sm" className="ml-1" />
+                    </OverlayTrigger> :
+                  ""}
+                  {animal.behavior_notes ?
+                    <OverlayTrigger
+                      key={"behavior-notes"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-behavior-notes`}>
+                          {animal.behavior_notes}
+                        </Tooltip>
+                      }
+                    >
+                      <FontAwesomeIcon icon={faStickyNote} size="sm" className="ml-1" />
+                    </OverlayTrigger> :
+                  ""}
+                  {animal.medical_notes ?
+                    <OverlayTrigger
+                      key={"medical-notes"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-medical-notes`}>
+                          {animal.medical_notes}
+                        </Tooltip>
+                      }
+                    >
+                      <FontAwesomeIcon icon={faNotesMedical} size="sm" className="ml-1" />
                     </OverlayTrigger> :
                   ""}
                 </Card.Title>
