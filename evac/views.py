@@ -139,7 +139,8 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
                     if animal.shelter != new_shelter:
                         action.send(self.request.user, verb='sheltered animal', target=animal)
                         action.send(self.request.user, verb='sheltered animal', target=animal.shelter, action_object=animal)
-                    Animal.objects.filter(id=animal_dict['id']).update(status=new_status, shelter=new_shelter)
+                    intake_date = animal.intake_date if animal.intake_date else datetime.now()
+                    Animal.objects.filter(id=animal_dict['id']).update(status=new_status, shelter=new_shelter, intake_date=intake_date)
                     # Mark SR as open if any animal is SIP or UTL.
                     if new_status in ['SHELTERED IN PLACE', 'UNABLE TO LOCATE'] and sr_status != 'assigned':
                         sr_status = 'open'
