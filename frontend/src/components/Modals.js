@@ -14,7 +14,7 @@ const DispatchDuplicateSRModal = (props) => {
             The following service requests have already had a team deployed to them:
           </p>
           <p>
-            {props.sr_list.map(service_request => (
+            {props.dupe_list.map(service_request => (
               <li key={service_request.id} style={{marginLeft:"10px"}}><span style={{position:"relative", left:"-8px"}}>{service_request.full_address}</span></li>
             ))}
           </p>
@@ -24,7 +24,7 @@ const DispatchDuplicateSRModal = (props) => {
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={props.handleReselect}>Go Back and Reselect</Button>
-          <Button variant="primary" onClick={props.handleSubmit}>Continue Without Duplicates</Button>
+          <Button variant="primary" onClick={props.handleSubmit} disabled={props.sr_list.length === props.dupe_list.length ? true : false}>Continue Without Duplicates</Button>
         </Modal.Footer>
       </Modal>
     </>

@@ -40,7 +40,7 @@ function Deploy() {
   const [error, setError] = useState('');
   const [showDispatchDuplicateSRModal, setShowDispatchDuplicateSRModal] = useState(false);
   const [duplicateSRs, setDuplicateSRs] = useState([]);
-  const handleCloseDispatchDuplicateSRModal = () => setShowDispatchDuplicateSRModal(false);
+  const handleCloseDispatchDuplicateSRModal = () => {setDuplicateSRs([]);setShowDispatchDuplicateSRModal(false);}
 
   // Handle aco_required toggle.
   const handleACO = async event => {
@@ -687,7 +687,7 @@ function Deploy() {
             </Scrollbar>
           </Col>
         </Row>
-        <DispatchDuplicateSRModal sr_list={data.service_requests.filter(sr => duplicateSRs.includes(sr.id))} show={showDispatchDuplicateSRModal} handleClose={handleCloseDispatchDuplicateSRModal} handleSubmit={props.handleSubmit} handleReselect={handleReselect} />
+        <DispatchDuplicateSRModal dupe_list={data.service_requests.filter(sr => duplicateSRs.includes(String(sr.id)))} sr_list={data.service_requests.filter(sr => mapState[sr.id] && mapState[sr.id].checked === true)} show={showDispatchDuplicateSRModal} handleClose={handleCloseDispatchDuplicateSRModal} handleSubmit={props.handleSubmit} handleReselect={handleReselect} />
         <Modal show={show} onHide={handleClose}>
           <Modal.Header closeButton>
             <Modal.Title>Update Team Name</Modal.Title>
