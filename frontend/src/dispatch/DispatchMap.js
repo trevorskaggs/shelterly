@@ -19,6 +19,7 @@ import { Typeahead } from 'react-bootstrap-typeahead';
 import Moment from 'react-moment';
 import Map, { countMatches, prettyText, reportedMarkerIcon, SIPMarkerIcon, UTLMarkerIcon, checkMarkerIcon } from "../components/Map";
 import { Checkbox, TextInput } from "../components/Form";
+import { DispatchDuplicateSRModal } from "../components/Modals";
 import Scrollbar from '../components/Scrollbars';
 import 'react-bootstrap-typeahead/css/Typeahead.css';
 import 'leaflet/dist/leaflet.css';
@@ -30,21 +31,25 @@ function Deploy() {
   const [totalSelectedState, setTotalSelectedState] = useState({'REPORTED':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}});
   const [selectedCount, setSelectedCount] = useState({count:0, disabled:true});
   const [statusOptions, setStatusOptions] = useState({aco_required:false, pending_only: true});
+  const [triggerRefresh, setTriggerRefresh] = useState(false);
   const [teamData, setTeamData] = useState({teams: [], options: [], isFetching: false});
   const [selected, setSelected] = useState([]);
   const [teamName, setTeamName] = useState('');
   const handleClose = () => setShow(false);
   const [show, setShow] = useState(false);
   const [error, setError] = useState('');
+  const [showDispatchDuplicateSRModal, setShowDispatchDuplicateSRModal] = useState(false);
+  const [duplicateSRs, setDuplicateSRs] = useState([]);
+  const handleCloseDispatchDuplicateSRModal = () => {setDuplicateSRs([]);setShowDispatchDuplicateSRModal(false);}
 
   // Handle aco_required toggle.
   const handleACO = async event => {
-    setStatusOptions({aco_required:!statusOptions.aco_required, pending_only:statusOptions.pending_only})
+    setStatusOptions(prevState => ({ ...prevState, aco_required:!statusOptions.aco_required }));
   }
 
   // Handle pending_only toggle.
   const handlePendingOnly = async event => {
-    setStatusOptions({aco_required:statusOptions.aco_required, pending_only:!statusOptions.pending_only})
+    setStatusOptions(prevState => ({ ...prevState, pending_only:!statusOptions.pending_only }));
   }
 
   // Handle radius circle toggles.
@@ -120,6 +125,20 @@ function Deploy() {
     }
   }
 
+  // Handle reselecting after hitting dupe assigned SR error.
+  const handleReselect = async event => {
+    // Perform API update for most recent data and clean out the duplicate SRs.
+    setTriggerRefresh(!triggerRefresh)
+    setMapState(Object.keys(mapState).filter(key => !duplicateSRs.includes(key))
+      .reduce((obj, key) => {
+        obj[key] = mapState[key];
+        return obj;
+      }, {})
+    );
+    setDuplicateSRs([]);
+    setShowDispatchDuplicateSRModal(false);
+  }
+
   // Handle dynamic SR state and map display when an SR is selected or deselected.
   const handleMapState = (id) => {
     var status_matches = {};
@@ -182,7 +201,7 @@ function Deploy() {
         }
       }
     }
-    setMapState(prevState => ({ ...prevState, tempMapState}));
+    setMapState(tempMapState);
   }
 
   // Hook for initializing data.
@@ -244,14 +263,12 @@ function Deploy() {
       await axios.get('/hotline/api/servicerequests/', {
         params: {
           status: 'open',
-          aco_required: statusOptions.aco_required,
-          pending_only: statusOptions.pending_only,
           map: true
         },
         cancelToken: source.token,
       })
       .then(response => {
-        setData({service_requests: response.data, isFetching: false, bounds:L.latLngBounds([[0,0]])});
+        setData(prevState => ({ ...prevState, service_requests: response.data, isFetching: false}));
         const map_dict = {...mapState};
         const bounds = [];
         const current_ids = Object.keys(mapState);
@@ -263,11 +280,12 @@ function Deploy() {
             const status_matches = total_matches[1];
             const color = service_request.reported_animals > 0 ? '#ff4c4c' : service_request.unable_to_locate > 0 ? '#5f5fff' : '#f5ee0f';
             map_dict[service_request.id] = {checked:false, hidden:false, color:color, matches:matches, status_matches:status_matches, radius:"disabled", has_reported_animals:service_request.reported_animals > 0, latitude:service_request.latitude, longitude:service_request.longitude};
+            bounds.push([service_request.latitude, service_request.longitude]);
           }
-          bounds.push([service_request.latitude, service_request.longitude]);
         }
         setMapState(map_dict);
-        if (bounds.length > 0) {
+
+        if (bounds.length > 0 && Object.keys(mapState).length < 1) {
           setData(prevState => ({ ...prevState, "bounds":L.latLngBounds(bounds) }));
         }
       })
@@ -284,7 +302,7 @@ function Deploy() {
     return () => {
       source.cancel();
     };
-  }, [statusOptions]);
+  }, [triggerRefresh]);
 
   return (
     <Formik
@@ -301,7 +319,11 @@ function Deploy() {
       })}
       enableReinitialize={true}
       onSubmit={(values, { setSubmitting }) => {
-        values.service_requests = Object.keys(mapState).filter(key => mapState[key].checked === true)
+        values.service_requests = Object.keys(mapState).filter(key => mapState[key].checked === true);
+        // Remove duplicate assignments from POST values.
+        if (duplicateSRs.length > 0) {
+          values.service_requests = values.service_requests.filter(sr_id => !duplicateSRs.includes(sr_id));
+        }
         setTimeout(() => {
           axios.post('/evac/api/evacassignment/', values)
           .then(response => {
@@ -309,6 +331,10 @@ function Deploy() {
           })
           .catch(error => {
             console.log(error.response);
+            if (error.response.data && error.response.data[0].includes('Duplicate assigned service request error')) {
+              setDuplicateSRs(error.response.data[1]);
+              setShowDispatchDuplicateSRModal(true);
+            }
           });
           setSubmitting(false);
         }, 500);
@@ -381,36 +407,40 @@ function Deploy() {
           </Col>
           <Col xs={10} className="border rounded pl-0 pr-0">
             <Map style={{marginRight:"0px"}} bounds={data.bounds} onMoveEnd={onMove}>
-              {data.service_requests.map(service_request => (
-                <Marker
-                  key={service_request.id}
-                  position={[service_request.latitude, service_request.longitude]}
-                  icon={mapState[service_request.id] && mapState[service_request.id].checked ? checkMarkerIcon : service_request.sheltered_in_place > 0 ? SIPMarkerIcon : service_request.unable_to_locate > 0 ? UTLMarkerIcon : reportedMarkerIcon}
-                  onClick={() => handleMapState(service_request.id)}
-                >
-                  <MapTooltip autoPan={false}>
-                    <span>
-                      {mapState[service_request.id] ?
-                        <span>
-                          {Object.keys(mapState[service_request.id].matches).map((key,i) => (
-                            <span key={key} style={{textTransform:"capitalize"}}>
-                              {i > 0 && ", "}{prettyText(key.split(',')[1], key.split(',')[0], mapState[service_request.id].matches[key])}
-                            </span>
-                          ))}
-                        </span>
-                      :""}
-                      <br />
-                      {service_request.full_address}
-                      {service_request.followup_date ? <div>Followup Date: <Moment format="L">{service_request.followup_date}</Moment></div> : ""}
-                      <div>
-                        {service_request.aco_required ? <img width={16} height={16} src={badge} alt="" className="mr-1" /> : ""}
-                        {service_request.injured ? <img width={16} height={16} src={bandaid} alt="" className="mr-1" /> : ""}
-                        {service_request.accessible ? <img width={16} height={16} src={car} alt="" className="mr-1" /> : ""}
-                        {service_request.turn_around ? <img width={16} height={16} src={trailer} alt="" /> : ""}
-                      </div>
-                    </span>
-                  </MapTooltip>
-                </Marker>
+              {data.service_requests
+              .filter(service_request => statusOptions.aco_required ? service_request.aco_required === statusOptions.aco_required : true)
+              .filter(service_request => statusOptions.pending_only ? service_request.pending === statusOptions.pending_only : true)
+              .map(service_request => (
+                <span key={service_request.id}> {mapState[service_request.id] ? 
+                  <Marker
+                    position={[service_request.latitude, service_request.longitude]}
+                    icon={mapState[service_request.id] && mapState[service_request.id].checked ? checkMarkerIcon : service_request.sheltered_in_place > 0 ? SIPMarkerIcon : service_request.unable_to_locate > 0 ? UTLMarkerIcon : reportedMarkerIcon}
+                    onClick={() => handleMapState(service_request.id)}
+                  >
+                    <MapTooltip autoPan={false}>
+                      <span>
+                        {mapState[service_request.id] ?
+                          <span>
+                            {Object.keys(mapState[service_request.id].matches).map((key,i) => (
+                              <span key={key} style={{textTransform:"capitalize"}}>
+                                {i > 0 && ", "}{prettyText(key.split(',')[1], key.split(',')[0], mapState[service_request.id].matches[key])}
+                              </span>
+                            ))}
+                          </span>
+                        :""}
+                        <br />
+                        {service_request.full_address}
+                        {service_request.followup_date ? <div>Followup Date: <Moment format="L">{service_request.followup_date}</Moment></div> : ""}
+                        <div>
+                          {service_request.aco_required ? <img width={16} height={16} src={badge} alt="" className="mr-1" /> : ""}
+                          {service_request.injured ? <img width={16} height={16} src={bandaid} alt="" className="mr-1" /> : ""}
+                          {service_request.accessible ? <img width={16} height={16} src={car} alt="" className="mr-1" /> : ""}
+                          {service_request.turn_around ? <img width={16} height={16} src={trailer} alt="" /> : ""}
+                        </div>
+                      </span>
+                    </MapTooltip>
+                  </Marker> : ""}
+                </span>
               ))}
               {Object.entries(mapState).filter(([key, value]) => value.radius === "enabled").map(([key, value]) => (
                 <Circle key={key} center={{lat:value.latitude, lng: value.longitude}} color={value.color} radius={805} interactive={false} />
@@ -462,7 +492,10 @@ function Deploy() {
           </Col>
           <Col xs={10} className="border rounded" style={{marginLeft:"1px", height:"277px", overflowY:"auto", paddingRight:"-1px"}}>
             <Scrollbar no_shadow="true" style={{height:"275px", marginLeft:"-10px", marginRight:"-10px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
-              {data.service_requests.map(service_request => (
+              {data.service_requests
+              .filter(service_request => statusOptions.aco_required ? service_request.aco_required === statusOptions.aco_required : true)
+              .filter(service_request => statusOptions.pending_only ? service_request.pending === statusOptions.pending_only : true)
+              .map(service_request => (
                 <span key={service_request.id}>{mapState[service_request.id] && (mapState[service_request.id].checked || !mapState[service_request.id].hidden) ?
                 <div className="mt-1 mb-1" style={{}}>
                   <div className="card-header rounded">
@@ -654,6 +687,7 @@ function Deploy() {
             </Scrollbar>
           </Col>
         </Row>
+        <DispatchDuplicateSRModal dupe_list={data.service_requests.filter(sr => duplicateSRs.includes(String(sr.id)))} sr_list={data.service_requests.filter(sr => mapState[sr.id] && mapState[sr.id].checked === true)} show={showDispatchDuplicateSRModal} handleClose={handleCloseDispatchDuplicateSRModal} handleSubmit={props.handleSubmit} handleReselect={handleReselect} />
         <Modal show={show} onHide={handleClose}>
           <Modal.Header closeButton>
             <Modal.Title>Update Team Name</Modal.Title>

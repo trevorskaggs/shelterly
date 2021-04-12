@@ -153,8 +153,8 @@ function DispatchResolutionForm({ id }) {
                 status: Yup.string()
                   .test('required-check', 'Animal cannot remain REPORTED.',
                     function(value) {
-                      let required = true;
-                      data.sr_updates.filter(asdf => asdf.id === this.parent.request).forEach(sr_update => {
+                      let required = true
+                      data.sr_updates.filter(sr => sr.id === this.parent.request).forEach(sr_update => {
                         if (sr_update.unable_to_complete || sr_update.incomplete) {
                           required = false;
                         }

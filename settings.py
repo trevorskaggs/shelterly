@@ -152,7 +152,6 @@ STATICFILES_DIRS = [
 # Dev settings. Remove when deploying to Zappa
 STATIC_ROOT=os.path.join(BASE_DIR, 'static')
 # SECURE_CONTENT_TYPE_NOSNIFF = False
-# DEBUG = True
 
 #TODO Change to envvars.
 # Zappa settings
@@ -188,7 +187,7 @@ LOGGING = {
         },
         'django.db.backends': {
             'level': 'DEBUG',
-            'handlers': ['console'],
+            'handlers': [],
             'propagate': False
         }
     },

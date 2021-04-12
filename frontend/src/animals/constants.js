@@ -11,29 +11,24 @@ export const speciesChoices = [
   ]
 
 export const dogSizeChoices = [
-    {value:'unknown', label:"Unknown"},
-    {value:'small', label:"Small"},
-    {value:'medium', label:"Medium"},
-    {value:'large', label:"Large"},
-    {value:'giant', label:"Giant"},
+  {value:'small', label:"Small"},
+  {value:'medium', label:"Medium"},
+  {value:'large', label:"Large"},
+  {value:'giant', label:"Giant"},
 ]
 
 export const catSizeChoices = [
-  {value:'unknown', label:"Unknown"},
   {value:'small', label:'Small'},
   {value:'large', label:'Large'},
 ]
 
 export const horseSizeChoices = [
-  {value:'unknown', label:"Unknown"},
   {value:'mini', label:'Mini'},
   {value:'pony', label:'Pony'},
-  {value:'horse', label:'Horse'},
   {value:'draft', label:'Draft'},
 ]
 
 export const otherSizeChoices = [
-  {value:'unknown', label:"Unknown"},
   {value:'small', label:'Small'},
   {value:'medium', label:'Medium'},
   {value:'large', label:'Large'},

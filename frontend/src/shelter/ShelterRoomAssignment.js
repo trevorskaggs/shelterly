@@ -184,7 +184,7 @@ function ShelterRoomAssignment({id}) {
                                   <span title={animal.name}>{animal.name||"Unknown"}</span>
                                   <div>
                                     #{animal.id}&nbsp;
-                                    {animal.species === 'horse' && animal.size !== 'unknown' ? animal.size : animal.species}&nbsp;
+                                    {animal.species}&nbsp;
                                     {animal.owner_names.length === 0 ?
                                     <OverlayTrigger
                                       key={"stray"}
@@ -258,7 +258,7 @@ function ShelterRoomAssignment({id}) {
                                     <span title={animal.name}>{animal.name||"Unknown"}</span>
                                     <div>
                                       #{animal.id}&nbsp;
-                                      {animal.species === 'horse' && animal.size !== 'unknown' ? animal.size : animal.species}&nbsp;
+                                      {animal.species}&nbsp;
                                       {animal.owner_names.length === 0 ?
                                       <OverlayTrigger
                                         key={"stray"}

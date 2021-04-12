@@ -20,7 +20,7 @@ function AnimalCards(props) {
         <Card.Text className="mb-0 border-top" style={{textTransform:"capitalize"}}>
         <span title={animal.name} className="ml-1">{animal.name||"Unknown"}</span>
         <span className="ml-1" style={{display:"block"}}>
-          {animal.species === 'horse' && animal.size !== 'unknown' ? animal.size : animal.species}&nbsp;
+          {animal.species}&nbsp;
           {props.show_owner ? <span>
           {animal.owner_names.length === 0 ?
           <OverlayTrigger

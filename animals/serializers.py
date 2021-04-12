@@ -23,7 +23,7 @@ class ModestAnimalSerializer(SimpleAnimalSerializer):
 
     class Meta:
         model = Animal
-        fields = ['id', 'species', 'aggressive', 'status', 'aco_required', 'evacuation_assignments']
+        fields = ['id', 'species', 'aggressive', 'request', 'status', 'aco_required', 'evacuation_assignments']
 
 class AnimalSerializer(SimpleAnimalSerializer):
     front_image = serializers.SerializerMethodField()

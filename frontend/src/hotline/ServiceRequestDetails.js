@@ -339,7 +339,7 @@ function ServiceRequestDetails({id}) {
                 <Card.Text className="mb-0 border-top" style={{textTransform:"capitalize"}}>
                 <span title={animal.name} className="ml-1">{animal.name||"Unknown"}</span>
                 <span className="ml-1" style={{display:"block"}}>
-                  {animal.species === 'horse' && animal.size !== 'unknown' ? animal.size : animal.species}&nbsp;
+                  {animal.species}&nbsp;
                   {animal.status === "SHELTERED IN PLACE" ?
                     <OverlayTrigger key={"sip"} placement="top"
                                     overlay={<Tooltip id={`tooltip-sip`}>SHELTERED IN PLACE</Tooltip>}>

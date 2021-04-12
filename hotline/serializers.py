@@ -41,6 +41,7 @@ class SimpleServiceRequestSerializer(serializers.ModelSerializer):
     from people.serializers import SimplePersonSerializer
 
     full_address = serializers.SerializerMethodField()
+    pending = serializers.BooleanField(read_only=True)
     animals = SimpleAnimalSerializer(many=True, required=False, read_only=True)
     latest_evac = serializers.SerializerMethodField()
     # these method fields require animals queryset
@@ -56,7 +57,7 @@ class SimpleServiceRequestSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ServiceRequest
-        fields = ['id', 'latitude', 'longitude', 'full_address', 'followup_date', 'owners', 'address', 'reporter', 'directions', 'latest_evac', 'evacuation_assignments',
+        fields = ['id', 'latitude', 'longitude', 'full_address', 'followup_date', 'owners', 'address', 'reporter', 'directions', 'latest_evac', 'evacuation_assignments', 'pending',
         'animal_count','injured', 'accessible', 'turn_around', 'animals', 'status', 'reported_animals', 'reporter_object', 'owner_objects', 'sheltered_in_place', 'unable_to_locate', 'aco_required']
 
 
