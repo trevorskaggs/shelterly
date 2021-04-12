@@ -66,7 +66,7 @@ const Menu = ({ state, dispatch, removeCookie, ...props }) => {
     
     return (
     <StyledMenu  {...props} className="flex-column" style={{ height: viewHeight }}>
-    <Link href="/"><img src={logo} alt="logo" /></Link>
+    <Link href="/"><img src={logo} alt="Logo" /></Link>
     <div className="logo border-bottom">SHELTERLY</div>
       <Link href="/hotline" ><FontAwesomeIcon icon={faPhone} fixedWidth inverse/> HOTLINE</Link>
       <Link href="/dispatch"><FontAwesomeIcon icon={faBullhorn} fixedWidth inverse/>  DISPATCH</Link>
@@ -82,9 +82,9 @@ function Sidebar({ state, dispatch, removeCookie }) {
     const menuId = "main-menu";
 
     return (
-        <div ref={node}>
-            <Menu id={menuId} state={state} dispatch={dispatch} removeCookie={removeCookie} />
-        </div>
+      <div ref={node}>
+          <Menu id={menuId} state={state} dispatch={dispatch} removeCookie={removeCookie} />
+      </div>
     )
 }
 export default Sidebar;

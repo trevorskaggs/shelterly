@@ -92,62 +92,60 @@ function ServiceRequestDispatchAssignment({id}) {
       navigate('/dispatch/summary/' + selected)
     })
     .catch(error => {
-      console.log(error.response);
     });
   }
 
   // Hook for initializing data.
   useEffect(() => {
+    let unmounted = false;
     let source = axios.CancelToken.source();
 
     const fetchServiceRequests = async () => {
-
       // Fetch current ServiceRequest data.
       await axios.get('/hotline/api/servicerequests/' + id + '/', {
         cancelToken: source.token,
       })
       .then(currentResponse => {
-
-        // Fetch open DA data.
-        axios.get('/evac/api/evacassignment/', {
-          params: {
-            status: 'open',
-            map: true
-          },
-          cancelToken: source.token,
-        })
-        .then(response => {
-          const map_dict = {};
-          const bounds = [];
-          const random_colors = randomColor({count:response.data.length});
-          response.data.forEach((dispatch_assignment, index) => {
-            let sr_dict = {}
-            for (const service_request of dispatch_assignment.service_request_objects) {
-              const matches = countMatches(service_request);
-              sr_dict[service_request.id] = {id:service_request.id, matches:matches, latitude:service_request.latitude, longitude:service_request.longitude, latest_evac:service_request.latest_evac, full_address:service_request.full_address};
-              bounds.push([service_request.latitude, service_request.longitude]);
-            }
-            map_dict[dispatch_assignment.id] = {checked:(currentResponse.data.latest_evac !== null) && (currentResponse.data.latest_evac.end_time === null) && (currentResponse.data.latest_evac.id === dispatch_assignment.id), hidden: false, color:random_colors[index], service_requests:sr_dict}
+        if (!unmounted) {
+          // Fetch open DA data.
+          axios.get('/evac/api/evacassignment/', {
+            params: {
+              status: 'open',
+              map: true
+            },
+            cancelToken: source.token,
+          })
+          .then(response => {
+            const map_dict = {};
+            const bounds = [];
+            const random_colors = randomColor({count:response.data.length});
+            response.data.forEach((dispatch_assignment, index) => {
+              let sr_dict = {}
+              for (const service_request of dispatch_assignment.service_request_objects) {
+                const matches = countMatches(service_request);
+                sr_dict[service_request.id] = {id:service_request.id, matches:matches, latitude:service_request.latitude, longitude:service_request.longitude, latest_evac:service_request.latest_evac, full_address:service_request.full_address};
+                bounds.push([service_request.latitude, service_request.longitude]);
+              }
+              map_dict[dispatch_assignment.id] = {checked:(currentResponse.data.latest_evac !== null) && (currentResponse.data.latest_evac.end_time === null) && (currentResponse.data.latest_evac.id === dispatch_assignment.id), hidden: false, color:random_colors[index], service_requests:sr_dict}
+            });
+            const current_matches = countMatches(currentResponse.data);
+            currentResponse.data['matches'] = current_matches;
+            setCurrentRequest(currentResponse.data);
+            bounds.push([currentResponse.data.latitude, currentResponse.data.longitude]);
+            setMapState(map_dict);
+            setData({dispatch_assignments: response.data, isFetching: false, bounds:L.latLngBounds(bounds)});
+          })
+          .catch(error => {
+            setData({dispatch_assignments: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
           });
-          const current_matches = countMatches(currentResponse.data);
-          currentResponse.data['matches'] = current_matches;
-          setCurrentRequest(currentResponse.data);
-          bounds.push([currentResponse.data.latitude, currentResponse.data.longitude]);
-          setMapState(map_dict);
-          setData({dispatch_assignments: response.data, isFetching: false, bounds:L.latLngBounds(bounds)});
-        })
-        .catch(error => {
-          console.log(error.response);
-          setData({dispatch_assignments: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
-        });
+        }
       })
     };
 
-    // fetchCurrentRequest();
     fetchServiceRequests();
-
     // Cleanup.
     return () => {
+      unmounted = true;
       source.cancel();
     };
   }, [id]);
@@ -213,10 +211,10 @@ function ServiceRequestDispatchAssignment({id}) {
                 {currentRequest.full_address}
                 {currentRequest.followup_date ? <div>Followup Date: <Moment format="L">{currentRequest.followup_date}</Moment></div> : ""}
                 <div>
-                  {currentRequest.aco_required ? <img width={16} height={16} src={badge} alt="" className="mr-1" /> : ""}
-                  {currentRequest.injured ? <img width={16} height={16} src={bandaid} alt="" className="mr-1" /> : ""}
-                  {currentRequest.accessible ? <img width={16} height={16} src={car} alt="" className="mr-1" /> : ""}
-                  {currentRequest.turn_around ? <img width={16} height={16} src={trailer} alt="" /> : ""}
+                  {currentRequest.aco_required ? <img width={16} height={16} src={badge} alt="ACO Required" className="mr-1" /> : ""}
+                  {currentRequest.injured ? <img width={16} height={16} src={bandaid} alt="Injured" className="mr-1" /> : ""}
+                  {currentRequest.accessible ? <img width={16} height={16} src={car} alt="Accessible" className="mr-1" /> : ""}
+                  {currentRequest.turn_around ? <img width={16} height={16} src={trailer} alt="Turn Around" /> : ""}
                 </div>
               </span>
             </MapTooltip>
@@ -250,10 +248,10 @@ function ServiceRequestDispatchAssignment({id}) {
                   {service_request.full_address}
                   {service_request.followup_date ? <div>Followup Date: <Moment format="L">{service_request.followup_date}</Moment></div> : ""}
                   <div>
-                    {service_request.aco_required ? <img width={16} height={16} src={badge} alt="" className="mr-1" /> : ""}
-                    {service_request.injured ? <img width={16} height={16} src={bandaid} alt="" className="mr-1" /> : ""}
-                    {service_request.accessible ? <img width={16} height={16} src={car} alt="" className="mr-1" /> : ""}
-                    {service_request.turn_around ? <img width={16} height={16} src={trailer} alt="" /> : ""}
+                    {service_request.aco_required ? <img width={16} height={16} src={badge} alt="ACO Required" className="mr-1" /> : ""}
+                    {service_request.injured ? <img width={16} height={16} src={bandaid} alt="Injured" className="mr-1" /> : ""}
+                    {service_request.accessible ? <img width={16} height={16} src={car} alt="Accessible" className="mr-1" /> : ""}
+                    {service_request.turn_around ? <img width={16} height={16} src={trailer} alt="Turn Around" /> : ""}
                   </div>
                 </span>
               </MapTooltip>

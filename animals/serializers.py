@@ -51,6 +51,7 @@ class AnimalSerializer(SimpleAnimalSerializer):
         if obj.owners.exists():
             return [person.first_name + ' ' + person.last_name for person in obj.owners.all()]
         return []
+
     # Custom Owner object field that excludes animals to avoid a circular reference.
     def get_owner_objects(self, obj):
         from people.serializers import SimplePersonSerializer

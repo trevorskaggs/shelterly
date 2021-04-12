@@ -206,6 +206,7 @@ function Deploy() {
 
   // Hook for initializing data.
   useEffect(() => {
+    let unmounted = false;
     let source = axios.CancelToken.source();
     const fetchTeamMembers = async () => {
       setTeamData({teams: [], options: [], isFetching: true});
@@ -214,46 +215,48 @@ function Deploy() {
         cancelToken: source.token,
       })
       .then(response => {
-        let options = [];
-        let team_names = [];
-        let team_name = '';
-        response.data.forEach(function(teammember) {
-          options.push({id: [teammember.id], label: teammember.display_name})
-        });
-        // Then fetch all recent Teams.
-        axios.get('/evac/api/dispatchteam/', {
-          params: {
-            map: true
-          },
-          cancelToken: source.token,
-        })
-        .then(response => {
-          response.data.forEach(function(team) {
-            // Only add to option list if not actively assigned and not already in the list which is sorted by newest.
-            if (!team.is_assigned && !team_names.includes(team.name)) {
-              options.unshift({id: team.team_members, label: team.name + ": " + team.display_name});
-            }
-            team_names.push(team.name);
+        if (!unmounted) {
+          let options = [];
+          let team_names = [];
+          let team_name = '';
+          response.data.forEach(function(teammember) {
+            options.push({id: [teammember.id], label: teammember.display_name})
           });
-          // Provide a default "TeamN" team name that hasn't already be used.
-          let i = 1;
-          do {
-            if (!team_names.includes("Team " + String(i))){
-              team_name = "Team " + String(i);
+          // Then fetch all recent Teams.
+          axios.get('/evac/api/dispatchteam/', {
+            params: {
+              map: true
+            },
+            cancelToken: source.token,
+          })
+          .then(response => {
+            response.data.forEach(function(team) {
+              // Only add to option list if not actively assigned and not already in the list which is sorted by newest.
+              if (!team.is_assigned && !team_names.includes(team.name)) {
+                options.unshift({id: team.team_members, label: team.name + ": " + team.display_name});
+              }
+              team_names.push(team.name);
+            });
+            // Provide a default "TeamN" team name that hasn't already be used.
+            let i = 1;
+            do {
+              if (!team_names.includes("Team " + String(i))){
+                team_name = "Team " + String(i);
+              }
+              i++;
             }
-            i++;
-          }
-          while (team_name === '');
-          setTeamData({teams: response.data, options: options, isFetching: false});
-          setTeamName(team_name);
-        })
-        .catch(error => {
-          console.log(error.response);
-          setTeamData({teams: [], options: [], isFetching: false});
-        });
+            while (team_name === '');
+            setTeamData({teams: response.data, options: options, isFetching: false});
+            setTeamName(team_name);
+          })
+          .catch(error => {
+            if (!unmounted) {
+              setTeamData({teams: [], options: [], isFetching: false});
+            }
+          });
+        }
       })
       .catch(error => {
-        console.log(error.response);
         setTeamData({teams: [], options: [], isFetching: false});
       });
     };
@@ -268,30 +271,33 @@ function Deploy() {
         cancelToken: source.token,
       })
       .then(response => {
-        setData(prevState => ({ ...prevState, service_requests: response.data, isFetching: false}));
-        const map_dict = {...mapState};
-        const bounds = [];
-        const current_ids = Object.keys(mapState);
-        for (const service_request of response.data) {
-          // Only add initial settings if we don't already have them.
-          if (!current_ids.includes(String(service_request.id))) {
-            const total_matches = countMatches(service_request);
-            const matches = total_matches[0];
-            const status_matches = total_matches[1];
-            const color = service_request.reported_animals > 0 ? '#ff4c4c' : service_request.unable_to_locate > 0 ? '#5f5fff' : '#f5ee0f';
-            map_dict[service_request.id] = {checked:false, hidden:false, color:color, matches:matches, status_matches:status_matches, radius:"disabled", has_reported_animals:service_request.reported_animals > 0, latitude:service_request.latitude, longitude:service_request.longitude};
-            bounds.push([service_request.latitude, service_request.longitude]);
+        if (!unmounted) {
+          setData(prevState => ({ ...prevState, service_requests: response.data, isFetching: false}));
+          const map_dict = {...mapState};
+          const bounds = [];
+          const current_ids = Object.keys(mapState);
+          for (const service_request of response.data) {
+            // Only add initial settings if we don't already have them.
+            if (!current_ids.includes(String(service_request.id))) {
+              const total_matches = countMatches(service_request);
+              const matches = total_matches[0];
+              const status_matches = total_matches[1];
+              const color = service_request.reported_animals > 0 ? '#ff4c4c' : service_request.unable_to_locate > 0 ? '#5f5fff' : '#f5ee0f';
+              map_dict[service_request.id] = {checked:false, hidden:false, color:color, matches:matches, status_matches:status_matches, radius:"disabled", has_reported_animals:service_request.reported_animals > 0, latitude:service_request.latitude, longitude:service_request.longitude};
+              bounds.push([service_request.latitude, service_request.longitude]);
+            }
           }
-        }
-        setMapState(map_dict);
+          setMapState(map_dict);
 
-        if (bounds.length > 0 && Object.keys(mapState).length < 1) {
-          setData(prevState => ({ ...prevState, "bounds":L.latLngBounds(bounds) }));
+          if (bounds.length > 0 && Object.keys(mapState).length < 1) {
+            setData(prevState => ({ ...prevState, "bounds":L.latLngBounds(bounds) }));
+          }
         }
       })
       .catch(error => {
-        console.log(error.response);
-        setData({service_requests: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
+        if (!unmounted) {
+          setData({service_requests: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
+        }
       });
     };
 
@@ -300,6 +306,7 @@ function Deploy() {
 
     // Cleanup.
     return () => {
+      unmounted = true;
       source.cancel();
     };
   }, [triggerRefresh]);
@@ -330,7 +337,6 @@ function Deploy() {
             navigate('/dispatch/summary/' + response.data.id);
           })
           .catch(error => {
-            console.log(error.response);
             if (error.response.data && error.response.data[0].includes('Duplicate assigned service request error')) {
               setDuplicateSRs(error.response.data[1]);
               setShowDispatchDuplicateSRModal(true);
@@ -432,10 +438,10 @@ function Deploy() {
                         {service_request.full_address}
                         {service_request.followup_date ? <div>Followup Date: <Moment format="L">{service_request.followup_date}</Moment></div> : ""}
                         <div>
-                          {service_request.aco_required ? <img width={16} height={16} src={badge} alt="" className="mr-1" /> : ""}
-                          {service_request.injured ? <img width={16} height={16} src={bandaid} alt="" className="mr-1" /> : ""}
-                          {service_request.accessible ? <img width={16} height={16} src={car} alt="" className="mr-1" /> : ""}
-                          {service_request.turn_around ? <img width={16} height={16} src={trailer} alt="" /> : ""}
+                          {service_request.aco_required ? <img width={16} height={16} src={badge} alt="ACO Required" className="mr-1" /> : ""}
+                          {service_request.injured ? <img width={16} height={16} src={bandaid} alt="Injured" className="mr-1" /> : ""}
+                          {service_request.accessible ? <img width={16} height={16} src={car} alt="Accessible" className="mr-1" /> : ""}
+                          {service_request.turn_around ? <img width={16} height={16} src={trailer} alt="Turn Around" /> : ""}
                         </div>
                       </span>
                     </MapTooltip>

@@ -36,8 +36,9 @@ const ShelterForm = ({id}) => {
 
   // Hook for initializing data.
   useEffect(() => {
+    let unmounted = false;
     let source = axios.CancelToken.source();
-    // determines if edit or new
+
     if (id) {
       const fetchShelterData = async () => {
         // Fetch ServiceRequest data.
@@ -45,18 +46,20 @@ const ShelterForm = ({id}) => {
           cancelToken: source.token,
         })
         .then(response => {
-          // Set phone field to be the pretty version.
-          response.data['phone'] = response.data['display_phone']
-          setData(response.data);
+          if (!unmounted) {
+            // Set phone field to be the pretty version.
+            response.data['phone'] = response.data['display_phone']
+            setData(response.data);
+          }
         })
         .catch(error => {
-          console.log(error.response);
         });
       };
       fetchShelterData();
     }
     // Cleanup.
     return () => {
+      unmounted = true;
       source.cancel();
     };
   }, [id]);
@@ -95,7 +98,6 @@ const ShelterForm = ({id}) => {
               navigate('/shelter/' + id)
             })
             .catch(error => {
-              console.log(error.response);
               if (error.response.data && error.response.data.name[0].includes('shelter with this name already exists')) {
                 setShow(true);
               }
@@ -107,7 +109,6 @@ const ShelterForm = ({id}) => {
               navigate('/shelter/' + response.data.id)
             })
             .catch(error => {
-              console.log(error.response);
               if (error.response.data && error.response.data.name[0].includes('shelter with this name already exists')) {
                 setShow(true);
               }

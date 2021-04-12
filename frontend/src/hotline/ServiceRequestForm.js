@@ -47,6 +47,7 @@ function ServiceRequestForm(props) {
 
   // Hook for initializing data.
   useEffect(() => {
+    let unmounted = false;
     let source = axios.CancelToken.source();
     if (id) {
       const fetchServiceRequestData = async () => {
@@ -54,18 +55,19 @@ function ServiceRequestForm(props) {
         await axios.get('/hotline/api/servicerequests/' + id + '/', {
           cancelToken: source.token,
         })
-          .then(response => {
+        .then(response => {
+          if (!unmounted) {
             setData(response.data);
-          })
-          .catch(error => {
-            console.log(error.response);
-          });
+          }
+        })
+        .catch(error => {
+        });
       };
       fetchServiceRequestData();
     }
-
     // Cleanup.
     return () => {
+      unmounted = true;
       source.cancel();
     };
   }, [id]);
@@ -111,7 +113,6 @@ function ServiceRequestForm(props) {
                 axios.post('/people/api/person/', props.state.steps.owner)
               ]);
             }
-            // Create Animals
             // Create Service Request
             values['reporter'] = reporterResponse[0].data.id
             if (ownerResponse[0].data.id) {
@@ -119,6 +120,7 @@ function ServiceRequestForm(props) {
             }
             axios.post('/hotline/api/servicerequests/', values)
             .then(response => {
+              // Create Animals
               props.state.steps.animals.forEach(animal => {
                 // Add owner and reporter to animal data.
                 if (reporterResponse[0].data.id) {
@@ -130,13 +132,11 @@ function ServiceRequestForm(props) {
                 animal.append('request', response.data.id);
                 axios.post('/animals/api/animal/', animal)
                 .catch(error => {
-                  console.log(error.response);
                 });
               });
               navigate('/hotline/servicerequest/' + response.data.id);
             })
             .catch(error => {
-              console.log(error.response);
               if (error.response.data && error.response.data[0].includes('same address')) {
                 setError({show:true, error:error.response.data});
               }
@@ -153,7 +153,6 @@ function ServiceRequestForm(props) {
               }
             })
             .catch(error => {
-              console.log(error.response);
               if (error.response.data && error.response.data[0].includes('same address')) {
                 setError({show:true, error:error.response.data});
               }

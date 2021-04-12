@@ -13,7 +13,7 @@ function Shelterly() {
 
   // Initial state.
   const { state, dispatch } = useContext(AuthContext);
-  const [cookies, setCookie, removeCookie] = useCookies(['token']);
+  const [, , removeCookie] = useCookies(['token']);
 
   const routeResult = useRoutes(state.user ? routes : publicRoutes);
 

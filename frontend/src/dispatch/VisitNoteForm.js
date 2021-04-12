@@ -31,6 +31,7 @@ const VisitNoteForm = ({ id }) => {
   })
 
   useEffect(() => {
+    let unmounted = false;
     let source = axios.CancelToken.source();
     if (id) {
       const fetchVisitNote = async () => {
@@ -38,16 +39,19 @@ const VisitNoteForm = ({ id }) => {
         await axios.get('/hotline/api/visitnote/' + id + '/', {
           cancelToken: source.token,
         })
-          .then(response => {
+        .then(response => {
+          if (!unmounted) {
             setData(response.data);
-          })
-          .catch(error => {
-            console.log(error.response);
-          });
+          }
+        })
+        .catch(error => {
+        });
       };
       fetchVisitNote();
     };
+    // Cleanup.
     return () => {
+      unmounted = true;
       source.cancel();
     };
   }, [id]);
@@ -67,7 +71,6 @@ const VisitNoteForm = ({ id }) => {
               navigate('/hotline/servicerequest/' + values.service_request)
             )
             .catch(error => {
-              console.log(error.response);
             });
           setSubmitting(false);
         }, 500);

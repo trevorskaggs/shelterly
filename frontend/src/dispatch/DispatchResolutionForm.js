@@ -50,6 +50,7 @@ function DispatchResolutionForm({ id }) {
 
   // Hook for initializing data.
   useEffect(() => {
+    let unmounted = false;
     let source = axios.CancelToken.source();
 
     const fetchEvacAssignmentData = () => {
@@ -57,7 +58,8 @@ function DispatchResolutionForm({ id }) {
       axios.get('/evac/api/evacassignment/' + id + '/', {
         cancelToken: source.token,
       })
-        .then(response => {
+      .then(response => {
+        if (!unmounted) {
           let ownerChoices = {}
           response.data["sr_updates"] = [];
           response.data.service_request_objects.forEach((service_request, index) => {
@@ -85,10 +87,10 @@ function DispatchResolutionForm({ id }) {
           });
           setOwnerChoices(ownerChoices);
           setData(response.data);
-        })
-        .catch(error => {
-          console.log(error.response);
-        });
+        }
+      })
+      .catch(error => {
+      });
     };
 
     const fetchShelters = () => {
@@ -98,16 +100,19 @@ function DispatchResolutionForm({ id }) {
         cancelToken: source.token,
       })
       .then(response => {
-        let options = []
-        response.data.forEach(shelter => {
-          let display_name = shelter.name + ' ('+shelter.buildings.length+' buildings, ' + shelter.room_count + ' rooms, ' + shelter.animal_count + ' animals)';
-          options.push({value: shelter.id, label: display_name});
-        });
-        setShelters({options: options, isFetching: false});
+        if (!unmounted) {
+          let options = []
+          response.data.forEach(shelter => {
+            let display_name = shelter.name + ' ('+shelter.buildings.length+' buildings, ' + shelter.room_count + ' rooms, ' + shelter.animal_count + ' animals)';
+            options.push({value: shelter.id, label: display_name});
+          });
+          setShelters({options: options, isFetching: false});
+        }
       })
       .catch(error => {
-        console.log(error.response);
-        setShelters({options: [], isFetching: false});
+        if (!unmounted) {
+          setShelters({options: [], isFetching: false});
+        }
       });
     };
     // Only fetch data first time.
@@ -129,7 +134,12 @@ function DispatchResolutionForm({ id }) {
         setShouldCheckForScroll(false);
       });
     }
-  }, [id, shouldCheckForScroll, ordered]);
+    // Cleanup.
+    return () => {
+      unmounted = true;
+      source.cancel();
+    };
+  }, [id, data.id, shouldCheckForScroll, ordered]);
 
   return (
     <Formik
@@ -191,7 +201,6 @@ function DispatchResolutionForm({ id }) {
               navigate('/dispatch/summary/' + response.data.id);
             })
             .catch(error => {
-              console.log(error.response);
             });
           setSubmitting(false);
         }, 500);

@@ -64,7 +64,6 @@ function Hotline() {
       })
       .catch(error => {
         if (!unmounted) {
-          console.log(error.response);
           setData({service_requests: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
         }
       });
@@ -126,10 +125,10 @@ function Hotline() {
                       {service_request.full_address}
                       {service_request.followup_date ? <div>Followup Date: <Moment format="L">{service_request.followup_date}</Moment></div> : ""}
                       <div>
-                        {service_request.aco_required ? <img width={16} height={16} src={badge} alt="" className="mr-1" /> : ""}
-                        {service_request.injured ? <img width={16} height={16} src={bandaid} alt="" className="mr-1" /> : ""}
-                        {service_request.accessible ? <img width={16} height={16} src={car} alt="" className="mr-1" /> : ""}
-                        {service_request.turn_around ? <img width={16} height={16} src={trailer} alt="" /> : ""}
+                        {service_request.aco_required ? <img width={16} height={16} src={badge} alt="ACO Required" className="mr-1" /> : ""}
+                        {service_request.injured ? <img width={16} height={16} src={bandaid} alt="Injured" className="mr-1" /> : ""}
+                        {service_request.accessible ? <img width={16} height={16} src={car} alt="Accessible" className="mr-1" /> : ""}
+                        {service_request.turn_around ? <img width={16} height={16} src={trailer} alt="Turn Around" /> : ""}
                       </div>
                     </span>
                   </MapTooltip>

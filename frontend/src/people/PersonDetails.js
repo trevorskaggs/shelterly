@@ -15,7 +15,7 @@ import AnimalCards from '../components/AnimalCards';
 function PersonDetails({id}) {
 
   // Determine if this is an owner or reporter when creating a Person.
-  var is_owner = window.location.pathname.includes("owner")
+  let is_owner = window.location.pathname.includes("owner")
 
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
@@ -28,7 +28,6 @@ function PersonDetails({id}) {
       handleClose()
     })
     .catch(error => {
-      console.log(error.response);
     });
   }
 
@@ -52,20 +51,28 @@ function PersonDetails({id}) {
 
   // Hook for initializing data.
   useEffect(() => {
+    let unmounted = false;
     let source = axios.CancelToken.source();
+
     const fetchPersonData = async () => {
       // Fetch Person data.
       await axios.get('/people/api/person/' + id + '/', {
         cancelToken: source.token,
       })
       .then(response => {
-        setData(response.data);
+        if (!unmounted) {
+          setData(response.data);
+        }
       })
       .catch(error => {
-        console.log(error.response);
       });
     };
     fetchPersonData();
+    // Cleanup.
+    return () => {
+      unmounted = true;
+      source.cancel();
+    };
   }, [id]);
 
   return (

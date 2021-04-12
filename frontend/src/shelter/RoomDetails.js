@@ -25,27 +25,34 @@ function RoomDetails({id}) {
     .then(response => {
       navigate('/shelter/building/' + data.building)
     })
-    .catch(e => {
-      console.log(e);
+    .catch(error => {
     });
   }
 
   // Hook for initializing data.
   useEffect(() => {
+    let unmounted = false;
     let source = axios.CancelToken.source();
+
     const fetchRoomData = async () => {
       // Fetch Room Details data.
       await axios.get('/shelter/api/room/' + id + '/', {
           cancelToken: source.token,
       })
       .then(response => {
+        if (!unmounted) {
           setData(response.data);
+        }
       })
-      .catch(e => {
-          console.log(e);
+      .catch(error => {
       });
     };
     fetchRoomData();
+    // Cleanup.
+    return () => {
+      unmounted = true;
+      source.cancel();
+    };
   }, [id]);
 
   return (

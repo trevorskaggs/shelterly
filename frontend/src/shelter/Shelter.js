@@ -35,7 +35,6 @@ function Shelter() {
       })
       .catch(error => {
         if (!unmounted) {
-          console.log(error.response);
           setData({shelters: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
         }
       });

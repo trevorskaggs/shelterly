@@ -5,7 +5,6 @@ import { loadUser, setAuthToken } from "./AccountsUtils";
 import { publicRoutes } from "../router";
 
 const initialState = {
-  token: null,
   isAuthenticated: null,
   isLoading: false,
   user: null,
@@ -25,13 +24,13 @@ function auth_reducer(state, action) {
       return {...state, isAuthenticated: true, isLoading: false, user: action.user};
 
     case 'LOGIN_SUCCESSFUL':
-      return {...state, ...action.data, isAuthenticated: true, isLoading: false, errors: null};
+      return {...state, user:action.data.user, isAuthenticated: true, isLoading: false, errors: null};
 
     case 'AUTHENTICATION_ERROR':
     case 'LOGIN_FAILED':
     case 'LOGOUT_SUCCESSFUL':
     case 'LOGOUT_FAILED':
-      return {...state, errors: action.data, token: null, user: null,
+      return {...state, errors: action.data, user: null,
         isAuthenticated: false, isLoading: false};
 
     case 'PAGE_CHANGED':
@@ -47,7 +46,7 @@ function auth_reducer(state, action) {
 const AuthContext = React.createContext(initialState);
 
 function AuthProvider(props) {
-  const [cookies, setCookie, removeCookie] = useCookies(['token']);
+  const [cookies, , removeCookie] = useCookies(['token']);
   const [state, dispatch] = useReducer(auth_reducer, initialState);
 
   if (cookies.token) setAuthToken(cookies.token);

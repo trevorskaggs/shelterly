@@ -24,27 +24,34 @@ function BuildingDetails({id}) {
     .then(response => {
       navigate('/shelter/' + data.shelter)
     })
-    .catch(e => {
-      console.log(e);
+    .catch(error => {
     });
   }
 
   // Hook for initializing data.
   useEffect(() => {
+    let unmounted = false;
     let source = axios.CancelToken.source();
+
     const fetchBuildingData = async () => {
       // Fetch Building Details data.
       await axios.get('/shelter/api/building/' + id + '/', {
         cancelToken: source.token,
       })
       .then(response => {
-        setData(response.data);
+        if (!unmounted) {
+          setData(response.data);
+        }
       })
-      .catch(e => {
-        console.log(e);
+      .catch(error => {
       });
     };
     fetchBuildingData();
+    // Cleanup.
+    return () => {
+      unmounted = true;
+      source.cancel();
+    };
   }, [id]);
 
   return (

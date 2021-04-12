@@ -14,7 +14,7 @@ import logo from "../static/images/shelterly.png";
 
 const Login = () => {
   const { dispatch } = useContext(AuthContext);
-  const [cookies, setCookie, removeCookie] = useCookies(['token']);
+  const [, setCookie, removeCookie] = useCookies(['token']);
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
 
@@ -48,7 +48,6 @@ const Login = () => {
               navigate(next);
             })
             .catch(e => {
-              console.log(e.response);
               removeCookie("token", {path: '/'});
               setAuthToken();
               actions.setStatus('Failed to log in with this username and password combination.')
@@ -61,7 +60,7 @@ const Login = () => {
       {({ isSubmitting, status }) => (
         <>
         <Row className='ml-auto mr-auto align-bottom' style={{marginTop:"70px"}}>
-          <img src={logo} alt="logo" style={{height:"120px", width:"120px", marginTop:"-4px"}} />
+          <img src={logo} alt="Logo" style={{height:"120px", width:"120px", marginTop:"-4px"}} />
           <h1  style={{fontSize:"100px"}}>Shelterly</h1>
         </Row>
         <Col xs={{ span:5 }} className="border rounded border-light shadow-sm" style={{marginRight:"auto", marginLeft:"auto"}}>
@@ -109,7 +108,6 @@ const Login = () => {
                 setShow(false);
               })
               .catch(error => {
-                console.log(error.response);
               });
             }}
           >

@@ -60,7 +60,6 @@ function AnimalDetails({id}) {
       handleClose()
     })
     .catch(error => {
-      console.log(error.response);
     });
   }
 
@@ -71,12 +70,12 @@ function AnimalDetails({id}) {
       handleOwnerClose();
     })
     .catch(error => {
-      console.log(error.response);
     });
   }
 
   // Hook for initializing data.
   useEffect(() => {
+    let unmounted = false;
     let source = axios.CancelToken.source();
     const fetchAnimalData = async () => {
       // Fetch Animal data.
@@ -84,16 +83,22 @@ function AnimalDetails({id}) {
         cancelToken: source.token,
       })
       .then(response => {
-        setData(response.data);
-        var image_urls = [];
-        image_urls = image_urls.concat(response.data.front_image||[]).concat(response.data.side_image||[]).concat(response.data.extra_images);
-        setImages(image_urls);
+        if (!unmounted) {
+          setData(response.data);
+          let image_urls = [];
+          image_urls = image_urls.concat(response.data.front_image||[]).concat(response.data.side_image||[]).concat(response.data.extra_images);
+          setImages(image_urls);
+        }
       })
       .catch(error => {
-        console.log(error.response);
       });
     };
     fetchAnimalData();
+    // Cleanup.
+    return () => {
+      unmounted = true;
+      source.cancel();
+    };
   }, [id]);
 
   return (
@@ -307,12 +312,13 @@ function AnimalDetails({id}) {
         <div className="slide-container flex-grow-1 border rounded pl-0 pr-0" style={{width:"auto", height:"322px"}}>
           {images.length < 1 ?
             <Carousel className="carousel-wrapper" showThumbs={false} showStatus={false}>
-              <img src={noImageFound} alt="" />
-            </Carousel> :
+              <img src={noImageFound} alt="Not Found" />
+            </Carousel>
+          :
             <Carousel className="carousel-wrapper" showThumbs={false} showStatus={false}>
               {images.map(image => (
                 <div key={image} className="image-container">
-                  <img src={image} alt="" />
+                  <img src={image} alt="Animal" />
                 </div>
               ))}
             </Carousel>

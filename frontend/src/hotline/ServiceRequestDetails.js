@@ -34,7 +34,6 @@ function ServiceRequestDetails({id}) {
       datetime.current.flatpickr.clear();
       axios.patch('/hotline/api/servicerequests/' + id + '/', {followup_date:null})
       .catch(error => {
-        console.log(error.response);
       });
     }
   }, [id, datetime]);
@@ -78,7 +77,6 @@ function ServiceRequestDetails({id}) {
       handleClose()
     })
     .catch(error => {
-      console.log(error.response);
     });
   }
 
@@ -90,26 +88,33 @@ function ServiceRequestDetails({id}) {
       handleAnimalClose();
     })
     .catch(error => {
-      console.log(error.response);
     });
   }
 
   // Hook for initializing data.
   useEffect(() => {
+    let unmounted = false;
     let source = axios.CancelToken.source();
+
     const fetchServiceRequestData = async () => {
       // Fetch ServiceRequest data.
       await axios.get('/hotline/api/servicerequests/' + id + '/', {
         cancelToken: source.token,
       })
       .then(response => {
-        setData(response.data);
+        if (!unmounted) {
+          setData(response.data);
+        }
       })
       .catch(error => {
-        console.log(error.response);
       });
     };
     fetchServiceRequestData();
+    // Cleanup.
+    return () => {
+      unmounted = true;
+      source.cancel();
+    };
   }, [id]);
 
   return (
@@ -232,7 +237,6 @@ function ServiceRequestDetails({id}) {
                       setData(prevState => ({ ...prevState, "followup_date":dateStr }));
                       axios.patch('/hotline/api/servicerequests/' + id + '/', {followup_date:date[0]})
                       .catch(error => {
-                        console.log(error.response);
                       });
                     }}
                     value={data.followup_date || null}>

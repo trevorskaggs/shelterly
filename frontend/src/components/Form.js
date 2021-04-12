@@ -81,7 +81,7 @@ const DateTimePicker = ({ label, xs, clearable, ...props }) => {
   }, [datetime]);
 
   // Flatpickr options
-  var options = {};
+  let options = {};
   if (props["data-enable-time"] === false) {
     options = {allowInput:true, altInput: true, altFormat: "F j, Y", dateFormat: "Y-m-d H:i"}
   }
@@ -103,7 +103,7 @@ const DateTimePicker = ({ label, xs, clearable, ...props }) => {
   );
 };
 
-const TextInput = ({ label, value, xs, controlId, formGroupClasses, ...props }) => {
+const TextInput = ({ label, xs, controlId, formGroupClasses, ...props }) => {
 
   const [field, meta] = useField(props);
 
@@ -113,7 +113,7 @@ const TextInput = ({ label, value, xs, controlId, formGroupClasses, ...props }) 
     <>
     <Form.Group as={Col} xs={xs} controlId={controlId} className={formGroupClasses} hidden={props.hidden} ref={meta.error && registeredRef}>
       <Form.Label>{label}</Form.Label>
-      <Form.Control type="text" value={value} isInvalid={meta.touched && meta.error} onChange={props.handleChange} {...field} {...props} />
+      <Form.Control type="text" isInvalid={meta.touched && meta.error} onChange={props.handleChange} {...field} {...props} />
       <Form.Control.Feedback type="invalid"> {meta.error}</ Form.Control.Feedback>
     </Form.Group>
     </>
@@ -235,7 +235,7 @@ const ImageUploader = ({ parentStateSetter, ...props }) => {
           <span className="d-flex flex-wrap align-items-end">
             {imageList.map((image, index) => (
               <span key={index} className="mt-2 mr-3">
-                <Image width={131} src={image.data_url} alt="" thumbnail />
+                <Image width={131} src={image.data_url} alt="Animal" thumbnail />
                 <div className="image-item__btn-wrapper">
                   <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => onImageRemove(index)} style={{backgroundColor:"red"}} />
                   <span className="ml-1">{props.label}</span>
@@ -277,11 +277,11 @@ const AddressLookup = ({ ...props }) => {
 
     if (suggestion.address_components) {
       // Extract location information from the return. Use short_name for the state.
-      var components={};
+      let components={};
       suggestion.address_components.forEach(function(k,v1) {k.types.forEach(function(v2, k2){v2 !== "administrative_area_level_1" ? components[v2]=k.long_name : components[v2]=k.short_name});});
 
       // Build formatted street number + name string.
-      var address = "";
+      let address = "";
       if (components.street_number) {
         address = components.street_number + " " + components.route;
       }
@@ -314,8 +314,6 @@ const AddressLookup = ({ ...props }) => {
           new window.google.maps.Geocoder().geocode({ location: latlng }, function (results, status) {
             if (status === window.google.maps.GeocoderStatus.OK) {
               updateAddr(results[0]);
-            } else {
-              console.log(status);
             }
           });
           }
@@ -393,15 +391,18 @@ const AddressSearch = (props) => {
                 type="text"
                 label="Address"
                 name="address"
+                value={props.formikProps.values.address || ''}
                 disabled
               />
               {props.show_apt ?
-              <TextInput
-                xs="2"
-                type="text"
-                label="Apartment"
-                name="apartment"
-              /> : ""}
+                <TextInput
+                  xs="2"
+                  type="text"
+                  label="Apartment"
+                  name="apartment"
+                  value={props.formikProps.values.apartment || ''}
+                />
+              : ""}
             </Form.Row>
             <Form.Row>
               <TextInput
@@ -409,6 +410,7 @@ const AddressSearch = (props) => {
                 type="text"
                 label="City"
                 name="city"
+                value={props.formikProps.values.city || ''}
                 disabled
               />
               <Col xs="2">
@@ -426,6 +428,7 @@ const AddressSearch = (props) => {
                 type="text"
                 label="Zip Code"
                 name="zip_code"
+                value={props.formikProps.values.zip_code || ''}
                 disabled
               />
             </Form.Row>
@@ -437,7 +440,7 @@ const AddressSearch = (props) => {
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
             />
-              {props.formikProps.values.latitude ?
+              {props.formikProps.values.latitude && props.formikProps.values.longitude ?
               <Marker
                 draggable={true}
                 onDragEnd={updatePosition}

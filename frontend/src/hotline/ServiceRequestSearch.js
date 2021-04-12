@@ -92,7 +92,6 @@ function ServiceRequestSearch() {
       })
       .catch(error => {
         if (!unmounted) {
-          console.log(error.response);
           setData({service_requests: [], isFetching: false});
         }
       });

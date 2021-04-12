@@ -14,7 +14,6 @@ export function loadUser({dispatch, removeCookie}) {
     dispatch({type: 'USER_LOADED', user: results.data });
   })
   .catch(e => {
-    console.log(e);
     // Raise error.
     removeCookie("token", {path: '/'});
     setAuthToken();
@@ -37,7 +36,6 @@ export function logoutUser({dispatch}, {removeCookie}) {
     navigate('/');
   })
   .catch(e => {
-    console.log(e);
     removeCookie("token", {path: '/'});
     setAuthToken();
     // Raise error.

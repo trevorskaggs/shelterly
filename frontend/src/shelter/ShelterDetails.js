@@ -34,20 +34,28 @@ function ShelterDetails({id}) {
 
   // Hook for initializing data.
   useEffect(() => {
+    let unmounted = false;
     let source = axios.CancelToken.source();
+
     const fetchShelterData = async () => {
       // Fetch Shelter Details data.
       await axios.get('/shelter/api/shelter/' + id + '/', {
         cancelToken: source.token,
       })
       .then(response => {
-        setData(response.data);
+        if (!unmounted) {
+          setData(response.data);
+        }
       })
-      .catch(e => {
-        console.log(e);
+      .catch(error => {
       });
     };
     fetchShelterData();
+    // Cleanup.
+    return () => {
+      unmounted = true;
+      source.cancel();
+    };
   }, [id]);
 
   return (

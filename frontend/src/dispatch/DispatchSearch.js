@@ -107,7 +107,6 @@ function DispatchAssignmentSearch() {
       })
       .catch(error => {
         if (!unmounted) {
-          console.log(error.response);
           setData({evacuation_assignments: [], isFetching: false});
         }
       });

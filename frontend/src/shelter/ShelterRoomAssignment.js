@@ -6,7 +6,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faClipboardList, faUserAlt, faUserAltSlash
 } from '@fortawesome/free-solid-svg-icons';
-import ReactImageFallback from 'react-image-fallback';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
@@ -72,7 +71,6 @@ function ShelterRoomAssignment({id}) {
       }
       axios.patch('/animals/api/animal/' + Number(draggableId) + '/', {set_order:destination.index})
       .catch(error => {
-        console.log(error.response);
       });
     }
     else {
@@ -88,7 +86,6 @@ function ShelterRoomAssignment({id}) {
         rooms[destination.droppableId].animals = dest_animals;
         axios.patch('/animals/api/animal/' + Number(draggableId) + '/', {room:data.rooms[destination.droppableId].id, set_order:destination.index})
         .catch(error => {
-          console.log(error.response);
         });
       }
       // Room to unroomed.
@@ -99,7 +96,6 @@ function ShelterRoomAssignment({id}) {
         rooms[source.droppableId].animals = source_animals;
         axios.patch('/animals/api/animal/' + Number(draggableId) + '/', {room:null, set_order:destination.index})
         .catch(error => {
-          console.log(error.response);
         });
       }
       // Room to room.
@@ -112,7 +108,6 @@ function ShelterRoomAssignment({id}) {
         rooms[source.droppableId].animals = source_animals.filter(animal => animal.id !== Number(draggableId));
         axios.patch('/animals/api/animal/' + Number(draggableId) + '/', {room:data.rooms[destination.droppableId].id, set_order:destination.index})
         .catch(error => {
-          console.log(error.response);
         });
       }
       setData(prevState => ({ ...prevState, 'rooms':rooms, 'unroomed_animals':unroomed_animals }));
@@ -138,8 +133,7 @@ function ShelterRoomAssignment({id}) {
           setSelectedBuilding(response.data.buildings[0].id)
         }
       })
-      .catch(e => {
-        console.log(e);
+      .catch(error => {
       });
     };
     fetchShelterData();
@@ -180,7 +174,7 @@ function ShelterRoomAssignment({id}) {
                             <Card className={"border rounded" + (snapshot.isDragging ? " border-danger" : "")} style={{width:"150px", whiteSpace:"nowrap", overflow:"hidden"}}>
                               <div className="row no-gutters" style={{ textTransform:"capitalize" }}>
                                 <div className="mb-0">
-                                  <ReactImageFallback style={{width:"47px", height:"47px", marginRight:"3px", objectFit:"cover", overflow:"hidden", float:"left"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} />
+                                  <img alt="Animal" style={{width:"47px", height:"47px", marginRight:"3px", objectFit:"cover", overflow:"hidden", float:"left"}} src={animal.front_image || animal.side_image || noImageFound} />
                                   <span title={animal.name}>{animal.name||"Unknown"}</span>
                                   <div>
                                     #{animal.id}&nbsp;
@@ -254,7 +248,7 @@ function ShelterRoomAssignment({id}) {
                               <Card className={"border rounded" + (snapshot.isDragging ? " border-danger" : "")} style={{width:"150px", whiteSpace:"nowrap", overflow:"hidden"}}>
                                 <div className="row no-gutters" style={{ textTransform:"capitalize" }}>
                                   <div className="mb-0">
-                                    <ReactImageFallback style={{width:"47px", height:"47px", marginRight:"3px", objectFit:"cover", overflow:"hidden", float:"left"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} />
+                                    <img alt="Animal" style={{width:"47px", height:"47px", marginRight:"3px", objectFit:"cover", overflow:"hidden", float:"left"}} src={animal.front_image || animal.side_image || noImageFound} />
                                     <span title={animal.name}>{animal.name||"Unknown"}</span>
                                     <div>
                                       #{animal.id}&nbsp;

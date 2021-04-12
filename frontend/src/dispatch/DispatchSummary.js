@@ -46,7 +46,6 @@ function DispatchSummary({id}) {
       handleClose()
     })
     .catch(error => {
-      console.log(error.response);
     });
   }
 
@@ -58,53 +57,59 @@ function DispatchSummary({id}) {
       handleTeamMemberClose();
     })
     .catch(error => {
-      console.log(error.response);
     });
   }
 
   // Hook for initializing data.
   useEffect(() => {
+    let unmounted = false;
     let source = axios.CancelToken.source();
+
     const fetchDispatchSummaryData = async () => {
       // Fetch Animal data.
       await axios.get('/evac/api/evacassignment/' + id + '/', {
         cancelToken: source.token,
       })
       .then(response => {
-        const map_dict = {};
-        const bounds = [];
-        for (const service_request of response.data.service_request_objects) {
-          const matches = countMatches(service_request)[0];
-          map_dict[service_request.id] = {matches:matches, has_reported_animals:service_request.reported_animals > 0, latitude:service_request.latitude, longitude:service_request.longitude};
-          bounds.push([service_request.latitude, service_request.longitude]);
-        }
-        response.data['team_members'] = response.data.team.team_members;
-        response.data['team_member_objects'] = response.data.team_object.team_member_objects
-        response.data['bounds'] = bounds.length > 0 ? bounds : L.latLngBounds([[0,0]]);
-        setData(response.data);
-        setMapState(map_dict);
-        setTeamData({options: [], isFetching: true});
-        axios.get('/evac/api/evacteammember/', {
-          cancelToken: source.token,
-        })
-        .then(teamResponse => {
-          var options = [];
-          teamResponse.data.filter(team_member => !response.data.team_object.team_members.includes(team_member.id)).forEach(function(teammember){
-            options.push({id: teammember.id, label: teammember.display_name})
+        if (!unmounted) {
+          const map_dict = {};
+          const bounds = [];
+          for (const service_request of response.data.service_request_objects) {
+            const matches = countMatches(service_request)[0];
+            map_dict[service_request.id] = {matches:matches, has_reported_animals:service_request.reported_animals > 0, latitude:service_request.latitude, longitude:service_request.longitude};
+            bounds.push([service_request.latitude, service_request.longitude]);
+          }
+          response.data['team_members'] = response.data.team.team_members;
+          response.data['team_member_objects'] = response.data.team_object.team_member_objects
+          response.data['bounds'] = bounds.length > 0 ? bounds : L.latLngBounds([[0,0]]);
+          setData(response.data);
+          setMapState(map_dict);
+          setTeamData({options: [], isFetching: true});
+          axios.get('/evac/api/evacteammember/', {
+            cancelToken: source.token,
+          })
+          .then(teamResponse => {
+            let options = [];
+            teamResponse.data.filter(team_member => !response.data.team_object.team_members.includes(team_member.id)).forEach(function(teammember){
+              options.push({id: teammember.id, label: teammember.display_name})
+            });
+            setTeamData({options: options, isFetching: false});
+          })
+          .catch(error => {
+            setTeamData({options: [], isFetching: false});
           });
-          setTeamData({options: options, isFetching: false});
-        })
-        .catch(error => {
-          console.log(error.response);
-          setTeamData({options: [], isFetching: false});
-        });
+        }
       })
       .catch(error => {
-        console.log(error.response);
       });
     };
 
     fetchDispatchSummaryData();
+    // Cleanup.
+    return () => {
+      unmounted = true;
+      source.cancel();
+    };
 
   }, [id]);
 
