@@ -42,7 +42,7 @@ class AnimalSerializer(SimpleAnimalSerializer):
 
     class Meta:
         model = Animal
-        fields = ['id', 'species', 'aggressive', 'status', 'aco_required', 'front_image', 'side_image', 'extra_images',
+        fields = ['id', 'species', 'aggressive', 'status', 'aco_required', 'front_image', 'side_image', 'extra_images', 'address', 'city', 'state', 'zip_code',
         'found_location', 'owner_names', 'owner_objects', 'full_address', 'shelter', 'shelter_name', 'reporter_object', 'request', 'request_address',
         'action_history', 'evacuation_assignments', 'room', 'room_name', 'name', 'sex', 'size', 'age', 'pcolor', 'scolor']
     

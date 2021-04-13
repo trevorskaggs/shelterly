@@ -116,27 +116,31 @@ function ServiceRequestDispatchAssignment({id}) {
             cancelToken: source.token,
           })
           .then(response => {
-            const map_dict = {};
-            const bounds = [];
-            const random_colors = randomColor({count:response.data.length});
-            response.data.forEach((dispatch_assignment, index) => {
-              let sr_dict = {}
-              for (const service_request of dispatch_assignment.service_request_objects) {
-                const matches = countMatches(service_request);
-                sr_dict[service_request.id] = {id:service_request.id, matches:matches, latitude:service_request.latitude, longitude:service_request.longitude, latest_evac:service_request.latest_evac, full_address:service_request.full_address};
-                bounds.push([service_request.latitude, service_request.longitude]);
-              }
-              map_dict[dispatch_assignment.id] = {checked:(currentResponse.data.latest_evac !== null) && (currentResponse.data.latest_evac.end_time === null) && (currentResponse.data.latest_evac.id === dispatch_assignment.id), hidden: false, color:random_colors[index], service_requests:sr_dict}
-            });
-            const current_matches = countMatches(currentResponse.data);
-            currentResponse.data['matches'] = current_matches;
-            setCurrentRequest(currentResponse.data);
-            bounds.push([currentResponse.data.latitude, currentResponse.data.longitude]);
-            setMapState(map_dict);
-            setData({dispatch_assignments: response.data, isFetching: false, bounds:L.latLngBounds(bounds)});
+            if (!unmounted) {
+              const map_dict = {};
+              const bounds = [];
+              const random_colors = randomColor({count:response.data.length});
+              response.data.forEach((dispatch_assignment, index) => {
+                let sr_dict = {}
+                for (const service_request of dispatch_assignment.service_request_objects) {
+                  const matches = countMatches(service_request);
+                  sr_dict[service_request.id] = {id:service_request.id, matches:matches, latitude:service_request.latitude, longitude:service_request.longitude, latest_evac:service_request.latest_evac, full_address:service_request.full_address};
+                  bounds.push([service_request.latitude, service_request.longitude]);
+                }
+                map_dict[dispatch_assignment.id] = {checked:(currentResponse.data.latest_evac !== null) && (currentResponse.data.latest_evac.end_time === null) && (currentResponse.data.latest_evac.id === dispatch_assignment.id), hidden: false, color:random_colors[index], service_requests:sr_dict}
+              });
+              const current_matches = countMatches(currentResponse.data);
+              currentResponse.data['matches'] = current_matches;
+              setCurrentRequest(currentResponse.data);
+              bounds.push([currentResponse.data.latitude, currentResponse.data.longitude]);
+              setMapState(map_dict);
+              setData({dispatch_assignments: response.data, isFetching: false, bounds:L.latLngBounds(bounds)});
+            }
           })
           .catch(error => {
-            setData({dispatch_assignments: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
+            if (!unmounted) {
+              setData({dispatch_assignments: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
+            }
           });
         }
       })

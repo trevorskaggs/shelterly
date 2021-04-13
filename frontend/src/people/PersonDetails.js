@@ -4,7 +4,7 @@ import { Link } from 'raviger';
 import { Button, Card, ListGroup, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faClipboardList, faEdit, faPhone, faPlusSquare
+  faEdit, faPhone, faPlusSquare, faUserPlus
 } from '@fortawesome/free-solid-svg-icons';
 import { faHomeHeart } from '@fortawesome/pro-solid-svg-icons';
 import Moment from 'react-moment';
@@ -91,17 +91,6 @@ function PersonDetails({id}) {
           >
             <Link href={"/people/owner/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-1 mr-1" inverse /></Link>
           </OverlayTrigger>
-          <OverlayTrigger
-            key={"add-owner"}
-            placement="bottom"
-            overlay={
-              <Tooltip id={`tooltip-add-owner`}>
-                Add another owner for all of these animals
-              </Tooltip>
-            }
-          >
-            <Link href={"/people/owner/new?owner_id=" + id}><FontAwesomeIcon icon={faPlusSquare} className="fa-move-down" inverse /></Link>
-          </OverlayTrigger>
         </span>
       :
         <span>Reporter Details
@@ -137,19 +126,7 @@ function PersonDetails({id}) {
               {data.comments ? <ListGroup.Item><b>Comments: </b>{data.comments}</ListGroup.Item>: ''}
               <ListGroup.Item><b>Address: </b>{data.address ? data.full_address : 'No Address Listed'}</ListGroup.Item>
               {data.request ?
-                <ListGroup.Item><b>Service Request: </b>{data.request.full_address}
-                  <OverlayTrigger
-                    key={"request-details"}
-                    placement="top"
-                    overlay={
-                      <Tooltip id={`tooltip-request-details`}>
-                        Service request details
-                      </Tooltip>
-                    }
-                  >
-                    <Link href={"/hotline/servicerequest/" + data.request.id}><FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1" inverse /></Link>
-                  </OverlayTrigger>
-                </ListGroup.Item>: ''}
+                <ListGroup.Item><b>Service Request: </b><Link href={"/hotline/servicerequest/" + data.request.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.request.full_address}</Link></ListGroup.Item>: ''}
             </ListGroup>
           </Card.Body>
         </Card>
@@ -159,7 +136,17 @@ function PersonDetails({id}) {
           <Card.Body>
             <Card.Title>
               <h4>Contact Log
-                <Link href={"/hotline/ownercontact/new?owner=" + id}><FontAwesomeIcon icon={faPhone} className="ml-1" inverse /></Link>
+                <OverlayTrigger
+                  key={"add-contact-note"}
+                  placement="top"
+                  overlay={
+                    <Tooltip id={`tooltip-add-contact-note`}>
+                      Add an owner contact note
+                    </Tooltip>
+                  }
+                >
+                  <Link href={"/hotline/ownercontact/new?owner=" + id}><FontAwesomeIcon icon={faPhone} className="ml-1" inverse /></Link>
+                </OverlayTrigger>
               </h4>
             </Card.Title>
             <hr/>
@@ -167,6 +154,7 @@ function PersonDetails({id}) {
               {data.owner_contacts.map(owner_contact => (
               <ListGroup.Item key={owner_contact.id}><b><Moment format="MMMM Do YYYY HH:mm">{owner_contact.owner_contact_time}</Moment></b><Link href={"/hotline/ownercontact/" + owner_contact.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>: {owner_contact.owner_contact_note}</ListGroup.Item>
               ))}
+              {data.owner_contacts.length < 1 ? <ListGroup.Item>This owner has not been contacted yet.</ListGroup.Item> : ""}
             </ListGroup>
           </Card.Body>
         </Card>
@@ -189,6 +177,17 @@ function PersonDetails({id}) {
                 >
                   <Link href={"/animals/new?owner_id=" + id}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
                 </OverlayTrigger>
+                <OverlayTrigger
+                  key={"add-owner"}
+                  placement="bottom"
+                  overlay={
+                    <Tooltip id={`tooltip-add-owner`}>
+                      Add another owner for all of these animals
+                    </Tooltip>
+                  }
+                >
+                  <Link href={"/people/owner/new?owner_id=" + id}><FontAwesomeIcon icon={faUserPlus} className="ml-1 fa-move-up" size="sm" inverse /></Link>
+                </OverlayTrigger>
                 {is_owner && data.animals.filter(animal => (!['REUNITED', 'DECEASED'].includes(animal.status))).length > 0 ?
                 <OverlayTrigger
                   key={"reunite"}
@@ -199,7 +198,7 @@ function PersonDetails({id}) {
                     </Tooltip>
                   }
                 >
-                  <FontAwesomeIcon icon={faHomeHeart} onClick={() => setShow(true)} style={{cursor:'pointer'}} className="ml-1 fa-move-up" inverse />
+                  <FontAwesomeIcon icon={faHomeHeart} onClick={() => setShow(true)} style={{cursor:'pointer'}} className="ml-1 fa-move-up" size="sm" inverse />
                 </OverlayTrigger>
                 : ""}
               </h4>
