@@ -4,12 +4,13 @@ import { Link } from 'raviger';
 import { Button, Card, ListGroup, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faEdit, faPhone, faPlusSquare, faUserPlus
+  faEdit, faPlusSquare, faUserPlus
 } from '@fortawesome/free-solid-svg-icons';
-import { faHomeHeart } from '@fortawesome/pro-solid-svg-icons';
+import { faHomeHeart, faPhonePlus } from '@fortawesome/pro-solid-svg-icons';
 import Moment from 'react-moment';
 import Header from '../components/Header';
 import History from '../components/History';
+import Scrollbar from '../components/Scrollbars';
 import AnimalCards from '../components/AnimalCards';
 
 function PersonDetails({id}) {
@@ -120,19 +121,20 @@ function PersonDetails({id}) {
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
               <ListGroup.Item><b>Name: </b>{data.first_name} {data.last_name}</ListGroup.Item>
               {data.agency ? <ListGroup.Item><b>Agency: </b>{data.agency}</ListGroup.Item>: ''}
-              {data.phone ? <ListGroup.Item><b>Telephone: </b>{data.display_phone}</ListGroup.Item> : ""}
-              {data.alt_phone ? <ListGroup.Item><b>Alternate Telephone: </b>{data.display_alt_phone}</ListGroup.Item> : ""}
+              {data.phone ? <ListGroup.Item><b>Telephone: </b>{data.display_phone} {data.display_alt_phone ? <span>|&nbsp;Alt: {data.display_alt_phone}</span> : ""}</ListGroup.Item> : ""}
               {data.email ? <ListGroup.Item><b>Email: </b>{data.email}</ListGroup.Item> : ""}
-              {data.comments ? <ListGroup.Item><b>Comments: </b>{data.comments}</ListGroup.Item>: ''}
-              <ListGroup.Item><b>Address: </b>{data.address ? data.full_address : 'No Address Listed'}</ListGroup.Item>
               {data.request ?
-                <ListGroup.Item><b>Service Request: </b><Link href={"/hotline/servicerequest/" + data.request.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.request.full_address}</Link></ListGroup.Item>: ''}
+                <ListGroup.Item><b>Service Request: </b><Link href={"/hotline/servicerequest/" + data.request.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.request.full_address}</Link></ListGroup.Item>
+              :
+                <ListGroup.Item><b>Address: </b>{data.address ? data.full_address : 'No Address Listed'}</ListGroup.Item>
+              }
+              {data.comments ? <ListGroup.Item><b>Comments: </b>{data.comments}</ListGroup.Item>: ''}
             </ListGroup>
           </Card.Body>
         </Card>
       </div>
       <div className="col-6 d-flex" style={{paddingLeft:"9px"}}>
-        <Card className="border rounded d-flex" style={{width:"100%"}}>
+        <Card className="border rounded d-flex" style={{width:"100%", minHeight:"312px"}}>
           <Card.Body>
             <Card.Title>
               <h4>Contact Log
@@ -145,17 +147,31 @@ function PersonDetails({id}) {
                     </Tooltip>
                   }
                 >
-                  <Link href={"/hotline/ownercontact/new?owner=" + id}><FontAwesomeIcon icon={faPhone} className="ml-1" inverse /></Link>
+                  <Link href={"/hotline/ownercontact/new?owner=" + id}><FontAwesomeIcon icon={faPhonePlus} className="ml-1" inverse /></Link>
                 </OverlayTrigger>
               </h4>
             </Card.Title>
             <hr/>
+            <Scrollbar autoHeight autoHeightMin={100} autoHeightMax={210} no_shadow="true" renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
               {data.owner_contacts.map(owner_contact => (
-              <ListGroup.Item key={owner_contact.id}><b><Moment format="MMMM Do YYYY HH:mm">{owner_contact.owner_contact_time}</Moment></b><Link href={"/hotline/ownercontact/" + owner_contact.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>: {owner_contact.owner_contact_note}</ListGroup.Item>
+              <ListGroup.Item key={owner_contact.id}><b><Moment format="MMMM Do YYYY HH:mm">{owner_contact.owner_contact_time}</Moment></b>
+              <OverlayTrigger
+                  key={"add-contact-note"}
+                  placement="top"
+                  overlay={
+                    <Tooltip id={`tooltip-add-contact-note`}>
+                      Update owner contact note
+                    </Tooltip>
+                  }
+                >
+                  <Link href={"/hotline/ownercontact/" + owner_contact.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
+                </OverlayTrigger>
+                : {owner_contact.owner_contact_note}</ListGroup.Item>
               ))}
               {data.owner_contacts.length < 1 ? <ListGroup.Item>This owner has not been contacted yet.</ListGroup.Item> : ""}
             </ListGroup>
+            </Scrollbar>
           </Card.Body>
         </Card>
       </div>
@@ -171,7 +187,7 @@ function PersonDetails({id}) {
                   placement="top"
                   overlay={
                     <Tooltip id={`tooltip-add-animal`}>
-                      Add animal
+                      Add animal to this owner
                     </Tooltip>
                   }
                 >
@@ -194,7 +210,7 @@ function PersonDetails({id}) {
                   placement="top"
                   overlay={
                     <Tooltip id={`tooltip-reunite`}>
-                      Reunite all owner animals
+                      Reunite all animals with this owner
                     </Tooltip>
                   }
                 >
