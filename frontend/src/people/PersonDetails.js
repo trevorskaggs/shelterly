@@ -112,30 +112,32 @@ function PersonDetails({id}) {
     <hr/>
     <div className="row">
       <div className="col-6 d-flex" style={{paddingRight:"9px"}}>
-        <Card className="border rounded d-flex" style={{width:"100%"}}>
+        <Card className="border rounded d-flex" style={{width:"100%", minHeight:"312px"}}>
           <Card.Body>
             <Card.Title>
               <h4>Information</h4>
             </Card.Title>
             <hr/>
-            <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
-              <ListGroup.Item><b>Name: </b>{data.first_name} {data.last_name}</ListGroup.Item>
-              {data.agency ? <ListGroup.Item><b>Agency: </b>{data.agency}</ListGroup.Item>: ''}
-              {data.phone ? <ListGroup.Item><b>Telephone: </b>{data.display_phone} {data.display_alt_phone ? <span>|&nbsp;Alt: {data.display_alt_phone}</span> : ""}</ListGroup.Item> : ""}
-              {data.email ? <ListGroup.Item><b>Email: </b>{data.email}</ListGroup.Item> : ""}
-              {data.request ?
-                <ListGroup.Item><b>Service Request: </b><Link href={"/hotline/servicerequest/" + data.request.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.request.full_address}</Link></ListGroup.Item>
-              :
-                <ListGroup.Item><b>Address: </b>{data.address ? data.full_address : 'No Address Listed'}</ListGroup.Item>
-              }
-              {data.comments ? <ListGroup.Item><b>Comments: </b>{data.comments}</ListGroup.Item>: ''}
-            </ListGroup>
+            <Scrollbar no_shadow="true" style={{height:"222px", marginBottom:"-10px"}} renderView={props => <div {...props} style={{...props.style, marginBottom:"-19px"}}/>} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
+              <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
+                <ListGroup.Item><b>Name: </b>{data.first_name} {data.last_name}</ListGroup.Item>
+                {data.agency ? <ListGroup.Item><b>Agency: </b>{data.agency}</ListGroup.Item>: ''}
+                {data.phone ? <ListGroup.Item><b>Telephone: </b>{data.display_phone} {data.display_alt_phone ? <span>|&nbsp;Alt: {data.display_alt_phone}</span> : ""}</ListGroup.Item> : ""}
+                {data.email ? <ListGroup.Item><b>Email: </b>{data.email}</ListGroup.Item> : ""}
+                {data.request ?
+                  <ListGroup.Item><b>Service Request: </b><Link href={"/hotline/servicerequest/" + data.request.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.request.full_address}</Link></ListGroup.Item>
+                :
+                  <ListGroup.Item><b>Address: </b>{data.address ? data.full_address : 'No Address Listed'}</ListGroup.Item>
+                }
+                {data.comments ? <ListGroup.Item><b>Comments: </b>{data.comments}</ListGroup.Item>: ''}
+              </ListGroup>
+            </Scrollbar>
           </Card.Body>
         </Card>
       </div>
       <div className="col-6 d-flex" style={{paddingLeft:"9px"}}>
         <Card className="border rounded d-flex" style={{width:"100%", minHeight:"312px"}}>
-          <Card.Body>
+          <Card.Body style={{width:"100%", minHeight:"312px"}}>
             <Card.Title>
               <h4>Contact Log
                 <OverlayTrigger
@@ -152,25 +154,25 @@ function PersonDetails({id}) {
               </h4>
             </Card.Title>
             <hr/>
-            <Scrollbar autoHeight autoHeightMin={100} autoHeightMax={210} no_shadow="true" renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
-            <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
-              {data.owner_contacts.map(owner_contact => (
-              <ListGroup.Item key={owner_contact.id}><b><Moment format="MMMM Do YYYY HH:mm">{owner_contact.owner_contact_time}</Moment></b>
-              <OverlayTrigger
-                  key={"add-contact-note"}
-                  placement="top"
-                  overlay={
-                    <Tooltip id={`tooltip-add-contact-note`}>
-                      Update owner contact note
-                    </Tooltip>
-                  }
-                >
-                  <Link href={"/hotline/ownercontact/" + owner_contact.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
-                </OverlayTrigger>
-                : {owner_contact.owner_contact_note}</ListGroup.Item>
-              ))}
-              {data.owner_contacts.length < 1 ? <ListGroup.Item>This owner has not been contacted yet.</ListGroup.Item> : ""}
-            </ListGroup>
+            <Scrollbar no_shadow="true" style={{height:"210px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
+              <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
+                {data.owner_contacts.map(owner_contact => (
+                <ListGroup.Item key={owner_contact.id}><b><Moment format="MMMM Do YYYY HH:mm">{owner_contact.owner_contact_time}</Moment></b>
+                <OverlayTrigger
+                    key={"add-contact-note"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-add-contact-note`}>
+                        Update owner contact note
+                      </Tooltip>
+                    }
+                  >
+                    <Link href={"/hotline/ownercontact/" + owner_contact.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
+                  </OverlayTrigger>
+                  : {owner_contact.owner_contact_note}</ListGroup.Item>
+                ))}
+                {data.owner_contacts.length < 1 ? <ListGroup.Item>This owner has not been contacted yet.</ListGroup.Item> : ""}
+              </ListGroup>
             </Scrollbar>
           </Card.Body>
         </Card>
