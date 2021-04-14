@@ -37,6 +37,7 @@ function AnimalDetails({id}) {
     behavior_notes: '',
     medical_notes: '',
     last_seen: null,
+    intake_date: null,
     front_image: null,
     side_image: null,
     room: null,
@@ -212,7 +213,6 @@ function AnimalDetails({id}) {
                   <span className="col-6"><b>Secondary Color:</b> {data.scolor||"N/A"}</span>
                 </div>
               </ListGroup.Item>
-              {data.last_seen ? <ListGroup.Item><b>Last Seen:</b> <Moment format="MMMM Do YYYY HH:mm">{data.last_seen}</Moment></ListGroup.Item> : ""}
             </ListGroup>
             <Card.Title>
               <h4 className="mb-0 mt-3">Contacts
@@ -294,6 +294,7 @@ function AnimalDetails({id}) {
                 </ListGroup.Item>
               : ''}
               {data.shelter ? <ListGroup.Item style={{marginTop:"-13px"}}><b>Shelter:</b> {data.shelter_name}<Link href={"/shelter/" + data.shelter}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item> : ""}
+              {data.shelter ? <ListGroup.Item style={{marginTop:"-13px"}}><b>Intake Date:</b> <Moment format="MMMM Do YYYY HH:mm">{data.intake_date}</Moment></ListGroup.Item> : ""}
               {data.shelter ? <ListGroup.Item style={{marginTop:"-13px"}}><b>Address:</b> {data.full_address || "Unknown"}</ListGroup.Item> : ""}
               {data.room ? <ListGroup.Item style={{marginTop:"-13px"}}><b>Room:</b> {data.room_name}<Link href={"/shelter/room/" + data.room}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item> : ""}
               {data.found_location ? 
