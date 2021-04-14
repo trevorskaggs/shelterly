@@ -105,7 +105,7 @@ const OwnerContactForm = ({id}) => {
               <Row>
                 <Col>
                   <DateTimePicker
-                    label="Owner Contact Time"
+                    label="Owner Contact Time*"
                     name="owner_contact_time"
                     id="owner_contact_time"
                     xs="4"
@@ -122,7 +122,7 @@ const OwnerContactForm = ({id}) => {
                 <Col >
                   <TextInput
                     as="textarea"
-                    label="Owner Contact Note"
+                    label="Owner Contact Note*"
                     name="owner_contact_note"
                     id="owner_contact_note"
                     xs="12"

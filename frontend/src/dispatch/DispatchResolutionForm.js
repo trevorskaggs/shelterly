@@ -388,7 +388,7 @@ function DispatchResolutionForm({ id }) {
                       <BootstrapForm.Row className="mt-2">
                         <Col xs="4">
                          <DropDown
-                          label="Owner Contacted"
+                          label="Owner Contacted*"
                           id={`sr_updates.${index}.owner_contact_id`}
                           name={`sr_updates.${index}.owner_contact_id`}
                           key={`my_unique_test_select_key__d}`}
@@ -402,7 +402,7 @@ function DispatchResolutionForm({ id }) {
                       </BootstrapForm.Row>
                       <BootstrapForm.Row className="mt-3">
                         <DateTimePicker
-                          label="Owner Contact Time"
+                          label="Owner Contact Time*"
                           name={`sr_updates.${index}.owner_contact_time`}
                           id={`sr_updates.${index}.owner_contact_time`}
                           xs="4"
@@ -420,7 +420,7 @@ function DispatchResolutionForm({ id }) {
                           xs="9"
                           as="textarea"
                           rows={5}
-                          label="Owner Contact Note"
+                          label="Owner Contact Note*"
                         />
                       </BootstrapForm.Row>
                     </span>
