@@ -40,6 +40,7 @@ function AnimalDetails({id}) {
     behavior_notes: '',
     medical_notes: '',
     last_seen: null,
+    intake_date: null,
     front_image: null,
     side_image: null,
     room: null,
@@ -176,7 +177,7 @@ function AnimalDetails({id}) {
     <hr/>
     <div className="row">
       <div className="col-6 d-flex" style={{marginRight:"-15px"}}>
-        <Card className="border rounded d-flex" style={{width:"100%"}}>
+        <Card className="border rounded d-flex" style={{width:"100%", marginBottom:"16px"}}>
           <Card.Body>
             <Card.Title>
               <h4>Information
@@ -260,7 +261,6 @@ function AnimalDetails({id}) {
                   <span className="col-6"><b>Secondary Color:</b> {data.scolor||"N/A"}</span>
                 </div>
               </ListGroup.Item>
-              {data.last_seen ? <ListGroup.Item><b>Last Seen:</b> <Moment format="MMMM Do YYYY HH:mm">{data.last_seen}</Moment></ListGroup.Item> : ""}
             </ListGroup>
             <Card.Title>
               <h4 className="mb-0 mt-3">Contacts
@@ -333,9 +333,13 @@ function AnimalDetails({id}) {
               {data.request ?
                 <ListGroup.Item><b>Service Request: </b><Link href={"/hotline/servicerequest/" + data.request} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.request_address}</Link></ListGroup.Item>
               : ''}
-              {data.shelter ? <ListGroup.Item><b>Shelter:</b> <Link href={"/shelter/" + data.shelter} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.shelter_name}</Link>
-              {data.room ? <div className="mt-1"><b>Room:</b> <Link href={"/shelter/room/" + data.room} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.room_name}</Link></div> : ""}
-              {data.shelter ? <div className="mt-1"><b>Address:</b> {data.full_address || "Unknown"}</div> : ""}</ListGroup.Item> : ""}
+              {data.shelter ?
+              <ListGroup.Item>
+                <b>Shelter:</b> <Link href={"/shelter/" + data.shelter} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.shelter_name}</Link>
+                {data.room ? <div className="mt-1"><b>Room:</b> <Link href={"/shelter/room/" + data.room} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.room_name}</Link></div> : ""}
+                <div className="mt-1"><b>Intake Date:</b> <Moment format="MMMM Do YYYY HH:mm">{data.intake_date}</Moment></div>
+                <div className="mt-1"><b>Address:</b> {data.full_address || "Unknown"}</div>
+              </ListGroup.Item> : ""}
             </ListGroup>
           </Card.Body>
         </Card>
@@ -356,13 +360,13 @@ function AnimalDetails({id}) {
             </Carousel>
           }
         </div>
-        <Card className="border rounded mt-3" style={{width:"100%", height:"100%"}}>
+        <Card className="border rounded mt-3" style={{width:"100%", height:"100%", marginBottom:"16px"}}>
           <Card.Body>
             <Card.Title>
               <h4>Description</h4>
             </Card.Title>
             <hr/>
-            <ListGroup variant="flush" style={{marginTop:"-13px"}}>
+            <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
               {data.color_notes ? <ListGroup.Item><b>Color Notes:</b> {data.color_notes}</ListGroup.Item> : ""}
               {data.behavior_notes ? <ListGroup.Item style={{whiteSpace:"pre-line"}}><b>Behavior Notes:</b> {data.behavior_notes}</ListGroup.Item> : ""}
               {data.medical_notes ? <ListGroup.Item style={{whiteSpace:"pre-line"}}><b>Medical Notes:</b> {data.medical_notes}</ListGroup.Item> : ""}

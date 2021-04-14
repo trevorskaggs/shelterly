@@ -5,9 +5,10 @@ import { Button, ButtonGroup, Card, CardGroup, Form, FormControl, InputGroup, Li
 import noImageFound from '../static/images/image-not-found.png';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBandAid, faClipboardList, faCut, faLink, faNotesMedical, faStickyNote, faUserAltSlash
+  faBandAid, faCalendarDay, faClipboardList, faCut, faLink, faNotesMedical, faStickyNote, faUserAltSlash
 } from '@fortawesome/free-solid-svg-icons';
 import { faClawMarks } from '@fortawesome/pro-solid-svg-icons';
+import Moment from 'react-moment';
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
 import { titleCase } from '../components/Utils';
@@ -236,7 +237,20 @@ function AnimalSearch() {
               <Card.Title style={{marginTop:"-9px", marginBottom:"8px"}}>Location</Card.Title>
                 <ListGroup>
                   <ListGroup.Item className='request'><b>Service Request: </b>{animal.request_address || "None"}</ListGroup.Item>
-                    <ListGroup.Item><b>Shelter: </b>{animal.shelter_name || "None"}</ListGroup.Item>
+                    <ListGroup.Item><b>Shelter: </b>{animal.shelter_name || "None"}
+                      {animal.shelter ? <OverlayTrigger
+                        key={"animal-intake-date"}
+                        placement="top"
+                        overlay={
+                          <Tooltip id={`tooltip-animal-intake-date`}>
+                            Intake Date: <Moment format="MMMM Do YYYY HH:mm">{animal.intake_date}</Moment>
+                          </Tooltip>
+                        }
+                      >
+                        <FontAwesomeIcon icon={faCalendarDay} className="ml-1" inverse />
+                      </OverlayTrigger>
+                      : ""}
+                    </ListGroup.Item>
                     {animal.shelter ? <ListGroup.Item><b>Address: </b>{animal.full_address}</ListGroup.Item> : ""}
                 </ListGroup>
               </Card.Body>
