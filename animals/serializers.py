@@ -7,13 +7,21 @@ from location.utils import build_full_address, build_action_string
 
 class SimpleAnimalSerializer(serializers.ModelSerializer):
     aco_required = serializers.SerializerMethodField()
+    owner_names = serializers.SerializerMethodField()
 
     # An Animal is ACO Required if it is aggressive or "Other" species.
     def get_aco_required(self, obj):
         return (obj.aggressive or obj.species.other)
+
+    def get_owner_names(self, obj):
+        #TODO: optimize
+        if obj.owners.exists():
+            return [person.first_name + ' ' + person.last_name for person in obj.owners.all()]
+        return []
+
     class Meta:
         model = Animal
-        fields = ['id', 'species', 'aggressive', 'status', 'aco_required', 'name', 'sex', 'size', 'age', 'pcolor', 'scolor']
+        fields = ['id', 'species', 'aggressive', 'status', 'aco_required', 'name', 'sex', 'size', 'age', 'pcolor', 'scolor', 'owner_names']
 
 class ModestAnimalSerializer(SimpleAnimalSerializer):
     evacuation_assignments = serializers.SerializerMethodField()
@@ -30,7 +38,6 @@ class AnimalSerializer(SimpleAnimalSerializer):
     side_image = serializers.SerializerMethodField()
     extra_images = serializers.SerializerMethodField()
     found_location = serializers.SerializerMethodField()
-    owner_names = serializers.SerializerMethodField()
     owner_objects = serializers.SerializerMethodField()
     full_address = serializers.SerializerMethodField()
     shelter_name = serializers.SerializerMethodField()
@@ -45,12 +52,6 @@ class AnimalSerializer(SimpleAnimalSerializer):
         fields = ['id', 'species', 'aggressive', 'status', 'aco_required', 'front_image', 'side_image', 'extra_images', 'address', 'city', 'state', 'zip_code',
         'found_location', 'owner_names', 'owner_objects', 'full_address', 'shelter', 'shelter_name', 'reporter_object', 'request', 'request_address',
         'action_history', 'evacuation_assignments', 'room', 'room_name', 'name', 'sex', 'size', 'age', 'pcolor', 'scolor']
-    
-    def get_owner_names(self, obj):
-        #TODO: optimize
-        if obj.owners.exists():
-            return [person.first_name + ' ' + person.last_name for person in obj.owners.all()]
-        return []
 
     # Custom Owner object field that excludes animals to avoid a circular reference.
     def get_owner_objects(self, obj):
