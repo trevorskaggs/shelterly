@@ -139,3 +139,35 @@ input[disabled] {
 .icon-thin {
   transform: scale(.5,1.35);
 }
+
+.MuiStep-completed {
+  position:absolute;
+  background: white;
+  border-radius: 50%;
+  /* top: 1em;
+  left: 1em; */
+  width:30px;
+  height:30px;
+}
+
+.MuiStepIcon-completed {
+  position:absolute;
+  top: 0em;
+  left: 0em;
+}
+
+.icon {
+  background: #fff;
+  width:15px;
+  height:15px;
+  border-radius: 50%;
+  position: absolute;
+  top: 1em;
+  left: 1em;
+}
+
+.iconfix {
+  position: absolute;
+  top: -1.2em;
+  left: -0.2em;
+}
