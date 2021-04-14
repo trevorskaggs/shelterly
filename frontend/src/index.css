@@ -151,15 +151,43 @@ input[disabled] {
 }
 
 .shelter-link:hover {
-  color: #b18662!important;
+  color: #b18662 !important;
 }
 
 .building-link:hover {
-  color: #b18662!important;
+  color: #b18662 !important;
+}
+
+.shelter-hover-div:hover {
+  border-color: #b18662 !important;
+}
+
+.shelter-hover-div:hover .border {
+  border-color: #b18662 !important;
+}
+
+.shelter-hover-div:hover .border-right {
+  border-color: #b18662 !important;
+}
+
+.animal-link:hover {
+  color: #a52b44 !important;
+}
+
+.animal-hover-div:hover .animal-icon {
+  color: #a52b44 !important;
+}
+
+.animal-hover-div:hover {
+  border-color: #a52b44 !important;
+}
+
+.animal-hover-div:hover .text-border {
+  color: #a52b44 !important;
 }
 
 .text-link:hover {
-  color: #6657e7!important;
+  color: #6657e7 !important;
   text-decoration: underline !important;
 }
 

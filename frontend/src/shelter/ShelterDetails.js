@@ -151,7 +151,7 @@ function ShelterDetails({id}) {
           {data.buildings.map(building => (
             <span key={building.id} className="pl-0 pr-0 mr-3 mb-3">
               <Link href={"/shelter/building/" + building.id} className="building-link" style={{textDecoration:"none", color:"white"}}>
-                <Card className="border rounded" style={{minWidth:"315px", maxWidth:"315px", whiteSpace:"nowrap", overflow:"hidden"}}>
+                <Card className="border rounded shelter-hover-div" style={{minWidth:"315px", maxWidth:"315px", whiteSpace:"nowrap", overflow:"hidden"}}>
                   <div className="row no-gutters hover-div" style={{textTransform:"capitalize", marginRight:"-2px"}}>
                     <Row className="ml-0 mr-0 w-100" style={{flexWrap:"nowrap"}}>
                       <div className="border-right" style={{width:"100px", minWidth:"100px"}}>

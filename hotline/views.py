@@ -44,10 +44,6 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
                     raise serializers.ValidationError(['Multiple open Requests may not exist with the same address.', service_request.id])
             service_request = serializer.save()
 
-            # Remove animal from SR.
-            if self.request.data.get('remove_animal'):
-                Animal.objects.filter(id=self.request.data.get('remove_animal')).update(status='CANCELED', shelter=None, room=None)
-
             if service_request.status == 'canceled':
                 service_request.animal_set.update(status='CANCELED')
 

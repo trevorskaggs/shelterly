@@ -1,21 +1,24 @@
-import React, {useEffect, useState} from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
-import { Link } from 'raviger';
+import { Link, navigate } from 'raviger';
+import { AuthContext } from "../accounts/AccountsReducer";
 import Moment from 'react-moment';
 import { Carousel } from 'react-responsive-carousel';
 import { Button, Card, Col, ListGroup, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBandAid, faCut, faEdit, faEnvelope, faLink, faMinusSquare, faUserPlus
+  faBan, faBandAid, faCut, faEdit, faEnvelope, faLink, faMinusSquare, faUserPlus
 } from '@fortawesome/free-solid-svg-icons';
 import { faClawMarks, faHomeHeart, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
+import { AnimalDeleteModal } from "../components/Modals";
 import Header from '../components/Header';
 import History from '../components/History';
 import noImageFound from '../static/images/image-not-found.png';
 
 function AnimalDetails({id}) {
 
+  const { state } = useContext(AuthContext);
   const [images, setImages] = useState([]);
 
   // Initial animal data.
@@ -52,7 +55,10 @@ function AnimalDetails({id}) {
   const [ownerToDelete, setOwnerToDelete] = useState({id:0, name:''});
   const [showOwnerConfirm, setShowOwnerConfirm] = useState(false);
   const handleOwnerClose = () => setShowOwnerConfirm(false);
+  const [showAnimalConfirm, setShowAnimalConfirm] = useState(false);
+  const handleAnimalClose = () => setShowAnimalConfirm(false);
 
+  // Handle animal reunited submit.
   const handleSubmit = async () => {
     await axios.patch('/animals/api/animal/' + id + '/', {status:'REUNITED', shelter:null, room:null})
     .then(response => {
@@ -63,11 +69,37 @@ function AnimalDetails({id}) {
     });
   }
 
+  // Handle remove owner submit.
   const handleOwnerSubmit = async () => {
     await axios.patch('/animals/api/animal/' + id + '/', {remove_owner:ownerToDelete.id})
     .then(response => {
       setData(prevState => ({ ...prevState, "owner_objects":prevState.owner_objects.filter(owner => owner.id !== ownerToDelete.id) }));
       handleOwnerClose();
+    })
+    .catch(error => {
+    });
+  }
+
+  // Handle animal removal submit.
+  const handleAnimalSubmit = async () => {
+    await axios.patch('/animals/api/animal/' + id + '/', {remove_animal:id})
+    .then(response => {
+      handleAnimalClose();
+      if (state.prevLocation) {
+        navigate(state.prevLocation);
+      }
+      else if (data.request) {
+        navigate('/hotline/servicerequest/' + data.request);
+      }
+      else if (data.owner) {
+        navigate('/people/owner/' + data.owner);
+      }
+      else if (data.reporter) {
+        navigate('/people/reporter/' + data.reporter);
+      }
+      else {
+        navigate('/');
+      }
     })
     .catch(error => {
     });
@@ -129,6 +161,17 @@ function AnimalDetails({id}) {
         <FontAwesomeIcon icon={faHomeHeart} onClick={() => setShow(true)} style={{cursor:'pointer'}} inverse />
       </OverlayTrigger>
       : ""}
+      <OverlayTrigger
+        key={"remove-animal"}
+        placement="bottom"
+        overlay={
+          <Tooltip id={`tooltip-remove-animal`}>
+            Remove animal
+          </Tooltip>
+        }
+      >
+        <FontAwesomeIcon icon={faBan} style={{cursor:'pointer'}} onClick={() => {setShowAnimalConfirm(true);}} className="ml-1" inverse />
+      </OverlayTrigger>
     </Header>
     <hr/>
     <div className="row">
@@ -359,6 +402,7 @@ function AnimalDetails({id}) {
         <Button variant="secondary" onClick={handleOwnerClose}>Close</Button>
       </Modal.Footer>
     </Modal>
+    <AnimalDeleteModal name={data.name} show={showAnimalConfirm} handleClose={handleAnimalClose} handleSubmit={handleAnimalSubmit} />
     </>
   );
 };

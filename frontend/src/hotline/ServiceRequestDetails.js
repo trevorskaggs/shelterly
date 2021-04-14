@@ -5,14 +5,13 @@ import Moment from 'react-moment';
 import { Button, Card, ListGroup, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBan, faCar, faCircle, faExclamationCircle, faQuestionCircle, faHome, faHelicopter, faHeart, faSkullCrossbones,
-  faClipboardCheck, faClipboardList, faComment, faEdit, faEnvelope, faHouseDamage,
-  faKey, faMapMarkedAlt, faMinusSquare, faPlusSquare, faTimes, faTrailer, faUserPlus, faUsers
+  faBan, faCar, faClipboardCheck, faClipboardList, faComment, faEdit, faEnvelope, faHouseDamage,
+  faKey, faMapMarkedAlt, faPlusSquare, faTimes, faTrailer, faUserPlus, faUsers
 } from '@fortawesome/free-solid-svg-icons';
-import { faCalendarEdit, faHomeAlt, faHomeHeart, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
+import { faCalendarEdit, faHomeHeart, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import Header from '../components/Header';
 import History from '../components/History';
-import noImageFound from '../static/images/image-not-found.png';
+import AnimalCards from '../components/AnimalCards';
 import Flatpickr from 'react-flatpickr';
 
 function ServiceRequestDetails({id}) {
@@ -65,9 +64,6 @@ function ServiceRequestDetails({id}) {
 
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
-  const [animalToDelete, setAnimalToDelete] = useState({id:0, name:''});
-  const [showAnimalConfirm, setShowAnimalConfirm] = useState(false);
-  const handleAnimalClose = () => setShowAnimalConfirm(false);
 
   // Handle animal reunification submit.
   const handleSubmit = async () => {
@@ -75,17 +71,6 @@ function ServiceRequestDetails({id}) {
     .then(response => {
       setData(prevState => ({ ...prevState, "status":"Closed", "animals":prevState['animals'].map(animal => ({...animal, status:animal.status !== 'DECEASED' ? 'REUNITED' : 'DECEASED'})) }));
       handleClose()
-    })
-    .catch(error => {
-    });
-  }
-
-  // Handle animal removal submit.
-  const handleAnimalSubmit = async () => {
-    await axios.patch('/hotline/api/servicerequests/' + id + '/', {remove_animal:animalToDelete.id})
-    .then(response => {
-      setData(prevState => ({ ...prevState, "animals":prevState.animals.filter(animal => animal.id !== animalToDelete.id) }));
-      handleAnimalClose();
     })
     .catch(error => {
     });
@@ -147,7 +132,7 @@ function ServiceRequestDetails({id}) {
       </Header>
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>Confirm Cancelation</Modal.Title>
+          <Modal.Title>Confirm Cancellation</Modal.Title>
         </Modal.Header>
         <Modal.Body>Are you sure you want to cancel this Service Request and associated animals?</Modal.Body>
         <Modal.Footer>
@@ -337,81 +322,7 @@ function ServiceRequestDetails({id}) {
                 </h4>
               </Card.Title>
               <hr />
-              <span className="d-flex flex-wrap align-items-end" style={{marginLeft:"-15px"}}>
-              {data.animals.map(animal => (
-              <Card key={animal.id} className="border rounded ml-3 mb-3" style={{width:"153px", whiteSpace:"nowrap", overflow:"hidden"}}>
-                <Card.Img variant="top" src={animal.front_image || animal.side_image || noImageFound} style={{width:"153px", height:"153px", objectFit: "cover", overflow: "hidden"}} />
-                <Card.ImgOverlay className="text-border" style={{height:"20px"}}>#{animal.id}</Card.ImgOverlay>
-                <Card.Text className="mb-0 border-top" style={{textTransform:"capitalize"}}>
-                <span title={animal.name} className="ml-1">{animal.name||"Unknown"}</span>
-                <span className="ml-1" style={{display:"block"}}>
-                  {animal.species}&nbsp;
-                  {animal.status === "SHELTERED IN PLACE" ?
-                    <OverlayTrigger key={"sip"} placement="top"
-                                    overlay={<Tooltip id={`tooltip-sip`}>SHELTERED IN PLACE</Tooltip>}>
-                        <span className="fa-layers fa-fw">
-                          <FontAwesomeIcon icon={faCircle} transform={'grow-1'} />
-                          <FontAwesomeIcon icon={faHomeAlt} style={{color:"#444"}} transform={'shrink-3'} size="sm" inverse />
-                        </span>
-                    </OverlayTrigger> : ""}
-                  {animal.status === "REPORTED" ?
-                    <OverlayTrigger key={"reported"} placement="top"
-                                    overlay={<Tooltip id={`tooltip-reported`}>REPORTED</Tooltip>}>
-                        <FontAwesomeIcon icon={faExclamationCircle} inverse/>
-                    </OverlayTrigger> : ""}
-                  {animal.status === "UNABLE TO LOCATE" ?
-                    <OverlayTrigger key={"unable-to-locate"} placement="top"
-                                    overlay={<Tooltip id={`tooltip-unable-to-locate`}>UNABLE TO LOCATE</Tooltip>}>
-                        <FontAwesomeIcon icon={faQuestionCircle} inverse/>
-                    </OverlayTrigger> : ""}
-                  {animal.status === "EVACUATED" ?
-                    <OverlayTrigger key={"evacuated"} placement="top"
-                                    overlay={<Tooltip id={`tooltip-evacuated`}>EVACUATED</Tooltip>}>
-                        <FontAwesomeIcon icon={faHelicopter} size="sm" inverse/>
-                    </OverlayTrigger> : ""}
-                  {animal.status === "REUNITED" ?
-                    <OverlayTrigger key={"reunited"} placement="top"
-                                    overlay={<Tooltip id={`tooltip-reunited`}>REUNITED</Tooltip>}>
-                        <FontAwesomeIcon icon={faHeart} inverse/>
-                    </OverlayTrigger> : ""}
-                  {animal.status === "SHELTERED" ?
-                    <OverlayTrigger key={"sheltered"} placement="top"
-                                    overlay={<Tooltip id={`tooltip-sheltered`}>SHELTERED</Tooltip>}>
-                        <FontAwesomeIcon icon={faHome} inverse/>
-                    </OverlayTrigger> : ""}
-                  {animal.status === "DECEASED" ?
-                    <OverlayTrigger key={"deceased"} placement="top"
-                                    overlay={<Tooltip id={`tooltip-deceased`}>DECEASED</Tooltip>}>
-                        <FontAwesomeIcon icon={faSkullCrossbones} inverse/>
-                    </OverlayTrigger>
-                  : ""}
-                  <OverlayTrigger
-                    key={"animal-details"}
-                    placement="top"
-                    overlay={
-                      <Tooltip id={`tooltip-animal-details`}>
-                        Animal details
-                      </Tooltip>
-                    }
-                  >
-                    <Link href={"/animals/" + animal.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
-                  </OverlayTrigger>
-                  <OverlayTrigger
-                    key={"remove-animal"}
-                    placement="top"
-                    overlay={
-                      <Tooltip id={`tooltip-remove-animal`}>
-                        Remove animal
-                      </Tooltip>
-                    }
-                  >
-                    <FontAwesomeIcon icon={faMinusSquare} style={{cursor:'pointer'}} onClick={() => {setAnimalToDelete({id:animal.id, name: animal.name});setShowAnimalConfirm(true);}} className="ml-1" inverse />
-                  </OverlayTrigger>
-                </span>
-                </Card.Text>
-              </Card>
-              ))}
-              </span>
+              <AnimalCards animals={data.animals} show_owner={false} show_status={true} />
             </Card.Body>
           </Card>
         </div>
@@ -537,20 +448,6 @@ function ServiceRequestDetails({id}) {
         </div>
       </div>
       <History action_history={data.action_history} />
-      <Modal show={showAnimalConfirm} onHide={handleAnimalClose}>
-        <Modal.Header closeButton>
-          <Modal.Title>Confirm Animal Removal</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <p>
-            Are you sure you would like to remove animal {animalToDelete.name || "Unknown"} from this service request?
-          </p>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="primary" onClick={handleAnimalSubmit}>Yes</Button>
-          <Button variant="secondary" onClick={handleAnimalClose}>Close</Button>
-        </Modal.Footer>
-      </Modal>
       <Modal show={show} onHide={handleClose}>
         <Modal.Header closeButton>
           <Modal.Title>Confirm Animal Reunification</Modal.Title>

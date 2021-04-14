@@ -142,7 +142,7 @@ function BuildingDetails({id}) {
           {data.rooms.map(room => (
             <span key={room.id} className="mr-3 mb-3">
               <Link href={"/shelter/room/" + room.id} className="building-link" style={{textDecoration:"none", color:"white"}}>
-                <Card className="border rounded" style={{width:"110px", height:"110px"}}>
+                <Card className="border rounded shelter-hover-div" style={{width:"110px", height:"110px"}}>
                   <div style={{marginRight:"-2px"}}>
                     <div className="card-header border" title={room.name} style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"3px", marginLeft:"-1px", marginTop:"-1px", width:"100%", backgroundColor:"#615e5e", fontSize:"16px", whiteSpace:"nowrap", overflow:"hidden"}}>
                       {room.name}
