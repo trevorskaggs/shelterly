@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import { Link, useQueryParams } from 'raviger';
-import { Button, ButtonGroup, Card, Row, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Button, ButtonGroup, Card, Row } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faClipboardList, faUserAlt, faUserAltSlash
+  faArrowAltCircleLeft
 } from '@fortawesome/free-solid-svg-icons';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
-import noImageFound from '../static/images/image-not-found.png';
+import AnimalRoomAssignmentCard from '../components/AnimalRoomAssignmentCard';
 
 function ShelterRoomAssignment({id}) {
 
@@ -142,72 +142,34 @@ function ShelterRoomAssignment({id}) {
   return (
     <>
       <Header>
+      <span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-2"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="sm" inverse /></span>
         {data.name}
-        <OverlayTrigger
-          key={"shelter-details"}
-          placement="bottom"
-          overlay={
-            <Tooltip id={`tooltip-shelter-details`}>
-              Shelter details
-            </Tooltip>
-          }
-        >
-          <Link href={"/shelter/" + id}><FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1" inverse /></Link>
-        </OverlayTrigger>
         &nbsp;- Room Animals
       </Header>
       <hr/>
+      <h4 style={{marginBottom:"1px"}}>Buildings</h4>
+      <Row className="d-flex ml-0 mr-0 mt-1 mb-3 border rounded">
+        <ButtonGroup className="hide-scrollbars" style={{whiteSpace:"nowrap", overflow:"auto"}}>
+          {data.buildings.map(building => (
+            <Button key={building.id} variant={selectedBuilding === building.id ? "primary" : "secondary"} onClick={() => setSelectedBuilding(building.id)}>{building.name}</Button>
+          ))}
+        </ButtonGroup>
+      </Row>
       <DragDropContext onDragEnd={handleOnDragEnd}>
-        <Row className="mb-3 d-flex" style={{height:"111px"}}>
-          <div className="col">
+        <Row className="mb-3 d-flex" style={{height:"100px"}}>
+          <div className="col mt-1">
             <h4 style={{marginBottom:"3px"}}>Roomless Animals</h4>
             <Droppable droppableId="unroomed_animals" direction="horizontal">
               {(provided, snapshot) => (
-              <Card className="border rounded" style={{height:"91px", display:"flex", justifyContent:"space-around", overflow:"auto", backgroundColor:snapshot.isDraggingOver ? "gray" : "#303030"}}>
+              <Card className="border rounded" style={{height:"80px", display:"flex", justifyContent:"space-around", overflowX:"auto", overflowY: "hidden", backgroundColor:snapshot.isDraggingOver ? "gray" : "#303030"}}>
                 <Scrollbar style={{height:"89px", width:"99.99%"}} renderView={props => <div {...props} style={{...props.style, marginBottom:"-18px"}}/>}>
-                  <Card.Body style={{paddingBottom:"3px", display:"flex", flexDirection:"column"}}>
+                  <Card.Body style={{paddingBottom:"3px", marginBottom:"-10px", display:"flex", flexDirection:"column"}}>
                     <ul className="unroomed_animals" {...provided.droppableProps} ref={provided.innerRef}>
                     {data.unroomed_animals.map((animal, index) => (
                       <Draggable key={animal.id} draggableId={String(animal.id)} index={index}>
                         {(provided, snapshot) => (
                           <li ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
-                            <Card className={"border rounded" + (snapshot.isDragging ? " border-danger" : "")} style={{width:"150px", whiteSpace:"nowrap", overflow:"hidden"}}>
-                              <div className="row no-gutters" style={{ textTransform:"capitalize" }}>
-                                <div className="mb-0">
-                                  <img alt="Animal" style={{width:"47px", height:"47px", marginRight:"3px", objectFit:"cover", overflow:"hidden", float:"left"}} src={animal.front_image || animal.side_image || noImageFound} />
-                                  <span title={animal.name}>{animal.name||"Unknown"}</span>
-                                  <div>
-                                    #{animal.id}&nbsp;
-                                    {animal.species}&nbsp;
-                                    {animal.owner_names.length === 0 ?
-                                    <OverlayTrigger
-                                      key={"stray"}
-                                      placement="top"
-                                      overlay={
-                                        <Tooltip id={`tooltip-stray`}>
-                                          Animal is stray
-                                        </Tooltip>
-                                      }
-                                    >
-                                      <FontAwesomeIcon icon={faUserAltSlash} size="sm" />
-                                    </OverlayTrigger> :
-                                    <OverlayTrigger
-                                      key={"stray"}
-                                      placement="top"
-                                      overlay={
-                                        <Tooltip id={`tooltip-stray`}>
-                                          {animal.owner_names.map(owner_name => (
-                                            <div key={owner_name}>{owner_name}</div>
-                                          ))}
-                                        </Tooltip>
-                                      }
-                                    >
-                                      <FontAwesomeIcon icon={faUserAlt} size="sm" />
-                                    </OverlayTrigger>}
-                                  </div>
-                                </div>
-                              </div>
-                            </Card>
+                            <AnimalRoomAssignmentCard animal={animal} snapshot={snapshot} />
                           </li>
                         )}
                       </Draggable>
@@ -221,20 +183,11 @@ function ShelterRoomAssignment({id}) {
             </Droppable>
           </div>
         </Row>
-        <h4 className="mt-3" style={{marginBottom:"1px"}}>Buildings</h4>
-        <Row className="d-flex ml-0 mr-0 mt-1 mb-3 border rounded">
-          <ButtonGroup className="hide-scrollbars" style={{whiteSpace:"nowrap", overflow:"auto"}}>
-            {data.buildings.map(building => (
-              <Button key={building.id} variant={selectedBuilding === building.id ? "primary" : "secondary"} onClick={() => setSelectedBuilding(building.id)}>{building.name}</Button>
-            ))}
-          </ButtonGroup>
-        </Row>
-        <h4 style={{marginBottom:"-13px"}}>Rooms</h4>
-        <hr style={{marginBottom:"5px"}} />
-        <Scrollbar style={{height:"509px"}} no_shadow="true" renderView={props => <div {...props} style={{...props.style, overflowX:"hidden", overflowY:"scroll"}}/>} renderThumbHorizontal={props => <div {...props} style={{...props.style, display:"none"}} />}>
-        <Row className="d-flex ml-0">
+        <h4 style={{marginBottom:"0px", marginTop:"17px"}}>Rooms</h4>
+        <Scrollbar style={{height:"509px"}} no_shadow="true" renderView={props => <div {...props} style={{...props.style, overflowX:"hidden", overflowY:"scroll", marginBottom:"0px"}}/>} renderThumbHorizontal={props => <div {...props} style={{...props.style, display:"none"}} />}>
+        <Row className="d-flex ml-0" style={{marginTop:"-20px"}}>
           {data.rooms.map((room, index) => (
-            <span key={room.id} hidden={room.building !== selectedBuilding} style={{marginTop:"5px", marginBottom:"0px"}}>{room.name}<Link href={"/shelter/room/" + room.id}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link>
+            <span key={room.id} hidden={room.building !== selectedBuilding} style={{marginBottom:"0px"}}>
               <span className="col">
                 <Droppable droppableId={String(index)}>
                   {(provided, snapshot) => (
@@ -245,43 +198,7 @@ function ShelterRoomAssignment({id}) {
                         <Draggable key={animal.id} draggableId={String(animal.id)} index={index}>
                           {(provided, snapshot) => (
                             <li ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
-                              <Card className={"border rounded" + (snapshot.isDragging ? " border-danger" : "")} style={{width:"150px", whiteSpace:"nowrap", overflow:"hidden"}}>
-                                <div className="row no-gutters" style={{ textTransform:"capitalize" }}>
-                                  <div className="mb-0">
-                                    <img alt="Animal" style={{width:"47px", height:"47px", marginRight:"3px", objectFit:"cover", overflow:"hidden", float:"left"}} src={animal.front_image || animal.side_image || noImageFound} />
-                                    <span title={animal.name}>{animal.name||"Unknown"}</span>
-                                    <div>
-                                      #{animal.id}&nbsp;
-                                      {animal.species}&nbsp;
-                                      {animal.owner_names.length === 0 ?
-                                      <OverlayTrigger
-                                        key={"stray"}
-                                        placement="top"
-                                        overlay={
-                                          <Tooltip id={`tooltip-stray`}>
-                                            Animal is stray
-                                          </Tooltip>
-                                        }
-                                      >
-                                        <FontAwesomeIcon icon={faUserAltSlash} size="sm" />
-                                      </OverlayTrigger> :
-                                      <OverlayTrigger
-                                        key={"stray"}
-                                        placement="top"
-                                        overlay={
-                                          <Tooltip id={`tooltip-stray`}>
-                                            {animal.owner_names.map(owner_name => (
-                                              <div key={owner_name}>{owner_name}</div>
-                                            ))}
-                                          </Tooltip>
-                                        }
-                                      >
-                                        <FontAwesomeIcon icon={faUserAlt} size="sm" />
-                                      </OverlayTrigger>}
-                                    </div>
-                                  </div>
-                                </div>
-                              </Card>
+                              <AnimalRoomAssignmentCard animal={animal} snapshot={snapshot} />
                             </li>
                           )}
                         </Draggable>
@@ -293,6 +210,7 @@ function ShelterRoomAssignment({id}) {
                   )}
                 </Droppable>
               </span>
+              <Link href={"/shelter/room/" + room.id} className="text-link" style={{textDecoration:"none", color:"white", marginLeft:"-15px"}}>{room.name}</Link>
             </span>
           ))}
           {data.rooms.filter(room => room.building === selectedBuilding).length < 1 ? "This building does not have any rooms yet." : ""}

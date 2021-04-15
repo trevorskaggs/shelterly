@@ -109,7 +109,7 @@ export const checkMarkerIcon = new L.DivIcon({
   shadowAnchor: null
 });
 
-const shelterIconHTML = ReactDOMServer.renderToString(<FontAwesomeIcon icon={faHome} className="icon-border" size="lg" color="#af7051" />);
+const shelterIconHTML = ReactDOMServer.renderToString(<FontAwesomeIcon icon={faHome} className="icon-border" size="lg" color="#b18662" />);
 export const shelterMarkerIcon = new L.DivIcon({
   html: shelterIconHTML,
   iconSize: [0, 0],

@@ -124,6 +124,10 @@ input[disabled] {
   margin-bottom: 17px;
 }
 
+#tooltip-owners .tooltip-inner {
+  text-align: left!important;
+}
+
 /* Icon CSS */
 .fa-move-down {
   transform: translateY(5%);

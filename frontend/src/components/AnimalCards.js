@@ -36,10 +36,11 @@ function AnimalCards(props) {
               <FontAwesomeIcon icon={faUserAltSlash} size="sm" />
             </OverlayTrigger> :
             <OverlayTrigger
-              key={"stray"}
+              key={"owners"}
               placement="top"
               overlay={
-                <Tooltip id={`tooltip-stray`}>
+                <Tooltip id={`tooltip-owners`}>
+                  Owners:
                   {animal.owner_names.map(owner_name => (
                     <div key={owner_name}>{owner_name}</div>
                   ))}

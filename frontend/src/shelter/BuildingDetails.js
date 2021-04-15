@@ -4,7 +4,7 @@ import { Link, navigate } from 'raviger';
 import { Button, Card, ListGroup, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faArrowsAltH, faClipboardList, faEdit, faPlusSquare,
+  faArrowsAltH, faEdit, faPlusSquare,
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faSquare,
@@ -96,18 +96,7 @@ function BuildingDetails({id}) {
             <b>Description: </b>{data.description}
           </ListGroup.Item> : ""}
           <ListGroup.Item>
-            <b>Shelter:</b> {data.shelter_name}
-            <OverlayTrigger
-              key={"shelter-details"}
-              placement="top"
-              overlay={
-                <Tooltip id={`tooltip-shelter-details`}>
-                  Shelter details
-                </Tooltip>
-              }
-            >
-              <Link href={"/shelter/" + data.shelter}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
-            </OverlayTrigger>
+            <b>Shelter:</b> <Link href={"/shelter/" + data.shelter} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.shelter_name}</Link>
           </ListGroup.Item>
         </ListGroup>
       </Card.Body>
