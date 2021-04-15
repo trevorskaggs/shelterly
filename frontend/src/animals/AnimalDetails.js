@@ -175,7 +175,7 @@ function AnimalDetails({id}) {
       </OverlayTrigger>
     </Header>
     <hr/>
-    <div className="row">
+    <div className="row" style={{marginBottom:"-13px"}}>
       <div className="col-6 d-flex" style={{marginRight:"-15px"}}>
         <Card className="border rounded d-flex" style={{width:"100%", marginBottom:"16px"}}>
           <Card.Body>

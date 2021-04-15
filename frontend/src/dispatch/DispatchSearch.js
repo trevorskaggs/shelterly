@@ -144,37 +144,39 @@ function DispatchAssignmentSearch() {
       </Form>
       {data.evacuation_assignments.map((evacuation_assignment, index) => (
         <div key={evacuation_assignment.id} className="mt-3" hidden={page !== Math.ceil((index+1)/ITEMS_PER_PAGE)}>
-          <div className="card-header d-flex hide-scrollbars" style={{whiteSpace:'nowrap', overflow:"auto"}}><h4 style={{marginBottom:"-2px", marginLeft:"-12px"}}>
-            <Moment format="L">{evacuation_assignment.start_time}</Moment>
-            <OverlayTrigger
-              key={"dispatch-assignment-summary"}
-              placement="top"
-              overlay={
-                <Tooltip id={`tooltip-dispatch-assignment-summary`}>
-                  Dispatch assignment summary
-                </Tooltip>
-              }
-            >
-              <Link href={"/dispatch/summary/" + evacuation_assignment.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
-            </OverlayTrigger>
-            {evacuation_assignment.end_time ? "" :
+          <div className="card-header d-flex hide-scrollbars" style={{whiteSpace:'nowrap', overflow:"hidden"}}>
+            <h4 style={{marginBottom:"-2px", marginLeft:"-12px", whiteSpace:'nowrap', overflow:"hidden", textOverflow:"ellipsis"}}>
+              <Moment format="L">{evacuation_assignment.start_time}</Moment>
               <OverlayTrigger
-                key={"close-dispatch-assignment"}
+                key={"dispatch-assignment-summary"}
                 placement="top"
                 overlay={
-                  <Tooltip id={`tooltip-close-dispatch-assignment`}>
-                    Close dispatch assignment
+                  <Tooltip id={`tooltip-dispatch-assignment-summary`}>
+                    Dispatch assignment summary
                   </Tooltip>
                 }
               >
-                <Link href={"/dispatch/resolution/" + evacuation_assignment.id}><FontAwesomeIcon icon={faClipboardCheck} className="ml-1" inverse /></Link>
+                <Link href={"/dispatch/summary/" + evacuation_assignment.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
               </OverlayTrigger>
-            }
-            &nbsp;&nbsp;|&nbsp;
-            <span title={evacuation_assignment.team ? evacuation_assignment.team_object.name + ": " + evacuation_assignment.team_member_names : ""}>{evacuation_assignment.team && evacuation_assignment.team_object.name}: {evacuation_assignment.team && evacuation_assignment.team_object.team_member_objects.map((member, i) => (
+              {evacuation_assignment.end_time ? "" :
+                <OverlayTrigger
+                  key={"close-dispatch-assignment"}
+                  placement="top"
+                  overlay={
+                    <Tooltip id={`tooltip-close-dispatch-assignment`}>
+                      Close dispatch assignment
+                    </Tooltip>
+                  }
+                >
+                  <Link href={"/dispatch/resolution/" + evacuation_assignment.id}><FontAwesomeIcon icon={faClipboardCheck} className="ml-1" inverse /></Link>
+                </OverlayTrigger>
+              }
+              &nbsp;&nbsp;|&nbsp;
+              <span title={evacuation_assignment.team ? evacuation_assignment.team_object.name + ": " + evacuation_assignment.team_member_names : ""}>{evacuation_assignment.team && evacuation_assignment.team_object.name}: {evacuation_assignment.team && evacuation_assignment.team_object.team_member_objects.map((member, i) => (
                 <span key={member.id}>{i > 0 && ", "}{member.first_name} {member.last_name}</span>))}
-            </span>
-          </h4></div>
+              </span>
+            </h4>
+          </div>
           <CardGroup style={{overflowX:"hidden"}}>
             <Card style={{maxWidth:"206px", height:"206px"}}>
               <Card.Body className="p-0 m-0">
