@@ -150,12 +150,6 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "frontend/build/static"),
     os.path.join(BASE_DIR, "frontend/src/static")
 ]
-<<<<<<< HEAD
-=======
-# Dev settings. Remove when deploying to Zappa
-STATIC_ROOT=os.path.join(BASE_DIR, 'static')
-# SECURE_CONTENT_TYPE_NOSNIFF = False
->>>>>>> master
 
 #TODO Change to envvars.
 # Zappa settings
