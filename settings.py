@@ -10,8 +10,10 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
+import datetime
 import os
 import json
+import boto3
 
 try:
     with open('config/secrets.json') as f:
@@ -33,9 +35,20 @@ DEBUG = False
 ALLOWED_HOSTS = ['*']
 AUTH_USER_MODEL = 'accounts.ShelterlyUser'
 
+# AWS Config
+credentials = boto3.Session().get_credentials()
+if credentials:
+    AWS_ACCESS_KEY_ID = credentials.access_key
+    AWS_SECRET_ACCESS_KEY = credentials.secret_key
+AWS_SES_REGION_NAME = 'us-west-2'
+AWS_SES_REGION_ENDPOINT = 'email.us-west-2.amazonaws.com'
+
+# Use to output emails in console.
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# AWS email backend
+EMAIL_BACKEND = 'django_ses.SESBackend'
 
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -55,10 +68,12 @@ INSTALLED_APPS = [
     'people',
     'rest_framework',
     'knox',
+    'django_rest_passwordreset',
     'shelter',
     'frontend',
     'ordered_model',
-    'actstream'
+    'actstream',
+    'drf_yasg'
 ]
 
 ACTSTREAM_SETTINGS = {
@@ -135,6 +150,12 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "frontend/build/static"),
     os.path.join(BASE_DIR, "frontend/src/static")
 ]
+<<<<<<< HEAD
+=======
+# Dev settings. Remove when deploying to Zappa
+STATIC_ROOT=os.path.join(BASE_DIR, 'static')
+# SECURE_CONTENT_TYPE_NOSNIFF = False
+>>>>>>> master
 
 #TODO Change to envvars.
 # Zappa settings
@@ -145,6 +166,11 @@ AWS_S3_REGION_NAME = 'us-west-2'
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': ('knox.auth.TokenAuthentication',),
     'USER_SERIALIZER': 'accounts.serializers.UserSerializer',
+}
+
+REST_KNOX = {
+  'TOKEN_TTL': datetime.timedelta(hours=1),
+  'USER_SERIALIZER': 'accounts.serializers.UserSerializer'
 }
 
 LOGGING = {
@@ -162,7 +188,7 @@ LOGGING = {
         },
         'django.db.backends': {
             'level': 'DEBUG',
-            'handlers': ['console'],
+            'handlers': [],
             'propagate': False
         }
     },

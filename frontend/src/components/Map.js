@@ -4,11 +4,11 @@ import L from "leaflet";
 import { Map as LeafletMap, TileLayer, useLeaflet } from "react-leaflet";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faCircle, faExclamationCircle, faHome, faMapMarkerAlt, faStar
+  faCircle, faExclamationCircle, faHome, faMapMarkerAlt, faStar,
 } from '@fortawesome/free-solid-svg-icons';
 import { faCheckCircle, faQuestionCircle as faQuestionCircleDuo } from '@fortawesome/pro-duotone-svg-icons';
 import { faHomeAlt as faHomeAltReg } from '@fortawesome/pro-regular-svg-icons';
-import { faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
+import { faHomeAlt, faDoNotEnter } from '@fortawesome/pro-solid-svg-icons';
 
 export const Legend = (props) => {
   const { map } = useLeaflet();
@@ -109,12 +109,29 @@ export const checkMarkerIcon = new L.DivIcon({
   shadowAnchor: null
 });
 
-const shelterIconHTML = ReactDOMServer.renderToString(<FontAwesomeIcon icon={faHome} className="icon-border" size="lg" color="#b18662" />);
+const shelterIconHTML = ReactDOMServer.renderToString(<FontAwesomeIcon icon={faHome} className="icon-border" size="lg" color="#af7051" />);
 export const shelterMarkerIcon = new L.DivIcon({
   html: shelterIconHTML,
   iconSize: [0, 0],
   iconAnchor: [6, 9],
   className: "shelter-icon",
+  popupAnchor: null,
+  shadowUrl: null,
+  shadowSize: null,
+  shadowAnchor: null
+});
+
+const closedIconHTML = ReactDOMServer.renderToString(
+  <span className="fa-layers">
+    <FontAwesomeIcon icon={faCircle} color="white" size="lg" />
+    <FontAwesomeIcon icon={faDoNotEnter} className="icon-border" size="lg" color="#af7051" />
+  </span>
+);
+export const closedMarkerIcon = new L.DivIcon({
+  html: closedIconHTML,
+  iconSize: [0, 0],
+  iconAnchor: [6, 9],
+  className: "closed-icon",
   popupAnchor: null,
   shadowUrl: null,
   shadowSize: null,
@@ -150,27 +167,24 @@ export const prettyText = (size, species, count) => {
   if (count <= 0) {
     return "";
   }
-  var plural = ""
+  let plural = ""
   if (count > 1) {
     plural = "s"
   }
 
-  var size_and_species = size + " " + species + plural;
+  let size_and_species = size + " " + species + plural;
   // Exception for horses since they don't need an extra species output.
   if (species === 'horse') {
     // Exception for pluralizing ponies.
     if (size === 'pony' && count > 1) {
       size_and_species = 'ponies'
     }
-    if (size === 'unknown') {
-      size_and_species = 'horse' + plural
-    }
-    else {
+    else if (size) {
       size_and_species = size + plural;
     }
   }
 
-  var text = count + " " + size_and_species;
+  let text = count + " " + size_and_species;
   return text;
 }
 
@@ -178,8 +192,8 @@ const Map = (props) => {
 
   return (
     <>
-    <LeafletMap className={props.className || "d-block"} bounds={props.bounds} onMoveEnd={props.onMoveEnd}>
-      <Legend position="bottomleft" metric={false} />
+    <LeafletMap className={props.className || "d-block"} bounds={props.bounds} boundsOptions={props.boundsOptions} zoomControl={props.zoomControl === false ? false : true} onMoveEnd={props.onMoveEnd}>
+      <Legend position={props.legend_position || "bottomleft"} metric={false} />
       <TileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'

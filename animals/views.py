@@ -2,6 +2,7 @@ from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Case, BooleanField, Prefetch, Value, When, Exists
 from copy import deepcopy
+from datetime import datetime
 from rest_framework import filters, viewsets
 from actstream import action
 
@@ -23,6 +24,7 @@ class AnimalViewSet(viewsets.ModelViewSet):
             # Set status to SHELTERED if a shelter is added.
             if serializer.validated_data.get('shelter'):
                 serializer.validated_data['status'] = 'SHELTERED'
+                serializer.validated_data['intake_date'] = datetime.now()
 
             animal = serializer.save()
             animals = [animal]
@@ -67,8 +69,14 @@ class AnimalViewSet(viewsets.ModelViewSet):
             serializer.validated_data['owners'] = serializer.instance.owners.values_list('id', flat=True)
 
             # Mark as SHELTERED if we receive shelter field and it's not already in a shelter.
-            if serializer.validated_data.get('shelter') and (not serializer.instance.shelter or serializer.instance.shelter != serializer.validated_data.get('shelter')) :
+            if serializer.validated_data.get('shelter') and not serializer.instance.shelter:
                 serializer.validated_data['status'] = 'SHELTERED'
+                serializer.validated_data['intake_date'] = datetime.now()
+                action.send(self.request.user, verb='sheltered animal in', target=serializer.instance, action_object=serializer.validated_data.get('shelter'))
+                action.send(self.request.user, verb='sheltered animal', target=serializer.validated_data.get('shelter'), action_object=serializer.instance)
+
+            # If animal already had a shelter and now has a different shelter.
+            if serializer.validated_data.get('shelter') and serializer.instance.shelter != serializer.validated_data.get('shelter'):
                 action.send(self.request.user, verb='sheltered animal in', target=serializer.instance, action_object=serializer.validated_data.get('shelter'))
                 action.send(self.request.user, verb='sheltered animal', target=serializer.validated_data.get('shelter'), action_object=serializer.instance)
 
@@ -140,9 +148,7 @@ class AnimalViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """
         Returns: Queryset of distinct animals, each annotated with:
-            is_stray (boolean)
             images (List of AnimalImages)
-        and filtered by is_stray.   
         """        
         queryset = Animal.objects.exclude(status="CANCELED").prefetch_related(Prefetch('animalimage_set', to_attr='images')).distinct()
         

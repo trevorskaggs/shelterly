@@ -17,6 +17,10 @@ import {
   faClipboardList,
 } from '@fortawesome/free-solid-svg-icons';
 import * as Yup from 'yup';
+import {
+  useOrderedNodes
+} from "react-register-nodes";
+import smoothScrollIntoView from "smooth-scroll-into-view-if-needed";
 import Moment from 'react-moment';
 import Header from '../components/Header';
 import { Checkbox, DateTimePicker, DropDown, TextInput } from '../components/Form';
@@ -26,8 +30,11 @@ function DispatchResolutionForm({ id }) {
 
   // Initial animal data.
   const [data, setData] = useState({
+    id: null,
     team_members: [],
     team_member_objects: [],
+    team: null,
+    team_object: {name:''},
     service_requests: [],
     service_request_objects: [],
     start_time: null,
@@ -37,6 +44,9 @@ function DispatchResolutionForm({ id }) {
 
   const [shelters, setShelters] = useState({options: [], isFetching: false});
   const [ownerChoices, setOwnerChoices] = useState({});
+
+  const ordered = useOrderedNodes();
+  const [shouldCheckForScroll, setShouldCheckForScroll] = React.useState(false);
 
   // Hook for initializing data.
   useEffect(() => {
@@ -80,7 +90,6 @@ function DispatchResolutionForm({ id }) {
           console.log(error.response);
         });
     };
-    fetchEvacAssignmentData();
 
     const fetchShelters = () => {
       setShelters({options: [], isFetching: true});
@@ -101,8 +110,26 @@ function DispatchResolutionForm({ id }) {
         setShelters({options: [], isFetching: false});
       });
     };
-    fetchShelters();
-  }, [id]);
+    // Only fetch data first time.
+    if (!data.id) {
+      fetchEvacAssignmentData();
+      fetchShelters();
+    }
+
+    // Scroll page to topmost error.
+    if (shouldCheckForScroll && ordered.length > 0) {
+      smoothScrollIntoView(ordered[0], {
+        scrollMode: "if-needed",
+        block: "center",
+        inline: "start"
+      }).then(() => {
+        if (ordered[0].querySelector("input")) {
+          ordered[0].querySelector("input").focus();
+        }
+        setShouldCheckForScroll(false);
+      });
+    }
+  }, [id, shouldCheckForScroll, ordered]);
 
   return (
     <Formik
@@ -126,8 +153,8 @@ function DispatchResolutionForm({ id }) {
                 status: Yup.string()
                   .test('required-check', 'Animal cannot remain REPORTED.',
                     function(value) {
-                      let required = true;
-                      data.sr_updates.filter(asdf => asdf.id === this.parent.request).forEach(sr_update => {
+                      let required = true
+                      data.sr_updates.filter(sr => sr.id === this.parent.request).forEach(sr_update => {
                         if (sr_update.unable_to_complete || sr_update.incomplete) {
                           required = false;
                         }
@@ -180,11 +207,11 @@ function DispatchResolutionForm({ id }) {
             <Card border="secondary" className="mt-3">
               <Card.Body>
                 <Card.Title>
-                  <h4>Team Members</h4>
+                  <h4>{data.team_object.name}</h4>
                 </Card.Title>
                 <hr />
                 <ListGroup variant="flush" style={{ marginTop: "-13px", marginBottom: "-13px", textTransform: "capitalize" }}>
-                  {data.team_member_objects.map(team_member => (
+                  {data.team && data.team_object.team_member_objects.map(team_member => (
                     <ListGroup.Item key={team_member.id}>
                       {team_member.first_name + " " + team_member.last_name + " - " + team_member.display_phone}{team_member.agency ? <span>({team_member.agency})</span> : ""}
                     </ListGroup.Item>
@@ -393,7 +420,7 @@ function DispatchResolutionForm({ id }) {
               </Card>
             ))}
             <ButtonGroup size="lg" className="col-12 pl-0 pr-0">
-              <Button className="btn btn-block" type="button" onClick={() => { props.submitForm() }}>Save</Button>
+              <Button className="btn btn-block" type="submit" onClick={() => { setShouldCheckForScroll(true); }}>Save</Button>
             </ButtonGroup>
           </BootstrapForm>
         </>

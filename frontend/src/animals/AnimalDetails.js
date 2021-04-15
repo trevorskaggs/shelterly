@@ -35,7 +35,9 @@ function AnimalDetails({id}) {
     confined: 'unknown',
     injured: 'unknown',
     behavior_notes: '',
+    medical_notes: '',
     last_seen: null,
+    intake_date: null,
     front_image: null,
     side_image: null,
     room: null,
@@ -205,21 +207,12 @@ function AnimalDetails({id}) {
                   <span className="col-6"><b>Size:</b> {data.size}</span>
                 </div>
               </ListGroup.Item>
-              {data.last_seen ? <ListGroup.Item><b>Last Seen:</b> <Moment format="MMMM Do YYYY HH:mm">{data.last_seen}</Moment></ListGroup.Item> : ""}
-              {data.request ?
-              <ListGroup.Item><b>Service Request: </b>{data.request_address}
-                <OverlayTrigger
-                  key={"service-request-details"}
-                  placement="top"
-                  overlay={
-                    <Tooltip id={`tooltip-service-request-details`}>
-                      Service request details
-                    </Tooltip>
-                  }
-                >
-                  <Link href={"/hotline/servicerequest/" + data.request}><FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1" inverse /></Link>
-                </OverlayTrigger>
-              </ListGroup.Item>: ''}
+              <ListGroup.Item style={{textTransform:"capitalize"}}>
+                <div className="row">
+                  <span className="col-6"><b>Primary Color:</b> {data.pcolor||"N/A"}</span>
+                  <span className="col-6"><b>Secondary Color:</b> {data.scolor||"N/A"}</span>
+                </div>
+              </ListGroup.Item>
             </ListGroup>
             <Card.Title>
               <h4 className="mb-0 mt-3">Contacts
@@ -285,8 +278,24 @@ function AnimalDetails({id}) {
             </Card.Title>
             <hr/>
             <ListGroup variant="flush" style={{marginBottom:"-13px"}}>
+              {data.request ?
+                <ListGroup.Item style={{marginTop:"-13px"}}><b>Service Request: </b>{data.request_address}
+                  <OverlayTrigger
+                    key={"service-request-details"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-service-request-details`}>
+                        Service request details
+                      </Tooltip>
+                    }
+                  >
+                    <Link href={"/hotline/servicerequest/" + data.request}><FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1" inverse /></Link>
+                  </OverlayTrigger>
+                </ListGroup.Item>
+              : ''}
               {data.shelter ? <ListGroup.Item style={{marginTop:"-13px"}}><b>Shelter:</b> {data.shelter_name}<Link href={"/shelter/" + data.shelter}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item> : ""}
-              <ListGroup.Item style={{marginTop:"-13px"}}><b>Address:</b> {data.full_address || "Unknown"}</ListGroup.Item>
+              {data.shelter ? <ListGroup.Item style={{marginTop:"-13px"}}><b>Intake Date:</b> <Moment format="MMMM Do YYYY HH:mm">{data.intake_date}</Moment></ListGroup.Item> : ""}
+              {data.shelter ? <ListGroup.Item style={{marginTop:"-13px"}}><b>Address:</b> {data.full_address || "Unknown"}</ListGroup.Item> : ""}
               {data.room ? <ListGroup.Item style={{marginTop:"-13px"}}><b>Room:</b> {data.room_name}<Link href={"/shelter/room/" + data.room}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item> : ""}
               {data.found_location ? 
               <ListGroup.Item><b>Found Location: </b>{data.found_location}</ListGroup.Item>:
@@ -316,15 +325,10 @@ function AnimalDetails({id}) {
               <h4>Description</h4>
             </Card.Title>
             <hr/>
-            <ListGroup variant="flush">
-              <ListGroup.Item style={{marginTop:"-13px", textTransform:"capitalize"}}>
-              <div className="row">
-                <span className="col-6"><b>Primary Color:</b> {data.pcolor||"N/A"}</span>
-                <span className="col-6"><b>Secondary Color:</b> {data.scolor||"N/A"}</span>
-              </div>
-              </ListGroup.Item>
+            <ListGroup variant="flush" style={{marginTop:"-13px"}}>
               {data.color_notes ? <ListGroup.Item><b>Color Notes:</b> {data.color_notes}</ListGroup.Item> : ""}
-              {data.behavior_notes ? <ListGroup.Item><b>Behavior Notes:</b> {data.behavior_notes}</ListGroup.Item> : ""}
+              {data.behavior_notes ? <ListGroup.Item style={{whiteSpace:"pre-line"}}><b>Behavior Notes:</b> {data.behavior_notes}</ListGroup.Item> : ""}
+              {data.medical_notes ? <ListGroup.Item style={{whiteSpace:"pre-line"}}><b>Medical Notes:</b> {data.medical_notes}</ListGroup.Item> : ""}
               {data.last_seen ? <ListGroup.Item><b>Last Seen:</b> <Moment format="MMMM Do YYYY HH:mm">{data.last_seen}</Moment></ListGroup.Item> : ""}
             </ListGroup>
           </Card.Body>

@@ -65,9 +65,9 @@ function AuthProvider(props) {
     }
     // Redirect to login page if no authenticated user object is present.
     else if (!state.user) {
-      // Do not redirect is it's a public route.
+      // Do not redirect if it's a public route.
       if (!Object.keys(publicRoutes).includes(path)) {
-        navigate('/login?next=' + path);
+        navigate('/?next=' + path);
       }
     }
   }, [path, state.user, cookies.token, removeCookie]);
