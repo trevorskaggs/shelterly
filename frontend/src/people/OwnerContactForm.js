@@ -125,7 +125,7 @@ const OwnerContactForm = ({id}) => {
                     label="Owner Contact Note*"
                     name="owner_contact_note"
                     id="owner_contact_note"
-                    xs="12"
+                    xs="10"
                     rows={5}
                   />
                 </Col>

@@ -12,10 +12,6 @@ import {
   ListGroup,
   Row,
 } from 'react-bootstrap';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faClipboardList,
-} from '@fortawesome/free-solid-svg-icons';
 import * as Yup from 'yup';
 import {
   useOrderedNodes
@@ -115,13 +111,19 @@ function DispatchResolutionForm({ id }) {
         }
       });
     };
-    // Only fetch data first time.
-    if (!data.id) {
-      fetchEvacAssignmentData();
-      fetchShelters();
-    }
 
-    // Scroll page to topmost error.
+    fetchEvacAssignmentData();
+    fetchShelters();
+
+    // Cleanup.
+    return () => {
+      unmounted = true;
+      source.cancel();
+    };
+  }, [id, data.id]);
+
+  // Hook scrolling to top error.
+  useEffect(() => {
     if (shouldCheckForScroll && ordered.length > 0) {
       smoothScrollIntoView(ordered[0], {
         scrollMode: "if-needed",
@@ -136,10 +138,8 @@ function DispatchResolutionForm({ id }) {
     }
     // Cleanup.
     return () => {
-      unmounted = true;
-      source.cancel();
     };
-  }, [id, data.id, shouldCheckForScroll, ordered]);
+  }, [shouldCheckForScroll, ordered]);
 
   return (
     <Formik
@@ -232,7 +232,8 @@ function DispatchResolutionForm({ id }) {
               <Card key={service_request.id} border="secondary" className="mt-3">
                 <Card.Body>
                   <Card.Title style={{marginBottom:"-5px"}}>
-                    <h4>Service Request <Link href={"/hotline/servicerequest/" + service_request.id}><FontAwesomeIcon icon={faClipboardList} inverse /></Link> |&nbsp;
+                    <h4>
+                      <Link href={"/hotline/servicerequest/" + service_request.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{service_request.full_address}</Link> |&nbsp;
                       <Checkbox
                         label={"Not Completed Yet:"}
                         name={`sr_updates.${index}.incomplete`}
@@ -295,7 +296,6 @@ function DispatchResolutionForm({ id }) {
                   </Card.Title>
                   <hr />
                   <ListGroup variant="flush" style={{ marginTop: "-13px", marginBottom: "-13px" }}>
-                    <ListGroup.Item><b>Address: </b>{service_request.full_address}</ListGroup.Item>
                     {service_request.owner_objects.map(owner => (
                       <ListGroup.Item key={owner.id}><b>Owner: </b>{owner.first_name} {owner.last_name}</ListGroup.Item>
                     ))}
@@ -322,7 +322,7 @@ function DispatchResolutionForm({ id }) {
                         </Row>
                         {props.values && props.values.sr_updates[index] && props.values.sr_updates[index].animals[inception].status === 'SHELTERED' ?
                         <Row>
-                          <Col xs={4} className="pl-0">
+                          <Col xs={6} className="pl-0">
                             <DropDown
                               id={`sr_updates.${index}.animals.${inception}.shelter`}
                               name={`sr_updates.${index}.animals.${inception}.shelter`}

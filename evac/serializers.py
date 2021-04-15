@@ -47,10 +47,17 @@ class DispatchServiceRequestSerializer(SimpleServiceRequestSerializer):
     owner_contacts = OwnerContactSerializer(source='ownercontact_set', many=True, required=False, read_only=True)
     owner_objects = SimplePersonSerializer(source='owners', many=True, required=False, read_only=True)
     visit_notes = VisitNoteSerializer(source='visitnote_set', many=True, required=False, read_only=True)
+    latest_evac = serializers.SerializerMethodField()
+
+    def get_latest_evac(self, obj):
+        assigned_evac = EvacAssignment.objects.filter(service_requests=obj, end_time__isnull=True).values('id', 'start_time', 'end_time').first()
+        if assigned_evac:
+            return assigned_evac
+        return EvacAssignment.objects.filter(service_requests=obj, end_time__isnull=False).values('id', 'start_time', 'end_time').first()
 
     class Meta:
         model = ServiceRequest
-        fields = ['id', 'latitude', 'longitude', 'full_address', 'followup_date',
+        fields = ['id', 'latitude', 'longitude', 'full_address', 'followup_date', 'status', 'latest_evac',
         'injured', 'accessible', 'turn_around', 'animals', 'reported_animals', 'sheltered_in_place', 'unable_to_locate', 'aco_required',
         'owner_contacts', 'owner_objects', 'owners', 'visit_notes']
 
