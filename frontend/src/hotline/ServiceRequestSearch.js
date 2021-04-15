@@ -16,8 +16,11 @@ import {
 } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faClipboardList, faUsers
+  faUsers
 } from '@fortawesome/free-solid-svg-icons';
+import {
+  faDotCircle
+} from '@fortawesome/free-regular-svg-icons';
 import Moment from 'react-moment';
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
@@ -132,7 +135,7 @@ function ServiceRequestSearch() {
       {data.service_requests.map((service_request, index) => (
         <div key={service_request.id} className="mt-3" hidden={page !== Math.ceil((index+1)/ITEMS_PER_PAGE)}>
           <div className="card-header">
-            <h4 style={{marginBottom:"-2px",  marginLeft:"-12px"}}>{service_request.full_address}
+            <h4 style={{marginBottom:"-2px",  marginLeft:"-12px"}}>
               <OverlayTrigger
                 key={"request-details"}
                 placement="top"
@@ -142,8 +145,9 @@ function ServiceRequestSearch() {
                   </Tooltip>
                 }
               >
-                <Link href={"/hotline/servicerequest/" + service_request.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+                <Link href={"/hotline/servicerequest/" + service_request.id}><FontAwesomeIcon icon={faDotCircle} className="mr-2" inverse /></Link>
               </OverlayTrigger>
+              {service_request.full_address}
               &nbsp;| <span style={{textTransform:"capitalize"}}>{service_request.status}</span>
             </h4>
           </div>
@@ -157,7 +161,7 @@ function ServiceRequestSearch() {
                     {service_request.latest_evac ?
                       <span>
                         <b>{service_request.latest_evac.end_time ? "Last" : "Active"} Dispatch Assignment: </b>
-                        <Moment format="L">{service_request.latest_evac.start_time}</Moment>&nbsp;
+                        <Link href={"/dispatch/summary/" + service_request.latest_evac.id} className="text-link" style={{textDecoration:"none", color:"white"}}><Moment format="L">{service_request.latest_evac.start_time}</Moment></Link>&nbsp;
                         ({service_request.evacuation_assignments.filter(da => da.id === service_request.latest_evac.id)[0].team_name}
                         <OverlayTrigger
                           key={"team-names"}
@@ -180,10 +184,10 @@ function ServiceRequestSearch() {
                     }
                     </ListGroup.Item>
                     {service_request.owner_objects.map(owner => (
-                      <ListGroup.Item key={owner.id}><b>Owner: </b>{owner.first_name} {owner.last_name}</ListGroup.Item>
+                      <ListGroup.Item key={owner.id}><b>Owner: </b><Link href={"/people/owner/" + owner.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{owner.first_name} {owner.last_name}</Link></ListGroup.Item>
                     ))}
                     {service_request.owners.length < 1 ? <ListGroup.Item><b>Owner: </b>No Owner</ListGroup.Item> : ""}
-                    <ListGroup.Item><b>Reporter: </b>{service_request.reporter ? <span>{service_request.reporter_object.first_name} {service_request.reporter_object.last_name}</span> : "No Reporter"}</ListGroup.Item>
+                    <ListGroup.Item><b>Reporter: </b>{service_request.reporter ? <Link href={"/people/reporter/" + service_request.reporter} className="text-link" style={{textDecoration:"none", color:"white"}}>{service_request.reporter_object.first_name} {service_request.reporter_object.last_name}</Link> : "No Reporter"}</ListGroup.Item>
                   </ListGroup>
                 </Scrollbar>
               </Card.Body>
@@ -202,7 +206,7 @@ function ServiceRequestSearch() {
                     <Scrollbar style={{height:"144px"}}>
                       {service_request.animals.filter(animal => animal.species === searchState[service_request.id].selectedSpecies).map((animal, i) => (
                         <ListGroup.Item key={animal.id}>
-                          <b>#{animal.id}:</b>&nbsp;&nbsp;{animal.name || "Unknown"} - {animal.status}
+                          <b>#{animal.id}:</b>&nbsp;&nbsp;<Link href={"/animals/" + animal.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.name || "Unknown"}</Link> - {animal.status}
                         </ListGroup.Item>
                       ))}
                     {service_request.animals.length < 1 ? <ListGroup.Item style={{marginTop:"32px"}}>No Animals</ListGroup.Item> : ""}

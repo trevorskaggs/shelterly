@@ -4,8 +4,11 @@ import { Button, ButtonGroup, Card, CardGroup, Form, FormControl, InputGroup, Ov
 import { Link, useQueryParams } from "raviger";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faClipboardCheck, faClipboardList, faCircle, faExclamationCircle, faQuestionCircle, faUserAlt, faUserAltSlash
+  faCircle, faExclamationCircle, faQuestionCircle, faUserAlt, faUserAltSlash
 } from '@fortawesome/free-solid-svg-icons';
+import {
+  faDotCircle
+} from '@fortawesome/free-regular-svg-icons';
 import { faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
 import L from "leaflet";
 import { Marker, Tooltip as MapTooltip } from "react-leaflet";
@@ -146,7 +149,6 @@ function DispatchAssignmentSearch() {
         <div key={evacuation_assignment.id} className="mt-3" hidden={page !== Math.ceil((index+1)/ITEMS_PER_PAGE)}>
           <div className="card-header d-flex hide-scrollbars" style={{whiteSpace:'nowrap', overflow:"hidden"}}>
             <h4 style={{marginBottom:"-2px", marginLeft:"-12px", whiteSpace:'nowrap', overflow:"hidden", textOverflow:"ellipsis"}}>
-              <Moment format="L">{evacuation_assignment.start_time}</Moment>
               <OverlayTrigger
                 key={"dispatch-assignment-summary"}
                 placement="top"
@@ -156,22 +158,10 @@ function DispatchAssignmentSearch() {
                   </Tooltip>
                 }
               >
-                <Link href={"/dispatch/summary/" + evacuation_assignment.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+                <Link href={"/dispatch/summary/" + evacuation_assignment.id}><FontAwesomeIcon icon={faDotCircle} className="mr-2" inverse /></Link>
               </OverlayTrigger>
-              {evacuation_assignment.end_time ? "" :
-                <OverlayTrigger
-                  key={"close-dispatch-assignment"}
-                  placement="top"
-                  overlay={
-                    <Tooltip id={`tooltip-close-dispatch-assignment`}>
-                      Close dispatch assignment
-                    </Tooltip>
-                  }
-                >
-                  <Link href={"/dispatch/resolution/" + evacuation_assignment.id}><FontAwesomeIcon icon={faClipboardCheck} className="ml-1" inverse /></Link>
-                </OverlayTrigger>
-              }
-              &nbsp;&nbsp;|&nbsp;
+              <Moment format="L">{evacuation_assignment.start_time}</Moment>
+              &nbsp;|&nbsp;
               <span title={evacuation_assignment.team ? evacuation_assignment.team_object.name + ": " + evacuation_assignment.team_member_names : ""}>{evacuation_assignment.team && evacuation_assignment.team_object.name}: {evacuation_assignment.team && evacuation_assignment.team_object.team_member_objects.map((member, i) => (
                 <span key={member.id}>{i > 0 && ", "}{member.first_name} {member.last_name}</span>))}
               </span>
@@ -274,7 +264,7 @@ function DispatchAssignmentSearch() {
                         </OverlayTrigger>
                         : ""}
                         </span>
-                        <span>{service_request.full_address} |
+                        <span><Link href={"/hotline/servicerequest/" + service_request.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{service_request.full_address}</Link> |
                         {service_request.owner_objects.length === 0 ?
                           <OverlayTrigger
                             key={"stray"}

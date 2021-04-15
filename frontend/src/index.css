@@ -36,6 +36,8 @@ hr { display: block; height: 1px;
 
 .landing-leaflet-container { width: auto; height: 350px; min-height:350px;}
 
+.dispatch-leaflet-container { width: auto; height: 309px; min-height:309px;}
+
 .search-leaflet-container { width: auto; height: 200px; min-height:200px;}
 
 .da-search-leaflet-container { width: auto; height: 204px; min-height:204px;}

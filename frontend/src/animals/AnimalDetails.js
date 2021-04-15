@@ -46,8 +46,7 @@ function AnimalDetails({id}) {
     room: null,
     extra_images: [],
     action_history: [],
-    full_address:'',
-    shelter_name: '',
+    shelter_object: {name: '', full_address: ''},
     owner_objects: [],
   });
 
@@ -335,10 +334,10 @@ function AnimalDetails({id}) {
               : ''}
               {data.shelter ?
               <ListGroup.Item>
-                <b>Shelter:</b> <Link href={"/shelter/" + data.shelter} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.shelter_name}</Link>
+                <b>Shelter:</b> <Link href={"/shelter/" + data.shelter} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.shelter_object.name}</Link>
                 {data.room ? <div className="mt-1"><b>Room:</b> <Link href={"/shelter/room/" + data.room} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.room_name}</Link></div> : ""}
                 <div className="mt-1"><b>Intake Date:</b> <Moment format="MMMM Do YYYY HH:mm">{data.intake_date}</Moment></div>
-                <div className="mt-1"><b>Address:</b> {data.full_address || "Unknown"}</div>
+                <div className="mt-1"><b>Address:</b> {data.shelter_object.full_address || "Unknown"}</div>
               </ListGroup.Item> : ""}
             </ListGroup>
           </Card.Body>

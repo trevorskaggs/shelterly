@@ -39,18 +39,17 @@ class AnimalSerializer(SimpleAnimalSerializer):
     extra_images = serializers.SerializerMethodField()
     found_location = serializers.SerializerMethodField()
     owner_objects = serializers.SerializerMethodField()
-    full_address = serializers.SerializerMethodField()
-    shelter_name = serializers.SerializerMethodField()
     reporter_object = serializers.SerializerMethodField(read_only=True)
     request_address = serializers.SerializerMethodField()
     action_history = serializers.SerializerMethodField()
     evacuation_assignments = serializers.SerializerMethodField()
     room_name = serializers.SerializerMethodField()
+    shelter_object = serializers.SerializerMethodField()
 
     class Meta:
         model = Animal
         fields = ['id', 'species', 'aggressive', 'status', 'aco_required', 'front_image', 'side_image', 'extra_images', 'last_seen', 'intake_date', 'address', 'city', 'state', 'zip_code',
-        'found_location', 'owner_names', 'owner_objects', 'full_address', 'shelter', 'shelter_name', 'reporter_object', 'request', 'request_address',
+        'found_location', 'owner_names', 'owner_objects', 'shelter_object', 'shelter', 'reporter_object', 'request', 'request_address',
         'action_history', 'evacuation_assignments', 'room', 'room_name', 'name', 'sex', 'size', 'age', 'pcolor', 'scolor']
 
     # Custom Owner object field that excludes animals to avoid a circular reference.
@@ -59,25 +58,21 @@ class AnimalSerializer(SimpleAnimalSerializer):
         if obj.owners.exists():
             return SimplePersonSerializer(obj.owners, many=True).data
         return []
+
+    # Custom Shelter object field that excludes animals to avoid a circular reference.
+    def get_shelter_object(self, obj):
+        from shelter.serializers import SimpleShelterSerializer
+
+        if obj.shelter:
+            return SimpleShelterSerializer(obj.shelter).data
+        return None
+
     def get_found_location(self, obj):
         return build_full_address(obj)
-
-    # Custom field for the full address.
-    def get_full_address(self, obj):
-        # Use the Room address first if it exists.
-        if obj.shelter:
-            return build_full_address(obj.shelter)
-        # Otherwise return an empty string.
-        return ''
 
     # Custom field for request address.
     def get_request_address(self, obj):
         return build_full_address(obj.request)
-
-    # Custom field to return the shelter name.
-    def get_shelter_name(self, obj):
-        if obj.shelter:
-            return obj.shelter.name
 
     # Custom field to return the shelter name.
     def get_room_name(self, obj):
