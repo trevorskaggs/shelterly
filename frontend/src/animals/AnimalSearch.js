@@ -5,7 +5,7 @@ import { Button, ButtonGroup, Card, CardGroup, Form, FormControl, InputGroup, Li
 import noImageFound from '../static/images/image-not-found.png';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBandAid, faCalendarDay, faClipboardList, faCut, faLink, faNotesMedical, faStickyNote, faUserAltSlash
+  faBandAid, faCalendarDay, faClipboardList, faCut, faLink, faNotesMedical, faUserAltSlash
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faDotCircle
@@ -208,7 +208,7 @@ function AnimalSearch() {
                         </Tooltip>
                       }
                     >
-                      <FontAwesomeIcon icon={faStickyNote} size="sm" className="ml-1" />
+                      <FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1" />
                     </OverlayTrigger> :
                   ""}
                   {animal.medical_notes ?
