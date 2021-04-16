@@ -3,7 +3,7 @@ from shelter.models import Shelter, Building, Room
 from rest_framework import viewsets
 from actstream import action
 from django_filters import rest_framework as filters
-from .serializers import ShelterSerializer, SimpleShelterSerializer, SimpleBuildingSerializer, RoomSerializer
+from .serializers import ShelterSerializer, ModestShelterSerializer, SimpleBuildingSerializer, RoomSerializer
 
 class ShelterViewSet(viewsets.ModelViewSet):
     queryset = Shelter.objects.all()
@@ -11,7 +11,7 @@ class ShelterViewSet(viewsets.ModelViewSet):
 
     def get_serializer_class(self):
         if self.action == 'list':
-            return SimpleShelterSerializer
+            return ModestShelterSerializer
         return ShelterSerializer
 
     def perform_create(self, serializer):

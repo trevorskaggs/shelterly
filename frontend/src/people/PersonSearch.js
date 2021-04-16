@@ -170,7 +170,7 @@ function PersonSearch() {
 													</ListGroup>
 												</Card.Title>
 												<ListGroup style={{height:"144px", overflowY:"auto", marginTop:"-12px"}}>
-													<Scrollbar style={{height:"144px"}}>
+													<Scrollbar style={{height:"144px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
 														{owner.animals.filter(animal => animal.species === searchState[owner.id].selectedSpecies).map((animal, i) => (
 															<ListGroup.Item key={animal.id}>
 																<b>#{animal.id}:</b>&nbsp;&nbsp;<Link href={"/animals/" + animal.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.name || "Unknown"}</Link> - {animal.status}

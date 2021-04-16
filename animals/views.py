@@ -62,6 +62,10 @@ class AnimalViewSet(viewsets.ModelViewSet):
                     # Create image object.
                     AnimalImage.objects.create(image=image_data, animal=animal, category=category)
 
+            # Check to see if animal SR status should be changed.
+            if animal.request:
+                animal.request.update_status()
+
     def perform_update(self, serializer):
         if serializer.is_valid():
 
@@ -148,6 +152,10 @@ class AnimalViewSet(viewsets.ModelViewSet):
                 # Otherwise create a new extra image.
                 else:
                     AnimalImage.objects.create(image=image_data, animal=animal, category="extra")
+
+            # Check to see if animal SR status should be changed.
+            if animal.request:
+                animal.request.update_status()
     
     def get_queryset(self):
         """
