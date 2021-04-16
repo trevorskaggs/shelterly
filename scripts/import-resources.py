@@ -34,7 +34,8 @@ for item in a:
             member, _ = EvacTeamMember.objects.get_or_create(
                 first_name=item['first_name'],
                 last_name=item['last_name'],
-                phone=item['cell_phone']
+                phone=item['cell_phone'],
+                agency_id=item['agency_id']
             )
             print(member)
         except IntegrityError:
