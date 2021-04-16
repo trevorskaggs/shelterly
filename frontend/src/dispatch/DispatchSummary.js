@@ -165,7 +165,7 @@ function DispatchSummary({id}) {
               </h4>
             </Card.Title>
             <hr/>
-            <Scrollbar no_shadow="true" style={{height:"225px"}}>
+            <Scrollbar no_shadow="true" style={{height:"225px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
               <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px", textTransform:"capitalize"}}>
                 {data.team_member_objects.map(team_member => (
                   <ListGroup.Item key={team_member.id}>

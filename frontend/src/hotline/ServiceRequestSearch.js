@@ -1,26 +1,15 @@
 import React, { useEffect, useState, useRef } from 'react';
 import axios from "axios";
 import { Link, useQueryParams } from 'raviger';
-import {
-  Button,
-  ButtonGroup,
-  Card,
-  CardGroup,
-  Form,
-  FormControl,
-  InputGroup,
-  ListGroup,
-  OverlayTrigger,
-  Pagination,
-  Tooltip
-} from 'react-bootstrap';
+import { Button, ButtonGroup, Card, CardGroup, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Pagination, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faUsers
+  faEnvelope, faUsers
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faDotCircle
 } from '@fortawesome/free-regular-svg-icons';
+import { faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import Moment from 'react-moment';
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
@@ -184,7 +173,35 @@ function ServiceRequestSearch() {
                     }
                     </ListGroup.Item>
                     {service_request.owner_objects.map(owner => (
-                      <ListGroup.Item key={owner.id}><b>Owner: </b><Link href={"/people/owner/" + owner.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{owner.first_name} {owner.last_name}</Link></ListGroup.Item>
+                      <ListGroup.Item key={owner.id}>
+                        <b>Owner: </b><Link href={"/people/owner/" + owner.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{owner.first_name} {owner.last_name}</Link>
+                        {owner.display_phone ?
+                        <OverlayTrigger
+                          key={"owner-phone"}
+                          placement="top"
+                          overlay={
+                            <Tooltip id={`tooltip-owner-phone`}>
+                              Phone: {owner.display_phone}
+                            </Tooltip>
+                          }
+                        >
+                          <FontAwesomeIcon icon={faPhoneRotary} className="ml-1" inverse />
+                        </OverlayTrigger>
+                        : ""}
+                        {owner.email ?
+                        <OverlayTrigger
+                          key={"owner-email"}
+                          placement="top"
+                          overlay={
+                            <Tooltip id={`tooltip-owner-email`}>
+                              Email: {owner.email}
+                            </Tooltip>
+                          }
+                        >
+                          <FontAwesomeIcon icon={faEnvelope} className="ml-1" inverse />
+                        </OverlayTrigger>
+                        : ""}
+                      </ListGroup.Item>
                     ))}
                     {service_request.owners.length < 1 ? <ListGroup.Item><b>Owner: </b>No Owner</ListGroup.Item> : ""}
                     <ListGroup.Item><b>Reporter: </b>{service_request.reporter ? <Link href={"/people/reporter/" + service_request.reporter} className="text-link" style={{textDecoration:"none", color:"white"}}>{service_request.reporter_object.first_name} {service_request.reporter_object.last_name}</Link> : "No Reporter"}</ListGroup.Item>
