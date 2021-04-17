@@ -240,7 +240,6 @@ function StepperWorkflow() {
                 StepIconComponent={activeStep < index+1 ? undefined : CustomStepIcon}
                 classes={{
                   label: classes.stepper,
-                  text: classes.stepper,
                   root: classes.stepper,
                   active: classes.active,
                   completed: classes.completed,
@@ -248,7 +247,6 @@ function StepperWorkflow() {
                 StepIconProps={{
                   classes: {
                     root: classes.stepIcon,
-                    text: classes.stepper,
                     completed: classes.completed,
                     active: classes.active,
                   }
