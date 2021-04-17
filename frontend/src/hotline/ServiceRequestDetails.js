@@ -5,10 +5,11 @@ import Moment from 'react-moment';
 import { Button, Card, ListGroup, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBan, faCalendarDay, faCar, faCircle, faExclamationCircle, faQuestionCircle, faHome, faHelicopter, faHeart, faSkullCrossbones, faClipboardCheck, faClipboardList, faComment, faEdit, faHouseDamage, faKey, faMapMarkedAlt, faMinusSquare, faPlusSquare, faTimes, faTrailer, faUserAlt, faUserAltSlash
+  faBan, faCar, faCircle, faExclamationCircle, faQuestionCircle, faHome, faHelicopter, faHeart, faSkullCrossbones,
+  faClipboardCheck, faClipboardList, faComment, faEdit, faHouseDamage,
+  faKey, faMapMarkedAlt, faMinusSquare, faPlusSquare, faTimes, faTrailer, faUsers
 } from '@fortawesome/free-solid-svg-icons';
-import { faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
-import ReactImageFallback from 'react-image-fallback';
+import { faCalendarEdit, faHomeAlt, faHomeHeart } from '@fortawesome/pro-solid-svg-icons';
 import Header from '../components/Header';
 import History from '../components/History';
 import noImageFound from '../static/images/image-not-found.png';
@@ -57,15 +58,31 @@ function ServiceRequestDetails({id}) {
     turn_around: false,
     followup_date: null,
     latest_evac: {},
+    evacuation_assignments: [],
     status:'',
     action_history: [],
     visit_notes: [],
   });
 
+  const [show, setShow] = useState(false);
+  const handleClose = () => setShow(false);
   const [animalToDelete, setAnimalToDelete] = useState({id:0, name:''});
   const [showAnimalConfirm, setShowAnimalConfirm] = useState(false);
   const handleAnimalClose = () => setShowAnimalConfirm(false);
 
+  // Handle animal reunification submit.
+  const handleSubmit = async () => {
+    await axios.patch('/hotline/api/servicerequests/' + id + '/', {reunite_animals:true})
+    .then(response => {
+      setData(prevState => ({ ...prevState, "status":"Closed", "animals":prevState['animals'].map(animal => ({...animal, status:animal.status !== 'DECEASED' ? 'REUNITED' : 'DECEASED'})) }));
+      handleClose()
+    })
+    .catch(error => {
+      console.log(error.response);
+    });
+  }
+
+  // Handle animal removal submit.
   const handleAnimalSubmit = async () => {
     await axios.patch('/hotline/api/servicerequests/' + id + '/', {remove_animal:animalToDelete.id})
     .then(response => {
@@ -129,11 +146,11 @@ function ServiceRequestDetails({id}) {
         </Modal.Header>
         <Modal.Body>Are you sure you want to cancel this Service Request and associated animals?</Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowModal(false)}>
-            Close
+          <Button variant="primary" onClick={() => cancelServiceRequest()}>
+            Yes
           </Button>
-          <Button variant="primary" onClick={() => cancelServiceRequest(showModal)}>
-            Confirm
+          <Button variant="secondary" onClick={() => setShowModal(false)}>
+            Cancel
           </Button>
         </Modal.Footer>
       </Modal>
@@ -199,7 +216,7 @@ function ServiceRequestDetails({id}) {
                 <ListGroup.Item style={{marginTop:"-13px"}}><b>Address: </b>{data.full_address}</ListGroup.Item>
                 <ListGroup.Item>
                   <b>Followup Date: </b>
-                  <FontAwesomeIcon icon={faCalendarDay} className="ml-1 mr-1" style={{cursor:'pointer'}} onClick={() => openCalendar()} />
+                  <FontAwesomeIcon icon={faCalendarEdit} className="ml-1 mr-1" style={{cursor:'pointer'}} onClick={() => openCalendar()} />
                   {data.followup_date ?
                   <span>
                     <Moment format="ll">{data.followup_date}</Moment>
@@ -284,7 +301,7 @@ function ServiceRequestDetails({id}) {
       <div className="row mb-2">
         <div className="col-12 d-flex">
           <Card className="mb-2 border rounded" style={{width:"100%"}}>
-            <Card.Body style={{marginBottom:"-15px"}}>
+            <Card.Body style={{marginBottom:"-20px"}}>
               <Card.Title>
                 <h4 className="mb-0">Animals
                   <OverlayTrigger
@@ -298,6 +315,19 @@ function ServiceRequestDetails({id}) {
                   >
                     <Link href={"/animals/new?servicerequest_id=" + id}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
                   </OverlayTrigger>
+                  {data.status.toLowerCase() !== 'closed' ?
+                    <OverlayTrigger
+                      key={"reunite"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-reunite`}>
+                          Reunite all service request animals
+                        </Tooltip>
+                      }
+                    >
+                      <FontAwesomeIcon icon={faHomeHeart} onClick={() => setShow(true)} style={{cursor:'pointer'}} className="ml-1 fa-move-up" inverse />
+                    </OverlayTrigger>
+                    : ""}
                 </h4>
               </Card.Title>
               <hr />
@@ -308,8 +338,8 @@ function ServiceRequestDetails({id}) {
                 <Card.ImgOverlay className="text-border" style={{height:"20px"}}>#{animal.id}</Card.ImgOverlay>
                 <Card.Text className="mb-0 border-top" style={{textTransform:"capitalize"}}>
                 <span title={animal.name} className="ml-1">{animal.name||"Unknown"}</span>
-                <div className="ml-1">
-                  {animal.species === 'horse' && animal.size !== 'unknown' ? animal.size : animal.species}&nbsp;
+                <span className="ml-1" style={{display:"block"}}>
+                  {animal.species}&nbsp;
                   {animal.status === "SHELTERED IN PLACE" ?
                     <OverlayTrigger key={"sip"} placement="top"
                                     overlay={<Tooltip id={`tooltip-sip`}>SHELTERED IN PLACE</Tooltip>}>
@@ -369,9 +399,9 @@ function ServiceRequestDetails({id}) {
                       </Tooltip>
                     }
                   >
-                    <FontAwesomeIcon icon={faMinusSquare} style={{cursor:'pointer'}} size="sm" onClick={() => {setAnimalToDelete({id:animal.id, name: animal.name});setShowAnimalConfirm(true);}} className="ml-1" inverse />
+                    <FontAwesomeIcon icon={faMinusSquare} style={{cursor:'pointer'}} onClick={() => {setAnimalToDelete({id:animal.id, name: animal.name});setShowAnimalConfirm(true);}} className="ml-1" inverse />
                   </OverlayTrigger>
-                </div>
+                </span>
                 </Card.Text>
               </Card>
               ))}
@@ -401,9 +431,21 @@ function ServiceRequestDetails({id}) {
               </Card.Title>
               <hr/>
               <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
-                {data.latest_evac && !data.latest_evac.end_time ?
-                  <ListGroup.Item>
+                {data.evacuation_assignments.filter(da => !da.end_time).map(latest_dispatch => (
+                  <ListGroup.Item key={latest_dispatch.id}>
                     <b>Active Dispatch Assignment:</b>
+                    &nbsp;{latest_dispatch.team__name}
+                    <OverlayTrigger
+                      key={"team-names"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-team-names`}>
+                          {latest_dispatch.team_member_names}
+                        </Tooltip>
+                      }
+                    >
+                      <FontAwesomeIcon icon={faUsers} className="ml-1 fa-move-down" />
+                    </OverlayTrigger>
                     <OverlayTrigger
                       key={"dispatch-summary"}
                       placement="top"
@@ -413,7 +455,7 @@ function ServiceRequestDetails({id}) {
                         </Tooltip>
                       }
                     >
-                      <Link href={"/dispatch/summary/" + data.latest_evac.id}><FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1" inverse /></Link>
+                      <Link href={"/dispatch/summary/" + latest_dispatch.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
                     </OverlayTrigger>
                     <OverlayTrigger
                       key={"close-dispatch-assignment"}
@@ -424,14 +466,25 @@ function ServiceRequestDetails({id}) {
                         </Tooltip>
                       }
                     >
-                      <Link href={"/dispatch/resolution/" + data.latest_evac.id}><FontAwesomeIcon icon={faClipboardCheck} className="ml-1" inverse /></Link>
+                      <Link href={"/dispatch/resolution/" + latest_dispatch.id}><FontAwesomeIcon icon={faClipboardCheck} className="ml-1" inverse /></Link>
                     </OverlayTrigger>
-                    <div><b>Date Opened: </b><Moment format="LL">{data.latest_evac.start_time}</Moment></div>
+                    <div><b>Date Opened: </b><Moment format="LL">{latest_dispatch.start_time}</Moment></div>
                   </ListGroup.Item>
-                : ""}
+                ))}
                 {data.visit_notes.map((visit_note, index) => (
                   <ListGroup.Item key={visit_note.id}>
-                    <b>Dispatch Assignment:</b> #{index + 1}
+                    <b>Dispatch Assignment:</b> {visit_note.team_name}
+                    <OverlayTrigger
+                      key={"team-names-"+id}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-team-names` + id}>
+                          {visit_note.team_member_names}
+                        </Tooltip>
+                      }
+                    >
+                      <FontAwesomeIcon icon={faUsers} className="ml-1 fa-move-down" />
+                    </OverlayTrigger>
                     <OverlayTrigger
                       key={"dispatch-summary"}
                       placement="top"
@@ -490,6 +543,20 @@ function ServiceRequestDetails({id}) {
         <Modal.Footer>
           <Button variant="primary" onClick={handleAnimalSubmit}>Yes</Button>
           <Button variant="secondary" onClick={handleAnimalClose}>Close</Button>
+        </Modal.Footer>
+      </Modal>
+      <Modal show={show} onHide={handleClose}>
+        <Modal.Header closeButton>
+          <Modal.Title>Confirm Animal Reunification</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>
+            Have all of the animals in this service request been reunited with their owner?
+          </p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="primary" onClick={handleSubmit}>Yes</Button>
+          <Button variant="secondary" onClick={handleClose}>Close</Button>
         </Modal.Footer>
       </Modal>
     </>

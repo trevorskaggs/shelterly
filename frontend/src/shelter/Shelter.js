@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'raviger';
-import { Card, Col, ListGroup, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
+import { Card, Col, ListGroup, Row } from 'react-bootstrap';
 import L from "leaflet";
 import { Marker, Tooltip as MapTooltip } from "react-leaflet";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faClipboardList, faHome } from '@fortawesome/free-solid-svg-icons';
+import { faHome } from '@fortawesome/free-solid-svg-icons';
 import Header from '../components/Header';
 import Map, { shelterMarkerIcon } from "../components/Map";
 
@@ -61,13 +61,13 @@ function Shelter() {
           <Link href="/animals/search">
             <ListGroup.Item className="rounded" action>SEARCH ANIMALS</ListGroup.Item>
           </Link>
-          <Link href="/intake/owner/search">
+          <Link href="/people/owner/search">
           <ListGroup.Item className="rounded" action>SEARCH OWNERS</ListGroup.Item>
         </Link>
         </ListGroup>
       </Col>
       <Col xs={8} className="border rounded pl-0 pr-0">
-        <Map bounds={data.bounds} className="landing-leaflet-container">
+        <Map bounds={data.bounds} boundsOptions={{padding:[10,10]}} className="landing-leaflet-container">
           {data.shelters.map(shelter => (
             <Marker
               key={shelter.id}
@@ -85,34 +85,27 @@ function Shelter() {
             </Marker>
           ))}
         </Map>
+        <Row style={{marginLeft:"0px", marginRight:"0px", maxHeight:"37px"}}>
+          <h4 className="card-header text-center" style={{paddingTop:"4px", paddingLeft:"10px", paddingRight:"10px", height:"36px", width:"100%", backgroundColor:"#808080"}}>Shelters</h4>
+        </Row>
       </Col>
     </Row>
     <hr/>
     <Row className="ml-0">
     {data.shelters.map(shelter => (
-      <Col key={shelter.id} xs="6" className="pl-0 pr-0">
-        <Card className="border rounded mr-3 mb-3" style={{whiteSpace:"nowrap", overflow:"hidden"}}>
-          <div className="row no-gutters" style={{ textTransform:"capitalize" }}>
-            <div className="mb-0">
-              <Row className="ml-0 mr-0">
+      <span key={shelter.id} className="pl-0 pr-0 mr-3 mb-3">
+        <Link href={"/shelter/" + shelter.id} className="shelter-link" style={{textDecoration:"none", color:"white"}}>
+          <Card className="border rounded" style={{whiteSpace:"nowrap", overflow:"hidden"}}>
+            <div className="row no-gutters hover-div" style={{textTransform:"capitalize", marginRight:"-2px"}}>
+              <Row className="ml-0 mr-0 w-100" style={{minWidth:"485px", maxWidth:"485px", flexWrap:"nowrap"}}>
                 <div className="border-right" style={{width:"100px"}}>
-                  <FontAwesomeIcon icon={faHome} size="6x" className="ml-1" style={{paddingRight:"10px"}} inverse />
+                  <FontAwesomeIcon icon={faHome} size="6x" className="ml-1 shelter-icon" style={{paddingRight:"10px"}} inverse />
                 </div>
-                <Col style={{marginLeft:"-5px"}}>
-                  <h4 className="mt-1">{shelter.name}
-                    <OverlayTrigger
-                      key={"shelter-details"}
-                      placement="top"
-                      overlay={
-                        <Tooltip id={`tooltip-shelter-details`}>
-                          Shelter details
-                        </Tooltip>
-                      }
-                    >
-                      <Link href={"/shelter/" + shelter.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
-                    </OverlayTrigger>
-                  </h4>
-                  <div>
+                <Col style={{marginLeft:"-5px", marginRight:"-25px"}}>
+                  <div className="border" style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"10px", marginLeft:"-11px", marginTop: "-1px", fontSize:"18px", width:"100%", backgroundColor:"#615e5e"}}>
+                    {shelter.name}
+                  </div>
+                  <div style={{marginTop:"2px"}}>
                     {shelter.full_address}
                   </div>
                   <div>
@@ -121,9 +114,9 @@ function Shelter() {
                 </Col>
               </Row>
             </div>
-          </div>
-        </Card>
-      </Col>
+          </Card>
+        </Link>
+      </span>
     ))}
     <p>{data.isFetching ? 'Fetching Shelters...' : <span>{!data.shelters.length ? 'No shelters have been created yet.' : ''}</span>}</p>
     </Row>

@@ -4,8 +4,11 @@ import { Link } from 'raviger';
 import { Card, Col, ListGroup, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faClipboardList, faDoorOpen, faEdit, faPlusSquare, faWarehouse,
+  faArrowsAltH, faBuilding, faDoorOpen, faEdit, faPlusSquare,
 } from '@fortawesome/free-solid-svg-icons';
+import {
+  faSquare,
+} from '@fortawesome/free-regular-svg-icons';
 import History from '../components/History';
 import Header from '../components/Header';
 
@@ -100,12 +103,17 @@ function ShelterDetails({id}) {
                 <ListGroup.Item className="rounded" action><Link href={"/intake/workflow/owner?shelter_id=" + id} style={{color:"#FFF"}}><FontAwesomeIcon icon={faDoorOpen} inverse/> <b>Intake from Walk-In (Owner)</b></Link></ListGroup.Item>
                 <ListGroup.Item className="rounded" action><Link href={"/intake/workflow/reporter?shelter_id=" + id} style={{color:"#FFF"}}><FontAwesomeIcon icon={faDoorOpen} inverse/> <b>Intake from Walk-In (Non-Owner)</b></Link></ListGroup.Item>
                 <ListGroup.Item>
-                  <b>Currently Sheltering:</b> {data.animal_count} animal{data.animal_count === 1 ? "" : "s"}
+                  <b>Currently Sheltering:</b> {data.animal_count} Animal{data.animal_count === 1 ? "" : "s"}
                 </ListGroup.Item>
                 <ListGroup.Item>
-                  <b>Room Assignment:</b> {data.unroomed_animals.length} animal{data.unroomed_animals.length === 1 ? "" : "s"}
-                  <OverlayTrigger key={"assign"} placement="top" overlay={<Tooltip id={`tooltip-assign`}>Assign animals to rooms</Tooltip>}>
-                    <Link href={"/shelter/" + id + "/assign"}><FontAwesomeIcon className="ml-1" icon={faWarehouse} inverse/></Link>
+                  <b>Roomless:</b> {data.unroomed_animals.length} Animal{data.unroomed_animals.length === 1 ? "" : "s"}
+                  <OverlayTrigger placement="top" overlay={<Tooltip id={`tooltip-assign`}>Assign animals to rooms</Tooltip>}>
+                    <Link href={"/shelter/" + id + "/assign"}>
+                      <span className="fa-layers" style={{marginLeft:"3px"}}>
+                        <FontAwesomeIcon icon={faSquare} size="lg" inverse />
+                        <FontAwesomeIcon icon={faArrowsAltH} transform={'shrink-4 right-1'} inverse />
+                      </span>
+                    </Link>
                   </OverlayTrigger>
                 </ListGroup.Item>
               </ListGroup>
@@ -113,10 +121,10 @@ function ShelterDetails({id}) {
           </Card>
         </Col>
       </Row>
-      <Card className="border rounded d-flex mt-3" >
-        <Card.Body>
-          <Card.Title className="">
-            <h4 className="mb-0">Buildings
+      <Card className="border rounded d-flex mt-3">
+        <Card.Body style={{marginBottom:"-20px"}}>
+          <Card.Title>
+            <h4 className="mb-0">Buildings ({data.buildings.length})
               <OverlayTrigger
                 key={"add-building"}
                 placement="top"
@@ -131,60 +139,32 @@ function ShelterDetails({id}) {
             </h4>
           </Card.Title>
           <hr/>
-          <span className="d-flex flex-wrap align-items-end">
-            {data.buildings.map(building => (
-              <Card key={building.id} className="border rounded mr-3" style={{width:"202px"}}>
-                <Card.Title className="text-center mb-0 mt-3">
-                  {building.name}
-                  <OverlayTrigger
-                    key={"building-details"}
-                    placement="top"
-                    overlay={
-                      <Tooltip id={`tooltip-building-details`}>
-                        Building details
-                      </Tooltip>
-                    }
-                  >
-                    <Link href={"/shelter/building/" + building.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
-                  </OverlayTrigger>
-                </Card.Title>
-                <hr style={{marginBottom:"0px"}} />
-                <span className="d-flex flex-wrap align-items-end">
-                  {building.rooms.map(room => (
-                    <Card key={room.id} className="border rounded" style={{width:"100px", height:"100px"}}>
-                      <Card.Text className="text-center mb-0">
-                        {room.name}
-                        <OverlayTrigger
-                          key={"room-details"}
-                          placement="top"
-                          overlay={
-                            <Tooltip id={`tooltip-room-details`}>
-                              Room details
-                            </Tooltip>
-                          }
-                        >
-                          <Link href={"/shelter/room/" + room.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
-                        </OverlayTrigger>
-                      </Card.Text>
-                      <Card.Text className="text-center mb-0">
-                        {room.animals.length} Animals
-                      </Card.Text>
-                    </Card>
-                  ))}
-                  <OverlayTrigger
-                    key={"add-room"}
-                    placement="top"
-                    overlay={
-                      <Tooltip id={`tooltip-add-room`}>
-                        Add a room
-                      </Tooltip>
-                    }
-                  >
-                    <Link href={"/shelter/building/room/new?building_id=" + building.id}> <FontAwesomeIcon icon={faPlusSquare} style={{width:"100px", height:"100px", verticalAlign:"middle"}} inverse /></Link>
-                  </OverlayTrigger>
-                </span>
-              </Card>
-            ))}
+          <span className="d-flex flex-wrap ml-0">
+          {data.buildings.map(building => (
+            <span key={building.id} className="pl-0 pr-0 mr-3 mb-3">
+              <Link href={"/shelter/building/" + building.id} className="building-link" style={{textDecoration:"none", color:"white"}}>
+                <Card className="border rounded" style={{minWidth:"315px", maxWidth:"315px", whiteSpace:"nowrap", overflow:"hidden"}}>
+                  <div className="row no-gutters hover-div" style={{textTransform:"capitalize", marginRight:"-2px"}}>
+                    <Row className="ml-0 mr-0 w-100" style={{flexWrap:"nowrap"}}>
+                      <div className="border-right" style={{width:"100px", minWidth:"100px"}}>
+                        <FontAwesomeIcon icon={faBuilding} size="6x" className="ml-3 building-icon" style={{paddingRight:"10px"}} inverse />
+                      </div>
+                      <Col style={{marginLeft:"-5px", marginRight:"-25px"}}>
+                        <div className="border" title={building.name} style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"8px", marginLeft:"-11px", marginTop:"-1px", width:"100%", fontSize:"18px", backgroundColor:"#615e5e", whiteSpace:"nowrap", overflow:"hidden"}}>{building.name}</div>
+                        <div style={{marginTop:"2px"}}>
+                          {building.rooms.length} room{building.rooms.length !== 1 ? "s" : ""}
+                        </div>
+                        <div>
+                          {building.animal_count} animal{building.animal_count !== 1 ? "s" : ""}
+                        </div>
+                      </Col>
+                    </Row>
+                  </div>
+                </Card>
+              </Link>
+            </span>
+          ))}
+          {data.buildings.length < 1 ? <p>No buildings have been created yet.</p> : ""}
           </span>
         </Card.Body>
       </Card>

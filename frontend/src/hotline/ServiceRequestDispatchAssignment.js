@@ -7,7 +7,7 @@ import { CircleMarker, Marker, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
 import Moment from 'react-moment';
 import randomColor from "randomcolor";
-import Map from "../components/Map";
+import Map, { prettyText } from "../components/Map";
 import { Checkbox } from "../components/Form"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -33,32 +33,6 @@ function ServiceRequestDispatchAssignment({id}) {
     let tempSRs = {...showSRs};
     tempSRs[dispatch_id] = !showSRs[dispatch_id];
     setShowSRs(tempSRs);
-  }
-
-  // Takes in animal size, species, and count and returns a pretty string combination.
-  const prettyText = (size, species, count) => {
-    if (count <= 0) {
-      return "";
-    }
-    var plural = ""
-    if (count > 1) {
-      plural = "s"
-    }
-
-    var size_and_species = size + " " + species + plural;
-    // Exception for horses since they don't need an extra species output.
-    if (species === 'horse') {
-      // Exception for pluralizing ponies.
-      if (size === 'pony' && count > 1) {
-        size_and_species = 'ponies'
-      }
-      else {
-        size_and_species = size + plural;
-      }
-    }
-
-    var text = count + " " + size_and_species;
-    return text;
   }
 
   // Counts the number of size/species matches for a service request by status.
@@ -93,7 +67,6 @@ function ServiceRequestDispatchAssignment({id}) {
 
   // Handle dynamic SR state and map display when an SR is selected or deselected.
   const handleMapState = (id) => {
-
     // If selected.
     if (mapState[id].checked === false) {
       const tempMapState = {...mapState};
@@ -295,7 +268,7 @@ function ServiceRequestDispatchAssignment({id}) {
                 key={service_request.id} 
                 position={[service_request.latitude, service_request.longitude]}
                 icon={currentRequest.latest_evac && Number(key) === currentRequest.latest_evac.id ? checkMarkerIconGray : checkMarkerIcon}
-                onClick={currentRequest.latest_evac ? (Number(key) === currentRequest.latest_evac.id) : true ? () => handleMapState(service_request.latest_evac.id) : undefined}
+                onClick={currentRequest.latest_evac && Number(key) === currentRequest.latest_evac.id ? undefined : () => handleMapState(service_request.latest_evac.id)}
               >
                 <MapTooltip autoPan={false}>
                   <span>
@@ -338,11 +311,11 @@ function ServiceRequestDispatchAssignment({id}) {
     <Row className="d-flex flex-wrap" style={{marginTop:"-8px", marginRight:"-19px", marginLeft:"-17px", minHeight:"36vh", paddingRight:"4px"}}>
       <Col xs={12} className="border rounded" style={{marginLeft:"1px", height:"36vh", overflowY:"auto", paddingRight:"-1px"}}>
         {currentRequest.latest_evac && data.dispatch_assignments.filter(dispatch_assignment => dispatch_assignment.id === currentRequest.latest_evac.id).map(dispatch_assignment => (
-        <div className="mt-1 mb-1" style={{marginLeft:"-10px", marginRight:"-10px"}}>
+        <div key={dispatch_assignment.id} className="mt-1 mb-1" style={{marginLeft:"-10px", marginRight:"-10px"}}>
           <div className="card-header rounded">
             <Checkbox
-              id={dispatch_assignment.id}
-              name={dispatch_assignment.id}
+              id={String(dispatch_assignment.id)}
+              name={String(dispatch_assignment.id)}
               checked={mapState[dispatch_assignment.id] ? mapState[dispatch_assignment.id].checked : false}
               style={{
                 transform: "scale(1.25)",
@@ -365,7 +338,7 @@ function ServiceRequestDispatchAssignment({id}) {
             >
               <Link href={"/dispatch/summary/" + dispatch_assignment.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
             </OverlayTrigger>&nbsp;&nbsp;|&nbsp;
-            Team Members: {dispatch_assignment.team_member_objects.map((member, i) => (
+            {dispatch_assignment.team ? dispatch_assignment.team_object.name : ""}: {dispatch_assignment.team && dispatch_assignment.team_object.team_member_objects.map((member, i) => (
                 <span key={member.id}>{i > 0 && ", "}{member.first_name} {member.last_name}</span>))}
             &nbsp;|&nbsp;Service Requests<FontAwesomeIcon icon={faChevronCircleRight} hidden={showSRs[dispatch_assignment.id]} onClick={() => updateShowSRs(dispatch_assignment.id)} className="ml-1 fa-move-up" style={{verticalAlign:"middle"}} inverse /><FontAwesomeIcon icon={faChevronCircleDown} hidden={!showSRs[dispatch_assignment.id]} onClick={() => updateShowSRs(dispatch_assignment.id)} className="ml-1 fa-move-up" style={{verticalAlign:"middle"}} inverse />
             {dispatch_assignment.service_request_objects.map(service_request => (
@@ -419,7 +392,7 @@ function ServiceRequestDispatchAssignment({id}) {
                 }}
               />
               <FontAwesomeIcon icon={faRectanglePortrait} className="icon-thin mr-1" color={mapState[dispatch_assignment.id].color} style={{marginLeft:"-9px", marginBottom:"-2px"}} />
-              <span>Dispatch Assignment #{index+1}</span>
+              <span>Dispatch Assignment</span>
               <OverlayTrigger
                 key={"assignment-summary"}
                 placement="top"
@@ -431,7 +404,7 @@ function ServiceRequestDispatchAssignment({id}) {
               >
                 <Link href={"/dispatch/summary/" + dispatch_assignment.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
               </OverlayTrigger>&nbsp;&nbsp;|&nbsp;
-              Team Members: {dispatch_assignment.team_member_objects.map((member, i) => (
+              {dispatch_assignment.team ? dispatch_assignment.team_object.name : ""}: {dispatch_assignment.team && dispatch_assignment.team_object.team_member_objects.map((member, i) => (
                   <span key={member.id}>{i > 0 && ", "}{member.first_name} {member.last_name}</span>))}
               &nbsp;|&nbsp;Service Requests<FontAwesomeIcon icon={faChevronCircleRight} hidden={showSRs[dispatch_assignment.id]} onClick={() => updateShowSRs(dispatch_assignment.id)} className="ml-1 fa-move-up" style={{verticalAlign:"middle"}} inverse /><FontAwesomeIcon icon={faChevronCircleDown} hidden={!showSRs[dispatch_assignment.id]} onClick={() => updateShowSRs(dispatch_assignment.id)} className="ml-1 fa-move-up" style={{verticalAlign:"middle"}} inverse />
               {dispatch_assignment.service_request_objects.map(service_request => (

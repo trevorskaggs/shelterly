@@ -10,10 +10,10 @@ describe("Login form", () => {
         <Login />
       </AuthProvider>
     );
-    const username = screen.getByPlaceholderText(/Username/);
+    const username = screen.getByPlaceholderText(/Email/);
     const password = screen.getByPlaceholderText(/Password/);
     const button = screen.getByText(/Login/);
-    await fireEvent.change(username, { target: { value: "test_user" } });
+    await fireEvent.change(username, { target: { value: "test@test.com" } });
     await fireEvent.change(password, { target: { value: "password" } });
     await fireEvent.click(button);
     await expect(
@@ -29,11 +29,11 @@ describe("Login form", () => {
         <Login />
       </AuthProvider>
     );
-    const username = screen.getByPlaceholderText(/Username/);
-    await fireEvent.change(username, { target: { value: "test_user" } });
+    const username = screen.getByPlaceholderText(/Email/);
+    await fireEvent.change(username, { target: { value: "test@test.com" } });
     await fireEvent.change(username, { target: { value: "" } });
     await expect(
-      await screen.findByText(/A Username is required./)
+      await screen.findByText(/An email address is required./)
     ).toBeTruthy();
   });
 

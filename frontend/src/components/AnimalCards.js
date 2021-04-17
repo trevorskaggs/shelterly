@@ -6,7 +6,6 @@ import {
   faUserAlt, faUserAltSlash, faClipboardList, faCircle, faExclamationCircle, faQuestionCircle, faHome, faHelicopter, faHeart, faSkullCrossbones
 } from '@fortawesome/free-solid-svg-icons';
 import { faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
-import ReactImageFallback from 'react-image-fallback';
 import noImageFound from '../static/images/image-not-found.png';
 
 function AnimalCards(props) {
@@ -20,8 +19,8 @@ function AnimalCards(props) {
         <Card.ImgOverlay className="text-border" style={{height:"20px"}}>#{animal.id}</Card.ImgOverlay>
         <Card.Text className="mb-0 border-top" style={{textTransform:"capitalize"}}>
         <span title={animal.name} className="ml-1">{animal.name||"Unknown"}</span>
-        <div className="ml-1">
-          {animal.species === 'horse' && animal.size !== 'unknown' ? animal.size : animal.species}&nbsp;
+        <span className="ml-1" style={{display:"block"}}>
+          {animal.species}&nbsp;
           {props.show_owner ? <span>
           {animal.owner_names.length === 0 ?
           <OverlayTrigger
@@ -101,7 +100,7 @@ function AnimalCards(props) {
           >
             <Link href={"/animals/" + animal.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1 mr-1" inverse /></Link>
           </OverlayTrigger>
-        </div>
+        </span>
         </Card.Text>
       </Card>
     ))}

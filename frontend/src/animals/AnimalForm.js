@@ -69,6 +69,7 @@ const AnimalForm = (props) => {
     confined: 'unknown',
     injured: 'unknown',
     behavior_notes: '',
+    medical_notes: '',
     last_seen: null,
     number_of_animals: 1,
     room: null,
@@ -234,8 +235,7 @@ const AnimalForm = (props) => {
           species: Yup.string()
             .required('Required')
             .oneOf(speciesChoices.map(option => option['value'])),
-          size: Yup.string()
-            .required('Required'),
+          size: Yup.string(),
           age: Yup.string(),
           sex: Yup.string()
             .oneOf(['M', 'F']),
@@ -446,11 +446,11 @@ const AnimalForm = (props) => {
                   </Col>
                   <Col xs={id ? "6" : "5"}>
                     <DropDown
-                      label="Size*"
+                      label="Size"
                       id="sizeDropdown"
                       name="size"
                       type="text"
-                      isClearable={false}
+                      isClearable={true}
                       key={`my_unique_size_select_key__${formikProps.values.size}`}
                       ref={sizeRef}
                       options={sizeChoices[formikProps.values.species]}
@@ -594,7 +594,17 @@ const AnimalForm = (props) => {
                     xs="12"
                   />
                 </BootstrapForm.Row>
-                <BootstrapForm.Row className={is_workflow ? "mb-3" : ""}>
+                <BootstrapForm.Row>
+                  <TextInput
+                    label="Medical Notes"
+                    id="medical_notes"
+                    name="medical_notes"
+                    as="textarea"
+                    rows={5}
+                    xs="12"
+                  />
+                </BootstrapForm.Row>
+                <BootstrapForm.Row className={is_workflow && !is_intake ? "mb-3" : ""}>
                   <DateTimePicker
                     label="Last Seen"
                     name="last_seen"
@@ -719,7 +729,7 @@ const AnimalForm = (props) => {
             :
               <Button type="button" onClick={() => {setAddAnother(false); formikProps.submitForm()}}>Save</Button>
             }
-            {is_workflow && !is_intake ? <Button type="button" className="btn btn-primary mr-1 border" onClick={() => {setAddAnother(false); formikProps.submitForm()}}>Next Step</Button> : ""}
+            {is_workflow && !is_intake ? <Button type="button" className="btn btn-primary border" onClick={() => {setAddAnother(false); formikProps.submitForm()}}>Next Step</Button> : ""}
             {is_workflow && is_intake ? <Button type="button" className="btn btn-primary mr-1 border" onClick={() => {setAddAnother(false); formikProps.submitForm()}}>Save and Finish</Button> : ""}
           </ButtonGroup>
           </Card>
