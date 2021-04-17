@@ -9,14 +9,7 @@ import AnimalForm from '../animals/AnimalForm';
 import PersonForm from '../people/PersonForm';
 import ServiceRequestForm from '../hotline/ServiceRequestForm';
 import PageNotFound from "../components/PageNotFound";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faCircle,
-} from '@fortawesome/free-solid-svg-icons';
-import clsx from 'clsx';
-import Check from '@material-ui/icons/Check';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
-import StepIcon from '@material-ui/core/StepIcon';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -40,13 +33,6 @@ const useStyles = makeStyles((theme) => ({
     },
     "&$completed": {
       color: '#375a7f',
-      // <circle cx="12" cy="12", r="8", fill="white"/>
-      // background: faCircle
-      // fill: 'white'
-
-      // backgroundColor: 'white', //TODO: figure out how to make the checkmark white
-      // borderRadius: '50%',
-      // stroke: '#375a7f'
     },
   },
   active: {},
@@ -57,36 +43,25 @@ const useStyles = makeStyles((theme) => ({
     borderRadius: '50%',
     backgroundColor: 'currentColor',
     color:'white',
-    marginTop:"-12px"
   },
-  test: {
+  checkIcon: {
     color: '#375a7f',
+    stroke: '#375a7f',
     zIndex: 1,
-    fontSize: 26,
+    fontSize: 27,
     marginTop: "-6px",
     marginLeft: "-3px"
   },
-
   instructions: {
     marginTop: theme.spacing(1),
     marginBottom: theme.spacing(1),
   },
 }));
 
-function QontoStepIcon(props) {
+function CustomStepIcon() {
   const classes = useStyles();
-  const { active, completed } = props;
-
   return (
-    <div
-      className={clsx(classes.root, {
-        [classes.active]: active,
-      })}
-    >
-      
-      {/* {completed ? <div className={classes.circle}><CheckCircleIcon className={classes.test} /></div> : <StepIcon icon={StepIcon} />} */}
-      <div className={classes.circle}><CheckCircleIcon className={classes.test} /></div>
-    </div>
+    <div className={classes.circle}><CheckCircleIcon className={classes.checkIcon} /></div>
   );
 }
 
@@ -171,6 +146,7 @@ function StepperWorkflow() {
   // The major overall step tracker.
   const [activeStep, setActiveStep] = React.useState(0);
   const steps = getSteps(is_intake);
+
   // Tracks the workflow state and data.
   const [state, setState] = useState(initialWorkflowData);
   // Counts number of reporter + owner
@@ -259,8 +235,9 @@ function StepperWorkflow() {
           }
           return (
             <Step key={label} {...stepProps}>
-              <StepLabel 
-              StepIconComponent={QontoStepIcon}
+              <StepLabel
+                // Use a custom checkbox for completed state in order to have a white background.
+                StepIconComponent={activeStep < index+1 ? undefined : CustomStepIcon}
                 classes={{
                   label: classes.stepper,
                   text: classes.stepper,
@@ -276,7 +253,8 @@ function StepperWorkflow() {
                     active: classes.active,
                   }
                 }}
-                {...labelProps}>{label}</StepLabel>
+                {...labelProps}>{label}
+              </StepLabel>
             </Step>
           );
         })}
