@@ -1,5 +1,5 @@
 import sys
-sys.path.append('/home/sheltuser/shelterly/')
+sys.path.append('/var/task')
 import django
 django.setup()
 from django.conf import settings
