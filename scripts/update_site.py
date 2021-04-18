@@ -7,6 +7,6 @@ from django.contrib.sites.models import Site
 
 domain = sys.argv[1]
 site = Site.objects.all()[0]
-site.domain_name = domain
+site.domain = domain
 site.name = domain
 site.save()
