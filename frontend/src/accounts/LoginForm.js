@@ -59,11 +59,11 @@ const Login = () => {
       >
       {({ isSubmitting, status }) => (
         <>
-        <Row className='ml-auto mr-auto align-bottom' style={{marginTop:"70px"}}>
+        <Row className='ml-auto mr-auto mt-auto align-bottom'>
           <img src={logo} alt="Logo" style={{height:"120px", width:"120px", marginTop:"-4px"}} />
           <h1  style={{fontSize:"100px"}}>Shelterly</h1>
         </Row>
-        <Col xs={{ span:5 }} className="border rounded border-light shadow-sm" style={{marginRight:"auto", marginLeft:"auto"}}>
+        <Col xs={{ span:5 }} className="border rounded border-light shadow-sm ml-auto mr-auto mb-auto" style={{maxHeight:"340px"}}>
           <h3 className='mb-0 text-center mt-3'>Log-in</h3>
           <BootstrapForm as={Form}>
             <TextInput
