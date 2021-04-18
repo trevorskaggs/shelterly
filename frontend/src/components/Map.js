@@ -54,7 +54,7 @@ const reportedIconHTML = ReactDOMServer.renderToString(
 export const reportedMarkerIcon = new L.DivIcon({
   html: reportedIconHTML,
   iconSize: [0, 0],
-  iconAnchor: [6, 9],
+  iconAnchor: [8, 9],
   className: "reported-icon",
   popupAnchor: null,
   shadowUrl: null,
@@ -72,7 +72,7 @@ const SIPIconHTML = ReactDOMServer.renderToString(
 export const SIPMarkerIcon = new L.DivIcon({
   html: SIPIconHTML,
   iconSize: [0, 0],
-  iconAnchor: [5, 9],
+  iconAnchor: [8, 9],
   className: "SIP-icon",
   popupAnchor: null,
   shadowUrl: null,
@@ -89,7 +89,7 @@ const UTLIconHTML = ReactDOMServer.renderToString(
 export const UTLMarkerIcon = new L.DivIcon({
   html: UTLIconHTML,
   iconSize: [0, 0],
-  iconAnchor: [6, 9],
+  iconAnchor: [8, 9],
   className: "UTL-icon",
   popupAnchor: null,
   shadowUrl: null,
@@ -101,7 +101,7 @@ const checkIconHTML = ReactDOMServer.renderToString(<FontAwesomeIcon icon={faChe
 export const checkMarkerIcon = new L.DivIcon({
   html: checkIconHTML,
   iconSize: [0, 0],
-  iconAnchor: [6, 9],
+  iconAnchor: [8, 9],
   className: "check-icon",
   popupAnchor: null,
   shadowUrl: null,
@@ -113,7 +113,7 @@ const shelterIconHTML = ReactDOMServer.renderToString(<FontAwesomeIcon icon={faH
 export const shelterMarkerIcon = new L.DivIcon({
   html: shelterIconHTML,
   iconSize: [0, 0],
-  iconAnchor: [6, 9],
+  iconAnchor: [8, 9],
   className: "shelter-icon",
   popupAnchor: null,
   shadowUrl: null,
@@ -130,7 +130,7 @@ const closedIconHTML = ReactDOMServer.renderToString(
 export const closedMarkerIcon = new L.DivIcon({
   html: closedIconHTML,
   iconSize: [0, 0],
-  iconAnchor: [6, 9],
+  iconAnchor: [8, 9],
   className: "closed-icon",
   popupAnchor: null,
   shadowUrl: null,

@@ -158,7 +158,7 @@ function ShelterDetails({id}) {
                         <FontAwesomeIcon icon={faBuilding} size="6x" className="ml-3 building-icon" style={{paddingRight:"10px"}} inverse />
                       </div>
                       <Col style={{marginLeft:"-5px", marginRight:"-25px"}}>
-                        <div className="border" title={building.name} style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"8px", marginLeft:"-11px", marginTop:"-1px", width:"100%", fontSize:"18px", backgroundColor:"#615e5e", whiteSpace:"nowrap", overflow:"hidden"}}>{building.name}</div>
+                        <div className="border" title={building.name} style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"8px", marginLeft:"-11px", marginRight:"-5px", marginTop:"-1px", width:"100%", fontSize:"18px", backgroundColor:"#615e5e", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis"}}>{building.name}</div>
                         <div style={{marginTop:"2px"}}>
                           {building.rooms.length} room{building.rooms.length !== 1 ? "s" : ""}
                         </div>

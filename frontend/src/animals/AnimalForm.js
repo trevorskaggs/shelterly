@@ -631,6 +631,7 @@ const AnimalForm = (props) => {
                         key={`my_unique_shelter_select_key__${formikProps.values.shelter}`}
                         onChange={(instance) => {
                           roomRef.current.select.clearValue();
+                          formikProps.setFieldValue("room", '');
                           formikProps.setFieldValue("shelter", instance === null ? '' : instance.value);
                         }}
                         value={formikProps.values.shelter||''}
@@ -647,7 +648,7 @@ const AnimalForm = (props) => {
                         key={`my_unique_room_select_key__${formikProps.values.room}`}
                         options={shelters.room_options[formikProps.values.shelter] ? shelters.room_options[formikProps.values.shelter] : []}
                         isClearable={true}
-                        value={formikProps.values.room||null}
+                        value={formikProps.values.room||''}
                       />
                     </Col>
                   </BootstrapForm.Row>

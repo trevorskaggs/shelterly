@@ -121,7 +121,7 @@ function ServiceRequestForm(props) {
             axios.post('/hotline/api/servicerequests/', values)
             .then(response => {
               // Create Animals
-              props.state.steps.animals.forEach(animal => {
+              let promises = props.state.steps.animals.map(async (animal) => {
                 // Add owner and reporter to animal data.
                 if (reporterResponse[0].data.id) {
                   animal.append('reporter', reporterResponse[0].data.id);
@@ -130,11 +130,12 @@ function ServiceRequestForm(props) {
                   animal.append('new_owner', ownerResponse[0].data.id);
                 }
                 animal.append('request', response.data.id);
-                axios.post('/animals/api/animal/', animal)
-                .catch(error => {
-                });
+                return axios.post('/animals/api/animal/', animal)
               });
-              navigate('/hotline/servicerequest/' + response.data.id);
+              Promise.all(promises)
+              .then((results) => {
+                navigate('/hotline/servicerequest/' + response.data.id);
+              })
             })
             .catch(error => {
               if (error.response.data && error.response.data[0].includes('same address')) {
