@@ -29,8 +29,8 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         if serializer.is_valid():
             for service_request in ServiceRequest.objects.filter(latitude=serializer.validated_data['latitude'], longitude=serializer.validated_data['longitude'], status='open'):
-                reporter_id = serializer.validated_data.get('reporter', {'id':None}).id
-                owner_id = serializer.validated_data.get('owners', [{'id':None}])[0].id
+                reporter_id = serializer.validated_data.get('reporter').id if serializer.validated_data.get('reporter') else None
+                owner_id = serializer.validated_data.get('owners')[0].id if serializer.validated_data.get('owners') else None
                 Person.objects.filter(id__in=[reporter_id, owner_id]).delete()
                 raise serializers.ValidationError(['Multiple open Requests may not exist with the same address.', service_request.id])
             service_request = serializer.save()
