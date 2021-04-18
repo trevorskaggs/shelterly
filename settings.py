@@ -25,11 +25,13 @@ except FileNotFoundError:
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('SECRET_KEY')
+ORGANIZATION = os.environ.get('ORGANIZATION')
+INCIDENT_NAME = os.environ.get('INCIDENT_NAME')
+SHELTERLY_VERSION = os.environ.get('SHELTERLY_VERSION')
+
 DEBUG = False
 # SECURITY WARNING: don't run with debug turned on in production!
 ALLOWED_HOSTS = ['*']
@@ -40,8 +42,8 @@ credentials = boto3.Session().get_credentials()
 if credentials:
     AWS_ACCESS_KEY_ID = credentials.access_key
     AWS_SECRET_ACCESS_KEY = credentials.secret_key
-AWS_SES_REGION_NAME = 'us-west-2'
-AWS_SES_REGION_ENDPOINT = 'email.us-west-2.amazonaws.com'
+    AWS_SES_REGION_NAME = 'us-west-2'
+    AWS_SES_REGION_ENDPOINT = 'email.us-west-2.amazonaws.com'
 
 # Use to output emails in console.
 # EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
@@ -144,7 +146,7 @@ USE_TZ = True
 
 SECURE_SSL_REDIRECT = False
 
-USE_CLOUD_FILES = True
+USE_S3 = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
@@ -153,12 +155,21 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "frontend/build/static"),
     os.path.join(BASE_DIR, "frontend/src/static")
 ]
-STATIC_ROOT=os.path.join(BASE_DIR, 'static')
 
-if USE_CLOUD_FILES:
+MEDIA_URL = '/media/'
+
+if USE_S3:
+    #Static File Settings
     STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    #Media File Settings
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    #AWS Settings
     AWS_STORAGE_BUCKET_NAME = 'shelterly-staticfiles'
     AWS_S3_REGION_NAME = 'us-west-2'
+else:
+    STATIC_ROOT=os.path.join(BASE_DIR, 'static')
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': ('knox.auth.TokenAuthentication',),
