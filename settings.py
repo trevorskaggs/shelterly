@@ -160,11 +160,11 @@ MEDIA_URL = '/media/'
 
 if USE_S3:
     #Static File Settings
-    STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    STATICFILES_STORAGE = 'custom_storage.StaticStorage'
     #Media File Settings
-    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    DEFAULT_FILE_STORAGE = 'custom_storage.MediaStorage'
     #AWS Settings
-    AWS_STORAGE_BUCKET_NAME = 'shelterly-staticfiles'
+    AWS_STORAGE_BUCKET_NAME = 'shelterly-files'
     AWS_S3_REGION_NAME = 'us-west-2'
 else:
     STATIC_ROOT=os.path.join(BASE_DIR, 'static')
