@@ -142,7 +142,9 @@ USE_L10N = True
 
 USE_TZ = True
 
-SECURE_SSL_REDIRECT = True
+SECURE_SSL_REDIRECT = False
+
+USE_CLOUD_FILES = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
@@ -151,12 +153,12 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "frontend/build/static"),
     os.path.join(BASE_DIR, "frontend/src/static")
 ]
+STATIC_ROOT=os.path.join(BASE_DIR, 'static')
 
-#TODO Change to envvars.
-# Zappa settings
-STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-AWS_STORAGE_BUCKET_NAME = 'shelterly-staticfiles'
-AWS_S3_REGION_NAME = 'us-west-2'
+if USE_CLOUD_FILES:
+    STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    AWS_STORAGE_BUCKET_NAME = 'shelterly-staticfiles'
+    AWS_S3_REGION_NAME = 'us-west-2'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': ('knox.auth.TokenAuthentication',),
