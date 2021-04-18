@@ -50,6 +50,6 @@ export function setAuthToken(token, csrftoken) {
     axios.defaults.headers.post['X-CSRF-Token'] = csrftoken;
   } else {
     delete axios.defaults.headers.common['Authorization'];
-    delete axios.defaults.headers.common['X-CSRF-Token'];
+    delete axios.defaults.headers.post['X-CSRF-Token'];
   }
 };
