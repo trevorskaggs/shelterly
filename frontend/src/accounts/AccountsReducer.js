@@ -48,7 +48,7 @@ function AuthProvider(props) {
   const [cookies, , removeCookie] = useCookies(['token']);
   const [state, dispatch] = useReducer(auth_reducer, initialState);
 
-  cookies.token ? setAuthToken(cookies.token) : setAuthToken();
+  cookies.token ? setAuthToken(cookies.token, cookies.csrftoken) : setAuthToken();
 
   const path = usePath();
   // Keep track of current and previous locations.

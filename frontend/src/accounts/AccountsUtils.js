@@ -43,11 +43,13 @@ export function logoutUser({dispatch}, {removeCookie}) {
   });
 }
 
-export function setAuthToken(token) {
+export function setAuthToken(token, csrftoken) {
   if (token) {
     // if we have a token, set as default axios token
     axios.defaults.headers.common['Authorization'] = `Token ${token}`;
+    axios.defaults.headers.post['X-CSRF-Token'] = csrftoken;
   } else {
     delete axios.defaults.headers.common['Authorization'];
+    delete axios.defaults.headers.common['X-CSRF-Token'];
   }
 };
