@@ -7,7 +7,7 @@ django-cors-headers
 django-filter
 django-rest-knox
 django-ordered-model
-django-ses
+django_smtp_ssl
 djangorestframework>=3.12
 django-storages
 drf-yasg

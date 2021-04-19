@@ -49,7 +49,7 @@ if credentials:
 # EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # AWS email backend
 # EMAIL_BACKEND = 'django_ses.SESBackend'
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND = 'django_smtp_ssl.SSLEmailBackend'
 EMAIL_HOST = 'email-smtp.us-west-2.amazonaws.com'
 EMAIL_PORT = '465'
 EMAIL_HOST_USER = os.environ.get('EMAIL_USER')
