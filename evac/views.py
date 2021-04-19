@@ -31,10 +31,9 @@ class DispatchTeamViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = DispatchTeam.objects.all().annotate(is_assigned=Exists(EvacAssignment.objects.filter(team_id=OuterRef("id"), end_time=None)))
-        is_map = self.request.query_params.get('is_map', '')
+        is_map = self.request.query_params.get('map', '')
         if is_map == 'true':
             yesterday = datetime.today() - timedelta(days=1)
-            today = datetime.today()
             y_mid = datetime.combine(yesterday,datetime.min.time())
             queryset = queryset.filter(dispatch_date__gte=y_mid)
         return queryset

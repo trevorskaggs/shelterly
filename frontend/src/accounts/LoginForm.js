@@ -65,7 +65,7 @@ const Login = () => {
           <img src={logo} alt="Logo" style={{height:"120px", width:"120px", marginTop:"-4px"}} />
           <h1  style={{fontSize:"100px"}}>Shelterly</h1>
         </Row>
-        <Col xs={{ span:5 }} className="border rounded border-light shadow-sm ml-auto mr-auto mb-auto" style={{maxHeight:"340px"}}>
+        <Col xs={{ span:5 }} className="border rounded border-light shadow-sm ml-auto mr-auto mb-auto" style={{maxHeight:"347px"}}>
           <h3 className='mb-0 text-center mt-3'>Log-in {state.isLoading ? <FontAwesomeIcon icon={faSpinner} spin inverse /> : ""}</h3>
           <BootstrapForm as={Form}>
             <TextInput
