@@ -9,20 +9,61 @@ import AnimalForm from '../animals/AnimalForm';
 import PersonForm from '../people/PersonForm';
 import ServiceRequestForm from '../hotline/ServiceRequestForm';
 import PageNotFound from "../components/PageNotFound";
+import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 
 const useStyles = makeStyles((theme) => ({
   root: {
     width: '100%',
     marginTop: theme.spacing(2),
   },
-  test: {
+  stepper: {
     borderRadius: "0.25rem",
+    color: '#ffffff',
+    backgroundColor: '#444',
+    "&$active": {
+      color: '#ffffff'
+    },
+    "&$completed": {
+      color: '#ffffff',
+    },
+  },
+  stepIcon: {
+    "&$active": {
+      color: '#375a7f',
+    },
+    "&$completed": {
+      color: '#375a7f',
+    },
+  },
+  active: {},
+  completed: {},
+  circle: {
+    width: 20,
+    height: 20,
+    borderRadius: '50%',
+    backgroundColor: 'currentColor',
+    color:'white',
+  },
+  checkIcon: {
+    color: '#375a7f',
+    stroke: '#375a7f',
+    zIndex: 1,
+    fontSize: 27,
+    marginTop: "-6px",
+    marginLeft: "-3px"
   },
   instructions: {
     marginTop: theme.spacing(1),
     marginBottom: theme.spacing(1),
   },
 }));
+
+function CustomStepIcon() {
+  const classes = useStyles();
+  return (
+    <div className={classes.circle}><CheckCircleIcon className={classes.checkIcon} /></div>
+  );
+}
 
 function getSteps(is_intake) {
   if (is_intake) {
@@ -105,6 +146,7 @@ function StepperWorkflow() {
   // The major overall step tracker.
   const [activeStep, setActiveStep] = React.useState(0);
   const steps = getSteps(is_intake);
+
   // Tracks the workflow state and data.
   const [state, setState] = useState(initialWorkflowData);
   // Counts number of reporter + owner
@@ -181,7 +223,7 @@ function StepperWorkflow() {
 
   return (
     <div className={classes.root}>
-      <Stepper className={classes.test} activeStep={activeStep}>
+      <Stepper className={classes.stepper} activeStep={activeStep}>
         {steps.map((label, index) => {
           const stepProps = {};
           const labelProps = {};
@@ -193,7 +235,24 @@ function StepperWorkflow() {
           }
           return (
             <Step key={label} {...stepProps}>
-              <StepLabel {...labelProps}>{label}</StepLabel>
+              <StepLabel
+                // Use a custom checkbox for completed state in order to have a white background.
+                StepIconComponent={activeStep < index+1 ? undefined : CustomStepIcon}
+                classes={{
+                  label: classes.stepper,
+                  root: classes.stepper,
+                  active: classes.active,
+                  completed: classes.completed,
+                }}
+                StepIconProps={{
+                  classes: {
+                    root: classes.stepIcon,
+                    completed: classes.completed,
+                    active: classes.active,
+                  }
+                }}
+                {...labelProps}>{label}
+              </StepLabel>
             </Step>
           );
         })}
