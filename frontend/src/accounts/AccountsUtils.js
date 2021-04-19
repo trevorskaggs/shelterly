@@ -2,7 +2,7 @@ import axios from "axios";
 import { navigate } from "raviger";
 
 // Authenticate the user with the backnd to obtain a user.
-export function loadUser({dispatch, removeCookie}) {
+export function loadUser({dispatch, removeCookie, path}) {
 
   // Set user loading state.
   dispatch({ type: 'USER_LOADING' });
@@ -18,7 +18,7 @@ export function loadUser({dispatch, removeCookie}) {
     removeCookie("token", {path: '/'});
     setAuthToken();
     dispatch({type: "AUTHENTICATION_ERROR", data: e});
-    navigate('/');
+    navigate('/?next=' + path);
   })
 }
 

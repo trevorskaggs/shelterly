@@ -7,13 +7,15 @@ import Col from 'react-bootstrap/Col';
 import { Form as BootstrapForm, Modal, Row } from 'react-bootstrap';
 import * as Yup from "yup";
 import { useCookies } from 'react-cookie';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { TextInput } from '../components/Form.js';
 import { AuthContext } from "./AccountsReducer";
-import { loadUser, setAuthToken } from "./AccountsUtils";
+import { setAuthToken } from "./AccountsUtils";
 import logo from "../static/images/shelterly.png";
 
 const Login = () => {
-  const { dispatch } = useContext(AuthContext);
+  const { state, dispatch } = useContext(AuthContext);
   const [, setCookie, removeCookie] = useCookies(['token']);
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
@@ -35,16 +37,16 @@ const Login = () => {
             .required('No password provided.'),
         })}
         onSubmit={(values, actions ) => {
+          dispatch({ type: 'USER_LOADING' });
           setTimeout(() => {
             axios.post('/login/', values)
             .then(response => {
+              // Set token for axios calls.
               setAuthToken(response.data.token);
-              //set token as cookie 
+              // Store token in cookie.
               setCookie("token", response.data.token, {path: '/'});
-              //set authcontext
+              // Update state information.
               dispatch({type: 'LOGIN_SUCCESSFUL', data: response.data });
-              //called once
-              loadUser({dispatch, removeCookie});
               navigate(next);
             })
             .catch(e => {
@@ -64,7 +66,7 @@ const Login = () => {
           <h1  style={{fontSize:"100px"}}>Shelterly</h1>
         </Row>
         <Col xs={{ span:5 }} className="border rounded border-light shadow-sm ml-auto mr-auto mb-auto" style={{maxHeight:"340px"}}>
-          <h3 className='mb-0 text-center mt-3'>Log-in</h3>
+          <h3 className='mb-0 text-center mt-3'>Log-in {state.isLoading ? <FontAwesomeIcon icon={faSpinner} spin inverse /> : ""}</h3>
           <BootstrapForm as={Form}>
             <TextInput
               name="username"

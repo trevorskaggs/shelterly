@@ -58,7 +58,7 @@ function AuthProvider(props) {
   useEffect(() => {
     // If we have a token but no user, attempt to authenticate them.
     if (!state.user && cookies.token) {
-      loadUser({dispatch, removeCookie})
+      loadUser({dispatch, removeCookie, path})
     }
     // Redirect to login page if no authenticated user object is present.
     else if (!state.user) {
