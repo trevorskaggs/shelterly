@@ -1,4 +1,4 @@
-from django.db.models import Count, Exists, OuterRef, Prefetch
+from django.db.models import Count, Exists, OuterRef, Prefetch, Q
 from django.http import JsonResponse
 from datetime import datetime, timedelta
 from rest_framework import filters, permissions, serializers, viewsets
@@ -35,7 +35,7 @@ class DispatchTeamViewSet(viewsets.ModelViewSet):
         if is_map == 'true':
             yesterday = datetime.today() - timedelta(days=1)
             y_mid = datetime.combine(yesterday,datetime.min.time())
-            queryset = queryset.filter(dispatch_date__gte=y_mid)
+            queryset = queryset.filter(Q(is_assigned=True) | Q(dispatch_date__gte=y_mid))
         return queryset
 
     def perform_update(self, serializer):
