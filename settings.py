@@ -48,7 +48,13 @@ if credentials:
 # Use to output emails in console.
 # EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # AWS email backend
-EMAIL_BACKEND = 'django_ses.SESBackend'
+# EMAIL_BACKEND = 'django_ses.SESBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'email-smtp.us-west-2.amazonaws.com'
+EMAIL_PORT = '465'
+EMAIL_HOST_USER = os.environ.get('EMAIL_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_PASSWORD')
+EMAIL_USE_SSL = True
 
 # Application definition
 INSTALLED_APPS = [
