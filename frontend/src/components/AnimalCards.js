@@ -6,7 +6,8 @@ import {
   faUserAlt, faUserAltSlash, faClipboardList, faCircle, faExclamationCircle, faQuestionCircle, faHome, faHelicopter, faHeart, faSkullCrossbones
 } from '@fortawesome/free-solid-svg-icons';
 import { faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
-import noImageFound from '../static/images/image-not-found.png';
+import ReactImageFallback from 'react-image-fallback';
+import { S3_BUCKET } from '../constants';
 
 function AnimalCards(props) {
 
@@ -15,7 +16,7 @@ function AnimalCards(props) {
     <span className="d-flex flex-wrap align-items-end" style={{marginLeft:"-15px"}}>
     {props.animals.map(animal => (
       <Card key={animal.id} className="border rounded ml-3 mb-3" style={{width:"153px", whiteSpace:"nowrap", overflow:"hidden"}}>
-        <Card.Img variant="top" src={animal.front_image || animal.side_image || noImageFound} style={{width:"153px", height:"153px", objectFit: "cover", overflow: "hidden"}} />
+        <Card.Img variant="top" src={animal.front_image || animal.side_image || `${S3_BUCKET}images/image-not-found.png`} style={{width:"153px", height:"153px", objectFit: "cover", overflow: "hidden"}} />
         <Card.ImgOverlay className="text-border" style={{height:"20px"}}>#{animal.id}</Card.ImgOverlay>
         <Card.Text className="mb-0 border-top" style={{textTransform:"capitalize"}}>
         <span title={animal.name} className="ml-1">{animal.name||"Unknown"}</span>

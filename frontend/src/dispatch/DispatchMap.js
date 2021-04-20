@@ -11,10 +11,6 @@ import { faBadgeSheriff, faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
 import { Circle, Marker, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
 import * as Yup from 'yup';
-import badge from "../static/images/badge-sheriff.png";
-import bandaid from "../static/images/band-aid-solid.png";
-import car from "../static/images/car-solid.png";
-import trailer from "../static/images/trailer-solid.png";
 import { Typeahead } from 'react-bootstrap-typeahead';
 import Moment from 'react-moment';
 import Map, { countMatches, prettyText, reportedMarkerIcon, SIPMarkerIcon, UTLMarkerIcon, checkMarkerIcon } from "../components/Map";
@@ -23,6 +19,8 @@ import { DispatchDuplicateSRModal } from "../components/Modals";
 import Scrollbar from '../components/Scrollbars';
 import 'react-bootstrap-typeahead/css/Typeahead.css';
 import 'leaflet/dist/leaflet.css';
+import { S3_BUCKET } from '../constants';
+
 
 function Deploy() {
 
@@ -432,10 +430,10 @@ function Deploy() {
                         {service_request.full_address}
                         {service_request.followup_date ? <div>Followup Date: <Moment format="L">{service_request.followup_date}</Moment></div> : ""}
                         <div>
-                          {service_request.aco_required ? <img width={16} height={16} src={badge} alt="" className="mr-1" /> : ""}
-                          {service_request.injured ? <img width={16} height={16} src={bandaid} alt="" className="mr-1" /> : ""}
-                          {service_request.accessible ? <img width={16} height={16} src={car} alt="" className="mr-1" /> : ""}
-                          {service_request.turn_around ? <img width={16} height={16} src={trailer} alt="" /> : ""}
+                        {service_request.aco_required ? <img width={16} height={16} src={`${S3_BUCKET}images/badge-sheriff.png`} alt="" className="mr-1" /> : ""}
+                        {service_request.injured ? <img width={16} height={16} src={`${S3_BUCKET}images/band-aid-solid.png`} alt="" className="mr-1" /> : ""}
+                        {service_request.accessible ? <img width={16} height={16} src={`${S3_BUCKET}images/car-solid.png`} alt="" className="mr-1" /> : ""}
+                        {service_request.turn_around ? <img width={16} height={16} src={`${S3_BUCKET}images/trailer-solid.png`} alt="" /> : ""}
                         </div>
                       </span>
                     </MapTooltip>

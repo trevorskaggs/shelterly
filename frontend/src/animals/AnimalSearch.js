@@ -3,7 +3,6 @@ import axios from "axios";
 import { Link, useQueryParams } from 'raviger';
 import { Button, ButtonGroup, Card, CardGroup, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Pagination, Tooltip } from 'react-bootstrap';
 import ReactImageFallback from 'react-image-fallback';
-import noImageFound from '../static/images/image-not-found.png';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBandAid, faCalendarDay, faClipboardList, faCut, faLink, faNotesMedical, faStickyNote, faUserAltSlash
@@ -13,6 +12,7 @@ import Moment from 'react-moment';
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
 import { titleCase } from '../components/Utils';
+import { S3_BUCKET } from '../constants';
 
 import { ITEMS_PER_PAGE } from '../constants';
 
@@ -123,7 +123,7 @@ function AnimalSearch() {
           <CardGroup>
             <Card style={{maxWidth:"206px", maxHeight:"206px"}}>
               <Card.Body className="p-0 m-0">
-                <ReactImageFallback style={{width:"206px", height:"206px", objectFit: "cover", overflow: "hidden"}} src={animal.front_image} fallbackImage={[animal.side_image, noImageFound]} />
+                <ReactImageFallback style={{width:"206px", height:"206px", objectFit: "cover", overflow: "hidden"}} src={animal.front_image} fallbackImage={[animal.side_image, `${S3_BUCKET}images/image-not-found.png`]} />
               </Card.Body>
             </Card>
             <Card style={{marginBottom:"6px", maxWidth:"335px"}}>

@@ -10,7 +10,9 @@ import { useCookies } from 'react-cookie';
 import { TextInput } from '../components/Form.js';
 import { AuthContext } from "./AccountsReducer";
 import { loadUser, setAuthToken } from "./AccountsUtils";
-import logo from "../static/images/shelterly.png";
+import { S3_BUCKET } from '../constants';
+
+
 
 const Login = () => {
   const { dispatch } = useContext(AuthContext);
@@ -61,7 +63,7 @@ const Login = () => {
       {({ isSubmitting, status }) => (
         <>
         <Row className='ml-auto mr-auto align-bottom' style={{marginTop:"70px"}}>
-          <img src={logo} alt="logo" style={{height:"120px", width:"120px", marginTop:"-4px"}} />
+          <img src={`${S3_BUCKET}images/shelterly.png`} alt="logo" style={{height:"120px", width:"120px", marginTop:"-4px"}} />
           <h1  style={{fontSize:"100px"}}>Shelterly</h1>
         </Row>
         <Col xs={{ span:5 }} className="border rounded border-light shadow-sm" style={{marginRight:"auto", marginLeft:"auto"}}>

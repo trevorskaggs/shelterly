@@ -5,7 +5,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Nav } from 'react-bootstrap';
 import { faHome, faBullhorn, faPhone, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
 import { logoutUser } from ".././accounts/AccountsUtils";
-import logo from "../static/images/shelterly.png";
+import { S3_BUCKET } from '../constants';
+
 
 export const StyledMenu = styled(Nav)`
   background: ${({ theme }) => theme.primaryDark};
@@ -66,7 +67,7 @@ const Menu = ({ state, dispatch, removeCookie, ...props }) => {
     
     return (
     <StyledMenu  {...props} className="flex-column" style={{ height: viewHeight }}>
-    <Link href="/"><img src={logo} alt="logo" /></Link>
+    <Link href="/"><img src={`${S3_BUCKET}images/shelterly.png`} alt="logo" /></Link>
     <div className="logo border-bottom">SHELTERLY</div>
       <Link href="/hotline" ><FontAwesomeIcon icon={faPhone} fixedWidth inverse/> HOTLINE</Link>
       <Link href="/dispatch"><FontAwesomeIcon icon={faBullhorn} fixedWidth inverse/>  DISPATCH</Link>

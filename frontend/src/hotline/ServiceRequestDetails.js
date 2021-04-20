@@ -12,8 +12,8 @@ import {
 import { faCalendarEdit, faHomeAlt, faHomeHeart } from '@fortawesome/pro-solid-svg-icons';
 import Header from '../components/Header';
 import History from '../components/History';
-import noImageFound from '../static/images/image-not-found.png';
 import Flatpickr from 'react-flatpickr';
+import { S3_BUCKET } from '../constants';
 
 function ServiceRequestDetails({id}) {
 
@@ -334,7 +334,7 @@ function ServiceRequestDetails({id}) {
               <span className="d-flex flex-wrap align-items-end" style={{marginLeft:"-15px"}}>
               {data.animals.map(animal => (
               <Card key={animal.id} className="border rounded ml-3 mb-3" style={{width:"153px", whiteSpace:"nowrap", overflow:"hidden"}}>
-                <Card.Img variant="top" src={animal.front_image || animal.side_image || noImageFound} style={{width:"153px", height:"153px", objectFit: "cover", overflow: "hidden"}} />
+                <Card.Img variant="top" src={animal.front_image || animal.side_image || `${S3_BUCKET}images/image-not-found.png`} style={{width:"153px", height:"153px", objectFit: "cover", overflow: "hidden"}} />
                 <Card.ImgOverlay className="text-border" style={{height:"20px"}}>#{animal.id}</Card.ImgOverlay>
                 <Card.Text className="mb-0 border-top" style={{textTransform:"capitalize"}}>
                 <span title={animal.name} className="ml-1">{animal.name||"Unknown"}</span>
