@@ -5,15 +5,14 @@ import Moment from 'react-moment';
 import { Button, Card, ListGroup, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBan, faCar, faCircle, faExclamationCircle, faQuestionCircle, faHome, faHelicopter, faHeart, faSkullCrossbones,
-  faClipboardCheck, faClipboardList, faComment, faEdit, faHouseDamage,
-  faKey, faMapMarkedAlt, faMinusSquare, faPlusSquare, faTimes, faTrailer, faUsers
+  faBan, faCar, faClipboardCheck, faComment, faEdit, faEnvelope, faHouseDamage,
+  faKey, faMapMarkedAlt, faPlusSquare, faTimes, faTrailer, faUserPlus, faUsers
 } from '@fortawesome/free-solid-svg-icons';
-import { faCalendarEdit, faHomeAlt, faHomeHeart } from '@fortawesome/pro-solid-svg-icons';
+import { faCalendarEdit, faHomeHeart, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import Header from '../components/Header';
 import History from '../components/History';
+import AnimalCards from '../components/AnimalCards';
 import Flatpickr from 'react-flatpickr';
-import { S3_BUCKET } from '../constants';
 
 function ServiceRequestDetails({id}) {
 
@@ -34,7 +33,6 @@ function ServiceRequestDetails({id}) {
       datetime.current.flatpickr.clear();
       axios.patch('/hotline/api/servicerequests/' + id + '/', {followup_date:null})
       .catch(error => {
-        console.log(error.response);
       });
     }
   }, [id, datetime]);
@@ -66,9 +64,6 @@ function ServiceRequestDetails({id}) {
 
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
-  const [animalToDelete, setAnimalToDelete] = useState({id:0, name:''});
-  const [showAnimalConfirm, setShowAnimalConfirm] = useState(false);
-  const handleAnimalClose = () => setShowAnimalConfirm(false);
 
   // Handle animal reunification submit.
   const handleSubmit = async () => {
@@ -78,38 +73,33 @@ function ServiceRequestDetails({id}) {
       handleClose()
     })
     .catch(error => {
-      console.log(error.response);
-    });
-  }
-
-  // Handle animal removal submit.
-  const handleAnimalSubmit = async () => {
-    await axios.patch('/hotline/api/servicerequests/' + id + '/', {remove_animal:animalToDelete.id})
-    .then(response => {
-      setData(prevState => ({ ...prevState, "animals":prevState.animals.filter(animal => animal.id !== animalToDelete.id) }));
-      handleAnimalClose();
-    })
-    .catch(error => {
-      console.log(error.response);
     });
   }
 
   // Hook for initializing data.
   useEffect(() => {
+    let unmounted = false;
     let source = axios.CancelToken.source();
+
     const fetchServiceRequestData = async () => {
       // Fetch ServiceRequest data.
       await axios.get('/hotline/api/servicerequests/' + id + '/', {
         cancelToken: source.token,
       })
       .then(response => {
-        setData(response.data);
+        if (!unmounted) {
+          setData(response.data);
+        }
       })
       .catch(error => {
-        console.log(error.response);
       });
     };
     fetchServiceRequestData();
+    // Cleanup.
+    return () => {
+      unmounted = true;
+      source.cancel();
+    };
   }, [id]);
 
   return (
@@ -125,7 +115,7 @@ function ServiceRequestDetails({id}) {
             </Tooltip>
           }
         >
-          <Link href={"/hotline/servicerequest/edit/" + id}> <FontAwesomeIcon icon={faEdit} className="mb-1" inverse /></Link>
+          <Link href={"/hotline/servicerequest/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-1" inverse /></Link>
         </OverlayTrigger>
         <OverlayTrigger
           key={"cancel-service-request"}
@@ -136,13 +126,13 @@ function ServiceRequestDetails({id}) {
             </Tooltip>
           }
         >
-          <FontAwesomeIcon icon={faBan} style={{cursor:'pointer'}} className="fa-move-up" inverse onClick={() => {setShowModal(true)}}/>
+          <FontAwesomeIcon icon={faBan} style={{cursor:'pointer'}} inverse onClick={() => {setShowModal(true)}}/>
         </OverlayTrigger>
         &nbsp;| <span style={{textTransform:"capitalize"}}>{data.status}</span>
       </Header>
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>Confirm Cancelation</Modal.Title>
+          <Modal.Title>Confirm Cancellation</Modal.Title>
         </Modal.Header>
         <Modal.Body>Are you sure you want to cancel this Service Request and associated animals?</Modal.Body>
         <Modal.Footer>
@@ -232,13 +222,12 @@ function ServiceRequestDetails({id}) {
                       setData(prevState => ({ ...prevState, "followup_date":dateStr }));
                       axios.patch('/hotline/api/servicerequests/' + id + '/', {followup_date:date[0]})
                       .catch(error => {
-                        console.log(error.response);
                       });
                     }}
                     value={data.followup_date || null}>
                   </Flatpickr>
                 </ListGroup.Item>
-                <ListGroup.Item style={{marginBottom:"-13px"}}><b>Directions:</b> {data.directions}</ListGroup.Item>
+                <ListGroup.Item style={{marginBottom:"-13px"}}><b>Directions:</b> {data.directions||"No directions available"}</ListGroup.Item>
               </ListGroup>
             </Card.Body>
           </Card>
@@ -253,46 +242,48 @@ function ServiceRequestDetails({id}) {
                     placement="top"
                     overlay={
                       <Tooltip id={`tooltip-add-owner`}>
-                        Add owner
+                        Add an owner to this service request and its animals
                       </Tooltip>
                     }
                   >
-                    <Link href={"/people/owner/new?servicerequest_id=" + id}><FontAwesomeIcon icon={faPlusSquare} size="sm" className="ml-1" inverse /></Link>
+                    <Link href={"/people/owner/new?servicerequest_id=" + id}><FontAwesomeIcon icon={faUserPlus} size="sm" className="ml-1" inverse /></Link>
                   </OverlayTrigger>
                 </h4>
               </Card.Title>
               <hr/>
               <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-20px"}}>
                 {data.owner_objects.map(owner => (
-                  <ListGroup.Item key={owner.id}><b>Owner: </b>{owner.first_name} {owner.last_name}
+                  <ListGroup.Item key={owner.id}><b>Owner: </b><Link href={"/people/owner/" + owner.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{owner.first_name} {owner.last_name}</Link>
+                    {owner.display_phone ?
                     <OverlayTrigger
-                      key={"owner-details"}
+                      key={"owner-phone"}
                       placement="top"
                       overlay={
-                        <Tooltip id={`tooltip-owner-details`}>
-                          Owner details
+                        <Tooltip id={`tooltip-owner-phone`}>
+                          Phone: {owner.display_phone}
                         </Tooltip>
                       }
                     >
-                      <Link href={"/people/owner/" + owner.id}><FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1" inverse /></Link>
+                      <FontAwesomeIcon icon={faPhoneRotary} className="ml-1" inverse />
                     </OverlayTrigger>
-                    &nbsp;| {owner.display_phone||owner.email||"No Contact"}
+                    : ""}
+                    {owner.email ?
+                    <OverlayTrigger
+                      key={"owner-email"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-owner-email`}>
+                          Email: {owner.email}
+                        </Tooltip>
+                      }
+                    >
+                      <FontAwesomeIcon icon={faEnvelope} className="ml-1" inverse />
+                    </OverlayTrigger>
+                    : ""}
                   </ListGroup.Item>
                 ))}
                 {data.reporter ?
-                <ListGroup.Item><b>Reporter: </b>{data.reporter_object.first_name} {data.reporter_object.last_name} {data.reporter_object.agency ? <span>({data.reporter_object.agency})</span> : "" }
-                <OverlayTrigger
-                  key={"reporter-details"}
-                  placement="top"
-                  overlay={
-                    <Tooltip id={`tooltip-reporter-details`}>
-                      Reporter details
-                    </Tooltip>
-                  }
-                >
-                  <Link href={"/people/reporter/" + data.reporter}><FontAwesomeIcon icon={faClipboardList} size="sm" inverse /></Link>
-                </OverlayTrigger>
-                </ListGroup.Item> : ""}
+                <ListGroup.Item><b>Reporter: </b><Link href={"/people/reporter/" + data.reporter} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.reporter_object.first_name} {data.reporter_object.last_name}</Link> {data.reporter_object.agency ? <span>({data.reporter_object.agency})</span> : "" }</ListGroup.Item> : ""}
               </ListGroup>
             </Card.Body>
           </Card>
@@ -309,7 +300,7 @@ function ServiceRequestDetails({id}) {
                     placement="top"
                     overlay={
                       <Tooltip id={`tooltip-add-animal`}>
-                        Add animal
+                        Add an animal to this service request
                       </Tooltip>
                     }
                   >
@@ -331,88 +322,14 @@ function ServiceRequestDetails({id}) {
                 </h4>
               </Card.Title>
               <hr />
-              <span className="d-flex flex-wrap align-items-end" style={{marginLeft:"-15px"}}>
-              {data.animals.map(animal => (
-              <Card key={animal.id} className="border rounded ml-3 mb-3" style={{width:"153px", whiteSpace:"nowrap", overflow:"hidden"}}>
-                <Card.Img variant="top" src={animal.front_image || animal.side_image || `${S3_BUCKET}images/image-not-found.png`} style={{width:"153px", height:"153px", objectFit: "cover", overflow: "hidden"}} />
-                <Card.ImgOverlay className="text-border" style={{height:"20px"}}>#{animal.id}</Card.ImgOverlay>
-                <Card.Text className="mb-0 border-top" style={{textTransform:"capitalize"}}>
-                <span title={animal.name} className="ml-1">{animal.name||"Unknown"}</span>
-                <span className="ml-1" style={{display:"block"}}>
-                  {animal.species}&nbsp;
-                  {animal.status === "SHELTERED IN PLACE" ?
-                    <OverlayTrigger key={"sip"} placement="top"
-                                    overlay={<Tooltip id={`tooltip-sip`}>SHELTERED IN PLACE</Tooltip>}>
-                        <span className="fa-layers fa-fw">
-                          <FontAwesomeIcon icon={faCircle} transform={'grow-1'} />
-                          <FontAwesomeIcon icon={faHomeAlt} style={{color:"#444"}} transform={'shrink-3'} size="sm" inverse />
-                        </span>
-                    </OverlayTrigger> : ""}
-                  {animal.status === "REPORTED" ?
-                    <OverlayTrigger key={"reported"} placement="top"
-                                    overlay={<Tooltip id={`tooltip-reported`}>REPORTED</Tooltip>}>
-                        <FontAwesomeIcon icon={faExclamationCircle} inverse/>
-                    </OverlayTrigger> : ""}
-                  {animal.status === "UNABLE TO LOCATE" ?
-                    <OverlayTrigger key={"unable-to-locate"} placement="top"
-                                    overlay={<Tooltip id={`tooltip-unable-to-locate`}>UNABLE TO LOCATE</Tooltip>}>
-                        <FontAwesomeIcon icon={faQuestionCircle} inverse/>
-                    </OverlayTrigger> : ""}
-                  {animal.status === "EVACUATED" ?
-                    <OverlayTrigger key={"evacuated"} placement="top"
-                                    overlay={<Tooltip id={`tooltip-evacuated`}>EVACUATED</Tooltip>}>
-                        <FontAwesomeIcon icon={faHelicopter} size="sm" inverse/>
-                    </OverlayTrigger> : ""}
-                  {animal.status === "REUNITED" ?
-                    <OverlayTrigger key={"reunited"} placement="top"
-                                    overlay={<Tooltip id={`tooltip-reunited`}>REUNITED</Tooltip>}>
-                        <FontAwesomeIcon icon={faHeart} inverse/>
-                    </OverlayTrigger> : ""}
-                  {animal.status === "SHELTERED" ?
-                    <OverlayTrigger key={"sheltered"} placement="top"
-                                    overlay={<Tooltip id={`tooltip-sheltered`}>SHELTERED</Tooltip>}>
-                        <FontAwesomeIcon icon={faHome} inverse/>
-                    </OverlayTrigger> : ""}
-                  {animal.status === "DECEASED" ?
-                    <OverlayTrigger key={"deceased"} placement="top"
-                                    overlay={<Tooltip id={`tooltip-deceased`}>DECEASED</Tooltip>}>
-                        <FontAwesomeIcon icon={faSkullCrossbones} inverse/>
-                    </OverlayTrigger>
-                  : ""}
-                  <OverlayTrigger
-                    key={"animal-details"}
-                    placement="top"
-                    overlay={
-                      <Tooltip id={`tooltip-animal-details`}>
-                        Animal details
-                      </Tooltip>
-                    }
-                  >
-                    <Link href={"/animals/" + animal.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
-                  </OverlayTrigger>
-                  <OverlayTrigger
-                    key={"remove-animal"}
-                    placement="top"
-                    overlay={
-                      <Tooltip id={`tooltip-remove-animal`}>
-                        Remove animal
-                      </Tooltip>
-                    }
-                  >
-                    <FontAwesomeIcon icon={faMinusSquare} style={{cursor:'pointer'}} onClick={() => {setAnimalToDelete({id:animal.id, name: animal.name});setShowAnimalConfirm(true);}} className="ml-1" inverse />
-                  </OverlayTrigger>
-                </span>
-                </Card.Text>
-              </Card>
-              ))}
-              </span>
+              <AnimalCards animals={data.animals} show_owner={false} show_status={true} />
             </Card.Body>
           </Card>
         </div>
       </div>
-      <div className="row mb-2">
+      <div className="row">
         <div className="col-12 d-flex">
-          <Card className="mb-2 border rounded" style={{width:"100%"}}>
+          <Card className="border rounded" style={{width:"100%"}}>
             <Card.Body>
               <Card.Title>
                 <h4 className="mb-0">Visit Log
@@ -434,7 +351,8 @@ function ServiceRequestDetails({id}) {
                 {data.evacuation_assignments.filter(da => !da.end_time).map(latest_dispatch => (
                   <ListGroup.Item key={latest_dispatch.id}>
                     <b>Active Dispatch Assignment:</b>
-                    &nbsp;{latest_dispatch.team__name}
+                    &nbsp;<Link href={"/dispatch/summary/" + latest_dispatch.id} className="text-link" style={{textDecoration:"none", color:"white"}}><Moment format="LL">{latest_dispatch.start_time}</Moment></Link>&nbsp;|&nbsp;
+                    {latest_dispatch.team_name}
                     <OverlayTrigger
                       key={"team-names"}
                       placement="top"
@@ -447,17 +365,6 @@ function ServiceRequestDetails({id}) {
                       <FontAwesomeIcon icon={faUsers} className="ml-1 fa-move-down" />
                     </OverlayTrigger>
                     <OverlayTrigger
-                      key={"dispatch-summary"}
-                      placement="top"
-                      overlay={
-                        <Tooltip id={`tooltip-dispatch-summary`}>
-                          Dispatch assignment summary
-                        </Tooltip>
-                      }
-                    >
-                      <Link href={"/dispatch/summary/" + latest_dispatch.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
-                    </OverlayTrigger>
-                    <OverlayTrigger
                       key={"close-dispatch-assignment"}
                       placement="top"
                       overlay={
@@ -468,12 +375,13 @@ function ServiceRequestDetails({id}) {
                     >
                       <Link href={"/dispatch/resolution/" + latest_dispatch.id}><FontAwesomeIcon icon={faClipboardCheck} className="ml-1" inverse /></Link>
                     </OverlayTrigger>
-                    <div><b>Date Opened: </b><Moment format="LL">{latest_dispatch.start_time}</Moment></div>
                   </ListGroup.Item>
                 ))}
-                {data.visit_notes.map((visit_note, index) => (
+                {data.visit_notes.map((visit_note) => (
                   <ListGroup.Item key={visit_note.id}>
-                    <b>Dispatch Assignment:</b> {visit_note.team_name}
+                    <b>Dispatch Assignment:</b>
+                    &nbsp;<Link href={"/dispatch/summary/" + visit_note.evac_assignment} className="text-link" style={{textDecoration:"none", color:"white"}}><Moment format="LL">{visit_note.date_completed}</Moment></Link>&nbsp;|&nbsp;
+                    {visit_note.team_name}
                     <OverlayTrigger
                       key={"team-names-"+id}
                       placement="top"
@@ -486,17 +394,6 @@ function ServiceRequestDetails({id}) {
                       <FontAwesomeIcon icon={faUsers} className="ml-1 fa-move-down" />
                     </OverlayTrigger>
                     <OverlayTrigger
-                      key={"dispatch-summary"}
-                      placement="top"
-                      overlay={
-                        <Tooltip id={`tooltip-dispatch-summary`}>
-                          Dispatch assignment summary
-                        </Tooltip>
-                      }
-                    >
-                      <Link href={"/dispatch/summary/" + visit_note.evac_assignment}><FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1" inverse /></Link>
-                    </OverlayTrigger>
-                    <OverlayTrigger
                       key={"edit-visit-note"}
                       placement="top"
                       overlay={
@@ -505,9 +402,9 @@ function ServiceRequestDetails({id}) {
                         </Tooltip>
                       }
                     >
-                      <Link href={"/dispatch/assignment/note/" + visit_note.id}> <FontAwesomeIcon icon={faEdit} size="sm" inverse /></Link>
+                      <Link href={"/dispatch/assignment/note/" + visit_note.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
                     </OverlayTrigger>
-                    <div className="mt-1"><b>Date Completed:</b> <Moment format="LL">{visit_note.date_completed}</Moment>
+                    <div className="mt-1">
                       {visit_note.forced_entry ?
                         <OverlayTrigger
                           key={"forced"}
@@ -531,20 +428,6 @@ function ServiceRequestDetails({id}) {
         </div>
       </div>
       <History action_history={data.action_history} />
-      <Modal show={showAnimalConfirm} onHide={handleAnimalClose}>
-        <Modal.Header closeButton>
-          <Modal.Title>Confirm Animal Removal</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <p>
-            Are you sure you would like to remove animal {animalToDelete.name || "Unknown"} from this service request?
-          </p>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="primary" onClick={handleAnimalSubmit}>Yes</Button>
-          <Button variant="secondary" onClick={handleAnimalClose}>Close</Button>
-        </Modal.Footer>
-      </Modal>
       <Modal show={show} onHide={handleClose}>
         <Modal.Header closeButton>
           <Modal.Title>Confirm Animal Reunification</Modal.Title>

@@ -16,7 +16,7 @@ const ResetPassword = () => {
     token = '',
   } = queryParams;
 
-  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})/
 
   return (
     <>
@@ -31,14 +31,12 @@ const ResetPassword = () => {
             .oneOf([Yup.ref('password'), null], 'Passwords must match.'),
         })}
         onSubmit={(values, actions ) => {
-          console.log(values)
           setTimeout(() => {
             axios.post('/accounts/api/password_reset/confirm/', values)
             .then(response => {
-              navigate('/login');
+              navigate('/');
             })
             .catch(e => {
-              console.log(e.response);
             });
             actions.setSubmitting(false);
           }, 500);
@@ -68,7 +66,7 @@ const ResetPassword = () => {
             />
             <BootstrapForm.Group as={Col}>
               <Button type="submit" size="lg" className="btn-primary" block>Reset Password</Button>
-              <Button size="lg" className="btn-primary" onClick={() => navigate('/login')} block>Return to Login</Button>
+              <Button size="lg" className="btn-primary" onClick={() => navigate('/')} block>Return to Login</Button>
             </BootstrapForm.Group>
           </BootstrapForm>
         </Col>

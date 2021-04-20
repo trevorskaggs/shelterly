@@ -31,4 +31,26 @@ const DispatchDuplicateSRModal = (props) => {
   );
 };
 
-export { DispatchDuplicateSRModal };
+const AnimalDeleteModal = (props) => {
+
+  return (
+    <>
+      <Modal show={props.show} onHide={props.handleClose}>
+        <Modal.Header closeButton>
+          <Modal.Title>Confirm Animal Removal</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>
+            Are you sure you would like to remove animal {props.name || "Unknown"}?
+          </p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="primary" onClick={props.handleSubmit}>Yes</Button>
+          <Button variant="secondary" onClick={props.handleClose}>Close</Button>
+        </Modal.Footer>
+      </Modal>
+    </>
+  );
+};
+
+export { AnimalDeleteModal, DispatchDuplicateSRModal };

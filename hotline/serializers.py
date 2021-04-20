@@ -57,7 +57,7 @@ class SimpleServiceRequestSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ServiceRequest
-        fields = ['id', 'latitude', 'longitude', 'full_address', 'followup_date', 'owners', 'address', 'reporter', 'directions', 'latest_evac', 'evacuation_assignments', 'pending',
+        fields = ['id', 'latitude', 'longitude', 'full_address', 'followup_date', 'owners', 'address', 'city', 'state', 'zip_code', 'apartment', 'reporter', 'directions', 'latest_evac', 'evacuation_assignments', 'pending',
         'animal_count','injured', 'accessible', 'turn_around', 'animals', 'status', 'reported_animals', 'reporter_object', 'owner_objects', 'sheltered_in_place', 'unable_to_locate', 'aco_required']
 
 
@@ -130,7 +130,7 @@ class ServiceRequestSerializer(SimpleServiceRequestSerializer):
 
     class Meta:
         model = ServiceRequest
-        fields = ['id', 'latitude', 'longitude', 'full_address', 'followup_date', 'status',
+        fields = ['id', 'latitude', 'longitude', 'full_address', 'followup_date', 'status', 'address', 'city', 'state', 'zip_code',
         'injured', 'accessible', 'turn_around', 'animals', 'reported_animals', 'sheltered_in_place', 'unable_to_locate', 'aco_required',
         'animal_count', 'action_history', 'owner_objects', 'reporter_object', 'evacuation_assignments', 'visit_notes', 'latest_evac']
 

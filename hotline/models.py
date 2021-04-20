@@ -36,6 +36,18 @@ class ServiceRequest(Location):
         output.append('Animal Count: %s' % self.animal_set.all().count())
         return ', '.join(output)
 
+    def update_status(self):
+        from evac.models import EvacAssignment
+        from animals.models import Animal
+        status = 'closed'
+        if EvacAssignment.objects.filter(end_time=None, service_requests=self).exists():
+            status = 'assigned'
+        elif Animal.objects.filter(status__in=['REPORTED', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE'], request=self).exists():
+            status = 'open'
+        self.status = status
+        self.save()
+
+
     class Meta:
         ordering = ['timestamp']
 

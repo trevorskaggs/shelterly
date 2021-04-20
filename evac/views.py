@@ -1,4 +1,4 @@
-from django.db.models import Count, Exists, OuterRef, Prefetch
+from django.db.models import Count, Exists, OuterRef, Prefetch, Q
 from django.http import JsonResponse
 from datetime import datetime, timedelta
 from rest_framework import filters, permissions, serializers, viewsets
@@ -31,12 +31,11 @@ class DispatchTeamViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = DispatchTeam.objects.all().annotate(is_assigned=Exists(EvacAssignment.objects.filter(team_id=OuterRef("id"), end_time=None)))
-        is_map = self.request.query_params.get('is_map', '')
+        is_map = self.request.query_params.get('map', '')
         if is_map == 'true':
             yesterday = datetime.today() - timedelta(days=1)
-            today = datetime.today()
             y_mid = datetime.combine(yesterday,datetime.min.time())
-            queryset = queryset.filter(dispatch_date__gte=y_mid)
+            queryset = queryset.filter(Q(is_assigned=True) | Q(dispatch_date__gte=y_mid))
         return queryset
 
     def perform_update(self, serializer):
@@ -157,7 +156,7 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
                     else:
                         VisitNote.objects.filter(evac_assignment=evac_assignment, service_request=service_requests[0]).update(date_completed=service_request['date_completed'], notes=service_request['notes'], forced_entry=service_request['forced_entry'])
                 # Only create OwnerContact on first update, otherwise update existing OwnerContact.
-                if service_request.get('owner_contact_id'):
+                if service_request.get('owner_contact_id') and service_request.get('owner_contact_note') and service_request.get('owner_contact_time'):
                     if not OwnerContact.objects.filter(evac_assignment=evac_assignment, service_request=service_requests[0]).exists():
                         OwnerContact.objects.create(evac_assignment=evac_assignment, service_request=service_requests[0], owner=Person.objects.get(pk=service_request['owner_contact_id']), owner_contact_note=service_request['owner_contact_note'], owner_contact_time=service_request['owner_contact_time'])
                     else:

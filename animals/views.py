@@ -62,6 +62,10 @@ class AnimalViewSet(viewsets.ModelViewSet):
                     # Create image object.
                     AnimalImage.objects.create(image=image_data, animal=animal, category=category)
 
+            # Check to see if animal SR status should be changed.
+            if animal.request:
+                animal.request.update_status()
+
     def perform_update(self, serializer):
         if serializer.is_valid():
 
@@ -110,6 +114,10 @@ class AnimalViewSet(viewsets.ModelViewSet):
 
             animal = serializer.save()
 
+            # Remove animal.
+            if self.request.data.get('remove_animal'):
+                Animal.objects.filter(id=self.request.data.get('remove_animal')).update(status='CANCELED', shelter=None, room=None)
+
             # Set order if present, add 1 to avoid 0 index since order is a PositiveIntergerField.
             if type(self.request.data.get('set_order', '')) == int:
                 animal.to(int(self.request.data.get('set_order'))+1)
@@ -144,6 +152,10 @@ class AnimalViewSet(viewsets.ModelViewSet):
                 # Otherwise create a new extra image.
                 else:
                     AnimalImage.objects.create(image=image_data, animal=animal, category="extra")
+
+            # Check to see if animal SR status should be changed.
+            if animal.request:
+                animal.request.update_status()
     
     def get_queryset(self):
         """

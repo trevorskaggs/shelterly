@@ -54,7 +54,6 @@ const DispatchTeamMemberForm = () => {
             }
           })
           .catch(error => {
-            console.log(error.response);
           });
           setSubmitting(false);
         }, 500);

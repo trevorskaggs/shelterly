@@ -4,7 +4,7 @@ import { Link, navigate } from 'raviger';
 import { Button, Card, ListGroup, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faArrowsAltH, faClipboardList, faEdit, faPlusSquare,
+  faArrowsAltH, faEdit, faPlusSquare,
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faSquare,
@@ -24,27 +24,34 @@ function BuildingDetails({id}) {
     .then(response => {
       navigate('/shelter/' + data.shelter)
     })
-    .catch(e => {
-      console.log(e);
+    .catch(error => {
     });
   }
 
   // Hook for initializing data.
   useEffect(() => {
+    let unmounted = false;
     let source = axios.CancelToken.source();
+
     const fetchBuildingData = async () => {
       // Fetch Building Details data.
       await axios.get('/shelter/api/building/' + id + '/', {
         cancelToken: source.token,
       })
       .then(response => {
-        setData(response.data);
+        if (!unmounted) {
+          setData(response.data);
+        }
       })
-      .catch(e => {
-        console.log(e);
+      .catch(error => {
       });
     };
     fetchBuildingData();
+    // Cleanup.
+    return () => {
+      unmounted = true;
+      source.cancel();
+    };
   }, [id]);
 
   return (
@@ -89,18 +96,7 @@ function BuildingDetails({id}) {
             <b>Description: </b>{data.description}
           </ListGroup.Item> : ""}
           <ListGroup.Item>
-            <b>Shelter:</b> {data.shelter_name}
-            <OverlayTrigger
-              key={"shelter-details"}
-              placement="top"
-              overlay={
-                <Tooltip id={`tooltip-shelter-details`}>
-                  Shelter details
-                </Tooltip>
-              }
-            >
-              <Link href={"/shelter/" + data.shelter}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
-            </OverlayTrigger>
+            <b>Shelter:</b> <Link href={"/shelter/" + data.shelter} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.shelter_name}</Link>
           </ListGroup.Item>
         </ListGroup>
       </Card.Body>
@@ -135,9 +131,9 @@ function BuildingDetails({id}) {
           {data.rooms.map(room => (
             <span key={room.id} className="mr-3 mb-3">
               <Link href={"/shelter/room/" + room.id} className="building-link" style={{textDecoration:"none", color:"white"}}>
-                <Card className="border rounded" style={{width:"110px", height:"110px"}}>
+                <Card className="border rounded shelter-hover-div" style={{width:"110px", height:"110px"}}>
                   <div style={{marginRight:"-2px"}}>
-                    <div className="card-header border" title={room.name} style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"3px", marginLeft:"-1px", marginTop:"-1px", width:"100%", backgroundColor:"#615e5e", fontSize:"16px", whiteSpace:"nowrap", overflow:"hidden"}}>
+                    <div className="card-header border pr-0" title={room.name} style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"3px", marginLeft:"-1px", marginTop:"-1px", width:"100%", backgroundColor:"#615e5e", fontSize:"16px", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis"}}>
                       {room.name}
                     </div>
                   </div>

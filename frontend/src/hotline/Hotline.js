@@ -9,7 +9,6 @@ import Map, { prettyText, closedMarkerIcon, reportedMarkerIcon, SIPMarkerIcon, U
 import Header from "../components/Header";
 import { S3_BUCKET } from '../constants';
 
-
 function Hotline() {
 
   const [data, setData] = useState({service_requests: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
@@ -62,7 +61,6 @@ function Hotline() {
       })
       .catch(error => {
         if (!unmounted) {
-          console.log(error.response);
           setData({service_requests: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
         }
       });
@@ -107,7 +105,7 @@ function Hotline() {
                   key={service_request.id}
                   position={[service_request.latitude, service_request.longitude]}
                   icon={service_request.sheltered_in_place > 0 ? SIPMarkerIcon : service_request.unable_to_locate > 0 ? UTLMarkerIcon : service_request.reported_animals > 0 ? reportedMarkerIcon : closedMarkerIcon}
-                  onClick={() => window.open("/hotline/servicerequest/" + service_request.id, "_blank")}
+                  onClick={() => window.open("/hotline/servicerequest/" + service_request.id)}
                 >
                   <MapTooltip autoPan={false}>
                     <span>
@@ -124,10 +122,10 @@ function Hotline() {
                       {service_request.full_address}
                       {service_request.followup_date ? <div>Followup Date: <Moment format="L">{service_request.followup_date}</Moment></div> : ""}
                       <div>
-                      {service_request.aco_required ? <img width={16} height={16} src={`${S3_BUCKET}images/badge-sheriff.png`} alt="" className="mr-1" /> : ""}
-                        {service_request.injured ? <img width={16} height={16} src={`${S3_BUCKET}images/band-aid-solid.png`} alt="" className="mr-1" /> : ""}
-                        {service_request.accessible ? <img width={16} height={16} src={`${S3_BUCKET}images/car-solid.png`} alt="" className="mr-1" /> : ""}
-                        {service_request.turn_around ? <img width={16} height={16} src={`${S3_BUCKET}images/trailer-solid.png`} alt="" /> : ""}
+                      {service_request.aco_required ? <img width={16} height={16} src={`${S3_BUCKET}images/badge-sheriff.png`} alt="ACO Required" className="mr-1" /> : ""}
+                        {service_request.injured ? <img width={16} height={16} src={`${S3_BUCKET}images/band-aid-solid.png`} alt="Injured" className="mr-1" /> : ""}
+                        {service_request.accessible ? <img width={16} height={16} src={`${S3_BUCKET}images/car-solid.png`} alt="Accessible" className="mr-1" /> : ""}
+                        {service_request.turn_around ? <img width={16} height={16} src={`${S3_BUCKET}images/trailer-solid.png`} alt="Turn Around" /> : ""}
                       </div>
                     </span>
                   </MapTooltip>

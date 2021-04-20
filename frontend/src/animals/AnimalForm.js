@@ -1,7 +1,7 @@
 import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { navigate, useQueryParams } from 'raviger';
-import { Field, Form, Formik } from "formik";
+import { Form, Formik } from "formik";
 import { Col, Image } from 'react-bootstrap';
 import { Button, ButtonGroup, Form as BootstrapForm } from "react-bootstrap";
 import { Card } from 'react-bootstrap';
@@ -165,6 +165,7 @@ const AnimalForm = (props) => {
 
   // Hook for initializing data.
   useEffect(() => {
+    let unmounted = false;
     let source = axios.CancelToken.source();
     if (id) {
       const fetchAnimalData = async () => {
@@ -173,15 +174,16 @@ const AnimalForm = (props) => {
           cancelToken: source.token,
         })
         .then(response => {
-          // Initialize number_of_animals because it's not returned by the serializer.
-          response.data['number_of_animals'] = 1;
-          setData(response.data);
-          setPlaceholder("Select...");
-          // Turn off reinitialization after form load so that data can be modified for image tracking without causing a form reset.
-          setReinitialize(false);
+          if (!unmounted) {
+            // Initialize number_of_animals because it's not returned by the serializer.
+            response.data['number_of_animals'] = 1;
+            setData(response.data);
+            setPlaceholder("Select...");
+            // Turn off reinitialization after form load so that data can be modified for image tracking without causing a form reset.
+            setReinitialize(false);
+          }
         })
         .catch(error => {
-          console.log(error.response);
         });
       };
       fetchAnimalData();
@@ -194,31 +196,33 @@ const AnimalForm = (props) => {
         cancelToken: source.token,
       })
       .then(response => {
-        let options = [];
-        let room_options = {};
-        response.data.forEach(shelter => {
-          let display_name = shelter.name + ' (' + shelter.buildings.length + ' buildings, ' + shelter.room_count + ' rooms, ' + shelter.animal_count + ' animals)';
-          // Build shelter option list.
-          options.push({value: shelter.id, label: display_name});
-          room_options[shelter.id] = [];
-          shelter.buildings.forEach(building => {
-            building.rooms.forEach(room => {
-              // Build room option list identified by shelter ID.
-              room_options[shelter.id].push({value: room.id, label: room.building_name + ' - ' + room.name + ' (' + room.animal_count + ' animals)'});
+        if (!unmounted) {
+          let options = [];
+          let room_options = {};
+          response.data.forEach(shelter => {
+            // Build shelter option list.
+            options.push({value: shelter.id, label: shelter.name});
+            room_options[shelter.id] = [];
+            shelter.buildings.forEach(building => {
+              building.rooms.forEach(room => {
+                // Build room option list identified by shelter ID.
+                room_options[shelter.id].push({value: room.id, label: room.building_name + ' - ' + room.name + ' (' + room.animal_count + ' animals)'});
+              });
             });
           });
-        });
-        setShelters({options: options, shelters:response.data, room_options:room_options, isFetching:false});
+          setShelters({options: options, shelters:response.data, room_options:room_options, isFetching:false});
+        }
       })
       .catch(error => {
-        console.log(error.response);
-        setShelters({options: [], shelters: [], room_options: {}, isFetching: false});
+        if (!unmounted) {
+          setShelters({options: [], shelters: [], room_options: {}, isFetching: false});
+        }
       });
     };
     fetchShelters();
-
     // Cleanup.
     return () => {
+      unmounted = true;
       source.cancel();
     };
   }, [id]);
@@ -343,7 +347,6 @@ const AnimalForm = (props) => {
                 animal.append('new_owner', ownerResponse[0].data.id);
                 axios.post('/animals/api/animal/', animal)
                 .catch(error => {
-                  console.log(error.response);
                 });
               });
               // Create current animal then navigate.
@@ -363,7 +366,6 @@ const AnimalForm = (props) => {
                 }
               })
               .catch(error => {
-                console.log(error.response);
               });
             }
             else {
@@ -382,7 +384,6 @@ const AnimalForm = (props) => {
                 }
               })
               .catch(error => {
-                console.log(error.response);
               });
             }
             else {
@@ -402,7 +403,6 @@ const AnimalForm = (props) => {
                 }
               })
               .catch(error => {
-                console.log(error.response);
               });
               setSubmitting(false);
             }
@@ -419,9 +419,6 @@ const AnimalForm = (props) => {
               <span style={{cursor:'pointer'}} onClick={() => {props.handleBack('animals', props.state.stepIndex > 1 ? 'owner' : 'reporter')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}</span>}{!id ? "Animal Information" : "Update Animal"}</Card.Header>
             <Card.Body>
             <BootstrapForm as={Form}>
-              <Field type="hidden" value={servicerequest_id||""} name="request" id="request"></Field>
-              <Field type="hidden" value={data.latitude || ""} name="latitude" id="latitude"></Field>
-              <Field type="hidden" value={data.longitude || ""} name="longitude" id="longitude"></Field>
                 <BootstrapForm.Row>
                   <Col xs={id ? "6" : "5"}>
                     <DropDown
@@ -633,6 +630,7 @@ const AnimalForm = (props) => {
                         key={`my_unique_shelter_select_key__${formikProps.values.shelter}`}
                         onChange={(instance) => {
                           roomRef.current.select.clearValue();
+                          formikProps.setFieldValue("room", '');
                           formikProps.setFieldValue("shelter", instance === null ? '' : instance.value);
                         }}
                         value={formikProps.values.shelter||''}
@@ -649,7 +647,7 @@ const AnimalForm = (props) => {
                         key={`my_unique_room_select_key__${formikProps.values.room}`}
                         options={shelters.room_options[formikProps.values.shelter] ? shelters.room_options[formikProps.values.shelter] : []}
                         isClearable={true}
-                        value={formikProps.values.room||null}
+                        value={formikProps.values.room||''}
                       />
                     </Col>
                   </BootstrapForm.Row>
@@ -660,7 +658,7 @@ const AnimalForm = (props) => {
                   <BootstrapForm.Row className="align-items-end">
                     {data.front_image ?
                       <span className="mt-2 ml-1 mr-3">
-                        <Image width={131} src={data.front_image} alt="" thumbnail />
+                        <Image width={131} src={data.front_image} alt="Animal Front" thumbnail />
                         <div className="mb-2">
                           <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => clearImage("front_image", formikProps.setFieldValue)} style={{backgroundColor:"red"}} />
                           <span className="ml-1">Front-Shot</span>
@@ -679,7 +677,7 @@ const AnimalForm = (props) => {
                     }
                     {data.side_image ?
                       <span className="mt-2 mr-3">
-                        <Image width={131} src={data.side_image} alt="" thumbnail />
+                        <Image width={131} src={data.side_image} alt="Animal Side" thumbnail />
                         <div className="mb-2">
                           <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => clearImage("side_image", formikProps.setFieldValue)} style={{backgroundColor:"red"}} />
                           <span className="ml-1">Side-Shot</span>
@@ -699,7 +697,7 @@ const AnimalForm = (props) => {
                     {data.extra_images.length > 0 ?
                       <span className="mt-2 d-flex flex-wrap align-items-end">
                         {data.extra_images.map(extra_image => (
-                          <span key={extra_image} className="mr-3"><Image width={131} src={extra_image} alt="" thumbnail />
+                          <span key={extra_image} className="mr-3"><Image width={131} src={extra_image} alt="Animal Extra" thumbnail />
                             <div className="mb-2">
                               <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => clearImages(extra_image, formikProps.setFieldValue)} style={{backgroundColor:"red"}} />
                               <span className="ml-1">Extra</span>

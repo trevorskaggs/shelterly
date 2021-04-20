@@ -7,8 +7,8 @@ import Header from './components/Header';
 function Home() {
 
   // Initial state.
-  const { state, dispatch } = useContext(AuthContext);
-  const [cookies, setCookie, removeCookie] = useCookies(['token']);
+  const { state } = useContext(AuthContext);
+  const [cookies] = useCookies(['token']);
 
   return (
     <>

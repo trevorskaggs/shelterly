@@ -2,19 +2,19 @@ import React, { useEffect, useState, useRef } from 'react';
 import axios from "axios";
 import { Link, useQueryParams } from 'raviger';
 import { Button, ButtonGroup, Card, CardGroup, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Pagination, Tooltip } from 'react-bootstrap';
-import ReactImageFallback from 'react-image-fallback';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBandAid, faCalendarDay, faClipboardList, faCut, faLink, faNotesMedical, faStickyNote, faUserAltSlash
+  faBandAid, faCalendarDay, faClipboardList, faCut, faEnvelope, faLink, faNotesMedical, faUserAltSlash
 } from '@fortawesome/free-solid-svg-icons';
-import { faClawMarks } from '@fortawesome/pro-solid-svg-icons';
+import {
+  faDotCircle
+} from '@fortawesome/free-regular-svg-icons';
+import { faClawMarks, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import Moment from 'react-moment';
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
 import { titleCase } from '../components/Utils';
-import { S3_BUCKET } from '../constants';
-
-import { ITEMS_PER_PAGE } from '../constants';
+import { S3_BUCKET, ITEMS_PER_PAGE } from '../constants';
 
 function AnimalSearch() {
 
@@ -69,7 +69,6 @@ function AnimalSearch() {
       })
       .catch(error => {
         if (!unmounted) {
-          console.log(error.response);
           setData({animals: [], isFetching: false});
         }
       });
@@ -107,28 +106,44 @@ function AnimalSearch() {
       </Form>
       {data.animals.map((animal, index) => (
         <div key={animal.id} className="mt-3" hidden={page !== Math.ceil((index+1)/ITEMS_PER_PAGE)}>
-          <div className="card-header"><h4 style={{marginBottom:"-2px",  marginLeft:"-12px"}}>#{animal.id} {animal.name ? titleCase(animal.name) : "Unknown"}
-          <OverlayTrigger
-            key={"animal-details"}
-            placement="top"
-            overlay={
-              <Tooltip id={`tooltip-animal-details`}>
-                Animal details
-              </Tooltip>
-            }
-          >
-            <Link href={"/animals/" + animal.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
-          </OverlayTrigger>
-          &nbsp;| {titleCase(animal.status)}</h4></div>
+          <div className="card-header">
+            <h4 style={{marginBottom:"-2px",  marginLeft:"-12px"}}>
+              <OverlayTrigger
+                key={"animal-details"}
+                placement="top"
+                overlay={
+                  <Tooltip id={`tooltip-animal-details`}>
+                    Animal details
+                  </Tooltip>
+                }
+              >
+                <Link href={"/animals/" + animal.id}><FontAwesomeIcon icon={faDotCircle} className="mr-2" inverse /></Link>
+              </OverlayTrigger>
+              #{animal.id} {animal.name ? titleCase(animal.name) : "Unknown"}&nbsp;| {titleCase(animal.status)}
+            </h4>
+          </div>
           <CardGroup>
             <Card style={{maxWidth:"206px", maxHeight:"206px"}}>
               <Card.Body className="p-0 m-0">
-                <ReactImageFallback style={{width:"206px", height:"206px", objectFit: "cover", overflow: "hidden"}} src={animal.front_image} fallbackImage={[animal.side_image, `${S3_BUCKET}images/image-not-found.png`]} />
+                <img alt="Animal" style={{width:"206px", height:"206px", objectFit: "cover", overflow: "hidden"}} src={animal.front_image || animal.side_image || `${S3_BUCKET}images/image-not-found.png`} />
               </Card.Body>
             </Card>
             <Card style={{marginBottom:"6px", maxWidth:"335px"}}>
               <Card.Body>
                 <Card.Title style={{marginTop:"-9px", marginBottom:"8px"}}>Information
+                {animal.color_notes ?
+                  <OverlayTrigger
+                    key={"animal-color-notes"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-animal-color-notes`}>
+                        {animal.color_notes}
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon icon={faClipboardList} className="ml-1" size="sm" inverse />
+                  </OverlayTrigger>
+                  : ""}
                   {animal.owner_objects.length < 1 ?
                     <OverlayTrigger
                       key={"stray"}
@@ -204,7 +219,7 @@ function AnimalSearch() {
                         </Tooltip>
                       }
                     >
-                      <FontAwesomeIcon icon={faStickyNote} size="sm" className="ml-1" />
+                      <FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1" />
                     </OverlayTrigger> :
                   ""}
                   {animal.medical_notes ?
@@ -221,15 +236,43 @@ function AnimalSearch() {
                     </OverlayTrigger> :
                   ""}
                 </Card.Title>
-                <Scrollbar style={{height:"144px"}}>
+                <Scrollbar style={{height:"144px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
                   <ListGroup>
                     <ListGroup.Item>{titleCase(animal.species)}{animal.size ? <span>,&nbsp;{titleCase(animal.size)}</span> : ""}{animal.sex ? <span>,&nbsp;{titleCase(animal.sex)}</span> : ""}{animal.age ? <span>,&nbsp;{titleCase(animal.age)}</span> : ""}</ListGroup.Item>
                     <ListGroup.Item style={{textTransform:"capitalize"}}><b>Color: </b>{animal.pcolor ? <span>{animal.pcolor}{animal.scolor ? <span> / {animal.scolor}</span> : ""}</span> : "Unknown"}</ListGroup.Item>
                     {animal.owner_objects.map(owner => (
-                      <ListGroup.Item key={owner.id}><b>Owner:</b> {owner.first_name} {owner.last_name}</ListGroup.Item>
+                      <ListGroup.Item key={owner.id}>
+                        <b>Owner:</b> <Link href={"/people/owner/" + owner.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{owner.first_name} {owner.last_name}</Link>
+                        {owner.display_phone ?
+                        <OverlayTrigger
+                          key={"owner-phone"}
+                          placement="top"
+                          overlay={
+                            <Tooltip id={`tooltip-owner-phone`}>
+                              Phone: {owner.display_phone}
+                            </Tooltip>
+                          }
+                        >
+                          <FontAwesomeIcon icon={faPhoneRotary} className="ml-1" inverse />
+                        </OverlayTrigger>
+                        : ""}
+                        {owner.email ?
+                        <OverlayTrigger
+                          key={"owner-email"}
+                          placement="top"
+                          overlay={
+                            <Tooltip id={`tooltip-owner-email`}>
+                              Email: {owner.email}
+                            </Tooltip>
+                          }
+                        >
+                          <FontAwesomeIcon icon={faEnvelope} className="ml-1" inverse />
+                        </OverlayTrigger>
+                        : ""}
+                      </ListGroup.Item>
                     ))}
                     {animal.owner_objects < 1 ? <ListGroup.Item><b>Owner: </b>No Owner</ListGroup.Item> : ""}
-                    {animal.reporter ? <ListGroup.Item><b>Reporter: </b>{animal.reporter_object.first_name} {animal.reporter_object.last_name}</ListGroup.Item> : ""}
+                    {animal.reporter ? <ListGroup.Item><b>Reporter: </b><Link href={"/people/reporter/" + animal.reporter} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.reporter_object.first_name} {animal.reporter_object.last_name}</Link></ListGroup.Item> : ""}
                   </ListGroup>
                 </Scrollbar>
               </Card.Body>
@@ -238,9 +281,11 @@ function AnimalSearch() {
               <Card.Body>
               <Card.Title style={{marginTop:"-9px", marginBottom:"8px"}}>Location</Card.Title>
                 <ListGroup>
-                  <ListGroup.Item className='request'><b>Service Request: </b>{animal.request_address || "None"}</ListGroup.Item>
-                    <ListGroup.Item><b>Shelter: </b>{animal.shelter_name || "None"}
-                      {animal.shelter ? <OverlayTrigger
+                  <ListGroup.Item className='request'><b>Service Request: </b>{animal.request ? <Link href={"/hotline/servicerequest/" + animal.request} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.request_address}</Link> : "None"}</ListGroup.Item>
+                  <ListGroup.Item><b>Shelter: </b>{animal.shelter ? <Link href={"/shelter/" + animal.shelter} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.shelter_object.name}</Link> : "None"}
+                    {animal.shelter ?
+                    <span>
+                      <OverlayTrigger
                         key={"animal-intake-date"}
                         placement="top"
                         overlay={
@@ -251,9 +296,34 @@ function AnimalSearch() {
                       >
                         <FontAwesomeIcon icon={faCalendarDay} className="ml-1" inverse />
                       </OverlayTrigger>
+                      {animal.shelter_object.phone ?
+                      <OverlayTrigger
+                        key={"animal-shelter-phone"}
+                        placement="top"
+                        overlay={
+                          <Tooltip id={`tooltip-animal-shelter-phone`}>
+                            Phone: {animal.shelter_object.display_phone}
+                          </Tooltip>
+                        }
+                      >
+                        <FontAwesomeIcon icon={faPhoneRotary} className="ml-1" inverse />
+                      </OverlayTrigger>
                       : ""}
-                    </ListGroup.Item>
-                    {animal.shelter ? <ListGroup.Item><b>Address: </b>{animal.full_address}</ListGroup.Item> : ""}
+                      <OverlayTrigger
+                        key={"animal-shelter-address"}
+                        placement="top"
+                        overlay={
+                          <Tooltip id={`tooltip-animal-shelter-address`}>
+                            Address: {animal.shelter_object.full_address}
+                          </Tooltip>
+                        }
+                      >
+                        <FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse />
+                      </OverlayTrigger>
+                    </span>
+                    : ""}
+                  </ListGroup.Item>
+                  {animal.room ? <ListGroup.Item><b>Room: </b><Link href={"/shelter/room/" + animal.room} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.room_name}</Link></ListGroup.Item> : ""}
                 </ListGroup>
               </Card.Body>
             </Card>

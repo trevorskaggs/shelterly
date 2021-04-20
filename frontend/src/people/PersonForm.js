@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
 import { navigate, useQueryParams } from 'raviger';
-import { Field, Formik } from 'formik';
+import { Formik } from 'formik';
 import { Form as BootstrapForm, Button, ButtonGroup, Card, Modal } from "react-bootstrap";
 import * as Yup from 'yup';
 import { AddressSearch, TextInput } from '../components/Form';
@@ -92,6 +92,7 @@ const PersonForm = (props) => {
 
   // Hook for initializing data.
   useEffect(() => {
+    let unmounted = false;
     let source = axios.CancelToken.source();
     if (id) {
       const fetchPersonData = async () => {
@@ -99,22 +100,24 @@ const PersonForm = (props) => {
         await axios.get('/people/api/person/' + id + '/', {
           cancelToken: source.token,
         })
-          .then(response => {
+        .then(response => {
+          if (!unmounted) {
             // Set phone field to be the pretty version.
             response.data['phone'] = response.data['display_phone']
             response.data['alt_phone'] = response.data['display_alt_phone']
             // Initialize change_reason on fetch to avoid warning.
             response.data['change_reason'] = '';
             setData(response.data);
-          })
-          .catch(error => {
-            console.log(error.response);
-          });
+          }
+        })
+        .catch(error => {
+        });
       };
       fetchPersonData();
     }
     // Cleanup.
     return () => {
+      unmounted = true;
       source.cancel();
     };
   }, [id]);
@@ -192,7 +195,6 @@ const PersonForm = (props) => {
               }
             })
             .catch(error => {
-              console.log(error.response);
             });
           }
           else {
@@ -216,7 +218,6 @@ const PersonForm = (props) => {
               }
             })
             .catch(error => {
-              console.log(error.response);
             });
             setSubmitting(false);
           }
@@ -235,8 +236,6 @@ const PersonForm = (props) => {
           </Card.Header>}
           <Card.Body>
           <BootstrapForm noValidate>
-            <Field type="hidden" value={data.latitude || ""} name="latitude" id="latitude"></Field>
-            <Field type="hidden" value={data.longitude || ""} name="longitude" id="longitude"></Field>
             <BootstrapForm.Row>
               <TextInput
                 xs="6"
