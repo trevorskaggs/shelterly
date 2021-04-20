@@ -21,7 +21,7 @@ class SimpleAnimalSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Animal
-        fields = ['id', 'species', 'aggressive', 'status', 'aco_required', 'name', 'sex', 'size', 'age', 'pcolor', 'scolor', 'owner_names']
+        fields = ['id', 'species', 'aggressive', 'status', 'aco_required', 'name', 'sex', 'size', 'age', 'pcolor', 'scolor', 'color_notes', 'owner_names']
 
 class ModestAnimalSerializer(SimpleAnimalSerializer):
     evacuation_assignments = serializers.SerializerMethodField()
@@ -31,7 +31,7 @@ class ModestAnimalSerializer(SimpleAnimalSerializer):
 
     class Meta:
         model = Animal
-        fields = ['id', 'species', 'aggressive', 'request', 'shelter', 'status', 'aco_required', 'evacuation_assignments']
+        fields = ['id', 'species', 'aggressive', 'request', 'shelter', 'status', 'aco_required', 'color_notes', 'evacuation_assignments']
 
 class AnimalSerializer(SimpleAnimalSerializer):
     front_image = serializers.SerializerMethodField()
@@ -48,9 +48,9 @@ class AnimalSerializer(SimpleAnimalSerializer):
 
     class Meta:
         model = Animal
-        fields = ['id', 'species', 'aggressive', 'status', 'aco_required', 'front_image', 'side_image', 'extra_images', 'last_seen', 'intake_date', 'address', 'city', 'state', 'zip_code',
-        'found_location', 'owner_names', 'owner_objects', 'shelter_object', 'shelter', 'reporter_object', 'request', 'request_address',
-        'action_history', 'evacuation_assignments', 'room', 'room_name', 'name', 'sex', 'size', 'age', 'pcolor', 'scolor']
+        fields = ['id', 'species', 'status', 'aco_required', 'front_image', 'side_image', 'extra_images', 'last_seen', 'intake_date', 'address', 'city', 'state', 'zip_code',
+        'aggressive', 'injured', 'fixed', 'confined', 'found_location', 'owner_names', 'owner_objects', 'shelter_object', 'shelter', 'reporter_object', 'request', 'request_address',
+        'action_history', 'evacuation_assignments', 'room', 'room_name', 'name', 'sex', 'size', 'age', 'pcolor', 'scolor', 'color_notes']
 
     # Custom Owner object field that excludes animals to avoid a circular reference.
     def get_owner_objects(self, obj):

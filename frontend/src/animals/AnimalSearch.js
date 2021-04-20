@@ -131,6 +131,19 @@ function AnimalSearch() {
             <Card style={{marginBottom:"6px", maxWidth:"335px"}}>
               <Card.Body>
                 <Card.Title style={{marginTop:"-9px", marginBottom:"8px"}}>Information
+                {animal.color_notes ?
+                  <OverlayTrigger
+                    key={"animal-color-notes"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-animal-color-notes`}>
+                        {animal.color_notes}
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon icon={faClipboardList} className="ml-1" size="sm" inverse />
+                  </OverlayTrigger>
+                  : ""}
                   {animal.owner_objects.length < 1 ?
                     <OverlayTrigger
                       key={"stray"}

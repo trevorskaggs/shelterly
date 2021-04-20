@@ -10,12 +10,18 @@ import {
   Card,
   Col,
   ListGroup,
+  OverlayTrigger,
   Row,
+  Tooltip,
 } from 'react-bootstrap';
 import * as Yup from 'yup';
 import {
   useOrderedNodes
 } from "react-register-nodes";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faClipboardList
+} from '@fortawesome/free-solid-svg-icons';
 import smoothScrollIntoView from "smooth-scroll-into-view-if-needed";
 import Moment from 'react-moment';
 import Header from '../components/Header';
@@ -317,7 +323,22 @@ function DispatchResolutionForm({ id }) {
                               isClearable={false}
                             />
                           </Col>
-                          <span style={{ marginTop:"5px" }}><span style={{ textTransform: "capitalize" }}>#{animal.id} - {animal.name || "Unknown"}</span>&nbsp;({animal.species})</span>
+                          <span style={{ marginTop:"5px", textTransform:"capitalize" }}>
+                            #{animal.id} - <Link href={"/animals/" + animal.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.name || "Unknown"}</Link>&nbsp;({animal.species})
+                            {animal.color_notes ?
+                            <OverlayTrigger
+                              key={"animal-color-notes"}
+                              placement="top"
+                              overlay={
+                                <Tooltip id={`tooltip-animal-color-notes`}>
+                                  {animal.color_notes}
+                                </Tooltip>
+                              }
+                            >
+                              <FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse />
+                            </OverlayTrigger>
+                            : ""}
+                          </span>
                         </Row>
                         {props.values && props.values.sr_updates[index] && props.values.sr_updates[index].animals[inception].status === 'SHELTERED' ?
                         <Row>
