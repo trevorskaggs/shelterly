@@ -148,8 +148,6 @@ USE_TZ = True
 
 SECURE_SSL_REDIRECT = False
 
-USE_S3 = True
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 STATIC_URL = '/static/'
@@ -160,7 +158,10 @@ STATICFILES_DIRS = [
 
 MEDIA_URL = '/media/'
 
-if USE_S3:
+if DEBUG:
+    STATIC_ROOT=os.path.join(BASE_DIR, 'static')
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+else:
     #Static File Settings
     STATICFILES_STORAGE = 'custom_storage.StaticStorage'
     #Media File Settings
@@ -168,9 +169,7 @@ if USE_S3:
     #AWS Settings
     AWS_STORAGE_BUCKET_NAME = 'shelterly-files'
     AWS_S3_REGION_NAME = 'us-west-2'
-else:
-    STATIC_ROOT=os.path.join(BASE_DIR, 'static')
-    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 
 
 REST_FRAMEWORK = {
