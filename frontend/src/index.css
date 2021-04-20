@@ -177,19 +177,19 @@ input[disabled] {
 }
 
 .animal-link:hover {
-  color: #a52b44 !important;
+  color: #b18662 !important;
 }
 
 .animal-hover-div:hover .animal-icon {
-  color: #a52b44 !important;
+  color: #b18662 !important;
 }
 
 .animal-hover-div:hover {
-  border-color: #a52b44 !important;
+  border-color: #b18662 !important;
 }
 
 .animal-hover-div:hover .text-border {
-  color: #a52b44 !important;
+  color: #b18662 !important;
 }
 
 .text-link:hover {
