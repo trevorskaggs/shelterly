@@ -200,9 +200,8 @@ const AnimalForm = (props) => {
           let options = [];
           let room_options = {};
           response.data.forEach(shelter => {
-            let display_name = shelter.name + ' (' + shelter.buildings.length + ' buildings, ' + shelter.room_count + ' rooms, ' + shelter.animal_count + ' animals)';
             // Build shelter option list.
-            options.push({value: shelter.id, label: display_name});
+            options.push({value: shelter.id, label: shelter.name});
             room_options[shelter.id] = [];
             shelter.buildings.forEach(building => {
               building.rooms.forEach(room => {

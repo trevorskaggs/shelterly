@@ -99,8 +99,7 @@ function DispatchResolutionForm({ id }) {
         if (!unmounted) {
           let options = []
           response.data.forEach(shelter => {
-            let display_name = shelter.name + ' ('+shelter.buildings.length+' buildings, ' + shelter.room_count + ' rooms, ' + shelter.animal_count + ' animals)';
-            options.push({value: shelter.id, label: display_name});
+            options.push({value: shelter.id, label: shelter.name});
           });
           setShelters({options: options, isFetching: false});
         }
@@ -322,7 +321,7 @@ function DispatchResolutionForm({ id }) {
                         </Row>
                         {props.values && props.values.sr_updates[index] && props.values.sr_updates[index].animals[inception].status === 'SHELTERED' ?
                         <Row>
-                          <Col xs={6} className="pl-0">
+                          <Col xs={4} className="pl-0">
                             <DropDown
                               id={`sr_updates.${index}.animals.${inception}.shelter`}
                               name={`sr_updates.${index}.animals.${inception}.shelter`}
