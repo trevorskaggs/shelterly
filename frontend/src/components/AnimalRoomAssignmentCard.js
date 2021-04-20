@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faUserAlt, faUserAltSlash
 } from '@fortawesome/free-solid-svg-icons';
-import noImageFound from '../static/images/image-not-found.png';
+import { S3_BUCKET } from '../constants';
 
 function AnimalRoomAssignmentCard(props) {
 
@@ -13,7 +13,7 @@ function AnimalRoomAssignmentCard(props) {
     <Card className={"border rounded" + (props.snapshot.isDragging ? " border-danger" : "")} float="left" style={{width:"157px", marginLeft:"-5px", whiteSpace:"nowrap", overflow:"hidden"}}>
       <div className="row no-gutters" style={{ textTransform:"capitalize" }}>
         <div style={{whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis"}}>
-          <img alt="Animal" style={{width:"47px", height:"47px", marginRight:"3px", objectFit:"cover", overflow:"hidden", float:"left"}} src={props.animal.front_image || props.animal.side_image || noImageFound} />
+          <img alt="Animal" style={{width:"47px", height:"47px", marginRight:"3px", objectFit:"cover", overflow:"hidden", float:"left"}} src={props.animal.front_image || props.animal.side_image || `${S3_BUCKET}images/image-not-found.png`} />
           <span title={props.animal.name}>
             {props.animal.name||"Unknown"}
             </span>

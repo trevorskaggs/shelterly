@@ -12,7 +12,7 @@ import { faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { TextInput } from '../components/Form.js';
 import { AuthContext } from "./AccountsReducer";
 import { setAuthToken } from "./AccountsUtils";
-import logo from "../static/images/shelterly.png";
+import { S3_BUCKET } from '../constants';
 
 const Login = () => {
   const { state, dispatch } = useContext(AuthContext);
@@ -62,7 +62,7 @@ const Login = () => {
       {({ isSubmitting, status }) => (
         <>
         <Row className='ml-auto mr-auto mt-auto align-bottom'>
-          <img src={logo} alt="Logo" style={{height:"120px", width:"120px", marginTop:"-4px", marginLeft:"-4px"}} />
+          <img src={`${S3_BUCKET}images/shelterly.png`} alt="Logo" style={{height:"120px", width:"120px", marginTop:"-4px", marginLeft:"-4px"}} />
           <h1  style={{fontSize:"100px"}}>Shelterly</h1>
         </Row>
         <Col xs={{ span:5 }} className="border rounded border-light shadow-sm ml-auto mr-auto mb-auto" style={{maxHeight:"347px"}}>
