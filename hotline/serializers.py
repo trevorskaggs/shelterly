@@ -57,7 +57,7 @@ class SimpleServiceRequestSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ServiceRequest
-        fields = ['id', 'latitude', 'longitude', 'full_address', 'followup_date', 'owners', 'address', 'reporter', 'directions', 'latest_evac', 'evacuation_assignments', 'pending',
+        fields = ['id', 'latitude', 'longitude', 'full_address', 'followup_date', 'owners', 'address', 'city', 'state', 'zip_code', 'apartment', 'reporter', 'directions', 'latest_evac', 'evacuation_assignments', 'pending',
         'animal_count','injured', 'accessible', 'turn_around', 'animals', 'status', 'reported_animals', 'reporter_object', 'owner_objects', 'sheltered_in_place', 'unable_to_locate', 'aco_required']
 
 

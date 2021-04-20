@@ -98,7 +98,7 @@ function Dispatch() {
                     key={service_request.id}
                     position={[service_request.latitude, service_request.longitude]}
                     icon={service_request.sheltered_in_place > 0 ? SIPMarkerIcon : service_request.unable_to_locate > 0 ? UTLMarkerIcon : reportedMarkerIcon}
-                    onClick={() => window.open("/dispatch/summary/" + dispatch_assignment.id, "_blank")}
+                    onClick={() => window.open("/dispatch/summary/" + dispatch_assignment.id)}
                   >
                   <MapTooltip autoPan={false}>
                     <span>

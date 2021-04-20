@@ -285,17 +285,6 @@ function AnimalSearch() {
                       >
                         <FontAwesomeIcon icon={faCalendarDay} className="ml-1" inverse />
                       </OverlayTrigger>
-                      <OverlayTrigger
-                        key={"animal-shelter-address"}
-                        placement="top"
-                        overlay={
-                          <Tooltip id={`tooltip-animal-shelter-address`}>
-                            Address: {animal.shelter_object.full_address}
-                          </Tooltip>
-                        }
-                      >
-                        <FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse />
-                      </OverlayTrigger>
                       {animal.shelter_object.phone ?
                       <OverlayTrigger
                         key={"animal-shelter-phone"}
@@ -309,6 +298,17 @@ function AnimalSearch() {
                         <FontAwesomeIcon icon={faPhoneRotary} className="ml-1" inverse />
                       </OverlayTrigger>
                       : ""}
+                      <OverlayTrigger
+                        key={"animal-shelter-address"}
+                        placement="top"
+                        overlay={
+                          <Tooltip id={`tooltip-animal-shelter-address`}>
+                            Address: {animal.shelter_object.full_address}
+                          </Tooltip>
+                        }
+                      >
+                        <FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse />
+                      </OverlayTrigger>
                     </span>
                     : ""}
                   </ListGroup.Item>

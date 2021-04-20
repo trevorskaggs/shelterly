@@ -198,7 +198,6 @@ function ServiceRequestDispatchAssignment({id}) {
           <Marker
             position={[currentRequest.latitude, currentRequest.longitude]}
             icon={starMarkerIcon}
-            onClick={() => window.open("/hotline/servicerequest/" + currentRequest.id, "_blank")}
           >
             <MapTooltip autoPan={false}>
               <span>
@@ -338,7 +337,7 @@ function ServiceRequestDispatchAssignment({id}) {
                 </Tooltip>
               }
             >
-              <Link href={"/dispatch/summary/" + dispatch_assignment.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+              <Link href={"/dispatch/summary/" + dispatch_assignment.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
             </OverlayTrigger>&nbsp;&nbsp;|&nbsp;
             {dispatch_assignment.team ? dispatch_assignment.team_object.name : ""}: {dispatch_assignment.team && dispatch_assignment.team_object.team_member_objects.map((member, i) => (
                 <span key={member.id}>{i > 0 && ", "}{member.first_name} {member.last_name}</span>))}
@@ -367,7 +366,7 @@ function ServiceRequestDispatchAssignment({id}) {
                         </Tooltip>
                       }
                     >
-                      <Link href={"/hotline/servicerequest/" + service_request.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+                      <Link href={"/hotline/servicerequest/" + service_request.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
                     </OverlayTrigger>
                 </li>
                 : ""}
@@ -404,7 +403,7 @@ function ServiceRequestDispatchAssignment({id}) {
                   </Tooltip>
                 }
               >
-                <Link href={"/dispatch/summary/" + dispatch_assignment.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+                <Link href={"/dispatch/summary/" + dispatch_assignment.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
               </OverlayTrigger>&nbsp;&nbsp;|&nbsp;
               {dispatch_assignment.team ? dispatch_assignment.team_object.name : ""}: {dispatch_assignment.team && dispatch_assignment.team_object.team_member_objects.map((member, i) => (
                   <span key={member.id}>{i > 0 && ", "}{member.first_name} {member.last_name}</span>))}
@@ -433,7 +432,7 @@ function ServiceRequestDispatchAssignment({id}) {
                           </Tooltip>
                         }
                       >
-                        <Link href={"/hotline/servicerequest/" + service_request.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+                        <Link href={"/hotline/servicerequest/" + service_request.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
                       </OverlayTrigger>
                   </li>
                   : ""}

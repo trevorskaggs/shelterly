@@ -72,7 +72,7 @@ function Shelter() {
               key={shelter.id}
               position={[shelter.latitude, shelter.longitude]}
               icon={shelterMarkerIcon}
-              onClick={() => window.open("/shelter/" + shelter.id, "_blank")}
+              onClick={() => window.open("/shelter/" + shelter.id)}
             >
               <MapTooltip autoPan={false}>
                 <span>

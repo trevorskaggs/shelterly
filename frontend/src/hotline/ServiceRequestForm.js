@@ -211,7 +211,7 @@ function ServiceRequestForm(props) {
         <Modal.Body>
           <p>
             {error && error.error[0]}
-            &nbsp;Click <Link href={'/hotline/servicerequest/' + error.error[1]} target="_blank" style={{color:"#8d99d4"}}>here</Link> to view this Service Request.
+            &nbsp;Click <Link href={'/hotline/servicerequest/' + error.error[1]} style={{color:"#8d99d4"}}>here</Link> to view this Service Request.
           </p>
         </Modal.Body>
         <Modal.Footer>

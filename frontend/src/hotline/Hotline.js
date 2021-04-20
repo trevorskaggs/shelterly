@@ -108,7 +108,7 @@ function Hotline() {
                   key={service_request.id}
                   position={[service_request.latitude, service_request.longitude]}
                   icon={service_request.sheltered_in_place > 0 ? SIPMarkerIcon : service_request.unable_to_locate > 0 ? UTLMarkerIcon : service_request.reported_animals > 0 ? reportedMarkerIcon : closedMarkerIcon}
-                  onClick={() => window.open("/hotline/servicerequest/" + service_request.id, "_blank")}
+                  onClick={() => window.open("/hotline/servicerequest/" + service_request.id)}
                 >
                   <MapTooltip autoPan={false}>
                     <span>
