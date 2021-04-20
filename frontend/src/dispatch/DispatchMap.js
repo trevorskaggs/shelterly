@@ -680,8 +680,8 @@ function Deploy() {
                         </Tooltip>
                       }
                     >
-                      <Link href={"/hotline/servicerequest/" + service_request.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} inverse /></Link>
-                      </OverlayTrigger>
+                      <Link href={"/hotline/servicerequest/" + service_request.id}><FontAwesomeIcon icon={faClipboardList} inverse /></Link>
+                    </OverlayTrigger>
                   </div>
                 </div>
                 : ""}

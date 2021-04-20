@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useFormikContext, useField } from 'formik';
 import { Col, Collapse, Image, Form, Row } from 'react-bootstrap';
-import Select from 'react-select';
+import Select, { createFilter } from 'react-select';
 import SimpleValue from 'react-select-simple-value';
 import Flatpickr from 'react-flatpickr';
 import ImageUploading from 'react-images-uploading';
@@ -150,6 +150,8 @@ const DropDown = React.forwardRef((props, ref) => {
 
   const registeredRef = useRegisteredRef(props.name);
 
+  const filterConfig = {matchFrom:"start"}
+
   const customStyles = {
     // For the select it self, not the options of the select
     control: (styles, { isDisabled}) => {
@@ -190,7 +192,7 @@ const DropDown = React.forwardRef((props, ref) => {
     <div ref={meta.error && registeredRef}>
       {props.label ? <Form.Label style={props.style}>{props.label}</Form.Label> : ""}
       <SimpleValue {...field} options={props.options}>
-         {simpleProps => <Select isDisabled={props.disabled} ref={ref} styles={customStyles} isClearable={true} onBlur={updateBlur} onChange={handleOptionChange} {...props} {...simpleProps} />}
+         {simpleProps => <Select isDisabled={props.disabled} ref={ref} styles={customStyles} isClearable={true} filterOption={createFilter(filterConfig)} onBlur={updateBlur} onChange={handleOptionChange} {...props} {...simpleProps} />}
       </SimpleValue>
       {meta.touched && meta.error ? <div style={{ color: "#e74c3c", marginTop: ".5rem", fontSize: "80%" }}>{meta.error}</div> : ""}
     </div>
