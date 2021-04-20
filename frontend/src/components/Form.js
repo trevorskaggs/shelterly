@@ -301,6 +301,7 @@ const AddressLookup = ({ ...props }) => {
       setFieldValue("latitude", suggestion.geometry.location.lat());
       setFieldValue("longitude", suggestion.geometry.location.lng());
       setFieldValue("full_address", suggestion.formatted_address.replace(', USA', ''));
+      props.setLatLon(suggestion.geometry.location.lat(), suggestion.geometry.location.lng())
     }
   }
 
@@ -339,9 +340,13 @@ const AddressSearch = (props) => {
   const { setFieldValue } = useFormikContext();
   const [initialLatLon, setInitialLatLon] = useState([0, 0]);
 
+  const setLatLon = (lat, lon) => {
+    setInitialLatLon([lat, lon]);
+  }
+
   const renderAddressLookup = () => {
     if (process.env.REACT_APP_GOOGLE_API_KEY) {
-      return <AddressLookup label={props.label} style={{width: '100%'}} className={"form-control"}/>
+      return <AddressLookup label={props.label} style={{width: '100%'}} className={"form-control"} setLatLon={setLatLon} />
     } else {
       return <Alert variant="danger">Found Location Search is not available. Please contact support for assistance.</Alert>
     }
