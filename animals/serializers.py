@@ -24,14 +24,10 @@ class SimpleAnimalSerializer(serializers.ModelSerializer):
         fields = ['id', 'species', 'aggressive', 'status', 'aco_required', 'name', 'sex', 'size', 'age', 'pcolor', 'scolor', 'color_notes', 'owner_names']
 
 class ModestAnimalSerializer(SimpleAnimalSerializer):
-    evacuation_assignments = serializers.SerializerMethodField()
-
-    def get_evacuation_assignments(self, obj):
-        return [ea.id for ea in obj.evacuation_assignments.all()]
 
     class Meta:
         model = Animal
-        fields = ['id', 'species', 'aggressive', 'request', 'shelter', 'status', 'aco_required', 'color_notes', 'evacuation_assignments']
+        fields = ['id', 'species', 'aggressive', 'request', 'shelter', 'status', 'aco_required', 'color_notes']
 
 class AnimalSerializer(SimpleAnimalSerializer):
     front_image = serializers.SerializerMethodField()
@@ -42,7 +38,6 @@ class AnimalSerializer(SimpleAnimalSerializer):
     reporter_object = serializers.SerializerMethodField(read_only=True)
     request_address = serializers.SerializerMethodField()
     action_history = serializers.SerializerMethodField()
-    evacuation_assignments = serializers.SerializerMethodField()
     room_name = serializers.SerializerMethodField()
     shelter_object = serializers.SerializerMethodField()
 
@@ -50,7 +45,7 @@ class AnimalSerializer(SimpleAnimalSerializer):
         model = Animal
         fields = ['id', 'species', 'status', 'aco_required', 'front_image', 'side_image', 'extra_images', 'last_seen', 'intake_date', 'address', 'city', 'state', 'zip_code',
         'aggressive', 'injured', 'fixed', 'confined', 'found_location', 'owner_names', 'owner_objects', 'shelter_object', 'shelter', 'reporter_object', 'request', 'request_address',
-        'action_history', 'evacuation_assignments', 'room', 'room_name', 'name', 'sex', 'size', 'age', 'pcolor', 'scolor', 'color_notes']
+        'action_history', 'room', 'room_name', 'name', 'sex', 'size', 'age', 'pcolor', 'scolor', 'color_notes']
 
     # Custom Owner object field that excludes animals to avoid a circular reference.
     def get_owner_objects(self, obj):
@@ -86,10 +81,6 @@ class AnimalSerializer(SimpleAnimalSerializer):
         if obj.reporter:
             return SimplePersonSerializer(obj.reporter).data
         return None
-
-    # Custom Evac Assignment field to avoid a circular reference.
-    def get_evacuation_assignments(self, obj):
-        return obj.evacuation_assignments.all().values_list('id', flat=True)
 
     def get_action_history(self, obj):
         return [build_action_string(action) for action in obj.target_actions.all()]

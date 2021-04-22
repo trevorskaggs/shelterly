@@ -52,11 +52,8 @@ class ServiceRequest(Location):
         ordering = ['timestamp']
 
 class VisitNote(models.Model):
-    from evac.models import EvacAssignment
 
     date_completed = models.DateTimeField(blank=True, null=True)
-    evac_assignment = models.ForeignKey(EvacAssignment, on_delete=models.CASCADE)
-    service_request = models.ForeignKey(ServiceRequest, on_delete=models.CASCADE)
     forced_entry = models.BooleanField(default=False)
     notes = models.CharField(max_length=500, blank=True)
 

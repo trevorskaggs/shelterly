@@ -5,7 +5,7 @@ from rest_framework import filters, permissions, serializers, viewsets
 from actstream import action
 
 from animals.models import Animal
-from evac.models import DispatchTeam, EvacAssignment, EvacTeamMember
+from evac.models import AssignedRequest, DispatchTeam, EvacAssignment, EvacTeamMember
 from evac.serializers import DispatchTeamSerializer, EvacAssignmentSerializer, EvacTeamMemberSerializer
 from hotline.models import ServiceRequest, VisitNote
 from people.models import OwnerContact, Person
@@ -66,13 +66,12 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
             .annotate(
                 injured=Exists(Animal.objects.filter(request_id=OuterRef("id"), injured="yes"))
             ).prefetch_related(Prefetch(
-                'animal_set', queryset=Animal.objects.exclude(status='CANCELED').prefetch_related('evacuation_assignments').prefetch_related(
+                'animal_set', queryset=Animal.objects.exclude(status='CANCELED').prefetch_related(
                     Prefetch('animalimage_set', to_attr='images')), to_attr='animals'))
             .prefetch_related(
                 Prefetch('owners', queryset=Person.objects.annotate(
                     is_sr_owner=Exists(ServiceRequest.objects.filter(owners__id=OuterRef('id')))).annotate(
                     is_animal_owner=Exists(Animal.objects.filter(owners__id=OuterRef('id'))))))
-            .prefetch_related('visitnote_set')
             .select_related('reporter')
             .prefetch_related('evacuation_assignments')
         ))
@@ -99,12 +98,15 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
                 team.team_members.set(self.request.data.get('team_members'))
                 serializer.validated_data['team'] = team
             evac_assignment = serializer.save()
-            service_requests = ServiceRequest.objects.filter(pk__in=serializer.data['service_requests'])
+            service_requests = ServiceRequest.objects.filter(pk__in=self.request.data['service_requests'])
             service_requests.update(status="assigned")
             action.send(self.request.user, verb='created evacuation assignment', target=evac_assignment)
             for service_request in service_requests:
                 action.send(self.request.user, verb='assigned service request', target=service_request)
-                evac_assignment.animals.add(*Animal.objects.filter(request=service_request, status__in=['REPORTED', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE']))
+                animals_dict = {}
+                for animal in service_request.animal_set.filter(status__in=['REPORTED', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE']):
+                    animals_dict[animal.id] = {'status':animal.status, 'shelter':''}
+                AssignedRequest.objects.create(dispatch_assignment=evac_assignment, service_request=service_request, animals=animals_dict)
 
     def perform_update(self, serializer):
         if serializer.is_valid():
@@ -122,15 +124,18 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
                 old_da = EvacAssignment.objects.filter(service_requests=service_requests[0], end_time=None).first()
                 if old_da:
                     old_da.service_requests.remove(service_requests[0])
-                    old_da.animals.remove(*Animal.objects.filter(request=service_requests[0]))
                 # Add SR to selected DA.
-                evac_assignment.service_requests.add(service_requests[0])
-                evac_assignment.animals.add(*Animal.objects.filter(request=service_requests[0], status__in=['REPORTED', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE']))
+                animals_dict = {}
+                for animal in service_requests[0].animal_set.filter(status__in=['REPORTED', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE']):
+                    animals_dict[animal.id] = {'status':animal.status, 'shelter':''}
+                AssignedRequest.objects.create(dispatch_assignment=evac_assignment, service_request=service_requests[0], animals=animals_dict)
                 action.send(self.request.user, verb='assigned service request', target=service_requests[0])
 
             for service_request in self.request.data.get('sr_updates', []):
+                animals_dict = {}
                 sr_status = 'open' if service_request['unable_to_complete'] else 'assigned' if service_request['incomplete'] else 'closed'
                 for animal_dict in service_request['animals']:
+                    animals_dict[animal_dict['id']] = {'status':animal_dict.get('status'), 'shelter':animal_dict.get('shelter')}
                     # Record status change if applicable.
                     animal = Animal.objects.get(pk=animal_dict['id'])
                     new_status = animal_dict.get('status')
@@ -146,22 +151,26 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
                     if new_status in ['SHELTERED IN PLACE', 'UNABLE TO LOCATE'] and sr_status != 'assigned':
                         sr_status = 'open'
                 # Update the relevant SR fields.
+                assigned_request = AssignedRequest.objects.get(service_request=service_request['id'], dispatch_assignment=evac_assignment.id)
+                assigned_request.animals = animals_dict
                 service_requests = ServiceRequest.objects.filter(id=service_request['id'])
                 service_requests.update(status=sr_status, followup_date=service_request['followup_date'] or None)
                 action.send(self.request.user, verb=sr_status.replace('ed','') + 'ed service request', target=service_requests[0])
                 # Only create VisitNote on first update, otherwise update existing VisitNote.
                 if service_request.get('date_completed'):
-                    if not VisitNote.objects.filter(evac_assignment=evac_assignment, service_request=service_requests[0]).exists():
-                        VisitNote.objects.create(evac_assignment=evac_assignment, service_request=service_requests[0], date_completed=service_request['date_completed'], notes=service_request['notes'], forced_entry=service_request['forced_entry'])
+                    if not assigned_request.visit_note:
+                        visit_note = VisitNote.objects.create(date_completed=service_request['date_completed'], notes=service_request['notes'], forced_entry=service_request['forced_entry'])
+                        assigned_request.visit_note = visit_note
                     else:
-                        VisitNote.objects.filter(evac_assignment=evac_assignment, service_request=service_requests[0]).update(date_completed=service_request['date_completed'], notes=service_request['notes'], forced_entry=service_request['forced_entry'])
+                        VisitNote.objects.filter(assigned_request=assigned_request).update(date_completed=service_request['date_completed'], notes=service_request['notes'], forced_entry=service_request['forced_entry'])
                 # Only create OwnerContact on first update, otherwise update existing OwnerContact.
                 if service_request.get('owner_contact_id') and service_request.get('owner_contact_note') and service_request.get('owner_contact_time'):
-                    if not OwnerContact.objects.filter(evac_assignment=evac_assignment, service_request=service_requests[0]).exists():
-                        OwnerContact.objects.create(evac_assignment=evac_assignment, service_request=service_requests[0], owner=Person.objects.get(pk=service_request['owner_contact_id']), owner_contact_note=service_request['owner_contact_note'], owner_contact_time=service_request['owner_contact_time'])
+                    if not assigned_request.owner_contact:
+                        owner_contact = OwnerContact.objects.create(owner=Person.objects.get(pk=service_request['owner_contact_id']), owner_contact_note=service_request['owner_contact_note'], owner_contact_time=service_request['owner_contact_time'])
+                        assigned_request.owner_contact = owner_contact
                     else:
-                        OwnerContact.objects.filter(evac_assignment=evac_assignment, service_request=service_requests[0]).update(owner=Person.objects.get(pk=service_request['owner_contact_id']), owner_contact_note=service_request['owner_contact_note'], owner_contact_time=service_request['owner_contact_time'])
-
+                        OwnerContact.objects.filter(assigned_request=assigned_request).update(owner=Person.objects.get(pk=service_request['owner_contact_id']), owner_contact_note=service_request['owner_contact_note'], owner_contact_time=service_request['owner_contact_time'])
+                assigned_request.save()
                 if service_request['unable_to_complete']:
                     evac_assignment.service_requests.remove(service_requests[0])
 

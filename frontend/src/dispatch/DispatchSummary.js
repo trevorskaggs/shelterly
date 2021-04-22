@@ -23,8 +23,7 @@ function DispatchSummary({id}) {
     team_member_objects: [],
     team: null,
     team_object: {name:''},
-    service_requests: [],
-    service_request_objects: [],
+    assigned_requests: [],
     start_time: null,
     end_time: null,
     bounds:L.latLngBounds([[0,0]])
@@ -75,10 +74,10 @@ function DispatchSummary({id}) {
         if (!unmounted) {
           const map_dict = {};
           const bounds = [];
-          for (const service_request of response.data.service_request_objects) {
-            const matches = countMatches(service_request)[0];
-            map_dict[service_request.id] = {matches:matches, has_reported_animals:service_request.reported_animals > 0, latitude:service_request.latitude, longitude:service_request.longitude};
-            bounds.push([service_request.latitude, service_request.longitude]);
+          for (const assigned_request of response.data.assigned_requests) {
+            const matches = countMatches(assigned_request.service_request_object)[0];
+            map_dict[assigned_request.service_request_object.id] = {matches:matches, has_reported_animals:assigned_request.service_request_object.reported_animals > 0, latitude:assigned_request.service_request_object.latitude, longitude:assigned_request.service_request_object.longitude};
+            bounds.push([assigned_request.service_request_object.latitude, assigned_request.service_request_object.longitude]);
           }
           response.data['team_members'] = response.data.team.team_members;
           response.data['team_member_objects'] = response.data.team_object.team_member_objects
@@ -191,25 +190,25 @@ function DispatchSummary({id}) {
       </Col>
       <Col className="border rounded pl-0 pr-0" style={{marginTop:"4px", marginRight:"15px", maxHeight:"311px"}}>
         <Map className="d-block dispatch-leaflet-container" bounds={data.bounds}>
-          {data.service_request_objects.map(service_request => (
+          {data.assigned_requests.map(assigned_request => (
             <Marker
-              key={service_request.id}
-              position={[service_request.latitude, service_request.longitude]}
-              icon={service_request.sheltered_in_place > 0 ? SIPMarkerIcon : service_request.unable_to_locate > 0 ? UTLMarkerIcon : reportedMarkerIcon}
+              key={assigned_request.service_request_object.id}
+              position={[assigned_request.service_request_object.latitude, assigned_request.service_request_object.longitude]}
+              icon={assigned_request.service_request_object.sheltered_in_place > 0 ? SIPMarkerIcon : assigned_request.service_request_object.unable_to_locate > 0 ? UTLMarkerIcon : reportedMarkerIcon}
             >
               <MapTooltip autoPan={false}>
                 <span>
-                  {mapState[service_request.id] ?
+                  {mapState[assigned_request.service_request_object.id] ?
                     <span>
-                      {Object.keys(mapState[service_request.id].matches).map((key,i) => (
+                      {Object.keys(mapState[assigned_request.service_request_object.id].matches).map((key,i) => (
                         <span key={key} style={{textTransform:"capitalize"}}>
-                          {i > 0 && ", "}{prettyText(key.split(',')[1], key.split(',')[0], mapState[service_request.id].matches[key])}
+                          {i > 0 && ", "}{prettyText(key.split(',')[1], key.split(',')[0], mapState[assigned_request.service_request_object.id].matches[key])}
                         </span>
                       ))}
                     </span>
                   :""}
                   <br />
-                  {service_request.full_address}
+                  {assigned_request.service_request_object.full_address}
                 </span>
               </MapTooltip>
             </Marker>
@@ -217,81 +216,79 @@ function DispatchSummary({id}) {
         </Map>
       </Col>
     </Row>
-    {data.service_request_objects.map((service_request, index) => (
-    <Row key={service_request.id}>
-      <Card border="secondary" className="mb-3 ml-3 mr-3" style={{width:"100%"}}>
-        <Card.Body>
-          <Card.Title>
-            <h4>
-              <Link href={"/hotline/servicerequest/" + service_request.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{service_request.full_address}</Link>
-              &nbsp;| <span style={{textTransform:"capitalize"}}>{service_request.status}</span>
-            </h4>
-          </Card.Title>
-          <hr style={{marginBottom:"7px"}}/>
-          <ListGroup variant="flush" style={{marginTop:"-5px", marginBottom:"-13px"}}>
-            {service_request.owner_objects.map(owner => (
-              <ListGroup.Item key={owner.id}>
-                <b>Owner: </b><Link href={"/people/owner/" + owner.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{owner.first_name} {owner.last_name}</Link>
-                {owner.display_phone ?
-                <OverlayTrigger
-                  key={"owner-phone"}
-                  placement="top"
-                  overlay={
-                    <Tooltip id={`tooltip-owner-phone`}>
-                      {owner.display_phone}
-                    </Tooltip>
-                  }
-                >
-                  <FontAwesomeIcon icon={faPhoneRotary} className="ml-1" inverse />
-                </OverlayTrigger>
-                : ""}
-                {owner.email ?
-                <OverlayTrigger
-                  key={"owner-email"}
-                  placement="top"
-                  overlay={
-                    <Tooltip id={`tooltip-owner-email`}>
-                      {owner.email}
-                    </Tooltip>
-                  }
-                >
-                  <FontAwesomeIcon icon={faEnvelope} className="ml-1" inverse />
-                </OverlayTrigger>
-                : ""}
-              </ListGroup.Item>
-            ))}
-            {service_request.owners.length < 1 ? <ListGroup.Item><b>Owner: </b>No Owner</ListGroup.Item> : ""}
-          </ListGroup>
-          <hr/>
-          <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
-            <h4 className="mt-2" style={{marginBottom:"-2px"}}>Animals</h4>
-            {service_request.animals.filter(animal => animal.evacuation_assignments.includes(Number(id))).map((animal, inception) => (
-              <ListGroup.Item key={animal.id}>
-                <span style={{textTransform:"capitalize"}}>#{animal.id} - <Link href={"/animals/" + animal.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.name||"Unknown"}</Link> ({animal.species})</span> - {animal.status}
-              </ListGroup.Item>
-            ))}
-          </ListGroup>
-          {!service_request.visit_notes.filter(note => String(note.evac_assignment) === String(id))[0] && service_request.visit_notes.sort((a,b) => new Date(b.date_completed).getTime() - new Date(a.date_completed).getTime())[0] ?
+    {data.assigned_requests.map(assigned_request => (
+        <Row key={assigned_request.service_request_object.id}>
+          <Card border="secondary" className="mb-3 ml-3 mr-3" style={{width:"100%"}}>
+            <Card.Body>
+              <Card.Title>
+                <h4>
+                  <Link href={"/hotline/servicerequest/" + assigned_request.service_request_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link>
+                  &nbsp;| <span style={{textTransform:"capitalize"}}>{assigned_request.service_request_object.status}</span>
+                </h4>
+              </Card.Title>
+              <hr style={{marginBottom:"7px"}}/>
+              <ListGroup variant="flush" style={{marginTop:"-5px", marginBottom:"-13px"}}>
+                {assigned_request.service_request_object.owner_objects.map(owner => (
+                  <ListGroup.Item key={owner.id}>
+                    <b>Owner: </b><Link href={"/people/owner/" + owner.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{owner.first_name} {owner.last_name}</Link>
+                    {owner.display_phone ?
+                    <OverlayTrigger
+                      key={"owner-phone"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-owner-phone`}>
+                          {owner.display_phone}
+                        </Tooltip>
+                      }
+                    >
+                      <FontAwesomeIcon icon={faPhoneRotary} className="ml-1" inverse />
+                    </OverlayTrigger>
+                    : ""}
+                    {owner.email ?
+                    <OverlayTrigger
+                      key={"owner-email"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-owner-email`}>
+                          {owner.email}
+                        </Tooltip>
+                      }
+                    >
+                      <FontAwesomeIcon icon={faEnvelope} className="ml-1" inverse />
+                    </OverlayTrigger>
+                    : ""}
+                  </ListGroup.Item>
+                ))}
+              {assigned_request.service_request_object.owners.length < 1 ? <ListGroup.Item><b>Owner: </b>No Owner</ListGroup.Item> : ""}
+            </ListGroup>
+            <hr/>
+            <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
+              <h4 className="mt-2" style={{marginBottom:"-2px"}}>Animals</h4>
+              {assigned_request.service_request_object.animals.filter(animal => Object.keys(assigned_request.animals).includes(String(animal.id))).map((animal, inception) => (
+                <ListGroup.Item key={animal.id}>
+                  <span style={{textTransform:"capitalize"}}>#{animal.id} - <Link href={"/animals/" + animal.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.name||"Unknown"}</Link> ({animal.species})</span> - {animal.status}
+                </ListGroup.Item>
+              ))}
+            </ListGroup>
+          {assigned_request.previous_visit ?
           <span>
             <hr/>
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
-              <h4 className="mt-2" style={{marginBottom:"-2px"}}>Previous Visit: <Link href={"/dispatch/summary/" + service_request.latest_evac.id} className="text-link" style={{textDecoration:"none", color:"white"}}><Moment format="L">{service_request.visit_notes.sort((a,b) => new Date(b.date_completed).getTime() - new Date(a.date_completed).getTime())[0].date_completed}</Moment></Link></h4>
+              <h4 className="mt-2" style={{marginBottom:"-2px"}}>Previous Visit: <Link href={"/dispatch/summary/" + assigned_request.previous_visit.dispatch_assignment} className="text-link" style={{textDecoration:"none", color:"white"}}><Moment format="L">{assigned_request.previous_visit.date_completed}</Moment></Link></h4>
                 <ListGroup.Item>
-                {service_request.visit_notes.sort((a,b) => new Date(b.date_completed).getTime() - new Date(a.date_completed).getTime())[0].notes || "No information available."}
+                  {assigned_request.previous_visit.notes || "No information available."}
                 </ListGroup.Item>
             </ListGroup>
           </span>
           : "" }
-          {service_request.visit_notes.filter(note => String(note.evac_assignment) === String(id))[0] ?
+          {assigned_request.visit_note ?
           <span>
-          <hr/>
+            <hr/>
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
               <h4 className="mt-2" style={{marginBottom:"-2px"}}>Visit Notes</h4>
-              {service_request.visit_notes.filter(note => String(note.evac_assignment) === String(id)).map((note) => (
-                <ListGroup.Item key={note.id}>
-                  {note.notes || "No information available."}
-                </ListGroup.Item>
-              ))}
+              <ListGroup.Item key={assigned_request.visit_note.id}>
+                {assigned_request.visit_note.notes || "No information available."}
+              </ListGroup.Item>
             </ListGroup>
           </span>
           : ""}
