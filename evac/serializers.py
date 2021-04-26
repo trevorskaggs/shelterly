@@ -47,7 +47,7 @@ class DispatchServiceRequestSerializer(SimpleServiceRequestSerializer):
     owner_contacts = OwnerContactSerializer(source='ownercontact_set', many=True, required=False, read_only=True)
     owner_objects = SimplePersonSerializer(source='owners', many=True, required=False, read_only=True)
     visit_notes = VisitNoteSerializer(source='visitnote_set', many=True, required=False, read_only=True)
-    latest_evac = serializers.SerializerMethodField()
+    # latest_evac = serializers.SerializerMethodField()
 
     def get_latest_evac(self, obj):
         assigned_evac = EvacAssignment.objects.filter(service_requests=obj, end_time__isnull=True).values('id', 'start_time', 'end_time').first()
@@ -63,22 +63,8 @@ class DispatchServiceRequestSerializer(SimpleServiceRequestSerializer):
 
 class SimpleEvacAssignmentSerializer(serializers.ModelSerializer):
 
-    team_name = serializers.SerializerMethodField()
-    team_member_names = serializers.SerializerMethodField()
-
-    def get_team_name(self, obj):
-        # does this kick off another query?
-        try:
-            return obj.team.name
-        except AttributeError:
-            return ''
-
-    def get_team_member_names(self, obj):
-        # does this kick off another query?
-        try:
-            return ", ".join([team_member['first_name'] + " " + team_member['last_name'] for team_member in obj.team.team_members.all().values('first_name', 'last_name')])
-        except AttributeError:
-            return ''
+    team_name = serializers.StringRelatedField(source='team')
+    team_member_names = serializers.StringRelatedField(source='team__team_members', many=True)
 
     class Meta:
         model = EvacAssignment
@@ -89,17 +75,7 @@ class EvacAssignmentSerializer(SimpleEvacAssignmentSerializer):
     # action_history = serializers.SerializerMethodField()
     team_object = DispatchTeamSerializer(source='team', required=False, read_only=True)
     service_request_objects = DispatchServiceRequestSerializer(source='service_requests', required=False, read_only=True, many=True)
-    team_member_names = serializers.SerializerMethodField()
 
-    def get_team_member_names(self, obj):
-        # does this kick off another query?
-        try:
-            return ", ".join([team_member['first_name'] + " " + team_member['last_name'] for team_member in obj.team.team_members.all().values('first_name', 'last_name')])
-        except AttributeError:
-            return ''
-
-    # def get_action_history(self, obj):
-    #     return [build_action_string(action) for action in obj.target_actions.all()]
 
     class Meta:
         model = EvacAssignment

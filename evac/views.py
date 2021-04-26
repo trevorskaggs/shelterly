@@ -14,7 +14,7 @@ class EvacTeamMemberViewSet(viewsets.ModelViewSet):
 
     queryset = EvacTeamMember.objects.all()
     filter_backends = (filters.SearchFilter,)
-    permission_classes = [permissions.IsAuthenticated, ]
+    permission_classes = []
     serializer_class = EvacTeamMemberSerializer
 
     def perform_create(self, serializer):
@@ -26,11 +26,11 @@ class EvacTeamMemberViewSet(viewsets.ModelViewSet):
 class DispatchTeamViewSet(viewsets.ModelViewSet):
 
     queryset = DispatchTeam.objects.all()
-    permission_classes = [permissions.IsAuthenticated, ]
+    permission_classes = []
     serializer_class = DispatchTeamSerializer
 
     def get_queryset(self):
-        queryset = DispatchTeam.objects.all().annotate(is_assigned=Exists(EvacAssignment.objects.filter(team_id=OuterRef("id"), end_time=None)))
+        queryset = DispatchTeam.objects.all().annotate(is_assigned=Exists(EvacAssignment.objects.filter(team_id=OuterRef("id"), end_time=None))).prefetch_related('team_members')
         is_map = self.request.query_params.get('map', '')
         if is_map == 'true':
             yesterday = datetime.today() - timedelta(days=1)
@@ -56,7 +56,7 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
     queryset = EvacAssignment.objects.all()
     search_fields = ['team__name', 'team__team_members__first_name', 'team__team_members__last_name', 'service_requests__owners__first_name', 'service_requests__owners__last_name', 'service_requests__address', 'service_requests__reporter__first_name', 'service_requests__reporter__last_name', 'animals__name']
     filter_backends = (filters.SearchFilter,)
-    permission_classes = [permissions.IsAuthenticated, ]
+    permission_classes = []
     serializer_class = EvacAssignmentSerializer
 
     def get_queryset(self):
@@ -75,7 +75,8 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
             .prefetch_related('visitnote_set')
             .select_related('reporter')
             .prefetch_related('evacuation_assignments')
-        ))
+        )).prefetch_related(Prefetch('team', DispatchTeam.objects.prefetch_related('team_members')))
+
         # Exclude EAs without animals when fetching for a map.
         is_map = self.request.query_params.get('map', '')
         if is_map == 'true':

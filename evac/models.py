@@ -19,6 +19,9 @@ class DispatchTeam(models.Model):
     team_members = models.ManyToManyField(EvacTeamMember)
     dispatch_date = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return self.name
+
     class Meta:
         ordering = ['-dispatch_date',]
 
