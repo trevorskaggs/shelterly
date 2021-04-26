@@ -35,6 +35,7 @@ class AnimalSerializer(SimpleAnimalSerializer):
     extra_images = serializers.SerializerMethodField()
     found_location = serializers.SerializerMethodField()
     owner_objects = SimplePersonSerializer(many=True)
+    evacuation_assignments = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     reporter_object = SimplePersonSerializer(source='reporter', read_only=True)
     request_address = serializers.SerializerMethodField()
     action_history = serializers.SerializerMethodField()
