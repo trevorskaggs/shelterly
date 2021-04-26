@@ -60,7 +60,7 @@ class AnimalSerializer(SimpleAnimalSerializer):
         return None
 
     def get_action_history(self, obj):
-        return []
+        return [build_action_string(action) for action in obj.target_actions.all()]
 
     def get_front_image(self, obj):
         try:

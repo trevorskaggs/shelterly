@@ -5,6 +5,7 @@ from copy import deepcopy
 from datetime import datetime
 from rest_framework import filters, viewsets
 from actstream import action
+from actstream.models import Action
 
 from people.models import Person
 from animals.models import Animal, AnimalImage
@@ -162,7 +163,7 @@ class AnimalViewSet(viewsets.ModelViewSet):
         Returns: Queryset of distinct animals, each annotated with:
             images (List of AnimalImages)
         """        
-        queryset = Animal.objects.exclude(status="CANCELED").prefetch_related(Prefetch('animalimage_set', to_attr='images')).prefetch_related(Prefetch('owners', to_attr='owner_objects')).prefetch_related('evacuation_assignments').prefetch_related('target_actions').select_related('reporter', 'room', 'request').distinct()
+        queryset = Animal.objects.exclude(status="CANCELED").prefetch_related(Prefetch('animalimage_set', to_attr='images')).prefetch_related(Prefetch('owners', to_attr='owner_objects')).prefetch_related('evacuation_assignments').prefetch_related(Prefetch('target_actions', Action.objects.prefetch_related('actor'))).select_related('reporter', 'room', 'request').distinct()
         
         #filter by stray
         if self.request.query_params.get('owned', '') == 'stray':
