@@ -162,7 +162,7 @@ class AnimalViewSet(viewsets.ModelViewSet):
         Returns: Queryset of distinct animals, each annotated with:
             images (List of AnimalImages)
         """        
-        queryset = Animal.objects.exclude(status="CANCELED").prefetch_related(Prefetch('animalimage_set', to_attr='images')).distinct()
+        queryset = Animal.objects.exclude(status="CANCELED").prefetch_related(Prefetch('animalimage_set', to_attr='images')).prefetch_related(Prefetch('owners', to_attr='owner_objects')).prefetch_related('evacuation_assignments').prefetch_related('target_actions').select_related('reporter', 'room', 'request').distinct()
         
         #filter by stray
         if self.request.query_params.get('owned', '') == 'stray':
