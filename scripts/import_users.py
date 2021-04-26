@@ -38,6 +38,6 @@ for item in a:
                 agency_id=item['agency_id']
             )
             print(member)
-        except IntegrityError:
+        except IntegrityError, MultipleObjectsReturned:
             print('failed for {0}'.format(item))
             pass
