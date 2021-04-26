@@ -31,7 +31,9 @@ export const BuildingForm = ({id}) => {
 
   // Hook for initializing data.
   useEffect(() => {
+    let unmounted = false;
     let source = axios.CancelToken.source();
+
     if (id) {
       const fetchBuildingData = async () => {
         // Fetch ServiceRequest data.
@@ -39,17 +41,18 @@ export const BuildingForm = ({id}) => {
           cancelToken: source.token,
         })
         .then(response => {
-          setData(response.data);
+          if (!unmounted) {
+            setData(response.data);
+          }
         })
         .catch(error => {
-          console.log(error.response);
         });
       };
       fetchBuildingData();
     }
-
     // Cleanup.
     return () => {
+      unmounted = true;
       source.cancel();
     };
   }, [id]);
@@ -79,8 +82,7 @@ export const BuildingForm = ({id}) => {
                   navigate('/shelter/building/' + id);
                 }
               })
-              .catch(e => {
-                console.log(e);
+              .catch(error => {
               });
             }
             else {
@@ -93,8 +95,7 @@ export const BuildingForm = ({id}) => {
                   navigate('/shelter/' + shelter_id);
                 }
               })
-              .catch(e => {
-                console.log(e);
+              .catch(error => {
               });
             }
             setSubmitting(false);

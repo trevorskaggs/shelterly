@@ -35,7 +35,6 @@ function Shelter() {
       })
       .catch(error => {
         if (!unmounted) {
-          console.log(error.response);
           setData({shelters: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
         }
       });
@@ -73,7 +72,7 @@ function Shelter() {
               key={shelter.id}
               position={[shelter.latitude, shelter.longitude]}
               icon={shelterMarkerIcon}
-              onClick={() => window.open("/shelter/" + shelter.id, "_blank")}
+              onClick={() => window.open("/shelter/" + shelter.id)}
             >
               <MapTooltip autoPan={false}>
                 <span>
@@ -95,7 +94,7 @@ function Shelter() {
     {data.shelters.map(shelter => (
       <span key={shelter.id} className="pl-0 pr-0 mr-3 mb-3">
         <Link href={"/shelter/" + shelter.id} className="shelter-link" style={{textDecoration:"none", color:"white"}}>
-          <Card className="border rounded" style={{whiteSpace:"nowrap", overflow:"hidden"}}>
+          <Card className="border rounded shelter-hover-div" style={{whiteSpace:"nowrap", overflow:"hidden"}}>
             <div className="row no-gutters hover-div" style={{textTransform:"capitalize", marginRight:"-2px"}}>
               <Row className="ml-0 mr-0 w-100" style={{minWidth:"485px", maxWidth:"485px", flexWrap:"nowrap"}}>
                 <div className="border-right" style={{width:"100px"}}>

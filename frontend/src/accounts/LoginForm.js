@@ -7,14 +7,16 @@ import Col from 'react-bootstrap/Col';
 import { Form as BootstrapForm, Modal, Row } from 'react-bootstrap';
 import * as Yup from "yup";
 import { useCookies } from 'react-cookie';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { TextInput } from '../components/Form.js';
 import { AuthContext } from "./AccountsReducer";
-import { loadUser, setAuthToken } from "./AccountsUtils";
-import logo from "../static/images/shelterly.png";
+import { setAuthToken } from "./AccountsUtils";
+import { S3_BUCKET } from '../constants';
 
 const Login = () => {
-  const { dispatch } = useContext(AuthContext);
-  const [cookies, setCookie, removeCookie] = useCookies(['token']);
+  const { state, dispatch } = useContext(AuthContext);
+  const [, setCookie, removeCookie] = useCookies(['token']);
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
 
@@ -35,20 +37,19 @@ const Login = () => {
             .required('No password provided.'),
         })}
         onSubmit={(values, actions ) => {
+          dispatch({ type: 'USER_LOADING' });
           setTimeout(() => {
             axios.post('/login/', values)
             .then(response => {
+              // Set token for axios calls.
               setAuthToken(response.data.token);
-              //set token as cookie 
+              // Store token in cookie.
               setCookie("token", response.data.token, {path: '/'});
-              //set authcontext
+              // Update state information.
               dispatch({type: 'LOGIN_SUCCESSFUL', data: response.data });
-              //called once
-              loadUser({dispatch, removeCookie});
               navigate(next);
             })
             .catch(e => {
-              console.log(e.response);
               removeCookie("token", {path: '/'});
               setAuthToken();
               actions.setStatus('Failed to log in with this username and password combination.')
@@ -60,12 +61,12 @@ const Login = () => {
       >
       {({ isSubmitting, status }) => (
         <>
-        <Row className='ml-auto mr-auto align-bottom' style={{marginTop:"70px"}}>
-          <img src={logo} alt="logo" style={{height:"120px", width:"120px", marginTop:"-4px"}} />
+        <Row className='ml-auto mr-auto mt-auto align-bottom'>
+          <img src={`${S3_BUCKET}images/shelterly.png`} alt="Logo" style={{height:"120px", width:"120px", marginTop:"-4px", marginLeft:"-4px"}} />
           <h1  style={{fontSize:"100px"}}>Shelterly</h1>
         </Row>
-        <Col xs={{ span:5 }} className="border rounded border-light shadow-sm" style={{marginRight:"auto", marginLeft:"auto"}}>
-          <h3 className='mb-0 text-center mt-3'>Log-in</h3>
+        <Col xs={{ span:5 }} className="border rounded border-light shadow-sm ml-auto mr-auto mb-auto" style={{maxHeight:"347px"}}>
+          <h3 className='mb-0 text-center mt-3'>Log-in {state.isLoading ? <FontAwesomeIcon icon={faSpinner} spin inverse /> : ""}</h3>
           <BootstrapForm as={Form}>
             <TextInput
               name="username"
@@ -109,7 +110,6 @@ const Login = () => {
                 setShow(false);
               })
               .catch(error => {
-                console.log(error.response);
               });
             }}
           >

@@ -4,18 +4,19 @@ import { Link } from 'raviger';
 import { Button, Card, ListGroup, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faClipboardList, faEdit, faPhone, faPlusSquare
+  faEdit, faPlusSquare, faUserPlus
 } from '@fortawesome/free-solid-svg-icons';
-import { faHomeHeart } from '@fortawesome/pro-solid-svg-icons';
+import { faHomeHeart, faPhonePlus } from '@fortawesome/pro-solid-svg-icons';
 import Moment from 'react-moment';
 import Header from '../components/Header';
 import History from '../components/History';
+import Scrollbar from '../components/Scrollbars';
 import AnimalCards from '../components/AnimalCards';
 
 function PersonDetails({id}) {
 
   // Determine if this is an owner or reporter when creating a Person.
-  var is_owner = window.location.pathname.includes("owner")
+  let is_owner = window.location.pathname.includes("owner")
 
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
@@ -28,7 +29,6 @@ function PersonDetails({id}) {
       handleClose()
     })
     .catch(error => {
-      console.log(error.response);
     });
   }
 
@@ -52,20 +52,28 @@ function PersonDetails({id}) {
 
   // Hook for initializing data.
   useEffect(() => {
+    let unmounted = false;
     let source = axios.CancelToken.source();
+
     const fetchPersonData = async () => {
       // Fetch Person data.
       await axios.get('/people/api/person/' + id + '/', {
         cancelToken: source.token,
       })
       .then(response => {
-        setData(response.data);
+        if (!unmounted) {
+          setData(response.data);
+        }
       })
       .catch(error => {
-        console.log(error.response);
       });
     };
     fetchPersonData();
+    // Cleanup.
+    return () => {
+      unmounted = true;
+      source.cancel();
+    };
   }, [id]);
 
   return (
@@ -83,17 +91,6 @@ function PersonDetails({id}) {
             }
           >
             <Link href={"/people/owner/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-1 mr-1" inverse /></Link>
-          </OverlayTrigger>
-          <OverlayTrigger
-            key={"add-owner"}
-            placement="bottom"
-            overlay={
-              <Tooltip id={`tooltip-add-owner`}>
-                Add another owner for all of these animals
-              </Tooltip>
-            }
-          >
-            <Link href={"/people/owner/new?owner_id=" + id}><FontAwesomeIcon icon={faPlusSquare} className="fa-move-down" inverse /></Link>
           </OverlayTrigger>
         </span>
       :
@@ -115,52 +112,68 @@ function PersonDetails({id}) {
     <hr/>
     <div className="row">
       <div className="col-6 d-flex" style={{paddingRight:"9px"}}>
-        <Card className="border rounded d-flex" style={{width:"100%"}}>
+        <Card className="border rounded d-flex" style={{width:"100%", minHeight:"312px"}}>
           <Card.Body>
             <Card.Title>
               <h4>Information</h4>
             </Card.Title>
             <hr/>
-            <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
-              <ListGroup.Item><b>Name: </b>{data.first_name} {data.last_name}</ListGroup.Item>
-              {data.agency ? <ListGroup.Item><b>Agency: </b>{data.agency}</ListGroup.Item>: ''}
-              {data.phone ? <ListGroup.Item><b>Telephone: </b>{data.display_phone}</ListGroup.Item> : ""}
-              {data.alt_phone ? <ListGroup.Item><b>Alternate Telephone: </b>{data.display_alt_phone}</ListGroup.Item> : ""}
-              {data.email ? <ListGroup.Item><b>Email: </b>{data.email}</ListGroup.Item> : ""}
-              {data.comments ? <ListGroup.Item><b>Comments: </b>{data.comments}</ListGroup.Item>: ''}
-              <ListGroup.Item><b>Address: </b>{data.address ? data.full_address : 'No Address Listed'}</ListGroup.Item>
-              {data.request ?
-                <ListGroup.Item><b>Service Request: </b>{data.request.full_address}
-                  <OverlayTrigger
-                    key={"request-details"}
-                    placement="top"
-                    overlay={
-                      <Tooltip id={`tooltip-request-details`}>
-                        Service request details
-                      </Tooltip>
-                    }
-                  >
-                    <Link href={"/hotline/servicerequest/" + data.request.id}><FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1" inverse /></Link>
-                  </OverlayTrigger>
-                </ListGroup.Item>: ''}
-            </ListGroup>
+            <Scrollbar no_shadow="true" style={{height:"222px", marginBottom:"-10px"}} renderView={props => <div {...props} style={{...props.style, marginBottom:"-19px"}}/>} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
+              <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
+                <ListGroup.Item><b>Name: </b>{data.first_name} {data.last_name}</ListGroup.Item>
+                {data.agency ? <ListGroup.Item><b>Agency: </b>{data.agency}</ListGroup.Item>: ''}
+                {data.phone ? <ListGroup.Item><b>Telephone: </b>{data.display_phone} {data.display_alt_phone ? <span>|&nbsp;Alt: {data.display_alt_phone}</span> : ""}</ListGroup.Item> : ""}
+                {data.email ? <ListGroup.Item><b>Email: </b>{data.email}</ListGroup.Item> : ""}
+                {data.request ?
+                  <ListGroup.Item><b>Service Request: </b><Link href={"/hotline/servicerequest/" + data.request.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.request.full_address}</Link></ListGroup.Item>
+                :
+                  <ListGroup.Item><b>Address: </b>{data.address ? data.full_address : 'No Address Listed'}</ListGroup.Item>
+                }
+                {data.comments ? <ListGroup.Item><b>Comments: </b>{data.comments}</ListGroup.Item>: ''}
+              </ListGroup>
+            </Scrollbar>
           </Card.Body>
         </Card>
       </div>
       <div className="col-6 d-flex" style={{paddingLeft:"9px"}}>
-        <Card className="border rounded d-flex" style={{width:"100%"}}>
-          <Card.Body>
+        <Card className="border rounded d-flex" style={{width:"100%", minHeight:"312px"}}>
+          <Card.Body style={{width:"100%", minHeight:"312px"}}>
             <Card.Title>
               <h4>Contact Log
-                <Link href={"/hotline/ownercontact/new?owner=" + id}><FontAwesomeIcon icon={faPhone} className="ml-1" inverse /></Link>
+                <OverlayTrigger
+                  key={"add-contact-note"}
+                  placement="top"
+                  overlay={
+                    <Tooltip id={`tooltip-add-contact-note`}>
+                      Add an owner contact note
+                    </Tooltip>
+                  }
+                >
+                  <Link href={"/hotline/ownercontact/new?owner=" + id}><FontAwesomeIcon icon={faPhonePlus} className="ml-1" inverse /></Link>
+                </OverlayTrigger>
               </h4>
             </Card.Title>
             <hr/>
-            <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
-              {data.owner_contacts.map(owner_contact => (
-              <ListGroup.Item key={owner_contact.id}><b><Moment format="MMMM Do YYYY HH:mm">{owner_contact.owner_contact_time}</Moment></b><Link href={"/hotline/ownercontact/" + owner_contact.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>: {owner_contact.owner_contact_note}</ListGroup.Item>
-              ))}
-            </ListGroup>
+            <Scrollbar no_shadow="true" style={{height:"210px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
+              <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
+                {data.owner_contacts.map(owner_contact => (
+                <ListGroup.Item key={owner_contact.id}><b><Moment format="MMMM Do YYYY HH:mm">{owner_contact.owner_contact_time}</Moment></b>
+                <OverlayTrigger
+                    key={"add-contact-note"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-add-contact-note`}>
+                        Update owner contact note
+                      </Tooltip>
+                    }
+                  >
+                    <Link href={"/hotline/ownercontact/" + owner_contact.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
+                  </OverlayTrigger>
+                  : {owner_contact.owner_contact_note}</ListGroup.Item>
+                ))}
+                {data.owner_contacts.length < 1 ? <ListGroup.Item>This owner has not been contacted yet.</ListGroup.Item> : ""}
+              </ListGroup>
+            </Scrollbar>
           </Card.Body>
         </Card>
       </div>
@@ -176,11 +189,22 @@ function PersonDetails({id}) {
                   placement="top"
                   overlay={
                     <Tooltip id={`tooltip-add-animal`}>
-                      Add animal
+                      Add animal to this owner
                     </Tooltip>
                   }
                 >
                   <Link href={"/animals/new?owner_id=" + id}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
+                </OverlayTrigger>
+                <OverlayTrigger
+                  key={"add-owner"}
+                  placement="bottom"
+                  overlay={
+                    <Tooltip id={`tooltip-add-owner`}>
+                      Add another owner for all of these animals
+                    </Tooltip>
+                  }
+                >
+                  <Link href={"/people/owner/new?owner_id=" + id}><FontAwesomeIcon icon={faUserPlus} className="ml-1 fa-move-up" size="sm" inverse /></Link>
                 </OverlayTrigger>
                 {is_owner && data.animals.filter(animal => (!['REUNITED', 'DECEASED'].includes(animal.status))).length > 0 ?
                 <OverlayTrigger
@@ -188,11 +212,11 @@ function PersonDetails({id}) {
                   placement="top"
                   overlay={
                     <Tooltip id={`tooltip-reunite`}>
-                      Reunite all owner animals
+                      Reunite all animals with this owner
                     </Tooltip>
                   }
                 >
-                  <FontAwesomeIcon icon={faHomeHeart} onClick={() => setShow(true)} style={{cursor:'pointer'}} className="ml-1 fa-move-up" inverse />
+                  <FontAwesomeIcon icon={faHomeHeart} onClick={() => setShow(true)} style={{cursor:'pointer'}} className="ml-1 fa-move-up" size="sm" inverse />
                 </OverlayTrigger>
                 : ""}
               </h4>

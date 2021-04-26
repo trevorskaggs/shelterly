@@ -27,6 +27,7 @@ class EvacAssignment(models.Model):
 
     team = models.ForeignKey(DispatchTeam, on_delete=models.SET_NULL, blank=True, null=True)
     service_requests = models.ManyToManyField(ServiceRequest, related_name='evacuation_assignments')
+    # do we need this or can we get animals from SR?
     animals = models.ManyToManyField('animals.Animal', blank=True, related_name='evacuation_assignments')
     start_time = models.DateTimeField(auto_now_add=True)
     end_time = models.DateTimeField(blank=True, null=True)

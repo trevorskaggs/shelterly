@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useFormikContext, useField } from 'formik';
 import { Col, Collapse, Image, Form, Row } from 'react-bootstrap';
-import Select from 'react-select';
+import Select, { createFilter } from 'react-select';
 import SimpleValue from 'react-select-simple-value';
 import Flatpickr from 'react-flatpickr';
 import ImageUploading from 'react-images-uploading';
@@ -14,6 +14,9 @@ import { Map, Marker, Tooltip as MapTooltip, TileLayer } from "react-leaflet";
 import flatten from 'flat';
 import clsx from 'clsx';
 import MaterialCheckbox from '@material-ui/core/Checkbox';
+import {
+  useRegisteredRef
+} from "react-register-nodes";
 import { makeStyles } from '@material-ui/core/styles';
 import Alert from 'react-bootstrap/Alert';
 import { Legend, pinMarkerIcon } from "../components/Map";
@@ -67,6 +70,8 @@ const DateTimePicker = ({ label, xs, clearable, ...props }) => {
 
   const [field, meta] = useField(props);
 
+  const registeredRef = useRegisteredRef(props.name);
+
   // Ref and function to clear field.
   const datetime = useRef(null);
   const clearDate = useCallback(() => {
@@ -76,7 +81,7 @@ const DateTimePicker = ({ label, xs, clearable, ...props }) => {
   }, [datetime]);
 
   // Flatpickr options
-  var options = {};
+  let options = {};
   if (props["data-enable-time"] === false) {
     options = {allowInput:true, altInput: true, altFormat: "F j, Y", dateFormat: "Y-m-d H:i"}
   }
@@ -86,7 +91,7 @@ const DateTimePicker = ({ label, xs, clearable, ...props }) => {
 
   return (
     <>
-      <Form.Group as={Col} xs={xs} hidden={props.hidden} className="mb-0">
+      <Form.Group as={Col} xs={xs} hidden={props.hidden} className="mb-0" ref={meta.error && registeredRef}>
       <label htmlFor={props.id || props.name}>{label}</label>
       <span className="d-flex">
         <Flatpickr className="datetime_picker" ref={datetime} data-enable-time options={options} {...field} {...props} />
@@ -98,14 +103,17 @@ const DateTimePicker = ({ label, xs, clearable, ...props }) => {
   );
 };
 
-const TextInput = ({ label, value, xs, controlId, formGroupClasses, ...props }) => {
+const TextInput = ({ label, xs, controlId, formGroupClasses, ...props }) => {
 
   const [field, meta] = useField(props);
+
+  const registeredRef = useRegisteredRef(props.name);
+
   return (
     <>
-    <Form.Group as={Col} xs={xs} controlId={controlId} className={formGroupClasses} hidden={props.hidden}>
+    <Form.Group as={Col} xs={xs} controlId={controlId} className={formGroupClasses} hidden={props.hidden} ref={meta.error && registeredRef}>
       <Form.Label>{label}</Form.Label>
-      <Form.Control type="text" value={value} isInvalid={meta.touched && meta.error} onChange={props.handleChange} {...field} {...props} />
+      <Form.Control type="text" isInvalid={meta.touched && meta.error} onChange={props.handleChange} {...field} {...props} />
       <Form.Control.Feedback type="invalid"> {meta.error}</ Form.Control.Feedback>
     </Form.Group>
     </>
@@ -139,6 +147,10 @@ const Checkbox = (props) => {
 const DropDown = React.forwardRef((props, ref) => {
   const { setFieldValue, errors, setFieldTouched, isSubmitting, isValidating } = useFormikContext();
   const [field, meta] = useField(props);
+
+  const registeredRef = useRegisteredRef(props.name);
+
+  const filterConfig = {matchFrom:"start"}
 
   const customStyles = {
     // For the select it self, not the options of the select
@@ -177,11 +189,13 @@ const DropDown = React.forwardRef((props, ref) => {
 
   return (
     <>
+    <div ref={meta.error && registeredRef}>
       {props.label ? <Form.Label style={props.style}>{props.label}</Form.Label> : ""}
       <SimpleValue {...field} options={props.options}>
-         {simpleProps => <Select isDisabled={props.disabled} ref={ref} styles={customStyles} isClearable={true} onBlur={updateBlur} onChange={handleOptionChange} {...props} {...simpleProps} />}
+         {simpleProps => <Select isDisabled={props.disabled} ref={ref} styles={customStyles} isClearable={true} filterOption={createFilter(filterConfig)} onBlur={updateBlur} onChange={handleOptionChange} {...props} {...simpleProps} />}
       </SimpleValue>
       {meta.touched && meta.error ? <div style={{ color: "#e74c3c", marginTop: ".5rem", fontSize: "80%" }}>{meta.error}</div> : ""}
+    </div>
     </>
   );
 });
@@ -223,7 +237,7 @@ const ImageUploader = ({ parentStateSetter, ...props }) => {
           <span className="d-flex flex-wrap align-items-end">
             {imageList.map((image, index) => (
               <span key={index} className="mt-2 mr-3">
-                <Image width={131} src={image.data_url} alt="" thumbnail />
+                <Image width={131} src={image.data_url} alt="Animal" thumbnail />
                 <div className="image-item__btn-wrapper">
                   <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => onImageRemove(index)} style={{backgroundColor:"red"}} />
                   <span className="ml-1">{props.label}</span>
@@ -265,11 +279,11 @@ const AddressLookup = ({ ...props }) => {
 
     if (suggestion.address_components) {
       // Extract location information from the return. Use short_name for the state.
-      var components={};
+      let components={};
       suggestion.address_components.forEach(function(k,v1) {k.types.forEach(function(v2, k2){v2 !== "administrative_area_level_1" ? components[v2]=k.long_name : components[v2]=k.short_name});});
 
       // Build formatted street number + name string.
-      var address = "";
+      let address = "";
       if (components.street_number) {
         address = components.street_number + " " + components.route;
       }
@@ -287,6 +301,7 @@ const AddressLookup = ({ ...props }) => {
       setFieldValue("latitude", suggestion.geometry.location.lat());
       setFieldValue("longitude", suggestion.geometry.location.lng());
       setFieldValue("full_address", suggestion.formatted_address.replace(', USA', ''));
+      props.setLatLon(suggestion.geometry.location.lat(), suggestion.geometry.location.lng())
     }
   }
 
@@ -302,8 +317,6 @@ const AddressLookup = ({ ...props }) => {
           new window.google.maps.Geocoder().geocode({ location: latlng }, function (results, status) {
             if (status === window.google.maps.GeocoderStatus.OK) {
               updateAddr(results[0]);
-            } else {
-              console.log(status);
             }
           });
           }
@@ -327,9 +340,13 @@ const AddressSearch = (props) => {
   const { setFieldValue } = useFormikContext();
   const [initialLatLon, setInitialLatLon] = useState([0, 0]);
 
+  const setLatLon = (lat, lon) => {
+    setInitialLatLon([lat, lon]);
+  }
+
   const renderAddressLookup = () => {
-    if(process.env.REACT_APP_GOOGLE_API_KEY){
-      return <AddressLookup label={props.label} style={{width: '100%'}} className={"form-control"}/>
+    if (process.env.REACT_APP_GOOGLE_API_KEY) {
+      return <AddressLookup label={props.label} style={{width: '100%'}} className={"form-control"} setLatLon={setLatLon} />
     } else {
       return <Alert variant="danger">Found Location Search is not available. Please contact support for assistance.</Alert>
     }
@@ -381,15 +398,18 @@ const AddressSearch = (props) => {
                 type="text"
                 label="Address"
                 name="address"
+                value={props.formikProps.values.address || ''}
                 disabled
               />
               {props.show_apt ?
-              <TextInput
-                xs="2"
-                type="text"
-                label="Apartment"
-                name="apartment"
-              /> : ""}
+                <TextInput
+                  xs="2"
+                  type="text"
+                  label="Apartment"
+                  name="apartment"
+                  value={props.formikProps.values.apartment || ''}
+                />
+              : ""}
             </Form.Row>
             <Form.Row>
               <TextInput
@@ -397,6 +417,7 @@ const AddressSearch = (props) => {
                 type="text"
                 label="City"
                 name="city"
+                value={props.formikProps.values.city || ''}
                 disabled
               />
               <Col xs="2">
@@ -414,6 +435,7 @@ const AddressSearch = (props) => {
                 type="text"
                 label="Zip Code"
                 name="zip_code"
+                value={props.formikProps.values.zip_code || ''}
                 disabled
               />
             </Form.Row>
@@ -425,7 +447,7 @@ const AddressSearch = (props) => {
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
             />
-              {props.formikProps.values.latitude ?
+              {props.formikProps.values.latitude && props.formikProps.values.longitude ?
               <Marker
                 draggable={true}
                 onDragEnd={updatePosition}

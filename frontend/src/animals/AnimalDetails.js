@@ -1,21 +1,24 @@
-import React, {useEffect, useState} from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
-import { Link } from 'raviger';
+import { Link, navigate } from 'raviger';
+import { AuthContext } from "../accounts/AccountsReducer";
 import Moment from 'react-moment';
 import { Carousel } from 'react-responsive-carousel';
 import { Button, Card, Col, ListGroup, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBandAid, faClipboardList, faCut, faEdit, faMinusSquare, faPlusSquare, faLink,
+  faBan, faBandAid, faCut, faEdit, faEnvelope, faLink, faMinusSquare, faUserPlus
 } from '@fortawesome/free-solid-svg-icons';
-import { faClawMarks, faHomeHeart } from '@fortawesome/pro-solid-svg-icons';
+import { faClawMarks, faHomeHeart, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
+import { AnimalDeleteModal } from "../components/Modals";
 import Header from '../components/Header';
 import History from '../components/History';
-import noImageFound from '../static/images/image-not-found.png';
+import { S3_BUCKET } from '../constants';
 
 function AnimalDetails({id}) {
 
+  const { state } = useContext(AuthContext);
   const [images, setImages] = useState([]);
 
   // Initial animal data.
@@ -35,14 +38,15 @@ function AnimalDetails({id}) {
     confined: 'unknown',
     injured: 'unknown',
     behavior_notes: '',
+    medical_notes: '',
     last_seen: null,
+    intake_date: null,
     front_image: null,
     side_image: null,
     room: null,
     extra_images: [],
     action_history: [],
-    full_address:'',
-    shelter_name: '',
+    shelter_object: {name: '', full_address: ''},
     owner_objects: [],
   });
 
@@ -51,7 +55,10 @@ function AnimalDetails({id}) {
   const [ownerToDelete, setOwnerToDelete] = useState({id:0, name:''});
   const [showOwnerConfirm, setShowOwnerConfirm] = useState(false);
   const handleOwnerClose = () => setShowOwnerConfirm(false);
+  const [showAnimalConfirm, setShowAnimalConfirm] = useState(false);
+  const handleAnimalClose = () => setShowAnimalConfirm(false);
 
+  // Handle animal reunited submit.
   const handleSubmit = async () => {
     await axios.patch('/animals/api/animal/' + id + '/', {status:'REUNITED', shelter:null, room:null})
     .then(response => {
@@ -59,10 +66,10 @@ function AnimalDetails({id}) {
       handleClose()
     })
     .catch(error => {
-      console.log(error.response);
     });
   }
 
+  // Handle remove owner submit.
   const handleOwnerSubmit = async () => {
     await axios.patch('/animals/api/animal/' + id + '/', {remove_owner:ownerToDelete.id})
     .then(response => {
@@ -70,12 +77,37 @@ function AnimalDetails({id}) {
       handleOwnerClose();
     })
     .catch(error => {
-      console.log(error.response);
+    });
+  }
+
+  // Handle animal removal submit.
+  const handleAnimalSubmit = async () => {
+    await axios.patch('/animals/api/animal/' + id + '/', {remove_animal:id})
+    .then(response => {
+      handleAnimalClose();
+      if (state.prevLocation) {
+        navigate(state.prevLocation);
+      }
+      else if (data.request) {
+        navigate('/hotline/servicerequest/' + data.request);
+      }
+      else if (data.owner) {
+        navigate('/people/owner/' + data.owner);
+      }
+      else if (data.reporter) {
+        navigate('/people/reporter/' + data.reporter);
+      }
+      else {
+        navigate('/');
+      }
+    })
+    .catch(error => {
     });
   }
 
   // Hook for initializing data.
   useEffect(() => {
+    let unmounted = false;
     let source = axios.CancelToken.source();
     const fetchAnimalData = async () => {
       // Fetch Animal data.
@@ -83,16 +115,22 @@ function AnimalDetails({id}) {
         cancelToken: source.token,
       })
       .then(response => {
-        setData(response.data);
-        var image_urls = [];
-        image_urls = image_urls.concat(response.data.front_image||[]).concat(response.data.side_image||[]).concat(response.data.extra_images);
-        setImages(image_urls);
+        if (!unmounted) {
+          setData(response.data);
+          let image_urls = [];
+          image_urls = image_urls.concat(response.data.front_image||[]).concat(response.data.side_image||[]).concat(response.data.extra_images);
+          setImages(image_urls);
+        }
       })
       .catch(error => {
-        console.log(error.response);
       });
     };
     fetchAnimalData();
+    // Cleanup.
+    return () => {
+      unmounted = true;
+      source.cancel();
+    };
   }, [id]);
 
   return (
@@ -108,7 +146,7 @@ function AnimalDetails({id}) {
           </Tooltip>
         }
       >
-        <Link href={"/animals/edit/" + id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
+        <Link href={"/animals/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-1" inverse /></Link>
       </OverlayTrigger>
       {data.status !== 'REUNITED' ?
       <OverlayTrigger
@@ -123,11 +161,22 @@ function AnimalDetails({id}) {
         <FontAwesomeIcon icon={faHomeHeart} onClick={() => setShow(true)} style={{cursor:'pointer'}} inverse />
       </OverlayTrigger>
       : ""}
+      <OverlayTrigger
+        key={"remove-animal"}
+        placement="bottom"
+        overlay={
+          <Tooltip id={`tooltip-remove-animal`}>
+            Remove animal
+          </Tooltip>
+        }
+      >
+        <FontAwesomeIcon icon={faBan} style={{cursor:'pointer'}} onClick={() => {setShowAnimalConfirm(true);}} className="ml-1" inverse />
+      </OverlayTrigger>
     </Header>
     <hr/>
-    <div className="row">
+    <div className="row" style={{marginBottom:"-13px"}}>
       <div className="col-6 d-flex" style={{marginRight:"-15px"}}>
-        <Card className="border rounded d-flex" style={{width:"100%"}}>
+        <Card className="border rounded d-flex" style={{width:"100%", marginBottom:"16px"}}>
           <Card.Body>
             <Card.Title>
               <h4>Information
@@ -202,24 +251,15 @@ function AnimalDetails({id}) {
               <ListGroup.Item>
                 <div className="row">
                   <span className="col-6"><b>Age:</b> {data.age||"Unknown"}</span>
-                  <span className="col-6"><b>Size:</b> {data.size}</span>
+                  <span className="col-6"><b>Size:</b> {data.size||"Unknown"}</span>
                 </div>
               </ListGroup.Item>
-              {data.last_seen ? <ListGroup.Item><b>Last Seen:</b> <Moment format="MMMM Do YYYY HH:mm">{data.last_seen}</Moment></ListGroup.Item> : ""}
-              {data.request ?
-              <ListGroup.Item><b>Service Request: </b>{data.request_address}
-                <OverlayTrigger
-                  key={"service-request-details"}
-                  placement="top"
-                  overlay={
-                    <Tooltip id={`tooltip-service-request-details`}>
-                      Service request details
-                    </Tooltip>
-                  }
-                >
-                  <Link href={"/hotline/servicerequest/" + data.request}><FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1" inverse /></Link>
-                </OverlayTrigger>
-              </ListGroup.Item>: ''}
+              <ListGroup.Item style={{textTransform:"capitalize"}}>
+                <div className="row">
+                  <span className="col-6"><b>Primary Color:</b> {data.pcolor||"N/A"}</span>
+                  <span className="col-6"><b>Secondary Color:</b> {data.scolor||"N/A"}</span>
+                </div>
+              </ListGroup.Item>
             </ListGroup>
             <Card.Title>
               <h4 className="mb-0 mt-3">Contacts
@@ -228,29 +268,44 @@ function AnimalDetails({id}) {
                   placement="top"
                   overlay={
                     <Tooltip id={`tooltip-add-owner`}>
-                      Add owner
+                      Add an owner to this animal
                     </Tooltip>
                   }
                 >
-                  <Link href={"/people/owner/new?animal_id=" + id}><FontAwesomeIcon icon={faPlusSquare} size="sm" className="ml-1" inverse /></Link>
+                  <Link href={"/people/owner/new?animal_id=" + id}><FontAwesomeIcon icon={faUserPlus} size="sm" className="ml-1" inverse /></Link>
                 </OverlayTrigger>
               </h4>
             </Card.Title>
             <hr/>
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
               {data.owner_objects.map(owner => (
-                <ListGroup.Item key={owner.id}><b>Owner: </b>{owner.first_name} {owner.last_name}
+                <ListGroup.Item key={owner.id}><b>Owner: </b><Link href={"/people/owner/" + owner.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{owner.first_name} {owner.last_name}</Link>
+                {owner.display_phone ?
                   <OverlayTrigger
-                    key={"owner-details"}
+                    key={"owner-phone"}
                     placement="top"
                     overlay={
-                      <Tooltip id={`tooltip-owner-details`}>
-                        Owner details
+                      <Tooltip id={`tooltip-owner-phone`}>
+                        {owner.display_phone}
                       </Tooltip>
                     }
                   >
-                    <Link href={"/people/owner/" + owner.id}><FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1 mr-1" inverse /></Link>
+                    <FontAwesomeIcon icon={faPhoneRotary} className="ml-1" inverse />
                   </OverlayTrigger>
+                  : ""}
+                  {owner.email ?
+                  <OverlayTrigger
+                    key={"owner-email"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-owner-email`}>
+                        {owner.email}
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon icon={faEnvelope} className="ml-1" inverse />
+                  </OverlayTrigger>
+                  : ""}
                   <OverlayTrigger
                     key={"remove-owner"}
                     placement="top"
@@ -260,37 +315,30 @@ function AnimalDetails({id}) {
                       </Tooltip>
                     }
                   >
-                    <FontAwesomeIcon icon={faMinusSquare} style={{cursor:'pointer'}} size="sm" onClick={() => {setOwnerToDelete({id:owner.id, name: owner.first_name + " " + owner.last_name});setShowOwnerConfirm(true);}} inverse />
+                    <FontAwesomeIcon icon={faMinusSquare} style={{cursor:'pointer'}} className="ml-1" onClick={() => {setOwnerToDelete({id:owner.id, name: owner.first_name + " " + owner.last_name});setShowOwnerConfirm(true);}} inverse />
                   </OverlayTrigger>
-                &nbsp;| {owner.display_phone||owner.email||"No Contact"}</ListGroup.Item>
+                </ListGroup.Item>
               ))}
               {data.reporter ?
-              <ListGroup.Item><b>Reporter: </b>{data.reporter_object.first_name} {data.reporter_object.last_name}
-                <OverlayTrigger
-                  key={"reporter-details"}
-                  placement="top"
-                  overlay={
-                    <Tooltip id={`tooltip-reporter-details`}>
-                      Reporter details
-                    </Tooltip>
-                  }
-                >
-                  <Link href={"/people/reporter/" + data.reporter}><FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1" inverse /></Link>
-                </OverlayTrigger>
-              </ListGroup.Item> : ""}
+              <ListGroup.Item><b>Reporter: </b><Link href={"/people/reporter/" + data.reporter} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.reporter_object.first_name} {data.reporter_object.last_name}</Link></ListGroup.Item> : ""}
               {data.owner_objects.length < 1 && !data.reporter ? <ListGroup.Item>No Contacts</ListGroup.Item> : ""}
             </ListGroup>
             <Card.Title>
                <h4 className="mb-0 mt-3">Location</h4>
             </Card.Title>
             <hr/>
-            <ListGroup variant="flush" style={{marginBottom:"-13px"}}>
-              {data.shelter ? <ListGroup.Item style={{marginTop:"-13px"}}><b>Shelter:</b> {data.shelter_name}<Link href={"/shelter/" + data.shelter}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item> : ""}
-              <ListGroup.Item style={{marginTop:"-13px"}}><b>Address:</b> {data.full_address || "Unknown"}</ListGroup.Item>
-              {data.room ? <ListGroup.Item style={{marginTop:"-13px"}}><b>Room:</b> {data.room_name}<Link href={"/shelter/room/" + data.room}> <FontAwesomeIcon icon={faClipboardList} inverse /></Link></ListGroup.Item> : ""}
-              {data.found_location ? 
-              <ListGroup.Item><b>Found Location: </b>{data.found_location}</ListGroup.Item>:
-              ""}
+            <ListGroup variant="flush" style={{marginBottom:"-13px", marginTop:"-13px"}}>
+              {data.found_location ? <ListGroup.Item><b>Found Location: </b>{data.found_location}</ListGroup.Item> : ""}
+              {data.request ?
+                <ListGroup.Item><b>Service Request: </b><Link href={"/hotline/servicerequest/" + data.request} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.request_address}</Link></ListGroup.Item>
+              : ''}
+              {data.shelter ?
+              <ListGroup.Item>
+                <b>Shelter:</b> <Link href={"/shelter/" + data.shelter} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.shelter_object.name}</Link>
+                {data.room ? <div className="mt-1"><b>Room:</b> <Link href={"/shelter/room/" + data.room} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.room_name}</Link></div> : ""}
+                <div className="mt-1"><b>Intake Date:</b> <Moment format="MMMM Do YYYY HH:mm">{data.intake_date}</Moment></div>
+                <div className="mt-1"><b>Address:</b> {data.shelter_object.full_address || "Unknown"}</div>
+              </ListGroup.Item> : ""}
             </ListGroup>
           </Card.Body>
         </Card>
@@ -299,33 +347,30 @@ function AnimalDetails({id}) {
         <div className="slide-container flex-grow-1 border rounded pl-0 pr-0" style={{width:"auto", height:"322px"}}>
           {images.length < 1 ?
             <Carousel className="carousel-wrapper" showThumbs={false} showStatus={false}>
-              <img src={noImageFound} alt="" />
-            </Carousel> :
+              <img src={`${S3_BUCKET}images/image-not-found.png`} alt="Not Found" />
+            </Carousel>
+          :
             <Carousel className="carousel-wrapper" showThumbs={false} showStatus={false}>
               {images.map(image => (
                 <div key={image} className="image-container">
-                  <img src={image} alt="" />
+                  <img src={image} alt="Animal" />
                 </div>
               ))}
             </Carousel>
           }
         </div>
-        <Card className="border rounded mt-3" style={{width:"100%", height:"100%"}}>
+        <Card className="border rounded mt-3" style={{width:"100%", height:"100%", marginBottom:"16px"}}>
           <Card.Body>
             <Card.Title>
               <h4>Description</h4>
             </Card.Title>
             <hr/>
-            <ListGroup variant="flush">
-              <ListGroup.Item style={{marginTop:"-13px", textTransform:"capitalize"}}>
-              <div className="row">
-                <span className="col-6"><b>Primary Color:</b> {data.pcolor||"N/A"}</span>
-                <span className="col-6"><b>Secondary Color:</b> {data.scolor||"N/A"}</span>
-              </div>
-              </ListGroup.Item>
+            <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
               {data.color_notes ? <ListGroup.Item><b>Color Notes:</b> {data.color_notes}</ListGroup.Item> : ""}
-              {data.behavior_notes ? <ListGroup.Item><b>Behavior Notes:</b> {data.behavior_notes}</ListGroup.Item> : ""}
+              {data.behavior_notes ? <ListGroup.Item style={{whiteSpace:"pre-line"}}><b>Behavior Notes:</b> {data.behavior_notes}</ListGroup.Item> : ""}
+              {data.medical_notes ? <ListGroup.Item style={{whiteSpace:"pre-line"}}><b>Medical Notes:</b> {data.medical_notes}</ListGroup.Item> : ""}
               {data.last_seen ? <ListGroup.Item><b>Last Seen:</b> <Moment format="MMMM Do YYYY HH:mm">{data.last_seen}</Moment></ListGroup.Item> : ""}
+              {!data.color_notes && !data.behavior_notes && !data.medical_notes && !data.last_seen ? <ListGroup.Item>No description available</ListGroup.Item> : ""}
             </ListGroup>
           </Card.Body>
         </Card>
@@ -360,6 +405,7 @@ function AnimalDetails({id}) {
         <Button variant="secondary" onClick={handleOwnerClose}>Close</Button>
       </Modal.Footer>
     </Modal>
+    <AnimalDeleteModal name={data.name} show={showAnimalConfirm} handleClose={handleAnimalClose} handleSubmit={handleAnimalSubmit} />
     </>
   );
 };

@@ -2,7 +2,7 @@ import axios from "axios";
 import { navigate } from "raviger";
 
 // Authenticate the user with the backnd to obtain a user.
-export function loadUser({dispatch, removeCookie}) {
+export function loadUser({dispatch, removeCookie, path}) {
 
   // Set user loading state.
   dispatch({ type: 'USER_LOADING' });
@@ -14,12 +14,11 @@ export function loadUser({dispatch, removeCookie}) {
     dispatch({type: 'USER_LOADED', user: results.data });
   })
   .catch(e => {
-    console.log(e);
     // Raise error.
     removeCookie("token", {path: '/'});
     setAuthToken();
     dispatch({type: "AUTHENTICATION_ERROR", data: e});
-    navigate('/');
+    navigate('/?next=' + path);
   })
 }
 
@@ -37,7 +36,6 @@ export function logoutUser({dispatch}, {removeCookie}) {
     navigate('/');
   })
   .catch(e => {
-    console.log(e);
     removeCookie("token", {path: '/'});
     setAuthToken();
     // Raise error.
@@ -45,11 +43,13 @@ export function logoutUser({dispatch}, {removeCookie}) {
   });
 }
 
-export function setAuthToken(token) {
+export function setAuthToken(token, csrftoken) {
   if (token) {
     // if we have a token, set as default axios token
     axios.defaults.headers.common['Authorization'] = `Token ${token}`;
+    axios.defaults.headers.post['X-CSRF-Token'] = csrftoken;
   } else {
     delete axios.defaults.headers.common['Authorization'];
+    delete axios.defaults.headers.post['X-CSRF-Token'];
   }
 };

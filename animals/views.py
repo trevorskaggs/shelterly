@@ -2,6 +2,7 @@ from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Case, BooleanField, Prefetch, Value, When, Exists
 from copy import deepcopy
+from datetime import datetime
 from rest_framework import filters, viewsets
 from actstream import action
 
@@ -23,6 +24,7 @@ class AnimalViewSet(viewsets.ModelViewSet):
             # Set status to SHELTERED if a shelter is added.
             if serializer.validated_data.get('shelter'):
                 serializer.validated_data['status'] = 'SHELTERED'
+                serializer.validated_data['intake_date'] = datetime.now()
 
             animal = serializer.save()
             animals = [animal]
@@ -60,6 +62,10 @@ class AnimalViewSet(viewsets.ModelViewSet):
                     # Create image object.
                     AnimalImage.objects.create(image=image_data, animal=animal, category=category)
 
+            # Check to see if animal SR status should be changed.
+            if animal.request:
+                animal.request.update_status()
+
     def perform_update(self, serializer):
         if serializer.is_valid():
 
@@ -67,8 +73,14 @@ class AnimalViewSet(viewsets.ModelViewSet):
             serializer.validated_data['owners'] = serializer.instance.owners.values_list('id', flat=True)
 
             # Mark as SHELTERED if we receive shelter field and it's not already in a shelter.
-            if serializer.validated_data.get('shelter') and (not serializer.instance.shelter or serializer.instance.shelter != serializer.validated_data.get('shelter')) :
+            if serializer.validated_data.get('shelter') and not serializer.instance.shelter:
                 serializer.validated_data['status'] = 'SHELTERED'
+                serializer.validated_data['intake_date'] = datetime.now()
+                action.send(self.request.user, verb='sheltered animal in', target=serializer.instance, action_object=serializer.validated_data.get('shelter'))
+                action.send(self.request.user, verb='sheltered animal', target=serializer.validated_data.get('shelter'), action_object=serializer.instance)
+
+            # If animal already had a shelter and now has a different shelter.
+            if serializer.validated_data.get('shelter') and serializer.instance.shelter != serializer.validated_data.get('shelter'):
                 action.send(self.request.user, verb='sheltered animal in', target=serializer.instance, action_object=serializer.validated_data.get('shelter'))
                 action.send(self.request.user, verb='sheltered animal', target=serializer.validated_data.get('shelter'), action_object=serializer.instance)
 
@@ -101,6 +113,10 @@ class AnimalViewSet(viewsets.ModelViewSet):
                     changed_fields.append(field)
 
             animal = serializer.save()
+
+            # Remove animal.
+            if self.request.data.get('remove_animal'):
+                Animal.objects.filter(id=self.request.data.get('remove_animal')).update(status='CANCELED', shelter=None, room=None)
 
             # Set order if present, add 1 to avoid 0 index since order is a PositiveIntergerField.
             if type(self.request.data.get('set_order', '')) == int:
@@ -136,13 +152,15 @@ class AnimalViewSet(viewsets.ModelViewSet):
                 # Otherwise create a new extra image.
                 else:
                     AnimalImage.objects.create(image=image_data, animal=animal, category="extra")
+
+            # Check to see if animal SR status should be changed.
+            if animal.request:
+                animal.request.update_status()
     
     def get_queryset(self):
         """
         Returns: Queryset of distinct animals, each annotated with:
-            is_stray (boolean)
             images (List of AnimalImages)
-        and filtered by is_stray.   
         """        
         queryset = Animal.objects.exclude(status="CANCELED").prefetch_related(Prefetch('animalimage_set', to_attr='images')).distinct()
         

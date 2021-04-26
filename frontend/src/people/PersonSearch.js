@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import axios from "axios";
 import { Link, useQueryParams } from 'raviger';
 import { Button, ButtonGroup, Card, CardGroup, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Pagination, Tooltip } from 'react-bootstrap';
@@ -6,6 +6,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faClipboardList
 } from '@fortawesome/free-solid-svg-icons';
+import {
+  faDotCircle
+} from '@fortawesome/free-regular-svg-icons';
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
 
@@ -27,6 +30,7 @@ function PersonSearch() {
 	const [tempSearchTerm, setTempSearchTerm] = useState(search);
 	const [page, setPage] = useState(1);
   const [numPages, setNumPages] = useState(1);
+	const topRef = useRef(null);
 
 	// Update searchTerm when field input changes.
 	const handleChange = event => {
@@ -38,6 +42,12 @@ function PersonSearch() {
 			event.preventDefault();
 			setSearchTerm(tempSearchTerm);
 	}
+
+	function setFocus(pageNum) {
+    if (pageNum !== page) {
+      topRef.current.focus();
+    }
+  }
 
 	// Hook for initializing data.
 	useEffect(() => {
@@ -69,7 +79,6 @@ function PersonSearch() {
 			})
 			.catch(error => {
 				if (!unmounted) {
-					console.log(error.response);
 					setData({owners: [], isFetching: false});
 				}
 			});
@@ -84,7 +93,7 @@ function PersonSearch() {
 
 	return (
 			<div className="ml-2 mr-2">
-			<Header>Search Owners and Reporters</Header>
+			<Header>Search Owners</Header>
 			<hr/>
 					<Form onSubmit={handleSubmit}>
 						<InputGroup className="mb-3">
@@ -94,6 +103,7 @@ function PersonSearch() {
 								name="searchTerm"
 								value={tempSearchTerm}
 								onChange={handleChange}
+								ref={topRef}
 							/>
 							<InputGroup.Append>
 								<Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0"}}>Search</Button>
@@ -107,8 +117,7 @@ function PersonSearch() {
 					{data.owners.map((owner, index) => (
 							<div key={owner.id} className="mt-3" hidden={page !== Math.ceil((index+1)/ITEMS_PER_PAGE)}>
 									<div className="card-header"> {owner.first_name ?
-										<h4 style={{marginBottom: "-2px",  marginLeft:"-12px"}}>{owner.first_name} {owner.last_name}
-											{owner.agency ? <span> ({owner.agency})</span> : ""}
+										<h4 style={{marginBottom: "-2px",  marginLeft:"-12px"}}>
 											{statusOptions === 'owners' ?
 											<OverlayTrigger
 												key={"owner-details"}
@@ -119,7 +128,7 @@ function PersonSearch() {
 													</Tooltip>
 												}
 											>
-												<Link href={"/people/owner/" + owner.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse/></Link>
+												<Link href={"/people/owner/" + owner.id}><FontAwesomeIcon icon={faDotCircle} className="mr-2" inverse/></Link>
 											</OverlayTrigger>
 											:
 											<OverlayTrigger
@@ -131,9 +140,11 @@ function PersonSearch() {
 													</Tooltip>
 												}
 											>
-												<Link href={"/people/reporter/" + owner.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse/></Link>
+												<Link href={"/people/reporter/" + owner.id}><FontAwesomeIcon icon={faDotCircle} className="mr-2" inverse/></Link>
 											</OverlayTrigger>
 											}
+											{owner.first_name} {owner.last_name}
+											{owner.agency ? <span> ({owner.agency})</span> : ""}
 										</h4> : "Unknown"}
 									</div>
 									<CardGroup>
@@ -143,12 +154,11 @@ function PersonSearch() {
 												<ListGroup>
 													<ListGroup.Item><b>Phone: </b>{owner.phone ? <span>{owner.display_phone} </span> : "None"}</ListGroup.Item>
 													<ListGroup.Item><b>Email: </b>{owner.email ? <span>{owner.email} </span> : "None"}</ListGroup.Item>
-													<ListGroup.Item><b>Service Request: </b>
 													{owner.request ?
-														<span>{owner.request.full_address}</span>
-													: "None"
+														<ListGroup.Item><b>Service Request: </b><Link href={"/hotline/servicerequest/" + owner.request.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{owner.request.full_address}</Link></ListGroup.Item>
+													:
+														<ListGroup.Item><b>Address: </b>{owner.full_address || "None"}</ListGroup.Item>
 													}
-													</ListGroup.Item>
 												</ListGroup>
 											</Card.Body>
 										</Card>
@@ -163,10 +173,24 @@ function PersonSearch() {
 													</ListGroup>
 												</Card.Title>
 												<ListGroup style={{height:"144px", overflowY:"auto", marginTop:"-12px"}}>
-													<Scrollbar style={{height:"144px"}}>
+													<Scrollbar style={{height:"144px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
 														{owner.animals.filter(animal => animal.species === searchState[owner.id].selectedSpecies).map((animal, i) => (
 															<ListGroup.Item key={animal.id}>
-																<b>#{animal.id}:</b>&nbsp;&nbsp;{animal.name || "Unknown"} - {animal.status}
+																<b>#{animal.id}:</b>&nbsp;&nbsp;<Link href={"/animals/" + animal.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.name || "Unknown"}</Link>
+																{animal.color_notes ?
+																<OverlayTrigger
+																	key={"animal-color-notes"}
+																	placement="top"
+																	overlay={
+																		<Tooltip id={`tooltip-animal-color-notes`}>
+																			{animal.color_notes}
+																		</Tooltip>
+																	}
+																>
+																	<FontAwesomeIcon icon={faClipboardList} style={{marginLeft:"3px"}} size="sm" inverse />
+																</OverlayTrigger>
+																: ""}
+																&nbsp;- {animal.status}
 															</ListGroup.Item>
 														))}
 													{owner.animals.length < 1 ? <ListGroup.Item style={{marginTop:"32px"}}>No Animals</ListGroup.Item> : ""}
@@ -181,7 +205,7 @@ function PersonSearch() {
 					<p>{data.isFetching ? 'Fetching ' + statusOptions + '...' :
 						<span>{data.owners && data.owners.length ? '' : 'No ' + statusOptions + ' found.'}</span>}
 					</p>
-					<Pagination className="custom-page-links" size="lg" onClick={(e) => {setPage(parseInt(e.target.innerText))}}>
+					<Pagination className="custom-page-links" size="lg" onClick={(e) => {setFocus(parseInt(e.target.innerText));setPage(parseInt(e.target.innerText))}}>
 						{[...Array(numPages).keys()].map(x =>
 						<Pagination.Item key={x+1} active={x+1 === page}>
 							{x+1}

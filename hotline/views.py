@@ -1,7 +1,7 @@
-from django.db.models import Count, Exists, OuterRef, Prefetch, Q
+from django.db.models import Case, Count, Exists, OuterRef, Prefetch, Q, When, Value, BooleanField
 from actstream import action
 from datetime import datetime
-from .serializers import ServiceRequestSerializer, VisitNoteSerializer
+from .serializers import ServiceRequestSerializer, SimpleServiceRequestSerializer, VisitNoteSerializer
 
 from animals.models import Animal
 from hotline.models import ServiceRequest, VisitNote
@@ -13,15 +13,24 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
     search_fields = ['address', 'city', 'animal__name', 'owners__first_name', 'owners__last_name', 'owners__address', 'owners__city', 'reporter__first_name', 'reporter__last_name']
     filter_backends = (filters.SearchFilter, filters.OrderingFilter)
     permission_classes = [permissions.IsAuthenticated, ]
-    serializer_class = ServiceRequestSerializer
+    serializer_class = SimpleServiceRequestSerializer
+    detail_serializer_class = ServiceRequestSerializer
     ordering_fields = ['injured', 'animal_count']
     ordering = ['-injured', '-animal_count']
+
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            if hasattr(self, 'detail_serializer_class'):
+                return self.detail_serializer_class
+
+        return super(ServiceRequestViewSet, self).get_serializer_class()
+
 
     def perform_create(self, serializer):
         if serializer.is_valid():
             for service_request in ServiceRequest.objects.filter(latitude=serializer.validated_data['latitude'], longitude=serializer.validated_data['longitude'], status='open'):
-                reporter_id = serializer.validated_data.get('reporter', {'id':None}).id
-                owner_id = serializer.validated_data.get('owners', [{'id':None}])[0].id
+                reporter_id = serializer.validated_data.get('reporter').id if serializer.validated_data.get('reporter') else None
+                owner_id = serializer.validated_data.get('owners')[0].id if serializer.validated_data.get('owners') else None
                 Person.objects.filter(id__in=[reporter_id, owner_id]).delete()
                 raise serializers.ValidationError(['Multiple open Requests may not exist with the same address.', service_request.id])
             service_request = serializer.save()
@@ -34,10 +43,6 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
                 for service_request in ServiceRequest.objects.filter(latitude=serializer.validated_data['latitude'], longitude=serializer.validated_data['longitude'], status='open').exclude(id=self.kwargs['pk']):
                     raise serializers.ValidationError(['Multiple open Requests may not exist with the same address.', service_request.id])
             service_request = serializer.save()
-
-            # Remove animal from SR.
-            if self.request.data.get('remove_animal'):
-                Animal.objects.filter(id=self.request.data.get('remove_animal')).update(status='CANCELED', shelter=None, room=None)
 
             if service_request.status == 'canceled':
                 service_request.animal_set.update(status='CANCELED')
@@ -58,7 +63,10 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
             .annotate(animal_count=Count("animal"))
             .annotate(
                 injured=Exists(Animal.objects.filter(request_id=OuterRef("id"), injured="yes"))
-            ).prefetch_related(Prefetch('animal_set', queryset=Animal.objects.prefetch_related('evacuation_assignments').prefetch_related(Prefetch('animalimage_set', to_attr='images')), to_attr='animals'))
+            )
+            .annotate(
+                pending=Case(When(Q(followup_date__lte=datetime.today()) | Q(followup_date__isnull=True), then=Value(True)), default=Value(False), output_field=BooleanField())
+            ).prefetch_related(Prefetch('animal_set', queryset=Animal.objects.exclude(status='CANCELED').prefetch_related('evacuation_assignments').prefetch_related(Prefetch('animalimage_set', to_attr='images')), to_attr='animals'))
             .prefetch_related('owners')
             .prefetch_related('visitnote_set')
             .select_related('reporter')
@@ -69,16 +77,6 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
         status = self.request.query_params.get('status', '')
         if status in ('open', 'assigned', 'closed', 'canceled'):
             queryset = queryset.filter(status=status).distinct()
-
-        # Filter on aco_required option for the map.
-        aco_required = self.request.query_params.get('aco_required', '')
-        if aco_required == 'true':
-            queryset = queryset.filter(Q(animal__aggressive='yes') | Q(animal__species='other'))
-
-        # Filter on pending_only option for the map.
-        pending_only = self.request.query_params.get('pending_only', '')
-        if pending_only == 'true':
-            queryset = queryset.filter(Q(followup_date__lte=datetime.today()) | Q(followup_date__isnull=True))
 
         # Exclude SRs without a geolocation when fetching for a map.
         is_map = self.request.query_params.get('map', '')
@@ -91,4 +89,3 @@ class VisitNoteViewSet(viewsets.ModelViewSet):
     queryset = VisitNote.objects.all()
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = VisitNoteSerializer
-

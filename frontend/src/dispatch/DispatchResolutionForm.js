@@ -10,13 +10,19 @@ import {
   Card,
   Col,
   ListGroup,
+  OverlayTrigger,
   Row,
+  Tooltip,
 } from 'react-bootstrap';
+import * as Yup from 'yup';
+import {
+  useOrderedNodes
+} from "react-register-nodes";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faClipboardList,
+  faClipboardList
 } from '@fortawesome/free-solid-svg-icons';
-import * as Yup from 'yup';
+import smoothScrollIntoView from "smooth-scroll-into-view-if-needed";
 import Moment from 'react-moment';
 import Header from '../components/Header';
 import { Checkbox, DateTimePicker, DropDown, TextInput } from '../components/Form';
@@ -26,6 +32,7 @@ function DispatchResolutionForm({ id }) {
 
   // Initial animal data.
   const [data, setData] = useState({
+    id: null,
     team_members: [],
     team_member_objects: [],
     team: null,
@@ -40,8 +47,12 @@ function DispatchResolutionForm({ id }) {
   const [shelters, setShelters] = useState({options: [], isFetching: false});
   const [ownerChoices, setOwnerChoices] = useState({});
 
+  const ordered = useOrderedNodes();
+  const [shouldCheckForScroll, setShouldCheckForScroll] = React.useState(false);
+
   // Hook for initializing data.
   useEffect(() => {
+    let unmounted = false;
     let source = axios.CancelToken.source();
 
     const fetchEvacAssignmentData = () => {
@@ -49,7 +60,8 @@ function DispatchResolutionForm({ id }) {
       axios.get('/evac/api/evacassignment/' + id + '/', {
         cancelToken: source.token,
       })
-        .then(response => {
+      .then(response => {
+        if (!unmounted) {
           let ownerChoices = {}
           response.data["sr_updates"] = [];
           response.data.service_request_objects.forEach((service_request, index) => {
@@ -77,12 +89,11 @@ function DispatchResolutionForm({ id }) {
           });
           setOwnerChoices(ownerChoices);
           setData(response.data);
-        })
-        .catch(error => {
-          console.log(error.response);
-        });
+        }
+      })
+      .catch(error => {
+      });
     };
-    fetchEvacAssignmentData();
 
     const fetchShelters = () => {
       setShelters({options: [], isFetching: true});
@@ -91,20 +102,49 @@ function DispatchResolutionForm({ id }) {
         cancelToken: source.token,
       })
       .then(response => {
-        let options = []
-        response.data.forEach(shelter => {
-          let display_name = shelter.name + ' ('+shelter.buildings.length+' buildings, ' + shelter.room_count + ' rooms, ' + shelter.animal_count + ' animals)';
-          options.push({value: shelter.id, label: display_name});
-        });
-        setShelters({options: options, isFetching: false});
+        if (!unmounted) {
+          let options = []
+          response.data.forEach(shelter => {
+            options.push({value: shelter.id, label: shelter.name});
+          });
+          setShelters({options: options, isFetching: false});
+        }
       })
       .catch(error => {
-        console.log(error.response);
-        setShelters({options: [], isFetching: false});
+        if (!unmounted) {
+          setShelters({options: [], isFetching: false});
+        }
       });
     };
+
+    fetchEvacAssignmentData();
     fetchShelters();
-  }, [id]);
+
+    // Cleanup.
+    return () => {
+      unmounted = true;
+      source.cancel();
+    };
+  }, [id, data.id]);
+
+  // Hook scrolling to top error.
+  useEffect(() => {
+    if (shouldCheckForScroll && ordered.length > 0) {
+      smoothScrollIntoView(ordered[0], {
+        scrollMode: "if-needed",
+        block: "center",
+        inline: "start"
+      }).then(() => {
+        if (ordered[0].querySelector("input")) {
+          ordered[0].querySelector("input").focus();
+        }
+        setShouldCheckForScroll(false);
+      });
+    }
+    // Cleanup.
+    return () => {
+    };
+  }, [shouldCheckForScroll, ordered]);
 
   return (
     <Formik
@@ -128,8 +168,8 @@ function DispatchResolutionForm({ id }) {
                 status: Yup.string()
                   .test('required-check', 'Animal cannot remain REPORTED.',
                     function(value) {
-                      let required = true;
-                      data.sr_updates.filter(asdf => asdf.id === this.parent.request).forEach(sr_update => {
+                      let required = true
+                      data.sr_updates.filter(sr => sr.id === this.parent.request).forEach(sr_update => {
                         if (sr_update.unable_to_complete || sr_update.incomplete) {
                           required = false;
                         }
@@ -166,7 +206,6 @@ function DispatchResolutionForm({ id }) {
               navigate('/dispatch/summary/' + response.data.id);
             })
             .catch(error => {
-              console.log(error.response);
             });
           setSubmitting(false);
         }, 500);
@@ -198,7 +237,8 @@ function DispatchResolutionForm({ id }) {
               <Card key={service_request.id} border="secondary" className="mt-3">
                 <Card.Body>
                   <Card.Title style={{marginBottom:"-5px"}}>
-                    <h4>Service Request <Link href={"/hotline/servicerequest/" + service_request.id}><FontAwesomeIcon icon={faClipboardList} inverse /></Link> |&nbsp;
+                    <h4>
+                      <Link href={"/hotline/servicerequest/" + service_request.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{service_request.full_address}</Link> |&nbsp;
                       <Checkbox
                         label={"Not Completed Yet:"}
                         name={`sr_updates.${index}.incomplete`}
@@ -261,7 +301,6 @@ function DispatchResolutionForm({ id }) {
                   </Card.Title>
                   <hr />
                   <ListGroup variant="flush" style={{ marginTop: "-13px", marginBottom: "-13px" }}>
-                    <ListGroup.Item><b>Address: </b>{service_request.full_address}</ListGroup.Item>
                     {service_request.owner_objects.map(owner => (
                       <ListGroup.Item key={owner.id}><b>Owner: </b>{owner.first_name} {owner.last_name}</ListGroup.Item>
                     ))}
@@ -284,7 +323,22 @@ function DispatchResolutionForm({ id }) {
                               isClearable={false}
                             />
                           </Col>
-                          <span style={{ marginTop:"5px" }}><span style={{ textTransform: "capitalize" }}>#{animal.id} - {animal.name || "Unknown"}</span>&nbsp;({animal.species})</span>
+                          <span style={{ marginTop:"5px", textTransform:"capitalize" }}>
+                            #{animal.id} - <Link href={"/animals/" + animal.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.name || "Unknown"}</Link>&nbsp;({animal.species})
+                            {animal.color_notes ?
+                            <OverlayTrigger
+                              key={"animal-color-notes"}
+                              placement="top"
+                              overlay={
+                                <Tooltip id={`tooltip-animal-color-notes`}>
+                                  {animal.color_notes}
+                                </Tooltip>
+                              }
+                            >
+                              <FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse />
+                            </OverlayTrigger>
+                            : ""}
+                          </span>
                         </Row>
                         {props.values && props.values.sr_updates[index] && props.values.sr_updates[index].animals[inception].status === 'SHELTERED' ?
                         <Row>
@@ -354,7 +408,7 @@ function DispatchResolutionForm({ id }) {
                       <BootstrapForm.Row className="mt-2">
                         <Col xs="4">
                          <DropDown
-                          label="Owner Contacted"
+                          label="Owner Contacted*"
                           id={`sr_updates.${index}.owner_contact_id`}
                           name={`sr_updates.${index}.owner_contact_id`}
                           key={`my_unique_test_select_key__d}`}
@@ -368,7 +422,7 @@ function DispatchResolutionForm({ id }) {
                       </BootstrapForm.Row>
                       <BootstrapForm.Row className="mt-3">
                         <DateTimePicker
-                          label="Owner Contact Time"
+                          label="Owner Contact Time*"
                           name={`sr_updates.${index}.owner_contact_time`}
                           id={`sr_updates.${index}.owner_contact_time`}
                           xs="4"
@@ -386,7 +440,7 @@ function DispatchResolutionForm({ id }) {
                           xs="9"
                           as="textarea"
                           rows={5}
-                          label="Owner Contact Note"
+                          label="Owner Contact Note*"
                         />
                       </BootstrapForm.Row>
                     </span>
@@ -395,7 +449,7 @@ function DispatchResolutionForm({ id }) {
               </Card>
             ))}
             <ButtonGroup size="lg" className="col-12 pl-0 pr-0">
-              <Button className="btn btn-block" type="button" onClick={() => { props.submitForm() }}>Save</Button>
+              <Button className="btn btn-block" type="submit" onClick={() => { setShouldCheckForScroll(true); }}>Save</Button>
             </ButtonGroup>
           </BootstrapForm>
         </>

@@ -54,7 +54,7 @@ const reportedIconHTML = ReactDOMServer.renderToString(
 export const reportedMarkerIcon = new L.DivIcon({
   html: reportedIconHTML,
   iconSize: [0, 0],
-  iconAnchor: [6, 9],
+  iconAnchor: [8, 9],
   className: "reported-icon",
   popupAnchor: null,
   shadowUrl: null,
@@ -72,7 +72,7 @@ const SIPIconHTML = ReactDOMServer.renderToString(
 export const SIPMarkerIcon = new L.DivIcon({
   html: SIPIconHTML,
   iconSize: [0, 0],
-  iconAnchor: [5, 9],
+  iconAnchor: [8, 9],
   className: "SIP-icon",
   popupAnchor: null,
   shadowUrl: null,
@@ -89,7 +89,7 @@ const UTLIconHTML = ReactDOMServer.renderToString(
 export const UTLMarkerIcon = new L.DivIcon({
   html: UTLIconHTML,
   iconSize: [0, 0],
-  iconAnchor: [6, 9],
+  iconAnchor: [8, 9],
   className: "UTL-icon",
   popupAnchor: null,
   shadowUrl: null,
@@ -101,7 +101,7 @@ const checkIconHTML = ReactDOMServer.renderToString(<FontAwesomeIcon icon={faChe
 export const checkMarkerIcon = new L.DivIcon({
   html: checkIconHTML,
   iconSize: [0, 0],
-  iconAnchor: [6, 9],
+  iconAnchor: [8, 9],
   className: "check-icon",
   popupAnchor: null,
   shadowUrl: null,
@@ -109,11 +109,11 @@ export const checkMarkerIcon = new L.DivIcon({
   shadowAnchor: null
 });
 
-const shelterIconHTML = ReactDOMServer.renderToString(<FontAwesomeIcon icon={faHome} className="icon-border" size="lg" color="#af7051" />);
+const shelterIconHTML = ReactDOMServer.renderToString(<FontAwesomeIcon icon={faHome} className="icon-border" size="lg" color="#b18662" />);
 export const shelterMarkerIcon = new L.DivIcon({
   html: shelterIconHTML,
   iconSize: [0, 0],
-  iconAnchor: [6, 9],
+  iconAnchor: [8, 9],
   className: "shelter-icon",
   popupAnchor: null,
   shadowUrl: null,
@@ -130,7 +130,7 @@ const closedIconHTML = ReactDOMServer.renderToString(
 export const closedMarkerIcon = new L.DivIcon({
   html: closedIconHTML,
   iconSize: [0, 0],
-  iconAnchor: [6, 9],
+  iconAnchor: [8, 9],
   className: "closed-icon",
   popupAnchor: null,
   shadowUrl: null,
@@ -167,27 +167,24 @@ export const prettyText = (size, species, count) => {
   if (count <= 0) {
     return "";
   }
-  var plural = ""
+  let plural = ""
   if (count > 1) {
     plural = "s"
   }
 
-  var size_and_species = size + " " + species + plural;
+  let size_and_species = size + " " + species + plural;
   // Exception for horses since they don't need an extra species output.
   if (species === 'horse') {
     // Exception for pluralizing ponies.
     if (size === 'pony' && count > 1) {
       size_and_species = 'ponies'
     }
-    else if (size === 'unknown' || size === '') {
-      size_and_species = 'horse' + plural
-    }
-    else {
+    else if (size) {
       size_and_species = size + plural;
     }
   }
 
-  var text = count + " " + size_and_species;
+  let text = count + " " + size_and_species;
   return text;
 }
 

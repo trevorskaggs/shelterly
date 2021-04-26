@@ -11,17 +11,16 @@ import { faBadgeSheriff, faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
 import { Circle, Marker, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
 import * as Yup from 'yup';
-import badge from "../static/images/badge-sheriff.png";
-import bandaid from "../static/images/band-aid-solid.png";
-import car from "../static/images/car-solid.png";
-import trailer from "../static/images/trailer-solid.png";
 import { Typeahead } from 'react-bootstrap-typeahead';
 import Moment from 'react-moment';
 import Map, { countMatches, prettyText, reportedMarkerIcon, SIPMarkerIcon, UTLMarkerIcon, checkMarkerIcon } from "../components/Map";
 import { Checkbox, TextInput } from "../components/Form";
+import { DispatchDuplicateSRModal } from "../components/Modals";
 import Scrollbar from '../components/Scrollbars';
 import 'react-bootstrap-typeahead/css/Typeahead.css';
 import 'leaflet/dist/leaflet.css';
+import { S3_BUCKET } from '../constants';
+
 
 function Deploy() {
 
@@ -30,21 +29,25 @@ function Deploy() {
   const [totalSelectedState, setTotalSelectedState] = useState({'REPORTED':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}});
   const [selectedCount, setSelectedCount] = useState({count:0, disabled:true});
   const [statusOptions, setStatusOptions] = useState({aco_required:false, pending_only: true});
+  const [triggerRefresh, setTriggerRefresh] = useState(false);
   const [teamData, setTeamData] = useState({teams: [], options: [], isFetching: false});
   const [selected, setSelected] = useState([]);
   const [teamName, setTeamName] = useState('');
   const handleClose = () => setShow(false);
   const [show, setShow] = useState(false);
   const [error, setError] = useState('');
+  const [showDispatchDuplicateSRModal, setShowDispatchDuplicateSRModal] = useState(false);
+  const [duplicateSRs, setDuplicateSRs] = useState([]);
+  const handleCloseDispatchDuplicateSRModal = () => {setDuplicateSRs([]);setShowDispatchDuplicateSRModal(false);}
 
   // Handle aco_required toggle.
   const handleACO = async event => {
-    setStatusOptions({aco_required:!statusOptions.aco_required, pending_only:statusOptions.pending_only})
+    setStatusOptions(prevState => ({ ...prevState, aco_required:!statusOptions.aco_required }));
   }
 
   // Handle pending_only toggle.
   const handlePendingOnly = async event => {
-    setStatusOptions({aco_required:statusOptions.aco_required, pending_only:!statusOptions.pending_only})
+    setStatusOptions(prevState => ({ ...prevState, pending_only:!statusOptions.pending_only }));
   }
 
   // Handle radius circle toggles.
@@ -120,6 +123,20 @@ function Deploy() {
     }
   }
 
+  // Handle reselecting after hitting dupe assigned SR error.
+  const handleReselect = async event => {
+    // Perform API update for most recent data and clean out the duplicate SRs.
+    setTriggerRefresh(!triggerRefresh)
+    setMapState(Object.keys(mapState).filter(key => !duplicateSRs.includes(key))
+      .reduce((obj, key) => {
+        obj[key] = mapState[key];
+        return obj;
+      }, {})
+    );
+    setDuplicateSRs([]);
+    setShowDispatchDuplicateSRModal(false);
+  }
+
   // Handle dynamic SR state and map display when an SR is selected or deselected.
   const handleMapState = (id) => {
     var status_matches = {};
@@ -182,11 +199,12 @@ function Deploy() {
         }
       }
     }
-    setMapState(prevState => ({ ...prevState, tempMapState}));
+    setMapState(tempMapState);
   }
 
   // Hook for initializing data.
   useEffect(() => {
+    let unmounted = false;
     let source = axios.CancelToken.source();
     const fetchTeamMembers = async () => {
       setTeamData({teams: [], options: [], isFetching: true});
@@ -195,46 +213,48 @@ function Deploy() {
         cancelToken: source.token,
       })
       .then(response => {
-        let options = [];
-        let team_names = [];
-        let team_name = '';
-        response.data.forEach(function(teammember) {
-          options.push({id: [teammember.id], label: teammember.display_name})
-        });
-        // Then fetch all recent Teams.
-        axios.get('/evac/api/dispatchteam/', {
-          params: {
-            map: true
-          },
-          cancelToken: source.token,
-        })
-        .then(response => {
-          response.data.forEach(function(team) {
-            // Only add to option list if not actively assigned and not already in the list which is sorted by newest.
-            if (!team.is_assigned && !team_names.includes(team.name)) {
-              options.unshift({id: team.team_members, label: team.name + ": " + team.display_name});
-            }
-            team_names.push(team.name);
+        if (!unmounted) {
+          let options = [];
+          let team_names = [];
+          let team_name = '';
+          response.data.forEach(function(teammember) {
+            options.push({id: [teammember.id], label: teammember.display_name})
           });
-          // Provide a default "TeamN" team name that hasn't already be used.
-          let i = 1;
-          do {
-            if (!team_names.includes("Team " + String(i))){
-              team_name = "Team " + String(i);
+          // Then fetch all recent Teams.
+          axios.get('/evac/api/dispatchteam/', {
+            params: {
+              map: true
+            },
+            cancelToken: source.token,
+          })
+          .then(response => {
+            response.data.forEach(function(team) {
+              // Only add to option list if not actively assigned and not already in the list which is sorted by newest.
+              if (!team.is_assigned && !team_names.includes(team.name)) {
+                options.unshift({id: team.team_members, label: team.name + ": " + team.display_name});
+              }
+              team_names.push(team.name);
+            });
+            // Provide a default "TeamN" team name that hasn't already be used.
+            let i = 1;
+            do {
+              if (!team_names.includes("Team " + String(i))){
+                team_name = "Team " + String(i);
+              }
+              i++;
             }
-            i++;
-          }
-          while (team_name === '');
-          setTeamData({teams: response.data, options: options, isFetching: false});
-          setTeamName(team_name);
-        })
-        .catch(error => {
-          console.log(error.response);
-          setTeamData({teams: [], options: [], isFetching: false});
-        });
+            while (team_name === '');
+            setTeamData({teams: response.data, options: options, isFetching: false});
+            setTeamName(team_name);
+          })
+          .catch(error => {
+            if (!unmounted) {
+              setTeamData({teams: [], options: [], isFetching: false});
+            }
+          });
+        }
       })
       .catch(error => {
-        console.log(error.response);
         setTeamData({teams: [], options: [], isFetching: false});
       });
     };
@@ -244,36 +264,38 @@ function Deploy() {
       await axios.get('/hotline/api/servicerequests/', {
         params: {
           status: 'open',
-          aco_required: statusOptions.aco_required,
-          pending_only: statusOptions.pending_only,
           map: true
         },
         cancelToken: source.token,
       })
       .then(response => {
-        setData({service_requests: response.data, isFetching: false, bounds:L.latLngBounds([[0,0]])});
-        const map_dict = {...mapState};
-        const bounds = [];
-        const current_ids = Object.keys(mapState);
-        for (const service_request of response.data) {
-          // Only add initial settings if we don't already have them.
-          if (!current_ids.includes(String(service_request.id))) {
-            const total_matches = countMatches(service_request);
-            const matches = total_matches[0];
-            const status_matches = total_matches[1];
-            const color = service_request.reported_animals > 0 ? '#ff4c4c' : service_request.unable_to_locate > 0 ? '#5f5fff' : '#f5ee0f';
-            map_dict[service_request.id] = {checked:false, hidden:false, color:color, matches:matches, status_matches:status_matches, radius:"disabled", has_reported_animals:service_request.reported_animals > 0, latitude:service_request.latitude, longitude:service_request.longitude};
+        if (!unmounted) {
+          setData(prevState => ({ ...prevState, service_requests: response.data, isFetching: false}));
+          const map_dict = {...mapState};
+          const bounds = [];
+          const current_ids = Object.keys(mapState);
+          for (const service_request of response.data) {
+            // Only add initial settings if we don't already have them.
+            if (!current_ids.includes(String(service_request.id))) {
+              const total_matches = countMatches(service_request);
+              const matches = total_matches[0];
+              const status_matches = total_matches[1];
+              const color = service_request.reported_animals > 0 ? '#ff4c4c' : service_request.unable_to_locate > 0 ? '#5f5fff' : '#f5ee0f';
+              map_dict[service_request.id] = {checked:false, hidden:false, color:color, matches:matches, status_matches:status_matches, radius:"disabled", has_reported_animals:service_request.reported_animals > 0, latitude:service_request.latitude, longitude:service_request.longitude};
+              bounds.push([service_request.latitude, service_request.longitude]);
+            }
           }
-          bounds.push([service_request.latitude, service_request.longitude]);
-        }
-        setMapState(map_dict);
-        if (bounds.length > 0) {
-          setData(prevState => ({ ...prevState, "bounds":L.latLngBounds(bounds) }));
+          setMapState(map_dict);
+
+          if (bounds.length > 0 && Object.keys(mapState).length < 1) {
+            setData(prevState => ({ ...prevState, "bounds":L.latLngBounds(bounds) }));
+          }
         }
       })
       .catch(error => {
-        console.log(error.response);
-        setData({service_requests: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
+        if (!unmounted) {
+          setData({service_requests: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
+        }
       });
     };
 
@@ -282,9 +304,10 @@ function Deploy() {
 
     // Cleanup.
     return () => {
+      unmounted = true;
       source.cancel();
     };
-  }, [statusOptions]);
+  }, [triggerRefresh]);
 
   return (
     <Formik
@@ -301,14 +324,21 @@ function Deploy() {
       })}
       enableReinitialize={true}
       onSubmit={(values, { setSubmitting }) => {
-        values.service_requests = Object.keys(mapState).filter(key => mapState[key].checked === true)
+        values.service_requests = Object.keys(mapState).filter(key => mapState[key].checked === true);
+        // Remove duplicate assignments from POST values.
+        if (duplicateSRs.length > 0) {
+          values.service_requests = values.service_requests.filter(sr_id => !duplicateSRs.includes(sr_id));
+        }
         setTimeout(() => {
           axios.post('/evac/api/evacassignment/', values)
           .then(response => {
             navigate('/dispatch/summary/' + response.data.id);
           })
           .catch(error => {
-            console.log(error.response);
+            if (error.response.data && error.response.data[0].includes('Duplicate assigned service request error')) {
+              setDuplicateSRs(error.response.data[1]);
+              setShowDispatchDuplicateSRModal(true);
+            }
           });
           setSubmitting(false);
         }, 500);
@@ -381,36 +411,40 @@ function Deploy() {
           </Col>
           <Col xs={10} className="border rounded pl-0 pr-0">
             <Map style={{marginRight:"0px"}} bounds={data.bounds} onMoveEnd={onMove}>
-              {data.service_requests.map(service_request => (
-                <Marker
-                  key={service_request.id}
-                  position={[service_request.latitude, service_request.longitude]}
-                  icon={mapState[service_request.id] && mapState[service_request.id].checked ? checkMarkerIcon : service_request.sheltered_in_place > 0 ? SIPMarkerIcon : service_request.unable_to_locate > 0 ? UTLMarkerIcon : reportedMarkerIcon}
-                  onClick={() => handleMapState(service_request.id)}
-                >
-                  <MapTooltip autoPan={false}>
-                    <span>
-                      {mapState[service_request.id] ?
-                        <span>
-                          {Object.keys(mapState[service_request.id].matches).map((key,i) => (
-                            <span key={key} style={{textTransform:"capitalize"}}>
-                              {i > 0 && ", "}{prettyText(key.split(',')[1], key.split(',')[0], mapState[service_request.id].matches[key])}
-                            </span>
-                          ))}
-                        </span>
-                      :""}
-                      <br />
-                      {service_request.full_address}
-                      {service_request.followup_date ? <div>Followup Date: <Moment format="L">{service_request.followup_date}</Moment></div> : ""}
-                      <div>
-                        {service_request.aco_required ? <img width={16} height={16} src={badge} alt="" className="mr-1" /> : ""}
-                        {service_request.injured ? <img width={16} height={16} src={bandaid} alt="" className="mr-1" /> : ""}
-                        {service_request.accessible ? <img width={16} height={16} src={car} alt="" className="mr-1" /> : ""}
-                        {service_request.turn_around ? <img width={16} height={16} src={trailer} alt="" /> : ""}
-                      </div>
-                    </span>
-                  </MapTooltip>
-                </Marker>
+              {data.service_requests
+              .filter(service_request => statusOptions.aco_required ? service_request.aco_required === statusOptions.aco_required : true)
+              .filter(service_request => statusOptions.pending_only ? service_request.pending === statusOptions.pending_only : true)
+              .map(service_request => (
+                <span key={service_request.id}> {mapState[service_request.id] ? 
+                  <Marker
+                    position={[service_request.latitude, service_request.longitude]}
+                    icon={mapState[service_request.id] && mapState[service_request.id].checked ? checkMarkerIcon : service_request.sheltered_in_place > 0 ? SIPMarkerIcon : service_request.unable_to_locate > 0 ? UTLMarkerIcon : reportedMarkerIcon}
+                    onClick={() => handleMapState(service_request.id)}
+                  >
+                    <MapTooltip autoPan={false}>
+                      <span>
+                        {mapState[service_request.id] ?
+                          <span>
+                            {Object.keys(mapState[service_request.id].matches).map((key,i) => (
+                              <span key={key} style={{textTransform:"capitalize"}}>
+                                {i > 0 && ", "}{prettyText(key.split(',')[1], key.split(',')[0], mapState[service_request.id].matches[key])}
+                              </span>
+                            ))}
+                          </span>
+                        :""}
+                        <br />
+                        {service_request.full_address}
+                        {service_request.followup_date ? <div>Followup Date: <Moment format="L">{service_request.followup_date}</Moment></div> : ""}
+                        <div>
+                        {service_request.aco_required ? <img width={16} height={16} src={`${S3_BUCKET}images/badge-sheriff.png`} alt="ACO Required" className="mr-1" /> : ""}
+                        {service_request.injured ? <img width={16} height={16} src={`${S3_BUCKET}images/band-aid-solid.png`} alt="Injured" className="mr-1" /> : ""}
+                        {service_request.accessible ? <img width={16} height={16} src={`${S3_BUCKET}images/car-solid.png`} alt="Accessible" className="mr-1" /> : ""}
+                        {service_request.turn_around ? <img width={16} height={16} src={`${S3_BUCKET}images/trailer-solid.png`} alt="Turn Around" /> : ""}
+                        </div>
+                      </span>
+                    </MapTooltip>
+                  </Marker> : ""}
+                </span>
               ))}
               {Object.entries(mapState).filter(([key, value]) => value.radius === "enabled").map(([key, value]) => (
                 <Circle key={key} center={{lat:value.latitude, lng: value.longitude}} color={value.color} radius={805} interactive={false} />
@@ -419,11 +453,11 @@ function Deploy() {
           </Col>
         </Row>
         <Row className="mt-2" style={{marginRight:"-12px"}}>
-          <Col xs={2} className="pl-0 pr-0" style={{marginLeft:"-7px", paddingRight:"2px"}}>
+          <Col xs={2} className="pl-0 pr-0" style={{marginLeft:"-7px", marginRight:"12px"}}>
             <Button type="submit" className="btn-block mt-auto" style={{marginBottom:"-33px"}} disabled={selectedCount.disabled || props.values.team_members.length === 0}>DEPLOY</Button>
           </Col>
-          <Col xs={2} className="pl-0 pr-0" style={{marginLeft:"-7px", paddingRight:"2px"}}>
-            <div className="card-header border rounded text-center" style={{height:"37px", width:"188px", marginLeft:"12px", paddingTop:"6px", whiteSpace:"nowrap"}}>
+          <Col xs={2} className="pl-0 pr-0" style={{marginRight:"5px"}}>
+            <div className="card-header border rounded text-center" style={{height:"37px", marginLeft:"-6px", paddingTop:"6px", whiteSpace:"nowrap"}}>
               <span style={{marginLeft:"-10px"}}>{props.values.team_name || teamName}
                 <OverlayTrigger
                   key={"edit-team-name"}
@@ -439,7 +473,7 @@ function Deploy() {
               </span>
             </div>
           </Col>
-          <Col xs={8} className="pl-0" style={{marginLeft:"26px", marginRight:"-13px"}}>
+          <Col xs={8} className="pl-0" style={{marginRight:"-10px"}}>
             <Typeahead
               id="team_members"
               multiple
@@ -462,7 +496,10 @@ function Deploy() {
           </Col>
           <Col xs={10} className="border rounded" style={{marginLeft:"1px", height:"277px", overflowY:"auto", paddingRight:"-1px"}}>
             <Scrollbar no_shadow="true" style={{height:"275px", marginLeft:"-10px", marginRight:"-10px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
-              {data.service_requests.map(service_request => (
+              {data.service_requests
+              .filter(service_request => statusOptions.aco_required ? service_request.aco_required === statusOptions.aco_required : true)
+              .filter(service_request => statusOptions.pending_only ? service_request.pending === statusOptions.pending_only : true)
+              .map(service_request => (
                 <span key={service_request.id}>{mapState[service_request.id] && (mapState[service_request.id].checked || !mapState[service_request.id].hidden) ?
                 <div className="mt-1 mb-1" style={{}}>
                   <div className="card-header rounded">
@@ -641,8 +678,8 @@ function Deploy() {
                         </Tooltip>
                       }
                     >
-                      <Link href={"/hotline/servicerequest/" + service_request.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} inverse /></Link>
-                      </OverlayTrigger>
+                      <Link href={"/hotline/servicerequest/" + service_request.id}><FontAwesomeIcon icon={faClipboardList} inverse /></Link>
+                    </OverlayTrigger>
                   </div>
                 </div>
                 : ""}
@@ -654,6 +691,7 @@ function Deploy() {
             </Scrollbar>
           </Col>
         </Row>
+        <DispatchDuplicateSRModal dupe_list={data.service_requests.filter(sr => duplicateSRs.includes(String(sr.id)))} sr_list={data.service_requests.filter(sr => mapState[sr.id] && mapState[sr.id].checked === true)} show={showDispatchDuplicateSRModal} handleClose={handleCloseDispatchDuplicateSRModal} handleSubmit={props.handleSubmit} handleReselect={handleReselect} />
         <Modal show={show} onHide={handleClose}>
           <Modal.Header closeButton>
             <Modal.Title>Update Team Name</Modal.Title>

@@ -1,7 +1,7 @@
-from django.db.models import Count, Exists, OuterRef, Prefetch
+from django.db.models import Count, Exists, OuterRef, Prefetch, Q
 from django.http import JsonResponse
 from datetime import datetime, timedelta
-from rest_framework import filters, permissions, viewsets
+from rest_framework import filters, permissions, serializers, viewsets
 from actstream import action
 
 from animals.models import Animal
@@ -31,12 +31,11 @@ class DispatchTeamViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = DispatchTeam.objects.all().annotate(is_assigned=Exists(EvacAssignment.objects.filter(team_id=OuterRef("id"), end_time=None)))
-        is_map = self.request.query_params.get('is_map', '')
+        is_map = self.request.query_params.get('map', '')
         if is_map == 'true':
             yesterday = datetime.today() - timedelta(days=1)
-            today = datetime.today()
             y_mid = datetime.combine(yesterday,datetime.min.time())
-            queryset = queryset.filter(dispatch_date__gte=y_mid)
+            queryset = queryset.filter(Q(is_assigned=True) | Q(dispatch_date__gte=y_mid))
         return queryset
 
     def perform_update(self, serializer):
@@ -66,8 +65,13 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
             .annotate(animal_count=Count("animal"))
             .annotate(
                 injured=Exists(Animal.objects.filter(request_id=OuterRef("id"), injured="yes"))
-            ).prefetch_related(Prefetch('animal_set', queryset=Animal.objects.prefetch_related(Prefetch('animalimage_set', to_attr='images')), to_attr='animals'))
-            .prefetch_related('owners')
+            ).prefetch_related(Prefetch(
+                'animal_set', queryset=Animal.objects.exclude(status='CANCELED').prefetch_related('evacuation_assignments').prefetch_related(
+                    Prefetch('animalimage_set', to_attr='images')), to_attr='animals'))
+            .prefetch_related(
+                Prefetch('owners', queryset=Person.objects.annotate(
+                    is_sr_owner=Exists(ServiceRequest.objects.filter(owners__id=OuterRef('id')))).annotate(
+                    is_animal_owner=Exists(Animal.objects.filter(owners__id=OuterRef('id'))))))
             .prefetch_related('visitnote_set')
             .select_related('reporter')
             .prefetch_related('evacuation_assignments')
@@ -88,6 +92,8 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
     # When creating, update all service requests to be assigned status.
     def perform_create(self, serializer):
         if serializer.is_valid():
+            if ServiceRequest.objects.filter(pk__in=self.request.data['service_requests'], status='assigned').exists():
+                raise serializers.ValidationError(['Duplicate assigned service request error.', list(ServiceRequest.objects.filter(pk__in=self.request.data['service_requests'], status='assigned').values_list('id', flat=True))])
             if self.request.data.get('team_name'):
                 team = DispatchTeam.objects.create(name=self.request.data.get('team_name'))
                 team.team_members.set(self.request.data.get('team_members'))
@@ -134,7 +140,8 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
                     if animal.shelter != new_shelter:
                         action.send(self.request.user, verb='sheltered animal', target=animal)
                         action.send(self.request.user, verb='sheltered animal', target=animal.shelter, action_object=animal)
-                    Animal.objects.filter(id=animal_dict['id']).update(status=new_status, shelter=new_shelter)
+                    intake_date = animal.intake_date if animal.intake_date else datetime.now()
+                    Animal.objects.filter(id=animal_dict['id']).update(status=new_status, shelter=new_shelter, intake_date=intake_date)
                     # Mark SR as open if any animal is SIP or UTL.
                     if new_status in ['SHELTERED IN PLACE', 'UNABLE TO LOCATE'] and sr_status != 'assigned':
                         sr_status = 'open'
@@ -149,7 +156,7 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
                     else:
                         VisitNote.objects.filter(evac_assignment=evac_assignment, service_request=service_requests[0]).update(date_completed=service_request['date_completed'], notes=service_request['notes'], forced_entry=service_request['forced_entry'])
                 # Only create OwnerContact on first update, otherwise update existing OwnerContact.
-                if service_request.get('owner_contact_id'):
+                if service_request.get('owner_contact_id') and service_request.get('owner_contact_note') and service_request.get('owner_contact_time'):
                     if not OwnerContact.objects.filter(evac_assignment=evac_assignment, service_request=service_requests[0]).exists():
                         OwnerContact.objects.create(evac_assignment=evac_assignment, service_request=service_requests[0], owner=Person.objects.get(pk=service_request['owner_contact_id']), owner_contact_note=service_request['owner_contact_note'], owner_contact_time=service_request['owner_contact_time'])
                     else:

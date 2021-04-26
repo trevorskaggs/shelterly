@@ -47,6 +47,7 @@ function ServiceRequestForm(props) {
 
   // Hook for initializing data.
   useEffect(() => {
+    let unmounted = false;
     let source = axios.CancelToken.source();
     if (id) {
       const fetchServiceRequestData = async () => {
@@ -54,18 +55,19 @@ function ServiceRequestForm(props) {
         await axios.get('/hotline/api/servicerequests/' + id + '/', {
           cancelToken: source.token,
         })
-          .then(response => {
+        .then(response => {
+          if (!unmounted) {
             setData(response.data);
-          })
-          .catch(error => {
-            console.log(error.response);
-          });
+          }
+        })
+        .catch(error => {
+        });
       };
       fetchServiceRequestData();
     }
-
     // Cleanup.
     return () => {
+      unmounted = true;
       source.cancel();
     };
   }, [id]);
@@ -111,7 +113,6 @@ function ServiceRequestForm(props) {
                 axios.post('/people/api/person/', props.state.steps.owner)
               ]);
             }
-            // Create Animals
             // Create Service Request
             values['reporter'] = reporterResponse[0].data.id
             if (ownerResponse[0].data.id) {
@@ -119,7 +120,8 @@ function ServiceRequestForm(props) {
             }
             axios.post('/hotline/api/servicerequests/', values)
             .then(response => {
-              props.state.steps.animals.forEach(animal => {
+              // Create Animals
+              let promises = props.state.steps.animals.map(async (animal) => {
                 // Add owner and reporter to animal data.
                 if (reporterResponse[0].data.id) {
                   animal.append('reporter', reporterResponse[0].data.id);
@@ -128,15 +130,14 @@ function ServiceRequestForm(props) {
                   animal.append('new_owner', ownerResponse[0].data.id);
                 }
                 animal.append('request', response.data.id);
-                axios.post('/animals/api/animal/', animal)
-                .catch(error => {
-                  console.log(error.response);
-                });
+                return axios.post('/animals/api/animal/', animal)
               });
-              navigate('/hotline/servicerequest/' + response.data.id);
+              Promise.all(promises)
+              .then((results) => {
+                navigate('/hotline/servicerequest/' + response.data.id);
+              })
             })
             .catch(error => {
-              console.log(error.response);
               if (error.response.data && error.response.data[0].includes('same address')) {
                 setError({show:true, error:error.response.data});
               }
@@ -153,7 +154,6 @@ function ServiceRequestForm(props) {
               }
             })
             .catch(error => {
-              console.log(error.response);
               if (error.response.data && error.response.data[0].includes('same address')) {
                 setError({show:true, error:error.response.data});
               }
@@ -206,12 +206,12 @@ function ServiceRequestForm(props) {
       </Card>
       <Modal show={error.show} onHide={handleClose}>
         <Modal.Header closeButton>
-          <Modal.Title>Duplicate Request Address Found</Modal.Title>
+          <Modal.Title>Duplicate Service Request Address Found</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <p>
             {error && error.error[0]}
-            &nbsp;Click <Link href={'/hotline/servicerequest/' + error.error[1]} target="_blank" style={{color:"#8d99d4"}}>here</Link> to view this Request.
+            &nbsp;Click <Link href={'/hotline/servicerequest/' + error.error[1]} style={{color:"#8d99d4"}}>here</Link> to view this Service Request.
           </p>
         </Modal.Body>
         <Modal.Footer>

@@ -34,20 +34,28 @@ function ShelterDetails({id}) {
 
   // Hook for initializing data.
   useEffect(() => {
+    let unmounted = false;
     let source = axios.CancelToken.source();
+
     const fetchShelterData = async () => {
       // Fetch Shelter Details data.
       await axios.get('/shelter/api/shelter/' + id + '/', {
         cancelToken: source.token,
       })
       .then(response => {
-        setData(response.data);
+        if (!unmounted) {
+          setData(response.data);
+        }
       })
-      .catch(e => {
-        console.log(e);
+      .catch(error => {
       });
     };
     fetchShelterData();
+    // Cleanup.
+    return () => {
+      unmounted = true;
+      source.cancel();
+    };
   }, [id]);
 
   return (
@@ -143,14 +151,14 @@ function ShelterDetails({id}) {
           {data.buildings.map(building => (
             <span key={building.id} className="pl-0 pr-0 mr-3 mb-3">
               <Link href={"/shelter/building/" + building.id} className="building-link" style={{textDecoration:"none", color:"white"}}>
-                <Card className="border rounded" style={{minWidth:"315px", maxWidth:"315px", whiteSpace:"nowrap", overflow:"hidden"}}>
+                <Card className="border rounded shelter-hover-div" style={{minWidth:"315px", maxWidth:"315px", whiteSpace:"nowrap", overflow:"hidden"}}>
                   <div className="row no-gutters hover-div" style={{textTransform:"capitalize", marginRight:"-2px"}}>
                     <Row className="ml-0 mr-0 w-100" style={{flexWrap:"nowrap"}}>
                       <div className="border-right" style={{width:"100px", minWidth:"100px"}}>
                         <FontAwesomeIcon icon={faBuilding} size="6x" className="ml-3 building-icon" style={{paddingRight:"10px"}} inverse />
                       </div>
                       <Col style={{marginLeft:"-5px", marginRight:"-25px"}}>
-                        <div className="border" title={building.name} style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"8px", marginLeft:"-11px", marginTop:"-1px", width:"100%", fontSize:"18px", backgroundColor:"#615e5e", whiteSpace:"nowrap", overflow:"hidden"}}>{building.name}</div>
+                        <div className="border" title={building.name} style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"8px", marginLeft:"-11px", marginRight:"-5px", marginTop:"-1px", width:"100%", fontSize:"18px", backgroundColor:"#615e5e", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis"}}>{building.name}</div>
                         <div style={{marginTop:"2px"}}>
                           {building.rooms.length} room{building.rooms.length !== 1 ? "s" : ""}
                         </div>

@@ -4,7 +4,7 @@ import { Link, navigate } from 'raviger';
 import { Button, Card, ListGroup, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faArrowsAltH, faClipboardList, faEdit,
+  faArrowsAltH, faEdit,
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faSquare,
@@ -25,27 +25,34 @@ function RoomDetails({id}) {
     .then(response => {
       navigate('/shelter/building/' + data.building)
     })
-    .catch(e => {
-      console.log(e);
+    .catch(error => {
     });
   }
 
   // Hook for initializing data.
   useEffect(() => {
+    let unmounted = false;
     let source = axios.CancelToken.source();
+
     const fetchRoomData = async () => {
       // Fetch Room Details data.
       await axios.get('/shelter/api/room/' + id + '/', {
           cancelToken: source.token,
       })
       .then(response => {
+        if (!unmounted) {
           setData(response.data);
+        }
       })
-      .catch(e => {
-          console.log(e);
+      .catch(error => {
       });
     };
     fetchRoomData();
+    // Cleanup.
+    return () => {
+      unmounted = true;
+      source.cancel();
+    };
   }, [id]);
 
   return (
@@ -90,32 +97,10 @@ function RoomDetails({id}) {
             <b>Description: </b>{data.description}
           </ListGroup.Item> : ""}
           <ListGroup.Item>
-            <b>Building:</b> {data.building_name}
-            <OverlayTrigger
-              key={"building-details"}
-              placement="top"
-              overlay={
-                <Tooltip id={`tooltip-building-details`}>
-                  Building details
-                </Tooltip>
-              }
-            >
-              <Link href={"/shelter/building/" + data.building}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
-            </OverlayTrigger>
+            <b>Building:</b> <Link href={"/shelter/building/" + data.building} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.building_name}</Link>
           </ListGroup.Item>
           <ListGroup.Item>
-            <b>Shelter:</b> {data.shelter_name}
-            <OverlayTrigger
-              key={"shelter-details"}
-              placement="top"
-              overlay={
-                <Tooltip id={`tooltip-shelter-details`}>
-                  Shelter details
-                </Tooltip>
-              }
-            >
-              <Link href={"/shelter/" + data.shelter}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
-            </OverlayTrigger>
+            <b>Shelter:</b> <Link href={"/shelter/" + data.shelter} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.shelter_name}</Link>
           </ListGroup.Item>
         </ListGroup>
       </Card.Body>

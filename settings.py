@@ -25,15 +25,16 @@ except FileNotFoundError:
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('SECRET_KEY')
+ORGANIZATION = os.environ.get('ORGANIZATION')
+INCIDENT_NAME = os.environ.get('INCIDENT_NAME')
+SHELTERLY_VERSION = os.environ.get('SHELTERLY_VERSION')
 
+DEBUG = False
 # SECURITY WARNING: don't run with debug turned on in production!
 ALLOWED_HOSTS = ['*']
-DEBUG = False
 AUTH_USER_MODEL = 'accounts.ShelterlyUser'
 
 # AWS Config
@@ -41,13 +42,15 @@ credentials = boto3.Session().get_credentials()
 if credentials:
     AWS_ACCESS_KEY_ID = credentials.access_key
     AWS_SECRET_ACCESS_KEY = credentials.secret_key
-AWS_SES_REGION_NAME = 'us-west-2'
-AWS_SES_REGION_ENDPOINT = 'email.us-west-2.amazonaws.com'
 
 # Use to output emails in console.
 # EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-# AWS email backend
-EMAIL_BACKEND = 'django_ses.SESBackend'
+EMAIL_BACKEND = 'django_smtp_ssl.SSLEmailBackend'
+EMAIL_HOST = 'email-smtp.us-west-2.amazonaws.com'
+EMAIL_PORT = '465'
+EMAIL_HOST_USER = os.environ.get('EMAIL_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_PASSWORD')
+EMAIL_USE_SSL = True
 
 # Application definition
 INSTALLED_APPS = [
@@ -74,6 +77,7 @@ INSTALLED_APPS = [
     'frontend',
     'ordered_model',
     'actstream',
+    'drf_yasg'
 ]
 
 ACTSTREAM_SETTINGS = {
@@ -142,26 +146,31 @@ USE_L10N = True
 
 USE_TZ = True
 
+SECURE_SSL_REDIRECT = False
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "frontend/src/static/")
+    os.path.join(BASE_DIR, "frontend/build/static"),
+    os.path.join(BASE_DIR, "frontend/src/static")
 ]
-# Dev settings. Remove when deploying to Zappa
-STATIC_ROOT=os.path.join(BASE_DIR, 'static')
-# SECURE_CONTENT_TYPE_NOSNIFF = False
-# DEBUG = True
 
-#TODO Change to envvars.
-# Zappa settings
-# STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-# AWS_STORAGE_BUCKET_NAME = 'shelterly-statics'
-# AWS_S3_ADDRESSING_STYLE = "virtual"
-# AWS_S3_REGION_NAME = 'us-east-2'
-# AWS_AUTO_CREATE_BUCKET = True
-# ALLOWED_HOSTS = ['725rgosijg.execute-api.us-east-2.amazonaws.com',]
+MEDIA_URL = '/media/'
+
+if DEBUG:
+    STATIC_ROOT=os.path.join(BASE_DIR, 'static')
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+else:
+    #Static File Settings
+    STATICFILES_STORAGE = 'custom_storage.StaticStorage'
+    #Media File Settings
+    DEFAULT_FILE_STORAGE = 'custom_storage.MediaStorage'
+    #AWS Settings
+    AWS_STORAGE_BUCKET_NAME = 'shelterly-files'
+    AWS_S3_REGION_NAME = 'us-west-2'
+
+
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': ('knox.auth.TokenAuthentication',),
@@ -170,7 +179,8 @@ REST_FRAMEWORK = {
 
 REST_KNOX = {
   'TOKEN_TTL': datetime.timedelta(hours=1),
-  'USER_SERIALIZER': 'accounts.serializers.UserSerializer'
+  'USER_SERIALIZER': 'accounts.serializers.UserSerializer',
+  'AUTO_REFRESH': True
 }
 
 LOGGING = {
@@ -188,7 +198,7 @@ LOGGING = {
         },
         'django.db.backends': {
             'level': 'DEBUG',
-            'handlers': ['console'],
+            'handlers': [],
             'propagate': False
         }
     },

@@ -7,7 +7,7 @@ import { CircleMarker, Marker, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
 import Moment from 'react-moment';
 import randomColor from "randomcolor";
-import Map from "../components/Map";
+import Map, { prettyText } from "../components/Map";
 import { Checkbox } from "../components/Form"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -15,10 +15,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { faRectanglePortrait } from '@fortawesome/pro-solid-svg-icons';
 import { faCheckCircle } from '@fortawesome/pro-duotone-svg-icons';
-import badge from "../static/images/badge-sheriff.png";
-import bandaid from "../static/images/band-aid-solid.png";
-import car from "../static/images/car-solid.png";
-import trailer from "../static/images/trailer-solid.png";
+import { S3_BUCKET } from '../constants';
 
 function ServiceRequestDispatchAssignment({id}) {
 
@@ -33,32 +30,6 @@ function ServiceRequestDispatchAssignment({id}) {
     let tempSRs = {...showSRs};
     tempSRs[dispatch_id] = !showSRs[dispatch_id];
     setShowSRs(tempSRs);
-  }
-
-  // Takes in animal size, species, and count and returns a pretty string combination.
-  const prettyText = (size, species, count) => {
-    if (count <= 0) {
-      return "";
-    }
-    var plural = ""
-    if (count > 1) {
-      plural = "s"
-    }
-
-    var size_and_species = size + " " + species + plural;
-    // Exception for horses since they don't need an extra species output.
-    if (species === 'horse') {
-      // Exception for pluralizing ponies.
-      if (size === 'pony' && count > 1) {
-        size_and_species = 'ponies'
-      }
-      else {
-        size_and_species = size + plural;
-      }
-    }
-
-    var text = count + " " + size_and_species;
-    return text;
   }
 
   // Counts the number of size/species matches for a service request by status.
@@ -118,62 +89,64 @@ function ServiceRequestDispatchAssignment({id}) {
       navigate('/dispatch/summary/' + selected)
     })
     .catch(error => {
-      console.log(error.response);
     });
   }
 
   // Hook for initializing data.
   useEffect(() => {
+    let unmounted = false;
     let source = axios.CancelToken.source();
 
     const fetchServiceRequests = async () => {
-
       // Fetch current ServiceRequest data.
       await axios.get('/hotline/api/servicerequests/' + id + '/', {
         cancelToken: source.token,
       })
       .then(currentResponse => {
-
-        // Fetch open DA data.
-        axios.get('/evac/api/evacassignment/', {
-          params: {
-            status: 'open',
-            map: true
-          },
-          cancelToken: source.token,
-        })
-        .then(response => {
-          const map_dict = {};
-          const bounds = [];
-          const random_colors = randomColor({count:response.data.length});
-          response.data.forEach((dispatch_assignment, index) => {
-            let sr_dict = {}
-            for (const service_request of dispatch_assignment.service_request_objects) {
-              const matches = countMatches(service_request);
-              sr_dict[service_request.id] = {id:service_request.id, matches:matches, latitude:service_request.latitude, longitude:service_request.longitude, latest_evac:service_request.latest_evac, full_address:service_request.full_address};
-              bounds.push([service_request.latitude, service_request.longitude]);
+        if (!unmounted) {
+          // Fetch open DA data.
+          axios.get('/evac/api/evacassignment/', {
+            params: {
+              status: 'open',
+              map: true
+            },
+            cancelToken: source.token,
+          })
+          .then(response => {
+            if (!unmounted) {
+              const map_dict = {};
+              const bounds = [];
+              const random_colors = randomColor({count:response.data.length});
+              response.data.forEach((dispatch_assignment, index) => {
+                let sr_dict = {}
+                for (const service_request of dispatch_assignment.service_request_objects) {
+                  const matches = countMatches(service_request);
+                  sr_dict[service_request.id] = {id:service_request.id, matches:matches, latitude:service_request.latitude, longitude:service_request.longitude, latest_evac:service_request.latest_evac, full_address:service_request.full_address};
+                  bounds.push([service_request.latitude, service_request.longitude]);
+                }
+                map_dict[dispatch_assignment.id] = {checked:(currentResponse.data.latest_evac !== null) && (currentResponse.data.latest_evac.end_time === null) && (currentResponse.data.latest_evac.id === dispatch_assignment.id), hidden: false, color:random_colors[index], service_requests:sr_dict}
+              });
+              const current_matches = countMatches(currentResponse.data);
+              currentResponse.data['matches'] = current_matches;
+              setCurrentRequest(currentResponse.data);
+              bounds.push([currentResponse.data.latitude, currentResponse.data.longitude]);
+              setMapState(map_dict);
+              setData({dispatch_assignments: response.data, isFetching: false, bounds:L.latLngBounds(bounds)});
             }
-            map_dict[dispatch_assignment.id] = {checked:(currentResponse.data.latest_evac !== null) && (currentResponse.data.latest_evac.end_time === null) && (currentResponse.data.latest_evac.id === dispatch_assignment.id), hidden: false, color:random_colors[index], service_requests:sr_dict}
+          })
+          .catch(error => {
+            if (!unmounted) {
+              setData({dispatch_assignments: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
+            }
           });
-          const current_matches = countMatches(currentResponse.data);
-          currentResponse.data['matches'] = current_matches;
-          setCurrentRequest(currentResponse.data);
-          bounds.push([currentResponse.data.latitude, currentResponse.data.longitude]);
-          setMapState(map_dict);
-          setData({dispatch_assignments: response.data, isFetching: false, bounds:L.latLngBounds(bounds)});
-        })
-        .catch(error => {
-          console.log(error.response);
-          setData({dispatch_assignments: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
-        });
+        }
       })
     };
 
-    // fetchCurrentRequest();
     fetchServiceRequests();
-
     // Cleanup.
     return () => {
+      unmounted = true;
       source.cancel();
     };
   }, [id]);
@@ -222,7 +195,6 @@ function ServiceRequestDispatchAssignment({id}) {
           <Marker
             position={[currentRequest.latitude, currentRequest.longitude]}
             icon={starMarkerIcon}
-            onClick={() => window.open("/hotline/servicerequest/" + currentRequest.id, "_blank")}
           >
             <MapTooltip autoPan={false}>
               <span>
@@ -239,10 +211,10 @@ function ServiceRequestDispatchAssignment({id}) {
                 {currentRequest.full_address}
                 {currentRequest.followup_date ? <div>Followup Date: <Moment format="L">{currentRequest.followup_date}</Moment></div> : ""}
                 <div>
-                  {currentRequest.aco_required ? <img width={16} height={16} src={badge} alt="" className="mr-1" /> : ""}
-                  {currentRequest.injured ? <img width={16} height={16} src={bandaid} alt="" className="mr-1" /> : ""}
-                  {currentRequest.accessible ? <img width={16} height={16} src={car} alt="" className="mr-1" /> : ""}
-                  {currentRequest.turn_around ? <img width={16} height={16} src={trailer} alt="" /> : ""}
+                  {currentRequest.aco_required ? <img width={16} height={16} src={`${S3_BUCKET}images/badge-sheriff.png`} alt="ACO Required" className="mr-1" /> : ""}
+                  {currentRequest.injured ? <img width={16} height={16} src={`${S3_BUCKET}images/band-aid-solid.png`} alt="Injured" className="mr-1" /> : ""}
+                  {currentRequest.accessible ? <img width={16} height={16} src={`${S3_BUCKET}images/car-solid.png`} alt="Accessible" className="mr-1" /> : ""}
+                  {currentRequest.turn_around ? <img width={16} height={16} src={`${S3_BUCKET}images/trailer-solid.png`} alt="Turn Around" /> : ""}
                 </div>
               </span>
             </MapTooltip>
@@ -276,10 +248,10 @@ function ServiceRequestDispatchAssignment({id}) {
                   {service_request.full_address}
                   {service_request.followup_date ? <div>Followup Date: <Moment format="L">{service_request.followup_date}</Moment></div> : ""}
                   <div>
-                    {service_request.aco_required ? <img width={16} height={16} src={badge} alt="" className="mr-1" /> : ""}
-                    {service_request.injured ? <img width={16} height={16} src={bandaid} alt="" className="mr-1" /> : ""}
-                    {service_request.accessible ? <img width={16} height={16} src={car} alt="" className="mr-1" /> : ""}
-                    {service_request.turn_around ? <img width={16} height={16} src={trailer} alt="" /> : ""}
+                    {service_request.aco_required ? <img width={16} height={16} src={`${S3_BUCKET}images/badge-sheriff.png`} alt="ACO Required" className="mr-1" /> : ""}
+                    {service_request.injured ? <img width={16} height={16} src={`${S3_BUCKET}images/band-aid-solid.png`} alt="Injured" className="mr-1" /> : ""}
+                    {service_request.accessible ? <img width={16} height={16} src={`${S3_BUCKET}images/car-solid.png`} alt="Accessible" className="mr-1" /> : ""}
+                    {service_request.turn_around ? <img width={16} height={16} src={`${S3_BUCKET}images/trailer-solid.png`} alt="Turn Around" /> : ""}
                   </div>
                 </span>
               </MapTooltip>
@@ -362,7 +334,7 @@ function ServiceRequestDispatchAssignment({id}) {
                 </Tooltip>
               }
             >
-              <Link href={"/dispatch/summary/" + dispatch_assignment.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+              <Link href={"/dispatch/summary/" + dispatch_assignment.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
             </OverlayTrigger>&nbsp;&nbsp;|&nbsp;
             {dispatch_assignment.team ? dispatch_assignment.team_object.name : ""}: {dispatch_assignment.team && dispatch_assignment.team_object.team_member_objects.map((member, i) => (
                 <span key={member.id}>{i > 0 && ", "}{member.first_name} {member.last_name}</span>))}
@@ -391,7 +363,7 @@ function ServiceRequestDispatchAssignment({id}) {
                         </Tooltip>
                       }
                     >
-                      <Link href={"/hotline/servicerequest/" + service_request.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+                      <Link href={"/hotline/servicerequest/" + service_request.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
                     </OverlayTrigger>
                 </li>
                 : ""}
@@ -428,7 +400,7 @@ function ServiceRequestDispatchAssignment({id}) {
                   </Tooltip>
                 }
               >
-                <Link href={"/dispatch/summary/" + dispatch_assignment.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+                <Link href={"/dispatch/summary/" + dispatch_assignment.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
               </OverlayTrigger>&nbsp;&nbsp;|&nbsp;
               {dispatch_assignment.team ? dispatch_assignment.team_object.name : ""}: {dispatch_assignment.team && dispatch_assignment.team_object.team_member_objects.map((member, i) => (
                   <span key={member.id}>{i > 0 && ", "}{member.first_name} {member.last_name}</span>))}
@@ -457,7 +429,7 @@ function ServiceRequestDispatchAssignment({id}) {
                           </Tooltip>
                         }
                       >
-                        <Link href={"/hotline/servicerequest/" + service_request.id} target="_blank"><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+                        <Link href={"/hotline/servicerequest/" + service_request.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
                       </OverlayTrigger>
                   </li>
                   : ""}
