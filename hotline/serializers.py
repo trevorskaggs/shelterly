@@ -114,6 +114,7 @@ class SimpleServiceRequestSerializer(serializers.ModelSerializer):
         return super().to_internal_value(data)
 
     def get_latest_evac(self, obj):
+        #TODO
         from evac.models import EvacAssignment
         assigned_evac = EvacAssignment.objects.filter(service_requests=obj, end_time__isnull=True).values('id', 'start_time', 'end_time').first()
         if assigned_evac:

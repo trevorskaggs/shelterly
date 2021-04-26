@@ -8,7 +8,7 @@ from animals.models import Animal
 
 class SimpleRoomSerializer(serializers.ModelSerializer):
     animal_count = serializers.SerializerMethodField()
-    building_name = serializers.SerializerMethodField()
+    building_name = serializers.StringRelatedField(source='building')
 
     # Custom field for total animals.
     def get_animal_count(self, obj):
@@ -41,13 +41,10 @@ class RoomSerializer(SimpleRoomSerializer):
         return obj.building.shelter.name
 
 class SimpleBuildingSerializer(serializers.ModelSerializer):
-    shelter_name = serializers.SerializerMethodField()
+    shelter_name = serializers.StringRelatedField(source='shelter')
     rooms = SimpleRoomSerializer(source='room_set', many=True, required=False, read_only=True)
     action_history = serializers.SerializerMethodField()
 
-    # Custom field for the shelter name.
-    def get_shelter_name(self, obj):
-        return obj.shelter.name
 
     def get_action_history(self, obj):
         return [build_action_string(action) for action in obj.target_actions.all()]
@@ -75,6 +72,7 @@ class SimpleShelterSerializer(serializers.ModelSerializer):
         return build_full_address(obj)
 
     def get_room_count(self, obj):
+        #TODO
         return Room.objects.filter(building__in=obj.building_set.all()).count()
 
     # Custom field for Formated Phone Number
@@ -83,6 +81,7 @@ class SimpleShelterSerializer(serializers.ModelSerializer):
 
     # Custom field for total animals.
     def get_animal_count(self, obj):
+        #TODO
         return obj.animal_set.exclude(status='CANCELED').count()
 
     class Meta:

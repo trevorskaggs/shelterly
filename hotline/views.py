@@ -12,7 +12,7 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
     queryset = ServiceRequest.objects.all()
     search_fields = ['address', 'city', 'animal__name', 'owners__first_name', 'owners__last_name', 'owners__address', 'owners__city', 'reporter__first_name', 'reporter__last_name']
     filter_backends = (filters.SearchFilter, filters.OrderingFilter)
-    permission_classes = [permissions.IsAuthenticated, ]
+    permission_classes = []
     serializer_class = SimpleServiceRequestSerializer
     detail_serializer_class = ServiceRequestSerializer
     ordering_fields = ['injured', 'animal_count']

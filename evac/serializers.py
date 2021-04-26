@@ -50,6 +50,7 @@ class DispatchServiceRequestSerializer(SimpleServiceRequestSerializer):
     latest_evac = serializers.SerializerMethodField()
 
     def get_latest_evac(self, obj):
+        #TODO
         assigned_evac = EvacAssignment.objects.filter(service_requests=obj, end_time__isnull=True).values('id', 'start_time', 'end_time').first()
         if assigned_evac:
             return assigned_evac
@@ -63,7 +64,7 @@ class DispatchServiceRequestSerializer(SimpleServiceRequestSerializer):
 
 class SimpleEvacAssignmentSerializer(serializers.ModelSerializer):
 
-    team_name = serializers.SerializerMethodField()
+    team_name = serializers.StringRelatedField(source='team')
     team_member_names = serializers.SerializerMethodField()
 
     def get_team_name(self, obj):
