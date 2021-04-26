@@ -5,7 +5,7 @@ import { Button, Card, Col, ListGroup, Modal, OverlayTrigger, Row, Tooltip } fro
 import { Typeahead } from 'react-bootstrap-typeahead';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faClipboardCheck, faEdit, faEnvelope, faMinusSquare, faPlusSquare
+  faClipboardCheck, faEdit, faEnvelope, faMinusSquare, faPlusSquare, faUserCheck
 } from '@fortawesome/free-solid-svg-icons';
 import { faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import { Marker, Tooltip as MapTooltip } from "react-leaflet";
@@ -223,7 +223,7 @@ function DispatchSummary({id}) {
               <Card.Title>
                 <h4>
                   <Link href={"/hotline/servicerequest/" + assigned_request.service_request_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link>
-                  &nbsp;| <span style={{textTransform:"capitalize"}}>{assigned_request.service_request_object.status}</span>
+                  &nbsp;| <span style={{textTransform:"capitalize"}}>{assigned_request.service_request_object.status}</span> {assigned_request.visit_note ? <Moment format="[ on ]l[,] HH:mm">{assigned_request.visit_note.date_completed}</Moment> : ""}
                 </h4>
               </Card.Title>
               <hr style={{marginBottom:"7px"}}/>
@@ -255,6 +255,20 @@ function DispatchSummary({id}) {
                       }
                     >
                       <FontAwesomeIcon icon={faEnvelope} className="ml-1" inverse />
+                    </OverlayTrigger>
+                    : ""}
+                    {assigned_request.owner_contact ?
+                    <OverlayTrigger
+                      key={"owner-contacted"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-owner-contacted`}>
+                          Owner Contacted: <Moment format="l HH:mm">{assigned_request.owner_contact.owner_contact_time}</Moment>
+                          {/* <div>Note: {assigned_request.owner_contact.owner_contact_note}</div> */}
+                        </Tooltip>
+                      }
+                    >
+                      <FontAwesomeIcon icon={faUserCheck} className="ml-1 fa-move-up" size="sm" inverse />
                     </OverlayTrigger>
                     : ""}
                   </ListGroup.Item>

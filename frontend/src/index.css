@@ -130,6 +130,10 @@ input[disabled] {
   text-align: left!important;
 }
 
+#tooltip-owner-contacted .tooltip-inner {
+  text-align: left!important;
+}
+
 /* Icon CSS */
 .fa-move-down {
   transform: translateY(5%);
