@@ -5,7 +5,7 @@ import { Button, Card, Col, ListGroup, Modal, OverlayTrigger, Row, Tooltip } fro
 import { Typeahead } from 'react-bootstrap-typeahead';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faClipboardCheck, faEdit, faEnvelope, faMinusSquare, faPlusSquare, faUserCheck
+  faClipboardCheck, faClipboardList, faEdit, faEnvelope, faHouseDamage, faMinusSquare, faPlusSquare, faUserCheck
 } from '@fortawesome/free-solid-svg-icons';
 import { faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import { Marker, Tooltip as MapTooltip } from "react-leaflet";
@@ -223,6 +223,19 @@ function DispatchSummary({id}) {
               <Card.Title>
                 <h4>
                   <Link href={"/hotline/servicerequest/" + assigned_request.service_request_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link>
+                  {assigned_request.visit_note && assigned_request.visit_note.forced_entry ?
+                    <OverlayTrigger
+                      key={"forced"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-forced`}>
+                          Forced entry
+                        </Tooltip>
+                      }
+                    >
+                      <FontAwesomeIcon icon={faHouseDamage} size="sm" className="ml-1 fa-move-up" />
+                    </OverlayTrigger>
+                  : ""}
                   &nbsp;| <span style={{textTransform:"capitalize"}}>{assigned_request.service_request_object.status}</span> {assigned_request.visit_note ? <Moment format="[ on ]l[,] HH:mm">{assigned_request.visit_note.date_completed}</Moment> : ""}
                 </h4>
               </Card.Title>
@@ -258,18 +271,20 @@ function DispatchSummary({id}) {
                     </OverlayTrigger>
                     : ""}
                     {assigned_request.owner_contact ?
-                    <OverlayTrigger
-                      key={"owner-contacted"}
-                      placement="top"
-                      overlay={
-                        <Tooltip id={`tooltip-owner-contacted`}>
-                          Owner Contacted: <Moment format="l HH:mm">{assigned_request.owner_contact.owner_contact_time}</Moment>
-                          {/* <div>Note: {assigned_request.owner_contact.owner_contact_note}</div> */}
-                        </Tooltip>
-                      }
-                    >
-                      <FontAwesomeIcon icon={faUserCheck} className="ml-1 fa-move-up" size="sm" inverse />
-                    </OverlayTrigger>
+                    <span>
+                      <OverlayTrigger
+                        key={"owner-contacted"}
+                        placement="top"
+                        overlay={
+                          <Tooltip id={`tooltip-owner-contacted`}>
+                            Contacted: <Moment format="l HH:mm">{assigned_request.owner_contact.owner_contact_time}</Moment>
+                          </Tooltip>
+                        }
+                      >
+                        <FontAwesomeIcon icon={faUserCheck} className="ml-1 fa-move-up" size="sm" inverse />
+                      </OverlayTrigger>
+                      <div><b>Contact Note: </b>{assigned_request.owner_contact.owner_contact_note}</div>
+                    </span>
                     : ""}
                   </ListGroup.Item>
                 ))}
@@ -280,7 +295,21 @@ function DispatchSummary({id}) {
               <h4 className="mt-2" style={{marginBottom:"-2px"}}>Animals</h4>
               {assigned_request.service_request_object.animals.filter(animal => Object.keys(assigned_request.animals).includes(String(animal.id))).map((animal, inception) => (
                 <ListGroup.Item key={animal.id}>
-                  <span style={{textTransform:"capitalize"}}>#{animal.id} - <Link href={"/animals/" + animal.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.name||"Unknown"}</Link> ({animal.species})</span> - {animal.status}
+                  <span style={{textTransform:"capitalize"}}>#{animal.id} - <Link href={"/animals/" + animal.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.name||"Unknown"}</Link> ({animal.species})</span>
+                  {animal.color_notes ?
+                    <OverlayTrigger
+                      key={"animal-color-notes"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-animal-color-notes`}>
+                          {animal.color_notes}
+                        </Tooltip>
+                      }
+                    >
+                      <FontAwesomeIcon icon={faClipboardList} className="ml-1" size="sm" inverse />
+                    </OverlayTrigger>
+                  : ""}
+                  &nbsp;- {animal.status}
                 </ListGroup.Item>
               ))}
             </ListGroup>
