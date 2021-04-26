@@ -36,6 +36,7 @@ class AnimalViewSet(viewsets.ModelViewSet):
         "reporter__last_name",
     ]
     filter_backends = (filters.SearchFilter,)
+    permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = AnimalSerializer
 
     def perform_create(self, serializer):
