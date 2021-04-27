@@ -6,10 +6,9 @@ from .models import Animal, AnimalImage
 from location.utils import build_full_address, build_action_string
 
 class SimpleAnimalSerializer(serializers.ModelSerializer):
+
     aco_required = serializers.SerializerMethodField()
     owner_names = serializers.SerializerMethodField()
-    front_image = serializers.SerializerMethodField()
-    side_image = serializers.SerializerMethodField()
 
     # An Animal is ACO Required if it is aggressive or "Other" species.
     def get_aco_required(self, obj):
@@ -26,6 +25,9 @@ class SimpleAnimalSerializer(serializers.ModelSerializer):
         fields = ['id', 'species', 'aggressive', 'status', 'aco_required', 'name', 'sex', 'size', 'age', 'pcolor', 'scolor', 'color_notes', 'owner_names']
 
 class ModestAnimalSerializer(SimpleAnimalSerializer):
+
+    front_image = serializers.SerializerMethodField()
+    side_image = serializers.SerializerMethodField()
 
     def get_front_image(self, obj):
         try:
@@ -55,7 +57,7 @@ class ModestAnimalSerializer(SimpleAnimalSerializer):
         model = Animal
         fields = ['id', 'species', 'aggressive', 'request', 'shelter', 'status', 'aco_required', 'color_notes', 'front_image', 'side_image']
 
-class AnimalSerializer(SimpleAnimalSerializer):
+class AnimalSerializer(ModestAnimalSerializer):
     front_image = serializers.SerializerMethodField()
     side_image = serializers.SerializerMethodField()
     extra_images = serializers.SerializerMethodField()
