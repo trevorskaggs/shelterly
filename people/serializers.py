@@ -6,7 +6,6 @@ from animals.models import Animal
 from .models import OwnerContact, Person
 from location.utils import build_full_address, build_action_string
 from hotline.models import ServiceRequest
-from animals.serializers import AnimalSerializer
 
 class SimplePersonSerializer(serializers.ModelSerializer):
 

@@ -46,3 +46,5 @@ class Room(BaseShelterModel):
     def parent(self):
         return self.building
    
+    def __str__(self):
+        return self.name
