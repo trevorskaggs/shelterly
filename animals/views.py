@@ -3,7 +3,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Case, BooleanField, Prefetch, Value, When, Exists
 from copy import deepcopy
 from datetime import datetime
-from rest_framework import filters, viewsets
+from rest_framework import filters, permissions, viewsets
 from actstream import action
 from actstream.models import Action
 

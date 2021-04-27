@@ -34,19 +34,20 @@ class AnimalSerializer(SimpleAnimalSerializer):
     side_image = serializers.SerializerMethodField()
     extra_images = serializers.SerializerMethodField()
     found_location = serializers.SerializerMethodField()
-    owner_objects = SimplePersonSerializer(many=True)
+    owner_objects = SimplePersonSerializer(many=True, required=False, read_only=True)
     evacuation_assignments = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     reporter_object = SimplePersonSerializer(source='reporter', read_only=True)
     request_address = serializers.SerializerMethodField()
     action_history = serializers.SerializerMethodField()
     room_name = serializers.StringRelatedField()
-    shelter_object = SimpleShelterSerializer(source='shelter')
+    shelter_object = SimpleShelterSerializer(source='shelter', required=False, read_only=True)
 
     class Meta:
         model = Animal
         fields = ['id', 'species', 'status', 'aco_required', 'front_image', 'side_image', 'extra_images', 'last_seen', 'intake_date', 'address', 'city', 'state', 'zip_code',
         'aggressive', 'injured', 'fixed', 'confined', 'found_location', 'owner_names', 'owner_objects', 'shelter_object', 'shelter', 'reporter_object', 'request', 'request_address',
         'action_history', 'evacuation_assignments', 'room', 'room_name', 'name', 'sex', 'size', 'age', 'pcolor', 'scolor', 'color_notes']
+
     def get_found_location(self, obj):
         return build_full_address(obj)
 
