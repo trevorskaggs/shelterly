@@ -5,7 +5,6 @@ from actstream.models import target_stream
 from .models import *
 from location.utils import build_full_address, build_action_string
 from animals.models import Animal
-from animals.serializers import AnimalSerializer
 
 class SimpleRoomSerializer(serializers.ModelSerializer):
     animal_count = serializers.SerializerMethodField()
@@ -29,6 +28,7 @@ class RoomSerializer(SimpleRoomSerializer):
     action_history = serializers.SerializerMethodField()
 
     def get_animals(self, obj):
+        from animals.serializers import AnimalSerializer
         return AnimalSerializer(obj.animal_set.exclude(status='CANCELED'), many=True, required=False, read_only=True).data
 
     def get_action_history(self, obj):

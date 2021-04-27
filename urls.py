@@ -40,7 +40,7 @@ urlpatterns = [
     url(r'login/', LoginView.as_view(), name='knox_login'),
     url(r'logout/', knox_views.LogoutView.as_view(), name='knox_logout'),
 ]
-if not settings.USE_S3:
+if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 urlpatterns += [url(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),

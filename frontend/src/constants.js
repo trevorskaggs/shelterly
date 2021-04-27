@@ -8,4 +8,4 @@ export const STATE_OPTIONS = [{ value: 'AL', label: "AL" }, { value: 'AK', label
   { value: 'OK', label: "OK" }, { value: 'PA', label: "PA" }, { value: 'RI', label: "RI" }, { value: 'SC', label: "SC" }, { value: 'SD', label: "SD" }, { value: 'TN', label: "TN" }, { value: 'TX', label: "TX" },
   { value: 'VA', label: "VA" }, { value: "VT", label: "VT" }, { value: 'WA', label: "WA" }, { value: 'WV', label: "WV" }, { value: 'WI', label: "WI" }, { value: 'WY', label: "WY" },]
 
-export const S3_BUCKET = 'https://shelterly-staticfiles.s3-us-west-2.amazonaws.com/'
+export const S3_BUCKET = 'https://shelterly-files.s3-us-west-2.amazonaws.com/static/'
