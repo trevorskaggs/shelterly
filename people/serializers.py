@@ -6,7 +6,7 @@ from animals.models import Animal
 from .models import OwnerContact, Person
 from location.utils import build_full_address, build_action_string
 from hotline.models import ServiceRequest
-from animals.serializers import AnimalSerializer
+from animals.serializers import AnimalSerializer, ModestAnimalSerializer
 
 class SimplePersonSerializer(serializers.ModelSerializer):
 
@@ -66,7 +66,7 @@ class PersonSerializer(SimplePersonSerializer):
     action_history = serializers.SerializerMethodField()
 
     def get_animals(self, obj):
-        return obj.animal_set.exclude(status='CANCELED').values() | obj.animals.exclude(status='CANCELED').values()
+        return ModestAnimalSerializer(obj.animal_set.exclude(status='CANCELED') | obj.animals.exclude(status='CANCELED'), many=True).data
 
     # Custom field for the action history.
     def get_action_history(self, obj):
