@@ -152,9 +152,15 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
                         sr_status = 'open'
                 # Update the relevant SR fields.
                 assigned_request = AssignedRequest.objects.get(service_request=service_request['id'], dispatch_assignment=evac_assignment.id)
-                assigned_request.animals = animals_dict
                 service_requests = ServiceRequest.objects.filter(id=service_request['id'])
-                service_requests.update(status=sr_status, followup_date=service_request['followup_date'] or None)
+                assigned_request.animals = animals_dict
+                # Only update SR with followup_date while DA is open or if the old AssignedRequest followup_date matches the current SR followup_date.
+                if not evac_assignment.end_time or (assigned_request.followup_date == service_requests[0].followup_date):
+                    sr_followup_date = service_request['followup_date']
+                else:
+                    sr_followup_date = service_requests[0].followup_date or None
+                assigned_request.followup_date = service_request['followup_date']
+                service_requests.update(status=sr_status, followup_date=sr_followup_date)
                 action.send(self.request.user, verb=sr_status.replace('ed','') + 'ed service request', target=service_requests[0])
                 # Only create VisitNote on first update, otherwise update existing VisitNote.
                 if service_request.get('date_completed'):

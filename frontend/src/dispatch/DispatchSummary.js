@@ -5,7 +5,7 @@ import { Button, Card, Col, ListGroup, Modal, OverlayTrigger, Row, Tooltip } fro
 import { Typeahead } from 'react-bootstrap-typeahead';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faClipboardCheck, faClipboardList, faEdit, faEnvelope, faHouseDamage, faMinusSquare, faPlusSquare, faUserCheck
+  faCalendarDay, faClipboardCheck, faClipboardList, faEdit, faEnvelope, faHouseDamage, faMinusSquare, faPlusSquare, faUserCheck
 } from '@fortawesome/free-solid-svg-icons';
 import { faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import { Marker, Tooltip as MapTooltip } from "react-leaflet";
@@ -236,7 +236,19 @@ function DispatchSummary({id}) {
                       <FontAwesomeIcon icon={faHouseDamage} size="sm" className="ml-1 fa-move-up" />
                     </OverlayTrigger>
                   : ""}
-                  &nbsp;| <span style={{textTransform:"capitalize"}}>{assigned_request.service_request_object.status}</span> {assigned_request.visit_note ? <Moment format="[ on ]l[,] HH:mm">{assigned_request.visit_note.date_completed}</Moment> : ""}
+                  {assigned_request.followup_date ?
+                    <OverlayTrigger
+                      key={"followup-date"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-followup-date`}>
+                          Followup date:&nbsp;<Moment format="L">{assigned_request.followup_date}</Moment>
+                        </Tooltip>
+                      }
+                    >
+                      <FontAwesomeIcon icon={faCalendarDay} className="ml-1 fa-move-up" size="sm" />
+                    </OverlayTrigger> : ""}
+                  &nbsp;| {assigned_request.visit_note ? "Completed" : <span style={{textTransform:"capitalize"}}>{assigned_request.service_request_object.status}</span>} {assigned_request.visit_note ? <Moment format="[ on ]l[,] HH:mm">{assigned_request.visit_note.date_completed}</Moment> : ""}
                 </h4>
               </Card.Title>
               <hr style={{marginBottom:"7px"}}/>

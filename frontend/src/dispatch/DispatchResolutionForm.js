@@ -71,7 +71,7 @@ function DispatchResolutionForm({ id }) {
             })
             response.data.sr_updates.push({
               id: assigned_request.service_request_object.id,
-              followup_date: assigned_request.service_request_object.followup_date,
+              followup_date: assigned_request.followup_date,
               date_completed: assigned_request.visit_note ? assigned_request.visit_note.date_completed : new Date(),
               notes: assigned_request.visit_note ? assigned_request.visit_note.notes : '',
               forced_entry: assigned_request.visit_note ? assigned_request.visit_note.forced_entry : false,
@@ -381,7 +381,8 @@ function DispatchResolutionForm({ id }) {
                       onChange={(date, dateStr) => {
                         props.setFieldValue(`sr_updates.${index}.followup_date`, dateStr)
                       }}
-                      value={assigned_request.service_request_object.followup_date || null}
+                      value={assigned_request.followup_date || null}
+                      disabled={data.end_time !== null && assigned_request.followup_date !== assigned_request.service_request_object.followup_date}
                     />
                   </BootstrapForm.Row>
                   <BootstrapForm.Row className="mt-3">
