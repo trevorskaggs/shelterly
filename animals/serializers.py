@@ -10,18 +10,7 @@ from shelter.serializers import SimpleShelterSerializer
 class SimpleAnimalSerializer(serializers.ModelSerializer):
 
     aco_required = serializers.SerializerMethodField()
-    owner_names = serializers.StringRelatedField(source='owner_objects')
-
-    # An Animal is ACO Required if it is aggressive or "Other" species.
-    def get_aco_required(self, obj):
-        return (obj.aggressive or obj.species.other)
-
-    class Meta:
-        model = Animal
-        fields = ['id', 'species', 'aggressive', 'status', 'aco_required', 'name', 'sex', 'size', 'age', 'pcolor', 'scolor', 'color_notes', 'owner_names']
-
-class ModestAnimalSerializer(SimpleAnimalSerializer):
-
+    owner_names = serializers.StringRelatedField(source='owners', many=True)
     front_image = serializers.SerializerMethodField()
     side_image = serializers.SerializerMethodField()
 
@@ -34,7 +23,7 @@ class ModestAnimalSerializer(SimpleAnimalSerializer):
         except AttributeError:
             # Should only hit this when returning a single object after create.
             try:
-                return obj.animalimage_set.filter(category='front_image').first().url
+                return obj.animalimage_set.filter(category='front_image').first().image.url
             except AttributeError:
                 return ''
 
@@ -45,9 +34,19 @@ class ModestAnimalSerializer(SimpleAnimalSerializer):
             return ''
         except AttributeError:
             try:
-                return obj.animalimage_set.filter(category='side_image').first().url
+                return obj.animalimage_set.filter(category='side_image').first().image.url
             except AttributeError:
                 return ''
+
+    # An Animal is ACO Required if it is aggressive or "Other" species.
+    def get_aco_required(self, obj):
+        return (obj.aggressive or obj.species.other)
+
+    class Meta:
+        model = Animal
+        fields = ['id', 'species', 'aggressive', 'status', 'aco_required', 'name', 'sex', 'size', 'age', 'pcolor', 'scolor', 'color_notes', 'owner_names', 'front_image', 'side_image']
+
+class ModestAnimalSerializer(SimpleAnimalSerializer):
 
     class Meta:
         model = Animal
@@ -59,11 +58,10 @@ class AnimalSerializer(ModestAnimalSerializer):
     extra_images = serializers.SerializerMethodField()
     found_location = serializers.SerializerMethodField()
     owner_objects = SimplePersonSerializer(many=True, required=False, read_only=True)
-    evacuation_assignments = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     reporter_object = SimplePersonSerializer(source='reporter', read_only=True)
     request_address = serializers.SerializerMethodField()
     action_history = serializers.SerializerMethodField()
-    room_name = serializers.StringRelatedField()
+    room_name = serializers.StringRelatedField(source='room')
     shelter_object = SimpleShelterSerializer(source='shelter', required=False, read_only=True)
 
     class Meta:
