@@ -62,7 +62,7 @@ input[disabled] {
 }
 
 .daterange_picker {
-  margin-left: 12px;
+  margin-left: 16px;
   width:210px;
   min-width:210px;
   text-align: center;

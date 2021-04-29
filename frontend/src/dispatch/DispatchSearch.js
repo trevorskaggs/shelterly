@@ -39,8 +39,8 @@ function DispatchAssignmentSearch() {
   const [numPages, setNumPages] = useState(1);
   const topRef = useRef(null);
 
-  const [firstDate, setFirstDate] = useState(moment('20200101').format('YYYY-MM-DD'));
-  const [lastDate, setLastDate] = useState(moment().format('YYYY-MM-DD'));
+  const [startDate, setStartDate] = useState(moment('20200101').format('YYYY-MM-DD'));
+  const [endDate, setEndDate] = useState(moment().format('YYYY-MM-DD'));
 
   // Update searchTerm when field input changes.
   const handleChange = event => {
@@ -150,19 +150,18 @@ function DispatchAssignmentSearch() {
               <DateRangePicker
                 name={`date_range_picker`}
                 id={`date_range_picker`}
-                dateFormat={"Y-m-d"}
                 placeholder={"Filter by Date Range"}
                 onChange={(dateRange) => {
                   dateRange = dateRange.toString().split(',');
-                  setFirstDate(moment(dateRange[0]).format('YYYY-MM-DD'));
-                  setLastDate(moment(dateRange[1]).format('YYYY-MM-DD'));
+                  setStartDate(moment(dateRange[0]).format('YYYY-MM-DD'));
+                  setEndDate(moment(dateRange[1]).format('YYYY-MM-DD'));
                 }}
               />
           </ButtonGroup>
         </InputGroup>
       </Form>
       {data.evacuation_assignments
-        .filter(ea => firstDate <= moment(ea.start_time).format('YYYY-MM-DD') && lastDate >= moment(ea.start_time).format('YYYY-MM-DD'))
+        .filter(ea => startDate <= moment(ea.start_time).format('YYYY-MM-DD') && endDate >= moment(ea.start_time).format('YYYY-MM-DD'))
         .map((evacuation_assignment, index) => (
         <div key={evacuation_assignment.id} className="mt-3" hidden={page !== Math.ceil((index+1)/ITEMS_PER_PAGE)}>
           <div className="card-header d-flex hide-scrollbars" style={{whiteSpace:'nowrap', overflow:"hidden"}}>
