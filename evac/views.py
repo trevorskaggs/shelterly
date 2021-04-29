@@ -23,6 +23,10 @@ class EvacTeamMemberViewSet(viewsets.ModelViewSet):
             serializer.validated_data['phone'] = ''.join(char for char in serializer.validated_data.get('phone', '') if char.isdigit())
             team_member = serializer.save()
 
+    def get_queryset(self):
+        queryset = EvacTeamMember.objects.all().annotate(is_assigned=Exists(EvacAssignment.objects.filter(team__team_members__id=OuterRef("id"), end_time=None)))
+        return queryset
+
 class DispatchTeamViewSet(viewsets.ModelViewSet):
 
     queryset = DispatchTeam.objects.all()

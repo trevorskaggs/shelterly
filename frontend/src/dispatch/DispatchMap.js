@@ -5,7 +5,7 @@ import { Form, Formik } from 'formik';
 import { Button, Col, FormCheck, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBandAid, faBullseye, faCalendarDay, faCar, faCircle, faClipboardList, faExclamationCircle, faQuestionCircle, faPencilAlt, faTrailer, faUserAlt, faUserAltSlash
+  faBandAid, faBullseye, faCalendarDay, faCar, faExclamationTriangle, faCircle, faClipboardList, faExclamationCircle, faQuestionCircle, faPencilAlt, faTrailer, faUserAlt, faUserAltSlash
 } from '@fortawesome/free-solid-svg-icons';
 import { faBadgeSheriff, faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
 import { Circle, Marker, Tooltip as MapTooltip } from "react-leaflet";
@@ -15,7 +15,7 @@ import { Typeahead } from 'react-bootstrap-typeahead';
 import Moment from 'react-moment';
 import Map, { countMatches, prettyText, reportedMarkerIcon, SIPMarkerIcon, UTLMarkerIcon, checkMarkerIcon } from "../components/Map";
 import { Checkbox, TextInput } from "../components/Form";
-import { DispatchDuplicateSRModal } from "../components/Modals";
+import { DispatchDuplicateSRModal, DispatchAlreadyAssignedTeamModal } from "../components/Modals";
 import Scrollbar from '../components/Scrollbars';
 import 'react-bootstrap-typeahead/css/Typeahead.css';
 import 'leaflet/dist/leaflet.css';
@@ -33,12 +33,16 @@ function Deploy() {
   const [teamData, setTeamData] = useState({teams: [], options: [], isFetching: false});
   const [selected, setSelected] = useState([]);
   const [teamName, setTeamName] = useState('');
+  const [assignedTeamMembers, setAssignedTeamMembers] = useState([]);
   const handleClose = () => setShow(false);
   const [show, setShow] = useState(false);
   const [error, setError] = useState('');
   const [showDispatchDuplicateSRModal, setShowDispatchDuplicateSRModal] = useState(false);
   const [duplicateSRs, setDuplicateSRs] = useState([]);
   const handleCloseDispatchDuplicateSRModal = () => {setDuplicateSRs([]);setShowDispatchDuplicateSRModal(false);}
+  const [showAlreadyAssignedTeamModal, setShowAlreadyAssignedTeamModal] = useState(false);
+  const handleCloseAlreadyAssignedTeamModal = () => {setDuplicateSRs([]);setShowAlreadyAssignedTeamModal(false);}
+  const [proceed, setProceed] = useState(false);
 
   // Handle aco_required toggle.
   const handleACO = async event => {
@@ -72,7 +76,7 @@ function Deploy() {
         // Parse out the team name.
         team_name = value.label.split(':')[0];
         value.label.split(':')[1].split(',').forEach((name, index) =>  {
-          let team_option = {id: [value.id[index]], label:name.replace(' ', '')};
+          let team_option = {id: [value.id[index]], label:name.replace(' ', ''), is_assigned:value.is_assigned};
           // Add to list if not already selected.
           if (!selected_list.some(option => option.id[0] === team_option.id[0])) {
             selected_list.push(team_option);
@@ -81,16 +85,16 @@ function Deploy() {
       }
       // Else handle as an individual TeamMember.
       else {
-        selected_list.push({id: value.id, label:value.label})
+        selected_list.push({id:value.id, label:value.label, is_assigned:value.is_assigned})
       }
     });
     // If deselecting.
     if (selected.length > selected_list.length) {
       let team_options = [];
-      teamData.teams.filter(team => !team.is_assigned && team.team_members.filter(value => id_list.includes(value)).length === 0).forEach(function(team) {
+      teamData.teams.filter(team => team.team_members.filter(value => id_list.includes(value)).length === 0).forEach(function(team) {
         // Add selectable options back if if not already available.
         if (!teamData.options.some(option => option.label === team.name + ": " + team.display_name)) {
-          team_options.push({id: team.team_members, label: team.name + ": " + team.display_name});
+          team_options.push({id:team.team_members, label:team.name + ": " + team.display_name, is_assigned:team.is_assigned});
         }
       });
       setTeamData(prevState => ({ ...prevState, "options":team_options.concat(teamData.options.concat(selected.filter(option => !id_list.includes(option.id[0])))) }));
@@ -107,10 +111,7 @@ function Deploy() {
 
   // Handle Team Name updating to reject names already in use.
   const handleSubmit = (props) => {
-    if (teamData.teams.map(team => team.name.toLowerCase()).includes(props.values.temp_team_name.toLowerCase())) {
-      setError("This team name is already in use.");
-    }
-    else if (props.values.temp_team_name.length === 0) {
+    if (props.values.temp_team_name.length === 0) {
       setError("Team name cannot be blank.");
     }
     else if (props.values.temp_team_name.length > 18) {
@@ -218,8 +219,9 @@ function Deploy() {
           let team_names = [];
           let team_name = '';
           response.data.forEach(function(teammember) {
-            options.push({id: [teammember.id], label: teammember.display_name})
+            options.push({id: [teammember.id], label: teammember.display_name, is_assigned:teammember.is_assigned})
           });
+          setAssignedTeamMembers(response.data.filter(teammember => teammember.is_assigned === true).map(teammember => teammember.id))
           // Then fetch all recent Teams.
           axios.get('/evac/api/dispatchteam/', {
             params: {
@@ -230,8 +232,8 @@ function Deploy() {
           .then(response => {
             response.data.forEach(function(team) {
               // Only add to option list if not actively assigned and not already in the list which is sorted by newest.
-              if (!team.is_assigned && !team_names.includes(team.name)) {
-                options.unshift({id: team.team_members, label: team.name + ": " + team.display_name});
+              if (!team_names.includes(team.name)) {
+                options.unshift({id: team.team_members, label: team.name + ": " + team.display_name, is_assigned:team.is_assigned});
               }
               team_names.push(team.name);
             });
@@ -324,24 +326,30 @@ function Deploy() {
       })}
       enableReinitialize={true}
       onSubmit={(values, { setSubmitting }) => {
-        values.service_requests = Object.keys(mapState).filter(key => mapState[key].checked === true);
-        // Remove duplicate assignments from POST values.
-        if (duplicateSRs.length > 0) {
-          values.service_requests = values.service_requests.filter(sr_id => !duplicateSRs.includes(sr_id));
+        // Check if assigned team members have been submitted.
+        if (!proceed && values.team_members.filter(teammember => (assignedTeamMembers.includes(teammember))).map(teammember => teammember).length > 0) {
+          setShowAlreadyAssignedTeamModal(true);
         }
-        setTimeout(() => {
-          axios.post('/evac/api/evacassignment/', values)
-          .then(response => {
-            navigate('/dispatch/summary/' + response.data.id);
-          })
-          .catch(error => {
-            if (error.response.data && error.response.data[0].includes('Duplicate assigned service request error')) {
-              setDuplicateSRs(error.response.data[1]);
-              setShowDispatchDuplicateSRModal(true);
-            }
-          });
-          setSubmitting(false);
-        }, 500);
+        else {
+          values.service_requests = Object.keys(mapState).filter(key => mapState[key].checked === true);
+          // Remove duplicate assignments from POST values.
+          if (duplicateSRs.length > 0) {
+            values.service_requests = values.service_requests.filter(sr_id => !duplicateSRs.includes(sr_id));
+          }
+          setTimeout(() => {
+            axios.post('/evac/api/evacassignment/', values)
+            .then(response => {
+              navigate('/dispatch/summary/' + response.data.id);
+            })
+            .catch(error => {
+              if (error.response.data && error.response.data[0].includes('Duplicate assigned service request error')) {
+                setDuplicateSRs(error.response.data[1]);
+                setShowDispatchDuplicateSRModal(true);
+              }
+            });
+            setSubmitting(false);
+          }, 500);
+        }
       }}
     >
     {props => (
@@ -482,6 +490,11 @@ function Deploy() {
               options={teamData.options}
               placeholder="Choose team members..."
               style={{height:"20px"}}
+              renderMenuItemChildren={(option) => (
+                <div>
+                  {option.label} {option.is_assigned ? <FontAwesomeIcon icon={faExclamationTriangle} size="sm" /> : ""}
+                </div>
+              )}
             />
           </Col>
         </Row>
@@ -692,6 +705,7 @@ function Deploy() {
           </Col>
         </Row>
         <DispatchDuplicateSRModal dupe_list={data.service_requests.filter(sr => duplicateSRs.includes(String(sr.id)))} sr_list={data.service_requests.filter(sr => mapState[sr.id] && mapState[sr.id].checked === true)} show={showDispatchDuplicateSRModal} handleClose={handleCloseDispatchDuplicateSRModal} handleSubmit={props.handleSubmit} handleReselect={handleReselect} />
+        <DispatchAlreadyAssignedTeamModal team_members={props.values.team_members} team_options={selected} setProceed={setProceed} show={showAlreadyAssignedTeamModal} handleClose={handleCloseAlreadyAssignedTeamModal} handleSubmit={props.handleSubmit} />
         <Modal show={show} onHide={handleClose}>
           <Modal.Header closeButton>
             <Modal.Title>Update Team Name</Modal.Title>
