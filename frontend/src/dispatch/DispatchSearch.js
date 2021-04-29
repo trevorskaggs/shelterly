@@ -14,9 +14,11 @@ import L from "leaflet";
 import { Marker, Tooltip as MapTooltip } from "react-leaflet";
 import Map, { prettyText, reportedMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
 import Moment from "react-moment";
+import moment from 'moment'
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
 import { ITEMS_PER_PAGE } from '../constants';
+import {DateRangePicker} from '../components/Form';
 
 function DispatchAssignmentSearch() {
 
@@ -36,6 +38,9 @@ function DispatchAssignmentSearch() {
   const [page, setPage] = useState(1);
   const [numPages, setNumPages] = useState(1);
   const topRef = useRef(null);
+
+  const [firstDate, setFirstDate] = useState(moment('20200101').format('YYYY-MM-DD'));
+  const [lastDate, setLastDate] = useState(moment().format('YYYY-MM-DD'));
 
   // Update searchTerm when field input changes.
   const handleChange = event => {
@@ -142,10 +147,23 @@ function DispatchAssignmentSearch() {
           <ButtonGroup className="ml-3">
             <Button variant={statusOptions === "open" ? "primary" : "secondary"} onClick={statusOptions !== "open" ? () => {setPage(1);setStatusOptions("open")} : () => {setPage(1);setStatusOptions("")}}>Open</Button>
             <Button variant={statusOptions === "closed" ? "primary" : "secondary"} onClick={statusOptions !== "closed" ? () => {setPage(1);setStatusOptions("closed")} : () => {setPage(1);setStatusOptions("")}}>Closed</Button>
+              <DateRangePicker
+                name={`date_range_picker`}
+                id={`date_range_picker`}
+                dateFormat={"Y-m-d"}
+                placeholder={"Filter by Date Range"}
+                onChange={(dateRange) => {
+                  dateRange = dateRange.toString().split(',');
+                  setFirstDate(moment(dateRange[0]).format('YYYY-MM-DD'));
+                  setLastDate(moment(dateRange[1]).format('YYYY-MM-DD'));
+                }}
+              />
           </ButtonGroup>
         </InputGroup>
       </Form>
-      {data.evacuation_assignments.map((evacuation_assignment, index) => (
+      {data.evacuation_assignments
+        .filter(ea => firstDate <= moment(ea.start_time).format('YYYY-MM-DD') && lastDate >= moment(ea.start_time).format('YYYY-MM-DD'))
+        .map((evacuation_assignment, index) => (
         <div key={evacuation_assignment.id} className="mt-3" hidden={page !== Math.ceil((index+1)/ITEMS_PER_PAGE)}>
           <div className="card-header d-flex hide-scrollbars" style={{whiteSpace:'nowrap', overflow:"hidden"}}>
             <h4 style={{marginBottom:"-2px", marginLeft:"-12px", whiteSpace:'nowrap', overflow:"hidden", textOverflow:"ellipsis"}}>
