@@ -168,7 +168,6 @@ class AnimalViewSet(viewsets.ModelViewSet):
             Animal.objects.exclude(status="CANCELED")
             .prefetch_related(Prefetch("animalimage_set", to_attr="images"))
             .prefetch_related(Prefetch("owners", to_attr="owner_objects"))
-            .prefetch_related("evacuation_assignments")
             .prefetch_related(
                 Prefetch("target_actions", Action.objects.prefetch_related("actor"))
             )

@@ -14,10 +14,17 @@ class VisitNoteSerializer(serializers.ModelSerializer):
     address = serializers.SerializerMethodField()
     team_name = serializers.SerializerMethodField()
     team_member_names = serializers.SerializerMethodField()
+    dispatch_assignment = serializers.SerializerMethodField()
 
     def get_address(self, obj):
-        # does this kick off another query?
-        return obj.service_request.location_output
+        if obj.assigned_request.first():
+            return obj.assigned_request.first().service_request.location_output
+        return None
+
+    def get_dispatch_assignment(self, obj):
+        if obj.assigned_request.first():
+            return obj.assigned_request.first().dispatch_assignment.id
+        return None
 
     def get_team_name(self, obj):
         # does this kick off another query?
@@ -43,7 +50,6 @@ class SimpleServiceRequestSerializer(serializers.ModelSerializer):
     full_address = serializers.SerializerMethodField()
     pending = serializers.BooleanField(read_only=True)
     animals = SimpleAnimalSerializer(many=True, required=False, read_only=True)
-    latest_evac = serializers.SerializerMethodField()
     # these method fields require animals queryset
     reported_animals = serializers.SerializerMethodField()
     sheltered_in_place = serializers.SerializerMethodField()
@@ -57,8 +63,8 @@ class SimpleServiceRequestSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ServiceRequest
-        fields = ['id', 'latitude', 'longitude', 'full_address', 'followup_date', 'owners', 'address', 'city', 'state', 'zip_code', 'apartment', 'reporter', 'directions', 'latest_evac', 'evacuation_assignments', 'pending',
-        'animal_count','injured', 'accessible', 'turn_around', 'animals', 'status', 'reported_animals', 'reporter_object', 'owner_objects', 'sheltered_in_place', 'unable_to_locate', 'aco_required']
+        fields = ['id', 'latitude', 'longitude', 'full_address', 'followup_date', 'owners', 'address', 'city', 'state', 'zip_code', 'apartment', 'reporter', 'directions', 'evacuation_assignments', 'pending',
+        'animal_count', 'injured', 'accessible', 'turn_around', 'animals', 'status', 'reported_animals', 'reporter_object', 'owner_objects', 'sheltered_in_place', 'unable_to_locate', 'aco_required']
 
 
     # Custom field for the full address.
@@ -113,30 +119,25 @@ class SimpleServiceRequestSerializer(serializers.ModelSerializer):
             data['longitude'] = float("%.6f" % float(data.get('longitude')))
         return super().to_internal_value(data)
 
-    def get_latest_evac(self, obj):
-        from evac.models import EvacAssignment
-        assigned_evac = EvacAssignment.objects.filter(service_requests=obj, end_time__isnull=True).values('id', 'start_time', 'end_time').first()
-        if assigned_evac:
-            return assigned_evac
-        return EvacAssignment.objects.filter(service_requests=obj, end_time__isnull=False).values('id', 'start_time', 'end_time').first()
-
 class ServiceRequestSerializer(SimpleServiceRequestSerializer):
     from people.serializers import SimplePersonSerializer
 
     action_history = serializers.SerializerMethodField()
     animal_count = serializers.IntegerField(read_only=True)
     injured = serializers.BooleanField(read_only=True)
-    visit_notes = VisitNoteSerializer(source='visitnote_set', many=True, required=False, read_only=True)
+    assigned_requests = serializers.SerializerMethodField()
 
     class Meta:
         model = ServiceRequest
         fields = ['id', 'latitude', 'longitude', 'full_address', 'followup_date', 'status', 'address', 'city', 'state', 'zip_code',
         'injured', 'accessible', 'turn_around', 'animals', 'reported_animals', 'sheltered_in_place', 'unable_to_locate', 'aco_required',
-        'animal_count', 'action_history', 'owner_objects', 'reporter_object', 'evacuation_assignments', 'visit_notes', 'latest_evac']
+        'animal_count', 'action_history', 'owner_objects', 'reporter_object', 'assigned_requests']
 
-    # def __init__(self, *args, **kwargs):
-    #     super(ServiceRequestSerializer, self).__init__(*args, **kwargs)
-    #     self.fields.pop('action_history')
+    def get_assigned_requests(self, obj):
+        from evac.models import AssignedRequest
+        from evac.serializers import AssignedRequestServiceRequestSerializer
+
+        return AssignedRequestServiceRequestSerializer(AssignedRequest.objects.filter(service_request=obj), many=True, required=False, read_only=True).data
 
     # Custom field for the action history list.
     def get_action_history(self, obj):
