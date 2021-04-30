@@ -38,7 +38,6 @@ function DispatchAssignmentSearch() {
   const [page, setPage] = useState(1);
   const [numPages, setNumPages] = useState(1);
   const topRef = useRef(null);
-
   const [startDate, setStartDate] = useState(moment('20200101').format('YYYY-MM-DD'));
   const [endDate, setEndDate] = useState(moment().format('YYYY-MM-DD'));
 
