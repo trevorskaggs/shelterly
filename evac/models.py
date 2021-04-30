@@ -10,7 +10,7 @@ class EvacTeamMember(models.Model):
     agency_id = models.CharField(max_length=50, blank=True)
 
     def __str__(self):
-        agency = " (%s)" if self.agency_id else ""
+        agency = " (%s)" % (self.agency_id) if self.agency_id else ""
         return "%s, %s%s" % (self.last_name, self.first_name, agency)
 
     class Meta:

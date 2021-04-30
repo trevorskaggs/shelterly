@@ -18,7 +18,8 @@ class EvacTeamMemberSerializer(serializers.ModelSerializer):
 
     # Custom field for Name Output
     def get_display_name(self, obj):
-        return '%s %s' % (obj.first_name, obj.last_name)
+        agency = " (%s)" % (obj.agency_id) if obj.agency_id else ""
+        return '%s %s%s' % (obj.first_name, obj.last_name, agency)
 
     # Custom field for Formated Phone Number
     def get_display_phone(self, obj):
