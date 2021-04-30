@@ -67,12 +67,12 @@ const useStyles = makeStyles({
   },
 });
 
-const DateRangePicker = ({ label, xs, clearable, ...props }) => {
+const DateRangePicker = ({...props}) => {
 
   let options = {allowInput: true, dateFormat: "Y-m-d", mode: "range", maxDate: moment().format('YYYY-MM-DD')}
   return (
     <>
-        <Flatpickr className="daterange_picker" options={options} {...props} />
+      <Flatpickr className="daterange_picker" options={options} {...props} />
     </>
   );
 };

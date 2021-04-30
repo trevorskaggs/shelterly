@@ -147,17 +147,17 @@ function DispatchAssignmentSearch() {
           <ButtonGroup className="ml-3">
             <Button variant={statusOptions === "open" ? "primary" : "secondary"} onClick={statusOptions !== "open" ? () => {setPage(1);setStatusOptions("open")} : () => {setPage(1);setStatusOptions("")}}>Open</Button>
             <Button variant={statusOptions === "closed" ? "primary" : "secondary"} onClick={statusOptions !== "closed" ? () => {setPage(1);setStatusOptions("closed")} : () => {setPage(1);setStatusOptions("")}}>Closed</Button>
-              <DateRangePicker
-                name={`date_range_picker`}
-                id={`date_range_picker`}
-                placeholder={"Filter by Date Range"}
-                onChange={(dateRange) => {
-                  dateRange = dateRange.toString().split(',');
-                  setStartDate(moment(dateRange[0]).format('YYYY-MM-DD'));
-                  setEndDate(moment(dateRange[1]).format('YYYY-MM-DD'));
-                }}
-              />
           </ButtonGroup>
+          <DateRangePicker
+            name={`date_range_picker`}
+            id={`date_range_picker`}
+            placeholder={"Filter by Date Range"}
+            onChange={(dateRange) => {
+              dateRange = dateRange.toString().split(',');
+              setStartDate(moment(dateRange[0]).format('YYYY-MM-DD'));
+              setEndDate(moment(dateRange[1]).format('YYYY-MM-DD'));
+            }}
+          />
         </InputGroup>
       </Form>
       {data.evacuation_assignments
