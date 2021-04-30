@@ -235,6 +235,7 @@ function DispatchResolutionForm({ id }) {
                 <Card.Body>
                   <Card.Title style={{marginBottom:"-5px"}}>
                     <h4>
+                      #{assigned_request.service_request_object.id} -&nbsp;
                       <Link href={"/hotline/servicerequest/" + assigned_request.service_request_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link> |&nbsp;
                       <Checkbox
                         label={"Not Completed Yet:"}

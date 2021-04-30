@@ -39,10 +39,10 @@ function Dispatch() {
           const random_colors = randomColor({count:response.data.length});
           response.data.forEach((dispatch_assignment, index) => {
             let sr_dict = {}
-            for (const service_request of dispatch_assignment.service_request_objects) {
-              const matches = countMatches(service_request)[0];
-              sr_dict[service_request.id] = {id:service_request.id, matches:matches, latitude:service_request.latitude, longitude:service_request.longitude, full_address:service_request.full_address};
-              bounds.push([service_request.latitude, service_request.longitude]);
+            for (const assigned_request of dispatch_assignment.assigned_requests) {
+              const matches = countMatches(assigned_request.service_request_object)[0];
+              sr_dict[assigned_request.service_request_object.id] = {id:assigned_request.service_request_object.id, matches:matches, latitude:assigned_request.service_request_object.latitude, longitude:assigned_request.service_request_object.longitude, full_address:assigned_request.service_request_object.full_address};
+              bounds.push([assigned_request.service_request_object.latitude, assigned_request.service_request_object.longitude]);
             }
             map_dict[dispatch_assignment.id] = {color:random_colors[index], service_requests:sr_dict}
           });
@@ -90,11 +90,11 @@ function Dispatch() {
             <Map bounds={data.bounds} boundsOptions={{padding:[10,10]}} className="landing-leaflet-container">
               {data.dispatch_assignments.filter(dispatch_assignment => (selectedTeam == null || dispatch_assignment.team === selectedTeam)).map(dispatch_assignment => (
               <span key={dispatch_assignment.id}>
-                {dispatch_assignment.service_request_objects.map(service_request => (
+                {dispatch_assignment.assigned_requests.map(assigned_request => (
                   <Marker
-                    key={service_request.id}
-                    position={[service_request.latitude, service_request.longitude]}
-                    icon={service_request.sheltered_in_place > 0 ? SIPMarkerIcon : service_request.unable_to_locate > 0 ? UTLMarkerIcon : reportedMarkerIcon}
+                    key={assigned_request.service_request_object.id}
+                    position={[assigned_request.service_request_object.latitude, assigned_request.service_request_object.longitude]}
+                    icon={assigned_request.service_request_object.sheltered_in_place > 0 ? SIPMarkerIcon : assigned_request.service_request_object.unable_to_locate > 0 ? UTLMarkerIcon : reportedMarkerIcon}
                     onClick={() => window.open("/dispatch/summary/" + dispatch_assignment.id)}
                   >
                   <MapTooltip autoPan={false}>
@@ -106,21 +106,20 @@ function Dispatch() {
                       </div>
                       {mapState[dispatch_assignment.id] ?
                         <span>
-                          {Object.keys(mapState[dispatch_assignment.id].service_requests[service_request.id].matches).map((key,i) => (
+                          {Object.keys(mapState[dispatch_assignment.id].service_requests[assigned_request.service_request_object.id].matches).map((key,i) => (
                             <span key={key} style={{textTransform:"capitalize"}}>
-                              {i > 0 && ", "}{prettyText(key.split(',')[1], key.split(',')[0], mapState[dispatch_assignment.id].service_requests[service_request.id].matches[key])}
+                              {i > 0 && ", "}{prettyText(key.split(',')[1], key.split(',')[0], mapState[dispatch_assignment.id].service_requests[assigned_request.service_request_object.id].matches[key])}
                             </span>
                           ))}
                         </span>
                       :""}
                       <br />
-                      {service_request.full_address}
-                      {service_request.followup_date ? <div>Followup Date: <Moment format="L">{service_request.followup_date}</Moment></div> : ""}
+                      #{assigned_request.service_request_object.id}: {assigned_request.service_request_object.full_address}
                       <div>
-                        {service_request.aco_required ? <img width={16} height={16} src={`${S3_BUCKET}images/badge-sheriff.png`} alt="ACO Required" className="mr-1" /> : ""}
-                        {service_request.injured ? <img width={16} height={16} src={`${S3_BUCKET}images/band-aid-solid.png`} alt="Injured" className="mr-1" /> : ""}
-                        {service_request.accessible ? <img width={16} height={16} src={`${S3_BUCKET}images/car-solid.png`} alt="Accessible" className="mr-1" /> : ""}
-                        {service_request.turn_around ? <img width={16} height={16} src={`${S3_BUCKET}images/trailer-solid.png`} alt="Turn Around" /> : ""}
+                        {assigned_request.service_request_object.aco_required ? <img width={16} height={16} src={`${S3_BUCKET}images/badge-sheriff.png`} alt="ACO Required" className="mr-1" /> : ""}
+                        {assigned_request.service_request_object.injured ? <img width={16} height={16} src={`${S3_BUCKET}images/band-aid-solid.png`} alt="Injured" className="mr-1" /> : ""}
+                        {assigned_request.service_request_object.accessible ? <img width={16} height={16} src={`${S3_BUCKET}images/car-solid.png`} alt="Accessible" className="mr-1" /> : ""}
+                        {assigned_request.service_request_object.turn_around ? <img width={16} height={16} src={`${S3_BUCKET}images/trailer-solid.png`} alt="Turn Around" /> : ""}
                       </div>
                     </span>
                   </MapTooltip>

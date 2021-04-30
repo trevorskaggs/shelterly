@@ -208,7 +208,7 @@ function DispatchSummary({id}) {
                     </span>
                   :""}
                   <br />
-                  {assigned_request.service_request_object.full_address}
+                  #{assigned_request.service_request_object.id}: {assigned_request.service_request_object.full_address}
                 </span>
               </MapTooltip>
             </Marker>
@@ -217,114 +217,115 @@ function DispatchSummary({id}) {
       </Col>
     </Row>
     {data.assigned_requests.map(assigned_request => (
-        <Row key={assigned_request.service_request_object.id}>
-          <Card border="secondary" className="mb-3 ml-3 mr-3" style={{width:"100%"}}>
-            <Card.Body>
-              <Card.Title>
-                <h4>
-                  <Link href={"/hotline/servicerequest/" + assigned_request.service_request_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link>
-                  {assigned_request.visit_note && assigned_request.visit_note.forced_entry ?
-                    <OverlayTrigger
-                      key={"forced"}
-                      placement="top"
-                      overlay={
-                        <Tooltip id={`tooltip-forced`}>
-                          Forced entry
-                        </Tooltip>
-                      }
-                    >
-                      <FontAwesomeIcon icon={faHouseDamage} size="sm" className="ml-1 fa-move-up" />
-                    </OverlayTrigger>
+      <Row key={assigned_request.service_request_object.id}>
+        <Card border="secondary" className="mb-3 ml-3 mr-3" style={{width:"100%"}}>
+          <Card.Body>
+            <Card.Title>
+              <h4>
+                #{assigned_request.service_request_object.id} -&nbsp;
+                <Link href={"/hotline/servicerequest/" + assigned_request.service_request_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link>
+                {assigned_request.visit_note && assigned_request.visit_note.forced_entry ?
+                  <OverlayTrigger
+                    key={"forced"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-forced`}>
+                        Forced entry
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon icon={faHouseDamage} size="sm" className="ml-1 fa-move-up" />
+                  </OverlayTrigger>
+                : ""}
+                {assigned_request.followup_date ?
+                  <OverlayTrigger
+                    key={"followup-date"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-followup-date`}>
+                        Followup date:&nbsp;<Moment format="L">{assigned_request.followup_date}</Moment>
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon icon={faCalendarDay} className="ml-1 fa-move-up" size="sm" />
+                  </OverlayTrigger> : ""}
+                &nbsp;| {assigned_request.visit_note ? "Completed" : <span style={{textTransform:"capitalize"}}>{assigned_request.service_request_object.status}</span>} {assigned_request.visit_note ? <Moment format="[ on ]l[,] HH:mm">{assigned_request.visit_note.date_completed}</Moment> : ""}
+              </h4>
+            </Card.Title>
+            <hr style={{marginBottom:"7px"}}/>
+            <ListGroup variant="flush" style={{marginTop:"-5px", marginBottom:"-13px"}}>
+              {assigned_request.service_request_object.owner_objects.map(owner => (
+                <ListGroup.Item key={owner.id}>
+                  <b>Owner: </b><Link href={"/people/owner/" + owner.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{owner.first_name} {owner.last_name}</Link>
+                  {owner.display_phone ?
+                  <OverlayTrigger
+                    key={"owner-phone"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-owner-phone`}>
+                        {owner.display_phone}
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon icon={faPhoneRotary} className="ml-1" inverse />
+                  </OverlayTrigger>
                   : ""}
-                  {assigned_request.followup_date ?
-                    <OverlayTrigger
-                      key={"followup-date"}
-                      placement="top"
-                      overlay={
-                        <Tooltip id={`tooltip-followup-date`}>
-                          Followup date:&nbsp;<Moment format="L">{assigned_request.followup_date}</Moment>
-                        </Tooltip>
-                      }
-                    >
-                      <FontAwesomeIcon icon={faCalendarDay} className="ml-1 fa-move-up" size="sm" />
-                    </OverlayTrigger> : ""}
-                  &nbsp;| {assigned_request.visit_note ? "Completed" : <span style={{textTransform:"capitalize"}}>{assigned_request.service_request_object.status}</span>} {assigned_request.visit_note ? <Moment format="[ on ]l[,] HH:mm">{assigned_request.visit_note.date_completed}</Moment> : ""}
-                </h4>
-              </Card.Title>
-              <hr style={{marginBottom:"7px"}}/>
-              <ListGroup variant="flush" style={{marginTop:"-5px", marginBottom:"-13px"}}>
-                {assigned_request.service_request_object.owner_objects.map(owner => (
-                  <ListGroup.Item key={owner.id}>
-                    <b>Owner: </b><Link href={"/people/owner/" + owner.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{owner.first_name} {owner.last_name}</Link>
-                    {owner.display_phone ?
-                    <OverlayTrigger
-                      key={"owner-phone"}
-                      placement="top"
-                      overlay={
-                        <Tooltip id={`tooltip-owner-phone`}>
-                          {owner.display_phone}
-                        </Tooltip>
-                      }
-                    >
-                      <FontAwesomeIcon icon={faPhoneRotary} className="ml-1" inverse />
-                    </OverlayTrigger>
-                    : ""}
-                    {owner.email ?
-                    <OverlayTrigger
-                      key={"owner-email"}
-                      placement="top"
-                      overlay={
-                        <Tooltip id={`tooltip-owner-email`}>
-                          {owner.email}
-                        </Tooltip>
-                      }
-                    >
-                      <FontAwesomeIcon icon={faEnvelope} className="ml-1" inverse />
-                    </OverlayTrigger>
-                    : ""}
-                    {assigned_request.owner_contact ?
-                    <span>
-                      <OverlayTrigger
-                        key={"owner-contacted"}
-                        placement="top"
-                        overlay={
-                          <Tooltip id={`tooltip-owner-contacted`}>
-                            Contacted: <Moment format="l HH:mm">{assigned_request.owner_contact.owner_contact_time}</Moment>
-                          </Tooltip>
-                        }
-                      >
-                        <FontAwesomeIcon icon={faUserCheck} className="ml-1 fa-move-up" size="sm" inverse />
-                      </OverlayTrigger>
-                      <div><b>Contact Note: </b>{assigned_request.owner_contact.owner_contact_note}</div>
-                    </span>
-                    : ""}
-                  </ListGroup.Item>
-                ))}
-              {assigned_request.service_request_object.owners.length < 1 ? <ListGroup.Item><b>Owner: </b>No Owner</ListGroup.Item> : ""}
-            </ListGroup>
-            <hr/>
-            <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
-              <h4 className="mt-2" style={{marginBottom:"-2px"}}>Animals</h4>
-              {assigned_request.service_request_object.animals.filter(animal => Object.keys(assigned_request.animals).includes(String(animal.id))).map((animal, inception) => (
-                <ListGroup.Item key={animal.id}>
-                  <span style={{textTransform:"capitalize"}}>#{animal.id} - <Link href={"/animals/" + animal.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.name||"Unknown"}</Link> ({animal.species})</span>
-                  {animal.color_notes ?
-                    <OverlayTrigger
-                      key={"animal-color-notes"}
-                      placement="top"
-                      overlay={
-                        <Tooltip id={`tooltip-animal-color-notes`}>
-                          {animal.color_notes}
-                        </Tooltip>
-                      }
-                    >
-                      <FontAwesomeIcon icon={faClipboardList} className="ml-1" size="sm" inverse />
-                    </OverlayTrigger>
+                  {owner.email ?
+                  <OverlayTrigger
+                    key={"owner-email"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-owner-email`}>
+                        {owner.email}
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon icon={faEnvelope} className="ml-1" inverse />
+                  </OverlayTrigger>
                   : ""}
-                  &nbsp;- {animal.status}
+                  {assigned_request.owner_contact ?
+                  <span>
+                    <OverlayTrigger
+                      key={"owner-contacted"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-owner-contacted`}>
+                          Contacted: <Moment format="l HH:mm">{assigned_request.owner_contact.owner_contact_time}</Moment>
+                        </Tooltip>
+                      }
+                    >
+                      <FontAwesomeIcon icon={faUserCheck} className="ml-1 fa-move-up" size="sm" inverse />
+                    </OverlayTrigger>
+                    <div><b>Contact Note: </b>{assigned_request.owner_contact.owner_contact_note}</div>
+                  </span>
+                  : ""}
                 </ListGroup.Item>
               ))}
-            </ListGroup>
+            {assigned_request.service_request_object.owners.length < 1 ? <ListGroup.Item><b>Owner: </b>No Owner</ListGroup.Item> : ""}
+          </ListGroup>
+          <hr/>
+          <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
+            <h4 className="mt-2" style={{marginBottom:"-2px"}}>Animals</h4>
+            {assigned_request.service_request_object.animals.filter(animal => Object.keys(assigned_request.animals).includes(String(animal.id))).map((animal, inception) => (
+              <ListGroup.Item key={animal.id}>
+                <span style={{textTransform:"capitalize"}}>#{animal.id} - <Link href={"/animals/" + animal.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.name||"Unknown"}</Link> ({animal.species})</span>
+                {animal.color_notes ?
+                  <OverlayTrigger
+                    key={"animal-color-notes"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-animal-color-notes`}>
+                        {animal.color_notes}
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon icon={faClipboardList} className="ml-1" size="sm" inverse />
+                  </OverlayTrigger>
+                : ""}
+                &nbsp;- {animal.status}
+              </ListGroup.Item>
+            ))}
+          </ListGroup>
           {assigned_request.previous_visit ?
           <span>
             <hr/>

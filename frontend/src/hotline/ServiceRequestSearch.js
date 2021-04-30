@@ -136,7 +136,8 @@ function ServiceRequestSearch() {
               >
                 <Link href={"/hotline/servicerequest/" + service_request.id}><FontAwesomeIcon icon={faDotCircle} className="mr-2" inverse /></Link>
               </OverlayTrigger>
-              {service_request.full_address}
+              #{service_request.id}
+              &nbsp;-&nbsp;{service_request.full_address}
               &nbsp;| <span style={{textTransform:"capitalize"}}>{service_request.status}</span>
             </h4>
           </div>
