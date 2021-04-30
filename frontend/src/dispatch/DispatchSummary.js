@@ -168,8 +168,21 @@ function DispatchSummary({id}) {
               <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px", textTransform:"capitalize"}}>
                 {data.team_member_objects.map(team_member => (
                   <ListGroup.Item key={team_member.id}>
-                    {team_member.first_name + " " + team_member.last_name + " - " + team_member.display_phone}{team_member.agency ?
-                    <span>({team_member.agency})</span> : ""}
+                    {team_member.first_name + " " + team_member.last_name}{team_member.agency_id ?
+                    <span>&nbsp;({team_member.agency_id})</span> : ""}
+                    {team_member.display_phone ?
+                    <OverlayTrigger
+                      key={"owner-phone"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-owner-phone`}>
+                          Phone: {team_member.display_phone}
+                        </Tooltip>
+                      }
+                    >
+                      <FontAwesomeIcon icon={faPhoneRotary} className="ml-1" inverse />
+                    </OverlayTrigger>
+                    : ""}
                     <OverlayTrigger
                       key={"remove-team-member"}
                       placement="top"
@@ -263,7 +276,7 @@ function DispatchSummary({id}) {
                     placement="top"
                     overlay={
                       <Tooltip id={`tooltip-owner-phone`}>
-                        {owner.display_phone}
+                        Phone: {owner.display_phone}
                       </Tooltip>
                     }
                   >
@@ -276,7 +289,7 @@ function DispatchSummary({id}) {
                     placement="top"
                     overlay={
                       <Tooltip id={`tooltip-owner-email`}>
-                        {owner.email}
+                        Email: {owner.email}
                       </Tooltip>
                     }
                   >

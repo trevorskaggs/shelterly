@@ -11,7 +11,7 @@ import Map, { prettyText } from "../components/Map";
 import { Checkbox } from "../components/Form"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faChevronCircleDown, faChevronCircleRight, faClipboardList, faStar
+  faChevronCircleDown, faChevronCircleRight, faClipboardList, faStar, faUsers
 } from '@fortawesome/free-solid-svg-icons';
 import { faRectanglePortrait } from '@fortawesome/pro-solid-svg-icons';
 import { faCheckCircle } from '@fortawesome/pro-duotone-svg-icons';
@@ -341,8 +341,20 @@ function ServiceRequestDispatchAssignment({id}) {
             >
               <Link href={"/dispatch/summary/" + dispatch_assignment.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
             </OverlayTrigger>&nbsp;&nbsp;|&nbsp;
-            {dispatch_assignment.team ? dispatch_assignment.team_object.name : ""}: {dispatch_assignment.team && dispatch_assignment.team_object.team_member_objects.map((member, i) => (
-                <span key={member.id}>{i > 0 && ", "}{member.first_name} {member.last_name}</span>))}
+            {dispatch_assignment.team ? dispatch_assignment.team_object.name : ""}
+            {dispatch_assignment.team ?
+              <OverlayTrigger
+                key={"team-names"}
+                placement="top"
+                overlay={
+                  <Tooltip id={`tooltip-team-names`}>
+                    {dispatch_assignment.team_member_names}
+                  </Tooltip>
+                }
+              >
+                <FontAwesomeIcon icon={faUsers} className="ml-1" />
+              </OverlayTrigger>
+            : ""}
             &nbsp;|&nbsp;Service Requests<FontAwesomeIcon icon={faChevronCircleRight} hidden={showSRs[dispatch_assignment.id]} onClick={() => updateShowSRs(dispatch_assignment.id)} className="ml-1 fa-move-up" style={{verticalAlign:"middle"}} inverse /><FontAwesomeIcon icon={faChevronCircleDown} hidden={!showSRs[dispatch_assignment.id]} onClick={() => updateShowSRs(dispatch_assignment.id)} className="ml-1 fa-move-up" style={{verticalAlign:"middle"}} inverse />
             {dispatch_assignment.assigned_requests.map(assigned_request => (
             <Collapse key={assigned_request.service_request_object.id} in={showSRs[dispatch_assignment.id]}>
@@ -396,8 +408,20 @@ function ServiceRequestDispatchAssignment({id}) {
               >
                 <Link href={"/dispatch/summary/" + dispatch_assignment.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
               </OverlayTrigger>&nbsp;&nbsp;|&nbsp;
-              {dispatch_assignment.team ? dispatch_assignment.team_object.name : ""}: {dispatch_assignment.team && dispatch_assignment.team_object.team_member_objects.map((member, i) => (
-                  <span key={member.id}>{i > 0 && ", "}{member.first_name} {member.last_name}</span>))}
+              {dispatch_assignment.team ? dispatch_assignment.team_object.name : ""}
+              {dispatch_assignment.team ?
+                <OverlayTrigger
+                  key={"team-names"}
+                  placement="top"
+                  overlay={
+                    <Tooltip id={`tooltip-team-names`}>
+                      {dispatch_assignment.team_member_names}
+                    </Tooltip>
+                  }
+                >
+                  <FontAwesomeIcon icon={faUsers} className="ml-1" />
+                </OverlayTrigger>
+              : ""}
               &nbsp;|&nbsp;Service Requests<FontAwesomeIcon icon={faChevronCircleRight} hidden={showSRs[dispatch_assignment.id]} onClick={() => updateShowSRs(dispatch_assignment.id)} className="ml-1 fa-move-up" style={{verticalAlign:"middle"}} inverse /><FontAwesomeIcon icon={faChevronCircleDown} hidden={!showSRs[dispatch_assignment.id]} onClick={() => updateShowSRs(dispatch_assignment.id)} className="ml-1 fa-move-up" style={{verticalAlign:"middle"}} inverse />
               {dispatch_assignment.assigned_requests.map(assigned_request => (
               <Collapse key={assigned_request.service_request_object.id} in={showSRs[dispatch_assignment.id]}>

@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link } from 'raviger';
-import { Button, Col, ListGroup, Row } from 'react-bootstrap'
+import { Button, Col, ListGroup, OverlayTrigger, Row, Tooltip } from 'react-bootstrap'
 import { Marker, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
-import Moment from 'react-moment';
-import randomColor from "randomcolor";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faUsers
+} from '@fortawesome/free-solid-svg-icons';
 import Map, { countMatches, prettyText, reportedMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
 import Header from "../components/Header";
 import Scrollbar from '../components/Scrollbars';
@@ -36,7 +38,6 @@ function Dispatch() {
         if (!unmounted) {
           const map_dict = {};
           const bounds = [];
-          const random_colors = randomColor({count:response.data.length});
           response.data.forEach((dispatch_assignment, index) => {
             let sr_dict = {}
             for (const assigned_request of dispatch_assignment.assigned_requests) {
@@ -44,7 +45,7 @@ function Dispatch() {
               sr_dict[assigned_request.service_request_object.id] = {id:assigned_request.service_request_object.id, matches:matches, latitude:assigned_request.service_request_object.latitude, longitude:assigned_request.service_request_object.longitude, full_address:assigned_request.service_request_object.full_address};
               bounds.push([assigned_request.service_request_object.latitude, assigned_request.service_request_object.longitude]);
             }
-            map_dict[dispatch_assignment.id] = {color:random_colors[index], service_requests:sr_dict}
+            map_dict[dispatch_assignment.id] = {service_requests:sr_dict}
           });
           setMapState(map_dict);
           setData({dispatch_assignments: response.data, isFetching: false, bounds:bounds.length > 0 ? bounds : L.latLngBounds([[0,0]])});
@@ -101,7 +102,7 @@ function Dispatch() {
                     <span>
                       <div>{dispatch_assignment.team_object ? dispatch_assignment.team_object.name : ""}:&nbsp;
                       {dispatch_assignment.team && dispatch_assignment.team_object.team_member_objects.map((team_member, i) => (
-                        <span key={team_member.id}>{i > 0 && ", "}{team_member.first_name + ' ' + team_member.last_name}</span>
+                        <span key={team_member.id}>{i > 0 && ", "}{team_member.first_name + ' ' + team_member.last_name}{team_member.agency_id ? <span>&nbsp;({team_member.agency_id})</span> : ""}</span>
                       ))}
                       </div>
                       {mapState[dispatch_assignment.id] ?
@@ -133,7 +134,22 @@ function Dispatch() {
             <Scrollbar no_shadow="true" style={{height:"350px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
             <Button variant={selectedTeam === null ? "primary" : "secondary"} className="border" onClick={() => setSelectedTeam(null)} style={{maxHeight:"36px", width:"100%", marginTop:"-1px"}}>All</Button>
             {data.dispatch_assignments.map(dispatch_assignment => (
-              <Button key={dispatch_assignment.id} title={dispatch_assignment.team ? dispatch_assignment.team.name : ""}variant={dispatch_assignment.team === selectedTeam ? "primary" : "secondary"} className="border" onClick={() => setSelectedTeam(dispatch_assignment.team)} style={{maxHeight:"36px", width:"100%", marginTop:"-1px"}}>{dispatch_assignment.team ? dispatch_assignment.team_object.name : "Team"}</Button>
+              <Button key={dispatch_assignment.id} title={dispatch_assignment.team ? dispatch_assignment.team.name : ""} variant={dispatch_assignment.team === selectedTeam ? "primary" : "secondary"} className="border" onClick={() => setSelectedTeam(dispatch_assignment.team)} style={{maxHeight:"36px", width:"100%", marginTop:"-1px"}}>
+                {dispatch_assignment.team ? dispatch_assignment.team_object.name : "Team"}
+                {dispatch_assignment.team ?
+                  <OverlayTrigger
+                    key={"team-names"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-team-names`}>
+                        {dispatch_assignment.team_member_names}
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon icon={faUsers} className="ml-1" />
+                  </OverlayTrigger>
+                : ""}
+              </Button>
             ))}
             </Scrollbar>
           </Col>

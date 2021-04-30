@@ -4,7 +4,7 @@ import { Button, ButtonGroup, Card, CardGroup, Form, FormControl, InputGroup, Ov
 import { Link, useQueryParams } from "raviger";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faCircle, faExclamationCircle, faQuestionCircle, faUserAlt, faUserAltSlash
+  faCircle, faExclamationCircle, faQuestionCircle, faUserAlt, faUserAltSlash, faUsers
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faDotCircle
@@ -162,8 +162,20 @@ function DispatchAssignmentSearch() {
               </OverlayTrigger>
               <Moment format="L">{evacuation_assignment.start_time}</Moment>
               &nbsp;|&nbsp;
-              <span title={evacuation_assignment.team ? evacuation_assignment.team_object.name + ": " + evacuation_assignment.team_member_names : ""}>{evacuation_assignment.team && evacuation_assignment.team_object.name}: {evacuation_assignment.team && evacuation_assignment.team_object.team_member_objects.map((member, i) => (
-                <span key={member.id}>{i > 0 && ", "}{member.first_name} {member.last_name}</span>))}
+              <span title={evacuation_assignment.team ? evacuation_assignment.team_object.name + ": " + evacuation_assignment.team_member_names : ""}>
+                {evacuation_assignment.team && evacuation_assignment.team_object.name}
+                {evacuation_assignment.team ?
+                <OverlayTrigger
+                  key={"team-names"}
+                  placement="top"
+                  overlay={
+                    <Tooltip id={`tooltip-team-names`}>
+                      {evacuation_assignment.team_member_names}
+                    </Tooltip>
+                  }
+                >
+                  <FontAwesomeIcon icon={faUsers} className="ml-1" />
+                </OverlayTrigger> : ""}
               </span>
             </h4>
           </div>

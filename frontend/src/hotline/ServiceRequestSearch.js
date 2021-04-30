@@ -152,7 +152,7 @@ function ServiceRequestSearch() {
                       <span key={dispatch_assignment.id}>
                         <b>{dispatch_assignment.end_time ? "Last" : "Active"} Dispatch Assignment: </b>
                         <Link href={"/dispatch/summary/" + dispatch_assignment.id} className="text-link" style={{textDecoration:"none", color:"white"}}><Moment format="L">{dispatch_assignment.start_time}</Moment></Link>&nbsp;
-                        ({dispatch_assignment.team_name}
+                        |&nbsp;{dispatch_assignment.team_name}
                         <OverlayTrigger
                           key={"team-names"}
                           placement="top"
@@ -164,7 +164,6 @@ function ServiceRequestSearch() {
                         >
                           <FontAwesomeIcon icon={faUsers} className="ml-1 fa-move-down" />
                         </OverlayTrigger>
-                        )
                       </span>
                     )}
                     {service_request.evacuation_assignments.length === 0 ?
