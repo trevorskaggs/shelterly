@@ -38,6 +38,7 @@ function ServiceRequestDetails({id}) {
   }, [id, datetime]);
 
   const [data, setData] = useState({
+    id: '',
     animals: [],
     owners: [],
     owner_objects: [],
@@ -201,7 +202,8 @@ function ServiceRequestDetails({id}) {
               </Card.Title>
               <hr/>
               <ListGroup variant="flush">
-                <ListGroup.Item style={{marginTop:"-13px"}}><b>Address: </b>{data.full_address}</ListGroup.Item>
+                <ListGroup.Item style={{marginTop:"-13px"}}><b>ID: </b>#{data.id}</ListGroup.Item>
+                <ListGroup.Item><b>Address: </b>{data.full_address}</ListGroup.Item>
                 <ListGroup.Item>
                   <b>Followup Date: </b>
                   <FontAwesomeIcon icon={faCalendarEdit} className="ml-1 mr-1" style={{cursor:'pointer'}} onClick={() => openCalendar()} />

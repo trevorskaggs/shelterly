@@ -58,7 +58,7 @@ class DispatchTeamViewSet(viewsets.ModelViewSet):
 class EvacAssignmentViewSet(viewsets.ModelViewSet):
 
     queryset = EvacAssignment.objects.all()
-    search_fields = ['team__name', 'team__team_members__first_name', 'team__team_members__last_name', 'service_requests__owners__first_name', 'service_requests__owners__last_name', 'service_requests__address', 'service_requests__reporter__first_name', 'service_requests__reporter__last_name', 'animals__name']
+    search_fields = ['team__name', 'team__team_members__first_name', 'team__team_members__last_name', 'service_requests__owners__first_name', 'service_requests__owners__last_name', 'service_requests__owners__phone', 'service_requests__owners__drivers_license', 'service_requests__address', 'service_requests__reporter__first_name', 'service_requests__reporter__last_name']
     filter_backends = (filters.SearchFilter,)
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = EvacAssignmentSerializer

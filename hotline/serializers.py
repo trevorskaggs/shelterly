@@ -36,7 +36,7 @@ class VisitNoteSerializer(serializers.ModelSerializer):
     def get_team_member_names(self, obj):
         # does this kick off another query?
         try:
-            return ", ".join([team_member['first_name'] + " " + team_member['last_name'] for team_member in obj.evac_assignment.team.team_members.all().values('first_name', 'last_name')])
+            return ", ".join([team_member['first_name'] + " " + team_member['last_name'] + (" (" + team_member['agency_id'] + ")") if team_member['agency_id'] else "" for team_member in obj.evac_assignment.team.team_members.all().values('first_name', 'last_name', 'agency_id')])
         except AttributeError:
             return ''
 

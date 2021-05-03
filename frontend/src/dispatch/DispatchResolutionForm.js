@@ -224,7 +224,7 @@ function DispatchResolutionForm({ id }) {
                 <ListGroup variant="flush" style={{ marginTop: "-13px", marginBottom: "-13px", textTransform: "capitalize" }}>
                   {data.team && data.team_object.team_member_objects.map(team_member => (
                     <ListGroup.Item key={team_member.id}>
-                      {team_member.first_name + " " + team_member.last_name + " - " + team_member.display_phone}{team_member.agency ? <span>({team_member.agency})</span> : ""}
+                      {team_member.first_name + " " + team_member.last_name}{team_member.agency_id ? <span>&nbsp;({team_member.agency_id})</span> : ""}
                     </ListGroup.Item>
                   ))}
                 </ListGroup>
@@ -235,6 +235,7 @@ function DispatchResolutionForm({ id }) {
                 <Card.Body>
                   <Card.Title style={{marginBottom:"-5px"}}>
                     <h4>
+                      #{assigned_request.service_request_object.id} -&nbsp;
                       <Link href={"/hotline/servicerequest/" + assigned_request.service_request_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link> |&nbsp;
                       <Checkbox
                         label={"Not Completed Yet:"}

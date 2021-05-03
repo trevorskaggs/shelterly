@@ -10,7 +10,7 @@ from rest_framework import filters, permissions, serializers, viewsets
 
 class ServiceRequestViewSet(viewsets.ModelViewSet):
     queryset = ServiceRequest.objects.all()
-    search_fields = ['address', 'city', 'animal__name', 'owners__first_name', 'owners__last_name', 'owners__address', 'owners__city', 'reporter__first_name', 'reporter__last_name']
+    search_fields = ['address', 'city', 'animal__name', 'owners__first_name', 'owners__last_name', 'owners__phone', 'owners__drivers_license', 'owners__address', 'owners__city', 'reporter__first_name', 'reporter__last_name']
     filter_backends = (filters.SearchFilter, filters.OrderingFilter)
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = SimpleServiceRequestSerializer
@@ -28,20 +28,20 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         if serializer.is_valid():
-            for service_request in ServiceRequest.objects.filter(latitude=serializer.validated_data['latitude'], longitude=serializer.validated_data['longitude'], status='open'):
+            for service_request in ServiceRequest.objects.filter(address=serializer.validated_data['address'], city=serializer.validated_data['city'], state=serializer.validated_data['state']):
                 reporter_id = serializer.validated_data.get('reporter').id if serializer.validated_data.get('reporter') else None
                 owner_id = serializer.validated_data.get('owners')[0].id if serializer.validated_data.get('owners') else None
                 Person.objects.filter(id__in=[reporter_id, owner_id]).delete()
-                raise serializers.ValidationError(['Multiple open Requests may not exist with the same address.', service_request.id])
+                raise serializers.ValidationError(['Multiple service requests may not exist with the same address.', service_request.id])
             service_request = serializer.save()
             action.send(self.request.user, verb='created service request', target=service_request)
 
     def perform_update(self, serializer):
         if serializer.is_valid():
             # Check if lat/log are being passed,Lat/Lon are not included when canceling a service request.
-            if 'latitude' in serializer.validated_data and 'longitude' in serializer.validated_data:
-                for service_request in ServiceRequest.objects.filter(latitude=serializer.validated_data['latitude'], longitude=serializer.validated_data['longitude'], status='open').exclude(id=self.kwargs['pk']):
-                    raise serializers.ValidationError(['Multiple open Requests may not exist with the same address.', service_request.id])
+            if 'address' in serializer.validated_data and 'city' in serializer.validated_data and 'state' in serializer.validated_data:
+                for service_request in ServiceRequest.objects.filter(address=serializer.validated_data['address'], city=serializer.validated_data['city'], state=serializer.validated_data['state']).exclude(id=self.kwargs['pk']):
+                    raise serializers.ValidationError(['Multiple service requests may not exist with the same address.', service_request.id])
             service_request = serializer.save()
 
             if service_request.status == 'canceled':

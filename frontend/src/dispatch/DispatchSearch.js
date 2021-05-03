@@ -4,7 +4,7 @@ import { Button, ButtonGroup, Card, CardGroup, Form, FormControl, InputGroup, Ov
 import { Link, useQueryParams } from "raviger";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faCircle, faExclamationCircle, faQuestionCircle, faUserAlt, faUserAltSlash
+  faCircle, faExclamationCircle, faQuestionCircle, faUserAlt, faUserAltSlash, faUsers
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faDotCircle
@@ -162,8 +162,20 @@ function DispatchAssignmentSearch() {
               </OverlayTrigger>
               <Moment format="L">{evacuation_assignment.start_time}</Moment>
               &nbsp;|&nbsp;
-              <span title={evacuation_assignment.team ? evacuation_assignment.team_object.name + ": " + evacuation_assignment.team_member_names : ""}>{evacuation_assignment.team && evacuation_assignment.team_object.name}: {evacuation_assignment.team && evacuation_assignment.team_object.team_member_objects.map((member, i) => (
-                <span key={member.id}>{i > 0 && ", "}{member.first_name} {member.last_name}</span>))}
+              <span title={evacuation_assignment.team ? evacuation_assignment.team_object.name + ": " + evacuation_assignment.team_member_names : ""}>
+                {evacuation_assignment.team && evacuation_assignment.team_object.name}
+                {evacuation_assignment.team ?
+                <OverlayTrigger
+                  key={"team-names"}
+                  placement="top"
+                  overlay={
+                    <Tooltip id={`tooltip-team-names`}>
+                      {evacuation_assignment.team_member_names}
+                    </Tooltip>
+                  }
+                >
+                  <FontAwesomeIcon icon={faUsers} className="ml-1" />
+                </OverlayTrigger> : ""}
               </span>
             </h4>
           </div>
@@ -190,7 +202,7 @@ function DispatchAssignmentSearch() {
                           </span>
                         :""}
                         <br />
-                        {assigned_request.service_request_object.full_address.split(',')[0]}
+                        #{assigned_request.service_request_object.id}: {assigned_request.service_request_object.full_address.split(',')[0]}
                       </span>
                     </MapTooltip>
                   </Marker>
@@ -264,7 +276,7 @@ function DispatchAssignmentSearch() {
                         </OverlayTrigger>
                         : ""}
                         </span>
-                        <span><Link href={"/hotline/servicerequest/" + assigned_request.service_request_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link> |
+                        <span><Link href={"/hotline/servicerequest/" + assigned_request.service_request_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>#{assigned_request.service_request_object.id} - {assigned_request.service_request_object.full_address}</Link> |
                         {assigned_request.service_request_object.owner_objects.length === 0 ?
                           <OverlayTrigger
                             key={"stray"}

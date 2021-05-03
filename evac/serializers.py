@@ -19,7 +19,8 @@ class EvacTeamMemberSerializer(serializers.ModelSerializer):
 
     # Custom field for Name Output
     def get_display_name(self, obj):
-        return '%s %s' % (obj.first_name, obj.last_name)
+        agency = " (%s)" % (obj.agency_id) if obj.agency_id else ""
+        return '%s %s%s' % (obj.first_name, obj.last_name, agency)
 
     # Custom field for Formated Phone Number
     def get_display_phone(self, obj):
@@ -86,7 +87,7 @@ class SimpleEvacAssignmentSerializer(serializers.ModelSerializer):
     def get_team_member_names(self, obj):
         # does this kick off another query?
         try:
-            return ", ".join([team_member['first_name'] + " " + team_member['last_name'] for team_member in obj.team.team_members.all().values('first_name', 'last_name')])
+            return ", ".join([team_member['first_name'] + " " + team_member['last_name'] + (" (" + team_member['agency_id'] + ")" if team_member['agency_id'] else "") for team_member in obj.team.team_members.all().values('first_name', 'last_name', 'agency_id')])
         except AttributeError:
             return ''
 
