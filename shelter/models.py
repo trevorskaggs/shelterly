@@ -27,6 +27,9 @@ class Shelter(BaseShelterModel, Location):
     @property
     def rooms(self):
         return Room.objects.filter(building__shelter=self)
+
+    def __str__(self):
+        return self.name
     
 
 class Building(BaseShelterModel):
@@ -36,6 +39,9 @@ class Building(BaseShelterModel):
     @property
     def parent(self):
         return self.shelter
+
+    def __str__(self):
+        return self.name
 
 
 class Room(BaseShelterModel):

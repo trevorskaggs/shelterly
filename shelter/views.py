@@ -2,7 +2,10 @@
 from shelter.models import Shelter, Building, Room
 from rest_framework import viewsets
 from actstream import action
+from actstream.models import Action
 from django_filters import rest_framework as filters
+from django.db.models import Prefetch
+from animals.models import Animal
 from .serializers import ShelterSerializer, ModestShelterSerializer, SimpleBuildingSerializer, RoomSerializer
 
 class ShelterViewSet(viewsets.ModelViewSet):
@@ -57,3 +60,21 @@ class RoomViewSet(viewsets.ModelViewSet):
         if serializer.is_valid():
             room = serializer.save()
             action.send(self.request.user, verb='updated room', target=room)
+
+    def get_queryset(self):
+        queryset = (
+            Room.objects.select_related("building__shelter")
+            .prefetch_related(
+                Prefetch(
+                    "animal_set",
+                    queryset=Animal.objects.exclude(status="CANCELED").prefetch_related(
+                        Prefetch("animalimage_set", to_attr="images")
+                    ).prefetch_related(Prefetch("owners", to_attr="owner_objects")),
+                    to_attr="animals",
+                )
+            )
+            .prefetch_related(
+                Prefetch("target_actions", Action.objects.prefetch_related("action_object"))
+            )
+        )
+        return queryset

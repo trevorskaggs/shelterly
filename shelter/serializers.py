@@ -8,37 +8,35 @@ from animals.models import Animal
 
 class SimpleRoomSerializer(serializers.ModelSerializer):
     animal_count = serializers.SerializerMethodField()
-    building_name = serializers.SerializerMethodField()
+    building_name = serializers.StringRelatedField(source='building')
 
-    # Custom field for total animals.
-    def get_animal_count(self, obj):
-        return obj.animal_set.exclude(status="CANCELED").count()
 
     def get_building_name(self, obj):
         return obj.building.name
 
+    def get_animal_count(self, obj):
+        return len(obj.animals)
+
     class Meta:
         model = Room
-        fields = '__all__'
+        fields = ['id', 'name', 'description', 'animal_count', 'building_name']
 
 class RoomSerializer(SimpleRoomSerializer):
     animals = serializers.SerializerMethodField()
-    shelter = serializers.SerializerMethodField()
-    shelter_name = serializers.SerializerMethodField()
+    shelter = serializers.PrimaryKeyRelatedField(source="building.shelter", read_only=True)
+    shelter_name = serializers.StringRelatedField(source="building.shelter")
     action_history = serializers.SerializerMethodField()
 
     def get_animals(self, obj):
-        from animals.serializers import AnimalSerializer
-        return AnimalSerializer(obj.animal_set.exclude(status='CANCELED'), many=True, required=False, read_only=True).data
+        from animals.serializers import ModestAnimalSerializer
+        return ModestAnimalSerializer(obj.animals, many=True, required=False, read_only=True).data
 
     def get_action_history(self, obj):
         return [build_action_string(action) for action in obj.target_actions.all()]
 
-    def get_shelter(self, obj):
-        return obj.building.shelter.id
-
-    def get_shelter_name(self, obj):
-        return obj.building.shelter.name
+    class Meta:
+        model = Room
+        fields = ['id', 'name', 'description', 'animal_count', 'building_name','animals','shelter','shelter_name','action_history']
 
 class SimpleBuildingSerializer(serializers.ModelSerializer):
     shelter_name = serializers.SerializerMethodField()

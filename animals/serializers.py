@@ -10,13 +10,13 @@ from shelter.serializers import SimpleShelterSerializer
 class SimpleAnimalSerializer(serializers.ModelSerializer):
 
     aco_required = serializers.SerializerMethodField()
-    owner_names = serializers.StringRelatedField(source='owners', many=True)
+    owner_names = serializers.StringRelatedField(source='owner_objects', many=True)
     front_image = serializers.SerializerMethodField()
     side_image = serializers.SerializerMethodField()
 
     def get_front_image(self, obj):
         try:
-            return [animal_image.image.url for animal_image in obj.images.filter(category='front_image')][0]
+            return [animal_image.image.url for animal_image in obj.images if animal_image.category == 'front_image'][0]
             # change this exception
         except IndexError:
             return ''
@@ -29,7 +29,7 @@ class SimpleAnimalSerializer(serializers.ModelSerializer):
 
     def get_side_image(self, obj):
         try:
-            return [animal_image.image.url for animal_image in obj.images.filter(category='side_image')][0]
+            return [animal_image.image.url for animal_image in obj.images if animal_image.category == 'side_image'][0]
         except IndexError:
             return ''
         except AttributeError:
@@ -50,7 +50,7 @@ class ModestAnimalSerializer(SimpleAnimalSerializer):
 
     class Meta:
         model = Animal
-        fields = ['id', 'species', 'aggressive', 'request', 'shelter', 'status', 'aco_required', 'color_notes', 'front_image', 'side_image']
+        fields = ['id', 'species', 'aggressive', 'request', 'shelter', 'status', 'aco_required', 'color_notes', 'front_image', 'side_image','owner_names']
 
 class AnimalSerializer(ModestAnimalSerializer):
     front_image = serializers.SerializerMethodField()
