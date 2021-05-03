@@ -10,7 +10,7 @@ from shelter.serializers import SimpleShelterSerializer
 class SimpleAnimalSerializer(serializers.ModelSerializer):
 
     aco_required = serializers.SerializerMethodField()
-    owner_names = serializers.StringRelatedField(source='owners', many=True)
+    owner_names = serializers.StringRelatedField(source='owners', many=True, read_only=True)
     front_image = serializers.SerializerMethodField()
     side_image = serializers.SerializerMethodField()
 
@@ -61,7 +61,7 @@ class AnimalSerializer(ModestAnimalSerializer):
     reporter_object = SimplePersonSerializer(source='reporter', read_only=True)
     request_address = serializers.SerializerMethodField()
     action_history = serializers.SerializerMethodField()
-    room_name = serializers.StringRelatedField(source='room')
+    room_name = serializers.StringRelatedField(source='room', read_only=True)
     shelter_object = SimpleShelterSerializer(source='shelter', required=False, read_only=True)
 
     class Meta:
