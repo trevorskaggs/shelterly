@@ -26,10 +26,12 @@ class Person(Location):
 
 class OwnerContact(models.Model):
     owner = models.ForeignKey(Person, on_delete=models.CASCADE)
-    evac_assignment = models.ForeignKey('evac.EvacAssignment', null=True, blank=True, on_delete=models.CASCADE)
     service_request = models.ForeignKey('hotline.ServiceRequest', null=True, blank=True, on_delete=models.CASCADE)
     owner_contact_time = models.DateTimeField()
     owner_contact_note = models.TextField(blank=False)
+
+    class Meta:
+        ordering = ('-owner_contact_time',)
 
 class PersonChange(models.Model):
     user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)

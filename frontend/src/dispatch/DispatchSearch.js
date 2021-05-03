@@ -4,7 +4,7 @@ import { Button, ButtonGroup, Card, CardGroup, Form, FormControl, InputGroup, Ov
 import { Link, useQueryParams } from "raviger";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faCircle, faExclamationCircle, faQuestionCircle, faUserAlt, faUserAltSlash
+  faCircle, faExclamationCircle, faQuestionCircle, faUserAlt, faUserAltSlash, faUsers
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faDotCircle
@@ -101,10 +101,10 @@ function DispatchAssignmentSearch() {
           let bounds_dict = {};
           for (const dispatch_assignment of response.data) {
             let sr_bounds = [];
-            for (const service_request of dispatch_assignment.service_request_objects) {
-              const [species_matches, status_matches] = countMatches(service_request);
-              map_dict[service_request.id] = {species_matches:species_matches, status_matches:status_matches};
-              sr_bounds.push([service_request.latitude, service_request.longitude]);
+            for (const assigned_request of dispatch_assignment.assigned_requests) {
+              const [species_matches, status_matches] = countMatches(assigned_request.service_request_object);
+              map_dict[assigned_request.service_request_object.id] = {species_matches:species_matches, status_matches:status_matches};
+              sr_bounds.push([assigned_request.service_request_object.latitude, assigned_request.service_request_object.longitude]);
             }
             bounds_dict[dispatch_assignment.id] = sr_bounds.length > 0 ? L.latLngBounds(sr_bounds).pad(.1) : L.latLngBounds([[0,0]]);;
           }
@@ -178,8 +178,20 @@ function DispatchAssignmentSearch() {
               </OverlayTrigger>
               <Moment format="L">{evacuation_assignment.start_time}</Moment>
               &nbsp;|&nbsp;
-              <span title={evacuation_assignment.team ? evacuation_assignment.team_object.name + ": " + evacuation_assignment.team_member_names : ""}>{evacuation_assignment.team && evacuation_assignment.team_object.name}: {evacuation_assignment.team && evacuation_assignment.team_object.team_member_objects.map((member, i) => (
-                <span key={member.id}>{i > 0 && ", "}{member.first_name} {member.last_name}</span>))}
+              <span title={evacuation_assignment.team ? evacuation_assignment.team_object.name + ": " + evacuation_assignment.team_member_names : ""}>
+                {evacuation_assignment.team && evacuation_assignment.team_object.name}
+                {evacuation_assignment.team ?
+                <OverlayTrigger
+                  key={"team-names"}
+                  placement="top"
+                  overlay={
+                    <Tooltip id={`tooltip-team-names`}>
+                      {evacuation_assignment.team_member_names}
+                    </Tooltip>
+                  }
+                >
+                  <FontAwesomeIcon icon={faUsers} className="ml-1" />
+                </OverlayTrigger> : ""}
               </span>
             </h4>
           </div>
@@ -187,26 +199,26 @@ function DispatchAssignmentSearch() {
             <Card style={{maxWidth:"206px", height:"206px"}}>
               <Card.Body className="p-0 m-0">
                 <Map className="d-block da-search-leaflet-container" bounds={bounds[evacuation_assignment.id]} zoomControl={false} legend_position="topleft">
-                  {evacuation_assignment.service_request_objects.map(service_request => (
+                  {evacuation_assignment.assigned_requests.map(assigned_request => (
                   <Marker
-                    key={service_request.id}
-                    position={[service_request.latitude, service_request.longitude]}
-                    icon={service_request.sheltered_in_place > 0 ? SIPMarkerIcon : service_request.unable_to_locate > 0 ? UTLMarkerIcon : reportedMarkerIcon}
-                    onClick={() => window.open("/hotline/servicerequest/" + service_request.id)}
+                    key={assigned_request.service_request_object.id}
+                    position={[assigned_request.service_request_object.latitude, assigned_request.service_request_object.longitude]}
+                    icon={assigned_request.service_request_object.sheltered_in_place > 0 ? SIPMarkerIcon : assigned_request.service_request_object.unable_to_locate > 0 ? UTLMarkerIcon : reportedMarkerIcon}
+                    onClick={() => window.open("/hotline/servicerequest/" + assigned_request.service_request_object.id)}
                   >
-                    <MapTooltip autoPan={false} direction={evacuation_assignment.service_request_objects.length > 1 ? "auto" : "top"}>
+                    <MapTooltip autoPan={false} direction={evacuation_assignment.assigned_requests.length > 1 ? "auto" : "top"}>
                       <span>
-                        {matches[service_request.id] ?
+                        {matches[assigned_request.service_request_object.id] ?
                           <span>
-                            {Object.keys(matches[service_request.id].species_matches).map((key,i) => (
+                            {Object.keys(matches[assigned_request.service_request_object.id].species_matches).map((key,i) => (
                               <span key={key} style={{textTransform:"capitalize"}}>
-                                {i > 0 && ", "}{prettyText('', key.split(',')[0], matches[service_request.id].species_matches[key])}
+                                {i > 0 && ", "}{prettyText('', key.split(',')[0], matches[assigned_request.service_request_object.id].species_matches[key])}
                               </span>
                             ))}
                           </span>
                         :""}
                         <br />
-                        {service_request.full_address.split(',')[0]}
+                        #{assigned_request.service_request_object.id}: {assigned_request.service_request_object.full_address.split(',')[0]}
                       </span>
                     </MapTooltip>
                   </Marker>
@@ -218,40 +230,40 @@ function DispatchAssignmentSearch() {
               <Scrollbar style={{height:"204px"}} renderView={props => <div {...props} style={{...props.style, overflow:"auto"}}/>} renderThumbHorizontal={props => <div {...props} style={{...props.style, display:"none"}} />}>
                 <Card.Body style={{marginBottom:"0px"}}>
                   <Card.Title style={{marginTop:"-9px", marginBottom:"7px", marginLeft:"-9px"}}>Service Requests</Card.Title>
-                  {evacuation_assignment.service_request_objects.map(service_request => (
-                    <div key={service_request.id} className="" style={{marginLeft:"-10px", marginRight:"7px", marginTop: "7px", marginBottom:"0px"}}>
+                  {evacuation_assignment.assigned_requests.map(assigned_request => (
+                    <div key={assigned_request.service_request_object.id} className="" style={{marginLeft:"-10px", marginRight:"7px", marginTop: "7px", marginBottom:"0px"}}>
                       <div className="card-header rounded">
                       <span style={{marginLeft:"-12px"}}>
-                      {matches[service_request.id] && Object.keys(matches[service_request.id].status_matches['REPORTED']).length > 0 ?
+                      {matches[assigned_request.service_request_object.id] && Object.keys(matches[assigned_request.service_request_object.id].status_matches['REPORTED']).length > 0 ?
                         <OverlayTrigger
                           key={"reported"}
                           placement="top"
                           overlay={
                             <Tooltip id={`tooltip-utl`}>
-                              {Object.keys(matches[service_request.id].status_matches['REPORTED']).map((key,i) => (
+                              {Object.keys(matches[assigned_request.service_request_object.id].status_matches['REPORTED']).map((key,i) => (
                                 <span key={key} style={{textTransform:"capitalize"}}>
-                                  {i > 0 && ", "}{prettyText('', key.split(',')[0], matches[service_request.id].status_matches['REPORTED'][key])}
+                                  {i > 0 && ", "}{prettyText('', key.split(',')[0], matches[assigned_request.service_request_object.id].status_matches['REPORTED'][key])}
                                 </span>
                               ))}
-                              {service_request.reported_animals > 1 ? " are":" is"} reported
+                              {assigned_request.service_request_object.reported_animals > 1 ? " are":" is"} reported
                             </Tooltip>
                           }
                         >
                           <FontAwesomeIcon icon={faExclamationCircle} className="mr-1"/>
                         </OverlayTrigger>
                         : ""}
-                        {matches[service_request.id] && Object.keys(matches[service_request.id].status_matches['SHELTERED IN PLACE']).length > 0 ?
+                        {matches[assigned_request.service_request_object.id] && Object.keys(matches[assigned_request.service_request_object.id].status_matches['SHELTERED IN PLACE']).length > 0 ?
                         <OverlayTrigger
                           key={"sip"}
                           placement="top"
                           overlay={
                             <Tooltip id={`tooltip-utl`}>
-                              {Object.keys(matches[service_request.id].status_matches['SHELTERED IN PLACE']).map((key,i) => (
+                              {Object.keys(matches[assigned_request.service_request_object.id].status_matches['SHELTERED IN PLACE']).map((key,i) => (
                                 <span key={key} style={{textTransform:"capitalize"}}>
-                                  {i > 0 && ", "}{prettyText('', key.split(',')[0], matches[service_request.id].status_matches['SHELTERED IN PLACE'][key])}
+                                  {i > 0 && ", "}{prettyText('', key.split(',')[0], matches[assigned_request.service_request_object.id].status_matches['SHELTERED IN PLACE'][key])}
                                 </span>
                               ))}
-                              {service_request.sheltered_in_place > 1 ? " are":" is"} sheltered in place
+                              {assigned_request.service_request_object.sheltered_in_place > 1 ? " are":" is"} sheltered in place
                             </Tooltip>
                           }
                         >
@@ -261,18 +273,18 @@ function DispatchAssignmentSearch() {
                           </span>
                         </OverlayTrigger>
                         : ""}
-                        {matches[service_request.id] && Object.keys(matches[service_request.id].status_matches['UNABLE TO LOCATE']).length > 0 ?
+                        {matches[assigned_request.service_request_object.id] && Object.keys(matches[assigned_request.service_request_object.id].status_matches['UNABLE TO LOCATE']).length > 0 ?
                         <OverlayTrigger
                           key={"utl"}
                           placement="top"
                           overlay={
                             <Tooltip id={`tooltip-utl`}>
-                              {Object.keys(matches[service_request.id].status_matches['UNABLE TO LOCATE']).map((key,i) => (
+                              {Object.keys(matches[assigned_request.service_request_object.id].status_matches['UNABLE TO LOCATE']).map((key,i) => (
                                 <span key={key} style={{textTransform:"capitalize"}}>
-                                  {i > 0 && ", "}{prettyText('', key.split(',')[0], matches[service_request.id].status_matches['UNABLE TO LOCATE'][key])}
+                                  {i > 0 && ", "}{prettyText('', key.split(',')[0], matches[assigned_request.service_request_object.id].status_matches['UNABLE TO LOCATE'][key])}
                                 </span>
                               ))}
-                              {service_request.unable_to_locate > 1 ? " are":" is"} unable to be located
+                              {assigned_request.service_request_object.unable_to_locate > 1 ? " are":" is"} unable to be located
                             </Tooltip>
                           }
                         >
@@ -280,8 +292,8 @@ function DispatchAssignmentSearch() {
                         </OverlayTrigger>
                         : ""}
                         </span>
-                        <span><Link href={"/hotline/servicerequest/" + service_request.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{service_request.full_address}</Link> |
-                        {service_request.owner_objects.length === 0 ?
+                        <span><Link href={"/hotline/servicerequest/" + assigned_request.service_request_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>#{assigned_request.service_request_object.id} - {assigned_request.service_request_object.full_address}</Link> |
+                        {assigned_request.service_request_object.owner_objects.length === 0 ?
                           <OverlayTrigger
                             key={"stray"}
                             placement="top"
@@ -298,7 +310,7 @@ function DispatchAssignmentSearch() {
                             placement="top"
                             overlay={
                               <Tooltip id={`tooltip-stray`}>
-                                {service_request.owner_objects.map(owner => (
+                                {assigned_request.service_request_object.owner_objects.map(owner => (
                                   <div key={owner.id}>{owner.first_name} {owner.last_name}</div>
                                 ))}
                               </Tooltip>
@@ -308,11 +320,11 @@ function DispatchAssignmentSearch() {
                           </OverlayTrigger>
                         }
                         </span>
-                        {matches[service_request.id] ?
+                        {matches[assigned_request.service_request_object.id] ?
                         <span>
-                          {Object.keys(matches[service_request.id].species_matches).map((key,i) => (
+                          {Object.keys(matches[assigned_request.service_request_object.id].species_matches).map((key,i) => (
                             <span key={key} style={{textTransform:"capitalize"}}>
-                              {i > 0 && ", "}{prettyText('', key.split(',')[0], matches[service_request.id].species_matches[key])}
+                              {i > 0 && ", "}{prettyText('', key.split(',')[0], matches[assigned_request.service_request_object.id].species_matches[key])}
                             </span>
                           ))}
                         </span>

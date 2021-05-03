@@ -11,7 +11,7 @@ import Map, { prettyText } from "../components/Map";
 import { Checkbox } from "../components/Form"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faChevronCircleDown, faChevronCircleRight, faClipboardList, faStar
+  faChevronCircleDown, faChevronCircleRight, faClipboardList, faStar, faUsers
 } from '@fortawesome/free-solid-svg-icons';
 import { faRectanglePortrait } from '@fortawesome/pro-solid-svg-icons';
 import { faCheckCircle } from '@fortawesome/pro-duotone-svg-icons';
@@ -19,11 +19,12 @@ import { S3_BUCKET } from '../constants';
 
 function ServiceRequestDispatchAssignment({id}) {
 
-  const [currentRequest, setCurrentRequest] = useState({id:'', matches: {}, latitude:0, longitude:0, followup_date:'', latest_evac:{id:0, start_time:null, end_time:null}});
+  const [currentRequest, setCurrentRequest] = useState({id:'', matches: {}, latitude:0, longitude:0, followup_date:''});
   const [data, setData] = useState({dispatch_assignments: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
   const [mapState, setMapState] = useState({});
   const [selected, setSelected] = useState(null);
   const [showSRs, setShowSRs] = useState({});
+  const [activeDispatch, setActiveDispatch] = useState(null);
 
   // Takes in dispatch ID,
   const updateShowSRs = (dispatch_id) => {
@@ -51,9 +52,9 @@ function ServiceRequestDispatchAssignment({id}) {
   const onMove = event => {
     for (const dispatch_assignment of data.dispatch_assignments) {
       let hidden = true;
-      for (const service_request of dispatch_assignment.service_request_objects) {
-        if (mapState[dispatch_assignment.id].service_requests[service_request.id]) {
-          if (event.target.getBounds().contains(L.latLng(service_request.latitude, service_request.longitude))) {
+      for (const assigned_request of dispatch_assignment.assigned_requests) {
+        if (mapState[dispatch_assignment.id].service_requests[assigned_request.service_request_object.id]) {
+          if (event.target.getBounds().contains(L.latLng(assigned_request.service_request_object.latitude, assigned_request.service_request_object.longitude))) {
             hidden = false;
           }
         }
@@ -114,21 +115,25 @@ function ServiceRequestDispatchAssignment({id}) {
           })
           .then(response => {
             if (!unmounted) {
+              const active_assignment = currentResponse.data.assigned_requests.find(assigned_request => !assigned_request.dispatch_assignment.end_time)
+              const active_dispatch = active_assignment ? active_assignment.dispatch_assignment : null;
               const map_dict = {};
               const bounds = [];
               const random_colors = randomColor({count:response.data.length});
               response.data.forEach((dispatch_assignment, index) => {
                 let sr_dict = {}
-                for (const service_request of dispatch_assignment.service_request_objects) {
-                  const matches = countMatches(service_request);
-                  sr_dict[service_request.id] = {id:service_request.id, matches:matches, latitude:service_request.latitude, longitude:service_request.longitude, latest_evac:service_request.latest_evac, full_address:service_request.full_address};
-                  bounds.push([service_request.latitude, service_request.longitude]);
+                for (const assigned_request of dispatch_assignment.assigned_requests) {
+                  const matches = countMatches(assigned_request.service_request_object);
+                  sr_dict[assigned_request.service_request_object.id] = {id:assigned_request.service_request_object.id, matches:matches, latitude:assigned_request.service_request_object.latitude, longitude:assigned_request.service_request_object.longitude, full_address:assigned_request.service_request_object.full_address};
+                  bounds.push([assigned_request.service_request_object.latitude, assigned_request.service_request_object.longitude]);
                 }
-                map_dict[dispatch_assignment.id] = {checked:(currentResponse.data.latest_evac !== null) && (currentResponse.data.latest_evac.end_time === null) && (currentResponse.data.latest_evac.id === dispatch_assignment.id), hidden: false, color:random_colors[index], service_requests:sr_dict}
+                map_dict[dispatch_assignment.id] = {checked:(active_dispatch !== null) && (active_dispatch.id === dispatch_assignment.id), hidden: false, color:random_colors[index], service_requests:sr_dict}
+
               });
               const current_matches = countMatches(currentResponse.data);
               currentResponse.data['matches'] = current_matches;
               setCurrentRequest(currentResponse.data);
+              setActiveDispatch(active_dispatch);
               bounds.push([currentResponse.data.latitude, currentResponse.data.longitude]);
               setMapState(map_dict);
               setData({dispatch_assignments: response.data, isFetching: false, bounds:L.latLngBounds(bounds)});
@@ -208,7 +213,7 @@ function ServiceRequestDispatchAssignment({id}) {
                   </span>
                 :""}
                 <br />
-                {currentRequest.full_address}
+                #{currentRequest.id}: {currentRequest.full_address}
                 {currentRequest.followup_date ? <div>Followup Date: <Moment format="L">{currentRequest.followup_date}</Moment></div> : ""}
                 <div>
                   {currentRequest.aco_required ? <img width={16} height={16} src={`${S3_BUCKET}images/badge-sheriff.png`} alt="ACO Required" className="mr-1" /> : ""}
@@ -219,39 +224,39 @@ function ServiceRequestDispatchAssignment({id}) {
               </span>
             </MapTooltip>
           </Marker>
-          {data.dispatch_assignments.filter(dispatch_assignment => mapState[dispatch_assignment.id].checked === false && (currentRequest.latest_evac ? (dispatch_assignment.id !== currentRequest.latest_evac.id) : true)).map(dispatch_assignment => (
+          {data.dispatch_assignments.filter(dispatch_assignment => mapState[dispatch_assignment.id].checked === false && (activeDispatch ? (dispatch_assignment.id !== activeDispatch.id) : true)).map(dispatch_assignment => (
           <span key={dispatch_assignment.id}>
-            {dispatch_assignment.service_request_objects.map(service_request => (
+            {dispatch_assignment.assigned_requests.map(assigned_request => (
             <CircleMarker
-              key={service_request.id}
-              center={{lat:service_request.latitude, lng: service_request.longitude}}
+              key={assigned_request.service_request_object.id}
+              center={{lat:assigned_request.service_request_object.latitude, lng: assigned_request.service_request_object.longitude}}
               color="black"
               weight="1"
               fillColor={mapState[dispatch_assignment.id] ? mapState[dispatch_assignment.id].color : ""}
               fill={true}
               fillOpacity="1"
-              onClick={() => handleMapState(service_request.latest_evac.id)}
+              onClick={() => handleMapState(dispatch_assignment.id)}
               radius={5}
             >
               <MapTooltip autoPan={false}>
                 <span>
                   {mapState[dispatch_assignment.id] ?
                     <span>
-                      {Object.keys(mapState[dispatch_assignment.id].service_requests[service_request.id].matches).map((key,i) => (
+                      {Object.keys(mapState[dispatch_assignment.id].service_requests[assigned_request.service_request_object.id].matches).map((key,i) => (
                         <span key={key} style={{textTransform:"capitalize"}}>
-                          {i > 0 && ", "}{prettyText(key.split(',')[1], key.split(',')[0], mapState[dispatch_assignment.id].service_requests[service_request.id].matches[key])}
+                          {i > 0 && ", "}{prettyText(key.split(',')[1], key.split(',')[0], mapState[dispatch_assignment.id].service_requests[assigned_request.service_request_object.id].matches[key])}
                         </span>
                       ))}
                     </span>
                   :""}
                   <br />
-                  {service_request.full_address}
-                  {service_request.followup_date ? <div>Followup Date: <Moment format="L">{service_request.followup_date}</Moment></div> : ""}
+                  #{assigned_request.service_request_object.id}: {assigned_request.service_request_object.full_address}
+                  {assigned_request.service_request_object.followup_date ? <div>Followup Date: <Moment format="L">{assigned_request.service_request_object.followup_date}</Moment></div> : ""}
                   <div>
-                    {service_request.aco_required ? <img width={16} height={16} src={`${S3_BUCKET}images/badge-sheriff.png`} alt="ACO Required" className="mr-1" /> : ""}
-                    {service_request.injured ? <img width={16} height={16} src={`${S3_BUCKET}images/band-aid-solid.png`} alt="Injured" className="mr-1" /> : ""}
-                    {service_request.accessible ? <img width={16} height={16} src={`${S3_BUCKET}images/car-solid.png`} alt="Accessible" className="mr-1" /> : ""}
-                    {service_request.turn_around ? <img width={16} height={16} src={`${S3_BUCKET}images/trailer-solid.png`} alt="Turn Around" /> : ""}
+                    {assigned_request.service_request_object.aco_required ? <img width={16} height={16} src={`${S3_BUCKET}images/badge-sheriff.png`} alt="ACO Required" className="mr-1" /> : ""}
+                    {assigned_request.service_request_object.injured ? <img width={16} height={16} src={`${S3_BUCKET}images/band-aid-solid.png`} alt="Injured" className="mr-1" /> : ""}
+                    {assigned_request.service_request_object.accessible ? <img width={16} height={16} src={`${S3_BUCKET}images/car-solid.png`} alt="Accessible" className="mr-1" /> : ""}
+                    {assigned_request.service_request_object.turn_around ? <img width={16} height={16} src={`${S3_BUCKET}images/trailer-solid.png`} alt="Turn Around" /> : ""}
                   </div>
                 </span>
               </MapTooltip>
@@ -259,14 +264,14 @@ function ServiceRequestDispatchAssignment({id}) {
             ))}
           </span>
           ))}
-          {Object.entries(mapState).filter(([key, value]) => (value.checked === true || (currentRequest.latest_evac && (Number(key) === currentRequest.latest_evac.id)))).map(([key, value]) => (
+          {Object.entries(mapState).filter(([key, value]) => (value.checked === true || (activeDispatch && (Number(key) === activeDispatch.id)))).map(([key, value]) => (
             <span key={key}>
             {Object.entries(value.service_requests).filter(([sr_id, service_request]) => (Number(sr_id) !== currentRequest.id)).map(([sr_id, service_request]) => (
               <Marker
                 key={service_request.id} 
                 position={[service_request.latitude, service_request.longitude]}
-                icon={currentRequest.latest_evac && Number(key) === currentRequest.latest_evac.id ? checkMarkerIconGray : checkMarkerIcon}
-                onClick={currentRequest.latest_evac && Number(key) === currentRequest.latest_evac.id ? undefined : () => handleMapState(service_request.latest_evac.id)}
+                icon={activeDispatch && Number(key) === activeDispatch.id ? checkMarkerIconGray : checkMarkerIcon}
+                onClick={activeDispatch && Number(key) === activeDispatch.id ? undefined : () => handleMapState(activeDispatch.id)}
               >
                 <MapTooltip autoPan={false}>
                   <span>
@@ -280,7 +285,7 @@ function ServiceRequestDispatchAssignment({id}) {
                       </span>
                     :""}
                     <br />
-                    {service_request.full_address}
+                    #{service_request.id}: {service_request.full_address}
                     {service_request.followup_date ? <div>Followup Date: <Moment format="L">{service_request.followup_date}</Moment></div> : ""}
                   </span>
                 </MapTooltip>
@@ -303,12 +308,12 @@ function ServiceRequestDispatchAssignment({id}) {
                 {i > 0 && ", "}{prettyText(key.split(',')[1], key.split(',')[0], currentRequest.matches[key])}
               </span>
             ))}
-          &nbsp;| {currentRequest.full_address}</div>
+          &nbsp;| #{currentRequest.id} - {currentRequest.full_address}</div>
       </Col>
     </Row>
     <Row className="d-flex flex-wrap" style={{marginTop:"-8px", marginRight:"-19px", marginLeft:"-17px", minHeight:"36vh", paddingRight:"4px"}}>
       <Col xs={12} className="border rounded" style={{marginLeft:"1px", height:"36vh", overflowY:"auto", paddingRight:"-1px"}}>
-        {currentRequest.latest_evac && data.dispatch_assignments.filter(dispatch_assignment => dispatch_assignment.id === currentRequest.latest_evac.id).map(dispatch_assignment => (
+        {activeDispatch && data.dispatch_assignments.filter(dispatch_assignment => dispatch_assignment.id === activeDispatch.id).map(dispatch_assignment => (
         <div key={dispatch_assignment.id} className="mt-1 mb-1" style={{marginLeft:"-10px", marginRight:"-10px"}}>
           <div className="card-header rounded">
             <Checkbox
@@ -324,7 +329,7 @@ function ServiceRequestDispatchAssignment({id}) {
               disabled={true}
             />
             <FontAwesomeIcon icon={faRectanglePortrait} className="icon-thin mr-1" color="gray" style={{marginLeft:"-9px", marginBottom:"-2px"}} />
-            <span>Active Dispatch Assignment</span>
+            <span>Current Dispatch Assignment</span>
             <OverlayTrigger
               key={"assignment-summary"}
               placement="top"
@@ -336,35 +341,36 @@ function ServiceRequestDispatchAssignment({id}) {
             >
               <Link href={"/dispatch/summary/" + dispatch_assignment.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
             </OverlayTrigger>&nbsp;&nbsp;|&nbsp;
-            {dispatch_assignment.team ? dispatch_assignment.team_object.name : ""}: {dispatch_assignment.team && dispatch_assignment.team_object.team_member_objects.map((member, i) => (
-                <span key={member.id}>{i > 0 && ", "}{member.first_name} {member.last_name}</span>))}
+            {dispatch_assignment.team ? dispatch_assignment.team_object.name : ""}
+            {dispatch_assignment.team ?
+              <OverlayTrigger
+                key={"team-names"}
+                placement="top"
+                overlay={
+                  <Tooltip id={`tooltip-team-names`}>
+                    {dispatch_assignment.team_member_names}
+                  </Tooltip>
+                }
+              >
+                <FontAwesomeIcon icon={faUsers} className="ml-1" />
+              </OverlayTrigger>
+            : ""}
             &nbsp;|&nbsp;Service Requests<FontAwesomeIcon icon={faChevronCircleRight} hidden={showSRs[dispatch_assignment.id]} onClick={() => updateShowSRs(dispatch_assignment.id)} className="ml-1 fa-move-up" style={{verticalAlign:"middle"}} inverse /><FontAwesomeIcon icon={faChevronCircleDown} hidden={!showSRs[dispatch_assignment.id]} onClick={() => updateShowSRs(dispatch_assignment.id)} className="ml-1 fa-move-up" style={{verticalAlign:"middle"}} inverse />
-            {dispatch_assignment.service_request_objects.map(service_request => (
-            <Collapse key={service_request.id} in={showSRs[dispatch_assignment.id]}>
+            {dispatch_assignment.assigned_requests.map(assigned_request => (
+            <Collapse key={assigned_request.service_request_object.id} in={showSRs[dispatch_assignment.id]}>
               <span>
                 {mapState[dispatch_assignment.id] ?
                 <li className="mt-1 mb-1" style={{marginLeft:"15%", marginRight:"-10px"}}>
-                    {mapState[dispatch_assignment.id].service_requests[service_request.id] ?
+                    {mapState[dispatch_assignment.id].service_requests[assigned_request.service_request_object.id] ?
                     <span>
-                      {Object.keys(mapState[dispatch_assignment.id].service_requests[service_request.id].matches).map((key,i) => (
+                      {Object.keys(mapState[dispatch_assignment.id].service_requests[assigned_request.service_request_object.id].matches).map((key,i) => (
                         <span key={key} style={{textTransform:"capitalize"}}>
-                          {i > 0 && ", "}{prettyText(key.split(',')[1], key.split(',')[0], mapState[dispatch_assignment.id].service_requests[service_request.id].matches[key])}
+                          {i > 0 && ", "}{prettyText(key.split(',')[1], key.split(',')[0], mapState[dispatch_assignment.id].service_requests[assigned_request.service_request_object.id].matches[key])}
                         </span>
                       ))}
                     </span>
                     :""}
-                    &nbsp;|&nbsp;{service_request.full_address}
-                    <OverlayTrigger
-                      key={"request-details"}
-                      placement="top"
-                      overlay={
-                        <Tooltip id={`tooltip-request-details`}>
-                          Service request details
-                        </Tooltip>
-                      }
-                    >
-                      <Link href={"/hotline/servicerequest/" + service_request.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
-                    </OverlayTrigger>
+                    &nbsp;|&nbsp;#{assigned_request.service_request_object.id} - <Link href={"/hotline/servicerequest/" + assigned_request.service_request_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link>
                 </li>
                 : ""}
               </span>
@@ -373,7 +379,7 @@ function ServiceRequestDispatchAssignment({id}) {
           </div>
         </div>
         ))}
-        {data.dispatch_assignments.filter(dispatch_assignment => (mapState[dispatch_assignment.id].hidden === false) && (currentRequest.latest_evac ? (dispatch_assignment.id !== currentRequest.latest_evac.id) : true)).map((dispatch_assignment, index) => (
+        {data.dispatch_assignments.filter(dispatch_assignment => (mapState[dispatch_assignment.id].hidden === false) && (activeDispatch ? (dispatch_assignment.id !== activeDispatch.id) : true)).map((dispatch_assignment, index) => (
         <span key={dispatch_assignment.id}>
           <div className="mt-1 mb-1" style={{marginLeft:"-10px", marginRight:"-10px"}}>
             <div className="card-header rounded" style={{height:""}}>
@@ -402,24 +408,36 @@ function ServiceRequestDispatchAssignment({id}) {
               >
                 <Link href={"/dispatch/summary/" + dispatch_assignment.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
               </OverlayTrigger>&nbsp;&nbsp;|&nbsp;
-              {dispatch_assignment.team ? dispatch_assignment.team_object.name : ""}: {dispatch_assignment.team && dispatch_assignment.team_object.team_member_objects.map((member, i) => (
-                  <span key={member.id}>{i > 0 && ", "}{member.first_name} {member.last_name}</span>))}
+              {dispatch_assignment.team ? dispatch_assignment.team_object.name : ""}
+              {dispatch_assignment.team ?
+                <OverlayTrigger
+                  key={"team-names"}
+                  placement="top"
+                  overlay={
+                    <Tooltip id={`tooltip-team-names`}>
+                      {dispatch_assignment.team_member_names}
+                    </Tooltip>
+                  }
+                >
+                  <FontAwesomeIcon icon={faUsers} className="ml-1" />
+                </OverlayTrigger>
+              : ""}
               &nbsp;|&nbsp;Service Requests<FontAwesomeIcon icon={faChevronCircleRight} hidden={showSRs[dispatch_assignment.id]} onClick={() => updateShowSRs(dispatch_assignment.id)} className="ml-1 fa-move-up" style={{verticalAlign:"middle"}} inverse /><FontAwesomeIcon icon={faChevronCircleDown} hidden={!showSRs[dispatch_assignment.id]} onClick={() => updateShowSRs(dispatch_assignment.id)} className="ml-1 fa-move-up" style={{verticalAlign:"middle"}} inverse />
-              {dispatch_assignment.service_request_objects.map(service_request => (
-              <Collapse key={service_request.id} in={showSRs[dispatch_assignment.id]}>
+              {dispatch_assignment.assigned_requests.map(assigned_request => (
+              <Collapse key={assigned_request.service_request_object.id} in={showSRs[dispatch_assignment.id]}>
                 <span>
                   {mapState[dispatch_assignment.id] ?
                   <li className="mt-1 mb-1" style={{marginLeft:"15%", marginRight:"-10px"}}>
-                      {mapState[dispatch_assignment.id].service_requests[service_request.id] ?
+                      {mapState[dispatch_assignment.id].service_requests[assigned_request.service_request_object.id] ?
                       <span>
-                        {Object.keys(mapState[dispatch_assignment.id].service_requests[service_request.id].matches).map((key,i) => (
+                        {Object.keys(mapState[dispatch_assignment.id].service_requests[assigned_request.service_request_object.id].matches).map((key,i) => (
                           <span key={key} style={{textTransform:"capitalize"}}>
-                            {i > 0 && ", "}{prettyText(key.split(',')[1], key.split(',')[0], mapState[dispatch_assignment.id].service_requests[service_request.id].matches[key])}
+                            {i > 0 && ", "}{prettyText(key.split(',')[1], key.split(',')[0], mapState[dispatch_assignment.id].service_requests[assigned_request.service_request_object.id].matches[key])}
                           </span>
                         ))}
                       </span>
                       :""}
-                      &nbsp;|&nbsp;{service_request.full_address}
+                      &nbsp;|&nbsp;#{assigned_request.service_request_object.id} - {assigned_request.service_request_object.full_address}
                       <OverlayTrigger
                         key={"request-details"}
                         placement="top"
@@ -429,7 +447,7 @@ function ServiceRequestDispatchAssignment({id}) {
                           </Tooltip>
                         }
                       >
-                        <Link href={"/hotline/servicerequest/" + service_request.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+                        <Link href={"/hotline/servicerequest/" + assigned_request.service_request_object.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
                       </OverlayTrigger>
                   </li>
                   : ""}

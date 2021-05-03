@@ -162,14 +162,14 @@ function ShelterRoomAssignment({id}) {
             <Droppable droppableId="unroomed_animals" direction="horizontal">
               {(provided, snapshot) => (
               <Card className="border rounded" style={{height:"80px", display:"flex", justifyContent:"space-around", overflowX:"auto", overflowY: "hidden", backgroundColor:snapshot.isDraggingOver ? "gray" : "#303030"}}>
-                <Scrollbar style={{height:"89px", width:"99.99%"}} renderView={props => <div {...props} style={{...props.style, marginBottom:"-18px"}}/>}>
+                <Scrollbar style={{height:"89px", width:"99.99%"}} renderView={props => <div {...props} style={{...props.style, marginBottom:"-18px", overflowX:"auto", overflowY: "hidden"}}/>} renderThumbVertical={props => <div {...props} style={{...props.style, display: 'none'}} />}>
                   <Card.Body style={{paddingBottom:"3px", marginBottom:"-10px", display:"flex", flexDirection:"column"}}>
                     <ul className="unroomed_animals" {...provided.droppableProps} ref={provided.innerRef}>
                     {data.unroomed_animals.map((animal, index) => (
                       <Draggable key={animal.id} draggableId={String(animal.id)} index={index}>
                         {(provided, snapshot) => (
                           <li ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
-                            <AnimalRoomAssignmentCard animal={animal} snapshot={snapshot} />
+                            <AnimalRoomAssignmentCard animal={animal} snapshot={snapshot} direction="horizontal" />
                           </li>
                         )}
                       </Draggable>

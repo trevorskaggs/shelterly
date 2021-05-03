@@ -38,6 +38,7 @@ function ServiceRequestDetails({id}) {
   }, [id, datetime]);
 
   const [data, setData] = useState({
+    id: '',
     animals: [],
     owners: [],
     owner_objects: [],
@@ -55,11 +56,9 @@ function ServiceRequestDetails({id}) {
     accessible: false,
     turn_around: false,
     followup_date: null,
-    latest_evac: {},
-    evacuation_assignments: [],
+    assigned_requests: [],
     status:'',
     action_history: [],
-    visit_notes: [],
   });
 
   const [show, setShow] = useState(false);
@@ -203,7 +202,8 @@ function ServiceRequestDetails({id}) {
               </Card.Title>
               <hr/>
               <ListGroup variant="flush">
-                <ListGroup.Item style={{marginTop:"-13px"}}><b>Address: </b>{data.full_address}</ListGroup.Item>
+                <ListGroup.Item style={{marginTop:"-13px"}}><b>ID: </b>#{data.id}</ListGroup.Item>
+                <ListGroup.Item><b>Address: </b>{data.full_address}</ListGroup.Item>
                 <ListGroup.Item>
                   <b>Followup Date: </b>
                   <FontAwesomeIcon icon={faCalendarEdit} className="ml-1 mr-1" style={{cursor:'pointer'}} onClick={() => openCalendar()} />
@@ -338,7 +338,7 @@ function ServiceRequestDetails({id}) {
                     placement="top"
                     overlay={
                       <Tooltip id={`tooltip-add-to-dispatch`}>
-                        {data.latest_evac ? "Reassign" : "Assign"} service request to an open dispatch assignment
+                        {data.assigned_requests.filter(assigned_request => assigned_request.dispatch_assignment.end_time).length ? "Reassign" : "Assign"} service request to an open dispatch assignment
                       </Tooltip>
                     }
                   >
@@ -348,17 +348,17 @@ function ServiceRequestDetails({id}) {
               </Card.Title>
               <hr/>
               <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
-                {data.evacuation_assignments.filter(da => !da.end_time).map(latest_dispatch => (
-                  <ListGroup.Item key={latest_dispatch.id}>
+                {data.assigned_requests.filter(assigned_request => !assigned_request.dispatch_assignment.end_time).map(assigned_request => (
+                  <ListGroup.Item key={assigned_request.id}>
                     <b>Active Dispatch Assignment:</b>
-                    &nbsp;<Link href={"/dispatch/summary/" + latest_dispatch.id} className="text-link" style={{textDecoration:"none", color:"white"}}><Moment format="LL">{latest_dispatch.start_time}</Moment></Link>&nbsp;|&nbsp;
-                    {latest_dispatch.team_name}
+                    &nbsp;<Link href={"/dispatch/summary/" + assigned_request.dispatch_assignment.id} className="text-link" style={{textDecoration:"none", color:"white"}}><Moment format="LL">{assigned_request.dispatch_assignment.start_time}</Moment></Link>&nbsp;|&nbsp;
+                    {assigned_request.dispatch_assignment.team_name}
                     <OverlayTrigger
                       key={"team-names"}
                       placement="top"
                       overlay={
                         <Tooltip id={`tooltip-team-names`}>
-                          {latest_dispatch.team_member_names}
+                          {assigned_request.dispatch_assignment.team_member_names}
                         </Tooltip>
                       }
                     >
@@ -373,21 +373,35 @@ function ServiceRequestDetails({id}) {
                         </Tooltip>
                       }
                     >
-                      <Link href={"/dispatch/resolution/" + latest_dispatch.id}><FontAwesomeIcon icon={faClipboardCheck} className="ml-1" inverse /></Link>
+                      <Link href={"/dispatch/resolution/" + assigned_request.dispatch_assignment.id}><FontAwesomeIcon icon={faClipboardCheck} className="ml-1" inverse /></Link>
                     </OverlayTrigger>
                   </ListGroup.Item>
                 ))}
-                {data.visit_notes.map((visit_note) => (
-                  <ListGroup.Item key={visit_note.id}>
+                {data.assigned_requests.filter(assigned_request => assigned_request.visit_note && assigned_request.visit_note.date_completed).map((assigned_request) => (
+                  <ListGroup.Item key={assigned_request.id}>
                     <b>Dispatch Assignment:</b>
-                    &nbsp;<Link href={"/dispatch/summary/" + visit_note.evac_assignment} className="text-link" style={{textDecoration:"none", color:"white"}}><Moment format="LL">{visit_note.date_completed}</Moment></Link>&nbsp;|&nbsp;
-                    {visit_note.team_name}
+                    &nbsp;<Link href={"/dispatch/summary/" + assigned_request.visit_note.dispatch_assignment} className="text-link" style={{textDecoration:"none", color:"white"}}><Moment format="LL">{assigned_request.visit_note.date_completed}</Moment></Link>
+                    {assigned_request.visit_note.forced_entry ?
+                      <OverlayTrigger
+                        key={"forced"}
+                        placement="top"
+                        overlay={
+                          <Tooltip id={`tooltip-forced`}>
+                            Forced entry
+                          </Tooltip>
+                        }
+                      >
+                        <FontAwesomeIcon icon={faHouseDamage} size="sm" className="ml-1" style={{marginBottom:"1px"}} />
+                      </OverlayTrigger>
+                    : ""}
+                    &nbsp;|&nbsp;
+                    {assigned_request.dispatch_assignment.team_name}
                     <OverlayTrigger
                       key={"team-names-"+id}
                       placement="top"
                       overlay={
                         <Tooltip id={`tooltip-team-names` + id}>
-                          {visit_note.team_member_names}
+                          {assigned_request.dispatch_assignment.team_member_names}
                         </Tooltip>
                       }
                     >
@@ -402,26 +416,18 @@ function ServiceRequestDetails({id}) {
                         </Tooltip>
                       }
                     >
-                      <Link href={"/dispatch/assignment/note/" + visit_note.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
+                      <Link href={"/dispatch/assignment/note/" + assigned_request.visit_note.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
                     </OverlayTrigger>
-                    <div className="mt-1">
-                      {visit_note.forced_entry ?
-                        <OverlayTrigger
-                          key={"forced"}
-                          placement="top"
-                          overlay={
-                            <Tooltip id={`tooltip-forced`}>
-                              Forced entry
-                            </Tooltip>
-                          }
-                        >
-                          <FontAwesomeIcon icon={faHouseDamage} size="sm" className="ml-1" style={{marginBottom:"1px"}} />
-                        </OverlayTrigger> : ""}
-                    </div>
-                    <div className="mt-1 mb-0"><b>Outcome:</b> {visit_note.notes||"No information available."}</div>
+                    <div className="mt-1 mb-0"><b>Outcome:</b> {assigned_request.visit_note.notes||"No visit information available."}</div>
+                    {assigned_request.owner_contact ?
+                    <span>
+                      <div className="mt-1 mb-0"><b>Owner Contacted:</b> {assigned_request.owner_contact.owner_name} on <Moment format="LLL">{assigned_request.owner_contact.owner_contact_time}</Moment></div>
+                      <div className="mt-1 mb-0"><b>Contact Notes:</b> {assigned_request.owner_contact.owner_contact_note||"No contact information available."}</div>
+                    </span>
+                    : ""}
                   </ListGroup.Item>
                 ))}
-                {data.visit_notes.length < 1 && !data.latest_evac ? <div className="mt-2 mb-1">Service Request has not been visited yet.</div> : ""}
+                {data.assigned_requests.length < 1 ? <div className="mt-2 mb-1">Service Request has not been visited yet.</div> : ""}
               </ListGroup>
             </Card.Body>
           </Card>

@@ -136,7 +136,8 @@ function ServiceRequestSearch() {
               >
                 <Link href={"/hotline/servicerequest/" + service_request.id}><FontAwesomeIcon icon={faDotCircle} className="mr-2" inverse /></Link>
               </OverlayTrigger>
-              {service_request.full_address}
+              #{service_request.id}
+              &nbsp;-&nbsp;{service_request.full_address}
               &nbsp;| <span style={{textTransform:"capitalize"}}>{service_request.status}</span>
             </h4>
           </div>
@@ -147,30 +148,30 @@ function ServiceRequestSearch() {
                 <Scrollbar style={{height:"144px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
                   <ListGroup>
                     <ListGroup.Item>
-                    {service_request.latest_evac ?
-                      <span>
-                        <b>{service_request.latest_evac.end_time ? "Last" : "Active"} Dispatch Assignment: </b>
-                        <Link href={"/dispatch/summary/" + service_request.latest_evac.id} className="text-link" style={{textDecoration:"none", color:"white"}}><Moment format="L">{service_request.latest_evac.start_time}</Moment></Link>&nbsp;
-                        ({service_request.evacuation_assignments.filter(da => da.id === service_request.latest_evac.id)[0].team_name}
+                    {service_request.evacuation_assignments.filter(da => da.start_time === service_request.evacuation_assignments.map(da => da.start_time).sort().reverse()[0]).map(dispatch_assignment =>
+                      <span key={dispatch_assignment.id}>
+                        <b>{dispatch_assignment.end_time ? "Last" : "Active"} Dispatch Assignment: </b>
+                        <Link href={"/dispatch/summary/" + dispatch_assignment.id} className="text-link" style={{textDecoration:"none", color:"white"}}><Moment format="L">{dispatch_assignment.start_time}</Moment></Link>&nbsp;
+                        |&nbsp;{dispatch_assignment.team_name}
                         <OverlayTrigger
                           key={"team-names"}
                           placement="top"
                           overlay={
                             <Tooltip id={`tooltip-team-names`}>
-                              {service_request.evacuation_assignments.filter(da => da.id === service_request.latest_evac.id)[0].team_member_names}
+                              {dispatch_assignment.team_member_names}
                             </Tooltip>
                           }
                         >
                           <FontAwesomeIcon icon={faUsers} className="ml-1 fa-move-down" />
                         </OverlayTrigger>
-                        )
                       </span>
-                    :
+                    )}
+                    {service_request.evacuation_assignments.length === 0 ?
                       <span>
                         <b>Dispatch Assignment: </b>
                         Never Serviced
                       </span>
-                    }
+                    : ""}
                     </ListGroup.Item>
                     {service_request.owner_objects.map(owner => (
                       <ListGroup.Item key={owner.id}>

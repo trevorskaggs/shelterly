@@ -11,7 +11,7 @@ from people.serializers import OwnerContactSerializer, PersonSerializer
 # Provides view for Person API calls.
 class PersonViewSet(viewsets.ModelViewSet):
     queryset = Person.objects.all().prefetch_related(Prefetch('animal_set', queryset=Animal.objects.prefetch_related(Prefetch('animalimage_set', to_attr='images')), to_attr='animals'))
-    search_fields = ['first_name', 'last_name', 'address', 'animals__name', 'animal__name']
+    search_fields = ['first_name', 'last_name', 'address', 'phone', 'email', 'drivers_license', 'animals__name', 'animal__name']
     filter_backends = (filters.SearchFilter,)
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = PersonSerializer
