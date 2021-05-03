@@ -31,6 +31,36 @@ const DispatchDuplicateSRModal = (props) => {
   );
 };
 
+const DispatchAlreadyAssignedTeamModal = (props) => {
+
+  return (
+    <>
+      <Modal show={props.show} onHide={props.handleClose}>
+        <Modal.Header closeButton>
+          <Modal.Title>Team Members Already Dispatched</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>
+            The following team members are already assigned to an active dispatch:
+          </p>
+          <p>
+            {props.team_options.filter(team_member => team_member.is_assigned === true && !team_member.label.includes(":") && props.team_members.includes(team_member.id[0])).map(team_member => (
+              <li key={team_member.id[0]} style={{marginLeft:"10px"}}><span style={{position:"relative", left:"-8px"}}>{team_member.label}</span></li>
+            ))}
+          </p>
+          <p style={{marginBottom:"-5px"}}>
+            Are you sure you still want to proceed?
+          </p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={props.handleClose}>Go Back and Reselect</Button>
+          <Button variant="primary" onClick={() => {props.setProceed(true);props.handleSubmit();}}>Yes</Button>
+        </Modal.Footer>
+      </Modal>
+    </>
+  );
+};
+
 const AnimalDeleteModal = (props) => {
 
   return (
@@ -53,4 +83,4 @@ const AnimalDeleteModal = (props) => {
   );
 };
 
-export { AnimalDeleteModal, DispatchDuplicateSRModal };
+export { AnimalDeleteModal, DispatchAlreadyAssignedTeamModal, DispatchDuplicateSRModal };

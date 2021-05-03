@@ -15,6 +15,7 @@ class EvacTeamMemberSerializer(serializers.ModelSerializer):
 
     display_name = serializers.SerializerMethodField()
     display_phone = serializers.SerializerMethodField()
+    is_assigned = serializers.BooleanField(read_only=True)
 
     # Custom field for Name Output
     def get_display_name(self, obj):
