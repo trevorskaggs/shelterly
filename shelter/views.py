@@ -33,22 +33,8 @@ class ShelterViewSet(viewsets.ModelViewSet):
             shelter = serializer.save()
             action.send(self.request.user, verb='updated shelter', target=shelter)
 
-class BuildingViewSet(viewsets.ModelViewSet):
-    queryset = Building.objects.all()
-    serializer_class = SimpleBuildingSerializer
-
-    def perform_create(self, serializer):
-        if serializer.is_valid():
-            building = serializer.save()
-            action.send(self.request.user, verb='created building', target=building)
-
-    def perform_update(self, serializer):
-        if serializer.is_valid():
-            building = serializer.save()
-            action.send(self.request.user, verb='updated building', target=building)
-
     def get_queryset(self):
-        queryset = Building.objects.prefetch_related(
+        queryset = Shelter.objects.prefetch_related(Prefetch('building_set', Building.objects.prefetch_related(
             Prefetch(
                 "room_set",
                 Room.objects.select_related("building__shelter").prefetch_related(
@@ -62,6 +48,39 @@ class BuildingViewSet(viewsets.ModelViewSet):
                 ),
                 to_attr="rooms",
             )
+        ), to_attr='buildings')).all()
+        return queryset
+
+class BuildingViewSet(viewsets.ModelViewSet):
+    serializer_class = SimpleBuildingSerializer
+
+    def perform_create(self, serializer):
+        if serializer.is_valid():
+            building = serializer.save()
+            action.send(self.request.user, verb='created building', target=building)
+
+    def perform_update(self, serializer):
+        if serializer.is_valid():
+            building = serializer.save()
+            action.send(self.request.user, verb='updated building', target=building)
+
+    def get_queryset(self):
+        queryset = Building.objects.select_related('shelter').prefetch_related(
+            Prefetch(
+                "room_set",
+                Room.objects.select_related("building__shelter").prefetch_related(
+                    Prefetch(
+                        "animal_set",
+                        queryset=Animal.objects.exclude(status="CANCELED")
+                        .prefetch_related(Prefetch("animalimage_set", to_attr="images"))
+                        .prefetch_related(Prefetch("owners", to_attr="owner_objects")),
+                        to_attr="animals",
+                    )
+                ),
+                to_attr="rooms",
+            )
+        ).prefetch_related(
+            Prefetch("target_actions", Action.objects.prefetch_related("actor","action_object"))
         )
         return queryset
 
@@ -93,7 +112,7 @@ class RoomViewSet(viewsets.ModelViewSet):
                 )
             )
             .prefetch_related(
-                Prefetch("target_actions", Action.objects.prefetch_related("action_object"))
+                Prefetch("target_actions", Action.objects.prefetch_related("actor","action_object"))
             )
         )
         return queryset
