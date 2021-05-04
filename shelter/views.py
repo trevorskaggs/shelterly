@@ -47,6 +47,25 @@ class BuildingViewSet(viewsets.ModelViewSet):
             building = serializer.save()
             action.send(self.request.user, verb='updated building', target=building)
 
+    def get_queryset(self):
+        queryset = Building.objects.prefetch_related(
+            Prefetch(
+                "room_set",
+                Room.objects.select_related("building__shelter").prefetch_related(
+                    Prefetch(
+                        "animal_set",
+                        queryset=Animal.objects.exclude(status="CANCELED")
+                        .prefetch_related(Prefetch("animalimage_set", to_attr="images"))
+                        .prefetch_related(Prefetch("owners", to_attr="owner_objects")),
+                        to_attr="animals",
+                    )
+                ),
+                to_attr="rooms",
+            )
+        )
+        return queryset
+
+
 class RoomViewSet(viewsets.ModelViewSet):
     queryset = Room.objects.all()
     serializer_class = RoomSerializer

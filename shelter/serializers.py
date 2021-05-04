@@ -40,7 +40,7 @@ class RoomSerializer(SimpleRoomSerializer):
 
 class SimpleBuildingSerializer(serializers.ModelSerializer):
     shelter_name = serializers.SerializerMethodField()
-    rooms = SimpleRoomSerializer(source='room_set', many=True, required=False, read_only=True)
+    rooms = SimpleRoomSerializer(many=True, required=False, read_only=True)
     action_history = serializers.SerializerMethodField()
 
     # Custom field for the shelter name.
