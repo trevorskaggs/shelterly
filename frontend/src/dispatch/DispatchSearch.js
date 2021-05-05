@@ -84,9 +84,7 @@ function DispatchAssignmentSearch() {
 
   let evacAssignments = data.evacuation_assignments.filter(ea => startDate <= moment(ea.start_time)
     .format('YYYY-MM-DD') && endDate >= moment(ea.start_time).format('YYYY-MM-DD'));
-
-
-
+  
   // Hook for initializing data.
   useEffect(() => {
     let unmounted = false;
