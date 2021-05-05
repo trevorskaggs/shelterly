@@ -6,12 +6,14 @@ DOG_COLOR_CHOICES = (
     ('black', 'Black'),
     ('blue', 'Blue'),
     ('brown', 'Brown'),
-    ('tan', 'Tan'),
     ('brindle', 'Brindle'),
     ('cream', 'Cream/Taupe'),
     ('gold', 'Gold'),
     ('gray', 'Gray'),
+    ('harlequin', 'Harlequin'),
+    ('pink', 'Pink'),
     ('red', 'Red'),
+    ('tan', 'Tan'),
     ('white', 'White'),
     ('yellow', 'Yellow'),
 )
@@ -19,11 +21,17 @@ DOG_COLOR_CHOICES = (
 ## Source: https://en.wikipedia.org/wiki/Cat_coat_genetics
 CAT_COLOR_CHOICES = (
     ('black', 'Black'),
+    ('blue', 'Blue'),
     ('caramel', 'Caramel'),
     ('chocolate', 'Chocolate'),
     ('cinnamon', 'Cinnamon'),
+    ('cream', 'Cream'),
+    ('fawn', 'Fawn'),
     ('grey', 'Grey'),
+    ('lilac', 'Lilac'),
     ('orange', 'Orange'),
+    ('red', 'Red'),
+    ('smoke', 'Smoke'),
     ('white', 'White'),
 )
 
