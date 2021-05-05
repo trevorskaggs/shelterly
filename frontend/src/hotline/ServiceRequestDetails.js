@@ -5,10 +5,11 @@ import Moment from 'react-moment';
 import { Button, Card, ListGroup, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBan, faCar, faClipboardCheck, faComment, faEdit, faEnvelope, faHouseDamage,
-  faKey, faMapMarkedAlt, faPlusSquare, faTimes, faTrailer, faUserPlus, faUsers
+  faBan, faCar, faClipboardCheck, faCommentSlash, faEdit, faEnvelope, faHouseDamage,
+  faKey, faLock, faMapMarkedAlt, faPlusSquare, faTrailer, faUserPlus, faUsers
 } from '@fortawesome/free-solid-svg-icons';
-import { faCalendarEdit, faHomeHeart, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
+import { faCalendarEdit, faCommentSmile, faHomeHeart, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
+import { faTimes } from '@fortawesome/pro-light-svg-icons';
 import Header from '../components/Header';
 import History from '../components/History';
 import AnimalCards from '../components/AnimalCards';
@@ -160,8 +161,20 @@ function ServiceRequestDetails({id}) {
                       </Tooltip>
                     }
                   >
-                    <FontAwesomeIcon icon={faComment} size="sm" className="ml-1" />
-                  </OverlayTrigger> : ""}
+                    <FontAwesomeIcon icon={faCommentSmile} size="sm" className="ml-1" />
+                  </OverlayTrigger> :
+                  <OverlayTrigger
+                    key={"no-verbal"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-no-verbal`}>
+                        Verbal permission not granted
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon icon={faCommentSlash} size="sm" transform={'shrink-2'} />
+                  </OverlayTrigger>
+                  }
                   {data.key_provided ?
                   <OverlayTrigger
                     key={"key"}
@@ -172,8 +185,20 @@ function ServiceRequestDetails({id}) {
                       </Tooltip>
                     }
                   >
-                    <FontAwesomeIcon icon={faKey} size="sm" className="ml-1" />
-                  </OverlayTrigger> : ""}
+                    <FontAwesomeIcon icon={faKey} size="sm" className="ml-1" transform={'shrink-2'} />
+                  </OverlayTrigger> :
+                  <OverlayTrigger
+                    key={"no-key"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-no-key`}>
+                        No key provided
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon icon={faLock} size="sm" className="ml-1 fa-move-up" transform={'shrink-2'} />
+                  </OverlayTrigger>
+                  }
                   {data.accessible ?
                   <OverlayTrigger
                     key={"accessible"}
@@ -184,8 +209,25 @@ function ServiceRequestDetails({id}) {
                       </Tooltip>
                     }
                   >
-                    <FontAwesomeIcon icon={faCar} size="sm" className="ml-1" />
-                  </OverlayTrigger> : ""}
+                    <span className="fa-layers">
+                      <FontAwesomeIcon icon={faCar} size="sm" className="ml-1 fa-move-down" />
+                    </span>
+                  </OverlayTrigger> :
+                  <OverlayTrigger
+                    key={"not-accessible"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-not-accessible`}>
+                        Not easily accessible
+                      </Tooltip>
+                    }
+                  >
+                    <span className="fa-layers ml-1">
+                      <FontAwesomeIcon icon={faCar} size="sm" className="fa-move-down" />
+                      <FontAwesomeIcon icon={faTimes} color="#ef5151" size="lg" />
+                    </span>
+                  </OverlayTrigger>
+                  }
                   {data.turn_around ?
                   <OverlayTrigger
                     key={"turnaround"}
@@ -197,7 +239,22 @@ function ServiceRequestDetails({id}) {
                     }
                   >
                     <FontAwesomeIcon icon={faTrailer} size="sm" className="ml-1" />
-                  </OverlayTrigger> : ""}
+                  </OverlayTrigger> :
+                  <OverlayTrigger
+                    key={"no-turnaround"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-no-turnaround`}>
+                        No room to turn around
+                      </Tooltip>
+                    }
+                  >
+                    <span className="fa-layers ml-1">
+                      <FontAwesomeIcon icon={faTrailer} size="sm" />
+                      <FontAwesomeIcon icon={faTimes} color="#ef5151" size="lg" />
+                    </span>
+                  </OverlayTrigger>
+                  }
                 </h4>
               </Card.Title>
               <hr/>
