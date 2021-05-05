@@ -21,6 +21,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import Alert from 'react-bootstrap/Alert';
 import { Legend, pinMarkerIcon } from "../components/Map";
 import { STATE_OPTIONS } from '../constants';
+import moment from "moment";
 
 const useStyles = makeStyles({
   root: {
@@ -65,6 +66,16 @@ const useStyles = makeStyles({
     },
   },
 });
+
+const DateRangePicker = ({...props}) => {
+
+  let options = {allowInput: true, dateFormat: "Y-m-d", mode: "range", maxDate: moment().format('YYYY-MM-DD')}
+  return (
+    <>
+      <Flatpickr className="daterange_picker" options={options} {...props} />
+    </>
+  );
+};
 
 const DateTimePicker = ({ label, xs, clearable, ...props }) => {
 
@@ -274,7 +285,7 @@ const ImageUploader = ({ parentStateSetter, ...props }) => {
   );
 }
 
-const AddressLookup = ({ ...props }) => {
+const AddressLookup = ({setLatLon, ...props}) => {
 
   const childRef = useRef(null);
   const { setFieldValue } = useFormikContext();
@@ -305,7 +316,7 @@ const AddressLookup = ({ ...props }) => {
       setFieldValue("latitude", suggestion.geometry.location.lat());
       setFieldValue("longitude", suggestion.geometry.location.lng());
       setFieldValue("full_address", suggestion.formatted_address.replace(', USA', ''));
-      props.setLatLon(suggestion.geometry.location.lat(), suggestion.geometry.location.lng())
+      setLatLon(suggestion.geometry.location.lat(), suggestion.geometry.location.lng())
     }
   }
 
@@ -479,4 +490,4 @@ const AddressSearch = (props) => {
   );
 }
 
-export { AddressLookup, AddressSearch, TextInput, Checkbox, DropDown, ImageUploader, DateTimePicker };
+export { AddressLookup, AddressSearch, TextInput, Checkbox, DropDown, ImageUploader, DateTimePicker, DateRangePicker };
