@@ -7,12 +7,10 @@ import { Carousel } from 'react-responsive-carousel';
 import { Button, Card, Col, ListGroup, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBan, faMedkit, faNeuter, faEdit, faEnvelope, faLink, faMinusSquare, faPaw, faUnlink, faUserPlus
+  faBan, faMedkit, faCut, faEdit, faEnvelope, faLink, faMinusSquare, faPaw, faTimes, faUnlink, faUserPlus
 } from '@fortawesome/free-solid-svg-icons';
 import { faClawMarks, faHomeHeart, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
-import {
-  faTimes
-} from '@fortawesome/pro-light-svg-icons';
+// import { faTimes } from '@fortawesome/pro-light-svg-icons';
 import { faHeart } from '@fortawesome/pro-duotone-svg-icons';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import { AnimalDeleteModal } from "../components/Modals";
@@ -174,7 +172,7 @@ function AnimalDetails({id}) {
           </Tooltip>
         }
       >
-        <FontAwesomeIcon icon={faBan} style={{cursor:'pointer'}} onClick={() => {setShowAnimalConfirm(true);}} className="ml-1" inverse />
+        <FontAwesomeIcon icon={faTimes} style={{cursor:'pointer'}} onClick={() => {setShowAnimalConfirm(true);}} className="ml-1" size="lg" inverse />
       </OverlayTrigger>
     </Header>
     <hr/>
@@ -194,7 +192,7 @@ function AnimalDetails({id}) {
                     </Tooltip>
                   }
                 >
-                  <FontAwesomeIcon icon={faLink} size="sm" className="ml-1" />
+                  <FontAwesomeIcon icon={faLink} size="sm" className="ml-1 fa-move-up" transform={'shrink-2'} />
                 </OverlayTrigger> :
               data.confined === 'no' ?
                 <OverlayTrigger
@@ -269,7 +267,7 @@ function AnimalDetails({id}) {
                     </Tooltip>
                   }
                 >
-                  <FontAwesomeIcon icon={faNeuter} size="sm" className="ml-1" />
+                  <FontAwesomeIcon icon={faCut} size="sm" className="ml-1" />
                 </OverlayTrigger> :
               data.fixed === 'no' ?
               <OverlayTrigger
@@ -281,9 +279,9 @@ function AnimalDetails({id}) {
                   </Tooltip>
                 }
               >
-                <span className="fa-layers">
-                  <FontAwesomeIcon icon={faNeuter} size="sm" />
-                  <FontAwesomeIcon icon={faTimes} color="#ef5151" size="lg" />
+                <span className="fa-layers" style={{marginLeft:"2px"}}>
+                  <FontAwesomeIcon icon={faCut} size="sm" />
+                  <FontAwesomeIcon icon={faBan} color="#ef5151" size="sm" />
                 </span>
               </OverlayTrigger> :
               ""}

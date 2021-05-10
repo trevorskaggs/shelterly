@@ -6,10 +6,10 @@ import { Button, Card, ListGroup, Modal, OverlayTrigger, Tooltip } from 'react-b
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBan, faCar, faClipboardCheck, faCommentSlash, faEdit, faEnvelope, faHouseDamage,
-  faKey, faLock, faMapMarkedAlt, faPlusSquare, faTrailer, faUserPlus, faUsers
+  faKey, faLock, faMapMarkedAlt, faPlusSquare, faTimes, faTrailer, faUserPlus, faUsers
 } from '@fortawesome/free-solid-svg-icons';
 import { faCalendarEdit, faCommentSmile, faHomeHeart, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
-import { faTimes } from '@fortawesome/pro-light-svg-icons';
+// import { faTimes } from '@fortawesome/pro-light-svg-icons';
 import Header from '../components/Header';
 import History from '../components/History';
 import AnimalCards from '../components/AnimalCards';
@@ -126,7 +126,7 @@ function ServiceRequestDetails({id}) {
             </Tooltip>
           }
         >
-          <FontAwesomeIcon icon={faBan} style={{cursor:'pointer'}} inverse onClick={() => {setShowModal(true)}}/>
+          <FontAwesomeIcon icon={faTimes} className="ml-1" size="lg" style={{cursor:'pointer'}} inverse onClick={() => {setShowModal(true)}}/>
         </OverlayTrigger>
         &nbsp;| <span style={{textTransform:"capitalize"}}>{data.status}</span>
       </Header>
@@ -172,7 +172,7 @@ function ServiceRequestDetails({id}) {
                       </Tooltip>
                     }
                   >
-                    <FontAwesomeIcon icon={faCommentSlash} size="sm" transform={'shrink-2'} />
+                    <FontAwesomeIcon icon={faCommentSlash} size="sm" className="ml-1" transform={'shrink-2'} />
                   </OverlayTrigger>
                   }
                   {data.key_provided ?
@@ -224,7 +224,7 @@ function ServiceRequestDetails({id}) {
                   >
                     <span className="fa-layers ml-1">
                       <FontAwesomeIcon icon={faCar} size="sm" className="fa-move-down" />
-                      <FontAwesomeIcon icon={faTimes} color="#ef5151" size="lg" />
+                      <FontAwesomeIcon icon={faBan} color="#ef5151" size="sm" />
                     </span>
                   </OverlayTrigger>
                   }
@@ -251,7 +251,7 @@ function ServiceRequestDetails({id}) {
                   >
                     <span className="fa-layers ml-1">
                       <FontAwesomeIcon icon={faTrailer} size="sm" />
-                      <FontAwesomeIcon icon={faTimes} color="#ef5151" size="lg" />
+                      <FontAwesomeIcon icon={faBan} color="#ef5151" size="sm" />
                     </span>
                   </OverlayTrigger>
                   }

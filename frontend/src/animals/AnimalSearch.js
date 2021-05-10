@@ -4,12 +4,11 @@ import { Link, useQueryParams } from 'raviger';
 import { Button, ButtonGroup, Card, CardGroup, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Pagination, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faCalendarDay, faClipboardList, faEnvelope, faLink, faMedkit, faPaw, faNeuter, faNotesMedical, faUnlink, faUserAltSlash
+  faBan, faCalendarDay, faClipboardList, faCut, faEnvelope, faLink, faMedkit, faPaw, faNotesMedical, faUnlink, faUserAltSlash
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faDotCircle
 } from '@fortawesome/free-regular-svg-icons';
-import { faTimes } from '@fortawesome/pro-light-svg-icons';
 import { faHeart } from '@fortawesome/pro-duotone-svg-icons';
 import { faClawMarks, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import Moment from 'react-moment';
@@ -244,7 +243,7 @@ function AnimalSearch() {
                         </Tooltip>
                       }
                     >
-                      <FontAwesomeIcon icon={faNeuter} size="sm" className="ml-1" />
+                      <FontAwesomeIcon icon={faCut} size="sm" className="ml-1" />
                     </OverlayTrigger> :
                   animal.fixed === 'no' ?
                   <OverlayTrigger
@@ -256,9 +255,9 @@ function AnimalSearch() {
                       </Tooltip>
                     }
                   >
-                    <span className="fa-layers">
-                      <FontAwesomeIcon icon={faNeuter} size="sm" />
-                      <FontAwesomeIcon icon={faTimes} color="#ef5151" size="lg" />
+                    <span className="fa-layers" style={{marginLeft:"2px"}}>
+                      <FontAwesomeIcon icon={faCut} size="sm" />
+                      <FontAwesomeIcon icon={faBan} color="#ef5151" size="sm" />
                     </span>
                   </OverlayTrigger> :
                   ""}

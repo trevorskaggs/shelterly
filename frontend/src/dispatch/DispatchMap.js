@@ -5,7 +5,7 @@ import { Form, Formik } from 'formik';
 import { Button, Col, FormCheck, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBandAid, faBullseye, faCalendarDay, faCar, faExclamationTriangle, faCircle, faClipboardList, faExclamationCircle, faQuestionCircle, faPencilAlt, faTrailer, faUserAlt, faUserAltSlash
+  faBan, faBandAid, faBullseye, faCalendarDay, faCar, faExclamationTriangle, faCircle, faClipboardList, faExclamationCircle, faQuestionCircle, faPencilAlt, faTrailer, faUserAlt, faUserAltSlash
 } from '@fortawesome/free-solid-svg-icons';
 import { faBadgeSheriff, faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
 import { Circle, Marker, Tooltip as MapTooltip } from "react-leaflet";
@@ -20,7 +20,6 @@ import Scrollbar from '../components/Scrollbars';
 import 'react-bootstrap-typeahead/css/Typeahead.css';
 import 'leaflet/dist/leaflet.css';
 import { S3_BUCKET } from '../constants';
-
 
 function Deploy() {
 
@@ -615,9 +614,25 @@ function Deploy() {
                         </Tooltip>
                       }
                     >
-                      <FontAwesomeIcon icon={faCar} className="ml-1"/>
+                      <span className="fa-layers">
+                        <FontAwesomeIcon icon={faCar} className="ml-1 fa-move-down" />
+                      </span>
+                    </OverlayTrigger> :
+                    <OverlayTrigger
+                      key={"not-accessible"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-not-accessible`}>
+                          Not easily accessible
+                        </Tooltip>
+                      }
+                    >
+                      <span className="fa-layers ml-1">
+                        <FontAwesomeIcon icon={faCar} className="fa-move-down" />
+                        <FontAwesomeIcon icon={faBan} color="#ef5151" />
+                      </span>
                     </OverlayTrigger>
-                    : ""}
+                    }
                     {service_request.turn_around ?
                     <OverlayTrigger
                       key={"turnaround"}
@@ -628,9 +643,23 @@ function Deploy() {
                         </Tooltip>
                       }
                     >
-                      <FontAwesomeIcon icon={faTrailer} className="ml-1"/>
+                      <FontAwesomeIcon icon={faTrailer} className="ml-1" style={{marginRight:"-3px"}} />
+                    </OverlayTrigger> :
+                    <OverlayTrigger
+                      key={"no-turnaround"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-no-turnaround`}>
+                          No room to turn around
+                        </Tooltip>
+                      }
+                    >
+                      <span className="fa-layers ml-1">
+                        <FontAwesomeIcon icon={faTrailer} />
+                        <FontAwesomeIcon icon={faBan} color="#ef5151" transform={'right-1'} />
+                      </span>
                     </OverlayTrigger>
-                    : ""}
+                    }
                     <span className="ml-2">|
                     &nbsp;#{service_request.id} - {service_request.full_address}</span>
                     <OverlayTrigger
