@@ -7,11 +7,9 @@ import { Carousel } from 'react-responsive-carousel';
 import { Button, Card, Col, ListGroup, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBan, faMedkit, faCut, faEdit, faEnvelope, faLink, faMinusSquare, faPaw, faTimes, faUnlink, faUserPlus
+  faBan, faMedkit, faCut, faEdit, faEnvelope, faLink, faMinusSquare, faTimes, faUserPlus
 } from '@fortawesome/free-solid-svg-icons';
 import { faClawMarks, faHomeHeart, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
-// import { faTimes } from '@fortawesome/pro-light-svg-icons';
-import { faHeart } from '@fortawesome/pro-duotone-svg-icons';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import { AnimalDeleteModal } from "../components/Modals";
 import Header from '../components/Header';
@@ -194,18 +192,6 @@ function AnimalDetails({id}) {
                 >
                   <FontAwesomeIcon icon={faLink} size="sm" className="ml-1 fa-move-up" transform={'shrink-2'} />
                 </OverlayTrigger> :
-              data.confined === 'no' ?
-                <OverlayTrigger
-                  key={"not-confined"}
-                  placement="top"
-                  overlay={
-                    <Tooltip id={`tooltip-confined`}>
-                      Animal is not confined
-                    </Tooltip>
-                  }
-                >
-                  <FontAwesomeIcon icon={faUnlink} size="sm" className="ml-1" transform={'shrink-2'} />
-                </OverlayTrigger> :
               ""}
               {data.aggressive === 'yes' ?
                 <OverlayTrigger
@@ -229,7 +215,10 @@ function AnimalDetails({id}) {
                     </Tooltip>
                   }
                 >
-                  <FontAwesomeIcon icon={faPaw} size="sm" className="ml-1 fa-move-up" />
+                  <span className="fa-layers" style={{marginLeft:"2px"}}>
+                    <FontAwesomeIcon icon={faClawMarks} size="sm" />
+                    <FontAwesomeIcon icon={faBan} color="#ef5151" size="sm" transform={'shrink-2'} />
+                  </span>
                 </OverlayTrigger> :
               ""}
               {data.injured === 'yes' ?
@@ -254,7 +243,10 @@ function AnimalDetails({id}) {
                     </Tooltip>
                   }
                 >
-                  <FontAwesomeIcon icon={faHeart} size="sm" className="ml-1" />
+                  <span className="fa-layers" style={{marginLeft:"2px"}}>
+                    <FontAwesomeIcon icon={faMedkit} size="sm" className="fa-move-up" />
+                    <FontAwesomeIcon icon={faBan} color="#ef5151" size="sm" transform={'shrink-2'} />
+                  </span>
                 </OverlayTrigger> :
               ""}
               {data.fixed === 'yes' ?
@@ -281,7 +273,7 @@ function AnimalDetails({id}) {
               >
                 <span className="fa-layers" style={{marginLeft:"2px"}}>
                   <FontAwesomeIcon icon={faCut} size="sm" />
-                  <FontAwesomeIcon icon={faBan} color="#ef5151" size="sm" />
+                  <FontAwesomeIcon icon={faBan} color="#ef5151" size="sm" transform={'shrink-2'} />
                 </span>
               </OverlayTrigger> :
               ""}
