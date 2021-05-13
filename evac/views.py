@@ -60,7 +60,7 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
     queryset = EvacAssignment.objects.all()
     search_fields = ['team__name', 'team__team_members__first_name', 'team__team_members__last_name', 'service_requests__owners__first_name', 'service_requests__owners__last_name', 'service_requests__owners__phone', 'service_requests__owners__drivers_license', 'service_requests__address', 'service_requests__reporter__first_name', 'service_requests__reporter__last_name']
     filter_backends = (filters.SearchFilter,)
-    permission_classes = [permissions.IsAuthenticated, ]
+    permission_classes = []
     serializer_class = EvacAssignmentSerializer
 
     def get_queryset(self):
@@ -78,7 +78,8 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
                     is_animal_owner=Exists(Animal.objects.filter(owners__id=OuterRef('id'))))))
             .select_related('reporter')
             .prefetch_related('evacuation_assignments')
-        ))
+        )).prefetch_related(Prefetch('team', DispatchTeam.objects.prefetch_related('team_members')))
+
         # Exclude EAs without animals when fetching for a map.
         is_map = self.request.query_params.get('map', '')
         if is_map == 'true':

@@ -63,7 +63,7 @@ class DispatchServiceRequestSerializer(SimpleServiceRequestSerializer):
         model = ServiceRequest
         fields = ['id', 'latitude', 'longitude', 'full_address', 'followup_date', 'status',
         'injured', 'accessible', 'turn_around', 'animals', 'reported_animals', 'sheltered_in_place', 'unable_to_locate', 'aco_required',
-        'owner_contacts', 'owner_objects', 'owners']
+        'owner_contacts', 'owner_objects', 'owners', 'latest_evac', 'visit_notes']
 
 class AssignedRequestDispatchSerializer(serializers.ModelSerializer):
 
@@ -94,9 +94,10 @@ class SimpleEvacAssignmentSerializer(serializers.ModelSerializer):
             return ''
 
     def get_team_member_names(self, obj):
+        #TODO: use StringRelatedField and EvacTeamMember __str__ method
         # does this kick off another query?
         try:
-            return ", ".join([team_member['first_name'] + " " + team_member['last_name'] + (" (" + team_member['agency_id'] + ")" if team_member['agency_id'] else "") for team_member in obj.team.team_members.all().values('first_name', 'last_name', 'agency_id')])
+            return ", ".join([team_member.first_name + " " + team_member.last_name + (" (" + team_member.agency_id + ")" if team_member.agency_id else "") for team_member in obj.team.team_members.all()])
         except AttributeError:
             return ''
 
@@ -117,10 +118,7 @@ class AssignedRequestServiceRequestSerializer(serializers.ModelSerializer):
 class EvacAssignmentSerializer(SimpleEvacAssignmentSerializer):
 
     team_object = DispatchTeamSerializer(source='team', required=False, read_only=True)
-    assigned_requests = serializers.SerializerMethodField()
-
-    def get_assigned_requests(self, obj):
-        return AssignedRequestDispatchSerializer(AssignedRequest.objects.filter(dispatch_assignment=obj), many=True, required=False, read_only=True).data
+    assigned_requests = AssignedRequestDispatchSerializer(many=True, required=False, read_only=True)
 
     class Meta:
         model = EvacAssignment

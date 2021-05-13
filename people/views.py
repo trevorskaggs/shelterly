@@ -1,6 +1,7 @@
 from django.db.models import Exists, OuterRef, Prefetch
 from rest_framework import filters, permissions, viewsets
 from actstream import action
+from actstream.models import Action
 
 from animals.models import Animal
 from hotline.models import ServiceRequest
@@ -17,10 +18,23 @@ class PersonViewSet(viewsets.ModelViewSet):
     serializer_class = PersonSerializer
 
     def get_queryset(self):
-        queryset = Person.objects.all().annotate(
-            is_owner=Exists(Animal.objects.filter(owners=OuterRef("id")))
-        ).prefetch_related(Prefetch('animal_set', queryset=Animal.objects.prefetch_related(Prefetch('animalimage_set', to_attr='images')), to_attr='animals'))
-
+        queryset = (
+            Person.objects.all()
+            .annotate(is_owner=Exists(Animal.objects.filter(owners=OuterRef("id"))))
+            .prefetch_related(
+                Prefetch(
+                    "animal_set",
+                    queryset=Animal.objects.prefetch_related(
+                        Prefetch("animalimage_set", to_attr="images")
+                    ),
+                    to_attr="animals",
+                )
+            )
+            .prefetch_related("ownercontact_set")
+            .prefetch_related(
+                Prefetch("target_actions", Action.objects.prefetch_related("actor"))
+            )
+        )
         # Status filter.
         status = self.request.query_params.get('status', '')
         if status == 'owners':
