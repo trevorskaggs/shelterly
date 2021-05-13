@@ -10,37 +10,7 @@ from shelter.serializers import SimpleShelterSerializer
 class SimpleAnimalSerializer(serializers.ModelSerializer):
 
     aco_required = serializers.SerializerMethodField()
-<<<<<<< HEAD
-    owner_names = serializers.StringRelatedField(source='owner_objects')
-=======
     owner_names = serializers.StringRelatedField(source='owners', many=True)
-    front_image = serializers.SerializerMethodField()
-    side_image = serializers.SerializerMethodField()
-
-    def get_front_image(self, obj):
-        try:
-            return [animal_image.image.url for animal_image in obj.images.filter(category='front_image')][0]
-            # change this exception
-        except IndexError:
-            return ''
-        except AttributeError:
-            # Should only hit this when returning a single object after create.
-            try:
-                return obj.animalimage_set.filter(category='front_image').first().image.url
-            except AttributeError:
-                return ''
-
-    def get_side_image(self, obj):
-        try:
-            return [animal_image.image.url for animal_image in obj.images.filter(category='side_image')][0]
-        except IndexError:
-            return ''
-        except AttributeError:
-            try:
-                return obj.animalimage_set.filter(category='side_image').first().image.url
-            except AttributeError:
-                return ''
->>>>>>> master
 
     # An Animal is ACO Required if it is aggressive or "Other" species.
     def get_aco_required(self, obj):
@@ -48,20 +18,45 @@ class SimpleAnimalSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Animal
-        fields = ['id', 'species', 'aggressive', 'status', 'aco_required', 'name', 'sex', 'size', 'age', 'pcolor', 'scolor', 'color_notes', 'owner_names', 'front_image', 'side_image']
+        fields = ['id', 'species', 'aggressive', 'status', 'aco_required', 'name', 'sex', 'size', 'age', 'pcolor', 'scolor', 'color_notes', 'owner_names']
 
 class ModestAnimalSerializer(SimpleAnimalSerializer):
+    front_image = serializers.SerializerMethodField()
+    side_image = serializers.SerializerMethodField()
 
     class Meta:
         model = Animal
         fields = ['id', 'species', 'aggressive', 'request', 'shelter', 'status', 'aco_required', 'color_notes', 'front_image', 'side_image']
 
+    def get_front_image(self, obj):
+        try:
+            return [animal_image.image.url for animal_image in obj.images if animal_image.category == 'front_image'][0]
+            # change this exception
+        except IndexError:
+            return ''
+        except AttributeError:
+            # Should only hit this when returning a single object after create.
+            try:
+                return obj.animalimage_set.filter(category='front_image').first().url
+            except AttributeError:
+                return ''
+
+
+    def get_side_image(self, obj):
+        try:
+            return [animal_image.image.url for animal_image in obj.images if animal_image.category == 'side_image'][0]
+        except IndexError:
+            return ''
+        except AttributeError:
+            try:
+                return obj.animalimage_set.filter(category='side_image').first().url
+            except AttributeError:
+                return ''
+
 class AnimalSerializer(ModestAnimalSerializer):
-    front_image = serializers.SerializerMethodField()
-    side_image = serializers.SerializerMethodField()
     extra_images = serializers.SerializerMethodField()
     found_location = serializers.SerializerMethodField()
-    owner_objects = SimplePersonSerializer(many=True, required=False, read_only=True)
+    owners = SimplePersonSerializer(many=True, required=False, read_only=True)
     reporter_object = SimplePersonSerializer(source='reporter', read_only=True)
     request_address = serializers.SerializerMethodField()
     action_history = serializers.SerializerMethodField()
@@ -71,8 +66,8 @@ class AnimalSerializer(ModestAnimalSerializer):
     class Meta:
         model = Animal
         fields = ['id', 'species', 'status', 'aco_required', 'front_image', 'side_image', 'extra_images', 'last_seen', 'intake_date', 'address', 'city', 'state', 'zip_code',
-        'aggressive', 'injured', 'fixed', 'confined', 'found_location', 'owner_names', 'owner_objects', 'shelter_object', 'shelter', 'reporter_object', 'request', 'request_address',
-        'action_history', 'evacuation_assignments', 'room', 'room_name', 'name', 'sex', 'size', 'age', 'pcolor', 'scolor', 'color_notes']
+        'aggressive', 'injured', 'fixed', 'confined', 'found_location', 'owner_names', 'owners', 'shelter_object', 'shelter', 'reporter_object', 'request', 'request_address',
+        'action_history', 'room', 'room_name', 'name', 'sex', 'size', 'age', 'pcolor', 'scolor', 'color_notes']
     def get_found_location(self, obj):
         return build_full_address(obj)
 
@@ -88,30 +83,6 @@ class AnimalSerializer(ModestAnimalSerializer):
 
     def get_action_history(self, obj):
         return []
-
-    def get_front_image(self, obj):
-        try:
-            return [animal_image.image.url for animal_image in obj.images if animal_image.category == 'front_image'][0]
-            # change this exception
-        except IndexError:
-            return ''
-        except AttributeError:
-            # Should only hit this when returning a single object after create.
-            try:
-                return obj.animalimage_set.filter(category='front_image').first().url
-            except AttributeError:
-                return ''
-
-    def get_side_image(self, obj):
-        try:
-            return [animal_image.image.url for animal_image in obj.images if animal_image.category == 'side_image'][0]
-        except IndexError:
-            return ''
-        except AttributeError:
-            try:
-                return obj.animalimage_set.filter(category='side_image').first().url
-            except AttributeError:
-                return ''
 
     def get_extra_images(self, obj):
         try:

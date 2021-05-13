@@ -23,7 +23,7 @@ function AnimalDetails({id}) {
 
   // Initial animal data.
   const [data, setData] = useState({
-    owners: null,
+    owners: [],
     request: null,
     name: '',
     species: '',
@@ -46,8 +46,7 @@ function AnimalDetails({id}) {
     room: null,
     extra_images: [],
     action_history: [],
-    shelter_object: {name: '', full_address: ''},
-    owner_objects: [],
+    shelter_object: {name: '', full_address: ''}
   });
 
   const [show, setShow] = useState(false);
@@ -73,7 +72,7 @@ function AnimalDetails({id}) {
   const handleOwnerSubmit = async () => {
     await axios.patch('/animals/api/animal/' + id + '/', {remove_owner:ownerToDelete.id})
     .then(response => {
-      setData(prevState => ({ ...prevState, "owner_objects":prevState.owner_objects.filter(owner => owner.id !== ownerToDelete.id) }));
+      setData(prevState => ({ ...prevState, "owners":prevState.owners.filter(owner => owner.id !== ownerToDelete.id) }));
       handleOwnerClose();
     })
     .catch(error => {
@@ -278,7 +277,7 @@ function AnimalDetails({id}) {
             </Card.Title>
             <hr/>
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
-              {data.owner_objects.map(owner => (
+              {data.owners.map(owner => (
                 <ListGroup.Item key={owner.id}><b>Owner: </b><Link href={"/people/owner/" + owner.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{owner.first_name} {owner.last_name}</Link>
                 {owner.display_phone ?
                   <OverlayTrigger
@@ -321,7 +320,7 @@ function AnimalDetails({id}) {
               ))}
               {data.reporter ?
               <ListGroup.Item><b>Reporter: </b><Link href={"/people/reporter/" + data.reporter} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.reporter_object.first_name} {data.reporter_object.last_name}</Link></ListGroup.Item> : ""}
-              {data.owner_objects.length < 1 && !data.reporter ? <ListGroup.Item>No Contacts</ListGroup.Item> : ""}
+              {data.owners.length < 1 && !data.reporter ? <ListGroup.Item>No Contacts</ListGroup.Item> : ""}
             </ListGroup>
             <Card.Title>
                <h4 className="mb-0 mt-3">Location</h4>
