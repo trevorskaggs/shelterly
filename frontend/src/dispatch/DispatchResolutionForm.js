@@ -38,7 +38,7 @@ function DispatchResolutionForm({ id }) {
     team: null,
     team_object: {name:''},
     service_requests: [],
-    service_request_objects: [],
+    assigned_requests: [],
     start_time: null,
     end_time: null,
     sr_updates: [],
@@ -64,28 +64,25 @@ function DispatchResolutionForm({ id }) {
         if (!unmounted) {
           let ownerChoices = {}
           response.data["sr_updates"] = [];
-          response.data.service_request_objects.forEach((service_request, index) => {
-            ownerChoices[service_request.id] = []
-            service_request.owner_objects.forEach(owner => {
-              ownerChoices[service_request.id].push({value: owner.id, label: owner.first_name + ' ' + owner.last_name})
+          response.data.assigned_requests.forEach((assigned_request, index) => {
+            ownerChoices[assigned_request.service_request_object.id] = []
+            assigned_request.service_request_object.owner_objects.forEach(owner => {
+              ownerChoices[assigned_request.service_request_object.id].push({value: owner.id, label: owner.first_name + ' ' + owner.last_name})
             })
-            // Use existing VisitNote/OwnerContact to populate data if we're editing a closed Resolution.
-            const visit_note = service_request.visit_notes.filter(note => String(note.evac_assignment) === String(id))[0] || {date_completed:new Date(), notes:'', forced_entry:false}
-            const owner_contact = service_request.owner_contacts.filter(contact => String(contact.evac_assignment) === String(id))[0] || {owner:'', owner_contact_time:'', owner_contact_note:''}
             response.data.sr_updates.push({
-              id: service_request.id,
-              followup_date: service_request.followup_date,
-              date_completed: visit_note.date_completed || new Date(),
-              notes: visit_note.notes || '',
-              forced_entry: visit_note.forced_entry || false,
-              animals: service_request.animals.filter(animal => animal.evacuation_assignments.includes(Number(id))),
-              owner: service_request.owners.length > 0,
-              owner_contact_id: owner_contact.owner,
-              owner_contact_time: owner_contact.owner_contact_time || '',
-              owner_contact_note: owner_contact.owner_contact_note || '',
+              id: assigned_request.service_request_object.id,
+              followup_date: assigned_request.followup_date,
+              date_completed: assigned_request.visit_note ? assigned_request.visit_note.date_completed : new Date(),
+              notes: assigned_request.visit_note ? assigned_request.visit_note.notes : '',
+              forced_entry: assigned_request.visit_note ? assigned_request.visit_note.forced_entry : false,
+              animals: Object.keys(assigned_request.animals).map(animal_id => {return {id:animal_id, status:assigned_request.animals[animal_id].status, shelter:assigned_request.animals[animal_id].shelter || ''}}),
+              owner: assigned_request.service_request_object.owners.length > 0,
+              owner_contact_id: assigned_request.owner_contact ? assigned_request.owner_contact.owner : '',
+              owner_contact_time: assigned_request.owner_contact ? assigned_request.owner_contact.owner_contact_time : '',
+              owner_contact_note: assigned_request.owner_contact ? assigned_request.owner_contact.owner_contact_note : '',
               unable_to_complete: false,
               incomplete: false
-            })
+            });
           });
           setOwnerChoices(ownerChoices);
           setData(response.data);
@@ -227,18 +224,19 @@ function DispatchResolutionForm({ id }) {
                 <ListGroup variant="flush" style={{ marginTop: "-13px", marginBottom: "-13px", textTransform: "capitalize" }}>
                   {data.team && data.team_object.team_member_objects.map(team_member => (
                     <ListGroup.Item key={team_member.id}>
-                      {team_member.first_name + " " + team_member.last_name + " - " + team_member.display_phone}{team_member.agency ? <span>({team_member.agency})</span> : ""}
+                      {team_member.first_name + " " + team_member.last_name}{team_member.agency_id ? <span>&nbsp;({team_member.agency_id})</span> : ""}
                     </ListGroup.Item>
                   ))}
                 </ListGroup>
               </Card.Body>
             </Card>
-            {data.service_request_objects.map((service_request, index) => (
-              <Card key={service_request.id} border="secondary" className="mt-3">
+            {data.assigned_requests.map((assigned_request, index) => (
+              <Card key={assigned_request.service_request_object.id} border="secondary" className="mt-3">
                 <Card.Body>
                   <Card.Title style={{marginBottom:"-5px"}}>
                     <h4>
-                      <Link href={"/hotline/servicerequest/" + service_request.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{service_request.full_address}</Link> |&nbsp;
+                      #{assigned_request.service_request_object.id} -&nbsp;
+                      <Link href={"/hotline/servicerequest/" + assigned_request.service_request_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link> |&nbsp;
                       <Checkbox
                         label={"Not Completed Yet:"}
                         name={`sr_updates.${index}.incomplete`}
@@ -248,7 +246,7 @@ function DispatchResolutionForm({ id }) {
                             const newItems = [...data.sr_updates];
                             newItems[index].incomplete = false;
                             setData(prevState => ({...prevState, sr_updates: newItems}))
-                            props.setFieldValue(`sr_updates.${index}.owner`, service_request.owners.length > 0);
+                            props.setFieldValue(`sr_updates.${index}.owner`, assigned_request.service_request_object.owners.length > 0);
                             props.setFieldValue(`sr_updates.${index}.incomplete`, false);
 
                           }
@@ -275,7 +273,7 @@ function DispatchResolutionForm({ id }) {
                         checked={(props.values.sr_updates[index] && props.values.sr_updates[index].unable_to_complete) || false}
                         onChange={() => {
                           if (props.values.sr_updates[index] && props.values.sr_updates[index].unable_to_complete) {
-                            props.setFieldValue(`sr_updates.${index}.owner`, service_request.owners.length > 0);
+                            props.setFieldValue(`sr_updates.${index}.owner`, assigned_request.service_request_object.owners.length > 0);
                             const newItems = [...data.sr_updates];
                             newItems[index].unable_to_complete = false;
                             setData(prevState => ({...prevState, sr_updates: newItems}))
@@ -301,15 +299,15 @@ function DispatchResolutionForm({ id }) {
                   </Card.Title>
                   <hr />
                   <ListGroup variant="flush" style={{ marginTop: "-13px", marginBottom: "-13px" }}>
-                    {service_request.owner_objects.map(owner => (
+                    {assigned_request.service_request_object.owner_objects.map(owner => (
                       <ListGroup.Item key={owner.id}><b>Owner: </b>{owner.first_name} {owner.last_name}</ListGroup.Item>
                     ))}
-                    {service_request.owners.length < 1 ? <ListGroup.Item><b>Owner: </b>No Owner</ListGroup.Item> : ""}
+                    {assigned_request.service_request_object.owners.length < 1 ? <ListGroup.Item><b>Owner: </b>No Owner</ListGroup.Item> : ""}
                   </ListGroup>
                   <hr />
                   <ListGroup variant="flush" style={{ marginTop: "-13px", marginBottom: "-13px" }}>
                     <h4 className="mt-2" style={{ marginBottom: "-2px" }}>Animals</h4>
-                    {service_request.animals.filter(animal => animal.evacuation_assignments.includes(Number(id))).map((animal, inception) => (
+                    {assigned_request.service_request_object.animals.filter(animal => Object.keys(assigned_request.animals).includes(String(animal.id))).map((animal, inception) => (
                       <ListGroup.Item key={animal.id}>
                         <Row>
                           <Col xs={4} className="pl-0">
@@ -324,7 +322,7 @@ function DispatchResolutionForm({ id }) {
                             />
                           </Col>
                           <span style={{ marginTop:"5px", textTransform:"capitalize" }}>
-                            #{animal.id} - <Link href={"/animals/" + animal.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.name || "Unknown"}</Link>&nbsp;({animal.species})
+                            #{animal.id} - {animal.name || "Unknown"}&nbsp;({animal.species})
                             {animal.color_notes ?
                             <OverlayTrigger
                               key={"animal-color-notes"}
@@ -384,7 +382,8 @@ function DispatchResolutionForm({ id }) {
                       onChange={(date, dateStr) => {
                         props.setFieldValue(`sr_updates.${index}.followup_date`, dateStr)
                       }}
-                      value={service_request.followup_date || null}
+                      value={assigned_request.followup_date || null}
+                      disabled={data.end_time !== null && assigned_request.followup_date !== assigned_request.service_request_object.followup_date}
                     />
                   </BootstrapForm.Row>
                   <BootstrapForm.Row className="mt-3">
@@ -403,7 +402,7 @@ function DispatchResolutionForm({ id }) {
                       <Field component={Switch} name={`sr_updates.${index}.forced_entry`} type="checkbox" color="primary" />
                     </Col>
                   </BootstrapForm.Row>
-                  {service_request.owners.length > 0 ?
+                  {assigned_request.service_request_object.owners.length > 0 ?
                     <span>
                       <BootstrapForm.Row className="mt-2">
                         <Col xs="4">
@@ -414,7 +413,7 @@ function DispatchResolutionForm({ id }) {
                           key={`my_unique_test_select_key__d}`}
                           type="text"
                           xs="4"
-                          options={ownerChoices[service_request.id]}
+                          options={ownerChoices[assigned_request.service_request_object.id]}
                           value={props.values.sr_updates[index] ? props.values.sr_updates[index].owner_contact_id : null}
                           isClearable={false}
                         />

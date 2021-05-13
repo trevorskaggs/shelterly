@@ -3,8 +3,9 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Case, BooleanField, Prefetch, Value, When, Exists
 from copy import deepcopy
 from datetime import datetime
-from rest_framework import filters, viewsets
+from rest_framework import filters, permissions, viewsets
 from actstream import action
+from actstream.models import Action
 
 from people.models import Person
 from animals.models import Animal, AnimalImage
@@ -14,8 +15,9 @@ class AnimalViewSet(viewsets.ModelViewSet):
 
     queryset = Animal.objects.exclude(status="CANCELED").prefetch_related(Prefetch('animalimage_set', to_attr='images')).order_by('order')
 
-    search_fields = ['id', 'name', 'species', 'status', 'pcolor', 'request__address', 'request__city', 'owners__first_name', 'owners__last_name', 'owners__address', 'owners__city', 'reporter__first_name', 'reporter__last_name']
+    search_fields = ['id', 'name', 'species', 'status', 'pcolor', 'request__address', 'request__city', 'owners__first_name', 'owners__last_name', 'owners__phone', 'owners__drivers_license', 'owners__address', 'owners__city', 'reporter__first_name', 'reporter__last_name']
     filter_backends = (filters.SearchFilter,)
+    permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = AnimalSerializer
 
     def perform_create(self, serializer):
@@ -167,8 +169,7 @@ class AnimalViewSet(viewsets.ModelViewSet):
         #filter by stray
         if self.request.query_params.get('owned', '') == 'stray':
             queryset = queryset.filter(owners=None)
-        elif self.request.query_params.get('owned', '') == 'owned':
+        elif self.request.query_params.get("owned", "") == "owned":
             queryset = queryset.filter(owners__isnull=False)
-            
+
         return queryset
-    

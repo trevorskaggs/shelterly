@@ -40,11 +40,13 @@ export const dogColorChoices = [
   {value:'blue', label:'Blue'},
   {value:'brindle', label:'Brindle'},
   {value:'brown', label:'Brown'},
-  {value:'tan', label:'Tan'},
   {value:'cream', label:'Cream/Taupe'},
   {value:'gold', label:'Gold'},
   {value:'gray', label:'Gray'},
+  {value:'harlequin', label:'Harlequin'},
+  {value:'pink', label:'Pink'},
   {value:'red', label:'Red'},
+  {value:'tan', label:'Tan'},
   {value:'white', label:'White'},
   {value:'yellow', label:'Yellow'},
 ]
@@ -52,11 +54,17 @@ export const dogColorChoices = [
 // Source: https://en.wikipedia.org/wiki/Cat_coat_genetics
 export const catColorChoices = [
   {value:'black', label:'Black'},
+  {value:'blue', label:'Blue'},
   {value:'caramel', label:'Caramel'},
   {value:'chocolate', label:'Chocolate'},
   {value:'cinnamon', label:'Cinnamon'},
+  {value:'cream', label:'Cream'},
+  {value:'fawn', label:'Fawn'},
   {value:'grey', label:'Grey'},
+  {value:'lilac', label:'Lilac'},
   {value:'orange', label:'Orange'},
+  {value:'red', label:'Red'},
+  {value:'smoke', label:'Smoke'},
   {value:'white', label:'White'},
 ]
 

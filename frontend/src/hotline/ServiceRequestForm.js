@@ -171,7 +171,7 @@ function ServiceRequestForm(props) {
           <span style={{cursor:'pointer'}} onClick={() => {props.handleBack('request', 'animals')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}{id ? "Update " : ""}Service Request{is_workflow ? " Information" :""}</Card.Header>
         <Card.Body>
         <BootstrapForm as={Form}>
-            <AddressSearch formikProps={formikProps} label="Search" show_apt={true} show_same={props.state.steps.owner.address} />
+            <AddressSearch formikProps={formikProps} label="Search for Service Request Address" show_apt={true} show_same={props.state.steps.owner.address} />
             <BootstrapForm.Row>
               <TextInput
                 as="textarea"

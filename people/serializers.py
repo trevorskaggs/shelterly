@@ -65,7 +65,8 @@ class PersonSerializer(SimplePersonSerializer):
     action_history = serializers.SerializerMethodField()
 
     def get_animals(self, obj):
-        return obj.animal_set.exclude(status='CANCELED').values() | obj.animals.exclude(status='CANCELED').values()
+        from animals.serializers import ModestAnimalSerializer
+        return ModestAnimalSerializer(obj.animal_set.exclude(status='CANCELED') | obj.animals.exclude(status='CANCELED'), many=True).data
 
     # Custom field for the action history.
     def get_action_history(self, obj):

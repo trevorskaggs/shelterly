@@ -1,5 +1,7 @@
 from django.db import models
 
+from hotline.models import ServiceRequest
+
 class EvacTeamMember(models.Model):
 
     first_name = models.CharField(max_length=50, blank=False)
@@ -8,7 +10,8 @@ class EvacTeamMember(models.Model):
     agency_id = models.CharField(max_length=50, blank=True)
 
     def __str__(self):
-        return "%s, %s" % (self.last_name, self.first_name)
+        agency = " (%s)" % (self.agency_id) if self.agency_id else ""
+        return "%s, %s%s" % (self.last_name, self.first_name, agency)
 
     class Meta:
         ordering = ['last_name', 'first_name']
@@ -23,14 +26,20 @@ class DispatchTeam(models.Model):
         ordering = ['-dispatch_date',]
 
 class EvacAssignment(models.Model):
-    from hotline.models import ServiceRequest
 
     team = models.ForeignKey(DispatchTeam, on_delete=models.SET_NULL, blank=True, null=True)
-    service_requests = models.ManyToManyField(ServiceRequest, related_name='evacuation_assignments')
-    # do we need this or can we get animals from SR?
-    animals = models.ManyToManyField('animals.Animal', blank=True, related_name='evacuation_assignments')
+    service_requests = models.ManyToManyField(ServiceRequest, through='AssignedRequest', related_name='evacuation_assignments')
     start_time = models.DateTimeField(auto_now_add=True)
     end_time = models.DateTimeField(blank=True, null=True)
 
     class Meta:
         ordering = ['-start_time',]
+
+class AssignedRequest(models.Model):
+
+    service_request = models.ForeignKey(ServiceRequest, null=True, on_delete=models.SET_NULL)
+    dispatch_assignment = models.ForeignKey(EvacAssignment, null=True, on_delete=models.SET_NULL)
+    animals = models.JSONField()
+    followup_date = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
+    owner_contact = models.ForeignKey('people.OwnerContact', null=True, on_delete=models.CASCADE, related_name='assigned_request')
+    visit_note = models.ForeignKey('hotline.VisitNote', null=True, on_delete=models.CASCADE, related_name='assigned_request')
