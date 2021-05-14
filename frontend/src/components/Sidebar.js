@@ -66,11 +66,8 @@ const Menu = ({ state, dispatch, removeCookie, ...props }) => {
     }, []);
     const [activated, setActivated] = useState({show:false, user_count:""});
     const handleClose = () => setActivated({show:false, user_count:""});
-    const activateIncident = async () => {
-      let source = axios.CancelToken.source();
-      await axios.post('/activate/', {
-        canceltoken: source.token,
-      })
+    const activateIncident = () => {
+      axios.get('/activate/', {})
       .then(response => {
         setActivated({show:true, user_count:response.data.user_count})
       })
