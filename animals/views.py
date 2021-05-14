@@ -13,7 +13,7 @@ from animals.serializers import AnimalSerializer
 
 class AnimalViewSet(viewsets.ModelViewSet):
 
-    queryset = Animal.objects.exclude(status="CANCELED").with_images().order_by('order')
+    queryset = Animal.objects.with_images().exclude(status="CANCELED").order_by('order')
 
     search_fields = ['id', 'name', 'species', 'status', 'pcolor', 'request__address', 'request__city', 'owners__first_name', 'owners__last_name', 'owners__phone', 'owners__drivers_license', 'owners__address', 'owners__city', 'reporter__first_name', 'reporter__last_name']
     filter_backends = (filters.SearchFilter,)
