@@ -5,12 +5,14 @@ from actstream import action
 from actstream.models import Action
 from django_filters import rest_framework as filters
 from django.db.models import Count, Prefetch, Q
+from rest_framework import permissions
 from .serializers import ShelterSerializer, ModestShelterSerializer, SimpleBuildingSerializer, RoomSerializer
 
 class ShelterViewSet(viewsets.ModelViewSet):
-    # add permissions
     queryset = Shelter.objects.all()
     serializer_class = ShelterSerializer
+    permission_classes = [permissions.IsAuthenticated, ]
+
 
     def get_serializer_class(self):
         if self.action == 'list':
@@ -72,6 +74,7 @@ class BuildingViewSet(viewsets.ModelViewSet):
 
     queryset = Building.objects.all()
     serializer_class = SimpleBuildingSerializer
+    permission_classes = [permissions.IsAuthenticated, ]
 
     def perform_create(self, serializer):
         if serializer.is_valid():
@@ -88,6 +91,7 @@ class RoomViewSet(viewsets.ModelViewSet):
 
     queryset = Room.objects.all()
     serializer_class = RoomSerializer
+    permission_classes = [permissions.IsAuthenticated, ]
 
     def perform_create(self, serializer):
         if serializer.is_valid():
