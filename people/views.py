@@ -19,29 +19,26 @@ class PersonViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = (
-            Person.objects.all()
+            Person.objects.with_history()
+            .all()
             .annotate(is_owner=Exists(Animal.objects.filter(owners=OuterRef("id"))))
             .prefetch_related(
                 Prefetch(
                     "animal_set",
-                    queryset=Animal.objects.prefetch_related(
-                        Prefetch("animalimage_set", to_attr="images")
-                    ),
+                    queryset=Animal.objects.with_images(),
                     to_attr="animals",
                 )
             )
             .prefetch_related("ownercontact_set")
-            .prefetch_related(
-                Prefetch("target_actions", Action.objects.prefetch_related("actor"))
-            )
         )
         # Status filter.
-        status = self.request.query_params.get('status', '')
-        if status == 'owners':
+        status = self.request.query_params.get("status", "")
+        if status == "owners":
             queryset = queryset.filter(is_owner=True)
-        elif status == 'reporters':
+        elif status == "reporters":
             queryset = queryset.filter(is_owner=False)
         return queryset
+
 
     def perform_create(self, serializer):
         if serializer.is_valid():

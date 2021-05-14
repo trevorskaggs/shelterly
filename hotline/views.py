@@ -66,7 +66,7 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
             )
             .annotate(
                 pending=Case(When(Q(followup_date__lte=datetime.today()) | Q(followup_date__isnull=True), then=Value(True)), default=Value(False), output_field=BooleanField())
-            ).prefetch_related(Prefetch('animal_set', queryset=Animal.objects.exclude(status='CANCELED').prefetch_related('owners').prefetch_related(Prefetch('animalimage_set', to_attr='images')), to_attr='animals'))
+            ).prefetch_related(Prefetch('animal_set', queryset=Animal.objects.exclude(status='CANCELED').prefetch_related('owners').with_images(), to_attr='animals'))
             .prefetch_related('owners')
             .select_related('reporter')
             .prefetch_related('evacuation_assignments')

@@ -1,11 +1,13 @@
 from django.db import models
 from location.models import Location
+from ..managers import ActionHistoryManager
 # Create your models here.
 
 class BaseShelterModel(models.Model):
 
     name = models.CharField(max_length=100)
     description = models.CharField(max_length=400, blank=True)
+    objects = ActionHistoryManager()
 
     def __str__(self):
         return self.name.upper()

@@ -45,9 +45,7 @@ class ShelterViewSet(viewsets.ModelViewSet):
             .prefetch_related(
                 Prefetch(
                     "building_set",
-                    Building.objects.prefetch_related(
-                        Prefetch("target_actions", Action.objects.prefetch_related("actor"))
-                    )
+                    Building.objects.with_history()
                     .annotate(
                         animal_count=Count(
                             "room__animal", filter=~Q(room__animal__status="CANCELED")
@@ -56,12 +54,7 @@ class ShelterViewSet(viewsets.ModelViewSet):
                     .prefetch_related(
                         Prefetch(
                             "room_set",
-                            Room.objects.prefetch_related(
-                                Prefetch(
-                                    "target_actions",
-                                    Action.objects.prefetch_related("actor"),
-                                )
-                            ).annotate(
+                            Room.objects.with_history().annotate(
                                 animal_count=Count(
                                     "animal", filter=~Q(animal__status="CANCELED")
                                 )
@@ -70,9 +63,7 @@ class ShelterViewSet(viewsets.ModelViewSet):
                     ),
                 )
             )
-            .prefetch_related(
-                Prefetch("target_actions", Action.objects.prefetch_related("actor"))
-            )
+            .with_history()
         )
 
 
