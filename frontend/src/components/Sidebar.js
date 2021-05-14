@@ -1,8 +1,9 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
+import axios from "axios";
 import styled from 'styled-components';
 import { Link } from 'raviger';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Nav } from 'react-bootstrap';
+import { Button, Nav, Modal } from 'react-bootstrap';
 import { faHome, faBullhorn, faPhone, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
 import { logoutUser } from ".././accounts/AccountsUtils";
 import { S3_BUCKET } from '../constants';
@@ -63,7 +64,18 @@ const Menu = ({ state, dispatch, removeCookie, ...props }) => {
     useEffect(() => {
        document.title = "Shelterly"
     }, []);
-    
+    const [activated, setActivated] = useState({show:false, user_count:""});
+    const handleClose = () => setActivated({show:false, user_count:""});
+    const activateIncident = async () => {
+      let source = axios.CancelToken.source();
+      await axios.post('activate/', {
+        canceltoken: source.token,
+      })
+      .then(response => {
+        //setActivated({show:true, user_count:response.data.user_count})
+      })
+    };
+
     return (
     <StyledMenu  {...props} className="flex-column" style={{ height: viewHeight }}>
     <Link href="/"><img src={`${S3_BUCKET}images/shelterly.png`} alt="Logo" /></Link>
@@ -71,8 +83,21 @@ const Menu = ({ state, dispatch, removeCookie, ...props }) => {
       <Link href="/hotline" ><FontAwesomeIcon icon={faPhone} fixedWidth inverse/> HOTLINE</Link>
       <Link href="/dispatch"><FontAwesomeIcon icon={faBullhorn} fixedWidth inverse/>  DISPATCH</Link>
       <Link href="/shelter"><FontAwesomeIcon icon={faHome} fixedWidth inverse/> SHELTER</Link>
-      {state.user.is_superuser ? <Link href="/activate"><FontAwesomeIcon icon={faHome} fixedWidth inverse/> ACTIVATE</Link>: ""}
+      {state.user.is_superuser ? <Link onClick={() => activateIncident()} href="#"><FontAwesomeIcon icon={faHome} fixedWidth inverse/> ACTIVATE</Link>: ""}
       {state.user ? <Link onClick={() => logoutUser({dispatch}, {removeCookie})} href="#"><FontAwesomeIcon icon={faSignOutAlt} fixedWidth inverse/> SIGN OUT</Link> : ""}
+      <Modal show={activated.show} onHide={handleClose}>
+        <Modal.Header closeButton>
+          <Modal.Title>Incident Activated</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>
+            Inicident Started! {activated.user_count} new users added!
+          </p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleClose}>Close</Button>
+        </Modal.Footer>
+      </Modal>
     </StyledMenu>
     )
   }
