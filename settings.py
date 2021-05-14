@@ -32,7 +32,7 @@ ORGANIZATION = os.environ.get('ORGANIZATION')
 INCIDENT_NAME = os.environ.get('INCIDENT_NAME')
 SHELTERLY_VERSION = os.environ.get('SHELTERLY_VERSION')
 
-DEBUG = True
+DEBUG = False
 # SECURITY WARNING: don't run with debug turned on in production!
 ALLOWED_HOSTS = ['*']
 AUTH_USER_MODEL = 'accounts.ShelterlyUser'
@@ -76,9 +76,7 @@ INSTALLED_APPS = [
     'shelter',
     'frontend',
     'ordered_model',
-    'actstream',
-    'drf_yasg',
-    'silk'
+    'actstream'
 ]
 
 ACTSTREAM_SETTINGS = {
@@ -87,7 +85,6 @@ ACTSTREAM_SETTINGS = {
 }
 
 MIDDLEWARE = [
-    'silk.middleware.SilkyMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
