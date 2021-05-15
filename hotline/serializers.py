@@ -45,9 +45,17 @@ class VisitNoteSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class BarebonesServiceRequestSerializer(serializers.ModelSerializer):
+    full_address = serializers.SerializerMethodField()
+
     class Meta:
         model = ServiceRequest
         fields = ['id', 'full_address']
+
+
+    # Custom field for the full address.
+    def get_full_address(self, obj):
+        return build_full_address(obj)
+
 
 class SimpleServiceRequestSerializer(serializers.ModelSerializer):
     from people.serializers import SimplePersonSerializer

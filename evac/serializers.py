@@ -3,10 +3,10 @@ import re
 from rest_framework import serializers
 from actstream.models import target_stream
 
-from animals.serializers import ModestAnimalSerializer
+from animals.serializers import ModestAnimalSerializer, SimpleAnimalSerializer
 from evac.models import DispatchTeam, EvacAssignment, EvacTeamMember, AssignedRequest
 from hotline.models import ServiceRequest, VisitNote
-from hotline.serializers import SimpleServiceRequestSerializer, VisitNoteSerializer
+from hotline.serializers import BarebonesServiceRequestSerializer, SimpleServiceRequestSerializer, VisitNoteSerializer
 from people.serializers import OwnerContactSerializer, SimplePersonSerializer
 
 from location.utils import build_action_string
@@ -44,9 +44,9 @@ class DispatchTeamSerializer(serializers.ModelSerializer):
         model = DispatchTeam
         fields = '__all__'
 
-class DispatchServiceRequestSerializer(SimpleServiceRequestSerializer):
+class DispatchServiceRequestSerializer(BarebonesServiceRequestSerializer):
 
-    animals = ModestAnimalSerializer(source='animal_set', many=True, read_only=True)
+    animals = SimpleAnimalSerializer(source='animal_set', many=True, read_only=True)
     owner_contacts = OwnerContactSerializer(source='ownercontact_set', many=True, required=False, read_only=True)
     owner_objects = SimplePersonSerializer(source='owners', many=True, required=False, read_only=True)
     visit_notes = VisitNoteSerializer(source='visitnote_set', many=True, required=False, read_only=True)
@@ -62,7 +62,7 @@ class DispatchServiceRequestSerializer(SimpleServiceRequestSerializer):
     class Meta:
         model = ServiceRequest
         fields = ['id', 'latitude', 'longitude', 'full_address', 'followup_date', 'status',
-        'injured', 'accessible', 'turn_around', 'animals', 'reported_animals', 'sheltered_in_place', 'unable_to_locate', 'aco_required',
+         'accessible', 'turn_around', 'animals',
         'owner_contacts', 'owner_objects', 'owners', 'latest_evac', 'visit_notes']
 
 class AssignedRequestDispatchSerializer(serializers.ModelSerializer):
@@ -73,6 +73,7 @@ class AssignedRequestDispatchSerializer(serializers.ModelSerializer):
     previous_visit = serializers.SerializerMethodField()
 
     def get_previous_visit(self, obj):
+        # want to exclude this assigned request but get latest visit pertaining to this the SR the AR belongs to
         if VisitNote.objects.filter(assigned_request__service_request=obj.service_request).exclude(assigned_request=obj).exists():
             return VisitNoteSerializer(VisitNote.objects.filter(assigned_request__service_request=obj.service_request).exclude(assigned_request=obj).latest('date_completed')).data
         return None

@@ -77,7 +77,8 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
                     is_animal_owner=Exists(Animal.objects.filter(owners__id=OuterRef('id'))))))
             .select_related('reporter')
             .prefetch_related('evacuation_assignments')
-        )).prefetch_related(Prefetch('team', DispatchTeam.objects.prefetch_related('team_members')))
+        )).prefetch_related(Prefetch('team', DispatchTeam.objects.prefetch_related('team_members'))).prefetch_related(Prefetch('assigned_requests',
+        AssignedRequest.objects.select_related('service_request', 'owner_contact').prefetch_related('service_request__owners', 'service_request__animal_set', 'service_request__ownercontact_set')))
 
         # Exclude EAs without animals when fetching for a map.
         is_map = self.request.query_params.get('map', '')
