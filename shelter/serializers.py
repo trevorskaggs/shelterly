@@ -25,8 +25,14 @@ class RoomSerializer(SimpleRoomSerializer):
     action_history = serializers.SerializerMethodField()
 
     def get_animals(self, obj):
-        from animals.serializers import AnimalSerializer
-        return AnimalSerializer(obj.animal_set.exclude(status='CANCELED'), many=True, required=False, read_only=True).data
+        from animals.serializers import AnimalSerializer, SimpleAnimalSerializer
+        if hasattr(obj, 'animals'):
+            # if this is a list of rooms for shelter/building endpoints, we have prefethed animals and 
+            # only need simple serialization
+            return SimpleAnimalSerializer(obj.animals, many=True, required=False, read_only=True).data
+        else:
+            # we don't bother prefetching for single obj return
+            return AnimalSerializer(obj.animal_set.exclude(status='CANCELED'), many=True, required=False, read_only=True).data
 
     def get_action_history(self, obj):
         return [build_action_string(action) for action in obj.target_actions.all()]
@@ -51,13 +57,11 @@ class SimpleBuildingSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class BuildingSerializer(SimpleBuildingSerializer):
-    animal_count = serializers.IntegerField(read_only=True)
+    animal_count = serializers.IntegerField()
     rooms = RoomSerializer(source='room_set', many=True, required=False, read_only=True)
 
 class SimpleShelterSerializer(serializers.ModelSerializer):
     full_address = serializers.SerializerMethodField()
-    animal_count = serializers.IntegerField(read_only=True)
-    room_count = serializers.IntegerField(read_only=True)
     display_phone = serializers.SerializerMethodField()
 
     # Custom field for the full address.
@@ -75,8 +79,13 @@ class SimpleShelterSerializer(serializers.ModelSerializer):
 
 class ModestShelterSerializer(SimpleShelterSerializer):
     buildings = SimpleBuildingSerializer(source='building_set', many=True, required=False, read_only=True)
+    animal_count = serializers.IntegerField()
+    room_count = serializers.IntegerField()
+
+
 
 class ShelterSerializer(ModestShelterSerializer):
+    #Single obj serializer
     unroomed_animals = serializers.SerializerMethodField()
     buildings = BuildingSerializer(source='building_set', many=True, required=False, read_only=True)
     action_history = serializers.SerializerMethodField()

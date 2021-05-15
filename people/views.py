@@ -25,7 +25,7 @@ class PersonViewSet(viewsets.ModelViewSet):
             .prefetch_related(
                 Prefetch(
                     "animal_set",
-                    queryset=Animal.objects.with_images(),
+                    queryset=Animal.objects.with_images().prefetch_related('owners'),
                     to_attr="animals",
                 )
             )

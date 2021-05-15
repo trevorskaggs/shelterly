@@ -1,3 +1,4 @@
+from evac.models import EvacAssignment
 from django.db.models import Case, Count, Exists, OuterRef, Prefetch, Q, When, Value, BooleanField
 from actstream import action
 from datetime import datetime
@@ -69,7 +70,7 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
             ).prefetch_related(Prefetch('animal_set', queryset=Animal.objects.with_images().exclude(status='CANCELED').prefetch_related('owners'), to_attr='animals'))
             .prefetch_related('owners')
             .select_related('reporter')
-            .prefetch_related('evacuation_assignments')
+            .prefetch_related(Prefetch('evacuation_assignments', EvacAssignment.objects.select_related('team').prefetch_related('team__team_members')))
         )
 
         # Status filter.
