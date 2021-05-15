@@ -25,14 +25,16 @@ class RoomSerializer(SimpleRoomSerializer):
     action_history = serializers.SerializerMethodField()
 
     def get_animals(self, obj):
-        from animals.serializers import AnimalSerializer, SimpleAnimalSerializer
-        if hasattr(obj, 'animals'):
+        from animals.serializers import AnimalSerializer, ModestAnimalSerializer
+        if 'shelter/api/shelter' in self.context['request'].path:
             # if this is a list of rooms for shelter/building endpoints, we have prefethed animals and 
             # only need simple serialization
-            return SimpleAnimalSerializer(obj.animals, many=True, required=False, read_only=True).data
+            if hasattr(obj, 'animals'):
+                return ModestAnimalSerializer(obj.animals, many=True, required=False, read_only=True).data
+            else:
+                ModestAnimalSerializer(obj.animal_set.exclude(status='CANCELED'), many=True, required=False, read_only=True).data
         else:
-            # we don't bother prefetching for single obj return
-            return AnimalSerializer(obj.animal_set.exclude(status='CANCELED'), many=True, required=False, read_only=True).data
+            return AnimalSerializer(obj.animals, many=True, required=False, read_only=True).data
 
     def get_action_history(self, obj):
         return [build_action_string(action) for action in obj.target_actions.all()]
@@ -57,7 +59,7 @@ class SimpleBuildingSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class BuildingSerializer(SimpleBuildingSerializer):
-    animal_count = serializers.IntegerField()
+    animal_count = serializers.IntegerField(read_only=True)
     rooms = RoomSerializer(source='room_set', many=True, required=False, read_only=True)
 
 class SimpleShelterSerializer(serializers.ModelSerializer):
@@ -95,8 +97,8 @@ class ShelterSerializer(ModestShelterSerializer):
 
     # Custom field for total animals.
     def get_unroomed_animals(self, obj):
-        from animals.serializers import SimpleAnimalSerializer
-        return SimpleAnimalSerializer(obj.animal_set.filter(room=None).exclude(status='CANCELED'), many=True).data
+        from animals.serializers import ModestAnimalSerializer
+        return ModestAnimalSerializer(obj.animal_set.filter(room=None).exclude(status='CANCELED'), many=True).data
 
     # Truncates latitude and longitude.
     def to_internal_value(self, data):

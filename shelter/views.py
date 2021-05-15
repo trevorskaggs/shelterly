@@ -10,7 +10,6 @@ from .serializers import ShelterSerializer, ModestShelterSerializer, SimpleBuild
 from animals.models import Animal
 
 class ShelterViewSet(viewsets.ModelViewSet):
-    queryset = Shelter.objects.all()
     serializer_class = ShelterSerializer
     permission_classes = [permissions.IsAuthenticated, ]
 
@@ -72,7 +71,6 @@ class ShelterViewSet(viewsets.ModelViewSet):
 
 class BuildingViewSet(viewsets.ModelViewSet):
     # add permissions
-
     queryset = Building.objects.all()
     serializer_class = SimpleBuildingSerializer
     permission_classes = [permissions.IsAuthenticated, ]
@@ -90,7 +88,6 @@ class BuildingViewSet(viewsets.ModelViewSet):
 class RoomViewSet(viewsets.ModelViewSet):
     # add permissions
 
-    queryset = Room.objects.all()
     serializer_class = RoomSerializer
     permission_classes = [permissions.IsAuthenticated, ]
 
@@ -103,3 +100,7 @@ class RoomViewSet(viewsets.ModelViewSet):
         if serializer.is_valid():
             room = serializer.save()
             action.send(self.request.user, verb='updated room', target=room)
+
+    def get_queryset(self):
+        return Room.objects.select_related('building__shelter').with_history().prefetch_related(Prefetch('animal_set', Animal.objects.with_images().exclude(status='CANCELED').prefetch_related('owners'), to_attr='animals'))
+        

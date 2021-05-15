@@ -4,7 +4,7 @@ from shelter import views
 app_name = 'shelter'
 
 router = DefaultRouter()
-router.register(r'shelter', views.ShelterViewSet)
+router.register(r'shelter', views.ShelterViewSet, basename='shelter')
 router.register(r'building', views.BuildingViewSet, basename='building')
 router.register(r'room', views.RoomViewSet, basename='room')
 
