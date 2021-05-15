@@ -10,7 +10,7 @@ from shelter.serializers import SimpleShelterSerializer
 class SimpleAnimalSerializer(serializers.ModelSerializer):
 
     aco_required = serializers.SerializerMethodField()
-    owner_names = serializers.StringRelatedField(source='owners', many=True)
+    owner_names = serializers.StringRelatedField(source='owners', many=True, read_only=True)
 
     # An Animal is ACO Required if it is aggressive or "Other" species.
     def get_aco_required(self, obj):

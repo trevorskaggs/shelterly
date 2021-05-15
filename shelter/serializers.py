@@ -7,7 +7,7 @@ from location.utils import build_full_address, build_action_string
 from animals.models import Animal
 
 class SimpleRoomSerializer(serializers.ModelSerializer):
-    animal_count = serializers.IntegerField()
+    animal_count = serializers.IntegerField(read_only=True)
     building_name = serializers.StringRelatedField(source='building')
 
 
@@ -51,13 +51,13 @@ class SimpleBuildingSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class BuildingSerializer(SimpleBuildingSerializer):
-    animal_count = serializers.IntegerField()
+    animal_count = serializers.IntegerField(read_only=True)
     rooms = RoomSerializer(source='room_set', many=True, required=False, read_only=True)
 
 class SimpleShelterSerializer(serializers.ModelSerializer):
     full_address = serializers.SerializerMethodField()
-    animal_count = serializers.IntegerField()
-    room_count = serializers.IntegerField()
+    animal_count = serializers.IntegerField(read_only=True)
+    room_count = serializers.IntegerField(read_only=True)
     display_phone = serializers.SerializerMethodField()
 
     # Custom field for the full address.

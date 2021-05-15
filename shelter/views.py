@@ -74,7 +74,6 @@ class BuildingViewSet(viewsets.ModelViewSet):
 
     queryset = Building.objects.all()
     serializer_class = SimpleBuildingSerializer
-    permission_classes = [permissions.IsAuthenticated, ]
 
     def perform_create(self, serializer):
         if serializer.is_valid():
@@ -85,6 +84,12 @@ class BuildingViewSet(viewsets.ModelViewSet):
         if serializer.is_valid():
             building = serializer.save()
             action.send(self.request.user, verb='updated building', target=building)
+
+    def get_queryset(self):
+        return Building.objects.all().annotate(
+            animal_count=Count(
+                "room__animal", filter=~Q(room__animal__status="CANCELED")
+            ))
 
 class RoomViewSet(viewsets.ModelViewSet):
     # add permissions
