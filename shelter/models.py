@@ -10,7 +10,7 @@ class BaseShelterModel(models.Model):
     objects = ActionHistoryQueryset.as_manager()
 
     def __str__(self):
-        return self.name.upper()
+        return self.name
 
     class Meta:
         abstract=True

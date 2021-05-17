@@ -22,6 +22,9 @@ class DispatchTeam(models.Model):
     team_members = models.ManyToManyField(EvacTeamMember)
     dispatch_date = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return self.name
+
     class Meta:
         ordering = ['-dispatch_date',]
 
@@ -37,7 +40,7 @@ class EvacAssignment(models.Model):
 
 class AssignedRequest(models.Model):
 
-    service_request = models.ForeignKey(ServiceRequest, null=True, on_delete=models.SET_NULL, related_name='come_on')
+    service_request = models.ForeignKey(ServiceRequest, null=True, on_delete=models.SET_NULL)
     dispatch_assignment = models.ForeignKey(EvacAssignment, null=True, on_delete=models.SET_NULL, related_name='assigned_requests')
     animals = models.JSONField()
     followup_date = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)

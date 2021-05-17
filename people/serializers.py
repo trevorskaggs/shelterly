@@ -61,13 +61,13 @@ class PersonSerializer(SimplePersonSerializer):
 
     owner_contacts = OwnerContactSerializer(source='ownercontact_set', many=True, required=False, read_only=True)
     animals = serializers.SerializerMethodField()
-    # request = serializers.SerializerMethodField()
+    request = serializers.SerializerMethodField()
     action_history = serializers.SerializerMethodField()
 
     def get_animals(self, obj):
         from animals.serializers import ModestAnimalSerializer
-        if hasattr(obj, 'animals'):
-            return ModestAnimalSerializer(obj.animals, many=True).data
+        if hasattr(obj, 'reporter_animals'):
+            return ModestAnimalSerializer(obj.reporter_animals, many=True).data
         else:
             return ModestAnimalSerializer(obj.animal_set.all(), many=True).data
 

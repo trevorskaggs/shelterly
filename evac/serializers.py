@@ -50,20 +50,12 @@ class DispatchServiceRequestSerializer(BarebonesServiceRequestSerializer):
     owner_contacts = OwnerContactSerializer(source='ownercontact_set', many=True, required=False, read_only=True)
     owner_objects = SimplePersonSerializer(source='owners', many=True, required=False, read_only=True)
     visit_notes = VisitNoteSerializer(source='visitnote_set', many=True, required=False, read_only=True)
-    latest_evac = serializers.SerializerMethodField()
-
-    def get_latest_evac(self, obj):
-        #TODO
-        assigned_evac = EvacAssignment.objects.filter(service_requests=obj, end_time__isnull=True).values('id', 'start_time', 'end_time').first()
-        if assigned_evac:
-            return assigned_evac
-        return EvacAssignment.objects.filter(service_requests=obj, end_time__isnull=False).values('id', 'start_time', 'end_time').first()
 
     class Meta:
         model = ServiceRequest
-        fields = ['id', 'latitude', 'longitude', 'full_address', 'followup_date', 'status',
-         'accessible', 'turn_around', 'animals',
-        'owner_contacts', 'owner_objects', 'owners', 'latest_evac', 'visit_notes']
+        fields = ['id', 'latitude', 'longitude', 'full_address', 'followup_date', 'status', 'injured',
+         'accessible', 'turn_around', 'animals', 'reported_animals', 'sheltered_in_place', 'unable_to_locate', 'aco_required',
+        'owner_contacts', 'owner_objects', 'owners', 'visit_notes']
 
 class AssignedRequestDispatchSerializer(serializers.ModelSerializer):
 
@@ -86,13 +78,6 @@ class SimpleEvacAssignmentSerializer(serializers.ModelSerializer):
 
     team_name = serializers.StringRelatedField(source='team')
     team_member_names = serializers.SerializerMethodField()
-
-    def get_team_name(self, obj):
-        # does this kick off another query?
-        try:
-            return obj.team.name
-        except AttributeError:
-            return ''
 
     def get_team_member_names(self, obj):
         #TODO: use StringRelatedField and EvacTeamMember __str__ method

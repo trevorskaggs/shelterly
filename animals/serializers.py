@@ -38,7 +38,7 @@ class ModestAnimalSerializer(SimpleAnimalSerializer):
         except AttributeError:
             # Should only hit this when returning a single object after create.
             try:
-                return obj.animalimage_set.filter(category='front_image').first().url
+                return obj.animalimage_set.filter(category='front_image').first().image.url
             except AttributeError:
                 return ''
 
@@ -50,7 +50,7 @@ class ModestAnimalSerializer(SimpleAnimalSerializer):
             return ''
         except AttributeError:
             try:
-                return obj.animalimage_set.filter(category='side_image').first().url
+                return obj.animalimage_set.filter(category='side_image').first().image.url
             except AttributeError:
                 return ''
 
@@ -67,7 +67,7 @@ class AnimalSerializer(ModestAnimalSerializer):
     class Meta:
         model = Animal
         fields = ['id', 'species', 'status', 'aco_required', 'front_image', 'side_image', 'extra_images', 'last_seen', 'intake_date', 'address', 'city', 'state', 'zip_code',
-        'aggressive', 'injured', 'fixed', 'confined', 'found_location', 'owner_names', 'owners', 'shelter_object', 'shelter', 'reporter_object', 'request', 'request_address',
+        'aggressive', 'injured', 'fixed', 'confined', 'found_location', 'owner_names', 'owners', 'shelter_object', 'shelter', 'reporter', 'reporter_object', 'request', 'request_address',
         'action_history', 'room', 'room_name', 'name', 'sex', 'size', 'age', 'pcolor', 'scolor', 'color_notes']
     def get_found_location(self, obj):
         return build_full_address(obj)
