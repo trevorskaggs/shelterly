@@ -46,47 +46,11 @@ class VisitNoteSerializer(serializers.ModelSerializer):
 
 class BarebonesServiceRequestSerializer(serializers.ModelSerializer):
     full_address = serializers.SerializerMethodField()
-    injured = serializers.BooleanField(read_only=True)
-    reported_animals = serializers.SerializerMethodField()
-    sheltered_in_place = serializers.SerializerMethodField()
-    unable_to_locate = serializers.SerializerMethodField()
-    aco_required = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = ServiceRequest
         fields = ['id', 'full_address']
 
-    # Custom field for if any animal is ACO Required. If it is aggressive or "Other" species.
-    def get_aco_required(self, obj):
-        # Performs list comp. on prefetched queryset of animals for this SR to avoid hitting db again.
-        try:
-            return bool([animal for animal in obj.animals if animal.aggressive == 'yes' or animal.species == 'other'])
-        except AttributeError:
-            return obj.animal_set.filter(Q(aggressive='yes')|Q(species='other')).exists()
-
-    # Custom field for determining if an SR contains REPORTED animals.
-    def get_reported_animals(self, obj):
-        # Performs list comp. on prefetched queryset of animals for this SR to avoid hitting db again.
-        try:
-            return len([animal for animal in obj.animals if animal.status == 'REPORTED'])
-        except AttributeError:
-            return obj.animal_set.filter(status='REPORTED').count()
-
-    # Custom field for determining that count of SHELTERED IN PLACE animals.
-    def get_sheltered_in_place(self, obj):
-        # Performs list comp. on prefetched queryset of animals for this SR to avoid hitting db again.
-        try:
-            return len([animal for animal in obj.animals if animal.status == 'SHELTERED IN PLACE'])
-        except AttributeError:
-            return obj.animal_set.filter(status='SHELTERED IN PLACE').count()
-    # Custom field for determining that count of UNABLE TO LOCATE animals.
-
-    def get_unable_to_locate(self, obj):
-        # Performs list comp. on prefetched queryset of animals for this SR to avoid hitting db again.
-        try:
-            return len([animal for animal in obj.animals if animal.status == 'UNABLE TO LOCATE'])
-        except AttributeError:
-            return obj.animal_set.filter(status='UNABLE TO LOCATE').count()
 
     # Custom field for the full address.
     def get_full_address(self, obj):
@@ -123,6 +87,38 @@ class SimpleServiceRequestSerializer(BarebonesServiceRequestSerializer):
     def get_evacuation_assignments(self, obj):
         from evac.serializers import SimpleEvacAssignmentSerializer
         return SimpleEvacAssignmentSerializer(obj.evacuation_assignments, many=True, required=False, read_only=True).data
+
+    # Custom field for if any animal is ACO Required. If it is aggressive or "Other" species.
+    def get_aco_required(self, obj):
+        # Performs list comp. on prefetched queryset of animals for this SR to avoid hitting db again.
+        try:
+            return bool([animal for animal in obj.animals if animal.aggressive == 'yes' or animal.species == 'other'])
+        except AttributeError:
+            return obj.animal_set.filter(Q(aggressive='yes')|Q(species='other')).exists()
+
+    # Custom field for determining if an SR contains REPORTED animals.
+    def get_reported_animals(self, obj):
+        # Performs list comp. on prefetched queryset of animals for this SR to avoid hitting db again.
+        try:
+            return len([animal for animal in obj.animals if animal.status == 'REPORTED'])
+        except AttributeError:
+            return obj.animal_set.filter(status='REPORTED').count()
+
+    # Custom field for determining that count of SHELTERED IN PLACE animals.
+    def get_sheltered_in_place(self, obj):
+        # Performs list comp. on prefetched queryset of animals for this SR to avoid hitting db again.
+        try:
+            return len([animal for animal in obj.animals if animal.status == 'SHELTERED IN PLACE'])
+        except AttributeError:
+            return obj.animal_set.filter(status='SHELTERED IN PLACE').count()
+    # Custom field for determining that count of UNABLE TO LOCATE animals.
+
+    def get_unable_to_locate(self, obj):
+        # Performs list comp. on prefetched queryset of animals for this SR to avoid hitting db again.
+        try:
+            return len([animal for animal in obj.animals if animal.status == 'UNABLE TO LOCATE'])
+        except AttributeError:
+            return obj.animal_set.filter(status='UNABLE TO LOCATE').count()
 
     def to_internal_value(self, data):
         # Updates datetime fields to null when receiving an empty string submission.

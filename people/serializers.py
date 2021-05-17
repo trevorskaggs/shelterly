@@ -78,10 +78,14 @@ class PersonSerializer(SimplePersonSerializer):
     # Custom field for the ServiceRequest ID.
     def get_request(self, obj):
         from hotline.serializers import BarebonesServiceRequestSerializer
-        service_request = (
-            ServiceRequest.objects.filter(Q(owners=obj.id) | Q(reporter=obj.id))
-        ).first()
+        if obj.reporter_service_request.all():
+            service_request = obj.reporter_service_request.all()[0]
+        elif obj.request.all():
+            service_request = obj.request.all()[0]
+        else:
+            service_request = None
         if service_request:
             return BarebonesServiceRequestSerializer(service_request).data
-        return None
+        else:
+            return None
 

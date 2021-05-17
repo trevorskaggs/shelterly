@@ -44,7 +44,7 @@ class DispatchTeamSerializer(serializers.ModelSerializer):
         model = DispatchTeam
         fields = '__all__'
 
-class DispatchServiceRequestSerializer(BarebonesServiceRequestSerializer):
+class DispatchServiceRequestSerializer(SimpleServiceRequestSerializer):
 
     animals = SimpleAnimalSerializer(many=True, read_only=True)
     owner_contacts = OwnerContactSerializer(source='ownercontact_set', many=True, required=False, read_only=True)

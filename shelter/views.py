@@ -85,6 +85,17 @@ class BuildingViewSet(viewsets.ModelViewSet):
             building = serializer.save()
             action.send(self.request.user, verb='updated building', target=building)
 
+    def get_queryset(self):
+        return Building.objects.with_history().all().prefetch_related(
+            Prefetch(
+                "room_set",
+                Room.objects
+                .annotate(
+                    animal_count=Count("animal", filter=~Q(animal__status="CANCELED"))
+                )
+            )
+        )
+
 class RoomViewSet(viewsets.ModelViewSet):
     # add permissions
 
@@ -102,5 +113,19 @@ class RoomViewSet(viewsets.ModelViewSet):
             action.send(self.request.user, verb='updated room', target=room)
 
     def get_queryset(self):
-        return Room.objects.select_related('building__shelter').with_history().prefetch_related(Prefetch('animal_set', Animal.objects.with_images().exclude(status='CANCELED').prefetch_related('owners'), to_attr='animals'))
+        return (
+            Room.objects.select_related("building__shelter")
+            .with_history()
+            .prefetch_related(
+                Prefetch(
+                    "animal_set",
+                    Animal.objects.select_related("request", "shelter")
+                    .with_history()
+                    .with_images()
+                    .exclude(status="CANCELED")
+                    .prefetch_related("owners"),
+                    to_attr="animals",
+                )
+            )
+        )
         

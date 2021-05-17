@@ -29,7 +29,8 @@ class PersonViewSet(viewsets.ModelViewSet):
                     to_attr="animals",
                 )
             )
-            .prefetch_related("ownercontact_set")
+            .prefetch_related('reporter_animals')
+            .prefetch_related("ownercontact_set", 'reporter_service_request', 'request')
         )
         # Status filter.
         status = self.request.query_params.get("status", "")

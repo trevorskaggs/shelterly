@@ -7,15 +7,12 @@ from location.utils import build_full_address, build_action_string
 from animals.models import Animal
 
 class SimpleRoomSerializer(serializers.ModelSerializer):
-    animal_count = serializers.SerializerMethodField()
+    animal_count = serializers.IntegerField(read_only=True)
     building_name = serializers.StringRelatedField(source='building')
 
     def get_building_name(self, obj):
         return obj.building.name
 
-    # Custom field for total animals.
-    def get_animal_count(self, obj):
-        return obj.animal_set.exclude(status="CANCELED").count()
 
     class Meta:
         model = Room
