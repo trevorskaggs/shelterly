@@ -9,5 +9,5 @@ router.register(r'animal', views.AnimalViewSet)
 
 urlpatterns = [
     path('api/', include(router.urls)),
-    path('print', views.print_kennel_card, name="print_kennel_card"),
+    path('print/<int:animal_id>', views.print_kennel_card, name="print_kennel_card"),
 ]

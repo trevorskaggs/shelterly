@@ -7,7 +7,7 @@ import { Carousel } from 'react-responsive-carousel';
 import { Button, Card, Col, ListGroup, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBan, faBandAid, faCut, faEdit, faEnvelope, faLink, faMinusSquare, faUserPlus
+  faBan, faBandAid, faCut, faEdit, faEnvelope, faLink, faMinusSquare, faPrint, faUserPlus
 } from '@fortawesome/free-solid-svg-icons';
 import { faClawMarks, faHomeHeart, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
@@ -146,7 +146,18 @@ function AnimalDetails({id}) {
           </Tooltip>
         }
       >
-        <Link href={"/animals/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-1" inverse /></Link>
+        <Link href={"/animals/edit/" + id} ><FontAwesomeIcon icon={faEdit} className="ml-1" inverse /></Link>
+      </OverlayTrigger>
+      <OverlayTrigger
+        key={"print"}
+        placement="bottom"
+        overlay={
+          <Tooltip id={`tooltip-print`}>
+            Print kennel card
+          </Tooltip>
+        }
+      >
+        <Link href={"/animals/print/" + id} target="_blank"><FontAwesomeIcon icon={faPrint} className="ml-1" inverse /></Link>
       </OverlayTrigger>
       {data.status !== 'REUNITED' ?
       <OverlayTrigger

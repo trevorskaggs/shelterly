@@ -184,8 +184,7 @@ class AnimalViewSet(viewsets.ModelViewSet):
 
         return queryset
 
-def print_kennel_card(request):
-    id = request.GET.get('id', '')
-    animals = Animal.objects.exclude(status="CANCELED").prefetch_related(Prefetch('animalimage_set', to_attr='images')).distinct().get(pk=id)
-    context={"animals":animals}
+def print_kennel_card(request, animal_id):
+    animal = Animal.objects.get(id=animal_id)
+    context={"animal":animal, "care_schedule_rows": range(33)}
     return render(request, "ui/animals/print.html", context)    
