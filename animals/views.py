@@ -167,8 +167,7 @@ class AnimalViewSet(viewsets.ModelViewSet):
         queryset = (
             Animal.objects.with_images().with_history().exclude(status="CANCELED")
             .prefetch_related("owners")
-            .select_related("reporter", "room", "request")
-            .distinct()
+            .select_related("reporter", "room", "request", "shelter")
         )        
         #filter by stray
         if self.request.query_params.get('owned', '') == 'stray':

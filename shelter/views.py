@@ -60,12 +60,12 @@ class ShelterViewSet(viewsets.ModelViewSet):
                                 animal_count=Count(
                                     "animal", filter=~Q(animal__status="CANCELED")
                                 )
-                            ).prefetch_related(Prefetch('animal_set',Animal.objects.exclude(status='CANCELED'), to_attr='animals'))
+                            ).prefetch_related(Prefetch('animal_set',Animal.objects.with_images().prefetch_related('owners').exclude(status='CANCELED'), to_attr='animals'))
                         )
                     ),
                 )
             )
-            .with_history()
+            .with_history().prefetch_related(Prefetch('animal_set', Animal.objects.filter(room=None).exclude(status='CANCELED'), to_attr="unroomed_animals"))
         )
 
 

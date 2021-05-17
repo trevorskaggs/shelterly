@@ -96,7 +96,7 @@ class ShelterSerializer(ModestShelterSerializer):
     # Custom field for total animals.
     def get_unroomed_animals(self, obj):
         from animals.serializers import ModestAnimalSerializer
-        return ModestAnimalSerializer(obj.animal_set.filter(room=None).exclude(status='CANCELED'), many=True).data
+        return ModestAnimalSerializer(obj.unroomed_animals, many=True).data
 
     # Truncates latitude and longitude.
     def to_internal_value(self, data):
