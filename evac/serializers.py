@@ -46,7 +46,7 @@ class DispatchTeamSerializer(serializers.ModelSerializer):
 
 class DispatchServiceRequestSerializer(BarebonesServiceRequestSerializer):
 
-    animals = SimpleAnimalSerializer(source='animal_set', many=True, read_only=True)
+    animals = SimpleAnimalSerializer(many=True, read_only=True)
     owner_contacts = OwnerContactSerializer(source='ownercontact_set', many=True, required=False, read_only=True)
     owner_objects = SimplePersonSerializer(source='owners', many=True, required=False, read_only=True)
     visit_notes = VisitNoteSerializer(source='visitnote_set', many=True, required=False, read_only=True)
@@ -65,7 +65,7 @@ class AssignedRequestDispatchSerializer(serializers.ModelSerializer):
     previous_visit = serializers.SerializerMethodField()
 
     def get_previous_visit(self, obj):
-        # want to exclude this assigned request but get latest visit pertaining to this the SR the AR belongs to
+        #TODO: this triggers one request per SR
         if VisitNote.objects.filter(assigned_request__service_request=obj.service_request).exclude(assigned_request=obj).exists():
             return VisitNoteSerializer(VisitNote.objects.filter(assigned_request__service_request=obj.service_request).exclude(assigned_request=obj).latest('date_completed')).data
         return None
