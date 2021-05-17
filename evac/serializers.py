@@ -4,8 +4,8 @@ from rest_framework import serializers
 from actstream.models import target_stream
 
 from animals.serializers import ModestAnimalSerializer
-from evac.models import DispatchTeam, EvacAssignment, EvacTeamMember
-from hotline.models import ServiceRequest
+from evac.models import DispatchTeam, EvacAssignment, EvacTeamMember, AssignedRequest
+from hotline.models import ServiceRequest, VisitNote
 from hotline.serializers import SimpleServiceRequestSerializer, VisitNoteSerializer
 from people.serializers import OwnerContactSerializer, SimplePersonSerializer
 
@@ -15,10 +15,12 @@ class EvacTeamMemberSerializer(serializers.ModelSerializer):
 
     display_name = serializers.SerializerMethodField()
     display_phone = serializers.SerializerMethodField()
+    is_assigned = serializers.BooleanField(read_only=True)
 
     # Custom field for Name Output
     def get_display_name(self, obj):
-        return '%s %s' % (obj.first_name, obj.last_name)
+        agency = " (%s)" % (obj.agency_id) if obj.agency_id else ""
+        return '%s %s%s' % (obj.first_name, obj.last_name, agency)
 
     # Custom field for Formated Phone Number
     def get_display_phone(self, obj):
@@ -43,23 +45,32 @@ class DispatchTeamSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class DispatchServiceRequestSerializer(SimpleServiceRequestSerializer):
-    animals = ModestAnimalSerializer(many=True, read_only=True)
+
+    animals = ModestAnimalSerializer(source='animal_set', many=True, read_only=True)
     owner_contacts = OwnerContactSerializer(source='ownercontact_set', many=True, required=False, read_only=True)
     owner_objects = SimplePersonSerializer(source='owners', many=True, required=False, read_only=True)
-    visit_notes = VisitNoteSerializer(source='visitnote_set', many=True, required=False, read_only=True)
-    latest_evac = serializers.SerializerMethodField()
-
-    def get_latest_evac(self, obj):
-        assigned_evac = EvacAssignment.objects.filter(service_requests=obj, end_time__isnull=True).values('id', 'start_time', 'end_time').first()
-        if assigned_evac:
-            return assigned_evac
-        return EvacAssignment.objects.filter(service_requests=obj, end_time__isnull=False).values('id', 'start_time', 'end_time').first()
 
     class Meta:
         model = ServiceRequest
-        fields = ['id', 'latitude', 'longitude', 'full_address', 'followup_date', 'status', 'latest_evac',
+        fields = ['id', 'latitude', 'longitude', 'full_address', 'followup_date', 'status',
         'injured', 'accessible', 'turn_around', 'animals', 'reported_animals', 'sheltered_in_place', 'unable_to_locate', 'aco_required',
-        'owner_contacts', 'owner_objects', 'owners', 'visit_notes']
+        'owner_contacts', 'owner_objects', 'owners']
+
+class AssignedRequestDispatchSerializer(serializers.ModelSerializer):
+
+    service_request_object = DispatchServiceRequestSerializer(source='service_request', required=False, read_only=True)
+    visit_note = VisitNoteSerializer(required=False, read_only=True)
+    owner_contact = OwnerContactSerializer(required=False, read_only=True)
+    previous_visit = serializers.SerializerMethodField()
+
+    def get_previous_visit(self, obj):
+        if VisitNote.objects.filter(assigned_request__service_request=obj.service_request).exclude(assigned_request=obj).exists():
+            return VisitNoteSerializer(VisitNote.objects.filter(assigned_request__service_request=obj.service_request).exclude(assigned_request=obj).latest('date_completed')).data
+        return None
+
+    class Meta:
+        model = AssignedRequest
+        fields = '__all__'
 
 class SimpleEvacAssignmentSerializer(serializers.ModelSerializer):
 
@@ -76,7 +87,7 @@ class SimpleEvacAssignmentSerializer(serializers.ModelSerializer):
     def get_team_member_names(self, obj):
         # does this kick off another query?
         try:
-            return ", ".join([team_member['first_name'] + " " + team_member['last_name'] for team_member in obj.team.team_members.all().values('first_name', 'last_name')])
+            return ", ".join([team_member['first_name'] + " " + team_member['last_name'] + (" (" + team_member['agency_id'] + ")" if team_member['agency_id'] else "") for team_member in obj.team.team_members.all().values('first_name', 'last_name', 'agency_id')])
         except AttributeError:
             return ''
 
@@ -84,22 +95,23 @@ class SimpleEvacAssignmentSerializer(serializers.ModelSerializer):
         model = EvacAssignment
         fields = ['id', 'start_time', 'end_time', 'team_name', 'team_member_names']
 
+class AssignedRequestServiceRequestSerializer(serializers.ModelSerializer):
+
+    dispatch_assignment = SimpleEvacAssignmentSerializer(required=False, read_only=True)
+    visit_note = VisitNoteSerializer(required=False, read_only=True)
+    owner_contact = OwnerContactSerializer(required=False, read_only=True)
+
+    class Meta:
+        model = AssignedRequest
+        fields = '__all__'
+
 class EvacAssignmentSerializer(SimpleEvacAssignmentSerializer):
 
-    # action_history = serializers.SerializerMethodField()
     team_object = DispatchTeamSerializer(source='team', required=False, read_only=True)
-    service_request_objects = DispatchServiceRequestSerializer(source='service_requests', required=False, read_only=True, many=True)
-    team_member_names = serializers.SerializerMethodField()
+    assigned_requests = serializers.SerializerMethodField()
 
-    def get_team_member_names(self, obj):
-        # does this kick off another query?
-        try:
-            return ", ".join([team_member['first_name'] + " " + team_member['last_name'] for team_member in obj.team.team_members.all().values('first_name', 'last_name')])
-        except AttributeError:
-            return ''
-
-    # def get_action_history(self, obj):
-    #     return [build_action_string(action) for action in obj.target_actions.all()]
+    def get_assigned_requests(self, obj):
+        return AssignedRequestDispatchSerializer(AssignedRequest.objects.filter(dispatch_assignment=obj), many=True, required=False, read_only=True).data
 
     class Meta:
         model = EvacAssignment

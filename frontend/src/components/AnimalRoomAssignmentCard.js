@@ -10,7 +10,7 @@ function AnimalRoomAssignmentCard(props) {
 
   return (
     <>
-    <Card className={"border rounded" + (props.snapshot.isDragging ? " border-danger" : "")} float="left" style={{width:"157px", marginLeft:"-5px", whiteSpace:"nowrap", overflow:"hidden"}}>
+    <Card className={"border rounded" + (props.snapshot.isDragging ? " border-danger" : "")} float="left" style={{width:"157px", marginLeft:"-5px", marginTop:props.direction === "horizontal" ? "-5px" : "", whiteSpace:"nowrap", overflow:"hidden"}}>
       <div className="row no-gutters" style={{ textTransform:"capitalize" }}>
         <div style={{whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis"}}>
           <img alt="Animal" style={{width:"47px", height:"47px", marginRight:"3px", objectFit:"cover", overflow:"hidden", float:"left"}} src={props.animal.front_image || props.animal.side_image || `${S3_BUCKET}images/image-not-found.png`} />

@@ -71,9 +71,13 @@ const DateTimePicker = ({ label, xs, clearable, ...props }) => {
   const [field, meta] = useField(props);
 
   const registeredRef = useRegisteredRef(props.name);
+  const datetime = useRef(null);
+
+  useEffect(() => {
+    datetime.current.flatpickr.altInput.disabled = props.disabled;
+  }, [props.disabled]);
 
   // Ref and function to clear field.
-  const datetime = useRef(null);
   const clearDate = useCallback(() => {
     if (datetime.current) {
       datetime.current.flatpickr.clear();
@@ -95,7 +99,7 @@ const DateTimePicker = ({ label, xs, clearable, ...props }) => {
       <label htmlFor={props.id || props.name}>{label}</label>
       <span className="d-flex">
         <Flatpickr className="datetime_picker" ref={datetime} data-enable-time options={options} {...field} {...props} />
-        {clearable === false ? "" : <span>{field.value ? <FontAwesomeIcon icon={faTimes} style={{position:"relative", left: "-22px", marginTop:"11px",color:"#808080"}} onClick={clearDate} /> : ""}</span>}
+        {clearable === false || props.disabled === true ? "" : <span>{field.value ? <FontAwesomeIcon icon={faTimes} style={{position:"relative", left: "-22px", marginTop:"11px", marginRight:"-10px", color:"#808080"}} onClick={clearDate} /> : ""}</span>}
       </span>
       {meta.touched && meta.error ? <div style={{ color: "#e74c3c", marginTop: ".3rem", fontSize: "80%" }}>{meta.error}</div> : ""}
       </Form.Group>
