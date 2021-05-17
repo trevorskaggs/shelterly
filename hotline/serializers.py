@@ -51,38 +51,6 @@ class BarebonesServiceRequestSerializer(serializers.ModelSerializer):
         model = ServiceRequest
         fields = ['id', 'full_address']
 
-    # Custom field for if any animal is ACO Required. If it is aggressive or "Other" species.
-    def get_aco_required(self, obj):
-        # Performs list comp. on prefetched queryset of animals for this SR to avoid hitting db again.
-        try:
-            return bool([animal for animal in obj.animals if animal.aggressive == 'yes' or animal.species == 'other'])
-        except AttributeError:
-            return obj.animal_set.filter(Q(aggressive='yes')|Q(species='other')).exists()
-
-    # Custom field for determining if an SR contains REPORTED animals.
-    def get_reported_animals(self, obj):
-        # Performs list comp. on prefetched queryset of animals for this SR to avoid hitting db again.
-        try:
-            return len([animal for animal in obj.animals if animal.status == 'REPORTED'])
-        except AttributeError:
-            return obj.animal_set.filter(status='REPORTED').count()
-
-    # Custom field for determining that count of SHELTERED IN PLACE animals.
-    def get_sheltered_in_place(self, obj):
-        # Performs list comp. on prefetched queryset of animals for this SR to avoid hitting db again.
-        try:
-            return len([animal for animal in obj.animals if animal.status == 'SHELTERED IN PLACE'])
-        except AttributeError:
-            return obj.animal_set.filter(status='SHELTERED IN PLACE').count()
-
-    # Custom field for determining that count of UNABLE TO LOCATE animals.
-    def get_unable_to_locate(self, obj):
-        # Performs list comp. on prefetched queryset of animals for this SR to avoid hitting db again.
-        try:
-            return len([animal for animal in obj.animals if animal.status == 'UNABLE TO LOCATE'])
-        except AttributeError:
-            return obj.animal_set.filter(status='UNABLE TO LOCATE').count()
-
     # Custom field for the full address.
     def get_full_address(self, obj):
         return build_full_address(obj)
