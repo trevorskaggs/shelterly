@@ -27,7 +27,7 @@ function ServiceRequestSearch() {
   const [data, setData] = useState({service_requests: [], isFetching: false});
   const [searchState, setSearchState] = useState({});
   const [searchTerm, setSearchTerm] = useState(search);
-  const [tempSearchTerm, setTempSearchTerm] = useState(search);
+  const tempSearchTerm = useRef('')
   const [statusOptions, setStatusOptions] = useState(status);
   const [page, setPage] = useState(1);
   const [numPages, setNumPages] = useState(1);
@@ -35,13 +35,13 @@ function ServiceRequestSearch() {
 
   // Update searchTerm when field input changes.
   const handleChange = event => {
-    setTempSearchTerm(event.target.value);
+    tempSearchTerm.current.value = event.target.value
   };
 
   // Use searchTerm to filter service_requests.
   const handleSubmit = async event => {
     event.preventDefault();
-    setSearchTerm(tempSearchTerm);
+    setSearchTerm(tempSearchTerm.current.value);
   }
 
   function setFocus(pageNum) {
@@ -106,9 +106,8 @@ function ServiceRequestSearch() {
             type="text"
             placeholder="Search"
             name="searchTerm"
-            value={tempSearchTerm}
             onChange={handleChange}
-            ref={topRef}
+            ref={tempSearchTerm}
           />
           <InputGroup.Append>
             <Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0"}}>Search</Button>
@@ -210,43 +209,6 @@ function ServiceRequestSearch() {
                 </Scrollbar>
               </Card.Body>
             </Card>
-            {searchState[service_request.id] ?
-              <Card style={{marginBottom:"6px"}}>
-                <Card.Body>
-                  <Card.Title style={{marginTop:"-10px"}}>
-                    <ListGroup horizontal>
-                    {searchState[service_request.id].species.map(species => (
-                      <ListGroup.Item key={species} active={searchState[service_request.id].selectedSpecies === species ? true : false} style={{textTransform:"capitalize", cursor:'pointer', paddingTop:"4px", paddingBottom:"4px"}} onClick={() => setSearchState(prevState => ({ ...prevState, [service_request.id]:{...prevState[service_request.id], selectedSpecies:species} }))}>{species}{species !== "other" ? "s" : ""}</ListGroup.Item>
-                    ))}
-                    </ListGroup>
-                  </Card.Title>
-                  <ListGroup style={{height:"144px", overflowY:"auto", marginTop:"-12px"}}>
-                    <Scrollbar style={{height:"144px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
-                      {service_request.animals.filter(animal => animal.species === searchState[service_request.id].selectedSpecies).map((animal, i) => (
-                        <ListGroup.Item key={animal.id}>
-                          <b>#{animal.id}:</b>&nbsp;&nbsp;<Link href={"/animals/" + animal.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.name || "Unknown"}</Link>
-                          {animal.color_notes ?
-                          <OverlayTrigger
-                            key={"animal-color-notes"}
-                            placement="top"
-                            overlay={
-                              <Tooltip id={`tooltip-animal-color-notes`}>
-                                {animal.color_notes}
-                              </Tooltip>
-                            }
-                          >
-                            <FontAwesomeIcon icon={faClipboardList} style={{marginLeft:"3px"}} size="sm" inverse />
-                          </OverlayTrigger>
-                          : ""}
-                          &nbsp;- {animal.status}
-                        </ListGroup.Item>
-                      ))}
-                    {service_request.animals.length < 1 ? <ListGroup.Item style={{marginTop:"32px"}}>No Animals</ListGroup.Item> : ""}
-                    </Scrollbar>
-                  </ListGroup>
-              </Card.Body>
-            </Card>
-            : ""}
           </CardGroup>
         </div>
       ))}
