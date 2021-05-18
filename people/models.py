@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 from location.models import Location
+from managers import ActionHistoryQueryset
 
 User = get_user_model()
 
@@ -13,6 +14,7 @@ class Person(Location):
     agency = models.TextField(blank=True)
     drivers_license = models.CharField(max_length=50, blank=True)
     email = models.CharField(max_length=200, blank=True)
+    objects = ActionHistoryQueryset.as_manager()
 
     @property
     def location_type(self):

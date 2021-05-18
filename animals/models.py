@@ -4,6 +4,7 @@ from ordered_model.models import OrderedModel
 
 from animals.choices import ALL_AGE_CHOICES, ALL_SIZE_CHOICES, SEX_CHOICES, SPECIES_CHOICES, STATUS_CHOICES, UNKNOWN_CHOICES
 from animals.colors import ALL_COLOR_CHOICES
+from .managers import AnimalQueryset
 from hotline.models import ServiceRequest
 from people.models import Person
 from shelter.models import Room, Shelter
@@ -13,7 +14,7 @@ class Animal(Location, OrderedModel):
 
     request = models.ForeignKey(ServiceRequest, on_delete=models.SET_NULL, blank=True, null=True)
     owners = models.ManyToManyField(Person, blank=True)
-    reporter = models.ForeignKey(Person, on_delete=models.SET_NULL, blank=True, null=True, related_name="animals")
+    reporter = models.ForeignKey(Person, on_delete=models.SET_NULL, blank=True, null=True, related_name="reporter_animals")
     room = models.ForeignKey(Room, on_delete=models.SET_NULL, blank=True, null=True)
     shelter = models.ForeignKey(Shelter, on_delete=models.SET_NULL, blank=True, null=True)
 
@@ -41,6 +42,7 @@ class Animal(Location, OrderedModel):
     intake_date = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
 
     order_with_respect_to = 'room'
+    objects = AnimalQueryset.as_manager()
 
     class Meta:
         ordering = ('order',)
