@@ -209,6 +209,43 @@ function ServiceRequestSearch() {
                 </Scrollbar>
               </Card.Body>
             </Card>
+            {searchState[service_request.id] ?
+              <Card style={{marginBottom:"6px"}}>
+                <Card.Body>
+                  <Card.Title style={{marginTop:"-10px"}}>
+                    <ListGroup horizontal>
+                    {searchState[service_request.id].species.map(species => (
+                      <ListGroup.Item key={species} active={searchState[service_request.id].selectedSpecies === species ? true : false} style={{textTransform:"capitalize", cursor:'pointer', paddingTop:"4px", paddingBottom:"4px"}} onClick={() => setSearchState(prevState => ({ ...prevState, [service_request.id]:{...prevState[service_request.id], selectedSpecies:species} }))}>{species}{species !== "other" ? "s" : ""}</ListGroup.Item>
+                    ))}
+                    </ListGroup>
+                  </Card.Title>
+                  <ListGroup style={{height:"144px", overflowY:"auto", marginTop:"-12px"}}>
+                    <Scrollbar style={{height:"144px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
+                      {service_request.animals.filter(animal => animal.species === searchState[service_request.id].selectedSpecies).map((animal, i) => (
+                        <ListGroup.Item key={animal.id}>
+                          <b>#{animal.id}:</b>&nbsp;&nbsp;<Link href={"/animals/" + animal.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.name || "Unknown"}</Link>
+                          {animal.color_notes ?
+                          <OverlayTrigger
+                            key={"animal-color-notes"}
+                            placement="top"
+                            overlay={
+                              <Tooltip id={`tooltip-animal-color-notes`}>
+                                {animal.color_notes}
+                              </Tooltip>
+                            }
+                          >
+                            <FontAwesomeIcon icon={faClipboardList} style={{marginLeft:"3px"}} size="sm" inverse />
+                          </OverlayTrigger>
+                          : ""}
+                          &nbsp;- {animal.status}
+                        </ListGroup.Item>
+                      ))}
+                    {service_request.animals.length < 1 ? <ListGroup.Item style={{marginTop:"32px"}}>No Animals</ListGroup.Item> : ""}
+                    </Scrollbar>
+                  </ListGroup>
+              </Card.Body>
+            </Card>
+            : ""}
           </CardGroup>
         </div>
       ))}
