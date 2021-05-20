@@ -1,6 +1,7 @@
 from django.db.models import Exists, OuterRef, Prefetch
 from rest_framework import filters, permissions, viewsets
 from actstream import action
+from actstream.models import Action
 
 from animals.models import Animal
 from hotline.models import ServiceRequest
@@ -10,24 +11,35 @@ from people.serializers import OwnerContactSerializer, PersonSerializer
 
 # Provides view for Person API calls.
 class PersonViewSet(viewsets.ModelViewSet):
-    queryset = Person.objects.all().prefetch_related(Prefetch('animal_set', queryset=Animal.objects.prefetch_related(Prefetch('animalimage_set', to_attr='images')), to_attr='animals'))
+    queryset = Person.objects.all()
     search_fields = ['first_name', 'last_name', 'address', 'phone', 'email', 'drivers_license', 'animals__name', 'animal__name']
     filter_backends = (filters.SearchFilter,)
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = PersonSerializer
 
     def get_queryset(self):
-        queryset = Person.objects.all().annotate(
-            is_owner=Exists(Animal.objects.filter(owners=OuterRef("id")))
+        queryset = (
+            Person.objects.with_history()
+            .all()
+            .annotate(is_owner=Exists(Animal.objects.filter(owners=OuterRef("id"))))
+            .prefetch_related(
+                Prefetch(
+                    "animal_set",
+                    queryset=Animal.objects.with_images().prefetch_related('owners'),
+                    to_attr="animals",
+                )
+            )
+            .prefetch_related('reporter_animals')
+            .prefetch_related("ownercontact_set", 'reporter_service_request', 'request')
         )
-
         # Status filter.
-        status = self.request.query_params.get('status', '')
-        if status == 'owners':
+        status = self.request.query_params.get("status", "")
+        if status == "owners":
             queryset = queryset.filter(is_owner=True)
-        elif status == 'reporters':
+        elif status == "reporters":
             queryset = queryset.filter(is_owner=False)
         return queryset
+
 
     def perform_create(self, serializer):
         if serializer.is_valid():

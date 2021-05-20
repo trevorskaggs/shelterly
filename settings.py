@@ -76,8 +76,7 @@ INSTALLED_APPS = [
     'shelter',
     'frontend',
     'ordered_model',
-    'actstream',
-    'drf_yasg'
+    'actstream'
 ]
 
 ACTSTREAM_SETTINGS = {

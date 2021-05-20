@@ -66,7 +66,10 @@ class PersonSerializer(SimplePersonSerializer):
 
     def get_animals(self, obj):
         from animals.serializers import ModestAnimalSerializer
-        return ModestAnimalSerializer(obj.animal_set.exclude(status='CANCELED') | obj.animals.exclude(status='CANCELED'), many=True).data
+        if hasattr(obj, 'reporter_animals'):
+            return ModestAnimalSerializer(obj.reporter_animals, many=True).data
+        else:
+            return ModestAnimalSerializer(obj.animal_set.all(), many=True).data
 
     # Custom field for the action history.
     def get_action_history(self, obj):
@@ -74,11 +77,15 @@ class PersonSerializer(SimplePersonSerializer):
 
     # Custom field for the ServiceRequest ID.
     def get_request(self, obj):
-        from hotline.serializers import SimpleServiceRequestSerializer
-        service_request = (
-            ServiceRequest.objects.filter(Q(owners=obj.id) | Q(reporter=obj.id))
-        ).first()
+        from hotline.serializers import BarebonesServiceRequestSerializer
+        if obj.reporter_service_request.all():
+            service_request = obj.reporter_service_request.all()[0]
+        elif obj.request.all():
+            service_request = obj.request.all()[0]
+        else:
+            service_request = None
         if service_request:
-            return SimpleServiceRequestSerializer(service_request).data
-        return None
+            return BarebonesServiceRequestSerializer(service_request).data
+        else:
+            return None
 

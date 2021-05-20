@@ -1,14 +1,16 @@
 from django.db import models
 from location.models import Location
+from managers import ActionHistoryQueryset
 # Create your models here.
 
 class BaseShelterModel(models.Model):
 
     name = models.CharField(max_length=100)
     description = models.CharField(max_length=400, blank=True)
+    objects = ActionHistoryQueryset.as_manager()
 
     def __str__(self):
-        return self.name.upper()
+        return self.name
 
     class Meta:
         abstract=True
@@ -32,6 +34,9 @@ class Shelter(BaseShelterModel, Location):
 class Building(BaseShelterModel):
 
     shelter = models.ForeignKey(Shelter, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
 
     @property
     def parent(self):
