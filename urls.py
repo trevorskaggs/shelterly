@@ -27,6 +27,7 @@ schema_view = get_schema_view(
 )
 urlpatterns = [
     path('admin/', admin.site.urls),
+    url('activate/', views.activate_incident, name='activate'),
     path('', views.home, name="home"),
     path('accounts/', include('accounts.urls')),
     path('animals/', include('animals.urls')),
