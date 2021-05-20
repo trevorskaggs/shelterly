@@ -24,7 +24,6 @@ class ModestAnimalSerializer(SimpleAnimalSerializer):
     side_image = serializers.SerializerMethodField()
     owner_names = serializers.StringRelatedField(source='owners', many=True, read_only=True)
 
-
     class Meta:
         model = Animal
         fields = ['id', 'species', 'aggressive', 'request', 'shelter', 'status', 'aco_required', 'color_notes', 'front_image', 'side_image', 'owner_names']
