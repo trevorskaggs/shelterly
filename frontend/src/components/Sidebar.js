@@ -5,6 +5,7 @@ import { Link } from 'raviger';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Button, Nav, Modal } from 'react-bootstrap';
 import { faHome, faBullhorn, faPhone, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
+import { faSirenOn } from '@fortawesome/pro-solid-svg-icons';
 import { logoutUser } from ".././accounts/AccountsUtils";
 import { S3_BUCKET } from '../constants';
 
@@ -80,7 +81,7 @@ const Menu = ({ state, dispatch, removeCookie, ...props }) => {
       <Link href="/hotline" ><FontAwesomeIcon icon={faPhone} fixedWidth inverse/> HOTLINE</Link>
       <Link href="/dispatch"><FontAwesomeIcon icon={faBullhorn} fixedWidth inverse/>  DISPATCH</Link>
       <Link href="/shelter"><FontAwesomeIcon icon={faHome} fixedWidth inverse/> SHELTER</Link>
-      {state.user.is_superuser ? <Link onClick={() => activateIncident()} href="#"><FontAwesomeIcon icon={faHome} fixedWidth inverse/> ACTIVATE</Link>: ""}
+      {state.user.is_superuser ? <Link onClick={() => activateIncident()} href="#"><FontAwesomeIcon icon={faSirenOn} fixedWidth inverse/> ACTIVATE</Link>: ""}
       {state.user ? <Link onClick={() => logoutUser({dispatch}, {removeCookie})} href="#"><FontAwesomeIcon icon={faSignOutAlt} fixedWidth inverse/> SIGN OUT</Link> : ""}
       <Modal show={activated.show} onHide={handleClose}>
         <Modal.Header closeButton>
