@@ -44,7 +44,19 @@ class VisitNoteSerializer(serializers.ModelSerializer):
         model = VisitNote
         fields = '__all__'
 
-class SimpleServiceRequestSerializer(serializers.ModelSerializer):
+class BarebonesServiceRequestSerializer(serializers.ModelSerializer):
+    full_address = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ServiceRequest
+        fields = ['id', 'full_address']
+
+    # Custom field for the full address.
+    def get_full_address(self, obj):
+        return build_full_address(obj)
+
+
+class SimpleServiceRequestSerializer(BarebonesServiceRequestSerializer):
     from people.serializers import SimplePersonSerializer
 
     full_address = serializers.SerializerMethodField()
@@ -63,7 +75,7 @@ class SimpleServiceRequestSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ServiceRequest
-        fields = ['id', 'latitude', 'longitude', 'full_address', 'followup_date', 'owners', 'address', 'city', 'state', 'zip_code', 'apartment', 'reporter', 'directions', 'evacuation_assignments', 'pending',
+        fields = ['id', 'latitude', 'longitude', 'full_address', 'followup_date', 'owners', 'reporter', 'address', 'city', 'state', 'zip_code', 'apartment', 'reporter', 'directions', 'evacuation_assignments', 'pending',
         'animal_count', 'injured', 'accessible', 'turn_around', 'animals', 'status', 'reported_animals', 'reporter_object', 'owner_objects', 'sheltered_in_place', 'unable_to_locate', 'aco_required']
 
 
@@ -98,8 +110,8 @@ class SimpleServiceRequestSerializer(serializers.ModelSerializer):
             return len([animal for animal in obj.animals if animal.status == 'SHELTERED IN PLACE'])
         except AttributeError:
             return obj.animal_set.filter(status='SHELTERED IN PLACE').count()
-    # Custom field for determining that count of UNABLE TO LOCATE animals.
 
+    # Custom field for determining that count of UNABLE TO LOCATE animals.
     def get_unable_to_locate(self, obj):
         # Performs list comp. on prefetched queryset of animals for this SR to avoid hitting db again.
         try:
@@ -130,7 +142,7 @@ class ServiceRequestSerializer(SimpleServiceRequestSerializer):
     class Meta:
         model = ServiceRequest
         fields = ['id', 'latitude', 'longitude', 'full_address', 'followup_date', 'status', 'address', 'city', 'state', 'zip_code',
-        'injured', 'accessible', 'turn_around', 'animals', 'reported_animals', 'sheltered_in_place', 'unable_to_locate', 'aco_required',
+        'injured', 'accessible', 'turn_around', 'animals', 'reporter', 'reported_animals', 'sheltered_in_place', 'unable_to_locate', 'aco_required',
         'animal_count', 'action_history', 'owner_objects', 'reporter_object', 'assigned_requests']
 
     def get_assigned_requests(self, obj):

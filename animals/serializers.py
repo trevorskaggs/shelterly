@@ -10,13 +10,28 @@ from shelter.serializers import SimpleShelterSerializer
 class SimpleAnimalSerializer(serializers.ModelSerializer):
 
     aco_required = serializers.SerializerMethodField()
-    owner_names = serializers.StringRelatedField(source='owners', many=True)
+
+    # An Animal is ACO Required if it is aggressive or "Other" species.
+    def get_aco_required(self, obj):
+        return (obj.aggressive or obj.species.other)
+
+    class Meta:
+        model = Animal
+        fields = ['id', 'species', 'aggressive', 'status', 'aco_required', 'name', 'sex', 'size', 'age', 'pcolor', 'scolor', 'color_notes']
+
+class ModestAnimalSerializer(SimpleAnimalSerializer):
     front_image = serializers.SerializerMethodField()
     side_image = serializers.SerializerMethodField()
+    owner_names = serializers.StringRelatedField(source='owners', many=True, read_only=True)
+
+
+    class Meta:
+        model = Animal
+        fields = ['id', 'species', 'aggressive', 'request', 'shelter', 'status', 'aco_required', 'color_notes', 'front_image', 'side_image', 'owner_names']
 
     def get_front_image(self, obj):
         try:
-            return [animal_image.image.url for animal_image in obj.images.filter(category='front_image')][0]
+            return [animal_image.image.url for animal_image in obj.images if animal_image.category == 'front_image'][0]
             # change this exception
         except IndexError:
             return ''
@@ -27,9 +42,10 @@ class SimpleAnimalSerializer(serializers.ModelSerializer):
             except AttributeError:
                 return ''
 
+
     def get_side_image(self, obj):
         try:
-            return [animal_image.image.url for animal_image in obj.images.filter(category='side_image')][0]
+            return [animal_image.image.url for animal_image in obj.images if animal_image.category == 'side_image'][0]
         except IndexError:
             return ''
         except AttributeError:
@@ -38,26 +54,10 @@ class SimpleAnimalSerializer(serializers.ModelSerializer):
             except AttributeError:
                 return ''
 
-    # An Animal is ACO Required if it is aggressive or "Other" species.
-    def get_aco_required(self, obj):
-        return (obj.aggressive or obj.species.other)
-
-    class Meta:
-        model = Animal
-        fields = ['id', 'species', 'aggressive', 'status', 'aco_required', 'name', 'sex', 'size', 'age', 'pcolor', 'scolor', 'color_notes', 'owner_names', 'front_image', 'side_image']
-
-class ModestAnimalSerializer(SimpleAnimalSerializer):
-
-    class Meta:
-        model = Animal
-        fields = ['id', 'species', 'aggressive', 'request', 'shelter', 'status', 'aco_required', 'color_notes', 'front_image', 'side_image']
-
 class AnimalSerializer(ModestAnimalSerializer):
-    front_image = serializers.SerializerMethodField()
-    side_image = serializers.SerializerMethodField()
     extra_images = serializers.SerializerMethodField()
     found_location = serializers.SerializerMethodField()
-    owner_objects = SimplePersonSerializer(many=True, required=False, read_only=True)
+    owners = SimplePersonSerializer(many=True, required=False, read_only=True)
     reporter_object = SimplePersonSerializer(source='reporter', read_only=True)
     request_address = serializers.SerializerMethodField()
     action_history = serializers.SerializerMethodField()
@@ -67,7 +67,7 @@ class AnimalSerializer(ModestAnimalSerializer):
     class Meta:
         model = Animal
         fields = ['id', 'species', 'status', 'aco_required', 'front_image', 'side_image', 'extra_images', 'last_seen', 'intake_date', 'address', 'city', 'state', 'zip_code',
-        'aggressive', 'injured', 'fixed', 'confined', 'found_location', 'owner_names', 'owner_objects', 'shelter_object', 'shelter', 'reporter_object', 'request', 'request_address',
+        'aggressive', 'injured', 'fixed', 'confined', 'found_location', 'owner_names', 'owners', 'shelter_object', 'shelter', 'reporter', 'reporter_object', 'request', 'request_address',
         'action_history', 'room', 'room_name', 'name', 'sex', 'size', 'age', 'pcolor', 'scolor', 'color_notes']
 
     def get_found_location(self, obj):
@@ -85,7 +85,7 @@ class AnimalSerializer(ModestAnimalSerializer):
 
     def get_extra_images(self, obj):
         try:
-            return [animal_image.image.url for animal_image in obj.images.filter(category='extra')]
+            return [animal_image.image.url for animal_image in obj.images if animal_image.category == 'extra']
         except IndexError:
             return ''
         except AttributeError:

@@ -144,7 +144,7 @@ function AnimalSearch() {
                       <FontAwesomeIcon icon={faClipboardList} className="ml-1" size="sm" inverse />
                     </OverlayTrigger>
                   : ""}
-                  {animal.owner_objects.length < 1 ?
+                  {animal.owners.length < 1 ?
                     <OverlayTrigger
                       key={"stray"}
                       placement="top"
@@ -240,7 +240,7 @@ function AnimalSearch() {
                   <ListGroup>
                     <ListGroup.Item>{titleCase(animal.species)}{animal.size ? <span>,&nbsp;{titleCase(animal.size)}</span> : ""}{animal.sex ? <span>,&nbsp;{titleCase(animal.sex)}</span> : ""}{animal.age ? <span>,&nbsp;{titleCase(animal.age)}</span> : ""}</ListGroup.Item>
                     <ListGroup.Item style={{textTransform:"capitalize"}}><b>Color: </b>{animal.pcolor ? <span>{animal.pcolor}{animal.scolor ? <span> / {animal.scolor}</span> : ""}</span> : "Unknown"}</ListGroup.Item>
-                    {animal.owner_objects.map(owner => (
+                    {animal.owners.map(owner => (
                       <ListGroup.Item key={owner.id}>
                         <b>Owner:</b> <Link href={"/people/owner/" + owner.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{owner.first_name} {owner.last_name}</Link>
                         {owner.display_phone ?
@@ -271,7 +271,7 @@ function AnimalSearch() {
                         : ""}
                       </ListGroup.Item>
                     ))}
-                    {animal.owner_objects < 1 ? <ListGroup.Item><b>Owner: </b>No Owner</ListGroup.Item> : ""}
+                    {animal.owners < 1 ? <ListGroup.Item><b>Owner: </b>No Owner</ListGroup.Item> : ""}
                     {animal.reporter ? <ListGroup.Item><b>Reporter: </b><Link href={"/people/reporter/" + animal.reporter} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.reporter_object.first_name} {animal.reporter_object.last_name}</Link></ListGroup.Item> : ""}
                   </ListGroup>
                 </Scrollbar>
