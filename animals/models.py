@@ -51,6 +51,7 @@ class Animal(Location, OrderedModel):
             return animal_images.filter(category='front_image')[0]
         elif animal_images.filter(category='side_image').exists():
             return animal_images.filter(category='side_image')[0]
+        return None
     
 
     class Meta:

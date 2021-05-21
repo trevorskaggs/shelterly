@@ -180,5 +180,5 @@ class AnimalViewSet(viewsets.ModelViewSet):
 
 def print_kennel_card(request, animal_id):
     animal = Animal.objects.get(id=animal_id)
-    context={"animal":animal, "care_schedule_rows": range(33)}
+    context={"animal":animal, "care_schedule_rows": range(30)}
     return render(request, "ui/animals/print.html", context)    
