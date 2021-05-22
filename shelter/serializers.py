@@ -80,9 +80,10 @@ class SimpleShelterSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class ModestShelterSerializer(SimpleShelterSerializer):
+    
     buildings = SimpleBuildingSerializer(source='building_set', many=True, required=False, read_only=True)
-    animal_count = serializers.IntegerField()
-    room_count = serializers.IntegerField()
+    animal_count = serializers.IntegerField(required=False)
+    room_count = serializers.IntegerField(required=False)
 
 class ShelterSerializer(ModestShelterSerializer):
     #Single obj serializer
