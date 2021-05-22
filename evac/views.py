@@ -187,21 +187,3 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
                     evac_assignment.service_requests.remove(service_requests[0])
 
             action.send(self.request.user, verb='updated evacuation assignment', target=evac_assignment)
-
-from django.shortcuts import render
-
-def dispatch_print(request):
-    da = request.GET.get('da', '')
-    evac_assignment = EvacAssignment.objects.order_by('-start_time').prefetch_related(Prefetch('service_requests',
-                        ServiceRequest.objects
-                .annotate(animal_count=Count("animal"))
-                .annotate(
-                    injured=Exists(Animal.objects.filter(request_id=OuterRef("id"), injured="yes"))
-                ).prefetch_related(Prefetch('animal_set', queryset=Animal.objects.prefetch_related(Prefetch('animalimage_set', to_attr='images')), to_attr='animals'))
-                .prefetch_related('owners')
-                .prefetch_related('visitnote_set')
-                .select_related('reporter')
-                .prefetch_related('evacuation_assignments')
-            )).get(pk=da)
-    context={"evac_assignment":evac_assignment}
-    return render(request, "ui/dispatch/print.html", context)
