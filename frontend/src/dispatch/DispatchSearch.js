@@ -38,6 +38,7 @@ function DispatchAssignmentSearch() {
   const [page, setPage] = useState(1);
   const [numPages, setNumPages] = useState(1);
   const topRef = useRef(null);
+  const [isDateSet, setIsDateSet] = useState(false);
   const [startDate, setStartDate] = useState(moment('20200101').format('YYYY-MM-DD'));
   const [endDate, setEndDate] = useState(moment().format('YYYY-MM-DD'));
 
@@ -82,9 +83,12 @@ function DispatchAssignmentSearch() {
     return [species_matches, status_matches]
   }
 
-  let evacAssignments = data.evacuation_assignments.filter(ea => startDate <= moment(ea.start_time)
-    .format('YYYY-MM-DD') && endDate >= moment(ea.start_time).format('YYYY-MM-DD'));
-  
+  let evacAssignments = data.evacuation_assignments.filter(ea => (isDateSet ? startDate <= moment(ea.start_time)
+    .format('YYYY-MM-DD') && endDate >= moment(ea.start_time).format('YYYY-MM-DD') : true));
+  // let evacAssignments = data.evacuation_assignments.filter(ea => startDate <= moment(ea.start_time)
+  //   .format('YYYY-MM-DD') && endDate >= moment(ea.start_time).format('YYYY-MM-DD'));
+
+
   // Hook for initializing data.
   useEffect(() => {
     let unmounted = false;
@@ -155,10 +159,20 @@ function DispatchAssignmentSearch() {
             id={`date_range_picker`}
             placeholder={"Filter by Date Range"}
             onChange={(dateRange) => {
-              dateRange = dateRange.toString().split(',');
-              setStartDate(moment(dateRange[0]).format('YYYY-MM-DD'))
-              setEndDate(moment(dateRange[1]).format('YYYY-MM-DD'));
-              setNumPages(Math.ceil(evacAssignments.length / ITEMS_PER_PAGE));
+              if (dateRange == '') {
+                // evacAssignments = data.evacuation_assignments;
+                console.log("date range is empty")
+                setIsDateSet(false)
+                setNumPages(Math.ceil(evacAssignments.length / ITEMS_PER_PAGE));
+              } else {
+                setIsDateSet(true)
+                dateRange = dateRange.toString().split(',');
+                setStartDate(moment(dateRange[0]).format('YYYY-MM-DD'))
+                setEndDate(moment(dateRange[1]).format('YYYY-MM-DD'));
+                // evacAssignments = data.evacuation_assignments.filter(ea => startDate <= moment(ea.start_time)
+                //   .format('YYYY-MM-DD') && endDate >= moment(ea.start_time).format('YYYY-MM-DD'));
+                setNumPages(Math.ceil(evacAssignments.length / ITEMS_PER_PAGE));
+              }
             }}
           />
         </InputGroup>
