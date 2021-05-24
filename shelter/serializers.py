@@ -34,7 +34,10 @@ class RoomSerializer(SimpleRoomSerializer):
             else:
                 ModestAnimalSerializer(obj.animal_set.exclude(status='CANCELED'), many=True, required=False, read_only=True).data
         else:
-            return AnimalSerializer(obj.animals, many=True, required=False, read_only=True).data
+            if hasattr(obj, 'animals'):
+                return ModestAnimalSerializer(obj.animals, many=True, required=False, read_only=True).data
+            else:
+                return AnimalSerializer(obj.animal_set.exclude(status='CANCELED'), many=True, required=False, read_only=True).data
 
     def get_action_history(self, obj):
         return [build_action_string(action) for action in obj.target_actions.all()]
