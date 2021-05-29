@@ -21,6 +21,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import Alert from 'react-bootstrap/Alert';
 import { Legend, pinMarkerIcon } from "../components/Map";
 import { STATE_OPTIONS } from '../constants';
+import moment from "moment";
 
 const useStyles = makeStyles({
   root: {
@@ -65,6 +66,16 @@ const useStyles = makeStyles({
     },
   },
 });
+
+const DateRangePicker = ({...props}) => {
+
+  let options = {allowInput: true, dateFormat: "Y-m-d", mode: "range", maxDate: moment().format('YYYY-MM-DD')}
+  return (
+    <>
+      <Flatpickr className="daterange_picker" options={options} {...props} />
+    </>
+  );
+};
 
 const DateTimePicker = ({ label, xs, clearable, ...props }) => {
 
@@ -479,4 +490,4 @@ const AddressSearch = (props) => {
   );
 }
 
-export { AddressLookup, AddressSearch, TextInput, Checkbox, DropDown, ImageUploader, DateTimePicker };
+export { AddressLookup, AddressSearch, TextInput, Checkbox, DropDown, ImageUploader, DateTimePicker, DateRangePicker };

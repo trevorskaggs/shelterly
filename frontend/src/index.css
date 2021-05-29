@@ -61,6 +61,12 @@ input[disabled] {
   background-image: none;
 }
 
+.daterange_picker {
+  margin-left: 16px;
+  width:200px;
+  text-align: center;
+}
+
 /* DatetimePicker fixed min width CSS */
 .datetime_picker {
   width:213px;
