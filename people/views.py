@@ -14,7 +14,7 @@ class PersonViewSet(viewsets.ModelViewSet):
     queryset = Person.objects.all()
     search_fields = ['first_name', 'last_name', 'address', 'phone', 'email', 'drivers_license', 'animal__name', 'reporter_animals__name',]
     filter_backends = (filters.SearchFilter,)
-    permission_classes = []
+    permission_classes = [permissions.IsAuthenticated]
     serializer_class = PersonSerializer
 
     def get_queryset(self):

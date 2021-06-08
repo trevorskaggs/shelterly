@@ -27,26 +27,26 @@ function ServiceRequestSearch() {
   const [data, setData] = useState({service_requests: [], isFetching: false});
   const [searchState, setSearchState] = useState({});
   const [searchTerm, setSearchTerm] = useState(search);
-  const tempSearchTerm = useRef('')
+  const tempSearchTerm = useRef(null);
   const [statusOptions, setStatusOptions] = useState(status);
   const [page, setPage] = useState(1);
   const [numPages, setNumPages] = useState(1);
-  const topRef = useRef(null);
 
   // Update searchTerm when field input changes.
   const handleChange = event => {
-    tempSearchTerm.current.value = event.target.value
+    tempSearchTerm.current.value = event.target.value;
   };
 
   // Use searchTerm to filter service_requests.
   const handleSubmit = async event => {
     event.preventDefault();
     setSearchTerm(tempSearchTerm.current.value);
+    setPage(1);
   }
 
   function setFocus(pageNum) {
     if (pageNum !== page) {
-      topRef.current.focus();
+      tempSearchTerm.current.focus();
     }
   }
 
@@ -250,7 +250,7 @@ function ServiceRequestSearch() {
         </div>
       ))}
       <p>{data.isFetching ? 'Fetching service requests...' : <span>{data.service_requests && data.service_requests.length ? '' : 'No Service Requests found.'}</span>}</p>
-      <Pagination ref={topRef} className="custom-page-links" size="lg" onClick={(e) => {setFocus(parseInt(e.target.innerText));setPage(parseInt(e.target.innerText))}}>
+      <Pagination className="custom-page-links" size="lg" onClick={(e) => {setFocus(parseInt(e.target.innerText));setPage(parseInt(e.target.innerText))}}>
         {[...Array(numPages).keys()].map(x =>
         <Pagination.Item key={x+1} active={x+1 === page}>
           {x+1}

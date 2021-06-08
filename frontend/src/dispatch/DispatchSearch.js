@@ -29,28 +29,28 @@ function DispatchAssignmentSearch() {
 
   const [data, setData] = useState({evacuation_assignments: [], isFetching: false});
   const [searchTerm, setSearchTerm] = useState(search);
-  const tempSearchTerm = useRef('')
+  const tempSearchTerm = useRef(null);
   const [statusOptions, setStatusOptions] = useState(status);
   const [matches, setMatches] = useState({});
   const [bounds, setBounds] = useState({});
   const [page, setPage] = useState(1);
   const [numPages, setNumPages] = useState(1);
-  const topRef = useRef(null);
 
   // Update searchTerm when field input changes.
   const handleChange = event => {
-    tempSearchTerm.current.value = event.target.value
+    tempSearchTerm.current.value = event.target.value;
   };
 
   // Use searchTerm to filter service_requests.
   const handleSubmit = async event => {
     event.preventDefault();
     setSearchTerm(tempSearchTerm.current.value);
+    setPage(1);
   }
 
   function setFocus(pageNum) {
     if (pageNum !== page) {
-      topRef.current.focus();
+      tempSearchTerm.current.focus();
     }
   }
 
@@ -322,7 +322,7 @@ function DispatchAssignmentSearch() {
         </div>
       ))}
       <p>{data.isFetching ? 'Fetching dispatch assignments...' : <span>{data.evacuation_assignments && data.evacuation_assignments.length ? '' : 'No dispatch assignments found.'}</span>}</p>
-      <Pagination ref={topRef} className="custom-page-links" size="lg" onClick={(e) => {setFocus(parseInt(e.target.innerText));setPage(parseInt(e.target.innerText))}}>
+      <Pagination className="custom-page-links" size="lg" onClick={(e) => {setFocus(parseInt(e.target.innerText));setPage(parseInt(e.target.innerText))}}>
         {[...Array(numPages).keys()].map(x =>
         <Pagination.Item key={x+1} active={x+1 === page}>
           {x+1}
