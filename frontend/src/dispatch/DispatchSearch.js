@@ -132,9 +132,8 @@ function DispatchAssignmentSearch() {
               type="text"
               placeholder="Search"
               name="searchTerm"
-              value={tempSearchTerm}
               onChange={handleChange}
-              ref={topRef}
+              ref={tempSearchTerm}
           />
           <InputGroup.Append>
             <Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0"}}>Search</Button>

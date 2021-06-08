@@ -12,9 +12,9 @@ from people.serializers import OwnerContactSerializer, PersonSerializer
 # Provides view for Person API calls.
 class PersonViewSet(viewsets.ModelViewSet):
     queryset = Person.objects.all()
-    search_fields = ['first_name', 'last_name', 'address', 'phone', 'email', 'drivers_license', 'animals__name', 'animal__name']
+    search_fields = ['first_name', 'last_name', 'address', 'phone', 'email', 'drivers_license', 'animal__name', 'reporter_animals__name',]
     filter_backends = (filters.SearchFilter,)
-    permission_classes = [permissions.IsAuthenticated, ]
+    permission_classes = []
     serializer_class = PersonSerializer
 
     def get_queryset(self):
