@@ -31,26 +31,26 @@ function DispatchAssignmentSearch() {
 
   const [data, setData] = useState({evacuation_assignments: [], isFetching: false});
   const [searchTerm, setSearchTerm] = useState(search);
-  const [tempSearchTerm, setTempSearchTerm] = useState(search);
+  const tempSearchTerm = useRef(null);
   const [statusOptions, setStatusOptions] = useState(status);
   const [matches, setMatches] = useState({});
   const [bounds, setBounds] = useState({});
   const [page, setPage] = useState(1);
   const [numPages, setNumPages] = useState(1);
-  const topRef = useRef(null);
   const [isDateSet, setIsDateSet] = useState(false);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(moment().format('YYYY-MM-DD'));
 
   // Update searchTerm when field input changes.
   const handleChange = event => {
-    setTempSearchTerm(event.target.value);
+    tempSearchTerm.current.value = event.target.value;
   };
 
-  // Use searchTerm to filter evacuation_assignments.
+  // Use searchTerm to filter service_requests.
   const handleSubmit = async event => {
     event.preventDefault();
-    setSearchTerm(tempSearchTerm);
+    setSearchTerm(tempSearchTerm.current.value);
+    setPage(1);
   }
 
   // Parses the Date Range object
@@ -67,7 +67,7 @@ function DispatchAssignmentSearch() {
 
   function setFocus(pageNum) {
     if (pageNum !== page) {
-      topRef.current.focus();
+      tempSearchTerm.current.focus();
     }
   }
 
@@ -152,9 +152,8 @@ function DispatchAssignmentSearch() {
               type="text"
               placeholder="Search"
               name="searchTerm"
-              value={tempSearchTerm}
               onChange={handleChange}
-              ref={topRef}
+              ref={tempSearchTerm}
           />
           <InputGroup.Append>
             <Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0"}}>Search</Button>
