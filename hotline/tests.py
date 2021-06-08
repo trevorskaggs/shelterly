@@ -9,7 +9,7 @@ class TestViews(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.user = ShelterlyUser.objects.create_user(username='test_user', email="test@test.com", password="test", is_active=True)
+        cls.user = ShelterlyUser.objects.create_user(email="test@test.com", cell_phone="5555555", password="test", is_active=True)
         cls.person = Person.objects.create(first_name="Jane", last_name="Doe", phone="123-456-7890")
         cls.service_request = ServiceRequest.objects.create(directions="Turn left")
         cls.service_request.owners.set([cls.person])

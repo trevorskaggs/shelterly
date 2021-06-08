@@ -6,7 +6,7 @@ class TestAuthentication(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.user = ShelterlyUser.objects.create_user(username="test_user", email="test@test.com", cell_phone="5555555", password="test", is_active=True)
+        cls.user = ShelterlyUser.objects.create_user(email="test@test.com", cell_phone="5555555", password="test", is_active=True)
 
     def test_login(self):
         response = self.client.post('/login/', {'username':'test@test.com', 'password':'test'})
