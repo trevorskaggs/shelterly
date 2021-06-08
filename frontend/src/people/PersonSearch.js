@@ -27,21 +27,21 @@ function PersonSearch() {
 	const [searchState, setSearchState] = useState({});
 	const [statusOptions, setStatusOptions] = useState(person);
 	const [searchTerm, setSearchTerm] = useState(search);
-	const [tempSearchTerm, setTempSearchTerm] = useState(search);
+	const tempSearchTerm = useRef('')
 	const [page, setPage] = useState(1);
-  const [numPages, setNumPages] = useState(1);
+  	const [numPages, setNumPages] = useState(1);
 	const topRef = useRef(null);
 
-	// Update searchTerm when field input changes.
-	const handleChange = event => {
-		setTempSearchTerm(event.target.value);
-	};
+  // Update searchTerm when field input changes.
+  const handleChange = event => {
+    tempSearchTerm.current.value = event.target.value
+  };
 
-	// Use searchTerm to filter owners.
-	const handleSubmit = async event => {
-			event.preventDefault();
-			setSearchTerm(tempSearchTerm);
-	}
+  // Use searchTerm to filter service_requests.
+  const handleSubmit = async event => {
+    event.preventDefault();
+    setSearchTerm(tempSearchTerm.current.value);
+  }
 
 	function setFocus(pageNum) {
     if (pageNum !== page) {
@@ -205,7 +205,7 @@ function PersonSearch() {
 					<p>{data.isFetching ? 'Fetching ' + statusOptions + '...' :
 						<span>{data.owners && data.owners.length ? '' : 'No ' + statusOptions + ' found.'}</span>}
 					</p>
-					<Pagination className="custom-page-links" size="lg" onClick={(e) => {setFocus(parseInt(e.target.innerText));setPage(parseInt(e.target.innerText))}}>
+					<Pagination ref={topRef} className="custom-page-links" size="lg" onClick={(e) => {setFocus(parseInt(e.target.innerText));setPage(parseInt(e.target.innerText))}}>
 						{[...Array(numPages).keys()].map(x =>
 						<Pagination.Item key={x+1} active={x+1 === page}>
 							{x+1}
