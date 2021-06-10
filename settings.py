@@ -30,7 +30,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 SECRET_KEY = os.environ.get('SECRET_KEY')
 ORGANIZATION = os.environ.get('ORGANIZATION')
 INCIDENT_NAME = os.environ.get('INCIDENT_NAME')
-SHELTERLY_VERSION = os.environ.get('SHELTERLY_VERSION')
+SHELTERLY_VERSION = os.environ.get('SHELTERLY_VERSION', 'v0.2')
 
 DEBUG = False
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -149,19 +149,20 @@ SECURE_SSL_REDIRECT = False
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
-STATIC_URL = '/static/'
+
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "frontend/build/static"),
     os.path.join(BASE_DIR, "frontend/src/static")
 ]
 
-MEDIA_URL = '/media/'
-
 if DEBUG:
+    STATIC_URL = '/static/'
     STATIC_ROOT=os.path.join(BASE_DIR, 'static')
+    MEDIA_URL = '/media/'
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 else:
     #Static File Settings
+    STATIC_URL = 'https://shelterly-files.s3-us-west-2.amazonaws.com/static/%s/' % SHELTERLY_VERSION
     STATICFILES_STORAGE = 'custom_storage.StaticStorage'
     #Media File Settings
     DEFAULT_FILE_STORAGE = 'custom_storage.MediaStorage'

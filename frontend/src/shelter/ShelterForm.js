@@ -98,7 +98,7 @@ const ShelterForm = ({id}) => {
               navigate('/shelter/' + id)
             })
             .catch(error => {
-              if (error.response.data && error.response.data.name[0].includes('shelter with this name already exists')) {
+              if (error.response.data && error.response.data.name && error.response.data.name[0].includes('shelter with this name already exists')) {
                 setShow(true);
               }
             });
@@ -109,7 +109,7 @@ const ShelterForm = ({id}) => {
               navigate('/shelter/' + response.data.id)
             })
             .catch(error => {
-              if (error.response.data && error.response.data.name[0].includes('shelter with this name already exists')) {
+              if (error.response.data && error.response.data.name && error.response.data.name[0].includes('shelter with this name already exists')) {
                 setShow(true);
               }
             });

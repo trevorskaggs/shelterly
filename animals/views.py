@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Case, BooleanField, Prefetch, Value, When, Exists
+from django.shortcuts import render
 from copy import deepcopy
 from datetime import datetime
 from rest_framework import filters, permissions, viewsets
@@ -158,7 +159,7 @@ class AnimalViewSet(viewsets.ModelViewSet):
             # Check to see if animal SR status should be changed.
             if animal.request:
                 animal.request.update_status()
-    
+
     def get_queryset(self):
         """
         Returns: Queryset of distinct animals, each annotated with:
@@ -176,3 +177,8 @@ class AnimalViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(owners__isnull=False)
 
         return queryset
+
+def print_kennel_card(request, animal_id):
+    animal = Animal.objects.get(id=animal_id)
+    context={"animal":animal, "care_schedule_rows": range(30)}
+    return render(request, "ui/animals/print.html", context)    

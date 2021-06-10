@@ -61,7 +61,7 @@ class AnimalSerializer(ModestAnimalSerializer):
     reporter_object = SimplePersonSerializer(source='reporter', read_only=True)
     request_address = serializers.SerializerMethodField()
     action_history = serializers.SerializerMethodField()
-    room_name = serializers.StringRelatedField(source='room')
+    room_name = serializers.StringRelatedField(source='room', read_only=True)
     shelter_object = SimpleShelterSerializer(source='shelter', required=False, read_only=True)
 
     class Meta:
