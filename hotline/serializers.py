@@ -76,7 +76,7 @@ class SimpleServiceRequestSerializer(BarebonesServiceRequestSerializer):
     class Meta:
         model = ServiceRequest
         fields = ['id', 'latitude', 'longitude', 'full_address', 'followup_date', 'owners', 'reporter', 'address', 'city', 'state', 'zip_code', 'apartment', 'reporter', 'directions', 'evacuation_assignments', 'pending',
-        'animal_count', 'injured', 'accessible', 'turn_around', 'animals', 'status', 'reported_animals', 'reporter_object', 'owner_objects', 'sheltered_in_place', 'unable_to_locate', 'aco_required']
+        'animal_count', 'key_provided', 'verbal_permission', 'injured', 'accessible', 'turn_around', 'animals', 'status', 'reported_animals', 'reporter_object', 'owner_objects', 'sheltered_in_place', 'unable_to_locate', 'aco_required']
 
 
     # Custom field for the full address.
@@ -132,7 +132,6 @@ class SimpleServiceRequestSerializer(BarebonesServiceRequestSerializer):
         return super().to_internal_value(data)
 
 class ServiceRequestSerializer(SimpleServiceRequestSerializer):
-    from people.serializers import SimplePersonSerializer
 
     action_history = serializers.SerializerMethodField()
     animal_count = serializers.IntegerField(read_only=True)
@@ -143,7 +142,7 @@ class ServiceRequestSerializer(SimpleServiceRequestSerializer):
         model = ServiceRequest
         fields = ['id', 'latitude', 'longitude', 'full_address', 'followup_date', 'status', 'address', 'city', 'state', 'zip_code',
         'injured', 'accessible', 'turn_around', 'animals', 'reporter', 'reported_animals', 'sheltered_in_place', 'unable_to_locate', 'aco_required',
-        'animal_count', 'action_history', 'owner_objects', 'reporter_object', 'assigned_requests']
+        'animal_count', 'key_provided', 'verbal_permission', 'action_history', 'owner_objects', 'reporter_object', 'assigned_requests']
 
     def get_assigned_requests(self, obj):
         from evac.models import AssignedRequest

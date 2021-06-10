@@ -12,6 +12,43 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.apps import apps
 
+class ShelterlyUserManager(BaseUserManager):
+    def create_user(self, email, cell_phone, password=None, **extra_fields):
+        """
+        Creates and saves a User with the given email, date of
+        birth and password.
+        """
+        if not email:
+            raise ValueError('Users must have an email address')
+
+        user = self.model(
+            email=self.normalize_email(email),
+            cell_phone=cell_phone,
+            **extra_fields
+        )
+
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, email, cell_phone, password=None, **extra_fields):
+        """
+        Creates and saves a superuser with the given email, date of
+        birth and password.
+        """
+        user = self.create_user(
+            email,
+            password=password,
+            cell_phone=cell_phone,
+            **extra_fields
+        )
+        user.is_admin = True
+        user.save(using=self._db)
+        return user
+
+    # Customize to allow case insensitive email login.
+    def get_by_natural_key(self, email):
+        return self.get(email__iexact=email)
 
 class ShelterlyUser(AbstractUser):
 
@@ -22,6 +59,8 @@ class ShelterlyUser(AbstractUser):
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['cell_phone']
+
+    objects = ShelterlyUserManager()
 
     def __str__(self):
         return '{} {}'.format(self.first_name, self.last_name)

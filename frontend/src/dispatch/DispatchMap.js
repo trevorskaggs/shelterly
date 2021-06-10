@@ -5,7 +5,7 @@ import { Form, Formik } from 'formik';
 import { Button, Col, FormCheck, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBandAid, faBullseye, faCalendarDay, faCar, faExclamationTriangle, faCircle, faClipboardList, faExclamationCircle, faQuestionCircle, faPencilAlt, faTrailer, faUserAlt, faUserAltSlash
+  faBan, faBandAid, faBullseye, faCalendarDay, faCar, faExclamationTriangle, faCircle, faClipboardList, faExclamationCircle, faQuestionCircle, faPencilAlt, faTrailer, faUserAlt, faUserAltSlash
 } from '@fortawesome/free-solid-svg-icons';
 import { faBadgeSheriff, faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
 import { Circle, Marker, Tooltip as MapTooltip } from "react-leaflet";
@@ -20,7 +20,6 @@ import Scrollbar from '../components/Scrollbars';
 import 'react-bootstrap-typeahead/css/Typeahead.css';
 import 'leaflet/dist/leaflet.css';
 import { S3_BUCKET } from '../constants';
-
 
 function Deploy() {
 
@@ -446,8 +445,8 @@ function Deploy() {
                         <div>
                         {service_request.aco_required ? <img width={16} height={16} src={`${S3_BUCKET}images/badge-sheriff.png`} alt="ACO Required" className="mr-1" /> : ""}
                         {service_request.injured ? <img width={16} height={16} src={`${S3_BUCKET}images/band-aid-solid.png`} alt="Injured" className="mr-1" /> : ""}
-                        {service_request.accessible ? <img width={16} height={16} src={`${S3_BUCKET}images/car-solid.png`} alt="Accessible" className="mr-1" /> : ""}
-                        {service_request.turn_around ? <img width={16} height={16} src={`${S3_BUCKET}images/trailer-solid.png`} alt="Turn Around" /> : ""}
+                        {service_request.accessible ? <img width={16} height={16} src={`${S3_BUCKET}images/car-solid.png`} alt="Accessible" className="mr-1" /> : <img width={16} height={16} src={`${S3_BUCKET}images/car-ban-solid.png`} alt="Not Acessible" className="mr-1" />}
+                        {service_request.turn_around ? <img width={16} height={16} src={`${S3_BUCKET}images/trailer-solid.png`} alt="Turn Around" className="mr-1" /> : <img width={16} height={16} src={`${S3_BUCKET}images/trailer-ban-solid.png`} alt="No Turn Around" className="mr-1" />}
                         </div>
                       </span>
                     </MapTooltip>
@@ -615,9 +614,25 @@ function Deploy() {
                         </Tooltip>
                       }
                     >
-                      <FontAwesomeIcon icon={faCar} className="ml-1"/>
+                      <span className="fa-layers">
+                        <FontAwesomeIcon icon={faCar} className="ml-1 fa-move-down" />
+                      </span>
+                    </OverlayTrigger> :
+                    <OverlayTrigger
+                      key={"not-accessible"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-not-accessible`}>
+                          Not easily accessible
+                        </Tooltip>
+                      }
+                    >
+                      <span className="fa-layers ml-1">
+                        <FontAwesomeIcon icon={faCar} className="fa-move-down" />
+                        <FontAwesomeIcon icon={faBan} color="#ef5151" />
+                      </span>
                     </OverlayTrigger>
-                    : ""}
+                    }
                     {service_request.turn_around ?
                     <OverlayTrigger
                       key={"turnaround"}
@@ -628,9 +643,23 @@ function Deploy() {
                         </Tooltip>
                       }
                     >
-                      <FontAwesomeIcon icon={faTrailer} className="ml-1"/>
+                      <FontAwesomeIcon icon={faTrailer} className="ml-2" style={{marginRight:"-3px"}} />
+                    </OverlayTrigger> :
+                    <OverlayTrigger
+                      key={"no-turnaround"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-no-turnaround`}>
+                          No room to turn around
+                        </Tooltip>
+                      }
+                    >
+                      <span className="fa-layers ml-1">
+                        <FontAwesomeIcon icon={faTrailer} />
+                        <FontAwesomeIcon icon={faBan} color="#ef5151" transform={'right-1'} />
+                      </span>
                     </OverlayTrigger>
-                    : ""}
+                    }
                     <span className="ml-2">|
                     &nbsp;#{service_request.id} - {service_request.full_address}</span>
                     <OverlayTrigger

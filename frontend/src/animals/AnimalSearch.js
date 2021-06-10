@@ -4,7 +4,7 @@ import { Link, useQueryParams } from 'raviger';
 import { Button, ButtonGroup, Card, CardGroup, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Pagination, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBandAid, faCalendarDay, faClipboardList, faCut, faEnvelope, faLink, faNotesMedical, faUserAltSlash
+  faBan, faCalendarDay, faClipboardList, faCut, faEnvelope, faLink, faMedkit, faNotesMedical, faUserAltSlash
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faDotCircle
@@ -170,19 +170,6 @@ function AnimalSearch() {
                       <FontAwesomeIcon icon={faLink} size="sm" className="ml-1" />
                     </OverlayTrigger> :
                   ""}
-                  {animal.fixed === 'yes' ?
-                    <OverlayTrigger
-                      key={"fixed"}
-                      placement="top"
-                      overlay={
-                        <Tooltip id={`tooltip-fixed`}>
-                          Animal is fixed or neutered
-                        </Tooltip>
-                      }
-                    >
-                      <FontAwesomeIcon icon={faCut} size="sm" className="ml-1" />
-                    </OverlayTrigger> :
-                  ""}
                   {animal.aggressive === 'yes' ?
                     <OverlayTrigger
                       key={"aggressive"}
@@ -195,6 +182,21 @@ function AnimalSearch() {
                     >
                       <FontAwesomeIcon icon={faClawMarks} size="sm" className="ml-1" />
                     </OverlayTrigger> :
+                  animal.aggressive === 'no' ?
+                    <OverlayTrigger
+                      key={"not-aggressive"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-aggressive`}>
+                          Animal is not aggressive
+                        </Tooltip>
+                      }
+                    >
+                      <span className="fa-layers" style={{marginLeft:"2px"}}>
+                        <FontAwesomeIcon icon={faClawMarks} size="sm" />
+                        <FontAwesomeIcon icon={faBan} color="#ef5151" size="sm" transform={'shrink-2'} />
+                      </span>
+                    </OverlayTrigger> :
                   ""}
                   {animal.injured === 'yes' ?
                     <OverlayTrigger
@@ -206,8 +208,51 @@ function AnimalSearch() {
                         </Tooltip>
                       }
                     >
-                      <FontAwesomeIcon icon={faBandAid} size="sm" className="ml-1" />
+                      <FontAwesomeIcon icon={faMedkit} size="sm" className="ml-1 fa-move-up" />
                     </OverlayTrigger> :
+                  animal.injured === 'no' ?
+                    <OverlayTrigger
+                      key={"not-injured"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-injured`}>
+                          Animal is not injured
+                        </Tooltip>
+                      }
+                    >
+                      <span className="fa-layers" style={{marginLeft:"2px"}}>
+                        <FontAwesomeIcon icon={faMedkit} size="sm" className="fa-move-up" />
+                        <FontAwesomeIcon icon={faBan} color="#ef5151" size="sm" transform={'shrink-2'} />
+                      </span>
+                    </OverlayTrigger> :
+                  ""}
+                  {animal.fixed === 'yes' ?
+                    <OverlayTrigger
+                      key={"fixed"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-fixed`}>
+                          Animal is fixed or neutered
+                        </Tooltip>
+                      }
+                    >
+                      <FontAwesomeIcon icon={faCut} size="sm" className="ml-1" />
+                    </OverlayTrigger> :
+                  animal.fixed === 'no' ?
+                  <OverlayTrigger
+                    key={"not-fixed"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-fixed`}>
+                        Animal is not fixed or neutered
+                      </Tooltip>
+                    }
+                  >
+                    <span className="fa-layers" style={{marginLeft:"2px"}}>
+                      <FontAwesomeIcon icon={faCut} size="sm" />
+                      <FontAwesomeIcon icon={faBan} color="#ef5151" size="sm" transform={'shrink-2'} />
+                    </span>
+                  </OverlayTrigger> :
                   ""}
                   {animal.behavior_notes ?
                     <OverlayTrigger

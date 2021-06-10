@@ -8,7 +8,7 @@ class TestViews(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.user = ShelterlyUser.objects.create_user(username='test_user', email="test@test.com", password="test", is_active=True)
+        cls.user = ShelterlyUser.objects.create_user(email="test@test.com", cell_phone="5555555", password="test", is_active=True)
         cls.owner = Person.objects.create(first_name="Leroy", last_name="Jenkins")
         cls.animal = Animal.objects.create(name='bella')
         cls.animal.owners.set([cls.owner])

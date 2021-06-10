@@ -285,7 +285,7 @@ const ImageUploader = ({ parentStateSetter, ...props }) => {
   );
 }
 
-const AddressLookup = ({ ...props }) => {
+const AddressLookup = ({setLatLon, ...props}) => {
 
   const childRef = useRef(null);
   const { setFieldValue } = useFormikContext();
@@ -316,7 +316,7 @@ const AddressLookup = ({ ...props }) => {
       setFieldValue("latitude", suggestion.geometry.location.lat());
       setFieldValue("longitude", suggestion.geometry.location.lng());
       setFieldValue("full_address", suggestion.formatted_address.replace(', USA', ''));
-      props.setLatLon(suggestion.geometry.location.lat(), suggestion.geometry.location.lng())
+      setLatLon(suggestion.geometry.location.lat(), suggestion.geometry.location.lng())
     }
   }
 

@@ -14,6 +14,7 @@ import datetime
 import os
 import json
 import boto3
+from version import __version__
 
 try:
     with open('config/secrets.json') as f:
@@ -30,7 +31,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 SECRET_KEY = os.environ.get('SECRET_KEY')
 ORGANIZATION = os.environ.get('ORGANIZATION')
 INCIDENT_NAME = os.environ.get('INCIDENT_NAME')
-SHELTERLY_VERSION = os.environ.get('SHELTERLY_VERSION', 'v0.2')
+SHELTERLY_VERSION = __version__
 
 DEBUG = False
 # SECURITY WARNING: don't run with debug turned on in production!
