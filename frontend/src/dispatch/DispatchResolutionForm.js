@@ -303,6 +303,12 @@ function DispatchResolutionForm({ id }) {
                       <ListGroup.Item key={owner.id}><b>Owner: </b>{owner.first_name} {owner.last_name}</ListGroup.Item>
                     ))}
                     {assigned_request.service_request_object.owners.length < 1 ? <ListGroup.Item><b>Owner: </b>No Owner</ListGroup.Item> : ""}
+                      <ListGroup.Item><b>Directions: </b>{ assigned_request.service_request_object.directions ? assigned_request.service_request_object.directions : "N/A"}</ListGroup.Item>
+                      <ListGroup.Item>
+                        <b>Accessible: </b>{ assigned_request.service_request_object.accessible ? "Yes" : "No"}, 
+                        <b>Turn Aroundable: </b>{ assigned_request.service_request_object.turn_around ? "Yes" : "No"},
+
+                        </ListGroup.Item>
                   </ListGroup>
                   <hr />
                   <ListGroup variant="flush" style={{ marginTop: "-13px", marginBottom: "-13px" }}>
@@ -336,6 +342,7 @@ function DispatchResolutionForm({ id }) {
                               <FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse />
                             </OverlayTrigger>
                             : ""}
+                            (Primary Color: {animal.p_color ? animal.p_color : "N/A" }, Secondary Color: {animal.s_color ? animal.s_color : "N/A"}, Description: {animal.color_notes ? animal.color_notes : "N/A"})
                           </span>
                         </Row>
                         {props.values && props.values.sr_updates[index] && props.values.sr_updates[index].animals[inception].status === 'SHELTERED' ?

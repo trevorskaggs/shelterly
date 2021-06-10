@@ -14,9 +14,11 @@ import L from "leaflet";
 import { Marker, Tooltip as MapTooltip } from "react-leaflet";
 import Map, { prettyText, reportedMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
 import Moment from "react-moment";
+import moment from 'moment'
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
 import { ITEMS_PER_PAGE } from '../constants';
+import {DateRangePicker} from '../components/Form';
 
 function DispatchAssignmentSearch() {
 
@@ -29,28 +31,43 @@ function DispatchAssignmentSearch() {
 
   const [data, setData] = useState({evacuation_assignments: [], isFetching: false});
   const [searchTerm, setSearchTerm] = useState(search);
-  const [tempSearchTerm, setTempSearchTerm] = useState(search);
+  const tempSearchTerm = useRef(null);
   const [statusOptions, setStatusOptions] = useState(status);
   const [matches, setMatches] = useState({});
   const [bounds, setBounds] = useState({});
   const [page, setPage] = useState(1);
   const [numPages, setNumPages] = useState(1);
-  const topRef = useRef(null);
+  const [isDateSet, setIsDateSet] = useState(false);
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(moment().format('YYYY-MM-DD'));
 
   // Update searchTerm when field input changes.
   const handleChange = event => {
-    setTempSearchTerm(event.target.value);
+    tempSearchTerm.current.value = event.target.value;
   };
 
-  // Use searchTerm to filter evacuation_assignments.
+  // Use searchTerm to filter service_requests.
   const handleSubmit = async event => {
     event.preventDefault();
-    setSearchTerm(tempSearchTerm);
+    setSearchTerm(tempSearchTerm.current.value);
+    setPage(1);
+  }
+
+  // Parses the Date Range object
+  function parseDateRange(dateRange) {
+    if (dateRange.length > 1) {
+      dateRange = dateRange.toString().split(',');
+      setStartDate(moment(dateRange[0]).format('YYYY-MM-DD'))
+      setEndDate(moment(dateRange[1]).format('YYYY-MM-DD'));
+    } else {
+      setStartDate(moment(dateRange[0]).format('YYYY-MM-DD'))
+      setEndDate(moment(dateRange[0]).format('YYYY-MM-DD'));
+    }
   }
 
   function setFocus(pageNum) {
     if (pageNum !== page) {
-      topRef.current.focus();
+      tempSearchTerm.current.focus();
     }
   }
 
@@ -78,6 +95,9 @@ function DispatchAssignmentSearch() {
     return [species_matches, status_matches]
   }
 
+  let evacAssignments = data.evacuation_assignments.filter(ea => (isDateSet ? startDate <= moment(ea.start_time)
+    .format('YYYY-MM-DD') && endDate >= moment(ea.start_time).format('YYYY-MM-DD') : true));
+
   // Hook for initializing data.
   useEffect(() => {
     let unmounted = false;
@@ -102,7 +122,7 @@ function DispatchAssignmentSearch() {
               map_dict[assigned_request.service_request_object.id] = {species_matches:species_matches, status_matches:status_matches};
               sr_bounds.push([assigned_request.service_request_object.latitude, assigned_request.service_request_object.longitude]);
             }
-            bounds_dict[dispatch_assignment.id] = sr_bounds.length > 0 ? L.latLngBounds(sr_bounds).pad(.1) : L.latLngBounds([[0,0]]);;
+            bounds_dict[dispatch_assignment.id] = sr_bounds.length > 0 ? L.latLngBounds(sr_bounds).pad(.1) : L.latLngBounds([[0,0]]);
           }
           setMatches(map_dict);
           setBounds(bounds_dict);
@@ -132,9 +152,8 @@ function DispatchAssignmentSearch() {
               type="text"
               placeholder="Search"
               name="searchTerm"
-              value={tempSearchTerm}
               onChange={handleChange}
-              ref={topRef}
+              ref={tempSearchTerm}
           />
           <InputGroup.Append>
             <Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0"}}>Search</Button>
@@ -143,9 +162,24 @@ function DispatchAssignmentSearch() {
             <Button variant={statusOptions === "open" ? "primary" : "secondary"} onClick={statusOptions !== "open" ? () => {setPage(1);setStatusOptions("open")} : () => {setPage(1);setStatusOptions("")}}>Open</Button>
             <Button variant={statusOptions === "closed" ? "primary" : "secondary"} onClick={statusOptions !== "closed" ? () => {setPage(1);setStatusOptions("closed")} : () => {setPage(1);setStatusOptions("")}}>Closed</Button>
           </ButtonGroup>
+          <DateRangePicker
+            name={`date_range_picker`}
+            id={`date_range_picker`}
+            placeholder={"Filter by Date Range"}
+            onChange={(dateRange) => {
+              if (dateRange == '') {
+                setIsDateSet(false)
+                setNumPages(Math.ceil(data.evacuation_assignments.length / ITEMS_PER_PAGE));
+              } else {
+                setIsDateSet(true)
+                parseDateRange(dateRange)
+                setNumPages(Math.ceil(evacAssignments.length / ITEMS_PER_PAGE));
+              }
+            }}
+          />
         </InputGroup>
       </Form>
-      {data.evacuation_assignments.map((evacuation_assignment, index) => (
+      {evacAssignments.map((evacuation_assignment, index) => (
         <div key={evacuation_assignment.id} className="mt-3" hidden={page !== Math.ceil((index+1)/ITEMS_PER_PAGE)}>
           <div className="card-header d-flex hide-scrollbars" style={{whiteSpace:'nowrap', overflow:"hidden"}}>
             <h4 style={{marginBottom:"-2px", marginLeft:"-12px", whiteSpace:'nowrap', overflow:"hidden", textOverflow:"ellipsis"}}>

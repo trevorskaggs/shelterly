@@ -27,25 +27,25 @@ function PersonSearch() {
 	const [searchState, setSearchState] = useState({});
 	const [statusOptions, setStatusOptions] = useState(person);
 	const [searchTerm, setSearchTerm] = useState(search);
-	const [tempSearchTerm, setTempSearchTerm] = useState(search);
+	const tempSearchTerm = useRef(null);
 	const [page, setPage] = useState(1);
   const [numPages, setNumPages] = useState(1);
-	const topRef = useRef(null);
 
-	// Update searchTerm when field input changes.
-	const handleChange = event => {
-		setTempSearchTerm(event.target.value);
-	};
+  // Update searchTerm when field input changes.
+  const handleChange = event => {
+    tempSearchTerm.current.value = event.target.value;
+  };
 
-	// Use searchTerm to filter owners.
-	const handleSubmit = async event => {
-			event.preventDefault();
-			setSearchTerm(tempSearchTerm);
-	}
+  // Use searchTerm to filter service_requests.
+  const handleSubmit = async event => {
+    event.preventDefault();
+    setSearchTerm(tempSearchTerm.current.value);
+		setPage(1);
+  }
 
 	function setFocus(pageNum) {
     if (pageNum !== page) {
-      topRef.current.focus();
+      tempSearchTerm.current.focus();
     }
   }
 
@@ -101,10 +101,9 @@ function PersonSearch() {
 								type="text"
 								placeholder="Search"
 								name="searchTerm"
-								value={tempSearchTerm}
 								onChange={handleChange}
-								ref={topRef}
-							/>
+								ref={tempSearchTerm}
+								/>
 							<InputGroup.Append>
 								<Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0"}}>Search</Button>
 							</InputGroup.Append>

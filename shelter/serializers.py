@@ -34,7 +34,10 @@ class RoomSerializer(SimpleRoomSerializer):
             else:
                 ModestAnimalSerializer(obj.animal_set.exclude(status='CANCELED'), many=True, required=False, read_only=True).data
         else:
-            return AnimalSerializer(obj.animals, many=True, required=False, read_only=True).data
+            if hasattr(obj, 'animals'):
+                return ModestAnimalSerializer(obj.animals, many=True, required=False, read_only=True).data
+            else:
+                return AnimalSerializer(obj.animal_set.exclude(status='CANCELED'), many=True, required=False, read_only=True).data
 
     def get_action_history(self, obj):
         return [build_action_string(action) for action in obj.target_actions.all()]
@@ -80,9 +83,10 @@ class SimpleShelterSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class ModestShelterSerializer(SimpleShelterSerializer):
+    
     buildings = SimpleBuildingSerializer(source='building_set', many=True, required=False, read_only=True)
-    animal_count = serializers.IntegerField()
-    room_count = serializers.IntegerField()
+    animal_count = serializers.IntegerField(required=False)
+    room_count = serializers.IntegerField(required=False)
 
 class ShelterSerializer(ModestShelterSerializer):
     #Single obj serializer

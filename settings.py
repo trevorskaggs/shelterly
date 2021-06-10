@@ -150,19 +150,20 @@ SECURE_SSL_REDIRECT = False
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
-STATIC_URL = '/static/'
+
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "frontend/build/static"),
     os.path.join(BASE_DIR, "frontend/src/static")
 ]
 
-MEDIA_URL = '/media/'
-
 if DEBUG:
+    STATIC_URL = '/static/'
     STATIC_ROOT=os.path.join(BASE_DIR, 'static')
+    MEDIA_URL = '/media/'
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 else:
     #Static File Settings
+    STATIC_URL = 'https://shelterly-files.s3-us-west-2.amazonaws.com/static/%s/' % SHELTERLY_VERSION
     STATICFILES_STORAGE = 'custom_storage.StaticStorage'
     #Media File Settings
     DEFAULT_FILE_STORAGE = 'custom_storage.MediaStorage'
