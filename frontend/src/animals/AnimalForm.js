@@ -352,7 +352,7 @@ const AnimalForm = (props) => {
               // Create current animal then navigate.
               formData.append('reporter', reporterResponse[0].data.id);
               formData.append('new_owner', ownerResponse[0].data.id);
-              axios.post('/animals/api/animal/', formData)
+              await axios.post('/animals/api/animal/', formData)
               .then(function() {
                 // Navigate to shelter page.
                 if (values.shelter) {

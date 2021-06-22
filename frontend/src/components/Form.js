@@ -22,6 +22,7 @@ import Alert from 'react-bootstrap/Alert';
 import { Legend, pinMarkerIcon } from "../components/Map";
 import { STATE_OPTIONS } from '../constants';
 import moment from "moment";
+import imageCompression from 'browser-image-compression';
 
 const useStyles = makeStyles({
   root: {
@@ -230,12 +231,18 @@ const ImageUploader = ({ parentStateSetter, ...props }) => {
     <>
       <ImageUploading
         {...props}
-        onChange={(imageList) => {
+        onChange={ async (imageList) => {
           setChildState(imageList);
           if (!props.multiple) {
             // Set file to field if it exists.
             if (imageList[0]) {
-              setFieldValue(props.id, imageList[0].file);
+              const options = {
+                maxSizeMB: 2,
+                maxWidthOrHeight: 1920,
+                useWebWorker: true
+              }
+              const compressedFile = await imageCompression(imageList[0].file, options);
+              setFieldValue(props.id, compressedFile);
               setFieldValue(props.id + '_data_url', imageList[0].data_url);
             }
           }
