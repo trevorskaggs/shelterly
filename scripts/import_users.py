@@ -17,7 +17,7 @@ parser.add_argument("--admins", help="load only admins", action="store_true")
 args = parser.parse_args()
 
 with open(args.path, newline='', encoding='utf-8-sig') as f:
-    reader = csv.DictReader(f, fieldnames=['first_name','last_name','email','cell_phone','agency_id','shelterly_user', 'team_member', 'admin'])
+    reader = csv.DictReader(f, fieldnames=['first_name','last_name','email','cell_phone','agency_id','shelterly_user', 'team_member', 'shelterly_lead', 'shelterly_admin'])
     # skip first line w/ header info
     next(reader)
     a = list(reader)
@@ -27,8 +27,9 @@ with open(args.path, newline='', encoding='utf-8-sig') as f:
 admins_only = args.admins
 for item in a:
     if item['shelterly_user'] == 'yes':
-        super_user = item['admin'] == 'yes'
-        if not admins_only or (admins_only and super_user):
+        shelterly_lead = item['shelterly_lead'] == 'yes'
+        super_user = item['shelterly_admin'] == 'yes'
+        if not admins_only or (admins_only and shelterly_lead):
             try:
                 user = ShelterlyUser.objects.create_user(
                     first_name=item['first_name'],
