@@ -31,6 +31,7 @@ for item in a:
         super_user = item['shelterly_admin'] == 'yes'
         if not admins_only or (admins_only and shelterly_lead):
             try:
+                import ipdb; ipdb.set_trace()
                 user = ShelterlyUser.objects.create_user(
                     first_name=item['first_name'],
                     last_name=item['last_name'],
