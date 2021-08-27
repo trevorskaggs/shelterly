@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Link } from 'raviger';
+import { Link, navigate } from 'raviger';
 import { Button, Col, ListGroup, Row } from 'react-bootstrap';
 import { Marker, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
@@ -105,7 +105,7 @@ function Hotline() {
                   key={service_request.id}
                   position={[service_request.latitude, service_request.longitude]}
                   icon={service_request.sheltered_in_place > 0 ? SIPMarkerIcon : service_request.unable_to_locate > 0 ? UTLMarkerIcon : service_request.reported_animals > 0 ? reportedMarkerIcon : closedMarkerIcon}
-                  onClick={() => window.open("/hotline/servicerequest/" + service_request.id)}
+                  onClick={() => navigate("/hotline/servicerequest/" + service_request.id)}
                 >
                   <MapTooltip autoPan={false}>
                     <span>
