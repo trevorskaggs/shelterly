@@ -56,7 +56,7 @@ function DispatchResolutionForm({ id }) {
     let source = axios.CancelToken.source();
 
     const fetchEvacAssignmentData = () => {
-      // Fetch Animal data.
+      // Fetch Evac Assignment data.
       axios.get('/evac/api/evacassignment/' + id + '/', {
         cancelToken: source.token,
       })
@@ -75,7 +75,7 @@ function DispatchResolutionForm({ id }) {
               date_completed: assigned_request.visit_note ? assigned_request.visit_note.date_completed : new Date(),
               notes: assigned_request.visit_note ? assigned_request.visit_note.notes : '',
               forced_entry: assigned_request.visit_note ? assigned_request.visit_note.forced_entry : false,
-              animals: Object.keys(assigned_request.animals).map(animal_id => {return {id:animal_id, status:assigned_request.animals[animal_id].status, shelter:assigned_request.animals[animal_id].shelter || ''}}),
+              animals: Object.keys(assigned_request.animals).map(animal_id => {return {id:animal_id, status:assigned_request.animals[animal_id].status, request:assigned_request.service_request_object.id, shelter:assigned_request.animals[animal_id].shelter || ''}}),
               owner: assigned_request.service_request_object.owners.length > 0,
               owner_contact_id: assigned_request.owner_contact ? assigned_request.owner_contact.owner : '',
               owner_contact_time: assigned_request.owner_contact ? assigned_request.owner_contact.owner_contact_time : '',
@@ -165,7 +165,7 @@ function DispatchResolutionForm({ id }) {
                 status: Yup.string()
                   .test('required-check', 'Animal cannot remain REPORTED.',
                     function(value) {
-                      let required = true
+                      let required = true;
                       data.sr_updates.filter(sr => sr.id === this.parent.request).forEach(sr_update => {
                         if (sr_update.unable_to_complete || sr_update.incomplete) {
                           required = false;
@@ -305,10 +305,9 @@ function DispatchResolutionForm({ id }) {
                     {assigned_request.service_request_object.owners.length < 1 ? <ListGroup.Item><b>Owner: </b>No Owner</ListGroup.Item> : ""}
                       <ListGroup.Item><b>Directions: </b>{ assigned_request.service_request_object.directions ? assigned_request.service_request_object.directions : "N/A"}</ListGroup.Item>
                       <ListGroup.Item>
-                        <b>Accessible: </b>{ assigned_request.service_request_object.accessible ? "Yes" : "No"}, 
-                        <b>Turn Aroundable: </b>{ assigned_request.service_request_object.turn_around ? "Yes" : "No"},
-
-                        </ListGroup.Item>
+                        <b>Accessible: </b>{ assigned_request.service_request_object.accessible ? "Yes" : "No"},&nbsp;
+                        <b>Turn Around: </b>{ assigned_request.service_request_object.turn_around ? "Yes" : "No"}
+                      </ListGroup.Item>
                   </ListGroup>
                   <hr />
                   <ListGroup variant="flush" style={{ marginTop: "-13px", marginBottom: "-13px" }}>
@@ -328,7 +327,7 @@ function DispatchResolutionForm({ id }) {
                             />
                           </Col>
                           <span style={{ marginTop:"5px", textTransform:"capitalize" }}>
-                            #{animal.id} - {animal.name || "Unknown"}&nbsp;({animal.species})
+                            #{animal.id} - {animal.name || "Unknown"}&nbsp;-&nbsp;{animal.species}
                             {animal.color_notes ?
                             <OverlayTrigger
                               key={"animal-color-notes"}
@@ -339,10 +338,10 @@ function DispatchResolutionForm({ id }) {
                                 </Tooltip>
                               }
                             >
-                              <FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse />
+                              <FontAwesomeIcon icon={faClipboardList} className="ml-1 mr-1" inverse />
                             </OverlayTrigger>
                             : ""}
-                            (Primary Color: {animal.p_color ? animal.p_color : "N/A" }, Secondary Color: {animal.s_color ? animal.s_color : "N/A"}, Description: {animal.color_notes ? animal.color_notes : "N/A"})
+                            {animal.pcolor || animal.scolor ? <span>({animal.pcolor ? animal.pcolor : "" }{animal.scolor ? <span>{animal.pcolor ? <span>, </span> : ""}{animal.scolor}</span> : ""})</span>: ""}
                           </span>
                         </Row>
                         {props.values && props.values.sr_updates[index] && props.values.sr_updates[index].animals[inception].status === 'SHELTERED' ?

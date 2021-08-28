@@ -1,8 +1,7 @@
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import serializers
-from actstream.models import target_stream
 
-from .models import Animal, AnimalImage
+from .models import Animal
 from location.utils import build_full_address, build_action_string
 from people.serializers import SimplePersonSerializer
 from shelter.serializers import SimpleShelterSerializer
