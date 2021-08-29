@@ -167,7 +167,7 @@ function DispatchAssignmentSearch() {
             id={`date_range_picker`}
             placeholder={"Filter by Date Range"}
             onChange={(dateRange) => {
-              if (dateRange == '') {
+              if (dateRange === '') {
                 setIsDateSet(false)
                 setNumPages(Math.ceil(data.evacuation_assignments.length / ITEMS_PER_PAGE));
               } else {
