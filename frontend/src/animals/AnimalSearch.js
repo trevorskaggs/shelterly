@@ -4,7 +4,7 @@ import { Link, useQueryParams } from 'raviger';
 import { Button, ButtonGroup, Card, CardGroup, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Pagination, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBan, faCalendarDay, faClipboardList, faCut, faEnvelope, faLink, faMedkit, faNotesMedical, faUserAltSlash
+  faBan, faCalendarDay, faClipboardList, faCut, faEnvelope, faLink, faMedkit, faUserAltSlash
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faDotCircle
@@ -253,32 +253,6 @@ function AnimalSearch() {
                       <FontAwesomeIcon icon={faBan} color="#ef5151" size="sm" transform={'shrink-2'} />
                     </span>
                   </OverlayTrigger> :
-                  ""}
-                  {animal.behavior_notes ?
-                    <OverlayTrigger
-                      key={"behavior-notes"}
-                      placement="top"
-                      overlay={
-                        <Tooltip id={`tooltip-behavior-notes`}>
-                          {animal.behavior_notes}
-                        </Tooltip>
-                      }
-                    >
-                      <FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1" />
-                    </OverlayTrigger> :
-                  ""}
-                  {animal.medical_notes ?
-                    <OverlayTrigger
-                      key={"medical-notes"}
-                      placement="top"
-                      overlay={
-                        <Tooltip id={`tooltip-medical-notes`}>
-                          {animal.medical_notes}
-                        </Tooltip>
-                      }
-                    >
-                      <FontAwesomeIcon icon={faNotesMedical} size="sm" className="ml-1" />
-                    </OverlayTrigger> :
                   ""}
                 </Card.Title>
                 <Scrollbar style={{height:"144px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>

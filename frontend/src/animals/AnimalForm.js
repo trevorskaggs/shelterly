@@ -723,7 +723,7 @@ const AnimalForm = (props) => {
           </Card.Body>
           <ButtonGroup size="lg">
             {is_workflow ?
-              <Button type="button" onClick={() => {setAddAnother(true); formikProps.submitForm()}}>{props.state.steps.animals.length -1 > props.state.animalIndex ? "Next Animal" : "Add Another"}</Button>
+              <Button type="button" onClick={() => {setAddAnother(true); formikProps.submitForm(); speciesRef.current.focus()}}>{props.state.steps.animals.length -1 > props.state.animalIndex ? "Next Animal" : "Add Another"}</Button>
             :
               <Button type="button" onClick={() => {setAddAnother(false); formikProps.submitForm()}}>Save</Button>
             }
