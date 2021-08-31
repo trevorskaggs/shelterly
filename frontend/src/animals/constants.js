@@ -25,6 +25,7 @@ export const catSizeChoices = [
 export const horseSizeChoices = [
   {value:'mini', label:'Mini'},
   {value:'pony', label:'Pony'},
+  {value:'standard', label:'Standard'},
   {value:'draft', label:'Draft'},
 ]
 

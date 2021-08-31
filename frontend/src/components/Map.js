@@ -174,7 +174,7 @@ export const prettyText = (size, species, count) => {
 
   let size_and_species = size + " " + species + plural;
   // Exception for horses since they don't need an extra species output.
-  if (species === 'horse') {
+  if (species === 'horse' && size !== 'standard') {
     // Exception for pluralizing ponies.
     if (size === 'pony' && count > 1) {
       size_and_species = 'ponies'
