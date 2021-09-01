@@ -19,7 +19,6 @@ import { DispatchDuplicateSRModal, DispatchAlreadyAssignedTeamModal } from "../c
 import Scrollbar from '../components/Scrollbars';
 import 'react-bootstrap-typeahead/css/Typeahead.css';
 import 'leaflet/dist/leaflet.css';
-import { S3_BUCKET } from '../constants';
 
 function Deploy() {
 
