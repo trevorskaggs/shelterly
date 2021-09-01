@@ -14,7 +14,6 @@ import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import { AnimalDeleteModal } from "../components/Modals";
 import Header from '../components/Header';
 import History from '../components/History';
-import { S3_BUCKET } from '../constants';
 
 function AnimalDetails({id}) {
 
@@ -402,7 +401,7 @@ function AnimalDetails({id}) {
         <div className="slide-container flex-grow-1 border rounded pl-0 pr-0" style={{width:"auto", height:"322px"}}>
           {images.length < 1 ?
             <Carousel className="carousel-wrapper" showThumbs={false} showStatus={false}>
-              <img src={`${S3_BUCKET}images/image-not-found.png`} alt="Not Found" />
+              <img src="/static/images/image-not-found.png" alt="Not Found" />
             </Carousel>
           :
             <Carousel className="carousel-wrapper" showThumbs={false} showStatus={false}>
