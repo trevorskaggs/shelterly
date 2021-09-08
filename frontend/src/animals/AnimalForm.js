@@ -411,7 +411,7 @@ const AnimalForm = (props) => {
       >
         {formikProps => (
           <Card border="secondary" className={is_workflow ? "mt-3" : "mt-5"}>
-            <Card.Header as="h5" className="pl-3">{id ?
+            <Card.Header as="h5" className="pl-3">{id || owner_id ?
               <span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
               :
               <span>{props.state.animalIndex > 0 ? <span style={{cursor:'pointer'}} onClick={() => {setAddAnother(false); populateBack(props.state.steps.animals[props.state.animalIndex-1]); props.handleBack('animals', 'animals')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
