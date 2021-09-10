@@ -315,14 +315,14 @@ function DispatchSummary({id}) {
                 </ListGroup.Item>
               ))}
             {assigned_request.service_request_object.owners.length < 1 ? <ListGroup.Item><b>Owner: </b>No Owner</ListGroup.Item> : ""}
-            <ListGroup.Item><b>Directions:</b> {assigned_request.service_request_object.directions}</ListGroup.Item>
+            <ListGroup.Item><b>Directions:</b> {assigned_request.service_request_object.directions||"No directions available."}</ListGroup.Item>
           </ListGroup>
           <hr/>
           <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
             <h4 className="mt-2" style={{marginBottom:"-2px"}}>Animals</h4>
             {assigned_request.service_request_object.animals.filter(animal => Object.keys(assigned_request.animals).includes(String(animal.id))).map((animal, inception) => (
               <ListGroup.Item key={animal.id}>
-                <span style={{textTransform:"capitalize"}}>#{animal.id} - <Link href={"/animals/" + animal.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.name||"Unknown"}</Link> ({animal.species})</span>
+                <span style={{textTransform:"capitalize"}}>#{animal.id} - <Link href={"/animals/" + animal.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.name||"Unknown"}</Link>&nbsp;-&nbsp;{animal.species}</span>
                 {animal.color_notes ?
                   <OverlayTrigger
                     key={"animal-color-notes"}
@@ -333,9 +333,10 @@ function DispatchSummary({id}) {
                       </Tooltip>
                     }
                   >
-                    <FontAwesomeIcon icon={faClipboardList} className="ml-1" size="sm" inverse />
+                    <FontAwesomeIcon icon={faClipboardList} className="ml-1 mr-1" size="sm" inverse />
                   </OverlayTrigger>
                 : ""}
+                {animal.pcolor || animal.scolor ? <span style={{textTransform:"capitalize"}}>({animal.pcolor ? animal.pcolor : "" }{animal.scolor ? <span>{animal.pcolor ? <span>, </span> : ""}{animal.scolor}</span> : ""})</span>: ""}
                 &nbsp;- {animal.status}
               </ListGroup.Item>
             ))}

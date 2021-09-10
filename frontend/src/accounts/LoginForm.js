@@ -85,7 +85,7 @@ const Login = () => {
             />
             <BootstrapForm.Group as={Col}>
               <Button type="submit" size="lg" className="btn-primary" block>Login</Button>
-              <Button size="lg" className="btn-primary" onClick={() => setShow(true)} block>Reset Password</Button>
+              <Button size="lg" className="btn-primary" onClick={() => setShow(true)} block>Forgot Password</Button>
               {status && <div className="invalid-feedback invalid-form" variant="warning">{status}</div>}
             </BootstrapForm.Group>
           </BootstrapForm>

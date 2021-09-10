@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Link } from 'raviger';
+import { Link, navigate } from 'raviger';
 import { Button, Col, ListGroup, OverlayTrigger, Row, Tooltip } from 'react-bootstrap'
 import { Marker, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
@@ -96,7 +96,7 @@ function Dispatch() {
                     key={assigned_request.service_request_object.id}
                     position={[assigned_request.service_request_object.latitude, assigned_request.service_request_object.longitude]}
                     icon={assigned_request.service_request_object.sheltered_in_place > 0 ? SIPMarkerIcon : assigned_request.service_request_object.unable_to_locate > 0 ? UTLMarkerIcon : reportedMarkerIcon}
-                    onClick={() => window.open("/dispatch/summary/" + dispatch_assignment.id)}
+                    onClick={() => navigate("/dispatch/summary/" + dispatch_assignment.id)}
                   >
                   <MapTooltip autoPan={false}>
                     <span>

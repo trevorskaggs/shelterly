@@ -45,7 +45,7 @@ CAT_AGE_CHOICES = (
 HORSE_SIZE_CHOICES = (
     ('mini', 'Mini'),
     ('pony', 'Pony'),
-    ('horse', 'Horse'),
+    ('standard', 'Standard'),
     ('draft', 'Draft'),
 )
 HORSE_AGE_CHOICES = (

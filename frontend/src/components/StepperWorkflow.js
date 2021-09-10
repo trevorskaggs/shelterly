@@ -88,6 +88,7 @@ function getStepContent(step, handleStepSubmit, handleBack, state) {
 export const initialWorkflowData = {
   stepIndex: 0,
   hasOwner: false,
+  animalCount: 0,
   animalIndex: 0,
   shelter: null,
   steps: {
@@ -182,16 +183,19 @@ function StepperWorkflow() {
       // Only increase animal index on save if we're adding another animal.
       var index = state.animalIndex;
       if (nextStep === 'animals') {
-        index = index + 1
+        index = index + 1;
       }
       // If we're not on the last animal, update the current animal based on the index.
       if (state.animalIndex !== state.steps.animals.length) {
         const animalList = [...state.steps.animals];
+        let animal_count = animalList[state.animalIndex].get('number_of_animals');
+
         animalList[state.animalIndex] = data;
         setState((prevState) => ({
           ...prevState,
           stepIndex: prevState.stepIndex + 1,
           animalIndex: index,
+          animalCount: prevState.animalCount - Number(animal_count) + Number(data.get('number_of_animals')),
           steps: { ...prevState.steps, [currentStep]:animalList }
         }))
       }
@@ -201,6 +205,7 @@ function StepperWorkflow() {
           ...prevState,
           stepIndex: prevState.stepIndex + 1,
           animalIndex: index,
+          animalCount: prevState.animalCount + Number(data.get('number_of_animals')),
           steps: { ...prevState.steps, [currentStep]:[...prevState.steps.animals, data] }
         }))
       }
@@ -231,7 +236,7 @@ function StepperWorkflow() {
             labelProps.optional = <Typography variant="caption" component={'span'}>{contactCount} Contact{contactCount === 1 ? "" : "s"} Created</Typography>;
           }
           else if (index === 1) {
-            labelProps.optional = <Typography variant="caption" component={'span'}>{state.steps.animals.length} Animal{state.steps.animals.length === 1 ? "" : "s"} Created</Typography>;
+            labelProps.optional = <Typography variant="caption" component={'span'}>{state.animalCount} Animal{state.animalCount === 1 ? "" : "s"} Created</Typography>;
           }
           return (
             <Step key={label} {...stepProps}>

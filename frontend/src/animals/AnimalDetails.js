@@ -156,7 +156,7 @@ function AnimalDetails({id}) {
           </Tooltip>
         }
       >
-        <Link href={"/animals/print/" + id} target="_blank"><FontAwesomeIcon icon={faPrint} className="ml-1" inverse /></Link>
+        <Link href={"/animals/print/" + id} target="_blank"><FontAwesomeIcon icon={faPrint} className="ml-1 mr-2" inverse /></Link>
       </OverlayTrigger>
       {data.status !== 'REUNITED' ?
       <OverlayTrigger
