@@ -46,3 +46,4 @@ class AssignedRequest(models.Model):
     followup_date = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
     owner_contact = models.ForeignKey('people.OwnerContact', null=True, on_delete=models.CASCADE, related_name='assigned_request')
     visit_note = models.ForeignKey('hotline.VisitNote', null=True, on_delete=models.CASCADE, related_name='assigned_request')
+    timestamp = models.DateTimeField(auto_now_add=True)
