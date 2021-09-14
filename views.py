@@ -1,6 +1,7 @@
 import os
+import settings
 from django.http import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 
 from accounts.models import ShelterlyUser
 
@@ -16,3 +17,6 @@ def activate_incident(request):
         end_users = ShelterlyUser.objects.all().count()
         added_users = end_users - start_users
         return JsonResponse({'user_count': added_users})
+
+def static_url(request, path):
+    return redirect(settings.STATIC_URL + '%s' % path)

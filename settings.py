@@ -34,6 +34,7 @@ INCIDENT_NAME = os.environ.get('INCIDENT_NAME')
 SHELTERLY_VERSION = __version__
 
 DEBUG = False
+USE_S3 = True
 # SECURITY WARNING: don't run with debug turned on in production!
 ALLOWED_HOSTS = ['*']
 AUTH_USER_MODEL = 'accounts.ShelterlyUser'
@@ -110,6 +111,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.media',
+                'django.template.context_processors.static'
             ],
         },
     },
@@ -156,12 +158,7 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "frontend/src/static")
 ]
 
-if DEBUG:
-    STATIC_URL = '/static/'
-    STATIC_ROOT=os.path.join(BASE_DIR, 'static')
-    MEDIA_URL = '/media/'
-    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-else:
+if USE_S3:
     #Static File Settings
     STATIC_URL = 'https://shelterly-files.s3-us-west-2.amazonaws.com/static/%s/' % SHELTERLY_VERSION
     STATICFILES_STORAGE = 'custom_storage.StaticStorage'
@@ -170,8 +167,11 @@ else:
     #AWS Settings
     AWS_STORAGE_BUCKET_NAME = 'shelterly-files'
     AWS_S3_REGION_NAME = 'us-west-2'
-
-
+else:
+    STATIC_URL = '/static/'
+    STATIC_ROOT=os.path.join(BASE_DIR, 'static')
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': ('knox.auth.TokenAuthentication',),
