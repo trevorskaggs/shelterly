@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Link } from 'raviger';
+import { Link, navigate } from 'raviger';
 import { Button, Col, ListGroup, Row } from 'react-bootstrap';
 import { Marker, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
 import Moment from 'react-moment';
 import Map, { prettyText, closedMarkerIcon, reportedMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
 import Header from "../components/Header";
-import { S3_BUCKET } from '../constants';
 
 function Hotline() {
 
@@ -105,7 +104,7 @@ function Hotline() {
                   key={service_request.id}
                   position={[service_request.latitude, service_request.longitude]}
                   icon={service_request.sheltered_in_place > 0 ? SIPMarkerIcon : service_request.unable_to_locate > 0 ? UTLMarkerIcon : service_request.reported_animals > 0 ? reportedMarkerIcon : closedMarkerIcon}
-                  onClick={() => window.open("/hotline/servicerequest/" + service_request.id)}
+                  onClick={() => navigate("/hotline/servicerequest/" + service_request.id)}
                 >
                   <MapTooltip autoPan={false}>
                     <span>
@@ -122,10 +121,10 @@ function Hotline() {
                       #{service_request.id}: {service_request.full_address}
                       {service_request.followup_date ? <div>Followup Date: <Moment format="L">{service_request.followup_date}</Moment></div> : ""}
                       <div>
-                        {service_request.aco_required ? <img width={16} height={16} src={`${S3_BUCKET}images/badge-sheriff.png`} alt="ACO Required" className="mr-1" /> : ""}
-                        {service_request.injured ? <img width={16} height={16} src={`${S3_BUCKET}images/band-aid-solid.png`} alt="Injured" className="mr-1" /> : ""}
-                        {service_request.accessible ? <img width={16} height={16} src={`${S3_BUCKET}images/car-solid.png`} alt="Accessible" className="mr-1" /> : <img width={16} height={16} src={`${S3_BUCKET}images/car-ban-solid.png`} alt="Not Acessible" className="mr-1" />}
-                        {service_request.turn_around ? <img width={16} height={16} src={`${S3_BUCKET}images/trailer-solid.png`} alt="Turn Around" /> : <img width={16} height={16} src={`${S3_BUCKET}images/trailer-ban-solid.png`} alt="No Turn Around" className="mr-1" />}
+                        {service_request.aco_required ? <img width={16} height={16} src="/static/images/badge-sheriff.png" alt="ACO Required" className="mr-1" /> : ""}
+                        {service_request.injured ? <img width={16} height={16} src="/static/images/band-aid-solid.png" alt="Injured" className="mr-1" /> : ""}
+                        {service_request.accessible ? <img width={16} height={16} src="/static/images/car-solid.png" alt="Accessible" className="mr-1" /> : <img width={16} height={16} src="/static/images/car-ban-solid.png" alt="Not Acessible" className="mr-1" />}
+                        {service_request.turn_around ? <img width={16} height={16} src="/static/images/trailer-solid.png" alt="Turn Around" /> : <img width={16} height={16} src="/static/images/trailer-ban-solid.png" alt="No Turn Around" className="mr-1" />}
                       </div>
                     </span>
                   </MapTooltip>

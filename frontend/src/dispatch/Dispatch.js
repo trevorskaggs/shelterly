@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Link } from 'raviger';
+import { Link, navigate } from 'raviger';
 import { Button, Col, ListGroup, OverlayTrigger, Row, Tooltip } from 'react-bootstrap'
 import { Marker, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
@@ -11,7 +11,6 @@ import {
 import Map, { countMatches, prettyText, reportedMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
 import Header from "../components/Header";
 import Scrollbar from '../components/Scrollbars';
-import { S3_BUCKET } from '../constants';
 
 function Dispatch() {
 
@@ -96,7 +95,7 @@ function Dispatch() {
                     key={assigned_request.service_request_object.id}
                     position={[assigned_request.service_request_object.latitude, assigned_request.service_request_object.longitude]}
                     icon={assigned_request.service_request_object.sheltered_in_place > 0 ? SIPMarkerIcon : assigned_request.service_request_object.unable_to_locate > 0 ? UTLMarkerIcon : reportedMarkerIcon}
-                    onClick={() => window.open("/dispatch/summary/" + dispatch_assignment.id)}
+                    onClick={() => navigate("/dispatch/summary/" + dispatch_assignment.id)}
                   >
                   <MapTooltip autoPan={false}>
                     <span>
@@ -117,10 +116,10 @@ function Dispatch() {
                       <br />
                       #{assigned_request.service_request_object.id}: {assigned_request.service_request_object.full_address}
                       <div>
-                        {assigned_request.service_request_object.aco_required ? <img width={16} height={16} src={`${S3_BUCKET}images/badge-sheriff.png`} alt="ACO Required" className="mr-1" /> : ""}
-                        {assigned_request.service_request_object.injured ? <img width={16} height={16} src={`${S3_BUCKET}images/band-aid-solid.png`} alt="Injured" className="mr-1" /> : ""}
-                        {assigned_request.service_request_object.accessible ? <img width={16} height={16} src={`${S3_BUCKET}images/car-solid.png`} alt="Accessible" className="mr-1" /> : <img width={16} height={16} src={`${S3_BUCKET}images/car-ban-solid.png`} alt="Not Acessible" className="mr-1" />}
-                        {assigned_request.service_request_object.turn_around ? <img width={16} height={16} src={`${S3_BUCKET}images/trailer-solid.png`} alt="Turn Around" /> : <img width={16} height={16} src={`${S3_BUCKET}images/trailer-ban-solid.png`} alt="No Turn Around" className="mr-1" />}
+                        {assigned_request.service_request_object.aco_required ? <img width={16} height={16} src="/static/images/badge-sheriff.png" alt="ACO Required" className="mr-1" /> : ""}
+                        {assigned_request.service_request_object.injured ? <img width={16} height={16} src="/static/images/band-aid-solid.png" alt="Injured" className="mr-1" /> : ""}
+                        {assigned_request.service_request_object.accessible ? <img width={16} height={16} src="/static/images/car-solid.png" alt="Accessible" className="mr-1" /> : <img width={16} height={16} src="/static/images/car-ban-solid.png" alt="Not Acessible" className="mr-1" />}
+                        {assigned_request.service_request_object.turn_around ? <img width={16} height={16} src="/static/images/trailer-solid.png" alt="Turn Around" /> : <img width={16} height={16} src="/static/images/trailer-ban-solid.png" alt="No Turn Around" className="mr-1" />}
                       </div>
                     </span>
                   </MapTooltip>

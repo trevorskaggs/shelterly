@@ -1,13 +1,9 @@
 from django.db.models import Q
 from rest_framework import serializers
-from rest_framework.decorators import action
 
 from .models import ServiceRequest, VisitNote
-from animals.models import Animal
-from animals.serializers import SimpleAnimalSerializer
-from evac.models import EvacAssignment
+from animals.serializers import SimpleAnimalSerializer, ModestAnimalSerializer
 from location.utils import build_full_address, build_action_string
-from people.serializers import OwnerContactSerializer
 
 class VisitNoteSerializer(serializers.ModelSerializer):
 
@@ -137,10 +133,11 @@ class ServiceRequestSerializer(SimpleServiceRequestSerializer):
     animal_count = serializers.IntegerField(read_only=True)
     injured = serializers.BooleanField(read_only=True)
     assigned_requests = serializers.SerializerMethodField()
+    animals = ModestAnimalSerializer(many=True, required=False, read_only=True)
 
     class Meta:
         model = ServiceRequest
-        fields = ['id', 'latitude', 'longitude', 'full_address', 'followup_date', 'status', 'address', 'city', 'state', 'zip_code',
+        fields = ['id', 'latitude', 'longitude', 'full_address', 'followup_date', 'status', 'address', 'city', 'state', 'zip_code', 'directions',
         'injured', 'accessible', 'turn_around', 'animals', 'reporter', 'reported_animals', 'sheltered_in_place', 'unable_to_locate', 'aco_required',
         'animal_count', 'key_provided', 'verbal_permission', 'action_history', 'owner_objects', 'reporter_object', 'assigned_requests']
 
