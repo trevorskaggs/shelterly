@@ -151,21 +151,3 @@ class ServiceRequestSerializer(SimpleServiceRequestSerializer):
     # Custom field for the action history list.
     def get_action_history(self, obj):
         return [build_action_string(action) for action in obj.target_actions.all()]
-
-class ReportSerializer(serializers.Serializer):
-
-    days = serializers.SerializerMethodField()
-
-    # class Meta:
-    #     model = ServiceRequest
-    #     fields = ['id', 'latitude', 'longitude', 'full_address', 'followup_date', 'status', 'address', 'city', 'state', 'zip_code', 'directions',
-    #     'injured', 'accessible', 'turn_around', 'animals', 'reporter', 'reported_animals', 'sheltered_in_place', 'unable_to_locate', 'aco_required',
-    #     'animal_count', 'key_provided', 'verbal_permission', 'action_history', 'owner_objects', 'reporter_object', 'assigned_requests']
-
-    def get_days(self, obj):
-        # import ipdb;ipdb.set_trace()
-        days = ServiceRequest.objects.annotate(date=TruncDay('timestamp')).values('date').order_by('date').annotate(new_srs=Count("date")).values('date', 'new_srs')
-        #values('timestamp', 'assignedrequest__timestamp')
-        # EvacTeamMember.objects.all().annotate(is_assigned=Exists(EvacAssignment.objects.filter(team__team_members__id=OuterRef("id"), end_time=None)))
-        # import ipdb;ipdb.set_trace()
-        return days

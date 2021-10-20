@@ -36,6 +36,7 @@ urlpatterns = [
     path('intake/', include('intake.urls')),
     path('location/', include('location.urls')),
     path('people/', include('people.urls')),
+    path('reports/', include('reports.urls')),
     path('shelter/', include('shelter.urls')),
     path('activity/', include('actstream.urls')),
     url(r'login/', LoginView.as_view(), name='knox_login'),

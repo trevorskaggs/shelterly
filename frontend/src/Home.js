@@ -3,6 +3,7 @@ import axios from "axios";
 import DataTable from 'react-data-table-component';
 import LoginForm from "./accounts/LoginForm";
 import { useCookies } from 'react-cookie';
+import moment from 'moment';
 import { AuthContext } from "./accounts/AccountsReducer";
 import Header from './components/Header';
 
@@ -22,13 +23,13 @@ function Home() {
     const fetchServiceRequests = async () => {
       setData({days: [], isFetching: true});
       // Fetch ServiceRequest data.
-      await axios.get('/hotline/api/servicerequests/', {
+      await axios.get('/reports/api/reports/', {
         cancelToken: source.token,
       })
       .then(response => {
         if (!unmounted) {
           console.log(response.data)
-          setData({days: response.data[0].days, isFetching: false});
+          setData({days: response.data, isFetching: false});
         }
       })
       .catch(error => {
@@ -47,14 +48,23 @@ function Home() {
 
   const columns = [
     {
-        name: 'ID',
+        name: 'Date',
         selector: row => row.date,
+        format: row => moment(row.date).format('MM/DD/YY')
     },
     {
         name: 'New SRs',
-        selector: row => row.new_srs,
+        selector: row => row.new,
     },
-];
+    {
+      name: 'SRs Worked',
+      selector: row => row.assigned,
+    },
+    {
+      name: 'Total SRs',
+      selector: row => row.total,
+    },
+  ];
 
 
   return (
@@ -63,10 +73,11 @@ function Home() {
     <span>
       <Header>Home</Header>
       <hr/>
-      <h3>Welcome to Shelterly!</h3>
+      <h3>Daily Report</h3>
       <DataTable
             columns={columns}
             data={data.days}
+            pagination
         />
     </span>
     }
