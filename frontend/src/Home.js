@@ -44,9 +44,9 @@ function Home() {
       unmounted = true;
       source.cancel();
     };
-  }, []);
+  }, [state.user]);
 
-  const columns = [
+  const daily_columns = [
     {
         name: 'Date',
         selector: row => row.date,
@@ -66,6 +66,34 @@ function Home() {
     },
   ];
 
+  const sr_worked_columns = [
+    {
+        name: 'Date',
+        selector: row => row.date,
+        format: row => moment(row.date).format('MM/DD/YY')
+    },
+    {
+        name: 'SIP SRs Worked',
+        selector: row => row.new,
+    },
+    {
+      name: 'UTL SRs Worked',
+      selector: row => row.assigned,
+    },
+    {
+      name: 'Total SRs Worked',
+      selector: row => row.total,
+    },
+    {
+      name: '# Evac Teams',
+      selector: row => row.total,
+    },
+    {
+      name: 'SRs Per Team',
+      selector: row => row.total,
+    },
+  ];
+
 
   return (
     <>
@@ -75,10 +103,18 @@ function Home() {
       <hr/>
       <h3>Daily Report</h3>
       <DataTable
-            columns={columns}
-            data={data.days}
-            pagination
-        />
+          columns={daily_columns}
+          data={data.days.daily_report}
+          pagination
+      />
+      <hr/>
+      <h3>SR Worked Report</h3>
+      <DataTable
+          columns={sr_worked_columns}
+          data={data.days.sr_worked_report}
+          pagination
+      />
+      <br/>
     </span>
     }
     </>
