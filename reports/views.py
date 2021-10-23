@@ -1,8 +1,9 @@
 from django.db.models import Count, Exists, OuterRef, Subquery, Prefetch, F, Q, IntegerField
 from django.db.models.functions import TruncDay
-from rest_framework import filters, permissions, viewsets
+from rest_framework import viewsets
 from rest_framework.response import Response
 from hotline.models import ServiceRequest
+from evac.models import DispatchTeam
 import datetime
 from django.utils import timezone
 
@@ -18,24 +19,29 @@ class ReportViewSet(viewsets.ViewSet):
     sr_worked_report = []
     delta = datetime.timedelta(days=1)
 
-    while start_date <= end_date:
+    while end_date >= start_date:
+      sip_sr_worked = service_requests.filter(assignedrequest__timestamp__date=end_date, assignedrequest__animals__data__contains={'status':'SHELTERED IN PLACE'}).count()
+      utl_sr_worked = service_requests.filter(assignedrequest__timestamp__date=end_date, assignedrequest__animals__data__contains={'status':'UNABLE TO LOCATE'}).count()
+      teams = DispatchTeam.objects.filter(dispatch_date__date=end_date).distinct('name').count()
+      total = service_requests.filter(assignedrequest__timestamp__date=end_date).count(),
+
       data = {
-        'date': start_date.strftime('%m/%d/%Y'),
-        'total': service_requests.filter(timestamp__date__lte=start_date).count(),
-        'assigned': service_requests.filter(assignedrequest__timestamp__date=start_date).count(),
-        'new': service_requests.filter(timestamp__date=start_date).count()
+        'date': end_date.strftime('%m/%d/%Y'),
+        'total': service_requests.filter(timestamp__date__lte=end_date).count(),
+        'assigned': service_requests.filter(assignedrequest__timestamp__date=end_date).count(),
+        'new': service_requests.filter(timestamp__date=end_date).count()
       }
       daily_report.append(data)
       sr_data = {
-        'date': start_date.strftime('%m/%d/%Y'),
-        'new_sr_worked': service_requests.filter(timestamp__date__lte=start_date).count(),
-        'sip_sr_worked': service_requests.filter(timestamp__date__lte=start_date).count(),
-        'utl_sr_worked': service_requests.filter(timestamp__date__lte=start_date).count(),
-        'total': service_requests.filter(timestamp__date__lte=start_date).count(),
-        'teams': service_requests.filter(assignedrequest__timestamp__date=start_date).count(),
-        'sr_per_team': service_requests.filter(timestamp__date=start_date).count()
+        'date': end_date.strftime('%m/%d/%Y'),
+        'new_sr_worked': total[0] - sip_sr_worked - utl_sr_worked,
+        'sip_sr_worked': sip_sr_worked,
+        'utl_sr_worked': utl_sr_worked,
+        'total': total,
+        'teams': teams,
+        'sr_per_team': total[0] / teams if teams > 0 else 0
       }
       sr_worked_report.append(sr_data)
-      start_date += delta
+      end_date -= delta
     test = {'daily_report':daily_report, 'sr_worked_report':sr_worked_report}
     return Response(test)

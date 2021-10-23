@@ -23,20 +23,21 @@ function Home() {
     const fetchServiceRequests = async () => {
       setData({days: [], isFetching: true});
       // Fetch ServiceRequest data.
-      await axios.get('/reports/api/reports/', {
-        cancelToken: source.token,
-      })
-      .then(response => {
-        if (!unmounted) {
-          console.log(response.data)
-          setData({days: response.data, isFetching: false});
-        }
-      })
-      .catch(error => {
-        if (!unmounted) {
-          setData({days: [], isFetching: false});
-        }
-      });
+      if (state.user) {
+        await axios.get('/reports/api/reports/', {
+          cancelToken: source.token,
+        })
+        .then(response => {
+          if (!unmounted) {
+            setData({days: response.data, isFetching: false});
+          }
+        })
+        .catch(error => {
+          if (!unmounted) {
+            setData({days: [], isFetching: false});
+          }
+        });
+      }
     };
     fetchServiceRequests();
     // Cleanup.
@@ -73,12 +74,16 @@ function Home() {
         format: row => moment(row.date).format('MM/DD/YY')
     },
     {
+      name: 'New SRs Worked',
+      selector: row => row.new_sr_worked,
+  },
+    {
         name: 'SIP SRs Worked',
-        selector: row => row.new,
+        selector: row => row.sip_sr_worked,
     },
     {
       name: 'UTL SRs Worked',
-      selector: row => row.assigned,
+      selector: row => row.utl_sr_worked,
     },
     {
       name: 'Total SRs Worked',
@@ -86,11 +91,11 @@ function Home() {
     },
     {
       name: '# Evac Teams',
-      selector: row => row.total,
+      selector: row => row.teams,
     },
     {
       name: 'SRs Per Team',
-      selector: row => row.total,
+      selector: row => row.sr_per_team,
     },
   ];
 
@@ -99,15 +104,12 @@ function Home() {
     <>
     {!state.user && !cookies.token ? <LoginForm /> :
     <span>
-      <Header>Home</Header>
-      <hr/>
       <h3>Daily Report</h3>
       <DataTable
           columns={daily_columns}
           data={data.days.daily_report}
           pagination
       />
-      <hr/>
       <h3>SR Worked Report</h3>
       <DataTable
           columns={sr_worked_columns}
