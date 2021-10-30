@@ -24,6 +24,8 @@ class ServiceRequest(Location):
     key_provided = models.BooleanField(default=False)
     accessible = models.BooleanField(default=False)
     turn_around = models.BooleanField(default=False)
+    sip = models.BooleanField(default=False)
+    utl = models.BooleanField(default=False)
 
     #post_fields
     followup_date = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
@@ -40,11 +42,28 @@ class ServiceRequest(Location):
         from evac.models import EvacAssignment
         from animals.models import Animal
         status = 'closed'
+
         if EvacAssignment.objects.filter(end_time=None, service_requests=self).exists():
             status = 'assigned'
         elif Animal.objects.filter(status__in=['REPORTED', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE'], request=self).exists():
             status = 'open'
         self.status = status
+
+        self.save()
+
+    def update_sip_utl(self):
+        from animals.models import Animal
+        sip = self.sip
+        utl = self.utl
+
+        # Update SIP/UTL identifiers.
+        if not sip and Animal.objects.filter(status='SHELTERED IN PLACE', request=self).exists():
+            sip = True
+        elif not sip and Animal.objects.filter(status='UNABLE TO LOCATE', request=self).exists():
+            utl = True
+        self.sip = sip
+        self.utl = utl
+
         self.save()
 
 

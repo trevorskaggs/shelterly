@@ -20,26 +20,26 @@ class ReportViewSet(viewsets.ViewSet):
     delta = datetime.timedelta(days=1)
 
     while end_date >= start_date:
-      sip_sr_worked = service_requests.filter(assignedrequest__timestamp__date=end_date, assignedrequest__animals__data__contains={'status':'SHELTERED IN PLACE'}).count()
-      utl_sr_worked = service_requests.filter(assignedrequest__timestamp__date=end_date, assignedrequest__animals__data__contains={'status':'UNABLE TO LOCATE'}).count()
+      sip_sr_worked = service_requests.filter(assignedrequest__timestamp__date=end_date, sip=True).distinct().count()
+      utl_sr_worked = service_requests.filter(assignedrequest__timestamp__date=end_date, utl=True).distinct().count()
       teams = DispatchTeam.objects.filter(dispatch_date__date=end_date).distinct('name').count()
-      total = service_requests.filter(assignedrequest__timestamp__date=end_date).count(),
+      total_assigned = service_requests.filter(assignedrequest__timestamp__date=end_date).distinct().count(),
 
       data = {
         'date': end_date.strftime('%m/%d/%Y'),
         'total': service_requests.filter(timestamp__date__lte=end_date).count(),
-        'assigned': service_requests.filter(assignedrequest__timestamp__date=end_date).count(),
+        'assigned': total_assigned,
         'new': service_requests.filter(timestamp__date=end_date).count()
       }
       daily_report.append(data)
       sr_data = {
         'date': end_date.strftime('%m/%d/%Y'),
-        'new_sr_worked': total[0] - sip_sr_worked - utl_sr_worked,
+        'new_sr_worked': total_assigned[0] - sip_sr_worked - utl_sr_worked,
         'sip_sr_worked': sip_sr_worked,
         'utl_sr_worked': utl_sr_worked,
-        'total': total,
+        'total': total_assigned,
         'teams': teams,
-        'sr_per_team': total[0] / teams if teams > 0 else 0
+        'sr_per_team': total_assigned[0] / teams if teams > 0 else 0
       }
       sr_worked_report.append(sr_data)
       end_date -= delta

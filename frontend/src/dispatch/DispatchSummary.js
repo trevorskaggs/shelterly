@@ -141,7 +141,7 @@ function DispatchSummary({id}) {
         <Link href={"/dispatch/resolution/" + id}><FontAwesomeIcon icon={faClipboardCheck} className="ml-1"  inverse /></Link>
       </OverlayTrigger>
       }
-    <div style={{fontSize:"18px", marginTop:"12px"}}><b>Opened: </b><Moment format="MMMM Do YYYY, HH:mm">{data.start_time}</Moment>{data.end_time ? <span> | <b>Closed: </b><Moment format="MMMM Do YYYY, HH:mm:ss">{data.end_time}</Moment></span> : ""}</div>
+    <div style={{fontSize:"18px", marginTop:"12px"}}><b>Opened: </b><Moment format="MMMM Do YYYY, HH:mm">{data.start_time}</Moment>{data.end_time ? <span> | <b>Closed: </b><Moment format="MMMM Do YYYY, HH:mm">{data.end_time}</Moment></span> : ""}</div>
     </Header>
     <hr/>
     <Row className="mb-3">

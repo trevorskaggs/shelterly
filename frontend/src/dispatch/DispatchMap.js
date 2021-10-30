@@ -614,7 +614,7 @@ function Deploy() {
                         </Tooltip>
                       }
                     >
-                      <span className="fa-layers">
+                      <span className="fa-layers mr-1">
                         <FontAwesomeIcon icon={faCar} className="ml-1 fa-move-down" />
                       </span>
                     </OverlayTrigger> :
@@ -643,7 +643,7 @@ function Deploy() {
                         </Tooltip>
                       }
                     >
-                      <FontAwesomeIcon icon={faTrailer} className="ml-2" style={{marginRight:"-3px"}} />
+                      <FontAwesomeIcon icon={faTrailer} className="ml-1" style={{marginRight:"-3px"}} />
                     </OverlayTrigger> :
                     <OverlayTrigger
                       key={"no-turnaround"}

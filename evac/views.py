@@ -159,6 +159,7 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
                 # Update the relevant SR fields.
                 assigned_request = AssignedRequest.objects.get(service_request=service_request['id'], dispatch_assignment=evac_assignment.id)
                 service_requests = ServiceRequest.objects.filter(id=service_request['id'])
+                service_requests[0].update_sip_utl()
                 assigned_request.animals = animals_dict
                 # Only update SR with followup_date while DA is open or if the old AssignedRequest followup_date matches the current SR followup_date.
                 if not evac_assignment.end_time or (assigned_request.followup_date == service_requests[0].followup_date):
