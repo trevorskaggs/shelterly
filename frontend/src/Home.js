@@ -78,7 +78,7 @@ function Home() {
     {
       name: 'New SRs Worked',
       selector: row => row.new_sr_worked,
-  },
+    },
     {
         name: 'SIP SRs Worked',
         selector: row => row.sip_sr_worked,
@@ -103,13 +103,12 @@ function Home() {
 
   const shelter_columns = [
     {
-        name: 'Name',
-        selector: row => row.name,
-        format: row => row.name
+      name: 'Name',
+      selector: row => row.name,
     },
     {
-        name: 'Dogs',
-        selector: row => row.dogs,
+      name: 'Dogs',
+      selector: row => row.dogs,
     },
     {
       name: 'Cats',
@@ -129,11 +128,66 @@ function Home() {
     },
   ];
 
+  const animal_status_columns = [
+    {
+      name: 'Species',
+      selector: row => row.species,
+    },
+    {
+      name: 'Reported',
+      selector: row => row.reported,
+    },
+    {
+      name: 'UTL',
+      selector: row => row.utl,
+    },
+    {
+      name: 'Sheltered',
+      selector: row => row.sheltered,
+    },
+    {
+      name: 'SIP',
+      selector: row => row.sip,
+    },
+    {
+      name: 'Reunited',
+      selector: row => row.reunited,
+    },
+    {
+      name: 'Deceased',
+      selector: row => row.deceased,
+    },
+    {
+      name: 'Total',
+      selector: row => row.total,
+    },
+  ];
+
+  const animal_owner_columns = [
+    {
+      name: 'Species',
+      selector: row => row.species,
+    },
+    {
+      name: 'Owned',
+      selector: row => row.owned,
+    },
+    {
+      name: 'Stray',
+      selector: row => row.stray,
+    },
+    {
+      name: 'Total',
+      selector: row => row.total,
+    },
+  ];
+
   const reportChoices = [
     {value:'daily', label:"Daily Report"},
     {value:'worked', label:"SR Worked Report"},
     {value:'shelter', label:"Shelter Report"},
-    // {value:'giant', label:"Giant"},
+    {value:'animal_status', label:"Total Animals By Status"},
+    {value:'animal_owner', label:"Total Animals By Ownership"},
   ]
 
   const customStyles = {
@@ -183,10 +237,22 @@ function Home() {
           data={data.days.sr_worked_report}
           pagination
       />
-      :
+      : selection.value === 'shelter' ?
       <DataTable
           columns={shelter_columns}
           data={data.days.shelter_report}
+          pagination
+      />
+      : selection.value === 'animal_status' ?
+      <DataTable
+          columns={animal_status_columns}
+          data={data.days.animal_status_report}
+          pagination
+      />
+      :
+      <DataTable
+          columns={animal_owner_columns}
+          data={data.days.animal_owner_report}
           pagination
       />
       }
