@@ -3,6 +3,7 @@ import axios from "axios";
 import DataTable from 'react-data-table-component';
 import LoginForm from "./accounts/LoginForm";
 import { useCookies } from 'react-cookie';
+import Select from 'react-select';
 import moment from 'moment';
 import { AuthContext } from "./accounts/AccountsReducer";
 import Header from './components/Header';
@@ -14,6 +15,7 @@ function Home() {
   const [cookies] = useCookies(['token']);
 
   const [data, setData] = useState({days: [], isFetching: false});
+  const [selection, setSelection] = useState({value:'daily', label:"Daily Report"});
 
   // Hook for initializing data.
   useEffect(() => {
@@ -99,24 +101,95 @@ function Home() {
     },
   ];
 
+  const shelter_columns = [
+    {
+        name: 'Name',
+        selector: row => row.name,
+        format: row => row.name
+    },
+    {
+        name: 'Dogs',
+        selector: row => row.dogs,
+    },
+    {
+      name: 'Cats',
+      selector: row => row.cats,
+    },
+    {
+      name: 'Horses',
+      selector: row => row.horses,
+    },
+    {
+      name: 'Other',
+      selector: row => row.other,
+    },
+    {
+      name: 'Total',
+      selector: row => row.total,
+    },
+  ];
+
+  const reportChoices = [
+    {value:'daily', label:"Daily Report"},
+    {value:'worked', label:"SR Worked Report"},
+    {value:'shelter', label:"Shelter Report"},
+    // {value:'giant', label:"Giant"},
+  ]
+
+  const customStyles = {
+    // For the select it self, not the options of the select
+    control: (styles, { isDisabled}) => {
+      return {
+        ...styles,
+        color: '#FFF',
+        cursor: isDisabled ? 'not-allowed' : 'default',
+        backgroundColor: isDisabled ? '#DFDDDD' : 'white',
+        height: 35,
+        minHeight: 35
+      }
+    },
+    option: provided => ({
+      ...provided,
+      color: 'black'
+    }),
+  };
 
   return (
     <>
     {!state.user && !cookies.token ? <LoginForm /> :
-    <span>
-      <h3>Daily Report</h3>
+    <span className="rounded-top">
+      <Header>Home</Header>
+      <hr/>
+      <Select
+          label="Reports"
+          name="reports"
+          options={reportChoices}
+          value={selection}
+          isClearable={false}
+          styles={customStyles}
+          onChange={(instance) => {
+            setSelection(instance)
+          }}
+        />
+      {selection.value === 'daily' ?
       <DataTable
           columns={daily_columns}
           data={data.days.daily_report}
           pagination
       />
-      <h3>SR Worked Report</h3>
+      : selection.value === 'worked' ?
       <DataTable
           columns={sr_worked_columns}
           data={data.days.sr_worked_report}
           pagination
       />
-      <br/>
+      :
+      <DataTable
+          columns={shelter_columns}
+          data={data.days.shelter_report}
+          pagination
+      />
+      }
     </span>
     }
     </>
