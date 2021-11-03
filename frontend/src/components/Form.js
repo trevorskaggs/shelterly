@@ -69,10 +69,10 @@ const useStyles = makeStyles({
 
 const DateRangePicker = ({...props}) => {
 
-  let options = {allowInput: true, dateFormat: "Y-m-d", mode: "range", maxDate: moment().format('YYYY-MM-DD')}
+  let options = {allowInput: true, dateFormat: "m-d-Y", mode: "range", maxDate: moment().format('MM-DD-YYYY')}
   return (
     <>
-      <Flatpickr className="daterange_picker" options={options} {...props} />
+      <Flatpickr className="daterange_picker" options={options} {...props} style={{...props.style, borderRadius:'.25rem'}} />
     </>
   );
 };

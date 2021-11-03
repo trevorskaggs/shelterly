@@ -18,7 +18,7 @@ import moment from 'moment';
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
 import { ITEMS_PER_PAGE } from '../constants';
-import {DateRangePicker} from '../components/Form';
+import { DateRangePicker } from '../components/Form';
 
 function DispatchAssignmentSearch() {
 

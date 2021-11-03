@@ -14,7 +14,7 @@ function Home() {
   const { state } = useContext(AuthContext);
   const [cookies] = useCookies(['token']);
 
-  const [data, setData] = useState({days: [], isFetching: false});
+  const [data, setData] = useState({});
   const [selection, setSelection] = useState({value:'daily', label:"Daily Report"});
 
   // Hook for initializing data.
@@ -23,7 +23,7 @@ function Home() {
     let source = axios.CancelToken.source();
 
     const fetchServiceRequests = async () => {
-      setData({days: [], isFetching: true});
+      setData({});
       // Fetch ServiceRequest data.
       if (state.user) {
         await axios.get('/reports/api/reports/', {
@@ -31,12 +31,12 @@ function Home() {
         })
         .then(response => {
           if (!unmounted) {
-            setData({days: response.data, isFetching: false});
+            setData(response.data);
           }
         })
         .catch(error => {
           if (!unmounted) {
-            setData({days: [], isFetching: false});
+            setData({});
           }
         });
       }
@@ -138,6 +138,10 @@ function Home() {
       selector: row => row.reported,
     },
     {
+      name: 'Evacuated',
+      selector: row => row.evacuated,
+    },
+    {
       name: 'UTL',
       selector: row => row.utl,
     },
@@ -215,44 +219,58 @@ function Home() {
       <Header>Home</Header>
       <hr/>
       <Select
-          label="Reports"
-          name="reports"
-          options={reportChoices}
-          value={selection}
-          isClearable={false}
-          styles={customStyles}
-          onChange={(instance) => {
-            setSelection(instance)
-          }}
-        />
+        label="Reports"
+        name="reports"
+        className="mb-2"
+        options={reportChoices}
+        value={selection}
+        isClearable={false}
+        styles={customStyles}
+        onChange={(instance) => {
+          setSelection(instance)
+        }}
+      />
+      <DateRangePicker
+        name={`date_range_picker`}
+        id={`date_range_picker`}
+        placeholder={"Filter by Date Range"}
+        onChange={(dateRange) => {
+          if (dateRange === '') {
+            setIsDateSet(false)
+          } else {
+            setIsDateSet(true)
+            parseDateRange(dateRange)
+          }
+        }}
+      />
       {selection.value === 'daily' ?
       <DataTable
           columns={daily_columns}
-          data={data.days.daily_report}
+          data={data.daily_report}
           pagination
       />
       : selection.value === 'worked' ?
       <DataTable
           columns={sr_worked_columns}
-          data={data.days.sr_worked_report}
+          data={data.sr_worked_report}
           pagination
       />
       : selection.value === 'shelter' ?
       <DataTable
           columns={shelter_columns}
-          data={data.days.shelter_report}
+          data={data.shelter_report}
           pagination
       />
       : selection.value === 'animal_status' ?
       <DataTable
           columns={animal_status_columns}
-          data={data.days.animal_status_report}
+          data={data.animal_status_report}
           pagination
       />
       :
       <DataTable
           columns={animal_owner_columns}
-          data={data.days.animal_owner_report}
+          data={data.animal_owner_report}
           pagination
       />
       }
