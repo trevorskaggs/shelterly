@@ -2,11 +2,13 @@ import React, { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import DataTable from 'react-data-table-component';
 import LoginForm from "./accounts/LoginForm";
+import { Row } from 'react-bootstrap';
 import { useCookies } from 'react-cookie';
 import Select from 'react-select';
 import moment from 'moment';
 import { AuthContext } from "./accounts/AccountsReducer";
 import Header from './components/Header';
+import { DateRangePicker } from './components/Form';
 
 function Home() {
 
@@ -16,6 +18,10 @@ function Home() {
 
   const [data, setData] = useState({});
   const [selection, setSelection] = useState({value:'daily', label:"Daily Report"});
+
+  const [storeDate, setStoreDate] = useState('');
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(moment().format('YYYY-MM-DD'));
 
   // Hook for initializing data.
   useEffect(() => {
@@ -138,10 +144,6 @@ function Home() {
       selector: row => row.reported,
     },
     {
-      name: 'Evacuated',
-      selector: row => row.evacuated,
-    },
-    {
       name: 'UTL',
       selector: row => row.utl,
     },
@@ -218,10 +220,11 @@ function Home() {
     <span className="rounded-top">
       <Header>Home</Header>
       <hr/>
+      <Row className="ml-0">
       <Select
         label="Reports"
         name="reports"
-        className="mb-2"
+        className="mb-2 w-50"
         options={reportChoices}
         value={selection}
         isClearable={false}
@@ -230,29 +233,43 @@ function Home() {
           setSelection(instance)
         }}
       />
+      { selection.value === 'daily' || selection.value === 'worked' ?
       <DateRangePicker
         name={`date_range_picker`}
         id={`date_range_picker`}
         placeholder={"Filter by Date Range"}
         onChange={(dateRange) => {
-          if (dateRange === '') {
-            setIsDateSet(false)
-          } else {
-            setIsDateSet(true)
-            parseDateRange(dateRange)
+          setStoreDate(dateRange);
+          if (!dateRange.length) {
+            setStartDate(null);
+          }
+          else if (dateRange.length > 1) {
+            let parsedDateRange = dateRange.toString().split(',');
+            setStartDate(moment(parsedDateRange[0]).format('YYYY-MM-DD'));
+            setEndDate(moment(parsedDateRange[1]).format('YYYY-MM-DD'));
+          }
+          else {
+            setStartDate(moment(dateRange[0]).format('YYYY-MM-DD'));
+            setEndDate(moment(dateRange[0]).format('YYYY-MM-DD'));
           }
         }}
+        value={storeDate}
+        style={{height:"36px", width:"48%", marginLeft:"6px"}}
       />
+      : ""}
+      </Row>
       {selection.value === 'daily' ?
       <DataTable
           columns={daily_columns}
-          data={data.daily_report}
+          data={data && data.daily_report ? data.daily_report.filter(row => (startDate ? startDate <= moment(row.date)
+          .format('YYYY-MM-DD') && endDate >= moment(row.date).format('YYYY-MM-DD') : row)) : []}
           pagination
       />
       : selection.value === 'worked' ?
       <DataTable
           columns={sr_worked_columns}
-          data={data.sr_worked_report}
+          data={data && data.sr_worked_report ? data.sr_worked_report.filter(row => (startDate ? startDate <= moment(row.date)
+            .format('YYYY-MM-DD') && endDate >= moment(row.date).format('YYYY-MM-DD') : row)) : []}
           pagination
       />
       : selection.value === 'shelter' ?

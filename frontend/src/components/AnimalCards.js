@@ -3,7 +3,7 @@ import { Link } from 'raviger';
 import { Card, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faUserAlt, faUserAltSlash, faCircle, faExclamationCircle, faQuestionCircle, faHome, faHelicopter, faHeart, faSkullCrossbones
+  faUserAlt, faUserAltSlash, faCircle, faExclamationCircle, faQuestionCircle, faHome, faHeart, faSkullCrossbones
 } from '@fortawesome/free-solid-svg-icons';
 import { faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
 import { S3_BUCKET } from '../constants';
@@ -70,11 +70,6 @@ function AnimalCards(props) {
                   <OverlayTrigger key={"unable-to-locate"} placement="top"
                                   overlay={<Tooltip id={`tooltip-unable-to-locate`}>UNABLE TO LOCATE</Tooltip>}>
                       <FontAwesomeIcon className="animal-icon" icon={faQuestionCircle} inverse/>
-                  </OverlayTrigger> : ""}
-                {animal.status === "EVACUATED" ?
-                  <OverlayTrigger key={"evacuated"} placement="top"
-                                  overlay={<Tooltip id={`tooltip-evacuated`}>EVACUATED</Tooltip>}>
-                      <FontAwesomeIcon className="animal-icon" icon={faHelicopter} inverse/>
                   </OverlayTrigger> : ""}
                 {animal.status === "REUNITED" ?
                   <OverlayTrigger key={"reunited"} placement="top"

@@ -65,8 +65,6 @@ input[disabled] {
 }
 
 .daterange_picker {
-  margin-left: 16px;
-  width:200px;
   text-align: center;
 }
 

@@ -166,6 +166,7 @@ function DispatchAssignmentSearch() {
             name={`date_range_picker`}
             id={`date_range_picker`}
             placeholder={"Filter by Date Range"}
+            style={{width:"200px", marginLeft:"16px"}}
             onChange={(dateRange) => {
               if (dateRange === '') {
                 setIsDateSet(false)
