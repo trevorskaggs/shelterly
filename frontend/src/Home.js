@@ -264,6 +264,7 @@ function Home() {
           data={data && data.daily_report ? data.daily_report.filter(row => (startDate ? startDate <= moment(row.date)
           .format('YYYY-MM-DD') && endDate >= moment(row.date).format('YYYY-MM-DD') : row)) : []}
           pagination
+          noDataComponent={data && data.daily_report ? <div style={{padding:"24px"}}>There are no records to display</div> : <div style={{padding:"24px"}}>Fetching report data...</div>}
       />
       : selection.value === 'worked' ?
       <DataTable
@@ -284,12 +285,14 @@ function Home() {
           data={data.animal_status_report}
           pagination
       />
-      :
+      : selection.value === 'animal_owner' ?
       <DataTable
           columns={animal_owner_columns}
           data={data.animal_owner_report}
           pagination
       />
+      :
+      <span></span>
       }
     </span>
     }
