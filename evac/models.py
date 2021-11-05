@@ -25,9 +25,6 @@ class DispatchTeam(models.Model):
     def __str__(self):
         return self.name
 
-    # class Meta:
-    #     ordering = ['-dispatch_date',]
-
 class EvacAssignment(models.Model):
 
     team = models.ForeignKey(DispatchTeam, on_delete=models.SET_NULL, blank=True, null=True)

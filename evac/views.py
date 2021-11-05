@@ -34,7 +34,7 @@ class DispatchTeamViewSet(viewsets.ModelViewSet):
     serializer_class = DispatchTeamSerializer
 
     def get_queryset(self):
-        queryset = DispatchTeam.objects.all().annotate(is_assigned=Exists(EvacAssignment.objects.filter(team_id=OuterRef("id"), end_time=None)))
+        queryset = DispatchTeam.objects.all().annotate(is_assigned=Exists(EvacAssignment.objects.filter(team_id=OuterRef("id"), end_time=None))).order_by('-dispatch_date')
         is_map = self.request.query_params.get('map', '')
         if is_map == 'true':
             yesterday = datetime.today() - timedelta(days=1)
