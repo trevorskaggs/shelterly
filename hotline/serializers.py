@@ -1,4 +1,5 @@
-from django.db.models import Q
+from django.db.models import Count, Exists, OuterRef, Prefetch, Q
+from django.db.models.functions import TruncDay, ExtractDay
 from rest_framework import serializers
 
 from .models import ServiceRequest, VisitNote
@@ -71,7 +72,7 @@ class SimpleServiceRequestSerializer(BarebonesServiceRequestSerializer):
 
     class Meta:
         model = ServiceRequest
-        fields = ['id', 'latitude', 'longitude', 'full_address', 'followup_date', 'owners', 'reporter', 'address', 'city', 'state', 'zip_code', 'apartment', 'reporter', 'directions', 'evacuation_assignments', 'pending',
+        fields = ['id', 'timestamp', 'latitude', 'longitude', 'full_address', 'followup_date', 'owners', 'reporter', 'address', 'city', 'state', 'zip_code', 'apartment', 'reporter', 'directions', 'evacuation_assignments', 'pending',
         'animal_count', 'key_provided', 'verbal_permission', 'injured', 'accessible', 'turn_around', 'animals', 'status', 'reported_animals', 'reporter_object', 'owner_objects', 'sheltered_in_place', 'unable_to_locate', 'aco_required']
 
 

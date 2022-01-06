@@ -34,7 +34,7 @@ class DispatchTeamViewSet(viewsets.ModelViewSet):
     serializer_class = DispatchTeamSerializer
 
     def get_queryset(self):
-        queryset = DispatchTeam.objects.all().annotate(is_assigned=Exists(EvacAssignment.objects.filter(team_id=OuterRef("id"), end_time=None)))
+        queryset = DispatchTeam.objects.all().annotate(is_assigned=Exists(EvacAssignment.objects.filter(team_id=OuterRef("id"), end_time=None))).order_by('-dispatch_date')
         is_map = self.request.query_params.get('map', '')
         if is_map == 'true':
             yesterday = datetime.today() - timedelta(days=1)
@@ -159,6 +159,7 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
                 # Update the relevant SR fields.
                 assigned_request = AssignedRequest.objects.get(service_request=service_request['id'], dispatch_assignment=evac_assignment.id)
                 service_requests = ServiceRequest.objects.filter(id=service_request['id'])
+                service_requests[0].update_sip_utl()
                 assigned_request.animals = animals_dict
                 # Only update SR with followup_date while DA is open or if the old AssignedRequest followup_date matches the current SR followup_date.
                 if not evac_assignment.end_time or (assigned_request.followup_date == service_requests[0].followup_date):

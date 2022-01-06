@@ -201,7 +201,7 @@ function ServiceRequestDetails({id}) {
                     }
                   >
                     <span className="fa-layers">
-                      <FontAwesomeIcon icon={faCar} size="sm" className="ml-1 fa-move-down" />
+                      <FontAwesomeIcon icon={faCar} size="sm" className="fa-move-down" />
                     </span>
                   </OverlayTrigger> :
                   <OverlayTrigger

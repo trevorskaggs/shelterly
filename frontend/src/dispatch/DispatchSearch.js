@@ -14,11 +14,11 @@ import L from "leaflet";
 import { Marker, Tooltip as MapTooltip } from "react-leaflet";
 import Map, { prettyText, reportedMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
 import Moment from "react-moment";
-import moment from 'moment'
+import moment from 'moment';
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
 import { ITEMS_PER_PAGE } from '../constants';
-import {DateRangePicker} from '../components/Form';
+import { DateRangePicker } from '../components/Form';
 
 function DispatchAssignmentSearch() {
 
@@ -166,6 +166,7 @@ function DispatchAssignmentSearch() {
             name={`date_range_picker`}
             id={`date_range_picker`}
             placeholder={"Filter by Date Range"}
+            style={{width:"200px", marginLeft:"16px"}}
             onChange={(dateRange) => {
               if (dateRange === '') {
                 setIsDateSet(false)

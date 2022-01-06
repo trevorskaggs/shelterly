@@ -31,6 +31,9 @@ hr { display: block; height: 1px;
     -webkit-text-stroke-color: black;
 }
 
+/* Data table CSS */
+.rdt_Pagination { border-bottom-left-radius : .25rem; border-bottom-right-radius : .25rem; }
+
 /* Leaflet map CSS */
 .leaflet-container { width: auto; height: 55vh;}
 
@@ -62,8 +65,6 @@ input[disabled] {
 }
 
 .daterange_picker {
-  margin-left: 16px;
-  width:200px;
   text-align: center;
 }
 
