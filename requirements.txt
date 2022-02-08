@@ -1,7 +1,7 @@
 apig-wsgi
 awscli
 boto3
-Django==3.1
+Django==3.1.14
 django-activity-stream
 django-cors-headers
 django-filter
