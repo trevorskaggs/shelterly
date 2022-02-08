@@ -65,12 +65,12 @@ class PersonSerializer(SimplePersonSerializer):
     def get_animals(self, obj):
         from animals.serializers import ModestAnimalSerializer
         if hasattr(obj, 'reporter_animals') and obj.reporter_animals.all():
-            return ModestAnimalSerializer(obj.reporter_animals, many=True).data
+            return ModestAnimalSerializer(obj.reporter_animals.exclude(status='CANCELED'), many=True).data
         else:
             if hasattr(obj, 'animals'):
                 return ModestAnimalSerializer(obj.animals, many=True).data
             else:
-                return ModestAnimalSerializer(obj.animal_set.all(), many=True).data
+                return ModestAnimalSerializer(obj.animal_set.exclude(status='CANCELED'), many=True).data
 
     # Custom field for the action history.
     def get_action_history(self, obj):
