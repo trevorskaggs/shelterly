@@ -250,7 +250,7 @@ function ServiceRequestDetails({id}) {
               </Card.Title>
               <hr/>
               <ListGroup variant="flush">
-                <ListGroup.Item style={{marginTop:"-13px"}}><b>ID: </b>#{data.id}</ListGroup.Item>
+                <ListGroup.Item style={{marginTop:"-13px"}}><b>ID: </b>SR#{data.id}</ListGroup.Item>
                 <ListGroup.Item><b>Address: </b>{data.full_address}</ListGroup.Item>
                 <ListGroup.Item>
                   <b>Followup Date: </b>
@@ -275,7 +275,7 @@ function ServiceRequestDetails({id}) {
                     value={data.followup_date || null}>
                   </Flatpickr>
                 </ListGroup.Item>
-                <ListGroup.Item style={{marginBottom:"-13px"}}><b>Directions:</b> {data.directions||"No directions available"}</ListGroup.Item>
+                <ListGroup.Item style={{marginBottom:"-13px"}}><b>Additional Information:</b> {data.directions||"No additional information available"}</ListGroup.Item>
               </ListGroup>
             </Card.Body>
           </Card>

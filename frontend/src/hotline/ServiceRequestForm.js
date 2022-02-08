@@ -176,7 +176,7 @@ function ServiceRequestForm(props) {
               <TextInput
                 as="textarea"
                 rows={5}
-                label="Directions"
+                label="Additional Information"
                 name="directions"
                 id="directions"
                 xs="12"

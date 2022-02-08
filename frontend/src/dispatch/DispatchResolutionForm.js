@@ -303,7 +303,7 @@ function DispatchResolutionForm({ id }) {
                       <ListGroup.Item key={owner.id}><b>Owner: </b>{owner.first_name} {owner.last_name}</ListGroup.Item>
                     ))}
                     {assigned_request.service_request_object.owners.length < 1 ? <ListGroup.Item><b>Owner: </b>No Owner</ListGroup.Item> : ""}
-                      <ListGroup.Item><b>Directions: </b>{ assigned_request.service_request_object.directions ? assigned_request.service_request_object.directions : "N/A"}</ListGroup.Item>
+                      <ListGroup.Item><b>Additional Information: </b>{ assigned_request.service_request_object.directions ? assigned_request.service_request_object.directions : "N/A"}</ListGroup.Item>
                       <ListGroup.Item>
                         <b>Accessible: </b>{ assigned_request.service_request_object.accessible ? "Yes" : "No"},&nbsp;
                         <b>Turn Around: </b>{ assigned_request.service_request_object.turn_around ? "Yes" : "No"}

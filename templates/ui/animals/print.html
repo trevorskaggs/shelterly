@@ -63,7 +63,7 @@
                         <img style="max-height:250px; max-width:240px; vertical-align: center; margin-bottom: -70px; margin-top:-25px" src="{% if animal.kennel_card_image %}{{ animal.kennel_card_image.image.url }}{% else %}{% static 'images/image-not-found.png' %}{% endif %}">
                     </div>
                     <div class='col-4'>
-                        Animal No: <b>{{ animal.id }}</b><br/>
+                        Animal No: <b>A#{{ animal.id }}</b><br/>
                         Kennel No: <b>{{ animal.shelter }} / {{ animal.room.building }} / {{ animal.room }}</b><br/>
                         Animal Name: <b>{% if animal.name %}{{ animal.name }}{% else %}N/A{% endif %}</b><br/>
                         Species:
@@ -71,7 +71,7 @@
                         Age:
                         <b>{% if animal.age %}{{ animal.age }}{% else %}N/A{% endif %}</b><br/>
                         Color: <b>{% if animal.pcolor %}{{ animal.pcolor }}{% else %}N/A{% endif %} // {% if animal.scolor %}{{ animal.scolor }}{% else %}N/A{% endif %}</b><br/>
-                        Description: <b>{% if animal.color_notes %}{{ animal.color_notes }}{% else %}N/A{% endif %}</b><br/>
+                        Breed / Description: <b>{% if animal.color_notes %}{{ animal.color_notes }}{% else %}N/A{% endif %}</b><br/>
                         </b>
                     </div>
                     <div class='col-4'>
@@ -86,7 +86,7 @@
                         <b>{% if animal.aggressive %}{{ animal.aggressive }}{% else %}N/A{% endif %}</b><br/>
                         Injured:
                         <b>{% if animal.injured %}{{ animal.injured }}{% else %}N/A{% endif %}</b><br/>
-                        Behaivor Notes: <b>{% if animal.behaivor_notes %}{{ animal.behaivor_notes }}{% else %}N/A{% endif %}</b><br/>
+                        Behavior Notes: <b>{% if animal.behavior_notes %}{{ animal.behavior_notes }}{% else %}N/A{% endif %}</b><br/>
                         Medical Notes: <b>{% if animal.medical_notes %}{{ animal.medical_notes }}{% else %}N/A{% endif %}</b><br/>
                     </div>
                 </div>

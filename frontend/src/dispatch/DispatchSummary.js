@@ -315,7 +315,7 @@ function DispatchSummary({id}) {
                 </ListGroup.Item>
               ))}
             {assigned_request.service_request_object.owners.length < 1 ? <ListGroup.Item><b>Owner: </b>No Owner</ListGroup.Item> : ""}
-            <ListGroup.Item><b>Directions:</b> {assigned_request.service_request_object.directions||"No directions available."}</ListGroup.Item>
+            <ListGroup.Item><b>Additional Information:</b> {assigned_request.service_request_object.directions||"No additional information available."}</ListGroup.Item>
           </ListGroup>
           <hr/>
           <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
