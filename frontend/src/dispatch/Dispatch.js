@@ -99,13 +99,10 @@ function Dispatch() {
                   >
                   <MapTooltip autoPan={false}>
                     <span>
-                      <div>{dispatch_assignment.team_object ? dispatch_assignment.team_object.name : ""}:&nbsp;
-                      {dispatch_assignment.team && dispatch_assignment.team_object.team_member_objects.map((team_member, i) => (
-                        <span key={team_member.id}>{i > 0 && ", "}{team_member.first_name + ' ' + team_member.last_name}{team_member.agency_id ? <span>&nbsp;({team_member.agency_id})</span> : ""}</span>
-                      ))}
-                      </div>
+                      <div>{dispatch_assignment.team_object ? dispatch_assignment.team_object.name : ""}</div>
                       {mapState[dispatch_assignment.id] ?
                         <span>
+                          {assigned_request.service_request_object.sheltered_in_place > 0 ? 'SIP: ' : assigned_request.service_request_object.unable_to_locate > 0 ? 'UTL: ' : 'Reported: '}
                           {Object.keys(mapState[dispatch_assignment.id].service_requests[assigned_request.service_request_object.id].matches).map((key,i) => (
                             <span key={key} style={{textTransform:"capitalize"}}>
                               {i > 0 && ", "}{prettyText(key.split(',')[1], key.split(',')[0], mapState[dispatch_assignment.id].service_requests[assigned_request.service_request_object.id].matches[key])}
@@ -114,7 +111,7 @@ function Dispatch() {
                         </span>
                       :""}
                       <br />
-                      #{assigned_request.service_request_object.id}: {assigned_request.service_request_object.full_address}
+                      SR#{assigned_request.service_request_object.id}: {assigned_request.service_request_object.full_address}
                       <div>
                         {assigned_request.service_request_object.aco_required ? <img width={16} height={16} src="/static/images/badge-sheriff.png" alt="ACO Required" className="mr-1" /> : ""}
                         {assigned_request.service_request_object.injured ? <img width={16} height={16} src="/static/images/band-aid-solid.png" alt="Injured" className="mr-1" /> : ""}

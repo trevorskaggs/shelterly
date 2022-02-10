@@ -110,6 +110,7 @@ function Hotline() {
                     <span>
                       {mapState[service_request.id] ?
                         <span>
+                          {service_request.sheltered_in_place > 0 ? 'SIP: ' : service_request.unable_to_locate > 0 ? 'UTL: ' : service_request.reported_animals > 0 ? 'Reported: ' : 'Closed: '}
                           {Object.keys(mapState[service_request.id].matches).map((key,i) => (
                             <span key={key} style={{textTransform:"capitalize"}}>
                               {i > 0 && ", "}{prettyText('', key.split(',')[0], mapState[service_request.id].matches[key])}
@@ -118,7 +119,7 @@ function Hotline() {
                         </span>
                       :""}
                       <br />
-                      #{service_request.id}: {service_request.full_address}
+                      SR#{service_request.id}: {service_request.full_address}
                       {service_request.followup_date ? <div>Followup Date: <Moment format="L">{service_request.followup_date}</Moment></div> : ""}
                       <div>
                         {service_request.aco_required ? <img width={16} height={16} src="/static/images/badge-sheriff.png" alt="ACO Required" className="mr-1" /> : ""}
