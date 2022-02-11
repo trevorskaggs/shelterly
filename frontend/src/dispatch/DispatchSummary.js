@@ -298,17 +298,18 @@ function DispatchSummary({id}) {
                   : ""}
                   {assigned_request.owner_contact ?
                   <span>
+                    {assigned_request.owner_contact.owner_name === owner.first_name + ' ' + owner.last_name ?
                     <OverlayTrigger
                       key={"owner-contacted"}
                       placement="top"
                       overlay={
                         <Tooltip id={`tooltip-owner-contacted`}>
-                          Contacted: <Moment format="l HH:mm">{assigned_request.owner_contact.owner_contact_time}</Moment>
+                          Contacted: {assigned_request.owner_contact.owner_contact_time ? <Moment format="l HH:mm">{assigned_request.owner_contact.owner_contact_time}</Moment> : 'N/A'}
                         </Tooltip>
                       }
                     >
                       <FontAwesomeIcon icon={faUserCheck} className="ml-1 fa-move-up" size="sm" inverse />
-                    </OverlayTrigger>
+                    </OverlayTrigger> : ""}
                     <div><b>Contact Note: </b>{assigned_request.owner_contact.owner_contact_note}</div>
                   </span>
                   : ""}

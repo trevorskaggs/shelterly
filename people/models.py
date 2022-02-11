@@ -27,9 +27,9 @@ class Person(Location):
         ordering = ('-first_name',)
 
 class OwnerContact(models.Model):
-    owner = models.ForeignKey(Person, on_delete=models.CASCADE)
+    owner = models.ForeignKey(Person, null=True, on_delete=models.CASCADE)
     service_request = models.ForeignKey('hotline.ServiceRequest', null=True, blank=True, on_delete=models.CASCADE)
-    owner_contact_time = models.DateTimeField()
+    owner_contact_time = models.DateTimeField(null=True)
     owner_contact_note = models.TextField(blank=False)
 
     class Meta:

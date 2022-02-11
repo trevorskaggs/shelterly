@@ -47,8 +47,9 @@ class OwnerContactSerializer(serializers.ModelSerializer):
     owner_name = serializers.SerializerMethodField()
 
     def get_owner_name(self, obj):
-
-        return str(obj.owner)
+        if obj.owner:
+            return str(obj.owner)
+        return ''
 
     class Meta:
         model = OwnerContact

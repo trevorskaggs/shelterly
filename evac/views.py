@@ -177,12 +177,14 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
                     else:
                         VisitNote.objects.filter(assigned_request=assigned_request).update(date_completed=service_request['date_completed'], notes=service_request['notes'], forced_entry=service_request['forced_entry'])
                 # Only create OwnerContact on first update, otherwise update existing OwnerContact.
-                if service_request.get('owner_contact_id') and service_request.get('owner_contact_note') and service_request.get('owner_contact_time'):
+                if service_request.get('owner_contact_note'):
+                    owner = service_request['owner_contact_id'] if service_request.get('owner_contact_id') else None
+                    owner_contact_time = service_request['owner_contact_time'] if service_request.get('owner_contact_time') else None
                     if not assigned_request.owner_contact:
-                        owner_contact = OwnerContact.objects.create(owner=Person.objects.get(pk=service_request['owner_contact_id']), owner_contact_note=service_request['owner_contact_note'], owner_contact_time=service_request['owner_contact_time'])
+                        owner_contact = OwnerContact.objects.create(owner=owner, owner_contact_note=service_request['owner_contact_note'], owner_contact_time=owner_contact_time)
                         assigned_request.owner_contact = owner_contact
                     else:
-                        OwnerContact.objects.filter(assigned_request=assigned_request).update(owner=Person.objects.get(pk=service_request['owner_contact_id']), owner_contact_note=service_request['owner_contact_note'], owner_contact_time=service_request['owner_contact_time'])
+                        OwnerContact.objects.filter(assigned_request=assigned_request).update(owner=owner, owner_contact_note=service_request['owner_contact_note'], owner_contact_time=owner_contact_time)
                 assigned_request.save()
                 if service_request['unable_to_complete']:
                     evac_assignment.service_requests.remove(service_requests[0])

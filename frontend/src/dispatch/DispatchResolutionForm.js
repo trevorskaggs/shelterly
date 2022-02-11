@@ -235,7 +235,7 @@ function DispatchResolutionForm({ id }) {
                 <Card.Body>
                   <Card.Title style={{marginBottom:"-5px"}}>
                     <h4>
-                      #{assigned_request.service_request_object.id} -&nbsp;
+                      SR#{assigned_request.service_request_object.id} -&nbsp;
                       <Link href={"/hotline/servicerequest/" + assigned_request.service_request_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link> |&nbsp;
                       <Checkbox
                         label={"Not Completed Yet:"}
@@ -327,7 +327,7 @@ function DispatchResolutionForm({ id }) {
                             />
                           </Col>
                           <span style={{ marginTop:"5px", textTransform:"capitalize" }}>
-                            #{animal.id} - {animal.name || "Unknown"}&nbsp;-&nbsp;{animal.species}
+                            A#{animal.id} - {animal.name || "Unknown"}&nbsp;-&nbsp;{animal.species}
                             {animal.color_notes ?
                             <OverlayTrigger
                               key={"animal-color-notes"}
@@ -413,7 +413,7 @@ function DispatchResolutionForm({ id }) {
                       <BootstrapForm.Row className="mt-2">
                         <Col xs="4">
                          <DropDown
-                          label="Owner Contacted*"
+                          label="Owner Contacted"
                           id={`sr_updates.${index}.owner_contact_id`}
                           name={`sr_updates.${index}.owner_contact_id`}
                           key={`my_unique_test_select_key__d}`}
@@ -421,17 +421,18 @@ function DispatchResolutionForm({ id }) {
                           xs="4"
                           options={ownerChoices[assigned_request.service_request_object.id]}
                           value={props.values.sr_updates[index] ? props.values.sr_updates[index].owner_contact_id : null}
-                          isClearable={false}
+                          isClearable={true}
                         />
                         </Col>
                       </BootstrapForm.Row>
                       <BootstrapForm.Row className="mt-3">
                         <DateTimePicker
-                          label="Owner Contact Time*"
+                          label="Owner Contact Time"
                           name={`sr_updates.${index}.owner_contact_time`}
                           id={`sr_updates.${index}.owner_contact_time`}
                           xs="4"
                           data-enable-time={true}
+                          clearable={true}
                           onChange={(date, dateStr) => {
                             props.setFieldValue(`sr_updates.${index}.owner_contact_time`, dateStr)
                           }}
