@@ -20,7 +20,7 @@
     "axios": "^0.21.2",
     "bootstrap": "^4.4.1",
     "bootswatch": "^4.5.0",
-    "browser-image-compression": "^1.0.14",
+    "browser-image-compression": "^1.0.17",
     "file-loader": "^6.1.1",
     "flat": "^5.0.2",
     "formik": "^2.2.0",

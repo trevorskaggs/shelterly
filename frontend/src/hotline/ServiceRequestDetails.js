@@ -45,6 +45,7 @@ function ServiceRequestDetails({id}) {
     reporter: '',
     reporter_object: {first_name:'', last_name:''},
     directions: '',
+    priority: '',
     address: '',
     full_address: '',
     apartment: '',
@@ -250,7 +251,12 @@ function ServiceRequestDetails({id}) {
               </Card.Title>
               <hr/>
               <ListGroup variant="flush">
-                <ListGroup.Item style={{marginTop:"-13px"}}><b>ID: </b>#{data.id}</ListGroup.Item>
+                <ListGroup.Item style={{marginTop:"-13px"}}>
+                  <div className="row">
+                    <span className="col-5"><b>ID: </b>#{data.id}</span>
+                    <span className="col-6" style={{textTransform:"capitalize"}}><b>Priority: </b>{data.priority}</span>
+                  </div>
+                </ListGroup.Item>
                 <ListGroup.Item><b>Address: </b>{data.full_address}</ListGroup.Item>
                 <ListGroup.Item>
                   <b>Followup Date: </b>

@@ -10,12 +10,21 @@ STATUS_CHOICES = (
   ('canceled','Canceled')
 )
 
+PRIORITY_CHOICES = (
+  ('highest', 'Highest'),
+  ('high', 'High'),
+  ('medium', 'Medium'),
+  ('low', 'Low'),
+  ('lowest', 'Lowest'),
+)
+
 class ServiceRequest(Location):
     
     #keys
     owners = models.ManyToManyField(Person, blank=True, related_name='request')
     reporter = models.ForeignKey(Person, on_delete=models.SET_NULL, blank=True, null=True, related_name='reporter_service_request')
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, blank=False, default='open')
+    priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, blank=False, default='medium')
 
     #pre_fields
     timestamp = models.DateTimeField(auto_now_add=True)
@@ -68,7 +77,7 @@ class ServiceRequest(Location):
 
 
     class Meta:
-        ordering = ['timestamp']
+        ordering = ['-timestamp']
 
 class VisitNote(models.Model):
 
