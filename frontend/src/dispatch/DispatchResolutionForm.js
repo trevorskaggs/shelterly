@@ -78,7 +78,7 @@ function DispatchResolutionForm({ id }) {
               animals: Object.keys(assigned_request.animals).map(animal_id => {return {id:animal_id, status:assigned_request.animals[animal_id].status, request:assigned_request.service_request_object.id, shelter:assigned_request.animals[animal_id].shelter || ''}}),
               owner: assigned_request.service_request_object.owners.length > 0,
               owner_contact_id: assigned_request.owner_contact ? assigned_request.owner_contact.owner : '',
-              owner_contact_time: assigned_request.owner_contact ? assigned_request.owner_contact.owner_contact_time : '',
+              owner_contact_time: assigned_request.owner_contact ? assigned_request.owner_contact.owner_contact_time : null,
               owner_contact_note: assigned_request.owner_contact ? assigned_request.owner_contact.owner_contact_note : '',
               unable_to_complete: false,
               incomplete: false
@@ -184,9 +184,9 @@ function DispatchResolutionForm({ id }) {
               then: Yup.date().required('Required.')}),
             notes: Yup.string(),
             forced_entry: Yup.boolean(),
-            owner_contact_note: Yup.string().when('owner', {
-              is: true,
-              then: Yup.string().required('An owner contact note is required.')}),
+            owner_contact_id: Yup.number().nullable(),
+            owner_contact_time: Yup.date().nullable(),
+            owner_contact_note: Yup.string(),
           })
         ),
       })}
@@ -440,7 +440,7 @@ function DispatchResolutionForm({ id }) {
                           xs="9"
                           as="textarea"
                           rows={5}
-                          label="Owner Contact Note*"
+                          label="Owner Contact Note"
                         />
                       </BootstrapForm.Row>
                     </span>
