@@ -250,7 +250,7 @@ function ServiceRequestDetails({id}) {
               </Card.Title>
               <hr/>
               <ListGroup variant="flush">
-                <ListGroup.Item style={{marginTop:"-13px"}}><b>ID: </b>#{data.id}</ListGroup.Item>
+                <ListGroup.Item style={{marginTop:"-13px"}}><b>ID: </b>SR#{data.id}</ListGroup.Item>
                 <ListGroup.Item><b>Address: </b>{data.full_address}</ListGroup.Item>
                 <ListGroup.Item>
                   <b>Followup Date: </b>
@@ -275,7 +275,7 @@ function ServiceRequestDetails({id}) {
                     value={data.followup_date || null}>
                   </Flatpickr>
                 </ListGroup.Item>
-                <ListGroup.Item style={{marginBottom:"-13px"}}><b>Directions:</b> {data.directions||"No directions available"}</ListGroup.Item>
+                <ListGroup.Item style={{marginBottom:"-13px"}}><b>Additional Information:</b> {data.directions||"No additional information available"}</ListGroup.Item>
               </ListGroup>
             </Card.Body>
           </Card>
@@ -386,7 +386,7 @@ function ServiceRequestDetails({id}) {
                     placement="top"
                     overlay={
                       <Tooltip id={`tooltip-add-to-dispatch`}>
-                        {data.assigned_requests.filter(assigned_request => assigned_request.dispatch_assignment.end_time).length ? "Reassign" : "Assign"} service request to an open dispatch assignment
+                        {data.assigned_requests.filter(assigned_request => !assigned_request.dispatch_assignment.end_time).length ? "Reassign" : "Assign"} service request to an open dispatch assignment
                       </Tooltip>
                     }
                   >
@@ -469,7 +469,7 @@ function ServiceRequestDetails({id}) {
                     <div className="mt-1 mb-0"><b>Outcome:</b> {assigned_request.visit_note.notes||"No visit information available."}</div>
                     {assigned_request.owner_contact ?
                     <span>
-                      <div className="mt-1 mb-0"><b>Owner Contacted:</b> {assigned_request.owner_contact.owner_name} on <Moment format="LLL">{assigned_request.owner_contact.owner_contact_time}</Moment></div>
+                      {assigned_request.owner_contact.owner_name ? <div className="mt-1 mb-0"><b>Owner Contacted:</b> {assigned_request.owner_contact.owner_name} {assigned_request.owner_contact.owner_contact_time ? <span>on <Moment format="LLL">{assigned_request.owner_contact.owner_contact_time}</Moment></span> : ""}</div> : ""}
                       <div className="mt-1 mb-0"><b>Contact Notes:</b> {assigned_request.owner_contact.owner_contact_note||"No contact information available."}</div>
                     </span>
                     : ""}

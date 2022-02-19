@@ -47,8 +47,9 @@ class OwnerContactSerializer(serializers.ModelSerializer):
     owner_name = serializers.SerializerMethodField()
 
     def get_owner_name(self, obj):
-
-        return str(obj.owner)
+        if obj.owner:
+            return str(obj.owner)
+        return ''
 
     class Meta:
         model = OwnerContact
@@ -65,12 +66,12 @@ class PersonSerializer(SimplePersonSerializer):
     def get_animals(self, obj):
         from animals.serializers import ModestAnimalSerializer
         if hasattr(obj, 'reporter_animals') and obj.reporter_animals.all():
-            return ModestAnimalSerializer(obj.reporter_animals, many=True).data
+            return ModestAnimalSerializer(obj.reporter_animals.exclude(status='CANCELED'), many=True).data
         else:
             if hasattr(obj, 'animals'):
                 return ModestAnimalSerializer(obj.animals, many=True).data
             else:
-                return ModestAnimalSerializer(obj.animal_set.all(), many=True).data
+                return ModestAnimalSerializer(obj.animal_set.exclude(status='CANCELED'), many=True).data
 
     # Custom field for the action history.
     def get_action_history(self, obj):
