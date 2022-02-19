@@ -184,15 +184,9 @@ function DispatchResolutionForm({ id }) {
               then: Yup.date().required('Required.')}),
             notes: Yup.string(),
             forced_entry: Yup.boolean(),
-            owner_contact_id: Yup.number().when('owner', {
-              is: true,
-              then: Yup.number().required('Please select the contacted owner.')}),
             owner_contact_note: Yup.string().when('owner', {
               is: true,
-              then: Yup.string().required('The owner must be notified before resolution.')}),
-            owner_contact_time: Yup.date().when('owner', {
-              is: true,
-              then: Yup.date().required('The owner must be notified before resolution.')}),
+              then: Yup.string().required('An owner contact note is required.')}),
           })
         ),
       })}

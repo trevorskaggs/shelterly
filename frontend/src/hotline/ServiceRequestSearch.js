@@ -24,6 +24,8 @@ function ServiceRequestSearch() {
     status = 'open',
   } = queryParams;
 
+  const priorityText = {1:'Highest', 2:'High', 3:'Medium', 4:'Low', 5:'Lowest'};
+
   const [data, setData] = useState({service_requests: [], isFetching: false});
   const [searchState, setSearchState] = useState({});
   const [searchTerm, setSearchTerm] = useState(search);
@@ -143,7 +145,8 @@ function ServiceRequestSearch() {
           <CardGroup>
             <Card style={{marginBottom:"6px"}}>
               <Card.Body>
-                <Card.Title style={{marginTop:"-9px", marginBottom:"8px"}}>
+                <Card.Title style={{marginTop:"-9px", marginBottom:"8px"}} className="row">
+                  <span className="col-5">
                   Information
                   {service_request.verbal_permission ?
                   <OverlayTrigger
@@ -241,6 +244,8 @@ function ServiceRequestSearch() {
                     </span>
                   </OverlayTrigger>
                   }
+                  </span>
+                  <span className="col-5">Priority: {priorityText[service_request.priority]}</span>
                 </Card.Title>
                 <Scrollbar style={{height:"144px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
                   <ListGroup>

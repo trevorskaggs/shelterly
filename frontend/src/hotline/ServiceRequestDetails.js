@@ -21,6 +21,8 @@ function ServiceRequestDetails({id}) {
     setTimeout(() => datetime.current.flatpickr.open(), 0);
   }
 
+  const priorityText = {1:'Highest', 2:'High', 3:'Medium', 4:'Low', 5:'Lowest'};
+
   const [showModal, setShowModal] = useState(false);
   const cancelServiceRequest = () => {
     axios.patch('/hotline/api/servicerequests/' + id + '/', {status:'canceled'})
@@ -253,8 +255,8 @@ function ServiceRequestDetails({id}) {
               <ListGroup variant="flush">
                 <ListGroup.Item style={{marginTop:"-13px"}}>
                   <div className="row">
+                    <span className="col-6"><b>Priority: </b>{priorityText[data.priority]}</span>
                     <span className="col-5"><b>ID: </b>#{data.id}</span>
-                    <span className="col-6" style={{textTransform:"capitalize"}}><b>Priority: </b>{data.priority}</span>
                   </div>
                 </ListGroup.Item>
                 <ListGroup.Item><b>Address: </b>{data.full_address}</ListGroup.Item>

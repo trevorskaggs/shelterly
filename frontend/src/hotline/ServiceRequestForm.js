@@ -32,7 +32,7 @@ function ServiceRequestForm(props) {
     owners: [],
     reporter: null,
     directions: '',
-    priority: 'medium',
+    priority: 2,
     address: props.state.steps.owner.address || '',
     apartment: props.state.steps.owner.apartment || '',
     city: props.state.steps.owner.city || '',
@@ -47,11 +47,11 @@ function ServiceRequestForm(props) {
   });
 
   const priorityChoices = [
-    { value: 'highest', label: 'Highest' },
-    { value: 'high', label: 'High' },
-    { value: 'medium', label: 'Medium' },
-    { value: 'low', label: 'Low' },
-    { value: 'lowest', label: 'Lowest' }
+    { value: 1, label: 'Highest' },
+    { value: 2, label: 'High' },
+    { value: 3, label: 'Medium' },
+    { value: 4, label: 'Low' },
+    { value: 5, label: 'Lowest' }
   ]
 
   // Hook for initializing data.
@@ -86,7 +86,7 @@ function ServiceRequestForm(props) {
         initialValues={data}
         enableReinitialize={true}
         validationSchema={Yup.object({
-          priority: Yup.string(),
+          priority: Yup.number(),
           directions: Yup.string()
             .max(2000, 'Must be 2000 characters or less'),
           verbal_permission: Yup.boolean(),
