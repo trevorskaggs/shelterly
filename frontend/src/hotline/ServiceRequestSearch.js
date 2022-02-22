@@ -4,12 +4,12 @@ import { Link, useQueryParams } from 'raviger';
 import { Button, ButtonGroup, Card, CardGroup, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Pagination, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBan, faCar, faClipboardList, faEnvelope, faKey, faTrailer, faUsers
+  faBan, faCar, faChevronDown, faChevronUp, faEquals, faClipboardList, faEnvelope, faKey, faTrailer, faUsers
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faDotCircle
 } from '@fortawesome/free-regular-svg-icons';
-import { faCommentSmile, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
+import { faChevronDoubleDown, faChevronDoubleUp, faCommentSmile, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import Moment from 'react-moment';
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
@@ -146,8 +146,68 @@ function ServiceRequestSearch() {
             <Card style={{marginBottom:"6px"}}>
               <Card.Body>
                 <Card.Title style={{marginTop:"-9px", marginBottom:"8px"}} className="row">
-                  <span className="col-5">
                   Information
+                  {service_request.priority === 1 ?
+                    <OverlayTrigger
+                      key={"highest"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-highest`}>
+                          {priorityText[service_request.priority]} priority
+                        </Tooltip>
+                      }
+                    >
+                      <FontAwesomeIcon icon={faChevronDoubleUp} size="sm" className="ml-1 fa-move-down"/>
+                    </OverlayTrigger>
+                  : service_request.priority === 2 ?
+                    <OverlayTrigger
+                      key={"high"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-high`}>
+                          {priorityText[service_request.priority]} priority
+                        </Tooltip>
+                      }
+                    >
+                      <FontAwesomeIcon icon={faChevronUp} size="sm" className="ml-1 fa-move-down"/>
+                    </OverlayTrigger>
+                  : service_request.priority === 3 ?
+                    <OverlayTrigger
+                      key={"medium"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-medium`}>
+                          {priorityText[service_request.priority]} priority
+                        </Tooltip>
+                      }
+                    >
+                      <FontAwesomeIcon icon={faEquals} size="sm" className="ml-1 fa-move-down"/>
+                    </OverlayTrigger>
+                  : service_request.priority === 4 ?
+                    <OverlayTrigger
+                      key={"low"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-low`}>
+                          {priorityText[service_request.priority]} priority
+                        </Tooltip>
+                      }
+                    >
+                      <FontAwesomeIcon icon={faChevronDown} size="sm" className="ml-1 fa-move-down"/>
+                    </OverlayTrigger>
+                  : service_request.priority === 5 ?
+                    <OverlayTrigger
+                      key={"lowest"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-lowest`}>
+                          {priorityText[service_request.priority]} priority
+                        </Tooltip>
+                      }
+                    >
+                      <FontAwesomeIcon icon={faChevronDoubleDown} size="sm" className="ml-1 fa-move-down"/>
+                    </OverlayTrigger>
+                  : ""}
                   {service_request.verbal_permission ?
                   <OverlayTrigger
                     key={"verbal"}
@@ -244,8 +304,6 @@ function ServiceRequestSearch() {
                     </span>
                   </OverlayTrigger>
                   }
-                  </span>
-                  <span className="col-5">Priority: {priorityText[service_request.priority]}</span>
                 </Card.Title>
                 <Scrollbar style={{height:"144px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
                   <ListGroup>
