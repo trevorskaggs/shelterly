@@ -244,6 +244,7 @@ function DispatchResolutionForm({ id }) {
                       <Checkbox
                         label={"Not Completed Yet:"}
                         name={`sr_updates.${index}.incomplete`}
+                        disabled={assigned_request.visit_note && assigned_request.visit_note.date_completed ? true : false}
                         checked={(props.values.sr_updates[index] && props.values.sr_updates[index].incomplete) || false}
                         onChange={() => {
                           if (props.values.sr_updates[index] && props.values.sr_updates[index].incomplete) {
@@ -274,6 +275,7 @@ function DispatchResolutionForm({ id }) {
                       <Checkbox
                         label={"Unable to Complete:"}
                         name={`sr_updates.${index}.unable_to_complete`}
+                        disabled={assigned_request.visit_note && assigned_request.visit_note.date_completed ? true : false}
                         checked={(props.values.sr_updates[index] && props.values.sr_updates[index].unable_to_complete) || false}
                         onChange={() => {
                           if (props.values.sr_updates[index] && props.values.sr_updates[index].unable_to_complete) {
