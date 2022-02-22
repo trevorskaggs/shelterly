@@ -127,6 +127,20 @@ export const initialWorkflowData = {
       longitude: null,
       change_reason: '',},
     animals: [],
+    request: {
+      address: '',
+      apartment: '',
+      city: '',
+      state: '',
+      zip_code: '',
+      latitude: null,
+      longitude: null,
+      directions:'',
+      verbal_permission: false,
+      key_required: false,
+      accessible: false,
+      turnaround: false
+    },
   }
 }
 
@@ -153,7 +167,7 @@ function StepperWorkflow() {
   // Counts number of reporter + owner
   const [contactCount, setContactCount] = React.useState(0);
 
-  function handleBack(currentStep, nextStep) {
+  function handleBack(currentStep, nextStep, data=null) {
     // Lower the active step if going backwards between major steps.
     if ((currentStep === 'animals' && nextStep !== 'animals') || (currentStep === 'request' && nextStep === 'animals')) {
       setActiveStep((prevActiveStep) => prevActiveStep - 1);
@@ -169,6 +183,7 @@ function StepperWorkflow() {
       hasOwner: nextStep === 'owner',
       stepIndex: prevState.stepIndex - 1,
       animalIndex: track_index,
+      steps: { ...prevState.steps, ['request']:data ? data : prevState.steps.request } // Only set SR data if present.
     }))
   };
 

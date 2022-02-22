@@ -87,7 +87,7 @@ function DispatchResolutionForm({ id }) {
               animals: Object.keys(assigned_request.animals).map(animal_id => {return {id:animal_id, status:assigned_request.animals[animal_id].status, request:assigned_request.service_request_object.id, shelter:assigned_request.animals[animal_id].shelter || ''}}),
               owner: assigned_request.service_request_object.owners.length > 0,
               owner_contact_id: assigned_request.owner_contact ? assigned_request.owner_contact.owner : '',
-              owner_contact_time: assigned_request.owner_contact ? assigned_request.owner_contact.owner_contact_time : '',
+              owner_contact_time: assigned_request.owner_contact ? assigned_request.owner_contact.owner_contact_time : null,
               owner_contact_note: assigned_request.owner_contact ? assigned_request.owner_contact.owner_contact_note : '',
               unable_to_complete: false,
               incomplete: false
@@ -194,9 +194,9 @@ function DispatchResolutionForm({ id }) {
               then: Yup.date().required('Required.')}),
             notes: Yup.string(),
             forced_entry: Yup.boolean(),
-            owner_contact_note: Yup.string().when('owner', {
-              is: true,
-              then: Yup.string().required('An owner contact note is required.')}),
+            owner_contact_id: Yup.number().nullable(),
+            owner_contact_time: Yup.date().nullable(),
+            owner_contact_note: Yup.string(),
           })
         ),
       })}
@@ -239,7 +239,7 @@ function DispatchResolutionForm({ id }) {
                 <Card.Body>
                   <Card.Title style={{marginBottom:"-5px"}}>
                     <h4>
-                      #{assigned_request.service_request_object.id} -&nbsp;
+                      SR#{assigned_request.service_request_object.id} -&nbsp;
                       <Link href={"/hotline/servicerequest/" + assigned_request.service_request_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link> |&nbsp;
                       <Checkbox
                         label={"Not Completed Yet:"}
@@ -307,7 +307,7 @@ function DispatchResolutionForm({ id }) {
                       <ListGroup.Item key={owner.id}><b>Owner: </b>{owner.first_name} {owner.last_name}</ListGroup.Item>
                     ))}
                     {assigned_request.service_request_object.owners.length < 1 ? <ListGroup.Item><b>Owner: </b>No Owner</ListGroup.Item> : ""}
-                      <ListGroup.Item><b>Directions: </b>{ assigned_request.service_request_object.directions ? assigned_request.service_request_object.directions : "N/A"}</ListGroup.Item>
+                      <ListGroup.Item><b>Additional Information: </b>{ assigned_request.service_request_object.directions ? assigned_request.service_request_object.directions : "N/A"}</ListGroup.Item>
                       <ListGroup.Item>
                         <b>Accessible: </b>{ assigned_request.service_request_object.accessible ? "Yes" : "No"},&nbsp;
                         <b>Turn Around: </b>{ assigned_request.service_request_object.turn_around ? "Yes" : "No"}
@@ -331,7 +331,7 @@ function DispatchResolutionForm({ id }) {
                             />
                           </Col>
                           <span style={{ marginTop:"5px", textTransform:"capitalize" }}>
-                            #{animal.id} - {animal.name || "Unknown"}&nbsp;-&nbsp;{animal.species}
+                            A#{animal.id} - {animal.name || "Unknown"}&nbsp;-&nbsp;{animal.species}
                             {animal.color_notes ?
                             <OverlayTrigger
                               key={"animal-color-notes"}
@@ -434,7 +434,7 @@ function DispatchResolutionForm({ id }) {
                       <BootstrapForm.Row className="mt-2">
                         <Col xs="4">
                          <DropDown
-                          label="Owner Contacted*"
+                          label="Owner Contacted"
                           id={`sr_updates.${index}.owner_contact_id`}
                           name={`sr_updates.${index}.owner_contact_id`}
                           key={`my_unique_test_select_key__d}`}
@@ -442,17 +442,18 @@ function DispatchResolutionForm({ id }) {
                           xs="4"
                           options={ownerChoices[assigned_request.service_request_object.id]}
                           value={props.values.sr_updates[index] ? props.values.sr_updates[index].owner_contact_id : null}
-                          isClearable={false}
+                          isClearable={true}
                         />
                         </Col>
                       </BootstrapForm.Row>
                       <BootstrapForm.Row className="mt-3">
                         <DateTimePicker
-                          label="Owner Contact Time*"
+                          label="Owner Contact Time"
                           name={`sr_updates.${index}.owner_contact_time`}
                           id={`sr_updates.${index}.owner_contact_time`}
                           xs="4"
                           data-enable-time={true}
+                          clearable={true}
                           onChange={(date, dateStr) => {
                             props.setFieldValue(`sr_updates.${index}.owner_contact_time`, dateStr)
                           }}
@@ -466,7 +467,7 @@ function DispatchResolutionForm({ id }) {
                           xs="9"
                           as="textarea"
                           rows={5}
-                          label="Owner Contact Note*"
+                          label="Owner Contact Note"
                         />
                       </BootstrapForm.Row>
                     </span>

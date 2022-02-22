@@ -137,7 +137,7 @@ function ServiceRequestSearch() {
               >
                 <Link href={"/hotline/servicerequest/" + service_request.id}><FontAwesomeIcon icon={faDotCircle} className="mr-2" inverse /></Link>
               </OverlayTrigger>
-              #{service_request.id}
+              SR#{service_request.id}
               &nbsp;-&nbsp;{service_request.full_address}
               &nbsp;| <span style={{textTransform:"capitalize"}}>{service_request.status}</span>
             </h4>
@@ -326,7 +326,7 @@ function ServiceRequestSearch() {
                     <Scrollbar style={{height:"144px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
                       {service_request.animals.filter(animal => animal.species === searchState[service_request.id].selectedSpecies).map((animal, i) => (
                         <ListGroup.Item key={animal.id}>
-                          <b>#{animal.id}:</b>&nbsp;&nbsp;<Link href={"/animals/" + animal.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.name || "Unknown"}</Link>
+                          <b>A#{animal.id}:</b>&nbsp;&nbsp;<Link href={"/animals/" + animal.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.name || "Unknown"}</Link>
                           {animal.color_notes ?
                           <OverlayTrigger
                             key={"animal-color-notes"}

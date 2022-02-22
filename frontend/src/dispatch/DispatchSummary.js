@@ -298,24 +298,25 @@ function DispatchSummary({id}) {
                   : ""}
                   {assigned_request.owner_contact ?
                   <span>
+                    {assigned_request.owner_contact.owner_name === owner.first_name + ' ' + owner.last_name ?
                     <OverlayTrigger
                       key={"owner-contacted"}
                       placement="top"
                       overlay={
                         <Tooltip id={`tooltip-owner-contacted`}>
-                          Contacted: <Moment format="l HH:mm">{assigned_request.owner_contact.owner_contact_time}</Moment>
+                          Contacted: {assigned_request.owner_contact.owner_contact_time ? <Moment format="l HH:mm">{assigned_request.owner_contact.owner_contact_time}</Moment> : 'N/A'}
                         </Tooltip>
                       }
                     >
                       <FontAwesomeIcon icon={faUserCheck} className="ml-1 fa-move-up" size="sm" inverse />
-                    </OverlayTrigger>
+                    </OverlayTrigger> : ""}
                     <div><b>Contact Note: </b>{assigned_request.owner_contact.owner_contact_note}</div>
                   </span>
                   : ""}
                 </ListGroup.Item>
               ))}
             {assigned_request.service_request_object.owners.length < 1 ? <ListGroup.Item><b>Owner: </b>No Owner</ListGroup.Item> : ""}
-            <ListGroup.Item><b>Directions:</b> {assigned_request.service_request_object.directions||"No directions available."}</ListGroup.Item>
+            <ListGroup.Item><b>Additional Information:</b> {assigned_request.service_request_object.directions||"No additional information available."}</ListGroup.Item>
           </ListGroup>
           <hr/>
           <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>

@@ -31,19 +31,19 @@ function ServiceRequestForm(props) {
   const [data, setData] = useState({
     owners: [],
     reporter: null,
-    directions: '',
-    priority: 2,
-    address: props.state.steps.owner.address || '',
-    apartment: props.state.steps.owner.apartment || '',
-    city: props.state.steps.owner.city || '',
-    state: props.state.steps.owner.state || '',
-    zip_code: props.state.steps.owner.zip_code || '',
-    latitude: props.state.steps.owner.latitude || null,
-    longitude: props.state.steps.owner.longitude || null,
-    verbal_permission: false,
-    key_provided: false,
-    accessible: false,
-    turn_around: false,
+    directions: props.state.steps.request.directions || '',
+    priority: props.state.steps.request.priority || 2,
+    address: props.state.steps.request.address || props.state.steps.owner.address || '',
+    apartment: props.state.steps.request.apartment || props.state.steps.owner.apartment || '',
+    city: props.state.steps.request.city || props.state.steps.owner.city || '',
+    state: props.state.steps.request.state || props.state.steps.owner.state || '',
+    zip_code: props.state.steps.request.zip_code || props.state.steps.owner.zip_code || '',
+    latitude: props.state.steps.request.latitude || props.state.steps.owner.latitude || null,
+    longitude: props.state.steps.request.longitude || props.state.steps.owner.longitude || null,
+    verbal_permission: props.state.steps.request.verbal_permission || false,
+    key_provided: props.state.steps.request.key_provided || false,
+    accessible: props.state.steps.request.accessible || false,
+    turn_around: props.state.steps.request.turn_around || false,
   });
 
   const priorityChoices = [
@@ -178,7 +178,7 @@ function ServiceRequestForm(props) {
         <Card.Header as="h5">{id ?
           <span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
           :
-          <span style={{cursor:'pointer'}} onClick={() => {props.handleBack('request', 'animals')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}{id ? "Update " : ""}Service Request{is_workflow ? " Information" :""}
+          <span style={{cursor:'pointer'}} onClick={() => {props.handleBack('request', 'animals', formikProps.values)}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}{id ? "Update " : ""}Service Request{is_workflow ? " Information" :""}
         </Card.Header>
         <Card.Body>
           <BootstrapForm as={Form}>
@@ -204,7 +204,7 @@ function ServiceRequestForm(props) {
               <TextInput
                 as="textarea"
                 rows={5}
-                label="Directions"
+                label="Additional Information"
                 name="directions"
                 id="directions"
                 xs="12"

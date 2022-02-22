@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Link } from 'raviger';
+import { Link, navigate } from 'raviger';
 import { Card, Col, ListGroup, Row } from 'react-bootstrap';
 import L from "leaflet";
 import { Marker, Tooltip as MapTooltip } from "react-leaflet";
@@ -72,7 +72,7 @@ function Shelter() {
               key={shelter.id}
               position={[shelter.latitude, shelter.longitude]}
               icon={shelterMarkerIcon}
-              onClick={() => window.open("/shelter/" + shelter.id)}
+              onClick={() => navigate("/shelter/" + shelter.id)}
             >
               <MapTooltip autoPan={false}>
                 <span>
