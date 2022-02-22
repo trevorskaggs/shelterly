@@ -379,6 +379,7 @@ function ServiceRequestDetails({id}) {
               </Card.Title>
               <hr />
               <AnimalCards animals={data.animals} show_owner={false} show_status={true} />
+              {data.animals.length < 1 ? <div className="mb-3">Service Request does not have any animals assigned.</div> : ""}
             </Card.Body>
           </Card>
         </div>
