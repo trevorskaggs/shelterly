@@ -134,7 +134,7 @@ function AnimalDetails({id}) {
   return (
     <>
     <Header>
-      Animal Details - {data.status}
+      Animal Details
       <OverlayTrigger
         key={"edit"}
         placement="bottom"
@@ -181,6 +181,7 @@ function AnimalDetails({id}) {
       >
         <FontAwesomeIcon icon={faTimes} style={{cursor:'pointer'}} onClick={() => {setShowAnimalConfirm(true);}} className="ml-1" size="lg" inverse />
       </OverlayTrigger>
+      &nbsp;| {data.status}
     </Header>
     <hr/>
     <div className="row" style={{marginBottom:"-13px"}}>

@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Case, BooleanField, Prefetch, Value, When, Exists
+from django.db.models import Case, Prefetch, Value, When, Exists
 from django.shortcuts import render
 from copy import deepcopy
 from datetime import datetime
@@ -11,6 +11,7 @@ from actstream.models import Action
 from people.models import Person
 from animals.models import Animal, AnimalImage
 from animals.serializers import AnimalSerializer
+from people.serializers import SimplePersonSerializer
 
 class AnimalViewSet(viewsets.ModelViewSet):
 
@@ -180,5 +181,6 @@ class AnimalViewSet(viewsets.ModelViewSet):
 
 def print_kennel_card(request, animal_id):
     animal = Animal.objects.get(id=animal_id)
-    context={"animal":animal, "care_schedule_rows": range(30)}
+    owners = SimplePersonSerializer(animal.owners.all(), many=True).data
+    context={"animal":animal, "owners":owners, "care_schedule_rows": range(28)}
     return render(request, "ui/animals/print.html", context)    
