@@ -55,14 +55,14 @@
 </style>
 <body>
 <div id="root" class="mr-3 ml-3">
-    <div class="mt-3 card border-secondary col-9" >
-        <div class="card-body">
+    <div class="card border-secondary col-9" >
+        <div class="card-body" style="margin-left:-30px; margin-right:-30px">
             <div class="row">
                 <div class="d-flex col-12">
                     <div class='col-4'>
                         <img style="max-height:250px; max-width:240px; vertical-align: center;" src="{% if animal.kennel_card_image %}{{ animal.kennel_card_image.image.url }}{% else %}{% static 'images/image-not-found.png' %}{% endif %}">
                     </div>
-                    <div class='col-3'>
+                    <div class='col-4'>
                         Animal No: <b>A#{{ animal.id }}</b><br/>
                         Kennel No: <b>{% if animal.shelter %}{{ animal.shelter }} / {{ animal.room.building }} / {{ animal.room }}{% else %}N/A{% endif %}</b><br/>
                         Name: <b>{{ animal.name|default:"N/A" }}</b><br/>
@@ -70,14 +70,14 @@
                         Age: <b>{{ animal.age|capfirst|default:"N/A" }}</b><br/>
                         Color: <b>{{ animal.pcolor|capfirst|default:"N/A" }} {% if animal.scolor %}// {{ animal.scolor|capfirst }}{% else %}{% endif %}</b><br/>
                     </div>
-                    <div class='col-5'>
+                    <div class='col-4'>
                         Owner(s): <b>
                             {% for owner in owners %}
                                 {{ owner.first_name }} {{ owner.last_name }} {% if owner.display_phone %}({{ owner.display_phone }}){% endif %}{% if not forloop.last %}, {% endif %}
                             {% endfor %}
                         </b><br/>
-                        Service Request Date: <b>{% if animal.request %}{{ animal.request.timestamp }}{% else %}N/A{% endif %}</b><br/>
-                        Intake Date: <b>{{ animal.intake_date|default:"N/A" }}</b><br/>
+                        Service Request Date: <b>{% if animal.request %}{{ animal.request.timestamp|date:"M. d, Y" }}{% else %}N/A{% endif %}</b><br/>
+                        Intake Date: <b>{{ animal.intake_date|date:"M. d, Y"|default:"N/A" }}</b><br/>
                         Aggressive:
                         <b>{{ animal.aggressive|default:"N/A" }}</b><br/>
                         Injured:
