@@ -3,6 +3,7 @@ from django.db.models import Case, Count, Exists, OuterRef, Prefetch, Q, When, V
 from actstream import action
 from datetime import datetime
 from .serializers import ServiceRequestSerializer, SimpleServiceRequestSerializer, VisitNoteSerializer
+from .ordering import MyCustomOrdering
 
 from animals.models import Animal
 from hotline.models import ServiceRequest, VisitNote
@@ -12,12 +13,10 @@ from rest_framework import filters, permissions, serializers, viewsets
 class ServiceRequestViewSet(viewsets.ModelViewSet):
     queryset = ServiceRequest.objects.all()
     search_fields = ['id', 'address', 'city', 'animal__name', 'owners__first_name', 'owners__last_name', 'owners__phone', 'owners__drivers_license', 'owners__address', 'owners__city', 'reporter__first_name', 'reporter__last_name']
-    filter_backends = (filters.SearchFilter, filters.OrderingFilter)
+    filter_backends = (filters.SearchFilter, MyCustomOrdering)
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = SimpleServiceRequestSerializer
     detail_serializer_class = ServiceRequestSerializer
-    ordering_fields = ['injured', 'animal_count']
-    ordering = ['-injured', '-animal_count']
 
     def get_serializer_class(self):
         if self.action == 'retrieve':

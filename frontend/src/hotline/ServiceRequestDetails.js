@@ -21,6 +21,8 @@ function ServiceRequestDetails({id}) {
     setTimeout(() => datetime.current.flatpickr.open(), 0);
   }
 
+  const priorityText = {1:'Highest', 2:'High', 3:'Medium', 4:'Low', 5:'Lowest'};
+
   const [showModal, setShowModal] = useState(false);
   const cancelServiceRequest = () => {
     axios.patch('/hotline/api/servicerequests/' + id + '/', {status:'canceled'})
@@ -45,6 +47,7 @@ function ServiceRequestDetails({id}) {
     reporter: '',
     reporter_object: {first_name:'', last_name:''},
     directions: '',
+    priority: '',
     address: '',
     full_address: '',
     apartment: '',
@@ -250,7 +253,12 @@ function ServiceRequestDetails({id}) {
               </Card.Title>
               <hr/>
               <ListGroup variant="flush">
-                <ListGroup.Item style={{marginTop:"-13px"}}><b>ID: </b>SR#{data.id}</ListGroup.Item>
+                <ListGroup.Item style={{marginTop:"-13px"}}>
+                  <div className="row">
+                    <span className="col-6"><b>Priority: </b>{priorityText[data.priority]}</span>
+                    <span className="col-5"><b>ID: </b>SR#{data.id}</span>
+                  </div>
+                </ListGroup.Item>
                 <ListGroup.Item><b>Address: </b>{data.full_address}</ListGroup.Item>
                 <ListGroup.Item>
                   <b>Followup Date: </b>
@@ -371,6 +379,7 @@ function ServiceRequestDetails({id}) {
               </Card.Title>
               <hr />
               <AnimalCards animals={data.animals} show_owner={false} show_status={true} />
+              {data.animals.length < 1 ? <div className="mb-3">Service Request does not have any animals assigned.</div> : ""}
             </Card.Body>
           </Card>
         </div>

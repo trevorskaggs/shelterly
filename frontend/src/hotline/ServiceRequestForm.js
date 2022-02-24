@@ -2,11 +2,11 @@ import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
 import { Link, navigate } from 'raviger';
 import { Field, Form, Formik } from 'formik';
-import { Button, ButtonGroup, Card, Form as BootstrapForm, Modal } from "react-bootstrap";
+import { Button, ButtonGroup, Card, Col, Form as BootstrapForm, Modal } from "react-bootstrap";
 import * as Yup from 'yup';
 import { Switch } from 'formik-material-ui';
 import 'flatpickr/dist/themes/light.css';
-import { AddressSearch, TextInput } from '../components/Form';
+import { AddressSearch, DropDown, TextInput } from '../components/Form';
 import { AuthContext } from "../accounts/AccountsReducer";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft } from '@fortawesome/free-solid-svg-icons';
@@ -32,6 +32,7 @@ function ServiceRequestForm(props) {
     owners: [],
     reporter: null,
     directions: props.state.steps.request.directions || '',
+    priority: props.state.steps.request.priority || 2,
     address: props.state.steps.request.address || props.state.steps.owner.address || '',
     apartment: props.state.steps.request.apartment || props.state.steps.owner.apartment || '',
     city: props.state.steps.request.city || props.state.steps.owner.city || '',
@@ -44,6 +45,14 @@ function ServiceRequestForm(props) {
     accessible: props.state.steps.request.accessible || false,
     turn_around: props.state.steps.request.turn_around || false,
   });
+
+  const priorityChoices = [
+    { value: 1, label: 'Highest' },
+    { value: 2, label: 'High' },
+    { value: 3, label: 'Medium' },
+    { value: 4, label: 'Low' },
+    { value: 5, label: 'Lowest' }
+  ]
 
   // Hook for initializing data.
   useEffect(() => {
@@ -77,6 +86,7 @@ function ServiceRequestForm(props) {
         initialValues={data}
         enableReinitialize={true}
         validationSchema={Yup.object({
+          priority: Yup.number(),
           directions: Yup.string()
             .max(2000, 'Must be 2000 characters or less'),
           verbal_permission: Yup.boolean(),
@@ -168,10 +178,28 @@ function ServiceRequestForm(props) {
         <Card.Header as="h5">{id ?
           <span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
           :
-          <span style={{cursor:'pointer'}} onClick={() => {props.handleBack('request', 'animals', formikProps.values)}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}{id ? "Update " : ""}Service Request{is_workflow ? " Information" :""}</Card.Header>
+          <span style={{cursor:'pointer'}} onClick={() => {props.handleBack('request', 'animals', formikProps.values)}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}{id ? "Update " : ""}Service Request{is_workflow ? " Information" :""}
+        </Card.Header>
         <Card.Body>
-        <BootstrapForm as={Form}>
+          <BootstrapForm as={Form}>
             <AddressSearch formikProps={formikProps} label="Search for Service Request Address" show_apt={true} show_same={props.state.steps.owner.address} />
+            <BootstrapForm.Row className="mb-3">
+              <Col xs={"2"}>
+                <DropDown
+                  label="Priority"
+                  id="priorityDropdown"
+                  name="priority"
+                  type="text"
+                  key={`my_unique_priority_select_key__${formikProps.values.priority}`}
+                  options={priorityChoices}
+                  value={formikProps.values.priority||data.priority}
+                  isClearable={false}
+                  onChange={(instance) => {
+                    formikProps.setFieldValue("priority", instance === null ? '' : instance.value);
+                  }}
+                />
+              </Col>
+            </BootstrapForm.Row>
             <BootstrapForm.Row>
               <TextInput
                 as="textarea"

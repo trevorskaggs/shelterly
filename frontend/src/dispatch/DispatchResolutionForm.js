@@ -50,6 +50,14 @@ function DispatchResolutionForm({ id }) {
   const ordered = useOrderedNodes();
   const [shouldCheckForScroll, setShouldCheckForScroll] = React.useState(false);
 
+  const priorityChoices = [
+    { value: 1, label: 'Highest' },
+    { value: 2, label: 'High' },
+    { value: 3, label: 'Medium' },
+    { value: 4, label: 'Low' },
+    { value: 5, label: 'Lowest' }
+  ]
+
   // Hook for initializing data.
   useEffect(() => {
     let unmounted = false;
@@ -72,6 +80,7 @@ function DispatchResolutionForm({ id }) {
             response.data.sr_updates.push({
               id: assigned_request.service_request_object.id,
               followup_date: assigned_request.followup_date,
+              priority: assigned_request.service_request_object.priority,
               date_completed: assigned_request.visit_note ? assigned_request.visit_note.date_completed : new Date(),
               notes: assigned_request.visit_note ? assigned_request.visit_note.notes : '',
               forced_entry: assigned_request.visit_note ? assigned_request.visit_note.forced_entry : false,
@@ -122,7 +131,7 @@ function DispatchResolutionForm({ id }) {
       unmounted = true;
       source.cancel();
     };
-  }, [id, data.id]);
+  }, [id]);
 
   // Hook scrolling to top error.
   useEffect(() => {
@@ -156,6 +165,7 @@ function DispatchResolutionForm({ id }) {
           Yup.object().shape({
             id: Yup.number().required(),
             owner: Yup.boolean(),
+            priority: Yup.number(),
             unable_to_complete: Yup.boolean(),
             incomplete: Yup.boolean(),
             followup_date: Yup.date().nullable(),
@@ -234,6 +244,7 @@ function DispatchResolutionForm({ id }) {
                       <Checkbox
                         label={"Not Completed Yet:"}
                         name={`sr_updates.${index}.incomplete`}
+                        disabled={assigned_request.visit_note && assigned_request.visit_note.date_completed ? true : false}
                         checked={(props.values.sr_updates[index] && props.values.sr_updates[index].incomplete) || false}
                         onChange={() => {
                           if (props.values.sr_updates[index] && props.values.sr_updates[index].incomplete) {
@@ -264,6 +275,7 @@ function DispatchResolutionForm({ id }) {
                       <Checkbox
                         label={"Unable to Complete:"}
                         name={`sr_updates.${index}.unable_to_complete`}
+                        disabled={assigned_request.visit_note && assigned_request.visit_note.date_completed ? true : false}
                         checked={(props.values.sr_updates[index] && props.values.sr_updates[index].unable_to_complete) || false}
                         onChange={() => {
                           if (props.values.sr_updates[index] && props.values.sr_updates[index].unable_to_complete) {
@@ -358,6 +370,23 @@ function DispatchResolutionForm({ id }) {
                     ))}
                   </ListGroup>
                   <hr />
+                  <BootstrapForm.Row className="mb-3">
+                    <Col xs={"4"}>
+                      <DropDown
+                        label="Priority"
+                        id={`sr_updates.${index}.priority`}
+                        name={`sr_updates.${index}.priority`}
+                        type="text"
+                        key={`my_unique_priority_select_key__${props.values.priority}`}
+                        options={priorityChoices}
+                        value={props.values.sr_updates[index] ? props.values.sr_updates[index].priority : 2}
+                        isClearable={false}
+                        onChange={(instance) => {
+                          props.setFieldValue(`sr_updates.${index}.priority`, instance === null ? '' : instance.value);
+                        }}
+                      />
+                    </Col>
+                  </BootstrapForm.Row>
                   <BootstrapForm.Row className="mt-3">
                     <DateTimePicker
                       label="Date Completed"

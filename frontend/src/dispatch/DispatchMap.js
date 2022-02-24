@@ -5,9 +5,9 @@ import { Form, Formik } from 'formik';
 import { Button, Col, FormCheck, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBan, faBandAid, faBullseye, faCalendarDay, faCar, faExclamationTriangle, faCircle, faClipboardList, faExclamationCircle, faQuestionCircle, faPencilAlt, faTrailer, faUserAlt, faUserAltSlash
+  faBan, faBandAid, faBullseye, faCalendarDay, faCar, faChevronDown, faChevronUp, faEquals, faExclamationTriangle, faCircle, faClipboardList, faExclamationCircle, faQuestionCircle, faPencilAlt, faTrailer, faUserAlt, faUserAltSlash
 } from '@fortawesome/free-solid-svg-icons';
-import { faBadgeSheriff, faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
+import { faBadgeSheriff, faChevronDoubleDown, faChevronDoubleUp, faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
 import { Circle, Marker, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
 import * as Yup from 'yup';
@@ -41,6 +41,8 @@ function Deploy() {
   const [showAlreadyAssignedTeamModal, setShowAlreadyAssignedTeamModal] = useState(false);
   const handleCloseAlreadyAssignedTeamModal = () => {setDuplicateSRs([]);setShowAlreadyAssignedTeamModal(false);}
   const [proceed, setProceed] = useState(false);
+
+  const priorityText = {1:'Highest', 2:'High', 3:'Medium', 4:'Low', 5:'Lowest'};
 
   // Handle aco_required toggle.
   const handleACO = async event => {
@@ -261,7 +263,7 @@ function Deploy() {
 
     const fetchServiceRequests = async () => {
       // Fetch ServiceRequest data.
-      await axios.get('/hotline/api/servicerequests/', {
+      await axios.get('/hotline/api/servicerequests/?map=true', {
         params: {
           status: 'open',
           map: true
@@ -576,6 +578,67 @@ function Deploy() {
                     >
                       <FontAwesomeIcon icon={faQuestionCircle} className="ml-1"/>
                     </OverlayTrigger>
+                    : ""}
+                    {service_request.priority === 1 ?
+                      <OverlayTrigger
+                        key={"highest"}
+                        placement="top"
+                        overlay={
+                          <Tooltip id={`tooltip-highest`}>
+                            {priorityText[service_request.priority]} priority
+                          </Tooltip>
+                        }
+                      >
+                        <FontAwesomeIcon icon={faChevronDoubleUp} className="ml-1"/>
+                      </OverlayTrigger>
+                    : service_request.priority === 2 ?
+                      <OverlayTrigger
+                        key={"high"}
+                        placement="top"
+                        overlay={
+                          <Tooltip id={`tooltip-high`}>
+                            {priorityText[service_request.priority]} priority
+                          </Tooltip>
+                        }
+                      >
+                        <FontAwesomeIcon icon={faChevronUp} className="ml-1"/>
+                      </OverlayTrigger>
+                    : service_request.priority === 3 ?
+                      <OverlayTrigger
+                        key={"medium"}
+                        placement="top"
+                        overlay={
+                          <Tooltip id={`tooltip-medium`}>
+                            {priorityText[service_request.priority]} priority
+                          </Tooltip>
+                        }
+                      >
+                        <FontAwesomeIcon icon={faEquals} className="ml-1"/>
+                      </OverlayTrigger>
+                    : service_request.priority === 4 ?
+                      <OverlayTrigger
+                        key={"low"}
+                        placement="top"
+                        overlay={
+                          <Tooltip id={`tooltip-low`}>
+                            {priorityText[service_request.priority]} priority
+                          </Tooltip>
+                        }
+                      >
+                        <FontAwesomeIcon icon={faChevronDown} className="ml-1"/>
+                      </OverlayTrigger>
+                    : service_request.priority === 5 ?
+                      <OverlayTrigger
+                        key={"lowest"}
+                        placement="top"
+                        overlay={
+                          <Tooltip id={`tooltip-lowest`}>
+                            {priorityText[service_request.priority]} priority
+                          </Tooltip>
+                        }
+                      >
+                        <FontAwesomeIcon icon={faChevronDoubleDown} className="ml-1"/>
+                      </OverlayTrigger>
                     : ""}
                     {service_request.aco_required ?
                     <OverlayTrigger

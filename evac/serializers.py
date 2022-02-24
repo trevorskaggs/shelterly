@@ -53,7 +53,7 @@ class DispatchServiceRequestSerializer(SimpleServiceRequestSerializer):
 
     class Meta:
         model = ServiceRequest
-        fields = ['id', 'directions', 'latitude', 'longitude', 'full_address', 'followup_date', 'status', 'injured',
+        fields = ['id', 'directions', 'latitude', 'longitude', 'full_address', 'followup_date', 'status', 'injured', 'priority',
          'accessible', 'turn_around', 'animals', 'reported_animals', 'sheltered_in_place', 'unable_to_locate', 'aco_required',
         'owner_contacts', 'owner_objects', 'owners', 'visit_notes']
 
