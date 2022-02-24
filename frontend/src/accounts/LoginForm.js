@@ -43,13 +43,13 @@ const Login = () => {
               // Set token for axios calls.
               setAuthToken(response.data.token);
               // Store token in cookie.
-              setCookie("token", response.data.token, {path: '/'});
+              setCookie("token", response.data.token);
               // Update state information.
               dispatch({type: 'LOGIN_SUCCESSFUL', data: response.data });
               navigate(next);
             })
             .catch(e => {
-              removeCookie("token", {path: '/'});
+              removeCookie("token");
               setAuthToken();
               actions.setStatus('Failed to log in with this username and password combination.')
               dispatch({type: "LOGIN_FAILED", data: e});

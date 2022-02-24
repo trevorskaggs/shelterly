@@ -1,9 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import DataTable from 'react-data-table-component';
-import LoginForm from "./accounts/LoginForm";
 import { Row } from 'react-bootstrap';
-import { useCookies } from 'react-cookie';
 import Select from 'react-select';
 import moment from 'moment';
 import { AuthContext } from "./accounts/AccountsReducer";
@@ -14,7 +12,6 @@ function Home() {
 
   // Initial state.
   const { state } = useContext(AuthContext);
-  const [cookies] = useCookies(['token']);
 
   const [data, setData] = useState({});
   const [selection, setSelection] = useState({value:'daily', label:"Daily Report"});
@@ -29,9 +26,8 @@ function Home() {
     let source = axios.CancelToken.source();
 
     const fetchServiceRequests = async () => {
-      setData({});
       // Fetch ServiceRequest data.
-      if (state.user) {
+      if (state.user && !data.daily_report) {
         await axios.get('/reports/api/reports/', {
           cancelToken: source.token,
         })
@@ -216,7 +212,6 @@ function Home() {
 
   return (
     <>
-    {!state.user && !cookies.token ? <LoginForm /> :
     <span className="rounded-top">
       <Header>Home</Header>
       <hr/>
@@ -295,7 +290,6 @@ function Home() {
       <span></span>
       }
     </span>
-    }
     </>
   );
 }
