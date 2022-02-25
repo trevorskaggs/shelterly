@@ -135,6 +135,7 @@ function PersonDetails({id}) {
           </Card.Body>
         </Card>
       </div>
+      {is_owner ?
       <div className="col-6 d-flex" style={{paddingLeft:"9px"}}>
         <Card className="border rounded d-flex" style={{width:"100%", minHeight:"312px"}}>
           <Card.Body style={{width:"100%", minHeight:"312px"}}>
@@ -176,7 +177,7 @@ function PersonDetails({id}) {
             </Scrollbar>
           </Card.Body>
         </Card>
-      </div>
+      </div> : ""}
     </div>
     <div className="row mt-3">
       <div className="col-12 d-flex">
@@ -200,7 +201,7 @@ function PersonDetails({id}) {
                   placement="bottom"
                   overlay={
                     <Tooltip id={`tooltip-add-owner`}>
-                      Add another owner for all of these animals
+                      Add an{is_owner ? "other" : ""} owner to all of these animals
                     </Tooltip>
                   }
                 >
