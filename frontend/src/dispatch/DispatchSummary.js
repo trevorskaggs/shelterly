@@ -221,7 +221,7 @@ function DispatchSummary({id}) {
                     </span>
                   :""}
                   <br />
-                  #{assigned_request.service_request_object.id}: {assigned_request.service_request_object.full_address}
+                  SR#{assigned_request.service_request_object.id}: {assigned_request.service_request_object.full_address}
                 </span>
               </MapTooltip>
             </Marker>
@@ -235,7 +235,7 @@ function DispatchSummary({id}) {
           <Card.Body>
             <Card.Title>
               <h4>
-                #{assigned_request.service_request_object.id} -&nbsp;
+                SR#{assigned_request.service_request_object.id} -&nbsp;
                 <Link href={"/hotline/servicerequest/" + assigned_request.service_request_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link>
                 {assigned_request.visit_note && assigned_request.visit_note.forced_entry ?
                   <OverlayTrigger
@@ -323,7 +323,7 @@ function DispatchSummary({id}) {
             <h4 className="mt-2" style={{marginBottom:"-2px"}}>Animals</h4>
             {assigned_request.service_request_object.animals.filter(animal => Object.keys(assigned_request.animals).includes(String(animal.id))).map((animal, inception) => (
               <ListGroup.Item key={animal.id}>
-                <span style={{textTransform:"capitalize"}}>#{animal.id} - <Link href={"/animals/" + animal.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.name||"Unknown"}</Link>&nbsp;-&nbsp;{animal.species}</span>
+                <span style={{textTransform:"capitalize"}}>A#{animal.id} - <Link href={"/animals/" + animal.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.name||"Unknown"}</Link>&nbsp;-&nbsp;{animal.species}</span>
                 {animal.color_notes ?
                   <OverlayTrigger
                     key={"animal-color-notes"}
