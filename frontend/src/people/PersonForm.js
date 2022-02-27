@@ -64,7 +64,7 @@ const PersonForm = (props) => {
       else if (animal_id) {
         navigate('/animals/' + animal_id);
       }
-      // Otherise redirect to the newly created Owner details.
+      // Otherise redirect to the duplicate Owner details.
       else {
         navigate('/people/owner/' + response.data.id);
       }
