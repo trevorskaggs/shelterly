@@ -90,8 +90,8 @@
                       </b></span>
                     </div>
                     <div class='col-5' style="margin-top:-7px;">
-                        Intake Date: <b>{{ animal.intake_date|date:"M. d, Y"|default:"N/A" }}</b><br/>
                         <span class="trunctate">Animal Name: <b class="">{{ animal.name|default:"N/A" }}</b><br/></span>
+                        Intake Date: <b>{{ animal.intake_date|date:"M. d, Y"|default:"N/A" }}</b><br/>
                         Color: <b>{{ animal.pcolor|capfirst|default:"N/A" }} {% if animal.scolor %}/ {{ animal.scolor|capfirst }}{% else %}{% endif %}</b><br/>
                         Under Vet Care: <b>Y / N</b><br/>
                     </div>
