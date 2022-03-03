@@ -44,13 +44,29 @@
       width: 100%;
     }
     div {
-        font-size: 20px;
+        font-size: 18px;
     }
 
     td, th {
       border: 1px solid #dddddd;
       text-align: left;
       padding: 15px;
+    }
+    .text {
+      overflow: hidden;
+      min-height: 56px;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 2; /* number of lines to show */
+      -webkit-box-orient: vertical;
+    }
+    .trunctate {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    #root {
+      width:850px;
     }
 </style>
 <body>
@@ -59,38 +75,53 @@
         <div class="card-body" style="margin-left:-30px; margin-right:-30px">
             <div class="row">
                 <div class="d-flex col-12">
-                    <div class='col-4'>
-                        <img style="max-height:250px; max-width:240px; vertical-align: center;" src="{% if animal.kennel_card_image %}{{ animal.kennel_card_image.image.url }}{% else %}{% static 'images/image-not-found.png' %}{% endif %}">
+                    <div class='col-3'>
+                        <img style="max-height:144px; max-width:200px; vertical-align: center;" src="{% if animal.kennel_card_image %}{{ animal.kennel_card_image.image.url }}{% else %}{% static 'images/image-not-found.png' %}{% endif %}">
                     </div>
-                    <div class='col-4'>
+                    <div class='col-4 ml-2' style="margin-top:-8px;">
                         Animal No: <b>A#{{ animal.id }}</b><br/>
                         Kennel No: <b>{% if animal.shelter %}{{ animal.shelter }} / {{ animal.room.building }} / {{ animal.room }}{% else %}N/A{% endif %}</b><br/>
-                        Name: <b>{{ animal.name|default:"N/A" }}</b><br/>
+                        <span class="trunctate">Animal Name: <b class="">{{ animal.name|default:"N/A" }}</b><br/></span>
                         Species: <b>{{ animal.species|capfirst }}</b><br/>
-                        Age: <b>{{ animal.age|capfirst|default:"N/A" }}</b><br/>
-                        Color: <b>{{ animal.pcolor|capfirst|default:"N/A" }} {% if animal.scolor %}// {{ animal.scolor|capfirst }}{% else %}{% endif %}</b><br/>
+                        <span class="trunctate">Owner(s): <b>
+                          {% for owner in owners %}
+                              {{ owner.first_name }} {{ owner.last_name }}{% if not forloop.last %}, {% endif %}
+                          {% endfor %}
+                      </b></span>
                     </div>
-                    <div class='col-4'>
-                        Owner(s): <b>
-                            {% for owner in owners %}
-                                {{ owner.first_name }} {{ owner.last_name }} {% if owner.display_phone %}({{ owner.display_phone }}){% endif %}{% if not forloop.last %}, {% endif %}
-                            {% endfor %}
-                        </b><br/>
-                        Service Request Date: <b>{% if animal.request %}{{ animal.request.timestamp|date:"M. d, Y" }}{% else %}N/A{% endif %}</b><br/>
+                    <div class='col-5' style="margin-top:-7px;">
                         Intake Date: <b>{{ animal.intake_date|date:"M. d, Y"|default:"N/A" }}</b><br/>
-                        Aggressive:
-                        <b>{{ animal.aggressive|default:"N/A" }}</b><br/>
-                        Injured:
-                        <b>{{ animal.injured|default:"N/A" }}</b><br/>
+                        Age: <b>{{ animal.age|capfirst|default:"N/A" }}</b><br/>
+                        Color: <b>{{ animal.pcolor|capfirst|default:"N/A" }} {% if animal.scolor %}/ {{ animal.scolor|capfirst }}{% else %}{% endif %}</b><br/>
+                        Under Vet Care: <b>Y / N</b><br/>
                     </div>
                 </div>
             </div>
-            <div class="mt-3 row">
+            <div class="row mt-1">
+              <div class="d-flex col-12">
+                <div class="col-4">
+                  Aggressive:
+                        <b>{{ animal.aggressive|default:"N/A" }}</b><br/>
+                  Microchip: ______________
+                </div>
+                <div class="col-4">
+                  Injured:
+                        <b>{{ animal.injured|default:"N/A" }}</b><br/>
+                  Neck Tag: ______________
+                </div>
+                <div class="col-4">
+                  Fixed:
+                        <b>{{ animal.fixed|default:"N/A" }}</b><br/>
+                  Collar: ______________
+                </div>
+              </div>
+            </div>
+            <div class="mt-1 row">
                 <div class='d-flex col-12'>
                   <div class='col-12'>
-                  Breed / Description:<b> {{ animal.color_notes|default:"N/A" }}</b><br/>
-                  Behavior Notes: <b>{{ animal.behavior_notes|default:"N/A" }}</b><br/>
-                  Medical Notes: <b>{{ animal.medical_notes|default:"N/A" }}</b><br/></div>
+                  <span class="text">Breed / Description:<b> {{ animal.color_notes|default:"N/A" }}</b></span>
+                  <span class="text">Behavior Notes: <b>{{ animal.behavior_notes|default:"N/A" }}</b></span>
+                  <span class="text">Medical Notes: <b>{{ animal.medical_notes|default:"N/A" }}</b></div></span>
                 </div>
             </div>
         </div>
@@ -100,12 +131,14 @@
             <div class="col-12">
                 <table>
                   <tr>
-                    <th style="width:1%0">Date</th>
-                    <th style="width:15%">Performer</th>
-                    <th style="width:75%">Action</th>
+                    <th style="width:10%">Date Time</th>
+                    <th style="width:10%">AR#</th>
+                    <th style="width:40%">Actions</th>
+                    <th style="width:40%">Comments</th>
                   </tr>
                   {% for i in care_schedule_rows %}
                   <tr>
+                    <td></td>
                     <td></td>
                     <td></td>
                     <td></td>
