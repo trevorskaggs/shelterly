@@ -182,5 +182,5 @@ class AnimalViewSet(viewsets.ModelViewSet):
 def print_kennel_card(request, animal_id):
     animal = Animal.objects.get(id=animal_id)
     owners = SimplePersonSerializer(animal.owners.all(), many=True).data
-    context={"animal":animal, "owners":owners, "care_schedule_rows": range(22)}
+    context={"animal":animal, "owners":owners, "care_schedule_rows": range(30)}
     return render(request, "ui/animals/print.html", context)    

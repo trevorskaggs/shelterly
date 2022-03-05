@@ -66,7 +66,7 @@
       white-space: nowrap;
     }
     #root {
-      width:850px;
+      width:975px;
     }
 </style>
 <body>
@@ -78,9 +78,9 @@
                     <div class='col-3'>
                         <img style="max-height:144px; max-width:200px; vertical-align: center;" src="{% if animal.kennel_card_image %}{{ animal.kennel_card_image.image.url }}{% else %}{% static 'images/image-not-found.png' %}{% endif %}">
                     </div>
-                    <div class='col-4 ml-2' style="margin-top:-8px;">
+                    <div class='col-4' style="margin-top:-8px;">
                         Animal No: <b>A#{{ animal.id }}</b><br/>
-                        Kennel No: <b>{% if animal.shelter %}{{ animal.shelter }} / {{ animal.room.building }} / {{ animal.room }}{% else %}N/A{% endif %}</b><br/>
+                        <span class="trunctate">Kennel No: <b>{% if animal.shelter %}{{ animal.shelter }}{% if animal.room %} / {{ animal.room.building }} / {{ animal.room }}{% endif %}{% else %}N/A{% endif %}</b><br/></span>
                         Species: <b>{{ animal.species|capfirst }}</b><br/>
                         Age: <b>{{ animal.age|capfirst|default:"N/A" }}</b><br/>
                         <span class="trunctate">Owner(s): <b>
@@ -90,38 +90,49 @@
                       </b></span>
                     </div>
                     <div class='col-5' style="margin-top:-7px;">
-                        <span class="trunctate">Animal Name: <b class="">{{ animal.name|default:"N/A" }}</b><br/></span>
+                        <span class="trunctate">Animal Name: <b>{{ animal.name|default:"N/A" }}</b><br/></span>
                         Intake Date: <b>{{ animal.intake_date|date:"M. d, Y"|default:"N/A" }}</b><br/>
                         Color: <b>{{ animal.pcolor|capfirst|default:"N/A" }} {% if animal.scolor %}/ {{ animal.scolor|capfirst }}{% else %}{% endif %}</b><br/>
                         Under Vet Care: <b>Y / N</b><br/>
                     </div>
                 </div>
             </div>
-            <div class="row mt-1">
+            <div class="row mt-2">
               <div class="d-flex col-12">
                 <div class="col-4">
                   Aggressive:
-                        <b>{{ animal.aggressive|default:"N/A" }}</b><br/>
-                  Microchip: ______________
+                        <b>{{ animal.aggressive|capfirst|default:"N/A" }}</b><br/>
                 </div>
                 <div class="col-4">
                   Injured:
-                        <b>{{ animal.injured|default:"N/A" }}</b><br/>
-                  Neck Tag: ______________
+                        <b>{{ animal.injured|capfirst|default:"N/A" }}</b><br/>
                 </div>
                 <div class="col-4">
                   Fixed:
-                        <b>{{ animal.fixed|default:"N/A" }}</b><br/>
+                        <b>{{ animal.fixed|capfirst|default:"N/A" }}</b><br/>
+                </div>
+              </div>
+            </div>
+            <div class="row mt-1">
+              <div class="d-flex col-12">
+                <div class="col-4">
+                  Microchip: ______________
+                </div>
+                <div class="col-4">
+                  Neck Tag: ______________
+                </div>
+                <div class="col-4">
                   Collar: ______________
                 </div>
               </div>
             </div>
-            <div class="mt-1 row">
-                <div class='d-flex col-12'>
+            <div class="mt-3 row">
+                <div class='d-flex col-12' style='margin-bottom:-5px;'>
                   <div class='col-12'>
-                  <span class="text">Breed / Description:<b> {{ animal.color_notes|default:"N/A" }}</b></span>
-                  <span class="text">Behavior Notes: <b>{{ animal.behavior_notes|default:"N/A" }}</b></span>
-                  <span class="text">Medical Notes: <b>{{ animal.medical_notes|default:"N/A" }}</b></div></span>
+                    <span class="text">Breed / Description:<b> {{ animal.color_notes|default:"N/A" }}</b></span>
+                    <span class="text">Behavior Notes: <b>{{ animal.behavior_notes|default:"N/A" }}</b></span>
+                    <span class="text">Medical Notes: <b>{{ animal.medical_notes|default:"N/A" }}</b></span>
+                  </div>
                 </div>
             </div>
         </div>
