@@ -179,7 +179,7 @@ REST_FRAMEWORK = {
 }
 
 REST_KNOX = {
-  'TOKEN_TTL': datetime.timedelta(hours=1),
+  'TOKEN_TTL': datetime.timedelta(hours=8),
   'USER_SERIALIZER': 'accounts.serializers.UserSerializer',
   'AUTO_REFRESH': True
 }

@@ -15,10 +15,10 @@ export function loadUser({dispatch, removeCookie, path}) {
   })
   .catch(e => {
     // Raise error.
-    removeCookie("token", {path: '/'});
+    removeCookie("token");
     setAuthToken();
     dispatch({type: "AUTHENTICATION_ERROR", data: e});
-    navigate('/?next=' + path);
+    navigate('/login?next=' + path);
   })
 }
 
@@ -29,14 +29,14 @@ export function logoutUser({dispatch}, {removeCookie}) {
   axios.post("/logout/")
   .then(function() {
     // Logout user out of frontend by removing the token.
-    removeCookie("token", {path: '/'});
+    removeCookie("token");
     setAuthToken();
     dispatch({ type: 'LOGOUT_SUCCESSFUL' });
     // Redirect to login page.
-    navigate('/');
+    navigate('/login');
   })
   .catch(e => {
-    removeCookie("token", {path: '/'});
+    removeCookie("token");
     setAuthToken();
     // Raise error.
     dispatch({type: "LOGOUT_FAILED", data: e});

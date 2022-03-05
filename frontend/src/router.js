@@ -1,5 +1,6 @@
 import React from "react";
 import Home from "./Home";
+import LoginForm from "./accounts/LoginForm";
 import PasswordReset from "./accounts/PasswordReset";
 import AnimalForm from "./animals/AnimalForm";
 import AnimalDetails from "./animals/AnimalDetails";
@@ -31,7 +32,7 @@ import RoomDetails from "./shelter/RoomDetails";
 import VisitNoteForm from "./dispatch/VisitNoteForm";
 
 export const publicRoutes = {
-  "/": () => <Home />,
+  "/login": () => <LoginForm />,
   "/reset_password": () => <PasswordReset />,
 }
 

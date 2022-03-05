@@ -56,17 +56,33 @@ function AuthProvider(props) {
   useLocationChange(onChange);
 
   useEffect(() => {
+
+    // Called when user switches back to Shelterly.
+    const onFocus = () => {
+      // Only recheck user auth if in a private route.
+      if (!Object.keys(publicRoutes).includes(path)) {
+        loadUser({dispatch, removeCookie, path});
+      }
+    };
+
+    // Check for user auth on focus.
+    window.addEventListener("focus", onFocus);
+
+    // Redirect to Home if attempting to access LoginForm while logged in.
+    if (state.user && path === '/login') {
+      navigate('/')
+    }
     // If we have a token but no user, attempt to authenticate them.
-    if (!state.user && cookies.token) {
-      loadUser({dispatch, removeCookie, path})
+    else if (!state.user && cookies.token) {
+      loadUser({dispatch, removeCookie, path});
     }
     // Redirect to login page if no authenticated user object is present.
-    else if (!state.user) {
-      // Do not redirect if it's a public route.
-      if (!Object.keys(publicRoutes).includes(path)) {
-        navigate('/?next=' + path);
-      }
+    else if (!Object.keys(publicRoutes).includes(path) && !state.user) {
+      navigate('/login?next=' + path);
     }
+    return () => {
+      window.removeEventListener("focus", onFocus);
+  };
   }, [path, state.user, cookies.token, removeCookie]);
 
   return (
