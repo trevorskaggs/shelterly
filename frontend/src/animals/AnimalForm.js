@@ -334,7 +334,7 @@ const AnimalForm = (props) => {
                 ]);
               }
               // Create Owner
-              let ownerResponse = [{data:{id:null}}];
+              let ownerResponse = [{data:{id:''}}];
               if (props.state.steps.owner.first_name) {
                 ownerResponse = await Promise.all([
                   axios.post('/people/api/person/', props.state.steps.owner)

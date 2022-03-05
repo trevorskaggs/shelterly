@@ -207,7 +207,6 @@ const PersonForm = (props) => {
               }
               // Always continue on if reporter.
               if (!isOwner) {
-                console.log(values)
                 if (skipOwner) {
                   props.onSubmit('reporter', values, 'animals');
                 }

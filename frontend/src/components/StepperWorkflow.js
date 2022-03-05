@@ -93,7 +93,7 @@ export const initialWorkflowData = {
   shelter: null,
   steps: {
     reporter: {
-      id: null,
+      id: '',
       first_name: '',
       last_name: '',
       phone: '',
@@ -184,7 +184,7 @@ function StepperWorkflow() {
       hasOwner: nextStep === 'owner',
       stepIndex: prevState.stepIndex - 1,
       animalIndex: track_index,
-      steps: { ...prevState.steps, ['request']:data ? data : prevState.steps.request } // Only set SR data if present.
+      steps: { ...prevState.steps, 'request':data ? data : prevState.steps.request } // Only set SR data if present.
     }))
   };
 
