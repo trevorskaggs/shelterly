@@ -49,7 +49,7 @@ function Home() {
       unmounted = true;
       source.cancel();
     };
-  }, [state.user]);
+  }, [state.user, data.daily_report]);
 
   const daily_columns = [
     {

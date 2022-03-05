@@ -55,15 +55,16 @@ function AuthProvider(props) {
   const onChange = useCallback(path => dispatch({type: "PAGE_CHANGED", data: path}), []);
   useLocationChange(onChange);
 
-  // Called when user switches back to Shelterly.
-  const onFocus = () => {
-    // Only recheck user auth if in a private route.
-    if (!Object.keys(publicRoutes).includes(path)) {
-      loadUser({dispatch, removeCookie, path});
-    }
-  };
-
   useEffect(() => {
+
+    // Called when user switches back to Shelterly.
+    const onFocus = () => {
+      // Only recheck user auth if in a private route.
+      if (!Object.keys(publicRoutes).includes(path)) {
+        loadUser({dispatch, removeCookie, path});
+      }
+    };
+
     // Check for user auth on focus.
     window.addEventListener("focus", onFocus);
 
