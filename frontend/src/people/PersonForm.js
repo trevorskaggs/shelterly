@@ -73,22 +73,6 @@ const PersonForm = (props) => {
     });
   }
 
-  const checkOwner = (formikProps) => {
-    // Check to see if owner data already exists.
-    axios.get('/people/api/person/?search=' + formikProps.values.first_name +  ' ' + formikProps.values.last_name + ' ' + formikProps.values.phone)
-    .then(response => {
-      if (response.data.length > 0) {
-        setError({show:true, error:['a duplicate owner with the same name and phone number already exists.', response.data[0].id]});
-      }
-      else {
-        setSkipOwner(true);
-        formikProps.submitForm();
-      }
-    })
-    .catch(error => {
-    });
-  }
-
   // Control Agency display.
   const [showAgency, setShowAgency] = useState(props.state.stepIndex === 0 && is_first_responder);
 
@@ -204,20 +188,39 @@ const PersonForm = (props) => {
         })}
         onSubmit={(values, { setSubmitting, resetForm }) => {
           if (is_workflow) {
-            if (isOwner) {
-              props.onSubmit('owner', values, 'animals');
-            }
-            else {
-              if (skipOwner) {
-                props.onSubmit('reporter', values, 'animals');
+            // Check to see if owner data already exists.
+            axios.get('/people/api/person/?search=' + values.first_name +  ' ' + values.last_name + ' ' + values.phone)
+            .then(response => {
+              if (response.data.length > 0) {
+                // Throw error if duplicate owner found.
+                if (isOwner) {
+                  setError({show:true, error:['a duplicate owner with the same name and phone number already exists.', response.data[0].id]});
+                }
+                // Use existing person object if duplicate reporter found.
+                else {
+                  values['id'] = response.data[0].id;
+                }
               }
-              else {
-                props.onSubmit('reporter', values, 'owner');
-                setIsOwner(true);
-                setShowAgency(false);
-                resetForm({values:props.state.steps.owner});
+              // Only continue on from owner if there are no errors.
+              else if (isOwner) {
+                props.onSubmit('owner', values, 'animals');
               }
-            }
+              // Always continue on if reporter.
+              if (!isOwner) {
+                console.log(values)
+                if (skipOwner) {
+                  props.onSubmit('reporter', values, 'animals');
+                }
+                else {
+                  props.onSubmit('reporter', values, 'owner');
+                  setIsOwner(true);
+                  setShowAgency(false);
+                  resetForm({values:props.state.steps.owner});
+                }
+              }
+            })
+            .catch(error => {
+            });
           }
           else if (id) {
             axios.put('/people/api/person/' + id + '/', values)
@@ -346,7 +349,7 @@ const PersonForm = (props) => {
               {!is_first_responder && !is_workflow ? <Button type="button" onClick={() => { setSkipOwner(false); formikProps.submitForm() }}>{!isOwner && !is_intake ? <span>{!id ? "Add Owner" : "Save"}</span> : "Save"}</Button> : ""}
               {/* workflow buttons */}
               {is_workflow && !isOwner ? <Button type="button" onClick={() => { setSkipOwner(false); formikProps.submitForm(); }}>{props.state.steps.owner.first_name ? "Change Owner" : "Add Owner"}</Button> : ""}
-              {is_workflow ? <button type="button" className="btn btn-primary border" onClick={() => { checkOwner(formikProps); }}>Next Step</button> : ""}
+              {is_workflow ? <button type="button" className="btn btn-primary border" onClick={() => { setSkipOwner(true); formikProps.submitForm(); }}>Next Step</button> : ""}
             </ButtonGroup>
             <Modal show={error.show} onHide={handleErrorClose}>
               <Modal.Header closeButton>

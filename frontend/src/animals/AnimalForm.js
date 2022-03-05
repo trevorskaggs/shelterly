@@ -327,14 +327,14 @@ const AnimalForm = (props) => {
             // If we're in intake, then create objects and navigate to shelter page.
             else if (is_intake) {
               // Create Reporter
-              let reporterResponse = [{data:{id:''}}];
-              if (props.state.steps.reporter.first_name) {
+              let reporterResponse = [{data:{id:props.state.steps.reporter.id}}];
+              if (props.state.steps.reporter.first_name && !props.state.steps.reporter.id) {
                 reporterResponse = await Promise.all([
                   axios.post('/people/api/person/', props.state.steps.reporter)
                 ]);
               }
               // Create Owner
-              let ownerResponse = [{data:{id:''}}];
+              let ownerResponse = [{data:{id:null}}];
               if (props.state.steps.owner.first_name) {
                 ownerResponse = await Promise.all([
                   axios.post('/people/api/person/', props.state.steps.owner)

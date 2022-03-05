@@ -93,6 +93,7 @@ export const initialWorkflowData = {
   shelter: null,
   steps: {
     reporter: {
+      id: null,
       first_name: '',
       last_name: '',
       phone: '',
