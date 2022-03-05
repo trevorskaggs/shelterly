@@ -188,6 +188,7 @@ function StepperWorkflow() {
   };
 
   function handleStepSubmit(currentStep, data, nextStep) {
+
     // Only count contacts the first time.
     if ((currentStep === 'reporter' && state.steps.reporter.first_name === '') || (currentStep === 'owner' && state.steps.owner.first_name === '')) {
       setContactCount((count) => count + 1);

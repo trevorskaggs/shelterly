@@ -73,6 +73,22 @@ const PersonForm = (props) => {
     });
   }
 
+  const checkOwner = (formikProps) => {
+    // Check to see if owner data already exists.
+    axios.get('/people/api/person/?search=' + formikProps.values.first_name +  ' ' + formikProps.values.last_name + ' ' + formikProps.values.phone)
+    .then(response => {
+      if (response.data.length > 0) {
+        setError({show:true, error:['a duplicate owner with the same name and phone number already exists.', response.data[0].id]});
+      }
+      else {
+        setSkipOwner(true);
+        formikProps.submitForm();
+      }
+    })
+    .catch(error => {
+    });
+  }
+
   // Control Agency display.
   const [showAgency, setShowAgency] = useState(props.state.stepIndex === 0 && is_first_responder);
 
@@ -330,7 +346,7 @@ const PersonForm = (props) => {
               {!is_first_responder && !is_workflow ? <Button type="button" onClick={() => { setSkipOwner(false); formikProps.submitForm() }}>{!isOwner && !is_intake ? <span>{!id ? "Add Owner" : "Save"}</span> : "Save"}</Button> : ""}
               {/* workflow buttons */}
               {is_workflow && !isOwner ? <Button type="button" onClick={() => { setSkipOwner(false); formikProps.submitForm(); }}>{props.state.steps.owner.first_name ? "Change Owner" : "Add Owner"}</Button> : ""}
-              {is_workflow ? <button type="button" className="btn btn-primary border" onClick={() => { setSkipOwner(true); formikProps.submitForm() }}>Next Step</button> : ""}
+              {is_workflow ? <button type="button" className="btn btn-primary border" onClick={() => { checkOwner(formikProps); }}>Next Step</button> : ""}
             </ButtonGroup>
             <Modal show={error.show} onHide={handleErrorClose}>
               <Modal.Header closeButton>
@@ -340,11 +356,11 @@ const PersonForm = (props) => {
                 <div>
                   <span>This person cannot be created because</span> {error && error.error[0]}
                   <div className="mt-1 mb-1">Click <Link href={'/people/owner/' + error.error[1]} style={{color:"#8d99d4"}}>here</Link> to view this owner.</div>
-                  <div>Would you like to use the existing owner instead?</div>
+                  {!is_workflow ? <div>Would you like to use the existing owner instead?</div> : ""}
                 </div>
               </Modal.Body>
               <Modal.Footer>
-                <Button variant="primary" onClick={() => {handleDuplicateOwner(error.error[1], formikProps.values)}}>Yes</Button>
+                {!is_workflow ? <Button variant="primary" onClick={() => {handleDuplicateOwner(error.error[1], formikProps.values)}}>Yes</Button> : ""}
                 <Button variant="secondary" onClick={handleErrorClose}>Close</Button>
               </Modal.Footer>
             </Modal>
