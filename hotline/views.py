@@ -51,8 +51,7 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
                 service_request.animal_set.exclude(status='DECEASED').update(status='REUNITED', shelter=None, room=None)
                 for animal in service_request.animal_set.exclude(status='DECEASED'):
                     action.send(self.request.user, verb=f'changed animal status to reunited', target=animal)
-                service_request.status = 'closed'
-                service_request.save()
+                service_request.update_status()
                 action.send(self.request.user, verb='closed service request', target=service_request)
             else:
                 action.send(self.request.user, verb='updated service request', target=service_request)

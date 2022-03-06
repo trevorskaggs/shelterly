@@ -40,16 +40,24 @@ class ServiceRequest(Location):
         return ', '.join(output)
 
     def update_status(self):
-        from evac.models import EvacAssignment
+        from evac.models import AssignedRequest, EvacAssignment
         from animals.models import Animal
         status = 'closed'
+        animals = Animal.objects.filter(status__in=['REPORTED', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE'], request=self).exists()
 
-        if EvacAssignment.objects.filter(end_time=None, service_requests=self).exists():
+        # Identify proper status based on DAs and Animals.
+        if animals and EvacAssignment.objects.filter(end_time=None, assigned_requests=self).exists():
             status = 'assigned'
-        elif Animal.objects.filter(status__in=['REPORTED', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE'], request=self).exists():
+        elif animals:
             status = 'open'
-        self.status = status
+        elif Animal.objects.filter(status='CANCELED', request=self).count() == self.animal_set.count():
+          status = 'canceled'
 
+        # Remove SR from any active DAs if all animals are sheltered, deceased, reuinted, or canceled.
+        if Animal.objects.filter(status__in=['SHELTERED', 'DECEASED', 'REUNITED', 'CANCELED'], request=self).count() == self.animal_set.count():
+          AssignedRequest.objects.filter(service_request=self, dispatch_assignment__end_time=None).delete()
+
+        self.status = status
         self.save()
 
     def update_sip_utl(self):

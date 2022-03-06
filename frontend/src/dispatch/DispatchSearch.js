@@ -160,7 +160,7 @@ function DispatchAssignmentSearch() {
           </InputGroup.Append>
           <ButtonGroup className="ml-3">
             <Button variant={statusOptions === "open" ? "primary" : "secondary"} onClick={statusOptions !== "open" ? () => {setPage(1);setStatusOptions("open")} : () => {setPage(1);setStatusOptions("")}}>Open</Button>
-            <Button variant={statusOptions === "closed" ? "primary" : "secondary"} onClick={statusOptions !== "closed" ? () => {setPage(1);setStatusOptions("closed")} : () => {setPage(1);setStatusOptions("")}}>Closed</Button>
+            <Button variant={statusOptions === "resolved" ? "primary" : "secondary"} onClick={statusOptions !== "resolved" ? () => {setPage(1);setStatusOptions("resolved")} : () => {setPage(1);setStatusOptions("")}}>Resolved</Button>
           </ButtonGroup>
           <DateRangePicker
             name={`date_range_picker`}
@@ -237,7 +237,7 @@ function DispatchAssignmentSearch() {
                           </span>
                         :""}
                         <br />
-                        #{assigned_request.service_request_object.id}: {assigned_request.service_request_object.full_address.split(',')[0]}
+                        SR#{assigned_request.service_request_object.id}: {assigned_request.service_request_object.full_address.split(',')[0]}
                       </span>
                     </MapTooltip>
                   </Marker>
