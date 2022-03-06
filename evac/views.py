@@ -64,7 +64,7 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
     serializer_class = EvacAssignmentSerializer
 
     def get_queryset(self):
-        queryset = EvacAssignment.objects.filter(service_requests__isnull=False, assigned_requests__isnull=False).order_by('-start_time').prefetch_related(Prefetch('service_requests',
+        queryset = EvacAssignment.objects.filter(service_requests__isnull=False, assigned_requests__isnull=False).distinct().order_by('-start_time').prefetch_related(Prefetch('service_requests',
                     ServiceRequest.objects
             .exclude(status='CANCELED')
             .annotate(animal_count=Count("animal"))
