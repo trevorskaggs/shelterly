@@ -184,7 +184,7 @@ function PersonDetails({id}) {
         <Card className="border rounded" style={{width:"100%"}}>
           <Card.Body style={{marginBottom:"-17px"}}>
             <Card.Title>
-              <h4 className="mb-0">Owned Animals
+              <h4 className="mb-0">Animals
                 <OverlayTrigger
                   key={"add-animal"}
                   placement="top"

@@ -189,7 +189,7 @@ const PersonForm = (props) => {
         onSubmit={(values, { setSubmitting, resetForm }) => {
           if (is_workflow) {
             // Check to see if owner data already exists.
-            axios.get('/people/api/person/?search=' + values.first_name +  ' ' + values.last_name + ' ' + values.phone)
+            axios.get('/people/api/person/?search=' + values.first_name +  ' ' + values.last_name + ' ' + values.phone.replace(/\D/g, ""))
             .then(response => {
               if (response.data.length > 0) {
                 // Throw error if duplicate owner found.
