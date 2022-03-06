@@ -80,7 +80,7 @@
                     </div>
                     <div class='col-4' style="margin-top:-8px;">
                         Animal No: <b>A#{{ animal.id }}</b><br/>
-                        <span class="trunctate">Kennel No: <b>{% if animal.shelter %}{{ animal.shelter }}{% if animal.room %} / {{ animal.room.building }} / {{ animal.room }}{% endif %}{% else %}N/A{% endif %}</b><br/></span>
+                        Intake Date: <b>{{ animal.intake_date|date:"M. d, Y"|default:"N/A" }}</b><br/>
                         Species: <b>{{ animal.species|capfirst }}</b><br/>
                         Age: <b>{{ animal.age|capfirst|default:"N/A" }}</b><br/>
                         <span class="trunctate">Owner(s): <b>
@@ -91,7 +91,7 @@
                     </div>
                     <div class='col-5' style="margin-top:-7px;">
                         <span class="trunctate">Animal Name: <b>{{ animal.name|default:"N/A" }}</b><br/></span>
-                        Intake Date: <b>{{ animal.intake_date|date:"M. d, Y"|default:"N/A" }}</b><br/>
+                        <span class="trunctate">Kennel No: <b>{% if animal.room %}{{ animal.room.building }} / {{ animal.room }}{% else %}N/A{% endif %}</b><br/></span>
                         Color: <b>{{ animal.pcolor|capfirst|default:"N/A" }} {% if animal.scolor %}/ {{ animal.scolor|capfirst }}{% else %}{% endif %}</b><br/>
                         Under Vet Care: <b>Y / N</b><br/>
                     </div>

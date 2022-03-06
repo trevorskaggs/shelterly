@@ -390,7 +390,7 @@ function AnimalDetails({id}) {
               {data.shelter ?
               <ListGroup.Item>
                 <b>Shelter:</b> <Link href={"/shelter/" + data.shelter} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.shelter_object.name}</Link>
-                {data.room ? <div className="mt-1"><b>Room:</b> <Link href={"/shelter/room/" + data.room} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.room_name}</Link></div> : ""}
+                {data.room ? <div className="mt-1"><b>Room:</b> {data.building_name} - <Link href={"/shelter/room/" + data.room} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.room_name}</Link></div> : ""}
                 <div className="mt-1"><b>Intake Date:</b> <Moment format="MMMM Do YYYY HH:mm">{data.intake_date}</Moment></div>
                 <div className="mt-1"><b>Address:</b> {data.shelter_object.full_address || "Unknown"}</div>
               </ListGroup.Item> : ""}
