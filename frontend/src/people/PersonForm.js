@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
-import { navigate, useQueryParams } from 'raviger';
+import { Link, navigate, useQueryParams } from 'raviger';
 import { Formik } from 'formik';
 import { Form as BootstrapForm, Button, ButtonGroup, Card, Modal } from "react-bootstrap";
 import * as Yup from 'yup';
@@ -19,7 +19,6 @@ const PersonForm = (props) => {
   var is_workflow = window.location.pathname.includes("workflow");
 
   // Determine if this is an owner or reporter when creating a Person.
-
   let is_owner = window.location.pathname.includes("owner")
 
   // Determine if this is an intake workflow.
@@ -31,7 +30,6 @@ const PersonForm = (props) => {
   // Identify any query param data.
   const [queryParams] = useQueryParams();
   const {
-    reporter_id = '',
     servicerequest_id = '',
     animal_id = '',
     owner_id = '',
@@ -50,6 +48,30 @@ const PersonForm = (props) => {
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
   const goBack = () => navigate('/hotline');
+
+  // Track duplicate owner error.
+  const [error, setError] = useState({show:false, error:[]});
+  const handleErrorClose = () => setError({show:false, error:[]});
+
+  const handleDuplicateOwner = (dupe_id, values) => {
+    axios.patch('/people/api/person/' + dupe_id + '/', values)
+    .then(response => {
+      // If SR already exists, redirect to the SR details.
+      if (servicerequest_id) {
+        navigate('/hotline/servicerequest/' + servicerequest_id);
+      }
+      // If adding from an animal, redirect to the Animal details.
+      else if (animal_id) {
+        navigate('/animals/' + animal_id);
+      }
+      // Otherise redirect to the duplicate Owner details.
+      else {
+        navigate('/people/owner/' + response.data.id);
+      }
+    })
+    .catch(error => {
+    });
+  }
 
   // Control Agency display.
   const [showAgency, setShowAgency] = useState(props.state.stepIndex === 0 && is_first_responder);
@@ -166,20 +188,38 @@ const PersonForm = (props) => {
         })}
         onSubmit={(values, { setSubmitting, resetForm }) => {
           if (is_workflow) {
-            if (isOwner) {
-              props.onSubmit('owner', values, 'animals');
-            }
-            else {
-              if (skipOwner) {
-                props.onSubmit('reporter', values, 'animals');
+            // Check to see if owner data already exists.
+            axios.get('/people/api/person/?search=' + values.first_name +  ' ' + values.last_name + ' ' + values.phone.replace(/\D/g, ""))
+            .then(response => {
+              if (response.data.length > 0) {
+                // Throw error if duplicate owner found.
+                if (isOwner) {
+                  setError({show:true, error:['a duplicate owner with the same name and phone number already exists.', response.data[0].id]});
+                }
+                // Use existing person object if duplicate reporter found.
+                else {
+                  values['id'] = response.data[0].id;
+                }
               }
-              else {
-                props.onSubmit('reporter', values, 'owner');
-                setIsOwner(true);
-                setShowAgency(false);
-                resetForm({values:props.state.steps.owner});
+              // Only continue on from owner if there are no errors.
+              else if (isOwner) {
+                props.onSubmit('owner', values, 'animals');
               }
-            }
+              // Always continue on if reporter.
+              if (!isOwner) {
+                if (skipOwner) {
+                  props.onSubmit('reporter', values, 'animals');
+                }
+                else {
+                  props.onSubmit('reporter', values, 'owner');
+                  setIsOwner(true);
+                  setShowAgency(false);
+                  resetForm({values:props.state.steps.owner});
+                }
+              }
+            })
+            .catch(error => {
+            });
           }
           else if (id) {
             axios.put('/people/api/person/' + id + '/', values)
@@ -209,15 +249,14 @@ const PersonForm = (props) => {
                 navigate('/animals/' + animal_id);
               }
               // If adding from an owner, redirect to the new Owner details.
-              else if (owner_id) {
+              else {
                 navigate('/people/owner/' + response.data.id);
-              }
-              // If we have a reporter ID, redirect to create a new Animal with owner + reporter IDs.
-              else if (reporter_id) {
-                navigate('/animals/new?owner_id=' + response.data.id + '&reporter_id=' + reporter_id);
               }
             })
             .catch(error => {
+              if (error.response.data && error.response.data[0].includes('duplicate owner')) {
+                setError({show:true, error:error.response.data});
+              }
             });
             setSubmitting(false);
           }
@@ -309,8 +348,24 @@ const PersonForm = (props) => {
               {!is_first_responder && !is_workflow ? <Button type="button" onClick={() => { setSkipOwner(false); formikProps.submitForm() }}>{!isOwner && !is_intake ? <span>{!id ? "Add Owner" : "Save"}</span> : "Save"}</Button> : ""}
               {/* workflow buttons */}
               {is_workflow && !isOwner ? <Button type="button" onClick={() => { setSkipOwner(false); formikProps.submitForm(); }}>{props.state.steps.owner.first_name ? "Change Owner" : "Add Owner"}</Button> : ""}
-              {is_workflow ? <button type="button" className="btn btn-primary border" onClick={() => { setSkipOwner(true); formikProps.submitForm() }}>Next Step</button> : ""}
+              {is_workflow ? <button type="button" className="btn btn-primary border" onClick={() => { setSkipOwner(true); formikProps.submitForm(); }}>Next Step</button> : ""}
             </ButtonGroup>
+            <Modal show={error.show} onHide={handleErrorClose}>
+              <Modal.Header closeButton>
+                <Modal.Title>Duplicate Owner Found</Modal.Title>
+              </Modal.Header>
+              <Modal.Body>
+                <div>
+                  <span>This person cannot be created because</span> {error && error.error[0]}
+                  <div className="mt-1 mb-1">Click <Link href={'/people/owner/' + error.error[1]} style={{color:"#8d99d4"}}>here</Link> to view this owner.</div>
+                  {!is_workflow ? <div>Would you like to use the existing owner instead?</div> : ""}
+                </div>
+              </Modal.Body>
+              <Modal.Footer>
+                {!is_workflow ? <Button variant="primary" onClick={() => {handleDuplicateOwner(error.error[1], formikProps.values)}}>Yes</Button> : ""}
+                <Button variant="secondary" onClick={handleErrorClose}>Close</Button>
+              </Modal.Footer>
+            </Modal>
           </Card>
         )}
       </Formik>

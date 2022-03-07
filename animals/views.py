@@ -167,7 +167,7 @@ class AnimalViewSet(viewsets.ModelViewSet):
             images (List of AnimalImages)
         """        
         queryset = (
-            Animal.objects.with_images().with_history().exclude(status="CANCELED")
+            Animal.objects.with_images().with_history().exclude(status="CANCELED").distinct()
             .prefetch_related("owners")
             .select_related("reporter", "room", "request", "shelter")
         )        

@@ -1,5 +1,5 @@
-from django.db.models import Exists, OuterRef, Prefetch
-from rest_framework import filters, permissions, viewsets
+from django.db.models import Exists, OuterRef, Prefetch, Q
+from rest_framework import filters, permissions, serializers, viewsets
 from actstream import action
 from actstream.models import Action
 
@@ -43,6 +43,9 @@ class PersonViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         if serializer.is_valid():
+            # Check for duplicate owners.
+            for owner in Person.objects.filter(first_name=serializer.validated_data['first_name'], last_name=serializer.validated_data['last_name'], phone=serializer.validated_data['phone']):
+                raise serializers.ValidationError(['a duplicate owner with the same name and phone number already exists.', owner.id])
             # Clean phone fields.
             serializer.validated_data['phone'] = ''.join(char for char in serializer.validated_data.get('phone', '') if char.isdigit())
             serializer.validated_data['alt_phone'] = ''.join(char for char in serializer.validated_data.get('alt_phone', '') if char.isdigit())
@@ -61,13 +64,15 @@ class PersonViewSet(viewsets.ModelViewSet):
                 animal = Animal.objects.get(pk=self.request.data.get('animal'))
                 animal.owners.add(person)
 
-            # If an owner is being added from an owner, update the original owner animals with the new owner.
+            # If an owner is being added from another Person, add the new owner to the animals of the original Person.
             if self.request.data.get('owner'):
                 owner = Person.objects.get(pk=self.request.data.get('owner'))
                 for animal in owner.animal_set.all():
                     animal.owners.add(person)
+                for animal in owner.reporter_animals.all():
+                    animal.owners.add(person)
                 # If the original owner belongs to an SR, update the SR with the new owner.
-                for service_request in ServiceRequest.objects.filter(owners=owner):
+                for service_request in ServiceRequest.objects.filter(Q(owners=owner)|Q(reporter=owner)):
                     service_request.owners.add(person)
 
     def perform_update(self, serializer):
@@ -98,6 +103,29 @@ class PersonViewSet(viewsets.ModelViewSet):
                     service_request.status = 'closed'
                     service_request.save()
                     action.send(self.request.user, verb='closed service request', target=service_request)
+
+            # If an owner is being added to an existing SR, add the owner to the SR and update all SR animals with the owner.
+            if self.request.data.get('request'):
+                service_request = ServiceRequest.objects.get(pk=self.request.data.get('request'))
+                service_request.owners.add(person)
+                for animal in service_request.animal_set.all():
+                    animal.owners.add(person)
+
+            # If an owner is being added from an animal, update the animal with the new owner.
+            if self.request.data.get('animal'):
+                animal = Animal.objects.get(pk=self.request.data.get('animal'))
+                animal.owners.add(person)
+
+            # If an owner is being added from another Person, add the new owner to the animals of the original Person.
+            if self.request.data.get('owner'):
+                owner = Person.objects.get(pk=self.request.data.get('owner'))
+                for animal in owner.animal_set.all():
+                    animal.owners.add(person)
+                for animal in owner.reporter_animals.all():
+                    animal.owners.add(person)
+                # If the original owner belongs to an SR, update the SR with the new owner.
+                for service_request in ServiceRequest.objects.filter(Q(owners=owner)|Q(reporter=owner)):
+                    service_request.owners.add(person)
             else:
                 # Record update action.
                 action.send(self.request.user, verb='updated person', target=person)

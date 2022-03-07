@@ -93,6 +93,7 @@ export const initialWorkflowData = {
   shelter: null,
   steps: {
     reporter: {
+      id: '',
       first_name: '',
       last_name: '',
       phone: '',
@@ -183,11 +184,12 @@ function StepperWorkflow() {
       hasOwner: nextStep === 'owner',
       stepIndex: prevState.stepIndex - 1,
       animalIndex: track_index,
-      steps: { ...prevState.steps, ['request']:data ? data : prevState.steps.request } // Only set SR data if present.
+      steps: { ...prevState.steps, 'request':data ? data : prevState.steps.request } // Only set SR data if present.
     }))
   };
 
   function handleStepSubmit(currentStep, data, nextStep) {
+
     // Only count contacts the first time.
     if ((currentStep === 'reporter' && state.steps.reporter.first_name === '') || (currentStep === 'owner' && state.steps.owner.first_name === '')) {
       setContactCount((count) => count + 1);

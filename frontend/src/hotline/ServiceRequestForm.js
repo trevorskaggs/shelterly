@@ -110,8 +110,8 @@ function ServiceRequestForm(props) {
         onSubmit={ async (values, { setSubmitting }) => {
           if (is_workflow) {
             // Create Reporter
-            let reporterResponse = [{data:{id:null}}];
-            if (props.state.steps.reporter.first_name) {
+            let reporterResponse = [{data:{id:props.state.steps.reporter.id}}];
+            if (props.state.steps.reporter.first_name && !props.state.steps.reporter.id) {
               reporterResponse = await Promise.all([
                 axios.post('/people/api/person/', props.state.steps.reporter)
               ]);

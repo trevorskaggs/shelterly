@@ -38,9 +38,9 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         if serializer.is_valid():
-            # Check if lat/log are being passed,Lat/Lon are not included when canceling a service request.
+            # Check for duplicate address among active service requests.
             if 'address' in serializer.validated_data and 'city' in serializer.validated_data and 'state' in serializer.validated_data:
-                for service_request in ServiceRequest.objects.filter(address=serializer.validated_data['address'], city=serializer.validated_data['city'], state=serializer.validated_data['state']).exclude(id=self.kwargs['pk']):
+                for service_request in ServiceRequest.objects.filter(address=serializer.validated_data['address'], city=serializer.validated_data['city'], state=serializer.validated_data['state']).exclude(id=self.kwargs['pk']).exclude(status='CANCELED'):
                     raise serializers.ValidationError(['Multiple service requests may not exist with the same address.', service_request.id])
             service_request = serializer.save()
 
