@@ -130,18 +130,18 @@ function DispatchSummary({id}) {
       </OverlayTrigger>
       :
       <OverlayTrigger
-        key={"close-dispatch-assignment"}
+        key={"resolve-dispatch-assignment"}
         placement="bottom"
         overlay={
-          <Tooltip id={`tooltip-close-dispatch-assignment`}>
-            Close dispatch assignment
+          <Tooltip id={`tooltip-resolve-dispatch-assignment`}>
+            Resolve dispatch assignment
           </Tooltip>
         }
       >
         <Link href={"/dispatch/resolution/" + id}><FontAwesomeIcon icon={faClipboardCheck} className="ml-1"  inverse /></Link>
       </OverlayTrigger>
       }
-    <div style={{fontSize:"18px", marginTop:"12px"}}><b>Opened: </b><Moment format="MMMM Do YYYY, HH:mm">{data.start_time}</Moment>{data.end_time ? <span> | <b>Closed: </b><Moment format="MMMM Do YYYY, HH:mm">{data.end_time}</Moment></span> : ""}</div>
+    <div style={{fontSize:"18px", marginTop:"12px"}}><b>Opened: </b><Moment format="MMMM Do YYYY, HH:mm">{data.start_time}</Moment>{data.end_time ? <span> | <b>Resolved: </b><Moment format="MMMM Do YYYY, HH:mm">{data.end_time}</Moment></span> : ""}</div>
     </Header>
     <hr/>
     <Row className="mb-3">
@@ -229,7 +229,7 @@ function DispatchSummary({id}) {
         </Map>
       </Col>
     </Row>
-    {data.assigned_requests.map(assigned_request => (
+    {data.assigned_requests.filter(request => request.service_request_object.animals.length > 0).map(assigned_request => (
       <Row key={assigned_request.service_request_object.id}>
         <Card border="secondary" className="mb-3 ml-3 mr-3" style={{width:"100%"}}>
           <Card.Body>

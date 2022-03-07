@@ -422,11 +422,11 @@ function ServiceRequestDetails({id}) {
                       <FontAwesomeIcon icon={faUsers} className="ml-1 fa-move-down" />
                     </OverlayTrigger>
                     <OverlayTrigger
-                      key={"close-dispatch-assignment"}
+                      key={"resolve-dispatch-assignment"}
                       placement="top"
                       overlay={
-                        <Tooltip id={`tooltip-close-dispatch-assignment`}>
-                          Close dispatch assignment
+                        <Tooltip id={`tooltip-resolve-dispatch-assignment`}>
+                          Resolve dispatch assignment
                         </Tooltip>
                       }
                     >

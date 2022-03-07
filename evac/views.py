@@ -64,8 +64,9 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
     serializer_class = EvacAssignmentSerializer
 
     def get_queryset(self):
-        queryset = EvacAssignment.objects.all().order_by('-start_time').prefetch_related(Prefetch('service_requests',
+        queryset = EvacAssignment.objects.filter(service_requests__isnull=False, assigned_requests__isnull=False).distinct().order_by('-start_time').prefetch_related(Prefetch('service_requests',
                     ServiceRequest.objects
+            .exclude(status='CANCELED')
             .annotate(animal_count=Count("animal"))
             .annotate(
                 injured=Exists(Animal.objects.filter(request_id=OuterRef("id"), injured="yes"))
@@ -89,7 +90,7 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
         status = self.request.query_params.get('status', '')
         if status == "open":
             return queryset.filter(end_time__isnull=True).distinct()
-        elif status == "closed":
+        elif status == "resolved":
             return queryset.filter(end_time__isnull=False).distinct()
 
         return queryset
