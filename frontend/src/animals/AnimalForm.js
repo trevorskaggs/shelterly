@@ -284,7 +284,12 @@ const AnimalForm = (props) => {
           // Convert json to FormData.
           for ( let key in values ) {
             if (values[key] !== null) {
-              formData.append(key, values[key]);
+              if (['front_image', 'side_image'].includes(key) && values[key].name) {
+                formData.append(key, values[key], values[key].name);
+              }
+              else {
+                formData.append(key, values[key]);
+              }
             }
           }
           // Add extra images.
