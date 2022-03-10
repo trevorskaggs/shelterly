@@ -46,7 +46,7 @@ class ServiceRequest(Location):
         animals = Animal.objects.filter(status__in=['REPORTED', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE'], request=self).exists()
 
         # Identify proper status based on DAs and Animals.
-        if animals and EvacAssignment.objects.filter(end_time=None, assigned_requests=self).exists():
+        if animals and AssignedRequest.objects.filter(service_request=self, dispatch_assignment__end_time=None).exists():
             status = 'assigned'
         elif animals:
             status = 'open'
