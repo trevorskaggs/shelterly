@@ -39,6 +39,8 @@ USE_S3 = True
 ALLOWED_HOSTS = ['*']
 AUTH_USER_MODEL = 'accounts.ShelterlyUser'
 
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760 #Bump allowed filesize to 10MB
+
 # AWS Config
 credentials = boto3.Session().get_credentials()
 if credentials:
