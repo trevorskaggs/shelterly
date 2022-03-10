@@ -134,28 +134,25 @@ class AnimalViewSet(viewsets.ModelViewSet):
             if self.request.data.get('remove_owner'):
                 animal.owners.remove(self.request.data.get('remove_owner'))
 
-            old_images = serializer.data['extra_images']
-            updated_images = self.request.data['extra_images'].split(',') if self.request.data.get('extra_images', None) else []
-            # Compare old vs updated extra images to identify ones that have been removed and should be deleted.
-            # Strip out MEDIA_URL so that we can compare to image filename using a filter().
-            images_to_delete = [image_to_delete.replace(settings.MEDIA_URL, '') for image_to_delete in set(old_images) - set(updated_images)]
-            AnimalImage.objects.filter(animal=animal, category="extra", image__in=images_to_delete).delete()
-            for key in ['front_image', 'side_image']:
-                if serializer.data.get(key, '') != self.request.data.get(key, ''):
-                    try:
-                        AnimalImage.objects.get(animal=animal, category=key).delete()
-                    except ObjectDoesNotExist:
-                        pass
+            # Check if any original front/side images need to be removed.
+            for key in ("front_image", "side_image"):
+                if key in self.request.FILES.keys() or not self.request.data.get(key, ''):
+                    AnimalImage.objects.filter(animal=animal, category=key).delete()
 
-            # Only brand new files should show up in request.FILES.
-            images_data = self.request.FILES
-            for key, image_data in images_data.items():
-                # If we have a new front or side image, delete the old one and create a new one.
-                if key in ("front_image", "side_image"):
-                    AnimalImage.objects.create(image=image_data, animal=animal, category=key)
-                # Otherwise create a new extra image.
-                else:
-                    AnimalImage.objects.create(image=image_data, animal=animal, category="extra")
+            def strip_s3(url):
+                return url.split("?AWSAccessKeyId")[0]
+
+            # Remove extra images that have been removed.
+            remaining_extra_urls = [strip_s3(url) for url in self.request.data.get('extra_images', '').split(',')]
+            for extra_image in AnimalImage.objects.filter(animal=animal, category="extra"):
+                if strip_s3(extra_image.image.url) not in remaining_extra_urls:
+                    extra_image.delete()
+
+            #Create new files from uploads
+            for key in self.request.FILES.keys():
+                image_data = self.request.FILES[key]
+                key = key if key in ("front_image", "side_image") else "extra"
+                AnimalImage.objects.create(image=image_data, animal=animal, category=key)
 
             # Check to see if animal SR status should be changed.
             if animal.request:
