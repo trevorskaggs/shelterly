@@ -25,8 +25,9 @@ class ShelterlyPDF {
   #documentFontSize = 15;
   #documentTitle1FontSize = 25;
   #documentTitle2FontSize = 20;
-  #documentLeftMargin = 15;
-  #documentRightMargin = 15;
+  #defaultXMargin = 15;
+  #documentLeftMargin = this.#defaultXMargin;
+  #documentRightMargin = this.#defaultXMargin;
   #documentLastYPosition = 0;
   #defaultElementBuffer = 20;
 
@@ -141,9 +142,10 @@ class ShelterlyPDF {
   }
 
   drawHRule({
-    xOffset = 0
+    xOffset = 0,
+    buffer
   } = {}) {
-    const yPosition = this.beforeDraw({ yPosition: this.getLastYPositionWithBuffer() });
+    const yPosition = this.beforeDraw({ yPosition: this.getLastYPositionWithBuffer({ buffer }) });
     const xPosition = this.#documentLeftMargin + xOffset;
     const width = this.pageWidth - (xPosition - xOffset);
     this.#jsPDF.line(xPosition, yPosition, width, yPosition);
@@ -154,7 +156,8 @@ class ShelterlyPDF {
 
   drawTextWithLine({
     label,
-    xOffset
+    xOffset,
+    yBuffer
   }) {
     const yPosition = this.beforeDraw({ yPosition:this.getLastYPositionWithBuffer() });
 
@@ -164,7 +167,7 @@ class ShelterlyPDF {
       yPosition
     );
 
-    this.drawHRule({ xOffset });
+    this.drawHRule({ xOffset, buffer: yBuffer });
 
     // set last y position
     this.#documentLastYPosition = yPosition + 25;
@@ -214,8 +217,6 @@ class ShelterlyPDF {
     listStyle = 'block',
     bottomPadding = 0
   }) {
-    let nextXPosition = this.#documentLeftMargin;
-
     listItems.forEach(({
       type = 'text',
       label,
@@ -226,10 +227,10 @@ class ShelterlyPDF {
       this.#jsPDF.setFillColor(...fillColor);
 
       if (type === 'checkbox') {
-        this.#jsPDF.rect(nextXPosition, yPosition, size, size, 'FD');
+        this.#jsPDF.rect(this.#documentLeftMargin, yPosition, size, size, 'FD');
       }
 
-      this.#jsPDF.text(label, nextXPosition + size + (size * 0.25), yPosition + 15)
+      this.#jsPDF.text(label, this.#documentLeftMargin + size + (size * 0.25), yPosition + 15)
 
       if (listStyle === 'block') {
         this.#documentLastYPosition = this.beforeDraw({ yPosition }) + size;
@@ -237,12 +238,32 @@ class ShelterlyPDF {
 
       if (listStyle === 'grid') {
         if (i % 2 === 0) {
-          nextXPosition = this.pageWidth / 2;
-          if (i === listItems.length - 1) {
-            this.#documentLastYPosition = this.beforeDraw({ yPosition }) + size + bottomPadding;
-          }
+          this.#documentLeftMargin = this.pageWidth / 2;
         } else {
-          nextXPosition = this.#documentLeftMargin;
+          this.#documentLeftMargin = this.#defaultXMargin;
+          this.#documentLastYPosition = this.beforeDraw({ yPosition }) + size + bottomPadding;
+        }
+
+        if (i === listItems.length - 1) {
+          this.#documentLastYPosition = this.beforeDraw({ yPosition }) + size + bottomPadding;
+        }
+      }
+
+      if (listStyle === 'inline') {
+        const lineSize = (this.pageWidth - 30) / 5;
+        this.#documentLeftMargin = this.#documentLeftMargin + lineSize;
+
+        if (this.#documentLeftMargin > (this.pageWidth - 30)) {
+
+        }
+
+        if (
+          // last item
+          i === listItems.length - 1 ||
+          // or we went off the page
+          this.#documentLeftMargin > (this.pageWidth - 30)
+        ) {
+          this.#documentLeftMargin = this.#defaultXMargin;
           this.#documentLastYPosition = this.beforeDraw({ yPosition }) + size + bottomPadding;
         }
       }
@@ -253,6 +274,26 @@ class ShelterlyPDF {
 
     // reset default colors
     this.#jsPDF.setFillColor(...rgbColors.DEFAULT);
+  }
+
+  drawGrid({
+    blocks = [],
+    bottomPadding = 0
+  }) {
+    let startYPosition = this.#documentLastYPosition;
+
+    blocks.forEach((blockList, i) => {
+      this.#documentLastYPosition = startYPosition;
+      // this.#documentLeftMargin = startXPosition;
+      this.drawList(blockList);
+
+      if (i % 2 === 0) {
+        this.#documentLastYPosition = startYPosition;
+        this.#documentLeftMargin = this.pageWidth / 2;
+      } else {
+        this.#documentLeftMargin = this.#defaultXMargin;
+      }
+    })
   }
 
   drawCheckboxList({
@@ -292,68 +333,3 @@ class ShelterlyPDF {
 };
 
 export default ShelterlyPDF;
-
-// export const generateAndSavePdf = ({
-//   fileName = 'shelterly-pdf',
-//   title = 'Shelterly',
-//   format = {
-//     orientation: 'p',
-//     unit: 'pt',
-//     format: 'a4'
-//   }
-// }) => {
-//   const doc = new jsPDF(format);
-//   const pageHeight = doc.internal.pageSize.height || doc.internal.pageSize.getHeight();
-//   const pageWidth = doc.internal.pageSize.width || doc.internal.pageSize.getWidth();
-
-//   // header
-//   doc.addImage(logo, "png", 35, 15, 50, 50);
-
-//   // text brown
-//   doc.setTextColor(139, 107, 82)
-//   doc.text("SHELTERLY", 15, 80);
-
-//   // text black
-//   doc.setTextColor(0)
-
-//   // draw black
-//   doc.setDrawColor(0, 0, 0);
-
-//   // title text
-//   doc.setFontSize("25")
-//   doc.text("Dispatch Assignment Resolution Form", pageWidth - 10, 35, {align: 'right'})
-
-//   // title sub text
-//   doc.setFontSize("15")
-//   doc.text("Opened: March 5th, 14:01", pageWidth - 10, 60, {align: "right"})
-
-//   // sub title text
-//   doc.setFontSize("22")
-//   doc.text("Team Name", 15, 120)
-
-//   // <hr />
-//   doc.line(15, 130, pageWidth - 35, 130);
-
-//   // checkbox
-//   doc.setFillColor(255,255,255);
-//   doc.rect(15, 145, 20, 20, 'FD');
-
-//   // checkbox label
-//   doc.setFontSize("15")
-//   doc.text("Not Completed Yet", 45, 160)
-
-//   // checkbox inline
-//   doc.setFillColor(255,255,255);
-//   doc.rect(205, 145, 20, 20, 'FD');
-
-//   // checkbox label
-//   doc.setFontSize("15")
-//   doc.text("Unable to Complete", 235, 160)
-
-
-//   // footer
-//   doc.text("1 / 2", pageWidth / 2, pageHeight  - 10, {align: 'center'});
-
-//   // save
-//   doc.save(`${fileName}.pdf`)
-// };
