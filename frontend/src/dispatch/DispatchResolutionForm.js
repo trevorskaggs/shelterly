@@ -27,6 +27,7 @@ import Moment from 'react-moment';
 import Header from '../components/Header';
 import { Checkbox, DateTimePicker, DropDown, TextInput } from '../components/Form';
 import { dispatchStatusChoices } from '../animals/constants';
+import ShelterlyPDF from '../utils/pdf'
 
 function DispatchResolutionForm({ id }) {
 
@@ -57,6 +58,120 @@ function DispatchResolutionForm({ id }) {
     { value: 4, label: 'Low' },
     { value: 5, label: 'Lowest' }
   ]
+
+  // download pdf event handler
+  const downloadClickHandler = (e) => {
+    e.preventDefault();
+
+    const pdf = new ShelterlyPDF();
+
+    // draw page header
+    pdf.drawPageHeader({
+      text: 'Dispatch Assignment Resolution Form',
+      subText: `Opened: ${new Date(data.start_time).toLocaleDateString()}`
+    });
+    pdf.drawHRule();
+
+    // draw team section
+    pdf.drawSectionHeader({ text: data.team_object.name, hRule: true });
+    pdf.drawTextList({
+      labels: data.team && data.team_object.team_member_objects.map(team_member => (
+        `${team_member.first_name} ${team_member.last_name} ${team_member.agency_id ? `(${team_member.agency_id})` : ''}`
+      )),
+      bottomPadding: 10
+    });
+
+    // loop through SR's and page break between each one
+    data.assigned_requests.forEach((assigned_request, index) => {
+      if (index > 0) {
+        pdf.drawPageBreak();
+      }
+      // SR Header
+      pdf.drawSectionHeader({
+        text: `SR#${assigned_request.service_request_object.id} - ${assigned_request.service_request_object.full_address}`,
+        hRule: true
+      });
+
+      pdf.drawCheckboxList({
+        labels: ['Not Completed Yet', 'Unable to Complete'],
+        listStyle: 'grid'
+      });
+
+      // owners
+      if (assigned_request.service_request_object.owners.length) {
+        pdf.drawTextList({
+          labels: assigned_request.service_request_object.owner_objects.map((owner) => (
+            `Owner: ${owner.first_name} ${owner.last_name} ${owner.phone}`
+          )),
+          listStyle: 'grid'
+        })
+      } else {
+        //no owners
+        pdf.drawTextList({
+          labels: ['Owner: No Owner']
+        })
+      }
+      
+      // additional info
+      pdf.drawTextList({
+        labels: [
+          `Additional Information: ${assigned_request.service_request_object.directions || 'N/A'}`,
+          `Accessible: ${assigned_request.service_request_object.accessible ? 'Yes' : 'No'}`,
+          `Turn Around: ${assigned_request.service_request_object.turn_around ? 'Yes' : 'No'}`
+        ],
+        listStyle: 'grid',
+        bottomPadding: 10
+      })
+
+      // animals
+      pdf.drawSectionHeader({ text: 'Animals', hRule: true });
+
+      assigned_request.service_request_object.animals.filter(animal => Object.keys(assigned_request.animals).includes(String(animal.id))).forEach((animal, index) => {
+        pdf.drawTextList({ labels: [ `A#${animal.id} - ${animal.name || 'Unknown'} - ${animal.species}` ]});
+
+        pdf.drawCheckboxList({
+          labels: dispatchStatusChoices.filter((choice) => choice.value !== 'REPORTED' ).map((choice) => (
+            choice.label
+          ))
+        });
+
+        dispatchStatusChoices.forEach((animalStatus, i) => {
+          
+        })
+      })
+
+      pdf.drawHRule();
+
+      // priorities
+      pdf.drawSectionHeader({ text: 'Priority', hRule: true });
+      pdf.drawCheckboxList({
+        labels: priorityChoices.map((priority) => priority.label),
+        listStyle: 'block',
+        bottomPadding: 25
+      })
+
+      // date completed, followup, etc..
+      pdf.drawTextWithLine({ label: 'Date Completed: ' });
+      pdf.drawTextWithLine({ label: 'Followup Date: ' });
+      pdf.drawTextArea({ label: 'Visit Notes: ' });
+      pdf.drawCheckBoxLine({ label: 'Forced Entry' });
+
+      // owners contacted
+      if (assigned_request.service_request_object.owners.length) {
+        pdf.drawTextList({
+          labels: ['Owner Contacted:']
+        });
+
+        assigned_request.service_request_object.owner_objects.forEach((owner) => {
+          pdf.drawCheckBoxLine({ label: `Owner: ${owner.first_name} ${owner.last_name} ${owner.phone}` });
+          pdf.drawTextWithLine({ label: 'Owner Contact Time: ' });
+          pdf.drawTextArea({ label: 'Owner Contact Notes: ' });
+        });
+      }
+    });
+
+    pdf.saveFile();
+  }
 
   // Hook for initializing data.
   useEffect(() => {
@@ -218,7 +333,11 @@ function DispatchResolutionForm({ id }) {
             <Header>Dispatch Assignment Resolution
               <div style={{ fontSize: "16px", marginTop: "5px" }}><b>Opened: </b><Moment format="MMMM Do YYYY, HH:mm">{data.start_time}</Moment>{data.end_time ? <span style={{ fontSize: "16px", marginTop: "5px" }}> | <b>Closed: </b><Moment format="MMMM Do YYYY, HH:mm">{data.end_time}</Moment></span> : ""}</div>
             </Header>
-            <hr />
+            <Button variant="link" onClick={downloadClickHandler} style={{color:"#FFF"}} className="p-0 m-0 mt-3">
+              <FontAwesomeIcon icon={faClipboardList} inverse/>
+              <b className="pl-2">Download printable field resolution form</b>
+            </Button>
+            <hr className="mt-2" />
             <Card border="secondary" className="mt-3">
               <Card.Body>
                 <Card.Title>
