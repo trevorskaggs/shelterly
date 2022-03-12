@@ -79,7 +79,7 @@ function DispatchResolutionForm({ id }) {
       labels: data.team && data.team_object.team_member_objects.map(team_member => (
         `${team_member.first_name} ${team_member.last_name} ${team_member.agency_id ? `(${team_member.agency_id})` : ''}`
       )),
-      bottomPadding: 10
+      bottomPadding: 20
     });
 
     // loop through SR's and page break between each one
@@ -103,8 +103,7 @@ function DispatchResolutionForm({ id }) {
         pdf.drawTextList({
           labels: assigned_request.service_request_object.owner_objects.map((owner) => (
             `Owner: ${owner.first_name} ${owner.last_name} ${owner.phone}`
-          )),
-          listStyle: 'grid'
+          ))
         })
       } else {
         //no owners
@@ -120,41 +119,38 @@ function DispatchResolutionForm({ id }) {
           `Accessible: ${assigned_request.service_request_object.accessible ? 'Yes' : 'No'}`,
           `Turn Around: ${assigned_request.service_request_object.turn_around ? 'Yes' : 'No'}`
         ],
-        listStyle: 'grid',
-        bottomPadding: 10
+        bottomPadding: 20
       })
 
       // animals
       pdf.drawSectionHeader({ text: 'Animals', hRule: true });
 
-      assigned_request.service_request_object.animals.filter(animal => Object.keys(assigned_request.animals).includes(String(animal.id))).forEach((animal, index) => {
-        pdf.drawTextList({ labels: [ `A#${animal.id} - ${animal.name || 'Unknown'} - ${animal.species}` ]});
-
-        pdf.drawCheckboxList({
-          labels: dispatchStatusChoices.filter((choice) => choice.value !== 'REPORTED' ).map((choice) => (
-            choice.label
-          ))
-        });
-
-        dispatchStatusChoices.forEach((animalStatus, i) => {
-          
-        })
+      pdf.drawGrid({
+        blocks: assigned_request.service_request_object.animals.filter(animal => Object.keys(assigned_request.animals).includes(String(animal.id))).map((animal, index) => ({
+          listItems: [
+            { label: `A#${animal.id} - ${animal.name || 'Unknown'} - ${animal.species}` },
+            ...dispatchStatusChoices.filter((choice) => choice.value !== 'REPORTED' ).map((choice) => ({
+              type: 'checkbox',
+              label: choice.label,
+              size: 20
+            }))
+          ],
+          bottomPadding: 20
+        }))
       })
-
-      pdf.drawHRule();
 
       // priorities
       pdf.drawSectionHeader({ text: 'Priority', hRule: true });
       pdf.drawCheckboxList({
         labels: priorityChoices.map((priority) => priority.label),
-        listStyle: 'block',
+        listStyle: 'inline',
         bottomPadding: 25
       })
 
       // date completed, followup, etc..
-      pdf.drawTextWithLine({ label: 'Date Completed: ' });
-      pdf.drawTextWithLine({ label: 'Followup Date: ' });
-      pdf.drawTextArea({ label: 'Visit Notes: ' });
+      pdf.drawTextWithLine({ label: 'Date Completed:', xOffset: 120, yBuffer: 0 });
+      pdf.drawTextWithLine({ label: 'Followup Date:', xOffset: 110, yBuffer: 20 });
+      pdf.drawTextArea({ label: 'Visit Notes:' });
       pdf.drawCheckBoxLine({ label: 'Forced Entry' });
 
       // owners contacted
@@ -165,8 +161,8 @@ function DispatchResolutionForm({ id }) {
 
         assigned_request.service_request_object.owner_objects.forEach((owner) => {
           pdf.drawCheckBoxLine({ label: `Owner: ${owner.first_name} ${owner.last_name} ${owner.phone}` });
-          pdf.drawTextWithLine({ label: 'Owner Contact Time: ' });
-          pdf.drawTextArea({ label: 'Owner Contact Notes: ' });
+          pdf.drawTextWithLine({ label: 'Owner Contact Time:', xOffset: 150 });
+          pdf.drawTextArea({ label: 'Owner Contact Notes:' });
         });
       }
     });
