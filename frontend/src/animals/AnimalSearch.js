@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import axios from "axios";
 import { Link, useQueryParams } from 'raviger';
-import { Button, ButtonGroup, Card, CardGroup, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Pagination, Tooltip } from 'react-bootstrap';
+import { Button, ButtonGroup, Card, CardGroup, Col, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Pagination, Row, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBan, faCalendarDay, faClipboardList, faCut, faEnvelope, faLink, faMedkit, faUserAltSlash
@@ -11,10 +11,12 @@ import {
 } from '@fortawesome/free-regular-svg-icons';
 import { faClawMarks, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import Moment from 'react-moment';
+import Select from 'react-select';
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
 import { titleCase } from '../components/Utils';
 import { ITEMS_PER_PAGE } from '../constants';
+import { catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, speciesChoices, sexChoices } from './constants';
 
 function AnimalSearch() {
 
@@ -25,12 +27,21 @@ function AnimalSearch() {
     owned = 'owned',
   } = queryParams;
 
+  const boolChoices = [
+    { value: 'yes', label: 'Yes' },
+    { value: 'no', label: 'No' },
+  ]
+
   const [data, setData] = useState({animals: [], isFetching: false});
+  const [options, setOptions] = useState({species: null, sex: null, owned: null, pcolor: '', fixed: null, location: null});
   const [searchTerm, setSearchTerm] = useState(search);
   const tempSearchTerm = useRef(null);
+  const pcolorRef = useRef(null);
   const [statusOptions, setStatusOptions] = useState(owned);
   const [page, setPage] = useState(1);
   const [numPages, setNumPages] = useState(1);
+
+  const colorChoices = {'':[], 'dog':dogColorChoices, 'cat':catColorChoices, 'horse':horseColorChoices, 'other':otherColorChoices}
 
   // Update searchTerm when field input changes.
   const handleChange = event => {
@@ -44,12 +55,36 @@ function AnimalSearch() {
     setPage(1);
   }
 
-
   function setFocus(pageNum) {
     if (pageNum !== page) {
       tempSearchTerm.current.focus();
     }
   }
+
+  const customStyles = {
+    // For the select it self, not the options of the select
+    control: (styles, { isDisabled}) => {
+      return {
+        ...styles,
+        color: '#FFF',
+        cursor: isDisabled ? 'not-allowed' : 'default',
+        backgroundColor: isDisabled ? '#DFDDDD' : 'white',
+        height: 35,
+        minHeight: 35
+      }
+    },
+    option: provided => ({
+      ...provided,
+      color: 'black'
+    }),
+  };
+
+  let animals = data.animals.filter(animal => options.species ? animal.species === options.species : animal)
+                            .filter(animal => options.owned === 'yes' ? animal.owners.length > 0 : animal)
+                            .filter(animal => options.owned === 'no' ? animal.owners.length === 0 : animal)
+                            .filter(animal => options.fixed ? animal.fixed === options.fixed : animal)
+                            .filter(animal => options.sex ? animal.sex === options.sex : animal)
+                            .filter(animal => options.pcolor ? animal.pcolor === options.pcolor : animal)
 
   // Hook for initializing data.
   useEffect(() => {
@@ -66,6 +101,7 @@ function AnimalSearch() {
         if (!unmounted) {
           setNumPages(Math.ceil(response.data.length / ITEMS_PER_PAGE));
           setData({animals: response.data, isFetching: false});
+          console.log(response.data)
         }
       })
       .catch(error => {
@@ -81,6 +117,12 @@ function AnimalSearch() {
       source.cancel();
     };
   }, [searchTerm, statusOptions]);
+
+  // Hook handling option changes.
+  useEffect(() => {
+    setNumPages(Math.ceil(animals.length / ITEMS_PER_PAGE));
+    setPage(1);
+  }, [options]);
 
   return (
     <div className="ml-2 mr-2">
@@ -98,13 +140,91 @@ function AnimalSearch() {
           <InputGroup.Append>
             <Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0"}}>Search</Button>
           </InputGroup.Append>
-          <ButtonGroup className="ml-1">
-            <Button variant={statusOptions === "owned" ? "primary" : "secondary"} onClick={statusOptions !== "owned" ? () => {setPage(1);setStatusOptions("owned")} : () => {setPage(1);setStatusOptions("")}}>Owned</Button>
-            <Button variant={statusOptions === "stray" ? "primary" : "secondary"} onClick={statusOptions !== "stray" ? () => {setPage(1);setStatusOptions("stray")} : () => {setPage(1);setStatusOptions("")}}>Stray</Button>
-          </ButtonGroup>
+          <Button variant="outline-light" className="ml-1">Advanced</Button>
         </InputGroup>
+        <Card className="border rounded d-flex" style={{width:"100%", marginBottom:"16px"}}>
+          <Card.Body>
+            <Col xs={"3"}>
+              <Select
+                label="Species"
+                id="speciesDropdown"
+                name="species"
+                type="text"
+                placeholder="Select Species"
+                options={speciesChoices}
+                styles={customStyles}
+                isClearable={true}
+                onChange={(instance) => {
+                  pcolorRef.current.select.clearValue();
+                  setOptions({...options, species: instance ? instance.value : null, pcolor: ''});
+                }}
+              />
+            </Col>
+            <Col xs={"3"}>
+              <Select
+                label="Sex"
+                id="sexDropdown"
+                name="sex"
+                type="text"
+                placeholder="Select Sex"
+                options={sexChoices}
+                styles={customStyles}
+                isClearable={true}
+                onChange={(instance) => {
+                  setOptions({...options, sex: instance ? instance.value : null})
+                }}
+              />
+            </Col>
+            <Col xs={"3"}>
+              <Select
+                label="Owned"
+                id="ownedDropdown"
+                name="owned"
+                type="text"
+                placeholder="Select Owned"
+                options={boolChoices}
+                styles={customStyles}
+                isClearable={true}
+                onChange={(instance) => {
+                  setOptions({...options, owned: instance ? instance.value : null})
+                }}
+              />
+            </Col>
+            <Col xs={"3"}>
+              <Select
+                label="Fixed"
+                id="fixedDropdown"
+                name="fixed"
+                type="text"
+                placeholder="Select Fixed"
+                options={boolChoices}
+                styles={customStyles}
+                isClearable={true}
+                onChange={(instance) => {
+                  setOptions({...options, fixed: instance ? instance.value : null})
+                }}
+              />
+            </Col>
+            <Col xs={"3"}>
+              <Select
+                label="Primary Color"
+                id="pcolorDropdown"
+                name="pcolor"
+                type="text"
+                placeholder="Select Primary Color"
+                ref={pcolorRef}
+                options={colorChoices[options.species]}
+                styles={customStyles}
+                isClearable={true}
+                onChange={(instance) => {
+                  setOptions({...options, pcolor: instance ? instance.value : ''})
+                }}
+              />
+            </Col>
+          </Card.Body>
+        </Card>
       </Form>
-      {data.animals.map((animal, index) => (
+      {animals.map((animal, index) => (
         <div key={animal.id} className="mt-3" hidden={page !== Math.ceil((index+1)/ITEMS_PER_PAGE)}>
           <div className="card-header">
             <h4 style={{marginBottom:"-2px",  marginLeft:"-12px"}}>
