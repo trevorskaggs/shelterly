@@ -10,6 +10,7 @@ import { AddressSearch, DropDown, TextInput } from '../components/Form';
 import { AuthContext } from "../accounts/AccountsReducer";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft } from '@fortawesome/free-solid-svg-icons';
+import { priorityChoices } from '../constants';
 
 // Form for Service Request objects.
 function ServiceRequestForm(props) {
@@ -45,14 +46,6 @@ function ServiceRequestForm(props) {
     accessible: props.state.steps.request.accessible || false,
     turn_around: props.state.steps.request.turn_around || false,
   });
-
-  const priorityChoices = [
-    { value: 1, label: 'Highest' },
-    { value: 2, label: 'High' },
-    { value: 3, label: 'Medium' },
-    { value: 4, label: 'Low' },
-    { value: 5, label: 'Lowest' }
-  ]
 
   // Hook for initializing data.
   useEffect(() => {
