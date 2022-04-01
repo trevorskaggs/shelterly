@@ -30,6 +30,9 @@ class ShelterlyPDF {
   #documentRightMargin = this.#defaultXMargin;
   #documentLastYPosition = 0;
   #defaultElementBuffer = 20;
+  #totalPages = 1;
+  #currentPage = 1;
+  #pageRewound = false;
 
   constructor (format = {}) {
     this.#jsPDF = new jsPDF({
@@ -94,12 +97,27 @@ class ShelterlyPDF {
     if (yPosition >= (this.pageHeight - 75)) {
       return this.drawPageBreak();
     }
-    
+
     return yPosition;
   }
 
-  drawPageBreak() {
+  addPage() {
     this.#jsPDF.addPage();
+    this.#totalPages++;
+    this.#currentPage++;
+  }
+
+  setPage(pageNumber) {
+    this.#jsPDF.setPage(pageNumber);
+    this.#currentPage = pageNumber;
+  }
+
+  drawPageBreak() {
+    if (this.#pageRewound) {
+      this.setPage(this.#currentPage + 1);
+    } else {
+      this.addPage();
+    }
     this.#documentLastYPosition = 35;
 
     return this.#documentLastYPosition;
@@ -280,17 +298,21 @@ class ShelterlyPDF {
     blocks = [],
     bottomPadding = 0
   }) {
-    let startYPosition = this.#documentLastYPosition;
-
     blocks.forEach((blockList, i) => {
-      this.#documentLastYPosition = startYPosition;
-      // this.#documentLeftMargin = startXPosition;
+      const yBeforeDraw = this.#documentLastYPosition;
+      const pageBeforeDraw = this.#currentPage;
       this.drawList(blockList);
+      const pageAfterDraw = this.#currentPage
 
       if (i % 2 === 0) {
-        this.#documentLastYPosition = startYPosition;
+        if (pageBeforeDraw < pageAfterDraw) {
+          this.setPage(pageBeforeDraw);
+          this.#pageRewound = true;
+        }
+        this.#documentLastYPosition = yBeforeDraw;
         this.#documentLeftMargin = this.pageWidth / 2;
       } else {
+        this.#pageRewound = false;
         this.#documentLeftMargin = this.#defaultXMargin;
       }
     })

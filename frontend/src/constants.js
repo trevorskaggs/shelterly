@@ -7,3 +7,12 @@ export const STATE_OPTIONS = [{ value: 'AL', label: "AL" }, { value: 'AK', label
   { value: 'NH', label: "NH" }, { value: 'NJ', label: "NJ" }, { value: 'NM', label: "NM" }, { value: 'NY', label: "NY" }, { value: 'NC', label: "NC" }, { value: 'ND', label: "ND" }, { value: 'OH', label: "OH" },
   { value: 'OK', label: "OK" }, { value: 'OR', label: "OR" }, { value: 'PA', label: "PA" }, { value: 'RI', label: "RI" }, { value: 'SC', label: "SC" }, { value: 'SD', label: "SD" }, { value: 'TN', label: "TN" },
   { value: 'TX', label: "TX" }, { value: 'VA', label: "VA" }, { value: "VT", label: "VT" }, { value: 'WA', label: "WA" }, { value: 'WV', label: "WV" }, { value: 'WI', label: "WI" }, { value: 'WY', label: "WY" },]
+
+  export const priorityChoices = [
+    { value: 1, label: 'Highest' },
+    { value: 2, label: 'High' },
+    { value: 3, label: 'Medium' },
+    { value: 4, label: 'Low' },
+    { value: 5, label: 'Lowest' }
+  ];
+  

@@ -5,7 +5,6 @@ import { Field, Form, Formik } from 'formik';
 import { Switch } from 'formik-material-ui';
 import {
   Form as BootstrapForm,
-  Button,
   ButtonGroup,
   Card,
   Col,
@@ -20,7 +19,7 @@ import {
 } from "react-register-nodes";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faClipboardList
+  faClipboardList, faPrint
 } from '@fortawesome/free-solid-svg-icons';
 import smoothScrollIntoView from "smooth-scroll-into-view-if-needed";
 import Moment from 'react-moment';
@@ -28,7 +27,8 @@ import Header from '../components/Header';
 import { Checkbox, DateTimePicker, DropDown, TextInput } from '../components/Form';
 import { dispatchStatusChoices } from '../animals/constants';
 import ButtonSpinner from '../components/ButtonSpinner';
-import ShelterlyPDF from '../utils/pdf'
+import { printDispatchResolutionForm } from './Utils';
+import { priorityChoices } from '../constants';
 
 function DispatchResolutionForm({ id }) {
 
@@ -52,122 +52,10 @@ function DispatchResolutionForm({ id }) {
   const ordered = useOrderedNodes();
   const [shouldCheckForScroll, setShouldCheckForScroll] = React.useState(false);
 
-  const priorityChoices = [
-    { value: 1, label: 'Highest' },
-    { value: 2, label: 'High' },
-    { value: 3, label: 'Medium' },
-    { value: 4, label: 'Low' },
-    { value: 5, label: 'Lowest' }
-  ]
-
-  // download pdf event handler
-  const downloadClickHandler = (e) => {
+  const handleDownloadPdfClick = (e) => {
     e.preventDefault();
 
-    const pdf = new ShelterlyPDF();
-
-    // draw page header
-    pdf.drawPageHeader({
-      text: 'Dispatch Assignment Resolution Form',
-      subText: `Opened: ${new Date(data.start_time).toLocaleDateString()}`
-    });
-    pdf.drawHRule();
-
-    // draw team section
-    pdf.drawSectionHeader({ text: data.team_object.name, hRule: true });
-    pdf.drawTextList({
-      labels: data.team && data.team_object.team_member_objects.map(team_member => (
-        `${team_member.first_name} ${team_member.last_name} ${team_member.agency_id ? `(${team_member.agency_id})` : ''}`
-      )),
-      bottomPadding: 20
-    });
-
-    // loop through SR's and page break between each one
-    data.assigned_requests.forEach((assigned_request, index) => {
-      if (index > 0) {
-        pdf.drawPageBreak();
-      }
-      // SR Header
-      pdf.drawSectionHeader({
-        text: `SR#${assigned_request.service_request_object.id} - ${assigned_request.service_request_object.full_address}`,
-        hRule: true
-      });
-
-      pdf.drawCheckboxList({
-        labels: ['Not Completed Yet', 'Unable to Complete'],
-        listStyle: 'grid'
-      });
-
-      // owners
-      if (assigned_request.service_request_object.owners.length) {
-        pdf.drawTextList({
-          labels: assigned_request.service_request_object.owner_objects.map((owner) => (
-            `Owner: ${owner.first_name} ${owner.last_name} ${owner.phone}`
-          ))
-        })
-      } else {
-        //no owners
-        pdf.drawTextList({
-          labels: ['Owner: No Owner']
-        })
-      }
-      
-      // additional info
-      pdf.drawTextList({
-        labels: [
-          `Additional Information: ${assigned_request.service_request_object.directions || 'N/A'}`,
-          `Accessible: ${assigned_request.service_request_object.accessible ? 'Yes' : 'No'}`,
-          `Turn Around: ${assigned_request.service_request_object.turn_around ? 'Yes' : 'No'}`
-        ],
-        bottomPadding: 20
-      })
-
-      // animals
-      pdf.drawSectionHeader({ text: 'Animals', hRule: true });
-
-      pdf.drawGrid({
-        blocks: assigned_request.service_request_object.animals.filter(animal => Object.keys(assigned_request.animals).includes(String(animal.id))).map((animal, index) => ({
-          listItems: [
-            { label: `A#${animal.id} - ${animal.name || 'Unknown'} - ${animal.species}` },
-            ...dispatchStatusChoices.filter((choice) => choice.value !== 'REPORTED' ).map((choice) => ({
-              type: 'checkbox',
-              label: choice.label,
-              size: 20
-            }))
-          ],
-          bottomPadding: 20
-        }))
-      })
-
-      // priorities
-      pdf.drawSectionHeader({ text: 'Priority', hRule: true });
-      pdf.drawCheckboxList({
-        labels: priorityChoices.map((priority) => priority.label),
-        listStyle: 'inline',
-        bottomPadding: 25
-      })
-
-      // date completed, followup, etc..
-      pdf.drawTextWithLine({ label: 'Date Completed:', xOffset: 120, yBuffer: 0 });
-      pdf.drawTextWithLine({ label: 'Followup Date:', xOffset: 110, yBuffer: 20 });
-      pdf.drawTextArea({ label: 'Visit Notes:' });
-      pdf.drawCheckBoxLine({ label: 'Forced Entry' });
-
-      // owners contacted
-      if (assigned_request.service_request_object.owners.length) {
-        pdf.drawTextList({
-          labels: ['Owner Contacted:']
-        });
-
-        assigned_request.service_request_object.owner_objects.forEach((owner) => {
-          pdf.drawCheckBoxLine({ label: `Owner: ${owner.first_name} ${owner.last_name} ${owner.phone}` });
-          pdf.drawTextWithLine({ label: 'Owner Contact Time:', xOffset: 150 });
-          pdf.drawTextArea({ label: 'Owner Contact Notes:' });
-        });
-      }
-    });
-
-    pdf.saveFile();
+    printDispatchResolutionForm(data);
   }
 
   // Hook for initializing data.
@@ -328,12 +216,23 @@ function DispatchResolutionForm({ id }) {
         <>
           <BootstrapForm as={Form}>
             <Header>Dispatch Assignment Resolution
+            <OverlayTrigger
+              key={"offline-dispatch-assignment"}
+              placement="bottom"
+              overlay={
+                <Tooltip id={`tooltip-offline-dispatch-assignment`}>
+                  Download printable field resolution form
+                </Tooltip>
+              }
+            >
+              {({ ref, ...triggerHandler }) => (
+                <Link onClick={handleDownloadPdfClick} {...triggerHandler} href="#">
+                  <span ref={ref}><FontAwesomeIcon icon={faPrint} className="ml-3"  inverse /></span>
+                </Link>
+              )}
+            </OverlayTrigger>
               <div style={{ fontSize: "16px", marginTop: "5px" }}><b>Opened: </b><Moment format="MMMM Do YYYY, HH:mm">{data.start_time}</Moment>{data.end_time ? <span style={{ fontSize: "16px", marginTop: "5px" }}> | <b>Closed: </b><Moment format="MMMM Do YYYY, HH:mm">{data.end_time}</Moment></span> : ""}</div>
             </Header>
-            <Button variant="link" onClick={downloadClickHandler} style={{color:"#FFF"}} className="p-0 m-0 mt-3">
-              <FontAwesomeIcon icon={faClipboardList} inverse/>
-              <b className="pl-2">Download printable field resolution form</b>
-            </Button>
             <hr className="mt-2" />
             <Card border="secondary" className="mt-3">
               <Card.Body>
