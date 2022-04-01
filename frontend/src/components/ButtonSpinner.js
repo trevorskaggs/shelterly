@@ -1,0 +1,39 @@
+import React, { useRef } from "react";
+import { Button, Spinner } from "react-bootstrap";
+
+const ButtonSpinner = ({
+  isSubmitting = false,
+  isSubmittingText = 'Loading...',
+  isSubmitted = false,
+  children,
+  ...buttonProps
+}) => {
+  const childrenRef = useRef({
+    children,
+    isLoading: false
+  });
+
+  const loadingComponent = (
+    <>
+      <Spinner
+        as="span"
+        animation="border"
+        size="sm"
+        role="status"
+        aria-hidden="true"
+      />
+      <span className="visually-hidden ml-2">{isSubmittingText}</span>
+    </>
+  );
+
+  childrenRef.current = {
+    children: isSubmitting ? loadingComponent : children,
+    isLoading: isSubmitting
+  }
+
+  return <Button {...buttonProps} disabled={childrenRef.current.isLoading}>
+    {childrenRef.current.children}
+  </Button>
+};
+
+export default ButtonSpinner;
