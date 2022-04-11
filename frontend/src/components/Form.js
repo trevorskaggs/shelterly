@@ -464,11 +464,11 @@ const AddressSearch = (props) => {
           </Col>
           <Col className="border rounded pl-0 pr-0 mb-3 mr-3" xs="4" style={{marginTop:"31px"}}>
             <Map zoom={15} ref={mapRef} center={[initialLatLon[0] || props.formikProps.values.latitude || 0, initialLatLon[1] || props.formikProps.values.longitude || 0]} className="search-leaflet-container" >
-            <Legend position="bottomleft" metric={false} />
-            <TileLayer
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-            />
+              <Legend position="bottomleft" metric={false} />
+              <TileLayer
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+              />
               {props.formikProps.values.latitude && props.formikProps.values.longitude ?
               <Marker
                 draggable={true}

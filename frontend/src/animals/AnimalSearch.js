@@ -12,10 +12,13 @@ import {
 import { faClawMarks, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import Moment from 'react-moment';
 import Select from 'react-select';
+import L from "leaflet";
+import { Map, Marker, Tooltip as MapTooltip, TileLayer } from "react-leaflet";
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
 import { titleCase } from '../components/Utils';
 import { ITEMS_PER_PAGE } from '../constants';
+import { Legend, pinMarkerIcon } from "../components/Map";
 import { catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, speciesChoices, sexChoices } from './constants';
 
 function AnimalSearch() {
@@ -24,7 +27,6 @@ function AnimalSearch() {
   const [queryParams] = useQueryParams();
   const {
     search = '',
-    owned = 'owned',
   } = queryParams;
 
   const boolChoices = [
@@ -33,11 +35,13 @@ function AnimalSearch() {
   ]
 
   const [data, setData] = useState({animals: [], isFetching: false});
-  const [options, setOptions] = useState({species: null, sex: null, owned: null, pcolor: '', fixed: null, location: null});
+  const [options, setOptions] = useState({species: null, sex: null, owned: null, pcolor: '', fixed: null, location: null, latlng: null});
   const [searchTerm, setSearchTerm] = useState(search);
   const tempSearchTerm = useRef(null);
   const pcolorRef = useRef(null);
-  const [statusOptions, setStatusOptions] = useState(owned);
+  const markerRef = useRef(null);
+  const mapRef = useRef(null);
+  const [bounds, setBounds] = useState(L.latLngBounds([[0,0]]));
   const [page, setPage] = useState(1);
   const [numPages, setNumPages] = useState(1);
 
@@ -60,6 +64,10 @@ function AnimalSearch() {
       tempSearchTerm.current.focus();
     }
   }
+
+  const updatePosition = (e) => {
+    setOptions({...options, latlng: e.latlng})
+}
 
   const customStyles = {
     // For the select it self, not the options of the select
@@ -94,14 +102,18 @@ function AnimalSearch() {
     const fetchAnimals = async () => {
       setData({animals: [], isFetching: true});
       // Fetch ServiceRequest data.
-      await axios.get('/animals/api/animal/?search=' + searchTerm + '&owned=' + statusOptions, {
+      await axios.get('/animals/api/animal/?search=' + searchTerm, {
         cancelToken: source.token,
       })
       .then(response => {
         if (!unmounted) {
           setNumPages(Math.ceil(response.data.length / ITEMS_PER_PAGE));
           setData({animals: response.data, isFetching: false});
-          console.log(response.data)
+          let bounds = [];
+          for (const animal of response.data) {
+            bounds.push([animal.latitude, animal.longitude]);
+          }
+          setBounds(bounds.length > 0 ? bounds : L.latLngBounds([[0,0]]));
         }
       })
       .catch(error => {
@@ -116,7 +128,7 @@ function AnimalSearch() {
       unmounted = true;
       source.cancel();
     };
-  }, [searchTerm, statusOptions]);
+  }, [searchTerm]);
 
   // Hook handling option changes.
   useEffect(() => {
@@ -144,6 +156,28 @@ function AnimalSearch() {
         </InputGroup>
         <Card className="border rounded d-flex" style={{width:"100%", marginBottom:"16px"}}>
           <Card.Body>
+            <Col className="border rounded pl-0 pr-0 mb-3 mr-3" xs="4">
+              <Map zoom={15} ref={mapRef} bounds={bounds} onClick={updatePosition} dragging={false} keyboard={false} className="search-leaflet-container" >
+                <Legend position="bottomleft" metric={false} />
+                <TileLayer
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+                />
+                {options.latlng ?
+                <Marker
+                  position={options.latlng}
+                  icon={pinMarkerIcon}
+                  ref={markerRef}
+                >
+                  <MapTooltip autoPan={false} direction="top">
+                    <div>
+                      Lat: {+(Math.round(options.latlng.lat + "e+4") + "e-4")}, Lon: {+(Math.round(options.latlng.lng + "e+4") + "e-4")}
+                    </div>
+                  </MapTooltip>
+                </Marker>
+                : ""}
+              </Map>
+            </Col>
             <Col xs={"3"}>
               <Select
                 label="Species"
