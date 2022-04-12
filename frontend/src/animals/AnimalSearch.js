@@ -13,7 +13,7 @@ import { faClawMarks, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import Moment from 'react-moment';
 import Select from 'react-select';
 import L from "leaflet";
-import { Map, Marker, Tooltip as MapTooltip, TileLayer } from "react-leaflet";
+import { Circle, Map, Marker, Tooltip as MapTooltip, TileLayer } from "react-leaflet";
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
 import { titleCase } from '../components/Utils';
@@ -34,8 +34,14 @@ function AnimalSearch() {
     { value: 'no', label: 'No' },
   ]
 
+  const radiusChoices = [
+    { value: 1, label: '1 Mile' },
+    { value: 2, label: '2 Miles' },
+    { value: 4, label: '5 Miles' },
+  ]
+
   const [data, setData] = useState({animals: [], isFetching: false});
-  const [options, setOptions] = useState({species: null, sex: null, owned: null, pcolor: '', fixed: null, location: null, latlng: null});
+  const [options, setOptions] = useState({species: null, sex: null, owned: null, pcolor: '', fixed: null, location: null, latlng: null, radius: 1});
   const [searchTerm, setSearchTerm] = useState(search);
   const tempSearchTerm = useRef(null);
   const pcolorRef = useRef(null);
@@ -67,7 +73,11 @@ function AnimalSearch() {
 
   const updatePosition = (e) => {
     setOptions({...options, latlng: e.latlng})
-}
+  }
+
+  const clearMarker = () => {
+    setOptions({...options, latlng: null})
+  }
 
   const customStyles = {
     // For the select it self, not the options of the select
@@ -78,7 +88,8 @@ function AnimalSearch() {
         cursor: isDisabled ? 'not-allowed' : 'default',
         backgroundColor: isDisabled ? '#DFDDDD' : 'white',
         height: 35,
-        minHeight: 35
+        minHeight: 35,
+        marginBottom: "15px"
       }
     },
     option: provided => ({
@@ -154,31 +165,10 @@ function AnimalSearch() {
           </InputGroup.Append>
           <Button variant="outline-light" className="ml-1">Advanced</Button>
         </InputGroup>
-        <Card className="border rounded d-flex" style={{width:"100%", marginBottom:"16px"}}>
+        <Card className="border rounded d-flex" style={{width:"100%"}}>
           <Card.Body>
-            <Col className="border rounded pl-0 pr-0 mb-3 mr-3" xs="4">
-              <Map zoom={15} ref={mapRef} bounds={bounds} onClick={updatePosition} dragging={false} keyboard={false} className="search-leaflet-container" >
-                <Legend position="bottomleft" metric={false} />
-                <TileLayer
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-                />
-                {options.latlng ?
-                <Marker
-                  position={options.latlng}
-                  icon={pinMarkerIcon}
-                  ref={markerRef}
-                >
-                  <MapTooltip autoPan={false} direction="top">
-                    <div>
-                      Lat: {+(Math.round(options.latlng.lat + "e+4") + "e-4")}, Lon: {+(Math.round(options.latlng.lng + "e+4") + "e-4")}
-                    </div>
-                  </MapTooltip>
-                </Marker>
-                : ""}
-              </Map>
-            </Col>
-            <Col xs={"3"}>
+            <Row>
+            <Col xs={"4"}>
               <Select
                 label="Species"
                 id="speciesDropdown"
@@ -193,8 +183,6 @@ function AnimalSearch() {
                   setOptions({...options, species: instance ? instance.value : null, pcolor: ''});
                 }}
               />
-            </Col>
-            <Col xs={"3"}>
               <Select
                 label="Sex"
                 id="sexDropdown"
@@ -208,8 +196,6 @@ function AnimalSearch() {
                   setOptions({...options, sex: instance ? instance.value : null})
                 }}
               />
-            </Col>
-            <Col xs={"3"}>
               <Select
                 label="Owned"
                 id="ownedDropdown"
@@ -223,8 +209,6 @@ function AnimalSearch() {
                   setOptions({...options, owned: instance ? instance.value : null})
                 }}
               />
-            </Col>
-            <Col xs={"3"}>
               <Select
                 label="Fixed"
                 id="fixedDropdown"
@@ -238,8 +222,6 @@ function AnimalSearch() {
                   setOptions({...options, fixed: instance ? instance.value : null})
                 }}
               />
-            </Col>
-            <Col xs={"3"}>
               <Select
                 label="Primary Color"
                 id="pcolorDropdown"
@@ -255,6 +237,55 @@ function AnimalSearch() {
                 }}
               />
             </Col>
+            <Col xs="4">
+              <Row style={{marginBottom:"-16px"}}>
+                <Col className="border rounded pl-0 pr-0 mb-3 mr-3">
+                  <Map zoom={15} ref={mapRef} bounds={bounds} onClick={updatePosition} dragging={false} keyboard={false} className="animal-search-leaflet-container" >
+                    <Legend position="bottomleft" metric={false} />
+                    <TileLayer
+                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                      attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+                    />
+                    {options.latlng ?
+                    <span>
+                    <Marker
+                      position={options.latlng}
+                      icon={pinMarkerIcon}
+                      ref={markerRef}
+                    >
+                      <MapTooltip autoPan={false} direction="top">
+                        <div>
+                          Lat: {+(Math.round(options.latlng.lat + "e+4") + "e-4")}, Lon: {+(Math.round(options.latlng.lng + "e+4") + "e-4")}
+                        </div>
+                      </MapTooltip>
+                    </Marker>
+                    <Circle center={options.latlng} color={'#ff4c4c'} radius={805} interactive={false} />
+                    </span>
+                    : ""}
+                  </Map>
+                </Col>
+              </Row>
+              <Row className="mr-0 d-flex" style={{maxHeight:"37px"}}>
+                <Col className="flex-grow-1" style={{marginLeft:"-15px", paddingRight:"0px"}}>
+                  <Select
+                    label="Radius"
+                    id="radiusDropdown"
+                    name="radius"
+                    type="text"
+                    placeholder="Select radius"
+                    options={radiusChoices}
+                    styles={customStyles}
+                    defaultValue={radiusChoices[0]}
+                    isClearable={false}
+                    onChange={(instance) => {
+                      setOptions({...options, radius: instance ? instance.value : null});
+                    }}
+                  />
+                </Col>
+                <Button variant="outline-light" className="float-right" style={{maxHeight:"36px"}} onClick={clearMarker}>Clear</Button>
+              </Row>
+            </Col>
+            </Row>
           </Card.Body>
         </Card>
       </Form>
