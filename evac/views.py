@@ -158,7 +158,7 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
                     Animal.objects.filter(id=animal_dict['id']).update(status=new_status, shelter=new_shelter, intake_date=intake_date)
                     # Update animal found location with SR location if blank.
                     if not animal.address:
-                        Animal.objects.filter(id=animal_dict['id']).update(address=service_requests[0].address, city=service_requests[0].city, state=service_requests[0].state, zip_code=service_requests[0].zip_code)
+                        Animal.objects.filter(id=animal_dict['id']).update(address=service_requests[0].address, city=service_requests[0].city, state=service_requests[0].state, zip_code=service_requests[0].zip_code, latitude=service_requests[0].latitude, longitude=service_requests[0].longitude)
                     # Mark SR as open if any animal is SIP or UTL.
                     if new_status in ['SHELTERED IN PLACE', 'UNABLE TO LOCATE'] and sr_status != 'assigned':
                         sr_status = 'open'
