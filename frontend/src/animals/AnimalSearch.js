@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import axios from "axios";
 import { Link, useQueryParams } from 'raviger';
-import { Button, Card, CardGroup, Col, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Pagination, Row, Tooltip } from 'react-bootstrap';
+import { Button, Card, CardGroup, Col, Collapse, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Pagination, Row, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBan, faCalendarDay, faClipboardList, faCut, faEnvelope, faLink, faMedkit, faUserAltSlash
@@ -32,13 +32,13 @@ function AnimalSearch() {
   const boolChoices = [
     { value: 'yes', label: 'Yes' },
     { value: 'no', label: 'No' },
-  ]
+  ];
 
   const radiusChoices = [
     { value: 1.60934, label: '1 Mile' },
     { value: 3.21869, label: '2 Miles' },
     { value: 8.04672, label: '5 Miles' },
-  ]
+  ];
 
   const [data, setData] = useState({animals: [], isFetching: false});
   const [options, setOptions] = useState({species: null, sex: null, owned: null, pcolor: '', fixed: null, latlng: null, radius: 1.60934});
@@ -66,21 +66,26 @@ function AnimalSearch() {
     setPage(1);
   };
 
-  const handleFilters = () => setShowFilters(!showFilters)
+  const handleFilters = () => {
+    setShowFilters(!showFilters);
+    setTimeout(() => {
+      mapRef.current.leafletElement.invalidateSize();
+    }, 250);
+  };
 
   function setFocus(pageNum) {
     if (pageNum !== page) {
       tempSearchTerm.current.focus();
     }
-  }
+  };
 
   const updatePosition = (e) => {
     setOptions({...options, latlng: e.latlng})
-  }
+  };
 
   const clearMarker = () => {
     setOptions({...options, latlng: null})
-  }
+  };
 
   function arePointsNear(checkPoint, centerPoint) {
     var ky = 40000 / 360;
@@ -88,7 +93,7 @@ function AnimalSearch() {
     var dx = Math.abs(centerPoint.lng - checkPoint.lng) * kx;
     var dy = Math.abs(centerPoint.lat - checkPoint.lat) * ky;
     return Math.sqrt(dx * dx + dy * dy) <= options.radius;
-  }
+  };
 
   const customStyles = {
     // For the select it self, not the options of the select
@@ -175,132 +180,135 @@ function AnimalSearch() {
           <InputGroup.Append>
             <Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0"}}>Search</Button>
           </InputGroup.Append>
-          <Button variant="outline-light" className="ml-1" onClick={handleFilters}>Advanced {showFilters ? <FontAwesomeIcon icon={faChevronDoubleUp} className="ml-1" size="sm" /> : <FontAwesomeIcon icon={faChevronDoubleDown} className="ml-1" size="sm" />}</Button>
+          <Button variant="outline-light" className="ml-1" onClick={handleFilters}>Advanced {showFilters ? <FontAwesomeIcon icon={faChevronDoubleUp} size="sm" /> : <FontAwesomeIcon icon={faChevronDoubleDown} size="sm" />}</Button>
         </InputGroup>
-        {showFilters ?
-        <Card className="border rounded d-flex" style={{width:"100%"}}>
-          <Card.Body style={{marginBottom:"-16px"}}>
-            <Row>
-              <Col xs={"4"}>
-                <Select
-                  label="Species"
-                  id="speciesDropdown"
-                  name="species"
-                  type="text"
-                  placeholder="Select Species"
-                  options={speciesChoices}
-                  styles={customStyles}
-                  isClearable={true}
-                  onChange={(instance) => {
-                    pcolorRef.current.select.clearValue();
-                    setOptions({...options, species: instance ? instance.value : null, pcolor: ''});
-                  }}
-                />
-                <Select
-                  label="Sex"
-                  id="sexDropdown"
-                  name="sex"
-                  type="text"
-                  placeholder="Select Sex"
-                  options={sexChoices}
-                  styles={customStyles}
-                  isClearable={true}
-                  onChange={(instance) => {
-                    setOptions({...options, sex: instance ? instance.value : null})
-                  }}
-                />
-                <Select
-                  label="Owned"
-                  id="ownedDropdown"
-                  name="owned"
-                  type="text"
-                  placeholder="Select Owned"
-                  options={boolChoices}
-                  styles={customStyles}
-                  isClearable={true}
-                  onChange={(instance) => {
-                    setOptions({...options, owned: instance ? instance.value : null})
-                  }}
-                />
-                <Select
-                  label="Fixed"
-                  id="fixedDropdown"
-                  name="fixed"
-                  type="text"
-                  placeholder="Select Fixed"
-                  options={boolChoices}
-                  styles={customStyles}
-                  isClearable={true}
-                  onChange={(instance) => {
-                    setOptions({...options, fixed: instance ? instance.value : null})
-                  }}
-                />
-                <Select
-                  label="Primary Color"
-                  id="pcolorDropdown"
-                  name="pcolor"
-                  type="text"
-                  placeholder="Select Primary Color"
-                  ref={pcolorRef}
-                  options={colorChoices[options.species]}
-                  styles={customStyles}
-                  isClearable={true}
-                  onChange={(instance) => {
-                    setOptions({...options, pcolor: instance ? instance.value : ''})
-                  }}
-                />
-              </Col>
-              <Col xs="5">
-                <Row style={{marginBottom:"-16px"}}>
-                  <Col className="border rounded pl-0 pr-0 mb-3 mr-3">
-                    <Map zoom={15} ref={mapRef} bounds={bounds} onClick={updatePosition} dragging={false} keyboard={false} className="animal-search-leaflet-container" >
-                      <Legend position="bottomleft" metric={false} />
-                      <TileLayer
-                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                        attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+        <Collapse in={showFilters}>
+          <div>
+          <Card className="border rounded d-flex" style={{width:"100%"}}>
+            <Card.Body style={{marginBottom:"-16px"}}>
+              <Row>
+                <Col xs={"4"}>
+                  <Select
+                    label="Species"
+                    id="speciesDropdown"
+                    name="species"
+                    type="text"
+                    placeholder="Select Species"
+                    options={speciesChoices}
+                    styles={customStyles}
+                    isClearable={true}
+                    onChange={(instance) => {
+                      pcolorRef.current.select.clearValue();
+                      setOptions({...options, species: instance ? instance.value : null, pcolor: ''});
+                    }}
+                  />
+                  <Select
+                    label="Sex"
+                    id="sexDropdown"
+                    name="sex"
+                    type="text"
+                    placeholder="Select Sex"
+                    options={sexChoices}
+                    styles={customStyles}
+                    isClearable={true}
+                    onChange={(instance) => {
+                      setOptions({...options, sex: instance ? instance.value : null})
+                    }}
+                  />
+                  <Select
+                    label="Owned"
+                    id="ownedDropdown"
+                    name="owned"
+                    type="text"
+                    placeholder="Select Owned"
+                    options={boolChoices}
+                    styles={customStyles}
+                    isClearable={true}
+                    onChange={(instance) => {
+                      setOptions({...options, owned: instance ? instance.value : null})
+                    }}
+                  />
+                  <Select
+                    label="Fixed"
+                    id="fixedDropdown"
+                    name="fixed"
+                    type="text"
+                    placeholder="Select Fixed"
+                    options={boolChoices}
+                    styles={customStyles}
+                    isClearable={true}
+                    onChange={(instance) => {
+                      setOptions({...options, fixed: instance ? instance.value : null})
+                    }}
+                  />
+                  <Select
+                    label="Primary Color"
+                    id="pcolorDropdown"
+                    name="pcolor"
+                    type="text"
+                    placeholder="Select Primary Color"
+                    ref={pcolorRef}
+                    options={colorChoices[options.species]}
+                    styles={customStyles}
+                    isClearable={true}
+                    onChange={(instance) => {
+                      setOptions({...options, pcolor: instance ? instance.value : ''})
+                    }}
+                  />
+                </Col>
+                <Col xs="5">
+                  <Row style={{marginBottom:"-16px"}}>
+                    <Col className="border rounded pl-0 pr-0 mb-3 mr-3">
+                      <Map zoom={15} ref={mapRef} bounds={bounds} onClick={updatePosition} dragging={false} keyboard={false} className="animal-search-leaflet-container" >
+                        <Legend position="bottomleft" metric={false} />
+                        <TileLayer
+                          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                          attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+                        />
+                        {options.latlng ?
+                        <span>
+                        <Marker
+                          position={options.latlng}
+                          icon={pinMarkerIcon}
+                          ref={markerRef}
+                        >
+                          <MapTooltip autoPan={false} direction="top">
+                            <div>
+                              Lat: {+(Math.round(options.latlng.lat + "e+4") + "e-4")}, Lon: {+(Math.round(options.latlng.lng + "e+4") + "e-4")}
+                            </div>
+                          </MapTooltip>
+                        </Marker>
+                        <Circle center={options.latlng} color={'#ff4c4c'} radius={805} interactive={false} />
+                        </span>
+                        : ""}
+                      </Map>
+                    </Col>
+                  </Row>
+                  <Row className="mr-0 d-flex" style={{maxHeight:"37px"}}>
+                    <Col className="flex-grow-1" style={{marginLeft:"-15px", paddingRight:"0px"}}>
+                      <Select
+                        label="Radius"
+                        id="radiusDropdown"
+                        name="radius"
+                        type="text"
+                        placeholder="Select radius"
+                        options={radiusChoices}
+                        styles={customStyles}
+                        defaultValue={radiusChoices[0]}
+                        isClearable={false}
+                        onChange={(instance) => {
+                          setOptions({...options, radius: instance ? instance.value : null});
+                        }}
                       />
-                      {options.latlng ?
-                      <span>
-                      <Marker
-                        position={options.latlng}
-                        icon={pinMarkerIcon}
-                        ref={markerRef}
-                      >
-                        <MapTooltip autoPan={false} direction="top">
-                          <div>
-                            Lat: {+(Math.round(options.latlng.lat + "e+4") + "e-4")}, Lon: {+(Math.round(options.latlng.lng + "e+4") + "e-4")}
-                          </div>
-                        </MapTooltip>
-                      </Marker>
-                      <Circle center={options.latlng} color={'#ff4c4c'} radius={805} interactive={false} />
-                      </span>
-                      : ""}
-                    </Map>
-                  </Col>
-                </Row>
-                <Row className="mr-0 d-flex" style={{maxHeight:"37px"}}>
-                  <Col className="flex-grow-1" style={{marginLeft:"-15px", paddingRight:"0px"}}>
-                    <Select
-                      label="Radius"
-                      id="radiusDropdown"
-                      name="radius"
-                      type="text"
-                      placeholder="Select radius"
-                      options={radiusChoices}
-                      styles={customStyles}
-                      defaultValue={radiusChoices[0]}
-                      isClearable={false}
-                      onChange={(instance) => {
-                        setOptions({...options, radius: instance ? instance.value : null});
-                      }}
-                    />
-                  </Col>
-                  <Button variant="outline-light" className="float-right" style={{maxHeight:"35px"}} onClick={clearMarker}>Clear</Button>
-                </Row>
-              </Col>
-            </Row>
-          </Card.Body>
-        </Card> : ""}
+                    </Col>
+                    <Button variant="outline-light" className="float-right" style={{maxHeight:"35px"}} onClick={clearMarker}>Clear</Button>
+                  </Row>
+                </Col>
+              </Row>
+            </Card.Body>
+          </Card>
+          </div>
+        </Collapse>
       </Form>
       {animals.map((animal, index) => (
         <div key={animal.id} className="mt-3" hidden={page !== Math.ceil((index+1)/ITEMS_PER_PAGE)}>
