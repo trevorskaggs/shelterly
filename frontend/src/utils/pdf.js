@@ -1,5 +1,5 @@
 import jsPDF from 'jspdf';
-import logo from '../static/images/shelterly.png';
+import logo from '../shelterly.png';
 
 const defaultFormat = {
   orientation: 'p',
@@ -161,11 +161,12 @@ class ShelterlyPDF {
 
   drawHRule({
     xOffset = 0,
-    buffer
+    buffer,
+    lineWidth = this.pageWidth
   } = {}) {
     const yPosition = this.beforeDraw({ yPosition: this.getLastYPositionWithBuffer({ buffer }) });
     const xPosition = this.#documentLeftMargin + xOffset;
-    const width = this.pageWidth - (xPosition - xOffset);
+    const width = lineWidth - (xPosition - xOffset);
     this.#jsPDF.line(xPosition, yPosition, width, yPosition);
 
     // set last y position
@@ -204,7 +205,7 @@ class ShelterlyPDF {
     );
 
     // set last y position
-    this.#documentLastYPosition = yPosition + 25;
+    this.#documentLastYPosition = yPosition;
 
     for (var i = 0; i < rows; i++) {
       this.drawHRule();
@@ -239,9 +240,10 @@ class ShelterlyPDF {
       type = 'text',
       label,
       fillColor = rgbColors.WHITE,
-      size = 0
+      size = 0,
+      marginTop = 0
     }, i) => {
-      const yPosition = this.getLastYPositionWithBuffer();
+      const yPosition = this.getLastYPositionWithBuffer() + marginTop;
       this.#jsPDF.setFillColor(...fillColor);
 
       if (type === 'checkbox') {
@@ -268,7 +270,8 @@ class ShelterlyPDF {
       }
 
       if (listStyle === 'inline') {
-        const lineSize = (this.pageWidth - 30) / 5;
+        const itemWidth = listItems.length > 5 ? listItems.length : 5;
+        const lineSize = (this.pageWidth - 30) / itemWidth;
         this.#documentLeftMargin = this.#documentLeftMargin + lineSize;
 
         if (this.#documentLeftMargin > (this.pageWidth - 30)) {
@@ -336,13 +339,15 @@ class ShelterlyPDF {
 
   drawTextList({
     labels = [],
+    labelMarginTop = 0,
     listStyle = 'block',
     bottomPadding = 0
   }) {
     this.drawList({
       listStyle,
       listItems: labels.map((label) => ({
-        label
+        label,
+        marginTop: labelMarginTop
       })),
       bottomPadding
     })
