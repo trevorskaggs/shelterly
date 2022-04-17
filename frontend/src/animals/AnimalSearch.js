@@ -11,7 +11,7 @@ import {
 } from '@fortawesome/free-regular-svg-icons';
 import { faChevronDoubleDown, faChevronDoubleUp, faClawMarks, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import Moment from 'react-moment';
-import Select from 'react-select';
+import Select, { components } from 'react-select';
 import L from "leaflet";
 import { Circle, Map, Marker, Tooltip as MapTooltip, TileLayer } from "react-leaflet";
 import Header from '../components/Header';
@@ -19,7 +19,15 @@ import Scrollbar from '../components/Scrollbars';
 import { titleCase } from '../components/Utils';
 import { ITEMS_PER_PAGE } from '../constants';
 import { Legend, pinMarkerIcon } from "../components/Map";
-import { catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, speciesChoices, sexChoices } from './constants';
+import { catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, speciesChoices } from './constants';
+
+const NoOptionsMessage = props => {
+  return (
+    <components.NoOptionsMessage {...props}>
+      <span>Select a species</span>
+    </components.NoOptionsMessage>
+  );
+};
 
 function AnimalSearch() {
 
@@ -29,9 +37,21 @@ function AnimalSearch() {
     search = '',
   } = queryParams;
 
-  const boolChoices = [
+  const ownedChoices = [
     { value: 'yes', label: 'Yes' },
     { value: 'no', label: 'No' },
+  ];
+
+  const fixedChoices = [
+    { value: 'yes', label: 'Yes' },
+    { value: 'no', label: 'No' },
+    { value: 'unknown', label: 'Unknown'}
+  ];
+
+  const sexChoices = [
+    { value: 'M', label: 'Male' },
+    { value: 'F', label: 'Female' },
+    { value: 'unknown', label: 'Unknown'}
   ];
 
   const radiusChoices = [
@@ -83,7 +103,7 @@ function AnimalSearch() {
                            .filter(animal => options.owned === 'yes' ? animal.owners.length > 0 : animal)
                            .filter(animal => options.owned === 'no' ? animal.owners.length === 0 : animal)
                            .filter(animal => options.fixed ? animal.fixed === options.fixed : animal)
-                           .filter(animal => options.sex ? animal.sex === options.sex : animal)
+                           .filter(animal => options.sex === 'unknown' ? animal.sex === '' : options.sex ? animal.sex === options.sex : animal)
                            .filter(animal => options.pcolor ? animal.pcolor === options.pcolor || animal.scolor === options.pcolor : animal)
                            .filter(animal => options.latlng ? arePointsNear({lat:animal.latitude, lng: animal.longitude}, options.latlng) : animal))
   }
@@ -241,7 +261,7 @@ function AnimalSearch() {
                     name="owned"
                     type="text"
                     placeholder="Select Owned"
-                    options={boolChoices}
+                    options={ownedChoices}
                     styles={customStyles}
                     isClearable={true}
                     ref={ownedRef}
@@ -255,7 +275,7 @@ function AnimalSearch() {
                     name="fixed"
                     type="text"
                     placeholder="Select Fixed"
-                    options={boolChoices}
+                    options={fixedChoices}
                     styles={customStyles}
                     isClearable={true}
                     ref={fixedRef}
@@ -268,7 +288,8 @@ function AnimalSearch() {
                     id="pcolorDropdown"
                     name="pcolor"
                     type="text"
-                    placeholder="Select Primary Color"
+                    placeholder="Select Color"
+                    components={{ NoOptionsMessage }}
                     ref={pcolorRef}
                     options={colorChoices[options.species]}
                     styles={customStyles}
