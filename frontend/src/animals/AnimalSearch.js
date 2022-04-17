@@ -41,10 +41,15 @@ function AnimalSearch() {
   ];
 
   const [data, setData] = useState({animals: [], isFetching: false});
+  const [animals, setAnimals] = useState([]);
   const [options, setOptions] = useState({species: null, sex: null, owned: null, pcolor: '', fixed: null, latlng: null, radius: 1.60934});
   const [searchTerm, setSearchTerm] = useState(search);
   const [showFilters, setShowFilters] = useState(false);
   const tempSearchTerm = useRef(null);
+  const speciesRef = useRef(null);
+  const sexRef = useRef(null);
+  const ownedRef = useRef(null);
+  const fixedRef = useRef(null);
   const pcolorRef = useRef(null);
   const markerRef = useRef(null);
   const mapRef = useRef(null);
@@ -66,12 +71,32 @@ function AnimalSearch() {
     setPage(1);
   };
 
-  const handleFilters = () => {
+  const handleShowFilters = () => {
     setShowFilters(!showFilters);
     setTimeout(() => {
       mapRef.current.leafletElement.invalidateSize();
     }, 250);
   };
+
+  const handleApplyFilters = () => {
+    setAnimals(data.animals.filter(animal => options.species ? animal.species === options.species : animal)
+                           .filter(animal => options.owned === 'yes' ? animal.owners.length > 0 : animal)
+                           .filter(animal => options.owned === 'no' ? animal.owners.length === 0 : animal)
+                           .filter(animal => options.fixed ? animal.fixed === options.fixed : animal)
+                           .filter(animal => options.sex ? animal.sex === options.sex : animal)
+                           .filter(animal => options.pcolor ? animal.pcolor === options.pcolor || animal.scolor === options.pcolor : animal)
+                           .filter(animal => options.latlng ? arePointsNear({lat:animal.latitude, lng: animal.longitude}, options.latlng) : animal))
+  }
+
+  const handleClear = () => {
+    speciesRef.current.select.clearValue();
+    sexRef.current.select.clearValue();
+    ownedRef.current.select.clearValue();
+    fixedRef.current.select.clearValue();
+    pcolorRef.current.select.clearValue();
+    setOptions({species: null, sex: null, owned: null, pcolor: '', fixed: null, latlng: null, radius: 1.60934});
+    setAnimals(data.animals);
+  }
 
   function setFocus(pageNum) {
     if (pageNum !== page) {
@@ -114,14 +139,6 @@ function AnimalSearch() {
     }),
   };
 
-  let animals = data.animals.filter(animal => options.species ? animal.species === options.species : animal)
-                            .filter(animal => options.owned === 'yes' ? animal.owners.length > 0 : animal)
-                            .filter(animal => options.owned === 'no' ? animal.owners.length === 0 : animal)
-                            .filter(animal => options.fixed ? animal.fixed === options.fixed : animal)
-                            .filter(animal => options.sex ? animal.sex === options.sex : animal)
-                            .filter(animal => options.pcolor ? animal.pcolor === options.pcolor : animal)
-                            .filter(animal => options.latlng ? arePointsNear({lat:animal.latitude, lng: animal.longitude}, options.latlng) : animal)
-
   // Hook for initializing data.
   useEffect(() => {
     let unmounted = false;
@@ -137,6 +154,7 @@ function AnimalSearch() {
         if (!unmounted) {
           setNumPages(Math.ceil(response.data.length / ITEMS_PER_PAGE));
           setData({animals: response.data, isFetching: false});
+          setAnimals(response.data);
           let bounds = [];
           for (const animal of response.data) {
             bounds.push([animal.latitude, animal.longitude]);
@@ -162,7 +180,7 @@ function AnimalSearch() {
   useEffect(() => {
     setNumPages(Math.ceil(animals.length / ITEMS_PER_PAGE));
     setPage(1);
-  }, [options, animals.length]);
+  }, [animals.length]);
 
   return (
     <div className="ml-2 mr-2">
@@ -180,7 +198,7 @@ function AnimalSearch() {
           <InputGroup.Append>
             <Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0"}}>Search</Button>
           </InputGroup.Append>
-          <Button variant="outline-light" className="ml-1" onClick={handleFilters}>Advanced {showFilters ? <FontAwesomeIcon icon={faChevronDoubleUp} size="sm" /> : <FontAwesomeIcon icon={faChevronDoubleDown} size="sm" />}</Button>
+          <Button variant="outline-light" className="ml-1" onClick={handleShowFilters}>Advanced {showFilters ? <FontAwesomeIcon icon={faChevronDoubleUp} size="sm" /> : <FontAwesomeIcon icon={faChevronDoubleDown} size="sm" />}</Button>
         </InputGroup>
         <Collapse in={showFilters}>
           <div>
@@ -197,6 +215,7 @@ function AnimalSearch() {
                     options={speciesChoices}
                     styles={customStyles}
                     isClearable={true}
+                    ref={speciesRef}
                     onChange={(instance) => {
                       pcolorRef.current.select.clearValue();
                       setOptions({...options, species: instance ? instance.value : null, pcolor: ''});
@@ -211,6 +230,7 @@ function AnimalSearch() {
                     options={sexChoices}
                     styles={customStyles}
                     isClearable={true}
+                    ref={sexRef}
                     onChange={(instance) => {
                       setOptions({...options, sex: instance ? instance.value : null})
                     }}
@@ -224,6 +244,7 @@ function AnimalSearch() {
                     options={boolChoices}
                     styles={customStyles}
                     isClearable={true}
+                    ref={ownedRef}
                     onChange={(instance) => {
                       setOptions({...options, owned: instance ? instance.value : null})
                     }}
@@ -237,6 +258,7 @@ function AnimalSearch() {
                     options={boolChoices}
                     styles={customStyles}
                     isClearable={true}
+                    ref={fixedRef}
                     onChange={(instance) => {
                       setOptions({...options, fixed: instance ? instance.value : null})
                     }}
@@ -303,6 +325,10 @@ function AnimalSearch() {
                     </Col>
                     <Button variant="outline-light" className="float-right" style={{maxHeight:"35px"}} onClick={clearMarker}>Clear</Button>
                   </Row>
+                </Col>
+                <Col className="flex-grow-1 pl-0" xs="3">
+                  <Button className="btn btn-primary" style={{maxHeight:"35px", width:"100%"}} onClick={handleApplyFilters}>Apply</Button>
+                  <Button variant="outline-light" style={{maxHeight:"35px", width:"100%", marginTop:"15px"}} onClick={handleClear}>Clear</Button>
                 </Col>
               </Row>
             </Card.Body>
