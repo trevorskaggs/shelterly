@@ -10,6 +10,7 @@ import { AddressSearch, DropDown, TextInput } from '../components/Form';
 import { AuthContext } from "../accounts/AccountsReducer";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft } from '@fortawesome/free-solid-svg-icons';
+import ButtonSpinner from '../components/ButtonSpinner';
 
 // Form for Service Request objects.
 function ServiceRequestForm(props) {
@@ -26,6 +27,9 @@ function ServiceRequestForm(props) {
   // Track duplicate request address error.
   const [error, setError] = useState({show:false, error:[]});
   const handleClose = () => setError({show:false, error:[]});
+
+  // is submitting state for save/next workflow buttons
+  const [isButtonSubmitting, setIsButtonSubmitting] = useState(false);
 
   // Initial ServiceRequest data.
   const [data, setData] = useState({
@@ -108,6 +112,7 @@ function ServiceRequestForm(props) {
             .nullable(),
         })}
         onSubmit={ async (values, { setSubmitting }) => {
+          setIsButtonSubmitting(true);
           if (is_workflow) {
             // Create Reporter
             let reporterResponse = [{data:{id:props.state.steps.reporter.id}}];
@@ -151,6 +156,7 @@ function ServiceRequestForm(props) {
               if (error.response.data && error.response.data[0].includes('same address')) {
                 setError({show:true, error:error.response.data});
               }
+              setIsButtonSubmitting(false);
             });
           }
           else if (id) {
@@ -167,8 +173,8 @@ function ServiceRequestForm(props) {
               if (error.response.data && error.response.data[0].includes('same address')) {
                 setError({show:true, error:error.response.data});
               }
+              setIsButtonSubmitting(false);
             });
-            setSubmitting(false);
           }
       }}
     >
@@ -227,8 +233,10 @@ function ServiceRequestForm(props) {
         </Card.Body>
         <ButtonGroup size="lg">
           {is_workflow ?
-            <Button className="btn btn-primary border" type="submit" onClick={() => { formikProps.submitForm()}}>Finish and Create Service Request</Button> :
-            <Button type="submit" onClick={() => { formikProps.submitForm()}}>Save</Button>
+            <ButtonSpinner isSubmitting={isButtonSubmitting} isSubmittingText="Saving..." className="btn btn-primary border" type="submit" onClick={() => { formikProps.submitForm()}}>
+              Finish and Create Service Request
+            </ButtonSpinner> :
+            <ButtonSpinner isSubmitting={isButtonSubmitting} isSubmittingText="Saving..." type="submit" onClick={() => { formikProps.submitForm()}}>Save</ButtonSpinner>
           }
         </ButtonGroup>
       </Card>

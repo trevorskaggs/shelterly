@@ -13,4 +13,5 @@ frontend/.env
 static/
 media/
 docker-compose.override.yml
-
+.venv
+.eslintcache

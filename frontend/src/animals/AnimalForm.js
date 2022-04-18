@@ -3,7 +3,7 @@ import axios from "axios";
 import { navigate, useQueryParams } from 'raviger';
 import { Form, Formik } from "formik";
 import { Col, Image } from 'react-bootstrap';
-import { Button, ButtonGroup, Form as BootstrapForm } from "react-bootstrap";
+import { ButtonGroup, Form as BootstrapForm } from "react-bootstrap";
 import { Card } from 'react-bootstrap';
 import * as Yup from 'yup';
 import { AuthContext } from "../accounts/AccountsReducer";
@@ -11,6 +11,7 @@ import { AddressSearch, DateTimePicker, DropDown, ImageUploader, TextInput } fro
 import { catAgeChoices, dogAgeChoices, horseAgeChoices, otherAgeChoices, catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, speciesChoices, sexChoices, dogSizeChoices, catSizeChoices, horseSizeChoices, otherSizeChoices, unknownChoices } from './constants';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft, faMinusSquare } from '@fortawesome/free-solid-svg-icons';
+import ButtonSpinner from "../components/ButtonSpinner";
 
 const AnimalForm = (props) => {
 
@@ -50,6 +51,9 @@ const AnimalForm = (props) => {
 
   // Dynamic placeholder value for options.
   const [placeholder, setPlaceholder] = useState("Select a species...");
+
+  // is submitting state for save/next workflow buttons
+  const [isButtonSubmitting, setIsButtonSubmitting] = useState(false);
 
   const initialData = {
     new_owner: owner_id,
@@ -274,6 +278,7 @@ const AnimalForm = (props) => {
             .nullable()
         })}
         onSubmit={ async (values, { setSubmitting, resetForm }) => {
+          setIsButtonSubmitting(true);
           // Remove owners from form data.
           if (values["owners"]) {
             delete values["owners"];
@@ -321,12 +326,14 @@ const AnimalForm = (props) => {
                   }
                 }
                 resetForm({values:animal_json});
+                setIsButtonSubmitting(false);
               }
               // Otherwise reset form with blank data.
               else {
                 resetForm({values:initialData});
                 setFrontImage([]);
                 setSideImage([]);
+                setIsButtonSubmitting(false);
               }
             }
             // If we're in intake, then create objects and navigate to shelter page.
@@ -352,6 +359,7 @@ const AnimalForm = (props) => {
                 animal.append('new_owner', ownerResponse[0].data.id);
                 axios.post('/animals/api/animal/', animal)
                 .catch(error => {
+                  setIsButtonSubmitting(false);
                 });
               });
               // Create current animal then navigate.
@@ -371,6 +379,7 @@ const AnimalForm = (props) => {
                 }
               })
               .catch(error => {
+                setIsButtonSubmitting(false);
               });
             }
             else {
@@ -389,6 +398,7 @@ const AnimalForm = (props) => {
                 }
               })
               .catch(error => {
+                setIsButtonSubmitting(false);
               });
             }
             else {
@@ -408,8 +418,8 @@ const AnimalForm = (props) => {
                 }
               })
               .catch(error => {
+                setIsButtonSubmitting(false);
               });
-              setSubmitting(false);
             }
           }
         }}
@@ -728,12 +738,21 @@ const AnimalForm = (props) => {
           </Card.Body>
           <ButtonGroup size="lg">
             {is_workflow ?
-              <Button type="button" onClick={() => {setAddAnother(true); formikProps.submitForm(); speciesRef.current.focus()}}>{props.state.steps.animals.length -1 > props.state.animalIndex ? "Next Animal" : "Add Another"}</Button>
-            :
-              <Button type="button" onClick={() => {setAddAnother(false); formikProps.submitForm()}}>Save</Button>
+                <ButtonSpinner isSubmitting={isButtonSubmitting} isSubmittingText="Saving..." type="button" onClick={() => {setAddAnother(true); formikProps.submitForm(); speciesRef.current.focus()}}>
+                  {props.state.steps.animals.length -1 > props.state.animalIndex ? "Next Animal" : "Add Another"}
+                </ButtonSpinner> :
+                <ButtonSpinner isSubmitting={isButtonSubmitting} isSubmittingText="Saving..." type="button" onClick={() => {setAddAnother(false); formikProps.submitForm()}}>
+                  Save
+                </ButtonSpinner>
             }
-            {is_workflow && !is_intake ? <Button type="button" className="btn btn-primary border" onClick={() => {setAddAnother(false); formikProps.submitForm()}}>Next Step</Button> : ""}
-            {is_workflow && is_intake ? <Button type="button" className="btn btn-primary mr-1 border" onClick={() => {setAddAnother(false); formikProps.submitForm()}}>Save and Finish</Button> : ""}
+            {is_workflow && !is_intake ?
+                <ButtonSpinner isSubmitting={isButtonSubmitting} isSubmittingText="Loading..." type="button" className="btn btn-primary border" onClick={() => {setAddAnother(false); formikProps.submitForm()}}>
+                  Next Step
+                </ButtonSpinner> : ""}
+            {is_workflow && is_intake ?
+                <ButtonSpinner isSubmitting={isButtonSubmitting} isSubmittingText="Saving..." type="button" className="btn btn-primary mr-1 border" onClick={() => {setAddAnother(false); formikProps.submitForm()}}>
+                  Save and Finish
+                </ButtonSpinner> : ""}
           </ButtonGroup>
           </Card>
         )}

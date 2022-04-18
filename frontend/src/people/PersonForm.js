@@ -8,6 +8,7 @@ import { AddressSearch, TextInput } from '../components/Form';
 import { AuthContext } from "../accounts/AccountsReducer";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft } from '@fortawesome/free-solid-svg-icons';
+import ButtonSpinner from '../components/ButtonSpinner';
 
 // Form for owner and reporter Person objects.
 const PersonForm = (props) => {
@@ -195,6 +196,7 @@ const PersonForm = (props) => {
                 // Throw error if duplicate owner found.
                 if (isOwner) {
                   setError({show:true, error:['a duplicate owner with the same name and phone number already exists.', response.data[0].id]});
+                  setSubmitting(false);
                 }
                 // Use existing person object if duplicate reporter found.
                 else {
@@ -219,6 +221,7 @@ const PersonForm = (props) => {
               }
             })
             .catch(error => {
+              setSubmitting(false);
             });
           }
           else if (id) {
@@ -235,6 +238,7 @@ const PersonForm = (props) => {
               }
             })
             .catch(error => {
+              setSubmitting(false);
             });
           }
           else {
@@ -257,8 +261,8 @@ const PersonForm = (props) => {
               if (error.response.data && error.response.data[0].includes('duplicate owner')) {
                 setError({show:true, error:error.response.data});
               }
+              setSubmitting(false);
             });
-            setSubmitting(false);
           }
         }}
       >
@@ -345,10 +349,19 @@ const PersonForm = (props) => {
           </Card.Body>
             <ButtonGroup size="lg" >
               {/* form save buttons */}
-              {!is_first_responder && !is_workflow ? <Button type="button" onClick={() => { setSkipOwner(false); formikProps.submitForm() }}>{!isOwner && !is_intake ? <span>{!id ? "Add Owner" : "Save"}</span> : "Save"}</Button> : ""}
+              {!is_first_responder && !is_workflow ?
+                <ButtonSpinner isSubmitting={formikProps.isSubmitting} isSubmittingText="Saving..." type="button" onClick={() => { setSkipOwner(false); formikProps.submitForm() }}>
+                  {!isOwner && !is_intake ? <span>{!id ? "Add Owner" : "Save"}</span> : "Save"}
+                </ButtonSpinner> : ""}
               {/* workflow buttons */}
-              {is_workflow && !isOwner ? <Button type="button" onClick={() => { setSkipOwner(false); formikProps.submitForm(); }}>{props.state.steps.owner.first_name ? "Change Owner" : "Add Owner"}</Button> : ""}
-              {is_workflow ? <button type="button" className="btn btn-primary border" onClick={() => { setSkipOwner(true); formikProps.submitForm(); }}>Next Step</button> : ""}
+              {is_workflow && !isOwner ?
+                <ButtonSpinner isSubmitting={formikProps.isSubmitting} isSubmittingText="Saving..." type="button" onClick={() => { setSkipOwner(false); formikProps.submitForm(); }}>
+                  {props.state.steps.owner.first_name ? "Change Owner" : "Add Owner"}
+                </ButtonSpinner> : ""}
+              {is_workflow ?
+                <ButtonSpinner isSubmitting={formikProps.isSubmitting} isSubmittingText="Loading..." type="button" className="btn btn-primary border" onClick={() => { setSkipOwner(true); formikProps.submitForm(); }}>
+                  Next Step
+                </ButtonSpinner> : ""}
             </ButtonGroup>
             <Modal show={error.show} onHide={handleErrorClose}>
               <Modal.Header closeButton>

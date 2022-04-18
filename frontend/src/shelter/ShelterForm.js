@@ -7,6 +7,7 @@ import { AddressSearch, TextInput } from '../components/Form';
 import * as Yup from 'yup';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft } from '@fortawesome/free-solid-svg-icons';
+import ButtonSpinner from '../components/ButtonSpinner';
 
 // Regex validators.
 const nameRegex = /^[a-z0-9 ,.'-]+$/i;
@@ -154,7 +155,7 @@ const ShelterForm = ({id}) => {
               </BootstrapForm>
             </Card.Body>
             <ButtonGroup size="lg">
-              <Button type="submit" onClick={() => { props.submitForm()}}>Save</Button>
+              <ButtonSpinner isSubmitting={props.isSubmitting} isSubmittingText="Saving..." type="submit" onClick={() => { props.submitForm()}}>Save</ButtonSpinner>
             </ButtonGroup>
           </Card>
           <Modal show={show} onHide={handleClose}>

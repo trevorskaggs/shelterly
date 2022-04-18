@@ -4,7 +4,6 @@ import { navigate } from "raviger";
 import { Formik, } from 'formik';
 import {
   Form as BootstrapForm,
-  Button,
   ButtonGroup,
   Card,
 } from 'react-bootstrap';
@@ -14,6 +13,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import * as Yup from 'yup';
 import { TextInput } from '.././components/Form.js';
+import ButtonSpinner from '../components/ButtonSpinner.js';
 
 const DispatchTeamMemberForm = () => {
 
@@ -54,8 +54,8 @@ const DispatchTeamMemberForm = () => {
             }
           })
           .catch(error => {
+            setSubmitting(false);
           });
-          setSubmitting(false);
         }, 500);
       }}
     >
@@ -99,8 +99,8 @@ const DispatchTeamMemberForm = () => {
             </BootstrapForm>
           </Card.Body>
           <ButtonGroup size="lg">
-            <Button onClick={() => { setAddAnother(true); form.submitForm() }}>Add Another</Button>
-            <Button className="btn btn-primary border" onClick={() => { setAddAnother(false); form.submitForm() }} style={{paddingLeft:"78px"}}>Save</Button>
+            <ButtonSpinner isSubmitting={form.isSubmitting} isSubmittingText="Saving..." onClick={() => { setAddAnother(true); form.submitForm() }}>Add Another</ButtonSpinner>
+            <ButtonSpinner isSubmitting={form.isSubmitting} isSubmittingText="Saving..." className="btn btn-primary border" onClick={() => { setAddAnother(false); form.submitForm() }} style={{paddingLeft:"78px"}}>Save</ButtonSpinner>
           </ButtonGroup>
         </Card>
       )}

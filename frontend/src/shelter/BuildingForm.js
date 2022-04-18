@@ -2,12 +2,13 @@ import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
 import { navigate, useQueryParams } from 'raviger';
 import { Formik } from 'formik';
-import { Form as BootstrapForm, Button, ButtonGroup, Card } from "react-bootstrap";
+import { Form as BootstrapForm, ButtonGroup, Card } from "react-bootstrap";
 import { TextInput } from '../components/Form';
 import * as Yup from 'yup';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft } from '@fortawesome/free-solid-svg-icons';
 import { AuthContext } from "../accounts/AccountsReducer";
+import ButtonSpinner from '../components/ButtonSpinner';
 
 // Regex validators.
 const nameRegex = /^[a-z0-9 ,.'-]+$/i
@@ -83,6 +84,7 @@ export const BuildingForm = ({id}) => {
                 }
               })
               .catch(error => {
+                setSubmitting(false);
               });
             }
             else {
@@ -96,9 +98,9 @@ export const BuildingForm = ({id}) => {
                 }
               })
               .catch(error => {
+                setSubmitting(false);
               });
             }
-            setSubmitting(false);
           }, 500);
         }}
       >
@@ -125,7 +127,7 @@ export const BuildingForm = ({id}) => {
             </BootstrapForm>
           </Card.Body>
           <ButtonGroup size="lg">
-            <Button type="submit" onClick={() => { props.submitForm()}}>Save</Button>
+            <ButtonSpinner isSubmitting={props.isSubmitting} isSubmittingText="Saving..." type="submit" onClick={() => { props.submitForm()}}>Save</ButtonSpinner>
           </ButtonGroup>
         </Card>
         )}

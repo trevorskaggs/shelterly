@@ -4,7 +4,6 @@ import { Link, navigate } from "raviger";
 import { Field, Form, Formik } from 'formik';
 import { Switch } from 'formik-material-ui';
 import {
-  Button,
   Form as BootstrapForm,
   ButtonGroup,
   Card,
@@ -27,6 +26,7 @@ import Moment from 'react-moment';
 import Header from '../components/Header';
 import { Checkbox, DateTimePicker, DropDown, TextInput } from '../components/Form';
 import { dispatchStatusChoices } from '../animals/constants';
+import ButtonSpinner from '../components/ButtonSpinner';
 
 function DispatchResolutionForm({ id }) {
 
@@ -207,8 +207,8 @@ function DispatchResolutionForm({ id }) {
               navigate('/dispatch/summary/' + response.data.id);
             })
             .catch(error => {
+              setSubmitting(false);
             });
-          setSubmitting(false);
         }, 500);
       }}
     >
@@ -478,7 +478,9 @@ function DispatchResolutionForm({ id }) {
               </Card>
             ))}
             <ButtonGroup size="lg" className="col-12 pl-0 pr-0">
-              <Button className="btn btn-block" type="submit" onClick={() => { setShouldCheckForScroll(true); }}>Save</Button>
+              <ButtonSpinner isSubmitting={props.isSubmitting} isSubmittingText="Saving..." className="btn btn-block" type="submit" onClick={() => { setShouldCheckForScroll(true); }}>
+                Save
+              </ButtonSpinner>
             </ButtonGroup>
           </BootstrapForm>
         </>

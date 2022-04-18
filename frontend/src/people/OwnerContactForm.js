@@ -2,11 +2,12 @@ import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import { navigate, useQueryParams } from 'raviger';
 import { Formik } from 'formik';
-import { Form as BootstrapForm, Button, ButtonGroup, Card, Col, FormGroup, Row } from "react-bootstrap";
+import { Form as BootstrapForm, ButtonGroup, Card, Col, FormGroup, Row } from "react-bootstrap";
 import * as Yup from 'yup';
 import { DateTimePicker, TextInput } from '../components/Form';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft } from '@fortawesome/free-solid-svg-icons';
+import ButtonSpinner from '../components/ButtonSpinner';
 
 const OwnerContactForm = ({id}) => {
 
@@ -92,8 +93,8 @@ const OwnerContactForm = ({id}) => {
           navigate('/people/owner/' + response.data.owner)
         })
         .catch(error => {
+          setSubmitting(false);
         });
-        setSubmitting(false);
       }}
     >
     {form => (
@@ -134,7 +135,7 @@ const OwnerContactForm = ({id}) => {
           </BootstrapForm>
         </Card.Body>
         <ButtonGroup>
-          <Button type="button" className="btn btn-primary" onClick={() => {form.submitForm()}}>Save</Button>
+          <ButtonSpinner isSubmitting={form.isSubmitting} isSubmittingText="Saving..." type="button" className="btn btn-primary" onClick={() => {form.submitForm()}}>Save</ButtonSpinner>
         </ButtonGroup>
       </Card>
       )}
