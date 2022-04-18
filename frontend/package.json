@@ -26,7 +26,7 @@
     "formik": "^2.2.0",
     "formik-material-ui": "^2.0.0-beta.1",
     "leaflet": "^1.7.1",
-    "moment": "^2.29.1",
+    "moment": "^2.29.2",
     "msw": "^0.20.5",
     "randomcolor": "^0.6.2",
     "raviger": "^1.5.1",
