@@ -1,10 +1,11 @@
 import React, { useEffect, useState, useRef } from 'react';
+import ReactDOMServer from 'react-dom/server';
 import axios from "axios";
 import { Link, useQueryParams } from 'raviger';
 import { Button, Card, CardGroup, Col, Collapse, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Pagination, Row, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBan, faCalendarDay, faClipboardList, faCut, faEnvelope, faLink, faMedkit, faUserAltSlash
+  faBan, faCalendarDay, faClipboardList, faCut, faEnvelope, faLink, faMapMarkerAlt, faMedkit, faUserAltSlash
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faDotCircle
@@ -18,7 +19,7 @@ import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
 import { titleCase } from '../components/Utils';
 import { ITEMS_PER_PAGE } from '../constants';
-import { Legend, pinMarkerIcon } from "../components/Map";
+import { Legend } from "../components/Map";
 import { catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, speciesChoices } from './constants';
 
 const NoOptionsMessage = props => {
@@ -65,6 +66,7 @@ function AnimalSearch() {
   const [options, setOptions] = useState({species: null, sex: null, owned: null, pcolor: '', fixed: null, latlng: null, radius: 1.60934});
   const [searchTerm, setSearchTerm] = useState(search);
   const [showFilters, setShowFilters] = useState(false);
+  const [isDisabled, setIsDisabled] = useState(true);
   const tempSearchTerm = useRef(null);
   const speciesRef = useRef(null);
   const sexRef = useRef(null);
@@ -95,7 +97,7 @@ function AnimalSearch() {
     setShowFilters(!showFilters);
     setTimeout(() => {
       mapRef.current.leafletElement.invalidateSize();
-    }, 250);
+    }, 1000);
   };
 
   const handleApplyFilters = () => {
@@ -116,7 +118,7 @@ function AnimalSearch() {
     pcolorRef.current.select.clearValue();
     setOptions({species: null, sex: null, owned: null, pcolor: '', fixed: null, latlng: null, radius: 1.60934});
     setAnimals(data.animals);
-  }
+  };
 
   function setFocus(pageNum) {
     if (pageNum !== page) {
@@ -159,6 +161,18 @@ function AnimalSearch() {
     }),
   };
 
+  const pinIconHTML = ReactDOMServer.renderToString(<FontAwesomeIcon color="red" size="lg" className="icon-border" icon={faMapMarkerAlt} />);
+  const pinMarkerIcon = new L.DivIcon({
+    html: pinIconHTML,
+    iconSize: [0, 0],
+    iconAnchor: [5, 10],
+    className: "pin-icon",
+    popupAnchor: null,
+    shadowUrl: null,
+    shadowSize: null,
+    shadowAnchor: null
+  });
+
   // Hook for initializing data.
   useEffect(() => {
     let unmounted = false;
@@ -175,11 +189,13 @@ function AnimalSearch() {
           setNumPages(Math.ceil(response.data.length / ITEMS_PER_PAGE));
           setData({animals: response.data, isFetching: false});
           setAnimals(response.data);
-          let bounds = [];
+          let bounds_array = [];
           for (const animal of response.data) {
-            bounds.push([animal.latitude, animal.longitude]);
+            if (animal.latitude && animal.longitude) {
+              bounds_array.push([animal.latitude, animal.longitude]);
+            }
           }
-          setBounds(bounds.length > 0 ? bounds : L.latLngBounds([[0,0]]));
+          setBounds(bounds_array.length > 0 ? L.latLngBounds(bounds_array) : L.latLngBounds([[0,0]]));
         }
       })
       .catch(error => {
@@ -198,9 +214,14 @@ function AnimalSearch() {
 
   // Hook handling option changes.
   useEffect(() => {
+    const handleDisabled = () => {
+      setIsDisabled(!(options.species || options.sex || options.owned || options.pcolor || options.fixed || options.latlng));
+    };
+
     setNumPages(Math.ceil(animals.length / ITEMS_PER_PAGE));
     setPage(1);
-  }, [animals.length]);
+    handleDisabled();
+  }, [options, animals.length]);
 
   return (
     <div className="ml-2 mr-2">
@@ -302,7 +323,7 @@ function AnimalSearch() {
                 <Col xs="5">
                   <Row style={{marginBottom:"-16px"}}>
                     <Col className="border rounded pl-0 pr-0 mb-3 mr-3">
-                      <Map zoom={15} ref={mapRef} bounds={bounds} onClick={updatePosition} dragging={false} keyboard={false} className="animal-search-leaflet-container" >
+                      <Map ref={mapRef} bounds={bounds} boundsOptions={{padding:[10,10]}} onClick={updatePosition} dragging={false} keyboard={false} className="animal-search-leaflet-container" >
                         <Legend position="bottomleft" metric={false} />
                         <TileLayer
                           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -321,7 +342,7 @@ function AnimalSearch() {
                             </div>
                           </MapTooltip>
                         </Marker>
-                        <Circle center={options.latlng} color={'#ff4c4c'} radius={805} interactive={false} />
+                        <Circle center={options.latlng} color={'#ff4c4c'} radius={options.radius * 1000} interactive={false} />
                         </span>
                         : ""}
                       </Map>
@@ -348,7 +369,7 @@ function AnimalSearch() {
                   </Row>
                 </Col>
                 <Col className="flex-grow-1 pl-0" xs="3">
-                  <Button className="btn btn-primary" style={{maxHeight:"35px", width:"100%"}} onClick={handleApplyFilters}>Apply</Button>
+                  <Button className="btn btn-primary" style={{maxHeight:"35px", width:"100%"}} onClick={handleApplyFilters} disabled={isDisabled}>Apply</Button>
                   <Button variant="outline-light" style={{maxHeight:"35px", width:"100%", marginTop:"15px"}} onClick={handleClear}>Clear</Button>
                 </Col>
               </Row>
@@ -602,7 +623,7 @@ function AnimalSearch() {
           </CardGroup>
           </div>
       ))}
-      <p style={{marginTop:"15px"}}>{data.isFetching ? 'Fetching Animals...' : <span>{!data.animals.length && searchTerm ? 'No Animals found.' : ''}</span>}</p>
+      <p style={{marginTop:"15px"}}>{data.isFetching ? 'Fetching Animals...' : <span>{animals.length === 0 ? 'No animals found.' : ''}</span>}</p>
       <Pagination className="custom-page-links" size="lg" onClick={(e) => {setFocus(parseInt(e.target.innerText));setPage(parseInt(e.target.innerText))}}>
         {[...Array(numPages).keys()].map(x =>
         <Pagination.Item key={x+1} active={x+1 === page}>
