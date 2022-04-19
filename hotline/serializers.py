@@ -88,9 +88,9 @@ class SimpleServiceRequestSerializer(BarebonesServiceRequestSerializer):
     def get_aco_required(self, obj):
         # Performs list comp. on prefetched queryset of animals for this SR to avoid hitting db again.
         try:
-            return bool([animal for animal in obj.animals if animal.aggressive == 'yes' or animal.species == 'other'])
+            return bool([animal for animal in obj.animals if animal.aco_required == 'yes'])
         except AttributeError:
-            return obj.animal_set.filter(Q(aggressive='yes')|Q(species='other')).exists()
+            return obj.animal_set.filter(aco_required='yes').exists()
 
     # Custom field for determining if an SR contains REPORTED animals.
     def get_reported_animals(self, obj):
