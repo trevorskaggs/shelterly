@@ -17,7 +17,7 @@ class AnimalViewSet(viewsets.ModelViewSet):
 
     queryset = Animal.objects.with_images().exclude(status="CANCELED").order_by('order')
 
-    search_fields = ['id', 'name', 'species', 'status', 'pcolor', 'request__address', 'request__city', 'owners__first_name', 'owners__last_name', 'owners__phone', 'owners__drivers_license', 'owners__address', 'owners__city', 'reporter__first_name', 'reporter__last_name']
+    search_fields = ['id', 'name', 'species', 'status', 'pcolor', 'scolor', 'request__address', 'request__city', 'owners__first_name', 'owners__last_name', 'owners__phone', 'owners__drivers_license', 'owners__address', 'owners__city', 'reporter__first_name', 'reporter__last_name']
     filter_backends = (filters.SearchFilter,)
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = AnimalSerializer
@@ -167,13 +167,7 @@ class AnimalViewSet(viewsets.ModelViewSet):
             Animal.objects.with_images().with_history().exclude(status="CANCELED").distinct()
             .prefetch_related("owners")
             .select_related("reporter", "room", "request", "shelter")
-        )        
-        #filter by stray
-        if self.request.query_params.get('owned', '') == 'stray':
-            queryset = queryset.filter(owners=None)
-        elif self.request.query_params.get("owned", "") == "owned":
-            queryset = queryset.filter(owners__isnull=False)
-
+        )
         return queryset
 
 def print_kennel_card(request, animal_id):

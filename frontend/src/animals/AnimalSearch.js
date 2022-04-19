@@ -1,20 +1,34 @@
 import React, { useEffect, useState, useRef } from 'react';
+import ReactDOMServer from 'react-dom/server';
 import axios from "axios";
 import { Link, useQueryParams } from 'raviger';
-import { Button, ButtonGroup, Card, CardGroup, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Pagination, Tooltip } from 'react-bootstrap';
+import { Button, Card, CardGroup, Col, Collapse, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Pagination, Row, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBan, faCalendarDay, faClipboardList, faCut, faEnvelope, faLink, faMedkit, faUserAltSlash
+  faBan, faCalendarDay, faClipboardList, faCut, faEnvelope, faLink, faMapMarkerAlt, faMedkit, faUserAltSlash
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faDotCircle
 } from '@fortawesome/free-regular-svg-icons';
-import { faClawMarks, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
+import { faChevronDoubleDown, faChevronDoubleUp, faClawMarks, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import Moment from 'react-moment';
+import Select, { components } from 'react-select';
+import L from "leaflet";
+import { Circle, Map, Marker, Tooltip as MapTooltip, TileLayer } from "react-leaflet";
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
 import { titleCase } from '../components/Utils';
 import { ITEMS_PER_PAGE } from '../constants';
+import { Legend } from "../components/Map";
+import { catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, speciesChoices } from './constants';
+
+const NoOptionsMessage = props => {
+  return (
+    <components.NoOptionsMessage {...props}>
+      <span>Select a species</span>
+    </components.NoOptionsMessage>
+  );
+};
 
 function AnimalSearch() {
 
@@ -22,15 +36,50 @@ function AnimalSearch() {
   const [queryParams] = useQueryParams();
   const {
     search = '',
-    owned = 'owned',
   } = queryParams;
 
+  const ownedChoices = [
+    { value: 'yes', label: 'Yes' },
+    { value: 'no', label: 'No' },
+  ];
+
+  const fixedChoices = [
+    { value: 'yes', label: 'Yes' },
+    { value: 'no', label: 'No' },
+    { value: 'unknown', label: 'Unknown'}
+  ];
+
+  const sexChoices = [
+    { value: 'M', label: 'Male' },
+    { value: 'F', label: 'Female' },
+    { value: 'unknown', label: 'Unknown'}
+  ];
+
+  const radiusChoices = [
+    { value: 1.60934, label: '1 Mile' },
+    { value: 3.21869, label: '2 Miles' },
+    { value: 8.04672, label: '5 Miles' },
+  ];
+
   const [data, setData] = useState({animals: [], isFetching: false});
+  const [animals, setAnimals] = useState([]);
+  const [options, setOptions] = useState({species: null, sex: null, owned: null, pcolor: '', fixed: null, latlng: null, radius: 1.60934});
   const [searchTerm, setSearchTerm] = useState(search);
+  const [showFilters, setShowFilters] = useState(false);
+  const [isDisabled, setIsDisabled] = useState(true);
   const tempSearchTerm = useRef(null);
-  const [statusOptions, setStatusOptions] = useState(owned);
+  const speciesRef = useRef(null);
+  const sexRef = useRef(null);
+  const ownedRef = useRef(null);
+  const fixedRef = useRef(null);
+  const pcolorRef = useRef(null);
+  const markerRef = useRef(null);
+  const mapRef = useRef(null);
+  const [bounds, setBounds] = useState(L.latLngBounds([[0,0]]));
   const [page, setPage] = useState(1);
   const [numPages, setNumPages] = useState(1);
+
+  const colorChoices = {'':[], 'dog':dogColorChoices, 'cat':catColorChoices, 'horse':horseColorChoices, 'other':otherColorChoices}
 
   // Update searchTerm when field input changes.
   const handleChange = event => {
@@ -42,14 +91,87 @@ function AnimalSearch() {
     event.preventDefault();
     setSearchTerm(tempSearchTerm.current.value);
     setPage(1);
+  };
+
+  const handleShowFilters = () => {
+    setShowFilters(!showFilters);
+    setTimeout(() => {
+      mapRef.current.leafletElement.invalidateSize();
+    }, 1000);
+  };
+
+  const handleApplyFilters = () => {
+    setAnimals(data.animals.filter(animal => options.species ? animal.species === options.species : animal)
+                           .filter(animal => options.owned === 'yes' ? animal.owners.length > 0 : animal)
+                           .filter(animal => options.owned === 'no' ? animal.owners.length === 0 : animal)
+                           .filter(animal => options.fixed ? animal.fixed === options.fixed : animal)
+                           .filter(animal => options.sex === 'unknown' ? animal.sex === '' : options.sex ? animal.sex === options.sex : animal)
+                           .filter(animal => options.pcolor ? animal.pcolor === options.pcolor || animal.scolor === options.pcolor : animal)
+                           .filter(animal => options.latlng ? arePointsNear({lat:animal.latitude, lng: animal.longitude}, options.latlng) : animal))
   }
 
+  const handleClear = () => {
+    speciesRef.current.select.clearValue();
+    sexRef.current.select.clearValue();
+    ownedRef.current.select.clearValue();
+    fixedRef.current.select.clearValue();
+    pcolorRef.current.select.clearValue();
+    setOptions({species: null, sex: null, owned: null, pcolor: '', fixed: null, latlng: null, radius: 1.60934});
+    setAnimals(data.animals);
+  };
 
   function setFocus(pageNum) {
     if (pageNum !== page) {
       tempSearchTerm.current.focus();
     }
-  }
+  };
+
+  const updatePosition = (e) => {
+    setOptions({...options, latlng: e.latlng})
+  };
+
+  const clearMarker = () => {
+    setOptions({...options, latlng: null})
+  };
+
+  function arePointsNear(checkPoint, centerPoint) {
+    var ky = 40000 / 360;
+    var kx = Math.cos(Math.PI * centerPoint.lat / 180.0) * ky;
+    var dx = Math.abs(centerPoint.lng - checkPoint.lng) * kx;
+    var dy = Math.abs(centerPoint.lat - checkPoint.lat) * ky;
+    return Math.sqrt(dx * dx + dy * dy) <= options.radius;
+  };
+
+  const customStyles = {
+    // For the select it self, not the options of the select
+    control: (styles, { isDisabled}) => {
+      return {
+        ...styles,
+        color: '#FFF',
+        cursor: isDisabled ? 'not-allowed' : 'default',
+        backgroundColor: isDisabled ? '#DFDDDD' : 'white',
+        height: 35,
+        minHeight: 35,
+        marginBottom: "15px"
+      }
+    },
+    option: provided => ({
+      ...provided,
+      color: 'black'
+    }),
+  };
+
+  const pinIconHTML = ReactDOMServer.renderToString(<FontAwesomeIcon color="red" size="lg" className="icon-border" icon={faMapMarkerAlt} />);
+  const pinMarkerIcon = new L.DivIcon({
+    html: pinIconHTML,
+    iconSize: [0, 0],
+    iconAnchor: [5, 10],
+    className: "pin-icon",
+    popupAnchor: null,
+    shadowUrl: null,
+    shadowSize: null,
+    shadowAnchor: null
+  });
 
   // Hook for initializing data.
   useEffect(() => {
@@ -59,13 +181,21 @@ function AnimalSearch() {
     const fetchAnimals = async () => {
       setData({animals: [], isFetching: true});
       // Fetch ServiceRequest data.
-      await axios.get('/animals/api/animal/?search=' + searchTerm + '&owned=' + statusOptions, {
+      await axios.get('/animals/api/animal/?search=' + searchTerm, {
         cancelToken: source.token,
       })
       .then(response => {
         if (!unmounted) {
           setNumPages(Math.ceil(response.data.length / ITEMS_PER_PAGE));
           setData({animals: response.data, isFetching: false});
+          setAnimals(response.data);
+          let bounds_array = [];
+          for (const animal of response.data) {
+            if (animal.latitude && animal.longitude) {
+              bounds_array.push([animal.latitude, animal.longitude]);
+            }
+          }
+          setBounds(bounds_array.length > 0 ? L.latLngBounds(bounds_array) : L.latLngBounds([[0,0]]));
         }
       })
       .catch(error => {
@@ -80,7 +210,18 @@ function AnimalSearch() {
       unmounted = true;
       source.cancel();
     };
-  }, [searchTerm, statusOptions]);
+  }, [searchTerm]);
+
+  // Hook handling option changes.
+  useEffect(() => {
+    const handleDisabled = () => {
+      setIsDisabled(!(options.species || options.sex || options.owned || options.pcolor || options.fixed || options.latlng));
+    };
+
+    setNumPages(Math.ceil(animals.length / ITEMS_PER_PAGE));
+    setPage(1);
+    handleDisabled();
+  }, [options, animals.length]);
 
   return (
     <div className="ml-2 mr-2">
@@ -98,13 +239,146 @@ function AnimalSearch() {
           <InputGroup.Append>
             <Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0"}}>Search</Button>
           </InputGroup.Append>
-          <ButtonGroup className="ml-1">
-            <Button variant={statusOptions === "owned" ? "primary" : "secondary"} onClick={statusOptions !== "owned" ? () => {setPage(1);setStatusOptions("owned")} : () => {setPage(1);setStatusOptions("")}}>Owned</Button>
-            <Button variant={statusOptions === "stray" ? "primary" : "secondary"} onClick={statusOptions !== "stray" ? () => {setPage(1);setStatusOptions("stray")} : () => {setPage(1);setStatusOptions("")}}>Stray</Button>
-          </ButtonGroup>
+          <Button variant="outline-light" className="ml-1" onClick={handleShowFilters}>Advanced {showFilters ? <FontAwesomeIcon icon={faChevronDoubleUp} size="sm" /> : <FontAwesomeIcon icon={faChevronDoubleDown} size="sm" />}</Button>
         </InputGroup>
+        <Collapse in={showFilters}>
+          <div>
+          <Card className="border rounded d-flex" style={{width:"100%"}}>
+            <Card.Body style={{marginBottom:"-16px"}}>
+              <Row>
+                <Col xs={"4"}>
+                  <Select
+                    label="Species"
+                    id="speciesDropdown"
+                    name="species"
+                    type="text"
+                    placeholder="Select Species"
+                    options={speciesChoices}
+                    styles={customStyles}
+                    isClearable={true}
+                    ref={speciesRef}
+                    onChange={(instance) => {
+                      pcolorRef.current.select.clearValue();
+                      setOptions({...options, species: instance ? instance.value : null, pcolor: ''});
+                    }}
+                  />
+                  <Select
+                    label="Sex"
+                    id="sexDropdown"
+                    name="sex"
+                    type="text"
+                    placeholder="Select Sex"
+                    options={sexChoices}
+                    styles={customStyles}
+                    isClearable={true}
+                    ref={sexRef}
+                    onChange={(instance) => {
+                      setOptions({...options, sex: instance ? instance.value : null})
+                    }}
+                  />
+                  <Select
+                    label="Owned"
+                    id="ownedDropdown"
+                    name="owned"
+                    type="text"
+                    placeholder="Select Owned"
+                    options={ownedChoices}
+                    styles={customStyles}
+                    isClearable={true}
+                    ref={ownedRef}
+                    onChange={(instance) => {
+                      setOptions({...options, owned: instance ? instance.value : null})
+                    }}
+                  />
+                  <Select
+                    label="Fixed"
+                    id="fixedDropdown"
+                    name="fixed"
+                    type="text"
+                    placeholder="Select Fixed"
+                    options={fixedChoices}
+                    styles={customStyles}
+                    isClearable={true}
+                    ref={fixedRef}
+                    onChange={(instance) => {
+                      setOptions({...options, fixed: instance ? instance.value : null})
+                    }}
+                  />
+                  <Select
+                    label="Primary Color"
+                    id="pcolorDropdown"
+                    name="pcolor"
+                    type="text"
+                    placeholder="Select Color"
+                    components={{ NoOptionsMessage }}
+                    ref={pcolorRef}
+                    options={colorChoices[options.species]}
+                    styles={customStyles}
+                    isClearable={true}
+                    onChange={(instance) => {
+                      setOptions({...options, pcolor: instance ? instance.value : ''})
+                    }}
+                  />
+                </Col>
+                <Col xs="5">
+                  <Row style={{marginBottom:"-16px"}}>
+                    <Col className="border rounded pl-0 pr-0 mb-3 mr-3">
+                      <Map ref={mapRef} bounds={bounds} boundsOptions={{padding:[10,10]}} onClick={updatePosition} dragging={false} keyboard={false} className="animal-search-leaflet-container" >
+                        <Legend position="bottomleft" metric={false} />
+                        <TileLayer
+                          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                          attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+                        />
+                        {options.latlng ?
+                        <span>
+                        <Marker
+                          position={options.latlng}
+                          icon={pinMarkerIcon}
+                          ref={markerRef}
+                        >
+                          <MapTooltip autoPan={false} direction="top">
+                            <div>
+                              Lat: {+(Math.round(options.latlng.lat + "e+4") + "e-4")}, Lon: {+(Math.round(options.latlng.lng + "e+4") + "e-4")}
+                            </div>
+                          </MapTooltip>
+                        </Marker>
+                        <Circle center={options.latlng} color={'#ff4c4c'} radius={options.radius * 1000} interactive={false} />
+                        </span>
+                        : ""}
+                      </Map>
+                    </Col>
+                  </Row>
+                  <Row className="mr-0 d-flex" style={{maxHeight:"37px"}}>
+                    <Col className="flex-grow-1" style={{marginLeft:"-15px", paddingRight:"0px"}}>
+                      <Select
+                        label="Radius"
+                        id="radiusDropdown"
+                        name="radius"
+                        type="text"
+                        placeholder="Select radius"
+                        options={radiusChoices}
+                        styles={customStyles}
+                        defaultValue={radiusChoices[0]}
+                        isClearable={false}
+                        onChange={(instance) => {
+                          setOptions({...options, radius: instance ? instance.value : null});
+                        }}
+                      />
+                    </Col>
+                    <Button variant="outline-light" className="float-right" style={{maxHeight:"35px"}} onClick={clearMarker}>Clear</Button>
+                  </Row>
+                </Col>
+                <Col className="flex-grow-1 pl-0" xs="3">
+                  <Button className="btn btn-primary" style={{maxHeight:"35px", width:"100%"}} onClick={handleApplyFilters} disabled={isDisabled}>Apply</Button>
+                  <Button variant="outline-light" style={{maxHeight:"35px", width:"100%", marginTop:"15px"}} onClick={handleClear}>Clear</Button>
+                </Col>
+              </Row>
+            </Card.Body>
+          </Card>
+          </div>
+        </Collapse>
       </Form>
-      {data.animals.map((animal, index) => (
+      {animals.map((animal, index) => (
         <div key={animal.id} className="mt-3" hidden={page !== Math.ceil((index+1)/ITEMS_PER_PAGE)}>
           <div className="card-header">
             <h4 style={{marginBottom:"-2px",  marginLeft:"-12px"}}>
@@ -349,7 +623,7 @@ function AnimalSearch() {
           </CardGroup>
           </div>
       ))}
-      <p>{data.isFetching ? 'Fetching Animals...' : <span>{!data.animals.length && searchTerm ? 'No Animals found.' : ''}</span>}</p>
+      <p style={{marginTop:"15px"}}>{data.isFetching ? 'Fetching Animals...' : <span>{animals.length === 0 ? 'No animals found.' : ''}</span>}</p>
       <Pagination className="custom-page-links" size="lg" onClick={(e) => {setFocus(parseInt(e.target.innerText));setPage(parseInt(e.target.innerText))}}>
         {[...Array(numPages).keys()].map(x =>
         <Pagination.Item key={x+1} active={x+1 === page}>

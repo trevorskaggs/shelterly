@@ -140,6 +140,7 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
 
             for service_request in self.request.data.get('sr_updates', []):
                 animals_dict = {}
+                service_requests = ServiceRequest.objects.filter(id=service_request['id'])
                 sr_status = 'open' if service_request['unable_to_complete'] else 'assigned' if service_request['incomplete'] else 'closed'
                 for animal_dict in service_request['animals']:
                     animals_dict[animal_dict['id']] = {'status':animal_dict.get('status'), 'shelter':animal_dict.get('shelter')}
@@ -153,13 +154,17 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
                         action.send(self.request.user, verb='sheltered animal', target=animal)
                         action.send(self.request.user, verb='sheltered animal', target=animal.shelter, action_object=animal)
                     intake_date = animal.intake_date if animal.intake_date else datetime.now()
+                    # Update sheler and intake_date info.
                     Animal.objects.filter(id=animal_dict['id']).update(status=new_status, shelter=new_shelter, intake_date=intake_date)
+                    # Update animal found location with SR location if blank.
+                    if not animal.address:
+                        Animal.objects.filter(id=animal_dict['id']).update(address=service_requests[0].address, city=service_requests[0].city, state=service_requests[0].state, zip_code=service_requests[0].zip_code, latitude=service_requests[0].latitude, longitude=service_requests[0].longitude)
                     # Mark SR as open if any animal is SIP or UTL.
                     if new_status in ['SHELTERED IN PLACE', 'UNABLE TO LOCATE'] and sr_status != 'assigned':
                         sr_status = 'open'
                 # Update the relevant SR fields.
                 assigned_request = AssignedRequest.objects.get(service_request=service_request['id'], dispatch_assignment=evac_assignment.id)
-                service_requests = ServiceRequest.objects.filter(id=service_request['id'])
+                # Update SIP/UTL.
                 service_requests[0].update_sip_utl()
                 assigned_request.animals = animals_dict
                 # Only update SR with followup_date while DA is open or if the old AssignedRequest followup_date matches the current SR followup_date.

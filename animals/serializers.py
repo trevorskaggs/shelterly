@@ -67,7 +67,23 @@ class AnimalSerializer(ModestAnimalSerializer):
         model = Animal
         fields = ['id', 'species', 'status', 'aco_required', 'front_image', 'side_image', 'extra_images', 'last_seen', 'intake_date', 'address', 'city', 'state', 'zip_code',
         'aggressive', 'injured', 'fixed', 'confined', 'found_location', 'owner_names', 'owners', 'shelter_object', 'shelter', 'reporter', 'reporter_object', 'request', 'request_address',
-        'action_history', 'building_name', 'room', 'room_name', 'name', 'sex', 'size', 'age', 'pcolor', 'scolor', 'color_notes', 'behavior_notes', 'medical_notes']
+        'action_history', 'building_name', 'room', 'room_name', 'name', 'sex', 'size', 'age', 'pcolor', 'scolor', 'color_notes', 'behavior_notes', 'medical_notes',
+        'latitude', 'longitude']
+
+    # Truncates latitude and longitude.
+    def to_internal_value(self, data):
+        # remember old state
+        _mutable = data._mutable
+        data._mutable = True
+
+        if data.get('latitude'):
+            data['latitude'] = float("%.6f" % float(data.get('latitude')))
+        if data.get('longitude'):
+            data['longitude'] = float("%.6f" % float(data.get('longitude')))
+
+        data._mutable = _mutable
+
+        return super().to_internal_value(data)
 
     def get_found_location(self, obj):
         return build_full_address(obj)
