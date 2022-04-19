@@ -1,5 +1,6 @@
 import axios from "axios";
 import { navigate } from "raviger";
+import { publicRoutes } from "../router";
 
 // Authenticate the user with the backnd to obtain a user.
 export function loadUser({dispatch, removeCookie, path}) {
@@ -18,7 +19,9 @@ export function loadUser({dispatch, removeCookie, path}) {
     removeCookie("token");
     setAuthToken();
     dispatch({type: "AUTHENTICATION_ERROR", data: e});
-    navigate('/login?next=' + path);
+    if (!Object.keys(publicRoutes).includes(path)) {
+      navigate('/login?next=' + path);
+    }
   })
 }
 
