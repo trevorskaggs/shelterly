@@ -5,6 +5,7 @@ import { dispatchStatusChoices } from '../animals/constants';
 
 export const printDispatchResolutionForm = (data) => {
   const pdf = new ShelterlyPDF();
+  pdf.fileName = `DAR-${data.id.toString().padStart(3, 0)}`;
 
   // draw page header
   pdf.drawPageHeader({
@@ -201,7 +202,7 @@ export const printDispatchResolutionForm = (data) => {
     // priorities
     pdf.drawSectionHeader({ text: 'Priority', hRule: true });
     pdf.setDocumentFontSize({ size: 11 });
-    const currentPriority = data.sr_updates[index] ? data.sr_updates[index].priority : 2
+    const currentPriority = assigned_request.service_request_object.priority || 2
     pdf.drawCheckboxList({
       labels: priorityChoices.map(({ value, label}) => {
         if (value === currentPriority) {
