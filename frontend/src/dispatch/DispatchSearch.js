@@ -12,6 +12,7 @@ import {
 import { faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
 import L from "leaflet";
 import { Marker, Tooltip as MapTooltip } from "react-leaflet";
+import { useMark } from '../hooks';
 import Map, { prettyText, reportedMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
 import Moment from "react-moment";
 import moment from 'moment';
@@ -40,6 +41,7 @@ function DispatchAssignmentSearch() {
   const [isDateSet, setIsDateSet] = useState(false);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(moment().format('YYYY-MM-DD'));
+  const { markInstances } = useMark();
 
   // Update searchTerm when field input changes.
   const handleChange = event => {
@@ -126,6 +128,9 @@ function DispatchAssignmentSearch() {
           }
           setMatches(map_dict);
           setBounds(bounds_dict);
+
+          // highlight search terms
+          markInstances(searchTerm);
         }
       })
       .catch(error => {
