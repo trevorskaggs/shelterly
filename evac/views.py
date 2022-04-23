@@ -98,12 +98,14 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
     # When creating, update all service requests to be assigned status.
     def perform_create(self, serializer):
         if serializer.is_valid():
+            timestamp = None
             if ServiceRequest.objects.filter(pk__in=self.request.data['service_requests'], status='assigned').exists():
                 raise serializers.ValidationError(['Duplicate assigned service request error.', list(ServiceRequest.objects.filter(pk__in=self.request.data['service_requests'], status='assigned').values_list('id', flat=True))])
-            if self.request.data.get('team_name'):
+            if self.request.data.get('team_members'):
                 team = DispatchTeam.objects.create(name=self.request.data.get('team_name'))
                 team.team_members.set(self.request.data.get('team_members'))
                 serializer.validated_data['team'] = team
+                timestamp = datetime.now()
             evac_assignment = serializer.save()
             service_requests = ServiceRequest.objects.filter(pk__in=self.request.data['service_requests'])
             service_requests.update(status="assigned")
@@ -113,7 +115,7 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
                 animals_dict = {}
                 for animal in service_request.animal_set.filter(status__in=['REPORTED', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE']):
                     animals_dict[animal.id] = {'status':animal.status, 'shelter':''}
-                AssignedRequest.objects.create(dispatch_assignment=evac_assignment, service_request=service_request, animals=animals_dict)
+                AssignedRequest.objects.create(dispatch_assignment=evac_assignment, service_request=service_request, animals=animals_dict, timestamp=timestamp)
 
     def perform_update(self, serializer):
         if serializer.is_valid():

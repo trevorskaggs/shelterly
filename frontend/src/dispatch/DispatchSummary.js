@@ -11,6 +11,7 @@ import { faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import { Marker, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
 import Moment from 'react-moment';
+import { TextInput } from "../components/Form";
 import Map, { countMatches, prettyText, reportedMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
@@ -37,6 +38,7 @@ function DispatchSummary({id}) {
   const [teamMemberToDelete, setTeamMemberToDelete] = useState({id: 0, name: '', display_name: ''});
   const [showTeamMemberConfirm, setShowTeamMemberConfirm] = useState(false);
   const handleTeamMemberClose = () => setShowTeamMemberConfirm(false);
+  const [error, setError] = useState('');
 
   const handleAddTeamMemberSubmit = async () => {
     await axios.patch('/evac/api/dispatchteam/' + data.team + '/', {'new_team_members':teamMembers.map(item => item.id)})
@@ -79,8 +81,10 @@ function DispatchSummary({id}) {
             map_dict[assigned_request.service_request_object.id] = {matches:matches, has_reported_animals:assigned_request.service_request_object.reported_animals > 0, latitude:assigned_request.service_request_object.latitude, longitude:assigned_request.service_request_object.longitude};
             bounds.push([assigned_request.service_request_object.latitude, assigned_request.service_request_object.longitude]);
           }
-          response.data['team_members'] = response.data.team.team_members;
-          response.data['team_member_objects'] = response.data.team_object.team_member_objects
+          if (response.data.team) {
+            response.data['team_members'] = response.data.team.team_members;
+            response.data['team_member_objects'] = response.data.team_object.team_member_objects;
+          }
           response.data['bounds'] = bounds.length > 0 ? bounds : L.latLngBounds([[0,0]]);
           setData(response.data);
           setMapState(map_dict);
@@ -149,7 +153,7 @@ function DispatchSummary({id}) {
         <Card border="secondary" className="mt-1" style={{minHeight:"313px", maxHeight:"313px"}}>
           <Card.Body>
             <Card.Title>
-              <h4>{data.team_object.name}
+              <h4>{data.team_object ? data.team_object.name : "Pre-planned"}
               <OverlayTrigger
                 key={"add-team-member"}
                 placement="top"
@@ -164,6 +168,7 @@ function DispatchSummary({id}) {
               </h4>
             </Card.Title>
             <hr/>
+            {data.team_member_objects && data.team_member_objects.length > 0 ?
             <Scrollbar no_shadow="true" style={{height:"225px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
               <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px", textTransform:"capitalize"}}>
                 {data.team_member_objects.map(team_member => (
@@ -197,7 +202,7 @@ function DispatchSummary({id}) {
                   </ListGroup.Item>
                 ))}
               </ListGroup>
-            </Scrollbar>
+            </Scrollbar> : ""}
           </Card.Body>
         </Card>
       </Col>
@@ -373,6 +378,13 @@ function DispatchSummary({id}) {
         <Modal.Title>Add Team Members</Modal.Title>
       </Modal.Header>
       <Modal.Body>
+        <TextInput
+          label="Team Name"
+          id="team_name"
+          name="team_name"
+          type="text"
+        />
+        {error ? <div style={{ color: "#e74c3c", marginTop: "-8px", marginLeft: "16px", fontSize: "80%" }}>{error}</div> : ""}
         <Typeahead
           id="team_members"
           multiple
