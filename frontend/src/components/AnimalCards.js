@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faUserAlt, faUserAltSlash, faCircle, faExclamationCircle, faQuestionCircle, faHome, faHeart, faSkullCrossbones
 } from '@fortawesome/free-solid-svg-icons';
-import { faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
+import { faBadgeSheriff, faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
 
 function AnimalCards(props) {
 
@@ -86,6 +86,12 @@ function AnimalCards(props) {
                       <FontAwesomeIcon className="animal-icon" icon={faSkullCrossbones} inverse/>
                   </OverlayTrigger> : ""}
                 </span> : ""}
+                {animal.aco_required === "yes" ?
+                  <OverlayTrigger key={"aco-required"} placement="top"
+                                  overlay={<Tooltip id={`tooltip-aco-required`}>ACO required</Tooltip>}>
+                      <FontAwesomeIcon className="animal-icon ml-1" icon={faBadgeSheriff} />
+                  </OverlayTrigger>
+                : ""}
               </span>
             </Card.Text>
           </Card>

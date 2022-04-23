@@ -238,7 +238,7 @@ function AnimalDetails({id}) {
                   placement="top"
                   overlay={
                     <Tooltip id={`tooltip-aco-required`}>
-                      Animal is ACO required
+                      ACO required
                     </Tooltip>
                   }
                 >
