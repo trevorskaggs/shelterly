@@ -33,6 +33,7 @@ class Animal(Location, OrderedModel):
     aggressive = models.CharField(max_length=10, choices=UNKNOWN_CHOICES, default='unknown')
     confined = models.CharField(max_length=10, choices=UNKNOWN_CHOICES, default='unknown')
     injured = models.CharField(max_length=10, choices=UNKNOWN_CHOICES, default='unknown')
+    aco_required = models.CharField(max_length=10, choices=UNKNOWN_CHOICES, default='unknown')
 
     #text fields
     name = models.CharField(max_length=50, blank=True)
