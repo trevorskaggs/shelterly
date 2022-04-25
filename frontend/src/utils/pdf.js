@@ -91,9 +91,9 @@ class ShelterlyPDF {
   }
 
   // draw methods
-  beforeDraw({ yPosition } = {}) {
-    yPosition = yPosition || this.#documentLastYPosition;
-
+  beforeDraw({
+    yPosition = this.#documentLastYPosition
+  } = {}) {
     if (yPosition >= (this.pageHeight - 75)) {
       return this.drawPageBreak();
     }
@@ -121,6 +121,11 @@ class ShelterlyPDF {
     this.#documentLastYPosition = 35;
 
     return this.#documentLastYPosition;
+  }
+
+  drawPad(amount = 20) {
+    // set last y position
+    this.#documentLastYPosition = this.#documentLastYPosition + amount;
   }
 
   drawPageHeader({
@@ -171,6 +176,36 @@ class ShelterlyPDF {
 
     // set last y position
     this.#documentLastYPosition = yPosition;
+  }
+
+  drawSingleLineText({ text, bottomPadding = 0, topPadding = 0 }) {
+    let yPosition = this.getLastYPositionWithBuffer() + topPadding;
+    this.#jsPDF.text(text, this.#documentLeftMargin, yPosition)
+    this.#documentLastYPosition = yPosition + bottomPadding;
+  }
+
+  drawWrappedText({ text, linePadding = 0, bottomPadding = 0 }) {
+    const splitLines = this.#jsPDF.splitTextToSize(text, this.pageWidth - (this.#documentRightMargin * 2));
+    if (splitLines.length > 1) {
+      splitLines.forEach((splitText) => {
+        this.drawSingleLineText({
+          text: splitText,
+          bottomPadding: linePadding,
+          topPadding: linePadding
+        })
+      })
+    } else {
+      this.drawSingleLineText({
+        text,
+        bottomPadding: bottomPadding,
+        topPadding: linePadding
+      })
+    }
+
+    // set last y position
+    this.#documentLastYPosition = this.#documentLastYPosition + bottomPadding;
+
+    return this.#documentLastYPosition
   }
 
   drawTextWithLine({
