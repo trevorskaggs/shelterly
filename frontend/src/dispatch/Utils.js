@@ -68,6 +68,8 @@ export const printDispatchResolutionForm = (data) => {
         `${species.replace(/(^.)/, m => m.toUpperCase())}: ${count}`
       ))
     });
+
+    pdf.drawPad(30);
   });
 
   // end of summary page break
