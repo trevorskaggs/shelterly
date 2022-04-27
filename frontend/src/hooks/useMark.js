@@ -12,10 +12,10 @@ function useMark ({
    * marks instances of term within selector
    * @param  {string} term - term instance to mark
    */
-  function markInstances (term) {
+  function markInstances (term = '') {
     if (typeof window === 'undefined') return;
     if (typeof document === 'undefined') return;
-    if (!selector || !term) return;
+    if (!selector) return;
 
     // highlight all the instances
     window.markInstance = new Mark(document.querySelectorAll(selector));
