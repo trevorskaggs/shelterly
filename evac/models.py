@@ -18,7 +18,7 @@ class EvacTeamMember(models.Model):
 
 class DispatchTeam(models.Model):
 
-    name = models.CharField(max_length=50, blank=False)
+    name = models.CharField(max_length=50)
     team_members = models.ManyToManyField(EvacTeamMember)
     dispatch_date = models.DateTimeField(auto_now_add=True)
 

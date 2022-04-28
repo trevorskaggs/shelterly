@@ -6,7 +6,7 @@ import { Marker, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faUsers
+  faUserPlus, faUsers
 } from '@fortawesome/free-solid-svg-icons';
 import Map, { countMatches, prettyText, reportedMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
 import Header from "../components/Header";
@@ -68,16 +68,29 @@ function Dispatch() {
 
   return (
     <>
-    <Header>Dispatch</Header>
+    <Header>
+      Dispatch
+      <OverlayTrigger
+        key={"add-team-member"}
+        placement="bottom"
+        overlay={
+          <Tooltip id={`tooltip-add-team-member`}>
+            Create new team member
+          </Tooltip>
+        }
+      >
+        <Link href={"/dispatch/dispatchteammember/new"}><FontAwesomeIcon icon={faUserPlus} size="sm" className="ml-2" inverse /></Link>
+      </OverlayTrigger>
+    </Header>
     <hr/>
     <Row className="mr-0">
       <Col xs={4} className="mr-0 pr-0">
         <ListGroup className="flex-fill" style={{marginRight:"15px"}}>
-          <Link href="/dispatch/dispatchteammember/new">
-            <ListGroup.Item className="rounded" action>ADD TEAM MEMBER</ListGroup.Item>
-          </Link>
           <Link href="/dispatch/deploy">
             <ListGroup.Item className="rounded" action>DEPLOY TEAMS</ListGroup.Item>
+          </Link>
+          <Link href="/dispatch/preplan">
+            <ListGroup.Item className="rounded" action>PREPLANNING</ListGroup.Item>
           </Link>
           <Link href="/dispatch/dispatchassignment/search">
             <ListGroup.Item className="rounded" action>SEARCH DISPATCH ASSIGNMENTS</ListGroup.Item>
@@ -88,7 +101,7 @@ function Dispatch() {
         <Row xs={12} className="ml-0 mr-0 pl-0 pr-0" style={{marginBottom:"-1px"}}>
           <Col xs={9} className="border rounded pl-0 pr-0">
             <Map bounds={data.bounds} boundsOptions={{padding:[10,10]}} className="landing-leaflet-container">
-              {data.dispatch_assignments.filter(dispatch_assignment => (selectedTeam == null || dispatch_assignment.team === selectedTeam)).map(dispatch_assignment => (
+              {data.dispatch_assignments.filter(dispatch_assignment => (selectedTeam == null || dispatch_assignment.id === selectedTeam)).map(dispatch_assignment => (
               <span key={dispatch_assignment.id}>
                 {dispatch_assignment.assigned_requests.map(assigned_request => (
                   <Marker
@@ -130,8 +143,8 @@ function Dispatch() {
             <Scrollbar no_shadow="true" style={{height:"350px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
             <Button variant={selectedTeam === null ? "primary" : "secondary"} className="border" onClick={() => setSelectedTeam(null)} style={{maxHeight:"36px", width:"100%", marginTop:"-1px"}}>All</Button>
             {data.dispatch_assignments.map(dispatch_assignment => (
-              <Button key={dispatch_assignment.id} title={dispatch_assignment.team ? dispatch_assignment.team.name : ""} variant={dispatch_assignment.team === selectedTeam ? "primary" : "secondary"} className="border" onClick={() => setSelectedTeam(dispatch_assignment.team)} style={{maxHeight:"36px", width:"100%", marginTop:"-1px"}}>
-                {dispatch_assignment.team ? dispatch_assignment.team_object.name : "Team"}
+              <Button key={dispatch_assignment.id} title={dispatch_assignment.team ? dispatch_assignment.team.name : ""} variant={dispatch_assignment.id === selectedTeam ? "primary" : "secondary"} className="border" onClick={() => setSelectedTeam(dispatch_assignment.id)} style={{maxHeight:"36px", width:"100%", marginTop:"-1px"}}>
+                {dispatch_assignment.team ? dispatch_assignment.team_object.name : "Preplanned"}
                 {dispatch_assignment.team ?
                   <OverlayTrigger
                     key={"team-names"}

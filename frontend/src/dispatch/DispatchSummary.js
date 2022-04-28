@@ -1,17 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import { Link } from 'raviger';
-import { Button, Card, Col, ListGroup, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
+import { Button, Card, Col, Form, ListGroup, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { Typeahead } from 'react-bootstrap-typeahead';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faCalendarDay, faClipboardCheck, faClipboardList, faEdit, faEnvelope, faHouseDamage, faMinusSquare, faPlusSquare, faUserCheck
+  faCalendarDay, faClipboardCheck, faClipboardList, faEdit, faEnvelope, faHouseDamage, faMinusSquare, faPencilAlt, faPlusSquare, faUserCheck
 } from '@fortawesome/free-solid-svg-icons';
 import { faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import { Marker, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
 import Moment from 'react-moment';
-import { TextInput } from "../components/Form";
 import Map, { countMatches, prettyText, reportedMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
@@ -20,6 +19,7 @@ function DispatchSummary({id}) {
 
   // Initial animal data.
   const [data, setData] = useState({
+    id: '',
     team_members: [],
     team_member_objects: [],
     team: null,
@@ -32,16 +32,39 @@ function DispatchSummary({id}) {
 
   const [mapState, setMapState] = useState({});
   const [teamData, setTeamData] = useState({options: [], isFetching: false});
+  const [teamName, setTeamName] = useState('')
+  const [showTeamName, setShowTeamName] = useState(false)
+  const handleTeamNameClose = () => {setShowTeamName(false);}
   const [teamMembers, setNewTeamMembers] = useState(null);
   const [show, setShow] = useState(false);
-  const handleClose = () => setShow(false);
+  const handleClose = () => {setShow(false);}
   const [teamMemberToDelete, setTeamMemberToDelete] = useState({id: 0, name: '', display_name: ''});
   const [showTeamMemberConfirm, setShowTeamMemberConfirm] = useState(false);
   const handleTeamMemberClose = () => setShowTeamMemberConfirm(false);
   const [error, setError] = useState('');
 
+  const handleTeamNameSubmit = async () => {
+    console.log(teamName)
+    if (teamName.replace(/ /g, '').length === 0) {
+      setError("Team name cannot be blank.");
+    }
+    else if (teamName.length > 18) {
+      setError("Team name must be 18 characters or less.");
+    }
+    else {
+      await axios.patch('/evac/api/dispatchteam/' + data.team + '/', {'name':teamName})
+      .then(response => {
+        setData(prevState => ({ ...prevState, "team_object":{"name": teamName} }));
+        handleTeamNameClose();
+        setError('');
+      })
+      .catch(error => {
+      });
+    }
+  }
+
   const handleAddTeamMemberSubmit = async () => {
-    await axios.patch('/evac/api/dispatchteam/' + data.team + '/', {'new_team_members':teamMembers.map(item => item.id)})
+    await axios.patch('/evac/api/dispatchteam/' + data.team + '/', {'dispatch_id':data.id, 'new_team_members':teamMembers.map(item => item.id)})
     .then(response => {
       setData(prevState => ({ ...prevState, "team_member_objects":response.data.team_member_objects, "team_members":response.data.team_members }));
       setTeamData(prevState => ({ ...prevState, "options":prevState.options.filter(option => !response.data.team_members.includes(option.id)) }));
@@ -153,7 +176,18 @@ function DispatchSummary({id}) {
         <Card border="secondary" className="mt-1" style={{minHeight:"313px", maxHeight:"313px"}}>
           <Card.Body>
             <Card.Title>
-              <h4>{data.team_object ? data.team_object.name : "Pre-planned"}
+              <h4>{data.team_object ? data.team_object.name : "Preplanned"}
+              <OverlayTrigger
+                key={"edit-team-name"}
+                placement="top"
+                overlay={
+                  <Tooltip id={`tooltip-edit-team-name`}>
+                    Edit team name
+                  </Tooltip>
+                }
+              >
+                <FontAwesomeIcon icon={faPencilAlt} className="ml-1 fa-move-up" size="sm" onClick={() => {setShowTeamName(true)}} style={{cursor:'pointer'}} inverse />
+              </OverlayTrigger>
               <OverlayTrigger
                 key={"add-team-member"}
                 placement="top"
@@ -373,18 +407,30 @@ function DispatchSummary({id}) {
       </Card>
     </Row>
     ))}
+    <Modal show={showTeamName} onHide={handleTeamNameClose}>
+      <Modal.Header closeButton>
+        <Modal.Title>Edit Team Name</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <Form.Control
+          label="Team Name"
+          id="team_name"
+          name="team_name"
+          type="text"
+          onChange={(event) => {setTeamName(event.target.value)}}
+        />
+        {error ? <div style={{ color: "#e74c3c", marginTop: "-8px", marginLeft: "16px", fontSize: "80%" }}>{error}</div> : ""}
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="primary" onClick={handleTeamNameSubmit}>Save</Button>
+        <Button variant="secondary" onClick={handleTeamNameClose}>Cancel</Button>
+      </Modal.Footer>
+    </Modal>
     <Modal show={show} onHide={handleClose}>
       <Modal.Header closeButton>
         <Modal.Title>Add Team Members</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <TextInput
-          label="Team Name"
-          id="team_name"
-          name="team_name"
-          type="text"
-        />
-        {error ? <div style={{ color: "#e74c3c", marginTop: "-8px", marginLeft: "16px", fontSize: "80%" }}>{error}</div> : ""}
         <Typeahead
           id="team_members"
           multiple

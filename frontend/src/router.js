@@ -49,6 +49,7 @@ const routes = {
   "/dispatch/resolution/:id": ({id}) => <DispatchResolutionForm id={id} />,
   "/dispatch/assignment/note/:id": ({id}) => <VisitNoteForm id={id} />,
   "/dispatch/deploy": () => <Deploy />,
+  "/dispatch/preplan": () => <Deploy />,
   "/hotline": () => <Hotline />,
   "/hotline/servicerequest/:id/assign": ({id}) => <ServiceRequestDispatchAssignment id={id} />,
   "/hotline/ownercontact/new": () => <OwnerContactForm />,

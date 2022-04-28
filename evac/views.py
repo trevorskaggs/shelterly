@@ -49,6 +49,10 @@ class DispatchTeamViewSet(viewsets.ModelViewSet):
 
             # Add Team Members to DA.
             if self.request.data.get('new_team_members'):
+                # if team length was 0, set timestamp
+                if team.team_members.count() == 0:
+                    team.timestamp = datetime.now()
+                    team.save()
                 team.team_members.add(*self.request.data.get('new_team_members'))
 
             # Remove Team Member from DA.
@@ -101,11 +105,12 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
             timestamp = None
             if ServiceRequest.objects.filter(pk__in=self.request.data['service_requests'], status='assigned').exists():
                 raise serializers.ValidationError(['Duplicate assigned service request error.', list(ServiceRequest.objects.filter(pk__in=self.request.data['service_requests'], status='assigned').values_list('id', flat=True))])
+            team = DispatchTeam.objects.create(name=self.request.data.get('team_name'))
+
             if self.request.data.get('team_members'):
-                team = DispatchTeam.objects.create(name=self.request.data.get('team_name'))
                 team.team_members.set(self.request.data.get('team_members'))
-                serializer.validated_data['team'] = team
                 timestamp = datetime.now()
+            serializer.validated_data['team'] = team
             evac_assignment = serializer.save()
             service_requests = ServiceRequest.objects.filter(pk__in=self.request.data['service_requests'])
             service_requests.update(status="assigned")

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import { Link, navigate } from 'raviger';
 import { Form, Formik } from 'formik';
-import { Button, Col, FormCheck, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
+import { Button, Col, Form as BootstrapForm, FormCheck, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBan, faBandAid, faBullseye, faCalendarDay, faCar, faChevronDown, faChevronUp, faEquals, faExclamationTriangle, faCircle, faClipboardList, faExclamationCircle, faQuestionCircle, faPencilAlt, faTrailer, faUserAlt, faUserAltSlash
@@ -21,6 +21,9 @@ import 'react-bootstrap-typeahead/css/Typeahead.css';
 import 'leaflet/dist/leaflet.css';
 
 function Deploy() {
+
+  // Determine if this is a preplanning workflow.
+  let preplan = window.location.pathname.includes("preplan")
 
   const [data, setData] = useState({service_requests: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
   const [mapState, setMapState] = useState({});
@@ -239,9 +242,10 @@ function Deploy() {
             });
             // Provide a default "TeamN" team name that hasn't already be used.
             let i = 1;
+            let name = preplan ? "Preplanning " : "Team "
             do {
-              if (!team_names.includes("Team " + String(i))){
-                team_name = "Team " + String(i);
+              if (!team_names.includes(name + String(i))){
+                team_name = name + String(i);
               }
               i++;
             }
@@ -336,10 +340,53 @@ function Deploy() {
           if (duplicateSRs.length > 0) {
             values.service_requests = values.service_requests.filter(sr_id => !duplicateSRs.includes(sr_id));
           }
+          console.log(values)
           setTimeout(() => {
             axios.post('/evac/api/evacassignment/', values)
             .then(response => {
-              navigate('/dispatch/summary/' + response.data.id);
+              // Stay on map and remove selected SRs if in Preplanning mode.
+              if (preplan) {
+                setData(prevState => ({ ...prevState, "service_requests":data.service_requests.filter(sr => !values.service_requests.includes(String(sr.id))) }));
+                setTotalSelectedState({'REPORTED':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}});
+                setSelectedCount({count:0, disabled:true});
+                setMapState(Object.keys(mapState).filter(key => !values.service_requests.includes(String(key)))
+                  .reduce((obj, key) => {
+                    obj[key] = mapState[key];
+                    return obj;
+                  }, {})
+                );
+                axios.get('/evac/api/dispatchteam/', {
+                  params: {
+                    map: true
+                  },
+                })
+                .then(response => {
+                  let team_names = [];
+                  let team_name = '';
+                  response.data.forEach(function(team) {
+                    team_names.push(team.name);
+                  });
+                  // Provide a default "TeamN" team name that hasn't already be used.
+                  let i = 1;
+                  let name = 'Preplanning '
+                  do {
+                    if (!team_names.includes(name + String(i))){
+                      team_name = name + String(i);
+                    }
+                    i++;
+                  }
+                  while (team_name === '');
+                  setTeamData({teams: response.data, options: [], isFetching: false});
+                  setTeamName(team_name);
+                })
+                .catch(error => {
+                  setTeamData({teams: [], options: [], isFetching: false});
+                });
+              }
+              // Otherwise navigate to the DA Summary page.
+              else {
+                navigate('/dispatch/summary/' + response.data.id);
+              }
             })
             .catch(error => {
               if (error.response.data && error.response.data[0].includes('Duplicate assigned service request error')) {
@@ -462,12 +509,12 @@ function Deploy() {
         </Row>
         <Row className="mt-2" style={{marginRight:"-12px"}}>
           <Col xs={2} className="pl-0 pr-0" style={{marginLeft:"-7px", marginRight:"12px"}}>
-            <Button type="submit" className="btn-block mt-auto" style={{marginBottom:"-33px"}} disabled={selectedCount.disabled}>DEPLOY</Button>
+            <Button type="submit" className="btn-block mt-auto" style={{marginBottom:"-33px"}} disabled={selectedCount.disabled || (!preplan && props.values.team_members.length === 0)}>{preplan ? "PREPLAN" : "DEPLOY"}</Button>
           </Col>
           <Col xs={2} className="pl-0 pr-0" style={{marginRight:"5px"}}>
             <div className="card-header border rounded text-center" style={{height:"37px", marginLeft:"-6px", paddingTop:"6px", whiteSpace:"nowrap"}}>
               <span style={{marginLeft:"-10px"}}>{props.values.team_name || teamName}
-                <OverlayTrigger
+                {!preplan ? <OverlayTrigger
                   key={"edit-team-name"}
                   placement="top"
                   overlay={
@@ -477,25 +524,36 @@ function Deploy() {
                   }
                 >
                   <FontAwesomeIcon icon={faPencilAlt} className="ml-1" style={{cursor:'pointer'}} onClick={() => setShow(true)} />
-                </OverlayTrigger>
+                </OverlayTrigger> : ""}
               </span>
             </div>
           </Col>
           <Col xs={8} className="pl-0" style={{marginRight:"-10px"}}>
-            <Typeahead
-              id="team_members"
-              multiple
-              onChange={(values) => handleChange(values, props)}
-              selected={selected}
-              options={teamData.options}
-              placeholder="Choose team members..."
-              style={{height:"20px"}}
-              renderMenuItemChildren={(option) => (
-                <div>
-                  {option.label} {option.is_assigned ? <FontAwesomeIcon icon={faExclamationTriangle} size="sm" /> : ""}
-                </div>
-              )}
-            />
+            {preplan ?
+              <BootstrapForm.Control
+                id="disabled_team_name"
+                name="disabled_team_name"
+                type="text"
+                placeholder="Cannot choose team members when preplanning..."
+                disabled={true}
+                style={{height:"37px"}}
+              />
+            :
+              <Typeahead
+                id="team_members"
+                multiple
+                onChange={(values) => handleChange(values, props)}
+                selected={selected}
+                options={teamData.options}
+                placeholder="Choose team members..."
+                style={{height:"20px"}}
+                renderMenuItemChildren={(option) => (
+                  <div>
+                    {option.label} {option.is_assigned ? <FontAwesomeIcon icon={faExclamationTriangle} size="sm" /> : ""}
+                  </div>
+                )}
+              />
+            }
           </Col>
         </Row>
         <Row className="d-flex flex-wrap" style={{marginTop:"8px", marginRight:"-23px", marginLeft:"-14px", minHeight:"36vh", paddingRight:"14px"}}>
