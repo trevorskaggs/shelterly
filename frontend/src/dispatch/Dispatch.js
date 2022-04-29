@@ -8,6 +8,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faUserPlus, faUsers
 } from '@fortawesome/free-solid-svg-icons';
+import { faChevronDoubleDown, faChevronDoubleUp } from '@fortawesome/pro-solid-svg-icons';
 import Map, { countMatches, prettyText, reportedMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
 import Header from "../components/Header";
 import Scrollbar from '../components/Scrollbars';
@@ -17,6 +18,8 @@ function Dispatch() {
   const [data, setData] = useState({dispatch_assignments: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
   const [mapState, setMapState] = useState({});
   const [selectedTeam, setSelectedTeam] = useState(null);
+  const [showActive, setShowActive] = useState(true);
+  const [showPreplanned, setShowPreplanned] = useState(true);
 
   // Hook for initializing data.
   useEffect(() => {
@@ -101,7 +104,8 @@ function Dispatch() {
         <Row xs={12} className="ml-0 mr-0 pl-0 pr-0" style={{marginBottom:"-1px"}}>
           <Col xs={9} className="border rounded pl-0 pr-0">
             <Map bounds={data.bounds} boundsOptions={{padding:[10,10]}} className="landing-leaflet-container">
-              {data.dispatch_assignments.filter(dispatch_assignment => (selectedTeam == null || dispatch_assignment.id === selectedTeam)).map(dispatch_assignment => (
+              {data.dispatch_assignments.filter(da => da.id === selectedTeam ? da : showActive && showPreplanned ? da : showActive ? da.team_member_names.length > 0 : showPreplanned ? da.team_member_names.length === 0 : null)
+                                        .filter(dispatch_assignment => (selectedTeam == null || dispatch_assignment.id === selectedTeam)).map(dispatch_assignment => (
               <span key={dispatch_assignment.id}>
                 {dispatch_assignment.assigned_requests.map(assigned_request => (
                   <Marker
@@ -141,9 +145,28 @@ function Dispatch() {
           </Col>
           <Col xs={3} className="ml-0 mr-0 pl-0 pr-0 border rounded">
             <Scrollbar no_shadow="true" style={{height:"350px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
-            <Button variant={selectedTeam === null ? "primary" : "secondary"} className="border" onClick={() => setSelectedTeam(null)} style={{maxHeight:"36px", width:"100%", marginTop:"-1px"}}>All</Button>
-            {data.dispatch_assignments.map(dispatch_assignment => (
-              <Button key={dispatch_assignment.id} title={dispatch_assignment.team ? dispatch_assignment.team.name : ""} variant={dispatch_assignment.id === selectedTeam ? "primary" : "secondary"} className="border" onClick={() => setSelectedTeam(dispatch_assignment.id)} style={{maxHeight:"36px", width:"100%", marginTop:"-1px"}}>
+            <Button variant={showActive === true ? "primary" : "secondary"} className="border" onClick={() => setShowActive(!showActive)} style={{maxHeight:"36px", width:"100%", marginTop:"-1px"}}>Active {showActive ? <FontAwesomeIcon icon={faChevronDoubleUp} size="sm" /> : <FontAwesomeIcon icon={faChevronDoubleDown} size="sm" />}</Button>
+            {data.dispatch_assignments.filter(da => showActive ? da.team_member_names.length > 0 : null).map(dispatch_assignment => (
+              <Button key={dispatch_assignment.id} title={dispatch_assignment.team ? dispatch_assignment.team.name : ""} variant={dispatch_assignment.id === selectedTeam ? "primary" : "secondary"} className="border" onClick={() => setSelectedTeam(selectedTeam === dispatch_assignment.id ? null : dispatch_assignment.id)} style={{maxHeight:"36px", width:"100%", marginTop:"-1px"}}>
+                {dispatch_assignment.team ? dispatch_assignment.team_object.name : "Preplanned"}
+                {dispatch_assignment.team_member_names ?
+                  <OverlayTrigger
+                    key={"team-names"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-team-names`}>
+                        {dispatch_assignment.team_member_names}
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon icon={faUsers} className="ml-1" />
+                  </OverlayTrigger>
+                : ""}
+              </Button>
+            ))}
+            <Button variant={showPreplanned === true ? "primary" : "secondary"} className="border" onClick={() => setShowPreplanned(!showPreplanned)} style={{maxHeight:"36px", width:"100%", marginTop:"-1px"}}>Preplanned {showPreplanned ? <FontAwesomeIcon icon={faChevronDoubleUp} size="sm" /> : <FontAwesomeIcon icon={faChevronDoubleDown} size="sm" />}</Button>
+            {data.dispatch_assignments.filter(da => showPreplanned ? da.team_member_names.length === 0 : null).map(dispatch_assignment => (
+              <Button key={dispatch_assignment.id} title={dispatch_assignment.team ? dispatch_assignment.team.name : ""} variant={dispatch_assignment.id === selectedTeam ? "primary" : "secondary"} className="border" onClick={() => setSelectedTeam(selectedTeam === dispatch_assignment.id ? null : dispatch_assignment.id)} style={{maxHeight:"36px", width:"100%", marginTop:"-1px"}}>
                 {dispatch_assignment.team ? dispatch_assignment.team_object.name : "Preplanned"}
                 {dispatch_assignment.team_member_names ?
                   <OverlayTrigger
@@ -164,7 +187,7 @@ function Dispatch() {
           </Col>
         </Row>
         <Row className="ml-0 mr-0 border rounded" style={{maxHeight:"38px"}}>
-          <h4 className="card-header text-center" style={{paddingTop:"4px", paddingLeft:"10px", paddingRight:"10px", height:"36px", width:"100%", backgroundColor:"#808080"}}>Active Dispatch Assignments</h4>
+          <h4 className="card-header text-center" style={{paddingTop:"4px", paddingLeft:"10px", paddingRight:"10px", height:"36px", width:"100%", backgroundColor:"#808080"}}>Dispatch Assignments</h4>
         </Row>
       </Col>
     </Row>
