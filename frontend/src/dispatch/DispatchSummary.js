@@ -5,7 +5,7 @@ import { Button, Card, Col, Form, ListGroup, Modal, OverlayTrigger, Row, Tooltip
 import { Typeahead } from 'react-bootstrap-typeahead';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faCalendarDay, faClipboardCheck, faClipboardList, faEdit, faEnvelope, faHouseDamage, faMinusSquare, faPencilAlt, faPlusSquare, faUserCheck
+  faCalendarDay, faClipboardCheck, faClipboardList, faEdit, faEnvelope, faHouseDamage, faMinusSquare, faPencilAlt, faUserCheck, faUserPlus
 } from '@fortawesome/free-solid-svg-icons';
 import { faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import { Marker, Tooltip as MapTooltip } from "react-leaflet";
@@ -44,7 +44,6 @@ function DispatchSummary({id}) {
   const [error, setError] = useState('');
 
   const handleTeamNameSubmit = async () => {
-    console.log(teamName)
     if (teamName.replace(/ /g, '').length === 0) {
       setError("Team name cannot be blank.");
     }
@@ -104,14 +103,13 @@ function DispatchSummary({id}) {
             map_dict[assigned_request.service_request_object.id] = {matches:matches, has_reported_animals:assigned_request.service_request_object.reported_animals > 0, latitude:assigned_request.service_request_object.latitude, longitude:assigned_request.service_request_object.longitude};
             bounds.push([assigned_request.service_request_object.latitude, assigned_request.service_request_object.longitude]);
           }
-          if (response.data.team) {
-            response.data['team_members'] = response.data.team.team_members;
-            response.data['team_member_objects'] = response.data.team_object.team_member_objects;
-          }
+          response.data['team_members'] = response.data.team.team_members;
+          response.data['team_member_objects'] = response.data.team_object.team_member_objects;
           response.data['bounds'] = bounds.length > 0 ? bounds : L.latLngBounds([[0,0]]);
           setData(response.data);
           setMapState(map_dict);
           setTeamData({options: [], isFetching: true});
+          setTeamName(response.data.team_object.name);
           axios.get('/evac/api/evacteammember/', {
             cancelToken: source.token,
           })
@@ -155,7 +153,7 @@ function DispatchSummary({id}) {
       >
         <Link href={"/dispatch/resolution/" + id}><FontAwesomeIcon icon={faEdit} className="ml-1" inverse /></Link>
       </OverlayTrigger>
-      :
+      : data.team_member_objects.length ?
       <OverlayTrigger
         key={"resolve-dispatch-assignment"}
         placement="bottom"
@@ -167,7 +165,7 @@ function DispatchSummary({id}) {
       >
         <Link href={"/dispatch/resolution/" + id}><FontAwesomeIcon icon={faClipboardCheck} className="ml-1"  inverse /></Link>
       </OverlayTrigger>
-      }
+      : ""}
     <div style={{fontSize:"18px", marginTop:"12px"}}><b>Opened: </b><Moment format="MMMM Do YYYY, HH:mm">{data.start_time}</Moment>{data.end_time ? <span> | <b>Resolved: </b><Moment format="MMMM Do YYYY, HH:mm">{data.end_time}</Moment></span> : ""}</div>
     </Header>
     <hr/>
@@ -197,7 +195,7 @@ function DispatchSummary({id}) {
                   </Tooltip>
                 }
               >
-                <FontAwesomeIcon icon={faPlusSquare} className="ml-1" onClick={() => {setShow(true)}} style={{cursor:'pointer'}} inverse />
+                <FontAwesomeIcon icon={faUserPlus} className="ml-1 fa-move-up" size="sm" onClick={() => {setShow(true)}} style={{cursor:'pointer'}} inverse />
               </OverlayTrigger>
               </h4>
             </Card.Title>
@@ -418,6 +416,7 @@ function DispatchSummary({id}) {
           name="team_name"
           type="text"
           onChange={(event) => {setTeamName(event.target.value)}}
+          value={teamName}
         />
         {error ? <div style={{ color: "#e74c3c", marginTop: "-8px", marginLeft: "16px", fontSize: "80%" }}>{error}</div> : ""}
       </Modal.Body>
@@ -437,7 +436,6 @@ function DispatchSummary({id}) {
           onChange={(values) => {setNewTeamMembers(values)}}
           options={teamData.options}
           placeholder="Choose team members..."
-          style={{marginLeft:"3px", marginRight:"-13px"}}
         />
       </Modal.Body>
       <Modal.Footer>

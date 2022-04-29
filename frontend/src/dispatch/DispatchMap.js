@@ -547,6 +547,7 @@ function Deploy() {
                 options={teamData.options}
                 placeholder="Choose team members..."
                 style={{height:"20px"}}
+                className="map-typeahead"
                 renderMenuItemChildren={(option) => (
                   <div>
                     {option.label} {option.is_assigned ? <FontAwesomeIcon icon={faExclamationTriangle} size="sm" /> : ""}
