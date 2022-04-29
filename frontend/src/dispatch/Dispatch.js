@@ -90,7 +90,7 @@ function Dispatch() {
             <ListGroup.Item className="rounded" action>DEPLOY TEAMS</ListGroup.Item>
           </Link>
           <Link href="/dispatch/preplan">
-            <ListGroup.Item className="rounded" action>PREPLANNING</ListGroup.Item>
+            <ListGroup.Item className="rounded" action>PREPLAN</ListGroup.Item>
           </Link>
           <Link href="/dispatch/dispatchassignment/search">
             <ListGroup.Item className="rounded" action>SEARCH DISPATCH ASSIGNMENTS</ListGroup.Item>
@@ -145,7 +145,7 @@ function Dispatch() {
             {data.dispatch_assignments.map(dispatch_assignment => (
               <Button key={dispatch_assignment.id} title={dispatch_assignment.team ? dispatch_assignment.team.name : ""} variant={dispatch_assignment.id === selectedTeam ? "primary" : "secondary"} className="border" onClick={() => setSelectedTeam(dispatch_assignment.id)} style={{maxHeight:"36px", width:"100%", marginTop:"-1px"}}>
                 {dispatch_assignment.team ? dispatch_assignment.team_object.name : "Preplanned"}
-                {dispatch_assignment.team ?
+                {dispatch_assignment.team_member_names ?
                   <OverlayTrigger
                     key={"team-names"}
                     placement="top"

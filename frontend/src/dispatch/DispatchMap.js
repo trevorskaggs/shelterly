@@ -5,7 +5,7 @@ import { Form, Formik } from 'formik';
 import { Button, Col, Form as BootstrapForm, FormCheck, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBan, faBandAid, faBullseye, faCalendarDay, faCar, faChevronDown, faChevronUp, faEquals, faExclamationTriangle, faCircle, faClipboardList, faExclamationCircle, faQuestionCircle, faPencilAlt, faTrailer, faUserAlt, faUserAltSlash
+  faBan, faBandAid, faBullseye, faCalendarDay, faCar, faChevronDown, faChevronUp, faEquals, faExclamationTriangle, faCircle, faClipboardList, faExclamationCircle, faMapMarkedAlt, faQuestionCircle, faPencilAlt, faTrailer, faUserAlt, faUserAltSlash
 } from '@fortawesome/free-solid-svg-icons';
 import { faBadgeSheriff, faChevronDoubleDown, faChevronDoubleUp, faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
 import { Circle, Marker, Tooltip as MapTooltip } from "react-leaflet";
@@ -242,7 +242,7 @@ function Deploy() {
             });
             // Provide a default "TeamN" team name that hasn't already be used.
             let i = 1;
-            let name = preplan ? "Preplanning " : "Team "
+            let name = preplan ? "Preplanned " : "Team "
             do {
               if (!team_names.includes(name + String(i))){
                 team_name = name + String(i);
@@ -313,7 +313,7 @@ function Deploy() {
       unmounted = true;
       source.cancel();
     };
-  }, [triggerRefresh]);
+  }, [triggerRefresh, preplan]);
 
   return (
     <Formik
@@ -340,7 +340,7 @@ function Deploy() {
           if (duplicateSRs.length > 0) {
             values.service_requests = values.service_requests.filter(sr_id => !duplicateSRs.includes(sr_id));
           }
-          console.log(values)
+
           setTimeout(() => {
             axios.post('/evac/api/evacassignment/', values)
             .then(response => {
@@ -368,7 +368,7 @@ function Deploy() {
                   });
                   // Provide a default "TeamN" team name that hasn't already be used.
                   let i = 1;
-                  let name = 'Preplanning '
+                  let name = 'Preplanned '
                   do {
                     if (!team_names.includes(name + String(i))){
                       team_name = name + String(i);
@@ -841,6 +841,17 @@ function Deploy() {
                       }
                     >
                       <Link href={"/hotline/servicerequest/" + service_request.id}><FontAwesomeIcon icon={faClipboardList} inverse /></Link>
+                    </OverlayTrigger>
+                    <OverlayTrigger
+                      key={"add-to-dispatch"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-add-to-dispatch`}>
+                          Assign service request to an open dispatch assignment
+                        </Tooltip>
+                      }
+                    >
+                      <Link href={"/hotline/servicerequest/" + service_request.id + "/assign"}><FontAwesomeIcon icon={faMapMarkedAlt} className="ml-1" inverse /></Link>
                     </OverlayTrigger>
                   </div>
                 </div>

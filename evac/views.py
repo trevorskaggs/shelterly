@@ -86,14 +86,16 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
         AssignedRequest.objects.select_related('service_request', 'owner_contact').prefetch_related('service_request__owners', 'service_request__ownercontact_set').prefetch_related(Prefetch(
                 'service_request__animal_set', queryset=Animal.objects.with_images().exclude(status='CANCELED'), to_attr='animals'))))
 
-        # Exclude EAs without animals when fetching for a map.
+        # Exclude DAs without SRs when fetching for a map.
         is_map = self.request.query_params.get('map', '')
         if is_map == 'true':
             queryset = queryset.exclude(service_requests=None)
 
         status = self.request.query_params.get('status', '')
-        if status == "open":
-            return queryset.filter(end_time__isnull=True).distinct()
+        if status == "active":
+            return queryset.filter(end_time__isnull=True).filter(team__team_members__isnull=False).distinct()
+        elif status == "preplanned":
+            return queryset.filter(end_time__isnull=True).filter(team__team_members__isnull=True).distinct()
         elif status == "resolved":
             return queryset.filter(end_time__isnull=False).distinct()
 
