@@ -49,10 +49,9 @@ class DispatchTeamViewSet(viewsets.ModelViewSet):
 
             # Add Team Members to DA.
             if self.request.data.get('new_team_members'):
-                # if team length was 0, set timestamp
+                # if team length was 0, set AssignedRequest timestamp
                 if team.team_members.count() == 0:
-                    team.timestamp = datetime.now()
-                    team.save()
+                    AssignedRequest.objects.filter(dispatch_assignment__team=team.id).update(timestamp=datetime.now())
                 team.team_members.add(*self.request.data.get('new_team_members'))
 
             # Remove Team Member from DA.
