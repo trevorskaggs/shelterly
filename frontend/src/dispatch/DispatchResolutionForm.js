@@ -19,7 +19,7 @@ import {
 } from "react-register-nodes";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faClipboardList
+  faClipboardList, faPrint
 } from '@fortawesome/free-solid-svg-icons';
 import smoothScrollIntoView from "smooth-scroll-into-view-if-needed";
 import Moment from 'react-moment';
@@ -27,6 +27,8 @@ import Header from '../components/Header';
 import { Checkbox, DateTimePicker, DropDown, TextInput } from '../components/Form';
 import { dispatchStatusChoices } from '../animals/constants';
 import ButtonSpinner from '../components/ButtonSpinner';
+import { printDispatchResolutionForm } from './Utils';
+import { priorityChoices } from '../constants';
 
 function DispatchResolutionForm({ id }) {
 
@@ -50,13 +52,11 @@ function DispatchResolutionForm({ id }) {
   const ordered = useOrderedNodes();
   const [shouldCheckForScroll, setShouldCheckForScroll] = React.useState(false);
 
-  const priorityChoices = [
-    { value: 1, label: 'Highest' },
-    { value: 2, label: 'High' },
-    { value: 3, label: 'Medium' },
-    { value: 4, label: 'Low' },
-    { value: 5, label: 'Lowest' }
-  ]
+  const handleDownloadPdfClick = (e) => {
+    e.preventDefault();
+
+    printDispatchResolutionForm(data);
+  }
 
   // Hook for initializing data.
   useEffect(() => {
@@ -216,9 +216,24 @@ function DispatchResolutionForm({ id }) {
         <>
           <BootstrapForm as={Form}>
             <Header>Dispatch Assignment Resolution
+            <OverlayTrigger
+              key={"offline-dispatch-assignment"}
+              placement="bottom"
+              overlay={
+                <Tooltip id={`tooltip-offline-dispatch-assignment`}>
+                  Download printable field resolution form
+                </Tooltip>
+              }
+            >
+              {({ ref, ...triggerHandler }) => (
+                <Link onClick={handleDownloadPdfClick} {...triggerHandler} href="#">
+                  <span ref={ref}><FontAwesomeIcon icon={faPrint} className="ml-3"  inverse /></span>
+                </Link>
+              )}
+            </OverlayTrigger>
               <div style={{ fontSize: "16px", marginTop: "5px" }}><b>Opened: </b><Moment format="MMMM Do YYYY, HH:mm">{data.start_time}</Moment>{data.end_time ? <span style={{ fontSize: "16px", marginTop: "5px" }}> | <b>Closed: </b><Moment format="MMMM Do YYYY, HH:mm">{data.end_time}</Moment></span> : ""}</div>
             </Header>
-            <hr />
+            <hr className="mt-2" />
             <Card border="secondary" className="mt-3">
               <Card.Body>
                 <Card.Title>

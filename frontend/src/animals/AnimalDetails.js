@@ -9,7 +9,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBan, faMedkit, faCut, faEdit, faEnvelope, faLink, faMinusSquare, faPrint, faTimes, faUserPlus
 } from '@fortawesome/free-solid-svg-icons';
-import { faClawMarks, faHomeHeart, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
+import { faBadgeSheriff, faClawMarks, faHomeHeart, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import { AnimalDeleteModal } from "../components/Modals";
 import Header from '../components/Header';
@@ -34,6 +34,7 @@ function AnimalDetails({id}) {
     color_notes: '',
     fixed: 'unknown',
     aggressive: 'unknown',
+    aco_required: 'unknown',
     confined: 'unknown',
     injured: 'unknown',
     behavior_notes: '',
@@ -231,6 +232,18 @@ function AnimalDetails({id}) {
                   </span>
                 </OverlayTrigger> :
               ""}
+              {data.aco_required === 'yes' ?
+                <OverlayTrigger
+                  key={"aco-required"}
+                  placement="top"
+                  overlay={
+                    <Tooltip id={`tooltip-aco-required`}>
+                      ACO required
+                    </Tooltip>
+                  }
+                >
+                  <FontAwesomeIcon icon={faBadgeSheriff} size="sm" className="ml-1" />
+                </OverlayTrigger> : ""}
               {data.injured === 'yes' ?
                 <OverlayTrigger
                   key={"injured"}

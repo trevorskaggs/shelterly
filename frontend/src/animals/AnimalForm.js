@@ -69,6 +69,7 @@ const AnimalForm = (props) => {
     scolor: '',
     color_notes: '',
     fixed: 'unknown',
+    aco_required: 'unknown',
     aggressive: 'unknown',
     confined: 'unknown',
     injured: 'unknown',
@@ -253,13 +254,15 @@ const AnimalForm = (props) => {
           color_notes: Yup.string()
             .max(200, 'Must be 200 characters or less'),
           fixed: Yup.string()
-            .max(200, 'Must be 200 characters or less'),
+            .max(10, 'Must be 10 characters or less'),
+          aco_required: Yup.string()
+            .max(10, 'Must be 10 characters or less'),
           aggressive: Yup.string()
-            .max(200, 'Must be 200 characters or less'),
+            .max(10, 'Must be 10 characters or less'),
           confined: Yup.string()
-           .max(200, 'Must be 200 characters or less'),
+           .max(10, 'Must be 10 characters or less'),
           injured: Yup.string()
-           .max(200, 'Must be 200 characters or less'),
+           .max(10, 'Must be 10 characters or less'),
           behavior_notes: Yup.string()
             .max(200, 'Must be 200 characters or less'),
           last_seen: Yup.date()
@@ -367,11 +370,7 @@ const AnimalForm = (props) => {
               formData.append('new_owner', ownerResponse[0].data.id);
               await axios.post('/animals/api/animal/', formData)
               .then(function() {
-                // Navigate to shelter page.
-                if (values.shelter) {
-                  navigate('/shelter/' + values.shelter);
-                }
-                else if (ownerResponse[0].data.id) {
+                if (ownerResponse[0].data.id) {
                   navigate('/people/owner/' + ownerResponse[0].data.id)
                 }
                 else {
@@ -518,7 +517,7 @@ const AnimalForm = (props) => {
                 <BootstrapForm.Row>
                   <TextInput
                     id="name"
-                    xs="6"
+                    xs="3"
                     name="name"
                     type="text"
                     label="Animal Name"
@@ -549,6 +548,17 @@ const AnimalForm = (props) => {
                       placeholder={placeholder}
                     />
                   </Col>
+                  <Col xs="3">
+                    <DropDown
+                      label="Fixed"
+                      id="fixed"
+                      name="fixed"
+                      type="text"
+                      options={unknownChoices}
+                      value={formikProps.values.fixed||'unknown'}
+                      isClearable={false}
+                    />
+                  </Col>
                 </BootstrapForm.Row>
                 <BootstrapForm.Row>
                   <Col xs="3">
@@ -560,16 +570,20 @@ const AnimalForm = (props) => {
                       options={unknownChoices}
                       value={formikProps.values.aggressive||'unknown'}
                       isClearable={false}
+                      onChange={(instance) => {
+                        formikProps.setFieldValue("aggressive", instance === null ? '' : instance.value);
+                        formikProps.setFieldValue("aco_required", instance && instance.value === 'yes' ? 'yes' : formikProps.values.aco_required);
+                      }}
                     />
                   </Col>
                   <Col xs="3">
                     <DropDown
-                      label="Fixed"
-                      id="fixed"
-                      name="fixed"
+                      label="ACO Required"
+                      id="aco_required"
+                      name="aco_required"
                       type="text"
                       options={unknownChoices}
-                      value={formikProps.values.fixed||'unknown'}
+                      value={formikProps.values.aco_required||'unknown'}
                       isClearable={false}
                     />
                   </Col>

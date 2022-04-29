@@ -10,7 +10,7 @@ import {
 import {
   faDotCircle
 } from '@fortawesome/free-regular-svg-icons';
-import { faChevronDoubleDown, faChevronDoubleUp, faClawMarks, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
+import { faBadgeSheriff, faChevronDoubleDown, faChevronDoubleUp, faClawMarks, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import Moment from 'react-moment';
 import Select, { components } from 'react-select';
 import L from "leaflet";
@@ -472,6 +472,19 @@ function AnimalSearch() {
                       </span>
                     </OverlayTrigger> :
                   ""}
+                  {animal.aco_required === 'yes' ?
+                    <OverlayTrigger
+                      key={"aco-required"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-aco-required`}>
+                          ACO required
+                        </Tooltip>
+                      }
+                    >
+                      <FontAwesomeIcon icon={faBadgeSheriff} size="sm" className="ml-1" />
+                    </OverlayTrigger>
+                  : ""}
                   {animal.injured === 'yes' ?
                     <OverlayTrigger
                       key={"injured"}

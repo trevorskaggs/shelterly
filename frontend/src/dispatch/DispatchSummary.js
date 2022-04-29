@@ -5,7 +5,7 @@ import { Button, Card, Col, Form, ListGroup, Modal, OverlayTrigger, Row, Tooltip
 import { Typeahead } from 'react-bootstrap-typeahead';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faCalendarDay, faClipboardCheck, faClipboardList, faEdit, faEnvelope, faHouseDamage, faMinusSquare, faPencilAlt, faUserCheck, faUserPlus
+  faCalendarDay, faClipboardCheck, faClipboardList, faEdit, faEnvelope, faHouseDamage, faMinusSquare, faPencilAlt, faPrint, faUserCheck, faUserPlus
 } from '@fortawesome/free-solid-svg-icons';
 import { faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import { Marker, Tooltip as MapTooltip } from "react-leaflet";
@@ -14,6 +14,7 @@ import Moment from 'react-moment';
 import Map, { countMatches, prettyText, reportedMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
+import { printDispatchResolutionForm } from './Utils'
 
 function DispatchSummary({id}) {
 
@@ -82,6 +83,12 @@ function DispatchSummary({id}) {
     })
     .catch(error => {
     });
+  }
+
+  const handleDownloadPdfClick = (e) => {
+    e.preventDefault();
+
+    printDispatchResolutionForm(data);
   }
 
   // Hook for initializing data.
@@ -166,6 +173,21 @@ function DispatchSummary({id}) {
         <Link href={"/dispatch/resolution/" + id}><FontAwesomeIcon icon={faClipboardCheck} className="ml-1"  inverse /></Link>
       </OverlayTrigger>
       : ""}
+      <OverlayTrigger
+        key={"offline-dispatch-assignment"}
+        placement="bottom"
+        overlay={
+          <Tooltip id={`tooltip-offline-dispatch-assignment`}>
+            Download printable field resolution form
+          </Tooltip>
+        }
+      >
+        {({ ref, ...triggerHandler }) => (
+          <Link onClick={handleDownloadPdfClick} {...triggerHandler} href="#">
+            <span ref={ref}><FontAwesomeIcon icon={faPrint} className="ml-3"  inverse /></span>
+          </Link>
+        )}
+      </OverlayTrigger>
     <div style={{fontSize:"18px", marginTop:"12px"}}><b>Opened: </b><Moment format="MMMM Do YYYY, HH:mm">{data.start_time}</Moment>{data.end_time ? <span> | <b>Resolved: </b><Moment format="MMMM Do YYYY, HH:mm">{data.end_time}</Moment></span> : ""}</div>
     </Header>
     <hr/>

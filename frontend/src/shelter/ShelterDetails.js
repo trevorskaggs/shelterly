@@ -77,7 +77,7 @@ function ShelterDetails({id}) {
       <hr/>
       <Row className="d-flex">
         <Col>
-          <Card className="border rounded d-flex" style={{width:"100%"}}>
+          <Card className="border rounded d-flex" style={{width:"100%", height: "100%"}}>
             <Card.Body>
               <Card.Title>
                 <h4>Information</h4>
@@ -110,6 +110,7 @@ function ShelterDetails({id}) {
               <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
                 <ListGroup.Item className="rounded" action><Link href={"/intake/workflow/owner?shelter_id=" + id} style={{color:"#FFF"}}><FontAwesomeIcon icon={faDoorOpen} inverse/> <b>Intake from Walk-In (Owner)</b></Link></ListGroup.Item>
                 <ListGroup.Item className="rounded" action><Link href={"/intake/workflow/reporter?shelter_id=" + id} style={{color:"#FFF"}}><FontAwesomeIcon icon={faDoorOpen} inverse/> <b>Intake from Walk-In (Non-Owner)</b></Link></ListGroup.Item>
+                <ListGroup.Item className="rounded" action><Link href={"/dispatch/dispatchassignment/search"} style={{color:"#FFF"}}><FontAwesomeIcon icon={faDoorOpen} inverse/> <b>Intake from Dispatch Assignment</b></Link></ListGroup.Item>
                 <ListGroup.Item>
                   <b>Currently Sheltering:</b> {data.animal_count + data.unroomed_animals.length} Animal{data.animal_count + data.unroomed_animals.length === 1 ? "" : "s"}
                 </ListGroup.Item>
