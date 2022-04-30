@@ -160,7 +160,7 @@ function DispatchSummary({id}) {
       >
         <Link href={"/dispatch/resolution/" + id}><FontAwesomeIcon icon={faEdit} className="ml-1" inverse /></Link>
       </OverlayTrigger>
-      : data.team_member_objects.length ?
+      :
       <OverlayTrigger
         key={"resolve-dispatch-assignment"}
         placement="bottom"
@@ -172,7 +172,7 @@ function DispatchSummary({id}) {
       >
         <Link href={"/dispatch/resolution/" + id}><FontAwesomeIcon icon={faClipboardCheck} className="ml-1"  inverse /></Link>
       </OverlayTrigger>
-      : ""}
+      }
       <OverlayTrigger
         key={"offline-dispatch-assignment"}
         placement="bottom"
