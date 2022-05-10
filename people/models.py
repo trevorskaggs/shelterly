@@ -26,6 +26,12 @@ class Person(Location):
     class Meta:
         ordering = ('-first_name',)
 
+class PersonImage(models.Model):
+
+    image = models.ImageField(upload_to='images/')
+    name = models.CharField(max_length=20, blank=True)
+    person = models.ForeignKey(Person, on_delete=models.SET_NULL, null=True)
+
 class OwnerContact(models.Model):
     owner = models.ForeignKey(Person, null=True, on_delete=models.CASCADE)
     service_request = models.ForeignKey('hotline.ServiceRequest', null=True, blank=True, on_delete=models.CASCADE)

@@ -1,5 +1,9 @@
 import React from 'react';
 import { Button, Modal } from 'react-bootstrap';
+import { Formik } from "formik";
+import axios from 'axios';
+import * as Yup from 'yup';
+import { ImageUploader, TextInput } from '../components/Form.js';
 
 const DispatchDuplicateSRModal = (props) => {
 
@@ -83,4 +87,69 @@ const AnimalDeleteModal = (props) => {
   );
 };
 
-export { AnimalDeleteModal, DispatchAlreadyAssignedTeamModal, DispatchDuplicateSRModal };
+const PhotoDocumentModal = (props) => {
+
+  return (
+    <>
+    <Formik
+      initialValues={{name:'', images:[]}}
+      enableReinitialize={true}
+      validationSchema={Yup.object({
+        name: Yup.string()
+          .max(50, 'Must be 20 characters or less.'),
+        images: Yup.mixed(),
+      })}
+      onSubmit={ async (values, { setSubmitting, resetForm }) => {
+        const formData = new FormData();
+        const options = {
+          maxSizeMB: 2,
+          maxWidthOrHeight: 1920,
+          useWebWorker: true
+        }
+        formData.append('image', props.images[0].file, props.images[0].file.name);
+        await axios.patch(props.url, formData)
+        .then(response => {
+          props.setData(prevState => ({ ...prevState, "images":response.data.images}));
+          props.handleClose();
+          resetForm();
+        })
+        .catch(error => {
+        });
+      }}
+      >
+      {formikProps => (
+        <Modal show={props.show} onHide={props.handleClose}>
+          <Modal.Header closeButton>
+            <Modal.Title>Add Photo Document</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <TextInput
+              id="filename"
+              name="filename"
+              type="text"
+              xs="8"
+              label="Filename"
+            />
+            <div className="ml-3">
+              <span>Photo Document</span>
+              <ImageUploader
+                value={props.images}
+                id="image"
+                name="image"
+                parentStateSetter={props.setImages}
+                maxNumber={1}
+              />
+            </div>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="primary" onClick={() => { formikProps.submitForm() }} disabled={props.images.length ? false : true}>Yes</Button>
+            <Button variant="secondary" onClick={props.handleClose}>Close</Button>
+          </Modal.Footer>
+        </Modal>
+      )}
+    </Formik>
+    </>
+  );
+};
+
+export { AnimalDeleteModal, DispatchAlreadyAssignedTeamModal, DispatchDuplicateSRModal, PhotoDocumentModal };

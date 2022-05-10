@@ -2,9 +2,7 @@ import React, { useCallback, useContext, useEffect, useRef, useState } from "rea
 import axios from "axios";
 import { navigate, useQueryParams } from 'raviger';
 import { Form, Formik } from "formik";
-import { Col, Image } from 'react-bootstrap';
-import { ButtonGroup, Form as BootstrapForm } from "react-bootstrap";
-import { Card } from 'react-bootstrap';
+import { ButtonGroup, Card, Col, Image, Form as BootstrapForm } from "react-bootstrap";
 import * as Yup from 'yup';
 import { AuthContext } from "../accounts/AccountsReducer";
 import { AddressSearch, DateTimePicker, DropDown, ImageUploader, TextInput } from '../components/Form.js';

@@ -6,7 +6,7 @@ from .serializers import ServiceRequestSerializer, SimpleServiceRequestSerialize
 from .ordering import MyCustomOrdering
 
 from animals.models import Animal
-from hotline.models import ServiceRequest, VisitNote
+from hotline.models import ServiceRequest, ServiceRequestImage, VisitNote
 from people.models import Person
 from rest_framework import filters, permissions, serializers, viewsets
 
@@ -46,6 +46,11 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
 
             if service_request.status == 'canceled':
                 service_request.animal_set.update(status='CANCELED')
+
+            #Create new files from uploads
+            for key in self.request.FILES.keys():
+                image_data = self.request.FILES[key]
+                ServiceRequestImage.objects.create(image=image_data, service_request=service_request)
 
             if self.request.data.get('reunite_animals'):
                 service_request.animal_set.exclude(status='DECEASED').update(status='REUNITED', shelter=None, room=None)

@@ -262,7 +262,7 @@ const ImageUploader = ({ parentStateSetter, ...props }) => {
                 <Image width={131} src={image.data_url} alt="Animal" thumbnail />
                 <div className="image-item__btn-wrapper">
                   <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => onImageRemove(index)} style={{backgroundColor:"red"}} />
-                  <span className="ml-1">{props.label}</span>
+                  <span className="ml-1">{props.label || image.file.name}</span>
                 </div>
               </span>
             ))}

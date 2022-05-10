@@ -6,12 +6,13 @@ import { Button, Card, ListGroup, Modal, OverlayTrigger, Tooltip } from 'react-b
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBan, faCar, faClipboardCheck, faEdit, faEnvelope, faHouseDamage,
-  faKey, faMapMarkedAlt, faPlusSquare, faTimes, faTrailer, faUserPlus, faUsers
+  faKey, faMapMarkedAlt, faMinusSquare, faPlusSquare, faTimes, faTrailer, faUserPlus, faUsers
 } from '@fortawesome/free-solid-svg-icons';
 import { faCalendarEdit, faCommentSmile, faHomeHeart, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import Header from '../components/Header';
 import History from '../components/History';
 import AnimalCards from '../components/AnimalCards';
+import { PhotoDocumentModal } from '../components/Modals';
 import Flatpickr from 'react-flatpickr';
 
 function ServiceRequestDetails({id}) {
@@ -61,17 +62,32 @@ function ServiceRequestDetails({id}) {
     followup_date: null,
     assigned_requests: [],
     status:'',
+    images: [],
     action_history: [],
   });
 
+  const [images, setImages] = useState(null);
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
+  const [showAddPhoto, setShowAddPhoto] = useState(false);
+  const handleCloseAddPhoto = () => setShowAddPhoto(false);
 
   // Handle animal reunification submit.
   const handleSubmit = async () => {
     await axios.patch('/hotline/api/servicerequests/' + id + '/', {reunite_animals:true})
     .then(response => {
       setData(prevState => ({ ...prevState, "status":"Closed", "animals":prevState['animals'].map(animal => ({...animal, status:animal.status !== 'DECEASED' ? 'REUNITED' : 'DECEASED'})) }));
+      handleClose()
+    })
+    .catch(error => {
+    });
+  }
+
+  // Handle remove photo.
+  const handleSubmitRemovePhoto = async (image_id) => {
+    await axios.patch('/hotline/api/servicerequests/' + id + '/', {'remove_image':image_id})
+    .then(response => {
+      setData(prevState => ({ ...prevState, "images":data.images.filter(image => image.id !== image_id)}));
       handleClose()
     })
     .catch(error => {
@@ -384,6 +400,48 @@ function ServiceRequestDetails({id}) {
           </Card>
         </div>
       </div>
+      <div className="row mb-2">
+        <div className="col-12 d-flex">
+          <Card className="mb-2 border rounded" style={{width:"100%"}}>
+            <Card.Body style={{marginBottom:"-20px"}}>
+              <Card.Title>
+                <h4 className="mb-0">Photo Documents
+                    <OverlayTrigger
+                      key={"add-photo"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-add-photo`}>
+                          Add a photo document to this service request
+                        </Tooltip>
+                      }
+                    >
+                      <FontAwesomeIcon icon={faPlusSquare} onClick={() => setShowAddPhoto(true)} style={{cursor:'pointer'}} className="ml-1 fa-move-up" inverse />
+                    </OverlayTrigger>
+                </h4>
+              </Card.Title>
+              <hr />
+              <span className="d-flex flex-wrap align-items-end" style={{marginLeft:"-15px"}}>
+              {data.images.map((image, index) => (
+                <span key={index} className="ml-3 mb-3">
+                  {/* <Link href={"/animals/" + animal.id} className="animal-link" style={{textDecoration:"none", color:"white"}}> */}
+                    <Card className="border rounded animal-hover-div" style={{width:"153px", whiteSpace:"nowrap", overflow:"hidden"}}>
+                      <Card.Img variant="top" src={image || "/static/images/image-not-found.png"} style={{width:"153px", height:"153px", objectFit: "cover", overflow: "hidden"}} />
+                      <Card.Text className="mb-0 border-top" style={{textTransform:"capitalize", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis"}}>
+                        {/* <span title={image.name} className="ml-1">{image.name||"Unknown"}</span> */}
+                        {/* <span className="ml-1" style={{display:"block"}}>
+                          {animal.species}&nbsp;
+                        </span> */}
+                      </Card.Text>
+                    </Card>
+                  {/* </Link> */}
+                </span>
+              ))}
+              </span>
+              {data.images.length < 1 ? <div className="mb-3">Service Request does not have any photo documents.</div> : ""}
+            </Card.Body>
+          </Card>
+        </div>
+      </div>
       <div className="row">
         <div className="col-12 d-flex">
           <Card className="border rounded" style={{width:"100%"}}>
@@ -505,6 +563,7 @@ function ServiceRequestDetails({id}) {
           <Button variant="secondary" onClick={handleClose}>Close</Button>
         </Modal.Footer>
       </Modal>
+      <PhotoDocumentModal images={images} url={'/hotline/api/servicerequests/' + id + '/'} setImages={setImages} setData={setData} show={showAddPhoto} handleClose={handleCloseAddPhoto} />
     </>
   );
 };
