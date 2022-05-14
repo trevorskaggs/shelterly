@@ -119,13 +119,13 @@ class SimpleServiceRequestSerializer(BarebonesServiceRequestSerializer):
 
     def get_images(self, obj):
         try:
-            return [sr_image.image.url for sr_image in obj.images]
+            return [{'url':sr_image.image.url, 'name':sr_image.name} for sr_image in obj.images]
         except IndexError:
             return ''
         except AttributeError:
             # Should only hit this when returning a single object after create.
             try:
-                return [sr_image.image.url for sr_image in obj.servicerequestimage_set.all()]
+                return [{'url':sr_image.image.url, 'name':sr_image.name} for sr_image in obj.servicerequestimage_set.all()]
             except AttributeError:
                 return ''
 

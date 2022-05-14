@@ -12,7 +12,7 @@ import { faCalendarEdit, faCommentSmile, faHomeHeart, faPhoneRotary } from '@for
 import Header from '../components/Header';
 import History from '../components/History';
 import AnimalCards from '../components/AnimalCards';
-import { PhotoDocumentModal } from '../components/Modals';
+import { PhotoDocumentModal, PhotoDocumentRemovalModal } from '../components/Modals';
 import Flatpickr from 'react-flatpickr';
 
 function ServiceRequestDetails({id}) {
@@ -71,6 +71,9 @@ function ServiceRequestDetails({id}) {
   const handleClose = () => setShow(false);
   const [showAddPhoto, setShowAddPhoto] = useState(false);
   const handleCloseAddPhoto = () => setShowAddPhoto(false);
+  const [photoToRemove, setPhotoToRemove] = useState({name:'', url:''});
+  const [showRemovePhoto, setShowRemovePhoto] = useState(false);
+  const handleCloseRemovePhoto = () => setShowRemovePhoto(false);
 
   // Handle animal reunification submit.
   const handleSubmit = async () => {
@@ -84,11 +87,11 @@ function ServiceRequestDetails({id}) {
   }
 
   // Handle remove photo.
-  const handleSubmitRemovePhoto = async (image_id) => {
-    await axios.patch('/hotline/api/servicerequests/' + id + '/', {'remove_image':image_id})
+  const handleSubmitRemovePhoto = async () => {
+    await axios.patch('/hotline/api/servicerequests/' + id + '/', {'remove_image':photoToRemove.url})
     .then(response => {
-      setData(prevState => ({ ...prevState, "images":data.images.filter(image => image.id !== image_id)}));
-      handleClose()
+      setData(prevState => ({ ...prevState, "images":data.images.filter(image => image.url !== photoToRemove.url)}));
+      handleCloseRemovePhoto()
     })
     .catch(error => {
     });
@@ -423,17 +426,25 @@ function ServiceRequestDetails({id}) {
               <span className="d-flex flex-wrap align-items-end" style={{marginLeft:"-15px"}}>
               {data.images.map((image, index) => (
                 <span key={index} className="ml-3 mb-3">
-                  {/* <Link href={"/animals/" + animal.id} className="animal-link" style={{textDecoration:"none", color:"white"}}> */}
+                  <a href={image.url} download={image.name ? image.name + '.' + image.url.split('.').pop() : image.url.split('/').pop()} className="animal-link" style={{textDecoration:"none", color:"white"}}>
                     <Card className="border rounded animal-hover-div" style={{width:"153px", whiteSpace:"nowrap", overflow:"hidden"}}>
-                      <Card.Img variant="top" src={image || "/static/images/image-not-found.png"} style={{width:"153px", height:"153px", objectFit: "cover", overflow: "hidden"}} />
-                      <Card.Text className="mb-0 border-top" style={{textTransform:"capitalize", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis"}}>
-                        {/* <span title={image.name} className="ml-1">{image.name||"Unknown"}</span> */}
-                        {/* <span className="ml-1" style={{display:"block"}}>
-                          {animal.species}&nbsp;
-                        </span> */}
+                      <Card.Img variant="top" src={image.url || "/static/images/image-not-found.png"} style={{width:"153px", height:"153px", objectFit: "cover", overflow: "hidden"}} />
+                      <Card.Text className="mb-0 border-top animal-hover-div" style={{whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis"}}>
+                        <span title={image.name||image.url.split('/').pop().split('.')[0]} className="ml-1">{image.name||image.url.split('/').pop().split('.')[0]}</span>
                       </Card.Text>
                     </Card>
-                  {/* </Link> */}
+                  </a>
+                  <OverlayTrigger
+                      key={"remove-photo"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-remove-photo`}>
+                          Remove photo document
+                        </Tooltip>
+                      }
+                    >
+                      <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => {setPhotoToRemove(image); setShowRemovePhoto(true);}} title="Remove photo document" style={{backgroundColor:"red", cursor:'pointer'}} />
+                    </OverlayTrigger>
                 </span>
               ))}
               </span>
@@ -564,6 +575,7 @@ function ServiceRequestDetails({id}) {
         </Modal.Footer>
       </Modal>
       <PhotoDocumentModal images={images} url={'/hotline/api/servicerequests/' + id + '/'} setImages={setImages} setData={setData} show={showAddPhoto} handleClose={handleCloseAddPhoto} />
+      <PhotoDocumentRemovalModal image={photoToRemove} show={showRemovePhoto} handleClose={handleCloseRemovePhoto} handleSubmit={handleSubmitRemovePhoto} />
     </>
   );
 };

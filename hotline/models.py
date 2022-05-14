@@ -84,7 +84,7 @@ class ServiceRequest(Location):
 class ServiceRequestImage(models.Model):
 
     image = models.ImageField(upload_to='images/')
-    name = models.CharField(max_length=20, blank=True)
+    name = models.CharField(max_length=25, blank=True)
     service_request = models.ForeignKey(ServiceRequest, on_delete=models.SET_NULL, null=True)
 
 class VisitNote(models.Model):

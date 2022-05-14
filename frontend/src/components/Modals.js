@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button, Modal } from 'react-bootstrap';
 import { Formik } from "formik";
 import axios from 'axios';
@@ -89,6 +89,8 @@ const AnimalDeleteModal = (props) => {
 
 const PhotoDocumentModal = (props) => {
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   return (
     <>
     <Formik
@@ -96,24 +98,23 @@ const PhotoDocumentModal = (props) => {
       enableReinitialize={true}
       validationSchema={Yup.object({
         name: Yup.string()
-          .max(50, 'Must be 20 characters or less.'),
+          .max(25, 'Must be 25 characters or less.'),
         images: Yup.mixed(),
       })}
-      onSubmit={ async (values, { setSubmitting, resetForm }) => {
+      onSubmit={ async (values, { resetForm }) => {
+        setIsSubmitting(true);
         const formData = new FormData();
-        const options = {
-          maxSizeMB: 2,
-          maxWidthOrHeight: 1920,
-          useWebWorker: true
-        }
         formData.append('image', props.images[0].file, props.images[0].file.name);
+        formData.append('name', values.name);
         await axios.patch(props.url, formData)
         .then(response => {
           props.setData(prevState => ({ ...prevState, "images":response.data.images}));
           props.handleClose();
           resetForm();
+          setIsSubmitting(false);
         })
         .catch(error => {
+          setIsSubmitting(false);
         });
       }}
       >
@@ -124,11 +125,11 @@ const PhotoDocumentModal = (props) => {
           </Modal.Header>
           <Modal.Body>
             <TextInput
-              id="filename"
-              name="filename"
+              id="name"
+              name="name"
               type="text"
               xs="8"
-              label="Filename"
+              label="Display Name"
             />
             <div className="ml-3">
               <span>Photo Document</span>
@@ -142,7 +143,7 @@ const PhotoDocumentModal = (props) => {
             </div>
           </Modal.Body>
           <Modal.Footer>
-            <Button variant="primary" onClick={() => { formikProps.submitForm() }} disabled={props.images.length ? false : true}>Yes</Button>
+            <Button variant="primary" onClick={() => { formikProps.submitForm() }} disabled={isSubmitting && props.images && props.images.length ? false : true}>Yes</Button>
             <Button variant="secondary" onClick={props.handleClose}>Close</Button>
           </Modal.Footer>
         </Modal>
@@ -152,4 +153,26 @@ const PhotoDocumentModal = (props) => {
   );
 };
 
-export { AnimalDeleteModal, DispatchAlreadyAssignedTeamModal, DispatchDuplicateSRModal, PhotoDocumentModal };
+const PhotoDocumentRemovalModal = (props) => {
+
+  return (
+    <>
+      <Modal show={props.show} onHide={props.handleClose}>
+        <Modal.Header closeButton>
+          <Modal.Title>Confirm Photo Document Removal</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>
+            Are you sure you would like to remove photo document {props.image.name||props.image.url.split('/').pop().split('.')[0]}?
+          </p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="primary" onClick={props.handleSubmit}>Yes</Button>
+          <Button variant="secondary" onClick={props.handleClose}>Close</Button>
+        </Modal.Footer>
+      </Modal>
+    </>
+  );
+};
+
+export { AnimalDeleteModal, DispatchAlreadyAssignedTeamModal, DispatchDuplicateSRModal, PhotoDocumentModal, PhotoDocumentRemovalModal };

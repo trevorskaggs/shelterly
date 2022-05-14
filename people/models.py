@@ -29,7 +29,7 @@ class Person(Location):
 class PersonImage(models.Model):
 
     image = models.ImageField(upload_to='images/')
-    name = models.CharField(max_length=20, blank=True)
+    name = models.CharField(max_length=25, blank=True)
     person = models.ForeignKey(Person, on_delete=models.SET_NULL, null=True)
 
 class OwnerContact(models.Model):
