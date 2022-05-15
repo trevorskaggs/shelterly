@@ -121,13 +121,13 @@ class SimpleServiceRequestSerializer(BarebonesServiceRequestSerializer):
         try:
             return [{'url':sr_image.image.url, 'name':sr_image.name} for sr_image in obj.images]
         except IndexError:
-            return ''
+            return []
         except AttributeError:
             # Should only hit this when returning a single object after create.
             try:
                 return [{'url':sr_image.image.url, 'name':sr_image.name} for sr_image in obj.servicerequestimage_set.all()]
             except AttributeError:
-                return ''
+                return []
 
     def to_internal_value(self, data):
         # Updates datetime fields to null when receiving an empty string submission.

@@ -60,6 +60,7 @@ class PersonSerializer(SimplePersonSerializer):
 
     owner_contacts = OwnerContactSerializer(source='ownercontact_set', many=True, required=False, read_only=True)
     animals = serializers.SerializerMethodField()
+    images = serializers.SerializerMethodField()
     request = serializers.SerializerMethodField()
     action_history = serializers.SerializerMethodField()
 
@@ -72,6 +73,18 @@ class PersonSerializer(SimplePersonSerializer):
                 return ModestAnimalSerializer(obj.animals, many=True).data
             else:
                 return ModestAnimalSerializer(obj.animal_set.exclude(status='CANCELED'), many=True).data
+
+    def get_images(self, obj):
+        try:
+            return [{'url':sr_image.image.url, 'name':sr_image.name} for sr_image in obj.images]
+        except IndexError:
+            return []
+        except AttributeError:
+            # Should only hit this when returning a single object after create.
+            try:
+                return [{'url':sr_image.image.url, 'name':sr_image.name} for sr_image in obj.personimage_set.all()]
+            except AttributeError:
+                return []
 
     # Custom field for the action history.
     def get_action_history(self, obj):
@@ -90,4 +103,3 @@ class PersonSerializer(SimplePersonSerializer):
             return BarebonesServiceRequestSerializer(service_request).data
         else:
             return None
-

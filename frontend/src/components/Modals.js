@@ -99,7 +99,7 @@ const PhotoDocumentModal = (props) => {
       validationSchema={Yup.object({
         name: Yup.string()
           .max(25, 'Must be 25 characters or less.'),
-        images: Yup.mixed(),
+        images: Yup.mixed().required(),
       })}
       onSubmit={ async (values, { resetForm }) => {
         setIsSubmitting(true);
@@ -143,7 +143,7 @@ const PhotoDocumentModal = (props) => {
             </div>
           </Modal.Body>
           <Modal.Footer>
-            <Button variant="primary" onClick={() => { formikProps.submitForm() }} disabled={isSubmitting && props.images && props.images.length ? false : true}>Yes</Button>
+            <Button variant="primary" onClick={() => { formikProps.submitForm() }} disabled={!isSubmitting && props.images && props.images.length ? false : true}>Yes</Button>
             <Button variant="secondary" onClick={props.handleClose}>Close</Button>
           </Modal.Footer>
         </Modal>

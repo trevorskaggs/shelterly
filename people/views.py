@@ -5,7 +5,7 @@ from actstream.models import Action
 
 from animals.models import Animal
 from hotline.models import ServiceRequest
-from people.models import OwnerContact, Person, PersonChange
+from people.models import OwnerContact, Person, PersonChange, PersonImage
 from people.serializers import OwnerContactSerializer, PersonSerializer
 
 
@@ -104,20 +104,28 @@ class PersonViewSet(viewsets.ModelViewSet):
                     service_request.save()
                     action.send(self.request.user, verb='closed service request', target=service_request)
 
+            elif self.request.FILES.keys():
+              # Create new files from uploads
+              for key in self.request.FILES.keys():
+                  image_data = self.request.FILES[key]
+                  PersonImage.objects.create(image=image_data, name=self.request.data.get('name'), person=person)
+            elif self.request.data.get('remove_image'):
+              PersonImage.objects.filter(image__icontains='/' + self.request.data.get('remove_image').split('/')[::-1][0]).delete()
+
             # If an owner is being added to an existing SR, add the owner to the SR and update all SR animals with the owner.
-            if self.request.data.get('request'):
+            elif self.request.data.get('request'):
                 service_request = ServiceRequest.objects.get(pk=self.request.data.get('request'))
                 service_request.owners.add(person)
                 for animal in service_request.animal_set.all():
                     animal.owners.add(person)
 
             # If an owner is being added from an animal, update the animal with the new owner.
-            if self.request.data.get('animal'):
+            elif self.request.data.get('animal'):
                 animal = Animal.objects.get(pk=self.request.data.get('animal'))
                 animal.owners.add(person)
 
             # If an owner is being added from another Person, add the new owner to the animals of the original Person.
-            if self.request.data.get('owner'):
+            elif self.request.data.get('owner'):
                 owner = Person.objects.get(pk=self.request.data.get('owner'))
                 for animal in owner.animal_set.all():
                     animal.owners.add(person)

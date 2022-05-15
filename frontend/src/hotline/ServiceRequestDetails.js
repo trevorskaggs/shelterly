@@ -66,9 +66,9 @@ function ServiceRequestDetails({id}) {
     action_history: [],
   });
 
-  const [images, setImages] = useState(null);
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
+  const [images, setImages] = useState([]);
   const [showAddPhoto, setShowAddPhoto] = useState(false);
   const handleCloseAddPhoto = () => setShowAddPhoto(false);
   const [photoToRemove, setPhotoToRemove] = useState({name:'', url:''});

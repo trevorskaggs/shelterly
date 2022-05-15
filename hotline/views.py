@@ -53,7 +53,7 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
                   image_data = self.request.FILES[key]
                   ServiceRequestImage.objects.create(image=image_data, name=self.request.data.get('name'), service_request=service_request)
             elif self.request.data.get('remove_image'):
-              ServiceRequestImage.objects.filter(image__icontains=self.request.data.get('remove_image').split('/')[::-1][0]).delete()
+              ServiceRequestImage.objects.filter(image__icontains='/' + self.request.data.get('remove_image').split('/')[::-1][0]).delete()
             elif self.request.data.get('reunite_animals'):
                 service_request.animal_set.exclude(status='DECEASED').update(status='REUNITED', shelter=None, room=None)
                 for animal in service_request.animal_set.exclude(status='DECEASED'):

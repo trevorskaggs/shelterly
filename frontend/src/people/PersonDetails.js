@@ -4,7 +4,7 @@ import { Link } from 'raviger';
 import { Button, Card, ListGroup, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faEdit, faPlusSquare, faUserPlus
+  faEdit, faMinusSquare, faPlusSquare, faUserPlus
 } from '@fortawesome/free-solid-svg-icons';
 import { faHomeHeart, faPhonePlus } from '@fortawesome/pro-solid-svg-icons';
 import Moment from 'react-moment';
@@ -12,6 +12,7 @@ import Header from '../components/Header';
 import History from '../components/History';
 import Scrollbar from '../components/Scrollbars';
 import AnimalCards from '../components/AnimalCards';
+import { PhotoDocumentModal, PhotoDocumentRemovalModal } from '../components/Modals';
 
 function PersonDetails({id}) {
 
@@ -20,6 +21,12 @@ function PersonDetails({id}) {
 
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
+  const [images, setImages] = useState([]);
+  const [showAddPhoto, setShowAddPhoto] = useState(false);
+  const handleCloseAddPhoto = () => setShowAddPhoto(false);
+  const [photoToRemove, setPhotoToRemove] = useState({name:'', url:''});
+  const [showRemovePhoto, setShowRemovePhoto] = useState(false);
+  const handleCloseRemovePhoto = () => setShowRemovePhoto(false);
 
   // Handle animal reunification submit.
   const handleSubmit = async () => {
@@ -27,6 +34,17 @@ function PersonDetails({id}) {
     .then(response => {
       setData(prevState => ({ ...prevState, "animals":prevState['animals'].map(animal => ({...animal, status:animal.status !== 'DECEASED' ? 'REUNITED' : 'DECEASED'})) }));
       handleClose()
+    })
+    .catch(error => {
+    });
+  }
+
+  // Handle remove photo.
+  const handleSubmitRemovePhoto = async () => {
+    await axios.patch('/people/api/person/' + id + '/', {'remove_image':photoToRemove.url})
+    .then(response => {
+      setData(prevState => ({ ...prevState, "images":data.images.filter(image => image.url !== photoToRemove.url)}));
+      handleCloseRemovePhoto()
     })
     .catch(error => {
     });
@@ -46,6 +64,7 @@ function PersonDetails({id}) {
     state: '',
     zip_code: '',
     animals: [],
+    images: [],
     owner_contacts: [],
     action_history: [],
   });
@@ -229,7 +248,59 @@ function PersonDetails({id}) {
         </Card>
       </div>
     </div>
+    <div className="row mt-2">
+      <div className="col-12 d-flex">
+        <Card className="mt-2 border rounded" style={{width:"100%"}}>
+          <Card.Body style={{marginBottom:"-20px"}}>
+            <Card.Title>
+              <h4 className="mb-0">Photo Documents
+                  <OverlayTrigger
+                    key={"add-photo"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-add-photo`}>
+                        Add a photo document to this {is_owner ? "owner" : "reporter"}
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon icon={faPlusSquare} onClick={() => setShowAddPhoto(true)} style={{cursor:'pointer'}} className="ml-1 fa-move-up" inverse />
+                  </OverlayTrigger>
+              </h4>
+            </Card.Title>
+            <hr />
+            <span className="d-flex flex-wrap align-items-end" style={{marginLeft:"-15px"}}>
+            {data.images.map((image, index) => (
+              <span key={index} className="ml-3 mb-3">
+                <a href={image.url} download={image.name ? image.name + '.' + image.url.split('.').pop() : image.url.split('/').pop()} className="animal-link" style={{textDecoration:"none", color:"white"}}>
+                  <Card className="border rounded animal-hover-div" style={{width:"153px", whiteSpace:"nowrap", overflow:"hidden"}}>
+                    <Card.Img variant="top" src={image.url || "/static/images/image-not-found.png"} style={{width:"153px", height:"153px", objectFit: "cover", overflow: "hidden"}} />
+                    <Card.Text className="mb-0 border-top animal-hover-div" style={{whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis"}}>
+                      <span title={image.name||image.url.split('/').pop().split('.')[0]} className="ml-1">{image.name||image.url.split('/').pop().split('.')[0]}</span>
+                    </Card.Text>
+                  </Card>
+                </a>
+                <OverlayTrigger
+                    key={"remove-photo"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-remove-photo`}>
+                        Remove photo document
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => {setPhotoToRemove(image); setShowRemovePhoto(true);}} title="Remove photo document" style={{backgroundColor:"red", cursor:'pointer'}} />
+                  </OverlayTrigger>
+              </span>
+            ))}
+            </span>
+            {data.images.length < 1 ? <div className="mb-3">{is_owner ? "Owner" : "Reporter"} does not have any photo documents.</div> : ""}
+          </Card.Body>
+        </Card>
+      </div>
+    </div>
     <History action_history={data.action_history} />
+    <PhotoDocumentModal images={images} url={'/people/api/person/' + id + '/'} setImages={setImages} setData={setData} show={showAddPhoto} handleClose={handleCloseAddPhoto} />
+    <PhotoDocumentRemovalModal image={photoToRemove} show={showRemovePhoto} handleClose={handleCloseRemovePhoto} handleSubmit={handleSubmitRemovePhoto} />
     <Modal show={show} onHide={handleClose}>
       <Modal.Header closeButton>
         <Modal.Title>Confirm Animal Reunification</Modal.Title>
