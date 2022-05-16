@@ -132,6 +132,11 @@ export const statusChoices = [
   {value:'DECEASED', label:'DECEASED'},
 ]
 
+export const reportedStatusChoices = [
+  {value:'REPORTED', label:"REPORTED"},
+  {value:'SHELTERED IN PLACE', label:"SHELTERED IN PLACE"},
+]
+
 export const dispatchStatusChoices = [
   {value:'REPORTED', label:'REPORTED'},
   {value:'SHELTERED', label:'SHELTERED'},

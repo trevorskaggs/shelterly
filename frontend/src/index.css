@@ -62,7 +62,7 @@ hr { display: block; height: 1px;
 /* Grey out disabled fields CSS */
 input[disabled] {
   color: #595959;
-  background-color: #DFDDDD !important;
+  background-color: #DFDDDD!important;
   background-image: none;
 }
 
