@@ -96,7 +96,7 @@ function Deploy() {
       let team_options = [];
       teamData.teams.filter(team => team.team_members.filter(value => id_list.includes(value)).length === 0).forEach(function(team) {
         // Add selectable options back if if not already available.
-        if (!teamData.options.some(option => option.label === team.name + ": " + team.display_name)) {
+        if (team.team_members.length && !teamData.options.some(option => option.label === team.name + ": " + team.display_name)) {
           team_options.push({id:team.team_members, label:team.name + ": " + team.display_name, is_assigned:team.is_assigned});
         }
       });
@@ -234,8 +234,8 @@ function Deploy() {
           })
           .then(response => {
             response.data.forEach(function(team) {
-              // Only add to option list if not actively assigned and not already in the list which is sorted by newest.
-              if (!team_names.includes(team.name)) {
+              // Only add to option list if team has members and is not already in the list which is sorted by newest.
+              if (team.team_members.length && !team_names.includes(team.name)) {
                 options.unshift({id: team.team_members, label: team.name + ": " + team.display_name, is_assigned:team.is_assigned});
               }
               team_names.push(team.name);

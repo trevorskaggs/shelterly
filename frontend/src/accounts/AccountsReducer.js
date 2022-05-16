@@ -90,7 +90,7 @@ function AuthProvider(props) {
     return () => {
       window.removeEventListener("focus", onFocus);
   };
-  }, [path, state.user, cookies.token, removeCookie]);
+  }, [path, state.user, cookies.token, removeCookie, next]);
 
   return (
     <AuthContext.Provider value={{ state, dispatch }}>

@@ -32,11 +32,11 @@ function DispatchSummary({id}) {
   });
 
   const [mapState, setMapState] = useState({});
-  const [teamData, setTeamData] = useState({options: [], isFetching: false});
+  const [teamData, setTeamData] = useState({teams: [], options: [], isFetching: false});
   const [teamName, setTeamName] = useState('')
   const [showTeamName, setShowTeamName] = useState(false)
   const handleTeamNameClose = () => {setShowTeamName(false);}
-  const [teamMembers, setNewTeamMembers] = useState(null);
+  const [teamMembers, setTeamMembers] = useState([]);
   const [show, setShow] = useState(false);
   const handleClose = () => {setShow(false);}
   const [teamMemberToDelete, setTeamMemberToDelete] = useState({id: 0, name: '', display_name: ''});
@@ -63,12 +63,53 @@ function DispatchSummary({id}) {
     }
   }
 
+  // Handle TeamMember selector onChange.
+  const handleChange = (values) => {
+    let id_list = [];
+    let selected_list = [];
+    values.forEach(value => {
+      id_list = [...id_list, ...value.id];
+      // Handle if Team.
+      if (value.label.split(':').length > 1) {
+        // Parse out the team name.
+        value.label.split(':')[1].split(',').forEach((name, index) =>  {
+          let team_option = {id: [value.id[index]], label:name.replace(' ', '')};
+          // Add to list if not already selected.
+          if (!selected_list.some(option => option.id[0] === team_option.id[0])) {
+            selected_list.push(team_option);
+          }
+        });
+      }
+      // Else handle as an individual TeamMember.
+      else {
+        selected_list.push({id:value.id, label:value.label})
+      }
+    });
+    // If deselecting.
+    if (teamMembers.length > selected_list.length) {
+      let team_options = [];
+      teamData.teams.filter(team => team.team_members.filter(value => id_list.includes(value)).length === 0).forEach(function(team) {
+        // Add selectable options back if if not already available.
+        if (team.team_members.length && !teamData.options.some(option => option.label === team.name + ": " + team.display_name)) {
+          team_options.push({id:team.team_members, label:team.name + ": " + team.display_name, is_assigned:team.is_assigned});
+        }
+      });
+      setTeamData(prevState => ({ ...prevState, "options":team_options.concat(teamData.options.concat(teamMembers.filter(option => !id_list.includes(option.id[0])))) }));
+    }
+    // Else we're selecting. Remove selection from option list.
+    else {
+      setTeamData(prevState => ({ ...prevState, "options":teamData.options.filter(option => !id_list.includes(option.id[0])) }));
+    }
+    setTeamMembers(selected_list);
+  }
+
   const handleAddTeamMemberSubmit = async () => {
-    await axios.patch('/evac/api/dispatchteam/' + data.team + '/', {'dispatch_id':data.id, 'new_team_members':teamMembers.map(item => item.id)})
+    await axios.patch('/evac/api/dispatchteam/' + data.team + '/', {'dispatch_id':data.id, 'new_team_members':teamMembers.map(item => item.id[0])})
     .then(response => {
       setData(prevState => ({ ...prevState, "team_member_objects":response.data.team_member_objects, "team_members":response.data.team_members }));
       setTeamData(prevState => ({ ...prevState, "options":prevState.options.filter(option => !response.data.team_members.includes(option.id)) }));
-      handleClose()
+      setTeamMembers([]);
+      handleClose();
     })
     .catch(error => {
     });
@@ -78,7 +119,7 @@ function DispatchSummary({id}) {
     await axios.patch('/evac/api/dispatchteam/' + data.team + '/', {'remove_team_member':teamMemberToDelete.id})
     .then(response => {
       setData(prevState => ({ ...prevState, "team_member_objects":response.data.team_member_objects, "team_members":response.data.team_members }));
-      setTeamData(prevState => ({ ...prevState, "options":prevState.options.concat([{id: teamMemberToDelete.id, label: teamMemberToDelete.display_name}]) }));
+      setTeamData(prevState => ({ ...prevState, "options":prevState.options.concat([{id: [teamMemberToDelete.id], label: teamMemberToDelete.display_name}]) }));
       handleTeamMemberClose();
     })
     .catch(error => {
@@ -115,17 +156,40 @@ function DispatchSummary({id}) {
           response.data['bounds'] = bounds.length > 0 ? bounds : L.latLngBounds([[0,0]]);
           setData(response.data);
           setMapState(map_dict);
-          setTeamData({options: [], isFetching: true});
+          setTeamData({teams: [], options: [], isFetching: true});
           setTeamName(response.data.team_object.name);
           axios.get('/evac/api/evacteammember/', {
             cancelToken: source.token,
           })
-          .then(teamResponse => {
+          .then(teamMemberResponse => {
             let options = [];
-            teamResponse.data.filter(team_member => !response.data.team_object.team_members.includes(team_member.id)).forEach(function(teammember){
-              options.push({id: teammember.id, label: teammember.display_name})
+            let team_names = [];
+            teamMemberResponse.data.filter(team_member => !response.data.team_object.team_members.includes(team_member.id)).forEach(function(teammember){
+              options.push({id: [teammember.id], label: teammember.display_name})
             });
-            setTeamData({options: options, isFetching: false});
+            setTeamData({teams: [], options: options, isFetching: false});
+            // Then fetch all recent Teams.
+            axios.get('/evac/api/dispatchteam/', {
+              params: {
+                map: true
+              },
+              cancelToken: source.token,
+            })
+            .then(teamResponse => {
+              teamResponse.data.forEach(function(team) {
+                // Only add to option list if team has members, is populated with at least 1 new valid team member, and is not already in the list which is sorted by newest.
+                if (team.team_members.length && team.team_members.filter(team_member => !response.data.team_object.team_members.includes(team_member)).length > 0 && !team_names.includes(team.name)) {
+                  options.unshift({id: team.team_members, label: team.name + ": " + team.display_name});
+                }
+                team_names.push(team.name);
+              });
+              setTeamData({teams: teamResponse.data, options: options, isFetching: false});
+            })
+            .catch(error => {
+              if (!unmounted) {
+                setTeamData({teams: [], options: [], isFetching: false});
+              }
+            });
           })
           .catch(error => {
             setTeamData({options: [], isFetching: false});
@@ -455,7 +519,8 @@ function DispatchSummary({id}) {
         <Typeahead
           id="team_members"
           multiple
-          onChange={(values) => {setNewTeamMembers(values)}}
+          onChange={(values) => {handleChange(values)}}
+          selected={teamMembers}
           options={teamData.options}
           placeholder="Choose team members..."
         />
