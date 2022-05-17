@@ -124,23 +124,23 @@ export const unknownChoices = [
 ]
 
 export const statusChoices = [
-  {value:'REPORTED', label:'REPORTED'},
-  {value:'SHELTERED IN PLACE', label:'SHELTERED IN PLACE (SIP)'},
-  {value:'UNABLE TO LOCATE', label:'UNABLE TO LOCATE (UTL)'},
-  {value:'SHELTERED', label:'SHELTERED'},
-  {value:'REUNITED', label:'REUNITED'},
-  {value:'DECEASED', label:'DECEASED'},
+  {value:'REPORTED', label:'Reported'},
+  {value:'SHELTERED IN PLACE', label:'Sheltered In Place (SIP)'},
+  {value:'UNABLE TO LOCATE', label:'Unable To Locate (UTL)'},
+  {value:'SHELTERED', label:'Sheltered'},
+  {value:'REUNITED', label:'Reunited'},
+  {value:'DECEASED', label:'Deceased'},
 ]
 
 export const reportedStatusChoices = [
-  {value:'REPORTED', label:"REPORTED"},
-  {value:'SHELTERED IN PLACE', label:"SHELTERED IN PLACE"},
+  {value:'REPORTED', label:"Reported"},
+  {value:'SHELTERED IN PLACE', label:"Sheltered In Place (SIP)"},
 ]
 
 export const dispatchStatusChoices = [
-  {value:'REPORTED', label:'REPORTED'},
-  {value:'SHELTERED', label:'SHELTERED'},
-  {value:'SHELTERED IN PLACE', label:'SHELTERED IN PLACE (SIP)'},
-  {value:'UNABLE TO LOCATE', label:'UNABLE TO LOCATE (UTL)'},
-  {value:'DECEASED', label:'DECEASED'},
+  {value:'REPORTED', label:'Reported'},
+  {value:'SHELTERED', label:'Sheltered'},
+  {value:'SHELTERED IN PLACE', label:'Sheltered In Place (SIP)'},
+  {value:'UNABLE TO LOCATE', label:'Unable To Locate (UTL)'},
+  {value:'DECEASED', label:'Deceased'},
 ]
