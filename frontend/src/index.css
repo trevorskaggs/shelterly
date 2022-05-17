@@ -37,7 +37,7 @@ hr { display: block; height: 1px;
 /* Leaflet map CSS */
 .leaflet-container { width: auto; height: 55vh;}
 
-.landing-leaflet-container { width: auto; height: 350px; min-height:350px;}
+.landing-leaflet-container { width: auto; height: 450px; min-height:450px;}
 
 .dispatch-leaflet-container { width: auto; height: 309px; min-height:309px;}
 
@@ -159,6 +159,11 @@ input[disabled] {
 
 .icon-thin {
   transform: scale(.5,1.35);
+}
+
+.sidebar:hover .sidebar-icon {
+  color: #a52b44;
+  transition: color 0.3s linear;
 }
 
 .hover-div:hover .shelter-icon {

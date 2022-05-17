@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link, navigate } from 'raviger';
-import { Button, Col, ListGroup, Row } from 'react-bootstrap';
+import { Button, Col, Row } from 'react-bootstrap';
 import { Marker, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
 import Moment from 'react-moment';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPhone } from '@fortawesome/free-solid-svg-icons';
 import Map, { prettyText, closedMarkerIcon, reportedMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
 import Header from "../components/Header";
 
@@ -78,72 +80,69 @@ function Hotline() {
     <>
     <Header>Hotline</Header>
     <hr/>
-    <Row className="mr-0">
-      <Col xs={4}>
-        <ListGroup className="pb-3">
-          <Link href="/hotline/workflow/owner">
-            <ListGroup.Item className="rounded" action>OWNER CALLING</ListGroup.Item>
-          </Link>
-          <Link href="/hotline/workflow/reporter">
-            <ListGroup.Item className="rounded" action>NON-OWNER CALLING</ListGroup.Item>
-          </Link>
-          <Link href="/hotline/workflow/first_responder">
-            <ListGroup.Item className="rounded" action>FIRST RESPONDER CALLING</ListGroup.Item>
-          </Link>
-          <Link href="/hotline/servicerequest/search">
-            <ListGroup.Item className="rounded" action>SEARCH SERVICE REQUESTS</ListGroup.Item>
-          </Link>
-        </ListGroup>
+    <Row className="ml-0 mr-0 pl-0 pr-0 mb-0">
+      <Col xs={4} className="pl-0 pr-0">
+        <Link href="/hotline/workflow/owner" style={{textDecoration:"none"}}>
+          <Button className="rounded border btn-block" style={{height:"100px", fontSize:"20px"}} action><FontAwesomeIcon icon={faPhone} className="mr-1 fa-move-up" inverse />OWNER CALLING</Button>
+        </Link>
       </Col>
-      <Col xs={8} className="ml-0 mr-0 pl-0 pr-0">
-        <Row xs={12} className="ml-0 mr-0 pl-0 pr-0" style={{marginBottom:"-1px"}}>
-          <Col xs={10} className="border rounded pl-0 pr-0">
-            <Map bounds={data.bounds} boundsOptions={{padding:[10,10]}} className="landing-leaflet-container">
-              {data.service_requests.filter(service_request => (service_request.status === statusOptions || statusOptions === "all")).map(service_request => (
-                <Marker
-                  key={service_request.id}
-                  position={[service_request.latitude, service_request.longitude]}
-                  icon={service_request.sheltered_in_place > 0 ? SIPMarkerIcon : service_request.unable_to_locate > 0 ? UTLMarkerIcon : service_request.reported_animals > 0 ? reportedMarkerIcon : closedMarkerIcon}
-                  onClick={() => navigate("/hotline/servicerequest/" + service_request.id)}
-                >
-                  <MapTooltip autoPan={false}>
+      <Col xs={4} className="pl-0 pr-0">
+        <Link href="/hotline/workflow/reporter" style={{textDecoration:"none"}}>
+          <Button className="rounded border btn-block" style={{height:"100px", fontSize:"20px"}} action><FontAwesomeIcon icon={faPhone} className="mr-1 fa-move-up" inverse />NON-OWNER CALLING</Button>
+        </Link>
+      </Col>
+      <Col xs={4} className="pl-0 pr-0">
+        <Link href="/hotline/workflow/first_responder" style={{textDecoration:"none"}}>
+          <Button className="rounded border btn-block" style={{height:"100px", fontSize:"20px"}} action><FontAwesomeIcon icon={faPhone} className="mr-1 fa-move-up" inverse />FIRST RESPONDER CALLING</Button>
+        </Link>
+      </Col>
+    </Row>
+    <Row xs={12} className="ml-0 mr-0 pl-0 pr-0" style={{marginBottom:"-1px"}}>
+      <Col xs={10} className="border rounded pl-0 pr-0">
+        <Map bounds={data.bounds} boundsOptions={{padding:[10,10]}} className="landing-leaflet-container">
+          {data.service_requests.filter(service_request => (service_request.status === statusOptions || statusOptions === "all")).map(service_request => (
+            <Marker
+              key={service_request.id}
+              position={[service_request.latitude, service_request.longitude]}
+              icon={service_request.sheltered_in_place > 0 ? SIPMarkerIcon : service_request.unable_to_locate > 0 ? UTLMarkerIcon : service_request.reported_animals > 0 ? reportedMarkerIcon : closedMarkerIcon}
+              onClick={() => navigate("/hotline/servicerequest/" + service_request.id)}
+            >
+              <MapTooltip autoPan={false}>
+                <span>
+                  {mapState[service_request.id] ?
                     <span>
-                      {mapState[service_request.id] ?
-                        <span>
-                          {service_request.sheltered_in_place > 0 ? 'SIP: ' : service_request.unable_to_locate > 0 ? 'UTL: ' : service_request.reported_animals > 0 ? 'Reported: ' : 'Closed: '}
-                          {Object.keys(mapState[service_request.id].matches).map((key,i) => (
-                            <span key={key} style={{textTransform:"capitalize"}}>
-                              {i > 0 && ", "}{prettyText('', key.split(',')[0], mapState[service_request.id].matches[key])}
-                            </span>
-                          ))}
+                      {service_request.sheltered_in_place > 0 ? 'SIP: ' : service_request.unable_to_locate > 0 ? 'UTL: ' : service_request.reported_animals > 0 ? 'Reported: ' : 'Closed: '}
+                      {Object.keys(mapState[service_request.id].matches).map((key,i) => (
+                        <span key={key} style={{textTransform:"capitalize"}}>
+                          {i > 0 && ", "}{prettyText('', key.split(',')[0], mapState[service_request.id].matches[key])}
                         </span>
-                      :""}
-                      <br />
-                      SR#{service_request.id}: {service_request.full_address}
-                      {service_request.followup_date ? <div>Followup Date: <Moment format="L">{service_request.followup_date}</Moment></div> : ""}
-                      <div>
-                        {service_request.aco_required ? <img width={16} height={16} src="/static/images/badge-sheriff.png" alt="ACO Required" className="mr-1" /> : ""}
-                        {service_request.injured ? <img width={16} height={16} src="/static/images/band-aid-solid.png" alt="Injured" className="mr-1" /> : ""}
-                        {service_request.accessible ? <img width={16} height={16} src="/static/images/car-solid.png" alt="Accessible" className="mr-1" /> : <img width={16} height={16} src="/static/images/car-ban-solid.png" alt="Not Acessible" className="mr-1" />}
-                        {service_request.turn_around ? <img width={16} height={16} src="/static/images/trailer-solid.png" alt="Turn Around" /> : <img width={16} height={16} src="/static/images/trailer-ban-solid.png" alt="No Turn Around" className="mr-1" />}
-                      </div>
+                      ))}
                     </span>
-                  </MapTooltip>
-                </Marker>
-              ))}
-            </Map>
-          </Col>
-          <Col xs={2} className="ml-0 mr-0 pl-0 pr-0 border rounded">
-            <Button variant={statusOptions === "all" ? "primary" : "secondary"} className="border" onClick={() => setStatusOptions("all")} style={{maxHeight:"36px", width:"100%", marginTop:"-1px"}}>All</Button>
-            <Button variant={statusOptions === "open" ? "primary" : "secondary"} className="border" onClick={() => setStatusOptions("open")} style={{maxHeight:"36px", width:"100%", marginTop:"-1px"}}>Open</Button>
-            <Button variant={statusOptions === "assigned" ? "primary" : "secondary"} className="border" onClick={() => setStatusOptions("assigned")} style={{maxHeight:"36px", width:"100%", marginTop:"-1px"}}>Assigned</Button>
-            <Button variant={statusOptions === "closed" ? "primary" : "secondary"} className="border" onClick={() => setStatusOptions("closed")} style={{maxHeight:"36px", width:"100%", marginTop:"-1px"}}>Closed</Button>
-          </Col>
-        </Row>
-        <Row className="ml-0 mr-0 border rounded" style={{maxHeight:"38px"}}>
-          <h4 className="card-header text-center" style={{paddingTop:"4px", paddingLeft:"10px", paddingRight:"10px", height:"36px", width:"100%", backgroundColor:"#808080"}}>Service Requests</h4>
-        </Row>
+                  :""}
+                  <br />
+                  SR#{service_request.id}: {service_request.full_address}
+                  {service_request.followup_date ? <div>Followup Date: <Moment format="L">{service_request.followup_date}</Moment></div> : ""}
+                  <div>
+                    {service_request.aco_required ? <img width={16} height={16} src="/static/images/badge-sheriff.png" alt="ACO Required" className="mr-1" /> : ""}
+                    {service_request.injured ? <img width={16} height={16} src="/static/images/band-aid-solid.png" alt="Injured" className="mr-1" /> : ""}
+                    {service_request.accessible ? <img width={16} height={16} src="/static/images/car-solid.png" alt="Accessible" className="mr-1" /> : <img width={16} height={16} src="/static/images/car-ban-solid.png" alt="Not Acessible" className="mr-1" />}
+                    {service_request.turn_around ? <img width={16} height={16} src="/static/images/trailer-solid.png" alt="Turn Around" /> : <img width={16} height={16} src="/static/images/trailer-ban-solid.png" alt="No Turn Around" className="mr-1" />}
+                  </div>
+                </span>
+              </MapTooltip>
+            </Marker>
+          ))}
+        </Map>
       </Col>
+      <Col xs={2} className="ml-0 mr-0 pl-0 pr-0 border rounded">
+        <Button variant={statusOptions === "all" ? "primary" : "secondary"} className="border" onClick={() => setStatusOptions("all")} style={{maxHeight:"36px", width:"100%", marginTop:"-1px"}}>All</Button>
+        <Button variant={statusOptions === "open" ? "primary" : "secondary"} className="border" onClick={() => setStatusOptions("open")} style={{maxHeight:"36px", width:"100%", marginTop:"-1px"}}>Open</Button>
+        <Button variant={statusOptions === "assigned" ? "primary" : "secondary"} className="border" onClick={() => setStatusOptions("assigned")} style={{maxHeight:"36px", width:"100%", marginTop:"-1px"}}>Assigned</Button>
+        <Button variant={statusOptions === "closed" ? "primary" : "secondary"} className="border" onClick={() => setStatusOptions("closed")} style={{maxHeight:"36px", width:"100%", marginTop:"-1px"}}>Closed</Button>
+      </Col>
+    </Row>
+    <Row className="ml-0 mr-0 border rounded" style={{maxHeight:"38px"}}>
+      <h4 className="card-header text-center" style={{paddingTop:"4px", paddingLeft:"10px", paddingRight:"10px", height:"36px", width:"100%", backgroundColor:"#808080"}}>Service Requests</h4>
     </Row>
   </>
   )
