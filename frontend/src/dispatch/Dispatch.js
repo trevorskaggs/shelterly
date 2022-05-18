@@ -8,7 +8,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faUserPlus, faUsers
 } from '@fortawesome/free-solid-svg-icons';
-import { faChevronDoubleDown, faChevronDoubleUp } from '@fortawesome/pro-solid-svg-icons';
+import { faChevronCircleDown, faChevronCircleUp } from '@fortawesome/pro-duotone-svg-icons';
 import Map, { countMatches, prettyText, reportedMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
 import Header from "../components/Header";
 import Scrollbar from '../components/Scrollbars';
@@ -93,7 +93,7 @@ function Dispatch() {
             <ListGroup.Item className="rounded" action>DEPLOY TEAMS</ListGroup.Item>
           </Link>
           <Link href="/dispatch/preplan">
-            <ListGroup.Item className="rounded" action>PREPLAN</ListGroup.Item>
+            <ListGroup.Item className="rounded" action>PREPLAN ASSIGNMENTS</ListGroup.Item>
           </Link>
           <Link href="/dispatch/dispatchassignment/search">
             <ListGroup.Item className="rounded" action>SEARCH DISPATCH ASSIGNMENTS</ListGroup.Item>
@@ -145,7 +145,7 @@ function Dispatch() {
           </Col>
           <Col xs={3} className="ml-0 mr-0 pl-0 pr-0 border rounded">
             <Scrollbar no_shadow="true" style={{height:"350px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
-            <Button variant={showActive === true ? "primary" : "secondary"} className="border" onClick={() => setShowActive(!showActive)} style={{maxHeight:"36px", width:"100%", marginTop:"-1px"}}>Active {showActive ? <FontAwesomeIcon icon={faChevronDoubleUp} size="sm" /> : <FontAwesomeIcon icon={faChevronDoubleDown} size="sm" />}</Button>
+            <Button variant={"secondary"} className="border" onClick={() => setShowActive(!showActive)} style={{maxHeight:"36px", width:"100%", marginTop:"-1px"}}>Active {showActive ? <FontAwesomeIcon icon={faChevronCircleUp} size="sm" /> : <FontAwesomeIcon icon={faChevronCircleDown} size="sm" />}</Button>
             {data.dispatch_assignments.filter(da => showActive ? da.team_member_names.length > 0 : null).map(dispatch_assignment => (
               <Button key={dispatch_assignment.id} title={dispatch_assignment.team ? dispatch_assignment.team.name : ""} variant={dispatch_assignment.id === selectedTeam ? "primary" : "secondary"} className="border" onClick={() => setSelectedTeam(selectedTeam === dispatch_assignment.id ? null : dispatch_assignment.id)} style={{maxHeight:"36px", width:"100%", marginTop:"-1px"}}>
                 {dispatch_assignment.team ? dispatch_assignment.team_object.name : "Preplanned"}
@@ -164,7 +164,7 @@ function Dispatch() {
                 : ""}
               </Button>
             ))}
-            <Button variant={showPreplanned === true ? "primary" : "secondary"} className="border" onClick={() => setShowPreplanned(!showPreplanned)} style={{maxHeight:"36px", width:"100%", marginTop:"-1px"}}>Preplanned {showPreplanned ? <FontAwesomeIcon icon={faChevronDoubleUp} size="sm" /> : <FontAwesomeIcon icon={faChevronDoubleDown} size="sm" />}</Button>
+            <Button variant={"secondary"} className="border" onClick={() => setShowPreplanned(!showPreplanned)} style={{maxHeight:"36px", width:"100%", marginTop:"-1px"}}>Preplanned {showPreplanned ? <FontAwesomeIcon icon={faChevronCircleUp} size="sm" /> : <FontAwesomeIcon icon={faChevronCircleDown} size="sm" />}</Button>
             {data.dispatch_assignments.filter(da => showPreplanned ? da.team_member_names.length === 0 : null).map(dispatch_assignment => (
               <Button key={dispatch_assignment.id} title={dispatch_assignment.team ? dispatch_assignment.team.name : ""} variant={dispatch_assignment.id === selectedTeam ? "primary" : "secondary"} className="border" onClick={() => setSelectedTeam(selectedTeam === dispatch_assignment.id ? null : dispatch_assignment.id)} style={{maxHeight:"36px", width:"100%", marginTop:"-1px"}}>
                 {dispatch_assignment.team ? dispatch_assignment.team_object.name : "Preplanned"}
