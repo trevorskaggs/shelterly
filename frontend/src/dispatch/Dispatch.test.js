@@ -7,8 +7,8 @@ import DispatchSearch from "./DispatchSearch";
 describe("Render evac", () => {
   it("Render Dispatch", () => {
     const { getByText } = render(<Dispatch />);
-    expect(getByText(/ADD TEAM MEMBER/)).toBeTruthy();
     expect(getByText(/DEPLOY TEAMS/)).toBeTruthy();
+    expect(getByText(/PREPLAN/)).toBeTruthy();
     expect(getByText(/DISPATCH ASSIGNMENTS/)).toBeTruthy();
   });
 

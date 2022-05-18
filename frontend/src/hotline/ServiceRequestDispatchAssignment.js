@@ -212,7 +212,7 @@ function ServiceRequestDispatchAssignment({id}) {
                   </span>
                 :""}
                 <br />
-                #{currentRequest.id}: {currentRequest.full_address}
+                SR#{currentRequest.id}: {currentRequest.full_address}
                 {currentRequest.followup_date ? <div>Followup Date: <Moment format="L">{currentRequest.followup_date}</Moment></div> : ""}
                 <div>
                   {currentRequest.aco_required ? <img width={16} height={16} src="/static/images/badge-sheriff.png" alt="ACO Required" className="mr-1" /> : ""}
@@ -249,7 +249,7 @@ function ServiceRequestDispatchAssignment({id}) {
                     </span>
                   :""}
                   <br />
-                  #{assigned_request.service_request_object.id}: {assigned_request.service_request_object.full_address}
+                  SR#{assigned_request.service_request_object.id}: {assigned_request.service_request_object.full_address}
                   {assigned_request.service_request_object.followup_date ? <div>Followup Date: <Moment format="L">{assigned_request.service_request_object.followup_date}</Moment></div> : ""}
                   <div>
                     {assigned_request.service_request_object.aco_required ? <img width={16} height={16} src="/static/images/badge-sheriff.png" alt="ACO Required" className="mr-1" /> : ""}
@@ -284,7 +284,7 @@ function ServiceRequestDispatchAssignment({id}) {
                       </span>
                     :""}
                     <br />
-                    #{service_request.id}: {service_request.full_address}
+                    SR#{service_request.id}: {service_request.full_address}
                     {service_request.followup_date ? <div>Followup Date: <Moment format="L">{service_request.followup_date}</Moment></div> : ""}
                   </span>
                 </MapTooltip>
@@ -307,7 +307,7 @@ function ServiceRequestDispatchAssignment({id}) {
                 {i > 0 && ", "}{prettyText(key.split(',')[1], key.split(',')[0], currentRequest.matches[key])}
               </span>
             ))}
-          &nbsp;| #{currentRequest.id} - {currentRequest.full_address}</div>
+          &nbsp;| SR#{currentRequest.id} - {currentRequest.full_address}</div>
       </Col>
     </Row>
     <Row className="d-flex flex-wrap" style={{marginTop:"-8px", marginRight:"-19px", marginLeft:"-17px", minHeight:"36vh", paddingRight:"4px"}}>
@@ -369,7 +369,7 @@ function ServiceRequestDispatchAssignment({id}) {
                       ))}
                     </span>
                     :""}
-                    &nbsp;|&nbsp;#{assigned_request.service_request_object.id} - <Link href={"/hotline/servicerequest/" + assigned_request.service_request_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link>
+                    &nbsp;|&nbsp;SR#{assigned_request.service_request_object.id} - <Link href={"/hotline/servicerequest/" + assigned_request.service_request_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link>
                 </li>
                 : ""}
               </span>
@@ -408,7 +408,7 @@ function ServiceRequestDispatchAssignment({id}) {
                 <Link href={"/dispatch/summary/" + dispatch_assignment.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
               </OverlayTrigger>&nbsp;&nbsp;|&nbsp;
               {dispatch_assignment.team ? dispatch_assignment.team_object.name : ""}
-              {dispatch_assignment.team ?
+              {dispatch_assignment.team_member_names ?
                 <OverlayTrigger
                   key={"team-names"}
                   placement="top"
@@ -436,7 +436,7 @@ function ServiceRequestDispatchAssignment({id}) {
                         ))}
                       </span>
                       :""}
-                      &nbsp;|&nbsp;#{assigned_request.service_request_object.id} - {assigned_request.service_request_object.full_address}
+                      &nbsp;|&nbsp;SR#{assigned_request.service_request_object.id} - {assigned_request.service_request_object.full_address}
                       <OverlayTrigger
                         key={"request-details"}
                         placement="top"

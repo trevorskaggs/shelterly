@@ -92,7 +92,7 @@ input[disabled] {
   font-size: 100% !important;
 }
 
-.rbt-input-wrapper {
+.map-typeahead > .rbt-input > .rbt-input-wrapper {
   height: 29px;
 }
 

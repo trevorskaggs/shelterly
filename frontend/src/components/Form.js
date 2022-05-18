@@ -184,6 +184,10 @@ const DropDown = React.forwardRef((props, ref) => {
       ...provided,
       color: 'black'
     }),
+    singleValue: (styles, { isDisabled }) => ({
+      ...styles,
+      color: isDisabled ? '#595959' : 'black'
+    }),
   };
 
   useEffect(() => {

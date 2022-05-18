@@ -8,7 +8,7 @@ import { Card } from 'react-bootstrap';
 import * as Yup from 'yup';
 import { AuthContext } from "../accounts/AccountsReducer";
 import { AddressSearch, DateTimePicker, DropDown, ImageUploader, TextInput } from '../components/Form.js';
-import { catAgeChoices, dogAgeChoices, horseAgeChoices, otherAgeChoices, catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, speciesChoices, sexChoices, dogSizeChoices, catSizeChoices, horseSizeChoices, otherSizeChoices, unknownChoices } from './constants';
+import { catAgeChoices, dogAgeChoices, horseAgeChoices, otherAgeChoices, catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, speciesChoices, sexChoices, dogSizeChoices, catSizeChoices, horseSizeChoices, otherSizeChoices, statusChoices, reportedStatusChoices, unknownChoices } from './constants';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft, faMinusSquare } from '@fortawesome/free-solid-svg-icons';
 import ButtonSpinner from "../components/ButtonSpinner";
@@ -517,11 +517,26 @@ const AnimalForm = (props) => {
                 <BootstrapForm.Row>
                   <TextInput
                     id="name"
-                    xs="3"
+                    xs="6"
                     name="name"
                     type="text"
                     label="Animal Name"
                   />
+                </BootstrapForm.Row>
+                <BootstrapForm.Row className="mb-3">
+                  <Col xs="3">
+                    <DropDown
+                        label="Status"
+                        id="statusDropDown"
+                        name="status"
+                        type="text"
+                        key={`my_unique_status_select_key__${formikProps.values.status}`}
+                        options={['REPORTED', 'SHELTERED IN PLACE'].includes(data.status) ? reportedStatusChoices : statusChoices}
+                        isClearable={false}
+                        disabled={['REPORTED', 'SHELTERED IN PLACE'].includes(data.status) ? false : true}
+                        value={formikProps.values.status||''}
+                    />
+                  </Col>
                   <Col xs="3">
                     <DropDown
                         label="Sex"

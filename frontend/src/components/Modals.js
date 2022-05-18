@@ -11,7 +11,7 @@ const DispatchDuplicateSRModal = (props) => {
         </Modal.Header>
         <Modal.Body>
           <p>
-            The following service requests have already had a team deployed to them:
+            The following service requests already have an open dispatch assignment:
           </p>
           <p>
             {props.dupe_list.map(service_request => (
