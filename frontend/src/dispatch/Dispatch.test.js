@@ -8,8 +8,8 @@ describe("Render evac", () => {
   it("Render Dispatch", () => {
     const { getByText } = render(<Dispatch />);
     expect(getByText(/DEPLOY TEAMS/)).toBeTruthy();
-    expect(getByText(/PREPLAN/)).toBeTruthy();
-    expect(getByText(/DISPATCH ASSIGNMENTS/)).toBeTruthy();
+    expect(getByText(/PREPLAN ASSIGNMENTS/)).toBeTruthy();
+    expect(getByText(/Dispatch Assignments/)).toBeTruthy();
   });
 
   it("Render new dispatch team member form", async () => {

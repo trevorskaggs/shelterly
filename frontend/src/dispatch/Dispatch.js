@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link, navigate } from 'raviger';
 import { Button, Col, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
-import { Marker, Tooltip as MapTooltip, Popup } from "react-leaflet";
+import { Marker, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
