@@ -15,6 +15,7 @@ import Moment from 'react-moment';
 import Select, { components } from 'react-select';
 import L from "leaflet";
 import { Circle, Map, Marker, Tooltip as MapTooltip, TileLayer } from "react-leaflet";
+import { useMark } from '../hooks';
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
 import { titleCase } from '../components/Utils';
@@ -78,6 +79,7 @@ function AnimalSearch() {
   const [bounds, setBounds] = useState(L.latLngBounds([[0,0]]));
   const [page, setPage] = useState(1);
   const [numPages, setNumPages] = useState(1);
+  const { markInstances } = useMark();
 
   const colorChoices = {'':[], 'dog':dogColorChoices, 'cat':catColorChoices, 'horse':horseColorChoices, 'other':otherColorChoices}
 
@@ -196,6 +198,9 @@ function AnimalSearch() {
             }
           }
           setBounds(bounds_array.length > 0 ? L.latLngBounds(bounds_array) : L.latLngBounds([[0,0]]));
+
+          // highlight search terms
+          markInstances(searchTerm);
         }
       })
       .catch(error => {
@@ -205,6 +210,7 @@ function AnimalSearch() {
       });
     };
     fetchAnimals();
+
     // Cleanup.
     return () => {
       unmounted = true;

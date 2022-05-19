@@ -9,6 +9,7 @@ import {
 import {
   faDotCircle
 } from '@fortawesome/free-regular-svg-icons';
+import { useMark } from '../hooks';
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
 
@@ -30,6 +31,7 @@ function PersonSearch() {
 	const tempSearchTerm = useRef(null);
 	const [page, setPage] = useState(1);
   const [numPages, setNumPages] = useState(1);
+	const { markInstances } = useMark();
 
   // Update searchTerm when field input changes.
   const handleChange = event => {
@@ -75,6 +77,9 @@ function PersonSearch() {
 						search_state[owner.id] = {species:species, selectedSpecies:species[0]}
 						})
 					setSearchState(search_state);
+
+					// highlight search terms
+          markInstances(searchTerm);
 				}
 			})
 			.catch(error => {
