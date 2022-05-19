@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useReducer } from "react";
-import { navigate, useLocationChange, usePath } from 'raviger';
+import { navigate, useLocationChange, usePath, useQueryParams } from 'raviger';
 import { useCookies } from 'react-cookie';
 import { loadUser, setAuthToken } from "./AccountsUtils";
 import { publicRoutes } from "../router";
@@ -45,6 +45,13 @@ function auth_reducer(state, action) {
 const AuthContext = React.createContext(initialState);
 
 function AuthProvider(props) {
+
+  // Identify any query param data.
+  const [queryParams] = useQueryParams();
+  const {
+    next = '/',
+  } = queryParams;
+
   const [cookies, , removeCookie] = useCookies(['token']);
   const [state, dispatch] = useReducer(auth_reducer, initialState);
 
@@ -68,9 +75,9 @@ function AuthProvider(props) {
     // Check for user auth on focus.
     window.addEventListener("focus", onFocus);
 
-    // Redirect to Home if attempting to access LoginForm while logged in.
+    // Redirect to next or Home if attempting to access LoginForm while logged in.
     if (state.user && path === '/login') {
-      navigate('/')
+      navigate(next)
     }
     // If we have a token but no user, attempt to authenticate them.
     else if (!state.user && cookies.token) {
@@ -83,7 +90,7 @@ function AuthProvider(props) {
     return () => {
       window.removeEventListener("focus", onFocus);
   };
-  }, [path, state.user, cookies.token, removeCookie]);
+  }, [path, state.user, cookies.token, removeCookie, next]);
 
   return (
     <AuthContext.Provider value={{ state, dispatch }}>
