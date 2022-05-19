@@ -48,6 +48,7 @@ export const StyledMenu = styled(Nav)`
   div.logo {
     font-size: 2rem;
     font-weight: bold;
+    width: 267px;
     display: block;
     letter-spacing: 0.5rem;
     margin-left: auto;
@@ -72,7 +73,7 @@ const Menu = ({ state, dispatch, removeCookie, ...props }) => {
     return (
     <StyledMenu  {...props} className="flex-column" style={{ height: viewHeight }}>
     <Link href="/"><img src="/static/images/shelterly.png" alt="Logo" /></Link>
-    <div className="logo border-bottom">SHELTERLY</div>
+    <div className="logo border-bottom text-center">SHELTERLY</div>
       <Link href="/hotline" className="rounded sidebar" style={{backgroundColor:path.includes("hotline") && !path.includes("search") ? "#444444" : "#292b2c", marginLeft:"-23px", marginRight:"-23px"}}><FontAwesomeIcon icon={faPhone} fixedWidth inverse className="sidebar-icon" style={{marginLeft:"23px"}} /> HOTLINE</Link>
       <Link href="/dispatch" className="rounded sidebar" style={{backgroundColor:path.includes("dispatch") && !path.includes("search") ? "#444444" : "#292b2c", marginLeft:"-23px", marginRight:"-23px"}}><FontAwesomeIcon icon={faBullhorn} fixedWidth inverse className="sidebar-icon" style={{marginLeft:"23px"}} />  DISPATCH</Link>
       <Link href="/shelter" className="rounded sidebar" style={{backgroundColor:path.includes("shelter") ? "#444444" : "#292b2c", marginLeft:"-23px", marginRight:"-23px"}}><FontAwesomeIcon icon={faHome} fixedWidth inverse className="sidebar-icon" style={{marginLeft:"23px"}} /> SHELTER</Link>

@@ -1,17 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link, navigate } from 'raviger';
-import { Card, Col, Row } from 'react-bootstrap';
+import { Button, Card, Col, Row } from 'react-bootstrap';
 import L from "leaflet";
 import { Marker, Tooltip as MapTooltip } from "react-leaflet";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHome, faPlusSquare } from '@fortawesome/free-solid-svg-icons';
 import Header from '../components/Header';
 import Map, { shelterMarkerIcon } from "../components/Map";
+import Scrollbar from '../components/Scrollbars';
 
 function Shelter() {
 
   const [data, setData] = useState({shelters: [],  isFetching: false, bounds:L.latLngBounds([[0,0]])});
+  const [selectedShelter, setSelectedShelter] = useState(null);
 
   // Hook for initializing data.
   useEffect(() => {
@@ -52,16 +54,16 @@ function Shelter() {
     <Header>Shelter</Header>
     <hr/>
     <Row className="ml-0 mr-0 pl-0 pr-0">
-      <Col xs={12} className="border rounded pl-0 pr-0">
-        <Map bounds={data.bounds} boundsOptions={{padding:[10,10]}} className="landing-leaflet-container">
-          {data.shelters.map(shelter => (
+      <Col xs={10} className="border rounded pl-0 pr-0">
+        <Map bounds={data.bounds} className="landing-leaflet-container">
+          {data.shelters.filter(shelter => shelter.id === selectedShelter || !selectedShelter ? shelter : null).map((shelter, index) => (
             <Marker
               key={shelter.id}
               position={[shelter.latitude, shelter.longitude]}
               icon={shelterMarkerIcon}
               onClick={() => navigate("/shelter/" + shelter.id)}
             >
-              <MapTooltip autoPan={false}>
+              <MapTooltip key={`${index}-${selectedShelter}`} keepInView={false} autoPan={false} permanent={selectedShelter === shelter.id ? true : false}>
                 <span>
                   <div>{shelter.name} - {shelter.animal_count} Animal{shelter.animal_count === 1 ? "" :"s"}</div>
                   <div>Address: {shelter.full_address}</div>
@@ -74,6 +76,16 @@ function Shelter() {
         <Row style={{marginLeft:"0px", marginRight:"0px", maxHeight:"37px"}}>
           <h4 className="card-header text-center" style={{paddingTop:"4px", paddingLeft:"10px", paddingRight:"10px", height:"36px", width:"100%", backgroundColor:"#808080"}}>Shelters</h4>
         </Row>
+      </Col>
+      <Col xs={2} className="ml-0 mr-0 pl-0 pr-0 border rounded">
+        <Scrollbar no_shadow="true" style={{height:"450px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
+          <Button variant={selectedShelter === null ? "primary" : "secondary"} className="border" onClick={() => setSelectedShelter(null)} style={{maxHeight:"36px", width:"100%", marginTop:"-1px"}}>All</Button>
+          {data.shelters.map(shelter => (
+            <Button key={shelter.id} title={shelter.name} variant={shelter.id === selectedShelter ? "primary" : "secondary"} className="border" onClick={() => setSelectedShelter(selectedShelter === shelter.id ? null : shelter.id)} style={{maxHeight:"36px", width:"100%", marginTop:"-1px"}}>
+              {shelter.name}
+            </Button>
+          ))}
+        </Scrollbar>
       </Col>
     </Row>
     <hr/>

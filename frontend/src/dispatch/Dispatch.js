@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link, navigate } from 'raviger';
 import { Button, Col, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
-import { Marker, Tooltip as MapTooltip } from "react-leaflet";
+import { Marker, Tooltip as MapTooltip, Popup } from "react-leaflet";
 import L from "leaflet";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -91,19 +91,19 @@ function Dispatch() {
       </Col>
     </Row>
     <Row xs={12} className="ml-0 mr-0 pl-0 pr-0" style={{marginBottom:"-1px"}}>
-      <Col xs={9} className="border rounded pl-0 pr-0">
-        <Map bounds={data.bounds} boundsOptions={{padding:[10,10]}} className="landing-leaflet-container">
+      <Col xs={10} className="border rounded pl-0 pr-0">
+        <Map bounds={data.bounds} className="landing-leaflet-container">
           {data.dispatch_assignments.filter(da => da.id === selectedTeam ? da : showActive && showPreplanned ? da : showActive ? da.team_member_names.length > 0 : showPreplanned ? da.team_member_names.length === 0 : null)
                                     .filter(dispatch_assignment => (selectedTeam == null || dispatch_assignment.id === selectedTeam)).map(dispatch_assignment => (
           <span key={dispatch_assignment.id}>
-            {dispatch_assignment.assigned_requests.map(assigned_request => (
+            {dispatch_assignment.assigned_requests.map((assigned_request, index) => (
               <Marker
                 key={assigned_request.service_request_object.id}
                 position={[assigned_request.service_request_object.latitude, assigned_request.service_request_object.longitude]}
                 icon={assigned_request.service_request_object.sheltered_in_place > 0 ? SIPMarkerIcon : assigned_request.service_request_object.unable_to_locate > 0 ? UTLMarkerIcon : reportedMarkerIcon}
                 onClick={() => navigate("/dispatch/summary/" + dispatch_assignment.id)}
               >
-              <MapTooltip autoPan={false}>
+              <MapTooltip key={`${index}-${selectedTeam}`} autoPan={false} closeButton={true} permanent={selectedTeam === dispatch_assignment.id ? true : false}>
                 <span>
                   <div>{dispatch_assignment.team_object ? dispatch_assignment.team_object.name : ""}</div>
                   {mapState[dispatch_assignment.id] ?
@@ -132,7 +132,7 @@ function Dispatch() {
           ))}
         </Map>
       </Col>
-      <Col xs={3} className="ml-0 mr-0 pl-0 pr-0 border rounded">
+      <Col xs={2} className="ml-0 mr-0 pl-0 pr-0 border rounded">
         <Scrollbar no_shadow="true" style={{height:"450px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
         <Button variant={"info"} className="border" onClick={() => setShowActive(!showActive)} style={{maxHeight:"36px", width:"100%", marginTop:"-1px"}}>Active {showActive ? <FontAwesomeIcon icon={faChevronCircleUp} size="sm" /> : <FontAwesomeIcon icon={faChevronCircleDown} size="sm" />}</Button>
         {data.dispatch_assignments.filter(da => showActive ? da.team_member_names.length > 0 : null).map(dispatch_assignment => (
