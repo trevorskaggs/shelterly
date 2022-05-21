@@ -6,12 +6,13 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faEdit, faPlusSquare, faUserPlus
 } from '@fortawesome/free-solid-svg-icons';
-import { faHomeHeart, faPhonePlus } from '@fortawesome/pro-solid-svg-icons';
+import { faHomeHeart, faPhonePlus, faPrint } from '@fortawesome/pro-solid-svg-icons';
 import Moment from 'react-moment';
 import Header from '../components/Header';
 import History from '../components/History';
 import Scrollbar from '../components/Scrollbars';
 import AnimalCards from '../components/AnimalCards';
+import { printOwnerDetails } from './Utils';
 
 function PersonDetails({id}) {
 
@@ -49,6 +50,13 @@ function PersonDetails({id}) {
     owner_contacts: [],
     action_history: [],
   });
+
+  const handleDownloadPdfClick = (e) => {
+    e.preventDefault();
+
+    printOwnerDetails(data);
+  }
+
 
   // Hook for initializing data.
   useEffect(() => {
@@ -108,6 +116,21 @@ function PersonDetails({id}) {
           </OverlayTrigger>
         </span>
       }
+      <OverlayTrigger
+        key={"offline-dispatch-assignment"}
+        placement="bottom"
+        overlay={
+          <Tooltip id={`tooltip-offline-dispatch-assignment`}>
+            Download printable Intake Summary
+          </Tooltip>
+        }
+      >
+        {({ ref, ...triggerHandler }) => (
+          <Link onClick={handleDownloadPdfClick} {...triggerHandler} href="#">
+            <span ref={ref}><FontAwesomeIcon icon={faPrint} className="ml-3"  inverse /></span>
+          </Link>
+        )}
+      </OverlayTrigger>
     </Header>
     <hr/>
     <div className="row">

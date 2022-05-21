@@ -179,7 +179,7 @@ class ShelterlyPDF {
   }
 
   drawSingleLineText({ text, bottomPadding = 0, topPadding = 0 }) {
-    let yPosition = this.getLastYPositionWithBuffer() + topPadding;
+    let yPosition = this.beforeDraw({ yPosition: this.getLastYPositionWithBuffer({ buffer: this.#defaultElementBuffer + topPadding }) }); // this.getLastYPositionWithBuffer() + topPadding;
     this.#jsPDF.text(text, this.#documentLeftMargin, yPosition)
     this.#documentLastYPosition = yPosition + bottomPadding;
   }
