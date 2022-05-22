@@ -1,3 +1,9 @@
+/**
+ * capitalizes the first character of the first word, or all words in a string
+ * @param  {string} stringToCapitalize
+ * @param  {object} [options] - optional configuration options
+ * @param  {boolean} [options.proper] - proper noun capitalization if true
+ */
 export function capitalize(stringToCapitalize, {
   proper = false
 } = {}) {
