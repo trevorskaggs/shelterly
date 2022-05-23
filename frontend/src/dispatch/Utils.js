@@ -4,7 +4,19 @@ import { priorityChoices } from '../constants';
 import { dispatchStatusChoices } from '../animals/constants';
 
 export const printDispatchResolutionForm = (data) => {
-  const pdf = new ShelterlyPDF();
+  const pdf = new ShelterlyPDF({}, {
+    // adds page numbers to the footer
+    addFooterHandler: ({
+      pageNumber,
+      pageCount,
+      pdf
+    }) => {
+      const { width: pageWidth, height: pageHeight } = pdf.internal.pageSize;
+      pdf.text('Page ' + String(pageNumber) + ' of ' + String(pageCount), pageWidth / 2, pageHeight - 15, {
+        align: 'center'
+      });
+    }
+  });
   pdf.fileName = `DAR-${data.id.toString().padStart(3, 0)}`;
 
   // draw page header
@@ -12,6 +24,7 @@ export const printDispatchResolutionForm = (data) => {
     text: 'Dispatch Assignment Resolution Form',
     subText: `Opened: ${new Date(data.start_time).toLocaleDateString()}`
   });
+  pdf.drawPad();
   pdf.drawHRule();
 
   // draw team section
@@ -26,15 +39,17 @@ export const printDispatchResolutionForm = (data) => {
 
   // summary page
   data.assigned_requests.forEach((assigned_request, index) => {
+    // service request priority
+    const srPriority = priorityChoices.find(({ value }) => value === (assigned_request.service_request_object.priority || 2))
     // Summary page
     pdf.drawSectionHeader({
-      text: `SR#${assigned_request.service_request_object.id} - Summary`
+      text: `SR#${assigned_request.service_request_object.id} - ${srPriority.label} Priority`
     });
 
     pdf.drawPad();
 
     // summary address
-    pdf.drawSectionHeader({ text: 'Service Request Address:', fontSize: 18 });
+    pdf.drawSectionHeader({ text: 'Service Request Address:', fontSize: 14 });
 
     const [addressLine1, ...addressLine2] = assigned_request.service_request_object.full_address.split(',')
 
@@ -43,11 +58,11 @@ export const printDispatchResolutionForm = (data) => {
         addressLine1,
         addressLine2.join(',')?.trim?.()
       ],
-      bottomPadding: 15
+      bottomPadding: 12
     })
 
     // Animal count
-    pdf.drawSectionHeader({ text: 'Animals', fontSize: 18 });
+    pdf.drawSectionHeader({ text: 'Animals', fontSize: 14 });
 
     const animalCounts = [];
     assigned_request.service_request_object.animals
@@ -150,7 +165,7 @@ export const printDispatchResolutionForm = (data) => {
     }
 
     // draw the animals header before the animals table
-    pdf.setDocumentFontSize({ size: 11 });
+    pdf.setDocumentFontSize({ size: 10 });
     drawAnimalHeader();
     
 
@@ -202,7 +217,7 @@ export const printDispatchResolutionForm = (data) => {
 
     // priorities
     pdf.drawSectionHeader({ text: 'Priority', hRule: true });
-    pdf.setDocumentFontSize({ size: 11 });
+    pdf.setDocumentFontSize({ size: 10 });
     const currentPriority = assigned_request.service_request_object.priority || 2
     pdf.drawCheckboxList({
       labels: priorityChoices.map(({ value, label}) => {
@@ -212,7 +227,7 @@ export const printDispatchResolutionForm = (data) => {
         return label
       }),
       listStyle: 'inline',
-      bottomPadding: 25
+      bottomPadding: 16
     });
     pdf.setDocumentFontSize();
 
@@ -227,7 +242,7 @@ export const printDispatchResolutionForm = (data) => {
       labels: [
         'Followup Date:  ________/________/________________'
       ],
-      bottomPadding: 20
+      bottomPadding: 16
     })
     pdf.drawTextArea({ label: 'Visit Notes:', rows: 4 });
     pdf.drawCheckBoxLine({ label: 'Forced Entry' });
