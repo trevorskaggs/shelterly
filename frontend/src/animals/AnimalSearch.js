@@ -22,6 +22,7 @@ import { titleCase } from '../components/Utils';
 import { ITEMS_PER_PAGE } from '../constants';
 import { Legend } from "../components/Map";
 import { catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, speciesChoices } from './constants';
+import AnimalCoverImage from '../components/AnimalCoverImage';
 
 const NoOptionsMessage = props => {
   return (
@@ -405,7 +406,10 @@ function AnimalSearch() {
           <CardGroup>
             <Card style={{maxWidth:"206px", maxHeight:"206px"}}>
               <Card.Body className="p-0 m-0">
-                <img alt="Animal" style={{width:"206px", height:"206px", objectFit: "cover", overflow: "hidden"}} src={animal.front_image || animal.side_image || "/static/images/image-not-found.png" } />
+                <AnimalCoverImage
+                  animalSpecies={animal.species}
+                  customStyles={{ padding: '40px' }}
+                />
               </Card.Body>
             </Card>
             <Card style={{marginBottom:"6px", maxWidth:"335px"}}>
