@@ -117,11 +117,11 @@ function PersonDetails({id}) {
         </span>
       }
       <OverlayTrigger
-        key={"offline-dispatch-assignment"}
+        key={"offline-owner-summary"}
         placement="bottom"
         overlay={
-          <Tooltip id={`tooltip-offline-dispatch-assignment`}>
-            Download printable Intake Summary
+          <Tooltip id={`tooltip-offline-owner-summary`}>
+            Download printable Owner Summary
           </Tooltip>
         }
       >

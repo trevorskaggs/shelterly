@@ -3,17 +3,17 @@ import { capitalize } from '../utils/formatString';
 
 export const printOwnerDetails = (owner) => {
   const pdf = new ShelterlyPDF();
-  pdf.fileName = `Intake-Summary-${owner.id.toString().padStart(3, 0)}`;
+  pdf.fileName = `Owner-Summary-${owner.id.toString().padStart(3, 0)}`;
 
   // draw page header
   pdf.drawPageHeader({
-    text: 'Intake Summary',
+    text: 'Owner Summary',
     subText: `Date: ${new Date().toLocaleDateString()}`
   });
   pdf.drawHRule();
 
   // draw owner section
-  pdf.drawSectionHeader({ text: 'Owner Details', hRule: false });
+  pdf.drawSectionHeader({ text: 'Owner Details', hRule: true });
   
   const ownerInfoList = [`Name: ${owner.first_name} ${owner.last_name}`];
   if (owner.agency) ownerInfoList.push(`Agency: ${owner.agency}`);
@@ -52,11 +52,12 @@ export const printOwnerDetails = (owner) => {
 
     const animalInfoList = [
       `ID: A#${animal.id}`,
+      `Status: ${animal.status}`,
       `Name: ${animal.name || 'Unknown'}`,
-      `Species: ${animal.species}`,
-      `Sex: ${animal.sex || 'Unknown'}`,
-      `Age: ${animal.age || 'Unknown'}`,
-      `Size: ${animal.size || 'Unknown'}`,
+      `Species: ${capitalize(animal.species)}`,
+      `Sex: ${capitalize(animal.sex|| 'Unknown')}`,
+      `Age: ${capitalize(animal.age || 'Unknown')}`,
+      `Size: ${capitalize(animal.size || 'Unknown')}`,
       `Primary Color: ${capitalize(animal.pcolor || 'N/A')}`,
       `Secondary Color: ${capitalize(animal.scolor || 'N/A')}`
     ];
@@ -83,8 +84,9 @@ export const printOwnerDetails = (owner) => {
       })
     }
 
-    pdf.drawHRule({ buffer: 15 });
-    lastYPosAfterDraw = pdf.getLastYPositionWithBuffer({ buffer: 0 });
+    pdf.drawPad(5);
+    pdf.drawHRule();
+    lastYPosAfterDraw = pdf.getLastYPositionWithBuffer();
 
     // If after draw y position is less than before draw, that means there was a page break.
     // Draw the animal header again.

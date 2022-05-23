@@ -300,6 +300,7 @@ class ShelterlyPDF {
         }
 
         if (i === listItems.length - 1) {
+          this.#documentLeftMargin = this.#defaultXMargin;
           this.#documentLastYPosition = this.beforeDraw({ yPosition }) + size + bottomPadding;
         }
       }
