@@ -8,6 +8,7 @@ class EvacTeamMember(models.Model):
     last_name = models.CharField(max_length=50, blank=False)
     phone = models.CharField(max_length=50, blank=False)
     agency_id = models.CharField(max_length=50, blank=True)
+    show = models.BooleanField(default=True)
 
     def __str__(self):
         agency = " (%s)" % (self.agency_id) if self.agency_id else ""
@@ -21,6 +22,7 @@ class DispatchTeam(models.Model):
     name = models.CharField(max_length=50)
     team_members = models.ManyToManyField(EvacTeamMember)
     dispatch_date = models.DateTimeField(auto_now_add=True)
+    show = models.BooleanField(default=True)
 
     def __str__(self):
         return self.name

@@ -26,7 +26,7 @@ function Dispatch() {
     let unmounted = false;
     let source = axios.CancelToken.source();
 
-    const fetchServiceRequests = async () => {
+    const fetchDispatchAssignments = async () => {
 
       // Fetch open DA data.
       axios.get('/evac/api/evacassignment/', {
@@ -60,7 +60,7 @@ function Dispatch() {
       });
     };
 
-    fetchServiceRequests();
+    fetchDispatchAssignments();
 
     // Cleanup.
     return () => {
@@ -85,7 +85,7 @@ function Dispatch() {
         </Link>
       </Col>
       <Col xs={4} className="pl-0 pr-0">
-        <Link href="/dispatch/dispatchteammember/new" style={{textDecoration:"none"}}>
+        <Link href="/dispatch/teammanagement" style={{textDecoration:"none"}}>
           <Button className="rounded border btn-block" style={{height:"100px", fontSize:"20px"}} action><FontAwesomeIcon icon={faUsers} className="mr-1 fa-move-up" inverse />TEAM MANAGEMENT</Button>
         </Link>
       </Col>

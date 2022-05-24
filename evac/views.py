@@ -21,7 +21,17 @@ class EvacTeamMemberViewSet(viewsets.ModelViewSet):
         if serializer.is_valid():
             # Clean phone fields.
             serializer.validated_data['phone'] = ''.join(char for char in serializer.validated_data.get('phone', '') if char.isdigit())
-            team_member = serializer.save()
+            serializer.save()
+
+    def perform_update(self, serializer):
+
+        if serializer.is_valid():
+            # Show/hide from map selectors.
+            show = True
+            if self.request.data.get('action', '') == 'hide':
+                show = False
+            serializer.validated_data['show'] = show
+            serializer.save()
 
     def get_queryset(self):
         queryset = EvacTeamMember.objects.all().annotate(is_assigned=Exists(EvacAssignment.objects.filter(team__team_members__id=OuterRef("id"), end_time=None)))
@@ -45,6 +55,12 @@ class DispatchTeamViewSet(viewsets.ModelViewSet):
     def perform_update(self, serializer):
 
         if serializer.is_valid():
+            # Show/hide from map selectors.
+            if self.request.data.get('action', '') == 'show':
+                serializer.validated_data['show'] = True
+            elif self.request.data.get('action', '') == 'hide':
+                serializer.validated_data['show'] = False
+
             team = serializer.save()
 
             # Add Team Members to DA.
@@ -55,7 +71,7 @@ class DispatchTeamViewSet(viewsets.ModelViewSet):
                 team.team_members.add(*self.request.data.get('new_team_members'))
 
             # Remove Team Member from DA.
-            if self.request.data.get('remove_team_member'):
+            elif self.request.data.get('remove_team_member'):
                 team.team_members.remove(self.request.data.get('remove_team_member'))
 
 class EvacAssignmentViewSet(viewsets.ModelViewSet):
