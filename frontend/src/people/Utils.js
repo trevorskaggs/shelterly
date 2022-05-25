@@ -19,7 +19,7 @@ export const printOwnerDetails = (owner) => {
   if (owner.agency) ownerInfoList.push(`Agency: ${owner.agency}`);
   if (owner.phone) ownerInfoList.push(`Telephone: ${owner.display_phone} ${owner.display_alt_phone ? `  Alt: ${owner.display_alt_phone}` : ''}`);
   if (owner.email) ownerInfoList.push(`Email: ${owner.email}`);
-  if (owner.request) ownerInfoList.push(`ServiceRequest: ${owner.request.full_address}`);
+  if (owner.request) ownerInfoList.push(`Service Request: ${owner.request.full_address}`);
   else {
     if (owner.address) ownerInfoList.push(`Address: ${owner.full_address}`);
     else ownerInfoList.push('Address: No Address Listed');
@@ -52,7 +52,7 @@ export const printOwnerDetails = (owner) => {
 
     const animalInfoList = [
       `ID: A#${animal.id}`,
-      `Status: ${animal.status}`,
+      `Status: ${capitalize(animal.status.toLowerCase(), { proper: true })}`,
       `Name: ${animal.name || 'Unknown'}`,
       `Species: ${capitalize(animal.species)}`,
       `Sex: ${capitalize(animal.sex|| 'Unknown')}`,
