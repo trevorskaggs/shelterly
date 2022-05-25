@@ -11,6 +11,7 @@ import {
 } from '@fortawesome/free-regular-svg-icons';
 import { faChevronDoubleDown, faChevronDoubleUp, faCommentSmile, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import Moment from 'react-moment';
+import { useMark } from '../hooks';
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
 import { ITEMS_PER_PAGE } from '../constants';
@@ -33,6 +34,7 @@ function ServiceRequestSearch() {
   const [statusOptions, setStatusOptions] = useState(status);
   const [page, setPage] = useState(1);
   const [numPages, setNumPages] = useState(1);
+  const { markInstances } = useMark();
 
   // Update searchTerm when field input changes.
   const handleChange = event => {
@@ -82,6 +84,9 @@ function ServiceRequestSearch() {
 						search_state[service_request.id] = {species:species, selectedSpecies:species[0]};
 					});
 					setSearchState(search_state);
+
+          // highlight search terms
+          markInstances(searchTerm);
         }
       })
       .catch(error => {
