@@ -6,7 +6,11 @@ import { Marker, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
 import Moment from 'react-moment';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPhone } from '@fortawesome/free-solid-svg-icons';
+import { faCircle, faExclamationCircle, faPhone } from '@fortawesome/free-solid-svg-icons';
+import { faQuestionCircle as faQuestionCircleDuo } from '@fortawesome/pro-duotone-svg-icons';
+import { faHomeAlt as faHomeAltReg } from '@fortawesome/pro-regular-svg-icons';
+import { faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
+
 import Map, { prettyText, closedMarkerIcon, reportedMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
 import Header from "../components/Header";
 
@@ -142,7 +146,27 @@ function Hotline() {
       </Col>
     </Row>
     <Row className="ml-0 mr-0 border rounded" style={{maxHeight:"38px"}}>
-      <h4 className="card-header text-center" style={{paddingTop:"4px", paddingLeft:"10px", paddingRight:"10px", height:"36px", width:"100%", backgroundColor:"#808080"}}>Service Requests</h4>
+      <h4 className="card-header text-center" style={{paddingTop:"4px", paddingLeft:"10px", paddingRight:"10px", height:"36px", width:"100%", backgroundColor:"#808080"}}>
+        Service Requests&nbsp;&nbsp; -
+        <span className="fa-layers mr-1 ml-3">
+          <FontAwesomeIcon icon={faCircle} color="white" />
+          <FontAwesomeIcon icon={faExclamationCircle} className="icon-border" color="#ff4c4c" />
+        </span>
+        Reported
+        <span style={{paddingRight:"15px", paddingLeft:"15px"}}>
+          <span className="fa-layers ml-1" style={{marginRight:"6px"}}>
+            <FontAwesomeIcon icon={faCircle} className="icon-border" color="#f5ee0f" transform={'grow-2'} />
+            <FontAwesomeIcon icon={faHomeAlt} style={{color:"white"}} transform={'shrink-3 left-1'} inverse />
+            <FontAwesomeIcon icon={faHomeAltReg} style={{color:"#444"}} transform={'shrink-3 left-1'} inverse />
+          </span>
+          SIP
+        </span>
+        <span className="fa-layers ml-1 mr-1">
+          <FontAwesomeIcon icon={faCircle} color="white" />
+          <FontAwesomeIcon icon={faQuestionCircleDuo} className="icon-border" style={{"--fa-primary-color":'white', "--fa-secondary-color":'#5f5fff', "--fa-secondary-opacity": 1}}  />
+        </span>
+        UTL
+      </h4>
     </Row>
   </>
   )

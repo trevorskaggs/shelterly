@@ -8,6 +8,7 @@ import {
   faBan, faBandAid, faBullseye, faCalendarDay, faCar, faChevronDown, faChevronUp, faEquals, faExclamationTriangle, faCircle, faClipboardList, faExclamationCircle, faMapMarkedAlt, faQuestionCircle, faPencilAlt, faTrailer, faUserAlt, faUserAltSlash
 } from '@fortawesome/free-solid-svg-icons';
 import { faBadgeSheriff, faChevronDoubleDown, faChevronDoubleUp, faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
+import { faHomeAlt as faHomeAltReg } from '@fortawesome/pro-regular-svg-icons';
 import { Circle, Marker, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
 import * as Yup from 'yup';
@@ -221,7 +222,7 @@ function Deploy() {
           let options = [];
           let team_names = [];
           let team_name = '';
-          response.data.forEach(function(teammember) {
+          response.data.filter(teammember => teammember.show === true).forEach(function(teammember) {
             options.push({id: [teammember.id], label: teammember.display_name, is_assigned:teammember.is_assigned})
           });
           setAssignedTeamMembers(response.data.filter(teammember => teammember.is_assigned === true).map(teammember => teammember.id))
@@ -233,7 +234,7 @@ function Deploy() {
             cancelToken: source.token,
           })
           .then(response => {
-            response.data.forEach(function(team) {
+            response.data.filter(team => team.show === true).forEach(function(team) {
               // Only add to option list if team has members and is not already in the list which is sorted by newest.
               if (team.team_members.length && !team_names.includes(team.name)) {
                 options.unshift({id: team.team_members, label: team.name + ": " + team.display_name, is_assigned:team.is_assigned});
@@ -414,7 +415,10 @@ function Deploy() {
                     </Tooltip>
                   }
                 >
-                  <FontAwesomeIcon icon={faExclamationCircle} className="ml-1"/>
+                  <span className="fa-layers ml-1 mr-1">
+                    <FontAwesomeIcon icon={faCircle} color="white" />
+                    <FontAwesomeIcon icon={faExclamationCircle} className="icon-border" color="#ff4c4c" />
+                  </span>
                 </OverlayTrigger>
               </p>
               <hr className="mt-1 mb-1"/>
@@ -433,10 +437,15 @@ function Deploy() {
                     </Tooltip>
                   }
                 >
-                  <span className="fa-layers ml-1">
-                    <FontAwesomeIcon icon={faCircle} transform={'grow-1'} />
-                    <FontAwesomeIcon icon={faHomeAlt} style={{color:"#444"}} transform={'shrink-3'} size="sm" inverse />
+                  <span className="fa-layers ml-1" >
+                    <FontAwesomeIcon icon={faCircle} className="icon-border" color="#f5ee0f" transform={'grow-2'} />
+                    <FontAwesomeIcon icon={faHomeAlt} style={{color:"white"}} transform={'shrink-3 left-1'} inverse />
+                    <FontAwesomeIcon icon={faHomeAltReg} style={{color:"#444"}} transform={'shrink-3 left-1'} inverse />
                   </span>
+                  {/* <span className="fa-layers ml-1">
+                    <FontAwesomeIcon icon={faCircle} className="icon-border" transform={'grow-1'} color="#f5ee0f" />
+                    <FontAwesomeIcon icon={faHomeAlt} className="icon-border" style={{color:"white"}} transform={'shrink-3'} size="sm" inverse />
+                  </span> */}
                 </OverlayTrigger>
               </p>
               <hr className="mt-1 mb-1"/>
@@ -455,7 +464,10 @@ function Deploy() {
                     </Tooltip>
                   }
                 >
-                  <FontAwesomeIcon icon={faQuestionCircle} className="ml-1"/>
+                  <span className="fa-layers ml-1 mr-1">
+                    <FontAwesomeIcon icon={faCircle} className="fa-move-up icon-border" color="white" />
+                    <FontAwesomeIcon icon={faQuestionCircle} className="fa-move-up icon-border" color="#5f5fff" />
+                  </span>
                 </OverlayTrigger>
               </p>
               <hr className="mt-1 mb-1"/>

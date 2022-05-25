@@ -164,7 +164,7 @@ function DispatchSummary({id}) {
           .then(teamMemberResponse => {
             let options = [];
             let team_names = [];
-            teamMemberResponse.data.filter(team_member => !response.data.team_object.team_members.includes(team_member.id)).forEach(function(teammember){
+            teamMemberResponse.data.filter(team_member => !response.data.team_object.team_members.includes(team_member.id) && team_member.show === true).forEach(function(teammember){
               options.push({id: [teammember.id], label: teammember.display_name})
             });
             setTeamData({teams: [], options: options, isFetching: false});
@@ -176,7 +176,7 @@ function DispatchSummary({id}) {
               cancelToken: source.token,
             })
             .then(teamResponse => {
-              teamResponse.data.forEach(function(team) {
+              teamResponse.data.filter(team => team.show === true).forEach(function(team) {
                 // Only add to option list if team has members, is populated with at least 1 new valid team member, and is not already in the list which is sorted by newest.
                 if (team.team_members.length && team.team_members.filter(team_member => !response.data.team_object.team_members.includes(team_member)).length > 0 && !team_names.includes(team.name)) {
                   options.unshift({id: team.team_members, label: team.name + ": " + team.display_name});
