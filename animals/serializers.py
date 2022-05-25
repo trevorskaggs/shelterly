@@ -66,16 +66,17 @@ class AnimalSerializer(ModestAnimalSerializer):
 
     # Truncates latitude and longitude.
     def to_internal_value(self, data):
-        # remember old state
-        _mutable = data._mutable
-        data._mutable = True
+        if data.get('latitude') or data.get('longitude'):
+            # remember old state
+            _mutable = data._mutable
+            data._mutable = True
 
-        if data.get('latitude'):
-            data['latitude'] = float("%.6f" % float(data.get('latitude')))
-        if data.get('longitude'):
-            data['longitude'] = float("%.6f" % float(data.get('longitude')))
+            if data.get('latitude'):
+                data['latitude'] = float("%.6f" % float(data.get('latitude')))
+            if data.get('longitude'):
+                data['longitude'] = float("%.6f" % float(data.get('longitude')))
 
-        data._mutable = _mutable
+            data._mutable = _mutable
 
         return super().to_internal_value(data)
 

@@ -9,9 +9,7 @@ import {
 import {
   faSquare,
 } from '@fortawesome/free-regular-svg-icons';
-import {
-  faTimesSquare,
-} from '@fortawesome/pro-regular-svg-icons';
+import { faTimesSquare } from '@fortawesome/pro-regular-svg-icons';
 import History from '../components/History';
 import Header from '../components/Header';
 

@@ -434,7 +434,7 @@ const AnimalForm = (props) => {
             <Card.Body>
             <BootstrapForm as={Form}>
                 <BootstrapForm.Row>
-                  <Col xs={id ? "6" : "5"}>
+                  <Col xs={"6"}>
                     <DropDown
                       label="Species*"
                       id="speciesDropdown"
@@ -455,7 +455,7 @@ const AnimalForm = (props) => {
                       }}
                     />
                   </Col>
-                  <Col xs={id ? "6" : "5"}>
+                  <Col xs="6">
                     <DropDown
                       label="Size"
                       id="sizeDropdown"
@@ -469,16 +469,8 @@ const AnimalForm = (props) => {
                       placeholder={placeholder}
                     />
                   </Col>
-                  <TextInput
-                    id="number_of_animals"
-                    name="number_of_animals"
-                    type="text"
-                    xs="2"
-                    label="No. of Animals"
-                    hidden={id}
-                  />
                 </BootstrapForm.Row>
-                <BootstrapForm.Row className={id ? "mt-3" : ""}>
+                <BootstrapForm.Row className={"mt-3"}>
                   <Col xs="4">
                     <DropDown
                       label="Primary Color"
@@ -651,12 +643,21 @@ const AnimalForm = (props) => {
                     name="last_seen"
                     id="last_seen"
                     xs="6"
-                    key={`my_unique_last_seen_select_key__${formikProps.values.last_seen}`}
                     onChange={(date, dateStr) => {
                       formikProps.setFieldValue("last_seen", dateStr)
                     }}
                     value={formikProps.values.last_seen||null}
                     hidden={is_intake}
+                    disabled={false}
+                  />
+                </BootstrapForm.Row>
+                <BootstrapForm.Row hidden={id}>
+                  <TextInput
+                    id="number_of_animals"
+                    name="number_of_animals"
+                    type="text"
+                    xs="2"
+                    label="No. of Copies"
                   />
                 </BootstrapForm.Row>
                 {/* Only show Shelter selection on intake and update. */}

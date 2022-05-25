@@ -134,7 +134,7 @@ function ServiceRequestDetails({id}) {
       </Header>
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>Confirm Cancellation</Modal.Title>
+          <Modal.Title>Confirm Service Request Cancellation</Modal.Title>
         </Modal.Header>
         <Modal.Body>Are you sure you want to cancel this Service Request and associated animals?</Modal.Body>
         <Modal.Footer>

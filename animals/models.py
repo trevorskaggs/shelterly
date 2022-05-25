@@ -26,7 +26,7 @@ class Animal(Location, OrderedModel):
     color_notes = models.CharField(max_length=200, blank=True)
     size = models.CharField(max_length=10, choices=ALL_SIZE_CHOICES, blank=True)
     age = models.CharField(max_length=10, choices=ALL_AGE_CHOICES, blank=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='REPORTED')
+    status = models.CharField(max_length=25, choices=STATUS_CHOICES, default='REPORTED')
 
     #boolean fields
     fixed = models.CharField(max_length=10, choices=UNKNOWN_CHOICES, default='unknown')
