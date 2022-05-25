@@ -339,12 +339,13 @@ const AddressLookup = ({setLatLon, ...props}) => {
         onChange={(e) => {
           const lookup = e.target.value.replace(' ', '').split(',');
           if (lookup[0] <= 90 && lookup[0] >= -90 && lookup[1] <= 180 && lookup[1] >= -180) {
-          let latlng = {lat:Number(lookup[0]), lng:Number(lookup[1])};
-          new window.google.maps.Geocoder().geocode({ location: latlng }, function (results, status) {
-            if (status === window.google.maps.GeocoderStatus.OK) {
-              updateAddr(results[0]);
-            }
-          });
+            let latlng = {lat:Number(lookup[0]), lng:Number(lookup[1])};
+            new window.google.maps.Geocoder().geocode({ location: latlng }, function (results, status) {
+              if (status === window.google.maps.GeocoderStatus.OK) {
+                // Filter out results that do not have a road name.
+                updateAddr(results.filter(result => !result.address_components[0].long_name.includes('+'))[0]);
+              }
+            });
           }
         }}
         onPlaceSelected={(place) => {
