@@ -15,7 +15,7 @@ const ShelterlyIcon = ({
 }) => {
   const Icon = icon;
   return (
-    <Icon fill={color} width="100%" height="auto" role="img" aria-label={srLabel} />
+    <Icon fill={color} width="100%" height="100%" role="img" aria-label={srLabel} />
   )
 };
 
