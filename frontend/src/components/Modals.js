@@ -67,11 +67,11 @@ const AnimalDeleteModal = (props) => {
     <>
       <Modal show={props.show} onHide={props.handleClose}>
         <Modal.Header closeButton>
-          <Modal.Title>Confirm Animal Removal</Modal.Title>
+          <Modal.Title>Confirm Animal Cancellation</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <p>
-            Are you sure you would like to remove animal {props.name || "Unknown"}?
+            Are you sure you would like to cancel animal {props.name || "Unknown"}?
           </p>
         </Modal.Body>
         <Modal.Footer>

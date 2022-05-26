@@ -50,7 +50,7 @@ const DispatchTeamMemberForm = () => {
               resetForm();
             }
             else {
-              navigate('/dispatch');
+              navigate('/dispatch/teammanagement');
             }
           })
           .catch(error => {

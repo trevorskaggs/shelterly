@@ -8,6 +8,7 @@ import AnimalSearch from "./animals/AnimalSearch";
 import Deploy from "./dispatch/DispatchMap";
 import DispatchSummary from "./dispatch/DispatchSummary";
 import DispatchResolutionForm from "./dispatch/DispatchResolutionForm";
+import DispatchTeamManagement from "./dispatch/DispatchTeamManagement";
 import DispatchTeamMemberForm from "./dispatch/DispatchTeamMemberForm";
 import Dispatch from "./dispatch/Dispatch";
 import DispatchAssignmentSearch from "./dispatch/DispatchSearch"
@@ -50,6 +51,7 @@ const routes = {
   "/dispatch/assignment/note/:id": ({id}) => <VisitNoteForm id={id} />,
   "/dispatch/deploy": () => <Deploy />,
   "/dispatch/preplan": () => <Deploy />,
+  "/dispatch/teammanagement": () => <DispatchTeamManagement />,
   "/hotline": () => <Hotline />,
   "/hotline/servicerequest/:id/assign": ({id}) => <ServiceRequestDispatchAssignment id={id} />,
   "/hotline/ownercontact/new": () => <OwnerContactForm />,

@@ -34,7 +34,7 @@ describe("Render hotline", () => {
     render(<Hotline />);
     expect(screen.getAllByText(/OWNER CALLING/)).toBeTruthy();
     expect(screen.getByText(/NON-OWNER CALLING/)).toBeTruthy();
-    expect(screen.getByText(/SEARCH SERVICE REQUESTS/)).toBeTruthy();
+    expect(screen.getByText(/FIRST RESPONDER CALLING/)).toBeTruthy();
   });
 });
 

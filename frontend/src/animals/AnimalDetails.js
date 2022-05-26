@@ -172,11 +172,11 @@ function AnimalDetails({id}) {
       </OverlayTrigger>
       : ""}
       <OverlayTrigger
-        key={"remove-animal"}
+        key={"cancel-animal"}
         placement="bottom"
         overlay={
-          <Tooltip id={`tooltip-remove-animal`}>
-            Remove animal
+          <Tooltip id={`tooltip-cancel-animal`}>
+            Cancel animal
           </Tooltip>
         }
       >
