@@ -28,6 +28,7 @@ const AnimalForm = (props) => {
     owner_id = null,
     servicerequest_id = null,
     reporter_id = null,
+    shelter_id = null,
   } = queryParams;
 
   // Determine if we're in a multi-step workflow.
@@ -424,7 +425,7 @@ const AnimalForm = (props) => {
         }}
       >
         {formikProps => (
-          <Card border="secondary" className={is_workflow ? "mt-3" : "mt-5"}>
+          <Card border="secondary" style={{marginTop:is_workflow ? "15px" : "35px"}}>
             <Card.Header as="h5" className="pl-3">{id || owner_id ?
               <span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
               :
@@ -434,7 +435,14 @@ const AnimalForm = (props) => {
             <Card.Body>
             <BootstrapForm as={Form}>
                 <BootstrapForm.Row>
-                  <Col xs={"6"}>
+                  <TextInput
+                    id="name"
+                    name="name"
+                    type="text"
+                    label="Animal Name"
+                    xs="4"
+                  />
+                  <Col xs="4">
                     <DropDown
                       label="Species*"
                       id="speciesDropdown"
@@ -455,7 +463,7 @@ const AnimalForm = (props) => {
                       }}
                     />
                   </Col>
-                  <Col xs="6">
+                  <Col xs="4">
                     <DropDown
                       label="Size"
                       id="sizeDropdown"
@@ -470,7 +478,7 @@ const AnimalForm = (props) => {
                     />
                   </Col>
                 </BootstrapForm.Row>
-                <BootstrapForm.Row className={"mt-3"}>
+                <BootstrapForm.Row>
                   <Col xs="4">
                     <DropDown
                       label="Primary Color"
@@ -506,17 +514,8 @@ const AnimalForm = (props) => {
                     xs="8"
                   />
                 </BootstrapForm.Row>
-                <BootstrapForm.Row>
-                  <TextInput
-                    id="name"
-                    xs="6"
-                    name="name"
-                    type="text"
-                    label="Animal Name"
-                  />
-                </BootstrapForm.Row>
                 <BootstrapForm.Row className="mb-3">
-                  <Col xs="3">
+                  <Col xs="3" hidden={shelter_id}>
                     <DropDown
                         label="Status"
                         id="statusDropDown"
@@ -637,7 +636,7 @@ const AnimalForm = (props) => {
                     xs="12"
                   />
                 </BootstrapForm.Row>
-                <BootstrapForm.Row className={is_workflow && !is_intake ? "mb-3" : ""}>
+                <BootstrapForm.Row className={!is_intake ? "mb-3" : ""}>
                   <DateTimePicker
                     label="Last Seen"
                     name="last_seen"
@@ -651,7 +650,7 @@ const AnimalForm = (props) => {
                     disabled={false}
                   />
                 </BootstrapForm.Row>
-                <BootstrapForm.Row hidden={id}>
+                <BootstrapForm.Row hidden={id} style={{marginBottom:is_intake ? "" : "-15px"}}>
                   <TextInput
                     id="number_of_animals"
                     name="number_of_animals"

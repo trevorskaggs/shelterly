@@ -300,10 +300,23 @@ const AddressLookup = ({setLatLon, ...props}) => {
 
   const childRef = useRef(null);
   const { setFieldValue } = useFormikContext();
+  const [timer, setTimer] = useState(null);
+
+  function changeDelay(change) {
+    if (timer) {
+      clearTimeout(timer);
+      setTimer(null);
+    }
+    setTimer(
+      setTimeout(() => {
+        updateAddr(change);
+      }, 2500)
+    );
+  }
 
   const updateAddr = suggestion => {
 
-    if (suggestion.address_components) {
+    if (suggestion && suggestion.address_components) {
       // Extract location information from the return. Use short_name for the state.
       let components={};
       suggestion.address_components.forEach(function(k,v1) {k.types.forEach(function(v2, k2){v2 !== "administrative_area_level_1" ? components[v2]=k.long_name : components[v2]=k.short_name});});
@@ -343,7 +356,8 @@ const AddressLookup = ({setLatLon, ...props}) => {
             new window.google.maps.Geocoder().geocode({ location: latlng }, function (results, status) {
               if (status === window.google.maps.GeocoderStatus.OK) {
                 // Filter out results that do not have a road name.
-                updateAddr(results.filter(result => !result.address_components[0].long_name.includes('+'))[0]);
+                // Delay lookup to reduce number of calls while user is tpying.
+                changeDelay(results.filter(result => !result.address_components[0].long_name.includes('+'))[0]);
               }
             });
           }

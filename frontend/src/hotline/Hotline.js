@@ -108,14 +108,15 @@ function Hotline() {
             <Marker
               key={service_request.id}
               position={[service_request.latitude, service_request.longitude]}
-              icon={service_request.sheltered_in_place > 0 ? SIPMarkerIcon : service_request.unable_to_locate > 0 ? UTLMarkerIcon : service_request.reported_animals > 0 ? reportedMarkerIcon : closedMarkerIcon}
+              icon={service_request.reported_animals > 0 ? reportedMarkerIcon : service_request.sheltered_in_place > 0 ? SIPMarkerIcon : service_request.unable_to_locate > 0 ? UTLMarkerIcon : closedMarkerIcon}
               onClick={() => navigate("/hotline/servicerequest/" + service_request.id)}
             >
               <MapTooltip autoPan={false}>
                 <span>
+                  SR#{service_request.id}: {service_request.full_address}
+                  <br/>
                   {mapState[service_request.id] ?
                     <span>
-                      {service_request.sheltered_in_place > 0 ? 'SIP: ' : service_request.unable_to_locate > 0 ? 'UTL: ' : service_request.reported_animals > 0 ? 'Reported: ' : 'Closed: '}
                       {Object.keys(mapState[service_request.id].matches).map((key,i) => (
                         <span key={key} style={{textTransform:"capitalize"}}>
                           {i > 0 && ", "}{prettyText('', key.split(',')[0], mapState[service_request.id].matches[key])}
@@ -123,8 +124,6 @@ function Hotline() {
                       ))}
                     </span>
                   :""}
-                  <br />
-                  SR#{service_request.id}: {service_request.full_address}
                   {service_request.followup_date ? <div>Followup Date: <Moment format="L">{service_request.followup_date}</Moment></div> : ""}
                   <div>
                     {service_request.aco_required ? <img width={16} height={16} src="/static/images/badge-sheriff.png" alt="ACO Required" className="mr-1" /> : ""}

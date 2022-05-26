@@ -442,10 +442,6 @@ function Deploy() {
                     <FontAwesomeIcon icon={faHomeAlt} style={{color:"white"}} transform={'shrink-3 left-1'} inverse />
                     <FontAwesomeIcon icon={faHomeAltReg} style={{color:"#444"}} transform={'shrink-3 left-1'} inverse />
                   </span>
-                  {/* <span className="fa-layers ml-1">
-                    <FontAwesomeIcon icon={faCircle} className="icon-border" transform={'grow-1'} color="#f5ee0f" />
-                    <FontAwesomeIcon icon={faHomeAlt} className="icon-border" style={{color:"white"}} transform={'shrink-3'} size="sm" inverse />
-                  </span> */}
                 </OverlayTrigger>
               </p>
               <hr className="mt-1 mb-1"/>
@@ -485,7 +481,7 @@ function Deploy() {
                 <span key={service_request.id}> {mapState[service_request.id] ? 
                   <Marker
                     position={[service_request.latitude, service_request.longitude]}
-                    icon={mapState[service_request.id] && mapState[service_request.id].checked ? checkMarkerIcon : service_request.sheltered_in_place > 0 ? SIPMarkerIcon : service_request.unable_to_locate > 0 ? UTLMarkerIcon : reportedMarkerIcon}
+                    icon={mapState[service_request.id] && mapState[service_request.id].checked ? checkMarkerIcon : service_request.reported_animals > 0 ? reportedMarkerIcon : service_request.sheltered_in_place > 0 ? SIPMarkerIcon : UTLMarkerIcon}
                     onClick={() => handleMapState(service_request.id)}
                   >
                     <MapTooltip autoPan={false}>

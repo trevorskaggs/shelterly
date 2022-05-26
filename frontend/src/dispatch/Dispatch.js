@@ -102,7 +102,7 @@ function Dispatch() {
               <Marker
                 key={assigned_request.service_request_object.id}
                 position={[assigned_request.service_request_object.latitude, assigned_request.service_request_object.longitude]}
-                icon={assigned_request.service_request_object.sheltered_in_place > 0 ? SIPMarkerIcon : assigned_request.service_request_object.unable_to_locate > 0 ? UTLMarkerIcon : reportedMarkerIcon}
+                icon={assigned_request.service_request_object.reported_animals > 0 ? reportedMarkerIcon : assigned_request.service_request_object.sheltered_in_place > 0 ? SIPMarkerIcon : UTLMarkerIcon}
                 onClick={() => navigate("/dispatch/summary/" + dispatch_assignment.id)}
               >
               <MapTooltip key={`${index}-${selectedTeam}`} autoPan={false} closeButton={true} permanent={selectedTeam === dispatch_assignment.id ? true : false}>
@@ -110,7 +110,6 @@ function Dispatch() {
                   <div>{dispatch_assignment.team_object ? dispatch_assignment.team_object.name : ""}</div>
                   {mapState[dispatch_assignment.id] ?
                     <span>
-                      {assigned_request.service_request_object.sheltered_in_place > 0 ? 'SIP: ' : assigned_request.service_request_object.unable_to_locate > 0 ? 'UTL: ' : 'Reported: '}
                       {Object.keys(mapState[dispatch_assignment.id].service_requests[assigned_request.service_request_object.id].matches).map((key,i) => (
                         <span key={key} style={{textTransform:"capitalize"}}>
                           {i > 0 && ", "}{prettyText(key.split(',')[1], key.split(',')[0], mapState[dispatch_assignment.id].service_requests[assigned_request.service_request_object.id].matches[key])}
@@ -181,21 +180,21 @@ function Dispatch() {
       <h4 className="card-header text-center" style={{paddingTop:"4px", paddingLeft:"10px", paddingRight:"10px", height:"36px", width:"100%", backgroundColor:"#808080"}}>
         Dispatch Assignments&nbsp;&nbsp; -
         <span className="fa-layers ml-3 mr-1">
-          <FontAwesomeIcon icon={faCircle} color="white" />
-          <FontAwesomeIcon icon={faExclamationCircle} className="icon-border" color="#ff4c4c" />
+          <FontAwesomeIcon icon={faCircle} className="fa-move-down" color="white" />
+          <FontAwesomeIcon icon={faExclamationCircle} className="icon-border fa-move-down" color="#ff4c4c" />
         </span>
         Reported
         <span style={{paddingRight:"15px", paddingLeft:"15px"}}>
           <span className="fa-layers ml-1" style={{marginRight:"6px"}}>
-            <FontAwesomeIcon icon={faCircle} className="icon-border" color="#f5ee0f" transform={'grow-2'} />
-            <FontAwesomeIcon icon={faHomeAlt} style={{color:"white"}} transform={'shrink-3 left-1'} inverse />
-            <FontAwesomeIcon icon={faHomeAltReg} style={{color:"#444"}} transform={'shrink-3 left-1'} inverse />
+            <FontAwesomeIcon icon={faCircle} className="icon-border fa-move-down" color="#f5ee0f" transform={'grow-2'} />
+            <FontAwesomeIcon icon={faHomeAlt} className="fa-move-down" style={{color:"white"}} transform={'shrink-3 left-1'} inverse />
+            <FontAwesomeIcon icon={faHomeAltReg} className="fa-move-down" style={{color:"#444"}} transform={'shrink-3 left-1'} inverse />
           </span>
           SIP
         </span>
         <span className="fa-layers ml-1 mr-1">
-          <FontAwesomeIcon icon={faCircle} color="white" />
-          <FontAwesomeIcon icon={faQuestionCircleDuo} className="icon-border" style={{"--fa-primary-color":'white', "--fa-secondary-color":'#5f5fff', "--fa-secondary-opacity": 1}} />
+          <FontAwesomeIcon icon={faCircle} className="fa-move-down" color="white" />
+          <FontAwesomeIcon icon={faQuestionCircleDuo} className="icon-border fa-move-down" style={{"--fa-primary-color":'white', "--fa-secondary-color":'#5f5fff', "--fa-secondary-opacity": 1}} />
         </span>
         UTL
       </h4>
