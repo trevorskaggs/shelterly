@@ -87,17 +87,17 @@ function Hotline() {
     <Row className="ml-0 mr-0 pl-0 pr-0 mb-0">
       <Col xs={4} className="pl-0 pr-0">
         <Link href="/hotline/workflow/owner" style={{textDecoration:"none"}}>
-          <Button className="rounded border btn-block" style={{height:"100px", fontSize:"20px"}} action><FontAwesomeIcon icon={faPhone} className="mr-1 fa-move-up" inverse />OWNER CALLING</Button>
+          <Button className="rounded border btn-block" style={{height:"100px", fontSize:"20px"}}><FontAwesomeIcon icon={faPhone} className="mr-1 fa-move-up" inverse />OWNER CALLING</Button>
         </Link>
       </Col>
       <Col xs={4} className="pl-0 pr-0">
         <Link href="/hotline/workflow/reporter" style={{textDecoration:"none"}}>
-          <Button className="rounded border btn-block" style={{height:"100px", fontSize:"20px"}} action><FontAwesomeIcon icon={faPhone} className="mr-1 fa-move-up" inverse />NON-OWNER CALLING</Button>
+          <Button className="rounded border btn-block" style={{height:"100px", fontSize:"20px"}}><FontAwesomeIcon icon={faPhone} className="mr-1 fa-move-up" inverse />NON-OWNER CALLING</Button>
         </Link>
       </Col>
       <Col xs={4} className="pl-0 pr-0">
         <Link href="/hotline/workflow/first_responder" style={{textDecoration:"none"}}>
-          <Button className="rounded border btn-block" style={{height:"100px", fontSize:"20px"}} action><FontAwesomeIcon icon={faPhone} className="mr-1 fa-move-up" inverse />FIRST RESPONDER CALLING</Button>
+          <Button className="rounded border btn-block" style={{height:"100px", fontSize:"20px"}}><FontAwesomeIcon icon={faPhone} className="mr-1 fa-move-up" inverse />FIRST RESPONDER CALLING</Button>
         </Link>
       </Col>
     </Row>

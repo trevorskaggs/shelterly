@@ -78,17 +78,17 @@ function Dispatch() {
     <Row className="ml-0 mr-0 pl-0 pr-0 mb-0">
       <Col xs={4} className="pl-0 pr-0">
         <Link href="/dispatch/deploy" style={{textDecoration:"none"}}>
-          <Button className="rounded border btn-block" style={{height:"100px", fontSize:"20px"}} action><FontAwesomeIcon icon={faBullhorn} className="mr-1 fa-move-up" inverse />DEPLOY TEAMS</Button>
+          <Button className="rounded border btn-block" style={{height:"100px", fontSize:"20px"}}><FontAwesomeIcon icon={faBullhorn} className="mr-1 fa-move-up" inverse />DEPLOY TEAMS</Button>
         </Link>
       </Col>
       <Col xs={4} className="pl-0 pr-0">
         <Link href="/dispatch/preplan" style={{textDecoration:"none"}}>
-          <Button className="rounded border btn-block" style={{height:"100px", fontSize:"20px"}} action><FontAwesomeIcon icon={faMapMarkedAlt} className="mr-1 fa-move-up" inverse />PREPLAN ASSIGNMENTS</Button>
+          <Button className="rounded border btn-block" style={{height:"100px", fontSize:"20px"}}><FontAwesomeIcon icon={faMapMarkedAlt} className="mr-1 fa-move-up" inverse />PREPLAN ASSIGNMENTS</Button>
         </Link>
       </Col>
       <Col xs={4} className="pl-0 pr-0">
         <Link href="/dispatch/teammanagement" style={{textDecoration:"none"}}>
-          <Button className="rounded border btn-block" style={{height:"100px", fontSize:"20px"}} action><FontAwesomeIcon icon={faUsers} className="mr-1 fa-move-up" inverse />TEAM MANAGEMENT</Button>
+          <Button className="rounded border btn-block" style={{height:"100px", fontSize:"20px"}}><FontAwesomeIcon icon={faUsers} className="mr-1 fa-move-up" inverse />TEAM MANAGEMENT</Button>
         </Link>
       </Col>
     </Row>
