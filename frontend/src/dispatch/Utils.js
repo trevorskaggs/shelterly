@@ -1,4 +1,3 @@
-
 import ShelterlyPDF from '../utils/pdf';
 import { priorityChoices } from '../constants';
 import { dispatchStatusChoices } from '../animals/constants';
@@ -195,12 +194,11 @@ export const printDispatchResolutionForm = (data) => {
       });
       pdf.drawWrappedText({
         text: `Description: ${animal.color_notes || 'N/A'}`,
-        linePadding: -5,
         bottomPadding: 5
       });
       pdf.drawWrappedText({
         text: `Behavior: ${animal.behavior_notes || 'N/A'}`,
-        linePadding: -5
+        linePadding: -10
       });
 
       pdf.drawHRule({ buffer: 15 });
