@@ -5,7 +5,8 @@ import {
   ShCat,
   ShDog,
   ShHorse,
-  ShPaw
+  ShPaw,
+  ShLogo
 } from './index';
 
 /**
@@ -39,7 +40,7 @@ const SpeciesIcon = ({
       break;
     }
     default: {
-      iconSpecies = ShPaw
+      iconSpecies = ShLogo
       srLabel = 'Other Species Icon';
       break;
     }
