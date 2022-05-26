@@ -22,19 +22,22 @@ class ShelterlyPDF {
   #paddingBetweenElements = 5;
   #documentDrawColor = rgbColors.DEFAULT;
   #documentTextColor = rgbColors.DEFAULT;
-  #documentFontSize = 15;
-  #documentTitle1FontSize = 25;
-  #documentTitle2FontSize = 20;
+  #documentFontSize = 12;
+  #documentTitle1FontSize = 20;
+  #documentTitle2FontSize = 16;
   #defaultXMargin = 15;
   #documentLeftMargin = this.#defaultXMargin;
   #documentRightMargin = this.#defaultXMargin;
   #documentLastYPosition = 0;
-  #defaultElementBuffer = 20;
+  #defaultElementBuffer = 16;
   #totalPages = 1;
   #currentPage = 1;
   #pageRewound = false;
+  #addFooter = null;
 
-  constructor (format = {}) {
+  constructor (format = {}, {
+    addFooterHandler
+  } = {}) {
     this.#jsPDF = new jsPDF({
       ...defaultFormat,
       ...format
@@ -52,6 +55,10 @@ class ShelterlyPDF {
 
     // reset doc colors
     this.setDocumentColors();
+
+    if (typeof addFooterHandler === 'function') {
+      this.#addFooter = addFooterHandler;
+    }
   }
 
   // read/write properties
@@ -157,6 +164,7 @@ class ShelterlyPDF {
     this.#documentLastYPosition = yPosition - 20;
 
     if (hRule) {
+      this.drawPad();
       this.drawHRule();
     }
 
@@ -179,7 +187,7 @@ class ShelterlyPDF {
   }
 
   drawSingleLineText({ text, bottomPadding = 0, topPadding = 0 }) {
-    let yPosition = this.getLastYPositionWithBuffer() + topPadding;
+    let yPosition = this.beforeDraw({ yPosition: this.getLastYPositionWithBuffer({ buffer: this.#defaultElementBuffer + topPadding }) }); // this.getLastYPositionWithBuffer() + topPadding;
     this.#jsPDF.text(text, this.#documentLeftMargin, yPosition)
     this.#documentLastYPosition = yPosition + bottomPadding;
   }
@@ -300,6 +308,7 @@ class ShelterlyPDF {
         }
 
         if (i === listItems.length - 1) {
+          this.#documentLeftMargin = this.#defaultXMargin;
           this.#documentLastYPosition = this.beforeDraw({ yPosition }) + size + bottomPadding;
         }
       }
@@ -390,6 +399,20 @@ class ShelterlyPDF {
 
   // save methods
   saveFile() {
+    if (typeof this.#addFooter === 'function') {
+      const pageCount = this.#jsPDF.internal.getNumberOfPages()
+
+      // this.#jsPDF.setFontSize(8)
+      for (var i = 1; i <= pageCount; i++) {
+        // calls the addFooterHandler for each page, before the file is saved
+        this.#jsPDF.setPage(i)
+        this.#addFooter({
+          pageNumber: i,
+          pageCount,
+          pdf: this.#jsPDF
+        });
+      }
+    }
     this.#jsPDF.save(`${this.#fileName}.${this.#fileExtension}`);
   }
 };

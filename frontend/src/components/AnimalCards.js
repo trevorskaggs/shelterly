@@ -6,6 +6,7 @@ import {
   faUserAlt, faUserAltSlash, faCircle, faExclamationCircle, faQuestionCircle, faHome, faHeart, faSkullCrossbones
 } from '@fortawesome/free-solid-svg-icons';
 import { faBadgeSheriff, faClawMarks, faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
+import AnimalCoverImage from './AnimalCoverImage';
 
 function AnimalCards(props) {
 
@@ -16,7 +17,12 @@ function AnimalCards(props) {
       <span key={animal.id} className="ml-3 mb-3">
         <Link href={"/animals/" + animal.id} className="animal-link" style={{textDecoration:"none", color:"white"}}>
           <Card className="border rounded animal-hover-div" style={{width:"153px", whiteSpace:"nowrap", overflow:"hidden"}}>
-            <Card.Img variant="top" src={animal.front_image || animal.side_image || "/static/images/image-not-found.png"} style={{width:"153px", height:"153px", objectFit: "cover", overflow: "hidden"}} />
+            <AnimalCoverImage
+              animalSpecies={animal.species}
+              height="153px"
+              width="153px"
+              customStyles={{ padding: '40px' }}
+            />
             <Card.ImgOverlay className="text-border" style={{height:"20px"}}>#{animal.id}</Card.ImgOverlay>
             <Card.Text className="mb-0 border-top animal-hover-div" style={{textTransform:"capitalize", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis"}}>
               <span title={animal.name} className="ml-1">{animal.name||"Unknown"}</span>

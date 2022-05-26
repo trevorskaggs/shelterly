@@ -6,13 +6,14 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faEdit, faMinusSquare, faPlusSquare, faUserPlus
 } from '@fortawesome/free-solid-svg-icons';
-import { faHomeHeart, faPhonePlus } from '@fortawesome/pro-solid-svg-icons';
+import { faHomeHeart, faPhonePlus, faPrint } from '@fortawesome/pro-solid-svg-icons';
 import Moment from 'react-moment';
 import Header from '../components/Header';
 import History from '../components/History';
 import Scrollbar from '../components/Scrollbars';
 import AnimalCards from '../components/AnimalCards';
 import { PhotoDocumentModal, PhotoDocumentRemovalModal } from '../components/Modals';
+import { printOwnerDetails } from './Utils';
 
 function PersonDetails({id}) {
 
@@ -69,6 +70,13 @@ function PersonDetails({id}) {
     action_history: [],
   });
 
+  const handleDownloadPdfClick = (e) => {
+    e.preventDefault();
+
+    printOwnerDetails(data);
+  }
+
+
   // Hook for initializing data.
   useEffect(() => {
     let unmounted = false;
@@ -109,7 +117,7 @@ function PersonDetails({id}) {
               </Tooltip>
             }
           >
-            <Link href={"/people/owner/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-1 mr-1" inverse /></Link>
+            <Link href={"/people/owner/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-2 mr-1" inverse /></Link>
           </OverlayTrigger>
         </span>
       :
@@ -123,10 +131,25 @@ function PersonDetails({id}) {
               </Tooltip>
             }
           >
-            <Link href={"/people/reporter/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-1" inverse /></Link>
+            <Link href={"/people/reporter/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-2 mr-1" inverse /></Link>
           </OverlayTrigger>
         </span>
       }
+      <OverlayTrigger
+        key={"offline-owner-summary"}
+        placement="bottom"
+        overlay={
+          <Tooltip id={`tooltip-offline-owner-summary`}>
+            Download printable Owner Summary
+          </Tooltip>
+        }
+      >
+        {({ ref, ...triggerHandler }) => (
+          <Link onClick={handleDownloadPdfClick} {...triggerHandler} href="#">
+            <span ref={ref}><FontAwesomeIcon icon={faPrint} className="ml-1"  inverse /></span>
+          </Link>
+        )}
+      </OverlayTrigger>
     </Header>
     <hr/>
     <div className="row">

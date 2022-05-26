@@ -12,6 +12,7 @@ import {
 import { faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
 import L from "leaflet";
 import { Marker, Tooltip as MapTooltip } from "react-leaflet";
+import { useMark } from '../hooks';
 import Map, { prettyText, reportedMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
 import Moment from "react-moment";
 import moment from 'moment';
@@ -26,7 +27,7 @@ function DispatchAssignmentSearch() {
   const [queryParams] = useQueryParams();
   const {
     search = '',
-    status = 'open',
+    status = 'active',
   } = queryParams;
 
   const [data, setData] = useState({evacuation_assignments: [], isFetching: false});
@@ -40,6 +41,7 @@ function DispatchAssignmentSearch() {
   const [isDateSet, setIsDateSet] = useState(false);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(moment().format('YYYY-MM-DD'));
+  const { markInstances } = useMark();
 
   // Update searchTerm when field input changes.
   const handleChange = event => {
@@ -126,6 +128,9 @@ function DispatchAssignmentSearch() {
           }
           setMatches(map_dict);
           setBounds(bounds_dict);
+
+          // highlight search terms
+          markInstances(searchTerm);
         }
       })
       .catch(error => {
@@ -159,7 +164,8 @@ function DispatchAssignmentSearch() {
             <Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0"}}>Search</Button>
           </InputGroup.Append>
           <ButtonGroup className="ml-3">
-            <Button variant={statusOptions === "open" ? "primary" : "secondary"} onClick={statusOptions !== "open" ? () => {setPage(1);setStatusOptions("open")} : () => {setPage(1);setStatusOptions("")}}>Open</Button>
+            <Button variant={statusOptions === "preplanned" ? "primary" : "secondary"} onClick={statusOptions !== "preplanned" ? () => {setPage(1);setStatusOptions("preplanned")} : () => {setPage(1);setStatusOptions("")}}>Preplanned</Button>
+            <Button variant={statusOptions === "active" ? "primary" : "secondary"} onClick={statusOptions !== "active" ? () => {setPage(1);setStatusOptions("active")} : () => {setPage(1);setStatusOptions("")}}>Active</Button>
             <Button variant={statusOptions === "resolved" ? "primary" : "secondary"} onClick={statusOptions !== "resolved" ? () => {setPage(1);setStatusOptions("resolved")} : () => {setPage(1);setStatusOptions("")}}>Resolved</Button>
           </ButtonGroup>
           <DateRangePicker
@@ -198,8 +204,8 @@ function DispatchAssignmentSearch() {
               <Moment format="L">{evacuation_assignment.start_time}</Moment>
               &nbsp;|&nbsp;
               <span title={evacuation_assignment.team ? evacuation_assignment.team_object.name + ": " + evacuation_assignment.team_member_names : ""}>
-                {evacuation_assignment.team && evacuation_assignment.team_object.name}
-                {evacuation_assignment.team ?
+                {(evacuation_assignment.team && evacuation_assignment.team_object.name) || "Preplanned"}
+                {evacuation_assignment.team_member_names ?
                 <OverlayTrigger
                   key={"team-names"}
                   placement="top"
@@ -311,7 +317,7 @@ function DispatchAssignmentSearch() {
                         </OverlayTrigger>
                         : ""}
                         </span>
-                        <span>#{assigned_request.service_request_object.id} - <Link href={"/hotline/servicerequest/" + assigned_request.service_request_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link> |
+                        <span>SR#{assigned_request.service_request_object.id} - <Link href={"/hotline/servicerequest/" + assigned_request.service_request_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link> |
                         {assigned_request.service_request_object.owner_objects.length === 0 ?
                           <OverlayTrigger
                             key={"stray"}

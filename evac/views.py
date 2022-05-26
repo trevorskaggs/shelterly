@@ -21,7 +21,17 @@ class EvacTeamMemberViewSet(viewsets.ModelViewSet):
         if serializer.is_valid():
             # Clean phone fields.
             serializer.validated_data['phone'] = ''.join(char for char in serializer.validated_data.get('phone', '') if char.isdigit())
-            team_member = serializer.save()
+            serializer.save()
+
+    def perform_update(self, serializer):
+
+        if serializer.is_valid():
+            # Show/hide from map selectors.
+            show = True
+            if self.request.data.get('action', '') == 'hide':
+                show = False
+            serializer.validated_data['show'] = show
+            serializer.save()
 
     def get_queryset(self):
         queryset = EvacTeamMember.objects.all().annotate(is_assigned=Exists(EvacAssignment.objects.filter(team__team_members__id=OuterRef("id"), end_time=None)))
@@ -45,14 +55,23 @@ class DispatchTeamViewSet(viewsets.ModelViewSet):
     def perform_update(self, serializer):
 
         if serializer.is_valid():
+            # Show/hide from map selectors.
+            if self.request.data.get('action', '') == 'show':
+                serializer.validated_data['show'] = True
+            elif self.request.data.get('action', '') == 'hide':
+                serializer.validated_data['show'] = False
+
             team = serializer.save()
 
             # Add Team Members to DA.
             if self.request.data.get('new_team_members'):
+                # if team length was 0, set AssignedRequest timestamp
+                if team.team_members.count() == 0:
+                    AssignedRequest.objects.filter(dispatch_assignment__team=team.id).update(timestamp=datetime.now())
                 team.team_members.add(*self.request.data.get('new_team_members'))
 
             # Remove Team Member from DA.
-            if self.request.data.get('remove_team_member'):
+            elif self.request.data.get('remove_team_member'):
                 team.team_members.remove(self.request.data.get('remove_team_member'))
 
 class EvacAssignmentViewSet(viewsets.ModelViewSet):
@@ -82,14 +101,16 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
         AssignedRequest.objects.select_related('service_request', 'owner_contact').prefetch_related('service_request__owners', 'service_request__ownercontact_set').prefetch_related(Prefetch(
                 'service_request__animal_set', queryset=Animal.objects.with_images().exclude(status='CANCELED'), to_attr='animals'))))
 
-        # Exclude EAs without animals when fetching for a map.
+        # Exclude DAs without SRs when fetching for a map.
         is_map = self.request.query_params.get('map', '')
         if is_map == 'true':
             queryset = queryset.exclude(service_requests=None)
 
         status = self.request.query_params.get('status', '')
-        if status == "open":
-            return queryset.filter(end_time__isnull=True).distinct()
+        if status == "active":
+            return queryset.filter(end_time__isnull=True).filter(team__team_members__isnull=False).distinct()
+        elif status == "preplanned":
+            return queryset.filter(end_time__isnull=True).filter(team__team_members__isnull=True).distinct()
         elif status == "resolved":
             return queryset.filter(end_time__isnull=False).distinct()
 
@@ -98,12 +119,15 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
     # When creating, update all service requests to be assigned status.
     def perform_create(self, serializer):
         if serializer.is_valid():
+            timestamp = None
             if ServiceRequest.objects.filter(pk__in=self.request.data['service_requests'], status='assigned').exists():
                 raise serializers.ValidationError(['Duplicate assigned service request error.', list(ServiceRequest.objects.filter(pk__in=self.request.data['service_requests'], status='assigned').values_list('id', flat=True))])
-            if self.request.data.get('team_name'):
-                team = DispatchTeam.objects.create(name=self.request.data.get('team_name'))
+            team = DispatchTeam.objects.create(name=self.request.data.get('team_name'))
+
+            if self.request.data.get('team_members'):
                 team.team_members.set(self.request.data.get('team_members'))
-                serializer.validated_data['team'] = team
+                timestamp = datetime.now()
+            serializer.validated_data['team'] = team
             evac_assignment = serializer.save()
             service_requests = ServiceRequest.objects.filter(pk__in=self.request.data['service_requests'])
             service_requests.update(status="assigned")
@@ -113,7 +137,7 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
                 animals_dict = {}
                 for animal in service_request.animal_set.filter(status__in=['REPORTED', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE']):
                     animals_dict[animal.id] = {'status':animal.status, 'shelter':''}
-                AssignedRequest.objects.create(dispatch_assignment=evac_assignment, service_request=service_request, animals=animals_dict)
+                AssignedRequest.objects.create(dispatch_assignment=evac_assignment, service_request=service_request, animals=animals_dict, timestamp=timestamp)
 
     def perform_update(self, serializer):
         if serializer.is_valid():

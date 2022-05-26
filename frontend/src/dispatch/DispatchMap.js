@@ -2,12 +2,13 @@ import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import { Link, navigate } from 'raviger';
 import { Form, Formik } from 'formik';
-import { Button, Col, FormCheck, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
+import { Button, Col, Form as BootstrapForm, FormCheck, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBan, faBandAid, faBullseye, faCalendarDay, faCar, faChevronDown, faChevronUp, faEquals, faExclamationTriangle, faCircle, faClipboardList, faExclamationCircle, faQuestionCircle, faPencilAlt, faTrailer, faUserAlt, faUserAltSlash
+  faBan, faBandAid, faBullseye, faCalendarDay, faCar, faChevronDown, faChevronUp, faEquals, faExclamationTriangle, faCircle, faClipboardList, faExclamationCircle, faMapMarkedAlt, faQuestionCircle, faPencilAlt, faTrailer, faUserAlt, faUserAltSlash
 } from '@fortawesome/free-solid-svg-icons';
 import { faBadgeSheriff, faChevronDoubleDown, faChevronDoubleUp, faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
+import { faHomeAlt as faHomeAltReg } from '@fortawesome/pro-regular-svg-icons';
 import { Circle, Marker, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
 import * as Yup from 'yup';
@@ -21,6 +22,9 @@ import 'react-bootstrap-typeahead/css/Typeahead.css';
 import 'leaflet/dist/leaflet.css';
 
 function Deploy() {
+
+  // Determine if this is a preplanning workflow.
+  let preplan = window.location.pathname.includes("preplan")
 
   const [data, setData] = useState({service_requests: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
   const [mapState, setMapState] = useState({});
@@ -93,7 +97,7 @@ function Deploy() {
       let team_options = [];
       teamData.teams.filter(team => team.team_members.filter(value => id_list.includes(value)).length === 0).forEach(function(team) {
         // Add selectable options back if if not already available.
-        if (!teamData.options.some(option => option.label === team.name + ": " + team.display_name)) {
+        if (team.team_members.length && !teamData.options.some(option => option.label === team.name + ": " + team.display_name)) {
           team_options.push({id:team.team_members, label:team.name + ": " + team.display_name, is_assigned:team.is_assigned});
         }
       });
@@ -218,7 +222,7 @@ function Deploy() {
           let options = [];
           let team_names = [];
           let team_name = '';
-          response.data.forEach(function(teammember) {
+          response.data.filter(teammember => teammember.show === true).forEach(function(teammember) {
             options.push({id: [teammember.id], label: teammember.display_name, is_assigned:teammember.is_assigned})
           });
           setAssignedTeamMembers(response.data.filter(teammember => teammember.is_assigned === true).map(teammember => teammember.id))
@@ -230,18 +234,19 @@ function Deploy() {
             cancelToken: source.token,
           })
           .then(response => {
-            response.data.forEach(function(team) {
-              // Only add to option list if not actively assigned and not already in the list which is sorted by newest.
-              if (!team_names.includes(team.name)) {
+            response.data.filter(team => team.show === true).forEach(function(team) {
+              // Only add to option list if team has members and is not already in the list which is sorted by newest.
+              if (team.team_members.length && !team_names.includes(team.name)) {
                 options.unshift({id: team.team_members, label: team.name + ": " + team.display_name, is_assigned:team.is_assigned});
               }
               team_names.push(team.name);
             });
             // Provide a default "TeamN" team name that hasn't already be used.
             let i = 1;
+            let name = preplan ? "Preplanned " : "Team "
             do {
-              if (!team_names.includes("Team " + String(i))){
-                team_name = "Team " + String(i);
+              if (!team_names.includes(name + String(i))){
+                team_name = name + String(i);
               }
               i++;
             }
@@ -309,7 +314,7 @@ function Deploy() {
       unmounted = true;
       source.cancel();
     };
-  }, [triggerRefresh]);
+  }, [triggerRefresh, preplan]);
 
   return (
     <Formik
@@ -336,10 +341,53 @@ function Deploy() {
           if (duplicateSRs.length > 0) {
             values.service_requests = values.service_requests.filter(sr_id => !duplicateSRs.includes(sr_id));
           }
+
           setTimeout(() => {
             axios.post('/evac/api/evacassignment/', values)
             .then(response => {
-              navigate('/dispatch/summary/' + response.data.id);
+              // Stay on map and remove selected SRs if in Preplanning mode.
+              if (preplan) {
+                setData(prevState => ({ ...prevState, "service_requests":data.service_requests.filter(sr => !values.service_requests.includes(String(sr.id))) }));
+                setTotalSelectedState({'REPORTED':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}});
+                setSelectedCount({count:0, disabled:true});
+                setMapState(Object.keys(mapState).filter(key => !values.service_requests.includes(String(key)))
+                  .reduce((obj, key) => {
+                    obj[key] = mapState[key];
+                    return obj;
+                  }, {})
+                );
+                axios.get('/evac/api/dispatchteam/', {
+                  params: {
+                    map: true
+                  },
+                })
+                .then(response => {
+                  let team_names = [];
+                  let team_name = '';
+                  response.data.forEach(function(team) {
+                    team_names.push(team.name);
+                  });
+                  // Provide a default "TeamN" team name that hasn't already be used.
+                  let i = 1;
+                  let name = 'Preplanned '
+                  do {
+                    if (!team_names.includes(name + String(i))){
+                      team_name = name + String(i);
+                    }
+                    i++;
+                  }
+                  while (team_name === '');
+                  setTeamData({teams: response.data, options: [], isFetching: false});
+                  setTeamName(team_name);
+                })
+                .catch(error => {
+                  setTeamData({teams: [], options: [], isFetching: false});
+                });
+              }
+              // Otherwise navigate to the DA Summary page.
+              else {
+                navigate('/dispatch/summary/' + response.data.id);
+              }
             })
             .catch(error => {
               if (error.response.data && error.response.data[0].includes('Duplicate assigned service request error')) {
@@ -367,7 +415,10 @@ function Deploy() {
                     </Tooltip>
                   }
                 >
-                  <FontAwesomeIcon icon={faExclamationCircle} className="ml-1"/>
+                  <span className="fa-layers ml-1 mr-1">
+                    <FontAwesomeIcon icon={faCircle} color="white" />
+                    <FontAwesomeIcon icon={faExclamationCircle} className="icon-border" color="#ff4c4c" />
+                  </span>
                 </OverlayTrigger>
               </p>
               <hr className="mt-1 mb-1"/>
@@ -386,9 +437,10 @@ function Deploy() {
                     </Tooltip>
                   }
                 >
-                  <span className="fa-layers ml-1">
-                    <FontAwesomeIcon icon={faCircle} transform={'grow-1'} />
-                    <FontAwesomeIcon icon={faHomeAlt} style={{color:"#444"}} transform={'shrink-3'} size="sm" inverse />
+                  <span className="fa-layers ml-1" >
+                    <FontAwesomeIcon icon={faCircle} className="icon-border" color="#f5ee0f" transform={'grow-2'} />
+                    <FontAwesomeIcon icon={faHomeAlt} style={{color:"white"}} transform={'shrink-3 left-1'} inverse />
+                    <FontAwesomeIcon icon={faHomeAltReg} style={{color:"#444"}} transform={'shrink-3 left-1'} inverse />
                   </span>
                 </OverlayTrigger>
               </p>
@@ -408,7 +460,10 @@ function Deploy() {
                     </Tooltip>
                   }
                 >
-                  <FontAwesomeIcon icon={faQuestionCircle} className="ml-1"/>
+                  <span className="fa-layers ml-1 mr-1">
+                    <FontAwesomeIcon icon={faCircle} className="fa-move-up icon-border" color="white" />
+                    <FontAwesomeIcon icon={faQuestionCircle} className="fa-move-up icon-border" color="#5f5fff" />
+                  </span>
                 </OverlayTrigger>
               </p>
               <hr className="mt-1 mb-1"/>
@@ -426,7 +481,7 @@ function Deploy() {
                 <span key={service_request.id}> {mapState[service_request.id] ? 
                   <Marker
                     position={[service_request.latitude, service_request.longitude]}
-                    icon={mapState[service_request.id] && mapState[service_request.id].checked ? checkMarkerIcon : service_request.sheltered_in_place > 0 ? SIPMarkerIcon : service_request.unable_to_locate > 0 ? UTLMarkerIcon : reportedMarkerIcon}
+                    icon={mapState[service_request.id] && mapState[service_request.id].checked ? checkMarkerIcon : service_request.reported_animals > 0 ? reportedMarkerIcon : service_request.sheltered_in_place > 0 ? SIPMarkerIcon : UTLMarkerIcon}
                     onClick={() => handleMapState(service_request.id)}
                   >
                     <MapTooltip autoPan={false}>
@@ -462,12 +517,12 @@ function Deploy() {
         </Row>
         <Row className="mt-2" style={{marginRight:"-12px"}}>
           <Col xs={2} className="pl-0 pr-0" style={{marginLeft:"-7px", marginRight:"12px"}}>
-            <Button type="submit" className="btn-block mt-auto" style={{marginBottom:"-33px"}} disabled={selectedCount.disabled || props.values.team_members.length === 0}>DEPLOY</Button>
+            <Button type="submit" className="btn-block mt-auto" style={{marginBottom:"-33px"}} disabled={selectedCount.disabled || (!preplan && props.values.team_members.length === 0)}>{preplan ? "PREPLAN" : "DEPLOY"}</Button>
           </Col>
           <Col xs={2} className="pl-0 pr-0" style={{marginRight:"5px"}}>
             <div className="card-header border rounded text-center" style={{height:"37px", marginLeft:"-6px", paddingTop:"6px", whiteSpace:"nowrap"}}>
               <span style={{marginLeft:"-10px"}}>{props.values.team_name || teamName}
-                <OverlayTrigger
+                {!preplan ? <OverlayTrigger
                   key={"edit-team-name"}
                   placement="top"
                   overlay={
@@ -477,25 +532,37 @@ function Deploy() {
                   }
                 >
                   <FontAwesomeIcon icon={faPencilAlt} className="ml-1" style={{cursor:'pointer'}} onClick={() => setShow(true)} />
-                </OverlayTrigger>
+                </OverlayTrigger> : ""}
               </span>
             </div>
           </Col>
           <Col xs={8} className="pl-0" style={{marginRight:"-10px"}}>
-            <Typeahead
-              id="team_members"
-              multiple
-              onChange={(values) => handleChange(values, props)}
-              selected={selected}
-              options={teamData.options}
-              placeholder="Choose team members..."
-              style={{height:"20px"}}
-              renderMenuItemChildren={(option) => (
-                <div>
-                  {option.label} {option.is_assigned ? <FontAwesomeIcon icon={faExclamationTriangle} size="sm" /> : ""}
-                </div>
-              )}
-            />
+            {preplan ?
+              <BootstrapForm.Control
+                id="disabled_team_name"
+                name="disabled_team_name"
+                type="text"
+                placeholder="Cannot choose team members when preplanning..."
+                disabled={true}
+                style={{height:"37px"}}
+              />
+            :
+              <Typeahead
+                id="team_members"
+                multiple
+                onChange={(values) => handleChange(values, props)}
+                selected={selected}
+                options={teamData.options}
+                placeholder="Choose team members..."
+                style={{height:"20px"}}
+                className="map-typeahead"
+                renderMenuItemChildren={(option) => (
+                  <div>
+                    {option.label} {option.is_assigned ? <FontAwesomeIcon icon={faExclamationTriangle} size="sm" /> : ""}
+                  </div>
+                )}
+              />
+            }
           </Col>
         </Row>
         <Row className="d-flex flex-wrap" style={{marginTop:"8px", marginRight:"-23px", marginLeft:"-14px", minHeight:"36vh", paddingRight:"14px"}}>
@@ -783,6 +850,17 @@ function Deploy() {
                       }
                     >
                       <Link href={"/hotline/servicerequest/" + service_request.id}><FontAwesomeIcon icon={faClipboardList} inverse /></Link>
+                    </OverlayTrigger>
+                    <OverlayTrigger
+                      key={"add-to-dispatch"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-add-to-dispatch`}>
+                          Assign service request to an open dispatch assignment
+                        </Tooltip>
+                      }
+                    >
+                      <Link href={"/hotline/servicerequest/" + service_request.id + "/assign"}><FontAwesomeIcon icon={faMapMarkedAlt} className="ml-1" inverse /></Link>
                     </OverlayTrigger>
                   </div>
                 </div>

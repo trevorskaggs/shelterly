@@ -15,12 +15,14 @@ import Moment from 'react-moment';
 import Select, { components } from 'react-select';
 import L from "leaflet";
 import { Circle, Map, Marker, Tooltip as MapTooltip, TileLayer } from "react-leaflet";
+import { useMark } from '../hooks';
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
 import { titleCase } from '../components/Utils';
 import { ITEMS_PER_PAGE } from '../constants';
 import { Legend } from "../components/Map";
 import { catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, speciesChoices } from './constants';
+import AnimalCoverImage from '../components/AnimalCoverImage';
 
 const NoOptionsMessage = props => {
   return (
@@ -62,8 +64,9 @@ function AnimalSearch() {
   ];
 
   const [data, setData] = useState({animals: [], isFetching: false});
+  const [shelters, setShelters] = useState({options: [], isFetching: false});
   const [animals, setAnimals] = useState([]);
-  const [options, setOptions] = useState({species: null, sex: null, owned: null, pcolor: '', fixed: null, latlng: null, radius: 1.60934});
+  const [options, setOptions] = useState({species: null, sex: null, owned: null, pcolor: '', fixed: null, latlng: null, radius: 1.60934, shelter: ''});
   const [searchTerm, setSearchTerm] = useState(search);
   const [showFilters, setShowFilters] = useState(false);
   const [isDisabled, setIsDisabled] = useState(true);
@@ -73,11 +76,13 @@ function AnimalSearch() {
   const ownedRef = useRef(null);
   const fixedRef = useRef(null);
   const pcolorRef = useRef(null);
+  const shelterRef = useRef(null);
   const markerRef = useRef(null);
   const mapRef = useRef(null);
   const [bounds, setBounds] = useState(L.latLngBounds([[0,0]]));
   const [page, setPage] = useState(1);
   const [numPages, setNumPages] = useState(1);
+  const { markInstances } = useMark();
 
   const colorChoices = {'':[], 'dog':dogColorChoices, 'cat':catColorChoices, 'horse':horseColorChoices, 'other':otherColorChoices}
 
@@ -107,7 +112,10 @@ function AnimalSearch() {
                            .filter(animal => options.fixed ? animal.fixed === options.fixed : animal)
                            .filter(animal => options.sex === 'unknown' ? animal.sex === '' : options.sex ? animal.sex === options.sex : animal)
                            .filter(animal => options.pcolor ? animal.pcolor === options.pcolor || animal.scolor === options.pcolor : animal)
-                           .filter(animal => options.latlng ? arePointsNear({lat:animal.latitude, lng: animal.longitude}, options.latlng) : animal))
+                           .filter(animal => options.latlng ? arePointsNear({lat:animal.latitude, lng: animal.longitude}, options.latlng) : animal)
+                           .filter(animal => options.shelter ? animal.shelter === options.shelter : animal)
+    )
+
   }
 
   const handleClear = () => {
@@ -116,6 +124,7 @@ function AnimalSearch() {
     ownedRef.current.select.clearValue();
     fixedRef.current.select.clearValue();
     pcolorRef.current.select.clearValue();
+    shelterRef.current.select.clearValue();
     setOptions({species: null, sex: null, owned: null, pcolor: '', fixed: null, latlng: null, radius: 1.60934});
     setAnimals(data.animals);
   };
@@ -196,6 +205,9 @@ function AnimalSearch() {
             }
           }
           setBounds(bounds_array.length > 0 ? L.latLngBounds(bounds_array) : L.latLngBounds([[0,0]]));
+
+          // highlight search terms
+          markInstances(searchTerm);
         }
       })
       .catch(error => {
@@ -205,6 +217,30 @@ function AnimalSearch() {
       });
     };
     fetchAnimals();
+
+    const fetchShelters = () => {
+      setShelters({options: [], isFetching: true});
+      // Fetch Shelter data.
+      axios.get('/shelter/api/shelter/', {
+        cancelToken: source.token,
+      })
+      .then(response => {
+        if (!unmounted) {
+          let shelter_options = [];
+          response.data.forEach(shelter => {
+            // Build shelter option list.
+            shelter_options.push({value: shelter.id, label: shelter.name});
+          });
+          setShelters({options: shelter_options, isFetching:false});
+        }
+      })
+      .catch(error => {
+        if (!unmounted) {
+          setShelters({options: [], isFetching: false});
+        }
+      });
+    };
+    fetchShelters();
     // Cleanup.
     return () => {
       unmounted = true;
@@ -215,7 +251,7 @@ function AnimalSearch() {
   // Hook handling option changes.
   useEffect(() => {
     const handleDisabled = () => {
-      setIsDisabled(!(options.species || options.sex || options.owned || options.pcolor || options.fixed || options.latlng));
+      setIsDisabled(!(options.species || options.sex || options.owned || options.pcolor || options.fixed || options.latlng || options.shelter));
     };
 
     setNumPages(Math.ceil(animals.length / ITEMS_PER_PAGE));
@@ -319,6 +355,20 @@ function AnimalSearch() {
                       setOptions({...options, pcolor: instance ? instance.value : ''})
                     }}
                   />
+                  <Select
+                    label="Shelter"
+                    id="shelterDropdown"
+                    name="shelter"
+                    type="text"
+                    placeholder="Select Shelter"
+                    options={shelters.options}
+                    styles={customStyles}
+                    isClearable={true}
+                    ref={shelterRef}
+                    onChange={(instance) => {
+                      setOptions({...options, shelter: instance ? instance.value : ''})
+                    }}
+                  />
                 </Col>
                 <Col xs="5">
                   <Row style={{marginBottom:"-16px"}}>
@@ -399,7 +449,10 @@ function AnimalSearch() {
           <CardGroup>
             <Card style={{maxWidth:"206px", maxHeight:"206px"}}>
               <Card.Body className="p-0 m-0">
-                <img alt="Animal" style={{width:"206px", height:"206px", objectFit: "cover", overflow: "hidden"}} src={animal.front_image || animal.side_image || "/static/images/image-not-found.png" } />
+                <AnimalCoverImage
+                  animalSpecies={animal.species}
+                  customStyles={{ padding: '40px' }}
+                />
               </Card.Body>
             </Card>
             <Card style={{marginBottom:"6px", maxWidth:"335px"}}>

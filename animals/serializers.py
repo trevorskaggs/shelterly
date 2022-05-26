@@ -16,10 +16,11 @@ class ModestAnimalSerializer(SimpleAnimalSerializer):
     front_image = serializers.SerializerMethodField()
     side_image = serializers.SerializerMethodField()
     owner_names = serializers.StringRelatedField(source='owners', many=True, read_only=True)
+    shelter_object = SimpleShelterSerializer(source='shelter', required=False, read_only=True)
 
     class Meta:
         model = Animal
-        fields = ['id', 'name', 'species', 'aggressive', 'request', 'shelter', 'status', 'aco_required', 'color_notes', 'front_image', 'side_image', 'owner_names']
+        fields = ['id', 'name', 'species', 'aggressive', 'request', 'shelter_object', 'shelter', 'status', 'aco_required', 'color_notes', 'front_image', 'side_image', 'owner_names']
 
     def get_front_image(self, obj):
         try:
@@ -66,16 +67,17 @@ class AnimalSerializer(ModestAnimalSerializer):
 
     # Truncates latitude and longitude.
     def to_internal_value(self, data):
-        # remember old state
-        _mutable = data._mutable
-        data._mutable = True
+        if data.get('latitude') or data.get('longitude'):
+            # remember old state
+            _mutable = data._mutable
+            data._mutable = True
 
-        if data.get('latitude'):
-            data['latitude'] = float("%.6f" % float(data.get('latitude')))
-        if data.get('longitude'):
-            data['longitude'] = float("%.6f" % float(data.get('longitude')))
+            if data.get('latitude'):
+                data['latitude'] = float("%.6f" % float(data.get('latitude')))
+            if data.get('longitude'):
+                data['longitude'] = float("%.6f" % float(data.get('longitude')))
 
-        data._mutable = _mutable
+            data._mutable = _mutable
 
         return super().to_internal_value(data)
 

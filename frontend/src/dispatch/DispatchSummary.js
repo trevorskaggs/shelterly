@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import { Link } from 'raviger';
-import { Button, Card, Col, ListGroup, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
+import { Button, Card, Col, Form, ListGroup, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { Typeahead } from 'react-bootstrap-typeahead';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faCalendarDay, faClipboardCheck, faClipboardList, faEdit, faEnvelope, faHouseDamage, faMinusSquare, faPlusSquare, faUserCheck, faPrint
+  faCalendarDay, faClipboardCheck, faClipboardList, faEdit, faEnvelope, faHouseDamage, faMinusSquare, faPencilAlt, faPrint, faUserCheck, faUserPlus
 } from '@fortawesome/free-solid-svg-icons';
 import { faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import { Marker, Tooltip as MapTooltip } from "react-leaflet";
@@ -20,6 +20,7 @@ function DispatchSummary({id}) {
 
   // Initial animal data.
   const [data, setData] = useState({
+    id: '',
     team_members: [],
     team_member_objects: [],
     team: null,
@@ -31,20 +32,84 @@ function DispatchSummary({id}) {
   });
 
   const [mapState, setMapState] = useState({});
-  const [teamData, setTeamData] = useState({options: [], isFetching: false});
-  const [teamMembers, setNewTeamMembers] = useState(null);
+  const [teamData, setTeamData] = useState({teams: [], options: [], isFetching: false});
+  const [teamName, setTeamName] = useState('')
+  const [showTeamName, setShowTeamName] = useState(false)
+  const handleTeamNameClose = () => {setShowTeamName(false);}
+  const [teamMembers, setTeamMembers] = useState([]);
   const [show, setShow] = useState(false);
-  const handleClose = () => setShow(false);
+  const handleClose = () => {setShow(false);}
   const [teamMemberToDelete, setTeamMemberToDelete] = useState({id: 0, name: '', display_name: ''});
   const [showTeamMemberConfirm, setShowTeamMemberConfirm] = useState(false);
   const handleTeamMemberClose = () => setShowTeamMemberConfirm(false);
+  const [error, setError] = useState('');
+
+  const handleTeamNameSubmit = async () => {
+    if (teamName.replace(/ /g, '').length === 0) {
+      setError("Team name cannot be blank.");
+    }
+    else if (teamName.length > 18) {
+      setError("Team name must be 18 characters or less.");
+    }
+    else {
+      await axios.patch('/evac/api/dispatchteam/' + data.team + '/', {'name':teamName})
+      .then(response => {
+        setData(prevState => ({ ...prevState, "team_object":{"name": teamName} }));
+        handleTeamNameClose();
+        setError('');
+      })
+      .catch(error => {
+      });
+    }
+  }
+
+  // Handle TeamMember selector onChange.
+  const handleChange = (values) => {
+    let id_list = [];
+    let selected_list = [];
+    values.forEach(value => {
+      id_list = [...id_list, ...value.id];
+      // Handle if Team.
+      if (value.label.split(':').length > 1) {
+        // Parse out the team name.
+        value.label.split(':')[1].split(',').forEach((name, index) =>  {
+          let team_option = {id: [value.id[index]], label:name.replace(' ', '')};
+          // Add to list if not already selected.
+          if (!selected_list.some(option => option.id[0] === team_option.id[0])) {
+            selected_list.push(team_option);
+          }
+        });
+      }
+      // Else handle as an individual TeamMember.
+      else {
+        selected_list.push({id:value.id, label:value.label})
+      }
+    });
+    // If deselecting.
+    if (teamMembers.length > selected_list.length) {
+      let team_options = [];
+      teamData.teams.filter(team => team.team_members.filter(value => id_list.includes(value)).length === 0).forEach(function(team) {
+        // Add selectable options back if if not already available.
+        if (team.team_members.length && !teamData.options.some(option => option.label === team.name + ": " + team.display_name)) {
+          team_options.push({id:team.team_members, label:team.name + ": " + team.display_name, is_assigned:team.is_assigned});
+        }
+      });
+      setTeamData(prevState => ({ ...prevState, "options":team_options.concat(teamData.options.concat(teamMembers.filter(option => !id_list.includes(option.id[0])))) }));
+    }
+    // Else we're selecting. Remove selection from option list.
+    else {
+      setTeamData(prevState => ({ ...prevState, "options":teamData.options.filter(option => !id_list.includes(option.id[0])) }));
+    }
+    setTeamMembers(selected_list);
+  }
 
   const handleAddTeamMemberSubmit = async () => {
-    await axios.patch('/evac/api/dispatchteam/' + data.team + '/', {'new_team_members':teamMembers.map(item => item.id)})
+    await axios.patch('/evac/api/dispatchteam/' + data.team + '/', {'dispatch_id':data.id, 'new_team_members':teamMembers.map(item => item.id[0])})
     .then(response => {
       setData(prevState => ({ ...prevState, "team_member_objects":response.data.team_member_objects, "team_members":response.data.team_members }));
       setTeamData(prevState => ({ ...prevState, "options":prevState.options.filter(option => !response.data.team_members.includes(option.id)) }));
-      handleClose()
+      setTeamMembers([]);
+      handleClose();
     })
     .catch(error => {
     });
@@ -54,7 +119,7 @@ function DispatchSummary({id}) {
     await axios.patch('/evac/api/dispatchteam/' + data.team + '/', {'remove_team_member':teamMemberToDelete.id})
     .then(response => {
       setData(prevState => ({ ...prevState, "team_member_objects":response.data.team_member_objects, "team_members":response.data.team_members }));
-      setTeamData(prevState => ({ ...prevState, "options":prevState.options.concat([{id: teamMemberToDelete.id, label: teamMemberToDelete.display_name}]) }));
+      setTeamData(prevState => ({ ...prevState, "options":prevState.options.concat([{id: [teamMemberToDelete.id], label: teamMemberToDelete.display_name}]) }));
       handleTeamMemberClose();
     })
     .catch(error => {
@@ -87,20 +152,44 @@ function DispatchSummary({id}) {
             bounds.push([assigned_request.service_request_object.latitude, assigned_request.service_request_object.longitude]);
           }
           response.data['team_members'] = response.data.team.team_members;
-          response.data['team_member_objects'] = response.data.team_object.team_member_objects
+          response.data['team_member_objects'] = response.data.team_object.team_member_objects;
           response.data['bounds'] = bounds.length > 0 ? bounds : L.latLngBounds([[0,0]]);
           setData(response.data);
           setMapState(map_dict);
-          setTeamData({options: [], isFetching: true});
+          setTeamData({teams: [], options: [], isFetching: true});
+          setTeamName(response.data.team_object.name);
           axios.get('/evac/api/evacteammember/', {
             cancelToken: source.token,
           })
-          .then(teamResponse => {
+          .then(teamMemberResponse => {
             let options = [];
-            teamResponse.data.filter(team_member => !response.data.team_object.team_members.includes(team_member.id)).forEach(function(teammember){
-              options.push({id: teammember.id, label: teammember.display_name})
+            let team_names = [];
+            teamMemberResponse.data.filter(team_member => !response.data.team_object.team_members.includes(team_member.id) && team_member.show === true).forEach(function(teammember){
+              options.push({id: [teammember.id], label: teammember.display_name})
             });
-            setTeamData({options: options, isFetching: false});
+            setTeamData({teams: [], options: options, isFetching: false});
+            // Then fetch all recent Teams.
+            axios.get('/evac/api/dispatchteam/', {
+              params: {
+                map: true
+              },
+              cancelToken: source.token,
+            })
+            .then(teamResponse => {
+              teamResponse.data.filter(team => team.show === true).forEach(function(team) {
+                // Only add to option list if team has members, is populated with at least 1 new valid team member, and is not already in the list which is sorted by newest.
+                if (team.team_members.length && team.team_members.filter(team_member => !response.data.team_object.team_members.includes(team_member)).length > 0 && !team_names.includes(team.name)) {
+                  options.unshift({id: team.team_members, label: team.name + ": " + team.display_name});
+                }
+                team_names.push(team.name);
+              });
+              setTeamData({teams: teamResponse.data, options: options, isFetching: false});
+            })
+            .catch(error => {
+              if (!unmounted) {
+                setTeamData({teams: [], options: [], isFetching: false});
+              }
+            });
           })
           .catch(error => {
             setTeamData({options: [], isFetching: false});
@@ -171,7 +260,18 @@ function DispatchSummary({id}) {
         <Card border="secondary" className="mt-1" style={{minHeight:"313px", maxHeight:"313px"}}>
           <Card.Body>
             <Card.Title>
-              <h4>{data.team_object.name}
+              <h4>{data.team_object ? data.team_object.name : "Preplanned"}
+              <OverlayTrigger
+                key={"edit-team-name"}
+                placement="top"
+                overlay={
+                  <Tooltip id={`tooltip-edit-team-name`}>
+                    Edit team name
+                  </Tooltip>
+                }
+              >
+                <FontAwesomeIcon icon={faPencilAlt} className="ml-1 fa-move-up" size="sm" onClick={() => {setShowTeamName(true)}} style={{cursor:'pointer'}} inverse />
+              </OverlayTrigger>
               <OverlayTrigger
                 key={"add-team-member"}
                 placement="top"
@@ -181,11 +281,12 @@ function DispatchSummary({id}) {
                   </Tooltip>
                 }
               >
-                <FontAwesomeIcon icon={faPlusSquare} className="ml-1" onClick={() => {setShow(true)}} style={{cursor:'pointer'}} inverse />
+                <FontAwesomeIcon icon={faUserPlus} className="ml-1 fa-move-up" size="sm" onClick={() => {setShow(true)}} style={{cursor:'pointer'}} inverse />
               </OverlayTrigger>
               </h4>
             </Card.Title>
             <hr/>
+            {data.team_member_objects && data.team_member_objects.length > 0 ?
             <Scrollbar no_shadow="true" style={{height:"225px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
               <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px", textTransform:"capitalize"}}>
                 {data.team_member_objects.map(team_member => (
@@ -219,7 +320,7 @@ function DispatchSummary({id}) {
                   </ListGroup.Item>
                 ))}
               </ListGroup>
-            </Scrollbar>
+            </Scrollbar> : ""}
           </Card.Body>
         </Card>
       </Col>
@@ -390,6 +491,26 @@ function DispatchSummary({id}) {
       </Card>
     </Row>
     ))}
+    <Modal show={showTeamName} onHide={handleTeamNameClose}>
+      <Modal.Header closeButton>
+        <Modal.Title>Edit Team Name</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <Form.Control
+          label="Team Name"
+          id="team_name"
+          name="team_name"
+          type="text"
+          onChange={(event) => {setTeamName(event.target.value)}}
+          value={teamName}
+        />
+        {error ? <div style={{ color: "#e74c3c", marginTop: "-8px", marginLeft: "16px", fontSize: "80%" }}>{error}</div> : ""}
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="primary" onClick={handleTeamNameSubmit}>Save</Button>
+        <Button variant="secondary" onClick={handleTeamNameClose}>Cancel</Button>
+      </Modal.Footer>
+    </Modal>
     <Modal show={show} onHide={handleClose}>
       <Modal.Header closeButton>
         <Modal.Title>Add Team Members</Modal.Title>
@@ -398,10 +519,10 @@ function DispatchSummary({id}) {
         <Typeahead
           id="team_members"
           multiple
-          onChange={(values) => {setNewTeamMembers(values)}}
+          onChange={(values) => {handleChange(values)}}
+          selected={teamMembers}
           options={teamData.options}
           placeholder="Choose team members..."
-          style={{marginLeft:"3px", marginRight:"-13px"}}
         />
       </Modal.Body>
       <Modal.Footer>
