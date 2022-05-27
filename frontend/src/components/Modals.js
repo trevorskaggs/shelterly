@@ -194,6 +194,7 @@ const PhotoDocumentEditModal = (props) => {
               label="Name"
             />
             <div className="ml-3">
+              <span>Photo Document</span>
               <Card className="border rounded" style={{width:"153px", whiteSpace:"nowrap", overflow:"hidden"}}>
                 <Card.Img variant="top" src={props.image.url || "/static/images/image-not-found.png"} style={{width:"153px", height:"153px", objectFit: "cover", overflow: "hidden"}} />
               </Card>

@@ -297,36 +297,36 @@ function PersonDetails({id}) {
             <span className="d-flex flex-wrap align-items-end" style={{marginLeft:"-15px"}}>
             {data.images.map((image, index) => (
               <span key={index} className="ml-3 mb-3">
-                <a href={image.url} target="_blank" rel="noreferrer" className="animal-link" style={{textDecoration:"none", color:"white"}}>
-                  <Card className="border rounded animal-hover-div" style={{width:"153px", whiteSpace:"nowrap", overflow:"hidden"}}>
-                    <Card.Img variant="top" src={image.url || "/static/images/image-not-found.png"} style={{width:"153px", height:"153px", objectFit: "cover", overflow: "hidden"}} />
-                    <Card.Text className="mb-0 border-top animal-hover-div" style={{whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis"}}>
-                      <span title={image.name||image.url.split('/').pop().split('.')[0]} className="ml-1">{image.name||image.url.split('/').pop().split('.')[0]}</span>
-                    </Card.Text>
-                  </Card>
-                </a>
-                <OverlayTrigger
-                  key={"edit-photo"}
-                  placement="top"
-                  overlay={
-                    <Tooltip id={`tooltip-edit-photo`}>
-                      Edit photo document name
-                    </Tooltip>
-                  }
-                >
-                  <FontAwesomeIcon icon={faPencil} className="mr-1" inverse onClick={() => {setPhotoToEdit(image); setShowEditPhoto(true);}} title="Edit photo document name" style={{cursor:'pointer'}} />
-                </OverlayTrigger>
-                <OverlayTrigger
-                    key={"remove-photo"}
-                    placement="top"
-                    overlay={
-                      <Tooltip id={`tooltip-remove-photo`}>
-                        Remove photo document
-                      </Tooltip>
-                    }
-                  >
-                    <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => {setPhotoToRemove(image); setShowRemovePhoto(true);}} title="Remove photo document" style={{backgroundColor:"red", cursor:'pointer'}} />
-                  </OverlayTrigger>
+                <Card className="border rounded animal-hover-div" style={{width:"153px", whiteSpace:"nowrap", overflow:"hidden"}}>
+                  <a href={image.url} target="_blank" rel="noreferrer" className="animal-link" style={{textDecoration:"none", color:"white"}}>
+                    <Card.Img className="border-bottom animal-hover-div" variant="top" src={image.url || "/static/images/image-not-found.png"} style={{width:"153px", height:"153px", objectFit: "cover", overflow: "hidden"}} />
+                  </a>
+                  <Card.Text className="mb-0 animal-hover-div">
+                    <span title={image.name||image.url.split('/').pop().split('.')[0]} className="ml-1" style={{display:"inline-block", width:"111px", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis"}}>{image.name||image.url.split('/').pop().split('.')[0]}</span>
+                    <OverlayTrigger
+                      key={"edit-photo"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-edit-photo`}>
+                          Edit photo document name
+                        </Tooltip>
+                      }
+                    >
+                      <FontAwesomeIcon icon={faPencil} className="mr-1" inverse onClick={() => {setPhotoToEdit(image); setShowEditPhoto(true);}} title="Edit photo document name" style={{cursor:'pointer'}} />
+                    </OverlayTrigger>
+                    <OverlayTrigger
+                      key={"remove-photo"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-remove-photo`}>
+                          Remove photo document
+                        </Tooltip>
+                      }
+                    >
+                      <FontAwesomeIcon icon={faMinusSquare} className="mr-1" inverse onClick={() => {setPhotoToRemove(image); setShowRemovePhoto(true);}} title="Remove photo document" style={{backgroundColor:"red", cursor:'pointer'}} />
+                    </OverlayTrigger>
+                  </Card.Text>
+                </Card>
               </span>
             ))}
             </span>
