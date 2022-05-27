@@ -109,8 +109,10 @@ class PersonViewSet(viewsets.ModelViewSet):
               for key in self.request.FILES.keys():
                   image_data = self.request.FILES[key]
                   PersonImage.objects.create(image=image_data, name=self.request.data.get('name'), person=person)
+            elif self.request.data.get('edit_image'):
+              PersonImage.objects.filter(id=self.request.data.get('id')).update(name=self.request.data.get('edit_image'))
             elif self.request.data.get('remove_image'):
-              PersonImage.objects.filter(image__icontains='/' + self.request.data.get('remove_image').split('/')[::-1][0]).delete()
+              PersonImage.objects.filter(id=self.request.data.get('remove_image')).delete()
 
             # If an owner is being added to an existing SR, add the owner to the SR and update all SR animals with the owner.
             elif self.request.data.get('request'):

@@ -47,13 +47,17 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
             if service_request.status == 'canceled':
                 service_request.animal_set.update(status='CANCELED')
                 action.send(self.request.user, verb='canceled service request', target=service_request)
+
             elif self.request.FILES.keys():
               # Create new files from uploads
               for key in self.request.FILES.keys():
                   image_data = self.request.FILES[key]
                   ServiceRequestImage.objects.create(image=image_data, name=self.request.data.get('name'), service_request=service_request)
+            elif self.request.data.get('edit_image'):
+              ServiceRequestImage.objects.filter(id=self.request.data.get('id')).update(name=self.request.data.get('edit_image'))
             elif self.request.data.get('remove_image'):
-              ServiceRequestImage.objects.filter(image__icontains='/' + self.request.data.get('remove_image').split('/')[::-1][0]).delete()
+              ServiceRequestImage.objects.filter(id=self.request.data.get('remove_image')).delete()
+
             elif self.request.data.get('reunite_animals'):
                 service_request.animal_set.exclude(status='DECEASED').update(status='REUNITED', shelter=None, room=None)
                 for animal in service_request.animal_set.exclude(status='DECEASED'):

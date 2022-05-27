@@ -76,13 +76,13 @@ class PersonSerializer(SimplePersonSerializer):
 
     def get_images(self, obj):
         try:
-            return [{'url':sr_image.image.url, 'name':sr_image.name} for sr_image in obj.images]
+            return [{'id':sr_image.id, 'url':sr_image.image.url, 'name':sr_image.name} for sr_image in obj.images]
         except IndexError:
             return []
         except AttributeError:
             # Should only hit this when returning a single object after create.
             try:
-                return [{'url':sr_image.image.url, 'name':sr_image.name} for sr_image in obj.personimage_set.all()]
+                return [{'id':sr_image.id, 'url':sr_image.image.url, 'name':sr_image.name} for sr_image in obj.personimage_set.all()]
             except AttributeError:
                 return []
 

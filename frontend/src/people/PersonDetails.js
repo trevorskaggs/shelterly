@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import { Link } from 'raviger';
 import { Button, Card, ListGroup, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap';
@@ -6,13 +6,13 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faEdit, faMinusSquare, faPlusSquare, faUserPlus
 } from '@fortawesome/free-solid-svg-icons';
-import { faHomeHeart, faPhonePlus, faPrint } from '@fortawesome/pro-solid-svg-icons';
+import { faHomeHeart, faPhonePlus, faPencil, faPrint } from '@fortawesome/pro-solid-svg-icons';
 import Moment from 'react-moment';
 import Header from '../components/Header';
 import History from '../components/History';
 import Scrollbar from '../components/Scrollbars';
 import AnimalCards from '../components/AnimalCards';
-import { PhotoDocumentModal, PhotoDocumentRemovalModal } from '../components/Modals';
+import { PhotoDocumentModal, PhotoDocumentEditModal, PhotoDocumentRemovalModal } from '../components/Modals';
 import { printOwnerDetails } from './Utils';
 
 function PersonDetails({id}) {
@@ -25,9 +25,12 @@ function PersonDetails({id}) {
   const [images, setImages] = useState([]);
   const [showAddPhoto, setShowAddPhoto] = useState(false);
   const handleCloseAddPhoto = () => setShowAddPhoto(false);
-  const [photoToRemove, setPhotoToRemove] = useState({name:'', url:''});
+  const [photoToRemove, setPhotoToRemove] = useState({id: '', name:'', url:''});
   const [showRemovePhoto, setShowRemovePhoto] = useState(false);
   const handleCloseRemovePhoto = () => setShowRemovePhoto(false);
+  const [photoToEdit, setPhotoToEdit] = useState({id: '', name:'', url:''});
+  const [showEditPhoto, setShowEditPhoto] = useState(false);
+  const handleCloseEditPhoto = () => setShowEditPhoto(false);
 
   // Handle animal reunification submit.
   const handleSubmit = async () => {
@@ -42,9 +45,9 @@ function PersonDetails({id}) {
 
   // Handle remove photo.
   const handleSubmitRemovePhoto = async () => {
-    await axios.patch('/people/api/person/' + id + '/', {'remove_image':photoToRemove.url})
+    await axios.patch('/people/api/person/' + id + '/', {'remove_image':photoToRemove.id})
     .then(response => {
-      setData(prevState => ({ ...prevState, "images":data.images.filter(image => image.url !== photoToRemove.url)}));
+      setData(prevState => ({ ...prevState, "images":data.images.filter(image => image.id !== photoToRemove.id)}));
       handleCloseRemovePhoto()
     })
     .catch(error => {
@@ -294,7 +297,7 @@ function PersonDetails({id}) {
             <span className="d-flex flex-wrap align-items-end" style={{marginLeft:"-15px"}}>
             {data.images.map((image, index) => (
               <span key={index} className="ml-3 mb-3">
-                <a href={image.url} download={image.name ? image.name + '.' + image.url.split('.').pop() : image.url.split('/').pop()} className="animal-link" style={{textDecoration:"none", color:"white"}}>
+                <a href={image.url} target="_blank" rel="noreferrer" className="animal-link" style={{textDecoration:"none", color:"white"}}>
                   <Card className="border rounded animal-hover-div" style={{width:"153px", whiteSpace:"nowrap", overflow:"hidden"}}>
                     <Card.Img variant="top" src={image.url || "/static/images/image-not-found.png"} style={{width:"153px", height:"153px", objectFit: "cover", overflow: "hidden"}} />
                     <Card.Text className="mb-0 border-top animal-hover-div" style={{whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis"}}>
@@ -302,6 +305,17 @@ function PersonDetails({id}) {
                     </Card.Text>
                   </Card>
                 </a>
+                <OverlayTrigger
+                  key={"edit-photo"}
+                  placement="top"
+                  overlay={
+                    <Tooltip id={`tooltip-edit-photo`}>
+                      Edit photo document name
+                    </Tooltip>
+                  }
+                >
+                  <FontAwesomeIcon icon={faPencil} className="mr-1" inverse onClick={() => {setPhotoToEdit(image); setShowEditPhoto(true);}} title="Edit photo document name" style={{cursor:'pointer'}} />
+                </OverlayTrigger>
                 <OverlayTrigger
                     key={"remove-photo"}
                     placement="top"
@@ -324,6 +338,7 @@ function PersonDetails({id}) {
     <History action_history={data.action_history} />
     <PhotoDocumentModal images={images} url={'/people/api/person/' + id + '/'} setImages={setImages} setData={setData} show={showAddPhoto} handleClose={handleCloseAddPhoto} />
     <PhotoDocumentRemovalModal image={photoToRemove} show={showRemovePhoto} handleClose={handleCloseRemovePhoto} handleSubmit={handleSubmitRemovePhoto} />
+    <PhotoDocumentEditModal image={photoToEdit} setData={setData} url={'/people/api/person/' + id + '/'} show={showEditPhoto} handleClose={handleCloseEditPhoto} />
     <Modal show={show} onHide={handleClose}>
       <Modal.Header closeButton>
         <Modal.Title>Confirm Animal Reunification</Modal.Title>

@@ -8,11 +8,11 @@ import {
   faBan, faCar, faClipboardCheck, faEdit, faEnvelope, faHouseDamage,
   faKey, faMapMarkedAlt, faMinusSquare, faPlusSquare, faTimes, faTrailer, faUserPlus, faUsers
 } from '@fortawesome/free-solid-svg-icons';
-import { faCalendarEdit, faCommentSmile, faHomeHeart, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
+import { faCalendarEdit, faCommentSmile, faHomeHeart, faPencil, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import Header from '../components/Header';
 import History from '../components/History';
 import AnimalCards from '../components/AnimalCards';
-import { PhotoDocumentModal, PhotoDocumentRemovalModal } from '../components/Modals';
+import { PhotoDocumentModal, PhotoDocumentEditModal, PhotoDocumentRemovalModal } from '../components/Modals';
 import Flatpickr from 'react-flatpickr';
 
 function ServiceRequestDetails({id}) {
@@ -71,9 +71,12 @@ function ServiceRequestDetails({id}) {
   const [images, setImages] = useState([]);
   const [showAddPhoto, setShowAddPhoto] = useState(false);
   const handleCloseAddPhoto = () => setShowAddPhoto(false);
-  const [photoToRemove, setPhotoToRemove] = useState({name:'', url:''});
+  const [photoToRemove, setPhotoToRemove] = useState({id: '', name:'', url:''});
   const [showRemovePhoto, setShowRemovePhoto] = useState(false);
   const handleCloseRemovePhoto = () => setShowRemovePhoto(false);
+  const [photoToEdit, setPhotoToEdit] = useState({id: '', name:'', url:''});
+  const [showEditPhoto, setShowEditPhoto] = useState(false);
+  const handleCloseEditPhoto = () => setShowEditPhoto(false);
 
   // Handle animal reunification submit.
   const handleSubmit = async () => {
@@ -88,9 +91,9 @@ function ServiceRequestDetails({id}) {
 
   // Handle remove photo.
   const handleSubmitRemovePhoto = async () => {
-    await axios.patch('/hotline/api/servicerequests/' + id + '/', {'remove_image':photoToRemove.url})
+    await axios.patch('/hotline/api/servicerequests/' + id + '/', {'remove_image':photoToRemove.id})
     .then(response => {
-      setData(prevState => ({ ...prevState, "images":data.images.filter(image => image.url !== photoToRemove.url)}));
+      setData(prevState => ({ ...prevState, "images":data.images.filter(image => image.id !== photoToRemove.id)}));
       handleCloseRemovePhoto()
     })
     .catch(error => {
@@ -426,25 +429,36 @@ function ServiceRequestDetails({id}) {
               <span className="d-flex flex-wrap align-items-end" style={{marginLeft:"-15px"}}>
               {data.images.map((image, index) => (
                 <span key={index} className="ml-3 mb-3">
-                  <a href={image.url} download={image.name ? image.name + '.' + image.url.split('.').pop() : image.url.split('/').pop()} className="animal-link" style={{textDecoration:"none", color:"white"}}>
+                  <Link href={image.url} target="_blank" rel="noreferrer" className="animal-link" style={{textDecoration:"none", color:"white"}}>
                     <Card className="border rounded animal-hover-div" style={{width:"153px", whiteSpace:"nowrap", overflow:"hidden"}}>
                       <Card.Img variant="top" src={image.url || "/static/images/image-not-found.png"} style={{width:"153px", height:"153px", objectFit: "cover", overflow: "hidden"}} />
                       <Card.Text className="mb-0 border-top animal-hover-div" style={{whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis"}}>
                         <span title={image.name||image.url.split('/').pop().split('.')[0]} className="ml-1">{image.name||image.url.split('/').pop().split('.')[0]}</span>
                       </Card.Text>
                     </Card>
-                  </a>
+                  </Link>
                   <OverlayTrigger
-                      key={"remove-photo"}
-                      placement="top"
-                      overlay={
-                        <Tooltip id={`tooltip-remove-photo`}>
-                          Remove photo document
-                        </Tooltip>
-                      }
-                    >
-                      <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => {setPhotoToRemove(image); setShowRemovePhoto(true);}} title="Remove photo document" style={{backgroundColor:"red", cursor:'pointer'}} />
-                    </OverlayTrigger>
+                    key={"edit-photo"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-edit-photo`}>
+                        Edit photo document name
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon icon={faPencil} className="mr-1" inverse onClick={() => {setPhotoToEdit(image); setShowEditPhoto(true);}} title="Edit photo document name" style={{cursor:'pointer'}} />
+                  </OverlayTrigger>
+                  <OverlayTrigger
+                    key={"remove-photo"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-remove-photo`}>
+                        Remove photo document
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => {setPhotoToRemove(image); setShowRemovePhoto(true);}} title="Remove photo document" style={{backgroundColor:"red", cursor:'pointer'}} />
+                  </OverlayTrigger>
                 </span>
               ))}
               </span>
@@ -575,6 +589,7 @@ function ServiceRequestDetails({id}) {
         </Modal.Footer>
       </Modal>
       <PhotoDocumentModal images={images} url={'/hotline/api/servicerequests/' + id + '/'} setImages={setImages} setData={setData} show={showAddPhoto} handleClose={handleCloseAddPhoto} />
+      <PhotoDocumentEditModal image={photoToEdit} setData={setData} url={'/hotline/api/servicerequests/' + id + '/'} show={showEditPhoto} handleClose={handleCloseEditPhoto} />
       <PhotoDocumentRemovalModal image={photoToRemove} show={showRemovePhoto} handleClose={handleCloseRemovePhoto} handleSubmit={handleSubmitRemovePhoto} />
     </>
   );

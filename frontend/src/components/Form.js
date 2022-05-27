@@ -356,7 +356,7 @@ const AddressLookup = ({setLatLon, ...props}) => {
             new window.google.maps.Geocoder().geocode({ location: latlng }, function (results, status) {
               if (status === window.google.maps.GeocoderStatus.OK) {
                 // Filter out results that do not have a road name.
-                // Delay lookup to reduce number of calls while user is tpying.
+                // Delay lookup to reduce number of calls while user is typing.
                 changeDelay(results.filter(result => !result.address_components[0].long_name.includes('+'))[0]);
               }
             });
