@@ -6,13 +6,13 @@ import { Button, Card, ListGroup, Modal, OverlayTrigger, Tooltip } from 'react-b
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBan, faCar, faClipboardCheck, faEdit, faEnvelope, faHouseDamage,
-  faKey, faMapMarkedAlt, faMinusSquare, faPlusSquare, faTimes, faTrailer, faUserPlus, faUsers
+  faKey, faMapMarkedAlt, faPlusSquare, faTimes, faTrailer, faUserPlus, faUsers
 } from '@fortawesome/free-solid-svg-icons';
-import { faCalendarEdit, faCommentSmile, faHomeHeart, faPencil, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
+import { faCalendarEdit, faCommentSmile, faHomeHeart, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import Header from '../components/Header';
 import History from '../components/History';
 import AnimalCards from '../components/AnimalCards';
-import { PhotoDocumentModal, PhotoDocumentEditModal, PhotoDocumentRemovalModal } from '../components/Modals';
+import PhotoDocuments from '../components/PhotoDocuments';
 import Flatpickr from 'react-flatpickr';
 
 function ServiceRequestDetails({id}) {
@@ -68,15 +68,6 @@ function ServiceRequestDetails({id}) {
 
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
-  const [images, setImages] = useState([]);
-  const [showAddPhoto, setShowAddPhoto] = useState(false);
-  const handleCloseAddPhoto = () => setShowAddPhoto(false);
-  const [photoToRemove, setPhotoToRemove] = useState({id: '', name:'', url:''});
-  const [showRemovePhoto, setShowRemovePhoto] = useState(false);
-  const handleCloseRemovePhoto = () => setShowRemovePhoto(false);
-  const [photoToEdit, setPhotoToEdit] = useState({id: '', name:'', url:''});
-  const [showEditPhoto, setShowEditPhoto] = useState(false);
-  const handleCloseEditPhoto = () => setShowEditPhoto(false);
 
   // Handle animal reunification submit.
   const handleSubmit = async () => {
@@ -84,17 +75,6 @@ function ServiceRequestDetails({id}) {
     .then(response => {
       setData(prevState => ({ ...prevState, "status":"Closed", "animals":prevState['animals'].map(animal => ({...animal, status:animal.status !== 'DECEASED' ? 'REUNITED' : 'DECEASED'})) }));
       handleClose()
-    })
-    .catch(error => {
-    });
-  }
-
-  // Handle remove photo.
-  const handleSubmitRemovePhoto = async () => {
-    await axios.patch('/hotline/api/servicerequests/' + id + '/', {'remove_image':photoToRemove.id})
-    .then(response => {
-      setData(prevState => ({ ...prevState, "images":data.images.filter(image => image.id !== photoToRemove.id)}));
-      handleCloseRemovePhoto()
     })
     .catch(error => {
     });
@@ -367,9 +347,9 @@ function ServiceRequestDetails({id}) {
           </Card>
         </div>
       </div>
-      <div className="row mb-2">
+      <div className="row mt-3">
         <div className="col-12 d-flex">
-          <Card className="mb-2 border rounded" style={{width:"100%"}}>
+          <Card className="border rounded" style={{width:"100%"}}>
             <Card.Body style={{marginBottom:"-20px"}}>
               <Card.Title>
                 <h4 className="mb-0">Animals
@@ -406,68 +386,8 @@ function ServiceRequestDetails({id}) {
           </Card>
         </div>
       </div>
-      <div className="row mb-2">
-        <div className="col-12 d-flex">
-          <Card className="mb-2 border rounded" style={{width:"100%"}}>
-            <Card.Body style={{marginBottom:"-20px"}}>
-              <Card.Title>
-                <h4 className="mb-0">Photo Documents
-                    <OverlayTrigger
-                      key={"add-photo"}
-                      placement="top"
-                      overlay={
-                        <Tooltip id={`tooltip-add-photo`}>
-                          Add a photo document to this service request
-                        </Tooltip>
-                      }
-                    >
-                      <FontAwesomeIcon icon={faPlusSquare} onClick={() => setShowAddPhoto(true)} style={{cursor:'pointer'}} className="ml-1 fa-move-up" inverse />
-                    </OverlayTrigger>
-                </h4>
-              </Card.Title>
-              <hr />
-              <span className="d-flex flex-wrap align-items-end" style={{marginLeft:"-15px"}}>
-              {data.images.map((image, index) => (
-                <span key={index} className="ml-3 mb-3">
-                  <Link href={image.url} target="_blank" rel="noreferrer" className="animal-link" style={{textDecoration:"none", color:"white"}}>
-                    <Card className="border rounded animal-hover-div" style={{width:"153px", whiteSpace:"nowrap", overflow:"hidden"}}>
-                      <Card.Img variant="top" src={image.url || "/static/images/image-not-found.png"} style={{width:"153px", height:"153px", objectFit: "cover", overflow: "hidden"}} />
-                      <Card.Text className="mb-0 border-top animal-hover-div" style={{whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis"}}>
-                        <span title={image.name||image.url.split('/').pop().split('.')[0]} className="ml-1">{image.name||image.url.split('/').pop().split('.')[0]}</span>
-                      </Card.Text>
-                    </Card>
-                  </Link>
-                  <OverlayTrigger
-                    key={"edit-photo"}
-                    placement="top"
-                    overlay={
-                      <Tooltip id={`tooltip-edit-photo`}>
-                        Edit photo document name
-                      </Tooltip>
-                    }
-                  >
-                    <FontAwesomeIcon icon={faPencil} className="mr-1" inverse onClick={() => {setPhotoToEdit(image); setShowEditPhoto(true);}} title="Edit photo document name" style={{cursor:'pointer'}} />
-                  </OverlayTrigger>
-                  <OverlayTrigger
-                    key={"remove-photo"}
-                    placement="top"
-                    overlay={
-                      <Tooltip id={`tooltip-remove-photo`}>
-                        Remove photo document
-                      </Tooltip>
-                    }
-                  >
-                    <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => {setPhotoToRemove(image); setShowRemovePhoto(true);}} title="Remove photo document" style={{backgroundColor:"red", cursor:'pointer'}} />
-                  </OverlayTrigger>
-                </span>
-              ))}
-              </span>
-              {data.images.length < 1 ? <div className="mb-3">Service Request does not have any photo documents.</div> : ""}
-            </Card.Body>
-          </Card>
-        </div>
-      </div>
-      <div className="row">
+      <PhotoDocuments setData={setData} data={data} id={id} object="service request" url={'/people/api/person/' + id + '/'} />
+      <div className="row mt-3">
         <div className="col-12 d-flex">
           <Card className="border rounded" style={{width:"100%"}}>
             <Card.Body>
@@ -588,9 +508,6 @@ function ServiceRequestDetails({id}) {
           <Button variant="secondary" onClick={handleClose}>Close</Button>
         </Modal.Footer>
       </Modal>
-      <PhotoDocumentModal images={images} url={'/hotline/api/servicerequests/' + id + '/'} setImages={setImages} setData={setData} show={showAddPhoto} handleClose={handleCloseAddPhoto} />
-      <PhotoDocumentEditModal image={photoToEdit} setData={setData} url={'/hotline/api/servicerequests/' + id + '/'} show={showEditPhoto} handleClose={handleCloseEditPhoto} />
-      <PhotoDocumentRemovalModal image={photoToRemove} show={showRemovePhoto} handleClose={handleCloseRemovePhoto} handleSubmit={handleSubmitRemovePhoto} />
     </>
   );
 };
