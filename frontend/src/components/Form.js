@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useFormikContext, useField } from 'formik';
-import { Col, Collapse, Image, Form, Row } from 'react-bootstrap';
+import { Col, Collapse, Image, Form, OverlayTrigger, Tooltip, Row } from 'react-bootstrap';
 import Select, { createFilter } from 'react-select';
 import SimpleValue from 'react-select-simple-value';
 import Flatpickr from 'react-flatpickr';
@@ -122,14 +122,27 @@ const DateTimePicker = ({ label, xs, clearable, ...props }) => {
 const TextInput = ({ label, xs, controlId, formGroupClasses, ...props }) => {
 
   const [field, meta] = useField(props);
-
   const registeredRef = useRegisteredRef(props.name);
 
   return (
     <>
     <Form.Group as={Col} xs={xs} controlId={controlId} className={formGroupClasses} hidden={props.hidden} ref={meta.error && registeredRef}>
       <Form.Label>{label}</Form.Label>
-      <Form.Control type="text" isInvalid={meta.touched && meta.error} onChange={props.handleChange} {...field} {...props} />
+      {props.tooltip ?
+      <OverlayTrigger
+        key={"text-input"}
+        placement="top"
+        overlay={
+          <Tooltip id={`tooltip-text-input`}>
+            {props.tooltip}
+          </Tooltip>
+        }
+      >
+        <Form.Control type="text" isInvalid={meta.touched && meta.error} {...field} {...props} />
+      </OverlayTrigger>
+      :
+        <Form.Control type="text" isInvalid={meta.touched && meta.error} {...field} {...props} />
+      }
       <Form.Control.Feedback type="invalid"> {meta.error}</ Form.Control.Feedback>
     </Form.Group>
     </>
@@ -191,12 +204,12 @@ const DropDown = React.forwardRef((props, ref) => {
   };
 
   useEffect(() => {
-    if (isSubmitting && !isValidating) {
-      for (const path of Object.keys(flatten(errors))) {
-        setFieldTouched(path, true, false);
-      }
-    }
-  }, [errors, isSubmitting, isValidating, setFieldTouched]);
+    // if (isSubmitting && !isValidating) {
+    //   for (const path of Object.keys(flatten(errors))) {
+    //     setFieldTouched(path, true, false);
+    //   }
+    // }
+  }, []);
 
   function handleOptionChange(selection) {
     setFieldTouched(props.name, true);
@@ -211,9 +224,27 @@ const DropDown = React.forwardRef((props, ref) => {
     <>
     <div ref={meta.error && registeredRef}>
       {props.label ? <Form.Label style={props.style}>{props.label}</Form.Label> : ""}
+      {props.tooltip ?
+      <OverlayTrigger
+         key={"edit-service-request"}
+         placement="top"
+         overlay={
+           <Tooltip id={`tooltip-edit-service-request`}>
+             {props.tooltip}
+           </Tooltip>
+         }
+       >
+        <span>
+          <SimpleValue {...field} options={props.options}>
+            {simpleProps => <Select isDisabled={props.disabled} ref={ref} styles={customStyles} isClearable={true} filterOption={createFilter(filterConfig)} onBlur={updateBlur} onChange={handleOptionChange} {...props} {...simpleProps} />}
+          </SimpleValue>
+        </span>
+      </OverlayTrigger>
+      :
       <SimpleValue {...field} options={props.options}>
-         {simpleProps => <Select isDisabled={props.disabled} ref={ref} styles={customStyles} isClearable={true} filterOption={createFilter(filterConfig)} onBlur={updateBlur} onChange={handleOptionChange} {...props} {...simpleProps} />}
+        {simpleProps => <Select isDisabled={props.disabled} ref={ref} styles={customStyles} isClearable={true} filterOption={createFilter(filterConfig)} onBlur={updateBlur} onChange={handleOptionChange} {...props} {...simpleProps} />}
       </SimpleValue>
+      }
       {meta.touched && meta.error ? <div style={{ color: "#e74c3c", marginTop: ".5rem", fontSize: "80%" }}>{meta.error}</div> : ""}
     </div>
     </>
@@ -440,6 +471,7 @@ const AddressSearch = (props) => {
                 label="Address"
                 name="address"
                 value={props.formikProps.values.address || ''}
+                tooltip="Address must be populated using the Address Search."
                 disabled
               />
               {props.show_apt ?
@@ -459,17 +491,19 @@ const AddressSearch = (props) => {
                 label="City"
                 name="city"
                 value={props.formikProps.values.city || ''}
+                tooltip="City must be populated using the Address Search."
                 disabled
               />
               <Col xs="2">
-              <DropDown
-                label="State"
-                name="state"
-                id="state"
-                options={STATE_OPTIONS}
-                placeholder=''
-                disabled
-              />
+                <DropDown
+                  label="State"
+                  name="state"
+                  id="state"
+                  options={STATE_OPTIONS}
+                  placeholder=''
+                  tooltip="State must be populated using the Address Search."
+                  disabled
+                />
               </Col>
               <TextInput
                 xs="2"
@@ -477,12 +511,14 @@ const AddressSearch = (props) => {
                 label="Zip Code"
                 name="zip_code"
                 value={props.formikProps.values.zip_code || ''}
+                tooltip="Zip Code must be populated using the Address Search."
                 disabled
               />
             </Form.Row>
           </Col>
-          <Col className="border rounded pl-0 pr-0 mb-3 mr-3" xs="4" style={{marginTop:"31px"}}>
-            <Map zoom={15} ref={mapRef} center={[initialLatLon[0] || props.formikProps.values.latitude || 0, initialLatLon[1] || props.formikProps.values.longitude || 0]} className="search-leaflet-container" >
+          <Col className="pl-0 pr-0 mb-3 mr-3" xs="4" style={{marginTop:"0px"}}>
+            <Form.Label>Refine Exact Lat/Lon Point</Form.Label>
+            <Map zoom={15} ref={mapRef} center={[initialLatLon[0] || props.formikProps.values.latitude || 0, initialLatLon[1] || props.formikProps.values.longitude || 0]} className="search-leaflet-container border rounded " >
               <Legend position="bottomleft" metric={false} />
               <TileLayer
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
