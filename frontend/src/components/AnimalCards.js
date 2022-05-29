@@ -24,7 +24,7 @@ function AnimalCards(props) {
               customStyles={{ padding: '40px' }}
             />
             <Card.ImgOverlay className="text-border" style={{height:"20px"}}>#{animal.id}</Card.ImgOverlay>
-            <Card.Text className="mb-0 border-top" style={{textTransform:"capitalize", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis"}}>
+            <Card.Text className="mb-0 border-top animal-hover-div" style={{textTransform:"capitalize", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis"}}>
               <span title={animal.name} className="ml-1">{animal.name||"Unknown"}</span>
               <span className="ml-1" style={{display:"block"}}>
                 {animal.species}&nbsp;

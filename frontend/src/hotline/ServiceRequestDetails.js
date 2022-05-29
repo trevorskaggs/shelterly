@@ -12,6 +12,7 @@ import { faCalendarEdit, faCommentSmile, faHomeHeart, faPhoneRotary } from '@for
 import Header from '../components/Header';
 import History from '../components/History';
 import AnimalCards from '../components/AnimalCards';
+import PhotoDocuments from '../components/PhotoDocuments';
 import Flatpickr from 'react-flatpickr';
 
 function ServiceRequestDetails({id}) {
@@ -61,6 +62,7 @@ function ServiceRequestDetails({id}) {
     followup_date: null,
     assigned_requests: [],
     status:'',
+    images: [],
     action_history: [],
   });
 
@@ -345,9 +347,9 @@ function ServiceRequestDetails({id}) {
           </Card>
         </div>
       </div>
-      <div className="row mb-2">
+      <div className="row">
         <div className="col-12 d-flex">
-          <Card className="mb-2 border rounded" style={{width:"100%"}}>
+          <Card className="border rounded" style={{width:"100%"}}>
             <Card.Body style={{marginBottom:"-20px"}}>
               <Card.Title>
                 <h4 className="mb-0">Animals
@@ -384,7 +386,8 @@ function ServiceRequestDetails({id}) {
           </Card>
         </div>
       </div>
-      <div className="row">
+      <PhotoDocuments setData={setData} data={data} id={id} object="service request" url={'/hotline/api/servicerequests/' + id + '/'} />
+      <div className="row mt-3">
         <div className="col-12 d-flex">
           <Card className="border rounded" style={{width:"100%"}}>
             <Card.Body>

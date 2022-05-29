@@ -1,6 +1,7 @@
 from django.db import models
 from location.models import Location
 from people.models import Person
+from .managers import ServiceRequestQueryset
 
 
 STATUS_CHOICES = (
@@ -75,9 +76,16 @@ class ServiceRequest(Location):
 
         self.save()
 
+    objects = ServiceRequestQueryset.as_manager()
 
     class Meta:
         ordering = ['-timestamp']
+
+class ServiceRequestImage(models.Model):
+
+    image = models.ImageField(upload_to='images/')
+    name = models.CharField(max_length=25, blank=True)
+    service_request = models.ForeignKey(ServiceRequest, on_delete=models.SET_NULL, null=True)
 
 class VisitNote(models.Model):
 
