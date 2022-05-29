@@ -386,7 +386,7 @@ function ServiceRequestDetails({id}) {
           </Card>
         </div>
       </div>
-      <PhotoDocuments setData={setData} data={data} id={id} object="service request" url={'/people/api/person/' + id + '/'} />
+      <PhotoDocuments setData={setData} data={data} id={id} object="service request" url={'/hotline/api/servicerequests/' + id + '/'} />
       <div className="row mt-3">
         <div className="col-12 d-flex">
           <Card className="border rounded" style={{width:"100%"}}>
