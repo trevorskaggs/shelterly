@@ -95,9 +95,9 @@ function PhotoDocuments(props) {
         </Card>
       </div>
     </div>
-    <PhotoDocumentModal images={images} url={'/people/api/person/' + props.id + '/'} setImages={setImages} setData={props.setData} show={showAddPhoto} handleClose={handleCloseAddPhoto} />
+    <PhotoDocumentModal images={images} url={props.url} setImages={setImages} setData={props.setData} show={showAddPhoto} handleClose={handleCloseAddPhoto} />
     <PhotoDocumentRemovalModal image={photoToRemove} show={showRemovePhoto} handleClose={handleCloseRemovePhoto} handleSubmit={handleSubmitRemovePhoto} />
-    <PhotoDocumentEditModal image={photoToEdit} setData={props.setData} url={'/people/api/person/' + props.id + '/'} show={showEditPhoto} handleClose={handleCloseEditPhoto} />
+    <PhotoDocumentEditModal image={photoToEdit} setData={props.setData} url={props.url} show={showEditPhoto} handleClose={handleCloseEditPhoto} />
     </>
   );
 };
