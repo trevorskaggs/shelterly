@@ -334,12 +334,14 @@ const AddressLookup = ({setLatLon, ...props}) => {
     }
     setTimer(
       setTimeout(() => {
-        updateAddr(change);
+        setSearch(change);
       }, 2500)
     );
   }
 
   const clearAddress = () => {
+    childRef.current.refs.input.value = "";
+    childRef.current.refs.input.focus();
     setFieldValue("address", "");
     setFieldValue("city", "");
     setFieldValue("state", "");
