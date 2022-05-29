@@ -181,7 +181,7 @@ function ServiceRequestForm(props) {
         </Card.Header>
         <Card.Body>
           <BootstrapForm as={Form}>
-            <AddressSearch formikProps={formikProps} label="Search for Service Request Address" show_apt={true} show_same={props.state.steps.owner.address} />
+            <AddressSearch formikProps={formikProps} label="Search for Service Request Address" show_apt={true} show_same={props.state.steps.owner.address} error="Service Request Address was not selected." />
             <BootstrapForm.Row className="mb-3">
               <Col xs={"2"}>
                 <DropDown

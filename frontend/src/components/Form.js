@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useFormikContext, useField } from 'formik';
-import { Col, Collapse, Image, Form, Row } from 'react-bootstrap';
+import { Button, Col, Collapse, Image, Form, OverlayTrigger, Tooltip, Row } from 'react-bootstrap';
 import Select, { createFilter } from 'react-select';
 import SimpleValue from 'react-select-simple-value';
 import Flatpickr from 'react-flatpickr';
@@ -11,7 +11,6 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import Autocomplete from 'react-google-autocomplete';
 import { Map, Marker, Tooltip as MapTooltip, TileLayer } from "react-leaflet";
-import flatten from 'flat';
 import clsx from 'clsx';
 import MaterialCheckbox from '@material-ui/core/Checkbox';
 import {
@@ -122,14 +121,27 @@ const DateTimePicker = ({ label, xs, clearable, ...props }) => {
 const TextInput = ({ label, xs, controlId, formGroupClasses, ...props }) => {
 
   const [field, meta] = useField(props);
-
   const registeredRef = useRegisteredRef(props.name);
 
   return (
     <>
     <Form.Group as={Col} xs={xs} controlId={controlId} className={formGroupClasses} hidden={props.hidden} ref={meta.error && registeredRef}>
       <Form.Label>{label}</Form.Label>
-      <Form.Control type="text" isInvalid={meta.touched && meta.error} onChange={props.handleChange} {...field} {...props} />
+      {props.tooltip ?
+      <OverlayTrigger
+        key={"text-input"}
+        placement="top"
+        overlay={
+          <Tooltip id={`tooltip-text-input`}>
+            {props.tooltip}
+          </Tooltip>
+        }
+      >
+        <Form.Control type="text" isInvalid={meta.touched && meta.error} {...field} {...props} />
+      </OverlayTrigger>
+      :
+        <Form.Control type="text" isInvalid={meta.touched && meta.error} {...field} {...props} />
+      }
       <Form.Control.Feedback type="invalid"> {meta.error}</ Form.Control.Feedback>
     </Form.Group>
     </>
@@ -161,7 +173,7 @@ const Checkbox = (props) => {
 };
 
 const DropDown = React.forwardRef((props, ref) => {
-  const { setFieldValue, errors, setFieldTouched, isSubmitting, isValidating } = useFormikContext();
+  const { setFieldValue, setFieldTouched } = useFormikContext();
   const [field, meta] = useField(props);
 
   const registeredRef = useRegisteredRef(props.name);
@@ -190,14 +202,6 @@ const DropDown = React.forwardRef((props, ref) => {
     }),
   };
 
-  useEffect(() => {
-    if (isSubmitting && !isValidating) {
-      for (const path of Object.keys(flatten(errors))) {
-        setFieldTouched(path, true, false);
-      }
-    }
-  }, [errors, isSubmitting, isValidating, setFieldTouched]);
-
   function handleOptionChange(selection) {
     setFieldTouched(props.name, true);
     setFieldValue(props.name, selection === null ? '' : selection.value);
@@ -211,9 +215,27 @@ const DropDown = React.forwardRef((props, ref) => {
     <>
     <div ref={meta.error && registeredRef}>
       {props.label ? <Form.Label style={props.style}>{props.label}</Form.Label> : ""}
+      {props.tooltip ?
+      <OverlayTrigger
+         key={"edit-service-request"}
+         placement="top"
+         overlay={
+           <Tooltip id={`tooltip-edit-service-request`}>
+             {props.tooltip}
+           </Tooltip>
+         }
+       >
+        <span>
+          <SimpleValue {...field} options={props.options}>
+            {simpleProps => <Select isDisabled={props.disabled} ref={ref} styles={customStyles} isClearable={true} filterOption={createFilter(filterConfig)} onBlur={updateBlur} onChange={handleOptionChange} {...props} {...simpleProps} />}
+          </SimpleValue>
+        </span>
+      </OverlayTrigger>
+      :
       <SimpleValue {...field} options={props.options}>
-         {simpleProps => <Select isDisabled={props.disabled} ref={ref} styles={customStyles} isClearable={true} filterOption={createFilter(filterConfig)} onBlur={updateBlur} onChange={handleOptionChange} {...props} {...simpleProps} />}
+        {simpleProps => <Select isDisabled={props.disabled} ref={ref} styles={customStyles} isClearable={true} filterOption={createFilter(filterConfig)} onBlur={updateBlur} onChange={handleOptionChange} {...props} {...simpleProps} />}
       </SimpleValue>
+      }
       {meta.touched && meta.error ? <div style={{ color: "#e74c3c", marginTop: ".5rem", fontSize: "80%" }}>{meta.error}</div> : ""}
     </div>
     </>
@@ -299,8 +321,11 @@ const ImageUploader = ({ parentStateSetter, ...props }) => {
 const AddressLookup = ({setLatLon, ...props}) => {
 
   const childRef = useRef(null);
-  const { setFieldValue } = useFormikContext();
+  const { setFieldValue, values } = useFormikContext();
   const [timer, setTimer] = useState(null);
+  const [error, setError] = useState('');
+  const [triggerRefresh, setTriggerRefresh] = useState(false);
+  const [search, setSearch] = useState({});
 
   function changeDelay(change) {
     if (timer) {
@@ -309,10 +334,31 @@ const AddressLookup = ({setLatLon, ...props}) => {
     }
     setTimer(
       setTimeout(() => {
-        updateAddr(change);
+        setSearch(change);
       }, 2500)
     );
   }
+
+  const clearAddress = () => {
+    childRef.current.refs.input.value = "";
+    childRef.current.refs.input.focus();
+    setFieldValue("address", "");
+    setFieldValue("city", "");
+    setFieldValue("state", "");
+    setFieldValue("zip_code", "");
+    setFieldValue("latitude", null);
+    setFieldValue("longitude", null);
+    setFieldValue("full_address", "");
+    setLatLon(0, 0);
+  };
+
+
+  useEffect(() => {
+    if ((childRef.current && (childRef.current.refs.input.value.includes(", USA") || childRef.current.refs.input.value.includes(", United")))) {
+      setError("");
+    }
+    updateAddr(search);
+  }, [triggerRefresh, search]);
 
   const updateAddr = suggestion => {
 
@@ -340,36 +386,53 @@ const AddressLookup = ({setLatLon, ...props}) => {
       setFieldValue("latitude", suggestion.geometry.location.lat());
       setFieldValue("longitude", suggestion.geometry.location.lng());
       setFieldValue("full_address", suggestion.formatted_address.replace(', USA', ''));
-      setLatLon(suggestion.geometry.location.lat(), suggestion.geometry.location.lng())
+      setLatLon(suggestion.geometry.location.lat(), suggestion.geometry.location.lng());
+      setSearch({});
     }
   }
 
   return (
     <>
       <Form.Label>{props.label}</Form.Label>
-      <Autocomplete
-        {...props}
-        onChange={(e) => {
-          const lookup = e.target.value.replace(' ', '').split(',');
-          if (lookup[0] <= 90 && lookup[0] >= -90 && lookup[1] <= 180 && lookup[1] >= -180) {
-            let latlng = {lat:Number(lookup[0]), lng:Number(lookup[1])};
-            new window.google.maps.Geocoder().geocode({ location: latlng }, function (results, status) {
-              if (status === window.google.maps.GeocoderStatus.OK) {
-                // Filter out results that do not have a road name.
-                // Delay lookup to reduce number of calls while user is typing.
-                changeDelay(results.filter(result => !result.address_components[0].long_name.includes('+'))[0]);
+      <Row className="mr-0 d-flex" style={{maxHeight:"37px"}}>
+        <Col className="flex-grow-1 pr-1">
+          <Autocomplete
+            {...props}
+            onChange={(e) => {
+              setError("");
+              const lookup = e.target.value.replace(' ', '').split(',');
+              if (lookup[0] <= 90 && lookup[0] >= -90 && lookup[1] <= 180 && lookup[1] >= -180) {
+                let latlng = {lat:Number(lookup[0]), lng:Number(lookup[1])};
+                new window.google.maps.Geocoder().geocode({ location: latlng }, function (results, status) {
+                  if (status === window.google.maps.GeocoderStatus.OK) {
+                    // Filter out results that do not have a road name.
+                    // Delay lookup to reduce number of calls while user is typing.
+                    changeDelay(results.filter(result => !result.address_components[0].long_name.includes('+'))[0]);
+                  }
+                });
               }
-            });
-          }
-        }}
-        onPlaceSelected={(place) => {
-          updateAddr(place);
-        }}
-        types={['geocode']}
-        componentRestrictions={{country: "us"}}
-        ref={childRef}
-        apiKey={process.env.REACT_APP_GOOGLE_API_KEY}
-      />
+            }}
+            onPlaceSelected={(place) => {
+              setSearch(place);
+            }}
+            onBlur={(e) => {
+              setError("");
+              setTriggerRefresh(!triggerRefresh)
+              if (!values.address && childRef.current && childRef.current.refs.input.value) {
+                setError(props.error);
+              }
+            }}
+            types={['geocode']}
+            id="search"
+            name="search"
+            componentRestrictions={{country: "us"}}
+            ref={childRef}
+            apiKey={process.env.REACT_APP_GOOGLE_API_KEY}
+          />
+          {error ? <div style={{ color: "#e74c3c", marginTop: "1px", marginBottom:error ? "-15px" : "0px", fontSize: "80%" }}>{error}</div> : ""}
+        </Col>
+        <Button variant="outline-light" className="float-right" style={{maxHeight:"37px"}} onClick={clearAddress} disabled={values.address ? false: true}>Clear</Button>
+      </Row>
     </>
   );
 }
@@ -387,7 +450,7 @@ const AddressSearch = (props) => {
 
   const renderAddressLookup = () => {
     if (process.env.REACT_APP_GOOGLE_API_KEY) {
-      return <AddressLookup label={props.label} style={{width: '100%'}} className={"form-control"} setLatLon={setLatLon} />
+      return <AddressLookup label={props.label} style={{width: '100%'}} className={"form-control"} setLatLon={setLatLon} error={props.error} />
     } else {
       return <Alert variant="danger">Found Location Search is not available. Please contact support for assistance.</Alert>
     }
@@ -440,6 +503,7 @@ const AddressSearch = (props) => {
                 label="Address"
                 name="address"
                 value={props.formikProps.values.address || ''}
+                tooltip="Address must be populated using the Address Search."
                 disabled
               />
               {props.show_apt ?
@@ -459,17 +523,19 @@ const AddressSearch = (props) => {
                 label="City"
                 name="city"
                 value={props.formikProps.values.city || ''}
+                tooltip="City must be populated using the Address Search."
                 disabled
               />
               <Col xs="2">
-              <DropDown
-                label="State"
-                name="state"
-                id="state"
-                options={STATE_OPTIONS}
-                placeholder=''
-                disabled
-              />
+                <DropDown
+                  label="State"
+                  name="state"
+                  id="state"
+                  options={STATE_OPTIONS}
+                  placeholder=''
+                  tooltip="State must be populated using the Address Search."
+                  disabled
+                />
               </Col>
               <TextInput
                 xs="2"
@@ -477,12 +543,14 @@ const AddressSearch = (props) => {
                 label="Zip Code"
                 name="zip_code"
                 value={props.formikProps.values.zip_code || ''}
+                tooltip="Zip Code must be populated using the Address Search."
                 disabled
               />
             </Form.Row>
           </Col>
-          <Col className="border rounded pl-0 pr-0 mb-3 mr-3" xs="4" style={{marginTop:"31px"}}>
-            <Map zoom={15} ref={mapRef} center={[initialLatLon[0] || props.formikProps.values.latitude || 0, initialLatLon[1] || props.formikProps.values.longitude || 0]} className="search-leaflet-container" >
+          <Col className="pl-0 pr-0 mb-3 mr-3" xs="4" style={{marginTop:"0px"}}>
+            <Form.Label>Refine Exact Lat/Lon Point</Form.Label>
+            <Map zoom={15} ref={mapRef} center={[initialLatLon[0] || props.formikProps.values.latitude || 0, initialLatLon[1] || props.formikProps.values.longitude || 0]} className="search-leaflet-container border rounded " >
               <Legend position="bottomleft" metric={false} />
               <TileLayer
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
