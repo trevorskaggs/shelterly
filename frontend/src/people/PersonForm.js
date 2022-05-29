@@ -336,7 +336,7 @@ const PersonForm = (props) => {
                 name="agency"
               />
             </BootstrapForm.Row>
-            <AddressSearch formikProps={formikProps} label="Search for Contact Address" show_apt={true} hidden={!isOwner}/>
+            <AddressSearch formikProps={formikProps} label="Search for Contact Address" show_apt={true} hidden={!isOwner} error="Contact Address was not selected." />
             <BootstrapForm.Row hidden={!id || !isOwner}>
               <TextInput
                 xs="12"

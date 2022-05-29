@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useFormikContext, useField } from 'formik';
-import { Col, Collapse, Image, Form, OverlayTrigger, Tooltip, Row } from 'react-bootstrap';
+import { Button, Col, Collapse, Image, Form, OverlayTrigger, Tooltip, Row } from 'react-bootstrap';
 import Select, { createFilter } from 'react-select';
 import SimpleValue from 'react-select-simple-value';
 import Flatpickr from 'react-flatpickr';
@@ -11,7 +11,6 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import Autocomplete from 'react-google-autocomplete';
 import { Map, Marker, Tooltip as MapTooltip, TileLayer } from "react-leaflet";
-import flatten from 'flat';
 import clsx from 'clsx';
 import MaterialCheckbox from '@material-ui/core/Checkbox';
 import {
@@ -174,7 +173,7 @@ const Checkbox = (props) => {
 };
 
 const DropDown = React.forwardRef((props, ref) => {
-  const { setFieldValue, errors, setFieldTouched, isSubmitting, isValidating } = useFormikContext();
+  const { setFieldValue, setFieldTouched } = useFormikContext();
   const [field, meta] = useField(props);
 
   const registeredRef = useRegisteredRef(props.name);
@@ -202,14 +201,6 @@ const DropDown = React.forwardRef((props, ref) => {
       color: isDisabled ? '#595959' : 'black'
     }),
   };
-
-  useEffect(() => {
-    // if (isSubmitting && !isValidating) {
-    //   for (const path of Object.keys(flatten(errors))) {
-    //     setFieldTouched(path, true, false);
-    //   }
-    // }
-  }, []);
 
   function handleOptionChange(selection) {
     setFieldTouched(props.name, true);
@@ -330,8 +321,11 @@ const ImageUploader = ({ parentStateSetter, ...props }) => {
 const AddressLookup = ({setLatLon, ...props}) => {
 
   const childRef = useRef(null);
-  const { setFieldValue } = useFormikContext();
+  const { setFieldValue, values } = useFormikContext();
   const [timer, setTimer] = useState(null);
+  const [error, setError] = useState('');
+  const [triggerRefresh, setTriggerRefresh] = useState(false);
+  const [search, setSearch] = useState({});
 
   function changeDelay(change) {
     if (timer) {
@@ -344,6 +338,25 @@ const AddressLookup = ({setLatLon, ...props}) => {
       }, 2500)
     );
   }
+
+  const clearAddress = () => {
+    setFieldValue("address", "");
+    setFieldValue("city", "");
+    setFieldValue("state", "");
+    setFieldValue("zip_code", "");
+    setFieldValue("latitude", null);
+    setFieldValue("longitude", null);
+    setFieldValue("full_address", "");
+    setLatLon(0, 0);
+  };
+
+
+  useEffect(() => {
+    if ((childRef.current && (childRef.current.refs.input.value.includes(", USA") || childRef.current.refs.input.value.includes(", United")))) {
+      setError("");
+    }
+    updateAddr(search);
+  }, [triggerRefresh, search]);
 
   const updateAddr = suggestion => {
 
@@ -371,36 +384,53 @@ const AddressLookup = ({setLatLon, ...props}) => {
       setFieldValue("latitude", suggestion.geometry.location.lat());
       setFieldValue("longitude", suggestion.geometry.location.lng());
       setFieldValue("full_address", suggestion.formatted_address.replace(', USA', ''));
-      setLatLon(suggestion.geometry.location.lat(), suggestion.geometry.location.lng())
+      setLatLon(suggestion.geometry.location.lat(), suggestion.geometry.location.lng());
+      setSearch({});
     }
   }
 
   return (
     <>
       <Form.Label>{props.label}</Form.Label>
-      <Autocomplete
-        {...props}
-        onChange={(e) => {
-          const lookup = e.target.value.replace(' ', '').split(',');
-          if (lookup[0] <= 90 && lookup[0] >= -90 && lookup[1] <= 180 && lookup[1] >= -180) {
-            let latlng = {lat:Number(lookup[0]), lng:Number(lookup[1])};
-            new window.google.maps.Geocoder().geocode({ location: latlng }, function (results, status) {
-              if (status === window.google.maps.GeocoderStatus.OK) {
-                // Filter out results that do not have a road name.
-                // Delay lookup to reduce number of calls while user is tpying.
-                changeDelay(results.filter(result => !result.address_components[0].long_name.includes('+'))[0]);
+      <Row className="mr-0 d-flex" style={{maxHeight:"37px"}}>
+        <Col className="flex-grow-1 pr-1">
+          <Autocomplete
+            {...props}
+            onChange={(e) => {
+              setError("");
+              const lookup = e.target.value.replace(' ', '').split(',');
+              if (lookup[0] <= 90 && lookup[0] >= -90 && lookup[1] <= 180 && lookup[1] >= -180) {
+                let latlng = {lat:Number(lookup[0]), lng:Number(lookup[1])};
+                new window.google.maps.Geocoder().geocode({ location: latlng }, function (results, status) {
+                  if (status === window.google.maps.GeocoderStatus.OK) {
+                    // Filter out results that do not have a road name.
+                    // Delay lookup to reduce number of calls while user is tpying.
+                    changeDelay(results.filter(result => !result.address_components[0].long_name.includes('+'))[0]);
+                  }
+                });
               }
-            });
-          }
-        }}
-        onPlaceSelected={(place) => {
-          updateAddr(place);
-        }}
-        types={['geocode']}
-        componentRestrictions={{country: "us"}}
-        ref={childRef}
-        apiKey={process.env.REACT_APP_GOOGLE_API_KEY}
-      />
+            }}
+            onPlaceSelected={(place) => {
+              setSearch(place);
+            }}
+            onBlur={(e) => {
+              setError("");
+              setTriggerRefresh(!triggerRefresh)
+              if (!values.address && childRef.current && childRef.current.refs.input.value) {
+                setError(props.error);
+              }
+            }}
+            types={['geocode']}
+            id="search"
+            name="search"
+            componentRestrictions={{country: "us"}}
+            ref={childRef}
+            apiKey={process.env.REACT_APP_GOOGLE_API_KEY}
+          />
+          {error ? <div style={{ color: "#e74c3c", marginTop: "1px", marginBottom:error ? "-15px" : "0px", fontSize: "80%" }}>{error}</div> : ""}
+        </Col>
+        <Button variant="outline-light" className="float-right" style={{maxHeight:"37px"}} onClick={clearAddress} disabled={values.address ? false: true}>Clear</Button>
+      </Row>
     </>
   );
 }
@@ -418,7 +448,7 @@ const AddressSearch = (props) => {
 
   const renderAddressLookup = () => {
     if (process.env.REACT_APP_GOOGLE_API_KEY) {
-      return <AddressLookup label={props.label} style={{width: '100%'}} className={"form-control"} setLatLon={setLatLon} />
+      return <AddressLookup label={props.label} style={{width: '100%'}} className={"form-control"} setLatLon={setLatLon} error={props.error} />
     } else {
       return <Alert variant="danger">Found Location Search is not available. Please contact support for assistance.</Alert>
     }
