@@ -347,7 +347,7 @@ function ServiceRequestDetails({id}) {
           </Card>
         </div>
       </div>
-      <div className="row mt-3">
+      <div className="row">
         <div className="col-12 d-flex">
           <Card className="border rounded" style={{width:"100%"}}>
             <Card.Body style={{marginBottom:"-20px"}}>
