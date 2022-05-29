@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import { Link } from 'raviger';
 import { Button, Card, ListGroup, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap';
@@ -12,6 +12,7 @@ import Header from '../components/Header';
 import History from '../components/History';
 import Scrollbar from '../components/Scrollbars';
 import AnimalCards from '../components/AnimalCards';
+import PhotoDocuments from '../components/PhotoDocuments';
 import { printOwnerDetails } from './Utils';
 
 function PersonDetails({id}) {
@@ -47,6 +48,7 @@ function PersonDetails({id}) {
     state: '',
     zip_code: '',
     animals: [],
+    images: [],
     owner_contacts: [],
     action_history: [],
   });
@@ -252,6 +254,7 @@ function PersonDetails({id}) {
         </Card>
       </div>
     </div>
+    <PhotoDocuments setData={setData} data={data} id={id} url={'/people/api/person/' + id + '/'} object={is_owner ? "owner" : "reporter"} />
     <History action_history={data.action_history} />
     <Modal show={show} onHide={handleClose}>
       <Modal.Header closeButton>

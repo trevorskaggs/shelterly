@@ -69,11 +69,12 @@ class SimpleServiceRequestSerializer(BarebonesServiceRequestSerializer):
     owner_objects = SimplePersonSerializer(source='owners', many=True, required=False, read_only=True)
     reporter_object = SimplePersonSerializer(source='reporter', required=False, read_only=True)
     evacuation_assignments = serializers.SerializerMethodField()
+    images = serializers.SerializerMethodField()
 
     class Meta:
         model = ServiceRequest
         fields = ['id', 'timestamp', 'latitude', 'longitude', 'full_address', 'followup_date', 'owners', 'reporter', 'address', 'city', 'state', 'zip_code', 'apartment', 'reporter', 'directions', 'priority', 'evacuation_assignments', 'pending',
-        'animal_count', 'key_provided', 'verbal_permission', 'injured', 'accessible', 'turn_around', 'animals', 'status', 'reported_animals', 'reporter_object', 'owner_objects', 'sheltered_in_place', 'unable_to_locate', 'aco_required']
+        'images', 'animal_count', 'key_provided', 'verbal_permission', 'injured', 'accessible', 'turn_around', 'animals', 'status', 'reported_animals', 'reporter_object', 'owner_objects', 'sheltered_in_place', 'unable_to_locate', 'aco_required']
 
 
     # Custom field for the full address.
@@ -116,6 +117,18 @@ class SimpleServiceRequestSerializer(BarebonesServiceRequestSerializer):
         except AttributeError:
             return obj.animal_set.filter(status='UNABLE TO LOCATE').count()
 
+    def get_images(self, obj):
+        try:
+            return [{'id':sr_image.id, 'url':sr_image.image.url, 'name':sr_image.name} for sr_image in obj.images]
+        except IndexError:
+            return []
+        except AttributeError:
+            # Should only hit this when returning a single object after create.
+            try:
+                return [{'id':sr_image.id, 'url':sr_image.image.url, 'name':sr_image.name} for sr_image in obj.servicerequestimage_set.all()]
+            except AttributeError:
+                return []
+
     def to_internal_value(self, data):
         # Updates datetime fields to null when receiving an empty string submission.
         for key in ['followup_date']:
@@ -140,7 +153,7 @@ class ServiceRequestSerializer(SimpleServiceRequestSerializer):
         model = ServiceRequest
         fields = ['id', 'latitude', 'longitude', 'full_address', 'followup_date', 'status', 'address', 'city', 'state', 'zip_code', 'directions', 'priority',
         'injured', 'accessible', 'turn_around', 'animals', 'reporter', 'reported_animals', 'sheltered_in_place', 'unable_to_locate', 'aco_required',
-        'animal_count', 'key_provided', 'verbal_permission', 'action_history', 'owner_objects', 'reporter_object', 'assigned_requests']
+        'animal_count', 'images', 'key_provided', 'verbal_permission', 'action_history', 'owner_objects', 'reporter_object', 'assigned_requests']
 
     def get_assigned_requests(self, obj):
         from evac.models import AssignedRequest

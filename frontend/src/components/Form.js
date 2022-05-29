@@ -266,7 +266,7 @@ const ImageUploader = ({ parentStateSetter, ...props }) => {
                 <Image width={131} src={image.data_url} alt="Animal" thumbnail />
                 <div className="image-item__btn-wrapper">
                   <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => onImageRemove(index)} style={{backgroundColor:"red"}} />
-                  <span className="ml-1">{props.label}</span>
+                  <span className="ml-1">{props.label || image.file.name}</span>
                 </div>
               </span>
             ))}
@@ -356,7 +356,7 @@ const AddressLookup = ({setLatLon, ...props}) => {
             new window.google.maps.Geocoder().geocode({ location: latlng }, function (results, status) {
               if (status === window.google.maps.GeocoderStatus.OK) {
                 // Filter out results that do not have a road name.
-                // Delay lookup to reduce number of calls while user is tpying.
+                // Delay lookup to reduce number of calls while user is typing.
                 changeDelay(results.filter(result => !result.address_components[0].long_name.includes('+'))[0]);
               }
             });
