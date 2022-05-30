@@ -275,7 +275,7 @@ function ServiceRequestDetails({id}) {
                     ref={datetime}
                     name="followup_date"
                     id="followup_date"
-                    options={{clickOpens:false, altInput:true, altInputClass:"hide-input", altFormat:"F j, Y h:i K"}}
+                    options={{clickOpens:false, altInput:true, altInputClass:"hide-input", altFormat:"F j, Y h:i K", minDate:new Date()}}
                     onChange={(date, dateStr) => {
                       setData(prevState => ({ ...prevState, "followup_date":dateStr }));
                       axios.patch('/hotline/api/servicerequests/' + id + '/', {followup_date:date[0]})

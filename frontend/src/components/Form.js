@@ -211,6 +211,14 @@ const DropDown = React.forwardRef((props, ref) => {
     setFieldTouched(props.name, true);
   }
 
+  // useEffect(() => {
+  //   if (isSubmitting && !isValidating) {
+  //     for (const path of Object.keys(flatten(errors))) {
+  //       setFieldTouched(path, true, false);
+  //     }
+  //   }
+  // }, [errors, isSubmitting, isValidating, setFieldTouched]);
+
   return (
     <>
     <div ref={meta.error && registeredRef}>
@@ -227,7 +235,7 @@ const DropDown = React.forwardRef((props, ref) => {
        >
         <span>
           <SimpleValue {...field} options={props.options}>
-            {simpleProps => <Select isDisabled={props.disabled} ref={ref} styles={customStyles} isClearable={true} filterOption={createFilter(filterConfig)} onBlur={updateBlur} onChange={handleOptionChange} {...props} {...simpleProps} />}
+            {simpleProps => <Select isDisabled={props.disabled} ref={ref} styles={customStyles} isClearable={true} onBlur={updateBlur} filterOption={createFilter(filterConfig)} onChange={handleOptionChange} {...props} {...simpleProps} />}
           </SimpleValue>
         </span>
       </OverlayTrigger>
