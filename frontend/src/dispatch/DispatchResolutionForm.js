@@ -182,9 +182,9 @@ function DispatchResolutionForm({ id }) {
                         }
                       })
                       if (value === 'REPORTED' && required) {
-                        return false
+                        return false;
                       }
-                      return true
+                      return true;
                     }),
                 shelter: Yup.number().nullable(),
               })
@@ -344,7 +344,15 @@ function DispatchResolutionForm({ id }) {
                               className="mt-0"
                               options={dispatchStatusChoices}
                               value={`sr_updates.${index}.animals.${inception}.status`}
+                              key={`sr_updates.${index}.animals.${inception}.status`}
                               isClearable={false}
+                              onChange={(instance) => {
+                                props.setFieldValue(`sr_updates.${index}.animals.${inception}.status`, instance === null ? '' : instance.value);
+                                // Hack to proprly update Cannot Remain Reported error display.
+                                if (instance.value === 'REPORTED') {
+                                  props.setFieldTouched(`sr_updates.${index}.animals.${inception}.status`)
+                                }
+                              }}
                             />
                           </Col>
                           <span style={{ marginTop:"5px", textTransform:"capitalize" }}>
@@ -413,6 +421,7 @@ function DispatchResolutionForm({ id }) {
                       onChange={(date, dateStr) => {
                         props.setFieldValue(`sr_updates.${index}.date_completed`, dateStr)
                       }}
+                      disabled={false}
                       value={props.values.sr_updates[index] ? props.values.sr_updates[index].date_completed : new Date()}
                     />
                   </BootstrapForm.Row>
@@ -421,6 +430,7 @@ function DispatchResolutionForm({ id }) {
                       label="Followup Date"
                       name={`sr_updates.${index}.followup_date`}
                       id={`sr_updates.${index}.followup_date`}
+                      more_options={{minDate:new Date()}}
                       xs="4"
                       data-enable-time={false}
                       onChange={(date, dateStr) => {
@@ -454,7 +464,7 @@ function DispatchResolutionForm({ id }) {
                           label="Owner Contacted"
                           id={`sr_updates.${index}.owner_contact_id`}
                           name={`sr_updates.${index}.owner_contact_id`}
-                          key={`my_unique_test_select_key__d}`}
+                          key={`sr_updates.${index}.owner_contact_id`}
                           type="text"
                           xs="4"
                           options={ownerChoices[assigned_request.service_request_object.id]}

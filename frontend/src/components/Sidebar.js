@@ -43,7 +43,6 @@ export const StyledMenu = styled(Nav)`
     margin-right: auto;
     width: 10rem;
     height: 10rem;
-
   }
   div.logo {
     font-size: 2rem;
@@ -71,7 +70,7 @@ const Menu = ({ state, dispatch, removeCookie, ...props }) => {
     }, [path]);
 
     return (
-    <StyledMenu  {...props} className="flex-column" style={{ height: viewHeight }}>
+    <StyledMenu  {...props} className="flex-column" style={{ height: viewHeight, minHeight:"880px" }}>
     <Link href="/"><img src="/static/images/shelterly.png" alt="Logo" /></Link>
     <div className="logo border-bottom text-center">SHELTERLY</div>
       <Link href="/hotline" className="rounded sidebar" style={{backgroundColor:path.includes("hotline") && !path.includes("search") ? "#444444" : "#292b2c", marginLeft:"-23px", marginRight:"-23px"}}><FontAwesomeIcon icon={faPhone} fixedWidth inverse className="sidebar-icon" style={{marginLeft:"23px"}} /> HOTLINE</Link>
