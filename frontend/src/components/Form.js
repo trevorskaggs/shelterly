@@ -109,7 +109,7 @@ const DateTimePicker = ({ label, xs, clearable, ...props }) => {
       <Form.Group as={Col} xs={xs} hidden={props.hidden} className="mb-0" ref={meta.error && registeredRef}>
       <label htmlFor={props.id || props.name}>{label}</label>
       <span className="d-flex">
-        <Flatpickr className="datetime_picker" ref={datetime} data-enable-time options={options} {...field} {...props} />
+        <Flatpickr className="datetime_picker" ref={datetime} data-enable-time options={{...options, ...props.more_options}} {...field} {...props} />
         {clearable === false || props.disabled === true ? "" : <span>{field.value ? <FontAwesomeIcon icon={faTimes} style={{position:"relative", left: "-22px", marginTop:"11px", marginRight:"-10px", color:"#808080"}} onClick={clearDate} /> : ""}</span>}
       </span>
       {meta.touched && meta.error ? <div style={{ color: "#e74c3c", marginTop: ".3rem", fontSize: "80%" }}>{meta.error}</div> : ""}

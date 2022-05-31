@@ -421,6 +421,7 @@ function DispatchResolutionForm({ id }) {
                       onChange={(date, dateStr) => {
                         props.setFieldValue(`sr_updates.${index}.date_completed`, dateStr)
                       }}
+                      disabled={false}
                       value={props.values.sr_updates[index] ? props.values.sr_updates[index].date_completed : new Date()}
                     />
                   </BootstrapForm.Row>
@@ -429,6 +430,7 @@ function DispatchResolutionForm({ id }) {
                       label="Followup Date"
                       name={`sr_updates.${index}.followup_date`}
                       id={`sr_updates.${index}.followup_date`}
+                      more_options={{minDate:new Date()}}
                       xs="4"
                       data-enable-time={false}
                       onChange={(date, dateStr) => {
