@@ -52,6 +52,8 @@ class ShelterlyUserManager(BaseUserManager):
 
 class ShelterlyUser(AbstractUser):
 
+    first_name = models.CharField(max_length=50, blank=False, null=False)
+    last_name = models.CharField(max_length=50, blank=False, null=False)
     cell_phone = models.CharField(max_length=50, blank=False, null=False)
     agency_id = models.CharField(max_length=50, blank=True, null=True)
     username = models.CharField(max_length=50, blank=True, null=True)
