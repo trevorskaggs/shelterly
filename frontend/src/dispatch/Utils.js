@@ -45,7 +45,12 @@ export const printDispatchResolutionForm = (data) => {
       text: `SR#${assigned_request.service_request_object.id} - ${srPriority.label} Priority`
     });
 
-    pdf.drawPad();
+    pdf.drawPad(20);
+
+    // lat/lng
+    pdf.drawWrappedText({
+      text: `Latitude: ${assigned_request.service_request_object.latitude},  Longitude: ${assigned_request.service_request_object.longitude}`
+    });
 
     // summary address
     pdf.drawSectionHeader({ text: 'Service Request Address:', fontSize: 14 });
@@ -98,9 +103,15 @@ export const printDispatchResolutionForm = (data) => {
     // SR Header
     pdf.drawSectionHeader({
       text: `SR#${assigned_request.service_request_object.id} - ${assigned_request.service_request_object.full_address}`,
-      hRule: true
+      hRule: false
     });
-
+    pdf.drawPad(20);
+    pdf.drawWrappedText({
+      text: `Latitude: ${assigned_request.service_request_object.latitude},  Longitude: ${assigned_request.service_request_object.longitude}`
+    });
+    pdf.drawPad(-10);
+    pdf.drawHRule();
+    pdf.drawPad(-10);
     pdf.drawCheckboxList({
       labels: ['Not Completed Yet', 'Unable to Complete'],
       listStyle: 'grid'
