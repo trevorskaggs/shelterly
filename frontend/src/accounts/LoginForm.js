@@ -65,7 +65,6 @@ const Login = () => {
           <h1  style={{fontSize:"100px"}}>Shelterly</h1>
         </Row>
         <Col xs={{ span:5 }} className="border rounded border-light shadow-sm ml-auto mr-auto mb-auto" style={{maxHeight:"347px"}}>
-          <h3 className='mb-0 text-center mt-3'>Log-in {state.isLoading ? <FontAwesomeIcon icon={faSpinner} spin inverse /> : ""}</h3>
           <BootstrapForm as={Form}>
             <TextInput
               name="username"
@@ -83,7 +82,7 @@ const Login = () => {
               formGroupClasses="mt-0 mb-4"
             />
             <BootstrapForm.Group as={Col}>
-              <Button type="submit" size="lg" className="btn-primary" block>Login</Button>
+              <Button type="submit" size="lg" className="btn-primary" block>Login{state.isLoading ? <FontAwesomeIcon icon={faSpinner} spin inverse /> : ""}</Button>
               <Button size="lg" className="btn-primary" onClick={() => setShow(true)} block>Forgot Password</Button>
               {status && <div className="invalid-feedback invalid-form" variant="warning">{status}</div>}
             </BootstrapForm.Group>
@@ -126,7 +125,7 @@ const Login = () => {
                 />
               </Modal.Body>
               <Modal.Footer>
-                <Button type="submit" size="lg" className="btn-primary" block>Reset Password</Button>
+                <Button type="submit" size="lg" className="btn-primary" block>Send Reset Password Email</Button>
               </Modal.Footer>
             </BootstrapForm>
             </>

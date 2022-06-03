@@ -31,5 +31,5 @@ class UserAuth(generics.RetrieveAPIView):
 # Provides view for User API calls.
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
-    permission_classes = [permissions.IsAuthenticated, ]
+    permission_classes = [permissions.IsAuthenticated, permissions.IsAdminUser]
     serializer_class = UserSerializer

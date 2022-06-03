@@ -2,6 +2,7 @@ import React from "react";
 import Home from "./Home";
 import LoginForm from "./accounts/LoginForm";
 import PasswordReset from "./accounts/PasswordReset";
+import UserForm from "./accounts/UserForm";
 import UserManagement from "./accounts/UserManagement";
 import AnimalForm from "./animals/AnimalForm";
 import AnimalDetails from "./animals/AnimalDetails";
@@ -40,6 +41,8 @@ export const publicRoutes = {
 
 const routes = {
   "/": () => <Home />,
+  "/accounts/user/new": () => <UserForm />,
+  "/accounts/user/edit/:id": ({id}) => <UserForm id={id} />,
   "/accounts/user_management": () => <UserManagement />,
   "/animals/edit/:id": ({id}) => <AnimalForm id={id} state={initialWorkflowData} />,
   "/animals/new": () => <AnimalForm state={initialWorkflowData} />,
