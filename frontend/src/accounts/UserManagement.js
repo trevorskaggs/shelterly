@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "raviger";
 import axios from "axios";
-import { Button, Card, Col, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
+import { Button, Card, Col, Form, FormControl, InputGroup, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faMinusSquare, faUpload, faUserPlus
@@ -14,6 +14,7 @@ import Header from "../components/Header";
 function UserManagement() {
 
   const [data, setData] = useState({users: [], isFetching: false});
+  const [filteredData, setFilteredData] = useState({users: [], isFetching: false});
 
   const [userToDelete, setUserToDelete] = useState({id: 0, first_name: '', last_name: ''});
   const [showUserConfirm, setShowUserConfirm] = useState(false);
@@ -22,6 +23,11 @@ function UserManagement() {
   const [userToReset, setUserToReset] = useState({id: 0, first_name: '', last_name: ''});
   const [showUserResetConfirm, setShowUserResetConfirm] = useState(false);
   const handleUserResetClose = () => setShowUserResetConfirm(false);
+
+  const [showUploadCSV, setShowUploadCSV] = useState(false);
+  const handleUploadCSVClose = () => setShowUploadCSV(false);
+
+  const [searchTerm, setSearchTerm] = useState('');
 
   const handleRemoveUserSubmit = async () => {
     await axios.delete('/accounts/api/user/' + userToDelete.id + '/')
@@ -44,6 +50,31 @@ function UserManagement() {
     });
   }
 
+  const handleUploadCSV = async () => {
+    await axios.post('/accounts/api/user/')
+    .then(response => {
+      setData(prevState => ({ ...prevState, "users":data.users }));
+      handleUploadCSVClose();
+    })
+    .catch(error => {
+    });
+  }
+
+  // Update searchTerm when field input changes.
+  const handleSearch = () => {
+    if (searchTerm) {
+      setFilteredData(prevState => ({ ...prevState, "users":data.users.filter(user => (user.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                                                                      user.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                                                                      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                                                                      user.cell_phone.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                                                                      (user.agency_id ? user.agency_id.toLowerCase().includes(searchTerm.toLowerCase()) : null))
+      ) }));
+    }
+    else {
+      setFilteredData(prevState => ({ ...prevState, "users":data.users }));
+    }
+  };
+
   // Hook for initializing data.
   useEffect(() => {
     let unmounted = false;
@@ -58,6 +89,7 @@ function UserManagement() {
       .then(response => {
         if (!unmounted) {
           setData({users: response.data, isFetching: false});
+          setFilteredData({users: response.data, isFetching: false});
         }
       })
       .catch(error => {
@@ -99,10 +131,23 @@ function UserManagement() {
           </Tooltip>
         }
       >
-        <Link href={"/accounts/user/new"}><FontAwesomeIcon icon={faUpload} size="sm" className="ml-2 fa-move-up" inverse /></Link>
+        <FontAwesomeIcon icon={faUpload} size="sm" className="ml-2 fa-move-up" onClick={() => {setShowUploadCSV(true);}} inverse />
       </OverlayTrigger>
     </Header>
     <hr/>
+    <InputGroup className="mb-3">
+      <FormControl
+        type="text"
+        placeholder="Search"
+        name="searchTerm"
+        onChange={(event) => {
+          setSearchTerm(event.target.value);
+        }}
+      />
+      <InputGroup.Append>
+        <Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0"}} onClick={() => {handleSearch();}}>Search</Button>
+      </InputGroup.Append>
+    </InputGroup>
     <Row>
       <Col style={{minWidth:"150px", maxWidth:"150px", marginLeft:"0px"}}>
           Last Name
@@ -123,7 +168,7 @@ function UserManagement() {
           Actions
       </Col>
     </Row>
-    {data.users.map(user => (
+    {filteredData.users.map(user => (
       <Card key={user.id} className=" rounded w-100 mb-1" style={{height:"32px"}}>
         <div className="row no-gutters">
           <Col className="border-top border-left border-bottom" style={{height:"32px", paddingLeft:"3px", paddingTop:"5px", marginTop: "-1px", fontSize:"13px", borderTopLeftRadius:"0.25rem", borderBottomLeftRadius:"0.25rem", minWidth:"150px", maxWidth:"150px", backgroundColor:"#615e5e"}}>
@@ -205,6 +250,21 @@ function UserManagement() {
       <Modal.Footer>
         <Button variant="primary" onClick={handleResetUserSubmit}>Yes</Button>
         <Button variant="secondary" onClick={handleUserResetClose}>Cancel</Button>
+      </Modal.Footer>
+    </Modal>
+    <Modal show={showUploadCSV} onHide={handleUploadCSVClose}>
+      <Modal.Header closeButton>
+        <Modal.Title>Upload User CSV</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <Form.Group controlId="formFile" className="mt-3 mb-3">
+          {/* <Form.Label>Default file input example</Form.Label> */}
+          <Form.Control type="file" />
+        </Form.Group>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="primary" onClick={handleUploadCSV}>Upload</Button>
+        <Button variant="secondary" onClick={handleUploadCSVClose}>Cancel</Button>
       </Modal.Footer>
     </Modal>
     </>

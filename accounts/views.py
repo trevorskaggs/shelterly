@@ -1,12 +1,16 @@
+import csv
+
 from django.contrib.auth import get_user_model, login
 from django.contrib.sites.models import Site
 from django.core.mail import send_mail
 from django.apps import apps
+from django.db import IntegrityError
 from django.template.loader import render_to_string
 from knox.views import LoginView as KnoxLoginView
 from rest_framework import generics, permissions, viewsets
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 
+from accounts.models import ShelterlyUser
 from accounts.serializers import UserSerializer
 
 User = get_user_model()

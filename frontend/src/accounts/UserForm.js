@@ -134,6 +134,7 @@ const UserForm = (props) => {
                   name="cell_phone"
                   id="cell_phone"
                   xs="3"
+                  value={form.values.cell_phone || ''}
                 />
                 <TextInput
                   type="text"
