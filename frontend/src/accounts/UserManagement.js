@@ -24,6 +24,7 @@ function UserManagement() {
   const [showUserResetConfirm, setShowUserResetConfirm] = useState(false);
   const handleUserResetClose = () => setShowUserResetConfirm(false);
 
+  const [file, setFile] = useState({users: [], isFetching: false});
   const [showUploadCSV, setShowUploadCSV] = useState(false);
   const handleUploadCSVClose = () => setShowUploadCSV(false);
 
@@ -33,6 +34,7 @@ function UserManagement() {
     await axios.delete('/accounts/api/user/' + userToDelete.id + '/')
     .then(response => {
       setData(prevState => ({ ...prevState, "users":data.users.filter(user => user.id !== userToDelete.id) }));
+      setFilteredData(prevState => ({ ...prevState, "users":data.users.filter(user => user.id !== userToDelete.id) }));
       setUserToDelete({id: 0, first_name: '', last_name: ''});
       handleUserClose();
     })
@@ -51,9 +53,13 @@ function UserManagement() {
   }
 
   const handleUploadCSV = async () => {
-    await axios.post('/accounts/api/user/')
+    const formData = new FormData();
+    formData.append('user_csv', file);
+
+    await axios.post('/accounts/api/user/upload_csv/', formData)
     .then(response => {
-      setData(prevState => ({ ...prevState, "users":data.users }));
+      setData(prevState => ({ ...prevState, "users":data.users.concat(response.data)}));
+      setFilteredData(prevState => ({ ...prevState, "users":filteredData.users.concat(response.data)}));
       handleUploadCSVClose();
     })
     .catch(error => {
@@ -131,7 +137,7 @@ function UserManagement() {
           </Tooltip>
         }
       >
-        <FontAwesomeIcon icon={faUpload} size="sm" className="ml-2 fa-move-up" onClick={() => {setShowUploadCSV(true);}} inverse />
+        <FontAwesomeIcon icon={faUpload} size="sm" className="ml-2 fa-move-up" onClick={() => {setShowUploadCSV(true);}} style={{cursor:'pointer'}} inverse />
       </OverlayTrigger>
     </Header>
     <hr/>
@@ -258,8 +264,7 @@ function UserManagement() {
       </Modal.Header>
       <Modal.Body>
         <Form.Group controlId="formFile" className="mt-3 mb-3">
-          {/* <Form.Label>Default file input example</Form.Label> */}
-          <Form.Control type="file" />
+          <Form.Control type="file" onChange={(event) => {setFile(event.target.files[0]) }} />
         </Form.Group>
       </Modal.Body>
       <Modal.Footer>

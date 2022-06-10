@@ -1,4 +1,5 @@
 import csv
+import io
 
 from django.contrib.auth import get_user_model, login
 from django.contrib.sites.models import Site
@@ -7,7 +8,8 @@ from django.apps import apps
 from django.db import IntegrityError
 from django.template.loader import render_to_string
 from knox.views import LoginView as KnoxLoginView
-from rest_framework import generics, permissions, viewsets
+from rest_framework import generics, permissions, response, status, viewsets
+from rest_framework.decorators import action
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 
 from accounts.models import ShelterlyUser
@@ -41,6 +43,34 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     permission_classes = [permissions.IsAuthenticated, permissions.IsAdminUser]
     serializer_class = UserSerializer
+
+    @action(detail=False, methods=["post"])
+    def upload_csv(self, request):
+        if self.request.FILES.get('user_csv'):
+            user_csv = self.request.FILES['user_csv']
+            reader = csv.DictReader(io.StringIO(user_csv.read().decode('utf-8')), delimiter=',', quotechar='|', fieldnames=['first_name','last_name','cell_phone','email','agency_id', 'is_admin'])
+            # skip first line w/ header info
+            next(reader)
+            a = list(reader)
+            user_ids = []
+
+            for item in a:
+                try:
+                    user = ShelterlyUser.objects.create_user(
+                        first_name=item['first_name'],
+                        last_name=item['last_name'],
+                        email=item['email'],
+                        cell_phone=item['cell_phone'].replace('-', '').replace('(', '').replace(')', ''),
+                        username=item['email'],
+                        password=item['last_name'] + '1',
+                        is_staff=item['is_admin'],
+                        is_superuser=item['is_admin'],
+                    )
+                    user_ids.append(user.id)
+                except IntegrityError:
+                    print('failed for {0}'.format(item))
+                    pass
+        return response.Response(UserSerializer(ShelterlyUser.objects.filter(id__in=user_ids), many=True).data, status=201)
 
     def perform_update(self, serializer):
         if serializer.is_valid():
