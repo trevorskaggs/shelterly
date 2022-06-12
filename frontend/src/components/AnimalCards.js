@@ -3,7 +3,7 @@ import { Link } from 'raviger';
 import { Card, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faUserAlt, faUserAltSlash, faCircle, faExclamationCircle, faQuestionCircle, faHome, faHeart, faSkullCrossbones
+  faMinusCircle, faUserAlt, faUserAltSlash, faCircle, faExclamationCircle, faQuestionCircle, faHome, faHeart, faSkullCrossbones
 } from '@fortawesome/free-solid-svg-icons';
 import { faBadgeSheriff, faClawMarks, faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
 import AnimalCoverImage from './AnimalCoverImage';
@@ -75,6 +75,11 @@ function AnimalCards(props) {
                   <OverlayTrigger key={"unable-to-locate"} placement="top"
                                   overlay={<Tooltip id={`tooltip-unable-to-locate`}>UNABLE TO LOCATE</Tooltip>}>
                       <FontAwesomeIcon className="animal-icon" icon={faQuestionCircle} inverse/>
+                  </OverlayTrigger> : ""}
+                {animal.status === "UNABLE TO LOCATE - NFA" ?
+                  <OverlayTrigger key={"unable-to-locate-nfa"} placement="top"
+                                  overlay={<Tooltip id={`tooltip-unable-to-locate-nfa`}>UNABLE TO LOCATE - NO FURTHER ACTION</Tooltip>}>
+                      <FontAwesomeIcon className="animal-icon" icon={faMinusCircle} inverse/>
                   </OverlayTrigger> : ""}
                 {animal.status === "REUNITED" ?
                   <OverlayTrigger key={"reunited"} placement="top"

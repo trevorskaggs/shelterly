@@ -150,7 +150,7 @@ function ServiceRequestSearch() {
           <CardGroup>
             <Card style={{marginBottom:"6px"}}>
               <Card.Body>
-                <Card.Title style={{marginTop:"-9px", marginBottom:"8px"}} className="row">
+                <Card.Title style={{marginTop:"-9px", marginBottom:"8px", marginLeft:"0px"}} className="row">
                   Information
                   {service_request.priority === 1 ?
                     <OverlayTrigger

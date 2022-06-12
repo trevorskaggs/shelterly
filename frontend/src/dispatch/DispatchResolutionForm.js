@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import axios from "axios";
 import { Link, navigate } from "raviger";
 import { Field, Form, Formik } from 'formik';
@@ -46,7 +46,8 @@ function DispatchResolutionForm({ id }) {
     sr_updates: [],
   });
 
-  const [shelters, setShelters] = useState({options: [], isFetching: false});
+  const [shelters, setShelters] = useState({options: [], room_options: {}, isFetching: false});
+  const roomRef = useRef(null);
   const [ownerChoices, setOwnerChoices] = useState({});
 
   const ordered = useOrderedNodes();
@@ -84,7 +85,7 @@ function DispatchResolutionForm({ id }) {
               date_completed: assigned_request.visit_note ? assigned_request.visit_note.date_completed : new Date(),
               notes: assigned_request.visit_note ? assigned_request.visit_note.notes : '',
               forced_entry: assigned_request.visit_note ? assigned_request.visit_note.forced_entry : false,
-              animals: Object.keys(assigned_request.animals).map(animal_id => {return {id:animal_id, status:assigned_request.animals[animal_id].status, request:assigned_request.service_request_object.id, shelter:assigned_request.animals[animal_id].shelter || ''}}),
+              animals: Object.keys(assigned_request.animals).map(animal_id => {return {id:animal_id, name:assigned_request.animals[animal_id].name, species:assigned_request.animals[animal_id].species, status:assigned_request.animals[animal_id].status, color_notes:assigned_request.animals[animal_id].color_notes, pcolor:assigned_request.animals[animal_id].pcolor, scolor:assigned_request.animals[animal_id].scolor, request:assigned_request.service_request_object.id, shelter:assigned_request.animals[animal_id].shelter || '', room:assigned_request.animals[animal_id].room || ''}}),
               owner: assigned_request.service_request_object.owners.length > 0,
               owner_contact_id: assigned_request.owner_contact ? assigned_request.owner_contact.owner : '',
               owner_contact_time: assigned_request.owner_contact ? assigned_request.owner_contact.owner_contact_time : null,
@@ -102,23 +103,31 @@ function DispatchResolutionForm({ id }) {
     };
 
     const fetchShelters = () => {
-      setShelters({options: [], isFetching: true});
+      setShelters({options: [], room_options: [], isFetching: true});
       // Fetch Shelter data.
       axios.get('/shelter/api/shelter/', {
         cancelToken: source.token,
       })
       .then(response => {
         if (!unmounted) {
-          let options = []
+          let options = [];
+          let room_options = {};
           response.data.forEach(shelter => {
             options.push({value: shelter.id, label: shelter.name});
+            room_options[shelter.id] = [];
+            shelter.buildings.forEach(building => {
+              building.rooms.forEach(room => {
+                // Build room option list identified by shelter ID.
+                room_options[shelter.id].push({value: room.id, label: room.building_name + ' - ' + room.name + ' (' + room.animal_count + ' animals)'});
+              });
+            });
           });
-          setShelters({options: options, isFetching: false});
+          setShelters({options: options, room_options: room_options, isFetching: false});
         }
       })
       .catch(error => {
         if (!unmounted) {
-          setShelters({options: [], isFetching: false});
+          setShelters({options: [], room_options: [], isFetching: false});
         }
       });
     };
@@ -187,6 +196,7 @@ function DispatchResolutionForm({ id }) {
                       return true;
                     }),
                 shelter: Yup.number().nullable(),
+                room: Yup.number().nullable(),
               })
             ),
             date_completed: Yup.date().nullable().when(['unable_to_complete', 'incomplete'], {
@@ -333,7 +343,7 @@ function DispatchResolutionForm({ id }) {
                   <hr />
                   <ListGroup variant="flush" style={{ marginTop: "-13px", marginBottom: "-13px" }}>
                     <h4 className="mt-2" style={{ marginBottom: "-2px" }}>Animals</h4>
-                    {assigned_request.service_request_object.animals.filter(animal => Object.keys(assigned_request.animals).includes(String(animal.id))).map((animal, inception) => (
+                    {data.sr_updates[index].animals.filter(animal => Object.keys(assigned_request.animals).includes(String(animal.id))).map((animal, inception) => (
                       <ListGroup.Item key={animal.id}>
                         <Row>
                           <Col xs={4} className="pl-0">
@@ -385,6 +395,28 @@ function DispatchResolutionForm({ id }) {
                               value={`sr_updates.${index}.animals.${inception}.shelter`}
                               isClearable={false}
                               placeholder="Select Shelter..."
+                              onChange={(instance) => {
+                                roomRef.current.select.clearValue();
+                                props.setFieldValue(`sr_updates.${index}.animals.${inception}.room`, '');
+                                props.setFieldValue(`sr_updates.${index}.animals.${inception}.shelter`, instance === null ? '' : instance.value);
+                              }}
+                            />
+                          </Col>
+                          <Col xs={4} className="pl-0">
+                            <DropDown
+                              id={`sr_updates.${index}.animals.${inception}.room`}
+                              name={`sr_updates.${index}.animals.${inception}.room`}
+                              type="text"
+                              ref={roomRef}
+                              className="mt-3"
+                              key={`sr_updates.${index}.animals.${inception}.room`}
+                              options={shelters.room_options[props.values.sr_updates[index].animals[inception].shelter] ? shelters.room_options[props.values.sr_updates[index].animals[inception].shelter] : []}
+                              isClearable={true}
+                              placeholder="Select Room..."
+                              value={`sr_updates.${index}.animals.${inception}.room`||''}
+                              onChange={(instance) => {
+                                props.setFieldValue(`sr_updates.${index}.animals.${inception}.room`, instance === null ? '' : instance.value);
+                              }}
                             />
                           </Col>
                         </Row>
