@@ -198,10 +198,10 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
                 else:
                     sr_followup_date = service_requests[0].followup_date or None
                 assigned_request.followup_date = service_request['followup_date']
-                service_requests.update(status=sr_status, followup_date=sr_followup_date, priority=service_request['priority'])
-                # Only update the action per SR one time when Dispatch is closed.
-                if evac_assignment.end_time and not serializer.instance.end_time:
+                # Record SR status change in history if appplicable.
+                if service_requests[0].status != sr_status:
                     action.send(self.request.user, verb=sr_status.replace('ed','') + 'ed service request', target=service_requests[0])
+                service_requests.update(status=sr_status, followup_date=sr_followup_date, priority=service_request['priority'])
                 # Only create VisitNote on first update, otherwise update existing VisitNote.
                 if service_request.get('date_completed'):
                     if not assigned_request.visit_note:
