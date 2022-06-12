@@ -158,7 +158,7 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
                 # Add SR to selected DA.
                 animals_dict = {}
                 for animal in service_requests[0].animal_set.filter(status__in=['REPORTED', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE']):
-                    animals_dict[animal.id] = {'status':animal.status, 'shelter':'', 'room':''}
+                    animals_dict[animal.id] = {'name':animal_dict.get('name'), 'species':animal_dict.get('species'), 'status':animal_dict.get('status'), 'color_notes':animal_dict.get('color_notes'), 'pcolor':animal_dict.get('pcolor'), 'scolor':animal_dict.get('scolor'), 'shelter':animal_dict.get('shelter'), 'room':animal_dict.get('room')}
                 AssignedRequest.objects.create(dispatch_assignment=evac_assignment, service_request=service_requests[0], animals=animals_dict)
                 action.send(self.request.user, verb='assigned service request', target=service_requests[0])
 
@@ -167,7 +167,7 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
                 service_requests = ServiceRequest.objects.filter(id=service_request['id'])
                 sr_status = 'open' if service_request['unable_to_complete'] else 'assigned' if service_request['incomplete'] else 'closed'
                 for animal_dict in service_request['animals']:
-                    animals_dict[animal_dict['id']] = {'status':animal_dict.get('status'), 'shelter':animal_dict.get('shelter'), 'room':animal_dict.get('room')}
+                    animals_dict[animal_dict['id']] = {'name':animal_dict.get('name'), 'species':animal_dict.get('species'), 'status':animal_dict.get('status'), 'color_notes':animal_dict.get('color_notes'), 'pcolor':animal_dict.get('pcolor'), 'scolor':animal_dict.get('scolor'), 'shelter':animal_dict.get('shelter'), 'room':animal_dict.get('room')}
                     # Record status change if applicable.
                     animal = Animal.objects.get(pk=animal_dict['id'])
                     new_status = animal_dict.get('status')
@@ -199,7 +199,9 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
                     sr_followup_date = service_requests[0].followup_date or None
                 assigned_request.followup_date = service_request['followup_date']
                 service_requests.update(status=sr_status, followup_date=sr_followup_date, priority=service_request['priority'])
-                action.send(self.request.user, verb=sr_status.replace('ed','') + 'ed service request', target=service_requests[0])
+                # Only update the action per SR one time when Dispatch is closed.
+                if evac_assignment.end_time and not serializer.instance.end_time:
+                    action.send(self.request.user, verb=sr_status.replace('ed','') + 'ed service request', target=service_requests[0])
                 # Only create VisitNote on first update, otherwise update existing VisitNote.
                 if service_request.get('date_completed'):
                     if not assigned_request.visit_note:
