@@ -4,7 +4,6 @@ import Incident from "./Incident";
 import IncidentForm from "./IncidentForm";
 import LoginForm from "./accounts/LoginForm";
 import PasswordReset from "./accounts/PasswordReset";
-import UserManagement from "./accounts/UserManagement";
 import AnimalForm from "./animals/AnimalForm";
 import AnimalDetails from "./animals/AnimalDetails";
 import AnimalSearch from "./animals/AnimalSearch";
@@ -45,7 +44,6 @@ const routes = {
   "/incident/edit/:id": ({id}) => <IncidentForm id={id} />,
   "/incident/new": () => <IncidentForm />,
   "/:incident/home": ({incident}) => <Home incident={incident} />,
-  "/:incident/accounts/user_management": ({incident}) => <UserManagement incident={incident} />,
   "/:incident/animals/edit/:id": ({id, incident}) => <AnimalForm id={id} state={initialWorkflowData} incident={incident} />,
   "/:incident/animals/new": ({incident}) => <AnimalForm state={initialWorkflowData} incident={incident} />,
   "/:incident/animals/search": ({incident}) => <AnimalSearch incident={incident} />,

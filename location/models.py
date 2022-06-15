@@ -15,7 +15,7 @@ class Location(models.Model):
 
     address = models.CharField(max_length=50, blank=True)
     apartment = models.CharField(max_length=50, blank=True)
-    city = models.CharField(max_length=50, blank=True, null=True)
+    city = models.CharField(max_length=50, blank=True)
     state = models.CharField(max_length=2, choices=STATE_CHOICES, blank=True)
     zip_code = models.CharField(max_length=50, blank=True)
     latitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)

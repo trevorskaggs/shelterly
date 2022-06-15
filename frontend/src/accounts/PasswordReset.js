@@ -65,8 +65,8 @@ const ResetPassword = () => {
               formGroupClasses="mt-3 mb-4"
             />
             <BootstrapForm.Group as={Col}>
-              <Button type="submit" size="lg" className="btn-primary" disabled={isSubmitting} block>Save Password</Button>
-              <Button size="lg" className="btn-primary" onClick={() => navigate('/')} disabled={isSubmitting} block>Return to Login</Button>
+              <Button type="submit" size="lg" className="btn-primary" block>Reset Password</Button>
+              <Button size="lg" className="btn-primary" onClick={() => navigate('/')} block>Return to Login</Button>
             </BootstrapForm.Group>
           </BootstrapForm>
         </Col>
