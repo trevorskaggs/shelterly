@@ -71,7 +71,7 @@ INSTALLED_APPS = [
     'animals',
     'evac',
     'hotline',
-    'intake',
+    'incident',
     'location',
     'people',
     'rest_framework',
