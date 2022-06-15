@@ -32,7 +32,7 @@ urlpatterns = [
     path('animals/', include('animals.urls')),
     path('evac/', include('evac.urls')),
     path('hotline/', include('hotline.urls')),
-    path('intake/', include('intake.urls')),
+    path('incident/', include('incident.urls')),
     path('location/', include('location.urls')),
     path('people/', include('people.urls')),
     path('reports/', include('reports.urls')),
