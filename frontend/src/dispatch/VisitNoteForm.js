@@ -19,7 +19,7 @@ import {
 import * as Yup from 'yup';
 import { DateTimePicker, TextInput } from '../components/Form';
 
-const VisitNoteForm = ({ id }) => {
+const VisitNoteForm = ({ id, incident }) => {
 
   const [data, setData] = useState({
     date_completed: '',
@@ -68,7 +68,7 @@ const VisitNoteForm = ({ id }) => {
         setTimeout(() => {
           axios.patch('/hotline/api/visitnote/' + values.id + '/', values)
             .then(
-              navigate('/hotline/servicerequest/' + values.service_request)
+              navigate('/' + incident + '/hotline/servicerequest/' + values.service_request)
             )
             .catch(error => {
             });

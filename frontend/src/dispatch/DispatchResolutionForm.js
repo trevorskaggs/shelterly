@@ -30,7 +30,7 @@ import ButtonSpinner from '../components/ButtonSpinner';
 import { printDispatchResolutionForm } from './Utils';
 import { priorityChoices } from '../constants';
 
-function DispatchResolutionForm({ id }) {
+function DispatchResolutionForm({ id, incident }) {
 
   // Initial animal data.
   const [data, setData] = useState({
@@ -204,7 +204,7 @@ function DispatchResolutionForm({ id }) {
         setTimeout(() => {
           axios.put('/evac/api/evacassignment/' + id + '/', values)
             .then(response => {
-              navigate('/dispatch/summary/' + response.data.id);
+              navigate('/' + incident + '/dispatch/summary/' + response.data.id);
             })
             .catch(error => {
               setSubmitting(false);
@@ -255,7 +255,7 @@ function DispatchResolutionForm({ id }) {
                   <Card.Title style={{marginBottom:"-5px"}}>
                     <h4>
                       SR#{assigned_request.service_request_object.id} -&nbsp;
-                      <Link href={"/hotline/servicerequest/" + assigned_request.service_request_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link> |&nbsp;
+                      <Link href={"/" + incident + "/hotline/servicerequest/" + assigned_request.service_request_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link> |&nbsp;
                       <Checkbox
                         label={"Not Completed Yet:"}
                         name={`sr_updates.${index}.incomplete`}

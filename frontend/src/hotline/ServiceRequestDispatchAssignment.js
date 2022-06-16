@@ -16,7 +16,7 @@ import {
 import { faRectanglePortrait } from '@fortawesome/pro-solid-svg-icons';
 import { faCheckCircle } from '@fortawesome/pro-duotone-svg-icons';
 
-function ServiceRequestDispatchAssignment({id}) {
+function ServiceRequestDispatchAssignment({ id, incident }) {
 
   const [currentRequest, setCurrentRequest] = useState({id:'', matches: {}, latitude:0, longitude:0, followup_date:''});
   const [data, setData] = useState({dispatch_assignments: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
@@ -86,7 +86,7 @@ function ServiceRequestDispatchAssignment({id}) {
   const handleSubmit = () => {
     axios.patch('/evac/api/evacassignment/' + selected + '/', {new_service_request:currentRequest.id})
     .then(response => {
-      navigate('/dispatch/summary/' + selected)
+      navigate('/' + incident + '/dispatch/summary/' + selected)
     })
     .catch(error => {
     });
@@ -338,7 +338,7 @@ function ServiceRequestDispatchAssignment({id}) {
                 </Tooltip>
               }
             >
-              <Link href={"/dispatch/summary/" + dispatch_assignment.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+              <Link href={"/" + incident + "/dispatch/summary/" + dispatch_assignment.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
             </OverlayTrigger>&nbsp;&nbsp;|&nbsp;
             {dispatch_assignment.team ? dispatch_assignment.team_object.name : ""}
             {dispatch_assignment.team ?
@@ -369,7 +369,7 @@ function ServiceRequestDispatchAssignment({id}) {
                       ))}
                     </span>
                     :""}
-                    &nbsp;|&nbsp;SR#{assigned_request.service_request_object.id} - <Link href={"/hotline/servicerequest/" + assigned_request.service_request_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link>
+                    &nbsp;|&nbsp;SR#{assigned_request.service_request_object.id} - <Link href={"/" + incident + "/hotline/servicerequest/" + assigned_request.service_request_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link>
                 </li>
                 : ""}
               </span>
@@ -405,7 +405,7 @@ function ServiceRequestDispatchAssignment({id}) {
                   </Tooltip>
                 }
               >
-                <Link href={"/dispatch/summary/" + dispatch_assignment.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+                <Link href={"/" + incident + "/dispatch/summary/" + dispatch_assignment.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
               </OverlayTrigger>&nbsp;&nbsp;|&nbsp;
               {dispatch_assignment.team ? dispatch_assignment.team_object.name : ""}
               {dispatch_assignment.team_member_names ?
@@ -446,7 +446,7 @@ function ServiceRequestDispatchAssignment({id}) {
                           </Tooltip>
                         }
                       >
-                        <Link href={"/hotline/servicerequest/" + assigned_request.service_request_object.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+                        <Link href={"/" + incident + "/hotline/servicerequest/" + assigned_request.service_request_object.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
                       </OverlayTrigger>
                   </li>
                   : ""}

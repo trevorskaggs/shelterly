@@ -21,8 +21,7 @@ const IncidentForm = ({ id }) => {
     slug: '',
     latitude: '',
     longitude: '',
-  })
-  const [latLon, setLatLon] = useState('');
+  });
 
   const markerRef = useRef(null);
   const mapRef = useRef(null);
@@ -37,7 +36,7 @@ const IncidentForm = ({ id }) => {
       setFieldValue("longitude", +(Math.round(latLon.lng + "e+4") + "e-4"));
       map.leafletElement.setView(latLon);
     }
-}
+  }
 
   useEffect(() => {
     console.log('test')

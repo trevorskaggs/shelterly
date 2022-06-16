@@ -18,6 +18,7 @@ function ServiceRequestForm(props) {
 
   const { state } = useContext(AuthContext);
   const id = props.id;
+  const incident = props.incident;
 
   // Determine if we're in the hotline workflow.
   var is_workflow = window.location.pathname.includes("workflow");
@@ -142,7 +143,7 @@ function ServiceRequestForm(props) {
               });
               Promise.all(promises)
               .then((results) => {
-                navigate('/hotline/servicerequest/' + response.data.id);
+                navigate('/' + incident + '/hotline/servicerequest/' + response.data.id);
               })
             })
             .catch(error => {
@@ -159,7 +160,7 @@ function ServiceRequestForm(props) {
                 navigate(state.prevLocation);
               }
               else {
-                navigate('/hotline/servicerequest/' + id);
+                navigate('/' + incident + '/hotline/servicerequest/' + id);
               }
             })
             .catch(error => {
@@ -240,7 +241,7 @@ function ServiceRequestForm(props) {
         <Modal.Body>
           <p>
             {error && error.error[0]}
-            &nbsp;Click <Link href={'/hotline/servicerequest/' + error.error[1]} style={{color:"#8d99d4"}}>here</Link> to view this Service Request.
+            &nbsp;Click <Link href={"/" + incident + "/hotline/servicerequest/" + error.error[1]} style={{color:"#8d99d4"}}>here</Link> to view this Service Request.
           </p>
         </Modal.Body>
         <Modal.Footer>

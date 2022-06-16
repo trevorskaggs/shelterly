@@ -10,7 +10,7 @@ import Header from '../components/Header';
 import Map, { shelterMarkerIcon } from "../components/Map";
 import Scrollbar from '../components/Scrollbars';
 
-function Shelter() {
+function Shelter({ incident }) {
 
   const [data, setData] = useState({shelters: [],  isFetching: false, bounds:L.latLngBounds([[0,0]])});
   const [selectedShelter, setSelectedShelter] = useState(null);
@@ -61,7 +61,7 @@ function Shelter() {
               key={shelter.id}
               position={[shelter.latitude, shelter.longitude]}
               icon={shelterMarkerIcon}
-              onClick={() => navigate("/shelter/" + shelter.id)}
+              onClick={() => navigate("/" + incident + "/shelter/" + shelter.id)}
             >
               <MapTooltip key={`${index}-${selectedShelter}`} keepInView={false} autoPan={false} permanent={selectedShelter === shelter.id ? true : false}>
                 <span>
@@ -92,7 +92,7 @@ function Shelter() {
     <Row className="ml-0">
       {data.shelters.map(shelter => (
         <span key={shelter.id} className="pl-0 pr-0 mr-3 mb-3">
-          <Link href={"/shelter/" + shelter.id} className="shelter-link" style={{textDecoration:"none", color:"white"}}>
+          <Link href={"/" + incident + "/shelter/" + shelter.id} className="shelter-link" style={{textDecoration:"none", color:"white"}}>
             <Card className="border rounded shelter-hover-div" style={{height:"100px", whiteSpace:"nowrap", overflow:"hidden"}}>
               <div className="row no-gutters hover-div" style={{height:"100px", textTransform:"capitalize", marginRight:"-2px"}}>
                 <Row className="ml-0 mr-0 w-100" style={{minWidth:"510px", maxWidth:"510px", flexWrap:"nowrap"}}>
@@ -117,7 +117,7 @@ function Shelter() {
         </span>
       ))}
       <span className="pl-0 pr-0 mr-3 mb-3">
-        <Link href={"/shelter/new"} className="shelter-link" style={{textDecoration:"none", color:"white"}}>
+        <Link href={"/" + incident + "/shelter/new"} className="shelter-link" style={{textDecoration:"none", color:"white"}}>
           <Card className="border rounded shelter-hover-div" style={{height:"100px", whiteSpace:"nowrap", overflow:"hidden"}}>
             <div className="row no-gutters hover-div" style={{height:"100px", textTransform:"capitalize", marginRight:"-2px"}}>
               <Row className="ml-0 mr-0 w-100" style={{minWidth:"510px", maxWidth:"510px", flexWrap:"nowrap"}}>

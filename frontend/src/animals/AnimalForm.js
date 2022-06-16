@@ -15,6 +15,7 @@ const AnimalForm = (props) => {
 
   const { state } = useContext(AuthContext);
   const id = props.id;
+  const incident = '/' + props.incident;
 
   // Determine if this is an intake workflow.
   let is_intake = window.location.pathname.includes("intake")
@@ -370,10 +371,10 @@ const AnimalForm = (props) => {
               await axios.post('/animals/api/animal/', formData)
               .then(function() {
                 if (ownerResponse[0].data.id) {
-                  navigate('/people/owner/' + ownerResponse[0].data.id)
+                  navigate(incident + '/people/owner/' + ownerResponse[0].data.id)
                 }
                 else {
-                  navigate('/people/reporter/' + reporterResponse[0].data.id)
+                  navigate(incident + '/people/reporter/' + reporterResponse[0].data.id)
                 }
               })
               .catch(error => {
@@ -392,7 +393,7 @@ const AnimalForm = (props) => {
                   navigate(state.prevLocation);
                 }
                 else {
-                  navigate('/animals/' + id);
+                  navigate(incident + '/animals/' + id);
                 }
               })
               .catch(error => {
@@ -404,15 +405,15 @@ const AnimalForm = (props) => {
               .then(response => {
                 // If adding to an SR, redirect to the SR.
                 if (servicerequest_id) {
-                  navigate('/hotline/servicerequest/' + servicerequest_id);
+                  navigate(incident + '/hotline/servicerequest/' + servicerequest_id);
                 }
                 // If adding to an Owner, redirect to the owner.
                 else if (owner_id) {
-                  navigate('/people/owner/' + owner_id)
+                  navigate(incident + '/people/owner/' + owner_id)
                 }
                 // Else redirect to the animal.
                 else {
-                  navigate('/animals/' + response.data.id);
+                  navigate(incident + '/animals/' + response.data.id);
                 }
               })
               .catch(error => {

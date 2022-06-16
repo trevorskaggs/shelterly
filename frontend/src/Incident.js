@@ -2,8 +2,8 @@ import React, { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import Select from 'react-select';
 import SimpleValue from 'react-select-simple-value';
-import { Button, Col, Form, Row } from 'react-bootstrap';
-import { Link, navigate } from "raviger";
+import { Button, Col, Row } from 'react-bootstrap';
+import { Link } from "raviger";
 import moment from 'moment';
 import { AuthContext } from "./accounts/AccountsReducer";
 
@@ -29,10 +29,6 @@ function Home() {
       ...provided,
       color: 'black'
     }),
-    // valueContainer: (base) => ({
-    //   ...base,
-    //   minHeight: height,
-    // })
   };
 
   // Hook for initializing data.
@@ -52,7 +48,6 @@ function Home() {
             // Build incident option list.
             options.push({value: incident.slug, label: incident.name + ' - ' + moment(incident.start_time).format('MM/DD/YYYY')});
           });
-          // setData(response.data);
           setOptions(options)
         }
       })

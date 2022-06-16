@@ -21,7 +21,7 @@ import Scrollbar from '../components/Scrollbars';
 import 'react-bootstrap-typeahead/css/Typeahead.css';
 import 'leaflet/dist/leaflet.css';
 
-function Deploy() {
+function Deploy({ incident }) {
 
   // Determine if this is a preplanning workflow.
   let preplan = window.location.pathname.includes("preplan")
@@ -386,7 +386,7 @@ function Deploy() {
               }
               // Otherwise navigate to the DA Summary page.
               else {
-                navigate('/dispatch/summary/' + response.data.id);
+                navigate("/" + incident + '/dispatch/summary/' + response.data.id);
               }
             })
             .catch(error => {
@@ -849,7 +849,7 @@ function Deploy() {
                         </Tooltip>
                       }
                     >
-                      <Link href={"/hotline/servicerequest/" + service_request.id}><FontAwesomeIcon icon={faClipboardList} inverse /></Link>
+                      <Link href={"/" + incident + "/hotline/servicerequest/" + service_request.id}><FontAwesomeIcon icon={faClipboardList} inverse /></Link>
                     </OverlayTrigger>
                     <OverlayTrigger
                       key={"add-to-dispatch"}
@@ -860,7 +860,7 @@ function Deploy() {
                         </Tooltip>
                       }
                     >
-                      <Link href={"/hotline/servicerequest/" + service_request.id + "/assign"}><FontAwesomeIcon icon={faMapMarkedAlt} className="ml-1" inverse /></Link>
+                      <Link href={"/" + incident + "/hotline/servicerequest/" + service_request.id + "/assign"}><FontAwesomeIcon icon={faMapMarkedAlt} className="ml-1" inverse /></Link>
                     </OverlayTrigger>
                   </div>
                 </div>

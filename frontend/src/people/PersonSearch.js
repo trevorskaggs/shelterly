@@ -15,7 +15,7 @@ import Scrollbar from '../components/Scrollbars';
 
 import { ITEMS_PER_PAGE } from '../constants';
 
-function PersonSearch() {
+function PersonSearch({ incident }) {
 
 	// Identify any query param data.
   const [queryParams] = useQueryParams();
@@ -132,7 +132,7 @@ function PersonSearch() {
 													</Tooltip>
 												}
 											>
-												<Link href={"/people/owner/" + owner.id}><FontAwesomeIcon icon={faDotCircle} className="mr-2" inverse/></Link>
+												<Link href={"/" + incident + "/people/owner/" + owner.id}><FontAwesomeIcon icon={faDotCircle} className="mr-2" inverse/></Link>
 											</OverlayTrigger>
 											:
 											<OverlayTrigger
@@ -144,7 +144,7 @@ function PersonSearch() {
 													</Tooltip>
 												}
 											>
-												<Link href={"/people/reporter/" + owner.id}><FontAwesomeIcon icon={faDotCircle} className="mr-2" inverse/></Link>
+												<Link href={"/" + incident + "/people/reporter/" + owner.id}><FontAwesomeIcon icon={faDotCircle} className="mr-2" inverse/></Link>
 											</OverlayTrigger>
 											}
 											{owner.first_name} {owner.last_name}
@@ -159,7 +159,7 @@ function PersonSearch() {
 													<ListGroup.Item><b>Phone: </b>{owner.phone ? <span>{owner.display_phone} </span> : "None"}</ListGroup.Item>
 													<ListGroup.Item><b>Email: </b>{owner.email ? <span>{owner.email} </span> : "None"}</ListGroup.Item>
 													{owner.request ?
-														<ListGroup.Item><b>Service Request: </b><Link href={"/hotline/servicerequest/" + owner.request.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{owner.request.full_address}</Link></ListGroup.Item>
+														<ListGroup.Item><b>Service Request: </b><Link href={"/" + incident + "/hotline/servicerequest/" + owner.request.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{owner.request.full_address}</Link></ListGroup.Item>
 													:
 														<ListGroup.Item><b>Address: </b>{owner.full_address || "None"}</ListGroup.Item>
 													}
@@ -180,7 +180,7 @@ function PersonSearch() {
 													<Scrollbar style={{height:"144px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
 														{owner.animals.filter(animal => animal.species === searchState[owner.id].selectedSpecies).map((animal, i) => (
 															<ListGroup.Item key={animal.id}>
-																<b>#{animal.id}:</b>&nbsp;&nbsp;<Link href={"/animals/" + animal.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.name || "Unknown"}</Link>
+																<b>#{animal.id}:</b>&nbsp;&nbsp;<Link href={"/" + incident + "/animals/" + animal.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.name || "Unknown"}</Link>
 																{animal.color_notes ?
 																<OverlayTrigger
 																	key={"animal-color-notes"}

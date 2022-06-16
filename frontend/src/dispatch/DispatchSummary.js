@@ -16,7 +16,7 @@ import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
 import { printDispatchResolutionForm } from './Utils'
 
-function DispatchSummary({id}) {
+function DispatchSummary({ id, incident }) {
 
   // Initial animal data.
   const [data, setData] = useState({
@@ -222,7 +222,7 @@ function DispatchSummary({id}) {
           </Tooltip>
         }
       >
-        <Link href={"/dispatch/resolution/" + id}><FontAwesomeIcon icon={faEdit} className="ml-1" inverse /></Link>
+        <Link href={"/" + incident + "/dispatch/resolution/" + id}><FontAwesomeIcon icon={faEdit} className="ml-1" inverse /></Link>
       </OverlayTrigger>
       :
       <OverlayTrigger
@@ -234,7 +234,7 @@ function DispatchSummary({id}) {
           </Tooltip>
         }
       >
-        <Link href={"/dispatch/resolution/" + id}><FontAwesomeIcon icon={faClipboardCheck} className="ml-1"  inverse /></Link>
+        <Link href={"/" + incident + "/dispatch/resolution/" + id}><FontAwesomeIcon icon={faClipboardCheck} className="ml-1"  inverse /></Link>
       </OverlayTrigger>
       }
       <OverlayTrigger
@@ -359,7 +359,7 @@ function DispatchSummary({id}) {
             <Card.Title>
               <h4>
                 SR#{assigned_request.service_request_object.id} -&nbsp;
-                <Link href={"/hotline/servicerequest/" + assigned_request.service_request_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link>
+                <Link href={"/" + incident + "/hotline/servicerequest/" + assigned_request.service_request_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link>
                 {assigned_request.visit_note && assigned_request.visit_note.forced_entry ?
                   <OverlayTrigger
                     key={"forced"}
@@ -392,7 +392,7 @@ function DispatchSummary({id}) {
             <ListGroup variant="flush" style={{marginTop:"-5px", marginBottom:"-13px"}}>
               {assigned_request.service_request_object.owner_objects.map(owner => (
                 <ListGroup.Item key={owner.id}>
-                  <b>Owner: </b><Link href={"/people/owner/" + owner.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{owner.first_name} {owner.last_name}</Link>
+                  <b>Owner: </b><Link href={"/" + incident + "/people/owner/" + owner.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{owner.first_name} {owner.last_name}</Link>
                   {owner.display_phone ?
                   <OverlayTrigger
                     key={"owner-phone"}
@@ -446,7 +446,7 @@ function DispatchSummary({id}) {
             <h4 className="mt-2" style={{marginBottom:"-2px"}}>Animals</h4>
             {assigned_request.service_request_object.animals.filter(animal => Object.keys(assigned_request.animals).includes(String(animal.id))).map((animal, inception) => (
               <ListGroup.Item key={animal.id}>
-                <span style={{textTransform:"capitalize"}}>A#{animal.id} - <Link href={"/animals/" + animal.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.name||"Unknown"}</Link>&nbsp;-&nbsp;{animal.species}</span>
+                <span style={{textTransform:"capitalize"}}>A#{animal.id} - <Link href={"/" + incident + "/animals/" + animal.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.name||"Unknown"}</Link>&nbsp;-&nbsp;{animal.species}</span>
                 {animal.color_notes ?
                   <OverlayTrigger
                     key={"animal-color-notes"}
@@ -469,7 +469,7 @@ function DispatchSummary({id}) {
           <span>
             <hr/>
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
-              <h4 className="mt-2" style={{marginBottom:"-2px"}}>Previous Visit: <Link href={"/dispatch/summary/" + assigned_request.previous_visit.dispatch_assignment} className="text-link" style={{textDecoration:"none", color:"white"}}><Moment format="L">{assigned_request.previous_visit.date_completed}</Moment></Link></h4>
+              <h4 className="mt-2" style={{marginBottom:"-2px"}}>Previous Visit: <Link href={"/" + incident + "/dispatch/summary/" + assigned_request.previous_visit.dispatch_assignment} className="text-link" style={{textDecoration:"none", color:"white"}}><Moment format="L">{assigned_request.previous_visit.date_completed}</Moment></Link></h4>
                 <ListGroup.Item>
                   {assigned_request.previous_visit.notes || "No information available."}
                 </ListGroup.Item>

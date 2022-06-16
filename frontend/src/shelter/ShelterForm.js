@@ -12,7 +12,7 @@ import ButtonSpinner from '../components/ButtonSpinner';
 // Regex validators.
 const nameRegex = /^[a-z0-9 ,.'-]+$/i;
 
-const ShelterForm = ({id}) => {
+const ShelterForm = ({ id, incident }) => {
 
   // Initial shelter data.
   const [data, setData] = useState({
@@ -96,7 +96,7 @@ const ShelterForm = ({id}) => {
           if (id) {
             axios.put('/shelter/api/shelter/' + id + '/', values)
             .then(function() {
-              navigate('/shelter/' + id)
+              navigate("/" + incident + '/shelter/' + id)
             })
             .catch(error => {
               if (error.response.data && error.response.data.name && error.response.data.name[0].includes('shelter with this name already exists')) {
@@ -107,7 +107,7 @@ const ShelterForm = ({id}) => {
           else {
             axios.post('/shelter/api/shelter/', values)
             .then(response => {
-              navigate('/shelter/' + response.data.id)
+              navigate("/" + incident + '/shelter/' + response.data.id)
             })
             .catch(error => {
               if (error.response.data && error.response.data.name && error.response.data.name[0].includes('shelter with this name already exists')) {

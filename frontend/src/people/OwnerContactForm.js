@@ -9,7 +9,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft } from '@fortawesome/free-solid-svg-icons';
 import ButtonSpinner from '../components/ButtonSpinner';
 
-const OwnerContactForm = ({id}) => {
+const OwnerContactForm = ({ id, incident }) => {
 
   const [queryParams] = useQueryParams();
   let url;
@@ -90,7 +90,7 @@ const OwnerContactForm = ({id}) => {
         }
         axios_method(url, values)
         .then(response => {
-          navigate('/people/owner/' + response.data.owner)
+          navigate('/' + incident + '/people/owner/' + response.data.owner)
         })
         .catch(error => {
           setSubmitting(false);

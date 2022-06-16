@@ -15,6 +15,7 @@ const PersonForm = (props) => {
 
   const { state } = useContext(AuthContext);
   const id = props.id;
+  const incident = "/" + props.incident
 
   // Determine if we're in the hotline workflow.
   var is_workflow = window.location.pathname.includes("workflow");
@@ -48,7 +49,7 @@ const PersonForm = (props) => {
   // Modal for exiting workflow.
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
-  const goBack = () => navigate('/hotline');
+  const goBack = () => navigate(incident + '/hotline');
 
   // Track duplicate owner error.
   const [error, setError] = useState({show:false, error:[]});
@@ -59,15 +60,15 @@ const PersonForm = (props) => {
     .then(response => {
       // If SR already exists, redirect to the SR details.
       if (servicerequest_id) {
-        navigate('/hotline/servicerequest/' + servicerequest_id);
+        navigate(incident + '/hotline/servicerequest/' + servicerequest_id);
       }
       // If adding from an animal, redirect to the Animal details.
       else if (animal_id) {
-        navigate('/animals/' + animal_id);
+        navigate(incident + '/animals/' + animal_id);
       }
       // Otherise redirect to the duplicate Owner details.
       else {
-        navigate('/people/owner/' + response.data.id);
+        navigate(incident + '/people/owner/' + response.data.id);
       }
     })
     .catch(error => {
@@ -231,10 +232,10 @@ const PersonForm = (props) => {
                 navigate(state.prevLocation);
               }
               else if (isOwner) {
-                navigate('/people/owner/' + id);
+                navigate(incident + '/people/owner/' + id);
               }
               else {
-                navigate('/people/reporter/' + id);
+                navigate(incident + '/people/reporter/' + id);
               }
             })
             .catch(error => {
@@ -246,15 +247,15 @@ const PersonForm = (props) => {
             .then(response => {
               // If SR already exists, redirect to the SR details.
               if (servicerequest_id) {
-                navigate('/hotline/servicerequest/' + servicerequest_id);
+                navigate(incident + '/hotline/servicerequest/' + servicerequest_id);
               }
               // If adding from an animal, redirect to the Animal details.
               else if (animal_id) {
-                navigate('/animals/' + animal_id);
+                navigate(incident + '/animals/' + animal_id);
               }
               // If adding from an owner, redirect to the new Owner details.
               else {
-                navigate('/people/owner/' + response.data.id);
+                navigate(incident + '/people/owner/' + response.data.id);
               }
             })
             .catch(error => {
@@ -370,7 +371,7 @@ const PersonForm = (props) => {
               <Modal.Body>
                 <div>
                   <span>This person cannot be created because</span> {error && error.error[0]}
-                  <div className="mt-1 mb-1">Click <Link href={'/people/owner/' + error.error[1]} style={{color:"#8d99d4"}}>here</Link> to view this owner.</div>
+                  <div className="mt-1 mb-1">Click <Link href={"/" + incident + "/people/owner/" + error.error[1]} style={{color:"#8d99d4"}}>here</Link> to view this owner.</div>
                   {!is_workflow ? <div>Would you like to use the existing owner instead?</div> : ""}
                 </div>
               </Modal.Body>

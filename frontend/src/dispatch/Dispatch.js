@@ -15,7 +15,7 @@ import Map, { countMatches, prettyText, reportedMarkerIcon, SIPMarkerIcon, UTLMa
 import Header from "../components/Header";
 import Scrollbar from '../components/Scrollbars';
 
-function Dispatch() {
+function Dispatch(incident) {
 
   const [data, setData] = useState({dispatch_assignments: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
   const [mapState, setMapState] = useState({});
@@ -77,17 +77,17 @@ function Dispatch() {
     <hr/>
     <Row className="ml-0 mr-0 pl-0 pr-0 mb-0">
       <Col xs={4} className="pl-0 pr-0">
-        <Link href="/dispatch/deploy" style={{textDecoration:"none"}}>
+        <Link href={"/" + incident + "/dispatch/deploy"} style={{textDecoration:"none"}}>
           <Button className="rounded border btn-block" style={{height:"100px", fontSize:"20px"}}><FontAwesomeIcon icon={faBullhorn} className="mr-1 fa-move-up" inverse />DEPLOY TEAMS</Button>
         </Link>
       </Col>
       <Col xs={4} className="pl-0 pr-0">
-        <Link href="/dispatch/preplan" style={{textDecoration:"none"}}>
+        <Link href={"/" + incident + "/dispatch/preplan"} style={{textDecoration:"none"}}>
           <Button className="rounded border btn-block" style={{height:"100px", fontSize:"20px"}}><FontAwesomeIcon icon={faMapMarkedAlt} className="mr-1 fa-move-up" inverse />PREPLAN ASSIGNMENTS</Button>
         </Link>
       </Col>
       <Col xs={4} className="pl-0 pr-0">
-        <Link href="/dispatch/teammanagement" style={{textDecoration:"none"}}>
+        <Link href={"/" + incident + "/dispatch/teammanagement"} style={{textDecoration:"none"}}>
           <Button className="rounded border btn-block" style={{height:"100px", fontSize:"20px"}}><FontAwesomeIcon icon={faUsers} className="mr-1 fa-move-up" inverse />TEAM MANAGEMENT</Button>
         </Link>
       </Col>

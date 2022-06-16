@@ -15,7 +15,7 @@ import AnimalCards from '../components/AnimalCards';
 import PhotoDocuments from '../components/PhotoDocuments';
 import { printOwnerDetails } from './Utils';
 
-function PersonDetails({id}) {
+function PersonDetails({id, incident}) {
 
   // Determine if this is an owner or reporter when creating a Person.
   let is_owner = window.location.pathname.includes("owner")
@@ -100,7 +100,7 @@ function PersonDetails({id}) {
               </Tooltip>
             }
           >
-            <Link href={"/people/owner/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-2 mr-1" inverse /></Link>
+            <Link href={"/" + incident + "/people/owner/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-2 mr-1" inverse /></Link>
           </OverlayTrigger>
         </span>
       :
@@ -114,7 +114,7 @@ function PersonDetails({id}) {
               </Tooltip>
             }
           >
-            <Link href={"/people/reporter/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-2 mr-1" inverse /></Link>
+            <Link href={"/" + incident + "/people/reporter/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-2 mr-1" inverse /></Link>
           </OverlayTrigger>
         </span>
       }
@@ -150,7 +150,7 @@ function PersonDetails({id}) {
                 {data.phone ? <ListGroup.Item><b>Telephone: </b>{data.display_phone} {data.display_alt_phone ? <span>|&nbsp;Alt: {data.display_alt_phone}</span> : ""}</ListGroup.Item> : ""}
                 {data.email ? <ListGroup.Item><b>Email: </b>{data.email}</ListGroup.Item> : ""}
                 {data.request ?
-                  <ListGroup.Item><b>Service Request: </b><Link href={"/hotline/servicerequest/" + data.request.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.request.full_address}</Link></ListGroup.Item>
+                  <ListGroup.Item><b>Service Request: </b><Link href={"/" + incident + "/hotline/servicerequest/" + data.request.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.request.full_address}</Link></ListGroup.Item>
                 :
                   <ListGroup.Item><b>Address: </b>{data.address ? data.full_address : 'No Address Listed'}</ListGroup.Item>
                 }
@@ -175,7 +175,7 @@ function PersonDetails({id}) {
                     </Tooltip>
                   }
                 >
-                  <Link href={"/hotline/ownercontact/new?owner=" + id}><FontAwesomeIcon icon={faPhonePlus} className="ml-1" inverse /></Link>
+                  <Link href={"/" + incident + "/hotline/ownercontact/new?owner=" + id}><FontAwesomeIcon icon={faPhonePlus} className="ml-1" inverse /></Link>
                 </OverlayTrigger>
               </h4>
             </Card.Title>
@@ -193,7 +193,7 @@ function PersonDetails({id}) {
                       </Tooltip>
                     }
                   >
-                    <Link href={"/hotline/ownercontact/" + owner_contact.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
+                    <Link href={"/" + incident + "/hotline/ownercontact/" + owner_contact.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
                   </OverlayTrigger>
                   : {owner_contact.owner_contact_note}</ListGroup.Item>
                 ))}
@@ -219,7 +219,7 @@ function PersonDetails({id}) {
                     </Tooltip>
                   }
                 >
-                  <Link href={"/animals/new?owner_id=" + id}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
+                  <Link href={"/" + incident + "/animals/new?owner_id=" + id}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
                 </OverlayTrigger>
                 <OverlayTrigger
                   key={"add-owner"}
@@ -230,7 +230,7 @@ function PersonDetails({id}) {
                     </Tooltip>
                   }
                 >
-                  <Link href={"/people/owner/new?owner_id=" + id}><FontAwesomeIcon icon={faUserPlus} className="ml-1 fa-move-up" size="sm" inverse /></Link>
+                  <Link href={"/" + incident + "/people/owner/new?owner_id=" + id}><FontAwesomeIcon icon={faUserPlus} className="ml-1 fa-move-up" size="sm" inverse /></Link>
                 </OverlayTrigger>
                 {is_owner && data.animals.filter(animal => (!['REUNITED', 'DECEASED'].includes(animal.status))).length > 0 ?
                 <OverlayTrigger
@@ -248,7 +248,7 @@ function PersonDetails({id}) {
               </h4>
             </Card.Title>
             <hr/>
-            <AnimalCards animals={data.animals} show_owner={false} show_status={true} />
+            <AnimalCards animals={data.animals} show_owner={false} show_status={true} incident={"/" + incident} />
             {data.animals.length < 1 ? <p>This {is_owner ? "owner" : "reporter"} has no animals.</p> : ""}
           </Card.Body>
         </Card>

@@ -13,14 +13,14 @@ import { faTimesSquare } from '@fortawesome/pro-regular-svg-icons';
 import History from '../components/History';
 import Header from '../components/Header';
 
-function BuildingDetails({id}) {
+function BuildingDetails({ id, incident }) {
 
   const [data, setData] = useState({name:'', description: '', shelter: null, shelter_name:'', rooms:[], action_history:[]});
   const [showModal, setShowModal] = useState(false);
   const removeBuildingSubmit = () => {
     axios.delete('/shelter/api/building/' + id + '/')
     .then(response => {
-      navigate('/shelter/' + data.shelter)
+      navigate('/' + incident + '/shelter/' + data.shelter)
     })
     .catch(error => {
     });
@@ -65,7 +65,7 @@ function BuildingDetails({id}) {
           </Tooltip>
         }
       >
-        <Link href={"/shelter/building/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-1" inverse /></Link>
+        <Link href={"/" + incident + "/shelter/building/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-1" inverse /></Link>
       </OverlayTrigger>
       <OverlayTrigger
           key={"remove-building"}
@@ -94,7 +94,7 @@ function BuildingDetails({id}) {
             <b>Description: </b>{data.description}
           </ListGroup.Item> : ""}
           <ListGroup.Item>
-            <b>Shelter:</b> <Link href={"/shelter/" + data.shelter} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.shelter_name}</Link>
+            <b>Shelter:</b> <Link href={"/" + incident + "/shelter/" + data.shelter} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.shelter_name}</Link>
           </ListGroup.Item>
         </ListGroup>
       </Card.Body>
@@ -104,7 +104,7 @@ function BuildingDetails({id}) {
         <Card.Title>
           <h4>Rooms ({data.rooms.length})
             <OverlayTrigger placement="top" overlay={<Tooltip id={`tooltip-assign`}>Assign animals to rooms</Tooltip>}>
-              <Link href={"/shelter/" + data.shelter + "/assign?building_id=" + id}>
+              <Link href={"/" + incident + "/shelter/" + data.shelter + "/assign?building_id=" + id}>
                 <span className="fa-layers" style={{marginLeft:"3px"}}>
                   <FontAwesomeIcon icon={faSquare} inverse />
                   <FontAwesomeIcon icon={faArrowsAltH} size="sm" transform={'shrink-4'} inverse />
@@ -120,7 +120,7 @@ function BuildingDetails({id}) {
                 </Tooltip>
               }
             >
-            <Link href={"/shelter/building/room/new?building_id=" + id}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
+            <Link href={"/" + incident + "/shelter/building/room/new?building_id=" + id}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
           </OverlayTrigger>
           </h4>
         </Card.Title>
@@ -128,7 +128,7 @@ function BuildingDetails({id}) {
         <span className="d-flex flex-wrap align-items-end">
           {data.rooms.map(room => (
             <span key={room.id} className="mr-3 mb-3">
-              <Link href={"/shelter/room/" + room.id} className="building-link" style={{textDecoration:"none", color:"white"}}>
+              <Link href={"/" + incident + "/shelter/room/" + room.id} className="building-link" style={{textDecoration:"none", color:"white"}}>
                 <Card className="border rounded shelter-hover-div" style={{width:"110px", height:"110px"}}>
                   <div style={{marginRight:"-2px"}}>
                     <div className="card-header border pr-0" title={room.name} style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"3px", marginLeft:"-1px", marginTop:"-1px", width:"100%", backgroundColor:"#615e5e", fontSize:"16px", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis"}}>
