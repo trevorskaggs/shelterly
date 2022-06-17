@@ -37,25 +37,23 @@ const Login = () => {
         })}
         onSubmit={(values, actions ) => {
           dispatch({ type: 'USER_LOADING' });
-          setTimeout(() => {
-            axios.post('/login/', values)
-            .then(response => {
-              // Set token for axios calls.
-              setAuthToken(response.data.token);
-              // Store token in cookie.
-              setCookie("token", response.data.token);
-              // Update state information.
-              dispatch({type: 'LOGIN_SUCCESSFUL', data: response.data });
-              navigate(next);
-            })
-            .catch(e => {
-              removeCookie("token");
-              setAuthToken();
-              actions.setStatus('Failed to log in with this username and password combination.')
-              dispatch({type: "LOGIN_FAILED", data: e});
-            });
-            actions.setSubmitting(false);
-          }, 500);
+          axios.post('/login/', values)
+          .then(response => {
+            // Set token for axios calls.
+            setAuthToken(response.data.token);
+            // Store token in cookie.
+            setCookie("token", response.data.token);
+            // Update state information.
+            dispatch({type: 'LOGIN_SUCCESSFUL', data: response.data });
+            navigate(next);
+          })
+          .catch(e => {
+            removeCookie("token");
+            setAuthToken();
+            actions.setStatus('Failed to log in with this username and password combination.')
+            dispatch({type: "LOGIN_FAILED", data: e});
+          });
+          actions.setSubmitting(false);
         }}
       >
       {({ isSubmitting, status }) => (
