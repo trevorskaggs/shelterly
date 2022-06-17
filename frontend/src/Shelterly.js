@@ -17,13 +17,15 @@ function Shelterly() {
 
   const routeResult = useRoutes(state.user ? routes : publicRoutes);
 
-  const style = state.user ? {position:"absolute", marginLeft:"335px"} : {position:"absolute", maxWidth:"100%"}
+  const path = window.location.pathname;
+
+  const style = state.user && path !== '/' && !path.includes('/incident') ? {position:"absolute", marginLeft:"335px"} : {position:"absolute", maxWidth:"100%"}
 
   return (
     <ThemeProvider theme={theme}>
       <Container fluid>
         <Row>
-          {state.user ?
+          {state.user && path !== '/' && !path.includes('/incident') ?
           <span>
             <Sidebar state={state} dispatch={dispatch} removeCookie={removeCookie} />
           </span>

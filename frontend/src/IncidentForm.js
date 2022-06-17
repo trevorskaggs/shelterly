@@ -31,7 +31,7 @@ const IncidentForm = ({ id }) => {
     const map = mapRef.current
     if (marker !== null) {
       const latLon = marker.leafletElement.getLatLng();
-      setFieldValue("latlon", latLon)
+      setFieldValue("latlon", latLon.lat + ', ' + latLon.lng)
       setFieldValue("latitude", +(Math.round(latLon.lat + "e+4") + "e-4"));
       setFieldValue("longitude", +(Math.round(latLon.lng + "e+4") + "e-4"));
       map.leafletElement.setView(latLon);
@@ -39,7 +39,6 @@ const IncidentForm = ({ id }) => {
   }
 
   useEffect(() => {
-    console.log('test')
     let unmounted = false;
     let source = axios.CancelToken.source();
     if (id) {
@@ -50,6 +49,7 @@ const IncidentForm = ({ id }) => {
         })
         .then(response => {
           if (!unmounted) {
+            response.data['latlon'] = response.data['latitude'] + ', ' + response.data['longitude']
             setData(response.data);
           }
         })
@@ -71,7 +71,7 @@ const IncidentForm = ({ id }) => {
       enableReinitialize={true}
       validationSchema={Yup.object({
         name: Yup.string()
-          .max(50, 'Must be 50 characters or less')
+          .max(20, 'Must be 20 characters or less')
           .required('Required'),
         latlon: Yup.string().required('Required'),
         latitude: Yup.number(),
@@ -79,18 +79,27 @@ const IncidentForm = ({ id }) => {
       })}
       onSubmit={(values, { setSubmitting }) => {
         values['slug'] = values.name.replace(' ','-').match(/[a-zA-Z-]+/g)[0];
-        axios.post('/incident/api/incident/', values)
-        .then(function () {
-          navigate('/');
-        })
-        .catch(error => {
-          console.log(error.response)
-        });
+        if (id) {
+          axios.put('/incident/api/incident/' + id + '/', values)
+          .then(function () {
+            navigate('/');
+          })
+          .catch(error => {
+          });
+        }
+        else {
+          axios.post('/incident/api/incident/', values)
+          .then(function () {
+            navigate('/');
+          })
+          .catch(error => {
+          });
+        }
       }}
     >
       {form => (
-        <Card border="secondary" className="mt-5">
-          <Card.Header as="h5" className="pl-3"><span style={{ cursor: 'pointer' }} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>New Incident</Card.Header>
+        <Card border="secondary" className="mt-4 ml-auto mr-auto" style={{width:"50%", maxWidth:"50%"}}>
+          <Card.Header as="h5" className="pl-3"><span style={{ cursor: 'pointer' }} onClick={() => navigate("/")} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>{id ? 'Edit' : 'New'} Incident</Card.Header>
           <Card.Body>
             <BootstrapForm>
               <BootstrapForm.Row>
@@ -99,7 +108,7 @@ const IncidentForm = ({ id }) => {
                   label="Name*"
                   name="name"
                   id="name"
-                  xs="6"
+                  xs="12"
                 />
               </BootstrapForm.Row>
               <BootstrapForm.Row>
@@ -108,9 +117,8 @@ const IncidentForm = ({ id }) => {
                   label="Lat/Lon*"
                   name="latlon"
                   id="latlon"
-                  xs="6"
+                  xs="12"
                   onChange={(e) => {
-                    console.log(e)
                     const lookup = e.target.value.replace(' ', '').split(',');
                     if (lookup[0] <= 90 && lookup[0] >= -90 && lookup[1] <= 180 && lookup[1] >= -180) {
                       form.setFieldValue("latitude", Number(lookup[0]));
@@ -118,19 +126,13 @@ const IncidentForm = ({ id }) => {
                       form.setFieldValue("latlon", e.target.value);
                     }
                   }}
+                  value={form.values.latlon || ''}
                 />
-                {/* <TextInput
-                  type="text"
-                  label="Longitude*"
-                  name="longitude"
-                  id="longitude"
-                  xs="3"
-                /> */}
               </BootstrapForm.Row>
               <BootstrapForm.Row>
-              <Col xs="4">
+              <Col xs="12">
                 <BootstrapForm.Label>Refine Incident Lat/Lon Point</BootstrapForm.Label>
-                <Map zoom={15} ref={mapRef} center={[form.values.latitude || 0, form.values.longitude || 0]} className="search-leaflet-container border rounded " >
+                <Map zoom={11} ref={mapRef} center={[form.values.latitude || 0, form.values.longitude || 0]} className="incident-leaflet-container border rounded " >
                   <Legend position="bottomleft" metric={false} />
                   <TileLayer
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -160,7 +162,7 @@ const IncidentForm = ({ id }) => {
             </BootstrapForm>
           </Card.Body>
           <ButtonGroup size="lg">
-            <ButtonSpinner isSubmitting={form.isSubmitting} isSubmittingText="Saving..." className="btn btn-primary border" onClick={() => { form.submitForm() }} style={{paddingLeft:"78px"}}>Save</ButtonSpinner>
+            <ButtonSpinner isSubmitting={form.isSubmitting} isSubmittingText="Saving..." className="btn btn-primary border" onClick={() => { form.submitForm() }}>Save</ButtonSpinner>
           </ButtonGroup>
         </Card>
       )}

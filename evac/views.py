@@ -1,5 +1,4 @@
 from django.db.models import Count, Exists, OuterRef, Prefetch, Q
-from django.http import JsonResponse
 from datetime import datetime, timedelta
 from rest_framework import filters, permissions, serializers, viewsets
 from actstream import action
