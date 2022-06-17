@@ -9,7 +9,7 @@ import { AuthContext } from "./accounts/AccountsReducer";
 
 function Home() {
 
-  const [incident, setIncident] = useState('');
+  const [incident, setIncident] = useState({id: '', slug: ''});
   const [options, setOptions] = useState([]);
   const { state } = useContext(AuthContext);
 
@@ -33,7 +33,7 @@ function Home() {
 
   // Handle opening and closing an incident.
   const handleOpenCloseSubmit = async () => {
-    await axios.patch('/incident/api/incident/' + incident + '/', {change_lock:true})
+    await axios.patch('/incident/api/incident/' + incident.id + '/', {change_lock:true})
     .then(response => {
       let options_copy = [...options]
       options_copy.filter(option => option.value === response.data.id)[0]['label'] = response.data.name + ' (' + moment(response.data.start_time).format('MM/DD/YYYY') + (response.data.end_time ? ' - ' + moment(response.data.start_time).format('MM/DD/YYYY') : '') + ')';
@@ -60,7 +60,7 @@ function Home() {
           response.data.forEach(incident => {
             // Build incident option list.
             if (!incident.end_time || state.user.is_superuser) {
-              options.push({value: incident.id, label: incident.name + ' (' + moment(incident.start_time).format('MM/DD/YYYY') + (incident.end_time ? ' - ' + moment(incident.start_time).format('MM/DD/YYYY') : '') + ')', end_time:incident.end_time});
+              options.push({value: incident.id, label: incident.name + ' (' + moment(incident.start_time).format('MM/DD/YYYY') + (incident.end_time ? ' - ' + moment(incident.start_time).format('MM/DD/YYYY') : '') + ')', slug:incident.slug, end_time:incident.end_time});
             }
           });
           setOptions(options)
@@ -86,16 +86,16 @@ function Home() {
     </Row>
     <Col xs={{ span:5 }} className="border rounded border-light shadow-sm ml-auto mr-auto mb-auto" style={{maxHeight:state.user.is_superuser ? "254px" : "145px", minWidth:"572px"}}>
       <SimpleValue options={options}>
-        {simpleProps => <Select styles={customStyles} {...simpleProps} className="mt-3" placeholder="Select incident..." onChange={(instance) => setIncident(instance.value)} />}
+        {simpleProps => <Select styles={customStyles} {...simpleProps} className="mt-3" placeholder="Select incident..." onChange={(instance) => setIncident({id:instance.value, slug:instance.slug})} />}
       </SimpleValue>
-      <Link href={incident + '/home'} style={{textDecoration:"none"}}><Button size="lg" className="btn-primary mt-3" disabled={incident ? false : true} block>Select Incident</Button></Link>
+      <Link href={incident.slug + '/home'} style={{textDecoration:"none"}}><Button size="lg" className="btn-primary mt-3" disabled={incident.id ? false : true} block>Select Incident</Button></Link>
       {state.user.is_superuser ?
         <Row>
           <Col style={{marginRight:"-23px"}}>
-            <Link href={'/incident/edit/' + incident} style={{textDecoration:"none"}}><Button size="lg" className="btn-primary mt-2" disabled={incident ? false : true} block>Edit Incident</Button></Link>
+            <Link href={'/incident/edit/' + incident.id} style={{textDecoration:"none"}}><Button size="lg" className="btn-primary mt-2" disabled={incident.id ? false : true} block>Edit Incident</Button></Link>
           </Col>
           <Col>
-            <Button size="lg" className="btn-primary mt-2" disabled={incident ? false : true} onClick={() => handleOpenCloseSubmit()} block>{incident && options.filter(option => option.value === incident)[0].end_time ? "Open" : "Close"} Incident</Button>
+            <Button size="lg" className="btn-primary mt-2" disabled={incident.id ? false : true} onClick={() => handleOpenCloseSubmit()} block>{incident.id && options.filter(option => option.value === incident.id)[0].end_time ? "Open" : "Close"} Incident</Button>
           </Col>
         </Row>
       : ""}

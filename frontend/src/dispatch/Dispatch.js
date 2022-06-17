@@ -15,7 +15,7 @@ import Map, { countMatches, prettyText, reportedMarkerIcon, SIPMarkerIcon, UTLMa
 import Header from "../components/Header";
 import Scrollbar from '../components/Scrollbars';
 
-function Dispatch(incident) {
+function Dispatch({ incident }) {
 
   const [data, setData] = useState({dispatch_assignments: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
   const [mapState, setMapState] = useState({});

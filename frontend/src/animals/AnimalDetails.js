@@ -15,7 +15,7 @@ import { AnimalDeleteModal } from "../components/Modals";
 import Header from '../components/Header';
 import History from '../components/History';
 
-function AnimalDetails({id, incident}) {
+function AnimalDetails({ id, incident }) {
 
   const { state } = useContext(AuthContext);
   const [images, setImages] = useState([]);
