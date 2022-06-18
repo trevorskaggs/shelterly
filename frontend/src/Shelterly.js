@@ -15,7 +15,7 @@ function Shelterly() {
   const { state, dispatch } = useContext(AuthContext);
   const [cookies, , removeCookie] = useCookies(['token']);
 
-  const routeResult = useRoutes(state.user || cookies.token ? routes : publicRoutes);
+  const routeResult = useRoutes(state.user ? routes : publicRoutes);
 
   const style = state.user ? {position:"absolute", marginLeft:"335px"} : {position:"absolute", maxWidth:"100%"};
 
@@ -23,14 +23,14 @@ function Shelterly() {
     <ThemeProvider theme={theme}>
       <Container fluid>
         <Row>
-          {state.user || cookies.token ?
+          {state.user ?
           <span>
             <Sidebar state={state} dispatch={dispatch} removeCookie={removeCookie} />
           </span>
           : ""}
           <span className='d-flex flex-column col-9 h-100' style={style}>
             <Fragment>
-              {routeResult || <PageNotFound />}
+              {routeResult || <PageNotFound cookies={cookies} />}
             </Fragment>
           </span>
         </Row>
