@@ -13,17 +13,17 @@ function Shelterly() {
 
   // Initial state.
   const { state, dispatch } = useContext(AuthContext);
-  const [, , removeCookie] = useCookies(['token']);
+  const [cookies, , removeCookie] = useCookies(['token']);
 
-  const routeResult = useRoutes(state.user ? routes : publicRoutes);
+  const routeResult = useRoutes(state.user || cookies.token ? routes : publicRoutes);
 
-  const style = state.user ? {position:"absolute", marginLeft:"335px"} : {position:"absolute", maxWidth:"100%"}
+  const style = state.user ? {position:"absolute", marginLeft:"335px"} : {position:"absolute", maxWidth:"100%"};
 
   return (
     <ThemeProvider theme={theme}>
       <Container fluid>
         <Row>
-          {state.user ?
+          {state.user || cookies.token ?
           <span>
             <Sidebar state={state} dispatch={dispatch} removeCookie={removeCookie} />
           </span>

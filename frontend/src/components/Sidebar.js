@@ -65,8 +65,8 @@ const Menu = ({ state, dispatch, removeCookie, ...props }) => {
     const [showSearch, setShowSearch] = useState(path.includes("search") ? true : false);
 
     useEffect(() => {
-       document.title = "Shelterly";
-       setShowSearch(path.includes("search"));
+      document.title = "Shelterly";
+      setShowSearch(path.includes("search"));
     }, [path]);
 
     return (
