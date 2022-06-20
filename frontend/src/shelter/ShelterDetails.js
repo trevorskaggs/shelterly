@@ -39,7 +39,7 @@ function ShelterDetails({ id, incident }) {
 
     const fetchShelterData = async () => {
       // Fetch Shelter Details data.
-      await axios.get('/shelter/api/shelter/' + id + '/', {
+      await axios.get('/shelter/api/shelter/' + id + '/?incident=' + incident, {
         cancelToken: source.token,
       })
       .then(response => {
@@ -112,7 +112,7 @@ function ShelterDetails({ id, incident }) {
                 <ListGroup.Item className="rounded" action><Link href={"/" + incident + "/intake/workflow/reporter?shelter_id=" + id} style={{color:"#FFF"}}><FontAwesomeIcon icon={faDoorOpen} inverse/> <b>Intake from Walk-In (Non-Owner)</b></Link></ListGroup.Item>
                 <ListGroup.Item className="rounded" action><Link href={"/" + incident + "/dispatch/dispatchassignment/search"} style={{color:"#FFF"}}><FontAwesomeIcon icon={faDoorOpen} inverse/> <b>Intake from Dispatch Assignment</b></Link></ListGroup.Item>
                 <ListGroup.Item>
-                  <b>Currently Sheltering:</b> {data.animal_count + data.unroomed_animals.length} Animal{data.animal_count + data.unroomed_animals.length === 1 ? "" : "s"}
+                  <b>Currently Sheltering:</b> {data.animal_count} Animal{data.animal_count + data.unroomed_animals.length === 1 ? "" : "s"}
                 </ListGroup.Item>
                 <ListGroup.Item>
                   <b>Roomless:</b> {data.unroomed_animals.length} Animal{data.unroomed_animals.length === 1 ? "" : "s"}

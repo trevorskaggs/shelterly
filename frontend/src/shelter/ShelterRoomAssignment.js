@@ -119,7 +119,7 @@ function ShelterRoomAssignment({ id, incident }) {
     let source = axios.CancelToken.source();
     const fetchShelterData = async () => {
       // Fetch Shelter Details data.
-      await axios.get('/shelter/api/shelter/' + id + '/', {
+      await axios.get('/shelter/api/shelter/' + id + '/?incident=' + incident, {
         cancelToken: source.token,
       })
       .then(response => {
@@ -187,7 +187,7 @@ function ShelterRoomAssignment({ id, incident }) {
         <Scrollbar style={{height:"509px"}} no_shadow="true" renderView={props => <div {...props} style={{...props.style, overflowX:"hidden", overflowY:"scroll", marginBottom:"0px"}}/>} renderThumbHorizontal={props => <div {...props} style={{...props.style, display:"none"}} />}>
         <Row className="d-flex ml-0" style={{marginTop:"-20px"}}>
           {data.rooms.map((room, index) => (
-            <span key={room.id} hidden={room.building !== selectedBuilding} style={{marginBottom:"0px"}}>
+            <span key={room.id} hidden={room.building !== selectedBuilding} style={{marginBottom:"-5px"}}>
               <span className="col">
                 <Droppable droppableId={String(index)}>
                   {(provided, snapshot) => (

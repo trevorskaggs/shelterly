@@ -33,7 +33,7 @@ function BuildingDetails({ id, incident }) {
 
     const fetchBuildingData = async () => {
       // Fetch Building Details data.
-      await axios.get('/shelter/api/building/' + id + '/', {
+      await axios.get('/shelter/api/building/' + id + '/?incident=' + incident, {
         cancelToken: source.token,
       })
       .then(response => {

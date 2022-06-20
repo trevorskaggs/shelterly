@@ -36,7 +36,7 @@ function RoomDetails({ id, incident }) {
 
     const fetchRoomData = async () => {
       // Fetch Room Details data.
-      await axios.get('/shelter/api/room/' + id + '/', {
+      await axios.get('/shelter/api/room/' + id + '/?incident=' + incident, {
           cancelToken: source.token,
       })
       .then(response => {

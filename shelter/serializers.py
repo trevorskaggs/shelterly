@@ -77,7 +77,6 @@ class SimpleShelterSerializer(serializers.ModelSerializer):
     def get_display_phone(self, obj):
         return re.sub(r'(\d{3})(\d{3})(\d{4})', r'(\1) \2-\3', obj.phone)
 
-
     class Meta:
         model = Shelter
         fields = '__all__'

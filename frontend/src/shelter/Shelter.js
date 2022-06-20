@@ -23,7 +23,7 @@ function Shelter({ incident }) {
     const fetchShelters = async () => {
       setData({shelters: [], isFetching: true});
       // Fetch Shelter data.
-      await axios.get('/shelter/api/shelter/', {
+      await axios.get('/shelter/api/shelter/?incident=' + incident, {
         cancelToken: source.token,
       })
       .then(response => {
