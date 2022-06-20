@@ -31,7 +31,7 @@ function Dispatch({ incident }) {
     const fetchDispatchAssignments = async () => {
 
       // Fetch open DA data.
-      axios.get('/evac/api/evacassignment/', {
+      axios.get('/evac/api/evacassignment/?incident=' + incident, {
         params: {
           status: 'open',
           map: true
@@ -69,7 +69,7 @@ function Dispatch({ incident }) {
       unmounted = true;
       source.cancel();
     };
-  }, []);
+  }, [incident]);
 
   return (
     <>

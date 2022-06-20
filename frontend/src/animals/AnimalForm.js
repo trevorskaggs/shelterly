@@ -91,6 +91,7 @@ const AnimalForm = (props) => {
     zip_code: '',
     latitude: null,
     longitude: null,
+    incident_slug: props.incident,
   }
   let current_data = {...initialData};
   let imageList = [];
@@ -425,7 +426,7 @@ const AnimalForm = (props) => {
       >
         {formikProps => (
           <Card border="secondary" style={{marginTop:is_workflow ? "15px" : "35px"}}>
-            <Card.Header as="h5" className="pl-3">{id || owner_id ?
+            <Card.Header as="h5" className="pl-3">{id || owner_id || reporter_id || servicerequest_id ?
               <span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
               :
               <span>{props.state.animalIndex > 0 ? <span style={{cursor:'pointer'}} onClick={() => {setAddAnother(false); populateBack(props.state.steps.animals[props.state.animalIndex-1]); props.handleBack('animals', 'animals')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>

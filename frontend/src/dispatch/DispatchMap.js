@@ -268,7 +268,7 @@ function Deploy({ incident }) {
 
     const fetchServiceRequests = async () => {
       // Fetch ServiceRequest data.
-      await axios.get('/hotline/api/servicerequests/?map=true', {
+      await axios.get('/hotline/api/servicerequests/?map=true&incident=' + incident, {
         params: {
           status: 'open',
           map: true
@@ -314,7 +314,7 @@ function Deploy({ incident }) {
       unmounted = true;
       source.cancel();
     };
-  }, [triggerRefresh, preplan]);
+  }, [triggerRefresh, preplan, incident]);
 
   return (
     <Formik
@@ -323,6 +323,7 @@ function Deploy({ incident }) {
         temp_team_name: teamName,
         team_members: [],
         service_requests: [],
+        incident_slug: incident,
       }}
       validationSchema={Yup.object({
         temp_team_name: Yup.string()

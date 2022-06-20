@@ -27,11 +27,12 @@ const IncidentForm = ({ id }) => {
   const mapRef = useRef(null);
 
   const updatePosition = (setFieldValue) => {
+    console.log('update pos')
     const marker = markerRef.current;
     const map = mapRef.current
     if (marker !== null) {
       const latLon = marker.leafletElement.getLatLng();
-      setFieldValue("latlon", latLon.lat + ', ' + latLon.lng)
+      setFieldValue("latlon", latLon.lat.toFixed(4) + ', ' + latLon.lng.toFixed(4))
       setFieldValue("latitude", +(Math.round(latLon.lat + "e+4") + "e-4"));
       setFieldValue("longitude", +(Math.round(latLon.lng + "e+4") + "e-4"));
       map.leafletElement.setView(latLon);
@@ -78,7 +79,7 @@ const IncidentForm = ({ id }) => {
         longitude: Yup.number()
       })}
       onSubmit={(values, { setSubmitting }) => {
-        values['slug'] = values.name.replace(' ','-').match(/[a-zA-Z-]+/g)[0];
+        values['slug'] = values.name.replaceAll(' ','-').match(/[a-zA-Z-]+/g)[0];
         if (id) {
           axios.put('/incident/api/incident/' + id + '/', values)
           .then(function () {
@@ -109,6 +110,7 @@ const IncidentForm = ({ id }) => {
                   name="name"
                   id="name"
                   xs="12"
+                  disabled={form.values.name === 'Test' ? true : false}
                 />
               </BootstrapForm.Row>
               <BootstrapForm.Row>
@@ -119,12 +121,13 @@ const IncidentForm = ({ id }) => {
                   id="latlon"
                   xs="12"
                   onChange={(e) => {
+                    console.log('on change')
                     const lookup = e.target.value.replace(' ', '').split(',');
                     if (lookup[0] <= 90 && lookup[0] >= -90 && lookup[1] <= 180 && lookup[1] >= -180) {
                       form.setFieldValue("latitude", Number(lookup[0]));
                       form.setFieldValue("longitude", Number(lookup[1]));
-                      form.setFieldValue("latlon", e.target.value);
                     }
+                    form.setFieldValue("latlon", e.target.value);
                   }}
                   value={form.values.latlon || ''}
                 />

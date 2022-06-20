@@ -6,8 +6,12 @@ from animals.choices import ALL_AGE_CHOICES, ALL_SIZE_CHOICES, SEX_CHOICES, SPEC
 from animals.colors import ALL_COLOR_CHOICES
 from .managers import AnimalQueryset
 from hotline.models import ServiceRequest
+from incident.models import Incident
 from people.models import Person
 from shelter.models import Room, Shelter
+
+def test_incident():
+    return Incident.objects.get(name='Test').id
 
 # Create your models here.
 class Animal(Location, OrderedModel):
@@ -17,6 +21,7 @@ class Animal(Location, OrderedModel):
     reporter = models.ForeignKey(Person, on_delete=models.SET_NULL, blank=True, null=True, related_name="reporter_animals")
     room = models.ForeignKey(Room, on_delete=models.SET_NULL, blank=True, null=True)
     shelter = models.ForeignKey(Shelter, on_delete=models.SET_NULL, blank=True, null=True)
+    incident = models.ForeignKey(Incident, on_delete=models.CASCADE, default=test_incident)
 
     #choice fields
     species = models.CharField(max_length=50, choices=SPECIES_CHOICES, blank=True)

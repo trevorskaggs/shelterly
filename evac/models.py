@@ -1,6 +1,10 @@
 from django.db import models
 
 from hotline.models import ServiceRequest
+from incident.models import Incident
+
+def test_incident():
+    return Incident.objects.get(name='Test').id
 
 class EvacTeamMember(models.Model):
 
@@ -33,6 +37,7 @@ class EvacAssignment(models.Model):
     service_requests = models.ManyToManyField(ServiceRequest, through='AssignedRequest', related_name='evacuation_assignments')
     start_time = models.DateTimeField(auto_now_add=True)
     end_time = models.DateTimeField(blank=True, null=True)
+    incident = models.ForeignKey(Incident, on_delete=models.CASCADE, default=test_incident)
 
     class Meta:
         ordering = ['-start_time',]

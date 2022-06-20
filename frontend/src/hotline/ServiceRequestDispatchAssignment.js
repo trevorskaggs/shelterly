@@ -105,7 +105,7 @@ function ServiceRequestDispatchAssignment({ id, incident }) {
       .then(currentResponse => {
         if (!unmounted) {
           // Fetch open DA data.
-          axios.get('/evac/api/evacassignment/', {
+          axios.get('/evac/api/evacassignment/?incident=' + incident, {
             params: {
               status: 'open',
               map: true
@@ -153,7 +153,7 @@ function ServiceRequestDispatchAssignment({ id, incident }) {
       unmounted = true;
       source.cancel();
     };
-  }, [id]);
+  }, [id, incident]);
 
   const starIconHTML = ReactDOMServer.renderToString(<FontAwesomeIcon color="gold" size="lg" className="icon-border" icon={faStar} />);
   const starMarkerIcon = new L.DivIcon({

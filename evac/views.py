@@ -7,6 +7,7 @@ from animals.models import Animal
 from evac.models import AssignedRequest, DispatchTeam, EvacAssignment, EvacTeamMember
 from evac.serializers import DispatchTeamSerializer, EvacAssignmentSerializer, EvacTeamMemberSerializer
 from hotline.models import ServiceRequest, VisitNote
+from incident.models import Incident
 from people.models import OwnerContact, Person
 
 class EvacTeamMemberViewSet(viewsets.ModelViewSet):
@@ -105,6 +106,9 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
         if is_map == 'true':
             queryset = queryset.exclude(service_requests=None)
 
+        if self.request.GET.get('incident'):
+            queryset = queryset.filter(incident__slug=self.request.GET.get('incident'))
+
         status = self.request.query_params.get('status', '')
         if status == "active":
             return queryset.filter(end_time__isnull=True).filter(team__team_members__isnull=False).distinct()
@@ -118,6 +122,10 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
     # When creating, update all service requests to be assigned status.
     def perform_create(self, serializer):
         if serializer.is_valid():
+
+            if self.request.data.get('incident_slug'):
+                serializer.validated_data['incident'] = Incident.objects.get(slug=self.request.data.get('incident_slug'))
+
             timestamp = None
             if ServiceRequest.objects.filter(pk__in=self.request.data['service_requests'], status='assigned').exists():
                 raise serializers.ValidationError(['Duplicate assigned service request error.', list(ServiceRequest.objects.filter(pk__in=self.request.data['service_requests'], status='assigned').values_list('id', flat=True))])

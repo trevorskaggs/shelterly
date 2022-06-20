@@ -62,7 +62,7 @@ function ServiceRequestSearch({ incident }) {
     const fetchServiceRequests = async () => {
       setData({service_requests: [], isFetching: true});
       // Fetch ServiceRequest data.
-      await axios.get('/hotline/api/servicerequests/?search=' + searchTerm + '&status=' + statusOptions, {
+      await axios.get('/hotline/api/servicerequests/?search=' + searchTerm + '&status=' + statusOptions +'&incident=' + incident, {
         cancelToken: source.token,
       })
       .then(response => {
@@ -101,7 +101,7 @@ function ServiceRequestSearch({ incident }) {
       unmounted = true;
       source.cancel();
     };
-  }, [searchTerm, statusOptions]);
+  }, [searchTerm, statusOptions, incident]);
 
   return (
     <div className="ml-2 mr-2">

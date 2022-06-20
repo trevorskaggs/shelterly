@@ -50,6 +50,7 @@ function ServiceRequestForm(props) {
     key_provided: props.state.steps.request.key_provided || false,
     accessible: props.state.steps.request.accessible || false,
     turn_around: props.state.steps.request.turn_around || false,
+    incident_slug: props.incident,
   });
 
   // Hook for initializing data.

@@ -190,7 +190,7 @@ function AnimalSearch({ incident }) {
     const fetchAnimals = async () => {
       setData({animals: [], isFetching: true});
       // Fetch ServiceRequest data.
-      await axios.get('/animals/api/animal/?search=' + searchTerm, {
+      await axios.get('/animals/api/animal/?search=' + searchTerm +'&incident=' + incident, {
         cancelToken: source.token,
       })
       .then(response => {
@@ -246,7 +246,7 @@ function AnimalSearch({ incident }) {
       unmounted = true;
       source.cancel();
     };
-  }, [searchTerm]);
+  }, [searchTerm, incident]);
 
   // Hook handling option changes.
   useEffect(() => {

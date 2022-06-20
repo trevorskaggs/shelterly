@@ -44,6 +44,7 @@ function DispatchResolutionForm({ id, incident }) {
     start_time: null,
     end_time: null,
     sr_updates: [],
+    incident_slug: incident,
   });
 
   const [shelters, setShelters] = useState({options: [], isFetching: false});
@@ -204,7 +205,12 @@ function DispatchResolutionForm({ id, incident }) {
         setTimeout(() => {
           axios.put('/evac/api/evacassignment/' + id + '/', values)
             .then(response => {
-              navigate('/' + incident + '/dispatch/summary/' + response.data.id);
+              if (response.data.service_requests.length === 0) {
+                navigate('/' + incident + '/dispatch/dispatchassignment/search');
+              }
+              else {
+                navigate('/' + incident + '/dispatch/summary/' + response.data.id);
+              }
             })
             .catch(error => {
               setSubmitting(false);

@@ -42,7 +42,7 @@ function Hotline({ incident }) {
 
     const fetchServiceRequests = async () => {
       // Fetch ServiceRequest data.
-      await axios.get('/hotline/api/servicerequests/', {
+      await axios.get('/hotline/api/servicerequests/?incident=' + incident, {
         params: {
           map: true
         },
@@ -78,7 +78,7 @@ function Hotline({ incident }) {
       unmounted = true;
       source.cancel();
     };
-  }, []);
+  }, [incident]);
 
   return (
     <>

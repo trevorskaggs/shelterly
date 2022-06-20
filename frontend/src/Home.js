@@ -8,7 +8,7 @@ import { AuthContext } from "./accounts/AccountsReducer";
 import Header from './components/Header';
 import { DateRangePicker } from './components/Form';
 
-function Home() {
+function Home({ incident }) {
 
   // Initial state.
   const { state } = useContext(AuthContext);
@@ -28,7 +28,7 @@ function Home() {
     const fetchServiceRequests = async () => {
       // Fetch ServiceRequest data.
       if (state.user && !data.daily_report) {
-        await axios.get('/reports/api/reports/', {
+        await axios.get('/reports/api/reports/?incident=' + incident, {
           cancelToken: source.token,
         })
         .then(response => {

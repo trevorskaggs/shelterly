@@ -74,12 +74,9 @@ const Menu = ({ state, dispatch, removeCookie, ...props }) => {
 
     return (
     <StyledMenu  {...props} className="flex-column" style={{ height: viewHeight, minHeight:"880px" }}>
-      <Link href={incident + "/home"} style={{marginTop:"-5px"}}><img src="/static/images/shelterly.png" alt="Logo" /></Link>
-      <div className="logo text-center" style={{marginTop:"-5px"}}>SHELTERLY</div>
-      <div className="logo border-bottom text-center" style={{marginTop:"-12px", paddingBottom:"12px", fontSize:"1.25rem"}}>
-        {titleCase(path.split('/')[1].replace('-', ' '))}
-        {/* <Link href="/" style={{marginBottom:"-10px"}}><FontAwesomeIcon icon={faRepeat} className="" size="sm" fixedWidth inverse/></Link> */}
-      </div>
+      <Link href={incident + "/home"} style={{marginTop:"-5px", paddingBottom:"0px"}} title="Home"><img src="/static/images/shelterly.png" alt="Logo" /></Link>
+      <div className="logo text-center" style={{marginTop:"10px", marginBottom:"0px", paddingBottom:"0px"}}>SHELTERLY</div>
+      <div className="logo border-bottom text-center" style={{paddingBottom:"12px", letterSpacing:"0.25rem", fontSize:"1.2rem"}} title="Incident"><span style={{cursor:"pointer"}} onClick={() => navigate('/')}>{titleCase(path.split('/')[1].replaceAll('-', ' '))}</span></div>
       <Link href={incident + "/hotline"} className="rounded sidebar" style={{backgroundColor:path.includes("hotline") && !path.includes("search") ? "#444444" : "#292b2c", marginLeft:"-23px", marginRight:"-23px", marginBottom:"-10px"}}><FontAwesomeIcon icon={faPhone} fixedWidth inverse className="sidebar-icon" style={{marginLeft:"23px"}} /> HOTLINE</Link>
       <Link href={incident + "/dispatch"} className="rounded sidebar" style={{backgroundColor:path.includes("dispatch") && !path.includes("search") ? "#444444" : "#292b2c", marginLeft:"-23px", marginRight:"-23px", marginBottom:"-10px"}}><FontAwesomeIcon icon={faBullhorn} fixedWidth inverse className="sidebar-icon" style={{marginLeft:"23px"}} />  DISPATCH</Link>
       <Link href={incident + "/shelter"} className="rounded sidebar" style={{backgroundColor:path.includes("shelter") ? "#444444" : "#292b2c", marginLeft:"-23px", marginRight:"-23px", marginBottom:"-10px"}}><FontAwesomeIcon icon={faHome} fixedWidth inverse className="sidebar-icon" style={{marginLeft:"23px"}} /> SHELTER</Link>
