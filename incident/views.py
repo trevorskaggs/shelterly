@@ -20,12 +20,14 @@ class IncidentViewSet(viewsets.ModelViewSet):
     def perform_update(self, serializer):
         if serializer.is_valid():
 
-            incident = serializer.save()
+            # Only create incident if user is an Admin.
+            if self.request.user.is_staff:
+                incident = serializer.save()
 
-            # Open/close incident.
-            if self.request.data.get('change_lock'):
-                if incident.end_time:
-                    incident.end_time = None
-                else:
-                    incident.end_time = datetime.now()
-                incident.save()
+                # Open/close incident.
+                if self.request.data.get('change_lock'):
+                    if incident.end_time:
+                        incident.end_time = None
+                    else:
+                        incident.end_time = datetime.now()
+                    incident.save()
