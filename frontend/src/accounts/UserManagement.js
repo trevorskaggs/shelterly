@@ -28,7 +28,7 @@ function UserManagement() {
   const [showUploadCSV, setShowUploadCSV] = useState(false);
   const handleUploadCSVClose = () => setShowUploadCSV(false);
 
-  const [searchTerm, setSearchTerm] = useState('');
+  const [timer, setTimer] = useState(null);
 
   const handleRemoveUserSubmit = async () => {
     await axios.delete('/accounts/api/user/' + userToDelete.id + '/')
@@ -66,14 +66,28 @@ function UserManagement() {
     });
   }
 
+  // Use a delay for quick search
+  function changeDelay(searchTerm) {
+    if (timer) {
+      clearTimeout(timer);
+      setTimer(null);
+    }
+    setTimer(
+      setTimeout(() => {
+        handleSearch(searchTerm);
+      }, 1000)
+    );
+  }
+
   // Update searchTerm when field input changes.
-  const handleSearch = () => {
+  const handleSearch = (searchTerm) => {
     if (searchTerm) {
-      setFilteredData(prevState => ({ ...prevState, "users":data.users.filter(user => (user.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                                                                      user.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                                                                      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                                                                      user.cell_phone.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                                                                      (user.agency_id ? user.agency_id.toLowerCase().includes(searchTerm.toLowerCase()) : null))
+      setFilteredData(prevState => ({ ...prevState,
+        "users":data.users.filter(user => (user.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                  user.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                  user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                  user.cell_phone.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                  (user.agency_id ? user.agency_id.toLowerCase().includes(searchTerm.toLowerCase()) : null))
       ) }));
     }
     else {
@@ -144,15 +158,12 @@ function UserManagement() {
     <InputGroup className="mb-3">
       <FormControl
         type="text"
-        placeholder="Search"
+        placeholder="Quick Search..."
         name="searchTerm"
         onChange={(event) => {
-          setSearchTerm(event.target.value);
+          changeDelay(event.target.value);
         }}
       />
-      <InputGroup.Append>
-        <Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0"}} onClick={() => {handleSearch();}}>Search</Button>
-      </InputGroup.Append>
     </InputGroup>
     <Row>
       <Col style={{minWidth:"150px", maxWidth:"150px", marginLeft:"0px"}}>

@@ -15,9 +15,7 @@ import * as Yup from 'yup';
 import { TextInput } from '.././components/Form.js';
 import ButtonSpinner from '../components/ButtonSpinner.js';
 
-const UserForm = (props) => {
-
-  const id = props.id;
+const UserForm = ({ id }) => {
 
   // Regex validators.
   const phoneRegex = /^((\+\d{1,3}(-| )?\(?\d\)?(-| )?\d{1,3})|(\(?\d{2,3}\)?))(-| )?(\d{3,4})(-| )?(\d{4})(( x| ext)\d{1,5}){0,1}$/;
