@@ -60,7 +60,7 @@ function Home() {
           response.data.forEach(incident => {
             // Build incident option list.
             if (!incident.end_time || state.user.is_superuser) {
-              options.push({value: incident.id, label: incident.name + ' (' + moment(incident.start_time).format('MM/DD/YYYY') + (incident.end_time ? ' - ' + moment(incident.start_time).format('MM/DD/YYYY') : '') + ')', slug:incident.slug, end_time:incident.end_time});
+              options.push({value: incident.id, label: incident.name + ' (' + moment(incident.start_time).format('MM/DD/YYYY') + (incident.end_time ? ' - ' + moment(incident.end_time).format('MM/DD/YYYY') : '') + ')', slug:incident.slug, end_time:incident.end_time});
             }
           });
           setOptions(options)
