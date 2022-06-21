@@ -27,7 +27,6 @@ const IncidentForm = ({ id }) => {
   const mapRef = useRef(null);
 
   const updatePosition = (setFieldValue) => {
-    console.log('update pos')
     const marker = markerRef.current;
     const map = mapRef.current
     if (marker !== null) {
@@ -121,7 +120,6 @@ const IncidentForm = ({ id }) => {
                   id="latlon"
                   xs="12"
                   onChange={(e) => {
-                    console.log('on change')
                     const lookup = e.target.value.replace(' ', '').split(',');
                     if (lookup[0] <= 90 && lookup[0] >= -90 && lookup[1] <= 180 && lookup[1] >= -180) {
                       form.setFieldValue("latitude", Number(lookup[0]));
