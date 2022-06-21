@@ -7,6 +7,7 @@ import { publicRoutes } from "../router";
 const initialState = {
   isAuthenticated: null,
   isLoading: false,
+  logout: false,
   user: null,
   errors: {},
   location:'',
@@ -21,14 +22,17 @@ function auth_reducer(state, action) {
       return {...state, isLoading: true};
 
     case 'USER_LOADED':
-      return {...state, isAuthenticated: true, isLoading: false, user: action.user};
+      return {...state, isAuthenticated: true, isLoading: false, logout: false, user: action.user};
 
     case 'LOGIN_SUCCESSFUL':
       return {...state, user:action.data.user, isAuthenticated: true, isLoading: false, errors: null};
 
+    case 'LOGOUT_SUCCESSFUL':
+      return {...state, errors: action.data, user: null,
+        isAuthenticated: false, isLoading: false, logout: true};
+
     case 'AUTHENTICATION_ERROR':
     case 'LOGIN_FAILED':
-    case 'LOGOUT_SUCCESSFUL':
     case 'LOGOUT_FAILED':
       return {...state, errors: action.data, user: null,
         isAuthenticated: false, isLoading: false};
@@ -84,8 +88,13 @@ function AuthProvider(props) {
       loadUser({dispatch, removeCookie, path});
     }
     // Redirect to login page if no authenticated user object is present.
-    else if (!Object.keys(publicRoutes).includes(path) && !state.user) {
-      navigate('/login?next=' + path);
+    else if (!Object.keys(publicRoutes).includes(path) && !state.user && !cookies.token) {
+      if (state.logout) {
+        navigate('/login');
+      }
+      else {
+        navigate('/login?next=' + path);
+      }
     }
     return () => {
       window.removeEventListener("focus", onFocus);

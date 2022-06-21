@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import axios from "axios";
 import { Link, navigate } from "raviger";
 import { Field, Form, Formik } from 'formik';
@@ -30,6 +30,95 @@ import ButtonSpinner from '../components/ButtonSpinner';
 import { printDispatchResolutionForm } from './Utils';
 import { priorityChoices } from '../constants';
 
+function AnimalStatus(props) {
+
+  const roomRef = useRef(null);
+  const shelterRef = useRef(null);
+
+  return (
+    <>
+    <Row>
+      <Col xs={4} className="pl-0">
+        <DropDown
+          id={`sr_updates.${props.index}.animals.${props.inception}.status`}
+          name={`sr_updates.${props.index}.animals.${props.inception}.status`}
+          type="text"
+          className="mt-0"
+          options={dispatchStatusChoices}
+          value={`sr_updates.${props.index}.animals.${props.inception}.status`}
+          key={`sr_updates.${props.index}.animals.${props.inception}.status`}
+          isClearable={false}
+          onChange={(instance) => {
+            props.formikProps.setFieldValue(`sr_updates.${props.index}.animals.${props.inception}.status`, instance === null ? '' : instance.value);
+            props.formikProps.setFieldValue(`sr_updates.${props.index}.animals.${props.inception}.shelter`, '');
+            if (shelterRef.current) shelterRef.current.select.clearValue();
+            // Hack to proprly update Cannot Remain Reported error display.
+            if (instance.value === 'REPORTED') {
+              props.formikProps.setFieldTouched(`sr_updates.${props.index}.animals.${props.inception}.status`)
+            }
+          }}
+        />
+      </Col>
+      <span style={{ marginTop:"5px", textTransform:"capitalize" }}>
+        A#{props.animal.id} - {props.animal.name || "Unknown"}&nbsp;-&nbsp;{props.animal.species}
+        {props.animal.color_notes ?
+        <OverlayTrigger
+          key={"animal-color-notes"}
+          placement="top"
+          overlay={
+            <Tooltip id={`tooltip-animal-color-notes`}>
+              {props.animal.color_notes}
+            </Tooltip>
+          }
+        >
+          <FontAwesomeIcon icon={faClipboardList} className="ml-1 mr-1" inverse />
+        </OverlayTrigger>
+        : ""}
+        {props.animal.pcolor || props.animal.scolor ? <span>({props.animal.pcolor ? props.animal.pcolor : "" }{props.animal.scolor ? <span>{props.animal.pcolor ? <span>, </span> : ""}{props.animal.scolor}</span> : ""})</span>: ""}
+      </span>
+    </Row>
+    {props.formikProps.values && props.formikProps.values.sr_updates[props.index] && props.formikProps.values.sr_updates[props.index].animals[props.inception].status === 'SHELTERED' ?
+    <Row>
+      <Col xs={4} className="pl-0">
+        <DropDown
+          id={`sr_updates.${props.index}.animals.${props.inception}.shelter`}
+          name={`sr_updates.${props.index}.animals.${props.inception}.shelter`}
+          type="text"
+          ref={shelterRef}
+          className="mt-3"
+          options={props.shelters.options}
+          value={`sr_updates.${props.index}.animals.${props.inception}.shelter`}
+          isClearable={false}
+          placeholder="Select Shelter..."
+          onChange={(instance) => {
+            props.formikProps.setFieldValue(`sr_updates.${props.index}.animals.${props.inception}.room`, '');
+            props.formikProps.setFieldValue(`sr_updates.${props.index}.animals.${props.inception}.shelter`, instance === null ? '' : instance.value);
+            roomRef.current.select.clearValue();
+          }}
+        />
+      </Col>
+      <Col xs={4} className="pl-0">
+        <DropDown
+          id={`sr_updates.${props.index}.animals.${props.inception}.room`}
+          name={`sr_updates.${props.index}.animals.${props.inception}.room`}
+          type="text"
+          ref={roomRef}
+          className="mt-3"
+          options={props.shelters.room_options[props.formikProps.values.sr_updates[props.index].animals[props.inception].shelter] ? props.shelters.room_options[props.formikProps.values.sr_updates[props.index].animals[props.inception].shelter] : []}
+          isClearable={true}
+          placeholder="Select Room..."
+          value={`sr_updates.${props.index}.animals.${props.inception}.room`}
+          onChange={(instance) => {
+            props.formikProps.setFieldValue(`sr_updates.${props.index}.animals.${props.inception}.room`, instance === null ? '' : instance.value);
+          }}
+        />
+      </Col>
+    </Row>
+    : ""}
+    </>
+  )
+  }
+
 function DispatchResolutionForm({ id }) {
 
   // Initial animal data.
@@ -46,7 +135,7 @@ function DispatchResolutionForm({ id }) {
     sr_updates: [],
   });
 
-  const [shelters, setShelters] = useState({options: [], isFetching: false});
+  const [shelters, setShelters] = useState({options: [], room_options: {}, isFetching: false});
   const [ownerChoices, setOwnerChoices] = useState({});
 
   const ordered = useOrderedNodes();
@@ -84,7 +173,7 @@ function DispatchResolutionForm({ id }) {
               date_completed: assigned_request.visit_note ? assigned_request.visit_note.date_completed : new Date(),
               notes: assigned_request.visit_note ? assigned_request.visit_note.notes : '',
               forced_entry: assigned_request.visit_note ? assigned_request.visit_note.forced_entry : false,
-              animals: Object.keys(assigned_request.animals).map(animal_id => {return {id:animal_id, status:assigned_request.animals[animal_id].status, request:assigned_request.service_request_object.id, shelter:assigned_request.animals[animal_id].shelter || ''}}),
+              animals: Object.keys(assigned_request.animals).map(animal_id => {return {id:animal_id, name:assigned_request.animals[animal_id].name, species:assigned_request.animals[animal_id].species, status:assigned_request.animals[animal_id].status, color_notes:assigned_request.animals[animal_id].color_notes, pcolor:assigned_request.animals[animal_id].pcolor, scolor:assigned_request.animals[animal_id].scolor, request:assigned_request.service_request_object.id, shelter:assigned_request.animals[animal_id].shelter || '', room:assigned_request.animals[animal_id].room || ''}}),
               owner: assigned_request.service_request_object.owners.length > 0,
               owner_contact_id: assigned_request.owner_contact ? assigned_request.owner_contact.owner : '',
               owner_contact_time: assigned_request.owner_contact ? assigned_request.owner_contact.owner_contact_time : null,
@@ -102,23 +191,31 @@ function DispatchResolutionForm({ id }) {
     };
 
     const fetchShelters = () => {
-      setShelters({options: [], isFetching: true});
+      setShelters({options: [], room_options: [], isFetching: true});
       // Fetch Shelter data.
       axios.get('/shelter/api/shelter/', {
         cancelToken: source.token,
       })
       .then(response => {
         if (!unmounted) {
-          let options = []
+          let options = [];
+          let room_options = {};
           response.data.forEach(shelter => {
             options.push({value: shelter.id, label: shelter.name});
+            room_options[shelter.id] = [];
+            shelter.buildings.forEach(building => {
+              building.rooms.forEach(room => {
+                // Build room option list identified by shelter ID.
+                room_options[shelter.id].push({value: room.id, label: room.building_name + ' - ' + room.name + ' (' + room.animal_count + ' animals)'});
+              });
+            });
           });
-          setShelters({options: options, isFetching: false});
+          setShelters({options: options, room_options: room_options, isFetching: false});
         }
       })
       .catch(error => {
         if (!unmounted) {
-          setShelters({options: [], isFetching: false});
+          setShelters({options: [], room_options: [], isFetching: false});
         }
       });
     };
@@ -187,6 +284,7 @@ function DispatchResolutionForm({ id }) {
                       return true;
                     }),
                 shelter: Yup.number().nullable(),
+                room: Yup.number().nullable(),
               })
             ),
             date_completed: Yup.date().nullable().when(['unable_to_complete', 'incomplete'], {
@@ -333,62 +431,9 @@ function DispatchResolutionForm({ id }) {
                   <hr />
                   <ListGroup variant="flush" style={{ marginTop: "-13px", marginBottom: "-13px" }}>
                     <h4 className="mt-2" style={{ marginBottom: "-2px" }}>Animals</h4>
-                    {assigned_request.service_request_object.animals.filter(animal => Object.keys(assigned_request.animals).includes(String(animal.id))).map((animal, inception) => (
+                    {data.sr_updates[index].animals.filter(animal => Object.keys(assigned_request.animals).includes(String(animal.id))).map((animal, inception) => (
                       <ListGroup.Item key={animal.id}>
-                        <Row>
-                          <Col xs={4} className="pl-0">
-                            <DropDown
-                              id={`sr_updates.${index}.animals.${inception}.status`}
-                              name={`sr_updates.${index}.animals.${inception}.status`}
-                              type="text"
-                              className="mt-0"
-                              options={dispatchStatusChoices}
-                              value={`sr_updates.${index}.animals.${inception}.status`}
-                              key={`sr_updates.${index}.animals.${inception}.status`}
-                              isClearable={false}
-                              onChange={(instance) => {
-                                props.setFieldValue(`sr_updates.${index}.animals.${inception}.status`, instance === null ? '' : instance.value);
-                                // Hack to proprly update Cannot Remain Reported error display.
-                                if (instance.value === 'REPORTED') {
-                                  props.setFieldTouched(`sr_updates.${index}.animals.${inception}.status`)
-                                }
-                              }}
-                            />
-                          </Col>
-                          <span style={{ marginTop:"5px", textTransform:"capitalize" }}>
-                            A#{animal.id} - {animal.name || "Unknown"}&nbsp;-&nbsp;{animal.species}
-                            {animal.color_notes ?
-                            <OverlayTrigger
-                              key={"animal-color-notes"}
-                              placement="top"
-                              overlay={
-                                <Tooltip id={`tooltip-animal-color-notes`}>
-                                  {animal.color_notes}
-                                </Tooltip>
-                              }
-                            >
-                              <FontAwesomeIcon icon={faClipboardList} className="ml-1 mr-1" inverse />
-                            </OverlayTrigger>
-                            : ""}
-                            {animal.pcolor || animal.scolor ? <span>({animal.pcolor ? animal.pcolor : "" }{animal.scolor ? <span>{animal.pcolor ? <span>, </span> : ""}{animal.scolor}</span> : ""})</span>: ""}
-                          </span>
-                        </Row>
-                        {props.values && props.values.sr_updates[index] && props.values.sr_updates[index].animals[inception].status === 'SHELTERED' ?
-                        <Row>
-                          <Col xs={4} className="pl-0">
-                            <DropDown
-                              id={`sr_updates.${index}.animals.${inception}.shelter`}
-                              name={`sr_updates.${index}.animals.${inception}.shelter`}
-                              type="text"
-                              className="mt-3"
-                              options={shelters.options}
-                              value={`sr_updates.${index}.animals.${inception}.shelter`}
-                              isClearable={false}
-                              placeholder="Select Shelter..."
-                            />
-                          </Col>
-                        </Row>
-                        : ""}
+                        <AnimalStatus formikProps={props} index={index} inception={inception} animal={animal} shelters={shelters} />
                       </ListGroup.Item>
                     ))}
                   </ListGroup>

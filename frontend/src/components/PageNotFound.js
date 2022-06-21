@@ -1,9 +1,9 @@
 import React from "react";
 
-const PageNotFound = () => (
-  <div>
-    Page Not Found.
-  </div>
+const PageNotFound = ({ cookies }) => (
+  <h4 className="mt-3">
+    {cookies.token ? "Page Not Found." : ""}
+  </h4>
 );
 
 export default PageNotFound;

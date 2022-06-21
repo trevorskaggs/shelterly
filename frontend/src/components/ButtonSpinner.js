@@ -22,7 +22,7 @@ const ButtonSpinner = ({
         role="status"
         aria-hidden="true"
       />
-      <span className="visually-hidden ml-2">{isSubmittingText}</span>
+      <span className="visually-hidden ml-2 fa-move-up">{isSubmittingText}</span>
     </>
   );
 
