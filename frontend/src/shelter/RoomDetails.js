@@ -53,7 +53,7 @@ function RoomDetails({ id, incident }) {
       unmounted = true;
       source.cancel();
     };
-  }, [id]);
+  }, [id, incident]);
 
   return (
     <>

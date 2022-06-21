@@ -137,7 +137,7 @@ function ShelterRoomAssignment({ id, incident }) {
       });
     };
     fetchShelterData();
-  }, [id, selectedBuilding]);
+  }, [id, selectedBuilding, incident]);
 
   return (
     <>

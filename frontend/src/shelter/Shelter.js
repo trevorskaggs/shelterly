@@ -47,7 +47,7 @@ function Shelter({ incident }) {
       unmounted = true;
       source.cancel();
     };
-  }, []);
+  }, [incident]);
 
   return (
     <>
