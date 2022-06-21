@@ -3,8 +3,7 @@ import styled from 'styled-components';
 import { Link, navigate } from 'raviger';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Collapse, ListGroup, Nav } from 'react-bootstrap';
-import { faHome, faBullhorn, faChevronDown, faChevronUp, faPhone, faSearch, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
-// import { faRepeat } from '@fortawesome/pro-solid-svg-icons';
+import { faHome, faBullhorn, faChevronDown, faChevronUp, faPhone, faSearch, faSignOutAlt, faUserCog } from '@fortawesome/free-solid-svg-icons';
 import { logoutUser } from ".././accounts/AccountsUtils";
 import { titleCase } from '.././components/Utils';
 
@@ -68,8 +67,8 @@ const Menu = ({ state, dispatch, removeCookie, ...props }) => {
     const [showSearch, setShowSearch] = useState(path.includes("search") ? true : false);
 
     useEffect(() => {
-       document.title = "Shelterly";
-       setShowSearch(path.includes("search"));
+      document.title = "Shelterly";
+      setShowSearch(path.includes("search"));
     }, [path]);
 
     return (
@@ -89,6 +88,7 @@ const Menu = ({ state, dispatch, removeCookie, ...props }) => {
           <ListGroup.Item action className="rounded sidebar" onClick={() => navigate(incident + '/dispatch/dispatchassignment/search')} style={{backgroundColor:path.includes("dispatch/dispatchassignment/search") ? "#444444" : "#292b2c"}}><FontAwesomeIcon className="mr-1 sidebar-icon" icon={faSearch} fixedWidth inverse/><span className="sidebar-icon">DISPATCH ASSIGNMENTS</span></ListGroup.Item>
         </ListGroup>
       </Collapse>
+      {state.user && state.user.is_superuser ? <Link href="/accounts/user_management" className="rounded sidebar"><FontAwesomeIcon icon={faUserCog} className="sidebar-icon" fixedWidth inverse/>  ADMIN</Link> : ""}
       {state.user ? <Link onClick={() => logoutUser({dispatch}, {removeCookie})} href="#" className="rounded sidebar"><FontAwesomeIcon icon={faSignOutAlt} className="sidebar-icon" fixedWidth inverse/> SIGN OUT</Link> : ""}
     </StyledMenu>
     )

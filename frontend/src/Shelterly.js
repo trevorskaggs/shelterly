@@ -13,13 +13,13 @@ function Shelterly() {
 
   // Initial state.
   const { state, dispatch } = useContext(AuthContext);
-  const [, , removeCookie] = useCookies(['token']);
+  const [cookies, , removeCookie] = useCookies(['token']);
 
   const routeResult = useRoutes(state.user ? routes : publicRoutes);
 
   const path = window.location.pathname;
 
-  const style = state.user && path !== '/' && !path.includes('/incident') ? {position:"absolute", marginLeft:"335px"} : {position:"absolute", maxWidth:"100%"}
+  const style = state.user && path !== '/' && !path.includes('/incident') ? {position:"absolute", marginLeft:"335px"} : {position:"absolute", maxWidth:"100%"};
 
   return (
     <ThemeProvider theme={theme}>
@@ -32,7 +32,7 @@ function Shelterly() {
           : ""}
           <span className='d-flex flex-column col-9 h-100' style={style}>
             <Fragment>
-              {routeResult || <PageNotFound />}
+              {routeResult || <PageNotFound cookies={cookies} />}
             </Fragment>
           </span>
         </Row>

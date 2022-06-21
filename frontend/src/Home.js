@@ -144,6 +144,10 @@ function Home({ incident }) {
       selector: row => row.utl,
     },
     {
+      name: 'UTL - NFA',
+      selector: row => row.nfa,
+    },
+    {
       name: 'Sheltered',
       selector: row => row.sheltered,
     },

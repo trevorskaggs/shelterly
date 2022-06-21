@@ -35,8 +35,6 @@ export function logoutUser({dispatch}, {removeCookie}) {
     removeCookie("token");
     setAuthToken();
     dispatch({ type: 'LOGOUT_SUCCESSFUL' });
-    // Redirect to login page.
-    navigate('/login');
   })
   .catch(e => {
     removeCookie("token");

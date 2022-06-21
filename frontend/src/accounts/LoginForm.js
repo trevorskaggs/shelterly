@@ -37,25 +37,23 @@ const Login = () => {
         })}
         onSubmit={(values, actions ) => {
           dispatch({ type: 'USER_LOADING' });
-          setTimeout(() => {
-            axios.post('/login/', values)
-            .then(response => {
-              // Set token for axios calls.
-              setAuthToken(response.data.token);
-              // Store token in cookie.
-              setCookie("token", response.data.token);
-              // Update state information.
-              dispatch({type: 'LOGIN_SUCCESSFUL', data: response.data });
-              navigate(next);
-            })
-            .catch(e => {
-              removeCookie("token");
-              setAuthToken();
-              actions.setStatus('Failed to log in with this username and password combination.')
-              dispatch({type: "LOGIN_FAILED", data: e});
-            });
-            actions.setSubmitting(false);
-          }, 500);
+          axios.post('/login/', values)
+          .then(response => {
+            // Set token for axios calls.
+            setAuthToken(response.data.token);
+            // Store token in cookie.
+            setCookie("token", response.data.token);
+            // Update state information.
+            dispatch({type: 'LOGIN_SUCCESSFUL', data: response.data });
+            navigate(next);
+          })
+          .catch(e => {
+            removeCookie("token");
+            setAuthToken();
+            actions.setStatus('Failed to log in with this username and password combination.')
+            dispatch({type: "LOGIN_FAILED", data: e});
+          });
+          actions.setSubmitting(false);
         }}
       >
       {({ isSubmitting, status }) => (
@@ -65,14 +63,14 @@ const Login = () => {
           <h1  style={{fontSize:"100px"}}>Shelterly</h1>
         </Row>
         <Col xs={{ span:5 }} className="border rounded border-light shadow-sm ml-auto mr-auto mb-auto" style={{maxHeight:"347px"}}>
-          <h3 className='mb-0 text-center mt-3'>Log-in {state.isLoading ? <FontAwesomeIcon icon={faSpinner} spin inverse /> : ""}</h3>
           <BootstrapForm as={Form}>
             <TextInput
               name="username"
               id="username"
               placeholder="Email"
               size="lg"
-              formGroupClasses="mb-0"
+              label="Email"
+              formGroupClasses="mb-0 mt-3"
             />
             <TextInput
               type="password"
@@ -80,10 +78,11 @@ const Login = () => {
               id="password"
               placeholder="Password"
               size="lg"
-              formGroupClasses="mt-0 mb-4"
+              label="Password"
+              formGroupClasses="mt-0 mb-4 mt-3"
             />
             <BootstrapForm.Group as={Col}>
-              <Button type="submit" size="lg" className="btn-primary" block>Login</Button>
+              <Button type="submit" size="lg" className="btn-primary" block>Login{state.isLoading ? <FontAwesomeIcon icon={faSpinner} className="ml-1" spin inverse /> : ""}</Button>
               <Button size="lg" className="btn-primary" onClick={() => setShow(true)} block>Forgot Password</Button>
               {status && <div className="invalid-feedback invalid-form" variant="warning">{status}</div>}
             </BootstrapForm.Group>
@@ -126,7 +125,7 @@ const Login = () => {
                 />
               </Modal.Body>
               <Modal.Footer>
-                <Button type="submit" size="lg" className="btn-primary" block>Reset Password</Button>
+                <Button type="submit" size="lg" className="btn-primary" block>Send Reset Password Email</Button>
               </Modal.Footer>
             </BootstrapForm>
             </>
