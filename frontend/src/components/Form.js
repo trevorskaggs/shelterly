@@ -446,7 +446,7 @@ const AddressLookup = ({setLatLon, ...props}) => {
                 setError(props.error);
               }
             }}
-            bounds={{north:incidentLatLon.lat, south:incidentLatLon.lat, east:incidentLatLon.lng, west:incidentLatLon.lng}}
+            bounds={{north:incidentLatLon.lat+.1, south:incidentLatLon.lat-.1, east:incidentLatLon.lng+.1, west:incidentLatLon.lng-.1}}
             types={['geocode']}
             id="search"
             name="search"
