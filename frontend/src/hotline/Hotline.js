@@ -18,7 +18,7 @@ function Hotline({ incident }) {
 
   const [data, setData] = useState({service_requests: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
   const [mapState, setMapState] = useState({});
-  const [statusOptions, setStatusOptions] = useState("open");
+  const [statusOptions, setStatusOptions] = useState("all");
 
   // Counts the number of species matches for a service request.
   const countMatches = (service_request) => {
@@ -41,6 +41,7 @@ function Hotline({ incident }) {
     let source = axios.CancelToken.source();
 
     const fetchServiceRequests = async () => {
+      setData({service_requests: [], isFetching: true, bounds:L.latLngBounds([[0,0]])});
       // Fetch ServiceRequest data.
       await axios.get('/hotline/api/servicerequests/?incident=' + incident, {
         params: {
@@ -138,7 +139,7 @@ function Hotline({ incident }) {
             ))}
           </Map>
         :
-          <Card className="text-center" style={{height:"450px", marginRight:"-1px", paddingTop:"225px", fontSize:"30px"}}>No Service Requests.</Card>
+          <Card className="text-center" style={{height:"450px", marginRight:"-1px", paddingTop:"225px", fontSize:"30px"}}>{data.isFetching ? "Fetching" : "No"} Service Requests.</Card>
         }
       </Col>
       <Col xs={2} className="ml-0 mr-0 pl-0 pr-0 border rounded">

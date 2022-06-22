@@ -29,7 +29,7 @@ function Dispatch({ incident }) {
     let source = axios.CancelToken.source();
 
     const fetchDispatchAssignments = async () => {
-
+      setData({dispatch_assignments: [], isFetching: true, bounds:L.latLngBounds([[0,0]])});
       // Fetch open DA data.
       axios.get('/evac/api/evacassignment/?incident=' + incident, {
         params: {
@@ -134,7 +134,7 @@ function Dispatch({ incident }) {
             ))}
           </Map>
         :
-          <Card className="text-center" style={{height:"450px", marginRight:"-1px", paddingTop:"225px", fontSize:"30px"}}>No Dispatch Assignments.</Card>
+          <Card className="text-center" style={{height:"450px", marginRight:"-1px", paddingTop:"225px", fontSize:"30px"}}>{data.isFetching ? "Fetching" : "No"} Dispatch Assignments.</Card>
         }
       </Col>
       <Col xs={2} className="ml-0 mr-0 pl-0 pr-0 border rounded">

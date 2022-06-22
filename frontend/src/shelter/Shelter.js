@@ -53,9 +53,9 @@ function Shelter({ incident }) {
     <>
     <Header>Shelter</Header>
     <hr/>
-    <Row className="ml-0 mr-0 pl-0 pr-0">
+    <Row className="ml-0 mr-0 pl-0 pr-0" style={{marginBottom:"-1px"}}>
       <Col xs={10} className="border rounded pl-0 pr-0">
-        {data.shelters ?
+        {data.shelters.length ?
           <Map bounds={data.bounds} className="landing-leaflet-container">
             {data.shelters.filter(shelter => shelter.id === selectedShelter || !selectedShelter ? shelter : null).map((shelter, index) => (
               <Marker
@@ -75,11 +75,8 @@ function Shelter({ incident }) {
             ))}
           </Map>
         :
-          <Card className="text-center" style={{height:"450px", marginRight:"-1px", paddingTop:"225px", fontSize:"30px"}}>No Shelters.</Card>
+          <Card className="text-center" style={{height:"450px", marginRight:"-1px", paddingTop:"225px", fontSize:"30px"}}>{data.isFetching ? "Fetching" : "No"} Shelters.</Card>
         }
-        <Row style={{marginLeft:"0px", marginRight:"0px", maxHeight:"37px"}}>
-          <h4 className="card-header text-center" style={{paddingTop:"4px", paddingLeft:"10px", paddingRight:"10px", height:"36px", width:"100%", backgroundColor:"#808080"}}>Shelters</h4>
-        </Row>
       </Col>
       <Col xs={2} className="ml-0 mr-0 pl-0 pr-0 border rounded">
         <Scrollbar no_shadow="true" style={{height:"450px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
@@ -91,6 +88,9 @@ function Shelter({ incident }) {
           ))}
         </Scrollbar>
       </Col>
+    </Row>
+    <Row className="ml-0 mr-0 border rounded" style={{maxHeight:"38px"}}>
+      <h4 className="card-header text-center" style={{paddingTop:"4px", paddingLeft:"10px", paddingRight:"10px", height:"36px", width:"100%", backgroundColor:"#808080"}}>Shelters</h4>
     </Row>
     <hr/>
     <Row className="ml-0">
