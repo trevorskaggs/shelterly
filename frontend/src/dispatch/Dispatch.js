@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link, navigate } from 'raviger';
-import { Button, Col, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
+import { Button, Card, Col, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { Marker, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -94,44 +94,48 @@ function Dispatch({ incident }) {
     </Row>
     <Row xs={12} className="ml-0 mr-0 pl-0 pr-0" style={{marginBottom:"-1px"}}>
       <Col xs={10} className="border rounded pl-0 pr-0">
-        <Map bounds={data.bounds} className="landing-leaflet-container">
-          {data.dispatch_assignments.filter(da => da.id === selectedTeam ? da : showActive && showPreplanned ? da : showActive ? da.team_member_names.length > 0 : showPreplanned ? da.team_member_names.length === 0 : null)
-                                    .filter(dispatch_assignment => (selectedTeam == null || dispatch_assignment.id === selectedTeam)).map(dispatch_assignment => (
-          <span key={dispatch_assignment.id}>
-            {dispatch_assignment.assigned_requests.map((assigned_request, index) => (
-              <Marker
-                key={assigned_request.service_request_object.id}
-                position={[assigned_request.service_request_object.latitude, assigned_request.service_request_object.longitude]}
-                icon={assigned_request.service_request_object.reported_animals > 0 ? reportedMarkerIcon : assigned_request.service_request_object.sheltered_in_place > 0 ? SIPMarkerIcon : UTLMarkerIcon}
-                onClick={() => navigate("/dispatch/summary/" + dispatch_assignment.id)}
-              >
-              <MapTooltip key={`${index}-${selectedTeam}`} autoPan={false} closeButton={true} permanent={selectedTeam === dispatch_assignment.id ? true : false}>
-                <span>
-                  <div>{dispatch_assignment.team_object ? dispatch_assignment.team_object.name : ""}</div>
-                  {mapState[dispatch_assignment.id] ?
-                    <span>
-                      {Object.keys(mapState[dispatch_assignment.id].service_requests[assigned_request.service_request_object.id].matches).map((key,i) => (
-                        <span key={key} style={{textTransform:"capitalize"}}>
-                          {i > 0 && ", "}{prettyText(key.split(',')[1], key.split(',')[0], mapState[dispatch_assignment.id].service_requests[assigned_request.service_request_object.id].matches[key])}
-                        </span>
-                      ))}
-                    </span>
-                  :""}
-                  <br />
-                  SR#{assigned_request.service_request_object.id}: {assigned_request.service_request_object.full_address}
-                  <div>
-                    {assigned_request.service_request_object.aco_required ? <img width={16} height={16} src="/static/images/badge-sheriff.png" alt="ACO Required" className="mr-1" /> : ""}
-                    {assigned_request.service_request_object.injured ? <img width={16} height={16} src="/static/images/band-aid-solid.png" alt="Injured" className="mr-1" /> : ""}
-                    {assigned_request.service_request_object.accessible ? <img width={16} height={16} src="/static/images/car-solid.png" alt="Accessible" className="mr-1" /> : <img width={16} height={16} src="/static/images/car-ban-solid.png" alt="Not Acessible" className="mr-1" />}
-                    {assigned_request.service_request_object.turn_around ? <img width={16} height={16} src="/static/images/trailer-solid.png" alt="Turn Around" /> : <img width={16} height={16} src="/static/images/trailer-ban-solid.png" alt="No Turn Around" className="mr-1" />}
-                  </div>
-                </span>
-              </MapTooltip>
-            </Marker>
+        {data.dispatch_assignments.length ?
+          <Map bounds={data.bounds} className="landing-leaflet-container">
+            {data.dispatch_assignments.filter(da => da.id === selectedTeam ? da : showActive && showPreplanned ? da : showActive ? da.team_member_names.length > 0 : showPreplanned ? da.team_member_names.length === 0 : null)
+                                      .filter(dispatch_assignment => (selectedTeam == null || dispatch_assignment.id === selectedTeam)).map(dispatch_assignment => (
+            <span key={dispatch_assignment.id}>
+              {dispatch_assignment.assigned_requests.map((assigned_request, index) => (
+                <Marker
+                  key={assigned_request.service_request_object.id}
+                  position={[assigned_request.service_request_object.latitude, assigned_request.service_request_object.longitude]}
+                  icon={assigned_request.service_request_object.reported_animals > 0 ? reportedMarkerIcon : assigned_request.service_request_object.sheltered_in_place > 0 ? SIPMarkerIcon : UTLMarkerIcon}
+                  onClick={() => navigate("/dispatch/summary/" + dispatch_assignment.id)}
+                >
+                <MapTooltip key={`${index}-${selectedTeam}`} autoPan={false} closeButton={true} permanent={selectedTeam === dispatch_assignment.id ? true : false}>
+                  <span>
+                    <div>{dispatch_assignment.team_object ? dispatch_assignment.team_object.name : ""}</div>
+                    {mapState[dispatch_assignment.id] ?
+                      <span>
+                        {Object.keys(mapState[dispatch_assignment.id].service_requests[assigned_request.service_request_object.id].matches).map((key,i) => (
+                          <span key={key} style={{textTransform:"capitalize"}}>
+                            {i > 0 && ", "}{prettyText(key.split(',')[1], key.split(',')[0], mapState[dispatch_assignment.id].service_requests[assigned_request.service_request_object.id].matches[key])}
+                          </span>
+                        ))}
+                      </span>
+                    :""}
+                    <br />
+                    SR#{assigned_request.service_request_object.id}: {assigned_request.service_request_object.full_address}
+                    <div>
+                      {assigned_request.service_request_object.aco_required ? <img width={16} height={16} src="/static/images/badge-sheriff.png" alt="ACO Required" className="mr-1" /> : ""}
+                      {assigned_request.service_request_object.injured ? <img width={16} height={16} src="/static/images/band-aid-solid.png" alt="Injured" className="mr-1" /> : ""}
+                      {assigned_request.service_request_object.accessible ? <img width={16} height={16} src="/static/images/car-solid.png" alt="Accessible" className="mr-1" /> : <img width={16} height={16} src="/static/images/car-ban-solid.png" alt="Not Acessible" className="mr-1" />}
+                      {assigned_request.service_request_object.turn_around ? <img width={16} height={16} src="/static/images/trailer-solid.png" alt="Turn Around" /> : <img width={16} height={16} src="/static/images/trailer-ban-solid.png" alt="No Turn Around" className="mr-1" />}
+                    </div>
+                  </span>
+                </MapTooltip>
+              </Marker>
+              ))}
+            </span>
             ))}
-          </span>
-          ))}
-        </Map>
+          </Map>
+        :
+          <Card className="text-center" style={{height:"450px", marginRight:"-1px", paddingTop:"225px", fontSize:"30px"}}>No Dispatch Assignments.</Card>
+        }
       </Col>
       <Col xs={2} className="ml-0 mr-0 pl-0 pr-0 border rounded">
         <Scrollbar no_shadow="true" style={{height:"450px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>

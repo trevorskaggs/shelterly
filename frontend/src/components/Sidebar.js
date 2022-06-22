@@ -72,7 +72,7 @@ const Menu = ({ state, dispatch, removeCookie, ...props }) => {
     }, [path]);
 
     return (
-    <StyledMenu  {...props} className="flex-column" style={{ height: viewHeight, minHeight:"880px" }}>
+    <StyledMenu  {...props} className="flex-column" style={{ height: viewHeight, minHeight:"925px" }}>
       <Link href={incident + "/home"} style={{marginTop:"-5px", paddingBottom:"0px"}} title="Home"><img src="/static/images/shelterly.png" alt="Logo" /></Link>
       <div className="logo text-center" style={{marginTop:"10px", marginBottom:"0px", paddingBottom:"0px"}}>SHELTERLY</div>
       <div className="logo border-bottom text-center" style={{paddingBottom:"12px", letterSpacing:"0.25rem", fontSize:"1.2rem"}} title="Incident"><span style={{cursor:"pointer"}} onClick={() => navigate('/')}>{titleCase(path.split('/')[1].replaceAll('-', ' '))}</span></div>
@@ -88,7 +88,7 @@ const Menu = ({ state, dispatch, removeCookie, ...props }) => {
           <ListGroup.Item action className="rounded sidebar" onClick={() => navigate(incident + '/dispatch/dispatchassignment/search')} style={{backgroundColor:path.includes("dispatch/dispatchassignment/search") ? "#444444" : "#292b2c"}}><FontAwesomeIcon className="mr-1 sidebar-icon" icon={faSearch} fixedWidth inverse/><span className="sidebar-icon">DISPATCH ASSIGNMENTS</span></ListGroup.Item>
         </ListGroup>
       </Collapse>
-      {state.user && state.user.is_superuser ? <Link href="/accounts/user_management" className="rounded sidebar"><FontAwesomeIcon icon={faUserCog} className="sidebar-icon" fixedWidth inverse/>  ADMIN</Link> : ""}
+      {state.user && state.user.is_superuser ? <Link href="/accounts/user_management" className="rounded sidebar" style={{marginBottom:"-10px"}}><FontAwesomeIcon icon={faUserCog} className="sidebar-icon" fixedWidth inverse/>  ADMIN</Link> : ""}
       {state.user ? <Link onClick={() => logoutUser({dispatch}, {removeCookie})} href="#" className="rounded sidebar"><FontAwesomeIcon icon={faSignOutAlt} className="sidebar-icon" fixedWidth inverse/> SIGN OUT</Link> : ""}
     </StyledMenu>
     )

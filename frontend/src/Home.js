@@ -13,7 +13,7 @@ function Home({ incident }) {
   // Initial state.
   const { state } = useContext(AuthContext);
 
-  const [data, setData] = useState({});
+  const [data, setData] = useState({'isFetching':true, 'daily_report':[], 'sr_worked_report':[], 'shelter_report':[], 'animal_status_report':[], 'animal_owner_report':[]});
   const [selection, setSelection] = useState({value:'daily', label:"Daily Report"});
 
   const [storeDate, setStoreDate] = useState('');
@@ -27,21 +27,20 @@ function Home({ incident }) {
 
     const fetchServiceRequests = async () => {
       // Fetch ServiceRequest data.
-      if (state.user && !data.daily_report) {
-        await axios.get('/reports/api/reports/?incident=' + incident, {
-          cancelToken: source.token,
-        })
-        .then(response => {
-          if (!unmounted) {
-            setData(response.data);
-          }
-        })
-        .catch(error => {
-          if (!unmounted) {
-            setData({});
-          }
-        });
-      }
+      await axios.get('/reports/api/reports/?incident=' + incident, {
+        cancelToken: source.token,
+      })
+      .then(response => {
+        if (!unmounted) {
+          response.data['isFetching'] = false
+          setData(response.data)
+        }
+      })
+      .catch(error => {
+        if (!unmounted) {
+          setData({'isFetching':false, 'daily_report':[], 'sr_worked_report':[], 'shelter_report':[], 'animal_status_report':[], 'animal_owner_report':[]});
+        }
+      });
     };
     fetchServiceRequests();
     // Cleanup.
@@ -263,7 +262,7 @@ function Home({ incident }) {
           data={data && data.daily_report ? data.daily_report.filter(row => (startDate ? startDate <= moment(row.date)
           .format('YYYY-MM-DD') && endDate >= moment(row.date).format('YYYY-MM-DD') : row)) : []}
           pagination
-          noDataComponent={data && data.daily_report ? <div style={{padding:"24px"}}>There are no records to display</div> : <div style={{padding:"24px"}}>Fetching report data...</div>}
+          noDataComponent={data && data.daily_report.length === 0 && !data.isFetching ? <div style={{padding:"24px"}}>There are no records to display</div> : <div style={{padding:"24px"}}>Fetching report data...</div>}
       />
       : selection.value === 'worked' ?
       <DataTable

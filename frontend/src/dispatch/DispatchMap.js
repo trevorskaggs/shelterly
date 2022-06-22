@@ -518,7 +518,7 @@ function Deploy({ incident }) {
         </Row>
         <Row className="mt-2" style={{marginRight:"-12px"}}>
           <Col xs={2} className="pl-0 pr-0" style={{marginLeft:"-7px", marginRight:"12px"}}>
-            <Button type="submit" className="btn-block mt-auto" style={{marginBottom:"-33px"}} disabled={selectedCount.disabled || (!preplan && props.values.team_members.length === 0)}>{preplan ? "PREPLAN" : "DEPLOY"}</Button>
+            <Button type="submit" className="btn-block mt-auto border" style={{marginBottom:"-33px"}} disabled={selectedCount.disabled || (!preplan && props.values.team_members.length === 0)}>{preplan ? "PREPLAN" : "DEPLOY"}</Button>
           </Col>
           <Col xs={2} className="pl-0 pr-0" style={{marginRight:"5px"}}>
             <div className="card-header border rounded text-center" style={{height:"37px", marginLeft:"-6px", paddingTop:"6px", whiteSpace:"nowrap"}}>
@@ -868,7 +868,7 @@ function Deploy({ incident }) {
                 : ""}
                 </span>
               ))}
-              <div className="card-header mt-1 mb-1 rounded"  style={{marginLeft:"-10px", marginRight:"-10px"}} hidden={data.service_requests.length > 0}>
+              <div className="card-header mt-1 mb-1 rounded" hidden={data.service_requests.length > 0}>
                 No open Service Requests found.
               </div>
             </Scrollbar>

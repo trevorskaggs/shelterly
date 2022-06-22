@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import axios from 'axios';
 import { useFormikContext, useField } from 'formik';
 import { Button, Col, Collapse, Image, Form, OverlayTrigger, Tooltip, Row } from 'react-bootstrap';
 import Select, { createFilter } from 'react-select';
@@ -334,6 +335,7 @@ const AddressLookup = ({setLatLon, ...props}) => {
   const [error, setError] = useState('');
   const [triggerRefresh, setTriggerRefresh] = useState(false);
   const [search, setSearch] = useState({});
+  const [incidentLatLon, setIncidentLatLon] = useState({lat:0, lng:0});
 
   function changeDelay(change) {
     if (timer) {
@@ -366,6 +368,20 @@ const AddressLookup = ({setLatLon, ...props}) => {
       setError("");
     }
     updateAddr(search);
+
+    let unmounted = false;
+    let source = axios.CancelToken.source();
+
+    axios.get('/incident/api/incident/?incident_slug=' + props.incident, {
+      cancelToken: source.token,
+    })
+    .then(response => {
+      if (!unmounted) {
+        setIncidentLatLon({lat:Number(response.data[0].latitude), lng:Number(response.data[0].longitude)})
+      }
+    })
+    .catch(error => {
+    });
   }, [triggerRefresh, search]);
 
   const updateAddr = suggestion => {
@@ -430,9 +446,11 @@ const AddressLookup = ({setLatLon, ...props}) => {
                 setError(props.error);
               }
             }}
+            bounds={{north:incidentLatLon.lat, south:incidentLatLon.lat, east:incidentLatLon.lng, west:incidentLatLon.lng}}
             types={['geocode']}
             id="search"
             name="search"
+            key={`search_key__${String(incidentLatLon.lat)}`}
             componentRestrictions={{country: "us"}}
             ref={childRef}
             apiKey={process.env.REACT_APP_GOOGLE_API_KEY}
@@ -458,7 +476,7 @@ const AddressSearch = (props) => {
 
   const renderAddressLookup = () => {
     if (process.env.REACT_APP_GOOGLE_API_KEY) {
-      return <AddressLookup label={props.label} style={{width: '100%'}} className={"form-control"} setLatLon={setLatLon} error={props.error} />
+      return <AddressLookup label={props.label} style={{width: '100%'}} className={"form-control"} setLatLon={setLatLon} error={props.error} incident={props.incident} />
     } else {
       return <Alert variant="danger">Found Location Search is not available. Please contact support for assistance.</Alert>
     }

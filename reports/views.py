@@ -13,7 +13,7 @@ from django.utils import timezone
 class ReportViewSet(viewsets.ViewSet):
 
   def list(self, response):
-    if ServiceRequest.objects.exists():
+    if ServiceRequest.objects.filter(incident__slug=self.request.GET.get('incident', 'test')).exists():
         start_date = ServiceRequest.objects.filter(incident__slug=self.request.GET.get('incident', 'test')).annotate(date=TruncDay('timestamp')).values('date').earliest('date')['date']
         end_date = timezone.now()
 
@@ -52,4 +52,4 @@ class ReportViewSet(viewsets.ViewSet):
         animals_ownership = Animal.objects.filter(incident__slug=self.request.GET.get('incident', 'test')).exclude(status='CANCELED').values('species').annotate(owned=Count("id", filter=Q(owners__isnull=False)), stray=Count("id", filter=Q(owners__isnull=True)), total=Count("id")).order_by()
         data = {'daily_report':daily_report, 'sr_worked_report':sr_worked_report, 'shelter_report':shelters, 'animal_status_report':animals_status, 'animal_owner_report':animals_ownership}
         return Response(data)
-    return Response({})
+    return Response({'daily_report':[], 'sr_worked_report':[], 'shelter_report':[], 'animal_status_report':[], 'animal_owner_report':[]})

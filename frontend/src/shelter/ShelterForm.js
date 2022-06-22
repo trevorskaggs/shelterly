@@ -151,7 +151,7 @@ const ShelterForm = ({ id, incident }) => {
                     name="description"
                   />
                 </BootstrapForm.Row>
-                <AddressSearch formikProps={props} label="Search for Shelter Address" show_apt={false} error="Shelter Address was not selected." />
+                <AddressSearch formikProps={props} label="Search for Shelter Address" show_apt={false} incident={incident} error="Shelter Address was not selected." />
               </BootstrapForm>
             </Card.Body>
             <ButtonGroup size="lg">

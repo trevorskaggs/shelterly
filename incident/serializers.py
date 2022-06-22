@@ -10,9 +10,9 @@ class IncidentSerializer(serializers.ModelSerializer):
             data['slug'] = data.get('slug').lower()
         # Truncates latitude and longitude.
         if data.get('latitude'):
-            data['latitude'] = float("%.6f" % float(data.get('latitude')))
+            data['latitude'] = float("%.4f" % float(data.get('latitude')))
         if data.get('longitude'):
-            data['longitude'] = float("%.6f" % float(data.get('longitude')))
+            data['longitude'] = float("%.4f" % float(data.get('longitude')))
         return super().to_internal_value(data)
 
     class Meta:

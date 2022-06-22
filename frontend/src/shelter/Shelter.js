@@ -55,24 +55,28 @@ function Shelter({ incident }) {
     <hr/>
     <Row className="ml-0 mr-0 pl-0 pr-0">
       <Col xs={10} className="border rounded pl-0 pr-0">
-        <Map bounds={data.bounds} className="landing-leaflet-container">
-          {data.shelters.filter(shelter => shelter.id === selectedShelter || !selectedShelter ? shelter : null).map((shelter, index) => (
-            <Marker
-              key={shelter.id}
-              position={[shelter.latitude, shelter.longitude]}
-              icon={shelterMarkerIcon}
-              onClick={() => navigate("/" + incident + "/shelter/" + shelter.id)}
-            >
-              <MapTooltip key={`${index}-${selectedShelter}`} keepInView={false} autoPan={false} permanent={selectedShelter === shelter.id ? true : false}>
-                <span>
-                  <div>{shelter.name} - {shelter.animal_count} Animal{shelter.animal_count === 1 ? "" :"s"}</div>
-                  <div>Address: {shelter.full_address}</div>
-                  {shelter.phone ? <div>Phone: {shelter.display_phone}</div> : ""}
-                </span>
-              </MapTooltip>
-            </Marker>
-          ))}
-        </Map>
+        {data.shelters ?
+          <Map bounds={data.bounds} className="landing-leaflet-container">
+            {data.shelters.filter(shelter => shelter.id === selectedShelter || !selectedShelter ? shelter : null).map((shelter, index) => (
+              <Marker
+                key={shelter.id}
+                position={[shelter.latitude, shelter.longitude]}
+                icon={shelterMarkerIcon}
+                onClick={() => navigate("/" + incident + "/shelter/" + shelter.id)}
+              >
+                <MapTooltip key={`${index}-${selectedShelter}`} keepInView={false} autoPan={false} permanent={selectedShelter === shelter.id ? true : false}>
+                  <span>
+                    <div>{shelter.name} - {shelter.animal_count} Animal{shelter.animal_count === 1 ? "" :"s"}</div>
+                    <div>Address: {shelter.full_address}</div>
+                    {shelter.phone ? <div>Phone: {shelter.display_phone}</div> : ""}
+                  </span>
+                </MapTooltip>
+              </Marker>
+            ))}
+          </Map>
+        :
+          <Card className="text-center" style={{height:"450px", marginRight:"-1px", paddingTop:"225px", fontSize:"30px"}}>No Shelters.</Card>
+        }
         <Row style={{marginLeft:"0px", marginRight:"0px", maxHeight:"37px"}}>
           <h4 className="card-header text-center" style={{paddingTop:"4px", paddingLeft:"10px", paddingRight:"10px", height:"36px", width:"100%", backgroundColor:"#808080"}}>Shelters</h4>
         </Row>

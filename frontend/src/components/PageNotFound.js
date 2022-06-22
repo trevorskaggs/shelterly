@@ -1,8 +1,8 @@
 import React from "react";
 
-const PageNotFound = ({ cookies }) => (
+const PageNotFound = ({ state }) => (
   <h4 className="mt-3">
-    {cookies.token ? "Page Not Found." : ""}
+    {state.isAuthenticated ? "Page Not Found." : ""}
   </h4>
 );
 
