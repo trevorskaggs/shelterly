@@ -30,7 +30,7 @@ const ResetPassword = () => {
           password2: Yup.string()
             .oneOf([Yup.ref('password'), null], 'Passwords must match.'),
         })}
-        onSubmit={(values, actions ) => {
+        onSubmit={(values, actions) => {
           setTimeout(() => {
             axios.post('/accounts/api/password_reset/confirm/', values)
             .then(response => {

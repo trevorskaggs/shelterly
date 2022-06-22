@@ -88,7 +88,7 @@ const Menu = ({ state, dispatch, removeCookie, ...props }) => {
           <ListGroup.Item action className="rounded sidebar" onClick={() => navigate(incident + '/dispatch/dispatchassignment/search')} style={{backgroundColor:path.includes("dispatch/dispatchassignment/search") ? "#444444" : "#292b2c"}}><FontAwesomeIcon className="mr-1 sidebar-icon" icon={faSearch} fixedWidth inverse/><span className="sidebar-icon">DISPATCH ASSIGNMENTS</span></ListGroup.Item>
         </ListGroup>
       </Collapse>
-      {state.user && state.user.is_superuser ? <Link href="/accounts/user_management" className="rounded sidebar" style={{marginBottom:"-10px"}}><FontAwesomeIcon icon={faUserCog} className="sidebar-icon" fixedWidth inverse/>  ADMIN</Link> : ""}
+      {state.user && state.user.is_superuser ? <Link href={incident + "/accounts/user_management"} className="rounded sidebar" style={{marginBottom:"-10px"}}><FontAwesomeIcon icon={faUserCog} className="sidebar-icon" fixedWidth inverse/>  ADMIN</Link> : ""}
       {state.user ? <Link onClick={() => logoutUser({dispatch}, {removeCookie})} href="#" className="rounded sidebar"><FontAwesomeIcon icon={faSignOutAlt} className="sidebar-icon" fixedWidth inverse/> SIGN OUT</Link> : ""}
     </StyledMenu>
     )
