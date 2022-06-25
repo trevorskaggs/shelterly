@@ -38,7 +38,8 @@ for item in a:
                     cell_phone=item['cell_phone'],
                     username=item['email'],
                     password=item['last_name'] + '1',
-                    is_superuser=super_user
+                    is_superuser=super_user,
+                    is_staff=super_user
                 )
                 print(user)
             except IntegrityError:
