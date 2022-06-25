@@ -30,7 +30,7 @@ function Shelterly() {
           : ""}
           <span className='d-flex flex-column col-9 h-100' style={style}>
             <Fragment>
-              {routeResult || <PageNotFound cookies={cookies} />}
+              {routeResult || <PageNotFound state={state} />}
             </Fragment>
           </span>
         </Row>
