@@ -47,11 +47,6 @@ export const printDispatchResolutionForm = (data) => {
 
     pdf.drawPad(20);
 
-    // lat/lng
-    pdf.drawWrappedText({
-      text: `Latitude: ${assigned_request.service_request_object.latitude},  Longitude: ${assigned_request.service_request_object.longitude}`
-    });
-
     // summary address
     pdf.drawSectionHeader({ text: 'Service Request Address:', fontSize: 14 });
 
@@ -64,6 +59,11 @@ export const printDispatchResolutionForm = (data) => {
       ],
       bottomPadding: 12
     })
+
+    // lat/lng
+    pdf.drawWrappedText({
+      text: `Latitude: ${assigned_request.service_request_object.latitude},  Longitude: ${assigned_request.service_request_object.longitude}`
+    });
 
     // Animal count
     pdf.drawSectionHeader({ text: 'Animals', fontSize: 14 });
