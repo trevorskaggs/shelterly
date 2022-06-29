@@ -53,26 +53,33 @@ const PersonForm = (props) => {
 
   // Track duplicate owner error.
   const [error, setError] = useState({show:false, error:[]});
-  const handleErrorClose = () => setError({show:false, error:[]});
+  const [dupeOwner, setDupeOwner] = useState(false);
+  const handleErrorClose = () => {setError({show:false, error:[]}); setDupeOwner(null);}
 
-  const handleDuplicateOwner = (dupe_id, values) => {
-    axios.patch('/people/api/person/' + dupe_id + '/', values)
-    .then(response => {
-      // If SR already exists, redirect to the SR details.
-      if (servicerequest_id) {
-        navigate(incident + '/hotline/servicerequest/' + servicerequest_id);
-      }
-      // If adding from an animal, redirect to the Animal details.
-      else if (animal_id) {
-        navigate(incident + '/animals/' + animal_id);
-      }
-      // Otherise redirect to the duplicate Owner details.
-      else {
-        navigate(incident + '/people/owner/' + response.data.id);
-      }
-    })
-    .catch(error => {
-    });
+  const handleDuplicateOwner = (dupe_id, formikProps) => {
+    if (is_workflow) {
+      setDupeOwner(true);
+      formikProps.submitForm();
+    }
+    else {
+      axios.patch('/people/api/person/' + dupe_id + '/', formikProps.values)
+      .then(response => {
+        // If SR already exists, redirect to the SR details.
+        if (servicerequest_id) {
+          navigate(incident + '/hotline/servicerequest/' + servicerequest_id);
+        }
+        // If adding from an animal, redirect to the Animal details.
+        else if (animal_id) {
+          navigate(incident + '/animals/' + animal_id);
+        }
+        // Otherise redirect to the duplicate Owner details.
+        else {
+          navigate(incident + '/people/owner/' + response.data.id);
+        }
+      })
+      .catch(error => {
+      });
+    }
   }
 
   // Control Agency display.
@@ -193,7 +200,11 @@ const PersonForm = (props) => {
             // Check to see if owner data already exists.
             axios.get('/people/api/person/?search=' + values.first_name +  ' ' + values.last_name + ' ' + values.phone.replace(/\D/g, ""))
             .then(response => {
-              if (response.data.length > 0) {
+              // If we have a dupe owner then use it.
+              if (dupeOwner) {
+                values['id'] = response.data[0].id;
+              }
+              if (response.data.length > 0 && !dupeOwner) {
                 // Throw error if duplicate owner found.
                 if (isOwner) {
                   setError({show:true, error:['a duplicate owner with the same name and phone number already exists.', response.data[0].id]});
@@ -206,10 +217,12 @@ const PersonForm = (props) => {
               }
               // Only continue on from owner if there are no errors.
               else if (isOwner) {
+                setDupeOwner(false);
                 props.onSubmit('owner', values, 'animals');
               }
               // Always continue on if reporter.
               if (!isOwner) {
+                setDupeOwner(false);
                 if (skipOwner) {
                   props.onSubmit('reporter', values, 'animals');
                 }
@@ -372,11 +385,11 @@ const PersonForm = (props) => {
                 <div>
                   <span>This person cannot be created because</span> {error && error.error[0]}
                   <div className="mt-1 mb-1">Click <Link href={"/" + incident + "/people/owner/" + error.error[1]} style={{color:"#8d99d4"}}>here</Link> to view this owner.</div>
-                  {!is_workflow ? <div>Would you like to use the existing owner instead?</div> : ""}
+                  <div>Would you like to use the existing owner instead?</div>
                 </div>
               </Modal.Body>
               <Modal.Footer>
-                {!is_workflow ? <Button variant="primary" onClick={() => {handleDuplicateOwner(error.error[1], formikProps.values)}}>Yes</Button> : ""}
+                <Button variant="primary" onClick={() => {handleDuplicateOwner(error.error[1], formikProps)}}>Yes</Button>
                 <Button variant="secondary" onClick={handleErrorClose}>Close</Button>
               </Modal.Footer>
             </Modal>

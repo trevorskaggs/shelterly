@@ -117,8 +117,8 @@ function ServiceRequestForm(props) {
               ]);
             }
             // Create Owner
-            let ownerResponse = [{data:{id:null}}];
-            if (props.state.steps.owner.first_name) {
+            let ownerResponse = [{data:{id:props.state.steps.owner.id}}];
+            if (props.state.steps.owner.first_name && !props.state.steps.owner.id) {
               ownerResponse = await Promise.all([
                 axios.post('/people/api/person/', props.state.steps.owner)
               ]);

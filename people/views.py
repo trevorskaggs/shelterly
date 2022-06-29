@@ -25,12 +25,29 @@ class PersonViewSet(viewsets.ModelViewSet):
             .prefetch_related(
                 Prefetch(
                     "animal_set",
-                    queryset=Animal.objects.exclude(status='CANCELED').with_images().prefetch_related('owners'),
+                    queryset=Animal.objects.filter(incident__slug=self.request.GET.get('incident', 'test')).exclude(status='CANCELED').with_images().prefetch_related('owners'),
                     to_attr="animals",
                 )
             )
-            .prefetch_related('reporter_animals')
-            .prefetch_related("ownercontact_set", 'reporter_service_request', 'request')
+            .prefetch_related(
+                Prefetch(
+                    "reporter_animals",
+                    queryset=Animal.objects.filter(incident__slug=self.request.GET.get('incident', 'test')).exclude(status='CANCELED').with_images().prefetch_related('owners'),
+                )
+            )
+            .prefetch_related(
+                Prefetch(
+                    "request",
+                    queryset=ServiceRequest.objects.filter(incident__slug=self.request.GET.get('incident', 'test')).exclude(status='canceled'),
+                )
+            )
+            .prefetch_related(
+                Prefetch(
+                    "reporter_service_request",
+                    queryset=ServiceRequest.objects.filter(incident__slug=self.request.GET.get('incident', 'test')).exclude(status='canceled'),
+                )
+            )
+            .prefetch_related("ownercontact_set")
         )
         # Status filter.
         status = self.request.query_params.get("status", "")

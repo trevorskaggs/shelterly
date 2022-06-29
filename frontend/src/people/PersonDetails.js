@@ -67,7 +67,7 @@ function PersonDetails({id, incident}) {
 
     const fetchPersonData = async () => {
       // Fetch Person data.
-      await axios.get('/people/api/person/' + id + '/', {
+      await axios.get('/people/api/person/' + id + '/?incident=' + incident, {
         cancelToken: source.token,
       })
       .then(response => {
