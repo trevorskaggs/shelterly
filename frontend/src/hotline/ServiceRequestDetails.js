@@ -285,7 +285,7 @@ function ServiceRequestDetails({ id, incident }) {
                     value={data.followup_date || null}>
                   </Flatpickr>
                 </ListGroup.Item>
-                <ListGroup.Item style={{marginBottom:"-13px"}}><b>Additional Information:</b> {data.directions||"No additional information available"}</ListGroup.Item>
+                <ListGroup.Item style={{marginBottom:"-13px"}}><b>Additional Information:</b> {data.directions||"None"}</ListGroup.Item>
               </ListGroup>
             </Card.Body>
           </Card>

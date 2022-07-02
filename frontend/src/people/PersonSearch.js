@@ -38,7 +38,7 @@ function PersonSearch({ incident }) {
     tempSearchTerm.current.value = event.target.value;
   };
 
-  // Use searchTerm to filter service_requests.
+  // Use searchTerm to filter owners.
   const handleSubmit = async event => {
     event.preventDefault();
     setSearchTerm(tempSearchTerm.current.value);
@@ -99,7 +99,7 @@ function PersonSearch({ incident }) {
 			unmounted = true;
 			source.cancel();
 		};
-	}, [searchTerm, statusOptions]);
+	}, [searchTerm, statusOptions, incident]);
 
 	return (
 			<div className="ml-2 mr-2">
@@ -160,15 +160,18 @@ function PersonSearch({ incident }) {
                 <Card style={{marginBottom:"6px"}}>
                   <Card.Body>
                     <Card.Title style={{marginTop:"-9px", marginBottom:"8px"}}>Information</Card.Title>
-                    <ListGroup>
-                      <ListGroup.Item><b>Phone: </b>{owner.phone ? <span>{owner.display_phone} </span> : "None"}</ListGroup.Item>
-                      <ListGroup.Item><b>Email: </b>{owner.email ? <span>{owner.email} </span> : "None"}</ListGroup.Item>
-                      {owner.request ?
-                        <ListGroup.Item><b>Service Request: </b><Link href={"/" + incident + "/hotline/servicerequest/" + owner.request.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{owner.request.full_address}</Link></ListGroup.Item>
-                      :
-                        <ListGroup.Item><b>Address: </b>{owner.full_address || "None"}</ListGroup.Item>
-                      }
-                    </ListGroup>
+                    <Scrollbar style={{height:"144px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
+                      <ListGroup>
+                        <ListGroup.Item><b>Phone: </b>{owner.phone ? <span>{owner.display_phone} </span> : "None"}</ListGroup.Item>
+                        <ListGroup.Item><b>Email: </b>{owner.email ? <span>{owner.email} </span> : "None"}</ListGroup.Item>
+                        {owner.requests && owner.requests.map(request => (
+                          <ListGroup.Item><b>Service Request: </b><Link href={"/" + incident + "/hotline/servicerequest/" + request.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{request.full_address}</Link></ListGroup.Item>
+                        ))}
+                        {owner.requests && owner.requests.length === 0 ?
+                          <ListGroup.Item><b>Address: </b>{owner.address ? owner.full_address : 'None'}</ListGroup.Item>
+                        : ""}
+                      </ListGroup>
+                    </Scrollbar>
                   </Card.Body>
                 </Card>
                 {searchState[owner.id] ?

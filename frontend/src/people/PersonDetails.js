@@ -49,6 +49,7 @@ function PersonDetails({id, incident}) {
     zip_code: '',
     animals: [],
     reporter_animals: [],
+    requests: [],
     images: [],
     owner_contacts: [],
     action_history: [],
@@ -85,7 +86,7 @@ function PersonDetails({id, incident}) {
       unmounted = true;
       source.cancel();
     };
-  }, [id]);
+  }, [id, incident]);
 
   return (
     <>
@@ -150,11 +151,12 @@ function PersonDetails({id, incident}) {
                 {data.agency ? <ListGroup.Item><b>Agency: </b>{data.agency}</ListGroup.Item>: ''}
                 {data.phone ? <ListGroup.Item><b>Telephone: </b>{data.display_phone} {data.display_alt_phone ? <span>|&nbsp;Alt: {data.display_alt_phone}</span> : ""}</ListGroup.Item> : ""}
                 {data.email ? <ListGroup.Item><b>Email: </b>{data.email}</ListGroup.Item> : ""}
-                {data.request ?
-                  <ListGroup.Item><b>Service Request: </b><Link href={"/" + incident + "/hotline/servicerequest/" + data.request.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.request.full_address}</Link></ListGroup.Item>
-                :
+                {data.requests.map(request => (
+                  <ListGroup.Item><b>Service Request: </b><Link href={"/" + incident + "/hotline/servicerequest/" + request.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{request.full_address}</Link></ListGroup.Item>
+                ))}
+                {data.requests.length === 0 ?
                   <ListGroup.Item><b>Address: </b>{data.address ? data.full_address : 'No Address Listed'}</ListGroup.Item>
-                }
+                : ""}
                 {data.comments ? <ListGroup.Item><b>Comments: </b>{data.comments}</ListGroup.Item>: ''}
               </ListGroup>
             </Scrollbar>

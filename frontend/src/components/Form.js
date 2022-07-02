@@ -382,7 +382,7 @@ const AddressLookup = ({setLatLon, ...props}) => {
     })
     .catch(error => {
     });
-  }, [triggerRefresh, search]);
+  }, [triggerRefresh, search, props.incident]);
 
   const updateAddr = suggestion => {
 
@@ -510,7 +510,7 @@ const AddressSearch = (props) => {
     {props.show_same ?
       <span className="form-row mb-2">
         <Form.Label style={{marginLeft:"5px"}}>Address Same as Owner: </Form.Label>
-        <input id="same_address" type="checkbox" className="ml-2" checked={!fadeIn} onChange={handleChange} style={{marginTop:"5px"}} />
+        <input id="same_address" type="checkbox" className="ml-2" checked={!fadeIn} onChange={handleChange} style={{marginTop:"-7px"}} />
       </span>
     : ""}
     <Collapse in={fadeIn}>

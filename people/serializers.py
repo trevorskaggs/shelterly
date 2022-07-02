@@ -62,7 +62,7 @@ class PersonSerializer(SimplePersonSerializer):
     animals = serializers.SerializerMethodField()
     reporter_animals = serializers.SerializerMethodField()
     images = serializers.SerializerMethodField()
-    request = serializers.SerializerMethodField()
+    requests = serializers.SerializerMethodField()
     action_history = serializers.SerializerMethodField()
 
     def get_animals(self, obj):
@@ -93,15 +93,15 @@ class PersonSerializer(SimplePersonSerializer):
         return [build_action_string(action) for action in obj.target_actions.all()]
 
     # Custom field for the ServiceRequest ID.
-    def get_request(self, obj):
+    def get_requests(self, obj):
         from hotline.serializers import BarebonesServiceRequestSerializer
-        if obj.reporter_service_request.all():
-            service_request = obj.reporter_service_request.all()[0]
-        elif obj.request.all():
-            service_request = obj.request.all()[0]
+        if obj.request.all():
+            service_requests = obj.request.all()
+        elif obj.reporter_service_request.all():
+            service_requests = obj.reporter_service_request.all()
         else:
-            service_request = None
-        if service_request:
-            return BarebonesServiceRequestSerializer(service_request).data
+            service_requests = []
+        if service_requests:
+            return BarebonesServiceRequestSerializer(service_requests, many=True).data
         else:
             return None
