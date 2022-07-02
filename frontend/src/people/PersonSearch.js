@@ -59,7 +59,7 @@ function PersonSearch({ incident }) {
 		const fetchOwners = async () => {
 			setData({owners: [], isFetching: true});
 			// Fetch People data.
-			await axios.get('/people/api/person/?search=' + searchTerm + '&status=' + statusOptions, {
+			await axios.get('/people/api/person/?search=' + searchTerm + '&status=' + statusOptions + '&incident=' + incident, {
 				cancelToken: source.token,
 			})
 			.then(response => {
@@ -70,6 +70,11 @@ function PersonSearch({ incident }) {
 					response.data.forEach(owner => {
 						let species = [];
 						owner.animals.forEach(animal => {
+							if (!species.includes(animal.species)) {
+								species.push(animal.species)
+							}
+						})
+            owner.reporter_animals.forEach(animal => {
 							if (!species.includes(animal.species)) {
 								species.push(animal.species)
 							}
@@ -119,91 +124,117 @@ function PersonSearch({ incident }) {
 						</InputGroup>
 					</Form>
 					{data.owners.map((owner, index) => (
-							<div key={owner.id} className="mt-3" hidden={page !== Math.ceil((index+1)/ITEMS_PER_PAGE)}>
-									<div className="card-header"> {owner.first_name ?
-										<h4 style={{marginBottom: "-2px",  marginLeft:"-12px"}}>
-											{statusOptions === 'owners' ?
-											<OverlayTrigger
-												key={"owner-details"}
-												placement="top"
-												overlay={
-													<Tooltip id={`tooltip-owner-details`}>
-														Owner details
-													</Tooltip>
-												}
-											>
-												<Link href={"/" + incident + "/people/owner/" + owner.id}><FontAwesomeIcon icon={faDotCircle} className="mr-2" inverse/></Link>
-											</OverlayTrigger>
-											:
-											<OverlayTrigger
-												key={"reporter-details"}
-												placement="top"
-												overlay={
-													<Tooltip id={`tooltip-reporter-details`}>
-														Reporter details
-													</Tooltip>
-												}
-											>
-												<Link href={"/" + incident + "/people/reporter/" + owner.id}><FontAwesomeIcon icon={faDotCircle} className="mr-2" inverse/></Link>
-											</OverlayTrigger>
-											}
-											{owner.first_name} {owner.last_name}
-											{owner.agency ? <span> ({owner.agency})</span> : ""}
-										</h4> : "Unknown"}
-									</div>
-									<CardGroup>
-										<Card style={{marginBottom:"6px"}}>
-											<Card.Body>
-												<Card.Title style={{marginTop:"-9px", marginBottom:"8px"}}>Information</Card.Title>
-												<ListGroup>
-													<ListGroup.Item><b>Phone: </b>{owner.phone ? <span>{owner.display_phone} </span> : "None"}</ListGroup.Item>
-													<ListGroup.Item><b>Email: </b>{owner.email ? <span>{owner.email} </span> : "None"}</ListGroup.Item>
-													{owner.request ?
-														<ListGroup.Item><b>Service Request: </b><Link href={"/" + incident + "/hotline/servicerequest/" + owner.request.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{owner.request.full_address}</Link></ListGroup.Item>
-													:
-														<ListGroup.Item><b>Address: </b>{owner.full_address || "None"}</ListGroup.Item>
-													}
-												</ListGroup>
-											</Card.Body>
-										</Card>
-										{searchState[owner.id] ?
-										<Card style={{marginBottom:"6px"}}>
-											<Card.Body>
-												<Card.Title style={{marginTop:"-10px"}}>
-													<ListGroup horizontal>
-													{searchState[owner.id].species.map(species => (
-														<ListGroup.Item key={species} active={searchState[owner.id].selectedSpecies === species ? true : false} style={{textTransform:"capitalize", cursor:'pointer', paddingTop:"4px", paddingBottom:"4px"}} onClick={() => setSearchState(prevState => ({ ...prevState, [owner.id]:{...prevState[owner.id], selectedSpecies:species} }))}>{species}{species !== "other" ? "s" : ""}</ListGroup.Item>
-													))}
-													</ListGroup>
-												</Card.Title>
-												<ListGroup style={{height:"144px", overflowY:"auto", marginTop:"-12px"}}>
-													<Scrollbar style={{height:"144px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
-														{owner.animals.filter(animal => animal.species === searchState[owner.id].selectedSpecies).map((animal, i) => (
-															<ListGroup.Item key={animal.id}>
-																<b>#{animal.id}:</b>&nbsp;&nbsp;<Link href={"/" + incident + "/animals/" + animal.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.name || "Unknown"}</Link>
-																{animal.color_notes ?
-																<OverlayTrigger
-																	key={"animal-color-notes"}
-																	placement="top"
-																	overlay={
-																		<Tooltip id={`tooltip-animal-color-notes`}>
-																			{animal.color_notes}
-																		</Tooltip>
-																	}
-																>
-																	<FontAwesomeIcon icon={faClipboardList} style={{marginLeft:"3px"}} size="sm" inverse />
-																</OverlayTrigger>
-																: ""}
-																&nbsp;- {animal.status}
-															</ListGroup.Item>
-														))}
-													{owner.animals.length < 1 ? <ListGroup.Item style={{marginTop:"32px"}}>No Animals</ListGroup.Item> : ""}
-													</Scrollbar>
-												</ListGroup>
-										</Card.Body>
-									</Card>
-									: ""}
-								</CardGroup>
+            <div key={owner.id} className="mt-3" hidden={page !== Math.ceil((index+1)/ITEMS_PER_PAGE)}>
+              <div className="card-header"> {owner.first_name ?
+                <h4 style={{marginBottom: "-2px",  marginLeft:"-12px"}}>
+                  {statusOptions === 'owners' ?
+                  <OverlayTrigger
+                    key={"owner-details"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-owner-details`}>
+                        Owner details
+                      </Tooltip>
+                    }
+                  >
+                    <Link href={"/" + incident + "/people/owner/" + owner.id}><FontAwesomeIcon icon={faDotCircle} className="mr-2" inverse/></Link>
+                  </OverlayTrigger>
+                  :
+                  <OverlayTrigger
+                    key={"reporter-details"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-reporter-details`}>
+                        Reporter details
+                      </Tooltip>
+                    }
+                  >
+                    <Link href={"/" + incident + "/people/reporter/" + owner.id}><FontAwesomeIcon icon={faDotCircle} className="mr-2" inverse/></Link>
+                  </OverlayTrigger>
+                  }
+                  {owner.first_name} {owner.last_name}
+                  {owner.agency ? <span> ({owner.agency})</span> : ""}
+                </h4> : "Unknown"}
+              </div>
+              <CardGroup>
+                <Card style={{marginBottom:"6px"}}>
+                  <Card.Body>
+                    <Card.Title style={{marginTop:"-9px", marginBottom:"8px"}}>Information</Card.Title>
+                    <ListGroup>
+                      <ListGroup.Item><b>Phone: </b>{owner.phone ? <span>{owner.display_phone} </span> : "None"}</ListGroup.Item>
+                      <ListGroup.Item><b>Email: </b>{owner.email ? <span>{owner.email} </span> : "None"}</ListGroup.Item>
+                      {owner.request ?
+                        <ListGroup.Item><b>Service Request: </b><Link href={"/" + incident + "/hotline/servicerequest/" + owner.request.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{owner.request.full_address}</Link></ListGroup.Item>
+                      :
+                        <ListGroup.Item><b>Address: </b>{owner.full_address || "None"}</ListGroup.Item>
+                      }
+                    </ListGroup>
+                  </Card.Body>
+                </Card>
+                {searchState[owner.id] ?
+                <Card style={{marginBottom:"6px"}}>
+                  <Card.Body>
+                    <Card.Title style={{marginTop:"-10px"}}>
+                      <ListGroup horizontal>
+                      {searchState[owner.id].species.map(species => (
+                        <ListGroup.Item key={species} active={searchState[owner.id].selectedSpecies === species ? true : false} style={{textTransform:"capitalize", cursor:'pointer', paddingTop:"4px", paddingBottom:"4px"}} onClick={() => setSearchState(prevState => ({ ...prevState, [owner.id]:{...prevState[owner.id], selectedSpecies:species} }))}>{species}{species !== "other" ? "s" : ""}</ListGroup.Item>
+                      ))}
+                      </ListGroup>
+                    </Card.Title>
+                    {statusOptions === 'owners' ?
+                    <ListGroup style={{height:"144px", overflowY:"auto", marginTop:"-12px"}}>
+                      <Scrollbar style={{height:"144px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
+                        {owner.animals.filter(animal => animal.species === searchState[owner.id].selectedSpecies).map((animal, i) => (
+                          <ListGroup.Item key={animal.id}>
+                            <b>#{animal.id}:</b>&nbsp;&nbsp;<Link href={"/" + incident + "/animals/" + animal.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.name || "Unknown"}</Link>
+                            {animal.color_notes ?
+                            <OverlayTrigger
+                              key={"animal-color-notes"}
+                              placement="top"
+                              overlay={
+                                <Tooltip id={`tooltip-animal-color-notes`}>
+                                  {animal.color_notes}
+                                </Tooltip>
+                              }
+                            >
+                              <FontAwesomeIcon icon={faClipboardList} style={{marginLeft:"3px"}} size="sm" inverse />
+                            </OverlayTrigger>
+                            : ""}
+                            &nbsp;- {animal.status}
+                          </ListGroup.Item>
+                        ))}
+                        {owner.animals.length < 1 ? <ListGroup.Item style={{marginTop:"32px"}}>No Animals</ListGroup.Item> : ""}
+                      </Scrollbar>
+                    </ListGroup> : ""}
+                    {statusOptions === 'reporters' ?
+                    <ListGroup style={{height:"144px", overflowY:"auto", marginTop:"-12px"}}>
+                      <Scrollbar style={{height:"144px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
+                        {owner.reporter_animals.filter(animal => animal.species === searchState[owner.id].selectedSpecies).map((animal, i) => (
+                          <ListGroup.Item key={animal.id}>
+                            <b>#{animal.id}:</b>&nbsp;&nbsp;<Link href={"/" + incident + "/animals/" + animal.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.name || "Unknown"}</Link>
+                            {animal.color_notes ?
+                            <OverlayTrigger
+                              key={"animal-color-notes"}
+                              placement="top"
+                              overlay={
+                                <Tooltip id={`tooltip-animal-color-notes`}>
+                                  {animal.color_notes}
+                                </Tooltip>
+                              }
+                            >
+                              <FontAwesomeIcon icon={faClipboardList} style={{marginLeft:"3px"}} size="sm" inverse />
+                            </OverlayTrigger>
+                            : ""}
+                            &nbsp;- {animal.status}
+                          </ListGroup.Item>
+                        ))}
+                        {owner.reporter_animals.length < 1 ? <ListGroup.Item style={{marginTop:"32px"}}>No Animals</ListGroup.Item> : ""}
+                      </Scrollbar>
+                    </ListGroup> : ""}
+                  </Card.Body>
+                </Card>
+                : ""}
+              </CardGroup>
 						</div>
 					))}
 					<p>{data.isFetching ? 'Fetching ' + statusOptions + '...' :

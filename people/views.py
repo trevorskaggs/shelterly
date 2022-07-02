@@ -21,7 +21,7 @@ class PersonViewSet(viewsets.ModelViewSet):
         queryset = (
             Person.objects.with_history()
             .all()
-            .annotate(is_owner=Exists(Animal.objects.filter(owners=OuterRef("id"))))
+            .annotate(is_owner=Exists(Animal.objects.filter(incident__slug=self.request.GET.get('incident', 'test'), owners=OuterRef("id"))))
             .prefetch_related(
                 Prefetch(
                     "animal_set",
