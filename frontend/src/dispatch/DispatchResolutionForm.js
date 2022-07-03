@@ -478,7 +478,7 @@ function DispatchResolutionForm({ id, incident }) {
                   </BootstrapForm.Row>
                   <BootstrapForm.Row className="mt-3">
                     <DateTimePicker
-                      label="Followup Date"
+                      label="Service Request Followup Date"
                       name={`sr_updates.${index}.followup_date`}
                       id={`sr_updates.${index}.followup_date`}
                       more_options={{minDate:new Date()}}

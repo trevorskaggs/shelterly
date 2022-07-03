@@ -241,10 +241,7 @@ const PersonForm = (props) => {
           else if (id) {
             axios.put('/people/api/person/' + id + '/', values)
             .then(function() {
-              if (state.prevLocation) {
-                navigate(state.prevLocation);
-              }
-              else if (isOwner) {
+              if (isOwner) {
                 navigate(incident + '/people/owner/' + id);
               }
               else {
@@ -384,7 +381,7 @@ const PersonForm = (props) => {
               <Modal.Body>
                 <div>
                   <span>This person cannot be created because</span> {error && error.error[0]}
-                  <div className="mt-1 mb-1">Click <Link href={"/" + incident + "/people/owner/" + error.error[1]} style={{color:"#8d99d4"}}>here</Link> to view this owner.</div>
+                  <div className="mt-1 mb-1">Click <Link target="_blank" href={"/" + incident + "/people/owner/" + error.error[1]} style={{color:"#8d99d4"}}>here</Link> to view this owner.</div>
                   <div>Would you like to use the existing owner instead?</div>
                 </div>
               </Modal.Body>

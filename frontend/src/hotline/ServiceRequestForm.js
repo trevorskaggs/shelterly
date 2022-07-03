@@ -128,7 +128,7 @@ function ServiceRequestForm(props) {
             if (ownerResponse[0].data.id) {
               values['owners'] = [ownerResponse[0].data.id]
             }
-            axios.post('/hotline/api/servicerequests/', values)
+            axios.post('/hotline/api/servicerequests/?incident=' + incident, values)
             .then(response => {
               // Create Animals
               let promises = props.state.steps.animals.map(async (animal) => {
@@ -155,7 +155,7 @@ function ServiceRequestForm(props) {
             });
           }
           else if (id) {
-            axios.put('/hotline/api/servicerequests/' + id + '/', values)
+            axios.put('/hotline/api/servicerequests/' + id + '/?incident=' + incident, values)
             .then(function() {
               if (state.prevLocation) {
                 navigate(state.prevLocation);
@@ -242,7 +242,7 @@ function ServiceRequestForm(props) {
         <Modal.Body>
           <p>
             {error && error.error[0]}
-            &nbsp;Click <Link href={"/" + incident + "/hotline/servicerequest/" + error.error[1]} style={{color:"#8d99d4"}}>here</Link> to view this Service Request.
+            &nbsp;Click <Link target="_blank" href={"/" + incident + "/hotline/servicerequest/" + error.error[1]} style={{color:"#8d99d4"}}>here</Link> to view this Service Request.
           </p>
         </Modal.Body>
         <Modal.Footer>
