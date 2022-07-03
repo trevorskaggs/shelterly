@@ -104,4 +104,4 @@ class PersonSerializer(SimplePersonSerializer):
         if service_requests:
             return BarebonesServiceRequestSerializer(service_requests, many=True).data
         else:
-            return None
+            return []
