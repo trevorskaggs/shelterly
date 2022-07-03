@@ -164,12 +164,12 @@ function PersonSearch({ incident }) {
                       <ListGroup>
                         <ListGroup.Item><b>Phone: </b>{owner.phone ? <span>{owner.display_phone} </span> : "None"}</ListGroup.Item>
                         <ListGroup.Item><b>Email: </b>{owner.email ? <span>{owner.email} </span> : "None"}</ListGroup.Item>
+                        {owner.full_address ?
+                          <ListGroup.Item><b>Address: </b>{owner.full_address}</ListGroup.Item>
+                        : ""}
                         {owner.requests && owner.requests.map(request => (
                           <ListGroup.Item><b>Service Request: </b><Link href={"/" + incident + "/hotline/servicerequest/" + request.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{request.full_address}</Link></ListGroup.Item>
                         ))}
-                        {owner.requests && owner.requests.length === 0 ?
-                          <ListGroup.Item><b>Address: </b>{owner.address ? owner.full_address : 'None'}</ListGroup.Item>
-                        : ""}
                       </ListGroup>
                     </Scrollbar>
                   </Card.Body>
