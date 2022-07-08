@@ -5,9 +5,9 @@ import { Button, Card, Col, Form, ListGroup, Modal, OverlayTrigger, Row, Tooltip
 import { Typeahead } from 'react-bootstrap-typeahead';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faCalendarDay, faClipboardCheck, faClipboardList, faEdit, faEnvelope, faHouseDamage, faMinusSquare, faPencilAlt, faPrint, faUserCheck, faUserPlus
+  faCalendarDay, faClipboardCheck, faClipboardList, faEdit, faEnvelope, faHouseDamage, faBriefcaseMedical, faMinusSquare, faPencilAlt, faPrint, faUserCheck, faUserPlus
 } from '@fortawesome/free-solid-svg-icons';
-import { faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
+import { faExclamationSquare, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import { Marker, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
 import Moment from 'react-moment';
@@ -212,6 +212,21 @@ function DispatchSummary({ id, incident }) {
   return (
     <>
     <Header>Dispatch Assignment Summary
+      <OverlayTrigger
+        key={"offline-dispatch-assignment"}
+        placement="bottom"
+        overlay={
+          <Tooltip id={`tooltip-offline-dispatch-assignment`}>
+            Print dispatch assignment
+          </Tooltip>
+        }
+      >
+        {({ ref, ...triggerHandler }) => (
+          <Link onClick={handleDownloadPdfClick} {...triggerHandler} href="#">
+            <span ref={ref}><FontAwesomeIcon icon={faPrint} className="ml-1 mr-1"  inverse /></span>
+          </Link>
+        )}
+      </OverlayTrigger>
       {data.end_time ?
       <OverlayTrigger
         key={"edit-dispatch-assignment"}
@@ -237,22 +252,7 @@ function DispatchSummary({ id, incident }) {
         <Link href={"/" + incident + "/dispatch/resolution/" + id}><FontAwesomeIcon icon={faClipboardCheck} className="ml-1"  inverse /></Link>
       </OverlayTrigger>
       }
-      <OverlayTrigger
-        key={"offline-dispatch-assignment"}
-        placement="bottom"
-        overlay={
-          <Tooltip id={`tooltip-offline-dispatch-assignment`}>
-            Download printable field resolution form
-          </Tooltip>
-        }
-      >
-        {({ ref, ...triggerHandler }) => (
-          <Link onClick={handleDownloadPdfClick} {...triggerHandler} href="#">
-            <span ref={ref}><FontAwesomeIcon icon={faPrint} className="ml-3"  inverse /></span>
-          </Link>
-        )}
-      </OverlayTrigger>
-    <div style={{fontSize:"18px", marginTop:"12px"}}><b>Opened: </b><Moment format="MMMM Do YYYY, HH:mm">{data.start_time}</Moment>{data.end_time ? <span> | <b>Resolved: </b><Moment format="MMMM Do YYYY, HH:mm">{data.end_time}</Moment></span> : ""}</div>
+    <div style={{fontSize:"18px", marginTop:"10px"}}><b>Opened: </b><Moment format="MMMM Do YYYY, HH:mm">{data.start_time}</Moment>{data.end_time ? <span> | <b>Resolved: </b><Moment format="MMMM Do YYYY, HH:mm">{data.end_time}</Moment></span> : ""}</div>
     </Header>
     <hr/>
     <Row className="mb-3">
@@ -457,7 +457,33 @@ function DispatchSummary({ id, incident }) {
                       </Tooltip>
                     }
                   >
-                    <FontAwesomeIcon icon={faClipboardList} className="ml-1 mr-1" size="sm" inverse />
+                    <FontAwesomeIcon icon={faClipboardList} className="ml-1" size="sm" inverse />
+                  </OverlayTrigger>
+                : ""}
+                {animal.behavior_notes ?
+                  <OverlayTrigger
+                    key={"animal-behavior-notes"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-animal-behavior-notes`}>
+                        {animal.behavior_notes}
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon icon={faExclamationSquare} className="ml-1 fa-move-down" size="sm" inverse />
+                  </OverlayTrigger>
+                : ""}
+                {animal.medical_notes ?
+                  <OverlayTrigger
+                    key={"animal-medical-notes"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-animal-medical-notes`}>
+                        {animal.medical_notes}
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon icon={faBriefcaseMedical} className="ml-1 mr-1" size="sm" inverse />
                   </OverlayTrigger>
                 : ""}
                 {animal.pcolor || animal.scolor ? <span style={{textTransform:"capitalize"}}>({animal.pcolor ? animal.pcolor : "" }{animal.scolor ? <span>{animal.pcolor ? <span>, </span> : ""}{animal.scolor}</span> : ""})</span>: ""}
