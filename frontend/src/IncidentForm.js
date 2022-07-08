@@ -78,7 +78,7 @@ const IncidentForm = ({ id }) => {
         longitude: Yup.number()
       })}
       onSubmit={(values, { setSubmitting }) => {
-        values['slug'] = values.name.replaceAll(' ','-').match(/[a-zA-Z-]+/g)[0];
+        values['slug'] = values.name.replaceAll(' ','-').match(/[a-zA-Z0-9-]+/g)[0];
         if (id) {
           axios.put('/incident/api/incident/' + id + '/', values)
           .then(function () {

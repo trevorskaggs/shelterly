@@ -257,7 +257,7 @@ function DispatchSummary({ id, incident }) {
     <hr/>
     <Row className="mb-3">
       <Col>
-        <Card border="secondary" className="mt-1" style={{minHeight:"313px", maxHeight:"313px"}}>
+        <Card className="mt-1 border rounded" style={{minHeight:"313px", maxHeight:"313px"}}>
           <Card.Body>
             <Card.Title>
               <h4>{data.team_object ? data.team_object.name : "Preplanned"}
@@ -354,7 +354,7 @@ function DispatchSummary({ id, incident }) {
     </Row>
     {data.assigned_requests.filter(request => request.service_request_object.animals.length > 0).map(assigned_request => (
       <Row key={assigned_request.service_request_object.id}>
-        <Card border="secondary" className="mb-3 ml-3 mr-3" style={{width:"100%"}}>
+        <Card className="mb-3 ml-3 mr-3 border rounded" style={{width:"100%"}}>
           <Card.Body>
             <Card.Title>
               <h4>

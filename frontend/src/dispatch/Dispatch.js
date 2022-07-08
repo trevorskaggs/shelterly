@@ -104,7 +104,7 @@ function Dispatch({ incident }) {
                   key={assigned_request.service_request_object.id}
                   position={[assigned_request.service_request_object.latitude, assigned_request.service_request_object.longitude]}
                   icon={assigned_request.service_request_object.reported_animals > 0 ? reportedMarkerIcon : assigned_request.service_request_object.sheltered_in_place > 0 ? SIPMarkerIcon : UTLMarkerIcon}
-                  onClick={() => navigate("/dispatch/summary/" + dispatch_assignment.id)}
+                  onClick={() => navigate("/" + incident + "/dispatch/summary/" + dispatch_assignment.id)}
                 >
                 <MapTooltip key={`${index}-${selectedTeam}`} autoPan={false} closeButton={true} permanent={selectedTeam === dispatch_assignment.id ? true : false}>
                   <span>

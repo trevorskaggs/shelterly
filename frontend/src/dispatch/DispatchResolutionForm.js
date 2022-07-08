@@ -319,7 +319,7 @@ function DispatchResolutionForm({ id, incident }) {
       {props => (
         <>
           <BootstrapForm as={Form}>
-            <Header>Dispatch Assignment Resolution
+            <Header>Dispatch Assignment and Resolution
             <OverlayTrigger
               key={"offline-dispatch-assignment"}
               placement="bottom"

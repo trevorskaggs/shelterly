@@ -18,6 +18,7 @@ import Map, { countMatches, prettyText, reportedMarkerIcon, SIPMarkerIcon, UTLMa
 import { Checkbox, TextInput } from "../components/Form";
 import { DispatchDuplicateSRModal, DispatchAlreadyAssignedTeamModal } from "../components/Modals";
 import Scrollbar from '../components/Scrollbars';
+import Header from '../components/Header';
 import 'react-bootstrap-typeahead/css/Typeahead.css';
 import 'leaflet/dist/leaflet.css';
 
@@ -403,8 +404,13 @@ function Deploy({ incident }) {
     >
     {props => (
       <Form>
-        <Row className="d-flex flex-wrap" style={{marginTop:"10px", marginRight:"-7px"}}>
-          <Col xs={2} className="border rounded" style={{marginLeft:"-5px", marginRight:"5px"}}>
+        <Header>
+          {preplan ? "Preplan Dispatch Assignments" : "Deploy Teams"}
+        </Header>
+        <hr/>
+        <Row className="d-flex flex-wrap" style={{marginTop:"10px", marginLeft:"0px", marginRight:"0px"}}>
+          <Col xs={2} className="border rounded">
+          <Scrollbar no_shadow="true" style={{height:"55vh", marginLeft:"-10px", marginRight:"-10px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
             <div className="card-header border rounded mt-3 text-center" style={{paddingRight:"15px", paddingLeft:"15px"}}>
               <p className="mb-2" style={{marginTop:"-5px"}}>Reported
                 <OverlayTrigger
@@ -472,6 +478,7 @@ function Deploy({ incident }) {
                 <div key={key} style={{textTransform:"capitalize", marginTop:"5px", marginBottom:"-5px"}}>{prettyText(key.split(',')[1], key.split(',')[0], totalSelectedState["UNABLE TO LOCATE"][key])}</div>
               ))}
             </div>
+          </Scrollbar>
           </Col>
           <Col xs={10} className="border rounded pl-0 pr-0">
             <Map style={{marginRight:"0px"}} bounds={data.bounds} onMoveEnd={onMove}>
@@ -516,12 +523,12 @@ function Deploy({ incident }) {
             </Map>
           </Col>
         </Row>
-        <Row className="mt-2" style={{marginRight:"-12px"}}>
-          <Col xs={2} className="pl-0 pr-0" style={{marginLeft:"-7px", marginRight:"12px"}}>
-            <Button type="submit" className="btn-block mt-auto border" style={{marginBottom:"-33px"}} disabled={selectedCount.disabled || (!preplan && props.values.team_members.length === 0)}>{preplan ? "PREPLAN" : "DEPLOY"}</Button>
+        <Row className="ml-0 mr-0 border rounded" style={{marginTop:"-1px"}}>
+          <Col xs={2} className="pl-0 pr-0" style={{marginLeft:"-1px", marginRight:"1px"}}>
+            <Button type="submit" className="btn-block mt-auto border" disabled={selectedCount.disabled || (!preplan && props.values.team_members.length === 0)}>{preplan ? "PREPLAN" : "DEPLOY"}</Button>
           </Col>
-          <Col xs={2} className="pl-0 pr-0" style={{marginRight:"5px"}}>
-            <div className="card-header border rounded text-center" style={{height:"37px", marginLeft:"-6px", paddingTop:"6px", whiteSpace:"nowrap"}}>
+          <Col xs={2} className="pl-0 pr-0 ml-1">
+            <div className="card-header border rounded text-center" style={{height:"37px", marginLeft:"-6px", marginRight:"-11px", paddingTop:"6px", whiteSpace:"nowrap"}}>
               <span style={{marginLeft:"-10px"}}>{props.values.team_name || teamName}
                 {!preplan ? <OverlayTrigger
                   key={"edit-team-name"}
@@ -537,7 +544,7 @@ function Deploy({ incident }) {
               </span>
             </div>
           </Col>
-          <Col xs={8} className="pl-0" style={{marginRight:"-10px"}}>
+          <Col xs={8} className="" style={{marginLeft:"-4px", paddingRight:"0px"}}>
             {preplan ?
               <BootstrapForm.Control
                 id="disabled_team_name"
@@ -566,8 +573,8 @@ function Deploy({ incident }) {
             }
           </Col>
         </Row>
-        <Row className="d-flex flex-wrap" style={{marginTop:"8px", marginRight:"-23px", marginLeft:"-14px", minHeight:"36vh", paddingRight:"14px"}}>
-          <Col xs={2} className="d-flex flex-column pl-0 pr-0" style={{marginLeft:"-7px", marginRight:"5px", height:"277px"}}>
+        <Row className="d-flex flex-wrap" style={{marginTop:"-1px", marginRight:"-23px", marginLeft:"6px", minHeight:"36vh", paddingRight:"14px"}}>
+          <Col xs={2} className="d-flex flex-column pl-0 pr-0" style={{marginLeft:"-7px", marginRight:"-2px", height:"277px"}}>
             <div className="card-header border rounded pl-3 pr-3" style={{height:"100%"}}>
               <h5 className="mb-0 text-center">Options</h5>
               <hr/>
@@ -833,7 +840,7 @@ function Deploy({ incident }) {
                         overlay={
                           <Tooltip id={`tooltip-stray`}>
                             {service_request.owner_objects.map(owner => (
-                              <div key={owner.id}>{owner.first_name} {owner.last_name}</div>
+                              <div key={owner.id}>Owner: {owner.first_name} {owner.last_name}</div>
                             ))}
                           </Tooltip>
                         }

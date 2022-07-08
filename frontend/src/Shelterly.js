@@ -13,7 +13,7 @@ function Shelterly() {
 
   // Initial state.
   const { state, dispatch } = useContext(AuthContext);
-  const [cookies, , removeCookie] = useCookies(['token']);
+  const [, , removeCookie] = useCookies(['token']);
 
   const routeResult = useRoutes(state.user ? routes : publicRoutes);
 
@@ -30,7 +30,7 @@ function Shelterly() {
             <Sidebar state={state} dispatch={dispatch} removeCookie={removeCookie} />
           </span>
           : ""}
-          <span className='d-flex flex-column col-9 h-100' style={style}>
+          <span className='d-flex flex-column col-9 h-100 pl-0 pr-0' style={style}>
             <Fragment>
               {routeResult || <PageNotFound state={state} />}
             </Fragment>

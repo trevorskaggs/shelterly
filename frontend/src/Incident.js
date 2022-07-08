@@ -36,7 +36,7 @@ function Home() {
     await axios.patch('/incident/api/incident/' + incident.id + '/', {change_lock:true})
     .then(response => {
       let options_copy = [...options]
-      options_copy.filter(option => option.value === response.data.id)[0]['label'] = response.data.name + ' (' + moment(response.data.start_time).format('MM/DD/YYYY') + (response.data.end_time ? ' - ' + moment(response.data.start_time).format('MM/DD/YYYY') : '') + ')';
+      options_copy.filter(option => option.value === response.data.id)[0]['label'] = response.data.name + ' (' + moment(response.data.start_time).format('MM/DD/YYYY') + (response.data.end_time ? ' - ' + moment(response.data.end_time).format('MM/DD/YYYY') : '') + ')';
       options_copy.filter(option => option.value === response.data.id)[0]['end_time'] = response.data.end_time
       setOptions(options_copy);
     })
@@ -88,7 +88,7 @@ function Home() {
       <SimpleValue options={options}>
         {simpleProps => <Select styles={customStyles} {...simpleProps} className="mt-3" placeholder="Select incident..." onChange={(instance) => setIncident({id:instance.value, slug:instance.slug})} />}
       </SimpleValue>
-      <Link href={incident.slug + '/home'} style={{textDecoration:"none"}}><Button size="lg" className="btn-primary mt-3" disabled={incident.id ? false : true} block>Select Incident</Button></Link>
+      <Link href={incident.slug} style={{textDecoration:"none"}}><Button size="lg" className="btn-primary mt-3" disabled={incident.id ? false : true} block>Select Incident</Button></Link>
       {state.user.is_superuser ?
         <Row>
           <Col style={{marginRight:"-23px"}}>

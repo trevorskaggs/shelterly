@@ -97,7 +97,7 @@ function AnimalDetails({ id, incident }) {
         navigate('/' + incident + '/people/reporter/' + data.reporter);
       }
       else {
-        navigate('/' + incident + '/home');
+        navigate('/' + incident);
       }
     })
     .catch(error => {
