@@ -201,6 +201,7 @@ function DispatchAssignmentSearch({ incident }) {
               >
                 <Link href={"/" + incident + "/dispatch/summary/" + evacuation_assignment.id}><FontAwesomeIcon icon={faDotCircle} className="mr-2" inverse /></Link>
               </OverlayTrigger>
+              DA#{evacuation_assignment.id} -&nbsp;
               <Moment format="L">{evacuation_assignment.start_time}</Moment>
               &nbsp;|&nbsp;
               <span title={evacuation_assignment.team ? evacuation_assignment.team_object.name + ": " + evacuation_assignment.team_member_names : ""}>

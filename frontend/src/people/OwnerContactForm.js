@@ -76,12 +76,12 @@ const OwnerContactForm = ({ id, incident }) => {
       initialValues={data}
       enableReinitialize={true}
       validationSchema={Yup.object({
-        owner_contact_time: Yup.date().required(),
-        owner_contact_note: Yup.string().required(),
+        owner_contact_time: Yup.date().required('Required'),
+        owner_contact_note: Yup.string().required('Required'),
       })}
       onSubmit={(values, { setSubmitting }) => {
         if (id) {
-          url = url + values.id
+          url = '/people/api/ownercontact/' + values.id + '/'
           axios_method = axios.patch
         }
         else {

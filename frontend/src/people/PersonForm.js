@@ -13,7 +13,6 @@ import ButtonSpinner from '../components/ButtonSpinner';
 // Form for owner and reporter Person objects.
 const PersonForm = (props) => {
 
-  const { state } = useContext(AuthContext);
   const id = props.id;
   const incident = "/" + props.incident
 
@@ -86,6 +85,7 @@ const PersonForm = (props) => {
   const [showAgency, setShowAgency] = useState(props.state.stepIndex === 0 && is_first_responder);
 
   const initialData = {
+    has_id: false,
     first_name: '',
     last_name: '',
     phone: '',
@@ -138,6 +138,7 @@ const PersonForm = (props) => {
             response.data['alt_phone'] = response.data['display_alt_phone']
             // Initialize change_reason on fetch to avoid warning.
             response.data['change_reason'] = '';
+            response.data['has_id'] = id && isOwner ? true : false;
             setData(response.data);
           }
         })
@@ -159,6 +160,7 @@ const PersonForm = (props) => {
         initialValues={data}
         enableReinitialize={true}
         validationSchema={Yup.object({
+          has_id: Yup.boolean(),
           first_name: Yup.string()
             .max(50, 'Must be 50 characters or less')
             .matches(nameRegex, "Name is not valid")
@@ -193,7 +195,9 @@ const PersonForm = (props) => {
           longitude: Yup.number()
             .nullable(),
           change_reason: Yup.string()
-            .max(50, 'Must be 50 characters or less'),
+            .when('has_id', {
+              is: true,
+              then: Yup.string().required('Required').max(50, 'Must be 50 characters or less')}),
         })}
         onSubmit={(values, { setSubmitting, resetForm }) => {
           if (is_workflow) {

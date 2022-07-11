@@ -61,7 +61,7 @@ class Animal(Location, OrderedModel):
     
 
     class Meta:
-        ordering = ('order',)
+        ordering = ('order', 'id')
 
 class AnimalImage(models.Model):
 

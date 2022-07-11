@@ -390,12 +390,7 @@ const AnimalForm = (props) => {
             if (id) {
               axios.put('/animals/api/animal/' + id + '/', formData)
               .then(function() {
-                if (state.prevLocation) {
-                  navigate(state.prevLocation);
-                }
-                else {
-                  navigate(incident + '/animals/' + id);
-                }
+                navigate(incident + '/animals/' + id);
               })
               .catch(error => {
                 setIsButtonSubmitting(false);

@@ -31,9 +31,10 @@ function Dispatch({ incident }) {
     const fetchDispatchAssignments = async () => {
       setData({dispatch_assignments: [], isFetching: true, bounds:L.latLngBounds([[0,0]])});
       // Fetch open DA data.
-      axios.get('/evac/api/evacassignment/?incident=' + incident, {
+      axios.get('/evac/api/evacassignment/', {
         params: {
           status: 'open',
+          incident: incident,
           map: true
         },
         cancelToken: source.token,

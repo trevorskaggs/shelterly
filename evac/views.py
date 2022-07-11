@@ -110,6 +110,8 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(incident__slug=self.request.GET.get('incident'))
 
         status = self.request.query_params.get('status', '')
+        if status == "open":
+            return queryset.filter(end_time__isnull=True).distinct()
         if status == "active":
             return queryset.filter(end_time__isnull=True).filter(team__team_members__isnull=False).distinct()
         elif status == "preplanned":
