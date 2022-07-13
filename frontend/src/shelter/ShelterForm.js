@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import { navigate } from 'raviger';
-import { Formik } from 'formik';
+import { Field, Formik } from 'formik';
 import { Form as BootstrapForm, Button, ButtonGroup, Card, Modal } from "react-bootstrap";
+import { Switch } from 'formik-material-ui';
 import { AddressSearch, TextInput } from '../components/Form';
 import * as Yup from 'yup';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft } from '@fortawesome/free-solid-svg-icons';
 import ButtonSpinner from '../components/ButtonSpinner';
-
 // Regex validators.
 const nameRegex = /^[a-z0-9 ,.'-]+$/i;
 
@@ -24,6 +24,7 @@ const ShelterForm = ({ id, incident }) => {
     city: '',
     state: '',
     zip_code: '',
+    test: false,
     latitude: null,
     longitude: null,
   });
@@ -87,6 +88,7 @@ const ShelterForm = ({ id, incident }) => {
           state: Yup.string(),
           zip_code: Yup.string()
             .max(10, 'Must be 10 characters or less'),
+          test: Yup.boolean(),
           latitude: Yup.number()
             .nullable(),
           longitude: Yup.number()
@@ -152,6 +154,8 @@ const ShelterForm = ({ id, incident }) => {
                   />
                 </BootstrapForm.Row>
                 <AddressSearch formikProps={props} label="Search for Shelter Address" show_apt={false} incident={incident} error="Shelter Address was not selected." />
+                <BootstrapForm.Label htmlFor="test">Test Shelter</BootstrapForm.Label>
+                <Field component={Switch} name="test" id="test" type="checkbox" color="primary" />
               </BootstrapForm>
             </Card.Body>
             <ButtonGroup size="lg">

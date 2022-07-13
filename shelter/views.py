@@ -35,8 +35,7 @@ class ShelterViewSet(viewsets.ModelViewSet):
             action.send(self.request.user, verb='updated shelter', target=shelter)
 
     def get_queryset(self):
-        return (
-            Shelter.objects.annotate(room_count=Count("building__room"))
+        queryset = (Shelter.objects.annotate(room_count=Count("building__room"))
             .annotate(
                 animal_count=Count(
                     "animal",
@@ -65,8 +64,10 @@ class ShelterViewSet(viewsets.ModelViewSet):
                     ),
                 )
             )
-            .with_history().prefetch_related(Prefetch('animal_set', Animal.objects.filter(room=None, incident__slug=self.request.GET.get('incident')).exclude(status='CANCELED'), to_attr="unroomed_animals"))
-        )
+            .with_history().prefetch_related(Prefetch('animal_set', Animal.objects.filter(room=None, incident__slug=self.request.GET.get('incident')).exclude(status='CANCELED'), to_attr="unroomed_animals")))
+        if self.request.GET.get('incident') and self.request.GET.get('incident', '') != 'test':
+            queryset = queryset.filter(test=False)
+        return queryset
 
 
 class BuildingViewSet(viewsets.ModelViewSet):

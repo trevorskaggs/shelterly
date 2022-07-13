@@ -49,7 +49,7 @@ class DispatchTeamViewSet(viewsets.ModelViewSet):
         if is_map == 'true':
             yesterday = datetime.today() - timedelta(days=1)
             y_mid = datetime.combine(yesterday,datetime.min.time())
-            queryset = queryset.filter(Q(is_assigned=True) | Q(dispatch_date__gte=y_mid))
+            queryset = queryset.filter(Q(is_assigned=True) | Q(dispatch_date__gte=y_mid)).filter(team_members__show=True)
         return queryset
 
     def perform_update(self, serializer):
