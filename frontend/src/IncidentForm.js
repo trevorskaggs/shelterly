@@ -133,7 +133,7 @@ const IncidentForm = ({ id }) => {
               <BootstrapForm.Row>
               <Col xs="12">
                 <BootstrapForm.Label>Refine Incident Lat/Lon Point</BootstrapForm.Label>
-                <Map zoom={11} ref={mapRef} center={[form.values.latitude || 0, form.values.longitude || 0]} className="incident-leaflet-container border rounded " >
+                <Map zoom={11} ref={mapRef} center={[form.values.latitude || 0, form.values.longitude || 0]} className="incident-leaflet-container border rounded" >
                   <Legend position="bottomleft" metric={false} />
                   <TileLayer
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -145,7 +145,7 @@ const IncidentForm = ({ id }) => {
                     onDragEnd={() => {
                       updatePosition(form.setFieldValue)
                     }}
-                    autoPan={true}
+                    autoPan={false}
                     position={[form.values.latitude, form.values.longitude]}
                     icon={pinMarkerIcon}
                     ref={markerRef}

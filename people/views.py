@@ -80,6 +80,8 @@ class PersonViewSet(viewsets.ModelViewSet):
             if self.request.data.get('animal'):
                 animal = Animal.objects.get(pk=self.request.data.get('animal'))
                 animal.owners.add(person)
+                if animal.request:
+                    animal.request.owners.add(person)
 
             # If an owner is being added from another Person, add the new owner to the animals of the original Person.
             if self.request.data.get('owner'):

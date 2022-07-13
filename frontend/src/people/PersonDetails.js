@@ -214,6 +214,7 @@ function PersonDetails({id, incident}) {
           <Card.Body style={{marginBottom:"-17px"}}>
             <Card.Title>
               <h4 className="mb-0">Animals
+                {data.requests.length ?
                 <OverlayTrigger
                   key={"add-animal"}
                   placement="top"
@@ -225,6 +226,7 @@ function PersonDetails({id, incident}) {
                 >
                   <Link href={"/" + incident + "/animals/new?owner_id=" + id}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
                 </OverlayTrigger>
+                : ""}
                 <OverlayTrigger
                   key={"add-owner"}
                   placement="bottom"

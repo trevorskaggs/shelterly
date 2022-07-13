@@ -1,10 +1,9 @@
-import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { navigate, useQueryParams } from 'raviger';
 import { Form, Formik } from "formik";
 import { ButtonGroup, Card, Col, Image, Form as BootstrapForm } from "react-bootstrap";
 import * as Yup from 'yup';
-import { AuthContext } from "../accounts/AccountsReducer";
 import { AddressSearch, DateTimePicker, DropDown, ImageUploader, TextInput } from '../components/Form.js';
 import { catAgeChoices, dogAgeChoices, horseAgeChoices, otherAgeChoices, catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, speciesChoices, sexChoices, dogSizeChoices, catSizeChoices, horseSizeChoices, otherSizeChoices, statusChoices, reportedStatusChoices, unknownChoices } from './constants';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -13,7 +12,6 @@ import ButtonSpinner from "../components/ButtonSpinner";
 
 const AnimalForm = (props) => {
 
-  const { state } = useContext(AuthContext);
   const id = props.id;
   const incident = '/' + props.incident;
 
@@ -350,8 +348,8 @@ const AnimalForm = (props) => {
                 ]);
               }
               // Create Owner
-              let ownerResponse = [{data:{id:''}}];
-              if (props.state.steps.owner.first_name) {
+              let ownerResponse = [{data:{id:props.state.steps.owner.id}}];
+              if (props.state.steps.owner.first_name && !props.state.steps.owner.id) {
                 ownerResponse = await Promise.all([
                   axios.post('/people/api/person/', props.state.steps.owner)
                 ]);

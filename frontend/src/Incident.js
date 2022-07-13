@@ -75,7 +75,7 @@ function Home() {
       unmounted = true;
       source.cancel();
     };
-  }, []);
+  }, [state.user.is_superuser]);
 
 
   return (

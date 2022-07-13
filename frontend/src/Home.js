@@ -48,7 +48,7 @@ function Home({ incident }) {
       unmounted = true;
       source.cancel();
     };
-  }, [state.user]);
+  }, [state.user, incident]);
 
   const daily_columns = [
     {
