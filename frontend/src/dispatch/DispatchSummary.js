@@ -390,6 +390,11 @@ function DispatchSummary({ id, incident }) {
             </Card.Title>
             <hr style={{marginBottom:"7px"}}/>
             <ListGroup variant="flush" style={{marginTop:"-5px", marginBottom:"-13px"}}>
+              <ListGroup.Item>
+                <b>Latitude: </b>{assigned_request.service_request_object.latitude}
+                <br />
+                <b>Longitude: </b>{assigned_request.service_request_object.longitude}
+              </ListGroup.Item>
               {assigned_request.service_request_object.owner_objects.map(owner => (
                 <ListGroup.Item key={owner.id}>
                   <b>Owner: </b><Link href={"/" + incident + "/people/owner/" + owner.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{owner.first_name} {owner.last_name}</Link>
