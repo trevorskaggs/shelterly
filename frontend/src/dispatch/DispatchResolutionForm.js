@@ -187,7 +187,7 @@ function DispatchResolutionForm({ id, incident }) {
     const fetchShelters = () => {
       setShelters({options: [], room_options: [], isFetching: true});
       // Fetch Shelter data.
-      axios.get('/shelter/api/shelter/', {
+      axios.get('/shelter/api/shelter/?incident=' + incident, {
         cancelToken: source.token,
       })
       .then(response => {
