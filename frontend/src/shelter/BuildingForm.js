@@ -13,7 +13,7 @@ import ButtonSpinner from '../components/ButtonSpinner';
 // Regex validators.
 const nameRegex = /^[a-z0-9 ,.'-]+$/i
 
-export const BuildingForm = ({id}) => {
+export const BuildingForm = ({ id, incident }) => {
 
   const { state } = useContext(AuthContext);
 
@@ -80,7 +80,7 @@ export const BuildingForm = ({id}) => {
                   navigate(state.prevLocation);
                 }
                 else {
-                  navigate('/shelter/building/' + id);
+                  navigate('/' + incident + '/shelter/building/' + id);
                 }
               })
               .catch(error => {
@@ -94,7 +94,7 @@ export const BuildingForm = ({id}) => {
                   navigate(state.prevLocation);
                 }
                 else {
-                  navigate('/shelter/' + shelter_id);
+                  navigate('/' + incident + '/shelter/' + shelter_id);
                 }
               })
               .catch(error => {

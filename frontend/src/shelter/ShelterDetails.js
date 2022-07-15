@@ -12,7 +12,7 @@ import {
 import History from '../components/History';
 import Header from '../components/Header';
 
-function ShelterDetails({id}) {
+function ShelterDetails({ id, incident }) {
 
   const [data, setData] = useState({
     name: '',
@@ -39,7 +39,7 @@ function ShelterDetails({id}) {
 
     const fetchShelterData = async () => {
       // Fetch Shelter Details data.
-      await axios.get('/shelter/api/shelter/' + id + '/', {
+      await axios.get('/shelter/api/shelter/' + id + '/?incident=' + incident, {
         cancelToken: source.token,
       })
       .then(response => {
@@ -56,7 +56,7 @@ function ShelterDetails({id}) {
       unmounted = true;
       source.cancel();
     };
-  }, [id]);
+  }, [id, incident]);
 
   return (
     <>
@@ -71,7 +71,7 @@ function ShelterDetails({id}) {
             </Tooltip>
           }
         >
-          <Link href={"/shelter/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-1" inverse /></Link>
+          <Link href={"/" + incident + "/shelter/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-1" inverse /></Link>
         </OverlayTrigger>
       </Header>
       <hr/>
@@ -108,16 +108,16 @@ function ShelterDetails({id}) {
               </Card.Title>
               <hr/>
               <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
-                <ListGroup.Item className="rounded" action><Link href={"/intake/workflow/owner?shelter_id=" + id} style={{color:"#FFF"}}><FontAwesomeIcon icon={faDoorOpen} inverse/> <b>Intake from Walk-In (Owner)</b></Link></ListGroup.Item>
-                <ListGroup.Item className="rounded" action><Link href={"/intake/workflow/reporter?shelter_id=" + id} style={{color:"#FFF"}}><FontAwesomeIcon icon={faDoorOpen} inverse/> <b>Intake from Walk-In (Non-Owner)</b></Link></ListGroup.Item>
-                <ListGroup.Item className="rounded" action><Link href={"/dispatch/dispatchassignment/search"} style={{color:"#FFF"}}><FontAwesomeIcon icon={faDoorOpen} inverse/> <b>Intake from Dispatch Assignment</b></Link></ListGroup.Item>
+                <ListGroup.Item className="rounded" action><Link href={"/" + incident + "/intake/workflow/owner?shelter_id=" + id} style={{color:"#FFF"}}><FontAwesomeIcon icon={faDoorOpen} inverse/> <b>Intake from Walk-In (Owner)</b></Link></ListGroup.Item>
+                <ListGroup.Item className="rounded" action><Link href={"/" + incident + "/intake/workflow/reporter?shelter_id=" + id} style={{color:"#FFF"}}><FontAwesomeIcon icon={faDoorOpen} inverse/> <b>Intake from Walk-In (Non-Owner)</b></Link></ListGroup.Item>
+                <ListGroup.Item className="rounded" action><Link href={"/" + incident + "/dispatch/dispatchassignment/search"} style={{color:"#FFF"}}><FontAwesomeIcon icon={faDoorOpen} inverse/> <b>Intake from Dispatch Assignment</b></Link></ListGroup.Item>
                 <ListGroup.Item>
-                  <b>Currently Sheltering:</b> {data.animal_count + data.unroomed_animals.length} Animal{data.animal_count + data.unroomed_animals.length === 1 ? "" : "s"}
+                  <b>Currently Sheltering:</b> {data.animal_count} Animal{data.animal_count + data.unroomed_animals.length === 1 ? "" : "s"}
                 </ListGroup.Item>
                 <ListGroup.Item>
                   <b>Roomless:</b> {data.unroomed_animals.length} Animal{data.unroomed_animals.length === 1 ? "" : "s"}
                   <OverlayTrigger placement="top" overlay={<Tooltip id={`tooltip-assign`}>Assign animals to rooms</Tooltip>}>
-                    <Link href={"/shelter/" + id + "/assign"}>
+                    <Link href={"/" + incident + "/shelter/" + id + "/assign"}>
                       <span className="fa-layers" style={{marginLeft:"3px"}}>
                         <FontAwesomeIcon icon={faSquare} size="lg" inverse />
                         <FontAwesomeIcon icon={faArrowsAltH} transform={'shrink-4 right-1'} inverse />
@@ -143,7 +143,7 @@ function ShelterDetails({id}) {
                   </Tooltip>
                 }
               >
-                <Link href={"/shelter/building/new?shelter_id=" + id}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
+                <Link href={"/" + incident + "/shelter/building/new?shelter_id=" + id}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
               </OverlayTrigger>
             </h4>
           </Card.Title>
@@ -151,7 +151,7 @@ function ShelterDetails({id}) {
           <span className="d-flex flex-wrap ml-0">
           {data.buildings.map(building => (
             <span key={building.id} className="pl-0 pr-0 mr-3 mb-3">
-              <Link href={"/shelter/building/" + building.id} className="building-link" style={{textDecoration:"none", color:"white"}}>
+              <Link href={"/" + incident + "/shelter/building/" + building.id} className="building-link" style={{textDecoration:"none", color:"white"}}>
                 <Card className="border rounded shelter-hover-div" style={{minWidth:"315px", maxWidth:"315px", whiteSpace:"nowrap", overflow:"hidden"}}>
                   <div className="row no-gutters hover-div" style={{textTransform:"capitalize", marginRight:"-2px"}}>
                     <Row className="ml-0 mr-0 w-100" style={{flexWrap:"nowrap"}}>

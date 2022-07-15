@@ -5,9 +5,9 @@ import { Button, Card, Col, Form, ListGroup, Modal, OverlayTrigger, Row, Tooltip
 import { Typeahead } from 'react-bootstrap-typeahead';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faCalendarDay, faClipboardCheck, faClipboardList, faEdit, faEnvelope, faHouseDamage, faMinusSquare, faPencilAlt, faPrint, faUserCheck, faUserPlus
+  faCalendarDay, faClipboardCheck, faClipboardList, faEdit, faEnvelope, faHouseDamage, faBriefcaseMedical, faMinusSquare, faPencilAlt, faPrint, faUserCheck, faUserPlus
 } from '@fortawesome/free-solid-svg-icons';
-import { faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
+import { faExclamationSquare, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import { Marker, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
 import Moment from 'react-moment';
@@ -16,7 +16,7 @@ import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
 import { printDispatchResolutionForm } from './Utils'
 
-function DispatchSummary({id}) {
+function DispatchSummary({ id, incident }) {
 
   // Initial animal data.
   const [data, setData] = useState({
@@ -212,6 +212,21 @@ function DispatchSummary({id}) {
   return (
     <>
     <Header>Dispatch Assignment Summary
+      <OverlayTrigger
+        key={"offline-dispatch-assignment"}
+        placement="bottom"
+        overlay={
+          <Tooltip id={`tooltip-offline-dispatch-assignment`}>
+            Print dispatch assignment
+          </Tooltip>
+        }
+      >
+        {({ ref, ...triggerHandler }) => (
+          <Link onClick={handleDownloadPdfClick} {...triggerHandler} href="#">
+            <span ref={ref}><FontAwesomeIcon icon={faPrint} className="ml-1 mr-1"  inverse /></span>
+          </Link>
+        )}
+      </OverlayTrigger>
       {data.end_time ?
       <OverlayTrigger
         key={"edit-dispatch-assignment"}
@@ -222,7 +237,7 @@ function DispatchSummary({id}) {
           </Tooltip>
         }
       >
-        <Link href={"/dispatch/resolution/" + id}><FontAwesomeIcon icon={faEdit} className="ml-1" inverse /></Link>
+        <Link href={"/" + incident + "/dispatch/resolution/" + id}><FontAwesomeIcon icon={faEdit} className="ml-1" inverse /></Link>
       </OverlayTrigger>
       :
       <OverlayTrigger
@@ -234,30 +249,15 @@ function DispatchSummary({id}) {
           </Tooltip>
         }
       >
-        <Link href={"/dispatch/resolution/" + id}><FontAwesomeIcon icon={faClipboardCheck} className="ml-1"  inverse /></Link>
+        <Link href={"/" + incident + "/dispatch/resolution/" + id}><FontAwesomeIcon icon={faClipboardCheck} className="ml-1"  inverse /></Link>
       </OverlayTrigger>
       }
-      <OverlayTrigger
-        key={"offline-dispatch-assignment"}
-        placement="bottom"
-        overlay={
-          <Tooltip id={`tooltip-offline-dispatch-assignment`}>
-            Download printable field resolution form
-          </Tooltip>
-        }
-      >
-        {({ ref, ...triggerHandler }) => (
-          <Link onClick={handleDownloadPdfClick} {...triggerHandler} href="#">
-            <span ref={ref}><FontAwesomeIcon icon={faPrint} className="ml-3"  inverse /></span>
-          </Link>
-        )}
-      </OverlayTrigger>
-    <div style={{fontSize:"18px", marginTop:"12px"}}><b>Opened: </b><Moment format="MMMM Do YYYY, HH:mm">{data.start_time}</Moment>{data.end_time ? <span> | <b>Resolved: </b><Moment format="MMMM Do YYYY, HH:mm">{data.end_time}</Moment></span> : ""}</div>
+    <div style={{fontSize:"18px", marginTop:"10px"}}><b>Opened: </b><Moment format="MMMM Do YYYY, HH:mm">{data.start_time}</Moment>{data.end_time ? <span> | <b>Resolved: </b><Moment format="MMMM Do YYYY, HH:mm">{data.end_time}</Moment></span> : ""}</div>
     </Header>
     <hr/>
     <Row className="mb-3">
       <Col>
-        <Card border="secondary" className="mt-1" style={{minHeight:"313px", maxHeight:"313px"}}>
+        <Card className="mt-1 border rounded" style={{minHeight:"313px", maxHeight:"313px"}}>
           <Card.Body>
             <Card.Title>
               <h4>{data.team_object ? data.team_object.name : "Preplanned"}
@@ -354,12 +354,12 @@ function DispatchSummary({id}) {
     </Row>
     {data.assigned_requests.filter(request => request.service_request_object.animals.length > 0).map(assigned_request => (
       <Row key={assigned_request.service_request_object.id}>
-        <Card border="secondary" className="mb-3 ml-3 mr-3" style={{width:"100%"}}>
+        <Card className="mb-3 ml-3 mr-3 border rounded" style={{width:"100%"}}>
           <Card.Body>
             <Card.Title>
               <h4>
                 SR#{assigned_request.service_request_object.id} -&nbsp;
-                <Link href={"/hotline/servicerequest/" + assigned_request.service_request_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link>
+                <Link href={"/" + incident + "/hotline/servicerequest/" + assigned_request.service_request_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link>
                 {assigned_request.visit_note && assigned_request.visit_note.forced_entry ?
                   <OverlayTrigger
                     key={"forced"}
@@ -397,7 +397,7 @@ function DispatchSummary({id}) {
               </ListGroup.Item>
               {assigned_request.service_request_object.owner_objects.map(owner => (
                 <ListGroup.Item key={owner.id}>
-                  <b>Owner: </b><Link href={"/people/owner/" + owner.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{owner.first_name} {owner.last_name}</Link>
+                  <b>Owner: </b><Link href={"/" + incident + "/people/owner/" + owner.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{owner.first_name} {owner.last_name}</Link>
                   {owner.display_phone ?
                   <OverlayTrigger
                     key={"owner-phone"}
@@ -451,7 +451,7 @@ function DispatchSummary({id}) {
             <h4 className="mt-2" style={{marginBottom:"-2px"}}>Animals</h4>
             {assigned_request.service_request_object.animals.filter(animal => Object.keys(assigned_request.animals).includes(String(animal.id))).map((animal, inception) => (
               <ListGroup.Item key={animal.id}>
-                <span style={{textTransform:"capitalize"}}>A#{animal.id} - <Link href={"/animals/" + animal.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.name||"Unknown"}</Link>&nbsp;-&nbsp;{animal.species}</span>
+                <span style={{textTransform:"capitalize"}}>A#{animal.id} - <Link href={"/" + incident + "/animals/" + animal.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.name||"Unknown"}</Link>&nbsp;-&nbsp;{animal.species}</span>
                 {animal.color_notes ?
                   <OverlayTrigger
                     key={"animal-color-notes"}
@@ -462,7 +462,33 @@ function DispatchSummary({id}) {
                       </Tooltip>
                     }
                   >
-                    <FontAwesomeIcon icon={faClipboardList} className="ml-1 mr-1" size="sm" inverse />
+                    <FontAwesomeIcon icon={faClipboardList} className="ml-1" size="sm" inverse />
+                  </OverlayTrigger>
+                : ""}
+                {animal.behavior_notes ?
+                  <OverlayTrigger
+                    key={"animal-behavior-notes"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-animal-behavior-notes`}>
+                        {animal.behavior_notes}
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon icon={faExclamationSquare} className="ml-1 fa-move-down" size="sm" inverse />
+                  </OverlayTrigger>
+                : ""}
+                {animal.medical_notes ?
+                  <OverlayTrigger
+                    key={"animal-medical-notes"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-animal-medical-notes`}>
+                        {animal.medical_notes}
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon icon={faBriefcaseMedical} className="ml-1 mr-1" size="sm" inverse />
                   </OverlayTrigger>
                 : ""}
                 {animal.pcolor || animal.scolor ? <span style={{textTransform:"capitalize"}}>({animal.pcolor ? animal.pcolor : "" }{animal.scolor ? <span>{animal.pcolor ? <span>, </span> : ""}{animal.scolor}</span> : ""})</span>: ""}
@@ -474,7 +500,7 @@ function DispatchSummary({id}) {
           <span>
             <hr/>
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
-              <h4 className="mt-2" style={{marginBottom:"-2px"}}>Previous Visit: <Link href={"/dispatch/summary/" + assigned_request.previous_visit.dispatch_assignment} className="text-link" style={{textDecoration:"none", color:"white"}}><Moment format="L">{assigned_request.previous_visit.date_completed}</Moment></Link></h4>
+              <h4 className="mt-2" style={{marginBottom:"-2px"}}>Previous Visit: <Link href={"/" + incident + "/dispatch/summary/" + assigned_request.previous_visit.dispatch_assignment} className="text-link" style={{textDecoration:"none", color:"white"}}><Moment format="L">{assigned_request.previous_visit.date_completed}</Moment></Link></h4>
                 <ListGroup.Item>
                   {assigned_request.previous_visit.notes || "No information available."}
                 </ListGroup.Item>

@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import axios from 'axios';
 import { useFormikContext, useField } from 'formik';
-import { Button, Col, Collapse, Image, Form, OverlayTrigger, Tooltip, Row } from 'react-bootstrap';
+import { Button, Col, Image, Form, OverlayTrigger, Tooltip, Row } from 'react-bootstrap';
 import Select, { createFilter } from 'react-select';
 import SimpleValue from 'react-select-simple-value';
 import Flatpickr from 'react-flatpickr';
@@ -334,6 +335,7 @@ const AddressLookup = ({setLatLon, ...props}) => {
   const [error, setError] = useState('');
   const [triggerRefresh, setTriggerRefresh] = useState(false);
   const [search, setSearch] = useState({});
+  const [incidentLatLon, setIncidentLatLon] = useState({lat:0, lng:0});
 
   function changeDelay(change) {
     if (timer) {
@@ -366,7 +368,21 @@ const AddressLookup = ({setLatLon, ...props}) => {
       setError("");
     }
     updateAddr(search);
-  }, [triggerRefresh, search]);
+
+    let unmounted = false;
+    let source = axios.CancelToken.source();
+
+    axios.get('/incident/api/incident/?incident_slug=' + props.incident, {
+      cancelToken: source.token,
+    })
+    .then(response => {
+      if (!unmounted) {
+        setIncidentLatLon({lat:Number(response.data[0].latitude), lng:Number(response.data[0].longitude)})
+      }
+    })
+    .catch(error => {
+    });
+  }, [triggerRefresh, search, props.incident]);
 
   const updateAddr = suggestion => {
 
@@ -430,16 +446,19 @@ const AddressLookup = ({setLatLon, ...props}) => {
                 setError(props.error);
               }
             }}
+            bounds={{north:incidentLatLon.lat+.1, south:incidentLatLon.lat-.1, east:incidentLatLon.lng+.1, west:incidentLatLon.lng-.1}}
             types={['geocode']}
             id="search"
             name="search"
+            disabled={props.disabled}
+            key={`search_key__${String(incidentLatLon.lat)}`}
             componentRestrictions={{country: "us"}}
             ref={childRef}
             apiKey={process.env.REACT_APP_GOOGLE_API_KEY}
           />
           {error ? <div style={{ color: "#e74c3c", marginTop: "1px", marginBottom:error ? "-15px" : "0px", fontSize: "80%" }}>{error}</div> : ""}
         </Col>
-        <Button variant="outline-light" className="float-right" style={{maxHeight:"37px"}} onClick={clearAddress} disabled={values.address ? false: true}>Clear</Button>
+        <Button variant="outline-light" className="float-right" style={{maxHeight:"37px"}} onClick={clearAddress} disabled={!values.address || props.disabled ? true : false}>Clear</Button>
       </Row>
     </>
   );
@@ -458,7 +477,7 @@ const AddressSearch = (props) => {
 
   const renderAddressLookup = () => {
     if (process.env.REACT_APP_GOOGLE_API_KEY) {
-      return <AddressLookup label={props.label} style={{width: '100%'}} className={"form-control"} setLatLon={setLatLon} error={props.error} />
+      return <AddressLookup label={props.label} style={{width: '100%'}} className={"form-control"} setLatLon={setLatLon} error={props.error} incident={props.incident} disabled={!fadeIn} />
     } else {
       return <Alert variant="danger">Found Location Search is not available. Please contact support for assistance.</Alert>
     }
@@ -492,18 +511,16 @@ const AddressSearch = (props) => {
     {props.show_same ?
       <span className="form-row mb-2">
         <Form.Label style={{marginLeft:"5px"}}>Address Same as Owner: </Form.Label>
-        <input id="same_address" type="checkbox" className="ml-2" checked={!fadeIn} onChange={handleChange} style={{marginTop:"5px"}} />
+        <input id="same_address" type="checkbox" className="ml-2" checked={!fadeIn} onChange={handleChange} style={{marginTop:"-7px"}} />
       </span>
     : ""}
-    <Collapse in={fadeIn}>
-      <div>
         <Row hidden={props.hidden} style={{fontSize:"15px"}}>
           <Col>
-            <Form.Row>
-              <Form.Group as={Col} xs="12">
-                {renderAddressLookup()}
-              </Form.Group>
-            </Form.Row>
+                <Form.Row>
+                  <Form.Group as={Col} xs="12">
+                    {renderAddressLookup()}
+                  </Form.Group>
+                </Form.Row>
             <Form.Row>
               <TextInput
                 xs={props.show_apt ? "10" : "12"}
@@ -521,6 +538,7 @@ const AddressSearch = (props) => {
                   label="Apartment"
                   name="apartment"
                   value={props.formikProps.values.apartment || ''}
+                  disabled={!fadeIn}
                 />
               : ""}
             </Form.Row>
@@ -586,8 +604,6 @@ const AddressSearch = (props) => {
             </Map>
           </Col>
         </Row>
-      </div>
-    </Collapse>
     </>
   );
 }

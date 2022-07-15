@@ -20,7 +20,7 @@ export const printDispatchResolutionForm = (data) => {
 
   // draw page header
   pdf.drawPageHeader({
-    text: 'Dispatch Assignment Resolution Form',
+    text: 'Dispatch Assignment',
     subText: `Opened: ${new Date(data.start_time).toLocaleDateString()}`
   });
   pdf.drawPad();
@@ -121,7 +121,7 @@ export const printDispatchResolutionForm = (data) => {
     if (assigned_request.service_request_object.owners.length) {
       assigned_request.service_request_object.owner_objects.forEach((owner) => (
         pdf.drawWrappedText({
-          text: `Owner: ${owner.first_name} ${owner.last_name} ${owner.phone}`
+          text: `Owner: ${owner.first_name} ${owner.last_name} ${owner.display_phone}`
         })
       ));
     } else {
@@ -164,6 +164,9 @@ export const printDispatchResolutionForm = (data) => {
           if (choice.label.indexOf('UTL') > -1) {
             return 'UTL';
           }
+          if (choice.label.indexOf('Unable To Locate - No Further Action') > -1) {
+            return 'UTL- NFA';
+          }
   
           return choice.label;
         }),
@@ -186,9 +189,9 @@ export const printDispatchResolutionForm = (data) => {
       const lastYPosBeforeDraw = pdf.getLastYPositionWithBuffer({ buffer: 0 });
 
       const animalRow = [{
-        label: `A#${animal.id} - ${animal.species}\n${animal.name || 'Unknown'}`,
+        label: `A#${animal.id} - ${animal.species[0].toUpperCase()}${animal.species.slice(1)}\n${animal.name || 'Unknown'}\n${animal.status}`,
         marginTop: -10
-      }].concat(Array(4).fill({
+      }].concat(Array(5).fill({
         type: 'checkbox',
         label: '',
         size: 20
@@ -201,7 +204,8 @@ export const printDispatchResolutionForm = (data) => {
       });
 
       pdf.drawWrappedText({
-        text: `Primary Color: ${animal.pcolor || 'N/A'}, Secondary Color: ${animal.scolor}`
+        text: `Primary Color: ${animal.pcolor || 'N/A'}, Secondary Color: ${animal.scolor || 'N/A'}`,
+        linePadding: 10
       });
       pdf.drawWrappedText({
         text: `Description: ${animal.color_notes || 'N/A'}`,
@@ -209,10 +213,14 @@ export const printDispatchResolutionForm = (data) => {
       });
       pdf.drawWrappedText({
         text: `Behavior: ${animal.behavior_notes || 'N/A'}`,
+        bottomPadding: 5,
+        linePadding: -10
+      });
+      pdf.drawWrappedText({
+        text: `Medical: ${animal.medical_notes || 'N/A'}`,
         linePadding: -10
       });
 
-      pdf.drawHRule({ buffer: 15 });
       lastYPosAfterDraw = pdf.getLastYPositionWithBuffer({ buffer: 0 });
 
       // If after draw y position is less than before draw, that means there was a page break.
@@ -236,7 +244,6 @@ export const printDispatchResolutionForm = (data) => {
         return label
       }),
       listStyle: 'inline',
-      bottomPadding: 16
     });
     pdf.setDocumentFontSize();
 
@@ -263,7 +270,7 @@ export const printDispatchResolutionForm = (data) => {
       });
 
       assigned_request.service_request_object.owner_objects.forEach((owner) => {
-        pdf.drawCheckBoxLine({ label: `Owner: ${owner.first_name} ${owner.last_name} ${owner.phone}` });
+        pdf.drawCheckBoxLine({ label: `Owner: ${owner.first_name} ${owner.last_name} ${owner.display_phone}` });
         pdf.drawTextWithLine({ label: 'Owner Contact Time:', xOffset: 150 });
         pdf.drawTextArea({ label: 'Owner Contact Notes:' });
       });

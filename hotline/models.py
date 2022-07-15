@@ -2,7 +2,7 @@ from django.db import models
 from location.models import Location
 from people.models import Person
 from .managers import ServiceRequestQueryset
-
+from incident.models import Incident
 
 STATUS_CHOICES = (
   ('open', 'Open'),
@@ -11,11 +11,15 @@ STATUS_CHOICES = (
   ('canceled','Canceled')
 )
 
+def test_incident():
+    return Incident.objects.get(name='Test').id
+
 class ServiceRequest(Location):
     
     #keys
     owners = models.ManyToManyField(Person, blank=True, related_name='request')
     reporter = models.ForeignKey(Person, on_delete=models.SET_NULL, blank=True, null=True, related_name='reporter_service_request')
+    incident = models.ForeignKey(Incident, on_delete=models.CASCADE, default=test_incident)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, blank=False, default='open')
     priority = models.IntegerField(blank=False, default=2)
 

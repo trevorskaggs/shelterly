@@ -21,6 +21,7 @@ class Shelter(BaseShelterModel, Location):
     name = models.CharField(max_length=100, unique=True)
     image = models.ImageField(upload_to='media/images/shelter', blank=True, null=True)
     phone = models.CharField(max_length=50, blank=True)
+    test = models.BooleanField(default=True)
 
     @property
     def location_type(self):

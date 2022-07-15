@@ -15,8 +15,9 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { faRectanglePortrait } from '@fortawesome/pro-solid-svg-icons';
 import { faCheckCircle } from '@fortawesome/pro-duotone-svg-icons';
+import Header from '../components/Header';
 
-function ServiceRequestDispatchAssignment({id}) {
+function ServiceRequestDispatchAssignment({ id, incident }) {
 
   const [currentRequest, setCurrentRequest] = useState({id:'', matches: {}, latitude:0, longitude:0, followup_date:''});
   const [data, setData] = useState({dispatch_assignments: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
@@ -86,7 +87,7 @@ function ServiceRequestDispatchAssignment({id}) {
   const handleSubmit = () => {
     axios.patch('/evac/api/evacassignment/' + selected + '/', {new_service_request:currentRequest.id})
     .then(response => {
-      navigate('/dispatch/summary/' + selected)
+      navigate('/' + incident + '/dispatch/summary/' + selected)
     })
     .catch(error => {
     });
@@ -105,7 +106,7 @@ function ServiceRequestDispatchAssignment({id}) {
       .then(currentResponse => {
         if (!unmounted) {
           // Fetch open DA data.
-          axios.get('/evac/api/evacassignment/', {
+          axios.get('/evac/api/evacassignment/?incident=' + incident, {
             params: {
               status: 'open',
               map: true
@@ -153,7 +154,7 @@ function ServiceRequestDispatchAssignment({id}) {
       unmounted = true;
       source.cancel();
     };
-  }, [id]);
+  }, [id, incident]);
 
   const starIconHTML = ReactDOMServer.renderToString(<FontAwesomeIcon color="gold" size="lg" className="icon-border" icon={faStar} />);
   const starMarkerIcon = new L.DivIcon({
@@ -193,7 +194,11 @@ function ServiceRequestDispatchAssignment({id}) {
 
   return (
     <>
-    <Row className="d-flex flex-wrap mt-3">
+    <Header>
+      {activeDispatch ? "Rea" : "A"}ssign Service Request
+    </Header>
+    <hr/>
+    <Row className="d-flex flex-wrap" style={{marginLeft:"0px", marginRight:"0px"}}>
       <Col xs={12} className="border rounded pl-0 pr-0">
         <Map className="d-block" bounds={data.bounds} onMoveEnd={onMove}>
           <Marker
@@ -295,22 +300,22 @@ function ServiceRequestDispatchAssignment({id}) {
         </Map>
       </Col>
     </Row>
-    <Row className="mt-2 mb-3" style={{marginRight:"-18px"}}>
-      <Col xs={2} className="pl-0" style={{marginLeft:"-2px", paddingRight:"7px"}}>
-        <Button onClick={() => handleSubmit()} className="btn-block" disabled={selected === null}>ASSIGN</Button>
+    <Row className="border rounded" style={{marginLeft:"0px", marginRight:"0px"}}>
+      <Col xs={2} className="pl-0" style={{paddingRight:"0px"}}>
+        <Button onClick={() => handleSubmit()} className="btn-block border" disabled={selected === null}>ASSIGN</Button>
       </Col>
       <Col xs={10} className="pl-0 pr-0">
         <div className="card-header d-flex align-items-center rounded" style={{height:"37px"}}><b style={{marginLeft:"-10px"}}>
           Service Request:</b>&nbsp;
-            {Object.keys(currentRequest.matches).map((key,i) => (
-              <span key={key} style={{textTransform:"capitalize"}}>
-                {i > 0 && ", "}{prettyText(key.split(',')[1], key.split(',')[0], currentRequest.matches[key])}
-              </span>
-            ))}
-          &nbsp;| SR#{currentRequest.id} - {currentRequest.full_address}</div>
+          SR#{currentRequest.id} - {currentRequest.full_address}&nbsp;|&nbsp;
+          {Object.keys(currentRequest.matches).map((key,i) => (
+            <span key={key} style={{textTransform:"capitalize"}}>
+              {i > 0 && ", "}{prettyText(key.split(',')[1], key.split(',')[0], currentRequest.matches[key])}
+            </span>
+          ))}</div>
       </Col>
     </Row>
-    <Row className="d-flex flex-wrap" style={{marginTop:"-8px", marginRight:"-19px", marginLeft:"-17px", minHeight:"36vh", paddingRight:"4px"}}>
+    <Row className="d-flex flex-wrap" style={{marginTop:"-1px", marginRight:"0px", marginLeft:"0px", minHeight:"36vh"}}>
       <Col xs={12} className="border rounded" style={{marginLeft:"1px", height:"36vh", overflowY:"auto", paddingRight:"-1px"}}>
         {activeDispatch && data.dispatch_assignments.filter(dispatch_assignment => dispatch_assignment.id === activeDispatch.id).map(dispatch_assignment => (
         <div key={dispatch_assignment.id} className="mt-1 mb-1" style={{marginLeft:"-10px", marginRight:"-10px"}}>
@@ -338,7 +343,7 @@ function ServiceRequestDispatchAssignment({id}) {
                 </Tooltip>
               }
             >
-              <Link href={"/dispatch/summary/" + dispatch_assignment.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+              <Link href={"/" + incident + "/dispatch/summary/" + dispatch_assignment.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
             </OverlayTrigger>&nbsp;&nbsp;|&nbsp;
             {dispatch_assignment.team ? dispatch_assignment.team_object.name : ""}
             {dispatch_assignment.team ?
@@ -369,7 +374,7 @@ function ServiceRequestDispatchAssignment({id}) {
                       ))}
                     </span>
                     :""}
-                    &nbsp;|&nbsp;SR#{assigned_request.service_request_object.id} - <Link href={"/hotline/servicerequest/" + assigned_request.service_request_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link>
+                    &nbsp;|&nbsp;SR#{assigned_request.service_request_object.id} - <Link href={"/" + incident + "/hotline/servicerequest/" + assigned_request.service_request_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link>
                 </li>
                 : ""}
               </span>
@@ -405,7 +410,7 @@ function ServiceRequestDispatchAssignment({id}) {
                   </Tooltip>
                 }
               >
-                <Link href={"/dispatch/summary/" + dispatch_assignment.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+                <Link href={"/" + incident + "/dispatch/summary/" + dispatch_assignment.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
               </OverlayTrigger>&nbsp;&nbsp;|&nbsp;
               {dispatch_assignment.team ? dispatch_assignment.team_object.name : ""}
               {dispatch_assignment.team_member_names ?
@@ -446,7 +451,7 @@ function ServiceRequestDispatchAssignment({id}) {
                           </Tooltip>
                         }
                       >
-                        <Link href={"/hotline/servicerequest/" + assigned_request.service_request_object.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+                        <Link href={"/" + incident + "/hotline/servicerequest/" + assigned_request.service_request_object.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
                       </OverlayTrigger>
                   </li>
                   : ""}

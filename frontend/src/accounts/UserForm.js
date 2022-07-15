@@ -15,7 +15,7 @@ import * as Yup from 'yup';
 import { TextInput } from '.././components/Form.js';
 import ButtonSpinner from '../components/ButtonSpinner.js';
 
-const UserForm = ({ id }) => {
+const UserForm = ({ id, incident }) => {
 
   // Regex validators.
   const phoneRegex = /^((\+\d{1,3}(-| )?\(?\d\)?(-| )?\d{1,3})|(\(?\d{2,3}\)?))(-| )?(\d{3,4})(-| )?(\d{4})(( x| ext)\d{1,5}){0,1}$/;
@@ -74,12 +74,12 @@ const UserForm = ({ id }) => {
           .required('Required'),
         agency_id: Yup.string().nullable(),
       })}
-      onSubmit={(values, { setSubmitting }) => {
+      onSubmit={(values, { setFieldError, setSubmitting }) => {
         setTimeout(() => {
           if (id) {
             axios.put('/accounts/api/user/' + id + '/', values)
             .then(function () {
-              navigate('/accounts/user_management');
+              navigate('/' + incident + '/accounts/user_management');
             })
             .catch(error => {
               setSubmitting(false);
@@ -88,9 +88,12 @@ const UserForm = ({ id }) => {
           else {
             axios.post('/accounts/api/user/', values)
             .then(function () {
-              navigate('/accounts/user_management');
+              navigate('/' + incident + '/accounts/user_management');
             })
             .catch(error => {
+              if (error.response.data.email[0].includes('shelterly user with this email already exists')) {
+                setFieldError("email", "A user with this email address already exists.");
+              }
               setSubmitting(false);
             });
           }

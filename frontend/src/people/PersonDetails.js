@@ -15,7 +15,7 @@ import AnimalCards from '../components/AnimalCards';
 import PhotoDocuments from '../components/PhotoDocuments';
 import { printOwnerDetails } from './Utils';
 
-function PersonDetails({id}) {
+function PersonDetails({id, incident}) {
 
   // Determine if this is an owner or reporter when creating a Person.
   let is_owner = window.location.pathname.includes("owner")
@@ -48,6 +48,8 @@ function PersonDetails({id}) {
     state: '',
     zip_code: '',
     animals: [],
+    reporter_animals: [],
+    requests: [],
     images: [],
     owner_contacts: [],
     action_history: [],
@@ -67,7 +69,7 @@ function PersonDetails({id}) {
 
     const fetchPersonData = async () => {
       // Fetch Person data.
-      await axios.get('/people/api/person/' + id + '/', {
+      await axios.get('/people/api/person/' + id + '/?incident=' + incident, {
         cancelToken: source.token,
       })
       .then(response => {
@@ -84,7 +86,7 @@ function PersonDetails({id}) {
       unmounted = true;
       source.cancel();
     };
-  }, [id]);
+  }, [id, incident]);
 
   return (
     <>
@@ -100,7 +102,7 @@ function PersonDetails({id}) {
               </Tooltip>
             }
           >
-            <Link href={"/people/owner/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-2 mr-1" inverse /></Link>
+            <Link href={"/" + incident + "/people/owner/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-2 mr-1" inverse /></Link>
           </OverlayTrigger>
         </span>
       :
@@ -114,7 +116,7 @@ function PersonDetails({id}) {
               </Tooltip>
             }
           >
-            <Link href={"/people/reporter/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-2 mr-1" inverse /></Link>
+            <Link href={"/" + incident + "/people/reporter/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-2 mr-1" inverse /></Link>
           </OverlayTrigger>
         </span>
       }
@@ -149,11 +151,12 @@ function PersonDetails({id}) {
                 {data.agency ? <ListGroup.Item><b>Agency: </b>{data.agency}</ListGroup.Item>: ''}
                 {data.phone ? <ListGroup.Item><b>Telephone: </b>{data.display_phone} {data.display_alt_phone ? <span>|&nbsp;Alt: {data.display_alt_phone}</span> : ""}</ListGroup.Item> : ""}
                 {data.email ? <ListGroup.Item><b>Email: </b>{data.email}</ListGroup.Item> : ""}
-                {data.request ?
-                  <ListGroup.Item><b>Service Request: </b><Link href={"/hotline/servicerequest/" + data.request.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.request.full_address}</Link></ListGroup.Item>
-                :
-                  <ListGroup.Item><b>Address: </b>{data.address ? data.full_address : 'No Address Listed'}</ListGroup.Item>
-                }
+                {data.address ?
+                  <ListGroup.Item><b>Address: </b>{data.full_address}</ListGroup.Item>
+                : ""}
+                {data.requests.map(request => (
+                  <ListGroup.Item><b>Service Request: </b><Link href={"/" + incident + "/hotline/servicerequest/" + request.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{request.full_address}</Link></ListGroup.Item>
+                ))}
                 {data.comments ? <ListGroup.Item><b>Comments: </b>{data.comments}</ListGroup.Item>: ''}
               </ListGroup>
             </Scrollbar>
@@ -175,7 +178,7 @@ function PersonDetails({id}) {
                     </Tooltip>
                   }
                 >
-                  <Link href={"/hotline/ownercontact/new?owner=" + id}><FontAwesomeIcon icon={faPhonePlus} className="ml-1" inverse /></Link>
+                  <Link href={"/" + incident + "/hotline/ownercontact/new?owner=" + id}><FontAwesomeIcon icon={faPhonePlus} className="ml-1" inverse /></Link>
                 </OverlayTrigger>
               </h4>
             </Card.Title>
@@ -193,7 +196,7 @@ function PersonDetails({id}) {
                       </Tooltip>
                     }
                   >
-                    <Link href={"/hotline/ownercontact/" + owner_contact.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
+                    <Link href={"/" + incident + "/hotline/ownercontact/" + owner_contact.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
                   </OverlayTrigger>
                   : {owner_contact.owner_contact_note}</ListGroup.Item>
                 ))}
@@ -204,12 +207,14 @@ function PersonDetails({id}) {
         </Card>
       </div> : ""}
     </div>
+    {data.animals.length ?
     <div className="row mt-3">
       <div className="col-12 d-flex">
         <Card className="border rounded" style={{width:"100%"}}>
           <Card.Body style={{marginBottom:"-17px"}}>
             <Card.Title>
               <h4 className="mb-0">Animals
+                {data.requests.length ?
                 <OverlayTrigger
                   key={"add-animal"}
                   placement="top"
@@ -219,20 +224,21 @@ function PersonDetails({id}) {
                     </Tooltip>
                   }
                 >
-                  <Link href={"/animals/new?owner_id=" + id}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
+                  <Link href={"/" + incident + "/animals/new?owner_id=" + id}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
                 </OverlayTrigger>
+                : ""}
                 <OverlayTrigger
                   key={"add-owner"}
                   placement="bottom"
                   overlay={
                     <Tooltip id={`tooltip-add-owner`}>
-                      Add an{is_owner ? "other" : ""} owner to all of these animals
+                      Add another owner to all of these animals
                     </Tooltip>
                   }
                 >
-                  <Link href={"/people/owner/new?owner_id=" + id}><FontAwesomeIcon icon={faUserPlus} className="ml-1 fa-move-up" size="sm" inverse /></Link>
+                  <Link href={"/" + incident + "/people/owner/new?owner_id=" + id}><FontAwesomeIcon icon={faUserPlus} className="ml-1 fa-move-up" size="sm" inverse /></Link>
                 </OverlayTrigger>
-                {is_owner && data.animals.filter(animal => (!['REUNITED', 'DECEASED'].includes(animal.status))).length > 0 ?
+                {data.animals.filter(animal => (!['REUNITED', 'DECEASED'].includes(animal.status))).length > 0 ?
                 <OverlayTrigger
                   key={"reunite"}
                   placement="top"
@@ -248,12 +254,39 @@ function PersonDetails({id}) {
               </h4>
             </Card.Title>
             <hr/>
-            <AnimalCards animals={data.animals} show_owner={false} show_status={true} />
-            {data.animals.length < 1 ? <p>This {is_owner ? "owner" : "reporter"} has no animals.</p> : ""}
+            <AnimalCards animals={data.animals} show_owner={false} show_status={true} incident={"/" + incident} />
+            {data.animals.length < 1 ? <p>This owner has no animals.</p> : ""}
           </Card.Body>
         </Card>
       </div>
-    </div>
+    </div> : ""}
+    {data.reporter_animals.length ?
+    <div className="row mt-3">
+      <div className="col-12 d-flex">
+        <Card className="border rounded" style={{width:"100%"}}>
+          <Card.Body style={{marginBottom:"-17px"}}>
+            <Card.Title>
+              <h4 className="mb-0">Reported Animals
+                <OverlayTrigger
+                  key={"add-owner"}
+                  placement="bottom"
+                  overlay={
+                    <Tooltip id={`tooltip-add-owner`}>
+                      Add an owner to all of these animals
+                    </Tooltip>
+                  }
+                >
+                  <Link href={"/" + incident + "/people/owner/new?owner_id=" + id}><FontAwesomeIcon icon={faUserPlus} className="ml-1 fa-move-up" size="sm" inverse /></Link>
+                </OverlayTrigger>
+              </h4>
+            </Card.Title>
+            <hr/>
+            <AnimalCards animals={data.reporter_animals} show_owner={false} show_status={true} incident={"/" + incident} />
+            {data.reporter_animals.length < 1 ? <p>This reporter has no animals.</p> : ""}
+          </Card.Body>
+        </Card>
+      </div>
+    </div> : ""}
     <PhotoDocuments setData={setData} data={data} id={id} url={'/people/api/person/' + id + '/'} object={is_owner ? "owner" : "reporter"} />
     <History action_history={data.action_history} />
     <Modal show={show} onHide={handleClose}>

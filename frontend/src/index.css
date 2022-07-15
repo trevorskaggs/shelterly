@@ -43,6 +43,8 @@ hr { display: block; height: 1px;
 
 .search-leaflet-container { width: auto; height: 200px; min-height:200px;}
 
+.incident-leaflet-container { width: auto; height: 400px; min-height:400px;}
+
 .animal-search-leaflet-container { width: auto; height: 248px; min-height:248px;}
 
 .da-search-leaflet-container { width: auto; height: 204px; min-height:204px;}
@@ -161,7 +163,7 @@ input[disabled] {
   transform: scale(.5,1.35);
 }
 
-.sidebar:hover .sidebar-icon {
+.incident:hover, .sidebar:hover .sidebar-icon {
   color: #a52b44;
   transition: color 0.3s linear;
 }

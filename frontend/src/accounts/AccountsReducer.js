@@ -81,7 +81,7 @@ function AuthProvider(props) {
 
     // Redirect to next or Home if attempting to access LoginForm while logged in.
     if (state.user && path === '/login') {
-      navigate(next)
+      navigate(next);
     }
     // If we have a token but no user, attempt to authenticate them.
     else if (!state.user && cookies.token) {

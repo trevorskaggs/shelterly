@@ -30,11 +30,11 @@ const ResetPassword = () => {
           password2: Yup.string()
             .oneOf([Yup.ref('password'), null], 'Passwords must match.'),
         })}
-        onSubmit={(values, actions ) => {
+        onSubmit={(values, actions) => {
           setTimeout(() => {
             axios.post('/accounts/api/password_reset/confirm/', values)
             .then(response => {
-              navigate('/');
+              navigate('/login');
             })
             .catch(e => {
             });
@@ -66,7 +66,7 @@ const ResetPassword = () => {
             />
             <BootstrapForm.Group as={Col}>
               <Button type="submit" size="lg" className="btn-primary" disabled={isSubmitting} block>Save New Password</Button>
-              <Button size="lg" className="btn-primary" onClick={() => navigate('/')} disabled={isSubmitting} block>Return to Login</Button>
+              <Button size="lg" className="btn-primary" onClick={() => navigate('/login')} disabled={isSubmitting} block>Return to Login</Button>
             </BootstrapForm.Group>
           </BootstrapForm>
         </Col>

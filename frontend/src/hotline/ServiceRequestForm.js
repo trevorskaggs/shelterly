@@ -18,6 +18,7 @@ function ServiceRequestForm(props) {
 
   const { state } = useContext(AuthContext);
   const id = props.id;
+  const incident = props.incident;
 
   // Determine if we're in the hotline workflow.
   var is_workflow = window.location.pathname.includes("workflow");
@@ -49,6 +50,7 @@ function ServiceRequestForm(props) {
     key_provided: props.state.steps.request.key_provided || false,
     accessible: props.state.steps.request.accessible || false,
     turn_around: props.state.steps.request.turn_around || false,
+    incident_slug: props.incident,
   });
 
   // Hook for initializing data.
@@ -115,8 +117,8 @@ function ServiceRequestForm(props) {
               ]);
             }
             // Create Owner
-            let ownerResponse = [{data:{id:null}}];
-            if (props.state.steps.owner.first_name) {
+            let ownerResponse = [{data:{id:props.state.steps.owner.id}}];
+            if (props.state.steps.owner.first_name && !props.state.steps.owner.id) {
               ownerResponse = await Promise.all([
                 axios.post('/people/api/person/', props.state.steps.owner)
               ]);
@@ -126,7 +128,7 @@ function ServiceRequestForm(props) {
             if (ownerResponse[0].data.id) {
               values['owners'] = [ownerResponse[0].data.id]
             }
-            axios.post('/hotline/api/servicerequests/', values)
+            axios.post('/hotline/api/servicerequests/?incident=' + incident, values)
             .then(response => {
               // Create Animals
               let promises = props.state.steps.animals.map(async (animal) => {
@@ -142,7 +144,7 @@ function ServiceRequestForm(props) {
               });
               Promise.all(promises)
               .then((results) => {
-                navigate('/hotline/servicerequest/' + response.data.id);
+                navigate('/' + incident + '/hotline/servicerequest/' + response.data.id);
               })
             })
             .catch(error => {
@@ -153,13 +155,13 @@ function ServiceRequestForm(props) {
             });
           }
           else if (id) {
-            axios.put('/hotline/api/servicerequests/' + id + '/', values)
+            axios.put('/hotline/api/servicerequests/' + id + '/?incident=' + incident, values)
             .then(function() {
               if (state.prevLocation) {
                 navigate(state.prevLocation);
               }
               else {
-                navigate('/hotline/servicerequest/' + id);
+                navigate('/' + incident + '/hotline/servicerequest/' + id);
               }
             })
             .catch(error => {
@@ -181,7 +183,7 @@ function ServiceRequestForm(props) {
         </Card.Header>
         <Card.Body>
           <BootstrapForm as={Form}>
-            <AddressSearch formikProps={formikProps} label="Search for Service Request Address" show_apt={true} show_same={props.state.steps.owner.address} error="Service Request Address was not selected." />
+            <AddressSearch formikProps={formikProps} label="Search for Service Request Address" show_apt={true} show_same={props.state.steps.owner.address} incident={props.incident} error="Service Request Address was not selected." />
             <BootstrapForm.Row className="mb-3">
               <Col xs={"2"}>
                 <DropDown
@@ -240,7 +242,7 @@ function ServiceRequestForm(props) {
         <Modal.Body>
           <p>
             {error && error.error[0]}
-            &nbsp;Click <Link href={'/hotline/servicerequest/' + error.error[1]} style={{color:"#8d99d4"}}>here</Link> to view this Service Request.
+            &nbsp;Click <Link target="_blank" href={"/" + incident + "/hotline/servicerequest/" + error.error[1]} style={{color:"#8d99d4"}}>here</Link> to view this Service Request.
           </p>
         </Modal.Body>
         <Modal.Footer>

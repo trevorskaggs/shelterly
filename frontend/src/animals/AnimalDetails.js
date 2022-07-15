@@ -15,7 +15,7 @@ import { AnimalDeleteModal } from "../components/Modals";
 import Header from '../components/Header';
 import History from '../components/History';
 
-function AnimalDetails({id}) {
+function AnimalDetails({ id, incident }) {
 
   const { state } = useContext(AuthContext);
   const [images, setImages] = useState([]);
@@ -88,16 +88,16 @@ function AnimalDetails({id}) {
         navigate(state.prevLocation);
       }
       else if (data.request) {
-        navigate('/hotline/servicerequest/' + data.request);
+        navigate('/' + incident + '/hotline/servicerequest/' + data.request);
       }
       else if (data.owner) {
-        navigate('/people/owner/' + data.owner);
+        navigate('/' + incident + '/people/owner/' + data.owner);
       }
       else if (data.reporter) {
-        navigate('/people/reporter/' + data.reporter);
+        navigate('/' + incident + '/people/reporter/' + data.reporter);
       }
       else {
-        navigate('/');
+        navigate('/' + incident);
       }
     })
     .catch(error => {
@@ -145,7 +145,7 @@ function AnimalDetails({id}) {
           </Tooltip>
         }
       >
-        <Link href={"/animals/edit/" + id} ><FontAwesomeIcon icon={faEdit} className="ml-1" inverse /></Link>
+        <Link href={"/" + incident + "/animals/edit/" + id} ><FontAwesomeIcon icon={faEdit} className="ml-1" inverse /></Link>
       </OverlayTrigger>
       <OverlayTrigger
         key={"print"}
@@ -156,7 +156,7 @@ function AnimalDetails({id}) {
           </Tooltip>
         }
       >
-        <Link href={"/animals/print/" + id} target="_blank"><FontAwesomeIcon icon={faPrint} className="ml-1 mr-2" inverse /></Link>
+        <Link href={"/" + incident + "/animals/print/" + id} target="_blank"><FontAwesomeIcon icon={faPrint} className="ml-1 mr-2" inverse /></Link>
       </OverlayTrigger>
       {data.status !== 'REUNITED' ?
       <OverlayTrigger
@@ -340,14 +340,14 @@ function AnimalDetails({id}) {
                     </Tooltip>
                   }
                 >
-                  <Link href={"/people/owner/new?animal_id=" + id}><FontAwesomeIcon icon={faUserPlus} size="sm" className="ml-1" inverse /></Link>
+                  <Link href={"/" + incident + "/people/owner/new?animal_id=" + id}><FontAwesomeIcon icon={faUserPlus} size="sm" className="ml-1" inverse /></Link>
                 </OverlayTrigger>
               </h4>
             </Card.Title>
             <hr/>
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
               {data.owners.map(owner => (
-                <ListGroup.Item key={owner.id}><b>Owner: </b><Link href={"/people/owner/" + owner.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{owner.first_name} {owner.last_name}</Link>
+                <ListGroup.Item key={owner.id}><b>Owner: </b><Link href={"/" + incident + "/people/owner/" + owner.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{owner.first_name} {owner.last_name}</Link>
                 {owner.display_phone ?
                   <OverlayTrigger
                     key={"owner-phone"}
@@ -388,7 +388,7 @@ function AnimalDetails({id}) {
                 </ListGroup.Item>
               ))}
               {data.reporter ?
-              <ListGroup.Item><b>Reporter: </b><Link href={"/people/reporter/" + data.reporter} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.reporter_object.first_name} {data.reporter_object.last_name}</Link></ListGroup.Item> : ""}
+              <ListGroup.Item><b>Reporter: </b><Link href={"/" + incident + "/people/reporter/" + data.reporter} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.reporter_object.first_name} {data.reporter_object.last_name}</Link></ListGroup.Item> : ""}
               {data.owners.length < 1 && !data.reporter ? <ListGroup.Item>No Contacts</ListGroup.Item> : ""}
             </ListGroup>
             <Card.Title>
@@ -398,12 +398,12 @@ function AnimalDetails({id}) {
             <ListGroup variant="flush" style={{marginBottom:"-13px", marginTop:"-13px"}}>
               {data.found_location ? <ListGroup.Item><b>Found Location: </b>{data.found_location}</ListGroup.Item> : ""}
               {data.request ?
-                <ListGroup.Item><b>Service Request: </b><Link href={"/hotline/servicerequest/" + data.request} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.request_address}</Link></ListGroup.Item>
+                <ListGroup.Item><b>Service Request: </b><Link href={"/" + incident + "/hotline/servicerequest/" + data.request} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.request_address}</Link></ListGroup.Item>
               : ''}
               {data.shelter ?
               <ListGroup.Item>
-                <b>Shelter:</b> <Link href={"/shelter/" + data.shelter} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.shelter_object.name}</Link>
-                {data.room ? <div className="mt-1"><b>Room:</b> {data.building_name} - <Link href={"/shelter/room/" + data.room} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.room_name}</Link></div> : ""}
+                <b>Shelter:</b> <Link href={"/" + incident + "/shelter/" + data.shelter} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.shelter_object.name}</Link>
+                {data.room ? <div className="mt-1"><b>Room:</b> {data.building_name} - <Link href={"/" + incident + "/shelter/room/" + data.room} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.room_name}</Link></div> : ""}
                 <div className="mt-1"><b>Intake Date:</b> <Moment format="MMMM Do YYYY HH:mm">{data.intake_date}</Moment></div>
                 <div className="mt-1"><b>Address:</b> {data.shelter_object.full_address || "Unknown"}</div>
               </ListGroup.Item> : ""}
