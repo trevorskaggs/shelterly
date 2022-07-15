@@ -372,7 +372,7 @@ const AddressLookup = ({setLatLon, ...props}) => {
     let unmounted = false;
     let source = axios.CancelToken.source();
 
-    axios.get('/incident/api/incident/?incident_slug=' + props.incident, {
+    axios.get('/incident/api/incident/?incident=' + props.incident, {
       cancelToken: source.token,
     })
     .then(response => {

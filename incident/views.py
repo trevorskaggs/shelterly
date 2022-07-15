@@ -14,8 +14,8 @@ class IncidentViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = Incident.objects.all()
 
-        if self.request.GET.get('incident_slug'):
-            queryset = queryset.filter(slug=self.request.GET.get('incident_slug'))
+        if self.request.GET.get('incident'):
+            queryset = queryset.filter(slug=self.request.GET.get('incident'))
 
         return queryset
 

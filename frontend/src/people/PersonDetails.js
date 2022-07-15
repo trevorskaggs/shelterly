@@ -4,7 +4,7 @@ import { Link } from 'raviger';
 import { Button, Card, ListGroup, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faEdit, faPlusSquare, faUserPlus
+  faEdit, faUserPlus
 } from '@fortawesome/free-solid-svg-icons';
 import { faHomeHeart, faPhonePlus, faPrint } from '@fortawesome/pro-solid-svg-icons';
 import Moment from 'react-moment';
@@ -155,7 +155,7 @@ function PersonDetails({id, incident}) {
                   <ListGroup.Item><b>Address: </b>{data.full_address}</ListGroup.Item>
                 : ""}
                 {data.requests.map(request => (
-                  <ListGroup.Item><b>Service Request: </b><Link href={"/" + incident + "/hotline/servicerequest/" + request.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{request.full_address}</Link></ListGroup.Item>
+                  <ListGroup.Item key={request.id}><b>Service Request: </b><Link href={"/" + incident + "/hotline/servicerequest/" + request.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{request.full_address}</Link></ListGroup.Item>
                 ))}
                 {data.comments ? <ListGroup.Item><b>Comments: </b>{data.comments}</ListGroup.Item>: ''}
               </ListGroup>
@@ -214,19 +214,6 @@ function PersonDetails({id, incident}) {
           <Card.Body style={{marginBottom:"-17px"}}>
             <Card.Title>
               <h4 className="mb-0">Animals
-                {data.requests.length ?
-                <OverlayTrigger
-                  key={"add-animal"}
-                  placement="top"
-                  overlay={
-                    <Tooltip id={`tooltip-add-animal`}>
-                      Add animal to this owner
-                    </Tooltip>
-                  }
-                >
-                  <Link href={"/" + incident + "/animals/new?owner_id=" + id}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
-                </OverlayTrigger>
-                : ""}
                 <OverlayTrigger
                   key={"add-owner"}
                   placement="bottom"
