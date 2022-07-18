@@ -1,14 +1,12 @@
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Case, Prefetch, Value, When, Exists
 from django.shortcuts import render
 from copy import deepcopy
 from datetime import datetime
 from rest_framework import filters, permissions, viewsets
 from actstream import action
-from actstream.models import Action
 
-from people.models import Person
+from hotline.models import ServiceRequest
 from animals.models import Animal, AnimalImage
 from animals.serializers import AnimalSerializer
 from incident.models import Incident
@@ -48,7 +46,7 @@ class AnimalViewSet(viewsets.ModelViewSet):
                 if self.request.data.get('new_owner'):
                     animal.owners.add(self.request.data['new_owner'])
 
-                # Add ServiceRequest Owner and Reporter to new animals being added to an SR.
+                # Add ServiceRequest Owner to new animals being added to an SR.
                 if serializer.validated_data.get('request'):
                     animal.owners.add(*animal.request.owners.all())
 

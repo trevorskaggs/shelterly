@@ -21,30 +21,30 @@ class PersonViewSet(viewsets.ModelViewSet):
         queryset = (
             Person.objects.with_history()
             .all()
-            .annotate(is_owner=Exists(Animal.objects.filter(incident__slug=self.request.GET.get('incident', 'test'), owners=OuterRef("id"))))
+            .annotate(is_owner=Exists(Animal.objects.filter(incident__slug=self.request.GET.get('incident', ''), owners=OuterRef("id"))))
             .prefetch_related(
                 Prefetch(
                     "animal_set",
-                    queryset=Animal.objects.filter(incident__slug=self.request.GET.get('incident', 'test')).exclude(status='CANCELED').with_images().prefetch_related('owners'),
+                    queryset=Animal.objects.filter(incident__slug=self.request.GET.get('incident', '')).exclude(status='CANCELED').with_images().prefetch_related('owners'),
                     to_attr="animals",
                 )
             )
             .prefetch_related(
                 Prefetch(
                     "reporter_animals",
-                    queryset=Animal.objects.filter(incident__slug=self.request.GET.get('incident', 'test')).exclude(status='CANCELED').with_images().prefetch_related('owners'),
+                    queryset=Animal.objects.filter(incident__slug=self.request.GET.get('incident', '')).exclude(status='CANCELED').with_images().prefetch_related('owners'),
                 )
             )
             .prefetch_related(
                 Prefetch(
                     "request",
-                    queryset=ServiceRequest.objects.filter(incident__slug=self.request.GET.get('incident', 'test')).exclude(status='canceled'),
+                    queryset=ServiceRequest.objects.filter(incident__slug=self.request.GET.get('incident', '')).exclude(status='canceled'),
                 )
             )
             .prefetch_related(
                 Prefetch(
                     "reporter_service_request",
-                    queryset=ServiceRequest.objects.filter(incident__slug=self.request.GET.get('incident', 'test')).exclude(status='canceled'),
+                    queryset=ServiceRequest.objects.filter(incident__slug=self.request.GET.get('incident', '')).exclude(status='canceled'),
                 )
             )
             .prefetch_related("ownercontact_set")
