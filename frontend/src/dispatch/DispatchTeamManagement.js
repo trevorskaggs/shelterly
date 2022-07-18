@@ -9,7 +9,7 @@ import {
 import Header from "../components/Header";
 import Scrollbar from '../components/Scrollbars';
 
-function DispatchTeamManagement() {
+function DispatchTeamManagement({ incident }) {
 
   const [data, setData] = useState({team_members: [], teams: [], isFetching: false});
 
@@ -97,7 +97,7 @@ function DispatchTeamManagement() {
           </Tooltip>
         }
       >
-        <Link href={"/dispatch/dispatchteammember/new"}><FontAwesomeIcon icon={faUserPlus} size="sm" className="ml-2" inverse /></Link>
+        <Link href={"/" + incident + "/dispatch/dispatchteammember/new"}><FontAwesomeIcon icon={faUserPlus} size="sm" className="ml-2" inverse /></Link>
       </OverlayTrigger>
     </h3>
     <Scrollbar style={{height:"270px", minHeight:"270px"}} renderView={props => <div {...props} style={{...props.style, overflowX:"hidden"}}/>}  renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>

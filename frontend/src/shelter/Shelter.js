@@ -10,7 +10,7 @@ import Header from '../components/Header';
 import Map, { shelterMarkerIcon } from "../components/Map";
 import Scrollbar from '../components/Scrollbars';
 
-function Shelter() {
+function Shelter({ incident }) {
 
   const [data, setData] = useState({shelters: [],  isFetching: false, bounds:L.latLngBounds([[0,0]])});
   const [selectedShelter, setSelectedShelter] = useState(null);
@@ -23,7 +23,7 @@ function Shelter() {
     const fetchShelters = async () => {
       setData({shelters: [], isFetching: true});
       // Fetch Shelter data.
-      await axios.get('/shelter/api/shelter/', {
+      await axios.get('/shelter/api/shelter/?incident=' + incident, {
         cancelToken: source.token,
       })
       .then(response => {
@@ -47,35 +47,36 @@ function Shelter() {
       unmounted = true;
       source.cancel();
     };
-  }, []);
+  }, [incident]);
 
   return (
     <>
     <Header>Shelter</Header>
     <hr/>
-    <Row className="ml-0 mr-0 pl-0 pr-0">
+    <Row className="ml-0 mr-0 pl-0 pr-0" style={{marginBottom:"-1px"}}>
       <Col xs={10} className="border rounded pl-0 pr-0">
-        <Map bounds={data.bounds} className="landing-leaflet-container">
-          {data.shelters.filter(shelter => shelter.id === selectedShelter || !selectedShelter ? shelter : null).map((shelter, index) => (
-            <Marker
-              key={shelter.id}
-              position={[shelter.latitude, shelter.longitude]}
-              icon={shelterMarkerIcon}
-              onClick={() => navigate("/shelter/" + shelter.id)}
-            >
-              <MapTooltip key={`${index}-${selectedShelter}`} keepInView={false} autoPan={false} permanent={selectedShelter === shelter.id ? true : false}>
-                <span>
-                  <div>{shelter.name} - {shelter.animal_count} Animal{shelter.animal_count === 1 ? "" :"s"}</div>
-                  <div>Address: {shelter.full_address}</div>
-                  {shelter.phone ? <div>Phone: {shelter.display_phone}</div> : ""}
-                </span>
-              </MapTooltip>
-            </Marker>
-          ))}
-        </Map>
-        <Row style={{marginLeft:"0px", marginRight:"0px", maxHeight:"37px"}}>
-          <h4 className="card-header text-center" style={{paddingTop:"4px", paddingLeft:"10px", paddingRight:"10px", height:"36px", width:"100%", backgroundColor:"#808080"}}>Shelters</h4>
-        </Row>
+        {data.shelters.length ?
+          <Map bounds={data.bounds} className="landing-leaflet-container">
+            {data.shelters.filter(shelter => shelter.id === selectedShelter || !selectedShelter ? shelter : null).map((shelter, index) => (
+              <Marker
+                key={shelter.id}
+                position={[shelter.latitude, shelter.longitude]}
+                icon={shelterMarkerIcon}
+                onClick={() => navigate("/" + incident + "/shelter/" + shelter.id)}
+              >
+                <MapTooltip key={`${index}-${selectedShelter}`} keepInView={false} autoPan={false} permanent={selectedShelter === shelter.id ? true : false}>
+                  <span>
+                    <div>{shelter.name} - {shelter.animal_count} Animal{shelter.animal_count === 1 ? "" :"s"}</div>
+                    <div>Address: {shelter.full_address}</div>
+                    {shelter.phone ? <div>Phone: {shelter.display_phone}</div> : ""}
+                  </span>
+                </MapTooltip>
+              </Marker>
+            ))}
+          </Map>
+        :
+          <Card className="text-center" style={{height:"450px", marginRight:"-1px", paddingTop:"225px", fontSize:"30px"}}>{data.isFetching ? "Fetching" : "No"} Shelters.</Card>
+        }
       </Col>
       <Col xs={2} className="ml-0 mr-0 pl-0 pr-0 border rounded">
         <Scrollbar no_shadow="true" style={{height:"450px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
@@ -88,11 +89,14 @@ function Shelter() {
         </Scrollbar>
       </Col>
     </Row>
+    <Row className="ml-0 mr-0 border rounded" style={{maxHeight:"38px"}}>
+      <h4 className="card-header text-center" style={{paddingTop:"4px", paddingLeft:"10px", paddingRight:"10px", height:"36px", width:"100%", backgroundColor:"#808080"}}>Shelters</h4>
+    </Row>
     <hr/>
     <Row className="ml-0">
       {data.shelters.map(shelter => (
         <span key={shelter.id} className="pl-0 pr-0 mr-3 mb-3">
-          <Link href={"/shelter/" + shelter.id} className="shelter-link" style={{textDecoration:"none", color:"white"}}>
+          <Link href={"/" + incident + "/shelter/" + shelter.id} className="shelter-link" style={{textDecoration:"none", color:"white"}}>
             <Card className="border rounded shelter-hover-div" style={{height:"100px", whiteSpace:"nowrap", overflow:"hidden"}}>
               <div className="row no-gutters hover-div" style={{height:"100px", textTransform:"capitalize", marginRight:"-2px"}}>
                 <Row className="ml-0 mr-0 w-100" style={{minWidth:"510px", maxWidth:"510px", flexWrap:"nowrap"}}>
@@ -117,7 +121,7 @@ function Shelter() {
         </span>
       ))}
       <span className="pl-0 pr-0 mr-3 mb-3">
-        <Link href={"/shelter/new"} className="shelter-link" style={{textDecoration:"none", color:"white"}}>
+        <Link href={"/" + incident + "/shelter/new"} className="shelter-link" style={{textDecoration:"none", color:"white"}}>
           <Card className="border rounded shelter-hover-div" style={{height:"100px", whiteSpace:"nowrap", overflow:"hidden"}}>
             <div className="row no-gutters hover-div" style={{height:"100px", textTransform:"capitalize", marginRight:"-2px"}}>
               <Row className="ml-0 mr-0 w-100" style={{minWidth:"510px", maxWidth:"510px", flexWrap:"nowrap"}}>

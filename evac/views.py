@@ -1,5 +1,4 @@
 from django.db.models import Count, Exists, OuterRef, Prefetch, Q
-from django.http import JsonResponse
 from datetime import datetime, timedelta
 from rest_framework import filters, permissions, serializers, viewsets
 from actstream import action
@@ -8,6 +7,7 @@ from animals.models import Animal
 from evac.models import AssignedRequest, DispatchTeam, EvacAssignment, EvacTeamMember
 from evac.serializers import DispatchTeamSerializer, EvacAssignmentSerializer, EvacTeamMemberSerializer
 from hotline.models import ServiceRequest, VisitNote
+from incident.models import Incident
 from people.models import OwnerContact, Person
 
 class EvacTeamMemberViewSet(viewsets.ModelViewSet):
@@ -49,7 +49,7 @@ class DispatchTeamViewSet(viewsets.ModelViewSet):
         if is_map == 'true':
             yesterday = datetime.today() - timedelta(days=1)
             y_mid = datetime.combine(yesterday,datetime.min.time())
-            queryset = queryset.filter(Q(is_assigned=True) | Q(dispatch_date__gte=y_mid))
+            queryset = queryset.filter(Q(is_assigned=True) | Q(dispatch_date__gte=y_mid)).filter(team_members__show=True)
         return queryset
 
     def perform_update(self, serializer):
@@ -77,7 +77,7 @@ class DispatchTeamViewSet(viewsets.ModelViewSet):
 class EvacAssignmentViewSet(viewsets.ModelViewSet):
 
     queryset = EvacAssignment.objects.all()
-    search_fields = ['team__name', 'team__team_members__first_name', 'team__team_members__last_name', 'service_requests__owners__first_name', 'service_requests__owners__last_name', 'service_requests__owners__phone', 'service_requests__owners__drivers_license', 'service_requests__address', 'service_requests__reporter__first_name', 'service_requests__reporter__last_name']
+    search_fields = ['id', 'team__name', 'team__team_members__first_name', 'team__team_members__last_name', 'service_requests__owners__first_name', 'service_requests__owners__last_name', 'service_requests__owners__phone', 'service_requests__owners__drivers_license', 'service_requests__address', 'service_requests__reporter__first_name', 'service_requests__reporter__last_name']
     filter_backends = (filters.SearchFilter,)
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = EvacAssignmentSerializer
@@ -106,11 +106,13 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
         if is_map == 'true':
             queryset = queryset.exclude(service_requests=None)
 
-        status = self.request.query_params.get('status', '')
+        if self.request.GET.get('incident'):
+            queryset = queryset.filter(incident__slug=self.request.GET.get('incident'))
 
+        status = self.request.query_params.get('status', '')
         if status == "open":
-            return queryset.filter(end_time__isnull=True)
-        if status == "active":
+            return queryset.filter(end_time__isnull=True).distinct()
+        elif status == "active":
             return queryset.filter(end_time__isnull=True).filter(team__team_members__isnull=False).distinct()
         elif status == "preplanned":
             return queryset.filter(end_time__isnull=True).filter(team__team_members__isnull=True).distinct()
@@ -122,6 +124,10 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
     # When creating, update all service requests to be assigned status.
     def perform_create(self, serializer):
         if serializer.is_valid():
+
+            if self.request.data.get('incident_slug'):
+                serializer.validated_data['incident'] = Incident.objects.get(slug=self.request.data.get('incident_slug'))
+
             timestamp = None
             if ServiceRequest.objects.filter(pk__in=self.request.data['service_requests'], status='assigned').exists():
                 raise serializers.ValidationError(['Duplicate assigned service request error.', list(ServiceRequest.objects.filter(pk__in=self.request.data['service_requests'], status='assigned').values_list('id', flat=True))])

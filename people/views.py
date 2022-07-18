@@ -12,7 +12,7 @@ from people.serializers import OwnerContactSerializer, PersonSerializer
 # Provides view for Person API calls.
 class PersonViewSet(viewsets.ModelViewSet):
     queryset = Person.objects.all()
-    search_fields = ['first_name', 'last_name', 'address', 'phone', 'email', 'drivers_license', 'animal__name', 'reporter_animals__name',]
+    search_fields = ['id', 'first_name', 'last_name', 'address', 'city', 'phone', 'email', 'drivers_license', 'animal__name', 'reporter_animals__name',]
     filter_backends = (filters.SearchFilter,)
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = PersonSerializer
@@ -21,16 +21,33 @@ class PersonViewSet(viewsets.ModelViewSet):
         queryset = (
             Person.objects.with_history()
             .all()
-            .annotate(is_owner=Exists(Animal.objects.filter(owners=OuterRef("id"))))
+            .annotate(is_owner=Exists(Animal.objects.filter(incident__slug=self.request.GET.get('incident', ''), owners=OuterRef("id"))))
             .prefetch_related(
                 Prefetch(
                     "animal_set",
-                    queryset=Animal.objects.exclude(status='CANCELED').with_images().prefetch_related('owners'),
+                    queryset=Animal.objects.filter(incident__slug=self.request.GET.get('incident', '')).exclude(status='CANCELED').with_images().prefetch_related('owners'),
                     to_attr="animals",
                 )
             )
-            .prefetch_related('reporter_animals')
-            .prefetch_related("ownercontact_set", 'reporter_service_request', 'request')
+            .prefetch_related(
+                Prefetch(
+                    "reporter_animals",
+                    queryset=Animal.objects.filter(incident__slug=self.request.GET.get('incident', '')).exclude(status='CANCELED').with_images().prefetch_related('owners'),
+                )
+            )
+            .prefetch_related(
+                Prefetch(
+                    "request",
+                    queryset=ServiceRequest.objects.filter(incident__slug=self.request.GET.get('incident', '')).exclude(status='canceled'),
+                )
+            )
+            .prefetch_related(
+                Prefetch(
+                    "reporter_service_request",
+                    queryset=ServiceRequest.objects.filter(incident__slug=self.request.GET.get('incident', '')).exclude(status='canceled'),
+                )
+            )
+            .prefetch_related("ownercontact_set")
         )
         # Status filter.
         status = self.request.query_params.get("status", "")
@@ -63,6 +80,8 @@ class PersonViewSet(viewsets.ModelViewSet):
             if self.request.data.get('animal'):
                 animal = Animal.objects.get(pk=self.request.data.get('animal'))
                 animal.owners.add(person)
+                if animal.request:
+                    animal.request.owners.add(person)
 
             # If an owner is being added from another Person, add the new owner to the animals of the original Person.
             if self.request.data.get('owner'):

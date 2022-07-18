@@ -8,7 +8,6 @@ import {
 import { faPencil } from '@fortawesome/pro-solid-svg-icons';
 import { PhotoDocumentModal, PhotoDocumentEditModal, PhotoDocumentRemovalModal } from './Modals';
 
-
 function PhotoDocuments(props) {
 
   const [images, setImages] = useState([]);

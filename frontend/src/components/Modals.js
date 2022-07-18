@@ -4,6 +4,7 @@ import { Formik } from "formik";
 import axios from 'axios';
 import * as Yup from 'yup';
 import { ImageUploader, TextInput } from '../components/Form.js';
+import ButtonSpinner from './ButtonSpinner';
 
 const DispatchDuplicateSRModal = (props) => {
 
@@ -143,7 +144,8 @@ const PhotoDocumentModal = (props) => {
             </div>
           </Modal.Body>
           <Modal.Footer>
-            <Button variant="primary" onClick={() => { formikProps.submitForm() }} disabled={!isSubmitting && props.images && props.images.length ? false : true}>Save</Button>
+            {/* <Button variant="primary" onClick={() => { formikProps.submitForm() }} disabled={!isSubmitting && props.images && props.images.length ? false : true}>Save</Button> */}
+            <ButtonSpinner isSubmitting={formikProps.isSubmitting} isSubmittingText="Saving..."  variant="primary" onClick={() => { formikProps.submitForm() }} disabled={!isSubmitting && props.images && props.images.length ? false : true}>Save</ButtonSpinner>
             <Button variant="secondary" onClick={props.handleClose}>Close</Button>
           </Modal.Footer>
         </Modal>

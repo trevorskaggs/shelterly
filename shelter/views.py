@@ -13,7 +13,6 @@ class ShelterViewSet(viewsets.ModelViewSet):
     serializer_class = ShelterSerializer
     permission_classes = [permissions.IsAuthenticated, ]
 
-
     def get_serializer_class(self):
         if self.action == 'list':
             return ModestShelterSerializer
@@ -36,12 +35,12 @@ class ShelterViewSet(viewsets.ModelViewSet):
             action.send(self.request.user, verb='updated shelter', target=shelter)
 
     def get_queryset(self):
-        return (
-            Shelter.objects.annotate(room_count=Count("building__room"))
+        queryset = (Shelter.objects.annotate(room_count=Count("building__room"))
             .annotate(
                 animal_count=Count(
-                    "building__room__animal",
-                    filter=~Q(building__room__animal__status="CANCELED"),
+                    "animal",
+                    filter=~Q(building__room__animal__status="CANCELED")&Q(animal__incident__slug=self.request.GET.get('incident')),
+                    distinct=True
                 )
             )
             .prefetch_related(
@@ -50,7 +49,7 @@ class ShelterViewSet(viewsets.ModelViewSet):
                     Building.objects.with_history()
                     .annotate(
                         animal_count=Count(
-                            "room__animal", filter=~Q(room__animal__status="CANCELED")
+                            "room__animal", filter=~Q(room__animal__status="CANCELED")&Q(room__animal__incident__slug=self.request.GET.get('incident'))
                         )
                     )
                     .prefetch_related(
@@ -58,15 +57,17 @@ class ShelterViewSet(viewsets.ModelViewSet):
                             "room_set",
                             Room.objects.with_history().annotate(
                                 animal_count=Count(
-                                    "animal", filter=~Q(animal__status="CANCELED")
+                                    "animal", filter=~Q(animal__status="CANCELED")&Q(animal__incident__slug=self.request.GET.get('incident'))
                                 )
-                            ).prefetch_related(Prefetch('animal_set',Animal.objects.with_images().prefetch_related('owners').exclude(status='CANCELED'), to_attr='animals'))
+                            ).prefetch_related(Prefetch('animal_set',Animal.objects.with_images().prefetch_related('owners').exclude(status='CANCELED').filter(incident__slug=self.request.GET.get('incident')), to_attr='animals'))
                         )
                     ),
                 )
             )
-            .with_history().prefetch_related(Prefetch('animal_set', Animal.objects.filter(room=None).exclude(status='CANCELED'), to_attr="unroomed_animals"))
-        )
+            .with_history().prefetch_related(Prefetch('animal_set', Animal.objects.filter(room=None, incident__slug=self.request.GET.get('incident')).exclude(status='CANCELED'), to_attr="unroomed_animals")))
+        if self.request.GET.get('incident') and self.request.GET.get('incident', '') != 'test':
+            queryset = queryset.filter(test=False)
+        return queryset
 
 
 class BuildingViewSet(viewsets.ModelViewSet):
@@ -91,7 +92,7 @@ class BuildingViewSet(viewsets.ModelViewSet):
                 "room_set",
                 Room.objects
                 .annotate(
-                    animal_count=Count("animal", filter=~Q(animal__status="CANCELED"))
+                    animal_count=Count("animal", filter=~Q(animal__status="CANCELED")&Q(animal__incident__slug=self.request.GET.get('incident')))
                 )
             )
         )
@@ -123,6 +124,7 @@ class RoomViewSet(viewsets.ModelViewSet):
                     .with_history()
                     .with_images()
                     .exclude(status="CANCELED")
+                    .filter(incident__slug=self.request.GET.get('incident'))
                     .prefetch_related("owners"),
                     to_attr="animals",
                 )

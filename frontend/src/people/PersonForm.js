@@ -1,11 +1,10 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import { Link, navigate, useQueryParams } from 'raviger';
 import { Formik } from 'formik';
 import { Form as BootstrapForm, Button, ButtonGroup, Card, Modal } from "react-bootstrap";
 import * as Yup from 'yup';
 import { AddressSearch, TextInput } from '../components/Form';
-import { AuthContext } from "../accounts/AccountsReducer";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft } from '@fortawesome/free-solid-svg-icons';
 import ButtonSpinner from '../components/ButtonSpinner';
@@ -13,8 +12,8 @@ import ButtonSpinner from '../components/ButtonSpinner';
 // Form for owner and reporter Person objects.
 const PersonForm = (props) => {
 
-  const { state } = useContext(AuthContext);
   const id = props.id;
+  const incident = "/" + props.incident
 
   // Determine if we're in the hotline workflow.
   var is_workflow = window.location.pathname.includes("workflow");
@@ -48,36 +47,44 @@ const PersonForm = (props) => {
   // Modal for exiting workflow.
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
-  const goBack = () => navigate('/hotline');
+  const goBack = () => navigate(incident + '/hotline');
 
   // Track duplicate owner error.
   const [error, setError] = useState({show:false, error:[]});
-  const handleErrorClose = () => setError({show:false, error:[]});
+  const [dupeOwner, setDupeOwner] = useState(false);
+  const handleErrorClose = () => {setError({show:false, error:[]}); setDupeOwner(null);}
 
-  const handleDuplicateOwner = (dupe_id, values) => {
-    axios.patch('/people/api/person/' + dupe_id + '/', values)
-    .then(response => {
-      // If SR already exists, redirect to the SR details.
-      if (servicerequest_id) {
-        navigate('/hotline/servicerequest/' + servicerequest_id);
-      }
-      // If adding from an animal, redirect to the Animal details.
-      else if (animal_id) {
-        navigate('/animals/' + animal_id);
-      }
-      // Otherise redirect to the duplicate Owner details.
-      else {
-        navigate('/people/owner/' + response.data.id);
-      }
-    })
-    .catch(error => {
-    });
+  const handleDuplicateOwner = (dupe_id, formikProps) => {
+    if (is_workflow) {
+      setDupeOwner(true);
+      formikProps.submitForm();
+    }
+    else {
+      axios.patch('/people/api/person/' + dupe_id + '/', formikProps.values)
+      .then(response => {
+        // If SR already exists, redirect to the SR details.
+        if (servicerequest_id) {
+          navigate(incident + '/hotline/servicerequest/' + servicerequest_id);
+        }
+        // If adding from an animal, redirect to the Animal details.
+        else if (animal_id) {
+          navigate(incident + '/animals/' + animal_id);
+        }
+        // Otherise redirect to the duplicate Owner details.
+        else {
+          navigate(incident + '/people/owner/' + response.data.id);
+        }
+      })
+      .catch(error => {
+      });
+    }
   }
 
   // Control Agency display.
   const [showAgency, setShowAgency] = useState(props.state.stepIndex === 0 && is_first_responder);
 
   const initialData = {
+    has_id: false,
     first_name: '',
     last_name: '',
     phone: '',
@@ -130,6 +137,7 @@ const PersonForm = (props) => {
             response.data['alt_phone'] = response.data['display_alt_phone']
             // Initialize change_reason on fetch to avoid warning.
             response.data['change_reason'] = '';
+            response.data['has_id'] = id && isOwner ? true : false;
             setData(response.data);
           }
         })
@@ -143,7 +151,7 @@ const PersonForm = (props) => {
       unmounted = true;
       source.cancel();
     };
-  }, [id]);
+  }, [id, isOwner]);
 
   return (
     <>
@@ -151,6 +159,7 @@ const PersonForm = (props) => {
         initialValues={data}
         enableReinitialize={true}
         validationSchema={Yup.object({
+          has_id: Yup.boolean(),
           first_name: Yup.string()
             .max(50, 'Must be 50 characters or less')
             .matches(nameRegex, "Name is not valid")
@@ -185,14 +194,20 @@ const PersonForm = (props) => {
           longitude: Yup.number()
             .nullable(),
           change_reason: Yup.string()
-            .max(50, 'Must be 50 characters or less'),
+            .when('has_id', {
+              is: true,
+              then: Yup.string().required('Required').max(50, 'Must be 50 characters or less')}),
         })}
         onSubmit={(values, { setSubmitting, resetForm }) => {
           if (is_workflow) {
             // Check to see if owner data already exists.
             axios.get('/people/api/person/?search=' + values.first_name +  ' ' + values.last_name + ' ' + values.phone.replace(/\D/g, ""))
             .then(response => {
-              if (response.data.length > 0) {
+              // If we have a dupe owner then use it.
+              if (dupeOwner) {
+                values['id'] = response.data[0].id;
+              }
+              if (response.data.length > 0 && !dupeOwner) {
                 // Throw error if duplicate owner found.
                 if (isOwner) {
                   setError({show:true, error:['a duplicate owner with the same name and phone number already exists.', response.data[0].id]});
@@ -205,10 +220,12 @@ const PersonForm = (props) => {
               }
               // Only continue on from owner if there are no errors.
               else if (isOwner) {
+                setDupeOwner(false);
                 props.onSubmit('owner', values, 'animals');
               }
               // Always continue on if reporter.
               if (!isOwner) {
+                setDupeOwner(false);
                 if (skipOwner) {
                   props.onSubmit('reporter', values, 'animals');
                 }
@@ -227,14 +244,11 @@ const PersonForm = (props) => {
           else if (id) {
             axios.put('/people/api/person/' + id + '/', values)
             .then(function() {
-              if (state.prevLocation) {
-                navigate(state.prevLocation);
-              }
-              else if (isOwner) {
-                navigate('/people/owner/' + id);
+              if (isOwner) {
+                navigate(incident + '/people/owner/' + id);
               }
               else {
-                navigate('/people/reporter/' + id);
+                navigate(incident + '/people/reporter/' + id);
               }
             })
             .catch(error => {
@@ -246,15 +260,15 @@ const PersonForm = (props) => {
             .then(response => {
               // If SR already exists, redirect to the SR details.
               if (servicerequest_id) {
-                navigate('/hotline/servicerequest/' + servicerequest_id);
+                navigate(incident + '/hotline/servicerequest/' + servicerequest_id);
               }
               // If adding from an animal, redirect to the Animal details.
               else if (animal_id) {
-                navigate('/animals/' + animal_id);
+                navigate(incident + '/animals/' + animal_id);
               }
               // If adding from an owner, redirect to the new Owner details.
               else {
-                navigate('/people/owner/' + response.data.id);
+                navigate(incident + '/people/owner/' + response.data.id);
               }
             })
             .catch(error => {
@@ -336,7 +350,7 @@ const PersonForm = (props) => {
                 name="agency"
               />
             </BootstrapForm.Row>
-            <AddressSearch formikProps={formikProps} label="Search for Contact Address" show_apt={true} hidden={!isOwner} error="Contact Address was not selected." />
+            <AddressSearch formikProps={formikProps} label="Search for Contact Address" incident={props.incident} show_apt={true} hidden={!isOwner} error="Contact Address was not selected." />
             <BootstrapForm.Row hidden={!id || !isOwner}>
               <TextInput
                 xs="12"
@@ -370,12 +384,12 @@ const PersonForm = (props) => {
               <Modal.Body>
                 <div>
                   <span>This person cannot be created because</span> {error && error.error[0]}
-                  <div className="mt-1 mb-1">Click <Link href={'/people/owner/' + error.error[1]} style={{color:"#8d99d4"}}>here</Link> to view this owner.</div>
-                  {!is_workflow ? <div>Would you like to use the existing owner instead?</div> : ""}
+                  <div className="mt-1 mb-1">Click <Link target="_blank" href={"/" + incident + "/people/owner/" + error.error[1]} style={{color:"#8d99d4"}}>here</Link> to view this owner.</div>
+                  <div>Would you like to use the existing owner instead?</div>
                 </div>
               </Modal.Body>
               <Modal.Footer>
-                {!is_workflow ? <Button variant="primary" onClick={() => {handleDuplicateOwner(error.error[1], formikProps.values)}}>Yes</Button> : ""}
+                <Button variant="primary" onClick={() => {handleDuplicateOwner(error.error[1], formikProps)}}>Yes</Button>
                 <Button variant="secondary" onClick={handleErrorClose}>Close</Button>
               </Modal.Footer>
             </Modal>

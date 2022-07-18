@@ -31,7 +31,7 @@ const ButtonSpinner = ({
     isLoading: isSubmitting
   }
 
-  return <Button {...buttonProps} disabled={childrenRef.current.isLoading}>
+  return <Button {...buttonProps} disabled={childrenRef.current.isLoading || buttonProps.disabled}>
     {childrenRef.current.children}
   </Button>
 };

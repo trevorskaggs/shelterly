@@ -19,7 +19,7 @@ import {
 } from "react-register-nodes";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faClipboardList, faPrint
+  faClipboardList
 } from '@fortawesome/free-solid-svg-icons';
 import smoothScrollIntoView from "smooth-scroll-into-view-if-needed";
 import Moment from 'react-moment';
@@ -27,7 +27,6 @@ import Header from '../components/Header';
 import { Checkbox, DateTimePicker, DropDown, TextInput } from '../components/Form';
 import { dispatchStatusChoices } from '../animals/constants';
 import ButtonSpinner from '../components/ButtonSpinner';
-import { printDispatchResolutionForm } from './Utils';
 import { priorityChoices } from '../constants';
 
 function AnimalStatus(props) {
@@ -119,7 +118,7 @@ function AnimalStatus(props) {
   )
   }
 
-function DispatchResolutionForm({ id }) {
+function DispatchResolutionForm({ id, incident }) {
 
   // Initial animal data.
   const [data, setData] = useState({
@@ -133,6 +132,7 @@ function DispatchResolutionForm({ id }) {
     start_time: null,
     end_time: null,
     sr_updates: [],
+    incident_slug: incident,
   });
 
   const [shelters, setShelters] = useState({options: [], room_options: {}, isFetching: false});
@@ -140,12 +140,6 @@ function DispatchResolutionForm({ id }) {
 
   const ordered = useOrderedNodes();
   const [shouldCheckForScroll, setShouldCheckForScroll] = React.useState(false);
-
-  const handleDownloadPdfClick = (e) => {
-    e.preventDefault();
-
-    printDispatchResolutionForm(data);
-  }
 
   // Hook for initializing data.
   useEffect(() => {
@@ -193,7 +187,7 @@ function DispatchResolutionForm({ id }) {
     const fetchShelters = () => {
       setShelters({options: [], room_options: [], isFetching: true});
       // Fetch Shelter data.
-      axios.get('/shelter/api/shelter/', {
+      axios.get('/shelter/api/shelter/?incident=' + incident, {
         cancelToken: source.token,
       })
       .then(response => {
@@ -302,7 +296,12 @@ function DispatchResolutionForm({ id }) {
         setTimeout(() => {
           axios.put('/evac/api/evacassignment/' + id + '/', values)
             .then(response => {
-              navigate('/dispatch/summary/' + response.data.id);
+              if (response.data.service_requests.length === 0) {
+                navigate('/' + incident + '/dispatch/dispatchassignment/search');
+              }
+              else {
+                navigate('/' + incident + '/dispatch/summary/' + response.data.id);
+              }
             })
             .catch(error => {
               setSubmitting(false);
@@ -314,24 +313,9 @@ function DispatchResolutionForm({ id }) {
         <>
           <BootstrapForm as={Form}>
             <Header>Dispatch Assignment Resolution
-            <OverlayTrigger
-              key={"offline-dispatch-assignment"}
-              placement="bottom"
-              overlay={
-                <Tooltip id={`tooltip-offline-dispatch-assignment`}>
-                  Download printable field resolution form
-                </Tooltip>
-              }
-            >
-              {({ ref, ...triggerHandler }) => (
-                <Link onClick={handleDownloadPdfClick} {...triggerHandler} href="#">
-                  <span ref={ref}><FontAwesomeIcon icon={faPrint} className="ml-3"  inverse /></span>
-                </Link>
-              )}
-            </OverlayTrigger>
-              <div style={{ fontSize: "16px", marginTop: "5px" }}><b>Opened: </b><Moment format="MMMM Do YYYY, HH:mm">{data.start_time}</Moment>{data.end_time ? <span style={{ fontSize: "16px", marginTop: "5px" }}> | <b>Closed: </b><Moment format="MMMM Do YYYY, HH:mm">{data.end_time}</Moment></span> : ""}</div>
+              <div style={{ fontSize: "18px", marginTop: "10px" }}><b>Opened: </b><Moment format="MMMM Do YYYY, HH:mm">{data.start_time}</Moment>{data.end_time ? <span style={{ fontSize: "16px", marginTop: "5px" }}> | <b>Resolved: </b><Moment format="MMMM Do YYYY, HH:mm">{data.end_time}</Moment></span> : ""}</div>
             </Header>
-            <hr className="mt-2" />
+            <hr/>
             <Card border="secondary" className="mt-3">
               <Card.Body>
                 <Card.Title>
@@ -353,7 +337,7 @@ function DispatchResolutionForm({ id }) {
                   <Card.Title style={{marginBottom:"-5px"}}>
                     <h4>
                       SR#{assigned_request.service_request_object.id} -&nbsp;
-                      <Link href={"/hotline/servicerequest/" + assigned_request.service_request_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link> |&nbsp;
+                      <Link href={"/" + incident + "/hotline/servicerequest/" + assigned_request.service_request_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link> |&nbsp;
                       <Checkbox
                         label={"Not Completed Yet:"}
                         name={`sr_updates.${index}.incomplete`}
@@ -472,7 +456,7 @@ function DispatchResolutionForm({ id }) {
                   </BootstrapForm.Row>
                   <BootstrapForm.Row className="mt-3">
                     <DateTimePicker
-                      label="Followup Date"
+                      label="Service Request Followup Date"
                       name={`sr_updates.${index}.followup_date`}
                       id={`sr_updates.${index}.followup_date`}
                       more_options={{minDate:new Date()}}

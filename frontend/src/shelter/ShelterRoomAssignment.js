@@ -11,7 +11,7 @@ import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
 import AnimalRoomAssignmentCard from '../components/AnimalRoomAssignmentCard';
 
-function ShelterRoomAssignment({id}) {
+function ShelterRoomAssignment({ id, incident }) {
 
   // Identify any query param data.
   const [queryParams] = useQueryParams();
@@ -119,7 +119,7 @@ function ShelterRoomAssignment({id}) {
     let source = axios.CancelToken.source();
     const fetchShelterData = async () => {
       // Fetch Shelter Details data.
-      await axios.get('/shelter/api/shelter/' + id + '/', {
+      await axios.get('/shelter/api/shelter/' + id + '/?incident=' + incident, {
         cancelToken: source.token,
       })
       .then(response => {
@@ -137,7 +137,7 @@ function ShelterRoomAssignment({id}) {
       });
     };
     fetchShelterData();
-  }, [id, selectedBuilding]);
+  }, [id, selectedBuilding, incident]);
 
   return (
     <>
@@ -187,7 +187,7 @@ function ShelterRoomAssignment({id}) {
         <Scrollbar style={{height:"509px"}} no_shadow="true" renderView={props => <div {...props} style={{...props.style, overflowX:"hidden", overflowY:"scroll", marginBottom:"0px"}}/>} renderThumbHorizontal={props => <div {...props} style={{...props.style, display:"none"}} />}>
         <Row className="d-flex ml-0" style={{marginTop:"-20px"}}>
           {data.rooms.map((room, index) => (
-            <span key={room.id} hidden={room.building !== selectedBuilding} style={{marginBottom:"0px"}}>
+            <span key={room.id} hidden={room.building !== selectedBuilding} style={{marginBottom:"-5px"}}>
               <span className="col">
                 <Droppable droppableId={String(index)}>
                   {(provided, snapshot) => (
@@ -210,7 +210,7 @@ function ShelterRoomAssignment({id}) {
                   )}
                 </Droppable>
               </span>
-              <Link href={"/shelter/room/" + room.id} className="text-link" style={{textDecoration:"none", color:"white", marginLeft:"-15px"}}>{room.name}</Link>
+              <Link href={"/" + incident + "/shelter/room/" + room.id} className="text-link" style={{textDecoration:"none", color:"white", marginLeft:"-15px"}}>{room.name}</Link>
             </span>
           ))}
           {data.rooms.filter(room => room.building === selectedBuilding).length < 1 ? <span style={{marginTop:"24px"}}>This building does not have any rooms yet.</span> : ""}

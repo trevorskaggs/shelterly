@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Collapse, ListGroup, Nav } from 'react-bootstrap';
 import { faHome, faBullhorn, faChevronDown, faChevronUp, faPhone, faSearch, faSignOutAlt, faUserCog } from '@fortawesome/free-solid-svg-icons';
 import { logoutUser } from ".././accounts/AccountsUtils";
+import { titleCase } from '.././components/Utils';
 
 export const StyledMenu = styled(Nav)`
   background: ${({ theme }) => theme.primaryDark};
@@ -61,6 +62,7 @@ const Menu = ({ state, dispatch, removeCookie, ...props }) => {
 
     const viewHeight = window.outerHeight;
     const path = window.location.pathname;
+    const incident = '/' + path.split('/')[1];
 
     const [showSearch, setShowSearch] = useState(path.includes("search") ? true : false);
 
@@ -70,22 +72,23 @@ const Menu = ({ state, dispatch, removeCookie, ...props }) => {
     }, [path]);
 
     return (
-    <StyledMenu  {...props} className="flex-column" style={{ height: viewHeight, minHeight:"880px" }}>
-    <Link href="/"><img src="/static/images/shelterly.png" alt="Logo" /></Link>
-    <div className="logo border-bottom text-center">SHELTERLY</div>
-      <Link href="/hotline" className="rounded sidebar" style={{backgroundColor:path.includes("hotline") && !path.includes("search") ? "#444444" : "#292b2c", marginLeft:"-23px", marginRight:"-23px"}}><FontAwesomeIcon icon={faPhone} fixedWidth inverse className="sidebar-icon" style={{marginLeft:"23px"}} /> HOTLINE</Link>
-      <Link href="/dispatch" className="rounded sidebar" style={{backgroundColor:path.includes("dispatch") && !path.includes("search") ? "#444444" : "#292b2c", marginLeft:"-23px", marginRight:"-23px"}}><FontAwesomeIcon icon={faBullhorn} fixedWidth inverse className="sidebar-icon" style={{marginLeft:"23px"}} />  DISPATCH</Link>
-      <Link href="/shelter" className="rounded sidebar" style={{backgroundColor:path.includes("shelter") ? "#444444" : "#292b2c", marginLeft:"-23px", marginRight:"-23px"}}><FontAwesomeIcon icon={faHome} fixedWidth inverse className="sidebar-icon" style={{marginLeft:"23px"}} /> SHELTER</Link>
-      <Link href="" className="rounded sidebar" onClick={() => setShowSearch(!showSearch)}><FontAwesomeIcon icon={faSearch} className="sidebar-icon" fixedWidth inverse/> SEARCH<FontAwesomeIcon icon={showSearch ? faChevronUp : faChevronDown} size="sm" className="fa-move-up sidebar-icon" fixedWidth inverse /></Link>
+    <StyledMenu  {...props} className="flex-column" style={{ height: viewHeight, minHeight:"925px" }}>
+      <Link href={incident} style={{marginTop:"-5px", paddingBottom:"0px"}} title="Home"><img src="/static/images/shelterly.png" alt="Logo" /></Link>
+      <div className="logo text-center" style={{marginTop:"10px", marginBottom:"0px", paddingBottom:"0px"}}>SHELTERLY</div>
+      <div className="logo border-bottom text-center" style={{paddingBottom:"12px", letterSpacing:"0.25rem", fontSize:"1.2rem"}} title="Incident"><span style={{cursor:"pointer"}} className="incident" onClick={() => navigate('/')}>{titleCase(path.split('/')[1].replaceAll('-', ' '))}</span></div>
+      <Link href={incident + "/hotline"} className="rounded sidebar" style={{backgroundColor:path.includes("hotline") && !path.includes("search") ? "#444444" : "#292b2c", marginLeft:"-23px", marginRight:"-23px", marginBottom:"-10px"}}><FontAwesomeIcon icon={faPhone} fixedWidth inverse className="sidebar-icon" style={{marginLeft:"23px"}} /> HOTLINE</Link>
+      <Link href={incident + "/dispatch"} className="rounded sidebar" style={{backgroundColor:path.includes("dispatch") && !path.includes("search") ? "#444444" : "#292b2c", marginLeft:"-23px", marginRight:"-23px", marginBottom:"-10px"}}><FontAwesomeIcon icon={faBullhorn} fixedWidth inverse className="sidebar-icon" style={{marginLeft:"23px"}} />  DISPATCH</Link>
+      <Link href={incident + "/shelter"} className="rounded sidebar" style={{backgroundColor:path.includes("shelter") ? "#444444" : "#292b2c", marginLeft:"-23px", marginRight:"-23px", marginBottom:"-10px"}}><FontAwesomeIcon icon={faHome} fixedWidth inverse className="sidebar-icon" style={{marginLeft:"23px"}} /> SHELTER</Link>
+      <Link href="" className="rounded sidebar" onClick={() => setShowSearch(!showSearch)} style={{marginBottom:"-10px"}}><FontAwesomeIcon icon={faSearch} className="sidebar-icon" fixedWidth inverse/> SEARCH<FontAwesomeIcon icon={showSearch ? faChevronUp : faChevronDown} size="sm" className="fa-move-up sidebar-icon" fixedWidth inverse /></Link>
       <Collapse in={showSearch}>
-        <ListGroup variant="flush" style={{marignLeft:"20px", marginTop:"-15px"}}>
-          <ListGroup.Item action href="" className="rounded sidebar" onClick={() => navigate('/animals/search')} style={{backgroundColor:path.includes("animals/search") ? "#444444" : "#292b2c"}}><FontAwesomeIcon className="mr-1 sidebar-icon" icon={faSearch} fixedWidth inverse/><span className="sidebar-icon">ANIMALS</span></ListGroup.Item>
-          <ListGroup.Item action className="rounded sidebar" onClick={() => navigate('/people/owner/search')} style={{backgroundColor:path.includes("people/owner/search") ? "#444444" : "#292b2c"}}><FontAwesomeIcon className="mr-1 sidebar-icon" icon={faSearch} fixedWidth inverse/><span className="sidebar-icon">OWNERS</span></ListGroup.Item>
-          <ListGroup.Item action className="rounded sidebar" onClick={() => navigate('/hotline/servicerequest/search')} style={{backgroundColor:path.includes("hotline/servicerequest/search") ? "#444444" : "#292b2c"}}><FontAwesomeIcon className="mr-1 sidebar-icon" icon={faSearch} fixedWidth inverse/><span className="sidebar-icon">SERVICE REQUESTS</span></ListGroup.Item>
-          <ListGroup.Item action className="rounded sidebar" onClick={() => navigate('/dispatch/dispatchassignment/search')} style={{backgroundColor:path.includes("dispatch/dispatchassignment/search") ? "#444444" : "#292b2c"}}><FontAwesomeIcon className="mr-1 sidebar-icon" icon={faSearch} fixedWidth inverse/><span className="sidebar-icon">DISPATCH ASSIGNMENTS</span></ListGroup.Item>
+        <ListGroup variant="flush" style={{marginTop:"-5px", marginBottom:"-10px"}}>
+          <ListGroup.Item action className="rounded sidebar" onClick={() => navigate(incident + '/animals/search')} style={{backgroundColor:path.includes("animals/search") ? "#444444" : "#292b2c"}}><FontAwesomeIcon className="mr-1 sidebar-icon" icon={faSearch} fixedWidth inverse/><span className="sidebar-icon">ANIMALS</span></ListGroup.Item>
+          <ListGroup.Item action className="rounded sidebar" onClick={() => navigate(incident + '/people/owner/search')} style={{backgroundColor:path.includes("people/owner/search") ? "#444444" : "#292b2c"}}><FontAwesomeIcon className="mr-1 sidebar-icon" icon={faSearch} fixedWidth inverse/><span className="sidebar-icon">OWNERS</span></ListGroup.Item>
+          <ListGroup.Item action className="rounded sidebar" onClick={() => navigate(incident + '/hotline/servicerequest/search')} style={{backgroundColor:path.includes("hotline/servicerequest/search") ? "#444444" : "#292b2c"}}><FontAwesomeIcon className="mr-1 sidebar-icon" icon={faSearch} fixedWidth inverse/><span className="sidebar-icon">SERVICE REQUESTS</span></ListGroup.Item>
+          <ListGroup.Item action className="rounded sidebar" onClick={() => navigate(incident + '/dispatch/dispatchassignment/search')} style={{backgroundColor:path.includes("dispatch/dispatchassignment/search") ? "#444444" : "#292b2c"}}><FontAwesomeIcon className="mr-1 sidebar-icon" icon={faSearch} fixedWidth inverse/><span className="sidebar-icon">DISPATCH ASSIGNMENTS</span></ListGroup.Item>
         </ListGroup>
       </Collapse>
-      {state.user && state.user.is_superuser ? <Link href="/accounts/user_management" className="rounded sidebar"><FontAwesomeIcon icon={faUserCog} className="sidebar-icon" fixedWidth inverse/>  ADMIN</Link> : ""}
+      {state.user && state.user.is_superuser ? <Link href={incident + "/accounts/user_management"} className="rounded sidebar" style={{marginBottom:"-10px"}}><FontAwesomeIcon icon={faUserCog} className="sidebar-icon" fixedWidth inverse/>  ADMIN</Link> : ""}
       {state.user ? <Link onClick={() => logoutUser({dispatch}, {removeCookie})} href="#" className="rounded sidebar"><FontAwesomeIcon icon={faSignOutAlt} className="sidebar-icon" fixedWidth inverse/> SIGN OUT</Link> : ""}
     </StyledMenu>
     )

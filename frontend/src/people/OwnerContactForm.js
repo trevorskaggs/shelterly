@@ -9,7 +9,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft } from '@fortawesome/free-solid-svg-icons';
 import ButtonSpinner from '../components/ButtonSpinner';
 
-const OwnerContactForm = ({id}) => {
+const OwnerContactForm = ({ id, incident }) => {
 
   const [queryParams] = useQueryParams();
   let url;
@@ -76,12 +76,12 @@ const OwnerContactForm = ({id}) => {
       initialValues={data}
       enableReinitialize={true}
       validationSchema={Yup.object({
-        owner_contact_time: Yup.date().required(),
-        owner_contact_note: Yup.string().required(),
+        owner_contact_time: Yup.date().required('Required'),
+        owner_contact_note: Yup.string().required('Required'),
       })}
       onSubmit={(values, { setSubmitting }) => {
         if (id) {
-          url = url + values.id
+          url = '/people/api/ownercontact/' + values.id + '/'
           axios_method = axios.patch
         }
         else {
@@ -90,7 +90,7 @@ const OwnerContactForm = ({id}) => {
         }
         axios_method(url, values)
         .then(response => {
-          navigate('/people/owner/' + response.data.owner)
+          navigate('/' + incident + '/people/owner/' + response.data.owner)
         })
         .catch(error => {
           setSubmitting(false);

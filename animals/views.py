@@ -1,22 +1,19 @@
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Case, Prefetch, Value, When, Exists
 from django.shortcuts import render
 from copy import deepcopy
 from datetime import datetime
 from rest_framework import filters, permissions, viewsets
 from actstream import action
-from actstream.models import Action
 
-from people.models import Person
+from hotline.models import ServiceRequest
 from animals.models import Animal, AnimalImage
 from animals.serializers import AnimalSerializer
+from incident.models import Incident
 from people.serializers import SimplePersonSerializer
 
 class AnimalViewSet(viewsets.ModelViewSet):
-
     queryset = Animal.objects.with_images().exclude(status="CANCELED").order_by('order')
-
     search_fields = ['id', 'name', 'species', 'status', 'pcolor', 'scolor', 'request__address', 'request__city', 'owners__first_name', 'owners__last_name', 'owners__phone', 'owners__drivers_license', 'owners__address', 'owners__city', 'reporter__first_name', 'reporter__last_name']
     filter_backends = (filters.SearchFilter,)
     permission_classes = [permissions.IsAuthenticated, ]
@@ -29,6 +26,9 @@ class AnimalViewSet(viewsets.ModelViewSet):
             if serializer.validated_data.get('shelter'):
                 serializer.validated_data['status'] = 'SHELTERED'
                 serializer.validated_data['intake_date'] = datetime.now()
+
+            if self.request.data.get('incident_slug'):
+                serializer.validated_data['incident'] = Incident.objects.get(slug=self.request.data.get('incident_slug'))
 
             animal = serializer.save()
             animals = [animal]
@@ -46,7 +46,7 @@ class AnimalViewSet(viewsets.ModelViewSet):
                 if self.request.data.get('new_owner'):
                     animal.owners.add(self.request.data['new_owner'])
 
-                # Add ServiceRequest Owner and Reporter to new animals being added to an SR.
+                # Add ServiceRequest Owner to new animals being added to an SR.
                 if serializer.validated_data.get('request'):
                     animal.owners.add(*animal.request.owners.all())
 
@@ -167,7 +167,10 @@ class AnimalViewSet(viewsets.ModelViewSet):
             Animal.objects.with_images().with_history().exclude(status="CANCELED").distinct()
             .prefetch_related("owners")
             .select_related("reporter", "room", "request", "shelter")
+            .order_by('order')
         )
+        if self.request.GET.get('incident'):
+            queryset = queryset.filter(incident__slug=self.request.GET.get('incident'))
         return queryset
 
 def print_kennel_card(request, animal_id):

@@ -1,10 +1,9 @@
-import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { navigate, useQueryParams } from 'raviger';
 import { Form, Formik } from "formik";
 import { ButtonGroup, Card, Col, Image, Form as BootstrapForm } from "react-bootstrap";
 import * as Yup from 'yup';
-import { AuthContext } from "../accounts/AccountsReducer";
 import { AddressSearch, DateTimePicker, DropDown, ImageUploader, TextInput } from '../components/Form.js';
 import { catAgeChoices, dogAgeChoices, horseAgeChoices, otherAgeChoices, catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, speciesChoices, sexChoices, dogSizeChoices, catSizeChoices, horseSizeChoices, otherSizeChoices, statusChoices, reportedStatusChoices, unknownChoices } from './constants';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -13,8 +12,8 @@ import ButtonSpinner from "../components/ButtonSpinner";
 
 const AnimalForm = (props) => {
 
-  const { state } = useContext(AuthContext);
   const id = props.id;
+  const incident = '/' + props.incident;
 
   // Determine if this is an intake workflow.
   let is_intake = window.location.pathname.includes("intake")
@@ -90,6 +89,7 @@ const AnimalForm = (props) => {
     zip_code: '',
     latitude: null,
     longitude: null,
+    incident_slug: props.incident,
   }
   let current_data = {...initialData};
   let imageList = [];
@@ -196,7 +196,7 @@ const AnimalForm = (props) => {
     const fetchShelters = () => {
       setShelters({options: [], shelters: [], room_options: {}, isFetching: true});
       // Fetch Shelter data.
-      axios.get('/shelter/api/shelter/', {
+      axios.get('/shelter/api/shelter/?incident=' + props.incident, {
         cancelToken: source.token,
       })
       .then(response => {
@@ -348,8 +348,8 @@ const AnimalForm = (props) => {
                 ]);
               }
               // Create Owner
-              let ownerResponse = [{data:{id:''}}];
-              if (props.state.steps.owner.first_name) {
+              let ownerResponse = [{data:{id:props.state.steps.owner.id}}];
+              if (props.state.steps.owner.first_name && !props.state.steps.owner.id) {
                 ownerResponse = await Promise.all([
                   axios.post('/people/api/person/', props.state.steps.owner)
                 ]);
@@ -370,10 +370,10 @@ const AnimalForm = (props) => {
               await axios.post('/animals/api/animal/', formData)
               .then(function() {
                 if (ownerResponse[0].data.id) {
-                  navigate('/people/owner/' + ownerResponse[0].data.id)
+                  navigate(incident + '/people/owner/' + ownerResponse[0].data.id)
                 }
                 else {
-                  navigate('/people/reporter/' + reporterResponse[0].data.id)
+                  navigate(incident + '/people/reporter/' + reporterResponse[0].data.id)
                 }
               })
               .catch(error => {
@@ -388,12 +388,7 @@ const AnimalForm = (props) => {
             if (id) {
               axios.put('/animals/api/animal/' + id + '/', formData)
               .then(function() {
-                if (state.prevLocation) {
-                  navigate(state.prevLocation);
-                }
-                else {
-                  navigate('/animals/' + id);
-                }
+                navigate(incident + '/animals/' + id);
               })
               .catch(error => {
                 setIsButtonSubmitting(false);
@@ -404,15 +399,15 @@ const AnimalForm = (props) => {
               .then(response => {
                 // If adding to an SR, redirect to the SR.
                 if (servicerequest_id) {
-                  navigate('/hotline/servicerequest/' + servicerequest_id);
+                  navigate(incident + '/hotline/servicerequest/' + servicerequest_id);
                 }
                 // If adding to an Owner, redirect to the owner.
                 else if (owner_id) {
-                  navigate('/people/owner/' + owner_id)
+                  navigate(incident + '/people/owner/' + owner_id)
                 }
                 // Else redirect to the animal.
                 else {
-                  navigate('/animals/' + response.data.id);
+                  navigate(incident + '/animals/' + response.data.id);
                 }
               })
               .catch(error => {
@@ -424,7 +419,7 @@ const AnimalForm = (props) => {
       >
         {formikProps => (
           <Card border="secondary" style={{marginTop:is_workflow ? "15px" : "35px"}}>
-            <Card.Header as="h5" className="pl-3">{id || owner_id ?
+            <Card.Header as="h5" className="pl-3">{id || owner_id || reporter_id || servicerequest_id ?
               <span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
               :
               <span>{props.state.animalIndex > 0 ? <span style={{cursor:'pointer'}} onClick={() => {setAddAnother(false); populateBack(props.state.steps.animals[props.state.animalIndex-1]); props.handleBack('animals', 'animals')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
@@ -694,7 +689,7 @@ const AnimalForm = (props) => {
                     </Col>
                   </BootstrapForm.Row>
                 </span>
-                <AddressSearch formikProps={formikProps} label="Search for Animal Found Location" hidden={is_intake ? !is_reporter : !Boolean(id)} error="Animal Found Location was not selected." />
+                <AddressSearch formikProps={formikProps} label="Search for Animal Found Location" hidden={is_intake ? !is_reporter : !Boolean(id)} incident={props.incident} error="Animal Found Location was not selected." />
                 <span hidden={is_workflow && !is_intake}>
                   <p className={id || is_reporter ? "mb-0" : "mb-0 mt-3"}>Image Files</p>
                   <BootstrapForm.Row className="align-items-end">

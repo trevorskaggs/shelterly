@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from "axios";
 import { navigate } from "raviger";
-import { Formik, } from 'formik';
+import { Formik } from 'formik';
 import {
   Form as BootstrapForm,
   ButtonGroup,
@@ -15,7 +15,7 @@ import * as Yup from 'yup';
 import { TextInput } from '.././components/Form.js';
 import ButtonSpinner from '../components/ButtonSpinner.js';
 
-const DispatchTeamMemberForm = () => {
+const DispatchTeamMemberForm = ({ incident }) => {
 
   // Track whether or not to add another evac team member after saving.
   const [addAnother, setAddAnother] = useState(false);
@@ -50,7 +50,7 @@ const DispatchTeamMemberForm = () => {
               resetForm();
             }
             else {
-              navigate('/dispatch/teammanagement');
+              navigate('/' + incident + '/dispatch/teammanagement');
             }
           })
           .catch(error => {

@@ -21,7 +21,7 @@ import Scrollbar from '../components/Scrollbars';
 import { ITEMS_PER_PAGE } from '../constants';
 import { DateRangePicker } from '../components/Form';
 
-function DispatchAssignmentSearch() {
+function DispatchAssignmentSearch({ incident }) {
 
   // Identify any query param data.
   const [queryParams] = useQueryParams();
@@ -108,7 +108,7 @@ function DispatchAssignmentSearch() {
     const fetchDispatchAssignments = async () => {
       setData({evacuation_assignments: [], isFetching: true});
       // Fetch DispatchAssignment data.
-      await axios.get('/evac/api/evacassignment/?search=' + searchTerm + '&status=' + statusOptions, {
+      await axios.get('/evac/api/evacassignment/?search=' + searchTerm + '&status=' + statusOptions +'&incident=' + incident, {
         cancelToken: source.token,
       })
       .then(response => {
@@ -145,7 +145,7 @@ function DispatchAssignmentSearch() {
       unmounted = true;
       source.cancel();
     };
-  }, [searchTerm, statusOptions]);
+  }, [searchTerm, statusOptions, incident]);
 
   return (
     <div className="ml-2 mr-2">
@@ -199,8 +199,9 @@ function DispatchAssignmentSearch() {
                   </Tooltip>
                 }
               >
-                <Link href={"/dispatch/summary/" + evacuation_assignment.id}><FontAwesomeIcon icon={faDotCircle} className="mr-2" inverse /></Link>
+                <Link href={"/" + incident + "/dispatch/summary/" + evacuation_assignment.id}><FontAwesomeIcon icon={faDotCircle} className="mr-2" inverse /></Link>
               </OverlayTrigger>
+              DA#{evacuation_assignment.id} -&nbsp;
               <Moment format="L">{evacuation_assignment.start_time}</Moment>
               &nbsp;|&nbsp;
               <span title={evacuation_assignment.team ? evacuation_assignment.team_object.name + ": " + evacuation_assignment.team_member_names : ""}>
@@ -317,7 +318,7 @@ function DispatchAssignmentSearch() {
                         </OverlayTrigger>
                         : ""}
                         </span>
-                        <span>SR#{assigned_request.service_request_object.id} - <Link href={"/hotline/servicerequest/" + assigned_request.service_request_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link> |
+                        <span>SR#{assigned_request.service_request_object.id} - <Link href={"/" + incident + "/hotline/servicerequest/" + assigned_request.service_request_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link> |
                         {assigned_request.service_request_object.owner_objects.length === 0 ?
                           <OverlayTrigger
                             key={"stray"}
