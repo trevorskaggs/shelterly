@@ -23,10 +23,7 @@ export const printServiceRequestSummary = (data) => {
   const srPriority = priorityChoices.find(({ value }) => value === (data.priority || 2))
 
   // draw page header
-  pdf.drawPageHeader({
-    text: 'Service Request Summary',
-    subText: `SR#${data.id} - ${srPriority.label} Priority`
-  });
+  pdf.drawPageHeader({ text: 'Service Request Summary', subText: ' ' });
 
   pdf.drawPad();
   pdf.drawHRule();
@@ -36,22 +33,28 @@ export const printServiceRequestSummary = (data) => {
 
     pdf.drawPad(20);
 
+    // id & priority
+    pdf.drawWrappedText({ text: `SR#${data.id} - ${srPriority.label} Priority` })
+
     // summary address
     pdf.drawWrappedText({ text: 'Service Request Address:' });
 
     const [addressLine1, ...addressLine2] = data.full_address.split(',')
     pdf.drawWrappedText({ text: [addressLine1, addressLine2.join(',')?.trim?.()] });
 
-    pdf.drawPad(10);
+    pdf.drawPad(-10);
 
-    // key provided
-    pdf.drawWrappedText({ text: `Key Provided: ${data.key_provided ? 'Yes' : 'No'}` })
+    const infoList = [
+      `Key Provided: ${data.key_provided ? 'Yes' : 'No'}`,
+      `Accessible: ${data.accessible ? 'Yes' : 'No'}`,
+      `Turn Around: ${data.turn_around ? 'Yes' : 'No'}`,
+    ];
 
-    // accessible
-    pdf.drawWrappedText({ text: `Accessible: ${data.accessible ? 'Yes' : 'No'}` });
-
-    // turn around
-    pdf.drawWrappedText({ text: `Turn Around: ${data.turn_around ? 'Yes' : 'No'}` });
+    pdf.drawTextList({
+      labels: infoList,
+      listStyle: 'inline',
+      bottomPadding: 10
+    });
 
     // follow up date
     pdf.drawWrappedText({ text: `Followup Date: ${data.followup_date ? new Date(data.followup_date)?.toLocaleDateString?.() : 'Not set'}` });
@@ -123,8 +126,7 @@ export const printServiceRequestSummary = (data) => {
         `Sex: ${capitalize(animal.sex|| 'Unknown')}`,
         `Age: ${capitalize(animal.age || 'Unknown')}`,
         `Size: ${capitalize(animal.size || 'Unknown')}`,
-        `Primary Color: ${capitalize(animal.pcolor || 'N/A')}`,
-        `Secondary Color: ${capitalize(animal.scolor || 'N/A')}`
+        `Primary Color: ${capitalize(animal.pcolor || 'N/A')}, Secondary Color: ${capitalize(animal.scolor || 'N/A')}`
       ];
   
       pdf.drawTextList({
@@ -134,14 +136,31 @@ export const printServiceRequestSummary = (data) => {
       });
   
       pdf.drawPad();
-  
+
+      // breed / description (color_notes)
       if (animal.color_notes) {
         pdf.drawWrappedText({
           text: `Breed / Description: ${animal.color_notes}`,
-          linePadding: -5
+          linePadding: 0
         });
       }
-  
+
+      // medical notes
+      if (animal.medical_notes) {
+        pdf.drawWrappedText({
+          text: `Medical Notes: ${animal.medical_notes}`,
+          linePadding: 0
+        });
+      }
+
+      // behavior notes
+      if (animal.behavior_notes) {
+        pdf.drawWrappedText({
+          text: `Behavior Notes: ${animal.behavior_notes}`,
+          linePadding: 0
+        });
+      }
+
       if (animal.shelter) {
         pdf.drawWrappedText({
           text: `Shelter Address: ${animal.shelter_object?.full_address || 'Unknown'}`,
