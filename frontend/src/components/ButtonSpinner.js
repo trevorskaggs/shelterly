@@ -4,7 +4,6 @@ import { Button, Spinner } from "react-bootstrap";
 const ButtonSpinner = ({
   isSubmitting = false,
   isSubmittingText = 'Loading...',
-  isSubmitted = false,
   children,
   ...buttonProps
 }) => {
