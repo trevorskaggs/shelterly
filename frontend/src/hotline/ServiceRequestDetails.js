@@ -128,17 +128,7 @@ function ServiceRequestDetails({ id, incident }) {
         >
           <Link href={"/" + incident + "/hotline/servicerequest/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-1" inverse /></Link>
         </OverlayTrigger>
-        <OverlayTrigger
-          key={"cancel-service-request"}
-          placement="bottom"
-          overlay={
-            <Tooltip id={`tooltip-cancel-service-request`}>
-              Cancel service request
-            </Tooltip>
-          }
-        >
-          <FontAwesomeIcon icon={faTimes} className="ml-2" size="lg" style={{cursor:'pointer'}} inverse onClick={() => {setShowModal(true)}}/>
-        </OverlayTrigger>
+
         <OverlayTrigger
           key={"download-service-request-summary"}
           placement="bottom"
@@ -150,10 +140,23 @@ function ServiceRequestDetails({ id, incident }) {
         >
           {({ ref, ...triggerHandler }) => (
             <Link onClick={handleDownloadPdfClick} {...triggerHandler} href="#">
-              <span ref={ref}><FontAwesomeIcon icon={faPrint} className="ml-2"  inverse /></span>
+              <span ref={ref}><FontAwesomeIcon icon={faPrint} className="ml-1 mr-2"  inverse /></span>
             </Link>
           )}
         </OverlayTrigger>
+
+        <OverlayTrigger
+          key={"cancel-service-request"}
+          placement="bottom"
+          overlay={
+            <Tooltip id={`tooltip-cancel-service-request`}>
+              Cancel service request
+            </Tooltip>
+          }
+        >
+          <FontAwesomeIcon icon={faTimes} className="ml-1" size="lg" style={{cursor:'pointer'}} inverse onClick={() => {setShowModal(true)}}/>
+        </OverlayTrigger>
+
         &nbsp;| <span style={{textTransform:"capitalize"}}>{data.status}</span>
       </Header>
       <Modal show={showModal} onHide={() => setShowModal(false)}>
