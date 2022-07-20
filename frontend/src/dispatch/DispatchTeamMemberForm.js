@@ -99,8 +99,8 @@ const DispatchTeamMemberForm = ({ incident }) => {
             </BootstrapForm>
           </Card.Body>
           <ButtonGroup size="lg">
-            <ButtonSpinner isSubmitting={form.isSubmitting} isSubmittingText="Saving..." onClick={() => { setAddAnother(true); form.submitForm() }}>Add Another</ButtonSpinner>
-            <ButtonSpinner isSubmitting={form.isSubmitting} isSubmittingText="Saving..." className="btn btn-primary border" onClick={() => { setAddAnother(false); form.submitForm() }} style={{paddingLeft:"78px"}}>Save</ButtonSpinner>
+            <ButtonSpinner isSubmitting={form.isSubmitting && addAnother} isSubmittingText="Saving..." onClick={() => { setAddAnother(true); form.submitForm() }}>Add Another</ButtonSpinner>
+            <ButtonSpinner isSubmitting={form.isSubmitting && !addAnother} isSubmittingText="Saving..." className="btn btn-primary border" onClick={() => { setAddAnother(false); form.submitForm() }} style={{paddingLeft:"78px"}}>Save</ButtonSpinner>
           </ButtonGroup>
         </Card>
       )}
