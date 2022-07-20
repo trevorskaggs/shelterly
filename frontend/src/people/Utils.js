@@ -58,8 +58,7 @@ export const printOwnerDetails = (owner) => {
       `Sex: ${capitalize(animal.sex|| 'Unknown')}`,
       `Age: ${capitalize(animal.age || 'Unknown')}`,
       `Size: ${capitalize(animal.size || 'Unknown')}`,
-      `Primary Color: ${capitalize(animal.pcolor || 'N/A')}`,
-      `Secondary Color: ${capitalize(animal.scolor || 'N/A')}`
+      `Primary Color: ${capitalize(animal.pcolor || 'N/A')}, Secondary Color: ${capitalize(animal.scolor || 'N/A')}`
     ];
 
     pdf.drawTextList({
