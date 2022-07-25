@@ -37,7 +37,7 @@ function AnimalStatus(props) {
   return (
     <>
     <Row>
-      <Col xs={4} className="pl-0">
+      <Col xs={4} className="pl-0" style={{marginLeft:"-5px"}}>
         <DropDown
           id={`sr_updates.${props.index}.animals.${props.inception}.status`}
           name={`sr_updates.${props.index}.animals.${props.inception}.status`}
@@ -58,7 +58,7 @@ function AnimalStatus(props) {
           }}
         />
       </Col>
-      <span style={{ marginTop:"5px", textTransform:"capitalize" }}>
+      <span style={{ marginTop:"-6px", marginBottom: "-4px", fontSize: "30px", textTransform:"capitalize" }}>
         A#{props.animal.id} - {props.animal.name || "Unknown"}&nbsp;-&nbsp;{props.animal.species}
         {props.animal.color_notes ?
         <OverlayTrigger
@@ -78,7 +78,7 @@ function AnimalStatus(props) {
     </Row>
     {props.formikProps.values && props.formikProps.values.sr_updates[props.index] && props.formikProps.values.sr_updates[props.index].animals[props.inception].status === 'SHELTERED' ?
     <Row>
-      <Col xs={4} className="pl-0">
+      <Col xs={4} className="pl-0" style={{marginLeft:"-5px"}}>
         <DropDown
           id={`sr_updates.${props.index}.animals.${props.inception}.shelter`}
           name={`sr_updates.${props.index}.animals.${props.inception}.shelter`}
@@ -96,7 +96,7 @@ function AnimalStatus(props) {
           }}
         />
       </Col>
-      <Col xs={4} className="pl-0">
+      <Col xs={6} className="pl-0">
         <DropDown
           id={`sr_updates.${props.index}.animals.${props.inception}.room`}
           name={`sr_updates.${props.index}.animals.${props.inception}.room`}
@@ -116,7 +116,7 @@ function AnimalStatus(props) {
     : ""}
     </>
   )
-  }
+}
 
 function DispatchResolutionForm({ id, incident }) {
 

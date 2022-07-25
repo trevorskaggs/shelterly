@@ -86,20 +86,20 @@ class ModestShelterSerializer(SimpleShelterSerializer):
     buildings = SimpleBuildingSerializer(source='building_set', many=True, required=False, read_only=True)
     animal_count = serializers.IntegerField(required=False)
     room_count = serializers.IntegerField(required=False)
+    unroomed_animals = serializers.SerializerMethodField()
+
+    # Custom field for unroomed animals.
+    def get_unroomed_animals(self, obj):
+        from animals.serializers import ModestAnimalSerializer
+        return ModestAnimalSerializer(obj.unroomed_animals, many=True).data
 
 class ShelterSerializer(ModestShelterSerializer):
     #Single obj serializer
-    unroomed_animals = serializers.SerializerMethodField()
     buildings = BuildingSerializer(source='building_set', many=True, required=False, read_only=True)
     action_history = serializers.SerializerMethodField()
 
     def get_action_history(self, obj):
         return [build_action_string(action) for action in obj.target_actions.all()]
-
-    # Custom field for total animals.
-    def get_unroomed_animals(self, obj):
-        from animals.serializers import ModestAnimalSerializer
-        return ModestAnimalSerializer(obj.unroomed_animals, many=True).data
 
     # Truncates latitude and longitude.
     def to_internal_value(self, data):
