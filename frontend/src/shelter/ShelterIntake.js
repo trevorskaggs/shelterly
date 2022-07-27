@@ -14,6 +14,7 @@ import ButtonSpinner from '../components/ButtonSpinner';
 
 const statusLabelLookup = {
   'REPORTED':'Reported',
+  'SHELTERED':'Sheltered',
   'SHELTERED IN PLACE':'Sheltered In Place (SIP)',
   'UNABLE TO LOCATE':'Unable To Locate (UTL)',
   'UNABLE TO LOCATE - NFA':'Unable To Locate - No Further Action',
@@ -34,18 +35,23 @@ function AnimalStatus(props) {
           name={`sr_updates.${props.index}.animals.${props.inception}.status`}
           type="text"
           className="mt-0"
-          options={[{value:props.animal.status, label:statusLabelLookup[props.animal.status]}, {value:'SHELTERED', label:'Sheltered'}]}
+          options={props.animal.status === 'SHELTERED' ? [{value:props.animal.status, label:statusLabelLookup[props.animal.status]}] : [{value:props.animal.status, label:statusLabelLookup[props.animal.status]}, {value:'SHELTERED', label:'Sheltered'}]}
           value={`sr_updates.${props.index}.animals.${props.inception}.status`}
           key={`sr_updates.${props.index}.animals.${props.inception}.status`}
           isClearable={false}
           onChange={(instance) => {
             props.formikProps.setFieldValue(`sr_updates.${props.index}.animals.${props.inception}.status`, instance === null ? '' : instance.value);
-            props.formikProps.setFieldValue(`sr_updates.${props.index}.animals.${props.inception}.shelter`, '');
-            if (shelterRef.current) shelterRef.current.select.clearValue();
+            if (instance.value === 'SHELTERED') {
+              props.formikProps.setFieldValue(`sr_updates.${props.index}.animals.${props.inception}.shelter`, Number(props.shelter_id));
+            }
+            else {
+              props.formikProps.setFieldValue(`sr_updates.${props.index}.animals.${props.inception}.shelter`, '');
+              if (shelterRef.current) shelterRef.current.select.clearValue();
+            }
           }}
         />
       </Col>
-      <span style={{ marginTop:"-6px", marginBottom: "-4px", fontSize: "30px", textTransform:"capitalize" }}>
+      <span style={{ marginTop:"-3px", marginBottom: "-4px", fontSize: "26px", textTransform:"capitalize" }}>
         A#{props.animal.id} - {props.animal.name || "Unknown"}&nbsp;-&nbsp;{props.animal.species}
         {props.animal.color_notes ?
         <OverlayTrigger
@@ -63,7 +69,7 @@ function AnimalStatus(props) {
         {props.animal.pcolor || props.animal.scolor ? <span>({props.animal.pcolor ? props.animal.pcolor : "" }{props.animal.scolor ? <span>{props.animal.pcolor ? <span>, </span> : ""}{props.animal.scolor}</span> : ""})</span>: ""}
       </span>
     </Row>
-    {props.formikProps.values && props.formikProps.values.sr_updates[props.index] && props.formikProps.values.sr_updates[props.index].animals[props.inception].status === 'SHELTERED' ?
+    {props.formikProps.values && props.formikProps.values.sr_updates[props.index] && props.formikProps.values.sr_updates[props.index].animals[props.inception] && props.formikProps.values.sr_updates[props.index].animals[props.inception].status === 'SHELTERED' ?
     <Row>
       <Col xs={4} className="pl-0" style={{marginLeft:"-5px"}}>
         <DropDown
@@ -196,14 +202,9 @@ function ShelterIntake({ id, incident }) {
       })}
       onSubmit={(values, { setSubmitting }) => {
         setTimeout(() => {
-          axios.put('/evac/api/evacassignment/' + selected + '/', values)
+          axios.patch('/evac/api/evacassignment/' + selected + '/', values)
             .then(response => {
-              if (response.data.service_requests.length === 0) {
-                navigate('/' + incident + '/dispatch/dispatchassignment/search');
-              }
-              else {
-                navigate('/' + incident + '/dispatch/summary/' + response.data.id);
-              }
+              navigate("/" + incident + "/shelter/" + id);
             })
             .catch(error => {
               setSubmitting(false);
@@ -214,7 +215,7 @@ function ShelterIntake({ id, incident }) {
       {props => (
         <BootstrapForm as={Form}>
           <Header>
-            <span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-2"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="sm" inverse /></span>
+            <span style={{cursor:'pointer'}} onClick={() => navigate("/" + incident + "/shelter/" + id)} className="mr-2"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="sm" inverse /></span>
             {data.shelter.name}
             &nbsp;- Dispatch Intake
           </Header>
@@ -240,7 +241,7 @@ function ShelterIntake({ id, incident }) {
           {selected ?
           <Row>
             {data.dispatch_assignments.filter(da => da.id === selected)[0].assigned_requests.map((assigned_request, index) => (
-            <Col xs={10} key={assigned_request.service_request_object.id} className="pl-0" >
+            <Col xs={12} key={assigned_request.service_request_object.id} className="pl-0" >
               <Card className="mt-3 ml-3 border rounded">
                 <Card.Body>
                   <Card.Title style={{marginBottom:"-5px"}}>
@@ -253,8 +254,8 @@ function ShelterIntake({ id, incident }) {
                   <ListGroup variant="flush" style={{ marginTop: "-13px", marginBottom: "-13px" }}>
                     <h4 className="mt-2" style={{ marginBottom: "-2px" }}>Animals</h4>
                     {data.sr_updates[index] && data.sr_updates[index].animals.map((animal, inception) => (
-                      <ListGroup.Item key={animal}>
-                        <AnimalStatus formikProps={props} index={index} inception={inception} animal={animal} shelter_options={options.shelter_options} room_options={options.room_options} />
+                      <ListGroup.Item key={animal.id}>
+                        <AnimalStatus formikProps={props} index={index} inception={inception} shelter_id={id} animal={animal} shelter_options={options.shelter_options} room_options={options.room_options} />
                       </ListGroup.Item>
                     ))}
                   </ListGroup>
@@ -265,7 +266,7 @@ function ShelterIntake({ id, incident }) {
           </Row> : ""}
           {selected ?
           <ButtonGroup size="lg" className="col-12 pl-0 pr-0 mt-3 mb-3">
-            <ButtonSpinner isSubmitting={props.isSubmitting} isSubmittingText="Saving..." className="btn btn-block" type="submit">
+            <ButtonSpinner isSubmitting={props.isSubmitting} isSubmittingText="Saving..." className="btn btn-block border" type="submit">
               Save
             </ButtonSpinner>
           </ButtonGroup> : ""}
