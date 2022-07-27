@@ -44,6 +44,7 @@ export const publicRoutes = {
 
 const routes = {
   "/": () => <Incident />,
+  "/reset_password": () => <PasswordReset />,
   "/:incident": ({incident}) => <Home incident={incident} />,
   "/incident/edit/:id": ({id}) => <IncidentForm id={id} />,
   "/incident/new": () => <IncidentForm />,
