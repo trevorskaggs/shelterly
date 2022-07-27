@@ -244,7 +244,7 @@ function ShelterIntake({ id, incident }) {
             <Col xs={12} key={assigned_request.service_request_object.id} className="pl-0" >
               <Card className="mt-3 ml-3 border rounded">
                 <Card.Body>
-                  <Card.Title style={{marginBottom:"-5px"}}>
+                  <Card.Title style={{marginBottom:"-5px", marginTop:"-5px"}}>
                     <h4>
                       SR#{assigned_request.service_request_object.id} -&nbsp;
                       <Link href={"/" + incident + "/hotline/servicerequest/" + assigned_request.service_request_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link>
