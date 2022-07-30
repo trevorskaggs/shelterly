@@ -27,8 +27,9 @@ function ServiceRequestForm(props) {
   var is_first_responder = window.location.pathname.includes("first_responder");
 
   // Track duplicate request address error.
-  const [error, setError] = useState({show:false, error:[]});
-  const handleClose = () => setError({show:false, error:[]});
+  const [skip, setSkip] = useState(false);
+  const [dupeSRs, setDupeSRs] = useState([]);
+  const handleClose = () => setDupeSRs([]);
 
   // is submitting state for save/next workflow buttons
   const [isButtonSubmitting, setIsButtonSubmitting] = useState(false);
@@ -81,96 +82,101 @@ function ServiceRequestForm(props) {
   }, [id]);
 
   return (
-      <Formik
-        initialValues={data}
-        enableReinitialize={true}
-        validationSchema={Yup.object({
-          priority: Yup.number(),
-          directions: Yup.string()
-            .max(2000, 'Must be 2000 characters or less'),
-          verbal_permission: Yup.boolean(),
-          key_provided: Yup.boolean(),
-          accessible: Yup.boolean(),
-          turn_around: Yup.boolean(),
-          address: Yup.string()
-            .required('Required'),
-          apartment: Yup.string()
-            .max(10, 'Must be 10 characters or less'),
-          city: Yup.string(),
-          state: Yup.string()
-            .nullable(),
-          zip_code: Yup.string()
-            .max(10, 'Must be 10 characters or less'),
-          latitude: Yup.number()
-            .nullable(),
-          longitude: Yup.number()
-            .nullable(),
-        })}
-        onSubmit={ async (values, { setSubmitting }) => {
-          setIsButtonSubmitting(true);
-          if (is_workflow) {
-            // Create Reporter
-            let reporterResponse = [{data:{id:props.state.steps.reporter.id}}];
-            if (props.state.steps.reporter.first_name && !props.state.steps.reporter.id) {
-              reporterResponse = await Promise.all([
-                axios.post('/people/api/person/', props.state.steps.reporter)
-              ]);
-            }
-            // Create Owner
-            let ownerResponse = [{data:{id:props.state.steps.owner.id}}];
-            if (props.state.steps.owner.first_name && !props.state.steps.owner.id) {
-              ownerResponse = await Promise.all([
-                axios.post('/people/api/person/', props.state.steps.owner)
-              ]);
-            }
-            // Create Service Request
-            values['reporter'] = reporterResponse[0].data.id
-            if (ownerResponse[0].data.id) {
-              values['owners'] = [ownerResponse[0].data.id]
-            }
-            axios.post('/hotline/api/servicerequests/?incident=' + incident, values)
-            .then(response => {
-              // Create Animals
-              let promises = props.state.steps.animals.map(async (animal) => {
-                // Add owner and reporter to animal data.
-                if (reporterResponse[0].data.id) {
-                  animal.append('reporter', reporterResponse[0].data.id);
-                }
-                if (ownerResponse[0].data.id) {
-                  animal.append('new_owner', ownerResponse[0].data.id);
-                }
-                animal.append('request', response.data.id);
-                return axios.post('/animals/api/animal/', animal)
-              });
-              Promise.all(promises)
-              .then((results) => {
-                navigate('/' + incident + '/hotline/servicerequest/' + response.data.id);
+    <Formik
+      initialValues={data}
+      enableReinitialize={true}
+      validationSchema={Yup.object({
+        priority: Yup.number(),
+        directions: Yup.string()
+          .max(2000, 'Must be 2000 characters or less'),
+        verbal_permission: Yup.boolean(),
+        key_provided: Yup.boolean(),
+        accessible: Yup.boolean(),
+        turn_around: Yup.boolean(),
+        address: Yup.string()
+          .required('Required'),
+        apartment: Yup.string()
+          .max(10, 'Must be 10 characters or less'),
+        city: Yup.string(),
+        state: Yup.string()
+          .nullable(),
+        zip_code: Yup.string()
+          .max(10, 'Must be 10 characters or less'),
+        latitude: Yup.number()
+          .nullable(),
+        longitude: Yup.number()
+          .nullable(),
+      })}
+      onSubmit={ async (values, { setSubmitting }) => {
+        setIsButtonSubmitting(true);
+        axios.get('/hotline/api/servicerequests/?incident=' + incident, values)
+        .then(response => {
+          if (response.data.length > 0 && !skip) {
+            setDupeSRs(response.data);
+            setIsButtonSubmitting(false);
+          }
+          else {
+            if (is_workflow) {
+              // Create Reporter
+              let reporterResponse = [{data:{id:props.state.steps.reporter.id}}];
+              if (props.state.steps.reporter.first_name && !props.state.steps.reporter.id) {
+                reporterResponse = Promise.all([
+                  axios.post('/people/api/person/', props.state.steps.reporter)
+                ]);
+              }
+              // Create Owner
+              let ownerResponse = [{data:{id:props.state.steps.owner.id}}];
+              if (props.state.steps.owner.first_name && !props.state.steps.owner.id) {
+                ownerResponse = Promise.all([
+                  axios.post('/people/api/person/', props.state.steps.owner)
+                ]);
+              }
+              // Create Service Request
+              values['reporter'] = reporterResponse[0].data.id
+              if (ownerResponse[0].data.id) {
+                values['owners'] = [ownerResponse[0].data.id]
+              }
+              axios.post('/hotline/api/servicerequests/?incident=' + incident, values)
+              .then(response => {
+                // Create Animals
+                let promises = props.state.steps.animals.map(async (animal) => {
+                  // Add owner and reporter to animal data.
+                  if (reporterResponse[0].data.id) {
+                    animal.append('reporter', reporterResponse[0].data.id);
+                  }
+                  if (ownerResponse[0].data.id) {
+                    animal.append('new_owner', ownerResponse[0].data.id);
+                  }
+                  animal.append('request', response.data.id);
+                  return axios.post('/animals/api/animal/', animal)
+                });
+                Promise.all(promises)
+                .then((results) => {
+                  navigate('/' + incident + '/hotline/servicerequest/' + response.data.id);
+                })
               })
-            })
-            .catch(error => {
-              if (error.response.data && error.response.data[0].includes('same address')) {
-                setError({show:true, error:error.response.data});
-              }
-              setIsButtonSubmitting(false);
-            });
+              .catch(error => {
+                setIsButtonSubmitting(false);
+              });
+            }
+            else if (id) {
+              axios.put('/hotline/api/servicerequests/' + id + '/?incident=' + incident, values)
+              .then(function() {
+                if (state.prevLocation) {
+                  navigate(state.prevLocation);
+                }
+                else {
+                  navigate('/' + incident + '/hotline/servicerequest/' + id);
+                }
+              })
+              .catch(error => {
+                setIsButtonSubmitting(false);
+              });
+            }
           }
-          else if (id) {
-            axios.put('/hotline/api/servicerequests/' + id + '/?incident=' + incident, values)
-            .then(function() {
-              if (state.prevLocation) {
-                navigate(state.prevLocation);
-              }
-              else {
-                navigate('/' + incident + '/hotline/servicerequest/' + id);
-              }
-            })
-            .catch(error => {
-              if (error.response.data && error.response.data[0].includes('same address')) {
-                setError({show:true, error:error.response.data});
-              }
-              setIsButtonSubmitting(false);
-            });
-          }
+        })
+        .catch(error => {
+        });
       }}
     >
       {formikProps => (
@@ -235,17 +241,21 @@ function ServiceRequestForm(props) {
           }
         </ButtonGroup>
       </Card>
-      <Modal show={error.show} onHide={handleClose}>
+      <Modal show={dupeSRs.length > 0} onHide={handleClose}>
         <Modal.Header closeButton>
           <Modal.Title>Duplicate Service Request Address Found</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <p>
-            {error && error.error[0]}
-            &nbsp;Click <Link target="_blank" href={"/" + incident + "/hotline/servicerequest/" + error.error[1]} style={{color:"#8d99d4"}}>here</Link> to view this Service Request.
+            The following Service Requests have a duplicate address:
+            {dupeSRs.map(sr =>
+              <li style={{marginLeft:"10px"}}><span style={{position:"relative", left:"-5px"}}>SR#{sr.id} - Click <Link target="_blank" href={"/" + incident + "/hotline/servicerequest/" + sr.id} style={{color:"#8d99d4"}}>here</Link> to view this Service Request.</span></li>
+            )}
+            <br/>Proceed with creating a new Service Request?
           </p>
         </Modal.Body>
         <Modal.Footer>
+          <Button variant="primary" onClick={() => {setSkip(true);formikProps.submitForm()}}>Yes</Button>
           <Button variant="secondary" onClick={handleClose}>Close</Button>
         </Modal.Footer>
       </Modal>

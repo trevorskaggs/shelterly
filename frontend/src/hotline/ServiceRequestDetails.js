@@ -144,7 +144,6 @@ function ServiceRequestDetails({ id, incident }) {
             </Link>
           )}
         </OverlayTrigger>
-
         <OverlayTrigger
           key={"cancel-service-request"}
           placement="bottom"
@@ -156,7 +155,6 @@ function ServiceRequestDetails({ id, incident }) {
         >
           <FontAwesomeIcon icon={faTimes} className="ml-1" size="lg" style={{cursor:'pointer'}} inverse onClick={() => {setShowModal(true)}}/>
         </OverlayTrigger>
-
         &nbsp;| <span style={{textTransform:"capitalize"}}>{data.status}</span>
       </Header>
       <Modal show={showModal} onHide={() => setShowModal(false)}>
