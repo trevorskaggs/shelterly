@@ -280,8 +280,8 @@ function ServiceRequestDetails({ id, incident }) {
               <ListGroup variant="flush">
                 <ListGroup.Item style={{marginTop:"-13px"}}>
                   <div className="row">
+                    <span className="col-6"><b>ID: </b>SR#{data.id}</span>
                     <span className="col-6"><b>Priority: </b>{priorityText[data.priority]}</span>
-                    <span className="col-5"><b>ID: </b>SR#{data.id}</span>
                   </div>
                 </ListGroup.Item>
                 <ListGroup.Item><b>Address: </b>{data.full_address}</ListGroup.Item>
