@@ -32,20 +32,12 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
             if self.request.data.get('incident_slug'):
                 serializer.validated_data['incident'] = Incident.objects.get(slug=self.request.data.get('incident_slug'))
 
-            for service_request in ServiceRequest.objects.filter(incident__slug=self.request.GET.get('incident'), address=serializer.validated_data['address'], city=serializer.validated_data.get('city', ''), state=serializer.validated_data['state']):
-                reporter_id = serializer.validated_data.get('reporter').id if serializer.validated_data.get('reporter') else None
-                owner_id = serializer.validated_data.get('owners')[0].id if serializer.validated_data.get('owners') else None
-                Person.objects.filter(id__in=[reporter_id, owner_id]).delete()
-                raise serializers.ValidationError(['Multiple service requests may not exist with the same address.', service_request.id])
             service_request = serializer.save()
             action.send(self.request.user, verb='created service request', target=service_request)
 
     def perform_update(self, serializer):
         if serializer.is_valid():
-            # Check for duplicate address among active service requests.
-            if 'address' in serializer.validated_data and 'city' in serializer.validated_data and 'state' in serializer.validated_data:
-                for service_request in ServiceRequest.objects.filter(incident__slug=self.request.GET.get('incident'), address=serializer.validated_data['address'], city=serializer.validated_data.get('city', ''), state=serializer.validated_data['state']).exclude(id=self.kwargs['pk']).exclude(status='CANCELED'):
-                    raise serializers.ValidationError(['Multiple service requests may not exist with the same address.', service_request.id])
+
             service_request = serializer.save()
 
             if service_request.status == 'canceled':
