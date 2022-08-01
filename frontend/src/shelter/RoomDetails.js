@@ -4,11 +4,9 @@ import { Link, navigate } from 'raviger';
 import { Button, Card, ListGroup, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faArrowsAltH, faEdit,
+  faEdit
 } from '@fortawesome/free-solid-svg-icons';
-import {
-  faSquare,
-} from '@fortawesome/free-regular-svg-icons';
+import { faArrowDownToSquare } from '@fortawesome/pro-regular-svg-icons';
 import {
   faTimesSquare,
 } from '@fortawesome/pro-regular-svg-icons';
@@ -112,12 +110,7 @@ function RoomDetails({ id, incident }) {
             <Card.Title>
               <h4 className="mb-0">Animals ({data.animals.length})
                 <OverlayTrigger placement="top" overlay={<Tooltip id={`tooltip-assign`}>Assign animals to rooms</Tooltip>}>
-                  <Link href={"/" + incident + "/shelter/" + data.shelter + "/assign?building_id=" + data.building}>
-                    <span className="fa-layers" style={{marginLeft:"3px"}}>
-                      <FontAwesomeIcon icon={faSquare} inverse />
-                      <FontAwesomeIcon icon={faArrowsAltH} size="sm" transform={'shrink-4'} inverse />
-                    </span>
-                  </Link>
+                  <Link href={"/" + incident + "/shelter/" + data.shelter + "/assign?building_id=" + data.building}><FontAwesomeIcon icon={faArrowDownToSquare} size="lg" className="ml-1 fa-move-up" inverse /></Link>
                 </OverlayTrigger>
               </h4>
             </Card.Title>

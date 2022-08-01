@@ -37,7 +37,7 @@ function AnimalStatus(props) {
   return (
     <>
     <Row>
-      <Col xs={4} className="pl-0">
+      <Col xs={4} className="pl-0" style={{marginLeft:"-5px"}}>
         <DropDown
           id={`sr_updates.${props.index}.animals.${props.inception}.status`}
           name={`sr_updates.${props.index}.animals.${props.inception}.status`}
@@ -58,7 +58,7 @@ function AnimalStatus(props) {
           }}
         />
       </Col>
-      <span style={{ marginTop:"5px", textTransform:"capitalize" }}>
+      <span style={{ marginTop:"-3px", marginBottom: "-4px", fontSize: "26px", textTransform:"capitalize" }}>
         A#{props.animal.id} - {props.animal.name || "Unknown"}&nbsp;-&nbsp;{props.animal.species}
         {props.animal.color_notes ?
         <OverlayTrigger
@@ -76,9 +76,9 @@ function AnimalStatus(props) {
         {props.animal.pcolor || props.animal.scolor ? <span>({props.animal.pcolor ? props.animal.pcolor : "" }{props.animal.scolor ? <span>{props.animal.pcolor ? <span>, </span> : ""}{props.animal.scolor}</span> : ""})</span>: ""}
       </span>
     </Row>
-    {props.formikProps.values && props.formikProps.values.sr_updates[props.index] && props.formikProps.values.sr_updates[props.index].animals[props.inception].status === 'SHELTERED' ?
+    {props.formikProps.values && props.formikProps.values.sr_updates[props.index] && props.formikProps.values.sr_updates[props.index].animals[props.inception] && props.formikProps.values.sr_updates[props.index].animals[props.inception].status === 'SHELTERED' ?
     <Row>
-      <Col xs={4} className="pl-0">
+      <Col xs={4} className="pl-0" style={{marginLeft:"-5px"}}>
         <DropDown
           id={`sr_updates.${props.index}.animals.${props.inception}.shelter`}
           name={`sr_updates.${props.index}.animals.${props.inception}.shelter`}
@@ -96,7 +96,7 @@ function AnimalStatus(props) {
           }}
         />
       </Col>
-      <Col xs={4} className="pl-0">
+      <Col xs={6} className="pl-0">
         <DropDown
           id={`sr_updates.${props.index}.animals.${props.inception}.room`}
           name={`sr_updates.${props.index}.animals.${props.inception}.room`}
@@ -116,7 +116,7 @@ function AnimalStatus(props) {
     : ""}
     </>
   )
-  }
+}
 
 function DispatchResolutionForm({ id, incident }) {
 
@@ -222,7 +222,7 @@ function DispatchResolutionForm({ id, incident }) {
       unmounted = true;
       source.cancel();
     };
-  }, [id]);
+  }, [id, incident]);
 
   // Hook scrolling to top error.
   useEffect(() => {
@@ -316,7 +316,7 @@ function DispatchResolutionForm({ id, incident }) {
               <div style={{ fontSize: "18px", marginTop: "10px" }}><b>Opened: </b><Moment format="MMMM Do YYYY, HH:mm">{data.start_time}</Moment>{data.end_time ? <span style={{ fontSize: "16px", marginTop: "5px" }}> | <b>Resolved: </b><Moment format="MMMM Do YYYY, HH:mm">{data.end_time}</Moment></span> : ""}</div>
             </Header>
             <hr/>
-            <Card border="secondary" className="mt-3">
+            <Card className="mt-3 border rounded">
               <Card.Body>
                 <Card.Title>
                   <h4>{data.team_object.name}</h4>
@@ -332,9 +332,9 @@ function DispatchResolutionForm({ id, incident }) {
               </Card.Body>
             </Card>
             {data.assigned_requests.map((assigned_request, index) => (
-              <Card key={assigned_request.service_request_object.id} border="secondary" className="mt-3">
+              <Card key={assigned_request.service_request_object.id} className="mt-3 border rounded">
                 <Card.Body>
-                  <Card.Title style={{marginBottom:"-5px"}}>
+                  <Card.Title style={{marginBottom:"-5px", marginTop:"-5px"}}>
                     <h4>
                       SR#{assigned_request.service_request_object.id} -&nbsp;
                       <Link href={"/" + incident + "/hotline/servicerequest/" + assigned_request.service_request_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link> |&nbsp;
@@ -531,8 +531,8 @@ function DispatchResolutionForm({ id, incident }) {
                 </Card.Body>
               </Card>
             ))}
-            <ButtonGroup size="lg" className="col-12 pl-0 pr-0">
-              <ButtonSpinner isSubmitting={props.isSubmitting} isSubmittingText="Saving..." className="btn btn-block" type="submit" onClick={() => { setShouldCheckForScroll(true); }}>
+            <ButtonGroup size="lg" className="col-12 pl-0 pr-0 mt-3 mb-3">
+              <ButtonSpinner isSubmitting={props.isSubmitting} isSubmittingText="Saving..." className="btn btn-block border" type="submit" onClick={() => { setShouldCheckForScroll(true); }}>
                 Save
               </ButtonSpinner>
             </ButtonGroup>
