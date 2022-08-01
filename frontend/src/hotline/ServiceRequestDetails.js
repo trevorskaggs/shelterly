@@ -5,7 +5,7 @@ import Moment from 'react-moment';
 import { Button, Card, ListGroup, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBan, faCar, faClipboardCheck, faEdit, faEnvelope, faHouseDamage,
+  faBan, faCar, faClipboardCheck, faEdit, faEnvelope, faHouseDamage, faPrint,
   faKey, faMapMarkedAlt, faPlusSquare, faTimes, faTrailer, faUserPlus, faUsers
 } from '@fortawesome/free-solid-svg-icons';
 import { faCalendarEdit, faCommentSmile, faHomeHeart, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
@@ -14,6 +14,7 @@ import History from '../components/History';
 import AnimalCards from '../components/AnimalCards';
 import PhotoDocuments from '../components/PhotoDocuments';
 import Flatpickr from 'react-flatpickr';
+import { printServiceRequestSummary } from './Utils'
 
 function ServiceRequestDetails({ id, incident }) {
 
@@ -80,6 +81,12 @@ function ServiceRequestDetails({ id, incident }) {
     });
   }
 
+  const handleDownloadPdfClick = (e) => {
+    e.preventDefault();
+
+    printServiceRequestSummary(data);
+  }
+
   // Hook for initializing data.
   useEffect(() => {
     let unmounted = false;
@@ -120,6 +127,22 @@ function ServiceRequestDetails({ id, incident }) {
           }
         >
           <Link href={"/" + incident + "/hotline/servicerequest/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-1" inverse /></Link>
+        </OverlayTrigger>
+
+        <OverlayTrigger
+          key={"download-service-request-summary"}
+          placement="bottom"
+          overlay={
+            <Tooltip id={`tooltip-download-service-request-summary`}>
+              Download Service Request Summary
+            </Tooltip>
+          }
+        >
+          {({ ref, ...triggerHandler }) => (
+            <Link onClick={handleDownloadPdfClick} {...triggerHandler} href="#">
+              <span ref={ref}><FontAwesomeIcon icon={faPrint} className="ml-1 mr-2"  inverse /></span>
+            </Link>
+          )}
         </OverlayTrigger>
         <OverlayTrigger
           key={"cancel-service-request"}
@@ -257,8 +280,8 @@ function ServiceRequestDetails({ id, incident }) {
               <ListGroup variant="flush">
                 <ListGroup.Item style={{marginTop:"-13px"}}>
                   <div className="row">
+                    <span className="col-6"><b>ID: </b>SR#{data.id}</span>
                     <span className="col-6"><b>Priority: </b>{priorityText[data.priority]}</span>
-                    <span className="col-5"><b>ID: </b>SR#{data.id}</span>
                   </div>
                 </ListGroup.Item>
                 <ListGroup.Item><b>Address: </b>{data.full_address}</ListGroup.Item>

@@ -28,7 +28,7 @@
     "jspdf": "^2.5.1",
     "leaflet": "^1.7.1",
     "mark.js": "^8.11.1",
-    "moment": "^2.29.2",
+    "moment": "^2.29.4",
     "msw": "^0.20.5",
     "randomcolor": "^0.6.2",
     "raviger": "^4.1.0",

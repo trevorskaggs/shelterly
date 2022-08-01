@@ -404,7 +404,7 @@ const AddressLookup = ({setLatLon, ...props}) => {
       }
 
       setFieldValue("address", address);
-      setFieldValue("city", components.locality);
+      setFieldValue("city", components.locality || '');
       setFieldValue("state", components.administrative_area_level_1);
       setFieldValue("zip_code", components.postal_code);
       setFieldValue("latitude", suggestion.geometry.location.lat());

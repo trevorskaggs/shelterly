@@ -364,16 +364,16 @@ const PersonForm = (props) => {
             <ButtonGroup size="lg" >
               {/* form save buttons */}
               {!is_first_responder && !is_workflow ?
-                <ButtonSpinner isSubmitting={formikProps.isSubmitting} isSubmittingText="Saving..." type="button" onClick={() => { setSkipOwner(false); formikProps.submitForm() }}>
+                <ButtonSpinner isSubmitting={formikProps.isSubmitting && !skipOwner} isSubmittingText="Saving..." type="button" onClick={() => { setSkipOwner(false); formikProps.submitForm() }}>
                   {!isOwner && !is_intake ? <span>{!id ? "Add Owner" : "Save"}</span> : "Save"}
                 </ButtonSpinner> : ""}
               {/* workflow buttons */}
               {is_workflow && !isOwner ?
-                <ButtonSpinner isSubmitting={formikProps.isSubmitting} isSubmittingText="Saving..." type="button" onClick={() => { setSkipOwner(false); formikProps.submitForm(); }}>
+                <ButtonSpinner isSubmitting={formikProps.isSubmitting && !skipOwner} isSubmittingText="Saving..." type="button" onClick={() => { setSkipOwner(false); formikProps.submitForm(); }}>
                   {props.state.steps.owner.first_name ? "Change Owner" : "Add Owner"}
                 </ButtonSpinner> : ""}
               {is_workflow ?
-                <ButtonSpinner isSubmitting={formikProps.isSubmitting} isSubmittingText="Loading..." type="button" className="btn btn-primary border" onClick={() => { setSkipOwner(true); formikProps.submitForm(); }}>
+                <ButtonSpinner isSubmitting={formikProps.isSubmitting && skipOwner} isSubmittingText="Loading..." type="button" className="btn btn-primary border" onClick={() => { setSkipOwner(true); formikProps.submitForm(); }}>
                   Next Step
                 </ButtonSpinner> : ""}
             </ButtonGroup>
