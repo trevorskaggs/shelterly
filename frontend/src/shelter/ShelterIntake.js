@@ -124,7 +124,7 @@ function ShelterIntake({ id, incident }) {
 
     const fetchShelter = async () => {
       // Fetch current ServiceRequest data.
-      await axios.get('/shelter/api/shelter/' + id + '/', {
+      await axios.get('/shelter/api/shelter/' + id + '/?incident=' + incident, {
         cancelToken: source.token,
       })
       .then(currentResponse => {
@@ -161,7 +161,6 @@ function ShelterIntake({ id, incident }) {
               });
               setData({shelter: currentResponse.data, dispatch_assignments: response.data, sr_updates: [], isFetching: false});
               setOptions({shelter_options:shelter_options, room_options: room_options, da_options:da_options});
-              console.log(response.data)
             }
           })
           .catch(error => {
@@ -254,7 +253,7 @@ function ShelterIntake({ id, incident }) {
                   <ListGroup variant="flush" style={{ marginTop: "-13px", marginBottom: "-13px" }}>
                     <h4 className="mt-2" style={{ marginBottom: "-2px" }}>Animals</h4>
                     {data.sr_updates[index] && data.sr_updates[index].animals.map((animal, inception) => (
-                      <ListGroup.Item key={animal.id}>
+                      <ListGroup.Item key={animal.id} hidden={animal.status === 'SHELTERED' && data.sr_updates[index] && data.sr_updates[index].animals[inception] && (data.sr_updates[index].animals[inception].shelter !== Number(id))}>
                         <AnimalStatus formikProps={props} index={index} inception={inception} shelter_id={id} animal={animal} shelter_options={options.shelter_options} room_options={options.room_options} />
                       </ListGroup.Item>
                     ))}

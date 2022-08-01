@@ -118,7 +118,6 @@ function ServiceRequestForm(props) {
           .nullable(),
       })}
       onSubmit={ async (values, { setSubmitting }) => {
-        console.log(values)
         setIsButtonSubmitting(true);
         if (SRs.filter(sr => (sr.address === values.address && sr.city === values.city && sr.state === values.state)).length > 0 && !skip) {
           setDupeSRs(SRs.filter(sr => (sr.address === values.address && sr.city === values.city && sr.state === values.state)));
