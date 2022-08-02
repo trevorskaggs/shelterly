@@ -64,7 +64,7 @@ class ShelterViewSet(viewsets.ModelViewSet):
                     ),
                 )
             )
-            .with_history().prefetch_related(Prefetch('animal_set', Animal.objects.filter(room=None, incident__slug=self.request.GET.get('incident')).exclude(status='CANCELED'), to_attr="unroomed_animals")))
+            .with_history().prefetch_related(Prefetch('animal_set', Animal.objects.filter(room=None, incident__slug=self.request.GET.get('incident')).exclude(status='CANCELED'), to_attr="unroomed_animals"))).order_by('name')
         if self.request.GET.get('incident') and self.request.GET.get('incident', '') != 'test':
             queryset = queryset.filter(test=False)
         return queryset

@@ -491,6 +491,7 @@ function Deploy({ incident }) {
                     position={[service_request.latitude, service_request.longitude]}
                     icon={mapState[service_request.id] && mapState[service_request.id].checked ? checkMarkerIcon : service_request.reported_animals > 0 ? reportedMarkerIcon : service_request.sheltered_in_place > 0 ? SIPMarkerIcon : UTLMarkerIcon}
                     onClick={() => handleMapState(service_request.id)}
+                    zIndexOffset={mapState[service_request.id].checked ? 1000 : 0}
                   >
                     <MapTooltip autoPan={false}>
                       <span>

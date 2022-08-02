@@ -28,6 +28,7 @@ import PersonSearch from "./people/PersonSearch";
 import OwnerContactForm from "./people/OwnerContactForm";
 import Shelter from "./shelter/Shelter";
 import ShelterForm from "./shelter/ShelterForm";
+import ShelterIntake from "./shelter/ShelterIntake";
 import ShelterRoomAssignment from "./shelter/ShelterRoomAssignment";
 import ShelterDetails from "./shelter/ShelterDetails";
 import BuildingForm from "./shelter/BuildingForm";
@@ -43,6 +44,7 @@ export const publicRoutes = {
 
 const routes = {
   "/": () => <Incident />,
+  "/reset_password": () => <PasswordReset />,
   "/:incident": ({incident}) => <Home incident={incident} />,
   "/incident/edit/:id": ({id}) => <IncidentForm id={id} />,
   "/incident/new": () => <IncidentForm />,
@@ -71,6 +73,7 @@ const routes = {
   "/:incident/hotline/servicerequest/:id": ({id, incident}) => <ServiceRequestDetails id={id} incident={incident} />,
   "/:incident/hotline/workflow/*": ({incident}) => <StepperWorkflow incident={incident} />,
   "/:incident/intake/workflow/*": ({incident}) => <StepperWorkflow incident={incident} />,
+  "/:incident/shelter/:id/intake": ({id, incident}) => <ShelterIntake id={id} incident={incident} />,
   "/:incident/people/owner/edit/:id": ({id, incident}) => <PersonForm id={id} state={initialWorkflowData} incident={incident} />,
   "/:incident/people/owner/new": ({incident}) => <PersonForm state={initialWorkflowData} incident={incident} />,
   "/:incident/people/owner/search": ({incident}) => <PersonSearch incident={incident} />,

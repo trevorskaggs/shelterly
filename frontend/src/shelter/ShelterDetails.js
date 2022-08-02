@@ -4,11 +4,9 @@ import { Link } from 'raviger';
 import { Card, Col, ListGroup, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faArrowsAltH, faBuilding, faDoorOpen, faEdit, faPlusSquare,
+  faBuilding, faDoorOpen, faEdit, faPlusSquare,
 } from '@fortawesome/free-solid-svg-icons';
-import {
-  faSquare,
-} from '@fortawesome/free-regular-svg-icons';
+import { faArrowDownToSquare } from '@fortawesome/pro-regular-svg-icons';
 import History from '../components/History';
 import Header from '../components/Header';
 
@@ -94,6 +92,9 @@ function ShelterDetails({ id, incident }) {
                   <b>Phone:</b> {data.display_phone || "No contact number listed"}
                 </ListGroup.Item>
                 <ListGroup.Item>
+                  <b>Currently Sheltering:</b> {data.animal_count + data.unroomed_animals.length} Animal{data.animal_count + data.unroomed_animals.length === 1 ? "" : "s"}
+                </ListGroup.Item>
+                <ListGroup.Item>
                   <b>Description: </b>{data.description || "None"}
                 </ListGroup.Item>
               </ListGroup>
@@ -110,21 +111,14 @@ function ShelterDetails({ id, incident }) {
               <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
                 <ListGroup.Item className="rounded" action><Link href={"/" + incident + "/intake/workflow/owner?shelter_id=" + id} style={{color:"#FFF"}}><FontAwesomeIcon icon={faDoorOpen} inverse/> <b>Intake from Walk-In (Owner)</b></Link></ListGroup.Item>
                 <ListGroup.Item className="rounded" action><Link href={"/" + incident + "/intake/workflow/reporter?shelter_id=" + id} style={{color:"#FFF"}}><FontAwesomeIcon icon={faDoorOpen} inverse/> <b>Intake from Walk-In (Non-Owner)</b></Link></ListGroup.Item>
-                <ListGroup.Item className="rounded" action><Link href={"/" + incident + "/dispatch/dispatchassignment/search"} style={{color:"#FFF"}}><FontAwesomeIcon icon={faDoorOpen} inverse/> <b>Intake from Dispatch Assignment</b></Link></ListGroup.Item>
-                <ListGroup.Item>
-                  <b>Currently Sheltering:</b> {data.animal_count} Animal{data.animal_count + data.unroomed_animals.length === 1 ? "" : "s"}
-                </ListGroup.Item>
+                <ListGroup.Item className="rounded" action><Link href={"/" + incident + "/shelter/" + id + "/intake"} style={{color:"#FFF"}}><FontAwesomeIcon icon={faDoorOpen} inverse/> <b>Intake from Dispatch Assignment</b></Link></ListGroup.Item>
                 <ListGroup.Item>
                   <b>Roomless:</b> {data.unroomed_animals.length} Animal{data.unroomed_animals.length === 1 ? "" : "s"}
                   <OverlayTrigger placement="top" overlay={<Tooltip id={`tooltip-assign`}>Assign animals to rooms</Tooltip>}>
-                    <Link href={"/" + incident + "/shelter/" + id + "/assign"}>
-                      <span className="fa-layers" style={{marginLeft:"3px"}}>
-                        <FontAwesomeIcon icon={faSquare} size="lg" inverse />
-                        <FontAwesomeIcon icon={faArrowsAltH} transform={'shrink-4 right-1'} inverse />
-                      </span>
-                    </Link>
+                    <Link href={"/" + incident + "/shelter/" + id + "/assign"}><FontAwesomeIcon icon={faArrowDownToSquare} size="lg" className="ml-1 fa-move-up" inverse /></Link>
                   </OverlayTrigger>
                 </ListGroup.Item>
+                <ListGroup.Item></ListGroup.Item>
               </ListGroup>
             </Card.Body>
           </Card>

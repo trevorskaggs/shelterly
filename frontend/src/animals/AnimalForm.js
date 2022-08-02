@@ -226,7 +226,7 @@ const AnimalForm = (props) => {
       unmounted = true;
       source.cancel();
     };
-  }, [id]);
+  }, [id, props.incident]);
   
   return (
     <>

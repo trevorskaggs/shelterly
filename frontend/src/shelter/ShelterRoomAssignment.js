@@ -142,7 +142,7 @@ function ShelterRoomAssignment({ id, incident }) {
   return (
     <>
       <Header>
-      <span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-2"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="sm" inverse /></span>
+        <span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-2"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="sm" inverse /></span>
         {data.name}
         &nbsp;- Room Animals
       </Header>
