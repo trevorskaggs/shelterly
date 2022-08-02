@@ -12,7 +12,7 @@ import {
 import { useMark } from '../hooks';
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
-
+import { speciesChoices } from '../animals/constants';
 import { ITEMS_PER_PAGE } from '../constants';
 
 function PersonSearch({ incident }) {
@@ -79,6 +79,10 @@ function PersonSearch({ incident }) {
 								species.push(animal.species)
 							}
 						})
+            let sortOrder = speciesChoices.map(sc => sc.value);
+            species.sort(function(a, b) {
+              return sortOrder.indexOf(a) - sortOrder.indexOf(b);
+            });
 						search_state[owner.id] = {species:species, selectedSpecies:species[0]}
 						})
 					setSearchState(search_state);
@@ -176,13 +180,15 @@ function PersonSearch({ incident }) {
           </Card>
           {searchState[owner.id] ?
           <Card style={{marginBottom:"6px"}}>
-            <Card.Body>
+            <Card.Body style={{width:"525px"}}>
               <Card.Title style={{marginTop:"-10px"}}>
-                <ListGroup horizontal>
-                {searchState[owner.id].species.map(species => (
-                  <ListGroup.Item key={species} active={searchState[owner.id].selectedSpecies === species ? true : false} style={{textTransform:"capitalize", cursor:'pointer', paddingTop:"4px", paddingBottom:"4px"}} onClick={() => setSearchState(prevState => ({ ...prevState, [owner.id]:{...prevState[owner.id], selectedSpecies:species} }))}>{species}{species !== "other" ? "s" : ""}</ListGroup.Item>
-                ))}
-                </ListGroup>
+                <Scrollbar horizontal autoHide style={{height:"32px", width:"485px"}} renderView={props => <div {...props} style={{...props.style, marginBottom:"-18px", marginRight:"0px", overflowX:"auto", overflowY: "hidden"}}/>} renderThumbVertical={props => <div {...props} style={{...props.style, display: 'none'}} />}>
+                  <ListGroup horizontal>
+                  {searchState[owner.id].species.map(species => (
+                    <ListGroup.Item key={species} active={searchState[owner.id].selectedSpecies === species ? true : false} style={{textTransform:"capitalize", cursor:'pointer', paddingTop:"4px", paddingBottom:"4px"}} onClick={() => setSearchState(prevState => ({ ...prevState, [owner.id]:{...prevState[owner.id], selectedSpecies:species} }))}>{species}{species !== "other" ? "s" : ""}</ListGroup.Item>
+                  ))}
+                  </ListGroup>
+                </Scrollbar>
               </Card.Title>
               {statusOptions === 'owners' ?
               <ListGroup style={{height:"144px", overflowY:"auto", marginTop:"-12px"}}>

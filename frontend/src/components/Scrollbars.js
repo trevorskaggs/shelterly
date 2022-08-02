@@ -66,17 +66,19 @@ class ShadowScrollbars extends Component {
       bottom: 0,
       left: 0,
       right: 0,
-      height: 100,
+      height: 31,
       width: 10,
+      zIndex: 9999,
       background: 'linear-gradient(to right, rgba(226, 226, 226, 0.4) 0%, rgba(0, 0, 0, 0) 100%)'
     };
     const shadowRightStyle = {
       position: 'absolute',
       bottom: 0,
-      left: 1018,
+      left: 475,
       right: 0,
-      height: 100,
+      height: 31,
       width: 10,
+      zIndex: 9999,
       background: 'linear-gradient(to left, rgba(226, 226, 226, 0.4) 0%, rgba(0, 0, 0, 0) 100%)'
     };
     
@@ -86,7 +88,7 @@ class ShadowScrollbars extends Component {
           ref="scrollbars"
           onUpdate={this.handleUpdate}
           renderThumbVertical={props => <div {...props} style={{...props.style, background: 'rgba(226, 226, 226, 0.6)'}} />}
-          renderThumbHorizontal={props => <div {...props} style={{...props.style, background: 'rgba(226, 226, 226, 0.6)'}} />}
+          renderThumbHorizontal={props => <div {...props} style={{...props.style, zIndex: 9999, background: 'rgba(226, 226, 226, 0.6)'}} />}
           {...props}/>
         {props.no_shadow !== "true" ?
         <div

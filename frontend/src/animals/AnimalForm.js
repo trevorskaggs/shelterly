@@ -461,7 +461,7 @@ const AnimalForm = (props) => {
                       isClearable={true}
                       key={`my_unique_size_select_key__${formikProps.values.size}`}
                       ref={sizeRef}
-                      options={sizeChoices[formikProps.values.species]}
+                      options={Object.keys(sizeChoices).includes(formikProps.values.species) ? sizeChoices[formikProps.values.species] : sizeChoices['other']}
                       value={formikProps.values.size||''}
                       placeholder={placeholder}
                     />
@@ -477,7 +477,7 @@ const AnimalForm = (props) => {
                       key={`my_unique_pcolor_select_key__${formikProps.values.pcolor}`}
                       ref={pcolorRef}
                       style={{marginTop:"2px"}}
-                      options={colorChoices[formikProps.values.species]}
+                      options={Object.keys(colorChoices).includes(formikProps.values.species) ? colorChoices[formikProps.values.species] : colorChoices['other']}
                       value={formikProps.values.pcolor||''}
                       placeholder={placeholder}
                     />
@@ -489,7 +489,7 @@ const AnimalForm = (props) => {
                       key={`my_unique_scolor_select_key__${formikProps.values.scolor}`}
                       ref={scolorRef}
                       style={{marginTop:"23px"}}
-                      options={colorChoices[formikProps.values.species]}
+                      options={Object.keys(colorChoices).includes(formikProps.values.species) ? colorChoices[formikProps.values.species] : colorChoices['other']}
                       value={formikProps.values.scolor||''}
                       placeholder={placeholder}
                     />
@@ -519,14 +519,14 @@ const AnimalForm = (props) => {
                   </Col>
                   <Col xs="3">
                     <DropDown
-                        label="Sex"
-                        id="sexDropDown"
-                        name="sex"
-                        type="text"
-                        key={`my_unique_sex_select_key__${formikProps.values.sex}`}
-                        ref={sexRef}
-                        options={sexChoices}
-                        value={formikProps.values.sex||''}
+                      label="Sex"
+                      id="sexDropDown"
+                      name="sex"
+                      type="text"
+                      key={`my_unique_sex_select_key__${formikProps.values.sex}`}
+                      ref={sexRef}
+                      options={sexChoices}
+                      value={formikProps.values.sex||''}
                     />
                   </Col>
                   <Col xs="3">
@@ -538,7 +538,7 @@ const AnimalForm = (props) => {
                       xs="4"
                       key={`my_unique_age_select_key__${formikProps.values.age}`}
                       ref={ageRef}
-                      options={ageChoices[formikProps.values.species]}
+                      options={Object.keys(ageChoices).includes(formikProps.values.species) ? ageChoices[formikProps.values.species] : ageChoices['other']}
                       value={formikProps.values.age||''}
                       placeholder={placeholder}
                     />

@@ -35,7 +35,7 @@ hr { display: block; height: 1px;
 .rdt_Pagination { border-bottom-left-radius : .25rem; border-bottom-right-radius : .25rem; }
 
 /* Leaflet map CSS */
-.leaflet-container { width: auto; height: 55vh;}
+.leaflet-container { width: auto; height: 50vh;}
 
 .landing-leaflet-container { width: auto; height: 450px; min-height:450px;}
 

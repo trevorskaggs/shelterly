@@ -1,14 +1,25 @@
 export const speciesChoices = [
-    { value: 'cat', label: 'Cat' },
-    { value: 'dog', label: 'Dog' },
-    { value: 'horse', label: 'Horse' },
-    { value: 'other', label: 'Other' }
-  ]
+  { value: 'alpaca', label: 'Alpaca' },
+  { value: 'cat', label: 'Cat' },
+  { value: 'cow', label: 'Cow' },
+  { value: 'dog', label: 'Dog' },
+  { value: 'donkey', label: 'Donkey' },
+  { value: 'duck', label: 'Duck' },
+  { value: 'emu', label: 'Emu' },
+  { value: 'goat', label: 'Goat' },
+  { value: 'horse', label: 'Horse' },
+  { value: 'llama', label: 'Llama' },
+  { value: 'other', label: 'Other' },
+  { value: 'pig', label: 'Pig' },
+  { value: 'rabbit', label: 'Rabbit' },
+  { value: 'sheep', label: 'Sheep' },
+  { value: 'turkey', label: 'Turkey' },
+]
 
-  export const sexChoices = [
-    { value: 'M', label: 'Male' },
-    { value: 'F', label: 'Female' },
-  ]
+export const sexChoices = [
+  { value: 'M', label: 'Male' },
+  { value: 'F', label: 'Female' },
+]
 
 export const dogSizeChoices = [
   {value:'small', label:"Small"},

@@ -359,7 +359,7 @@ function AnimalSearch({ incident }) {
                     placeholder="Select Color"
                     components={{ NoOptionsMessage }}
                     ref={pcolorRef}
-                    options={colorChoices[options.species]}
+                    options={Object.keys(colorChoices).includes(options.species) ? colorChoices[options.species] : colorChoices['other']}
                     styles={customStyles}
                     isClearable={true}
                     onChange={(instance) => {
