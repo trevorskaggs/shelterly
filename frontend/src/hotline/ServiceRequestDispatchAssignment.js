@@ -38,11 +38,11 @@ function ServiceRequestDispatchAssignment({ id, incident }) {
     var matches = {};
 
     service_request.animals.forEach((animal) => {
-      if (!matches[[animal.species,animal.size]]) {
-        matches[[animal.species,animal.size]] = 1;
+      if (!matches[[animal.species]]) {
+        matches[[animal.species]] = 1;
       }
       else {
-        matches[[animal.species,animal.size]] += 1;
+        matches[[animal.species]] += 1;
       }
     });
     return matches
@@ -211,7 +211,7 @@ function ServiceRequestDispatchAssignment({ id, incident }) {
                   <span>
                     {Object.keys(currentRequest.matches).map((key,i) => (
                       <span key={key} style={{textTransform:"capitalize"}}>
-                        {i > 0 && ", "}{prettyText(key.split(',')[1], key.split(',')[0], currentRequest.matches[key])}
+                        {i > 0 && ", "}{prettyText(key.split(',')[0], currentRequest.matches[key])}
                       </span>
                     ))}
                   </span>
@@ -248,7 +248,7 @@ function ServiceRequestDispatchAssignment({ id, incident }) {
                     <span>
                       {Object.keys(mapState[dispatch_assignment.id].service_requests[assigned_request.service_request_object.id].matches).map((key,i) => (
                         <span key={key} style={{textTransform:"capitalize"}}>
-                          {i > 0 && ", "}{prettyText(key.split(',')[1], key.split(',')[0], mapState[dispatch_assignment.id].service_requests[assigned_request.service_request_object.id].matches[key])}
+                          {i > 0 && ", "}{prettyText(key.split(',')[0], mapState[dispatch_assignment.id].service_requests[assigned_request.service_request_object.id].matches[key])}
                         </span>
                       ))}
                     </span>
@@ -283,7 +283,7 @@ function ServiceRequestDispatchAssignment({ id, incident }) {
                       <span>
                         {Object.keys(service_request.matches).map((key,i) => (
                           <span key={key} style={{textTransform:"capitalize"}}>
-                            {i > 0 && ", "}{prettyText(key.split(',')[1], key.split(',')[0], service_request.matches[key])}
+                            {i > 0 && ", "}{prettyText(key.split(',')[0], service_request.matches[key])}
                           </span>
                         ))}
                       </span>
@@ -307,12 +307,13 @@ function ServiceRequestDispatchAssignment({ id, incident }) {
       <Col xs={10} className="pl-0 pr-0">
         <div className="card-header d-flex align-items-center rounded" style={{height:"37px"}}><b style={{marginLeft:"-10px"}}>
           Service Request:</b>&nbsp;
-          SR#{currentRequest.id} - {currentRequest.full_address}&nbsp;|&nbsp;
-          {Object.keys(currentRequest.matches).map((key,i) => (
+          SR#{currentRequest.id} - {currentRequest.full_address}
+          {/* {Object.keys(currentRequest.matches).map((key,i) => (
             <span key={key} style={{textTransform:"capitalize"}}>
-              {i > 0 && ", "}{prettyText(key.split(',')[1], key.split(',')[0], currentRequest.matches[key])}
+              {i > 0 && ", "}{prettyText(key.split(',')[0], currentRequest.matches[key])}
             </span>
-          ))}</div>
+          ))} */}
+        </div>
       </Col>
     </Row>
     <Row className="d-flex flex-wrap" style={{marginTop:"-1px", marginRight:"0px", marginLeft:"0px", minHeight:"36vh"}}>
@@ -369,7 +370,7 @@ function ServiceRequestDispatchAssignment({ id, incident }) {
                     <span>
                       {Object.keys(mapState[dispatch_assignment.id].service_requests[assigned_request.service_request_object.id].matches).map((key,i) => (
                         <span key={key} style={{textTransform:"capitalize"}}>
-                          {i > 0 && ", "}{prettyText(key.split(',')[1], key.split(',')[0], mapState[dispatch_assignment.id].service_requests[assigned_request.service_request_object.id].matches[key])}
+                          {i > 0 && ", "}{prettyText(key.split(',')[0], mapState[dispatch_assignment.id].service_requests[assigned_request.service_request_object.id].matches[key])}
                         </span>
                       ))}
                     </span>
@@ -436,7 +437,7 @@ function ServiceRequestDispatchAssignment({ id, incident }) {
                       <span>
                         {Object.keys(mapState[dispatch_assignment.id].service_requests[assigned_request.service_request_object.id].matches).map((key,i) => (
                           <span key={key} style={{textTransform:"capitalize"}}>
-                            {i > 0 && ", "}{prettyText(key.split(',')[1], key.split(',')[0], mapState[dispatch_assignment.id].service_requests[assigned_request.service_request_object.id].matches[key])}
+                            {i > 0 && ", "}{prettyText(key.split(',')[0], mapState[dispatch_assignment.id].service_requests[assigned_request.service_request_object.id].matches[key])}
                           </span>
                         ))}
                       </span>

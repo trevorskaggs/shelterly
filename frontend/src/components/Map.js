@@ -145,17 +145,17 @@ export const countMatches = (service_request) => {
 
   service_request.animals.forEach((animal) => {
     if (['REPORTED', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE'].indexOf(animal.status) > -1) {
-      if (!matches[[animal.species,animal.size]]) {
-        matches[[animal.species,animal.size]] = 1;
+      if (!matches[[animal.species]]) {
+        matches[[animal.species]] = 1;
       }
       else {
-        matches[[animal.species,animal.size]] += 1;
+        matches[[animal.species]] += 1;
       }
-      if (!status_matches[animal.status][[animal.species,animal.size]]) {
-        status_matches[animal.status][[animal.species,animal.size]] = 1;
+      if (!status_matches[animal.status][[animal.species]]) {
+        status_matches[animal.status][[animal.species]] = 1;
       }
       else {
-        status_matches[animal.status][[animal.species,animal.size]] += 1;
+        status_matches[animal.status][[animal.species]] += 1;
       }
     }
   });

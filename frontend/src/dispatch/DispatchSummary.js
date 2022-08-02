@@ -338,7 +338,7 @@ function DispatchSummary({ id, incident }) {
                     <span>
                       {Object.keys(mapState[assigned_request.service_request_object.id].matches).map((key,i) => (
                         <span key={key} style={{textTransform:"capitalize"}}>
-                          {i > 0 && ", "}{prettyText(key.split(',')[1], key.split(',')[0], mapState[assigned_request.service_request_object.id].matches[key])}
+                          {i > 0 && ", "}{prettyText(key.split(',')[0], mapState[assigned_request.service_request_object.id].matches[key])}
                         </span>
                       ))}
                     </span>
