@@ -63,10 +63,10 @@ function AnimalStatus(props) {
             </Tooltip>
           }
         >
-          <FontAwesomeIcon icon={faClipboardList} className="ml-1 mr-1" inverse />
+          <FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse />
         </OverlayTrigger>
         : ""}
-        {props.animal.pcolor || props.animal.scolor ? <span>({props.animal.pcolor ? props.animal.pcolor : "" }{props.animal.scolor ? <span>{props.animal.pcolor ? <span>, </span> : ""}{props.animal.scolor}</span> : ""})</span>: ""}
+        {props.animal.pcolor || props.animal.scolor ? <span className="ml-1">({props.animal.pcolor ? props.animal.pcolor : "" }{props.animal.scolor ? <span>{props.animal.pcolor ? <span>/</span> : ""}{props.animal.scolor}</span> : ""})</span>: ""}
       </span>
     </Row>
     {props.formikProps.values && props.formikProps.values.sr_updates[props.index] && props.formikProps.values.sr_updates[props.index].animals[props.inception] && props.formikProps.values.sr_updates[props.index].animals[props.inception].status === 'SHELTERED' ?

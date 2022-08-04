@@ -488,10 +488,10 @@ function DispatchSummary({ id, incident }) {
                       </Tooltip>
                     }
                   >
-                    <FontAwesomeIcon icon={faBriefcaseMedical} className="ml-1 mr-1" size="sm" inverse />
+                    <FontAwesomeIcon icon={faBriefcaseMedical} className="ml-1" size="sm" inverse />
                   </OverlayTrigger>
                 : ""}
-                {animal.pcolor || animal.scolor ? <span style={{textTransform:"capitalize"}}>({animal.pcolor ? animal.pcolor : "" }{animal.scolor ? <span>{animal.pcolor ? <span>, </span> : ""}{animal.scolor}</span> : ""})</span>: ""}
+                {animal.pcolor || animal.scolor ? <span className="ml-1" style={{textTransform:"capitalize"}}>({animal.pcolor ? animal.pcolor : "" }{animal.scolor ? <span>{animal.pcolor ? <span>/</span> : ""}{animal.scolor}</span> : ""})</span>: ""}
                 &nbsp;- {animal.status}
               </ListGroup.Item>
             ))}
