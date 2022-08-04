@@ -121,7 +121,7 @@ function Hotline({ incident }) {
                       <span>
                         {Object.keys(mapState[service_request.id].matches).map((key,i) => (
                           <span key={key} style={{textTransform:"capitalize"}}>
-                            {i > 0 && ", "}{prettyText('', key.split(',')[0], mapState[service_request.id].matches[key])}
+                            {i > 0 && ", "}{prettyText(key.split(',')[0], mapState[service_request.id].matches[key])}
                           </span>
                         ))}
                       </span>

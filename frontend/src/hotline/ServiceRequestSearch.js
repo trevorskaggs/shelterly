@@ -14,6 +14,7 @@ import Moment from 'react-moment';
 import { useMark } from '../hooks';
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
+import { speciesChoices } from '../animals/constants';
 import { ITEMS_PER_PAGE } from '../constants';
 
 function ServiceRequestSearch({ incident }) {
@@ -77,7 +78,7 @@ function ServiceRequestSearch({ incident }) {
 								species.push(animal.species)
 							}
 						});
-            let sortOrder = ['cat', 'dog', 'horse', 'other'];
+            let sortOrder = speciesChoices.map(sc => sc.value);
             species.sort(function(a, b) {
               return sortOrder.indexOf(a) - sortOrder.indexOf(b);
             });
@@ -377,13 +378,15 @@ function ServiceRequestSearch({ incident }) {
             </Card>
             {searchState[service_request.id] ?
               <Card style={{marginBottom:"6px"}}>
-                <Card.Body>
+                <Card.Body style={{width:"525px"}}>
                   <Card.Title style={{marginTop:"-10px"}}>
-                    <ListGroup horizontal>
-                    {searchState[service_request.id].species.map(species => (
-                      <ListGroup.Item key={species} active={searchState[service_request.id].selectedSpecies === species ? true : false} style={{textTransform:"capitalize", cursor:'pointer', paddingTop:"4px", paddingBottom:"4px"}} onClick={() => setSearchState(prevState => ({ ...prevState, [service_request.id]:{...prevState[service_request.id], selectedSpecies:species} }))}>{species}{species !== "other" ? "s" : ""}</ListGroup.Item>
-                    ))}
-                    </ListGroup>
+                    <Scrollbar horizontal autoHide style={{height:"32px", width:"485px"}} renderView={props => <div {...props} style={{...props.style, marginBottom:"-18px", marginRight:"0px", overflowX:"auto", overflowY: "hidden"}}/>} renderThumbVertical={props => <div {...props} style={{...props.style, display: 'none'}} />}>
+                      <ListGroup horizontal>
+                      {searchState[service_request.id].species.map(species => (
+                        <ListGroup.Item key={species} active={searchState[service_request.id].selectedSpecies === species ? true : false} style={{textTransform:"capitalize", cursor:'pointer', paddingTop:"4px", paddingBottom:"4px"}} onClick={() => setSearchState(prevState => ({ ...prevState, [service_request.id]:{...prevState[service_request.id], selectedSpecies:species} }))}>{species}{["other", "sheep"].includes(species) ? "" : "s"}</ListGroup.Item>
+                      ))}
+                      </ListGroup>
+                    </Scrollbar>
                   </Card.Title>
                   <ListGroup style={{height:"144px", overflowY:"auto", marginTop:"-12px"}}>
                     <Scrollbar style={{height:"144px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>

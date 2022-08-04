@@ -7,10 +7,22 @@ UNKNOWN_CHOICES = (
 )
 
 SPECIES_CHOICES = (
+    ('alpaca', "Alpaca"),
     ('cat', "Cat"),
+    ('chicken', "Chicken"),
+    ('cow', "Cow"),
     ('dog', "Dog"),
+    ('donkey', "Donkey"),
+    ('duck', "Duck"),
+    ('emu', "Emu"),
+    ('goat', "Goat"),
     ('horse', 'Horse'),
+    ('llama', "Llama"),
     ('other', "Other"),
+    ('pig', "Pig"),
+    ('rabbit', "Rabbit"),
+    ('sheep', "Sheep"),
+    ('turkey', "Turkey"),
 )
 
 SEX_CHOICES = (
@@ -25,7 +37,7 @@ DOG_SIZE_CHOICES = (
     ('giant', "Giant (111+ lbs)"),
 )
 DOG_AGE_CHOICES = (
-    ('youth', "Youth"),
+    ('young', "Young"),
     ('adult', "Adult"),
     ('senior', "Senior"),
 )
@@ -36,7 +48,7 @@ CAT_SIZE_CHOICES = (
 )
 CAT_AGE_CHOICES = (
     ('kitten', 'Kitten'),
-    ('youth', 'Youth'),
+    ('young', 'Young'),
     ('adult', 'Adult'),
     ('senior', 'Senior'),
     ('geriatric', 'Geriatric'),

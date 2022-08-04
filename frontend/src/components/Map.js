@@ -145,17 +145,17 @@ export const countMatches = (service_request) => {
 
   service_request.animals.forEach((animal) => {
     if (['REPORTED', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE'].indexOf(animal.status) > -1) {
-      if (!matches[[animal.species,animal.size]]) {
-        matches[[animal.species,animal.size]] = 1;
+      if (!matches[[animal.species]]) {
+        matches[[animal.species]] = 1;
       }
       else {
-        matches[[animal.species,animal.size]] += 1;
+        matches[[animal.species]] += 1;
       }
-      if (!status_matches[animal.status][[animal.species,animal.size]]) {
-        status_matches[animal.status][[animal.species,animal.size]] = 1;
+      if (!status_matches[animal.status][[animal.species]]) {
+        status_matches[animal.status][[animal.species]] = 1;
       }
       else {
-        status_matches[animal.status][[animal.species,animal.size]] += 1;
+        status_matches[animal.status][[animal.species]] += 1;
       }
     }
   });
@@ -163,28 +163,17 @@ export const countMatches = (service_request) => {
 }
 
 // Takes in animal size, species, and count and returns a pretty string combination.
-export const prettyText = (size, species, count) => {
+export const prettyText = (species, count) => {
   if (count <= 0) {
     return "";
   }
   let plural = ""
-  if (count > 1) {
+  if (count > 1 && species !== "sheep") {
     plural = "s"
   }
 
-  let size_and_species = size + " " + species + plural;
-  // Exception for horses since they don't need an extra species output.
-  if (species === 'horse' && size !== 'standard') {
-    // Exception for pluralizing ponies.
-    if (size === 'pony' && count > 1) {
-      size_and_species = 'ponies'
-    }
-    else if (size) {
-      size_and_species = size + plural;
-    }
-  }
+  let text = count + " " + species + plural;
 
-  let text = count + " " + size_and_species;
   return text;
 }
 

@@ -21,7 +21,7 @@ import Scrollbar from '../components/Scrollbars';
 import { titleCase } from '../components/Utils';
 import { ITEMS_PER_PAGE } from '../constants';
 import { Legend } from "../components/Map";
-import { catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, speciesChoices } from './constants';
+import { catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, speciesChoices, statusChoices } from './constants';
 import AnimalCoverImage from '../components/AnimalCoverImage';
 
 const NoOptionsMessage = props => {
@@ -45,16 +45,9 @@ function AnimalSearch({ incident }) {
     { value: 'no', label: 'No' },
   ];
 
-  const fixedChoices = [
-    { value: 'yes', label: 'Yes' },
-    { value: 'no', label: 'No' },
-    { value: 'unknown', label: 'Unknown'}
-  ];
-
   const sexChoices = [
     { value: 'M', label: 'Male' },
     { value: 'F', label: 'Female' },
-    { value: 'unknown', label: 'Unknown'}
   ];
 
   const radiusChoices = [
@@ -66,12 +59,13 @@ function AnimalSearch({ incident }) {
   const [data, setData] = useState({animals: [], isFetching: false});
   const [shelters, setShelters] = useState({options: [], isFetching: false});
   const [animals, setAnimals] = useState([]);
-  const [options, setOptions] = useState({species: null, sex: null, owned: null, pcolor: '', fixed: null, latlng: null, radius: 1.60934, shelter: ''});
+  const [options, setOptions] = useState({species: null, status: null, sex: null, owned: null, pcolor: '', fixed: null, latlng: null, radius: 1.60934, shelter: ''});
   const [searchTerm, setSearchTerm] = useState(search);
   const [showFilters, setShowFilters] = useState(false);
   const [isDisabled, setIsDisabled] = useState(true);
   const tempSearchTerm = useRef(null);
   const speciesRef = useRef(null);
+  const statusRef = useRef(null);
   const sexRef = useRef(null);
   const ownedRef = useRef(null);
   const fixedRef = useRef(null);
@@ -107,6 +101,7 @@ function AnimalSearch({ incident }) {
 
   const handleApplyFilters = () => {
     setAnimals(data.animals.filter(animal => options.species ? animal.species === options.species : animal)
+                           .filter(animal => options.status ? animal.status === options.status : animal)
                            .filter(animal => options.owned === 'yes' ? animal.owners.length > 0 : animal)
                            .filter(animal => options.owned === 'no' ? animal.owners.length === 0 : animal)
                            .filter(animal => options.fixed ? animal.fixed === options.fixed : animal)
@@ -120,12 +115,13 @@ function AnimalSearch({ incident }) {
 
   const handleClear = () => {
     speciesRef.current.select.clearValue();
+    statusRef.current.select.clearValue();
     sexRef.current.select.clearValue();
     ownedRef.current.select.clearValue();
     fixedRef.current.select.clearValue();
     pcolorRef.current.select.clearValue();
     shelterRef.current.select.clearValue();
-    setOptions({species: null, sex: null, owned: null, pcolor: '', fixed: null, latlng: null, radius: 1.60934});
+    setOptions({species: null, status: null, sex: null, owned: null, pcolor: '', fixed: null, latlng: null, radius: 1.60934});
     setAnimals(data.animals);
   };
 
@@ -251,7 +247,7 @@ function AnimalSearch({ incident }) {
   // Hook handling option changes.
   useEffect(() => {
     const handleDisabled = () => {
-      setIsDisabled(!(options.species || options.sex || options.owned || options.pcolor || options.fixed || options.latlng || options.shelter));
+      setIsDisabled(!(options.species || options.status || options.sex || options.owned || options.pcolor || options.fixed || options.latlng || options.shelter));
     };
 
     setNumPages(Math.ceil(animals.length / ITEMS_PER_PAGE));
@@ -299,6 +295,21 @@ function AnimalSearch({ incident }) {
                     }}
                   />
                   <Select
+                    label="status"
+                    id="statusDropdown"
+                    name="Status"
+                    type="text"
+                    placeholder="Select Status"
+                    options={statusChoices}
+                    styles={customStyles}
+                    isClearable={true}
+                    ref={statusRef}
+                    onChange={(instance) => {
+                      pcolorRef.current.select.clearValue();
+                      setOptions({...options, status: instance ? instance.value : null});
+                    }}
+                  />
+                  <Select
                     label="Sex"
                     id="sexDropdown"
                     name="sex"
@@ -332,7 +343,7 @@ function AnimalSearch({ incident }) {
                     name="fixed"
                     type="text"
                     placeholder="Select Fixed"
-                    options={fixedChoices}
+                    options={ownedChoices}
                     styles={customStyles}
                     isClearable={true}
                     ref={fixedRef}
@@ -348,7 +359,7 @@ function AnimalSearch({ incident }) {
                     placeholder="Select Color"
                     components={{ NoOptionsMessage }}
                     ref={pcolorRef}
-                    options={colorChoices[options.species]}
+                    options={Object.keys(colorChoices).includes(options.species) ? colorChoices[options.species] : colorChoices['other']}
                     styles={customStyles}
                     isClearable={true}
                     onChange={(instance) => {

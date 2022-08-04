@@ -238,7 +238,7 @@ function DispatchAssignmentSearch({ incident }) {
                           <span>
                             {Object.keys(matches[assigned_request.service_request_object.id].species_matches).map((key,i) => (
                               <span key={key} style={{textTransform:"capitalize"}}>
-                                {i > 0 && ", "}{prettyText('', key.split(',')[0], matches[assigned_request.service_request_object.id].species_matches[key])}
+                                {i > 0 && ", "}{prettyText(key.split(',')[0], matches[assigned_request.service_request_object.id].species_matches[key])}
                               </span>
                             ))}
                           </span>

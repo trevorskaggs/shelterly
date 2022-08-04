@@ -1,60 +1,51 @@
 UNKNOWN_CHOICE = ('Unknown', 'Unknown')
 
-## Source: https://en.wikipedia.org/wiki/Coat_(dog)#Colors
 DOG_COLOR_CHOICES = (
-    ('none', 'None'),
     ('black', 'Black'),
-    ('blue', 'Blue'),
     ('brown', 'Brown'),
-    ('brindle', 'Brindle'),
-    ('cream', 'Cream/Taupe'),
-    ('gold', 'Gold'),
     ('gray', 'Gray'),
-    ('harlequin', 'Harlequin'),
-    ('pink', 'Pink'),
+    ('merle', 'Merle'),
     ('red', 'Red'),
     ('tan', 'Tan'),
     ('white', 'White'),
-    ('yellow', 'Yellow'),
+    ('yellow/gold', 'Yellow/Gold'),
 )
 
-## Source: https://en.wikipedia.org/wiki/Cat_coat_genetics
 CAT_COLOR_CHOICES = (
     ('black', 'Black'),
-    ('blue', 'Blue'),
-    ('caramel', 'Caramel'),
-    ('chocolate', 'Chocolate'),
-    ('cinnamon', 'Cinnamon'),
-    ('cream', 'Cream'),
-    ('fawn', 'Fawn'),
-    ('grey', 'Grey'),
-    ('lilac', 'Lilac'),
+    ('brown', 'Brown'),
+    ('calico', 'Calico'),
+    ('gray', 'Gray'),
     ('orange', 'Orange'),
-    ('red', 'Red'),
-    ('smoke', 'Smoke'),
+    ('tan', 'Tan'),
+    ('tortie', 'Tortie'),
     ('white', 'White'),
 )
 
 HORSE_COLOR_CHOICES = (
     ('black', 'Black'),
     ('brown', 'Brown'),
-    ('bay', 'Bay'),
-    ('chestnut', 'Chestnut'),
-    ('grey', 'Grey'),
+    ('gray', 'Gray'),
+    ('paint', 'Paint'),
+    ('red', 'Red'),
+    ('roan', 'Roan'),
+    ('tan', 'Tan'),
     ('white', 'White'),
+    ('yellow/gold', 'Yellow/Gold'),
 )
 
 OTHER_COLOR_CHOICES = (
     ('black', 'Black'),
     ('blue', 'Blue'),
     ('brown', 'Brown'),
+    ('gray', 'Gray'),
+    ('green', 'Green'),
+    ('orange', 'Orange'),
+    ('pink', 'Pink'),
+    ('red', 'Red'),
     ('tan', 'Tan'),
     ('white', 'White'),
     ('yellow', 'Yellow'),
-    ('gray', 'Gray'),
-    ('red', 'Red'),
-    ('orange', 'Orange'),
-    ('green', 'Green'),
 )
 
 ALL_COLOR_CHOICES = DOG_COLOR_CHOICES + CAT_COLOR_CHOICES + HORSE_COLOR_CHOICES + OTHER_COLOR_CHOICES

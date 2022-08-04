@@ -410,8 +410,8 @@ function Deploy({ incident }) {
         <hr/>
         <Row className="d-flex flex-wrap" style={{marginTop:"10px", marginLeft:"0px", marginRight:"0px"}}>
           <Col xs={2} className="border rounded">
-          <Scrollbar no_shadow="true" style={{height:"55vh", marginLeft:"-10px", marginRight:"-10px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
-            <div className="card-header border rounded mt-3 text-center" style={{paddingRight:"15px", paddingLeft:"15px"}}>
+          <Scrollbar no_shadow="true" style={{height:"50vh", marginLeft:"-10px", marginRight:"-10px", right:"-5px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
+            <div className="card-header border rounded mt-3 text-center" style={{paddingRight:"15px", paddingLeft:"15px", marginLeft:"8px", marginRight:"18px"}}>
               <p className="mb-2" style={{marginTop:"-5px"}}>Reported
                 <OverlayTrigger
                   key={"selected-reported"}
@@ -430,10 +430,10 @@ function Deploy({ incident }) {
               </p>
               <hr className="mt-1 mb-1"/>
               {Object.keys(totalSelectedState["REPORTED"]).map(key => (
-                <div key={key} style={{textTransform:"capitalize", marginTop:"5px", marginBottom:"-5px"}}>{prettyText(key.split(',')[1], key.split(',')[0], totalSelectedState["REPORTED"][key])}</div>
+                <div key={key} style={{textTransform:"capitalize", marginTop:"5px", marginBottom:"-5px"}}>{prettyText(key.split(',')[0], totalSelectedState["REPORTED"][key])}</div>
               ))}
             </div>
-            <div className="card-header border rounded mt-3 text-center" style={{paddingRight:"15px", paddingLeft:"15px"}}>
+            <div className="card-header border rounded mt-3 text-center" style={{paddingRight:"15px", paddingLeft:"15px", marginLeft:"8px", marginRight:"18px"}}>
               <p className="mb-2" style={{marginTop:"-5px"}}>SIP
                 <OverlayTrigger
                   key={"selected-sip"}
@@ -453,10 +453,10 @@ function Deploy({ incident }) {
               </p>
               <hr className="mt-1 mb-1"/>
               {Object.keys(totalSelectedState["SHELTERED IN PLACE"]).map(key => (
-                <div key={key} style={{textTransform:"capitalize", marginTop:"5px", marginBottom:"-5px"}}>{prettyText(key.split(',')[1], key.split(',')[0], totalSelectedState["SHELTERED IN PLACE"][key])}</div>
+                <div key={key} style={{textTransform:"capitalize", marginTop:"5px", marginBottom:"-5px"}}>{prettyText(key.split(',')[0], totalSelectedState["SHELTERED IN PLACE"][key])}</div>
               ))}
             </div>
-            <div className="card-header border rounded mt-3 mb-3 text-center" style={{paddingRight:"15px", paddingLeft:"15px"}}>
+            <div className="card-header border rounded mt-3 mb-3 text-center" style={{paddingRight:"15px", paddingLeft:"15px", marginLeft:"8px", marginRight:"18px"}}>
               <p className="mb-2" style={{marginTop:"-5px"}}>UTL
                 <OverlayTrigger
                   key={"selected-utl"}
@@ -475,7 +475,7 @@ function Deploy({ incident }) {
               </p>
               <hr className="mt-1 mb-1"/>
               {Object.keys(totalSelectedState["UNABLE TO LOCATE"]).map(key => (
-                <div key={key} style={{textTransform:"capitalize", marginTop:"5px", marginBottom:"-5px"}}>{prettyText(key.split(',')[1], key.split(',')[0], totalSelectedState["UNABLE TO LOCATE"][key])}</div>
+                <div key={key} style={{textTransform:"capitalize", marginTop:"5px", marginBottom:"-5px"}}>{prettyText(key.split(',')[0], totalSelectedState["UNABLE TO LOCATE"][key])}</div>
               ))}
             </div>
           </Scrollbar>
@@ -499,7 +499,7 @@ function Deploy({ incident }) {
                           <span>
                             {Object.keys(mapState[service_request.id].matches).map((key,i) => (
                               <span key={key} style={{textTransform:"capitalize"}}>
-                                {i > 0 && ", "}{prettyText(key.split(',')[1], key.split(',')[0], mapState[service_request.id].matches[key])}
+                                {i > 0 && ", "}{prettyText(key.split(',')[0], mapState[service_request.id].matches[key])}
                               </span>
                             ))}
                           </span>
@@ -608,7 +608,7 @@ function Deploy({ incident }) {
                     <span>
                       {Object.keys(mapState[service_request.id].matches).map((key,i) => (
                         <span key={key} style={{textTransform:"capitalize"}}>
-                          {i > 0 && ", "}{prettyText(key.split(',')[1], key.split(',')[0], mapState[service_request.id].matches[key])}
+                          {i > 0 && ", "}{prettyText(key.split(',')[0], mapState[service_request.id].matches[key])}
                         </span>
                       ))}
                     </span>

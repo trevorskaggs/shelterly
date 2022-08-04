@@ -162,7 +162,7 @@ function ShelterRoomAssignment({ id, incident }) {
             <Droppable droppableId="unroomed_animals" direction="horizontal">
               {(provided, snapshot) => (
               <Card className="border rounded" style={{height:"80px", display:"flex", justifyContent:"space-around", overflowX:"auto", overflowY: "hidden", backgroundColor:snapshot.isDraggingOver ? "gray" : "#303030"}}>
-                <Scrollbar style={{height:"89px", width:"99.99%"}} renderView={props => <div {...props} style={{...props.style, marginBottom:"-18px", overflowX:"auto", overflowY: "hidden"}}/>} renderThumbVertical={props => <div {...props} style={{...props.style, display: 'none'}} />}>
+                <Scrollbar no_shadow="true" style={{height:"89px", width:"99.99%"}} renderView={props => <div {...props} style={{...props.style, marginBottom:"-18px", marginRight:"0px", overflowX:"auto", overflowY: "hidden"}}/>} renderThumbVertical={props => <div {...props} style={{...props.style, display: 'none'}} />}>
                   <Card.Body style={{paddingBottom:"3px", marginBottom:"-10px", display:"flex", flexDirection:"column"}}>
                     <ul className="unroomed_animals" {...provided.droppableProps} ref={provided.innerRef}>
                     {data.unroomed_animals.map((animal, index) => (
