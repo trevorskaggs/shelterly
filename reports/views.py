@@ -1,12 +1,14 @@
-from django.db.models import Count, Exists, OuterRef, Subquery, Prefetch, F, Q, IntegerField
-from django.db.models.functions import TruncDay
+from django.db.models import Count, CharField, DateTimeField, Exists, OuterRef, Subquery, Prefetch, F, Q, IntegerField, Value
+from django.db.models.functions import Cast, TruncDay
 from rest_framework import viewsets
+from operator import itemgetter
 from rest_framework.response import Response
 from animals.models import Animal
 from hotline.models import ServiceRequest
 from evac.models import DispatchTeam
 from shelter.models import Shelter
 import datetime
+from actstream.models import Action
 from django.utils import timezone
 
 # Provides view for Person API calls.
@@ -47,9 +49,15 @@ class ReportViewSet(viewsets.ViewSet):
           sr_worked_report.append(sr_data)
           end_date -= delta
 
-        shelters = Shelter.objects.all().annotate(dogs=Count("animal", filter=Q(animal__species="dog", animal__status='SHELTERED')), cats=Count("animal", filter=Q(animal__species="cat", animal__status='SHELTERED')), horses=Count("animal", filter=Q(animal__species="horse", animal__status='SHELTERED')), other=Count("animal", filter=Q(animal__species="other", animal__status='SHELTERED')), total=Count("animal", filter=Q(animal__status='SHELTERED'))).values('name', 'dogs', 'cats', 'horses', 'other', 'total')
-        animals_status = Animal.objects.filter(incident__slug=self.request.GET.get('incident', 'test')).exclude(status='CANCELED').values('species').annotate(reported=Count("id", filter=Q(status='REPORTED')), utl=Count("id", filter=Q(status='UNABLE TO LOCATE')), sheltered=Count("id", filter=Q(status='SHELTERED')), sip=Count("id", filter=Q(status='SHELTERED IN PLACE')), reunited=Count("id", filter=Q(status='REUNITED')), deceased=Count("id", filter=Q(status='DECEASED')), total=Count("id")).order_by()
-        animals_ownership = Animal.objects.filter(incident__slug=self.request.GET.get('incident', 'test')).exclude(status='CANCELED').values('species').annotate(owned=Count("id", filter=Q(owners__isnull=False)), stray=Count("id", filter=Q(owners__isnull=True)), total=Count("id")).order_by()
-        data = {'daily_report':daily_report, 'sr_worked_report':sr_worked_report, 'shelter_report':shelters, 'animal_status_report':animals_status, 'animal_owner_report':animals_ownership}
+        shelters = Shelter.objects.filter(test=True if self.request.GET.get('incident', '') == 'test' else False).annotate(dogs=Count("animal", filter=Q(animal__species="dog", animal__status='SHELTERED')), cats=Count("animal", filter=Q(animal__species="cat", animal__status='SHELTERED')), horses=Count("animal", filter=Q(animal__species="horse", animal__status='SHELTERED')), other=Count("animal", filter=Q(animal__species="other", animal__status='SHELTERED')), total=Count("animal", filter=Q(animal__status='SHELTERED'))).values('name', 'dogs', 'cats', 'horses', 'other', 'total')
+        animals_status = Animal.objects.filter(incident__slug=self.request.GET.get('incident', '')).exclude(status='CANCELED').values('species').annotate(reported=Count("id", filter=Q(status='REPORTED')), utl=Count("id", filter=Q(status='UNABLE TO LOCATE')), nfa=Count("id", filter=Q(status='UNABLE TO LOCATE - NFA')), sheltered=Count("id", filter=Q(status='SHELTERED')), sip=Count("id", filter=Q(status='SHELTERED IN PLACE')), reunited=Count("id", filter=Q(status='REUNITED')), deceased=Count("id", filter=Q(status='DECEASED')), total=Count("id")).order_by()
+        animals_ownership = Animal.objects.filter(incident__slug=self.request.GET.get('incident', '')).exclude(status='CANCELED').values('species').annotate(owned=Count("id", filter=Q(owners__isnull=False)), stray=Count("id", filter=Q(owners__isnull=True)), total=Count("id")).order_by()
+        animals_deceased = []
+        lookup = list(Animal.objects.filter(incident__slug=self.request.GET.get('incident', ''), status='DECEASED').values('id', 'name', 'species', 'status', 'address', 'city', 'state', 'zip_code'))
+        for animal in lookup:
+            if Action.objects.filter(target_object_id=str(animal['id']), verb="changed animal status to DECEASED").exists():
+                animal['date'] = Action.objects.get(target_object_id=str(animal['id']), verb="changed animal status to DECEASED").timestamp
+                animals_deceased.append(animal)
+        data = {'daily_report':daily_report, 'sr_worked_report':sr_worked_report, 'shelter_report':shelters, 'animal_status_report':animals_status, 'animal_owner_report':animals_ownership, 'animal_deceased_report':sorted(animals_deceased, key=itemgetter('date'), reverse=True)}
         return Response(data)
-    return Response({'daily_report':[], 'sr_worked_report':[], 'shelter_report':[], 'animal_status_report':[], 'animal_owner_report':[]})
+    return Response({'daily_report':[], 'sr_worked_report':[], 'shelter_report':[], 'animal_status_report':[], 'animal_owner_report':[], 'animal_deceased_report':[]})

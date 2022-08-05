@@ -13,7 +13,7 @@ function Home({ incident }) {
   // Initial state.
   const { state } = useContext(AuthContext);
 
-  const [data, setData] = useState({'isFetching':true, 'daily_report':[], 'sr_worked_report':[], 'shelter_report':[], 'animal_status_report':[], 'animal_owner_report':[]});
+  const [data, setData] = useState({'isFetching':true, 'daily_report':[], 'sr_worked_report':[], 'shelter_report':[], 'animal_status_report':[], 'animal_owner_report':[], 'animals_deceased_report':[]});
   const [selection, setSelection] = useState({value:'daily', label:"Daily Report"});
 
   const [storeDate, setStoreDate] = useState('');
@@ -34,11 +34,12 @@ function Home({ incident }) {
         if (!unmounted) {
           response.data['isFetching'] = false
           setData(response.data)
+          console.log(response.data)
         }
       })
       .catch(error => {
         if (!unmounted) {
-          setData({'isFetching':false, 'daily_report':[], 'sr_worked_report':[], 'shelter_report':[], 'animal_status_report':[], 'animal_owner_report':[]});
+          setData({'isFetching':false, 'daily_report':[], 'sr_worked_report':[], 'shelter_report':[], 'animal_status_report':[], 'animal_owner_report':[], 'animals_deceased_report':[]});
         }
       });
     };
@@ -52,13 +53,13 @@ function Home({ incident }) {
 
   const daily_columns = [
     {
-        name: 'Date',
-        selector: row => row.date,
-        format: row => moment(row.date).format('MM/DD/YY')
+      name: 'Date',
+      selector: row => row.date,
+      format: row => moment(row.date).format('MM/DD/YY')
     },
     {
-        name: 'New SRs',
-        selector: row => row.new,
+      name: 'New SRs',
+      selector: row => row.new,
     },
     {
       name: 'SRs Worked',
@@ -72,9 +73,9 @@ function Home({ incident }) {
 
   const sr_worked_columns = [
     {
-        name: 'Date',
-        selector: row => row.date,
-        format: row => moment(row.date).format('MM/DD/YY')
+      name: 'Date',
+      selector: row => row.date,
+      format: row => moment(row.date).format('MM/DD/YY')
     },
     {
       name: 'New SRs Worked',
@@ -187,12 +188,43 @@ function Home({ incident }) {
     },
   ];
 
+  const animal_deceased_columns = [
+    {
+      name: 'Date',
+      width: "100px",
+      selector: row => moment(row.date).format('MM/DD/YY'),
+    },
+    {
+      name: 'ID',
+      width: "100px",
+      selector: row => row.id,
+    },
+    {
+      name: 'Name',
+      selector: row => row.name || 'Unknown',
+    },
+    {
+      name: 'Address',
+      width: "300px",
+      selector: row => row.address + (row.city ? (", " + row.city) : ", ") + ", " + row.state + " " + row.zip_code,
+    },
+    {
+      name: 'Species',
+      selector: row => row.species[0].toUpperCase() + row.species.slice(1),
+    },
+    {
+      name: 'STATUS',
+      selector: row => row.status,
+    },
+  ];
+
   const reportChoices = [
     {value:'daily', label:"Daily Report"},
-    {value:'worked', label:"SR Worked Report"},
+    {value:'worked', label:"Service Requests Worked Report"},
     {value:'shelter', label:"Shelter Report"},
-    {value:'animal_status', label:"Total Animals By Status"},
-    {value:'animal_owner', label:"Total Animals By Ownership"},
+    {value:'animal_deceased', label:"Deceased Animal Report"},
+    {value:'animal_status', label:"Total Animals By Status Report"},
+    {value:'animal_owner', label:"Total Animals By Ownership Report"},
   ]
 
   const customStyles = {
@@ -287,6 +319,12 @@ function Home({ incident }) {
       <DataTable
           columns={animal_owner_columns}
           data={data.animal_owner_report}
+          pagination
+      />
+      : selection.value === 'animal_deceased' ?
+      <DataTable
+          columns={animal_deceased_columns}
+          data={data.animal_deceased_report}
           pagination
       />
       :
