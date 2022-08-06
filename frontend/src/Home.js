@@ -133,7 +133,7 @@ function Home({ incident }) {
   const animal_status_columns = [
     {
       name: 'Species',
-      selector: row => row.species,
+      selector: row => row.species[0].toUpperCase() + row.species.slice(1),
     },
     {
       name: 'Reported',
@@ -172,7 +172,7 @@ function Home({ incident }) {
   const animal_owner_columns = [
     {
       name: 'Species',
-      selector: row => row.species,
+      selector: row => row.species[0].toUpperCase() + row.species.slice(1),
     },
     {
       name: 'Owned',

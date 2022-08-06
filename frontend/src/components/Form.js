@@ -364,7 +364,7 @@ const AddressLookup = ({setLatLon, ...props}) => {
 
 
   useEffect(() => {
-    if ((childRef.current && (childRef.current.refs.input.value.includes(", USA") || childRef.current.refs.input.value.includes(", United")))) {
+    if ((childRef.current && childRef.current.refs && (childRef.current.refs.input.value.includes(", USA") || childRef.current.refs.input.value.includes(", United")))) {
       setError("");
     }
     updateAddr(search);
@@ -442,7 +442,7 @@ const AddressLookup = ({setLatLon, ...props}) => {
             onBlur={(e) => {
               setError("");
               setTriggerRefresh(!triggerRefresh)
-              if (!values.address && childRef.current && childRef.current.refs.input.value) {
+              if (!values.address && childRef.current && childRef.current.refs && childRef.current.refs.input.value) {
                 setError(props.error);
               }
             }}
@@ -451,7 +451,7 @@ const AddressLookup = ({setLatLon, ...props}) => {
             id="search"
             name="search"
             disabled={props.disabled}
-            key={`search_key__${String(incidentLatLon.lat)}`}
+            key={`search_key_` + incidentLatLon.lat ? String(incidentLatLon.lat) : ""}
             componentRestrictions={{country: "us"}}
             ref={childRef}
             apiKey={process.env.REACT_APP_GOOGLE_API_KEY}
