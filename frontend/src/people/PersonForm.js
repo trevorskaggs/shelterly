@@ -47,7 +47,7 @@ const PersonForm = (props) => {
   // Modal for exiting workflow.
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
-  const goBack = () => navigate(incident + '/hotline');
+  const goBack = () => navigate(window.history.back());
 
   // Track duplicate owner error.
   const [error, setError] = useState({show:false, error:[]});
