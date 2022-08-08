@@ -8,6 +8,7 @@ from django.db.models import Count, Prefetch, Q
 from rest_framework import permissions
 from .serializers import ShelterSerializer, ModestShelterSerializer, SimpleBuildingSerializer, RoomSerializer
 from animals.models import Animal
+from incident.models import Incident
 
 class ShelterViewSet(viewsets.ModelViewSet):
     serializer_class = ShelterSerializer
@@ -20,6 +21,10 @@ class ShelterViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         if serializer.is_valid():
+
+            if self.request.data.get('incident_slug'):
+                serializer.validated_data['incident'] = Incident.objects.get(slug=self.request.data.get('incident_slug'))
+
             # Clean phone fields.
             serializer.validated_data['phone'] = ''.join(char for char in serializer.validated_data.get('phone', '') if char.isdigit())
 
@@ -35,7 +40,7 @@ class ShelterViewSet(viewsets.ModelViewSet):
             action.send(self.request.user, verb='updated shelter', target=shelter)
 
     def get_queryset(self):
-        queryset = (Shelter.objects.annotate(room_count=Count("building__room"))
+        queryset = (Shelter.objects.filter(Q(incident__slug=self.request.GET.get('incident')) | Q(public=True)).annotate(room_count=Count("building__room"))
             .annotate(
                 animal_count=Count(
                     "animal",
@@ -65,8 +70,8 @@ class ShelterViewSet(viewsets.ModelViewSet):
                 )
             )
             .with_history().prefetch_related(Prefetch('animal_set', Animal.objects.filter(room=None, incident__slug=self.request.GET.get('incident', '')).exclude(status='CANCELED'), to_attr="unroomed_animals"))).order_by('name')
-        if self.request.GET.get('incident') and self.request.GET.get('incident', '') != 'test':
-            queryset = queryset.filter(test=False)
+        # if self.request.GET.get('incident') and self.request.GET.get('incident', '') != 'test':
+        #     queryset = queryset.filter(public=True)
         return queryset
 
 

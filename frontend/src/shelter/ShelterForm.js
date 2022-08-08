@@ -24,9 +24,10 @@ const ShelterForm = ({ id, incident }) => {
     city: '',
     state: '',
     zip_code: '',
-    test: false,
+    public: false,
     latitude: null,
     longitude: null,
+    incident_slug: incident,
   });
 
   // Regex validators.
@@ -44,7 +45,7 @@ const ShelterForm = ({ id, incident }) => {
     if (id) {
       const fetchShelterData = async () => {
         // Fetch ServiceRequest data.
-        await axios.get('/shelter/api/shelter/' + id + '/', {
+        await axios.get('/shelter/api/shelter/' + id + '/?incident=' + incident, {
           cancelToken: source.token,
         })
         .then(response => {
@@ -88,7 +89,7 @@ const ShelterForm = ({ id, incident }) => {
           state: Yup.string(),
           zip_code: Yup.string()
             .max(10, 'Must be 10 characters or less'),
-          test: Yup.boolean(),
+          public: Yup.boolean(),
           latitude: Yup.number()
             .nullable(),
           longitude: Yup.number()
@@ -96,7 +97,7 @@ const ShelterForm = ({ id, incident }) => {
         })}
         onSubmit={(values, { setSubmitting }) => {
           if (id) {
-            axios.put('/shelter/api/shelter/' + id + '/', values)
+            axios.put('/shelter/api/shelter/' + id + '/?incident=' + incident, values)
             .then(function() {
               navigate("/" + incident + '/shelter/' + id)
             })
@@ -154,8 +155,8 @@ const ShelterForm = ({ id, incident }) => {
                   />
                 </BootstrapForm.Row>
                 <AddressSearch formikProps={props} label="Search for Shelter Address" show_apt={false} incident={incident} error="Shelter Address was not selected." />
-                <BootstrapForm.Label htmlFor="test">Test Shelter</BootstrapForm.Label>
-                <Field component={Switch} name="test" id="test" type="checkbox" color="primary" />
+                <BootstrapForm.Label htmlFor="public">Public Shelter</BootstrapForm.Label>
+                <Field component={Switch} name="public" id="public" type="checkbox" color="primary" />
               </BootstrapForm>
             </Card.Body>
             <ButtonGroup size="lg">

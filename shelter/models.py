@@ -1,4 +1,5 @@
 from django.db import models
+from incident.models import Incident
 from location.models import Location
 from managers import ActionHistoryQueryset
 # Create your models here.
@@ -16,12 +17,16 @@ class BaseShelterModel(models.Model):
         abstract=True
         ordering = ['name',]
 
+def test_incident():
+    return Incident.objects.get(name='Test').id
+
 class Shelter(BaseShelterModel, Location):
 
     name = models.CharField(max_length=100, unique=True)
     image = models.ImageField(upload_to='media/images/shelter', blank=True, null=True)
     phone = models.CharField(max_length=50, blank=True)
-    test = models.BooleanField(default=True)
+    public = models.BooleanField(default=False)
+    incident = models.ForeignKey(Incident, on_delete=models.CASCADE, default=test_incident)
 
     @property
     def location_type(self):
