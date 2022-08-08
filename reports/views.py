@@ -49,7 +49,23 @@ class ReportViewSet(viewsets.ViewSet):
           sr_worked_report.append(sr_data)
           end_date -= delta
 
-        shelters = Shelter.objects.filter(test=True if self.request.GET.get('incident', '') == 'test' else False).annotate(dogs=Count("animal", filter=Q(animal__species="dog", animal__status='SHELTERED')), cats=Count("animal", filter=Q(animal__species="cat", animal__status='SHELTERED')), horses=Count("animal", filter=Q(animal__species="horse", animal__status='SHELTERED')), other=Count("animal", filter=Q(animal__species="other", animal__status='SHELTERED')), total=Count("animal", filter=Q(animal__status='SHELTERED'))).values('name', 'dogs', 'cats', 'horses', 'other', 'total')
+        shelters = Shelter.objects.filter(test=True if self.request.GET.get('incident', '') == 'test' else False).annotate(
+          alpacas=Count("animal", filter=Q(animal__species="alpaca", animal__status='SHELTERED', animal__incident__slug=self.request.GET.get('incident', ''))),
+          cats=Count("animal", filter=Q(animal__species="cat", animal__status='SHELTERED', animal__incident__slug=self.request.GET.get('incident', ''))),
+          cows=Count("animal", filter=Q(animal__species="cow", animal__status='SHELTERED', animal__incident__slug=self.request.GET.get('incident', ''))),
+          dogs=Count("animal", filter=Q(animal__species="dog", animal__status='SHELTERED', animal__incident__slug=self.request.GET.get('incident', ''))),
+          donkeys=Count("animal", filter=Q(animal__species="donkey", animal__status='SHELTERED', animal__incident__slug=self.request.GET.get('incident', ''))),
+          ducks=Count("animal", filter=Q(animal__species="duck", animal__status='SHELTERED', animal__incident__slug=self.request.GET.get('incident', ''))),
+          emus=Count("animal", filter=Q(animal__species="emu", animal__status='SHELTERED', animal__incident__slug=self.request.GET.get('incident', ''))),
+          goats=Count("animal", filter=Q(animal__species="goat", animal__status='SHELTERED', animal__incident__slug=self.request.GET.get('incident', ''))),
+          horses=Count("animal", filter=Q(animal__species="horse", animal__status='SHELTERED', animal__incident__slug=self.request.GET.get('incident', ''))),
+          llamas=Count("animal", filter=Q(animal__species="llama", animal__status='SHELTERED', animal__incident__slug=self.request.GET.get('incident', ''))),
+          other=Count("animal", filter=Q(animal__species="other", animal__status='SHELTERED', animal__incident__slug=self.request.GET.get('incident', ''))),
+          pigs=Count("animal", filter=Q(animal__species="pig", animal__status='SHELTERED', animal__incident__slug=self.request.GET.get('incident', ''))),
+          rabbits=Count("animal", filter=Q(animal__species="rabbit", animal__status='SHELTERED', animal__incident__slug=self.request.GET.get('incident', ''))),
+          sheep=Count("animal", filter=Q(animal__species="sheep", animal__status='SHELTERED', animal__incident__slug=self.request.GET.get('incident', ''))),
+          turkeys=Count("animal", filter=Q(animal__species="turkey", animal__status='SHELTERED', animal__incident__slug=self.request.GET.get('incident', ''))),
+          total=Count("animal", filter=Q(animal__status='SHELTERED', animal__incident__slug=self.request.GET.get('incident', '')))).values('name', 'alpacas', 'cats', 'cows', 'dogs', 'donkeys', 'ducks', 'emus', 'goats', 'horses', 'llamas', 'other', 'pigs', 'rabbits', 'sheep', 'turkeys', 'total').order_by('name')
         animals_status = Animal.objects.filter(incident__slug=self.request.GET.get('incident', '')).exclude(status='CANCELED').values('species').annotate(reported=Count("id", filter=Q(status='REPORTED')), utl=Count("id", filter=Q(status='UNABLE TO LOCATE')), nfa=Count("id", filter=Q(status='UNABLE TO LOCATE - NFA')), sheltered=Count("id", filter=Q(status='SHELTERED')), sip=Count("id", filter=Q(status='SHELTERED IN PLACE')), reunited=Count("id", filter=Q(status='REUNITED')), deceased=Count("id", filter=Q(status='DECEASED')), total=Count("id")).order_by()
         animals_ownership = Animal.objects.filter(incident__slug=self.request.GET.get('incident', '')).exclude(status='CANCELED').values('species').annotate(owned=Count("id", filter=Q(owners__isnull=False)), stray=Count("id", filter=Q(owners__isnull=True)), total=Count("id")).order_by()
         animals_deceased = []

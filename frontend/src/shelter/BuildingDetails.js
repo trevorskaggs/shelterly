@@ -102,7 +102,7 @@ function BuildingDetails({ id, incident }) {
         <Card.Title>
           <h4>Rooms ({data.rooms.length})
             <OverlayTrigger placement="top" overlay={<Tooltip id={`tooltip-assign`}>Assign animals to rooms</Tooltip>}>
-              <Link href={"/" + incident + "/shelter/" + data.shelter + "/assign?building_id=" + id}><FontAwesomeIcon icon={faArrowDownToSquare} size="lg" className="ml-1 fa-move-up" inverse /></Link>
+              <Link href={"/" + incident + "/shelter/" + data.shelter + "/assign?building_id=" + id}><FontAwesomeIcon icon={faArrowDownToSquare} className="ml-1 fa-move-up" inverse /></Link>
             </OverlayTrigger>
             <OverlayTrigger
               key={"add-room"}

@@ -105,7 +105,7 @@ function Shelter({ incident }) {
                   </div>
                   <Col style={{marginLeft:"-5px", marginRight:"-25px"}}>
                     <div className="border" style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"10px", marginLeft:"-11px", marginTop: "-1px", fontSize:"18px", width:"100%", backgroundColor:"#615e5e"}}>
-                      {shelter.name} - {shelter.animal_count + shelter.unroomed_animals.length} Animal{shelter.animal_count + shelter.unroomed_animals.length === 1 ? "" :"s"}
+                      {shelter.name} - {shelter.animal_count} Animal{shelter.animal_count === 1 ? "" :"s"}
                     </div>
                     <div style={{marginTop:"6px"}}>
                       {shelter.full_address}

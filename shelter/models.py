@@ -30,11 +30,6 @@ class Shelter(BaseShelterModel, Location):
     @property
     def rooms(self):
         return Room.objects.filter(building__shelter=self)
-
-    @property
-    def unroomed_animals(self):
-        from animals.models import Animal
-        return Animal.objects.filter(shelter=self, room__isnull=True)
     
 
 class Building(BaseShelterModel):
