@@ -24,8 +24,6 @@ function Home({ incident }) {
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
 
-  const [shelterColumns, setShelterColumns] = useState(shelter_columns);
-
   // Hook for initializing data.
   useEffect(() => {
     let unmounted = false;
@@ -208,6 +206,8 @@ function Home({ incident }) {
       compact: true,
     },
   ];
+
+  const [shelterColumns, setShelterColumns] = useState(shelter_columns);
 
   const animal_status_columns = [
     {
