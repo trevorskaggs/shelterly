@@ -14,6 +14,7 @@ import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import { AnimalDeleteModal } from "../components/Modals";
 import Header from '../components/Header';
 import History from '../components/History';
+import { printAnimalCareSchedule } from './Utils';
 
 function AnimalDetails({ id, incident }) {
 
@@ -104,6 +105,12 @@ function AnimalDetails({ id, incident }) {
     });
   }
 
+  const handleDownloadPdfClick = (e) => {
+    e.preventDefault();
+
+    printAnimalCareSchedule(data, images);
+  }
+
   // Hook for initializing data.
   useEffect(() => {
     let unmounted = false;
@@ -156,7 +163,11 @@ function AnimalDetails({ id, incident }) {
           </Tooltip>
         }
       >
-        <Link href={"/" + incident + "/animals/print/" + id} target="_blank"><FontAwesomeIcon icon={faPrint} className="ml-1 mr-2" inverse /></Link>
+        {({ ref, ...triggerHandler }) => (
+          <Link onClick={handleDownloadPdfClick} {...triggerHandler} href="#">
+            <span ref={ref}><FontAwesomeIcon icon={faPrint} className="ml-1 mr-2" inverse /></span>
+          </Link>
+        )}
       </OverlayTrigger>
       {data.status !== 'REUNITED' ?
       <OverlayTrigger
