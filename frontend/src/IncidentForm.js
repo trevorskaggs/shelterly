@@ -41,6 +41,14 @@ const IncidentForm = ({ id }) => {
     }
   }
 
+  const addMarker = (e, setFieldValue) => {
+    if (!id) {
+      setFieldValue("latlon", e.latlng.lat.toFixed(4) + ', ' + e.latlng.lng.toFixed(4))
+      setFieldValue("latitude", +(Math.round(e.latlng.lat + "e+4") + "e-4"));
+      setFieldValue("longitude", +(Math.round(e.latlng.lng + "e+4") + "e-4"));
+    }
+  }
+
   useEffect(() => {
     let unmounted = false;
     let source = axios.CancelToken.source();
@@ -163,7 +171,7 @@ const IncidentForm = ({ id }) => {
               <BootstrapForm.Row>
               <Col xs="12">
                 <BootstrapForm.Label>Refine Incident Lat/Lon Point</BootstrapForm.Label>
-                <Map zoom={11} ref={mapRef} bounds={bounds} center={[form.values.latitude || 0, form.values.longitude || 0]} className="incident-leaflet-container border rounded">
+                <Map zoom={11} ref={mapRef} bounds={bounds} center={id ? [form.values.latitude || 0, form.values.longitude || 0] : [0,0]} onClick={(e) => {addMarker(e, form.setFieldValue)}} className="incident-leaflet-container border rounded">
                   <Legend position="bottomleft" metric={false} />
                   <TileLayer
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

@@ -37,6 +37,8 @@ const ShelterForm = ({ id, incident }) => {
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
 
+  const [shelterIncident, setShelterIncident] = useState(null);
+
   // Hook for initializing data.
   useEffect(() => {
     let unmounted = false;
@@ -53,6 +55,14 @@ const ShelterForm = ({ id, incident }) => {
             // Set phone field to be the pretty version.
             response.data['phone'] = response.data['display_phone']
             setData(response.data);
+            axios.get('/incident/api/incident/' + response.data.incident + '/', {
+              cancelToken: source.token,
+            })
+            .then(incidentResponse => {
+              setShelterIncident(incidentResponse.data.slug)
+            })
+            .catch(error => {
+            });
           }
         })
         .catch(error => {
@@ -155,8 +165,10 @@ const ShelterForm = ({ id, incident }) => {
                   />
                 </BootstrapForm.Row>
                 <AddressSearch formikProps={props} label="Search for Shelter Address" show_apt={false} incident={incident} error="Shelter Address was not selected." />
-                <BootstrapForm.Label htmlFor="public">Public Shelter</BootstrapForm.Label>
-                <Field component={Switch} name="public" id="public" type="checkbox" color="primary" />
+                <span hidden={incident !== shelterIncident}>
+                  <BootstrapForm.Label htmlFor="public">Shared Shelter</BootstrapForm.Label>
+                  <Field component={Switch} name="public" id="public" type="checkbox" color="primary" />
+                </span>
               </BootstrapForm>
             </Card.Body>
             <ButtonGroup size="lg">

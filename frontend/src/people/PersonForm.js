@@ -47,7 +47,7 @@ const PersonForm = (props) => {
   // Modal for exiting workflow.
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
-  const goBack = () => navigate(window.history.back());
+  const goBack = () => window.history.back();
 
   // Track duplicate owner error.
   const [error, setError] = useState({show:false, error:[]});
@@ -398,11 +398,11 @@ const PersonForm = (props) => {
       </Formik>
       <Modal show={show} onHide={handleClose}>
         <Modal.Header closeButton>
-          <Modal.Title>Leave Service Request Creation Workflow?</Modal.Title>
+          <Modal.Title>Leave Animal Intake Workflow?</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <p>
-            Are you sure you would like to leave the Service Request creation workflow?&nbsp;&nbsp;No data will be saved.
+            Are you sure you would like to leave the intake workflow?&nbsp;&nbsp;No data will be saved.
           </p>
         </Modal.Body>
         <Modal.Footer>
