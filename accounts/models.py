@@ -54,6 +54,8 @@ class ShelterlyUser(AbstractUser):
     agency_id = models.CharField(max_length=50, blank=True, null=True)
     username = models.CharField(max_length=50, blank=True, null=True)
     email = models.EmailField(blank=False, null=False, unique=True)
+    user_perms = models.BooleanField(default=False)
+    incident_perms = models.BooleanField(default=False)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['cell_phone']

@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import { navigate } from "raviger";
-import { Formik, } from 'formik';
+import { Field, Formik } from 'formik';
+import { Switch } from 'formik-material-ui';
 import {
   Form as BootstrapForm,
   ButtonGroup,
@@ -26,6 +27,8 @@ const UserForm = ({ id, incident }) => {
     email: '',
     phone: '',
     agency_id: '',
+    user_perms: false,
+    incident_perms: false,
   })
 
   // Hook for initializing data.
@@ -73,6 +76,8 @@ const UserForm = ({ id, incident }) => {
           .matches(phoneRegex, "Phone number is not valid")
           .required('Required'),
         agency_id: Yup.string().nullable(),
+        user_perms: Yup.boolean(),
+        incident_perms: Yup.boolean(),
       })}
       onSubmit={(values, { setFieldError, setSubmitting }) => {
         setTimeout(() => {
@@ -146,6 +151,10 @@ const UserForm = ({ id, incident }) => {
                   value={form.values.agency_id || ''}
                 />
               </BootstrapForm.Row>
+              <BootstrapForm.Label htmlFor="user_perms">User Permissions</BootstrapForm.Label>
+              <Field component={Switch} name="user_perms" id="user_perms" type="checkbox" color="primary" />
+              <BootstrapForm.Label htmlFor="incident_perms">Incident Permissions</BootstrapForm.Label>
+              <Field component={Switch} name="incident_perms" id="incident_perms" type="checkbox" color="primary" />
             </BootstrapForm>
           </Card.Body>
           <ButtonGroup size="lg">

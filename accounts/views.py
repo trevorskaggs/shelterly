@@ -41,7 +41,7 @@ class UserAuth(generics.RetrieveAPIView):
 # Provides view for User API calls.
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
-    permission_classes = [permissions.IsAuthenticated, permissions.IsAdminUser]
+    permission_classes = [permissions.IsAuthenticated]
     serializer_class = UserSerializer
 
     @action(detail=False, methods=["post"])
@@ -72,37 +72,46 @@ class UserViewSet(viewsets.ModelViewSet):
                     pass
         return response.Response(UserSerializer(ShelterlyUser.objects.filter(id__in=user_ids), many=True).data, status=201)
 
+    def perform_create(self, serializer):
+        if serializer.is_valid():
+            if self.request.user.is_superuser or self.request.user.user_perms:
+                serializer.save()
+    
     def perform_update(self, serializer):
         if serializer.is_valid():
-            user = serializer.save()
-            if self.request.data.get('reset_password'):
-                ResetPasswordToken = apps.get_model('django_rest_passwordreset', 'ResetPasswordToken')
-                token = ResetPasswordToken.objects.create(
-                    user=user,
-                )
+            if self.request.user.is_superuser or self.request.user.user_perms:
+                user = serializer.save()
+                if self.request.data.get('reset_password'):
+                    ResetPasswordToken = apps.get_model('django_rest_passwordreset', 'ResetPasswordToken')
+                    token = ResetPasswordToken.objects.create(
+                        user=user,
+                    )
 
-                # Send email here.
-                send_mail(
-                    # title:
-                    "Password Reset for Shelterly",
-                    # message:
-                    render_to_string(
-                        'password_reset_email.txt',
-                        {
-                        'site': Site.objects.get_current(),
-                        'token': token.key,
-                        }
-                    ).strip(),
-                    # from:
-                    "DoNotReply@shelterly.org",
-                    # to:
-                    [user.email],
-                    fail_silently=False,
-                    html_message = render_to_string(
-                        'password_reset_email.html',
-                        {
-                        'site': Site.objects.get_current(),
-                        'token': token.key,
-                        }
-                    ).strip()
-                )
+                    # Send email here.
+                    send_mail(
+                        # title:
+                        "Password Reset for Shelterly",
+                        # message:
+                        render_to_string(
+                            'password_reset_email.txt',
+                            {
+                            'site': Site.objects.get_current(),
+                            'token': token.key,
+                            }
+                        ).strip(),
+                        # from:
+                        "DoNotReply@shelterly.org",
+                        # to:
+                        [user.email],
+                        fail_silently=False,
+                        html_message = render_to_string(
+                            'password_reset_email.html',
+                            {
+                            'site': Site.objects.get_current(),
+                            'token': token.key,
+                            }
+                        ).strip()
+                    )
+    def perform_destroy(self, instance):
+        if self.request.user.is_superuser or self.request.user.user_perms:
+            instance.delete()

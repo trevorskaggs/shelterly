@@ -183,12 +183,11 @@ const IncidentForm = ({ id }) => {
                     onDragEnd={() => {
                       updatePosition(form.setFieldValue)
                     }}
-                    autoPan={false}
                     position={[form.values.latitude, form.values.longitude]}
                     icon={pinMarkerIcon}
                     ref={markerRef}
                   >
-                    <MapTooltip autoPan={false} direction="top">
+                    <MapTooltip direction="top">
                       <div>
                         Lat: {form.values.latitude}, Lon: {form.values.longitude}
                       </div>
