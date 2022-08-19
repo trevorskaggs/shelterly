@@ -38,7 +38,7 @@ function auth_reducer(state, action) {
         isAuthenticated: false, isLoading: false};
 
     case 'PAGE_CHANGED':
-      return {...state, prevLocation: state.location, location:action.data};
+      return {...state, prevLocation: state.location.path, location:action.data};
 
     default:
       return state;
