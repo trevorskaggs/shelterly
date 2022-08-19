@@ -10,6 +10,7 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 from knox import views as knox_views
 from accounts.views import LoginView
+from animals.views import print_kennel_card
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 
@@ -41,6 +42,7 @@ urlpatterns = [
     url(r'login/', LoginView.as_view(), name='knox_login'),
     url(r'logout/', knox_views.LogoutView.as_view(), name='knox_logout'),
 ]
+urlpatterns.append(path('<str:incident>/animals/print/<int:animal_id>', print_kennel_card, name="print_kennel_card"))
 if settings.USE_S3:
     urlpatterns.append(re_path(u'static/(?P<path>.*)$', views.static_url))
 #To use local static files both USE_S3 must be FALSE and DEBUG must be TRUE!

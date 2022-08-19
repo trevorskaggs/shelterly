@@ -173,7 +173,7 @@ class AnimalViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(incident__slug=self.request.GET.get('incident'))
         return queryset
 
-def print_kennel_card(request, animal_id):
+def print_kennel_card(request, incident, animal_id):
     animal = Animal.objects.get(id=animal_id)
     owners = SimplePersonSerializer(animal.owners.all(), many=True).data
     context={"animal":animal, "owners":owners, "care_schedule_rows": range(30)}
