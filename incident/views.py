@@ -22,14 +22,14 @@ class IncidentViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         if serializer.is_valid():
             # Only create incident if user is an Admin.
-            if self.request.user.is_staff:
+            if self.request.user.is_staff or self.request.user.incident_perms:
                 serializer.save()
 
     def perform_update(self, serializer):
         if serializer.is_valid():
 
             # Only create incident if user is an Admin.
-            if self.request.user.is_staff:
+            if self.request.user.is_staff or self.request.user.incident_perms:
                 incident = serializer.save()
 
                 # Open/close incident.

@@ -364,11 +364,14 @@ const AddressLookup = ({setLatLon, ...props}) => {
 
 
   useEffect(() => {
-    if ((childRef.current && (childRef.current.refs.input.value.includes(", USA") || childRef.current.refs.input.value.includes(", United")))) {
+    if ((childRef.current && childRef.current.refs && (childRef.current.refs.input.value.includes(", USA") || childRef.current.refs.input.value.includes(", United")))) {
       setError("");
     }
     updateAddr(search);
 
+  }, [triggerRefresh, search]);
+
+  useEffect(() => {
     let unmounted = false;
     let source = axios.CancelToken.source();
 
@@ -377,12 +380,12 @@ const AddressLookup = ({setLatLon, ...props}) => {
     })
     .then(response => {
       if (!unmounted) {
-        setIncidentLatLon({lat:Number(response.data[0].latitude), lng:Number(response.data[0].longitude)})
+        setIncidentLatLon({lat:Number(response.data[0].latitude), lng:Number(response.data[0].longitude)});
       }
     })
     .catch(error => {
     });
-  }, [triggerRefresh, search, props.incident]);
+  }, [props.incident]);
 
   const updateAddr = suggestion => {
 
@@ -442,17 +445,19 @@ const AddressLookup = ({setLatLon, ...props}) => {
             onBlur={(e) => {
               setError("");
               setTriggerRefresh(!triggerRefresh)
-              if (!values.address && childRef.current && childRef.current.refs.input.value) {
+              if (!values.address && childRef.current && childRef.current.refs && childRef.current.refs.input.value) {
                 setError(props.error);
               }
             }}
-            bounds={{north:incidentLatLon.lat+.1, south:incidentLatLon.lat-.1, east:incidentLatLon.lng+.1, west:incidentLatLon.lng-.1}}
-            types={['geocode']}
             id="search"
             name="search"
             disabled={props.disabled}
-            key={`search_key__${String(incidentLatLon.lat)}`}
-            componentRestrictions={{country: "us"}}
+            key={`search_key_` + String(incidentLatLon.lat)}
+            options={{
+              bounds:{north:incidentLatLon.lat+.1, south:incidentLatLon.lat-.1, east:incidentLatLon.lng+.1, west:incidentLatLon.lng-.1},
+              types: ["geocode"],
+              componentRestrictions: { country: "us" },
+            }}
             ref={childRef}
             apiKey={process.env.REACT_APP_GOOGLE_API_KEY}
           />
@@ -516,11 +521,11 @@ const AddressSearch = (props) => {
     : ""}
         <Row hidden={props.hidden} style={{fontSize:"15px"}}>
           <Col>
-                <Form.Row>
-                  <Form.Group as={Col} xs="12">
-                    {renderAddressLookup()}
-                  </Form.Group>
-                </Form.Row>
+            <Form.Row>
+              <Form.Group as={Col} xs="12">
+                {renderAddressLookup()}
+              </Form.Group>
+            </Form.Row>
             <Form.Row>
               <TextInput
                 xs={props.show_apt ? "10" : "12"}

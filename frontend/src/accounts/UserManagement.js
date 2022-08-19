@@ -7,7 +7,7 @@ import {
   faMinusSquare, faUpload, faUserPlus
 } from '@fortawesome/free-solid-svg-icons';
 import {
-  faPencil, faUserUnlock
+  faCircleI, faCircleU, faPencil, faUserUnlock
 } from '@fortawesome/pro-solid-svg-icons';
 import Header from "../components/Header";
 
@@ -178,11 +178,14 @@ function UserManagement({ incident }) {
       <Col style={{minWidth:"150px", maxWidth:"150px"}}>
           Phone
       </Col>
-      <Col style={{minWidth:"150px", maxWidth:"150px"}}>
+      <Col style={{minWidth:"100px", maxWidth:"100px"}}>
           Agency ID
       </Col>
-      <Col>
+      <Col style={{minWidth:"75px", maxWidth:"75px"}}>
           Actions
+      </Col>
+      <Col>
+          Perms
       </Col>
     </Row>
     {filteredData.users.map(user => (
@@ -200,10 +203,10 @@ function UserManagement({ incident }) {
           <Col className="border-top border-left border-bottom" style={{height:"32px", paddingLeft:"3px", paddingTop:"5px", marginTop: "-1px", fontSize:"13px", minWidth:"150px", maxWidth:"150px", backgroundColor:"#615e5e"}}>
             {user.display_phone}
           </Col>
-          <Col className="border-top border-left border-bottom" style={{height:"32px", paddingLeft:"3px", paddingTop:"5px", marginTop: "-1px", fontSize:"13px", minWidth:"150px", maxWidth:"150px", backgroundColor:"#615e5e"}}>
+          <Col className="border-top border-left border-bottom" style={{height:"32px", paddingLeft:"3px", paddingTop:"5px", marginTop: "-1px", fontSize:"13px", minWidth:"100px", maxWidth:"100px", backgroundColor:"#615e5e"}}>
             {user.agency_id}
           </Col>
-          <Col className="border" style={{height:"32px", paddingLeft:"3px", paddingTop:"5px", marginTop: "-1px", fontSize:"13px", borderTopRightRadius:"0.25rem", borderBottomRightRadius:"0.25rem", backgroundColor:"#615e5e"}}>
+          <Col className="border-top border-left border-bottom" style={{height:"32px", paddingLeft:"3px", paddingTop:"5px", marginTop: "-1px", fontSize:"13px", minWidth:"75px", maxWidth:"75px", backgroundColor:"#615e5e"}}>
             <OverlayTrigger
               key={"edit-user"}
               placement="top"
@@ -237,6 +240,30 @@ function UserManagement({ incident }) {
             >
               <FontAwesomeIcon icon={faUserUnlock} style={{cursor:'pointer'}} size="lg" className="ml-1" onClick={() => {setUserToReset({id:user.id, first_name: user.first_name, last_name: user.last_name});setShowUserResetConfirm(true);}} inverse />
             </OverlayTrigger>
+          </Col>
+          <Col className="border" style={{height:"32px", paddingLeft:"3px", paddingTop:"5px", marginTop: "-1px", fontSize:"13px", borderTopRightRadius:"0.25rem", borderBottomRightRadius:"0.25rem", backgroundColor:"#615e5e"}}>
+            {user.user_perms ? <OverlayTrigger
+              key={"user-perms"}
+              placement="top"
+              overlay={
+                <Tooltip id={`tooltip-user-perms`}>
+                  User has user permissions
+                </Tooltip>
+              }
+            >
+              <FontAwesomeIcon icon={faCircleU} size="lg" className="ml-1" />
+            </OverlayTrigger> : ""}
+            {user.incident_perms ? <OverlayTrigger
+              key={"incident-perms"}
+              placement="top"
+              overlay={
+                <Tooltip id={`tooltip-incident-perms`}>
+                  User has incident permissions
+                </Tooltip>
+              }
+            >
+              <FontAwesomeIcon icon={faCircleI} size="lg" className="ml-1" />
+            </OverlayTrigger> : ""}
           </Col>
         </div>
       </Card>

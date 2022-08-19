@@ -24,9 +24,10 @@ const ShelterForm = ({ id, incident }) => {
     city: '',
     state: '',
     zip_code: '',
-    test: false,
+    public: false,
     latitude: null,
     longitude: null,
+    incident_slug: incident,
   });
 
   // Regex validators.
@@ -36,6 +37,8 @@ const ShelterForm = ({ id, incident }) => {
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
 
+  const [shelterIncident, setShelterIncident] = useState(null);
+
   // Hook for initializing data.
   useEffect(() => {
     let unmounted = false;
@@ -44,7 +47,7 @@ const ShelterForm = ({ id, incident }) => {
     if (id) {
       const fetchShelterData = async () => {
         // Fetch ServiceRequest data.
-        await axios.get('/shelter/api/shelter/' + id + '/', {
+        await axios.get('/shelter/api/shelter/' + id + '/?incident=' + incident, {
           cancelToken: source.token,
         })
         .then(response => {
@@ -52,6 +55,14 @@ const ShelterForm = ({ id, incident }) => {
             // Set phone field to be the pretty version.
             response.data['phone'] = response.data['display_phone']
             setData(response.data);
+            axios.get('/incident/api/incident/' + response.data.incident + '/', {
+              cancelToken: source.token,
+            })
+            .then(incidentResponse => {
+              setShelterIncident(incidentResponse.data.slug)
+            })
+            .catch(error => {
+            });
           }
         })
         .catch(error => {
@@ -88,7 +99,7 @@ const ShelterForm = ({ id, incident }) => {
           state: Yup.string(),
           zip_code: Yup.string()
             .max(10, 'Must be 10 characters or less'),
-          test: Yup.boolean(),
+          public: Yup.boolean(),
           latitude: Yup.number()
             .nullable(),
           longitude: Yup.number()
@@ -96,7 +107,7 @@ const ShelterForm = ({ id, incident }) => {
         })}
         onSubmit={(values, { setSubmitting }) => {
           if (id) {
-            axios.put('/shelter/api/shelter/' + id + '/', values)
+            axios.put('/shelter/api/shelter/' + id + '/?incident=' + incident, values)
             .then(function() {
               navigate("/" + incident + '/shelter/' + id)
             })
@@ -154,8 +165,10 @@ const ShelterForm = ({ id, incident }) => {
                   />
                 </BootstrapForm.Row>
                 <AddressSearch formikProps={props} label="Search for Shelter Address" show_apt={false} incident={incident} error="Shelter Address was not selected." />
-                <BootstrapForm.Label htmlFor="test">Test Shelter</BootstrapForm.Label>
-                <Field component={Switch} name="test" id="test" type="checkbox" color="primary" />
+                <span hidden={incident !== shelterIncident}>
+                  <BootstrapForm.Label htmlFor="public">Shared Shelter</BootstrapForm.Label>
+                  <Field component={Switch} name="public" id="public" type="checkbox" color="primary" />
+                </span>
               </BootstrapForm>
             </Card.Body>
             <ButtonGroup size="lg">

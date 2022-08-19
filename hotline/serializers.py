@@ -1,5 +1,3 @@
-from django.db.models import Count, Exists, OuterRef, Prefetch, Q
-from django.db.models.functions import TruncDay, ExtractDay
 from rest_framework import serializers
 
 from .models import ServiceRequest, VisitNote
@@ -58,7 +56,7 @@ class SimpleServiceRequestSerializer(BarebonesServiceRequestSerializer):
 
     full_address = serializers.SerializerMethodField()
     pending = serializers.BooleanField(read_only=True)
-    animals = SimpleAnimalSerializer(many=True, required=False, read_only=True)
+    animals = serializers.SerializerMethodField()
     # these method fields require animals queryset
     reported_animals = serializers.SerializerMethodField()
     sheltered_in_place = serializers.SerializerMethodField()
@@ -80,6 +78,10 @@ class SimpleServiceRequestSerializer(BarebonesServiceRequestSerializer):
     # Custom field for the full address.
     def get_full_address(self, obj):
         return build_full_address(obj)
+
+    # Custom field for ordering animals.
+    def get_animals(self, obj):
+        return SimpleAnimalSerializer(obj.animal_set.all().order_by('id'), many=True, required=False, read_only=True).data
 
     def get_evacuation_assignments(self, obj):
         from evac.serializers import SimpleEvacAssignmentSerializer
@@ -147,13 +149,17 @@ class ServiceRequestSerializer(SimpleServiceRequestSerializer):
     animal_count = serializers.IntegerField(read_only=True)
     injured = serializers.BooleanField(read_only=True)
     assigned_requests = serializers.SerializerMethodField()
-    animals = ModestAnimalSerializer(many=True, required=False, read_only=True)
+    animals = serializers.SerializerMethodField()
 
     class Meta:
         model = ServiceRequest
         fields = ['id', 'latitude', 'longitude', 'full_address', 'followup_date', 'status', 'address', 'city', 'state', 'zip_code', 'directions', 'priority',
         'injured', 'accessible', 'turn_around', 'animals', 'reporter', 'reported_animals', 'sheltered_in_place', 'unable_to_locate', 'aco_required',
         'animal_count', 'images', 'key_provided', 'verbal_permission', 'action_history', 'owner_objects', 'reporter_object', 'assigned_requests']
+
+    # Custom field for ordering animals.
+    def get_animals(self, obj):
+        return ModestAnimalSerializer(obj.animal_set.all().order_by('id'), many=True, required=False, read_only=True).data
 
     def get_assigned_requests(self, obj):
         from evac.models import AssignedRequest

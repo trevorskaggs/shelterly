@@ -32,7 +32,7 @@ class RoomSerializer(SimpleRoomSerializer):
             if hasattr(obj, 'animals'):
                 return ModestAnimalSerializer(obj.animals, many=True, required=False, read_only=True).data
             else:
-                ModestAnimalSerializer(obj.animal_set.exclude(status='CANCELED'), many=True, required=False, read_only=True).data
+                return ModestAnimalSerializer(obj.animal_set.exclude(status='CANCELED'), many=True, required=False, read_only=True).data
         else:
             if hasattr(obj, 'animals'):
                 return ModestAnimalSerializer(obj.animals, many=True, required=False, read_only=True).data
@@ -91,7 +91,10 @@ class ModestShelterSerializer(SimpleShelterSerializer):
     # Custom field for unroomed animals.
     def get_unroomed_animals(self, obj):
         from animals.serializers import ModestAnimalSerializer
-        return ModestAnimalSerializer(obj.unroomed_animals, many=True).data
+        if hasattr(obj, 'unroomed_animals'):
+            return ModestAnimalSerializer(obj.unroomed_animals, many=True).data
+        else:
+            return ModestAnimalSerializer(obj.animal_set.filter(room=None).exclude(status='CANCELED'), many=True, required=False, read_only=True).data
 
 class ShelterSerializer(ModestShelterSerializer):
     #Single obj serializer

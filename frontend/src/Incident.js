@@ -5,13 +5,16 @@ import SimpleValue from 'react-select-simple-value';
 import { Button, Col, Row } from 'react-bootstrap';
 import { Link } from "raviger";
 import moment from 'moment';
+import { useCookies } from 'react-cookie';
 import { AuthContext } from "./accounts/AccountsReducer";
+import { logoutUser } from "./accounts/AccountsUtils";
 
 function Home() {
 
   const [incident, setIncident] = useState({id: '', slug: ''});
   const [options, setOptions] = useState([]);
-  const { state } = useContext(AuthContext);
+  const { dispatch, state } = useContext(AuthContext);
+  const [, , removeCookie] = useCookies(['token']);
 
   const customStyles = {
     // For the select it self, not the options of the select
@@ -59,7 +62,7 @@ function Home() {
           let options = [];
           response.data.forEach(incident => {
             // Build incident option list.
-            if (!incident.end_time || state.user.is_superuser) {
+            if (!incident.end_time || state.user.is_superuser || state.user.incident_perms) {
               options.push({value: incident.id, label: incident.name + ' (' + moment(incident.start_time).format('MM/DD/YYYY') + (incident.end_time ? ' - ' + moment(incident.end_time).format('MM/DD/YYYY') : '') + ')', slug:incident.slug, end_time:incident.end_time});
             }
           });
@@ -75,7 +78,7 @@ function Home() {
       unmounted = true;
       source.cancel();
     };
-  }, [state.user.is_superuser]);
+  }, [state.user.is_superuser, state.user.incident_perms]);
 
 
   return (
@@ -84,12 +87,12 @@ function Home() {
       <img src="/static/images/shelterly.png" alt="Logo" style={{height:"120px", width:"120px", marginTop:"-4px", marginLeft:"-4px"}} />
       <h1  style={{fontSize:"100px"}}>Shelterly</h1>
     </Row>
-    <Col xs={{ span:5 }} className="border rounded border-light shadow-sm ml-auto mr-auto mb-auto" style={{maxHeight:state.user.is_superuser ? "254px" : "145px", minWidth:"572px"}}>
+    <Col xs={{ span:5 }} className="border rounded border-light shadow-sm ml-auto mr-auto mb-auto" style={{maxHeight:state.user.is_superuser || state.user.incident_perms ? "309px" : "200px", minWidth:"572px"}}>
       <SimpleValue options={options}>
         {simpleProps => <Select styles={customStyles} {...simpleProps} className="mt-3" placeholder="Select incident..." onChange={(instance) => setIncident({id:instance.value, slug:instance.slug})} />}
       </SimpleValue>
       <Link href={incident.slug} style={{textDecoration:"none"}}><Button size="lg" className="btn-primary mt-3" disabled={incident.id ? false : true} block>Select Incident</Button></Link>
-      {state.user.is_superuser ?
+      {state.user.is_superuser || state.user.incident_perms ?
         <Row>
           <Col style={{marginRight:"-23px"}}>
             <Link href={'/incident/edit/' + incident.id} style={{textDecoration:"none"}}><Button size="lg" className="btn-primary mt-2" disabled={incident.id ? false : true} block>Edit Incident</Button></Link>
@@ -99,7 +102,8 @@ function Home() {
           </Col>
         </Row>
       : ""}
-      {state.user.is_superuser ? <Link href={'/incident/new'} style={{textDecoration:"none"}}><Button size="lg" className="btn-primary mt-2 mb-3" block>Create New Incident</Button></Link> : ""}
+      {state.user.is_superuser || state.user.incident_perms ? <Link href={'/incident/new'} style={{textDecoration:"none"}}><Button size="lg" className="btn-primary mt-2" block>Create New Incident</Button></Link> : ""}
+      <Button size="lg" className="btn-primary mt-2 mb-3" onClick={() => logoutUser({dispatch}, {removeCookie})} block>Return to Login</Button>
     </Col>
     </>
   );

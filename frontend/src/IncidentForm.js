@@ -9,6 +9,7 @@ import {
   faArrowAltCircleLeft,
 } from '@fortawesome/free-solid-svg-icons';
 import * as Yup from 'yup';
+import L from "leaflet";
 import { Map, Marker, Tooltip as MapTooltip, TileLayer } from "react-leaflet";
 import { Legend, pinMarkerIcon } from "./components/Map";
 import { TextInput } from './components/Form.js';
@@ -23,6 +24,8 @@ const IncidentForm = ({ id }) => {
     longitude: '',
   });
 
+  const [bounds, setBounds] = useState(L.latLngBounds([[0,0]]));
+
   const markerRef = useRef(null);
   const mapRef = useRef(null);
 
@@ -35,6 +38,14 @@ const IncidentForm = ({ id }) => {
       setFieldValue("latitude", +(Math.round(latLon.lat + "e+4") + "e-4"));
       setFieldValue("longitude", +(Math.round(latLon.lng + "e+4") + "e-4"));
       map.leafletElement.setView(latLon);
+    }
+  }
+
+  const addMarker = (e, setFieldValue) => {
+    if (!id) {
+      setFieldValue("latlon", e.latlng.lat.toFixed(4) + ', ' + e.latlng.lng.toFixed(4))
+      setFieldValue("latitude", +(Math.round(e.latlng.lat + "e+4") + "e-4"));
+      setFieldValue("longitude", +(Math.round(e.latlng.lng + "e+4") + "e-4"));
     }
   }
 
@@ -57,7 +68,34 @@ const IncidentForm = ({ id }) => {
         });
       };
       fetchIncident();
-    };
+    }
+    else {
+      const fetchIncidents = async () => {
+        // Fetch Visit Note data.
+        await axios.get('/incident/api/incident/', {
+          cancelToken: source.token,
+        })
+        .then(response => {
+          if (!unmounted) {
+            const incident_bounds = [];
+            for (const incident of response.data) {
+              if (incident.latitude && incident.longitude && !incident.end_time) {
+                incident_bounds.push([incident.latitude, incident.longitude]);
+              }
+            }
+            // Add in some extra bounds to prevent map zoom level from being too small with few or nearby incident locations.
+            if (incident_bounds.length >= 1) {
+              incident_bounds.push([parseFloat(incident_bounds[0][0])+.04,incident_bounds[0][1]-.04])
+              incident_bounds.push([parseFloat(incident_bounds[0][0])-.04,parseFloat(incident_bounds[0][1])+.04])
+            }
+            setBounds(incident_bounds);
+          }
+        })
+        .catch(error => {
+        });
+      };
+      fetchIncidents();
+    }
     // Cleanup.
     return () => {
       unmounted = true;
@@ -133,7 +171,7 @@ const IncidentForm = ({ id }) => {
               <BootstrapForm.Row>
               <Col xs="12">
                 <BootstrapForm.Label>Refine Incident Lat/Lon Point</BootstrapForm.Label>
-                <Map zoom={11} ref={mapRef} center={[form.values.latitude || 0, form.values.longitude || 0]} className="incident-leaflet-container border rounded" >
+                <Map zoom={11} ref={mapRef} bounds={bounds} center={id ? [form.values.latitude || 0, form.values.longitude || 0] : [0,0]} onClick={(e) => {addMarker(e, form.setFieldValue)}} className="incident-leaflet-container border rounded">
                   <Legend position="bottomleft" metric={false} />
                   <TileLayer
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -145,12 +183,11 @@ const IncidentForm = ({ id }) => {
                     onDragEnd={() => {
                       updatePosition(form.setFieldValue)
                     }}
-                    autoPan={false}
                     position={[form.values.latitude, form.values.longitude]}
                     icon={pinMarkerIcon}
                     ref={markerRef}
                   >
-                    <MapTooltip autoPan={false} direction="top">
+                    <MapTooltip direction="top">
                       <div>
                         Lat: {form.values.latitude}, Lon: {form.values.longitude}
                       </div>

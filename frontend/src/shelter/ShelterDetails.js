@@ -92,7 +92,7 @@ function ShelterDetails({ id, incident }) {
                   <b>Phone:</b> {data.display_phone || "No contact number listed"}
                 </ListGroup.Item>
                 <ListGroup.Item>
-                  <b>Currently Sheltering:</b> {data.animal_count + data.unroomed_animals.length} Animal{data.animal_count + data.unroomed_animals.length === 1 ? "" : "s"}
+                  <b>Currently Sheltering:</b> {data.animal_count} Animal{data.animal_count === 1 ? "" : "s"}
                 </ListGroup.Item>
                 <ListGroup.Item>
                   <b>Description: </b>{data.description || "None"}
