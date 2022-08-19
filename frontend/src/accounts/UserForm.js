@@ -25,7 +25,7 @@ const UserForm = ({ id, incident }) => {
     first_name: '',
     last_name: '',
     email: '',
-    phone: '',
+    cell_phone: '',
     agency_id: '',
     user_perms: false,
     incident_perms: false,
