@@ -325,7 +325,7 @@ function Home({ incident }) {
   return (
     <>
     <span className="rounded-top">
-      <Header>Home</Header>
+      <Header>Home<span className="float-right">{state.user.version}</span></Header>
       <hr/>
       <Row className="ml-0">
       <Select

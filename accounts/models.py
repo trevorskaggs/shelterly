@@ -66,7 +66,7 @@ class ShelterlyUser(AbstractUser):
         return '{} {}'.format(self.first_name, self.last_name)
 
     class Meta:
-        ordering = ('last_name',)
+        ordering = ('last_name', 'first_name')
 
 # Send email to user on user creation.
 def email_new_user(sender, **kwargs):

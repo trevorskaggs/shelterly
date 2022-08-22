@@ -63,7 +63,7 @@ export const catColorChoices = [
   {value:'calico', label:'Calico'},
   {value:'gray', label:'Gray'},
   {value:'orange', label:'Orange'},
-  {value:'red', label:'Red'},
+  {value:'tan', label:'Tan'},
   {value:'tortie', label:'Tortie'},
   {value:'white', label:'White'},
 ]

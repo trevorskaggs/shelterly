@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
-import { Link, navigate, useQueryParams } from 'raviger';
+import { Link, navigate, useNavigationPrompt, useQueryParams } from 'raviger';
 import { Formik } from 'formik';
 import { Form as BootstrapForm, Button, ButtonGroup, Card, Modal } from "react-bootstrap";
 import * as Yup from 'yup';
@@ -19,13 +19,15 @@ const PersonForm = (props) => {
   var is_workflow = window.location.pathname.includes("workflow");
 
   // Determine if this is an owner or reporter when creating a Person.
-  let is_owner = window.location.pathname.includes("owner")
+  let is_owner = window.location.pathname.includes("owner");
 
   // Determine if this is an intake workflow.
-  let is_intake = window.location.pathname.includes("intake")
+  let is_intake = window.location.pathname.includes("intake");
 
   // Determine if this is a first responder when creating a Person.
-  let is_first_responder = window.location.pathname.includes("first_responder")
+  let is_first_responder = window.location.pathname.includes("first_responder");
+
+  useNavigationPrompt(is_workflow, "Are you sure you would like to leave the animal intake workflow? No data will be saved.");
 
   // Identify any query param data.
   const [queryParams] = useQueryParams();
@@ -43,11 +45,6 @@ const PersonForm = (props) => {
   // Whether or not to skip Owner creation.
   const [skipOwner, setSkipOwner] = useState(false);
   const [isOwner, setIsOwner] = useState(props.state.stepIndex > 0 || is_owner);
-
-  // Modal for exiting workflow.
-  const [show, setShow] = useState(false);
-  const handleClose = () => setShow(false);
-  const goBack = () => window.history.back();
 
   // Track duplicate owner error.
   const [error, setError] = useState({show:false, error:[]});
@@ -286,7 +283,7 @@ const PersonForm = (props) => {
               <Card.Header as="h5" className="pl-3"><span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>Update {isOwner ? "Owner" : "Reporter"}</Card.Header>
               :
               <Card.Header as="h5" className="pl-3">{props.state.stepIndex === 0 ?
-                <span style={{cursor:'pointer'}} onClick={() => {setShow(true)}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
+                <span style={{cursor:'pointer'}} onClick={() => {window.history.back()}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
                 :
                 <span style={{cursor:'pointer'}} onClick={() => {setIsOwner(false); setShowAgency(is_first_responder); formikProps.resetForm({values:props.state.steps.reporter}); props.handleBack('owner', 'reporter')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}
           {isOwner ? "Owner" : "Reporter"}{is_workflow ? " Information" : ""}
@@ -396,20 +393,6 @@ const PersonForm = (props) => {
           </Card>
         )}
       </Formik>
-      <Modal show={show} onHide={handleClose}>
-        <Modal.Header closeButton>
-          <Modal.Title>Leave Animal Intake Workflow?</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <p>
-            Are you sure you would like to leave the intake workflow?&nbsp;&nbsp;No data will be saved.
-          </p>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="primary" onClick={goBack}>Yes</Button>
-          <Button variant="secondary" onClick={handleClose}>Close</Button>
-        </Modal.Footer>
-      </Modal>
     </>
   );
 };

@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import axios from "axios";
-import { navigate, useQueryParams } from 'raviger';
+import { navigate, useNavigationPrompt, useQueryParams } from 'raviger';
 import { Form, Formik } from "formik";
 import { ButtonGroup, Card, Col, Image, Form as BootstrapForm } from "react-bootstrap";
 import * as Yup from 'yup';
@@ -16,8 +16,11 @@ const AnimalForm = (props) => {
   const incident = '/' + props.incident;
 
   // Determine if this is an intake workflow.
-  let is_intake = window.location.pathname.includes("intake")
-  let is_reporter = window.location.pathname.includes("reporter")
+  let is_intake = window.location.pathname.includes("intake");
+  let is_reporter = window.location.pathname.includes("reporter");
+
+  useNavigationPrompt(is_workflow, "Are you sure you would like to leave the animal intake workflow? No data will be saved.");
+
 
   // Identify any query param data.
   const [queryParams] = useQueryParams();
