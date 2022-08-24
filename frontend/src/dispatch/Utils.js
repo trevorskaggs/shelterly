@@ -124,11 +124,13 @@ export const printDispatchResolutionForm = (data) => {
           text: `Owner: ${owner.first_name} ${owner.last_name} ${owner.display_phone}`
         })
       ));
-    } else {
-      //no owners
+    }
+
+    // reporter
+    if (assigned_request.service_request_object.reporter_object) {
       pdf.drawWrappedText({
-        text: 'Owner: No Owner'
-      });
+        text: `Reporter: ${assigned_request.service_request_object.reporter_object.first_name} ${assigned_request.service_request_object.reporter_object.last_name} ${assigned_request.service_request_object.reporter_object.agency ? '(' + assigned_request.service_request_object.reporter_object.agency + ')' : 'No'} ${assigned_request.service_request_object.reporter_object.display_phone}`
+      })
     }
 
     // additional info

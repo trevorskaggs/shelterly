@@ -21,12 +21,13 @@ function ServiceRequestForm(props) {
   const incident = props.incident;
 
   // Determine if we're in the hotline workflow.
-  var is_workflow = window.location.pathname.includes("workflow");
+  // var is_workflow = window.location.pathname.includes("workflow");
+  const [isWorkflow, setIsWorkflow] = useState(window.location.pathname.includes("workflow"));
 
   // Determine if this is from a first responder when creating a SR.
   var is_first_responder = window.location.pathname.includes("first_responder");
 
-  useNavigationPrompt(is_workflow, "Are you sure you would like to leave the animal intake workflow? No data will be saved.");
+  useNavigationPrompt(isWorkflow, "Are you sure you would like to leave the animal intake workflow? No data will be saved.");
 
   // Track duplicate request address error.
   const [skip, setSkip] = useState(false);
@@ -121,12 +122,13 @@ function ServiceRequestForm(props) {
       })}
       onSubmit={ async (values, { setSubmitting }) => {
         setIsButtonSubmitting(true);
-        if (is_workflow) {
+        if (isWorkflow) {
           if (SRs.filter(sr => (sr.address === values.address && sr.city === values.city && sr.state === values.state)).length > 0 && !skip) {
             setDupeSRs(SRs.filter(sr => (sr.address === values.address && sr.city === values.city && sr.state === values.state)));
             setIsButtonSubmitting(false);
           }
           else {
+            setIsWorkflow(false);
             // Create Reporter
             let reporterResponse = [{data:{id:props.state.steps.reporter.id}}];
             if (props.state.steps.reporter.first_name && !props.state.steps.reporter.id) {
@@ -167,6 +169,7 @@ function ServiceRequestForm(props) {
             })
             .catch(error => {
               setIsButtonSubmitting(false);
+              setIsWorkflow(true);
             });
           }
         }
@@ -188,11 +191,11 @@ function ServiceRequestForm(props) {
     >
       {formikProps => (
         <>
-        <Card border="secondary" className={is_workflow ? "mt-3" : "mt-5"}>
+        <Card border="secondary" className={isWorkflow ? "mt-3" : "mt-5"}>
         <Card.Header as="h5">{id ?
           <span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
           :
-          <span style={{cursor:'pointer'}} onClick={() => {props.handleBack('request', 'animals', formikProps.values)}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}{id ? "Update " : ""}Service Request{is_workflow ? " Information" :""}
+          <span style={{cursor:'pointer'}} onClick={() => {props.handleBack('request', 'animals', formikProps.values)}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}{id ? "Update " : ""}Service Request{isWorkflow ? " Information" :""}
         </Card.Header>
         <Card.Body>
           <BootstrapForm as={Form}>
@@ -240,7 +243,7 @@ function ServiceRequestForm(props) {
           </BootstrapForm>
         </Card.Body>
         <ButtonGroup size="lg">
-          {is_workflow ?
+          {isWorkflow ?
             <ButtonSpinner isSubmitting={isButtonSubmitting} isSubmittingText="Saving..." className="btn btn-primary border" type="submit" onClick={() => { formikProps.submitForm()}}>
               Finish and Create Service Request
             </ButtonSpinner> :
