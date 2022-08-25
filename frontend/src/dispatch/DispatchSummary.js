@@ -295,10 +295,10 @@ function DispatchSummary({ id, incident }) {
                     <span>&nbsp;({team_member.agency_id})</span> : ""}
                     {team_member.display_phone ?
                     <OverlayTrigger
-                      key={"owner-phone"}
+                      key={"team-member-phone"}
                       placement="top"
                       overlay={
-                        <Tooltip id={`tooltip-owner-phone`}>
+                        <Tooltip id={`tooltip-team-member-phone`}>
                           Phone: {team_member.display_phone}
                         </Tooltip>
                       }
@@ -443,7 +443,24 @@ function DispatchSummary({ id, incident }) {
                   : ""}
                 </ListGroup.Item>
               ))}
-            {assigned_request.service_request_object.owners.length < 1 ? <ListGroup.Item><b>Owner: </b>No Owner</ListGroup.Item> : ""}
+            {assigned_request.service_request_object.reporter_object ? 
+              <ListGroup.Item>
+                <b>Reporter: </b>{assigned_request.service_request_object.reporter_object.first_name + " " + assigned_request.service_request_object.reporter_object.first_name}
+                {assigned_request.service_request_object.reporter_object.agency ? <span className="ml-1">({assigned_request.service_request_object.reporter_object.agency})</span> : "" }
+                {assigned_request.service_request_object.reporter_object.display_phone ?
+                <OverlayTrigger
+                  key={"reporter-phone"}
+                  placement="top"
+                  overlay={
+                    <Tooltip id={`tooltip-reporter-phone`}>
+                      Phone: {assigned_request.service_request_object.reporter_object.display_phone}
+                    </Tooltip>
+                  }
+                >
+                  <FontAwesomeIcon icon={faPhoneRotary} className="ml-1" inverse />
+                </OverlayTrigger>
+                : ""}
+              </ListGroup.Item> : ""}
             <ListGroup.Item><b>Additional Information:</b> {assigned_request.service_request_object.directions||"No additional information available."}</ListGroup.Item>
           </ListGroup>
           <hr/>

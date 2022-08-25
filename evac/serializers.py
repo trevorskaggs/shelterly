@@ -49,13 +49,14 @@ class DispatchServiceRequestSerializer(SimpleServiceRequestSerializer):
     animals = SimpleAnimalSerializer(many=True, read_only=True)
     owner_contacts = OwnerContactSerializer(source='ownercontact_set', many=True, required=False, read_only=True)
     owner_objects = SimplePersonSerializer(source='owners', many=True, required=False, read_only=True)
+    reporter_object = SimplePersonSerializer(source='reporter', required=False, read_only=True)
     visit_notes = VisitNoteSerializer(source='visitnote_set', many=True, required=False, read_only=True)
 
     class Meta:
         model = ServiceRequest
         fields = ['id', 'directions', 'latitude', 'longitude', 'full_address', 'followup_date', 'status', 'injured', 'priority',
          'accessible', 'turn_around', 'animals', 'reported_animals', 'sheltered_in_place', 'unable_to_locate', 'aco_required',
-        'owner_contacts', 'owner_objects', 'owners', 'visit_notes']
+        'owner_contacts', 'owner_objects', 'owners', 'reporter_object', 'visit_notes']
 
 class AssignedRequestDispatchSerializer(serializers.ModelSerializer):
 

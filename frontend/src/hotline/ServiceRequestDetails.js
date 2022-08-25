@@ -47,7 +47,7 @@ function ServiceRequestDetails({ id, incident }) {
     owners: [],
     owner_objects: [],
     reporter: '',
-    reporter_object: {first_name:'', last_name:''},
+    reporter_object: {first_name:'', last_name:'', display_phone:''},
     directions: '',
     priority: '',
     address: '',
@@ -364,7 +364,23 @@ function ServiceRequestDetails({ id, incident }) {
                   </ListGroup.Item>
                 ))}
                 {data.reporter ?
-                <ListGroup.Item><b>Reporter: </b><Link href={"/" + incident + "/people/reporter/" + data.reporter} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.reporter_object.first_name} {data.reporter_object.last_name}</Link> {data.reporter_object.agency ? <span>({data.reporter_object.agency})</span> : "" }</ListGroup.Item> : ""}
+                <ListGroup.Item>
+                  <b>Reporter: </b><Link href={"/" + incident + "/people/reporter/" + data.reporter} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.reporter_object.first_name} {data.reporter_object.last_name}</Link>
+                  {data.reporter_object.agency ? <span className="ml-1">({data.reporter_object.agency})</span> : "" }
+                  {data.reporter_object.display_phone ?
+                  <OverlayTrigger
+                    key={"reporter-phone"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-reporter-phone`}>
+                        Phone: {data.reporter_object.display_phone}
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon icon={faPhoneRotary} className="ml-1" inverse />
+                  </OverlayTrigger>
+                  : ""}
+                </ListGroup.Item> : ""}
               </ListGroup>
             </Card.Body>
           </Card>

@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
-import { Link, navigate } from 'raviger';
+import { Link, navigate, useNavigationPrompt } from 'raviger';
 import { Field, Form, Formik } from 'formik';
 import { Button, ButtonGroup, Card, Col, Form as BootstrapForm, Modal } from "react-bootstrap";
 import * as Yup from 'yup';
@@ -26,13 +26,16 @@ function ServiceRequestForm(props) {
   // Determine if this is from a first responder when creating a SR.
   var is_first_responder = window.location.pathname.includes("first_responder");
 
-  // Track duplicate request address error.
   const [skip, setSkip] = useState(false);
   const [SRs, setSRs] = useState([]);
   const [dupeSRs, setDupeSRs] = useState([]);
   const handleClose = () => setDupeSRs([]);
 
-  // is submitting state for save/next workflow buttons
+  // Check user navigating away when in workflow.
+  const [redirectCheck, setRedirectCheck] = useState(is_workflow);
+  useNavigationPrompt(redirectCheck, "Are you sure you would like to leave the animal intake workflow? No data will be saved.");
+
+  // Is submitting state for save/next workflow buttons.
   const [isButtonSubmitting, setIsButtonSubmitting] = useState(false);
 
   // Initial ServiceRequest data.
@@ -119,12 +122,13 @@ function ServiceRequestForm(props) {
       })}
       onSubmit={ async (values, { setSubmitting }) => {
         setIsButtonSubmitting(true);
-        if (SRs.filter(sr => (sr.address === values.address && sr.city === values.city && sr.state === values.state)).length > 0 && !skip) {
-          setDupeSRs(SRs.filter(sr => (sr.address === values.address && sr.city === values.city && sr.state === values.state)));
-          setIsButtonSubmitting(false);
-        }
-        else {
-          if (is_workflow) {
+        if (is_workflow) {
+          if (SRs.filter(sr => (sr.address === values.address && sr.city === values.city && sr.state === values.state)).length > 0 && !skip) {
+            setDupeSRs(SRs.filter(sr => (sr.address === values.address && sr.city === values.city && sr.state === values.state)));
+            setIsButtonSubmitting(false);
+          }
+          else {
+            setRedirectCheck(false);
             // Create Reporter
             let reporterResponse = [{data:{id:props.state.steps.reporter.id}}];
             if (props.state.steps.reporter.first_name && !props.state.steps.reporter.id) {
@@ -165,22 +169,23 @@ function ServiceRequestForm(props) {
             })
             .catch(error => {
               setIsButtonSubmitting(false);
+              setRedirectCheck(true);
             });
           }
-          else if (id) {
-            axios.put('/hotline/api/servicerequests/' + id + '/?incident=' + incident, values)
-            .then(function() {
-              if (state.prevLocation) {
-                navigate(state.prevLocation);
-              }
-              else {
-                navigate('/' + incident + '/hotline/servicerequest/' + id);
-              }
-            })
-            .catch(error => {
-              setIsButtonSubmitting(false);
-            });
-          }
+        }
+        else if (id) {
+          axios.put('/hotline/api/servicerequests/' + id + '/?incident=' + incident, values)
+          .then(function() {
+            if (state.prevLocation) {
+              navigate(state.prevLocation);
+            }
+            else {
+              navigate('/' + incident + '/hotline/servicerequest/' + id);
+            }
+          })
+          .catch(error => {
+            setIsButtonSubmitting(false);
+          });
         }
       }}
     >
