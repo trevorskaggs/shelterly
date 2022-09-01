@@ -166,6 +166,9 @@ export const printDispatchResolutionForm = (data) => {
           if (choice.label.indexOf('UTL') > -1) {
             return 'UTL';
           }
+          if (choice.label.indexOf('No Further Action (NFA)') > -1) {
+            return 'No Further Action';
+          }
   
           return choice.label;
         }),

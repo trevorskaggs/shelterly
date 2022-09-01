@@ -146,6 +146,6 @@ export const dispatchStatusChoices = [
   {value:'SHELTERED', label:'Sheltered'},
   {value:'SHELTERED IN PLACE', label:'Sheltered In Place (SIP)'},
   {value:'UNABLE TO LOCATE', label:'Unable To Locate (UTL)'},
-  {value:'NO FURTHER ACTION', label:'No Further Action (NFA)'},
   {value:'DECEASED', label:'Deceased'},
+  {value:'NO FURTHER ACTION', label:'No Further Action (NFA)'},
 ]
