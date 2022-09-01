@@ -59,7 +59,7 @@ class ServiceRequest(Location):
           status = 'canceled'
 
         # Remove SR from any active DAs if all animals are sheltered, deceased, reuinted, or canceled.
-        if Animal.objects.filter(status__in=['SHELTERED', 'UNABLE TO LOCATE - NFA', 'DECEASED', 'REUNITED', 'CANCELED'], request=self).count() == self.animal_set.count():
+        if Animal.objects.filter(status__in=['SHELTERED', 'NO FURTHER ACTION', 'DECEASED', 'REUNITED', 'CANCELED'], request=self).count() == self.animal_set.count():
           AssignedRequest.objects.filter(service_request=self, dispatch_assignment__end_time=None).delete()
 
         self.status = status

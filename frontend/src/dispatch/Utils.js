@@ -113,8 +113,8 @@ export const printDispatchResolutionForm = (data) => {
     pdf.drawHRule();
     pdf.drawPad(-10);
     pdf.drawCheckboxList({
-      labels: ['Not Completed Yet', 'Unable to Complete'],
-      listStyle: 'grid'
+      labels: ['Completed', 'Not Completed Yet', 'Unable to Complete'],
+      listStyle: 'inline',
     });
 
     // owners
@@ -165,9 +165,6 @@ export const printDispatchResolutionForm = (data) => {
           }
           if (choice.label.indexOf('UTL') > -1) {
             return 'UTL';
-          }
-          if (choice.label.indexOf('Unable To Locate - No Further Action') > -1) {
-            return 'UTL- NFA';
           }
   
           return choice.label;

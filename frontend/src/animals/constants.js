@@ -130,7 +130,7 @@ export const statusChoices = [
   {value:'REPORTED', label:'Reported'},
   {value:'SHELTERED IN PLACE', label:'Sheltered In Place (SIP)'},
   {value:'UNABLE TO LOCATE', label:'Unable To Locate (UTL)'},
-  {value:'UNABLE TO LOCATE - NFA', label:'Unable To Locate - No Further Action'},
+  {value:'NO FURTHER ACTION', label:'No Further Action (NFA)'},
   {value:'SHELTERED', label:'Sheltered'},
   {value:'REUNITED', label:'Reunited'},
   {value:'DECEASED', label:'Deceased'},
@@ -146,6 +146,6 @@ export const dispatchStatusChoices = [
   {value:'SHELTERED', label:'Sheltered'},
   {value:'SHELTERED IN PLACE', label:'Sheltered In Place (SIP)'},
   {value:'UNABLE TO LOCATE', label:'Unable To Locate (UTL)'},
-  {value:'UNABLE TO LOCATE - NFA', label:'Unable To Locate - No Further Action'},
+  {value:'NO FURTHER ACTION', label:'No Further Action (NFA)'},
   {value:'DECEASED', label:'Deceased'},
 ]

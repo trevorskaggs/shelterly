@@ -314,13 +314,9 @@ class ShelterlyPDF {
       }
 
       if (listStyle === 'inline') {
-        const itemWidth = listItems.length > 5 ? listItems.length : 5;
+        const itemWidth = listItems.length;
         const lineSize = (this.pageWidth - 30) / itemWidth;
         this.#documentLeftMargin = this.#documentLeftMargin + lineSize;
-
-        if (this.#documentLeftMargin > (this.pageWidth - 30)) {
-
-        }
 
         if (
           // last item

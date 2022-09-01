@@ -76,9 +76,9 @@ function AnimalCards(props) {
                                   overlay={<Tooltip id={`tooltip-unable-to-locate`}>UNABLE TO LOCATE</Tooltip>}>
                       <FontAwesomeIcon className="animal-icon" icon={faQuestionCircle} inverse/>
                   </OverlayTrigger> : ""}
-                {animal.status === "UNABLE TO LOCATE - NFA" ?
+                {animal.status === "NO FURTHER ACTION" ?
                   <OverlayTrigger key={"unable-to-locate-nfa"} placement="top"
-                                  overlay={<Tooltip id={`tooltip-unable-to-locate-nfa`}>UNABLE TO LOCATE - NO FURTHER ACTION</Tooltip>}>
+                                  overlay={<Tooltip id={`tooltip-unable-to-locate-nfa`}>NO FURTHER ACTION</Tooltip>}>
                       <FontAwesomeIcon className="animal-icon" icon={faMinusCircle} inverse/>
                   </OverlayTrigger> : ""}
                 {animal.status === "REUNITED" ?
