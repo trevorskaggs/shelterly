@@ -2,15 +2,12 @@ import ShelterlyPDF from '../utils/pdf';
 import { capitalize } from '../utils/formatString';
 
 export const printOwnerDetails = (owner) => {
-  const pdf = new ShelterlyPDF();
-  pdf.fileName = `Owner-Summary-${owner.id.toString().padStart(3, 0)}`;
-
-  // draw page header
-  pdf.drawPageHeader({
-    text: 'Owner Summary',
-    subText: `Date: ${new Date().toLocaleDateString()}`
+  const pdf = new ShelterlyPDF({}, {
+    pageTitle: 'Owner Summary',
+    pageSubtitle: `Date: ${new Date().toLocaleDateString()}`
   });
-  pdf.drawHRule();
+
+  pdf.fileName = `Owner-Summary-${owner.id.toString().padStart(3, 0)}`;
 
   // draw owner section
   pdf.drawSectionHeader({ text: 'Owner Details', hRule: true });

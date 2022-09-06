@@ -18,7 +18,6 @@ function AnimalRoomAssignmentCard(props) {
             height="47px"
             width="47px"
             customStyles={{
-              padding: '8px',
               marginRight: '3px',
               float: 'left'
             }}

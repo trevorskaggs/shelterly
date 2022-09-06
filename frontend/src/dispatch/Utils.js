@@ -14,17 +14,12 @@ export const printDispatchResolutionForm = (data) => {
       pdf.text('Page ' + String(pageNumber) + ' of ' + String(pageCount), pageWidth / 2, pageHeight - 15, {
         align: 'center'
       });
-    }
+    },
+    pageTitle: 'Dispatch Assignment',
+    pageSubtitle: `Opened: ${new Date(data.start_time).toLocaleDateString()}`
   });
-  pdf.fileName = `DAR-${data.id.toString().padStart(3, 0)}`;
 
-  // draw page header
-  pdf.drawPageHeader({
-    text: 'Dispatch Assignment',
-    subText: `Opened: ${new Date(data.start_time).toLocaleDateString()}`
-  });
-  pdf.drawPad();
-  pdf.drawHRule();
+  pdf.fileName = `DAR-${data.id.toString().padStart(3, 0)}`;
 
   // draw team section
   pdf.drawSectionHeader({ text: data.team_object.name, hRule: false });
