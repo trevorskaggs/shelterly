@@ -15,6 +15,7 @@ import { AnimalDeleteModal } from "../components/Modals";
 import Header from '../components/Header';
 import History from '../components/History';
 import { printAnimalCareSchedule } from './Utils';
+import AnimalCoverImage from '../components/AnimalCoverImage';
 
 function AnimalDetails({ id, incident }) {
 
@@ -108,7 +109,7 @@ function AnimalDetails({ id, incident }) {
   const handleDownloadPdfClick = (e) => {
     e.preventDefault();
 
-    printAnimalCareSchedule(data, images);
+    printAnimalCareSchedule(data);
   }
 
   // Hook for initializing data.
@@ -426,7 +427,11 @@ function AnimalDetails({ id, incident }) {
         <div className="slide-container flex-grow-1 border rounded pl-0 pr-0" style={{width:"auto", height:"322px"}}>
           {images.length < 1 ?
             <Carousel className="carousel-wrapper" showThumbs={false} showStatus={false}>
-              <img src="/static/images/image-not-found.png" alt="Not Found" />
+              <AnimalCoverImage
+                animalSpecies={data.species}
+                animalImageSrc={data.front_image}
+                customStyles={{ width: '100%', padding: '40px' }}
+              />
             </Carousel>
           :
             <Carousel className="carousel-wrapper" showThumbs={false} showStatus={false}>

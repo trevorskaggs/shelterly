@@ -14,19 +14,15 @@ export const printServiceRequestSummary = (data) => {
       pdf.text('Page ' + String(pageNumber) + ' of ' + String(pageCount), pageWidth / 2, pageHeight - 15, {
         align: 'center'
       });
-    }
+    },
+    pageTitle: 'Service Request Summary',
+    pageSubtitle: ' '
   });
-  pdf.fileName = `SR-${data.id.toString().padStart(3, 0)}`;
 
+  pdf.fileName = `SR-${data.id.toString().padStart(3, 0)}`;
 
   // service request priority
   const srPriority = priorityChoices.find(({ value }) => value === (data.priority || 2))
-
-  // draw page header
-  pdf.drawPageHeader({ text: 'Service Request Summary', subText: ' ' });
-
-  pdf.drawPad();
-  pdf.drawHRule();
 
     // Summary page
     pdf.drawSectionHeader({ text: `Information` });
