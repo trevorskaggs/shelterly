@@ -17,7 +17,7 @@ const statusLabelLookup = {
   'SHELTERED':'Sheltered',
   'SHELTERED IN PLACE':'Sheltered In Place (SIP)',
   'UNABLE TO LOCATE':'Unable To Locate (UTL)',
-  'UNABLE TO LOCATE - NFA':'Unable To Locate - No Further Action',
+  'NO FURTHER ACTION':'No Further Action (NFA)',
   'DECEASED':'Deceased',
 }
 

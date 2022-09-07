@@ -223,7 +223,7 @@ function Home({ incident }) {
       selector: row => row.utl,
     },
     {
-      name: 'UTL - NFA',
+      name: 'NFA',
       selector: row => row.nfa,
     },
     {
