@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
 import { Link } from 'raviger';
 import { Card, Col, ListGroup, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
@@ -9,8 +9,11 @@ import {
 import { faArrowDownToSquare } from '@fortawesome/pro-regular-svg-icons';
 import History from '../components/History';
 import Header from '../components/Header';
+import { SystemErrorContext } from '../components/SystemError';
 
 function ShelterDetails({ id, incident }) {
+
+  const { setShowSystemError } = useContext(SystemErrorContext);
 
   const [data, setData] = useState({
     name: '',
@@ -46,6 +49,7 @@ function ShelterDetails({ id, incident }) {
         }
       })
       .catch(error => {
+        setShowSystemError(true);
       });
     };
     fetchShelterData();

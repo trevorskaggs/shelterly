@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
 import { navigate } from "raviger";
 import { Field, Formik } from 'formik';
@@ -15,8 +15,11 @@ import {
 import * as Yup from 'yup';
 import { TextInput } from '.././components/Form.js';
 import ButtonSpinner from '../components/ButtonSpinner.js';
+import { SystemErrorContext } from '../components/SystemError';
 
 const UserForm = ({ id, incident }) => {
+
+  const { setShowSystemError } = useContext(SystemErrorContext);
 
   // Regex validators.
   const phoneRegex = /^((\+\d{1,3}(-| )?\(?\d\)?(-| )?\d{1,3})|(\(?\d{2,3}\)?))(-| )?(\d{3,4})(-| )?(\d{4})(( x| ext)\d{1,5}){0,1}$/;
@@ -47,6 +50,7 @@ const UserForm = ({ id, incident }) => {
           }
         })
         .catch(error => {
+          setShowSystemError(true);
         });
       };
       fetchUserData();
@@ -88,6 +92,7 @@ const UserForm = ({ id, incident }) => {
             })
             .catch(error => {
               setSubmitting(false);
+              setShowSystemError(true);
             });
           }
           else {
@@ -100,6 +105,7 @@ const UserForm = ({ id, incident }) => {
                 setFieldError("email", "A user with this email address already exists.");
               }
               setSubmitting(false);
+              setShowSystemError(true);
             });
           }
         }, 500);

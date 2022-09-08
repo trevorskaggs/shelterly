@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { Link } from "raviger";
 import axios from "axios";
 import { Card, Col, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
@@ -8,8 +8,11 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import Header from "../components/Header";
 import Scrollbar from '../components/Scrollbars';
+import { SystemErrorContext } from '../components/SystemError';
 
 function DispatchTeamManagement({ incident }) {
+
+  const { setShowSystemError } = useContext(SystemErrorContext);
 
   const [data, setData] = useState({team_members: [], teams: [], isFetching: false});
 
@@ -22,6 +25,7 @@ function DispatchTeamManagement({ incident }) {
       setData(prevState => ({ ...prevState, "teams": teams }));
     })
     .catch(error => {
+      setShowSystemError(true);
     });
   }
 
@@ -34,6 +38,7 @@ function DispatchTeamManagement({ incident }) {
       setData(prevState => ({ ...prevState, "team_members": team_members }));
     })
     .catch(error => {
+      setShowSystemError(true);
     });
   }
 
@@ -63,12 +68,14 @@ function DispatchTeamManagement({ incident }) {
           .catch(error => {
             if (!unmounted) {
               setData({team_members: [], teams: [], isFetching: false});
+              setShowSystemError(true);
             }
           });
         }
       })
       .catch(error => {
         setData({team_members: [], teams: [], isFetching: false});
+        setShowSystemError(true);
       });
 
       // Cleanup.

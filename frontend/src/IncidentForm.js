@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import axios from "axios";
 import { navigate } from "raviger";
 import { Formik } from 'formik';
@@ -14,8 +14,11 @@ import { Map, Marker, Tooltip as MapTooltip, TileLayer } from "react-leaflet";
 import { Legend, pinMarkerIcon } from "./components/Map";
 import { TextInput } from './components/Form.js';
 import ButtonSpinner from './components/ButtonSpinner.js';
+import { SystemErrorContext } from './components/SystemError';
 
 const IncidentForm = ({ id }) => {
+
+  const { setShowSystemError } = useContext(SystemErrorContext);
 
   const [data, setData] = useState({
     name: '',
@@ -65,6 +68,7 @@ const IncidentForm = ({ id }) => {
           }
         })
         .catch(error => {
+          setShowSystemError(true);
         });
       };
       fetchIncident();
@@ -92,6 +96,7 @@ const IncidentForm = ({ id }) => {
           }
         })
         .catch(error => {
+          setShowSystemError(true);
         });
       };
       fetchIncidents();
@@ -123,6 +128,7 @@ const IncidentForm = ({ id }) => {
             navigate('/');
           })
           .catch(error => {
+            setShowSystemError(true);
           });
         }
         else {
@@ -131,6 +137,7 @@ const IncidentForm = ({ id }) => {
             navigate('/');
           })
           .catch(error => {
+            setShowSystemError(true);
           });
         }
       }}

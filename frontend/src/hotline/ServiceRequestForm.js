@@ -12,11 +12,14 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft } from '@fortawesome/free-solid-svg-icons';
 import ButtonSpinner from '../components/ButtonSpinner';
 import { priorityChoices } from '../constants';
+import { SystemErrorContext } from '../components/SystemError';
 
 // Form for Service Request objects.
 function ServiceRequestForm(props) {
 
   const { state } = useContext(AuthContext);
+  const { setShowSystemError } = useContext(SystemErrorContext);
+
   const id = props.id;
   const incident = props.incident;
 
@@ -74,6 +77,7 @@ function ServiceRequestForm(props) {
           }
         })
         .catch(error => {
+          setShowSystemError(true);
         });
       };
       fetchServiceRequestData();
@@ -86,6 +90,7 @@ function ServiceRequestForm(props) {
       }
     })
     .catch(error => {
+      setShowSystemError(true);
     });
     // Cleanup.
     return () => {
@@ -170,6 +175,7 @@ function ServiceRequestForm(props) {
             .catch(error => {
               setIsButtonSubmitting(false);
               setRedirectCheck(true);
+              setShowSystemError(true);
             });
           }
         }
@@ -185,6 +191,7 @@ function ServiceRequestForm(props) {
           })
           .catch(error => {
             setIsButtonSubmitting(false);
+            setShowSystemError(true);
           });
         }
       }}

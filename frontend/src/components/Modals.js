@@ -16,7 +16,7 @@ const SystemErrorModal = (props) => {
       </Modal.Header>
       <Modal.Body>
         <p>
-          Shelterly has encountered an unexpected error. Please contact a system administrator for help.
+          Shelterly has encountered an unexpected error. If the problem persists please contact a system administrator for help.
         </p>
       </Modal.Body>
       <Modal.Footer>

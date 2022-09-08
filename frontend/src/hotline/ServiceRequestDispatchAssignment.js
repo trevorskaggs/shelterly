@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import ReactDOMServer from 'react-dom/server';
 import axios from "axios";
 import { Link, navigate } from 'raviger';
@@ -16,8 +16,11 @@ import {
 import { faRectanglePortrait } from '@fortawesome/pro-solid-svg-icons';
 import { faCheckCircle } from '@fortawesome/pro-duotone-svg-icons';
 import Header from '../components/Header';
+import { SystemErrorContext } from '../components/SystemError';
 
 function ServiceRequestDispatchAssignment({ id, incident }) {
+
+  const { setShowSystemError } = useContext(SystemErrorContext);
 
   const [currentRequest, setCurrentRequest] = useState({id:'', matches: {}, latitude:0, longitude:0, followup_date:''});
   const [data, setData] = useState({dispatch_assignments: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
@@ -90,6 +93,7 @@ function ServiceRequestDispatchAssignment({ id, incident }) {
       navigate('/' + incident + '/dispatch/summary/' + selected)
     })
     .catch(error => {
+      setShowSystemError(true);
     });
   }
 
@@ -142,6 +146,7 @@ function ServiceRequestDispatchAssignment({ id, incident }) {
           .catch(error => {
             if (!unmounted) {
               setData({dispatch_assignments: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
+              setShowSystemError(true);
             }
           });
         }

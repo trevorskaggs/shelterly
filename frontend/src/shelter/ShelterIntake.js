@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useContext, useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { Link, navigate } from 'raviger';
 import { ButtonGroup, Card, Col, Form as BootstrapForm, ListGroup, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
@@ -11,6 +11,7 @@ import {
 import { DropDown } from '../components/Form';
 import Header from '../components/Header';
 import ButtonSpinner from '../components/ButtonSpinner';
+import { SystemErrorContext } from '../components/SystemError';
 
 const statusLabelLookup = {
   'REPORTED':'Reported',
@@ -113,6 +114,8 @@ function AnimalStatus(props) {
 
 function ShelterIntake({ id, incident }) {
 
+  const { setShowSystemError } = useContext(SystemErrorContext);
+
   const [options, setOptions] = useState({shelter_options:[], room_options: {}, da_options:[]});
   const [data, setData] = useState({shelter: {}, dispatch_assignments: [], sr_updates: [], isFetching: false});
   const [selected, setSelected] = useState(null);
@@ -166,6 +169,7 @@ function ShelterIntake({ id, incident }) {
           .catch(error => {
             if (!unmounted) {
               setData({shelter: {}, dispatch_assignments: [], sr_updates: [], isFetching: false});
+              setShowSystemError(true);
             }
           });
         }
@@ -207,6 +211,7 @@ function ShelterIntake({ id, incident }) {
             })
             .catch(error => {
               setSubmitting(false);
+              setShowSystemError(true);
             });
         }, 500);
       }}

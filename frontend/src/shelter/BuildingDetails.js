@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
 import { Link, navigate } from 'raviger';
 import { Button, Card, ListGroup, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap';
@@ -10,8 +10,11 @@ import { faArrowDownToSquare } from '@fortawesome/pro-regular-svg-icons';
 import { faTimesSquare } from '@fortawesome/pro-regular-svg-icons';
 import History from '../components/History';
 import Header from '../components/Header';
+import { SystemErrorContext } from '../components/SystemError';
 
 function BuildingDetails({ id, incident }) {
+
+  const { setShowSystemError } = useContext(SystemErrorContext);
 
   const [data, setData] = useState({name:'', description: '', shelter: null, shelter_name:'', rooms:[], action_history:[]});
   const [showModal, setShowModal] = useState(false);
@@ -21,6 +24,7 @@ function BuildingDetails({ id, incident }) {
       navigate('/' + incident + '/shelter/' + data.shelter)
     })
     .catch(error => {
+      setShowSystemError(true);
     });
   }
 
@@ -40,6 +44,7 @@ function BuildingDetails({ id, incident }) {
         }
       })
       .catch(error => {
+        setShowSystemError(true);
       });
     };
     fetchBuildingData();
