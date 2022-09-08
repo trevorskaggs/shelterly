@@ -92,7 +92,7 @@ function ServiceRequestForm(props) {
       unmounted = true;
       source.cancel();
     };
-  }, [id]);
+  }, [id, incident]);
 
   return (
     <Formik

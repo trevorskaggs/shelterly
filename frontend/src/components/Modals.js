@@ -10,19 +10,19 @@ const SystemErrorModal = (props) => {
 
   return (
     <>
-      <Modal show={props.show} onHide={props.handleClose}>
-        <Modal.Header closeButton>
-          <Modal.Title>System Error</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <p>
-            Shelterly has encountered an unexpected error. Please contact a system administrator for help.
-          </p>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="primary" onClick={props.handleClose}>Ok</Button>
-        </Modal.Footer>
-      </Modal>
+    <Modal show={props.showSystemError} onHide={() => {props.setShowSystemError(false)}}>
+      <Modal.Header closeButton>
+        <Modal.Title>System Error</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <p>
+          Shelterly has encountered an unexpected error. Please contact a system administrator for help.
+        </p>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="primary" onClick={() => {props.setShowSystemError(false)}}>Ok</Button>
+      </Modal.Footer>
+    </Modal>
     </>
   );
 };

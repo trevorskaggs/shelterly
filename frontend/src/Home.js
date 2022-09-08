@@ -7,12 +7,13 @@ import moment from 'moment';
 import { AuthContext } from "./accounts/AccountsReducer";
 import Header from './components/Header';
 import { DateRangePicker } from './components/Form';
-import { SystemErrorModal } from './components/Modals';
+import { SystemErrorContext } from './components/SystemError';
 
 function Home({ incident }) {
 
   // Initial state.
   const { state } = useContext(AuthContext);
+  const { setShowSystemError } = useContext(SystemErrorContext);
 
   const [data, setData] = useState({'isFetching':true, 'daily_report':[], 'sr_worked_report':[], 'shelter_report':[], 'animal_status_report':[], 'animal_owner_report':[], 'animals_deceased_report':[]});
   const [selection, setSelection] = useState({value:'daily', label:"Daily Report"});
@@ -20,9 +21,6 @@ function Home({ incident }) {
   const [storeDate, setStoreDate] = useState('');
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(moment().format('YYYY-MM-DD'));
-
-  const [show, setShow] = useState(false);
-  const handleClose = () => setShow(false);
 
   // Hook for initializing data.
   useEffect(() => {
@@ -55,7 +53,7 @@ function Home({ incident }) {
       .catch(error => {
         if (!unmounted) {
           setData({'isFetching':false, 'daily_report':[], 'sr_worked_report':[], 'shelter_report':[], 'animal_status_report':[], 'animal_owner_report':[], 'animals_deceased_report':[]});
-          setShow(true);
+          setShowSystemError(true);
         }
       });
     };
@@ -411,10 +409,9 @@ function Home({ incident }) {
           striped
       />
       :
-      <span></span>
+      <span/>
       }
     </span>
-    <SystemErrorModal show={show} handleClose={handleClose} />
     </>
   );
 }

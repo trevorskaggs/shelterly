@@ -19,8 +19,10 @@ const AnimalForm = (props) => {
   let is_intake = window.location.pathname.includes("intake");
   let is_reporter = window.location.pathname.includes("reporter");
 
-  useNavigationPrompt(is_workflow, "Are you sure you would like to leave the animal intake workflow? No data will be saved.");
+  // Determine if we're in a multi-step workflow.
+  let is_workflow = window.location.pathname.includes("workflow");
 
+  useNavigationPrompt(is_workflow, "Are you sure you would like to leave the animal intake workflow? No data will be saved.");
 
   // Identify any query param data.
   const [queryParams] = useQueryParams();
@@ -30,9 +32,6 @@ const AnimalForm = (props) => {
     reporter_id = null,
     shelter_id = null,
   } = queryParams;
-
-  // Determine if we're in a multi-step workflow.
-  var is_workflow = window.location.pathname.includes("workflow");
 
   // Track species selected and update choice lists accordingly.
   const speciesRef = useRef(null);
