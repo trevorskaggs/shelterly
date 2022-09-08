@@ -7,18 +7,19 @@ import AnimalForm from "./AnimalForm";
 import AnimalSearch from "./AnimalSearch";
 import AnimalDetails from "./AnimalDetails";
 import { initialWorkflowData } from "../components/StepperWorkflow";
+import { SystemErrorProvider } from '../components/SystemError';
 
 describe("Animal tests", () => {
   it("Render AnimalForm", () => {
-    render(<AnimalForm state={initialWorkflowData} />);
+    render(<SystemErrorProvider><AnimalForm state={initialWorkflowData} /></SystemErrorProvider>);
     expect(screen.getByText("Animal Information"));
   });
   it("Render AnimalSearch", () => {
-    render(<AnimalSearch />);
+    render(<SystemErrorProvider><AnimalSearch /></SystemErrorProvider>);
     expect(screen.getByText("Search"));
   });
   it("Render AnimalView", () => {
-    render(<AnimalDetails id={1} />);
+    render(<SystemErrorProvider><AnimalDetails id={1} /></SystemErrorProvider>);
     expect(screen.getByText(/Animal Details/));
   });
 });
