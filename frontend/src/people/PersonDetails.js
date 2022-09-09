@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
 import { Link } from 'raviger';
 import { Button, Card, ListGroup, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap';
@@ -14,8 +14,11 @@ import Scrollbar from '../components/Scrollbars';
 import AnimalCards from '../components/AnimalCards';
 import PhotoDocuments from '../components/PhotoDocuments';
 import { printOwnerDetails } from './Utils';
+import { SystemErrorContext } from '../components/SystemError';
 
 function PersonDetails({id, incident}) {
+
+  const { setShowSystemError } = useContext(SystemErrorContext);
 
   // Determine if this is an owner or reporter when creating a Person.
   let is_owner = window.location.pathname.includes("owner")
@@ -31,6 +34,7 @@ function PersonDetails({id, incident}) {
       handleClose()
     })
     .catch(error => {
+      setShowSystemError(true);
     });
   }
 
@@ -78,6 +82,7 @@ function PersonDetails({id, incident}) {
         }
       })
       .catch(error => {
+        setShowSystemError(true);
       });
     };
     fetchPersonData();

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import axios from "axios";
 import { Link, navigate } from 'raviger';
 import { Button, Card, Col, Row } from 'react-bootstrap';
@@ -10,11 +10,13 @@ import { faCircle, faExclamationCircle, faPhone } from '@fortawesome/free-solid-
 import { faQuestionCircle as faQuestionCircleDuo } from '@fortawesome/pro-duotone-svg-icons';
 import { faHomeAlt as faHomeAltReg } from '@fortawesome/pro-regular-svg-icons';
 import { faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
-
 import Map, { prettyText, closedMarkerIcon, reportedMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
 import Header from "../components/Header";
+import { SystemErrorContext } from '../components/SystemError';
 
 function Hotline({ incident }) {
+
+  const { setShowSystemError } = useContext(SystemErrorContext);
 
   const [data, setData] = useState({service_requests: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
   const [mapState, setMapState] = useState({});
@@ -68,6 +70,7 @@ function Hotline({ incident }) {
       .catch(error => {
         if (!unmounted) {
           setData({service_requests: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
+          setShowSystemError(true);
         }
       });
     };

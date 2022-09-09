@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
 import { Link, useQueryParams } from 'raviger';
 import { Button, ButtonGroup, Card, Row } from 'react-bootstrap';
@@ -10,8 +10,11 @@ import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
 import AnimalRoomAssignmentCard from '../components/AnimalRoomAssignmentCard';
+import { SystemErrorContext } from '../components/SystemError';
 
 function ShelterRoomAssignment({ id, incident }) {
+
+  const { setShowSystemError } = useContext(SystemErrorContext);
 
   // Identify any query param data.
   const [queryParams] = useQueryParams();
@@ -71,6 +74,7 @@ function ShelterRoomAssignment({ id, incident }) {
       }
       axios.patch('/animals/api/animal/' + Number(draggableId) + '/', {set_order:destination.index})
       .catch(error => {
+        setShowSystemError(true);
       });
     }
     else {
@@ -86,6 +90,7 @@ function ShelterRoomAssignment({ id, incident }) {
         rooms[destination.droppableId].animals = dest_animals;
         axios.patch('/animals/api/animal/' + Number(draggableId) + '/', {room:data.rooms[destination.droppableId].id, set_order:destination.index})
         .catch(error => {
+          setShowSystemError(true);
         });
       }
       // Room to unroomed.
@@ -96,6 +101,7 @@ function ShelterRoomAssignment({ id, incident }) {
         rooms[source.droppableId].animals = source_animals;
         axios.patch('/animals/api/animal/' + Number(draggableId) + '/', {room:null, set_order:destination.index})
         .catch(error => {
+          setShowSystemError(true);
         });
       }
       // Room to room.
@@ -108,6 +114,7 @@ function ShelterRoomAssignment({ id, incident }) {
         rooms[source.droppableId].animals = source_animals.filter(animal => animal.id !== Number(draggableId));
         axios.patch('/animals/api/animal/' + Number(draggableId) + '/', {room:data.rooms[destination.droppableId].id, set_order:destination.index})
         .catch(error => {
+          setShowSystemError(true);
         });
       }
       setData(prevState => ({ ...prevState, 'rooms':rooms, 'unroomed_animals':unroomed_animals }));
@@ -134,6 +141,7 @@ function ShelterRoomAssignment({ id, incident }) {
         }
       })
       .catch(error => {
+        setShowSystemError(true);
       });
     };
     fetchShelterData();

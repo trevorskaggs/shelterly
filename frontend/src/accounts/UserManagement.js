@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { Link } from "raviger";
 import axios from "axios";
 import { Button, Card, Col, Form, FormControl, InputGroup, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
@@ -10,8 +10,11 @@ import {
   faCircleI, faCircleU, faPencil, faUserUnlock
 } from '@fortawesome/pro-solid-svg-icons';
 import Header from "../components/Header";
+import { SystemErrorContext } from '../components/SystemError';
 
 function UserManagement({ incident }) {
+
+  const { setShowSystemError } = useContext(SystemErrorContext);
 
   const [data, setData] = useState({users: [], isFetching: false});
   const [filteredData, setFilteredData] = useState({users: [], isFetching: false});
@@ -39,6 +42,7 @@ function UserManagement({ incident }) {
       handleUserClose();
     })
     .catch(error => {
+      setShowSystemError(true);
     });
   }
 
@@ -49,6 +53,7 @@ function UserManagement({ incident }) {
       handleUserResetClose();
     })
     .catch(error => {
+      setShowSystemError(true);
     });
   }
 
@@ -63,6 +68,7 @@ function UserManagement({ incident }) {
       handleUploadCSVClose();
     })
     .catch(error => {
+      setShowSystemError(true);
     });
   }
 
@@ -114,6 +120,7 @@ function UserManagement({ incident }) {
       })
       .catch(error => {
         setData({users: [], isFetching: false});
+        setShowSystemError(true);
       });
 
       // Cleanup.

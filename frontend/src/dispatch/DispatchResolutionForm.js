@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import axios from "axios";
 import { Link, navigate } from "raviger";
 import { Field, Form, Formik } from 'formik';
@@ -28,6 +28,7 @@ import { Checkbox, DateTimePicker, DropDown, TextInput } from '../components/For
 import { dispatchStatusChoices } from '../animals/constants';
 import ButtonSpinner from '../components/ButtonSpinner';
 import { priorityChoices } from '../constants';
+import { SystemErrorContext } from '../components/SystemError';
 
 function AnimalStatus(props) {
 
@@ -120,6 +121,8 @@ function AnimalStatus(props) {
 
 function DispatchResolutionForm({ id, incident }) {
 
+  const { setShowSystemError } = useContext(SystemErrorContext);
+
   // Initial animal data.
   const [data, setData] = useState({
     id: null,
@@ -181,6 +184,7 @@ function DispatchResolutionForm({ id, incident }) {
         }
       })
       .catch(error => {
+        setShowSystemError(true);
       });
     };
 
@@ -210,6 +214,7 @@ function DispatchResolutionForm({ id, incident }) {
       .catch(error => {
         if (!unmounted) {
           setShelters({options: [], room_options: [], isFetching: false});
+          setShowSystemError(true);
         }
       });
     };
@@ -305,6 +310,7 @@ function DispatchResolutionForm({ id, incident }) {
             })
             .catch(error => {
               setSubmitting(false);
+              setShowSystemError(true);
             });
         }, 500);
       }}

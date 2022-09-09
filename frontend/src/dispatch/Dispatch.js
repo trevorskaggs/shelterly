@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import axios from "axios";
 import { Link, navigate } from 'raviger';
 import { Button, Card, Col, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
@@ -14,8 +14,11 @@ import { faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
 import Map, { countMatches, prettyText, reportedMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
 import Header from "../components/Header";
 import Scrollbar from '../components/Scrollbars';
+import { SystemErrorContext } from '../components/SystemError';
 
 function Dispatch({ incident }) {
+
+  const { setShowSystemError } = useContext(SystemErrorContext);
 
   const [data, setData] = useState({dispatch_assignments: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
   const [mapState, setMapState] = useState({});
@@ -59,6 +62,7 @@ function Dispatch({ incident }) {
       .catch(error => {
         if (!unmounted) {
           setData({dispatch_assignments: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
+          setShowSystemError(true);
         }
       });
     };

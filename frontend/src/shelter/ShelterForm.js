@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
 import { navigate } from 'raviger';
 import { Field, Formik } from 'formik';
@@ -9,10 +9,14 @@ import * as Yup from 'yup';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft } from '@fortawesome/free-solid-svg-icons';
 import ButtonSpinner from '../components/ButtonSpinner';
+import { SystemErrorContext } from '../components/SystemError';
+
 // Regex validators.
 const nameRegex = /^[a-z0-9 ,.'-]+$/i;
 
 const ShelterForm = ({ id, incident }) => {
+
+  const { setShowSystemError } = useContext(SystemErrorContext);
 
   // Initial shelter data.
   const [data, setData] = useState({
@@ -62,10 +66,12 @@ const ShelterForm = ({ id, incident }) => {
               setShelterIncident(incidentResponse.data.slug)
             })
             .catch(error => {
+              setShowSystemError(true);
             });
           }
         })
         .catch(error => {
+          setShowSystemError(true);
         });
       };
       fetchShelterData();
@@ -75,7 +81,7 @@ const ShelterForm = ({ id, incident }) => {
       unmounted = true;
       source.cancel();
     };
-  }, [id]);
+  }, [id, incident]);
 
   return (
     <>
@@ -115,6 +121,9 @@ const ShelterForm = ({ id, incident }) => {
               if (error.response.data && error.response.data.name && error.response.data.name[0].includes('shelter with this name already exists')) {
                 setShow(true);
               }
+              else {
+                setShowSystemError(true);
+              }
             });
           }
           else {
@@ -125,6 +134,9 @@ const ShelterForm = ({ id, incident }) => {
             .catch(error => {
               if (error.response.data && error.response.data.name && error.response.data.name[0].includes('shelter with this name already exists')) {
                 setShow(true);
+              }
+              else {
+                setShowSystemError(true);
               }
             });
             setSubmitting(false);

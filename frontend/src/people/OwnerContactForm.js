@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
 import { navigate, useQueryParams } from 'raviger';
 import { Formik } from 'formik';
@@ -8,8 +8,11 @@ import { DateTimePicker, TextInput } from '../components/Form';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft } from '@fortawesome/free-solid-svg-icons';
 import ButtonSpinner from '../components/ButtonSpinner';
+import { SystemErrorContext } from '../components/SystemError';
 
 const OwnerContactForm = ({ id, incident }) => {
+
+  const { setShowSystemError } = useContext(SystemErrorContext);
 
   const [queryParams] = useQueryParams();
   let url;
@@ -43,6 +46,7 @@ const OwnerContactForm = ({ id, incident }) => {
           }
         })
         .catch(error => {
+          setShowSystemError(true);
         });
       };
       fetchOwnerContact();
@@ -60,6 +64,7 @@ const OwnerContactForm = ({ id, incident }) => {
         }
       })
       .catch(error => {
+        setShowSystemError(true);
       });
       }
       fetchOwner();
@@ -94,6 +99,7 @@ const OwnerContactForm = ({ id, incident }) => {
         })
         .catch(error => {
           setSubmitting(false);
+          setShowSystemError(true);
         });
       }}
     >

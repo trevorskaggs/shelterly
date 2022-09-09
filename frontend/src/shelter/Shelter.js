@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link, navigate } from 'raviger';
 import { Button, Card, Col, Row } from 'react-bootstrap';
@@ -9,8 +9,11 @@ import { faHome, faPlusSquare } from '@fortawesome/free-solid-svg-icons';
 import Header from '../components/Header';
 import Map, { shelterMarkerIcon } from "../components/Map";
 import Scrollbar from '../components/Scrollbars';
+import { SystemErrorContext } from '../components/SystemError';
 
 function Shelter({ incident }) {
+
+  const { setShowSystemError } = useContext(SystemErrorContext);
 
   const [data, setData] = useState({shelters: [],  isFetching: false, bounds:L.latLngBounds([[0,0]])});
   const [selectedShelter, setSelectedShelter] = useState(null);
@@ -38,6 +41,7 @@ function Shelter({ incident }) {
       .catch(error => {
         if (!unmounted) {
           setData({shelters: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
+          setShowSystemError(true);
         }
       });
     };

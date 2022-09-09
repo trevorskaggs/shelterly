@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useContext, useEffect, useState, useRef } from 'react';
 import ReactDOMServer from 'react-dom/server';
 import axios from "axios";
 import { Link, useQueryParams } from 'raviger';
@@ -23,6 +23,7 @@ import { ITEMS_PER_PAGE } from '../constants';
 import { Legend } from "../components/Map";
 import { catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, speciesChoices, statusChoices } from './constants';
 import AnimalCoverImage from '../components/AnimalCoverImage';
+import { SystemErrorContext } from '../components/SystemError';
 
 const NoOptionsMessage = props => {
   return (
@@ -33,6 +34,8 @@ const NoOptionsMessage = props => {
 };
 
 function AnimalSearch({ incident }) {
+
+  const { setShowSystemError } = useContext(SystemErrorContext);
 
   // Identify any query param data.
   const [queryParams] = useQueryParams();
@@ -209,6 +212,7 @@ function AnimalSearch({ incident }) {
       .catch(error => {
         if (!unmounted) {
           setData({animals: [], isFetching: false});
+          setShowSystemError(true);
         }
       });
     };
@@ -233,6 +237,7 @@ function AnimalSearch({ incident }) {
       .catch(error => {
         if (!unmounted) {
           setShelters({options: [], isFetching: false});
+          setShowSystemError(true);
         }
       });
     };
