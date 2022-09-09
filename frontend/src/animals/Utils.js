@@ -50,7 +50,9 @@ async function buildAnimalCareScheduleDoc (animals) {
     const labelsList = [
       [`Animal No: A#${animal.id}`, `Animal Name: ${animal.name}`],
       [
-        `Intake Date: ${new Date(animal.intake_date).toLocaleDateString()}`,
+        `Intake Date: ${animal.intake_date
+          ? new Date(animal.intake_date).toLocaleDateString()
+          : 'N/A'}`,
         `Location: ${animal.room ? `${animal.building_name} / ${animal.room_name}` : 'N/A'}`
       ],
       [`Species: ${animal.species}`, `Color: ${animal.pcolor} ${animal.scolor ? `/ ${animal.scolor}` : '' }`],
@@ -67,7 +69,15 @@ async function buildAnimalCareScheduleDoc (animals) {
     pdf.resetDocumentLeftMargin();
     pdf.drawPad(15);
 
-    pdf.drawWrappedText({ text: `Owner(s): ${animal.owners.map((owner) => `${owner.first_name} ${owner.last_name} ${owner.display_phone}`).join('; ')}`})
+    if (animal.owners && animal.owners.length) {
+      pdf.drawWrappedText({ text: `Owner(s): ${animal.owners.map((owner) => `${owner.first_name} ${owner.last_name} ${owner.display_phone}`).join('; ')}`})
+    }
+    else if (animal.owner_names && animal.owner_names.length) {
+        pdf.drawWrappedText({ text: `Owner(s): ${animal.owner_names.map((owner_name) => `${owner_name}`).join('; ')}`})
+    }
+    else {
+      pdf.drawWrappedText({ text: 'Owner(s): ___________________________________'})
+    }
 
     pdf.drawPad(-15);
 

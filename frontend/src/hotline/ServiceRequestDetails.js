@@ -15,6 +15,7 @@ import AnimalCards from '../components/AnimalCards';
 import PhotoDocuments from '../components/PhotoDocuments';
 import Flatpickr from 'react-flatpickr';
 import { printServiceRequestSummary } from './Utils'
+import { printAllAnimalCareSchedules } from '../animals/Utils';
 
 function ServiceRequestDetails({ id, incident }) {
 
@@ -85,6 +86,12 @@ function ServiceRequestDetails({ id, incident }) {
     e.preventDefault();
 
     printServiceRequestSummary(data);
+  }
+
+  const handlePrintAllAnimalsClick = (e) => {
+    e.preventDefault();
+
+    printAllAnimalCareSchedules(data.animals);
   }
 
   // Hook for initializing data.
@@ -416,6 +423,19 @@ function ServiceRequestDetails({ id, incident }) {
                       <FontAwesomeIcon icon={faHomeHeart} onClick={() => setShow(true)} style={{cursor:'pointer'}} className="ml-1 fa-move-up" inverse />
                     </OverlayTrigger>
                     : ""}
+                  {data.animals?.length > 0 && (
+                    <OverlayTrigger
+                      key={"printall"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-printall`}>
+                          Print all animal care schedules
+                        </Tooltip>
+                      }
+                    >
+                      <FontAwesomeIcon icon={faPrint} onClick={handlePrintAllAnimalsClick} style={{cursor:'pointer'}} className="ml-1 fa-move-up" size="sm" inverse />
+                    </OverlayTrigger>
+                  )}
                 </h4>
               </Card.Title>
               <hr />

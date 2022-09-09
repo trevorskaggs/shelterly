@@ -35,7 +35,7 @@ class RoomSerializer(SimpleRoomSerializer):
                 return ModestAnimalSerializer(obj.animal_set.exclude(status='CANCELED'), many=True, required=False, read_only=True).data
         else:
             if hasattr(obj, 'animals'):
-                return ModestAnimalSerializer(obj.animals, many=True, required=False, read_only=True).data
+                return AnimalSerializer(obj.animals, many=True, required=False, read_only=True).data
             else:
                 return AnimalSerializer(obj.animal_set.exclude(status='CANCELED'), many=True, required=False, read_only=True).data
 

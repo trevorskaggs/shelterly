@@ -4,7 +4,8 @@ import { Link, navigate } from 'raviger';
 import { Button, Card, ListGroup, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faEdit
+  faEdit,
+  faPrint
 } from '@fortawesome/free-solid-svg-icons';
 import { faArrowDownToSquare } from '@fortawesome/pro-regular-svg-icons';
 import {
@@ -13,6 +14,7 @@ import {
 import History from '../components/History';
 import Header from '../components/Header';
 import AnimalCards from '../components/AnimalCards';
+import { printAllAnimalCareSchedules } from '../animals/Utils';
 
 function RoomDetails({ id, incident }) {
 
@@ -25,6 +27,12 @@ function RoomDetails({ id, incident }) {
     })
     .catch(error => {
     });
+  }
+
+  const handlePrintAllAnimalsClick = (e) => {
+    e.preventDefault();
+
+    printAllAnimalCareSchedules(data.animals);
   }
 
   // Hook for initializing data.
@@ -112,6 +120,19 @@ function RoomDetails({ id, incident }) {
                 <OverlayTrigger placement="top" overlay={<Tooltip id={`tooltip-assign`}>Assign animals to rooms</Tooltip>}>
                   <Link href={"/" + incident + "/shelter/" + data.shelter + "/assign?building_id=" + data.building}><FontAwesomeIcon icon={faArrowDownToSquare} className="ml-1 fa-move-up" inverse /></Link>
                 </OverlayTrigger>
+                {data.animals?.length > 0 && (
+                  <OverlayTrigger
+                    key={"printall"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-printall`}>
+                        Print all animal care schedules
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon icon={faPrint} onClick={handlePrintAllAnimalsClick} style={{cursor:'pointer'}} className="ml-1 fa-move-up" size="sm" inverse />
+                  </OverlayTrigger>
+                )}
               </h4>
             </Card.Title>
             <hr/>
