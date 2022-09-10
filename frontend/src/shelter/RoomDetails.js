@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
 import { Link, navigate } from 'raviger';
 import { Button, Card, ListGroup, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap';
@@ -15,8 +15,11 @@ import History from '../components/History';
 import Header from '../components/Header';
 import AnimalCards from '../components/AnimalCards';
 import { printAllAnimalCareSchedules } from '../animals/Utils';
+import { SystemErrorContext } from '../components/SystemError';
 
 function RoomDetails({ id, incident }) {
+
+  const { setShowSystemError } = useContext(SystemErrorContext);
 
   const [data, setData] = useState({name:'', description:'', building:null, building_name: '', shelter_name:'', shelter: null, animals:[], action_history:[]});
   const [showModal, setShowModal] = useState(false);
@@ -26,6 +29,7 @@ function RoomDetails({ id, incident }) {
       navigate('/' + incident + '/shelter/building/' + data.building)
     })
     .catch(error => {
+      setShowSystemError(true);
     });
   }
 
@@ -51,6 +55,7 @@ function RoomDetails({ id, incident }) {
         }
       })
       .catch(error => {
+        setShowSystemError(true);
       });
     };
     fetchRoomData();

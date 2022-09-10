@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import axios from "axios";
 import { navigate } from "raviger";
 import { Formik } from 'formik';
@@ -14,8 +14,11 @@ import {
 import * as Yup from 'yup';
 import { TextInput } from '.././components/Form.js';
 import ButtonSpinner from '../components/ButtonSpinner.js';
+import { SystemErrorContext } from '../components/SystemError';
 
 const DispatchTeamMemberForm = ({ incident }) => {
+
+  const { setShowSystemError } = useContext(SystemErrorContext);
 
   // Track whether or not to add another evac team member after saving.
   const [addAnother, setAddAnother] = useState(false);
@@ -55,6 +58,7 @@ const DispatchTeamMemberForm = ({ incident }) => {
           })
           .catch(error => {
             setSubmitting(false);
+            setShowSystemError(true);
           });
         }, 500);
       }}

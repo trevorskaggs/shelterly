@@ -16,10 +16,12 @@ import Header from '../components/Header';
 import History from '../components/History';
 import { printAnimalCareSchedule } from './Utils';
 import AnimalCoverImage from '../components/AnimalCoverImage';
+import { SystemErrorContext } from '../components/SystemError';
 
 function AnimalDetails({ id, incident }) {
 
   const { state } = useContext(AuthContext);
+  const { setShowSystemError } = useContext(SystemErrorContext);
   const [images, setImages] = useState([]);
 
   // Initial animal data.
@@ -67,6 +69,7 @@ function AnimalDetails({ id, incident }) {
       handleClose()
     })
     .catch(error => {
+      setShowSystemError(true);
     });
   }
 
@@ -78,6 +81,7 @@ function AnimalDetails({ id, incident }) {
       handleOwnerClose();
     })
     .catch(error => {
+      setShowSystemError(true);
     });
   }
 
@@ -103,6 +107,7 @@ function AnimalDetails({ id, incident }) {
       }
     })
     .catch(error => {
+      setShowSystemError(true);
     });
   }
 
@@ -130,6 +135,7 @@ function AnimalDetails({ id, incident }) {
         }
       })
       .catch(error => {
+        setShowSystemError(true);
       });
     };
     fetchAnimalData();

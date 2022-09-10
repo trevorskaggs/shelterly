@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
 import { navigate } from "raviger";
 import { Field, Form, Formik, } from 'formik';
@@ -18,8 +18,11 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import * as Yup from 'yup';
 import { DateTimePicker, TextInput } from '../components/Form';
+import { SystemErrorContext } from '../components/SystemError';
 
 const VisitNoteForm = ({ id, incident }) => {
+
+  const { setShowSystemError } = useContext(SystemErrorContext);
 
   const [data, setData] = useState({
     date_completed: '',
@@ -45,6 +48,7 @@ const VisitNoteForm = ({ id, incident }) => {
           }
         })
         .catch(error => {
+          setShowSystemError(true);
         });
       };
       fetchVisitNote();
@@ -71,6 +75,7 @@ const VisitNoteForm = ({ id, incident }) => {
               navigate('/' + incident + '/hotline/servicerequest/' + values.service_request)
             )
             .catch(error => {
+              setShowSystemError(true);
             });
           setSubmitting(false);
         }, 500);

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'raviger';
 import Moment from 'react-moment';
@@ -16,8 +16,11 @@ import PhotoDocuments from '../components/PhotoDocuments';
 import Flatpickr from 'react-flatpickr';
 import { printServiceRequestSummary } from './Utils'
 import { printAllAnimalCareSchedules } from '../animals/Utils';
+import { SystemErrorContext } from '../components/SystemError';
 
 function ServiceRequestDetails({ id, incident }) {
+
+  const { setShowSystemError } = useContext(SystemErrorContext);
 
   const datetime = useRef(null);
   const openCalendar = () => {
@@ -38,6 +41,7 @@ function ServiceRequestDetails({ id, incident }) {
       datetime.current.flatpickr.clear();
       axios.patch('/hotline/api/servicerequests/' + id + '/', {followup_date:null})
       .catch(error => {
+        setShowSystemError(true);
       });
     }
   }, [id, datetime]);
@@ -79,6 +83,7 @@ function ServiceRequestDetails({ id, incident }) {
       handleClose()
     })
     .catch(error => {
+      setShowSystemError(true);
     });
   }
 
@@ -110,6 +115,7 @@ function ServiceRequestDetails({ id, incident }) {
         }
       })
       .catch(error => {
+        setShowSystemError(true);
       });
     };
     fetchServiceRequestData();
@@ -310,6 +316,7 @@ function ServiceRequestDetails({ id, incident }) {
                       setData(prevState => ({ ...prevState, "followup_date":dateStr }));
                       axios.patch('/hotline/api/servicerequests/' + id + '/', {followup_date:date[0]})
                       .catch(error => {
+                        setShowSystemError(true);
                       });
                     }}
                     value={data.followup_date || null}>

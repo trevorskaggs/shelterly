@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { navigate, useNavigationPrompt, useQueryParams } from 'raviger';
 import { Form, Formik } from "formik";
@@ -9,8 +9,11 @@ import { catAgeChoices, dogAgeChoices, horseAgeChoices, otherAgeChoices, catColo
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft, faMinusSquare } from '@fortawesome/free-solid-svg-icons';
 import ButtonSpinner from "../components/ButtonSpinner";
+import { SystemErrorContext } from '../components/SystemError';
 
 const AnimalForm = (props) => {
+
+  const { setShowSystemError } = useContext(SystemErrorContext);
 
   const id = props.id;
   const incident = '/' + props.incident;
@@ -19,8 +22,10 @@ const AnimalForm = (props) => {
   let is_intake = window.location.pathname.includes("intake");
   let is_reporter = window.location.pathname.includes("reporter");
 
-  useNavigationPrompt(is_workflow, "Are you sure you would like to leave the animal intake workflow? No data will be saved.");
+  // Determine if we're in a multi-step workflow.
+  let is_workflow = window.location.pathname.includes("workflow");
 
+  useNavigationPrompt(is_workflow, "Are you sure you would like to leave the animal intake workflow? No data will be saved.");
 
   // Identify any query param data.
   const [queryParams] = useQueryParams();
@@ -30,9 +35,6 @@ const AnimalForm = (props) => {
     reporter_id = null,
     shelter_id = null,
   } = queryParams;
-
-  // Determine if we're in a multi-step workflow.
-  var is_workflow = window.location.pathname.includes("workflow");
 
   // Track species selected and update choice lists accordingly.
   const speciesRef = useRef(null);
@@ -188,6 +190,7 @@ const AnimalForm = (props) => {
           }
         })
         .catch(error => {
+          setShowSystemError(true);
         });
       };
       fetchAnimalData();
@@ -220,6 +223,7 @@ const AnimalForm = (props) => {
       .catch(error => {
         if (!unmounted) {
           setShelters({options: [], shelters: [], room_options: {}, isFetching: false});
+          setShowSystemError(true);
         }
       });
     };
@@ -361,6 +365,7 @@ const AnimalForm = (props) => {
                 axios.post('/animals/api/animal/', animal)
                 .catch(error => {
                   setSubmitting(false);
+                  setShowSystemError(true);
                 });
               });
               // Create current animal then navigate.
@@ -377,6 +382,7 @@ const AnimalForm = (props) => {
               })
               .catch(error => {
                 setSubmitting(false);
+                setShowSystemError(true);
               });
             }
             else {
@@ -391,6 +397,7 @@ const AnimalForm = (props) => {
               })
               .catch(error => {
                 setSubmitting(false);
+                setShowSystemError(true);
               });
             }
             else {
@@ -411,6 +418,7 @@ const AnimalForm = (props) => {
               })
               .catch(error => {
                 setSubmitting(false);
+                setShowSystemError(true);
               });
             }
           }

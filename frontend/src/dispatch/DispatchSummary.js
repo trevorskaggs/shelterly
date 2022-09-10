@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
 import { Link } from 'raviger';
 import { Button, Card, Col, Form, ListGroup, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
@@ -15,8 +15,11 @@ import Map, { countMatches, prettyText, reportedMarkerIcon, SIPMarkerIcon, UTLMa
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
 import { printDispatchResolutionForm } from './Utils'
+import { SystemErrorContext } from '../components/SystemError';
 
 function DispatchSummary({ id, incident }) {
+
+  const { setShowSystemError } = useContext(SystemErrorContext);
 
   // Initial animal data.
   const [data, setData] = useState({
@@ -59,6 +62,7 @@ function DispatchSummary({ id, incident }) {
         setError('');
       })
       .catch(error => {
+        setShowSystemError(true);
       });
     }
   }
@@ -112,6 +116,7 @@ function DispatchSummary({ id, incident }) {
       handleClose();
     })
     .catch(error => {
+      setShowSystemError(true);
     });
   }
 
@@ -123,6 +128,7 @@ function DispatchSummary({ id, incident }) {
       handleTeamMemberClose();
     })
     .catch(error => {
+      setShowSystemError(true);
     });
   }
 
@@ -188,15 +194,18 @@ function DispatchSummary({ id, incident }) {
             .catch(error => {
               if (!unmounted) {
                 setTeamData({teams: [], options: [], isFetching: false});
+                setShowSystemError(true);
               }
             });
           })
           .catch(error => {
             setTeamData({options: [], isFetching: false});
+            setShowSystemError(true);
           });
         }
       })
       .catch(error => {
+        setShowSystemError(true);
       });
     };
 

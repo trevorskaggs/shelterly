@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import axios from "axios";
 import { navigate, useQueryParams } from "raviger";
 import { Form, Formik } from 'formik';
@@ -7,8 +7,11 @@ import Col from 'react-bootstrap/Col';
 import { Form as BootstrapForm } from 'react-bootstrap';
 import * as Yup from "yup";
 import { TextInput } from '../components/Form.js';
+import { SystemErrorContext } from '../components/SystemError';
 
 const ResetPassword = () => {
+
+  const { setShowSystemError } = useContext(SystemErrorContext);
 
   // Identify any query param data.
   const [queryParams] = useQueryParams();
@@ -37,6 +40,7 @@ const ResetPassword = () => {
               navigate('/login');
             })
             .catch(e => {
+              setShowSystemError(true);
             });
             actions.setSubmitting(false);
           }, 500);

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
 import { Link, navigate } from 'raviger';
 import { Form, Formik } from 'formik';
@@ -21,8 +21,11 @@ import Scrollbar from '../components/Scrollbars';
 import Header from '../components/Header';
 import 'react-bootstrap-typeahead/css/Typeahead.css';
 import 'leaflet/dist/leaflet.css';
+import { SystemErrorContext } from '../components/SystemError';
 
 function Deploy({ incident }) {
+
+  const { setShowSystemError } = useContext(SystemErrorContext);
 
   // Determine if this is a preplanning workflow.
   let preplan = window.location.pathname.includes("preplan")
@@ -258,12 +261,14 @@ function Deploy({ incident }) {
           .catch(error => {
             if (!unmounted) {
               setTeamData({teams: [], options: [], isFetching: false});
+              setShowSystemError(true);
             }
           });
         }
       })
       .catch(error => {
         setTeamData({teams: [], options: [], isFetching: false});
+        setShowSystemError(true);
       });
     };
 
@@ -303,6 +308,7 @@ function Deploy({ incident }) {
       .catch(error => {
         if (!unmounted) {
           setData({service_requests: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
+          setShowSystemError(true);
         }
       });
     };
@@ -384,6 +390,7 @@ function Deploy({ incident }) {
                 })
                 .catch(error => {
                   setTeamData({teams: [], options: [], isFetching: false});
+                  setShowSystemError(true);
                 });
               }
               // Otherwise navigate to the DA Summary page.
@@ -395,6 +402,9 @@ function Deploy({ incident }) {
               if (error.response.data && error.response.data[0].includes('Duplicate assigned service request error')) {
                 setDuplicateSRs(error.response.data[1]);
                 setShowDispatchDuplicateSRModal(true);
+              }
+              else {
+                setShowSystemError(true);
               }
             });
             setSubmitting(false);

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useContext, useEffect, useState, useRef } from 'react';
 import axios from "axios";
 import { Link, useQueryParams } from 'raviger';
 import { Button, ButtonGroup, Card, CardGroup, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Pagination, Tooltip } from 'react-bootstrap';
@@ -16,8 +16,11 @@ import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
 import { speciesChoices } from '../animals/constants';
 import { ITEMS_PER_PAGE } from '../constants';
+import { SystemErrorContext } from '../components/SystemError';
 
 function ServiceRequestSearch({ incident }) {
+
+  const { setShowSystemError } = useContext(SystemErrorContext);
 
   // Identify any query param data.
   const [queryParams] = useQueryParams();
@@ -93,6 +96,7 @@ function ServiceRequestSearch({ incident }) {
       .catch(error => {
         if (!unmounted) {
           setData({service_requests: [], isFetching: false});
+          setShowSystemError(true);
         }
       });
     };

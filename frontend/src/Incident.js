@@ -8,12 +8,15 @@ import moment from 'moment';
 import { useCookies } from 'react-cookie';
 import { AuthContext } from "./accounts/AccountsReducer";
 import { logoutUser } from "./accounts/AccountsUtils";
+import { SystemErrorContext } from './components/SystemError';
 
 function Home() {
 
+  const { dispatch, state } = useContext(AuthContext);
+  const { setShowSystemError } = useContext(SystemErrorContext);
+
   const [incident, setIncident] = useState({id: '', slug: ''});
   const [options, setOptions] = useState([]);
-  const { dispatch, state } = useContext(AuthContext);
   const [, , removeCookie] = useCookies(['token']);
 
   const customStyles = {
@@ -44,6 +47,7 @@ function Home() {
       setOptions(options_copy);
     })
     .catch(error => {
+      setShowSystemError(true);
     });
   }
 
@@ -70,6 +74,7 @@ function Home() {
         }
       })
       .catch(error => {
+        setShowSystemError(true);
       });
     };
     fetchIncidentData();

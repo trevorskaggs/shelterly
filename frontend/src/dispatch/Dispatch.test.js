@@ -3,17 +3,18 @@ import { render, screen } from "@testing-library/react";
 import Dispatch from "./Dispatch";
 import DispatchTeamMemberForm from "./DispatchTeamMemberForm";
 import DispatchSearch from "./DispatchSearch";
+import { SystemErrorProvider } from '../components/SystemError';
 
 describe("Render evac", () => {
   it("Render Dispatch", () => {
-    const { getByText } = render(<Dispatch />);
+    const { getByText } = render(<SystemErrorProvider><Dispatch /></SystemErrorProvider>);
     expect(getByText(/DEPLOY TEAMS/)).toBeTruthy();
     expect(getByText(/PREPLAN ASSIGNMENTS/)).toBeTruthy();
     expect(getByText(/Dispatch Assignments -/)).toBeTruthy();
   });
 
   it("Render new dispatch team member form", async () => {
-    const { getByText, findByText } = render(<DispatchTeamMemberForm />);
+    const { getByText, findByText } = render(<SystemErrorProvider><DispatchTeamMemberForm /></SystemErrorProvider>);
     expect(getByText(/First Name*/)).toBeTruthy();
     expect(getByText(/Last Name*/)).toBeTruthy();
     expect(getByText(/Phone*/)).toBeTruthy();
@@ -23,7 +24,7 @@ describe("Render evac", () => {
 
 describe("Render DispatchAssignmentSearch", () => {
   it("Empty table loads", async () => {
-    render(<DispatchSearch />);
+    render(<SystemErrorProvider><DispatchSearch /></SystemErrorProvider>);
     expect(await screen.getByText("Fetching dispatch assignments...")).toBeTruthy();
   });
 });

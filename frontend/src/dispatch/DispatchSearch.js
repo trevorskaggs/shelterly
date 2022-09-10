@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useContext, useEffect, useState, useRef } from 'react';
 import axios from "axios";
 import { Button, ButtonGroup, Card, CardGroup, Form, FormControl, InputGroup, OverlayTrigger, Pagination, Tooltip } from "react-bootstrap";
 import { Link, useQueryParams } from "raviger";
@@ -20,8 +20,11 @@ import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
 import { ITEMS_PER_PAGE } from '../constants';
 import { DateRangePicker } from '../components/Form';
+import { SystemErrorContext } from '../components/SystemError';
 
 function DispatchAssignmentSearch({ incident }) {
+
+  const { setShowSystemError } = useContext(SystemErrorContext);
 
   // Identify any query param data.
   const [queryParams] = useQueryParams();
@@ -136,6 +139,7 @@ function DispatchAssignmentSearch({ incident }) {
       .catch(error => {
         if (!unmounted) {
           setData({evacuation_assignments: [], isFetching: false});
+          setShowSystemError(true);
         }
       });
     };

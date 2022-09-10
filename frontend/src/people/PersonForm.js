@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
 import { Link, navigate, useNavigationPrompt, useQueryParams } from 'raviger';
 import { Formik } from 'formik';
@@ -8,9 +8,12 @@ import { AddressSearch, TextInput } from '../components/Form';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft } from '@fortawesome/free-solid-svg-icons';
 import ButtonSpinner from '../components/ButtonSpinner';
+import { SystemErrorContext } from '../components/SystemError';
 
 // Form for owner and reporter Person objects.
 const PersonForm = (props) => {
+
+  const { setShowSystemError } = useContext(SystemErrorContext);
 
   const id = props.id;
   const incident = "/" + props.incident
@@ -73,6 +76,7 @@ const PersonForm = (props) => {
         }
       })
       .catch(error => {
+        setShowSystemError(true);
       });
     }
   }
@@ -139,6 +143,7 @@ const PersonForm = (props) => {
           }
         })
         .catch(error => {
+          setShowSystemError(true);
         });
       };
       fetchPersonData();
@@ -236,6 +241,7 @@ const PersonForm = (props) => {
             })
             .catch(error => {
               setSubmitting(false);
+              setShowSystemError(true);
             });
           }
           else if (id) {
@@ -250,6 +256,7 @@ const PersonForm = (props) => {
             })
             .catch(error => {
               setSubmitting(false);
+              setShowSystemError(true);
             });
           }
           else {
@@ -271,6 +278,9 @@ const PersonForm = (props) => {
             .catch(error => {
               if (error.response.data && error.response.data[0].includes('duplicate owner')) {
                 setError({show:true, error:error.response.data});
+              }
+              else {
+                setShowSystemError(true);
               }
               setSubmitting(false);
             });
