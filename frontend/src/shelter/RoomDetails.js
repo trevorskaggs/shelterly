@@ -14,8 +14,8 @@ import {
 import History from '../components/History';
 import Header from '../components/Header';
 import AnimalCards from '../components/AnimalCards';
-import { printAllAnimalCareSchedules } from '../animals/Utils';
 import { SystemErrorContext } from '../components/SystemError';
+import { printRoomAnimalCareSchedules } from './Utils';
 
 function RoomDetails({ id, incident }) {
 
@@ -36,7 +36,7 @@ function RoomDetails({ id, incident }) {
   const handlePrintAllAnimalsClick = (e) => {
     e.preventDefault();
 
-    printAllAnimalCareSchedules(data.animals);
+    printRoomAnimalCareSchedules(data.animals, id);
   }
 
   // Hook for initializing data.

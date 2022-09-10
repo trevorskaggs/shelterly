@@ -1,5 +1,6 @@
 import ShelterlyPDF from '../utils/pdf';
 import { capitalize } from '../utils/formatString';
+import { buildAnimalCareScheduleDoc } from '../animals/Utils';
 
 export const printOwnerDetails = (owner) => {
   const pdf = new ShelterlyPDF({}, {
@@ -91,5 +92,11 @@ export const printOwnerDetails = (owner) => {
     }
   });
 
+  pdf.saveFile();
+};
+
+export const printOwnerAnimalCareSchedules  = async (animals = [], ownerId = 0) => {
+  const  pdf = await buildAnimalCareScheduleDoc(animals);
+  pdf.fileName = `Shelterly-Owner-Animal-Care-Schedules-${ownerId.toString().padStart(4, 0)}`;
   pdf.saveFile();
 };

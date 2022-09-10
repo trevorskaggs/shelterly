@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Link } from 'raviger';
 import Moment from 'react-moment';
 import { Button, Card, ListGroup, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import Flatpickr from 'react-flatpickr';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBan, faCar, faClipboardCheck, faEdit, faEnvelope, faHouseDamage, faPrint,
@@ -13,10 +14,9 @@ import Header from '../components/Header';
 import History from '../components/History';
 import AnimalCards from '../components/AnimalCards';
 import PhotoDocuments from '../components/PhotoDocuments';
-import Flatpickr from 'react-flatpickr';
-import { printServiceRequestSummary } from './Utils'
-import { printAllAnimalCareSchedules } from '../animals/Utils';
 import { SystemErrorContext } from '../components/SystemError';
+import { printServiceRequestSummary } from './Utils'
+import { printSrAnimalCareSchedules } from './Utils';
 
 function ServiceRequestDetails({ id, incident }) {
 
@@ -96,7 +96,7 @@ function ServiceRequestDetails({ id, incident }) {
   const handlePrintAllAnimalsClick = (e) => {
     e.preventDefault();
 
-    printAllAnimalCareSchedules(data.animals);
+    printSrAnimalCareSchedules(data.animals, id);
   }
 
   // Hook for initializing data.

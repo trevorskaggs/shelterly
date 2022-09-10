@@ -1,3 +1,4 @@
+import moment from 'moment';
 import ShelterlyPDF from '../utils/pdf';
 import { SpeciesIcon } from '../components/icons';
 
@@ -118,14 +119,20 @@ async function buildAnimalCareScheduleDoc (animals) {
   return pdf;
 }
 
-export const printAnimalCareSchedule = async (animal = {}) => {
+async function printAnimalCareSchedule (animal = {}) {
   const pdf = await buildAnimalCareScheduleDoc([animal]);
   pdf.fileName = pdf.filename || `Animal-Care-Schedule-${animal.id.toString().padStart(3, 0)}`;
   pdf.saveFile();
 };
 
-export const printAllAnimalCareSchedules = async (animals = []) => {
+async function printAllAnimalCareSchedules (animals = []) {
   const  pdf = await buildAnimalCareScheduleDoc(animals);
-  pdf.fileName = 'Shelterly-Animal-Care-Schedules';
+  pdf.fileName = `Shelterly-Animal-Care-Schedules-${moment().format('YYYYMMDDHHmm')}`;
   pdf.saveFile();
 }
+
+export {
+  buildAnimalCareScheduleDoc,
+  printAllAnimalCareSchedules,
+  printAnimalCareSchedule
+};

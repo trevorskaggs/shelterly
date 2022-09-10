@@ -1,6 +1,8 @@
 import ShelterlyPDF from '../utils/pdf';
 import { priorityChoices } from '../constants';
 import { capitalize } from '../utils/formatString';
+import { buildAnimalCareScheduleDoc } from '../animals/Utils';
+
 
 export const printServiceRequestSummary = (data) => {
   const pdf = new ShelterlyPDF({}, {
@@ -178,4 +180,10 @@ export const printServiceRequestSummary = (data) => {
     pdf.setDocumentFontSize();
 
   pdf.saveFile();
-}
+};
+
+export const printSrAnimalCareSchedules  = async (animals = [], srId = 0) => {
+  const  pdf = await buildAnimalCareScheduleDoc(animals);
+  pdf.fileName = `Shelterly-SR-Animal-Care-Schedules-${srId.toString().padStart(3, 0)}`;
+  pdf.saveFile();
+};

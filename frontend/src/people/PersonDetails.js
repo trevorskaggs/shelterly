@@ -13,9 +13,9 @@ import History from '../components/History';
 import Scrollbar from '../components/Scrollbars';
 import AnimalCards from '../components/AnimalCards';
 import PhotoDocuments from '../components/PhotoDocuments';
-import { printOwnerDetails } from './Utils';
-import { printAllAnimalCareSchedules } from '../animals/Utils';
 import { SystemErrorContext } from '../components/SystemError';
+import { printOwnerDetails } from './Utils';
+import { printOwnerAnimalCareSchedules } from './Utils';
 
 function PersonDetails({id, incident}) {
 
@@ -74,7 +74,7 @@ function PersonDetails({id, incident}) {
       owners: [data]
     }));
 
-    printAllAnimalCareSchedules(animals);
+    printOwnerAnimalCareSchedules(animals, id);
   }
 
   // Hook for initializing data.
