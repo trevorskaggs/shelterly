@@ -1,6 +1,9 @@
 import moment from 'moment';
 import ShelterlyPDF from '../utils/pdf';
+import { capitalize } from '../utils/formatString';
 import { SpeciesIcon } from '../components/icons';
+
+const dateFormat = 'YYYYMMDDHHmm';
 
 /**
  * generates care schedule for one animal
@@ -49,15 +52,15 @@ async function buildAnimalCareScheduleDoc (animals) {
     pdf.drawPad(-15);
 
     const labelsList = [
-      [`Animal No: A#${animal.id}`, `Animal Name: ${animal.name}`],
+      [`Animal No: A#${animal.id}`, `Animal Name: ${capitalize(animal.name || 'unknown')}`],
       [
         `Intake Date: ${animal.intake_date
           ? new Date(animal.intake_date).toLocaleDateString()
           : 'N/A'}`,
         `Location: ${animal.room ? `${animal.building_name} / ${animal.room_name}` : 'N/A'}`
       ],
-      [`Species: ${animal.species}`, `Color: ${animal.pcolor} ${animal.scolor ? `/ ${animal.scolor}` : '' }`],
-      [`Age: ${animal.age}`, `Under Vet Care: Y / N`]
+      [`Species: ${capitalize(animal.species)}`, `Color: ${capitalize(animal.pcolor)} ${animal.scolor ? `/ ${capitalize(animal.scolor)}` : '' }`],
+      [`Age: ${capitalize(animal.age)}`, `Under Vet Care: Y / N`]
     ];
     const listOptions = {
       listStyle: 'inline',
@@ -71,10 +74,12 @@ async function buildAnimalCareScheduleDoc (animals) {
     pdf.drawPad(15);
 
     if (animal.owners && animal.owners.length) {
-      pdf.drawWrappedText({ text: `Owner(s): ${animal.owners.map((owner) => `${owner.first_name} ${owner.last_name} ${owner.display_phone}`).join('; ')}`})
+      pdf.drawWrappedText({ text: `Owner(s): ${animal.owners.map((owner) =>
+        `${capitalize(`${owner.first_name} ${owner.last_name}`, { proper: true })} ${owner.display_phone}`).join('; ')}`})
     }
     else if (animal.owner_names && animal.owner_names.length) {
-        pdf.drawWrappedText({ text: `Owner(s): ${animal.owner_names.map((owner_name) => `${owner_name}`).join('; ')}`})
+        pdf.drawWrappedText({ text: `Owner(s): ${animal.owner_names.map((owner_name) =>
+          `${capitalize(owner_name, { proper: true })}`).join('; ')}`})
     }
     else {
       pdf.drawWrappedText({ text: 'Owner(s): ___________________________________'})
@@ -83,7 +88,7 @@ async function buildAnimalCareScheduleDoc (animals) {
     pdf.drawPad(-15);
 
     const additionalLabelsList = [
-      [`Aggressive: ${animal.aggressive}`, `Injured: ${animal.injured}`, `Fixed: ${animal.fixed}`],
+      [`Aggressive: ${capitalize(animal.aggressive)}`, `Injured: ${capitalize(animal.injured)}`, `Fixed: ${capitalize(animal.fixed)}`],
       [`Microchip: _______`, `Neck Tag: _______`, `Collar: _______`]
     ]
     const additionalListOptions = {
@@ -98,21 +103,25 @@ async function buildAnimalCareScheduleDoc (animals) {
 
     pdf.drawWrappedText({
       text: `Breed / Description: ${animal.color_notes || 'N/A'}`,
-      linePadding: -5,
-      bottomPadding: 0
+      linePadding: -2,
+      bottomPadding: 3
     });
     pdf.drawWrappedText({
       text: `Behavior Notes: ${animal.behavior_notes || 'N/A'}`,
-      bottomPadding: 0,
+      linePadding: -2,
+      bottomPadding: 3,
     });
     pdf.drawWrappedText({
-      text: `Medical Notes: ${animal.medical_notes || 'N/A'}`
+      text: `Medical Notes: ${animal.medical_notes || 'N/A'}`,
+      linePadding: -2
     });
 
-    pdf.drawHRule();
+    pdf.drawHRule({
+      buffer: 5
+    });
 
     pdf.drawTableGrid({
-      headers: ['Date\nTime', 'AR#', 'Actions', 'Comments']
+      headers: ['Date Time', 'AR#', 'Actions', 'Comments']
     });
   }
 
@@ -121,13 +130,13 @@ async function buildAnimalCareScheduleDoc (animals) {
 
 async function printAnimalCareSchedule (animal = {}) {
   const pdf = await buildAnimalCareScheduleDoc([animal]);
-  pdf.fileName = pdf.filename || `Animal-Care-Schedule-${animal.id.toString().padStart(3, 0)}`;
+  pdf.fileName = pdf.filename || `Shelterly-Animal-Care-Schedule-${animal.id.toString().padStart(3, 0)}-${moment().format(dateFormat)}`;
   pdf.saveFile();
 };
 
 async function printAllAnimalCareSchedules (animals = []) {
   const  pdf = await buildAnimalCareScheduleDoc(animals);
-  pdf.fileName = `Shelterly-Animal-Care-Schedules-${moment().format('YYYYMMDDHHmm')}`;
+  pdf.fileName = `Shelterly-Animal-Care-Schedules-${moment().format(dateFormat)}`;
   pdf.saveFile();
 }
 

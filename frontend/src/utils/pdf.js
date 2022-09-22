@@ -163,6 +163,8 @@ class ShelterlyPDF {
   }
 
   drawPageHeader() {
+    // set default font size
+    this.setDocumentFontSize({ size: 15 });
     // add logo header
     this.#jsPDF.addImage(logo, "png", this.#documentTopMargin, this.#documentLeftMargin, 50, 50);
 
@@ -183,7 +185,7 @@ class ShelterlyPDF {
       this.#jsPDF.text(this.#pageSubtitle, this.pageWidth - this.#documentRightMargin, this.#documentLastYPosition, {align: "right"});
     }
 
-    this.drawPad();
+    this.drawPad(5);
     this.drawHRule();
   }
 
@@ -372,9 +374,31 @@ class ShelterlyPDF {
     this.#documentLastYPosition = yPosition;
   }
 
+  textWithStyle({ text, xPosition, yPosition }) {
+    const boldIndicator = '***';
+    const textArray = text.split(boldIndicator);
+
+    let _xPosition = xPosition;
+
+    textArray.map((_text, i) => {
+      this.#jsPDF.setFont(undefined, 'bold');
+
+      if (i % 2 === 0) {
+        this.#jsPDF.setFont(undefined, 'normal');
+      }
+
+      this.#jsPDF.text(_text, _xPosition, yPosition);
+      _xPosition = _xPosition + this.#jsPDF.getStringUnitWidth(_text) * this.#documentFontSize;
+    })
+  }
+
   drawSingleLineText({ text, bottomPadding = 0, topPadding = 0 }) {
-    let yPosition = this.beforeDraw({ yPosition: this.getLastYPositionWithBuffer({ buffer: this.#defaultElementBuffer + topPadding }) }); // this.getLastYPositionWithBuffer() + topPadding;
-    this.#jsPDF.text(text, this.#documentLeftMargin, yPosition)
+    let yPosition = this.beforeDraw({ yPosition: this.getLastYPositionWithBuffer({ buffer: this.#defaultElementBuffer + topPadding }) });
+    this.textWithStyle({
+      text,
+      xPosition: this.#documentLeftMargin,
+      yPosition
+    })
     this.#documentLastYPosition = yPosition + bottomPadding;
   }
 
@@ -608,7 +632,7 @@ class ShelterlyPDF {
 
     // calculate how many rows are needed
     const rowHeight = 20;
-    const remainderPageHeight = (this.pageHeight - 75) - this.#documentLastYPosition - 20;
+    const remainderPageHeight = (this.pageHeight - 35) - this.#documentLastYPosition - 20;
     const numberOfRows = Math.floor(remainderPageHeight / rowHeight);
 
     this.#jsPDF.autoTable({
@@ -617,7 +641,7 @@ class ShelterlyPDF {
       startY: this.#documentLastYPosition,
       showHead: 'firstPage',
       theme: 'grid',
-      margin: { left: this.#documentLeftMargin, right: this.#documentRightMargin },
+      margin: { left: this.#documentLeftMargin, right: this.#documentRightMargin, bottom: 0 },
       willDrawCell: (data) => {
         if (data.row.section === 'head') {
           this.#jsPDF.setTextColor(...this.#documentDrawColor) // Black

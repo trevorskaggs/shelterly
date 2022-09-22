@@ -1,8 +1,10 @@
+import moment from 'moment';
 import ShelterlyPDF from '../utils/pdf';
 import { priorityChoices } from '../constants';
 import { capitalize } from '../utils/formatString';
 import { buildAnimalCareScheduleDoc } from '../animals/Utils';
 
+const dateFormat = 'YYYYMMDDHHmm';
 
 export const printServiceRequestSummary = (data) => {
   const pdf = new ShelterlyPDF({}, {
@@ -184,6 +186,6 @@ export const printServiceRequestSummary = (data) => {
 
 export const printSrAnimalCareSchedules  = async (animals = [], srId = 0) => {
   const  pdf = await buildAnimalCareScheduleDoc(animals);
-  pdf.fileName = `Shelterly-SR-Animal-Care-Schedules-${srId.toString().padStart(3, 0)}`;
+  pdf.fileName = `Shelterly-SR-Animal-Care-Schedules-${srId.toString().padStart(3, 0)}-${moment().format(dateFormat)}`;
   pdf.saveFile();
 };
