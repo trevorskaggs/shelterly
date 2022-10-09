@@ -231,7 +231,7 @@ function Deploy({ incident }) {
           });
           setAssignedTeamMembers(response.data.filter(teammember => teammember.is_assigned === true).map(teammember => teammember.id))
           // Then fetch all recent Teams.
-          axios.get('/evac/api/dispatchteam/', {
+          axios.get('/evac/api/dispatchteam/?incident=' + incident, {
             params: {
               map: true
             },
