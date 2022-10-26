@@ -1,3 +1,5 @@
+const webpack = require('webpack');
+
 module.exports = {
   module: {
     rules: [
@@ -16,6 +18,11 @@ module.exports = {
         test: /\.(png|svg|jpg|gif)$/,
         use: ["file-loader",],
       },
+    ],
+    plugins: [
+      new webpack.ProvidePlugin({
+        canvg: 'canvg',
+      }),
     ],
   },
 };

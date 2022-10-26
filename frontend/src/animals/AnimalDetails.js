@@ -14,6 +14,8 @@ import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import { AnimalDeleteModal } from "../components/Modals";
 import Header from '../components/Header';
 import History from '../components/History';
+import { printAnimalCareSchedule } from './Utils';
+import AnimalCoverImage from '../components/AnimalCoverImage';
 import { SystemErrorContext } from '../components/SystemError';
 
 function AnimalDetails({ id, incident }) {
@@ -109,6 +111,12 @@ function AnimalDetails({ id, incident }) {
     });
   }
 
+  const handleDownloadPdfClick = (e) => {
+    e.preventDefault();
+
+    printAnimalCareSchedule(data);
+  }
+
   // Hook for initializing data.
   useEffect(() => {
     let unmounted = false;
@@ -162,7 +170,11 @@ function AnimalDetails({ id, incident }) {
           </Tooltip>
         }
       >
-        <Link href={"/" + incident + "/animals/print/" + id} target="_blank"><FontAwesomeIcon icon={faPrint} className="ml-1 mr-2" inverse /></Link>
+        {({ ref, ...triggerHandler }) => (
+          <Link onClick={handleDownloadPdfClick} {...triggerHandler} href="#">
+            <span ref={ref}><FontAwesomeIcon icon={faPrint} className="ml-1 mr-2" inverse /></span>
+          </Link>
+        )}
       </OverlayTrigger>
       {data.status !== 'REUNITED' ?
       <OverlayTrigger
@@ -421,7 +433,11 @@ function AnimalDetails({ id, incident }) {
         <div className="slide-container flex-grow-1 border rounded pl-0 pr-0" style={{width:"auto", height:"322px"}}>
           {images.length < 1 ?
             <Carousel className="carousel-wrapper" showThumbs={false} showStatus={false}>
-              <img src="/static/images/image-not-found.png" alt="Not Found" />
+              <AnimalCoverImage
+                animalSpecies={data.species}
+                animalImageSrc={data.front_image}
+                customStyles={{ width: '100%', padding: '40px' }}
+              />
             </Carousel>
           :
             <Carousel className="carousel-wrapper" showThumbs={false} showStatus={false}>

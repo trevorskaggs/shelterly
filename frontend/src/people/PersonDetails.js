@@ -13,8 +13,9 @@ import History from '../components/History';
 import Scrollbar from '../components/Scrollbars';
 import AnimalCards from '../components/AnimalCards';
 import PhotoDocuments from '../components/PhotoDocuments';
-import { printOwnerDetails } from './Utils';
 import { SystemErrorContext } from '../components/SystemError';
+import { printOwnerDetails } from './Utils';
+import { printOwnerAnimalCareSchedules } from './Utils';
 
 function PersonDetails({id, incident}) {
 
@@ -65,6 +66,16 @@ function PersonDetails({id, incident}) {
     printOwnerDetails(data);
   }
 
+  const handlePrintAllAnimalsClick = (e) => {
+    e.preventDefault();
+
+    const animals = data.animals.map((animal) => ({
+      ...animal,
+      owners: [data]
+    }));
+
+    printOwnerAnimalCareSchedules(animals, id);
+  }
 
   // Hook for initializing data.
   useEffect(() => {
@@ -231,18 +242,31 @@ function PersonDetails({id, incident}) {
                   <Link href={"/" + incident + "/people/owner/new?owner_id=" + id}><FontAwesomeIcon icon={faUserPlus} className="ml-1 fa-move-up" size="sm" inverse /></Link>
                 </OverlayTrigger>
                 {data.animals.filter(animal => (!['REUNITED', 'DECEASED'].includes(animal.status))).length > 0 ?
-                <OverlayTrigger
-                  key={"reunite"}
-                  placement="top"
-                  overlay={
-                    <Tooltip id={`tooltip-reunite`}>
-                      Reunite all animals with this owner
-                    </Tooltip>
-                  }
-                >
-                  <FontAwesomeIcon icon={faHomeHeart} onClick={() => setShow(true)} style={{cursor:'pointer'}} className="ml-1 fa-move-up" size="sm" inverse />
-                </OverlayTrigger>
+                  <OverlayTrigger
+                    key={"reunite"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-reunite`}>
+                        Reunite all animals with this owner
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon icon={faHomeHeart} onClick={() => setShow(true)} style={{cursor:'pointer'}} className="ml-1 fa-move-up" size="sm" inverse />
+                  </OverlayTrigger>
                 : ""}
+                {data.animals?.length > 0 && (
+                  <OverlayTrigger
+                    key={"printall"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-printall`}>
+                        Print all animal care schedules
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon icon={faPrint} onClick={handlePrintAllAnimalsClick} style={{cursor:'pointer'}} className="ml-1 fa-move-up" size="sm" inverse />
+                  </OverlayTrigger>
+                )}
               </h4>
             </Card.Title>
             <hr/>

@@ -21,11 +21,13 @@
     "bootstrap": "^4.4.1",
     "bootswatch": "^4.5.0",
     "browser-image-compression": "^1.0.17",
+    "canvg": "^4.0.1",
     "file-loader": "^6.1.1",
     "flat": "^5.0.2",
     "formik": "^2.2.0",
     "formik-material-ui": "^2.0.0-beta.1",
     "jspdf": "^2.5.1",
+    "jspdf-autotable": "^3.5.25",
     "leaflet": "^1.7.1",
     "mark.js": "^8.11.1",
     "moment": "^2.29.4",
@@ -56,6 +58,7 @@
     "request": "^2.88.2",
     "smooth-scroll-into-view-if-needed": "^1.1.32",
     "styled-components": "^5.2.3",
+    "svg2pdf.js": "^2.2.1",
     "yup": "^0.28.3"
   },
   "scripts": {

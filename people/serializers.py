@@ -66,9 +66,9 @@ class PersonSerializer(SimplePersonSerializer):
     action_history = serializers.SerializerMethodField()
 
     def get_animals(self, obj):
-        from animals.serializers import ModestAnimalSerializer
+        from animals.serializers import ModestAnimalSerializer, AnimalSerializer
         if hasattr(obj, 'animals'):
-            return ModestAnimalSerializer(obj.animals, many=True).data
+            return AnimalSerializer(obj.animals, many=True).data
         else:
             return ModestAnimalSerializer(obj.animal_set.exclude(status='CANCELED'), many=True).data
 

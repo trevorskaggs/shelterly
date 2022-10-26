@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Link } from 'raviger';
 import Moment from 'react-moment';
 import { Button, Card, ListGroup, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import Flatpickr from 'react-flatpickr';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBan, faCar, faClipboardCheck, faEdit, faEnvelope, faHouseDamage, faPrint,
@@ -13,9 +14,9 @@ import Header from '../components/Header';
 import History from '../components/History';
 import AnimalCards from '../components/AnimalCards';
 import PhotoDocuments from '../components/PhotoDocuments';
-import Flatpickr from 'react-flatpickr';
-import { printServiceRequestSummary } from './Utils'
 import { SystemErrorContext } from '../components/SystemError';
+import { printServiceRequestSummary } from './Utils'
+import { printSrAnimalCareSchedules } from './Utils';
 
 function ServiceRequestDetails({ id, incident }) {
 
@@ -90,6 +91,12 @@ function ServiceRequestDetails({ id, incident }) {
     e.preventDefault();
 
     printServiceRequestSummary(data);
+  }
+
+  const handlePrintAllAnimalsClick = (e) => {
+    e.preventDefault();
+
+    printSrAnimalCareSchedules(data.animals, id);
   }
 
   // Hook for initializing data.
@@ -423,6 +430,19 @@ function ServiceRequestDetails({ id, incident }) {
                       <FontAwesomeIcon icon={faHomeHeart} onClick={() => setShow(true)} style={{cursor:'pointer'}} className="ml-1 fa-move-up" inverse />
                     </OverlayTrigger>
                     : ""}
+                  {data.animals?.length > 0 && (
+                    <OverlayTrigger
+                      key={"printall"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-printall`}>
+                          Print all animal care schedules
+                        </Tooltip>
+                      }
+                    >
+                      <FontAwesomeIcon icon={faPrint} onClick={handlePrintAllAnimalsClick} style={{cursor:'pointer'}} className="ml-1 fa-move-up" size="sm" inverse />
+                    </OverlayTrigger>
+                  )}
                 </h4>
               </Card.Title>
               <hr />
