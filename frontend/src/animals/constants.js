@@ -1,10 +1,10 @@
 export const speciesChoices = [
   { value: 'alpaca', label: 'Alpaca' },
+  { value: 'bird', label: 'Bird' },
   { value: 'cat', label: 'Cat' },
   { value: 'cow', label: 'Cow' },
   { value: 'dog', label: 'Dog' },
   { value: 'donkey', label: 'Donkey' },
-  { value: 'duck', label: 'Duck' },
   { value: 'emu', label: 'Emu' },
   { value: 'goat', label: 'Goat' },
   { value: 'horse', label: 'Horse' },
@@ -13,7 +13,6 @@ export const speciesChoices = [
   { value: 'pig', label: 'Pig' },
   { value: 'rabbit', label: 'Rabbit' },
   { value: 'sheep', label: 'Sheep' },
-  { value: 'turkey', label: 'Turkey' },
 ]
 
 export const sexChoices = [

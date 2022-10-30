@@ -25,7 +25,8 @@ const AnimalForm = (props) => {
   // Determine if we're in a multi-step workflow.
   let is_workflow = window.location.pathname.includes("workflow");
 
-  useNavigationPrompt(is_workflow, "Are you sure you would like to leave the animal intake workflow? No data will be saved.");
+  const [redirectCheck, setRedirectCheck] = useState(is_workflow);
+  useNavigationPrompt(redirectCheck, "Are you sure you would like to leave the animal intake workflow? No data will be saved.");
 
   // Identify any query param data.
   const [queryParams] = useQueryParams();
@@ -308,6 +309,7 @@ const AnimalForm = (props) => {
           }
 
           if (is_workflow) {
+            setRedirectCheck(false);
             if (addAnother) {
               props.onSubmit('animals', formData, 'animals');
               // Reset form data with existing animal data if we have it.
@@ -332,6 +334,7 @@ const AnimalForm = (props) => {
                 }
                 resetForm({values:animal_json});
                 setSubmitting(false);
+                setRedirectCheck(true);
               }
               // Otherwise reset form with blank data.
               else {
@@ -339,6 +342,7 @@ const AnimalForm = (props) => {
                 setFrontImage([]);
                 setSideImage([]);
                 setSubmitting(false);
+                setRedirectCheck(true);
               }
             }
             // If we're in intake, then create objects and navigate to shelter page.
@@ -366,6 +370,7 @@ const AnimalForm = (props) => {
                 .catch(error => {
                   setSubmitting(false);
                   setShowSystemError(true);
+                  setRedirectCheck(true);
                 });
               });
               // Create current animal then navigate.
@@ -383,6 +388,7 @@ const AnimalForm = (props) => {
               .catch(error => {
                 setSubmitting(false);
                 setShowSystemError(true);
+                setRedirectCheck(true);
               });
             }
             else {
@@ -398,6 +404,7 @@ const AnimalForm = (props) => {
               .catch(error => {
                 setSubmitting(false);
                 setShowSystemError(true);
+                setRedirectCheck(true);
               });
             }
             else {
@@ -419,6 +426,7 @@ const AnimalForm = (props) => {
               .catch(error => {
                 setSubmitting(false);
                 setShowSystemError(true);
+                setRedirectCheck(true);
               });
             }
           }
