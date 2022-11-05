@@ -1,4 +1,6 @@
+import ReactDOMServer from 'react-dom/server';
 import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 import logo from '../shelterly.png';
 
 const defaultFormat = {
@@ -16,9 +18,10 @@ const rgbColors = {
 class ShelterlyPDF {
   // private properties
   #jsPDF;
-  #fileName = 'shelterly-pdf';
+  #fileName;
   #fileExtension = 'pdf';
   #pageTitle = 'Shelterly PDF';
+  #pageSubtitle = null;
   #paddingBetweenElements = 5;
   #documentDrawColor = rgbColors.DEFAULT;
   #documentTextColor = rgbColors.DEFAULT;
@@ -26,39 +29,47 @@ class ShelterlyPDF {
   #documentTitle1FontSize = 20;
   #documentTitle2FontSize = 16;
   #defaultXMargin = 15;
+  #defaultYMargin = 35;
   #documentLeftMargin = this.#defaultXMargin;
   #documentRightMargin = this.#defaultXMargin;
-  #documentLastYPosition = 0;
+  #documentTopMargin = this.#defaultYMargin;
+  #documentLastYPosition = this.#documentTopMargin;
   #defaultElementBuffer = 16;
-  #totalPages = 1;
   #currentPage = 1;
+  #totalPages = 1;
   #pageRewound = false;
   #addFooter = null;
+  #drawHeaderOnEveryPage = false;
 
   constructor (format = {}, {
-    addFooterHandler
+    addFooterHandler,
+    drawHeaderOnEveryPage,
+    pageTitle,
+    pageSubtitle
   } = {}) {
     this.#jsPDF = new jsPDF({
       ...defaultFormat,
       ...format
     });
 
-    // document defaults
-    this.setDocumentColors();
-
-    // add logo header
-    this.#jsPDF.addImage(logo, "png", 35, this.#documentLeftMargin, 50, 50);
-
-    // text brown
-    this.setDocumentColors({ rgb: rgbColors.SHELTERLY_BROWN });
-    this.#jsPDF.text("SHELTERLY", this.#documentLeftMargin, 80);
-
-    // reset doc colors
-    this.setDocumentColors();
-
+    if (pageTitle) {
+      this.#pageTitle = pageTitle;
+    }
+    if (pageSubtitle) {
+      this.#pageSubtitle = pageSubtitle;
+    }
+    if (drawHeaderOnEveryPage === true) {
+      this.#drawHeaderOnEveryPage = true;
+    }
     if (typeof addFooterHandler === 'function') {
       this.#addFooter = addFooterHandler;
     }
+
+    // document defaults
+    this.setDocumentColors();
+
+    // draw header
+    this.drawPageHeader();
   }
 
   // read/write properties
@@ -75,8 +86,13 @@ class ShelterlyPDF {
   get fileExtension() { return this.#fileExtension; }
   get pageHeight() { return this.#jsPDF.internal.pageSize.height || this.#jsPDF.internal.pageSize.getHeight(); }
   get pageWidth() { return this.#jsPDF.internal.pageSize.width || this.#jsPDF.internal.pageSize.getWidth(); }
+  get numberOfPages() { return this.#jsPDF.internal.getNumberOfPages(); }
 
-  // method to get or set colors and other attributes
+  /**
+   * sets the text and draw colors
+   * @param {object} [arg1={}] - arguments as an object
+   * @param {Array} [arg1.rgb=this.#documentDrawColor] - rgb value in array form, defaults to rgbColors.DEFAULT or [0,0,0]
+   */
   setDocumentColors({
     rgb = this.#documentDrawColor
   } = {}) {
@@ -91,13 +107,51 @@ class ShelterlyPDF {
     this.#jsPDF.setFontSize(size);
   }
 
+  resetDocumentLeftMargin() {
+    this.#documentLeftMargin = this.#defaultXMargin;
+  }
+
   getLastYPositionWithBuffer({
     buffer = this.#defaultElementBuffer
   } = {}) {
     return this.#documentLastYPosition + this.#paddingBetweenElements + buffer;
   }
+  /**
+   * adds a new page to the document while keeping track of total pages and current page
+   */
+  addPage() {
+    this.#jsPDF.addPage();
+    this.#totalPages++;
+    this.#currentPage++;
+  }
 
+  /**
+   * sets the page for drawing by page number
+   * @param  {number} pageNumber page number to set
+   */
+  setPage(pageNumber) {
+    this.#jsPDF.setPage(pageNumber);
+    this.#currentPage = pageNumber;
+  }
+  /**
+   * deletes a page by page number
+   * @param  {number} pageNumber page number to delete
+   */
+  deletePage(pageNumber) {
+    this.#jsPDF.deletePage(pageNumber);
+  }
+
+  //
   // draw methods
+  //
+
+  /**
+   * process before drawing anything on the pdf document, i.e. automatic page breaking
+   * @param {object} [arg1={}] - arguments as an object
+   * @param {number} [arg1.yPosition=this.#documentLastYPosition] - set the yPosition before processing beforeDraw,
+   *  - defaults to the this.#documentLastYPosition
+   * @returns {number} - the yPosition after processing beforeDraw
+   */
   beforeDraw({
     yPosition = this.#documentLastYPosition
   } = {}) {
@@ -108,15 +162,31 @@ class ShelterlyPDF {
     return yPosition;
   }
 
-  addPage() {
-    this.#jsPDF.addPage();
-    this.#totalPages++;
-    this.#currentPage++;
-  }
+  drawPageHeader() {
+    // set default font size
+    this.setDocumentFontSize({ size: 15 });
+    // add logo header
+    this.#jsPDF.addImage(logo, "png", this.#documentTopMargin, this.#documentLeftMargin, 50, 50);
 
-  setPage(pageNumber) {
-    this.#jsPDF.setPage(pageNumber);
-    this.#currentPage = pageNumber;
+    // text brown
+    this.setDocumentColors({ rgb: rgbColors.SHELTERLY_BROWN });
+    this.#jsPDF.text("SHELTERLY", this.#documentLeftMargin, 80);
+
+    // reset doc colors
+    this.setDocumentColors();
+
+    // page title
+    this.#jsPDF.setFontSize(this.#documentTitle1FontSize);
+    this.#jsPDF.text(this.#pageTitle, this.pageWidth - this.#documentRightMargin, this.#documentTopMargin, {align: 'right'});
+    this.#documentLastYPosition = this.#documentTopMargin + 25;
+
+    if (this.#pageSubtitle) {
+      this.setDocumentFontSize();
+      this.#jsPDF.text(this.#pageSubtitle, this.pageWidth - this.#documentRightMargin, this.#documentLastYPosition, {align: "right"});
+    }
+
+    this.drawPad(5);
+    this.drawHRule();
   }
 
   drawPageBreak() {
@@ -125,7 +195,11 @@ class ShelterlyPDF {
     } else {
       this.addPage();
     }
-    this.#documentLastYPosition = 35;
+    this.#documentLastYPosition = this.#documentTopMargin;
+
+    if (this.#drawHeaderOnEveryPage) {
+      this.drawPageHeader();
+    }
 
     return this.#documentLastYPosition;
   }
@@ -134,20 +208,134 @@ class ShelterlyPDF {
     // set last y position
     this.#documentLastYPosition = this.#documentLastYPosition + amount;
   }
+  /**
+   * draws a png image from url source
+   * @param  {string} [display='block'] - image display, either 'block' or 'inline'
+   * @param  {number} [maxHeight=100] - image maximum height
+   * @param  {number} [maxWidth=100] - image maximum width
+   * @param  {number|Array} [padding=0] - padding int or array, i.e. [top, left, bottom, right]
+   * @param  {string} src - image url source, i.e. '/path/to/image.png'
+   */
+  async drawImage({
+    display = 'block',
+    maxHeight = 75,
+    maxWidth = 75,
+    padding = 0,
+    src
+  }) {
+    if (!src) {
+      throw new Error('The src param is not defined.')
+    }
 
-  drawPageHeader({
-    text = this.#pageTitle,
-    subText
-  } = {}) {
-    // page title
-    this.#jsPDF.setFontSize(this.#documentTitle1FontSize);
-    this.#jsPDF.text(text, this.pageWidth - this.#documentRightMargin, 35, {align: 'right'});
-    this.#documentLastYPosition = 35;
+    // force the loading of the image in the event the image is not cached by the browser
+    function promiseImage(src){
+      return new Promise((resolve, reject) => {
+        let img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = src;
+      })
+    }
+    const img = await promiseImage(src);
+    await this.drawGraphic({ display, maxHeight, maxWidth, padding, src: img });
+  }
 
-    if (subText) {
-      this.setDocumentFontSize();
-      this.#jsPDF.text(subText, this.pageWidth - this.#documentRightMargin, 60, {align: "right"});
-      this.#documentLastYPosition = 60;
+  async drawSvg({
+    display = 'block',
+    maxHeight = 75,
+    maxWidth = 75,
+    padding = 0,
+    svg
+  }) {
+    if (!svg) {
+      throw new Error('The svg param is not defined.');
+    }
+    await this.drawGraphic({ display, maxHeight, maxWidth, padding, svg });
+  }
+
+  async drawGraphic({
+    display = 'block',
+    maxHeight = 75,
+    maxWidth = 75,
+    padding = 0,
+    src,
+    svg
+  }) {
+    // padding settings
+    let leftPad = padding;
+    let rightPad = padding;
+    let topPad = padding;
+    let bottomPad = padding;
+    let imgWidth = 0;
+    let imgWidthBuffer = maxWidth;
+
+    if (Array.isArray(padding)) {
+      // enforce padding array precision
+      if (padding.length !== 4) throw new Error('padding array must equal all four sides, i.e. [top, left, bottom, right');
+
+      leftPad = padding[1];
+      rightPad = padding[3];
+      topPad = padding[0];
+      bottomPad = padding[2];
+    }
+
+    //
+    // add image
+    //
+    if (src) {
+      const img = src;
+
+      // use canvas to resize the image
+      var canvas = document.createElement('canvas');
+      var ctx = canvas.getContext('2d');
+      await ctx.drawImage(img, 0, 0);
+
+      var MAX_WIDTH = maxWidth;
+      var MAX_HEIGHT = maxHeight;
+      imgWidth = img.width;
+      var imgHeight = img.height;
+
+      // resizing logic
+      if (imgWidth > imgHeight) {
+        if (imgWidth > MAX_WIDTH) {
+          imgHeight *= MAX_WIDTH / imgWidth;
+          imgWidth = MAX_WIDTH;
+        }
+      } else {
+        if (imgHeight > MAX_HEIGHT) {
+          imgWidth *= MAX_HEIGHT / imgHeight;
+          imgHeight = MAX_HEIGHT;
+        }
+      }
+
+      canvas.width = imgWidth;
+      canvas.height = imgHeight;
+      await ctx.drawImage(img, 0, 0, imgWidth, imgHeight);
+
+      const imgData = await canvas.toDataURL();
+  
+      await this.#jsPDF.addImage(imgData, 'PNG', this.#documentLeftMargin + leftPad, this.#documentLastYPosition + topPad, imgWidth, imgHeight);
+    }
+
+    //
+    // add svg as image
+    //
+    else if (svg) {
+      const svgString = ReactDOMServer.renderToStaticMarkup(svg);
+      await this.#jsPDF.addSvgAsImage(svgString, this.#documentLeftMargin + leftPad, this.#documentLastYPosition + topPad, maxWidth, maxHeight);
+    }
+
+    //
+    // after draw, set document positions
+    //
+    if (display === 'inline') {
+      // this buffer will pad the right side of the image if the width is less than the max width
+      imgWidthBuffer = maxWidth - imgWidth;
+      this.#documentLeftMargin = this.#documentLeftMargin + leftPad + rightPad + imgWidth + imgWidthBuffer;
+    }
+    else { // display === 'block'
+      this.#documentLastYPosition = this.#documentLastYPosition + imgHeight + padding;
     }
   }
 
@@ -186,9 +374,31 @@ class ShelterlyPDF {
     this.#documentLastYPosition = yPosition;
   }
 
+  textWithStyle({ text, xPosition, yPosition }) {
+    const boldIndicator = '***';
+    const textArray = text.split(boldIndicator);
+
+    let _xPosition = xPosition;
+
+    textArray.map((_text, i) => {
+      this.#jsPDF.setFont(undefined, 'bold');
+
+      if (i % 2 === 0) {
+        this.#jsPDF.setFont(undefined, 'normal');
+      }
+
+      this.#jsPDF.text(_text, _xPosition, yPosition);
+      _xPosition = _xPosition + this.#jsPDF.getStringUnitWidth(_text) * this.#documentFontSize;
+    })
+  }
+
   drawSingleLineText({ text, bottomPadding = 0, topPadding = 0 }) {
-    let yPosition = this.beforeDraw({ yPosition: this.getLastYPositionWithBuffer({ buffer: this.#defaultElementBuffer + topPadding }) }); // this.getLastYPositionWithBuffer() + topPadding;
-    this.#jsPDF.text(text, this.#documentLeftMargin, yPosition)
+    let yPosition = this.beforeDraw({ yPosition: this.getLastYPositionWithBuffer({ buffer: this.#defaultElementBuffer + topPadding }) });
+    this.textWithStyle({
+      text,
+      xPosition: this.#documentLeftMargin,
+      yPosition
+    })
     this.#documentLastYPosition = yPosition + bottomPadding;
   }
 
@@ -284,7 +494,9 @@ class ShelterlyPDF {
       label,
       fillColor = rgbColors.WHITE,
       size = 0,
-      marginTop = 0
+      marginTop = 0,
+      inlineRightMargin = 0,
+      inlineOffset = 0
     }, i) => {
       const yPosition = this.getLastYPositionWithBuffer() + marginTop;
       this.#jsPDF.setFillColor(...fillColor);
@@ -324,7 +536,7 @@ class ShelterlyPDF {
           // or we went off the page
           this.#documentLeftMargin > (this.pageWidth - 30)
         ) {
-          this.#documentLeftMargin = this.#defaultXMargin;
+          this.#documentLeftMargin = this.#defaultXMargin + inlineOffset;
           this.#documentLastYPosition = this.beforeDraw({ yPosition }) + size + bottomPadding;
         }
       }
@@ -376,31 +588,88 @@ class ShelterlyPDF {
       bottomPadding
     });
   }
-
+  /**
+   * draw a text list
+   * @param  {number} [bottomPadding=0] - bottom padding after list is drawn
+   * @param  {number} [labelInlineMarginRight=0] - right margin of inline label/list item
+   * @param  {number} [labelInlineOffset=0] - offset for inline style
+   * @param  {number} [labelMarginTop=0] - top margin of label/list item
+   * @param  {Array} [labels=[]] - array of strings (labels) to draw as a test list
+   * @param  {string} [listStyle='block'] - draw the list items in block, grid, or inline style
+   */
   drawTextList({
-    labels = [],
+    bottomPadding = 0,
+    labelInlineMarginRight = 0,
+    labelInlineOffset = 0,
     labelMarginTop = 0,
-    listStyle = 'block',
-    bottomPadding = 0
+    labels = [],
+    listStyle = 'block'
   }) {
     this.drawList({
       listStyle,
       listItems: labels.map((label) => ({
         label,
-        marginTop: labelMarginTop
+        marginTop: labelMarginTop,
+        inlineRightMargin: labelInlineMarginRight,
+        inlineOffset: labelInlineOffset
       })),
       bottomPadding
     })
   }
+  /**
+   * draws a blank table grid with headers
+   * @param  {Array} [headers=[' ', ' ', ' ', ' ']] - column headers
+   */
+  drawTableGrid({
+    headers = [' ', ' ', ' ', ' ']
+  } = {}) {
+    this.#jsPDF.autoTableSetDefaults(
+      {
+        headStyles: { fillColor: [255, 255, 255] } // White
+      },
+      this.#jsPDF
+    );
+
+    // calculate how many rows are needed
+    const rowHeight = 20;
+    const remainderPageHeight = (this.pageHeight - 35) - this.#documentLastYPosition - 20;
+    const numberOfRows = Math.floor(remainderPageHeight / rowHeight);
+
+    this.#jsPDF.autoTable({
+      head: [headers],
+      body: Array(numberOfRows).fill(Array(headers.length).fill(' ')),
+      startY: this.#documentLastYPosition,
+      showHead: 'firstPage',
+      theme: 'grid',
+      margin: { left: this.#documentLeftMargin, right: this.#documentRightMargin, bottom: 0 },
+      willDrawCell: (data) => {
+        if (data.row.section === 'head') {
+          this.#jsPDF.setTextColor(...this.#documentDrawColor) // Black
+        }
+      },
+      styles: {
+        minCellHeight: rowHeight
+      }
+    });
+
+    this.resetDocumentLeftMargin();
+  }
 
   // save methods
-  saveFile() {
-    if (typeof this.#addFooter === 'function') {
-      const pageCount = this.#jsPDF.internal.getNumberOfPages()
+  saveFile({
+    maxPages = Infinity
+  } = {}) {
+    const pageCount = this.#jsPDF.internal.getNumberOfPages()
 
-      // this.#jsPDF.setFontSize(8)
-      for (var i = 1; i <= pageCount; i++) {
-        // calls the addFooterHandler for each page, before the file is saved
+    for (var i = 1; i <= pageCount; i++) {
+      // delete all pages that exceeds maxPages limit
+      if (i > maxPages) {
+        this.#jsPDF.deletePage(i);
+        continue;
+      }
+
+      // calls the addFooterHandler for each page, before the file is saved
+      if (typeof this.#addFooter === 'function') {
         this.#jsPDF.setPage(i)
         this.#addFooter({
           pageNumber: i,

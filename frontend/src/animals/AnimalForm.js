@@ -27,6 +27,9 @@ const AnimalForm = (props) => {
 
   const [redirectCheck, setRedirectCheck] = useState(is_workflow);
   useNavigationPrompt(redirectCheck, "Are you sure you would like to leave the animal intake workflow? No data will be saved.");
+  
+  // is submitting state for save/next workflow buttons
+  const [isButtonSubmitting, setIsButtonSubmitting] = useState(false);
 
   // Identify any query param data.
   const [queryParams] = useQueryParams();
@@ -284,7 +287,7 @@ const AnimalForm = (props) => {
           longitude: Yup.number()
             .nullable()
         })}
-        onSubmit={ async (values, { setSubmitting, resetForm }) => {
+        onSubmit={ async (values, { resetForm }) => {
           // Remove owners from form data.
           if (values["owners"]) {
             delete values["owners"];
@@ -333,16 +336,16 @@ const AnimalForm = (props) => {
                   }
                 }
                 resetForm({values:animal_json});
-                setSubmitting(false);
                 setRedirectCheck(true);
+                setIsButtonSubmitting(false);
               }
               // Otherwise reset form with blank data.
               else {
                 resetForm({values:initialData});
                 setFrontImage([]);
                 setSideImage([]);
-                setSubmitting(false);
                 setRedirectCheck(true);
+                setIsButtonSubmitting(false);
               }
             }
             // If we're in intake, then create objects and navigate to shelter page.
@@ -368,7 +371,7 @@ const AnimalForm = (props) => {
                 animal.append('new_owner', ownerResponse[0].data.id);
                 axios.post('/animals/api/animal/', animal)
                 .catch(error => {
-                  setSubmitting(false);
+                  setIsButtonSubmitting(false);
                   setShowSystemError(true);
                   setRedirectCheck(true);
                 });
@@ -386,7 +389,7 @@ const AnimalForm = (props) => {
                 }
               })
               .catch(error => {
-                setSubmitting(false);
+                setIsButtonSubmitting(false);
                 setShowSystemError(true);
                 setRedirectCheck(true);
               });
@@ -402,7 +405,7 @@ const AnimalForm = (props) => {
                 navigate(incident + '/animals/' + id);
               })
               .catch(error => {
-                setSubmitting(false);
+                setIsButtonSubmitting(false);
                 setShowSystemError(true);
                 setRedirectCheck(true);
               });
@@ -424,7 +427,7 @@ const AnimalForm = (props) => {
                 }
               })
               .catch(error => {
-                setSubmitting(false);
+                setIsButtonSubmitting(false);
                 setShowSystemError(true);
                 setRedirectCheck(true);
               });
@@ -775,19 +778,36 @@ const AnimalForm = (props) => {
           </Card.Body>
           <ButtonGroup size="lg">
             {is_workflow ?
-                <ButtonSpinner isSubmitting={formikProps.isSubmitting && addAnother} isSubmittingText="Saving..." type="button" onClick={() => {setAddAnother(true); formikProps.submitForm(); speciesRef.current.focus()}}>
+                <ButtonSpinner isSubmitting={isButtonSubmitting && addAnother} isSubmittingText="Saving..." type="button" onClick={() => {
+                  setAddAnother(true);
+                  setIsButtonSubmitting(true);
+                  formikProps.submitForm();
+                  speciesRef.current.focus()
+                }}>
                   {props.state.steps.animals.length -1 > props.state.animalIndex ? "Next Animal" : "Add Another"}
                 </ButtonSpinner> :
-                <ButtonSpinner isSubmitting={formikProps.isSubmitting && !addAnother} isSubmittingText="Saving..." type="button" onClick={() => {setAddAnother(false); formikProps.submitForm()}}>
+                <ButtonSpinner isSubmitting={isButtonSubmitting && !addAnother} isSubmittingText="Saving..." type="button" onClick={() => {
+                  setAddAnother(false);
+                  setIsButtonSubmitting(true);
+                  formikProps.submitForm()
+                }}>
                   Save
                 </ButtonSpinner>
             }
             {is_workflow && !is_intake ?
-                <ButtonSpinner isSubmitting={formikProps.isSubmitting && !addAnother} isSubmittingText="Loading..." type="button" className="btn btn-primary border" onClick={() => {setAddAnother(false); formikProps.submitForm()}}>
+                <ButtonSpinner isSubmitting={isButtonSubmitting && !addAnother} isSubmittingText="Loading..." type="button" className="btn btn-primary border" onClick={() => {
+                  setAddAnother(false);
+                  setIsButtonSubmitting(true);
+                  formikProps.submitForm()
+                }}>
                   Next Step
                 </ButtonSpinner> : ""}
             {is_workflow && is_intake ?
-                <ButtonSpinner isSubmitting={formikProps.isSubmitting && !addAnother} isSubmittingText="Saving..." type="button" className="btn btn-primary mr-1 border" onClick={() => {setAddAnother(false); formikProps.submitForm()}}>
+                <ButtonSpinner isSubmitting={isButtonSubmitting && !addAnother} isSubmittingText="Saving..." type="button" className="btn btn-primary mr-1 border" onClick={() => {
+                  setAddAnother(false);
+                  setIsButtonSubmitting(true);
+                  formikProps.submitForm()
+                }}>
                   Save and Finish
                 </ButtonSpinner> : ""}
           </ButtonGroup>

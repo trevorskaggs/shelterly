@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from .models import ServiceRequest, VisitNote
-from animals.serializers import SimpleAnimalSerializer, ModestAnimalSerializer
+from animals.serializers import SimpleAnimalSerializer, ModestAnimalSerializer, AnimalSerializer
 from location.utils import build_full_address, build_action_string
 
 class VisitNoteSerializer(serializers.ModelSerializer):
@@ -159,7 +159,7 @@ class ServiceRequestSerializer(SimpleServiceRequestSerializer):
 
     # Custom field for ordering animals.
     def get_animals(self, obj):
-        return ModestAnimalSerializer(obj.animal_set.all().order_by('id'), many=True, required=False, read_only=True).data
+        return AnimalSerializer(obj.animal_set.all().order_by('id'), many=True, required=False, read_only=True).data
 
     def get_assigned_requests(self, obj):
         from evac.models import AssignedRequest

@@ -5,7 +5,7 @@ import { Link, useQueryParams } from 'raviger';
 import { Button, Card, CardGroup, Col, Collapse, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Pagination, Row, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBan, faCalendarDay, faClipboardList, faCut, faEnvelope, faLink, faMapMarkerAlt, faMedkit, faUserAltSlash
+  faBan, faCalendarDay, faClipboardList, faCut, faEnvelope, faLink, faMapMarkerAlt, faMedkit, faPrint, faUserAltSlash
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faDotCircle
@@ -23,6 +23,7 @@ import { ITEMS_PER_PAGE } from '../constants';
 import { Legend } from "../components/Map";
 import { catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, speciesChoices, statusChoices } from './constants';
 import AnimalCoverImage from '../components/AnimalCoverImage';
+import { printAnimalCareSchedule, printAllAnimalCareSchedules } from './Utils';
 import { SystemErrorContext } from '../components/SystemError';
 
 const NoOptionsMessage = props => {
@@ -127,6 +128,19 @@ function AnimalSearch({ incident }) {
     setOptions({species: null, status: null, sex: null, owned: null, pcolor: '', fixed: null, latlng: null, radius: 1.60934});
     setAnimals(data.animals);
   };
+
+  const handleDownloadPdfClick = (e, animalId) => {
+    e.preventDefault();
+
+    const animal = animals.find((animal) => animal.id === animalId);
+    printAnimalCareSchedule(animal, [animal.front_image]);
+  }
+
+  const handlePrintAllClick = (e) => {
+    e.preventDefault();
+
+    printAllAnimalCareSchedules(animals);
+  }
 
   function setFocus(pageNum) {
     if (pageNum !== page) {
@@ -277,6 +291,10 @@ function AnimalSearch({ incident }) {
             <Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0"}}>Search</Button>
           </InputGroup.Append>
           <Button variant="outline-light" className="ml-1" onClick={handleShowFilters}>Advanced {showFilters ? <FontAwesomeIcon icon={faChevronDoubleUp} size="sm" /> : <FontAwesomeIcon icon={faChevronDoubleDown} size="sm" />}</Button>
+          <Button variant="outline-light" className="ml-1" onClick={handlePrintAllClick}>
+            Print All ({`${animals.length}`})
+            <FontAwesomeIcon icon={faPrint} className="ml-2 text-light" inverse />
+          </Button>
         </InputGroup>
         <Collapse in={showFilters}>
           <div>
@@ -460,6 +478,22 @@ function AnimalSearch({ incident }) {
                 <Link href={"/" + incident + "/animals/" + animal.id}><FontAwesomeIcon icon={faDotCircle} className="mr-2" inverse /></Link>
               </OverlayTrigger>
               A#{animal.id} - {animal.name ? titleCase(animal.name) : "Unknown"}&nbsp;| {titleCase(animal.status)}
+
+              <OverlayTrigger
+                key={"print"}
+                placement="bottom"
+                overlay={
+                  <Tooltip id={`tooltip-print`}>
+                    Animal care schedule
+                  </Tooltip>
+                }
+              >
+                {({ ref, ...triggerHandler }) => (
+                  <Link onClick={(e) => handleDownloadPdfClick(e, animal.id)} {...triggerHandler} href="#">
+                    <span ref={ref}><FontAwesomeIcon icon={faPrint} className="ml-2" inverse /></span>
+                  </Link>
+                )}
+              </OverlayTrigger>
             </h4>
           </div>
           <CardGroup>
@@ -467,7 +501,7 @@ function AnimalSearch({ incident }) {
               <Card.Body className="p-0 m-0">
                 <AnimalCoverImage
                   animalSpecies={animal.species}
-                  customStyles={{ padding: '40px' }}
+                  animalImageSrc={animal.front_image}
                 />
               </Card.Body>
             </Card>
