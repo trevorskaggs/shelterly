@@ -1,6 +1,6 @@
 import ShelterlyPDF from '../utils/pdf';
 import { priorityChoices } from '../constants';
-import { dispatchStatusChoices } from '../animals/constants';
+import { statusChoices } from '../animals/constants';
 
 export const printDispatchResolutionForm = (data) => {
   const pdf = new ShelterlyPDF({}, {
@@ -155,7 +155,7 @@ export const printDispatchResolutionForm = (data) => {
 
     const dispatchStatusHeaders = [{
       value: '', label: 'ID - Species\nName'
-    }].concat(dispatchStatusChoices.filter((choice) => choice.value !== 'REPORTED'));
+    }].concat(statusChoices.filter((choice) => choice.value !== 'REPORTED'));
 
     function drawAnimalHeader() {
       pdf.drawTextList({

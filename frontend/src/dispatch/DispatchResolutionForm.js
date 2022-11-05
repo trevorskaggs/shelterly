@@ -25,7 +25,7 @@ import smoothScrollIntoView from "smooth-scroll-into-view-if-needed";
 import Moment from 'react-moment';
 import Header from '../components/Header';
 import { Checkbox, DateTimePicker, DropDown, TextInput } from '../components/Form';
-import { dispatchStatusChoices } from '../animals/constants';
+import { statusChoices } from '../animals/constants';
 import ButtonSpinner from '../components/ButtonSpinner';
 import { priorityChoices } from '../constants';
 import { SystemErrorContext } from '../components/SystemError';
@@ -44,7 +44,7 @@ function AnimalStatus(props) {
           name={`sr_updates.${props.index}.animals.${props.inception}.status`}
           type="text"
           className="mt-0"
-          options={dispatchStatusChoices}
+          options={statusChoices}
           value={`sr_updates.${props.index}.animals.${props.inception}.status`}
           key={`sr_updates.${props.index}.animals.${props.inception}.status`}
           isClearable={false}
