@@ -266,7 +266,7 @@ def download_geojson(request, incident, dispatch_id):
             "type":"Feature",
             "properties":{
                 "marker-symbol":"point",
-                "marker-color":"#082B95" if any(species in list(species_counts.keys()) for species in ['cow', 'horse', 'sheep', 'goat', 'pig', 'llama', 'alpaca']) else '#FA8522' if any(species in list(species_counts.keys()) for species in ['bird', 'emu']) else '#082B95' if any(species in list(species_counts.keys()) for species in ['cat', 'dog']) else '#000000',# purple for dogs and cats, orange for avian, blue for livestock, black for undetermined animal
+                "marker-color":"#082B95" if any(species in list(species_counts.keys()) for species in ['cow', 'horse', 'sheep', 'goat', 'pig', 'llama', 'alpaca']) else '#FA8522' if any(species in list(species_counts.keys()) for species in ['bird', 'emu']) else '#5F0EB0' if any(species in list(species_counts.keys()) for species in ['cat', 'dog']) else '#000000',# purple for dogs and cats, orange for avian, blue for livestock, black for undetermined animal
                 "description":service_request.location_output.rsplit(',', 1)[0] + " (" + ', '.join(f'{value} {key}' + ('s' if value != 1 and animal.species != 'sheep' else '') for key, value in species_counts.items()) + ")", #123 Ranch Rd, Napa CA (1 cat, 2 dogs)
                 "title":service_request.id,
                 "class":"Marker",
