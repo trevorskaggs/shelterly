@@ -2,7 +2,7 @@ from django.db import models
 from location.models import Location
 from ordered_model.models import OrderedModel
 
-from animals.choices import ALL_AGE_CHOICES, ALL_SIZE_CHOICES, SEX_CHOICES, SPECIES_CHOICES, STATUS_CHOICES, UNKNOWN_CHOICES
+from animals.choices import ALL_AGE_CHOICES, ALL_SIZE_CHOICES, SEX_CHOICES, STATUS_CHOICES, UNKNOWN_CHOICES
 from animals.colors import ALL_COLOR_CHOICES
 from .managers import AnimalQueryset
 from hotline.models import ServiceRequest
@@ -24,7 +24,7 @@ class Animal(Location, OrderedModel):
     incident = models.ForeignKey(Incident, on_delete=models.CASCADE, default=test_incident)
 
     #choice fields
-    species = models.CharField(max_length=50, choices=SPECIES_CHOICES, blank=True)
+    species = models.CharField(max_length=50, blank=True)
     sex = models.CharField(max_length=1, choices=SEX_CHOICES, blank=True)
     pcolor = models.CharField(max_length=50, verbose_name='Primary Color', blank=True)
     scolor = models.CharField(max_length=50, verbose_name='Secondary Color', blank=True)
