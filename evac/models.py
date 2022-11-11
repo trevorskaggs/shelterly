@@ -27,6 +27,7 @@ class DispatchTeam(models.Model):
     team_members = models.ManyToManyField(EvacTeamMember)
     dispatch_date = models.DateTimeField(auto_now_add=True)
     show = models.BooleanField(default=True)
+    incident = models.ForeignKey(Incident, on_delete=models.CASCADE, default=test_incident)
 
     def __str__(self):
         return self.name

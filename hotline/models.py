@@ -1,4 +1,5 @@
 from django.db import models
+from actstream import action
 from location.models import Location
 from people.models import Person
 from .managers import ServiceRequestQueryset
@@ -44,8 +45,8 @@ class ServiceRequest(Location):
         output.append('Animal Count: %s' % self.animal_set.all().count())
         return ', '.join(output)
 
-    def update_status(self):
-        from evac.models import AssignedRequest, EvacAssignment
+    def update_status(self, user):
+        from evac.models import AssignedRequest
         from animals.models import Animal
         status = 'closed'
         animals = Animal.objects.filter(status__in=['REPORTED', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE'], request=self).exists()
@@ -53,14 +54,18 @@ class ServiceRequest(Location):
         # Identify proper status based on DAs and Animals.
         if animals and AssignedRequest.objects.filter(service_request=self, dispatch_assignment__end_time=None).exists():
             status = 'assigned'
+        elif Animal.objects.filter(status='CANCELED', request=self).count() == self.animal_set.count():
+            status = 'canceled'
         elif animals:
             status = 'open'
-        elif Animal.objects.filter(status='CANCELED', request=self).count() == self.animal_set.count():
-          status = 'canceled'
 
-        # Remove SR from any active DAs if all animals are sheltered, deceased, reuinted, or canceled.
-        if Animal.objects.filter(status__in=['SHELTERED', 'NO FURTHER ACTION', 'DECEASED', 'REUNITED', 'CANCELED'], request=self).count() == self.animal_set.count():
-          AssignedRequest.objects.filter(service_request=self, dispatch_assignment__end_time=None).delete()
+        # Remove SR from any active DAs if all animals are canceled.
+        if Animal.objects.filter(status__in=['CANCELED'], request=self).count() == self.animal_set.count():
+            AssignedRequest.objects.filter(service_request=self, dispatch_assignment__end_time=None).delete()
+
+        if self.status != status:
+            status_verb = 'opened' if status == 'open' else status
+            action.send(user, verb=f'{status_verb} service request', target=self)
 
         self.status = status
         self.save()

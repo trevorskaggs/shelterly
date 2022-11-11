@@ -3,7 +3,7 @@ from django.db import models
 
 class Incident(models.Model):
 
-    slug = models.CharField(max_length=20, blank=False, null=False)
+    slug = models.CharField(max_length=20, blank=False, null=False, unique=True)
     name = models.CharField(max_length=20, blank=False, null=False)
     start_time = models.DateTimeField(auto_now_add=True)
     end_time = models.DateTimeField(blank=True, null=True)
