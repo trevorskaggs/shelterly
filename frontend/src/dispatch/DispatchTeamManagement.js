@@ -56,7 +56,7 @@ function DispatchTeamManagement({ incident }) {
       .then(teamMemberResponse => {
         if (!unmounted) {
           // Fetch all recent Teams.
-          axios.get('/evac/api/dispatchteam/', {
+          axios.get('/evac/api/dispatchteam/?incident=' + incident, {
             params: {
               map: true
             },
@@ -87,7 +87,7 @@ function DispatchTeamManagement({ incident }) {
 
   fetchTeamData();
 
-  }, []);
+  }, [incident]);
 
   return (
     <>

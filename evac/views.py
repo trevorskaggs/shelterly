@@ -50,7 +50,19 @@ class DispatchTeamViewSet(viewsets.ModelViewSet):
             yesterday = datetime.today() - timedelta(days=1)
             y_mid = datetime.combine(yesterday,datetime.min.time())
             queryset = queryset.filter(Q(is_assigned=True) | Q(dispatch_date__gte=y_mid)).filter(team_members__show=True)
+
+        if self.request.GET.get('incident'):
+            queryset = queryset.filter(incident__slug=self.request.GET.get('incident'))
+
         return queryset
+
+    def perform_create(self, serializer):
+        if serializer.is_valid():
+
+            if self.request.data.get('incident_slug'):
+                serializer.validated_data['incident'] = Incident.objects.get(slug=self.request.data.get('incident_slug'))
+
+            serializer.save()
 
     def perform_update(self, serializer):
 
@@ -131,7 +143,7 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
             timestamp = None
             if ServiceRequest.objects.filter(pk__in=self.request.data['service_requests'], status='assigned').exists():
                 raise serializers.ValidationError(['Duplicate assigned service request error.', list(ServiceRequest.objects.filter(pk__in=self.request.data['service_requests'], status='assigned').values_list('id', flat=True))])
-            team = DispatchTeam.objects.create(name=self.request.data.get('team_name'))
+            team = DispatchTeam.objects.create(name=self.request.data.get('team_name'), incident=Incident.objects.get(slug=self.request.data.get('incident_slug')))
 
             if self.request.data.get('team_members'):
                 team.team_members.set(self.request.data.get('team_members'))

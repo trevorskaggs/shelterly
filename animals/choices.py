@@ -6,25 +6,6 @@ UNKNOWN_CHOICES = (
   ('no', 'No')
 )
 
-SPECIES_CHOICES = (
-    ('alpaca', "Alpaca"),
-    ('cat', "Cat"),
-    ('chicken', "Chicken"),
-    ('cow', "Cow"),
-    ('dog', "Dog"),
-    ('donkey', "Donkey"),
-    ('duck', "Duck"),
-    ('emu', "Emu"),
-    ('goat', "Goat"),
-    ('horse', 'Horse'),
-    ('llama', "Llama"),
-    ('other', "Other"),
-    ('pig', "Pig"),
-    ('rabbit', "Rabbit"),
-    ('sheep', "Sheep"),
-    ('turkey', "Turkey"),
-)
-
 SEX_CHOICES = (
     ('M', "Male"),
     ('F', "Female"),

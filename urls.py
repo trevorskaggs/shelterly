@@ -11,21 +11,7 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from knox import views as knox_views
 from accounts.views import LoginView
 from animals.views import print_kennel_card
-from drf_yasg.views import get_schema_view
-from drf_yasg import openapi
 
-schema_view = get_schema_view(
-   openapi.Info(
-      title="Snippets API",
-      default_version='v1',
-      description="Test description",
-      terms_of_service="https://www.google.com/policies/terms/",
-      contact=openapi.Contact(email="contact@snippets.local"),
-      license=openapi.License(name="BSD License"),
-   ),
-   public=True,
-   permission_classes=[],
-)
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.home, name="home"),

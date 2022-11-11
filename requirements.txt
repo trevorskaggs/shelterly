@@ -10,7 +10,6 @@ django-ordered-model
 django_smtp_ssl
 djangorestframework>=3.12
 django-storages
-drf-yasg
 django-rest-passwordreset
 ipython
 pillow
