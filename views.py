@@ -1,6 +1,5 @@
 import os
 import settings
-from django.http import JsonResponse
 from django.shortcuts import render, redirect
 
 from accounts.models import ShelterlyUser
