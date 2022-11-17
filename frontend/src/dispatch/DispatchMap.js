@@ -224,39 +224,31 @@ function Deploy({ incident }) {
       .then(response => {
         if (!unmounted) {
           let options = [];
-          let team_names = [];
-          let team_name = '';
           response.data.filter(teammember => teammember.show === true).forEach(function(teammember) {
             options.push({id: [teammember.id], label: teammember.display_name, is_assigned:teammember.is_assigned})
           });
           setAssignedTeamMembers(response.data.filter(teammember => teammember.is_assigned === true).map(teammember => teammember.id))
           // Then fetch all recent Teams.
-          axios.get('/evac/api/dispatchteam/?incident=' + incident, {
+          axios.get('/evac/api/evacassignment/', {
             params: {
-              map: true
+              map: true,
+              incident,
             },
             cancelToken: source.token,
           })
-          .then(response => {
-            response.data.filter(team => team.show === true).forEach(function(team) {
-              // Only add to option list if team has members and is not already in the list which is sorted by newest.
-              if (team.team_members.length && !team_names.includes(team.name)) {
-                options.unshift({id: team.team_members, label: team.name + ": " + team.display_name, is_assigned:team.is_assigned});
-              }
-              team_names.push(team.name);
-            });
-            // Provide a default "TeamN" team name that hasn't already be used.
-            let i = 1;
-            let name = preplan ? "Preplanned " : "Team "
-            do {
-              if (!team_names.includes(name + String(i))){
-                team_name = name + String(i);
-              }
-              i++;
-            }
-            while (team_name === '');
-            setTeamData({teams: response.data, options: options, isFetching: false});
-            setTeamName(team_name);
+          .then(({ data: teams }) => {
+            const teamNames = teams.filter(({ team_member_names }) =>
+                (preplan && team_member_names.length === 0)
+                || (!preplan && team_member_names.length > 0)
+              )
+              .map(({ team_object }, i) => team_object?.name || `Preplanned ${i + 1}`)
+            ;
+            // Provide a default "TeamN" team name that hasn't already been used.
+            const nextTeamNumber = teamNames.length + 1;
+            const nextTeamName = `${preplan ? 'Preplanned' : 'Team'} ${nextTeamNumber}`;
+
+            setTeamData({teams, options: options, isFetching: false});
+            setTeamName(nextTeamName);
           })
           .catch(error => {
             if (!unmounted) {
@@ -355,43 +347,7 @@ function Deploy({ incident }) {
             .then(response => {
               // Stay on map and remove selected SRs if in Preplanning mode.
               if (preplan) {
-                setData(prevState => ({ ...prevState, "service_requests":data.service_requests.filter(sr => !values.service_requests.includes(String(sr.id))) }));
-                setTotalSelectedState({'REPORTED':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}});
-                setSelectedCount({count:0, disabled:true});
-                setMapState(Object.keys(mapState).filter(key => !values.service_requests.includes(String(key)))
-                  .reduce((obj, key) => {
-                    obj[key] = mapState[key];
-                    return obj;
-                  }, {})
-                );
-                axios.get('/evac/api/dispatchteam/', {
-                  params: {
-                    map: true
-                  },
-                })
-                .then(response => {
-                  let team_names = [];
-                  let team_name = '';
-                  response.data.forEach(function(team) {
-                    team_names.push(team.name);
-                  });
-                  // Provide a default "TeamN" team name that hasn't already be used.
-                  let i = 1;
-                  let name = 'Preplanned '
-                  do {
-                    if (!team_names.includes(name + String(i))){
-                      team_name = name + String(i);
-                    }
-                    i++;
-                  }
-                  while (team_name === '');
-                  setTeamData({teams: response.data, options: [], isFetching: false});
-                  setTeamName(team_name);
-                })
-                .catch(error => {
-                  setTeamData({teams: [], options: [], isFetching: false});
-                  setShowSystemError(true);
-                });
+                setTriggerRefresh(true);
               }
               // Otherwise navigate to the DA Summary page.
               else {
