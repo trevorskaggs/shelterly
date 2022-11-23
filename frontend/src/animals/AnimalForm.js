@@ -25,10 +25,11 @@ const AnimalForm = (props) => {
   // Determine if we're in a multi-step workflow.
   let is_workflow = window.location.pathname.includes("workflow");
 
-    // is submitting state for save/next workflow buttons
-    const [isButtonSubmitting, setIsButtonSubmitting] = useState(false);
-
-  useNavigationPrompt(is_workflow, "Are you sure you would like to leave the animal intake workflow? No data will be saved.");
+  const [redirectCheck, setRedirectCheck] = useState(is_workflow);
+  useNavigationPrompt(redirectCheck, "Are you sure you would like to leave the animal intake workflow? No data will be saved.");
+  
+  // is submitting state for save/next workflow buttons
+  const [isButtonSubmitting, setIsButtonSubmitting] = useState(false);
 
   // Identify any query param data.
   const [queryParams] = useQueryParams();
@@ -311,6 +312,7 @@ const AnimalForm = (props) => {
           }
 
           if (is_workflow) {
+            setRedirectCheck(false);
             if (addAnother) {
               props.onSubmit('animals', formData, 'animals');
               // Reset form data with existing animal data if we have it.
@@ -334,6 +336,7 @@ const AnimalForm = (props) => {
                   }
                 }
                 resetForm({values:animal_json});
+                setRedirectCheck(true);
                 setIsButtonSubmitting(false);
               }
               // Otherwise reset form with blank data.
@@ -341,6 +344,7 @@ const AnimalForm = (props) => {
                 resetForm({values:initialData});
                 setFrontImage([]);
                 setSideImage([]);
+                setRedirectCheck(true);
                 setIsButtonSubmitting(false);
               }
             }
@@ -369,6 +373,7 @@ const AnimalForm = (props) => {
                 .catch(error => {
                   setIsButtonSubmitting(false);
                   setShowSystemError(true);
+                  setRedirectCheck(true);
                 });
               });
               // Create current animal then navigate.
@@ -386,6 +391,7 @@ const AnimalForm = (props) => {
               .catch(error => {
                 setIsButtonSubmitting(false);
                 setShowSystemError(true);
+                setRedirectCheck(true);
               });
             }
             else {
@@ -401,6 +407,7 @@ const AnimalForm = (props) => {
               .catch(error => {
                 setIsButtonSubmitting(false);
                 setShowSystemError(true);
+                setRedirectCheck(true);
               });
             }
             else {
@@ -422,6 +429,7 @@ const AnimalForm = (props) => {
               .catch(error => {
                 setIsButtonSubmitting(false);
                 setShowSystemError(true);
+                setRedirectCheck(true);
               });
             }
           }
@@ -663,7 +671,7 @@ const AnimalForm = (props) => {
                   />
                 </BootstrapForm.Row>
                 {/* Only show Shelter selection on intake and update. */}
-                <span hidden={!Boolean(id) && !is_intake}>
+                <span hidden={(!Boolean(id) && !is_intake) || data.status !== 'SHELTERED'}>
                   <BootstrapForm.Row className={is_intake ? "" : "mt-3"}>
                     <Col xs="6">
                       <DropDown
@@ -672,7 +680,7 @@ const AnimalForm = (props) => {
                         type="text"
                         name="shelter"
                         options={shelters.options}
-                        isClearable={true}
+                        isClearable={false}
                         ref={shelterRef}
                         key={`my_unique_shelter_select_key__${formikProps.values.shelter}`}
                         onChange={(instance) => {

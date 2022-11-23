@@ -28,6 +28,7 @@ const IncidentForm = ({ id }) => {
   });
 
   const [bounds, setBounds] = useState(L.latLngBounds([[0,0]]));
+  const [names, setNames] = useState([]);
 
   const markerRef = useRef(null);
   const mapRef = useRef(null);
@@ -55,6 +56,39 @@ const IncidentForm = ({ id }) => {
   useEffect(() => {
     let unmounted = false;
     let source = axios.CancelToken.source();
+
+    const fetchIncidents = async () => {
+      // Fetch Visit Note data.
+      await axios.get('/incident/api/incident/', {
+        cancelToken: source.token,
+      })
+      .then(response => {
+        if (!unmounted) {
+          const incident_bounds = [];
+          const incident_names = [];
+          for (const incident of response.data) {
+            incident_names.push(incident.slug);
+            if (incident.latitude && incident.longitude && !incident.end_time) {
+              incident_bounds.push([incident.latitude, incident.longitude]);
+            }
+          }
+          // Add in some extra bounds to prevent map zoom level from being too small with few or nearby incident locations.
+          if (incident_bounds.length >= 1) {
+            incident_bounds.push([parseFloat(incident_bounds[0][0])+.04,incident_bounds[0][1]-.04])
+            incident_bounds.push([parseFloat(incident_bounds[0][0])-.04,parseFloat(incident_bounds[0][1])+.04])
+          }
+          if (!id) {
+            setBounds(incident_bounds);
+          }
+          setNames(incident_names);
+        }
+      })
+      .catch(error => {
+        setShowSystemError(true);
+      });
+    };
+    fetchIncidents();
+
     if (id) {
       const fetchIncident = async () => {
         // Fetch Visit Note data.
@@ -73,34 +107,7 @@ const IncidentForm = ({ id }) => {
       };
       fetchIncident();
     }
-    else {
-      const fetchIncidents = async () => {
-        // Fetch Visit Note data.
-        await axios.get('/incident/api/incident/', {
-          cancelToken: source.token,
-        })
-        .then(response => {
-          if (!unmounted) {
-            const incident_bounds = [];
-            for (const incident of response.data) {
-              if (incident.latitude && incident.longitude && !incident.end_time) {
-                incident_bounds.push([incident.latitude, incident.longitude]);
-              }
-            }
-            // Add in some extra bounds to prevent map zoom level from being too small with few or nearby incident locations.
-            if (incident_bounds.length >= 1) {
-              incident_bounds.push([parseFloat(incident_bounds[0][0])+.04,incident_bounds[0][1]-.04])
-              incident_bounds.push([parseFloat(incident_bounds[0][0])-.04,parseFloat(incident_bounds[0][1])+.04])
-            }
-            setBounds(incident_bounds);
-          }
-        })
-        .catch(error => {
-          setShowSystemError(true);
-        });
-      };
-      fetchIncidents();
-    }
+
     // Cleanup.
     return () => {
       unmounted = true;
@@ -115,13 +122,21 @@ const IncidentForm = ({ id }) => {
       validationSchema={Yup.object({
         name: Yup.string()
           .max(20, 'Must be 20 characters or less')
-          .required('Required'),
+          .required('Required')
+          .test('required-check', 'Name already in use.',
+            function(value) {
+              // Check against slug for dupes.
+              if (names.includes(value.trim().toLowerCase().replaceAll(' ','-').match(/[a-zA-Z0-9-]+/g)[0])) {
+                return false;
+              }
+              return true;
+            }),
         latlon: Yup.string().required('Required'),
         latitude: Yup.number(),
         longitude: Yup.number()
       })}
       onSubmit={(values, { setSubmitting }) => {
-        values['slug'] = values.name.replaceAll(' ','-').match(/[a-zA-Z0-9-]+/g)[0];
+        values['slug'] = values.name.trim().replaceAll(' ','-').match(/[a-zA-Z0-9-]+/g)[0];
         if (id) {
           axios.put('/incident/api/incident/' + id + '/', values)
           .then(function () {
@@ -154,7 +169,6 @@ const IncidentForm = ({ id }) => {
                   name="name"
                   id="name"
                   xs="12"
-                  disabled={form.values.name === 'Test' ? true : false}
                 />
               </BootstrapForm.Row>
               <BootstrapForm.Row>

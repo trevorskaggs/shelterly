@@ -1,12 +1,10 @@
 from django.conf import settings
-from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render
 from copy import deepcopy
 from datetime import datetime
 from rest_framework import filters, permissions, viewsets
 from actstream import action
 
-from hotline.models import ServiceRequest
 from animals.models import Animal, AnimalImage
 from animals.serializers import AnimalSerializer
 from incident.models import Incident
@@ -68,9 +66,11 @@ class AnimalViewSet(viewsets.ModelViewSet):
 
             # Check to see if animal SR status should be changed.
             if animal.request:
-                animal.request.update_status()
+                animal.request.update_status(self.request.user)
 
     def perform_update(self, serializer):
+        from evac.models import AssignedRequest
+
         if serializer.is_valid():
 
             # Keep owner the same when editing an animal.
@@ -84,7 +84,7 @@ class AnimalViewSet(viewsets.ModelViewSet):
                 action.send(self.request.user, verb='sheltered animal', target=serializer.validated_data.get('shelter'), action_object=serializer.instance)
 
             # If animal already had a shelter and now has a different shelter.
-            if serializer.validated_data.get('shelter') and serializer.instance.shelter != serializer.validated_data.get('shelter'):
+            if serializer.validated_data.get('shelter') and serializer.instance.shelter and serializer.instance.shelter != serializer.validated_data.get('shelter'):
                 action.send(self.request.user, verb='sheltered animal in', target=serializer.instance, action_object=serializer.validated_data.get('shelter'))
                 action.send(self.request.user, verb='sheltered animal', target=serializer.validated_data.get('shelter'), action_object=serializer.instance)
 
@@ -106,6 +106,19 @@ class AnimalViewSet(viewsets.ModelViewSet):
             # Record status change if appplicable.
             if serializer.instance.status != serializer.validated_data.get('status', serializer.instance.status):
                 new_status = serializer.validated_data.get('status')
+                if serializer.instance.request:
+                    serializer.instance.request.update_status(self.request.user)
+                    for assigned_request in AssignedRequest.objects.filter(service_request=serializer.instance.request, dispatch_assignment__end_time=None):
+                        assigned_request.animals[str(serializer.instance.id)]['status'] = new_status
+                        assigned_request.save()
+
+                    # AssignedRequest.objects.filter(service_request=serializer.instance.request, dispatch_assignment__end_time=None).update(animals=Func(
+                    #   F("animals"),
+                    #   Value([str(serializer.instance.id)]),
+                    #   Value(["status"]),
+                    #   Value("REUNITED", JSONField()),
+                    #   function="jsonb_set",
+                    # ))
                 action.send(self.request.user, verb=f'changed animal status to {new_status}', target=serializer.instance)
 
             # Identify if there were any animal changes that aren't status, shelter, room, or owner.
@@ -156,7 +169,7 @@ class AnimalViewSet(viewsets.ModelViewSet):
 
             # Check to see if animal SR status should be changed.
             if animal.request:
-                animal.request.update_status()
+                animal.request.update_status(self.request.user)
 
     def get_queryset(self):
         """

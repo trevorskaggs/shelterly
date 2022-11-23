@@ -172,6 +172,7 @@ const PersonForm = (props) => {
             .required('Required'),
           phone: Yup.string()
             .matches(phoneRegex, "Phone number is not valid")
+            .min(10, "Phone number is not valid")
             .required('Required'),
           alt_phone: Yup.string()
             .matches(phoneRegex, "Phone number is not valid"),

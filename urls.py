@@ -11,21 +11,8 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from knox import views as knox_views
 from accounts.views import LoginView
 from animals.views import print_kennel_card
-from drf_yasg.views import get_schema_view
-from drf_yasg import openapi
+from evac.views import download_geojson
 
-schema_view = get_schema_view(
-   openapi.Info(
-      title="Snippets API",
-      default_version='v1',
-      description="Test description",
-      terms_of_service="https://www.google.com/policies/terms/",
-      contact=openapi.Contact(email="contact@snippets.local"),
-      license=openapi.License(name="BSD License"),
-   ),
-   public=True,
-   permission_classes=[],
-)
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.home, name="home"),
@@ -43,6 +30,7 @@ urlpatterns = [
     url(r'logout/', knox_views.LogoutView.as_view(), name='knox_logout'),
 ]
 urlpatterns.append(path('<str:incident>/animals/print/<int:animal_id>', print_kennel_card, name="print_kennel_card"))
+urlpatterns.append(path('<str:incident>/dispatch/download/<int:dispatch_id>', download_geojson, name="download_geojson"))
 if settings.USE_S3:
     urlpatterns.append(re_path(u'static/(?P<path>.*)$', views.static_url))
 #To use local static files both USE_S3 must be FALSE and DEBUG must be TRUE!

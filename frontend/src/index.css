@@ -31,6 +31,15 @@ hr { display: block; height: 1px;
     -webkit-text-stroke-color: black;
 }
 
+.search {
+  font-size: 2rem;
+  display: block;
+  text-transform: uppercase;
+  padding: 1rem 0;
+  font-weight: bold;
+  letter-spacing: 0.5rem;
+}
+
 /* Data table CSS */
 .rdt_Pagination { border-bottom-left-radius : .25rem; border-bottom-right-radius : .25rem; }
 

@@ -1,7 +1,6 @@
 from django.db.models import Exists, OuterRef, Prefetch, Q
 from rest_framework import filters, permissions, serializers, viewsets
 from actstream import action
-from actstream.models import Action
 
 from animals.models import Animal
 from hotline.models import ServiceRequest
@@ -95,6 +94,8 @@ class PersonViewSet(viewsets.ModelViewSet):
                     service_request.owners.add(person)
 
     def perform_update(self, serializer):
+        from evac.models import AssignedRequest
+
         if serializer.is_valid():
             # Clean phone fields.
             serializer.validated_data['phone'] = ''.join(char for char in serializer.validated_data.get('phone', '') if char.isdigit())
@@ -114,24 +115,25 @@ class PersonViewSet(viewsets.ModelViewSet):
                 PersonChange.objects.create(user=self.request.user, person=person, changes=change_dict, reason=self.request.data.get('change_reason', ''))
 
             if self.request.data.get('reunite_animals'):
-                person.animal_set.exclude(status='DECEASED').update(status='REUNITED', shelter=None, room=None)
-                for animal in person.animal_set.exclude(status='DECEASED'):
+                person.animal_set.exclude(status__in=['DECEASED', 'NO FURTHER ACTION']).update(status='REUNITED', shelter=None, room=None)
+                for animal in person.animal_set.exclude(status__in=['DECEASED', 'NO FURTHER ACTION']):
                     action.send(self.request.user, verb=f'changed animal status to reunited', target=animal)
-                if person.request.exists():
-                    service_request = person.request.first()
-                    service_request.status = 'closed'
-                    service_request.save()
-                    action.send(self.request.user, verb='closed service request', target=service_request)
+                    for assigned_request in AssignedRequest.objects.filter(service_request=serializer.instance.request, dispatch_assignment__end_time=None):
+                        assigned_request.animals[str(serializer.instance.id)]['status'] = 'REUNITED'
+                        assigned_request.save()
+
+                for service_request in person.request.all().exclude(status='closed'):
+                    service_request.update_status(self.request.user)
 
             elif self.request.FILES.keys():
-              # Create new files from uploads
-              for key in self.request.FILES.keys():
-                  image_data = self.request.FILES[key]
-                  PersonImage.objects.create(image=image_data, name=self.request.data.get('name'), person=person)
+                # Create new files from uploads
+                for key in self.request.FILES.keys():
+                    image_data = self.request.FILES[key]
+                    PersonImage.objects.create(image=image_data, name=self.request.data.get('name'), person=person)
             elif self.request.data.get('edit_image'):
-              PersonImage.objects.filter(id=self.request.data.get('id')).update(name=self.request.data.get('edit_image'))
+                PersonImage.objects.filter(id=self.request.data.get('id')).update(name=self.request.data.get('edit_image'))
             elif self.request.data.get('remove_image'):
-              PersonImage.objects.filter(id=self.request.data.get('remove_image')).delete()
+                PersonImage.objects.filter(id=self.request.data.get('remove_image')).delete()
 
             # If an owner is being added to an existing SR, add the owner to the SR and update all SR animals with the owner.
             elif self.request.data.get('request'):

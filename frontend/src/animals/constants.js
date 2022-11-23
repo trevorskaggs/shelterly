@@ -1,10 +1,10 @@
 export const speciesChoices = [
   { value: 'alpaca', label: 'Alpaca' },
+  { value: 'bird', label: 'Bird' },
   { value: 'cat', label: 'Cat' },
   { value: 'cow', label: 'Cow' },
   { value: 'dog', label: 'Dog' },
   { value: 'donkey', label: 'Donkey' },
-  { value: 'duck', label: 'Duck' },
   { value: 'emu', label: 'Emu' },
   { value: 'goat', label: 'Goat' },
   { value: 'horse', label: 'Horse' },
@@ -13,7 +13,6 @@ export const speciesChoices = [
   { value: 'pig', label: 'Pig' },
   { value: 'rabbit', label: 'Rabbit' },
   { value: 'sheep', label: 'Sheep' },
-  { value: 'turkey', label: 'Turkey' },
 ]
 
 export const sexChoices = [
@@ -139,13 +138,4 @@ export const statusChoices = [
 export const reportedStatusChoices = [
   {value:'REPORTED', label:"Reported"},
   {value:'SHELTERED IN PLACE', label:"Sheltered In Place (SIP)"},
-]
-
-export const dispatchStatusChoices = [
-  {value:'REPORTED', label:'Reported'},
-  {value:'SHELTERED', label:'Sheltered'},
-  {value:'SHELTERED IN PLACE', label:'Sheltered In Place (SIP)'},
-  {value:'UNABLE TO LOCATE', label:'Unable To Locate (UTL)'},
-  {value:'DECEASED', label:'Deceased'},
-  {value:'NO FURTHER ACTION', label:'No Further Action (NFA)'},
 ]
