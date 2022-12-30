@@ -88,7 +88,7 @@ function VetRequestDetails({ id, incident }) {
                 <b>Concern:</b> {data.concern || "N/A"}
               </ListGroup.Item>
               <ListGroup.Item>
-                <b>Diagnosis:</b> {data.diagnosis || "N/A"}
+                <b>Diagnosis:</b> {data.diagnosis_text || "N/A"}
               </ListGroup.Item>
             </ListGroup>
           </Card.Body>
@@ -127,7 +127,7 @@ function VetRequestDetails({ id, incident }) {
                 </div>
               </ListGroup.Item>
               <ListGroup.Item>
-                  <span><b>Medical Notes:</b> {data.animal_object.medical_notes}</span>
+                  <span><b>Medical Notes:</b> {data.animal_object.medical_notes || "N/A"}</span>
               </ListGroup.Item>
             </ListGroup>
           </Card.Body>
@@ -155,7 +155,7 @@ function VetRequestDetails({ id, incident }) {
             </Card.Title>
             <hr/>
             {data.treatment_plans.map(treatment_plan => (
-              <Link href={"/" + incident + "/vet/treatment/" + treatment_plan.id}  className="text-link" style={{textDecoration:"none", color:"white"}}>T#{treatment_plan.id}</Link>
+              <Link key={treatment_plan.id} href={"/" + incident + "/vet/treatment/" + treatment_plan.id}  className="text-link" style={{textDecoration:"none", color:"white"}}>T#{treatment_plan.id}</Link>
             ))}
             {data.treatment_plans.length < 1 ? <p>No treatments have been created for this request.</p> : ""}
           </Card.Body>

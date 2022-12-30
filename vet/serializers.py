@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import PresentingComplaint, VetRequest, Treatment, TreatmentPlan, TreatmentRequest
+from .models import Diagnosis, PresentingComplaint, VetRequest, Treatment, TreatmentPlan, TreatmentRequest
 from accounts.serializers import UserSerializer
 from animals.serializers import SimpleAnimalSerializer
 
@@ -15,6 +15,13 @@ class TreatmentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Treatment
+        fields = '__all__'
+
+
+class DiagnosisSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Diagnosis
         fields = '__all__'
 
 
@@ -40,6 +47,7 @@ class VetRequestSerializer(serializers.ModelSerializer):
     assignee_object = UserSerializer(source='assignee', required=False, read_only=True)
     treatment_plans = TreatmentPlanSerializer(source='treatmentplan_set', required=False, read_only=True, many=True)
     complaints_text = serializers.SerializerMethodField()
+    diagnosis_text = serializers.SerializerMethodField()
 
     class Meta:
         model = VetRequest
@@ -47,3 +55,6 @@ class VetRequestSerializer(serializers.ModelSerializer):
 
     def get_complaints_text(self, obj):
         return ', '.join(obj.presenting_complaints.all().values_list('name', flat=True))
+
+    def get_diagnosis_text(self, obj):
+        return obj.diagnosis.name if obj.diagnosis else ''

@@ -1,8 +1,8 @@
 from datetime import timedelta
 from rest_framework import filters, permissions, viewsets
 
-from vet.models import PresentingComplaint, Treatment, TreatmentPlan, TreatmentRequest, VetRequest
-from vet.serializers import PresentingComplaintSerializer, TreatmentSerializer, TreatmentPlanSerializer, VetRequestSerializer
+from vet.models import Diagnosis, PresentingComplaint, Treatment, TreatmentPlan, TreatmentRequest, VetRequest
+from vet.serializers import DiagnosisSerializer, PresentingComplaintSerializer, TreatmentSerializer, TreatmentPlanSerializer, VetRequestSerializer
 
 class PresentingComplaintViewSet(viewsets.ModelViewSet):
     queryset = PresentingComplaint.objects.all()
@@ -14,6 +14,12 @@ class TreatmentViewSet(viewsets.ModelViewSet):
     queryset = Treatment.objects.all()
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = TreatmentSerializer
+
+
+class DiagnosisViewSet(viewsets.ModelViewSet):
+    queryset = Diagnosis.objects.all()
+    permission_classes = [permissions.IsAuthenticated, ]
+    serializer_class = DiagnosisSerializer
 
 
 class VetRequestViewSet(viewsets.ModelViewSet):
@@ -44,5 +50,5 @@ class TreatmentPlanViewSet(viewsets.ModelViewSet):
             total_time = treatment_plan.end - treatment_plan.start
             total_hours = total_time.days * 24 + total_time.seconds // 3600
             # import ipdb;ipdb.set_trace()
-            for hours in range(int(total_hours / treatment_plan.frequency)):
-                TreatmentRequest.objects.create(treatment_plan=treatment_plan, suggested_admin_time=treatment_plan.start + timedelta(hours=hours))
+            for hours in range(int(total_hours / treatment_plan.frequency) + 1):
+                TreatmentRequest.objects.create(treatment_plan=treatment_plan, suggested_admin_time=treatment_plan.start + timedelta(hours=hours*treatment_plan.frequency))

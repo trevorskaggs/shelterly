@@ -9,6 +9,10 @@ class PresentingComplaint(models.Model):
 
     name = models.CharField(max_length=200)
 
+class Diagnosis(models.Model):
+
+    name = models.CharField(max_length=200)
+
 # Create your models here.
 class VetRequest(models.Model):
 
@@ -20,7 +24,7 @@ class VetRequest(models.Model):
     presenting_complaints = models.ManyToManyField(PresentingComplaint)
     concern = models.CharField(max_length=200)
     priority = models.CharField(max_length=25, choices=(('urgent', 'Urgent'),('when_available', 'When Available'),), default='urgent')
-    diagnosis = models.CharField(max_length=200, blank=True, null=True)
+    diagnosis = models.ForeignKey(Diagnosis, on_delete=models.SET_NULL, null=True)
 
 
 class Treatment(models.Model):

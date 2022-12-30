@@ -55,6 +55,7 @@ const VetRequestForm = (props) => {
 
   const [assigneeChoices, setAssigneeChoices] = useState([]);
   const [presentingComplaintChoices, setPresentingComplaintChoices] = useState([]);
+  const [diagnosisChoices, setDiagnosisChoices] = useState([]);
 
   useEffect(() => {
     let unmounted = false;
@@ -84,7 +85,6 @@ const VetRequestForm = (props) => {
       })
       .then(response => {
         if (!unmounted) {
-          console.log(response.data)
           let options = [];
           response.data.forEach(function(person) {
             options.unshift({value: person.id, label: person.first_name + ' ' + person.last_name})
@@ -118,6 +118,28 @@ const VetRequestForm = (props) => {
     };
     fetchPresentingComplaints();
 
+    const fetchDiagnoses = async () => {
+      // Fetch assignee data.
+      await axios.get('/vet/api/diagnosis/', {
+        cancelToken: source.token,
+      })
+      .then(response => {
+        if (!unmounted) {
+          let options = [];
+          response.data.forEach(function(diagnosis) {
+            options.push({value: diagnosis.id, label: diagnosis.name})
+          });
+          setDiagnosisChoices(options);
+        }
+      })
+      .catch(error => {
+        setShowSystemError(true);
+      });
+    };
+    if (props.id) {
+      fetchDiagnoses();
+    }
+
     // Cleanup.
     return () => {
       unmounted = true;
@@ -138,7 +160,7 @@ const VetRequestForm = (props) => {
         if (props.id) {
           axios.put('/vet/api/vetrequest/' + props.id + '/', values)
           .then(response => {
-            // navigate('/' + incident + '/vet/vetrequest/' + props.id)
+            navigate('/' + props.incident + '/vet/vetrequest/' + props.id)
           })
           .catch(error => {
             setShowSystemError(true);
@@ -146,13 +168,11 @@ const VetRequestForm = (props) => {
           setSubmitting(false);
         }
         else {
-          console.log(values)
           axios.post('/vet/api/vetrequest/', values)
           .then(response => {
             navigate('/' + props.incident + '/vet/vetrequest/' + response.data.id)
           })
           .catch(error => {
-            console.log(error.response)
             setShowSystemError(true);
           });
           setSubmitting(false);
@@ -174,10 +194,8 @@ const VetRequestForm = (props) => {
                       type="text"
                       key={`my_unique_assignee_select_key__${formikProps.values.assignee}`}
                       options={assigneeChoices}
-                      // value={formikProps.values.assignee||data.assignee}
                       isClearable={true}
                       onChange={(instance) => {
-                        console.log(instance.value)
                         formikProps.setFieldValue("assignee", instance === null ? '' : instance.value);
                       }}
                     />
@@ -213,11 +231,11 @@ const VetRequestForm = (props) => {
                       styles={customStyles}
                       isMulti
                       options={presentingComplaintChoices}
-                      // value={formikProps.values.presenting_complaints||data.presenting_complaints}
+                      value={presentingComplaintChoices.filter(choice => formikProps.values.presenting_complaints.includes(choice.value))}
                       isClearable={true}
                       onChange={(instance) => {
                         let values = [];
-                        instance.forEach(option => {
+                        instance && instance.forEach(option => {
                           values.push(option.value);
                         })
                         formikProps.setFieldValue("presenting_complaints", instance === null ? [] : values);
@@ -235,6 +253,24 @@ const VetRequestForm = (props) => {
                     rows={4}
                   />
                 </Row>
+                {props.id ?
+                <Row>
+                  <Col xs={"8"}>
+                    <DropDown
+                      label="Diagnosis"
+                      id="diagnosisDropdown"
+                      name="diagnosis"
+                      type="text"
+                      options={diagnosisChoices}
+                      value={formikProps.values.diagnosis||data.diagnosis}
+                      isClearable={false}
+                      onChange={(instance) => {
+                        formikProps.setFieldValue("diagnosis", instance === null ? '' : instance.value);
+                      }}
+                    />
+                  </Col>
+                </Row>
+                : ""}
               </FormGroup>
             </Form>
           </Card.Body>
