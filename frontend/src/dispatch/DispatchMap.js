@@ -555,7 +555,7 @@ function Deploy({ incident }) {
               </span>
             </div>
           </Col>
-          <Col xs={8} className="" style={{marginLeft:"-4px", paddingRight:"0px"}}>
+          <Col xs={8} style={{marginLeft:"-4px", paddingRight:"0px"}}>
             {preplan ?
               <BootstrapForm.Control
                 id="disabled_team_name"

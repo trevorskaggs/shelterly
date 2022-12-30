@@ -5,7 +5,10 @@ from . import views
 
 app_name = 'vet'
 router = DefaultRouter()
-router.register(r'vet', views.VetViewSet)
+router.register(r'vetrequest', views.VetRequestViewSet)
+router.register(r'treatment', views.TreatmentViewSet)
+router.register(r'treatmentplan', views.TreatmentPlanViewSet)
+router.register(r'complaints', views.PresentingComplaintViewSet)
 
 urlpatterns = [
     path('api/', include(router.urls)),

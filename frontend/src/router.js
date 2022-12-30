@@ -36,6 +36,11 @@ import BuildingDetails from "./shelter/BuildingDetails";
 import RoomForm from "./shelter/RoomForm";
 import RoomDetails from "./shelter/RoomDetails";
 import VisitNoteForm from "./dispatch/VisitNoteForm";
+import TreatmentPlanDetails from "./vet/TreatmentPlanDetails"
+import TreatmentPlanForm from "./vet/TreatmentPlanForm";
+import VetRequestDetails from "./vet/VetRequestDetails";
+import VetRequestForm from "./vet/VetRequestForm";
+import VetRequestSearch from "./vet/VetRequestSearch";
 
 export const publicRoutes = {
   "/login": () => <LoginForm />,
@@ -55,6 +60,7 @@ const routes = {
   "/:incident/animals/new": ({incident}) => <AnimalForm state={initialWorkflowData} incident={incident} />,
   "/:incident/animals/search": ({incident}) => <AnimalSearch incident={incident} />,
   "/:incident/animals/:id": ({id, incident}) => <AnimalDetails id={id} incident={incident} />,
+  "/:incident/animals/:animalid/vetrequest/new": ({animalid, incident}) => <VetRequestForm animalid={animalid} incident={incident} />,
   "/:incident/dispatch": ({incident}) => <Dispatch incident={incident} />,
   "/:incident/dispatch/dispatchteammember/new": ({incident}) => <DispatchTeamMemberForm incident={incident} />,
   "/:incident/dispatch/dispatchassignment/search": ({incident}) => <DispatchAssignmentSearch incident={incident} />,
@@ -92,6 +98,11 @@ const routes = {
   "/:incident/shelter/building/room/new": ({incident}) => <RoomForm incident={incident} />,
   "/:incident/shelter/room/edit/:id": ({id, incident}) => <RoomForm id={id} incident={incident} />,
   "/:incident/shelter/room/:id": ({id, incident}) => <RoomDetails id={id} incident={incident} />,
+  "/:incident/vet/treatment/new": ({incident}) => <TreatmentPlanForm incident={incident} />,
+  "/:incident/vet/treatment/:id": ({id, incident}) => <TreatmentPlanDetails id={id} incident={incident} />,
+  "/:incident/vet/vetrequest/search": ({incident}) => <VetRequestSearch incident={incident} />,
+  "/:incident/vet/vetrequest/edit/:id": ({id, incident}) => <VetRequestForm id={id} state={initialWorkflowData} incident={incident} />,
+  "/:incident/vet/vetrequest/:id": ({id, incident}) => <VetRequestDetails id={id} incident={incident} />,
 };
 
 export default routes;

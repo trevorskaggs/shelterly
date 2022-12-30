@@ -9,7 +9,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBan, faMedkit, faCut, faEdit, faEnvelope, faLink, faMinusSquare, faPrint, faTimes, faUserPlus
 } from '@fortawesome/free-solid-svg-icons';
-import { faBadgeSheriff, faClawMarks, faHomeHeart, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
+import { faBadgeSheriff, faClipboardMedical, faClawMarks, faHomeHeart, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import { AnimalDeleteModal } from "../components/Modals";
 import Header from '../components/Header';
@@ -186,9 +186,20 @@ function AnimalDetails({ id, incident }) {
           </Tooltip>
         }
       >
-        <FontAwesomeIcon icon={faHomeHeart} onClick={() => setShow(true)} style={{cursor:'pointer'}} inverse />
+        <FontAwesomeIcon icon={faHomeHeart} onClick={() => setShow(true)} className="mr-2" style={{cursor:'pointer'}} inverse />
       </OverlayTrigger>
       : ""}
+      <OverlayTrigger
+        key={"vetrequest"}
+        placement="bottom"
+        overlay={
+          <Tooltip id={`tooltip-vetrequest`}>
+            Create veterinary request
+          </Tooltip>
+        }
+      >
+        <Link href={"/" + incident + "/animals/" + id + "/vetrequest/new"} ><FontAwesomeIcon icon={faClipboardMedical} className="mr-1" inverse /></Link>
+      </OverlayTrigger>
       <OverlayTrigger
         key={"cancel-animal"}
         placement="bottom"
