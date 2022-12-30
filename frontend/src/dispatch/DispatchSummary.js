@@ -5,7 +5,7 @@ import { Button, Card, Col, Form, ListGroup, Modal, OverlayTrigger, Row, Tooltip
 import { Typeahead } from 'react-bootstrap-typeahead';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faCalendarDay, faClipboardCheck, faClipboardList, faEdit, faEnvelope, faHouseDamage, faBriefcaseMedical, faMinusSquare, faPencilAlt, faPrint, faUserCheck, faUserPlus
+  faCalendarDay, faClipboardCheck, faClipboardList, faDownload, faEdit, faEnvelope, faHouseDamage, faBriefcaseMedical, faMinusSquare, faPencilAlt, faPrint, faUserCheck, faUserPlus
 } from '@fortawesome/free-solid-svg-icons';
 import { faExclamationSquare, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import { Marker, Tooltip as MapTooltip } from "react-leaflet";
@@ -261,6 +261,17 @@ function DispatchSummary({ id, incident }) {
         <Link href={"/" + incident + "/dispatch/resolution/" + id}><FontAwesomeIcon icon={faClipboardCheck} className="ml-1"  inverse /></Link>
       </OverlayTrigger>
       }
+      <OverlayTrigger
+        key={"download-geojson"}
+        placement="bottom"
+        overlay={
+          <Tooltip id={`tooltip-download-geojson`}>
+            Download dispatch assignment data as geojson
+          </Tooltip>
+        }
+      >
+        <Link href={"/" + incident + "/dispatch/download/" + id}><FontAwesomeIcon icon={faDownload} className="ml-2"  inverse /></Link>
+      </OverlayTrigger>
     <div style={{fontSize:"18px", marginTop:"10px"}}><b>Opened: </b><Moment format="MMMM Do YYYY, HH:mm">{data.start_time}</Moment>{data.end_time ? <span> | <b>Resolved: </b><Moment format="MMMM Do YYYY, HH:mm">{data.end_time}</Moment></span> : ""}</div>
     </Header>
     <hr/>
