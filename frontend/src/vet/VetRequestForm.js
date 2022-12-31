@@ -119,7 +119,7 @@ const VetRequestForm = (props) => {
     fetchPresentingComplaints();
 
     const fetchDiagnoses = async () => {
-      // Fetch assignee data.
+      // Fetch diagnosis data.
       await axios.get('/vet/api/diagnosis/', {
         cancelToken: source.token,
       })

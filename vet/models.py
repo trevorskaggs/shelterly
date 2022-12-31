@@ -9,9 +9,15 @@ class PresentingComplaint(models.Model):
 
     name = models.CharField(max_length=200)
 
+    class Meta:
+        ordering = ('name',)
+
 class Diagnosis(models.Model):
 
     name = models.CharField(max_length=200)
+
+    class Meta:
+        ordering = ('name',)
 
 # Create your models here.
 class VetRequest(models.Model):
@@ -33,6 +39,9 @@ class Treatment(models.Model):
     category = models.CharField(max_length=200)
     valid_units = models.CharField(max_length=200, blank=True, null=True)
     valid_routes = models.CharField(max_length=200, blank=True, null=True)
+
+    class Meta:
+        ordering = ('description',)
 
 
 class TreatmentPlan(models.Model):

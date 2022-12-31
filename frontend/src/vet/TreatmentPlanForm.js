@@ -40,7 +40,9 @@ const TreatmentPlanForm = (props) => {
     route: '',
   })
 
-  const [treatmentChoices, setTreatmentChoices] = useState([])
+  const [treatmentChoices, setTreatmentChoices] = useState([]);
+  const [category, setCategory] = useState([]);
+  const [categoryChoices, setCategoryChoices] = useState([]);
 
   useEffect(() => {
     let unmounted = false;
@@ -70,11 +72,16 @@ const TreatmentPlanForm = (props) => {
       })
       .then(response => {
         if (!unmounted) {
-          let options = [];
+          let category_options = [];
+          let treatment_options = [];
           response.data.forEach(function(treatment) {
-            options.push({value: treatment.id, label: treatment.description + ' - ' + treatment.category})
+            treatment_options.push({value: treatment.id, label: treatment.description, category:treatment.category});
+            if (!category_options.map(category_option => category_option.value).includes(treatment.category)) {
+              category_options.push({value: treatment.category, label: treatment.category});
+            }
           });
-          setTreatmentChoices(options);
+          setTreatmentChoices(treatment_options);
+          setCategoryChoices(category_options);
         }
       })
       .catch(error => {
@@ -95,9 +102,13 @@ const TreatmentPlanForm = (props) => {
       initialValues={data}
       enableReinitialize={true}
       validationSchema={Yup.object({
-        assignee: Yup.number().nullable(),
-        concern: Yup.string(),
-        priority: Yup.string(),
+        treatment: Yup.string().required('Required'),
+        frequency: Yup.number().required('Required'),
+        start: Yup.string().required('Required'),
+        end: Yup.string().required('Required'),
+        quantity: Yup.number().required('Required'),
+        unit: Yup.string().required('Required'),
+        route: Yup.string().required('Required'),
       })}
       onSubmit={(values, { setSubmitting }) => {
         if (props.id) {
@@ -111,13 +122,11 @@ const TreatmentPlanForm = (props) => {
           setSubmitting(false);
         }
         else {
-          console.log(values)
           axios.post('/vet/api/treatmentplan/', values)
           .then(response => {
-            navigate('/' + props.incident + '/vet/treatment/' + response.data.id)
+            navigate('/' + props.incident + '/vet/treatmentplan/' + response.data.id)
           })
           .catch(error => {
-            console.log(error.response)
             setShowSystemError(true);
           });
           setSubmitting(false);
@@ -131,18 +140,33 @@ const TreatmentPlanForm = (props) => {
             <Form>
               <FormGroup>
                 <Row>
-                  <Col xs={"8"}>
+                <Col xs={"4"}>
+                    <DropDown
+                      label="Category"
+                      id="categoryDropdown"
+                      name="category"
+                      type="text"
+                      options={categoryChoices}
+                      // value={formikProps.values.category||data.category}
+                      isClearable={false}
+                      onChange={(instance) => {
+                        console.log(instance.value)
+                        setCategory(instance.value);
+                        formikProps.setFieldValue("treatment", '');
+                      }}
+                    />
+                  </Col>
+                  <Col xs={"6"}>
                     <DropDown
                       label="Treatment"
                       id="treatmentDropdown"
                       name="treatment"
                       type="text"
-                      key={`my_unique_treatment_select_key__${formikProps.values.treatment}`}
-                      options={treatmentChoices}
+                      key={`my_unique_treatment_select_key__${category}`}
+                      options={treatmentChoices.filter(option => option.category === category)}
                       value={formikProps.values.treatment||data.treatment}
-                      isClearable={true}
+                      isClearable={false}
                       onChange={(instance) => {
-                        console.log(instance.value)
                         formikProps.setFieldValue("treatment", instance === null ? '' : instance.value);
                       }}
                     />
@@ -154,13 +178,13 @@ const TreatmentPlanForm = (props) => {
                     name="frequency"
                     type="text"
                     xs="2"
-                    label="Frequency"
+                    label="Frequency (in hours)"
                   />
                   <DateTimePicker
                     label="Start"
                     name="start"
                     id="start"
-                    xs="3"
+                    xs="4"
                     onChange={(date, dateStr) => {
                       formikProps.setFieldValue("start", dateStr)
                     }}
@@ -171,7 +195,7 @@ const TreatmentPlanForm = (props) => {
                     label="End"
                     name="end"
                     id="end"
-                    xs="3"
+                    xs="4"
                     onChange={(date, dateStr) => {
                       formikProps.setFieldValue("end", dateStr)
                     }}
@@ -187,7 +211,7 @@ const TreatmentPlanForm = (props) => {
                     xs="2"
                     label="Quantity"
                   />
-                  <Col xs={"3"}>
+                  <Col xs={"4"}>
                     <DropDown
                       label="Unit"
                       id="unitDropdown"
@@ -206,7 +230,7 @@ const TreatmentPlanForm = (props) => {
                       }}
                     />
                   </Col>
-                  <Col xs={"3"}>
+                  <Col xs={"4"}>
                     <DropDown
                       label="Route"
                       id="routeDropdown"

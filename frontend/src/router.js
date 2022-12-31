@@ -36,8 +36,9 @@ import BuildingDetails from "./shelter/BuildingDetails";
 import RoomForm from "./shelter/RoomForm";
 import RoomDetails from "./shelter/RoomDetails";
 import VisitNoteForm from "./dispatch/VisitNoteForm";
-import TreatmentPlanDetails from "./vet/TreatmentPlanDetails"
+import TreatmentPlanDetails from "./vet/TreatmentPlanDetails";
 import TreatmentPlanForm from "./vet/TreatmentPlanForm";
+import TreatmentRequestForm from "./vet/TreatmentRequestForm";
 import VetRequestDetails from "./vet/VetRequestDetails";
 import VetRequestForm from "./vet/VetRequestForm";
 import VetRequestSearch from "./vet/VetRequestSearch";
@@ -98,8 +99,9 @@ const routes = {
   "/:incident/shelter/building/room/new": ({incident}) => <RoomForm incident={incident} />,
   "/:incident/shelter/room/edit/:id": ({id, incident}) => <RoomForm id={id} incident={incident} />,
   "/:incident/shelter/room/:id": ({id, incident}) => <RoomDetails id={id} incident={incident} />,
-  "/:incident/vet/treatment/new": ({incident}) => <TreatmentPlanForm incident={incident} />,
-  "/:incident/vet/treatment/:id": ({id, incident}) => <TreatmentPlanDetails id={id} incident={incident} />,
+  "/:incident/vet/treatmentplan/new": ({incident}) => <TreatmentPlanForm incident={incident} />,
+  "/:incident/vet/treatmentplan/:id": ({id, incident}) => <TreatmentPlanDetails id={id} incident={incident} />,
+  "/:incident/vet/treatmentrequest/edit/:id": ({id, incident}) => <TreatmentRequestForm id={id} incident={incident} />,
   "/:incident/vet/vetrequest/search": ({incident}) => <VetRequestSearch incident={incident} />,
   "/:incident/vet/vetrequest/edit/:id": ({id, incident}) => <VetRequestForm id={id} state={initialWorkflowData} incident={incident} />,
   "/:incident/vet/vetrequest/:id": ({id, incident}) => <VetRequestDetails id={id} incident={incident} />,

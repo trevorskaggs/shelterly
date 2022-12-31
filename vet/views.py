@@ -2,7 +2,7 @@ from datetime import timedelta
 from rest_framework import filters, permissions, viewsets
 
 from vet.models import Diagnosis, PresentingComplaint, Treatment, TreatmentPlan, TreatmentRequest, VetRequest
-from vet.serializers import DiagnosisSerializer, PresentingComplaintSerializer, TreatmentSerializer, TreatmentPlanSerializer, VetRequestSerializer
+from vet.serializers import DiagnosisSerializer, PresentingComplaintSerializer, TreatmentSerializer, TreatmentPlanSerializer, TreatmentRequestSerializer, VetRequestSerializer
 
 class PresentingComplaintViewSet(viewsets.ModelViewSet):
     queryset = PresentingComplaint.objects.all()
@@ -20,6 +20,12 @@ class DiagnosisViewSet(viewsets.ModelViewSet):
     queryset = Diagnosis.objects.all()
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = DiagnosisSerializer
+
+
+class TreatmentRequestViewSet(viewsets.ModelViewSet):
+    queryset = TreatmentRequest.objects.all()
+    permission_classes = [permissions.IsAuthenticated, ]
+    serializer_class = TreatmentRequestSerializer
 
 
 class VetRequestViewSet(viewsets.ModelViewSet):

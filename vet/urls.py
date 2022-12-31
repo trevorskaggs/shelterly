@@ -8,6 +8,7 @@ router = DefaultRouter()
 router.register(r'vetrequest', views.VetRequestViewSet)
 router.register(r'treatment', views.TreatmentViewSet)
 router.register(r'treatmentplan', views.TreatmentPlanViewSet)
+router.register(r'treatmentrequest', views.TreatmentRequestViewSet)
 router.register(r'complaints', views.PresentingComplaintViewSet)
 router.register(r'diagnosis', views.DiagnosisViewSet)
 

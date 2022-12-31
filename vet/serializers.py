@@ -25,21 +25,36 @@ class DiagnosisSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class TreatmentRequestSerializer(serializers.ModelSerializer):
+class SimpleTreatmentRequestSerializer(serializers.ModelSerializer):
+
+    assignee_object = UserSerializer(source='assignee', required=False, read_only=True)
 
     class Meta:
         model = TreatmentRequest
         fields = '__all__'
 
 
-class TreatmentPlanSerializer(serializers.ModelSerializer):
+class SimpleTreatmentPlanSerializer(serializers.ModelSerializer):
 
     treatment_object = TreatmentSerializer(source='treatment', required=False, read_only=True)
-    treatment_requests = TreatmentRequestSerializer(source='treatmentrequest_set', required=False, read_only=True, many=True)
+    animal_object = serializers.SerializerMethodField()
+
+    def get_animal_object(self, obj):
+        return SimpleAnimalSerializer(obj.vet_request.patient, required=False, read_only=True).data
 
     class Meta:
         model = TreatmentPlan
         fields = '__all__'
+
+
+class TreatmentRequestSerializer(SimpleTreatmentRequestSerializer):
+
+    treatment_plan_object = SimpleTreatmentPlanSerializer(source='treatment_plan', required=False, read_only=True)
+
+
+class TreatmentPlanSerializer(SimpleTreatmentPlanSerializer):
+
+    treatment_requests = SimpleTreatmentRequestSerializer(source='treatmentrequest_set', required=False, read_only=True, many=True)
 
 
 class VetRequestSerializer(serializers.ModelSerializer):
