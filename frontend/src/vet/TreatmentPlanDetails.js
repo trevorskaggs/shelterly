@@ -52,17 +52,17 @@ function TreatmentPlanDetails({ id, incident }) {
   return (
     <>
     <Header>
-      Treatment Plan Details
+      Treatment Details
       <OverlayTrigger
-        key={"edit-treatment-plan"}
+        key={"edit-treatment"}
         placement="bottom"
         overlay={
-          <Tooltip id={`tooltip-edit-treatment-plan`}>
-            Update treatment plan
+          <Tooltip id={`tooltip-edit-treatment`}>
+            Update treatment
           </Tooltip>
         }
       >
-        <Link href={"/" + incident + "/vet/treatmentplan/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-1" inverse /></Link>
+        <Link href={"/" + incident + "/vet/treatment/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-1" inverse /></Link>
       </OverlayTrigger>
     </Header>
     <hr/>
@@ -76,10 +76,7 @@ function TreatmentPlanDetails({ id, incident }) {
             <hr/>
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
               <ListGroup.Item>
-                <div className="row">
-                  <span className="col-6"><b>ID:</b> TP#{data.id}</span>
-                  <span className="col-6"><b>Vet Request:</b>&nbsp;<Link href={"/" + incident + "/vet/vetrequest/" + data.vet_request} className="text-link" style={{textDecoration:"none", color:"white"}}>VR#{data.vet_request}</Link></span>
-                </div>
+                <b>Veterinary Request:</b>&nbsp;<Link href={"/" + incident + "/vet/vetrequest/" + data.vet_request} className="text-link" style={{textDecoration:"none", color:"white"}}>VR#{data.vet_request}</Link>
               </ListGroup.Item>
               <ListGroup.Item>
                 <b>Treatment:</b> {data.treatment_object.description}
@@ -156,9 +153,9 @@ function TreatmentPlanDetails({ id, incident }) {
             <hr className="mb-3" />
               {data.treatment_requests.map(treatment_request => (
               <Row key={treatment_request.id} className="mb-3">
-                <Col xs={9}>
+                <Col xs={8}>
                   <Link href={"/" + incident + "/vet/treatmentrequest/edit/" + treatment_request.id} className="shelter-link w-100" style={{textDecoration:"none", color:"white"}}>
-                    <Card className="border rounded shelter-hover-div" style={{height:"100px", whiteSpace:"nowrap", overflow:"hidden"}}>
+                    <Card className="border rounded shelter-hover-div" style={{height:"100px", width:"560px", whiteSpace:"nowrap", overflow:"hidden"}}>
                       <div className="row no-gutters hover-div" style={{height:"100px", textTransform:"capitalize", marginRight:"-2px"}}>
                         <Row className="ml-0 mr-0 w-100" style={{flexWrap:"nowrap"}}>
                           <div className="border-right" style={{width:"100px"}}>

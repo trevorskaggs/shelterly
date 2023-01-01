@@ -1,3 +1,4 @@
+from datetime import datetime
 from rest_framework import serializers
 
 from .models import Diagnosis, PresentingComplaint, VetRequest, Treatment, TreatmentPlan, TreatmentRequest
@@ -55,7 +56,10 @@ class TreatmentRequestSerializer(SimpleTreatmentRequestSerializer):
 class TreatmentPlanSerializer(SimpleTreatmentPlanSerializer):
 
     treatment_requests = SimpleTreatmentRequestSerializer(source='treatmentrequest_set', required=False, read_only=True, many=True)
+    status = serializers.SerializerMethodField()
 
+    def get_status(self, obj):
+        return "Complete" if obj.treatmentrequest_set.filter(actual_admin_time__isnull=False).count() == obj.treatmentrequest_set.count() else "Awaiting" if obj.treatmentrequest_set.filter(suggested_admin_time__lte=datetime.now(), actual_admin_time__isnull=True).count() > 0 else "Scheduled"
 
 class VetRequestSerializer(serializers.ModelSerializer):
     animal_object = SimpleAnimalSerializer(source='patient', required=False, read_only=True)
@@ -63,6 +67,7 @@ class VetRequestSerializer(serializers.ModelSerializer):
     treatment_plans = TreatmentPlanSerializer(source='treatmentplan_set', required=False, read_only=True, many=True)
     complaints_text = serializers.SerializerMethodField()
     diagnosis_text = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
 
     class Meta:
         model = VetRequest
@@ -73,3 +78,6 @@ class VetRequestSerializer(serializers.ModelSerializer):
 
     def get_diagnosis_text(self, obj):
         return obj.diagnosis.name if obj.diagnosis else ''
+
+    def get_status(self, obj):
+        return "Closed" if obj.closed else "Assigned" if obj.assigned else "Open"

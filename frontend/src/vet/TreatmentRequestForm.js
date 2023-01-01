@@ -91,7 +91,7 @@ const TreatmetRequestForm = (props) => {
         if (props.id) {
           axios.put('/vet/api/treatmentrequest/' + props.id + '/', values)
           .then(response => {
-            navigate('/' + props.incident + '/vet/treatmentplan/' + response.data.treatment_plan)
+            navigate('/' + props.incident + '/vet/treatment/' + response.data.treatment_plan)
           })
           .catch(error => {
             setShowSystemError(true);

@@ -80,12 +80,19 @@ function VetRequestDetails({ id, incident }) {
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
               <ListGroup.Item>
                 <div className="row">
-                  <span className="col-6"><b>ID: </b>VR#{data.id}</span>
-                  <span className="col-6"><b>Priority: </b>{priorityText[data.priority]}</span>
+                  <span className="col-5"><b>ID: </b>VR#{data.id}</span>
+                  <span className="col-7"><b>Priority: </b>{priorityText[data.priority]}</span>
                 </div>
               </ListGroup.Item>
               <ListGroup.Item>
-                <b>Assignee:</b> {data.assignee_object ? <span>{data.assignee_object.first_name} {data.assignee_object.last_name}</span> : "Unassigned"}
+                <div className="row">
+                  <span className="col-5">
+                    <b>Assignee:</b> {data.assignee_object ? <span>{data.assignee_object.first_name} {data.assignee_object.last_name}</span> : "Unassigned"}
+                  </span>
+                  <span className="col-7">
+                    {data.assigned ? <span><b>Assigned: </b><Moment format="lll">{data.assigned}</Moment></span> : ""}
+                  </span>
+                </div>
               </ListGroup.Item>
               <ListGroup.Item>
                 <b>Presenting Complaints:</b> {data.complaints_text || "None"}
@@ -155,26 +162,26 @@ function VetRequestDetails({ id, incident }) {
                     </Tooltip>
                   }
                 >
-                  <Link href={"/" + incident + "/vet/treatmentplan/new?vetrequest_id=" + id}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
+                  <Link href={"/" + incident + "/vet/treatment/new?vetrequest_id=" + id}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
                 </OverlayTrigger>
               </h4>
             </Card.Title>
             <hr className="mb-3" />
             {data.treatment_plans.map(treatment_plan => (
               <Row key={treatment_plan.id} className="mb-3">
-                <Link href={"/" + incident + "/vet/treatmentplan/" + treatment_plan.id} className="shelter-link w-100" style={{textDecoration:"none", color:"white"}}>
-                  <Col xs={9}>
-                    <Card className="border rounded shelter-hover-div" style={{height:"100px", whiteSpace:"nowrap", overflow:"hidden"}}>
+                <Col xs={9}>
+                  <Link href={"/" + incident + "/vet/treatment/" + treatment_plan.id} className="treatment-plan-link w-100" style={{textDecoration:"none", color:"white"}}>
+                    <Card className="border rounded treatment-plan-hover-div" style={{height:"100px", width:"735px", whiteSpace:"nowrap", overflow:"hidden"}}>
                       <div className="row no-gutters hover-div" style={{height:"100px", textTransform:"capitalize", marginRight:"-2px"}}>
                         <Row className="ml-0 mr-0 w-100" style={{flexWrap:"nowrap"}}>
                           <div className="border-right" style={{width:"100px"}}>
-                            <FontAwesomeIcon icon={faPrescriptionBottlePill} size="6x" className="ml-1 shelter-icon" style={{marginTop:"5px", paddingRight:"10px"}} inverse />
+                            <FontAwesomeIcon icon={faPrescriptionBottlePill} size="6x" className="ml-1 treatment-plan-icon" style={{marginTop:"5px", paddingRight:"10px"}} inverse />
                           </div>
                           <Col style={{marginLeft:"-5px", marginRight:"-25px"}}>
                             <div className="border" style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"10px", marginLeft:"-11px", marginTop: "-1px", fontSize:"18px", width:"100%", backgroundColor:"#615e5e"}}>
                               {treatment_plan.treatment_object.description}
                               <span className="float-right">
-                              {treatment_plan.treatment_requests.filter(tr => tr.actual_admin_time !== null).length === treatment_plan.treatment_requests.length ?
+                              {treatment_plan.status === 'Complete' ?
                                 <OverlayTrigger
                                   key={"complete-treatment-request"}
                                   placement="top"
@@ -184,9 +191,9 @@ function VetRequestDetails({ id, incident }) {
                                     </Tooltip>
                                   }
                                 >
-                                  <FontAwesomeIcon icon={faCheckSquare} size="3x" className="ml-1 shelter-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
+                                  <FontAwesomeIcon icon={faCheckSquare} size="3x" className="ml-1 treatment-plan-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
                                 </OverlayTrigger>
-                                : treatment_plan.treatment_requests.filter(tr => new Date(tr.suggested_admin_time) <= new Date() && tr.actual_admin_time === null).length > 0 ?
+                                : treatment_plan.status === 'Awaiting' ?
                                 <OverlayTrigger
                                   key={"awaiting-action-treatment-request"}
                                   placement="top"
@@ -196,7 +203,7 @@ function VetRequestDetails({ id, incident }) {
                                     </Tooltip>
                                   }
                                 >
-                                  <FontAwesomeIcon icon={faSquareExclamation} size="3x" className="ml-1 shelter-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
+                                  <FontAwesomeIcon icon={faSquareExclamation} size="3x" className="ml-1 treatment-plan-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
                                 </OverlayTrigger>
                                 :
                                 <OverlayTrigger
@@ -208,13 +215,16 @@ function VetRequestDetails({ id, incident }) {
                                     </Tooltip>
                                   }
                                 >
-                                  <FontAwesomeIcon icon={faSquareEllipsis} size="3x" className="ml-1 shelter-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
+                                  <FontAwesomeIcon icon={faSquareEllipsis} size="3x" className="ml-1 treatment-plan-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
                                 </OverlayTrigger>
                                 }
                               </span>
                             </div>
                             <div style={{marginTop:"6px"}}>
                               <Row>
+                                <Col xs={3}>
+                                  {treatment_plan.treatment_requests.length} Treatment Request{treatment_plan.treatment_requests.length === 1 ? "" : "s"}
+                                </Col>
                                 <Col>
                                   Start: <Moment format="lll">{treatment_plan.start}</Moment>
                                 </Col>
@@ -224,14 +234,24 @@ function VetRequestDetails({ id, incident }) {
                               </Row>
                             </div>
                             <div>
-                              {treatment_plan.treatment_requests.length} Treatment Requests
+                              <Row>
+                                <Col xs={3}>
+                                  Quantity: {treatment_plan.quantity}
+                                </Col>
+                                <Col>
+                                  Unit: {treatment_plan.unit}
+                                </Col>
+                                <Col>
+                                  Route: {treatment_plan.route}
+                                </Col>
+                              </Row>
                             </div>
                           </Col>
                         </Row>
                       </div>
                     </Card>
-                  </Col>
-                </Link>
+                  </Link>
+                </Col>
               </Row>
             ))}
             {data.treatment_plans.length < 1 ? <p>No treatments have been created for this request.</p> : ""}

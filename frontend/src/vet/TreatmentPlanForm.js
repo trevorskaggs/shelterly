@@ -118,7 +118,7 @@ const TreatmentPlanForm = (props) => {
         if (props.id) {
           axios.put('/vet/api/treatmentplan/' + props.id + '/', values)
           .then(response => {
-            navigate('/' + props.incident + '/vet/treatmentplan/' + props.id)
+            navigate('/' + props.incident + '/vet/treatment/' + props.id)
           })
           .catch(error => {
             setShowSystemError(true);
@@ -128,7 +128,7 @@ const TreatmentPlanForm = (props) => {
         else {
           axios.post('/vet/api/treatmentplan/', values)
           .then(response => {
-            navigate('/' + props.incident + '/vet/treatmentplan/' + response.data.id)
+            navigate('/' + props.incident + '/vet/treatment/' + response.data.id)
           })
           .catch(error => {
             setShowSystemError(true);

@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.db import models
+from datetime import datetime
 
 from animals.models import Animal
 
@@ -32,6 +33,12 @@ class VetRequest(models.Model):
     priority = models.CharField(max_length=25, choices=(('urgent', 'Urgent'),('when_available', 'When Available'),), default='urgent')
     diagnosis = models.ForeignKey(Diagnosis, on_delete=models.SET_NULL, null=True)
 
+    def update_status(self):
+        # Mark VetRequest as closed if all TRs are completed.
+        if not self.closed and TreatmentRequest.objects.filter(treatment_plan__vet_request=self, actual_admin_time__isnull=False).exists():
+            self.closed = datetime.now()
+            self.save()
+
 
 class Treatment(models.Model):
 
@@ -58,7 +65,7 @@ class TreatmentPlan(models.Model):
 
 class TreatmentRequest(models.Model):
 
-    assignee = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    assignee = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True)
     suggested_admin_time = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
     actual_admin_time = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
     treatment_plan = models.ForeignKey(TreatmentPlan, on_delete=models.DO_NOTHING, null=True)
