@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
 import { navigate, useQueryParams } from "raviger";
-import { Form, Formik, } from 'formik';
+import { Form, Formik } from 'formik';
 import {
   Button,
   ButtonGroup,
@@ -17,6 +17,7 @@ import {
 import * as Yup from 'yup';
 import { DateTimePicker, DropDown, TextInput } from '../components/Form';
 import { SystemErrorContext } from '../components/SystemError';
+import moment from 'moment';
 
 const TreatmentPlanForm = (props) => {
 
@@ -26,6 +27,7 @@ const TreatmentPlanForm = (props) => {
   const [queryParams] = useQueryParams();
   const {
     vetrequest_id = null,
+    animal_name = 'Unknown'
   } = queryParams;
 
   const [data, setData] = useState({
@@ -42,7 +44,6 @@ const TreatmentPlanForm = (props) => {
   })
 
   const [treatmentChoices, setTreatmentChoices] = useState([]);
-  const [category, setCategory] = useState([]);
   const [categoryChoices, setCategoryChoices] = useState([]);
 
   useEffect(() => {
@@ -107,10 +108,10 @@ const TreatmentPlanForm = (props) => {
       enableReinitialize={true}
       validationSchema={Yup.object({
         treatment: Yup.string().required('Required'),
-        frequency: Yup.number().required('Required'),
+        frequency: Yup.number().positive('Must be positive').required('Required'),
         start: Yup.string().required('Required'),
         end: Yup.string().required('Required'),
-        quantity: Yup.number().required('Required'),
+        quantity: Yup.number().positive('Must be positive').required('Required'),
         unit: Yup.string().required('Required'),
         route: Yup.string().required('Required'),
       })}
@@ -139,7 +140,7 @@ const TreatmentPlanForm = (props) => {
     >
       {formikProps => (
         <Card border="secondary" className="mt-5">
-          <Card.Header as="h5" className="pl-3"><span style={{ cursor: 'pointer' }} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>{!props.id ? "" : "Update "}Treatment Plan Form</Card.Header>
+          <Card.Header as="h5" className="pl-3"><span style={{ cursor: 'pointer' }} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>{!props.id ? "" : "Update "}Treatment Form - {animal_name}</Card.Header>
           <Card.Body>
             <Form>
               <FormGroup>
@@ -192,7 +193,7 @@ const TreatmentPlanForm = (props) => {
                     onChange={(date, dateStr) => {
                       formikProps.setFieldValue("start", dateStr)
                     }}
-                    value={formikProps.values.start||null}
+                    value={formikProps.values.start||new Date()}
                     disabled={false}
                   />
                   <DateTimePicker
@@ -203,7 +204,7 @@ const TreatmentPlanForm = (props) => {
                     onChange={(date, dateStr) => {
                       formikProps.setFieldValue("end", dateStr)
                     }}
-                    value={formikProps.values.end||null}
+                    value={formikProps.values.end||new Date()}
                     disabled={false}
                   />
                 </Row>
@@ -257,6 +258,7 @@ const TreatmentPlanForm = (props) => {
               </FormGroup>
             </Form>
           </Card.Body>
+          {formikProps.values.end && formikProps.values.start && formikProps.values.frequency && formikProps.values.frequency > 0 ? <div className="alert alert-warning text-center" style={{fontSize:"16px", marginTop:"-35px"}}>This will generate {Math.trunc((moment.duration(moment(formikProps.values.end).diff(moment(formikProps.values.start))).hours() / formikProps.values.frequency) + 1)} treatment request(s).</div> : ""}
           <ButtonGroup>
             <Button type="button" className="btn btn-primary" onClick={() => { formikProps.submitForm() }}>Save</Button>
           </ButtonGroup>

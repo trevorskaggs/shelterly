@@ -62,7 +62,7 @@ function TreatmentPlanDetails({ id, incident }) {
           </Tooltip>
         }
       >
-        <Link href={"/" + incident + "/vet/treatment/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-1" inverse /></Link>
+        <Link href={"/" + incident + "/vet/treatment/edit/" + id + "/?animal_name=" + data.animal_object.name||"Unknown"}><FontAwesomeIcon icon={faEdit} className="ml-1" inverse /></Link>
       </OverlayTrigger>
     </Header>
     <hr/>
@@ -152,70 +152,68 @@ function TreatmentPlanDetails({ id, incident }) {
             </Card.Title>
             <hr className="mb-3" />
               {data.treatment_requests.map(treatment_request => (
-              <Row key={treatment_request.id} className="mb-3">
-                <Col xs={8}>
-                  <Link href={"/" + incident + "/vet/treatmentrequest/edit/" + treatment_request.id} className="shelter-link w-100" style={{textDecoration:"none", color:"white"}}>
-                    <Card className="border rounded shelter-hover-div" style={{height:"100px", width:"560px", whiteSpace:"nowrap", overflow:"hidden"}}>
-                      <div className="row no-gutters hover-div" style={{height:"100px", textTransform:"capitalize", marginRight:"-2px"}}>
-                        <Row className="ml-0 mr-0 w-100" style={{flexWrap:"nowrap"}}>
-                          <div className="border-right" style={{width:"100px"}}>
-                            <FontAwesomeIcon icon={faUserMd} size="6x" className="ml-2 shelter-icon" style={{marginTop:"5px", paddingLeft:"5px"}} inverse />
-                          </div>
-                          <Col style={{marginLeft:"-5px", marginRight:"-25px"}}>
-                            <div className="border" style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"10px", marginLeft:"-11px", marginTop: "-1px", fontSize:"18px", width:"100%", backgroundColor:"#615e5e"}}>
-                              Suggested Admin Time: <Moment format="lll">{treatment_request.suggested_admin_time}</Moment>
-                              <span className="float-right">
-                                {treatment_request.actual_admin_time ?
-                                <OverlayTrigger
-                                  key={"complete-treatment-request"}
-                                  placement="top"
-                                  overlay={
-                                    <Tooltip id={`tooltip-complete-treatment-request`}>
-                                      Treatment request is completed.
-                                    </Tooltip>
-                                  }
-                                >
-                                  <FontAwesomeIcon icon={faCheckSquare} size="3x" className="ml-1 shelter-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
-                                </OverlayTrigger>
-                                : new Date(treatment_request.suggested_admin_time) <= new Date() ?
-                                <OverlayTrigger
-                                  key={"awaiting-action-treatment-request"}
-                                  placement="top"
-                                  overlay={
-                                    <Tooltip id={`tooltip-awaiting-action-treatment-request`}>
-                                      Treatment request is awaiting action.
-                                    </Tooltip>
-                                  }
-                                >
-                                  <FontAwesomeIcon icon={faSquareExclamation} size="3x" className="ml-1 shelter-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
-                                </OverlayTrigger>
-                                :
-                                <OverlayTrigger
-                                  key={"scheduled-treatment-request"}
-                                  placement="top"
-                                  overlay={
-                                    <Tooltip id={`tooltip-scheduled-treatment-request`}>
-                                      Treatment request is scheduled for a future date/time.
-                                    </Tooltip>
-                                  }
-                                >
-                                  <FontAwesomeIcon icon={faSquareEllipsis} size="3x" className="ml-1 shelter-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
-                                </OverlayTrigger>
+              <Row key={treatment_request.id} className="ml-0 mb-3">
+                <Link href={"/" + incident + "/vet/treatmentrequest/edit/" + treatment_request.id} className="shelter-link" style={{textDecoration:"none", color:"white"}}>
+                  <Card className="border rounded shelter-hover-div" style={{height:"100px", width:"560px", whiteSpace:"nowrap", overflow:"hidden"}}>
+                    <div className="row no-gutters hover-div" style={{height:"100px", textTransform:"capitalize", marginRight:"-2px"}}>
+                      <Row className="ml-0 mr-0 w-100" style={{flexWrap:"nowrap"}}>
+                        <div className="border-right" style={{width:"100px"}}>
+                          <FontAwesomeIcon icon={faUserMd} size="6x" className="ml-2 shelter-icon" style={{marginTop:"5px", paddingLeft:"5px"}} inverse />
+                        </div>
+                        <Col style={{marginLeft:"-5px", marginRight:"-25px"}}>
+                          <div className="border" style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"10px", marginLeft:"-11px", marginTop: "-1px", fontSize:"18px", width:"100%", backgroundColor:"#615e5e"}}>
+                            Suggested Admin Time: <Moment format="lll">{treatment_request.suggested_admin_time}</Moment>
+                            <span className="float-right">
+                              {treatment_request.actual_admin_time ?
+                              <OverlayTrigger
+                                key={"complete-treatment-request"}
+                                placement="top"
+                                overlay={
+                                  <Tooltip id={`tooltip-complete-treatment-request`}>
+                                    Treatment request is completed.
+                                  </Tooltip>
                                 }
-                              </span>
-                            </div>
-                            <div style={{marginTop:"6px"}}>
-                              Actual Admin Time: {treatment_request.actual_admin_time ? <Moment format="lll">{treatment_request.actual_admin_time}</Moment> : "Pending"}
-                            </div>
-                            <div>
-                              Assignee: {treatment_request.assignee_object ? <span>{treatment_request.assignee_object.first_name} {treatment_request.assignee_object.last_name}</span> : "Unassigned"}
-                            </div>
-                          </Col>
-                        </Row>
-                      </div>
-                    </Card>
-                  </Link>
-                </Col>
+                              >
+                                <FontAwesomeIcon icon={faCheckSquare} size="3x" className="ml-1 shelter-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
+                              </OverlayTrigger>
+                              : new Date(treatment_request.suggested_admin_time) <= new Date() ?
+                              <OverlayTrigger
+                                key={"awaiting-action-treatment-request"}
+                                placement="top"
+                                overlay={
+                                  <Tooltip id={`tooltip-awaiting-action-treatment-request`}>
+                                    Treatment request is awaiting action.
+                                  </Tooltip>
+                                }
+                              >
+                                <FontAwesomeIcon icon={faSquareExclamation} size="3x" className="ml-1 shelter-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
+                              </OverlayTrigger>
+                              :
+                              <OverlayTrigger
+                                key={"scheduled-treatment-request"}
+                                placement="top"
+                                overlay={
+                                  <Tooltip id={`tooltip-scheduled-treatment-request`}>
+                                    Treatment request is scheduled for a future date/time.
+                                  </Tooltip>
+                                }
+                              >
+                                <FontAwesomeIcon icon={faSquareEllipsis} size="3x" className="ml-1 shelter-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
+                              </OverlayTrigger>
+                              }
+                            </span>
+                          </div>
+                          <div style={{marginTop:"6px"}}>
+                            Actual Admin Time: {treatment_request.actual_admin_time ? <Moment format="lll">{treatment_request.actual_admin_time}</Moment> : "Pending"}
+                          </div>
+                          <div>
+                            Assignee: {treatment_request.assignee_object ? <span>{treatment_request.assignee_object.first_name} {treatment_request.assignee_object.last_name}</span> : "Unassigned"}
+                          </div>
+                        </Col>
+                      </Row>
+                    </div>
+                  </Card>
+                </Link>
               </Row>
               ))}
             {data.treatment_requests.length < 1 ? <p>No treatment requests have been created for this treatment plan.</p> : ""}

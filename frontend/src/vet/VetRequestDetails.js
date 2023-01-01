@@ -162,96 +162,94 @@ function VetRequestDetails({ id, incident }) {
                     </Tooltip>
                   }
                 >
-                  <Link href={"/" + incident + "/vet/treatment/new?vetrequest_id=" + id}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
+                  <Link href={"/" + incident + "/vet/treatment/new?vetrequest_id=" + id + "&animal_name=" + data.animal_object.name || "Unknown"}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
                 </OverlayTrigger>
               </h4>
             </Card.Title>
             <hr className="mb-3" />
             {data.treatment_plans.map(treatment_plan => (
-              <Row key={treatment_plan.id} className="mb-3">
-                <Col xs={9}>
-                  <Link href={"/" + incident + "/vet/treatment/" + treatment_plan.id} className="treatment-plan-link w-100" style={{textDecoration:"none", color:"white"}}>
-                    <Card className="border rounded treatment-plan-hover-div" style={{height:"100px", width:"735px", whiteSpace:"nowrap", overflow:"hidden"}}>
-                      <div className="row no-gutters hover-div" style={{height:"100px", textTransform:"capitalize", marginRight:"-2px"}}>
-                        <Row className="ml-0 mr-0 w-100" style={{flexWrap:"nowrap"}}>
-                          <div className="border-right" style={{width:"100px"}}>
-                            <FontAwesomeIcon icon={faPrescriptionBottlePill} size="6x" className="ml-1 treatment-plan-icon" style={{marginTop:"5px", paddingRight:"10px"}} inverse />
-                          </div>
-                          <Col style={{marginLeft:"-5px", marginRight:"-25px"}}>
-                            <div className="border" style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"10px", marginLeft:"-11px", marginTop: "-1px", fontSize:"18px", width:"100%", backgroundColor:"#615e5e"}}>
-                              {treatment_plan.treatment_object.description}
-                              <span className="float-right">
-                              {treatment_plan.status === 'Complete' ?
-                                <OverlayTrigger
-                                  key={"complete-treatment-request"}
-                                  placement="top"
-                                  overlay={
-                                    <Tooltip id={`tooltip-complete-treatment-request`}>
-                                      All treatment requests are completed.
-                                    </Tooltip>
-                                  }
-                                >
-                                  <FontAwesomeIcon icon={faCheckSquare} size="3x" className="ml-1 treatment-plan-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
-                                </OverlayTrigger>
-                                : treatment_plan.status === 'Awaiting' ?
-                                <OverlayTrigger
-                                  key={"awaiting-action-treatment-request"}
-                                  placement="top"
-                                  overlay={
-                                    <Tooltip id={`tooltip-awaiting-action-treatment-request`}>
-                                      At least one treatment request is awaiting action.
-                                    </Tooltip>
-                                  }
-                                >
-                                  <FontAwesomeIcon icon={faSquareExclamation} size="3x" className="ml-1 treatment-plan-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
-                                </OverlayTrigger>
-                                :
-                                <OverlayTrigger
-                                  key={"scheduled-treatment-request"}
-                                  placement="top"
-                                  overlay={
-                                    <Tooltip id={`tooltip-scheduled-treatment-request`}>
-                                      At least one treatment request is scheduled for a future date/time.
-                                    </Tooltip>
-                                  }
-                                >
-                                  <FontAwesomeIcon icon={faSquareEllipsis} size="3x" className="ml-1 treatment-plan-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
-                                </OverlayTrigger>
+              <Row key={treatment_plan.id} className="ml-0 mb-3">
+                <Link href={"/" + incident + "/vet/treatment/" + treatment_plan.id} className="treatment-plan-link" style={{textDecoration:"none", color:"white"}}>
+                  <Card className="border rounded treatment-plan-hover-div" style={{height:"100px", width:"735px", whiteSpace:"nowrap", overflow:"hidden"}}>
+                    <div className="row no-gutters hover-div" style={{height:"100px", marginRight:"-2px"}}>
+                      <Row className="ml-0 mr-0 w-100" style={{flexWrap:"nowrap"}}>
+                        <div className="border-right" style={{width:"100px"}}>
+                          <FontAwesomeIcon icon={faPrescriptionBottlePill} size="6x" className="ml-1 treatment-plan-icon" style={{marginTop:"5px", paddingRight:"10px"}} inverse />
+                        </div>
+                        <Col style={{marginLeft:"-5px", marginRight:"-25px"}}>
+                          <div className="border" style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"10px", marginLeft:"-11px", marginTop: "-1px", fontSize:"18px", width:"100%", backgroundColor:"#615e5e"}}>
+                            {treatment_plan.treatment_object.description}
+                            <span className="float-right">
+                            {treatment_plan.status === 'Complete' ?
+                              <OverlayTrigger
+                                key={"complete-treatment-request"}
+                                placement="top"
+                                overlay={
+                                  <Tooltip id={`tooltip-complete-treatment-request`}>
+                                    All treatment requests are completed.
+                                  </Tooltip>
                                 }
-                              </span>
-                            </div>
-                            <div style={{marginTop:"6px"}}>
-                              <Row>
-                                <Col xs={3}>
-                                  {treatment_plan.treatment_requests.length} Treatment Request{treatment_plan.treatment_requests.length === 1 ? "" : "s"}
-                                </Col>
-                                <Col>
-                                  Start: <Moment format="lll">{treatment_plan.start}</Moment>
-                                </Col>
-                                <Col>
-                                  End: <Moment format="lll">{treatment_plan.end}</Moment>
-                                </Col>
-                              </Row>
-                            </div>
-                            <div>
-                              <Row>
-                                <Col xs={3}>
-                                  Quantity: {treatment_plan.quantity}
-                                </Col>
-                                <Col>
-                                  Unit: {treatment_plan.unit}
-                                </Col>
-                                <Col>
-                                  Route: {treatment_plan.route}
-                                </Col>
-                              </Row>
-                            </div>
-                          </Col>
-                        </Row>
-                      </div>
-                    </Card>
-                  </Link>
-                </Col>
+                              >
+                                <FontAwesomeIcon icon={faCheckSquare} size="3x" className="ml-1 treatment-plan-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
+                              </OverlayTrigger>
+                              : treatment_plan.status === 'Awaiting' ?
+                              <OverlayTrigger
+                                key={"awaiting-action-treatment-request"}
+                                placement="top"
+                                overlay={
+                                  <Tooltip id={`tooltip-awaiting-action-treatment-request`}>
+                                    At least one treatment request is awaiting action.
+                                  </Tooltip>
+                                }
+                              >
+                                <FontAwesomeIcon icon={faSquareExclamation} size="3x" className="ml-1 treatment-plan-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
+                              </OverlayTrigger>
+                              :
+                              <OverlayTrigger
+                                key={"scheduled-treatment-request"}
+                                placement="top"
+                                overlay={
+                                  <Tooltip id={`tooltip-scheduled-treatment-request`}>
+                                    At least one treatment request is scheduled for a future date/time.
+                                  </Tooltip>
+                                }
+                              >
+                                <FontAwesomeIcon icon={faSquareEllipsis} size="3x" className="ml-1 treatment-plan-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
+                              </OverlayTrigger>
+                              }
+                            </span>
+                          </div>
+                          <div style={{marginTop:"6px"}}>
+                            <Row>
+                              <Col>
+                                Start: <Moment format="lll">{treatment_plan.start}</Moment>
+                              </Col>
+                              <Col>
+                                End: <Moment format="lll">{treatment_plan.end}</Moment>
+                              </Col>
+                              <Col>
+                                Frequency: Every {treatment_plan.frequency} hours
+                              </Col>
+                            </Row>
+                          </div>
+                          <div>
+                            <Row>
+                              <Col>
+                                Quantity: {treatment_plan.quantity}
+                              </Col>
+                              <Col>
+                                Unit: {treatment_plan.unit}
+                              </Col>
+                              <Col>
+                                Route: {treatment_plan.route}
+                              </Col>
+                            </Row>
+                          </div>
+                        </Col>
+                      </Row>
+                    </div>
+                  </Card>
+                </Link>
               </Row>
             ))}
             {data.treatment_plans.length < 1 ? <p>No treatments have been created for this request.</p> : ""}
