@@ -32,8 +32,8 @@ const TreatmentPlanForm = (props) => {
 
   const [data, setData] = useState({
     vet_request: vetrequest_id,
-    start: '',
-    end: '',
+    start: new Date(),
+    end: new Date(),
     category: '',
     treatment: null,
     frequency: '',
@@ -41,7 +41,14 @@ const TreatmentPlanForm = (props) => {
     unit: '',
     route: '',
     treatment_object: {category:''}
-  })
+  });
+
+  function calc_requests(formikProps) {
+    let duration = moment.duration(moment(formikProps.values.end).diff(moment(formikProps.values.start)));
+    return Math.trunc(((duration.hours() + (duration.days() * 24)) / formikProps.values.frequency) + 1)
+  };
+
+  // Math.trunc((moment.duration().hours() / formikProps.values.frequency) + 1)
 
   const [treatmentChoices, setTreatmentChoices] = useState([]);
   const [categoryChoices, setCategoryChoices] = useState([]);
@@ -258,7 +265,7 @@ const TreatmentPlanForm = (props) => {
               </FormGroup>
             </Form>
           </Card.Body>
-          {formikProps.values.end && formikProps.values.start && formikProps.values.frequency && formikProps.values.frequency > 0 ? <div className="alert alert-warning text-center" style={{fontSize:"16px", marginTop:"-35px"}}>This will generate {Math.trunc((moment.duration(moment(formikProps.values.end).diff(moment(formikProps.values.start))).hours() / formikProps.values.frequency) + 1)} treatment request(s).</div> : ""}
+          {formikProps.values.end && formikProps.values.start && formikProps.values.frequency && formikProps.values.frequency > 0 ? <div className="alert alert-warning text-center" style={{fontSize:"16px", marginTop:"-35px"}}>This will generate {calc_requests(formikProps)} treatment request{calc_requests(formikProps) === 1 ? "" : "s"}.</div> : ""}
           <ButtonGroup>
             <Button type="button" className="btn btn-primary" onClick={() => { formikProps.submitForm() }}>Save</Button>
           </ButtonGroup>
