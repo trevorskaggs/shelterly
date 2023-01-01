@@ -1,8 +1,8 @@
 import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
 import Moment from 'react-moment';
-import { Link, navigate } from 'raviger';
-import { Button, Card, Col, ListGroup, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
+import { Link } from 'raviger';
+import { Card, Col, ListGroup, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faEdit,
@@ -38,7 +38,6 @@ function VetRequestDetails({ id, incident }) {
       .then(response => {
         if (!unmounted) {
           setData(response.data);
-          console.log(response.data)
         }
       })
       .catch(error => {
@@ -144,7 +143,7 @@ function VetRequestDetails({ id, incident }) {
     <div className="row mt-3">
       <div className="col-12 d-flex">
         <Card className="mb-2 border rounded" style={{width:"100%"}}>
-          <Card.Body style={{marginBottom:"-17px"}}>
+          <Card.Body style={{marginBottom:"-19px"}}>
             <Card.Title>
               <h4 className="mb-0">Treatments
                 <OverlayTrigger
@@ -160,11 +159,11 @@ function VetRequestDetails({ id, incident }) {
                 </OverlayTrigger>
               </h4>
             </Card.Title>
-            <hr/>
+            <hr className="mb-3" />
             {data.treatment_plans.map(treatment_plan => (
-              <span key={treatment_plan.id} className="pl-0 pr-0 mr-3 mb-3">
-                <Link href={"/" + incident + "/vet/treatmentplan/" + treatment_plan.id} className="shelter-link" style={{textDecoration:"none", color:"white"}}>
-                  <Col style={{marginLeft:"-15px", marginRight:"-25px"}} xs={9}>
+              <Row key={treatment_plan.id} className="mb-3">
+                <Link href={"/" + incident + "/vet/treatmentplan/" + treatment_plan.id} className="shelter-link w-100" style={{textDecoration:"none", color:"white"}}>
+                  <Col xs={9}>
                     <Card className="border rounded shelter-hover-div" style={{height:"100px", whiteSpace:"nowrap", overflow:"hidden"}}>
                       <div className="row no-gutters hover-div" style={{height:"100px", textTransform:"capitalize", marginRight:"-2px"}}>
                         <Row className="ml-0 mr-0 w-100" style={{flexWrap:"nowrap"}}>
@@ -175,7 +174,6 @@ function VetRequestDetails({ id, incident }) {
                             <div className="border" style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"10px", marginLeft:"-11px", marginTop: "-1px", fontSize:"18px", width:"100%", backgroundColor:"#615e5e"}}>
                               {treatment_plan.treatment_object.description}
                               <span className="float-right">
-                                
                               {treatment_plan.treatment_requests.filter(tr => tr.actual_admin_time !== null).length === treatment_plan.treatment_requests.length ?
                                 <OverlayTrigger
                                   key={"complete-treatment-request"}
@@ -217,10 +215,13 @@ function VetRequestDetails({ id, incident }) {
                             </div>
                             <div style={{marginTop:"6px"}}>
                               <Row>
-                            <Col>
-                              Start: <Moment format="lll">{treatment_plan.start}</Moment></Col>
-                              <Col>
-                              End: <Moment format="lll">{treatment_plan.end}</Moment></Col></Row>
+                                <Col>
+                                  Start: <Moment format="lll">{treatment_plan.start}</Moment>
+                                </Col>
+                                <Col>
+                                  End: <Moment format="lll">{treatment_plan.end}</Moment>
+                                </Col>
+                              </Row>
                             </div>
                             <div>
                               {treatment_plan.treatment_requests.length} Treatment Requests
@@ -231,7 +232,7 @@ function VetRequestDetails({ id, incident }) {
                     </Card>
                   </Col>
                 </Link>
-              </span>
+              </Row>
             ))}
             {data.treatment_plans.length < 1 ? <p>No treatments have been created for this request.</p> : ""}
           </Card.Body>

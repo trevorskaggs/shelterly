@@ -1,8 +1,8 @@
 import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
 import Moment from 'react-moment';
-import { Link, navigate } from 'raviger';
-import { Button, Card, Col, ListGroup, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
+import { Link } from 'raviger';
+import { Card, Col, ListGroup, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faEdit,
@@ -76,9 +76,10 @@ function TreatmentPlanDetails({ id, incident }) {
             <hr/>
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
               <ListGroup.Item>
-              <div className="row">
+                <div className="row">
                   <span className="col-6"><b>ID:</b> TP#{data.id}</span>
-                  <b>Vet Request:</b>&nbsp;<Link href={"/" + incident + "/vet/vetrequest/" + data.vet_request} className="text-link" style={{textDecoration:"none", color:"white"}}>VR#{data.vet_request}</Link>                </div>
+                  <span className="col-6"><b>Vet Request:</b>&nbsp;<Link href={"/" + incident + "/vet/vetrequest/" + data.vet_request} className="text-link" style={{textDecoration:"none", color:"white"}}>VR#{data.vet_request}</Link></span>
+                </div>
               </ListGroup.Item>
               <ListGroup.Item>
                 <b>Treatment:</b> {data.treatment_object.description}
@@ -148,15 +149,15 @@ function TreatmentPlanDetails({ id, incident }) {
     <div className="row mt-3">
       <div className="col-12 d-flex">
         <Card className="mb-2 border rounded" style={{width:"100%"}}>
-          <Card.Body style={{marginBottom:"-17px"}}>
+          <Card.Body style={{marginBottom:"-19px"}}>
             <Card.Title>
               <h4 className="mb-0">Treatment Requests</h4>
             </Card.Title>
-            <hr/>
+            <hr className="mb-3" />
               {data.treatment_requests.map(treatment_request => (
-              <span key={treatment_request.id} className="pl-0 pr-0 mr-3 mb-3">
-                <Col style={{marginLeft:"-15px", marginRight:"-25px"}} xs="8">
-                  <Link href={"/" + incident + "/vet/treatmentrequest/edit/" + treatment_request.id} className="shelter-link" style={{textDecoration:"none", color:"white"}}>
+              <Row key={treatment_request.id} className="mb-3">
+                <Col xs={9}>
+                  <Link href={"/" + incident + "/vet/treatmentrequest/edit/" + treatment_request.id} className="shelter-link w-100" style={{textDecoration:"none", color:"white"}}>
                     <Card className="border rounded shelter-hover-div" style={{height:"100px", whiteSpace:"nowrap", overflow:"hidden"}}>
                       <div className="row no-gutters hover-div" style={{height:"100px", textTransform:"capitalize", marginRight:"-2px"}}>
                         <Row className="ml-0 mr-0 w-100" style={{flexWrap:"nowrap"}}>
@@ -218,7 +219,7 @@ function TreatmentPlanDetails({ id, incident }) {
                     </Card>
                   </Link>
                 </Col>
-              </span>
+              </Row>
               ))}
             {data.treatment_requests.length < 1 ? <p>No treatment requests have been created for this treatment plan.</p> : ""}
           </Card.Body>

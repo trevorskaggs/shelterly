@@ -99,6 +99,7 @@ const routes = {
   "/:incident/shelter/building/room/new": ({incident}) => <RoomForm incident={incident} />,
   "/:incident/shelter/room/edit/:id": ({id, incident}) => <RoomForm id={id} incident={incident} />,
   "/:incident/shelter/room/:id": ({id, incident}) => <RoomDetails id={id} incident={incident} />,
+  "/:incident/vet/treatmentplan/edit/:id": ({id, incident}) => <TreatmentPlanForm id={id} incident={incident} />,
   "/:incident/vet/treatmentplan/new": ({incident}) => <TreatmentPlanForm incident={incident} />,
   "/:incident/vet/treatmentplan/:id": ({id, incident}) => <TreatmentPlanDetails id={id} incident={incident} />,
   "/:incident/vet/treatmentrequest/edit/:id": ({id, incident}) => <TreatmentRequestForm id={id} incident={incident} />,

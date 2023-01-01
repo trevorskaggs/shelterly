@@ -1,8 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
 import { navigate, useQueryParams } from "raviger";
-import { Field, Form, Formik, } from 'formik';
-import Select from 'react-select';
+import { Form, Formik, } from 'formik';
 import {
   Button,
   ButtonGroup,
@@ -16,7 +15,7 @@ import {
   faArrowAltCircleLeft,
 } from '@fortawesome/free-solid-svg-icons';
 import * as Yup from 'yup';
-import { DateTimePicker, DropDown, TextInput } from '../components/Form';
+import { DateTimePicker, DropDown } from '../components/Form';
 import { SystemErrorContext } from '../components/SystemError';
 
 const TreatmetRequestForm = (props) => {

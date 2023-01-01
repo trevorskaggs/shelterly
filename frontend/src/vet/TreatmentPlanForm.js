@@ -1,8 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
 import { navigate, useQueryParams } from "raviger";
-import { Field, Form, Formik, } from 'formik';
-import Select from 'react-select';
+import { Form, Formik, } from 'formik';
 import {
   Button,
   ButtonGroup,
@@ -33,11 +32,13 @@ const TreatmentPlanForm = (props) => {
     vet_request: vetrequest_id,
     start: '',
     end: '',
+    category: '',
     treatment: null,
     frequency: '',
     quantity: '',
     unit: '',
     route: '',
+    treatment_object: {category:''}
   })
 
   const [treatmentChoices, setTreatmentChoices] = useState([]);
@@ -47,23 +48,6 @@ const TreatmentPlanForm = (props) => {
   useEffect(() => {
     let unmounted = false;
     let source = axios.CancelToken.source();
-    if (props.id) {
-      const fetchTreatmentPlan = async () => {
-        // Fetch Visit Note data.
-        await axios.get('/vet/api/treatmentplan/' + props.id + '/', {
-          cancelToken: source.token,
-        })
-        .then(response => {
-          if (!unmounted) {
-            setData(response.data);
-          }
-        })
-        .catch(error => {
-          setShowSystemError(true);
-        });
-      };
-      fetchTreatmentPlan();
-    };
 
     const fetchTreatments = async () => {
       // Fetch Visit Note data.
@@ -90,6 +74,26 @@ const TreatmentPlanForm = (props) => {
     };
     fetchTreatments();
 
+    if (props.id) {
+      const fetchTreatmentPlan = async () => {
+        // Fetch Visit Note data.
+        await axios.get('/vet/api/treatmentplan/' + props.id + '/', {
+          cancelToken: source.token,
+        })
+        .then(response => {
+          if (!unmounted) {
+            response.data['category'] = response.data.treatment_object.category
+            response.data['treatment'] = response.data.treatment_object.id
+            setData(response.data);
+          }
+        })
+        .catch(error => {
+          setShowSystemError(true);
+        });
+      };
+      fetchTreatmentPlan();
+    };
+
     // Cleanup.
     return () => {
       unmounted = true;
@@ -114,7 +118,7 @@ const TreatmentPlanForm = (props) => {
         if (props.id) {
           axios.put('/vet/api/treatmentplan/' + props.id + '/', values)
           .then(response => {
-            // navigate('/' + incident + '/vet/vetrequest/' + props.id)
+            navigate('/' + props.incident + '/vet/treatmentplan/' + props.id)
           })
           .catch(error => {
             setShowSystemError(true);
@@ -135,7 +139,7 @@ const TreatmentPlanForm = (props) => {
     >
       {formikProps => (
         <Card border="secondary" className="mt-5">
-          <Card.Header as="h5" className="pl-3"><span style={{ cursor: 'pointer' }} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>{!props.id ? "" : "Update "}Treatment Form</Card.Header>
+          <Card.Header as="h5" className="pl-3"><span style={{ cursor: 'pointer' }} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>{!props.id ? "" : "Update "}Treatment Plan Form</Card.Header>
           <Card.Body>
             <Form>
               <FormGroup>
@@ -147,11 +151,11 @@ const TreatmentPlanForm = (props) => {
                       name="category"
                       type="text"
                       options={categoryChoices}
-                      // value={formikProps.values.category||data.category}
+                      value={formikProps.values.category||data.category}
+                      key={`my_unique_category_select_key__${data.category}`}
                       isClearable={false}
                       onChange={(instance) => {
-                        console.log(instance.value)
-                        setCategory(instance.value);
+                        formikProps.setFieldValue("category", instance === null ? '' : instance.value);
                         formikProps.setFieldValue("treatment", '');
                       }}
                     />
@@ -162,8 +166,8 @@ const TreatmentPlanForm = (props) => {
                       id="treatmentDropdown"
                       name="treatment"
                       type="text"
-                      key={`my_unique_treatment_select_key__${category}`}
-                      options={treatmentChoices.filter(option => option.category === category)}
+                      key={`my_unique_treatment_select_key__${formikProps.values.category}`}
+                      options={treatmentChoices.filter(option => option.category === formikProps.values.category)}
                       value={formikProps.values.treatment||data.treatment}
                       isClearable={false}
                       onChange={(instance) => {

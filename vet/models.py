@@ -51,7 +51,7 @@ class TreatmentPlan(models.Model):
     end = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
     treatment = models.ForeignKey(Treatment, on_delete=models.SET_NULL, null=True)
     frequency = models.IntegerField(blank=True)
-    quantity = models.IntegerField(blank=True)
+    quantity = models.FloatField(blank=True)
     unit = models.CharField(max_length=5, choices=(('ml', 'ml'),('cap', 'cap'),('tab', 'tab'),), default='ml')
     route = models.CharField(max_length=5, choices=(('IV', 'IV'),('SQ', 'SQ'),('PO', 'PO'),), default='IV')
 
