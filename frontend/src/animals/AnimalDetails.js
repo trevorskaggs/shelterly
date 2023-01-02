@@ -48,6 +48,7 @@ function AnimalDetails({ id, incident }) {
     front_image: null,
     side_image: null,
     room: null,
+    vet_requests: [],
     extra_images: [],
     action_history: [],
     shelter_object: {name: '', full_address: ''}
@@ -436,6 +437,11 @@ function AnimalDetails({ id, incident }) {
                 <div className="mt-1"><b>Intake Date:</b> <Moment format="MMMM Do YYYY HH:mm">{data.intake_date}</Moment></div>
                 <div className="mt-1"><b>Address:</b> {data.shelter_object.full_address || "Unknown"}</div>
               </ListGroup.Item> : ""}
+              {data.vet_requests.length && data.vet_requests.map(vetrequest => (
+                <ListGroup.Item key={vetrequest}>
+                  <b>Veterinary Request:</b> <Link href={"/" + incident + "/vet/vetrequest/" + vetrequest} className="text-link" style={{textDecoration:"none", color:"white"}}>VR#{vetrequest}</Link>
+                </ListGroup.Item>
+              ))}
             </ListGroup>
           </Card.Body>
         </Card>

@@ -114,7 +114,6 @@ function AnimalSearch({ incident }) {
                            .filter(animal => options.latlng ? arePointsNear({lat:animal.latitude, lng: animal.longitude}, options.latlng) : animal)
                            .filter(animal => options.shelter ? animal.shelter === options.shelter : animal)
     )
-
   }
 
   const handleClear = () => {

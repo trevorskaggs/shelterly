@@ -55,7 +55,7 @@ function VetRequestDetails({ id, incident }) {
   return (
     <>
     <Header>
-      Vet Request Details
+      Veterinary Request Details
       <OverlayTrigger
         key={"edit-vet-request"}
         placement="bottom"
@@ -171,13 +171,13 @@ function VetRequestDetails({ id, incident }) {
               <Row key={treatment_plan.id} className="ml-0 mb-3">
                 <Link href={"/" + incident + "/vet/treatment/" + treatment_plan.id} className="treatment-plan-link" style={{textDecoration:"none", color:"white"}}>
                   <Card className="border rounded treatment-plan-hover-div" style={{height:"100px", width:"735px", whiteSpace:"nowrap", overflow:"hidden"}}>
-                    <div className="row no-gutters hover-div" style={{height:"100px", marginRight:"-2px"}}>
+                    <div className="row no-gutters hover-div treatment-plan-hover-div" style={{height:"100px", marginRight:"-2px"}}>
                       <Row className="ml-0 mr-0 w-100" style={{flexWrap:"nowrap"}}>
                         <div className="border-right" style={{width:"100px"}}>
                           <FontAwesomeIcon icon={faPrescriptionBottlePill} size="6x" className="ml-1 treatment-plan-icon" style={{marginTop:"5px", paddingRight:"10px"}} inverse />
                         </div>
-                        <Col style={{marginLeft:"-5px", marginRight:"-25px"}}>
-                          <div className="border" style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"10px", marginLeft:"-11px", marginTop: "-1px", fontSize:"18px", width:"100%", backgroundColor:"#615e5e"}}>
+                        <Col style={{marginLeft:"-5px", marginRight:"-25px"}} className="hover-div">
+                          <div className="border treatment-plan-hover-div" style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"10px", marginLeft:"-11px", marginTop: "-1px", fontSize:"18px", width:"100%", backgroundColor:"#615e5e"}}>
                             {treatment_plan.treatment_object.description}
                             <span className="float-right">
                             {treatment_plan.status === 'Complete' ?

@@ -68,6 +68,7 @@ class VetRequestSerializer(serializers.ModelSerializer):
     complaints_text = serializers.SerializerMethodField()
     diagnosis_text = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
+    shelter_name = serializers.SerializerMethodField()
 
     class Meta:
         model = VetRequest
@@ -81,3 +82,6 @@ class VetRequestSerializer(serializers.ModelSerializer):
 
     def get_status(self, obj):
         return "Closed" if obj.closed else "Assigned" if obj.assigned else "Open"
+
+    def get_shelter_name(self, obj):
+        return obj.patient.shelter.name if obj.patient.shelter else ''

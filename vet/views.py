@@ -40,7 +40,7 @@ class TreatmentRequestViewSet(viewsets.ModelViewSet):
 
 class VetRequestViewSet(viewsets.ModelViewSet):
     queryset = VetRequest.objects.all()
-    search_fields = ['id', 'assignee__first_name', 'assignee__last_name', 'patient__shelter__name', 'patient__species', 'priority', 'open']
+    search_fields = ['id', 'assignee__first_name', 'assignee__last_name', 'patient__shelter__name', 'patient__species', 'priority', 'open', 'treatment__description']
     filter_backends = (filters.SearchFilter,)
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = VetRequestSerializer

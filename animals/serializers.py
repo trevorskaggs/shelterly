@@ -10,7 +10,7 @@ class SimpleAnimalSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Animal
-        fields = ['id', 'species', 'aggressive', 'status', 'aco_required', 'name', 'sex', 'size', 'age', 'pcolor', 'scolor', 'color_notes', 'behavior_notes', 'medical_notes']
+        fields = ['id', 'species', 'aggressive', 'status', 'aco_required', 'name', 'sex', 'size', 'age', 'pcolor', 'scolor', 'color_notes', 'behavior_notes', 'medical_notes', 'shelter']
 
 class ModestAnimalSerializer(SimpleAnimalSerializer):
     front_image = serializers.SerializerMethodField()
@@ -55,6 +55,7 @@ class AnimalSerializer(ModestAnimalSerializer):
     reporter_object = SimplePersonSerializer(source='reporter', read_only=True)
     request_address = serializers.SerializerMethodField()
     action_history = serializers.SerializerMethodField()
+    vet_requests = serializers.SerializerMethodField()
     room_name = serializers.StringRelatedField(source='room', read_only=True)
     building_name = serializers.StringRelatedField(source='room.building', read_only=True)
     shelter_object = SimpleShelterSerializer(source='shelter', required=False, read_only=True)
@@ -64,7 +65,7 @@ class AnimalSerializer(ModestAnimalSerializer):
         fields = ['id', 'species', 'status', 'aco_required', 'front_image', 'side_image', 'extra_images', 'last_seen', 'intake_date', 'address', 'city', 'state', 'zip_code',
         'aggressive', 'injured', 'fixed', 'confined', 'found_location', 'owner_names', 'owners', 'shelter_object', 'shelter', 'reporter', 'reporter_object', 'request', 'request_address',
         'action_history', 'building_name', 'room', 'room_name', 'name', 'sex', 'size', 'age', 'pcolor', 'scolor', 'color_notes', 'behavior_notes', 'medical_notes',
-        'latitude', 'longitude']
+        'latitude', 'longitude', 'vet_requests']
 
     # Truncates latitude and longitude.
     def to_internal_value(self, data):
@@ -84,6 +85,9 @@ class AnimalSerializer(ModestAnimalSerializer):
 
     def get_found_location(self, obj):
         return build_full_address(obj)
+
+    def get_vet_requests(self, obj):
+        return obj.vetrequest_set.all().values_list('id', flat=True)
 
     # Custom field for request address.
     def get_request_address(self, obj):
