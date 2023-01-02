@@ -23,7 +23,7 @@ function VetRequestDetails({ id, incident }) {
 
   const priorityText = {urgent:'Urgent', when_available:'When Available'};
 
-  const [data, setData] = useState({id: '', patient:{}, assignee:{}, open: '', assigned:'', closed: '', concern: '', priority: '', diagnosis: '', treatment_plans:[], presenting_complaints:[], animal_object: {id:'', name:'', species:'', sex:'', age:'', size:'', pcolor:'', scolor:'', medical_notes:''}});
+  const [data, setData] = useState({id: '', patient:{}, assignee:{}, open: '', assigned:'', closed: '', concern: '', priority: '', diagnosis: '', other_diagnosis:'', treatment_plans:[], presenting_complaints:[], animal_object: {id:'', name:'', species:'', sex:'', age:'', size:'', pcolor:'', scolor:'', medical_notes:''}});
 
   // Hook for initializing data.
   useEffect(() => {
@@ -101,7 +101,7 @@ function VetRequestDetails({ id, incident }) {
                 <b>Concern:</b> {data.concern || "N/A"}
               </ListGroup.Item>
               <ListGroup.Item>
-                <b>Diagnosis:</b> {data.diagnosis_text || "N/A"}
+                <b>Diagnosis:</b> {data.diagnosis_text === 'OPEN' ? data.other_diagnosis : data.diagnosis_text || "N/A"}
               </ListGroup.Item>
             </ListGroup>
           </Card.Body>

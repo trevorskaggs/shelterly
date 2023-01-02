@@ -186,7 +186,7 @@ const VetRequestForm = (props) => {
             <Form>
               <FormGroup>
                 <Row>
-                  <Col xs={"6"}>
+                  <Col xs={"4"}>
                     <DropDown
                       label="Assignee"
                       id="assigneeDropdown"
@@ -202,7 +202,7 @@ const VetRequestForm = (props) => {
                   </Col>
                 </Row>
                 <Row className="mt-3">
-                  <Col xs={"6"}>
+                  <Col xs={"4"}>
                     <DropDown
                       label="Priority"
                       id="priorityDropdown"
@@ -221,7 +221,7 @@ const VetRequestForm = (props) => {
                   </Col>
                 </Row>
                 <Row className="mt-3">
-                  <Col xs={"6"}>
+                  <Col xs={"8"}>
                     <label>Presenting Complaints</label>
                     <Select
                       label="Presenting Complaints"
@@ -255,7 +255,7 @@ const VetRequestForm = (props) => {
                 </Row>
                 {props.id ?
                 <Row>
-                  <Col xs={"8"}>
+                  <Col xs={"6"}>
                     <DropDown
                       label="Diagnosis"
                       id="diagnosisDropdown"
@@ -271,6 +271,18 @@ const VetRequestForm = (props) => {
                   </Col>
                 </Row>
                 : ""}
+                {diagnosisChoices.length && formikProps.values.diagnosis === diagnosisChoices.filter(option => option.label === 'OPEN')[0].value ?
+                <Row className="mt-3">
+                  <TextInput
+                    type="text"
+                    label="Other Diagnosis"
+                    name="other_diagnosis"
+                    id="other_diagnosis"
+                    xs="6"
+                  />
+                </Row>
+                : ""}
+
               </FormGroup>
             </Form>
           </Card.Body>

@@ -32,6 +32,7 @@ class VetRequest(models.Model):
     concern = models.CharField(max_length=200)
     priority = models.CharField(max_length=25, choices=(('urgent', 'Urgent'),('when_available', 'When Available'),), default='urgent')
     diagnosis = models.ForeignKey(Diagnosis, on_delete=models.SET_NULL, null=True)
+    other_diagnosis = models.CharField(max_length=200, blank=True, null=True)
 
     def update_status(self):
         # Mark VetRequest as closed if all TRs are completed.
