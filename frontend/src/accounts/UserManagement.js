@@ -7,7 +7,7 @@ import {
   faMinusSquare, faUpload, faUserPlus
 } from '@fortawesome/free-solid-svg-icons';
 import {
-  faCircleI, faCircleU, faPencil, faUserUnlock
+  faCircleI, faCircleU, faCircleV, faPencil, faUserUnlock
 } from '@fortawesome/pro-solid-svg-icons';
 import Header from "../components/Header";
 import { SystemErrorContext } from '../components/SystemError';
@@ -270,6 +270,17 @@ function UserManagement({ incident }) {
               }
             >
               <FontAwesomeIcon icon={faCircleI} size="lg" className="ml-1" />
+            </OverlayTrigger> : ""}
+            {user.vet_perms ? <OverlayTrigger
+              key={"vet-perms"}
+              placement="top"
+              overlay={
+                <Tooltip id={`tooltip-vet-perms`}>
+                  User has veterinary permissions
+                </Tooltip>
+              }
+            >
+              <FontAwesomeIcon icon={faCircleV} size="lg" className="ml-1" />
             </OverlayTrigger> : ""}
           </Col>
         </div>

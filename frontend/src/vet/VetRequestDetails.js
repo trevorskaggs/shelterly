@@ -170,7 +170,7 @@ function VetRequestDetails({ id, incident }) {
             {data.treatment_plans.map(treatment_plan => (
               <Row key={treatment_plan.id} className="ml-0 mb-3">
                 <Link href={"/" + incident + "/vet/treatment/" + treatment_plan.id} className="treatment-plan-link" style={{textDecoration:"none", color:"white"}}>
-                  <Card className="border rounded treatment-plan-hover-div" style={{height:"100px", width:"735px", whiteSpace:"nowrap", overflow:"hidden"}}>
+                  <Card className="border rounded treatment-plan-hover-div" style={{height:"100px", width:"745px", whiteSpace:"nowrap", overflow:"hidden"}}>
                     <div className="row no-gutters hover-div treatment-plan-hover-div" style={{height:"100px", marginRight:"-2px"}}>
                       <Row className="ml-0 mr-0 w-100" style={{flexWrap:"nowrap"}}>
                         <div className="border-right" style={{width:"100px"}}>

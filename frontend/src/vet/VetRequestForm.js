@@ -80,7 +80,7 @@ const VetRequestForm = (props) => {
 
     const fetchAssignees = async () => {
       // Fetch assignee data.
-      await axios.get('/accounts/api/user/', {
+      await axios.get('/accounts/api/user/?vet=true', {
         cancelToken: source.token,
       })
       .then(response => {

@@ -175,7 +175,7 @@ class AnimalViewSet(viewsets.ModelViewSet):
         """
         Returns: Queryset of distinct animals, each annotated with:
             images (List of AnimalImages)
-        """        
+        """
         queryset = (
             Animal.objects.with_images().with_history().exclude(status="CANCELED").distinct()
             .prefetch_related("owners")

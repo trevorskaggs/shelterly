@@ -115,3 +115,14 @@ class UserViewSet(viewsets.ModelViewSet):
     def perform_destroy(self, instance):
         if self.request.user.is_superuser or self.request.user.user_perms:
             instance.delete()
+
+    def get_queryset(self):
+        """
+        Returns: Queryset of users.
+        """
+        queryset = (
+            User.objects.all()
+        )
+        if self.request.GET.get('vet') == 'true':
+            queryset = queryset.filter(vet_perms=True)
+        return queryset
