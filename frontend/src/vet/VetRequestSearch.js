@@ -389,7 +389,7 @@ function VetRequestSearch({ incident }) {
                     <ListGroup.Item>
                       <Row>
                         <Col>
-                          <b>Patient ID: </b><Link href={"/" + incident + "/animals/" + vet_request.animal_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>A#{vet_request.animal_object.id}</Link>
+                          <b>Patient: </b><Link href={"/" + incident + "/animals/" + vet_request.animal_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>A#{vet_request.animal_object.id}</Link>
                         </Col>
                         <Col style={{textTransform:"capitalize"}}>
                           <b>Species:</b> {vet_request.animal_object.species}
@@ -430,7 +430,7 @@ function VetRequestSearch({ incident }) {
                         <Link href={"/" + incident + "/vet/treatment/" + treatment.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{treatment.treatment_object.description || "Unknown"}</Link>
                       </ListGroup.Item>
                     ))}
-                  {vet_request.treatment_plans.length < 1 ? <ListGroup.Item style={{marginTop:"32px"}}>No Treatments</ListGroup.Item> : ""}
+                  {vet_request.treatment_plans.length < 1 ? <ListGroup.Item>No Treatments</ListGroup.Item> : ""}
                   </Scrollbar>
                 </ListGroup>
               </Card.Body>

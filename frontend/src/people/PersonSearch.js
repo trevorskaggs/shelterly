@@ -216,7 +216,7 @@ function PersonSearch({ incident }) {
                       &nbsp;- {animal.status}
                     </ListGroup.Item>
                   ))}
-                  {owner.animals.length < 1 ? <ListGroup.Item style={{marginTop:"32px"}}>No Animals</ListGroup.Item> : ""}
+                  {owner.animals.length < 1 ? <ListGroup.Item>No Animals</ListGroup.Item> : ""}
                 </Scrollbar>
               </ListGroup> : ""}
               {statusOptions === 'reporters' ?

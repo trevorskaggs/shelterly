@@ -177,6 +177,26 @@ input[disabled] {
   transition: color 0.3s linear;
 }
 
+.treatment-link:hover {
+  color: #d3bfb4 !important;
+}
+
+.treatment-hover-div:hover .treatment-icon {
+  color: #d3bfb4 !important;
+}
+
+.treatment-hover-div:hover {
+  border-color: #d3bfb4 !important;
+}
+
+.treatment-hover-div:hover .border {
+  border-color: #d3bfb4 !important;
+}
+
+.treatment-hover-div:hover .border-right {
+  border-color: #d3bfb4 !important;
+}
+
 .hover-div:hover .shelter-icon {
   color: #b18662;
 }

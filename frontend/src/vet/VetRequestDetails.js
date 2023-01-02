@@ -169,15 +169,15 @@ function VetRequestDetails({ id, incident }) {
             <hr className="mb-3" />
             {data.treatment_plans.map(treatment_plan => (
               <Row key={treatment_plan.id} className="ml-0 mb-3">
-                <Link href={"/" + incident + "/vet/treatment/" + treatment_plan.id} className="treatment-plan-link" style={{textDecoration:"none", color:"white"}}>
-                  <Card className="border rounded treatment-plan-hover-div" style={{height:"100px", width:"745px", whiteSpace:"nowrap", overflow:"hidden"}}>
-                    <div className="row no-gutters hover-div treatment-plan-hover-div" style={{height:"100px", marginRight:"-2px"}}>
+                <Link href={"/" + incident + "/vet/treatment/" + treatment_plan.id} className="treatment-link" style={{textDecoration:"none", color:"white"}}>
+                  <Card className="border rounded treatment-hover-div" style={{height:"100px", width:"745px", whiteSpace:"nowrap", overflow:"hidden"}}>
+                    <div className="row no-gutters hover-div treatment-hover-div" style={{height:"100px", marginRight:"-2px"}}>
                       <Row className="ml-0 mr-0 w-100" style={{flexWrap:"nowrap"}}>
                         <div className="border-right" style={{width:"100px"}}>
-                          <FontAwesomeIcon icon={faPrescriptionBottlePill} size="6x" className="ml-1 treatment-plan-icon" style={{marginTop:"5px", paddingRight:"10px"}} inverse />
+                          <FontAwesomeIcon icon={faPrescriptionBottlePill} size="6x" className="ml-1 treatment-icon" style={{marginTop:"5px", paddingRight:"10px"}} inverse />
                         </div>
                         <Col style={{marginLeft:"-5px", marginRight:"-25px"}} className="hover-div">
-                          <div className="border treatment-plan-hover-div" style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"10px", marginLeft:"-11px", marginTop: "-1px", fontSize:"18px", width:"100%", backgroundColor:"#615e5e"}}>
+                          <div className="border treatment-hover-div" style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"10px", marginLeft:"-11px", marginTop: "-1px", fontSize:"18px", width:"100%", backgroundColor:"#615e5e"}}>
                             {treatment_plan.treatment_object.description}
                             <span className="float-right">
                             {treatment_plan.status === 'Complete' ?
@@ -190,7 +190,7 @@ function VetRequestDetails({ id, incident }) {
                                   </Tooltip>
                                 }
                               >
-                                <FontAwesomeIcon icon={faCheckSquare} size="3x" className="ml-1 treatment-plan-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
+                                <FontAwesomeIcon icon={faCheckSquare} size="3x" className="ml-1 treatment-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
                               </OverlayTrigger>
                               : treatment_plan.status === 'Awaiting' ?
                               <OverlayTrigger
@@ -202,7 +202,7 @@ function VetRequestDetails({ id, incident }) {
                                   </Tooltip>
                                 }
                               >
-                                <FontAwesomeIcon icon={faSquareExclamation} size="3x" className="ml-1 treatment-plan-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
+                                <FontAwesomeIcon icon={faSquareExclamation} size="3x" className="ml-1 treatment-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
                               </OverlayTrigger>
                               :
                               <OverlayTrigger
@@ -214,7 +214,7 @@ function VetRequestDetails({ id, incident }) {
                                   </Tooltip>
                                 }
                               >
-                                <FontAwesomeIcon icon={faSquareEllipsis} size="3x" className="ml-1 treatment-plan-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
+                                <FontAwesomeIcon icon={faSquareEllipsis} size="3x" className="ml-1 treatment-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
                               </OverlayTrigger>
                               }
                             </span>

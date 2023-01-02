@@ -22,6 +22,12 @@ const TreatmetRequestForm = (props) => {
 
   const { setShowSystemError } = useContext(SystemErrorContext);
 
+  // Identify any query param data.
+  const [queryParams] = useQueryParams();
+  const {
+    animal_name = 'Unknown'
+  } = queryParams;
+
   const [data, setData] = useState({
     treatment_plan: null,
     suggested_admin_time: '',
@@ -102,7 +108,7 @@ const TreatmetRequestForm = (props) => {
     >
       {formikProps => (
         <Card border="secondary" className="mt-5">
-          <Card.Header as="h5" className="pl-3"><span style={{ cursor: 'pointer' }} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>Treatment Request Form</Card.Header>
+          <Card.Header as="h5" className="pl-3"><span style={{ cursor: 'pointer' }} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>Treatment Request Form - {animal_name}</Card.Header>
           <Card.Body>
             <Form>
               <FormGroup>

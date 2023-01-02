@@ -153,12 +153,12 @@ function TreatmentPlanDetails({ id, incident }) {
             <hr className="mb-3" />
               {data.treatment_requests.map(treatment_request => (
               <Row key={treatment_request.id} className="ml-0 mb-3">
-                <Link href={"/" + incident + "/vet/treatmentrequest/edit/" + treatment_request.id} className="shelter-link" style={{textDecoration:"none", color:"white"}}>
-                  <Card className="border rounded shelter-hover-div" style={{height:"100px", width:"560px", whiteSpace:"nowrap", overflow:"hidden"}}>
+                <Link href={"/" + incident + "/vet/treatmentrequest/edit/" + treatment_request.id + "?animal_name=" + data.animal_object.name} className="treatment-link" style={{textDecoration:"none", color:"white"}}>
+                  <Card className="border rounded treatment-hover-div" style={{height:"100px", width:"560px", whiteSpace:"nowrap", overflow:"hidden"}}>
                     <div className="row no-gutters hover-div" style={{height:"100px", textTransform:"capitalize", marginRight:"-2px"}}>
                       <Row className="ml-0 mr-0 w-100" style={{flexWrap:"nowrap"}}>
                         <div className="border-right" style={{width:"100px"}}>
-                          <FontAwesomeIcon icon={faUserMd} size="6x" className="ml-2 shelter-icon" style={{marginTop:"5px", paddingLeft:"5px"}} inverse />
+                          <FontAwesomeIcon icon={faUserMd} size="6x" className="ml-2 treatment-icon" style={{marginTop:"5px", paddingLeft:"5px"}} inverse />
                         </div>
                         <Col style={{marginLeft:"-5px", marginRight:"-25px"}}>
                           <div className="border" style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"10px", marginLeft:"-11px", marginTop: "-1px", fontSize:"18px", width:"100%", backgroundColor:"#615e5e"}}>
@@ -174,7 +174,7 @@ function TreatmentPlanDetails({ id, incident }) {
                                   </Tooltip>
                                 }
                               >
-                                <FontAwesomeIcon icon={faCheckSquare} size="3x" className="ml-1 shelter-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
+                                <FontAwesomeIcon icon={faCheckSquare} size="3x" className="ml-1 treatment-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
                               </OverlayTrigger>
                               : new Date(treatment_request.suggested_admin_time) <= new Date() ?
                               <OverlayTrigger
@@ -186,7 +186,7 @@ function TreatmentPlanDetails({ id, incident }) {
                                   </Tooltip>
                                 }
                               >
-                                <FontAwesomeIcon icon={faSquareExclamation} size="3x" className="ml-1 shelter-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
+                                <FontAwesomeIcon icon={faSquareExclamation} size="3x" className="ml-1 treatment-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
                               </OverlayTrigger>
                               :
                               <OverlayTrigger
@@ -198,7 +198,7 @@ function TreatmentPlanDetails({ id, incident }) {
                                   </Tooltip>
                                 }
                               >
-                                <FontAwesomeIcon icon={faSquareEllipsis} size="3x" className="ml-1 shelter-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
+                                <FontAwesomeIcon icon={faSquareEllipsis} size="3x" className="ml-1 treatment-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
                               </OverlayTrigger>
                               }
                             </span>

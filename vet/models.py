@@ -40,6 +40,9 @@ class VetRequest(models.Model):
             self.closed = datetime.now()
             self.save()
 
+    class Meta:
+        ordering = ('-id',)
+
 
 class Treatment(models.Model):
 
@@ -63,6 +66,9 @@ class TreatmentPlan(models.Model):
     unit = models.CharField(max_length=5, choices=(('ml', 'ml'),('cap', 'cap'),('tab', 'tab'),), default='ml')
     route = models.CharField(max_length=5, choices=(('IV', 'IV'),('SQ', 'SQ'),('PO', 'PO'),), default='IV')
 
+    class Meta:
+        ordering = ('id',)
+
 
 class TreatmentRequest(models.Model):
 
@@ -70,3 +76,6 @@ class TreatmentRequest(models.Model):
     suggested_admin_time = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
     actual_admin_time = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
     treatment_plan = models.ForeignKey(TreatmentPlan, on_delete=models.DO_NOTHING, null=True)
+
+    class Meta:
+        ordering = ('id',)
