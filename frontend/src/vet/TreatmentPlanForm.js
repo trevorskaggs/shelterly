@@ -44,11 +44,10 @@ const TreatmentPlanForm = (props) => {
   });
 
   function calc_requests(formikProps) {
-    let duration = moment.duration(moment(formikProps.values.end).diff(moment(formikProps.values.start)));
+    let duration = moment.duration(moment(formikProps.values.end).add(1, 'm').diff(moment(formikProps.values.start)));
     return Math.trunc(((duration.hours() + (duration.days() * 24)) / formikProps.values.frequency) + 1)
   };
 
-  // Math.trunc((moment.duration().hours() / formikProps.values.frequency) + 1)
 
   const [treatmentChoices, setTreatmentChoices] = useState([]);
   const [categoryChoices, setCategoryChoices] = useState([]);

@@ -36,7 +36,7 @@ class VetRequest(models.Model):
 
     def update_status(self):
         # Mark VetRequest as closed if all TRs are completed.
-        if not self.closed and TreatmentRequest.objects.filter(treatment_plan__vet_request=self, actual_admin_time__isnull=False).exists():
+        if not self.closed and TreatmentRequest.objects.filter(treatment_plan__vet_request=self, actual_admin_time__isnull=True).exists():
             self.closed = datetime.now()
             self.save()
 

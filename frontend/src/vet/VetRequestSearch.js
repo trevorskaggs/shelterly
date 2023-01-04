@@ -330,7 +330,7 @@ function VetRequestSearch({ incident }) {
                         }}
                       />
                       <Flatpickr 
-                        options={{allowInput: true, altFormat: "F j, Y", dateFormat: "Y-m-d", mode: "range", maxDate: moment().format('MM-DD-YYYY')}}
+                        options={{allowInput: true, altFormat: "F j, Y", dateFormat: "m-d-Y", mode: "range", maxDate: moment().format('MM-DD-YYYY')}}
                         style={{height:"36px", paddingLeft:"11px", borderRadius:".25rem", borderWidth:"1px", borderStyle:"solid"}}
                         name={`open`}
                         id={`open`}
@@ -412,7 +412,7 @@ function VetRequestSearch({ incident }) {
                           <b>Assignee:</b> {vet_request.assignee_object ? <span>{vet_request.assignee_object.first_name} {vet_request.assignee_object.last_name}</span> : "Unassigned"}
                         </Col>
                         <Col>
-                          <b>Shelter: </b>{vet_request.shelter_name || "Unknown"}
+                          <b>Shelter: </b>{vet_request.shelter_name || "Remote"}
                         </Col>
                       </Row>
                     </ListGroup.Item>
