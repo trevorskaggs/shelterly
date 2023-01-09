@@ -1,17 +1,19 @@
 import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
 import Moment from 'react-moment';
-import { Link } from 'raviger';
-import { Card, Col, ListGroup, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
+import { Link, navigate } from 'raviger';
+import { Button, Card, Col, ListGroup, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faEdit,
   faUserMd,
   faCheckSquare,
+  faTimes,
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faSquareExclamation,
-  faSquareEllipsis
+  faSquareEllipsis,
+  faSquareX
 } from '@fortawesome/pro-solid-svg-icons';
 import Header from '../components/Header';
 import { SystemErrorContext } from '../components/SystemError';
@@ -20,7 +22,13 @@ function TreatmentPlanDetails({ id, incident }) {
 
   const { setShowSystemError } = useContext(SystemErrorContext);
 
-  const [data, setData] = useState({id: '', treatment_object:{name:'', category:''}, animal_object:{name:'', id:''}, start: '', end:'', frequency: '', quantity: '', unit: '', route: '', treatment_requests:[]});
+  const [data, setData] = useState({id: '', vet_request:'', treatment_object:{name:'', category:''}, animal_object:{name:'', id:''}, start: '', end:'', frequency: '', quantity: '', unit: '', route: '', treatment_requests:[]});
+
+  const [showModal, setShowModal] = useState(false);
+  const cancelTreatmentPlan = () => {
+    axios.delete('/vet/api/treatmentplan/' + id + '/')
+    navigate("/" + incident + "/vet/vetrequest/" + data.vet_request)
+  }
 
   // Hook for initializing data.
   useEffect(() => {
@@ -52,7 +60,7 @@ function TreatmentPlanDetails({ id, incident }) {
   return (
     <>
     <Header>
-      Treatment Details
+      Treatment #{data.id}
       <OverlayTrigger
         key={"edit-treatment"}
         placement="bottom"
@@ -62,7 +70,18 @@ function TreatmentPlanDetails({ id, incident }) {
           </Tooltip>
         }
       >
-        <Link href={"/" + incident + "/vet/treatment/edit/" + id + "/?animal_name=" + data.animal_object.name||"Unknown"}><FontAwesomeIcon icon={faEdit} className="ml-1" inverse /></Link>
+        <Link href={"/" + incident + "/vet/treatment/edit/" + id + "/?animal_name=" + data.animal_object.name||"Unknown"}><FontAwesomeIcon icon={faEdit} className="ml-2" inverse /></Link>
+      </OverlayTrigger>
+      <OverlayTrigger
+        key={"cancel-vet-request"}
+        placement="bottom"
+        overlay={
+          <Tooltip id={`tooltip-cancel-vet-request`}>
+            Cancel treatment
+          </Tooltip>
+        }
+      >
+        <FontAwesomeIcon icon={faTimes} className="ml-2" size="lg" style={{cursor:'pointer'}} inverse onClick={() => {setShowModal(true)}}/>
       </OverlayTrigger>
     </Header>
     <hr/>
@@ -76,7 +95,14 @@ function TreatmentPlanDetails({ id, incident }) {
             <hr/>
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
               <ListGroup.Item>
-                <b>Veterinary Request:</b>&nbsp;<Link href={"/" + incident + "/vet/vetrequest/" + data.vet_request} className="text-link" style={{textDecoration:"none", color:"white"}}>VR#{data.vet_request}</Link>
+                <Row>
+                  <Col>
+                    <b>Veterinary Request:</b>&nbsp;<Link href={"/" + incident + "/vet/vetrequest/" + data.vet_request} className="text-link" style={{textDecoration:"none", color:"white"}}>VR#{data.vet_request}</Link>
+                  </Col>
+                  <Col>
+                    <b>Status:</b> {data.status}
+                  </Col>
+                </Row>
               </ListGroup.Item>
               <ListGroup.Item>
                 <b>Treatment:</b> {data.treatment_object.description}
@@ -176,6 +202,18 @@ function TreatmentPlanDetails({ id, incident }) {
                               >
                                 <FontAwesomeIcon icon={faCheckSquare} size="3x" className="ml-1 treatment-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
                               </OverlayTrigger>
+                              : treatment_request.not_administered ?
+                              <OverlayTrigger
+                                key={"not-administered-treatment-request"}
+                                placement="top"
+                                overlay={
+                                  <Tooltip id={`tooltip-not-administered-treatment-request`}>
+                                    Treatment request was not administered.
+                                  </Tooltip>
+                                }
+                              >
+                                <FontAwesomeIcon icon={faSquareX} size="3x" className="ml-1 treatment-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
+                              </OverlayTrigger>
                               : new Date(treatment_request.suggested_admin_time) <= new Date() ?
                               <OverlayTrigger
                                 key={"awaiting-action-treatment-request"}
@@ -222,6 +260,20 @@ function TreatmentPlanDetails({ id, incident }) {
       </div>
     </div>
     {/* <History action_history={data.action_history} /> */}
+    <Modal show={showModal} onHide={() => setShowModal(false)}>
+      <Modal.Header closeButton>
+        <Modal.Title>Confirm Treatment Cancelation</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>Are you sure you want to cancel this Treatment and associated treatment requests?</Modal.Body>
+      <Modal.Footer>
+        <Button variant="primary" onClick={() => cancelTreatmentPlan()}>
+          Yes
+        </Button>
+        <Button variant="secondary" onClick={() => setShowModal(false)}>
+          Cancel
+        </Button>
+      </Modal.Footer>
+    </Modal>
     </>
   );
 };

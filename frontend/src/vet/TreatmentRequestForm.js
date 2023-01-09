@@ -8,6 +8,7 @@ import {
   Card,
   Col,
   FormGroup,
+  Form as BootstrapForm,
   Row,
 } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -15,7 +16,7 @@ import {
   faArrowAltCircleLeft,
 } from '@fortawesome/free-solid-svg-icons';
 import * as Yup from 'yup';
-import { DateTimePicker, DropDown } from '../components/Form';
+import { Checkbox, DateTimePicker, DropDown } from '../components/Form';
 import { SystemErrorContext } from '../components/SystemError';
 
 const TreatmetRequestForm = (props) => {
@@ -33,6 +34,7 @@ const TreatmetRequestForm = (props) => {
     suggested_admin_time: '',
     actual_admin_time: '',
     assignee: null,
+    not_administered: false
   })
 
   const [assigneeChoices, setAssigneeChoices] = useState([]);
@@ -89,9 +91,9 @@ const TreatmetRequestForm = (props) => {
       initialValues={data}
       enableReinitialize={true}
       validationSchema={Yup.object({
-        assignee: Yup.number(),
+        assignee: Yup.number().nullable(),
         suggested_admin_time: Yup.string().required('Required'),
-        actual_admin_time: Yup.string().required('Required'),
+        actual_admin_time: Yup.string().nullable(),
       })}
       onSubmit={(values, { setSubmitting }) => {
         if (props.id) {
@@ -108,7 +110,7 @@ const TreatmetRequestForm = (props) => {
     >
       {formikProps => (
         <Card border="secondary" className="mt-5">
-          <Card.Header as="h5" className="pl-3"><span style={{ cursor: 'pointer' }} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>Treatment Request Form - {animal_name}</Card.Header>
+          <Card.Header as="h5" className="pl-3"><span style={{ cursor: 'pointer' }} onClick={() => navigate("/" + props.incident + "/vet/treatment/" + data.treatment_plan)} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>Treatment Request Form - {animal_name}</Card.Header>
           <Card.Body>
             <Form>
               <FormGroup>
@@ -152,6 +154,23 @@ const TreatmetRequestForm = (props) => {
                     }}
                     value={formikProps.values.actual_admin_time||null}
                     disabled={false}
+                  />
+                </Row>
+                <BootstrapForm.Label className="mt-3">Not Administered</BootstrapForm.Label>
+                <Row className="mb-0 ml-0">
+                  <Checkbox
+                    id="not_administered"
+                    name={"not_administered"}
+                    checked={formikProps.values.not_administered || false}
+                    onChange={() => {
+                      formikProps.setFieldValue("not_administered", !formikProps.values.not_administered);
+                    }}
+                    style={{
+                      transform:"scale(2.0)",
+                      marginLeft:"-3px",
+                      marginBottom:"-5px",
+                      marginTop:"0px"
+                    }}
                   />
                 </Row>
               </FormGroup>

@@ -2,11 +2,12 @@ import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
 import Moment from 'react-moment';
 import { Link } from 'raviger';
-import { Card, Col, ListGroup, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
+import { Button, Card, Col, ListGroup, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faEdit,
   faPlusSquare,
+  faTimes,
   faCheckSquare
 } from '@fortawesome/free-solid-svg-icons';
 import {
@@ -24,6 +25,13 @@ function VetRequestDetails({ id, incident }) {
   const priorityText = {urgent:'Urgent', when_available:'When Available'};
 
   const [data, setData] = useState({id: '', patient:{}, assignee:{}, open: '', assigned:'', closed: '', concern: '', priority: '', diagnosis: '', other_diagnosis:'', treatment_plans:[], presenting_complaints:[], animal_object: {id:'', name:'', species:'', sex:'', age:'', size:'', pcolor:'', scolor:'', medical_notes:''}});
+
+  const [showModal, setShowModal] = useState(false);
+  const cancelVetRequest = () => {
+    axios.patch('/vet/api/vetrequest/' + id + '/', {status:'Canceled'})
+    setData(prevState => ({ ...prevState, 'status':'Canceled'}));
+    setShowModal(false)
+  }
 
   // Hook for initializing data.
   useEffect(() => {
@@ -55,8 +63,8 @@ function VetRequestDetails({ id, incident }) {
   return (
     <>
     <Header>
-      Veterinary Request Details
-      <OverlayTrigger
+      Veterinary Request #{data.id}
+      {data.status !== 'Canceled' ? <OverlayTrigger
         key={"edit-vet-request"}
         placement="bottom"
         overlay={
@@ -65,8 +73,19 @@ function VetRequestDetails({ id, incident }) {
           </Tooltip>
         }
       >
-        <Link href={"/" + incident + "/vet/vetrequest/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-1" inverse /></Link>
-      </OverlayTrigger>
+        <Link href={"/" + incident + "/vet/vetrequest/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-2" inverse /></Link>
+      </OverlayTrigger> : ""}
+      {data.status !== 'Canceled' ? <OverlayTrigger
+        key={"cancel-vet-request"}
+        placement="bottom"
+        overlay={
+          <Tooltip id={`tooltip-cancel-vet-request`}>
+            Cancel veterinary request
+          </Tooltip>
+        }
+      >
+        <FontAwesomeIcon icon={faTimes} className="ml-1" size="lg" style={{cursor:'pointer'}} inverse onClick={() => {setShowModal(true)}}/>
+      </OverlayTrigger> : ""}
     </Header>
     <hr/>
     <div className="row">
@@ -74,14 +93,16 @@ function VetRequestDetails({ id, incident }) {
         <Card className="border rounded d-flex" style={{width:"100%"}}>
           <Card.Body>
             <Card.Title>
-              <h4>Information</h4>
+              <h4>
+                Information
+              </h4>
             </Card.Title>
             <hr/>
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
               <ListGroup.Item>
                 <div className="row">
-                  <span className="col-5"><b>ID: </b>VR#{data.id}</span>
-                  <span className="col-7"><b>Priority: </b>{priorityText[data.priority]}</span>
+                  <span className="col-6"><b>Status: </b>{data.status}</span>
+                  <span className="col-6"><b>Priority: </b>{priorityText[data.priority]}</span>
                 </div>
               </ListGroup.Item>
               <ListGroup.Item>
@@ -153,7 +174,7 @@ function VetRequestDetails({ id, incident }) {
           <Card.Body style={{marginBottom:"-19px"}}>
             <Card.Title>
               <h4 className="mb-0">Treatments
-                <OverlayTrigger
+                {data.status !== 'Canceled' ? <OverlayTrigger
                   key={"add-treatment"}
                   placement="top"
                   overlay={
@@ -163,7 +184,7 @@ function VetRequestDetails({ id, incident }) {
                   }
                 >
                   <Link href={"/" + incident + "/vet/treatment/new?vetrequest_id=" + id + "&animal_name=" + data.animal_object.name || "Unknown"}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
-                </OverlayTrigger>
+                </OverlayTrigger> : ""}
               </h4>
             </Card.Title>
             <hr className="mb-3" />
@@ -258,6 +279,20 @@ function VetRequestDetails({ id, incident }) {
       </div>
     </div>
     {/* <History action_history={data.action_history} /> */}
+    <Modal show={showModal} onHide={() => setShowModal(false)}>
+      <Modal.Header closeButton>
+        <Modal.Title>Confirm Veterinary Request Cancelation</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>Are you sure you want to cancel this Veterinary Request and associated treatments?</Modal.Body>
+      <Modal.Footer>
+        <Button variant="primary" onClick={() => cancelVetRequest()}>
+          Yes
+        </Button>
+        <Button variant="secondary" onClick={() => setShowModal(false)}>
+          Cancel
+        </Button>
+      </Modal.Footer>
+    </Modal>
     </>
   );
 };

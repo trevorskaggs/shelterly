@@ -35,7 +35,7 @@ const TreatmentPlanForm = (props) => {
     start: new Date(),
     end: new Date(),
     category: '',
-    treatment: null,
+    treatment: '',
     frequency: '',
     quantity: '',
     unit: '',

@@ -4,7 +4,7 @@ import { Link, navigate } from 'raviger';
 import { AuthContext } from "../accounts/AccountsReducer";
 import Moment from 'react-moment';
 import { Carousel } from 'react-responsive-carousel';
-import { Button, Card, Col, ListGroup, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Button, Card, Col, ListGroup, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBan, faMedkit, faCut, faEdit, faEnvelope, faLink, faMinusSquare, faPrint, faTimes, faUserPlus
@@ -150,7 +150,7 @@ function AnimalDetails({ id, incident }) {
   return (
     <>
     <Header>
-      Animal Details
+      Animal #{data.id}
       <OverlayTrigger
         key={"edit"}
         placement="bottom"
@@ -160,7 +160,7 @@ function AnimalDetails({ id, incident }) {
           </Tooltip>
         }
       >
-        <Link href={"/" + incident + "/animals/edit/" + id} ><FontAwesomeIcon icon={faEdit} className="ml-1" inverse /></Link>
+        <Link href={"/" + incident + "/animals/edit/" + id} ><FontAwesomeIcon icon={faEdit} className="ml-2" inverse /></Link>
       </OverlayTrigger>
       <OverlayTrigger
         key={"print"}
@@ -177,19 +177,6 @@ function AnimalDetails({ id, incident }) {
           </Link>
         )}
       </OverlayTrigger>
-      {data.status !== 'REUNITED' ?
-      <OverlayTrigger
-        key={"reunite"}
-        placement="bottom"
-        overlay={
-          <Tooltip id={`tooltip-reunite`}>
-            Reunite animal
-          </Tooltip>
-        }
-      >
-        <FontAwesomeIcon icon={faHomeHeart} onClick={() => setShow(true)} className="mr-2" style={{cursor:'pointer'}} inverse />
-      </OverlayTrigger>
-      : ""}
       <OverlayTrigger
         key={"vetrequest"}
         placement="bottom"
@@ -201,6 +188,19 @@ function AnimalDetails({ id, incident }) {
       >
         <Link href={"/" + incident + "/animals/" + id + "/vetrequest/new"} ><FontAwesomeIcon icon={faClipboardMedical} className="mr-1" inverse /></Link>
       </OverlayTrigger>
+      {data.status !== 'REUNITED' ?
+      <OverlayTrigger
+        key={"reunite"}
+        placement="bottom"
+        overlay={
+          <Tooltip id={`tooltip-reunite`}>
+            Reunite animal
+          </Tooltip>
+        }
+      >
+        <FontAwesomeIcon icon={faHomeHeart} onClick={() => setShow(true)} className="mr-1 ml-1" style={{cursor:'pointer'}} inverse />
+      </OverlayTrigger>
+      : ""}
       <OverlayTrigger
         key={"cancel-animal"}
         placement="bottom"
@@ -212,7 +212,6 @@ function AnimalDetails({ id, incident }) {
       >
         <FontAwesomeIcon icon={faTimes} style={{cursor:'pointer'}} onClick={() => {setShowAnimalConfirm(true);}} className="ml-1" size="lg" inverse />
       </OverlayTrigger>
-      &nbsp;| {data.status}
     </Header>
     <hr/>
     <div className="row" style={{marginBottom:"-13px"}}>
@@ -336,8 +335,8 @@ function AnimalDetails({ id, incident }) {
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px", textTransform:"capitalize"}}>
               <ListGroup.Item>
                 <div className="row">
-                  <span className="col-6"><b>ID:</b> A#{data.id}</span>
                   <span className="col-6"><b>Name:</b> {data.name||"Unknown"}</span>
+                  <span className="col-6"><b>Status:</b> {data.status}</span>
                 </div>
               </ListGroup.Item>
               <ListGroup.Item>
@@ -432,9 +431,15 @@ function AnimalDetails({ id, incident }) {
               : ''}
               {data.shelter ?
               <ListGroup.Item>
-                <b>Shelter:</b> <Link href={"/" + incident + "/shelter/" + data.shelter} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.shelter_object.name}</Link>
-                {data.room ? <div className="mt-1"><b>Room:</b> {data.building_name} - <Link href={"/" + incident + "/shelter/room/" + data.room} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.room_name}</Link></div> : ""}
-                <div className="mt-1"><b>Intake Date:</b> <Moment format="MMMM Do YYYY HH:mm">{data.intake_date}</Moment></div>
+                <Row>
+                  <Col>
+                    <b>Shelter:</b> <Link href={"/" + incident + "/shelter/" + data.shelter} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.shelter_object.name}</Link>
+                  </Col>
+                  <Col>
+                    {data.room ? <div className="mt-1"><b>Room:</b> <Link href={"/" + incident + "/shelter/room/" + data.room} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.room_name}</Link></div> : ""}
+                  </Col>
+                </Row>
+                {data.intake_date ? <div className="mt-1"><b>Intake Date:</b> <Moment format="MMMM Do YYYY HH:mm">{data.intake_date}</Moment></div> : ""}
                 <div className="mt-1"><b>Address:</b> {data.shelter_object.full_address || "Unknown"}</div>
               </ListGroup.Item> : ""}
               {data.vet_requests.map(vetrequest => (

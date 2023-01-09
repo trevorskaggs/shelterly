@@ -35,12 +35,12 @@ class TreatmentRequestViewSet(viewsets.ModelViewSet):
 
             # Check vet request to see if it needs to be closed.
             if tr.actual_admin_time:
-                tr.treatment_plan.vet_request.update_status()
+                tr.treatment_plan.vet_request.check_closed()
 
 
 class VetRequestViewSet(viewsets.ModelViewSet):
     queryset = VetRequest.objects.all()
-    search_fields = ['id', 'assignee__first_name', 'assignee__last_name', 'patient__shelter__name', 'patient__species', 'priority', 'open', 'treatment__description']
+    search_fields = ['id', 'assignee__first_name', 'assignee__last_name', 'patient__shelter__name', 'patient__species', 'priority', 'open', 'treatmentplan__treatment__description']
     filter_backends = (filters.SearchFilter,)
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = VetRequestSerializer
@@ -51,6 +51,7 @@ class VetRequestViewSet(viewsets.ModelViewSet):
             # Mark assigned date if we have an assignee.
             if serializer.validated_data.get('assignee'):
                 serializer.validated_data['assigned'] = datetime.now()
+                serializer.validated_data['status'] = 'Assigned'
 
             serializer.save()
 
@@ -61,8 +62,10 @@ class VetRequestViewSet(viewsets.ModelViewSet):
             # Mark assigned date if we have an assignee and it is different from current assignee value.
             if serializer.validated_data.get('assignee') and serializer.instance.assignee != serializer.validated_data.get('assignee'):
                 serializer.validated_data['assigned'] = datetime.now()
-            elif not serializer.validated_data.get('assignee'):
+                serializer.validated_data['status'] = 'Assigned'
+            elif serializer.instance.assignee and not serializer.validated_data.get('assignee'):
                 serializer.validated_data['assigned'] = None
+                serializer.validated_data['status'] = 'Open'
 
             serializer.save()
 

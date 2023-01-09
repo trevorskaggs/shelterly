@@ -39,6 +39,7 @@ function VetRequestSearch({ incident }) {
     { value: 'Open', label: 'Open' },
     { value: 'Assigned', label: 'Assigned' },
     { value: 'Closed', label: 'Closed' },
+    { value: 'Canceled', label: 'Canceled' },
   ];
 
   const [data, setData] = useState({vet_requests: [], isFetching: false});
@@ -102,7 +103,8 @@ function VetRequestSearch({ incident }) {
                            .filter(vet_request => options.priority ? vet_request.priority === options.priority : vet_request)
                            .filter(vet_request => options.open ? (startDate <= moment(vet_request.open).format('YYYY-MM-DD') && endDate >= moment(vet_request.open).format('YYYY-MM-DD')) : vet_request)
                            .filter(vet_request => options.assignee ? vet_request.assignee === options.assignee : vet_request)
-                           .filter(vet_request => options.shelter ? vet_request.animal_object.shelter === options.shelter : vet_request)
+                           .filter(vet_request => options.shelter && options.shelter !== 'Remote' ? vet_request.animal_object.shelter === options.shelter : vet_request)
+                           .filter(vet_request => options.shelter === 'Remote' ? vet_request.animal_object.shelter === null : vet_request)
     )
   };
 
@@ -181,6 +183,7 @@ function VetRequestSearch({ incident }) {
             // Build shelter option list.
             shelter_options.push({value: shelter.id, label: shelter.name});
           });
+          shelter_options.push({value: 'Remote', label: 'Remote'});
           setShelters({options: shelter_options, isFetching:false});
         }
       })
