@@ -107,6 +107,18 @@ function DispatchSummary({ id, incident }) {
     setTeamMembers(selected_list);
   }
 
+  const handleGeoJsonDownload = () => {
+    var fileDownload = require('js-file-download');
+    axios.get('/evac/api/evacassignment/' + data.id +'/download/', { 
+            responseType: 'blob',
+        }).then(res => {
+            fileDownload(res.data, 'DAR-' + data.id + '.geojson');
+            console.log(res);
+        }).catch(err => {
+            console.log(err);
+        })
+  }
+
   const handleAddTeamMemberSubmit = async () => {
     await axios.patch('/evac/api/dispatchteam/' + data.team + '/', {'dispatch_id':data.id, 'new_team_members':teamMembers.map(item => item.id[0])})
     .then(response => {
@@ -270,7 +282,7 @@ function DispatchSummary({ id, incident }) {
           </Tooltip>
         }
       >
-        <Link href={"/" + incident + "/dispatch/download/" + id}><FontAwesomeIcon icon={faDownload} className="ml-2"  inverse /></Link>
+        <Link onClick={handleGeoJsonDownload} href="#"><FontAwesomeIcon icon={faDownload} className="ml-2"  inverse /></Link>
       </OverlayTrigger>
     <div style={{fontSize:"18px", marginTop:"10px"}}><b>Opened: </b><Moment format="MMMM Do YYYY, HH:mm">{data.start_time}</Moment>{data.end_time ? <span> | <b>Resolved: </b><Moment format="MMMM Do YYYY, HH:mm">{data.end_time}</Moment></span> : ""}</div>
     </Header>
