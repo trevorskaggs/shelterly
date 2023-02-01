@@ -11,7 +11,6 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from knox import views as knox_views
 from accounts.views import LoginView
 from animals.views import print_kennel_card
-from evac.views import download_geojson
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -30,7 +29,6 @@ urlpatterns = [
     url(r'logout/', knox_views.LogoutView.as_view(), name='knox_logout'),
 ]
 urlpatterns.append(path('<str:incident>/animals/print/<int:animal_id>', print_kennel_card, name="print_kennel_card"))
-urlpatterns.append(path('<str:incident>/dispatch/download/<int:dispatch_id>', download_geojson, name="download_geojson"))
 if settings.USE_S3:
     urlpatterns.append(re_path(u'static/(?P<path>.*)$', views.static_url))
 #To use local static files both USE_S3 must be FALSE and DEBUG must be TRUE!
