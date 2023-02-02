@@ -1,5 +1,6 @@
 from django.db import models
 from incident.models import Incident
+from evac.models import EvacAssignment
 from location.models import Location
 from managers import ActionHistoryQueryset
 # Create your models here.
@@ -59,3 +60,11 @@ class Room(BaseShelterModel):
    
     def __str__(self):
         return self.name
+
+
+class IntakeSummary(models.Model):
+
+    shelter = models.ForeignKey(Shelter, on_delete=models.CASCADE)
+    da = models.ForeignKey(EvacAssignment, on_delete=models.CASCADE)
+    animals = models.ManyToManyField('animals.Animal')
+    date = models.DateTimeField(auto_now_add=True)

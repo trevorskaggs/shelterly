@@ -111,3 +111,16 @@ class ShelterSerializer(ModestShelterSerializer):
         if data.get('longitude'):
             data['longitude'] = float("%.6f" % float(data.get('longitude')))
         return super().to_internal_value(data)
+
+class IntakeSummarySerializer(serializers.ModelSerializer):
+
+    animals = serializers.SerializerMethodField()
+    shelter_name = serializers.StringRelatedField(source='shelter')
+
+    def get_animals(self, obj):
+        from animals.serializers import ModestAnimalSerializer
+        return ModestAnimalSerializer(obj.animals, many=True).data
+
+    class Meta:
+        model = IntakeSummary
+        fields = '__all__'

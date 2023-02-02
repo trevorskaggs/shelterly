@@ -44,9 +44,11 @@ function AnimalStatus(props) {
             props.formikProps.setFieldValue(`sr_updates.${props.index}.animals.${props.inception}.status`, instance === null ? '' : instance.value);
             if (instance.value === 'SHELTERED') {
               props.formikProps.setFieldValue(`sr_updates.${props.index}.animals.${props.inception}.shelter`, Number(props.shelter_id));
+              props.formikProps.setFieldValue('animals', [...props.formikProps.values['animals'], props.animal.id]);
             }
             else {
               props.formikProps.setFieldValue(`sr_updates.${props.index}.animals.${props.inception}.shelter`, '');
+              props.formikProps.setFieldValue('animals', props.formikProps.values['animals'].filter(id => id !== props.animal.id))
               if (shelterRef.current) shelterRef.current.select.clearValue();
             }
           }}
@@ -116,8 +118,8 @@ function ShelterIntake({ id, incident }) {
 
   const { setShowSystemError } = useContext(SystemErrorContext);
 
-  const [options, setOptions] = useState({shelter_options:[], room_options: {}, da_options:[]});
-  const [data, setData] = useState({shelter: {}, dispatch_assignments: [], sr_updates: [], isFetching: false});
+  const [options, setOptions] = useState({shelter_options:[], room_options:{}, da_options:[]});
+  const [data, setData] = useState({shelter_name:'', dispatch_assignments:[], sr_updates:[], shelter: id, da: null, animals:[], isFetching: false});
   const [selected, setSelected] = useState(null);
 
   // Hook for initializing data.
@@ -162,13 +164,13 @@ function ShelterIntake({ id, incident }) {
                   });
                 });
               });
-              setData({shelter: currentResponse.data, dispatch_assignments: response.data, sr_updates: [], isFetching: false});
+              setData(prevState => ({ ...prevState, shelter_name: currentResponse.data.name, dispatch_assignments: response.data, sr_updates: [], isFetching: false}));
               setOptions({shelter_options:shelter_options, room_options: room_options, da_options:da_options});
             }
           })
           .catch(error => {
             if (!unmounted) {
-              setData({shelter: {}, dispatch_assignments: [], sr_updates: [], isFetching: false});
+              setData(prevState => ({ ...prevState, shelter_name: '', dispatch_assignments: [], sr_updates: [], isFetching: false}));
               setShowSystemError(true);
             }
           });
@@ -204,23 +206,28 @@ function ShelterIntake({ id, incident }) {
         ),
       })}
       onSubmit={(values, { setSubmitting }) => {
-        setTimeout(() => {
-          axios.patch('/evac/api/evacassignment/' + selected + '/', values)
-            .then(response => {
-              navigate("/" + incident + "/shelter/" + id);
-            })
-            .catch(error => {
-              setSubmitting(false);
-              setShowSystemError(true);
-            });
-        }, 500);
+        axios.patch('/evac/api/evacassignment/' + selected + '/?shelter=' + id, values)
+        .then(DAresponse => {
+          axios.post('/shelter/api/intakesummary/', values)
+          .then(response => {
+            navigate("/" + incident + "/shelter/intakesummary/" + response.data.id);
+          })
+          .catch(error => {
+            setSubmitting(false);
+            setShowSystemError(true);
+          });
+          })
+        .catch(error => {
+          setSubmitting(false);
+          setShowSystemError(true);
+        });
       }}
     >
       {props => (
         <BootstrapForm as={Form}>
           <Header>
             <span style={{cursor:'pointer'}} onClick={() => navigate("/" + incident + "/shelter/" + id)} className="mr-2"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="sm" inverse /></span>
-            {data.shelter.name}
+            {data.shelter_name}
             &nbsp;- Dispatch Intake
           </Header>
           <hr/>
@@ -236,8 +243,10 @@ function ShelterIntake({ id, incident }) {
                 placeholder="Select Dispatch..."
                 onChange={(instance) => {
                   instance.value ? setSelected(instance.value) : setSelected(null);
+                  props.setFieldValue("da", instance.value ? instance.value : null);
+                  props.setFieldValue("animals", []);
                   let selected_da = data.dispatch_assignments.filter(da => da.id === instance.value)[0];
-                  setData(prevState => ({ ...prevState, "sr_updates":selected_da.sr_updates }));
+                  setData(prevState => ({ ...prevState, "sr_updates":selected_da.sr_updates, "da":instance.value }));
                 }}
               />
             </Col>
