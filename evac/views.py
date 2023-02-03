@@ -184,7 +184,7 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
                 # Add SR to selected DA.
                 animals_dict = {}
                 for animal in service_requests[0].animal_set.filter(status__in=['REPORTED', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE']):
-                    animals_dict[animal.id] = {'name':animal_dict.get('name'), 'species':animal_dict.get('species'), 'status':animal_dict.get('status'), 'color_notes':animal_dict.get('color_notes'), 'pcolor':animal_dict.get('pcolor'), 'scolor':animal_dict.get('scolor'), 'shelter':animal_dict.get('shelter'), 'room':animal_dict.get('room')}
+                    animals_dict[animal.id] = {'name':animal.name, 'species':animal.species, 'status':animal.status, 'color_notes':animal.color_notes, 'pcolor':animal.pcolor, 'scolor':animal.scolor, 'shelter':animal.shelter, 'room':animal.room}
                 AssignedRequest.objects.create(dispatch_assignment=evac_assignment, service_request=service_requests[0], animals=animals_dict)
                 action.send(self.request.user, verb='assigned service request', target=service_requests[0])
 
