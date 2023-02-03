@@ -68,3 +68,6 @@ class IntakeSummary(models.Model):
     intake_type = models.CharField(max_length=20, default='walkin')
     animals = models.ManyToManyField('animals.Animal')
     date = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-id',]

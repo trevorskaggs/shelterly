@@ -366,42 +366,43 @@ const AnimalForm = (props) => {
               }
               // Create previous animals
               let animal_ids = [];
+              let promises = [];
               props.state.steps.animals.forEach(animal => {
                 // Add owner and reporter to animal data.
                 animal.append('reporter', reporterResponse[0].data.id);
                 animal.append('new_owner', ownerResponse[0].data.id);
-                axios.post('/animals/api/animal/', animal)
-                .then(animalResponse => {
-                  animal_ids.push(animalResponse.data.id)
-                })
-                .catch(error => {
-                  setIsButtonSubmitting(false);
-                  setShowSystemError(true);
-                  setRedirectCheck(true);
-                });
+                promises.push(
+                  axios.post('/animals/api/animal/', animal)
+                  .then(animalResponse => {
+                    animal_ids.push(animalResponse.data.id);
+                  })
+                );
               });
-              // Create current animal then navigate.
-              formData.append('reporter', reporterResponse[0].data.id);
-              formData.append('new_owner', ownerResponse[0].data.id);
-              await axios.post('/animals/api/animal/', formData)
-              .then(animalResponse => {
-                values['shelter'] = shelter_id;
-                values['animals'] = [...animal_ids, animalResponse.data.id];
-                values['intake_type'] = (ownerResponse[0].data.id ? 'owner' : 'reporter') + '_walkin';
-                axios.post('/shelter/api/intakesummary/', values)
-                .then(response => {
-                  navigate("/" + props.incident + "/shelter/intakesummary/" + response.data.id);
+              // Wait for animal responses to finish so that they can be included in Intake Summary.
+              Promise.all(promises).then(async () => {
+                // Create current animal then navigate.
+                formData.append('reporter', reporterResponse[0].data.id);
+                formData.append('new_owner', ownerResponse[0].data.id);
+                await axios.post('/animals/api/animal/', formData)
+                .then(animalResponse => {
+                  values['shelter'] = shelter_id;
+                  values['animals'] = [...animal_ids, animalResponse.data.id];
+                  values['intake_type'] = (reporterResponse[0].data.id ? 'reporter' : 'owner') + '_walkin';
+                  axios.post('/shelter/api/intakesummary/', values)
+                  .then(response => {
+                    navigate("/" + props.incident + "/shelter/intakesummary/" + response.data.id);
+                  })
+                  .catch(error => {
+                    setIsButtonSubmitting(false);
+                    setShowSystemError(true);
+                    setRedirectCheck(true);
+                  });
                 })
                 .catch(error => {
                   setIsButtonSubmitting(false);
                   setShowSystemError(true);
                   setRedirectCheck(true);
                 });
-              })
-              .catch(error => {
-                setIsButtonSubmitting(false);
-                setShowSystemError(true);
-                setRedirectCheck(true);
               });
             }
             else {
