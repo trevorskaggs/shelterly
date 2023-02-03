@@ -143,7 +143,9 @@ const PersonForm = (props) => {
           }
         })
         .catch(error => {
-          setShowSystemError(true);
+          if (!unmounted) {
+            setShowSystemError(true);
+          }
         });
       };
       fetchPersonData();

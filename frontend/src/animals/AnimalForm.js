@@ -194,7 +194,9 @@ const AnimalForm = (props) => {
           }
         })
         .catch(error => {
-          setShowSystemError(true);
+          if (!unmounted) {
+            setShowSystemError(true);
+          }
         });
       };
       fetchAnimalData();

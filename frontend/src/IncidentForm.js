@@ -84,7 +84,9 @@ const IncidentForm = ({ id }) => {
         }
       })
       .catch(error => {
-        setShowSystemError(true);
+        if (!unmounted) {
+          setShowSystemError(true);
+        }
       });
     };
     fetchIncidents();
@@ -102,7 +104,9 @@ const IncidentForm = ({ id }) => {
           }
         })
         .catch(error => {
-          setShowSystemError(true);
+          if (!unmounted) {
+            setShowSystemError(true);
+          }
         });
       };
       fetchIncident();

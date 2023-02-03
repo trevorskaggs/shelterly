@@ -211,13 +211,17 @@ function DispatchSummary({ id, incident }) {
             });
           })
           .catch(error => {
-            setTeamData({options: [], isFetching: false});
-            setShowSystemError(true);
+            if (!unmounted) {
+              setTeamData({options: [], isFetching: false});
+              setShowSystemError(true);
+            }
           });
         }
       })
       .catch(error => {
-        setShowSystemError(true);
+        if (!unmounted) {
+          setShowSystemError(true);
+        }
       });
     };
 

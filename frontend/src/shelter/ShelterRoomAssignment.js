@@ -141,7 +141,9 @@ function ShelterRoomAssignment({ id, incident }) {
         }
       })
       .catch(error => {
-        setShowSystemError(true);
+        if (!unmounted) {
+          setShowSystemError(true);
+        }
       });
     };
     fetchShelterData();
