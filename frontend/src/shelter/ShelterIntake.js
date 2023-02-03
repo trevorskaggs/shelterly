@@ -208,6 +208,7 @@ function ShelterIntake({ id, incident }) {
       onSubmit={(values, { setSubmitting }) => {
         axios.patch('/evac/api/evacassignment/' + selected + '/?shelter=' + id, values)
         .then(DAresponse => {
+          values['intake_type'] = 'dispatch';
           axios.post('/shelter/api/intakesummary/', values)
           .then(response => {
             navigate("/" + incident + "/shelter/intakesummary/" + response.data.id);

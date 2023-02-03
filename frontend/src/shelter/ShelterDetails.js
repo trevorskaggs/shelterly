@@ -29,6 +29,7 @@ function ShelterDetails({ id, incident }) {
     buildings: [],
     action_history: [],
     unroomed_animals: [],
+    intake_summaries: [],
     animal_count: 0,
     room_count: 0,
   });
@@ -49,7 +50,9 @@ function ShelterDetails({ id, incident }) {
         }
       })
       .catch(error => {
-        setShowSystemError(true);
+        if (!unmounted) {
+          setShowSystemError(true);
+        }
       });
     };
     fetchShelterData();

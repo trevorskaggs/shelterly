@@ -65,6 +65,6 @@ class Room(BaseShelterModel):
 class IntakeSummary(models.Model):
 
     shelter = models.ForeignKey(Shelter, on_delete=models.CASCADE)
-    da = models.ForeignKey(EvacAssignment, on_delete=models.CASCADE)
+    intake_type = models.CharField(max_length=20, default='walkin')
     animals = models.ManyToManyField('animals.Animal')
     date = models.DateTimeField(auto_now_add=True)

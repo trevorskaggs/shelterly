@@ -8,7 +8,6 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('animals', '0024_auto_20230201_1653'),
-        ('evac', '0019_dispatchteam_incident'),
         ('shelter', '0014_remove_shelter_test'),
     ]
 
@@ -19,7 +18,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('date', models.DateTimeField(auto_now_add=True)),
                 ('animals', models.ManyToManyField(to='animals.Animal')),
-                ('da', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='evac.evacassignment')),
+                ('intake_type', models.CharField(max_length=20)),
                 ('shelter', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='shelter.shelter')),
             ],
         ),

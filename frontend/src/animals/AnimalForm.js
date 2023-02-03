@@ -365,11 +365,15 @@ const AnimalForm = (props) => {
                 ]);
               }
               // Create previous animals
+              let animal_ids = [];
               props.state.steps.animals.forEach(animal => {
                 // Add owner and reporter to animal data.
                 animal.append('reporter', reporterResponse[0].data.id);
                 animal.append('new_owner', ownerResponse[0].data.id);
                 axios.post('/animals/api/animal/', animal)
+                .then(animalResponse => {
+                  animal_ids.push(animalResponse.data.id)
+                })
                 .catch(error => {
                   setIsButtonSubmitting(false);
                   setShowSystemError(true);
@@ -380,13 +384,19 @@ const AnimalForm = (props) => {
               formData.append('reporter', reporterResponse[0].data.id);
               formData.append('new_owner', ownerResponse[0].data.id);
               await axios.post('/animals/api/animal/', formData)
-              .then(function() {
-                if (ownerResponse[0].data.id) {
-                  navigate(incident + '/people/owner/' + ownerResponse[0].data.id)
-                }
-                else {
-                  navigate(incident + '/people/reporter/' + reporterResponse[0].data.id)
-                }
+              .then(animalResponse => {
+                values['shelter'] = shelter_id;
+                values['animals'] = [...animal_ids, animalResponse.data.id];
+                values['intake_type'] = (ownerResponse[0].data.id ? 'owner' : 'reporter') + '_walkin';
+                axios.post('/shelter/api/intakesummary/', values)
+                .then(response => {
+                  navigate("/" + props.incident + "/shelter/intakesummary/" + response.data.id);
+                })
+                .catch(error => {
+                  setIsButtonSubmitting(false);
+                  setShowSystemError(true);
+                  setRedirectCheck(true);
+                });
               })
               .catch(error => {
                 setIsButtonSubmitting(false);

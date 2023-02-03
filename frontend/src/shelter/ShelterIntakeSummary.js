@@ -1,10 +1,10 @@
 import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
 import { Link } from 'raviger';
-import { Card, Col, ListGroup, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
+import { Card, Col, ListGroup, OverlayTrigger, Pagination, Row, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faPrint
+  faPrint, faChevronCircleDown, faChevronCircleRight
 } from '@fortawesome/free-solid-svg-icons';
 import Moment from 'react-moment';
 import Header from '../components/Header';
@@ -20,9 +20,10 @@ function ShelterIntakeSummary({ id, incident }) {
     id: '',
     shelter: '',
     shelter_name: '',
-    da: '',
+    intake_type: '',
     date: '',
     animals: [],
+    animal_objects: [],
   });
 
   const handlePrintAllAnimalsClick = (e) => {
@@ -63,7 +64,7 @@ function ShelterIntakeSummary({ id, incident }) {
   return (
     <>
       <Header>
-        Intake Summary
+      {data.intake_type === 'owner_walkin' ? 'Owner Walk-In ' : data.intake_type === 'reporter_walkin' ? 'Reporter Walk-In ' : 'Dispatch '}Intake Summary
       </Header>
       <hr/>
       <Row className="d-flex">
@@ -76,7 +77,7 @@ function ShelterIntakeSummary({ id, incident }) {
               <hr/>
               <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
                 <ListGroup.Item>
-                  <b>Shelter:</b> <Link href={"/" + incident + "/shelter/" + id} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.shelter_name}</Link>
+                  <b>Shelter:</b> <Link href={"/" + incident + "/shelter/" + data.shelter} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.shelter_name}</Link>
                 </ListGroup.Item>
                 <ListGroup.Item>
                   <b>Date:</b> <Moment format="MMMM Do YYYY HH:mm">{data.date}</Moment>
@@ -108,7 +109,7 @@ function ShelterIntakeSummary({ id, incident }) {
               </h4>
             </Card.Title>
             <hr/>
-            <AnimalCards animals={data.animals} show_owner={true} incident={"/" + incident} />
+            <AnimalCards animals={data.animal_objects} show_owner={true} incident={"/" + incident} />
             {data.animals.length < 1 ? <p>No animals were intaken.</p> : ""}
           </Card.Body>
         </Card>
