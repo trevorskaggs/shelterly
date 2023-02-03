@@ -6,7 +6,7 @@ import { buildAnimalCareScheduleDoc } from '../animals/Utils';
 
 const dateFormat = 'YYYYMMDDHHmm';
 
-export const printServiceRequestSummary = (data) => {
+function buildServiceRequestsDoc(srs = []) {
   const pdf = new ShelterlyPDF({}, {
     // adds page numbers to the footer
     addFooterHandler: ({
@@ -23,10 +23,14 @@ export const printServiceRequestSummary = (data) => {
     pageSubtitle: ' '
   });
 
-  pdf.fileName = `SR-${data.id.toString().padStart(3, 0)}`;
+  srs.forEach((data, i) => {
+    if (i > 0) {
+      pdf.drawPageBreak();
+      pdf.drawPageHeader();
+    }
 
-  // service request priority
-  const srPriority = priorityChoices.find(({ value }) => value === (data.priority || 2))
+    // service request priority
+    const srPriority = priorityChoices.find(({ value }) => value === (data.priority || 2))
 
     // Summary page
     pdf.drawSectionHeader({ text: `Information` });
@@ -109,15 +113,23 @@ export const printServiceRequestSummary = (data) => {
       pdf.drawSectionHeader({ text: 'Animals' });
       pdf.drawPad(10);
     }
-  
+
     drawAnimalHeader();
 
     // keep the last y position after a row was drawn
     let lastYPosAfterDraw = pdf.getLastYPositionWithBuffer({ buffer: 0 });
-    data.animals.forEach((animal) => {
+    data.animals.forEach((animal, animalIndex) => {
       // grab the last y position before we draw a row
-      const lastYPosBeforeDraw = pdf.getLastYPositionWithBuffer({ buffer: 0 });
-  
+      let lastYPosBeforeDraw = pdf.getLastYPositionWithBuffer({ buffer: 0 });
+
+      // look ahead to see if this animal will bleed to the next page
+      const estimatedAnimalHeight = 209 // this is a magic number, it should change if we add or remove properties to render for animals
+      if (pdf.remainderPageHeight <= estimatedAnimalHeight) {
+        pdf.drawPageBreak();
+        drawAnimalHeader();
+        lastYPosBeforeDraw = pdf.getLastYPositionWithBuffer({ buffer: 0 });
+      }
+
       const animalInfoList = [
         `ID: A#${animal.id}`,
         `Status: ${capitalize(animal.status.toLowerCase(), { proper: true })}`,
@@ -128,13 +140,13 @@ export const printServiceRequestSummary = (data) => {
         `Size: ${capitalize(animal.size || 'Unknown')}`,
         `Primary Color: ${capitalize(animal.pcolor || 'N/A')}, Secondary Color: ${capitalize(animal.scolor || 'N/A')}`
       ];
-  
+
       pdf.drawTextList({
         labels: animalInfoList,
         listStyle: 'grid',
         bottomPadding: 0
       });
-  
+
       pdf.drawPad();
 
       // breed / description (color_notes)
@@ -167,25 +179,47 @@ export const printServiceRequestSummary = (data) => {
           linePadding: 5
         })
       }
-  
+
       pdf.drawPad(5);
       pdf.drawHRule();
       lastYPosAfterDraw = pdf.getLastYPositionWithBuffer();
-  
+
       // If after draw y position is less than before draw, that means there was a page break.
       // Draw the animal header again.
-      if (lastYPosAfterDraw < lastYPosBeforeDraw) {
+      if (
+        lastYPosAfterDraw < lastYPosBeforeDraw &&
+        animalIndex < data.animals.length - 1
+      ) {
         drawAnimalHeader();
       }
     });
 
     pdf.setDocumentFontSize();
+  });
 
-  pdf.saveFile();
-};
+  return pdf;
+}
 
-export const printSrAnimalCareSchedules  = async (animals = [], srId = 0) => {
+function printServiceRequestSummary(sr = {}) {
+  const pdf = buildServiceRequestsDoc([sr]);
+  pdf.fileName = `SR-${sr.id.toString().padStart(3, 0)}`;
+  return pdf.saveFile();
+}
+
+function printAllServiceRequests(srs = []) {
+  const pdf = buildServiceRequestsDoc(srs);
+  pdf.fileName = `SRs-${moment().format(dateFormat)}`;
+  return pdf.saveFile();
+}
+
+const printSrAnimalCareSchedules  = async (animals = [], srId = 0) => {
   const  pdf = await buildAnimalCareScheduleDoc(animals);
   pdf.fileName = `Shelterly-SR-Animal-Care-Schedules-${srId.toString().padStart(3, 0)}-${moment().format(dateFormat)}`;
-  pdf.saveFile();
+  return pdf.saveFile();
 };
+
+export {
+  printServiceRequestSummary,
+  printAllServiceRequests,
+  printSrAnimalCareSchedules
+}

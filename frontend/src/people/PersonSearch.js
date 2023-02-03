@@ -4,17 +4,20 @@ import { Link, useQueryParams } from 'raviger';
 import { Button, ButtonGroup, Card, CardGroup, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Pagination, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faClipboardList
+  faClipboardList,
+  faPrint
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faDotCircle
 } from '@fortawesome/free-regular-svg-icons';
-import { useMark } from '../hooks';
+import { useMark, useSubmitting } from '../hooks';
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
+import ButtonSpinner from '../components/ButtonSpinner';
 import { speciesChoices } from '../animals/constants';
 import { ITEMS_PER_PAGE } from '../constants';
 import { SystemErrorContext } from '../components/SystemError';
+import { printAllOwnersDetails } from './Utils';
 
 function PersonSearch({ incident }) {
 
@@ -35,6 +38,12 @@ function PersonSearch({ incident }) {
 	const [page, setPage] = useState(1);
   const [numPages, setNumPages] = useState(1);
 	const { markInstances } = useMark();
+  const {
+    isSubmitting,
+    handleSubmitting,
+    submittingComplete,
+    submittingLabel
+  } = useSubmitting();
 
   // Update searchTerm when field input changes.
   const handleChange = event => {
@@ -46,6 +55,14 @@ function PersonSearch({ incident }) {
     event.preventDefault();
     setSearchTerm(tempSearchTerm.current.value);
 		setPage(1);
+  }
+
+  function handlePrintAllClick(e) {
+    e.preventDefault();
+
+    handleSubmitting()
+      .then(() => printAllOwnersDetails(data.owners))
+      .then(submittingComplete);
   }
 
 	function setFocus(pageNum) {
@@ -129,6 +146,15 @@ function PersonSearch({ incident }) {
           <Button variant={statusOptions === "owners" ? "primary" : "secondary"} onClick={statusOptions !== "owners" ? () => {setPage(1);setStatusOptions("owners")} : () => {setPage(1);setStatusOptions("")}}>Owners</Button>
           <Button variant={statusOptions === "reporters" ? "primary" : "secondary"} onClick={statusOptions !== "reporters" ? () => {setPage(1);setStatusOptions("reporters")} : () => {setPage(1);setStatusOptions("")}}>Reporters</Button>
         </ButtonGroup>
+        <ButtonSpinner
+          variant="outline-light ml-2"
+          onClick={handlePrintAllClick}
+          isSubmitting={isSubmitting}
+          isSubmittingText={submittingLabel}
+        >
+          Print All ({`${data.owners.length}`})
+          <FontAwesomeIcon icon={faPrint} className="ml-2 text-light" inverse />
+        </ButtonSpinner>
       </InputGroup>
     </Form>
     {data.owners.map((owner, index) => (

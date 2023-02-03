@@ -4,7 +4,7 @@ import { Button, ButtonGroup, Card, CardGroup, Form, FormControl, InputGroup, Ov
 import { Link, useQueryParams } from "raviger";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faCircle, faExclamationCircle, faQuestionCircle, faUserAlt, faUserAltSlash, faUsers
+  faCircle, faExclamationCircle, faQuestionCircle, faUserAlt, faUserAltSlash, faUsers, faPrint
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faDotCircle
@@ -12,7 +12,7 @@ import {
 import { faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
 import L from "leaflet";
 import { Marker, Tooltip as MapTooltip } from "react-leaflet";
-import { useMark } from '../hooks';
+import { useMark, useSubmitting } from '../hooks';
 import Map, { prettyText, reportedMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
 import Moment from "react-moment";
 import moment from 'moment';
@@ -21,6 +21,8 @@ import Scrollbar from '../components/Scrollbars';
 import { ITEMS_PER_PAGE } from '../constants';
 import { DateRangePicker } from '../components/Form';
 import { SystemErrorContext } from '../components/SystemError';
+import ButtonSpinner from '../components/ButtonSpinner';
+import { printAllDispatchResolutions } from './Utils';
 
 function DispatchAssignmentSearch({ incident }) {
 
@@ -45,6 +47,12 @@ function DispatchAssignmentSearch({ incident }) {
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(moment().format('YYYY-MM-DD'));
   const { markInstances } = useMark();
+  const {
+    isSubmitting,
+    handleSubmitting,
+    submittingComplete,
+    submittingLabel
+  } = useSubmitting();
 
   // Update searchTerm when field input changes.
   const handleChange = event => {
@@ -56,6 +64,14 @@ function DispatchAssignmentSearch({ incident }) {
     event.preventDefault();
     setSearchTerm(tempSearchTerm.current.value);
     setPage(1);
+  }
+
+  const handlePrintAllClick = (e) => {
+    e.preventDefault();
+
+    handleSubmitting()
+      .then(() => printAllDispatchResolutions(evacAssignments))
+      .then(submittingComplete);
   }
 
   // Parses the Date Range object
@@ -188,6 +204,16 @@ function DispatchAssignmentSearch({ incident }) {
               }
             }}
           />
+          <ButtonSpinner
+            variant="outline-light"
+            className="ml-1"
+            onClick={handlePrintAllClick}
+            isSubmitting={isSubmitting}
+            isSubmittingText={submittingLabel}
+          >
+            Print All ({`${evacAssignments.length}`})
+            <FontAwesomeIcon icon={faPrint} className="ml-2 text-light" inverse />
+          </ButtonSpinner>
         </InputGroup>
       </Form>
       {evacAssignments.map((evacuation_assignment, index) => (
