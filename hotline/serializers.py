@@ -81,7 +81,7 @@ class SimpleServiceRequestSerializer(BarebonesServiceRequestSerializer):
 
     # Custom field for ordering animals.
     def get_animals(self, obj):
-        return SimpleAnimalSerializer(obj.animal_set.all().order_by('id'), many=True, required=False, read_only=True).data
+        return SimpleAnimalSerializer(obj.animal_set.all().exclude(status='CANCELED').order_by('id'), many=True, required=False, read_only=True).data
 
     def get_evacuation_assignments(self, obj):
         from evac.serializers import SimpleEvacAssignmentSerializer
@@ -159,7 +159,7 @@ class ServiceRequestSerializer(SimpleServiceRequestSerializer):
 
     # Custom field for ordering animals.
     def get_animals(self, obj):
-        return AnimalSerializer(obj.animal_set.all().order_by('id'), many=True, required=False, read_only=True).data
+        return AnimalSerializer(obj.animal_set.all().exclude(status='CANCELED').order_by('id'), many=True, required=False, read_only=True).data
 
     def get_assigned_requests(self, obj):
         from evac.models import AssignedRequest
