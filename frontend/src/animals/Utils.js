@@ -84,14 +84,12 @@ async function buildAnimalCareScheduleDoc (animals) {
     if (animal.shelter_object) {
       pdf.drawWrappedText({
         text: `Location: ${
-          animal.room
-            ? `${animal.building_name} / ${animal.room_name} /`
-            : animal.building_name ? `${animal.building_name} /` : ''
+          animal.shelter_object ? `${animal.shelter_object.name}` : "N/A"
         }${
-          animal.shelter_object
-            ? `${animal.shelter_object.name || ''} ${animal.shelter_object.full_address || ''} `
-            : ''
-        }`
+          animal.building_name ? ` / ${animal.building_name}` : ""
+        }${
+          animal.room ? ` / ${animal.room_name}` : ""
+        }`,
       })
     }
 

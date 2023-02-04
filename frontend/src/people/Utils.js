@@ -8,7 +8,18 @@ const dateFormat = 'YYYYMMDDHHmm';
 const buildOwnersDoc = (owners) => {
   const pdf = new ShelterlyPDF({}, {
     pageTitle: 'Owner Summary',
-    pageSubtitle: `Date: ${new Date().toLocaleDateString()}`
+    pageSubtitle: `Date: ${new Date().toLocaleDateString()}`,
+    // adds page numbers to the footer
+    addFooterHandler: ({
+      pageNumber,
+      pageCount,
+      pdf
+    }) => {
+      const { width: pageWidth, height: pageHeight } = pdf.internal.pageSize;
+      pdf.text('Page ' + String(pageNumber) + ' of ' + String(pageCount), pageWidth / 2, pageHeight - 15, {
+        align: 'center'
+      });
+    }
   });
 
   owners.forEach((owner, i) => {
