@@ -4,6 +4,7 @@ import { Link, navigate, useNavigationPrompt, useQueryParams } from 'raviger';
 import { Formik } from 'formik';
 import { Form as BootstrapForm, Button, ButtonGroup, Card, Modal } from "react-bootstrap";
 import * as Yup from 'yup';
+import { Typeahead } from 'react-bootstrap-typeahead';
 import { AddressSearch, TextInput } from '../components/Form';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft } from '@fortawesome/free-solid-svg-icons';
@@ -121,6 +122,8 @@ const PersonForm = (props) => {
   // Initial Person data.
   const [data, setData] = useState(current_data);
 
+  const [existingOwners, setExistingOwners] = useState({data:{}, options:[]});
+
   // Hook for initializing data.
   useEffect(() => {
     let unmounted = false;
@@ -148,6 +151,28 @@ const PersonForm = (props) => {
       };
       fetchPersonData();
     }
+    const fetchExistingOwnerData = async () => {
+      // Fetch all owners data.
+      await axios.get('/people/api/person/', {
+        cancelToken: source.token,
+      })
+      .then(existingOwnersResponse => {
+        if (!unmounted) {
+          let options = [];
+          existingOwnersResponse.data.forEach(owner => {
+            options.push({id: owner.id, label: owner.first_name + ' ' + owner.last_name + ' ' + owner.display_phone})
+          })
+          setExistingOwners({data:existingOwnersResponse.data, options:options});
+        }
+      })
+      .catch(error => {
+        if (!unmounted) {
+          setShowSystemError(true);
+        }
+      });
+    }
+    fetchExistingOwnerData();
+
     // Cleanup.
     return () => {
       unmounted = true;
@@ -301,6 +326,26 @@ const PersonForm = (props) => {
           </Card.Header>}
           <Card.Body>
           <BootstrapForm noValidate>
+            {/* Only show existing owner if owner and in a workflow/intake */}
+            <span hidden={!(is_workflow || is_intake) && !is_owner}>
+              <label>Use Existing Owner</label>
+              <Typeahead
+                id="existing_owner"
+                className="mb-3"
+                onChange={(values) => {
+                  if (values.length) {
+                    setData(existingOwners.data.filter(owner => owner.id === values[0].id)[0])
+                    setDupeOwner(true);
+                  }
+                  else {
+                    setData(initialData);
+                    setDupeOwner(false);
+                  }
+                }}
+                options={existingOwners.options}
+                placeholder="Search..."
+              />
+            </span>
             <BootstrapForm.Row>
               <TextInput
                 xs="6"
