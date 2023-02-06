@@ -176,7 +176,7 @@ function PersonSearch({ incident }) {
                     <ListGroup.Item><b>Address: </b>{owner.full_address}</ListGroup.Item>
                   : ""}
                   {owner.requests && owner.requests.map(request => (
-                    <ListGroup.Item><b>Service Request: </b><Link href={"/" + incident + "/hotline/servicerequest/" + request.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{request.full_address}</Link></ListGroup.Item>
+                    <ListGroup.Item key={request.id}><b>Service Request: </b><Link href={"/" + incident + "/hotline/servicerequest/" + request.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{request.full_address}</Link></ListGroup.Item>
                   ))}
                 </ListGroup>
               </Scrollbar>
@@ -186,10 +186,10 @@ function PersonSearch({ incident }) {
           <Card style={{marginBottom:"6px"}}>
             <Card.Body style={{width:"525px"}}>
               <Card.Title style={{marginTop:"-10px"}}>
-                <Scrollbar horizontal autoHide style={{height:"32px", width:"485px"}} renderView={props => <div {...props} style={{...props.style, marginBottom:"-18px", marginRight:"0px", overflowX:"auto", overflowY: "hidden"}}/>} renderThumbVertical={props => <div {...props} style={{...props.style, display: 'none'}} />}>
+                <Scrollbar horizontal={"true"} autoHide style={{height:"32px", width:"485px"}} renderView={props => <div {...props} style={{...props.style, marginBottom:"-18px", marginRight:"0px", overflowX:"auto", overflowY: "hidden"}}/>} renderThumbVertical={props => <div {...props} style={{...props.style, display: 'none'}} />}>
                   <ListGroup horizontal>
                   {searchState[owner.id].species.map(species => (
-                    <ListGroup.Item key={species} active={searchState[owner.id].selectedSpecies === species ? true : false} style={{textTransform:"capitalize", cursor:'pointer', paddingTop:"4px", paddingBottom:"4px"}} onClick={() => setSearchState(prevState => ({ ...prevState, [owner.id]:{...prevState[owner.id], selectedSpecies:species} }))}>{species}{species !== "other" ? "s" : ""}</ListGroup.Item>
+                    <ListGroup.Item key={species} active={searchState[owner.id].selectedSpecies === species ? true : false} style={{textTransform:"capitalize", cursor:'pointer', paddingTop:"4px", paddingBottom:"4px"}} onClick={() => setSearchState(prevState => ({ ...prevState, [owner.id]:{...prevState[owner.id], selectedSpecies:species} }))}>{species}{!["other", "sheep"].includes(species) ? "s" : ""}</ListGroup.Item>
                   ))}
                   </ListGroup>
                 </Scrollbar>
