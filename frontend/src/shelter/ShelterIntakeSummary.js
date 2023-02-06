@@ -10,7 +10,7 @@ import Moment from 'react-moment';
 import Header from '../components/Header';
 import { SystemErrorContext } from '../components/SystemError';
 import AnimalCards from '../components/AnimalCards';
-import { printRoomAnimalCareSchedules } from './Utils';
+import { printIntakeSummaryAnimalCareSchedules } from './Utils';
 
 function ShelterIntakeSummary({ id, incident }) {
 
@@ -31,7 +31,7 @@ function ShelterIntakeSummary({ id, incident }) {
   const handlePrintAllAnimalsClick = (e) => {
     e.preventDefault();
 
-    printRoomAnimalCareSchedules(data.animals, id);
+    printIntakeSummaryAnimalCareSchedules(data.animal_objects, id);
   }
 
   // Hook for initializing data.
