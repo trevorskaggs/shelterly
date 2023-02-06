@@ -50,6 +50,8 @@ const PersonForm = (props) => {
   const [skipOwner, setSkipOwner] = useState(false);
   const [isOwner, setIsOwner] = useState(props.state.stepIndex > 0 || is_owner);
 
+  const [existingOwner, setExistingOwner] = useState(false);
+
   // Track duplicate owner error.
   const [error, setError] = useState({show:false, error:[]});
   const [dupeOwner, setDupeOwner] = useState(false);
@@ -232,10 +234,10 @@ const PersonForm = (props) => {
             axios.get('/people/api/person/?search=' + values.first_name +  ' ' + values.last_name + ' ' + values.phone.replace(/\D/g, ""))
             .then(response => {
               // If we have a dupe owner then use it.
-              if (dupeOwner) {
+              if (!existingOwner && dupeOwner) {
                 values['id'] = response.data[0].id;
               }
-              if (response.data.length > 0 && !dupeOwner) {
+              if (response.data.length > 0 && !existingOwner && !dupeOwner) {
                 // Throw error if duplicate owner found.
                 if (isOwner) {
                   setError({show:true, error:['a duplicate owner with the same name and phone number already exists.', response.data[0].id]});
@@ -327,7 +329,7 @@ const PersonForm = (props) => {
           <Card.Body>
           <BootstrapForm noValidate>
             {/* Only show existing owner if owner and in a workflow/intake */}
-            <span hidden={!(is_workflow || is_intake) && !is_owner}>
+            <span hidden={!(is_workflow || is_intake) || !isOwner}>
               <label>Use Existing Owner</label>
               <Typeahead
                 id="existing_owner"
@@ -335,11 +337,11 @@ const PersonForm = (props) => {
                 onChange={(values) => {
                   if (values.length) {
                     setData(existingOwners.data.filter(owner => owner.id === values[0].id)[0])
-                    setDupeOwner(true);
+                    setExistingOwner(true);
                   }
                   else {
                     setData(initialData);
-                    setDupeOwner(false);
+                    setExistingOwner(false);
                   }
                 }}
                 options={existingOwners.options}
