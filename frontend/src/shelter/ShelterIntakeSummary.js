@@ -1,10 +1,10 @@
 import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
 import { Link } from 'raviger';
-import { Card, Col, ListGroup, OverlayTrigger, Pagination, Row, Tooltip } from 'react-bootstrap';
+import { Card, Col, ListGroup, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faPrint, faChevronCircleDown, faChevronCircleRight
+  faPrint
 } from '@fortawesome/free-solid-svg-icons';
 import Moment from 'react-moment';
 import Header from '../components/Header';
@@ -24,6 +24,8 @@ function ShelterIntakeSummary({ id, incident }) {
     date: '',
     animals: [],
     animal_objects: [],
+    person: null,
+    person_object: {first_name:'', last_name:''}
   });
 
   const handlePrintAllAnimalsClick = (e) => {
@@ -82,6 +84,15 @@ function ShelterIntakeSummary({ id, incident }) {
                 <ListGroup.Item>
                   <b>Date:</b> <Moment format="MMMM Do YYYY HH:mm">{data.date}</Moment>
                 </ListGroup.Item>
+                {data.intake_type === 'owner_walkin' ?
+                <ListGroup.Item>
+                  <b>Owner:</b> <Link href={"/" + incident + "/people/owner/" + data.person} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.person_object.first_name} {data.person_object.last_name}</Link>
+                </ListGroup.Item>
+                : data.intake_type === 'reporter_walkin' ?
+                <ListGroup.Item>
+                  <b>Reporter:</b> <Link href={"/" + incident + "/people/reporter/" + data.person} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.person_object.first_name} {data.person_object.last_name}</Link>
+                </ListGroup.Item>
+                : ""}
               </ListGroup>
             </Card.Body>
           </Card>

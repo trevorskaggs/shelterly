@@ -99,11 +99,16 @@ class ModestShelterSerializer(SimpleShelterSerializer):
 class IntakeSummarySerializer(serializers.ModelSerializer):
 
     animal_objects = serializers.SerializerMethodField()
+    person_object = serializers.SerializerMethodField()
     shelter_name = serializers.StringRelatedField(source='shelter')
 
     def get_animal_objects(self, obj):
         from animals.serializers import ModestAnimalSerializer
         return ModestAnimalSerializer(obj.animals, many=True).data
+
+    def get_person_object(self, obj):
+        from people.serializers import SimplePersonSerializer
+        return SimplePersonSerializer(obj.person, required=False, read_only=True).data
 
     class Meta:
         model = IntakeSummary

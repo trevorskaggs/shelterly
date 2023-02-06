@@ -389,6 +389,7 @@ const AnimalForm = (props) => {
                 .then(animalResponse => {
                   values['shelter'] = shelter_id;
                   values['animals'] = [...animal_ids, animalResponse.data.id];
+                  values['person'] = reporterResponse[0].data.id ? reporterResponse[0].data.id : ownerResponse[0].data.id
                   values['intake_type'] = (reporterResponse[0].data.id ? 'reporter' : 'owner') + '_walkin';
                   axios.post('/shelter/api/intakesummary/', values)
                   .then(response => {
