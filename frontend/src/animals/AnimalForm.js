@@ -357,55 +357,71 @@ const AnimalForm = (props) => {
               if (props.state.steps.reporter.first_name && !props.state.steps.reporter.id) {
                 reporterResponse = await Promise.all([
                   axios.post('/people/api/person/', props.state.steps.reporter)
-                ]);
+                ])
+                .catch(error => {
+                  setIsButtonSubmitting(false);
+                  setShowSystemError(true);
+                  setRedirectCheck(true);
+                });
               }
               // Create Owner
               let ownerResponse = [{data:{id:props.state.steps.owner.id}}];
               if (props.state.steps.owner.first_name && !props.state.steps.owner.id) {
                 ownerResponse = await Promise.all([
                   axios.post('/people/api/person/', props.state.steps.owner)
-                ]);
+                ])
+                .catch(error => {
+                  setIsButtonSubmitting(false);
+                  setShowSystemError(true);
+                  setRedirectCheck(true);
+                });
               }
+
+              // Create Intake Summary
+              let intakeSummaryResponse = [{data:{id:null}}];
+              values['shelter'] = shelter_id;
+              values['person'] = reporterResponse[0].data.id ? reporterResponse[0].data.id : ownerResponse[0].data.id
+              values['intake_type'] = (reporterResponse[0].data.id ? 'reporter' : 'owner') + '_walkin';
+              intakeSummaryResponse = await Promise.all([
+                axios.post('/shelter/api/intakesummary/', values)
+              ])
+              .catch(error => {
+                setIsButtonSubmitting(false);
+                setShowSystemError(true);
+                setRedirectCheck(true);
+              });
               // Create previous animals
-              let animal_ids = [];
               let promises = [];
               props.state.steps.animals.forEach(animal => {
                 // Add owner and reporter to animal data.
                 animal.append('reporter', reporterResponse[0].data.id);
                 animal.append('new_owner', ownerResponse[0].data.id);
+                animal.append('intake_summary', intakeSummaryResponse[0].data.id);
                 promises.push(
                   axios.post('/animals/api/animal/', animal)
-                  .then(animalResponse => {
-                    animal_ids.push(animalResponse.data.id);
-                  })
                 );
               });
-              // Wait for animal responses to finish so that they can be included in Intake Summary.
+
               Promise.all(promises).then(async () => {
                 // Create current animal then navigate.
                 formData.append('reporter', reporterResponse[0].data.id);
                 formData.append('new_owner', ownerResponse[0].data.id);
-                await axios.post('/animals/api/animal/', formData)
+                formData.append('intake_summary', intakeSummaryResponse[0].data.id);
+
+                axios.post('/animals/api/animal/', formData)
                 .then(animalResponse => {
-                  values['shelter'] = shelter_id;
-                  values['animals'] = [...animal_ids, animalResponse.data.id];
-                  values['person'] = reporterResponse[0].data.id ? reporterResponse[0].data.id : ownerResponse[0].data.id
-                  values['intake_type'] = (reporterResponse[0].data.id ? 'reporter' : 'owner') + '_walkin';
-                  axios.post('/shelter/api/intakesummary/', values)
-                  .then(response => {
-                    navigate("/" + props.incident + "/shelter/intakesummary/" + response.data.id);
-                  })
-                  .catch(error => {
-                    setIsButtonSubmitting(false);
-                    setShowSystemError(true);
-                    setRedirectCheck(true);
-                  });
+                  navigate("/" + props.incident + "/shelter/intakesummary/" + intakeSummaryResponse[0].data.id);
                 })
                 .catch(error => {
                   setIsButtonSubmitting(false);
                   setShowSystemError(true);
                   setRedirectCheck(true);
                 });
+              })
+              .catch(error => {
+                setIsButtonSubmitting(false);
+                setShowSystemError(true);
+                setRedirectCheck(true);
               });
             }
             else {
