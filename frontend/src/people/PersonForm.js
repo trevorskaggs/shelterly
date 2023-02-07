@@ -4,6 +4,7 @@ import { Link, navigate, useNavigationPrompt, useQueryParams } from 'raviger';
 import { Formik } from 'formik';
 import { Form as BootstrapForm, Button, ButtonGroup, Card, Modal } from "react-bootstrap";
 import * as Yup from 'yup';
+import { Typeahead } from 'react-bootstrap-typeahead';
 import { AddressSearch, TextInput } from '../components/Form';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft } from '@fortawesome/free-solid-svg-icons';
@@ -48,6 +49,8 @@ const PersonForm = (props) => {
   // Whether or not to skip Owner creation.
   const [skipOwner, setSkipOwner] = useState(false);
   const [isOwner, setIsOwner] = useState(props.state.stepIndex > 0 || is_owner);
+
+  const [existingOwner, setExistingOwner] = useState(false);
 
   // Track duplicate owner error.
   const [error, setError] = useState({show:false, error:[]});
@@ -121,6 +124,8 @@ const PersonForm = (props) => {
   // Initial Person data.
   const [data, setData] = useState(current_data);
 
+  const [existingOwners, setExistingOwners] = useState({data:{}, options:[]});
+
   // Hook for initializing data.
   useEffect(() => {
     let unmounted = false;
@@ -148,6 +153,28 @@ const PersonForm = (props) => {
       };
       fetchPersonData();
     }
+    const fetchExistingOwnerData = async () => {
+      // Fetch all owners data.
+      await axios.get('/people/api/person/', {
+        cancelToken: source.token,
+      })
+      .then(existingOwnersResponse => {
+        if (!unmounted) {
+          let options = [];
+          existingOwnersResponse.data.forEach(owner => {
+            options.push({id: owner.id, label: owner.first_name + ' ' + owner.last_name + ' ' + owner.display_phone})
+          })
+          setExistingOwners({data:existingOwnersResponse.data, options:options});
+        }
+      })
+      .catch(error => {
+        if (!unmounted) {
+          setShowSystemError(true);
+        }
+      });
+    }
+    fetchExistingOwnerData();
+
     // Cleanup.
     return () => {
       unmounted = true;
@@ -207,10 +234,10 @@ const PersonForm = (props) => {
             axios.get('/people/api/person/?search=' + values.first_name +  ' ' + values.last_name + ' ' + values.phone.replace(/\D/g, ""))
             .then(response => {
               // If we have a dupe owner then use it.
-              if (dupeOwner) {
+              if (!existingOwner && dupeOwner) {
                 values['id'] = response.data[0].id;
               }
-              if (response.data.length > 0 && !dupeOwner) {
+              if (response.data.length > 0 && !existingOwner && !dupeOwner) {
                 // Throw error if duplicate owner found.
                 if (isOwner) {
                   setError({show:true, error:['a duplicate owner with the same name and phone number already exists.', response.data[0].id]});
@@ -301,6 +328,26 @@ const PersonForm = (props) => {
           </Card.Header>}
           <Card.Body>
           <BootstrapForm noValidate>
+            {/* Only show existing owner if owner and in a workflow/intake */}
+            <span hidden={!(is_workflow || is_intake) || !isOwner}>
+              <label>Use Existing Owner</label>
+              <Typeahead
+                id="existing_owner"
+                className="mb-3"
+                onChange={(values) => {
+                  if (values.length) {
+                    setData(existingOwners.data.filter(owner => owner.id === values[0].id)[0])
+                    setExistingOwner(true);
+                  }
+                  else {
+                    setData(initialData);
+                    setExistingOwner(false);
+                  }
+                }}
+                options={existingOwners.options}
+                placeholder="Search..."
+              />
+            </span>
             <BootstrapForm.Row>
               <TextInput
                 xs="6"
