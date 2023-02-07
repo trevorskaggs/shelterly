@@ -364,11 +364,31 @@ const AnimalForm = (props) => {
                   setRedirectCheck(true);
                 });
               }
+              else if (props.state.steps.reporter.first_name && props.state.steps.reporter.id) {
+                reporterResponse = await Promise.all([
+                  axios.put('/people/api/person/' + props.state.steps.reporter.id + '/', props.state.steps.reporter)
+                ])
+                .catch(error => {
+                  setIsButtonSubmitting(false);
+                  setShowSystemError(true);
+                  setRedirectCheck(true);
+                });
+              }
               // Create Owner
               let ownerResponse = [{data:{id:props.state.steps.owner.id}}];
               if (props.state.steps.owner.first_name && !props.state.steps.owner.id) {
                 ownerResponse = await Promise.all([
                   axios.post('/people/api/person/', props.state.steps.owner)
+                ])
+                .catch(error => {
+                  setIsButtonSubmitting(false);
+                  setShowSystemError(true);
+                  setRedirectCheck(true);
+                });
+              }
+              else if (props.state.steps.owner.first_name && props.state.steps.owner.id) {
+                ownerResponse = await Promise.all([
+                  axios.put('/people/api/person/' + props.state.steps.owner.id + '/', props.state.steps.owner)
                 ])
                 .catch(error => {
                   setIsButtonSubmitting(false);
@@ -390,6 +410,7 @@ const AnimalForm = (props) => {
                 setShowSystemError(true);
                 setRedirectCheck(true);
               });
+              
               // Create previous animals
               let promises = [];
               props.state.steps.animals.forEach(animal => {
