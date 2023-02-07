@@ -49,7 +49,9 @@ const RoomForm = ({ id, incident }) => {
           }
         })
         .catch(error => {
-          setShowSystemError(true);
+          if (!unmounted) {
+            setShowSystemError(true);
+          }
         });
       };
       fetchRoomData();

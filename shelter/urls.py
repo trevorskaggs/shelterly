@@ -7,6 +7,7 @@ router = DefaultRouter()
 router.register(r'shelter', views.ShelterViewSet, basename='shelter')
 router.register(r'building', views.BuildingViewSet, basename='building')
 router.register(r'room', views.RoomViewSet, basename='room')
+router.register(r'intakesummary', views.IntakeSummaryViewSet, basename='intakesummary')
 
 urlpatterns = [
     path('api/', include(router.urls)),

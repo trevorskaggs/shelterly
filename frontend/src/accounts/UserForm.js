@@ -50,7 +50,9 @@ const UserForm = ({ id, incident }) => {
           }
         })
         .catch(error => {
-          setShowSystemError(true);
+          if (!unmounted) {
+            setShowSystemError(true);
+          }
         });
       };
       fetchUserData();

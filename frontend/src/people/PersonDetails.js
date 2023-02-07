@@ -93,7 +93,9 @@ function PersonDetails({id, incident}) {
         }
       })
       .catch(error => {
-        setShowSystemError(true);
+        if (!unmounted) {
+          setShowSystemError(true);
+        }
       });
     };
     fetchPersonData();

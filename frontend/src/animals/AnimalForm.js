@@ -194,7 +194,9 @@ const AnimalForm = (props) => {
           }
         })
         .catch(error => {
-          setShowSystemError(true);
+          if (!unmounted) {
+            setShowSystemError(true);
+          }
         });
       };
       fetchAnimalData();
@@ -355,48 +357,87 @@ const AnimalForm = (props) => {
               if (props.state.steps.reporter.first_name && !props.state.steps.reporter.id) {
                 reporterResponse = await Promise.all([
                   axios.post('/people/api/person/', props.state.steps.reporter)
-                ]);
+                ])
+                .catch(error => {
+                  setIsButtonSubmitting(false);
+                  setShowSystemError(true);
+                  setRedirectCheck(true);
+                });
               }
               else if (props.state.steps.reporter.first_name && props.state.steps.reporter.id) {
                 reporterResponse = await Promise.all([
                   axios.put('/people/api/person/' + props.state.steps.reporter.id + '/', props.state.steps.reporter)
-                ]);
+                ])
+                .catch(error => {
+                  setIsButtonSubmitting(false);
+                  setShowSystemError(true);
+                  setRedirectCheck(true);
+                });
               }
               // Create Owner
               let ownerResponse = [{data:{id:props.state.steps.owner.id}}];
               if (props.state.steps.owner.first_name && !props.state.steps.owner.id) {
                 ownerResponse = await Promise.all([
                   axios.post('/people/api/person/', props.state.steps.owner)
-                ]);
-              }
-              else if (props.state.steps.owner.first_name && props.state.steps.owner.id) {
-                ownerResponse = await Promise.all([
-                  axios.put('/people/api/person/' + props.state.steps.owner.id + '/', props.state.steps.owner)
-                ]);
-              }
-              // Create previous animals
-              props.state.steps.animals.forEach(animal => {
-                // Add owner and reporter to animal data.
-                animal.append('reporter', reporterResponse[0].data.id);
-                animal.append('new_owner', ownerResponse[0].data.id);
-                axios.post('/animals/api/animal/', animal)
+                ])
                 .catch(error => {
                   setIsButtonSubmitting(false);
                   setShowSystemError(true);
                   setRedirectCheck(true);
                 });
+              }
+              else if (props.state.steps.owner.first_name && props.state.steps.owner.id) {
+                ownerResponse = await Promise.all([
+                  axios.put('/people/api/person/' + props.state.steps.owner.id + '/', props.state.steps.owner)
+                ])
+                .catch(error => {
+                  setIsButtonSubmitting(false);
+                  setShowSystemError(true);
+                  setRedirectCheck(true);
+                });
+              }
+
+              // Create Intake Summary
+              let intakeSummaryResponse = [{data:{id:null}}];
+              values['shelter'] = shelter_id;
+              values['person'] = reporterResponse[0].data.id ? reporterResponse[0].data.id : ownerResponse[0].data.id
+              values['intake_type'] = (reporterResponse[0].data.id ? 'reporter' : 'owner') + '_walkin';
+              intakeSummaryResponse = await Promise.all([
+                axios.post('/shelter/api/intakesummary/', values)
+              ])
+              .catch(error => {
+                setIsButtonSubmitting(false);
+                setShowSystemError(true);
+                setRedirectCheck(true);
               });
-              // Create current animal then navigate.
-              formData.append('reporter', reporterResponse[0].data.id);
-              formData.append('new_owner', ownerResponse[0].data.id);
-              await axios.post('/animals/api/animal/', formData)
-              .then(function() {
-                if (ownerResponse[0].data.id) {
-                  navigate(incident + '/people/owner/' + ownerResponse[0].data.id)
-                }
-                else {
-                  navigate(incident + '/people/reporter/' + reporterResponse[0].data.id)
-                }
+              
+              // Create previous animals
+              let promises = [];
+              props.state.steps.animals.forEach(animal => {
+                // Add owner and reporter to animal data.
+                animal.append('reporter', reporterResponse[0].data.id);
+                animal.append('new_owner', ownerResponse[0].data.id);
+                animal.append('intake_summary', intakeSummaryResponse[0].data.id);
+                promises.push(
+                  axios.post('/animals/api/animal/', animal)
+                );
+              });
+
+              Promise.all(promises).then(async () => {
+                // Create current animal then navigate.
+                formData.append('reporter', reporterResponse[0].data.id);
+                formData.append('new_owner', ownerResponse[0].data.id);
+                formData.append('intake_summary', intakeSummaryResponse[0].data.id);
+
+                axios.post('/animals/api/animal/', formData)
+                .then(animalResponse => {
+                  navigate("/" + props.incident + "/shelter/intakesummary/" + intakeSummaryResponse[0].data.id);
+                })
+                .catch(error => {
+                  setIsButtonSubmitting(false);
+                  setShowSystemError(true);
+                  setRedirectCheck(true);
+                });
               })
               .catch(error => {
                 setIsButtonSubmitting(false);

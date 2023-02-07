@@ -74,8 +74,10 @@ function DispatchTeamManagement({ incident }) {
         }
       })
       .catch(error => {
-        setData({team_members: [], teams: [], isFetching: false});
-        setShowSystemError(true);
+        if (!unmounted) {
+          setData({team_members: [], teams: [], isFetching: false});
+          setShowSystemError(true);
+        }
       });
 
       // Cleanup.

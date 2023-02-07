@@ -123,28 +123,39 @@ function ShelterRoomAssignment({ id, incident }) {
 
   // Hook for initializing data.
   useEffect(() => {
+    let unmounted = false;
     let source = axios.CancelToken.source();
+
     const fetchShelterData = async () => {
       // Fetch Shelter Details data.
       await axios.get('/shelter/api/shelter/' + id + '/?incident=' + incident, {
         cancelToken: source.token,
       })
       .then(response => {
-        let rooms = [];
-        response.data.buildings.forEach(function(building){
-          rooms = rooms.concat(building.rooms);
-        });
-        response.data['rooms'] = rooms;
-        setData(response.data);
-        if (!selectedBuilding && response.data.buildings.length > 0) {
-          setSelectedBuilding(response.data.buildings[0].id)
+        if (!unmounted) {
+          let rooms = [];
+          response.data.buildings.forEach(function(building){
+            rooms = rooms.concat(building.rooms);
+          });
+          response.data['rooms'] = rooms;
+          setData(response.data);
+          if (!selectedBuilding && response.data.buildings.length > 0) {
+            setSelectedBuilding(response.data.buildings[0].id)
+          }
         }
       })
       .catch(error => {
-        setShowSystemError(true);
+        if (!unmounted) {
+          setShowSystemError(true);
+        }
       });
     };
     fetchShelterData();
+    // Cleanup.
+    return () => {
+      unmounted = true;
+      source.cancel();
+    };
   }, [id, selectedBuilding, incident]);
 
   return (
