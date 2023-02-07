@@ -6,7 +6,8 @@ import logo from '../shelterly.png';
 const defaultFormat = {
   orientation: 'p',
   unit: 'pt',
-  format: 'a4'
+  format: 'a4',
+  compress: true
 };
 
 const rgbColors = {
@@ -87,6 +88,7 @@ class ShelterlyPDF {
   get pageHeight() { return this.#jsPDF.internal.pageSize.height || this.#jsPDF.internal.pageSize.getHeight(); }
   get pageWidth() { return this.#jsPDF.internal.pageSize.width || this.#jsPDF.internal.pageSize.getWidth(); }
   get numberOfPages() { return this.#jsPDF.internal.getNumberOfPages(); }
+  get remainderPageHeight() { return (this.pageHeight - 35) - this.#documentLastYPosition - 20; }
 
   /**
    * sets the text and draw colors
@@ -162,7 +164,13 @@ class ShelterlyPDF {
     return yPosition;
   }
 
-  drawPageHeader() {
+  /**
+   * @param {object} [param0]
+   * @param {string} [param0.subtitle]
+   */
+  drawPageHeader({
+    subtitle = this.#pageSubtitle
+  } = {}) {
     // set default font size
     this.setDocumentFontSize({ size: 15 });
     // add logo header
@@ -180,9 +188,9 @@ class ShelterlyPDF {
     this.#jsPDF.text(this.#pageTitle, this.pageWidth - this.#documentRightMargin, this.#documentTopMargin, {align: 'right'});
     this.#documentLastYPosition = this.#documentTopMargin + 25;
 
-    if (this.#pageSubtitle) {
+    if (subtitle) {
       this.setDocumentFontSize();
-      this.#jsPDF.text(this.#pageSubtitle, this.pageWidth - this.#documentRightMargin, this.#documentLastYPosition, {align: "right"});
+      this.#jsPDF.text(subtitle, this.pageWidth - this.#documentRightMargin, this.#documentLastYPosition, {align: "right"});
     }
 
     this.drawPad(5);
@@ -315,7 +323,7 @@ class ShelterlyPDF {
 
       const imgData = await canvas.toDataURL();
   
-      await this.#jsPDF.addImage(imgData, 'PNG', this.#documentLeftMargin + leftPad, this.#documentLastYPosition + topPad, imgWidth, imgHeight);
+      await this.#jsPDF.addImage(imgData, 'PNG', this.#documentLeftMargin + leftPad, this.#documentLastYPosition + topPad, imgWidth, imgHeight, '', 'FAST');
     }
 
     //
@@ -616,13 +624,26 @@ class ShelterlyPDF {
       bottomPadding
     })
   }
+
   /**
    * draws a blank table grid with headers
    * @param  {Array} [headers=[' ', ' ', ' ', ' ']] - column headers
    */
   drawTableGrid({
-    headers = [' ', ' ', ' ', ' ']
+    headers = [' ', ' ', ' ', ' '],
+    columnStyles,
   } = {}) {
+    // set the default columnStyles if not defined
+    if (!columnStyles) {
+      const defaultColumnStyle = { cellWidth: 'auto' };
+      columnStyles = headers.map((_h, i) => defaultColumnStyle)
+    }
+
+    // columnStyles must be one for each column
+    if (columnStyles.length !== headers.length) {
+      throw new Error('columnStyles length must match header length');
+    }
+
     this.#jsPDF.autoTableSetDefaults(
       {
         headStyles: { fillColor: [255, 255, 255] } // White
@@ -632,8 +653,7 @@ class ShelterlyPDF {
 
     // calculate how many rows are needed
     const rowHeight = 20;
-    const remainderPageHeight = (this.pageHeight - 35) - this.#documentLastYPosition - 20;
-    const numberOfRows = Math.floor(remainderPageHeight / rowHeight);
+    const numberOfRows = Math.floor(this.remainderPageHeight / rowHeight);
 
     this.#jsPDF.autoTable({
       head: [headers],
@@ -649,13 +669,19 @@ class ShelterlyPDF {
       },
       styles: {
         minCellHeight: rowHeight
-      }
+      },
+      columnStyles
     });
 
     this.resetDocumentLeftMargin();
   }
 
-  // save methods
+  /**
+   * 
+   * @param {object} [param0]
+   * @param {number} [maxPages=Infinity]
+   * @returns {Promise<void>}
+   */
   saveFile({
     maxPages = Infinity
   } = {}) {
@@ -678,7 +704,7 @@ class ShelterlyPDF {
         });
       }
     }
-    this.#jsPDF.save(`${this.#fileName}.${this.#fileExtension}`);
+    return this.#jsPDF.save(`${this.#fileName}.${this.#fileExtension}`, { returnPromise: true });
   }
 };
 

@@ -4,19 +4,21 @@ import { Link, useQueryParams } from 'raviger';
 import { Button, ButtonGroup, Card, CardGroup, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Pagination, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBan, faCar, faChevronDown, faChevronUp, faEquals, faClipboardList, faEnvelope, faKey, faTrailer, faUsers
+  faBan, faCar, faChevronDown, faChevronUp, faEquals, faClipboardList, faEnvelope, faKey, faTrailer, faUsers, faPrint
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faDotCircle
 } from '@fortawesome/free-regular-svg-icons';
 import { faChevronDoubleDown, faChevronDoubleUp, faCommentSmile, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import Moment from 'react-moment';
-import { useMark } from '../hooks';
+import { useMark, useSubmitting } from '../hooks';
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
 import { speciesChoices } from '../animals/constants';
 import { ITEMS_PER_PAGE } from '../constants';
 import { SystemErrorContext } from '../components/SystemError';
+import ButtonSpinner from '../components/ButtonSpinner';
+import { printAllServiceRequests } from './Utils';
 
 function ServiceRequestSearch({ incident }) {
 
@@ -39,6 +41,12 @@ function ServiceRequestSearch({ incident }) {
   const [page, setPage] = useState(1);
   const [numPages, setNumPages] = useState(1);
   const { markInstances } = useMark();
+  const {
+    isSubmitting,
+    handleSubmitting,
+    submittingComplete,
+    submittingLabel
+  } = useSubmitting();
 
   // Update searchTerm when field input changes.
   const handleChange = event => {
@@ -50,6 +58,14 @@ function ServiceRequestSearch({ incident }) {
     event.preventDefault();
     setSearchTerm(tempSearchTerm.current.value);
     setPage(1);
+  }
+
+  const handlePrintAllClick = (e) => {
+    e.preventDefault();
+
+    handleSubmitting()
+      .then(() => printAllServiceRequests(data.service_requests))
+      .then(submittingComplete);
   }
 
   function setFocus(pageNum) {
@@ -130,6 +146,16 @@ function ServiceRequestSearch({ incident }) {
             <Button variant={statusOptions === "closed" ? "primary" : "secondary"} onClick={statusOptions !== "closed" ? () => {setPage(1);setStatusOptions("closed")} : () => {setPage(1);setStatusOptions("")}}>Closed</Button>
             <Button variant={statusOptions === "canceled" ? "primary" : "secondary"} onClick={statusOptions !== "canceled" ? () => {setPage(1);setStatusOptions("canceled")} : () => {setPage(1);setStatusOptions("")}}>Canceled</Button>
           </ButtonGroup>
+          <ButtonSpinner
+            variant="outline-light"
+            className="ml-1"
+            onClick={handlePrintAllClick}
+            isSubmitting={isSubmitting}
+            isSubmittingText={submittingLabel}
+          >
+            Print All ({`${data.service_requests.length}`})
+            <FontAwesomeIcon icon={faPrint} className="ml-2 text-light" inverse />
+          </ButtonSpinner>
         </InputGroup>
       </Form>
       {data.service_requests.map((service_request, index) => (
