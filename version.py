@@ -1,1 +1,1 @@
-__version__ = 'cve'
+__version__ = 'v0.6.9'
