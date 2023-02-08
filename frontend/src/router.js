@@ -27,6 +27,7 @@ import PersonForm from "./people/PersonForm";
 import PersonSearch from "./people/PersonSearch";
 import OwnerContactForm from "./people/OwnerContactForm";
 import Shelter from "./shelter/Shelter";
+import ShelterIntakeSummary from "./shelter/ShelterIntakeSummary";
 import ShelterForm from "./shelter/ShelterForm";
 import ShelterIntake from "./shelter/ShelterIntake";
 import ShelterRoomAssignment from "./shelter/ShelterRoomAssignment";
@@ -92,6 +93,7 @@ const routes = {
   "/:incident/shelter/new": ({incident}) => <ShelterForm incident={incident} />,
   "/:incident/shelter/edit/:id": ({id, incident}) => <ShelterForm id={id} incident={incident} />,
   "/:incident/shelter/:id": ({id, incident}) => <ShelterDetails id={id} incident={incident} />,
+  "/:incident/shelter/intakesummary/:id": ({id, incident}) => <ShelterIntakeSummary id={id} incident={incident} />,
   "/:incident/shelter/:id/assign": ({id, incident}) => <ShelterRoomAssignment id={id} incident={incident} />,
   "/:incident/shelter/building/new": ({incident}) => <BuildingForm incident={incident} />,
   "/:incident/shelter/building/edit/:id": ({id, incident}) => <BuildingForm id={id} incident={incident} />,

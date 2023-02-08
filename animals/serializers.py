@@ -20,7 +20,7 @@ class ModestAnimalSerializer(SimpleAnimalSerializer):
 
     class Meta:
         model = Animal
-        fields = ['id', 'name', 'species', 'aggressive', 'request', 'shelter_object', 'shelter', 'status', 'aco_required', 'color_notes',
+        fields = ['id', 'name', 'species', 'aggressive', 'injured', 'fixed', 'request', 'shelter_object', 'shelter', 'status', 'aco_required', 'color_notes',
         'front_image', 'side_image', 'owner_names', 'sex', 'size', 'age', 'pcolor', 'scolor', 'medical_notes', 'behavior_notes']
 
     def get_front_image(self, obj):

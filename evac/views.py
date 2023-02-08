@@ -5,6 +5,7 @@ import io
 from wsgiref.util import FileWrapper
 from datetime import datetime, timedelta
 from rest_framework import filters, permissions, serializers, viewsets
+from rest_framework.decorators import action as drf_action
 from actstream import action
 
 from animals.models import Animal
@@ -183,7 +184,7 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
                 # Add SR to selected DA.
                 animals_dict = {}
                 for animal in service_requests[0].animal_set.filter(status__in=['REPORTED', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE']):
-                    animals_dict[animal.id] = {'name':animal_dict.get('name'), 'species':animal_dict.get('species'), 'status':animal_dict.get('status'), 'color_notes':animal_dict.get('color_notes'), 'pcolor':animal_dict.get('pcolor'), 'scolor':animal_dict.get('scolor'), 'shelter':animal_dict.get('shelter'), 'room':animal_dict.get('room')}
+                    animals_dict[animal.id] = {'name':animal.name, 'species':animal.species, 'status':animal.status, 'color_notes':animal.color_notes, 'pcolor':animal.pcolor, 'scolor':animal.scolor, 'shelter':animal.shelter, 'room':animal.room}
                 AssignedRequest.objects.create(dispatch_assignment=evac_assignment, service_request=service_requests[0], animals=animals_dict)
                 action.send(self.request.user, verb='assigned service request', target=service_requests[0])
 
@@ -255,44 +256,45 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
 
             action.send(self.request.user, verb='updated evacuation assignment', target=evac_assignment)
 
-def download_geojson(request, incident, dispatch_id):
-    da = EvacAssignment.objects.get(id=dispatch_id)
-    data = {"features":[]}
-    for service_request in da.service_requests.all():
-        species_counts = {}
-        for animal in service_request.animal_set.all():
-            species_counts[animal.species] = species_counts.get(animal.species, 0) + 1
+    @drf_action(detail=True, methods=['GET'], name='Download GeoJSON')
+    def download(self, request, pk=None):
+        ea = EvacAssignment.objects.get(id=pk)
+        data = {"features":[]}
+        for service_request in ea.service_requests.all():
+            species_counts = {}
+            for animal in service_request.animal_set.all():
+                species_counts[animal.species] = species_counts.get(animal.species, 0) + 1
 
-        data['features'].append(
-          {
-            "geometry":{
-                "coordinates":[
-                  str(service_request.longitude),
-                  str(service_request.latitude),
-                  0,
-                  0
-                ],
-                "type":"Point"
-            },
-            "id":service_request.id,
-            "type":"Feature",
-            "properties":{
-                "marker-symbol":"point",
-                "marker-color":"#082B95" if any(species in list(species_counts.keys()) for species in ['cow', 'horse', 'sheep', 'goat', 'pig', 'llama', 'alpaca']) else '#FA8522' if any(species in list(species_counts.keys()) for species in ['bird', 'emu']) else '#5F0EB0' if any(species in list(species_counts.keys()) for species in ['cat', 'dog']) else '#000000',# purple for dogs and cats, orange for avian, blue for livestock, black for undetermined animal
-                "description":service_request.location_output.rsplit(',', 1)[0] + " (" + ', '.join(f'{value} {key}' + ('s' if value != 1 and animal.species != 'sheep' else '') for key, value in species_counts.items()) + ")", #123 Ranch Rd, Napa CA (1 cat, 2 dogs)
-                "title":service_request.id,
-                "class":"Marker",
-                "marker-size":str(1.5)
-            }
-          }
-        )
+            data['features'].append(
+              {
+                "geometry":{
+                    "coordinates":[
+                      str(service_request.longitude),
+                      str(service_request.latitude),
+                      0,
+                      0
+                    ],
+                    "type":"Point"
+                },
+                "id":service_request.id,
+                "type":"Feature",
+                "properties":{
+                    "marker-symbol":"point",
+                    "marker-color":"#082B95" if any(species in list(species_counts.keys()) for species in ['cow', 'horse', 'sheep', 'goat', 'pig', 'llama', 'alpaca']) else '#FA8522' if any(species in list(species_counts.keys()) for species in ['bird', 'emu']) else '#5F0EB0' if any(species in list(species_counts.keys()) for species in ['cat', 'dog']) else '#000000',# purple for dogs and cats, orange for avian, blue for livestock, black for undetermined animal
+                    "description":service_request.location_output.rsplit(',', 1)[0] + " (" + ', '.join(f'{value} {key}' + ('s' if value != 1 and animal.species != 'sheep' else '') for key, value in species_counts.items()) + ")", #123 Ranch Rd, Napa CA (1 cat, 2 dogs)
+                    "title":service_request.id,
+                    "class":"Marker",
+                    "marker-size":str(1.5)
+                }
+              }
+            )
 
-    data_string = json.dumps(data)
-    json_file = io.StringIO()
-    json_file.write(data_string)
-    json_file.seek(0)
+        data_string = json.dumps(data)
+        json_file = io.StringIO()
+        json_file.write(data_string)
+        json_file.seek(0)
 
-    wrapper = FileWrapper(json_file)
-    response = HttpResponse(wrapper, content_type='application/json')
-    response['Content-Disposition'] = 'attachement; filename=DAR-' + str(dispatch_id) + '.geojson'
-    return response
+        wrapper = FileWrapper(json_file)
+        response = HttpResponse(wrapper, content_type='application/json')
+        response['Content-Disposition'] = 'attachement; filename=DAR-' + str(pk) + '.geojson'
+        return response

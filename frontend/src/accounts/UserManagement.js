@@ -119,8 +119,10 @@ function UserManagement({ incident }) {
         }
       })
       .catch(error => {
-        setData({users: [], isFetching: false});
-        setShowSystemError(true);
+        if (!unmounted) {
+          setData({users: [], isFetching: false});
+          setShowSystemError(true);
+        }
       });
 
       // Cleanup.

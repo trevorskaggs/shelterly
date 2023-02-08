@@ -115,7 +115,9 @@ function ServiceRequestDetails({ id, incident }) {
         }
       })
       .catch(error => {
-        setShowSystemError(true);
+        if (!unmounted) {
+          setShowSystemError(true);
+        }
       });
     };
     fetchServiceRequestData();

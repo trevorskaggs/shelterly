@@ -15,7 +15,7 @@ import Moment from 'react-moment';
 import Select, { components } from 'react-select';
 import L from "leaflet";
 import { Circle, Map, Marker, Tooltip as MapTooltip, TileLayer } from "react-leaflet";
-import { useMark } from '../hooks';
+import { useMark, useSubmitting } from '../hooks';
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
 import { titleCase } from '../components/Utils';
@@ -25,6 +25,7 @@ import { catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices,
 import AnimalCoverImage from '../components/AnimalCoverImage';
 import { printAnimalCareSchedule, printAllAnimalCareSchedules } from './Utils';
 import { SystemErrorContext } from '../components/SystemError';
+import ButtonSpinner from '../components/ButtonSpinner';
 
 const NoOptionsMessage = props => {
   return (
@@ -81,6 +82,12 @@ function AnimalSearch({ incident }) {
   const [page, setPage] = useState(1);
   const [numPages, setNumPages] = useState(1);
   const { markInstances } = useMark();
+  const {
+    isSubmitting,
+    handleSubmitting,
+    submittingComplete,
+    submittingLabel
+  } = useSubmitting();
 
   const colorChoices = {'':[], 'dog':dogColorChoices, 'cat':catColorChoices, 'horse':horseColorChoices, 'other':otherColorChoices}
 
@@ -138,7 +145,9 @@ function AnimalSearch({ incident }) {
   const handlePrintAllClick = (e) => {
     e.preventDefault();
 
-    printAllAnimalCareSchedules(animals);
+    handleSubmitting()
+      .then(() => printAllAnimalCareSchedules(animals))
+      .then(submittingComplete);
   }
 
   function setFocus(pageNum) {
@@ -290,10 +299,16 @@ function AnimalSearch({ incident }) {
             <Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0"}}>Search</Button>
           </InputGroup.Append>
           <Button variant="outline-light" className="ml-1" onClick={handleShowFilters}>Advanced {showFilters ? <FontAwesomeIcon icon={faChevronDoubleUp} size="sm" /> : <FontAwesomeIcon icon={faChevronDoubleDown} size="sm" />}</Button>
-          <Button variant="outline-light" className="ml-1" onClick={handlePrintAllClick}>
+          <ButtonSpinner
+            variant="outline-light"
+            className="ml-1"
+            onClick={handlePrintAllClick}
+            isSubmitting={isSubmitting}
+            isSubmittingText={submittingLabel}
+          >
             Print All ({`${animals.length}`})
             <FontAwesomeIcon icon={faPrint} className="ml-2 text-light" inverse />
-          </Button>
+          </ButtonSpinner>
         </InputGroup>
         <Collapse in={showFilters}>
           <div>

@@ -74,7 +74,9 @@ function Home() {
         }
       })
       .catch(error => {
-        setShowSystemError(true);
+        if (!unmounted) {
+          setShowSystemError(true);
+        }
       });
     };
     fetchIncidentData();

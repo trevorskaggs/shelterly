@@ -136,7 +136,9 @@ function AnimalDetails({ id, incident }) {
         }
       })
       .catch(error => {
-        setShowSystemError(true);
+        if (!unmounted) {
+          setShowSystemError(true);
+        }
       });
     };
     fetchAnimalData();

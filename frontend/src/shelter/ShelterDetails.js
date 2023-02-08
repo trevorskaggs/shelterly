@@ -1,19 +1,24 @@
 import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
 import { Link } from 'raviger';
-import { Card, Col, ListGroup, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
+import { Card, Col, Collapse, ListGroup, OverlayTrigger, Pagination, Row, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBuilding, faDoorOpen, faEdit, faPlusSquare,
+  faBuilding, faChevronCircleDown, faChevronCircleRight, faDoorOpen, faEdit, faPlusSquare,
 } from '@fortawesome/free-solid-svg-icons';
 import { faArrowDownToSquare } from '@fortawesome/pro-regular-svg-icons';
-import History from '../components/History';
+import Moment from 'react-moment';
 import Header from '../components/Header';
 import { SystemErrorContext } from '../components/SystemError';
+import { ITEMS_PER_PAGE } from '.././constants';
 
 function ShelterDetails({ id, incident }) {
 
   const { setShowSystemError } = useContext(SystemErrorContext);
+
+  const [showHistory, setShowHistory] = useState(false);
+  const [page, setPage] = useState(1);
+  const [numPages, setNumPages] = useState(1);
 
   const [data, setData] = useState({
     name: '',
@@ -27,11 +32,15 @@ function ShelterDetails({ id, incident }) {
     phone: '',
     display_phone: '',
     buildings: [],
-    action_history: [],
     unroomed_animals: [],
+    intake_summaries: [],
     animal_count: 0,
     room_count: 0,
   });
+
+  useEffect(() => {
+    setNumPages(Math.ceil(data.intake_summaries.length / ITEMS_PER_PAGE))
+  }, [data.intake_summaries]);
 
   // Hook for initializing data.
   useEffect(() => {
@@ -49,7 +58,9 @@ function ShelterDetails({ id, incident }) {
         }
       })
       .catch(error => {
-        setShowSystemError(true);
+        if (!unmounted) {
+          setShowSystemError(true);
+        }
       });
     };
     fetchShelterData();
@@ -175,7 +186,27 @@ function ShelterDetails({ id, incident }) {
           </span>
         </Card.Body>
       </Card>
-      <History action_history={data.action_history} />
+      {/* <History action_history={data.action_history} /> */}
+      <hr/>
+      <h2 className="mb-3">Intake History<FontAwesomeIcon icon={faChevronCircleRight} hidden={showHistory} onClick={() => setShowHistory(!showHistory)} className="ml-2" style={{verticalAlign:"middle"}} inverse /><FontAwesomeIcon icon={faChevronCircleDown} hidden={!showHistory} onClick={() => setShowHistory(!showHistory)} className="ml-2" style={{verticalAlign:"middle"}} inverse /></h2>
+      {data.intake_summaries.map((intakesummary, index) => (
+        <Collapse key={intakesummary.id} in={showHistory} hidden={page !== Math.ceil((index+1)/ITEMS_PER_PAGE)}>
+          <div>
+            <Card className="border rounded d-flex mb-2">
+              <Card.Body>
+              {intakesummary.intake_type === 'owner_walkin' ? 'Owner Walk-In ' : intakesummary.intake_type === 'reporter_walkin' ? 'Reporter Walk-In ' : 'Dispatch '}<Link href={"/" + incident + "/shelter/intakesummary/" + intakesummary.id} className="text-link" style={{textDecoration:"none", color:"white"}}>Intake Summary #{intakesummary.id}</Link> for {intakesummary.animals.length} animal{intakesummary.animals.length === 1 ? '' : 's'} on <Moment format="MMMM Do YYYY">{intakesummary.date}</Moment> at <Moment format="HH:mm">{intakesummary.date}</Moment>.
+              </Card.Body>
+            </Card>
+          </div>
+        </Collapse>
+      ))}
+      <Pagination className="custom-page-links" size="lg" hidden={!showHistory} onClick={(e) => {setPage(parseInt(e.target.innerText))}}>
+          {[...Array(numPages).keys()].map(x =>
+        <Pagination.Item key={x+1} active={x+1 === page}>
+          {x+1}
+        </Pagination.Item>)
+          }
+      </Pagination>
     </>
   );
 };

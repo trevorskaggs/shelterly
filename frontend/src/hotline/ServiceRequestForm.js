@@ -77,7 +77,9 @@ function ServiceRequestForm(props) {
           }
         })
         .catch(error => {
-          setShowSystemError(true);
+          if (!unmounted) {
+            setShowSystemError(true);
+          }
         });
       };
       fetchServiceRequestData();
@@ -90,7 +92,9 @@ function ServiceRequestForm(props) {
       }
     })
     .catch(error => {
-      setShowSystemError(true);
+      if (!unmounted) {
+        setShowSystemError(true);
+      }
     });
     // Cleanup.
     return () => {
@@ -141,11 +145,21 @@ function ServiceRequestForm(props) {
                 axios.post('/people/api/person/', props.state.steps.reporter)
               ]);
             }
+            else if (props.state.steps.reporter.first_name && props.state.steps.reporter.id) {
+              reporterResponse = await Promise.all([
+                axios.put('/people/api/person/' + props.state.steps.reporter.id + '/', props.state.steps.reporter)
+              ]);
+            }
             // Create Owner
             let ownerResponse = [{data:{id:props.state.steps.owner.id}}];
             if (props.state.steps.owner.first_name && !props.state.steps.owner.id) {
               ownerResponse = await Promise.all([
                 axios.post('/people/api/person/', props.state.steps.owner)
+              ]);
+            }
+            else if (props.state.steps.owner.first_name && props.state.steps.owner.id) {
+              ownerResponse = await Promise.all([
+                axios.put('/people/api/person/' + props.state.steps.owner.id + '/', props.state.steps.owner)
               ]);
             }
             // Create Service Request
@@ -266,7 +280,7 @@ function ServiceRequestForm(props) {
           <p>
             The following Service Requests have a duplicate address:
             {dupeSRs.map(sr =>
-              <li style={{marginLeft:"10px"}}><span style={{position:"relative", left:"-5px"}}>SR#{sr.id} - Click <Link target="_blank" href={"/" + incident + "/hotline/servicerequest/" + sr.id} style={{color:"#8d99d4"}}>here</Link> to view this Service Request.</span></li>
+              <li key={sr.id} style={{marginLeft:"10px"}}><span style={{position:"relative", left:"-5px"}}>SR#{sr.id} - Click <Link target="_blank" href={"/" + incident + "/hotline/servicerequest/" + sr.id} style={{color:"#8d99d4"}}>here</Link> to view this Service Request.</span></li>
             )}
             <br/>Proceed with creating a new Service Request?
           </p>

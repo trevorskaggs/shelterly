@@ -267,8 +267,10 @@ function Deploy({ incident }) {
         }
       })
       .catch(error => {
-        setTeamData({teams: [], options: [], isFetching: false});
-        setShowSystemError(true);
+        if (!unmounted) {
+          setTeamData({teams: [], options: [], isFetching: false});
+          setShowSystemError(true);
+        }
       });
     };
 
