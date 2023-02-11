@@ -63,12 +63,11 @@ class PersonSerializer(SimplePersonSerializer):
     reporter_animals = serializers.SerializerMethodField()
     images = serializers.SerializerMethodField()
     requests = serializers.SerializerMethodField()
-    action_history = serializers.SerializerMethodField()
 
     def get_animals(self, obj):
         from animals.serializers import ModestAnimalSerializer, AnimalSerializer
         if hasattr(obj, 'animals'):
-            return AnimalSerializer(obj.animals, many=True).data
+            return ModestAnimalSerializer(obj.animals, many=True).data
         else:
             return ModestAnimalSerializer(obj.animal_set.exclude(status='CANCELED'), many=True).data
 
@@ -88,10 +87,6 @@ class PersonSerializer(SimplePersonSerializer):
             except AttributeError:
                 return []
 
-    # Custom field for the action history.
-    def get_action_history(self, obj):
-        return [build_action_string(action) for action in obj.target_actions.all()]
-
     # Custom field for the ServiceRequest ID.
     def get_requests(self, obj):
         from hotline.serializers import BarebonesServiceRequestSerializer
@@ -105,3 +100,11 @@ class PersonSerializer(SimplePersonSerializer):
             return BarebonesServiceRequestSerializer(service_requests, many=True).data
         else:
             return []
+
+class HeavyPersonSerializer(PersonSerializer):
+
+    action_history = serializers.SerializerMethodField()
+
+    # Custom field for the action history.
+    def get_action_history(self, obj):
+        return [build_action_string(action) for action in obj.target_actions.all()]
