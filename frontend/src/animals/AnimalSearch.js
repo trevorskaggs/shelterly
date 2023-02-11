@@ -110,8 +110,8 @@ function AnimalSearch({ incident }) {
     }, 1000);
   };
 
-  const handleApplyFilters = () => {
-    setAnimals(data.animals.filter(animal => options.species ? animal.species === options.species : animal)
+  const handleApplyFilters = (animals) => {
+    setAnimals(animals.filter(animal => options.species ? animal.species === options.species : animal)
                            .filter(animal => options.status ? animal.status === options.status : animal)
                            .filter(animal => options.owned === 'yes' ? animal.owners.length > 0 : animal)
                            .filter(animal => options.owned === 'no' ? animal.owners.length === 0 : animal)
@@ -230,6 +230,7 @@ function AnimalSearch({ incident }) {
 
           // highlight search terms
           markInstances(searchTerm);
+          handleApplyFilters(response.data);
         }
       })
       .catch(error => {
@@ -468,7 +469,7 @@ function AnimalSearch({ incident }) {
                   </Row>
                 </Col>
                 <Col className="flex-grow-1 pl-0" xs="3">
-                  <Button className="btn btn-primary" style={{maxHeight:"35px", width:"100%"}} onClick={handleApplyFilters} disabled={isDisabled}>Apply</Button>
+                  <Button className="btn btn-primary" style={{maxHeight:"35px", width:"100%"}} onClick={() => {handleApplyFilters(data.animals)}} disabled={isDisabled}>Apply</Button>
                   <Button variant="outline-light" style={{maxHeight:"35px", width:"100%", marginTop:"15px"}} onClick={handleClear}>Clear</Button>
                 </Col>
               </Row>
