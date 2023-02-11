@@ -139,6 +139,10 @@ class AnimalViewSet(viewsets.ModelViewSet):
             # Remove animal.
             if self.request.data.get('remove_animal'):
                 Animal.objects.filter(id=self.request.data.get('remove_animal')).update(status='CANCELED', shelter=None, room=None)
+                animal = Animal.objects.get(id=self.request.data.get('remove_animal'))
+                for assigned_request in AssignedRequest.objects.filter(service_request=animal.request, dispatch_assignment__end_time=None):
+                    assigned_request.animals[str(self.request.data.get('remove_animal'))]['status'] = 'CANCELED'
+                    assigned_request.save()
 
             # Set order if present, add 1 to avoid 0 index since order is a PositiveIntergerField.
             if type(self.request.data.get('set_order', '')) == int:

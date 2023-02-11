@@ -423,7 +423,7 @@ function DispatchResolutionForm({ id, incident }) {
                   <hr />
                   <ListGroup variant="flush" style={{ marginTop: "-13px", marginBottom: "-13px" }}>
                     <h4 className="mt-2" style={{ marginBottom: "-2px" }}>Animals</h4>
-                    {data.sr_updates[index].animals.filter(animal => Object.keys(assigned_request.animals).includes(String(animal.id))).map((animal, inception) => (
+                    {data.sr_updates[index].animals.filter(animal => animal.status !== 'CANCELED' && Object.keys(assigned_request.animals).includes(String(animal.id))).map((animal, inception) => (
                       <ListGroup.Item key={animal.id}>
                         <AnimalStatus formikProps={props} index={index} inception={inception} animal={animal} shelters={shelters} />
                       </ListGroup.Item>
