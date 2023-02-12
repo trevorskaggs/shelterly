@@ -57,7 +57,7 @@ function DispatchSummary({ id, incident }) {
     else {
       await axios.patch('/evac/api/dispatchteam/' + data.team + '/', {'name':teamName})
       .then(response => {
-        setData(prevState => ({ ...prevState, "team_object":{"name": teamName} }));
+        setData(prevState => ({ ...prevState, "team_object":{ ...prevState.team_object, "name": teamName} }));
         handleTeamNameClose();
         setError('');
       })

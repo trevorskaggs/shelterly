@@ -5,7 +5,7 @@ from actstream import action
 from animals.models import Animal
 from hotline.models import ServiceRequest
 from people.models import OwnerContact, Person, PersonChange, PersonImage
-from people.serializers import OwnerContactSerializer, PersonSerializer
+from people.serializers import OwnerContactSerializer, PersonSerializer, HeavyPersonSerializer
 
 
 # Provides view for Person API calls.
@@ -15,6 +15,14 @@ class PersonViewSet(viewsets.ModelViewSet):
     filter_backends = (filters.SearchFilter,)
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = PersonSerializer
+    detail_serializer_class = HeavyPersonSerializer
+
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            if hasattr(self, 'detail_serializer_class'):
+                return self.detail_serializer_class
+
+        return super(PersonViewSet, self).get_serializer_class()
 
     def get_queryset(self):
         queryset = (
