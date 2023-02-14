@@ -286,7 +286,7 @@ function DispatchSummary({ id, incident }) {
           </Tooltip>
         }
       >
-        <Link onClick={handleGeoJsonDownload} href="#"><FontAwesomeIcon icon={faDownload} className="ml-2"  inverse /></Link>
+        <Link onClick={handleGeoJsonDownload} href=""><FontAwesomeIcon icon={faDownload} className="ml-2"  inverse /></Link>
       </OverlayTrigger>
     <div style={{fontSize:"18px", marginTop:"10px"}}><b>Opened: </b><Moment format="MMMM Do YYYY, HH:mm">{data.start_time}</Moment>{data.end_time ? <span> | <b>Resolved: </b><Moment format="MMMM Do YYYY, HH:mm">{data.end_time}</Moment></span> : ""}</div>
     </Header>
