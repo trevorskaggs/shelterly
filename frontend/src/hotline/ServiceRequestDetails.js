@@ -6,7 +6,7 @@ import { Button, Card, ListGroup, Modal, OverlayTrigger, Tooltip } from 'react-b
 import Flatpickr from 'react-flatpickr';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBan, faCar, faClipboardCheck, faEdit, faEnvelope, faHouseDamage, faPrint,
+  faBan, faCar, faClipboardCheck, faDownload, faEdit, faEnvelope, faHouseDamage, faPrint,
   faKey, faMapMarkedAlt, faPlusSquare, faTimes, faTrailer, faUserPlus, faUsers
 } from '@fortawesome/free-solid-svg-icons';
 import { faCalendarEdit, faCommentSmile, faHomeHeart, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
@@ -99,6 +99,18 @@ function ServiceRequestDetails({ id, incident }) {
     printSrAnimalCareSchedules(data.animals, id);
   }
 
+  const handleGeoJsonDownload = () => {
+    var fileDownload = require('js-file-download');
+    axios.get('/hotline/api/servicerequests/' + data.id +'/download/', { 
+            responseType: 'blob',
+        }).then(res => {
+            fileDownload(res.data, 'SR-' + data.id + '.geojson');
+            console.log(res);
+        }).catch(err => {
+            console.log(err);
+        })
+  }
+
   // Hook for initializing data.
   useEffect(() => {
     let unmounted = false;
@@ -142,6 +154,18 @@ function ServiceRequestDetails({ id, incident }) {
           }
         >
           <Link href={"/" + incident + "/hotline/servicerequest/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-1" inverse /></Link>
+        </OverlayTrigger>
+
+        <OverlayTrigger
+          key={"download-geojson"}
+          placement="bottom"
+          overlay={
+            <Tooltip id={`tooltip-download-geojson`}>
+              Download service request data as geojson
+            </Tooltip>
+          }
+        >
+          <Link onClick={handleGeoJsonDownload} href="#"><FontAwesomeIcon icon={faDownload} className="ml-2"  inverse /></Link>
         </OverlayTrigger>
 
         <OverlayTrigger

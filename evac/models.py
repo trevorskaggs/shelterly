@@ -40,6 +40,12 @@ class EvacAssignment(models.Model):
     end_time = models.DateTimeField(blank=True, null=True)
     incident = models.ForeignKey(Incident, on_delete=models.CASCADE, default=test_incident)
 
+    def get_geojson(self):
+        geojson = {'features':[]}
+        for service_request in self.service_requests.all():
+            geojson['features'].append(service_request.get_feature_json())
+        return geojson
+
     class Meta:
         ordering = ['-start_time',]
 

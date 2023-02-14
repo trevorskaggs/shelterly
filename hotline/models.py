@@ -85,6 +85,32 @@ class ServiceRequest(Location):
 
         self.save()
 
+    def get_feature_json(self):
+        species_counts = {}
+        for animal in self.animal_set.all():
+            species_counts[animal.species] = species_counts.get(animal.species, 0) + 1
+        feature_json = {
+          "geometry":{
+              "coordinates":[
+                str(self.longitude),
+                str(self.latitude),
+                0,
+                0
+              ],
+              "type":"Point"
+          },
+          "id":self.id,
+          "type":"Feature",
+          "properties":{
+              "marker-symbol":"circle-n",
+              "marker-color":"#FF0000",
+              "description":self.location_output.rsplit(',', 1)[0] + " (" + ', '.join(f'{value} {key}' + ('s' if value != 1 and animal.species != 'sheep' else '') for key, value in species_counts.items()) + ")", #123 Ranch Rd, Napa CA (1 cat, 2 dogs)
+              "title":self.id,
+              "class":"Marker",
+          }
+        }
+        return feature_json
+
     objects = ServiceRequestQueryset.as_manager()
 
     class Meta:
