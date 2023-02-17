@@ -18,7 +18,7 @@ const buildDispatchResolutionsDoc = (drs = []) => {
         align: 'center'
       });
     },
-    pageTitle: 'Dispatch Assignment',
+    pageTitle: `Dispatch Assignment ${drs.length ? `#${drs[0].id}` : ''}`,
     pageSubtitle: drs.length
       ? `Opened: ${new Date(drs[0].start_time).toLocaleDateString()}`
       : ''
@@ -28,6 +28,7 @@ const buildDispatchResolutionsDoc = (drs = []) => {
     if (i > 0) {
       pdf.drawPageBreak();
       pdf.drawPageHeader({
+        pageTitle: `Dispatch Assignment #${data.id}`,
         subtitle: `Opened: ${new Date(data.start_time).toLocaleDateString()}`
       });
     }
