@@ -28,7 +28,6 @@ urlpatterns = [
     url(r'login/', LoginView.as_view(), name='knox_login'),
     url(r'logout/', knox_views.LogoutView.as_view(), name='knox_logout'),
 ]
-urlpatterns.append(path('<str:incident>/animals/print/<int:animal_id>', print_kennel_card, name="print_kennel_card"))
 if settings.USE_S3:
     urlpatterns.append(re_path(u'static/(?P<path>.*)$', views.static_url))
 #To use local static files both USE_S3 must be FALSE and DEBUG must be TRUE!

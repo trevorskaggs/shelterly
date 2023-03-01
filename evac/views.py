@@ -259,36 +259,7 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
     @drf_action(detail=True, methods=['GET'], name='Download GeoJSON')
     def download(self, request, pk=None):
         ea = EvacAssignment.objects.get(id=pk)
-        data = {"features":[]}
-        for service_request in ea.service_requests.all():
-            species_counts = {}
-            for animal in service_request.animal_set.all():
-                species_counts[animal.species] = species_counts.get(animal.species, 0) + 1
-
-            data['features'].append(
-              {
-                "geometry":{
-                    "coordinates":[
-                      str(service_request.longitude),
-                      str(service_request.latitude),
-                      0,
-                      0
-                    ],
-                    "type":"Point"
-                },
-                "id":service_request.id,
-                "type":"Feature",
-                "properties":{
-                    "marker-symbol":"point",
-                    "marker-color":"#082B95" if any(species in list(species_counts.keys()) for species in ['cow', 'horse', 'sheep', 'goat', 'pig', 'llama', 'alpaca']) else '#FA8522' if any(species in list(species_counts.keys()) for species in ['bird', 'emu']) else '#5F0EB0' if any(species in list(species_counts.keys()) for species in ['cat', 'dog']) else '#000000',# purple for dogs and cats, orange for avian, blue for livestock, black for undetermined animal
-                    "description":service_request.location_output.rsplit(',', 1)[0] + " (" + ', '.join(f'{value} {key}' + ('s' if value != 1 and animal.species != 'sheep' else '') for key, value in species_counts.items()) + ")", #123 Ranch Rd, Napa CA (1 cat, 2 dogs)
-                    "title":service_request.id,
-                    "class":"Marker",
-                    "marker-size":str(1.5)
-                }
-              }
-            )
-
+        data = ea.get_geojson()
         data_string = json.dumps(data)
         json_file = io.StringIO()
         json_file.write(data_string)
