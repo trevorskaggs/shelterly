@@ -40,6 +40,9 @@ function buildServiceRequestsDoc(srs = []) {
     // id & priority
     pdf.drawWrappedText({ text: `SR#${data.id} - ${srPriority.label} Priority` })
 
+    // status
+    pdf.drawWrappedText({ text: `Status: ${data.status.toUpperCase()}` });
+
     // summary address
     pdf.drawWrappedText({ text: 'Service Request Address:' });
 

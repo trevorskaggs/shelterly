@@ -31,7 +31,10 @@ const buildOwnersDoc = (owners) => {
     // draw owner section
     pdf.drawSectionHeader({ text: 'Owner Details', hRule: true });
     
-    const ownerInfoList = [`Name: ${owner.first_name} ${owner.last_name}`];
+    const ownerInfoList = [
+      `Name: ${owner.first_name} ${owner.last_name}`,
+      `Owner ID: #${owner.id}`
+    ];
     if (owner.agency) ownerInfoList.push(`Agency: ${owner.agency}`);
     if (owner.phone) ownerInfoList.push(`Telephone: ${owner.display_phone} ${owner.display_alt_phone ? `  Alt: ${owner.display_alt_phone}` : ''}`);
     if (owner.email) ownerInfoList.push(`Email: ${owner.email}`);

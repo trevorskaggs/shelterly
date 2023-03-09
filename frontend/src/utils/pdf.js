@@ -166,15 +166,24 @@ class ShelterlyPDF {
 
   /**
    * @param {object} [param0]
-   * @param {string} [param0.subtitle]
+   * @param {string} [param0.pageTitle=this.#pageTitle]
+   * @param {string} [param0.subtitle=this.#pageSubtitle]
    */
   drawPageHeader({
-    subtitle = this.#pageSubtitle
+    pageTitle = this.#pageTitle,
+    subtitle = this.#pageSubtitle,
   } = {}) {
     // set default font size
     this.setDocumentFontSize({ size: 15 });
     // add logo header
-    this.#jsPDF.addImage(logo, "png", this.#documentTopMargin, this.#documentLeftMargin, 50, 50);
+    this.#jsPDF.addImage(
+      logo,
+      "png",
+      this.#documentTopMargin,
+      this.#documentLeftMargin,
+      50,
+      50
+    );
 
     // text brown
     this.setDocumentColors({ rgb: rgbColors.SHELTERLY_BROWN });
@@ -185,12 +194,22 @@ class ShelterlyPDF {
 
     // page title
     this.#jsPDF.setFontSize(this.#documentTitle1FontSize);
-    this.#jsPDF.text(this.#pageTitle, this.pageWidth - this.#documentRightMargin, this.#documentTopMargin, {align: 'right'});
+    this.#jsPDF.text(
+      pageTitle,
+      this.pageWidth - this.#documentRightMargin,
+      this.#documentTopMargin,
+      { align: "right" }
+    );
     this.#documentLastYPosition = this.#documentTopMargin + 25;
 
     if (subtitle) {
       this.setDocumentFontSize();
-      this.#jsPDF.text(subtitle, this.pageWidth - this.#documentRightMargin, this.#documentLastYPosition, {align: "right"});
+      this.#jsPDF.text(
+        subtitle,
+        this.pageWidth - this.#documentRightMargin,
+        this.#documentLastYPosition,
+        { align: "right" }
+      );
     }
 
     this.drawPad(5);
@@ -216,6 +235,7 @@ class ShelterlyPDF {
     // set last y position
     this.#documentLastYPosition = this.#documentLastYPosition + amount;
   }
+
   /**
    * draws a png image from url source
    * @param  {string} [display='block'] - image display, either 'block' or 'inline'

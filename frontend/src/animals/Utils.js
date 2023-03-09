@@ -93,6 +93,9 @@ async function buildAnimalCareScheduleDoc (animals) {
       })
     }
 
+    // draw status
+    pdf.drawWrappedText({ text: `Status: ${animal.status.toUpperCase() }`});
+
     if (animal.owners && animal.owners.length) {
       pdf.drawWrappedText({ text: `Owner(s): ${animal.owners.map((owner) =>
         `${capitalize(`${owner.first_name} ${owner.last_name}`, { proper: true })}`).join('; ')}`})

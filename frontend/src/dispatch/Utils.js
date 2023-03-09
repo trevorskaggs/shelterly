@@ -18,7 +18,7 @@ const buildDispatchResolutionsDoc = (drs = []) => {
         align: 'center'
       });
     },
-    pageTitle: 'Dispatch Assignment',
+    pageTitle: `Dispatch Assignment ${drs.length ? `#${drs[0].id}` : ''}`,
     pageSubtitle: drs.length
       ? `Opened: ${new Date(drs[0].start_time).toLocaleDateString()}`
       : ''
@@ -28,6 +28,7 @@ const buildDispatchResolutionsDoc = (drs = []) => {
     if (i > 0) {
       pdf.drawPageBreak();
       pdf.drawPageHeader({
+        pageTitle: `Dispatch Assignment #${data.id}`,
         subtitle: `Opened: ${new Date(data.start_time).toLocaleDateString()}`
       });
     }
@@ -46,12 +47,18 @@ const buildDispatchResolutionsDoc = (drs = []) => {
     data.assigned_requests.forEach((assigned_request, index) => {
       // service request priority
       const srPriority = priorityChoices.find(({ value }) => value === (assigned_request.service_request_object.priority || 2))
+
       // Summary page
       pdf.drawSectionHeader({
         text: `SR#${assigned_request.service_request_object.id} - ${srPriority.label} Priority`
       });
 
       pdf.drawPad(20);
+
+      // status
+      pdf.drawWrappedText({
+        text: `Status: ${assigned_request.service_request_object.status.toUpperCase()}`,
+      });
 
       // summary address
       pdf.drawSectionHeader({ text: 'Service Request Address:', fontSize: 14 });
