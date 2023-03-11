@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState, useRef } from 'react';
 import axios from "axios";
 import { Link, useQueryParams } from 'raviger';
 import { Button, ButtonGroup, Card, CardGroup, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Pagination, Tooltip } from 'react-bootstrap';
+import moment from 'moment';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBan, faCar, faChevronDown, faChevronUp, faEquals, faClipboardList, faEnvelope, faKey, faTrailer, faUsers, faPrint
@@ -11,13 +12,14 @@ import {
 } from '@fortawesome/free-regular-svg-icons';
 import { faChevronDoubleDown, faChevronDoubleUp, faCommentSmile, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import Moment from 'react-moment';
-import { useMark, useSubmitting } from '../hooks';
+import { useMark, useSubmitting, useDateRange } from '../hooks';
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
 import { speciesChoices } from '../animals/constants';
 import { ITEMS_PER_PAGE } from '../constants';
 import { SystemErrorContext } from '../components/SystemError';
 import ButtonSpinner from '../components/ButtonSpinner';
+import { DateRangePicker } from '../components/Form';
 import { printAllServiceRequests } from './Utils';
 
 function ServiceRequestSearch({ incident }) {
@@ -47,6 +49,8 @@ function ServiceRequestSearch({ incident }) {
     submittingComplete,
     submittingLabel
   } = useSubmitting();
+  const [isDateSet, setIsDateSet] = useState(false);
+  const { startDate, endDate, parseDateRange } = useDateRange();
 
   // Update searchTerm when field input changes.
   const handleChange = event => {
@@ -73,6 +77,10 @@ function ServiceRequestSearch({ incident }) {
       tempSearchTerm.current.focus();
     }
   }
+
+  // filtered service requests by date
+  let serviceRequestsByDateRange = data.service_requests.filter(sr => (isDateSet ? startDate <= moment(sr.timestamp)
+    .format('YYYY-MM-DD') && endDate >= moment(sr.timestamp).format('YYYY-MM-DD') : true));
 
   // Hook for initializing data.
   useEffect(() => {
@@ -140,12 +148,28 @@ function ServiceRequestSearch({ incident }) {
           <InputGroup.Append>
             <Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0"}}>Search</Button>
           </InputGroup.Append>
-          <ButtonGroup className="ml-3">
+          <ButtonGroup className="ml-1">
             <Button variant={statusOptions === "open" ? "primary" : "secondary"} onClick={statusOptions !== "open" ? () => {setPage(1);setStatusOptions("open")} : () => {setPage(1);setStatusOptions("")}}>Open</Button>
             <Button variant={statusOptions === "assigned" ? "primary" : "secondary"} onClick={statusOptions !== "assigned" ? () => {setPage(1);setStatusOptions("assigned")} : () => {setPage(1);setStatusOptions("")}}>Assigned</Button>
             <Button variant={statusOptions === "closed" ? "primary" : "secondary"} onClick={statusOptions !== "closed" ? () => {setPage(1);setStatusOptions("closed")} : () => {setPage(1);setStatusOptions("")}}>Closed</Button>
             <Button variant={statusOptions === "canceled" ? "primary" : "secondary"} onClick={statusOptions !== "canceled" ? () => {setPage(1);setStatusOptions("canceled")} : () => {setPage(1);setStatusOptions("")}}>Canceled</Button>
           </ButtonGroup>
+          <DateRangePicker
+            name={`date_range_picker`}
+            id={`date_range_picker`}
+            placeholder={"Filter by Date Range"}
+            style={{width:"200px", marginLeft:"0.25rem"}}
+            onChange={(dateRange) => {
+              if (dateRange === '') {
+                setIsDateSet(false)
+                setNumPages(Math.ceil(data.service_requests.length / ITEMS_PER_PAGE));
+              } else {
+                setIsDateSet(true)
+                parseDateRange(dateRange)
+                setNumPages(Math.ceil(serviceRequestsByDateRange.length / ITEMS_PER_PAGE));
+              }
+            }}
+          />
           <ButtonSpinner
             variant="outline-light"
             className="ml-1"
@@ -153,12 +177,12 @@ function ServiceRequestSearch({ incident }) {
             isSubmitting={isSubmitting}
             isSubmittingText={submittingLabel}
           >
-            Print All ({`${data.service_requests.length}`})
+            Print All ({`${serviceRequestsByDateRange.length}`})
             <FontAwesomeIcon icon={faPrint} className="ml-2 text-light" inverse />
           </ButtonSpinner>
         </InputGroup>
       </Form>
-      {data.service_requests.map((service_request, index) => (
+      {serviceRequestsByDateRange.map((service_request, index) => (
         <div key={service_request.id} className="mt-3" hidden={page !== Math.ceil((index+1)/ITEMS_PER_PAGE)}>
           <div className="card-header">
             <h4 style={{marginBottom:"-2px",  marginLeft:"-12px"}}>
@@ -448,7 +472,7 @@ function ServiceRequestSearch({ incident }) {
           </CardGroup>
         </div>
       ))}
-      <p>{data.isFetching ? 'Fetching service requests...' : <span>{data.service_requests && data.service_requests.length ? '' : 'No Service Requests found.'}</span>}</p>
+      <p>{data.isFetching ? 'Fetching service requests...' : <span>{serviceRequestsByDateRange && serviceRequestsByDateRange.length ? '' : 'No Service Requests found.'}</span>}</p>
       <Pagination className="custom-page-links" size="lg" onClick={(e) => {setFocus(parseInt(e.target.innerText));setPage(parseInt(e.target.innerText))}}>
         {[...Array(numPages).keys()].map(x =>
         <Pagination.Item key={x+1} active={x+1 === page}>

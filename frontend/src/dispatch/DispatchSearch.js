@@ -12,7 +12,7 @@ import {
 import { faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
 import L from "leaflet";
 import { Marker, Tooltip as MapTooltip } from "react-leaflet";
-import { useMark, useSubmitting } from '../hooks';
+import { useMark, useSubmitting, useDateRange } from '../hooks';
 import Map, { prettyText, reportedMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
 import Moment from "react-moment";
 import moment from 'moment';
@@ -44,8 +44,6 @@ function DispatchAssignmentSearch({ incident }) {
   const [page, setPage] = useState(1);
   const [numPages, setNumPages] = useState(1);
   const [isDateSet, setIsDateSet] = useState(false);
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(moment().format('YYYY-MM-DD'));
   const { markInstances } = useMark();
   const {
     isSubmitting,
@@ -53,6 +51,7 @@ function DispatchAssignmentSearch({ incident }) {
     submittingComplete,
     submittingLabel
   } = useSubmitting();
+  const { startDate, endDate, parseDateRange } = useDateRange();
 
   // Update searchTerm when field input changes.
   const handleChange = event => {
@@ -72,18 +71,6 @@ function DispatchAssignmentSearch({ incident }) {
     handleSubmitting()
       .then(() => printAllDispatchResolutions(evacAssignments))
       .then(submittingComplete);
-  }
-
-  // Parses the Date Range object
-  function parseDateRange(dateRange) {
-    if (dateRange.length > 1) {
-      dateRange = dateRange.toString().split(',');
-      setStartDate(moment(dateRange[0]).format('YYYY-MM-DD'))
-      setEndDate(moment(dateRange[1]).format('YYYY-MM-DD'));
-    } else {
-      setStartDate(moment(dateRange[0]).format('YYYY-MM-DD'))
-      setEndDate(moment(dateRange[0]).format('YYYY-MM-DD'));
-    }
   }
 
   function setFocus(pageNum) {
@@ -183,7 +170,7 @@ function DispatchAssignmentSearch({ incident }) {
           <InputGroup.Append>
             <Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0"}}>Search</Button>
           </InputGroup.Append>
-          <ButtonGroup className="ml-3">
+          <ButtonGroup className="ml-1">
             <Button variant={statusOptions === "preplanned" ? "primary" : "secondary"} onClick={statusOptions !== "preplanned" ? () => {setPage(1);setStatusOptions("preplanned")} : () => {setPage(1);setStatusOptions("")}}>Preplanned</Button>
             <Button variant={statusOptions === "active" ? "primary" : "secondary"} onClick={statusOptions !== "active" ? () => {setPage(1);setStatusOptions("active")} : () => {setPage(1);setStatusOptions("")}}>Active</Button>
             <Button variant={statusOptions === "resolved" ? "primary" : "secondary"} onClick={statusOptions !== "resolved" ? () => {setPage(1);setStatusOptions("resolved")} : () => {setPage(1);setStatusOptions("")}}>Resolved</Button>
@@ -192,7 +179,7 @@ function DispatchAssignmentSearch({ incident }) {
             name={`date_range_picker`}
             id={`date_range_picker`}
             placeholder={"Filter by Date Range"}
-            style={{width:"200px", marginLeft:"16px"}}
+            style={{width:"200px", marginLeft:"0.25rem"}}
             onChange={(dateRange) => {
               if (dateRange === '') {
                 setIsDateSet(false)

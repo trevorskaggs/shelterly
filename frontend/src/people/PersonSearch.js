@@ -142,12 +142,12 @@ function PersonSearch({ incident }) {
         <InputGroup.Append>
           <Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0"}}>Search</Button>
         </InputGroup.Append>
-        <ButtonGroup className="ml-3">
+        <ButtonGroup className="ml-1">
           <Button variant={statusOptions === "owners" ? "primary" : "secondary"} onClick={statusOptions !== "owners" ? () => {setPage(1);setStatusOptions("owners")} : () => {setPage(1);setStatusOptions("")}}>Owners</Button>
           <Button variant={statusOptions === "reporters" ? "primary" : "secondary"} onClick={statusOptions !== "reporters" ? () => {setPage(1);setStatusOptions("reporters")} : () => {setPage(1);setStatusOptions("")}}>Reporters</Button>
         </ButtonGroup>
         <ButtonSpinner
-          variant="outline-light ml-2"
+          variant="outline-light ml-1"
           onClick={handlePrintAllClick}
           isSubmitting={isSubmitting}
           isSubmittingText={submittingLabel}
