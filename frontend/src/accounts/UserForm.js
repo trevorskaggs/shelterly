@@ -32,6 +32,7 @@ const UserForm = ({ id, incident }) => {
     agency_id: '',
     user_perms: false,
     incident_perms: false,
+    email_notification: false,
   })
 
   // Hook for initializing data.
@@ -84,6 +85,7 @@ const UserForm = ({ id, incident }) => {
         agency_id: Yup.string().nullable(),
         user_perms: Yup.boolean(),
         incident_perms: Yup.boolean(),
+        email_notification: Yup.boolean(),
       })}
       onSubmit={(values, { setFieldError, setSubmitting }) => {
         setTimeout(() => {
@@ -163,6 +165,8 @@ const UserForm = ({ id, incident }) => {
               <Field component={Switch} name="user_perms" id="user_perms" type="checkbox" color="primary" />
               <BootstrapForm.Label htmlFor="incident_perms">Incident Permissions</BootstrapForm.Label>
               <Field component={Switch} name="incident_perms" id="incident_perms" type="checkbox" color="primary" />
+              <BootstrapForm.Label htmlFor="email_notification">SR Email Notification</BootstrapForm.Label>
+              <Field component={Switch} name="email_notification" id="email_notification" type="checkbox" color="primary" />
             </BootstrapForm>
           </Card.Body>
           <ButtonGroup size="lg">

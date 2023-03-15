@@ -1,9 +1,16 @@
 from django.db import models
 from actstream import action
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.contrib.sites.models import Site
+from django.db.models.signals import post_save
+from django.contrib.auth import get_user_model
 from location.models import Location
 from people.models import Person
 from .managers import ServiceRequestQueryset
 from incident.models import Incident
+
+User = get_user_model()
 
 STATUS_CHOICES = (
   ('open', 'Open'),
@@ -89,6 +96,39 @@ class ServiceRequest(Location):
 
     class Meta:
         ordering = ['-timestamp']
+
+# Send email to hotline users on creation.
+def email_on_creation(sender, instance, **kwargs):
+    if kwargs["created"]:
+        # Send email here.
+        send_mail(
+            # title:
+            "Service Request #" + str(instance.id) + " Created for Shelterly",
+            # message:
+            render_to_string(
+                'service_request_creation_email.txt',
+                {
+                'site': Site.objects.get_current(),
+                'id': instance.id,
+                'address': instance.location_output,
+                }
+            ).strip(),
+            # from:
+            "DoNotReply@shelterly.org",
+            # to:
+            User.objects.filter(email_notification=True).values_list('email', flat=True),
+            fail_silently=False,
+            html_message = render_to_string(
+                'service_request_creation_email.html',
+                {
+                'site': Site.objects.get_current(),
+                'id': instance.id,
+                'address': instance.location_output,
+                }
+            ).strip()
+        )
+post_save.connect(email_on_creation, sender=ServiceRequest)
+
 
 class ServiceRequestImage(models.Model):
 

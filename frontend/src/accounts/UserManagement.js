@@ -7,7 +7,7 @@ import {
   faMinusSquare, faUpload, faUserPlus
 } from '@fortawesome/free-solid-svg-icons';
 import {
-  faCircleI, faCircleU, faPencil, faUserUnlock
+  faCircleE, faCircleI, faCircleU, faPencil, faUserUnlock
 } from '@fortawesome/pro-solid-svg-icons';
 import Header from "../components/Header";
 import { SystemErrorContext } from '../components/SystemError';
@@ -272,6 +272,17 @@ function UserManagement({ incident }) {
               }
             >
               <FontAwesomeIcon icon={faCircleI} size="lg" className="ml-1" />
+            </OverlayTrigger> : ""}
+            {user.email_notification ? <OverlayTrigger
+              key={"email-notification"}
+              placement="top"
+              overlay={
+                <Tooltip id={`tooltip-email-notification`}>
+                  User will receive SR email notifications
+                </Tooltip>
+              }
+            >
+              <FontAwesomeIcon icon={faCircleE} size="lg" className="ml-1" />
             </OverlayTrigger> : ""}
           </Col>
         </div>
