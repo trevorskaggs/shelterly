@@ -50,6 +50,10 @@ function ServiceRequestSearch({ incident }) {
     submittingLabel
   } = useSubmitting();
   const [isDateSet, setIsDateSet] = useState(false);
+  const [
+    filteredServiceRequests,
+    setFilteredServiceRequests
+  ] = useState(data.service_requests);
   const { startDate, endDate, parseDateRange } = useDateRange();
 
   // Update searchTerm when field input changes.
@@ -78,9 +82,20 @@ function ServiceRequestSearch({ incident }) {
     }
   }
 
-  // filtered service requests by date
-  let serviceRequestsByDateRange = data.service_requests.filter(sr => (isDateSet ? startDate <= moment(sr.timestamp)
-    .format('YYYY-MM-DD') && endDate >= moment(sr.timestamp).format('YYYY-MM-DD') : true));
+  // Hook for filtering service requests
+  useEffect(() => {
+    if (data.isFetching) return;
+    if (isDateSet) {
+      const srSubset = data.service_requests.filter((sr) => 
+        moment(startDate) <= moment(sr.timestamp) && moment(endDate) >= moment(sr.timestamp)
+      )
+      setFilteredServiceRequests(srSubset);
+      setNumPages(Math.ceil(srSubset.length / ITEMS_PER_PAGE));
+    } else {
+      setFilteredServiceRequests(data.service_requests);
+      setNumPages(Math.ceil(data.service_requests.length / ITEMS_PER_PAGE));
+    }
+  }, [data, isDateSet, startDate, endDate])
 
   // Hook for initializing data.
   useEffect(() => {
@@ -158,15 +173,15 @@ function ServiceRequestSearch({ incident }) {
             name={`date_range_picker`}
             id={`date_range_picker`}
             placeholder={"Filter by Date Range"}
-            style={{width:"200px", marginLeft:"0.25rem"}}
+            style={{width:"210px", marginLeft:"0.25rem"}}
             onChange={(dateRange) => {
-              if (dateRange === '') {
-                setIsDateSet(false)
-                setNumPages(Math.ceil(data.service_requests.length / ITEMS_PER_PAGE));
-              } else {
+              if (dateRange.length) {
                 setIsDateSet(true)
                 parseDateRange(dateRange)
-                setNumPages(Math.ceil(serviceRequestsByDateRange.length / ITEMS_PER_PAGE));
+                setNumPages(Math.ceil(filteredServiceRequests.length / ITEMS_PER_PAGE));
+              } else {
+                setIsDateSet(false)
+                setNumPages(Math.ceil(data.service_requests.length / ITEMS_PER_PAGE));
               }
             }}
           />
@@ -177,12 +192,12 @@ function ServiceRequestSearch({ incident }) {
             isSubmitting={isSubmitting}
             isSubmittingText={submittingLabel}
           >
-            Print All ({`${serviceRequestsByDateRange.length}`})
+            Print All ({`${filteredServiceRequests.length}`})
             <FontAwesomeIcon icon={faPrint} className="ml-2 text-light" inverse />
           </ButtonSpinner>
         </InputGroup>
       </Form>
-      {serviceRequestsByDateRange.map((service_request, index) => (
+      {filteredServiceRequests.map((service_request, index) => (
         <div key={service_request.id} className="mt-3" hidden={page !== Math.ceil((index+1)/ITEMS_PER_PAGE)}>
           <div className="card-header">
             <h4 style={{marginBottom:"-2px",  marginLeft:"-12px"}}>
@@ -472,7 +487,7 @@ function ServiceRequestSearch({ incident }) {
           </CardGroup>
         </div>
       ))}
-      <p>{data.isFetching ? 'Fetching service requests...' : <span>{serviceRequestsByDateRange && serviceRequestsByDateRange.length ? '' : 'No Service Requests found.'}</span>}</p>
+      <p>{data.isFetching ? 'Fetching service requests...' : <span>{filteredServiceRequests && filteredServiceRequests.length ? '' : 'No Service Requests found.'}</span>}</p>
       <Pagination className="custom-page-links" size="lg" onClick={(e) => {setFocus(parseInt(e.target.innerText));setPage(parseInt(e.target.innerText))}}>
         {[...Array(numPages).keys()].map(x =>
         <Pagination.Item key={x+1} active={x+1 === page}>

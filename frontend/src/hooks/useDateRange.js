@@ -1,5 +1,4 @@
-import { useState } from "react";
-import moment from "moment";
+import { useState } from 'react';
 
 /**
  * useDateRange hook to parse an array of dates and set the start and end dates
@@ -10,17 +9,17 @@ import moment from "moment";
  * @returns {(dateRange: [start: Date, end?: Date]) => void} output.parseDateRange
  */
 function useDateRange() {
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(moment().format("YYYY-MM-DD"));
+  const [startDate, setStartDate] = useState();
+  const [endDate, setEndDate] = useState(new Date());
 
   function parseDateRange(dateRange) {
     if (dateRange.length > 1) {
       dateRange = dateRange.toString().split(",");
-      setStartDate(moment(dateRange[0]).format("YYYY-MM-DD"));
-      setEndDate(moment(dateRange[1]).format("YYYY-MM-DD"));
+      setStartDate(dateRange[0]);
+      setEndDate(dateRange[1]);
     } else {
-      setStartDate(moment(dateRange[0]).format("YYYY-MM-DD"));
-      setEndDate(moment(dateRange[0]).format("YYYY-MM-DD"));
+      setStartDate(dateRange[0]);
+      setEndDate(dateRange[0]);
     }
   }
 

@@ -52,6 +52,10 @@ function DispatchAssignmentSearch({ incident }) {
     submittingLabel
   } = useSubmitting();
   const { startDate, endDate, parseDateRange } = useDateRange();
+  const [
+    filteredEvacAssignments,
+    setFilteredEvacAssignments
+  ] = useState(data.evacuation_assignments);
 
   // Update searchTerm when field input changes.
   const handleChange = event => {
@@ -69,7 +73,7 @@ function DispatchAssignmentSearch({ incident }) {
     e.preventDefault();
 
     handleSubmitting()
-      .then(() => printAllDispatchResolutions(evacAssignments))
+      .then(() => printAllDispatchResolutions(filteredEvacAssignments))
       .then(submittingComplete);
   }
 
@@ -103,8 +107,20 @@ function DispatchAssignmentSearch({ incident }) {
     return [species_matches, status_matches]
   }
 
-  let evacAssignments = data.evacuation_assignments.filter(ea => (isDateSet ? startDate <= moment(ea.start_time)
-    .format('YYYY-MM-DD') && endDate >= moment(ea.start_time).format('YYYY-MM-DD') : true));
+  // Hook for filtering evacuation assignments
+  useEffect(() => {
+    if (data.isFetching) return;
+    if (isDateSet) {
+      const srSubset = data.evacuation_assignments.filter((ea) => 
+        moment(startDate) <= moment(ea.start_time) && moment(endDate) >= moment(ea.start_time)
+      )
+      setFilteredEvacAssignments(srSubset);
+      setNumPages(Math.ceil(srSubset.length / ITEMS_PER_PAGE));
+    } else {
+      setFilteredEvacAssignments(data.evacuation_assignments);
+      setNumPages(Math.ceil(data.evacuation_assignments.length / ITEMS_PER_PAGE));
+    }
+  }, [data, isDateSet, startDate, endDate])
 
   // Hook for initializing data.
   useEffect(() => {
@@ -179,15 +195,15 @@ function DispatchAssignmentSearch({ incident }) {
             name={`date_range_picker`}
             id={`date_range_picker`}
             placeholder={"Filter by Date Range"}
-            style={{width:"200px", marginLeft:"0.25rem"}}
+            style={{width:"210px", marginLeft:"0.25rem"}}
             onChange={(dateRange) => {
-              if (dateRange === '') {
-                setIsDateSet(false)
-                setNumPages(Math.ceil(data.evacuation_assignments.length / ITEMS_PER_PAGE));
-              } else {
+              if (dateRange.length) {
                 setIsDateSet(true)
                 parseDateRange(dateRange)
-                setNumPages(Math.ceil(evacAssignments.length / ITEMS_PER_PAGE));
+                setNumPages(Math.ceil(filteredEvacAssignments.length / ITEMS_PER_PAGE));
+              } else {
+                setIsDateSet(false)
+                setNumPages(Math.ceil(data.evacuation_assignments.length / ITEMS_PER_PAGE));
               }
             }}
           />
@@ -198,12 +214,12 @@ function DispatchAssignmentSearch({ incident }) {
             isSubmitting={isSubmitting}
             isSubmittingText={submittingLabel}
           >
-            Print All ({`${evacAssignments.length}`})
+            Print All ({`${filteredEvacAssignments.length}`})
             <FontAwesomeIcon icon={faPrint} className="ml-2 text-light" inverse />
           </ButtonSpinner>
         </InputGroup>
       </Form>
-      {evacAssignments.map((evacuation_assignment, index) => (
+      {filteredEvacAssignments.map((evacuation_assignment, index) => (
         <div key={evacuation_assignment.id} className="mt-3" hidden={page !== Math.ceil((index+1)/ITEMS_PER_PAGE)}>
           <div className="card-header d-flex hide-scrollbars" style={{whiteSpace:'nowrap', overflow:"hidden"}}>
             <h4 style={{marginBottom:"-2px", marginLeft:"-12px", whiteSpace:'nowrap', overflow:"hidden", textOverflow:"ellipsis"}}>
@@ -381,7 +397,7 @@ function DispatchAssignmentSearch({ incident }) {
           </CardGroup>
         </div>
       ))}
-      <p>{data.isFetching ? 'Fetching dispatch assignments...' : <span>{data.evacuation_assignments && data.evacuation_assignments.length ? '' : 'No dispatch assignments found.'}</span>}</p>
+      <p>{data.isFetching ? 'Fetching dispatch assignments...' : <span>{filteredEvacAssignments.length ? '' : 'No dispatch assignments found.'}</span>}</p>
       <Pagination className="custom-page-links" size="lg" onClick={(e) => {setFocus(parseInt(e.target.innerText));setPage(parseInt(e.target.innerText))}}>
         {[...Array(numPages).keys()].map(x =>
         <Pagination.Item key={x+1} active={x+1 === page}>
