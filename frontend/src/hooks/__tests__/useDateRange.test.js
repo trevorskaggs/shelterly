@@ -1,8 +1,13 @@
-import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
-import { useDateRange } from "../index";
+import React, { useEffect } from 'react';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { useDateRange } from '../index';
 
-const TestComponent = ({ testStartDate = "2000-01-01", testEndDate }) => {
+const basicDateFormat = (date) => date?.toISOString?.()?.substring?.(0, 10);
+
+const TestComponent = ({
+  testStartDate,
+  testEndDate,
+}) => {
   const { startDate, endDate, parseDateRange } = useDateRange();
   const dateRange = [testStartDate];
 
@@ -12,45 +17,45 @@ const TestComponent = ({ testStartDate = "2000-01-01", testEndDate }) => {
 
   return (
     <div>
-      <p>{startDate}</p>
-      <p>{endDate}</p>
-      <button onClick={() => parseDateRange(dateRange)}>parse</button>
+      <p>{basicDateFormat(startDate)}</p>
+      <p>{basicDateFormat(endDate)}</p>
+      <button onClick={(e) => parseDateRange(dateRange)}>parse</button>
     </div>
   );
 };
 
-describe("Hooks > useDateRange", () => {
-  it("should render start and end dates given a date range on button click", () => {
-    const testStartDate = "2020-01-01";
-    const testEndDate = "2020-01-02";
+describe('Hooks > useDateRange', () => {
+  it('should render start and end dates given a date range on button click', () => {
+    const testStartDate = new Date('2020-01-01');
+    const testEndDate = new Date('2020-01-02');
 
     render(
       <TestComponent testStartDate={testStartDate} testEndDate={testEndDate} />
     );
 
     // find button and click it
-    const button = screen.getByRole("button");
+    const button = screen.getByRole('button');
     fireEvent.click(button);
 
     // find the start and end date elements
-    const startDate = screen.getByText(testStartDate);
-    const endDate = screen.getByText(testEndDate);
+    const startDate = screen.getByText(basicDateFormat(testStartDate));
+    const endDate = screen.getByText(basicDateFormat(testEndDate));
 
     expect(startDate).toBeInTheDocument();
     expect(endDate).toBeInTheDocument();
   });
 
-  it("should render start and end dates given a single date on button click", () => {
-    const testStartDate = "2023-01-01";
+  it('should render start and end dates given a single date on button click', () => {
+    const testStartDate = new Date('2023-01-01');
 
     render(<TestComponent testStartDate={testStartDate} />);
 
     // find button and click it
-    const button = screen.getByRole("button");
+    const button = screen.getByRole('button');
     fireEvent.click(button);
 
     // find the start and end date elements
-    const startDate = screen.getAllByText(testStartDate);
+    const startDate = screen.getAllByText(basicDateFormat(testStartDate));
 
     expect(startDate).toHaveLength(2);
   });

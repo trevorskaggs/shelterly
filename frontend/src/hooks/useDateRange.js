@@ -10,16 +10,17 @@ import { useState } from 'react';
  */
 function useDateRange() {
   const [startDate, setStartDate] = useState();
-  const [endDate, setEndDate] = useState(new Date());
+  const [endDate, setEndDate] = useState();
 
   function parseDateRange(dateRange) {
-    if (dateRange.length > 1) {
-      dateRange = dateRange.toString().split(",");
-      setStartDate(dateRange[0]);
-      setEndDate(dateRange[1]);
-    } else {
-      setStartDate(dateRange[0]);
-      setEndDate(dateRange[0]);
+    if (Array.isArray(dateRange) && dateRange.length) {
+      if (dateRange.length > 1) {
+        setStartDate(dateRange[0]);
+        setEndDate(dateRange[1]);
+      } else {
+        setStartDate(dateRange[0]);
+        setEndDate(dateRange[0]);
+      }
     }
   }
 
