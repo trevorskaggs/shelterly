@@ -16,6 +16,10 @@ const rgbColors = {
   WHITE: [255, 255, 255]
 }
 
+const handlerTypes = {
+  DEFAULT: 'default'
+}
+
 class ShelterlyPDF {
   // private properties
   #jsPDF;
@@ -64,6 +68,8 @@ class ShelterlyPDF {
     }
     if (typeof addFooterHandler === 'function') {
       this.#addFooter = addFooterHandler;
+    } else if (addFooterHandler === ShelterlyPDF.HandlerTypes.DEFAULT) {
+      this.#addFooter = this.drawPageNumbers;
     }
 
     // document defaults
@@ -71,6 +77,11 @@ class ShelterlyPDF {
 
     // draw header
     this.drawPageHeader();
+  }
+
+  // static getters
+  static get HandlerTypes() {
+    return handlerTypes;
   }
 
   // read/write properties
