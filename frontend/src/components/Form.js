@@ -90,7 +90,20 @@ const DateRangePicker = ({...props}) => {
         ref={pickerRef}
       />
       {!!pickerRef?.current?.flatpickr?.selectedDates?.length && (
-        <Button className="text-center bg-white text-dark mx-0 px-2 text-center border-1 border-left-0 text-muted" style={{ position: 'relative', left: -3, borderBottomLeftRadius: 0, borderTopLeftRadius: 0 }} onClick={() => pickerRef.current.flatpickr.clear()}>x</Button>
+        <Button
+          className="text-center bg-white text-dark mx-0 px-2 text-center border-1 border-left-0 text-muted"
+          style={{
+            position: "relative",
+            left: -3,
+            borderBottomLeftRadius: 0,
+            borderTopLeftRadius: 0,
+            textTransform: 'uppercase',
+            fontSize: 'x-small'
+          }}
+          onClick={() => pickerRef.current.flatpickr.clear()}
+        >
+          x
+        </Button>
       )}
     </div>
   );
