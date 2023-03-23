@@ -9,23 +9,20 @@ const buildOwnersDoc = (owners) => {
   const pdf = new ShelterlyPDF({}, {
     pageTitle: 'Owner Summary',
     pageSubtitle: `Date: ${new Date().toLocaleDateString()}`,
-    // adds page numbers to the footer
-    addFooterHandler: ({
-      pageNumber,
-      pageCount,
-      pdf
-    }) => {
-      const { width: pageWidth, height: pageHeight } = pdf.internal.pageSize;
-      pdf.text('Page ' + String(pageNumber) + ' of ' + String(pageCount), pageWidth / 2, pageHeight - 15, {
-        align: 'center'
-      });
-    }
   });
 
+  const groupedPageCounts = [];
+  let ownerPageCount = 1;
   owners.forEach((owner, i) => {
     if (i > 0) {
       pdf.drawPageBreak();
       pdf.drawPageHeader();
+      
+      // before resetting the owner page count, store the current count
+      groupedPageCounts.push(ownerPageCount);
+
+      // reset the page count for each owner
+      ownerPageCount = 1;
     }
 
     // draw owner section
@@ -75,6 +72,7 @@ const buildOwnersDoc = (owners) => {
         pdf.drawPageBreak();
         drawAnimalHeader();
         lastYPosBeforeDraw = pdf.getLastYPositionWithBuffer({ buffer: 0 });
+        ownerPageCount++;
       }
 
       const animalInfoList = [
@@ -124,6 +122,30 @@ const buildOwnersDoc = (owners) => {
       }
     });
   });
+
+  // push the last owner page count
+  groupedPageCounts.push(ownerPageCount);
+
+  const totalPageCount = pdf.numberOfPages
+  let ownerPageNumber = 1
+  let groupIndex = 0;
+
+  // draw the page numbers
+  for (let pageNumber = 1; pageNumber <= totalPageCount; pageNumber++) {
+    pdf.setPage(pageNumber);
+
+    let ownerPageCount = groupedPageCounts[groupIndex];
+    if (ownerPageNumber > ownerPageCount) {
+      ownerPageNumber = 1
+      groupIndex++;
+      ownerPageCount = groupedPageCounts[groupIndex];
+    }
+    pdf.drawPageNumbers({
+      pageNumber: ownerPageNumber,
+      pageCount: ownerPageCount
+    });
+    ownerPageNumber++;
+  }
 
   return pdf;
 };

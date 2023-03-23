@@ -178,7 +178,7 @@ class ShelterlyPDF {
     // add logo header
     this.#jsPDF.addImage(
       logo,
-      "png",
+      'png',
       this.#documentTopMargin,
       this.#documentLeftMargin,
       50,
@@ -187,7 +187,7 @@ class ShelterlyPDF {
 
     // text brown
     this.setDocumentColors({ rgb: rgbColors.SHELTERLY_BROWN });
-    this.#jsPDF.text("SHELTERLY", this.#documentLeftMargin, 80);
+    this.#jsPDF.text('SHELTERLY', this.#documentLeftMargin, 80);
 
     // reset doc colors
     this.setDocumentColors();
@@ -198,7 +198,7 @@ class ShelterlyPDF {
       pageTitle,
       this.pageWidth - this.#documentRightMargin,
       this.#documentTopMargin,
-      { align: "right" }
+      { align: 'right' }
     );
     this.#documentLastYPosition = this.#documentTopMargin + 25;
 
@@ -208,7 +208,7 @@ class ShelterlyPDF {
         subtitle,
         this.pageWidth - this.#documentRightMargin,
         this.#documentLastYPosition,
-        { align: "right" }
+        { align: 'right' }
       );
     }
 
@@ -408,7 +408,7 @@ class ShelterlyPDF {
 
     let _xPosition = xPosition;
 
-    textArray.map((_text, i) => {
+    textArray.forEach((_text, i) => {
       this.#jsPDF.setFont(undefined, 'bold');
 
       if (i % 2 === 0) {
@@ -694,6 +694,17 @@ class ShelterlyPDF {
     });
 
     this.resetDocumentLeftMargin();
+  }
+
+  drawPageNumbers({
+    pageNumber,
+    pageCount
+  }) {
+    const jsPdf = this.#jsPDF;
+    const { width: pageWidth, height: pageHeight } = jsPdf.internal.pageSize;
+    jsPdf.text('Page ' + String(pageNumber) + ' of ' + String(pageCount), pageWidth / 2, pageHeight - 15, {
+        align: 'center'
+      });
   }
 
   /**
