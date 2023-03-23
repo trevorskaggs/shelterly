@@ -165,7 +165,7 @@ function ServiceRequestDetails({ id, incident }) {
             </Tooltip>
           }
         >
-          <Link onClick={handleGeoJsonDownload} href=""><FontAwesomeIcon icon={faDownload} className="ml-2"  inverse /></Link>
+          <Link onClick={handleGeoJsonDownload} href=""><FontAwesomeIcon icon={faDownload} className="mx-2"  inverse /></Link>
         </OverlayTrigger>
 
         <OverlayTrigger

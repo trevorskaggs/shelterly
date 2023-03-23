@@ -69,12 +69,43 @@ const useStyles = makeStyles({
 });
 
 const DateRangePicker = ({...props}) => {
-
-  let options = {allowInput: true, dateFormat: "m-d-Y", mode: "range", maxDate: moment().format('MM-DD-YYYY')}
+  const pickerRef = useRef();
+  const options = {allowInput: true, dateFormat: "m-d-Y", mode: "range", maxDate: moment().format('MM-DD-YYYY')}
+  const styles = {
+    ...props.style,
+    display: 'flex'
+  }
   return (
-    <>
-      <Flatpickr className="daterange_picker" options={options} {...props} style={{...props.style, borderRadius:".25rem", borderWidth:"1px", borderStyle:"solid"}} />
-    </>
+    <div style={styles}>
+      <Flatpickr
+        className="daterange_picker"
+        options={options}
+        {...props}
+        style={{
+          borderRadius: ".25rem",
+          borderWidth: "1px",
+          borderStyle: "solid",
+          flexGrow: 1
+        }}
+        ref={pickerRef}
+      />
+      {!!pickerRef?.current?.flatpickr?.selectedDates?.length && (
+        <Button
+          className="text-center bg-white text-dark mx-0 px-2 text-center border-1 border-left-0 text-muted"
+          style={{
+            position: "relative",
+            left: -3,
+            borderBottomLeftRadius: 0,
+            borderTopLeftRadius: 0,
+            textTransform: 'uppercase',
+            fontSize: 'x-small'
+          }}
+          onClick={() => pickerRef.current.flatpickr.clear()}
+        >
+          x
+        </Button>
+      )}
+    </div>
   );
 };
 
