@@ -15,14 +15,18 @@ function DispatchTeamManagement({ incident }) {
   const { setShowSystemError } = useContext(SystemErrorContext);
 
   const [data, setData] = useState({team_members: [], teams: [], isFetching: false});
+  const [allTeams, setAllTeams] = useState([]);
 
   const showHideTeam = async (team_id, action) => {
     await axios.patch('/evac/api/dispatchteam/' + team_id + '/', {'action':action})
     .then(response => {
-      const index = data.teams.findIndex(team => team.id === team_id);
       let teams = [...data.teams];
+      const index = data.teams.findIndex(datateam => datateam.id === team_id);
       teams[index] = response.data;
       setData(prevState => ({ ...prevState, "teams": teams }));
+      allTeams.filter(team => team.name === response.data.name && team.id !== response.data.id).forEach(function(team) {
+        axios.patch('/evac/api/dispatchteam/' + team.id + '/', {'action':action})
+      })
     })
     .catch(error => {
       setShowSystemError(true);
@@ -63,7 +67,8 @@ function DispatchTeamManagement({ incident }) {
             cancelToken: source.token,
           })
           .then(teamResponse => {
-            setData({team_members: teamMemberResponse.data, teams: teamResponse.data, isFetching: false});
+            setAllTeams(teamResponse.data);
+            setData({team_members: teamMemberResponse.data, teams: teamResponse.data.filter((tag, index, array) => array.findIndex(t => t.name == tag.name) == index), isFetching: false});
           })
           .catch(error => {
             if (!unmounted) {
