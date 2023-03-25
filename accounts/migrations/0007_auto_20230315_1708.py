@@ -10,10 +10,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AlterModelOptions(
-            name='shelterlyuser',
-            options={'ordering': ('last_name', 'first_name')},
-        ),
         migrations.AddField(
             model_name='shelterlyuser',
             name='email_notification',
