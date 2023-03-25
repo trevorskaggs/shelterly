@@ -25,7 +25,7 @@ class Person(Location):
         return '{} {}'.format(self.first_name, self.last_name)
 
     class Meta:
-        ordering = ('-first_name',)
+        ordering = ('first_name',)
 
 class PersonImage(models.Model):
 
