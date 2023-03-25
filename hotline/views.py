@@ -46,6 +46,12 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
                 service_request.animal_set.update(status='CANCELED')
                 action.send(self.request.user, verb='canceled service request', target=service_request)
 
+                for assigned_request in AssignedRequest.objects.filter(service_request=service_request, dispatch_assignment__end_time=None):
+                    for animal in service_request.animal_set.all():
+                        if assigned_request.animals.get(str(animal.id)):
+                            assigned_request.animals[str(animal.id)]['status'] = 'CANCELED'
+                    assigned_request.save()
+
             elif self.request.FILES.keys():
               # Create new files from uploads
               for key in self.request.FILES.keys():
