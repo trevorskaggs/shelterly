@@ -51,13 +51,13 @@ class DispatchTeamViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = DispatchTeam.objects.all().annotate(is_assigned=Exists(EvacAssignment.objects.filter(team_id=OuterRef("id"), end_time=None))).order_by('-dispatch_date')
         is_map = self.request.query_params.get('map', '')
+        if self.request.GET.get('incident'):
+            queryset = queryset.filter(incident__slug=self.request.GET.get('incident'))
+
         if is_map == 'true':
             yesterday = datetime.today() - timedelta(days=1)
             y_mid = datetime.combine(yesterday,datetime.min.time())
-            queryset = queryset.filter(Q(is_assigned=True) | Q(dispatch_date__gte=y_mid)).filter(team_members__show=True)
-
-        if self.request.GET.get('incident'):
-            queryset = queryset.filter(incident__slug=self.request.GET.get('incident'))
+            queryset = queryset.filter(Q(is_assigned=True) | Q(dispatch_date__gte=y_mid)).filter(team_members__show=True).distinct()
 
         return queryset
 

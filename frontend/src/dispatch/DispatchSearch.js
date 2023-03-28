@@ -290,7 +290,7 @@ function DispatchAssignmentSearch({ incident }) {
                 <Card.Body style={{marginBottom:"0px"}}>
                   <Card.Title style={{marginTop:"-9px", marginBottom:"7px", marginLeft:"-9px"}}>Service Requests</Card.Title>
                   {evacuation_assignment.assigned_requests.map(assigned_request => (
-                    <div key={assigned_request.service_request_object.id} className="" style={{marginLeft:"-10px", marginRight:"7px", marginTop: "7px", marginBottom:"0px"}}>
+                    <div key={assigned_request.service_request_object.id} style={{marginLeft:"-10px", marginRight:"7px", marginTop: "7px", marginBottom:"0px"}}>
                       <div className="card-header rounded">
                       <span style={{marginLeft:"-12px"}}>
                       {matches[assigned_request.service_request_object.id] && Object.keys(matches[assigned_request.service_request_object.id].status_matches['REPORTED']).length > 0 ?
@@ -383,7 +383,7 @@ function DispatchAssignmentSearch({ incident }) {
                         <span>
                           {Object.keys(matches[assigned_request.service_request_object.id].species_matches).map((key,i) => (
                             <span key={key} style={{textTransform:"capitalize"}}>
-                              {i > 0 && ", "}{prettyText('', key.split(',')[0], matches[assigned_request.service_request_object.id].species_matches[key])}
+                              {i > 0 && ", "}{prettyText(key.split(',')[0], matches[assigned_request.service_request_object.id].species_matches[key])}
                             </span>
                           ))}
                         </span>

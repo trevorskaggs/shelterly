@@ -339,7 +339,7 @@ function DispatchResolutionForm({ id, incident }) {
                 </ListGroup>
               </Card.Body>
             </Card>
-            {data.assigned_requests.map((assigned_request, index) => (
+            {data.assigned_requests.filter(request => request.service_request_object.animals.length > 0).map((assigned_request, index) => (
               <Card key={assigned_request.service_request_object.id} className="mt-3 border rounded">
                 <Card.Body>
                   <Card.Title style={{marginBottom:"-5px", marginTop:"-5px"}}>

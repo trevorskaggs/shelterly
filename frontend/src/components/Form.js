@@ -381,8 +381,8 @@ const AddressLookup = ({setLatLon, ...props}) => {
   }
 
   const clearAddress = () => {
-    childRef.current.refs.input.value = "";
-    childRef.current.refs.input.focus();
+    childRef.current.value = "";
+    childRef.current.focus();
     setFieldValue("address", "");
     setFieldValue("city", "");
     setFieldValue("state", "");
@@ -395,7 +395,7 @@ const AddressLookup = ({setLatLon, ...props}) => {
 
 
   useEffect(() => {
-    if ((childRef.current && childRef.current.refs && (childRef.current.refs.input.value.includes(", USA") || childRef.current.refs.input.value.includes(", United")))) {
+    if ((childRef.current && (childRef.current.value.includes(", USA") || childRef.current.value.includes(", United")))) {
       setError("");
     }
     updateAddr(search);
@@ -476,14 +476,13 @@ const AddressLookup = ({setLatLon, ...props}) => {
             onBlur={(e) => {
               setError("");
               setTriggerRefresh(!triggerRefresh)
-              if (!values.address && childRef.current && childRef.current.refs && childRef.current.refs.input.value) {
+              if (!values.address && childRef.current && childRef.current.value) {
                 setError(props.error);
               }
             }}
             id="search"
             name="search"
             disabled={props.disabled}
-            key={`search_key_` + String(incidentLatLon.lat)}
             options={{
               bounds:{north:incidentLatLon.lat+.1, south:incidentLatLon.lat-.1, east:incidentLatLon.lng+.1, west:incidentLatLon.lng-.1},
               types: ["geocode"],
