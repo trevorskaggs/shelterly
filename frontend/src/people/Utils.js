@@ -124,7 +124,6 @@ const buildOwnersDoc = (owners) => {
     });
 
     const estimatedSectionHeight = 529;
-    console.log('🚀 ~ file: Utils.js:128 ~ owners.forEach ~ pdf.remainderPageHeight:', pdf.remainderPageHeight)
     if (pdf.remainderPageHeight <= estimatedSectionHeight) {
       pdf.drawPageBreak();
       ownerPageCount++;
@@ -146,7 +145,7 @@ const buildOwnersDoc = (owners) => {
 
     function drawAgreements(agreements) {
       agreements.forEach((agreement, i) => {
-        pdf.drawWrappedText({ text: `${i})    ${agreement}`, linePadding: -3, bottomPadding: 5 })
+        pdf.drawWrappedText({ text: `${i + 1})    ${agreement}`, linePadding: -3, bottomPadding: 5 })
       });
     }
 
