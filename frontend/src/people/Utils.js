@@ -2,6 +2,7 @@ import moment from 'moment';
 import ShelterlyPDF from '../utils/pdf';
 import { capitalize } from '../utils/formatString';
 import { buildAnimalCareScheduleDoc } from '../animals/Utils';
+import { ORGANIZATION_NAME, ORGANIZATION_SHORT_NAME } from "../constants";
 
 const dateFormat = 'YYYYMMDDHHmm';
 
@@ -120,6 +121,86 @@ const buildOwnersDoc = (owners) => {
         ) {
         drawAnimalHeader();
       }
+    });
+
+    const estimatedSectionHeight = 529;
+    console.log('🚀 ~ file: Utils.js:128 ~ owners.forEach ~ pdf.remainderPageHeight:', pdf.remainderPageHeight)
+    if (pdf.remainderPageHeight <= estimatedSectionHeight) {
+      pdf.drawPageBreak();
+      ownerPageCount++;
+    }
+
+    // Draw liability form
+    pdf.drawSectionHeader({
+      text: "Liability Release",
+      hRule: false,
+      align: ShelterlyPDF.AlignTypes.CENTER,
+    });
+    pdf.drawPad(18);
+    let liabilityPreface = `Due to a declared emergency, I am requesting ${ORGANIZATION_NAME} to board my animal(s) `;
+    liabilityPreface += '(listed above) and agree to all of the following:';
+    pdf.setDocumentFontSize({ size: 8 });
+    pdf.drawWrappedText({ text: liabilityPreface, linePadding: -2 });
+    pdf.drawHRule({ buffer: 1});
+    pdf.setDocumentFontSize();
+
+    function drawAgreements(agreements) {
+      agreements.forEach((agreement, i) => {
+        pdf.drawWrappedText({ text: `${i})    ${agreement}`, linePadding: -3, bottomPadding: 5 })
+      });
+    }
+
+    const agreements = [
+      // 1)
+      'I understand that my animal(s) may be exposed to disease and other risks while being ' +
+      'housed at the shelter and other facilities and therefore I will not hold ' +
+      `${ORGANIZATION_NAME} responsible for the health or death of my animal(s).`,
+
+      // 2)
+      'I agree to attempt to find alternate housing for my animal(s) as soon as possible.',
+
+      // 3)
+      `I agree to contact the agency on a regular basis to keep ${ORGANIZATION_NAME} ` +
+      'updated on my whereabouts and possible alternate housing.',
+
+      // 4)
+      'I understand that this boarding agreement is temporary and I agree to make arrangements ' +
+      'for or claim my pet(s) at the close of the shelter.',
+
+      // 5)
+      'I understand that I will be subject to boarding fees at the close of the shelter.',
+
+      // 6)
+      'I understand that photographs of myself and my animal(s) may be taken.'
+    ];
+
+    drawAgreements(agreements);
+
+    const releaseLabels = [
+      "I Allow",
+      { label: "or", type: "text" },
+      "I Decline",
+      {
+        label:
+          "any photos that are taken to be released to the media or public view",
+        type: "text",
+      }
+    ].concat(Array(7).fill({
+      label: ' ',
+      type: 'text'
+    }));
+    pdf.drawCheckboxList({
+      labels: releaseLabels,
+      listStyle: 'inline',
+    });
+
+    // pdf.drawTextWithLine({ label: 'Owner\'s Signature', xOffset: 100 });
+
+    pdf.drawTextList({
+      labels: ['Owner\'s Signature: ', 'Date: ', `${ORGANIZATION_SHORT_NAME} Witness: `],
+      listStyle: 'grid',
+      bottomPadding: 10,
+      withLines: true
     });
   });
 
