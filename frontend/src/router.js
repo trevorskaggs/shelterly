@@ -59,6 +59,7 @@ const routes = {
   "/:incident/animals/:id": ({id, incident}) => <AnimalDetails id={id} incident={incident} />,
   "/:incident/dispatch": ({incident}) => <Dispatch incident={incident} />,
   "/:incident/dispatch/dispatchteammember/new": ({incident}) => <DispatchTeamMemberForm incident={incident} />,
+  "/:incident/dispatch/dispatchteammember/edit/:id": ({id, incident}) => <DispatchTeamMemberForm id={id} incident={incident} />,
   "/:incident/dispatch/dispatchassignment/search": ({incident}) => <DispatchAssignmentSearch incident={incident} />,
   "/:incident/dispatch/summary/:id": ({id, incident}) => <DispatchSummary id={id} incident={incident} />,
   "/:incident/dispatch/resolution/:id": ({id, incident}) => <DispatchResolutionForm id={id} incident={incident} />,

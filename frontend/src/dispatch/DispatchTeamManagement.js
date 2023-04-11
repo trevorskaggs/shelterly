@@ -121,9 +121,11 @@ function DispatchTeamManagement({ incident }) {
               <Card className="border rounded" style={{height:"41px"}}>
                 <div className="row no-gutters" style={{height:"41px", textTransform:"capitalize", marginRight:"-2px"}}>
                   <Row className="ml-0 mr-0 w-100" style={{minWidth:"334px", maxWidth:"334px"}}>
-                    <div style={{width:"41px"}}>
-                      <FontAwesomeIcon icon={faUser} size="2x" style={{marginTop:"5px", marginLeft:"7px"}} inverse />
-                    </div>
+                    <Link href={"/" + incident + "/dispatch/dispatchteammember/edit/" + team_member.id}>
+                      <div style={{width:"41px"}}>
+                        <FontAwesomeIcon icon={faUser} size="2x" style={{marginTop:"5px", marginLeft:"7px"}} inverse />
+                      </div>
+                    </Link>
                     <Col style={{marginLeft:"-5px", marginRight:"-25px"}}>
                       <div className="border" style={{height:"41px", paddingTop:"9px", paddingBottom:"7px", paddingLeft:"10px", marginLeft:"-11px", marginTop: "-1px", fontSize:"15px", width:"100%", borderTopRightRadius:"0.25rem", borderBottomRightRadius:"0.25rem", backgroundColor:"#615e5e"}}>
                         {team_member.display_name}
