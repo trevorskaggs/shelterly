@@ -11,6 +11,7 @@ import Header from '../components/Header';
 import { SystemErrorContext } from '../components/SystemError';
 import AnimalCards from '../components/AnimalCards';
 import { printIntakeSummaryAnimalCareSchedules } from './Utils';
+import { printOwnerDetails } from './Utils';
 
 function ShelterIntakeSummary({ id, incident }) {
 
@@ -27,6 +28,12 @@ function ShelterIntakeSummary({ id, incident }) {
     person: null,
     person_object: {first_name:'', last_name:''}
   });
+
+  const handlePrintOwnerClick = (e) => {
+    e.preventDefault();
+
+    printOwnerDetails(data.person_object);
+  }
 
   const handlePrintAllAnimalsClick = (e) => {
     e.preventDefault();
@@ -86,7 +93,34 @@ function ShelterIntakeSummary({ id, incident }) {
                 </ListGroup.Item>
                 {data.intake_type === 'owner_walkin' ?
                 <ListGroup.Item>
-                  <b>Owner:</b> <Link href={"/" + incident + "/people/owner/" + data.person} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.person_object.first_name} {data.person_object.last_name}</Link>
+                  <b>Owner:</b>{' '}
+                  <Link
+                    href={"/" + incident + "/people/owner/" + data.person}
+                    className="text-link"
+                    style={{textDecoration:"none", color:"white"}}
+                  >
+                    {data.person_object.first_name}
+                    {' '}
+                    {data.person_object.last_name}
+                  </Link>
+                  <OverlayTrigger
+                    key={'printOwner'}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-printall`}>
+                        Print Owner Details
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon
+                      icon={faPrint}
+                      onClick={handlePrintOwnerClick}
+                      style={{cursor:'pointer'}}
+                      className="ml-2 fa-move-up"
+                      size="sm"
+                      inverse
+                    />
+                  </OverlayTrigger>
                 </ListGroup.Item>
                 : data.intake_type === 'reporter_walkin' ?
                 <ListGroup.Item>
