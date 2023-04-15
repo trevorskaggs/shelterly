@@ -1,6 +1,8 @@
 import moment from 'moment';
 import { buildAnimalCareScheduleDoc } from '../animals/Utils';
 
+export { printOwnerDetails } from '../people/Utils';
+
 const dateFormat = 'YYYYMMDDHHmm';
 
 export const printRoomAnimalCareSchedules  = async (animals = [], roomId = 0) => {

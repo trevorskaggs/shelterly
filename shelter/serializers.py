@@ -107,8 +107,8 @@ class IntakeSummarySerializer(serializers.ModelSerializer):
         return ModestAnimalSerializer(obj.animals, many=True).data
 
     def get_person_object(self, obj):
-        from people.serializers import SimplePersonSerializer
-        return SimplePersonSerializer(obj.person, required=False, read_only=True).data
+        from people.serializers import PersonSerializer
+        return PersonSerializer(obj.person, required=False, read_only=True).data
 
     class Meta:
         model = IntakeSummary

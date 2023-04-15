@@ -9,16 +9,7 @@ const dateFormat = 'YYYYMMDDHHmm';
 function buildServiceRequestsDoc(srs = []) {
   const pdf = new ShelterlyPDF({}, {
     // adds page numbers to the footer
-    addFooterHandler: ({
-      pageNumber,
-      pageCount,
-      pdf
-    }) => {
-      const { width: pageWidth, height: pageHeight } = pdf.internal.pageSize;
-      pdf.text('Page ' + String(pageNumber) + ' of ' + String(pageCount), pageWidth / 2, pageHeight - 15, {
-        align: 'center'
-      });
-    },
+    addFooterHandler: ShelterlyPDF.HandlerTypes.DEFAULT,
     pageTitle: 'Service Request Summary',
     pageSubtitle: ' '
   });

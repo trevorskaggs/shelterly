@@ -8,16 +8,7 @@ const dateFormat = 'YYYYMMDDHHmm';
 const buildDispatchResolutionsDoc = (drs = []) => {
   const pdf = new ShelterlyPDF({}, {
     // adds page numbers to the footer
-    addFooterHandler: ({
-      pageNumber,
-      pageCount,
-      pdf
-    }) => {
-      const { width: pageWidth, height: pageHeight } = pdf.internal.pageSize;
-      pdf.text('Page ' + String(pageNumber) + ' of ' + String(pageCount), pageWidth / 2, pageHeight - 15, {
-        align: 'center'
-      });
-    },
+    addFooterHandler: ShelterlyPDF.HandlerTypes.DEFAULT,
     pageTitle: `Dispatch Assignment ${drs.length ? `#${drs[0].id}` : ''}`,
     pageSubtitle: drs.length
       ? `Opened: ${new Date(drs[0].start_time).toLocaleDateString()}`
