@@ -2,16 +2,13 @@ import moment from 'moment';
 import ShelterlyPDF from '../utils/pdf';
 import { capitalize } from '../utils/formatString';
 import { buildAnimalCareScheduleDoc } from '../animals/Utils';
-import { ORGANIZATION_NAME, ORGANIZATION_SHORT_NAME } from "../constants";
+import {
+  ORGANIZATION_NAME,
+  ORGANIZATION_SHORT_NAME,
+  DATE_FORMAT,
+} from "../constants";
 
-const dateFormat = 'YYYYMMDDHHmm';
-
-const buildOwnersDoc = (owners) => {
-  const pdf = new ShelterlyPDF({}, {
-    pageTitle: 'Owner Summary',
-    pageSubtitle: `Date: ${new Date().toLocaleDateString()}`,
-  });
-
+const buildOwnersContent = (pdf, owners) => {
   const groupedPageCounts = [];
   let ownerPageCount = 1;
   owners.forEach((owner, i) => {
@@ -228,6 +225,15 @@ const buildOwnersDoc = (owners) => {
   }
 
   return pdf;
+}
+
+const buildOwnersDoc = (owners) => {
+  const pdf = new ShelterlyPDF({}, {
+    pageTitle: 'Owner Summary',
+    pageSubtitle: `Date: ${new Date().toLocaleDateString()}`,
+  });
+
+  return buildOwnersContent(pdf, owners);
 };
 
 function printOwnerDetails(owner = {}) {
@@ -238,17 +244,18 @@ function printOwnerDetails(owner = {}) {
 
 async function printAllOwnersDetails(owners = []) {
   const pdf = buildOwnersDoc(owners);
-  pdf.fileName = `Owner-Summaries-${moment().format(dateFormat)}`;
+  pdf.fileName = `Owner-Summaries-${moment().format(DATE_FORMAT)}`;
   return pdf.saveFile();
 }
 
 const printOwnerAnimalCareSchedules  = async (animals = [], ownerId = 0) => {
   const  pdf = await buildAnimalCareScheduleDoc(animals);
-  pdf.fileName = `Shelterly-Owner-Animal-Care-Schedules-${ownerId.toString().padStart(4, 0)}-${moment().format(dateFormat)}`;
+  pdf.fileName = `Shelterly-Owner-Animal-Care-Schedules-${ownerId.toString().padStart(4, 0)}-${moment().format(DATE_FORMAT)}`;
   return pdf.saveFile();
 };
 
 export {
+  buildOwnersContent,
   printOwnerDetails,
   printAllOwnersDetails,
   printOwnerAnimalCareSchedules

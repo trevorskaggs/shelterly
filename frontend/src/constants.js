@@ -18,3 +18,5 @@ export const priorityChoices = [
 
 export const ORGANIZATION_NAME = 'Butte County Animal Control/NVADG';
 export const ORGANIZATION_SHORT_NAME = 'BC/NVADG';
+
+export const DATE_FORMAT = 'YYYYMMDDHHmm';
