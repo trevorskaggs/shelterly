@@ -1,9 +1,7 @@
 import moment from 'moment';
 import ShelterlyPDF from '../utils/pdf';
-import { priorityChoices } from '../constants';
+import { priorityChoices, DATE_FORMAT } from '../constants';
 import { statusChoices } from '../animals/constants';
-
-const dateFormat = 'YYYYMMDDHHmm';
 
 const buildDispatchResolutionsDoc = (drs = []) => {
   const pdf = new ShelterlyPDF({}, {
@@ -293,7 +291,7 @@ function printDispatchResolutionForm(dr = {}) {
 
 function printAllDispatchResolutions(drs = []) {
   const pdf = buildDispatchResolutionsDoc(drs);
-  pdf.fileName = `DARs-${moment().format(dateFormat)}`;
+  pdf.fileName = `DARs-${moment().format(DATE_FORMAT)}`;
   return pdf.saveFile();
 }
 

@@ -10,8 +10,11 @@ import Moment from 'react-moment';
 import Header from '../components/Header';
 import { SystemErrorContext } from '../components/SystemError';
 import AnimalCards from '../components/AnimalCards';
-import { printIntakeSummaryAnimalCareSchedules } from './Utils';
-import { printOwnerDetails } from './Utils';
+import {
+  printIntakeSummaryAnimalCareSchedules,
+  printOwnerDetails,
+  printIntakeSummary
+} from "./Utils";
 
 function ShelterIntakeSummary({ id, incident }) {
 
@@ -39,6 +42,12 @@ function ShelterIntakeSummary({ id, incident }) {
     e.preventDefault();
 
     printIntakeSummaryAnimalCareSchedules(data.animal_objects, id);
+  }
+
+  const handlePrintIntakeSummary = async (e) => {
+    e.preventDefault();
+
+    await printIntakeSummary(data);
   }
 
   // Hook for initializing data.
@@ -73,9 +82,32 @@ function ShelterIntakeSummary({ id, incident }) {
   return (
     <>
       <Header>
-      {data.intake_type === 'owner_walkin' ? 'Owner Walk-In ' : data.intake_type === 'reporter_walkin' ? 'Reporter Walk-In ' : 'Dispatch '}Intake Summary
+        {data.intake_type === "owner_walkin"
+          ? "Owner Walk-In "
+          : data.intake_type === "reporter_walkin"
+          ? "Reporter Walk-In "
+          : "Dispatch "}
+        Intake Summary
+
+        {data.person_object && data.animal_objects?.length ? (
+          <OverlayTrigger
+            key={"offline-dispatch-assignment"}
+            placement="bottom"
+            overlay={
+              <Tooltip id={`tooltip-offline-dispatch-assignment`}>
+                Print dispatch assignment
+              </Tooltip>
+            }
+          >
+            {({ ref, ...triggerHandler }) => (
+              <Link onClick={handlePrintIntakeSummary} {...triggerHandler} href="#">
+                <span ref={ref}><FontAwesomeIcon icon={faPrint} className="ml-2 mr-1"  inverse /></span>
+              </Link>
+            )}
+          </OverlayTrigger>
+        ): null}
       </Header>
-      <hr/>
+      <hr />
       <Row className="d-flex">
         <Col>
           <Card className="border rounded d-flex" style={{width:"100%", height: "100%"}}>
