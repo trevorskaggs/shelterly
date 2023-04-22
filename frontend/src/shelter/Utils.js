@@ -34,10 +34,10 @@ export const printIntakeSummaryAnimalCareSchedules = async (
 export const printIntakeSummary = async (data = {}) => {
   const title = `${
     data.intake_type === "owner_walkin"
-      ? "Owner Walk-In "
+      ? "Owner Walk-In"
       : data.intake_type === "reporter_walkin"
-      ? "Reporter Walk-In "
-      : "Dispatch "
+      ? "Reporter Walk-In"
+      : "Dispatch"
   } Intake Summary`;
 
   const pdf = new ShelterlyPDF(
@@ -49,7 +49,7 @@ export const printIntakeSummary = async (data = {}) => {
     }
   );
 
-  await buildOwnersContent(pdf, [data.person_object]);
+  await buildOwnersContent(pdf, [data.person_object], data.animal_objects);
   pdf.drawPageBreak();
   await buildAnimalCareScheduleContent(pdf, data.animal_objects);
 

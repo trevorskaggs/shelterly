@@ -8,7 +8,15 @@ import {
   DATE_FORMAT,
 } from "../constants";
 
-const buildOwnersContent = (pdf, owners) => {
+/**
+ * builds owner summary content
+ *
+ * @param {ShelterlyPDF} pdf
+ * @param {Array} owners
+ * @param {Array} [animalsOverride] optionally set the animals, otherwise will use animals within the owner object
+ * @returns {ShelterlyPDF}
+ */
+const buildOwnersContent = (pdf, owners, animalsOverride) => {
   const groupedPageCounts = [];
   let ownerPageCount = 1;
   owners.forEach((owner, i) => {
@@ -27,16 +35,19 @@ const buildOwnersContent = (pdf, owners) => {
     pdf.drawSectionHeader({ text: 'Owner Details', hRule: true });
     
     const ownerInfoList = [
-      `Name: ${owner.first_name} ${owner.last_name}`,
-      `Owner ID: #${owner.id}`
+      `Name: ${owner.first_name} ${owner.last_name}`
     ];
+    if (owner.id) {
+      ownerInfoList.push(`Owner ID: #${owner.id}`)
+    }
     if (owner.agency) ownerInfoList.push(`Agency: ${owner.agency}`);
     if (owner.phone) ownerInfoList.push(`Telephone: ${owner.display_phone} ${owner.display_alt_phone ? `  Alt: ${owner.display_alt_phone}` : ''}`);
     if (owner.email) ownerInfoList.push(`Email: ${owner.email}`);
     if (owner.request) ownerInfoList.push(`Service Request: ${owner.request.full_address}`);
     else {
       if (owner.address) ownerInfoList.push(`Address: ${owner.full_address}`);
-      else ownerInfoList.push('Address: No Address Listed');
+      else if (owner.id) ownerInfoList.push('Address: No Address Listed');
+      else ownerInfoList.push('Address:');
     }
 
     pdf.drawTextList({
@@ -60,7 +71,10 @@ const buildOwnersContent = (pdf, owners) => {
 
     // keep the last y position after a row was drawn
     let lastYPosAfterDraw = pdf.getLastYPositionWithBuffer({ buffer: 0 });
-    owner.animals.forEach((animal, animalIndex) => {
+
+    const animals = animalsOverride || owner?.animals || [];
+
+    animals.forEach((animal, animalIndex) => {
       // grab the last y position before we draw a row
       let lastYPosBeforeDraw = pdf.getLastYPositionWithBuffer({ buffer: 0 });
       
@@ -114,7 +128,7 @@ const buildOwnersContent = (pdf, owners) => {
       // Draw the animal header again.
       if (
           lastYPosAfterDraw < lastYPosBeforeDraw &&
-          animalIndex < owner.animals.length - 1
+          animalIndex < animals.length - 1
         ) {
         drawAnimalHeader();
       }

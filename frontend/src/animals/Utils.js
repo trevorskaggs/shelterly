@@ -33,7 +33,12 @@ async function buildAnimalCareScheduleContent(pdf, animals) {
       };
     }
     // draw image or svg
-    await pdf[graphicOptions.drawFuncName](graphicOptions);
+    await pdf[graphicOptions.drawFuncName](graphicOptions)
+      .catch(() => {
+        if (imageSrc) {
+          console.log('Cannot add animal image to ShelterlyPDF');
+        }
+      });
 
     pdf.setDocumentFontSize({ size: 12 });
     pdf.drawPad(-15);
