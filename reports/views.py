@@ -49,7 +49,7 @@ class ReportViewSet(viewsets.ViewSet):
           sr_worked_report.append(sr_data)
           end_date -= delta
 
-        shelters = Shelter.objects.filter(Q(incident__slug=self.request.GET.get('incident')) | Q(public=True)).annotate(
+        shelters = Shelter.objects.filter(Q(incident__slug=self.request.GET.get('incident')) | Q(active=True)).annotate(
           alpacas=Count("animal", filter=Q(animal__species="alpaca", animal__status='SHELTERED', animal__incident__slug=self.request.GET.get('incident', ''))),
           cats=Count("animal", filter=Q(animal__species="cat", animal__status='SHELTERED', animal__incident__slug=self.request.GET.get('incident', ''))),
           cows=Count("animal", filter=Q(animal__species="cow", animal__status='SHELTERED', animal__incident__slug=self.request.GET.get('incident', ''))),

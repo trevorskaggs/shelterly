@@ -124,7 +124,7 @@ const PersonForm = (props) => {
   // Initial Person data.
   const [data, setData] = useState(current_data);
 
-  const [existingOwners, setExistingOwners] = useState({data:{}, options:[]});
+  const [existingOwners, setExistingOwners] = useState({data:{}, options:[], fetching:true});
 
   // Hook for initializing data.
   useEffect(() => {
@@ -166,7 +166,7 @@ const PersonForm = (props) => {
           existingOwnersResponse.data.forEach(owner => {
             options.push({id: owner.id, label: owner.first_name + ' ' + owner.last_name + ' ' + owner.display_phone})
           })
-          setExistingOwners({data:existingOwnersResponse.data, options:options});
+          setExistingOwners({data:existingOwnersResponse.data, options:options, fetching:false});
         }
       })
       .catch(error => {
@@ -347,7 +347,8 @@ const PersonForm = (props) => {
                   }
                 }}
                 options={existingOwners.options}
-                placeholder="Search..."
+                placeholder={existingOwners.fetching ? "Loading..." : "Search..."}
+                disabled={existingOwners.fetching ? true : false}
               />
             </span>
             <BootstrapForm.Row>

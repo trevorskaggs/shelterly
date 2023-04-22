@@ -64,7 +64,7 @@ class AnimalSerializer(ModestAnimalSerializer):
         fields = ['id', 'species', 'status', 'aco_required', 'front_image', 'side_image', 'extra_images', 'last_seen', 'intake_date', 'address', 'city', 'state', 'zip_code',
         'aggressive', 'injured', 'fixed', 'confined', 'found_location', 'owner_names', 'owners', 'shelter_object', 'shelter', 'reporter', 'reporter_object', 'request', 'request_address',
         'action_history', 'building_name', 'room', 'room_name', 'name', 'sex', 'size', 'age', 'pcolor', 'scolor', 'color_notes', 'behavior_notes', 'medical_notes',
-        'latitude', 'longitude']
+        'latitude', 'longitude', 'microchip']
 
     # Truncates latitude and longitude.
     def to_internal_value(self, data):

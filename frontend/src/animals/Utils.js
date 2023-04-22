@@ -104,7 +104,7 @@ async function buildAnimalCareScheduleContent(pdf, animals) {
 
     const additionalLabelsList = [
       [`Aggressive: ${capitalize(animal.aggressive)}`, `Injured: ${capitalize(animal.injured)}`, `Fixed: ${capitalize(animal.fixed)}`],
-      [`Microchip: _______`, `Neck Tag: _______`, `Collar: _______`]
+      [`Microchip: ${animal.microchip || '_______'}`, `Neck Tag: _______`, `Collar: _______`]
     ]
     const additionalListOptions = {
       listStyle: 'inline',
