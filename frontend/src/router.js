@@ -26,6 +26,7 @@ import PersonDetails from "./people/PersonDetails";
 import PersonForm from "./people/PersonForm";
 import PersonSearch from "./people/PersonSearch";
 import OwnerContactForm from "./people/OwnerContactForm";
+import Reports from "./reports/Reports";
 import Shelter from "./shelter/Shelter";
 import ShelterIntakeSummary from "./shelter/ShelterIntakeSummary";
 import ShelterForm from "./shelter/ShelterForm";
@@ -58,6 +59,7 @@ const routes = {
   "/:incident/animals/:id": ({id, incident}) => <AnimalDetails id={id} incident={incident} />,
   "/:incident/dispatch": ({incident}) => <Dispatch incident={incident} />,
   "/:incident/dispatch/dispatchteammember/new": ({incident}) => <DispatchTeamMemberForm incident={incident} />,
+  "/:incident/dispatch/dispatchteammember/edit/:id": ({id, incident}) => <DispatchTeamMemberForm id={id} incident={incident} />,
   "/:incident/dispatch/dispatchassignment/search": ({incident}) => <DispatchAssignmentSearch incident={incident} />,
   "/:incident/dispatch/summary/:id": ({id, incident}) => <DispatchSummary id={id} incident={incident} />,
   "/:incident/dispatch/resolution/:id": ({id, incident}) => <DispatchResolutionForm id={id} incident={incident} />,
@@ -82,6 +84,7 @@ const routes = {
   "/:incident/people/reporter/edit/:id": ({id, incident}) => <PersonForm id={id} incident={incident} state={initialWorkflowData} />,
   "/:incident/people/reporter/new": ({incident}) => <PersonForm state={initialWorkflowData} incident={incident} />,
   "/:incident/people/reporter/:id": ({id, incident}) => <PersonDetails id={id} incident={incident} />,
+  "/:incident/reports": ({incident}) => <Reports incident={incident} />,
   "/:incident/shelter": ({incident}) => <Shelter incident={incident} />,
   "/:incident/shelter/new": ({incident}) => <ShelterForm incident={incident} />,
   "/:incident/shelter/edit/:id": ({id, incident}) => <ShelterForm id={id} incident={incident} />,

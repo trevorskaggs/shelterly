@@ -118,7 +118,7 @@ function ShelterIntake({ id, incident }) {
 
   const { setShowSystemError } = useContext(SystemErrorContext);
 
-  const [options, setOptions] = useState({shelter_options:[], room_options:{}, da_options:[]});
+  const [options, setOptions] = useState({shelter_options:[], room_options:{}, da_options:[], fetching:true});
   const [data, setData] = useState({shelter_name:'', dispatch_assignments:[], sr_updates:[], shelter: id, da: null, animals:[], isFetching: false});
   const [selected, setSelected] = useState(null);
 
@@ -165,7 +165,7 @@ function ShelterIntake({ id, incident }) {
                 });
               });
               setData(prevState => ({ ...prevState, shelter_name: currentResponse.data.name, dispatch_assignments: response.data, sr_updates: [], isFetching: false}));
-              setOptions({shelter_options:shelter_options, room_options: room_options, da_options:da_options});
+              setOptions({shelter_options:shelter_options, room_options: room_options, da_options:da_options, fetching:false});
             }
           })
           .catch(error => {
@@ -241,7 +241,7 @@ function ShelterIntake({ id, incident }) {
                 size="lg"
                 options={options.da_options}
                 isClearable={false}
-                placeholder="Select Dispatch..."
+                placeholder={options.fetching ? "Loading..." : "Select Dispatch..."}
                 onChange={(instance) => {
                   instance.value ? setSelected(instance.value) : setSelected(null);
                   props.setFieldValue("da", instance.value ? instance.value : null);
@@ -249,6 +249,7 @@ function ShelterIntake({ id, incident }) {
                   let selected_da = data.dispatch_assignments.filter(da => da.id === instance.value)[0];
                   setData(prevState => ({ ...prevState, "sr_updates":selected_da.sr_updates, "da":instance.value }));
                 }}
+                disabled={options.fetching ? true : false}
               />
             </Col>
           </Row>

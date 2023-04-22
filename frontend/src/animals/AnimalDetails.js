@@ -43,6 +43,7 @@ function AnimalDetails({ id, incident }) {
     injured: 'unknown',
     behavior_notes: '',
     medical_notes: '',
+    microchip: '',
     last_seen: null,
     intake_date: null,
     front_image: null,
@@ -348,6 +349,11 @@ function AnimalDetails({ id, incident }) {
                   <span className="col-6"><b>Secondary Color:</b> {data.scolor||"N/A"}</span>
                 </div>
               </ListGroup.Item>
+              {data.microchip ?
+              <ListGroup.Item>
+                <span><b>Microchip:</b> {data.microchip}</span>
+              </ListGroup.Item>
+              : ""}
             </ListGroup>
             <Card.Title>
               <h4 className="mb-0 mt-3">Contacts

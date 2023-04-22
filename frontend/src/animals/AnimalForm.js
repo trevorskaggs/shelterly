@@ -80,6 +80,7 @@ const AnimalForm = (props) => {
     behavior_notes: '',
     medical_notes: '',
     last_seen: null,
+    microchip: '',
     number_of_animals: 1,
     room: null,
     shelter: props.state.shelter || null,
@@ -261,7 +262,7 @@ const AnimalForm = (props) => {
           pcolor: Yup.string(),
           scolor: Yup.string(),
           color_notes: Yup.string()
-            .max(200, 'Must be 200 characters or less'),
+            .max(400, 'Must be 400 characters or less'),
           fixed: Yup.string()
             .max(10, 'Must be 10 characters or less'),
           aco_required: Yup.string()
@@ -273,9 +274,10 @@ const AnimalForm = (props) => {
           injured: Yup.string()
            .max(10, 'Must be 10 characters or less'),
           behavior_notes: Yup.string()
-            .max(200, 'Must be 200 characters or less'),
+            .max(400, 'Must be 400 characters or less'),
           last_seen: Yup.date()
             .nullable(),
+          microchip: Yup.string().max(50, 'Must be 50 characters or less.'),
           front_image: Yup.mixed(),
           side_image: Yup.mixed(),
           extra_images: Yup.array(),
@@ -710,6 +712,15 @@ const AnimalForm = (props) => {
                     value={formikProps.values.last_seen||null}
                     hidden={is_intake}
                     disabled={false}
+                  />
+                </BootstrapForm.Row>
+                <BootstrapForm.Row className="mb-3" hidden={is_intake || id ? false : true}>
+                  <TextInput
+                    id="microchip"
+                    name="microchip"
+                    type="text"
+                    label="Microchip Number"
+                    xs="6"
                   />
                 </BootstrapForm.Row>
                 <BootstrapForm.Row hidden={id} style={{marginBottom:is_intake ? "" : "-15px"}}>
