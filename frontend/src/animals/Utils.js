@@ -57,10 +57,18 @@ async function buildAnimalCareScheduleDoc (animals) {
         `Intake Date: ${animal.intake_date
           ? new Date(animal.intake_date).toLocaleDateString()
           : 'N/A'}`,
-        `Location: ${animal.room ? `${animal.building_name} / ${animal.room_name}` : 'N/A'}`
+          `Species: ${capitalize(animal.species)}`
       ],
-      [`Species: ${capitalize(animal.species)}`, `Color: ${capitalize(animal.pcolor)} ${animal.scolor ? `/ ${capitalize(animal.scolor)}` : '' }`],
-      [`Age: ${capitalize(animal.age)}`, `Under Vet Care: Y / N`]
+      [
+        `Color: ${capitalize(animal.pcolor)} ${animal.scolor ? `/ ${capitalize(animal.scolor)}` : '' }`,
+        `Age: ${capitalize(animal.age)}`
+      ],
+      [
+        `Under Vet Care: Y / N`,
+        animal.shelter_object
+          ? ''
+          : 'Location: N/A'
+      ]
     ];
     const listOptions = {
       listStyle: 'inline',
@@ -73,9 +81,24 @@ async function buildAnimalCareScheduleDoc (animals) {
     pdf.resetDocumentLeftMargin();
     pdf.drawPad(15);
 
+    if (animal.shelter_object) {
+      pdf.drawWrappedText({
+        text: `Location: ${
+          animal.shelter_object ? `${animal.shelter_object.name}` : "N/A"
+        }${
+          animal.building_name ? ` / ${animal.building_name}` : ""
+        }${
+          animal.room ? ` / ${animal.room_name}` : ""
+        }`,
+      })
+    }
+
+    // draw status
+    pdf.drawWrappedText({ text: `Status: ${animal.status.toUpperCase() }`});
+
     if (animal.owners && animal.owners.length) {
       pdf.drawWrappedText({ text: `Owner(s): ${animal.owners.map((owner) =>
-        `${capitalize(`${owner.first_name} ${owner.last_name}`, { proper: true })} ${owner.display_phone}`).join('; ')}`})
+        `${capitalize(`${owner.first_name} ${owner.last_name}`, { proper: true })}`).join('; ')}`})
     }
     else if (animal.owner_names && animal.owner_names.length) {
         pdf.drawWrappedText({ text: `Owner(s): ${animal.owner_names.map((owner_name) =>
@@ -89,7 +112,7 @@ async function buildAnimalCareScheduleDoc (animals) {
 
     const additionalLabelsList = [
       [`Aggressive: ${capitalize(animal.aggressive)}`, `Injured: ${capitalize(animal.injured)}`, `Fixed: ${capitalize(animal.fixed)}`],
-      [`Microchip: _______`, `Neck Tag: _______`, `Collar: _______`]
+      [`Microchip: ${animal.microchip || '_______'}`, `Neck Tag: _______`, `Collar: _______`]
     ]
     const additionalListOptions = {
       listStyle: 'inline',
@@ -120,8 +143,12 @@ async function buildAnimalCareScheduleDoc (animals) {
       buffer: 5
     });
 
+    const pageWidth = pdf.pageWidth - 30;
+    const smallCol = pageWidth * .15;
+    const bigCol = pageWidth * .35;
     pdf.drawTableGrid({
-      headers: ['Date Time', 'AR#', 'Actions', 'Comments']
+      headers: ['Date Time', 'AR#', 'Actions', 'Comments'],
+      columnStyles: [{ cellWidth: smallCol }, { cellWidth: smallCol }, { cellWidth: bigCol }, { cellWidth: bigCol }]
     });
   }
 
@@ -131,13 +158,13 @@ async function buildAnimalCareScheduleDoc (animals) {
 async function printAnimalCareSchedule (animal = {}) {
   const pdf = await buildAnimalCareScheduleDoc([animal]);
   pdf.fileName = pdf.filename || `Shelterly-Animal-Care-Schedule-${animal.id.toString().padStart(3, 0)}-${moment().format(dateFormat)}`;
-  pdf.saveFile();
+  return pdf.saveFile();
 };
 
 async function printAllAnimalCareSchedules (animals = []) {
   const  pdf = await buildAnimalCareScheduleDoc(animals);
   pdf.fileName = `Shelterly-Animal-Care-Schedules-${moment().format(dateFormat)}`;
-  pdf.saveFile();
+  return pdf.saveFile();
 }
 
 export {

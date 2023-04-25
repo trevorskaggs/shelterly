@@ -4,7 +4,7 @@ import { Button, ButtonGroup, Card, CardGroup, Form, FormControl, InputGroup, Ov
 import { Link, useQueryParams } from "raviger";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faCircle, faExclamationCircle, faQuestionCircle, faUserAlt, faUserAltSlash, faUsers
+  faCircle, faExclamationCircle, faQuestionCircle, faUserAlt, faUserAltSlash, faUsers, faPrint
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faDotCircle
@@ -12,7 +12,7 @@ import {
 import { faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
 import L from "leaflet";
 import { Marker, Tooltip as MapTooltip } from "react-leaflet";
-import { useMark } from '../hooks';
+import { useMark, useSubmitting, useDateRange } from '../hooks';
 import Map, { prettyText, reportedMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
 import Moment from "react-moment";
 import moment from 'moment';
@@ -21,6 +21,8 @@ import Scrollbar from '../components/Scrollbars';
 import { ITEMS_PER_PAGE } from '../constants';
 import { DateRangePicker } from '../components/Form';
 import { SystemErrorContext } from '../components/SystemError';
+import ButtonSpinner from '../components/ButtonSpinner';
+import { printAllDispatchResolutions } from './Utils';
 
 function DispatchAssignmentSearch({ incident }) {
 
@@ -42,9 +44,18 @@ function DispatchAssignmentSearch({ incident }) {
   const [page, setPage] = useState(1);
   const [numPages, setNumPages] = useState(1);
   const [isDateSet, setIsDateSet] = useState(false);
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(moment().format('YYYY-MM-DD'));
   const { markInstances } = useMark();
+  const {
+    isSubmitting,
+    handleSubmitting,
+    submittingComplete,
+    submittingLabel
+  } = useSubmitting();
+  const { startDate, endDate, parseDateRange } = useDateRange();
+  const [
+    filteredEvacAssignments,
+    setFilteredEvacAssignments
+  ] = useState(data.evacuation_assignments);
 
   // Update searchTerm when field input changes.
   const handleChange = event => {
@@ -58,16 +69,12 @@ function DispatchAssignmentSearch({ incident }) {
     setPage(1);
   }
 
-  // Parses the Date Range object
-  function parseDateRange(dateRange) {
-    if (dateRange.length > 1) {
-      dateRange = dateRange.toString().split(',');
-      setStartDate(moment(dateRange[0]).format('YYYY-MM-DD'))
-      setEndDate(moment(dateRange[1]).format('YYYY-MM-DD'));
-    } else {
-      setStartDate(moment(dateRange[0]).format('YYYY-MM-DD'))
-      setEndDate(moment(dateRange[0]).format('YYYY-MM-DD'));
-    }
+  const handlePrintAllClick = (e) => {
+    e.preventDefault();
+
+    handleSubmitting()
+      .then(() => printAllDispatchResolutions(filteredEvacAssignments))
+      .then(submittingComplete);
   }
 
   function setFocus(pageNum) {
@@ -100,8 +107,20 @@ function DispatchAssignmentSearch({ incident }) {
     return [species_matches, status_matches]
   }
 
-  let evacAssignments = data.evacuation_assignments.filter(ea => (isDateSet ? startDate <= moment(ea.start_time)
-    .format('YYYY-MM-DD') && endDate >= moment(ea.start_time).format('YYYY-MM-DD') : true));
+  // Hook for filtering evacuation assignments
+  useEffect(() => {
+    if (data.isFetching) return;
+    if (isDateSet) {
+      const srSubset = data.evacuation_assignments.filter((ea) => 
+        moment(startDate) <= moment(ea.start_time) && moment(endDate) >= moment(ea.start_time)
+      )
+      setFilteredEvacAssignments(srSubset);
+      setNumPages(Math.ceil(srSubset.length / ITEMS_PER_PAGE));
+    } else {
+      setFilteredEvacAssignments(data.evacuation_assignments);
+      setNumPages(Math.ceil(data.evacuation_assignments.length / ITEMS_PER_PAGE));
+    }
+  }, [data, isDateSet, startDate, endDate])
 
   // Hook for initializing data.
   useEffect(() => {
@@ -167,7 +186,7 @@ function DispatchAssignmentSearch({ incident }) {
           <InputGroup.Append>
             <Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0"}}>Search</Button>
           </InputGroup.Append>
-          <ButtonGroup className="ml-3">
+          <ButtonGroup className="ml-1">
             <Button variant={statusOptions === "preplanned" ? "primary" : "secondary"} onClick={statusOptions !== "preplanned" ? () => {setPage(1);setStatusOptions("preplanned")} : () => {setPage(1);setStatusOptions("")}}>Preplanned</Button>
             <Button variant={statusOptions === "active" ? "primary" : "secondary"} onClick={statusOptions !== "active" ? () => {setPage(1);setStatusOptions("active")} : () => {setPage(1);setStatusOptions("")}}>Active</Button>
             <Button variant={statusOptions === "resolved" ? "primary" : "secondary"} onClick={statusOptions !== "resolved" ? () => {setPage(1);setStatusOptions("resolved")} : () => {setPage(1);setStatusOptions("")}}>Resolved</Button>
@@ -176,21 +195,31 @@ function DispatchAssignmentSearch({ incident }) {
             name={`date_range_picker`}
             id={`date_range_picker`}
             placeholder={"Filter by Date Range"}
-            style={{width:"200px", marginLeft:"16px"}}
+            style={{width:"210px", marginLeft:"0.25rem"}}
             onChange={(dateRange) => {
-              if (dateRange === '') {
-                setIsDateSet(false)
-                setNumPages(Math.ceil(data.evacuation_assignments.length / ITEMS_PER_PAGE));
-              } else {
+              if (dateRange.length) {
                 setIsDateSet(true)
                 parseDateRange(dateRange)
-                setNumPages(Math.ceil(evacAssignments.length / ITEMS_PER_PAGE));
+                setNumPages(Math.ceil(filteredEvacAssignments.length / ITEMS_PER_PAGE));
+              } else {
+                setIsDateSet(false)
+                setNumPages(Math.ceil(data.evacuation_assignments.length / ITEMS_PER_PAGE));
               }
             }}
           />
+          <ButtonSpinner
+            variant="outline-light"
+            className="ml-1"
+            onClick={handlePrintAllClick}
+            isSubmitting={isSubmitting}
+            isSubmittingText={submittingLabel}
+          >
+            Print All ({`${filteredEvacAssignments.length}`})
+            <FontAwesomeIcon icon={faPrint} className="ml-2 text-light" inverse />
+          </ButtonSpinner>
         </InputGroup>
       </Form>
-      {evacAssignments.map((evacuation_assignment, index) => (
+      {filteredEvacAssignments.map((evacuation_assignment, index) => (
         <div key={evacuation_assignment.id} className="mt-3" hidden={page !== Math.ceil((index+1)/ITEMS_PER_PAGE)}>
           <div className="card-header d-flex hide-scrollbars" style={{whiteSpace:'nowrap', overflow:"hidden"}}>
             <h4 style={{marginBottom:"-2px", marginLeft:"-12px", whiteSpace:'nowrap', overflow:"hidden", textOverflow:"ellipsis"}}>
@@ -261,7 +290,7 @@ function DispatchAssignmentSearch({ incident }) {
                 <Card.Body style={{marginBottom:"0px"}}>
                   <Card.Title style={{marginTop:"-9px", marginBottom:"7px", marginLeft:"-9px"}}>Service Requests</Card.Title>
                   {evacuation_assignment.assigned_requests.map(assigned_request => (
-                    <div key={assigned_request.service_request_object.id} className="" style={{marginLeft:"-10px", marginRight:"7px", marginTop: "7px", marginBottom:"0px"}}>
+                    <div key={assigned_request.service_request_object.id} style={{marginLeft:"-10px", marginRight:"7px", marginTop: "7px", marginBottom:"0px"}}>
                       <div className="card-header rounded">
                       <span style={{marginLeft:"-12px"}}>
                       {matches[assigned_request.service_request_object.id] && Object.keys(matches[assigned_request.service_request_object.id].status_matches['REPORTED']).length > 0 ?
@@ -354,7 +383,7 @@ function DispatchAssignmentSearch({ incident }) {
                         <span>
                           {Object.keys(matches[assigned_request.service_request_object.id].species_matches).map((key,i) => (
                             <span key={key} style={{textTransform:"capitalize"}}>
-                              {i > 0 && ", "}{prettyText('', key.split(',')[0], matches[assigned_request.service_request_object.id].species_matches[key])}
+                              {i > 0 && ", "}{prettyText(key.split(',')[0], matches[assigned_request.service_request_object.id].species_matches[key])}
                             </span>
                           ))}
                         </span>
@@ -368,7 +397,7 @@ function DispatchAssignmentSearch({ incident }) {
           </CardGroup>
         </div>
       ))}
-      <p>{data.isFetching ? 'Fetching dispatch assignments...' : <span>{data.evacuation_assignments && data.evacuation_assignments.length ? '' : 'No dispatch assignments found.'}</span>}</p>
+      <p>{data.isFetching ? 'Fetching dispatch assignments...' : <span>{filteredEvacAssignments.length ? '' : 'No dispatch assignments found.'}</span>}</p>
       <Pagination className="custom-page-links" size="lg" onClick={(e) => {setFocus(parseInt(e.target.innerText));setPage(parseInt(e.target.innerText))}}>
         {[...Array(numPages).keys()].map(x =>
         <Pagination.Item key={x+1} active={x+1 === page}>

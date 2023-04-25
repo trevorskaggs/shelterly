@@ -4,17 +4,20 @@ import { Link, useQueryParams } from 'raviger';
 import { Button, ButtonGroup, Card, CardGroup, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Pagination, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faClipboardList
+  faClipboardList,
+  faPrint
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faDotCircle
 } from '@fortawesome/free-regular-svg-icons';
-import { useMark } from '../hooks';
+import { useMark, useSubmitting } from '../hooks';
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
+import ButtonSpinner from '../components/ButtonSpinner';
 import { speciesChoices } from '../animals/constants';
 import { ITEMS_PER_PAGE } from '../constants';
 import { SystemErrorContext } from '../components/SystemError';
+import { printAllOwnersDetails } from './Utils';
 
 function PersonSearch({ incident }) {
 
@@ -35,6 +38,12 @@ function PersonSearch({ incident }) {
 	const [page, setPage] = useState(1);
   const [numPages, setNumPages] = useState(1);
 	const { markInstances } = useMark();
+  const {
+    isSubmitting,
+    handleSubmitting,
+    submittingComplete,
+    submittingLabel
+  } = useSubmitting();
 
   // Update searchTerm when field input changes.
   const handleChange = event => {
@@ -46,6 +55,14 @@ function PersonSearch({ incident }) {
     event.preventDefault();
     setSearchTerm(tempSearchTerm.current.value);
 		setPage(1);
+  }
+
+  function handlePrintAllClick(e) {
+    e.preventDefault();
+
+    handleSubmitting()
+      .then(() => printAllOwnersDetails(data.owners))
+      .then(submittingComplete);
   }
 
 	function setFocus(pageNum) {
@@ -125,10 +142,19 @@ function PersonSearch({ incident }) {
         <InputGroup.Append>
           <Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0"}}>Search</Button>
         </InputGroup.Append>
-        <ButtonGroup className="ml-3">
+        <ButtonGroup className="ml-1">
           <Button variant={statusOptions === "owners" ? "primary" : "secondary"} onClick={statusOptions !== "owners" ? () => {setPage(1);setStatusOptions("owners")} : () => {setPage(1);setStatusOptions("")}}>Owners</Button>
           <Button variant={statusOptions === "reporters" ? "primary" : "secondary"} onClick={statusOptions !== "reporters" ? () => {setPage(1);setStatusOptions("reporters")} : () => {setPage(1);setStatusOptions("")}}>Reporters</Button>
         </ButtonGroup>
+        <ButtonSpinner
+          variant="outline-light ml-1"
+          onClick={handlePrintAllClick}
+          isSubmitting={isSubmitting}
+          isSubmittingText={submittingLabel}
+        >
+          Print All ({`${data.owners.length}`})
+          <FontAwesomeIcon icon={faPrint} className="ml-2 text-light" inverse />
+        </ButtonSpinner>
       </InputGroup>
     </Form>
     {data.owners.map((owner, index) => (
@@ -176,7 +202,7 @@ function PersonSearch({ incident }) {
                     <ListGroup.Item><b>Address: </b>{owner.full_address}</ListGroup.Item>
                   : ""}
                   {owner.requests && owner.requests.map(request => (
-                    <ListGroup.Item><b>Service Request: </b><Link href={"/" + incident + "/hotline/servicerequest/" + request.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{request.full_address}</Link></ListGroup.Item>
+                    <ListGroup.Item key={request.id}><b>Service Request: </b><Link href={"/" + incident + "/hotline/servicerequest/" + request.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{request.full_address}</Link></ListGroup.Item>
                   ))}
                 </ListGroup>
               </Scrollbar>
@@ -186,10 +212,10 @@ function PersonSearch({ incident }) {
           <Card style={{marginBottom:"6px"}}>
             <Card.Body style={{width:"525px"}}>
               <Card.Title style={{marginTop:"-10px"}}>
-                <Scrollbar horizontal autoHide style={{height:"32px", width:"485px"}} renderView={props => <div {...props} style={{...props.style, marginBottom:"-18px", marginRight:"0px", overflowX:"auto", overflowY: "hidden"}}/>} renderThumbVertical={props => <div {...props} style={{...props.style, display: 'none'}} />}>
+                <Scrollbar horizontal="true" autoHide style={{height:"32px", width:"485px"}} renderView={props => <div {...props} style={{...props.style, marginBottom:"-18px", marginRight:"0px", overflowX:"auto", overflowY: "hidden"}}/>} renderThumbVertical={props => <div {...props} style={{...props.style, display: 'none'}} />}>
                   <ListGroup horizontal>
                   {searchState[owner.id].species.map(species => (
-                    <ListGroup.Item key={species} active={searchState[owner.id].selectedSpecies === species ? true : false} style={{textTransform:"capitalize", cursor:'pointer', paddingTop:"4px", paddingBottom:"4px"}} onClick={() => setSearchState(prevState => ({ ...prevState, [owner.id]:{...prevState[owner.id], selectedSpecies:species} }))}>{species}{species !== "other" ? "s" : ""}</ListGroup.Item>
+                    <ListGroup.Item key={species} active={searchState[owner.id].selectedSpecies === species ? true : false} style={{textTransform:"capitalize", cursor:'pointer', paddingTop:"4px", paddingBottom:"4px"}} onClick={() => setSearchState(prevState => ({ ...prevState, [owner.id]:{...prevState[owner.id], selectedSpecies:species} }))}>{species}{!["other", "sheep"].includes(species) ? "s" : ""}</ListGroup.Item>
                   ))}
                   </ListGroup>
                 </Scrollbar>

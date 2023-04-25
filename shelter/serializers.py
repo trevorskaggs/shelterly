@@ -96,13 +96,32 @@ class ModestShelterSerializer(SimpleShelterSerializer):
         else:
             return ModestAnimalSerializer(obj.animal_set.filter(room=None).exclude(status='CANCELED'), many=True, required=False, read_only=True).data
 
+class IntakeSummarySerializer(serializers.ModelSerializer):
+
+    animal_objects = serializers.SerializerMethodField()
+    person_object = serializers.SerializerMethodField()
+    shelter_name = serializers.StringRelatedField(source='shelter')
+
+    def get_animal_objects(self, obj):
+        from animals.serializers import ModestAnimalSerializer
+        return ModestAnimalSerializer(obj.animals, many=True).data
+
+    def get_person_object(self, obj):
+        from people.serializers import PersonSerializer
+        return PersonSerializer(obj.person, required=False, read_only=True).data
+
+    class Meta:
+        model = IntakeSummary
+        fields = '__all__'
+
 class ShelterSerializer(ModestShelterSerializer):
     #Single obj serializer
     buildings = BuildingSerializer(source='building_set', many=True, required=False, read_only=True)
-    action_history = serializers.SerializerMethodField()
+    intake_summaries = IntakeSummarySerializer(source='intakesummary_set', many=True, required=False, read_only=True)
+    # action_history = serializers.SerializerMethodField()
 
-    def get_action_history(self, obj):
-        return [build_action_string(action) for action in obj.target_actions.all()]
+    # def get_action_history(self, obj):
+    #     return [build_action_string(action) for action in obj.target_actions.all()]
 
     # Truncates latitude and longitude.
     def to_internal_value(self, data):

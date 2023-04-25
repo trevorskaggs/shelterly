@@ -1,12 +1,12 @@
 
-from shelter.models import Shelter, Building, Room
+from shelter.models import Shelter, Building, IntakeSummary, Room
 from rest_framework import viewsets
 from actstream import action
 from actstream.models import Action
 from django_filters import rest_framework as filters
 from django.db.models import Count, Prefetch, Q
 from rest_framework import permissions
-from .serializers import ShelterSerializer, ModestShelterSerializer, SimpleBuildingSerializer, RoomSerializer
+from .serializers import ShelterSerializer, ModestShelterSerializer, SimpleBuildingSerializer, RoomSerializer, IntakeSummarySerializer
 from animals.models import Animal
 from incident.models import Incident
 
@@ -40,7 +40,7 @@ class ShelterViewSet(viewsets.ModelViewSet):
             action.send(self.request.user, verb='updated shelter', target=shelter)
 
     def get_queryset(self):
-        queryset = (Shelter.objects.filter(Q(incident__slug=self.request.GET.get('incident')) | Q(public=True)).annotate(room_count=Count("building__room"))
+        queryset = (Shelter.objects.filter(active=True).annotate(room_count=Count("building__room"))
             .annotate(
                 animal_count=Count(
                     "animal",
@@ -135,4 +135,9 @@ class RoomViewSet(viewsets.ModelViewSet):
                 )
             )
         )
-        
+
+class IntakeSummaryViewSet(viewsets.ModelViewSet):
+
+    queryset = IntakeSummary.objects.all()
+    serializer_class = IntakeSummarySerializer
+    permission_classes = [permissions.IsAuthenticated, ]

@@ -49,7 +49,9 @@ export const BuildingForm = ({ id, incident }) => {
           }
         })
         .catch(error => {
-          setShowSystemError(true);
+          if (!unmounted) {
+            setShowSystemError(true);
+          }
         });
       };
       fetchBuildingData();

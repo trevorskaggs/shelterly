@@ -7,7 +7,7 @@ import {
   faMinusSquare, faUpload, faUserPlus
 } from '@fortawesome/free-solid-svg-icons';
 import {
-  faCircleI, faCircleU, faCircleV, faPencil, faUserUnlock
+  faCircleE, faCircleI, faCircleU, faCircleV, faPencil, faUserUnlock
 } from '@fortawesome/pro-solid-svg-icons';
 import Header from "../components/Header";
 import { SystemErrorContext } from '../components/SystemError';
@@ -119,8 +119,10 @@ function UserManagement({ incident }) {
         }
       })
       .catch(error => {
-        setData({users: [], isFetching: false});
-        setShowSystemError(true);
+        if (!unmounted) {
+          setData({users: [], isFetching: false});
+          setShowSystemError(true);
+        }
       });
 
       // Cleanup.
@@ -172,7 +174,7 @@ function UserManagement({ incident }) {
         }}
       />
     </InputGroup>
-    <Row>
+    <Row className="flex-nowrap">
       <Col style={{minWidth:"150px", maxWidth:"150px", marginLeft:"0px"}}>
           Last Name
       </Col>
@@ -191,13 +193,13 @@ function UserManagement({ incident }) {
       <Col style={{minWidth:"75px", maxWidth:"75px"}}>
           Actions
       </Col>
-      <Col>
+      <Col style={{minWidth:"75px"}}>
           Perms
       </Col>
     </Row>
     {filteredData.users.map(user => (
-      <Card key={user.id} className=" rounded w-100 mb-1" style={{height:"32px"}}>
-        <div className="row no-gutters">
+      <Card key={user.id} className="rounded w-100 mb-1" style={{height:"32px"}}>
+        <div className="row no-gutters flex-nowrap">
           <Col className="border-top border-left border-bottom" style={{height:"32px", paddingLeft:"3px", paddingTop:"5px", marginTop: "-1px", fontSize:"13px", borderTopLeftRadius:"0.25rem", borderBottomLeftRadius:"0.25rem", minWidth:"150px", maxWidth:"150px", backgroundColor:"#615e5e"}}>
             {user.last_name}
           </Col>
@@ -248,7 +250,7 @@ function UserManagement({ incident }) {
               <FontAwesomeIcon icon={faUserUnlock} style={{cursor:'pointer'}} size="lg" className="ml-1" onClick={() => {setUserToReset({id:user.id, first_name: user.first_name, last_name: user.last_name});setShowUserResetConfirm(true);}} inverse />
             </OverlayTrigger>
           </Col>
-          <Col className="border" style={{height:"32px", paddingLeft:"3px", paddingTop:"5px", marginTop: "-1px", fontSize:"13px", borderTopRightRadius:"0.25rem", borderBottomRightRadius:"0.25rem", backgroundColor:"#615e5e"}}>
+          <Col className="border" style={{height:"32px", paddingLeft:"3px", paddingTop:"5px", marginTop: "-1px", fontSize:"13px", minWidth:"75px", borderTopRightRadius:"0.25rem", borderBottomRightRadius:"0.25rem", backgroundColor:"#615e5e"}}>
             {user.user_perms ? <OverlayTrigger
               key={"user-perms"}
               placement="top"
@@ -281,6 +283,17 @@ function UserManagement({ incident }) {
               }
             >
               <FontAwesomeIcon icon={faCircleV} size="lg" className="ml-1" />
+            </OverlayTrigger> : ""}
+            {user.email_notification ? <OverlayTrigger
+              key={"email-notification"}
+              placement="top"
+              overlay={
+                <Tooltip id={`tooltip-email-notification`}>
+                  User will receive SR email notifications
+                </Tooltip>
+              }
+            >
+              <FontAwesomeIcon icon={faCircleE} size="lg" className="ml-1" />
             </OverlayTrigger> : ""}
           </Col>
         </div>

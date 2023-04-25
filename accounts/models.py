@@ -57,6 +57,7 @@ class ShelterlyUser(AbstractUser):
     user_perms = models.BooleanField(default=False)
     incident_perms = models.BooleanField(default=False)
     vet_perms = models.BooleanField(default=False)
+    email_notification = models.BooleanField(default=False)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['cell_phone']

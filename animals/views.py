@@ -8,6 +8,7 @@ from actstream import action
 from animals.models import Animal, AnimalImage
 from animals.serializers import AnimalSerializer
 from incident.models import Incident
+from shelter.models import IntakeSummary
 from people.serializers import SimplePersonSerializer
 
 class AnimalViewSet(viewsets.ModelViewSet):
@@ -41,7 +42,7 @@ class AnimalViewSet(viewsets.ModelViewSet):
 
             for animal in animals:
                 # Add Owner to new animals if included.
-                if self.request.data.get('new_owner'):
+                if self.request.data.get('new_owner', 'undefined') != 'undefined':
                     animal.owners.add(self.request.data['new_owner'])
 
                 # Add ServiceRequest Owner to new animals being added to an SR.
@@ -63,6 +64,10 @@ class AnimalViewSet(viewsets.ModelViewSet):
                     category = key.translate({ord(num): None for num in '0123456789'})
                     # Create image object.
                     AnimalImage.objects.create(image=image_data, animal=animal, category=category)
+
+            # Check to see if there is an intake summary
+            if self.request.data.get('intake_summary', False):
+                IntakeSummary.objects.get(pk=self.request.data.get('intake_summary')).animals.add(*animals)
 
             # Check to see if animal SR status should be changed.
             if animal.request:
@@ -134,6 +139,10 @@ class AnimalViewSet(viewsets.ModelViewSet):
             # Remove animal.
             if self.request.data.get('remove_animal'):
                 Animal.objects.filter(id=self.request.data.get('remove_animal')).update(status='CANCELED', shelter=None, room=None)
+                animal = Animal.objects.get(id=self.request.data.get('remove_animal'))
+                for assigned_request in AssignedRequest.objects.filter(service_request=animal.request, dispatch_assignment__end_time=None):
+                    assigned_request.animals[str(self.request.data.get('remove_animal'))]['status'] = 'CANCELED'
+                    assigned_request.save()
 
             # Set order if present, add 1 to avoid 0 index since order is a PositiveIntergerField.
             if type(self.request.data.get('set_order', '')) == int:

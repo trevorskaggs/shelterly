@@ -184,7 +184,9 @@ function DispatchResolutionForm({ id, incident }) {
         }
       })
       .catch(error => {
-        setShowSystemError(true);
+        if (!unmounted) {
+          setShowSystemError(true);
+        }
       });
     };
 
@@ -337,7 +339,7 @@ function DispatchResolutionForm({ id, incident }) {
                 </ListGroup>
               </Card.Body>
             </Card>
-            {data.assigned_requests.map((assigned_request, index) => (
+            {data.assigned_requests.filter(request => request.service_request_object.animals.length > 0).map((assigned_request, index) => (
               <Card key={assigned_request.service_request_object.id} className="mt-3 border rounded">
                 <Card.Body>
                   <Card.Title style={{marginBottom:"-5px", marginTop:"-5px"}}>
@@ -421,7 +423,7 @@ function DispatchResolutionForm({ id, incident }) {
                   <hr />
                   <ListGroup variant="flush" style={{ marginTop: "-13px", marginBottom: "-13px" }}>
                     <h4 className="mt-2" style={{ marginBottom: "-2px" }}>Animals</h4>
-                    {data.sr_updates[index].animals.filter(animal => Object.keys(assigned_request.animals).includes(String(animal.id))).map((animal, inception) => (
+                    {data.sr_updates[index].animals.filter(animal => animal.status !== 'CANCELED' && Object.keys(assigned_request.animals).includes(String(animal.id))).map((animal, inception) => (
                       <ListGroup.Item key={animal.id}>
                         <AnimalStatus formikProps={props} index={index} inception={inception} animal={animal} shelters={shelters} />
                       </ListGroup.Item>

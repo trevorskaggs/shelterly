@@ -15,14 +15,18 @@ function DispatchTeamManagement({ incident }) {
   const { setShowSystemError } = useContext(SystemErrorContext);
 
   const [data, setData] = useState({team_members: [], teams: [], isFetching: false});
+  const [allTeams, setAllTeams] = useState([]);
 
   const showHideTeam = async (team_id, action) => {
     await axios.patch('/evac/api/dispatchteam/' + team_id + '/', {'action':action})
     .then(response => {
-      const index = data.teams.findIndex(team => team.id === team_id);
       let teams = [...data.teams];
+      const index = data.teams.findIndex(datateam => datateam.id === team_id);
       teams[index] = response.data;
       setData(prevState => ({ ...prevState, "teams": teams }));
+      allTeams.filter(team => team.name === response.data.name && team.id !== response.data.id).forEach(function(team) {
+        axios.patch('/evac/api/dispatchteam/' + team.id + '/', {'action':action})
+      })
     })
     .catch(error => {
       setShowSystemError(true);
@@ -63,7 +67,8 @@ function DispatchTeamManagement({ incident }) {
             cancelToken: source.token,
           })
           .then(teamResponse => {
-            setData({team_members: teamMemberResponse.data, teams: teamResponse.data, isFetching: false});
+            setAllTeams(teamResponse.data);
+            setData({team_members: teamMemberResponse.data, teams: teamResponse.data.filter((tag, index, array) => array.findIndex(t => t.name == tag.name) == index), isFetching: false});
           })
           .catch(error => {
             if (!unmounted) {
@@ -74,8 +79,10 @@ function DispatchTeamManagement({ incident }) {
         }
       })
       .catch(error => {
-        setData({team_members: [], teams: [], isFetching: false});
-        setShowSystemError(true);
+        if (!unmounted) {
+          setData({team_members: [], teams: [], isFetching: false});
+          setShowSystemError(true);
+        }
       });
 
       // Cleanup.
@@ -114,9 +121,11 @@ function DispatchTeamManagement({ incident }) {
               <Card className="border rounded" style={{height:"41px"}}>
                 <div className="row no-gutters" style={{height:"41px", textTransform:"capitalize", marginRight:"-2px"}}>
                   <Row className="ml-0 mr-0 w-100" style={{minWidth:"334px", maxWidth:"334px"}}>
-                    <div style={{width:"41px"}}>
-                      <FontAwesomeIcon icon={faUser} size="2x" style={{marginTop:"5px", marginLeft:"7px"}} inverse />
-                    </div>
+                    <Link href={"/" + incident + "/dispatch/dispatchteammember/edit/" + team_member.id}>
+                      <div style={{width:"41px"}}>
+                        <FontAwesomeIcon icon={faUser} size="2x" style={{marginTop:"5px", marginLeft:"7px"}} inverse />
+                      </div>
+                    </Link>
                     <Col style={{marginLeft:"-5px", marginRight:"-25px"}}>
                       <div className="border" style={{height:"41px", paddingTop:"9px", paddingBottom:"7px", paddingLeft:"10px", marginLeft:"-11px", marginTop: "-1px", fontSize:"15px", width:"100%", borderTopRightRadius:"0.25rem", borderBottomRightRadius:"0.25rem", backgroundColor:"#615e5e"}}>
                         {team_member.display_name}

@@ -20,7 +20,7 @@ class ModestAnimalSerializer(SimpleAnimalSerializer):
 
     class Meta:
         model = Animal
-        fields = ['id', 'name', 'species', 'aggressive', 'request', 'shelter_object', 'shelter', 'status', 'aco_required', 'color_notes',
+        fields = ['id', 'name', 'species', 'aggressive', 'injured', 'fixed', 'request', 'shelter_object', 'shelter', 'status', 'aco_required', 'color_notes',
         'front_image', 'side_image', 'owner_names', 'sex', 'size', 'age', 'pcolor', 'scolor', 'medical_notes', 'behavior_notes']
 
     def get_front_image(self, obj):
@@ -65,7 +65,7 @@ class AnimalSerializer(ModestAnimalSerializer):
         fields = ['id', 'species', 'status', 'aco_required', 'front_image', 'side_image', 'extra_images', 'last_seen', 'intake_date', 'address', 'city', 'state', 'zip_code',
         'aggressive', 'injured', 'fixed', 'confined', 'found_location', 'owner_names', 'owners', 'shelter_object', 'shelter', 'reporter', 'reporter_object', 'request', 'request_address',
         'action_history', 'building_name', 'room', 'room_name', 'name', 'sex', 'size', 'age', 'pcolor', 'scolor', 'color_notes', 'behavior_notes', 'medical_notes',
-        'latitude', 'longitude', 'vet_requests']
+        'latitude', 'longitude', 'vet_requests', 'microchip']
 
     # Truncates latitude and longitude.
     def to_internal_value(self, data):

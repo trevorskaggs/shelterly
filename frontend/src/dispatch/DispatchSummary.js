@@ -57,7 +57,7 @@ function DispatchSummary({ id, incident }) {
     else {
       await axios.patch('/evac/api/dispatchteam/' + data.team + '/', {'name':teamName})
       .then(response => {
-        setData(prevState => ({ ...prevState, "team_object":{"name": teamName} }));
+        setData(prevState => ({ ...prevState, "team_object":{ ...prevState.team_object, "name": teamName} }));
         handleTeamNameClose();
         setError('');
       })
@@ -105,6 +105,18 @@ function DispatchSummary({ id, incident }) {
       setTeamData(prevState => ({ ...prevState, "options":teamData.options.filter(option => !id_list.includes(option.id[0])) }));
     }
     setTeamMembers(selected_list);
+  }
+
+  const handleGeoJsonDownload = () => {
+    var fileDownload = require('js-file-download');
+    axios.get('/evac/api/evacassignment/' + data.id +'/download/', { 
+            responseType: 'blob',
+        }).then(res => {
+            fileDownload(res.data, 'DAR-' + data.id + '.geojson');
+            console.log(res);
+        }).catch(err => {
+            console.log(err);
+        })
   }
 
   const handleAddTeamMemberSubmit = async () => {
@@ -199,13 +211,17 @@ function DispatchSummary({ id, incident }) {
             });
           })
           .catch(error => {
-            setTeamData({options: [], isFetching: false});
-            setShowSystemError(true);
+            if (!unmounted) {
+              setTeamData({options: [], isFetching: false});
+              setShowSystemError(true);
+            }
           });
         }
       })
       .catch(error => {
-        setShowSystemError(true);
+        if (!unmounted) {
+          setShowSystemError(true);
+        }
       });
     };
 
@@ -270,7 +286,7 @@ function DispatchSummary({ id, incident }) {
           </Tooltip>
         }
       >
-        <Link href={"/" + incident + "/dispatch/download/" + id}><FontAwesomeIcon icon={faDownload} className="ml-2"  inverse /></Link>
+        <Link onClick={handleGeoJsonDownload} href=""><FontAwesomeIcon icon={faDownload} className="ml-2"  inverse /></Link>
       </OverlayTrigger>
     <div style={{fontSize:"18px", marginTop:"10px"}}><b>Opened: </b><Moment format="MMMM Do YYYY, HH:mm">{data.start_time}</Moment>{data.end_time ? <span> | <b>Resolved: </b><Moment format="MMMM Do YYYY, HH:mm">{data.end_time}</Moment></span> : ""}</div>
     </Header>

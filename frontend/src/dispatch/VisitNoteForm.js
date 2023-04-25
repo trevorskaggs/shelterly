@@ -48,7 +48,9 @@ const VisitNoteForm = ({ id, incident }) => {
           }
         })
         .catch(error => {
-          setShowSystemError(true);
+          if (!unmounted) {
+            setShowSystemError(true);
+          }
         });
       };
       fetchVisitNote();

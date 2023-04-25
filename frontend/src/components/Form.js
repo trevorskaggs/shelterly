@@ -69,12 +69,43 @@ const useStyles = makeStyles({
 });
 
 const DateRangePicker = ({...props}) => {
-
-  let options = {allowInput: true, dateFormat: "m-d-Y", mode: "range", maxDate: moment().format('MM-DD-YYYY')}
+  const pickerRef = useRef();
+  const options = {allowInput: true, dateFormat: "m-d-Y", mode: "range", maxDate: moment().format('MM-DD-YYYY')}
+  const styles = {
+    ...props.style,
+    display: 'flex'
+  }
   return (
-    <>
-      <Flatpickr className="daterange_picker" options={options} {...props} style={{...props.style, borderRadius:".25rem", borderWidth:"1px", borderStyle:"solid"}} />
-    </>
+    <div style={styles}>
+      <Flatpickr
+        className="daterange_picker"
+        options={options}
+        {...props}
+        style={{
+          borderRadius: ".25rem",
+          borderWidth: "1px",
+          borderStyle: "solid",
+          flexGrow: 1
+        }}
+        ref={pickerRef}
+      />
+      {!!pickerRef?.current?.flatpickr?.selectedDates?.length && (
+        <Button
+          className="text-center bg-white text-dark mx-0 px-2 text-center border-1 border-left-0 text-muted"
+          style={{
+            position: "relative",
+            left: -3,
+            borderBottomLeftRadius: 0,
+            borderTopLeftRadius: 0,
+            textTransform: 'uppercase',
+            fontSize: 'x-small'
+          }}
+          onClick={() => pickerRef.current.flatpickr.clear()}
+        >
+          x
+        </Button>
+      )}
+    </div>
   );
 };
 
@@ -350,8 +381,8 @@ const AddressLookup = ({setLatLon, ...props}) => {
   }
 
   const clearAddress = () => {
-    childRef.current.refs.input.value = "";
-    childRef.current.refs.input.focus();
+    childRef.current.value = "";
+    childRef.current.focus();
     setFieldValue("address", "");
     setFieldValue("city", "");
     setFieldValue("state", "");
@@ -364,7 +395,7 @@ const AddressLookup = ({setLatLon, ...props}) => {
 
 
   useEffect(() => {
-    if ((childRef.current && childRef.current.refs && (childRef.current.refs.input.value.includes(", USA") || childRef.current.refs.input.value.includes(", United")))) {
+    if ((childRef.current && (childRef.current.value.includes(", USA") || childRef.current.value.includes(", United")))) {
       setError("");
     }
     updateAddr(search);
@@ -445,14 +476,13 @@ const AddressLookup = ({setLatLon, ...props}) => {
             onBlur={(e) => {
               setError("");
               setTriggerRefresh(!triggerRefresh)
-              if (!values.address && childRef.current && childRef.current.refs && childRef.current.refs.input.value) {
+              if (!values.address && childRef.current && childRef.current.value) {
                 setError(props.error);
               }
             }}
             id="search"
             name="search"
             disabled={props.disabled}
-            key={`search_key_` + String(incidentLatLon.lat)}
             options={{
               bounds:{north:incidentLatLon.lat+.1, south:incidentLatLon.lat-.1, east:incidentLatLon.lng+.1, west:incidentLatLon.lng-.1},
               types: ["geocode"],
