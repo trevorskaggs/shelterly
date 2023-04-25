@@ -30,7 +30,7 @@ class VetRequest(models.Model):
     assigned = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
     closed = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
     presenting_complaints = models.ManyToManyField(PresentingComplaint)
-    concern = models.CharField(max_length=200)
+    concern = models.CharField(max_length=200, blank=True, null=True)
     priority = models.CharField(max_length=25, choices=(('urgent', 'Urgent'),('when_available', 'When Available'),), default='urgent')
     diagnosis = models.ForeignKey(Diagnosis, on_delete=models.SET_NULL, null=True)
     other_diagnosis = models.CharField(max_length=200, blank=True, null=True)
@@ -38,7 +38,7 @@ class VetRequest(models.Model):
 
     def check_closed(self):
         # Mark VetRequest as closed if there is at least one TreatmentPlan and all TRs are completed.
-        if not self.closed and (self.treatment_plan_set.count > 0) and TreatmentRequest.objects.filter(treatment_plan__vet_request=self).filter(Q(actual_admin_time__isnull=True) | Q(not_administered=False)).exists():
+        if not self.closed and self.treatmentplan_set.all() and TreatmentRequest.objects.filter(treatment_plan__vet_request=self).filter(Q(actual_admin_time__isnull=True) | Q(not_administered=False)).exists():
             self.closed = datetime.now()
             self.status = 'Closed'
             self.save()
