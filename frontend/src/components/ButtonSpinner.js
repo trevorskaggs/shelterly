@@ -2,11 +2,15 @@ import React, { useRef } from "react";
 import { Button, Spinner } from "react-bootstrap";
 
 const ButtonSpinner = ({
+  as = Button,
   isSubmitting = false,
   isSubmittingText = 'Loading...',
   children,
+  spinnerProps,
   ...buttonProps
 }) => {
+  const ButtonComponent = as;
+
   const childrenRef = useRef({
     children,
     isLoading: false
@@ -15,11 +19,14 @@ const ButtonSpinner = ({
   const loadingComponent = (
     <>
       <Spinner
-        as="span"
-        animation="border"
-        size="sm"
-        role="status"
-        aria-hidden="true"
+        {...{
+          as: 'span',
+          animation: 'border',
+          size: 'sm',
+          role: 'status',
+          'aria-hidden': 'true',
+          ...spinnerProps
+        }}
       />
       <span className="visually-hidden ml-2 fa-move-up">{isSubmittingText}</span>
     </>
@@ -30,9 +37,9 @@ const ButtonSpinner = ({
     isLoading: isSubmitting
   }
 
-  return <Button {...buttonProps} disabled={childrenRef.current.isLoading || buttonProps.disabled}>
+  return <ButtonComponent {...buttonProps} disabled={childrenRef.current.isLoading || buttonProps.disabled}>
     {childrenRef.current.children}
-  </Button>
+  </ButtonComponent>
 };
 
 export default ButtonSpinner;

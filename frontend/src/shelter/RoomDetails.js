@@ -3,10 +3,7 @@ import axios from "axios";
 import { Link, navigate } from 'raviger';
 import { Button, Card, ListGroup, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faEdit,
-  faPrint
-} from '@fortawesome/free-solid-svg-icons';
+import { faEdit } from '@fortawesome/free-solid-svg-icons';
 import { faArrowDownToSquare } from '@fortawesome/pro-regular-svg-icons';
 import {
   faTimesSquare,
@@ -15,6 +12,7 @@ import History from '../components/History';
 import Header from '../components/Header';
 import AnimalCards from '../components/AnimalCards';
 import { SystemErrorContext } from '../components/SystemError';
+import ShelterlyPrintifyButton from '../components/ShelterlyPrintifyButton';
 import { printRoomAnimalCareSchedules } from './Utils';
 
 function RoomDetails({ id, incident }) {
@@ -33,11 +31,8 @@ function RoomDetails({ id, incident }) {
     });
   }
 
-  const handlePrintAllAnimalsClick = (e) => {
-    e.preventDefault();
-
-    printRoomAnimalCareSchedules(data.animals, id);
-  }
+  const handlePrintAllAnimalsClick = () =>
+    printRoomAnimalCareSchedules(data.animals, id)
 
   // Hook for initializing data.
   useEffect(() => {
@@ -128,17 +123,14 @@ function RoomDetails({ id, incident }) {
                   <Link href={"/" + incident + "/shelter/" + data.shelter + "/assign?building_id=" + data.building}><FontAwesomeIcon icon={faArrowDownToSquare} className="ml-1 fa-move-up" inverse /></Link>
                 </OverlayTrigger>
                 {data.animals?.length > 0 && (
-                  <OverlayTrigger
-                    key={"printall"}
-                    placement="top"
-                    overlay={
-                      <Tooltip id={`tooltip-printall`}>
-                        Print all animal care schedules
-                      </Tooltip>
-                    }
-                  >
-                    <FontAwesomeIcon icon={faPrint} onClick={handlePrintAllAnimalsClick} style={{cursor:'pointer'}} className="ml-1 fa-move-up" size="sm" inverse />
-                  </OverlayTrigger>
+                  <ShelterlyPrintifyButton
+                    id="room-details-animal-schedules"
+                    spinnerSize={1.5}
+                    tooltipPlacement='top'
+                    tooltipText='Print All Animal Care Schedules'
+                    printFunc={handlePrintAllAnimalsClick}
+                  />
+                  
                 )}
               </h4>
             </Card.Title>

@@ -10,7 +10,7 @@ import { DATE_FORMAT } from "../constants";
 export { printOwnerDetails } from "../people/Utils";
 
 async function printAnimalCareSchedules(animals = [], id = 0, type = "Intake") {
-  const pdf = buildAnimalCareScheduleDoc(animals);
+  const pdf = await buildAnimalCareScheduleDoc(animals);
   pdf.fileName = `Shelterly-${type}-Animal-Care-Schedules-${id
     .toString()
     .padStart(4, 0)}-${moment().format(DATE_FORMAT)}`;
