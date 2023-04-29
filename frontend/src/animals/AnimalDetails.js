@@ -7,7 +7,7 @@ import { Carousel } from 'react-responsive-carousel';
 import { Button, Card, Col, ListGroup, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBan, faMedkit, faCut, faEdit, faEnvelope, faLink, faMinusSquare, faPrint, faTimes, faUserPlus
+  faBan, faMedkit, faCut, faEdit, faEnvelope, faLink, faMinusSquare, faTimes, faUserPlus
 } from '@fortawesome/free-solid-svg-icons';
 import { faBadgeSheriff, faClawMarks, faHomeHeart, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
@@ -17,6 +17,7 @@ import History from '../components/History';
 import { printAnimalCareSchedule } from './Utils';
 import AnimalCoverImage from '../components/AnimalCoverImage';
 import { SystemErrorContext } from '../components/SystemError';
+import ShelterlyPrintifyButton from '../components/ShelterlyPrintifyButton';
 
 function AnimalDetails({ id, incident }) {
 
@@ -112,11 +113,8 @@ function AnimalDetails({ id, incident }) {
     });
   }
 
-  const handleDownloadPdfClick = (e) => {
-    e.preventDefault();
-
-    printAnimalCareSchedule(data);
-  }
+  const handleDownloadPdfClick = () =>
+    printAnimalCareSchedule(data)
 
   // Hook for initializing data.
   useEffect(() => {
@@ -164,21 +162,15 @@ function AnimalDetails({ id, incident }) {
       >
         <Link href={"/" + incident + "/animals/edit/" + id} ><FontAwesomeIcon icon={faEdit} className="ml-1" inverse /></Link>
       </OverlayTrigger>
-      <OverlayTrigger
-        key={"print"}
-        placement="bottom"
-        overlay={
-          <Tooltip id={`tooltip-print`}>
-            Animal care schedule
-          </Tooltip>
-        }
-      >
-        {({ ref, ...triggerHandler }) => (
-          <Link onClick={handleDownloadPdfClick} {...triggerHandler} href="#">
-            <span ref={ref}><FontAwesomeIcon icon={faPrint} className="ml-1 mr-2" inverse /></span>
-          </Link>
-        )}
-      </OverlayTrigger>
+
+      <ShelterlyPrintifyButton
+        id="animal-details-animal-care-schedule"
+        spinnerSize={2.0}
+        tooltipPlacement='bottom'
+        tooltipText='Print Animal Care Schedule'
+        printFunc={handleDownloadPdfClick}
+      />
+
       {data.status !== 'REUNITED' ?
       <OverlayTrigger
         key={"reunite"}

@@ -39,7 +39,7 @@ function PersonSearch({ incident }) {
   const [numPages, setNumPages] = useState(1);
 	const { markInstances } = useMark();
   const {
-    isSubmitting,
+    isSubmittingById,
     handleSubmitting,
     submittingComplete,
     submittingLabel
@@ -147,9 +147,10 @@ function PersonSearch({ incident }) {
           <Button variant={statusOptions === "reporters" ? "primary" : "secondary"} onClick={statusOptions !== "reporters" ? () => {setPage(1);setStatusOptions("reporters")} : () => {setPage(1);setStatusOptions("")}}>Reporters</Button>
         </ButtonGroup>
         <ButtonSpinner
-          variant="outline-light ml-1"
+          variant="outline-light"
+          className="ml-1 print-all-btn-icon"
           onClick={handlePrintAllClick}
-          isSubmitting={isSubmitting}
+          isSubmitting={isSubmittingById()}
           isSubmittingText={submittingLabel}
         >
           Print All ({`${data.owners.length}`})

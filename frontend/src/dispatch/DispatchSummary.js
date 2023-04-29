@@ -5,7 +5,7 @@ import { Button, Card, Col, Form, ListGroup, Modal, OverlayTrigger, Row, Tooltip
 import { Typeahead } from 'react-bootstrap-typeahead';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faCalendarDay, faClipboardCheck, faClipboardList, faDownload, faEdit, faEnvelope, faHouseDamage, faBriefcaseMedical, faMinusSquare, faPencilAlt, faPrint, faUserCheck, faUserPlus
+  faCalendarDay, faClipboardCheck, faClipboardList, faDownload, faEdit, faEnvelope, faHouseDamage, faBriefcaseMedical, faMinusSquare, faPencilAlt, faUserCheck, faUserPlus
 } from '@fortawesome/free-solid-svg-icons';
 import { faExclamationSquare, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import { Marker, Tooltip as MapTooltip } from "react-leaflet";
@@ -16,6 +16,7 @@ import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
 import { printDispatchResolutionForm } from './Utils'
 import { SystemErrorContext } from '../components/SystemError';
+import ShelterlyPrintifyButton from '../components/ShelterlyPrintifyButton';
 
 function DispatchSummary({ id, incident }) {
 
@@ -144,11 +145,8 @@ function DispatchSummary({ id, incident }) {
     });
   }
 
-  const handleDownloadPdfClick = (e) => {
-    e.preventDefault();
-
-    printDispatchResolutionForm(data);
-  }
+  const handleDownloadPdfClick = () =>
+    printDispatchResolutionForm(data)
 
   // Hook for initializing data.
   useEffect(() => {
@@ -237,21 +235,14 @@ function DispatchSummary({ id, incident }) {
   return (
     <>
     <Header>Dispatch Assignment Summary
-      <OverlayTrigger
-        key={"offline-dispatch-assignment"}
-        placement="bottom"
-        overlay={
-          <Tooltip id={`tooltip-offline-dispatch-assignment`}>
-            Print dispatch assignment
-          </Tooltip>
-        }
-      >
-        {({ ref, ...triggerHandler }) => (
-          <Link onClick={handleDownloadPdfClick} {...triggerHandler} href="#">
-            <span ref={ref}><FontAwesomeIcon icon={faPrint} className="ml-1 mr-1"  inverse /></span>
-          </Link>
-        )}
-      </OverlayTrigger>
+      <ShelterlyPrintifyButton
+        id="dispatch-assignment"
+        spinnerSize={2.0}
+        tooltipPlacement='bottom'
+        tooltipText='Print Dispatch Assignment'
+        printFunc={handleDownloadPdfClick}
+      />
+
       {data.end_time ?
       <OverlayTrigger
         key={"edit-dispatch-assignment"}

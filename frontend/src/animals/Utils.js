@@ -2,22 +2,9 @@ import moment from 'moment';
 import ShelterlyPDF from '../utils/pdf';
 import { capitalize } from '../utils/formatString';
 import { SpeciesIcon } from '../components/icons';
+import { DATE_FORMAT } from '../constants';
 
-const dateFormat = 'YYYYMMDDHHmm';
-
-/**
- * generates care schedule for one animal
- * @param  {Array} animals - an array of the animal objects
- * @param  {ShelterlyPDF} pdf - pre-instantiated ShelterlyPDF instance, creates a new one by default
- * @returns {ShelterlyPDF}
- */
-async function buildAnimalCareScheduleDoc (animals) {
-  const pdf = new ShelterlyPDF({}, {
-    pageTitle: 'Animal Care Schedule',
-    pageSubtitle: `Date: ${new Date().toLocaleDateString()}`,
-    drawHeaderOnEveryPage: true
-  });
-
+async function buildAnimalCareScheduleContent(pdf, animals) {
   for (let i = 0; i < animals.length; i++) {
     const animal = animals[i];
 
@@ -46,7 +33,12 @@ async function buildAnimalCareScheduleDoc (animals) {
       };
     }
     // draw image or svg
-    await pdf[graphicOptions.drawFuncName](graphicOptions);
+    await pdf[graphicOptions.drawFuncName](graphicOptions)
+      .catch(() => {
+        if (imageSrc) {
+          console.log('Cannot add animal image to ShelterlyPDF');
+        }
+      });
 
     pdf.setDocumentFontSize({ size: 12 });
     pdf.drawPad(-15);
@@ -155,19 +147,36 @@ async function buildAnimalCareScheduleDoc (animals) {
   return pdf;
 }
 
+/**
+ * generates care schedule for one animal
+ * @param  {Array} animals - an array of the animal objects
+ * @param  {ShelterlyPDF} pdf - pre-instantiated ShelterlyPDF instance, creates a new one by default
+ * @returns {ShelterlyPDF}
+ */
+async function buildAnimalCareScheduleDoc (animals) {
+  const pdf = new ShelterlyPDF({}, {
+    pageTitle: 'Animal Care Schedule',
+    pageSubtitle: `Date: ${new Date().toLocaleDateString()}`,
+    drawHeaderOnEveryPage: true
+  });
+
+  return buildAnimalCareScheduleContent(pdf, animals);
+}
+
 async function printAnimalCareSchedule (animal = {}) {
   const pdf = await buildAnimalCareScheduleDoc([animal]);
-  pdf.fileName = pdf.filename || `Shelterly-Animal-Care-Schedule-${animal.id.toString().padStart(3, 0)}-${moment().format(dateFormat)}`;
+  pdf.fileName = pdf.filename || `Shelterly-Animal-Care-Schedule-${animal.id.toString().padStart(3, 0)}-${moment().format(DATE_FORMAT)}`;
   return pdf.saveFile();
 };
 
 async function printAllAnimalCareSchedules (animals = []) {
   const  pdf = await buildAnimalCareScheduleDoc(animals);
-  pdf.fileName = `Shelterly-Animal-Care-Schedules-${moment().format(dateFormat)}`;
+  pdf.fileName = `Shelterly-Animal-Care-Schedules-${moment().format(DATE_FORMAT)}`;
   return pdf.saveFile();
 }
 
 export {
+  buildAnimalCareScheduleContent,
   buildAnimalCareScheduleDoc,
   printAllAnimalCareSchedules,
   printAnimalCareSchedule

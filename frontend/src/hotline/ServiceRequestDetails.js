@@ -6,7 +6,7 @@ import { Button, Card, ListGroup, Modal, OverlayTrigger, Tooltip } from 'react-b
 import Flatpickr from 'react-flatpickr';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBan, faCar, faClipboardCheck, faDownload, faEdit, faEnvelope, faHouseDamage, faPrint,
+  faBan, faCar, faClipboardCheck, faDownload, faEdit, faEnvelope, faHouseDamage,
   faKey, faMapMarkedAlt, faPlusSquare, faTimes, faTrailer, faUserPlus, faUsers
 } from '@fortawesome/free-solid-svg-icons';
 import { faCalendarEdit, faCommentSmile, faHomeHeart, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
@@ -15,8 +15,10 @@ import History from '../components/History';
 import AnimalCards from '../components/AnimalCards';
 import PhotoDocuments from '../components/PhotoDocuments';
 import { SystemErrorContext } from '../components/SystemError';
-import { printServiceRequestSummary } from './Utils'
-import { printSrAnimalCareSchedules } from './Utils';
+import { printServiceRequestSummary, printSrAnimalCareSchedules } from './Utils'
+import ShelterlyPrintifyButton from '../components/ShelterlyPrintifyButton';
+
+import '../assets/styles.css';
 
 function ServiceRequestDetails({ id, incident }) {
 
@@ -87,17 +89,11 @@ function ServiceRequestDetails({ id, incident }) {
     });
   }
 
-  const handleDownloadPdfClick = (e) => {
-    e.preventDefault();
+  const handleDownloadPdfClick = () =>
+    printServiceRequestSummary(data)
 
-    printServiceRequestSummary(data);
-  }
-
-  const handlePrintAllAnimalsClick = (e) => {
-    e.preventDefault();
-
-    printSrAnimalCareSchedules(data.animals, id);
-  }
+  const handlePrintAllAnimalsClick = () =>
+    printSrAnimalCareSchedules(data.animals, id)
 
   const handleGeoJsonDownload = () => {
     var fileDownload = require('js-file-download');
@@ -168,21 +164,14 @@ function ServiceRequestDetails({ id, incident }) {
           <Link onClick={handleGeoJsonDownload} href=""><FontAwesomeIcon icon={faDownload} className="mx-2"  inverse /></Link>
         </OverlayTrigger>
 
-        <OverlayTrigger
-          key={"download-service-request-summary"}
-          placement="bottom"
-          overlay={
-            <Tooltip id={`tooltip-download-service-request-summary`}>
-              Download Service Request Summary
-            </Tooltip>
-          }
-        >
-          {({ ref, ...triggerHandler }) => (
-            <Link onClick={handleDownloadPdfClick} {...triggerHandler} href="#">
-              <span ref={ref}><FontAwesomeIcon icon={faPrint} className="ml-1 mr-2"  inverse /></span>
-            </Link>
-          )}
-        </OverlayTrigger>
+        <ShelterlyPrintifyButton
+          id="service-request-summary"
+          spinnerSize={2.0}
+          tooltipPlacement='bottom'
+          tooltipText='Download Service Request Summary'
+          printFunc={handleDownloadPdfClick}
+        />
+
         <OverlayTrigger
           key={"cancel-service-request"}
           placement="bottom"
@@ -457,17 +446,13 @@ function ServiceRequestDetails({ id, incident }) {
                     </OverlayTrigger>
                     : ""}
                   {data.animals?.length > 0 && (
-                    <OverlayTrigger
-                      key={"printall"}
-                      placement="top"
-                      overlay={
-                        <Tooltip id={`tooltip-printall`}>
-                          Print all animal care schedules
-                        </Tooltip>
-                      }
-                    >
-                      <FontAwesomeIcon icon={faPrint} onClick={handlePrintAllAnimalsClick} style={{cursor:'pointer'}} className="ml-1 fa-move-up" size="sm" inverse />
-                    </OverlayTrigger>
+                    <ShelterlyPrintifyButton
+                      id="service-request-animal-care-schedules"
+                      spinnerSize={1.5}
+                      tooltipPlacement='bottom'
+                      tooltipText='Print All Animal Care Schedules'
+                      printFunc={handlePrintAllAnimalsClick}
+                    />
                   )}
                 </h4>
               </Card.Title>

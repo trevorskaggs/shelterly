@@ -44,7 +44,7 @@ function ServiceRequestSearch({ incident }) {
   const [numPages, setNumPages] = useState(1);
   const { markInstances } = useMark();
   const {
-    isSubmitting,
+    isSubmittingById,
     handleSubmitting,
     submittingComplete,
     submittingLabel
@@ -187,9 +187,9 @@ function ServiceRequestSearch({ incident }) {
           />
           <ButtonSpinner
             variant="outline-light"
-            className="ml-1"
+            className="ml-1 print-all-btn-icon"
             onClick={handlePrintAllClick}
-            isSubmitting={isSubmitting}
+            isSubmitting={isSubmittingById()}
             isSubmittingText={submittingLabel}
           >
             Print All ({`${filteredServiceRequests.length}`})

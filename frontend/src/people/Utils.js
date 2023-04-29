@@ -2,16 +2,21 @@ import moment from 'moment';
 import ShelterlyPDF from '../utils/pdf';
 import { capitalize } from '../utils/formatString';
 import { buildAnimalCareScheduleDoc } from '../animals/Utils';
-import { ORGANIZATION_NAME, ORGANIZATION_SHORT_NAME } from "../constants";
+import {
+  ORGANIZATION_NAME,
+  ORGANIZATION_SHORT_NAME,
+  DATE_FORMAT,
+} from "../constants";
 
-const dateFormat = 'YYYYMMDDHHmm';
-
-const buildOwnersDoc = (owners) => {
-  const pdf = new ShelterlyPDF({}, {
-    pageTitle: 'Owner Summary',
-    pageSubtitle: `Date: ${new Date().toLocaleDateString()}`,
-  });
-
+/**
+ * builds owner summary content
+ *
+ * @param {ShelterlyPDF} pdf
+ * @param {Array} owners
+ * @param {Array} [animalsOverride] optionally set the animals, otherwise will use animals within the owner object
+ * @returns {ShelterlyPDF}
+ */
+const buildOwnersContent = (pdf, owners, animalsOverride) => {
   const groupedPageCounts = [];
   let ownerPageCount = 1;
   owners.forEach((owner, i) => {
@@ -30,16 +35,19 @@ const buildOwnersDoc = (owners) => {
     pdf.drawSectionHeader({ text: 'Owner Details', hRule: true });
     
     const ownerInfoList = [
-      `Name: ${owner.first_name} ${owner.last_name}`,
-      `Owner ID: #${owner.id}`
+      `Name: ${owner.first_name} ${owner.last_name}`
     ];
+    if (owner.id) {
+      ownerInfoList.push(`Owner ID: #${owner.id}`)
+    }
     if (owner.agency) ownerInfoList.push(`Agency: ${owner.agency}`);
     if (owner.phone) ownerInfoList.push(`Telephone: ${owner.display_phone} ${owner.display_alt_phone ? `  Alt: ${owner.display_alt_phone}` : ''}`);
     if (owner.email) ownerInfoList.push(`Email: ${owner.email}`);
     if (owner.request) ownerInfoList.push(`Service Request: ${owner.request.full_address}`);
     else {
       if (owner.address) ownerInfoList.push(`Address: ${owner.full_address}`);
-      else ownerInfoList.push('Address: No Address Listed');
+      else if (owner.id) ownerInfoList.push('Address: No Address Listed');
+      else ownerInfoList.push('Address:');
     }
 
     pdf.drawTextList({
@@ -63,7 +71,10 @@ const buildOwnersDoc = (owners) => {
 
     // keep the last y position after a row was drawn
     let lastYPosAfterDraw = pdf.getLastYPositionWithBuffer({ buffer: 0 });
-    owner.animals.forEach((animal, animalIndex) => {
+
+    const animals = animalsOverride || owner?.animals || [];
+
+    animals.forEach((animal, animalIndex) => {
       // grab the last y position before we draw a row
       let lastYPosBeforeDraw = pdf.getLastYPositionWithBuffer({ buffer: 0 });
       
@@ -117,7 +128,7 @@ const buildOwnersDoc = (owners) => {
       // Draw the animal header again.
       if (
           lastYPosAfterDraw < lastYPosBeforeDraw &&
-          animalIndex < owner.animals.length - 1
+          animalIndex < animals.length - 1
         ) {
         drawAnimalHeader();
       }
@@ -228,6 +239,15 @@ const buildOwnersDoc = (owners) => {
   }
 
   return pdf;
+}
+
+const buildOwnersDoc = (owners) => {
+  const pdf = new ShelterlyPDF({}, {
+    pageTitle: 'Owner Summary',
+    pageSubtitle: `Date: ${new Date().toLocaleDateString()}`,
+  });
+
+  return buildOwnersContent(pdf, owners);
 };
 
 function printOwnerDetails(owner = {}) {
@@ -238,17 +258,18 @@ function printOwnerDetails(owner = {}) {
 
 async function printAllOwnersDetails(owners = []) {
   const pdf = buildOwnersDoc(owners);
-  pdf.fileName = `Owner-Summaries-${moment().format(dateFormat)}`;
+  pdf.fileName = `Owner-Summaries-${moment().format(DATE_FORMAT)}`;
   return pdf.saveFile();
 }
 
 const printOwnerAnimalCareSchedules  = async (animals = [], ownerId = 0) => {
   const  pdf = await buildAnimalCareScheduleDoc(animals);
-  pdf.fileName = `Shelterly-Owner-Animal-Care-Schedules-${ownerId.toString().padStart(4, 0)}-${moment().format(dateFormat)}`;
+  pdf.fileName = `Shelterly-Owner-Animal-Care-Schedules-${ownerId.toString().padStart(4, 0)}-${moment().format(DATE_FORMAT)}`;
   return pdf.saveFile();
 };
 
 export {
+  buildOwnersContent,
   printOwnerDetails,
   printAllOwnersDetails,
   printOwnerAnimalCareSchedules

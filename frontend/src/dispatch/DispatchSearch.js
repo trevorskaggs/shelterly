@@ -46,7 +46,7 @@ function DispatchAssignmentSearch({ incident }) {
   const [isDateSet, setIsDateSet] = useState(false);
   const { markInstances } = useMark();
   const {
-    isSubmitting,
+    isSubmittingById,
     handleSubmitting,
     submittingComplete,
     submittingLabel
@@ -209,9 +209,9 @@ function DispatchAssignmentSearch({ incident }) {
           />
           <ButtonSpinner
             variant="outline-light"
-            className="ml-1"
+            className="ml-1 print-all-btn-icon"
             onClick={handlePrintAllClick}
-            isSubmitting={isSubmitting}
+            isSubmitting={isSubmittingById()}
             isSubmittingText={submittingLabel}
           >
             Print All ({`${filteredEvacAssignments.length}`})
