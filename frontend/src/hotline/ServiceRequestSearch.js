@@ -1,18 +1,18 @@
 import React, { useContext, useEffect, useState, useRef } from 'react';
 import axios from "axios";
 import { Link, useQueryParams } from 'raviger';
-import { Button, ButtonGroup, Card, CardGroup, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Pagination, Tooltip } from 'react-bootstrap';
+import { Button, ButtonGroup, Card, CardGroup, Col, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Pagination, Row, Tooltip } from 'react-bootstrap';
 import moment from 'moment';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBan, faCar, faChevronDown, faChevronUp, faEquals, faClipboardList, faEnvelope, faKey, faTrailer, faUsers, faPrint
+  faBan, faCar, faChevronDown, faChevronUp, faEquals, faClipboardList, faEnvelope, faKey, faTrailer, faPrint
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faDotCircle
 } from '@fortawesome/free-regular-svg-icons';
 import { faChevronDoubleDown, faChevronDoubleUp, faCommentSmile, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import Moment from 'react-moment';
-import { useMark, useSubmitting, useDateRange } from '../hooks';
+import { useMark, useSubmitting } from '../hooks';
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
 import { speciesChoices } from '../animals/constants';
@@ -37,11 +37,13 @@ function ServiceRequestSearch({ incident }) {
 
   const [data, setData] = useState({service_requests: [], isFetching: false});
   const [searchState, setSearchState] = useState({});
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
   const [searchTerm, setSearchTerm] = useState(search);
   const tempSearchTerm = useRef(null);
-  const [statusOptions, setStatusOptions] = useState(status);
   const [page, setPage] = useState(1);
   const [numPages, setNumPages] = useState(1);
+  const [statusOptions, setStatusOptions] = useState(status);
   const { markInstances } = useMark();
   const {
     isSubmittingById,
@@ -49,12 +51,7 @@ function ServiceRequestSearch({ incident }) {
     submittingComplete,
     submittingLabel
   } = useSubmitting();
-  const [isDateSet, setIsDateSet] = useState(false);
-  const [
-    filteredServiceRequests,
-    setFilteredServiceRequests
-  ] = useState(data.service_requests);
-  const { startDate, endDate, parseDateRange } = useDateRange();
+  const [filteredServiceRequests, setFilteredServiceRequests] = useState(data.service_requests);
 
   // Update searchTerm when field input changes.
   const handleChange = event => {
@@ -85,7 +82,7 @@ function ServiceRequestSearch({ incident }) {
   // Hook for filtering service requests
   useEffect(() => {
     if (data.isFetching) return;
-    if (isDateSet) {
+    if (startDate && endDate) {
       const srSubset = data.service_requests.filter((sr) => 
         moment(startDate) <= moment(sr.timestamp) && moment(endDate) >= moment(sr.timestamp)
       )
@@ -95,7 +92,7 @@ function ServiceRequestSearch({ incident }) {
       setFilteredServiceRequests(data.service_requests);
       setNumPages(Math.ceil(data.service_requests.length / ITEMS_PER_PAGE));
     }
-  }, [data, isDateSet, startDate, endDate])
+  }, [data, startDate, endDate])
 
   // Hook for initializing data.
   useEffect(() => {
@@ -105,7 +102,7 @@ function ServiceRequestSearch({ incident }) {
     const fetchServiceRequests = async () => {
       setData({service_requests: [], isFetching: true});
       // Fetch ServiceRequest data.
-      await axios.get('/hotline/api/servicerequests/?search=' + searchTerm + '&status=' + statusOptions +'&incident=' + incident, {
+      await axios.get('/hotline/api/servicerequests/?search=' + searchTerm + '&status=' + statusOptions + '&incident=' + incident, {
         cancelToken: source.token,
       })
       .then(response => {
@@ -163,28 +160,6 @@ function ServiceRequestSearch({ incident }) {
           <InputGroup.Append>
             <Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0"}}>Search</Button>
           </InputGroup.Append>
-          <ButtonGroup className="ml-1">
-            <Button variant={statusOptions === "open" ? "primary" : "secondary"} onClick={statusOptions !== "open" ? () => {setPage(1);setStatusOptions("open")} : () => {setPage(1);setStatusOptions("")}}>Open</Button>
-            <Button variant={statusOptions === "assigned" ? "primary" : "secondary"} onClick={statusOptions !== "assigned" ? () => {setPage(1);setStatusOptions("assigned")} : () => {setPage(1);setStatusOptions("")}}>Assigned</Button>
-            <Button variant={statusOptions === "closed" ? "primary" : "secondary"} onClick={statusOptions !== "closed" ? () => {setPage(1);setStatusOptions("closed")} : () => {setPage(1);setStatusOptions("")}}>Closed</Button>
-            <Button variant={statusOptions === "canceled" ? "primary" : "secondary"} onClick={statusOptions !== "canceled" ? () => {setPage(1);setStatusOptions("canceled")} : () => {setPage(1);setStatusOptions("")}}>Canceled</Button>
-          </ButtonGroup>
-          <DateRangePicker
-            name={`date_range_picker`}
-            id={`date_range_picker`}
-            placeholder={"Filter by Date Range"}
-            style={{width:"210px", marginLeft:"0.25rem"}}
-            onChange={(dateRange) => {
-              if (dateRange.length) {
-                setIsDateSet(true)
-                parseDateRange(dateRange)
-                setNumPages(Math.ceil(filteredServiceRequests.length / ITEMS_PER_PAGE));
-              } else {
-                setIsDateSet(false)
-                setNumPages(Math.ceil(data.service_requests.length / ITEMS_PER_PAGE));
-              }
-            }}
-          />
           <ButtonSpinner
             variant="outline-light"
             className="ml-1 print-all-btn-icon"
@@ -196,6 +171,44 @@ function ServiceRequestSearch({ incident }) {
             <FontAwesomeIcon icon={faPrint} className="ml-2 text-light" inverse />
           </ButtonSpinner>
         </InputGroup>
+        <Row className="mr-0 pr-0 no-gutters">
+          <Col className="pr-2">
+            <DateRangePicker
+              name={`date_range_picker`}
+              id={`date_range_picker`}
+              placeholder={"Filter by Start Date"}
+              mode="single"
+              data-enable-time={true}
+              clearable={true}
+              style={{height:"36px"}}
+              onChange={(dateRange) => {
+                setStartDate(dateRange.length ? dateRange[0] : null)
+              }}
+            />
+          </Col>
+          <Col>
+            <DateRangePicker
+              name={`date_range_picker`}
+              id={`date_range_picker`}
+              placeholder={"Filter by End Date"}
+              mode="single"
+              data-enable-time={true}
+              clearable={true}
+              style={{height:"36px"}}
+              onChange={(dateRange) => {
+                setEndDate(dateRange.length ? dateRange[0] : null)
+              }}
+            />
+          </Col>
+          <Col xs={6} className="">
+            <ButtonGroup className="float-right align-self-end">
+              <Button variant={statusOptions === "open" ? "primary" : "secondary"} onClick={statusOptions !== "open" ? () => {setPage(1);setStatusOptions("open")} : () => {setPage(1);setStatusOptions("")}}>Open</Button>
+              <Button variant={statusOptions === "assigned" ? "primary" : "secondary"} onClick={statusOptions !== "assigned" ? () => {setPage(1);setStatusOptions("assigned")} : () => {setPage(1);setStatusOptions("")}}>Assigned</Button>
+              <Button variant={statusOptions === "closed" ? "primary" : "secondary"} onClick={statusOptions !== "closed" ? () => {setPage(1);setStatusOptions("closed")} : () => {setPage(1);setStatusOptions("")}}>Closed</Button>
+              <Button variant={statusOptions === "canceled" ? "primary" : "secondary"} onClick={statusOptions !== "canceled" ? () => {setPage(1);setStatusOptions("canceled")} : () => {setPage(1);setStatusOptions("")}}>Canceled</Button>
+            </ButtonGroup>
+          </Col>
+        </Row>
       </Form>
       {filteredServiceRequests.map((service_request, index) => (
         <div key={service_request.id} className="mt-3" hidden={page !== Math.ceil((index+1)/ITEMS_PER_PAGE)}>
@@ -333,7 +346,7 @@ function ServiceRequestSearch({ incident }) {
                       </Tooltip>
                     }
                   >
-                    <span className="fa-layers">
+                    <span className="fa-layers mr-1">
                       <FontAwesomeIcon icon={faCar} size="sm" className="ml-1 fa-move-down" />
                     </span>
                   </OverlayTrigger> :
@@ -383,9 +396,10 @@ function ServiceRequestSearch({ incident }) {
                 <Scrollbar style={{height:"144px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
                   <ListGroup>
                     <ListGroup.Item>
-                    {service_request.evacuation_assignments.filter(da => da.start_time === service_request.evacuation_assignments.map(da => da.start_time).sort().reverse()[0]).map(dispatch_assignment =>
+                      <b>Opened: </b><Moment format="LLL">{service_request.timestamp}</Moment>
+                    {/* {service_request.evacuation_assignments.filter(da => da.start_time === service_request.evacuation_assignments.map(da => da.start_time).sort().reverse()[0]).map(dispatch_assignment =>
                       <span key={dispatch_assignment.id}>
-                        <b>{dispatch_assignment.end_time ? "Last" : "Active"} Dispatch Assignment: </b>
+                        <b>Dispatch Assignment: </b>
                         <Link href={"/" + incident + "/dispatch/summary/" + dispatch_assignment.id} className="text-link" style={{textDecoration:"none", color:"white"}}><Moment format="L">{dispatch_assignment.start_time}</Moment></Link>&nbsp;
                         |&nbsp;{dispatch_assignment.team_name}
                         <OverlayTrigger
@@ -406,7 +420,7 @@ function ServiceRequestSearch({ incident }) {
                         <b>Dispatch Assignment: </b>
                         Never Serviced
                       </span>
-                    : ""}
+                    : ""} */}
                     </ListGroup.Item>
                     {service_request.owner_objects.map(owner => (
                       <ListGroup.Item key={owner.id}>

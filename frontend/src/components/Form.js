@@ -70,7 +70,7 @@ const useStyles = makeStyles({
 
 const DateRangePicker = ({...props}) => {
   const pickerRef = useRef();
-  const options = {allowInput: true, dateFormat: "m-d-Y", mode: "range", maxDate: moment().format('MM-DD-YYYY')}
+  const options = {allowInput: true, dateFormat: props.mode === "single" ? "M d, Y H:i" : "m-d-Y", mode: props.mode === "single" ? "single" : "range", maxDate: moment().format('MM-DD-YYYY')}
   const styles = {
     ...props.style,
     display: 'flex'
