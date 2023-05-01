@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('incident', '0002_auto_20220618_0459'),
-        ('animals', '0023_auto_20220618_1220'),
+        ('animals', '0022_auto_20220602_0851'),
     ]
 
     operations = [
