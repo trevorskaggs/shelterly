@@ -39,6 +39,7 @@ function ServiceRequestSearch({ incident }) {
   const [searchState, setSearchState] = useState({});
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
+  const [triggerRefresh, setTriggerRefresh] = useState(false);
   const [searchTerm, setSearchTerm] = useState(search);
   const tempSearchTerm = useRef(null);
   const [page, setPage] = useState(1);
@@ -92,7 +93,7 @@ function ServiceRequestSearch({ incident }) {
       setFilteredServiceRequests(data.service_requests);
       setNumPages(Math.ceil(data.service_requests.length / ITEMS_PER_PAGE));
     }
-  }, [data, startDate, endDate])
+  }, [data, startDate, endDate, triggerRefresh])
 
   // Hook for initializing data.
   useEffect(() => {
@@ -171,18 +172,19 @@ function ServiceRequestSearch({ incident }) {
             <FontAwesomeIcon icon={faPrint} className="ml-2 text-light" inverse />
           </ButtonSpinner>
         </InputGroup>
-        <Row className="mr-0 pr-0 no-gutters">
+        <Row className="mr-0 pr-0 no-gutters" style={{marginTop:"-5px"}}>
           <Col className="pr-2">
             <DateRangePicker
               name={`date_range_picker`}
               id={`date_range_picker`}
-              placeholder={"Filter by Start Date"}
+              placeholder={"Opened Start Date"}
               mode="single"
               data-enable-time={true}
               clearable={true}
               style={{height:"36px"}}
               onChange={(dateRange) => {
                 setStartDate(dateRange.length ? dateRange[0] : null)
+                setTriggerRefresh(!triggerRefresh)
               }}
             />
           </Col>
@@ -190,17 +192,19 @@ function ServiceRequestSearch({ incident }) {
             <DateRangePicker
               name={`date_range_picker`}
               id={`date_range_picker`}
-              placeholder={"Filter by End Date"}
+              placeholder={"Opened End Date"}
               mode="single"
               data-enable-time={true}
               clearable={true}
               style={{height:"36px"}}
               onChange={(dateRange) => {
+                console.log(dateRange)
                 setEndDate(dateRange.length ? dateRange[0] : null)
+                setTriggerRefresh(!triggerRefresh)
               }}
             />
           </Col>
-          <Col xs={6} className="">
+          <Col xs={6}>
             <ButtonGroup className="float-right align-self-end">
               <Button variant={statusOptions === "open" ? "primary" : "secondary"} onClick={statusOptions !== "open" ? () => {setPage(1);setStatusOptions("open")} : () => {setPage(1);setStatusOptions("")}}>Open</Button>
               <Button variant={statusOptions === "assigned" ? "primary" : "secondary"} onClick={statusOptions !== "assigned" ? () => {setPage(1);setStatusOptions("assigned")} : () => {setPage(1);setStatusOptions("")}}>Assigned</Button>
@@ -463,7 +467,7 @@ function ServiceRequestSearch({ incident }) {
               <Card style={{marginBottom:"6px"}}>
                 <Card.Body style={{width:"525px"}}>
                   <Card.Title style={{marginTop:"-10px"}}>
-                    <Scrollbar horizontal autoHide style={{height:"32px", width:"485px"}} renderView={props => <div {...props} style={{...props.style, marginBottom:"-18px", marginRight:"0px", overflowX:"auto", overflowY: "hidden"}}/>} renderThumbVertical={props => <div {...props} style={{...props.style, display: 'none'}} />}>
+                    <Scrollbar horizontal="true" autoHide style={{height:"32px", width:"485px"}} renderView={props => <div {...props} style={{...props.style, marginBottom:"-18px", marginRight:"0px", overflowX:"auto", overflowY: "hidden"}}/>} renderThumbVertical={props => <div {...props} style={{...props.style, display: 'none'}} />}>
                       <ListGroup horizontal>
                       {searchState[service_request.id].species.map(species => (
                         <ListGroup.Item key={species} active={searchState[service_request.id].selectedSpecies === species ? true : false} style={{textTransform:"capitalize", cursor:'pointer', paddingTop:"4px", paddingBottom:"4px"}} onClick={() => setSearchState(prevState => ({ ...prevState, [service_request.id]:{...prevState[service_request.id], selectedSpecies:species} }))}>{species}{["other", "sheep"].includes(species) ? "" : "s"}</ListGroup.Item>
@@ -501,7 +505,7 @@ function ServiceRequestSearch({ incident }) {
           </CardGroup>
         </div>
       ))}
-      <p>{data.isFetching ? 'Fetching service requests...' : <span>{filteredServiceRequests && filteredServiceRequests.length ? '' : 'No Service Requests found.'}</span>}</p>
+      <p className="mt-3">{data.isFetching ? 'Fetching service requests...' : <span>{filteredServiceRequests && filteredServiceRequests.length ? '' : 'No Service Requests found.'}</span>}</p>
       <Pagination className="custom-page-links" size="lg" onClick={(e) => {setFocus(parseInt(e.target.innerText));setPage(parseInt(e.target.innerText))}}>
         {[...Array(numPages).keys()].map(x =>
         <Pagination.Item key={x+1} active={x+1 === page}>

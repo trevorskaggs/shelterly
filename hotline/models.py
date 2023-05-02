@@ -93,9 +93,15 @@ class ServiceRequest(Location):
         self.save()
 
     def get_feature_json(self):
-        species_counts = {}
-        for animal in self.animal_set.all():
-            species_counts[animal.species] = species_counts.get(animal.species, 0) + 1
+        species_counts = {'REPORTED':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}}
+        for animal in self.animal_set.filter(status__in=['REPORTED', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE']):
+            species_counts[animal.status][animal.species] = species_counts[animal.status].get(animal.species, 0) + 1
+        description = self.location_output.rsplit(',', 1)[0]  + " ("
+        for status in [('Reported','REPORTED'), (' | SIP','SHELTERED IN PLACE'), (' | UTL', 'UNABLE TO LOCATE')]:
+            print (species_counts)
+            print (species_counts[status[1]])
+            description += status[0] + ': ' + ', '.join(f'{value} {key}' + ('s' if value != 1 and animal.species != 'sheep' else '') for key, value in species_counts[status[1]].items()) #123 Ranch Rd, Napa CA (1 cat, 2 dogs)
+        description += ")"
         feature_json = {
           "geometry":{
               "coordinates":[
@@ -111,7 +117,7 @@ class ServiceRequest(Location):
           "properties":{
               "marker-symbol":"circle-n",
               "marker-color":"#FF0000",
-              "description":self.location_output.rsplit(',', 1)[0] + " (" + ', '.join(f'{value} {key}' + ('s' if value != 1 and animal.species != 'sheep' else '') for key, value in species_counts.items()) + ")", #123 Ranch Rd, Napa CA (1 cat, 2 dogs)
+              "description":description,
               "title":self.id,
               "class":"Marker",
           }
