@@ -142,6 +142,7 @@ def email_on_creation(sender, instance, **kwargs):
                 {
                 'site': Site.objects.get_current(),
                 'id': instance.id,
+                'incident': instance.incident.slug,
                 'address': instance.location_output,
                 }
             ).strip(),
@@ -155,6 +156,7 @@ def email_on_creation(sender, instance, **kwargs):
                 {
                 'site': Site.objects.get_current(),
                 'id': instance.id,
+                'incident': instance.incident.slug,
                 'address': instance.location_output,
                 }
             ).strip()
