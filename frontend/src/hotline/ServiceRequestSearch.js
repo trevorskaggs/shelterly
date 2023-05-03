@@ -175,12 +175,13 @@ function ServiceRequestSearch({ incident }) {
         <Row className="mr-0 pr-0 no-gutters" style={{marginTop:"-5px"}}>
           <Col className="pr-2">
             <DateRangePicker
-              name={`date_range_picker`}
-              id={`date_range_picker`}
+              name={`start_date_range_picker`}
+              id={`start_date_range_picker`}
               placeholder={"Opened Start Date"}
               mode="single"
               data-enable-time={true}
               clearable={true}
+              hour={0}
               style={{height:"36px"}}
               onChange={(dateRange) => {
                 setStartDate(dateRange.length ? dateRange[0] : null)
@@ -190,15 +191,16 @@ function ServiceRequestSearch({ incident }) {
           </Col>
           <Col>
             <DateRangePicker
-              name={`date_range_picker`}
-              id={`date_range_picker`}
+              name={`end_date_range_picker`}
+              id={`end_date_range_picker`}
               placeholder={"Opened End Date"}
               mode="single"
               data-enable-time={true}
               clearable={true}
+              hour={23}
+              minute={59}
               style={{height:"36px"}}
               onChange={(dateRange) => {
-                console.log(dateRange)
                 setEndDate(dateRange.length ? dateRange[0] : null)
                 setTriggerRefresh(!triggerRefresh)
               }}
