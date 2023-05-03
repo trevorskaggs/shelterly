@@ -349,6 +349,7 @@ const PersonForm = (props) => {
                 options={existingOwners.options}
                 placeholder={existingOwners.fetching ? "Loading..." : "Search..."}
                 disabled={existingOwners.fetching ? true : false}
+                emptyLabel="No matches found. Please fill out the form below."
               />
             </span>
             <BootstrapForm.Row>
