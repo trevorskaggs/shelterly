@@ -584,16 +584,21 @@ class ShelterlyPDF {
         this.#documentLastYPosition = this.beforeDraw({ yPosition }) + size;
       }
 
-      if (listStyle === 'grid') {
-        if (withLines === true) {
-          const textWidth = this.#jsPDF.getStringUnitWidth(label) * this.#documentFontSize;
-          this.#jsPDF.line(
-            this.#documentLeftMargin + textWidth,
-            yPosition + 15,
-            this.#documentLeftMargin + this.pageWidth / 2 - 30,
-            yPosition + 15
-          );
+      if (withLines === true) {
+        let rightMargin = this.#documentLeftMargin + this.pageWidth - 45;
+        if (listStyle === 'grid') {
+          rightMargin = this.#documentLeftMargin + this.pageWidth / 2 - 30;
         }
+        const textWidth = this.#jsPDF.getStringUnitWidth(label) * this.#documentFontSize;
+        this.#jsPDF.line(
+          this.#documentLeftMargin + textWidth,
+          yPosition + 15,
+          rightMargin,
+          yPosition + 15
+        );
+      }
+
+      if (listStyle === 'grid') {
         if (i % 2 === 0) {
           this.#documentLeftMargin = this.pageWidth / 2;
         } else {

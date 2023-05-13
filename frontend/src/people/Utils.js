@@ -1,7 +1,7 @@
 import moment from 'moment';
 import ShelterlyPDF from '../utils/pdf';
 import { capitalize } from '../utils/formatString';
-import { buildAnimalCareScheduleDoc } from '../animals/Utils';
+import { buildAnimalCareScheduleDoc, buildAnimalCountList } from '../animals/Utils';
 import {
   ORGANIZATION_NAME,
   ORGANIZATION_SHORT_NAME,
@@ -32,7 +32,7 @@ const buildOwnersContent = (pdf, owners, animalsOverride) => {
     }
 
     // draw owner section
-    pdf.drawSectionHeader({ text: 'Owner Details', hRule: true });
+    pdf.drawSectionHeader({ text: 'Owner Summary/Liability', hRule: true });
     
     const ownerInfoList = [
       `Name: ${owner.first_name} ${owner.last_name}`
@@ -43,6 +43,8 @@ const buildOwnersContent = (pdf, owners, animalsOverride) => {
     if (owner.agency) ownerInfoList.push(`Agency: ${owner.agency}`);
     if (owner.phone) ownerInfoList.push(`Telephone: ${owner.display_phone} ${owner.display_alt_phone ? `  Alt: ${owner.display_alt_phone}` : ''}`);
     if (owner.email) ownerInfoList.push(`Email: ${owner.email}`);
+    if (owner.drivers_license) ownerInfoList.push(`Drivers License: ${owner.drivers_license}`);
+
     if (owner.request) ownerInfoList.push(`Service Request: ${owner.request.full_address}`);
     else {
       if (owner.address) ownerInfoList.push(`Address: ${owner.full_address}`);
@@ -64,15 +66,19 @@ const buildOwnersContent = (pdf, owners, animalsOverride) => {
     pdf.drawPad();
 
     function drawAnimalHeader() {
-      pdf.drawSectionHeader({ text: 'Animals', hRule: true });
+      pdf.drawSectionHeader({ text: 'Animals', hRule: false });
     }
+
+    const animals = animalsOverride || owner?.animals || [];
 
     drawAnimalHeader();
 
+    buildAnimalCountList(pdf, animals);
+
+    pdf.drawHRule();
+
     // keep the last y position after a row was drawn
     let lastYPosAfterDraw = pdf.getLastYPositionWithBuffer({ buffer: 0 });
-
-    const animals = animalsOverride || owner?.animals || [];
 
     animals.forEach((animal, animalIndex) => {
       // grab the last y position before we draw a row
@@ -160,6 +166,20 @@ const buildOwnersContent = (pdf, owners, animalsOverride) => {
       });
     }
 
+    function drawSignatureLines() {
+      pdf.drawTextList({
+        labels: ['Owner\'s Signature: ', 'Date: '],
+        listStyle: 'grid',
+        bottomPadding: 10,
+        withLines: true
+      });
+      pdf.drawTextList({
+        labels: [`${ORGANIZATION_SHORT_NAME} Witness Signature (First Name & AR#): `],
+        bottomPadding: 15,
+        withLines: true
+      });
+    }
+
     const agreements = [
       // 1)
       'I understand that my animal(s) may be exposed to disease and other risks while being ' +
@@ -204,14 +224,31 @@ const buildOwnersContent = (pdf, owners, animalsOverride) => {
       listStyle: 'inline',
     });
 
-    // pdf.drawTextWithLine({ label: 'Owner\'s Signature', xOffset: 100 });
+    drawSignatureLines();
 
-    pdf.drawTextList({
-      labels: ['Owner\'s Signature: ', 'Date: ', `${ORGANIZATION_SHORT_NAME} Witness: `],
-      listStyle: 'grid',
-      bottomPadding: 10,
-      withLines: true
+    // End liability form
+    // Begin release animal form
+    const estimatedReleaseSectionHeight = 150;
+    if (pdf.remainderPageHeight <= estimatedReleaseSectionHeight) {
+      pdf.drawPageBreak();
+      ownerPageCount++;
+    }
+
+    // Draw liability form
+    pdf.drawSectionHeader({
+      text: "Release of Animal",
+      hRule: false,
+      align: ShelterlyPDF.AlignTypes.CENTER,
     });
+    pdf.drawPad(18);
+    pdf.drawHRule({ buffer: 1});
+
+    let releaseText = 'I hereby acknowledge that I am the owner/responsible person for the above animal. I have taken ';
+    releaseText += 'custody of my animal and am now responsible for its care and transportation.';
+    pdf.drawWrappedText({ text: releaseText, linePadding: -2 });
+
+    drawSignatureLines();
+    // End release animal form
   });
 
   // push the last owner page count
