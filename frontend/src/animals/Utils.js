@@ -135,7 +135,7 @@ async function buildAnimalCareScheduleContent(pdf, animals) {
       buffer: 5
     });
 
-    const pageWidth = pdf.pageWidth - 30;
+    const pageWidth = pdf.pageWidth - pdf.documentLeftMargin * 2;
     const smallCol = pageWidth * .15;
     const bigCol = pageWidth * .35;
     pdf.drawTableGrid({
