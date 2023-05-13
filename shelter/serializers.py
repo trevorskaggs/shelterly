@@ -103,8 +103,8 @@ class IntakeSummarySerializer(serializers.ModelSerializer):
     shelter_name = serializers.StringRelatedField(source='shelter')
 
     def get_animal_objects(self, obj):
-        from animals.serializers import ModestAnimalSerializer
-        return ModestAnimalSerializer(obj.animals, many=True).data
+        from animals.serializers import AnimalSerializer
+        return AnimalSerializer(obj.animals, many=True).data
 
     def get_person_object(self, obj):
         from people.serializers import PersonSerializer
