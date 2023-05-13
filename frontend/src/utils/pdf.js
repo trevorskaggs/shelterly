@@ -39,7 +39,7 @@ class ShelterlyPDF {
   #documentFontSize = 12;
   #documentTitle1FontSize = 20;
   #documentTitle2FontSize = 16;
-  #defaultXMargin = 15;
+  #defaultXMargin = 35;
   #defaultYMargin = 35;
   #documentLeftMargin = this.#defaultXMargin;
   #documentRightMargin = this.#defaultXMargin;
@@ -51,6 +51,7 @@ class ShelterlyPDF {
   #pageRewound = false;
   #addFooter = null;
   #drawHeaderOnEveryPage = false;
+  #appName = 'Shelterly';
 
   constructor (format = {}, {
     addFooterHandler,
@@ -204,22 +205,33 @@ class ShelterlyPDF {
   drawPageHeader({
     pageTitle = this.#pageTitle,
     subtitle = this.#pageSubtitle,
+    appName = this.#appName
   } = {}) {
     // set default font size
     this.setDocumentFontSize({ size: 15 });
+
+    const textWidth = this.#jsPDF.getTextWidth(appName.toUpperCase());
+    const logoWidth = 50;
+    const logoHeight = 50;
+    let logoXPosition = (textWidth - logoWidth) / 2;
+    logoXPosition =
+      logoXPosition > 0
+        ? logoXPosition + this.#documentLeftMargin
+        : this.#documentLeftMargin;
+
     // add logo header
     this.#jsPDF.addImage(
       logo,
       'png',
-      this.#documentTopMargin,
-      this.#documentLeftMargin,
-      50,
-      50
+      logoXPosition,
+      logoHeight - this.#documentTopMargin,
+      logoWidth,
+      logoHeight
     );
 
     // text brown
     this.setDocumentColors({ rgb: rgbColors.SHELTERLY_BROWN });
-    this.#jsPDF.text('SHELTERLY', this.#documentLeftMargin, 80);
+    this.#jsPDF.text(appName.toUpperCase(), this.#documentLeftMargin, logoHeight + 30);
 
     // reset doc colors
     this.setDocumentColors();
@@ -584,16 +596,21 @@ class ShelterlyPDF {
         this.#documentLastYPosition = this.beforeDraw({ yPosition }) + size;
       }
 
-      if (listStyle === 'grid') {
-        if (withLines === true) {
-          const textWidth = this.#jsPDF.getStringUnitWidth(label) * this.#documentFontSize;
-          this.#jsPDF.line(
-            this.#documentLeftMargin + textWidth,
-            yPosition + 15,
-            this.#documentLeftMargin + this.pageWidth / 2 - 30,
-            yPosition + 15
-          );
+      if (withLines === true) {
+        let rightMargin = this.#documentLeftMargin + this.pageWidth - this.documentLeftMargin * 2;
+        if (listStyle === 'grid') {
+          rightMargin = this.#documentLeftMargin + this.pageWidth / 2 - 30;
         }
+        const textWidth = this.#jsPDF.getStringUnitWidth(label) * this.#documentFontSize;
+        this.#jsPDF.line(
+          this.#documentLeftMargin + textWidth,
+          yPosition + 15,
+          rightMargin,
+          yPosition + 15
+        );
+      }
+
+      if (listStyle === 'grid') {
         if (i % 2 === 0) {
           this.#documentLeftMargin = this.pageWidth / 2;
         } else {

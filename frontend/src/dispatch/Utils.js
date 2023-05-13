@@ -2,6 +2,7 @@ import moment from 'moment';
 import ShelterlyPDF from '../utils/pdf';
 import { priorityChoices, DATE_FORMAT } from '../constants';
 import { statusChoices } from '../animals/constants';
+import { buildAnimalCountList } from '../animals/Utils';
 
 const buildDispatchResolutionsDoc = (drs = []) => {
   const pdf = new ShelterlyPDF({}, {
@@ -70,25 +71,11 @@ const buildDispatchResolutionsDoc = (drs = []) => {
       // Animal count
       pdf.drawSectionHeader({ text: 'Animals', fontSize: 14 });
 
-      const animalCounts = [];
-      assigned_request.service_request_object.animals
-        .filter(animal => Object.keys(assigned_request.animals).includes(String(animal.id)))
-        .forEach((animal, index) => {
-          const countIndex = animalCounts.findIndex(([species]) => animal.species === species);
-          if (countIndex > -1) {
-            const [currentSpecies, oldCount] = animalCounts[countIndex];
-            animalCounts[countIndex] = [currentSpecies, oldCount + 1];
-          } else {
-            animalCounts.push([animal.species, 1]);
-          }
-        });
-
-      pdf.drawTextList({
-        labels: animalCounts.map(([species, count]) => (
-          // capitalize the species
-          `${species.replace(/(^.)/, m => m.toUpperCase())}: ${count}`
-        ))
-      });
+      const assignedRequestAnimals =
+        assigned_request.service_request_object.animals.filter((animal) =>
+          Object.keys(assigned_request.animals).includes(String(animal.id))
+        );
+      buildAnimalCountList(pdf, assignedRequestAnimals);
 
       pdf.drawPad(30);
     });
