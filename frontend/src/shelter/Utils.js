@@ -7,7 +7,7 @@ import {
 import { buildOwnersContent } from "../people/Utils";
 import { DATE_FORMAT } from "../constants";
 
-export { printOwnerDetails } from "../people/Utils";
+export { printOwnerDetails, printAllOwnersDetails } from "../people/Utils";
 
 async function printAnimalCareSchedules(animals = [], id = 0, type = "Intake") {
   const pdf = await buildAnimalCareScheduleDoc(animals);

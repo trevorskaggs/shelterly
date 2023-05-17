@@ -103,8 +103,8 @@ async function buildAnimalCareScheduleContent(pdf, animals) {
     pdf.drawPad(-15);
 
     const additionalLabelsList = [
-      [`Aggressive: ${capitalize(animal.aggressive)}`, `Injured: ${capitalize(animal.injured)}`, `Fixed: ${capitalize(animal.fixed)}`],
-      [`Microchip: ${animal.microchip || '_______'}`, `Neck Tag: _______`, `Collar: _______`]
+      [`Aggressive: ${capitalize(animal.aggressive)}`, `Injured: ${capitalize(animal.injured)}`, `Fixed: ${capitalize(animal.fixed)}`, ' '],
+      [`Microchip: ${animal.microchip || '_______'}`, 'Neck Tag: _______', 'Collar: _______', 'Sex: _______']
     ]
     const additionalListOptions = {
       listStyle: 'inline',
@@ -135,7 +135,7 @@ async function buildAnimalCareScheduleContent(pdf, animals) {
       buffer: 5
     });
 
-    const pageWidth = pdf.pageWidth - 30;
+    const pageWidth = pdf.pageWidth - pdf.documentLeftMargin * 2;
     const smallCol = pageWidth * .15;
     const bigCol = pageWidth * .35;
     pdf.drawTableGrid({
@@ -145,6 +145,27 @@ async function buildAnimalCareScheduleContent(pdf, animals) {
   }
 
   return pdf;
+}
+
+function buildAnimalCountList(pdf, animals) {
+  const animalCounts = [];
+  animals
+    .forEach((animal) => {
+      const countIndex = animalCounts.findIndex(([species]) => animal.species === species);
+      if (countIndex > -1) {
+        const [currentSpecies, oldCount] = animalCounts[countIndex];
+        animalCounts[countIndex] = [currentSpecies, oldCount + 1];
+      } else {
+        animalCounts.push([animal.species, 1]);
+      }
+    });
+
+    pdf.drawTextList({
+      labels: animalCounts.map(([species, count]) => (
+        // capitalize the species
+        `${species.replace(/(^.)/, m => m.toUpperCase())}: ${count}`
+      ))
+    });
 }
 
 /**
@@ -178,6 +199,7 @@ async function printAllAnimalCareSchedules (animals = []) {
 export {
   buildAnimalCareScheduleContent,
   buildAnimalCareScheduleDoc,
+  buildAnimalCountList,
   printAllAnimalCareSchedules,
   printAnimalCareSchedule
 };

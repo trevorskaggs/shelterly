@@ -10,8 +10,9 @@ import ShelterlyPrintifyButton from '../components/ShelterlyPrintifyButton';
 import {
   printIntakeSummaryAnimalCareSchedules,
   printOwnerDetails,
+  printAllOwnersDetails,
   printIntakeSummary
-} from "./Utils";
+} from './Utils';
 
 function ShelterIntakeSummary({ id, incident }) {
 
@@ -29,8 +30,15 @@ function ShelterIntakeSummary({ id, incident }) {
     person_object: {first_name:'', last_name:''}
   });
 
+  const [animalOwners, setAnimalOwners] = useState([]);
+
   const handlePrintOwnerClick = () =>
     printOwnerDetails(data.person_object);
+
+  const handlePrintAnimalOwnersClick = () =>
+    printAllOwnersDetails(
+      animalOwners
+    );
 
   const handlePrintAllAnimalsClick = () =>
     printIntakeSummaryAnimalCareSchedules(data.animal_objects, id);
@@ -67,6 +75,26 @@ function ShelterIntakeSummary({ id, incident }) {
     };
   }, [id, incident]);
 
+  useEffect(() => {
+    const ownersFromAnimals = [];
+
+    data?.animal_objects?.forEach?.((animal) => {
+      animal.owners?.forEach?.((owner) => {
+        const foundOwner = ownersFromAnimals.find(({ id }) => id === owner.id);
+        if (!foundOwner) {
+          ownersFromAnimals.push({
+            ...owner,
+            animals: data.animal_objects.filter(
+              (a) => !!a.owners.find(({ id }) => id === owner.id)
+            ),
+          });
+        }
+      });
+    });
+
+    setAnimalOwners(ownersFromAnimals);
+  }, [data]);
+
   return (
     <>
       <Header>
@@ -76,16 +104,6 @@ function ShelterIntakeSummary({ id, incident }) {
           ? "Reporter Walk-In "
           : "Dispatch "}
         Intake Summary
-
-        {data.person_object && data.animal_objects?.length ? (
-          <ShelterlyPrintifyButton
-            id="dispatch-assignment"
-            spinnerSize={2}
-            tooltipPlacement='bottom'
-            tooltipText='Print Intake Summary'
-            printFunc={handlePrintIntakeSummary}
-          />
-        ): null}
       </Header>
       <hr />
       <Row className="d-flex">
@@ -127,6 +145,20 @@ function ShelterIntakeSummary({ id, incident }) {
                 <ListGroup.Item>
                   <b>Reporter:</b> <Link href={"/" + incident + "/people/reporter/" + data.person} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.person_object.first_name} {data.person_object.last_name}</Link>
                 </ListGroup.Item>
+                : animalOwners.length ?
+                  <ListGroup.Item>
+                    <b>Owner(s):</b>{' '}
+                    {animalOwners.map((owner, i) => (
+                      <span key={`owner-${owner.id}`}>{owner.first_name} {owner.last_name}{i < animalOwners.length - 1 ? ', ' : ' '}</span>
+                    ))}
+                    <ShelterlyPrintifyButton
+                      id="dispatch-assignment-all-owners"
+                      spinnerSize={0.8}
+                      tooltipPlacement='top'
+                      tooltipText='Print All Owners'
+                      printFunc={handlePrintAnimalOwnersClick}
+                    />
+                  </ListGroup.Item>
                 : ""}
               </ListGroup>
             </Card.Body>
