@@ -157,7 +157,7 @@ const PersonForm = (props) => {
     }
     const fetchExistingOwnerData = async () => {
       // Fetch all owners data.
-      await axios.get('/people/api/person/', {
+      await axios.get('/people/api/person/?light=true', {
         cancelToken: source.token,
       })
       .then(existingOwnersResponse => {
@@ -349,6 +349,7 @@ const PersonForm = (props) => {
                 options={existingOwners.options}
                 placeholder={existingOwners.fetching ? "Loading..." : "Search..."}
                 disabled={existingOwners.fetching ? true : false}
+                emptyLabel="No matches found. Please fill out the form below."
               />
             </span>
             <BootstrapForm.Row>
