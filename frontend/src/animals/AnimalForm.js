@@ -586,9 +586,9 @@ const AnimalForm = (props) => {
                         name="status"
                         type="text"
                         key={`my_unique_status_select_key__${formikProps.values.status}`}
-                        options={['REPORTED', 'SHELTERED IN PLACE'].includes(data.status) ? reportedStatusChoices : statusChoices}
+                        options={['REPORTED', 'REPORTED (SHELTERED IN PLACE)'].includes(data.status) ? reportedStatusChoices : statusChoices}
                         isClearable={false}
-                        disabled={['REPORTED', 'SHELTERED IN PLACE'].includes(data.status) ? false : true}
+                        disabled={['REPORTED', 'REPORTED (SHELTERED IN PLACE)'].includes(data.status) ? false : true}
                         value={formikProps.values.status||''}
                     />
                   </Col>

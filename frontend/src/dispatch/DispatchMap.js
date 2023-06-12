@@ -14,7 +14,7 @@ import L from "leaflet";
 import * as Yup from 'yup';
 import { Typeahead } from 'react-bootstrap-typeahead';
 import Moment from 'react-moment';
-import Map, { countMatches, prettyText, reportedMarkerIcon, SIPMarkerIcon, UTLMarkerIcon, checkMarkerIcon } from "../components/Map";
+import Map, { countMatches, prettyText, reportedMarkerIcon, reportedSIPMarkerIcon, SIPMarkerIcon, UTLMarkerIcon, checkMarkerIcon } from "../components/Map";
 import { Checkbox, TextInput } from "../components/Form";
 import { DispatchDuplicateSRModal, DispatchAlreadyAssignedTeamModal } from "../components/Modals";
 import Scrollbar from '../components/Scrollbars';
@@ -32,7 +32,7 @@ function Deploy({ incident }) {
 
   const [data, setData] = useState({service_requests: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
   const [mapState, setMapState] = useState({});
-  const [totalSelectedState, setTotalSelectedState] = useState({'REPORTED':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}});
+  const [totalSelectedState, setTotalSelectedState] = useState({'REPORTED':{}, 'REPORTED (SHELTERED IN PLACE)':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}});
   const [selectedCount, setSelectedCount] = useState({count:0, disabled:true});
   const [statusOptions, setStatusOptions] = useState({aco_required:false, pending_only: true});
   const [triggerRefresh, setTriggerRefresh] = useState(false);
@@ -296,7 +296,7 @@ function Deploy({ incident }) {
               const matches = total_matches[0];
               const status_matches = total_matches[1];
               const color = service_request.reported_animals > 0 ? '#ff4c4c' : service_request.unable_to_locate > 0 ? '#5f5fff' : '#f5ee0f';
-              map_dict[service_request.id] = {checked:false, hidden:false, color:color, matches:matches, status_matches:status_matches, radius:"disabled", has_reported_animals:service_request.reported_animals > 0, latitude:service_request.latitude, longitude:service_request.longitude};
+              map_dict[service_request.id] = {checked:false, hidden:false, color:color, matches:matches, status_matches:status_matches, radius:"disabled", latitude:service_request.latitude, longitude:service_request.longitude};
               bounds.push([service_request.latitude, service_request.longitude]);
             }
           }
@@ -422,7 +422,7 @@ function Deploy({ incident }) {
         <hr/>
         <Row className="d-flex flex-wrap" style={{marginTop:"10px", marginLeft:"0px", marginRight:"0px"}}>
           <Col xs={2} className="border rounded">
-          <Scrollbar no_shadow="true" style={{height:"50vh", marginLeft:"-10px", marginRight:"-10px", right:"-5px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
+          <Scrollbar no_shadow="true" style={{height:"50vh", marginLeft:"-15px", marginRight:"-15px", right:"-5px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
             <div className="card-header border rounded mt-3 text-center" style={{paddingRight:"15px", paddingLeft:"15px", marginLeft:"8px", marginRight:"18px"}}>
               <p className="mb-2" style={{marginTop:"-5px"}}>Reported
                 <OverlayTrigger
@@ -443,6 +443,29 @@ function Deploy({ incident }) {
               <hr className="mt-1 mb-1"/>
               {Object.keys(totalSelectedState["REPORTED"]).map(key => (
                 <div key={key} style={{textTransform:"capitalize", marginTop:"5px", marginBottom:"-5px"}}>{prettyText(key.split(',')[0], totalSelectedState["REPORTED"][key])}</div>
+              ))}
+            </div>
+            <div className="card-header border rounded mt-3 text-center" style={{paddingRight:"15px", paddingLeft:"15px", marginLeft:"8px", marginRight:"18px"}}>
+              <p className="mb-2" style={{marginTop:"-5px"}}>Reported (SIP)
+                <OverlayTrigger
+                  key={"selected-reported-sip"}
+                  placement="top"
+                  overlay={
+                    <Tooltip id={`tooltip-selected-reported-sip`}>
+                      Reported - (Sheltered In Place)
+                    </Tooltip>
+                  }
+                >
+                  <span className="fa-layers ml-1" >
+                    <FontAwesomeIcon icon={faCircle} className="icon-border" color="#ff4c4c" transform={'grow-2'} />
+                    <FontAwesomeIcon icon={faHomeAlt} style={{color:"white"}} transform={'shrink-4 left-1'} inverse />
+                    <FontAwesomeIcon icon={faHomeAltReg} style={{color:"#444"}} transform={'shrink-3 left-1'} inverse />
+                  </span>
+                </OverlayTrigger>
+              </p>
+              <hr className="mt-1 mb-1"/>
+              {Object.keys(totalSelectedState["REPORTED (SHELTERED IN PLACE)"]).map(key => (
+                <div key={key} style={{textTransform:"capitalize", marginTop:"5px", marginBottom:"-5px"}}>{prettyText(key.split(',')[0], totalSelectedState["REPORTED (SHELTERED IN PLACE)"][key])}</div>
               ))}
             </div>
             <div className="card-header border rounded mt-3 text-center" style={{paddingRight:"15px", paddingLeft:"15px", marginLeft:"8px", marginRight:"18px"}}>
@@ -501,7 +524,7 @@ function Deploy({ incident }) {
                 <span key={service_request.id}> {mapState[service_request.id] ? 
                   <Marker
                     position={[service_request.latitude, service_request.longitude]}
-                    icon={mapState[service_request.id] && mapState[service_request.id].checked ? checkMarkerIcon : service_request.reported_animals > 0 ? reportedMarkerIcon : service_request.sheltered_in_place > 0 ? SIPMarkerIcon : UTLMarkerIcon}
+                    icon={mapState[service_request.id] && mapState[service_request.id].checked ? checkMarkerIcon : service_request.reported_animals > 0 ? reportedMarkerIcon : service_request.sheltered_in_place > 0 ? SIPMarkerIcon : service_request.reported_sheltered_in_place > 0 ? reportedSIPMarkerIcon : UTLMarkerIcon}
                     onClick={() => handleMapState(service_request.id)}
                     zIndexOffset={mapState[service_request.id].checked ? 1000 : 0}
                   >
@@ -636,6 +659,22 @@ function Deploy({ incident }) {
                       }
                     >
                       <FontAwesomeIcon icon={faExclamationCircle} className="ml-1"/>
+                    </OverlayTrigger>
+                    : ""}
+                    {service_request.reported_sheltered_in_place > 0 ?
+                    <OverlayTrigger
+                      key={"reported-sip"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-reported-sip`}>
+                          {service_request.reported_sheltered_in_place} animal{service_request.reported_sheltered_in_place > 1 ? "s are":" is"} reported (sheltered in place)
+                        </Tooltip>
+                      }
+                    >
+                      <span className="fa-layers ml-1">
+                        <FontAwesomeIcon icon={faCircle} transform={'grow-1'} />
+                        <FontAwesomeIcon icon={faHomeAlt} style={{color:"#444"}} transform={'shrink-3'} size="sm" inverse />
+                      </span>
                     </OverlayTrigger>
                     : ""}
                     {service_request.sheltered_in_place > 0 ?

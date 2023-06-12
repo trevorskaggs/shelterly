@@ -13,7 +13,7 @@ import { faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
 import L from "leaflet";
 import { Marker, Tooltip as MapTooltip } from "react-leaflet";
 import { useMark, useSubmitting, useDateRange } from '../hooks';
-import Map, { prettyText, reportedMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
+import Map, { prettyText, reportedMarkerIcon, reportedSIPMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
 import Moment from "react-moment";
 import moment from 'moment';
 import Header from '../components/Header';
@@ -86,10 +86,10 @@ function DispatchAssignmentSearch({ incident }) {
   // Counts the number of species matches for a service request.
   const countMatches = (service_request) => {
     let species_matches = {};
-    let status_matches = {'REPORTED':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}};
+    let status_matches = {'REPORTED':{}, 'REPORTED (SHELTERED IN PLACE)':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}};
 
     service_request.animals.forEach((animal) => {
-      if (['REPORTED', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE'].indexOf(animal.status) > -1) {
+      if (['REPORTED', 'REPORTED (SHELTERED IN PLACE)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE'].indexOf(animal.status) > -1) {
         if (!species_matches[[animal.species]]) {
           species_matches[[animal.species]] = 1;
         }
@@ -262,7 +262,7 @@ function DispatchAssignmentSearch({ incident }) {
                   <Marker
                     key={assigned_request.service_request_object.id}
                     position={[assigned_request.service_request_object.latitude, assigned_request.service_request_object.longitude]}
-                    icon={assigned_request.service_request_object.sheltered_in_place > 0 ? SIPMarkerIcon : assigned_request.service_request_object.unable_to_locate > 0 ? UTLMarkerIcon : reportedMarkerIcon}
+                    icon={assigned_request.service_request_object.sheltered_in_place > 0 ? SIPMarkerIcon : assigned_request.service_request_object.unable_to_locate > 0 ? UTLMarkerIcon : assigned_request.service_request_object.reported_sheltered_in_place > 0 ? reportedSIPMarkerIcon : reportedMarkerIcon}
                     onClick={() => window.open("/hotline/servicerequest/" + assigned_request.service_request_object.id)}
                   >
                     <MapTooltip autoPan={false} direction={evacuation_assignment.assigned_requests.length > 1 ? "auto" : "top"}>

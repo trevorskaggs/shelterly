@@ -215,6 +215,10 @@ function Reports({ incident }) {
       selector: row => row.reported,
     },
     {
+      name: 'Reported (SIP)',
+      selector: row => row.reported_sip,
+    },
+    {
       name: 'UTL',
       selector: row => row.utl,
     },

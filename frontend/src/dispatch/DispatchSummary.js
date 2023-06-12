@@ -11,7 +11,7 @@ import { faExclamationSquare, faPhoneRotary } from '@fortawesome/pro-solid-svg-i
 import { Marker, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
 import Moment from 'react-moment';
-import Map, { countMatches, prettyText, reportedMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
+import Map, { countMatches, prettyText, reportedMarkerIcon, reportedSIPMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
 import { printDispatchResolutionForm } from './Utils'
@@ -164,7 +164,7 @@ function DispatchSummary({ id, incident }) {
           const bounds = [];
           for (const assigned_request of response.data.assigned_requests) {
             const matches = countMatches(assigned_request.service_request_object)[0];
-            map_dict[assigned_request.service_request_object.id] = {matches:matches, has_reported_animals:assigned_request.service_request_object.reported_animals > 0, latitude:assigned_request.service_request_object.latitude, longitude:assigned_request.service_request_object.longitude};
+            map_dict[assigned_request.service_request_object.id] = {matches:matches, latitude:assigned_request.service_request_object.latitude, longitude:assigned_request.service_request_object.longitude};
             bounds.push([assigned_request.service_request_object.latitude, assigned_request.service_request_object.longitude]);
           }
           response.data['team_members'] = response.data.team.team_members;
@@ -357,7 +357,7 @@ function DispatchSummary({ id, incident }) {
             <Marker
               key={assigned_request.service_request_object.id}
               position={[assigned_request.service_request_object.latitude, assigned_request.service_request_object.longitude]}
-              icon={assigned_request.service_request_object.sheltered_in_place > 0 ? SIPMarkerIcon : assigned_request.service_request_object.unable_to_locate > 0 ? UTLMarkerIcon : reportedMarkerIcon}
+              icon={assigned_request.service_request_object.sheltered_in_place > 0 ? SIPMarkerIcon : assigned_request.service_request_object.unable_to_locate > 0 ? UTLMarkerIcon : assigned_request.service_request_object.reported_sheltered_in_place > 0 ? reportedSIPMarkerIcon : reportedMarkerIcon}
             >
               <MapTooltip autoPan={false}>
                 <span>

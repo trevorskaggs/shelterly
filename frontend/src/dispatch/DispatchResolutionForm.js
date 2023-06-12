@@ -53,7 +53,7 @@ function AnimalStatus(props) {
             props.formikProps.setFieldValue(`sr_updates.${props.index}.animals.${props.inception}.shelter`, '');
             if (shelterRef.current) shelterRef.current.select.clearValue();
             // Hack to proprly update Cannot Remain Reported error display.
-            if (instance.value === 'REPORTED') {
+            if (instance.value.includes('REPORTED')) {
               props.formikProps.setFieldTouched(`sr_updates.${props.index}.animals.${props.inception}.status`)
             }
           }}
@@ -279,7 +279,7 @@ function DispatchResolutionForm({ id, incident }) {
                           required = false;
                         }
                       })
-                      if (value === 'REPORTED' && required) {
+                      if (value.includes('REPORTED') && required) {
                         return false;
                       }
                       return true;

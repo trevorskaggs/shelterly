@@ -161,7 +161,7 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
             for service_request in service_requests:
                 action.send(self.request.user, verb='assigned service request', target=service_request)
                 animals_dict = {}
-                for animal in service_request.animal_set.filter(status__in=['REPORTED', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE']):
+                for animal in service_request.animal_set.filter(status__in=['REPORTED', 'REPORTED (SHELTERED IN PLACE)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE']):
                     animals_dict[animal.id] = {'status':animal.status, 'name':animal.name, 'species':animal.species, 'color_notes':animal.color_notes, 'pcolor':animal.pcolor, 'scolor':animal.scolor, 'shelter':'', 'room':''}
                 AssignedRequest.objects.create(dispatch_assignment=evac_assignment, service_request=service_request, animals=animals_dict, timestamp=timestamp)
 

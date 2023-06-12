@@ -62,6 +62,24 @@ export const reportedMarkerIcon = new L.DivIcon({
   shadowAnchor: null
 });
 
+const reportedSIPIconHTML = ReactDOMServer.renderToString(
+  <span className="fa-layers">
+    <FontAwesomeIcon icon={faCircle} className="icon-border" color="#ff4c4c" size="lg" transform={'grow-2'} />
+    <FontAwesomeIcon icon={faHomeAlt} style={{color:"white"}} transform={'shrink-3 left-1'} size="lg" inverse />
+    <FontAwesomeIcon icon={faHomeAltReg} style={{color:"#444"}} transform={'shrink-3 left-1'} size="lg" inverse />
+  </span>
+);
+export const reportedSIPMarkerIcon = new L.DivIcon({
+  html: reportedSIPIconHTML,
+  iconSize: [0, 0],
+  iconAnchor: [8, 9],
+  className: "reported-SIP-icon",
+  popupAnchor: null,
+  shadowUrl: null,
+  shadowSize: null,
+  shadowAnchor: null
+});
+
 const SIPIconHTML = ReactDOMServer.renderToString(
   <span className="fa-layers">
     <FontAwesomeIcon icon={faCircle} className="icon-border" color="#f5ee0f" size="lg" transform={'grow-2'} />
@@ -141,10 +159,10 @@ export const closedMarkerIcon = new L.DivIcon({
 // Counts the number of size/species matches for a service request by status.
 export const countMatches = (service_request) => {
   var matches = {};
-  var status_matches = {'REPORTED':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}};
+  var status_matches = {'REPORTED':{}, 'REPORTED (SHELTERED IN PLACE)':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}};
 
   service_request.animals.forEach((animal) => {
-    if (['REPORTED', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE'].indexOf(animal.status) > -1) {
+    if (['REPORTED', 'REPORTED (SHELTERED IN PLACE)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE'].indexOf(animal.status) > -1) {
       if (!matches[[animal.species]]) {
         matches[[animal.species]] = 1;
       }

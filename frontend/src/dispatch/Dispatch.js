@@ -11,7 +11,7 @@ import {
 import { faQuestionCircle as faQuestionCircleDuo, faChevronCircleDown, faChevronCircleUp } from '@fortawesome/pro-duotone-svg-icons';
 import { faHomeAlt as faHomeAltReg } from '@fortawesome/pro-regular-svg-icons';
 import { faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
-import Map, { countMatches, prettyText, reportedMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
+import Map, { countMatches, prettyText, reportedMarkerIcon, reportedSIPMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
 import Header from "../components/Header";
 import Scrollbar from '../components/Scrollbars';
 import { SystemErrorContext } from '../components/SystemError';
@@ -108,7 +108,7 @@ function Dispatch({ incident }) {
                 <Marker
                   key={assigned_request.service_request_object.id}
                   position={[assigned_request.service_request_object.latitude, assigned_request.service_request_object.longitude]}
-                  icon={assigned_request.service_request_object.reported_animals > 0 ? reportedMarkerIcon : assigned_request.service_request_object.sheltered_in_place > 0 ? SIPMarkerIcon : UTLMarkerIcon}
+                  icon={assigned_request.service_request_object.reported_animals > 0 ? reportedMarkerIcon : assigned_request.service_request_object.reported_sheltered_in_place > 0 ? reportedSIPMarkerIcon : assigned_request.service_request_object.sheltered_in_place > 0 ? SIPMarkerIcon : UTLMarkerIcon}
                   onClick={() => navigate("/" + incident + "/dispatch/summary/" + dispatch_assignment.id)}
                 >
                 <MapTooltip key={`${index}-${selectedTeam}`} autoPan={false} closeButton={true} permanent={selectedTeam === dispatch_assignment.id ? true : false}>
@@ -194,6 +194,14 @@ function Dispatch({ incident }) {
         </span>
         Reported
         <span style={{paddingRight:"15px", paddingLeft:"15px"}}>
+          <span className="fa-layers ml-1" style={{marginRight:"6px"}}>
+            <FontAwesomeIcon icon={faCircle} className="icon-border fa-move-down" color="#ff4c4c" transform={'grow-2'} />
+            <FontAwesomeIcon icon={faHomeAlt} className="fa-move-down" style={{color:"white"}} transform={'shrink-4 left-1'} inverse />
+            <FontAwesomeIcon icon={faHomeAltReg} className="fa-move-down" style={{color:"#444"}} transform={'shrink-3 left-1'} inverse />
+          </span>
+          Reported (SIP)
+        </span>
+        <span style={{paddingRight:"15px", paddingLeft:"5px"}}>
           <span className="fa-layers ml-1" style={{marginRight:"6px"}}>
             <FontAwesomeIcon icon={faCircle} className="icon-border fa-move-down" color="#f5ee0f" transform={'grow-2'} />
             <FontAwesomeIcon icon={faHomeAlt} className="fa-move-down" style={{color:"white"}} transform={'shrink-3 left-1'} inverse />
