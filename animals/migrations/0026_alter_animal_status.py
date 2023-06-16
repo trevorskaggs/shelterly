@@ -13,6 +13,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='animal',
             name='status',
-            field=models.CharField(choices=[('REPORTED', 'REPORTED'), ('REPORTED (SHELTERED IN PLACE)', 'REPORTED (SHELTERED IN PLACE)'), ('REUNITED', 'REUNITED'), ('SHELTERED', 'SHELTERED'), ('SHELTERED IN PLACE', 'SHELTERED IN PLACE'), ('UNABLE TO LOCATE', 'UNABLE TO LOCATE'), ('NO FURTHER ACTION', 'NO FURTHER ACTION'), ('DECEASED', 'DECEASED'), ('CANCELED', 'CANCELED')], default='REPORTED', max_length=30),
+            field=models.CharField(choices=[('REPORTED', 'REPORTED'), ('REPORTED (EVACUATION)', 'REPORTED (EVACUATION)'), ('REPORTED (SHELTERED IN PLACE)', 'REPORTED (SHELTERED IN PLACE)'), ('REUNITED', 'REUNITED'), ('SHELTERED', 'SHELTERED'), ('SHELTERED IN PLACE', 'SHELTERED IN PLACE'), ('UNABLE TO LOCATE', 'UNABLE TO LOCATE'), ('NO FURTHER ACTION', 'NO FURTHER ACTION'), ('DECEASED', 'DECEASED'), ('CANCELED', 'CANCELED')], default='REPORTED', max_length=30),
         ),
     ]

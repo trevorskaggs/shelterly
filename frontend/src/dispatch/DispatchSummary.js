@@ -7,11 +7,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faCalendarDay, faClipboardCheck, faClipboardList, faDownload, faEdit, faEnvelope, faHouseDamage, faBriefcaseMedical, faMinusSquare, faPencilAlt, faUserCheck, faUserPlus
 } from '@fortawesome/free-solid-svg-icons';
-import { faExclamationSquare, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
+import { faCircleBolt, faExclamationSquare, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import { Marker, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
 import Moment from 'react-moment';
-import Map, { countMatches, prettyText, reportedMarkerIcon, reportedSIPMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
+import Map, { countMatches, prettyText, reportedMarkerIcon, reportedEvacMarkerIcon, reportedSIPMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
 import { printDispatchResolutionForm } from './Utils'
@@ -357,7 +357,7 @@ function DispatchSummary({ id, incident }) {
             <Marker
               key={assigned_request.service_request_object.id}
               position={[assigned_request.service_request_object.latitude, assigned_request.service_request_object.longitude]}
-              icon={assigned_request.service_request_object.sheltered_in_place > 0 ? SIPMarkerIcon : assigned_request.service_request_object.unable_to_locate > 0 ? UTLMarkerIcon : assigned_request.service_request_object.reported_sheltered_in_place > 0 ? reportedSIPMarkerIcon : reportedMarkerIcon}
+              icon={assigned_request.service_request_object.reported_animals > 0 ? reportedMarkerIcon : assigned_request.service_request_object.reported_evac > 0 ? reportedEvacMarkerIcon : assigned_request.service_request_object.reported_sheltered_in_place > 0 ? reportedSIPMarkerIcon : assigned_request.service_request_object.sheltered_in_place > 0 ? SIPMarkerIcon : UTLMarkerIcon}
             >
               <MapTooltip autoPan={false}>
                 <span>

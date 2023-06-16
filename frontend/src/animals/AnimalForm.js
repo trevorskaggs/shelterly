@@ -297,6 +297,11 @@ const AnimalForm = (props) => {
             delete values["owners"];
           }
 
+          // Set default REPORTED status if Owner Requested is cleared.
+          if (!values["status"]) {
+            values["status"] = "REPORTED"
+          }
+
           // Use FormData so that image files may also be included.
           const formData = new FormData();
           // Convert json to FormData.
@@ -581,14 +586,13 @@ const AnimalForm = (props) => {
                 <BootstrapForm.Row className="mb-3">
                   <Col xs="3" hidden={shelter_id}>
                     <DropDown
-                        label="Status"
-                        id="statusDropDown"
+                        label="Requested Service"
+                        id="requestedServiceDropDown"
                         name="status"
                         type="text"
-                        key={`my_unique_status_select_key__${formikProps.values.status}`}
-                        options={['REPORTED', 'REPORTED (SHELTERED IN PLACE)'].includes(data.status) ? reportedStatusChoices : statusChoices}
-                        isClearable={false}
-                        disabled={['REPORTED', 'REPORTED (SHELTERED IN PLACE)'].includes(data.status) ? false : true}
+                        key={`my_unique_requested_service_select_key__${formikProps.values.status}`}
+                        options={reportedStatusChoices}
+                        disabled={['REPORTED', 'REPORTED (EVACUATION)', 'REPORTED (SHELTERED IN PLACE)'].includes(data.status) ? false : true}
                         value={formikProps.values.status||''}
                     />
                   </Col>

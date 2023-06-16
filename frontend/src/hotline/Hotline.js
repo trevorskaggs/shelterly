@@ -9,8 +9,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCircle, faExclamationCircle, faPhone } from '@fortawesome/free-solid-svg-icons';
 import { faQuestionCircle as faQuestionCircleDuo } from '@fortawesome/pro-duotone-svg-icons';
 import { faHomeAlt as faHomeAltReg } from '@fortawesome/pro-regular-svg-icons';
-import { faHomeAlt, faDoNotEnter } from '@fortawesome/pro-solid-svg-icons';
-import Map, { prettyText, closedMarkerIcon, reportedMarkerIcon, reportedSIPMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
+import { faCircleBolt, faHomeAlt, faDoNotEnter } from '@fortawesome/pro-solid-svg-icons';
+import Map, { prettyText, closedMarkerIcon, reportedMarkerIcon, reportedEvacMarkerIcon, reportedSIPMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
 import Header from "../components/Header";
 import { SystemErrorContext } from '../components/SystemError';
 
@@ -113,7 +113,7 @@ function Hotline({ incident }) {
               <Marker
                 key={service_request.id}
                 position={[service_request.latitude, service_request.longitude]}
-                icon={service_request.reported_animals > 0 ? reportedMarkerIcon : service_request.reported_sheltered_in_place > 0 ? reportedSIPMarkerIcon : service_request.sheltered_in_place > 0 ? SIPMarkerIcon : service_request.unable_to_locate > 0 ? UTLMarkerIcon : closedMarkerIcon}
+                icon={service_request.reported_animals > 0 ? reportedMarkerIcon : service_request.reported_evac > 0 ? reportedEvacMarkerIcon : service_request.reported_sheltered_in_place > 0 ? reportedSIPMarkerIcon : service_request.sheltered_in_place > 0 ? SIPMarkerIcon : service_request.unable_to_locate > 0 ? UTLMarkerIcon : closedMarkerIcon}
                 onClick={() => navigate("/" + incident + "/hotline/servicerequest/" + service_request.id)}
               >
                 <MapTooltip autoPan={false}>
@@ -161,6 +161,13 @@ function Hotline({ incident }) {
         </span>
         Reported
         <span style={{paddingRight:"15px", paddingLeft:"15px"}}>
+          <span className="fa-layers ml-1" style={{marginRight:"6px"}}>
+            <FontAwesomeIcon icon={faCircle} className="fa-move-down" color="white" />
+            <FontAwesomeIcon icon={faCircleBolt} className="icon-border fa-move-down" color="#ff4c4c" />
+          </span>
+          Reported (Evac)
+        </span>
+        <span style={{paddingRight:"15px"}}>
           <span className="fa-layers ml-1" style={{marginRight:"6px"}}>
             <FontAwesomeIcon icon={faCircle} className="icon-border fa-move-down" color="#ff4c4c" transform={'grow-2'} />
             <FontAwesomeIcon icon={faHomeAlt} className="fa-move-down" style={{color:"white"}} transform={'shrink-4 left-1'} inverse />

@@ -8,7 +8,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { faCheckCircle, faQuestionCircle as faQuestionCircleDuo } from '@fortawesome/pro-duotone-svg-icons';
 import { faHomeAlt as faHomeAltReg } from '@fortawesome/pro-regular-svg-icons';
-import { faHomeAlt, faDoNotEnter } from '@fortawesome/pro-solid-svg-icons';
+import { faCircleBolt, faHomeAlt, faDoNotEnter } from '@fortawesome/pro-solid-svg-icons';
 
 export const Legend = (props) => {
   const { map } = useLeaflet();
@@ -56,6 +56,23 @@ export const reportedMarkerIcon = new L.DivIcon({
   iconSize: [0, 0],
   iconAnchor: [8, 9],
   className: "reported-icon",
+  popupAnchor: null,
+  shadowUrl: null,
+  shadowSize: null,
+  shadowAnchor: null
+});
+
+const reportedEvacIconHTML = ReactDOMServer.renderToString(
+  <span className="fa-layers">
+    <FontAwesomeIcon icon={faCircle} color="white" size="lg" />
+    <FontAwesomeIcon icon={faCircleBolt} className="icon-border" size="lg" color="#ff4c4c" />
+  </span>
+);
+export const reportedEvacMarkerIcon = new L.DivIcon({
+  html: reportedEvacIconHTML,
+  iconSize: [0, 0],
+  iconAnchor: [8, 9],
+  className: "reported-evacuation-icon",
   popupAnchor: null,
   shadowUrl: null,
   shadowSize: null,
@@ -159,10 +176,10 @@ export const closedMarkerIcon = new L.DivIcon({
 // Counts the number of size/species matches for a service request by status.
 export const countMatches = (service_request) => {
   var matches = {};
-  var status_matches = {'REPORTED':{}, 'REPORTED (SHELTERED IN PLACE)':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}};
+  var status_matches = {'REPORTED':{}, 'REPORTED (EVACUATION)':{}, 'REPORTED (SHELTERED IN PLACE)':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}};
 
   service_request.animals.forEach((animal) => {
-    if (['REPORTED', 'REPORTED (SHELTERED IN PLACE)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE'].indexOf(animal.status) > -1) {
+    if (['REPORTED', 'REPORTED (EVACUATION)', 'REPORTED (SHELTERED IN PLACE)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE'].indexOf(animal.status) > -1) {
       if (!matches[[animal.species]]) {
         matches[[animal.species]] = 1;
       }
