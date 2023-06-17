@@ -121,6 +121,24 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
         response['Content-Disposition'] = 'attachement; filename=SR-' + str(pk) + '.geojson'
         return response
 
+    @drf_action(detail=False, methods=['GET'], name='Download All GeoJSON')
+    def download_all(self, request, pk=None):
+        json_file = io.StringIO()
+        features = []
+        for id in self.request.GET.get('ids').replace('&','').split('id='):
+            if id:
+                sr = ServiceRequest.objects.get(id=id)
+                features.append(sr.get_feature_json())
+
+        data = {"features":features}
+        data_string = json.dumps(data)
+        json_file.write(data_string)
+        json_file.seek(0)
+        wrapper = FileWrapper(json_file)
+        response = HttpResponse(wrapper, content_type='application/json')
+        response['Content-Disposition'] = 'attachement; filename=SRs-' + '.geojson'
+        return response
+
 class VisitNoteViewSet(viewsets.ModelViewSet):
 
     queryset = VisitNote.objects.all()
