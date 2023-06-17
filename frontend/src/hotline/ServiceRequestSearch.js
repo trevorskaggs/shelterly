@@ -194,7 +194,7 @@ function ServiceRequestSearch({ incident }) {
           key={"download-geojson"}
           placement="bottom"
           variant="outline-light"
-          onClick={handleGeoJsonDownload} href="">Download All ({`${filteredServiceRequests.length}`})<FontAwesomeIcon icon={faDownload} className="mx-2" inverse />
+          onClick={handleGeoJsonDownload} href="">Download All ({`${filteredServiceRequests.length}`})<FontAwesomeIcon icon={faDownload} className="mx-2 text-light" inverse />
         </Button>
         </InputGroup>
         <Row className="mr-0 pr-0 no-gutters" style={{marginTop:"-5px"}}>

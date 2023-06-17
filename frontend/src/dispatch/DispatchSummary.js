@@ -7,7 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faCalendarDay, faClipboardCheck, faClipboardList, faDownload, faEdit, faEnvelope, faHouseDamage, faBriefcaseMedical, faMinusSquare, faPencilAlt, faUserCheck, faUserPlus
 } from '@fortawesome/free-solid-svg-icons';
-import { faCircleBolt, faExclamationSquare, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
+import { faExclamationSquare, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import { Marker, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
 import Moment from 'react-moment';
@@ -25,6 +25,7 @@ function DispatchSummary({ id, incident }) {
   // Initial animal data.
   const [data, setData] = useState({
     id: '',
+    closed: false,
     team_members: [],
     team_member_objects: [],
     team: null,
@@ -279,7 +280,7 @@ function DispatchSummary({ id, incident }) {
       >
         <Link onClick={handleGeoJsonDownload} href=""><FontAwesomeIcon icon={faDownload} className="ml-2"  inverse /></Link>
       </OverlayTrigger>
-    <div style={{fontSize:"18px", marginTop:"10px"}}><b>Opened: </b><Moment format="MMMM Do YYYY, HH:mm">{data.start_time}</Moment>{data.end_time ? <span> | <b>Resolved: </b><Moment format="MMMM Do YYYY, HH:mm">{data.end_time}</Moment></span> : ""}</div>
+    <div style={{fontSize:"18px", marginTop:"10px"}}><b>Opened: </b><Moment format="MMMM Do YYYY, HH:mm">{data.start_time}</Moment>{data.closed && data.end_time ? <span> | <b>Closed: </b><Moment format="MMMM Do YYYY, HH:mm">{data.end_time}</Moment></span> : ""}</div>
     </Header>
     <hr/>
     <Row className="mb-3">
@@ -412,7 +413,7 @@ function DispatchSummary({ id, incident }) {
                   >
                     <FontAwesomeIcon icon={faCalendarDay} className="ml-1 fa-move-up" size="sm" />
                   </OverlayTrigger> : ""}
-                &nbsp;| {assigned_request.visit_note ? "Completed" : <span style={{textTransform:"capitalize"}}>{assigned_request.service_request_object.status}</span>} {assigned_request.visit_note ? <Moment format="[ on ]l[,] HH:mm">{assigned_request.visit_note.date_completed}</Moment> : ""}
+                &nbsp;| {Object.values(assigned_request.animals).filter(animal => ['REPORTED', 'REPORTED (EVACUATION)', 'REPORTED (SHELTERED IN PLACE)'].includes(animal.status)).length === 0 ? "Completed" : <span style={{textTransform:"capitalize"}}>{assigned_request.service_request_object.status}</span>} {assigned_request.visit_note ? <Moment format="[ on ]l[,] HH:mm">{assigned_request.visit_note.date_completed}</Moment> : ""}
               </h4>
             </Card.Title>
             <hr style={{marginBottom:"7px"}}/>

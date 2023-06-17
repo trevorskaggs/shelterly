@@ -102,7 +102,7 @@ const buildDispatchResolutionsDoc = (drs = []) => {
       pdf.drawHRule();
       pdf.drawPad(-10);
       pdf.drawCheckboxList({
-        labels: ['Completed', 'Not Completed Yet', 'Unable to Complete'],
+        labels: ['Unable to Complete'],
         listStyle: 'inline',
       });
 
