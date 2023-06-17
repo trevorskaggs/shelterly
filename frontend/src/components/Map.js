@@ -4,7 +4,7 @@ import L from "leaflet";
 import { Map as LeafletMap, TileLayer, useLeaflet } from "react-leaflet";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faCircle, faExclamationCircle, faHome, faMapMarkerAlt, faStar,
+  faCircle, faTimesCircle, faExclamationCircle, faHome, faMapMarkerAlt, faStar,
 } from '@fortawesome/free-solid-svg-icons';
 import { faCheckCircle, faQuestionCircle as faQuestionCircleDuo } from '@fortawesome/pro-duotone-svg-icons';
 import { faHomeAlt as faHomeAltReg } from '@fortawesome/pro-regular-svg-icons';
@@ -167,6 +167,23 @@ export const closedMarkerIcon = new L.DivIcon({
   iconSize: [0, 0],
   iconAnchor: [8, 9],
   className: "closed-icon",
+  popupAnchor: null,
+  shadowUrl: null,
+  shadowSize: null,
+  shadowAnchor: null
+});
+
+const finishedIconHTML = ReactDOMServer.renderToString(
+  <span className="fa-layers">
+    <FontAwesomeIcon icon={faCircle} color="white" size="lg" />
+    <FontAwesomeIcon icon={faTimesCircle} className="icon-border" size="lg" color="#af7051" />
+  </span>
+);
+export const finishedMarkerIcon = new L.DivIcon({
+  html: finishedIconHTML,
+  iconSize: [0, 0],
+  iconAnchor: [8, 9],
+  className: "finished-icon",
   popupAnchor: null,
   shadowUrl: null,
   shadowSize: null,

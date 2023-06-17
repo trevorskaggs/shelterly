@@ -489,7 +489,7 @@ function DispatchSummary({ id, incident }) {
                 </OverlayTrigger>
                 : ""}
               </ListGroup.Item> : ""}
-            <ListGroup.Item><b>Additional Information:</b> {assigned_request.service_request_object.directions||"No additional information available."}</ListGroup.Item>
+            <ListGroup.Item><b>Instructions for Field Team:</b> {assigned_request.service_request_object.directions||"No instructions available."}</ListGroup.Item>
           </ListGroup>
           <hr/>
           <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>

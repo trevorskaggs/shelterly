@@ -6,12 +6,12 @@ import { Marker, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBullhorn, faCircle, faExclamationCircle, faMapMarkedAlt, faUsers
+  faBullhorn, faCircle, faExclamationCircle, faMapMarkedAlt, faTimesCircle, faUsers
 } from '@fortawesome/free-solid-svg-icons';
 import { faQuestionCircle as faQuestionCircleDuo, faChevronCircleDown, faChevronCircleUp } from '@fortawesome/pro-duotone-svg-icons';
 import { faHomeAlt as faHomeAltReg } from '@fortawesome/pro-regular-svg-icons';
 import { faCircleBolt, faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
-import Map, { countMatches, prettyText, reportedMarkerIcon, reportedEvacMarkerIcon, reportedSIPMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
+import Map, { countMatches, prettyText, reportedMarkerIcon, reportedEvacMarkerIcon, reportedSIPMarkerIcon, SIPMarkerIcon, UTLMarkerIcon, finishedMarkerIcon } from "../components/Map";
 import Header from "../components/Header";
 import Scrollbar from '../components/Scrollbars';
 import { SystemErrorContext } from '../components/SystemError';
@@ -108,7 +108,7 @@ function Dispatch({ incident }) {
                 <Marker
                   key={assigned_request.service_request_object.id}
                   position={[assigned_request.service_request_object.latitude, assigned_request.service_request_object.longitude]}
-                  icon={assigned_request.service_request_object.reported_animals > 0 ? reportedMarkerIcon : assigned_request.service_request_object.reported_evac > 0 ? reportedEvacMarkerIcon : assigned_request.service_request_object.reported_sheltered_in_place > 0 ? reportedSIPMarkerIcon : assigned_request.service_request_object.sheltered_in_place > 0 ? SIPMarkerIcon : UTLMarkerIcon}
+                  icon={assigned_request.service_request_object.reported_animals > 0 ? reportedMarkerIcon : assigned_request.service_request_object.reported_evac > 0 ? reportedEvacMarkerIcon : assigned_request.service_request_object.reported_sheltered_in_place > 0 ? reportedSIPMarkerIcon : assigned_request.service_request_object.sheltered_in_place > 0 ? SIPMarkerIcon : assigned_request.service_request_object.unable_to_locate > 0 ? UTLMarkerIcon : finishedMarkerIcon}
                   onClick={() => navigate("/" + incident + "/dispatch/summary/" + dispatch_assignment.id)}
                 >
                 <MapTooltip key={`${index}-${selectedTeam}`} autoPan={false} closeButton={true} permanent={selectedTeam === dispatch_assignment.id ? true : false}>
@@ -187,7 +187,7 @@ function Dispatch({ incident }) {
     </Row>
     <Row className="ml-0 mr-0 border rounded" style={{maxHeight:"38px"}}>
       <h4 className="card-header text-center" style={{paddingTop:"4px", paddingLeft:"10px", paddingRight:"10px", height:"36px", width:"100%", backgroundColor:"#808080"}}>
-        Dispatch Assignments&nbsp;&nbsp; -
+        Dispatch Assignments
         <span className="fa-layers ml-3 mr-1">
           <FontAwesomeIcon icon={faCircle} className="fa-move-down" color="white" />
           <FontAwesomeIcon icon={faExclamationCircle} className="icon-border fa-move-down" color="#ff4c4c" />
@@ -208,7 +208,7 @@ function Dispatch({ incident }) {
           </span>
           Reported (SIP)
         </span>
-        <span style={{paddingRight:"15px", paddingLeft:"5px"}}>
+        <span style={{paddingRight:"15px"}}>
           <span className="fa-layers ml-1" style={{marginRight:"6px"}}>
             <FontAwesomeIcon icon={faCircle} className="icon-border fa-move-down" color="#f5ee0f" transform={'grow-2'} />
             <FontAwesomeIcon icon={faHomeAlt} className="fa-move-down" style={{color:"white"}} transform={'shrink-3 left-1'} inverse />
@@ -216,11 +216,16 @@ function Dispatch({ incident }) {
           </span>
           SIP
         </span>
-        <span className="fa-layers ml-1 mr-1">
+        <span className="fa-layers ml-1 mr-1" style={{paddingRight:"15px"}}>
           <FontAwesomeIcon icon={faCircle} className="fa-move-down" color="white" />
           <FontAwesomeIcon icon={faQuestionCircleDuo} className="icon-border fa-move-down" style={{"--fa-primary-color":'white', "--fa-secondary-color":'#5f5fff', "--fa-secondary-opacity": 1}} />
         </span>
         UTL
+        <span className="fa-layers ml-1 mr-1">
+          <FontAwesomeIcon icon={faCircle} className="fa-move-down" color="white" />
+          <FontAwesomeIcon icon={faTimesCircle} className="icon-border fa-move-down" color="#af7051" />
+        </span>
+          Sheltered
       </h4>
     </Row>
     </>

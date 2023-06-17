@@ -124,7 +124,7 @@ const buildDispatchResolutionsDoc = (drs = []) => {
 
       // additional info
       pdf.drawWrappedText({
-        text: `Additional Information: ${assigned_request.service_request_object.directions || 'N/A'}`
+        text: `Instructions for Field Team: ${assigned_request.service_request_object.directions || 'N/A'}`
       });
 
       // accessible

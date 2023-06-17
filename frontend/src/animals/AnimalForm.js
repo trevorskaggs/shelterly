@@ -686,7 +686,7 @@ const AnimalForm = (props) => {
                 </BootstrapForm.Row>
                 <BootstrapForm.Row className="mt-3">
                   <TextInput
-                    label="Behavior Notes"
+                    label="Animal Notes"
                     id="behavior_notes"
                     name="behavior_notes"
                     as="textarea"
