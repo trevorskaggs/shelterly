@@ -9,8 +9,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCircle, faExclamationCircle, faPhone } from '@fortawesome/free-solid-svg-icons';
 import { faQuestionCircle as faQuestionCircleDuo } from '@fortawesome/pro-duotone-svg-icons';
 import { faHomeAlt as faHomeAltReg } from '@fortawesome/pro-regular-svg-icons';
-import { faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
-import Map, { prettyText, closedMarkerIcon, reportedMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
+import { faCircleBolt, faHomeAlt, faDoNotEnter } from '@fortawesome/pro-solid-svg-icons';
+import Map, { prettyText, closedMarkerIcon, reportedMarkerIcon, reportedEvacMarkerIcon, reportedSIPMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
 import Header from "../components/Header";
 import { SystemErrorContext } from '../components/SystemError';
 
@@ -113,7 +113,7 @@ function Hotline({ incident }) {
               <Marker
                 key={service_request.id}
                 position={[service_request.latitude, service_request.longitude]}
-                icon={service_request.reported_animals > 0 ? reportedMarkerIcon : service_request.sheltered_in_place > 0 ? SIPMarkerIcon : service_request.unable_to_locate > 0 ? UTLMarkerIcon : closedMarkerIcon}
+                icon={service_request.reported_animals > 0 ? reportedMarkerIcon : service_request.reported_evac > 0 ? reportedEvacMarkerIcon : service_request.reported_sheltered_in_place > 0 ? reportedSIPMarkerIcon : service_request.sheltered_in_place > 0 ? SIPMarkerIcon : service_request.unable_to_locate > 0 ? UTLMarkerIcon : closedMarkerIcon}
                 onClick={() => navigate("/" + incident + "/hotline/servicerequest/" + service_request.id)}
               >
                 <MapTooltip autoPan={false}>
@@ -162,17 +162,39 @@ function Hotline({ incident }) {
         Reported
         <span style={{paddingRight:"15px", paddingLeft:"15px"}}>
           <span className="fa-layers ml-1" style={{marginRight:"6px"}}>
+            <FontAwesomeIcon icon={faCircle} className="fa-move-down" color="white" />
+            <FontAwesomeIcon icon={faCircleBolt} className="icon-border fa-move-down" color="#ff4c4c" />
+          </span>
+          Reported (Evac)
+        </span>
+        <span style={{paddingRight:"15px"}}>
+          <span className="fa-layers ml-1" style={{marginRight:"6px"}}>
+            <FontAwesomeIcon icon={faCircle} className="icon-border fa-move-down" color="#ff4c4c" transform={'grow-2'} />
+            <FontAwesomeIcon icon={faHomeAlt} className="fa-move-down" style={{color:"white"}} transform={'shrink-4 left-1'} inverse />
+            <FontAwesomeIcon icon={faHomeAltReg} className="fa-move-down" style={{color:"#444"}} transform={'shrink-3 left-1'} inverse />
+          </span>
+          Reported (SIP)
+        </span>
+        <span style={{paddingRight:"5px", paddingLeft:"5px"}}>
+          <span className="fa-layers" style={{marginRight:"6px"}}>
             <FontAwesomeIcon icon={faCircle} className="icon-border fa-move-down" color="#f5ee0f" transform={'grow-2'} />
             <FontAwesomeIcon icon={faHomeAlt} className="fa-move-down" style={{color:"white"}} transform={'shrink-3 left-1'} inverse />
             <FontAwesomeIcon icon={faHomeAltReg} className="fa-move-down" style={{color:"#444"}} transform={'shrink-3 left-1'} inverse />
           </span>
-          SIP
+        SIP
+        </span>
+        <span style={{paddingRight:"15px", paddingLeft:"15px"}}>
+          <span className="fa-layers ml-1 mr-1">
+            <FontAwesomeIcon icon={faCircle} className="fa-move-down" color="white" />
+            <FontAwesomeIcon icon={faQuestionCircleDuo} className="icon-border fa-move-down" style={{"--fa-primary-color":'white', "--fa-secondary-color":'#5f5fff', "--fa-secondary-opacity": 1}}  />
+          </span>
+          UTL
         </span>
         <span className="fa-layers ml-1 mr-1">
           <FontAwesomeIcon icon={faCircle} className="fa-move-down" color="white" />
-          <FontAwesomeIcon icon={faQuestionCircleDuo} className="icon-border fa-move-down" style={{"--fa-primary-color":'white', "--fa-secondary-color":'#5f5fff', "--fa-secondary-opacity": 1}}  />
+          <FontAwesomeIcon icon={faDoNotEnter} className="icon-border fa-move-down" color="#af7051" />
         </span>
-        UTL
+          Closed
       </h4>
     </Row>
   </>

@@ -9,7 +9,7 @@ import {
   faBan, faCar, faClipboardCheck, faDownload, faEdit, faEnvelope, faHouseDamage,
   faKey, faMapMarkedAlt, faPlusSquare, faTimes, faTrailer, faUserPlus, faUsers
 } from '@fortawesome/free-solid-svg-icons';
-import { faCalendarEdit, faCommentSmile, faHomeHeart, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
+import { faCalendarEdit, faHammerCrash, faHomeHeart, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import Header from '../components/Header';
 import History from '../components/History';
 import AnimalCards from '../components/AnimalCards';
@@ -139,7 +139,7 @@ function ServiceRequestDetails({ id, incident }) {
   return (
     <>
       <Header>
-        Service Request Details 
+        Service Request #{data.id}
         <OverlayTrigger
           key={"edit-service-request"}
           placement="bottom"
@@ -149,7 +149,7 @@ function ServiceRequestDetails({ id, incident }) {
             </Tooltip>
           }
         >
-          <Link href={"/" + incident + "/hotline/servicerequest/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-1" inverse /></Link>
+          <Link href={"/" + incident + "/hotline/servicerequest/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-2" inverse /></Link>
         </OverlayTrigger>
 
         <OverlayTrigger
@@ -183,11 +183,10 @@ function ServiceRequestDetails({ id, incident }) {
         >
           <FontAwesomeIcon icon={faTimes} className="ml-1" size="lg" style={{cursor:'pointer'}} inverse onClick={() => {setShowModal(true)}}/>
         </OverlayTrigger>
-        &nbsp;| <span style={{textTransform:"capitalize"}}>{data.status}</span>
       </Header>
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>Confirm Service Request Cancellation</Modal.Title>
+          <Modal.Title>Confirm Service Request Cancelation</Modal.Title>
         </Modal.Header>
         <Modal.Body>Are you sure you want to cancel this Service Request and associated animals?</Modal.Body>
         <Modal.Footer>
@@ -205,18 +204,18 @@ function ServiceRequestDetails({ id, incident }) {
           <Card className="mb-2 border rounded" style={{width:"100%"}}>
             <Card.Body>
               <Card.Title>
-                <h4 className="mb-0">Information
+                <h4 className="mb-0">Information&nbsp;
                   {data.verbal_permission ?
                   <OverlayTrigger
                     key={"verbal"}
                     placement="top"
                     overlay={
                       <Tooltip id={`tooltip-verbal`}>
-                        Verbal permission granted
+                        Forced entry permission granted
                       </Tooltip>
                     }
                   >
-                    <FontAwesomeIcon icon={faCommentSmile} size="sm" className="ml-1" />
+                    <FontAwesomeIcon icon={faHammerCrash} size="sm" className="fa-move-up" transform={'shrink-2'} />
                   </OverlayTrigger> : ""
                   }
                   {data.key_provided ?
@@ -225,22 +224,22 @@ function ServiceRequestDetails({ id, incident }) {
                     placement="top"
                     overlay={
                       <Tooltip id={`tooltip-key`}>
-                        Key provided
+                        Key at staging
                       </Tooltip>
                     }
                   >
-                    <FontAwesomeIcon icon={faKey} size="sm" className="ml-1" transform={'shrink-2'} />
+                    <FontAwesomeIcon icon={faKey} size="sm" className="" transform={'shrink-2'} />
                   </OverlayTrigger> :
                   <OverlayTrigger
                     key={"no-key"}
                     placement="top"
                     overlay={
                       <Tooltip id={`tooltip-no-key`}>
-                        No key provided
+                        No key at staging
                       </Tooltip>
                     }
                   >
-                    <span className="fa-layers" style={{marginLeft:"2px"}}>
+                    <span className="fa-layers" style={{marginLeft:"0px"}}>
                       <FontAwesomeIcon icon={faKey} size="sm" transform={'shrink-2'} />
                       <FontAwesomeIcon icon={faBan} color="#ef5151" size="sm" transform={'shrink-1'} />
                     </span>
@@ -308,8 +307,8 @@ function ServiceRequestDetails({ id, incident }) {
               <ListGroup variant="flush">
                 <ListGroup.Item style={{marginTop:"-13px"}}>
                   <div className="row">
-                    <span className="col-6"><b>ID: </b>SR#{data.id}</span>
                     <span className="col-6"><b>Priority: </b>{priorityText[data.priority]}</span>
+                    <span className="col-6" style={{textTransform:"capitalize"}}><b>Status: </b>{data.status}</span>
                   </div>
                 </ListGroup.Item>
                 <ListGroup.Item><b>Address: </b>{data.full_address}</ListGroup.Item>
@@ -337,7 +336,7 @@ function ServiceRequestDetails({ id, incident }) {
                     value={data.followup_date || null}>
                   </Flatpickr>
                 </ListGroup.Item>
-                <ListGroup.Item style={{marginBottom:"-13px"}}><b>Additional Information:</b> {data.directions||"None"}</ListGroup.Item>
+                <ListGroup.Item style={{marginBottom:"-13px"}}><b>Instructions for Field Team:</b> {data.directions||"None"}</ListGroup.Item>
               </ListGroup>
             </Card.Body>
           </Card>

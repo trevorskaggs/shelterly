@@ -104,7 +104,7 @@ async function buildAnimalCareScheduleContent(pdf, animals) {
 
     const additionalLabelsList = [
       [`Aggressive: ${capitalize(animal.aggressive)}`, `Injured: ${capitalize(animal.injured)}`, `Fixed: ${capitalize(animal.fixed)}`, ' '],
-      [`Microchip: ${animal.microchip || '_______'}`, 'Neck Tag: _______', 'Collar: _______', 'Sex: _______']
+      [`Microchip: ${animal.microchip || '_______'}`, 'Neck Tag: _______', 'Collar: _______', 'Sex: ' + `${animal.sex || '_______'}`]
     ]
     const additionalListOptions = {
       listStyle: 'inline',
@@ -122,7 +122,7 @@ async function buildAnimalCareScheduleContent(pdf, animals) {
       bottomPadding: 3
     });
     pdf.drawWrappedText({
-      text: `Behavior Notes: ${animal.behavior_notes || 'N/A'}`,
+      text: `Animal Notes: ${animal.behavior_notes || 'N/A'}`,
       linePadding: -2,
       bottomPadding: 3,
     });

@@ -41,7 +41,7 @@ function buildServiceRequestsDoc(srs = []) {
     pdf.drawPad(-10);
 
     const infoList = [
-      `Key Provided: ${data.key_provided ? 'Yes' : 'No'}`,
+      `Key at Staging: ${data.key_provided ? 'Yes' : 'No'}`,
       `Accessible: ${data.accessible ? 'Yes' : 'No'}`,
       `Turn Around: ${data.turn_around ? 'Yes' : 'No'}`,
     ];
@@ -56,7 +56,7 @@ function buildServiceRequestsDoc(srs = []) {
     pdf.drawWrappedText({ text: `Followup Date: ${data.followup_date ? new Date(data.followup_date)?.toLocaleDateString?.() : 'Not set'}` });
 
     // directions
-    pdf.drawWrappedText({ text: `Additional Information: ${data.directions || 'No additional information available'}` })
+    pdf.drawWrappedText({ text: `Instructions for Field Team: ${data.directions || 'No instructions available'}` })
 
     pdf.drawHRule();
 
@@ -160,7 +160,7 @@ function buildServiceRequestsDoc(srs = []) {
       // behavior notes
       if (animal.behavior_notes) {
         pdf.drawWrappedText({
-          text: `Behavior Notes: ${animal.behavior_notes}`,
+          text: `Animal Notes: ${animal.behavior_notes}`,
           linePadding: 0
         });
       }

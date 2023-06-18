@@ -5,13 +5,14 @@ import { Button, ButtonGroup, Card, CardGroup, Col, Form, FormControl, InputGrou
 import moment from 'moment';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBan, faCar, faChevronDown, faChevronUp, faEquals, faClipboardList, faEnvelope, faKey, faTrailer, faPrint
+  faBan, faCar, faChevronDown, faChevronUp, faDownload, faEquals, faClipboardList, faEnvelope, faKey, faTrailer, faPrint
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faDotCircle
 } from '@fortawesome/free-regular-svg-icons';
-import { faChevronDoubleDown, faChevronDoubleUp, faCommentSmile, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
+import { faChevronDoubleDown, faChevronDoubleUp, faHammerCrash, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import Moment from 'react-moment';
+import { DATE_FORMAT } from '../constants';
 import { useMark, useSubmitting } from '../hooks';
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
@@ -78,6 +79,24 @@ function ServiceRequestSearch({ incident }) {
     if (pageNum !== page) {
       tempSearchTerm.current.focus();
     }
+  }
+
+  const handleGeoJsonDownload = () => {
+    var params = '';
+    filteredServiceRequests.map(sr => sr.id).forEach(id => params = params + "id=" + id + "&")
+    // params.append("foo", 5);
+    var fileDownload = require('js-file-download');
+    axios.get('/hotline/api/servicerequests/download_all/', { 
+            params: {
+              ids: params
+            },
+            responseType: 'blob',
+        }).then(res => {
+            fileDownload(res.data, `SRs-${moment().format(DATE_FORMAT)}` + '.geojson');
+            console.log(res);
+        }).catch(err => {
+            console.log(err);
+        })
   }
 
   // Hook for filtering service requests
@@ -163,7 +182,7 @@ function ServiceRequestSearch({ incident }) {
           </InputGroup.Append>
           <ButtonSpinner
             variant="outline-light"
-            className="ml-1 print-all-btn-icon"
+            className="ml-1 mr-1 print-all-btn-icon"
             onClick={handlePrintAllClick}
             isSubmitting={isSubmittingById()}
             isSubmittingText={submittingLabel}
@@ -171,6 +190,12 @@ function ServiceRequestSearch({ incident }) {
             Print All ({`${filteredServiceRequests.length}`})
             <FontAwesomeIcon icon={faPrint} className="ml-2 text-light" inverse />
           </ButtonSpinner>
+          <Button
+          key={"download-geojson"}
+          placement="bottom"
+          variant="outline-light"
+          onClick={handleGeoJsonDownload} href="">Download All ({`${filteredServiceRequests.length}`})<FontAwesomeIcon icon={faDownload} className="mx-2 text-light" inverse />
+        </Button>
         </InputGroup>
         <Row className="mr-0 pr-0 no-gutters" style={{marginTop:"-5px"}}>
           <Col className="pr-2">
@@ -308,11 +333,11 @@ function ServiceRequestSearch({ incident }) {
                     placement="top"
                     overlay={
                       <Tooltip id={`tooltip-verbal`}>
-                        Verbal permission granted
+                        Forced entry permission granted
                       </Tooltip>
                     }
                   >
-                    <FontAwesomeIcon icon={faCommentSmile} size="sm" className="ml-1" />
+                    <FontAwesomeIcon icon={faHammerCrash} size="sm" className="ml-1" transform={'shrink-2'} />
                   </OverlayTrigger> : ""
                   }
                   {service_request.key_provided ?
@@ -321,7 +346,7 @@ function ServiceRequestSearch({ incident }) {
                     placement="top"
                     overlay={
                       <Tooltip id={`tooltip-key`}>
-                        Key provided
+                        Key at staging
                       </Tooltip>
                     }
                   >
@@ -332,7 +357,7 @@ function ServiceRequestSearch({ incident }) {
                     placement="top"
                     overlay={
                       <Tooltip id={`tooltip-no-key`}>
-                        No key provided
+                        No key at staging
                       </Tooltip>
                     }
                   >

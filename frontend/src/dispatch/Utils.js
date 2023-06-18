@@ -98,11 +98,17 @@ const buildDispatchResolutionsDoc = (drs = []) => {
       pdf.drawWrappedText({
         text: `Latitude: ${assigned_request.service_request_object.latitude},  Longitude: ${assigned_request.service_request_object.longitude}`
       });
+      pdf.drawPad(-30);
+      pdf.drawCheckboxList({
+        labels: [''],
+        listStyle: 'inline',
+        rightAlign:true
+      });
       pdf.drawPad(-10);
       pdf.drawHRule();
       pdf.drawPad(-10);
       pdf.drawCheckboxList({
-        labels: ['Completed', 'Not Completed Yet', 'Unable to Complete'],
+        labels: ['Unable to Complete'],
         listStyle: 'inline',
       });
 
@@ -124,7 +130,7 @@ const buildDispatchResolutionsDoc = (drs = []) => {
 
       // additional info
       pdf.drawWrappedText({
-        text: `Additional Information: ${assigned_request.service_request_object.directions || 'N/A'}`
+        text: `Instructions for Field Team: ${assigned_request.service_request_object.directions || 'N/A'}`
       });
 
       // accessible
@@ -144,7 +150,7 @@ const buildDispatchResolutionsDoc = (drs = []) => {
 
       const dispatchStatusHeaders = [{
         value: '', label: 'ID - Species\nName'
-      }].concat(statusChoices.filter((choice) => choice.value !== 'REPORTED'));
+      }].concat(statusChoices.filter((choice) => !choice.value.includes('REPORTED')));
 
       function drawAnimalHeader() {
         pdf.drawTextList({
@@ -156,7 +162,7 @@ const buildDispatchResolutionsDoc = (drs = []) => {
               return 'UTL';
             }
             if (choice.label.indexOf('No Further Action (NFA)') > -1) {
-              return 'No Further Action';
+              return 'NFA';
             }
 
             return choice.label;
@@ -181,8 +187,8 @@ const buildDispatchResolutionsDoc = (drs = []) => {
 
         const animalRow = [{
           label: `A#${animal.id} - ${animal.species[0].toUpperCase()}${animal.species.slice(1)}\n${animal.name || 'Unknown'}\n${animal.status}`,
-          marginTop: -10
-        }].concat(Array(5).fill({
+          marginTop: -7
+        }].concat(Array(6).fill({
           type: 'checkbox',
           label: '',
           size: 20

@@ -4,11 +4,11 @@ import L from "leaflet";
 import { Map as LeafletMap, TileLayer, useLeaflet } from "react-leaflet";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faCircle, faExclamationCircle, faHome, faMapMarkerAlt, faStar,
+  faCircle, faTimesCircle, faExclamationCircle, faHome, faMapMarkerAlt, faStar,
 } from '@fortawesome/free-solid-svg-icons';
 import { faCheckCircle, faQuestionCircle as faQuestionCircleDuo } from '@fortawesome/pro-duotone-svg-icons';
 import { faHomeAlt as faHomeAltReg } from '@fortawesome/pro-regular-svg-icons';
-import { faHomeAlt, faDoNotEnter } from '@fortawesome/pro-solid-svg-icons';
+import { faCircleBolt, faHomeAlt, faDoNotEnter } from '@fortawesome/pro-solid-svg-icons';
 
 export const Legend = (props) => {
   const { map } = useLeaflet();
@@ -56,6 +56,41 @@ export const reportedMarkerIcon = new L.DivIcon({
   iconSize: [0, 0],
   iconAnchor: [8, 9],
   className: "reported-icon",
+  popupAnchor: null,
+  shadowUrl: null,
+  shadowSize: null,
+  shadowAnchor: null
+});
+
+const reportedEvacIconHTML = ReactDOMServer.renderToString(
+  <span className="fa-layers">
+    <FontAwesomeIcon icon={faCircle} color="white" size="lg" />
+    <FontAwesomeIcon icon={faCircleBolt} className="icon-border" size="lg" color="#ff4c4c" />
+  </span>
+);
+export const reportedEvacMarkerIcon = new L.DivIcon({
+  html: reportedEvacIconHTML,
+  iconSize: [0, 0],
+  iconAnchor: [8, 9],
+  className: "reported-evacuation-icon",
+  popupAnchor: null,
+  shadowUrl: null,
+  shadowSize: null,
+  shadowAnchor: null
+});
+
+const reportedSIPIconHTML = ReactDOMServer.renderToString(
+  <span className="fa-layers">
+    <FontAwesomeIcon icon={faCircle} className="icon-border" color="#ff4c4c" size="lg" transform={'grow-2'} />
+    <FontAwesomeIcon icon={faHomeAlt} style={{color:"white"}} transform={'shrink-3 left-1'} size="lg" inverse />
+    <FontAwesomeIcon icon={faHomeAltReg} style={{color:"#444"}} transform={'shrink-3 left-1'} size="lg" inverse />
+  </span>
+);
+export const reportedSIPMarkerIcon = new L.DivIcon({
+  html: reportedSIPIconHTML,
+  iconSize: [0, 0],
+  iconAnchor: [8, 9],
+  className: "reported-SIP-icon",
   popupAnchor: null,
   shadowUrl: null,
   shadowSize: null,
@@ -138,13 +173,30 @@ export const closedMarkerIcon = new L.DivIcon({
   shadowAnchor: null
 });
 
+const finishedIconHTML = ReactDOMServer.renderToString(
+  <span className="fa-layers">
+    <FontAwesomeIcon icon={faCircle} color="white" size="lg" />
+    <FontAwesomeIcon icon={faTimesCircle} className="icon-border" size="lg" color="#af7051" />
+  </span>
+);
+export const finishedMarkerIcon = new L.DivIcon({
+  html: finishedIconHTML,
+  iconSize: [0, 0],
+  iconAnchor: [8, 9],
+  className: "finished-icon",
+  popupAnchor: null,
+  shadowUrl: null,
+  shadowSize: null,
+  shadowAnchor: null
+});
+
 // Counts the number of size/species matches for a service request by status.
 export const countMatches = (service_request) => {
   var matches = {};
-  var status_matches = {'REPORTED':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}};
+  var status_matches = {'REPORTED':{}, 'SHELTERED':{}, 'REPORTED (EVACUATION)':{}, 'REPORTED (SHELTERED IN PLACE)':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}};
 
   service_request.animals.forEach((animal) => {
-    if (['REPORTED', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE'].indexOf(animal.status) > -1) {
+    if (['REPORTED', 'SHELTERED', 'REPORTED (EVACUATION)', 'REPORTED (SHELTERED IN PLACE)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE'].indexOf(animal.status) > -1) {
       if (!matches[[animal.species]]) {
         matches[[animal.species]] = 1;
       }

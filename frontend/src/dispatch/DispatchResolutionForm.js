@@ -53,7 +53,7 @@ function AnimalStatus(props) {
             props.formikProps.setFieldValue(`sr_updates.${props.index}.animals.${props.inception}.shelter`, '');
             if (shelterRef.current) shelterRef.current.select.clearValue();
             // Hack to proprly update Cannot Remain Reported error display.
-            if (instance.value === 'REPORTED') {
+            if (instance.value.includes('REPORTED')) {
               props.formikProps.setFieldTouched(`sr_updates.${props.index}.animals.${props.inception}.status`)
             }
           }}
@@ -126,6 +126,7 @@ function DispatchResolutionForm({ id, incident }) {
   // Initial animal data.
   const [data, setData] = useState({
     id: null,
+    closed: false,
     team_members: [],
     team_member_objects: [],
     team: null,
@@ -140,6 +141,7 @@ function DispatchResolutionForm({ id, incident }) {
 
   const [shelters, setShelters] = useState({options: [], room_options: {}, isFetching: false});
   const [ownerChoices, setOwnerChoices] = useState({});
+  const [saveClose, setSaveClose] = useState(false);
 
   const ordered = useOrderedNodes();
   const [shouldCheckForScroll, setShouldCheckForScroll] = React.useState(false);
@@ -176,7 +178,6 @@ function DispatchResolutionForm({ id, incident }) {
               owner_contact_time: assigned_request.owner_contact ? assigned_request.owner_contact.owner_contact_time : null,
               owner_contact_note: assigned_request.owner_contact ? assigned_request.owner_contact.owner_contact_note : '',
               unable_to_complete: false,
-              incomplete: false
             });
           });
           setOwnerChoices(ownerChoices);
@@ -265,7 +266,6 @@ function DispatchResolutionForm({ id, incident }) {
             owner: Yup.boolean(),
             priority: Yup.number(),
             unable_to_complete: Yup.boolean(),
-            incomplete: Yup.boolean(),
             followup_date: Yup.date().nullable(),
             animals: Yup.array().of(
               Yup.object().shape({
@@ -275,11 +275,11 @@ function DispatchResolutionForm({ id, incident }) {
                     function(value) {
                       let required = true;
                       data.sr_updates.filter(sr => sr.id === this.parent.request).forEach(sr_update => {
-                        if (sr_update.unable_to_complete || sr_update.incomplete) {
+                        if (sr_update.unable_to_complete || !saveClose) {
                           required = false;
                         }
                       })
-                      if (value === 'REPORTED' && required) {
+                      if (value.includes('REPORTED') && required) {
                         return false;
                       }
                       return true;
@@ -288,7 +288,7 @@ function DispatchResolutionForm({ id, incident }) {
                 room: Yup.number().nullable(),
               })
             ),
-            date_completed: Yup.date().nullable().when(['unable_to_complete', 'incomplete'], {
+            date_completed: Yup.date().nullable().when(['unable_to_complete'], {
               is: false,
               then: Yup.date().required('Required.')}),
             notes: Yup.string(),
@@ -301,10 +301,11 @@ function DispatchResolutionForm({ id, incident }) {
       })}
       onSubmit={(values, { setSubmitting }) => {
         setTimeout(() => {
+          values['closed'] = saveClose;
           axios.put('/evac/api/evacassignment/' + id + '/', values)
             .then(response => {
               if (response.data.service_requests.length === 0) {
-                navigate('/' + incident + '/dispatch/dispatchassignment/search');
+                navigate('/' + incident + '/dispatch');
               }
               else {
                 navigate('/' + incident + '/dispatch/summary/' + response.data.id);
@@ -321,7 +322,7 @@ function DispatchResolutionForm({ id, incident }) {
         <>
           <BootstrapForm as={Form}>
             <Header>Dispatch Assignment and Resolution
-              <div style={{ fontSize: "18px", marginTop: "10px" }}><b>Opened: </b><Moment format="MMMM Do YYYY, HH:mm">{data.start_time}</Moment>{data.end_time ? <span style={{ fontSize: "16px", marginTop: "5px" }}> | <b>Resolved: </b><Moment format="MMMM Do YYYY, HH:mm">{data.end_time}</Moment></span> : ""}</div>
+              <div style={{ fontSize: "18px", marginTop: "10px" }}><b>Opened: </b><Moment format="MMMM Do YYYY, HH:mm">{data.start_time}</Moment>{data.closed && data.end_time ? <span style={{ fontSize: "16px", marginTop: "5px" }}> | <b>Closed: </b><Moment format="MMMM Do YYYY, HH:mm">{data.end_time}</Moment></span> : ""}</div>
             </Header>
             <hr/>
             <Card className="mt-3 border rounded">
@@ -347,40 +348,9 @@ function DispatchResolutionForm({ id, incident }) {
                       SR#{assigned_request.service_request_object.id} -&nbsp;
                       <Link href={"/" + incident + "/hotline/servicerequest/" + assigned_request.service_request_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link> |&nbsp;
                       <Checkbox
-                        label={"Not Completed Yet:"}
-                        name={`sr_updates.${index}.incomplete`}
-                        disabled={assigned_request.visit_note && assigned_request.visit_note.date_completed ? true : false}
-                        checked={(props.values.sr_updates[index] && props.values.sr_updates[index].incomplete) || false}
-                        onChange={() => {
-                          if (props.values.sr_updates[index] && props.values.sr_updates[index].incomplete) {
-                            const newItems = [...data.sr_updates];
-                            newItems[index].incomplete = false;
-                            setData(prevState => ({...prevState, sr_updates: newItems}))
-                            props.setFieldValue(`sr_updates.${index}.owner`, assigned_request.service_request_object.owners.length > 0);
-                            props.setFieldValue(`sr_updates.${index}.incomplete`, false);
-
-                          }
-                          else {
-                            props.setFieldValue(`sr_updates.${index}.owner`, false);
-                            const newItems = [...data.sr_updates];
-                            newItems[index].incomplete = true;
-                            newItems[index].unable_to_complete = false;
-                            setData(prevState => ({...prevState, sr_updates: newItems}))
-                            props.setFieldValue(`sr_updates.${index}.incomplete`, true);
-                            props.setFieldValue(`sr_updates.${index}.unable_to_complete`, false);
-                            props.setFieldValue(`sr_updates.${index}.date_completed`, null);
-                          }
-                        }}
-                        style={{
-                          transform: "scale(1.5)",
-                          marginTop: "-4px"
-                        }}
-                      />
-                      |&nbsp;
-                      <Checkbox
                         label={"Unable to Complete:"}
                         name={`sr_updates.${index}.unable_to_complete`}
-                        disabled={assigned_request.visit_note && assigned_request.visit_note.date_completed ? true : false}
+                        disabled={data.closed ? true : false}
                         checked={(props.values.sr_updates[index] && props.values.sr_updates[index].unable_to_complete) || false}
                         onChange={() => {
                           if (props.values.sr_updates[index] && props.values.sr_updates[index].unable_to_complete) {
@@ -394,10 +364,8 @@ function DispatchResolutionForm({ id, incident }) {
                             props.setFieldValue(`sr_updates.${index}.owner`, false);
                             const newItems = [...data.sr_updates];
                             newItems[index].unable_to_complete = true;
-                            newItems[index].incomplete = false;
                             setData(prevState => ({...prevState, sr_updates: newItems}))
                             props.setFieldValue(`sr_updates.${index}.unable_to_complete`, true);
-                            props.setFieldValue(`sr_updates.${index}.incomplete`, false);
                             props.setFieldValue(`sr_updates.${index}.date_completed`, null);
                           }
                         }}
@@ -414,7 +382,7 @@ function DispatchResolutionForm({ id, incident }) {
                       <ListGroup.Item key={owner.id}><b>Owner: </b>{owner.first_name} {owner.last_name}</ListGroup.Item>
                     ))}
                     {assigned_request.service_request_object.owners.length < 1 ? <ListGroup.Item><b>Owner: </b>No Owner</ListGroup.Item> : ""}
-                      <ListGroup.Item><b>Additional Information: </b>{ assigned_request.service_request_object.directions ? assigned_request.service_request_object.directions : "N/A"}</ListGroup.Item>
+                      <ListGroup.Item><b>Instructions for Field Team: </b>{ assigned_request.service_request_object.directions ? assigned_request.service_request_object.directions : "N/A"}</ListGroup.Item>
                       <ListGroup.Item>
                         <b>Accessible: </b>{ assigned_request.service_request_object.accessible ? "Yes" : "No"},&nbsp;
                         <b>Turn Around: </b>{ assigned_request.service_request_object.turn_around ? "Yes" : "No"}
@@ -540,9 +508,12 @@ function DispatchResolutionForm({ id, incident }) {
               </Card>
             ))}
             <ButtonGroup size="lg" className="col-12 pl-0 pr-0 mt-3 mb-3">
-              <ButtonSpinner isSubmitting={props.isSubmitting} isSubmittingText="Saving..." className="btn btn-block border" type="submit" onClick={() => { setShouldCheckForScroll(true); }}>
+              <ButtonSpinner isSubmitting={props.isSubmitting} isSubmittingText="Saving..." className="btn btn-block border" type="submit" onClick={() => { setSaveClose(false); setShouldCheckForScroll(true); }}>
                 Save
               </ButtonSpinner>
+              {data.closed ? "" : <ButtonSpinner isSubmitting={props.isSubmitting} isSubmittingText="Saving..." className="btn border col-6" type="submit" onClick={() => { setSaveClose(true); setShouldCheckForScroll(true); }}>
+                Save and Close
+              </ButtonSpinner>}
             </ButtonGroup>
           </BootstrapForm>
         </>

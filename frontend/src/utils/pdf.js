@@ -570,6 +570,7 @@ class ShelterlyPDF {
   drawList({
     listItems = [],
     listStyle = 'block',
+    rightAlign = false,
     bottomPadding = 0
   }) {
     listItems.forEach(({
@@ -584,10 +585,15 @@ class ShelterlyPDF {
       lineXOffset = 0
     }, i) => {
       const yPosition = this.getLastYPositionWithBuffer() + marginTop;
+      const textWidth = this.#jsPDF.getStringUnitWidth(label) * this.#documentFontSize;
       this.#jsPDF.setFillColor(...fillColor);
 
       if (type === 'checkbox') {
-        this.#jsPDF.rect(this.#documentLeftMargin, yPosition, size, size, 'FD');
+        var leftMargin = this.#documentLeftMargin
+        if (rightAlign) {
+          leftMargin = this.contentWidth - textWidth - 15;
+        }
+        this.#jsPDF.rect(leftMargin, yPosition, size, size, 'FD');
       }
 
       this.#jsPDF.text(label, this.#documentLeftMargin + size + (size * 0.25), yPosition + 15)
@@ -601,7 +607,7 @@ class ShelterlyPDF {
         if (listStyle === 'grid') {
           rightMargin = this.#documentLeftMargin + this.pageWidth / 2 - 30;
         }
-        const textWidth = this.#jsPDF.getStringUnitWidth(label) * this.#documentFontSize;
+
         this.#jsPDF.line(
           this.#documentLeftMargin + textWidth,
           yPosition + 15,
@@ -675,10 +681,12 @@ class ShelterlyPDF {
   drawCheckboxList({
     labels = [],
     listStyle = 'block',
-    bottomPadding = 0
+    bottomPadding = 0,
+    rightAlign = false
   }) {
     this.drawList({
       listStyle,
+      rightAlign,
       listItems: labels.map((label) => ({
         label: label.label || label,
         type: label.type || 'checkbox',

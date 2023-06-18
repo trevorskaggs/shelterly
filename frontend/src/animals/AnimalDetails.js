@@ -4,7 +4,7 @@ import { Link, navigate } from 'raviger';
 import { AuthContext } from "../accounts/AccountsReducer";
 import Moment from 'react-moment';
 import { Carousel } from 'react-responsive-carousel';
-import { Button, Card, Col, ListGroup, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Button, Card, Col, ListGroup, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBan, faMedkit, faCut, faEdit, faEnvelope, faLink, faMinusSquare, faTimes, faUserPlus
@@ -150,7 +150,7 @@ function AnimalDetails({ id, incident }) {
   return (
     <>
     <Header>
-      Animal Details
+      Animal #{data.id}
       <OverlayTrigger
         key={"edit"}
         placement="bottom"
@@ -160,7 +160,7 @@ function AnimalDetails({ id, incident }) {
           </Tooltip>
         }
       >
-        <Link href={"/" + incident + "/animals/edit/" + id} ><FontAwesomeIcon icon={faEdit} className="ml-1" inverse /></Link>
+        <Link href={"/" + incident + "/animals/edit/" + id} ><FontAwesomeIcon icon={faEdit} className="ml-2" inverse /></Link>
       </OverlayTrigger>
 
       <ShelterlyPrintifyButton
@@ -195,7 +195,6 @@ function AnimalDetails({ id, incident }) {
       >
         <FontAwesomeIcon icon={faTimes} style={{cursor:'pointer'}} onClick={() => {setShowAnimalConfirm(true);}} className="ml-1" size="lg" inverse />
       </OverlayTrigger>
-      &nbsp;| {data.status}
     </Header>
     <hr/>
     <div className="row" style={{marginBottom:"-13px"}}>
@@ -319,8 +318,8 @@ function AnimalDetails({ id, incident }) {
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px", textTransform:"capitalize"}}>
               <ListGroup.Item>
                 <div className="row">
-                  <span className="col-6"><b>ID:</b> A#{data.id}</span>
                   <span className="col-6"><b>Name:</b> {data.name||"Unknown"}</span>
+                  <span className="col-6"><b>Status:</b> {data.status}</span>
                 </div>
               </ListGroup.Item>
               <ListGroup.Item>
@@ -420,9 +419,15 @@ function AnimalDetails({ id, incident }) {
               : ''}
               {data.shelter ?
               <ListGroup.Item>
-                <b>Shelter:</b> <Link href={"/" + incident + "/shelter/" + data.shelter} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.shelter_object.name}</Link>
-                {data.room ? <div className="mt-1"><b>Room:</b> {data.building_name} - <Link href={"/" + incident + "/shelter/room/" + data.room} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.room_name}</Link></div> : ""}
-                <div className="mt-1"><b>Intake Date:</b> <Moment format="MMMM Do YYYY HH:mm">{data.intake_date}</Moment></div>
+                <Row>
+                  <Col>
+                    <b>Shelter:</b> <Link href={"/" + incident + "/shelter/" + data.shelter} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.shelter_object.name}</Link>
+                  </Col>
+                  <Col>
+                    {data.room ? <div><b>Room:</b> <Link href={"/" + incident + "/shelter/room/" + data.room} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.room_name}</Link></div> : ""}
+                  </Col>
+                </Row>
+                {data.intake_date ? <div className="mt-1"><b>Intake Date:</b> <Moment format="MMMM Do YYYY HH:mm">{data.intake_date}</Moment></div> : ""}
                 <div className="mt-1"><b>Address:</b> {data.shelter_object.full_address || "Unknown"}</div>
               </ListGroup.Item> : ""}
             </ListGroup>
@@ -457,7 +462,7 @@ function AnimalDetails({ id, incident }) {
             <hr/>
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
               {data.color_notes ? <ListGroup.Item><b>Breed / Description:</b> {data.color_notes}</ListGroup.Item> : ""}
-              {data.behavior_notes ? <ListGroup.Item style={{whiteSpace:"pre-line"}}><b>Behavior Notes:</b> {data.behavior_notes}</ListGroup.Item> : ""}
+              {data.behavior_notes ? <ListGroup.Item style={{whiteSpace:"pre-line"}}><b>Animal Notes:</b> {data.behavior_notes}</ListGroup.Item> : ""}
               {data.medical_notes ? <ListGroup.Item style={{whiteSpace:"pre-line"}}><b>Medical Notes:</b> {data.medical_notes}</ListGroup.Item> : ""}
               {data.last_seen ? <ListGroup.Item><b>Last Seen:</b> <Moment format="MMMM Do YYYY HH:mm">{data.last_seen}</Moment></ListGroup.Item> : ""}
               {!data.color_notes && !data.behavior_notes && !data.medical_notes && !data.last_seen ? <ListGroup.Item>No description available</ListGroup.Item> : ""}
