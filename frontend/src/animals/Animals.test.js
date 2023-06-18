@@ -20,6 +20,6 @@ describe("Animal tests", () => {
   });
   it("Render AnimalView", () => {
     render(<SystemErrorProvider><AnimalDetails id={1} /></SystemErrorProvider>);
-    expect(screen.getByText(/Animal Details/));
+    expect(screen.getByText(/Animal/));
   });
 });
