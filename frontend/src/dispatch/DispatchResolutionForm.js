@@ -508,12 +508,12 @@ function DispatchResolutionForm({ id, incident }) {
               </Card>
             ))}
             <ButtonGroup size="lg" className="col-12 pl-0 pr-0 mt-3 mb-3">
-              <ButtonSpinner isSubmitting={props.isSubmitting} isSubmittingText="Saving..." className="btn btn-block border col-6" type="submit" onClick={() => { setSaveClose(false); setShouldCheckForScroll(true); }}>
+              <ButtonSpinner isSubmitting={props.isSubmitting} isSubmittingText="Saving..." className="btn btn-block border" type="submit" onClick={() => { setSaveClose(false); setShouldCheckForScroll(true); }}>
                 Save
               </ButtonSpinner>
-              <ButtonSpinner isSubmitting={props.isSubmitting} isSubmittingText="Saving..." className="btn border col-6" type="submit" onClick={() => { setSaveClose(true); setShouldCheckForScroll(true); }}>
+              {data.closed ? "" : <ButtonSpinner isSubmitting={props.isSubmitting} isSubmittingText="Saving..." className="btn border col-6" type="submit" onClick={() => { setSaveClose(true); setShouldCheckForScroll(true); }}>
                 Save and Close
-              </ButtonSpinner>
+              </ButtonSpinner>}
             </ButtonGroup>
           </BootstrapForm>
         </>

@@ -189,7 +189,7 @@ function DispatchAssignmentSearch({ incident }) {
           <ButtonGroup className="ml-1">
             <Button variant={statusOptions === "preplanned" ? "primary" : "secondary"} onClick={statusOptions !== "preplanned" ? () => {setPage(1);setStatusOptions("preplanned")} : () => {setPage(1);setStatusOptions("")}}>Preplanned</Button>
             <Button variant={statusOptions === "active" ? "primary" : "secondary"} onClick={statusOptions !== "active" ? () => {setPage(1);setStatusOptions("active")} : () => {setPage(1);setStatusOptions("")}}>Active</Button>
-            <Button variant={statusOptions === "resolved" ? "primary" : "secondary"} onClick={statusOptions !== "resolved" ? () => {setPage(1);setStatusOptions("resolved")} : () => {setPage(1);setStatusOptions("")}}>Resolved</Button>
+            <Button variant={statusOptions === "resolved" ? "primary" : "secondary"} onClick={statusOptions !== "resolved" ? () => {setPage(1);setStatusOptions("resolved")} : () => {setPage(1);setStatusOptions("")}}>Closed</Button>
           </ButtonGroup>
           <DateRangePicker
             name={`date_range_picker`}

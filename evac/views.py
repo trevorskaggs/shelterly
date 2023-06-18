@@ -39,7 +39,7 @@ class EvacTeamMemberViewSet(viewsets.ModelViewSet):
             serializer.save()
 
     def get_queryset(self):
-        queryset = EvacTeamMember.objects.all().annotate(is_assigned=Exists(EvacAssignment.objects.filter(team__team_members__id=OuterRef("id"), end_time=None)))
+        queryset = EvacTeamMember.objects.all().annotate(is_assigned=Exists(EvacAssignment.objects.filter(team__team_members__id=OuterRef("id"), end_time=None, service_requests__isnull=False)))
         return queryset
 
 class DispatchTeamViewSet(viewsets.ModelViewSet):
@@ -49,7 +49,7 @@ class DispatchTeamViewSet(viewsets.ModelViewSet):
     serializer_class = DispatchTeamSerializer
 
     def get_queryset(self):
-        queryset = DispatchTeam.objects.all().annotate(is_assigned=Exists(EvacAssignment.objects.filter(team_id=OuterRef("id"), end_time=None))).order_by('-dispatch_date')
+        queryset = DispatchTeam.objects.all().annotate(is_assigned=Exists(EvacAssignment.objects.filter(team_id=OuterRef("id"), end_time=None, service_requests__isnull=False))).order_by('-dispatch_date')
         is_map = self.request.query_params.get('map', '')
         if self.request.GET.get('incident'):
             queryset = queryset.filter(incident__slug=self.request.GET.get('incident'))

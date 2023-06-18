@@ -254,7 +254,7 @@ function DispatchSummary({ id, incident }) {
           </Tooltip>
         }
       >
-        <Link href={"/" + incident + "/dispatch/resolution/" + id}><FontAwesomeIcon icon={faEdit} className="ml-1" inverse /></Link>
+        <Link href={"/" + incident + "/dispatch/resolution/" + id}><FontAwesomeIcon icon={faEdit} inverse /></Link>
       </OverlayTrigger>
       :
       <OverlayTrigger
@@ -266,7 +266,7 @@ function DispatchSummary({ id, incident }) {
           </Tooltip>
         }
       >
-        <Link href={"/" + incident + "/dispatch/resolution/" + id}><FontAwesomeIcon icon={faClipboardCheck} className="ml-1"  inverse /></Link>
+        <Link href={"/" + incident + "/dispatch/resolution/" + id}><FontAwesomeIcon icon={faClipboardCheck} inverse /></Link>
       </OverlayTrigger>
       }
       <OverlayTrigger
