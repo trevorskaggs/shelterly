@@ -120,7 +120,7 @@ function Dispatch({ incident }) {
                           <span key={key} style={{textTransform:"capitalize"}}>
                             {i > 0 && ", "}{prettyText(key.split(',')[0], mapState[dispatch_assignment.id].service_requests[assigned_request.service_request_object.id].matches[key])}
                           </span>
-                        )) : "test"}
+                        )) : "Assignemnt ready for resolution"}
                       </span>
                     :""}
                     <br />

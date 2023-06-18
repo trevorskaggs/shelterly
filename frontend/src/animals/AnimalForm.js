@@ -844,7 +844,7 @@ const AnimalForm = (props) => {
           </Card.Body>
           <ButtonGroup size="lg">
             {is_workflow ?
-                <ButtonSpinner isSubmitting={isButtonSubmitting && addAnother} isSubmittingText="Saving..." type="button" onClick={() => {
+                <ButtonSpinner isSubmitting={formikProps.isSubmitting && addAnother} isSubmittingText="Saving..." type="button" onClick={() => {
                   setAddAnother(true);
                   setIsButtonSubmitting(true);
                   formikProps.submitForm();
@@ -852,7 +852,7 @@ const AnimalForm = (props) => {
                 }}>
                   {props.state.steps.animals.length -1 > props.state.animalIndex ? "Next Animal" : "Add Another"}
                 </ButtonSpinner> :
-                <ButtonSpinner isSubmitting={isButtonSubmitting && !addAnother} isSubmittingText="Saving..." type="button" onClick={() => {
+                <ButtonSpinner isSubmitting={formikProps.isSubmitting && !addAnother} isSubmittingText="Saving..." type="button" onClick={() => {
                   setAddAnother(false);
                   setIsButtonSubmitting(true);
                   formikProps.submitForm()
@@ -861,7 +861,7 @@ const AnimalForm = (props) => {
                 </ButtonSpinner>
             }
             {is_workflow && !is_intake ?
-                <ButtonSpinner isSubmitting={isButtonSubmitting && !addAnother} isSubmittingText="Loading..." type="button" className="btn btn-primary border" onClick={() => {
+                <ButtonSpinner isSubmitting={formikProps.isSubmitting && !addAnother} isSubmittingText="Loading..." type="button" className="btn btn-primary border" onClick={() => {
                   setAddAnother(false);
                   setIsButtonSubmitting(true);
                   formikProps.submitForm()
@@ -869,7 +869,7 @@ const AnimalForm = (props) => {
                   Next Step
                 </ButtonSpinner> : ""}
             {is_workflow && is_intake ?
-                <ButtonSpinner isSubmitting={isButtonSubmitting && !addAnother} isSubmittingText="Saving..." type="button" className="btn btn-primary mr-1 border" onClick={() => {
+                <ButtonSpinner isSubmitting={formikProps.isSubmitting && !addAnother} isSubmittingText="Saving..." type="button" className="btn btn-primary mr-1 border" onClick={() => {
                   setAddAnother(false);
                   setIsButtonSubmitting(true);
                   formikProps.submitForm()
