@@ -360,7 +360,7 @@ function DispatchSummary({ id, incident }) {
               position={[assigned_request.service_request_object.latitude, assigned_request.service_request_object.longitude]}
               icon={assigned_request.service_request_object.reported_animals > 0 ? reportedMarkerIcon : assigned_request.service_request_object.reported_evac > 0 ? reportedEvacMarkerIcon : assigned_request.service_request_object.reported_sheltered_in_place > 0 ? reportedSIPMarkerIcon : assigned_request.service_request_object.sheltered_in_place > 0 ? SIPMarkerIcon : UTLMarkerIcon}
             >
-              <MapTooltip autoPan={false}>
+              <MapTooltip autoPan={false} direction="top">
                 <span>
                   {mapState[assigned_request.service_request_object.id] ?
                     <span>
@@ -372,7 +372,7 @@ function DispatchSummary({ id, incident }) {
                     </span>
                   :""}
                   <br />
-                  SR#{assigned_request.service_request_object.id}: {assigned_request.service_request_object.full_address}
+                  SR#{assigned_request.service_request_object.id}: {assigned_request.service_request_object.full_address.split(',')[0]}, {assigned_request.service_request_object.full_address.split(',')[1]}
                 </span>
               </MapTooltip>
             </Marker>
