@@ -270,20 +270,20 @@ function DispatchResolutionForm({ id, incident }) {
             animals: Yup.array().of(
               Yup.object().shape({
                 id: Yup.number().required(),
-                status: Yup.string(),
-                  // .test('required-check', 'Animal cannot remain REPORTED.',
-                  //   function(value) {
-                  //     let required = true;
-                  //     data.sr_updates.filter(sr => sr.id === this.parent.request).forEach(sr_update => {
-                  //       if (sr_update.unable_to_complete || sr_update.incomplete) {
-                  //         required = false;
-                  //       }
-                  //     })
-                  //     if (value.includes('REPORTED') && required) {
-                  //       return false;
-                  //     }
-                  //     return true;
-                  //   }),
+                status: Yup.string()
+                  .test('required-check', 'Animal cannot remain REPORTED.',
+                    function(value) {
+                      let required = true;
+                      data.sr_updates.filter(sr => sr.id === this.parent.request).forEach(sr_update => {
+                        if (sr_update.unable_to_complete || !saveClose) {
+                          required = false;
+                        }
+                      })
+                      if (value.includes('REPORTED') && required) {
+                        return false;
+                      }
+                      return true;
+                    }),
                 shelter: Yup.number().nullable(),
                 room: Yup.number().nullable(),
               })
