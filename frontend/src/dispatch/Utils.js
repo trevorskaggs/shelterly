@@ -41,7 +41,7 @@ const buildDispatchResolutionsDoc = (drs = []) => {
     pdf.drawPad(10);
 
     // summary page
-    data.assigned_requests.forEach((assigned_request, index) => {
+    data.assigned_requests.forEach((assigned_request) => {
       // service request priority
       const srPriority = priorityChoices.find(({ value }) => value === (assigned_request.service_request_object.priority || 2))
 
@@ -164,6 +164,11 @@ const buildDispatchResolutionsDoc = (drs = []) => {
       // turn around
       pdf.drawWrappedText({
         text: `Turn Around: ${assigned_request.service_request_object.turn_around ? 'Yes' : 'No'}`
+      });
+
+      // forced entry
+      pdf.drawWrappedText({
+        text: `Forced Entry: ${assigned_request.visit_note?.forced_entry ? 'Yes' : 'No'}`
       });
 
       // animals
