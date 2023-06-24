@@ -1,5 +1,6 @@
 import moment from 'moment';
 import ShelterlyPDF from '../utils/pdf';
+import { capitalize } from '../utils/formatString';
 import { priorityChoices, DATE_FORMAT } from '../constants';
 import { statusChoices } from '../animals/constants';
 import { buildAnimalCountList } from '../animals/Utils';
@@ -24,14 +25,20 @@ const buildDispatchResolutionsDoc = (drs = []) => {
     }
 
     // draw team section
-    pdf.drawSectionHeader({ text: data.team_object.name, hRule: false });
+    pdf.drawSectionHeader({ text: data.team_object.name, hRule: false, fontSize: 12 });
+    pdf.drawPad(10)
+    pdf.setDocumentFontSize({ size: 10 });
     pdf.drawTextList({
       labels: data.team && data.team_object.team_member_objects.map(team_member => (
         `${team_member.first_name} ${team_member.last_name} ${team_member.display_phone ? `${team_member.display_phone}` : ''}`
-      ))
+      )),
+      labelMarginTop: -10
     });
 
-    pdf.drawPad();
+    // reset document font size
+    pdf.setDocumentFontSize();
+
+    pdf.drawPad(10);
 
     // summary page
     data.assigned_requests.forEach((assigned_request, index) => {
@@ -40,44 +47,59 @@ const buildDispatchResolutionsDoc = (drs = []) => {
 
       // Summary page
       pdf.drawSectionHeader({
-        text: `SR#${assigned_request.service_request_object.id} - ${srPriority.label} Priority`
+        text: `SR#${assigned_request.service_request_object.id} - ${srPriority.label} Priority`,
+        fontSize: 12
       });
 
-      pdf.drawPad(20);
+      pdf.drawPad(15);
 
       // status
       pdf.drawWrappedText({
         text: `Status: ${assigned_request.service_request_object.status.toUpperCase()}`,
+        fontSize: 10
       });
 
       // summary address
-      pdf.drawSectionHeader({ text: 'Service Request Address:', fontSize: 14 });
+      pdf.drawSectionHeader({ text: 'Service Request Address:', fontSize: 12 });
+      pdf.drawPad(15);
 
-      const [addressLine1, ...addressLine2] = assigned_request.service_request_object.full_address.split(',')
+      const [addressLine1, ...addressLine2] = assigned_request.service_request_object.full_address.split(',');
+
+      pdf.setDocumentFontSize({ size: 10 });
 
       pdf.drawTextList({
         labels: [
           addressLine1,
           addressLine2.join(',')?.trim?.()
         ],
-        bottomPadding: 12
+        bottomPadding: 12,
+        labelMarginTop: -10
       })
+
+      // reset document font size
+      pdf.setDocumentFontSize();
 
       // lat/lng
       pdf.drawWrappedText({
-        text: `Latitude: ${assigned_request.service_request_object.latitude},  Longitude: ${assigned_request.service_request_object.longitude}`
+        text: `Latitude: ${assigned_request.service_request_object.latitude},  Longitude: ${assigned_request.service_request_object.longitude}`,
+        fontSize: 10
       });
 
       // Animal count
-      pdf.drawSectionHeader({ text: 'Animals', fontSize: 14 });
+      pdf.drawSectionHeader({ text: 'Animals', fontSize: 12 });
 
       const assignedRequestAnimals =
         assigned_request.service_request_object.animals.filter((animal) =>
           Object.keys(assigned_request.animals).includes(String(animal.id))
         );
-      buildAnimalCountList(pdf, assignedRequestAnimals);
 
-      pdf.drawPad(30);
+      pdf.setDocumentFontSize({ size: 10 });
+      buildAnimalCountList(pdf, assignedRequestAnimals, { countLabelMarginTop: -10 });
+
+      // rest document font size
+      pdf.setDocumentFontSize();
+
+      pdf.drawPad(15);
     });
 
     // end of summary page break
@@ -92,13 +114,14 @@ const buildDispatchResolutionsDoc = (drs = []) => {
       // SR Header
       pdf.drawSectionHeader({
         text: `SR#${assigned_request.service_request_object.id} - ${assigned_request.service_request_object.full_address}`,
-        hRule: false
+        hRule: false,
+        fontSize: 14
       });
-      pdf.drawPad(20);
+      pdf.drawPad(15);
       pdf.drawWrappedText({
         text: `Latitude: ${assigned_request.service_request_object.latitude},  Longitude: ${assigned_request.service_request_object.longitude}`
       });
-      pdf.drawPad(-30);
+      pdf.drawPad(-45);
       pdf.drawCheckboxList({
         labels: [''],
         listStyle: 'inline',
@@ -200,20 +223,44 @@ const buildDispatchResolutionsDoc = (drs = []) => {
           bottomPadding: 0
         });
 
-        pdf.drawWrappedText({
-          text: `Primary Color: ${animal.pcolor || 'N/A'}, Secondary Color: ${animal.scolor || 'N/A'}`,
-          linePadding: 10
+        pdf.setDocumentFontSize({ size: 10 });
+
+        pdf.drawTextList({
+          labels: [
+            `Sex: ${animal.sex}`,
+            `Fixed: ${capitalize(animal.fixed)}`,
+            `ACO Required: ${capitalize(animal.aco_required)}`,
+            `Aggressive: ${capitalize(animal.aggressive)}`,
+            `Confined: ${capitalize(animal.confined)}`,
+            `Injured: ${capitalize(animal.injured)}`,
+            `Last Seen: ${animal.last_seen ? moment(animal.last_seen).format('MMMM Do YYYY HH:mm') : 'Unknown'}`,
+            `Age: ${capitalize(animal.age)}`,
+            `Size: ${capitalize(animal.size)}`,
+            `Primary Color: ${capitalize(animal.pcolor) || 'N/A'}`,
+            `Secondary Color: ${capitalize(animal.scolor) || 'N/A'}`
+          ],
+          listStyle: 'grid',
+          labelMarginTop: -4
         });
+
+        // reset document font size
+        pdf.setDocumentFontSize();
+
+        pdf.drawPad(13);
+
         pdf.drawWrappedText({
           text: `Description: ${animal.color_notes || 'N/A'}`,
-          bottomPadding: 0
+          bottomPadding: 0,
+          fontSize: 10
         });
         pdf.drawWrappedText({
           text: `Behavior: ${animal.behavior_notes || 'N/A'}`,
           bottomPadding: 0,
+          fontSize: 10
         });
         pdf.drawWrappedText({
-          text: `Medical: ${animal.medical_notes || 'N/A'}`
+          text: `Medical: ${animal.medical_notes || 'N/A'}`,
+          fontSize: 10
         });
 
         lastYPosAfterDraw = pdf.getLastYPositionWithBuffer({ buffer: 0 });

@@ -3,7 +3,7 @@ import re
 from rest_framework import serializers
 from actstream.models import target_stream
 
-from animals.serializers import ModestAnimalSerializer, SimpleAnimalSerializer
+from animals.serializers import AnimalSerializer
 from evac.models import DispatchTeam, EvacAssignment, EvacTeamMember, AssignedRequest
 from hotline.models import ServiceRequest, VisitNote
 from hotline.serializers import BarebonesServiceRequestSerializer, SimpleServiceRequestSerializer, VisitNoteSerializer
@@ -46,7 +46,7 @@ class DispatchTeamSerializer(serializers.ModelSerializer):
 
 class DispatchServiceRequestSerializer(SimpleServiceRequestSerializer):
 
-    animals = SimpleAnimalSerializer(many=True, read_only=True)
+    animals = AnimalSerializer(many=True, read_only=True)
     owner_contacts = OwnerContactSerializer(source='ownercontact_set', many=True, required=False, read_only=True)
     owner_objects = SimplePersonSerializer(source='owners', many=True, required=False, read_only=True)
     reporter_object = SimplePersonSerializer(source='reporter', required=False, read_only=True)

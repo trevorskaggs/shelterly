@@ -485,7 +485,13 @@ class ShelterlyPDF {
     this.#documentLastYPosition = yPosition + bottomPadding;
   }
 
-  drawWrappedText({ text, linePadding = 0, bottomPadding = 0 }) {
+  drawWrappedText({
+    text,
+    linePadding = 0,
+    bottomPadding = 0,
+    fontSize = this.#documentFontSize
+  }) {
+    this.setDocumentFontSize({ size: fontSize });
     const splitLines = this.#jsPDF.splitTextToSize(text, this.pageWidth - (this.#documentRightMargin * 2));
     if (splitLines.length > 1) {
       splitLines.forEach((splitText) => {
@@ -493,15 +499,18 @@ class ShelterlyPDF {
           text: splitText,
           bottomPadding: linePadding,
           topPadding: linePadding
-        })
-      })
+        });
+      });
     } else {
       this.drawSingleLineText({
         text,
         bottomPadding: bottomPadding,
         topPadding: linePadding
-      })
+      });
     }
+
+    // reset font document font size
+    this.setDocumentFontSize();
 
     // set last y position
     this.#documentLastYPosition = this.#documentLastYPosition + bottomPadding;
@@ -581,8 +590,7 @@ class ShelterlyPDF {
       marginTop = 0,
       inlineRightMargin = 0,
       inlineOffset = 0,
-      withLines = false,
-      lineXOffset = 0
+      withLines = false
     }, i) => {
       const yPosition = this.getLastYPositionWithBuffer() + marginTop;
       const textWidth = this.#jsPDF.getStringUnitWidth(label) * this.#documentFontSize;
