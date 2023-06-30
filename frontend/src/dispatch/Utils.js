@@ -137,11 +137,19 @@ const buildDispatchResolutionsDoc = (drs = []) => {
 
       // owners
       if (assigned_request.service_request_object.owners.length) {
-        assigned_request.service_request_object.owner_objects.forEach((owner) => (
+        assigned_request.service_request_object.owner_objects.forEach((owner) => {
           pdf.drawWrappedText({
-            text: `Owner: ${owner.first_name} ${owner.last_name} ${owner.display_phone}`
-          })
-        ));
+            text: `Owner: ${owner.first_name} ${owner.last_name} ${
+              owner.display_phone
+            } ${
+              owner.display_alt_phone ? ` / ${owner.display_alt_phone}` : ""
+            }`,
+          });
+
+          if (!!owner.comments) {
+            pdf.drawWrappedText({ text: `Comments / Alternate Contact: ${owner.comments}` });
+          }
+        });
       }
 
       // reporter
@@ -170,6 +178,9 @@ const buildDispatchResolutionsDoc = (drs = []) => {
       pdf.drawWrappedText({
         text: `Forced Entry: ${assigned_request.visit_note?.forced_entry ? 'Yes' : 'No'}`
       });
+
+      // key at staging (key provided)
+      pdf.drawWrappedText({ text: `Key at Staging: ${assigned_request.service_request_object.key_provided} ? 'Yes': 'No'`})
 
       // animals
       pdf.drawSectionHeader({
@@ -232,15 +243,15 @@ const buildDispatchResolutionsDoc = (drs = []) => {
 
         pdf.drawTextList({
           labels: [
-            `Sex: ${animal.sex}`,
+            `Sex: ${animal.sex || 'N/A'}`,
             `Fixed: ${capitalize(animal.fixed)}`,
             `ACO Required: ${capitalize(animal.aco_required)}`,
             `Aggressive: ${capitalize(animal.aggressive)}`,
             `Confined: ${capitalize(animal.confined)}`,
             `Injured: ${capitalize(animal.injured)}`,
             `Last Seen: ${animal.last_seen ? moment(animal.last_seen).format('MMMM Do YYYY HH:mm') : 'Unknown'}`,
-            `Age: ${capitalize(animal.age)}`,
-            `Size: ${capitalize(animal.size)}`,
+            `Age: ${capitalize(animal.age) || 'N/A'}`,
+            `Size: ${capitalize(animal.size) || 'N/A'}`,
             `Primary Color: ${capitalize(animal.pcolor) || 'N/A'}`,
             `Secondary Color: ${capitalize(animal.scolor) || 'N/A'}`
           ],
