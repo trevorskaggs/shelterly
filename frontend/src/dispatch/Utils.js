@@ -180,7 +180,7 @@ const buildDispatchResolutionsDoc = (drs = []) => {
       });
 
       // key at staging (key provided)
-      pdf.drawWrappedText({ text: `Key at Staging: ${assigned_request.service_request_object.key_provided} ? 'Yes': 'No'`})
+      pdf.drawWrappedText({ text: `Key at Staging: ${assigned_request.service_request_object.key_provided ? 'Yes': 'No'}`})
 
       // animals
       pdf.drawSectionHeader({
@@ -316,9 +316,20 @@ const buildDispatchResolutionsDoc = (drs = []) => {
         labels: [
           'Followup Date:  ________/________/________________'
         ],
-        bottomPadding: 16
+        bottomPadding: 26
       })
-      pdf.drawTextArea({ label: 'Visit Notes:', rows: 4 });
+      pdf.drawWrappedText({
+        text: 'Visit Notes:'
+      });
+      if (assigned_request.visit_note?.notes) {
+        pdf.drawWrappedText({
+          text: `${
+            (assigned_request.visit_note?.notes && assigned_request.visit_note?.notes) || ''
+          }`
+        });
+      }
+      pdf.drawPad(-15);
+      pdf.drawTextArea({ rows: 4 });
       pdf.drawCheckBoxLine({ label: 'Forced Entry' });
 
       // owners contacted
@@ -330,7 +341,22 @@ const buildDispatchResolutionsDoc = (drs = []) => {
         assigned_request.service_request_object.owner_objects.forEach((owner) => {
           pdf.drawCheckBoxLine({ label: `Owner: ${owner.first_name} ${owner.last_name} ${owner.display_phone}` });
           pdf.drawTextWithLine({ label: 'Owner Contact Time:', xOffset: 150 });
-          pdf.drawTextArea({ label: 'Owner Contact Notes:' });
+          pdf.drawWrappedText({
+            text: 'Owner Contact Notes:'
+          });
+          if (
+            assigned_request.owner_contact?.owner === owner.id
+          ) {
+            pdf.drawWrappedText({
+              text: `${
+                (assigned_request.owner_contact?.owner_contact_note &&
+                  assigned_request.owner_contact?.owner_contact_note) ||
+                ""
+              }`,
+            });
+          }
+          pdf.drawPad(-15);
+          pdf.drawTextArea({ rows: 3 });
         });
       }
     });

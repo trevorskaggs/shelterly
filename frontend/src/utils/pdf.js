@@ -543,11 +543,14 @@ class ShelterlyPDF {
   }) {
     const yPosition = this.beforeDraw({ yPosition: this.getLastYPositionWithBuffer() });
 
-    this.#jsPDF.text(
-      label,
-      this.documentLeftMargin,
-      yPosition
-    );
+    if (!!label) {
+      this.#jsPDF.text(
+        label,
+        this.documentLeftMargin,
+        yPosition
+      );
+    }
+    
 
     // set last y position
     this.#documentLastYPosition = yPosition;
