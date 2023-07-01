@@ -270,7 +270,7 @@ const buildDispatchResolutionsDoc = (drs = []) => {
           fontSize: 10
         });
         pdf.drawWrappedText({
-          text: `Behavior: ${animal.behavior_notes || 'N/A'}`,
+          text: `Animal Notes: ${animal.behavior_notes || 'N/A'}`,
           bottomPadding: 0,
           fontSize: 10
         });
