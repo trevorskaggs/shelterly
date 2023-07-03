@@ -796,14 +796,16 @@ class ShelterlyPDF {
    * @param {object} param0
    * @param {number} param0.pageNumber
    * @param {number} param0.pageCount
+   * @param {number} [param0.marginBottom=30] space between page number and bottom edge of page
    */
   drawPageNumbers({
     pageNumber,
-    pageCount
+    pageCount,
+    marginBottom = 30
   }) {
     const jsPdf = this.#jsPDF;
     const { width: pageWidth, height: pageHeight } = jsPdf.internal.pageSize;
-    jsPdf.text('Page ' + String(pageNumber) + ' of ' + String(pageCount), pageWidth / 2, pageHeight - 15, {
+    jsPdf.text('Page ' + String(pageNumber) + ' of ' + String(pageCount), pageWidth / 2, pageHeight - marginBottom, {
         align: 'center'
       });
   }
