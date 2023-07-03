@@ -7,7 +7,7 @@ from animals.serializers import AnimalSerializer
 from evac.models import DispatchTeam, EvacAssignment, EvacTeamMember, AssignedRequest
 from hotline.models import ServiceRequest, VisitNote
 from hotline.serializers import BarebonesServiceRequestSerializer, SimpleServiceRequestSerializer, VisitNoteSerializer
-from people.serializers import OwnerContactSerializer, SimplePersonSerializer
+from people.serializers import OwnerContactSerializer, SimplePersonSerializer, PersonSerializer
 
 from location.utils import build_action_string
 
@@ -48,7 +48,7 @@ class DispatchServiceRequestSerializer(SimpleServiceRequestSerializer):
 
     animals = AnimalSerializer(many=True, read_only=True)
     owner_contacts = OwnerContactSerializer(source='ownercontact_set', many=True, required=False, read_only=True)
-    owner_objects = SimplePersonSerializer(source='owners', many=True, required=False, read_only=True)
+    owner_objects = PersonSerializer(source='owners', many=True, required=False, read_only=True)
     reporter_object = SimplePersonSerializer(source='reporter', required=False, read_only=True)
     visit_notes = VisitNoteSerializer(source='visitnote_set', many=True, required=False, read_only=True)
 

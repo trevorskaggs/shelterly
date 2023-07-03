@@ -340,21 +340,28 @@ const buildDispatchResolutionsDoc = (drs = []) => {
 
         assigned_request.service_request_object.owner_objects.forEach((owner) => {
           pdf.drawCheckBoxLine({ label: `Owner: ${owner.first_name} ${owner.last_name} ${owner.display_phone}` });
-          pdf.drawTextWithLine({ label: 'Owner Contact Time:', xOffset: 150 });
+          
+          owner.owner_contacts?.forEach((owner_contacted) => {
+            pdf.drawWrappedText({
+              text: `Owner Contact Time: ${
+                owner_contacted.owner_contact_time
+                  ? moment(owner_contacted.owner_contact_time).format(
+                      'MMMM Do YYYY HH:mm'
+                    )
+                  : 'UNKNOWN'
+              }`,
+            });
+            pdf.drawWrappedText({
+              text: `Owner Contact Notes: ${owner_contacted.owner_contact_note}`
+            });
+            pdf.drawHRule();
+          });
+
+          pdf.drawPad(10);
+          pdf.drawTextWithLine({ label: 'Owner Contact Time:', xOffset: 125 });
           pdf.drawWrappedText({
             text: 'Owner Contact Notes:'
           });
-          if (
-            assigned_request.owner_contact?.owner === owner.id
-          ) {
-            pdf.drawWrappedText({
-              text: `${
-                (assigned_request.owner_contact?.owner_contact_note &&
-                  assigned_request.owner_contact?.owner_contact_note) ||
-                ""
-              }`,
-            });
-          }
           pdf.drawPad(-15);
           pdf.drawTextArea({ rows: 3 });
         });
