@@ -297,11 +297,6 @@ const AnimalForm = (props) => {
             delete values["owners"];
           }
 
-          // Set default REPORTED status if Owner Requested is cleared.
-          if (!values["status"]) {
-            values["status"] = "REPORTED"
-          }
-
           // Use FormData so that image files may also be included.
           const formData = new FormData();
           // Convert json to FormData.
@@ -592,8 +587,9 @@ const AnimalForm = (props) => {
                         type="text"
                         key={`my_unique_requested_service_select_key__${formikProps.values.status}`}
                         options={reportedStatusChoices}
-                        disabled={['REPORTED', 'REPORTED (EVACUATION)', 'REPORTED (SHELTERED IN PLACE)'].includes(data.status) ? false : true}
+                        disabled={['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)'].includes(data.status) ? false : true}
                         value={formikProps.values.status||''}
+                        isClearable={false}
                     />
                   </Col>
                   <Col xs="3">

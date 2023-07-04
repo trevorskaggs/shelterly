@@ -56,7 +56,7 @@ class ServiceRequest(Location):
         from evac.models import AssignedRequest
         from animals.models import Animal
         status = 'closed'
-        animals = Animal.objects.filter(status__in=['REPORTED', 'REPORTED (EVACUATION)', 'REPORTED (SHELTERED IN PLACE)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE'], request=self).exists()
+        animals = Animal.objects.filter(status__in=['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE'], request=self).exists()
 
         # Identify proper status based on DAs and Animals.
         if animals and AssignedRequest.objects.filter(service_request=self, dispatch_assignment__end_time=None).exists():
@@ -93,12 +93,12 @@ class ServiceRequest(Location):
         self.save()
 
     def get_feature_json(self):
-        species_counts = {'REPORTED':{}, 'REPORTED (EVACUATION)':{}, 'REPORTED (SHELTERED IN PLACE)':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}}
-        for animal in self.animal_set.filter(status__in=['REPORTED', 'REPORTED (EVACUATION)', 'REPORTED (SHELTERED IN PLACE)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE']):
+        species_counts = {'REPORTED':{}, 'REPORTED (EVAC REQUESTED)':{}, 'REPORTED (SIP REQUESTED)':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}}
+        for animal in self.animal_set.filter(status__in=['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE']):
             species_counts[animal.status][animal.species] = species_counts[animal.status].get(animal.species, 0) + 1
         description = self.location_output.rsplit(',', 1)[0]  + " ("
         count = 0
-        for status in [('Reported','REPORTED'), ('Reported Evac','REPORTED (EVACUATION)'), ('Reported SIP','REPORTED (SHELTERED IN PLACE)'), ('SIP','SHELTERED IN PLACE'), ('UTL', 'UNABLE TO LOCATE')]:
+        for status in [('Reported','REPORTED'), ('Reported (Evac Requested)','REPORTED (EVAC REQUESTED)'), ('Reported (SIP Requested)','REPORTED (SIP REQUESTED)'), ('SIP','SHELTERED IN PLACE'), ('UTL', 'UNABLE TO LOCATE')]:
             if len(species_counts[status[1]].items()) > 0:
                 if count > 0:
                     description += '; ' 

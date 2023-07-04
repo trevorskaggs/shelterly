@@ -15,8 +15,8 @@ import { SystemErrorContext } from '../components/SystemError';
 
 const statusLabelLookup = {
   'REPORTED':'Reported',
-  'REPORTED (EVACUATION)':'Reported (Evacuation)',
-  'REPORTED (SHELTERED IN PLACE)':'Reported (Sheltered In Place)',
+  'REPORTED (EVAC REQUESTED)':'Reported (Evac Requested)',
+  'REPORTED (SIP REQUESTED)':'Reported (SIP Requested)',
   'SHELTERED':'Sheltered',
   'SHELTERED IN PLACE':'Sheltered In Place (SIP)',
   'UNABLE TO LOCATE':'Unable To Locate (UTL)',

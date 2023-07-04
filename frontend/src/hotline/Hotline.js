@@ -153,7 +153,7 @@ function Hotline({ incident }) {
       </Col>
     </Row>
     <Row className="ml-0 mr-0 border rounded" style={{maxHeight:"38px"}}>
-      <h4 className="card-header text-center" style={{paddingTop:"4px", paddingLeft:"10px", paddingRight:"10px", height:"36px", width:"100%", backgroundColor:"#808080"}}>
+      <h5 className="card-header" style={{paddingTop:"7px", paddingLeft:"10px", paddingRight:"10px", height:"36px", width:"100%", backgroundColor:"#808080"}}>
         Service Requests&nbsp;&nbsp; -
         <span className="fa-layers mr-1 ml-3">
           <FontAwesomeIcon icon={faCircle} className="fa-move-down" color="white" />
@@ -165,7 +165,7 @@ function Hotline({ incident }) {
             <FontAwesomeIcon icon={faCircle} className="fa-move-down" color="white" />
             <FontAwesomeIcon icon={faCircleBolt} className="icon-border fa-move-down" color="#ff4c4c" />
           </span>
-          Reported (Evac)
+          Reported (Evac Req)
         </span>
         <span style={{paddingRight:"15px"}}>
           <span className="fa-layers ml-1" style={{marginRight:"6px"}}>
@@ -173,7 +173,7 @@ function Hotline({ incident }) {
             <FontAwesomeIcon icon={faHomeAlt} className="fa-move-down" style={{color:"white"}} transform={'shrink-4 left-1'} inverse />
             <FontAwesomeIcon icon={faHomeAltReg} className="fa-move-down" style={{color:"#444"}} transform={'shrink-3 left-1'} inverse />
           </span>
-          Reported (SIP)
+          Reported (SIP Req)
         </span>
         <span style={{paddingRight:"5px", paddingLeft:"5px"}}>
           <span className="fa-layers" style={{marginRight:"6px"}}>
@@ -195,7 +195,7 @@ function Hotline({ incident }) {
           <FontAwesomeIcon icon={faDoNotEnter} className="icon-border fa-move-down" color="#af7051" />
         </span>
           Closed
-      </h4>
+      </h5>
     </Row>
   </>
   )

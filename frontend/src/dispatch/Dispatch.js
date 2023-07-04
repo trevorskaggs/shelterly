@@ -186,8 +186,8 @@ function Dispatch({ incident }) {
       </Col>
     </Row>
     <Row className="ml-0 mr-0 border rounded" style={{maxHeight:"38px"}}>
-      <h4 className="card-header text-center" style={{paddingTop:"4px", paddingLeft:"10px", paddingRight:"10px", height:"36px", width:"100%", backgroundColor:"#808080"}}>
-        Assignments -
+      <h5 className="card-header" style={{paddingTop:"7px", paddingLeft:"10px", paddingRight:"10px", height:"36px", width:"100%", backgroundColor:"#808080"}}>
+        Assignments&nbsp;&nbsp; -
         <span className="fa-layers ml-3 mr-1">
           <FontAwesomeIcon icon={faCircle} className="fa-move-down" color="white" />
           <FontAwesomeIcon icon={faExclamationCircle} className="icon-border fa-move-down" color="#ff4c4c" />
@@ -198,7 +198,7 @@ function Dispatch({ incident }) {
             <FontAwesomeIcon icon={faCircle} className="fa-move-down" color="white" />
             <FontAwesomeIcon icon={faCircleBolt} className="icon-border fa-move-down" color="#ff4c4c" />
           </span>
-          Reported (Evac)
+          Reported (Evac Req)
         </span>
         <span style={{paddingRight:"15px"}}>
           <span className="fa-layers ml-1" style={{marginRight:"6px"}}>
@@ -206,7 +206,7 @@ function Dispatch({ incident }) {
             <FontAwesomeIcon icon={faHomeAlt} className="fa-move-down" style={{color:"white"}} transform={'shrink-4 left-1'} inverse />
             <FontAwesomeIcon icon={faHomeAltReg} className="fa-move-down" style={{color:"#444"}} transform={'shrink-3 left-1'} inverse />
           </span>
-          Reported (SIP)
+          Reported (SIP Req)
         </span>
         <span style={{paddingRight:"15px"}}>
           <span className="fa-layers ml-1" style={{marginRight:"6px"}}>
@@ -228,7 +228,7 @@ function Dispatch({ incident }) {
           <FontAwesomeIcon icon={faTimesCircle} className="icon-border fa-move-down" color="#af7051" />
         </span>
           Sheltered
-      </h4>
+      </h5>
     </Row>
     </>
   )

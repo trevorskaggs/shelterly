@@ -161,7 +161,7 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
             for service_request in service_requests:
                 action.send(self.request.user, verb='assigned service request', target=service_request)
                 animals_dict = {}
-                for animal in service_request.animal_set.filter(status__in=['REPORTED', 'REPORTED (EVACUATION)', 'REPORTED (SHELTERED IN PLACE)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE']):
+                for animal in service_request.animal_set.filter(status__in=['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE']):
                     animals_dict[animal.id] = {'status':animal.status, 'name':animal.name, 'species':animal.species, 'color_notes':animal.color_notes, 'pcolor':animal.pcolor, 'scolor':animal.scolor, 'shelter':'', 'room':''}
                 AssignedRequest.objects.create(dispatch_assignment=evac_assignment, service_request=service_request, animals=animals_dict, timestamp=timestamp)
 
@@ -183,7 +183,7 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
                     old_da.service_requests.remove(service_requests[0])
                 # Add SR to selected DA.
                 animals_dict = {}
-                for animal in service_requests[0].animal_set.filter(status__in=['REPORTED', 'REPORTED (EVACUATION)', 'REPORTED (SHELTERED IN PLACE)',  'SHELTERED IN PLACE', 'UNABLE TO LOCATE']):
+                for animal in service_requests[0].animal_set.filter(status__in=['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)',  'SHELTERED IN PLACE', 'UNABLE TO LOCATE']):
                     animals_dict[animal.id] = {'name':animal.name, 'species':animal.species, 'status':animal.status, 'color_notes':animal.color_notes, 'pcolor':animal.pcolor, 'scolor':animal.scolor, 'shelter':animal.shelter, 'room':animal.room}
                 AssignedRequest.objects.create(dispatch_assignment=evac_assignment, service_request=service_requests[0], animals=animals_dict)
                 action.send(self.request.user, verb='assigned service request', target=service_requests[0])
@@ -210,9 +210,7 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
                     # Update animal found location with SR location if blank.
                     if not animal.address:
                         Animal.objects.filter(id=animal_dict['id']).update(address=service_requests[0].address, city=service_requests[0].city, state=service_requests[0].state, zip_code=service_requests[0].zip_code, latitude=service_requests[0].latitude, longitude=service_requests[0].longitude)
-                    # Mark SR as open if any animal is SIP or UTL.
-                    # if new_status in ['REPORTED', 'REPORTED (EVACUATION)', 'REPORTED (SHELTERED IN PLACE)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE'] and sr_status != 'assigned':
-                    #     sr_status = 'open'
+
                 # Update the relevant SR fields.
                 assigned_request = AssignedRequest.objects.get(service_request=service_request['id'], dispatch_assignment=evac_assignment.id)
                 # Update SIP/UTL.

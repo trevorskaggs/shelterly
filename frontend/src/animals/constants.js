@@ -127,8 +127,8 @@ export const unknownChoices = [
 
 export const statusChoices = [
   {value:'REPORTED', label:'Reported'},
-  {value:'REPORTED (EVACUATION)', label:"Reported (Evacuation)"},
-  {value:'REPORTED (SHELTERED IN PLACE)', label:'Reported (Sheltered In Place)'},
+  {value:'REPORTED (EVAC REQUESTED)', label:"Reported (Evac Requested)"},
+  {value:'REPORTED (SIP REQUESTED)', label:'Reported (SIP Requested)'},
   {value:'SHELTERED IN PLACE', label:'Sheltered In Place (SIP)'},
   {value:'UNABLE TO LOCATE', label:'Unable To Locate (UTL)'},
   {value:'NO FURTHER ACTION', label:'No Further Action (NFA)'},
@@ -138,6 +138,7 @@ export const statusChoices = [
 ]
 
 export const reportedStatusChoices = [
-  {value:'REPORTED (EVACUATION)', label:"Reported (Evacuation)"},
-  {value:'REPORTED (SHELTERED IN PLACE)', label:"Reported (Sheltered In Place)"},
+  {value:'REPORTED', label:'Reported'},
+  {value:'REPORTED (EVAC REQUESTED)', label:"Reported (Evac Requested)"},
+  {value:'REPORTED (SIP REQUESTED)', label:"Reported (SIP Requested)"},
 ]

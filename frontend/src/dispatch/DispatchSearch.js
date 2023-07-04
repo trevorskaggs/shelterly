@@ -86,10 +86,10 @@ function DispatchAssignmentSearch({ incident }) {
   // Counts the number of species matches for a service request.
   const countMatches = (service_request) => {
     let species_matches = {};
-    let status_matches = {'REPORTED':{}, 'REPORTED (EVACUATION)':{}, 'REPORTED (SHELTERED IN PLACE)':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}};
+    let status_matches = {'REPORTED':{}, 'REPORTED (EVAC REQUESTED)':{}, 'REPORTED (SIP REQUESTED)':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}};
 
     service_request.animals.forEach((animal) => {
-      if (['REPORTED', 'REPORTED (EVACUATION)', 'REPORTED (SHELTERED IN PLACE)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE'].indexOf(animal.status) > -1) {
+      if (['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE'].indexOf(animal.status) > -1) {
         if (!species_matches[[animal.species]]) {
           species_matches[[animal.species]] = 1;
         }

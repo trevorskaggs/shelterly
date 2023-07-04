@@ -32,7 +32,7 @@ function Deploy({ incident }) {
 
   const [data, setData] = useState({service_requests: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
   const [mapState, setMapState] = useState({});
-  const [totalSelectedState, setTotalSelectedState] = useState({'REPORTED':{}, 'REPORTED (EVACUATION)':{}, 'REPORTED (SHELTERED IN PLACE)':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}});
+  const [totalSelectedState, setTotalSelectedState] = useState({'REPORTED':{}, 'REPORTED (EVAC REQUESTED)':{}, 'REPORTED (SIP REQUESTED)':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}});
   const [selectedCount, setSelectedCount] = useState({count:0, disabled:true});
   const [statusOptions, setStatusOptions] = useState({aco_required:false, pending_only: true});
   const [triggerRefresh, setTriggerRefresh] = useState(false);
@@ -363,7 +363,7 @@ function Deploy({ incident }) {
               // Stay on map and remove selected SRs if in Preplanning mode.
               if (preplan) {
                 setData(prevState => ({ ...prevState, "service_requests":data.service_requests.filter(sr => !values.service_requests.includes(String(sr.id))) }));
-                setTotalSelectedState({'REPORTED':{}, 'REPORTED (EVACUATION)':{}, 'REPORTED (SHELTERED IN PLACE)':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}});
+                setTotalSelectedState({'REPORTED':{}, 'REPORTED (EVAC REQUESTED)':{}, 'REPORTED (SIP REQUESTED)':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}});
                 setSelectedCount({count:0, disabled:true});
                 setMapState(Object.keys(mapState).filter(key => !values.service_requests.includes(String(key)))
                   .reduce((obj, key) => {
@@ -427,8 +427,8 @@ function Deploy({ incident }) {
         <hr/>
         <Row className="d-flex flex-wrap" style={{marginTop:"10px", marginLeft:"0px", marginRight:"0px"}}>
           <Col xs={2} className="border rounded">
-          <h4 className="text-center mt-1">Selected</h4><hr style={{marginTop:"-5px", marginBottom:"-5px"}} />
           <Scrollbar no_shadow="true" style={{height:"50vh", marginLeft:"-15px", marginRight:"-15px", right:"-5px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
+            <h4 className="text-center mt-1 mr-1">Selected</h4><hr style={{marginTop:"-5px", marginBottom:"-5px", marginLeft:"10px", marginRight:"20px"}} />
             {Object.keys(totalSelectedState["REPORTED"]).length > 0 ? <div className="card-header border rounded mt-3 text-center" style={{paddingRight:"15px", paddingLeft:"15px", marginLeft:"8px", marginRight:"18px", marginBottom:"-4px"}}>
               <p className="mb-2" style={{marginTop:"-5px"}}>Reported
                 <OverlayTrigger
@@ -451,7 +451,7 @@ function Deploy({ incident }) {
                 <div key={key} style={{textTransform:"capitalize", marginTop:"5px", marginBottom:"-5px"}}>{prettyText(key.split(',')[0], totalSelectedState["REPORTED"][key])}</div>
               ))}
             </div> : ""}
-            {Object.keys(totalSelectedState["REPORTED (EVACUATION)"]).length > 0 ? <div className="card-header border rounded mt-3 text-center" style={{paddingRight:"15px", paddingLeft:"15px", marginLeft:"8px", marginRight:"18px", marginBottom:"-4px"}}>
+            {Object.keys(totalSelectedState["REPORTED (EVAC REQUESTED)"]).length > 0 ? <div className="card-header border rounded mt-3 text-center" style={{paddingRight:"15px", paddingLeft:"15px", marginLeft:"8px", marginRight:"18px", marginBottom:"-4px"}}>
               <p className="mb-2" style={{marginTop:"-5px", marginLeft:"-4px", marginRight:"-4px"}}>Reported (Evac)
                 <OverlayTrigger
                   key={"selected-reported-evac"}
@@ -469,11 +469,11 @@ function Deploy({ incident }) {
                 </OverlayTrigger>
               </p>
               <hr className="mt-1 mb-1"/>
-              {Object.keys(totalSelectedState["REPORTED (EVACUATION)"]).map(key => (
-                <div key={key} style={{textTransform:"capitalize", marginTop:"5px", marginBottom:"-5px"}}>{prettyText(key.split(',')[0], totalSelectedState["REPORTED (EVACUATION)"][key])}</div>
+              {Object.keys(totalSelectedState["REPORTED (EVAC REQUESTED)"]).map(key => (
+                <div key={key} style={{textTransform:"capitalize", marginTop:"5px", marginBottom:"-5px"}}>{prettyText(key.split(',')[0], totalSelectedState["REPORTED (EVAC REQUESTED)"][key])}</div>
               ))}
             </div> : ""}
-            {Object.keys(totalSelectedState["REPORTED (SHELTERED IN PLACE)"]).length > 0 ? <div className="card-header border rounded mt-3 text-center" style={{paddingRight:"15px", paddingLeft:"15px", marginLeft:"8px", marginRight:"18px", marginBottom:"-4px"}}>
+            {Object.keys(totalSelectedState["REPORTED (SIP REQUESTED)"]).length > 0 ? <div className="card-header border rounded mt-3 text-center" style={{paddingRight:"15px", paddingLeft:"15px", marginLeft:"8px", marginRight:"18px", marginBottom:"-4px"}}>
               <p className="mb-2" style={{marginTop:"-5px"}}>Reported (SIP)
                 <OverlayTrigger
                   key={"selected-reported-sip"}
@@ -492,8 +492,8 @@ function Deploy({ incident }) {
                 </OverlayTrigger>
               </p>
               <hr className="mt-1 mb-1"/>
-              {Object.keys(totalSelectedState["REPORTED (SHELTERED IN PLACE)"]).map(key => (
-                <div key={key} style={{textTransform:"capitalize", marginTop:"5px", marginBottom:"-5px"}}>{prettyText(key.split(',')[0], totalSelectedState["REPORTED (SHELTERED IN PLACE)"][key])}</div>
+              {Object.keys(totalSelectedState["REPORTED (SIP REQUESTED)"]).map(key => (
+                <div key={key} style={{textTransform:"capitalize", marginTop:"5px", marginBottom:"-5px"}}>{prettyText(key.split(',')[0], totalSelectedState["REPORTED (SIP REQUESTED)"][key])}</div>
               ))}
             </div> : ""}
             {Object.keys(totalSelectedState["SHELTERED IN PLACE"]).length > 0 ? <div className="card-header border rounded mt-3 text-center" style={{paddingRight:"15px", paddingLeft:"15px", marginLeft:"8px", marginRight:"18px", marginBottom:"-4px"}}>
@@ -695,7 +695,7 @@ function Deploy({ incident }) {
                       placement="top"
                       overlay={
                         <Tooltip id={`tooltip-reported-evac`}>
-                          {service_request.reported_evac} animal{service_request.reported_evac > 1 ? "s are":" is"} reported (evacuation)
+                          {service_request.reported_evac} animal{service_request.reported_evac > 1 ? "s are":" is"} reported (evac requested)
                         </Tooltip>
                       }
                     >
@@ -708,7 +708,7 @@ function Deploy({ incident }) {
                       placement="top"
                       overlay={
                         <Tooltip id={`tooltip-reported-sip`}>
-                          {service_request.reported_sheltered_in_place} animal{service_request.reported_sheltered_in_place > 1 ? "s are":" is"} reported (sheltered in place)
+                          {service_request.reported_sheltered_in_place} animal{service_request.reported_sheltered_in_place > 1 ? "s are":" is"} reported (sip requested)
                         </Tooltip>
                       }
                     >

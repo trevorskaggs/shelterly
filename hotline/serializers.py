@@ -105,21 +105,21 @@ class SimpleServiceRequestSerializer(BarebonesServiceRequestSerializer):
         except AttributeError:
             return obj.animal_set.filter(status='REPORTED').count()
 
-    # Custom field for determining if an SR contains REPORTED animals.
+    # Custom field for determining if an SR contains REPORTED (EVAC REQUESTED) animals.
     def get_reported_evac(self, obj):
         # Performs list comp. on prefetched queryset of animals for this SR to avoid hitting db again.
         try:
-            return len([animal for animal in obj.animals if animal.status == 'REPORTED (EVACUATION)'])
+            return len([animal for animal in obj.animals if animal.status == 'REPORTED (EVAC REQUESTED)'])
         except AttributeError:
-            return obj.animal_set.filter(status='REPORTED (EVACUATION)').count()
+            return obj.animal_set.filter(status='REPORTED (EVAC REQUESTED)').count()
 
-    # Custom field for determining that count of REPORTED (SHELTERED IN PLACE) animals.
+    # Custom field for determining that count of REPORTED (SIP REQUESTED) animals.
     def get_reported_sheltered_in_place(self, obj):
         # Performs list comp. on prefetched queryset of animals for this SR to avoid hitting db again.
         try:
-            return len([animal for animal in obj.animals if animal.status == 'REPORTED (SHELTERED IN PLACE)'])
+            return len([animal for animal in obj.animals if animal.status == 'REPORTED (SIP REQUESTED)'])
         except AttributeError:
-            return obj.animal_set.filter(status='REPORTED (SHELTERED IN PLACE)').count()
+            return obj.animal_set.filter(status='REPORTED (SIP REQUESTED)').count()
 
     # Custom field for determining that count of SHELTERED IN PLACE animals.
     def get_sheltered_in_place(self, obj):
