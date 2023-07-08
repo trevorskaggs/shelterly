@@ -1,5 +1,6 @@
 import moment from 'moment';
 import ShelterlyPDF from '../utils/pdf';
+import { capitalize } from '../utils/formatString';
 import { priorityChoices, DATE_FORMAT } from '../constants';
 import { statusChoices } from '../animals/constants';
 import { buildAnimalCountList } from '../animals/Utils';
@@ -24,60 +25,81 @@ const buildDispatchResolutionsDoc = (drs = []) => {
     }
 
     // draw team section
-    pdf.drawSectionHeader({ text: data.team_object.name, hRule: false });
+    pdf.drawSectionHeader({ text: data.team_object.name, hRule: false, fontSize: 12 });
+    pdf.drawPad(10)
+    pdf.setDocumentFontSize({ size: 10 });
     pdf.drawTextList({
       labels: data.team && data.team_object.team_member_objects.map(team_member => (
         `${team_member.first_name} ${team_member.last_name} ${team_member.display_phone ? `${team_member.display_phone}` : ''}`
-      ))
+      )),
+      labelMarginTop: -10
     });
 
-    pdf.drawPad();
+    // reset document font size
+    pdf.setDocumentFontSize();
+
+    pdf.drawPad(10);
 
     // summary page
-    data.assigned_requests.forEach((assigned_request, index) => {
+    data.assigned_requests.forEach((assigned_request) => {
       // service request priority
       const srPriority = priorityChoices.find(({ value }) => value === (assigned_request.service_request_object.priority || 2))
 
       // Summary page
       pdf.drawSectionHeader({
-        text: `SR#${assigned_request.service_request_object.id} - ${srPriority.label} Priority`
+        text: `SR#${assigned_request.service_request_object.id} - ${srPriority.label} Priority`,
+        fontSize: 12
       });
 
-      pdf.drawPad(20);
+      pdf.drawPad(15);
 
       // status
       pdf.drawWrappedText({
         text: `Status: ${assigned_request.service_request_object.status.toUpperCase()}`,
+        fontSize: 10
       });
 
       // summary address
-      pdf.drawSectionHeader({ text: 'Service Request Address:', fontSize: 14 });
+      pdf.drawSectionHeader({ text: 'Service Request Address:', fontSize: 12 });
+      pdf.drawPad(15);
 
-      const [addressLine1, ...addressLine2] = assigned_request.service_request_object.full_address.split(',')
+      const [addressLine1, ...addressLine2] = assigned_request.service_request_object.full_address.split(',');
+
+      pdf.setDocumentFontSize({ size: 10 });
 
       pdf.drawTextList({
         labels: [
           addressLine1,
           addressLine2.join(',')?.trim?.()
         ],
-        bottomPadding: 12
+        bottomPadding: 12,
+        labelMarginTop: -10
       })
+
+      // reset document font size
+      pdf.setDocumentFontSize();
 
       // lat/lng
       pdf.drawWrappedText({
-        text: `Latitude: ${assigned_request.service_request_object.latitude},  Longitude: ${assigned_request.service_request_object.longitude}`
+        text: `Latitude: ${assigned_request.service_request_object.latitude},  Longitude: ${assigned_request.service_request_object.longitude}`,
+        fontSize: 10
       });
 
       // Animal count
-      pdf.drawSectionHeader({ text: 'Animals', fontSize: 14 });
+      pdf.drawSectionHeader({ text: 'Animals', fontSize: 12 });
 
       const assignedRequestAnimals =
         assigned_request.service_request_object.animals.filter((animal) =>
           Object.keys(assigned_request.animals).includes(String(animal.id))
         );
-      buildAnimalCountList(pdf, assignedRequestAnimals);
 
-      pdf.drawPad(30);
+      pdf.setDocumentFontSize({ size: 10 });
+      buildAnimalCountList(pdf, assignedRequestAnimals, { countLabelMarginTop: -10 });
+
+      // rest document font size
+      pdf.setDocumentFontSize();
+
+      pdf.drawPad(15);
     });
 
     // end of summary page break
@@ -92,13 +114,14 @@ const buildDispatchResolutionsDoc = (drs = []) => {
       // SR Header
       pdf.drawSectionHeader({
         text: `SR#${assigned_request.service_request_object.id} - ${assigned_request.service_request_object.full_address}`,
-        hRule: false
+        hRule: false,
+        fontSize: 14
       });
-      pdf.drawPad(20);
+      pdf.drawPad(15);
       pdf.drawWrappedText({
         text: `Latitude: ${assigned_request.service_request_object.latitude},  Longitude: ${assigned_request.service_request_object.longitude}`
       });
-      pdf.drawPad(-30);
+      pdf.drawPad(-45);
       pdf.drawCheckboxList({
         labels: [''],
         listStyle: 'inline',
@@ -114,11 +137,19 @@ const buildDispatchResolutionsDoc = (drs = []) => {
 
       // owners
       if (assigned_request.service_request_object.owners.length) {
-        assigned_request.service_request_object.owner_objects.forEach((owner) => (
+        assigned_request.service_request_object.owner_objects.forEach((owner) => {
           pdf.drawWrappedText({
-            text: `Owner: ${owner.first_name} ${owner.last_name} ${owner.display_phone}`
-          })
-        ));
+            text: `Owner: ${owner.first_name} ${owner.last_name} ${
+              owner.display_phone
+            } ${
+              owner.display_alt_phone ? ` / ${owner.display_alt_phone}` : ""
+            }`,
+          });
+
+          if (!!owner.comments) {
+            pdf.drawWrappedText({ text: `Comments / Alternate Contact: ${owner.comments}` });
+          }
+        });
       }
 
       // reporter
@@ -142,6 +173,14 @@ const buildDispatchResolutionsDoc = (drs = []) => {
       pdf.drawWrappedText({
         text: `Turn Around: ${assigned_request.service_request_object.turn_around ? 'Yes' : 'No'}`
       });
+
+      // forced entry
+      pdf.drawWrappedText({
+        text: `Forced Entry: ${assigned_request.visit_note?.forced_entry ? 'Yes' : 'No'}`
+      });
+
+      // key at staging (key provided)
+      pdf.drawWrappedText({ text: `Key at Staging: ${assigned_request.service_request_object.key_provided ? 'Yes': 'No'}`})
 
       // animals
       pdf.drawSectionHeader({
@@ -200,20 +239,44 @@ const buildDispatchResolutionsDoc = (drs = []) => {
           bottomPadding: 0
         });
 
-        pdf.drawWrappedText({
-          text: `Primary Color: ${animal.pcolor || 'N/A'}, Secondary Color: ${animal.scolor || 'N/A'}`,
-          linePadding: 10
+        pdf.setDocumentFontSize({ size: 10 });
+
+        pdf.drawTextList({
+          labels: [
+            `Sex: ${animal.sex || 'N/A'}`,
+            `Fixed: ${capitalize(animal.fixed)}`,
+            `ACO Required: ${capitalize(animal.aco_required)}`,
+            `Aggressive: ${capitalize(animal.aggressive)}`,
+            `Confined: ${capitalize(animal.confined)}`,
+            `Injured: ${capitalize(animal.injured)}`,
+            `Last Seen: ${animal.last_seen ? moment(animal.last_seen).format('MMMM Do YYYY HH:mm') : 'Unknown'}`,
+            `Age: ${capitalize(animal.age) || 'N/A'}`,
+            `Size: ${capitalize(animal.size) || 'N/A'}`,
+            `Primary Color: ${capitalize(animal.pcolor) || 'N/A'}`,
+            `Secondary Color: ${capitalize(animal.scolor) || 'N/A'}`
+          ],
+          listStyle: 'grid',
+          labelMarginTop: -4
         });
+
+        // reset document font size
+        pdf.setDocumentFontSize();
+
+        pdf.drawPad(13);
+
         pdf.drawWrappedText({
           text: `Description: ${animal.color_notes || 'N/A'}`,
-          bottomPadding: 0
-        });
-        pdf.drawWrappedText({
-          text: `Behavior: ${animal.behavior_notes || 'N/A'}`,
           bottomPadding: 0,
+          fontSize: 10
         });
         pdf.drawWrappedText({
-          text: `Medical: ${animal.medical_notes || 'N/A'}`
+          text: `Animal Notes: ${animal.behavior_notes || 'N/A'}`,
+          bottomPadding: 0,
+          fontSize: 10
+        });
+        pdf.drawWrappedText({
+          text: `Medical: ${animal.medical_notes || 'N/A'}`,
+          fontSize: 10
         });
 
         lastYPosAfterDraw = pdf.getLastYPositionWithBuffer({ buffer: 0 });
@@ -253,9 +316,20 @@ const buildDispatchResolutionsDoc = (drs = []) => {
         labels: [
           'Followup Date:  ________/________/________________'
         ],
-        bottomPadding: 16
+        bottomPadding: 26
       })
-      pdf.drawTextArea({ label: 'Visit Notes:', rows: 4 });
+      pdf.drawWrappedText({
+        text: 'Visit Notes:'
+      });
+      if (assigned_request.visit_note?.notes) {
+        pdf.drawWrappedText({
+          text: `${
+            (assigned_request.visit_note?.notes && assigned_request.visit_note?.notes) || ''
+          }`
+        });
+      }
+      pdf.drawPad(-15);
+      pdf.drawTextArea({ rows: 4 });
       pdf.drawCheckBoxLine({ label: 'Forced Entry' });
 
       // owners contacted
@@ -266,8 +340,30 @@ const buildDispatchResolutionsDoc = (drs = []) => {
 
         assigned_request.service_request_object.owner_objects.forEach((owner) => {
           pdf.drawCheckBoxLine({ label: `Owner: ${owner.first_name} ${owner.last_name} ${owner.display_phone}` });
-          pdf.drawTextWithLine({ label: 'Owner Contact Time:', xOffset: 150 });
-          pdf.drawTextArea({ label: 'Owner Contact Notes:' });
+          
+          owner.owner_contacts?.forEach((owner_contacted) => {
+            pdf.drawWrappedText({
+              text: `Owner Contact Time: ${
+                owner_contacted.owner_contact_time
+                  ? moment(owner_contacted.owner_contact_time).format(
+                      'MMMM Do YYYY HH:mm'
+                    )
+                  : 'UNKNOWN'
+              }`,
+            });
+            pdf.drawWrappedText({
+              text: `Owner Contact Notes: ${owner_contacted.owner_contact_note}`
+            });
+            pdf.drawHRule();
+          });
+
+          pdf.drawPad(10);
+          pdf.drawTextWithLine({ label: 'Owner Contact Time:', xOffset: 125 });
+          pdf.drawWrappedText({
+            text: 'Owner Contact Notes:'
+          });
+          pdf.drawPad(-15);
+          pdf.drawTextArea({ rows: 3 });
         });
       }
     });

@@ -485,7 +485,13 @@ class ShelterlyPDF {
     this.#documentLastYPosition = yPosition + bottomPadding;
   }
 
-  drawWrappedText({ text, linePadding = 0, bottomPadding = 0 }) {
+  drawWrappedText({
+    text,
+    linePadding = 0,
+    bottomPadding = 0,
+    fontSize = this.#documentFontSize
+  }) {
+    this.setDocumentFontSize({ size: fontSize });
     const splitLines = this.#jsPDF.splitTextToSize(text, this.pageWidth - (this.#documentRightMargin * 2));
     if (splitLines.length > 1) {
       splitLines.forEach((splitText) => {
@@ -493,15 +499,18 @@ class ShelterlyPDF {
           text: splitText,
           bottomPadding: linePadding,
           topPadding: linePadding
-        })
-      })
+        });
+      });
     } else {
       this.drawSingleLineText({
         text,
         bottomPadding: bottomPadding,
         topPadding: linePadding
-      })
+      });
     }
+
+    // reset font document font size
+    this.setDocumentFontSize();
 
     // set last y position
     this.#documentLastYPosition = this.#documentLastYPosition + bottomPadding;
@@ -534,11 +543,14 @@ class ShelterlyPDF {
   }) {
     const yPosition = this.beforeDraw({ yPosition: this.getLastYPositionWithBuffer() });
 
-    this.#jsPDF.text(
-      label,
-      this.documentLeftMargin,
-      yPosition
-    );
+    if (!!label) {
+      this.#jsPDF.text(
+        label,
+        this.documentLeftMargin,
+        yPosition
+      );
+    }
+    
 
     // set last y position
     this.#documentLastYPosition = yPosition;
@@ -581,8 +593,7 @@ class ShelterlyPDF {
       marginTop = 0,
       inlineRightMargin = 0,
       inlineOffset = 0,
-      withLines = false,
-      lineXOffset = 0
+      withLines = false
     }, i) => {
       const yPosition = this.getLastYPositionWithBuffer() + marginTop;
       const textWidth = this.#jsPDF.getStringUnitWidth(label) * this.#documentFontSize;
@@ -785,14 +796,16 @@ class ShelterlyPDF {
    * @param {object} param0
    * @param {number} param0.pageNumber
    * @param {number} param0.pageCount
+   * @param {number} [param0.marginBottom=30] space between page number and bottom edge of page
    */
   drawPageNumbers({
     pageNumber,
-    pageCount
+    pageCount,
+    marginBottom = 30
   }) {
     const jsPdf = this.#jsPDF;
     const { width: pageWidth, height: pageHeight } = jsPdf.internal.pageSize;
-    jsPdf.text('Page ' + String(pageNumber) + ' of ' + String(pageCount), pageWidth / 2, pageHeight - 15, {
+    jsPdf.text('Page ' + String(pageNumber) + ' of ' + String(pageCount), pageWidth / 2, pageHeight - marginBottom, {
         align: 'center'
       });
   }

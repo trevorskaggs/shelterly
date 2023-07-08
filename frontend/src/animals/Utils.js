@@ -147,7 +147,9 @@ async function buildAnimalCareScheduleContent(pdf, animals) {
   return pdf;
 }
 
-function buildAnimalCountList(pdf, animals) {
+function buildAnimalCountList(pdf, animals, {
+  countLabelMarginTo = 0
+} = {}) {
   const animalCounts = [];
   animals
     .forEach((animal) => {
@@ -164,7 +166,8 @@ function buildAnimalCountList(pdf, animals) {
       labels: animalCounts.map(([species, count]) => (
         // capitalize the species
         `${species.replace(/(^.)/, m => m.toUpperCase())}: ${count}`
-      ))
+      )),
+      labelMarginTop: countLabelMarginTo
     });
 }
 
