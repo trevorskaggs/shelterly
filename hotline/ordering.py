@@ -8,7 +8,7 @@ class MyCustomOrdering(OrderingFilter):
 
         # If we are retrieving SRs for the map, order by priority and animal count.
         if map_ordering:
-            ordering = ['priority', '-animal_count']
+            ordering = ['priority', '-id']
             return queryset.order_by(*ordering)
 
         return queryset

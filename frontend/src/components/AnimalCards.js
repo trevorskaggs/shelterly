@@ -70,14 +70,14 @@ function AnimalCards(props) {
                                   overlay={<Tooltip id={`tooltip-reported`}>REPORTED</Tooltip>}>
                       <FontAwesomeIcon className="animal-icon" icon={faExclamationCircle} inverse/>
                   </OverlayTrigger> : ""}
-                {animal.status === "REPORTED (EVACUATION)" ?
+                {animal.status === "REPORTED (EVAC REQUESTED)" ?
                   <OverlayTrigger key={"reported-evac"} placement="top"
-                                  overlay={<Tooltip id={`tooltip-reported-evac`}>REPORTED (EVACUATION)</Tooltip>}>
+                                  overlay={<Tooltip id={`tooltip-reported-evac`}>REPORTED (EVAC REQUESTED)</Tooltip>}>
                       <FontAwesomeIcon className="animal-icon" icon={faCircleBolt} inverse/>
                   </OverlayTrigger> : ""}
-                {animal.status === "REPORTED (SHELTERED IN PLACE)" ?
+                {animal.status === "REPORTED (SIP REQUESTED)" ?
                   <OverlayTrigger key={"reported-sip"} placement="top"
-                                  overlay={<Tooltip id={`tooltip-reported-sip`}>REPORTED (SHELTERED IN PLACE)</Tooltip>}>
+                                  overlay={<Tooltip id={`tooltip-reported-sip`}>REPORTED (SIP REQUESTED)</Tooltip>}>
                       <FontAwesomeIcon className="animal-icon" icon={faExclamationCircle} inverse/>
                   </OverlayTrigger> : ""}
                 {animal.status === "UNABLE TO LOCATE" ?
