@@ -187,11 +187,13 @@ const buildDispatchResolutionsDoc = (drs = []) => {
         text: 'Animals'
       });
 
-      const dispatchStatusHeaders = [{
-        value: '', label: 'ID - Species\nName'
-      }].concat(statusChoices.filter((choice) => !choice.value.includes('REPORTED')));
+      function drawAnimalHeader({
+        firstLabel = 'ID - Species\nName'
+      } = {}) {
+        const dispatchStatusHeaders = [{
+          value: '', label: firstLabel
+        }].concat(statusChoices.filter((choice) => !choice.value.includes('REPORTED')));
 
-      function drawAnimalHeader() {
         pdf.drawTextList({
           labels: dispatchStatusHeaders.map((choice) => {
             if (choice.label.indexOf('SIP') > -1) {
@@ -213,30 +215,36 @@ const buildDispatchResolutionsDoc = (drs = []) => {
         pdf.drawHRule();
       }
 
-      // draw the animals header before the animals table
-      pdf.setDocumentFontSize({ size: 10 });
-      drawAnimalHeader();
-      
-
-      // keep the last y position after a row was drawn
-      let lastYPosAfterDraw = pdf.getLastYPositionWithBuffer({ buffer: 0 });
       assigned_request.service_request_object.animals.filter(animal => Object.keys(assigned_request.animals).includes(String(animal.id))).forEach((animal) => {
-        // grab the last y position before we draw a row
-        const lastYPosBeforeDraw = pdf.getLastYPositionWithBuffer({ buffer: 0 });
+        // if very little page is left that would cause a weird break between the header, manually page break now
+        const estimatedReleaseSectionHeight = 106;
+        if (pdf.remainderPageHeight <= estimatedReleaseSectionHeight) {
+          pdf.drawPageBreak();
+        }
+        // draw the animals header in each row
+        pdf.setDocumentFontSize({ size: 11 });
+        drawAnimalHeader({
+          firstLabel: `***A#${
+            animal.id
+          } - ${animal.species[0].toUpperCase()}${animal.species.slice(1)}\n${
+            animal.name || "Unknown"
+          }***`,
+        });
 
         const animalRow = [{
-          label: `A#${animal.id} - ${animal.species[0].toUpperCase()}${animal.species.slice(1)}\n${animal.name || 'Unknown'}\n${animal.status}`,
+          label: `\n\n${animal.status}`,
           marginTop: -7
         }].concat(Array(6).fill({
           type: 'checkbox',
           label: '',
-          size: 20
+          size: 20,
+          marginTop: -7
         }));
 
         pdf.drawList({
           listItems: animalRow,
           listStyle: 'inline',
-          bottomPadding: 0
+          bottomPadding: 10
         });
 
         pdf.setDocumentFontSize({ size: 10 });
@@ -278,14 +286,6 @@ const buildDispatchResolutionsDoc = (drs = []) => {
           text: `Medical Notes: ${animal.medical_notes || 'N/A'}`,
           fontSize: 10
         });
-
-        lastYPosAfterDraw = pdf.getLastYPositionWithBuffer({ buffer: 0 });
-
-        // If after draw y position is less than before draw, that means there was a page break.
-        // Draw the animal header again.
-        if (lastYPosAfterDraw < lastYPosBeforeDraw) {
-          drawAnimalHeader();
-        }
       });
 
       pdf.setDocumentFontSize();
