@@ -275,7 +275,7 @@ const buildDispatchResolutionsDoc = (drs = []) => {
           fontSize: 10
         });
         pdf.drawWrappedText({
-          text: `Medical: ${animal.medical_notes || 'N/A'}`,
+          text: `Medical Notes: ${animal.medical_notes || 'N/A'}`,
           fontSize: 10
         });
 
