@@ -88,7 +88,6 @@ const buildOwnersContent = (pdf, owners, animalsOverride) => {
       const estimatedAnimalHeight = 162 // this is a magic number, it should change if we add or remove properties to render for animals
       if (pdf.remainderPageHeight <= estimatedAnimalHeight) {
         pdf.drawPageBreak();
-        ownerPageCount++;
         drawAnimalHeader();
         lastYPosBeforeDraw = pdf.getLastYPositionWithBuffer({ buffer: 0 });
         ownerPageCount++;
@@ -141,11 +140,8 @@ const buildOwnersContent = (pdf, owners, animalsOverride) => {
       }
     });
 
-    const estimatedSectionHeight = 529;
-    if (pdf.remainderPageHeight <= estimatedSectionHeight) {
-      pdf.drawPageBreak();
-      ownerPageCount++;
-    }
+    pdf.drawPageBreak();
+    ownerPageCount++;
 
     // Draw liability form
     pdf.drawSectionHeader({
