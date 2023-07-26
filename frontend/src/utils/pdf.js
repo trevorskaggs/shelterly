@@ -607,7 +607,11 @@ class ShelterlyPDF {
         this.#jsPDF.rect(leftMargin, yPosition, size, size, 'FD');
       }
 
-      this.#jsPDF.text(label, this.#documentLeftMargin + size + (size * 0.25), yPosition + 15)
+      this.textWithStyle({
+        text: label,
+        xPosition: this.#documentLeftMargin + size + (size * 0.25),
+        yPosition: yPosition + 15
+      })
 
       if (listStyle === 'block') {
         this.#documentLastYPosition = this.beforeDraw({ yPosition }) + size;
