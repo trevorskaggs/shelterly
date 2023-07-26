@@ -216,7 +216,9 @@ const buildDispatchResolutionsDoc = (drs = []) => {
       // draw the animals header before the animals table
       pdf.setDocumentFontSize({ size: 10 });
       drawAnimalHeader();
-      
+
+      // reset document font size
+      pdf.setDocumentFontSize();
 
       // keep the last y position after a row was drawn
       let lastYPosAfterDraw = pdf.getLastYPositionWithBuffer({ buffer: 0 });
@@ -318,18 +320,27 @@ const buildDispatchResolutionsDoc = (drs = []) => {
         ],
         bottomPadding: 26
       })
-      pdf.drawWrappedText({
-        text: 'Visit Notes:'
-      });
       if (assigned_request.visit_note?.notes) {
         pdf.drawWrappedText({
-          text: `${
+          text: `Visit Notes: ${
             (assigned_request.visit_note?.notes && assigned_request.visit_note?.notes) || ''
           }`
         });
       }
-      pdf.drawPad(-15);
-      pdf.drawTextArea({ rows: 4 });
+      else {
+        pdf.drawPad(-15);
+        pdf.drawTextArea({ rows: 4 });
+      }
+
+      if (assigned_request.visit_notes.length > 0) {
+        assigned_request.visit_notes.forEach((visit_note) => {
+          pdf.drawWrappedText({
+            text: `Previous Visit Notes from ${moment(visit_note.date_completed).format(
+              'MMMM Do'
+            )}: ${(visit_note?.notes && visit_note?.notes) || ''}`
+          });
+        })
+      }
       pdf.drawCheckBoxLine({ label: 'Forced Entry' });
 
       // owners contacted
