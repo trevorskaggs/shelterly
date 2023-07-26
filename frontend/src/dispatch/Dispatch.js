@@ -11,7 +11,7 @@ import {
 import { faQuestionCircle as faQuestionCircleDuo, faChevronCircleDown, faChevronCircleUp } from '@fortawesome/pro-duotone-svg-icons';
 import { faHomeAlt as faHomeAltReg } from '@fortawesome/pro-regular-svg-icons';
 import { faCircleBolt, faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
-import Map, { countMatches, prettyText, reportedMarkerIcon, reportedEvacMarkerIcon, reportedSIPMarkerIcon, SIPMarkerIcon, UTLMarkerIcon, finishedMarkerIcon } from "../components/Map";
+import Map, { prettyText, reportedMarkerIcon, reportedEvacMarkerIcon, reportedSIPMarkerIcon, SIPMarkerIcon, UTLMarkerIcon, finishedMarkerIcon } from "../components/Map";
 import Header from "../components/Header";
 import Scrollbar from '../components/Scrollbars';
 import { SystemErrorContext } from '../components/SystemError';
@@ -25,6 +25,30 @@ function Dispatch({ incident }) {
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [showActive, setShowActive] = useState(true);
   const [showPreplanned, setShowPreplanned] = useState(true);
+
+  // Counts the number of size/species matches for a service request by status.
+const countMatches = (service_request) => {
+  var matches = {};
+  var status_matches = {'REPORTED':{}, 'SHELTERED':{}, 'REPORTED (EVAC REQUESTED)':{}, 'REPORTED (SIP REQUESTED)':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}};
+
+  service_request.animals.forEach((animal) => {
+    if (['REPORTED', 'SHELTERED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE'].indexOf(animal.status) > -1) {
+      if (!matches[[animal.species]]) {
+        matches[[animal.species]] = 1;
+      }
+      else {
+        matches[[animal.species]] += 1;
+      }
+      if (!status_matches[animal.status][[animal.species]]) {
+        status_matches[animal.status][[animal.species]] = 1;
+      }
+      else {
+        status_matches[animal.status][[animal.species]] += 1;
+      }
+    }
+  });
+  return [matches, status_matches]
+}
 
   // Hook for initializing data.
   useEffect(() => {
