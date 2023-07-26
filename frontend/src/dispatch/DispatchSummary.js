@@ -411,7 +411,7 @@ function DispatchSummary({ id, incident }) {
                   >
                     <FontAwesomeIcon icon={faCalendarDay} className="ml-1 fa-move-up" size="sm" />
                   </OverlayTrigger> : ""}
-                &nbsp;| {Object.values(assigned_request.animals).filter(animal => ['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)'].includes(animal.status)).length === 0 ? "Completed" : <span style={{textTransform:"capitalize"}}>{assigned_request.service_request_object.status}</span>} {assigned_request.visit_note ? <Moment format="[ on ]l">{assigned_request.visit_note.date_completed}</Moment> : ""}
+                &nbsp;| {Object.values(assigned_request.animals).filter(animal => ['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE'].includes(animal.status)).length === 0 ? "Completed" : <span style={{textTransform:"capitalize"}}>{assigned_request.service_request_object.status}</span>} {assigned_request.visit_note ? <Moment format="[ on ]l">{assigned_request.visit_note.date_completed}</Moment> : ""}
               </h4>
             </Card.Title>
             <hr style={{marginBottom:"7px"}}/>
