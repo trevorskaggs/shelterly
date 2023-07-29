@@ -246,7 +246,10 @@ function printAllServiceRequests(srs = []) {
 }
 
 const printSrAnimalCareSchedules  = async (animals = [], srId = 0) => {
-  const  pdf = await buildAnimalCareScheduleDoc(animals);
+  // sort animals by id
+  const sortedAnimals = [...animals].sort((a,b) => a.id - b.id);
+
+  const  pdf = await buildAnimalCareScheduleDoc(sortedAnimals);
   pdf.fileName = `Shelterly-SR-Animal-Care-Schedules-${srId.toString().padStart(3, 0)}-${moment().format(DATE_FORMAT)}`;
   return pdf.saveFile();
 };
