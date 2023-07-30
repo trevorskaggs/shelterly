@@ -550,17 +550,14 @@ function DispatchSummary({ id, incident }) {
             </ListGroup>
           </span>
           : "" }
+          {assigned_request.visit_notes.length > 0 ? <h4 className="mt-2" style={{marginBottom:"-2px"}}>Previous Visit Notes</h4> : ""}
           {assigned_request.visit_notes.map(visit_note =>
-          <span>
-            <hr/>
-            <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
-              <h4 className="mt-2" style={{marginBottom:"-2px"}}>Previous Visit Notes from <Link href={"/" + incident + "/dispatch/summary/" + visit_note.dispatch_assignment} className="text-link" style={{textDecoration:"none", color:"white"}}><Moment format="L">{visit_note.date_completed}</Moment></Link></h4>
+            <ListGroup variant="flush" style={{marginBottom:"-13px"}} key={visit_note.id}>
               <ListGroup.Item key={visit_note.id}>
-                {visit_note.notes || "No information available."}
+              <Link href={"/" + incident + "/dispatch/summary/" + visit_note.dispatch_assignment} className="text-link" style={{textDecoration:"none", color:"white"}}><Moment format="L">{visit_note.date_completed}</Moment></Link>: {visit_note.notes || "No information available."}
               </ListGroup.Item>
             </ListGroup>
-          </span>
-          )}
+          ) || "None"}
         </Card.Body>
       </Card>
     </Row>

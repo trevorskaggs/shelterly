@@ -320,25 +320,35 @@ const buildDispatchResolutionsDoc = (drs = []) => {
         ],
         bottomPadding: 26
       })
+
       if (assigned_request.visit_note?.notes) {
         pdf.drawWrappedText({
           text: `Visit Notes: ${
             (assigned_request.visit_note?.notes && assigned_request.visit_note?.notes) || ''
           }`
         });
+        pdf.drawHRule();
       }
       else {
+        pdf.drawWrappedText({
+          text: `Visit Notes:`,
+        });
         pdf.drawPad(-15);
         pdf.drawTextArea({ rows: 4 });
       }
 
       if (assigned_request.visit_notes.length > 0) {
+        pdf.drawWrappedText({
+          text: `Previous Visit Notes`,
+          fontSize: 12
+        });
         assigned_request.visit_notes.forEach((visit_note) => {
           pdf.drawWrappedText({
-            text: `Previous Visit Notes from ${moment(visit_note.date_completed).format(
+            text: `${moment(visit_note.date_completed).format(
               'MMMM Do'
-            )}: ${(visit_note?.notes && visit_note?.notes) || ''}`
+            )}: ${(visit_note?.notes && visit_note?.notes) || 'No information available.'}`
           });
+          pdf.drawHRule();
         })
       }
       pdf.drawCheckBoxLine({ label: 'Forced Entry Permission' });

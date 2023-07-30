@@ -27,23 +27,23 @@ function Dispatch({ incident }) {
   const [showPreplanned, setShowPreplanned] = useState(true);
 
   // Counts the number of size/species matches for a service request by status.
-const countMatches = (service_request) => {
+const countMatches = (animal_dict) => {
   var matches = {};
   var status_matches = {'REPORTED':{}, 'SHELTERED':{}, 'REPORTED (EVAC REQUESTED)':{}, 'REPORTED (SIP REQUESTED)':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}};
 
-  service_request.animals.forEach((animal) => {
-    if (['REPORTED', 'SHELTERED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE'].indexOf(animal.status) > -1) {
-      if (!matches[[animal.species]]) {
-        matches[[animal.species]] = 1;
+  Object.keys(animal_dict).forEach((animal) => {
+    if (['REPORTED', 'SHELTERED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE'].indexOf(animal_dict[animal]['status']) > -1) {
+      if (!matches[[animal_dict[animal]['species']]]) {
+        matches[[animal_dict[animal]['species']]] = 1;
       }
       else {
-        matches[[animal.species]] += 1;
+        matches[[animal_dict[animal]['species']]] += 1;
       }
-      if (!status_matches[animal.status][[animal.species]]) {
-        status_matches[animal.status][[animal.species]] = 1;
+      if (!status_matches[animal_dict[animal]['status']][[animal_dict[animal]['species']]]) {
+        status_matches[animal_dict[animal]['status']][[animal_dict[animal]['species']]] = 1;
       }
       else {
-        status_matches[animal.status][[animal.species]] += 1;
+        status_matches[animal_dict[animal]['status']][[animal_dict[animal]['species']]] += 1;
       }
     }
   });
@@ -73,7 +73,7 @@ const countMatches = (service_request) => {
           response.data.forEach((dispatch_assignment, index) => {
             let sr_dict = {}
             for (const assigned_request of dispatch_assignment.assigned_requests) {
-              const matches = countMatches(assigned_request.service_request_object)[0];
+              const matches = countMatches(assigned_request.animals)[0];
               sr_dict[assigned_request.service_request_object.id] = {id:assigned_request.service_request_object.id, matches:matches, latitude:assigned_request.service_request_object.latitude, longitude:assigned_request.service_request_object.longitude, full_address:assigned_request.service_request_object.full_address};
               bounds.push([assigned_request.service_request_object.latitude, assigned_request.service_request_object.longitude]);
             }
