@@ -130,7 +130,7 @@ const IncidentForm = ({ id }) => {
           .test('required-check', 'Name already in use.',
             function(value) {
               // Check against slug for dupes.
-              if (names.includes(value.trim().toLowerCase().replaceAll(' ','-').match(/[a-zA-Z0-9-]+/g)[0])) {
+              if (data.name !== value && names.includes(value.trim().toLowerCase().replaceAll(' ','-').match(/[a-zA-Z0-9-]+/g)[0])) {
                 return false;
               }
               return true;
