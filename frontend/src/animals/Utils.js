@@ -194,7 +194,10 @@ async function printAnimalCareSchedule (animal = {}) {
 };
 
 async function printAllAnimalCareSchedules (animals = []) {
-  const  pdf = await buildAnimalCareScheduleDoc(animals);
+  // sort animals by id
+  const sortedAnimals = [...animals].sort((a,b) => a.id - b.id);
+
+  const  pdf = await buildAnimalCareScheduleDoc(sortedAnimals);
   pdf.fileName = `Shelterly-Animal-Care-Schedules-${moment().format(DATE_FORMAT)}`;
   return pdf.saveFile();
 }

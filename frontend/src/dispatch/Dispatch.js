@@ -11,7 +11,7 @@ import {
 import { faQuestionCircle as faQuestionCircleDuo, faChevronCircleDown, faChevronCircleUp } from '@fortawesome/pro-duotone-svg-icons';
 import { faHomeAlt as faHomeAltReg } from '@fortawesome/pro-regular-svg-icons';
 import { faCircleBolt, faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
-import Map, { countMatches, prettyText, reportedMarkerIcon, reportedEvacMarkerIcon, reportedSIPMarkerIcon, SIPMarkerIcon, UTLMarkerIcon, finishedMarkerIcon } from "../components/Map";
+import Map, { prettyText, reportedMarkerIcon, reportedEvacMarkerIcon, reportedSIPMarkerIcon, SIPMarkerIcon, UTLMarkerIcon, finishedMarkerIcon } from "../components/Map";
 import Header from "../components/Header";
 import Scrollbar from '../components/Scrollbars';
 import { SystemErrorContext } from '../components/SystemError';
@@ -25,6 +25,30 @@ function Dispatch({ incident }) {
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [showActive, setShowActive] = useState(true);
   const [showPreplanned, setShowPreplanned] = useState(true);
+
+  // Counts the number of size/species matches for a service request by status.
+const countMatches = (animal_dict) => {
+  var matches = {};
+  var status_matches = {'REPORTED':{}, 'SHELTERED':{}, 'REPORTED (EVAC REQUESTED)':{}, 'REPORTED (SIP REQUESTED)':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}};
+
+  Object.keys(animal_dict).forEach((animal) => {
+    if (['REPORTED', 'SHELTERED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE'].indexOf(animal_dict[animal]['status']) > -1) {
+      if (!matches[[animal_dict[animal]['species']]]) {
+        matches[[animal_dict[animal]['species']]] = 1;
+      }
+      else {
+        matches[[animal_dict[animal]['species']]] += 1;
+      }
+      if (!status_matches[animal_dict[animal]['status']][[animal_dict[animal]['species']]]) {
+        status_matches[animal_dict[animal]['status']][[animal_dict[animal]['species']]] = 1;
+      }
+      else {
+        status_matches[animal_dict[animal]['status']][[animal_dict[animal]['species']]] += 1;
+      }
+    }
+  });
+  return [matches, status_matches]
+}
 
   // Hook for initializing data.
   useEffect(() => {
@@ -49,7 +73,7 @@ function Dispatch({ incident }) {
           response.data.forEach((dispatch_assignment, index) => {
             let sr_dict = {}
             for (const assigned_request of dispatch_assignment.assigned_requests) {
-              const matches = countMatches(assigned_request.service_request_object)[0];
+              const matches = countMatches(assigned_request.animals)[0];
               sr_dict[assigned_request.service_request_object.id] = {id:assigned_request.service_request_object.id, matches:matches, latitude:assigned_request.service_request_object.latitude, longitude:assigned_request.service_request_object.longitude, full_address:assigned_request.service_request_object.full_address};
               bounds.push([assigned_request.service_request_object.latitude, assigned_request.service_request_object.longitude]);
             }

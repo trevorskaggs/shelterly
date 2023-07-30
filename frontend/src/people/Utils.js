@@ -297,7 +297,10 @@ async function printAllOwnersDetails(owners = []) {
 }
 
 const printOwnerAnimalCareSchedules  = async (animals = [], ownerId = 0) => {
-  const  pdf = await buildAnimalCareScheduleDoc(animals);
+  // sort animals by id
+  const sortedAnimals = [...animals].sort((a,b) => a.id - b.id);
+
+  const  pdf = await buildAnimalCareScheduleDoc(sortedAnimals);
   pdf.fileName = `Shelterly-Owner-Animal-Care-Schedules-${ownerId.toString().padStart(4, 0)}-${moment().format(DATE_FORMAT)}`;
   return pdf.saveFile();
 };

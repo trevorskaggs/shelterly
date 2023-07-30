@@ -115,9 +115,7 @@ function DispatchSummary({ id, incident }) {
             responseType: 'blob',
         }).then(res => {
             fileDownload(res.data, 'DAR-' + data.id + '.geojson');
-            console.log(res);
         }).catch(err => {
-            console.log(err);
         })
   }
 
@@ -413,7 +411,7 @@ function DispatchSummary({ id, incident }) {
                   >
                     <FontAwesomeIcon icon={faCalendarDay} className="ml-1 fa-move-up" size="sm" />
                   </OverlayTrigger> : ""}
-                &nbsp;| {Object.values(assigned_request.animals).filter(animal => ['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)'].includes(animal.status)).length === 0 ? "Completed" : <span style={{textTransform:"capitalize"}}>{assigned_request.service_request_object.status}</span>} {assigned_request.visit_note ? <Moment format="[ on ]l">{assigned_request.visit_note.date_completed}</Moment> : ""}
+                &nbsp;| {Object.values(assigned_request.animals).filter(animal => ['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE'].includes(animal.status)).length === 0 ? "Completed" : <span style={{textTransform:"capitalize"}}>{assigned_request.service_request_object.status}</span>} {assigned_request.visit_note ? <Moment format="[ on ]l">{assigned_request.visit_note.date_completed}</Moment> : ""}
               </h4>
             </Card.Title>
             <hr style={{marginBottom:"7px"}}/>
@@ -541,28 +539,25 @@ function DispatchSummary({ id, incident }) {
               </ListGroup.Item>
             ))}
           </ListGroup>
-          {assigned_request.previous_visit ?
-          <span>
-            <hr/>
-            <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
-              <h4 className="mt-2" style={{marginBottom:"-2px"}}>Previous Visit: <Link href={"/" + incident + "/dispatch/summary/" + assigned_request.previous_visit.dispatch_assignment} className="text-link" style={{textDecoration:"none", color:"white"}}><Moment format="L">{assigned_request.previous_visit.date_completed}</Moment></Link></h4>
-                <ListGroup.Item>
-                  {assigned_request.previous_visit.notes || "No information available."}
-                </ListGroup.Item>
-            </ListGroup>
-          </span>
-          : "" }
           {assigned_request.visit_note ?
           <span>
             <hr/>
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
               <h4 className="mt-2" style={{marginBottom:"-2px"}}>Visit Notes</h4>
-              <ListGroup.Item key={assigned_request.visit_note.id}>
-                {assigned_request.visit_note.notes || "No information available."}
-              </ListGroup.Item>
+                <ListGroup.Item>
+                  {assigned_request.visit_note.notes || "No information available."}
+                </ListGroup.Item>
             </ListGroup>
           </span>
-          : ""}
+          : "" }
+          {assigned_request.visit_notes.length > 0 ? <h4 className="mt-2" style={{marginBottom:"-2px"}}>Previous Visit Notes</h4> : ""}
+          {assigned_request.visit_notes.map(visit_note =>
+            <ListGroup variant="flush" style={{marginBottom:"-13px"}} key={visit_note.id}>
+              <ListGroup.Item key={visit_note.id}>
+              <Link href={"/" + incident + "/dispatch/summary/" + visit_note.dispatch_assignment} className="text-link" style={{textDecoration:"none", color:"white"}}><Moment format="L">{visit_note.date_completed}</Moment></Link>: {visit_note.notes || "No information available."}
+              </ListGroup.Item>
+            </ListGroup>
+          ) || "None"}
         </Card.Body>
       </Card>
     </Row>

@@ -63,13 +63,13 @@ class AssignedRequestDispatchSerializer(serializers.ModelSerializer):
     service_request_object = DispatchServiceRequestSerializer(source='service_request', required=False, read_only=True)
     visit_note = VisitNoteSerializer(required=False, read_only=True)
     owner_contact = OwnerContactSerializer(required=False, read_only=True)
-    previous_visit = serializers.SerializerMethodField()
+    visit_notes = serializers.SerializerMethodField()
 
-    def get_previous_visit(self, obj):
+    def get_visit_notes(self, obj):
         #TODO: this triggers one request per SR
         if VisitNote.objects.filter(assigned_request__service_request=obj.service_request).exclude(assigned_request=obj).exists():
-            return VisitNoteSerializer(VisitNote.objects.filter(assigned_request__service_request=obj.service_request).exclude(assigned_request=obj).latest('date_completed')).data
-        return None
+            return VisitNoteSerializer(VisitNote.objects.filter(assigned_request__service_request=obj.service_request).exclude(assigned_request=obj), many=True).data
+        return []
 
     class Meta:
         model = AssignedRequest

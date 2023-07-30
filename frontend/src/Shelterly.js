@@ -19,13 +19,13 @@ function Shelterly() {
 
   const path = window.location.pathname;
 
-  const style = state.user && path !== '/' && !path.includes('/incident') && !path.includes('/reset_password') ? {position:"absolute", marginLeft:"335px"} : {position:"absolute", maxWidth:"100%"};
+  const style = state.user && path !== '/' && !path.includes('/incident/') && !path.includes('/reset_password') ? {position:"absolute", marginLeft:"335px"} : {position:"absolute", maxWidth:"100%"};
 
   return (
     <ThemeProvider theme={theme}>
       <Container fluid>
         <Row>
-          {state.user && path !== '/' && !path.includes('/incident') && !path.includes('/reset_password') ?
+          {state.user && path !== '/' && !path.includes('/incident/') && !path.includes('/reset_password') ?
           <span>
             <Sidebar state={state} dispatch={dispatch} removeCookie={removeCookie} />
           </span>

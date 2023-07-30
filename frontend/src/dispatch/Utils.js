@@ -176,7 +176,7 @@ const buildDispatchResolutionsDoc = (drs = []) => {
 
       // forced entry
       pdf.drawWrappedText({
-        text: `Forced Entry: ${assigned_request.visit_note?.forced_entry ? 'Yes' : 'No'}`
+        text: `Forced Entry Permission: ${assigned_request.visit_note?.forced_entry ? 'Yes' : 'No'}`
       });
 
       // key at staging (key provided)
@@ -215,6 +215,8 @@ const buildDispatchResolutionsDoc = (drs = []) => {
         pdf.drawHRule();
       }
 
+      pdf.setDocumentFontSize();
+
       assigned_request.service_request_object.animals.filter(animal => Object.keys(assigned_request.animals).includes(String(animal.id))).forEach((animal) => {
         // if very little page is left that would cause a weird break between the header, manually page break now
         const estimatedReleaseSectionHeight = 106;
@@ -244,7 +246,7 @@ const buildDispatchResolutionsDoc = (drs = []) => {
         pdf.drawList({
           listItems: animalRow,
           listStyle: 'inline',
-          bottomPadding: 10
+          bottomPadding: 5
         });
 
         pdf.setDocumentFontSize({ size: 10 });
@@ -318,19 +320,38 @@ const buildDispatchResolutionsDoc = (drs = []) => {
         ],
         bottomPadding: 26
       })
-      pdf.drawWrappedText({
-        text: 'Visit Notes:'
-      });
+
       if (assigned_request.visit_note?.notes) {
         pdf.drawWrappedText({
-          text: `${
+          text: `Visit Notes: ${
             (assigned_request.visit_note?.notes && assigned_request.visit_note?.notes) || ''
           }`
         });
+        pdf.drawHRule();
       }
-      pdf.drawPad(-15);
-      pdf.drawTextArea({ rows: 4 });
-      pdf.drawCheckBoxLine({ label: 'Forced Entry' });
+      else {
+        pdf.drawWrappedText({
+          text: `Visit Notes:`,
+        });
+        pdf.drawPad(-15);
+        pdf.drawTextArea({ rows: 4 });
+      }
+
+      if (assigned_request.visit_notes.length > 0) {
+        pdf.drawWrappedText({
+          text: `Previous Visit Notes`,
+          fontSize: 12
+        });
+        assigned_request.visit_notes.forEach((visit_note) => {
+          pdf.drawWrappedText({
+            text: `${moment(visit_note.date_completed).format(
+              'MMMM Do'
+            )}: ${(visit_note?.notes && visit_note?.notes) || 'No information available.'}`
+          });
+          pdf.drawHRule();
+        })
+      }
+      pdf.drawCheckBoxLine({ label: 'Forced Entry Permission' });
 
       // owners contacted
       if (assigned_request.service_request_object.owners.length) {

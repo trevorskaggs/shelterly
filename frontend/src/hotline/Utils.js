@@ -52,11 +52,38 @@ function buildServiceRequestsDoc(srs = []) {
       bottomPadding: 10
     });
 
+    // forced entry
+    pdf.drawWrappedText({
+      text: `Forced Entry Permission: ${
+        data.assigned_requests?.find?.(
+          (ar) => ar.visit_note?.forced_entry === true
+        )
+          ? 'Yes'
+          : 'No'
+      }`,
+    });
+
     // follow up date
     pdf.drawWrappedText({ text: `Followup Date: ${data.followup_date ? new Date(data.followup_date)?.toLocaleDateString?.() : 'Not set'}` });
 
     // directions
     pdf.drawWrappedText({ text: `Instructions for Field Team: ${data.directions || 'No instructions available'}` })
+
+    pdf.drawHRule();
+
+    // visit notes
+    data.assigned_requests?.forEach?.(({ visit_note }, i) => {
+      if (i === 0) {
+        pdf.drawSectionHeader({ text: 'Visit Notes' });
+        pdf.drawPad(20);
+      }
+
+      pdf.drawWrappedText({
+        text: `***${moment(visit_note.date_completed).format('MMMM Do')}:***${visit_note.forced_entry ? ' (Forced Entry)' : ''} ${
+          (visit_note?.notes && visit_note?.notes) || ''
+        }`,
+      });
+    });
 
     pdf.drawHRule();
 
@@ -122,15 +149,31 @@ function buildServiceRequestsDoc(srs = []) {
         lastYPosBeforeDraw = pdf.getLastYPositionWithBuffer({ buffer: 0 });
       }
 
+      let animalStatus;
+
+      switch (animal.status) {
+        case 'REPORTED (SIP REQUESTED)':
+          animalStatus = 'Reported (SIP Requested)';
+          break;
+        default:
+          animalStatus = `${capitalize(animal.status.toLowerCase(), { proper: true })}`;
+      }
+
       const animalInfoList = [
         `ID: A#${animal.id}`,
-        `Status: ${capitalize(animal.status.toLowerCase(), { proper: true })}`,
+        `Status: ${animalStatus}`,
         `Name: ${animal.name || 'Unknown'}`,
         `Species: ${capitalize(animal.species)}`,
         `Sex: ${capitalize(animal.sex|| 'Unknown')}`,
         `Age: ${capitalize(animal.age || 'Unknown')}`,
         `Size: ${capitalize(animal.size || 'Unknown')}`,
-        `Primary Color: ${capitalize(animal.pcolor || 'N/A')}, Secondary Color: ${capitalize(animal.scolor || 'N/A')}`
+        `Primary Color: ${capitalize(animal.pcolor || 'N/A')}, Secondary Color: ${capitalize(animal.scolor || 'N/A')}`,
+        `Fixed: ${capitalize(animal.fixed || 'Unknown')}`,
+        `Aggressive: ${capitalize(animal.aggressive || 'Unknown')}`,
+        `ACO Required: ${capitalize(animal.aco_required || 'Unknown')}`,
+        `Confined: ${capitalize(animal.confined || 'Unknown')}`,
+        `Injured: ${capitalize(animal.injured || 'Unknown')}`,
+        `Last Seen: ${animal.last_seen ? moment(animal.last_seen).format('MMMM Do YYYY HH:mm') : 'Unknown'}`
       ];
 
       pdf.drawTextList({
@@ -142,12 +185,10 @@ function buildServiceRequestsDoc(srs = []) {
       pdf.drawPad();
 
       // breed / description (color_notes)
-      if (animal.color_notes) {
-        pdf.drawWrappedText({
-          text: `Breed / Description: ${animal.color_notes}`,
-          linePadding: 0
-        });
-      }
+      pdf.drawWrappedText({
+        text: `Breed / Description: ${animal.color_notes}`,
+        linePadding: 0
+      });
 
       // medical notes
       if (animal.medical_notes) {
@@ -205,7 +246,10 @@ function printAllServiceRequests(srs = []) {
 }
 
 const printSrAnimalCareSchedules  = async (animals = [], srId = 0) => {
-  const  pdf = await buildAnimalCareScheduleDoc(animals);
+  // sort animals by id
+  const sortedAnimals = [...animals].sort((a,b) => a.id - b.id);
+
+  const  pdf = await buildAnimalCareScheduleDoc(sortedAnimals);
   pdf.fileName = `Shelterly-SR-Animal-Care-Schedules-${srId.toString().padStart(3, 0)}-${moment().format(DATE_FORMAT)}`;
   return pdf.saveFile();
 };
