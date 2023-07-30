@@ -54,7 +54,7 @@ function buildServiceRequestsDoc(srs = []) {
 
     // forced entry
     pdf.drawWrappedText({
-      text: `Forced Entry: ${
+      text: `Forced Entry Permission: ${
         data.assigned_requests?.find?.(
           (ar) => ar.visit_note?.forced_entry === true
         )

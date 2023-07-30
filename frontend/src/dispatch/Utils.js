@@ -176,7 +176,7 @@ const buildDispatchResolutionsDoc = (drs = []) => {
 
       // forced entry
       pdf.drawWrappedText({
-        text: `Forced Entry: ${assigned_request.visit_note?.forced_entry ? 'Yes' : 'No'}`
+        text: `Forced Entry Permission: ${assigned_request.visit_note?.forced_entry ? 'Yes' : 'No'}`
       });
 
       // key at staging (key provided)
@@ -341,7 +341,7 @@ const buildDispatchResolutionsDoc = (drs = []) => {
           });
         })
       }
-      pdf.drawCheckBoxLine({ label: 'Forced Entry' });
+      pdf.drawCheckBoxLine({ label: 'Forced Entry Permission' });
 
       // owners contacted
       if (assigned_request.service_request_object.owners.length) {
