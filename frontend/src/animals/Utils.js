@@ -73,17 +73,15 @@ async function buildAnimalCareScheduleContent(pdf, animals) {
     pdf.resetDocumentLeftMargin();
     pdf.drawPad(15);
 
-    if (animal.shelter_object) {
-      pdf.drawWrappedText({
-        text: `Location: ${
-          animal.shelter_object ? `${animal.shelter_object.name}` : "N/A"
-        }${
-          animal.building_name ? ` / ${animal.building_name}` : ""
-        }${
-          animal.room ? ` / ${animal.room_name}` : ""
-        }`,
-      })
-    }
+    pdf.drawWrappedText({
+      text: `Location: ${
+        animal.shelter_object ? `${animal.shelter_object.name}` : "N/A"
+      }${
+        animal.building_name ? ` / ${animal.building_name}` : ""
+      }${
+        animal.room ? ` / ${animal.room_name}` : ""
+      }`,
+    });
 
     // draw status
     pdf.drawWrappedText({ text: `Status: ${animal.status.toUpperCase() }`});

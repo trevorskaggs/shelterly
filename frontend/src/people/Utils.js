@@ -35,21 +35,20 @@ const buildOwnersContent = (pdf, owners, animalsOverride) => {
     pdf.drawSectionHeader({ text: 'Owner Summary/Liability', hRule: true });
     
     const ownerInfoList = [
-      `Name: ${owner.first_name} ${owner.last_name}`
+      `Name: ${owner.first_name} ${owner.last_name}`,
+      `Owner ID: #${owner.id || 'N/A'}`,
+      `Agency: ${owner.agency || 'N/A'}`,
+      `Telephone: ${owner.display_phone || 'N/A'} ${owner.display_alt_phone ? `  Alt: ${owner.display_alt_phone}` : ''}`,
+      `Email: ${owner.email || 'N/A'}`,
+      `Drivers License: ${owner.drivers_license || 'N/A'}`
     ];
-    if (owner.id) {
-      ownerInfoList.push(`Owner ID: #${owner.id}`)
-    }
-    if (owner.agency) ownerInfoList.push(`Agency: ${owner.agency}`);
-    if (owner.phone) ownerInfoList.push(`Telephone: ${owner.display_phone} ${owner.display_alt_phone ? `  Alt: ${owner.display_alt_phone}` : ''}`);
-    if (owner.email) ownerInfoList.push(`Email: ${owner.email}`);
-    if (owner.drivers_license) ownerInfoList.push(`Drivers License: ${owner.drivers_license}`);
 
-    if (owner.request) ownerInfoList.push(`Service Request: ${owner.request.full_address}`);
-    else {
-      if (owner.address) ownerInfoList.push(`Address: ${owner.full_address}`);
-      else if (owner.id) ownerInfoList.push('Address: No Address Listed');
-      else ownerInfoList.push('Address:');
+    if (owner.request) {
+      ownerInfoList.push(`Service Request: ${owner.request.full_address}`);
+    } else if (owner.address) {
+        ownerInfoList.push(`Address: ${owner.full_address}`);
+    } else {
+      ownerInfoList.push('Address: N/A');
     }
 
     pdf.drawTextList({
@@ -57,11 +56,10 @@ const buildOwnersContent = (pdf, owners, animalsOverride) => {
       bottomPadding: 15
     });
 
-    if (owner.comments) {
-      pdf.drawWrappedText({
-        text: `Comments: ${owner.comments}`
-      })
-    }
+    // Owner Comments
+    pdf.drawWrappedText({
+      text: `Comments: ${owner.comments || 'N/A'}`
+    });
 
     pdf.drawPad();
 
@@ -112,19 +110,15 @@ const buildOwnersContent = (pdf, owners, animalsOverride) => {
 
       pdf.drawPad();
 
-      if (animal.color_notes) {
-        pdf.drawWrappedText({
-          text: `Breed / Description: ${animal.color_notes}`,
-          linePadding: -5
-        });
-      }
+      pdf.drawWrappedText({
+        text: `Breed / Description: ${animal.color_notes || 'N/A'}`,
+        linePadding: -5
+      });
 
-      if (animal.shelter) {
-        pdf.drawWrappedText({
-          text: `Shelter Address: ${animal.shelter_object?.full_address || 'Unknown'}`,
-          linePadding: 5
-        })
-      }
+      pdf.drawWrappedText({
+        text: `Shelter Address: ${animal.shelter_object?.full_address || 'N/A'}`,
+        linePadding: 5
+      });
 
       pdf.drawPad(5);
       pdf.drawHRule();
