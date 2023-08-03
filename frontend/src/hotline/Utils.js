@@ -1,7 +1,7 @@
 import moment from 'moment';
 import ShelterlyPDF from '../utils/pdf';
 import { priorityChoices, DATE_FORMAT } from '../constants';
-import { capitalize } from '../utils/formatString';
+import { capitalize, statusLabelLookup } from '../utils/formatString';
 import { buildAnimalCareScheduleDoc } from '../animals/Utils';
 
 function buildServiceRequestsDoc(srs = []) {
@@ -149,15 +149,9 @@ function buildServiceRequestsDoc(srs = []) {
         lastYPosBeforeDraw = pdf.getLastYPositionWithBuffer({ buffer: 0 });
       }
 
-      let animalStatus;
-
-      switch (animal.status) {
-        case 'REPORTED (SIP REQUESTED)':
-          animalStatus = 'Reported (SIP Requested)';
-          break;
-        default:
-          animalStatus = `${capitalize(animal.status.toLowerCase(), { proper: true })}`;
-      }
+      const animalStatus =
+        statusLabelLookup[animal.status] ||
+        `${capitalize(animal.status.toLowerCase(), { proper: true })}`;
 
       const animalInfoList = [
         `ID: A#${animal.id}`,
