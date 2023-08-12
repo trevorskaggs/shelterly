@@ -146,10 +146,10 @@ const buildDispatchResolutionsDoc = (drs = []) => {
             }`,
           });
 
-          if (!!owner.comments) {
-            pdf.drawWrappedText({ text: `Comments / Alternate Contact: ${owner.comments}` });
-          }
+          pdf.drawWrappedText({ text: `Comments / Alternate Contact: ${owner.comments || 'N/A'}` });
         });
+      } else {
+        pdf.drawWrappedText({ text: 'Owner: N/A' });
       }
 
       // reporter
@@ -157,6 +157,8 @@ const buildDispatchResolutionsDoc = (drs = []) => {
         pdf.drawWrappedText({
           text: `Reporter: ${assigned_request.service_request_object.reporter_object.first_name} ${assigned_request.service_request_object.reporter_object.last_name} ${assigned_request.service_request_object.reporter_object.agency ? '(' + assigned_request.service_request_object.reporter_object.agency + ')' : 'No'} ${assigned_request.service_request_object.reporter_object.display_phone}`
         })
+      } else {
+        pdf.drawWrappedText({ text: 'Reporter: N/A' });
       }
 
       // additional info

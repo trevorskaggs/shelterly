@@ -99,16 +99,14 @@ function buildServiceRequestsDoc(srs = []) {
           text: `Owner: ${owner.first_name} ${owner.last_name} ${owner.display_phone || ''}`
         });
 
-        if (owner.email) {
-          pdf.drawWrappedText({
-            text: `Owner Email: ${owner.email}`
-          });
-        }
+        pdf.drawWrappedText({
+          text: `Owner Email: ${owner.email || 'N/A'}`
+        });
       })
     } else {
       //no owners
       pdf.drawWrappedText({
-        text: 'Owner: No Owner'
+        text: 'Owner: N/A'
       });
     }
 
@@ -117,12 +115,13 @@ function buildServiceRequestsDoc(srs = []) {
       pdf.drawWrappedText({
         text: `Reporter: ${data.reporter_object.first_name} ${data.reporter_object.last_name} ${data.reporter_object.display_phone || ''}`
       });
-
-      if (data.reporter_object.agency) {
-        pdf.drawWrappedText({
-          text: `Reporter Agency: ${data.reporter_object.agency}`
-        });
-      }
+      pdf.drawWrappedText({
+        text: `Reporter Agency: ${data.reporter_object.agency || 'N/A'}`
+      });
+    } else {
+      pdf.drawWrappedText({
+        text: 'Reporter: N/A'
+      });
     }
 
     pdf.drawHRule();
@@ -191,27 +190,21 @@ function buildServiceRequestsDoc(srs = []) {
       });
 
       // medical notes
-      if (animal.medical_notes) {
-        pdf.drawWrappedText({
-          text: `Medical Notes: ${animal.medical_notes}`,
-          linePadding: 0
-        });
-      }
+      pdf.drawWrappedText({
+        text: `Medical Notes: ${animal.medical_notes || 'N/A'}`,
+        linePadding: 0
+      });
 
       // behavior notes
-      if (animal.behavior_notes) {
-        pdf.drawWrappedText({
-          text: `Animal Notes: ${animal.behavior_notes}`,
-          linePadding: 0
-        });
-      }
+      pdf.drawWrappedText({
+        text: `Animal Notes: ${animal.behavior_notes || 'N/A'}`,
+        linePadding: 0
+      });
 
-      if (animal.shelter) {
-        pdf.drawWrappedText({
-          text: `Shelter Address: ${animal.shelter_object?.full_address || 'Unknown'}`,
-          linePadding: 5
-        })
-      }
+      pdf.drawWrappedText({
+        text: `Shelter Address: ${animal.shelter_object?.full_address || 'N/A'}`,
+        linePadding: 5
+      })
 
       pdf.drawPad(5);
       pdf.drawHRule();
