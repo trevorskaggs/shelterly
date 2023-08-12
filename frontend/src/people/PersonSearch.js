@@ -31,6 +31,12 @@ function PersonSearch({ incident }) {
   } = queryParams;
 
 	const [data, setData] = useState({owners: [], isFetching: false});
+  const [organization, setOrganization] = useState({
+    name: '',
+    short_name: '',
+    liability_name: '',
+    liability_short_name: '',
+  });
 	const [searchState, setSearchState] = useState({});
 	const [statusOptions, setStatusOptions] = useState(person);
 	const [searchTerm, setSearchTerm] = useState(search);
@@ -61,7 +67,7 @@ function PersonSearch({ incident }) {
     e.preventDefault();
 
     handleSubmitting()
-      .then(() => printAllOwnersDetails(data.owners))
+      .then(() => printAllOwnersDetails(data.owners, organization))
       .then(submittingComplete);
   }
 
@@ -119,6 +125,25 @@ function PersonSearch({ incident }) {
 			});
 		};
 		fetchOwners();
+
+    const fetchOrganizationData = async () => {
+      // Fetch Organization data.
+      await axios.get('/accounts/api/organization/', {
+        cancelToken: source.token,
+      })
+      .then(response => {
+        if (!unmounted) {
+          setOrganization(response.data[0]);
+        }
+      })
+      .catch(error => {
+        if (!unmounted) {
+          setShowSystemError(true);
+        }
+      });
+    };
+    fetchOrganizationData();
+
 		// Cleanup.
 		return () => {
 			unmounted = true;
