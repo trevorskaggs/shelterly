@@ -71,7 +71,7 @@ function ServiceRequestSearch({ incident }) {
     e.preventDefault();
 
     handleSubmitting()
-      .then(() => printAllServiceRequests(data.service_requests))
+      .then(() => printAllServiceRequests(filteredServiceRequests))
       .then(submittingComplete);
   }
 
