@@ -29,7 +29,6 @@
     "js-file-download": "^0.4.12",
     "jspdf": "^2.5.1",
     "jspdf-autotable": "^3.5.25",
-    "js-file-download": "^0.4.12",
     "leaflet": "^1.7.1",
     "mark.js": "^8.11.1",
     "moment": "^2.29.4",
@@ -57,10 +56,12 @@
     "react-select-simple-value": "^1.2.1",
     "react-table": "^7.5.2",
     "react-transition-group": "^4.4.1",
+    "react-use-websocket": "^3.0.0",
     "request": "^2.88.2",
     "smooth-scroll-into-view-if-needed": "^1.1.32",
     "styled-components": "^5.2.3",
     "svg2pdf.js": "^2.2.1",
+    "websocket": "^1.0.34",
     "yup": "^0.28.3"
   },
   "scripts": {

@@ -69,6 +69,7 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'django_filters',
     'corsheaders',
+    'channels',
     'accounts',
     'animals',
     'evac',
@@ -124,6 +125,12 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'wsgi.application'
+ASGI_APPLICATION = 'asgi.application' #asgi.py will handle the ASGI
+# CHANNEL_LAYERS = {
+#     'default': {
+#         'BACKEND': 'channels.layers.InMemoryChannelLayer'
+#         }
+#     }
 SITE_ID = 1
 
 # Database

@@ -9,6 +9,8 @@ from datetime import datetime
 from .serializers import ServiceRequestSerializer, SimpleServiceRequestSerializer, VisitNoteSerializer
 from .ordering import MyCustomOrdering
 from wsgiref.util import FileWrapper
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 from animals.models import Animal
 from hotline.models import ServiceRequest, ServiceRequestImage, VisitNote
@@ -40,6 +42,9 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
 
             service_request = serializer.save()
             action.send(self.request.user, verb='created service request', target=service_request)
+
+            channel_layer = get_channel_layer()
+            async_to_sync(channel_layer.group_send)("map", {"type":"new_data"})
 
     def perform_update(self, serializer):
         from evac.models import AssignedRequest

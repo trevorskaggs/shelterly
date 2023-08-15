@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import axios from "axios";
 import { Link, navigate } from 'raviger';
 import { Form, Formik } from 'formik';
@@ -14,6 +14,8 @@ import L from "leaflet";
 import * as Yup from 'yup';
 import { Typeahead } from 'react-bootstrap-typeahead';
 import Moment from 'react-moment';
+import { w3cwebsocket as W3CWebSocket } from "websocket";
+import useWebSocket from 'react-use-websocket';
 import Map, { countMatches, prettyText, reportedMarkerIcon, reportedEvacMarkerIcon, reportedSIPMarkerIcon, SIPMarkerIcon, UTLMarkerIcon, checkMarkerIcon } from "../components/Map";
 import { Checkbox, TextInput } from "../components/Form";
 import { DispatchDuplicateSRModal, DispatchAlreadyAssignedTeamModal } from "../components/Modals";
@@ -216,10 +218,19 @@ function Deploy({ incident }) {
     setMapState(tempMapState);
   }
 
+  useWebSocket('ws://localhost:8000/ws/canvas_data/', {
+    onMessage: (e) => {
+      console.log("omg")
+      console.log(e.data)
+    },
+    shouldReconnect: (closeEvent) => true,
+  });
+
   // Hook for initializing data.
   useEffect(() => {
     let unmounted = false;
     let source = axios.CancelToken.source();
+
     const fetchTeamMembers = async () => {
       setTeamData({teams: [], options: [], isFetching: true});
       // Fetch all TeamMembers.
