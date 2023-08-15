@@ -444,7 +444,7 @@ function Deploy({ incident }) {
               </Tooltip>
             }
           >
-            <Button className="ml-3 fa-move-up" onClick={() => setTriggerRefresh(!triggerRefresh)} disabled={!newData}>
+            <Button className="ml-3 fa-move-up" style={{}} onClick={() => setTriggerRefresh(!triggerRefresh)} disabled={!newData}>
               <FontAwesomeIcon icon={faRotate} />
             </Button>
           </OverlayTrigger>
