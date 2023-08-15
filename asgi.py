@@ -10,6 +10,6 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings')
 application = ProtocolTypeRouter({
     'http': get_asgi_application(),
     'websocket': URLRouter([
-        path(r'ws/canvas_data/', WSConsumer.as_asgi()),
+        path(r'ws/map_data/', WSConsumer.as_asgi()),
     ])
 })

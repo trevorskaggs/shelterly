@@ -14,8 +14,7 @@ from asgiref.sync import async_to_sync
 
 from animals.models import Animal
 from hotline.models import ServiceRequest, ServiceRequestImage, VisitNote
-from incident.models import Incident
-from people.models import Person
+
 from rest_framework import filters, permissions, serializers, viewsets
 from rest_framework.decorators import action as drf_action
 

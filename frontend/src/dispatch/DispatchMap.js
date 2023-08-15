@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
 import { Link, navigate } from 'raviger';
 import { Form, Formik } from 'formik';
@@ -7,14 +7,13 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBan, faBandAid, faBullseye, faCalendarDay, faCar, faChevronDown, faChevronUp, faEquals, faExclamationTriangle, faCircle, faClipboardList, faExclamationCircle, faMapMarkedAlt, faQuestionCircle, faPencilAlt, faTrailer, faUserAlt, faUserAltSlash
 } from '@fortawesome/free-solid-svg-icons';
-import { faBadgeSheriff, faChevronDoubleDown, faChevronDoubleUp, faCircleBolt, faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
+import { faBadgeSheriff, faChevronDoubleDown, faChevronDoubleUp, faCircleBolt, faHomeAlt, faRotate } from '@fortawesome/pro-solid-svg-icons';
 import { faHomeAlt as faHomeAltReg } from '@fortawesome/pro-regular-svg-icons';
 import { Circle, Marker, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
 import * as Yup from 'yup';
 import { Typeahead } from 'react-bootstrap-typeahead';
 import Moment from 'react-moment';
-import { w3cwebsocket as W3CWebSocket } from "websocket";
 import useWebSocket from 'react-use-websocket';
 import Map, { countMatches, prettyText, reportedMarkerIcon, reportedEvacMarkerIcon, reportedSIPMarkerIcon, SIPMarkerIcon, UTLMarkerIcon, checkMarkerIcon } from "../components/Map";
 import { Checkbox, TextInput } from "../components/Form";
@@ -33,6 +32,7 @@ function Deploy({ incident }) {
   let preplan = window.location.pathname.includes("preplan")
 
   const [data, setData] = useState({service_requests: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
+  const [newData, setNewData] = useState(false);
   const [mapState, setMapState] = useState({});
   const [totalSelectedState, setTotalSelectedState] = useState({'REPORTED':{}, 'REPORTED (EVAC REQUESTED)':{}, 'REPORTED (SIP REQUESTED)':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}});
   const [selectedCount, setSelectedCount] = useState({count:0, disabled:true});
@@ -218,10 +218,10 @@ function Deploy({ incident }) {
     setMapState(tempMapState);
   }
 
-  useWebSocket('ws://localhost:8000/ws/canvas_data/', {
+  useWebSocket('ws://localhost:8000/ws/map_data/', {
     onMessage: (e) => {
       console.log("omg")
-      console.log(e.data)
+      setNewData(true)
     },
     shouldReconnect: (closeEvent) => true,
   });
@@ -333,6 +333,7 @@ function Deploy({ incident }) {
 
     fetchTeamMembers();
     fetchServiceRequests();
+    setNewData(false);
 
     // Cleanup.
     return () => {
@@ -434,6 +435,19 @@ function Deploy({ incident }) {
       <Form>
         <Header>
           {preplan ? "Preplan Dispatch Assignments" : "Deploy Teams"}
+          <OverlayTrigger
+            key={"new-data"}
+            placement="bottom"
+            overlay={
+              <Tooltip id={`tooltip-new-data`}>
+                New data is available
+              </Tooltip>
+            }
+          >
+            <Button className="ml-3 fa-move-up" onClick={() => setTriggerRefresh(!triggerRefresh)} disabled={!newData}>
+              <FontAwesomeIcon icon={faRotate} />
+            </Button>
+          </OverlayTrigger>
         </Header>
         <hr/>
         <Row className="d-flex flex-wrap" style={{marginTop:"10px", marginLeft:"0px", marginRight:"0px"}}>
