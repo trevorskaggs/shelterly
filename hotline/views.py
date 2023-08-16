@@ -43,6 +43,7 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
             service_request = serializer.save()
             action.send(self.request.user, verb='created service request', target=service_request)
 
+            # Notify maps that there is new data.
             channel_layer = get_channel_layer()
             async_to_sync(channel_layer.group_send)("map", {"type":"new_data"})
 

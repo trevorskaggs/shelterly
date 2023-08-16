@@ -457,19 +457,21 @@ function Deploy({ incident }) {
     {props => (
       <Form>
         <Header>
-          {preplan ? "Preplan Dispatch Assignments" : "Deploy Teams"}
+          {preplan ? "Preplan Dispatch Assignments" : "Deploy Teams "}
           <OverlayTrigger
             key={"new-data"}
             placement="bottom"
             overlay={
               <Tooltip id={`tooltip-new-data`}>
-                New data is available
+                {!newData ? "No new Service Request data available." : "New Service Request data available."}
               </Tooltip>
             }
           >
-            <Button className="ml-3 fa-move-up" onClick={() => setTriggerRefresh(!triggerRefresh)} disabled={!newData}>
-              <FontAwesomeIcon icon={faRotate} />
-            </Button>
+            <span className="d-inline-block">
+              <Button className="fa-move-up" onClick={() => setTriggerRefresh(!triggerRefresh)} disabled={!newData}>
+                <FontAwesomeIcon icon={faRotate} />
+              </Button>
+            </span>
           </OverlayTrigger>
         </Header>
         <hr/>
