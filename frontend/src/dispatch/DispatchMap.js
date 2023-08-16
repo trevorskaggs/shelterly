@@ -220,7 +220,6 @@ function Deploy({ incident }) {
 
   useWebSocket('ws://localhost:8000/ws/map_data/', {
     onMessage: (e) => {
-      console.log("omg")
       setNewData(true)
     },
     shouldReconnect: (closeEvent) => true,
@@ -318,6 +317,26 @@ function Deploy({ incident }) {
           }
           setMapState(map_dict);
 
+          var status_matches = {'REPORTED':{}, 'REPORTED (EVAC REQUESTED)':{}, 'REPORTED (SIP REQUESTED)':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}};
+          var matches = {};
+          var total = 0;
+          // Recount the total state tracker for selected SRs on refresh.
+          Object.keys(map_dict).filter(key => map_dict[key].checked === true && response.data.map(sr => sr.id).includes(Number(key))).forEach(id => {
+            for (var select_status in map_dict[id].status_matches) {
+              matches = {...status_matches[select_status]};
+              for (var select_key in map_dict[id].status_matches[select_status]){
+                if (!status_matches[select_status][select_key]) {
+                  total = map_dict[id].status_matches[select_status][select_key];
+                } else {
+                  total = status_matches[select_status][select_key] += map_dict[id].status_matches[select_status][select_key];
+                }
+                matches[select_key] = total;
+              }
+              status_matches[select_status] = matches;
+            }
+          })
+          setTotalSelectedState(status_matches);
+
           if (bounds.length > 0 && Object.keys(mapState).length < 1) {
             setData(prevState => ({ ...prevState, "bounds":L.latLngBounds(bounds) }));
           }
@@ -331,7 +350,11 @@ function Deploy({ incident }) {
       });
     };
 
-    fetchTeamMembers();
+    // Only fetch team member data first time.
+    if (teamData.options.length === 0) {
+      fetchTeamMembers();
+    }
+
     fetchServiceRequests();
     setNewData(false);
 
@@ -444,7 +467,7 @@ function Deploy({ incident }) {
               </Tooltip>
             }
           >
-            <Button className="ml-3 fa-move-up" style={{}} onClick={() => setTriggerRefresh(!triggerRefresh)} disabled={!newData}>
+            <Button className="ml-3 fa-move-up" onClick={() => setTriggerRefresh(!triggerRefresh)} disabled={!newData}>
               <FontAwesomeIcon icon={faRotate} />
             </Button>
           </OverlayTrigger>
