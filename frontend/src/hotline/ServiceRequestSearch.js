@@ -93,9 +93,7 @@ function ServiceRequestSearch({ incident }) {
             responseType: 'blob',
         }).then(res => {
             fileDownload(res.data, `SRs-${moment().format(DATE_FORMAT)}` + '.geojson');
-            console.log(res);
         }).catch(err => {
-            console.log(err);
         })
   }
 
