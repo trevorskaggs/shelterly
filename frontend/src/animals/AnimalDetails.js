@@ -92,10 +92,7 @@ function AnimalDetails({ id, incident }) {
     await axios.patch('/animals/api/animal/' + id + '/', {remove_animal:id})
     .then(response => {
       handleAnimalClose();
-      if (state.prevLocation) {
-        navigate(state.prevLocation);
-      }
-      else if (data.request) {
+      if (data.request) {
         navigate('/' + incident + '/hotline/servicerequest/' + data.request);
       }
       else if (data.owner) {

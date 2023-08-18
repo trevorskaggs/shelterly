@@ -78,11 +78,13 @@ function buildServiceRequestsDoc(srs = []) {
         pdf.drawPad(20);
       }
 
-      pdf.drawWrappedText({
-        text: `***${moment(visit_note.date_completed).format('MMMM Do')}:***${visit_note.forced_entry ? ' (Forced Entry)' : ''} ${
-          (visit_note?.notes && visit_note?.notes) || ''
-        }`,
-      });
+      if (visit_note) {
+        pdf.drawWrappedText({
+          text: `${moment(visit_note.date_completed).format('MMMM Do')}:${visit_note.forced_entry ? ' (Forced Entry)' : ''} ${
+            (visit_note?.notes && visit_note?.notes) || ''
+          }`,
+        });
+      }
     });
 
     pdf.drawHRule();
