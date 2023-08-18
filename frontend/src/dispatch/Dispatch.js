@@ -1,12 +1,12 @@
 import React, { useContext, useState, useEffect } from "react";
 import axios from "axios";
 import { Link, navigate } from 'raviger';
-import { Button, Card, Col, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
+import { Button, Card, Col, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { Marker, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBullhorn, faCircle, faExclamationCircle, faMapMarkedAlt, faTimesCircle, faUsers
+  faBullhorn, faCircle, faExclamationCircle, faMapMarkedAlt, faSearch, faTimesCircle, faUsers
 } from '@fortawesome/free-solid-svg-icons';
 import { faQuestionCircle as faQuestionCircleDuo, faChevronCircleDown, faChevronCircleUp } from '@fortawesome/pro-duotone-svg-icons';
 import { faHomeAlt as faHomeAltReg } from '@fortawesome/pro-regular-svg-icons';
@@ -15,6 +15,7 @@ import Map, { prettyText, reportedMarkerIcon, reportedEvacMarkerIcon, reportedSI
 import Header from "../components/Header";
 import Scrollbar from '../components/Scrollbars';
 import { SystemErrorContext } from '../components/SystemError';
+import { AddressLookup } from '../components/Map';
 
 function Dispatch({ incident }) {
 
@@ -25,6 +26,10 @@ function Dispatch({ incident }) {
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [showActive, setShowActive] = useState(true);
   const [showPreplanned, setShowPreplanned] = useState(true);
+  const [showAddressModal, setShowAddressModal] = useState(false);
+  const [initialBounds, setInitialBounds] = useState(L.latLngBounds([[0,0]]));
+
+  const handleClose = () => {setShowAddressModal(false);}
 
   // Counts the number of size/species matches for a service request by status.
 const countMatches = (animal_dict) => {
@@ -81,6 +86,7 @@ const countMatches = (animal_dict) => {
           });
           setMapState(map_dict);
           setData({dispatch_assignments: response.data, isFetching: false, bounds:bounds.length > 0 ? bounds : L.latLngBounds([[0,0]])});
+          setInitialBounds(bounds);
         }
       })
       .catch(error => {
@@ -102,7 +108,21 @@ const countMatches = (animal_dict) => {
 
   return (
     <>
-    <Header>Dispatch</Header>
+    <Header>Dispatch
+      <OverlayTrigger
+        key={"address-finder"}
+        placement="bottom"
+        overlay={
+          <Tooltip id={`tooltip-address-finder`}>
+            Search for an address to zoom the map to.
+          </Tooltip>
+        }
+      >
+        <Button className="ml-1 fa-move-up" onClick={() => setShowAddressModal(true)}>
+          <FontAwesomeIcon icon={faSearch} />
+        </Button>
+      </OverlayTrigger>
+    </Header>
     <hr/>
     <Row className="ml-0 mr-0 pl-0 pr-0 mb-0">
       <Col xs={4} className="pl-0 pr-0">
@@ -254,6 +274,17 @@ const countMatches = (animal_dict) => {
           Sheltered
       </h5>
     </Row>
+    <Modal show={showAddressModal} onHide={handleClose}>
+      <Modal.Header closeButton>
+        <Modal.Title>Address Finder</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <AddressLookup style={{width: '100%'}} className={"form-control"} setData={setData} initialBounds={initialBounds} incident={incident} handleClose={handleClose} />
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="secondary" onClick={handleClose}>Close</Button>
+      </Modal.Footer>
+    </Modal>
     </>
   )
 }

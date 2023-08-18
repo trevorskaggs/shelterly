@@ -1,5 +1,8 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import axios from 'axios';
 import ReactDOMServer from 'react-dom/server';
+import { Button, Col, Row } from 'react-bootstrap';
+import Autocomplete from 'react-google-autocomplete';
 import L from "leaflet";
 import { Map as LeafletMap, TileLayer, useLeaflet } from "react-leaflet";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -244,5 +247,84 @@ const Map = (props) => {
     </>
   );
 };
+
+export const AddressLookup = ({setData, initialBounds, handleClose, ...props}) => {
+
+  const childRef = useRef(null);
+  const [incidentLatLon, setIncidentLatLon] = useState({lat:0, lng:0});
+
+  const clearAddress = () => {
+    childRef.current.value = "";
+    setData(prevState => ({ ...prevState, bounds:initialBounds }));
+    handleClose();
+  };
+
+  useEffect(() => {
+    let unmounted = false;
+    let source = axios.CancelToken.source();
+
+    axios.get('/incident/api/incident/?incident=' + props.incident, {
+      cancelToken: source.token,
+    })
+    .then(response => {
+      if (!unmounted) {
+        setIncidentLatLon({lat:Number(response.data[0].latitude), lng:Number(response.data[0].longitude)});
+      }
+    })
+    .catch(error => {
+    });
+  }, [props.incident]);
+
+  const updateAddr = suggestion => {
+
+    if (suggestion && suggestion.address_components) {
+      // Extract location information from the return. Use short_name for the state.
+      let components={};
+      suggestion.address_components.forEach(function(k,v1) {k.types.forEach(function(v2, k2){v2 !== "administrative_area_level_1" ? components[v2]=k.long_name : components[v2]=k.short_name});});
+
+      // Build formatted street number + name string.
+      let address = "";
+      if (components.street_number) {
+        address = components.street_number + " " + components.route;
+      }
+      else if (components.route) {
+        address = components.route;
+      }
+      else {
+        address = components.intersection;
+      }
+
+      setData(prevState => ({ ...prevState, bounds:L.latLngBounds([[suggestion.geometry.location.lat(), suggestion.geometry.location.lng()]]) }));
+    }
+  }
+
+  return (
+    <>
+      <Row className="mr-0 d-flex" style={{maxHeight:"37px"}}>
+        <Col className="flex-grow-1 pr-1">
+          <Autocomplete
+            {...props}
+            onPlaceSelected={(place) => {
+              updateAddr(place);
+              handleClose()
+            }}
+            onFocus={(event) => { event.target.setAttribute('autocomplete', 'off'); }}
+            id="search"
+            name="search"
+            options={{
+              bounds:{north:incidentLatLon.lat+.1, south:incidentLatLon.lat-.1, east:incidentLatLon.lng+.1, west:incidentLatLon.lng-.1},
+              types: ["geocode"],
+              componentRestrictions: { country: "us" },
+            }}
+            ref={childRef}
+            key={String(incidentLatLon.lat)}
+            apiKey={process.env.REACT_APP_GOOGLE_API_KEY}
+          />
+        </Col>
+        <Button variant="outline-light" className="float-right" style={{maxHeight:"37px"}} onClick={clearAddress} disabled={props.disabled ? true : false}>Reset</Button>
+      </Row>
+    </>
+  );
+}
 
 export default Map;
