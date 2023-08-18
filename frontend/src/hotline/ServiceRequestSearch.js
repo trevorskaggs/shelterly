@@ -31,7 +31,7 @@ function ServiceRequestSearch({ incident }) {
   const [queryParams] = useQueryParams();
   const {
     search = '',
-    status = 'open',
+    status = '',
   } = queryParams;
 
   const priorityText = {1:'Highest', 2:'High', 3:'Medium', 4:'Low', 5:'Lowest'};
@@ -203,7 +203,7 @@ function ServiceRequestSearch({ incident }) {
               placeholder={"Opened Start Date"}
               mode="single"
               data-enable-time={true}
-              clearable={true}
+              clearable={"true"}
               hour={0}
               style={{height:"36px"}}
               onChange={(dateRange) => {
@@ -219,7 +219,7 @@ function ServiceRequestSearch({ incident }) {
               placeholder={"Opened End Date"}
               mode="single"
               data-enable-time={true}
-              clearable={true}
+              clearable={"true"}
               hour={23}
               minute={59}
               style={{height:"36px"}}
