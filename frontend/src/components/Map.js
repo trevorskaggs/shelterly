@@ -248,15 +248,15 @@ const Map = (props) => {
   );
 };
 
-export const AddressLookup = ({setData, ...props}) => {
+export const AddressLookup = ({setData, initialBounds, handleClose, ...props}) => {
 
   const childRef = useRef(null);
   const [incidentLatLon, setIncidentLatLon] = useState({lat:0, lng:0});
 
   const clearAddress = () => {
     childRef.current.value = "";
-    childRef.current.focus();
-    setData(prevState => ({ ...prevState, bounds:props.initialBounds }));
+    setData(prevState => ({ ...prevState, bounds:initialBounds }));
+    handleClose();
   };
 
   useEffect(() => {
@@ -306,6 +306,7 @@ export const AddressLookup = ({setData, ...props}) => {
             {...props}
             onPlaceSelected={(place) => {
               updateAddr(place);
+              handleClose()
             }}
             onFocus={(event) => { event.target.setAttribute('autocomplete', 'off'); }}
             id="search"
@@ -316,10 +317,11 @@ export const AddressLookup = ({setData, ...props}) => {
               componentRestrictions: { country: "us" },
             }}
             ref={childRef}
+            key={String(incidentLatLon.lat)}
             apiKey={process.env.REACT_APP_GOOGLE_API_KEY}
           />
         </Col>
-        <Button variant="outline-light" className="float-right" style={{maxHeight:"37px"}} onClick={clearAddress} disabled={props.disabled ? true : false}>Clear</Button>
+        <Button variant="outline-light" className="float-right" style={{maxHeight:"37px"}} onClick={clearAddress} disabled={props.disabled ? true : false}>Reset</Button>
       </Row>
     </>
   );

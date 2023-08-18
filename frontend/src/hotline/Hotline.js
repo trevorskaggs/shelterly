@@ -222,7 +222,7 @@ function Hotline({ incident }) {
         <Modal.Title>Address Finder</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <AddressLookup style={{width: '100%'}} className={"form-control"} setData={setData} initialBounds={initialBounds} incident={incident} />
+        <AddressLookup style={{width: '100%'}} className={"form-control"} setData={setData} initialBounds={initialBounds} incident={incident} handleClose={handleClose} />
       </Modal.Body>
       <Modal.Footer>
         <Button variant="secondary" onClick={handleClose}>Close</Button>
