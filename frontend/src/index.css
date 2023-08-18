@@ -17,9 +17,11 @@ h1, h2, h3, h4, h5 {
   color: #fff !important;
 }
 
-hr { display: block; height: 1px;
+hr {
+  display: block; height: 1px;
   border: 0; border-top: 1px solid #ccc !important;
-  margin: 1em 0; padding: 0; }
+  margin: 1em 0; padding: 0;
+}
 
 .text-border {
     margin-top: -15px;
@@ -60,6 +62,10 @@ hr { display: block; height: 1px;
 
 .leaflet-top, .leaflet-bottom {
   z-index: 400 !important;
+}
+
+.pac-container {
+  z-index: 1050
 }
 
 /* Image gallery display CSS */

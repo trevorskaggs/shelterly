@@ -21,7 +21,6 @@ import { makeStyles } from '@material-ui/core/styles';
 import Alert from 'react-bootstrap/Alert';
 import { Legend, pinMarkerIcon } from "../components/Map";
 import { STATE_OPTIONS } from '../constants';
-import moment from "moment";
 import imageCompression from 'browser-image-compression';
 
 const useStyles = makeStyles({
@@ -480,6 +479,7 @@ const AddressLookup = ({setLatLon, ...props}) => {
                 setError(props.error);
               }
             }}
+            onFocus={(event) => { event.target.setAttribute('autocomplete', 'off'); }}
             id="search"
             name="search"
             disabled={props.disabled}

@@ -1,17 +1,18 @@
 import React, { useContext, useState, useEffect } from "react";
 import axios from "axios";
 import { Link, navigate } from 'raviger';
-import { Button, Card, Col, Row } from 'react-bootstrap';
+import { Button, Card, Col, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { Marker, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
 import Moment from 'react-moment';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCircle, faExclamationCircle, faPhone } from '@fortawesome/free-solid-svg-icons';
+import { faCircle, faExclamationCircle, faSearch, faPhone } from '@fortawesome/free-solid-svg-icons';
 import { faQuestionCircle as faQuestionCircleDuo } from '@fortawesome/pro-duotone-svg-icons';
 import { faHomeAlt as faHomeAltReg } from '@fortawesome/pro-regular-svg-icons';
 import { faCircleBolt, faHomeAlt, faDoNotEnter } from '@fortawesome/pro-solid-svg-icons';
 import Map, { prettyText, closedMarkerIcon, reportedMarkerIcon, reportedEvacMarkerIcon, reportedSIPMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
 import Header from "../components/Header";
+import { AddressLookup } from '../components/Map';
 import { SystemErrorContext } from '../components/SystemError';
 
 function Hotline({ incident }) {
@@ -20,7 +21,11 @@ function Hotline({ incident }) {
 
   const [data, setData] = useState({service_requests: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
   const [mapState, setMapState] = useState({});
+  const [showAddressModal, setShowAddressModal] = useState(false);
   const [statusOptions, setStatusOptions] = useState("all");
+  const [initialBounds, setInitialBounds] = useState(L.latLngBounds([[0,0]]));
+
+  const handleClose = () => {setShowAddressModal(false);}
 
   // Counts the number of species matches for a service request.
   const countMatches = (service_request) => {
@@ -64,6 +69,7 @@ function Hotline({ incident }) {
           setMapState(map_dict);
           if (bounds.length > 0) {
             setData({service_requests: response.data, isFetching: false, bounds:bounds});
+            setInitialBounds(bounds);
           }
         }
       })
@@ -86,7 +92,21 @@ function Hotline({ incident }) {
 
   return (
     <>
-    <Header>Hotline</Header>
+    <Header>Hotline
+      <OverlayTrigger
+        key={"address-finder"}
+        placement="bottom"
+        overlay={
+          <Tooltip id={`tooltip-address-finder`}>
+            Search for an address to zoom the map to.
+          </Tooltip>
+        }
+      >
+        <Button className="ml-1 fa-move-up" onClick={() => setShowAddressModal(true)}>
+          <FontAwesomeIcon icon={faSearch} />
+        </Button>
+      </OverlayTrigger>
+    </Header>
     <hr/>
     <Row className="ml-0 mr-0 pl-0 pr-0 mb-0">
       <Col xs={4} className="pl-0 pr-0">
@@ -108,7 +128,7 @@ function Hotline({ incident }) {
     <Row xs={12} className="ml-0 mr-0 pl-0 pr-0" style={{marginBottom:"-1px"}}>
       <Col xs={10} className="border rounded pl-0 pr-0">
         {data.service_requests.length ?
-          <Map zoom={11} bounds={data.bounds} className="landing-leaflet-container">
+          <Map zoom={12} bounds={data.bounds} className="landing-leaflet-container">
             {data.service_requests.filter(service_request => (service_request.status === statusOptions || statusOptions === "all")).map(service_request => (
               <Marker
                 key={service_request.id}
@@ -197,6 +217,17 @@ function Hotline({ incident }) {
           Closed
       </h5>
     </Row>
+    <Modal show={showAddressModal} onHide={handleClose}>
+      <Modal.Header closeButton>
+        <Modal.Title>Address Finder</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <AddressLookup style={{width: '100%'}} className={"form-control"} setData={setData} initialBounds={initialBounds} incident={incident} />
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="secondary" onClick={handleClose}>Close</Button>
+      </Modal.Footer>
+    </Modal>
   </>
   )
 }
