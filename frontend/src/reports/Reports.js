@@ -215,11 +215,11 @@ function Reports({ incident }) {
       selector: row => row.reported,
     },
     {
-      name: 'Reported (Evac)',
+      name: <div>Reported (Evac)</div>,
       selector: row => row.reported_evac,
     },
     {
-      name: 'Reported (SIP)',
+      name: <div>Reported (SIP)</div>,
       selector: row => row.reported_sip,
     },
     {
