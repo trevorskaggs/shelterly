@@ -101,9 +101,7 @@ function ServiceRequestDetails({ id, incident }) {
             responseType: 'blob',
         }).then(res => {
             fileDownload(res.data, 'SR-' + data.id + '.geojson');
-            console.log(res);
         }).catch(err => {
-            console.log(err);
         })
   }
 
