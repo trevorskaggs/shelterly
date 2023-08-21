@@ -115,8 +115,8 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
             .select_related('reporter')
             .prefetch_related('evacuation_assignments')
         )).prefetch_related(Prefetch('team', DispatchTeam.objects.prefetch_related('team_members'))).prefetch_related(Prefetch('assigned_requests',
-        AssignedRequest.objects.select_related('service_request', 'owner_contact').prefetch_related('service_request__owners', 'service_request__ownercontact_set').prefetch_related(Prefetch(
-                'service_request__animal_set', queryset=Animal.objects.with_images().exclude(status='CANCELED'), to_attr='animals'))))
+        AssignedRequest.objects.select_related('service_request', 'owner_contact').prefetch_related('service_request__owners', 'service_request__ownercontact_set',).prefetch_related(Prefetch(
+                'service_request__animal_set', queryset=Animal.objects.exclude(status='CANCELED'), to_attr='animals'))))
 
         # Exclude DAs without SRs when fetching for a map.
         is_map = self.request.query_params.get('map', '')
