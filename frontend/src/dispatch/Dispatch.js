@@ -85,7 +85,7 @@ const countMatches = (animal_dict) => {
             map_dict[dispatch_assignment.id] = {service_requests:sr_dict}
           });
           setMapState(map_dict);
-          setData({dispatch_assignments: response.data, isFetching: false, bounds:bounds.length > 0 ? bounds : L.latLngBounds([[0,0]])});
+          setData({dispatch_assignments: response.data.sort((a, b) => a.team_object.name.localeCompare(b.team_object.name)), isFetching: false, bounds:bounds.length > 0 ? bounds : L.latLngBounds([[0,0]])});
           setInitialBounds(bounds);
         }
       })
