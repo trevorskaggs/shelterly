@@ -3,7 +3,7 @@ import re
 from rest_framework import serializers
 from actstream.models import target_stream
 
-from animals.serializers import AnimalSerializer
+from animals.serializers import SimpleAnimalSerializer
 from evac.models import DispatchTeam, EvacAssignment, EvacTeamMember, AssignedRequest
 from hotline.models import ServiceRequest, VisitNote
 from hotline.serializers import BarebonesServiceRequestSerializer, SimpleServiceRequestSerializer, VisitNoteSerializer
@@ -46,7 +46,7 @@ class DispatchTeamSerializer(serializers.ModelSerializer):
 
 class DispatchServiceRequestSerializer(SimpleServiceRequestSerializer):
 
-    animals = AnimalSerializer(many=True, read_only=True)
+    animals = SimpleAnimalSerializer(many=True, read_only=True)
     owner_contacts = OwnerContactSerializer(source='ownercontact_set', many=True, required=False, read_only=True)
     owner_objects = PersonSerializer(source='owners', many=True, required=False, read_only=True)
     reporter_object = SimplePersonSerializer(source='reporter', required=False, read_only=True)
@@ -54,8 +54,8 @@ class DispatchServiceRequestSerializer(SimpleServiceRequestSerializer):
 
     class Meta:
         model = ServiceRequest
-        fields = ['id', 'directions', 'latitude', 'longitude', 'full_address', 'followup_date', 'status', 'injured', 'priority', 'key_provided',
-        'accessible', 'turn_around', 'animals', 'reported_animals', 'reported_evac', 'reported_sheltered_in_place', 'sheltered_in_place', 'unable_to_locate', 'aco_required',
+        fields = ['id', 'animals', 'directions', 'latitude', 'longitude', 'full_address', 'followup_date', 'status', 'injured', 'priority', 'key_provided',
+        'accessible', 'turn_around' , 'reported_animals', 'reported_evac', 'reported_sheltered_in_place', 'sheltered_in_place', 'unable_to_locate', 'aco_required',
         'owner_contacts', 'owner_objects', 'owners', 'reporter_object', 'visit_notes']
 
 class AssignedRequestDispatchSerializer(serializers.ModelSerializer):
