@@ -257,6 +257,7 @@ describe('Utils >  ShelterlyPDF', () => {
 
       expect(mockDrawList).toHaveBeenCalledWith({
         listStyle,
+        rightAlign: false,
         listItems: labels,
         bottomPadding
       });
