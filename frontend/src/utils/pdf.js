@@ -56,6 +56,7 @@ class ShelterlyPDF {
   constructor (format = {}, {
     addFooterHandler,
     drawHeaderOnEveryPage,
+    drawHeaderOnFirstPage = true,
     pageTitle,
     pageSubtitle
   } = {}) {
@@ -83,7 +84,9 @@ class ShelterlyPDF {
     this.setDocumentColors();
 
     // draw header
-    this.drawPageHeader();
+    if (drawHeaderOnFirstPage) {
+      this.drawPageHeader();
+    }
   }
 
   // static getters
@@ -207,7 +210,7 @@ class ShelterlyPDF {
    * @param {string} [param0.pageTitle=this.#pageTitle]
    * @param {string} [param0.subtitle=this.#pageSubtitle]
    */
-  async drawPageHeader({
+  drawPageHeader({
     pageTitle = this.#pageTitle,
     subtitle = this.#pageSubtitle,
     appName = this.#appName
@@ -225,15 +228,8 @@ class ShelterlyPDF {
         : this.#documentLeftMargin;
 
     // add logo header
-    const img = require('../shelterly.png');
-
-    // use canvas to resize the image
-    var canvas = document.createElement('canvas');
-    var ctx = canvas.getContext('2d');
-    await ctx.drawImage(img, 0, 0, 50, 50);
-    const logoData = await canvas.toDataURL();
     this.#jsPDF.addImage(
-      logoData,
+      logo,
       'png',
       logoXPosition,
       logoHeight - this.#documentTopMargin,
