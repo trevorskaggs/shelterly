@@ -118,6 +118,11 @@ class ShelterlyPDF {
   get numberOfPages() { return this.#jsPDF.internal.getNumberOfPages(); }
   get remainderPageHeight() { return (this.pageHeight - 35) - this.#documentLastYPosition - 20; }
   get contentWidth() { return this.pageWidth - this.#defaultXMargin * 2; }
+  get drawColor() { return this.#jsPDF.getDrawColor(); }
+  get textColor() { return this.#jsPDF.getTextColor(); }
+  get fontSize() { return this.#jsPDF.getFontSize(); }
+  get currentPage() { return this.#currentPage; }
+  get paddingBetweenElements() { return this.#paddingBetweenElements; }
 
   //
   // document config methods
@@ -202,7 +207,7 @@ class ShelterlyPDF {
    * @param {string} [param0.pageTitle=this.#pageTitle]
    * @param {string} [param0.subtitle=this.#pageSubtitle]
    */
-  drawPageHeader({
+  async drawPageHeader({
     pageTitle = this.#pageTitle,
     subtitle = this.#pageSubtitle,
     appName = this.#appName
@@ -220,8 +225,15 @@ class ShelterlyPDF {
         : this.#documentLeftMargin;
 
     // add logo header
+    const img = require('../shelterly.png');
+
+    // use canvas to resize the image
+    var canvas = document.createElement('canvas');
+    var ctx = canvas.getContext('2d');
+    await ctx.drawImage(img, 0, 0, 50, 50);
+    const logoData = await canvas.toDataURL();
     this.#jsPDF.addImage(
-      logo,
+      logoData,
       'png',
       logoXPosition,
       logoHeight - this.#documentTopMargin,
