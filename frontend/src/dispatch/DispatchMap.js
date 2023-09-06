@@ -218,7 +218,7 @@ function Deploy({ incident }) {
     setMapState(tempMapState);
   }
 
-  useWebSocket('ws://localhost:8000/ws/map_data/', {
+  useWebSocket('ws://' + window.location.host + '/ws/map_data/', {
     onMessage: (e) => {
       setNewData(true)
     },
