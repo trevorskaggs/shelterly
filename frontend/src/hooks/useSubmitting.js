@@ -3,12 +3,12 @@ import { useState } from "react";
 /**
  * a simple hook for using a submitting state
  * @param {object} [param0]
- * @param {string} [uiLabel='Printifying...   '] optionally use this as the submitting label message in the UI
+ * @param {string} [uiLabel='Printing...   '] optionally use this as the submitting label message in the UI
  * @param {string} [defaultId='defaultId'] optionally provide an identifier for working with multiple spinners
  * @returns 
  */
 function useSubmitting({
-  uiLabel = 'Printifying...   ',
+  uiLabel = 'Printing...   ',
   defaultId = 'defaultId'
 } = {}) {
   const submittingLabel = uiLabel;

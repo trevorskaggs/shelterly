@@ -30,15 +30,20 @@ function ShelterIntakeSummary({ id, incident }) {
     person_object: {first_name:'', last_name:''}
   });
 
+  const [organization, setOrganization] = useState({
+    name: '',
+    short_name: '',
+    liability_name: '',
+    liability_short_name: '',
+  });
+
   const [animalOwners, setAnimalOwners] = useState([]);
 
   const handlePrintOwnerClick = () =>
-    printOwnerDetails(data.person_object);
+    printOwnerDetails(data.person_object, organization);
 
   const handlePrintAnimalOwnersClick = () =>
-    printAllOwnersDetails(
-      animalOwners
-    );
+    printAllOwnersDetails(animalOwners, organization);
 
   const handlePrintAllAnimalsClick = () =>
     printIntakeSummaryAnimalCareSchedules(data.animal_objects, id);
@@ -68,6 +73,25 @@ function ShelterIntakeSummary({ id, incident }) {
       });
     };
     fetchIntakeSummaryData();
+
+    const fetchOrganizationData = async () => {
+      // Fetch Organization data.
+      await axios.get('/accounts/api/organization/', {
+        cancelToken: source.token,
+      })
+      .then(response => {
+        if (!unmounted) {
+          setOrganization(response.data[0]);
+        }
+      })
+      .catch(error => {
+        if (!unmounted) {
+          setShowSystemError(true);
+        }
+      });
+    };
+    fetchOrganizationData();
+
     // Cleanup.
     return () => {
       unmounted = true;
