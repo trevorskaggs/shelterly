@@ -9,7 +9,7 @@ django-rest-knox
 django-ordered-model
 django_smtp_ssl
 djangorestframework>=3.12
-django-storages
+django-storages==1.13.2
 django-rest-passwordreset
 ipython
 pillow
