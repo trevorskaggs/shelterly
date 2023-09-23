@@ -1,6 +1,7 @@
 apig-wsgi
 awscli
 boto3
+channels
 Django==3.2.18
 django-activity-stream
 django-cors-headers
