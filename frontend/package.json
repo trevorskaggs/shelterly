@@ -68,6 +68,8 @@
     "test:coverage": "npm test -- --coverage --watchAll",
     "test:coverage-ci": "npm test -- --coverage",
     "test:debug": "react-scripts --inspect-brk test --runInBand --no-cache",
+    "test:local": "npx react-scripts test --watchAll=false --coverage=true",
+    "test:local:nocov": "npx react-scripts test --watchAll=false --coverage=false",
     "eject": "react-scripts eject",
     "dev": "webpack --mode development ./src/index.js --output /home/sheltuser/shelterly/frontend/src/static/js/main.js",
     "wp_build": "webpack --mode production ./src/index.js --output /home/sheltuser/shelterly/frontend/src/static/js/main.js"

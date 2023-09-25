@@ -1,4 +1,5 @@
 import ShelterlyPDF from '../pdf';
+import jsPDF from 'jspdf';
 import '../../shelterly.png';
 
 describe('Utils >  ShelterlyPDF', () => {
@@ -6,21 +7,74 @@ describe('Utils >  ShelterlyPDF', () => {
   let mockDrawPageHeader = jest.fn();
   let mockDrawGraphic = jest.fn();
   let spyDrawPageHeader;
-  let spyDrawGraphic;
+  let mockJsPdf;
+  let numberOfPages = 1;
+
+  const mockFooterHandler = jest.fn();
+  const mockPdfText = jest.fn();
+  const mockPdfRect = jest.fn();
+  const mockPdfLine = jest.fn();
+  const mockPdfAutoTable = jest.fn();
+  const mockPdfSave = jest.fn();
+  const mockPdfDeletePage = jest.fn();
+  const mockPdfSetPage = jest.fn();
+  const getNumberOfPages = () => numberOfPages;
+  const incrementNumberOfPages = () => numberOfPages++;
+  const mockPdfAddPage = incrementNumberOfPages;
+  const mockPdfInternalGetNumberOfPages = getNumberOfPages;
+  let spyPdfText;
+  let spyPdfRect;
+  let spyPdfLine;
+  let spyPdfAutoTable;
+  let spyPdfSave;
+  let spyPdfDeletePage;
+  let spyPdfSetPage;
+  let spyPdfAddPage;
+  let spyPdfInternalGetNumberOfPages;
+
 
   beforeEach(() => {
+    mockJsPdf = new jsPDF();
     pdf = new ShelterlyPDF({}, {
-      drawHeaderOnFirstPage: false
+      drawHeaderOnFirstPage: false,
+      addFooterHandler: mockFooterHandler
+    }, {
+      mockJsPdf
     });
     spyDrawPageHeader = jest.spyOn(pdf, 'drawPageHeader')
       .mockImplementation(() => mockDrawPageHeader);
-    spyDrawGraphic = jest.spyOn(pdf, 'drawGraphic')
-      .mockImplementation(() => mockDrawGraphic);
+    spyPdfText = jest.spyOn(mockJsPdf, 'text')
+      .mockImplementation(() => mockPdfText);
+    spyPdfRect = jest.spyOn(mockJsPdf, 'rect')
+      .mockImplementation(() => mockPdfRect);
+    spyPdfLine = jest.spyOn(mockJsPdf, 'line')
+      .mockImplementation(() => mockPdfLine);
+    spyPdfAutoTable = jest.spyOn(mockJsPdf, 'autoTable')
+      .mockImplementation(() => mockPdfAutoTable);
+    spyPdfSave = jest.spyOn(mockJsPdf, 'save')
+      .mockImplementation(() => mockPdfSave);
+    spyPdfDeletePage = jest.spyOn(mockJsPdf, 'deletePage')
+      .mockImplementation(() => mockPdfDeletePage);
+    spyPdfSetPage = jest.spyOn(mockJsPdf, 'setPage')
+      .mockImplementation(() => mockPdfSetPage);
+    spyPdfAddPage = jest.spyOn(mockJsPdf, 'addPage')
+      .mockImplementation(mockPdfAddPage);
+    spyPdfInternalGetNumberOfPages = jest.spyOn(mockJsPdf.internal, 'getNumberOfPages')
+      .mockImplementation(mockPdfInternalGetNumberOfPages)
   });
 
   afterEach(() => {
     spyDrawPageHeader.mockRestore();
-    spyDrawGraphic.mockRestore();
+    spyPdfText.mockRestore();
+    spyPdfRect.mockRestore();
+    spyPdfLine.mockRestore();
+    spyPdfAutoTable.mockRestore();
+    spyPdfSave.mockRestore();
+    spyPdfDeletePage.mockRestore();
+    spyPdfSetPage.mockRestore();
+    spyPdfAddPage.mockRestore();
+    spyPdfInternalGetNumberOfPages.mockRestore();
+    numberOfPages = 1;
   })
 
   it('Creates new ShelterlyPDF instance', () => {
@@ -119,8 +173,8 @@ describe('Utils >  ShelterlyPDF', () => {
 
       pdf.beforeDraw({ yPosition: pageHeight });
       expect(pdf.numberOfPages).toBe(totalPages + 1);
-    })
-  })
+    });
+  });
   
   describe('Document Draw Methods', () => {
     // Test case for drawing a page header
@@ -129,178 +183,299 @@ describe('Utils >  ShelterlyPDF', () => {
       expect(spyDrawPageHeader).toHaveBeenCalled();
     });
 
-    // Test case for drawing a graphic
-    it('Draws a graphic', () => {
-      pdf.drawGraphic();
-      expect(spyDrawGraphic).toHaveBeenCalled();
+    // Test case for drawing vertical padding
+    it('Draws vertical padding', () => {
+      const currentYPosition = pdf.lastYPosition;
+      const padAmount = 90;
+      pdf.drawPad(padAmount);
+      expect(pdf.lastYPosition).toEqual(currentYPosition + padAmount);
     });
 
-    // Test case for drawing a text element
-    it('Draws a single line text element', () => {
-      const text = 'test';
-      const currentYPosition = pdf.lastYPosition;
-      pdf.drawSingleLineText({ text });
-      expect(pdf.lastYPosition).toBeGreaterThan(currentYPosition);
+    // Test case for drawing a horizontal rule
+    it('Draws a horizontal rule', () => {
+      const buffer = 10;
+      const expectedYPosition = pdf.getLastYPositionWithBuffer({ buffer });
+      pdf.drawHRule({ buffer });
+      expect(pdf.lastYPosition).toEqual(expectedYPosition);
     });
 
-    // Test case for drawing a wrapped text element
-    it('Draws a wrapped text element', () => {
-      const text = 'test';
-      const currentYPosition = pdf.lastYPosition;
-      pdf.drawWrappedText({ text });
-      expect(pdf.lastYPosition).toBeGreaterThan(currentYPosition);
+    // Test cases for drawing an image
+    describe('drawImage', () => {
+      it('Throws if no src argument is provided', async () => {
+        await expect(pdf.drawImage({}))
+          .rejects
+          .toThrow('The src param is not defined.');
+      });
+    });
+    
+
+    // Test cases for drawing an svg
+    describe('drawSvg', () => {
+      it('Throws if no svg argument is provided', async () => {
+        await expect(pdf.drawSvg({}))
+          .rejects
+          .toThrow('The svg param is not defined.');
+      });
     });
 
-    // Test case for drawing a text with a line
-    it('Draws a text with a line', async () => {
-      const mockDrawHRule = jest.fn();
-      const spyDrawHRule = jest.spyOn(pdf, 'drawHRule')
-        .mockImplementation(mockDrawHRule);
+    // Test cases for drawing a graphic
+    describe('drawGraphic', () => {
+      it('Should throw padding array is not in shape', async () => {
+        await expect(pdf.drawGraphic({ padding: [0, 0, 0] })).rejects.toThrow(
+          'padding array must equal all four sides, i.e. [top, left, bottom, right]'
+        );
+      })
+    });
 
-      const label = 'label';
-      const currentYPosition = pdf.lastYPosition;
-      const offset = 10;
-      const buffer = 5;
-
-      await pdf.drawTextWithLine({ label, xOffset: offset, yBuffer: buffer });
-
-      expect(pdf.lastYPosition).toBeGreaterThan(currentYPosition);
-      expect(mockDrawHRule).toHaveBeenCalledWith({
-        buffer,
-        xOffset: offset,
+    describe('Draw text elements', () => {
+      it('Draws a section header', () => {
+        const text = 'This is a test';
+        const expectedYPosition = pdf.getLastYPositionWithBuffer({ buffer: 25 })
+        pdf.drawSectionHeader({ text });
+        expect(spyPdfText).toHaveBeenCalledWith(
+          text,
+          pdf.documentLeftMargin,
+          expectedYPosition
+        );
       });
 
-      spyDrawHRule.mockRestore();
-    });
-
-    // Test case for drawing a text area
-    it('Draws a multi-row text area', () => {
-      const mockDrawHRule = jest.fn();
-      const spyDrawHRule = jest.spyOn(pdf, 'drawHRule')
-        .mockImplementation(mockDrawHRule);
-
-      const label = 'label';
-      const rows = 5;
-      const currentYPosition = pdf.lastYPosition;
-
-      pdf.drawTextArea({ label, rows });
-
-      expect(pdf.lastYPosition).toBeGreaterThan(currentYPosition);
-      expect(mockDrawHRule).toHaveBeenCalledTimes(rows);
-
-      spyDrawHRule.mockRestore();
-    });
-
-    // Test case fro drawing a checkbox
-    it('Draws a checkbox', () => {
-      const label = 'label';
-      const currentYPosition = pdf.lastYPosition;
-
-      pdf.drawCheckBoxLine({ label });
-
-      expect(pdf.lastYPosition).toBeGreaterThan(currentYPosition);
-    });
-
-    // Test case for drawing a list
-    it('Draws a list', () => {
-      const label = 'label';
-      const currentYPosition = pdf.lastYPosition;
-
-      // doesn't draw a list if no items are provided
-      expect(() => {
-        pdf.drawList();
-      }).toThrow();
-      expect(pdf.lastYPosition).toBe(currentYPosition);
-
-      // does draw the list if items are provided
-      pdf.drawList({
-        listItems: [{ label }, { label }, { label }]
-      });
-      expect(pdf.lastYPosition).toBeGreaterThan(currentYPosition);
-    });
-
-    // Test case for drawing a grid
-    it('Draws a grid', () => {
-      const mockDrawList = jest.fn();
-      const spyDrawList = jest.spyOn(pdf, 'drawList')
-        .mockImplementation(mockDrawList);
-
-      const label = 'label';
-      const blocks = [
-        [{ label }, { label }, { label }],
-        [{ label }, { label }, { label }],
-          [{ label }, { label }, { label }],
-          [{ label }, { label }, { label }],
-          [{ label }, { label }, { label }],
-      ];
-      pdf.drawGrid({ blocks });
-
-      expect(mockDrawList).toHaveBeenCalledTimes(blocks.length);
-
-      spyDrawList.mockRestore();
-    });
-
-    // Test case for drawing a checkbox list
-    it('Draws a checkbox list', () => {
-      const mockDrawList = jest.fn();
-      const spyDrawList = jest.spyOn(pdf, 'drawList')
-        .mockImplementation
-        (mockDrawList);
-
-      const label = 'label';
-      const listItem = { label, type: 'checkbox', size: 20 };
-      const labels = [listItem, listItem, listItem];
-      const listStyle = 'block';
-      const bottomPadding = 10;
-
-      pdf.drawCheckboxList({ labels, listStyle, bottomPadding });
-
-      expect(mockDrawList).toHaveBeenCalledWith({
-        listStyle,
-        rightAlign: false,
-        listItems: labels,
-        bottomPadding
+      it('Draws text with style', () => {
+        const text = 'This is a test';
+        const xPosition = 0;
+        const yPosition = 0;
+        pdf.textWithStyle({ text, xPosition, yPosition });
+        expect(spyPdfText).toHaveBeenCalledWith(text, xPosition, yPosition);
       });
 
-      spyDrawList.mockRestore();
+      it('Draws a single line text element', () => {
+        const text = 'test';
+        const currentYPosition = pdf.lastYPosition;
+        const expectedYPosition = pdf.getLastYPositionWithBuffer({ buffer: 16 });
+        pdf.drawSingleLineText({ text });
+        expect(pdf.lastYPosition).toBeGreaterThan(currentYPosition);
+        expect(spyPdfText).toHaveBeenCalledWith(text, pdf.documentLeftMargin, expectedYPosition);
+      });
+
+      it('Draws a wrapped text element', () => {
+        const text = 'test';
+        const currentYPosition = pdf.lastYPosition;
+        const expectedYPosition = pdf.getLastYPositionWithBuffer({ buffer: 16 });
+        pdf.drawWrappedText({ text });
+        expect(pdf.lastYPosition).toBeGreaterThan(currentYPosition);
+        expect(spyPdfText).toHaveBeenCalledWith(text, pdf.documentLeftMargin, expectedYPosition);
+      });
+
+      it('Draws a text with a line', async () => {
+        const mockDrawHRule = jest.fn();
+        const spyDrawHRule = jest.spyOn(pdf, 'drawHRule')
+          .mockImplementation(mockDrawHRule);
+  
+        const label = 'label';
+        const currentYPosition = pdf.lastYPosition;
+        const offset = 10;
+        const buffer = 5;
+        const expectedYPosition = pdf.getLastYPositionWithBuffer();
+  
+        await pdf.drawTextWithLine({ label, xOffset: offset, yBuffer: buffer });
+  
+        expect(pdf.lastYPosition).toBeGreaterThan(currentYPosition);
+        expect(mockDrawHRule).toHaveBeenCalledWith({
+          buffer,
+          xOffset: offset,
+        });
+        expect(spyPdfText).toHaveBeenCalledWith(label, pdf.documentLeftMargin, expectedYPosition);
+  
+        spyDrawHRule.mockRestore();
+      });
+
+      it('Draws a multi-row text area', () => {
+        const mockDrawHRule = jest.fn();
+        const spyDrawHRule = jest.spyOn(pdf, 'drawHRule')
+          .mockImplementation(mockDrawHRule);
+  
+        const label = 'label';
+        const rows = 5;
+        const currentYPosition = pdf.lastYPosition;
+        const expectedYPosition = pdf.getLastYPositionWithBuffer();
+  
+        pdf.drawTextArea({ label, rows });
+  
+        expect(pdf.lastYPosition).toBeGreaterThan(currentYPosition);
+        expect(mockDrawHRule).toHaveBeenCalledTimes(rows);
+        expect(spyPdfText).toHaveBeenCalledWith(label, pdf.documentLeftMargin, expectedYPosition);
+  
+        spyDrawHRule.mockRestore();
+      });
+
+      it('Draws page numbers', () => {
+        const pageNumber = 1;
+        const pageCount = 10;
+        const marginBottom = 30;
+        const expectedPageNumberText = `Page ${pageNumber} of ${pageCount}`;
+        const { pageWidth, pageHeight } = pdf;
+        pdf.drawPageNumbers({ pageNumber, pageCount, marginBottom });
+        expect(spyPdfText).toHaveBeenCalledWith(
+          expectedPageNumberText,
+          pageWidth / 2,
+          pageHeight - marginBottom,
+          { align: "center" }
+        );
+      });
     });
 
-    // Test case for drawing a text list
-    it('Draws a text list', () => {
-      const mockDrawList = jest.fn();
-      const spyDrawList = jest.spyOn(pdf, 'drawList')
-        .mockImplementation(mockDrawList);
-
-      const label = 'label';
-      const labels = [label, label, label];
-      const listStyle = 'block';
-      const bottomPadding = 10;
-
-      pdf.drawTextList({ labels, listStyle, bottomPadding });
-
-      expect(mockDrawList).toHaveBeenCalledWith({
-        listStyle,
-        listItems: labels.map((label) => ({
+    describe('Draw complex elements', () => {
+      it('Draws a checkbox', () => {
+        const label = 'label';
+        const currentYPosition = pdf.lastYPosition;
+        const expectedYPosition = pdf.getLastYPositionWithBuffer();
+        const docLeftMargin = pdf.documentLeftMargin;
+  
+        pdf.drawCheckBoxLine({ label });
+  
+        expect(pdf.lastYPosition).toBeGreaterThan(currentYPosition);
+        expect(spyPdfText).toHaveBeenCalledWith(
           label,
-          marginTop: 0,
-          inlineRightMargin: 0,
-          inlineOffset: 0,
-          withLines: false
-        })),
-        bottomPadding
+          docLeftMargin + 25,
+          expectedYPosition + 15
+        );
+        expect(spyPdfRect).toHaveBeenCalledWith(
+          docLeftMargin,
+          expectedYPosition,
+          20,
+          20,
+          "FD"
+        );
       });
 
-      spyDrawList.mockRestore();
+      it('Draws a list', () => {
+        const label = 'label';
+        const currentYPosition = pdf.lastYPosition;
+  
+        // doesn't draw a list if no items are provided
+        expect(() => {
+          pdf.drawList();
+        }).toThrow();
+        expect(pdf.lastYPosition).toBe(currentYPosition);
+
+        const listItem = { label, withLines: true, type: 'checkbox' };
+  
+        // does draw the list if items are provided
+        pdf.drawList({
+          listItems: [listItem, listItem, listItem]
+        });
+        expect(pdf.lastYPosition).toBeGreaterThan(currentYPosition);
+        expect(spyPdfText).toHaveBeenCalledTimes(3);
+        expect(spyPdfLine).toHaveBeenCalledTimes(3);
+        expect(spyPdfRect).toHaveBeenCalledTimes(3);
+      });
+
+      it('Draws a grid', () => {
+        const mockDrawList = jest.fn();
+        const spyDrawList = jest.spyOn(pdf, 'drawList')
+          .mockImplementation(mockDrawList);
+  
+        const label = 'label';
+        const blocks = [
+          [{ label }, { label }, { label }],
+          [{ label }, { label }, { label }],
+            [{ label }, { label }, { label }],
+            [{ label }, { label }, { label }],
+            [{ label }, { label }, { label }],
+        ];
+        pdf.drawGrid({ blocks });
+  
+        expect(mockDrawList).toHaveBeenCalledTimes(blocks.length);
+  
+        spyDrawList.mockRestore();
+      });
+
+      it('Draws a checkbox list', () => {
+        const mockDrawList = jest.fn();
+        const spyDrawList = jest.spyOn(pdf, 'drawList')
+          .mockImplementation
+          (mockDrawList);
+  
+        const label = 'label';
+        const listItem = { label, type: 'checkbox', size: 20 };
+        const labels = [listItem, listItem, listItem];
+        const listStyle = 'block';
+        const bottomPadding = 10;
+  
+        pdf.drawCheckboxList({ labels, listStyle, bottomPadding });
+  
+        expect(mockDrawList).toHaveBeenCalledWith({
+          listStyle,
+          rightAlign: false,
+          listItems: labels,
+          bottomPadding
+        });
+  
+        spyDrawList.mockRestore();
+      });
+
+      it('Draws a text list', () => {
+        const mockDrawList = jest.fn();
+        const spyDrawList = jest.spyOn(pdf, 'drawList')
+          .mockImplementation(mockDrawList);
+  
+        const label = 'label';
+        const labels = [label, label, label];
+        const listStyle = 'block';
+        const bottomPadding = 10;
+  
+        pdf.drawTextList({ labels, listStyle, bottomPadding });
+  
+        expect(mockDrawList).toHaveBeenCalledWith({
+          listStyle,
+          listItems: labels.map((label) => ({
+            label,
+            marginTop: 0,
+            inlineRightMargin: 0,
+            inlineOffset: 0,
+            withLines: false
+          })),
+          bottomPadding
+        });
+  
+        spyDrawList.mockRestore();
+      });
+
+      it('Throws if table grid arguments dont match length', () => {
+        expect(() => {
+          pdf.drawTableGrid({
+            headers: [''],
+            columnStyles: []
+          });
+        }).toThrow('columnStyles length must match header length');
+      });
+
+      it('Draws a table grid', () => {
+        const headers = ['Test header 1', 'Test header 1', 'Test header 3'];
+  
+        // does draw the list if items are provided
+        pdf.drawTableGrid({
+          headers
+        });
+        expect(spyPdfAutoTable.mock.calls[0][0]).toMatchObject({ head: [headers] });
+      });
     });
   });
 
-  // Test case for saving the PDF
-  // it('Save PDF', async () => {
-  //   const pdf = new ShelterlyPDF();
-  //   const fileName = 'test';
-  //   pdf.fileName = fileName;
-  //   const savedPdf = await pdf.saveFile();
-  //   const savedFileName = savedPdf.internal.fileTitle;
-  //   expect(savedFileName).toBe(`${fileName}.pdf`);
-  // });
+  describe('saveFile', () => {
+    it('Saves PDF', async () => {
+      const fileName = 'test';
+      pdf.fileName = fileName;
+      pdf.drawPageBreak();
+      pdf.drawPageBreak();
+      await pdf.saveFile({ maxPages: 1 });
+
+      const expectedFullFilename = `${pdf.fileName}.${pdf.fileExtension}`
+      expect(spyPdfSave).toHaveBeenCalledWith(expectedFullFilename, { returnPromise: true });
+      expect(mockFooterHandler).toHaveBeenCalledTimes(1);
+      // for some reason the mocks for setPage and deletePage are not being called, or set properly, i tired
+      // expect(mockPdfSetPage).toHaveBeenCalledTimes(1);
+      // expect(mockPdfDeletePage).toHaveBeenCalledTimes(1);
+      expect(mockPdfInternalGetNumberOfPages()).toEqual(3);
+    });
+  });
 });

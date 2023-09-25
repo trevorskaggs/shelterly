@@ -59,11 +59,15 @@ class ShelterlyPDF {
     drawHeaderOnFirstPage = true,
     pageTitle,
     pageSubtitle
+  } = {}, {
+    mockJsPdf
   } = {}) {
-    this.#jsPDF = new jsPDF({
-      ...defaultFormat,
-      ...format
-    });
+    this.#jsPDF =
+      mockJsPdf ||
+      new jsPDF({
+        ...defaultFormat,
+        ...format,
+      });
 
     if (pageTitle) {
       this.#pageTitle = pageTitle;
@@ -352,7 +356,7 @@ class ShelterlyPDF {
 
     if (Array.isArray(padding)) {
       // enforce padding array precision
-      if (padding.length !== 4) throw new Error('padding array must equal all four sides, i.e. [top, left, bottom, right');
+      if (padding.length !== 4) throw new Error('padding array must equal all four sides, i.e. [top, left, bottom, right]');
 
       leftPad = padding[1];
       rightPad = padding[3];
