@@ -56,13 +56,18 @@ class ShelterlyPDF {
   constructor (format = {}, {
     addFooterHandler,
     drawHeaderOnEveryPage,
+    drawHeaderOnFirstPage = true,
     pageTitle,
     pageSubtitle
+  } = {}, {
+    mockJsPdf
   } = {}) {
-    this.#jsPDF = new jsPDF({
-      ...defaultFormat,
-      ...format
-    });
+    this.#jsPDF =
+      mockJsPdf ||
+      new jsPDF({
+        ...defaultFormat,
+        ...format,
+      });
 
     if (pageTitle) {
       this.#pageTitle = pageTitle;
@@ -83,7 +88,9 @@ class ShelterlyPDF {
     this.setDocumentColors();
 
     // draw header
-    this.drawPageHeader();
+    if (drawHeaderOnFirstPage) {
+      this.drawPageHeader();
+    }
   }
 
   // static getters
@@ -118,6 +125,11 @@ class ShelterlyPDF {
   get numberOfPages() { return this.#jsPDF.internal.getNumberOfPages(); }
   get remainderPageHeight() { return (this.pageHeight - 35) - this.#documentLastYPosition - 20; }
   get contentWidth() { return this.pageWidth - this.#defaultXMargin * 2; }
+  get drawColor() { return this.#jsPDF.getDrawColor(); }
+  get textColor() { return this.#jsPDF.getTextColor(); }
+  get fontSize() { return this.#jsPDF.getFontSize(); }
+  get currentPage() { return this.#currentPage; }
+  get paddingBetweenElements() { return this.#paddingBetweenElements; }
 
   //
   // document config methods
@@ -344,7 +356,7 @@ class ShelterlyPDF {
 
     if (Array.isArray(padding)) {
       // enforce padding array precision
-      if (padding.length !== 4) throw new Error('padding array must equal all four sides, i.e. [top, left, bottom, right');
+      if (padding.length !== 4) throw new Error('padding array must equal all four sides, i.e. [top, left, bottom, right]');
 
       leftPad = padding[1];
       rightPad = padding[3];
