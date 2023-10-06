@@ -108,6 +108,7 @@ const VisitNoteForm = ({ id, incident }) => {
                     label="Notes"
                     name="notes"
                     id="notes"
+                    data-testid="notes_text"
                     xs="7"
                     rows={5}
                   />
@@ -115,14 +116,21 @@ const VisitNoteForm = ({ id, incident }) => {
                 <Row>
                   <Col>
                     <BootstrapForm.Label htmlFor="forced_entry" className="mt-2">Forced Entry</BootstrapForm.Label>
-                    <Field component={Switch} name="forced_entry" type="checkbox" color="primary" />
+                    <Field component={Switch} name="forced_entry" id="forced_entry" type="checkbox" color="primary" />
                   </Col>
                 </Row>
               </FormGroup>
             </Form>
           </Card.Body>
           <ButtonGroup>
-            <Button type="button" className="btn btn-primary" onClick={() => { form.submitForm() }}>Save</Button>
+            <Button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => { form.submitForm() }}
+              data-testid="save_button"
+            >
+              Save
+            </Button>
           </ButtonGroup>
         </Card>
       )}
