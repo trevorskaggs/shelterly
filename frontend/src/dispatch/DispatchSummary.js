@@ -471,7 +471,7 @@ function DispatchSummary({ id, incident }) {
               ))}
             {assigned_request.service_request_object.reporter_object ? 
               <ListGroup.Item>
-                <b>Reporter: </b>{assigned_request.service_request_object.reporter_object.first_name + " " + assigned_request.service_request_object.reporter_object.first_name}
+                <b>Reporter: </b>{assigned_request.service_request_object.reporter_object.first_name + " " + assigned_request.service_request_object.reporter_object.last_name}
                 {assigned_request.service_request_object.reporter_object.agency ? <span className="ml-1">({assigned_request.service_request_object.reporter_object.agency})</span> : "" }
                 {assigned_request.service_request_object.reporter_object.display_phone ?
                 <OverlayTrigger

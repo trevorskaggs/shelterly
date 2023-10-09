@@ -10,6 +10,7 @@ class VisitNoteSerializer(serializers.ModelSerializer):
     team_name = serializers.SerializerMethodField()
     team_member_names = serializers.SerializerMethodField()
     dispatch_assignment = serializers.SerializerMethodField()
+    service_request = serializers.SerializerMethodField()
 
     def get_address(self, obj):
         if obj.assigned_request.first():
@@ -19,6 +20,11 @@ class VisitNoteSerializer(serializers.ModelSerializer):
     def get_dispatch_assignment(self, obj):
         if obj.assigned_request.first():
             return obj.assigned_request.first().dispatch_assignment.id
+        return None
+    
+    def get_service_request(self, obj):
+        if obj.assigned_request.first():
+            return obj.assigned_request.first().service_request.id
         return None
 
     def get_team_name(self, obj):
