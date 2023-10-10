@@ -7,6 +7,8 @@ from datetime import datetime, timedelta
 from rest_framework import filters, permissions, serializers, viewsets
 from rest_framework.decorators import action as drf_action
 from actstream import action
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 from animals.models import Animal
 from evac.models import AssignedRequest, DispatchTeam, EvacAssignment, EvacTeamMember
@@ -164,6 +166,10 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
                 for animal in service_request.animal_set.filter(status__in=['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE']):
                     animals_dict[animal.id] = {'status':animal.status, 'name':animal.name, 'species':animal.species, 'color_notes':animal.color_notes, 'pcolor':animal.pcolor, 'scolor':animal.scolor, 'shelter':'', 'room':''}
                 AssignedRequest.objects.create(dispatch_assignment=evac_assignment, service_request=service_request, animals=animals_dict, timestamp=timestamp)
+
+            # Notify maps that there is updated data.
+            channel_layer = get_channel_layer()
+            async_to_sync(channel_layer.group_send)("map", {"type":"new_data"})
 
     def perform_update(self, serializer):
         if serializer.is_valid():

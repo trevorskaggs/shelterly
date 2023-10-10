@@ -7,13 +7,14 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBan, faBandAid, faBullseye, faCalendarDay, faCar, faChevronDown, faChevronUp, faEquals, faExclamationTriangle, faCircle, faClipboardList, faExclamationCircle, faMapMarkedAlt, faQuestionCircle, faPencilAlt, faTrailer, faUserAlt, faUserAltSlash
 } from '@fortawesome/free-solid-svg-icons';
-import { faBadgeSheriff, faChevronDoubleDown, faChevronDoubleUp, faCircleBolt, faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
+import { faBadgeSheriff, faChevronDoubleDown, faChevronDoubleUp, faCircleBolt, faHomeAlt, faRotate } from '@fortawesome/pro-solid-svg-icons';
 import { faHomeAlt as faHomeAltReg } from '@fortawesome/pro-regular-svg-icons';
 import { Circle, Marker, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
 import * as Yup from 'yup';
 import { Typeahead } from 'react-bootstrap-typeahead';
 import Moment from 'react-moment';
+import useWebSocket from 'react-use-websocket';
 import Map, { countMatches, prettyText, reportedMarkerIcon, reportedEvacMarkerIcon, reportedSIPMarkerIcon, SIPMarkerIcon, UTLMarkerIcon, checkMarkerIcon } from "../components/Map";
 import { Checkbox, TextInput } from "../components/Form";
 import { DispatchDuplicateSRModal, DispatchAlreadyAssignedTeamModal } from "../components/Modals";
@@ -31,6 +32,7 @@ function Deploy({ incident }) {
   let preplan = window.location.pathname.includes("preplan")
 
   const [data, setData] = useState({service_requests: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
+  const [newData, setNewData] = useState(false);
   const [mapState, setMapState] = useState({});
   const [totalSelectedState, setTotalSelectedState] = useState({'REPORTED':{}, 'REPORTED (EVAC REQUESTED)':{}, 'REPORTED (SIP REQUESTED)':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}});
   const [selectedCount, setSelectedCount] = useState({count:0, disabled:true});
@@ -216,10 +218,18 @@ function Deploy({ incident }) {
     setMapState(tempMapState);
   }
 
+  useWebSocket('ws://' + window.location.host + '/ws/map_data/', {
+    onMessage: (e) => {
+      setNewData(true)
+    },
+    shouldReconnect: (closeEvent) => true,
+  });
+
   // Hook for initializing data.
   useEffect(() => {
     let unmounted = false;
     let source = axios.CancelToken.source();
+
     const fetchTeamMembers = async () => {
       setTeamData({teams: [], options: [], isFetching: true});
       // Fetch all TeamMembers.
@@ -307,6 +317,26 @@ function Deploy({ incident }) {
           }
           setMapState(map_dict);
 
+          var status_matches = {'REPORTED':{}, 'REPORTED (EVAC REQUESTED)':{}, 'REPORTED (SIP REQUESTED)':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}};
+          var matches = {};
+          var total = 0;
+          // Recount the total state tracker for selected SRs on refresh.
+          Object.keys(map_dict).filter(key => map_dict[key].checked === true && response.data.map(sr => sr.id).includes(Number(key))).forEach(id => {
+            for (var select_status in map_dict[id].status_matches) {
+              matches = {...status_matches[select_status]};
+              for (var select_key in map_dict[id].status_matches[select_status]){
+                if (!status_matches[select_status][select_key]) {
+                  total = map_dict[id].status_matches[select_status][select_key];
+                } else {
+                  total = status_matches[select_status][select_key] += map_dict[id].status_matches[select_status][select_key];
+                }
+                matches[select_key] = total;
+              }
+              status_matches[select_status] = matches;
+            }
+          })
+          setTotalSelectedState(status_matches);
+
           if (bounds.length > 0 && Object.keys(mapState).length < 1) {
             setData(prevState => ({ ...prevState, "bounds":L.latLngBounds(bounds) }));
           }
@@ -320,8 +350,13 @@ function Deploy({ incident }) {
       });
     };
 
-    fetchTeamMembers();
+    // Only fetch team member data first time.
+    if (teamData.options.length === 0) {
+      fetchTeamMembers();
+    }
+
     fetchServiceRequests();
+    setNewData(false);
 
     // Cleanup.
     return () => {
@@ -422,7 +457,22 @@ function Deploy({ incident }) {
     {props => (
       <Form>
         <Header>
-          {preplan ? "Preplan Dispatch Assignments" : "Deploy Teams"}
+          {preplan ? "Preplan Dispatch Assignments" : "Deploy Teams "}
+          <OverlayTrigger
+            key={"new-data"}
+            placement="bottom"
+            overlay={
+              <Tooltip id={`tooltip-new-data`}>
+                {!newData ? "No new Service Request data available." : "New Service Request data available."}
+              </Tooltip>
+            }
+          >
+            <span className="d-inline-block">
+              <Button className="fa-move-up" onClick={() => setTriggerRefresh(!triggerRefresh)} disabled={!newData}>
+                <FontAwesomeIcon icon={faRotate} />
+              </Button>
+            </span>
+          </OverlayTrigger>
         </Header>
         <hr/>
         <Row className="d-flex flex-wrap" style={{marginTop:"10px", marginLeft:"0px", marginRight:"0px"}}>
