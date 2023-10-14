@@ -311,8 +311,15 @@ const AnimalForm = (props) => {
             }
           }
           // Add extra images.
-          for (let i = 0; i < extra_images.length; i++) {
-            formData.append('extra' + (i + 1), extra_images[i].file);
+          for (let i = 0; i < values.extra_images.length; i++) {
+            const extraKey = `extra${(i + 1)}`;
+            const extraImage = values.extra_images[i];
+            const extraName = extraImage.name;
+            if (extraName) {
+              formData.append(extraKey, extraImage, extraName);
+            } else {
+              formData.append(extraKey, extraImage);
+            }
           }
 
           if (is_workflow) {
