@@ -1,18 +1,19 @@
 import React, { useContext, useEffect, useState, useRef } from 'react';
 import axios from "axios";
 import { Link, useQueryParams } from 'raviger';
-import { Button, ButtonGroup, Card, CardGroup, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Pagination, Tooltip } from 'react-bootstrap';
+import { Button, ButtonGroup, Card, CardGroup, Col, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Pagination, Row, Tooltip } from 'react-bootstrap';
 import moment from 'moment';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBan, faCar, faChevronDown, faChevronUp, faEquals, faClipboardList, faEnvelope, faKey, faTrailer, faUsers, faPrint
+  faBan, faCar, faChevronDown, faChevronUp, faDownload, faEquals, faClipboardList, faEnvelope, faKey, faTrailer, faPrint
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faDotCircle
 } from '@fortawesome/free-regular-svg-icons';
-import { faChevronDoubleDown, faChevronDoubleUp, faCommentSmile, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
+import { faChevronDoubleDown, faChevronDoubleUp, faHammerCrash, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import Moment from 'react-moment';
-import { useMark, useSubmitting, useDateRange } from '../hooks';
+import { DATE_FORMAT } from '../constants';
+import { useMark, useSubmitting } from '../hooks';
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
 import { speciesChoices } from '../animals/constants';
@@ -30,31 +31,29 @@ function ServiceRequestSearch({ incident }) {
   const [queryParams] = useQueryParams();
   const {
     search = '',
-    status = 'open',
+    status = '',
   } = queryParams;
 
   const priorityText = {1:'Highest', 2:'High', 3:'Medium', 4:'Low', 5:'Lowest'};
 
   const [data, setData] = useState({service_requests: [], isFetching: false});
   const [searchState, setSearchState] = useState({});
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
+  const [triggerRefresh, setTriggerRefresh] = useState(false);
   const [searchTerm, setSearchTerm] = useState(search);
   const tempSearchTerm = useRef(null);
-  const [statusOptions, setStatusOptions] = useState(status);
   const [page, setPage] = useState(1);
   const [numPages, setNumPages] = useState(1);
+  const [statusOptions, setStatusOptions] = useState(status);
   const { markInstances } = useMark();
   const {
-    isSubmitting,
+    isSubmittingById,
     handleSubmitting,
     submittingComplete,
     submittingLabel
   } = useSubmitting();
-  const [isDateSet, setIsDateSet] = useState(false);
-  const [
-    filteredServiceRequests,
-    setFilteredServiceRequests
-  ] = useState(data.service_requests);
-  const { startDate, endDate, parseDateRange } = useDateRange();
+  const [filteredServiceRequests, setFilteredServiceRequests] = useState(data.service_requests);
 
   // Update searchTerm when field input changes.
   const handleChange = event => {
@@ -72,7 +71,7 @@ function ServiceRequestSearch({ incident }) {
     e.preventDefault();
 
     handleSubmitting()
-      .then(() => printAllServiceRequests(data.service_requests))
+      .then(() => printAllServiceRequests(filteredServiceRequests))
       .then(submittingComplete);
   }
 
@@ -82,10 +81,26 @@ function ServiceRequestSearch({ incident }) {
     }
   }
 
+  const handleGeoJsonDownload = () => {
+    var params = '';
+    filteredServiceRequests.map(sr => sr.id).forEach(id => params = params + "id=" + id + "&")
+    // params.append("foo", 5);
+    var fileDownload = require('js-file-download');
+    axios.get('/hotline/api/servicerequests/download_all/', { 
+            params: {
+              ids: params
+            },
+            responseType: 'blob',
+        }).then(res => {
+            fileDownload(res.data, `SRs-${moment().format(DATE_FORMAT)}` + '.geojson');
+        }).catch(err => {
+        })
+  }
+
   // Hook for filtering service requests
   useEffect(() => {
     if (data.isFetching) return;
-    if (isDateSet) {
+    if (startDate && endDate) {
       const srSubset = data.service_requests.filter((sr) => 
         moment(startDate) <= moment(sr.timestamp) && moment(endDate) >= moment(sr.timestamp)
       )
@@ -95,7 +110,7 @@ function ServiceRequestSearch({ incident }) {
       setFilteredServiceRequests(data.service_requests);
       setNumPages(Math.ceil(data.service_requests.length / ITEMS_PER_PAGE));
     }
-  }, [data, isDateSet, startDate, endDate])
+  }, [data, startDate, endDate, triggerRefresh])
 
   // Hook for initializing data.
   useEffect(() => {
@@ -105,7 +120,7 @@ function ServiceRequestSearch({ incident }) {
     const fetchServiceRequests = async () => {
       setData({service_requests: [], isFetching: true});
       // Fetch ServiceRequest data.
-      await axios.get('/hotline/api/servicerequests/?search=' + searchTerm + '&status=' + statusOptions +'&incident=' + incident, {
+      await axios.get('/hotline/api/servicerequests/?search=' + searchTerm + '&status=' + statusOptions + '&incident=' + incident, {
         cancelToken: source.token,
       })
       .then(response => {
@@ -163,39 +178,66 @@ function ServiceRequestSearch({ incident }) {
           <InputGroup.Append>
             <Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0"}}>Search</Button>
           </InputGroup.Append>
-          <ButtonGroup className="ml-1">
-            <Button variant={statusOptions === "open" ? "primary" : "secondary"} onClick={statusOptions !== "open" ? () => {setPage(1);setStatusOptions("open")} : () => {setPage(1);setStatusOptions("")}}>Open</Button>
-            <Button variant={statusOptions === "assigned" ? "primary" : "secondary"} onClick={statusOptions !== "assigned" ? () => {setPage(1);setStatusOptions("assigned")} : () => {setPage(1);setStatusOptions("")}}>Assigned</Button>
-            <Button variant={statusOptions === "closed" ? "primary" : "secondary"} onClick={statusOptions !== "closed" ? () => {setPage(1);setStatusOptions("closed")} : () => {setPage(1);setStatusOptions("")}}>Closed</Button>
-            <Button variant={statusOptions === "canceled" ? "primary" : "secondary"} onClick={statusOptions !== "canceled" ? () => {setPage(1);setStatusOptions("canceled")} : () => {setPage(1);setStatusOptions("")}}>Canceled</Button>
-          </ButtonGroup>
-          <DateRangePicker
-            name={`date_range_picker`}
-            id={`date_range_picker`}
-            placeholder={"Filter by Date Range"}
-            style={{width:"210px", marginLeft:"0.25rem"}}
-            onChange={(dateRange) => {
-              if (dateRange.length) {
-                setIsDateSet(true)
-                parseDateRange(dateRange)
-                setNumPages(Math.ceil(filteredServiceRequests.length / ITEMS_PER_PAGE));
-              } else {
-                setIsDateSet(false)
-                setNumPages(Math.ceil(data.service_requests.length / ITEMS_PER_PAGE));
-              }
-            }}
-          />
           <ButtonSpinner
             variant="outline-light"
-            className="ml-1"
+            className="ml-1 mr-1 print-all-btn-icon"
             onClick={handlePrintAllClick}
-            isSubmitting={isSubmitting}
+            isSubmitting={isSubmittingById()}
             isSubmittingText={submittingLabel}
           >
             Print All ({`${filteredServiceRequests.length}`})
             <FontAwesomeIcon icon={faPrint} className="ml-2 text-light" inverse />
           </ButtonSpinner>
+          <Button
+          key={"download-geojson"}
+          placement="bottom"
+          variant="outline-light"
+          onClick={handleGeoJsonDownload} href="">Download All ({`${filteredServiceRequests.length}`})<FontAwesomeIcon icon={faDownload} className="mx-2 text-light" inverse />
+        </Button>
         </InputGroup>
+        <Row className="mr-0 pr-0 no-gutters" style={{marginTop:"-5px"}}>
+          <Col className="pr-2">
+            <DateRangePicker
+              name={`start_date_range_picker`}
+              id={`start_date_range_picker`}
+              placeholder={"Opened Start Date"}
+              mode="single"
+              data-enable-time={true}
+              clearable={"true"}
+              hour={0}
+              style={{height:"36px"}}
+              onChange={(dateRange) => {
+                setStartDate(dateRange.length ? dateRange[0] : null)
+                setTriggerRefresh(!triggerRefresh)
+              }}
+            />
+          </Col>
+          <Col>
+            <DateRangePicker
+              name={`end_date_range_picker`}
+              id={`end_date_range_picker`}
+              placeholder={"Opened End Date"}
+              mode="single"
+              data-enable-time={true}
+              clearable={"true"}
+              hour={23}
+              minute={59}
+              style={{height:"36px"}}
+              onChange={(dateRange) => {
+                setEndDate(dateRange.length ? dateRange[0] : null)
+                setTriggerRefresh(!triggerRefresh)
+              }}
+            />
+          </Col>
+          <Col xs={6}>
+            <ButtonGroup className="float-right align-self-end">
+              <Button variant={statusOptions === "open" ? "primary" : "secondary"} onClick={statusOptions !== "open" ? () => {setPage(1);setStatusOptions("open")} : () => {setPage(1);setStatusOptions("")}}>Open</Button>
+              <Button variant={statusOptions === "assigned" ? "primary" : "secondary"} onClick={statusOptions !== "assigned" ? () => {setPage(1);setStatusOptions("assigned")} : () => {setPage(1);setStatusOptions("")}}>Assigned</Button>
+              <Button variant={statusOptions === "closed" ? "primary" : "secondary"} onClick={statusOptions !== "closed" ? () => {setPage(1);setStatusOptions("closed")} : () => {setPage(1);setStatusOptions("")}}>Closed</Button>
+              <Button variant={statusOptions === "canceled" ? "primary" : "secondary"} onClick={statusOptions !== "canceled" ? () => {setPage(1);setStatusOptions("canceled")} : () => {setPage(1);setStatusOptions("")}}>Canceled</Button>
+            </ButtonGroup>
+          </Col>
+        </Row>
       </Form>
       {filteredServiceRequests.map((service_request, index) => (
         <div key={service_request.id} className="mt-3" hidden={page !== Math.ceil((index+1)/ITEMS_PER_PAGE)}>
@@ -289,11 +331,11 @@ function ServiceRequestSearch({ incident }) {
                     placement="top"
                     overlay={
                       <Tooltip id={`tooltip-verbal`}>
-                        Verbal permission granted
+                        Forced entry permission granted
                       </Tooltip>
                     }
                   >
-                    <FontAwesomeIcon icon={faCommentSmile} size="sm" className="ml-1" />
+                    <FontAwesomeIcon icon={faHammerCrash} size="sm" className="ml-1" transform={'shrink-2'} />
                   </OverlayTrigger> : ""
                   }
                   {service_request.key_provided ?
@@ -302,7 +344,7 @@ function ServiceRequestSearch({ incident }) {
                     placement="top"
                     overlay={
                       <Tooltip id={`tooltip-key`}>
-                        Key provided
+                        Key at staging
                       </Tooltip>
                     }
                   >
@@ -313,7 +355,7 @@ function ServiceRequestSearch({ incident }) {
                     placement="top"
                     overlay={
                       <Tooltip id={`tooltip-no-key`}>
-                        No key provided
+                        No key at staging
                       </Tooltip>
                     }
                   >
@@ -333,7 +375,7 @@ function ServiceRequestSearch({ incident }) {
                       </Tooltip>
                     }
                   >
-                    <span className="fa-layers">
+                    <span className="fa-layers mr-1">
                       <FontAwesomeIcon icon={faCar} size="sm" className="ml-1 fa-move-down" />
                     </span>
                   </OverlayTrigger> :
@@ -383,9 +425,10 @@ function ServiceRequestSearch({ incident }) {
                 <Scrollbar style={{height:"144px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
                   <ListGroup>
                     <ListGroup.Item>
-                    {service_request.evacuation_assignments.filter(da => da.start_time === service_request.evacuation_assignments.map(da => da.start_time).sort().reverse()[0]).map(dispatch_assignment =>
+                      <b>Opened: </b><Moment format="LLL">{service_request.timestamp}</Moment>
+                    {/* {service_request.evacuation_assignments.filter(da => da.start_time === service_request.evacuation_assignments.map(da => da.start_time).sort().reverse()[0]).map(dispatch_assignment =>
                       <span key={dispatch_assignment.id}>
-                        <b>{dispatch_assignment.end_time ? "Last" : "Active"} Dispatch Assignment: </b>
+                        <b>Dispatch Assignment: </b>
                         <Link href={"/" + incident + "/dispatch/summary/" + dispatch_assignment.id} className="text-link" style={{textDecoration:"none", color:"white"}}><Moment format="L">{dispatch_assignment.start_time}</Moment></Link>&nbsp;
                         |&nbsp;{dispatch_assignment.team_name}
                         <OverlayTrigger
@@ -406,7 +449,7 @@ function ServiceRequestSearch({ incident }) {
                         <b>Dispatch Assignment: </b>
                         Never Serviced
                       </span>
-                    : ""}
+                    : ""} */}
                     </ListGroup.Item>
                     {service_request.owner_objects.map(owner => (
                       <ListGroup.Item key={owner.id}>
@@ -449,7 +492,7 @@ function ServiceRequestSearch({ incident }) {
               <Card style={{marginBottom:"6px"}}>
                 <Card.Body style={{width:"525px"}}>
                   <Card.Title style={{marginTop:"-10px"}}>
-                    <Scrollbar horizontal autoHide style={{height:"32px", width:"485px"}} renderView={props => <div {...props} style={{...props.style, marginBottom:"-18px", marginRight:"0px", overflowX:"auto", overflowY: "hidden"}}/>} renderThumbVertical={props => <div {...props} style={{...props.style, display: 'none'}} />}>
+                    <Scrollbar horizontal="true" autoHide style={{height:"32px", width:"485px"}} renderView={props => <div {...props} style={{...props.style, marginBottom:"-18px", marginRight:"0px", overflowX:"auto", overflowY: "hidden"}}/>} renderThumbVertical={props => <div {...props} style={{...props.style, display: 'none'}} />}>
                       <ListGroup horizontal>
                       {searchState[service_request.id].species.map(species => (
                         <ListGroup.Item key={species} active={searchState[service_request.id].selectedSpecies === species ? true : false} style={{textTransform:"capitalize", cursor:'pointer', paddingTop:"4px", paddingBottom:"4px"}} onClick={() => setSearchState(prevState => ({ ...prevState, [service_request.id]:{...prevState[service_request.id], selectedSpecies:species} }))}>{species}{["other", "sheep"].includes(species) ? "" : "s"}</ListGroup.Item>
@@ -487,7 +530,7 @@ function ServiceRequestSearch({ incident }) {
           </CardGroup>
         </div>
       ))}
-      <p>{data.isFetching ? 'Fetching service requests...' : <span>{filteredServiceRequests && filteredServiceRequests.length ? '' : 'No Service Requests found.'}</span>}</p>
+      <p className="mt-3">{data.isFetching ? 'Fetching service requests...' : <span>{filteredServiceRequests && filteredServiceRequests.length ? '' : 'No Service Requests found.'}</span>}</p>
       <Pagination className="custom-page-links" size="lg" onClick={(e) => {setFocus(parseInt(e.target.innerText));setPage(parseInt(e.target.innerText))}}>
         {[...Array(numPages).keys()].map(x =>
         <Pagination.Item key={x+1} active={x+1 === page}>

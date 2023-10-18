@@ -56,7 +56,7 @@ class ServiceRequest(Location):
         from evac.models import AssignedRequest
         from animals.models import Animal
         status = 'closed'
-        animals = Animal.objects.filter(status__in=['REPORTED', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE'], request=self).exists()
+        animals = Animal.objects.filter(status__in=['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE'], request=self).exists()
 
         # Identify proper status based on DAs and Animals.
         if animals and AssignedRequest.objects.filter(service_request=self, dispatch_assignment__end_time=None).exists():
@@ -93,9 +93,18 @@ class ServiceRequest(Location):
         self.save()
 
     def get_feature_json(self):
-        species_counts = {}
-        for animal in self.animal_set.all():
-            species_counts[animal.species] = species_counts.get(animal.species, 0) + 1
+        species_counts = {'REPORTED':{}, 'REPORTED (EVAC REQUESTED)':{}, 'REPORTED (SIP REQUESTED)':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}}
+        for animal in self.animal_set.filter(status__in=['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE']):
+            species_counts[animal.status][animal.species] = species_counts[animal.status].get(animal.species, 0) + 1
+        description = self.location_output.rsplit(',', 1)[0]  + " ("
+        count = 0
+        for status in [('Reported','REPORTED'), ('Reported (Evac Requested)','REPORTED (EVAC REQUESTED)'), ('Reported (SIP Requested)','REPORTED (SIP REQUESTED)'), ('SIP','SHELTERED IN PLACE'), ('UTL', 'UNABLE TO LOCATE')]:
+            if len(species_counts[status[1]].items()) > 0:
+                if count > 0:
+                    description += '; ' 
+                count+= 1
+                description += status[0] + ': ' + ', '.join(f'{value} {key}' + ('s' if value != 1 and animal.species != 'sheep' else '') for key, value in species_counts[status[1]].items()) #123 Ranch Rd, Napa CA (1 cat, 2 dogs)
+        description += ")"
         feature_json = {
           "geometry":{
               "coordinates":[
@@ -111,7 +120,7 @@ class ServiceRequest(Location):
           "properties":{
               "marker-symbol":"circle-n",
               "marker-color":"#FF0000",
-              "description":self.location_output.rsplit(',', 1)[0] + " (" + ', '.join(f'{value} {key}' + ('s' if value != 1 and animal.species != 'sheep' else '') for key, value in species_counts.items()) + ")", #123 Ranch Rd, Napa CA (1 cat, 2 dogs)
+              "description":description,
               "title":self.id,
               "class":"Marker",
           }
@@ -136,6 +145,7 @@ def email_on_creation(sender, instance, **kwargs):
                 {
                 'site': Site.objects.get_current(),
                 'id': instance.id,
+                'incident': instance.incident.slug,
                 'address': instance.location_output,
                 }
             ).strip(),
@@ -149,6 +159,7 @@ def email_on_creation(sender, instance, **kwargs):
                 {
                 'site': Site.objects.get_current(),
                 'id': instance.id,
+                'incident': instance.incident.slug,
                 'address': instance.location_output,
                 }
             ).strip()

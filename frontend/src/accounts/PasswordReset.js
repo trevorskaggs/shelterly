@@ -1,10 +1,10 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import axios from "axios";
 import { navigate, useQueryParams } from "raviger";
 import { Form, Formik } from 'formik';
 import Button from 'react-bootstrap/Button';
 import Col from 'react-bootstrap/Col';
-import { Form as BootstrapForm } from 'react-bootstrap';
+import { Form as BootstrapForm, Modal } from 'react-bootstrap';
 import * as Yup from "yup";
 import { TextInput } from '../components/Form.js';
 import { SystemErrorContext } from '../components/SystemError';
@@ -20,6 +20,9 @@ const ResetPassword = () => {
   } = queryParams;
 
   const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})/
+
+  const [showInvalidToken, setShowInvalidToken] = useState(false);
+  const handleClose = () => setShowInvalidToken(false);
 
   return (
     <>
@@ -40,7 +43,12 @@ const ResetPassword = () => {
               navigate('/login');
             })
             .catch(e => {
-              setShowSystemError(true);
+              if (e.response.status === 404) {
+                setShowInvalidToken(true);
+              }
+              else {
+                setShowSystemError(true);
+              }
             });
             actions.setSubmitting(false);
           }, 500);
@@ -77,6 +85,19 @@ const ResetPassword = () => {
         </>
       )}
       </Formik>
+      <Modal show={showInvalidToken} onHide={handleClose}>
+      <Modal.Header closeButton>
+        <Modal.Title>Reset Password Token Expired</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <p>
+          This reset password token appears to be expired. Please return to login and request a new reset password email.
+        </p>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="secondary" onClick={handleClose}>Ok</Button>
+      </Modal.Footer>
+    </Modal>
     </>
   )
 }

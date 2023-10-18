@@ -9,11 +9,11 @@ import {
 import {
   faDotCircle
 } from '@fortawesome/free-regular-svg-icons';
-import { faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
+import { faCircleBolt, faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
 import L from "leaflet";
 import { Marker, Tooltip as MapTooltip } from "react-leaflet";
 import { useMark, useSubmitting, useDateRange } from '../hooks';
-import Map, { prettyText, reportedMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
+import Map, { prettyText, reportedMarkerIcon, reportedEvacMarkerIcon, reportedSIPMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
 import Moment from "react-moment";
 import moment from 'moment';
 import Header from '../components/Header';
@@ -46,7 +46,7 @@ function DispatchAssignmentSearch({ incident }) {
   const [isDateSet, setIsDateSet] = useState(false);
   const { markInstances } = useMark();
   const {
-    isSubmitting,
+    isSubmittingById,
     handleSubmitting,
     submittingComplete,
     submittingLabel
@@ -84,23 +84,23 @@ function DispatchAssignmentSearch({ incident }) {
   }
 
   // Counts the number of species matches for a service request.
-  const countMatches = (service_request) => {
+  const countMatches = (animal_dict) => {
     let species_matches = {};
-    let status_matches = {'REPORTED':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}};
+    let status_matches = {'REPORTED':{}, 'REPORTED (EVAC REQUESTED)':{}, 'REPORTED (SIP REQUESTED)':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}};
 
-    service_request.animals.forEach((animal) => {
-      if (['REPORTED', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE'].indexOf(animal.status) > -1) {
-        if (!species_matches[[animal.species]]) {
-          species_matches[[animal.species]] = 1;
+    Object.keys(animal_dict).forEach((animal) => {
+      if (['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE'].indexOf(animal.status) > -1) {
+        if (!species_matches[[animal_dict[animal]['species']]]) {
+          species_matches[[animal_dict[animal]['species']]] = 1;
         }
         else {
-          species_matches[[animal.species]] += 1;
+          species_matches[[animal_dict[animal]['species']]] += 1;
         }
-        if (!status_matches[animal.status][[animal.species]]) {
-          status_matches[animal.status][[animal.species]] = 1;
+        if (!status_matches[animal.status][[animal_dict[animal]['species']]]) {
+          status_matches[animal.status][[animal_dict[animal]['species']]] = 1;
         }
         else {
-          status_matches[animal.status][[animal.species]] += 1;
+          status_matches[animal.status][[animal_dict[animal]['species']]] += 1;
         }
       }
     });
@@ -142,7 +142,7 @@ function DispatchAssignmentSearch({ incident }) {
           for (const dispatch_assignment of response.data) {
             let sr_bounds = [];
             for (const assigned_request of dispatch_assignment.assigned_requests) {
-              const [species_matches, status_matches] = countMatches(assigned_request.service_request_object);
+              const [species_matches, status_matches] = countMatches(assigned_request.animals);
               map_dict[assigned_request.service_request_object.id] = {species_matches:species_matches, status_matches:status_matches};
               sr_bounds.push([assigned_request.service_request_object.latitude, assigned_request.service_request_object.longitude]);
             }
@@ -189,7 +189,7 @@ function DispatchAssignmentSearch({ incident }) {
           <ButtonGroup className="ml-1">
             <Button variant={statusOptions === "preplanned" ? "primary" : "secondary"} onClick={statusOptions !== "preplanned" ? () => {setPage(1);setStatusOptions("preplanned")} : () => {setPage(1);setStatusOptions("")}}>Preplanned</Button>
             <Button variant={statusOptions === "active" ? "primary" : "secondary"} onClick={statusOptions !== "active" ? () => {setPage(1);setStatusOptions("active")} : () => {setPage(1);setStatusOptions("")}}>Active</Button>
-            <Button variant={statusOptions === "resolved" ? "primary" : "secondary"} onClick={statusOptions !== "resolved" ? () => {setPage(1);setStatusOptions("resolved")} : () => {setPage(1);setStatusOptions("")}}>Resolved</Button>
+            <Button variant={statusOptions === "resolved" ? "primary" : "secondary"} onClick={statusOptions !== "resolved" ? () => {setPage(1);setStatusOptions("resolved")} : () => {setPage(1);setStatusOptions("")}}>Closed</Button>
           </ButtonGroup>
           <DateRangePicker
             name={`date_range_picker`}
@@ -209,9 +209,9 @@ function DispatchAssignmentSearch({ incident }) {
           />
           <ButtonSpinner
             variant="outline-light"
-            className="ml-1"
+            className="ml-1 print-all-btn-icon"
             onClick={handlePrintAllClick}
-            isSubmitting={isSubmitting}
+            isSubmitting={isSubmittingById()}
             isSubmittingText={submittingLabel}
           >
             Print All ({`${filteredEvacAssignments.length}`})
@@ -262,7 +262,7 @@ function DispatchAssignmentSearch({ incident }) {
                   <Marker
                     key={assigned_request.service_request_object.id}
                     position={[assigned_request.service_request_object.latitude, assigned_request.service_request_object.longitude]}
-                    icon={assigned_request.service_request_object.sheltered_in_place > 0 ? SIPMarkerIcon : assigned_request.service_request_object.unable_to_locate > 0 ? UTLMarkerIcon : reportedMarkerIcon}
+                    icon={assigned_request.service_request_object.reported_animals > 0 ? reportedMarkerIcon : assigned_request.service_request_object.reported_evac > 0 ? reportedEvacMarkerIcon : assigned_request.service_request_object.reported_sheltered_in_place > 0 ? reportedSIPMarkerIcon : assigned_request.service_request_object.sheltered_in_place > 0 ? SIPMarkerIcon : assigned_request.service_request_object.unable_to_locate > 0 ? UTLMarkerIcon : UTLMarkerIcon}
                     onClick={() => window.open("/hotline/servicerequest/" + assigned_request.service_request_object.id)}
                   >
                     <MapTooltip autoPan={false} direction={evacuation_assignment.assigned_requests.length > 1 ? "auto" : "top"}>

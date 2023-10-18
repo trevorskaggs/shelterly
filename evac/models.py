@@ -39,6 +39,7 @@ class EvacAssignment(models.Model):
     start_time = models.DateTimeField(auto_now_add=True)
     end_time = models.DateTimeField(blank=True, null=True)
     incident = models.ForeignKey(Incident, on_delete=models.CASCADE, default=test_incident)
+    closed = models.BooleanField(default=False)
 
     def get_geojson(self):
         geojson = {'features':[]}

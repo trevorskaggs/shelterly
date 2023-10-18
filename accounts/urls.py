@@ -7,6 +7,7 @@ from accounts import views
 app_name = 'accounts'
 router = DefaultRouter()
 router.register(r'user', views.UserViewSet)
+router.register(r'organization', views.OrganizationViewSet)
 
 urlpatterns = [
     url("^api/user/auth/$", views.UserAuth.as_view()),

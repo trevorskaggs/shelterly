@@ -10,6 +10,7 @@ class VisitNoteSerializer(serializers.ModelSerializer):
     team_name = serializers.SerializerMethodField()
     team_member_names = serializers.SerializerMethodField()
     dispatch_assignment = serializers.SerializerMethodField()
+    service_request = serializers.SerializerMethodField()
 
     def get_address(self, obj):
         if obj.assigned_request.first():
@@ -19,6 +20,11 @@ class VisitNoteSerializer(serializers.ModelSerializer):
     def get_dispatch_assignment(self, obj):
         if obj.assigned_request.first():
             return obj.assigned_request.first().dispatch_assignment.id
+        return None
+    
+    def get_service_request(self, obj):
+        if obj.assigned_request.first():
+            return obj.assigned_request.first().service_request.id
         return None
 
     def get_team_name(self, obj):
@@ -59,6 +65,8 @@ class SimpleServiceRequestSerializer(BarebonesServiceRequestSerializer):
     animals = serializers.SerializerMethodField()
     # these method fields require animals queryset
     reported_animals = serializers.SerializerMethodField()
+    reported_evac = serializers.SerializerMethodField()
+    reported_sheltered_in_place = serializers.SerializerMethodField()
     sheltered_in_place = serializers.SerializerMethodField()
     unable_to_locate = serializers.SerializerMethodField()
     aco_required = serializers.SerializerMethodField(read_only=True)
@@ -72,7 +80,7 @@ class SimpleServiceRequestSerializer(BarebonesServiceRequestSerializer):
     class Meta:
         model = ServiceRequest
         fields = ['id', 'timestamp', 'latitude', 'longitude', 'full_address', 'followup_date', 'owners', 'reporter', 'address', 'city', 'state', 'zip_code', 'apartment', 'reporter', 'directions', 'priority', 'evacuation_assignments', 'pending',
-        'images', 'animal_count', 'key_provided', 'verbal_permission', 'injured', 'accessible', 'turn_around', 'animals', 'status', 'reported_animals', 'reporter_object', 'owner_objects', 'sheltered_in_place', 'unable_to_locate', 'aco_required']
+        'images', 'animal_count', 'key_provided', 'verbal_permission', 'injured', 'accessible', 'turn_around', 'animals', 'status', 'reported_animals', 'reported_evac', 'reporter_object', 'owner_objects', 'reported_sheltered_in_place', 'sheltered_in_place', 'unable_to_locate', 'aco_required']
 
 
     # Custom field for the full address.
@@ -102,6 +110,22 @@ class SimpleServiceRequestSerializer(BarebonesServiceRequestSerializer):
             return len([animal for animal in obj.animals if animal.status == 'REPORTED'])
         except AttributeError:
             return obj.animal_set.filter(status='REPORTED').count()
+
+    # Custom field for determining if an SR contains REPORTED (EVAC REQUESTED) animals.
+    def get_reported_evac(self, obj):
+        # Performs list comp. on prefetched queryset of animals for this SR to avoid hitting db again.
+        try:
+            return len([animal for animal in obj.animals if animal.status == 'REPORTED (EVAC REQUESTED)'])
+        except AttributeError:
+            return obj.animal_set.filter(status='REPORTED (EVAC REQUESTED)').count()
+
+    # Custom field for determining that count of REPORTED (SIP REQUESTED) animals.
+    def get_reported_sheltered_in_place(self, obj):
+        # Performs list comp. on prefetched queryset of animals for this SR to avoid hitting db again.
+        try:
+            return len([animal for animal in obj.animals if animal.status == 'REPORTED (SIP REQUESTED)'])
+        except AttributeError:
+            return obj.animal_set.filter(status='REPORTED (SIP REQUESTED)').count()
 
     # Custom field for determining that count of SHELTERED IN PLACE animals.
     def get_sheltered_in_place(self, obj):
@@ -154,7 +178,7 @@ class ServiceRequestSerializer(SimpleServiceRequestSerializer):
     class Meta:
         model = ServiceRequest
         fields = ['id', 'latitude', 'longitude', 'full_address', 'followup_date', 'status', 'address', 'city', 'state', 'zip_code', 'directions', 'priority',
-        'injured', 'accessible', 'turn_around', 'animals', 'reporter', 'reported_animals', 'sheltered_in_place', 'unable_to_locate', 'aco_required',
+        'injured', 'accessible', 'turn_around', 'animals', 'reporter', 'reported_animals', 'reported_evac', 'sheltered_in_place', 'reported_sheltered_in_place', 'unable_to_locate', 'aco_required',
         'animal_count', 'images', 'key_provided', 'verbal_permission', 'action_history', 'owner_objects', 'reporter_object', 'assigned_requests']
 
     # Custom field for ordering animals.

@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faMinusCircle, faUserAlt, faUserAltSlash, faCircle, faExclamationCircle, faQuestionCircle, faHome, faHeart, faSkullCrossbones
 } from '@fortawesome/free-solid-svg-icons';
-import { faBadgeSheriff, faClawMarks, faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
+import { faBadgeSheriff, faCircleBolt, faClawMarks, faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
 import AnimalCoverImage from './AnimalCoverImage';
 
 function AnimalCards(props) {
@@ -68,6 +68,16 @@ function AnimalCards(props) {
                 {animal.status === "REPORTED" ?
                   <OverlayTrigger key={"reported"} placement="top"
                                   overlay={<Tooltip id={`tooltip-reported`}>REPORTED</Tooltip>}>
+                      <FontAwesomeIcon className="animal-icon" icon={faExclamationCircle} inverse/>
+                  </OverlayTrigger> : ""}
+                {animal.status === "REPORTED (EVAC REQUESTED)" ?
+                  <OverlayTrigger key={"reported-evac"} placement="top"
+                                  overlay={<Tooltip id={`tooltip-reported-evac`}>REPORTED (EVAC REQUESTED)</Tooltip>}>
+                      <FontAwesomeIcon className="animal-icon" icon={faCircleBolt} inverse/>
+                  </OverlayTrigger> : ""}
+                {animal.status === "REPORTED (SIP REQUESTED)" ?
+                  <OverlayTrigger key={"reported-sip"} placement="top"
+                                  overlay={<Tooltip id={`tooltip-reported-sip`}>REPORTED (SIP REQUESTED)</Tooltip>}>
                       <FontAwesomeIcon className="animal-icon" icon={faExclamationCircle} inverse/>
                   </OverlayTrigger> : ""}
                 {animal.status === "UNABLE TO LOCATE" ?

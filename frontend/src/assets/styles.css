@@ -1,0 +1,23 @@
+.fa-icon-spinner-button {
+  display: inline-block;
+  font-size: inherit;
+  height: 1em;
+  width: 1.125em;
+  overflow: visible;
+  vertical-align: 0;
+  padding: 0px;
+  border-width: 0;
+  cursor: pointer;
+  text-align: center;
+}
+.fa-icon-spinner-button:hover {
+  background-color: transparent;
+}
+
+.print-all-btn-icon .fa-print {
+  transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+
+.print-all-btn-icon:hover .fa-print {
+  color: #222!important;
+}

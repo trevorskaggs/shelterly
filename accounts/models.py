@@ -135,3 +135,10 @@ def password_reset_token_created(sender, instance, reset_password_token, *args, 
             }
         ).strip()
     )
+
+class Organization(models.Model):
+
+    name = models.CharField(max_length=80)
+    short_name = models.CharField(max_length=40, blank=True, null=True)
+    liability_name = models.CharField(max_length=80)
+    liability_short_name = models.CharField(max_length=40)

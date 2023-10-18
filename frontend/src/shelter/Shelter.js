@@ -94,7 +94,7 @@ function Shelter({ incident }) {
       </Col>
     </Row>
     <Row className="ml-0 mr-0 border rounded" style={{maxHeight:"38px"}}>
-      <h4 className="card-header text-center" style={{paddingTop:"4px", paddingLeft:"10px", paddingRight:"10px", height:"36px", width:"100%", backgroundColor:"#808080"}}>Shelters</h4>
+      <h5 className="card-header" style={{paddingTop:"7px", paddingLeft:"10px", paddingRight:"10px", height:"36px", width:"100%", backgroundColor:"#808080"}}>Shelters</h5>
     </Row>
     <hr/>
     <Row className="ml-0">

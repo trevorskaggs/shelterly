@@ -27,6 +27,9 @@ import { printAnimalCareSchedule, printAllAnimalCareSchedules } from './Utils';
 import { SystemErrorContext } from '../components/SystemError';
 import ButtonSpinner from '../components/ButtonSpinner';
 
+import '../assets/styles.css';
+import ShelterlyPrintifyButton from '../components/ShelterlyPrintifyButton';
+
 const NoOptionsMessage = props => {
   return (
     <components.NoOptionsMessage {...props}>
@@ -135,9 +138,7 @@ function AnimalSearch({ incident }) {
     setAnimals(data.animals);
   };
 
-  const handleDownloadPdfClick = (e, animalId) => {
-    e.preventDefault();
-
+  const handleDownloadPdfClick = (animalId) => {
     const animal = animals.find((animal) => animal.id === animalId);
     printAnimalCareSchedule(animal, [animal.front_image]);
   }
@@ -302,7 +303,7 @@ function AnimalSearch({ incident }) {
           <Button variant="outline-light" className="ml-1" onClick={handleShowFilters}>Advanced {showFilters ? <FontAwesomeIcon icon={faChevronDoubleUp} size="sm" /> : <FontAwesomeIcon icon={faChevronDoubleDown} size="sm" />}</Button>
           <ButtonSpinner
             variant="outline-light"
-            className="ml-1"
+            className="ml-1 print-all-btn-icon"
             onClick={handlePrintAllClick}
             isSubmitting={isSubmitting}
             isSubmittingText={submittingLabel}
@@ -494,21 +495,13 @@ function AnimalSearch({ incident }) {
               </OverlayTrigger>
               A#{animal.id} - {animal.name ? titleCase(animal.name) : "Unknown"}&nbsp;| {titleCase(animal.status)}
 
-              <OverlayTrigger
-                key={"print"}
-                placement="bottom"
-                overlay={
-                  <Tooltip id={`tooltip-print`}>
-                    Animal care schedule
-                  </Tooltip>
-                }
-              >
-                {({ ref, ...triggerHandler }) => (
-                  <Link onClick={(e) => handleDownloadPdfClick(e, animal.id)} {...triggerHandler} href="#">
-                    <span ref={ref}><FontAwesomeIcon icon={faPrint} className="ml-2" inverse /></span>
-                  </Link>
-                )}
-              </OverlayTrigger>
+              <ShelterlyPrintifyButton
+                id="animal-search-animal-schedules"
+                spinnerSize={1.5}
+                tooltipPlacement='top'
+                tooltipText='Print Animal Care Schedule'
+                printFunc={() => handleDownloadPdfClick(animal.id)}
+              />
             </h4>
           </div>
           <CardGroup>

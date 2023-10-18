@@ -6,17 +6,19 @@ import { Button, Card, ListGroup, Modal, OverlayTrigger, Tooltip } from 'react-b
 import Flatpickr from 'react-flatpickr';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBan, faCar, faClipboardCheck, faDownload, faEdit, faEnvelope, faHouseDamage, faPrint,
+  faBan, faCar, faClipboardCheck, faDownload, faEdit, faEnvelope, faHouseDamage,
   faKey, faMapMarkedAlt, faPlusSquare, faTimes, faTrailer, faUserPlus, faUsers
 } from '@fortawesome/free-solid-svg-icons';
-import { faCalendarEdit, faCommentSmile, faHomeHeart, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
+import { faCalendarEdit, faHammerCrash, faHomeHeart, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import Header from '../components/Header';
 import History from '../components/History';
 import AnimalCards from '../components/AnimalCards';
 import PhotoDocuments from '../components/PhotoDocuments';
 import { SystemErrorContext } from '../components/SystemError';
-import { printServiceRequestSummary } from './Utils'
-import { printSrAnimalCareSchedules } from './Utils';
+import { printServiceRequestSummary, printSrAnimalCareSchedules } from './Utils'
+import ShelterlyPrintifyButton from '../components/ShelterlyPrintifyButton';
+
+import '../assets/styles.css';
 
 function ServiceRequestDetails({ id, incident }) {
 
@@ -87,17 +89,11 @@ function ServiceRequestDetails({ id, incident }) {
     });
   }
 
-  const handleDownloadPdfClick = (e) => {
-    e.preventDefault();
+  const handleDownloadPdfClick = () =>
+    printServiceRequestSummary(data)
 
-    printServiceRequestSummary(data);
-  }
-
-  const handlePrintAllAnimalsClick = (e) => {
-    e.preventDefault();
-
-    printSrAnimalCareSchedules(data.animals, id);
-  }
+  const handlePrintAllAnimalsClick = () =>
+    printSrAnimalCareSchedules(data.animals, id)
 
   const handleGeoJsonDownload = () => {
     var fileDownload = require('js-file-download');
@@ -105,9 +101,7 @@ function ServiceRequestDetails({ id, incident }) {
             responseType: 'blob',
         }).then(res => {
             fileDownload(res.data, 'SR-' + data.id + '.geojson');
-            console.log(res);
         }).catch(err => {
-            console.log(err);
         })
   }
 
@@ -168,21 +162,14 @@ function ServiceRequestDetails({ id, incident }) {
           <Link onClick={handleGeoJsonDownload} href=""><FontAwesomeIcon icon={faDownload} className="mx-2"  inverse /></Link>
         </OverlayTrigger>
 
-        <OverlayTrigger
-          key={"download-service-request-summary"}
-          placement="bottom"
-          overlay={
-            <Tooltip id={`tooltip-download-service-request-summary`}>
-              Download Service Request Summary
-            </Tooltip>
-          }
-        >
-          {({ ref, ...triggerHandler }) => (
-            <Link onClick={handleDownloadPdfClick} {...triggerHandler} href="#">
-              <span ref={ref}><FontAwesomeIcon icon={faPrint} className="ml-1 mr-2"  inverse /></span>
-            </Link>
-          )}
-        </OverlayTrigger>
+        <ShelterlyPrintifyButton
+          id="service-request-summary"
+          spinnerSize={2.0}
+          tooltipPlacement='bottom'
+          tooltipText='Download Service Request Summary'
+          printFunc={handleDownloadPdfClick}
+        />
+
         <OverlayTrigger
           key={"cancel-service-request"}
           placement="bottom"
@@ -215,18 +202,18 @@ function ServiceRequestDetails({ id, incident }) {
           <Card className="mb-2 border rounded" style={{width:"100%"}}>
             <Card.Body>
               <Card.Title>
-                <h4 className="mb-0">Information
+                <h4 className="mb-0">Information&nbsp;
                   {data.verbal_permission ?
                   <OverlayTrigger
                     key={"verbal"}
                     placement="top"
                     overlay={
                       <Tooltip id={`tooltip-verbal`}>
-                        Verbal permission granted
+                        Forced entry permission granted
                       </Tooltip>
                     }
                   >
-                    <FontAwesomeIcon icon={faCommentSmile} size="sm" className="ml-1" />
+                    <FontAwesomeIcon icon={faHammerCrash} size="sm" className="fa-move-up" transform={'shrink-2'} />
                   </OverlayTrigger> : ""
                   }
                   {data.key_provided ?
@@ -235,22 +222,22 @@ function ServiceRequestDetails({ id, incident }) {
                     placement="top"
                     overlay={
                       <Tooltip id={`tooltip-key`}>
-                        Key provided
+                        Key at staging
                       </Tooltip>
                     }
                   >
-                    <FontAwesomeIcon icon={faKey} size="sm" className="ml-1" transform={'shrink-2'} />
+                    <FontAwesomeIcon icon={faKey} size="sm" className="" transform={'shrink-2'} />
                   </OverlayTrigger> :
                   <OverlayTrigger
                     key={"no-key"}
                     placement="top"
                     overlay={
                       <Tooltip id={`tooltip-no-key`}>
-                        No key provided
+                        No key at staging
                       </Tooltip>
                     }
                   >
-                    <span className="fa-layers" style={{marginLeft:"2px"}}>
+                    <span className="fa-layers" style={{marginLeft:"0px"}}>
                       <FontAwesomeIcon icon={faKey} size="sm" transform={'shrink-2'} />
                       <FontAwesomeIcon icon={faBan} color="#ef5151" size="sm" transform={'shrink-1'} />
                     </span>
@@ -347,7 +334,7 @@ function ServiceRequestDetails({ id, incident }) {
                     value={data.followup_date || null}>
                   </Flatpickr>
                 </ListGroup.Item>
-                <ListGroup.Item style={{marginBottom:"-13px"}}><b>Additional Information:</b> {data.directions||"None"}</ListGroup.Item>
+                <ListGroup.Item style={{marginBottom:"-13px"}}><b>Instructions for Field Team:</b> {data.directions||"None"}</ListGroup.Item>
               </ListGroup>
             </Card.Body>
           </Card>
@@ -456,17 +443,13 @@ function ServiceRequestDetails({ id, incident }) {
                     </OverlayTrigger>
                     : ""}
                   {data.animals?.length > 0 && (
-                    <OverlayTrigger
-                      key={"printall"}
-                      placement="top"
-                      overlay={
-                        <Tooltip id={`tooltip-printall`}>
-                          Print all animal care schedules
-                        </Tooltip>
-                      }
-                    >
-                      <FontAwesomeIcon icon={faPrint} onClick={handlePrintAllAnimalsClick} style={{cursor:'pointer'}} className="ml-1 fa-move-up" size="sm" inverse />
-                    </OverlayTrigger>
+                    <ShelterlyPrintifyButton
+                      id="service-request-animal-care-schedules"
+                      spinnerSize={1.5}
+                      tooltipPlacement='bottom'
+                      tooltipText='Print All Animal Care Schedules'
+                      printFunc={handlePrintAllAnimalsClick}
+                    />
                   )}
                 </h4>
               </Card.Title>

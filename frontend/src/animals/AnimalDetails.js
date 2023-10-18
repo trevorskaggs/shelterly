@@ -7,7 +7,7 @@ import { Carousel } from 'react-responsive-carousel';
 import { Button, Card, Col, ListGroup, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBan, faMedkit, faCut, faEdit, faEnvelope, faLink, faMinusSquare, faPrint, faTimes, faUserPlus
+  faBan, faMedkit, faCut, faEdit, faEnvelope, faLink, faMinusSquare, faTimes, faUserPlus
 } from '@fortawesome/free-solid-svg-icons';
 import { faBadgeSheriff, faClipboardMedical, faClawMarks, faHomeHeart, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
@@ -17,6 +17,7 @@ import History from '../components/History';
 import { printAnimalCareSchedule } from './Utils';
 import AnimalCoverImage from '../components/AnimalCoverImage';
 import { SystemErrorContext } from '../components/SystemError';
+import ShelterlyPrintifyButton from '../components/ShelterlyPrintifyButton';
 
 function AnimalDetails({ id, incident }) {
 
@@ -92,10 +93,7 @@ function AnimalDetails({ id, incident }) {
     await axios.patch('/animals/api/animal/' + id + '/', {remove_animal:id})
     .then(response => {
       handleAnimalClose();
-      if (state.prevLocation) {
-        navigate(state.prevLocation);
-      }
-      else if (data.request) {
+      if (data.request) {
         navigate('/' + incident + '/hotline/servicerequest/' + data.request);
       }
       else if (data.owner) {
@@ -113,11 +111,8 @@ function AnimalDetails({ id, incident }) {
     });
   }
 
-  const handleDownloadPdfClick = (e) => {
-    e.preventDefault();
-
-    printAnimalCareSchedule(data);
-  }
+  const handleDownloadPdfClick = () =>
+    printAnimalCareSchedule(data)
 
   // Hook for initializing data.
   useEffect(() => {
@@ -165,21 +160,13 @@ function AnimalDetails({ id, incident }) {
       >
         <Link href={"/" + incident + "/animals/edit/" + id} ><FontAwesomeIcon icon={faEdit} className="ml-2" inverse /></Link>
       </OverlayTrigger>
-      <OverlayTrigger
-        key={"print"}
-        placement="bottom"
-        overlay={
-          <Tooltip id={`tooltip-print`}>
-            Animal care schedule
-          </Tooltip>
-        }
-      >
-        {({ ref, ...triggerHandler }) => (
-          <Link onClick={handleDownloadPdfClick} {...triggerHandler} href="#">
-            <span ref={ref}><FontAwesomeIcon icon={faPrint} className="ml-1 mr-2" inverse /></span>
-          </Link>
-        )}
-      </OverlayTrigger>
+      <ShelterlyPrintifyButton
+        id="animal-details-animal-care-schedule"
+        spinnerSize={2.0}
+        tooltipPlacement='bottom'
+        tooltipText='Print Animal Care Schedule'
+        printFunc={handleDownloadPdfClick}
+      />
       <OverlayTrigger
         key={"vetrequest"}
         placement="bottom"
@@ -444,7 +431,7 @@ function AnimalDetails({ id, incident }) {
                     <b>Shelter:</b> <Link href={"/" + incident + "/shelter/" + data.shelter} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.shelter_object.name}</Link>
                   </Col>
                   <Col>
-                    {data.room ? <div className="mt-1"><b>Room:</b> <Link href={"/" + incident + "/shelter/room/" + data.room} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.room_name}</Link></div> : ""}
+                    {data.room ? <div><b>Room:</b> <Link href={"/" + incident + "/shelter/room/" + data.room} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.room_name}</Link></div> : ""}
                   </Col>
                 </Row>
                 {data.intake_date ? <div className="mt-1"><b>Intake Date:</b> <Moment format="MMMM Do YYYY HH:mm">{data.intake_date}</Moment></div> : ""}
@@ -487,7 +474,7 @@ function AnimalDetails({ id, incident }) {
             <hr/>
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
               {data.color_notes ? <ListGroup.Item><b>Breed / Description:</b> {data.color_notes}</ListGroup.Item> : ""}
-              {data.behavior_notes ? <ListGroup.Item style={{whiteSpace:"pre-line"}}><b>Behavior Notes:</b> {data.behavior_notes}</ListGroup.Item> : ""}
+              {data.behavior_notes ? <ListGroup.Item style={{whiteSpace:"pre-line"}}><b>Animal Notes:</b> {data.behavior_notes}</ListGroup.Item> : ""}
               {data.medical_notes ? <ListGroup.Item style={{whiteSpace:"pre-line"}}><b>Medical Notes:</b> {data.medical_notes}</ListGroup.Item> : ""}
               {data.last_seen ? <ListGroup.Item><b>Last Seen:</b> <Moment format="MMMM Do YYYY HH:mm">{data.last_seen}</Moment></ListGroup.Item> : ""}
               {!data.color_notes && !data.behavior_notes && !data.medical_notes && !data.last_seen ? <ListGroup.Item>No description available</ListGroup.Item> : ""}

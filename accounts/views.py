@@ -12,8 +12,8 @@ from rest_framework import generics, permissions, response, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 
-from accounts.models import ShelterlyUser
-from accounts.serializers import UserSerializer
+from accounts.models import ShelterlyUser, Organization
+from accounts.serializers import UserSerializer, OrganizationSerializer
 
 User = get_user_model()
 
@@ -126,3 +126,9 @@ class UserViewSet(viewsets.ModelViewSet):
         if self.request.GET.get('vet') == 'true':
             queryset = queryset.filter(vet_perms=True)
         return queryset
+
+# Provides view for User API calls.
+class OrganizationViewSet(viewsets.ModelViewSet):
+    queryset = Organization.objects.all()
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = OrganizationSerializer

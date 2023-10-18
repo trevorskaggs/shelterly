@@ -12,15 +12,7 @@ import { DropDown } from '../components/Form';
 import Header from '../components/Header';
 import ButtonSpinner from '../components/ButtonSpinner';
 import { SystemErrorContext } from '../components/SystemError';
-
-const statusLabelLookup = {
-  'REPORTED':'Reported',
-  'SHELTERED':'Sheltered',
-  'SHELTERED IN PLACE':'Sheltered In Place (SIP)',
-  'UNABLE TO LOCATE':'Unable To Locate (UTL)',
-  'NO FURTHER ACTION':'No Further Action (NFA)',
-  'DECEASED':'Deceased',
-}
+import { statusLabelLookup } from "../utils/formatString";
 
 function AnimalStatus(props) {
 

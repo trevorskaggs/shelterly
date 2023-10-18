@@ -21,7 +21,6 @@ import { makeStyles } from '@material-ui/core/styles';
 import Alert from 'react-bootstrap/Alert';
 import { Legend, pinMarkerIcon } from "../components/Map";
 import { STATE_OPTIONS } from '../constants';
-import moment from "moment";
 import imageCompression from 'browser-image-compression';
 
 const useStyles = makeStyles({
@@ -70,7 +69,7 @@ const useStyles = makeStyles({
 
 const DateRangePicker = ({...props}) => {
   const pickerRef = useRef();
-  const options = {allowInput: true, dateFormat: "m-d-Y", mode: "range", maxDate: moment().format('MM-DD-YYYY')}
+  const options = {allowInput: true, dateFormat: props.mode === "single" ? "M d, Y H:i" : "m-d-Y", mode: props.mode === "single" ? "single" : "range", defaultHour:props.hour == 0 ? 0 : props.hour||12, defaultMinute:props.minute||0}
   const styles = {
     ...props.style,
     display: 'flex'
@@ -480,6 +479,7 @@ const AddressLookup = ({setLatLon, ...props}) => {
                 setError(props.error);
               }
             }}
+            onFocus={(event) => { event.target.setAttribute('autocomplete', 'off'); }}
             id="search"
             name="search"
             disabled={props.disabled}

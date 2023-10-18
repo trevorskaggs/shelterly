@@ -7,14 +7,15 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBan, faBandAid, faBullseye, faCalendarDay, faCar, faChevronDown, faChevronUp, faEquals, faExclamationTriangle, faCircle, faClipboardList, faExclamationCircle, faMapMarkedAlt, faQuestionCircle, faPencilAlt, faTrailer, faUserAlt, faUserAltSlash
 } from '@fortawesome/free-solid-svg-icons';
-import { faBadgeSheriff, faChevronDoubleDown, faChevronDoubleUp, faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
+import { faBadgeSheriff, faChevronDoubleDown, faChevronDoubleUp, faCircleBolt, faHomeAlt, faRotate } from '@fortawesome/pro-solid-svg-icons';
 import { faHomeAlt as faHomeAltReg } from '@fortawesome/pro-regular-svg-icons';
 import { Circle, Marker, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
 import * as Yup from 'yup';
 import { Typeahead } from 'react-bootstrap-typeahead';
 import Moment from 'react-moment';
-import Map, { countMatches, prettyText, reportedMarkerIcon, SIPMarkerIcon, UTLMarkerIcon, checkMarkerIcon } from "../components/Map";
+import useWebSocket from 'react-use-websocket';
+import Map, { countMatches, prettyText, reportedMarkerIcon, reportedEvacMarkerIcon, reportedSIPMarkerIcon, SIPMarkerIcon, UTLMarkerIcon, checkMarkerIcon } from "../components/Map";
 import { Checkbox, TextInput } from "../components/Form";
 import { DispatchDuplicateSRModal, DispatchAlreadyAssignedTeamModal } from "../components/Modals";
 import Scrollbar from '../components/Scrollbars';
@@ -31,8 +32,9 @@ function Deploy({ incident }) {
   let preplan = window.location.pathname.includes("preplan")
 
   const [data, setData] = useState({service_requests: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
+  const [newData, setNewData] = useState(false);
   const [mapState, setMapState] = useState({});
-  const [totalSelectedState, setTotalSelectedState] = useState({'REPORTED':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}});
+  const [totalSelectedState, setTotalSelectedState] = useState({'REPORTED':{}, 'REPORTED (EVAC REQUESTED)':{}, 'REPORTED (SIP REQUESTED)':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}});
   const [selectedCount, setSelectedCount] = useState({count:0, disabled:true});
   const [statusOptions, setStatusOptions] = useState({aco_required:false, pending_only: true});
   const [triggerRefresh, setTriggerRefresh] = useState(false);
@@ -181,7 +183,12 @@ function Deploy({ incident }) {
         matches = {...totalSelectedState[status]};
         for (var key in mapState[id].status_matches[status]) {
           total = totalSelectedState[status][key] -= mapState[id].status_matches[status][key];
-          matches[key] = total;
+          if (total === 0) {
+            delete matches[key]
+          }
+          else {
+            matches[key] = total;
+          }
         }
         status_matches[status] = matches;
       }
@@ -211,10 +218,18 @@ function Deploy({ incident }) {
     setMapState(tempMapState);
   }
 
+  useWebSocket('wss://' + window.location.host + '/ws/map_data/', {
+    onMessage: (e) => {
+      setNewData(true)
+    },
+    shouldReconnect: (closeEvent) => true,
+  });
+
   // Hook for initializing data.
   useEffect(() => {
     let unmounted = false;
     let source = axios.CancelToken.source();
+
     const fetchTeamMembers = async () => {
       setTeamData({teams: [], options: [], isFetching: true});
       // Fetch all TeamMembers.
@@ -296,11 +311,31 @@ function Deploy({ incident }) {
               const matches = total_matches[0];
               const status_matches = total_matches[1];
               const color = service_request.reported_animals > 0 ? '#ff4c4c' : service_request.unable_to_locate > 0 ? '#5f5fff' : '#f5ee0f';
-              map_dict[service_request.id] = {checked:false, hidden:false, color:color, matches:matches, status_matches:status_matches, radius:"disabled", has_reported_animals:service_request.reported_animals > 0, latitude:service_request.latitude, longitude:service_request.longitude};
+              map_dict[service_request.id] = {checked:false, hidden:false, color:color, matches:matches, status_matches:status_matches, radius:"disabled", latitude:service_request.latitude, longitude:service_request.longitude};
               bounds.push([service_request.latitude, service_request.longitude]);
             }
           }
           setMapState(map_dict);
+
+          var status_matches = {'REPORTED':{}, 'REPORTED (EVAC REQUESTED)':{}, 'REPORTED (SIP REQUESTED)':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}};
+          var matches = {};
+          var total = 0;
+          // Recount the total state tracker for selected SRs on refresh.
+          Object.keys(map_dict).filter(key => map_dict[key].checked === true && response.data.map(sr => sr.id).includes(Number(key))).forEach(id => {
+            for (var select_status in map_dict[id].status_matches) {
+              matches = {...status_matches[select_status]};
+              for (var select_key in map_dict[id].status_matches[select_status]){
+                if (!status_matches[select_status][select_key]) {
+                  total = map_dict[id].status_matches[select_status][select_key];
+                } else {
+                  total = status_matches[select_status][select_key] += map_dict[id].status_matches[select_status][select_key];
+                }
+                matches[select_key] = total;
+              }
+              status_matches[select_status] = matches;
+            }
+          })
+          setTotalSelectedState(status_matches);
 
           if (bounds.length > 0 && Object.keys(mapState).length < 1) {
             setData(prevState => ({ ...prevState, "bounds":L.latLngBounds(bounds) }));
@@ -315,8 +350,13 @@ function Deploy({ incident }) {
       });
     };
 
-    fetchTeamMembers();
+    // Only fetch team member data first time.
+    if (teamData.options.length === 0) {
+      fetchTeamMembers();
+    }
+
     fetchServiceRequests();
+    setNewData(false);
 
     // Cleanup.
     return () => {
@@ -358,7 +398,7 @@ function Deploy({ incident }) {
               // Stay on map and remove selected SRs if in Preplanning mode.
               if (preplan) {
                 setData(prevState => ({ ...prevState, "service_requests":data.service_requests.filter(sr => !values.service_requests.includes(String(sr.id))) }));
-                setTotalSelectedState({'REPORTED':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}});
+                setTotalSelectedState({'REPORTED':{}, 'REPORTED (EVAC REQUESTED)':{}, 'REPORTED (SIP REQUESTED)':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}});
                 setSelectedCount({count:0, disabled:true});
                 setMapState(Object.keys(mapState).filter(key => !values.service_requests.includes(String(key)))
                   .reduce((obj, key) => {
@@ -417,13 +457,29 @@ function Deploy({ incident }) {
     {props => (
       <Form>
         <Header>
-          {preplan ? "Preplan Dispatch Assignments" : "Deploy Teams"}
+          {preplan ? "Preplan Dispatch Assignments" : "Deploy Teams "}
+          <OverlayTrigger
+            key={"new-data"}
+            placement="bottom"
+            overlay={
+              <Tooltip id={`tooltip-new-data`}>
+                {!newData ? "No new Service Request data available." : "New Service Request data available."}
+              </Tooltip>
+            }
+          >
+            <span className="d-inline-block">
+              <Button className="fa-move-up" onClick={() => setTriggerRefresh(!triggerRefresh)} disabled={!newData}>
+                <FontAwesomeIcon icon={faRotate} />
+              </Button>
+            </span>
+          </OverlayTrigger>
         </Header>
         <hr/>
         <Row className="d-flex flex-wrap" style={{marginTop:"10px", marginLeft:"0px", marginRight:"0px"}}>
           <Col xs={2} className="border rounded">
-          <Scrollbar no_shadow="true" style={{height:"50vh", marginLeft:"-10px", marginRight:"-10px", right:"-5px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
-            <div className="card-header border rounded mt-3 text-center" style={{paddingRight:"15px", paddingLeft:"15px", marginLeft:"8px", marginRight:"18px"}}>
+          <Scrollbar no_shadow="true" style={{height:"50vh", marginLeft:"-15px", marginRight:"-15px", right:"-5px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
+            <h4 className="text-center mt-1 mr-1">Selected</h4><hr style={{marginTop:"-5px", marginBottom:"-5px", marginLeft:"10px", marginRight:"20px"}} />
+            {Object.keys(totalSelectedState["REPORTED"]).length > 0 ? <div className="card-header border rounded mt-3 text-center" style={{paddingRight:"15px", paddingLeft:"15px", marginLeft:"8px", marginRight:"18px", marginBottom:"-4px"}}>
               <p className="mb-2" style={{marginTop:"-5px"}}>Reported
                 <OverlayTrigger
                   key={"selected-reported"}
@@ -444,8 +500,53 @@ function Deploy({ incident }) {
               {Object.keys(totalSelectedState["REPORTED"]).map(key => (
                 <div key={key} style={{textTransform:"capitalize", marginTop:"5px", marginBottom:"-5px"}}>{prettyText(key.split(',')[0], totalSelectedState["REPORTED"][key])}</div>
               ))}
-            </div>
-            <div className="card-header border rounded mt-3 text-center" style={{paddingRight:"15px", paddingLeft:"15px", marginLeft:"8px", marginRight:"18px"}}>
+            </div> : ""}
+            {Object.keys(totalSelectedState["REPORTED (EVAC REQUESTED)"]).length > 0 ? <div className="card-header border rounded mt-3 text-center" style={{paddingRight:"15px", paddingLeft:"15px", marginLeft:"8px", marginRight:"18px", marginBottom:"-4px"}}>
+              <p className="mb-2" style={{marginTop:"-5px", marginLeft:"-4px", marginRight:"-4px"}}>Reported (Evac)
+                <OverlayTrigger
+                  key={"selected-reported-evac"}
+                  placement="top"
+                  overlay={
+                    <Tooltip id={`tooltip-selected-reported-evac`}>
+                      Reported - (Evacuation)
+                    </Tooltip>
+                  }
+                >
+                  <span className="fa-layers ml-1">
+                    <FontAwesomeIcon icon={faCircle} color="white" />
+                    <FontAwesomeIcon icon={faCircleBolt} className="icon-border" color="#ff4c4c" transform={'grow-2'} />
+                  </span>
+                </OverlayTrigger>
+              </p>
+              <hr className="mt-1 mb-1"/>
+              {Object.keys(totalSelectedState["REPORTED (EVAC REQUESTED)"]).map(key => (
+                <div key={key} style={{textTransform:"capitalize", marginTop:"5px", marginBottom:"-5px"}}>{prettyText(key.split(',')[0], totalSelectedState["REPORTED (EVAC REQUESTED)"][key])}</div>
+              ))}
+            </div> : ""}
+            {Object.keys(totalSelectedState["REPORTED (SIP REQUESTED)"]).length > 0 ? <div className="card-header border rounded mt-3 text-center" style={{paddingRight:"15px", paddingLeft:"15px", marginLeft:"8px", marginRight:"18px", marginBottom:"-4px"}}>
+              <p className="mb-2" style={{marginTop:"-5px"}}>Reported (SIP)
+                <OverlayTrigger
+                  key={"selected-reported-sip"}
+                  placement="top"
+                  overlay={
+                    <Tooltip id={`tooltip-selected-reported-sip`}>
+                      Reported - (Sheltered In Place)
+                    </Tooltip>
+                  }
+                >
+                  <span className="fa-layers ml-1" >
+                    <FontAwesomeIcon icon={faCircle} className="icon-border" color="#ff4c4c" transform={'grow-2'} />
+                    <FontAwesomeIcon icon={faHomeAlt} style={{color:"white"}} transform={'shrink-4 left-1'} inverse />
+                    <FontAwesomeIcon icon={faHomeAltReg} style={{color:"#444"}} transform={'shrink-3 left-1'} inverse />
+                  </span>
+                </OverlayTrigger>
+              </p>
+              <hr className="mt-1 mb-1"/>
+              {Object.keys(totalSelectedState["REPORTED (SIP REQUESTED)"]).map(key => (
+                <div key={key} style={{textTransform:"capitalize", marginTop:"5px", marginBottom:"-5px"}}>{prettyText(key.split(',')[0], totalSelectedState["REPORTED (SIP REQUESTED)"][key])}</div>
+              ))}
+            </div> : ""}
+            {Object.keys(totalSelectedState["SHELTERED IN PLACE"]).length > 0 ? <div className="card-header border rounded mt-3 text-center" style={{paddingRight:"15px", paddingLeft:"15px", marginLeft:"8px", marginRight:"18px", marginBottom:"-4px"}}>
               <p className="mb-2" style={{marginTop:"-5px"}}>SIP
                 <OverlayTrigger
                   key={"selected-sip"}
@@ -467,8 +568,8 @@ function Deploy({ incident }) {
               {Object.keys(totalSelectedState["SHELTERED IN PLACE"]).map(key => (
                 <div key={key} style={{textTransform:"capitalize", marginTop:"5px", marginBottom:"-5px"}}>{prettyText(key.split(',')[0], totalSelectedState["SHELTERED IN PLACE"][key])}</div>
               ))}
-            </div>
-            <div className="card-header border rounded mt-3 mb-3 text-center" style={{paddingRight:"15px", paddingLeft:"15px", marginLeft:"8px", marginRight:"18px"}}>
+            </div> : ""}
+            {Object.keys(totalSelectedState["UNABLE TO LOCATE"]).length > 0 ? <div className="card-header border rounded mt-3 mb-3 text-center" style={{paddingRight:"15px", paddingLeft:"15px", marginLeft:"8px", marginRight:"18px", marginBottom:"-4px"}}>
               <p className="mb-2" style={{marginTop:"-5px"}}>UTL
                 <OverlayTrigger
                   key={"selected-utl"}
@@ -489,7 +590,7 @@ function Deploy({ incident }) {
               {Object.keys(totalSelectedState["UNABLE TO LOCATE"]).map(key => (
                 <div key={key} style={{textTransform:"capitalize", marginTop:"5px", marginBottom:"-5px"}}>{prettyText(key.split(',')[0], totalSelectedState["UNABLE TO LOCATE"][key])}</div>
               ))}
-            </div>
+            </div> : ""}
           </Scrollbar>
           </Col>
           <Col xs={10} className="border rounded pl-0 pr-0">
@@ -501,7 +602,7 @@ function Deploy({ incident }) {
                 <span key={service_request.id}> {mapState[service_request.id] ? 
                   <Marker
                     position={[service_request.latitude, service_request.longitude]}
-                    icon={mapState[service_request.id] && mapState[service_request.id].checked ? checkMarkerIcon : service_request.reported_animals > 0 ? reportedMarkerIcon : service_request.sheltered_in_place > 0 ? SIPMarkerIcon : UTLMarkerIcon}
+                    icon={mapState[service_request.id] && mapState[service_request.id].checked ? checkMarkerIcon : service_request.reported_animals > 0 ? reportedMarkerIcon : service_request.reported_evac > 0 ? reportedEvacMarkerIcon : service_request.reported_sheltered_in_place > 0 ? reportedSIPMarkerIcon : service_request.sheltered_in_place > 0 ? SIPMarkerIcon : UTLMarkerIcon}
                     onClick={() => handleMapState(service_request.id)}
                     zIndexOffset={mapState[service_request.id].checked ? 1000 : 0}
                   >
@@ -636,6 +737,35 @@ function Deploy({ incident }) {
                       }
                     >
                       <FontAwesomeIcon icon={faExclamationCircle} className="ml-1"/>
+                    </OverlayTrigger>
+                    : ""}
+                    {service_request.reported_evac > 0 ?
+                    <OverlayTrigger
+                      key={"reported-evac"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-reported-evac`}>
+                          {service_request.reported_evac} animal{service_request.reported_evac > 1 ? "s are":" is"} reported (evac requested)
+                        </Tooltip>
+                      }
+                    >
+                      <FontAwesomeIcon icon={faCircleBolt} className="ml-1"/>
+                    </OverlayTrigger>
+                    : ""}
+                    {service_request.reported_sheltered_in_place > 0 ?
+                    <OverlayTrigger
+                      key={"reported-sip"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-reported-sip`}>
+                          {service_request.reported_sheltered_in_place} animal{service_request.reported_sheltered_in_place > 1 ? "s are":" is"} reported (sip requested)
+                        </Tooltip>
+                      }
+                    >
+                      <span className="fa-layers ml-1">
+                        <FontAwesomeIcon icon={faCircle} transform={'grow-1'} />
+                        <FontAwesomeIcon icon={faHomeAlt} style={{color:"#444"}} transform={'shrink-3'} size="sm" inverse />
+                      </span>
                     </OverlayTrigger>
                     : ""}
                     {service_request.sheltered_in_place > 0 ?

@@ -1,17 +1,18 @@
 import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
 import { Link } from 'raviger';
-import { Card, Col, ListGroup, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faPrint
-} from '@fortawesome/free-solid-svg-icons';
+import { Card, Col, ListGroup, Row } from 'react-bootstrap';
 import Moment from 'react-moment';
 import Header from '../components/Header';
 import { SystemErrorContext } from '../components/SystemError';
 import AnimalCards from '../components/AnimalCards';
-import { printIntakeSummaryAnimalCareSchedules } from './Utils';
-import { printOwnerDetails } from './Utils';
+import ShelterlyPrintifyButton from '../components/ShelterlyPrintifyButton';
+import {
+  printIntakeSummaryAnimalCareSchedules,
+  printOwnerDetails,
+  printAllOwnersDetails,
+  printIntakeSummary
+} from './Utils';
 
 function ShelterIntakeSummary({ id, incident }) {
 
@@ -29,17 +30,26 @@ function ShelterIntakeSummary({ id, incident }) {
     person_object: {first_name:'', last_name:''}
   });
 
-  const handlePrintOwnerClick = (e) => {
-    e.preventDefault();
+  const [organization, setOrganization] = useState({
+    name: '',
+    short_name: '',
+    liability_name: '',
+    liability_short_name: '',
+  });
 
-    printOwnerDetails(data.person_object);
-  }
+  const [animalOwners, setAnimalOwners] = useState([]);
 
-  const handlePrintAllAnimalsClick = (e) => {
-    e.preventDefault();
+  const handlePrintOwnerClick = () =>
+    printOwnerDetails(data.person_object, organization);
 
+  const handlePrintAnimalOwnersClick = () =>
+    printAllOwnersDetails(animalOwners, organization);
+
+  const handlePrintAllAnimalsClick = () =>
     printIntakeSummaryAnimalCareSchedules(data.animal_objects, id);
-  }
+
+  const handlePrintIntakeSummary = async () =>
+    printIntakeSummary(data);
 
   // Hook for initializing data.
   useEffect(() => {
@@ -63,6 +73,25 @@ function ShelterIntakeSummary({ id, incident }) {
       });
     };
     fetchIntakeSummaryData();
+
+    const fetchOrganizationData = async () => {
+      // Fetch Organization data.
+      await axios.get('/accounts/api/organization/', {
+        cancelToken: source.token,
+      })
+      .then(response => {
+        if (!unmounted) {
+          setOrganization(response.data[0]);
+        }
+      })
+      .catch(error => {
+        if (!unmounted) {
+          setShowSystemError(true);
+        }
+      });
+    };
+    fetchOrganizationData();
+
     // Cleanup.
     return () => {
       unmounted = true;
@@ -70,12 +99,37 @@ function ShelterIntakeSummary({ id, incident }) {
     };
   }, [id, incident]);
 
+  useEffect(() => {
+    const ownersFromAnimals = [];
+
+    data?.animal_objects?.forEach?.((animal) => {
+      animal.owners?.forEach?.((owner) => {
+        const foundOwner = ownersFromAnimals.find(({ id }) => id === owner.id);
+        if (!foundOwner) {
+          ownersFromAnimals.push({
+            ...owner,
+            animals: data.animal_objects.filter(
+              (a) => !!a.owners.find(({ id }) => id === owner.id)
+            ),
+          });
+        }
+      });
+    });
+
+    setAnimalOwners(ownersFromAnimals);
+  }, [data]);
+
   return (
     <>
       <Header>
-      {data.intake_type === 'owner_walkin' ? 'Owner Walk-In ' : data.intake_type === 'reporter_walkin' ? 'Reporter Walk-In ' : 'Dispatch '}Intake Summary
+        {data.intake_type === "owner_walkin"
+          ? "Owner Walk-In "
+          : data.intake_type === "reporter_walkin"
+          ? "Reporter Walk-In "
+          : "Dispatch "}
+        Intake Summary
       </Header>
-      <hr/>
+      <hr />
       <Row className="d-flex">
         <Col>
           <Card className="border rounded d-flex" style={{width:"100%", height: "100%"}}>
@@ -92,40 +146,43 @@ function ShelterIntakeSummary({ id, incident }) {
                   <b>Date:</b> <Moment format="MMMM Do YYYY HH:mm">{data.date}</Moment>
                 </ListGroup.Item>
                 {data.intake_type === 'owner_walkin' ?
-                <ListGroup.Item>
-                  <b>Owner:</b>{' '}
-                  <Link
-                    href={"/" + incident + "/people/owner/" + data.person}
-                    className="text-link"
-                    style={{textDecoration:"none", color:"white"}}
-                  >
-                    {data.person_object.first_name}
-                    {' '}
-                    {data.person_object.last_name}
-                  </Link>
-                  <OverlayTrigger
-                    key={'printOwner'}
-                    placement="top"
-                    overlay={
-                      <Tooltip id={`tooltip-printall`}>
-                        Print Owner Details
-                      </Tooltip>
-                    }
-                  >
-                    <FontAwesomeIcon
-                      icon={faPrint}
-                      onClick={handlePrintOwnerClick}
-                      style={{cursor:'pointer'}}
-                      className="ml-2 fa-move-up"
-                      size="sm"
-                      inverse
+                  <ListGroup.Item>
+                    <b>Owner:</b>{' '}
+                    <Link
+                      href={"/" + incident + "/people/owner/" + data.person}
+                      className="text-link"
+                      style={{textDecoration:"none", color:"white"}}
+                    >
+                      {data.person_object.first_name}
+                      {' '}
+                      {data.person_object.last_name}
+                    </Link>
+                    <ShelterlyPrintifyButton
+                      id="dispatch-assignment-owner"
+                      spinnerSize={0.8}
+                      tooltipPlacement='top'
+                      tooltipText='Print Owner Details'
+                      printFunc={handlePrintOwnerClick}
                     />
-                  </OverlayTrigger>
-                </ListGroup.Item>
+                  </ListGroup.Item>
                 : data.intake_type === 'reporter_walkin' ?
                 <ListGroup.Item>
                   <b>Reporter:</b> <Link href={"/" + incident + "/people/reporter/" + data.person} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.person_object.first_name} {data.person_object.last_name}</Link>
                 </ListGroup.Item>
+                : animalOwners.length ?
+                  <ListGroup.Item>
+                    <b>Owner(s):</b>{' '}
+                    {animalOwners.map((owner, i) => (
+                      <span key={`owner-${owner.id}`}>{owner.first_name} {owner.last_name}{i < animalOwners.length - 1 ? ', ' : ' '}</span>
+                    ))}
+                    <ShelterlyPrintifyButton
+                      id="dispatch-assignment-all-owners"
+                      spinnerSize={0.8}
+                      tooltipPlacement='top'
+                      tooltipText='Print All Owners'
+                      printFunc={handlePrintAnimalOwnersClick}
+                    />
+                  </ListGroup.Item>
                 : ""}
               </ListGroup>
             </Card.Body>
@@ -139,17 +196,13 @@ function ShelterIntakeSummary({ id, incident }) {
             <Card.Title>
               <h4 className="mb-0">Animals ({data.animals.length})
                 {data.animals?.length > 0 && (
-                  <OverlayTrigger
-                    key={"printall"}
-                    placement="top"
-                    overlay={
-                      <Tooltip id={`tooltip-printall`}>
-                        Print all animal care schedules
-                      </Tooltip>
-                    }
-                  >
-                    <FontAwesomeIcon icon={faPrint} onClick={handlePrintAllAnimalsClick} style={{cursor:'pointer'}} className="ml-1 fa-move-up" size="sm" inverse />
-                  </OverlayTrigger>
+                  <ShelterlyPrintifyButton
+                    id="dispatch-assignment-animal-care-schedules"
+                    spinnerSize={1.5}
+                    tooltipPlacement='top'
+                    tooltipText='Print All Animal Care Schedules'
+                    printFunc={handlePrintAllAnimalsClick}
+                  />
                 )}
               </h4>
             </Card.Title>
