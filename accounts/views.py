@@ -12,8 +12,9 @@ from rest_framework import generics, permissions, response, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 
-from accounts.models import ShelterlyUser, Organization
-from accounts.serializers import UserSerializer, OrganizationSerializer
+from accounts.models import ShelterlyUser
+from accounts.serializers import UserSerializer
+from incident.models import Organization
 
 User = get_user_model()
 
@@ -25,6 +26,7 @@ class LoginView(KnoxLoginView):
         serializer = AuthTokenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
+        ### TODO If user is not a member of the current organization, return 401 ###
         login(request, user)
         return super(LoginView, self).post(request, format=None)
 
@@ -73,6 +75,9 @@ class UserViewSet(viewsets.ModelViewSet):
         return response.Response(UserSerializer(ShelterlyUser.objects.filter(id__in=user_ids), many=True).data, status=201)
 
     def perform_create(self, serializer):
+        if serializer.validated_data.get('organization'):
+            org = Organization.objects.get(name=serializer.validated_data['organization'])
+            serializer.validated_data['organization'] = org.id
         if serializer.is_valid():
             if self.request.user.is_superuser or self.request.user.user_perms:
                 serializer.save()
@@ -112,12 +117,7 @@ class UserViewSet(viewsets.ModelViewSet):
                             }
                         ).strip()
                     )
+
     def perform_destroy(self, instance):
         if self.request.user.is_superuser or self.request.user.user_perms:
             instance.delete()
-
-# Provides view for User API calls.
-class OrganizationViewSet(viewsets.ModelViewSet):
-    queryset = Organization.objects.all()
-    permission_classes = [permissions.IsAuthenticated]
-    serializer_class = OrganizationSerializer

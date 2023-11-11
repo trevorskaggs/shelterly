@@ -101,7 +101,7 @@ function PersonDetails({id, incident}) {
 
     const fetchOrganizationData = async () => {
       // Fetch Organization data.
-      await axios.get('/accounts/api/organization/', {
+      await axios.get('/incident/api/organization/', {
         cancelToken: source.token,
       })
       .then(response => {

@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.db import models
+from incident.models import Organization
 from location.models import Location
 from .managers import PersonQueryset
 
@@ -14,6 +15,7 @@ class Person(Location):
     agency = models.TextField(blank=True)
     drivers_license = models.CharField(max_length=50, blank=True)
     email = models.CharField(max_length=200, blank=True)
+    organization = models.ForeignKey(Organization, on_delete=models.SET_NULL, null=True, blank=True)
 
     objects = PersonQueryset.as_manager()
 

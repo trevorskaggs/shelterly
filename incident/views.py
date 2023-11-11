@@ -1,8 +1,8 @@
 from datetime import datetime
 from rest_framework import permissions, viewsets
 
-from incident.models import Incident
-from incident.serializers import IncidentSerializer
+from incident.models import Incident, Organization
+from incident.serializers import IncidentSerializer, OrganizationSerializer
 
 
 # Provides view for User API calls.
@@ -20,6 +20,9 @@ class IncidentViewSet(viewsets.ModelViewSet):
         return queryset
 
     def perform_create(self, serializer):
+        if serializer.validated_data.get('organization'):
+            org = Organization.objects.get(name=serializer.validated_data['organization'])
+            serializer.validated_data['organization'] = org.id
         if serializer.is_valid():
 
             # Only create incident if user is an Admin.
@@ -40,3 +43,9 @@ class IncidentViewSet(viewsets.ModelViewSet):
                     else:
                         incident.end_time = datetime.now()
                     incident.save()
+
+# Provides view for User API calls.
+class OrganizationViewSet(viewsets.ModelViewSet):
+    queryset = Organization.objects.all()
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = OrganizationSerializer

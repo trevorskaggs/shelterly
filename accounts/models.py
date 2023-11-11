@@ -8,6 +8,9 @@ from django.db.models.signals import post_save
 from django.db import models
 from django.apps import apps
 
+from incident.models import Organization
+
+
 class ShelterlyUserManager(BaseUserManager):
     def create_user(self, email, cell_phone, password=None, **extra_fields):
         """
@@ -57,6 +60,7 @@ class ShelterlyUser(AbstractUser):
     user_perms = models.BooleanField(default=False)
     incident_perms = models.BooleanField(default=False)
     email_notification = models.BooleanField(default=False)
+    organizations = models.ManyToManyField(Organization, blank=True)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['cell_phone']
@@ -134,10 +138,3 @@ def password_reset_token_created(sender, instance, reset_password_token, *args, 
             }
         ).strip()
     )
-
-class Organization(models.Model):
-
-    name = models.CharField(max_length=80)
-    short_name = models.CharField(max_length=40, blank=True, null=True)
-    liability_name = models.CharField(max_length=80)
-    liability_short_name = models.CharField(max_length=40)
