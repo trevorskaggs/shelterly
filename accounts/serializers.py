@@ -10,6 +10,9 @@ class UserSerializer(serializers.ModelSerializer):
 
     display_phone = serializers.SerializerMethodField()
     version = serializers.SerializerMethodField()
+    user_perms = serializers.SerializerMethodField()
+    incident_perms = serializers.SerializerMethodField()
+    email_notification = serializers.SerializerMethodField()
 
     # Custom field for Formated Phone Number
     def get_display_phone(self, obj):
@@ -18,6 +21,20 @@ class UserSerializer(serializers.ModelSerializer):
     # Custom field for Shelterly version
     def get_version(self, obj):
         return settings.SHELTERLY_VERSION
+
+    # Custom field for user perms
+    def get_user_perms(self, obj):
+        # TODO tie these to current org
+        # import ipdb;ipdb.set_trace()
+        return True
+
+    # Custom field for user perms
+    def get_incident_perms(self, obj):
+        return True
+
+    # Custom field for user perms
+    def get_email_notification(self, obj):
+        return True
 
     class Meta:
         model = User

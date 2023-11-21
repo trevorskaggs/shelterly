@@ -49,6 +49,7 @@ class ShelterlyUserManager(BaseUserManager):
     def get_by_natural_key(self, email):
         return self.get(email__iexact=email)
 
+
 class ShelterlyUser(AbstractUser):
 
     first_name = models.CharField(max_length=50, blank=False, null=False)
@@ -57,10 +58,7 @@ class ShelterlyUser(AbstractUser):
     agency_id = models.CharField(max_length=50, blank=True, null=True)
     username = models.CharField(max_length=50, blank=True, null=True)
     email = models.EmailField(blank=False, null=False, unique=True)
-    user_perms = models.BooleanField(default=False)
-    incident_perms = models.BooleanField(default=False)
-    email_notification = models.BooleanField(default=False)
-    organizations = models.ManyToManyField(Organization, blank=True)
+    organization = models.ManyToManyField(Organization, through='ShelterlyUserOrg', related_name='users')
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['cell_phone']
@@ -72,6 +70,14 @@ class ShelterlyUser(AbstractUser):
 
     class Meta:
         ordering = ('last_name', 'first_name')
+
+
+class ShelterlyUserOrg(models.Model):
+    user = models.ForeignKey(ShelterlyUser, null=True, on_delete=models.SET_NULL)
+    organization = models.ForeignKey(Organization, null=True, on_delete=models.SET_NULL, related_name='user_perms')
+    user_perms = models.BooleanField(default=False)
+    incident_perms = models.BooleanField(default=False)
+    email_notification = models.BooleanField(default=False)
 
 # Send email to user on user creation.
 def email_new_user(sender, **kwargs):
