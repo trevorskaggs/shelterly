@@ -17,12 +17,12 @@ class IncidentViewSet(viewsets.ModelViewSet):
         if self.request.GET.get('incident'):
             queryset = queryset.filter(slug=self.request.GET.get('incident'))
 
+        if self.request.GET.get('organization'):
+            queryset = queryset.filter(organization__slug=self.request.GET.get('organization'))
+
         return queryset
 
     def perform_create(self, serializer):
-        if serializer.validated_data.get('organization'):
-            org = Organization.objects.get(name=serializer.validated_data['organization'])
-            serializer.validated_data['organization'] = org.id
         if serializer.is_valid():
 
             # Only create incident if user is an Admin.
@@ -49,3 +49,11 @@ class OrganizationViewSet(viewsets.ModelViewSet):
     queryset = Organization.objects.all()
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = OrganizationSerializer
+
+    def get_queryset(self):
+        queryset = Organization.objects.all()
+
+        if self.request.GET.get('slug'):
+            queryset = queryset.filter(slug=self.request.GET.get('slug'))
+
+        return queryset

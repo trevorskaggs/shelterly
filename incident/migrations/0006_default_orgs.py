@@ -6,7 +6,7 @@ from django.db import migrations, models
 def update_status_change(apps, schema_editor):
     db_alias = schema_editor.connection.alias
     Organization = apps.get_model("incident", "Organization")
-    Organization.objects.using(db_alias).create(name='Change Me', liability_name='Change Me', liability_short_name='CHANGEME')
+    Organization.objects.using(db_alias).create(name='Change Me', slug='changeme', liability_name='Change Me', liability_short_name='CHANGEME')
 
 class Migration(migrations.Migration):
 

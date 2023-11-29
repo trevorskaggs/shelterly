@@ -3,11 +3,9 @@ import axios from "axios";
 import Select from 'react-select';
 import SimpleValue from 'react-select-simple-value';
 import { Button, Col, Row } from 'react-bootstrap';
-import { Link } from "raviger";
+import { Link, navigate } from "raviger";
 import moment from 'moment';
-import { useCookies } from 'react-cookie';
 import { AuthContext } from "./accounts/AccountsReducer";
-import { logoutUser } from "./accounts/AccountsUtils";
 import { SystemErrorContext } from './components/SystemError';
 
 function Incident() {
@@ -15,12 +13,16 @@ function Incident() {
   const { dispatch, state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
-  const [incident, setIncident] = useState({id: '', slug: ''});
+  const [incident, setIncident] = useState({id: '', slug: '', name: ''});
   const [options, setOptions] = useState([]);
-  const [, , removeCookie] = useCookies(['token']);
 
   const path = window.location.pathname;
-  const organization = path.split('/')[1]
+  const org_slug = path.split('/')[1];
+
+  const handleSubmit = (incident_name) => {
+    dispatch({type: "SET_INCIDENT", data: incident_name});
+    navigate(window.location.pathname + "/" + incident.slug);
+  }
 
   const customStyles = {
     // For the select it self, not the options of the select
@@ -61,7 +63,7 @@ function Incident() {
 
     const fetchIncidentData = async () => {
       // Fetch ServiceRequest data.
-      await axios.get('/incident/api/incident/', {
+      await axios.get('/incident/api/incident/?organization=' + org_slug, {
         cancelToken: source.token,
       })
       .then(response => {
@@ -70,7 +72,7 @@ function Incident() {
           response.data.forEach(incident => {
             // Build incident option list.
             if (!incident.end_time || state.user.is_superuser || state.user.incident_perms) {
-              options.push({value: incident.id, label: incident.name + ' (' + moment(incident.start_time).format('MM/DD/YYYY') + (incident.end_time ? ' - ' + moment(incident.end_time).format('MM/DD/YYYY') : '') + ')', slug:incident.slug, end_time:incident.end_time});
+              options.push({value: incident.id, label: incident.name + ' (' + moment(incident.start_time).format('MM/DD/YYYY') + (incident.end_time ? ' - ' + moment(incident.end_time).format('MM/DD/YYYY') : '') + ')', slug:incident.slug, name:incident.name, end_time:incident.end_time});
             }
           });
           setOptions(options)
@@ -90,28 +92,27 @@ function Incident() {
     };
   }, [state.user.is_superuser, state.user.incident_perms]);
 
-
   return (
     <>
     <Row className='ml-auto mr-auto mt-auto align-bottom'>
-      <h1 style={{fontSize:"100px", textTransform: 'capitalize'}}>{organization.replace('_', ' ')}</h1>
+      <h1 style={{fontSize:"100px", textTransform: 'capitalize'}}>{state.organization.name}</h1>
     </Row>
     <Col xs={{ span:5 }} className="border rounded border-light shadow-sm ml-auto mr-auto mb-auto" style={{maxHeight:state.user.is_superuser || state.user.incident_perms ? "309px" : "200px", minWidth:"572px"}}>
       <SimpleValue options={options}>
-        {simpleProps => <Select styles={customStyles} {...simpleProps} className="mt-3" placeholder="Select incident..." onChange={(instance) => setIncident({id:instance.value, slug:instance.slug})} />}
+        {simpleProps => <Select styles={customStyles} {...simpleProps} className="mt-3" placeholder="Select incident..." onChange={(instance) => setIncident({id:instance.value, slug:instance.slug, name:instance.name})} />}
       </SimpleValue>
-      <Link href={window.location.pathname + "/" + incident.slug} style={{textDecoration:"none"}}><Button size="lg" className="btn-primary mt-3" disabled={incident.id ? false : true} block>Select Incident</Button></Link>
+      <Button size="lg" className="btn-primary mt-3" onClick={() => handleSubmit(incident.name)} disabled={incident.id ? false : true} block>Select Incident</Button>
       {state.user.is_superuser || state.user.incident_perms ?
         <Row>
           <Col style={{marginRight:"-23px"}}>
-            <Link href={'/incident/edit/' + incident.id} style={{textDecoration:"none"}}><Button size="lg" className="btn-primary mt-2" disabled={incident.id ? false : true} block>Edit Incident</Button></Link>
+            <Link href={'/' + org_slug + '/incident/edit/' + incident.id} style={{textDecoration:"none"}}><Button size="lg" className="btn-primary mt-2" disabled={incident.id ? false : true} block>Edit Incident</Button></Link>
           </Col>
           <Col>
             <Button size="lg" className="btn-primary mt-2" disabled={incident.id ? false : true} onClick={() => handleOpenCloseSubmit()} block>{incident.id && options.filter(option => option.value === incident.id)[0].end_time ? "Open" : "Close"} Incident</Button>
           </Col>
         </Row>
       : ""}
-      {state.user.is_superuser || state.user.incident_perms ? <Link href={'/incident/new'} style={{textDecoration:"none"}}><Button size="lg" className="btn-primary mt-2" block>Create New Incident</Button></Link> : ""}
+      {state.user.is_superuser || state.user.incident_perms ? <Link href={'/' + org_slug + '/incident/new'} style={{textDecoration:"none"}}><Button size="lg" className="btn-primary mt-2" block>Create New Incident</Button></Link> : ""}
       <Link href={"/"} style={{textDecoration:"none"}}><Button size="lg" className="btn-primary mt-2 mb-3" block>Return to Organizations</Button></Link>
     </Col>
     </>

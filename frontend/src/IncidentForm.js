@@ -14,10 +14,12 @@ import { Map, Marker, Tooltip as MapTooltip, TileLayer } from "react-leaflet";
 import { Legend, pinMarkerIcon } from "./components/Map";
 import { TextInput } from './components/Form.js';
 import ButtonSpinner from './components/ButtonSpinner.js';
+import { AuthContext } from "./accounts/AccountsReducer";
 import { SystemErrorContext } from './components/SystemError';
 
-const IncidentForm = ({ id }) => {
+const IncidentForm = ({ id, organization }) => {
 
+  const { dispatch, state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
   const [data, setData] = useState({
@@ -25,6 +27,7 @@ const IncidentForm = ({ id }) => {
     slug: '',
     latitude: '',
     longitude: '',
+    organization: state.organization.id
   });
 
   const [bounds, setBounds] = useState(L.latLngBounds([[0,0]]));
@@ -130,7 +133,7 @@ const IncidentForm = ({ id }) => {
           .test('required-check', 'Name already in use.',
             function(value) {
               // Check against slug for dupes.
-              if (data.name !== value && names.includes(value.trim().toLowerCase().replaceAll(' ','-').match(/[a-zA-Z0-9-]+/g)[0])) {
+              if (value && data.name !== value && names.includes(value.trim().toLowerCase().replaceAll(' ','').match(/[a-zA-Z0-9-]+/g)[0])) {
                 return false;
               }
               return true;
@@ -140,11 +143,11 @@ const IncidentForm = ({ id }) => {
         longitude: Yup.number()
       })}
       onSubmit={(values, { setSubmitting }) => {
-        values['slug'] = values.name.trim().replaceAll(' ','-').match(/[a-zA-Z0-9-]+/g)[0];
+        values['slug'] = values.name.trim().replaceAll(' ','').match(/[a-zA-Z0-9-]+/g)[0];
         if (id) {
           axios.put('/incident/api/incident/' + id + '/', values)
           .then(function () {
-            navigate('/');
+            navigate('/' + organization);
           })
           .catch(error => {
             setShowSystemError(true);
@@ -153,7 +156,7 @@ const IncidentForm = ({ id }) => {
         else {
           axios.post('/incident/api/incident/', values)
           .then(function () {
-            navigate('/');
+            navigate('/' + organization);
           })
           .catch(error => {
             setShowSystemError(true);
@@ -163,7 +166,7 @@ const IncidentForm = ({ id }) => {
     >
       {form => (
         <Card border="secondary" className="mt-4 ml-auto mr-auto" style={{width:"50%", maxWidth:"50%"}}>
-          <Card.Header as="h5" className="pl-3"><span style={{ cursor: 'pointer' }} onClick={() => navigate("/")} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>{id ? 'Edit' : 'New'} Incident</Card.Header>
+          <Card.Header as="h5" className="pl-3"><span style={{ cursor: 'pointer' }} onClick={() => navigate("/" + organization)} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>{id ? 'Edit' : 'New'} Incident</Card.Header>
           <Card.Body>
             <BootstrapForm>
               <BootstrapForm.Row>
