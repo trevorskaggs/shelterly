@@ -51,7 +51,7 @@ class OrganizationViewSet(viewsets.ModelViewSet):
     serializer_class = OrganizationSerializer
 
     def get_queryset(self):
-        queryset = Organization.objects.all()
+        queryset = Organization.objects.filter(id__in=self.request.user.organization.all())
 
         if self.request.GET.get('slug'):
             queryset = queryset.filter(slug=self.request.GET.get('slug'))
