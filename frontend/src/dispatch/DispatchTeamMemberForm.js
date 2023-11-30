@@ -16,7 +16,7 @@ import { TextInput } from '.././components/Form.js';
 import ButtonSpinner from '../components/ButtonSpinner.js';
 import { SystemErrorContext } from '../components/SystemError';
 
-const DispatchTeamMemberForm = ({ id, incident }) => {
+const DispatchTeamMemberForm = ({ id, incident, organization }) => {
 
   const { setShowSystemError } = useContext(SystemErrorContext);
 
@@ -81,7 +81,7 @@ const DispatchTeamMemberForm = ({ id, incident }) => {
           if (id) {
             axios.put('/evac/api/evacteammember/' + id + '/', values)
             .then(function () {
-              navigate('/' + incident + '/dispatch/teammanagement');
+              navigate('/' + organization + '/' + incident + '/dispatch/teammanagement');
             })
             .catch(error => {
               setSubmitting(false);
@@ -95,7 +95,7 @@ const DispatchTeamMemberForm = ({ id, incident }) => {
                 resetForm();
               }
               else {
-                navigate('/' + incident + '/dispatch/teammanagement');
+                navigate('/' + organization + '/' + incident + '/dispatch/teammanagement');
               }
             })
             .catch(error => {

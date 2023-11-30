@@ -14,7 +14,7 @@ import {
   printIntakeSummary
 } from './Utils';
 
-function ShelterIntakeSummary({ id, incident }) {
+function ShelterIntakeSummary({ id, incident, organization }) {
 
   const { setShowSystemError } = useContext(SystemErrorContext);
 
@@ -30,7 +30,7 @@ function ShelterIntakeSummary({ id, incident }) {
     person_object: {first_name:'', last_name:''}
   });
 
-  const [organization, setOrganization] = useState({
+  const [organizationData, setOrganizationData] = useState({
     name: '',
     short_name: '',
     liability_name: '',
@@ -40,10 +40,10 @@ function ShelterIntakeSummary({ id, incident }) {
   const [animalOwners, setAnimalOwners] = useState([]);
 
   const handlePrintOwnerClick = () =>
-    printOwnerDetails(data.person_object, organization);
+    printOwnerDetails(data.person_object, organizationData);
 
   const handlePrintAnimalOwnersClick = () =>
-    printAllOwnersDetails(animalOwners, organization);
+    printAllOwnersDetails(animalOwners, organizationData);
 
   const handlePrintAllAnimalsClick = () =>
     printIntakeSummaryAnimalCareSchedules(data.animal_objects, id);
@@ -81,7 +81,7 @@ function ShelterIntakeSummary({ id, incident }) {
       })
       .then(response => {
         if (!unmounted) {
-          setOrganization(response.data[0]);
+          setOrganizationData(response.data[0]);
         }
       })
       .catch(error => {
@@ -140,7 +140,7 @@ function ShelterIntakeSummary({ id, incident }) {
               <hr/>
               <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
                 <ListGroup.Item>
-                  <b>Shelter:</b> <Link href={"/" + incident + "/shelter/" + data.shelter} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.shelter_name}</Link>
+                  <b>Shelter:</b> <Link href={"/" + organization + "/" + incident + "/shelter/" + data.shelter} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.shelter_name}</Link>
                 </ListGroup.Item>
                 <ListGroup.Item>
                   <b>Date:</b> <Moment format="MMMM Do YYYY HH:mm">{data.date}</Moment>
@@ -149,7 +149,7 @@ function ShelterIntakeSummary({ id, incident }) {
                   <ListGroup.Item>
                     <b>Owner:</b>{' '}
                     <Link
-                      href={"/" + incident + "/people/owner/" + data.person}
+                      href={"/" + organization + "/" + incident + "/people/owner/" + data.person}
                       className="text-link"
                       style={{textDecoration:"none", color:"white"}}
                     >
@@ -167,7 +167,7 @@ function ShelterIntakeSummary({ id, incident }) {
                   </ListGroup.Item>
                 : data.intake_type === 'reporter_walkin' ?
                 <ListGroup.Item>
-                  <b>Reporter:</b> <Link href={"/" + incident + "/people/reporter/" + data.person} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.person_object.first_name} {data.person_object.last_name}</Link>
+                  <b>Reporter:</b> <Link href={"/" + organization + "/" + incident + "/people/reporter/" + data.person} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.person_object.first_name} {data.person_object.last_name}</Link>
                 </ListGroup.Item>
                 : animalOwners.length ?
                   <ListGroup.Item>
@@ -207,7 +207,7 @@ function ShelterIntakeSummary({ id, incident }) {
               </h4>
             </Card.Title>
             <hr/>
-            <AnimalCards animals={data.animal_objects} show_owner={true} incident={"/" + incident} />
+            <AnimalCards animals={data.animal_objects} show_owner={true} organization={organization} incident={"/" + incident} />
             {data.animals.length < 1 ? <p>No animals were intaken.</p> : ""}
           </Card.Body>
         </Card>

@@ -15,7 +15,7 @@ import { SystemErrorContext } from '../components/SystemError';
 import ShelterlyPrintifyButton from '../components/ShelterlyPrintifyButton';
 import { printOwnerDetails, printOwnerAnimalCareSchedules } from './Utils';
 
-function PersonDetails({id, incident}) {
+function PersonDetails({id, incident, organization}) {
 
   const { setShowSystemError } = useContext(SystemErrorContext);
 
@@ -58,7 +58,7 @@ function PersonDetails({id, incident}) {
     action_history: [],
   });
 
-  const [organization, setOrganization] = useState({
+  const [organizationData, setOrganizationData] = useState({
     name: '',
     short_name: '',
     liability_name: '',
@@ -66,7 +66,7 @@ function PersonDetails({id, incident}) {
   });
 
   const handleDownloadPdfClick = () =>
-    printOwnerDetails(data, organization)
+    printOwnerDetails(data, organizationData)
 
   const handlePrintAllAnimalsClick = () => {
     const animals = data.animals.map((animal) => ({
@@ -106,7 +106,7 @@ function PersonDetails({id, incident}) {
       })
       .then(response => {
         if (!unmounted) {
-          setOrganization(response.data[0]);
+          setOrganizationData(response.data[0]);
         }
       })
       .catch(error => {
@@ -138,7 +138,7 @@ function PersonDetails({id, incident}) {
               </Tooltip>
             }
           >
-            <Link href={"/" + incident + "/people/owner/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-2 mr-1" inverse /></Link>
+            <Link href={"/" + organization + "/" + incident + "/people/owner/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-2 mr-1" inverse /></Link>
           </OverlayTrigger>
         </span>
       :
@@ -152,7 +152,7 @@ function PersonDetails({id, incident}) {
               </Tooltip>
             }
           >
-            <Link href={"/" + incident + "/people/reporter/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-2 mr-1" inverse /></Link>
+            <Link href={"/" + organization + "/" + incident + "/people/reporter/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-2 mr-1" inverse /></Link>
           </OverlayTrigger>
         </span>
       }
@@ -183,7 +183,7 @@ function PersonDetails({id, incident}) {
                   <ListGroup.Item><b>Address: </b>{data.full_address}</ListGroup.Item>
                 : ""}
                 {data.requests.map(request => (
-                  <ListGroup.Item key={request.id}><b>Service Request: </b><Link href={"/" + incident + "/hotline/servicerequest/" + request.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{request.full_address}</Link></ListGroup.Item>
+                  <ListGroup.Item key={request.id}><b>Service Request: </b><Link href={"/" + organization + "/" + incident + "/hotline/servicerequest/" + request.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{request.full_address}</Link></ListGroup.Item>
                 ))}
                 {data.comments ? <ListGroup.Item><b>Comments: </b>{data.comments}</ListGroup.Item>: ''}
               </ListGroup>
@@ -206,7 +206,7 @@ function PersonDetails({id, incident}) {
                     </Tooltip>
                   }
                 >
-                  <Link href={"/" + incident + "/hotline/ownercontact/new?owner=" + id}><FontAwesomeIcon icon={faPhonePlus} className="ml-1" inverse /></Link>
+                  <Link href={"/" + organization + "/" + incident + "/hotline/ownercontact/new?owner=" + id}><FontAwesomeIcon icon={faPhonePlus} className="ml-1" inverse /></Link>
                 </OverlayTrigger>
               </h4>
             </Card.Title>
@@ -224,7 +224,7 @@ function PersonDetails({id, incident}) {
                       </Tooltip>
                     }
                   >
-                    <Link href={"/" + incident + "/hotline/ownercontact/" + owner_contact.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
+                    <Link href={"/" + organization + "/" + incident + "/hotline/ownercontact/" + owner_contact.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
                   </OverlayTrigger>
                   : {owner_contact.owner_contact_note}</ListGroup.Item>
                 ))}
@@ -251,7 +251,7 @@ function PersonDetails({id, incident}) {
                     </Tooltip>
                   }
                 >
-                  <Link href={"/" + incident + "/people/owner/new?owner_id=" + id}><FontAwesomeIcon icon={faUserPlus} className="ml-1 fa-move-up" size="sm" inverse /></Link>
+                  <Link href={"/" + organization + "/" + incident + "/people/owner/new?owner_id=" + id}><FontAwesomeIcon icon={faUserPlus} className="ml-1 fa-move-up" size="sm" inverse /></Link>
                 </OverlayTrigger>
                 {data.animals.filter(animal => (!['REUNITED', 'DECEASED'].includes(animal.status))).length > 0 ?
                   <OverlayTrigger
@@ -278,7 +278,7 @@ function PersonDetails({id, incident}) {
               </h4>
             </Card.Title>
             <hr/>
-            <AnimalCards animals={data.animals} show_owner={false} show_status={true} incident={"/" + incident} />
+            <AnimalCards animals={data.animals} show_owner={false} show_status={true} organization={organization} incident={"/" + incident} />
             {data.animals.length < 1 ? <p>This owner has no animals.</p> : ""}
           </Card.Body>
         </Card>
@@ -300,12 +300,12 @@ function PersonDetails({id, incident}) {
                     </Tooltip>
                   }
                 >
-                  <Link href={"/" + incident + "/people/owner/new?owner_id=" + id}><FontAwesomeIcon icon={faUserPlus} className="ml-1 fa-move-up" size="sm" inverse /></Link>
+                  <Link href={"/" + organization + "/" + incident + "/people/owner/new?owner_id=" + id}><FontAwesomeIcon icon={faUserPlus} className="ml-1 fa-move-up" size="sm" inverse /></Link>
                 </OverlayTrigger>
               </h4>
             </Card.Title>
             <hr/>
-            <AnimalCards animals={data.reporter_animals} show_owner={false} show_status={true} incident={"/" + incident} />
+            <AnimalCards animals={data.reporter_animals} show_owner={false} show_status={true} organization={organization} incident={"/" + incident} />
             {data.reporter_animals.length < 1 ? <p>This reporter has no animals.</p> : ""}
           </Card.Body>
         </Card>

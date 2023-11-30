@@ -20,7 +20,7 @@ import * as Yup from 'yup';
 import { DateTimePicker, TextInput } from '../components/Form';
 import { SystemErrorContext } from '../components/SystemError';
 
-const VisitNoteForm = ({ id, incident }) => {
+const VisitNoteForm = ({ id, incident, organization }) => {
 
   const { setShowSystemError } = useContext(SystemErrorContext);
 
@@ -74,7 +74,7 @@ const VisitNoteForm = ({ id, incident }) => {
         setTimeout(() => {
           axios.patch('/hotline/api/visitnote/' + values.id + '/', values)
             .then(
-              navigate('/' + incident + '/hotline/servicerequest/' + values.service_request)
+              navigate('/' + organization + '/' + incident + '/hotline/servicerequest/' + values.service_request)
             )
             .catch(error => {
               setShowSystemError(true);

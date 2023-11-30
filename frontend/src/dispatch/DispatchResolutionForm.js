@@ -119,7 +119,7 @@ function AnimalStatus(props) {
   )
 }
 
-function DispatchResolutionForm({ id, incident }) {
+function DispatchResolutionForm({ id, incident, organization }) {
 
   const { setShowSystemError } = useContext(SystemErrorContext);
 
@@ -305,10 +305,10 @@ function DispatchResolutionForm({ id, incident }) {
           axios.put('/evac/api/evacassignment/' + id + '/', values)
             .then(response => {
               if (response.data.service_requests.length === 0) {
-                navigate('/' + incident + '/dispatch');
+                navigate('/' + props.organization + '/' + incident + '/dispatch');
               }
               else {
-                navigate('/' + incident + '/dispatch/summary/' + response.data.id);
+                navigate('/' + props.organization + '/' + incident + '/dispatch/summary/' + response.data.id);
               }
             })
             .catch(error => {
@@ -346,7 +346,7 @@ function DispatchResolutionForm({ id, incident }) {
                   <Card.Title style={{marginBottom:"-5px", marginTop:"-5px"}}>
                     <h4>
                       SR#{assigned_request.service_request_object.id} -&nbsp;
-                      <Link href={"/" + incident + "/hotline/servicerequest/" + assigned_request.service_request_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link> |&nbsp;
+                      <Link href={"/" + organization + "/" + incident + "/hotline/servicerequest/" + assigned_request.service_request_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link> |&nbsp;
                       <Checkbox
                         label={"Unable to Complete:"}
                         name={`sr_updates.${index}.unable_to_complete`}

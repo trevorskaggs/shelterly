@@ -10,7 +10,7 @@ import Header from "../components/Header";
 import Scrollbar from '../components/Scrollbars';
 import { SystemErrorContext } from '../components/SystemError';
 
-function DispatchTeamManagement({ incident }) {
+function DispatchTeamManagement({ incident, organization }) {
 
   const { setShowSystemError } = useContext(SystemErrorContext);
 
@@ -111,7 +111,7 @@ function DispatchTeamManagement({ incident }) {
           </Tooltip>
         }
       >
-        <Link href={"/" + incident + "/dispatch/dispatchteammember/new"}><FontAwesomeIcon icon={faUserPlus} size="sm" className="ml-2" inverse /></Link>
+        <Link href={"/" + organization + "/" + incident + "/dispatch/dispatchteammember/new"}><FontAwesomeIcon icon={faUserPlus} size="sm" className="ml-2" inverse /></Link>
       </OverlayTrigger>
     </h3>
     <Scrollbar style={{height:"270px", minHeight:"270px"}} renderView={props => <div {...props} style={{...props.style, overflowX:"hidden"}}/>}  renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
@@ -121,7 +121,7 @@ function DispatchTeamManagement({ incident }) {
               <Card className="border rounded" style={{height:"41px"}}>
                 <div className="row no-gutters" style={{height:"41px", textTransform:"capitalize", marginRight:"-2px"}}>
                   <Row className="ml-0 mr-0 w-100" style={{minWidth:"334px", maxWidth:"334px"}}>
-                    <Link href={"/" + incident + "/dispatch/dispatchteammember/edit/" + team_member.id}>
+                    <Link href={"/" + organization + "/" + incident + "/dispatch/dispatchteammember/edit/" + team_member.id}>
                       <div style={{width:"41px"}}>
                         <FontAwesomeIcon icon={faUser} size="2x" style={{marginTop:"5px", marginLeft:"7px"}} inverse />
                       </div>

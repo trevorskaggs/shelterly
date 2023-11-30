@@ -24,7 +24,7 @@ import 'react-bootstrap-typeahead/css/Typeahead.css';
 import 'leaflet/dist/leaflet.css';
 import { SystemErrorContext } from '../components/SystemError';
 
-function Deploy({ incident }) {
+function Deploy({ incident, organization }) {
 
   const { setShowSystemError } = useContext(SystemErrorContext);
 
@@ -437,7 +437,7 @@ function Deploy({ incident }) {
               }
               // Otherwise navigate to the DA Summary page.
               else {
-                navigate("/" + incident + '/dispatch/summary/' + response.data.id);
+                navigate('/' + organization + "/" + incident + '/dispatch/summary/' + response.data.id);
               }
             })
             .catch(error => {

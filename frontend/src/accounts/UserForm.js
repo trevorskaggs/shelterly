@@ -17,7 +17,7 @@ import { TextInput } from '.././components/Form.js';
 import ButtonSpinner from '../components/ButtonSpinner.js';
 import { SystemErrorContext } from '../components/SystemError';
 
-const UserForm = ({ id, incident }) => {
+const UserForm = ({ id, incident, organization }) => {
 
   const { setShowSystemError } = useContext(SystemErrorContext);
 
@@ -92,7 +92,7 @@ const UserForm = ({ id, incident }) => {
           if (id) {
             axios.put('/accounts/api/user/' + id + '/', values)
             .then(function () {
-              navigate('/' + incident + '/accounts/user_management');
+              navigate('/' + organization + '/' + incident + '/accounts/user_management');
             })
             .catch(error => {
               setSubmitting(false);
@@ -102,7 +102,7 @@ const UserForm = ({ id, incident }) => {
           else {
             axios.post('/accounts/api/user/', values)
             .then(function () {
-              navigate('/' + incident + '/accounts/user_management');
+              navigate('/' + organization + '/' + incident + '/accounts/user_management');
             })
             .catch(error => {
               if (error.response.data.email[0].includes('shelterly user with this email already exists')) {

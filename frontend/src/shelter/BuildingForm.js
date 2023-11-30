@@ -14,7 +14,7 @@ import { SystemErrorContext } from '../components/SystemError';
 // Regex validators.
 const nameRegex = /^[a-z0-9 ,.'-]+$/i
 
-export const BuildingForm = ({ id, incident }) => {
+export const BuildingForm = ({ id, incident, organization }) => {
 
   const { state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
@@ -85,7 +85,7 @@ export const BuildingForm = ({ id, incident }) => {
                   navigate(state.prevLocation);
                 }
                 else {
-                  navigate('/' + incident + '/shelter/building/' + id);
+                  navigate('/' + organization + '/' + incident + '/shelter/building/' + id);
                 }
               })
               .catch(error => {
@@ -100,7 +100,7 @@ export const BuildingForm = ({ id, incident }) => {
                   navigate(state.prevLocation);
                 }
                 else {
-                  navigate('/' + incident + '/shelter/' + shelter_id);
+                  navigate('/' + organization + '/' + incident + '/shelter/' + shelter_id);
                 }
               })
               .catch(error => {

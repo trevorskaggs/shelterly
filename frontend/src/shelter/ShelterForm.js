@@ -14,7 +14,7 @@ import { SystemErrorContext } from '../components/SystemError';
 // Regex validators.
 const nameRegex = /^[a-z0-9 ,.'-]+$/i;
 
-const ShelterForm = ({ id, incident }) => {
+const ShelterForm = ({ id, incident, organization }) => {
 
   const { setShowSystemError } = useContext(SystemErrorContext);
 
@@ -118,10 +118,10 @@ const ShelterForm = ({ id, incident }) => {
             axios.put('/shelter/api/shelter/' + id + '/?incident=' + incident, values)
             .then(function() {
               if (values.active === false) {
-                navigate("/" + incident + '/shelter');
+                navigate('/' + organization + "/" + incident + '/shelter');
               }
               else {
-                navigate("/" + incident + '/shelter/' + id);
+                navigate('/' + organization + "/" + incident + '/shelter/' + id);
               }
             })
             .catch(error => {
@@ -136,7 +136,7 @@ const ShelterForm = ({ id, incident }) => {
           else {
             axios.post('/shelter/api/shelter/', values)
             .then(response => {
-              navigate("/" + incident + '/shelter/' + response.data.id)
+              navigate('/' + organization + "/" + incident + '/shelter/' + response.data.id)
             })
             .catch(error => {
               if (error.response.data && error.response.data.name && error.response.data.name[0].includes('shelter with this name already exists')) {

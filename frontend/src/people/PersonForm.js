@@ -67,15 +67,15 @@ const PersonForm = (props) => {
       .then(response => {
         // If SR already exists, redirect to the SR details.
         if (servicerequest_id) {
-          navigate(incident + '/hotline/servicerequest/' + servicerequest_id);
+          navigate('/' + props.organization + incident + '/hotline/servicerequest/' + servicerequest_id);
         }
         // If adding from an animal, redirect to the Animal details.
         else if (animal_id) {
-          navigate(incident + '/animals/' + animal_id);
+          navigate('/' + props.organization + incident + '/animals/' + animal_id);
         }
         // Otherise redirect to the duplicate Owner details.
         else {
-          navigate(incident + '/people/owner/' + response.data.id);
+          navigate('/' + props.organization + incident + '/people/owner/' + response.data.id);
         }
       })
       .catch(error => {
@@ -278,10 +278,10 @@ const PersonForm = (props) => {
             axios.put('/people/api/person/' + id + '/', values)
             .then(function() {
               if (isOwner) {
-                navigate(incident + '/people/owner/' + id);
+                navigate('/' + props.organization + incident + '/people/owner/' + id);
               }
               else {
-                navigate(incident + '/people/reporter/' + id);
+                navigate('/' + props.organization + incident + '/people/reporter/' + id);
               }
             })
             .catch(error => {
@@ -294,15 +294,15 @@ const PersonForm = (props) => {
             .then(response => {
               // If SR already exists, redirect to the SR details.
               if (servicerequest_id) {
-                navigate(incident + '/hotline/servicerequest/' + servicerequest_id);
+                navigate('/' + props.organization + incident + '/hotline/servicerequest/' + servicerequest_id);
               }
               // If adding from an animal, redirect to the Animal details.
               else if (animal_id) {
-                navigate(incident + '/animals/' + animal_id);
+                navigate('/' + props.organization + incident + '/animals/' + animal_id);
               }
               // If adding from an owner, redirect to the new Owner details.
               else {
-                navigate(incident + '/people/owner/' + response.data.id);
+                navigate('/' + props.organization + incident + '/people/owner/' + response.data.id);
               }
             })
             .catch(error => {
@@ -443,7 +443,7 @@ const PersonForm = (props) => {
               <Modal.Body>
                 <div>
                   <span>This person cannot be created because</span> {error && error.error[0]}
-                  <div className="mt-1 mb-1">Click <Link target="_blank" rel="noreferrer" href={incident + "/people/owner/" + error.error[1]} style={{color:"#8d99d4"}}>here</Link> to view this owner.</div>
+                  <div className="mt-1 mb-1">Click <Link target="_blank" rel="noreferrer" href={"/" + props.organization + incident + "/people/owner/" + error.error[1]} style={{color:"#8d99d4"}}>here</Link> to view this owner.</div>
                   <div>Would you like to use the existing owner instead?</div>
                 </div>
               </Modal.Body>

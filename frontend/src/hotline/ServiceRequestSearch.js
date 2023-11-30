@@ -23,7 +23,7 @@ import ButtonSpinner from '../components/ButtonSpinner';
 import { DateRangePicker } from '../components/Form';
 import { printAllServiceRequests } from './Utils';
 
-function ServiceRequestSearch({ incident }) {
+function ServiceRequestSearch({ incident, organization }) {
 
   const { setShowSystemError } = useContext(SystemErrorContext);
 
@@ -252,7 +252,7 @@ function ServiceRequestSearch({ incident }) {
                   </Tooltip>
                 }
               >
-                <Link href={"/" + incident + "/hotline/servicerequest/" + service_request.id}><FontAwesomeIcon icon={faDotCircle} className="mr-2" inverse /></Link>
+                <Link href={"/" + organization + "/" + incident + "/hotline/servicerequest/" + service_request.id}><FontAwesomeIcon icon={faDotCircle} className="mr-2" inverse /></Link>
               </OverlayTrigger>
               SR#{service_request.id}
               &nbsp;-&nbsp;{service_request.full_address}
@@ -429,7 +429,7 @@ function ServiceRequestSearch({ incident }) {
                     {/* {service_request.evacuation_assignments.filter(da => da.start_time === service_request.evacuation_assignments.map(da => da.start_time).sort().reverse()[0]).map(dispatch_assignment =>
                       <span key={dispatch_assignment.id}>
                         <b>Dispatch Assignment: </b>
-                        <Link href={"/" + incident + "/dispatch/summary/" + dispatch_assignment.id} className="text-link" style={{textDecoration:"none", color:"white"}}><Moment format="L">{dispatch_assignment.start_time}</Moment></Link>&nbsp;
+                        <Link href={"/" + organization + "/" + incident + "/dispatch/summary/" + dispatch_assignment.id} className="text-link" style={{textDecoration:"none", color:"white"}}><Moment format="L">{dispatch_assignment.start_time}</Moment></Link>&nbsp;
                         |&nbsp;{dispatch_assignment.team_name}
                         <OverlayTrigger
                           key={"team-names"}
@@ -453,7 +453,7 @@ function ServiceRequestSearch({ incident }) {
                     </ListGroup.Item>
                     {service_request.owner_objects.map(owner => (
                       <ListGroup.Item key={owner.id}>
-                        <b>Owner: </b><Link href={"/" + incident + "/people/owner/" + owner.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{owner.first_name} {owner.last_name}</Link>
+                        <b>Owner: </b><Link href={"/" + organization + "/" + incident + "/people/owner/" + owner.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{owner.first_name} {owner.last_name}</Link>
                         {owner.display_phone ?
                         <OverlayTrigger
                           key={"owner-phone"}
@@ -483,7 +483,7 @@ function ServiceRequestSearch({ incident }) {
                       </ListGroup.Item>
                     ))}
                     {service_request.owners.length < 1 ? <ListGroup.Item><b>Owner: </b>No Owner</ListGroup.Item> : ""}
-                    <ListGroup.Item><b>Reporter: </b>{service_request.reporter ? <Link href={"/" + incident + "/people/reporter/" + service_request.reporter} className="text-link" style={{textDecoration:"none", color:"white"}}>{service_request.reporter_object.first_name} {service_request.reporter_object.last_name}</Link> : "No Reporter"}</ListGroup.Item>
+                    <ListGroup.Item><b>Reporter: </b>{service_request.reporter ? <Link href={"/" + organization + "/" + incident + "/people/reporter/" + service_request.reporter} className="text-link" style={{textDecoration:"none", color:"white"}}>{service_request.reporter_object.first_name} {service_request.reporter_object.last_name}</Link> : "No Reporter"}</ListGroup.Item>
                   </ListGroup>
                 </Scrollbar>
               </Card.Body>
@@ -504,7 +504,7 @@ function ServiceRequestSearch({ incident }) {
                     <Scrollbar style={{height:"144px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
                       {service_request.animals.filter(animal => animal.species === searchState[service_request.id].selectedSpecies).map((animal, i) => (
                         <ListGroup.Item key={animal.id}>
-                          <b>A#{animal.id}:</b>&nbsp;&nbsp;<Link href={"/" + incident + "/animals/" + animal.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.name || "Unknown"}</Link>
+                          <b>A#{animal.id}:</b>&nbsp;&nbsp;<Link href={"/" + organization + "/" + incident + "/animals/" + animal.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.name || "Unknown"}</Link>
                           {animal.color_notes ?
                           <OverlayTrigger
                             key={"animal-color-notes"}
