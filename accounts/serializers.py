@@ -13,6 +13,7 @@ class UserSerializer(serializers.ModelSerializer):
     user_perms = serializers.SerializerMethodField()
     incident_perms = serializers.SerializerMethodField()
     email_notification = serializers.SerializerMethodField()
+    org_slugs = serializers.SerializerMethodField()
 
     # Custom field for Formated Phone Number
     def get_display_phone(self, obj):
@@ -36,6 +37,9 @@ class UserSerializer(serializers.ModelSerializer):
     def get_email_notification(self, obj):
         return True
 
+    def get_org_slugs(self, obj):
+        return obj.organization.all().values_list('slug', flat=True)
+
     class Meta:
         model = User
-        fields = ('agency_id', 'cell_phone', 'first_name', 'id', 'last_name', 'username', 'email', 'is_superuser', 'display_phone', 'user_perms', 'incident_perms', 'email_notification', 'version')
+        fields = ('agency_id', 'cell_phone', 'first_name', 'id', 'last_name', 'username', 'email', 'is_superuser', 'display_phone', 'user_perms', 'incident_perms', 'email_notification', 'organization', 'org_slugs', 'version')

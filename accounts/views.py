@@ -26,7 +26,6 @@ class LoginView(KnoxLoginView):
         serializer = AuthTokenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
-        ### TODO If user is not a member of the current organization, return 401 ###
         login(request, user)
         return super(LoginView, self).post(request, format=None)
 

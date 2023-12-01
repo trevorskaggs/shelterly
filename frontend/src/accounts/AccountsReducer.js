@@ -70,6 +70,8 @@ function AuthProvider(props) {
   cookies.token ? setAuthToken(cookies.token, cookies.csrftoken) : setAuthToken();
 
   const path = usePath();
+  const org_slug = path.split('/')[1];
+
   // Keep track of current and previous locations.
   const onChange = useCallback(path => dispatch({type: "PAGE_CHANGED", data: path}), []);
   useLocationChange(onChange);
@@ -86,6 +88,11 @@ function AuthProvider(props) {
 
     // Check for user auth on focus.
     window.addEventListener("focus", onFocus);
+
+    // Redirect user if they attempt to access an Organization they aren't a member of.
+    if (!Object.keys(publicRoutes).includes(path) && state.user && path !== '/' && !state.user.org_slugs.includes(org_slug)) {
+      navigate("/");
+    }
 
     // Redirect to next or Home if attempting to access LoginForm while logged in.
     if (state.user && path === '/login') {
