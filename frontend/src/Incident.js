@@ -62,7 +62,7 @@ function Incident() {
     let source = axios.CancelToken.source();
 
     const fetchIncidentData = async () => {
-      // Fetch ServiceRequest data.
+      // Fetch Incident data.
       await axios.get('/incident/api/incident/?organization=' + org_slug, {
         cancelToken: source.token,
       })

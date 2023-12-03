@@ -99,7 +99,7 @@ function AuthProvider(props) {
       navigate(next);
     }
     // If we have a token but no user, attempt to authenticate them.
-    else if (!state.user && cookies.token) {
+    else if (!state.user && cookies.token && !Object.keys(publicRoutes).includes(path)) {
       loadUser({dispatch, removeCookie, path});
     }
     // Redirect to login page if no authenticated user object is present.

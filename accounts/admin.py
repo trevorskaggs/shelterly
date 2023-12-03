@@ -6,7 +6,7 @@ class ShelterlyUserAdmin(admin.ModelAdmin):
     list_display = ('id', 'organizations', 'email', 'first_name', 'last_name',)
 
     def organizations(self, obj):
-        return [organization.name for organization in obj.organization.all()]
+        return [organization.name for organization in obj.organizations.all()]
 
 admin.site.register(ShelterlyUser, ShelterlyUserAdmin)
 

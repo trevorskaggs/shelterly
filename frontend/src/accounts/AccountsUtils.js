@@ -1,6 +1,8 @@
+import { useContext } from "react";
 import axios from "axios";
 import { navigate } from "raviger";
 import { publicRoutes } from "../router";
+import { SystemErrorContext } from '../components/SystemError';
 
 // Authenticate the user with the backnd to obtain a user.
 export function loadUser({dispatch, removeCookie, path}) {
@@ -8,11 +10,23 @@ export function loadUser({dispatch, removeCookie, path}) {
   // Set user loading state.
   dispatch({ type: 'USER_LOADING' });
 
+  const org_slug = path.split('/')[1];
+  const incident_slug = path.split('/')[2];
+
   // Check backend for authentication and return user information if valid.
   axios.get("/accounts/api/user/auth/")
   .then(function(results){
     // Set the user state.
     dispatch({type: 'USER_LOADED', user: results.data });
+    // Fetch Organization data.
+    axios.get('/incident/api/organization/?slug=' + org_slug)
+    .then(orgResponse => {
+      dispatch({type: "SET_ORGANIZATION", data: {id:orgResponse.data[0].id, name:orgResponse.data[0].name}});
+      axios.get('/incident/api/incident/?incident=' + incident_slug)
+      .then(incidentResponse => {
+        dispatch({type: "SET_INCIDENT", data: incidentResponse.data[0].name});
+      })
+    })
   })
   .catch(e => {
     // Raise error.

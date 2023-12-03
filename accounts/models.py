@@ -58,7 +58,7 @@ class ShelterlyUser(AbstractUser):
     agency_id = models.CharField(max_length=50, blank=True, null=True)
     username = models.CharField(max_length=50, blank=True, null=True)
     email = models.EmailField(blank=False, null=False, unique=True)
-    organization = models.ManyToManyField(Organization, through='ShelterlyUserOrg', related_name='users')
+    organizations = models.ManyToManyField(Organization, through='ShelterlyUserOrg', related_name='users')
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['cell_phone']
@@ -73,8 +73,8 @@ class ShelterlyUser(AbstractUser):
 
 
 class ShelterlyUserOrg(models.Model):
-    user = models.ForeignKey(ShelterlyUser, null=True, on_delete=models.SET_NULL)
-    organization = models.ForeignKey(Organization, null=True, on_delete=models.SET_NULL, related_name='user_perms')
+    user = models.ForeignKey(ShelterlyUser, null=True, on_delete=models.SET_NULL, related_name='perms')
+    organization = models.ForeignKey(Organization, null=True, on_delete=models.SET_NULL)
     user_perms = models.BooleanField(default=False)
     incident_perms = models.BooleanField(default=False)
     email_notification = models.BooleanField(default=False)

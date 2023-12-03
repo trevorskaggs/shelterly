@@ -16,9 +16,11 @@ import * as Yup from 'yup';
 import { TextInput } from '.././components/Form.js';
 import ButtonSpinner from '../components/ButtonSpinner.js';
 import { SystemErrorContext } from '../components/SystemError';
+import { AuthContext } from "./AccountsReducer";
 
 const UserForm = ({ id, incident, organization }) => {
 
+  const { dispatch, state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
   // Regex validators.
@@ -33,6 +35,7 @@ const UserForm = ({ id, incident, organization }) => {
     user_perms: false,
     incident_perms: false,
     email_notification: false,
+    organizations: [state.organization.id]
   })
 
   // Hook for initializing data.
@@ -42,7 +45,7 @@ const UserForm = ({ id, incident, organization }) => {
     if (id) {
       const fetchUserData = async () => {
         // Fetch User data.
-        await axios.get('/accounts/api/user/' + id + '/', {
+        await axios.get('/accounts/api/user/' + id + '/?organization=' + state.organization.id, {
           cancelToken: source.token,
         })
         .then(response => {
@@ -117,7 +120,7 @@ const UserForm = ({ id, incident, organization }) => {
     >
       {form => (
         <Card border="secondary" className="mt-5">
-          <Card.Header as="h5" className="pl-3"><span style={{ cursor: 'pointer' }} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>{id ? "Edit" : "New"} User</Card.Header>
+          <Card.Header as="h5" className="pl-3"><span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + organization + '/' + incident + '/accounts/user_management')} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>{id ? "Edit" : "New"} User</Card.Header>
           <Card.Body>
             <BootstrapForm>
               <BootstrapForm.Row>

@@ -10,10 +10,12 @@ import {
   faCircleE, faCircleI, faCircleU, faPencil, faUserUnlock
 } from '@fortawesome/pro-solid-svg-icons';
 import Header from "../components/Header";
+import { AuthContext } from "./AccountsReducer";
 import { SystemErrorContext } from '../components/SystemError';
 
 function UserManagement({ incident, organization }) {
 
+  const { dispatch, state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
   const [data, setData] = useState({users: [], isFetching: false});
@@ -61,7 +63,7 @@ function UserManagement({ incident, organization }) {
     const formData = new FormData();
     formData.append('user_csv', file);
 
-    await axios.post('/accounts/api/user/upload_csv/', formData)
+    await axios.post('/accounts/api/user/upload_csv/?organization=' + organization, formData)
     .then(response => {
       setData(prevState => ({ ...prevState, "users":data.users.concat(response.data)}));
       setFilteredData(prevState => ({ ...prevState, "users":filteredData.users.concat(response.data)}));
@@ -109,7 +111,7 @@ function UserManagement({ incident, organization }) {
     const fetchUserData = async () => {
 
       setData({users: [], isFetching: true});
-      axios.get('/accounts/api/user/', {
+      axios.get('/accounts/api/user/?organization=' + state.organization.id, {
         cancelToken: source.token,
       })
       .then(response => {

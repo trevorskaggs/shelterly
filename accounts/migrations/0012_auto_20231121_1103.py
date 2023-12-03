@@ -13,22 +13,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='shelterlyuser',
-            name='email_notification',
-        ),
-        migrations.RemoveField(
-            model_name='shelterlyuser',
-            name='incident_perms',
-        ),
-        migrations.RemoveField(
-            model_name='shelterlyuser',
-            name='organizations',
-        ),
-        migrations.RemoveField(
-            model_name='shelterlyuser',
-            name='user_perms',
-        ),
         migrations.CreateModel(
             name='ShelterlyUserOrg',
             fields=[
@@ -40,9 +24,13 @@ class Migration(migrations.Migration):
                 ('user', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
             ],
         ),
+        migrations.RemoveField(
+            model_name='shelterlyuser',
+            name='organizations',
+        ),
         migrations.AddField(
             model_name='shelterlyuser',
-            name='organization',
+            name='organizations',
             field=models.ManyToManyField(related_name='users', through='accounts.ShelterlyUserOrg', to='incident.Organization'),
         ),
     ]

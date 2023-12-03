@@ -12,7 +12,7 @@ from rest_framework import generics, permissions, response, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 
-from accounts.models import ShelterlyUser
+from accounts.models import ShelterlyUser, ShelterlyUserOrg
 from accounts.serializers import UserSerializer
 from incident.models import Organization
 
@@ -45,11 +45,18 @@ class UserViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = UserSerializer
 
+    def get_queryset(self):
+        queryset = User.objects.all()
+        if self.request.GET.get('organization'):
+            queryset = queryset.filter(organizations=self.request.GET.get('organization')).distinct()
+        return queryset
+
     @action(detail=False, methods=["post"])
     def upload_csv(self, request):
         if self.request.FILES.get('user_csv'):
+            org_slug = self.request.POST.get('organization')
             user_csv = self.request.FILES['user_csv']
-            reader = csv.DictReader(io.StringIO(user_csv.read().decode('utf-8')), delimiter=',', quotechar='|', fieldnames=['first_name','last_name','cell_phone','email','agency_id', 'is_admin'])
+            reader = csv.DictReader(io.StringIO(user_csv.read().decode('utf-8')), delimiter=',', quotechar='|', fieldnames=['first_name','last_name','cell_phone','email','agency_id','is_admin'])
             # skip first line w/ header info
             next(reader)
             a = list(reader)
@@ -67,24 +74,30 @@ class UserViewSet(viewsets.ModelViewSet):
                         is_staff=item['is_admin'],
                         is_superuser=item['is_admin'],
                     )
+                    user.organizations.add(Organization.objects.get(slug=org_slug))
                     user_ids.append(user.id)
                 except IntegrityError:
                     print('failed for {0}'.format(item))
+                    if ShelterlyUser.objects.filter(email=item['email']).exists():
+                        print('attempting to add to Organization ' + org_slug)
+                        ShelterlyUser.objects.get(email=item['email']).organizations.add(Organization.objects.get(slug=org_slug))
                     pass
         return response.Response(UserSerializer(ShelterlyUser.objects.filter(id__in=user_ids), many=True).data, status=201)
 
     def perform_create(self, serializer):
-        if serializer.validated_data.get('organization'):
-            org = Organization.objects.get(name=serializer.validated_data['organization'])
-            serializer.validated_data['organization'] = org.id
         if serializer.is_valid():
             if self.request.user.is_superuser or self.request.user.user_perms:
-                serializer.save()
+                user = serializer.save()
+                user.organizations.add(Organization.objects.get(id=self.request.data.get('organizations')[0]))
+                ShelterlyUserOrg.objects.create(user=user, organization=Organization.objects.get(id=self.request.data.get('organizations')[0]), user_perms=self.request.data.get('user_perms', False), incident_perms=self.request.data.get('incident_perms', False), email_notification=self.request.data.get('email_notification', False))
     
     def perform_update(self, serializer):
         if serializer.is_valid():
             if self.request.user.is_superuser or self.request.user.user_perms:
                 user = serializer.save()
+
+                ShelterlyUserOrg.objects.filter(user=user, organization=self.request.data.get('organizations')[0]).update(user_perms=self.request.data.get('user_perms', False), incident_perms=self.request.data.get('incident_perms', False), email_notification=self.request.data.get('email_notification', False))
+
                 if self.request.data.get('reset_password'):
                     ResetPasswordToken = apps.get_model('django_rest_passwordreset', 'ResetPasswordToken')
                     token = ResetPasswordToken.objects.create(
