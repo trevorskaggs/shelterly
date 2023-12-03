@@ -1,10 +1,12 @@
 import React, { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import Select from 'react-select';
+import { useCookies } from 'react-cookie';
 import SimpleValue from 'react-select-simple-value';
 import { Button, Col, Row } from 'react-bootstrap';
 import { Link, navigate } from "raviger";
 import moment from 'moment';
+import { loadUser } from "./accounts/AccountsUtils";
 import { AuthContext } from "./accounts/AccountsReducer";
 import { SystemErrorContext } from './components/SystemError';
 
@@ -15,6 +17,7 @@ function Incident() {
 
   const [incident, setIncident] = useState({id: '', slug: '', name: ''});
   const [options, setOptions] = useState([]);
+  const [cookies, , removeCookie] = useCookies(['token']);
 
   const path = window.location.pathname;
   const org_slug = path.split('/')[1];
@@ -85,6 +88,10 @@ function Incident() {
       });
     };
     fetchIncidentData();
+
+    // Reload user to get Org permission data
+    loadUser({state, dispatch, removeCookie, path});
+
     // Cleanup.
     return () => {
       unmounted = true;
@@ -112,7 +119,14 @@ function Incident() {
           </Col>
         </Row>
       : ""}
-      {state.user.is_superuser || state.user.incident_perms ? <Link href={'/' + org_slug + '/incident/new'} style={{textDecoration:"none"}}><Button size="lg" className="btn-primary mt-2" block>Create New Incident</Button></Link> : ""}
+      <Row>
+        {state.user.is_superuser || state.user.incident_perms ? <Col style={{marginRight:"-23px"}}>
+          <Link href={'/' + org_slug + '/incident/new'} style={{textDecoration:"none"}}><Button size="lg" className="btn-primary mt-2" block>Create New Incident</Button></Link>
+        </Col> : ""}
+        {state.user.is_superuser || state.user.user_perms ? <Col>
+          <Link href={'/' + org_slug + '/accounts/user_management'} style={{textDecoration:"none"}}><Button size="lg" className="btn-primary mt-2" block>User Administration</Button></Link>
+        </Col> : ""}
+      </Row>
       <Link href={"/"} style={{textDecoration:"none"}}><Button size="lg" className="btn-primary mt-2 mb-3" block>Return to Organizations</Button></Link>
     </Col>
     </>

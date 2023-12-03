@@ -82,7 +82,8 @@ function AuthProvider(props) {
     const onFocus = () => {
       // Only recheck user auth if in a private route.
       if (!Object.keys(publicRoutes).includes(path)) {
-        loadUser({dispatch, removeCookie, path});
+        console.log("focus loaduser")
+        loadUser({state, dispatch, removeCookie, path});
       }
     };
 
@@ -100,7 +101,8 @@ function AuthProvider(props) {
     }
     // If we have a token but no user, attempt to authenticate them.
     else if (!state.user && cookies.token && !Object.keys(publicRoutes).includes(path)) {
-      loadUser({dispatch, removeCookie, path});
+      console.log("no user loaduser")
+      loadUser({state, dispatch, removeCookie, path});
     }
     // Redirect to login page if no authenticated user object is present.
     else if (!Object.keys(publicRoutes).includes(path) && !state.user && !cookies.token) {

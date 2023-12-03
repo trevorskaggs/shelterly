@@ -59,7 +59,6 @@ function Organization() {
             options.push({value: organization.id, label: organization.name, slug:organization.slug});
           });
           setOptions(options)
-          // setData(response.data)
         }
       })
       .catch(error => {

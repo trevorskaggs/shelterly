@@ -90,7 +90,6 @@ const Menu = ({ state, dispatch, removeCookie, ...props }) => {
         </ListGroup>
       </Collapse>
       <Link href={incident + "/reports"} className="rounded sidebar" style={{backgroundColor:path.includes("reports") ? "#444444" : "#292b2c", marginLeft:"-23px", marginRight:"-23px", marginBottom:"-10px"}}><FontAwesomeIcon icon={faFileChartColumn} fixedWidth inverse className="sidebar-icon" style={{marginLeft:"23px"}} /> REPORTS</Link>
-      {state.user && (state.user.is_superuser || state.user.user_perms) ? <Link href={incident + "/accounts/user_management"} className="rounded sidebar" style={{marginBottom:"-10px", marginLeft:"-23px", marginRight:"-23px", backgroundColor:path.includes("/accounts/") ? "#444444" : "#292b2c"}}><FontAwesomeIcon icon={faUserCog} className="sidebar-icon" fixedWidth inverse style={{marginLeft:"23px"}} /> ADMIN</Link> : ""}
       {state.user ? <Link onClick={() => logoutUser({dispatch}, {removeCookie})} href="#" className="rounded sidebar"><FontAwesomeIcon icon={faSignOutAlt} className="sidebar-icon" fixedWidth inverse/> SIGN OUT</Link> : ""}
     </StyledMenu>
     )

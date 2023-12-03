@@ -13,7 +13,7 @@ import Header from "../components/Header";
 import { AuthContext } from "./AccountsReducer";
 import { SystemErrorContext } from '../components/SystemError';
 
-function UserManagement({ incident, organization }) {
+function UserManagement({ organization }) {
 
   const { dispatch, state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
@@ -151,7 +151,7 @@ function UserManagement({ incident, organization }) {
           </Tooltip>
         }
       >
-        <Link href={"/" + organization + "/" + incident + "/accounts/user/new"}><FontAwesomeIcon icon={faUserPlus} size="sm" className="ml-2 fa-move-up" inverse /></Link>
+        <Link href={"/" + organization + "/accounts/user/new"}><FontAwesomeIcon icon={faUserPlus} size="sm" className="ml-2 fa-move-up" inverse /></Link>
       </OverlayTrigger>
       <OverlayTrigger
         key={"upload-csv"}
@@ -227,7 +227,7 @@ function UserManagement({ incident, organization }) {
                 </Tooltip>
               }
             >
-              <Link href={"/" + organization + "/" + incident + "/accounts/user/edit/" + user.id}><FontAwesomeIcon icon={faPencil} size="lg" className="ml-1" inverse /></Link>
+              <Link href={"/" + organization + "/accounts/user/edit/" + user.id}><FontAwesomeIcon icon={faPencil} size="lg" className="ml-1" inverse /></Link>
             </OverlayTrigger>
             <OverlayTrigger
               key={"remove-user"}

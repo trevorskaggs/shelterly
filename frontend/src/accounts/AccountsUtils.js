@@ -5,7 +5,7 @@ import { publicRoutes } from "../router";
 import { SystemErrorContext } from '../components/SystemError';
 
 // Authenticate the user with the backnd to obtain a user.
-export function loadUser({dispatch, removeCookie, path}) {
+export function loadUser({state, dispatch, removeCookie, path}) {
 
   // Set user loading state.
   dispatch({ type: 'USER_LOADING' });
@@ -13,20 +13,27 @@ export function loadUser({dispatch, removeCookie, path}) {
   const org_slug = path.split('/')[1];
   const incident_slug = path.split('/')[2];
 
+  console.log("org_slug: " + org_slug)
+
   // Check backend for authentication and return user information if valid.
-  axios.get("/accounts/api/user/auth/")
+  axios.get("/accounts/api/user/auth/?organization=" + state.organization.id)
   .then(function(results){
+    console.log(results.data)
     // Set the user state.
     dispatch({type: 'USER_LOADED', user: results.data });
     // Fetch Organization data.
-    axios.get('/incident/api/organization/?slug=' + org_slug)
-    .then(orgResponse => {
-      dispatch({type: "SET_ORGANIZATION", data: {id:orgResponse.data[0].id, name:orgResponse.data[0].name}});
-      axios.get('/incident/api/incident/?incident=' + incident_slug)
-      .then(incidentResponse => {
-        dispatch({type: "SET_INCIDENT", data: incidentResponse.data[0].name});
+    if (!state.organization.id && org_slug) {
+      axios.get('/incident/api/organization/?slug=' + org_slug)
+      .then(orgResponse => {
+        dispatch({type: "SET_ORGANIZATION", data: {id:orgResponse.data[0].id, name:orgResponse.data[0].name}});
+        if (incident_slug && !state.incident){
+          axios.get('/incident/api/incident/?incident=' + incident_slug)
+          .then(incidentResponse => {
+            dispatch({type: "SET_INCIDENT", data: incidentResponse.data[0].name});
+          })
+        }
       })
-    })
+    }
   })
   .catch(e => {
     // Raise error.

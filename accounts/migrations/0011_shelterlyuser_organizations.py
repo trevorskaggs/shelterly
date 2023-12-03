@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('incident', '0007_incident_organization'),
+        ('incident', '0006_incident_organization'),
         ('accounts', '0010_delete_organization'),
     ]
 
