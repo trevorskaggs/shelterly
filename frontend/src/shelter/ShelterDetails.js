@@ -12,7 +12,7 @@ import Header from '../components/Header';
 import { SystemErrorContext } from '../components/SystemError';
 import { ITEMS_PER_PAGE } from '.././constants';
 
-function ShelterDetails({ id, incident }) {
+function ShelterDetails({ id, incident, organization }) {
 
   const { setShowSystemError } = useContext(SystemErrorContext);
 

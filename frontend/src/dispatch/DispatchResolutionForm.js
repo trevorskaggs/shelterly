@@ -305,10 +305,10 @@ function DispatchResolutionForm({ id, incident, organization }) {
           axios.put('/evac/api/evacassignment/' + id + '/', values)
             .then(response => {
               if (response.data.service_requests.length === 0) {
-                navigate('/' + props.organization + '/' + incident + '/dispatch');
+                navigate('/' + organization + '/' + incident + '/dispatch');
               }
               else {
-                navigate('/' + props.organization + '/' + incident + '/dispatch/summary/' + response.data.id);
+                navigate('/' + organization + '/' + incident + '/dispatch/summary/' + response.data.id);
               }
             })
             .catch(error => {
