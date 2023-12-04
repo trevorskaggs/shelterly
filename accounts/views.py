@@ -8,7 +8,7 @@ from django.apps import apps
 from django.db import IntegrityError
 from django.template.loader import render_to_string
 from knox.views import LoginView as KnoxLoginView
-from rest_framework import generics, permissions, response, status, viewsets
+from rest_framework import generics, permissions, response, status, exceptions, viewsets
 from rest_framework.decorators import action
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 
@@ -38,9 +38,20 @@ class UserAuth(generics.RetrieveAPIView):
     def get_object(self):
         return self.request.user
 
+class CreateUserMixin(object):
+    def create(self, request, *args, **kwargs):
+        try:
+            return super().create(request, *args, **kwargs)
+        except exceptions.ValidationError as exc:
+            serializer = self.get_serializer(data=request.data)
+            user = ShelterlyUser.objects.get(email=request.data.get('email'))
+            user.organizations.add(Organization.objects.get(id=request.data.get('organizations')[0]))
+            ShelterlyUserOrg.objects.filter(user=user, organization=Organization.objects.get(id=request.data.get('organizations')[0])).update(user_perms=request.data.get('user_perms', False), incident_perms=request.data.get('incident_perms', False), email_notification=request.data.get('email_notification', False))
+            serializer.is_valid()
+            return response.Response(serializer.data, status=status.HTTP_201_CREATED)
 
 # Provides view for User API calls.
-class UserViewSet(viewsets.ModelViewSet):
+class UserViewSet(CreateUserMixin, viewsets.ModelViewSet):
     queryset = User.objects.all()
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = UserSerializer
@@ -86,14 +97,14 @@ class UserViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         if serializer.is_valid():
-            if self.request.user.is_superuser or self.request.user.user_perms:
+            if self.request.user.is_superuser or self.request.user.perms.filter(organization=self.request.data.get('organizations')[0])[0].user_perms:
                 user = serializer.save()
                 user.organizations.add(Organization.objects.get(id=self.request.data.get('organizations')[0]))
-                ShelterlyUserOrg.objects.create(user=user, organization=Organization.objects.get(id=self.request.data.get('organizations')[0]), user_perms=self.request.data.get('user_perms', False), incident_perms=self.request.data.get('incident_perms', False), email_notification=self.request.data.get('email_notification', False))
-    
+                ShelterlyUserOrg.objects.filter(user=user, organization=Organization.objects.get(id=self.request.data.get('organizations')[0])).update(user_perms=self.request.data.get('user_perms', False), incident_perms=self.request.data.get('incident_perms', False), email_notification=self.request.data.get('email_notification', False))
+
     def perform_update(self, serializer):
         if serializer.is_valid():
-            if self.request.user.is_superuser or self.request.user.user_perms:
+            if self.request.user.is_superuser or self.request.user.perms.filter(organization=self.request.data.get('organizations')[0])[0].user_perms:
                 user = serializer.save()
 
                 ShelterlyUserOrg.objects.filter(user=user, organization=self.request.data.get('organizations')[0]).update(user_perms=self.request.data.get('user_perms', False), incident_perms=self.request.data.get('incident_perms', False), email_notification=self.request.data.get('email_notification', False))
@@ -131,5 +142,6 @@ class UserViewSet(viewsets.ModelViewSet):
                     )
 
     def perform_destroy(self, instance):
-        if self.request.user.is_superuser or self.request.user.user_perms:
-            instance.delete()
+        if self.request.user.is_superuser or self.request.user.perms.filter(organization=self.request.GET.get('organization')[0])[0].user_perms:
+            instance.organizations.remove(Organization.objects.get(id=self.request.GET.get('organization')[0]))
+            # instance.delete()

@@ -95,7 +95,7 @@ const UserForm = ({ id, incident, organization }) => {
           if (id) {
             axios.put('/accounts/api/user/' + id + '/', values)
             .then(function () {
-              navigate('/' + organization + '/' + incident + '/accounts/user_management');
+              navigate('/' + organization + '/accounts/user_management');
             })
             .catch(error => {
               setSubmitting(false);
@@ -105,12 +105,9 @@ const UserForm = ({ id, incident, organization }) => {
           else {
             axios.post('/accounts/api/user/', values)
             .then(function () {
-              navigate('/' + organization + '/' + incident + '/accounts/user_management');
+              navigate('/' + organization + '/accounts/user_management');
             })
             .catch(error => {
-              if (error.response.data.email[0].includes('shelterly user with this email already exists')) {
-                setFieldError("email", "A user with this email address already exists.");
-              }
               setSubmitting(false);
               setShowSystemError(true);
             });
@@ -119,8 +116,8 @@ const UserForm = ({ id, incident, organization }) => {
       }}
     >
       {form => (
-        <Card border="secondary" className="mt-5">
-          <Card.Header as="h5" className="pl-3"><span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + organization + '/' + incident + '/accounts/user_management')} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>{id ? "Edit" : "New"} User</Card.Header>
+        <Card border="secondary" className="mt-4 ml-auto mr-auto" style={{width:"50%", maxWidth:"50%"}}>
+          <Card.Header as="h5" className="pl-3"><span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + organization + '/accounts/user_management')} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>{state.organization.name} - {id ? "Edit" : "New"} User</Card.Header>
           <Card.Body>
             <BootstrapForm>
               <BootstrapForm.Row>

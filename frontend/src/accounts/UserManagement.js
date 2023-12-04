@@ -36,7 +36,7 @@ function UserManagement({ organization }) {
   const [timer, setTimer] = useState(null);
 
   const handleRemoveUserSubmit = async () => {
-    await axios.delete('/accounts/api/user/' + userToDelete.id + '/')
+    await axios.delete('/accounts/api/user/' + userToDelete.id + '/?organization=' + state.organization.id)
     .then(response => {
       setData(prevState => ({ ...prevState, "users":data.users.filter(user => user.id !== userToDelete.id) }));
       setFilteredData(prevState => ({ ...prevState, "users":data.users.filter(user => user.id !== userToDelete.id) }));
@@ -140,8 +140,9 @@ function UserManagement({ organization }) {
 
   return (
     <>
+    <span className="mt-4 ml-auto mr-auto" style={{width:"80%", maxWidth:"80%"}}>
     <Header>
-      User Management
+      <Link href={"/" + organization} style={{textDecoration:"none", color:"white"}}>{state.organization.name}</Link> - User Management
       <OverlayTrigger
         key={"add-user"}
         placement="bottom"
@@ -290,6 +291,7 @@ function UserManagement({ organization }) {
         </div>
       </Card>
     ))}
+    </span>
     <Modal show={showUserConfirm} onHide={handleUserClose}>
       <Modal.Header closeButton>
         <Modal.Title>Confirm User Removal</Modal.Title>
