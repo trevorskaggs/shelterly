@@ -83,7 +83,6 @@ class UserViewSet(CreateUserMixin, viewsets.ModelViewSet):
                         username=item['email'],
                         password=item['last_name'] + '1',
                         is_staff=item['is_admin'],
-                        is_superuser=item['is_admin'],
                     )
                     user.organizations.add(Organization.objects.get(slug=org_slug))
                     user_ids.append(user.id)

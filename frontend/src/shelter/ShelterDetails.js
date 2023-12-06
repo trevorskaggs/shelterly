@@ -10,10 +10,12 @@ import { faArrowDownToSquare } from '@fortawesome/pro-regular-svg-icons';
 import Moment from 'react-moment';
 import Header from '../components/Header';
 import { SystemErrorContext } from '../components/SystemError';
+import { AuthContext } from "../accounts/AccountsReducer";
 import { ITEMS_PER_PAGE } from '.././constants';
 
 function ShelterDetails({ id, incident, organization }) {
 
+  const { dispatch, state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
   const [showHistory, setShowHistory] = useState(false);
@@ -49,7 +51,7 @@ function ShelterDetails({ id, incident, organization }) {
 
     const fetchShelterData = async () => {
       // Fetch Shelter Details data.
-      await axios.get('/shelter/api/shelter/' + id + '/?incident=' + incident, {
+      await axios.get('/shelter/api/shelter/' + id + '/?incident=' + incident + '&organization=' + organization +'&training=' + state.incident.training, {
         cancelToken: source.token,
       })
       .then(response => {

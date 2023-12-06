@@ -26,6 +26,7 @@ class Incident(models.Model):
     end_time = models.DateTimeField(blank=True, null=True)
     latitude = models.DecimalField(max_digits=9, decimal_places=4)
     longitude = models.DecimalField(max_digits=9, decimal_places=4)
+    training = models.BooleanField(default=False)
     organization = models.ForeignKey(Organization, on_delete=models.SET_NULL, null=True, blank=True)
 
     class Meta:

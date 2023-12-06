@@ -13,6 +13,7 @@ class EvacTeamMember(models.Model):
     phone = models.CharField(max_length=50, blank=False)
     agency_id = models.CharField(max_length=50, blank=True)
     show = models.BooleanField(default=True)
+    training = models.BooleanField(default=False)
 
     def __str__(self):
         agency = " (%s)" % (self.agency_id) if self.agency_id else ""

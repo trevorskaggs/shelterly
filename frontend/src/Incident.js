@@ -15,15 +15,15 @@ function Incident() {
   const { dispatch, state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
-  const [incident, setIncident] = useState({id: '', slug: '', name: ''});
+  const [incident, setIncident] = useState({id: '', slug: '', name: '', training:false});
   const [options, setOptions] = useState([]);
   const [cookies, , removeCookie] = useCookies(['token']);
 
   const path = window.location.pathname;
   const org_slug = path.split('/')[1];
 
-  const handleSubmit = (incident_name) => {
-    dispatch({type: "SET_INCIDENT", data: incident_name});
+  const handleSubmit = (incident_name, incident_training) => {
+    dispatch({type: "SET_INCIDENT", data: {name:incident_name, training:incident_training}});
     navigate(window.location.pathname + "/" + incident.slug);
   }
 
@@ -75,7 +75,7 @@ function Incident() {
           response.data.forEach(incident => {
             // Build incident option list.
             if (!incident.end_time || state.user.is_superuser || state.user.incident_perms) {
-              options.push({value: incident.id, label: incident.name + ' (' + moment(incident.start_time).format('MM/DD/YYYY') + (incident.end_time ? ' - ' + moment(incident.end_time).format('MM/DD/YYYY') : '') + ')', slug:incident.slug, name:incident.name, end_time:incident.end_time});
+              options.push({value: incident.id, label: incident.name + ' (' + moment(incident.start_time).format('MM/DD/YYYY') + (incident.end_time ? ' - ' + moment(incident.end_time).format('MM/DD/YYYY') : '') + ')', slug:incident.slug, name:incident.name, training:incident.training, end_time:incident.end_time});
             }
           });
           setOptions(options)
@@ -106,9 +106,9 @@ function Incident() {
     </Row>
     <Col xs={{ span:5 }} className="border rounded border-light shadow-sm ml-auto mr-auto mb-auto" style={{maxHeight:state.user.is_superuser || state.user.incident_perms ? "309px" : "200px", minWidth:"572px"}}>
       <SimpleValue options={options}>
-        {simpleProps => <Select styles={customStyles} {...simpleProps} className="mt-3" placeholder="Select incident..." onChange={(instance) => setIncident({id:instance.value, slug:instance.slug, name:instance.name})} />}
+        {simpleProps => <Select styles={customStyles} {...simpleProps} className="mt-3" placeholder="Select incident..." onChange={(instance) => setIncident({id:instance.value, slug:instance.slug, name:instance.name, training:instance.training})} />}
       </SimpleValue>
-      <Button size="lg" className="btn-primary mt-3" onClick={() => handleSubmit(incident.name)} disabled={incident.id ? false : true} block>Select Incident</Button>
+      <Button size="lg" className="btn-primary mt-3" onClick={() => handleSubmit(incident.name, incident.training)} disabled={incident.id ? false : true} block>Select Incident</Button>
       {state.user.is_superuser || state.user.incident_perms ?
         <Row>
           <Col style={{marginRight:"-23px"}}>

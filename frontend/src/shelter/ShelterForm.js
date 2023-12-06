@@ -9,6 +9,7 @@ import * as Yup from 'yup';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft } from '@fortawesome/free-solid-svg-icons';
 import ButtonSpinner from '../components/ButtonSpinner';
+import { AuthContext } from "../accounts/AccountsReducer";
 import { SystemErrorContext } from '../components/SystemError';
 
 // Regex validators.
@@ -16,6 +17,7 @@ const nameRegex = /^[a-z0-9 ,.'-]+$/i;
 
 const ShelterForm = ({ id, incident, organization }) => {
 
+  const { dispatch, state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
   // Initial shelter data.
@@ -31,6 +33,7 @@ const ShelterForm = ({ id, incident, organization }) => {
     active: true,
     latitude: null,
     longitude: null,
+    training: state.incident.training,
     incident_slug: incident,
   });
 

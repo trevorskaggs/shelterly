@@ -1,9 +1,9 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import axios from "axios";
 import { navigate } from "raviger";
-import { Formik } from 'formik';
+import { Field, Formik } from 'formik';
 import { ButtonGroup, Card, Col, Form as BootstrapForm } from 'react-bootstrap';
-
+import { Switch } from 'formik-material-ui';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faArrowAltCircleLeft,
@@ -27,6 +27,7 @@ const IncidentForm = ({ id, organization }) => {
     slug: '',
     latitude: '',
     longitude: '',
+    training: false,
     organization: state.organization.id
   });
 
@@ -140,7 +141,8 @@ const IncidentForm = ({ id, organization }) => {
             }),
         latlon: Yup.string().required('Required'),
         latitude: Yup.number(),
-        longitude: Yup.number()
+        longitude: Yup.number(),
+        training: Yup.boolean()
       })}
       onSubmit={(values, { setSubmitting }) => {
         values['slug'] = values.name.trim().replaceAll(' ','').match(/[a-zA-Z0-9-]+/g)[0];
@@ -224,6 +226,10 @@ const IncidentForm = ({ id, organization }) => {
                   : ""}
                 </Map>
               </Col>
+              </BootstrapForm.Row>
+              <BootstrapForm.Row className="mt-3">
+                <BootstrapForm.Label htmlFor="training" className="ml-1" style={{marginTop:"5px"}}>Training</BootstrapForm.Label>
+                <Field component={Switch} name="training" type="checkbox" color="primary"/>
               </BootstrapForm.Row>
             </BootstrapForm>
           </Card.Body>

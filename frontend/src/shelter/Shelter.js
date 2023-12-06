@@ -9,10 +9,12 @@ import { faHome, faPlusSquare } from '@fortawesome/free-solid-svg-icons';
 import Header from '../components/Header';
 import Map, { shelterMarkerIcon } from "../components/Map";
 import Scrollbar from '../components/Scrollbars';
+import { AuthContext } from "../accounts/AccountsReducer";
 import { SystemErrorContext } from '../components/SystemError';
 
 function Shelter({ incident, organization }) {
 
+  const { dispatch, state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
   const [data, setData] = useState({shelters: [],  isFetching: false, bounds:L.latLngBounds([[0,0]])});
@@ -26,7 +28,7 @@ function Shelter({ incident, organization }) {
     const fetchShelters = async () => {
       setData({shelters: [], isFetching: true});
       // Fetch Shelter data.
-      await axios.get('/shelter/api/shelter/?incident=' + incident, {
+      await axios.get('/shelter/api/shelter/?incident=' + incident + '&organization=' + organization +'&training=' + state.incident.training, {
         cancelToken: source.token,
       })
       .then(response => {
