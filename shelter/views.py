@@ -40,7 +40,8 @@ class ShelterViewSet(viewsets.ModelViewSet):
             action.send(self.request.user, verb='updated shelter', target=shelter)
 
     def get_queryset(self):
-        queryset = (Shelter.objects.filter(Q(incident__organization__slug=self.request.GET.get('organization'), training=self.request.GET.get('training') == 'true')|Q(incident__slug=self.request.GET.get('incident'))).annotate(room_count=Count("building__room"))
+        queryset = (Shelter.objects.filter(Q(incident__organization__slug=self.request.GET.get('organization'), incident__training=self.request.GET.get('training') == 'true')|Q(incident__slug=self.request.GET.get('incident')))
+            .annotate(room_count=Count("building__room"))
             .annotate(
                 animal_count=Count(
                     "animal",

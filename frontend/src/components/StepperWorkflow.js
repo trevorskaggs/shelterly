@@ -72,14 +72,14 @@ function getSteps(is_intake) {
   return ['Create Contacts', 'Create Animals', 'Create Service Request'];
 }
 
-function getStepContent(incident, step, handleStepSubmit, handleBack, state) {
+function getStepContent(incident, organization, step, handleStepSubmit, handleBack, state) {
   switch (step) {
     case 0:
       return <PersonForm onSubmit={handleStepSubmit} handleBack={handleBack} state={state} incident={incident} />;
     case 1:
       return <AnimalForm onSubmit={handleStepSubmit} handleBack={handleBack} state={state} incident={incident} />;
     case 2:
-      return <ServiceRequestForm onSubmit={handleStepSubmit} handleBack={handleBack} state={state} incident={incident} />;
+      return <ServiceRequestForm onSubmit={handleStepSubmit} handleBack={handleBack} state={state} incident={incident} organization={organization} />;
     default:
       return <PageNotFound/>;
   }
@@ -146,7 +146,7 @@ export const initialWorkflowData = {
   }
 }
 
-function StepperWorkflow({ incident }) {
+function StepperWorkflow({ incident, organization }) {
 
   // Identify any query param data.
   const [queryParams] = useQueryParams();
@@ -282,7 +282,7 @@ function StepperWorkflow({ incident }) {
       </Stepper>
       <div>
           <div>
-            <Typography className={classes.instructions} component={'span'}>{getStepContent(incident, activeStep, handleStepSubmit, handleBack, state)}</Typography>
+            <Typography className={classes.instructions} component={'span'}>{getStepContent(incident, organization, activeStep, handleStepSubmit, handleBack, state)}</Typography>
           </div>
       </div>
     </div>

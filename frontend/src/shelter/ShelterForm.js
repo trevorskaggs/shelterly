@@ -31,9 +31,9 @@ const ShelterForm = ({ id, incident, organization }) => {
     state: '',
     zip_code: '',
     // active: true,
+    incident_slug: incident,
     latitude: null,
     longitude: null,
-    training: state.incident.training,
     incident_slug: incident,
   });
 
