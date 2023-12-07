@@ -30,7 +30,7 @@ const ShelterForm = ({ id, incident, organization }) => {
     city: '',
     state: '',
     zip_code: '',
-    active: true,
+    // active: true,
     latitude: null,
     longitude: null,
     training: state.incident.training,
@@ -187,12 +187,12 @@ const ShelterForm = ({ id, incident, organization }) => {
                   />
                 </BootstrapForm.Row>
                 <AddressSearch formikProps={props} label="Search for Shelter Address" show_apt={false} incident={incident} error="Shelter Address was not selected." />
-                {id && data.animal_count > 0 ?
+                {/* {id && data.animal_count > 0 ?
                 <OverlayTrigger
-                  key={"forced"}
+                  key={"active"}
                   placement="top"
                   overlay={
-                    <Tooltip id={`tooltip-forced`}>
+                    <Tooltip id={`tooltip-active`}>
                       A shelter cannot be deactivated while it still has animals.
                     </Tooltip>
                   }
@@ -207,7 +207,7 @@ const ShelterForm = ({ id, incident, organization }) => {
                   <BootstrapForm.Label htmlFor="active">Active</BootstrapForm.Label>
                   <Field component={Switch} name="active" id="active" type="checkbox" color="primary" disabled={data.animal_count > 0} />
                 </span>
-                :""}
+                :""} */}
               </BootstrapForm>
             </Card.Body>
             <ButtonGroup size="lg">

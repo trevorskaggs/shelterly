@@ -8,7 +8,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('incident', '0002_auto_20220618_0459'),
+        ('incident', '0008_auto_20231206_1109'),
         ('animals', '0022_auto_20220602_0851'),
     ]
 
