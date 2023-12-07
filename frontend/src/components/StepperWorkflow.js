@@ -77,7 +77,7 @@ function getStepContent(incident, organization, step, handleStepSubmit, handleBa
     case 0:
       return <PersonForm onSubmit={handleStepSubmit} handleBack={handleBack} state={state} incident={incident} />;
     case 1:
-      return <AnimalForm onSubmit={handleStepSubmit} handleBack={handleBack} state={state} incident={incident} />;
+      return <AnimalForm onSubmit={handleStepSubmit} handleBack={handleBack} state={state} incident={incident} organization={organization} />;
     case 2:
       return <ServiceRequestForm onSubmit={handleStepSubmit} handleBack={handleBack} state={state} incident={incident} organization={organization} />;
     default:
