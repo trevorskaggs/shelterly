@@ -247,7 +247,7 @@ function AnimalSearch({ incident, organization }) {
     const fetchShelters = () => {
       setShelters({options: [], isFetching: true});
       // Fetch Shelter data.
-      axios.get('/shelter/api/shelter/?incident=' + incident + '&organization=' + organization +'&training=' + state.incident.training, {
+      axios.get('/shelter/api/shelter/?incident=' + incident + '&organization=' + organization +'&training=' + (state && state.incident.training), {
         cancelToken: source.token,
       })
       .then(response => {

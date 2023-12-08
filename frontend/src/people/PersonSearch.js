@@ -87,7 +87,7 @@ function PersonSearch({ incident, organization }) {
 		const fetchOwners = async () => {
 			setData({owners: [], isFetching: true});
 			// Fetch People data.
-			await axios.get('/people/api/person/?search=' + searchTerm + '&status=' + statusOptions + '&incident=' + incident + '&organization=' + organization +'&training=' + state.incident.training, {
+			await axios.get('/people/api/person/?search=' + searchTerm + '&status=' + statusOptions + '&incident=' + 'test' + '&organization=' + organization +'&training=' + (state && state.incident.training), {
 				cancelToken: source.token,
 			})
 			.then(response => {
