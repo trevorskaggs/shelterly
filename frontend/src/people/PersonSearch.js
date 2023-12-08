@@ -17,10 +17,12 @@ import ButtonSpinner from '../components/ButtonSpinner';
 import { speciesChoices } from '../animals/constants';
 import { ITEMS_PER_PAGE } from '../constants';
 import { SystemErrorContext } from '../components/SystemError';
+import { AuthContext } from "../accounts/AccountsReducer";
 import { printAllOwnersDetails } from './Utils';
 
 function PersonSearch({ incident, organization }) {
 
+  const { dispatch, state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
 	// Identify any query param data.
@@ -85,7 +87,7 @@ function PersonSearch({ incident, organization }) {
 		const fetchOwners = async () => {
 			setData({owners: [], isFetching: true});
 			// Fetch People data.
-			await axios.get('/people/api/person/?search=' + searchTerm + '&status=' + statusOptions + '&incident=' + incident, {
+			await axios.get('/people/api/person/?search=' + searchTerm + '&status=' + statusOptions + '&incident=' + incident + '&organization=' + organization +'&training=' + state.incident.training, {
 				cancelToken: source.token,
 			})
 			.then(response => {

@@ -22,10 +22,12 @@ import Scrollbar from '../components/Scrollbars';
 import Header from '../components/Header';
 import 'react-bootstrap-typeahead/css/Typeahead.css';
 import 'leaflet/dist/leaflet.css';
+import { AuthContext } from "../accounts/AccountsReducer";
 import { SystemErrorContext } from '../components/SystemError';
 
 function Deploy({ incident, organization }) {
 
+  const { dispatch, state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
   // Determine if this is a preplanning workflow.
@@ -233,7 +235,7 @@ function Deploy({ incident, organization }) {
     const fetchTeamMembers = async () => {
       setTeamData({teams: [], options: [], isFetching: true});
       // Fetch all TeamMembers.
-      await axios.get('/evac/api/evacteammember/', {
+      await axios.get('/evac/api/evacteammember/?incident=' + incident + '&organization=' + organization +'&training=' + state.incident.training, {
         cancelToken: source.token,
       })
       .then(response => {

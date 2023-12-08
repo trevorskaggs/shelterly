@@ -4,7 +4,7 @@ from actstream import action
 
 from animals.models import Animal
 from hotline.models import ServiceRequest
-from incident.models import Organization
+from incident.models import Incident, Organization
 from people.models import OwnerContact, Person, PersonChange, PersonImage
 from people.serializers import OwnerContactSerializer, PersonSerializer, HeavyPersonSerializer, SimplePersonSerializer
 
@@ -31,7 +31,7 @@ class PersonViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = (
             Person.objects.with_history()
-            .all()
+            .filter(Q(incident__organization__slug=self.request.GET.get('organization'), incident__training=self.request.GET.get('training') == 'true')|Q(incident__slug=self.request.GET.get('incident')))()
             .annotate(is_owner=Exists(Animal.objects.filter(incident__slug=self.request.GET.get('incident', ''), owners=OuterRef("id"))))
             .prefetch_related(
                 Prefetch(
@@ -70,10 +70,9 @@ class PersonViewSet(viewsets.ModelViewSet):
 
 
     def perform_create(self, serializer):
-        if serializer.validated_data.get('organization'):
-            org = Organization.objects.get(name=serializer.validated_data['organization'])
-            serializer.validated_data['organization'] = org.id
         if serializer.is_valid():
+            if self.request.data.get('incident_slug'):
+                serializer.validated_data['incident'] = Incident.objects.get(slug=self.request.data.get('incident_slug'))
             # Check for duplicate owners.
             for owner in Person.objects.filter(first_name=serializer.validated_data['first_name'], last_name=serializer.validated_data['last_name'], phone=serializer.validated_data['phone']):
                 raise serializers.ValidationError(['a duplicate owner with the same name and phone number already exists.', owner.id])

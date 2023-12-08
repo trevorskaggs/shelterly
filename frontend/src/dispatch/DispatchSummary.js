@@ -15,11 +15,13 @@ import Map, { countMatches, prettyText, reportedMarkerIcon, reportedEvacMarkerIc
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
 import { printDispatchResolutionForm } from './Utils'
+import { AuthContext } from "../accounts/AccountsReducer";
 import { SystemErrorContext } from '../components/SystemError';
 import ShelterlyPrintifyButton from '../components/ShelterlyPrintifyButton';
 
 function DispatchSummary({ id, incident, organization }) {
 
+  const { dispatch, state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
   // Initial animal data.
@@ -173,7 +175,7 @@ function DispatchSummary({ id, incident, organization }) {
           setMapState(map_dict);
           setTeamData({teams: [], options: [], isFetching: true});
           setTeamName(response.data.team_object.name);
-          axios.get('/evac/api/evacteammember/', {
+          axios.get('/evac/api/evacteammember/?incident=' + incident + '&organization=' + organization +'&training=' + state.incident.training, {
             cancelToken: source.token,
           })
           .then(teamMemberResponse => {

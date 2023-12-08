@@ -30,6 +30,7 @@ const DispatchTeamMemberForm = ({ id, incident, organization }) => {
     last_name: '',
     phone: '',
     agency_id: '',
+    incident_slug: incident,
   })
 
   useEffect(() => {

@@ -1,9 +1,13 @@
 from django.contrib.auth import get_user_model
 from django.db import models
+from incident.models import Incident
 from location.models import Location
 from .managers import PersonQueryset
 
 User = get_user_model()
+
+def test_incident():
+    return Incident.objects.get(name='Test').id
 
 class Person(Location):
     first_name = models.CharField(max_length=50)
@@ -14,7 +18,7 @@ class Person(Location):
     agency = models.TextField(blank=True)
     drivers_license = models.CharField(max_length=50, blank=True)
     email = models.CharField(max_length=200, blank=True)
-    training = models.BooleanField(default=False)
+    incident = models.ForeignKey(Incident, on_delete=models.CASCADE, default=test_incident)
 
     objects = PersonQueryset.as_manager()
 

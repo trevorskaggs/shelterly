@@ -24,6 +24,7 @@ import { Legend } from "../components/Map";
 import { catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, speciesChoices, statusChoices } from './constants';
 import AnimalCoverImage from '../components/AnimalCoverImage';
 import { printAnimalCareSchedule, printAllAnimalCareSchedules } from './Utils';
+import { AuthContext } from "../accounts/AccountsReducer";
 import { SystemErrorContext } from '../components/SystemError';
 import ButtonSpinner from '../components/ButtonSpinner';
 
@@ -40,6 +41,7 @@ const NoOptionsMessage = props => {
 
 function AnimalSearch({ incident, organization }) {
 
+  const { dispatch, state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
   // Identify any query param data.
@@ -245,7 +247,7 @@ function AnimalSearch({ incident, organization }) {
     const fetchShelters = () => {
       setShelters({options: [], isFetching: true});
       // Fetch Shelter data.
-      axios.get('/shelter/api/shelter/?incident=' + incident, {
+      axios.get('/shelter/api/shelter/?incident=' + incident + '&organization=' + organization +'&training=' + state.incident.training, {
         cancelToken: source.token,
       })
       .then(response => {

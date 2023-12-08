@@ -26,6 +26,10 @@ class EvacTeamMemberViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         if serializer.is_valid():
+
+            if self.request.data.get('incident_slug'):
+                serializer.validated_data['incident'] = Incident.objects.get(slug=self.request.data.get('incident_slug'))
+
             # Clean phone fields.
             serializer.validated_data['phone'] = ''.join(char for char in serializer.validated_data.get('phone', '') if char.isdigit())
             serializer.save()
@@ -41,7 +45,7 @@ class EvacTeamMemberViewSet(viewsets.ModelViewSet):
             serializer.save()
 
     def get_queryset(self):
-        queryset = EvacTeamMember.objects.all().annotate(is_assigned=Exists(EvacAssignment.objects.filter(team__team_members__id=OuterRef("id"), end_time=None, service_requests__isnull=False)))
+        queryset = EvacTeamMember.objects.filter(Q(incident__organization__slug=self.request.GET.get('organization'), incident__training=self.request.GET.get('training') == 'true')|Q(incident__slug=self.request.GET.get('incident'))).annotate(is_assigned=Exists(EvacAssignment.objects.filter(team__team_members__id=OuterRef("id"), end_time=None, service_requests__isnull=False)))
         return queryset
 
 class DispatchTeamViewSet(viewsets.ModelViewSet):

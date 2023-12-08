@@ -8,10 +8,12 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import Header from "../components/Header";
 import Scrollbar from '../components/Scrollbars';
+import { AuthContext } from "../accounts/AccountsReducer";
 import { SystemErrorContext } from '../components/SystemError';
 
 function DispatchTeamManagement({ incident, organization }) {
 
+  const { dispatch, state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
   const [data, setData] = useState({team_members: [], teams: [], isFetching: false});
@@ -54,7 +56,7 @@ function DispatchTeamManagement({ incident, organization }) {
     const fetchTeamData = async () => {
 
       setData({team_members: [], teams: [], isFetching: true});
-      axios.get('/evac/api/evacteammember/', {
+      axios.get('/evac/api/evacteammember/?incident=' + incident + '&organization=' + organization +'&training=' + state.incident.training, {
         cancelToken: source.token,
       })
       .then(teamMemberResponse => {

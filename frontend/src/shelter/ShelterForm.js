@@ -53,7 +53,7 @@ const ShelterForm = ({ id, incident, organization }) => {
 
     if (id) {
       const fetchShelterData = async () => {
-        // Fetch ServiceRequest data.
+        // Fetch Shelter data.
         await axios.get('/shelter/api/shelter/' + id + '/?incident=' + incident, {
           cancelToken: source.token,
         })

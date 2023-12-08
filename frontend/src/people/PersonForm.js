@@ -9,11 +9,13 @@ import { AddressSearch, TextInput } from '../components/Form';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft } from '@fortawesome/free-solid-svg-icons';
 import ButtonSpinner from '../components/ButtonSpinner';
+import { AuthContext } from "../accounts/AccountsReducer";
 import { SystemErrorContext } from '../components/SystemError';
 
 // Form for owner and reporter Person objects.
 const PersonForm = (props) => {
 
+  const { dispatch, state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
   const id = props.id;
@@ -109,6 +111,7 @@ const PersonForm = (props) => {
     latitude: null,
     longitude: null,
     change_reason: '',
+    incident_slug: props.incident,
   }
   let current_data = initialData;
   if (is_workflow) {
@@ -132,7 +135,7 @@ const PersonForm = (props) => {
     let source = axios.CancelToken.source();
     if (id) {
       const fetchPersonData = async () => {
-        // Fetch ServiceRequest data.
+        // Fetch Person data.
         await axios.get('/people/api/person/' + id + '/', {
           cancelToken: source.token,
         })
@@ -157,7 +160,7 @@ const PersonForm = (props) => {
     }
     const fetchExistingOwnerData = async () => {
       // Fetch all owners data.
-      await axios.get('/people/api/person/?light=true', {
+      await axios.get('/people/api/person/?light=true&incident=' + props.incident + '&organization=' + props.organization +'&training=' + state.incident.training, {
         cancelToken: source.token,
       })
       .then(existingOwnersResponse => {

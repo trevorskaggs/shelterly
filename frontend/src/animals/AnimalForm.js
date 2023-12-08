@@ -9,10 +9,12 @@ import { catAgeChoices, dogAgeChoices, horseAgeChoices, otherAgeChoices, catColo
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft, faMinusSquare } from '@fortawesome/free-solid-svg-icons';
 import ButtonSpinner from "../components/ButtonSpinner";
+import { AuthContext } from "../accounts/AccountsReducer";
 import { SystemErrorContext } from '../components/SystemError';
 
 const AnimalForm = (props) => {
 
+  const { dispatch, state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
   const id = props.id;
@@ -206,7 +208,7 @@ const AnimalForm = (props) => {
     const fetchShelters = () => {
       setShelters({options: [], shelters: [], room_options: {}, isFetching: true});
       // Fetch Shelter data.
-      axios.get('/shelter/api/shelter/?incident=' + props.incident, {
+      axios.get('/shelter/api/shelter/?incident=' + props.incident + '&organization=' + organization +'&training=' + state.incident.training, {
         cancelToken: source.token,
       })
       .then(response => {

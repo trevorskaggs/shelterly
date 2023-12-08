@@ -28,6 +28,7 @@ import { Checkbox, DateTimePicker, DropDown, TextInput } from '../components/For
 import { statusChoices } from '../animals/constants';
 import ButtonSpinner from '../components/ButtonSpinner';
 import { priorityChoices } from '../constants';
+import { AuthContext } from "../accounts/AccountsReducer";
 import { SystemErrorContext } from '../components/SystemError';
 
 function AnimalStatus(props) {
@@ -121,6 +122,7 @@ function AnimalStatus(props) {
 
 function DispatchResolutionForm({ id, incident, organization }) {
 
+  const { dispatch, state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
   // Initial animal data.
@@ -194,7 +196,7 @@ function DispatchResolutionForm({ id, incident, organization }) {
     const fetchShelters = () => {
       setShelters({options: [], room_options: [], isFetching: true});
       // Fetch Shelter data.
-      axios.get('/shelter/api/shelter/?incident=' + incident, {
+      axios.get('/shelter/api/shelter/?incident=' + incident + '&organization=' + organization +'&training=' + state.incident.training, {
         cancelToken: source.token,
       })
       .then(response => {
