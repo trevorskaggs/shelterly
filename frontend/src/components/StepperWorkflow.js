@@ -75,7 +75,7 @@ function getSteps(is_intake) {
 function getStepContent(incident, organization, step, handleStepSubmit, handleBack, state) {
   switch (step) {
     case 0:
-      return <PersonForm onSubmit={handleStepSubmit} handleBack={handleBack} state={state} incident={incident} />;
+      return <PersonForm onSubmit={handleStepSubmit} handleBack={handleBack} state={state} incident={incident} organization={organization} />;
     case 1:
       return <AnimalForm onSubmit={handleStepSubmit} handleBack={handleBack} state={state} incident={incident} organization={organization} />;
     case 2:
