@@ -208,7 +208,7 @@ const AnimalForm = (props) => {
     const fetchShelters = () => {
       setShelters({options: [], shelters: [], room_options: {}, isFetching: true});
       // Fetch Shelter data.
-      axios.get('/shelter/api/shelter/?incident=' + props.incident + '&organization=' + organization +'&training=' + state.incident.training, {
+      axios.get('/shelter/api/shelter/?incident=' + props.incident + '&organization=' + props.organization +'&training=' + state.incident.training, {
         cancelToken: source.token,
       })
       .then(response => {
