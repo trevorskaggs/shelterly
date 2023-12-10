@@ -140,6 +140,7 @@ function UserManagement({ organization }) {
 
   return (
     <>
+    {state.user.is_superuser || state.user.user_perms ?
     <span className="mt-4 ml-auto mr-auto" style={{width:"80%", maxWidth:"80%"}}>
     <Header>
       <Link href={"/" + organization} style={{textDecoration:"none", color:"white"}}>{state.organization.name}</Link> - User Management
@@ -291,7 +292,7 @@ function UserManagement({ organization }) {
         </div>
       </Card>
     ))}
-    </span>
+    </span> : ""}
     <Modal show={showUserConfirm} onHide={handleUserClose}>
       <Modal.Header closeButton>
         <Modal.Title>Confirm User Removal</Modal.Title>

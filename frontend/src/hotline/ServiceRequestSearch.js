@@ -521,7 +521,7 @@ function ServiceRequestSearch({ incident, organization }) {
                           &nbsp;- {animal.status}
                         </ListGroup.Item>
                       ))}
-                    {service_request.animals.length < 1 ? <ListGroup.Item style={{marginTop:"32px"}}>No Animals</ListGroup.Item> : ""}
+                    {service_request.animals.length < 1 ? <ListGroup.Item>No Animals</ListGroup.Item> : ""}
                     </Scrollbar>
                   </ListGroup>
               </Card.Body>

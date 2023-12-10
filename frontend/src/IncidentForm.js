@@ -63,7 +63,7 @@ const IncidentForm = ({ id, organization }) => {
 
     const fetchIncidents = async () => {
       // Fetch Visit Note data.
-      await axios.get('/incident/api/incident/?organization=' + organization, {
+      await axios.get('/incident/api/incident/?organization_slug=' + organization, {
         cancelToken: source.token,
       })
       .then(response => {
@@ -82,7 +82,7 @@ const IncidentForm = ({ id, organization }) => {
             incident_bounds.push([parseFloat(incident_bounds[0][0])-.04,parseFloat(incident_bounds[0][1])+.04])
           }
           if (!id) {
-            setBounds(incident_bounds);
+            setBounds(incident_bounds.length ? incident_bounds : L.latLngBounds([[0,0]]));
           }
           setNames(incident_names);
         }
@@ -147,7 +147,7 @@ const IncidentForm = ({ id, organization }) => {
       onSubmit={(values, { setSubmitting }) => {
         values['slug'] = values.name.trim().replaceAll(' ','').match(/[a-zA-Z0-9-]+/g)[0];
         if (id) {
-          axios.put('/incident/api/incident/' + id + '/', values)
+          axios.put('/incident/api/incident/' + id + '/?organization=' + state.organization.id, values)
           .then(function () {
             navigate('/' + organization);
           })
@@ -156,7 +156,7 @@ const IncidentForm = ({ id, organization }) => {
           });
         }
         else {
-          axios.post('/incident/api/incident/', values)
+          axios.post('/incident/api/incident/?organization=' + state.organization.id, values)
           .then(function () {
             navigate('/' + organization);
           })

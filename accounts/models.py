@@ -8,8 +8,6 @@ from django.db.models.signals import post_save
 from django.db import models
 from django.apps import apps
 
-from incident.models import Organization
-
 
 class ShelterlyUserManager(BaseUserManager):
     def create_user(self, email, cell_phone, password=None, **extra_fields):
@@ -58,7 +56,7 @@ class ShelterlyUser(AbstractUser):
     agency_id = models.CharField(max_length=50, blank=True, null=True)
     username = models.CharField(max_length=50, blank=True, null=True)
     email = models.EmailField(blank=False, null=False, unique=True)
-    organizations = models.ManyToManyField(Organization, through='ShelterlyUserOrg', related_name='users')
+    organizations = models.ManyToManyField('incident.Organization', through='ShelterlyUserOrg', related_name='users')
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['cell_phone']
@@ -74,7 +72,7 @@ class ShelterlyUser(AbstractUser):
 
 class ShelterlyUserOrg(models.Model):
     user = models.ForeignKey(ShelterlyUser, null=True, on_delete=models.SET_NULL, related_name='perms')
-    organization = models.ForeignKey(Organization, null=True, on_delete=models.SET_NULL)
+    organization = models.ForeignKey('incident.Organization', null=True, on_delete=models.SET_NULL)
     user_perms = models.BooleanField(default=False)
     incident_perms = models.BooleanField(default=False)
     email_notification = models.BooleanField(default=False)

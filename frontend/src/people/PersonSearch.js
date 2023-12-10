@@ -87,7 +87,7 @@ function PersonSearch({ incident, organization }) {
 		const fetchOwners = async () => {
 			setData({owners: [], isFetching: true});
 			// Fetch People data.
-			await axios.get('/people/api/person/?search=' + searchTerm + '&status=' + statusOptions + '&incident=' + 'test' + '&organization=' + organization +'&training=' + (state && state.incident.training), {
+			await axios.get('/people/api/person/?search=' + searchTerm + '&status=' + statusOptions + '&incident=' + incident + '&organization=' + organization +'&training=' + (state && state.incident.training), {
 				cancelToken: source.token,
 			})
 			.then(response => {
@@ -270,7 +270,7 @@ function PersonSearch({ incident, organization }) {
                       &nbsp;- {animal.status}
                     </ListGroup.Item>
                   ))}
-                  {owner.animals.length < 1 ? <ListGroup.Item style={{marginTop:"32px"}}>No Animals</ListGroup.Item> : ""}
+                  {owner.animals.length < 1 ? <ListGroup.Item>No Animals</ListGroup.Item> : ""}
                 </Scrollbar>
               </ListGroup> : ""}
               {statusOptions === 'reporters' ?
@@ -295,7 +295,7 @@ function PersonSearch({ incident, organization }) {
                       &nbsp;- {animal.status}
                     </ListGroup.Item>
                   ))}
-                  {owner.reporter_animals.length < 1 ? <ListGroup.Item style={{marginTop:"32px"}}>No Animals</ListGroup.Item> : ""}
+                  {owner.reporter_animals.length < 1 ? <ListGroup.Item style={{}}>No Animals</ListGroup.Item> : ""}
                 </Scrollbar>
               </ListGroup> : ""}
             </Card.Body>

@@ -18,7 +18,7 @@ import ButtonSpinner from '../components/ButtonSpinner.js';
 import { SystemErrorContext } from '../components/SystemError';
 import { AuthContext } from "./AccountsReducer";
 
-const UserForm = ({ id, incident, organization }) => {
+const UserForm = ({ id, organization }) => {
 
   const { dispatch, state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
@@ -69,6 +69,8 @@ const UserForm = ({ id, incident, organization }) => {
   }, [id]);
 
   return (
+    <>
+    {state.user.is_superuser || state.user.user_perms ?
     <Formik
       initialValues={data}
       enableReinitialize={true}
@@ -174,7 +176,8 @@ const UserForm = ({ id, incident, organization }) => {
           </ButtonGroup>
         </Card>
       )}
-    </Formik>
+    </Formik> : ""}
+    </>
   );
 };
 

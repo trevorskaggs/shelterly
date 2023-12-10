@@ -47,7 +47,7 @@ function Incident() {
 
   // Handle opening and closing an incident.
   const handleOpenCloseSubmit = async () => {
-    await axios.patch('/incident/api/incident/' + incident.id + '/', {change_lock:true})
+    await axios.patch('/incident/api/incident/' + incident.id + '/?organization=' + state.organization.id, {change_lock:true})
     .then(response => {
       let options_copy = [...options]
       options_copy.filter(option => option.value === response.data.id)[0]['label'] = response.data.name + ' (' + moment(response.data.start_time).format('MM/DD/YYYY') + (response.data.end_time ? ' - ' + moment(response.data.end_time).format('MM/DD/YYYY') : '') + ')';
@@ -66,7 +66,7 @@ function Incident() {
 
     const fetchIncidentData = async () => {
       // Fetch Incident data.
-      await axios.get('/incident/api/incident/?organization=' + org_slug, {
+      await axios.get('/incident/api/incident/?organization_slug=' + org_slug, {
         cancelToken: source.token,
       })
       .then(response => {
@@ -104,7 +104,7 @@ function Incident() {
     <Row className='ml-auto mr-auto mt-auto align-bottom'>
       <h1 style={{fontSize:"100px", textTransform: 'capitalize'}}>{state.organization.name}</h1>
     </Row>
-    <Col xs={{ span:5 }} className="border rounded border-light shadow-sm ml-auto mr-auto mb-auto" style={{maxHeight:state.user.is_superuser || state.user.incident_perms ? "309px" : "200px", minWidth:"572px"}}>
+    <Col xs={{ span:5 }} className="border rounded border-light shadow-sm ml-auto mr-auto mb-auto" style={{minWidth:"572px"}}>
       <SimpleValue options={options}>
         {simpleProps => <Select styles={customStyles} {...simpleProps} className="mt-3" placeholder="Select incident..." onChange={(instance) => setIncident({id:instance.value, slug:instance.slug, name:instance.name, training:instance.training})} />}
       </SimpleValue>

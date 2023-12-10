@@ -1,6 +1,11 @@
+from django.contrib.auth import get_user_model
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.core.exceptions import ValidationError
 import re
+
+User = get_user_model()
 
 class Organization(models.Model):
 
@@ -16,6 +21,12 @@ class Organization(models.Model):
     def clean(self):
         if not bool(re.search(r"^[a-z0-9]*$", self.slug)):
             raise ValidationError("Invalid slug.")
+
+@receiver(post_save, sender=Organization)
+def add_default_admins(sender, instance, created, **kwargs):
+    if created:
+        for user in User.objects.filter(is_superuser=True):
+            user.organizations.add(instance)
 
 
 class Incident(models.Model):

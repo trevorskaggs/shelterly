@@ -17,8 +17,8 @@ class IncidentViewSet(viewsets.ModelViewSet):
         if self.request.GET.get('incident'):
             queryset = queryset.filter(slug=self.request.GET.get('incident'))
 
-        if self.request.GET.get('organization'):
-            queryset = queryset.filter(organization__slug=self.request.GET.get('organization'))
+        if self.request.GET.get('organization_slug'):
+            queryset = queryset.filter(organization__slug=self.request.GET.get('organization_slug'))
 
         return queryset
 
@@ -26,14 +26,14 @@ class IncidentViewSet(viewsets.ModelViewSet):
         if serializer.is_valid():
 
             # Only create incident if user is an Admin.
-            if self.request.user.is_staff or self.request.user.incident_perms:
+            if self.request.user.is_superuser or self.request.user.perms.filter(organization=self.request.data.get('organization'))[0].incident_perms:
                 serializer.save()
 
     def perform_update(self, serializer):
         if serializer.is_valid():
 
             # Only create incident if user is an Admin.
-            if self.request.user.is_staff or self.request.user.incident_perms:
+            if self.request.user.is_superuser or self.request.user.perms.filter(organization=self.request.data.get('organization'))[0].incident_perms:
                 incident = serializer.save()
 
                 # Open/close incident.

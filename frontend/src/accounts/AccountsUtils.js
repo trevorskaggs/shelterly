@@ -23,7 +23,7 @@ export function loadUser({state, dispatch, removeCookie, path}) {
       axios.get('/incident/api/organization/?slug=' + org_slug)
       .then(orgResponse => {
         dispatch({type: "SET_ORGANIZATION", data: {id:orgResponse.data[0].id, name:orgResponse.data[0].name}});
-        if (incident_slug && !state.incident.name){
+        if (incident_slug && !state.incident.name && incident_slug !=='accounts'){
           axios.get('/incident/api/incident/?incident=' + incident_slug)
           .then(incidentResponse => {
             dispatch({type: "SET_INCIDENT", data: {name:incidentResponse.data[0].name, training:incidentResponse.data[0].training}});

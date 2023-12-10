@@ -29,8 +29,11 @@ class PersonViewSet(viewsets.ModelViewSet):
         return super(PersonViewSet, self).get_serializer_class()
 
     def get_queryset(self):
+        queryset = Person.objects.with_history().all()
+        if self.request.GET.get('training'):
+            queryset = queryset.filter(incident__organization__slug=self.request.GET.get('organization'), incident__training=self.request.GET.get('training') == 'true')
         queryset = (
-            Person.objects.with_history().filter(Q(incident__organization__slug=self.request.GET.get('organization'), incident__training=self.request.GET.get('training') == 'true')|Q(incident__slug=self.request.GET.get('incident')))
+            queryset
             .annotate(is_owner=Exists(Animal.objects.filter(incident__slug=self.request.GET.get('incident', ''), owners=OuterRef("id"))))
             .prefetch_related(
                 Prefetch(
