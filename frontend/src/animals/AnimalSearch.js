@@ -24,6 +24,7 @@ import { Legend } from "../components/Map";
 import { catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, speciesChoices, statusChoices } from './constants';
 import AnimalCoverImage from '../components/AnimalCoverImage';
 import { printAnimalCareSchedule, printAllAnimalCareSchedules } from './Utils';
+import { AuthContext } from "../accounts/AccountsReducer";
 import { SystemErrorContext } from '../components/SystemError';
 import ButtonSpinner from '../components/ButtonSpinner';
 
@@ -38,8 +39,9 @@ const NoOptionsMessage = props => {
   );
 };
 
-function AnimalSearch({ incident }) {
+function AnimalSearch({ incident, organization }) {
 
+  const { dispatch, state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
   // Identify any query param data.
@@ -245,7 +247,7 @@ function AnimalSearch({ incident }) {
     const fetchShelters = () => {
       setShelters({options: [], isFetching: true});
       // Fetch Shelter data.
-      axios.get('/shelter/api/shelter/?incident=' + incident, {
+      axios.get('/shelter/api/shelter/?incident=' + incident + '&organization=' + organization +'&training=' + (state && state.incident.training), {
         cancelToken: source.token,
       })
       .then(response => {
@@ -491,7 +493,7 @@ function AnimalSearch({ incident }) {
                   </Tooltip>
                 }
               >
-                <Link href={"/" + incident + "/animals/" + animal.id}><FontAwesomeIcon icon={faDotCircle} className="mr-2" inverse /></Link>
+                <Link href={"/" + organization + "/" + incident + "/animals/" + animal.id}><FontAwesomeIcon icon={faDotCircle} className="mr-2" inverse /></Link>
               </OverlayTrigger>
               A#{animal.id} - {animal.name ? titleCase(animal.name) : "Unknown"}&nbsp;| {titleCase(animal.status)}
 
@@ -659,7 +661,7 @@ function AnimalSearch({ incident }) {
                     <ListGroup.Item style={{textTransform:"capitalize"}}><b>Color: </b>{animal.pcolor ? <span>{animal.pcolor}{animal.scolor ? <span> / {animal.scolor}</span> : ""}</span> : "Unknown"}</ListGroup.Item>
                     {animal.owners.map(owner => (
                       <ListGroup.Item key={owner.id}>
-                        <b>Owner:</b> <Link href={"/" + incident + "/people/owner/" + owner.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{owner.first_name} {owner.last_name}</Link>
+                        <b>Owner:</b> <Link href={"/" + organization + "/" + incident + "/people/owner/" + owner.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{owner.first_name} {owner.last_name}</Link>
                         {owner.display_phone ?
                         <OverlayTrigger
                           key={"owner-phone"}
@@ -689,7 +691,7 @@ function AnimalSearch({ incident }) {
                       </ListGroup.Item>
                     ))}
                     {animal.owners < 1 ? <ListGroup.Item><b>Owner: </b>No Owner</ListGroup.Item> : ""}
-                    {animal.reporter ? <ListGroup.Item><b>Reporter: </b><Link href={"/" + incident + "/people/reporter/" + animal.reporter} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.reporter_object.first_name} {animal.reporter_object.last_name}</Link></ListGroup.Item> : ""}
+                    {animal.reporter ? <ListGroup.Item><b>Reporter: </b><Link href={"/" + organization + "/" + incident + "/people/reporter/" + animal.reporter} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.reporter_object.first_name} {animal.reporter_object.last_name}</Link></ListGroup.Item> : ""}
                   </ListGroup>
                 </Scrollbar>
               </Card.Body>
@@ -698,8 +700,8 @@ function AnimalSearch({ incident }) {
               <Card.Body>
               <Card.Title style={{marginTop:"-9px", marginBottom:"8px"}}>Location</Card.Title>
                 <ListGroup>
-                  <ListGroup.Item className='request'><b>Service Request: </b>{animal.request ? <Link href={"/" + incident + "/hotline/servicerequest/" + animal.request} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.request_address}</Link> : "None"}</ListGroup.Item>
-                  <ListGroup.Item><b>Shelter: </b>{animal.shelter ? <Link href={"/" + incident + "/shelter/" + animal.shelter} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.shelter_object.name}</Link> : "None"}
+                  <ListGroup.Item className='request'><b>Service Request: </b>{animal.request ? <Link href={"/" + organization + "/" + incident + "/hotline/servicerequest/" + animal.request} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.request_address}</Link> : "None"}</ListGroup.Item>
+                  <ListGroup.Item><b>Shelter: </b>{animal.shelter ? <Link href={"/" + organization + "/" + incident + "/shelter/" + animal.shelter} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.shelter_object.name}</Link> : "None"}
                     {animal.shelter ?
                     <span>
                       <OverlayTrigger
@@ -740,7 +742,7 @@ function AnimalSearch({ incident }) {
                     </span>
                     : ""}
                   </ListGroup.Item>
-                  {animal.room ? <ListGroup.Item><b>Room: </b><Link href={"/" + incident + "/shelter/room/" + animal.room} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.room_name}</Link></ListGroup.Item> : ""}
+                  {animal.room ? <ListGroup.Item><b>Room: </b><Link href={"/" + organization + "/" + incident + "/shelter/room/" + animal.room} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.room_name}</Link></ListGroup.Item> : ""}
                 </ListGroup>
               </Card.Body>
             </Card>

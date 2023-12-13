@@ -37,15 +37,15 @@ nock('http://localhost')
 
 describe("Animal tests", () => {
   it("Render AnimalForm", () => {
-    render(<SystemErrorProvider><AnimalForm state={initialWorkflowData} /></SystemErrorProvider>);
+    render(<SystemErrorProvider><AnimalForm state={initialWorkflowData} incident={'test'} organization={'changeme'} /></SystemErrorProvider>);
     expect(screen.getByText("Animal Information"));
   });
   it("Render AnimalSearch", () => {
-    render(<SystemErrorProvider><AnimalSearch /></SystemErrorProvider>);
+    render(<SystemErrorProvider><AnimalSearch incident={'test'} organization={'changeme'} /></SystemErrorProvider>);
     expect(screen.getByText("Search"));
   });
   it("Render AnimalView", () => {
-    render(<SystemErrorProvider><AnimalDetails id={1} incident={1} /></SystemErrorProvider>);
+    render(<SystemErrorProvider><AnimalDetails id={1} incident={1} organization={'changeme'} /></SystemErrorProvider>);
     expect(screen.getByText(/Animal/));
   });
 });

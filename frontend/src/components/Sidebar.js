@@ -63,7 +63,7 @@ const Menu = ({ state, dispatch, removeCookie, ...props }) => {
 
     const viewHeight = window.outerHeight;
     const path = window.location.pathname;
-    const incident = '/' + path.split('/')[1];
+    const incident = '/' + path.split('/')[1] + '/' + path.split('/')[2];
 
     const [showSearch, setShowSearch] = useState(path.includes("search") ? true : false);
 
@@ -76,7 +76,7 @@ const Menu = ({ state, dispatch, removeCookie, ...props }) => {
     <StyledMenu  {...props} className="flex-column" style={{ height: viewHeight, minHeight:"1000px" }}>
       <Link href={incident} style={{marginTop:"-5px", paddingBottom:"0px"}} title="Home"><img src="/static/images/shelterly.png" alt="Logo" /></Link>
       <div className="logo text-center" style={{marginTop:"10px", marginBottom:"0px", paddingBottom:"0px"}}>SHELTERLY</div>
-      <div className="logo border-bottom text-center" style={{paddingBottom:"12px", letterSpacing:"0.25rem", fontSize:"1.2rem"}} title="Incident"><span style={{cursor:"pointer"}} className="incident" onClick={() => navigate('/')}>{titleCase(path.split('/')[1].replaceAll('-', ' '))}</span></div>
+      <div className="logo border-bottom text-center" style={{paddingBottom:"12px", letterSpacing:"0.25rem", fontSize:"1.2rem"}} title="Incident"><span style={{cursor:"pointer"}} className="incident" onClick={() => navigate('/' + path.split('/')[1])}>{state.incident.name}</span></div>
       <Link href={incident + "/hotline"} className="rounded sidebar" style={{backgroundColor:(path.includes("/hotline/") || path.endsWith("/hotline")) && !path.includes("search") ? "#444444" : "#292b2c", marginLeft:"-23px", marginRight:"-23px", marginBottom:"-10px"}}><FontAwesomeIcon icon={faPhone} fixedWidth inverse className="sidebar-icon" style={{marginLeft:"23px"}} /> HOTLINE</Link>
       <Link href={incident + "/dispatch"} className="rounded sidebar" style={{backgroundColor:(path.includes("/dispatch/") || path.endsWith("/dispatch")) && !path.includes("search") ? "#444444" : "#292b2c", marginLeft:"-23px", marginRight:"-23px", marginBottom:"-10px"}}><FontAwesomeIcon icon={faBullhorn} fixedWidth inverse className="sidebar-icon" style={{marginLeft:"23px"}} />  DISPATCH</Link>
       <Link href={incident + "/shelter"} className="rounded sidebar" style={{backgroundColor:path.includes("/shelter/") || path.endsWith("/shelter") ? "#444444" : "#292b2c", marginLeft:"-23px", marginRight:"-23px", marginBottom:"-10px"}}><FontAwesomeIcon icon={faHome} fixedWidth inverse className="sidebar-icon" style={{marginLeft:"23px"}} /> SHELTER</Link>
@@ -90,7 +90,6 @@ const Menu = ({ state, dispatch, removeCookie, ...props }) => {
         </ListGroup>
       </Collapse>
       <Link href={incident + "/reports"} className="rounded sidebar" style={{backgroundColor:path.includes("reports") ? "#444444" : "#292b2c", marginLeft:"-23px", marginRight:"-23px", marginBottom:"-10px"}}><FontAwesomeIcon icon={faFileChartColumn} fixedWidth inverse className="sidebar-icon" style={{marginLeft:"23px"}} /> REPORTS</Link>
-      {state.user && (state.user.is_superuser || state.user.user_perms) ? <Link href={incident + "/accounts/user_management"} className="rounded sidebar" style={{marginBottom:"-10px", marginLeft:"-23px", marginRight:"-23px", backgroundColor:path.includes("/accounts/") ? "#444444" : "#292b2c"}}><FontAwesomeIcon icon={faUserCog} className="sidebar-icon" fixedWidth inverse style={{marginLeft:"23px"}} /> ADMIN</Link> : ""}
       {state.user ? <Link onClick={() => logoutUser({dispatch}, {removeCookie})} href="#" className="rounded sidebar"><FontAwesomeIcon icon={faSignOutAlt} className="sidebar-icon" fixedWidth inverse/> SIGN OUT</Link> : ""}
     </StyledMenu>
     )

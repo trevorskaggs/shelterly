@@ -152,7 +152,7 @@ def email_on_creation(sender, instance, **kwargs):
             # from:
             "DoNotReply@shelterly.org",
             # to:
-            User.objects.filter(email_notification=True).values_list('email', flat=True),
+            User.objects.filter(perms__organization=instance.incident.organization, perms__email_notification=True).values_list('email', flat=True),
             fail_silently=False,
             html_message = render_to_string(
                 'service_request_creation_email.html',

@@ -12,7 +12,7 @@ import Header from '../components/Header';
 import { SystemErrorContext } from '../components/SystemError';
 import { ITEMS_PER_PAGE } from '.././constants';
 
-function ShelterDetails({ id, incident }) {
+function ShelterDetails({ id, incident, organization }) {
 
   const { setShowSystemError } = useContext(SystemErrorContext);
 
@@ -84,7 +84,7 @@ function ShelterDetails({ id, incident }) {
             </Tooltip>
           }
         >
-          <Link href={"/" + incident + "/shelter/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-1" inverse /></Link>
+          <Link href={"/" + organization + "/" + incident + "/shelter/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-1" inverse /></Link>
         </OverlayTrigger>
       </Header>
       <hr/>
@@ -124,13 +124,13 @@ function ShelterDetails({ id, incident }) {
               </Card.Title>
               <hr/>
               <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
-                <ListGroup.Item className="rounded" action><Link href={"/" + incident + "/intake/workflow/owner?shelter_id=" + id} style={{color:"#FFF"}}><FontAwesomeIcon icon={faDoorOpen} inverse/> <b>Intake from Walk-In (Owner)</b></Link></ListGroup.Item>
-                <ListGroup.Item className="rounded" action><Link href={"/" + incident + "/intake/workflow/reporter?shelter_id=" + id} style={{color:"#FFF"}}><FontAwesomeIcon icon={faDoorOpen} inverse/> <b>Intake from Walk-In (Non-Owner)</b></Link></ListGroup.Item>
-                <ListGroup.Item className="rounded" action><Link href={"/" + incident + "/shelter/" + id + "/intake"} style={{color:"#FFF"}}><FontAwesomeIcon icon={faDoorOpen} inverse/> <b>Intake from Dispatch Assignment</b></Link></ListGroup.Item>
+                <ListGroup.Item className="rounded" action><Link href={"/" + organization + "/" + incident + "/intake/workflow/owner?shelter_id=" + id} style={{color:"#FFF"}}><FontAwesomeIcon icon={faDoorOpen} inverse/> <b>Intake from Walk-In (Owner)</b></Link></ListGroup.Item>
+                <ListGroup.Item className="rounded" action><Link href={"/" + organization + "/" + incident + "/intake/workflow/reporter?shelter_id=" + id} style={{color:"#FFF"}}><FontAwesomeIcon icon={faDoorOpen} inverse/> <b>Intake from Walk-In (Non-Owner)</b></Link></ListGroup.Item>
+                <ListGroup.Item className="rounded" action><Link href={"/" + organization + "/" + incident + "/shelter/" + id + "/intake"} style={{color:"#FFF"}}><FontAwesomeIcon icon={faDoorOpen} inverse/> <b>Intake from Dispatch Assignment</b></Link></ListGroup.Item>
                 <ListGroup.Item>
                   <b>Roomless:</b> {data.unroomed_animals.length} Animal{data.unroomed_animals.length === 1 ? "" : "s"}
                   <OverlayTrigger placement="top" overlay={<Tooltip id={`tooltip-assign`}>Assign animals to rooms</Tooltip>}>
-                    <Link href={"/" + incident + "/shelter/" + id + "/assign"}><FontAwesomeIcon icon={faArrowDownToSquare} size="lg" className="ml-1 fa-move-up" inverse /></Link>
+                    <Link href={"/" + organization + "/" + incident + "/shelter/" + id + "/assign"}><FontAwesomeIcon icon={faArrowDownToSquare} size="lg" className="ml-1 fa-move-up" inverse /></Link>
                   </OverlayTrigger>
                 </ListGroup.Item>
                 <ListGroup.Item></ListGroup.Item>
@@ -152,7 +152,7 @@ function ShelterDetails({ id, incident }) {
                   </Tooltip>
                 }
               >
-                <Link href={"/" + incident + "/shelter/building/new?shelter_id=" + id}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
+                <Link href={"/" + organization + "/" + incident + "/shelter/building/new?shelter_id=" + id}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
               </OverlayTrigger>
             </h4>
           </Card.Title>
@@ -160,7 +160,7 @@ function ShelterDetails({ id, incident }) {
           <span className="d-flex flex-wrap ml-0">
           {data.buildings.map(building => (
             <span key={building.id} className="pl-0 pr-0 mr-3 mb-3">
-              <Link href={"/" + incident + "/shelter/building/" + building.id} className="building-link" style={{textDecoration:"none", color:"white"}}>
+              <Link href={"/" + organization + "/" + incident + "/shelter/building/" + building.id} className="building-link" style={{textDecoration:"none", color:"white"}}>
                 <Card className="border rounded shelter-hover-div" style={{minWidth:"315px", maxWidth:"315px", whiteSpace:"nowrap", overflow:"hidden"}}>
                   <div className="row no-gutters hover-div" style={{textTransform:"capitalize", marginRight:"-2px"}}>
                     <Row className="ml-0 mr-0 w-100" style={{flexWrap:"nowrap"}}>
@@ -194,7 +194,7 @@ function ShelterDetails({ id, incident }) {
           <div>
             <Card className="border rounded d-flex mb-2">
               <Card.Body>
-              {intakesummary.intake_type === 'owner_walkin' ? 'Owner Walk-In ' : intakesummary.intake_type === 'reporter_walkin' ? 'Reporter Walk-In ' : 'Dispatch '}<Link href={"/" + incident + "/shelter/intakesummary/" + intakesummary.id} className="text-link" style={{textDecoration:"none", color:"white"}}>Intake Summary #{intakesummary.id}</Link> for {intakesummary.animals.length} animal{intakesummary.animals.length === 1 ? '' : 's'} on <Moment format="MMMM Do YYYY">{intakesummary.date}</Moment> at <Moment format="HH:mm">{intakesummary.date}</Moment>.
+              {intakesummary.intake_type === 'owner_walkin' ? 'Owner Walk-In ' : intakesummary.intake_type === 'reporter_walkin' ? 'Reporter Walk-In ' : 'Dispatch '}<Link href={"/" + organization + "/" + incident + "/shelter/intakesummary/" + intakesummary.id} className="text-link" style={{textDecoration:"none", color:"white"}}>Intake Summary #{intakesummary.id}</Link> for {intakesummary.animals.length} animal{intakesummary.animals.length === 1 ? '' : 's'} on <Moment format="MMMM Do YYYY">{intakesummary.date}</Moment> at <Moment format="HH:mm">{intakesummary.date}</Moment>.
               </Card.Body>
             </Card>
           </div>

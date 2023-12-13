@@ -18,14 +18,15 @@ function Shelterly() {
   const routeResult = useRoutes(state.user ? routes : publicRoutes);
 
   const path = window.location.pathname;
+  const organization = path.split('/')[1]
 
-  const style = state.user && path !== '/' && !path.includes('/incident/') && !path.includes('/reset_password') ? {position:"absolute", marginLeft:"335px"} : {position:"absolute", maxWidth:"100%"};
+  const style = state.user && path !== '/' && path !== '/' + organization && !path.includes('/incident/') && !path.includes('accounts/user') && !path.includes('/reset_password') ? {position:"absolute", marginLeft:"335px"} : {position:"absolute", maxWidth:"100%"};
 
   return (
     <ThemeProvider theme={theme}>
       <Container fluid>
         <Row>
-          {state.user && path !== '/' && !path.includes('/incident/') && !path.includes('/reset_password') ?
+          {state.user && path !== '/' && path !== '/' + organization && !path.includes('/incident/') && !path.includes('accounts/user') && !path.includes('/reset_password') ?
           <span>
             <Sidebar state={state} dispatch={dispatch} removeCookie={removeCookie} />
           </span>

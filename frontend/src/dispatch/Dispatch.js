@@ -17,7 +17,7 @@ import Scrollbar from '../components/Scrollbars';
 import { SystemErrorContext } from '../components/SystemError';
 import { AddressLookup } from '../components/Map';
 
-function Dispatch({ incident }) {
+function Dispatch({ incident, organization }) {
 
   const { setShowSystemError } = useContext(SystemErrorContext);
 
@@ -126,17 +126,17 @@ const countMatches = (animal_dict) => {
     <hr/>
     <Row className="ml-0 mr-0 pl-0 pr-0 mb-0">
       <Col xs={4} className="pl-0 pr-0">
-        <Link href={"/" + incident + "/dispatch/deploy"} style={{textDecoration:"none"}}>
+        <Link href={"/" + organization + "/" + incident + "/dispatch/deploy"} style={{textDecoration:"none"}}>
           <Button className="rounded border btn-block" style={{height:"100px", fontSize:"20px"}}><FontAwesomeIcon icon={faBullhorn} className="mr-1 fa-move-up" inverse />DEPLOY TEAMS</Button>
         </Link>
       </Col>
       <Col xs={4} className="pl-0 pr-0">
-        <Link href={"/" + incident + "/dispatch/preplan"} style={{textDecoration:"none"}}>
+        <Link href={"/" + organization + "/" + incident + "/dispatch/preplan"} style={{textDecoration:"none"}}>
           <Button className="rounded border btn-block" style={{height:"100px", fontSize:"20px"}}><FontAwesomeIcon icon={faMapMarkedAlt} className="mr-1 fa-move-up" inverse />PREPLAN ASSIGNMENTS</Button>
         </Link>
       </Col>
       <Col xs={4} className="pl-0 pr-0">
-        <Link href={"/" + incident + "/dispatch/teammanagement"} style={{textDecoration:"none"}}>
+        <Link href={"/" + organization + "/" + incident + "/dispatch/teammanagement"} style={{textDecoration:"none"}}>
           <Button className="rounded border btn-block" style={{height:"100px", fontSize:"20px"}}><FontAwesomeIcon icon={faUsers} className="mr-1 fa-move-up" inverse />TEAM MANAGEMENT</Button>
         </Link>
       </Col>
@@ -153,7 +153,7 @@ const countMatches = (animal_dict) => {
                   key={assigned_request.service_request_object.id}
                   position={[assigned_request.service_request_object.latitude, assigned_request.service_request_object.longitude]}
                   icon={assigned_request.service_request_object.reported_animals > 0 ? reportedMarkerIcon : assigned_request.service_request_object.reported_evac > 0 ? reportedEvacMarkerIcon : assigned_request.service_request_object.reported_sheltered_in_place > 0 ? reportedSIPMarkerIcon : assigned_request.service_request_object.sheltered_in_place > 0 ? SIPMarkerIcon : assigned_request.service_request_object.unable_to_locate > 0 ? UTLMarkerIcon : finishedMarkerIcon}
-                  onClick={() => navigate("/" + incident + "/dispatch/summary/" + dispatch_assignment.id)}
+                  onClick={() => navigate('/' + organization + "/" + incident + "/dispatch/summary/" + dispatch_assignment.id)}
                 >
                 <MapTooltip key={`${index}-${selectedTeam}`} autoPan={false} closeButton={true} permanent={selectedTeam === dispatch_assignment.id ? true : false}>
                   <span>

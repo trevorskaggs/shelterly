@@ -24,7 +24,7 @@ import { SystemErrorContext } from '../components/SystemError';
 import ButtonSpinner from '../components/ButtonSpinner';
 import { printAllDispatchResolutions } from './Utils';
 
-function DispatchAssignmentSearch({ incident }) {
+function DispatchAssignmentSearch({ incident, organization }) {
 
   const { setShowSystemError } = useContext(SystemErrorContext);
 
@@ -232,7 +232,7 @@ function DispatchAssignmentSearch({ incident }) {
                   </Tooltip>
                 }
               >
-                <Link href={"/" + incident + "/dispatch/summary/" + evacuation_assignment.id}><FontAwesomeIcon icon={faDotCircle} className="mr-2" inverse /></Link>
+                <Link href={"/" + organization + "/" + incident + "/dispatch/summary/" + evacuation_assignment.id}><FontAwesomeIcon icon={faDotCircle} className="mr-2" inverse /></Link>
               </OverlayTrigger>
               DA#{evacuation_assignment.id} -&nbsp;
               <Moment format="L">{evacuation_assignment.start_time}</Moment>
@@ -351,7 +351,7 @@ function DispatchAssignmentSearch({ incident }) {
                         </OverlayTrigger>
                         : ""}
                         </span>
-                        <span>SR#{assigned_request.service_request_object.id} - <Link href={"/" + incident + "/hotline/servicerequest/" + assigned_request.service_request_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link> |
+                        <span>SR#{assigned_request.service_request_object.id} - <Link href={"/" + organization + "/" + incident + "/hotline/servicerequest/" + assigned_request.service_request_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link> |
                         {assigned_request.service_request_object.owner_objects.length === 0 ?
                           <OverlayTrigger
                             key={"stray"}

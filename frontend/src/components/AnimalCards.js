@@ -15,7 +15,7 @@ function AnimalCards(props) {
     <span className="d-flex flex-wrap align-items-end" style={{marginLeft:"-15px"}}>
     {props.animals.map(animal => (
       <span key={animal.id} className="ml-3 mb-3">
-        <Link href={props.incident + "/animals/" + animal.id} className="animal-link" style={{textDecoration:"none", color:"white"}}>
+        <Link href={"/" + props.organization + props.incident + "/animals/" + animal.id} className="animal-link" style={{textDecoration:"none", color:"white"}}>
           <Card className="border rounded animal-hover-div" style={{width:"153px", whiteSpace:"nowrap", overflow:"hidden"}}>
             <AnimalCoverImage
               animalSpecies={animal.species}
