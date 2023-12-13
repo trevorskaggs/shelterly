@@ -98,8 +98,13 @@ function AuthProvider(props) {
     if (state.user && path === '/login') {
       navigate(next);
     }
+
+    // Fetch org and incident data if missing.
+    else if (state && !state.logout && (!state.organization || (!state.organization.id || !state.incident.name))) {
+      loadUser({state, dispatch, removeCookie, path});
+    }
     // If we have a token but no user, attempt to authenticate them.
-    else if (!state.user && cookies.token && !Object.keys(publicRoutes).includes(path)) {
+    else if (!state.user && !state.logout && cookies.token && !Object.keys(publicRoutes).includes(path)) {
       loadUser({state, dispatch, removeCookie, path});
     }
     // Redirect to login page if no authenticated user object is present.
