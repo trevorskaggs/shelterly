@@ -34,7 +34,6 @@ const ShelterForm = ({ id, incident, organization }) => {
     incident_slug: incident,
     latitude: null,
     longitude: null,
-    incident_slug: incident,
   });
 
   // Regex validators.

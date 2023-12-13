@@ -111,7 +111,6 @@ const PersonForm = (props) => {
     latitude: null,
     longitude: null,
     change_reason: '',
-    incident_slug: props.incident,
   }
   let current_data = initialData;
   if (is_workflow) {
@@ -122,6 +121,7 @@ const PersonForm = (props) => {
       current_data = props.state.steps.reporter
     }
     current_data['show_agency'] = showAgency;
+    current_data['incident_slug'] = props.incident;
   }
 
   // Initial Person data.

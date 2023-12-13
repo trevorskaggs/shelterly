@@ -109,6 +109,7 @@ export const initialWorkflowData = {
       zip_code: '',
       latitude: null,
       longitude: null,
+      incident_slug: '',
       change_reason: '',},
     owner: {
       first_name: '',
@@ -126,6 +127,7 @@ export const initialWorkflowData = {
       zip_code: '',
       latitude: null,
       longitude: null,
+      incident_slug: '',
       change_reason: '',},
     animals: [],
     request: {
