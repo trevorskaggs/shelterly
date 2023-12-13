@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useReducer } from "react";
+import axios from "axios";
 import { navigate, useLocationChange, usePath, useQueryParams } from 'raviger';
 import { useCookies } from 'react-cookie';
 import { loadUser, setAuthToken } from "./AccountsUtils";
@@ -71,6 +72,7 @@ function AuthProvider(props) {
 
   const path = usePath();
   const org_slug = path.split('/')[1];
+  const incident_slug = path.split('/')[2];
 
   // Keep track of current and previous locations.
   const onChange = useCallback(path => dispatch({type: "PAGE_CHANGED", data: path}), []);
@@ -100,11 +102,28 @@ function AuthProvider(props) {
     }
 
     // Fetch org and incident data if missing.
-    else if (state && !state.logout && (!state.organization || (!state.organization.id || !state.incident.name))) {
-      loadUser({state, dispatch, removeCookie, path});
+    if (state && !state.logout && (!state.organization || (!state.organization.id || !state.incident.name))) {
+      // Fetch Organization data.
+      if (!state.organization.id && org_slug && org_slug !== 'login') {
+        axios.get('/incident/api/organization/?slug=' + org_slug)
+        .then(orgResponse => {
+          dispatch({type: "SET_ORGANIZATION", data: {id:orgResponse.data[0].id, name:orgResponse.data[0].name}});
+        })
+        .catch(error => {
+        });
+      }
+      // Fetch Incident data.
+      if (incident_slug && !state.incident.name && incident_slug !=='accounts'){
+        axios.get('/incident/api/incident/?incident=' + incident_slug)
+        .then(incidentResponse => {
+          dispatch({type: "SET_INCIDENT", data: {name:incidentResponse.data[0].name, training:incidentResponse.data[0].training}});
+        })
+        .catch(error => {
+        });
+      }
     }
     // If we have a token but no user, attempt to authenticate them.
-    else if (!state.user && !state.logout && cookies.token && !Object.keys(publicRoutes).includes(path)) {
+    if (!state.user && !state.logout && cookies.token && !Object.keys(publicRoutes).includes(path)) {
       loadUser({state, dispatch, removeCookie, path});
     }
     // Redirect to login page if no authenticated user object is present.
