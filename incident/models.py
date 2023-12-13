@@ -40,5 +40,8 @@ class Incident(models.Model):
     training = models.BooleanField(default=False)
     organization = models.ForeignKey(Organization, on_delete=models.SET_NULL, null=True, blank=True)
 
+    def __str__(self):
+        return '{}'.format(self.name)
+
     class Meta:
         ordering = ['name']
