@@ -41,11 +41,11 @@ function ServiceRequestDispatchAssignment({ id, incident, organization }) {
     var matches = {};
 
     service_request.animals.forEach((animal) => {
-      if (!matches[[animal.species]]) {
-        matches[[animal.species]] = 1;
+      if (!matches[[animal.species_string]]) {
+        matches[[animal.species_string]] = 1;
       }
       else {
-        matches[[animal.species]] += 1;
+        matches[[animal.species_string]] += 1;
       }
     });
     return matches

@@ -131,8 +131,8 @@ function ServiceRequestSearch({ incident, organization }) {
 					response.data.forEach(service_request => {
 						let species = [];
 						service_request.animals.forEach(animal => {
-							if (!species.includes(animal.species)) {
-								species.push(animal.species)
+							if (!species.includes(animal.species_string)) {
+								species.push(animal.species_string)
 							}
 						});
             let sortOrder = speciesChoices.map(sc => sc.value);
@@ -502,7 +502,7 @@ function ServiceRequestSearch({ incident, organization }) {
                   </Card.Title>
                   <ListGroup style={{height:"144px", overflowY:"auto", marginTop:"-12px"}}>
                     <Scrollbar style={{height:"144px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
-                      {service_request.animals.filter(animal => animal.species === searchState[service_request.id].selectedSpecies).map((animal, i) => (
+                      {service_request.animals.filter(animal => animal.species_string === searchState[service_request.id].selectedSpecies).map((animal, i) => (
                         <ListGroup.Item key={animal.id}>
                           <b>A#{animal.id}:</b>&nbsp;&nbsp;<Link href={"/" + organization + "/" + incident + "/animals/" + animal.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.name || "Unknown"}</Link>
                           {animal.color_notes ?

@@ -18,7 +18,7 @@ function AnimalCards(props) {
         <Link href={"/" + props.organization + props.incident + "/animals/" + animal.id} className="animal-link" style={{textDecoration:"none", color:"white"}}>
           <Card className="border rounded animal-hover-div" style={{width:"153px", whiteSpace:"nowrap", overflow:"hidden"}}>
             <AnimalCoverImage
-              animalSpecies={animal.species}
+              animalSpecies={animal.species_string}
               height="153px"
               width="153px"
             />
@@ -26,7 +26,7 @@ function AnimalCards(props) {
             <Card.Text className="mb-0 border-top animal-hover-div" style={{textTransform:"capitalize", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis"}}>
               <span title={animal.name} className="ml-1">{animal.name||"Unknown"}</span>
               <span className="ml-1" style={{display:"block"}}>
-                {animal.species}&nbsp;
+                {animal.species_string}&nbsp;
                 {props.show_owner ? <span>
                 {animal.owner_names.length === 0 ?
                 <OverlayTrigger

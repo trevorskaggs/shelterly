@@ -244,7 +244,7 @@ function Reports({ incident }) {
   const animal_status_columns = [
     {
       name: 'Species',
-      selector: row => row.species ? row.species[0].toUpperCase() + row.species.slice(1) : row.species,
+      selector: row => row.species_string ? row.species_string[0].toUpperCase() + row.species_string.slice(1) : row.species_string,
     },
     {
       name: 'Reported',
@@ -291,7 +291,7 @@ function Reports({ incident }) {
   const animal_owner_columns = [
     {
       name: 'Species',
-      selector: row => row.species ? row.species[0].toUpperCase() + row.species.slice(1) : row.species,
+      selector: row => row.species_string ? row.species_string[0].toUpperCase() + row.species_string.slice(1) : row.species_string,
     },
     {
       name: 'Owned',
@@ -327,7 +327,7 @@ function Reports({ incident }) {
     },
     {
       name: 'Species',
-      selector: row => row.species ? row.species[0].toUpperCase() + row.species.slice(1) : row.species,
+      selector: row => row.species_string ? row.species_string[0].toUpperCase() + row.species_string.slice(1) : row.species_string,
     },
     {
       name: 'STATUS',

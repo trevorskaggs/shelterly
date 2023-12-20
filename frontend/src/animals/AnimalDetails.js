@@ -30,7 +30,7 @@ function AnimalDetails({ id, incident, organization }) {
     owners: [],
     request: null,
     name: '',
-    species: '',
+    species_string: '',
     sex: '',
     size: '',
     age: '',
@@ -125,6 +125,7 @@ function AnimalDetails({ id, incident, organization }) {
       })
       .then(response => {
         if (!unmounted) {
+          console.log(response.data)
           setData(response.data);
           let image_urls = [];
           image_urls = image_urls.concat(response.data.front_image||[]).concat(response.data.side_image||[]).concat(response.data.extra_images);
@@ -331,7 +332,7 @@ function AnimalDetails({ id, incident, organization }) {
               </ListGroup.Item>
               <ListGroup.Item>
                 <div className="row">
-                  <span className="col-6"><b>Species:</b> {data.species}</span>
+                  <span className="col-6"><b>Species:</b> {data.species_string}</span>
                   <span className="col-6"><b>Sex:</b> {data.sex||"Unknown"}</span>
                 </div>
               </ListGroup.Item>
@@ -451,7 +452,7 @@ function AnimalDetails({ id, incident, organization }) {
           {images.length < 1 ?
             <Carousel className="carousel-wrapper" showThumbs={false} showStatus={false}>
               <AnimalCoverImage
-                animalSpecies={data.species}
+                animalSpecies={data.species_string}
                 animalImageSrc={data.front_image}
                 customStyles={{ width: '100%', padding: '40px' }}
               />

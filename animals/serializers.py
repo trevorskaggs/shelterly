@@ -1,16 +1,25 @@
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import serializers
 
-from .models import Animal
+from .models import Animal, Species
 from location.utils import build_full_address, build_action_string
 from people.serializers import SimplePersonSerializer
 from shelter.serializers import SimpleShelterSerializer
 
+class SpeciesSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Species
+        fields = '__all__'
+
+
 class SimpleAnimalSerializer(serializers.ModelSerializer):
+
+    species_string = serializers.StringRelatedField(source='species', read_only=True)
 
     class Meta:
         model = Animal
-        fields = ['id', 'species', 'aggressive', 'confined', 'injured', 'status', 'aco_required', 'name', 'sex', 'fixed', 'size', 'age', 'pcolor', 'scolor', 'last_seen', 'color_notes', 'behavior_notes', 'medical_notes']
+        fields = ['id', 'species', 'species_string', 'aggressive', 'confined', 'injured', 'status', 'aco_required', 'name', 'sex', 'fixed', 'size', 'age', 'pcolor', 'scolor', 'last_seen', 'color_notes', 'behavior_notes', 'medical_notes']
 
 class ModestAnimalSerializer(SimpleAnimalSerializer):
     front_image = serializers.SerializerMethodField()
@@ -20,7 +29,7 @@ class ModestAnimalSerializer(SimpleAnimalSerializer):
 
     class Meta:
         model = Animal
-        fields = ['id', 'name', 'species', 'aggressive', 'injured', 'fixed', 'request', 'shelter_object', 'shelter', 'status', 'aco_required', 'color_notes',
+        fields = ['id', 'name', 'species', 'species_string', 'aggressive', 'injured', 'fixed', 'request', 'shelter_object', 'shelter', 'status', 'aco_required', 'color_notes',
         'front_image', 'side_image', 'owner_names', 'sex', 'size', 'age', 'pcolor', 'scolor', 'medical_notes', 'behavior_notes']
 
     def get_front_image(self, obj):
@@ -62,7 +71,7 @@ class AnimalSerializer(ModestAnimalSerializer):
 
     class Meta:
         model = Animal
-        fields = ['id', 'species', 'status', 'aco_required', 'front_image', 'side_image', 'extra_images', 'last_seen', 'intake_date', 'address', 'city', 'state', 'zip_code',
+        fields = ['id', 'species', 'species_string', 'status', 'aco_required', 'front_image', 'side_image', 'extra_images', 'last_seen', 'intake_date', 'address', 'city', 'state', 'zip_code',
         'aggressive', 'injured', 'fixed', 'confined', 'found_location', 'owner_names', 'owners', 'shelter_object', 'shelter', 'reporter', 'reporter_object', 'request', 'request_address',
         'action_history', 'building_name', 'room', 'room_name', 'name', 'sex', 'size', 'age', 'pcolor', 'scolor', 'color_notes', 'behavior_notes', 'medical_notes',
         'latitude', 'longitude', 'vet_requests', 'microchip']

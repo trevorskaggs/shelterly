@@ -32,11 +32,11 @@ function Hotline({ incident, organization }) {
     let species_matches = {};
 
     service_request.animals.forEach((animal) => {
-      if (!species_matches[[animal.species]]) {
-        species_matches[[animal.species]] = 1;
+      if (!species_matches[[animal.species_string]]) {
+        species_matches[[animal.species_string]] = 1;
       }
       else {
-        species_matches[[animal.species]] += 1;
+        species_matches[[animal.species_string]] += 1;
       }
     });
     return species_matches

@@ -230,7 +230,7 @@ const buildDispatchResolutionsDoc = (drs = []) => {
         drawAnimalHeader({
           firstLabel: `***A#${
             animal.id
-          } - ${animal.species[0].toUpperCase()}${animal.species.slice(1)}\n${
+          } - ${animal.species_string[0].toUpperCase()}${animal.species_string.slice(1)}\n${
             animal.name || "Unknown"
           }***`,
         });

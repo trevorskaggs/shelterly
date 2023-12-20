@@ -47,7 +47,7 @@ function AnimalStatus(props) {
         />
       </Col>
       <span style={{ marginTop:"-3px", marginBottom: "-4px", fontSize: "26px", textTransform:"capitalize" }}>
-        A#{props.animal.id} - {props.animal.name || "Unknown"}&nbsp;-&nbsp;{props.animal.species}
+        A#{props.animal.id} - {props.animal.name || "Unknown"}&nbsp;-&nbsp;{props.animal.species_string}
         {props.animal.color_notes ?
         <OverlayTrigger
           key={"animal-color-notes"}
@@ -152,7 +152,7 @@ function ShelterIntake({ id, incident, organization }) {
                 da.assigned_requests.forEach((assigned_request, inception) => {
                   response.data[index].sr_updates.push({
                     id: assigned_request.service_request_object.id,
-                    animals: Object.keys(assigned_request.animals).map(animal_id => {return {id:animal_id, name:assigned_request.animals[animal_id].name, species:assigned_request.animals[animal_id].species, status:assigned_request.animals[animal_id].status, color_notes:assigned_request.animals[animal_id].color_notes, pcolor:assigned_request.animals[animal_id].pcolor, scolor:assigned_request.animals[animal_id].scolor, request:assigned_request.service_request_object.id, shelter:assigned_request.animals[animal_id].shelter || '', room:assigned_request.animals[animal_id].room || ''}}),
+                    animals: Object.keys(assigned_request.animals).map(animal_id => {return {id:animal_id, name:assigned_request.animals[animal_id].name, species:assigned_request.animals[animal_id].species_string, status:assigned_request.animals[animal_id].status, color_notes:assigned_request.animals[animal_id].color_notes, pcolor:assigned_request.animals[animal_id].pcolor, scolor:assigned_request.animals[animal_id].scolor, request:assigned_request.service_request_object.id, shelter:assigned_request.animals[animal_id].shelter || '', room:assigned_request.animals[animal_id].room || ''}}),
                   });
                 });
               });

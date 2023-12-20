@@ -131,7 +131,7 @@ function AnimalSearch({ incident, organization }) {
   };
 
   const handleApplyFilters = (animals) => {
-    setAnimals(animals.filter(animal => options.species ? animal.species === options.species : animal)
+    setAnimals(animals.filter(animal => options.species ? animal.species_string === options.species : animal)
                            .filter(animal => options.status ? animal.status === options.status : animal)
                            .filter(animal => options.owned === 'yes' ? animal.owners.length > 0 : animal)
                            .filter(animal => options.owned === 'no' ? animal.owners.length === 0 : animal)
@@ -545,7 +545,7 @@ function AnimalSearch({ incident, organization }) {
                   )
                 : (
                   <AnimalCoverImage
-                    animalSpecies={animal.species}
+                    animalSpecies={animal.species_string}
                     animalImageSrc={
                       animal.lazyImage
                         ? `data:image/png;base64,${getBase64Image(animal.lazyImage)}`
@@ -697,7 +697,7 @@ function AnimalSearch({ incident, organization }) {
                 </Card.Title>
                 <Scrollbar style={{height:"144px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
                   <ListGroup>
-                    <ListGroup.Item>{titleCase(animal.species)}{animal.size ? <span>,&nbsp;{titleCase(animal.size)}</span> : ""}{animal.sex ? <span>,&nbsp;{titleCase(animal.sex)}</span> : ""}{animal.age ? <span>,&nbsp;{titleCase(animal.age)}</span> : ""}</ListGroup.Item>
+                    <ListGroup.Item>{titleCase(animal.species_string)}{animal.size ? <span>,&nbsp;{titleCase(animal.size)}</span> : ""}{animal.sex ? <span>,&nbsp;{titleCase(animal.sex)}</span> : ""}{animal.age ? <span>,&nbsp;{titleCase(animal.age)}</span> : ""}</ListGroup.Item>
                     <ListGroup.Item style={{textTransform:"capitalize"}}><b>Color: </b>{animal.pcolor ? <span>{animal.pcolor}{animal.scolor ? <span> / {animal.scolor}</span> : ""}</span> : "Unknown"}</ListGroup.Item>
                     {animal.owners.map(owner => (
                       <ListGroup.Item key={owner.id}>

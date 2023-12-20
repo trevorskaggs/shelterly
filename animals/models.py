@@ -13,6 +13,26 @@ from shelter.models import Room, Shelter
 def test_incident():
     return Incident.objects.get(name='Test').id
 
+class SpeciesCategory(models.Model):
+    name = models.CharField(max_length=20)
+
+    def __str__(self):
+        return '{}'.format(self.name)
+
+    class Meta:
+        verbose_name_plural = 'Species categories'
+
+class Species(models.Model):
+    name = models.CharField(max_length=30)
+    plural_name = models.CharField(max_length=30, blank=True, null=True)
+    category = models.ForeignKey(SpeciesCategory, on_delete=models.SET_NULL, null=True)
+
+    def __str__(self):
+        return '{}'.format(self.name)
+
+    class Meta:
+        verbose_name_plural = 'Species'
+
 # Create your models here.
 class Animal(Location, OrderedModel):
 
@@ -24,7 +44,7 @@ class Animal(Location, OrderedModel):
     incident = models.ForeignKey(Incident, on_delete=models.CASCADE, default=test_incident)
 
     #choice fields
-    species = models.CharField(max_length=50, blank=True)
+    species = models.ForeignKey(Species, on_delete=models.SET_NULL, null=True)
     sex = models.CharField(max_length=1, choices=SEX_CHOICES, blank=True)
     pcolor = models.CharField(max_length=50, verbose_name='Primary Color', blank=True)
     scolor = models.CharField(max_length=50, verbose_name='Secondary Color', blank=True)

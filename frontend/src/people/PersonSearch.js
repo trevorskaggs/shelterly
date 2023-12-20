@@ -98,13 +98,13 @@ function PersonSearch({ incident, organization }) {
 					response.data.forEach(owner => {
 						let species = [];
 						owner.animals.forEach(animal => {
-							if (!species.includes(animal.species)) {
-								species.push(animal.species)
+							if (!species.includes(animal.species_string)) {
+								species.push(animal.species_string)
 							}
 						})
             owner.reporter_animals.forEach(animal => {
-							if (!species.includes(animal.species)) {
-								species.push(animal.species)
+							if (!species.includes(animal.species_string)) {
+								species.push(animal.species_string)
 							}
 						})
             let sortOrder = speciesChoices.map(sc => sc.value);
@@ -251,7 +251,7 @@ function PersonSearch({ incident, organization }) {
               {statusOptions === 'owners' ?
               <ListGroup style={{height:"144px", overflowY:"auto", marginTop:"-12px"}}>
                 <Scrollbar style={{height:"144px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
-                  {owner.animals.filter(animal => animal.species === searchState[owner.id].selectedSpecies).map((animal, i) => (
+                  {owner.animals.filter(animal => animal.species_string === searchState[owner.id].selectedSpecies).map((animal, i) => (
                     <ListGroup.Item key={animal.id}>
                       <b>#{animal.id}:</b>&nbsp;&nbsp;<Link href={"/" + organization + "/" + incident + "/animals/" + animal.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.name || "Unknown"}</Link>
                       {animal.color_notes ?
@@ -276,7 +276,7 @@ function PersonSearch({ incident, organization }) {
               {statusOptions === 'reporters' ?
               <ListGroup style={{height:"144px", overflowY:"auto", marginTop:"-12px"}}>
                 <Scrollbar style={{height:"144px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
-                  {owner.reporter_animals.filter(animal => animal.species === searchState[owner.id].selectedSpecies).map((animal, i) => (
+                  {owner.reporter_animals.filter(animal => animal.species_string === searchState[owner.id].selectedSpecies).map((animal, i) => (
                     <ListGroup.Item key={animal.id}>
                       <b>#{animal.id}:</b>&nbsp;&nbsp;<Link href={"/" + organization + "/" + incident + "/animals/" + animal.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.name || "Unknown"}</Link>
                       {animal.color_notes ?

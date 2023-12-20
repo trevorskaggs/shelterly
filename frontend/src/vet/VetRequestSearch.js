@@ -98,7 +98,7 @@ function VetRequestSearch({ incident, organization }) {
   };
 
   const handleApplyFilters = () => {
-    setVetRequests(data.vet_requests.filter(vet_request => options.species ? vet_request.species === options.species : vet_request)
+    setVetRequests(data.vet_requests.filter(vet_request => options.species ? vet_request.animal_object.species_string === options.species : vet_request)
                            .filter(vet_request => options.status ? vet_request.status === options.status : vet_request)
                            .filter(vet_request => options.priority ? vet_request.priority === options.priority : vet_request)
                            .filter(vet_request => options.open ? (startDate <= moment(vet_request.open).format('YYYY-MM-DD') && endDate >= moment(vet_request.open).format('YYYY-MM-DD')) : vet_request)
@@ -395,7 +395,7 @@ function VetRequestSearch({ incident, organization }) {
                           <b>Patient: </b><Link href={"/" + organization + "/" + incident + "/animals/" + vet_request.animal_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>A#{vet_request.animal_object.id}</Link>
                         </Col>
                         <Col style={{textTransform:"capitalize"}}>
-                          <b>Species:</b> {vet_request.animal_object.species}
+                          <b>Species:</b> {vet_request.animal_object.species_string}
                         </Col>
                       </Row>
                     </ListGroup.Item>
