@@ -20,7 +20,14 @@ async function buildAnimalCareScheduleContent(pdf, animals) {
       padding: [10, 0, 10, 50],
       drawFuncName: 'drawImage'
     };
-    if (imageSrc) {
+    if (animal.lazyImage) {
+      graphicOptions = {
+        ...graphicOptions,
+        src: animal.lazyImage,
+        drawFuncName: 'drawGraphic'
+      };
+    }
+    else if (imageSrc) {
       graphicOptions = {
         ...graphicOptions,
         src: imageSrc

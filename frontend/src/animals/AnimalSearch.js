@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState, useRef } from 'react';
 import ReactDOMServer from 'react-dom/server';
 import axios from "axios";
 import { Link, useQueryParams } from 'raviger';
-import { Button, Card, CardGroup, Col, Collapse, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Pagination, Row, Tooltip } from 'react-bootstrap';
+import { Button, Card, CardGroup, Col, Collapse, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Pagination, Row, Spinner, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBan, faCalendarDay, faClipboardList, faCut, faEnvelope, faLink, faMapMarkerAlt, faMedkit, faPrint, faUserAltSlash
@@ -15,7 +15,7 @@ import Moment from 'react-moment';
 import Select, { components } from 'react-select';
 import L from "leaflet";
 import { Circle, Map, Marker, Tooltip as MapTooltip, TileLayer } from "react-leaflet";
-import { useMark, useSubmitting } from '../hooks';
+import { useMark, useSubmitting, useDataImg } from '../hooks';
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
 import { titleCase } from '../components/Utils';
@@ -27,9 +27,9 @@ import { printAnimalCareSchedule, printAllAnimalCareSchedules } from './Utils';
 import { AuthContext } from "../accounts/AccountsReducer";
 import { SystemErrorContext } from '../components/SystemError';
 import ButtonSpinner from '../components/ButtonSpinner';
+import ShelterlyPrintifyButton from '../components/ShelterlyPrintifyButton';
 
 import '../assets/styles.css';
-import ShelterlyPrintifyButton from '../components/ShelterlyPrintifyButton';
 
 const NoOptionsMessage = props => {
   return (
@@ -93,6 +93,21 @@ function AnimalSearch({ incident, organization }) {
     submittingComplete,
     submittingLabel
   } = useSubmitting();
+  const { promiseImage, getBase64Image } = useDataImg();
+  const [lazyAnimalImages, setLazyAnimalImages] = useState([]);
+
+  function findLazyAnimalImage (animalId) {
+    return lazyAnimalImages.find((lazyAnimal) => lazyAnimal.id === animalId);
+  }
+  function addLazyAnimalImage (animalId, animalImage) {
+    setLazyAnimalImages((prevState) => {
+      prevState.push({
+        id: animalId,
+        image: animalImage
+      });
+      return prevState;
+    })
+  }
 
   const colorChoices = {'':[], 'dog':dogColorChoices, 'cat':catColorChoices, 'horse':horseColorChoices, 'other':otherColorChoices}
 
@@ -142,7 +157,7 @@ function AnimalSearch({ incident, organization }) {
 
   const handleDownloadPdfClick = (animalId) => {
     const animal = animals.find((animal) => animal.id === animalId);
-    printAnimalCareSchedule(animal, [animal.front_image]);
+    printAnimalCareSchedule(animal);
   }
 
   const handlePrintAllClick = (e) => {
@@ -217,22 +232,35 @@ function AnimalSearch({ incident, organization }) {
       await axios.get('/animals/api/animal/?search=' + searchTerm +'&incident=' + incident, {
         cancelToken: source.token,
       })
-      .then(response => {
+      .then(async (response) => {
         if (!unmounted) {
           setNumPages(Math.ceil(response.data.length / ITEMS_PER_PAGE));
           setData({animals: response.data, isFetching: false});
           setAnimals(response.data);
+          
+          // highlight search terms
+          markInstances(searchTerm);
+          handleApplyFilters(response.data);
+
           let bounds_array = [];
+
           for (const animal of response.data) {
             if (animal.latitude && animal.longitude) {
               bounds_array.push([animal.latitude, animal.longitude]);
             }
-          }
-          setBounds(bounds_array.length > 0 ? L.latLngBounds(bounds_array) : L.latLngBounds([[0,0]]));
 
-          // highlight search terms
-          markInstances(searchTerm);
-          handleApplyFilters(response.data);
+            // lazy load animal front_image
+            const lazyAnimalImage = findLazyAnimalImage(animal.id);
+            if (lazyAnimalImage?.image) {
+              animal.lazyImage = lazyAnimalImage.image
+            } else if (animal.front_image) {
+              const imgData = await promiseImage(animal.front_image);
+              animal.lazyImage = imgData;
+              addLazyAnimalImage(animal.id, imgData);
+            }
+          }
+          setAnimals(response.data);
+          setBounds(bounds_array.length > 0 ? L.latLngBounds(bounds_array) : L.latLngBounds([[0,0]]));
         }
       })
       .catch(error => {
@@ -508,11 +536,23 @@ function AnimalSearch({ incident, organization }) {
           </div>
           <CardGroup>
             <Card style={{maxWidth:"206px", maxHeight:"206px"}}>
-              <Card.Body className="p-0 m-0">
-                <AnimalCoverImage
-                  animalSpecies={animal.species}
-                  animalImageSrc={animal.front_image}
-                />
+              <Card.Body className="p-0 m-0 d-flex justify-content-center align-items-center">
+                {animal.front_image && !animal.lazyImage
+                  ? (
+                    <Spinner animation="border" role="status">
+                      <span className="visually-hidden">Loading Image...</span>
+                    </Spinner>
+                  )
+                : (
+                  <AnimalCoverImage
+                    animalSpecies={animal.species}
+                    animalImageSrc={
+                      animal.lazyImage
+                        ? `data:image/png;base64,${getBase64Image(animal.lazyImage)}`
+                        : animal.front_image
+                    }
+                  />
+                )}
               </Card.Body>
             </Card>
             <Card style={{marginBottom:"6px", maxWidth:"335px"}}>

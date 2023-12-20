@@ -21,3 +21,7 @@
 .print-all-btn-icon:hover .fa-print {
   color: #222!important;
 }
+
+.visually-hidden {
+  visibility: hidden;
+}
