@@ -660,7 +660,7 @@ function Deploy({ incident, organization }) {
               </span>
             </div>
           </Col>
-          <Col xs={8} className="" style={{marginLeft:"-4px", paddingRight:"0px"}}>
+          <Col xs={8} style={{marginLeft:"-4px", paddingRight:"0px"}}>
             {preplan ?
               <BootstrapForm.Control
                 id="disabled_team_name"
@@ -1002,7 +1002,7 @@ function Deploy({ incident, organization }) {
                         </Tooltip>
                       }
                     >
-                      <Link href={"/" + incident + "/hotline/servicerequest/" + service_request.id}><FontAwesomeIcon icon={faClipboardList} inverse /></Link>
+                      <Link href={"/" + organization +"/" + incident + "/hotline/servicerequest/" + service_request.id}><FontAwesomeIcon icon={faClipboardList} inverse /></Link>
                     </OverlayTrigger>
                     <OverlayTrigger
                       key={"add-to-dispatch"}
@@ -1013,7 +1013,7 @@ function Deploy({ incident, organization }) {
                         </Tooltip>
                       }
                     >
-                      <Link href={"/" + incident + "/hotline/servicerequest/" + service_request.id + "/assign"}><FontAwesomeIcon icon={faMapMarkedAlt} className="ml-1" inverse /></Link>
+                      <Link href={"/" + organization +"/" + incident + "/hotline/servicerequest/" + service_request.id + "/assign"}><FontAwesomeIcon icon={faMapMarkedAlt} className="ml-1" inverse /></Link>
                     </OverlayTrigger>
                   </div>
                 </div>

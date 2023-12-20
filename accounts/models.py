@@ -75,6 +75,7 @@ class ShelterlyUserOrg(models.Model):
     organization = models.ForeignKey('incident.Organization', null=True, on_delete=models.SET_NULL)
     user_perms = models.BooleanField(default=False)
     incident_perms = models.BooleanField(default=False)
+    vet_perms = models.BooleanField(default=False)
     email_notification = models.BooleanField(default=False)
 
 # Send email to user on user creation.

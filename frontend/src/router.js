@@ -38,6 +38,12 @@ import BuildingDetails from "./shelter/BuildingDetails";
 import RoomForm from "./shelter/RoomForm";
 import RoomDetails from "./shelter/RoomDetails";
 import VisitNoteForm from "./dispatch/VisitNoteForm";
+import TreatmentPlanDetails from "./vet/TreatmentPlanDetails";
+import TreatmentPlanForm from "./vet/TreatmentPlanForm";
+import TreatmentRequestForm from "./vet/TreatmentRequestForm";
+import VetRequestDetails from "./vet/VetRequestDetails";
+import VetRequestForm from "./vet/VetRequestForm";
+import VetRequestSearch from "./vet/VetRequestSearch";
 import Organization from "./Organization";
 
 export const publicRoutes = {
@@ -99,6 +105,13 @@ const routes = {
   "/:organization/:incident/shelter/building/room/new": ({incident, organization}) => <RoomForm incident={incident} organization={organization} />,
   "/:organization/:incident/shelter/room/edit/:id": ({id, incident, organization}) => <RoomForm id={id} incident={incident} organization={organization} />,
   "/:organization/:incident/shelter/room/:id": ({id, incident, organization}) => <RoomDetails id={id} incident={incident} organization={organization} />,
+  "/:organization/:incident/vet/treatment/edit/:id": ({id, incident, organization}) => <TreatmentPlanForm id={id} incident={incident} organization={organization} />,
+  "/:organization/:incident/vet/treatment/new": ({incident, organization}) => <TreatmentPlanForm incident={incident} organization={organization} />,
+  "/:organization/:incident/vet/treatment/:id": ({id, incident, organization}) => <TreatmentPlanDetails id={id} incident={incident} organization={organization} />,
+  "/:organization/:incident/vet/treatmentrequest/edit/:id": ({id, incident, organization}) => <TreatmentRequestForm id={id} incident={incident} organization={organization} />,
+  "/:organization/:incident/vet/vetrequest/search": ({incident, organization}) => <VetRequestSearch incident={incident} organization={organization} />,
+  "/:organization/:incident/vet/vetrequest/edit/:id": ({id, incident, organization}) => <VetRequestForm id={id} state={initialWorkflowData} incident={incident} organization={organization} />,
+  "/:organization/:incident/vet/vetrequest/:id": ({id, incident, organization}) => <VetRequestDetails id={id} incident={incident} organization={organization} />,
 };
 
 export default routes;

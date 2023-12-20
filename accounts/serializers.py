@@ -12,6 +12,7 @@ class UserSerializer(serializers.ModelSerializer):
     version = serializers.SerializerMethodField()
     user_perms = serializers.SerializerMethodField()
     incident_perms = serializers.SerializerMethodField()
+    vet_perms = serializers.SerializerMethodField()
     email_notification = serializers.SerializerMethodField()
     org_slugs = serializers.SerializerMethodField()
 
@@ -29,10 +30,16 @@ class UserSerializer(serializers.ModelSerializer):
             return obj.perms.filter(organization=self.context['request'].GET.get('organization'))[0].user_perms
         return False
 
-    # Custom field for user perms
+    # Custom field for incident perms
     def get_incident_perms(self, obj):
         if self.context['request'].GET.get('organization'):
             return obj.perms.filter(organization=self.context['request'].GET.get('organization'))[0].incident_perms
+        return False
+
+    # Custom field for user perms
+    def get_vet_perms(self, obj):
+        if self.context['request'].GET.get('organization'):
+            return obj.perms.filter(organization=self.context['request'].GET.get('organization'))[0].vet_perms
         return False
 
     # Custom field for user perms
@@ -46,4 +53,4 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('agency_id', 'cell_phone', 'first_name', 'id', 'last_name', 'username', 'email', 'is_superuser', 'display_phone', 'user_perms', 'incident_perms', 'email_notification', 'organizations', 'org_slugs', 'version')
+        fields = ('agency_id', 'cell_phone', 'first_name', 'id', 'last_name', 'username', 'email', 'is_superuser', 'display_phone', 'user_perms', 'incident_perms', 'vet_perms', 'email_notification', 'organizations', 'org_slugs', 'version')

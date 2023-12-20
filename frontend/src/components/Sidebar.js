@@ -73,7 +73,7 @@ const Menu = ({ state, dispatch, removeCookie, ...props }) => {
     }, [path]);
 
     return (
-    <StyledMenu  {...props} className="flex-column" style={{ height: viewHeight, minHeight:"1000px" }}>
+    <StyledMenu  {...props} className="flex-column" style={{ height: viewHeight, minHeight:"1025px" }}>
       <Link href={incident} style={{marginTop:"-5px", paddingBottom:"0px"}} title="Home"><img src="/static/images/shelterly.png" alt="Logo" /></Link>
       <div className="logo text-center" style={{marginTop:"10px", marginBottom:"0px", paddingBottom:"0px"}}>SHELTERLY</div>
       <div className="logo border-bottom text-center" style={{paddingBottom:"12px", letterSpacing:"0.25rem", fontSize:"1.2rem"}} title="Incident"><span style={{cursor:"pointer"}} className="incident" onClick={() => navigate('/' + path.split('/')[1])}>{state.incident.name}</span></div>
@@ -86,6 +86,7 @@ const Menu = ({ state, dispatch, removeCookie, ...props }) => {
           <ListGroup.Item action className="rounded sidebar" onClick={() => navigate(incident + '/animals/search')} style={{backgroundColor:path.includes("animals/search") ? "#444444" : "#292b2c"}}><FontAwesomeIcon className="mr-1 sidebar-icon" icon={faSearch} fixedWidth inverse/><span className="sidebar-icon">ANIMALS</span></ListGroup.Item>
           <ListGroup.Item action className="rounded sidebar" onClick={() => navigate(incident + '/people/owner/search')} style={{backgroundColor:path.includes("people/owner/search") ? "#444444" : "#292b2c"}}><FontAwesomeIcon className="mr-1 sidebar-icon" icon={faSearch} fixedWidth inverse/><span className="sidebar-icon">OWNERS</span></ListGroup.Item>
           <ListGroup.Item action className="rounded sidebar" onClick={() => navigate(incident + '/hotline/servicerequest/search')} style={{backgroundColor:path.includes("hotline/servicerequest/search") ? "#444444" : "#292b2c"}}><FontAwesomeIcon className="mr-1 sidebar-icon" icon={faSearch} fixedWidth inverse/><span className="sidebar-icon">SERVICE REQUESTS</span></ListGroup.Item>
+          {state.user && (state.user.is_superuser || state.user.vet_perms) ? <ListGroup.Item action className="rounded sidebar" onClick={() => navigate(incident + '/vet/vetrequest/search')} style={{backgroundColor:path.includes("vet/vetrequest/search") ? "#444444" : "#292b2c"}}><FontAwesomeIcon className="mr-1 sidebar-icon" icon={faSearch} fixedWidth inverse/><span className="sidebar-icon">VETERINARY REQUESTS</span></ListGroup.Item> : ""}
           <ListGroup.Item action className="rounded sidebar" onClick={() => navigate(incident + '/dispatch/dispatchassignment/search')} style={{backgroundColor:path.includes("dispatch/dispatchassignment/search") ? "#444444" : "#292b2c"}}><FontAwesomeIcon className="mr-1 sidebar-icon" icon={faSearch} fixedWidth inverse/><span className="sidebar-icon">DISPATCH ASSIGNMENTS</span></ListGroup.Item>
         </ListGroup>
       </Collapse>

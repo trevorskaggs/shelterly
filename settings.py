@@ -82,6 +82,7 @@ INSTALLED_APPS = [
     'knox',
     'django_rest_passwordreset',
     'shelter',
+    'vet',
     'frontend',
     'ordered_model',
     'actstream'

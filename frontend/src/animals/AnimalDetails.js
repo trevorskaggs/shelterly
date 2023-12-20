@@ -9,7 +9,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBan, faMedkit, faCut, faEdit, faEnvelope, faLink, faMinusSquare, faTimes, faUserPlus
 } from '@fortawesome/free-solid-svg-icons';
-import { faBadgeSheriff, faClawMarks, faHomeHeart, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
+import { faBadgeSheriff, faClipboardMedical, faClawMarks, faHomeHeart, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import { AnimalDeleteModal } from "../components/Modals";
 import Header from '../components/Header';
@@ -50,6 +50,7 @@ function AnimalDetails({ id, incident, organization }) {
     front_image: null,
     side_image: null,
     room: null,
+    vet_requests: [],
     extra_images: [],
     action_history: [],
     shelter_object: {name: '', full_address: ''}
@@ -159,7 +160,6 @@ function AnimalDetails({ id, incident, organization }) {
       >
         <Link href={"/" + organization + "/" + incident + "/animals/edit/" + id} ><FontAwesomeIcon icon={faEdit} className="ml-2" inverse /></Link>
       </OverlayTrigger>
-
       <ShelterlyPrintifyButton
         id="animal-details-animal-care-schedule"
         spinnerSize={2.0}
@@ -167,7 +167,17 @@ function AnimalDetails({ id, incident, organization }) {
         tooltipText='Print Animal Care Schedule'
         printFunc={handleDownloadPdfClick}
       />
-
+      <OverlayTrigger
+        key={"vetrequest"}
+        placement="bottom"
+        overlay={
+          <Tooltip id={`tooltip-vetrequest`}>
+            Create veterinary request
+          </Tooltip>
+        }
+      >
+        <Link href={"/" + incident + "/animals/" + id + "/vetrequest/new"} ><FontAwesomeIcon icon={faClipboardMedical} className="mr-1" inverse /></Link>
+      </OverlayTrigger>
       {data.status !== 'REUNITED' ?
       <OverlayTrigger
         key={"reunite"}
@@ -178,7 +188,7 @@ function AnimalDetails({ id, incident, organization }) {
           </Tooltip>
         }
       >
-        <FontAwesomeIcon icon={faHomeHeart} onClick={() => setShow(true)} style={{cursor:'pointer'}} inverse />
+        <FontAwesomeIcon icon={faHomeHeart} onClick={() => setShow(true)} className="mr-1 ml-1" style={{cursor:'pointer'}} inverse />
       </OverlayTrigger>
       : ""}
       <OverlayTrigger
@@ -427,6 +437,11 @@ function AnimalDetails({ id, incident, organization }) {
                 {data.intake_date ? <div className="mt-1"><b>Intake Date:</b> <Moment format="MMMM Do YYYY HH:mm">{data.intake_date}</Moment></div> : ""}
                 <div className="mt-1"><b>Address:</b> {data.shelter_object.full_address || "Unknown"}</div>
               </ListGroup.Item> : ""}
+              {data.vet_requests.map(vetrequest => (
+                <ListGroup.Item key={vetrequest}>
+                  <b>Veterinary Request:</b> <Link href={"/" + incident + "/vet/vetrequest/" + vetrequest} className="text-link" style={{textDecoration:"none", color:"white"}}>VR#{vetrequest}</Link>
+                </ListGroup.Item>
+              ))}
             </ListGroup>
           </Card.Body>
         </Card>

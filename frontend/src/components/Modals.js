@@ -93,7 +93,7 @@ const AnimalDeleteModal = (props) => {
     <>
       <Modal show={props.show} onHide={props.handleClose}>
         <Modal.Header closeButton>
-          <Modal.Title>Confirm Animal Cancellation</Modal.Title>
+          <Modal.Title>Confirm Animal Cancelation</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <p>

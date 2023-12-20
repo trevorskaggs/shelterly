@@ -24,6 +24,7 @@ urlpatterns = [
     path('people/', include('people.urls')),
     path('reports/', include('reports.urls')),
     path('shelter/', include('shelter.urls')),
+    path('vet/', include('vet.urls')),
     path('activity/', include('actstream.urls')),
     url(r'login/', LoginView.as_view(), name='knox_login'),
     url(r'logout/', knox_views.LogoutView.as_view(), name='knox_logout'),

@@ -60,6 +60,10 @@ class UserViewSet(CreateUserMixin, viewsets.ModelViewSet):
         queryset = User.objects.all()
         if self.request.GET.get('organization'):
             queryset = queryset.filter(organizations=self.request.GET.get('organization')).distinct()
+
+        if self.request.GET.get('vet') == 'true':
+            queryset = queryset.filter(perms__organization=self.request.data.get('organization'), perms__vet_perms=True)
+    
         return queryset
 
     @action(detail=False, methods=["post"])

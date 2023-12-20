@@ -256,10 +256,10 @@ const DropDown = React.forwardRef((props, ref) => {
       {props.label ? <Form.Label style={props.style}>{props.label}</Form.Label> : ""}
       {props.tooltip ?
       <OverlayTrigger
-         key={"edit-service-request"}
+         key={"tooltip"}
          placement="top"
          overlay={
-           <Tooltip id={`tooltip-edit-service-request`}>
+           <Tooltip id={`tooltip`}>
              {props.tooltip}
            </Tooltip>
          }

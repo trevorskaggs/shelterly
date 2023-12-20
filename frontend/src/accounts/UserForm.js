@@ -34,6 +34,7 @@ const UserForm = ({ id, organization }) => {
     agency_id: '',
     user_perms: false,
     incident_perms: false,
+    vet_perms: false,
     email_notification: false,
     organizations: [state.organization.id]
   })
@@ -90,6 +91,7 @@ const UserForm = ({ id, organization }) => {
         agency_id: Yup.string().nullable(),
         user_perms: Yup.boolean(),
         incident_perms: Yup.boolean(),
+        vet_perms: Yup.boolean(),
         email_notification: Yup.boolean(),
       })}
       onSubmit={(values, { setFieldError, setSubmitting }) => {
@@ -167,6 +169,8 @@ const UserForm = ({ id, organization }) => {
               <Field component={Switch} name="user_perms" id="user_perms" type="checkbox" color="primary" />
               <BootstrapForm.Label htmlFor="incident_perms">Incident Permissions</BootstrapForm.Label>
               <Field component={Switch} name="incident_perms" id="incident_perms" type="checkbox" color="primary" />
+              <BootstrapForm.Label htmlFor="vet_perms">Veterinary Permissions</BootstrapForm.Label>
+              <Field component={Switch} name="vet_perms" id="vet_perms" type="checkbox" color="primary" />
               <BootstrapForm.Label htmlFor="email_notification">SR Email Notification</BootstrapForm.Label>
               <Field component={Switch} name="email_notification" id="email_notification" type="checkbox" color="primary" />
             </BootstrapForm>
