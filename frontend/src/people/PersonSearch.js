@@ -17,10 +17,12 @@ import ButtonSpinner from '../components/ButtonSpinner';
 import { speciesChoices } from '../animals/constants';
 import { ITEMS_PER_PAGE } from '../constants';
 import { SystemErrorContext } from '../components/SystemError';
+import { AuthContext } from "../accounts/AccountsReducer";
 import { printAllOwnersDetails } from './Utils';
 
-function PersonSearch({ incident }) {
+function PersonSearch({ incident, organization }) {
 
+  const { dispatch, state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
 	// Identify any query param data.
@@ -31,6 +33,12 @@ function PersonSearch({ incident }) {
   } = queryParams;
 
 	const [data, setData] = useState({owners: [], isFetching: false});
+  const [organizationData, setOrganizationData] = useState({
+    name: '',
+    short_name: '',
+    liability_name: '',
+    liability_short_name: '',
+  });
 	const [searchState, setSearchState] = useState({});
 	const [statusOptions, setStatusOptions] = useState(person);
 	const [searchTerm, setSearchTerm] = useState(search);
@@ -61,7 +69,7 @@ function PersonSearch({ incident }) {
     e.preventDefault();
 
     handleSubmitting()
-      .then(() => printAllOwnersDetails(data.owners))
+      .then(() => printAllOwnersDetails(data.owners, organizationData))
       .then(submittingComplete);
   }
 
@@ -79,7 +87,7 @@ function PersonSearch({ incident }) {
 		const fetchOwners = async () => {
 			setData({owners: [], isFetching: true});
 			// Fetch People data.
-			await axios.get('/people/api/person/?search=' + searchTerm + '&status=' + statusOptions + '&incident=' + incident, {
+			await axios.get('/people/api/person/?search=' + searchTerm + '&status=' + statusOptions + '&incident=' + incident + '&organization=' + organization +'&training=' + (state && state.incident.training), {
 				cancelToken: source.token,
 			})
 			.then(response => {
@@ -119,6 +127,25 @@ function PersonSearch({ incident }) {
 			});
 		};
 		fetchOwners();
+
+    const fetchOrganizationData = async () => {
+      // Fetch Organization data.
+      await axios.get('/incident/api/organization/', {
+        cancelToken: source.token,
+      })
+      .then(response => {
+        if (!unmounted) {
+          setOrganizationData(response.data[0]);
+        }
+      })
+      .catch(error => {
+        if (!unmounted) {
+          setShowSystemError(true);
+        }
+      });
+    };
+    fetchOrganizationData();
+
 		// Cleanup.
 		return () => {
 			unmounted = true;
@@ -172,7 +199,7 @@ function PersonSearch({ incident }) {
                 </Tooltip>
               }
             >
-              <Link href={"/" + incident + "/people/owner/" + owner.id}><FontAwesomeIcon icon={faDotCircle} className="mr-2" inverse/></Link>
+              <Link href={"/" + organization + "/" + incident + "/people/owner/" + owner.id}><FontAwesomeIcon icon={faDotCircle} className="mr-2" inverse/></Link>
             </OverlayTrigger>
             :
             <OverlayTrigger
@@ -184,7 +211,7 @@ function PersonSearch({ incident }) {
                 </Tooltip>
               }
             >
-              <Link href={"/" + incident + "/people/reporter/" + owner.id}><FontAwesomeIcon icon={faDotCircle} className="mr-2" inverse/></Link>
+              <Link href={"/" + organization + "/" + incident + "/people/reporter/" + owner.id}><FontAwesomeIcon icon={faDotCircle} className="mr-2" inverse/></Link>
             </OverlayTrigger>
             }
             {owner.first_name} {owner.last_name}
@@ -203,7 +230,7 @@ function PersonSearch({ incident }) {
                     <ListGroup.Item><b>Address: </b>{owner.full_address}</ListGroup.Item>
                   : ""}
                   {owner.requests && owner.requests.map(request => (
-                    <ListGroup.Item key={request.id}><b>Service Request: </b><Link href={"/" + incident + "/hotline/servicerequest/" + request.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{request.full_address}</Link></ListGroup.Item>
+                    <ListGroup.Item key={request.id}><b>Service Request: </b><Link href={"/" + organization + "/" + incident + "/hotline/servicerequest/" + request.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{request.full_address}</Link></ListGroup.Item>
                   ))}
                 </ListGroup>
               </Scrollbar>
@@ -226,7 +253,7 @@ function PersonSearch({ incident }) {
                 <Scrollbar style={{height:"144px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
                   {owner.animals.filter(animal => animal.species === searchState[owner.id].selectedSpecies).map((animal, i) => (
                     <ListGroup.Item key={animal.id}>
-                      <b>#{animal.id}:</b>&nbsp;&nbsp;<Link href={"/" + incident + "/animals/" + animal.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.name || "Unknown"}</Link>
+                      <b>#{animal.id}:</b>&nbsp;&nbsp;<Link href={"/" + organization + "/" + incident + "/animals/" + animal.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.name || "Unknown"}</Link>
                       {animal.color_notes ?
                       <OverlayTrigger
                         key={"animal-color-notes"}
@@ -243,7 +270,7 @@ function PersonSearch({ incident }) {
                       &nbsp;- {animal.status}
                     </ListGroup.Item>
                   ))}
-                  {owner.animals.length < 1 ? <ListGroup.Item style={{marginTop:"32px"}}>No Animals</ListGroup.Item> : ""}
+                  {owner.animals.length < 1 ? <ListGroup.Item>No Animals</ListGroup.Item> : ""}
                 </Scrollbar>
               </ListGroup> : ""}
               {statusOptions === 'reporters' ?
@@ -251,7 +278,7 @@ function PersonSearch({ incident }) {
                 <Scrollbar style={{height:"144px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
                   {owner.reporter_animals.filter(animal => animal.species === searchState[owner.id].selectedSpecies).map((animal, i) => (
                     <ListGroup.Item key={animal.id}>
-                      <b>#{animal.id}:</b>&nbsp;&nbsp;<Link href={"/" + incident + "/animals/" + animal.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.name || "Unknown"}</Link>
+                      <b>#{animal.id}:</b>&nbsp;&nbsp;<Link href={"/" + organization + "/" + incident + "/animals/" + animal.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.name || "Unknown"}</Link>
                       {animal.color_notes ?
                       <OverlayTrigger
                         key={"animal-color-notes"}
@@ -268,7 +295,7 @@ function PersonSearch({ incident }) {
                       &nbsp;- {animal.status}
                     </ListGroup.Item>
                   ))}
-                  {owner.reporter_animals.length < 1 ? <ListGroup.Item style={{marginTop:"32px"}}>No Animals</ListGroup.Item> : ""}
+                  {owner.reporter_animals.length < 1 ? <ListGroup.Item style={{}}>No Animals</ListGroup.Item> : ""}
                 </Scrollbar>
               </ListGroup> : ""}
             </Card.Body>

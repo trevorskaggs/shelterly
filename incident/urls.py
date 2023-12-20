@@ -6,6 +6,7 @@ from incident import views
 app_name = 'incident'
 router = DefaultRouter()
 router.register(r'incident', views.IncidentViewSet)
+router.register(r'organization', views.OrganizationViewSet)
 
 urlpatterns = [
     path('api/', include(router.urls)),

@@ -10,7 +10,10 @@ import { DATE_FORMAT } from "../constants";
 export { printOwnerDetails, printAllOwnersDetails } from "../people/Utils";
 
 async function printAnimalCareSchedules(animals = [], id = 0, type = "Intake") {
-  const pdf = await buildAnimalCareScheduleDoc(animals);
+  // sort animals by id
+  const sortedAnimals = [...animals].sort((a,b) => a.id - b.id);
+
+  const pdf = await buildAnimalCareScheduleDoc(sortedAnimals);
   pdf.fileName = `Shelterly-${type}-Animal-Care-Schedules-${id
     .toString()
     .padStart(4, 0)}-${moment().format(DATE_FORMAT)}`;
@@ -31,7 +34,7 @@ export const printIntakeSummaryAnimalCareSchedules = async (
   await printAnimalCareSchedules(animals, roomId);
 };
 
-export const printIntakeSummary = async (data = {}) => {
+export const printIntakeSummary = async (data = {}, organization = {}) => {
   const title = `${
     data.intake_type === "owner_walkin"
       ? "Owner Walk-In"
@@ -49,7 +52,7 @@ export const printIntakeSummary = async (data = {}) => {
     }
   );
 
-  await buildOwnersContent(pdf, [data.person_object], data.animal_objects);
+  await buildOwnersContent(pdf, [data.person_object], organization, data.animal_objects);
   pdf.drawPageBreak();
   await buildAnimalCareScheduleContent(pdf, data.animal_objects);
 

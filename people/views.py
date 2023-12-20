@@ -4,8 +4,9 @@ from actstream import action
 
 from animals.models import Animal
 from hotline.models import ServiceRequest
+from incident.models import Incident, Organization
 from people.models import OwnerContact, Person, PersonChange, PersonImage
-from people.serializers import OwnerContactSerializer, PersonSerializer, HeavyPersonSerializer
+from people.serializers import OwnerContactSerializer, PersonSerializer, HeavyPersonSerializer, SimplePersonSerializer
 
 
 # Provides view for Person API calls.
@@ -15,20 +16,26 @@ class PersonViewSet(viewsets.ModelViewSet):
     filter_backends = (filters.SearchFilter,)
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = PersonSerializer
+    light_serializer_class = SimplePersonSerializer
     detail_serializer_class = HeavyPersonSerializer
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
             if hasattr(self, 'detail_serializer_class'):
                 return self.detail_serializer_class
-
+        elif self.action == 'list':
+            if self.request.GET.get('light', 'false') == 'true' and hasattr(self, 'light_serializer_class'):
+                return self.light_serializer_class
         return super(PersonViewSet, self).get_serializer_class()
 
     def get_queryset(self):
+        queryset = Person.objects.with_history().all()
+        if self.request.GET.get('training'):
+            queryset = queryset.filter(incident__organization__slug=self.request.GET.get('organization'), incident__training=self.request.GET.get('training') == 'true')
         queryset = (
-            Person.objects.with_history()
-            .all()
+            queryset
             .annotate(is_owner=Exists(Animal.objects.filter(incident__slug=self.request.GET.get('incident', ''), owners=OuterRef("id"))))
+            .annotate(is_reporter=Exists(Animal.objects.filter(incident__slug=self.request.GET.get('incident', ''), reporter=OuterRef("id"))))
             .prefetch_related(
                 Prefetch(
                     "animal_set",
@@ -61,14 +68,18 @@ class PersonViewSet(viewsets.ModelViewSet):
         if status == "owners":
             queryset = queryset.filter(is_owner=True)
         elif status == "reporters":
-            queryset = queryset.filter(is_owner=False)
+            queryset = queryset.filter(is_reporter=True)
+        elif 'status' in self.request.query_params:
+            queryset = queryset.filter(Q(is_owner=True)|Q(is_reporter=True))
         return queryset
 
 
     def perform_create(self, serializer):
         if serializer.is_valid():
+            if self.request.data.get('incident_slug'):
+                serializer.validated_data['incident'] = Incident.objects.get(slug=self.request.data.get('incident_slug'))
             # Check for duplicate owners.
-            for owner in Person.objects.filter(first_name=serializer.validated_data['first_name'], last_name=serializer.validated_data['last_name'], phone=serializer.validated_data['phone']):
+            for owner in Person.objects.filter(first_name=serializer.validated_data['first_name'], last_name=serializer.validated_data['last_name'], phone=serializer.validated_data['phone'], incident__slug=self.request.data.get('incident_slug')):
                 raise serializers.ValidationError(['a duplicate owner with the same name and phone number already exists.', owner.id])
             # Clean phone fields.
             serializer.validated_data['phone'] = ''.join(char for char in serializer.validated_data.get('phone', '') if char.isdigit())

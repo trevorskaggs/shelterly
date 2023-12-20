@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useReducer } from "react";
+import axios from "axios";
 import { navigate, useLocationChange, usePath, useQueryParams } from 'raviger';
 import { useCookies } from 'react-cookie';
 import { loadUser, setAuthToken } from "./AccountsUtils";
@@ -9,6 +10,8 @@ const initialState = {
   isLoading: false,
   logout: false,
   user: null,
+  incident: {name:'', training:false},
+  organization: {id:'', name:''},
   errors: {},
   location:'',
   prevLocation: '',
@@ -28,7 +31,7 @@ function auth_reducer(state, action) {
       return {...state, user:action.data.user, isAuthenticated: true, isLoading: false, errors: null};
 
     case 'LOGOUT_SUCCESSFUL':
-      return {...state, errors: action.data, user: null,
+      return {...state, errors: action.data, user: null, incident: {name:'', training:false}, organization: {id:'', name:''},
         isAuthenticated: false, isLoading: false, logout: true};
 
     case 'AUTHENTICATION_ERROR':
@@ -39,6 +42,12 @@ function auth_reducer(state, action) {
 
     case 'PAGE_CHANGED':
       return {...state, prevLocation: state.location.path, location:action.data};
+
+    case 'SET_INCIDENT':
+      return {...state, incident: action.data};
+
+    case 'SET_ORGANIZATION':
+      return {...state, organization: action.data};
 
     default:
       return state;
@@ -62,6 +71,9 @@ function AuthProvider(props) {
   cookies.token ? setAuthToken(cookies.token, cookies.csrftoken) : setAuthToken();
 
   const path = usePath();
+  const org_slug = path.split('/')[1];
+  const incident_slug = path.split('/')[2];
+
   // Keep track of current and previous locations.
   const onChange = useCallback(path => dispatch({type: "PAGE_CHANGED", data: path}), []);
   useLocationChange(onChange);
@@ -72,20 +84,47 @@ function AuthProvider(props) {
     const onFocus = () => {
       // Only recheck user auth if in a private route.
       if (!Object.keys(publicRoutes).includes(path)) {
-        loadUser({dispatch, removeCookie, path});
+        loadUser({state, dispatch, removeCookie, path});
       }
     };
 
     // Check for user auth on focus.
     window.addEventListener("focus", onFocus);
 
+    // Redirect user if they attempt to access an Organization they aren't a member of.
+    if (!Object.keys(publicRoutes).includes(path) && state.user && path !== '/' && !state.user.org_slugs.includes(org_slug)) {
+      navigate("/");
+    }
+
     // Redirect to next or Home if attempting to access LoginForm while logged in.
     if (state.user && path === '/login') {
       navigate(next);
     }
+
+    // Fetch org and incident data if missing.
+    if (state && !state.logout && (!state.organization || (!state.organization.id || !state.incident.name))) {
+      // Fetch Organization data.
+      if (!state.organization.id && org_slug && org_slug !== 'login') {
+        axios.get('/incident/api/organization/?slug=' + org_slug)
+        .then(orgResponse => {
+          dispatch({type: "SET_ORGANIZATION", data: {id:orgResponse.data[0].id, name:orgResponse.data[0].name}});
+        })
+        .catch(error => {
+        });
+      }
+      // Fetch Incident data.
+      if (incident_slug && !state.incident.name && incident_slug !=='accounts'){
+        axios.get('/incident/api/incident/?incident=' + incident_slug)
+        .then(incidentResponse => {
+          dispatch({type: "SET_INCIDENT", data: {name:incidentResponse.data[0].name, training:incidentResponse.data[0].training}});
+        })
+        .catch(error => {
+        });
+      }
+    }
     // If we have a token but no user, attempt to authenticate them.
-    else if (!state.user && cookies.token) {
-      loadUser({dispatch, removeCookie, path});
+    if (!state.user && !state.logout && cookies.token && !Object.keys(publicRoutes).includes(path)) {
+      loadUser({state, dispatch, removeCookie, path});
     }
     // Redirect to login page if no authenticated user object is present.
     else if (!Object.keys(publicRoutes).includes(path) && !state.user && !cookies.token) {

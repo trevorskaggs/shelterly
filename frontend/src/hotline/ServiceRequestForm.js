@@ -183,7 +183,7 @@ function ServiceRequestForm(props) {
               });
               Promise.all(promises)
               .then((results) => {
-                navigate('/' + incident + '/hotline/servicerequest/' + response.data.id);
+                navigate('/' + props.organization + '/' + incident + '/hotline/servicerequest/' + response.data.id);
               })
             })
             .catch(error => {
@@ -200,7 +200,7 @@ function ServiceRequestForm(props) {
               navigate(state.prevLocation);
             }
             else {
-              navigate('/' + incident + '/hotline/servicerequest/' + id);
+              navigate('/' + props.organization + '/' + incident + '/hotline/servicerequest/' + id);
             }
           })
           .catch(error => {
@@ -242,17 +242,17 @@ function ServiceRequestForm(props) {
               <TextInput
                 as="textarea"
                 rows={5}
-                label="Additional Information"
+                label="Instructions for Field Team"
                 name="directions"
                 id="directions"
                 xs="12"
               />
             </BootstrapForm.Row>
             <BootstrapForm.Row>
-              <span hidden={is_first_responder}><BootstrapForm.Label htmlFor="verbal_permission" className="ml-1">Verbal Permission</BootstrapForm.Label>
+              <span hidden={is_first_responder}><BootstrapForm.Label htmlFor="verbal_permission" className="ml-1">Forced Entry Permission</BootstrapForm.Label>
               <Field component={Switch} name="verbal_permission" type="checkbox" color="primary"/>
 
-              <BootstrapForm.Label htmlFor="key_provided">Key Provided</BootstrapForm.Label>
+              <BootstrapForm.Label htmlFor="key_provided">Key at Staging</BootstrapForm.Label>
               <Field component={Switch} name="key_provided" type="checkbox" color="primary" /></span>
 
               <span><BootstrapForm.Label htmlFor="accessible">Accessible</BootstrapForm.Label>
@@ -280,7 +280,7 @@ function ServiceRequestForm(props) {
           <p>
             The following Service Requests have a duplicate address:
             {dupeSRs.map(sr =>
-              <li key={sr.id} style={{marginLeft:"10px"}}><span style={{position:"relative", left:"-5px"}}>SR#{sr.id} - Click <Link target="_blank" href={"/" + incident + "/hotline/servicerequest/" + sr.id} style={{color:"#8d99d4"}}>here</Link> to view this Service Request.</span></li>
+              <li key={sr.id} style={{marginLeft:"10px"}}><span style={{position:"relative", left:"-5px"}}>SR#{sr.id} - Click <Link target="_blank" href={"/" + props.organization + "/" + incident + "/hotline/servicerequest/" + sr.id} style={{color:"#8d99d4"}}>here</Link> to view this Service Request.</span></li>
             )}
             <br/>Proceed with creating a new Service Request?
           </p>

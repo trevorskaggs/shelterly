@@ -1,14 +1,17 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import axios from 'axios';
 import ReactDOMServer from 'react-dom/server';
+import { Button, Col, Row } from 'react-bootstrap';
+import Autocomplete from 'react-google-autocomplete';
 import L from "leaflet";
 import { Map as LeafletMap, TileLayer, useLeaflet } from "react-leaflet";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faCircle, faExclamationCircle, faHome, faMapMarkerAlt, faStar,
+  faCircle, faTimesCircle, faExclamationCircle, faHome, faMapMarkerAlt, faStar,
 } from '@fortawesome/free-solid-svg-icons';
 import { faCheckCircle, faQuestionCircle as faQuestionCircleDuo } from '@fortawesome/pro-duotone-svg-icons';
 import { faHomeAlt as faHomeAltReg } from '@fortawesome/pro-regular-svg-icons';
-import { faHomeAlt, faDoNotEnter } from '@fortawesome/pro-solid-svg-icons';
+import { faCircleBolt, faHomeAlt, faDoNotEnter } from '@fortawesome/pro-solid-svg-icons';
 
 export const Legend = (props) => {
   const { map } = useLeaflet();
@@ -56,6 +59,41 @@ export const reportedMarkerIcon = new L.DivIcon({
   iconSize: [0, 0],
   iconAnchor: [8, 9],
   className: "reported-icon",
+  popupAnchor: null,
+  shadowUrl: null,
+  shadowSize: null,
+  shadowAnchor: null
+});
+
+const reportedEvacIconHTML = ReactDOMServer.renderToString(
+  <span className="fa-layers">
+    <FontAwesomeIcon icon={faCircle} color="white" size="lg" />
+    <FontAwesomeIcon icon={faCircleBolt} className="icon-border" size="lg" color="#ff4c4c" />
+  </span>
+);
+export const reportedEvacMarkerIcon = new L.DivIcon({
+  html: reportedEvacIconHTML,
+  iconSize: [0, 0],
+  iconAnchor: [8, 9],
+  className: "reported-evacuation-icon",
+  popupAnchor: null,
+  shadowUrl: null,
+  shadowSize: null,
+  shadowAnchor: null
+});
+
+const reportedSIPIconHTML = ReactDOMServer.renderToString(
+  <span className="fa-layers">
+    <FontAwesomeIcon icon={faCircle} className="icon-border" color="#ff4c4c" size="lg" transform={'grow-2'} />
+    <FontAwesomeIcon icon={faHomeAlt} style={{color:"white"}} transform={'shrink-3 left-1'} size="lg" inverse />
+    <FontAwesomeIcon icon={faHomeAltReg} style={{color:"#444"}} transform={'shrink-3 left-1'} size="lg" inverse />
+  </span>
+);
+export const reportedSIPMarkerIcon = new L.DivIcon({
+  html: reportedSIPIconHTML,
+  iconSize: [0, 0],
+  iconAnchor: [8, 9],
+  className: "reported-SIP-icon",
   popupAnchor: null,
   shadowUrl: null,
   shadowSize: null,
@@ -138,13 +176,30 @@ export const closedMarkerIcon = new L.DivIcon({
   shadowAnchor: null
 });
 
+const finishedIconHTML = ReactDOMServer.renderToString(
+  <span className="fa-layers">
+    <FontAwesomeIcon icon={faCircle} color="white" size="lg" />
+    <FontAwesomeIcon icon={faTimesCircle} className="icon-border" size="lg" color="#af7051" />
+  </span>
+);
+export const finishedMarkerIcon = new L.DivIcon({
+  html: finishedIconHTML,
+  iconSize: [0, 0],
+  iconAnchor: [8, 9],
+  className: "finished-icon",
+  popupAnchor: null,
+  shadowUrl: null,
+  shadowSize: null,
+  shadowAnchor: null
+});
+
 // Counts the number of size/species matches for a service request by status.
 export const countMatches = (service_request) => {
   var matches = {};
-  var status_matches = {'REPORTED':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}};
+  var status_matches = {'REPORTED':{}, 'REPORTED (EVAC REQUESTED)':{}, 'REPORTED (SIP REQUESTED)':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}};
 
   service_request.animals.forEach((animal) => {
-    if (['REPORTED', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE'].indexOf(animal.status) > -1) {
+    if (['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE'].indexOf(animal.status) > -1) {
       if (!matches[[animal.species]]) {
         matches[[animal.species]] = 1;
       }
@@ -192,5 +247,84 @@ const Map = (props) => {
     </>
   );
 };
+
+export const AddressLookup = ({setData, initialBounds, handleClose, ...props}) => {
+
+  const childRef = useRef(null);
+  const [incidentLatLon, setIncidentLatLon] = useState({lat:0, lng:0});
+
+  const clearAddress = () => {
+    childRef.current.value = "";
+    setData(prevState => ({ ...prevState, bounds:initialBounds }));
+    handleClose();
+  };
+
+  useEffect(() => {
+    let unmounted = false;
+    let source = axios.CancelToken.source();
+
+    axios.get('/incident/api/incident/?incident=' + props.incident, {
+      cancelToken: source.token,
+    })
+    .then(response => {
+      if (!unmounted) {
+        setIncidentLatLon({lat:Number(response.data[0].latitude), lng:Number(response.data[0].longitude)});
+      }
+    })
+    .catch(error => {
+    });
+  }, [props.incident]);
+
+  const updateAddr = suggestion => {
+
+    if (suggestion && suggestion.address_components) {
+      // Extract location information from the return. Use short_name for the state.
+      let components={};
+      suggestion.address_components.forEach(function(k,v1) {k.types.forEach(function(v2, k2){v2 !== "administrative_area_level_1" ? components[v2]=k.long_name : components[v2]=k.short_name});});
+
+      // Build formatted street number + name string.
+      let address = "";
+      if (components.street_number) {
+        address = components.street_number + " " + components.route;
+      }
+      else if (components.route) {
+        address = components.route;
+      }
+      else {
+        address = components.intersection;
+      }
+
+      setData(prevState => ({ ...prevState, bounds:L.latLngBounds([[suggestion.geometry.location.lat(), suggestion.geometry.location.lng()]]) }));
+    }
+  }
+
+  return (
+    <>
+      <Row className="mr-0 d-flex" style={{maxHeight:"37px"}}>
+        <Col className="flex-grow-1 pr-1">
+          <Autocomplete
+            {...props}
+            onPlaceSelected={(place) => {
+              updateAddr(place);
+              handleClose()
+            }}
+            onFocus={(event) => { event.target.setAttribute('autocomplete', 'off'); }}
+            id="search"
+            name="search"
+            options={{
+              bounds:{north:incidentLatLon.lat+.1, south:incidentLatLon.lat-.1, east:incidentLatLon.lng+.1, west:incidentLatLon.lng-.1},
+              types: ["geocode"],
+              componentRestrictions: { country: "us" },
+            }}
+            ref={childRef}
+            key={String(incidentLatLon.lat)}
+            apiKey={process.env.REACT_APP_GOOGLE_API_KEY}
+          />
+        </Col>
+        <Button variant="outline-light" className="float-right" style={{maxHeight:"37px"}} onClick={clearAddress} disabled={props.disabled ? true : false}>Reset</Button>
+      </Row>
+    </>
+  );
+}
 
 export default Map;

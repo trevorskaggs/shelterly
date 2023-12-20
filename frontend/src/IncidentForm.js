@@ -1,9 +1,9 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import axios from "axios";
 import { navigate } from "raviger";
-import { Formik } from 'formik';
+import { Field, Formik } from 'formik';
 import { ButtonGroup, Card, Col, Form as BootstrapForm } from 'react-bootstrap';
-
+import { Switch } from 'formik-material-ui';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faArrowAltCircleLeft,
@@ -14,10 +14,12 @@ import { Map, Marker, Tooltip as MapTooltip, TileLayer } from "react-leaflet";
 import { Legend, pinMarkerIcon } from "./components/Map";
 import { TextInput } from './components/Form.js';
 import ButtonSpinner from './components/ButtonSpinner.js';
+import { AuthContext } from "./accounts/AccountsReducer";
 import { SystemErrorContext } from './components/SystemError';
 
-const IncidentForm = ({ id }) => {
+const IncidentForm = ({ id, organization }) => {
 
+  const { dispatch, state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
   const [data, setData] = useState({
@@ -25,6 +27,8 @@ const IncidentForm = ({ id }) => {
     slug: '',
     latitude: '',
     longitude: '',
+    training: false,
+    organization: state.organization.id
   });
 
   const [bounds, setBounds] = useState(L.latLngBounds([[0,0]]));
@@ -59,7 +63,7 @@ const IncidentForm = ({ id }) => {
 
     const fetchIncidents = async () => {
       // Fetch Visit Note data.
-      await axios.get('/incident/api/incident/', {
+      await axios.get('/incident/api/incident/?organization_slug=' + organization, {
         cancelToken: source.token,
       })
       .then(response => {
@@ -78,7 +82,7 @@ const IncidentForm = ({ id }) => {
             incident_bounds.push([parseFloat(incident_bounds[0][0])-.04,parseFloat(incident_bounds[0][1])+.04])
           }
           if (!id) {
-            setBounds(incident_bounds);
+            setBounds(incident_bounds.length ? incident_bounds : L.latLngBounds([[0,0]]));
           }
           setNames(incident_names);
         }
@@ -130,30 +134,31 @@ const IncidentForm = ({ id }) => {
           .test('required-check', 'Name already in use.',
             function(value) {
               // Check against slug for dupes.
-              if (names.includes(value.trim().toLowerCase().replaceAll(' ','-').match(/[a-zA-Z0-9-]+/g)[0])) {
+              if (value && data.name !== value && names.includes(value.trim().toLowerCase().replaceAll(' ','').match(/[a-zA-Z0-9-]+/g)[0])) {
                 return false;
               }
               return true;
             }),
         latlon: Yup.string().required('Required'),
         latitude: Yup.number(),
-        longitude: Yup.number()
+        longitude: Yup.number(),
+        training: Yup.boolean()
       })}
       onSubmit={(values, { setSubmitting }) => {
-        values['slug'] = values.name.trim().replaceAll(' ','-').match(/[a-zA-Z0-9-]+/g)[0];
+        values['slug'] = values.name.trim().replaceAll(' ','').match(/[a-zA-Z0-9-]+/g)[0];
         if (id) {
-          axios.put('/incident/api/incident/' + id + '/', values)
+          axios.put('/incident/api/incident/' + id + '/?organization=' + state.organization.id, values)
           .then(function () {
-            navigate('/');
+            navigate('/' + organization);
           })
           .catch(error => {
             setShowSystemError(true);
           });
         }
         else {
-          axios.post('/incident/api/incident/', values)
+          axios.post('/incident/api/incident/?organization=' + state.organization.id, values)
           .then(function () {
-            navigate('/');
+            navigate('/' + organization);
           })
           .catch(error => {
             setShowSystemError(true);
@@ -163,7 +168,7 @@ const IncidentForm = ({ id }) => {
     >
       {form => (
         <Card border="secondary" className="mt-4 ml-auto mr-auto" style={{width:"50%", maxWidth:"50%"}}>
-          <Card.Header as="h5" className="pl-3"><span style={{ cursor: 'pointer' }} onClick={() => navigate("/")} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>{id ? 'Edit' : 'New'} Incident</Card.Header>
+          <Card.Header as="h5" className="pl-3"><span style={{ cursor: 'pointer' }} onClick={() => navigate("/" + organization)} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>{id ? 'Edit' : 'New'} Incident</Card.Header>
           <Card.Body>
             <BootstrapForm>
               <BootstrapForm.Row>
@@ -221,6 +226,10 @@ const IncidentForm = ({ id }) => {
                   : ""}
                 </Map>
               </Col>
+              </BootstrapForm.Row>
+              <BootstrapForm.Row className="mt-3">
+                <BootstrapForm.Label htmlFor="training" className="ml-1" style={{marginTop:"5px"}}>Training</BootstrapForm.Label>
+                <Field component={Switch} name="training" type="checkbox" color="primary"/>
               </BootstrapForm.Row>
             </BootstrapForm>
           </Card.Body>

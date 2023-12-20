@@ -16,9 +16,11 @@ import * as Yup from 'yup';
 import { TextInput } from '.././components/Form.js';
 import ButtonSpinner from '../components/ButtonSpinner.js';
 import { SystemErrorContext } from '../components/SystemError';
+import { AuthContext } from "./AccountsReducer";
 
-const UserForm = ({ id, incident }) => {
+const UserForm = ({ id, organization }) => {
 
+  const { dispatch, state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
   // Regex validators.
@@ -32,7 +34,9 @@ const UserForm = ({ id, incident }) => {
     agency_id: '',
     user_perms: false,
     incident_perms: false,
+    vet_perms: false,
     email_notification: false,
+    organizations: [state.organization.id]
   })
 
   // Hook for initializing data.
@@ -42,7 +46,7 @@ const UserForm = ({ id, incident }) => {
     if (id) {
       const fetchUserData = async () => {
         // Fetch User data.
-        await axios.get('/accounts/api/user/' + id + '/', {
+        await axios.get('/accounts/api/user/' + id + '/?organization=' + state.organization.id, {
           cancelToken: source.token,
         })
         .then(response => {
@@ -66,6 +70,8 @@ const UserForm = ({ id, incident }) => {
   }, [id]);
 
   return (
+    <>
+    {state.user.is_superuser || state.user.user_perms ?
     <Formik
       initialValues={data}
       enableReinitialize={true}
@@ -85,6 +91,7 @@ const UserForm = ({ id, incident }) => {
         agency_id: Yup.string().nullable(),
         user_perms: Yup.boolean(),
         incident_perms: Yup.boolean(),
+        vet_perms: Yup.boolean(),
         email_notification: Yup.boolean(),
       })}
       onSubmit={(values, { setFieldError, setSubmitting }) => {
@@ -92,7 +99,7 @@ const UserForm = ({ id, incident }) => {
           if (id) {
             axios.put('/accounts/api/user/' + id + '/', values)
             .then(function () {
-              navigate('/' + incident + '/accounts/user_management');
+              navigate('/' + organization + '/accounts/user_management');
             })
             .catch(error => {
               setSubmitting(false);
@@ -102,12 +109,9 @@ const UserForm = ({ id, incident }) => {
           else {
             axios.post('/accounts/api/user/', values)
             .then(function () {
-              navigate('/' + incident + '/accounts/user_management');
+              navigate('/' + organization + '/accounts/user_management');
             })
             .catch(error => {
-              if (error.response.data.email[0].includes('shelterly user with this email already exists')) {
-                setFieldError("email", "A user with this email address already exists.");
-              }
               setSubmitting(false);
               setShowSystemError(true);
             });
@@ -116,8 +120,8 @@ const UserForm = ({ id, incident }) => {
       }}
     >
       {form => (
-        <Card border="secondary" className="mt-5">
-          <Card.Header as="h5" className="pl-3"><span style={{ cursor: 'pointer' }} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>{id ? "Edit" : "New"} User</Card.Header>
+        <Card border="secondary" className="mt-4 ml-auto mr-auto" style={{width:"50%", maxWidth:"50%"}}>
+          <Card.Header as="h5" className="pl-3"><span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + organization + '/accounts/user_management')} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>{state.organization.name} - {id ? "Edit" : "New"} User</Card.Header>
           <Card.Body>
             <BootstrapForm>
               <BootstrapForm.Row>
@@ -165,6 +169,8 @@ const UserForm = ({ id, incident }) => {
               <Field component={Switch} name="user_perms" id="user_perms" type="checkbox" color="primary" />
               <BootstrapForm.Label htmlFor="incident_perms">Incident Permissions</BootstrapForm.Label>
               <Field component={Switch} name="incident_perms" id="incident_perms" type="checkbox" color="primary" />
+              <BootstrapForm.Label htmlFor="vet_perms">Veterinary Permissions</BootstrapForm.Label>
+              <Field component={Switch} name="vet_perms" id="vet_perms" type="checkbox" color="primary" />
               <BootstrapForm.Label htmlFor="email_notification">SR Email Notification</BootstrapForm.Label>
               <Field component={Switch} name="email_notification" id="email_notification" type="checkbox" color="primary" />
             </BootstrapForm>
@@ -174,7 +180,8 @@ const UserForm = ({ id, incident }) => {
           </ButtonGroup>
         </Card>
       )}
-    </Formik>
+    </Formik> : ""}
+    </>
   );
 };
 

@@ -80,17 +80,15 @@ async function buildAnimalCareScheduleContent(pdf, animals) {
     pdf.resetDocumentLeftMargin();
     pdf.drawPad(15);
 
-    if (animal.shelter_object) {
-      pdf.drawWrappedText({
-        text: `Location: ${
-          animal.shelter_object ? `${animal.shelter_object.name}` : "N/A"
-        }${
-          animal.building_name ? ` / ${animal.building_name}` : ""
-        }${
-          animal.room ? ` / ${animal.room_name}` : ""
-        }`,
-      })
-    }
+    pdf.drawWrappedText({
+      text: `Location: ${
+        animal.shelter_object ? `${animal.shelter_object.name}` : "N/A"
+      }${
+        animal.building_name ? ` / ${animal.building_name}` : ""
+      }${
+        animal.room ? ` / ${animal.room_name}` : ""
+      }`,
+    });
 
     // draw status
     pdf.drawWrappedText({ text: `Status: ${animal.status.toUpperCase() }`});
@@ -111,7 +109,7 @@ async function buildAnimalCareScheduleContent(pdf, animals) {
 
     const additionalLabelsList = [
       [`Aggressive: ${capitalize(animal.aggressive)}`, `Injured: ${capitalize(animal.injured)}`, `Fixed: ${capitalize(animal.fixed)}`, ' '],
-      [`Microchip: ${animal.microchip || '_______'}`, 'Neck Tag: _______', 'Collar: _______', 'Sex: _______']
+      [`Microchip: ${animal.microchip || '_______'}`, 'Neck Tag: _______', 'Collar: _______', 'Sex: ' + `${animal.sex || '_______'}`]
     ]
     const additionalListOptions = {
       listStyle: 'inline',
@@ -129,7 +127,7 @@ async function buildAnimalCareScheduleContent(pdf, animals) {
       bottomPadding: 3
     });
     pdf.drawWrappedText({
-      text: `Behavior Notes: ${animal.behavior_notes || 'N/A'}`,
+      text: `Animal Notes: ${animal.behavior_notes || 'N/A'}`,
       linePadding: -2,
       bottomPadding: 3,
     });
@@ -154,7 +152,9 @@ async function buildAnimalCareScheduleContent(pdf, animals) {
   return pdf;
 }
 
-function buildAnimalCountList(pdf, animals) {
+function buildAnimalCountList(pdf, animals, {
+  countLabelMarginTo = 0
+} = {}) {
   const animalCounts = [];
   animals
     .forEach((animal) => {
@@ -171,7 +171,8 @@ function buildAnimalCountList(pdf, animals) {
       labels: animalCounts.map(([species, count]) => (
         // capitalize the species
         `${species.replace(/(^.)/, m => m.toUpperCase())}: ${count}`
-      ))
+      )),
+      labelMarginTop: countLabelMarginTo
     });
 }
 
@@ -198,7 +199,10 @@ async function printAnimalCareSchedule (animal = {}) {
 };
 
 async function printAllAnimalCareSchedules (animals = []) {
-  const  pdf = await buildAnimalCareScheduleDoc(animals);
+  // sort animals by id
+  const sortedAnimals = [...animals].sort((a,b) => a.id - b.id);
+
+  const  pdf = await buildAnimalCareScheduleDoc(sortedAnimals);
   pdf.fileName = `Shelterly-Animal-Care-Schedules-${moment().format(DATE_FORMAT)}`;
   return pdf.saveFile();
 }

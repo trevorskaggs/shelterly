@@ -11,20 +11,23 @@ import { faExclamationSquare, faPhoneRotary } from '@fortawesome/pro-solid-svg-i
 import { Marker, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
 import Moment from 'react-moment';
-import Map, { countMatches, prettyText, reportedMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
+import Map, { countMatches, prettyText, reportedMarkerIcon, reportedEvacMarkerIcon, reportedSIPMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
 import { printDispatchResolutionForm } from './Utils'
+import { AuthContext } from "../accounts/AccountsReducer";
 import { SystemErrorContext } from '../components/SystemError';
 import ShelterlyPrintifyButton from '../components/ShelterlyPrintifyButton';
 
-function DispatchSummary({ id, incident }) {
+function DispatchSummary({ id, incident, organization }) {
 
+  const { dispatch, state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
   // Initial animal data.
   const [data, setData] = useState({
     id: '',
+    closed: false,
     team_members: [],
     team_member_objects: [],
     team: null,
@@ -114,9 +117,7 @@ function DispatchSummary({ id, incident }) {
             responseType: 'blob',
         }).then(res => {
             fileDownload(res.data, 'DAR-' + data.id + '.geojson');
-            console.log(res);
         }).catch(err => {
-            console.log(err);
         })
   }
 
@@ -164,7 +165,7 @@ function DispatchSummary({ id, incident }) {
           const bounds = [];
           for (const assigned_request of response.data.assigned_requests) {
             const matches = countMatches(assigned_request.service_request_object)[0];
-            map_dict[assigned_request.service_request_object.id] = {matches:matches, has_reported_animals:assigned_request.service_request_object.reported_animals > 0, latitude:assigned_request.service_request_object.latitude, longitude:assigned_request.service_request_object.longitude};
+            map_dict[assigned_request.service_request_object.id] = {matches:matches, latitude:assigned_request.service_request_object.latitude, longitude:assigned_request.service_request_object.longitude};
             bounds.push([assigned_request.service_request_object.latitude, assigned_request.service_request_object.longitude]);
           }
           response.data['team_members'] = response.data.team.team_members;
@@ -174,7 +175,7 @@ function DispatchSummary({ id, incident }) {
           setMapState(map_dict);
           setTeamData({teams: [], options: [], isFetching: true});
           setTeamName(response.data.team_object.name);
-          axios.get('/evac/api/evacteammember/', {
+          axios.get('/evac/api/evacteammember/?incident=' + incident + '&organization=' + organization +'&training=' + state.incident.training, {
             cancelToken: source.token,
           })
           .then(teamMemberResponse => {
@@ -253,7 +254,7 @@ function DispatchSummary({ id, incident }) {
           </Tooltip>
         }
       >
-        <Link href={"/" + incident + "/dispatch/resolution/" + id}><FontAwesomeIcon icon={faEdit} className="ml-1" inverse /></Link>
+        <Link href={"/" + organization + "/" + incident + "/dispatch/resolution/" + id}><FontAwesomeIcon icon={faEdit} inverse /></Link>
       </OverlayTrigger>
       :
       <OverlayTrigger
@@ -265,7 +266,7 @@ function DispatchSummary({ id, incident }) {
           </Tooltip>
         }
       >
-        <Link href={"/" + incident + "/dispatch/resolution/" + id}><FontAwesomeIcon icon={faClipboardCheck} className="ml-1"  inverse /></Link>
+        <Link href={"/" + organization + "/" + incident + "/dispatch/resolution/" + id}><FontAwesomeIcon icon={faClipboardCheck} inverse /></Link>
       </OverlayTrigger>
       }
       <OverlayTrigger
@@ -279,7 +280,7 @@ function DispatchSummary({ id, incident }) {
       >
         <Link onClick={handleGeoJsonDownload} href=""><FontAwesomeIcon icon={faDownload} className="ml-2"  inverse /></Link>
       </OverlayTrigger>
-    <div style={{fontSize:"18px", marginTop:"10px"}}><b>Opened: </b><Moment format="MMMM Do YYYY, HH:mm">{data.start_time}</Moment>{data.end_time ? <span> | <b>Resolved: </b><Moment format="MMMM Do YYYY, HH:mm">{data.end_time}</Moment></span> : ""}</div>
+    <div style={{fontSize:"18px", marginTop:"10px"}}><b>Opened: </b><Moment format="MMMM Do YYYY, HH:mm">{data.start_time}</Moment>{data.closed && data.end_time ? <span> | <b>Closed: </b><Moment format="MMMM Do YYYY, HH:mm">{data.end_time}</Moment></span> : ""}</div>
     </Header>
     <hr/>
     <Row className="mb-3">
@@ -357,9 +358,9 @@ function DispatchSummary({ id, incident }) {
             <Marker
               key={assigned_request.service_request_object.id}
               position={[assigned_request.service_request_object.latitude, assigned_request.service_request_object.longitude]}
-              icon={assigned_request.service_request_object.sheltered_in_place > 0 ? SIPMarkerIcon : assigned_request.service_request_object.unable_to_locate > 0 ? UTLMarkerIcon : reportedMarkerIcon}
+              icon={assigned_request.service_request_object.reported_animals > 0 ? reportedMarkerIcon : assigned_request.service_request_object.reported_evac > 0 ? reportedEvacMarkerIcon : assigned_request.service_request_object.reported_sheltered_in_place > 0 ? reportedSIPMarkerIcon : assigned_request.service_request_object.sheltered_in_place > 0 ? SIPMarkerIcon : UTLMarkerIcon}
             >
-              <MapTooltip autoPan={false}>
+              <MapTooltip autoPan={false} direction="top">
                 <span>
                   {mapState[assigned_request.service_request_object.id] ?
                     <span>
@@ -371,7 +372,7 @@ function DispatchSummary({ id, incident }) {
                     </span>
                   :""}
                   <br />
-                  SR#{assigned_request.service_request_object.id}: {assigned_request.service_request_object.full_address}
+                  SR#{assigned_request.service_request_object.id}: {assigned_request.service_request_object.full_address.split(',')[0]}, {assigned_request.service_request_object.full_address.split(',')[1]}
                 </span>
               </MapTooltip>
             </Marker>
@@ -386,7 +387,7 @@ function DispatchSummary({ id, incident }) {
             <Card.Title>
               <h4>
                 SR#{assigned_request.service_request_object.id} -&nbsp;
-                <Link href={"/" + incident + "/hotline/servicerequest/" + assigned_request.service_request_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link>
+                <Link href={"/" + organization + "/" + incident + "/hotline/servicerequest/" + assigned_request.service_request_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link>
                 {assigned_request.visit_note && assigned_request.visit_note.forced_entry ?
                   <OverlayTrigger
                     key={"forced"}
@@ -412,7 +413,7 @@ function DispatchSummary({ id, incident }) {
                   >
                     <FontAwesomeIcon icon={faCalendarDay} className="ml-1 fa-move-up" size="sm" />
                   </OverlayTrigger> : ""}
-                &nbsp;| {assigned_request.visit_note ? "Completed" : <span style={{textTransform:"capitalize"}}>{assigned_request.service_request_object.status}</span>} {assigned_request.visit_note ? <Moment format="[ on ]l[,] HH:mm">{assigned_request.visit_note.date_completed}</Moment> : ""}
+                &nbsp;| {Object.values(assigned_request.animals).filter(animal => ['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE'].includes(animal.status)).length === 0 ? "Completed" : <span style={{textTransform:"capitalize"}}>{assigned_request.service_request_object.status}</span>} {assigned_request.visit_note ? <Moment format="[ on ]l">{assigned_request.visit_note.date_completed}</Moment> : ""}
               </h4>
             </Card.Title>
             <hr style={{marginBottom:"7px"}}/>
@@ -424,7 +425,7 @@ function DispatchSummary({ id, incident }) {
               </ListGroup.Item>
               {assigned_request.service_request_object.owner_objects.map(owner => (
                 <ListGroup.Item key={owner.id}>
-                  <b>Owner: </b><Link href={"/" + incident + "/people/owner/" + owner.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{owner.first_name} {owner.last_name}</Link>
+                  <b>Owner: </b><Link href={"/" + organization + "/" + incident + "/people/owner/" + owner.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{owner.first_name} {owner.last_name}</Link>
                   {owner.display_phone ?
                   <OverlayTrigger
                     key={"owner-phone"}
@@ -472,7 +473,7 @@ function DispatchSummary({ id, incident }) {
               ))}
             {assigned_request.service_request_object.reporter_object ? 
               <ListGroup.Item>
-                <b>Reporter: </b>{assigned_request.service_request_object.reporter_object.first_name + " " + assigned_request.service_request_object.reporter_object.first_name}
+                <b>Reporter: </b>{assigned_request.service_request_object.reporter_object.first_name + " " + assigned_request.service_request_object.reporter_object.last_name}
                 {assigned_request.service_request_object.reporter_object.agency ? <span className="ml-1">({assigned_request.service_request_object.reporter_object.agency})</span> : "" }
                 {assigned_request.service_request_object.reporter_object.display_phone ?
                 <OverlayTrigger
@@ -488,14 +489,14 @@ function DispatchSummary({ id, incident }) {
                 </OverlayTrigger>
                 : ""}
               </ListGroup.Item> : ""}
-            <ListGroup.Item><b>Additional Information:</b> {assigned_request.service_request_object.directions||"No additional information available."}</ListGroup.Item>
+            <ListGroup.Item><b>Instructions for Field Team:</b> {assigned_request.service_request_object.directions||"No instructions available."}</ListGroup.Item>
           </ListGroup>
           <hr/>
           <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
             <h4 className="mt-2" style={{marginBottom:"-2px"}}>Animals</h4>
             {assigned_request.service_request_object.animals.filter(animal => Object.keys(assigned_request.animals).includes(String(animal.id))).map((animal, inception) => (
               <ListGroup.Item key={animal.id}>
-                <span style={{textTransform:"capitalize"}}>A#{animal.id} - <Link href={"/" + incident + "/animals/" + animal.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.name||"Unknown"}</Link>&nbsp;-&nbsp;{animal.species}</span>
+                <span style={{textTransform:"capitalize"}}>A#{animal.id} - <Link href={"/" + organization + "/" + incident + "/animals/" + animal.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.name||"Unknown"}</Link>&nbsp;-&nbsp;{animal.species}</span>
                 {animal.color_notes ?
                   <OverlayTrigger
                     key={"animal-color-notes"}
@@ -540,28 +541,25 @@ function DispatchSummary({ id, incident }) {
               </ListGroup.Item>
             ))}
           </ListGroup>
-          {assigned_request.previous_visit ?
-          <span>
-            <hr/>
-            <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
-              <h4 className="mt-2" style={{marginBottom:"-2px"}}>Previous Visit: <Link href={"/" + incident + "/dispatch/summary/" + assigned_request.previous_visit.dispatch_assignment} className="text-link" style={{textDecoration:"none", color:"white"}}><Moment format="L">{assigned_request.previous_visit.date_completed}</Moment></Link></h4>
-                <ListGroup.Item>
-                  {assigned_request.previous_visit.notes || "No information available."}
-                </ListGroup.Item>
-            </ListGroup>
-          </span>
-          : "" }
           {assigned_request.visit_note ?
           <span>
             <hr/>
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
               <h4 className="mt-2" style={{marginBottom:"-2px"}}>Visit Notes</h4>
-              <ListGroup.Item key={assigned_request.visit_note.id}>
-                {assigned_request.visit_note.notes || "No information available."}
-              </ListGroup.Item>
+                <ListGroup.Item>
+                  {assigned_request.visit_note.notes || "No information available."}
+                </ListGroup.Item>
             </ListGroup>
           </span>
-          : ""}
+          : "" }
+          {assigned_request.visit_notes.length > 0 ? <h4 className="mt-2" style={{marginBottom:"-2px"}}>Previous Visit Notes</h4> : ""}
+          {assigned_request.visit_notes.map(visit_note =>
+            <ListGroup variant="flush" style={{marginBottom:"-13px"}} key={visit_note.id}>
+              <ListGroup.Item key={visit_note.id}>
+              <Link href={"/" + organization + "/" + incident + "/dispatch/summary/" + visit_note.dispatch_assignment} className="text-link" style={{textDecoration:"none", color:"white"}}><Moment format="L">{visit_note.date_completed}</Moment></Link>: {visit_note.notes || "No information available."}
+              </ListGroup.Item>
+            </ListGroup>
+          ) || "None"}
         </Card.Body>
       </Card>
     </Row>

@@ -9,11 +9,13 @@ from datetime import datetime
 from .serializers import ServiceRequestSerializer, SimpleServiceRequestSerializer, VisitNoteSerializer
 from .ordering import MyCustomOrdering
 from wsgiref.util import FileWrapper
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 from animals.models import Animal
 from hotline.models import ServiceRequest, ServiceRequestImage, VisitNote
 from incident.models import Incident
-from people.models import Person
+
 from rest_framework import filters, permissions, serializers, viewsets
 from rest_framework.decorators import action as drf_action
 
@@ -40,6 +42,10 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
 
             service_request = serializer.save()
             action.send(self.request.user, verb='created service request', target=service_request)
+
+            # Notify maps that there is new data.
+            channel_layer = get_channel_layer()
+            async_to_sync(channel_layer.group_send)("map", {"type":"new_data"})
 
     def perform_update(self, serializer):
         from evac.models import AssignedRequest
@@ -119,6 +125,24 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
         wrapper = FileWrapper(json_file)
         response = HttpResponse(wrapper, content_type='application/json')
         response['Content-Disposition'] = 'attachement; filename=SR-' + str(pk) + '.geojson'
+        return response
+
+    @drf_action(detail=False, methods=['GET'], name='Download All GeoJSON')
+    def download_all(self, request, pk=None):
+        json_file = io.StringIO()
+        features = []
+        for id in self.request.GET.get('ids').replace('&','').split('id='):
+            if id:
+                sr = ServiceRequest.objects.get(id=id)
+                features.append(sr.get_feature_json())
+
+        data = {"features":features}
+        data_string = json.dumps(data)
+        json_file.write(data_string)
+        json_file.seek(0)
+        wrapper = FileWrapper(json_file)
+        response = HttpResponse(wrapper, content_type='application/json')
+        response['Content-Disposition'] = 'attachement; filename=SRs-' + '.geojson'
         return response
 
 class VisitNoteViewSet(viewsets.ModelViewSet):

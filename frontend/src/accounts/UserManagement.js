@@ -7,13 +7,15 @@ import {
   faMinusSquare, faUpload, faUserPlus
 } from '@fortawesome/free-solid-svg-icons';
 import {
-  faCircleE, faCircleI, faCircleU, faPencil, faUserUnlock
+  faCircleE, faCircleI, faCircleU, faCircleV, faPencil, faUserUnlock
 } from '@fortawesome/pro-solid-svg-icons';
 import Header from "../components/Header";
+import { AuthContext } from "./AccountsReducer";
 import { SystemErrorContext } from '../components/SystemError';
 
-function UserManagement({ incident }) {
+function UserManagement({ organization }) {
 
+  const { dispatch, state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
   const [data, setData] = useState({users: [], isFetching: false});
@@ -34,7 +36,7 @@ function UserManagement({ incident }) {
   const [timer, setTimer] = useState(null);
 
   const handleRemoveUserSubmit = async () => {
-    await axios.delete('/accounts/api/user/' + userToDelete.id + '/')
+    await axios.delete('/accounts/api/user/' + userToDelete.id + '/?organization=' + state.organization.id)
     .then(response => {
       setData(prevState => ({ ...prevState, "users":data.users.filter(user => user.id !== userToDelete.id) }));
       setFilteredData(prevState => ({ ...prevState, "users":data.users.filter(user => user.id !== userToDelete.id) }));
@@ -61,7 +63,7 @@ function UserManagement({ incident }) {
     const formData = new FormData();
     formData.append('user_csv', file);
 
-    await axios.post('/accounts/api/user/upload_csv/', formData)
+    await axios.post('/accounts/api/user/upload_csv/?organization=' + organization, formData)
     .then(response => {
       setData(prevState => ({ ...prevState, "users":data.users.concat(response.data)}));
       setFilteredData(prevState => ({ ...prevState, "users":filteredData.users.concat(response.data)}));
@@ -109,7 +111,7 @@ function UserManagement({ incident }) {
     const fetchUserData = async () => {
 
       setData({users: [], isFetching: true});
-      axios.get('/accounts/api/user/', {
+      axios.get('/accounts/api/user/?organization=' + state.organization.id, {
         cancelToken: source.token,
       })
       .then(response => {
@@ -138,8 +140,10 @@ function UserManagement({ incident }) {
 
   return (
     <>
+    {state.user.is_superuser || state.user.user_perms ?
+    <span className="mt-4 ml-auto mr-auto" style={{width:"80%", maxWidth:"80%"}}>
     <Header>
-      User Management
+      <Link href={"/" + organization} style={{textDecoration:"none", color:"white"}}>{state.organization.name}</Link> - User Management
       <OverlayTrigger
         key={"add-user"}
         placement="bottom"
@@ -149,7 +153,7 @@ function UserManagement({ incident }) {
           </Tooltip>
         }
       >
-        <Link href={"/" + incident + "/accounts/user/new"}><FontAwesomeIcon icon={faUserPlus} size="sm" className="ml-2 fa-move-up" inverse /></Link>
+        <Link href={"/" + organization + "/accounts/user/new"}><FontAwesomeIcon icon={faUserPlus} size="sm" className="ml-2 fa-move-up" inverse /></Link>
       </OverlayTrigger>
       <OverlayTrigger
         key={"upload-csv"}
@@ -225,7 +229,7 @@ function UserManagement({ incident }) {
                 </Tooltip>
               }
             >
-              <Link href={"/" + incident + "/accounts/user/edit/" + user.id}><FontAwesomeIcon icon={faPencil} size="lg" className="ml-1" inverse /></Link>
+              <Link href={"/" + organization + "/accounts/user/edit/" + user.id}><FontAwesomeIcon icon={faPencil} size="lg" className="ml-1" inverse /></Link>
             </OverlayTrigger>
             <OverlayTrigger
               key={"remove-user"}
@@ -273,6 +277,17 @@ function UserManagement({ incident }) {
             >
               <FontAwesomeIcon icon={faCircleI} size="lg" className="ml-1" />
             </OverlayTrigger> : ""}
+            {user.vet_perms ? <OverlayTrigger
+              key={"vet-perms"}
+              placement="top"
+              overlay={
+                <Tooltip id={`tooltip-vet-perms`}>
+                  User has veterinary permissions
+                </Tooltip>
+              }
+            >
+              <FontAwesomeIcon icon={faCircleV} size="lg" className="ml-1" />
+            </OverlayTrigger> : ""}
             {user.email_notification ? <OverlayTrigger
               key={"email-notification"}
               placement="top"
@@ -288,6 +303,7 @@ function UserManagement({ incident }) {
         </div>
       </Card>
     ))}
+    </span> : ""}
     <Modal show={showUserConfirm} onHide={handleUserClose}>
       <Modal.Header closeButton>
         <Modal.Title>Confirm User Removal</Modal.Title>

@@ -56,13 +56,18 @@ class ShelterlyPDF {
   constructor (format = {}, {
     addFooterHandler,
     drawHeaderOnEveryPage,
+    drawHeaderOnFirstPage = true,
     pageTitle,
     pageSubtitle
+  } = {}, {
+    mockJsPdf
   } = {}) {
-    this.#jsPDF = new jsPDF({
-      ...defaultFormat,
-      ...format
-    });
+    this.#jsPDF =
+      mockJsPdf ||
+      new jsPDF({
+        ...defaultFormat,
+        ...format,
+      });
 
     if (pageTitle) {
       this.#pageTitle = pageTitle;
@@ -83,7 +88,9 @@ class ShelterlyPDF {
     this.setDocumentColors();
 
     // draw header
-    this.drawPageHeader();
+    if (drawHeaderOnFirstPage) {
+      this.drawPageHeader();
+    }
   }
 
   // static getters
@@ -118,6 +125,11 @@ class ShelterlyPDF {
   get numberOfPages() { return this.#jsPDF.internal.getNumberOfPages(); }
   get remainderPageHeight() { return (this.pageHeight - 35) - this.#documentLastYPosition - 20; }
   get contentWidth() { return this.pageWidth - this.#defaultXMargin * 2; }
+  get drawColor() { return this.#jsPDF.getDrawColor(); }
+  get textColor() { return this.#jsPDF.getTextColor(); }
+  get fontSize() { return this.#jsPDF.getFontSize(); }
+  get currentPage() { return this.#currentPage; }
+  get paddingBetweenElements() { return this.#paddingBetweenElements; }
 
   //
   // document config methods
@@ -344,7 +356,7 @@ class ShelterlyPDF {
 
     if (Array.isArray(padding)) {
       // enforce padding array precision
-      if (padding.length !== 4) throw new Error('padding array must equal all four sides, i.e. [top, left, bottom, right');
+      if (padding.length !== 4) throw new Error('padding array must equal all four sides, i.e. [top, left, bottom, right]');
 
       leftPad = padding[1];
       rightPad = padding[3];
@@ -485,7 +497,13 @@ class ShelterlyPDF {
     this.#documentLastYPosition = yPosition + bottomPadding;
   }
 
-  drawWrappedText({ text, linePadding = 0, bottomPadding = 0 }) {
+  drawWrappedText({
+    text,
+    linePadding = 0,
+    bottomPadding = 0,
+    fontSize = this.#documentFontSize
+  }) {
+    this.setDocumentFontSize({ size: fontSize });
     const splitLines = this.#jsPDF.splitTextToSize(text, this.pageWidth - (this.#documentRightMargin * 2));
     if (splitLines.length > 1) {
       splitLines.forEach((splitText) => {
@@ -493,15 +511,18 @@ class ShelterlyPDF {
           text: splitText,
           bottomPadding: linePadding,
           topPadding: linePadding
-        })
-      })
+        });
+      });
     } else {
       this.drawSingleLineText({
         text,
         bottomPadding: bottomPadding,
         topPadding: linePadding
-      })
+      });
     }
+
+    // reset font document font size
+    this.setDocumentFontSize();
 
     // set last y position
     this.#documentLastYPosition = this.#documentLastYPosition + bottomPadding;
@@ -534,11 +555,14 @@ class ShelterlyPDF {
   }) {
     const yPosition = this.beforeDraw({ yPosition: this.getLastYPositionWithBuffer() });
 
-    this.#jsPDF.text(
-      label,
-      this.documentLeftMargin,
-      yPosition
-    );
+    if (!!label) {
+      this.#jsPDF.text(
+        label,
+        this.documentLeftMargin,
+        yPosition
+      );
+    }
+    
 
     // set last y position
     this.#documentLastYPosition = yPosition;
@@ -570,6 +594,7 @@ class ShelterlyPDF {
   drawList({
     listItems = [],
     listStyle = 'block',
+    rightAlign = false,
     bottomPadding = 0
   }) {
     listItems.forEach(({
@@ -580,17 +605,25 @@ class ShelterlyPDF {
       marginTop = 0,
       inlineRightMargin = 0,
       inlineOffset = 0,
-      withLines = false,
-      lineXOffset = 0
+      withLines = false
     }, i) => {
       const yPosition = this.getLastYPositionWithBuffer() + marginTop;
+      const textWidth = this.#jsPDF.getStringUnitWidth(label) * this.#documentFontSize;
       this.#jsPDF.setFillColor(...fillColor);
 
       if (type === 'checkbox') {
-        this.#jsPDF.rect(this.#documentLeftMargin, yPosition, size, size, 'FD');
+        var leftMargin = this.#documentLeftMargin
+        if (rightAlign) {
+          leftMargin = this.contentWidth - textWidth - 15;
+        }
+        this.#jsPDF.rect(leftMargin, yPosition, size, size, 'FD');
       }
 
-      this.#jsPDF.text(label, this.#documentLeftMargin + size + (size * 0.25), yPosition + 15)
+      this.textWithStyle({
+        text: label,
+        xPosition: this.#documentLeftMargin + size + (size * 0.25),
+        yPosition: yPosition + 15
+      })
 
       if (listStyle === 'block') {
         this.#documentLastYPosition = this.beforeDraw({ yPosition }) + size;
@@ -601,7 +634,7 @@ class ShelterlyPDF {
         if (listStyle === 'grid') {
           rightMargin = this.#documentLeftMargin + this.pageWidth / 2 - 30;
         }
-        const textWidth = this.#jsPDF.getStringUnitWidth(label) * this.#documentFontSize;
+
         this.#jsPDF.line(
           this.#documentLeftMargin + textWidth,
           yPosition + 15,
@@ -675,10 +708,12 @@ class ShelterlyPDF {
   drawCheckboxList({
     labels = [],
     listStyle = 'block',
-    bottomPadding = 0
+    bottomPadding = 0,
+    rightAlign = false
   }) {
     this.drawList({
       listStyle,
+      rightAlign,
       listItems: labels.map((label) => ({
         label: label.label || label,
         type: label.type || 'checkbox',
@@ -777,14 +812,16 @@ class ShelterlyPDF {
    * @param {object} param0
    * @param {number} param0.pageNumber
    * @param {number} param0.pageCount
+   * @param {number} [param0.marginBottom=30] space between page number and bottom edge of page
    */
   drawPageNumbers({
     pageNumber,
-    pageCount
+    pageCount,
+    marginBottom = 30
   }) {
     const jsPdf = this.#jsPDF;
     const { width: pageWidth, height: pageHeight } = jsPdf.internal.pageSize;
-    jsPdf.text('Page ' + String(pageNumber) + ' of ' + String(pageCount), pageWidth / 2, pageHeight - 15, {
+    jsPdf.text('Page ' + String(pageNumber) + ' of ' + String(pageCount), pageWidth / 2, pageHeight - marginBottom, {
         align: 'center'
       });
   }

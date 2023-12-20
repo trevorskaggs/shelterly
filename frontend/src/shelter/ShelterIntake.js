@@ -12,15 +12,7 @@ import { DropDown } from '../components/Form';
 import Header from '../components/Header';
 import ButtonSpinner from '../components/ButtonSpinner';
 import { SystemErrorContext } from '../components/SystemError';
-
-const statusLabelLookup = {
-  'REPORTED':'Reported',
-  'SHELTERED':'Sheltered',
-  'SHELTERED IN PLACE':'Sheltered In Place (SIP)',
-  'UNABLE TO LOCATE':'Unable To Locate (UTL)',
-  'NO FURTHER ACTION':'No Further Action (NFA)',
-  'DECEASED':'Deceased',
-}
+import { statusLabelLookup } from "../utils/formatString";
 
 function AnimalStatus(props) {
 
@@ -114,7 +106,7 @@ function AnimalStatus(props) {
   )
 }
 
-function ShelterIntake({ id, incident }) {
+function ShelterIntake({ id, incident, organization }) {
 
   const { setShowSystemError } = useContext(SystemErrorContext);
 
@@ -211,7 +203,7 @@ function ShelterIntake({ id, incident }) {
           values['intake_type'] = 'dispatch';
           axios.post('/shelter/api/intakesummary/', values)
           .then(response => {
-            navigate("/" + incident + "/shelter/intakesummary/" + response.data.id);
+            navigate('/' + organization + "/" + incident + "/shelter/intakesummary/" + response.data.id);
           })
           .catch(error => {
             setSubmitting(false);
@@ -227,7 +219,7 @@ function ShelterIntake({ id, incident }) {
       {props => (
         <BootstrapForm as={Form}>
           <Header>
-            <span style={{cursor:'pointer'}} onClick={() => navigate("/" + incident + "/shelter/" + id)} className="mr-2"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="sm" inverse /></span>
+            <span style={{cursor:'pointer'}} onClick={() => navigate('/' + organization + "/" + incident + "/shelter/" + id)} className="mr-2"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="sm" inverse /></span>
             {data.shelter_name}
             &nbsp;- Dispatch Intake
           </Header>
@@ -262,7 +254,7 @@ function ShelterIntake({ id, incident }) {
                   <Card.Title style={{marginBottom:"-5px", marginTop:"-5px"}}>
                     <h4>
                       SR#{assigned_request.service_request_object.id} -&nbsp;
-                      <Link href={"/" + incident + "/hotline/servicerequest/" + assigned_request.service_request_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link>
+                      <Link href={"/" + organization + "/" + incident + "/hotline/servicerequest/" + assigned_request.service_request_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link>
                     </h4>
                   </Card.Title>
                   <hr />

@@ -1,7 +1,7 @@
 import moment from 'moment';
 import ShelterlyPDF from '../utils/pdf';
 import { priorityChoices, DATE_FORMAT } from '../constants';
-import { capitalize } from '../utils/formatString';
+import { capitalize, statusLabelLookup } from '../utils/formatString';
 import { buildAnimalCareScheduleDoc } from '../animals/Utils';
 
 function buildServiceRequestsDoc(srs = []) {
@@ -41,7 +41,7 @@ function buildServiceRequestsDoc(srs = []) {
     pdf.drawPad(-10);
 
     const infoList = [
-      `Key Provided: ${data.key_provided ? 'Yes' : 'No'}`,
+      `Key at Staging: ${data.key_provided ? 'Yes' : 'No'}`,
       `Accessible: ${data.accessible ? 'Yes' : 'No'}`,
       `Turn Around: ${data.turn_around ? 'Yes' : 'No'}`,
     ];
@@ -52,11 +52,40 @@ function buildServiceRequestsDoc(srs = []) {
       bottomPadding: 10
     });
 
+    // forced entry
+    pdf.drawWrappedText({
+      text: `Forced Entry Permission: ${
+        data.assigned_requests?.find?.(
+          (ar) => ar.visit_note?.forced_entry === true
+        )
+          ? 'Yes'
+          : 'No'
+      }`,
+    });
+
     // follow up date
     pdf.drawWrappedText({ text: `Followup Date: ${data.followup_date ? new Date(data.followup_date)?.toLocaleDateString?.() : 'Not set'}` });
 
     // directions
-    pdf.drawWrappedText({ text: `Additional Information: ${data.directions || 'No additional information available'}` })
+    pdf.drawWrappedText({ text: `Instructions for Field Team: ${data.directions || 'No instructions available'}` })
+
+    pdf.drawHRule();
+
+    // visit notes
+    data.assigned_requests?.forEach?.(({ visit_note }, i) => {
+      if (i === 0) {
+        pdf.drawSectionHeader({ text: 'Visit Notes' });
+        pdf.drawPad(20);
+      }
+
+      if (visit_note) {
+        pdf.drawWrappedText({
+          text: `${moment(visit_note.date_completed).format('MMMM Do')}:${visit_note.forced_entry ? ' (Forced Entry)' : ''} ${
+            (visit_note?.notes && visit_note?.notes) || ''
+          }`,
+        });
+      }
+    });
 
     pdf.drawHRule();
 
@@ -72,16 +101,14 @@ function buildServiceRequestsDoc(srs = []) {
           text: `Owner: ${owner.first_name} ${owner.last_name} ${owner.display_phone || ''}`
         });
 
-        if (owner.email) {
-          pdf.drawWrappedText({
-            text: `Owner Email: ${owner.email}`
-          });
-        }
+        pdf.drawWrappedText({
+          text: `Owner Email: ${owner.email || 'N/A'}`
+        });
       })
     } else {
       //no owners
       pdf.drawWrappedText({
-        text: 'Owner: No Owner'
+        text: 'Owner: N/A'
       });
     }
 
@@ -90,12 +117,13 @@ function buildServiceRequestsDoc(srs = []) {
       pdf.drawWrappedText({
         text: `Reporter: ${data.reporter_object.first_name} ${data.reporter_object.last_name} ${data.reporter_object.display_phone || ''}`
       });
-
-      if (data.reporter_object.agency) {
-        pdf.drawWrappedText({
-          text: `Reporter Agency: ${data.reporter_object.agency}`
-        });
-      }
+      pdf.drawWrappedText({
+        text: `Reporter Agency: ${data.reporter_object.agency || 'N/A'}`
+      });
+    } else {
+      pdf.drawWrappedText({
+        text: 'Reporter: N/A'
+      });
     }
 
     pdf.drawHRule();
@@ -122,15 +150,25 @@ function buildServiceRequestsDoc(srs = []) {
         lastYPosBeforeDraw = pdf.getLastYPositionWithBuffer({ buffer: 0 });
       }
 
+      const animalStatus =
+        statusLabelLookup[animal.status] ||
+        `${capitalize(animal.status.toLowerCase(), { proper: true })}`;
+
       const animalInfoList = [
         `ID: A#${animal.id}`,
-        `Status: ${capitalize(animal.status.toLowerCase(), { proper: true })}`,
+        `Status: ${animalStatus}`,
         `Name: ${animal.name || 'Unknown'}`,
         `Species: ${capitalize(animal.species)}`,
         `Sex: ${capitalize(animal.sex|| 'Unknown')}`,
         `Age: ${capitalize(animal.age || 'Unknown')}`,
         `Size: ${capitalize(animal.size || 'Unknown')}`,
-        `Primary Color: ${capitalize(animal.pcolor || 'N/A')}, Secondary Color: ${capitalize(animal.scolor || 'N/A')}`
+        `Primary Color: ${capitalize(animal.pcolor || 'N/A')}, Secondary Color: ${capitalize(animal.scolor || 'N/A')}`,
+        `Fixed: ${capitalize(animal.fixed || 'Unknown')}`,
+        `Aggressive: ${capitalize(animal.aggressive || 'Unknown')}`,
+        `ACO Required: ${capitalize(animal.aco_required || 'Unknown')}`,
+        `Confined: ${capitalize(animal.confined || 'Unknown')}`,
+        `Injured: ${capitalize(animal.injured || 'Unknown')}`,
+        `Last Seen: ${animal.last_seen ? moment(animal.last_seen).format('MMMM Do YYYY HH:mm') : 'Unknown'}`
       ];
 
       pdf.drawTextList({
@@ -142,35 +180,27 @@ function buildServiceRequestsDoc(srs = []) {
       pdf.drawPad();
 
       // breed / description (color_notes)
-      if (animal.color_notes) {
-        pdf.drawWrappedText({
-          text: `Breed / Description: ${animal.color_notes}`,
-          linePadding: 0
-        });
-      }
+      pdf.drawWrappedText({
+        text: `Breed / Description: ${animal.color_notes}`,
+        linePadding: 0
+      });
 
       // medical notes
-      if (animal.medical_notes) {
-        pdf.drawWrappedText({
-          text: `Medical Notes: ${animal.medical_notes}`,
-          linePadding: 0
-        });
-      }
+      pdf.drawWrappedText({
+        text: `Medical Notes: ${animal.medical_notes || 'N/A'}`,
+        linePadding: 0
+      });
 
       // behavior notes
-      if (animal.behavior_notes) {
-        pdf.drawWrappedText({
-          text: `Behavior Notes: ${animal.behavior_notes}`,
-          linePadding: 0
-        });
-      }
+      pdf.drawWrappedText({
+        text: `Animal Notes: ${animal.behavior_notes || 'N/A'}`,
+        linePadding: 0
+      });
 
-      if (animal.shelter) {
-        pdf.drawWrappedText({
-          text: `Shelter Address: ${animal.shelter_object?.full_address || 'Unknown'}`,
-          linePadding: 5
-        })
-      }
+      pdf.drawWrappedText({
+        text: `Shelter Address: ${animal.shelter_object?.full_address || 'N/A'}`,
+        linePadding: 5
+      })
 
       pdf.drawPad(5);
       pdf.drawHRule();
@@ -205,7 +235,10 @@ function printAllServiceRequests(srs = []) {
 }
 
 const printSrAnimalCareSchedules  = async (animals = [], srId = 0) => {
-  const  pdf = await buildAnimalCareScheduleDoc(animals);
+  // sort animals by id
+  const sortedAnimals = [...animals].sort((a,b) => a.id - b.id);
+
+  const  pdf = await buildAnimalCareScheduleDoc(sortedAnimals);
   pdf.fileName = `Shelterly-SR-Animal-Care-Schedules-${srId.toString().padStart(3, 0)}-${moment().format(DATE_FORMAT)}`;
   return pdf.saveFile();
 };

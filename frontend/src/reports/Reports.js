@@ -1,7 +1,7 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import DataTable from 'react-data-table-component';
-import { Row } from 'react-bootstrap';
+import { Button, Row } from 'react-bootstrap';
 import Select from 'react-select';
 import moment from 'moment';
 import Header from '../components/Header';
@@ -14,11 +14,47 @@ function Reports({ incident }) {
   const { setShowSystemError } = useContext(SystemErrorContext);
 
   const [data, setData] = useState({'isFetching':true, 'daily_report':[], 'sr_worked_report':[], 'shelter_report':[], 'animal_status_report':[], 'animal_owner_report':[], 'animals_deceased_report':[]});
-  const [selection, setSelection] = useState({value:'daily', label:"Daily Report"});
+  const [selection, setSelection] = useState({value:'daily', label:"Daily Report", key:"daily_report"});
 
   const [storeDate, setStoreDate] = useState('');
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(moment().format('YYYY-MM-DD'));
+
+  function convertArrayOfObjectsToCSV(array) {
+    let result;
+    const columnDelimiter = ',';
+    const lineDelimiter = '\n';
+    const keys = Object.keys(array[0]);
+    result = '';
+    result += keys.join(columnDelimiter);
+    result += lineDelimiter;
+    array.forEach(item => {
+      let ctr = 0;
+      keys.forEach(key => {
+        if (ctr > 0) result += columnDelimiter;
+        result += item[key];
+        ctr++;
+      });
+      result += lineDelimiter;
+    });
+    return result;
+    }
+
+  function downloadCSV(array, name) {
+    const link = document.createElement('a');
+    let csv = convertArrayOfObjectsToCSV(array);
+    if (csv == null) return;
+    const filename = name + '.csv';
+    if (!csv.match(/^data:text\/csv/i)) {
+      csv = `data:text/csv;charset=utf-8,${csv}`;
+    }
+    link.setAttribute('href', encodeURI(csv));
+    link.setAttribute('download', filename);
+    link.click();
+    }
+
+  const Export = ({ onExport }) => <Button onClick={e => onExport(e.target.value)}>Export</Button>;
+  const actionsMemo = useMemo(() => <Export key={selection.key} onExport={() => downloadCSV(data[selection.key], selection.key)} />, [data, selection.key]);
 
   // Hook for initializing data.
   useEffect(() => {
@@ -215,6 +251,14 @@ function Reports({ incident }) {
       selector: row => row.reported,
     },
     {
+      name: <div>Reported (Evac)</div>,
+      selector: row => row.reported_evac,
+    },
+    {
+      name: <div>Reported (SIP)</div>,
+      selector: row => row.reported_sip,
+    },
+    {
       name: 'UTL',
       selector: row => row.utl,
     },
@@ -292,12 +336,12 @@ function Reports({ incident }) {
   ];
 
   const reportChoices = [
-    {value:'daily', label:"Daily Report"},
-    {value:'worked', label:"Service Requests Worked Report"},
-    {value:'shelter', label:"Shelter Report"},
-    {value:'animal_deceased', label:"Deceased Animal Report"},
-    {value:'animal_status', label:"Total Animals By Status Report"},
-    {value:'animal_owner', label:"Total Animals By Ownership Report"},
+    {value:'daily', label:"Daily Report", key:"daily_report"},
+    {value:'worked', label:"Service Requests Worked Report", key:"sr_worked_report"},
+    {value:'shelter', label:"Shelter Report", key:"shelter_report"},
+    {value:'animal_deceased', label:"Deceased Animal Report", key:"animals_deceased_report"},
+    {value:'animal_status', label:"Total Animals By Status Report", key:"animal_status_report"},
+    {value:'animal_owner', label:"Total Animals By Ownership Report", key:"animal_owner_report"},
   ]
 
   const customStyles = {
@@ -365,7 +409,9 @@ function Reports({ incident }) {
       <DataTable
           columns={daily_columns}
           data={data && data.daily_report ? data.daily_report.filter(row => (startDate ? startDate <= moment(row.date)
-          .format('YYYY-MM-DD') && endDate >= moment(row.date).format('YYYY-MM-DD') : row)) : []}
+            .format('YYYY-MM-DD') && endDate >= moment(row.date).format('YYYY-MM-DD') : row)) : []}
+          actions={actionsMemo}
+          title={selection.label}
           pagination
           striped
           noDataComponent={data && data.daily_report.length === 0 && !data.isFetching ? <div style={{padding:"24px"}}>There are no records to display</div> : <div style={{padding:"24px"}}>Fetching report data...</div>}
@@ -375,6 +421,8 @@ function Reports({ incident }) {
           columns={sr_worked_columns}
           data={data && data.sr_worked_report ? data.sr_worked_report.filter(row => (startDate ? startDate <= moment(row.date)
             .format('YYYY-MM-DD') && endDate >= moment(row.date).format('YYYY-MM-DD') : row)) : []}
+          actions={actionsMemo}
+          title={selection.label}
           pagination
           striped
       />
@@ -382,6 +430,8 @@ function Reports({ incident }) {
       <DataTable
           columns={shelterColumns}
           data={data.shelter_report}
+          actions={actionsMemo}
+          title={selection.label}
           pagination
           striped
       />
@@ -389,6 +439,8 @@ function Reports({ incident }) {
       <DataTable
           columns={animal_status_columns}
           data={data.animal_status_report}
+          actions={actionsMemo}
+          title={selection.label}
           pagination
           striped
       />
@@ -396,6 +448,8 @@ function Reports({ incident }) {
       <DataTable
           columns={animal_owner_columns}
           data={data.animal_owner_report}
+          actions={actionsMemo}
+          title={selection.label}
           pagination
           striped
       />
@@ -403,6 +457,8 @@ function Reports({ incident }) {
       <DataTable
           columns={animal_deceased_columns}
           data={data.animal_deceased_report}
+          actions={actionsMemo}
+          title={selection.label}
           pagination
           striped
       />

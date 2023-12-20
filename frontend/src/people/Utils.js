@@ -3,8 +3,6 @@ import ShelterlyPDF from '../utils/pdf';
 import { capitalize } from '../utils/formatString';
 import { buildAnimalCareScheduleDoc, buildAnimalCountList } from '../animals/Utils';
 import {
-  ORGANIZATION_NAME,
-  ORGANIZATION_SHORT_NAME,
   DATE_FORMAT,
 } from "../constants";
 
@@ -16,7 +14,7 @@ import {
  * @param {Array} [animalsOverride] optionally set the animals, otherwise will use animals within the owner object
  * @returns {ShelterlyPDF}
  */
-const buildOwnersContent = (pdf, owners, animalsOverride) => {
+const buildOwnersContent = (pdf, owners, organization, animalsOverride) => {
   const groupedPageCounts = [];
   let ownerPageCount = 1;
   owners.forEach((owner, i) => {
@@ -35,21 +33,20 @@ const buildOwnersContent = (pdf, owners, animalsOverride) => {
     pdf.drawSectionHeader({ text: 'Owner Summary/Liability', hRule: true });
     
     const ownerInfoList = [
-      `Name: ${owner.first_name} ${owner.last_name}`
+      `Name: ${owner.first_name} ${owner.last_name}`,
+      `Owner ID: #${owner.id || 'N/A'}`,
+      `Agency: ${owner.agency || 'N/A'}`,
+      `Telephone: ${owner.display_phone || 'N/A'} ${owner.display_alt_phone ? `  Alt: ${owner.display_alt_phone}` : ''}`,
+      `Email: ${owner.email || 'N/A'}`,
+      `Drivers License: ${owner.drivers_license || 'N/A'}`
     ];
-    if (owner.id) {
-      ownerInfoList.push(`Owner ID: #${owner.id}`)
-    }
-    if (owner.agency) ownerInfoList.push(`Agency: ${owner.agency}`);
-    if (owner.phone) ownerInfoList.push(`Telephone: ${owner.display_phone} ${owner.display_alt_phone ? `  Alt: ${owner.display_alt_phone}` : ''}`);
-    if (owner.email) ownerInfoList.push(`Email: ${owner.email}`);
-    if (owner.drivers_license) ownerInfoList.push(`Drivers License: ${owner.drivers_license}`);
 
-    if (owner.request) ownerInfoList.push(`Service Request: ${owner.request.full_address}`);
-    else {
-      if (owner.address) ownerInfoList.push(`Address: ${owner.full_address}`);
-      else if (owner.id) ownerInfoList.push('Address: No Address Listed');
-      else ownerInfoList.push('Address:');
+    if (owner.request) {
+      ownerInfoList.push(`Service Request: ${owner.request.full_address}`);
+    } else if (owner.address) {
+        ownerInfoList.push(`Address: ${owner.full_address}`);
+    } else {
+      ownerInfoList.push('Address: N/A');
     }
 
     pdf.drawTextList({
@@ -57,11 +54,10 @@ const buildOwnersContent = (pdf, owners, animalsOverride) => {
       bottomPadding: 15
     });
 
-    if (owner.comments) {
-      pdf.drawWrappedText({
-        text: `Comments: ${owner.comments}`
-      })
-    }
+    // Owner Comments
+    pdf.drawWrappedText({
+      text: `Comments: ${owner.comments || 'N/A'}`
+    });
 
     pdf.drawPad();
 
@@ -112,19 +108,15 @@ const buildOwnersContent = (pdf, owners, animalsOverride) => {
 
       pdf.drawPad();
 
-      if (animal.color_notes) {
-        pdf.drawWrappedText({
-          text: `Breed / Description: ${animal.color_notes}`,
-          linePadding: -5
-        });
-      }
+      pdf.drawWrappedText({
+        text: `Breed / Description: ${animal.color_notes || 'N/A'}`,
+        linePadding: -5
+      });
 
-      if (animal.shelter) {
-        pdf.drawWrappedText({
-          text: `Shelter Address: ${animal.shelter_object?.full_address || 'Unknown'}`,
-          linePadding: 5
-        })
-      }
+      pdf.drawWrappedText({
+        text: `Shelter Address: ${animal.shelter_object?.full_address || 'N/A'}`,
+        linePadding: 5
+      });
 
       pdf.drawPad(5);
       pdf.drawHRule();
@@ -140,11 +132,8 @@ const buildOwnersContent = (pdf, owners, animalsOverride) => {
       }
     });
 
-    const estimatedSectionHeight = 529;
-    if (pdf.remainderPageHeight <= estimatedSectionHeight) {
-      pdf.drawPageBreak();
-      ownerPageCount++;
-    }
+    pdf.drawPageBreak();
+    ownerPageCount++;
 
     // Draw liability form
     pdf.drawSectionHeader({
@@ -153,11 +142,11 @@ const buildOwnersContent = (pdf, owners, animalsOverride) => {
       align: ShelterlyPDF.AlignTypes.CENTER,
     });
     pdf.drawPad(18);
-    let liabilityPreface = `Due to a declared emergency, I am requesting ${ORGANIZATION_NAME} to board my animal(s) `;
+    pdf.drawHRule({ buffer: 3});
+    let liabilityPreface = `Due to a declared emergency, I am requesting ${organization.liability_name} to board my animal(s) `;
     liabilityPreface += '(listed above) and agree to all of the following:';
     pdf.setDocumentFontSize({ size: 8 });
     pdf.drawWrappedText({ text: liabilityPreface, linePadding: -2 });
-    pdf.drawHRule({ buffer: 1});
     pdf.setDocumentFontSize();
 
     function drawAgreements(agreements) {
@@ -174,7 +163,7 @@ const buildOwnersContent = (pdf, owners, animalsOverride) => {
         withLines: true
       });
       pdf.drawTextList({
-        labels: [`${ORGANIZATION_SHORT_NAME} Witness Signature (First Name & AR#): `],
+        labels: [`${organization.liability_short_name} Witness Signature (First Name & AR#): `],
         bottomPadding: 15,
         withLines: true
       });
@@ -184,13 +173,13 @@ const buildOwnersContent = (pdf, owners, animalsOverride) => {
       // 1)
       'I understand that my animal(s) may be exposed to disease and other risks while being ' +
       'housed at the shelter and other facilities and therefore I will not hold ' +
-      `${ORGANIZATION_NAME} responsible for the health or death of my animal(s).`,
+      `${organization.liability_name} responsible for the health or death of my animal(s).`,
 
       // 2)
       'I agree to attempt to find alternate housing for my animal(s) as soon as possible.',
 
       // 3)
-      `I agree to contact the agency on a regular basis to keep ${ORGANIZATION_NAME} ` +
+      `I agree to contact the agency on a regular basis to keep ${organization.liability_name} ` +
       'updated on my whereabouts and possible alternate housing.',
 
       // 4)
@@ -241,7 +230,7 @@ const buildOwnersContent = (pdf, owners, animalsOverride) => {
       align: ShelterlyPDF.AlignTypes.CENTER,
     });
     pdf.drawPad(18);
-    pdf.drawHRule({ buffer: 1});
+    pdf.drawHRule({ buffer: 3});
 
     let releaseText = 'I hereby acknowledge that I am the owner/responsible person for the above animal. I have taken ';
     releaseText += 'custody of my animal and am now responsible for its care and transportation.';
@@ -278,29 +267,32 @@ const buildOwnersContent = (pdf, owners, animalsOverride) => {
   return pdf;
 }
 
-const buildOwnersDoc = (owners) => {
+const buildOwnersDoc = (owners, organization) => {
   const pdf = new ShelterlyPDF({}, {
     pageTitle: 'Owner Summary',
     pageSubtitle: `Date: ${new Date().toLocaleDateString()}`,
   });
 
-  return buildOwnersContent(pdf, owners);
+  return buildOwnersContent(pdf, owners, organization);
 };
 
-function printOwnerDetails(owner = {}) {
-  const pdf = buildOwnersDoc([owner]);
+function printOwnerDetails(owner = {}, organization = {}) {
+  const pdf = buildOwnersDoc([owner], organization);
   pdf.fileName = `Owner-Summary-${owner.id.toString().padStart(3, 0)}`;
   return pdf.saveFile();
 }
 
-async function printAllOwnersDetails(owners = []) {
-  const pdf = buildOwnersDoc(owners);
+async function printAllOwnersDetails(owners = [], organization = {}) {
+  const pdf = buildOwnersDoc(owners, organization);
   pdf.fileName = `Owner-Summaries-${moment().format(DATE_FORMAT)}`;
   return pdf.saveFile();
 }
 
 const printOwnerAnimalCareSchedules  = async (animals = [], ownerId = 0) => {
-  const  pdf = await buildAnimalCareScheduleDoc(animals);
+  // sort animals by id
+  const sortedAnimals = [...animals].sort((a,b) => a.id - b.id);
+
+  const  pdf = await buildAnimalCareScheduleDoc(sortedAnimals);
   pdf.fileName = `Shelterly-Owner-Animal-Care-Schedules-${ownerId.toString().padStart(4, 0)}-${moment().format(DATE_FORMAT)}`;
   return pdf.saveFile();
 };
