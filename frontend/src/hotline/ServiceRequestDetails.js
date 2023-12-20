@@ -6,19 +6,21 @@ import { Button, Card, ListGroup, Modal, OverlayTrigger, Tooltip } from 'react-b
 import Flatpickr from 'react-flatpickr';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBan, faCar, faClipboardCheck, faEdit, faEnvelope, faHouseDamage, faPrint,
+  faBan, faCar, faClipboardCheck, faDownload, faEdit, faEnvelope, faHouseDamage,
   faKey, faMapMarkedAlt, faPlusSquare, faTimes, faTrailer, faUserPlus, faUsers
 } from '@fortawesome/free-solid-svg-icons';
-import { faCalendarEdit, faCommentSmile, faHomeHeart, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
+import { faCalendarEdit, faHammerCrash, faHomeHeart, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import Header from '../components/Header';
 import History from '../components/History';
 import AnimalCards from '../components/AnimalCards';
 import PhotoDocuments from '../components/PhotoDocuments';
 import { SystemErrorContext } from '../components/SystemError';
-import { printServiceRequestSummary } from './Utils'
-import { printSrAnimalCareSchedules } from './Utils';
+import { printServiceRequestSummary, printSrAnimalCareSchedules } from './Utils'
+import ShelterlyPrintifyButton from '../components/ShelterlyPrintifyButton';
 
-function ServiceRequestDetails({ id, incident }) {
+import '../assets/styles.css';
+
+function ServiceRequestDetails({ id, incident, organization }) {
 
   const { setShowSystemError } = useContext(SystemErrorContext);
 
@@ -87,16 +89,20 @@ function ServiceRequestDetails({ id, incident }) {
     });
   }
 
-  const handleDownloadPdfClick = (e) => {
-    e.preventDefault();
+  const handleDownloadPdfClick = () =>
+    printServiceRequestSummary(data)
 
-    printServiceRequestSummary(data);
-  }
+  const handlePrintAllAnimalsClick = () =>
+    printSrAnimalCareSchedules(data.animals, id)
 
-  const handlePrintAllAnimalsClick = (e) => {
-    e.preventDefault();
-
-    printSrAnimalCareSchedules(data.animals, id);
+  const handleGeoJsonDownload = () => {
+    var fileDownload = require('js-file-download');
+    axios.get('/hotline/api/servicerequests/' + data.id +'/download/', { 
+            responseType: 'blob',
+        }).then(res => {
+            fileDownload(res.data, 'SR-' + data.id + '.geojson');
+        }).catch(err => {
+        })
   }
 
   // Hook for initializing data.
@@ -115,7 +121,9 @@ function ServiceRequestDetails({ id, incident }) {
         }
       })
       .catch(error => {
-        setShowSystemError(true);
+        if (!unmounted) {
+          setShowSystemError(true);
+        }
       });
     };
     fetchServiceRequestData();
@@ -129,7 +137,7 @@ function ServiceRequestDetails({ id, incident }) {
   return (
     <>
       <Header>
-        Service Request Details 
+        Service Request #{data.id}
         <OverlayTrigger
           key={"edit-service-request"}
           placement="bottom"
@@ -139,24 +147,29 @@ function ServiceRequestDetails({ id, incident }) {
             </Tooltip>
           }
         >
-          <Link href={"/" + incident + "/hotline/servicerequest/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-1" inverse /></Link>
+          <Link href={"/" + organization + "/" + incident + "/hotline/servicerequest/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-2" inverse /></Link>
         </OverlayTrigger>
 
         <OverlayTrigger
-          key={"download-service-request-summary"}
+          key={"download-geojson"}
           placement="bottom"
           overlay={
-            <Tooltip id={`tooltip-download-service-request-summary`}>
-              Download Service Request Summary
+            <Tooltip id={`tooltip-download-geojson`}>
+              Download service request data as geojson
             </Tooltip>
           }
         >
-          {({ ref, ...triggerHandler }) => (
-            <Link onClick={handleDownloadPdfClick} {...triggerHandler} href="#">
-              <span ref={ref}><FontAwesomeIcon icon={faPrint} className="ml-1 mr-2"  inverse /></span>
-            </Link>
-          )}
+          <Link onClick={handleGeoJsonDownload} href=""><FontAwesomeIcon icon={faDownload} className="mx-2"  inverse /></Link>
         </OverlayTrigger>
+
+        <ShelterlyPrintifyButton
+          id="service-request-summary"
+          spinnerSize={2.0}
+          tooltipPlacement='bottom'
+          tooltipText='Download Service Request Summary'
+          printFunc={handleDownloadPdfClick}
+        />
+
         <OverlayTrigger
           key={"cancel-service-request"}
           placement="bottom"
@@ -168,11 +181,10 @@ function ServiceRequestDetails({ id, incident }) {
         >
           <FontAwesomeIcon icon={faTimes} className="ml-1" size="lg" style={{cursor:'pointer'}} inverse onClick={() => {setShowModal(true)}}/>
         </OverlayTrigger>
-        &nbsp;| <span style={{textTransform:"capitalize"}}>{data.status}</span>
       </Header>
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>Confirm Service Request Cancellation</Modal.Title>
+          <Modal.Title>Confirm Service Request Cancelation</Modal.Title>
         </Modal.Header>
         <Modal.Body>Are you sure you want to cancel this Service Request and associated animals?</Modal.Body>
         <Modal.Footer>
@@ -190,18 +202,18 @@ function ServiceRequestDetails({ id, incident }) {
           <Card className="mb-2 border rounded" style={{width:"100%"}}>
             <Card.Body>
               <Card.Title>
-                <h4 className="mb-0">Information
+                <h4 className="mb-0">Information&nbsp;
                   {data.verbal_permission ?
                   <OverlayTrigger
                     key={"verbal"}
                     placement="top"
                     overlay={
                       <Tooltip id={`tooltip-verbal`}>
-                        Verbal permission granted
+                        Forced entry permission granted
                       </Tooltip>
                     }
                   >
-                    <FontAwesomeIcon icon={faCommentSmile} size="sm" className="ml-1" />
+                    <FontAwesomeIcon icon={faHammerCrash} size="sm" className="fa-move-up" transform={'shrink-2'} />
                   </OverlayTrigger> : ""
                   }
                   {data.key_provided ?
@@ -210,22 +222,22 @@ function ServiceRequestDetails({ id, incident }) {
                     placement="top"
                     overlay={
                       <Tooltip id={`tooltip-key`}>
-                        Key provided
+                        Key at staging
                       </Tooltip>
                     }
                   >
-                    <FontAwesomeIcon icon={faKey} size="sm" className="ml-1" transform={'shrink-2'} />
+                    <FontAwesomeIcon icon={faKey} size="sm" className="" transform={'shrink-2'} />
                   </OverlayTrigger> :
                   <OverlayTrigger
                     key={"no-key"}
                     placement="top"
                     overlay={
                       <Tooltip id={`tooltip-no-key`}>
-                        No key provided
+                        No key at staging
                       </Tooltip>
                     }
                   >
-                    <span className="fa-layers" style={{marginLeft:"2px"}}>
+                    <span className="fa-layers" style={{marginLeft:"0px"}}>
                       <FontAwesomeIcon icon={faKey} size="sm" transform={'shrink-2'} />
                       <FontAwesomeIcon icon={faBan} color="#ef5151" size="sm" transform={'shrink-1'} />
                     </span>
@@ -293,8 +305,8 @@ function ServiceRequestDetails({ id, incident }) {
               <ListGroup variant="flush">
                 <ListGroup.Item style={{marginTop:"-13px"}}>
                   <div className="row">
-                    <span className="col-6"><b>ID: </b>SR#{data.id}</span>
                     <span className="col-6"><b>Priority: </b>{priorityText[data.priority]}</span>
+                    <span className="col-6" style={{textTransform:"capitalize"}}><b>Status: </b>{data.status}</span>
                   </div>
                 </ListGroup.Item>
                 <ListGroup.Item><b>Address: </b>{data.full_address}</ListGroup.Item>
@@ -322,7 +334,7 @@ function ServiceRequestDetails({ id, incident }) {
                     value={data.followup_date || null}>
                   </Flatpickr>
                 </ListGroup.Item>
-                <ListGroup.Item style={{marginBottom:"-13px"}}><b>Additional Information:</b> {data.directions||"None"}</ListGroup.Item>
+                <ListGroup.Item style={{marginBottom:"-13px"}}><b>Instructions for Field Team:</b> {data.directions||"None"}</ListGroup.Item>
               </ListGroup>
             </Card.Body>
           </Card>
@@ -341,14 +353,14 @@ function ServiceRequestDetails({ id, incident }) {
                       </Tooltip>
                     }
                   >
-                    <Link href={"/" + incident + "/people/owner/new?servicerequest_id=" + id}><FontAwesomeIcon icon={faUserPlus} size="sm" className="ml-1" inverse /></Link>
+                    <Link href={"/" + organization + "/" + incident + "/people/owner/new?servicerequest_id=" + id}><FontAwesomeIcon icon={faUserPlus} size="sm" className="ml-1" inverse /></Link>
                   </OverlayTrigger>
                 </h4>
               </Card.Title>
               <hr/>
               <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-20px"}}>
                 {data.owner_objects.map(owner => (
-                  <ListGroup.Item key={owner.id}><b>Owner: </b><Link href={"/" + incident + "/people/owner/" + owner.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{owner.first_name} {owner.last_name}</Link>
+                  <ListGroup.Item key={owner.id}><b>Owner: </b><Link href={"/" + organization + "/" + incident + "/people/owner/" + owner.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{owner.first_name} {owner.last_name}</Link>
                     {owner.display_phone ?
                     <OverlayTrigger
                       key={"owner-phone"}
@@ -379,7 +391,7 @@ function ServiceRequestDetails({ id, incident }) {
                 ))}
                 {data.reporter ?
                 <ListGroup.Item>
-                  <b>Reporter: </b><Link href={"/" + incident + "/people/reporter/" + data.reporter} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.reporter_object.first_name} {data.reporter_object.last_name}</Link>
+                  <b>Reporter: </b><Link href={"/" + organization + "/" + incident + "/people/reporter/" + data.reporter} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.reporter_object.first_name} {data.reporter_object.last_name}</Link>
                   {data.reporter_object.agency ? <span className="ml-1">({data.reporter_object.agency})</span> : "" }
                   {data.reporter_object.display_phone ?
                   <OverlayTrigger
@@ -415,7 +427,7 @@ function ServiceRequestDetails({ id, incident }) {
                       </Tooltip>
                     }
                   >
-                    <Link href={"/" + incident + "/animals/new?servicerequest_id=" + id}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
+                    <Link href={"/" + organization + "/" + incident + "/animals/new?servicerequest_id=" + id}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
                   </OverlayTrigger>
                   {data.status.toLowerCase() !== 'closed' ?
                     <OverlayTrigger
@@ -431,22 +443,18 @@ function ServiceRequestDetails({ id, incident }) {
                     </OverlayTrigger>
                     : ""}
                   {data.animals?.length > 0 && (
-                    <OverlayTrigger
-                      key={"printall"}
-                      placement="top"
-                      overlay={
-                        <Tooltip id={`tooltip-printall`}>
-                          Print all animal care schedules
-                        </Tooltip>
-                      }
-                    >
-                      <FontAwesomeIcon icon={faPrint} onClick={handlePrintAllAnimalsClick} style={{cursor:'pointer'}} className="ml-1 fa-move-up" size="sm" inverse />
-                    </OverlayTrigger>
+                    <ShelterlyPrintifyButton
+                      id="service-request-animal-care-schedules"
+                      spinnerSize={1.5}
+                      tooltipPlacement='bottom'
+                      tooltipText='Print All Animal Care Schedules'
+                      printFunc={handlePrintAllAnimalsClick}
+                    />
                   )}
                 </h4>
               </Card.Title>
               <hr />
-              <AnimalCards animals={data.animals} show_owner={false} show_status={true} incident={"/" + incident} />
+              <AnimalCards animals={data.animals} show_owner={false} show_status={true} organization={organization} incident={"/" + incident} />
               {data.animals.length < 1 ? <div className="mb-3">Service Request does not have any animals assigned.</div> : ""}
             </Card.Body>
           </Card>
@@ -468,7 +476,7 @@ function ServiceRequestDetails({ id, incident }) {
                       </Tooltip>
                     }
                   >
-                    <Link href={"/" + incident + "/hotline/servicerequest/" + id + "/assign"}><FontAwesomeIcon icon={faMapMarkedAlt} className="ml-1" inverse /></Link>
+                    <Link href={"/" + organization + "/" + incident + "/hotline/servicerequest/" + id + "/assign"}><FontAwesomeIcon icon={faMapMarkedAlt} className="ml-1" inverse /></Link>
                   </OverlayTrigger> : ""}
                 </h4>
               </Card.Title>
@@ -477,7 +485,7 @@ function ServiceRequestDetails({ id, incident }) {
                 {data.assigned_requests.filter(assigned_request => !assigned_request.dispatch_assignment.end_time).map(assigned_request => (
                   <ListGroup.Item key={assigned_request.id}>
                     <b>Active Dispatch Assignment:</b>
-                    &nbsp;<Link href={"/" + incident + "/dispatch/summary/" + assigned_request.dispatch_assignment.id} className="text-link" style={{textDecoration:"none", color:"white"}}><Moment format="LL">{assigned_request.dispatch_assignment.start_time}</Moment></Link>&nbsp;|&nbsp;
+                    &nbsp;<Link href={"/" + organization + "/" + incident + "/dispatch/summary/" + assigned_request.dispatch_assignment.id} className="text-link" style={{textDecoration:"none", color:"white"}}><Moment format="LL">{assigned_request.dispatch_assignment.start_time}</Moment></Link>&nbsp;|&nbsp;
                     {assigned_request.dispatch_assignment.team_name}
                     <OverlayTrigger
                       key={"team-names"}
@@ -499,14 +507,14 @@ function ServiceRequestDetails({ id, incident }) {
                         </Tooltip>
                       }
                     >
-                      <Link href={"/" + incident + "/dispatch/resolution/" + assigned_request.dispatch_assignment.id}><FontAwesomeIcon icon={faClipboardCheck} className="ml-1" inverse /></Link>
+                      <Link href={"/" + organization + "/" + incident + "/dispatch/resolution/" + assigned_request.dispatch_assignment.id}><FontAwesomeIcon icon={faClipboardCheck} className="ml-1" inverse /></Link>
                     </OverlayTrigger>
                   </ListGroup.Item>
                 ))}
                 {data.assigned_requests.filter(assigned_request => assigned_request.visit_note && assigned_request.visit_note.date_completed).map((assigned_request) => (
                   <ListGroup.Item key={assigned_request.id}>
                     <b>Dispatch Assignment:</b>
-                    &nbsp;<Link href={"/" + incident + "/dispatch/summary/" + assigned_request.visit_note.dispatch_assignment} className="text-link" style={{textDecoration:"none", color:"white"}}><Moment format="LL">{assigned_request.visit_note.date_completed}</Moment></Link>
+                    &nbsp;<Link href={"/" + organization + "/" + incident + "/dispatch/summary/" + assigned_request.visit_note.dispatch_assignment} className="text-link" style={{textDecoration:"none", color:"white"}}><Moment format="LL">{assigned_request.visit_note.date_completed}</Moment></Link>
                     {assigned_request.visit_note.forced_entry ?
                       <OverlayTrigger
                         key={"forced"}
@@ -542,7 +550,7 @@ function ServiceRequestDetails({ id, incident }) {
                         </Tooltip>
                       }
                     >
-                      <Link href={"/" + incident + "/dispatch/assignment/note/" + assigned_request.visit_note.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
+                      <Link href={"/" + organization + "/" + incident + "/dispatch/assignment/note/" + assigned_request.visit_note.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
                     </OverlayTrigger>
                     <div className="mt-1 mb-0"><b>Outcome:</b> {assigned_request.visit_note.notes||"No visit information available."}</div>
                     {assigned_request.owner_contact ?

@@ -14,7 +14,7 @@ import { SystemErrorContext } from '../components/SystemError';
 // Regex validators.
 const nameRegex = /^[a-z0-9 ,.'-]+$/i
 
-const RoomForm = ({ id, incident }) => {
+const RoomForm = ({ id, incident, organization }) => {
 
   const { state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
@@ -49,7 +49,9 @@ const RoomForm = ({ id, incident }) => {
           }
         })
         .catch(error => {
-          setShowSystemError(true);
+          if (!unmounted) {
+            setShowSystemError(true);
+          }
         });
       };
       fetchRoomData();
@@ -83,7 +85,7 @@ const RoomForm = ({ id, incident }) => {
                   navigate(state.prevLocation);
                 }
                 else {
-                  navigate('/' + incident + '/shelter/room/' + id);
+                  navigate('/' + organization + '/' + incident + '/shelter/room/' + id);
                 }
               })
               .catch(error => {
@@ -98,7 +100,7 @@ const RoomForm = ({ id, incident }) => {
                   navigate(state.prevLocation);
                 }
                 else {
-                  navigate('/' + incident + '/shelter/building/' + building_id);
+                  navigate('/' + organization + '/' + incident + '/shelter/building/' + building_id);
                 }
               })
               .catch(error => {

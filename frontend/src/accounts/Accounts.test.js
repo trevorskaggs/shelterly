@@ -1,7 +1,16 @@
 import React from "react";
 import { render, fireEvent, screen } from "@testing-library/react";
+import nock from "nock";
 import Login from "./LoginForm";
 import { AuthProvider } from "./AccountsReducer";
+
+// Nock API chain
+nock('http://localhost')
+  // POST login unauthorized
+  .post('/login/', { username: 'test@test.com', password: /.+/i })
+  .times(1)
+  .reply(401, {})
+;
 
 describe("Login form", () => {
   it("Logging in with incorrect credentials should show feedback", async () => {

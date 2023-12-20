@@ -7,13 +7,15 @@ import {
   faMinusSquare, faUpload, faUserPlus
 } from '@fortawesome/free-solid-svg-icons';
 import {
-  faCircleI, faCircleU, faPencil, faUserUnlock
+  faCircleE, faCircleI, faCircleU, faCircleV, faPencil, faUserUnlock
 } from '@fortawesome/pro-solid-svg-icons';
 import Header from "../components/Header";
+import { AuthContext } from "./AccountsReducer";
 import { SystemErrorContext } from '../components/SystemError';
 
-function UserManagement({ incident }) {
+function UserManagement({ organization }) {
 
+  const { dispatch, state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
   const [data, setData] = useState({users: [], isFetching: false});
@@ -34,7 +36,7 @@ function UserManagement({ incident }) {
   const [timer, setTimer] = useState(null);
 
   const handleRemoveUserSubmit = async () => {
-    await axios.delete('/accounts/api/user/' + userToDelete.id + '/')
+    await axios.delete('/accounts/api/user/' + userToDelete.id + '/?organization=' + state.organization.id)
     .then(response => {
       setData(prevState => ({ ...prevState, "users":data.users.filter(user => user.id !== userToDelete.id) }));
       setFilteredData(prevState => ({ ...prevState, "users":data.users.filter(user => user.id !== userToDelete.id) }));
@@ -61,7 +63,7 @@ function UserManagement({ incident }) {
     const formData = new FormData();
     formData.append('user_csv', file);
 
-    await axios.post('/accounts/api/user/upload_csv/', formData)
+    await axios.post('/accounts/api/user/upload_csv/?organization=' + organization, formData)
     .then(response => {
       setData(prevState => ({ ...prevState, "users":data.users.concat(response.data)}));
       setFilteredData(prevState => ({ ...prevState, "users":filteredData.users.concat(response.data)}));
@@ -109,7 +111,7 @@ function UserManagement({ incident }) {
     const fetchUserData = async () => {
 
       setData({users: [], isFetching: true});
-      axios.get('/accounts/api/user/', {
+      axios.get('/accounts/api/user/?organization=' + state.organization.id, {
         cancelToken: source.token,
       })
       .then(response => {
@@ -119,8 +121,10 @@ function UserManagement({ incident }) {
         }
       })
       .catch(error => {
-        setData({users: [], isFetching: false});
-        setShowSystemError(true);
+        if (!unmounted) {
+          setData({users: [], isFetching: false});
+          setShowSystemError(true);
+        }
       });
 
       // Cleanup.
@@ -136,8 +140,10 @@ function UserManagement({ incident }) {
 
   return (
     <>
+    {state.user.is_superuser || state.user.user_perms ?
+    <span className="mt-4 ml-auto mr-auto" style={{width:"80%", maxWidth:"80%"}}>
     <Header>
-      User Management
+      <Link href={"/" + organization} style={{textDecoration:"none", color:"white"}}>{state.organization.name}</Link> - User Management
       <OverlayTrigger
         key={"add-user"}
         placement="bottom"
@@ -147,7 +153,7 @@ function UserManagement({ incident }) {
           </Tooltip>
         }
       >
-        <Link href={"/" + incident + "/accounts/user/new"}><FontAwesomeIcon icon={faUserPlus} size="sm" className="ml-2 fa-move-up" inverse /></Link>
+        <Link href={"/" + organization + "/accounts/user/new"}><FontAwesomeIcon icon={faUserPlus} size="sm" className="ml-2 fa-move-up" inverse /></Link>
       </OverlayTrigger>
       <OverlayTrigger
         key={"upload-csv"}
@@ -172,7 +178,7 @@ function UserManagement({ incident }) {
         }}
       />
     </InputGroup>
-    <Row>
+    <Row className="flex-nowrap">
       <Col style={{minWidth:"150px", maxWidth:"150px", marginLeft:"0px"}}>
           Last Name
       </Col>
@@ -191,13 +197,13 @@ function UserManagement({ incident }) {
       <Col style={{minWidth:"75px", maxWidth:"75px"}}>
           Actions
       </Col>
-      <Col>
+      <Col style={{minWidth:"75px"}}>
           Perms
       </Col>
     </Row>
     {filteredData.users.map(user => (
-      <Card key={user.id} className=" rounded w-100 mb-1" style={{height:"32px"}}>
-        <div className="row no-gutters">
+      <Card key={user.id} className="rounded w-100 mb-1" style={{height:"32px"}}>
+        <div className="row no-gutters flex-nowrap">
           <Col className="border-top border-left border-bottom" style={{height:"32px", paddingLeft:"3px", paddingTop:"5px", marginTop: "-1px", fontSize:"13px", borderTopLeftRadius:"0.25rem", borderBottomLeftRadius:"0.25rem", minWidth:"150px", maxWidth:"150px", backgroundColor:"#615e5e"}}>
             {user.last_name}
           </Col>
@@ -223,7 +229,7 @@ function UserManagement({ incident }) {
                 </Tooltip>
               }
             >
-              <Link href={"/" + incident + "/accounts/user/edit/" + user.id}><FontAwesomeIcon icon={faPencil} size="lg" className="ml-1" inverse /></Link>
+              <Link href={"/" + organization + "/accounts/user/edit/" + user.id}><FontAwesomeIcon icon={faPencil} size="lg" className="ml-1" inverse /></Link>
             </OverlayTrigger>
             <OverlayTrigger
               key={"remove-user"}
@@ -248,7 +254,7 @@ function UserManagement({ incident }) {
               <FontAwesomeIcon icon={faUserUnlock} style={{cursor:'pointer'}} size="lg" className="ml-1" onClick={() => {setUserToReset({id:user.id, first_name: user.first_name, last_name: user.last_name});setShowUserResetConfirm(true);}} inverse />
             </OverlayTrigger>
           </Col>
-          <Col className="border" style={{height:"32px", paddingLeft:"3px", paddingTop:"5px", marginTop: "-1px", fontSize:"13px", borderTopRightRadius:"0.25rem", borderBottomRightRadius:"0.25rem", backgroundColor:"#615e5e"}}>
+          <Col className="border" style={{height:"32px", paddingLeft:"3px", paddingTop:"5px", marginTop: "-1px", fontSize:"13px", minWidth:"75px", borderTopRightRadius:"0.25rem", borderBottomRightRadius:"0.25rem", backgroundColor:"#615e5e"}}>
             {user.user_perms ? <OverlayTrigger
               key={"user-perms"}
               placement="top"
@@ -271,10 +277,33 @@ function UserManagement({ incident }) {
             >
               <FontAwesomeIcon icon={faCircleI} size="lg" className="ml-1" />
             </OverlayTrigger> : ""}
+            {user.vet_perms ? <OverlayTrigger
+              key={"vet-perms"}
+              placement="top"
+              overlay={
+                <Tooltip id={`tooltip-vet-perms`}>
+                  User has veterinary permissions
+                </Tooltip>
+              }
+            >
+              <FontAwesomeIcon icon={faCircleV} size="lg" className="ml-1" />
+            </OverlayTrigger> : ""}
+            {user.email_notification ? <OverlayTrigger
+              key={"email-notification"}
+              placement="top"
+              overlay={
+                <Tooltip id={`tooltip-email-notification`}>
+                  User will receive SR email notifications
+                </Tooltip>
+              }
+            >
+              <FontAwesomeIcon icon={faCircleE} size="lg" className="ml-1" />
+            </OverlayTrigger> : ""}
           </Col>
         </div>
       </Card>
     ))}
+    </span> : ""}
     <Modal show={showUserConfirm} onHide={handleUserClose}>
       <Modal.Header closeButton>
         <Modal.Title>Confirm User Removal</Modal.Title>

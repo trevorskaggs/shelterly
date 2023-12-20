@@ -21,7 +21,6 @@ import { makeStyles } from '@material-ui/core/styles';
 import Alert from 'react-bootstrap/Alert';
 import { Legend, pinMarkerIcon } from "../components/Map";
 import { STATE_OPTIONS } from '../constants';
-import moment from "moment";
 import imageCompression from 'browser-image-compression';
 
 const useStyles = makeStyles({
@@ -69,12 +68,43 @@ const useStyles = makeStyles({
 });
 
 const DateRangePicker = ({...props}) => {
-
-  let options = {allowInput: true, dateFormat: "m-d-Y", mode: "range", maxDate: moment().format('MM-DD-YYYY')}
+  const pickerRef = useRef();
+  const options = {allowInput: true, dateFormat: props.mode === "single" ? "M d, Y H:i" : "m-d-Y", mode: props.mode === "single" ? "single" : "range", defaultHour:props.hour === 0 ? 0 : props.hour||12, defaultMinute:props.minute||0}
+  const styles = {
+    ...props.style,
+    display: 'flex'
+  }
   return (
-    <>
-      <Flatpickr className="daterange_picker" options={options} {...props} style={{...props.style, borderRadius:".25rem", borderWidth:"1px", borderStyle:"solid"}} />
-    </>
+    <div style={styles}>
+      <Flatpickr
+        className="daterange_picker"
+        options={options}
+        {...props}
+        style={{
+          borderRadius: ".25rem",
+          borderWidth: "1px",
+          borderStyle: "solid",
+          flexGrow: 1
+        }}
+        ref={pickerRef}
+      />
+      {!!pickerRef?.current?.flatpickr?.selectedDates?.length && (
+        <Button
+          className="text-center bg-white text-dark mx-0 px-2 text-center border-1 border-left-0 text-muted"
+          style={{
+            position: "relative",
+            left: -3,
+            borderBottomLeftRadius: 0,
+            borderTopLeftRadius: 0,
+            textTransform: 'uppercase',
+            fontSize: 'x-small'
+          }}
+          onClick={() => pickerRef.current.flatpickr.clear()}
+        >
+          x
+        </Button>
+      )}
+    </div>
   );
 };
 
@@ -226,10 +256,10 @@ const DropDown = React.forwardRef((props, ref) => {
       {props.label ? <Form.Label style={props.style}>{props.label}</Form.Label> : ""}
       {props.tooltip ?
       <OverlayTrigger
-         key={"edit-service-request"}
+         key={"tooltip"}
          placement="top"
          overlay={
-           <Tooltip id={`tooltip-edit-service-request`}>
+           <Tooltip id={`tooltip`}>
              {props.tooltip}
            </Tooltip>
          }
@@ -253,7 +283,7 @@ const DropDown = React.forwardRef((props, ref) => {
 
 const ImageUploader = ({ parentStateSetter, ...props }) => {
 
-  const { setFieldValue } = useFormikContext();
+  const { setFieldValue, values } = useFormikContext();
   const [childState, setChildState] = useState(0);
   const [meta] = useField(props);
 
@@ -268,17 +298,32 @@ const ImageUploader = ({ parentStateSetter, ...props }) => {
         {...props}
         onChange={ async (imageList) => {
           setChildState(imageList);
-          if (!props.multiple) {
-            // Set file to field if it exists.
-            if (imageList[0]) {
-              const options = {
-                maxSizeMB: 2,
-                maxWidthOrHeight: 1920,
-                useWebWorker: true
-              }
-              const compressedFile = await imageCompression(imageList[0].file, options);
-              setFieldValue(props.id, compressedFile);
-              setFieldValue(props.id + '_data_url', imageList[0].data_url);
+          // splat the most recent uploaded image
+          const [mostRecentImage] = imageList?.slice?.(-1);
+          // Set file to field if it exists.
+          if (mostRecentImage) {
+            const options = {
+              maxSizeMB: 1,
+              maxWidthOrHeight: 1920,
+              useWebWorker: true
+            };
+
+            // compress the image
+            const compressedFile = await imageCompression(mostRecentImage.file, options);
+            let fileFormValue = compressedFile;
+
+            // add the image to array if it's multiple images
+            if (props.multiple) {
+              const multipleImages = [...(values[props.id]||[])];
+              multipleImages.push(compressedFile);
+              fileFormValue = multipleImages;
+            }
+
+            // set data to Formik context
+            await setFieldValue(props.id, fileFormValue);
+            if (!props.multiple) {
+              const compressedDataUrl = await imageCompression.getDataUrlFromFile(compressedFile);
+              setFieldValue(props.id + '_data_url', compressedDataUrl);
             }
           }
         }}
@@ -350,8 +395,8 @@ const AddressLookup = ({setLatLon, ...props}) => {
   }
 
   const clearAddress = () => {
-    childRef.current.refs.input.value = "";
-    childRef.current.refs.input.focus();
+    childRef.current.value = "";
+    childRef.current.focus();
     setFieldValue("address", "");
     setFieldValue("city", "");
     setFieldValue("state", "");
@@ -364,7 +409,7 @@ const AddressLookup = ({setLatLon, ...props}) => {
 
 
   useEffect(() => {
-    if ((childRef.current && childRef.current.refs && (childRef.current.refs.input.value.includes(", USA") || childRef.current.refs.input.value.includes(", United")))) {
+    if ((childRef.current && (childRef.current.value.includes(", USA") || childRef.current.value.includes(", United")))) {
       setError("");
     }
     updateAddr(search);
@@ -445,14 +490,14 @@ const AddressLookup = ({setLatLon, ...props}) => {
             onBlur={(e) => {
               setError("");
               setTriggerRefresh(!triggerRefresh)
-              if (!values.address && childRef.current && childRef.current.refs && childRef.current.refs.input.value) {
+              if (!values.address && childRef.current && childRef.current.value) {
                 setError(props.error);
               }
             }}
+            onFocus={(event) => { event.target.setAttribute('autocomplete', 'off'); }}
             id="search"
             name="search"
             disabled={props.disabled}
-            key={`search_key_` + String(incidentLatLon.lat)}
             options={{
               bounds:{north:incidentLatLon.lat+.1, south:incidentLatLon.lat-.1, east:incidentLatLon.lng+.1, west:incidentLatLon.lng-.1},
               types: ["geocode"],

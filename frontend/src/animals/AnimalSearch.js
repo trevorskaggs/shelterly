@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState, useRef } from 'react';
 import ReactDOMServer from 'react-dom/server';
 import axios from "axios";
 import { Link, useQueryParams } from 'raviger';
-import { Button, Card, CardGroup, Col, Collapse, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Pagination, Row, Tooltip } from 'react-bootstrap';
+import { Button, Card, CardGroup, Col, Collapse, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Pagination, Row, Spinner, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBan, faCalendarDay, faClipboardList, faCut, faEnvelope, faLink, faMapMarkerAlt, faMedkit, faPrint, faUserAltSlash
@@ -15,7 +15,7 @@ import Moment from 'react-moment';
 import Select, { components } from 'react-select';
 import L from "leaflet";
 import { Circle, Map, Marker, Tooltip as MapTooltip, TileLayer } from "react-leaflet";
-import { useMark } from '../hooks';
+import { useMark, useSubmitting, useDataImg } from '../hooks';
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
 import { titleCase } from '../components/Utils';
@@ -24,7 +24,12 @@ import { Legend } from "../components/Map";
 import { catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, speciesChoices, statusChoices } from './constants';
 import AnimalCoverImage from '../components/AnimalCoverImage';
 import { printAnimalCareSchedule, printAllAnimalCareSchedules } from './Utils';
+import { AuthContext } from "../accounts/AccountsReducer";
 import { SystemErrorContext } from '../components/SystemError';
+import ButtonSpinner from '../components/ButtonSpinner';
+import ShelterlyPrintifyButton from '../components/ShelterlyPrintifyButton';
+
+import '../assets/styles.css';
 
 const NoOptionsMessage = props => {
   return (
@@ -34,8 +39,9 @@ const NoOptionsMessage = props => {
   );
 };
 
-function AnimalSearch({ incident }) {
+function AnimalSearch({ incident, organization }) {
 
+  const { dispatch, state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
   // Identify any query param data.
@@ -81,6 +87,27 @@ function AnimalSearch({ incident }) {
   const [page, setPage] = useState(1);
   const [numPages, setNumPages] = useState(1);
   const { markInstances } = useMark();
+  const {
+    isSubmitting,
+    handleSubmitting,
+    submittingComplete,
+    submittingLabel
+  } = useSubmitting();
+  const { promiseImage, getBase64Image } = useDataImg();
+  const [lazyAnimalImages, setLazyAnimalImages] = useState([]);
+
+  function findLazyAnimalImage (animalId) {
+    return lazyAnimalImages.find((lazyAnimal) => lazyAnimal.id === animalId);
+  }
+  function addLazyAnimalImage (animalId, animalImage) {
+    setLazyAnimalImages((prevState) => {
+      prevState.push({
+        id: animalId,
+        image: animalImage
+      });
+      return prevState;
+    })
+  }
 
   const colorChoices = {'':[], 'dog':dogColorChoices, 'cat':catColorChoices, 'horse':horseColorChoices, 'other':otherColorChoices}
 
@@ -103,8 +130,8 @@ function AnimalSearch({ incident }) {
     }, 1000);
   };
 
-  const handleApplyFilters = () => {
-    setAnimals(data.animals.filter(animal => options.species ? animal.species === options.species : animal)
+  const handleApplyFilters = (animals) => {
+    setAnimals(animals.filter(animal => options.species ? animal.species === options.species : animal)
                            .filter(animal => options.status ? animal.status === options.status : animal)
                            .filter(animal => options.owned === 'yes' ? animal.owners.length > 0 : animal)
                            .filter(animal => options.owned === 'no' ? animal.owners.length === 0 : animal)
@@ -114,7 +141,6 @@ function AnimalSearch({ incident }) {
                            .filter(animal => options.latlng ? arePointsNear({lat:animal.latitude, lng: animal.longitude}, options.latlng) : animal)
                            .filter(animal => options.shelter ? animal.shelter === options.shelter : animal)
     )
-
   }
 
   const handleClear = () => {
@@ -129,17 +155,17 @@ function AnimalSearch({ incident }) {
     setAnimals(data.animals);
   };
 
-  const handleDownloadPdfClick = (e, animalId) => {
-    e.preventDefault();
-
+  const handleDownloadPdfClick = (animalId) => {
     const animal = animals.find((animal) => animal.id === animalId);
-    printAnimalCareSchedule(animal, [animal.front_image]);
+    printAnimalCareSchedule(animal);
   }
 
   const handlePrintAllClick = (e) => {
     e.preventDefault();
 
-    printAllAnimalCareSchedules(animals);
+    handleSubmitting()
+      .then(() => printAllAnimalCareSchedules(animals))
+      .then(submittingComplete);
   }
 
   function setFocus(pageNum) {
@@ -206,21 +232,35 @@ function AnimalSearch({ incident }) {
       await axios.get('/animals/api/animal/?search=' + searchTerm +'&incident=' + incident, {
         cancelToken: source.token,
       })
-      .then(response => {
+      .then(async (response) => {
         if (!unmounted) {
           setNumPages(Math.ceil(response.data.length / ITEMS_PER_PAGE));
           setData({animals: response.data, isFetching: false});
           setAnimals(response.data);
+          
+          // highlight search terms
+          markInstances(searchTerm);
+          handleApplyFilters(response.data);
+
           let bounds_array = [];
+
           for (const animal of response.data) {
             if (animal.latitude && animal.longitude) {
               bounds_array.push([animal.latitude, animal.longitude]);
             }
-          }
-          setBounds(bounds_array.length > 0 ? L.latLngBounds(bounds_array) : L.latLngBounds([[0,0]]));
 
-          // highlight search terms
-          markInstances(searchTerm);
+            // lazy load animal front_image
+            const lazyAnimalImage = findLazyAnimalImage(animal.id);
+            if (lazyAnimalImage?.image) {
+              animal.lazyImage = lazyAnimalImage.image
+            } else if (animal.front_image) {
+              const imgData = await promiseImage(animal.front_image);
+              animal.lazyImage = imgData;
+              addLazyAnimalImage(animal.id, imgData);
+            }
+          }
+          setAnimals(response.data);
+          setBounds(bounds_array.length > 0 ? L.latLngBounds(bounds_array) : L.latLngBounds([[0,0]]));
         }
       })
       .catch(error => {
@@ -235,7 +275,7 @@ function AnimalSearch({ incident }) {
     const fetchShelters = () => {
       setShelters({options: [], isFetching: true});
       // Fetch Shelter data.
-      axios.get('/shelter/api/shelter/?incident=' + incident, {
+      axios.get('/shelter/api/shelter/?incident=' + incident + '&organization=' + organization +'&training=' + (state && state.incident.training), {
         cancelToken: source.token,
       })
       .then(response => {
@@ -291,10 +331,16 @@ function AnimalSearch({ incident }) {
             <Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0"}}>Search</Button>
           </InputGroup.Append>
           <Button variant="outline-light" className="ml-1" onClick={handleShowFilters}>Advanced {showFilters ? <FontAwesomeIcon icon={faChevronDoubleUp} size="sm" /> : <FontAwesomeIcon icon={faChevronDoubleDown} size="sm" />}</Button>
-          <Button variant="outline-light" className="ml-1" onClick={handlePrintAllClick}>
+          <ButtonSpinner
+            variant="outline-light"
+            className="ml-1 print-all-btn-icon"
+            onClick={handlePrintAllClick}
+            isSubmitting={isSubmitting}
+            isSubmittingText={submittingLabel}
+          >
             Print All ({`${animals.length}`})
             <FontAwesomeIcon icon={faPrint} className="ml-2 text-light" inverse />
-          </Button>
+          </ButtonSpinner>
         </InputGroup>
         <Collapse in={showFilters}>
           <div>
@@ -453,7 +499,7 @@ function AnimalSearch({ incident }) {
                   </Row>
                 </Col>
                 <Col className="flex-grow-1 pl-0" xs="3">
-                  <Button className="btn btn-primary" style={{maxHeight:"35px", width:"100%"}} onClick={handleApplyFilters} disabled={isDisabled}>Apply</Button>
+                  <Button className="btn btn-primary" style={{maxHeight:"35px", width:"100%"}} onClick={() => {handleApplyFilters(data.animals)}} disabled={isDisabled}>Apply</Button>
                   <Button variant="outline-light" style={{maxHeight:"35px", width:"100%", marginTop:"15px"}} onClick={handleClear}>Clear</Button>
                 </Col>
               </Row>
@@ -475,34 +521,38 @@ function AnimalSearch({ incident }) {
                   </Tooltip>
                 }
               >
-                <Link href={"/" + incident + "/animals/" + animal.id}><FontAwesomeIcon icon={faDotCircle} className="mr-2" inverse /></Link>
+                <Link href={"/" + organization + "/" + incident + "/animals/" + animal.id}><FontAwesomeIcon icon={faDotCircle} className="mr-2" inverse /></Link>
               </OverlayTrigger>
               A#{animal.id} - {animal.name ? titleCase(animal.name) : "Unknown"}&nbsp;| {titleCase(animal.status)}
 
-              <OverlayTrigger
-                key={"print"}
-                placement="bottom"
-                overlay={
-                  <Tooltip id={`tooltip-print`}>
-                    Animal care schedule
-                  </Tooltip>
-                }
-              >
-                {({ ref, ...triggerHandler }) => (
-                  <Link onClick={(e) => handleDownloadPdfClick(e, animal.id)} {...triggerHandler} href="#">
-                    <span ref={ref}><FontAwesomeIcon icon={faPrint} className="ml-2" inverse /></span>
-                  </Link>
-                )}
-              </OverlayTrigger>
+              <ShelterlyPrintifyButton
+                id="animal-search-animal-schedules"
+                spinnerSize={1.5}
+                tooltipPlacement='top'
+                tooltipText='Print Animal Care Schedule'
+                printFunc={() => handleDownloadPdfClick(animal.id)}
+              />
             </h4>
           </div>
           <CardGroup>
             <Card style={{maxWidth:"206px", maxHeight:"206px"}}>
-              <Card.Body className="p-0 m-0">
-                <AnimalCoverImage
-                  animalSpecies={animal.species}
-                  animalImageSrc={animal.front_image}
-                />
+              <Card.Body className="p-0 m-0 d-flex justify-content-center align-items-center">
+                {animal.front_image && !animal.lazyImage
+                  ? (
+                    <Spinner animation="border" role="status">
+                      <span className="visually-hidden">Loading Image...</span>
+                    </Spinner>
+                  )
+                : (
+                  <AnimalCoverImage
+                    animalSpecies={animal.species}
+                    animalImageSrc={
+                      animal.lazyImage
+                        ? `data:image/png;base64,${getBase64Image(animal.lazyImage)}`
+                        : animal.front_image
+                    }
+                  />
+                )}
               </Card.Body>
             </Card>
             <Card style={{marginBottom:"6px", maxWidth:"335px"}}>
@@ -651,7 +701,7 @@ function AnimalSearch({ incident }) {
                     <ListGroup.Item style={{textTransform:"capitalize"}}><b>Color: </b>{animal.pcolor ? <span>{animal.pcolor}{animal.scolor ? <span> / {animal.scolor}</span> : ""}</span> : "Unknown"}</ListGroup.Item>
                     {animal.owners.map(owner => (
                       <ListGroup.Item key={owner.id}>
-                        <b>Owner:</b> <Link href={"/" + incident + "/people/owner/" + owner.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{owner.first_name} {owner.last_name}</Link>
+                        <b>Owner:</b> <Link href={"/" + organization + "/" + incident + "/people/owner/" + owner.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{owner.first_name} {owner.last_name}</Link>
                         {owner.display_phone ?
                         <OverlayTrigger
                           key={"owner-phone"}
@@ -681,7 +731,7 @@ function AnimalSearch({ incident }) {
                       </ListGroup.Item>
                     ))}
                     {animal.owners < 1 ? <ListGroup.Item><b>Owner: </b>No Owner</ListGroup.Item> : ""}
-                    {animal.reporter ? <ListGroup.Item><b>Reporter: </b><Link href={"/" + incident + "/people/reporter/" + animal.reporter} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.reporter_object.first_name} {animal.reporter_object.last_name}</Link></ListGroup.Item> : ""}
+                    {animal.reporter ? <ListGroup.Item><b>Reporter: </b><Link href={"/" + organization + "/" + incident + "/people/reporter/" + animal.reporter} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.reporter_object.first_name} {animal.reporter_object.last_name}</Link></ListGroup.Item> : ""}
                   </ListGroup>
                 </Scrollbar>
               </Card.Body>
@@ -690,8 +740,8 @@ function AnimalSearch({ incident }) {
               <Card.Body>
               <Card.Title style={{marginTop:"-9px", marginBottom:"8px"}}>Location</Card.Title>
                 <ListGroup>
-                  <ListGroup.Item className='request'><b>Service Request: </b>{animal.request ? <Link href={"/" + incident + "/hotline/servicerequest/" + animal.request} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.request_address}</Link> : "None"}</ListGroup.Item>
-                  <ListGroup.Item><b>Shelter: </b>{animal.shelter ? <Link href={"/" + incident + "/shelter/" + animal.shelter} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.shelter_object.name}</Link> : "None"}
+                  <ListGroup.Item className='request'><b>Service Request: </b>{animal.request ? <Link href={"/" + organization + "/" + incident + "/hotline/servicerequest/" + animal.request} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.request_address}</Link> : "None"}</ListGroup.Item>
+                  <ListGroup.Item><b>Shelter: </b>{animal.shelter ? <Link href={"/" + organization + "/" + incident + "/shelter/" + animal.shelter} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.shelter_object.name}</Link> : "None"}
                     {animal.shelter ?
                     <span>
                       <OverlayTrigger
@@ -732,7 +782,7 @@ function AnimalSearch({ incident }) {
                     </span>
                     : ""}
                   </ListGroup.Item>
-                  {animal.room ? <ListGroup.Item><b>Room: </b><Link href={"/" + incident + "/shelter/room/" + animal.room} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.room_name}</Link></ListGroup.Item> : ""}
+                  {animal.room ? <ListGroup.Item><b>Room: </b><Link href={"/" + organization + "/" + incident + "/shelter/room/" + animal.room} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.room_name}</Link></ListGroup.Item> : ""}
                 </ListGroup>
               </Card.Body>
             </Card>

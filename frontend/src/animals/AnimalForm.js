@@ -9,10 +9,12 @@ import { catAgeChoices, dogAgeChoices, horseAgeChoices, otherAgeChoices, catColo
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft, faMinusSquare } from '@fortawesome/free-solid-svg-icons';
 import ButtonSpinner from "../components/ButtonSpinner";
+import { AuthContext } from "../accounts/AccountsReducer";
 import { SystemErrorContext } from '../components/SystemError';
 
 const AnimalForm = (props) => {
 
+  const { dispatch, state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
   const id = props.id;
@@ -80,6 +82,7 @@ const AnimalForm = (props) => {
     behavior_notes: '',
     medical_notes: '',
     last_seen: null,
+    microchip: '',
     number_of_animals: 1,
     room: null,
     shelter: props.state.shelter || null,
@@ -194,7 +197,9 @@ const AnimalForm = (props) => {
           }
         })
         .catch(error => {
-          setShowSystemError(true);
+          if (!unmounted) {
+            setShowSystemError(true);
+          }
         });
       };
       fetchAnimalData();
@@ -203,7 +208,7 @@ const AnimalForm = (props) => {
     const fetchShelters = () => {
       setShelters({options: [], shelters: [], room_options: {}, isFetching: true});
       // Fetch Shelter data.
-      axios.get('/shelter/api/shelter/?incident=' + props.incident, {
+      axios.get('/shelter/api/shelter/?incident=' + props.incident + '&organization=' + props.organization +'&training=' + (state && state.incident.training), {
         cancelToken: source.token,
       })
       .then(response => {
@@ -259,7 +264,7 @@ const AnimalForm = (props) => {
           pcolor: Yup.string(),
           scolor: Yup.string(),
           color_notes: Yup.string()
-            .max(200, 'Must be 200 characters or less'),
+            .max(400, 'Must be 400 characters or less'),
           fixed: Yup.string()
             .max(10, 'Must be 10 characters or less'),
           aco_required: Yup.string()
@@ -271,9 +276,10 @@ const AnimalForm = (props) => {
           injured: Yup.string()
            .max(10, 'Must be 10 characters or less'),
           behavior_notes: Yup.string()
-            .max(200, 'Must be 200 characters or less'),
+            .max(400, 'Must be 400 characters or less'),
           last_seen: Yup.date()
             .nullable(),
+          microchip: Yup.string().max(50, 'Must be 50 characters or less.'),
           front_image: Yup.mixed(),
           side_image: Yup.mixed(),
           extra_images: Yup.array(),
@@ -307,8 +313,15 @@ const AnimalForm = (props) => {
             }
           }
           // Add extra images.
-          for (let i = 0; i < extra_images.length; i++) {
-            formData.append('extra' + (i + 1), extra_images[i].file);
+          for (let i = 0; i < values.extra_images.length; i++) {
+            const extraKey = `extra${(i + 1)}`;
+            const extraImage = values.extra_images[i];
+            const extraName = extraImage.name;
+            if (extraName) {
+              formData.append(extraKey, extraImage, extraName);
+            } else {
+              formData.append(extraKey, extraImage);
+            }
           }
 
           if (is_workflow) {
@@ -355,38 +368,87 @@ const AnimalForm = (props) => {
               if (props.state.steps.reporter.first_name && !props.state.steps.reporter.id) {
                 reporterResponse = await Promise.all([
                   axios.post('/people/api/person/', props.state.steps.reporter)
-                ]);
+                ])
+                .catch(error => {
+                  setIsButtonSubmitting(false);
+                  setShowSystemError(true);
+                  setRedirectCheck(true);
+                });
+              }
+              else if (props.state.steps.reporter.first_name && props.state.steps.reporter.id) {
+                reporterResponse = await Promise.all([
+                  axios.put('/people/api/person/' + props.state.steps.reporter.id + '/', props.state.steps.reporter)
+                ])
+                .catch(error => {
+                  setIsButtonSubmitting(false);
+                  setShowSystemError(true);
+                  setRedirectCheck(true);
+                });
               }
               // Create Owner
               let ownerResponse = [{data:{id:props.state.steps.owner.id}}];
               if (props.state.steps.owner.first_name && !props.state.steps.owner.id) {
                 ownerResponse = await Promise.all([
                   axios.post('/people/api/person/', props.state.steps.owner)
-                ]);
-              }
-              // Create previous animals
-              props.state.steps.animals.forEach(animal => {
-                // Add owner and reporter to animal data.
-                animal.append('reporter', reporterResponse[0].data.id);
-                animal.append('new_owner', ownerResponse[0].data.id);
-                axios.post('/animals/api/animal/', animal)
+                ])
                 .catch(error => {
                   setIsButtonSubmitting(false);
                   setShowSystemError(true);
                   setRedirectCheck(true);
                 });
+              }
+              else if (props.state.steps.owner.first_name && props.state.steps.owner.id) {
+                ownerResponse = await Promise.all([
+                  axios.put('/people/api/person/' + props.state.steps.owner.id + '/', props.state.steps.owner)
+                ])
+                .catch(error => {
+                  setIsButtonSubmitting(false);
+                  setShowSystemError(true);
+                  setRedirectCheck(true);
+                });
+              }
+
+              // Create Intake Summary
+              let intakeSummaryResponse = [{data:{id:null}}];
+              values['shelter'] = shelter_id;
+              values['person'] = reporterResponse[0].data.id ? reporterResponse[0].data.id : ownerResponse[0].data.id
+              values['intake_type'] = (reporterResponse[0].data.id ? 'reporter' : 'owner') + '_walkin';
+              intakeSummaryResponse = await Promise.all([
+                axios.post('/shelter/api/intakesummary/', values)
+              ])
+              .catch(error => {
+                setIsButtonSubmitting(false);
+                setShowSystemError(true);
+                setRedirectCheck(true);
               });
-              // Create current animal then navigate.
-              formData.append('reporter', reporterResponse[0].data.id);
-              formData.append('new_owner', ownerResponse[0].data.id);
-              await axios.post('/animals/api/animal/', formData)
-              .then(function() {
-                if (ownerResponse[0].data.id) {
-                  navigate(incident + '/people/owner/' + ownerResponse[0].data.id)
-                }
-                else {
-                  navigate(incident + '/people/reporter/' + reporterResponse[0].data.id)
-                }
+              
+              // Create previous animals
+              let promises = [];
+              props.state.steps.animals.forEach(animal => {
+                // Add owner and reporter to animal data.
+                animal.append('reporter', reporterResponse[0].data.id);
+                animal.append('new_owner', ownerResponse[0].data.id);
+                animal.append('intake_summary', intakeSummaryResponse[0].data.id);
+                promises.push(
+                  axios.post('/animals/api/animal/', animal)
+                );
+              });
+
+              Promise.all(promises).then(async () => {
+                // Create current animal then navigate.
+                formData.append('reporter', reporterResponse[0].data.id);
+                formData.append('new_owner', ownerResponse[0].data.id);
+                formData.append('intake_summary', intakeSummaryResponse[0].data.id);
+
+                axios.post('/animals/api/animal/', formData)
+                .then(animalResponse => {
+                  navigate('/' + props.organization + "/" + props.incident + "/shelter/intakesummary/" + intakeSummaryResponse[0].data.id);
+                })
+                .catch(error => {
+                  setIsButtonSubmitting(false);
+                  setShowSystemError(true);
+                  setRedirectCheck(true);
+                });
               })
               .catch(error => {
                 setIsButtonSubmitting(false);
@@ -402,7 +464,7 @@ const AnimalForm = (props) => {
             if (id) {
               axios.put('/animals/api/animal/' + id + '/', formData)
               .then(function() {
-                navigate(incident + '/animals/' + id);
+                navigate('/' + props.organization + incident + '/animals/' + id);
               })
               .catch(error => {
                 setIsButtonSubmitting(false);
@@ -415,15 +477,15 @@ const AnimalForm = (props) => {
               .then(response => {
                 // If adding to an SR, redirect to the SR.
                 if (servicerequest_id) {
-                  navigate(incident + '/hotline/servicerequest/' + servicerequest_id);
+                  navigate('/' + props.organization + incident + '/hotline/servicerequest/' + servicerequest_id);
                 }
                 // If adding to an Owner, redirect to the owner.
                 else if (owner_id) {
-                  navigate(incident + '/people/owner/' + owner_id)
+                  navigate('/' + props.organization + incident + '/people/owner/' + owner_id)
                 }
                 // Else redirect to the animal.
                 else {
-                  navigate(incident + '/animals/' + response.data.id);
+                  navigate('/' + props.organization + incident + '/animals/' + response.data.id);
                 }
               })
               .catch(error => {
@@ -528,15 +590,15 @@ const AnimalForm = (props) => {
                 <BootstrapForm.Row className="mb-3">
                   <Col xs="3" hidden={shelter_id}>
                     <DropDown
-                        label="Status"
-                        id="statusDropDown"
+                        label="Requested Service"
+                        id="requestedServiceDropDown"
                         name="status"
                         type="text"
-                        key={`my_unique_status_select_key__${formikProps.values.status}`}
-                        options={['REPORTED', 'SHELTERED IN PLACE'].includes(data.status) ? reportedStatusChoices : statusChoices}
-                        isClearable={false}
-                        disabled={['REPORTED', 'SHELTERED IN PLACE'].includes(data.status) ? false : true}
+                        key={`my_unique_requested_service_select_key__${formikProps.values.status}`}
+                        options={reportedStatusChoices}
+                        disabled={['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)'].includes(data.status) ? false : true}
                         value={formikProps.values.status||''}
+                        isClearable={false}
                     />
                   </Col>
                   <Col xs="3">
@@ -629,7 +691,7 @@ const AnimalForm = (props) => {
                 </BootstrapForm.Row>
                 <BootstrapForm.Row className="mt-3">
                   <TextInput
-                    label="Behavior Notes"
+                    label="Animal Notes"
                     id="behavior_notes"
                     name="behavior_notes"
                     as="textarea"
@@ -659,6 +721,15 @@ const AnimalForm = (props) => {
                     value={formikProps.values.last_seen||null}
                     hidden={is_intake}
                     disabled={false}
+                  />
+                </BootstrapForm.Row>
+                <BootstrapForm.Row className="mb-3" hidden={is_intake || id ? false : true}>
+                  <TextInput
+                    id="microchip"
+                    name="microchip"
+                    type="text"
+                    label="Microchip Number"
+                    xs="6"
                   />
                 </BootstrapForm.Row>
                 <BootstrapForm.Row hidden={id} style={{marginBottom:is_intake ? "" : "-15px"}}>
@@ -778,7 +849,7 @@ const AnimalForm = (props) => {
           </Card.Body>
           <ButtonGroup size="lg">
             {is_workflow ?
-                <ButtonSpinner isSubmitting={isButtonSubmitting && addAnother} isSubmittingText="Saving..." type="button" onClick={() => {
+                <ButtonSpinner isSubmitting={formikProps.isSubmitting && addAnother} isSubmittingText="Saving..." type="button" onClick={() => {
                   setAddAnother(true);
                   setIsButtonSubmitting(true);
                   formikProps.submitForm();
@@ -786,7 +857,7 @@ const AnimalForm = (props) => {
                 }}>
                   {props.state.steps.animals.length -1 > props.state.animalIndex ? "Next Animal" : "Add Another"}
                 </ButtonSpinner> :
-                <ButtonSpinner isSubmitting={isButtonSubmitting && !addAnother} isSubmittingText="Saving..." type="button" onClick={() => {
+                <ButtonSpinner isSubmitting={formikProps.isSubmitting && !addAnother} isSubmittingText="Saving..." type="button" onClick={() => {
                   setAddAnother(false);
                   setIsButtonSubmitting(true);
                   formikProps.submitForm()
@@ -795,7 +866,7 @@ const AnimalForm = (props) => {
                 </ButtonSpinner>
             }
             {is_workflow && !is_intake ?
-                <ButtonSpinner isSubmitting={isButtonSubmitting && !addAnother} isSubmittingText="Loading..." type="button" className="btn btn-primary border" onClick={() => {
+                <ButtonSpinner isSubmitting={formikProps.isSubmitting && !addAnother} isSubmittingText="Loading..." type="button" className="btn btn-primary border" onClick={() => {
                   setAddAnother(false);
                   setIsButtonSubmitting(true);
                   formikProps.submitForm()
@@ -803,7 +874,7 @@ const AnimalForm = (props) => {
                   Next Step
                 </ButtonSpinner> : ""}
             {is_workflow && is_intake ?
-                <ButtonSpinner isSubmitting={isButtonSubmitting && !addAnother} isSubmittingText="Saving..." type="button" className="btn btn-primary mr-1 border" onClick={() => {
+                <ButtonSpinner isSubmitting={formikProps.isSubmitting && !addAnother} isSubmittingText="Saving..." type="button" className="btn btn-primary mr-1 border" onClick={() => {
                   setAddAnother(false);
                   setIsButtonSubmitting(true);
                   formikProps.submitForm()

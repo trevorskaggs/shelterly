@@ -9,10 +9,12 @@ import { faHome, faPlusSquare } from '@fortawesome/free-solid-svg-icons';
 import Header from '../components/Header';
 import Map, { shelterMarkerIcon } from "../components/Map";
 import Scrollbar from '../components/Scrollbars';
+import { AuthContext } from "../accounts/AccountsReducer";
 import { SystemErrorContext } from '../components/SystemError';
 
-function Shelter({ incident }) {
+function Shelter({ incident, organization }) {
 
+  const { dispatch, state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
   const [data, setData] = useState({shelters: [],  isFetching: false, bounds:L.latLngBounds([[0,0]])});
@@ -26,7 +28,7 @@ function Shelter({ incident }) {
     const fetchShelters = async () => {
       setData({shelters: [], isFetching: true});
       // Fetch Shelter data.
-      await axios.get('/shelter/api/shelter/?incident=' + incident, {
+      await axios.get('/shelter/api/shelter/?incident=' + incident + '&organization=' + organization +'&training=' + state.incident.training, {
         cancelToken: source.token,
       })
       .then(response => {
@@ -66,7 +68,7 @@ function Shelter({ incident }) {
                 key={shelter.id}
                 position={[shelter.latitude, shelter.longitude]}
                 icon={shelterMarkerIcon}
-                onClick={() => navigate("/" + incident + "/shelter/" + shelter.id)}
+                onClick={() => navigate('/' + organization + "/" + incident + "/shelter/" + shelter.id)}
               >
                 <MapTooltip key={`${index}-${selectedShelter}`} keepInView={false} autoPan={false} permanent={selectedShelter === shelter.id ? true : false}>
                   <span>
@@ -94,13 +96,13 @@ function Shelter({ incident }) {
       </Col>
     </Row>
     <Row className="ml-0 mr-0 border rounded" style={{maxHeight:"38px"}}>
-      <h4 className="card-header text-center" style={{paddingTop:"4px", paddingLeft:"10px", paddingRight:"10px", height:"36px", width:"100%", backgroundColor:"#808080"}}>Shelters</h4>
+      <h5 className="card-header" style={{paddingTop:"7px", paddingLeft:"10px", paddingRight:"10px", height:"36px", width:"100%", backgroundColor:"#808080"}}>Shelters</h5>
     </Row>
     <hr/>
     <Row className="ml-0">
       {data.shelters.map(shelter => (
         <span key={shelter.id} className="pl-0 pr-0 mr-3 mb-3">
-          <Link href={"/" + incident + "/shelter/" + shelter.id} className="shelter-link" style={{textDecoration:"none", color:"white"}}>
+          <Link href={"/" + organization + "/" + incident + "/shelter/" + shelter.id} className="shelter-link" style={{textDecoration:"none", color:"white"}}>
             <Card className="border rounded shelter-hover-div" style={{height:"100px", whiteSpace:"nowrap", overflow:"hidden"}}>
               <div className="row no-gutters hover-div" style={{height:"100px", textTransform:"capitalize", marginRight:"-2px"}}>
                 <Row className="ml-0 mr-0 w-100" style={{minWidth:"510px", maxWidth:"510px", flexWrap:"nowrap"}}>
@@ -125,7 +127,7 @@ function Shelter({ incident }) {
         </span>
       ))}
       <span className="pl-0 pr-0 mr-3 mb-3">
-        <Link href={"/" + incident + "/shelter/new"} className="shelter-link" style={{textDecoration:"none", color:"white"}}>
+        <Link href={"/" + organization + "/" + incident + "/shelter/new"} className="shelter-link" style={{textDecoration:"none", color:"white"}}>
           <Card className="border rounded shelter-hover-div" style={{height:"100px", whiteSpace:"nowrap", overflow:"hidden"}}>
             <div className="row no-gutters hover-div" style={{height:"100px", textTransform:"capitalize", marginRight:"-2px"}}>
               <Row className="ml-0 mr-0 w-100" style={{minWidth:"510px", maxWidth:"510px", flexWrap:"nowrap"}}>

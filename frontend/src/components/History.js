@@ -4,13 +4,13 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faChevronCircleDown, faChevronCircleRight
 } from '@fortawesome/free-solid-svg-icons';
-import { ITEMS_PER_PAGE } from '.././constants'
+import { ITEMS_PER_PAGE } from '.././constants';
 
 function History({action_history}) {
 
   const [showHistory, setShowHistory] = useState(false);
-  const [page, setPage] = useState(1)
-  const [numPages, setNumPages] = useState(1)
+  const [page, setPage] = useState(1);
+  const [numPages, setNumPages] = useState(1);
 
   useEffect(() => {
     setNumPages(Math.ceil(action_history.length / ITEMS_PER_PAGE))
@@ -19,7 +19,7 @@ function History({action_history}) {
   return (
     <>
     <hr/>
-    <h1 className="mb-3">History<FontAwesomeIcon icon={faChevronCircleRight} hidden={showHistory} onClick={() => setShowHistory(!showHistory)} className="ml-2" style={{verticalAlign:"middle"}} inverse /><FontAwesomeIcon icon={faChevronCircleDown} hidden={!showHistory} onClick={() => setShowHistory(!showHistory)} className="ml-2" style={{verticalAlign:"middle"}} inverse /></h1>
+    <h2 className="mb-3">History<FontAwesomeIcon icon={faChevronCircleRight} hidden={showHistory} onClick={() => setShowHistory(!showHistory)} className="ml-2" style={{verticalAlign:"middle"}} inverse /><FontAwesomeIcon icon={faChevronCircleDown} hidden={!showHistory} onClick={() => setShowHistory(!showHistory)} className="ml-2" style={{verticalAlign:"middle"}} inverse /></h2>
     {action_history.map((action, index) => (
       <Collapse key={action + Math.random()} in={showHistory} hidden={page !== Math.ceil((index+1)/ITEMS_PER_PAGE)}>
         <div>

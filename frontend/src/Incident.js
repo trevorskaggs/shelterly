@@ -1,23 +1,31 @@
 import React, { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import Select from 'react-select';
+import { useCookies } from 'react-cookie';
 import SimpleValue from 'react-select-simple-value';
 import { Button, Col, Row } from 'react-bootstrap';
-import { Link } from "raviger";
+import { Link, navigate } from "raviger";
 import moment from 'moment';
-import { useCookies } from 'react-cookie';
+import { loadUser } from "./accounts/AccountsUtils";
 import { AuthContext } from "./accounts/AccountsReducer";
-import { logoutUser } from "./accounts/AccountsUtils";
 import { SystemErrorContext } from './components/SystemError';
 
-function Home() {
+function Incident() {
 
   const { dispatch, state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
-  const [incident, setIncident] = useState({id: '', slug: ''});
+  const [incident, setIncident] = useState({id: '', slug: '', name: '', training:false});
   const [options, setOptions] = useState([]);
-  const [, , removeCookie] = useCookies(['token']);
+  const [cookies, , removeCookie] = useCookies(['token']);
+
+  const path = window.location.pathname;
+  const org_slug = path.split('/')[1];
+
+  const handleSubmit = (incident_name, incident_training) => {
+    dispatch({type: "SET_INCIDENT", data: {name:incident_name, training:incident_training}});
+    navigate(window.location.pathname + "/" + incident.slug);
+  }
 
   const customStyles = {
     // For the select it self, not the options of the select
@@ -39,7 +47,7 @@ function Home() {
 
   // Handle opening and closing an incident.
   const handleOpenCloseSubmit = async () => {
-    await axios.patch('/incident/api/incident/' + incident.id + '/', {change_lock:true})
+    await axios.patch('/incident/api/incident/' + incident.id + '/?organization=' + state.organization.id, {change_lock:true})
     .then(response => {
       let options_copy = [...options]
       options_copy.filter(option => option.value === response.data.id)[0]['label'] = response.data.name + ' (' + moment(response.data.start_time).format('MM/DD/YYYY') + (response.data.end_time ? ' - ' + moment(response.data.end_time).format('MM/DD/YYYY') : '') + ')';
@@ -57,8 +65,8 @@ function Home() {
     let source = axios.CancelToken.source();
 
     const fetchIncidentData = async () => {
-      // Fetch ServiceRequest data.
-      await axios.get('/incident/api/incident/', {
+      // Fetch Incident data.
+      await axios.get('/incident/api/incident/?organization_slug=' + org_slug, {
         cancelToken: source.token,
       })
       .then(response => {
@@ -67,17 +75,23 @@ function Home() {
           response.data.forEach(incident => {
             // Build incident option list.
             if (!incident.end_time || state.user.is_superuser || state.user.incident_perms) {
-              options.push({value: incident.id, label: incident.name + ' (' + moment(incident.start_time).format('MM/DD/YYYY') + (incident.end_time ? ' - ' + moment(incident.end_time).format('MM/DD/YYYY') : '') + ')', slug:incident.slug, end_time:incident.end_time});
+              options.push({value: incident.id, label: incident.name + ' (' + moment(incident.start_time).format('MM/DD/YYYY') + (incident.end_time ? ' - ' + moment(incident.end_time).format('MM/DD/YYYY') : '') + ')', slug:incident.slug, name:incident.name, training:incident.training, end_time:incident.end_time});
             }
           });
           setOptions(options)
         }
       })
       .catch(error => {
-        setShowSystemError(true);
+        if (!unmounted) {
+          setShowSystemError(true);
+        }
       });
     };
     fetchIncidentData();
+
+    // Reload user to get Org permission data
+    loadUser({state, dispatch, removeCookie, path});
+
     // Cleanup.
     return () => {
       unmounted = true;
@@ -85,33 +99,38 @@ function Home() {
     };
   }, [state.user.is_superuser, state.user.incident_perms]);
 
-
   return (
     <>
     <Row className='ml-auto mr-auto mt-auto align-bottom'>
-      <img src="/static/images/shelterly.png" alt="Logo" style={{height:"120px", width:"120px", marginTop:"-4px", marginLeft:"-4px"}} />
-      <h1  style={{fontSize:"100px"}}>Shelterly</h1>
+      <h1 style={{fontSize:"100px", textTransform: 'capitalize'}}>{state.organization.name}</h1>
     </Row>
-    <Col xs={{ span:5 }} className="border rounded border-light shadow-sm ml-auto mr-auto mb-auto" style={{maxHeight:state.user.is_superuser || state.user.incident_perms ? "309px" : "200px", minWidth:"572px"}}>
+    <Col xs={{ span:5 }} className="border rounded border-light shadow-sm ml-auto mr-auto mb-auto" style={{minWidth:"572px"}}>
       <SimpleValue options={options}>
-        {simpleProps => <Select styles={customStyles} {...simpleProps} className="mt-3" placeholder="Select incident..." onChange={(instance) => setIncident({id:instance.value, slug:instance.slug})} />}
+        {simpleProps => <Select styles={customStyles} {...simpleProps} className="mt-3" placeholder="Select incident..." onChange={(instance) => setIncident({id:instance.value, slug:instance.slug, name:instance.name, training:instance.training})} />}
       </SimpleValue>
-      <Link href={incident.slug} style={{textDecoration:"none"}}><Button size="lg" className="btn-primary mt-3" disabled={incident.id ? false : true} block>Select Incident</Button></Link>
+      <Button size="lg" className="btn-primary mt-3" onClick={() => handleSubmit(incident.name, incident.training)} disabled={incident.id ? false : true} block>Select Incident</Button>
       {state.user.is_superuser || state.user.incident_perms ?
         <Row>
           <Col style={{marginRight:"-23px"}}>
-            <Link href={'/incident/edit/' + incident.id} style={{textDecoration:"none"}}><Button size="lg" className="btn-primary mt-2" disabled={incident.id ? false : true} block>Edit Incident</Button></Link>
+            <Link href={'/' + org_slug + '/incident/edit/' + incident.id} style={{textDecoration:"none"}}><Button size="lg" className="btn-primary mt-2" disabled={incident.id ? false : true} block>Edit Incident</Button></Link>
           </Col>
           <Col>
             <Button size="lg" className="btn-primary mt-2" disabled={incident.id ? false : true} onClick={() => handleOpenCloseSubmit()} block>{incident.id && options.filter(option => option.value === incident.id)[0].end_time ? "Open" : "Close"} Incident</Button>
           </Col>
         </Row>
       : ""}
-      {state.user.is_superuser || state.user.incident_perms ? <Link href={'/incident/new'} style={{textDecoration:"none"}}><Button size="lg" className="btn-primary mt-2" block>Create New Incident</Button></Link> : ""}
-      <Button size="lg" className="btn-primary mt-2 mb-3" onClick={() => logoutUser({dispatch}, {removeCookie})} block>Return to Login</Button>
+      <Row>
+        {state.user.is_superuser || state.user.incident_perms ? <Col style={{marginRight:"-23px"}}>
+          <Link href={'/' + org_slug + '/incident/new'} style={{textDecoration:"none"}}><Button size="lg" className="btn-primary mt-2" block>Create New Incident</Button></Link>
+        </Col> : ""}
+        {state.user.is_superuser || state.user.user_perms ? <Col>
+          <Link href={'/' + org_slug + '/accounts/user_management'} style={{textDecoration:"none"}}><Button size="lg" className="btn-primary mt-2" block>User Administration</Button></Link>
+        </Col> : ""}
+      </Row>
+      <Link href={"/"} style={{textDecoration:"none"}}><Button size="lg" className="btn-primary mt-2 mb-3" block>Return to Organizations</Button></Link>
     </Col>
     </>
   );
 }
 
-export default Home;
+export default Incident;

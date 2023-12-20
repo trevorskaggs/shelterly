@@ -2,20 +2,22 @@ import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
 import { navigate } from 'raviger';
 import { Field, Formik } from 'formik';
-import { Form as BootstrapForm, Button, ButtonGroup, Card, Modal } from "react-bootstrap";
+import { Form as BootstrapForm, Button, ButtonGroup, Card, Modal, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { Switch } from 'formik-material-ui';
 import { AddressSearch, TextInput } from '../components/Form';
 import * as Yup from 'yup';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft } from '@fortawesome/free-solid-svg-icons';
 import ButtonSpinner from '../components/ButtonSpinner';
+import { AuthContext } from "../accounts/AccountsReducer";
 import { SystemErrorContext } from '../components/SystemError';
 
 // Regex validators.
 const nameRegex = /^[a-z0-9 ,.'-]+$/i;
 
-const ShelterForm = ({ id, incident }) => {
+const ShelterForm = ({ id, incident, organization }) => {
 
+  const { dispatch, state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
   // Initial shelter data.
@@ -28,10 +30,10 @@ const ShelterForm = ({ id, incident }) => {
     city: '',
     state: '',
     zip_code: '',
-    public: false,
+    // active: true,
+    incident_slug: incident,
     latitude: null,
     longitude: null,
-    incident_slug: incident,
   });
 
   // Regex validators.
@@ -50,7 +52,7 @@ const ShelterForm = ({ id, incident }) => {
 
     if (id) {
       const fetchShelterData = async () => {
-        // Fetch ServiceRequest data.
+        // Fetch Shelter data.
         await axios.get('/shelter/api/shelter/' + id + '/?incident=' + incident, {
           cancelToken: source.token,
         })
@@ -71,7 +73,9 @@ const ShelterForm = ({ id, incident }) => {
           }
         })
         .catch(error => {
-          setShowSystemError(true);
+          if (!unmounted) {
+            setShowSystemError(true);
+          }
         });
       };
       fetchShelterData();
@@ -105,7 +109,7 @@ const ShelterForm = ({ id, incident }) => {
           state: Yup.string(),
           zip_code: Yup.string()
             .max(10, 'Must be 10 characters or less'),
-          public: Yup.boolean(),
+          active: Yup.boolean(),
           latitude: Yup.number()
             .nullable(),
           longitude: Yup.number()
@@ -115,7 +119,12 @@ const ShelterForm = ({ id, incident }) => {
           if (id) {
             axios.put('/shelter/api/shelter/' + id + '/?incident=' + incident, values)
             .then(function() {
-              navigate("/" + incident + '/shelter/' + id)
+              if (values.active === false) {
+                navigate('/' + organization + "/" + incident + '/shelter');
+              }
+              else {
+                navigate('/' + organization + "/" + incident + '/shelter/' + id);
+              }
             })
             .catch(error => {
               if (error.response.data && error.response.data.name && error.response.data.name[0].includes('shelter with this name already exists')) {
@@ -129,7 +138,7 @@ const ShelterForm = ({ id, incident }) => {
           else {
             axios.post('/shelter/api/shelter/', values)
             .then(response => {
-              navigate("/" + incident + '/shelter/' + response.data.id)
+              navigate('/' + organization + "/" + incident + '/shelter/' + response.data.id)
             })
             .catch(error => {
               if (error.response.data && error.response.data.name && error.response.data.name[0].includes('shelter with this name already exists')) {
@@ -177,10 +186,27 @@ const ShelterForm = ({ id, incident }) => {
                   />
                 </BootstrapForm.Row>
                 <AddressSearch formikProps={props} label="Search for Shelter Address" show_apt={false} incident={incident} error="Shelter Address was not selected." />
-                <span hidden={incident !== shelterIncident}>
-                  <BootstrapForm.Label htmlFor="public">Shared Shelter</BootstrapForm.Label>
-                  <Field component={Switch} name="public" id="public" type="checkbox" color="primary" />
+                {/* {id && data.animal_count > 0 ?
+                <OverlayTrigger
+                  key={"active"}
+                  placement="top"
+                  overlay={
+                    <Tooltip id={`tooltip-active`}>
+                      A shelter cannot be deactivated while it still has animals.
+                    </Tooltip>
+                  }
+                >
+                <span>
+                  <BootstrapForm.Label htmlFor="active">Active</BootstrapForm.Label>
+                  <Field component={Switch} name="active" id="active" type="checkbox" color="primary" disabled={data.animal_count > 0} />
                 </span>
+                </OverlayTrigger>
+                : id ?
+                <span>
+                  <BootstrapForm.Label htmlFor="active">Active</BootstrapForm.Label>
+                  <Field component={Switch} name="active" id="active" type="checkbox" color="primary" disabled={data.animal_count > 0} />
+                </span>
+                :""} */}
               </BootstrapForm>
             </Card.Body>
             <ButtonGroup size="lg">

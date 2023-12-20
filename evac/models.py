@@ -13,6 +13,7 @@ class EvacTeamMember(models.Model):
     phone = models.CharField(max_length=50, blank=False)
     agency_id = models.CharField(max_length=50, blank=True)
     show = models.BooleanField(default=True)
+    incident = models.ForeignKey(Incident, on_delete=models.CASCADE, default=test_incident)
 
     def __str__(self):
         agency = " (%s)" % (self.agency_id) if self.agency_id else ""
@@ -39,6 +40,13 @@ class EvacAssignment(models.Model):
     start_time = models.DateTimeField(auto_now_add=True)
     end_time = models.DateTimeField(blank=True, null=True)
     incident = models.ForeignKey(Incident, on_delete=models.CASCADE, default=test_incident)
+    closed = models.BooleanField(default=False)
+
+    def get_geojson(self):
+        geojson = {'features':[]}
+        for service_request in self.service_requests.all():
+            geojson['features'].append(service_request.get_feature_json())
+        return geojson
 
     class Meta:
         ordering = ['-start_time',]

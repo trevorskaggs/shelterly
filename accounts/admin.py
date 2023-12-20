@@ -3,6 +3,10 @@ from .models import ShelterlyUser
 
 class ShelterlyUserAdmin(admin.ModelAdmin):
     exclude = ('password', 'last_login', 'username')
-    list_display = ('id', 'email', 'first_name', 'last_name',)
+    list_display = ('id', 'user_organizations', 'email', 'first_name', 'last_name',)
+
+    def user_organizations(self, obj):
+        return [organization.name for organization in obj.organizations.all()]
 
 admin.site.register(ShelterlyUser, ShelterlyUserAdmin)
+

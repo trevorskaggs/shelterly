@@ -1,5 +1,6 @@
 from django.db import models
 from incident.models import Incident
+from people.models import Person
 from location.models import Location
 from managers import ActionHistoryQueryset
 # Create your models here.
@@ -22,10 +23,10 @@ def test_incident():
 
 class Shelter(BaseShelterModel, Location):
 
-    name = models.CharField(max_length=100, unique=True)
+    name = models.CharField(max_length=100)
     image = models.ImageField(upload_to='media/images/shelter', blank=True, null=True)
     phone = models.CharField(max_length=50, blank=True)
-    public = models.BooleanField(default=False)
+    active = models.BooleanField(default=True)
     incident = models.ForeignKey(Incident, on_delete=models.CASCADE, default=test_incident)
 
     @property
@@ -59,3 +60,15 @@ class Room(BaseShelterModel):
    
     def __str__(self):
         return self.name
+
+
+class IntakeSummary(models.Model):
+
+    shelter = models.ForeignKey(Shelter, on_delete=models.CASCADE)
+    intake_type = models.CharField(max_length=20, default='walkin')
+    animals = models.ManyToManyField('animals.Animal', blank=True)
+    person = models.ForeignKey(Person, on_delete=models.SET_NULL, null=True)
+    date = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-id',]

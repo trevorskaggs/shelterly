@@ -4,15 +4,18 @@ import { Link, navigate, useNavigationPrompt, useQueryParams } from 'raviger';
 import { Formik } from 'formik';
 import { Form as BootstrapForm, Button, ButtonGroup, Card, Modal } from "react-bootstrap";
 import * as Yup from 'yup';
+import { Typeahead } from 'react-bootstrap-typeahead';
 import { AddressSearch, TextInput } from '../components/Form';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft } from '@fortawesome/free-solid-svg-icons';
 import ButtonSpinner from '../components/ButtonSpinner';
+import { AuthContext } from "../accounts/AccountsReducer";
 import { SystemErrorContext } from '../components/SystemError';
 
 // Form for owner and reporter Person objects.
 const PersonForm = (props) => {
 
+  const { dispatch, state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
   const id = props.id;
@@ -49,6 +52,8 @@ const PersonForm = (props) => {
   const [skipOwner, setSkipOwner] = useState(false);
   const [isOwner, setIsOwner] = useState(props.state.stepIndex > 0 || is_owner);
 
+  const [existingOwner, setExistingOwner] = useState(false);
+
   // Track duplicate owner error.
   const [error, setError] = useState({show:false, error:[]});
   const [dupeOwner, setDupeOwner] = useState(false);
@@ -64,15 +69,15 @@ const PersonForm = (props) => {
       .then(response => {
         // If SR already exists, redirect to the SR details.
         if (servicerequest_id) {
-          navigate(incident + '/hotline/servicerequest/' + servicerequest_id);
+          navigate('/' + props.organization + incident + '/hotline/servicerequest/' + servicerequest_id);
         }
         // If adding from an animal, redirect to the Animal details.
         else if (animal_id) {
-          navigate(incident + '/animals/' + animal_id);
+          navigate('/' + props.organization + incident + '/animals/' + animal_id);
         }
         // Otherise redirect to the duplicate Owner details.
         else {
-          navigate(incident + '/people/owner/' + response.data.id);
+          navigate('/' + props.organization + incident + '/people/owner/' + response.data.id);
         }
       })
       .catch(error => {
@@ -116,10 +121,13 @@ const PersonForm = (props) => {
       current_data = props.state.steps.reporter
     }
     current_data['show_agency'] = showAgency;
+    current_data['incident_slug'] = props.incident;
   }
 
   // Initial Person data.
   const [data, setData] = useState(current_data);
+
+  const [existingOwners, setExistingOwners] = useState({data:{}, options:[], fetching:true});
 
   // Hook for initializing data.
   useEffect(() => {
@@ -127,7 +135,7 @@ const PersonForm = (props) => {
     let source = axios.CancelToken.source();
     if (id) {
       const fetchPersonData = async () => {
-        // Fetch ServiceRequest data.
+        // Fetch Person data.
         await axios.get('/people/api/person/' + id + '/', {
           cancelToken: source.token,
         })
@@ -143,11 +151,35 @@ const PersonForm = (props) => {
           }
         })
         .catch(error => {
-          setShowSystemError(true);
+          if (!unmounted) {
+            setShowSystemError(true);
+          }
         });
       };
       fetchPersonData();
     }
+    const fetchExistingOwnerData = async () => {
+      // Fetch all owners data.
+      await axios.get('/people/api/person/?light=true&incident=' + props.incident + '&organization=' + props.organization +'&training=' + state.incident.training, {
+        cancelToken: source.token,
+      })
+      .then(existingOwnersResponse => {
+        if (!unmounted) {
+          let options = [];
+          existingOwnersResponse.data.forEach(owner => {
+            options.push({id: owner.id, label: owner.first_name + ' ' + owner.last_name + ' ' + owner.display_phone})
+          })
+          setExistingOwners({data:existingOwnersResponse.data, options:options, fetching:false});
+        }
+      })
+      .catch(error => {
+        if (!unmounted) {
+          setShowSystemError(true);
+        }
+      });
+    }
+    fetchExistingOwnerData();
+
     // Cleanup.
     return () => {
       unmounted = true;
@@ -204,13 +236,13 @@ const PersonForm = (props) => {
         onSubmit={(values, { setSubmitting, resetForm }) => {
           if (is_workflow) {
             // Check to see if owner data already exists.
-            axios.get('/people/api/person/?search=' + values.first_name +  ' ' + values.last_name + ' ' + values.phone.replace(/\D/g, ""))
+            axios.get('/people/api/person/?search=' + values.first_name +  ' ' + values.last_name + ' ' + values.phone.replace(/\D/g, "")  + '&incident=' + props.incident + '&organization=' + props.organization +'&training=' + (state && state.incident.training))
             .then(response => {
               // If we have a dupe owner then use it.
-              if (dupeOwner) {
+              if (!existingOwner && dupeOwner) {
                 values['id'] = response.data[0].id;
               }
-              if (response.data.length > 0 && !dupeOwner) {
+              if (response.data.length > 0 && !existingOwner && !dupeOwner) {
                 // Throw error if duplicate owner found.
                 if (isOwner) {
                   setError({show:true, error:['a duplicate owner with the same name and phone number already exists.', response.data[0].id]});
@@ -249,10 +281,10 @@ const PersonForm = (props) => {
             axios.put('/people/api/person/' + id + '/', values)
             .then(function() {
               if (isOwner) {
-                navigate(incident + '/people/owner/' + id);
+                navigate('/' + props.organization + incident + '/people/owner/' + id);
               }
               else {
-                navigate(incident + '/people/reporter/' + id);
+                navigate('/' + props.organization + incident + '/people/reporter/' + id);
               }
             })
             .catch(error => {
@@ -265,15 +297,15 @@ const PersonForm = (props) => {
             .then(response => {
               // If SR already exists, redirect to the SR details.
               if (servicerequest_id) {
-                navigate(incident + '/hotline/servicerequest/' + servicerequest_id);
+                navigate('/' + props.organization + incident + '/hotline/servicerequest/' + servicerequest_id);
               }
               // If adding from an animal, redirect to the Animal details.
               else if (animal_id) {
-                navigate(incident + '/animals/' + animal_id);
+                navigate('/' + props.organization + incident + '/animals/' + animal_id);
               }
               // If adding from an owner, redirect to the new Owner details.
               else {
-                navigate(incident + '/people/owner/' + response.data.id);
+                navigate('/' + props.organization + incident + '/people/owner/' + response.data.id);
               }
             })
             .catch(error => {
@@ -301,6 +333,28 @@ const PersonForm = (props) => {
           </Card.Header>}
           <Card.Body>
           <BootstrapForm noValidate>
+            {/* Only show existing owner if owner and in a workflow/intake */}
+            <span hidden={!(is_workflow || is_intake) || !isOwner}>
+              <label>Use Existing Owner</label>
+              <Typeahead
+                id="existing_owner"
+                className="mb-3"
+                onChange={(values) => {
+                  if (values.length) {
+                    setData(existingOwners.data.filter(owner => owner.id === values[0].id)[0])
+                    setExistingOwner(true);
+                  }
+                  else {
+                    setData(initialData);
+                    setExistingOwner(false);
+                  }
+                }}
+                options={existingOwners.options}
+                placeholder={existingOwners.fetching ? "Loading..." : "Search..."}
+                disabled={existingOwners.fetching ? true : false}
+                emptyLabel="No matches found. Please fill out the form below."
+              />
+            </span>
             <BootstrapForm.Row>
               <TextInput
                 xs="6"
@@ -392,7 +446,7 @@ const PersonForm = (props) => {
               <Modal.Body>
                 <div>
                   <span>This person cannot be created because</span> {error && error.error[0]}
-                  <div className="mt-1 mb-1">Click <Link target="_blank" href={"/" + incident + "/people/owner/" + error.error[1]} style={{color:"#8d99d4"}}>here</Link> to view this owner.</div>
+                  <div className="mt-1 mb-1">Click <Link target="_blank" rel="noreferrer" href={"/" + props.organization + incident + "/people/owner/" + error.error[1]} style={{color:"#8d99d4"}}>here</Link> to view this owner.</div>
                   <div>Would you like to use the existing owner instead?</div>
                 </div>
               </Modal.Body>

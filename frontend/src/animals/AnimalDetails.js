@@ -4,12 +4,12 @@ import { Link, navigate } from 'raviger';
 import { AuthContext } from "../accounts/AccountsReducer";
 import Moment from 'react-moment';
 import { Carousel } from 'react-responsive-carousel';
-import { Button, Card, Col, ListGroup, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Button, Card, Col, ListGroup, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBan, faMedkit, faCut, faEdit, faEnvelope, faLink, faMinusSquare, faPrint, faTimes, faUserPlus
+  faBan, faMedkit, faCut, faEdit, faEnvelope, faLink, faMinusSquare, faTimes, faUserPlus
 } from '@fortawesome/free-solid-svg-icons';
-import { faBadgeSheriff, faClawMarks, faHomeHeart, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
+import { faBadgeSheriff, faClipboardMedical, faClawMarks, faHomeHeart, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import { AnimalDeleteModal } from "../components/Modals";
 import Header from '../components/Header';
@@ -17,8 +17,9 @@ import History from '../components/History';
 import { printAnimalCareSchedule } from './Utils';
 import AnimalCoverImage from '../components/AnimalCoverImage';
 import { SystemErrorContext } from '../components/SystemError';
+import ShelterlyPrintifyButton from '../components/ShelterlyPrintifyButton';
 
-function AnimalDetails({ id, incident }) {
+function AnimalDetails({ id, incident, organization }) {
 
   const { state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
@@ -43,11 +44,13 @@ function AnimalDetails({ id, incident }) {
     injured: 'unknown',
     behavior_notes: '',
     medical_notes: '',
+    microchip: '',
     last_seen: null,
     intake_date: null,
     front_image: null,
     side_image: null,
     room: null,
+    vet_requests: [],
     extra_images: [],
     action_history: [],
     shelter_object: {name: '', full_address: ''}
@@ -90,20 +93,17 @@ function AnimalDetails({ id, incident }) {
     await axios.patch('/animals/api/animal/' + id + '/', {remove_animal:id})
     .then(response => {
       handleAnimalClose();
-      if (state.prevLocation) {
-        navigate(state.prevLocation);
-      }
-      else if (data.request) {
-        navigate('/' + incident + '/hotline/servicerequest/' + data.request);
+      if (data.request) {
+        navigate('/' + organization + '/' + incident + '/hotline/servicerequest/' + data.request);
       }
       else if (data.owner) {
-        navigate('/' + incident + '/people/owner/' + data.owner);
+        navigate('/' + organization + '/' + incident + '/people/owner/' + data.owner);
       }
       else if (data.reporter) {
-        navigate('/' + incident + '/people/reporter/' + data.reporter);
+        navigate('/' + organization + '/' + incident + '/people/reporter/' + data.reporter);
       }
       else {
-        navigate('/' + incident);
+        navigate('/' + organization + '/' + incident);
       }
     })
     .catch(error => {
@@ -111,11 +111,8 @@ function AnimalDetails({ id, incident }) {
     });
   }
 
-  const handleDownloadPdfClick = (e) => {
-    e.preventDefault();
-
-    printAnimalCareSchedule(data);
-  }
+  const handleDownloadPdfClick = () =>
+    printAnimalCareSchedule(data)
 
   // Hook for initializing data.
   useEffect(() => {
@@ -135,7 +132,9 @@ function AnimalDetails({ id, incident }) {
         }
       })
       .catch(error => {
-        setShowSystemError(true);
+        if (!unmounted) {
+          setShowSystemError(true);
+        }
       });
     };
     fetchAnimalData();
@@ -149,7 +148,7 @@ function AnimalDetails({ id, incident }) {
   return (
     <>
     <Header>
-      Animal Details
+      Animal #{data.id}
       <OverlayTrigger
         key={"edit"}
         placement="bottom"
@@ -159,22 +158,25 @@ function AnimalDetails({ id, incident }) {
           </Tooltip>
         }
       >
-        <Link href={"/" + incident + "/animals/edit/" + id} ><FontAwesomeIcon icon={faEdit} className="ml-1" inverse /></Link>
+        <Link href={"/" + organization + "/" + incident + "/animals/edit/" + id} ><FontAwesomeIcon icon={faEdit} className="ml-2" inverse /></Link>
       </OverlayTrigger>
+      <ShelterlyPrintifyButton
+        id="animal-details-animal-care-schedule"
+        spinnerSize={2.0}
+        tooltipPlacement='bottom'
+        tooltipText='Print Animal Care Schedule'
+        printFunc={handleDownloadPdfClick}
+      />
       <OverlayTrigger
-        key={"print"}
+        key={"vetrequest"}
         placement="bottom"
         overlay={
-          <Tooltip id={`tooltip-print`}>
-            Animal care schedule
+          <Tooltip id={`tooltip-vetrequest`}>
+            Create veterinary request
           </Tooltip>
         }
       >
-        {({ ref, ...triggerHandler }) => (
-          <Link onClick={handleDownloadPdfClick} {...triggerHandler} href="#">
-            <span ref={ref}><FontAwesomeIcon icon={faPrint} className="ml-1 mr-2" inverse /></span>
-          </Link>
-        )}
+        <Link href={"/" + incident + "/animals/" + id + "/vetrequest/new"} ><FontAwesomeIcon icon={faClipboardMedical} className="mr-1" inverse /></Link>
       </OverlayTrigger>
       {data.status !== 'REUNITED' ?
       <OverlayTrigger
@@ -186,7 +188,7 @@ function AnimalDetails({ id, incident }) {
           </Tooltip>
         }
       >
-        <FontAwesomeIcon icon={faHomeHeart} onClick={() => setShow(true)} style={{cursor:'pointer'}} inverse />
+        <FontAwesomeIcon icon={faHomeHeart} onClick={() => setShow(true)} className="mr-1 ml-1" style={{cursor:'pointer'}} inverse />
       </OverlayTrigger>
       : ""}
       <OverlayTrigger
@@ -200,7 +202,6 @@ function AnimalDetails({ id, incident }) {
       >
         <FontAwesomeIcon icon={faTimes} style={{cursor:'pointer'}} onClick={() => {setShowAnimalConfirm(true);}} className="ml-1" size="lg" inverse />
       </OverlayTrigger>
-      &nbsp;| {data.status}
     </Header>
     <hr/>
     <div className="row" style={{marginBottom:"-13px"}}>
@@ -324,8 +325,8 @@ function AnimalDetails({ id, incident }) {
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px", textTransform:"capitalize"}}>
               <ListGroup.Item>
                 <div className="row">
-                  <span className="col-6"><b>ID:</b> A#{data.id}</span>
                   <span className="col-6"><b>Name:</b> {data.name||"Unknown"}</span>
+                  <span className="col-6"><b>Status:</b> {data.status}</span>
                 </div>
               </ListGroup.Item>
               <ListGroup.Item>
@@ -346,6 +347,11 @@ function AnimalDetails({ id, incident }) {
                   <span className="col-6"><b>Secondary Color:</b> {data.scolor||"N/A"}</span>
                 </div>
               </ListGroup.Item>
+              {data.microchip ?
+              <ListGroup.Item>
+                <span><b>Microchip:</b> {data.microchip}</span>
+              </ListGroup.Item>
+              : ""}
             </ListGroup>
             <Card.Title>
               <h4 className="mb-0 mt-3">Contacts
@@ -358,14 +364,14 @@ function AnimalDetails({ id, incident }) {
                     </Tooltip>
                   }
                 >
-                  <Link href={"/" + incident + "/people/owner/new?animal_id=" + id}><FontAwesomeIcon icon={faUserPlus} size="sm" className="ml-1" inverse /></Link>
+                  <Link href={"/" + organization + "/" + incident + "/people/owner/new?animal_id=" + id}><FontAwesomeIcon icon={faUserPlus} size="sm" className="ml-1" inverse /></Link>
                 </OverlayTrigger>
               </h4>
             </Card.Title>
             <hr/>
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
               {data.owners.map(owner => (
-                <ListGroup.Item key={owner.id}><b>Owner: </b><Link href={"/" + incident + "/people/owner/" + owner.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{owner.first_name} {owner.last_name}</Link>
+                <ListGroup.Item key={owner.id}><b>Owner: </b><Link href={"/" + organization + "/" + incident + "/people/owner/" + owner.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{owner.first_name} {owner.last_name}</Link>
                 {owner.display_phone ?
                   <OverlayTrigger
                     key={"owner-phone"}
@@ -406,7 +412,7 @@ function AnimalDetails({ id, incident }) {
                 </ListGroup.Item>
               ))}
               {data.reporter ?
-              <ListGroup.Item><b>Reporter: </b><Link href={"/" + incident + "/people/reporter/" + data.reporter} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.reporter_object.first_name} {data.reporter_object.last_name}</Link></ListGroup.Item> : ""}
+              <ListGroup.Item><b>Reporter: </b><Link href={"/" + organization + "/" + incident + "/people/reporter/" + data.reporter} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.reporter_object.first_name} {data.reporter_object.last_name}</Link></ListGroup.Item> : ""}
               {data.owners.length < 1 && !data.reporter ? <ListGroup.Item>No Contacts</ListGroup.Item> : ""}
             </ListGroup>
             <Card.Title>
@@ -416,15 +422,26 @@ function AnimalDetails({ id, incident }) {
             <ListGroup variant="flush" style={{marginBottom:"-13px", marginTop:"-13px"}}>
               {data.found_location ? <ListGroup.Item><b>Found Location: </b>{data.found_location}</ListGroup.Item> : ""}
               {data.request ?
-                <ListGroup.Item><b>Service Request: </b><Link href={"/" + incident + "/hotline/servicerequest/" + data.request} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.request_address}</Link></ListGroup.Item>
+                <ListGroup.Item><b>Service Request: </b><Link href={"/" + organization + "/" + incident + "/hotline/servicerequest/" + data.request} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.request_address}</Link></ListGroup.Item>
               : ''}
               {data.shelter ?
               <ListGroup.Item>
-                <b>Shelter:</b> <Link href={"/" + incident + "/shelter/" + data.shelter} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.shelter_object.name}</Link>
-                {data.room ? <div className="mt-1"><b>Room:</b> {data.building_name} - <Link href={"/" + incident + "/shelter/room/" + data.room} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.room_name}</Link></div> : ""}
-                <div className="mt-1"><b>Intake Date:</b> <Moment format="MMMM Do YYYY HH:mm">{data.intake_date}</Moment></div>
+                <Row>
+                  <Col>
+                    <b>Shelter:</b> <Link href={"/" + organization + "/" + incident + "/shelter/" + data.shelter} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.shelter_object.name}</Link>
+                  </Col>
+                  <Col>
+                    {data.room ? <div><b>Room:</b> <Link href={"/" + organization + "/" + incident + "/shelter/room/" + data.room} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.room_name}</Link></div> : ""}
+                  </Col>
+                </Row>
+                {data.intake_date ? <div className="mt-1"><b>Intake Date:</b> <Moment format="MMMM Do YYYY HH:mm">{data.intake_date}</Moment></div> : ""}
                 <div className="mt-1"><b>Address:</b> {data.shelter_object.full_address || "Unknown"}</div>
               </ListGroup.Item> : ""}
+              {data.vet_requests.map(vetrequest => (
+                <ListGroup.Item key={vetrequest}>
+                  <b>Veterinary Request:</b> <Link href={"/" + incident + "/vet/vetrequest/" + vetrequest} className="text-link" style={{textDecoration:"none", color:"white"}}>VR#{vetrequest}</Link>
+                </ListGroup.Item>
+              ))}
             </ListGroup>
           </Card.Body>
         </Card>
@@ -457,7 +474,7 @@ function AnimalDetails({ id, incident }) {
             <hr/>
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
               {data.color_notes ? <ListGroup.Item><b>Breed / Description:</b> {data.color_notes}</ListGroup.Item> : ""}
-              {data.behavior_notes ? <ListGroup.Item style={{whiteSpace:"pre-line"}}><b>Behavior Notes:</b> {data.behavior_notes}</ListGroup.Item> : ""}
+              {data.behavior_notes ? <ListGroup.Item style={{whiteSpace:"pre-line"}}><b>Animal Notes:</b> {data.behavior_notes}</ListGroup.Item> : ""}
               {data.medical_notes ? <ListGroup.Item style={{whiteSpace:"pre-line"}}><b>Medical Notes:</b> {data.medical_notes}</ListGroup.Item> : ""}
               {data.last_seen ? <ListGroup.Item><b>Last Seen:</b> <Moment format="MMMM Do YYYY HH:mm">{data.last_seen}</Moment></ListGroup.Item> : ""}
               {!data.color_notes && !data.behavior_notes && !data.medical_notes && !data.last_seen ? <ListGroup.Item>No description available</ListGroup.Item> : ""}

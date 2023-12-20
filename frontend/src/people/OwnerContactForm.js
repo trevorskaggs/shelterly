@@ -10,7 +10,7 @@ import { faArrowAltCircleLeft } from '@fortawesome/free-solid-svg-icons';
 import ButtonSpinner from '../components/ButtonSpinner';
 import { SystemErrorContext } from '../components/SystemError';
 
-const OwnerContactForm = ({ id, incident }) => {
+const OwnerContactForm = ({ id, incident, organization }) => {
 
   const { setShowSystemError } = useContext(SystemErrorContext);
 
@@ -46,7 +46,9 @@ const OwnerContactForm = ({ id, incident }) => {
           }
         })
         .catch(error => {
-          setShowSystemError(true);
+          if (!unmounted) {
+            setShowSystemError(true);
+          }
         });
       };
       fetchOwnerContact();
@@ -95,7 +97,7 @@ const OwnerContactForm = ({ id, incident }) => {
         }
         axios_method(url, values)
         .then(response => {
-          navigate('/' + incident + '/people/owner/' + response.data.owner)
+          navigate('/' + organization + '/' + incident + '/people/owner/' + response.data.owner)
         })
         .catch(error => {
           setSubmitting(false);
