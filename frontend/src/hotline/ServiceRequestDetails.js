@@ -20,7 +20,7 @@ import ShelterlyPrintifyButton from '../components/ShelterlyPrintifyButton';
 
 import '../assets/styles.css';
 
-function ServiceRequestDetails({ id, incident }) {
+function ServiceRequestDetails({ id, incident, organization }) {
 
   const { setShowSystemError } = useContext(SystemErrorContext);
 
@@ -147,7 +147,7 @@ function ServiceRequestDetails({ id, incident }) {
             </Tooltip>
           }
         >
-          <Link href={"/" + incident + "/hotline/servicerequest/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-2" inverse /></Link>
+          <Link href={"/" + organization + "/" + incident + "/hotline/servicerequest/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-2" inverse /></Link>
         </OverlayTrigger>
 
         <OverlayTrigger
@@ -353,14 +353,14 @@ function ServiceRequestDetails({ id, incident }) {
                       </Tooltip>
                     }
                   >
-                    <Link href={"/" + incident + "/people/owner/new?servicerequest_id=" + id}><FontAwesomeIcon icon={faUserPlus} size="sm" className="ml-1" inverse /></Link>
+                    <Link href={"/" + organization + "/" + incident + "/people/owner/new?servicerequest_id=" + id}><FontAwesomeIcon icon={faUserPlus} size="sm" className="ml-1" inverse /></Link>
                   </OverlayTrigger>
                 </h4>
               </Card.Title>
               <hr/>
               <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-20px"}}>
                 {data.owner_objects.map(owner => (
-                  <ListGroup.Item key={owner.id}><b>Owner: </b><Link href={"/" + incident + "/people/owner/" + owner.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{owner.first_name} {owner.last_name}</Link>
+                  <ListGroup.Item key={owner.id}><b>Owner: </b><Link href={"/" + organization + "/" + incident + "/people/owner/" + owner.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{owner.first_name} {owner.last_name}</Link>
                     {owner.display_phone ?
                     <OverlayTrigger
                       key={"owner-phone"}
@@ -391,7 +391,7 @@ function ServiceRequestDetails({ id, incident }) {
                 ))}
                 {data.reporter ?
                 <ListGroup.Item>
-                  <b>Reporter: </b><Link href={"/" + incident + "/people/reporter/" + data.reporter} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.reporter_object.first_name} {data.reporter_object.last_name}</Link>
+                  <b>Reporter: </b><Link href={"/" + organization + "/" + incident + "/people/reporter/" + data.reporter} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.reporter_object.first_name} {data.reporter_object.last_name}</Link>
                   {data.reporter_object.agency ? <span className="ml-1">({data.reporter_object.agency})</span> : "" }
                   {data.reporter_object.display_phone ?
                   <OverlayTrigger
@@ -427,7 +427,7 @@ function ServiceRequestDetails({ id, incident }) {
                       </Tooltip>
                     }
                   >
-                    <Link href={"/" + incident + "/animals/new?servicerequest_id=" + id}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
+                    <Link href={"/" + organization + "/" + incident + "/animals/new?servicerequest_id=" + id}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
                   </OverlayTrigger>
                   {data.status.toLowerCase() !== 'closed' ?
                     <OverlayTrigger
@@ -454,7 +454,7 @@ function ServiceRequestDetails({ id, incident }) {
                 </h4>
               </Card.Title>
               <hr />
-              <AnimalCards animals={data.animals} show_owner={false} show_status={true} incident={"/" + incident} />
+              <AnimalCards animals={data.animals} show_owner={false} show_status={true} organization={organization} incident={"/" + incident} />
               {data.animals.length < 1 ? <div className="mb-3">Service Request does not have any animals assigned.</div> : ""}
             </Card.Body>
           </Card>
@@ -476,7 +476,7 @@ function ServiceRequestDetails({ id, incident }) {
                       </Tooltip>
                     }
                   >
-                    <Link href={"/" + incident + "/hotline/servicerequest/" + id + "/assign"}><FontAwesomeIcon icon={faMapMarkedAlt} className="ml-1" inverse /></Link>
+                    <Link href={"/" + organization + "/" + incident + "/hotline/servicerequest/" + id + "/assign"}><FontAwesomeIcon icon={faMapMarkedAlt} className="ml-1" inverse /></Link>
                   </OverlayTrigger> : ""}
                 </h4>
               </Card.Title>
@@ -485,7 +485,7 @@ function ServiceRequestDetails({ id, incident }) {
                 {data.assigned_requests.filter(assigned_request => !assigned_request.dispatch_assignment.end_time).map(assigned_request => (
                   <ListGroup.Item key={assigned_request.id}>
                     <b>Active Dispatch Assignment:</b>
-                    &nbsp;<Link href={"/" + incident + "/dispatch/summary/" + assigned_request.dispatch_assignment.id} className="text-link" style={{textDecoration:"none", color:"white"}}><Moment format="LL">{assigned_request.dispatch_assignment.start_time}</Moment></Link>&nbsp;|&nbsp;
+                    &nbsp;<Link href={"/" + organization + "/" + incident + "/dispatch/summary/" + assigned_request.dispatch_assignment.id} className="text-link" style={{textDecoration:"none", color:"white"}}><Moment format="LL">{assigned_request.dispatch_assignment.start_time}</Moment></Link>&nbsp;|&nbsp;
                     {assigned_request.dispatch_assignment.team_name}
                     <OverlayTrigger
                       key={"team-names"}
@@ -507,14 +507,14 @@ function ServiceRequestDetails({ id, incident }) {
                         </Tooltip>
                       }
                     >
-                      <Link href={"/" + incident + "/dispatch/resolution/" + assigned_request.dispatch_assignment.id}><FontAwesomeIcon icon={faClipboardCheck} className="ml-1" inverse /></Link>
+                      <Link href={"/" + organization + "/" + incident + "/dispatch/resolution/" + assigned_request.dispatch_assignment.id}><FontAwesomeIcon icon={faClipboardCheck} className="ml-1" inverse /></Link>
                     </OverlayTrigger>
                   </ListGroup.Item>
                 ))}
                 {data.assigned_requests.filter(assigned_request => assigned_request.visit_note && assigned_request.visit_note.date_completed).map((assigned_request) => (
                   <ListGroup.Item key={assigned_request.id}>
                     <b>Dispatch Assignment:</b>
-                    &nbsp;<Link href={"/" + incident + "/dispatch/summary/" + assigned_request.visit_note.dispatch_assignment} className="text-link" style={{textDecoration:"none", color:"white"}}><Moment format="LL">{assigned_request.visit_note.date_completed}</Moment></Link>
+                    &nbsp;<Link href={"/" + organization + "/" + incident + "/dispatch/summary/" + assigned_request.visit_note.dispatch_assignment} className="text-link" style={{textDecoration:"none", color:"white"}}><Moment format="LL">{assigned_request.visit_note.date_completed}</Moment></Link>
                     {assigned_request.visit_note.forced_entry ?
                       <OverlayTrigger
                         key={"forced"}
@@ -550,7 +550,7 @@ function ServiceRequestDetails({ id, incident }) {
                         </Tooltip>
                       }
                     >
-                      <Link href={"/" + incident + "/dispatch/assignment/note/" + assigned_request.visit_note.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
+                      <Link href={"/" + organization + "/" + incident + "/dispatch/assignment/note/" + assigned_request.visit_note.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
                     </OverlayTrigger>
                     <div className="mt-1 mb-0"><b>Outcome:</b> {assigned_request.visit_note.notes||"No visit information available."}</div>
                     {assigned_request.owner_contact ?

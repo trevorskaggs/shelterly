@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Incident
+from .models import Incident, Organization
 
 class IncidentSerializer(serializers.ModelSerializer):
 
@@ -19,4 +19,10 @@ class IncidentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Incident
+        fields = '__all__'
+
+class OrganizationSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Organization
         fields = '__all__'

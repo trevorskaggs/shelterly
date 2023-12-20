@@ -160,7 +160,7 @@ const VetRequestForm = (props) => {
         if (props.id) {
           axios.put('/vet/api/vetrequest/' + props.id + '/', values)
           .then(response => {
-            navigate('/' + props.incident + '/vet/vetrequest/' + props.id)
+            navigate('/' + props.organization + '/' + props.incident + '/vet/vetrequest/' + props.id)
           })
           .catch(error => {
             setShowSystemError(true);
@@ -170,7 +170,7 @@ const VetRequestForm = (props) => {
         else {
           axios.post('/vet/api/vetrequest/', values)
           .then(response => {
-            navigate('/' + props.incident + '/vet/vetrequest/' + response.data.id)
+            navigate('/' + props.organization + '/' + props.incident + '/vet/vetrequest/' + response.data.id)
           })
           .catch(error => {
             setShowSystemError(true);

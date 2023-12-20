@@ -18,7 +18,7 @@ import {
 import Header from '../components/Header';
 import { SystemErrorContext } from '../components/SystemError';
 
-function TreatmentPlanDetails({ id, incident }) {
+function TreatmentPlanDetails({ id, incident, organization }) {
 
   const { setShowSystemError } = useContext(SystemErrorContext);
 
@@ -27,7 +27,7 @@ function TreatmentPlanDetails({ id, incident }) {
   const [showModal, setShowModal] = useState(false);
   const cancelTreatmentPlan = () => {
     axios.delete('/vet/api/treatmentplan/' + id + '/')
-    navigate("/" + incident + "/vet/vetrequest/" + data.vet_request)
+    navigate('/' + organization + "/" + incident + "/vet/vetrequest/" + data.vet_request)
   }
 
   // Hook for initializing data.
@@ -70,7 +70,7 @@ function TreatmentPlanDetails({ id, incident }) {
           </Tooltip>
         }
       >
-        <Link href={"/" + incident + "/vet/treatment/edit/" + id + "/?animal_name=" + data.animal_object.name||"Unknown"}><FontAwesomeIcon icon={faEdit} className="ml-2" inverse /></Link>
+        <Link href={"/" + organization + "/" + incident + "/vet/treatment/edit/" + id + "/?animal_name=" + data.animal_object.name||"Unknown"}><FontAwesomeIcon icon={faEdit} className="ml-2" inverse /></Link>
       </OverlayTrigger>
       <OverlayTrigger
         key={"cancel-vet-request"}
@@ -97,7 +97,7 @@ function TreatmentPlanDetails({ id, incident }) {
               <ListGroup.Item>
                 <Row>
                   <Col>
-                    <b>Veterinary Request:</b>&nbsp;<Link href={"/" + incident + "/vet/vetrequest/" + data.vet_request} className="text-link" style={{textDecoration:"none", color:"white"}}>VR#{data.vet_request}</Link>
+                    <b>Veterinary Request:</b>&nbsp;<Link href={"/" + organization + "/" + incident + "/vet/vetrequest/" + data.vet_request} className="text-link" style={{textDecoration:"none", color:"white"}}>VR#{data.vet_request}</Link>
                   </Col>
                   <Col>
                     <b>Status:</b> {data.status}
@@ -139,7 +139,7 @@ function TreatmentPlanDetails({ id, incident }) {
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
               <ListGroup.Item>
                 <div className="row" style={{textTransform:"capitalize"}}>
-                  <span className="col-6"><b>ID:</b> <Link href={"/" + incident + "/animals/" + data.animal_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>A#{data.animal_object.id}</Link></span>
+                  <span className="col-6"><b>ID:</b> <Link href={"/" + organization + "/" + incident + "/animals/" + data.animal_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>A#{data.animal_object.id}</Link></span>
                   <span className="col-6"><b>Name:</b> {data.animal_object.name||"Unknown"}</span>
                 </div>
               </ListGroup.Item>
@@ -179,7 +179,7 @@ function TreatmentPlanDetails({ id, incident }) {
             <hr className="mb-3" />
               {data.treatment_requests.map(treatment_request => (
               <Row key={treatment_request.id} className="ml-0 mb-3">
-                <Link href={"/" + incident + "/vet/treatmentrequest/edit/" + treatment_request.id + "?animal_name=" + data.animal_object.name} className="treatment-link" style={{textDecoration:"none", color:"white"}}>
+                <Link href={"/" + organization + "/" + incident + "/vet/treatmentrequest/edit/" + treatment_request.id + "?animal_name=" + data.animal_object.name} className="treatment-link" style={{textDecoration:"none", color:"white"}}>
                   <Card className="border rounded treatment-hover-div" style={{height:"100px", width:"560px", whiteSpace:"nowrap", overflow:"hidden"}}>
                     <div className="row no-gutters hover-div" style={{height:"100px", textTransform:"capitalize", marginRight:"-2px"}}>
                       <Row className="ml-0 mr-0 w-100" style={{flexWrap:"nowrap"}}>

@@ -12,7 +12,7 @@ import Scrollbar from '../components/Scrollbars';
 import AnimalRoomAssignmentCard from '../components/AnimalRoomAssignmentCard';
 import { SystemErrorContext } from '../components/SystemError';
 
-function ShelterRoomAssignment({ id, incident }) {
+function ShelterRoomAssignment({ id, incident, organization }) {
 
   const { setShowSystemError } = useContext(SystemErrorContext);
 
@@ -229,7 +229,7 @@ function ShelterRoomAssignment({ id, incident }) {
                   )}
                 </Droppable>
               </span>
-              <Link href={"/" + incident + "/shelter/room/" + room.id} className="text-link" style={{textDecoration:"none", color:"white", marginLeft:"-15px"}}>{room.name}</Link>
+              <Link href={"/" + organization + "/" + incident + "/shelter/room/" + room.id} className="text-link" style={{textDecoration:"none", color:"white", marginLeft:"-15px"}}>{room.name}</Link>
             </span>
           ))}
           {data.rooms.filter(room => room.building === selectedBuilding).length < 1 ? <span style={{marginTop:"24px"}}>This building does not have any rooms yet.</span> : ""}

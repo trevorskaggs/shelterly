@@ -69,7 +69,7 @@ const useStyles = makeStyles({
 
 const DateRangePicker = ({...props}) => {
   const pickerRef = useRef();
-  const options = {allowInput: true, dateFormat: props.mode === "single" ? "M d, Y H:i" : "m-d-Y", mode: props.mode === "single" ? "single" : "range", defaultHour:props.hour == 0 ? 0 : props.hour||12, defaultMinute:props.minute||0}
+  const options = {allowInput: true, dateFormat: props.mode === "single" ? "M d, Y H:i" : "m-d-Y", mode: props.mode === "single" ? "single" : "range", defaultHour:props.hour === 0 ? 0 : props.hour||12, defaultMinute:props.minute||0}
   const styles = {
     ...props.style,
     display: 'flex'
@@ -283,7 +283,7 @@ const DropDown = React.forwardRef((props, ref) => {
 
 const ImageUploader = ({ parentStateSetter, ...props }) => {
 
-  const { setFieldValue } = useFormikContext();
+  const { setFieldValue, values } = useFormikContext();
   const [childState, setChildState] = useState(0);
   const [meta] = useField(props);
 
@@ -298,17 +298,32 @@ const ImageUploader = ({ parentStateSetter, ...props }) => {
         {...props}
         onChange={ async (imageList) => {
           setChildState(imageList);
-          if (!props.multiple) {
-            // Set file to field if it exists.
-            if (imageList[0]) {
-              const options = {
-                maxSizeMB: 2,
-                maxWidthOrHeight: 1920,
-                useWebWorker: true
-              }
-              const compressedFile = await imageCompression(imageList[0].file, options);
-              setFieldValue(props.id, compressedFile);
-              setFieldValue(props.id + '_data_url', imageList[0].data_url);
+          // splat the most recent uploaded image
+          const [mostRecentImage] = imageList?.slice?.(-1);
+          // Set file to field if it exists.
+          if (mostRecentImage) {
+            const options = {
+              maxSizeMB: 1,
+              maxWidthOrHeight: 1920,
+              useWebWorker: true
+            };
+
+            // compress the image
+            const compressedFile = await imageCompression(mostRecentImage.file, options);
+            let fileFormValue = compressedFile;
+
+            // add the image to array if it's multiple images
+            if (props.multiple) {
+              const multipleImages = [...(values[props.id]||[])];
+              multipleImages.push(compressedFile);
+              fileFormValue = multipleImages;
+            }
+
+            // set data to Formik context
+            await setFieldValue(props.id, fileFormValue);
+            if (!props.multiple) {
+              const compressedDataUrl = await imageCompression.getDataUrlFromFile(compressedFile);
+              setFieldValue(props.id + '_data_url', compressedDataUrl);
             }
           }
         }}

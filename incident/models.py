@@ -1,4 +1,32 @@
+from django.contrib.auth import get_user_model
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.core.exceptions import ValidationError
+import re
+
+User = get_user_model()
+
+class Organization(models.Model):
+
+    name = models.CharField(max_length=80)
+    slug = models.CharField(max_length=20, blank=False, null=False, unique=True)
+    short_name = models.CharField(max_length=40, blank=True, null=True)
+    liability_name = models.CharField(max_length=80)
+    liability_short_name = models.CharField(max_length=40)
+
+    def __str__(self):
+        return '{}'.format(self.name)
+
+    def clean(self):
+        if not bool(re.search(r"^[a-z0-9]*$", self.slug)):
+            raise ValidationError("Invalid slug.")
+
+@receiver(post_save, sender=Organization)
+def add_default_admins(sender, instance, created, **kwargs):
+    if created:
+        for user in User.objects.filter(is_superuser=True):
+            user.organizations.add(instance)
 
 
 class Incident(models.Model):
@@ -9,6 +37,11 @@ class Incident(models.Model):
     end_time = models.DateTimeField(blank=True, null=True)
     latitude = models.DecimalField(max_digits=9, decimal_places=4)
     longitude = models.DecimalField(max_digits=9, decimal_places=4)
+    training = models.BooleanField(default=False)
+    organization = models.ForeignKey(Organization, on_delete=models.SET_NULL, null=True, blank=True)
+
+    def __str__(self):
+        return '{}'.format(self.name)
 
     class Meta:
         ordering = ['name']

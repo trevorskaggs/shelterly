@@ -22,10 +22,12 @@ import Scrollbar from '../components/Scrollbars';
 import Header from '../components/Header';
 import 'react-bootstrap-typeahead/css/Typeahead.css';
 import 'leaflet/dist/leaflet.css';
+import { AuthContext } from "../accounts/AccountsReducer";
 import { SystemErrorContext } from '../components/SystemError';
 
-function Deploy({ incident }) {
+function Deploy({ incident, organization }) {
 
+  const { dispatch, state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
   // Determine if this is a preplanning workflow.
@@ -218,7 +220,7 @@ function Deploy({ incident }) {
     setMapState(tempMapState);
   }
 
-  useWebSocket('wss://' + window.location.host + '/ws/map_data/', {
+  useWebSocket('ws://' + window.location.host.replace('localhost:3000', 'localhost:8000') + '/ws/map_data/', {
     onMessage: (e) => {
       setNewData(true)
     },
@@ -233,7 +235,7 @@ function Deploy({ incident }) {
     const fetchTeamMembers = async () => {
       setTeamData({teams: [], options: [], isFetching: true});
       // Fetch all TeamMembers.
-      await axios.get('/evac/api/evacteammember/', {
+      await axios.get('/evac/api/evacteammember/?incident=' + incident + '&organization=' + organization +'&training=' + state.incident.training, {
         cancelToken: source.token,
       })
       .then(response => {
@@ -437,7 +439,7 @@ function Deploy({ incident }) {
               }
               // Otherwise navigate to the DA Summary page.
               else {
-                navigate("/" + incident + '/dispatch/summary/' + response.data.id);
+                navigate('/' + organization + "/" + incident + '/dispatch/summary/' + response.data.id);
               }
             })
             .catch(error => {
@@ -1000,7 +1002,7 @@ function Deploy({ incident }) {
                         </Tooltip>
                       }
                     >
-                      <Link href={"/" + incident + "/hotline/servicerequest/" + service_request.id}><FontAwesomeIcon icon={faClipboardList} inverse /></Link>
+                      <Link href={"/" + organization +"/" + incident + "/hotline/servicerequest/" + service_request.id}><FontAwesomeIcon icon={faClipboardList} inverse /></Link>
                     </OverlayTrigger>
                     <OverlayTrigger
                       key={"add-to-dispatch"}
@@ -1011,7 +1013,7 @@ function Deploy({ incident }) {
                         </Tooltip>
                       }
                     >
-                      <Link href={"/" + incident + "/hotline/servicerequest/" + service_request.id + "/assign"}><FontAwesomeIcon icon={faMapMarkedAlt} className="ml-1" inverse /></Link>
+                      <Link href={"/" + organization +"/" + incident + "/hotline/servicerequest/" + service_request.id + "/assign"}><FontAwesomeIcon icon={faMapMarkedAlt} className="ml-1" inverse /></Link>
                     </OverlayTrigger>
                   </div>
                 </div>

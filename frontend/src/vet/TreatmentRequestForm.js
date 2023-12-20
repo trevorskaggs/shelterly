@@ -99,7 +99,7 @@ const TreatmetRequestForm = (props) => {
         if (props.id) {
           axios.put('/vet/api/treatmentrequest/' + props.id + '/', values)
           .then(response => {
-            navigate('/' + props.incident + '/vet/treatment/' + response.data.treatment_plan)
+            navigate('/' + props.organization + '/' + props.incident + '/vet/treatment/' + response.data.treatment_plan)
           })
           .catch(error => {
             setShowSystemError(true);
@@ -110,7 +110,7 @@ const TreatmetRequestForm = (props) => {
     >
       {formikProps => (
         <Card border="secondary" className="mt-5">
-          <Card.Header as="h5" className="pl-3"><span style={{ cursor: 'pointer' }} onClick={() => navigate("/" + props.incident + "/vet/treatment/" + data.treatment_plan)} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>Treatment Request Form - {animal_name}</Card.Header>
+          <Card.Header as="h5" className="pl-3"><span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + props.organization + "/" + props.incident + "/vet/treatment/" + data.treatment_plan)} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>Treatment Request Form - {animal_name}</Card.Header>
           <Card.Body>
             <Form>
               <FormGroup>

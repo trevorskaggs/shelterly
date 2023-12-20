@@ -18,7 +18,7 @@ import {
 import Header from '../components/Header';
 import { SystemErrorContext } from '../components/SystemError';
 
-function VetRequestDetails({ id, incident }) {
+function VetRequestDetails({ id, incident, organization }) {
 
   const { setShowSystemError } = useContext(SystemErrorContext);
 
@@ -73,7 +73,7 @@ function VetRequestDetails({ id, incident }) {
           </Tooltip>
         }
       >
-        <Link href={"/" + incident + "/vet/vetrequest/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-2" inverse /></Link>
+        <Link href={"/" + organization + "/" + incident + "/vet/vetrequest/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-2" inverse /></Link>
       </OverlayTrigger> : ""}
       {data.status !== 'Canceled' ? <OverlayTrigger
         key={"cancel-vet-request"}
@@ -138,7 +138,7 @@ function VetRequestDetails({ id, incident }) {
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
               <ListGroup.Item>
                 <div className="row" style={{textTransform:"capitalize"}}>
-                  <span className="col-6"><b>ID:</b> <Link href={"/" + incident + "/animals/" + data.animal_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>A#{data.animal_object.id}</Link></span>
+                  <span className="col-6"><b>ID:</b> <Link href={"/" + organization + "/" + incident + "/animals/" + data.animal_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>A#{data.animal_object.id}</Link></span>
                   <span className="col-6"><b>Name:</b> {data.animal_object.name||"Unknown"}</span>
                 </div>
               </ListGroup.Item>
@@ -183,14 +183,14 @@ function VetRequestDetails({ id, incident }) {
                     </Tooltip>
                   }
                 >
-                  <Link href={"/" + incident + "/vet/treatment/new?vetrequest_id=" + id + "&animal_name=" + data.animal_object.name || "Unknown"}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
+                  <Link href={"/" + organization + "/" + incident + "/vet/treatment/new?vetrequest_id=" + id + "&animal_name=" + data.animal_object.name || "Unknown"}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
                 </OverlayTrigger> : ""}
               </h4>
             </Card.Title>
             <hr className="mb-3" />
             {data.treatment_plans.map(treatment_plan => (
               <Row key={treatment_plan.id} className="ml-0 mb-3">
-                <Link href={"/" + incident + "/vet/treatment/" + treatment_plan.id} className="treatment-link" style={{textDecoration:"none", color:"white"}}>
+                <Link href={"/" + organization + "/" + incident + "/vet/treatment/" + treatment_plan.id} className="treatment-link" style={{textDecoration:"none", color:"white"}}>
                   <Card className="border rounded treatment-hover-div" style={{height:"100px", width:"745px", whiteSpace:"nowrap", overflow:"hidden"}}>
                     <div className="row no-gutters hover-div treatment-hover-div" style={{height:"100px", marginRight:"-2px"}}>
                       <Row className="ml-0 mr-0 w-100" style={{flexWrap:"nowrap"}}>

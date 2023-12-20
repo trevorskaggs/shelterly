@@ -15,7 +15,7 @@ import Header from "../components/Header";
 import { AddressLookup } from '../components/Map';
 import { SystemErrorContext } from '../components/SystemError';
 
-function Hotline({ incident }) {
+function Hotline({ incident, organization }) {
 
   const { setShowSystemError } = useContext(SystemErrorContext);
 
@@ -110,17 +110,17 @@ function Hotline({ incident }) {
     <hr/>
     <Row className="ml-0 mr-0 pl-0 pr-0 mb-0">
       <Col xs={4} className="pl-0 pr-0">
-        <Link href={"/" + incident + "/hotline/workflow/owner"} style={{textDecoration:"none"}}>
+        <Link href={"/" + organization + "/" + incident + "/hotline/workflow/owner"} style={{textDecoration:"none"}}>
           <Button className="rounded border btn-block" style={{height:"100px", fontSize:"20px"}}><FontAwesomeIcon icon={faPhone} className="mr-1 fa-move-up" inverse />OWNER CALLING</Button>
         </Link>
       </Col>
       <Col xs={4} className="pl-0 pr-0">
-        <Link href={"/" + incident + "/hotline/workflow/reporter"} style={{textDecoration:"none"}}>
+        <Link href={"/" + organization + "/" + incident + "/hotline/workflow/reporter"} style={{textDecoration:"none"}}>
           <Button className="rounded border btn-block" style={{height:"100px", fontSize:"20px"}}><FontAwesomeIcon icon={faPhone} className="mr-1 fa-move-up" inverse />NON-OWNER CALLING</Button>
         </Link>
       </Col>
       <Col xs={4} className="pl-0 pr-0">
-        <Link href={"/" + incident + "/hotline/workflow/first_responder"} style={{textDecoration:"none"}}>
+        <Link href={"/" + organization + "/" + incident + "/hotline/workflow/first_responder"} style={{textDecoration:"none"}}>
           <Button className="rounded border btn-block" style={{height:"100px", fontSize:"20px"}}><FontAwesomeIcon icon={faPhone} className="mr-1 fa-move-up" inverse />FIRST RESPONDER CALLING</Button>
         </Link>
       </Col>
@@ -134,7 +134,7 @@ function Hotline({ incident }) {
                 key={service_request.id}
                 position={[service_request.latitude, service_request.longitude]}
                 icon={service_request.reported_animals > 0 ? reportedMarkerIcon : service_request.reported_evac > 0 ? reportedEvacMarkerIcon : service_request.reported_sheltered_in_place > 0 ? reportedSIPMarkerIcon : service_request.sheltered_in_place > 0 ? SIPMarkerIcon : service_request.unable_to_locate > 0 ? UTLMarkerIcon : closedMarkerIcon}
-                onClick={() => navigate("/" + incident + "/hotline/servicerequest/" + service_request.id)}
+                onClick={() => navigate('/' + organization + "/" + incident + "/hotline/servicerequest/" + service_request.id)}
               >
                 <MapTooltip autoPan={false}>
                   <span>

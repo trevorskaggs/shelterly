@@ -3,13 +3,13 @@ import { navigate } from "raviger";
 import { publicRoutes } from "../router";
 
 // Authenticate the user with the backnd to obtain a user.
-export function loadUser({dispatch, removeCookie, path}) {
+export function loadUser({state, dispatch, removeCookie, path}) {
 
   // Set user loading state.
   dispatch({ type: 'USER_LOADING' });
 
   // Check backend for authentication and return user information if valid.
-  axios.get("/accounts/api/user/auth/")
+  axios.get("/accounts/api/user/auth/?organization=" + state.organization.id)
   .then(function(results){
     // Set the user state.
     dispatch({type: 'USER_LOADED', user: results.data });

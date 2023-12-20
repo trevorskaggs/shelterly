@@ -15,7 +15,7 @@ import { SystemErrorContext } from '../components/SystemError';
 import ShelterlyPrintifyButton from '../components/ShelterlyPrintifyButton';
 import { printRoomAnimalCareSchedules } from './Utils';
 
-function RoomDetails({ id, incident }) {
+function RoomDetails({ id, incident, organization }) {
 
   const { setShowSystemError } = useContext(SystemErrorContext);
 
@@ -24,7 +24,7 @@ function RoomDetails({ id, incident }) {
   const removeRoomSubmit = () => {
     axios.delete('/shelter/api/room/' + id + '/')
     .then(response => {
-      navigate('/' + incident + '/shelter/building/' + data.building)
+      navigate('/' + organization + '/' + incident + '/shelter/building/' + data.building)
     })
     .catch(error => {
       setShowSystemError(true);
@@ -76,7 +76,7 @@ function RoomDetails({ id, incident }) {
           </Tooltip>
         }
       >
-        <Link href={"/" + incident + "/shelter/room/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-1" inverse /></Link>
+        <Link href={"/" + organization + "/" + incident + "/shelter/room/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-1" inverse /></Link>
       </OverlayTrigger>
       <OverlayTrigger
           key={"remove-room"}
@@ -105,10 +105,10 @@ function RoomDetails({ id, incident }) {
             <b>Description: </b>{data.description}
           </ListGroup.Item> : ""}
           <ListGroup.Item>
-            <b>Building:</b> <Link href={"/" + incident + "/shelter/building/" + data.building} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.building_name}</Link>
+            <b>Building:</b> <Link href={"/" + organization + "/" + incident + "/shelter/building/" + data.building} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.building_name}</Link>
           </ListGroup.Item>
           <ListGroup.Item>
-            <b>Shelter:</b> <Link href={"/" + incident + "/shelter/" + data.shelter} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.shelter_name}</Link>
+            <b>Shelter:</b> <Link href={"/" + organization + "/" + incident + "/shelter/" + data.shelter} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.shelter_name}</Link>
           </ListGroup.Item>
         </ListGroup>
       </Card.Body>
@@ -120,7 +120,7 @@ function RoomDetails({ id, incident }) {
             <Card.Title>
               <h4 className="mb-0">Animals ({data.animals.length})
                 <OverlayTrigger placement="top" overlay={<Tooltip id={`tooltip-assign`}>Assign animals to rooms</Tooltip>}>
-                  <Link href={"/" + incident + "/shelter/" + data.shelter + "/assign?building_id=" + data.building}><FontAwesomeIcon icon={faArrowDownToSquare} className="ml-1 fa-move-up" inverse /></Link>
+                  <Link href={"/" + organization + "/" + incident + "/shelter/" + data.shelter + "/assign?building_id=" + data.building}><FontAwesomeIcon icon={faArrowDownToSquare} className="ml-1 fa-move-up" inverse /></Link>
                 </OverlayTrigger>
                 {data.animals?.length > 0 && (
                   <ShelterlyPrintifyButton
@@ -135,7 +135,7 @@ function RoomDetails({ id, incident }) {
               </h4>
             </Card.Title>
             <hr/>
-            <AnimalCards animals={data.animals} show_owner={true} incident={"/" + incident} />
+            <AnimalCards animals={data.animals} show_owner={true} organization={organization} incident={"/" + incident} />
             {data.animals.length < 1 ? <p>No animals have been assigned to this room.</p> : ""}
           </Card.Body>
         </Card>

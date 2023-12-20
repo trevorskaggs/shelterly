@@ -28,6 +28,7 @@ import { Checkbox, DateTimePicker, DropDown, TextInput } from '../components/For
 import { statusChoices } from '../animals/constants';
 import ButtonSpinner from '../components/ButtonSpinner';
 import { priorityChoices } from '../constants';
+import { AuthContext } from "../accounts/AccountsReducer";
 import { SystemErrorContext } from '../components/SystemError';
 
 function AnimalStatus(props) {
@@ -119,8 +120,9 @@ function AnimalStatus(props) {
   )
 }
 
-function DispatchResolutionForm({ id, incident }) {
+function DispatchResolutionForm({ id, incident, organization }) {
 
+  const { dispatch, state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
   // Initial animal data.
@@ -194,7 +196,7 @@ function DispatchResolutionForm({ id, incident }) {
     const fetchShelters = () => {
       setShelters({options: [], room_options: [], isFetching: true});
       // Fetch Shelter data.
-      axios.get('/shelter/api/shelter/?incident=' + incident, {
+      axios.get('/shelter/api/shelter/?incident=' + incident + '&organization=' + organization +'&training=' + state.incident.training, {
         cancelToken: source.token,
       })
       .then(response => {
@@ -305,10 +307,10 @@ function DispatchResolutionForm({ id, incident }) {
           axios.put('/evac/api/evacassignment/' + id + '/', values)
             .then(response => {
               if (response.data.service_requests.length === 0) {
-                navigate('/' + incident + '/dispatch');
+                navigate('/' + organization + '/' + incident + '/dispatch');
               }
               else {
-                navigate('/' + incident + '/dispatch/summary/' + response.data.id);
+                navigate('/' + organization + '/' + incident + '/dispatch/summary/' + response.data.id);
               }
             })
             .catch(error => {
@@ -346,7 +348,7 @@ function DispatchResolutionForm({ id, incident }) {
                   <Card.Title style={{marginBottom:"-5px", marginTop:"-5px"}}>
                     <h4>
                       SR#{assigned_request.service_request_object.id} -&nbsp;
-                      <Link href={"/" + incident + "/hotline/servicerequest/" + assigned_request.service_request_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link> |&nbsp;
+                      <Link href={"/" + organization + "/" + incident + "/hotline/servicerequest/" + assigned_request.service_request_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link> |&nbsp;
                       <Checkbox
                         label={"Unable to Complete:"}
                         name={`sr_updates.${index}.unable_to_complete`}

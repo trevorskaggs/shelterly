@@ -9,13 +9,15 @@ import * as Yup from 'yup';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft } from '@fortawesome/free-solid-svg-icons';
 import ButtonSpinner from '../components/ButtonSpinner';
+import { AuthContext } from "../accounts/AccountsReducer";
 import { SystemErrorContext } from '../components/SystemError';
 
 // Regex validators.
 const nameRegex = /^[a-z0-9 ,.'-]+$/i;
 
-const ShelterForm = ({ id, incident }) => {
+const ShelterForm = ({ id, incident, organization }) => {
 
+  const { dispatch, state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
   // Initial shelter data.
@@ -28,10 +30,10 @@ const ShelterForm = ({ id, incident }) => {
     city: '',
     state: '',
     zip_code: '',
-    active: true,
+    // active: true,
+    incident_slug: incident,
     latitude: null,
     longitude: null,
-    incident_slug: incident,
   });
 
   // Regex validators.
@@ -50,7 +52,7 @@ const ShelterForm = ({ id, incident }) => {
 
     if (id) {
       const fetchShelterData = async () => {
-        // Fetch ServiceRequest data.
+        // Fetch Shelter data.
         await axios.get('/shelter/api/shelter/' + id + '/?incident=' + incident, {
           cancelToken: source.token,
         })
@@ -118,10 +120,10 @@ const ShelterForm = ({ id, incident }) => {
             axios.put('/shelter/api/shelter/' + id + '/?incident=' + incident, values)
             .then(function() {
               if (values.active === false) {
-                navigate("/" + incident + '/shelter');
+                navigate('/' + organization + "/" + incident + '/shelter');
               }
               else {
-                navigate("/" + incident + '/shelter/' + id);
+                navigate('/' + organization + "/" + incident + '/shelter/' + id);
               }
             })
             .catch(error => {
@@ -136,7 +138,7 @@ const ShelterForm = ({ id, incident }) => {
           else {
             axios.post('/shelter/api/shelter/', values)
             .then(response => {
-              navigate("/" + incident + '/shelter/' + response.data.id)
+              navigate('/' + organization + "/" + incident + '/shelter/' + response.data.id)
             })
             .catch(error => {
               if (error.response.data && error.response.data.name && error.response.data.name[0].includes('shelter with this name already exists')) {
@@ -184,12 +186,12 @@ const ShelterForm = ({ id, incident }) => {
                   />
                 </BootstrapForm.Row>
                 <AddressSearch formikProps={props} label="Search for Shelter Address" show_apt={false} incident={incident} error="Shelter Address was not selected." />
-                {id && data.animal_count > 0 ?
+                {/* {id && data.animal_count > 0 ?
                 <OverlayTrigger
-                  key={"forced"}
+                  key={"active"}
                   placement="top"
                   overlay={
-                    <Tooltip id={`tooltip-forced`}>
+                    <Tooltip id={`tooltip-active`}>
                       A shelter cannot be deactivated while it still has animals.
                     </Tooltip>
                   }
@@ -204,7 +206,7 @@ const ShelterForm = ({ id, incident }) => {
                   <BootstrapForm.Label htmlFor="active">Active</BootstrapForm.Label>
                   <Field component={Switch} name="active" id="active" type="checkbox" color="primary" disabled={data.animal_count > 0} />
                 </span>
-                :""}
+                :""} */}
               </BootstrapForm>
             </Card.Body>
             <ButtonGroup size="lg">

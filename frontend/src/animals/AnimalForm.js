@@ -9,10 +9,12 @@ import { catAgeChoices, dogAgeChoices, horseAgeChoices, otherAgeChoices, catColo
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft, faMinusSquare } from '@fortawesome/free-solid-svg-icons';
 import ButtonSpinner from "../components/ButtonSpinner";
+import { AuthContext } from "../accounts/AccountsReducer";
 import { SystemErrorContext } from '../components/SystemError';
 
 const AnimalForm = (props) => {
 
+  const { dispatch, state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
   const id = props.id;
@@ -206,7 +208,7 @@ const AnimalForm = (props) => {
     const fetchShelters = () => {
       setShelters({options: [], shelters: [], room_options: {}, isFetching: true});
       // Fetch Shelter data.
-      axios.get('/shelter/api/shelter/?incident=' + props.incident, {
+      axios.get('/shelter/api/shelter/?incident=' + props.incident + '&organization=' + props.organization +'&training=' + (state && state.incident.training), {
         cancelToken: source.token,
       })
       .then(response => {
@@ -311,8 +313,15 @@ const AnimalForm = (props) => {
             }
           }
           // Add extra images.
-          for (let i = 0; i < extra_images.length; i++) {
-            formData.append('extra' + (i + 1), extra_images[i].file);
+          for (let i = 0; i < values.extra_images.length; i++) {
+            const extraKey = `extra${(i + 1)}`;
+            const extraImage = values.extra_images[i];
+            const extraName = extraImage.name;
+            if (extraName) {
+              formData.append(extraKey, extraImage, extraName);
+            } else {
+              formData.append(extraKey, extraImage);
+            }
           }
 
           if (is_workflow) {
@@ -433,7 +442,7 @@ const AnimalForm = (props) => {
 
                 axios.post('/animals/api/animal/', formData)
                 .then(animalResponse => {
-                  navigate("/" + props.incident + "/shelter/intakesummary/" + intakeSummaryResponse[0].data.id);
+                  navigate('/' + props.organization + "/" + props.incident + "/shelter/intakesummary/" + intakeSummaryResponse[0].data.id);
                 })
                 .catch(error => {
                   setIsButtonSubmitting(false);
@@ -455,7 +464,7 @@ const AnimalForm = (props) => {
             if (id) {
               axios.put('/animals/api/animal/' + id + '/', formData)
               .then(function() {
-                navigate(incident + '/animals/' + id);
+                navigate('/' + props.organization + incident + '/animals/' + id);
               })
               .catch(error => {
                 setIsButtonSubmitting(false);
@@ -468,15 +477,15 @@ const AnimalForm = (props) => {
               .then(response => {
                 // If adding to an SR, redirect to the SR.
                 if (servicerequest_id) {
-                  navigate(incident + '/hotline/servicerequest/' + servicerequest_id);
+                  navigate('/' + props.organization + incident + '/hotline/servicerequest/' + servicerequest_id);
                 }
                 // If adding to an Owner, redirect to the owner.
                 else if (owner_id) {
-                  navigate(incident + '/people/owner/' + owner_id)
+                  navigate('/' + props.organization + incident + '/people/owner/' + owner_id)
                 }
                 // Else redirect to the animal.
                 else {
-                  navigate(incident + '/animals/' + response.data.id);
+                  navigate('/' + props.organization + incident + '/animals/' + response.data.id);
                 }
               })
               .catch(error => {

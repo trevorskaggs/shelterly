@@ -18,7 +18,7 @@ import { SystemErrorContext } from '../components/SystemError';
 import { speciesChoices } from '../animals/constants';
 import Flatpickr from 'react-flatpickr';
 
-function VetRequestSearch({ incident }) {
+function VetRequestSearch({ incident, organization }) {
 
   const { setShowSystemError } = useContext(SystemErrorContext);
 
@@ -374,7 +374,7 @@ function VetRequestSearch({ incident }) {
                   </Tooltip>
                 }
               >
-                <Link href={"/" + incident + "/vet/vetrequest/" + vet_request.id}><FontAwesomeIcon icon={faDotCircle} className="mr-2" inverse /></Link>
+                <Link href={"/" + organization + "/" + incident + "/vet/vetrequest/" + vet_request.id}><FontAwesomeIcon icon={faDotCircle} className="mr-2" inverse /></Link>
               </OverlayTrigger>
               VR#{vet_request.id}
               &nbsp;-&nbsp;{vet_request.animal_object.name || "Unknown"}
@@ -392,7 +392,7 @@ function VetRequestSearch({ incident }) {
                     <ListGroup.Item>
                       <Row>
                         <Col>
-                          <b>Patient: </b><Link href={"/" + incident + "/animals/" + vet_request.animal_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>A#{vet_request.animal_object.id}</Link>
+                          <b>Patient: </b><Link href={"/" + organization + "/" + incident + "/animals/" + vet_request.animal_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>A#{vet_request.animal_object.id}</Link>
                         </Col>
                         <Col style={{textTransform:"capitalize"}}>
                           <b>Species:</b> {vet_request.animal_object.species}
@@ -430,7 +430,7 @@ function VetRequestSearch({ incident }) {
                   <Scrollbar style={{height:"144px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
                     {vet_request.treatment_plans.map((treatment, i) => (
                       <ListGroup.Item key={treatment.id}>
-                        <Link href={"/" + incident + "/vet/treatment/" + treatment.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{treatment.treatment_object.description || "Unknown"}</Link>
+                        <Link href={"/" + organization + "/" + incident + "/vet/treatment/" + treatment.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{treatment.treatment_object.description || "Unknown"}</Link>
                       </ListGroup.Item>
                     ))}
                   {vet_request.treatment_plans.length < 1 ? <ListGroup.Item>No Treatments</ListGroup.Item> : ""}
