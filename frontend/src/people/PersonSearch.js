@@ -14,7 +14,6 @@ import { useMark, useSubmitting } from '../hooks';
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
 import ButtonSpinner from '../components/ButtonSpinner';
-import { speciesChoices } from '../animals/constants';
 import { ITEMS_PER_PAGE } from '../constants';
 import { SystemErrorContext } from '../components/SystemError';
 import { AuthContext } from "../accounts/AccountsReducer";
@@ -42,6 +41,7 @@ function PersonSearch({ incident, organization }) {
 	const [searchState, setSearchState] = useState({});
 	const [statusOptions, setStatusOptions] = useState(person);
 	const [searchTerm, setSearchTerm] = useState(search);
+  const [speciesChoices, setSpeciesChoices] = useState([]);
 	const tempSearchTerm = useRef(null);
 	const [page, setPage] = useState(1);
   const [numPages, setNumPages] = useState(1);
@@ -84,10 +84,10 @@ function PersonSearch({ incident, organization }) {
 		let unmounted = false;
 		let source = axios.CancelToken.source();
 
-		const fetchOwners = async () => {
+		const fetchOwners = (species_options) => {
 			setData({owners: [], isFetching: true});
 			// Fetch People data.
-			await axios.get('/people/api/person/?search=' + searchTerm + '&status=' + statusOptions + '&incident=' + incident + '&organization=' + organization +'&training=' + (state && state.incident.training), {
+			axios.get('/people/api/person/?search=' + searchTerm + '&status=' + statusOptions + '&incident=' + incident + '&organization=' + organization +'&training=' + (state && state.incident.training), {
 				cancelToken: source.token,
 			})
 			.then(response => {
@@ -107,7 +107,7 @@ function PersonSearch({ incident, organization }) {
 								species.push(animal.species_string)
 							}
 						})
-            let sortOrder = speciesChoices.map(sc => sc.value);
+            let sortOrder = species_options.map(sc => sc.label);
             species.sort(function(a, b) {
               return sortOrder.indexOf(a) - sortOrder.indexOf(b);
             });
@@ -126,7 +126,32 @@ function PersonSearch({ incident, organization }) {
 				}
 			});
 		};
-		fetchOwners();
+
+    const fetchSpecies = () => {
+      setSpeciesChoices([]);
+      // Fetch Species data.
+      axios.get('/animals/api/species/', {
+        cancelToken: source.token,
+      })
+      .then(response => {
+        if (!unmounted) {
+          let species_options = [];
+          response.data.forEach(result => {
+            // Build species option list.
+            species_options.push({value: result.id, label: result.name});
+          });
+          setSpeciesChoices(species_options);
+          fetchOwners(species_options);
+        }
+      })
+      .catch(error => {
+        if (!unmounted) {
+          setShelters({options: []});
+          setShowSystemError(true);
+        }
+      });
+    };
+    fetchSpecies();
 
     const fetchOrganizationData = async () => {
       // Fetch Organization data.

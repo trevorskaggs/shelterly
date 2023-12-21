@@ -5,7 +5,7 @@ import { Form, Formik } from "formik";
 import { ButtonGroup, Card, Col, Image, Form as BootstrapForm } from "react-bootstrap";
 import * as Yup from 'yup';
 import { AddressSearch, DateTimePicker, DropDown, ImageUploader, TextInput } from '../components/Form.js';
-import { catAgeChoices, dogAgeChoices, horseAgeChoices, otherAgeChoices, catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, speciesChoices, sexChoices, dogSizeChoices, catSizeChoices, horseSizeChoices, otherSizeChoices, statusChoices, reportedStatusChoices, unknownChoices } from './constants';
+import { catAgeChoices, dogAgeChoices, horseAgeChoices, otherAgeChoices, catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, sexChoices, dogSizeChoices, catSizeChoices, horseSizeChoices, otherSizeChoices, statusChoices, reportedStatusChoices, unknownChoices } from './constants';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft, faMinusSquare } from '@fortawesome/free-solid-svg-icons';
 import ButtonSpinner from "../components/ButtonSpinner";
@@ -200,7 +200,7 @@ const AnimalForm = (props) => {
       })
       .catch(error => {
         if (!unmounted) {
-          setShelters({options: []});
+          setSpecies({options: []});
           setShowSystemError(true);
         }
       });
@@ -265,8 +265,6 @@ const AnimalForm = (props) => {
     };
     fetchShelters();
 
-    
-
     // Cleanup.
     return () => {
       unmounted = true;
@@ -283,8 +281,8 @@ const AnimalForm = (props) => {
           status: Yup.string(),
           name: Yup.string()
             .max(50, 'Must be 50 characters or less.'),
-          // species: Yup.number()
-          //   .required('Required'),
+          species: Yup.number()
+            .required('Required'),
           size: Yup.string(),
           age: Yup.string(),
           sex: Yup.string()

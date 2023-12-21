@@ -16,7 +16,6 @@ import { DATE_FORMAT } from '../constants';
 import { useMark, useSubmitting } from '../hooks';
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
-import { speciesChoices } from '../animals/constants';
 import { ITEMS_PER_PAGE } from '../constants';
 import { SystemErrorContext } from '../components/SystemError';
 import ButtonSpinner from '../components/ButtonSpinner';
@@ -42,6 +41,7 @@ function ServiceRequestSearch({ incident, organization }) {
   const [endDate, setEndDate] = useState(null);
   const [triggerRefresh, setTriggerRefresh] = useState(false);
   const [searchTerm, setSearchTerm] = useState(search);
+  const [speciesChoices, setSpeciesChoices] = useState([]);
   const tempSearchTerm = useRef(null);
   const [page, setPage] = useState(1);
   const [numPages, setNumPages] = useState(1);
@@ -117,10 +117,10 @@ function ServiceRequestSearch({ incident, organization }) {
     let unmounted = false;
     let source = axios.CancelToken.source();
 
-    const fetchServiceRequests = async () => {
+    const fetchServiceRequests = (species_options) => {
       setData({service_requests: [], isFetching: true});
       // Fetch ServiceRequest data.
-      await axios.get('/hotline/api/servicerequests/?search=' + searchTerm + '&status=' + statusOptions + '&incident=' + incident, {
+      axios.get('/hotline/api/servicerequests/?search=' + searchTerm + '&status=' + statusOptions + '&incident=' + incident, {
         cancelToken: source.token,
       })
       .then(response => {
@@ -135,7 +135,8 @@ function ServiceRequestSearch({ incident, organization }) {
 								species.push(animal.species_string)
 							}
 						});
-            let sortOrder = speciesChoices.map(sc => sc.value);
+
+            let sortOrder = species_options.map(sc => sc.label);
             species.sort(function(a, b) {
               return sortOrder.indexOf(a) - sortOrder.indexOf(b);
             });
@@ -154,7 +155,32 @@ function ServiceRequestSearch({ incident, organization }) {
         }
       });
     };
-    fetchServiceRequests();
+
+    const fetchSpecies = () => {
+      setSpeciesChoices([]);
+      // Fetch Species data.
+      axios.get('/animals/api/species/', {
+        cancelToken: source.token,
+      })
+      .then(response => {
+        if (!unmounted) {
+          let species_options = [];
+          response.data.forEach(result => {
+            // Build species option list.
+            species_options.push({value: result.id, label: result.name});
+          });
+          setSpeciesChoices(species_options);
+          fetchServiceRequests(species_options);
+        }
+      })
+      .catch(error => {
+        if (!unmounted) {
+          setShelters({options: []});
+          setShowSystemError(true);
+        }
+      });
+    };
+    fetchSpecies();
     // Cleanup.
     return () => {
       unmounted = true;

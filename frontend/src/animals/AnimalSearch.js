@@ -21,7 +21,7 @@ import Scrollbar from '../components/Scrollbars';
 import { titleCase } from '../components/Utils';
 import { ITEMS_PER_PAGE } from '../constants';
 import { Legend } from "../components/Map";
-import { catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, speciesChoices, statusChoices } from './constants';
+import { catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, statusChoices } from './constants';
 import AnimalCoverImage from '../components/AnimalCoverImage';
 import { printAnimalCareSchedule, printAllAnimalCareSchedules } from './Utils';
 import { AuthContext } from "../accounts/AccountsReducer";
@@ -68,6 +68,7 @@ function AnimalSearch({ incident, organization }) {
 
   const [data, setData] = useState({animals: [], isFetching: false});
   const [shelters, setShelters] = useState({options: [], isFetching: false});
+  const [speciesChoices, setSpeciesChoices] = useState([]);
   const [animals, setAnimals] = useState([]);
   const [options, setOptions] = useState({species: null, status: null, sex: null, owned: null, pcolor: '', fixed: null, latlng: null, radius: 1.60934, shelter: ''});
   const [searchTerm, setSearchTerm] = useState(search);
@@ -225,6 +226,31 @@ function AnimalSearch({ incident, organization }) {
   useEffect(() => {
     let unmounted = false;
     let source = axios.CancelToken.source();
+
+    const fetchSpecies = () => {
+      setSpeciesChoices([]);
+      // Fetch Species data.
+      axios.get('/animals/api/species/', {
+        cancelToken: source.token,
+      })
+      .then(response => {
+        if (!unmounted) {
+          let species_options = [];
+          response.data.forEach(result => {
+            // Build species option list.
+            species_options.push({value: result.id, label: result.name});
+          });
+          setSpeciesChoices(species_options);
+        }
+      })
+      .catch(error => {
+        if (!unmounted) {
+          setShelters({options: []});
+          setShowSystemError(true);
+        }
+      });
+    };
+    fetchSpecies();
 
     const fetchAnimals = async () => {
       setData({animals: [], isFetching: true});

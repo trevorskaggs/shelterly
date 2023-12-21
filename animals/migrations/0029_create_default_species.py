@@ -1,6 +1,6 @@
 from django.db import migrations, models
 
-categories = ['Cat', 'Dog', 'Avian', 'Small Mammal', 'Reptile', 'Ruminant', 'Equine', 'Other']
+categories = ['cat', 'dog', 'avian', 'small mammal', 'reptile', 'ruminant', 'equine', 'other']
 
 species = [
   { 'name': 'alpaca', 'plural': 'alpacas', 'category':'ruminant' },
@@ -36,7 +36,7 @@ def create_species_and_categories(apps, schema_editor):
     names = [row['name'] for row in species]
     for name in names:
         Animal.objects.using(db_alias).filter(species=name).update(species_fk=Species.objects.using(db_alias).get(name__iexact=name))
-    Animal.objects.using(db_alias).filter(species__name='bird').update(species_fk=Species.objects.using(db_alias).get(name__iexact='chicken'))
+    Animal.objects.using(db_alias).filter(species='bird').update(species_fk=Species.objects.using(db_alias).get(name__iexact='chicken'))
 
 class Migration(migrations.Migration):
 

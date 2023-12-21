@@ -91,7 +91,7 @@ const routes = {
   "/:organization/:incident/people/reporter/edit/:id": ({id, incident, organization}) => <PersonForm id={id} incident={incident} organization={organization} state={initialWorkflowData} />,
   "/:organization/:incident/people/reporter/new": ({incident, organization}) => <PersonForm state={initialWorkflowData} incident={incident} organization={organization} />,
   "/:organization/:incident/people/reporter/:id": ({id, incident, organization}) => <PersonDetails id={id} incident={incident} organization={organization} />,
-  "/:organization/:incident/reports": ({incident}) => <Reports incident={incident} />,
+  "/:organization/:incident/reports": ({incident, organization}) => <Reports incident={incident} organization={organization} />,
   "/:organization/:incident/shelter": ({incident, organization}) => <Shelter incident={incident} organization={organization} />,
   "/:organization/:incident/shelter/new": ({incident, organization}) => <ShelterForm incident={incident} organization={organization} />,
   "/:organization/:incident/shelter/edit/:id": ({id, incident, organization}) => <ShelterForm id={id} incident={incident} organization={organization} />,

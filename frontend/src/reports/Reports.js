@@ -8,7 +8,7 @@ import Header from '../components/Header';
 import { DateRangePicker } from '../components/Form';
 import { SystemErrorContext } from '../components/SystemError';
 
-function Reports({ incident }) {
+function Reports({ incident, organization }) {
 
   // Initial state.
   const { setShowSystemError } = useContext(SystemErrorContext);
@@ -61,9 +61,9 @@ function Reports({ incident }) {
     let unmounted = false;
     let source = axios.CancelToken.source();
 
-    const fetchServiceRequests = async () => {
-      // Fetch ServiceRequest data.
-      await axios.get('/reports/api/reports/?incident=' + incident, {
+    const fetchReports = async () => {
+      // Fetch Report data.
+      await axios.get('/reports/api/reports/?incident=' + incident + '&organization=' + organization, {
         cancelToken: source.token,
       })
       .then(response => {
@@ -91,7 +91,7 @@ function Reports({ incident }) {
         }
       });
     };
-    fetchServiceRequests();
+    fetchReports();
     // Cleanup.
     return () => {
       unmounted = true;
@@ -158,8 +158,8 @@ function Reports({ incident }) {
       grow: 1,
     },
     {
-      name: 'Alpacas',
-      selector: row => row.alpacas,
+      name: 'Avians',
+      selector: row => row.avians,
       compact: true,
     },
     {
@@ -168,68 +168,33 @@ function Reports({ incident }) {
       compact: true,
     },
     {
-      name: 'Cows',
-      selector: row => row.cows,
-      compact: true,
-    },
-    {
       name: 'Dogs',
       selector: row => row.dogs,
       compact: true,
     },
     {
-      name: 'Donkeys',
-      selector: row => row.donkeys,
+      name: 'Equines',
+      selector: row => row.equines,
       compact: true,
     },
     {
-      name: 'Ducks',
-      selector: row => row.ducks,
+      name: 'Reptiles',
+      selector: row => row.reptiles,
       compact: true,
     },
     {
-      name: 'Emus',
-      selector: row => row.emus,
+      name: 'Ruminants',
+      selector: row => row.ruminants,
       compact: true,
     },
     {
-      name: 'Goats',
-      selector: row => row.goats,
+      name: 'Small Mammals',
+      selector: row => row.small_mammals,
       compact: true,
     },
     {
-      name: 'Horses',
-      selector: row => row.horses,
-      compact: true,
-    },
-    {
-      name: 'Llamas',
-      selector: row => row.llamas,
-      compact: true,
-    },
-    {
-      name: 'Other',
-      selector: row => row.other,
-      compact: true,
-    },
-    {
-      name: 'Pigs',
-      selector: row => row.pigs,
-      compact: true,
-    },
-    {
-      name: 'Rabbits',
-      selector: row => row.rabbits,
-      compact: true,
-    },
-    {
-      name: 'Sheep',
-      selector: row => row.sheep,
-      compact: true,
-    },
-    {
-      name: 'Turkeys',
-      selector: row => row.turkeys,
+      name: 'Others',
+      selector: row => row.others,
       compact: true,
     },
     {
@@ -244,7 +209,7 @@ function Reports({ incident }) {
   const animal_status_columns = [
     {
       name: 'Species',
-      selector: row => row.species_string ? row.species_string[0].toUpperCase() + row.species_string.slice(1) : row.species_string,
+      selector: row => row.species__name ? row.species__name[0].toUpperCase() + row.species__name.slice(1) : row.species__name,
     },
     {
       name: 'Reported',
@@ -327,7 +292,7 @@ function Reports({ incident }) {
     },
     {
       name: 'Species',
-      selector: row => row.species_string ? row.species_string[0].toUpperCase() + row.species_string.slice(1) : row.species_string,
+      selector: row => row.species__name ? row.species__name[0].toUpperCase() + row.species__name.slice(1) : row.species__name,
     },
     {
       name: 'STATUS',
