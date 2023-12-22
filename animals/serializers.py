@@ -16,10 +16,14 @@ class SpeciesSerializer(serializers.ModelSerializer):
 class SimpleAnimalSerializer(serializers.ModelSerializer):
 
     species_string = serializers.StringRelatedField(source='species', read_only=True)
+    category = serializers.SerializerMethodField()
+
+    def get_category(self, obj):
+        return obj.species.category.name
 
     class Meta:
         model = Animal
-        fields = ['id', 'species', 'species_string', 'aggressive', 'confined', 'injured', 'status', 'aco_required', 'name', 'sex', 'fixed', 'size', 'age', 'pcolor', 'scolor', 'last_seen', 'color_notes', 'behavior_notes', 'medical_notes']
+        fields = ['id', 'species', 'species_string', 'category', 'aggressive', 'confined', 'injured', 'status', 'aco_required', 'name', 'sex', 'fixed', 'size', 'age', 'pcolor', 'scolor', 'last_seen', 'color_notes', 'behavior_notes', 'medical_notes']
 
 class ModestAnimalSerializer(SimpleAnimalSerializer):
     front_image = serializers.SerializerMethodField()

@@ -8,7 +8,8 @@ import {
   faEdit,
   faPlusSquare,
   faTimes,
-  faCheckSquare
+  faCheckSquare,
+  faHandHoldingMedical
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faPrescriptionBottlePill,
@@ -24,7 +25,7 @@ function VetRequestDetails({ id, incident, organization }) {
 
   const priorityText = {urgent:'Urgent', when_available:'When Available'};
 
-  const [data, setData] = useState({id: '', patient:{}, assignee:{}, open: '', assigned:'', closed: '', concern: '', priority: '', diagnosis: '', other_diagnosis:'', treatment_plans:[], presenting_complaints:[], animal_object: {id:'', name:'', species:'', sex:'', age:'', size:'', pcolor:'', scolor:'', medical_notes:''}});
+  const [data, setData] = useState({id: '', patient:{}, assignee:{}, open: '', assigned:'', closed: '', concern: '', priority: '', diagnosis: '', other_diagnosis:'', treatment_plans:[], presenting_complaints:[], animal_object: {id:'', name:'', species:'', category:'', sex:'', age:'', size:'', pcolor:'', scolor:'', medical_notes:''}});
 
   const [showModal, setShowModal] = useState(false);
   const cancelVetRequest = () => {
@@ -39,7 +40,7 @@ function VetRequestDetails({ id, incident, organization }) {
     let source = axios.CancelToken.source();
 
     const fetchVetRequestData = async () => {
-      // Fetch Room Details data.
+      // Fetch VetRequest Details data.
       await axios.get('/vet/api/vetrequest/' + id + '/?incident=' + incident, {
           cancelToken: source.token,
       })
@@ -85,6 +86,17 @@ function VetRequestDetails({ id, incident, organization }) {
         }
       >
         <FontAwesomeIcon icon={faTimes} className="ml-1" size="lg" style={{cursor:'pointer'}} inverse onClick={() => {setShowModal(true)}}/>
+      </OverlayTrigger> : ""}
+      {data.status !== 'Canceled' ? <OverlayTrigger
+        key={"start-exam"}
+        placement="bottom"
+        overlay={
+          <Tooltip id={`tooltip-start-exam`}>
+            Start exam
+          </Tooltip>
+        }
+      >
+        <Link href={"/" + organization + "/" + incident + "/vet/vetrequest/" + id + "/exam/"}><FontAwesomeIcon icon={faHandHoldingMedical} className="ml-1" size="lg" style={{cursor:'pointer'}} inverse /></Link>
       </OverlayTrigger> : ""}
     </Header>
     <hr/>

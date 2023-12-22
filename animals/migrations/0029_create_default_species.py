@@ -1,9 +1,9 @@
 from django.db import migrations, models
 
-categories = ['cat', 'dog', 'avian', 'small mammal', 'reptile', 'ruminant', 'equine', 'other']
+categories = ['cat', 'dog', 'avian', 'small mammal', 'reptile/amphibian', 'ruminant', 'equine', 'swine', 'other']
 
 species = [
-  { 'name': 'alpaca', 'plural': 'alpacas', 'category':'ruminant' },
+  { 'name': 'alpaca', 'plural': 'alpacas', 'category':'camelid' },
   { 'name': 'cat', 'plural': 'cats', 'category':'cat' },
   { 'name': 'chicken', 'plural': 'chickens', 'category':'avian' },
   { 'name': 'cow', 'plural': 'cows', 'category':'ruminant' },
@@ -13,9 +13,9 @@ species = [
   { 'name': 'emu', 'plural': 'emus', 'category':'avian' },
   { 'name': 'goat', 'plural': 'goats', 'category':'ruminant' },
   { 'name': 'horse', 'plural': 'horses', 'category':'equine' },
-  { 'name': 'llama', 'plural': 'llamas', 'category':'ruminant' },
+  { 'name': 'llama', 'plural': 'llamas', 'category':'camelid' },
   { 'name': 'other', 'plural': 'others', 'category':'other' },
-  { 'name': 'pig', 'plural': 'pigs', 'category':'ruminant' },
+  { 'name': 'pig', 'plural': 'pigs', 'category':'swine' },
   { 'name': 'rabbit', 'plural': 'rabbits', 'category':'small mammal' },
   { 'name': 'sheep', 'plural': 'sheep', 'category':'ruminant' },
   { 'name': 'turkey', 'plural': 'turkeys', 'category':'avian' },

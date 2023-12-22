@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.db.models import Q
 from datetime import datetime
@@ -11,6 +12,9 @@ class PresentingComplaint(models.Model):
 
     name = models.CharField(max_length=200)
 
+    def __str__(self):
+        return self.name
+
     class Meta:
         ordering = ('name',)
 
@@ -18,10 +22,39 @@ class Diagnosis(models.Model):
 
     name = models.CharField(max_length=200)
 
+    def __str__(self):
+        return self.name
+
     class Meta:
         ordering = ('name',)
 
-# Create your models here.
+class ExamQuestion(models.Model):
+
+    name = models.CharField(max_length=20, blank=True, null=True)
+    options = ArrayField(models.CharField(max_length=40))
+    categories = ArrayField(models.CharField(max_length=20))
+    allow_not_examined = models.BooleanField()
+    open_notes = models.BooleanField()
+
+    def __str__(self):
+        return self.name
+
+class Exam(models.Model):
+
+    confirm_sex_age = models.BooleanField(blank=True, null=True)
+    confirm_chip = models.BooleanField(blank=True, null=True)
+    temperature = models.CharField(max_length=20, blank=True, null=True)
+    weight = models.IntegerField(blank=True, null=True)
+    weight_unit = models.CharField(max_length=10, blank=True, null=True)
+
+class ExamAnswer(models.Model):
+
+    exam = models.ForeignKey(Exam, on_delete=models.SET_NULL, null=True)
+    question = models.ForeignKey(ExamQuestion, on_delete=models.SET_NULL, null=True)
+    answer = models.CharField(max_length=40, blank=True, null=True)
+    answer_notes = models.CharField(max_length=300, blank=True, null=True)
+
+
 class VetRequest(models.Model):
 
     patient = models.ForeignKey(Animal, on_delete=models.DO_NOTHING)
@@ -32,6 +65,7 @@ class VetRequest(models.Model):
     presenting_complaints = models.ManyToManyField(PresentingComplaint)
     concern = models.CharField(max_length=200, blank=True, null=True)
     priority = models.CharField(max_length=25, choices=(('urgent', 'Urgent'),('when_available', 'When Available'),), default='urgent')
+    exam = models.ForeignKey(Exam, on_delete=models.SET_NULL, null=True)
     diagnosis = models.ForeignKey(Diagnosis, on_delete=models.SET_NULL, null=True)
     other_diagnosis = models.CharField(max_length=200, blank=True, null=True)
     status = models.CharField(max_length=20, default='Open')

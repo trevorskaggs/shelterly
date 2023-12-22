@@ -44,6 +44,7 @@ import TreatmentRequestForm from "./vet/TreatmentRequestForm";
 import VetRequestDetails from "./vet/VetRequestDetails";
 import VetRequestForm from "./vet/VetRequestForm";
 import VetRequestSearch from "./vet/VetRequestSearch";
+import VetRequestExamForm from "./vet/VetRequestExamForm";
 import Organization from "./Organization";
 
 export const publicRoutes = {
@@ -112,6 +113,7 @@ const routes = {
   "/:organization/:incident/vet/vetrequest/search": ({incident, organization}) => <VetRequestSearch incident={incident} organization={organization} />,
   "/:organization/:incident/vet/vetrequest/edit/:id": ({id, incident, organization}) => <VetRequestForm id={id} state={initialWorkflowData} incident={incident} organization={organization} />,
   "/:organization/:incident/vet/vetrequest/:id": ({id, incident, organization}) => <VetRequestDetails id={id} incident={incident} organization={organization} />,
+  "/:organization/:incident/vet/vetrequest/:id/exam": ({id, incident, organization}) => <VetRequestExamForm id={id} incident={incident} organization={organization} />,
 };
 
 export default routes;

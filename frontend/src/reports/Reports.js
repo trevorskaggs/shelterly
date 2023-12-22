@@ -178,7 +178,7 @@ function Reports({ incident, organization }) {
       compact: true,
     },
     {
-      name: 'Reptiles',
+      name: 'Reptiles/Amphibians',
       selector: row => row.reptiles,
       compact: true,
     },

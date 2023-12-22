@@ -1,8 +1,20 @@
 from datetime import datetime, timedelta
 from rest_framework import filters, permissions, viewsets
 
-from vet.models import Diagnosis, PresentingComplaint, Treatment, TreatmentPlan, TreatmentRequest, VetRequest
-from vet.serializers import DiagnosisSerializer, PresentingComplaintSerializer, TreatmentSerializer, TreatmentPlanSerializer, TreatmentRequestSerializer, VetRequestSerializer
+from vet.models import Diagnosis, Exam, ExamQuestion, PresentingComplaint, Treatment, TreatmentPlan, TreatmentRequest, VetRequest
+from vet.serializers import DiagnosisSerializer, ExamQuestionSerializer, ExamSerializer, PresentingComplaintSerializer, TreatmentSerializer, TreatmentPlanSerializer, TreatmentRequestSerializer, VetRequestSerializer
+
+class ExamViewSet(viewsets.ModelViewSet):
+    queryset = Exam.objects.all()
+    permission_classes = [permissions.IsAuthenticated, ]
+    serializer_class = ExamSerializer
+
+
+class ExamQuestionViewSet(viewsets.ModelViewSet):
+    queryset = ExamQuestion.objects.all()
+    permission_classes = [permissions.IsAuthenticated, ]
+    serializer_class = ExamQuestionSerializer
+
 
 class PresentingComplaintViewSet(viewsets.ModelViewSet):
     queryset = PresentingComplaint.objects.all()

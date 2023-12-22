@@ -53,7 +53,7 @@ class ReportViewSet(viewsets.ViewSet):
           cats=Count("animal", filter=Q(animal__species__category__name="cat", animal__status='SHELTERED', animal__incident__slug=self.request.GET.get('incident', ''))),
           dogs=Count("animal", filter=Q(animal__species__category__name="dog", animal__status='SHELTERED', animal__incident__slug=self.request.GET.get('incident', ''))),
           equines=Count("animal", filter=Q(animal__species__category__name="equine", animal__status='SHELTERED', animal__incident__slug=self.request.GET.get('incident', ''))),
-          reptiles=Count("animal", filter=Q(animal__species__category__name="reptile", animal__status='SHELTERED', animal__incident__slug=self.request.GET.get('incident', ''))),
+          reptiles=Count("animal", filter=Q(animal__species__category__name="reptile/amphibian", animal__status='SHELTERED', animal__incident__slug=self.request.GET.get('incident', ''))),
           ruminants=Count("animal", filter=Q(animal__species__category__name="ruminant", animal__status='SHELTERED', animal__incident__slug=self.request.GET.get('incident', ''))),
           small_mammals=Count("animal", filter=Q(animal__species__category__name="small mammal", animal__status='SHELTERED', animal__incident__slug=self.request.GET.get('incident', ''))),
           others=Count("animal", filter=Q(animal__species__category__name="other", animal__status='SHELTERED', animal__incident__slug=self.request.GET.get('incident', ''))),

@@ -2,9 +2,23 @@ from datetime import datetime
 from rest_framework import serializers
 from django.db.models import Q
 
-from .models import Diagnosis, PresentingComplaint, VetRequest, Treatment, TreatmentPlan, TreatmentRequest
+from .models import Exam, ExamQuestion, Diagnosis, PresentingComplaint, VetRequest, Treatment, TreatmentPlan, TreatmentRequest
 from accounts.serializers import UserSerializer
 from animals.serializers import SimpleAnimalSerializer
+
+class ExamSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Exam
+        fields = '__all__'
+
+
+class ExamQuestionSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = ExamQuestion
+        fields = '__all__'
+
 
 class PresentingComplaintSerializer(serializers.ModelSerializer):
 
