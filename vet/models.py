@@ -44,8 +44,10 @@ class Exam(models.Model):
     confirm_sex_age = models.BooleanField(blank=True, null=True)
     confirm_chip = models.BooleanField(blank=True, null=True)
     temperature = models.CharField(max_length=20, blank=True, null=True)
+    temperature_method = models.CharField(max_length=20, blank=True, null=True)
     weight = models.IntegerField(blank=True, null=True)
     weight_unit = models.CharField(max_length=10, blank=True, null=True)
+
 
 class ExamAnswer(models.Model):
 

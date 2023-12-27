@@ -1,13 +1,37 @@
 from datetime import datetime, timedelta
 from rest_framework import filters, permissions, viewsets
 
-from vet.models import Diagnosis, Exam, ExamQuestion, PresentingComplaint, Treatment, TreatmentPlan, TreatmentRequest, VetRequest
+from vet.models import Diagnosis, Exam, ExamAnswer, ExamQuestion, PresentingComplaint, Treatment, TreatmentPlan, TreatmentRequest, VetRequest
 from vet.serializers import DiagnosisSerializer, ExamQuestionSerializer, ExamSerializer, PresentingComplaintSerializer, TreatmentSerializer, TreatmentPlanSerializer, TreatmentRequestSerializer, VetRequestSerializer
 
 class ExamViewSet(viewsets.ModelViewSet):
     queryset = Exam.objects.all()
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = ExamSerializer
+
+    # def get_queryset(self):
+    #     """
+    #     Returns: Queryset of distinct animals, each annotated with:
+    #         images (List of AnimalImages)
+    #     """
+    #     queryset = (
+    #         Exam.objects.all()
+    #     )
+
+    def perform_create(self, serializer):
+        if serializer.is_valid():
+            exam = serializer.save()
+            VetRequest.objects.filter(id=self.request.data.get('vetrequest_id')).update(exam=exam)
+            for k,v in self.request.data.items():
+                if k not in ['confirm_sex_age', 'confirm_chip', 'temperature', 'temperature_method', 'weight', 'weight_unit'] and '_notes' not in k and '_id' not in k and self.request.data.get(k + '_id'):
+                    ExamAnswer.objects.create(exam=exam, question=ExamQuestion.objects.get(id=self.request.data.get(k + '_id', '')), answer=v, answer_notes=self.request.data.get(k + '_notes', ''))
+
+    def perform_update(self, serializer):
+        if serializer.is_valid():
+            exam = serializer.save()
+            for k,v in self.request.data.items():
+                if k not in ['confirm_sex_age', 'confirm_chip', 'temperature', 'temperature_method', 'weight', 'weight_unit'] and '_notes' not in k and '_id' not in k and self.request.data.get(k + '_id'):
+                    ExamAnswer.objects.update_or_create(exam=exam, question=ExamQuestion.objects.get(id=self.request.data.get(k + '_id')), defaults={'answer':v, 'answer_notes':self.request.data.get(k + '_notes', '')})
 
 
 class ExamQuestionViewSet(viewsets.ModelViewSet):

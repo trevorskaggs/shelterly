@@ -84,7 +84,7 @@ function PersonSearch({ incident, organization }) {
 		let unmounted = false;
 		let source = axios.CancelToken.source();
 
-		const fetchOwners = (species_options) => {
+		const fetchOwners = () => {
 			setData({owners: [], isFetching: true});
 			// Fetch People data.
 			axios.get('/people/api/person/?search=' + searchTerm + '&status=' + statusOptions + '&incident=' + incident + '&organization=' + organization +'&training=' + (state && state.incident.training), {
@@ -107,9 +107,8 @@ function PersonSearch({ incident, organization }) {
 								species.push(animal.species_string)
 							}
 						})
-            let sortOrder = species_options.map(sc => sc.label);
             species.sort(function(a, b) {
-              return sortOrder.indexOf(a) - sortOrder.indexOf(b);
+              return a > b;
             });
 						search_state[owner.id] = {species:species, selectedSpecies:species[0]}
 						})
@@ -127,31 +126,7 @@ function PersonSearch({ incident, organization }) {
 			});
 		};
 
-    const fetchSpecies = () => {
-      setSpeciesChoices([]);
-      // Fetch Species data.
-      axios.get('/animals/api/species/', {
-        cancelToken: source.token,
-      })
-      .then(response => {
-        if (!unmounted) {
-          let species_options = [];
-          response.data.forEach(result => {
-            // Build species option list.
-            species_options.push({value: result.id, label: result.name});
-          });
-          setSpeciesChoices(species_options);
-          fetchOwners(species_options);
-        }
-      })
-      .catch(error => {
-        if (!unmounted) {
-          setShelters({options: []});
-          setShowSystemError(true);
-        }
-      });
-    };
-    fetchSpecies();
+    fetchOwners();
 
     const fetchOrganizationData = async () => {
       // Fetch Organization data.

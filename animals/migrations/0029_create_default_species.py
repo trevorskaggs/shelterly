@@ -1,6 +1,6 @@
 from django.db import migrations, models
 
-categories = ['cat', 'dog', 'avian', 'small mammal', 'reptile/amphibian', 'ruminant', 'equine', 'swine', 'other']
+categories = ['cat', 'dog', 'avian', 'small mammal', 'reptile/amphibian', 'camelid', 'ruminant', 'equine', 'swine', 'other']
 
 species = [
   { 'name': 'alpaca', 'plural': 'alpacas', 'category':'camelid' },

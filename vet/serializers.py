@@ -2,11 +2,20 @@ from datetime import datetime
 from rest_framework import serializers
 from django.db.models import Q
 
-from .models import Exam, ExamQuestion, Diagnosis, PresentingComplaint, VetRequest, Treatment, TreatmentPlan, TreatmentRequest
+from .models import Exam, ExamAnswer, ExamQuestion, Diagnosis, PresentingComplaint, VetRequest, Treatment, TreatmentPlan, TreatmentRequest
 from accounts.serializers import UserSerializer
 from animals.serializers import SimpleAnimalSerializer
 
 class ExamSerializer(serializers.ModelSerializer):
+
+    answers = serializers.SerializerMethodField()
+
+    def get_answers(self, obj):
+        answer_dict = {}
+        for examanswer in obj.examanswer_set.all():
+            answer_dict[examanswer.question.name.lower().replace(' ','_').replace('/','_')] = examanswer.answer
+            answer_dict[examanswer.question.name.lower().replace(' ','_').replace('/','_') + '_notes'] = examanswer.answer_notes
+        return answer_dict
 
     class Meta:
         model = Exam
@@ -79,6 +88,7 @@ class TreatmentPlanSerializer(SimpleTreatmentPlanSerializer):
 class VetRequestSerializer(serializers.ModelSerializer):
     animal_object = SimpleAnimalSerializer(source='patient', required=False, read_only=True)
     assignee_object = UserSerializer(source='assignee', required=False, read_only=True)
+    exam_object = ExamSerializer(source='exam', required=False, read_only=True)
     treatment_plans = TreatmentPlanSerializer(source='treatmentplan_set', required=False, read_only=True, many=True)
     complaints_text = serializers.SerializerMethodField()
     diagnosis_text = serializers.SerializerMethodField()

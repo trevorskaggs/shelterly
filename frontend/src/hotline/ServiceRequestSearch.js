@@ -117,7 +117,7 @@ function ServiceRequestSearch({ incident, organization }) {
     let unmounted = false;
     let source = axios.CancelToken.source();
 
-    const fetchServiceRequests = (species_options) => {
+    const fetchServiceRequests = () => {
       setData({service_requests: [], isFetching: true});
       // Fetch ServiceRequest data.
       axios.get('/hotline/api/servicerequests/?search=' + searchTerm + '&status=' + statusOptions + '&incident=' + incident, {
@@ -136,9 +136,8 @@ function ServiceRequestSearch({ incident, organization }) {
 							}
 						});
 
-            let sortOrder = species_options.map(sc => sc.label);
             species.sort(function(a, b) {
-              return sortOrder.indexOf(a) - sortOrder.indexOf(b);
+              return a > b;
             });
 						search_state[service_request.id] = {species:species, selectedSpecies:species[0]};
 					});
@@ -156,31 +155,8 @@ function ServiceRequestSearch({ incident, organization }) {
       });
     };
 
-    const fetchSpecies = () => {
-      setSpeciesChoices([]);
-      // Fetch Species data.
-      axios.get('/animals/api/species/', {
-        cancelToken: source.token,
-      })
-      .then(response => {
-        if (!unmounted) {
-          let species_options = [];
-          response.data.forEach(result => {
-            // Build species option list.
-            species_options.push({value: result.id, label: result.name});
-          });
-          setSpeciesChoices(species_options);
-          fetchServiceRequests(species_options);
-        }
-      })
-      .catch(error => {
-        if (!unmounted) {
-          setShelters({options: []});
-          setShowSystemError(true);
-        }
-      });
-    };
-    fetchSpecies();
+    fetchServiceRequests();
+
     // Cleanup.
     return () => {
       unmounted = true;

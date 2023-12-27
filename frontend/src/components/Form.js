@@ -156,8 +156,8 @@ const TextInput = ({ label, xs, controlId, formGroupClasses, ...props }) => {
 
   return (
     <>
-    <Form.Group as={Col} xs={xs} controlId={controlId} className={formGroupClasses} hidden={props.hidden} ref={meta.error && registeredRef}>
-      <Form.Label>{label}</Form.Label>
+    <Form.Group as={Col} xs={xs} controlId={controlId} className={formGroupClasses} hidden={props.hidden} style={props.colstyle} ref={meta.error && registeredRef}>
+      {label ? <Form.Label>{label}</Form.Label> : ""}
       {props.tooltip ?
       <OverlayTrigger
         key={"text-input"}

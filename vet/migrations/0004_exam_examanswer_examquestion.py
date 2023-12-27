@@ -19,6 +19,7 @@ class Migration(migrations.Migration):
                 ('confirm_sex_age', models.BooleanField(blank=True, null=True)),
                 ('confirm_chip', models.BooleanField(blank=True, null=True)),
                 ('temperature', models.CharField(blank=True, max_length=20, null=True)),
+                ('temperature_method', models.CharField(blank=True, max_length=20, null=True)),
                 ('weight', models.IntegerField(blank=True, null=True)),
                 ('weight_unit', models.CharField(blank=True, max_length=10, null=True)),
             ],
