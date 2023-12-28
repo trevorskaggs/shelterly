@@ -275,7 +275,7 @@ const DropDown = React.forwardRef((props, ref) => {
         {simpleProps => <Select isDisabled={props.disabled} ref={ref} styles={customStyles} isClearable={true} filterOption={createFilter(filterConfig)} onBlur={updateBlur} onChange={handleOptionChange} {...props} {...simpleProps} />}
       </SimpleValue>
       }
-      {meta.touched && meta.error ? <div style={{ color: "#e74c3c", marginTop: ".5rem", fontSize: "80%" }}>{meta.error}</div> : ""}
+      {meta.error ? <div style={{ color: "#e74c3c", marginTop: ".5rem", fontSize: "80%" }}>{meta.error}</div> : ""}
     </div>
     </>
   );

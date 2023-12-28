@@ -19,7 +19,9 @@ class SimpleAnimalSerializer(serializers.ModelSerializer):
     category = serializers.SerializerMethodField()
 
     def get_category(self, obj):
-        return obj.species.category.name
+        if obj.species.category:
+            return obj.species.category.name
+        return ''
 
     class Meta:
         model = Animal

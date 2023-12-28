@@ -22,28 +22,39 @@ import {
 import * as Yup from 'yup';
 import { DropDown, TextInput } from '../components/Form';
 import { SystemErrorContext } from '../components/SystemError';
+import { catAgeChoices, dogAgeChoices, horseAgeChoices, otherAgeChoices, sexChoices } from '../animals/constants';
 
-const customStyles = {
-  // For the select it self, not the options of the select
-  control: (styles, { isDisabled}) => {
-    return {
-      ...styles,
-      color: '#FFF',
-      cursor: isDisabled ? 'not-allowed' : 'default',
-      backgroundColor: isDisabled ? '#DFDDDD' : 'white',
-      height: 35,
-      minHeight: 35
+// From https://stackoverflow.com/a/71290404
+function createYupSchema(schema, config) {
+  const { id, validationType, validations = [] } = config;
+  if (!Yup[validationType]) {
+    return schema;
+  }
+  let validator = Yup[validationType]();
+  validations.forEach((validation) => {
+    const { params, type } = validation;
+    if (!validator[type]) {
+      return;
     }
-  },
-  option: provided => ({
-    ...provided,
-    color: 'black'
-  }),
-  // singleValue: (styles, { isDisabled }) => ({
-  //   ...styles,
-  //   color: isDisabled ? '#595959' : 'black'
-  // }),
-};
+    if (type === "when") {
+      const { is, then, otherwise } = params[1];
+      let whenParams = {};
+      whenParams.is = is;
+      whenParams.then = (schema) => schema[then[0].type](...then[0].params);
+
+      if (otherwise) {
+        whenParams.otherwise = (schema) =>
+          schema[otherwise[0].type](...otherwise[0].params);
+      }
+
+      validator = validator["when"](params[0], whenParams);
+    } else {
+      validator = validator[type](...params);
+    }
+  });
+  schema[id] = validator;
+  return schema;
+}
 
 const VetRequestForm = (props) => {
 
@@ -52,10 +63,34 @@ const VetRequestForm = (props) => {
   const [data, setData] = useState({id: '', patient:{}, assignee:{}, exam: null, open: '', assigned:'', closed: '', concern: '', priority: '', diagnosis: '', other_diagnosis:'', treatment_plans:[], presenting_complaints:[], exam_object: {}, animal_object: {id:'', name:'', species:'', category:'', sex:'', age:'', size:'', pcolor:'', scolor:'', medical_notes:''}})
   const [examQuestions, setExamQuestions] = useState([]);
   const [showNotes, setShowNotes] = useState({});
+  const [formSchema, setFormSchema] = useState([{
+    id:'confirm_sex_age',
+    validationType:"bool",
+    validations: [{
+      type:'oneOf',
+      params: [[true], "This field is required"]
+    },]},{
+    id:'confirm_chip',
+    validationType:"bool"},{
+    id:'weight',
+    validationType:"string"},{
+    id:'weight_unit',
+    validationType:"string"},{
+    id:'temperature',
+    validationType:"string"},{
+    id:'temperature_method',
+    validationType:"string",
+    validations: [{
+      type:'required',
+      params: ["This field is required"]
+    },]},
+  ]);
+  const ageChoices = {'':[], 'dog':dogAgeChoices, 'cat':catAgeChoices, 'horse':horseAgeChoices, 'other':otherAgeChoices}
 
   useEffect(() => {
     let unmounted = false;
     let source = axios.CancelToken.source();
+    let open_notes_dict = {};
     if (props.id) {
       const fetchExam = async () => {
         // Fetch Visit Note data.
@@ -68,38 +103,90 @@ const VetRequestForm = (props) => {
             if (response.data.exam) {
               Object.keys(response.data.exam_object.answers).forEach(key => {
                 response.data.exam_object[key] = response.data.exam_object.answers[key];
+                if (key.includes('_notes') && response.data.exam_object.answers[key]) {
+                  open_notes_dict[key.split('_notes')[0]] = true;
+                }
               })
             }
+            response.data.exam_object['age'] = response.data.animal_object.age
+            response.data.exam_object['sex'] = response.data.animal_object.sex
+            response.data.exam_object['microchip'] = response.data.animal_object.microchip
             setData(response.data);
+            setShowNotes(open_notes_dict);
+            fetchExamQuestions();
           }
         })
         .catch(error => {
           setShowSystemError(true);
         });
       };
+
+      const fetchExamQuestions = async () => {
+        // Fetch exam question data.
+        await axios.get('/vet/api/examquestions/', {
+          cancelToken: source.token,
+        })
+        .then(response => {
+          if (!unmounted) {
+            let config = [];
+            // Filter the questions by the animal category.
+            let filtered_data = response.data.filter(question => question.categories.includes(data.animal_object.category))
+            setExamQuestions(filtered_data);
+            filtered_data.forEach(question => {
+              // Set open notes defaults.
+              open_notes_dict[question.name.toLowerCase().replace(' ','_').replace('/','_')] = open_notes_dict[question.name.toLowerCase().replace(' ','_').replace('/','_')] === true ? true : question.open_notes;
+              // Create a dynamic config for Yup validation.
+              config.push({
+                id:question.name.toLowerCase().replace(' ','_').replace('/','_'),
+                validationType:"string",
+                validations: [{
+                  type:'required',
+                  params: ["This field is required"]
+                },]
+              })
+              config.push({
+                id:question.name.toLowerCase().replace(' ','_').replace('/','_') + '_notes',
+                validationType:"string",
+                validations: [
+                  {
+                    type: "when",
+                    params: [
+                      question.name.toLowerCase().replace(' ','_').replace('/','_'),
+                      {
+                        is: 'Other',
+                        then: [
+                          {
+                            type: "required",
+                            params: ["This field is required"],
+                          },
+                        ],
+                        // otherwise: [
+                        //   {
+                        //     type: "min",
+                        //     params: [0],
+                        //   },
+                        // ],
+                      },
+                    ],
+                  },
+                ],
+                // validations: [{
+                //   type:'required',
+                //   params: ["This field is required"]
+                // },]
+              })
+            });
+            const schema = config.reduce(createYupSchema, {});
+            setFormSchema(schema);
+          }
+        })
+        .catch(error => {
+          setShowSystemError(true);
+        });
+      };
+
       fetchExam();
     };
-
-    const fetchExamQuestions = async () => {
-      // Fetch exam question data.
-      await axios.get('/vet/api/examquestions/', {
-        cancelToken: source.token,
-      })
-      .then(response => {
-        if (!unmounted) {
-          setExamQuestions(response.data);
-          let open_notes_dict = {};
-          response.data.forEach(question => {
-            open_notes_dict[question.name] = question.open_notes;
-          });
-          setShowNotes(open_notes_dict);
-        }
-      })
-      .catch(error => {
-        setShowSystemError(true);
-      });
-    };
-    fetchExamQuestions();
 
     // Cleanup.
     return () => {
@@ -112,13 +199,17 @@ const VetRequestForm = (props) => {
     <Formik
       initialValues={data.exam ? data.exam_object : {vetrequest_id:props.id}}
       enableReinitialize={true}
+      validationSchema={Yup.object().shape(formSchema)}
       // validationSchema={Yup.object({
-      //   assignee: Yup.number().nullable(),
-      //   concern: Yup.string(),
-      //   priority: Yup.string(),
+      //   confirm_sex_age: Yup.bool().oneOf([true], 'Age/Sex must be confirmed.'),
+      //   confirm_chip: Yup.bool(),
+      //   weight: Yup.string(),
+      //   weight_unit: Yup.string(),
+      //   temperature: Yup.string(),
+      //   temperature_method: Yup.string().required(),
       // })}
       onSubmit={(values, { setSubmitting }) => {
-        console.log(values)
+        values['animal_id'] = data.animal_object.id
         if (data.exam) {
           axios.put('/vet/api/exam/' + data.exam + '/', values)
           .then(response => {
@@ -160,13 +251,6 @@ const VetRequestForm = (props) => {
                 </div>
               </ListGroup.Item>
               <ListGroup.Item>
-                <div className="row" style={{textTransform:"capitalize"}}>
-                  <span className="col-3"><b>Sex:</b> {data.animal_object.sex||"Unknown"}</span>
-                  <span className="col-3"><b>Age:</b> {data.animal_object.age||"Unknown"}</span>
-                  <span className="col-3"><b>Microchip Number:</b> {data.animal_object.age||"Unknown"}</span>
-                </div>
-              </ListGroup.Item>
-              <ListGroup.Item>
                   <span><b>Medical Notes:</b> {data.animal_object.medical_notes || "N/A"}</span>
               </ListGroup.Item>
             </ListGroup>
@@ -177,32 +261,53 @@ const VetRequestForm = (props) => {
             <Form>
               <FormGroup>
               <Row>
-                <Col xs="2"><BootstrapForm.Label htmlFor="confirm_sex_age" style={{marginBottom:"-5px"}}>Confirm Age/Sex</BootstrapForm.Label>
-                <div><Field component={Switch} name="confirm_sex_age" type="checkbox" color="primary" /></div></Col>
-
-                <Col xs="2"><BootstrapForm.Label htmlFor="confirm_chip" style={{marginBottom:"-5px"}}>Confirm Microchip</BootstrapForm.Label>
-                <div><Field component={Switch} name="confirm_chip" type="checkbox" color="primary" /></div></Col>
-              </Row>
-              <Row>
-                  <TextInput
-                    id="temperature"
-                    name="temperature"
-                    type="text"
-                    label="Temperature (F)"
-                    xs="2"
-                  />
-                    <Col xs="2" className="pl-0 pr-0" style={{marginLeft:"-5px"}}>
+                <Col xs="2">
+                  <BootstrapForm.Label htmlFor="confirm_sex_age" style={{marginBottom:"-5px"}}>Confirm Age/Sex</BootstrapForm.Label>
+                  <div style={{marginLeft:"20px"}}><Field component={Switch} name="confirm_sex_age" type="checkbox" color="primary" /></div>
+                </Col>
+                <Col xs="2">
                   <DropDown
-                    id={"temperature_method"}
-                    name={"temperature_method"}
+                    label="Age"
+                    id="age"
+                    name="age"
                     type="text"
-                    label="Method"
-                    placeholder=""
-                    options={[{value:'Axillary', label:'Axillary'}, {value:'Rectal', label:'Rectal'}, {value:'Not taken', label:'Not taken'}, {value:'Unable to obtain', label:'Unable to obtain'}]}
+                    xs="4"
+                    key={`my_unique_age_select_key__${formikProps.values.age}`}
+                    options={Object.keys(ageChoices).includes(data.animal_object.species) ? ageChoices[data.animal_object.species] : ageChoices['other']}
+                    value={formikProps.values.age||data.animal_object.age}
                     isClearable={false}
+                    disabled={formikProps.values.confirm_sex_age}
                   />
-                  </Col>
-                </Row>
+                </Col>
+                <Col xs="2" style={{paddingLeft:"0px", marginLeft:"-5px"}}>
+                  <DropDown
+                    label="Sex"
+                    id="sexDropDown"
+                    name="sex"
+                    type="text"
+                    key={`my_unique_sex_select_key__${formikProps.values.sex}`}
+                    options={sexChoices}
+                    isClearable={false}
+                    disabled={formikProps.values.confirm_sex_age}
+                    value={formikProps.values.sex||data.animal_object.age}
+                  />
+                </Col>
+              </Row>
+              <Row className="mt-3">
+                <Col xs="2">
+                  <BootstrapForm.Label htmlFor="confirm_chip" style={{marginBottom:"-5px"}}>Microchip Present</BootstrapForm.Label>
+                  <div style={{marginLeft:"20px"}}><Field component={Switch} name="confirm_chip" type="checkbox" color="primary" /></div>
+                </Col>
+                <TextInput
+                    id="microchip"
+                    name="microchip"
+                    type="text"
+                    label="Microchip"
+                    xs="2"
+                    disabled={!formikProps.values.confirm_chip}
+                    value={formikProps.values.microchip || data.animal_object.microchip}
+                  />
+              </Row>
                 <Row style={{marginBottom:"-15px"}}>
                   <TextInput
                     id="weight"
@@ -211,76 +316,104 @@ const VetRequestForm = (props) => {
                     label="Weight"
                     xs="3"
                   />
-                    <Col xs="1" className="pl-0 pr-0" style={{marginBottom:"-2px", marginLeft:"-5px"}}>
-                  <DropDown
-                    id={"weight_unit"}
-                    name={"weight_unit"}
-                    type="text"
-                    label="Unit"
-                    placeholder=""
-                    options={[{value:'k', label:'k'}, {value:'kg', label:'kg'}]}
-                    isClearable={false}
+                  <Col xs="1" className="pl-0" style={{marginBottom:"-2px", marginLeft:"-5px"}}>
+                    <DropDown
+                      id={"weight_unit"}
+                      name={"weight_unit"}
+                      type="text"
+                      label="Unit"
+                      placeholder=""
+                      options={[{value:'k', label:'k'}, {value:'kg', label:'kg'}]}
+                      isClearable={false}
 
-                  />
+                    />
                   </Col>
                 </Row>
-                {examQuestions.filter(question => question.categories.includes(data.animal_object.category)).map(question =>
-                    <span  className="mt-3" key={question.id}>
-                        <Row className="mt-3" style={{marginBottom:"4px"}}>
-                        <Col xs="2" className="pr-0">
+                <Row className="mt-3" style={{marginBottom:"-15px"}}>
+                  <TextInput
+                    id="temperature"
+                    name="temperature"
+                    type="text"
+                    label="Temperature (F)"
+                    xs="2"
+                  />
+                  <Col xs="2" className="pl-0" style={{marginLeft:"-5px"}}>
+                    <DropDown
+                      id={"temperature_method"}
+                      name={"temperature_method"}
+                      type="text"
+                      label="Method"
+                      placeholder=""
+                      options={[{value:'Axillary', label:'Axillary'}, {value:'Rectal', label:'Rectal'}, {value:'Not taken', label:'Not taken'}, {value:'Unable to obtain', label:'Unable to obtain'}]}
+                      isClearable={false}
+                    />
+                  </Col>
+                </Row>
+                {examQuestions.map(question =>
+                  <span key={question.id}>
+                    <Row className="mt-3" style={{marginBottom:"4px"}}>
+                      <Col xs="2" className="pr-0">
                         {question.name}
-                        </Col>
-                        <Col xs="2" className="pl-0 pr-0" style={{marginLeft:"-5px"}}>
+                      </Col>
+                      <Col xs="2" className="pl-0 pr-0" style={{marginLeft:"-5px"}}>
                         {question.allow_not_examined ? 
                         <span>
-                        <input
-                          id="allow_not_examined"
-                          type="checkbox"
-                          className="ml-3"
-                          checked={formikProps.values[question.name.toLowerCase().replace(' ','_').replace('/','_')] === 'Not examined'}
-                          onChange={() => {
-                            formikProps.values[question.name.toLowerCase().replace(' ','_').replace('/','_')] === 'Not examined' ? formikProps.setFieldValue(question.name.toLowerCase().replace(' ','_').replace('/','_'), null) : formikProps.setFieldValue(question.name.toLowerCase().replace(' ','_').replace('/','_'), 'Not examined');
-                            formikProps.setFieldValue(question.name.toLowerCase().replace(' ','_').replace('/','_') + '_id', question.id);
-                          }}
-                          // style={{marginBottom:"-1px"}}
-                        />
-                        <span>&nbsp;&nbsp;Not examined</span>
+                          <input
+                            id="allow_not_examined"
+                            type="checkbox"
+                            className="ml-3"
+                            checked={formikProps.values[question.name.toLowerCase().replace(' ','_').replace('/','_')] === 'Not examined'}
+                            onChange={() => {
+                              formikProps.values[question.name.toLowerCase().replace(' ','_').replace('/','_')] === 'Not examined' ? formikProps.setFieldValue(question.name.toLowerCase().replace(' ','_').replace('/','_'), null) : formikProps.setFieldValue(question.name.toLowerCase().replace(' ','_').replace('/','_'), 'Not examined');
+                              formikProps.setFieldValue(question.name.toLowerCase().replace(' ','_').replace('/','_') + '_id', question.id);
+                              if (formikProps.values[question.name.toLowerCase().replace(' ','_').replace('/','_')] !== 'Not examined') {
+                                showNotes[question.name.toLowerCase().replace(' ','_').replace('/','_')] = true;
+                              }
+                            }}
+                          />
+                          <span>&nbsp;&nbsp;Not examined</span>
                         </span> : ""}
-                        </Col>
-                    <Col xs="1" className="float-right" style={{marginLeft:"5px", minWidth:"90px"}}>
-                      {"Notes"}
-                      <FontAwesomeIcon icon={faChevronCircleRight} hidden={Object.keys(showNotes).length ? showNotes[question.name] : true} onClick={() => {setShowNotes(prevState => ({ ...prevState, [question.name]:true }));}} className="ml-1" style={{cursor:'pointer'}} inverse />
-                      <FontAwesomeIcon icon={faChevronCircleDown} hidden={Object.keys(showNotes).length ? !showNotes[question.name] : true} onClick={() => {setShowNotes(prevState => ({ ...prevState, [question.name]:false }));}} className="ml-1" style={{cursor:'pointer'}} inverse />
                       </Col>
-                      </Row>
-                    <Col xs="5" className="pl-0">
+                      
+                    </Row>
+                    <Row>
+                    <Col xs="4" className="">
                       <DropDown
-                        id={question.name + "Dropdown"}
+                        id={question.name.toLowerCase().replace(' ','_').replace('/','_')}
                         name={question.name.toLowerCase().replace(' ','_').replace('/','_')}
                         type="text"
-                        key={`my_unique_assignee_select_key__${formikProps.values[question.name.toLowerCase().replace(' ','_').replace('/','_')]}`}
+                        key={`my_unique_question_select_key__${formikProps.values[question.name.toLowerCase().replace(' ','_').replace('/','_')]}`}
                         options={formikProps.values[question.name.toLowerCase().replace(' ','_').replace('/','_')] === 'Not examined' ? [{value:'Not examined', label:'Not examined'}] : question.options.map(option => ({'value':option, 'label':option}))}
                         isClearable={false}
                         onChange={(instance) => {
                           formikProps.setFieldValue(question.name.toLowerCase().replace(' ','_').replace('/','_'), instance === null ? '' : instance.value);
                           formikProps.setFieldValue(question.name.toLowerCase().replace(' ','_').replace('/','_') + '_id', instance === null ? '' : question.id);
+                          if (instance.value === 'Other') {
+                            showNotes[question.name.toLowerCase().replace(' ','_').replace('/','_')] = true;
+                          }
                         }}
                       />
-                      </Col>
-                  <Collapse in={showNotes[question.name]}>
-                    <div className="mt-2">
-                    <TextInput
-                      as="textarea"
-                      name={question.name.toLowerCase().replace(' ','').replace('/','') + "_notes"}
-                      id="_notes"
-                      xs="5"
-                      rows={3}
-                      style={{marginLeft:"-15px"}}
-                      colstyle={{paddingRight:"0px"}}
-                    />
-                  </div>
-                  </Collapse>
-                </span>
+                    </Col>
+                    <Col xs="1" style={{marginTop:"15px", minWidth:"90px"}}>
+                      {"Notes"}
+                      <FontAwesomeIcon icon={faChevronCircleRight} hidden={Object.keys(showNotes).length ? showNotes[question.name.toLowerCase().replace(' ','_').replace('/','_')] : true} onClick={() => {setShowNotes(prevState => ({ ...prevState, [question.name.toLowerCase().replace(' ','_').replace('/','_')]:true }));}} className="ml-1" style={{cursor:'pointer'}} inverse />
+                      <FontAwesomeIcon icon={faChevronCircleDown} hidden={Object.keys(showNotes).length ? !showNotes[question.name.toLowerCase().replace(' ','_').replace('/','_')] : true} onClick={() => {setShowNotes(prevState => ({ ...prevState, [question.name.toLowerCase().replace(' ','_').replace('/','_')]:false }));}} className="ml-1" style={{cursor:'pointer'}} inverse />
+                    </Col>
+                    </Row>
+                    <Collapse in={showNotes[question.name.toLowerCase().replace(' ','_').replace('/','_')]}>
+                      <div className="mt-2">
+                        <TextInput
+                          as="textarea"
+                          name={question.name.toLowerCase().replace(' ','').replace('/','') + "_notes"}
+                          id="_notes"
+                          xs="5"
+                          rows={3}
+                          style={{marginLeft:"-15px", margTop:"-2px"}}
+                          colstyle={{paddingRight:"0px"}}
+                        />
+                      </div>
+                    </Collapse>
+                  </span>
                 )}
               </FormGroup>
             </Form>

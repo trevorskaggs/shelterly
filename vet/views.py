@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from rest_framework import filters, permissions, viewsets
 
+from animals.models import Animal
 from vet.models import Diagnosis, Exam, ExamAnswer, ExamQuestion, PresentingComplaint, Treatment, TreatmentPlan, TreatmentRequest, VetRequest
 from vet.serializers import DiagnosisSerializer, ExamQuestionSerializer, ExamSerializer, PresentingComplaintSerializer, TreatmentSerializer, TreatmentPlanSerializer, TreatmentRequestSerializer, VetRequestSerializer
 
@@ -21,6 +22,7 @@ class ExamViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         if serializer.is_valid():
             exam = serializer.save()
+            Animal.objects.filter(id=self.request.data.get('animal_id')).update(age=self.request.data.get('age'), sex=self.request.data.get('sex'), microchip=self.request.data.get('microchip', ''))
             VetRequest.objects.filter(id=self.request.data.get('vetrequest_id')).update(exam=exam)
             for k,v in self.request.data.items():
                 if k not in ['confirm_sex_age', 'confirm_chip', 'temperature', 'temperature_method', 'weight', 'weight_unit'] and '_notes' not in k and '_id' not in k and self.request.data.get(k + '_id'):
@@ -29,6 +31,7 @@ class ExamViewSet(viewsets.ModelViewSet):
     def perform_update(self, serializer):
         if serializer.is_valid():
             exam = serializer.save()
+            Animal.objects.filter(id=self.request.data.get('animal_id')).update(age=self.request.data.get('age'), sex=self.request.data.get('sex'), microchip=self.request.data.get('microchip', ''))
             for k,v in self.request.data.items():
                 if k not in ['confirm_sex_age', 'confirm_chip', 'temperature', 'temperature_method', 'weight', 'weight_unit'] and '_notes' not in k and '_id' not in k and self.request.data.get(k + '_id'):
                     ExamAnswer.objects.update_or_create(exam=exam, question=ExamQuestion.objects.get(id=self.request.data.get(k + '_id')), defaults={'answer':v, 'answer_notes':self.request.data.get(k + '_notes', '')})

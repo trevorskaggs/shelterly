@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
 import Moment from 'react-moment';
 import { Link } from 'raviger';
-import { Button, Card, Col, ListGroup, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
+import { Button, Card, Col, Collapse, ListGroup, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faEdit,
@@ -25,7 +25,8 @@ function VetRequestDetails({ id, incident, organization }) {
 
   const priorityText = {urgent:'Urgent', when_available:'When Available'};
 
-  const [data, setData] = useState({id: '', patient:{}, assignee:{}, open: '', assigned:'', closed: '', concern: '', priority: '', diagnosis: '', other_diagnosis:'', treatment_plans:[], presenting_complaints:[], animal_object: {id:'', name:'', species:'', category:'', sex:'', age:'', size:'', pcolor:'', scolor:'', medical_notes:''}});
+  const [data, setData] = useState({id: '', exam: null, patient:{}, assignee:{}, open: '', assigned:'', closed: '', concern: '', priority: '', diagnosis: '', other_diagnosis:'', treatment_plans:[], presenting_complaints:[], exam_object: {}, animal_object: {id:'', name:'', species:'', category:'', sex:'', age:'', size:'', pcolor:'', scolor:'', medical_notes:''}});
+  const [examQuestions, setExamQuestions] = useState([]);
 
   const [showModal, setShowModal] = useState(false);
   const cancelVetRequest = () => {
@@ -39,6 +40,21 @@ function VetRequestDetails({ id, incident, organization }) {
     let unmounted = false;
     let source = axios.CancelToken.source();
 
+    const fetchExamQuestions = async () => {
+      // Fetch exam question data.
+      await axios.get('/vet/api/examquestions/', {
+        cancelToken: source.token,
+      })
+      .then(response => {
+        if (!unmounted) {
+          setExamQuestions(response.data);
+        }
+      })
+      .catch(error => {
+        setShowSystemError(true);
+      });
+    };
+
     const fetchVetRequestData = async () => {
       // Fetch VetRequest Details data.
       await axios.get('/vet/api/vetrequest/' + id + '/?incident=' + incident, {
@@ -47,6 +63,7 @@ function VetRequestDetails({ id, incident, organization }) {
       .then(response => {
         if (!unmounted) {
           setData(response.data);
+          fetchExamQuestions();
         }
       })
       .catch(error => {
@@ -86,17 +103,6 @@ function VetRequestDetails({ id, incident, organization }) {
         }
       >
         <FontAwesomeIcon icon={faTimes} className="ml-1" size="lg" style={{cursor:'pointer'}} inverse onClick={() => {setShowModal(true)}}/>
-      </OverlayTrigger> : ""}
-      {data.status !== 'Canceled' ? <OverlayTrigger
-        key={"start-exam"}
-        placement="bottom"
-        overlay={
-          <Tooltip id={`tooltip-start-exam`}>
-            Start exam
-          </Tooltip>
-        }
-      >
-        <Link href={"/" + organization + "/" + incident + "/vet/vetrequest/" + id + "/exam/"}><FontAwesomeIcon icon={faHandHoldingMedical} className="ml-1" size="lg" style={{cursor:'pointer'}} inverse /></Link>
       </OverlayTrigger> : ""}
     </Header>
     <hr/>
@@ -175,6 +181,40 @@ function VetRequestDetails({ id, incident, organization }) {
               <ListGroup.Item>
                   <span><b>Medical Notes:</b> {data.animal_object.medical_notes || "N/A"}</span>
               </ListGroup.Item>
+            </ListGroup>
+          </Card.Body>
+        </Card>
+      </div>
+    </div>
+    <div className="row mt-3">
+      <div className="col-12 d-flex">
+        <Card className="mb-2 border rounded" style={{width:"100%"}}>
+          <Card.Body style={{marginBottom:"-7px"}}>
+            <Card.Title>
+              <h4 className="mb-0">Exam Results
+                {data.exam && data.status !== 'Canceled' ? <OverlayTrigger
+                key={"start-exam"}
+                placement="bottom"
+                overlay={
+                  <Tooltip id={`tooltip-start-exam`}>
+                    Edit exam
+                  </Tooltip>
+                }
+              >
+                <Link href={"/" + organization + "/" + incident + "/vet/vetrequest/" + id + "/exam/"}><FontAwesomeIcon icon={faEdit} className="ml-1" size="lg" style={{cursor:'pointer'}} inverse /></Link>
+              </OverlayTrigger> : ""}
+              </h4>
+            </Card.Title>
+            <hr className="mb-3" />
+            <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
+            {examQuestions.filter(question => question.categories.includes(data.animal_object.category)).map(question => (
+              <ListGroup.Item key={question.id}>
+                <div className="row" style={{textTransform:"capitalize"}}>
+                  <span className="col-3"><b>{question.name}:</b> {data.exam_object.answers[question.name.toLowerCase().replace(' ','_').replace('/','_')]}</span>
+                  <span className="col-4"><b>Notes:</b> {data.exam_object.answers[question.name.toLowerCase().replace(' ','_').replace('/','_') + '_notes']}</span>
+                </div>
+              </ListGroup.Item>
+            ))}
             </ListGroup>
           </Card.Body>
         </Card>
