@@ -69,7 +69,6 @@ function DispatchTeamManagement({ incident, organization }) {
             cancelToken: source.token,
           })
           .then(teamResponse => {
-            console.log(teamResponse.data)
             setAllTeams(teamResponse.data);
             setData({team_members: teamMemberResponse.data, teams: teamResponse.data.filter((tag, index, array) => array.findIndex(t => t.name == tag.name) == index), isFetching: false});
           })

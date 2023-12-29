@@ -125,7 +125,6 @@ function AnimalDetails({ id, incident, organization }) {
       })
       .then(response => {
         if (!unmounted) {
-          console.log(response.data)
           setData(response.data);
           let image_urls = [];
           image_urls = image_urls.concat(response.data.front_image||[]).concat(response.data.side_image||[]).concat(response.data.extra_images);
@@ -177,7 +176,7 @@ function AnimalDetails({ id, incident, organization }) {
           </Tooltip>
         }
       >
-        <Link href={"/" + incident + "/animals/" + id + "/vetrequest/new"} ><FontAwesomeIcon icon={faClipboardMedical} className="mr-1" inverse /></Link>
+        <Link href={"/" + organization + "/" + incident + "/animals/" + id + "/vetrequest/new"} ><FontAwesomeIcon icon={faClipboardMedical} className="mr-1" inverse /></Link>
       </OverlayTrigger>
       {data.status !== 'REUNITED' ?
       <OverlayTrigger
@@ -440,7 +439,7 @@ function AnimalDetails({ id, incident, organization }) {
               </ListGroup.Item> : ""}
               {data.vet_requests.map(vetrequest => (
                 <ListGroup.Item key={vetrequest}>
-                  <b>Veterinary Request:</b> <Link href={"/" + incident + "/vet/vetrequest/" + vetrequest} className="text-link" style={{textDecoration:"none", color:"white"}}>VR#{vetrequest}</Link>
+                  <b>Veterinary Request:</b> <Link href={"/" + organization + "/" + incident + "/vet/vetrequest/" + vetrequest} className="text-link" style={{textDecoration:"none", color:"white"}}>VR#{vetrequest}</Link>
                 </ListGroup.Item>
               ))}
             </ListGroup>

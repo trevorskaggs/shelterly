@@ -19,7 +19,7 @@ class SimpleAnimalSerializer(serializers.ModelSerializer):
     category = serializers.SerializerMethodField()
 
     def get_category(self, obj):
-        if obj.species.category:
+        if obj.species:
             return obj.species.category.name
         return ''
 

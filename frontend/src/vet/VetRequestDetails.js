@@ -25,7 +25,7 @@ function VetRequestDetails({ id, incident, organization }) {
 
   const priorityText = {urgent:'Urgent', when_available:'When Available'};
 
-  const [data, setData] = useState({id: '', exam: null, patient:{}, assignee:{}, open: '', assigned:'', closed: '', concern: '', priority: '', diagnosis: '', other_diagnosis:'', treatment_plans:[], presenting_complaints:[], exam_object: {}, animal_object: {id:'', name:'', species:'', category:'', sex:'', age:'', size:'', pcolor:'', scolor:'', medical_notes:''}});
+  const [data, setData] = useState({id: '', exam: null, patient:{}, assignee:{}, open: '', assigned:'', closed: '', concern: '', priority: '', diagnosis: '', other_diagnosis:'', treatment_plans:[], presenting_complaints:[], exam_object: {answers:{}}, animal_object: {id:'', name:'', species:'', category:'', sex:'', age:'', size:'', pcolor:'', scolor:'', medical_notes:''}});
   const [examQuestions, setExamQuestions] = useState([]);
 
   const [showModal, setShowModal] = useState(false);
@@ -139,9 +139,9 @@ function VetRequestDetails({ id, incident, organization }) {
               <ListGroup.Item>
                 <b>Concern:</b> {data.concern || "N/A"}
               </ListGroup.Item>
-              <ListGroup.Item>
-                <b>Diagnosis:</b> {data.diagnosis_text === 'OPEN' ? data.other_diagnosis : data.diagnosis_text || "N/A"}
-              </ListGroup.Item>
+              {data.exam ? <ListGroup.Item>
+                <b>Diagnosis:</b> {data.diagnosis_text || "N/A"}
+              </ListGroup.Item> : ""}
             </ListGroup>
           </Card.Body>
         </Card>
@@ -189,6 +189,7 @@ function VetRequestDetails({ id, incident, organization }) {
     <div className="row mt-3">
       <div className="col-12 d-flex">
         <Card className="mb-2 border rounded" style={{width:"100%"}}>
+          {data.exam ?
           <Card.Body style={{marginBottom:"-7px"}}>
             <Card.Title>
               <h4 className="mb-0">Exam Results
@@ -217,9 +218,15 @@ function VetRequestDetails({ id, incident, organization }) {
             ))}
             </ListGroup>
           </Card.Body>
+          :
+          <Card.Body>
+            <Link href={"/" + organization + "/" + incident + "/vet/vetrequest/" + id + "/workflow"}><Button>Start Exam</Button></Link>
+          </Card.Body>
+          }
         </Card>
       </div>
     </div>
+    {data.exam ?
     <div className="row mt-3">
       <div className="col-12 d-flex">
         <Card className="mb-2 border rounded" style={{width:"100%"}}>
@@ -329,7 +336,7 @@ function VetRequestDetails({ id, incident, organization }) {
           </Card.Body>
         </Card>
       </div>
-    </div>
+    </div> : ""}
     {/* <History action_history={data.action_history} /> */}
     <Modal show={showModal} onHide={() => setShowModal(false)}>
       <Modal.Header closeButton>

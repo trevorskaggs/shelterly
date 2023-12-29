@@ -102,7 +102,10 @@ class VetRequestSerializer(serializers.ModelSerializer):
         return ', '.join(obj.presenting_complaints.all().values_list('name', flat=True))
 
     def get_diagnosis_text(self, obj):
-        return obj.diagnosis.name if obj.diagnosis else ''
+        diagnosis = obj.diagnosis.all().values_list('name', flat=True)
+        if obj.diagnosis_other:
+            list(diagnosis).insert(0, obj.diagnosis_other)
+        return ', '.join(diagnosis)
 
     def get_shelter_name(self, obj):
         return obj.patient.shelter.name if obj.patient.shelter else ''

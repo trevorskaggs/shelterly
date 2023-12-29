@@ -41,6 +41,7 @@ class ExamQuestion(models.Model):
 
 class Exam(models.Model):
 
+    open = models.DateTimeField(auto_now=False, auto_now_add=True)
     confirm_sex_age = models.BooleanField(blank=True, null=True)
     confirm_chip = models.BooleanField(blank=True, null=True)
     temperature = models.CharField(max_length=20, blank=True, null=True)
@@ -68,8 +69,9 @@ class VetRequest(models.Model):
     concern = models.CharField(max_length=200, blank=True, null=True)
     priority = models.CharField(max_length=25, choices=(('urgent', 'Urgent'),('when_available', 'When Available'),), default='urgent')
     exam = models.ForeignKey(Exam, on_delete=models.SET_NULL, null=True)
-    diagnosis = models.ForeignKey(Diagnosis, on_delete=models.SET_NULL, null=True)
-    other_diagnosis = models.CharField(max_length=200, blank=True, null=True)
+    diagnosis = models.ManyToManyField(Diagnosis, blank=True, null=True)
+    diagnosis_other = models.CharField(max_length=200, blank=True, null=True)
+    diagnosis_notes = models.CharField(max_length=300, blank=True, null=True)
     status = models.CharField(max_length=20, default='Open')
 
     def check_closed(self):

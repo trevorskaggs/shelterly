@@ -67,8 +67,11 @@ const VetRequestForm = (props) => {
     id:'confirm_sex_age',
     validationType:"bool",
     validations: [{
+      type:'required',
+      params: ["This field is required"]
+    },{
       type:'oneOf',
-      params: [[true], "This field is required"]
+      params: [[true]]
     },]},{
     id:'confirm_chip',
     validationType:"bool"},{
@@ -93,7 +96,7 @@ const VetRequestForm = (props) => {
     let open_notes_dict = {};
     if (props.id) {
       const fetchExam = async () => {
-        // Fetch Visit Note data.
+        // Fetch VetRequest + Exam data.
         await axios.get('/vet/api/vetrequest/' + props.id + '/', {
           cancelToken: source.token,
         })
@@ -108,76 +111,66 @@ const VetRequestForm = (props) => {
                 }
               })
             }
+            else {
+              response.data.exam_object = {};
+            }
             response.data.exam_object['age'] = response.data.animal_object.age
             response.data.exam_object['sex'] = response.data.animal_object.sex
             response.data.exam_object['microchip'] = response.data.animal_object.microchip
             setData(response.data);
-            setShowNotes(open_notes_dict);
-            fetchExamQuestions();
-          }
-        })
-        .catch(error => {
-          setShowSystemError(true);
-        });
-      };
 
-      const fetchExamQuestions = async () => {
-        // Fetch exam question data.
-        await axios.get('/vet/api/examquestions/', {
-          cancelToken: source.token,
-        })
-        .then(response => {
-          if (!unmounted) {
-            let config = [];
-            // Filter the questions by the animal category.
-            let filtered_data = response.data.filter(question => question.categories.includes(data.animal_object.category))
-            setExamQuestions(filtered_data);
-            filtered_data.forEach(question => {
-              // Set open notes defaults.
-              open_notes_dict[question.name.toLowerCase().replace(' ','_').replace('/','_')] = open_notes_dict[question.name.toLowerCase().replace(' ','_').replace('/','_')] === true ? true : question.open_notes;
-              // Create a dynamic config for Yup validation.
-              config.push({
-                id:question.name.toLowerCase().replace(' ','_').replace('/','_'),
-                validationType:"string",
-                validations: [{
-                  type:'required',
-                  params: ["This field is required"]
-                },]
-              })
-              config.push({
-                id:question.name.toLowerCase().replace(' ','_').replace('/','_') + '_notes',
-                validationType:"string",
-                validations: [
-                  {
-                    type: "when",
-                    params: [
-                      question.name.toLowerCase().replace(' ','_').replace('/','_'),
+            // Fetch exam question data.
+            axios.get('/vet/api/examquestions/', {
+              cancelToken: source.token,
+            })
+            .then(questionResponse => {
+              if (!unmounted) {
+                let config = [];
+                // Filter the questions by the animal category.
+                let filtered_data = questionResponse.data.filter(question => question.categories.includes(response.data.animal_object.category))
+                setExamQuestions(filtered_data);
+                filtered_data.forEach(question => {
+                  // Set open notes defaults.
+                  open_notes_dict[question.name.toLowerCase().replace(' ','_').replace('/','_')] = open_notes_dict[question.name.toLowerCase().replace(' ','_').replace('/','_')] === true ? true : question.open_notes;
+                  // Create a dynamic config for Yup validation.
+                  config.push({
+                    id:question.name.toLowerCase().replace(' ','_').replace('/','_'),
+                    validationType:"string",
+                    validations: [{
+                      type:'required',
+                      params: ["This field is required"]
+                    },]
+                  })
+                  config.push({
+                    id:question.name.toLowerCase().replace(' ','_').replace('/','_') + '_notes',
+                    validationType:"string",
+                    validations: [
                       {
-                        is: 'Other',
-                        then: [
+                        type: "when",
+                        params: [
+                          question.name.toLowerCase().replace(' ','_').replace('/','_'),
                           {
-                            type: "required",
-                            params: ["This field is required"],
+                            is: 'Other',
+                            then: [
+                              {
+                                type: "required",
+                                params: ["This field is required"],
+                              },
+                            ],
                           },
                         ],
-                        // otherwise: [
-                        //   {
-                        //     type: "min",
-                        //     params: [0],
-                        //   },
-                        // ],
                       },
                     ],
-                  },
-                ],
-                // validations: [{
-                //   type:'required',
-                //   params: ["This field is required"]
-                // },]
-              })
+                  })
+                });
+                const schema = config.reduce(createYupSchema, {});
+                setFormSchema(schema);
+                setShowNotes(open_notes_dict);
+              }
+            })
+            .catch(error => {
+              setShowSystemError(true);
             });
-            const schema = config.reduce(createYupSchema, {});
-            setFormSchema(schema);
           }
         })
         .catch(error => {
@@ -200,14 +193,6 @@ const VetRequestForm = (props) => {
       initialValues={data.exam ? data.exam_object : {vetrequest_id:props.id}}
       enableReinitialize={true}
       validationSchema={Yup.object().shape(formSchema)}
-      // validationSchema={Yup.object({
-      //   confirm_sex_age: Yup.bool().oneOf([true], 'Age/Sex must be confirmed.'),
-      //   confirm_chip: Yup.bool(),
-      //   weight: Yup.string(),
-      //   weight_unit: Yup.string(),
-      //   temperature: Yup.string(),
-      //   temperature_method: Yup.string().required(),
-      // })}
       onSubmit={(values, { setSubmitting }) => {
         values['animal_id'] = data.animal_object.id
         if (data.exam) {
