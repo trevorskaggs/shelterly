@@ -139,7 +139,7 @@ const DateTimePicker = ({ label, xs, clearable, ...props }) => {
     <>
       <Form.Group as={Col} xs={xs} hidden={props.hidden} className="mb-0" ref={meta.error && registeredRef}>
       <label htmlFor={props.id || props.name}>{label}</label>
-      <span className="d-flex">
+      <span className="d-flex" style={{marginLeft:"-1px", marginRight:"-1px"}}>
         <Flatpickr className="datetime_picker" ref={datetime} data-enable-time options={{...options, ...props.more_options}} {...field} {...props} />
         {clearable === false || props.disabled === true ? "" : <span>{field.value ? <FontAwesomeIcon icon={faTimes} style={{position:"relative", left: "-22px", marginTop:"11px", marginRight:"-10px", color:"#808080"}} onClick={clearDate} /> : ""}</span>}
       </span>
@@ -173,7 +173,7 @@ const TextInput = ({ label, xs, controlId, formGroupClasses, ...props }) => {
       :
         <Form.Control type="text" isInvalid={meta.touched && meta.error} {...field} {...props} />
       }
-      <Form.Control.Feedback type="invalid"> {meta.error}</ Form.Control.Feedback>
+      <Form.Control.Feedback type="invalid" style={props.errstyle}>{meta.error}</Form.Control.Feedback>
     </Form.Group>
     </>
   );

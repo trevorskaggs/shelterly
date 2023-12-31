@@ -76,13 +76,13 @@ function getStepContent(id, incident, organization, step, handleStepSubmit, hand
     case 1:
       return <DiagnosticsForm onSubmit={handleStepSubmit} handleBack={handleBack} state={state} id={id} incident={incident} organization={organization} />;
     case 2:
-      return <TreatmentPlanForm onSubmit={handleStepSubmit} handleBack={handleBack} state={state} incident={incident} organization={organization} />;
+      return <TreatmentPlanForm onSubmit={handleStepSubmit} handleBack={handleBack} state={state} vetrequestid={id} incident={incident} organization={organization} />;
     default:
       return <PageNotFound/>;
   }
 }
 
-export const initialWorkflowData = {
+export const initialVetWorkflowData = {
   stepIndex: 0,
   // hasOwner: false,
   treatmentCount: 0,
@@ -91,7 +91,7 @@ export const initialWorkflowData = {
   steps: {
     exam: {
       id: '',},
-    diagnosis: {},
+    diagnostics: {},
     treatments: [],
   }
 }
@@ -109,11 +109,11 @@ function VetStepperWorkflow({ id, incident, organization }) {
   const steps = getSteps();
 
   // Tracks the workflow state and data.
-  const [state, setState] = useState(initialWorkflowData);
+  const [state, setState] = useState(initialVetWorkflowData);
 
-  function handleBack(currentStep, nextStep, data=null) {
+  function handleBack(currentStep, nextStep) {
     // Lower the active step if going backwards between major steps.
-    if (currentStep === 'treatments' && nextStep !== 'treatments') {
+    if ((currentStep === 'treatments' && nextStep === 'diagnostics') || (currentStep === 'diagnostics' && nextStep === 'exam')) {
       setActiveStep((prevActiveStep) => prevActiveStep - 1);
     }
 
@@ -131,25 +131,24 @@ function VetStepperWorkflow({ id, incident, organization }) {
   };
 
   function handleStepSubmit(currentStep, data, nextStep) {
-
-    // Treat animals differently since we need an array of N animals.
-    if (currentStep === 'animals') {
-      // Only increase animal index on save if we're adding another animal.
-      var index = state.animalIndex;
-      if (nextStep === 'animals') {
+    // Treat treatments differently since we need an array of N treatments.
+    if (currentStep === 'treatments') {
+      // Only increase treatment index on save if we're adding another treatment.
+      var index = state.treatmentIndex;
+      if (nextStep === 'treatments') {
         index = index + 1;
       }
       // If we're not on the last treatment, update the current treatment based on the index.
       if (state.treatmentIndex !== state.steps.treatments.length) {
         const treatmentList = [...state.steps.treatments];
-        let treatment_count = treatmentList[state.treatmentIndex].get('number_of_treatments');
+        // let treatment_count = treatmentList[state.treatmentIndex]['number_of_treatments'];
 
         treatmentList[state.treatmentIndex] = data;
         setState((prevState) => ({
           ...prevState,
           stepIndex: prevState.stepIndex + 1,
           treatmentIndex: index,
-          treatmentCount: prevState.treatmentCount - Number(treatment_count) + Number(data.get('number_of_treatments')),
+          // treatmentCount: prevState.treatmentCount - Number(treatment_count) + 1,
           steps: { ...prevState.steps, [currentStep]:treatmentList }
         }))
       }
@@ -159,7 +158,7 @@ function VetStepperWorkflow({ id, incident, organization }) {
           ...prevState,
           stepIndex: prevState.stepIndex + 1,
           treatmentIndex: index,
-          treatmentCount: prevState.treatmentCount + Number(data.get('number_of_treatments')),
+          treatmentCount: prevState.treatmentCount + 1,
           steps: { ...prevState.steps, [currentStep]:[...prevState.steps.treatments, data] }
         }))
       }
@@ -174,7 +173,7 @@ function VetStepperWorkflow({ id, incident, organization }) {
     }
 
     // Only bump up the major active step when moving to a new type of object creation.
-    if (currentStep !== 'treatments' && nextStep === 'treatments'){
+    if ((currentStep === 'exam' && nextStep === 'diagnostics') || (currentStep === 'diagnostics' && nextStep === 'treatments')){
       setActiveStep((prevActiveStep) => prevActiveStep + 1);
     }
   }

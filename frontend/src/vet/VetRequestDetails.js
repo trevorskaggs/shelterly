@@ -9,7 +9,6 @@ import {
   faPlusSquare,
   faTimes,
   faCheckSquare,
-  faHandHoldingMedical
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faPrescriptionBottlePill,
@@ -242,7 +241,7 @@ function VetRequestDetails({ id, incident, organization }) {
                     </Tooltip>
                   }
                 >
-                  <Link href={"/" + organization + "/" + incident + "/vet/treatment/new?vetrequest_id=" + id + "&animal_name=" + data.animal_object.name || "Unknown"}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
+                  <Link href={"/" + organization + "/" + incident + "/vet/vetrequest/" + data.id + "/treatment/new"}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
                 </OverlayTrigger> : ""}
               </h4>
             </Card.Title>

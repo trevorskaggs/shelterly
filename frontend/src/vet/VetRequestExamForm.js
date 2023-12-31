@@ -3,7 +3,10 @@ import axios from "axios";
 import { Link, navigate } from "raviger";
 import { Field, Form, Formik, } from 'formik';
 import { Switch } from 'formik-material-ui';
-import Select from 'react-select';
+import {
+  useOrderedNodes
+} from "react-register-nodes";
+import smoothScrollIntoView from "smooth-scroll-into-view-if-needed";
 import {
   Button,
   ButtonGroup,
@@ -20,6 +23,7 @@ import {
   faArrowAltCircleLeft, faChevronCircleDown, faChevronCircleRight
 } from '@fortawesome/free-solid-svg-icons';
 import * as Yup from 'yup';
+import ButtonSpinner from '../components/ButtonSpinner';
 import { DropDown, TextInput } from '../components/Form';
 import { SystemErrorContext } from '../components/SystemError';
 import { catAgeChoices, dogAgeChoices, horseAgeChoices, otherAgeChoices, sexChoices } from '../animals/constants';
@@ -56,13 +60,18 @@ function createYupSchema(schema, config) {
   return schema;
 }
 
-const VetRequestForm = (props) => {
+const VetRequestExamForm = (props) => {
 
   const { setShowSystemError } = useContext(SystemErrorContext);
 
-  const [data, setData] = useState({id: '', patient:{}, assignee:{}, exam: null, open: '', assigned:'', closed: '', concern: '', priority: '', diagnosis: '', other_diagnosis:'', treatment_plans:[], presenting_complaints:[], exam_object: {}, animal_object: {id:'', name:'', species:'', category:'', sex:'', age:'', size:'', pcolor:'', scolor:'', medical_notes:''}})
+  // Determine if we're in the vet exam workflow.
+  var is_workflow = window.location.pathname.includes("workflow");
+
+  const [data, setData] = useState({id: '', patient:{}, assignee:{}, exam: null, open: '', assigned:'', closed: '', concern: '', priority: '', diagnosis: '', other_diagnosis:'', treatment_plans:[], presenting_complaints:[], exam_object: {'confirm_sex_age':false}, animal_object: {id:'', name:'', species:'', category:'', sex:'', age:'', size:'', pcolor:'', scolor:'', medical_notes:''}})
   const [examQuestions, setExamQuestions] = useState([]);
   const [showNotes, setShowNotes] = useState({});
+  const ordered = useOrderedNodes();
+  const [shouldCheckForScroll, setShouldCheckForScroll] = React.useState(false);
   const [formSchema, setFormSchema] = useState([{
     id:'confirm_sex_age',
     validationType:"bool",
@@ -71,7 +80,7 @@ const VetRequestForm = (props) => {
       params: ["This field is required"]
     },{
       type:'oneOf',
-      params: [[true]]
+      params: [[true, "Age/Sex must be confirmed"]]
     },]},{
     id:'confirm_chip',
     validationType:"bool"},{
@@ -89,6 +98,25 @@ const VetRequestForm = (props) => {
     },]},
   ]);
   const ageChoices = {'':[], 'dog':dogAgeChoices, 'cat':catAgeChoices, 'horse':horseAgeChoices, 'other':otherAgeChoices}
+
+  // Hook scrolling to top error.
+  useEffect(() => {
+    if (shouldCheckForScroll && ordered.length > 0) {
+      smoothScrollIntoView(ordered[0], {
+        scrollMode: "if-needed",
+        block: "center",
+        inline: "start"
+      }).then(() => {
+        if (ordered[0].querySelector("input")) {
+          ordered[0].querySelector("input").focus();
+        }
+        setShouldCheckForScroll(false);
+      });
+    }
+    // Cleanup.
+    return () => {
+    };
+  }, [shouldCheckForScroll, ordered]);
 
   useEffect(() => {
     let unmounted = false;
@@ -198,7 +226,12 @@ const VetRequestForm = (props) => {
         if (data.exam) {
           axios.put('/vet/api/exam/' + data.exam + '/', values)
           .then(response => {
-            navigate('/' + props.organization + '/' + props.incident + '/vet/vetrequest/' + props.id)
+            if (is_workflow) {
+              props.onSubmit('exam', values, 'diagnostics');
+            }
+            else {
+              navigate('/' + props.organization + '/' + props.incident + '/vet/vetrequest/' + props.id)
+            }
           })
           .catch(error => {
             setShowSystemError(true);
@@ -208,7 +241,12 @@ const VetRequestForm = (props) => {
         else {
           axios.post('/vet/api/exam/', values)
           .then(response => {
-            navigate('/' + props.organization + '/' + props.incident + '/vet/vetrequest/' + props.id)
+            if (is_workflow) {
+              props.onSubmit('exam', values, 'diagnostics');
+            }
+            else {
+              navigate('/' + props.organization + '/' + props.incident + '/vet/vetrequest/' + props.id)
+            }
           })
           .catch(error => {
             setShowSystemError(true);
@@ -221,27 +259,27 @@ const VetRequestForm = (props) => {
         <Card border="secondary" className="mt-3">
           <Card.Header as="h5" className="pl-3"><span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + props.organization + '/' + props.incident + '/vet/vetrequest/' + props.id + '/')} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>Veterinary Exam Form</Card.Header>
           <div className="col-12 mt-3">
-        <Card className="border rounded" style={{width:"100%"}}>
-          <Card.Body>
-            <Card.Title>
-              <h4 className="mb-0">Patient</h4>
-            </Card.Title>
-            <hr/>
-            <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
-              <ListGroup.Item>
-                <div className="row" style={{textTransform:"capitalize"}}>
-                  <span className="col-3"><b>ID:</b> <Link href={"/" + props.organization + "/" + props.incident + "/animals/" + data.animal_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>A#{data.animal_object.id}</Link></span>
-                  <span className="col-3"><b>Name:</b> {data.animal_object.name||"Unknown"}</span>
-                  <span className="col-3"><b>Species:</b> {data.animal_object.species_string}</span>
-                </div>
-              </ListGroup.Item>
-              <ListGroup.Item>
-                  <span><b>Medical Notes:</b> {data.animal_object.medical_notes || "N/A"}</span>
-              </ListGroup.Item>
-            </ListGroup>
-          </Card.Body>
-        </Card>
-      </div>
+            <Card className="border rounded" style={{width:"100%"}}>
+              <Card.Body>
+                <Card.Title>
+                  <h4 className="mb-0">Patient</h4>
+                </Card.Title>
+                <hr/>
+                <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
+                  <ListGroup.Item>
+                    <div className="row" style={{textTransform:"capitalize"}}>
+                      <span className="col-3"><b>ID:</b> <Link href={"/" + props.organization + "/" + props.incident + "/animals/" + data.animal_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>A#{data.animal_object.id}</Link></span>
+                      <span className="col-3"><b>Name:</b> {data.animal_object.name||"Unknown"}</span>
+                      <span className="col-3"><b>Species:</b> {data.animal_object.species_string}</span>
+                    </div>
+                  </ListGroup.Item>
+                  <ListGroup.Item>
+                      <span><b>Medical Notes:</b> {data.animal_object.medical_notes || "N/A"}</span>
+                  </ListGroup.Item>
+                </ListGroup>
+              </Card.Body>
+            </Card>
+          </div>
           <Card.Body>
             <Form>
               <FormGroup>
@@ -293,76 +331,74 @@ const VetRequestForm = (props) => {
                     value={formikProps.values.microchip || data.animal_object.microchip}
                   />
               </Row>
-                <Row style={{marginBottom:"-15px"}}>
-                  <TextInput
-                    id="weight"
-                    name="weight"
+              <Row style={{marginBottom:"-15px"}}>
+                <TextInput
+                  id="weight"
+                  name="weight"
+                  type="text"
+                  label="Weight"
+                  xs="3"
+                />
+                <Col xs="1" className="pl-0" style={{marginBottom:"-2px", marginLeft:"-5px"}}>
+                  <DropDown
+                    id={"weight_unit"}
+                    name={"weight_unit"}
                     type="text"
-                    label="Weight"
-                    xs="3"
+                    label="Unit"
+                    placeholder=""
+                    options={[{value:'k', label:'k'}, {value:'kg', label:'kg'}]}
+                    isClearable={false}
                   />
-                  <Col xs="1" className="pl-0" style={{marginBottom:"-2px", marginLeft:"-5px"}}>
-                    <DropDown
-                      id={"weight_unit"}
-                      name={"weight_unit"}
-                      type="text"
-                      label="Unit"
-                      placeholder=""
-                      options={[{value:'k', label:'k'}, {value:'kg', label:'kg'}]}
-                      isClearable={false}
-
-                    />
-                  </Col>
-                </Row>
-                <Row className="mt-3" style={{marginBottom:"-15px"}}>
-                  <TextInput
-                    id="temperature"
-                    name="temperature"
+                </Col>
+              </Row>
+              <Row className="mt-3" style={{marginBottom:"-15px"}}>
+                <TextInput
+                  id="temperature"
+                  name="temperature"
+                  type="text"
+                  label="Temperature (F)"
+                  xs="2"
+                />
+                <Col xs="2" className="pl-0" style={{marginLeft:"-5px"}}>
+                  <DropDown
+                    id={"temperature_method"}
+                    name={"temperature_method"}
                     type="text"
-                    label="Temperature (F)"
-                    xs="2"
+                    label="Method"
+                    placeholder=""
+                    options={[{value:'Axillary', label:'Axillary'}, {value:'Rectal', label:'Rectal'}, {value:'Not taken', label:'Not taken'}, {value:'Unable to obtain', label:'Unable to obtain'}]}
+                    isClearable={false}
                   />
-                  <Col xs="2" className="pl-0" style={{marginLeft:"-5px"}}>
-                    <DropDown
-                      id={"temperature_method"}
-                      name={"temperature_method"}
-                      type="text"
-                      label="Method"
-                      placeholder=""
-                      options={[{value:'Axillary', label:'Axillary'}, {value:'Rectal', label:'Rectal'}, {value:'Not taken', label:'Not taken'}, {value:'Unable to obtain', label:'Unable to obtain'}]}
-                      isClearable={false}
-                    />
-                  </Col>
-                </Row>
-                {examQuestions.map(question =>
-                  <span key={question.id}>
-                    <Row className="mt-3" style={{marginBottom:"4px"}}>
-                      <Col xs="2" className="pr-0">
-                        {question.name}
-                      </Col>
-                      <Col xs="2" className="pl-0 pr-0" style={{marginLeft:"-5px"}}>
-                        {question.allow_not_examined ? 
-                        <span>
-                          <input
-                            id="allow_not_examined"
-                            type="checkbox"
-                            className="ml-3"
-                            checked={formikProps.values[question.name.toLowerCase().replace(' ','_').replace('/','_')] === 'Not examined'}
-                            onChange={() => {
-                              formikProps.values[question.name.toLowerCase().replace(' ','_').replace('/','_')] === 'Not examined' ? formikProps.setFieldValue(question.name.toLowerCase().replace(' ','_').replace('/','_'), null) : formikProps.setFieldValue(question.name.toLowerCase().replace(' ','_').replace('/','_'), 'Not examined');
-                              formikProps.setFieldValue(question.name.toLowerCase().replace(' ','_').replace('/','_') + '_id', question.id);
-                              if (formikProps.values[question.name.toLowerCase().replace(' ','_').replace('/','_')] !== 'Not examined') {
-                                showNotes[question.name.toLowerCase().replace(' ','_').replace('/','_')] = true;
-                              }
-                            }}
-                          />
-                          <span>&nbsp;&nbsp;Not examined</span>
-                        </span> : ""}
-                      </Col>
-                      
-                    </Row>
-                    <Row>
-                    <Col xs="4" className="">
+                </Col>
+              </Row>
+              {examQuestions.map(question =>
+                <span key={question.id}>
+                  <Row className="mt-3" style={{marginBottom:"4px"}}>
+                    <Col xs="2" className="pr-0">
+                      {question.name}
+                    </Col>
+                    <Col xs="2" className="pl-0 pr-0" style={{marginLeft:"-5px"}}>
+                      {question.allow_not_examined ? 
+                      <span>
+                        <input
+                          id="allow_not_examined"
+                          type="checkbox"
+                          className="ml-3"
+                          checked={formikProps.values[question.name.toLowerCase().replace(' ','_').replace('/','_')] === 'Not examined'}
+                          onChange={() => {
+                            formikProps.values[question.name.toLowerCase().replace(' ','_').replace('/','_')] === 'Not examined' ? formikProps.setFieldValue(question.name.toLowerCase().replace(' ','_').replace('/','_'), null) : formikProps.setFieldValue(question.name.toLowerCase().replace(' ','_').replace('/','_'), 'Not examined');
+                            formikProps.setFieldValue(question.name.toLowerCase().replace(' ','_').replace('/','_') + '_id', question.id);
+                            if (formikProps.values[question.name.toLowerCase().replace(' ','_').replace('/','_')] !== 'Not examined') {
+                              showNotes[question.name.toLowerCase().replace(' ','_').replace('/','_')] = true;
+                            }
+                          }}
+                        />
+                        <span>&nbsp;&nbsp;Not examined</span>
+                      </span> : ""}
+                    </Col>
+                  </Row>
+                  <Row>
+                    <Col xs="4">
                       <DropDown
                         id={question.name.toLowerCase().replace(' ','_').replace('/','_')}
                         name={question.name.toLowerCase().replace(' ','_').replace('/','_')}
@@ -379,32 +415,33 @@ const VetRequestForm = (props) => {
                         }}
                       />
                     </Col>
-                    <Col xs="1" style={{marginTop:"15px", minWidth:"90px"}}>
+                    <Col xs="1" style={{marginTop:"15px", minWidth:"95px"}}>
                       {"Notes"}
                       <FontAwesomeIcon icon={faChevronCircleRight} hidden={Object.keys(showNotes).length ? showNotes[question.name.toLowerCase().replace(' ','_').replace('/','_')] : true} onClick={() => {setShowNotes(prevState => ({ ...prevState, [question.name.toLowerCase().replace(' ','_').replace('/','_')]:true }));}} className="ml-1" style={{cursor:'pointer'}} inverse />
                       <FontAwesomeIcon icon={faChevronCircleDown} hidden={Object.keys(showNotes).length ? !showNotes[question.name.toLowerCase().replace(' ','_').replace('/','_')] : true} onClick={() => {setShowNotes(prevState => ({ ...prevState, [question.name.toLowerCase().replace(' ','_').replace('/','_')]:false }));}} className="ml-1" style={{cursor:'pointer'}} inverse />
                     </Col>
-                    </Row>
-                    <Collapse in={showNotes[question.name.toLowerCase().replace(' ','_').replace('/','_')]}>
-                      <div className="mt-2">
-                        <TextInput
-                          as="textarea"
-                          name={question.name.toLowerCase().replace(' ','').replace('/','') + "_notes"}
-                          id="_notes"
-                          xs="5"
-                          rows={3}
-                          style={{marginLeft:"-15px", margTop:"-2px"}}
-                          colstyle={{paddingRight:"0px"}}
-                        />
-                      </div>
-                    </Collapse>
-                  </span>
+                  </Row>
+                  <Collapse in={showNotes[question.name.toLowerCase().replace(' ','_').replace('/','_')]}>
+                    <div className="mt-2">
+                      <TextInput
+                        as="textarea"
+                        name={question.name.toLowerCase().replace(' ','').replace('/','') + "_notes"}
+                        id="_notes"
+                        xs="5"
+                        rows={3}
+                        style={{marginLeft:"-15px", margTop:"-2px"}}
+                        errstyle={{marginLeft:"-15px"}}
+                        colstyle={{paddingRight:"0px"}}
+                      />
+                    </div>
+                  </Collapse>
+                </span>
                 )}
               </FormGroup>
             </Form>
           </Card.Body>
           <ButtonGroup>
-            <Button type="button" className="btn btn-primary" onClick={() => { formikProps.submitForm() }}>Save</Button>
+            <ButtonSpinner isSubmitting={formikProps.isSubmitting} isSubmittingText="Saving..."  type="submit" className="btn btn-primary" onClick={() => { setShouldCheckForScroll(true);formikProps.submitForm(); }}>{is_workflow ? "Next" : "Save"}</ButtonSpinner>
           </ButtonGroup>
         </Card>
       )}
@@ -412,4 +449,4 @@ const VetRequestForm = (props) => {
   );
 };
 
-export default VetRequestForm;
+export default VetRequestExamForm;

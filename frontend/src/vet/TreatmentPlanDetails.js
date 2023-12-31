@@ -36,7 +36,7 @@ function TreatmentPlanDetails({ id, incident, organization }) {
     let source = axios.CancelToken.source();
 
     const fetchTreatmentPlanData = async () => {
-      // Fetch Room Details data.
+      // Fetch TreatmentPlan data.
       await axios.get('/vet/api/treatmentplan/' + id + '/?incident=' + incident, {
           cancelToken: source.token,
       })

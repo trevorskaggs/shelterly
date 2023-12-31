@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
-import { navigate } from "raviger";
+import { navigate, Link } from "raviger";
 import { Form, Formik, } from 'formik';
 import Select from 'react-select';
 import {
@@ -9,6 +9,7 @@ import {
   Card,
   Col,
   FormGroup,
+  ListGroup,
   Row,
 } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -45,17 +46,20 @@ const DiagnosticsForm = (props) => {
 
   const { setShowSystemError } = useContext(SystemErrorContext);
 
+  // Determine if we're in the vet exam workflow.
+  var is_workflow = window.location.pathname.includes("workflow");
+
   const [data, setData] = useState({
     patient: props.animalid,
     assignee: null,
     concern: '',
-    diagnosis: '',
+    diagnosis: [],
+    diagnosis_notes: '',
     priority: 'urgent',
     presenting_complaints: [],
+    animal_object: {id:''}
   })
 
-  const [assigneeChoices, setAssigneeChoices] = useState([]);
-  const [presentingComplaintChoices, setPresentingComplaintChoices] = useState([]);
   const [diagnosisChoices, setDiagnosisChoices] = useState([]);
 
   useEffect(() => {
@@ -63,7 +67,7 @@ const DiagnosticsForm = (props) => {
     let source = axios.CancelToken.source();
     if (props.id) {
       const fetchVetRequest = async () => {
-        // Fetch Visit Note data.
+        // Fetch VetRequest data.
         await axios.get('/vet/api/vetrequest/' + props.id + '/', {
           cancelToken: source.token,
         })
@@ -112,12 +116,18 @@ const DiagnosticsForm = (props) => {
       initialValues={data}
       enableReinitialize={true}
       validationSchema={Yup.object({
-        diagnosis: Yup.string(),
+        diagnosis: Yup.array().min(1, 'At least 1 diagnosis must be selected.').required(),
+        diagnosis_notes: Yup.string().nullable(),
       })}
       onSubmit={(values, { setSubmitting }) => {
         axios.patch('/vet/api/vetrequest/' + props.id + '/', values)
         .then(response => {
-          navigate('/' + props.organization + '/' + props.incident + '/vet/vetrequest/' + props.id)
+          if (is_workflow) {
+            props.onSubmit('diagnostics', values, 'treatments');
+          }
+          else {
+            navigate('/' + props.organization + '/' + props.incident + '/vet/vetrequest/' + props.id);
+          }
         })
         .catch(error => {
           setShowSystemError(true);
@@ -126,13 +136,41 @@ const DiagnosticsForm = (props) => {
       }}
     >
       {formikProps => (
-        <Card border="secondary" className="mt-5">
-          <Card.Header as="h5" className="pl-3"><span style={{ cursor: 'pointer' }} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>{!props.id ? "" : "Update "}Veterinary Request Form</Card.Header>
+        <Card border="secondary" className="mt-3">
+          <Card.Header as="h5" className="pl-3">
+            {is_workflow ?
+            <span style={{cursor:'pointer'}} onClick={() => {props.handleBack('diagnostics', 'exam')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
+            :
+            <span style={{ cursor: 'pointer' }} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}
+            Diagnostics Form
+            </Card.Header>
+          <div className="col-12 mt-3">
+            <Card className="border rounded" style={{width:"100%"}}>
+              <Card.Body>
+                <Card.Title>
+                  <h4 className="mb-0">Patient</h4>
+                </Card.Title>
+                <hr/>
+                <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
+                  <ListGroup.Item>
+                    <div className="row" style={{textTransform:"capitalize"}}>
+                      <span className="col-3"><b>ID:</b> <Link href={"/" + props.organization + "/" + props.incident + "/animals/" + data.animal_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>A#{data.animal_object.id}</Link></span>
+                      <span className="col-3"><b>Name:</b> {data.animal_object.name||"Unknown"}</span>
+                      <span className="col-3"><b>Species:</b> {data.animal_object.species_string}</span>
+                    </div>
+                  </ListGroup.Item>
+                  <ListGroup.Item>
+                      <span><b>Medical Notes:</b> {data.animal_object.medical_notes || "N/A"}</span>
+                  </ListGroup.Item>
+                </ListGroup>
+              </Card.Body>
+            </Card>
+          </div>
           <Card.Body>
             <Form>
               <FormGroup>
-                <Row className="mt-3">
-                  <Col xs={"8"}>
+                <Row>
+                  <Col xs={"6"}>
                     <label>Diagnosis</label>
                     <Select
                       label="Diagnosis"
@@ -152,6 +190,7 @@ const DiagnosticsForm = (props) => {
                         formikProps.setFieldValue("diagnosis", instance === null ? [] : values);
                       }}
                     />
+                    {formikProps.errors['diagnosis'] ? <div style={{ color: "#e74c3c", marginTop: ".5rem", fontSize: "80%" }}>{formikProps.errors['diagnosis']}</div> : ""}
                   </Col>
                 </Row>
                 {diagnosisChoices.length && formikProps.values.diagnosis.includes(diagnosisChoices.filter(option => option.label === 'OPEN')[0].value) ?
@@ -165,11 +204,21 @@ const DiagnosticsForm = (props) => {
                   />
                 </Row>
                 : ""}
+                <Row className="mt-3" style={{marginBottom:"-15px"}}>
+                  <TextInput
+                    as="textarea"
+                    label="Diagnostic Notes"
+                    name="diagnosis_notes"
+                    id="diagnosis_notes"
+                    xs="6"
+                    rows={3}
+                  />
+                </Row>
               </FormGroup>
             </Form>
           </Card.Body>
           <ButtonGroup>
-            <Button type="button" className="btn btn-primary" onClick={() => { formikProps.submitForm() }}>Save</Button>
+            <Button type="button" className="btn btn-primary" onClick={() => { formikProps.submitForm() }}>{is_workflow ? "Next" : "Save"}</Button>
           </ButtonGroup>
         </Card>
       )}

@@ -1,13 +1,15 @@
 import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
-import { navigate, useQueryParams } from "raviger";
+import { navigate, useQueryParams, Link } from "raviger";
 import { Form, Formik } from 'formik';
 import {
   Button,
   ButtonGroup,
   Card,
   Col,
+  Form as BootstrapForm,
   FormGroup,
+  ListGroup,
   Row,
 } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -23,15 +25,11 @@ const TreatmentPlanForm = (props) => {
 
   const { setShowSystemError } = useContext(SystemErrorContext);
 
-  // Identify any query param data.
-  const [queryParams] = useQueryParams();
-  const {
-    vetrequest_id = null,
-    animal_name = 'Unknown'
-  } = queryParams;
+  // Determine if we're in the vet exam workflow.
+  var is_workflow = window.location.pathname.includes("workflow");
 
-  const [data, setData] = useState({
-    vet_request: vetrequest_id,
+  let initialData = {
+    vet_request: props.vetrequestid,
     start: new Date(),
     end: new Date(),
     category: '',
@@ -41,23 +39,34 @@ const TreatmentPlanForm = (props) => {
     unit: '',
     route: '',
     treatment_object: {category:''}
-  });
+  }
+
+  let current_data = {...initialData};
+  if (is_workflow && props.state.steps.treatments[props.state.treatmentIndex]) {
+    current_data = props.state.steps.treatments[props.state.treatmentIndex];
+  }
+
+  const [data, setData] = useState(current_data);
+
+  const [vetRequestData, setVetRequestData] = useState({animal_object: {id:'', name:'', species_string:'', medical_notes:''}});
 
   function calc_requests(formikProps) {
     let duration = moment.duration(moment(formikProps.values.end).add(1, 'm').diff(moment(formikProps.values.start)));
     return Math.trunc(((duration.hours() + (duration.days() * 24)) / formikProps.values.frequency) + 1)
   };
 
-
   const [treatmentChoices, setTreatmentChoices] = useState([]);
   const [categoryChoices, setCategoryChoices] = useState([]);
+
+  // Track whether or not to add another treatment after saving.
+  const [addAnother, setAddAnother] = useState(false);
 
   useEffect(() => {
     let unmounted = false;
     let source = axios.CancelToken.source();
 
     const fetchTreatments = async () => {
-      // Fetch Visit Note data.
+      // Fetch Treatment data.
       await axios.get('/vet/api/treatment/', {
         cancelToken: source.token,
       })
@@ -83,7 +92,7 @@ const TreatmentPlanForm = (props) => {
 
     if (props.id) {
       const fetchTreatmentPlan = async () => {
-        // Fetch Visit Note data.
+        // Fetch TreatmentPlan data.
         await axios.get('/vet/api/treatmentplan/' + props.id + '/', {
           cancelToken: source.token,
         })
@@ -99,6 +108,24 @@ const TreatmentPlanForm = (props) => {
         });
       };
       fetchTreatmentPlan();
+    };
+
+    if (props.vetrequestid) {
+      const fetchVetRequest = async () => {
+        // Fetch VetRequest data.
+        await axios.get('/vet/api/vetrequest/' + props.vetrequestid + '/', {
+          cancelToken: source.token,
+        })
+        .then(response => {
+          if (!unmounted) {
+            setVetRequestData(response.data);
+          }
+        })
+        .catch(error => {
+          setShowSystemError(true);
+        });
+      };
+      fetchVetRequest();
     };
 
     // Cleanup.
@@ -121,11 +148,21 @@ const TreatmentPlanForm = (props) => {
         unit: Yup.string().required('Required'),
         route: Yup.string().required('Required'),
       })}
-      onSubmit={(values, { setSubmitting }) => {
-        if (props.id) {
-          axios.put('/vet/api/treatmentplan/' + props.id + '/', values)
+      onSubmit={(values, { resetForm, setSubmitting }) => {
+        if (props.id || (props.state.steps.treatments[props.state.treatmentIndex])) {
+          axios.put('/vet/api/treatmentplan/' + props.id || props.state.steps.treatments[props.state.treatmentIndex].id + '/', values)
           .then(response => {
-            navigate('/' + props.organization + '/' + props.incident + '/vet/treatment/' + props.id)
+            if (addAnother) {
+              if (is_workflow) {
+                props.onSubmit('treatments', values, 'treatments');
+              }
+              // Reset form data with existing treatment data if we have it.
+              let formdata = props.state && props.state.steps.treatments.length > 0 ? props.state.steps.treatments[props.state.treatmentIndex + 1] : data;
+              resetForm({values:formdata});
+            }
+            else {
+              navigate('/' + props.organization + '/' + props.incident + '/vet/vetrequest/' + props.vetrequestid);
+            }
           })
           .catch(error => {
             setShowSystemError(true);
@@ -135,7 +172,18 @@ const TreatmentPlanForm = (props) => {
         else {
           axios.post('/vet/api/treatmentplan/', values)
           .then(response => {
-            navigate('/' + props.organization + '/' + props.incident + '/vet/treatment/' + response.data.id)
+            if (addAnother) {
+              if (is_workflow) {
+                values['id'] = response.data.id;
+                props.onSubmit('treatments', values, 'treatments');
+              }
+              // Reset form data with existing treatment data if we have it.
+              let formdata = props.state.steps.treatments[props.state.treatmentIndex + 1] ? props.state.steps.treatments[props.state.treatmentIndex + 1] : initialData;
+              resetForm({values:formdata});
+            }
+            else {
+              navigate('/' + props.organization + '/' + props.incident + '/vet/vetrequest/' + props.vetrequestid);
+            }
           })
           .catch(error => {
             setShowSystemError(true);
@@ -145,12 +193,41 @@ const TreatmentPlanForm = (props) => {
       }}
     >
       {formikProps => (
-        <Card border="secondary" className="mt-5">
-          <Card.Header as="h5" className="pl-3"><span style={{ cursor: 'pointer' }} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>{!props.id ? "" : "Update "}Treatment Form - {animal_name}</Card.Header>
+        <Card border="secondary" className={is_workflow ? "mt-3" : "mt-5"}>
+          <Card.Header as="h5" className="pl-3">
+          {!is_workflow ? <span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + props.organization + '/' + props.incident + '/vet/vetrequest/' + props.vetrequestid + '/')} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
+          :
+          <span>{props.state.treatmentIndex > 0 ? <span style={{cursor:'pointer'}} onClick={() => {setAddAnother(false); setData(props.state.steps.treatments[props.state.treatmentIndex-1]); props.handleBack('treatments', 'treatments')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
+          :
+          <span style={{cursor:'pointer'}} onClick={() => {setAddAnother(false);props.handleBack('treatments', 'diagnostics')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}</span>}
+          {!props.id ? "" : "Update "}Treatment Form
+          </Card.Header>
+          <div className="col-12 mt-3">
+            <Card className="border rounded" style={{width:"100%"}}>
+              <Card.Body>
+                <Card.Title>
+                  <h4 className="mb-0">Patient</h4>
+                </Card.Title>
+                <hr/>
+                <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
+                  <ListGroup.Item>
+                    <div className="row" style={{textTransform:"capitalize"}}>
+                      <span className="col-3"><b>ID:</b> <Link href={"/" + props.organization + "/" + props.incident + "/animals/" + vetRequestData.animal_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>A#{vetRequestData.animal_object.id}</Link></span>
+                      <span className="col-3"><b>Name:</b> {vetRequestData.animal_object.name||"Unknown"}</span>
+                      <span className="col-3"><b>Species:</b> {vetRequestData.animal_object.species_string}</span>
+                    </div>
+                  </ListGroup.Item>
+                  <ListGroup.Item>
+                      <span><b>Medical Notes:</b> {vetRequestData.animal_object.medical_notes || "N/A"}</span>
+                  </ListGroup.Item>
+                </ListGroup>
+              </Card.Body>
+            </Card>
+          </div>
           <Card.Body>
-            <Form>
+            <BootstrapForm as={Form}>
               <FormGroup>
-                <Row>
+                <BootstrapForm.Row>
                 <Col xs={"4"}>
                     <DropDown
                       label="Category"
@@ -182,8 +259,8 @@ const TreatmentPlanForm = (props) => {
                       }}
                     />
                   </Col>
-                </Row>
-                <Row className="mt-3 pl-0">
+                </BootstrapForm.Row>
+                <BootstrapForm.Row className="mt-3 pl-0">
                   <TextInput
                     id="frequency"
                     name="frequency"
@@ -212,9 +289,10 @@ const TreatmentPlanForm = (props) => {
                     }}
                     value={formikProps.values.end||new Date()}
                     disabled={false}
+                    style={{}}
                   />
-                </Row>
-                <Row>
+                </BootstrapForm.Row>
+                <BootstrapForm.Row>
                   <TextInput
                     id="quantity"
                     name="quantity"
@@ -260,13 +338,20 @@ const TreatmentPlanForm = (props) => {
                       }}
                     />
                   </Col>
-                </Row>
+                </BootstrapForm.Row>
               </FormGroup>
-            </Form>
+            </BootstrapForm>
           </Card.Body>
           {formikProps.values.end && formikProps.values.start && formikProps.values.frequency && formikProps.values.frequency > 0 ? <div className="alert alert-warning text-center" style={{fontSize:"16px", marginTop:"-35px"}}>This will generate {calc_requests(formikProps)} treatment request{calc_requests(formikProps) === 1 ? "" : "s"}.</div> : ""}
           <ButtonGroup>
-            <Button type="button" className="btn btn-primary" onClick={() => { formikProps.submitForm() }}>Save</Button>
+            {!props.id ?
+            <Button onClick={() => {
+              setAddAnother(true);
+              formikProps.submitForm();
+            }}>
+              {props.state.steps.treatments.length -1 > props.state.treatmentIndex ? "Next Treatment" : "Add Another"}
+            </Button> : ""}
+            <Button type="button" className="btn btn-primary border" onClick={() => { setAddAnother(false);formikProps.submitForm() }}>Save{is_workflow ? " and Finish" : ""}</Button>
           </ButtonGroup>
         </Card>
       )}

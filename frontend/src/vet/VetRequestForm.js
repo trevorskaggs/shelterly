@@ -279,6 +279,7 @@ const VetRequestForm = (props) => {
                         formikProps.setFieldValue("diagnosis", instance === null ? [] : values);
                       }}
                     />
+                    {formikProps.errors['diagnosis'] ? <div style={{ color: "#e74c3c", marginTop: ".5rem", fontSize: "80%" }}>{formikProps.errors['diagnosis']}</div> : ""}
                   </Col>
                 </Row>
                 : ""}
