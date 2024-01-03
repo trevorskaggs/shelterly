@@ -2,8 +2,8 @@ from datetime import datetime, timedelta
 from rest_framework import filters, permissions, viewsets
 
 from animals.models import Animal
-from vet.models import Diagnosis, Exam, ExamAnswer, ExamQuestion, PresentingComplaint, Treatment, TreatmentPlan, TreatmentRequest, VetRequest
-from vet.serializers import DiagnosisSerializer, ExamQuestionSerializer, ExamSerializer, PresentingComplaintSerializer, TreatmentSerializer, TreatmentPlanSerializer, TreatmentRequestSerializer, VetRequestSerializer
+from vet.models import Diagnosis, Diagnostic, Exam, ExamAnswer, ExamQuestion, PresentingComplaint, Procedure, Treatment, TreatmentPlan, TreatmentRequest, VetRequest
+from vet.serializers import DiagnosisSerializer, DiagnosticSerializer, ExamQuestionSerializer, ExamSerializer, PresentingComplaintSerializer, ProcedureSerializer, TreatmentSerializer, TreatmentPlanSerializer, TreatmentRequestSerializer, VetRequestSerializer
 
 class ExamViewSet(viewsets.ModelViewSet):
     queryset = Exam.objects.all()
@@ -49,6 +49,12 @@ class PresentingComplaintViewSet(viewsets.ModelViewSet):
     serializer_class = PresentingComplaintSerializer
 
 
+class ProcedureViewSet(viewsets.ModelViewSet):
+    queryset = Procedure.objects.all()
+    permission_classes = [permissions.IsAuthenticated, ]
+    serializer_class = ProcedureSerializer
+
+
 class TreatmentViewSet(viewsets.ModelViewSet):
     queryset = Treatment.objects.all()
     permission_classes = [permissions.IsAuthenticated, ]
@@ -59,6 +65,12 @@ class DiagnosisViewSet(viewsets.ModelViewSet):
     queryset = Diagnosis.objects.all()
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = DiagnosisSerializer
+
+
+class DiagnosticViewSet(viewsets.ModelViewSet):
+    queryset = Diagnostic.objects.all()
+    permission_classes = [permissions.IsAuthenticated, ]
+    serializer_class = DiagnosticSerializer
 
 
 class TreatmentRequestViewSet(viewsets.ModelViewSet):

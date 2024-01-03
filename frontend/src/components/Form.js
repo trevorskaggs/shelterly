@@ -14,9 +14,7 @@ import Autocomplete from 'react-google-autocomplete';
 import { Map, Marker, Tooltip as MapTooltip, TileLayer } from "react-leaflet";
 import clsx from 'clsx';
 import MaterialCheckbox from '@material-ui/core/Checkbox';
-import {
-  useRegisteredRef
-} from "react-register-nodes";
+import { useRegisteredRef } from "react-register-nodes";
 import { makeStyles } from '@material-ui/core/styles';
 import Alert from 'react-bootstrap/Alert';
 import { Legend, pinMarkerIcon } from "../components/Map";
@@ -149,15 +147,14 @@ const DateTimePicker = ({ label, xs, clearable, ...props }) => {
   );
 };
 
-const TextInput = ({ label, xs, controlId, formGroupClasses, ...props }) => {
-
+const TextInput = React.forwardRef((props, ref) => {
   const [field, meta] = useField(props);
   const registeredRef = useRegisteredRef(props.name);
 
   return (
     <>
-    <Form.Group as={Col} xs={xs} controlId={controlId} className={formGroupClasses} hidden={props.hidden} style={props.colstyle} ref={meta.error && registeredRef}>
-      {label ? <Form.Label>{label}</Form.Label> : ""}
+    <Form.Group as={Col} xs={props.xs} controlId={props.controlId} className={props.formGroupClasses} hidden={props.hidden} style={props.colstyle} ref={meta.error && registeredRef}>
+      {props.label ? <Form.Label>{props.label}</Form.Label> : ""}
       {props.tooltip ?
       <OverlayTrigger
         key={"text-input"}
@@ -168,16 +165,16 @@ const TextInput = ({ label, xs, controlId, formGroupClasses, ...props }) => {
           </Tooltip>
         }
       >
-        <Form.Control type="text" isInvalid={meta.touched && meta.error} {...field} {...props} />
+        <Form.Control ref={ref} type="text" isInvalid={meta.touched && meta.error} {...field} {...props} />
       </OverlayTrigger>
       :
-        <Form.Control type="text" isInvalid={meta.touched && meta.error} {...field} {...props} />
+        <Form.Control ref={ref} type="text" isInvalid={meta.touched && meta.error} {...field} {...props} />
       }
       <Form.Control.Feedback type="invalid" style={props.errstyle}>{meta.error}</Form.Control.Feedback>
     </Form.Group>
     </>
   );
-};
+});
 
 const Checkbox = (props) => {
 
@@ -275,7 +272,7 @@ const DropDown = React.forwardRef((props, ref) => {
         {simpleProps => <Select isDisabled={props.disabled} ref={ref} styles={customStyles} isClearable={true} filterOption={createFilter(filterConfig)} onBlur={updateBlur} onChange={handleOptionChange} {...props} {...simpleProps} />}
       </SimpleValue>
       }
-      {meta.error ? <div style={{ color: "#e74c3c", marginTop: ".5rem", fontSize: "80%" }}>{meta.error}</div> : ""}
+      {meta.touched && meta.error ? <div style={{ color: "#e74c3c", marginTop: ".5rem", fontSize: "80%" }}>{meta.error}</div> : ""}
     </div>
     </>
   );

@@ -9,7 +9,7 @@ complaints = ['Painful', 'Not eating', 'Vomiting/diarrhea', 'Diarrhea', 'Lamenes
 diagnoses = ['Apparently healthy', 'Gatrointestinal problem', 'Parvovirus', 'Stress colotis', 'Intestinal parasites', 'Pancreatits',
              'Burns', 'Wound/laceration', 'Abrasions', 'Fracture', 'CCL rupture', 'Ectoparasites', 'Corneal ulcer', 'Stromal abscess',
              'Uveitis (no ulcer)', 'Congestive heart failure', 'Smoke inhalation', 'Pneumonia', 'Asthma', 'Hemothorax', 'Ascites',
-             'Allergic reaction', 'Dermatitis', 'Diaetes mellitus', 'OPEN', 'Shock', 'Dehydration', 'Recumbency', 'Mastitis', 'Dytocia/abortion',
+             'Allergic reaction', 'Dermatitis', 'Diaetes mellitus', 'OPEN', 'Other', 'Shock', 'Dehydration', 'Recumbency', 'Mastitis', 'Dytocia/abortion',
              'Uterine prolapse', 'Rectal prolapse', 'Sepsis', "Equine Cushing's/pituitary pars intermedia dysfunction (PPID)",
              'Equine metabolic syndrome', 'Laminitis', 'Renal failure', 'Hepatic lipidosis', 'Hyperparathyroidism', 'Foreign body/fistula',
              'Abscess', 'Lymphangitis']

@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
 import Moment from 'react-moment';
+import moment from 'moment';
 import { Link } from 'raviger';
 import { Button, Card, Col, Collapse, ListGroup, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -207,6 +208,18 @@ function VetRequestDetails({ id, incident, organization }) {
             </Card.Title>
             <hr className="mb-3" />
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
+            <ListGroup.Item>
+              <div className="row" style={{textTransform:"capitalize"}}>
+                <span className="col-3"><b>Performed:</b> {moment(data.exam_object.open).format('MMM Do HH:mm')}</span>
+                <span className="col-4"><b>Weight:</b> {data.exam_object.weight}{data.exam_object.weight_unit}</span>
+              </div>
+            </ListGroup.Item>
+            <ListGroup.Item>
+              <div className="row" style={{textTransform:"capitalize"}}>
+                <span className="col-3"><b>Temperature (F):</b> {data.exam_object.temperature}</span>
+                <span className="col-4"><b>Temperature Method:</b> {data.exam_object.temperature_method}</span>
+              </div>
+            </ListGroup.Item>
             {examQuestions.filter(question => question.categories.includes(data.animal_object.category)).map(question => (
               <ListGroup.Item key={question.id}>
                 <div className="row" style={{textTransform:"capitalize"}}>

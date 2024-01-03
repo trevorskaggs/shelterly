@@ -2,7 +2,7 @@ from datetime import datetime
 from rest_framework import serializers
 from django.db.models import Q
 
-from .models import Exam, ExamAnswer, ExamQuestion, Diagnosis, PresentingComplaint, VetRequest, Treatment, TreatmentPlan, TreatmentRequest
+from .models import Exam, ExamAnswer, ExamQuestion, Diagnosis, Diagnostic, PresentingComplaint, Procedure, VetRequest, Treatment, TreatmentPlan, TreatmentRequest
 from accounts.serializers import UserSerializer
 from animals.serializers import SimpleAnimalSerializer
 
@@ -43,10 +43,24 @@ class TreatmentSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class DiagnosticSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Diagnostic
+        fields = '__all__'
+
+
 class DiagnosisSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Diagnosis
+        fields = '__all__'
+
+
+class ProcedureSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Procedure
         fields = '__all__'
 
 

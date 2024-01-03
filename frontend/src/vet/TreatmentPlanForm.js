@@ -75,7 +75,7 @@ const TreatmentPlanForm = (props) => {
           let category_options = [];
           let treatment_options = [];
           response.data.forEach(function(treatment) {
-            treatment_options.push({value: treatment.id, label: treatment.description, category:treatment.category});
+            treatment_options.push({value: treatment.id, label: treatment.description, category:treatment.category, unit:treatment.unit, routes:treatment.routes});
             if (!category_options.map(category_option => category_option.value).includes(treatment.category)) {
               category_options.push({value: treatment.category, label: treatment.category});
             }
@@ -145,8 +145,8 @@ const TreatmentPlanForm = (props) => {
         start: Yup.string().required('Required'),
         end: Yup.string().required('Required'),
         quantity: Yup.number().positive('Must be positive').required('Required'),
-        unit: Yup.string().required('Required'),
-        route: Yup.string().required('Required'),
+        unit: Yup.string(),
+        route: Yup.string(),
       })}
       onSubmit={(values, { resetForm, setSubmitting }) => {
         if (props.id || (props.state.steps.treatments[props.state.treatmentIndex])) {
@@ -307,11 +307,7 @@ const TreatmentPlanForm = (props) => {
                       name="unit"
                       type="text"
                       key={`my_unique_unit_select_key__${formikProps.values.unit}`}
-                      options={[
-                        { value: 'ml', label: 'ml' },
-                        { value: 'cap', label: 'cap' },
-                        { value: 'tab', label: 'tab' },
-                      ]}
+                      options={treatmentChoices.length > 0 && formikProps.values.treatment ? treatmentChoices.filter(choice => Number(choice.value) === Number(formikProps.values.treatment)).map(choice => ({'value':choice.unit, 'label':choice.unit})) : []}
                       value={formikProps.values.unit||data.unit}
                       isClearable={false}
                       onChange={(instance) => {
@@ -326,11 +322,7 @@ const TreatmentPlanForm = (props) => {
                       name="route"
                       type="text"
                       key={`my_unique_route_select_key__${formikProps.values.route}`}
-                      options={[
-                        { value: 'IV', label: 'IV' },
-                        { value: 'SQ', label: 'SQ' },
-                        { value: 'PO', label: 'PO' },
-                      ]}
+                      options={treatmentChoices.length > 0 && formikProps.values.treatment ? treatmentChoices.filter(choice => Number(choice.value) === Number(formikProps.values.treatment))[0].routes.map(route => ({'value':route, 'label':route})) : []}
                       value={formikProps.values.route||data.route}
                       isClearable={false}
                       onChange={(instance) => {

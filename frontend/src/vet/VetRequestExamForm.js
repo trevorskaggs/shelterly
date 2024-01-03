@@ -1,8 +1,9 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { createRef, useContext, useEffect, useRef, useState } from 'react';
 import axios from "axios";
 import { Link, navigate } from "raviger";
 import { Field, Form, Formik, } from 'formik';
 import { Switch } from 'formik-material-ui';
+import useDynamicRefs from 'use-dynamic-refs';
 import {
   useOrderedNodes
 } from "react-register-nodes";
@@ -23,6 +24,7 @@ import {
   faArrowAltCircleLeft, faChevronCircleDown, faChevronCircleRight
 } from '@fortawesome/free-solid-svg-icons';
 import * as Yup from 'yup';
+import { useRegisteredRef } from "react-register-nodes";
 import ButtonSpinner from '../components/ButtonSpinner';
 import { DropDown, TextInput } from '../components/Form';
 import { SystemErrorContext } from '../components/SystemError';
@@ -67,23 +69,27 @@ const VetRequestExamForm = (props) => {
   // Determine if we're in the vet exam workflow.
   var is_workflow = window.location.pathname.includes("workflow");
 
-  const [data, setData] = useState({id: '', patient:{}, assignee:{}, exam: null, open: '', assigned:'', closed: '', concern: '', priority: '', diagnosis: '', other_diagnosis:'', treatment_plans:[], presenting_complaints:[], exam_object: {'confirm_sex_age':false}, animal_object: {id:'', name:'', species:'', category:'', sex:'', age:'', size:'', pcolor:'', scolor:'', medical_notes:''}})
+  const [data, setData] = useState({id: '', patient:{}, assignee:{}, exam: null, open: '', assigned:'', closed: '', concern: '', priority: '', diagnosis: '', other_diagnosis:'', treatment_plans:[], presenting_complaints:[], exam_object: {'confirm_sex_age':false, 'confirm_chip':false, 'weight':'', 'weight_unit':'', 'temperature':'', 'temperature_method':'', 'comments':''}, animal_object: {id:'', name:'', species:'', category:'', sex:'', age:'', size:'', pcolor:'', scolor:'', medical_notes:''}})
   const [examQuestions, setExamQuestions] = useState([]);
   const [showNotes, setShowNotes] = useState({});
+  const [getRef, setRef] = useDynamicRefs();
   const ordered = useOrderedNodes();
   const [shouldCheckForScroll, setShouldCheckForScroll] = React.useState(false);
   const [formSchema, setFormSchema] = useState([{
     id:'confirm_sex_age',
     validationType:"bool",
     validations: [{
-      type:'required',
-      params: ["This field is required"]
-    },{
       type:'oneOf',
-      params: [[true, "Age/Sex must be confirmed"]]
+      params: [[true], "Age/Sex must be confirmed"]
     },]},{
     id:'confirm_chip',
     validationType:"bool"},{
+      id:'microchip',
+      validationType:"string",
+      validations: [{
+        type:'max',
+        params: [50, "Max of 50 characters allowed"]
+      },]},{
     id:'weight',
     validationType:"string"},{
     id:'weight_unit',
@@ -142,10 +148,10 @@ const VetRequestExamForm = (props) => {
             else {
               response.data.exam_object = {};
             }
+            response.data.exam_object['vetrequest_id'] = props.id
             response.data.exam_object['age'] = response.data.animal_object.age
             response.data.exam_object['sex'] = response.data.animal_object.sex
             response.data.exam_object['microchip'] = response.data.animal_object.microchip
-            setData(response.data);
 
             // Fetch exam question data.
             axios.get('/vet/api/examquestions/', {
@@ -153,11 +159,13 @@ const VetRequestExamForm = (props) => {
             })
             .then(questionResponse => {
               if (!unmounted) {
-                let config = [];
+                let config = [...formSchema];
                 // Filter the questions by the animal category.
                 let filtered_data = questionResponse.data.filter(question => question.categories.includes(response.data.animal_object.category))
                 setExamQuestions(filtered_data);
                 filtered_data.forEach(question => {
+                  response.data.exam_object[question.name.toLowerCase().replace(' ','_').replace('/','_')] = '';
+                  response.data.exam_object[question.name.toLowerCase().replace(' ','_').replace('/','_') + '_notes'] = '';
                   // Set open notes defaults.
                   open_notes_dict[question.name.toLowerCase().replace(' ','_').replace('/','_')] = open_notes_dict[question.name.toLowerCase().replace(' ','_').replace('/','_')] === true ? true : question.open_notes;
                   // Create a dynamic config for Yup validation.
@@ -167,12 +175,21 @@ const VetRequestExamForm = (props) => {
                     validations: [{
                       type:'required',
                       params: ["This field is required"]
-                    },]
+                    },
+                    {
+                      type:'nullable',
+                      params: []
+                    },
+                  ]
                   })
                   config.push({
                     id:question.name.toLowerCase().replace(' ','_').replace('/','_') + '_notes',
                     validationType:"string",
                     validations: [
+                      {
+                        type:'max',
+                        params: [300, "Max of 300 characters allowed"]
+                      },
                       {
                         type: "when",
                         params: [
@@ -194,6 +211,7 @@ const VetRequestExamForm = (props) => {
                 const schema = config.reduce(createYupSchema, {});
                 setFormSchema(schema);
                 setShowNotes(open_notes_dict);
+                setData(response.data);
               }
             })
             .catch(error => {
@@ -218,8 +236,9 @@ const VetRequestExamForm = (props) => {
 
   return (
     <Formik
-      initialValues={data.exam ? data.exam_object : {vetrequest_id:props.id}}
+      initialValues={data.exam_object}
       enableReinitialize={true}
+      validateOnChange={false}
       validationSchema={Yup.object().shape(formSchema)}
       onSubmit={(values, { setSubmitting }) => {
         values['animal_id'] = data.animal_object.id
@@ -287,6 +306,7 @@ const VetRequestExamForm = (props) => {
                 <Col xs="2">
                   <BootstrapForm.Label htmlFor="confirm_sex_age" style={{marginBottom:"-5px"}}>Confirm Age/Sex</BootstrapForm.Label>
                   <div style={{marginLeft:"20px"}}><Field component={Switch} name="confirm_sex_age" type="checkbox" color="primary" /></div>
+                  {formikProps.errors['confirm_sex_age'] ? <div style={{ color: "#e74c3c", marginTop: ".5rem", fontSize: "80%" }}>{formikProps.errors['confirm_sex_age']}</div> : ""}
                 </Col>
                 <Col xs="2">
                   <DropDown
@@ -326,7 +346,7 @@ const VetRequestExamForm = (props) => {
                     name="microchip"
                     type="text"
                     label="Microchip"
-                    xs="2"
+                    xs="3"
                     disabled={!formikProps.values.confirm_chip}
                     value={formikProps.values.microchip || data.animal_object.microchip}
                   />
@@ -361,6 +381,7 @@ const VetRequestExamForm = (props) => {
                 />
                 <Col xs="2" className="pl-0" style={{marginLeft:"-5px"}}>
                   <DropDown
+                    key={formikProps.values['temperature_method']}
                     id={"temperature_method"}
                     name={"temperature_method"}
                     type="text"
@@ -368,10 +389,13 @@ const VetRequestExamForm = (props) => {
                     placeholder=""
                     options={[{value:'Axillary', label:'Axillary'}, {value:'Rectal', label:'Rectal'}, {value:'Not taken', label:'Not taken'}, {value:'Unable to obtain', label:'Unable to obtain'}]}
                     isClearable={false}
+                    onChange={(instance) => {
+                      formikProps.setFieldValue('temperature_method', instance === null ? '' : instance.value);
+                    }}
                   />
                 </Col>
               </Row>
-              {examQuestions.map(question =>
+              {examQuestions.map((question, index) =>
                 <span key={question.id}>
                   <Row className="mt-3" style={{marginBottom:"4px"}}>
                     <Col xs="2" className="pr-0">
@@ -390,6 +414,7 @@ const VetRequestExamForm = (props) => {
                             formikProps.setFieldValue(question.name.toLowerCase().replace(' ','_').replace('/','_') + '_id', question.id);
                             if (formikProps.values[question.name.toLowerCase().replace(' ','_').replace('/','_')] !== 'Not examined') {
                               showNotes[question.name.toLowerCase().replace(' ','_').replace('/','_')] = true;
+                              setTimeout(() => {getRef(question.name).current.focus(),3000})
                             }
                           }}
                         />
@@ -411,13 +436,14 @@ const VetRequestExamForm = (props) => {
                           formikProps.setFieldValue(question.name.toLowerCase().replace(' ','_').replace('/','_') + '_id', instance === null ? '' : question.id);
                           if (instance.value === 'Other') {
                             showNotes[question.name.toLowerCase().replace(' ','_').replace('/','_')] = true;
+                            setTimeout(() => {getRef(question.name).current.focus(),3000})
                           }
                         }}
                       />
                     </Col>
                     <Col xs="1" style={{marginTop:"15px", minWidth:"95px"}}>
                       {"Notes"}
-                      <FontAwesomeIcon icon={faChevronCircleRight} hidden={Object.keys(showNotes).length ? showNotes[question.name.toLowerCase().replace(' ','_').replace('/','_')] : true} onClick={() => {setShowNotes(prevState => ({ ...prevState, [question.name.toLowerCase().replace(' ','_').replace('/','_')]:true }));}} className="ml-1" style={{cursor:'pointer'}} inverse />
+                      <FontAwesomeIcon icon={faChevronCircleRight} hidden={Object.keys(showNotes).length ? showNotes[question.name.toLowerCase().replace(' ','_').replace('/','_')] : true} onClick={() => {setShowNotes(prevState => ({ ...prevState, [question.name.toLowerCase().replace(' ','_').replace('/','_')]:true }));setTimeout(() => {getRef(question.name).current.focus(),3000});}} className="ml-1" style={{cursor:'pointer'}} inverse />
                       <FontAwesomeIcon icon={faChevronCircleDown} hidden={Object.keys(showNotes).length ? !showNotes[question.name.toLowerCase().replace(' ','_').replace('/','_')] : true} onClick={() => {setShowNotes(prevState => ({ ...prevState, [question.name.toLowerCase().replace(' ','_').replace('/','_')]:false }));}} className="ml-1" style={{cursor:'pointer'}} inverse />
                     </Col>
                   </Row>
@@ -426,7 +452,9 @@ const VetRequestExamForm = (props) => {
                       <TextInput
                         as="textarea"
                         name={question.name.toLowerCase().replace(' ','').replace('/','') + "_notes"}
-                        id="_notes"
+                        id={question.name.toLowerCase().replace(' ','_').replace('/','_') + "_notes"}
+                        key={`my_unique_question_notes_key__${formikProps.values[question.name.toLowerCase().replace(' ','_').replace('/','_') + '_notes']}`}
+                        ref={setRef(question.name)}
                         xs="5"
                         rows={3}
                         style={{marginLeft:"-15px", margTop:"-2px"}}
