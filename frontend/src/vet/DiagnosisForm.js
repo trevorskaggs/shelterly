@@ -42,7 +42,7 @@ const customStyles = {
   // }),
 };
 
-const DiagnosticsForm = (props) => {
+const DiagnosisForm = (props) => {
 
   const { setShowSystemError } = useContext(SystemErrorContext);
 
@@ -53,16 +53,15 @@ const DiagnosticsForm = (props) => {
     patient: props.animalid,
     assignee: null,
     concern: '',
-    diagnostics: [],
-    diagnostic_notes: '',
-    diagnostic_other: '',
-    priority: '',
+    diagnosis: [],
+    diagnosis_notes: '',
+    diagnosis_other: '',
+    priority: 'urgent',
     presenting_complaints: [],
     animal_object: {id:''}
   })
 
-  const [diagnosticChoices, setDiagnosticChoices] = useState([]);
-  const [procedureChoices, setProcedureChoices] = useState([]);
+  const [diagnosisChoices, setDiagnosisChoices] = useState([]);
 
   useEffect(() => {
     let unmounted = false;
@@ -85,18 +84,18 @@ const DiagnosticsForm = (props) => {
       fetchVetRequest();
     };
 
-    const fetchDiagnostics = async () => {
-      // Fetch diagnostic data.
-      await axios.get('/vet/api/diagnostics/', {
+    const fetchDiagnoses = async () => {
+      // Fetch diagnosis data.
+      await axios.get('/vet/api/diagnosis/', {
         cancelToken: source.token,
       })
       .then(response => {
         if (!unmounted) {
           let options = [];
-          response.data.forEach(function(diagnostic) {
-            options.push({value: diagnostic.id, label: diagnostic.name})
+          response.data.forEach(function(diagnosis) {
+            options.push({value: diagnosis.id, label: diagnosis.name})
           });
-          setDiagnosticChoices(options);
+          setDiagnosisChoices(options);
         }
       })
       .catch(error => {
@@ -104,28 +103,7 @@ const DiagnosticsForm = (props) => {
       });
     };
 
-    fetchDiagnostics();
-
-    const fetchProcedures = async () => {
-      // Fetch procedure data.
-      await axios.get('/vet/api/procedures/', {
-        cancelToken: source.token,
-      })
-      .then(response => {
-        if (!unmounted) {
-          let options = [];
-          response.data.forEach(function(procedure) {
-            options.push({value: procedure.id, label: procedure.name})
-          });
-          setProcedureChoices(options);
-        }
-      })
-      .catch(error => {
-        setShowSystemError(true);
-      });
-    };
-
-    fetchProcedures();
+    fetchDiagnoses();
 
     // Cleanup.
     return () => {
@@ -139,19 +117,14 @@ const DiagnosticsForm = (props) => {
       initialValues={data}
       enableReinitialize={true}
       validationSchema={Yup.object({
-        diagnostics: Yup.array(),
-        diagnostic_other: Yup.string().nullable().max(50, 'Maximum character limit of 50.'),
-        diagnostic_notes: Yup.string().nullable().max(300, 'Maximum character limit of 300.'),
+        diagnosis: Yup.array().min(1, 'At least 1 diagnosis must be selected.').required(),
+        diagnosis_other: Yup.string().nullable().max(50, 'Maximum character limit of 50.'),
+        diagnosis_notes: Yup.string().nullable().max(300, 'Maximum character limit of 300.'),
       })}
       onSubmit={(values, { setSubmitting }) => {
         axios.patch('/vet/api/vetrequest/' + props.id + '/', values)
         .then(response => {
-          if (is_workflow) {
-            props.onSubmit('diagnostics', values, 'treatments');
-          }
-          else {
-            navigate('/' + props.organization + '/' + props.incident + '/vet/vetrequest/' + props.id);
-          }
+          navigate('/' + props.organization + '/' + props.incident + '/vet/vetrequest/' + props.id);
         })
         .catch(error => {
           setShowSystemError(true);
@@ -195,35 +168,35 @@ const DiagnosticsForm = (props) => {
               <FormGroup>
                 <Row className="mb-3">
                   <Col xs={"6"}>
-                    <label>Diagnostics</label>
+                    <label>Diagnosis</label>
                     <Select
-                      label="Diagnostics"
-                      id="diagnosticsDropdown"
-                      name="diagnostics"
+                      label="Diagnosis"
+                      id="diagnosisDropdown"
+                      name="diagnosis"
                       type="text"
                       styles={customStyles}
                       isMulti
-                      options={diagnosticChoices}
-                      value={diagnosticChoices.filter(choice => formikProps.values.diagnostics.includes(choice.value))}
+                      options={diagnosisChoices}
+                      value={diagnosisChoices.filter(choice => formikProps.values.diagnosis.includes(choice.value))}
                       isClearable={false}
                       onChange={(instance) => {
                         let values = [];
                         instance && instance.forEach(option => {
                           values.push(option.value);
                         })
-                        formikProps.setFieldValue("diagnostics", instance === null ? [] : values);
+                        formikProps.setFieldValue("diagnosis", instance === null ? [] : values);
                       }}
                     />
-                    {formikProps.errors['diagnostics'] ? <div style={{ color: "#e74c3c", marginTop: ".5rem", fontSize: "80%" }}>{formikProps.errors['diagnostics']}</div> : ""}
+                    {formikProps.errors['diagnosis'] ? <div style={{ color: "#e74c3c", marginTop: ".5rem", fontSize: "80%" }}>{formikProps.errors['diagnosis']}</div> : ""}
                   </Col>
                 </Row>
-                {diagnosticChoices.length && formikProps.values.diagnostics.includes(diagnosticChoices.filter(option => option.label === 'Other')[0].value) ?
+                {diagnosisChoices.length && formikProps.values.diagnosis.includes(diagnosisChoices.filter(option => (option.label === 'OPEN' || option.label === 'Other'))[0].value) ?
                 <Row>
                   <TextInput
                     type="text"
-                    label="Other Diagnostic"
-                    name="diagnostic_other"
-                    id="diagnostic_other"
+                    label="Other Diagnosis"
+                    name="diagnosis_other"
+                    id="diagnosis_other"
                     xs="6"
                   />
                 </Row>
@@ -231,9 +204,9 @@ const DiagnosticsForm = (props) => {
                 <Row style={{marginBottom:"-15px"}}>
                   <TextInput
                     as="textarea"
-                    label="Diagnostic Notes"
-                    name="diagnostic_notes"
-                    id="diagnostic_notes"
+                    label="Diagnosis Notes"
+                    name="diagnosis_notes"
+                    id="diagnosis_notes"
                     xs="6"
                     rows={3}
                   />
@@ -242,7 +215,7 @@ const DiagnosticsForm = (props) => {
             </Form>
           </Card.Body>
           <ButtonGroup>
-            <Button type="button" className="btn btn-primary" onClick={() => { formikProps.submitForm() }}>{is_workflow ? "Next" : "Save"}</Button>
+            <Button type="button" className="btn btn-primary" onClick={() => { formikProps.submitForm() }}>{is_workflow ? "Save and Finish" : "Save"}</Button>
           </ButtonGroup>
         </Card>
       )}
@@ -250,4 +223,4 @@ const DiagnosticsForm = (props) => {
   );
 };
 
-export default DiagnosticsForm;
+export default DiagnosisForm;

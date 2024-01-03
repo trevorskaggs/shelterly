@@ -161,7 +161,12 @@ const TreatmentPlanForm = (props) => {
               resetForm({values:formdata});
             }
             else {
-              navigate('/' + props.organization + '/' + props.incident + '/vet/vetrequest/' + props.vetrequestid);
+              if (is_workflow) {
+                props.onSubmit('treatments', values, 'diagnoses');
+              }
+              else {
+                navigate('/' + props.organization + '/' + props.incident + '/vet/vetrequest/' + props.vetrequestid);
+              }
             }
           })
           .catch(error => {
@@ -182,7 +187,13 @@ const TreatmentPlanForm = (props) => {
               resetForm({values:formdata});
             }
             else {
-              navigate('/' + props.organization + '/' + props.incident + '/vet/vetrequest/' + props.vetrequestid);
+              if (is_workflow) {
+                values['id'] = response.data.id;
+                props.onSubmit('treatments', values, 'diagnoses');
+              }
+              else {
+                navigate('/' + props.organization + '/' + props.incident + '/vet/vetrequest/' + props.vetrequestid);
+              }
             }
           })
           .catch(error => {
@@ -343,7 +354,7 @@ const TreatmentPlanForm = (props) => {
             }}>
               {props.state.steps.treatments.length -1 > props.state.treatmentIndex ? "Next Treatment" : "Add Another"}
             </Button> : ""}
-            <Button type="button" className="btn btn-primary border" onClick={() => { setAddAnother(false);formikProps.submitForm() }}>Save{is_workflow ? " and Finish" : ""}</Button>
+            <Button type="button" className="btn btn-primary border" onClick={() => { setAddAnother(false);formikProps.submitForm() }}>{is_workflow ? "Next" : "Save"}</Button>
           </ButtonGroup>
         </Card>
       )}

@@ -10,6 +10,8 @@ import DiagnosticsForm from '../vet/DiagnosticsForm';
 import TreatmentPlanForm from '../vet/TreatmentPlanForm';
 import PageNotFound from "../components/PageNotFound";
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
+import DiagnosisForm from './DiagnosisForm';
+import ProcedureForm from './ProcedureForm';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -66,7 +68,7 @@ function CustomStepIcon() {
 }
 
 function getSteps() {
-  return ['Intake Exam', 'Diagnostics', 'Create Treatments'];
+  return ['Intake Exam', 'Order Diagnostics', 'Create Treatments', 'Order Procedures', 'Diagnosis'];
 }
 
 function getStepContent(id, incident, organization, step, handleStepSubmit, handleBack, state) {
@@ -77,6 +79,10 @@ function getStepContent(id, incident, organization, step, handleStepSubmit, hand
       return <DiagnosticsForm onSubmit={handleStepSubmit} handleBack={handleBack} state={state} id={id} incident={incident} organization={organization} />;
     case 2:
       return <TreatmentPlanForm onSubmit={handleStepSubmit} handleBack={handleBack} state={state} vetrequestid={id} incident={incident} organization={organization} />;
+    case 3:
+      return <ProcedureForm onSubmit={handleStepSubmit} handleBack={handleBack} state={state} id={id} incident={incident} organization={organization} />;
+    case 4:
+      return <DiagnosisForm onSubmit={handleStepSubmit} handleBack={handleBack} state={state} id={id} incident={incident} organization={organization} />;
     default:
       return <PageNotFound/>;
   }
@@ -84,15 +90,15 @@ function getStepContent(id, incident, organization, step, handleStepSubmit, hand
 
 export const initialVetWorkflowData = {
   stepIndex: 0,
-  // hasOwner: false,
   treatmentCount: 0,
   treatmentIndex: 0,
-  // shelter: null,
   steps: {
     exam: {
       id: '',},
     diagnostics: {},
     treatments: [],
+    procedures: {},
+    diagnosis: {},
   }
 }
 
@@ -113,7 +119,7 @@ function VetStepperWorkflow({ id, incident, organization }) {
 
   function handleBack(currentStep, nextStep) {
     // Lower the active step if going backwards between major steps.
-    if ((currentStep === 'treatments' && nextStep === 'diagnostics') || (currentStep === 'diagnostics' && nextStep === 'exam')) {
+    if (currentStep !== nextStep) {
       setActiveStep((prevActiveStep) => prevActiveStep - 1);
     }
 
@@ -126,7 +132,6 @@ function VetStepperWorkflow({ id, incident, organization }) {
       ...prevState,
       stepIndex: prevState.stepIndex - 1,
       treatmentIndex: track_index,
-      // steps: { ...prevState.steps, 'request':data ? data : prevState.steps.request } // Only set SR data if present.
     }))
   };
 
@@ -141,14 +146,12 @@ function VetStepperWorkflow({ id, incident, organization }) {
       // If we're not on the last treatment, update the current treatment based on the index.
       if (state.treatmentIndex !== state.steps.treatments.length) {
         const treatmentList = [...state.steps.treatments];
-        // let treatment_count = treatmentList[state.treatmentIndex]['number_of_treatments'];
 
         treatmentList[state.treatmentIndex] = data;
         setState((prevState) => ({
           ...prevState,
           stepIndex: prevState.stepIndex + 1,
           treatmentIndex: index,
-          // treatmentCount: prevState.treatmentCount - Number(treatment_count) + 1,
           steps: { ...prevState.steps, [currentStep]:treatmentList }
         }))
       }
@@ -173,7 +176,7 @@ function VetStepperWorkflow({ id, incident, organization }) {
     }
 
     // Only bump up the major active step when moving to a new type of object creation.
-    if ((currentStep === 'exam' && nextStep === 'diagnostics') || (currentStep === 'diagnostics' && nextStep === 'treatments')){
+    if (currentStep !== nextStep){
       setActiveStep((prevActiveStep) => prevActiveStep + 1);
     }
   }

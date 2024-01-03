@@ -141,6 +141,7 @@ function VetRequestDetails({ id, incident, organization }) {
               </ListGroup.Item>
               {data.exam ? <ListGroup.Item>
                 <b>Diagnosis:</b> {data.diagnosis_text || "N/A"}
+                {data.exam && data.diagnosis_notes ? <div><b>Notes:</b> {data.diagnosis_notes || "N/A"}</div> : ""}
               </ListGroup.Item> : ""}
             </ListGroup>
           </Card.Body>

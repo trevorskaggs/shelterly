@@ -42,7 +42,7 @@ const customStyles = {
   // }),
 };
 
-const DiagnosticsForm = (props) => {
+const ProcedureForm = (props) => {
 
   const { setShowSystemError } = useContext(SystemErrorContext);
 
@@ -53,15 +53,14 @@ const DiagnosticsForm = (props) => {
     patient: props.animalid,
     assignee: null,
     concern: '',
-    diagnostics: [],
-    diagnostic_notes: '',
-    diagnostic_other: '',
+    procedures: [],
+    procedure_notes: '',
+    procedure_other: '',
     priority: '',
     presenting_complaints: [],
     animal_object: {id:''}
   })
 
-  const [diagnosticChoices, setDiagnosticChoices] = useState([]);
   const [procedureChoices, setProcedureChoices] = useState([]);
 
   useEffect(() => {
@@ -85,26 +84,6 @@ const DiagnosticsForm = (props) => {
       fetchVetRequest();
     };
 
-    const fetchDiagnostics = async () => {
-      // Fetch diagnostic data.
-      await axios.get('/vet/api/diagnostics/', {
-        cancelToken: source.token,
-      })
-      .then(response => {
-        if (!unmounted) {
-          let options = [];
-          response.data.forEach(function(diagnostic) {
-            options.push({value: diagnostic.id, label: diagnostic.name})
-          });
-          setDiagnosticChoices(options);
-        }
-      })
-      .catch(error => {
-        setShowSystemError(true);
-      });
-    };
-
-    fetchDiagnostics();
 
     const fetchProcedures = async () => {
       // Fetch procedure data.
@@ -139,15 +118,15 @@ const DiagnosticsForm = (props) => {
       initialValues={data}
       enableReinitialize={true}
       validationSchema={Yup.object({
-        diagnostics: Yup.array(),
-        diagnostic_other: Yup.string().nullable().max(50, 'Maximum character limit of 50.'),
-        diagnostic_notes: Yup.string().nullable().max(300, 'Maximum character limit of 300.'),
+        procedures: Yup.array(),
+        procedure_other: Yup.string().nullable().max(50, 'Maximum character limit of 50.'),
+        procedure_notes: Yup.string().nullable().max(300, 'Maximum character limit of 300.'),
       })}
       onSubmit={(values, { setSubmitting }) => {
         axios.patch('/vet/api/vetrequest/' + props.id + '/', values)
         .then(response => {
           if (is_workflow) {
-            props.onSubmit('diagnostics', values, 'treatments');
+            props.onSubmit('procedures', values, 'diagnosis');
           }
           else {
             navigate('/' + props.organization + '/' + props.incident + '/vet/vetrequest/' + props.id);
@@ -163,10 +142,10 @@ const DiagnosticsForm = (props) => {
         <Card border="secondary" className="mt-3">
           <Card.Header as="h5" className="pl-3">
             {is_workflow ?
-            <span style={{cursor:'pointer'}} onClick={() => {props.handleBack('diagnostics', 'exam')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
+            <span style={{cursor:'pointer'}} onClick={() => {props.handleBack('procedures', 'treatments')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
             :
             <span style={{ cursor: 'pointer' }} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}
-            Diagnostics Form
+            Procedures Form
             </Card.Header>
           <div className="col-12 mt-3">
             <Card className="border rounded" style={{width:"100%"}}>
@@ -195,35 +174,35 @@ const DiagnosticsForm = (props) => {
               <FormGroup>
                 <Row className="mb-3">
                   <Col xs={"6"}>
-                    <label>Diagnostics</label>
+                    <label>Procedures</label>
                     <Select
-                      label="Diagnostics"
-                      id="diagnosticsDropdown"
-                      name="diagnostics"
+                      label="Procedures"
+                      id="proceduresDropdown"
+                      name="procedures"
                       type="text"
                       styles={customStyles}
                       isMulti
-                      options={diagnosticChoices}
-                      value={diagnosticChoices.filter(choice => formikProps.values.diagnostics.includes(choice.value))}
+                      options={procedureChoices}
+                      value={procedureChoices.filter(choice => formikProps.values.procedures.includes(choice.value))}
                       isClearable={false}
                       onChange={(instance) => {
                         let values = [];
                         instance && instance.forEach(option => {
                           values.push(option.value);
                         })
-                        formikProps.setFieldValue("diagnostics", instance === null ? [] : values);
+                        formikProps.setFieldValue("procedures", instance === null ? [] : values);
                       }}
                     />
-                    {formikProps.errors['diagnostics'] ? <div style={{ color: "#e74c3c", marginTop: ".5rem", fontSize: "80%" }}>{formikProps.errors['diagnostics']}</div> : ""}
+                    {formikProps.errors['procedures'] ? <div style={{ color: "#e74c3c", marginTop: ".5rem", fontSize: "80%" }}>{formikProps.errors['procedures']}</div> : ""}
                   </Col>
                 </Row>
-                {diagnosticChoices.length && formikProps.values.diagnostics.includes(diagnosticChoices.filter(option => option.label === 'Other')[0].value) ?
+                {procedureChoices.length && formikProps.values.procedures.includes(procedureChoices.filter(option => option.label === 'Other')[0].value) ?
                 <Row>
                   <TextInput
                     type="text"
-                    label="Other Diagnostic"
-                    name="diagnostic_other"
-                    id="diagnostic_other"
+                    label="Other Procedure"
+                    name="procedure_other"
+                    id="procedure_other"
                     xs="6"
                   />
                 </Row>
@@ -231,9 +210,9 @@ const DiagnosticsForm = (props) => {
                 <Row style={{marginBottom:"-15px"}}>
                   <TextInput
                     as="textarea"
-                    label="Diagnostic Notes"
-                    name="diagnostic_notes"
-                    id="diagnostic_notes"
+                    label="Procedure Notes"
+                    name="procedure_notes"
+                    id="procedure_notes"
                     xs="6"
                     rows={3}
                   />
@@ -250,4 +229,4 @@ const DiagnosticsForm = (props) => {
   );
 };
 
-export default DiagnosticsForm;
+export default ProcedureForm;
