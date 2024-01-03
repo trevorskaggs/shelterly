@@ -414,7 +414,7 @@ const VetRequestExamForm = (props) => {
                             formikProps.setFieldValue(question.name.toLowerCase().replace(' ','_').replace('/','_') + '_id', question.id);
                             if (formikProps.values[question.name.toLowerCase().replace(' ','_').replace('/','_')] !== 'Not examined') {
                               showNotes[question.name.toLowerCase().replace(' ','_').replace('/','_')] = true;
-                              setTimeout(() => {getRef(question.name).current.focus(),3000})
+                              setTimeout(() => {(getRef(question.name).current.focus(),3000)})
                             }
                           }}
                         />
@@ -436,14 +436,14 @@ const VetRequestExamForm = (props) => {
                           formikProps.setFieldValue(question.name.toLowerCase().replace(' ','_').replace('/','_') + '_id', instance === null ? '' : question.id);
                           if (instance.value === 'Other') {
                             showNotes[question.name.toLowerCase().replace(' ','_').replace('/','_')] = true;
-                            setTimeout(() => {getRef(question.name).current.focus(),3000})
+                            setTimeout(() => {(getRef(question.name).current.focus(),3000)})
                           }
                         }}
                       />
                     </Col>
                     <Col xs="1" style={{marginTop:"15px", minWidth:"95px"}}>
                       {"Notes"}
-                      <FontAwesomeIcon icon={faChevronCircleRight} hidden={Object.keys(showNotes).length ? showNotes[question.name.toLowerCase().replace(' ','_').replace('/','_')] : true} onClick={() => {setShowNotes(prevState => ({ ...prevState, [question.name.toLowerCase().replace(' ','_').replace('/','_')]:true }));setTimeout(() => {getRef(question.name).current.focus(),3000});}} className="ml-1" style={{cursor:'pointer'}} inverse />
+                      <FontAwesomeIcon icon={faChevronCircleRight} hidden={Object.keys(showNotes).length ? showNotes[question.name.toLowerCase().replace(' ','_').replace('/','_')] : true} onClick={() => {setShowNotes(prevState => ({ ...prevState, [question.name.toLowerCase().replace(' ','_').replace('/','_')]:true }));setTimeout(() => {(getRef(question.name).current.focus(),3000)});}} className="ml-1" style={{cursor:'pointer'}} inverse />
                       <FontAwesomeIcon icon={faChevronCircleDown} hidden={Object.keys(showNotes).length ? !showNotes[question.name.toLowerCase().replace(' ','_').replace('/','_')] : true} onClick={() => {setShowNotes(prevState => ({ ...prevState, [question.name.toLowerCase().replace(' ','_').replace('/','_')]:false }));}} className="ml-1" style={{cursor:'pointer'}} inverse />
                     </Col>
                   </Row>
