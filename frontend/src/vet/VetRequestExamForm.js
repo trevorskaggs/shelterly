@@ -69,7 +69,7 @@ const VetRequestExamForm = (props) => {
   // Determine if we're in the vet exam workflow.
   var is_workflow = window.location.pathname.includes("workflow");
 
-  const [data, setData] = useState({id: '', patient:{}, assignee:{}, exam: null, open: '', assigned:'', closed: '', concern: '', priority: '', diagnosis: '', other_diagnosis:'', treatment_plans:[], presenting_complaints:[], exam_object: {'confirm_sex_age':false, 'confirm_chip':false, 'weight':'', 'weight_unit':'', 'temperature':'', 'temperature_method':'', 'comments':''}, animal_object: {id:'', name:'', species:'', category:'', sex:'', age:'', size:'', pcolor:'', scolor:'', medical_notes:''}})
+  const [data, setData] = useState({id: '', patient:{}, assignee:{}, exam: null, open: '', assigned:'', closed: '', concern: '', priority: '', diagnosis: '', other_diagnosis:'', treatment_plans:[], presenting_complaints:[], exam_object: {'vetrequest_id':props.id, 'confirm_sex_age':false, 'confirm_chip':false, 'weight':null, 'weight_unit':'', 'temperature':'', 'temperature_method':'', 'comments':''}, animal_object: {id:'', name:'', species:'', category:'', sex:'', age:'', size:'', pcolor:'', scolor:'', medical_notes:''}})
   const [examQuestions, setExamQuestions] = useState([]);
   const [showNotes, setShowNotes] = useState({});
   const [getRef, setRef] = useDynamicRefs();
@@ -91,7 +91,14 @@ const VetRequestExamForm = (props) => {
         params: [50, "Max of 50 characters allowed"]
       },]},{
     id:'weight',
-    validationType:"string"},{
+    validationType:"number",
+    validations: [
+    {
+      type:'nullable',
+      params: []
+    },
+  ]
+  },{
     id:'weight_unit',
     validationType:"string"},{
     id:'temperature',
@@ -146,7 +153,7 @@ const VetRequestExamForm = (props) => {
               })
             }
             else {
-              response.data.exam_object = {};
+              response.data.exam_object = data.exam_object;
             }
             response.data.exam_object['vetrequest_id'] = props.id
             response.data.exam_object['age'] = response.data.animal_object.age
@@ -164,8 +171,10 @@ const VetRequestExamForm = (props) => {
                 let filtered_data = questionResponse.data.filter(question => question.categories.includes(response.data.animal_object.category))
                 setExamQuestions(filtered_data);
                 filtered_data.forEach(question => {
-                  response.data.exam_object[question.name.toLowerCase().replace(' ','_').replace('/','_')] = '';
-                  response.data.exam_object[question.name.toLowerCase().replace(' ','_').replace('/','_') + '_notes'] = '';
+                  if (!response.data.exam) {
+                    response.data.exam_object[question.name.toLowerCase().replace(' ','_').replace('/','_')] = '';
+                    response.data.exam_object[question.name.toLowerCase().replace(' ','_').replace('/','_') + '_notes'] = '';
+                  }
                   // Set open notes defaults.
                   open_notes_dict[question.name.toLowerCase().replace(' ','_').replace('/','_')] = open_notes_dict[question.name.toLowerCase().replace(' ','_').replace('/','_')] === true ? true : question.open_notes;
                   // Create a dynamic config for Yup validation.
