@@ -42,6 +42,11 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='treatment',
+            name='controlled',
+            field=models.BooleanField(default=False),
+        ),
+        migrations.AddField(
+            model_name='treatment',
             name='routes',
             field=django.contrib.postgres.fields.ArrayField(base_field=models.CharField(max_length=8), default=[], size=None),
             preserve_default=False,

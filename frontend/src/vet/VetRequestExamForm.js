@@ -29,6 +29,7 @@ import ButtonSpinner from '../components/ButtonSpinner';
 import { DropDown, TextInput } from '../components/Form';
 import { SystemErrorContext } from '../components/SystemError';
 import { catAgeChoices, dogAgeChoices, horseAgeChoices, otherAgeChoices, sexChoices } from '../animals/constants';
+import Patient from './components/Patient';
 
 // From https://stackoverflow.com/a/71290404
 function createYupSchema(schema, config) {
@@ -69,7 +70,7 @@ const VetRequestExamForm = (props) => {
   // Determine if we're in the vet exam workflow.
   var is_workflow = window.location.pathname.includes("workflow");
 
-  const [data, setData] = useState({id: '', patient:{}, assignee:{}, exam: null, open: '', assigned:'', closed: '', concern: '', priority: '', diagnosis: '', other_diagnosis:'', treatment_plans:[], presenting_complaints:[], exam_object: {'vetrequest_id':props.id, 'confirm_sex_age':false, 'confirm_chip':false, 'weight':null, 'weight_unit':'', 'temperature':'', 'temperature_method':'', 'comments':''}, animal_object: {id:'', name:'', species:'', category:'', sex:'', age:'', size:'', pcolor:'', scolor:'', medical_notes:''}})
+  const [data, setData] = useState({id: '', patient:{}, assignee:{}, exam: null, open: '', assigned:'', closed: '', concern: '', priority: '', diagnosis: '', other_diagnosis:'', treatment_plans:[], presenting_complaints:[], exam_object: {'vetrequest_id':props.id, 'confirm_sex_age':false, 'confirm_chip':false, 'weight':null, 'weight_unit':'', 'weight_estimated':false, 'temperature':'', 'temperature_method':'', 'comments':''}, animal_object: {id:'', name:'', species:'', category:'', sex:'', age:'', size:'', pcolor:'', scolor:'', medical_notes:''}})
   const [examQuestions, setExamQuestions] = useState([]);
   const [showNotes, setShowNotes] = useState({});
   const [getRef, setRef] = useDynamicRefs();
@@ -97,10 +98,20 @@ const VetRequestExamForm = (props) => {
       type:'nullable',
       params: []
     },
+    {
+      type:'required',
+      params: ["This field is required"]
+    },
   ]
   },{
     id:'weight_unit',
-    validationType:"string"},{
+    validationType:"string",
+    validations: [{
+      type:'required',
+      params: ["Required"]
+    },]},{
+      id:'weight_estimated',
+      validationType:"bool"},{
     id:'temperature',
     validationType:"string"},{
     id:'temperature_method',
@@ -176,7 +187,7 @@ const VetRequestExamForm = (props) => {
                     response.data.exam_object[question.name.toLowerCase().replace(' ','_').replace('/','_') + '_notes'] = '';
                   }
                   // Set open notes defaults.
-                  open_notes_dict[question.name.toLowerCase().replace(' ','_').replace('/','_')] = open_notes_dict[question.name.toLowerCase().replace(' ','_').replace('/','_')] === true ? true : question.open_notes;
+                  open_notes_dict[question.name.toLowerCase().replace(' ','_').replace('/','_')] = open_notes_dict[question.name.toLowerCase().replace(' ','_').replace('/','_')] === true ? true : false;
                   // Create a dynamic config for Yup validation.
                   config.push({
                     id:question.name.toLowerCase().replace(' ','_').replace('/','_'),
@@ -286,28 +297,7 @@ const VetRequestExamForm = (props) => {
       {formikProps => (
         <Card border="secondary" className="mt-3">
           <Card.Header as="h5" className="pl-3"><span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + props.organization + '/' + props.incident + '/vet/vetrequest/' + props.id + '/')} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>Veterinary Exam Form</Card.Header>
-          <div className="col-12 mt-3">
-            <Card className="border rounded" style={{width:"100%"}}>
-              <Card.Body>
-                <Card.Title>
-                  <h4 className="mb-0">Patient</h4>
-                </Card.Title>
-                <hr/>
-                <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
-                  <ListGroup.Item>
-                    <div className="row" style={{textTransform:"capitalize"}}>
-                      <span className="col-3"><b>ID:</b> <Link href={"/" + props.organization + "/" + props.incident + "/animals/" + data.animal_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>A#{data.animal_object.id}</Link></span>
-                      <span className="col-3"><b>Name:</b> {data.animal_object.name||"Unknown"}</span>
-                      <span className="col-3"><b>Species:</b> {data.animal_object.species_string}</span>
-                    </div>
-                  </ListGroup.Item>
-                  <ListGroup.Item>
-                      <span><b>Medical Notes:</b> {data.animal_object.medical_notes || "N/A"}</span>
-                  </ListGroup.Item>
-                </ListGroup>
-              </Card.Body>
-            </Card>
-          </div>
+          <Patient animal={data.animal_object} organization={props.organization} incident={props.incident} />
           <Card.Body>
             <Form>
               <FormGroup>
@@ -380,6 +370,17 @@ const VetRequestExamForm = (props) => {
                     isClearable={false}
                   />
                 </Col>
+                <input
+                  id="weight_estimated"
+                  name="weight_estimated"
+                  type="checkbox"
+                  className="ml-3"
+                  checked={formikProps.values['weight_estimated']}
+                  onChange={() => {
+                    formikProps.setFieldValue('weight_estimated', !formikProps.values['weight_estimated']);
+                  }}
+                />
+                <span>&nbsp;&nbsp;Estimated</span>
               </Row>
               <Row className="mt-3" style={{marginBottom:"-15px"}}>
                 <TextInput
@@ -451,7 +452,7 @@ const VetRequestExamForm = (props) => {
                         }}
                       />
                     </Col>
-                    <Col xs="1" style={{marginTop:"15px", minWidth:"95px"}}>
+                    <Col xs="1" style={{marginTop:"15px", minWidth:"95px", paddingLeft:"0px"}} hidden={!question.open_notes}>
                       {"Notes"}
                       <FontAwesomeIcon icon={faChevronCircleRight} hidden={Object.keys(showNotes).length ? showNotes[question.name.toLowerCase().replace(' ','_').replace('/','_')] : true} onClick={() => {setShowNotes(prevState => ({ ...prevState, [question.name.toLowerCase().replace(' ','_').replace('/','_')]:true }));setTimeout(() => (getRef(question.name).current.focus(),3000));}} className="ml-1" style={{cursor:'pointer'}} inverse />
                       <FontAwesomeIcon icon={faChevronCircleDown} hidden={Object.keys(showNotes).length ? !showNotes[question.name.toLowerCase().replace(' ','_').replace('/','_')] : true} onClick={() => {setShowNotes(prevState => ({ ...prevState, [question.name.toLowerCase().replace(' ','_').replace('/','_')]:false }));}} className="ml-1" style={{cursor:'pointer'}} inverse />

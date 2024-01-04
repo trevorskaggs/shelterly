@@ -29,7 +29,7 @@ function VetRequestDetails({ id, incident, organization }) {
 
   const [data, setData] = useState({id: '', exam: null, patient:{}, assignee:{}, open: '', assigned:'', closed: '', concern: '', priority: '', diagnosis: '', other_diagnosis:'', treatment_plans:[], presenting_complaints:[], exam_object: {answers:{}}, animal_object: {id:'', name:'', species:'', category:'', sex:'', age:'', size:'', pcolor:'', scolor:'', medical_notes:''}});
   const [examQuestions, setExamQuestions] = useState([]);
-  const [showExam, setShowExam] = useState(false);
+  const [showExam, setShowExam] = useState(true);
 
   const [showModal, setShowModal] = useState(false);
   const cancelVetRequest = () => {

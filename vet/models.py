@@ -61,6 +61,7 @@ class ExamQuestion(models.Model):
 
 class Exam(models.Model):
 
+    assignee = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     open = models.DateTimeField(auto_now=False, auto_now_add=True)
     confirm_sex_age = models.BooleanField(blank=True, null=True)
     confirm_chip = models.BooleanField(blank=True, null=True)
@@ -68,6 +69,7 @@ class Exam(models.Model):
     temperature_method = models.CharField(max_length=20, blank=True, null=True)
     weight = models.IntegerField(blank=True, null=True)
     weight_unit = models.CharField(max_length=10, blank=True, null=True)
+    weight_estimated = models.BooleanField(default=False)
 
 
 class ExamAnswer(models.Model):
@@ -132,6 +134,7 @@ class Treatment(models.Model):
     category = models.CharField(max_length=50)
     unit = models.CharField(max_length=20, blank=True, null=True)
     routes = ArrayField(models.CharField(max_length=8))
+    controlled = models.BooleanField(default=False)
 
     class Meta:
         ordering = ('category', 'description',)
