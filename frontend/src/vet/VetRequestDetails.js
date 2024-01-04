@@ -10,6 +10,8 @@ import {
   faPlusSquare,
   faTimes,
   faCheckSquare,
+  faChevronCircleDown,
+  faChevronCircleRight
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faPrescriptionBottlePill,
@@ -27,6 +29,7 @@ function VetRequestDetails({ id, incident, organization }) {
 
   const [data, setData] = useState({id: '', exam: null, patient:{}, assignee:{}, open: '', assigned:'', closed: '', concern: '', priority: '', diagnosis: '', other_diagnosis:'', treatment_plans:[], presenting_complaints:[], exam_object: {answers:{}}, animal_object: {id:'', name:'', species:'', category:'', sex:'', age:'', size:'', pcolor:'', scolor:'', medical_notes:''}});
   const [examQuestions, setExamQuestions] = useState([]);
+  const [showExam, setShowExam] = useState(false);
 
   const [showModal, setShowModal] = useState(false);
   const cancelVetRequest = () => {
@@ -194,42 +197,47 @@ function VetRequestDetails({ id, incident, organization }) {
           <Card.Body style={{marginBottom:"-7px"}}>
             <Card.Title>
               <h4 className="mb-0">Exam Results
-                {data.exam && data.status !== 'Canceled' ? <OverlayTrigger
-                key={"start-exam"}
-                placement="bottom"
-                overlay={
-                  <Tooltip id={`tooltip-start-exam`}>
-                    Edit exam
-                  </Tooltip>
-                }
-              >
-                <Link href={"/" + organization + "/" + incident + "/vet/vetrequest/" + id + "/exam/"}><FontAwesomeIcon icon={faEdit} className="ml-1" size="lg" style={{cursor:'pointer'}} inverse /></Link>
-              </OverlayTrigger> : ""}
+                {data.exam && data.status !== 'Canceled' ?
+                <OverlayTrigger
+                  key={"start-exam"}
+                  placement="bottom"
+                  overlay={
+                    <Tooltip id={`tooltip-start-exam`}>
+                      Edit exam
+                    </Tooltip>
+                  }
+                >
+                  <Link href={"/" + organization + "/" + incident + "/vet/vetrequest/" + id + "/exam/"}><FontAwesomeIcon icon={faEdit} className="ml-1" size="lg" style={{cursor:'pointer'}} inverse /></Link>
+                </OverlayTrigger> : ""}
+                <FontAwesomeIcon icon={faChevronCircleRight} hidden={showExam} onClick={() => {setShowExam(true)}} className="ml-1" size="lg" style={{cursor:'pointer'}} inverse />
+                <FontAwesomeIcon icon={faChevronCircleDown} hidden={!showExam} onClick={() => {setShowExam(false)}} className="ml-1" size="lg" style={{cursor:'pointer'}} inverse />
               </h4>
             </Card.Title>
             <hr className="mb-3" />
-            <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
-            <ListGroup.Item>
-              <div className="row" style={{textTransform:"capitalize"}}>
-                <span className="col-3"><b>Performed:</b> {moment(data.exam_object.open).format('MMM Do HH:mm')}</span>
-                <span className="col-4"><b>Weight:</b> {data.exam_object.weight}{data.exam_object.weight_unit}</span>
-              </div>
-            </ListGroup.Item>
-            <ListGroup.Item>
-              <div className="row" style={{textTransform:"capitalize"}}>
-                <span className="col-3"><b>Temperature (F):</b> {data.exam_object.temperature}</span>
-                <span className="col-4"><b>Temperature Method:</b> {data.exam_object.temperature_method}</span>
-              </div>
-            </ListGroup.Item>
-            {examQuestions.filter(question => question.categories.includes(data.animal_object.category)).map(question => (
-              <ListGroup.Item key={question.id}>
+            <Collapse in={showExam}>
+              <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
+              <ListGroup.Item>
                 <div className="row" style={{textTransform:"capitalize"}}>
-                  <span className="col-3"><b>{question.name}:</b> {data.exam_object.answers[question.name.toLowerCase().replace(' ','_').replace('/','_')]}</span>
-                  <span className="col-4"><b>Notes:</b> {data.exam_object.answers[question.name.toLowerCase().replace(' ','_').replace('/','_') + '_notes']}</span>
+                  <span className="col-3"><b>Performed:</b> {moment(data.exam_object.open).format('MMM Do HH:mm')}</span>
+                  <span className="col-4"><b>Weight:</b> {data.exam_object.weight}{data.exam_object.weight_unit}</span>
                 </div>
               </ListGroup.Item>
-            ))}
-            </ListGroup>
+              <ListGroup.Item>
+                <div className="row" style={{textTransform:"capitalize"}}>
+                  <span className="col-3"><b>Temperature (F):</b> {data.exam_object.temperature}</span>
+                  <span className="col-4"><b>Temperature Method:</b> {data.exam_object.temperature_method}</span>
+                </div>
+              </ListGroup.Item>
+              {examQuestions.filter(question => question.categories.includes(data.animal_object.category)).map(question => (
+                <ListGroup.Item key={question.id}>
+                  <div className="row" style={{textTransform:"capitalize"}}>
+                    <span className="col-3"><b>{question.name}:</b> {data.exam_object.answers[question.name.toLowerCase().replace(' ','_').replace('/','_')]}</span>
+                    <span className="col-4"><b>Notes:</b> {data.exam_object.answers[question.name.toLowerCase().replace(' ','_').replace('/','_') + '_notes']}</span>
+                  </div>
+                </ListGroup.Item>
+              ))}
+              </ListGroup>
+            </Collapse>
           </Card.Body>
           :
           <Card.Body>
