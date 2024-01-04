@@ -36,7 +36,7 @@ async function buildAnimalCareScheduleContent(pdf, animals) {
       graphicOptions = {
         ...graphicOptions,
         drawFuncName: 'drawSvg',
-        svg: <SpeciesIcon color="#B9BECA" species={animal.species} />
+        svg: <SpeciesIcon color="#B9BECA" species={animal.species_string} />
       };
     }
     // draw image or svg
@@ -56,7 +56,7 @@ async function buildAnimalCareScheduleContent(pdf, animals) {
         `Intake Date: ${animal.intake_date
           ? new Date(animal.intake_date).toLocaleDateString()
           : 'N/A'}`,
-          `Species: ${capitalize(animal.species)}`
+          `Species: ${capitalize(animal.species_string)}`
       ],
       [
         `Color: ${capitalize(animal.pcolor)} ${animal.scolor ? `/ ${capitalize(animal.scolor)}` : '' }`,
@@ -158,12 +158,12 @@ function buildAnimalCountList(pdf, animals, {
   const animalCounts = [];
   animals
     .forEach((animal) => {
-      const countIndex = animalCounts.findIndex(([species]) => animal.species === species);
+      const countIndex = animalCounts.findIndex(([species]) => animal.species_string === species);
       if (countIndex > -1) {
         const [currentSpecies, oldCount] = animalCounts[countIndex];
         animalCounts[countIndex] = [currentSpecies, oldCount + 1];
       } else {
-        animalCounts.push([animal.species, 1]);
+        animalCounts.push([animal.species_string, 1]);
       }
     });
 

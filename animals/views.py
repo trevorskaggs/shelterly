@@ -5,8 +5,8 @@ from datetime import datetime
 from rest_framework import filters, permissions, viewsets
 from actstream import action
 
-from animals.models import Animal, AnimalImage
-from animals.serializers import AnimalSerializer
+from animals.models import Animal, AnimalImage, Species
+from animals.serializers import AnimalSerializer, SpeciesSerializer
 from incident.models import Incident
 from shelter.models import IntakeSummary
 from people.serializers import SimplePersonSerializer
@@ -194,6 +194,11 @@ class AnimalViewSet(viewsets.ModelViewSet):
         if self.request.GET.get('incident'):
             queryset = queryset.filter(incident__slug=self.request.GET.get('incident'))
         return queryset
+
+class SpeciesViewSet(viewsets.ModelViewSet):
+    queryset = Species.objects.all()
+    permission_classes = [permissions.IsAuthenticated, ]
+    serializer_class = SpeciesSerializer
 
 def print_kennel_card(request, incident, animal_id):
     animal = Animal.objects.get(id=animal_id)

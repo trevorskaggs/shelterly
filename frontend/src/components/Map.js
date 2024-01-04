@@ -200,17 +200,17 @@ export const countMatches = (service_request) => {
 
   service_request.animals.forEach((animal) => {
     if (['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE'].indexOf(animal.status) > -1) {
-      if (!matches[[animal.species]]) {
-        matches[[animal.species]] = 1;
+      if (!matches[[animal.species_string]]) {
+        matches[[animal.species_string]] = 1;
       }
       else {
-        matches[[animal.species]] += 1;
+        matches[[animal.species_string]] += 1;
       }
-      if (!status_matches[animal.status][[animal.species]]) {
-        status_matches[animal.status][[animal.species]] = 1;
+      if (!status_matches[animal.status][[animal.species_string]]) {
+        status_matches[animal.status][[animal.species_string]] = 1;
       }
       else {
-        status_matches[animal.status][[animal.species]] += 1;
+        status_matches[animal.status][[animal.species_string]] += 1;
       }
     }
   });

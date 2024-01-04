@@ -16,7 +16,6 @@ import { DATE_FORMAT } from '../constants';
 import { useMark, useSubmitting } from '../hooks';
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
-import { speciesChoices } from '../animals/constants';
 import { ITEMS_PER_PAGE } from '../constants';
 import { SystemErrorContext } from '../components/SystemError';
 import ButtonSpinner from '../components/ButtonSpinner';
@@ -42,6 +41,7 @@ function ServiceRequestSearch({ incident, organization }) {
   const [endDate, setEndDate] = useState(null);
   const [triggerRefresh, setTriggerRefresh] = useState(false);
   const [searchTerm, setSearchTerm] = useState(search);
+  const [speciesChoices, setSpeciesChoices] = useState([]);
   const tempSearchTerm = useRef(null);
   const [page, setPage] = useState(1);
   const [numPages, setNumPages] = useState(1);
@@ -117,10 +117,10 @@ function ServiceRequestSearch({ incident, organization }) {
     let unmounted = false;
     let source = axios.CancelToken.source();
 
-    const fetchServiceRequests = async () => {
+    const fetchServiceRequests = () => {
       setData({service_requests: [], isFetching: true});
       // Fetch ServiceRequest data.
-      await axios.get('/hotline/api/servicerequests/?search=' + searchTerm + '&status=' + statusOptions + '&incident=' + incident, {
+      axios.get('/hotline/api/servicerequests/?search=' + searchTerm + '&status=' + statusOptions + '&incident=' + incident, {
         cancelToken: source.token,
       })
       .then(response => {
@@ -131,13 +131,13 @@ function ServiceRequestSearch({ incident, organization }) {
 					response.data.forEach(service_request => {
 						let species = [];
 						service_request.animals.forEach(animal => {
-							if (!species.includes(animal.species)) {
-								species.push(animal.species)
+							if (!species.includes(animal.species_string)) {
+								species.push(animal.species_string)
 							}
 						});
-            let sortOrder = speciesChoices.map(sc => sc.value);
+
             species.sort(function(a, b) {
-              return sortOrder.indexOf(a) - sortOrder.indexOf(b);
+              return a > b;
             });
 						search_state[service_request.id] = {species:species, selectedSpecies:species[0]};
 					});
@@ -154,7 +154,9 @@ function ServiceRequestSearch({ incident, organization }) {
         }
       });
     };
+
     fetchServiceRequests();
+
     // Cleanup.
     return () => {
       unmounted = true;
@@ -502,7 +504,7 @@ function ServiceRequestSearch({ incident, organization }) {
                   </Card.Title>
                   <ListGroup style={{height:"144px", overflowY:"auto", marginTop:"-12px"}}>
                     <Scrollbar style={{height:"144px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
-                      {service_request.animals.filter(animal => animal.species === searchState[service_request.id].selectedSpecies).map((animal, i) => (
+                      {service_request.animals.filter(animal => animal.species_string === searchState[service_request.id].selectedSpecies).map((animal, i) => (
                         <ListGroup.Item key={animal.id}>
                           <b>A#{animal.id}:</b>&nbsp;&nbsp;<Link href={"/" + organization + "/" + incident + "/animals/" + animal.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.name || "Unknown"}</Link>
                           {animal.color_notes ?

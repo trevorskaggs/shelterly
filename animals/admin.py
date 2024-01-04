@@ -2,10 +2,10 @@ from django.contrib import admin
 from django.urls import reverse
 from django.utils.html import escape, mark_safe
 
-from animals.models import Animal, AnimalImage
+from animals.models import Animal, AnimalImage, Species, SpeciesCategory
 
 class AnimalAdmin(admin.ModelAdmin):
-  list_display = ('id', 'status', 'name', 'species', 'size')
+  list_display = ('id', 'status', 'name', 'size')
 
 class AnimalImageAdmin(admin.ModelAdmin):
 
@@ -22,3 +22,5 @@ class AnimalImageAdmin(admin.ModelAdmin):
 # Register your models here.
 admin.site.register(Animal, AnimalAdmin)
 admin.site.register(AnimalImage, AnimalImageAdmin)
+admin.site.register(Species)
+admin.site.register(SpeciesCategory)

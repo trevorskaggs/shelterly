@@ -36,7 +36,7 @@ function TreatmentPlanDetails({ id, incident, organization }) {
     let source = axios.CancelToken.source();
 
     const fetchTreatmentPlanData = async () => {
-      // Fetch Room Details data.
+      // Fetch TreatmentPlan data.
       await axios.get('/vet/api/treatmentplan/' + id + '/?incident=' + incident, {
           cancelToken: source.token,
       })
@@ -145,7 +145,7 @@ function TreatmentPlanDetails({ id, incident, organization }) {
               </ListGroup.Item>
               <ListGroup.Item>
                 <div className="row" style={{textTransform:"capitalize"}}>
-                  <span className="col-6"><b>Species:</b> {data.animal_object.species}</span>
+                  <span className="col-6"><b>Species:</b> {data.animal_object.species_string}</span>
                   <span className="col-6"><b>Sex:</b> {data.animal_object.sex||"Unknown"}</span>
                 </div>
               </ListGroup.Item>

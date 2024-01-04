@@ -2,9 +2,32 @@ from datetime import datetime
 from rest_framework import serializers
 from django.db.models import Q
 
-from .models import Diagnosis, PresentingComplaint, VetRequest, Treatment, TreatmentPlan, TreatmentRequest
+from .models import Exam, ExamAnswer, ExamQuestion, Diagnosis, Diagnostic, PresentingComplaint, Procedure, VetRequest, Treatment, TreatmentPlan, TreatmentRequest
 from accounts.serializers import UserSerializer
 from animals.serializers import SimpleAnimalSerializer
+
+class ExamSerializer(serializers.ModelSerializer):
+
+    answers = serializers.SerializerMethodField()
+
+    def get_answers(self, obj):
+        answer_dict = {}
+        for examanswer in obj.examanswer_set.all():
+            answer_dict[examanswer.question.name.lower().replace(' ','_').replace('/','_')] = examanswer.answer
+            answer_dict[examanswer.question.name.lower().replace(' ','_').replace('/','_') + '_notes'] = examanswer.answer_notes
+        return answer_dict
+
+    class Meta:
+        model = Exam
+        fields = '__all__'
+
+
+class ExamQuestionSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = ExamQuestion
+        fields = '__all__'
+
 
 class PresentingComplaintSerializer(serializers.ModelSerializer):
 
@@ -20,10 +43,24 @@ class TreatmentSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class DiagnosticSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Diagnostic
+        fields = '__all__'
+
+
 class DiagnosisSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Diagnosis
+        fields = '__all__'
+
+
+class ProcedureSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Procedure
         fields = '__all__'
 
 
@@ -65,6 +102,7 @@ class TreatmentPlanSerializer(SimpleTreatmentPlanSerializer):
 class VetRequestSerializer(serializers.ModelSerializer):
     animal_object = SimpleAnimalSerializer(source='patient', required=False, read_only=True)
     assignee_object = UserSerializer(source='assignee', required=False, read_only=True)
+    exam_object = ExamSerializer(source='exam', required=False, read_only=True)
     treatment_plans = TreatmentPlanSerializer(source='treatmentplan_set', required=False, read_only=True, many=True)
     complaints_text = serializers.SerializerMethodField()
     diagnosis_text = serializers.SerializerMethodField()
@@ -78,7 +116,10 @@ class VetRequestSerializer(serializers.ModelSerializer):
         return ', '.join(obj.presenting_complaints.all().values_list('name', flat=True))
 
     def get_diagnosis_text(self, obj):
-        return obj.diagnosis.name if obj.diagnosis else ''
+        diagnosis = obj.diagnosis.all().values_list('name', flat=True)
+        if obj.diagnosis_other:
+            list(diagnosis).insert(0, obj.diagnosis_other)
+        return ', '.join(diagnosis)
 
     def get_shelter_name(self, obj):
         return obj.patient.shelter.name if obj.patient.shelter else ''

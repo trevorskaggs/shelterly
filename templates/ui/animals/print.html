@@ -81,7 +81,7 @@
                     <div class='col-4' style="margin-top:-8px;">
                         Animal No: <b>A#{{ animal.id }}</b><br/>
                         Intake Date: <b>{{ animal.intake_date|date:"M. d, Y"|default:"N/A" }}</b><br/>
-                        Species: <b>{{ animal.species|capfirst }}</b><br/>
+                        Species: <b>{{ animal.species_string|capfirst }}</b><br/>
                         Age: <b>{{ animal.age|capfirst|default:"N/A" }}</b><br/>
                         <span class="trunctate">Owner(s): <b>
                           {% for owner in owners %}

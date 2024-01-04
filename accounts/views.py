@@ -62,7 +62,7 @@ class UserViewSet(CreateUserMixin, viewsets.ModelViewSet):
             queryset = queryset.filter(organizations=self.request.GET.get('organization')).distinct()
 
         if self.request.GET.get('vet') == 'true':
-            queryset = queryset.filter(perms__organization=self.request.data.get('organization'), perms__vet_perms=True)
+            queryset = queryset.filter(perms__organization=self.request.GET.get('organization'), perms__vet_perms=True)
     
         return queryset
 
@@ -103,14 +103,14 @@ class UserViewSet(CreateUserMixin, viewsets.ModelViewSet):
             if self.request.user.is_superuser or self.request.user.perms.filter(organization=self.request.data.get('organizations')[0])[0].user_perms:
                 user = serializer.save()
                 user.organizations.add(Organization.objects.get(id=self.request.data.get('organizations')[0]))
-                ShelterlyUserOrg.objects.filter(user=user, organization=Organization.objects.get(id=self.request.data.get('organizations')[0])).update(user_perms=self.request.data.get('user_perms', False), incident_perms=self.request.data.get('incident_perms', False), email_notification=self.request.data.get('email_notification', False))
+                ShelterlyUserOrg.objects.filter(user=user, organization=Organization.objects.get(id=self.request.data.get('organizations')[0])).update(user_perms=self.request.data.get('user_perms', False), incident_perms=self.request.data.get('incident_perms', False), vet_perms=self.request.data.get('vet_perms', False), email_notification=self.request.data.get('email_notification', False))
 
     def perform_update(self, serializer):
         if serializer.is_valid():
             if self.request.user.is_superuser or self.request.user.perms.filter(organization=self.request.data.get('organizations')[0])[0].user_perms:
                 user = serializer.save()
 
-                ShelterlyUserOrg.objects.filter(user=user, organization=self.request.data.get('organizations')[0]).update(user_perms=self.request.data.get('user_perms', False), incident_perms=self.request.data.get('incident_perms', False), email_notification=self.request.data.get('email_notification', False))
+                ShelterlyUserOrg.objects.filter(user=user, organization=self.request.data.get('organizations')[0]).update(user_perms=self.request.data.get('user_perms', False), incident_perms=self.request.data.get('incident_perms', False), vet_perms=self.request.data.get('vet_perms', False), email_notification=self.request.data.get('email_notification', False))
 
                 if self.request.data.get('reset_password'):
                     ResetPasswordToken = apps.get_model('django_rest_passwordreset', 'ResetPasswordToken')

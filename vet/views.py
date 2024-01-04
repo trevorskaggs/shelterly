@@ -1,13 +1,58 @@
 from datetime import datetime, timedelta
 from rest_framework import filters, permissions, viewsets
 
-from vet.models import Diagnosis, PresentingComplaint, Treatment, TreatmentPlan, TreatmentRequest, VetRequest
-from vet.serializers import DiagnosisSerializer, PresentingComplaintSerializer, TreatmentSerializer, TreatmentPlanSerializer, TreatmentRequestSerializer, VetRequestSerializer
+from animals.models import Animal
+from vet.models import Diagnosis, Diagnostic, Exam, ExamAnswer, ExamQuestion, PresentingComplaint, Procedure, Treatment, TreatmentPlan, TreatmentRequest, VetRequest
+from vet.serializers import DiagnosisSerializer, DiagnosticSerializer, ExamQuestionSerializer, ExamSerializer, PresentingComplaintSerializer, ProcedureSerializer, TreatmentSerializer, TreatmentPlanSerializer, TreatmentRequestSerializer, VetRequestSerializer
+
+class ExamViewSet(viewsets.ModelViewSet):
+    queryset = Exam.objects.all()
+    permission_classes = [permissions.IsAuthenticated, ]
+    serializer_class = ExamSerializer
+
+    # def get_queryset(self):
+    #     """
+    #     Returns: Queryset of distinct animals, each annotated with:
+    #         images (List of AnimalImages)
+    #     """
+    #     queryset = (
+    #         Exam.objects.all()
+    #     )
+
+    def perform_create(self, serializer):
+        if serializer.is_valid():
+            exam = serializer.save()
+            Animal.objects.filter(id=self.request.data.get('animal_id')).update(age=self.request.data.get('age'), sex=self.request.data.get('sex'), microchip=self.request.data.get('microchip', ''))
+            VetRequest.objects.filter(id=self.request.data.get('vetrequest_id')).update(exam=exam)
+            for k,v in self.request.data.items():
+                if k not in ['confirm_sex_age', 'confirm_chip', 'temperature', 'temperature_method', 'weight', 'weight_unit'] and '_notes' not in k and '_id' not in k and self.request.data.get(k + '_id'):
+                    ExamAnswer.objects.create(exam=exam, question=ExamQuestion.objects.get(id=self.request.data.get(k + '_id', '')), answer=v, answer_notes=self.request.data.get(k + '_notes', ''))
+
+    def perform_update(self, serializer):
+        if serializer.is_valid():
+            exam = serializer.save()
+            Animal.objects.filter(id=self.request.data.get('animal_id')).update(age=self.request.data.get('age'), sex=self.request.data.get('sex'), microchip=self.request.data.get('microchip', ''))
+            for k,v in self.request.data.items():
+                if k not in ['confirm_sex_age', 'confirm_chip', 'temperature', 'temperature_method', 'weight', 'weight_unit'] and '_notes' not in k and '_id' not in k and self.request.data.get(k + '_id'):
+                    ExamAnswer.objects.update_or_create(exam=exam, question=ExamQuestion.objects.get(id=self.request.data.get(k + '_id')), defaults={'answer':v, 'answer_notes':self.request.data.get(k + '_notes', '')})
+
+
+class ExamQuestionViewSet(viewsets.ModelViewSet):
+    queryset = ExamQuestion.objects.all()
+    permission_classes = [permissions.IsAuthenticated, ]
+    serializer_class = ExamQuestionSerializer
+
 
 class PresentingComplaintViewSet(viewsets.ModelViewSet):
     queryset = PresentingComplaint.objects.all()
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = PresentingComplaintSerializer
+
+
+class ProcedureViewSet(viewsets.ModelViewSet):
+    queryset = Procedure.objects.all()
+    permission_classes = [permissions.IsAuthenticated, ]
+    serializer_class = ProcedureSerializer
 
 
 class TreatmentViewSet(viewsets.ModelViewSet):
@@ -20,6 +65,12 @@ class DiagnosisViewSet(viewsets.ModelViewSet):
     queryset = Diagnosis.objects.all()
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = DiagnosisSerializer
+
+
+class DiagnosticViewSet(viewsets.ModelViewSet):
+    queryset = Diagnostic.objects.all()
+    permission_classes = [permissions.IsAuthenticated, ]
+    serializer_class = DiagnosticSerializer
 
 
 class TreatmentRequestViewSet(viewsets.ModelViewSet):

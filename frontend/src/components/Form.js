@@ -14,9 +14,7 @@ import Autocomplete from 'react-google-autocomplete';
 import { Map, Marker, Tooltip as MapTooltip, TileLayer } from "react-leaflet";
 import clsx from 'clsx';
 import MaterialCheckbox from '@material-ui/core/Checkbox';
-import {
-  useRegisteredRef
-} from "react-register-nodes";
+import { useRegisteredRef } from "react-register-nodes";
 import { makeStyles } from '@material-ui/core/styles';
 import Alert from 'react-bootstrap/Alert';
 import { Legend, pinMarkerIcon } from "../components/Map";
@@ -139,7 +137,7 @@ const DateTimePicker = ({ label, xs, clearable, ...props }) => {
     <>
       <Form.Group as={Col} xs={xs} hidden={props.hidden} className="mb-0" ref={meta.error && registeredRef}>
       <label htmlFor={props.id || props.name}>{label}</label>
-      <span className="d-flex">
+      <span className="d-flex" style={{marginLeft:"-1px", marginRight:"-1px"}}>
         <Flatpickr className="datetime_picker" ref={datetime} data-enable-time options={{...options, ...props.more_options}} {...field} {...props} />
         {clearable === false || props.disabled === true ? "" : <span>{field.value ? <FontAwesomeIcon icon={faTimes} style={{position:"relative", left: "-22px", marginTop:"11px", marginRight:"-10px", color:"#808080"}} onClick={clearDate} /> : ""}</span>}
       </span>
@@ -149,15 +147,14 @@ const DateTimePicker = ({ label, xs, clearable, ...props }) => {
   );
 };
 
-const TextInput = ({ label, xs, controlId, formGroupClasses, ...props }) => {
-
+const TextInput = React.forwardRef((props, ref) => {
   const [field, meta] = useField(props);
   const registeredRef = useRegisteredRef(props.name);
 
   return (
     <>
-    <Form.Group as={Col} xs={xs} controlId={controlId} className={formGroupClasses} hidden={props.hidden} ref={meta.error && registeredRef}>
-      <Form.Label>{label}</Form.Label>
+    <Form.Group as={Col} xs={props.xs} controlId={props.controlId} className={props.formGroupClasses} hidden={props.hidden} style={props.colstyle} ref={meta.error && registeredRef}>
+      {props.label ? <Form.Label>{props.label}</Form.Label> : ""}
       {props.tooltip ?
       <OverlayTrigger
         key={"text-input"}
@@ -168,16 +165,16 @@ const TextInput = ({ label, xs, controlId, formGroupClasses, ...props }) => {
           </Tooltip>
         }
       >
-        <Form.Control type="text" isInvalid={meta.touched && meta.error} {...field} {...props} />
+        <Form.Control ref={ref} type="text" isInvalid={meta.touched && meta.error} {...field} {...props} />
       </OverlayTrigger>
       :
-        <Form.Control type="text" isInvalid={meta.touched && meta.error} {...field} {...props} />
+        <Form.Control ref={ref} type="text" isInvalid={meta.touched && meta.error} {...field} {...props} />
       }
-      <Form.Control.Feedback type="invalid"> {meta.error}</ Form.Control.Feedback>
+      <Form.Control.Feedback type="invalid" style={props.errstyle}>{meta.error}</Form.Control.Feedback>
     </Form.Group>
     </>
   );
-};
+});
 
 const Checkbox = (props) => {
 

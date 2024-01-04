@@ -30,7 +30,7 @@ function AnimalDetails({ id, incident, organization }) {
     owners: [],
     request: null,
     name: '',
-    species: '',
+    species_string: '',
     sex: '',
     size: '',
     age: '',
@@ -176,7 +176,7 @@ function AnimalDetails({ id, incident, organization }) {
           </Tooltip>
         }
       >
-        <Link href={"/" + incident + "/animals/" + id + "/vetrequest/new"} ><FontAwesomeIcon icon={faClipboardMedical} className="mr-1" inverse /></Link>
+        <Link href={"/" + organization + "/" + incident + "/animals/" + id + "/vetrequest/new"} ><FontAwesomeIcon icon={faClipboardMedical} className="mr-1" inverse /></Link>
       </OverlayTrigger>
       {data.status !== 'REUNITED' ?
       <OverlayTrigger
@@ -331,7 +331,7 @@ function AnimalDetails({ id, incident, organization }) {
               </ListGroup.Item>
               <ListGroup.Item>
                 <div className="row">
-                  <span className="col-6"><b>Species:</b> {data.species}</span>
+                  <span className="col-6"><b>Species:</b> {data.species_string}</span>
                   <span className="col-6"><b>Sex:</b> {data.sex||"Unknown"}</span>
                 </div>
               </ListGroup.Item>
@@ -439,7 +439,7 @@ function AnimalDetails({ id, incident, organization }) {
               </ListGroup.Item> : ""}
               {data.vet_requests.map(vetrequest => (
                 <ListGroup.Item key={vetrequest}>
-                  <b>Veterinary Request:</b> <Link href={"/" + incident + "/vet/vetrequest/" + vetrequest} className="text-link" style={{textDecoration:"none", color:"white"}}>VR#{vetrequest}</Link>
+                  <b>Veterinary Request:</b> <Link href={"/" + organization + "/" + incident + "/vet/vetrequest/" + vetrequest} className="text-link" style={{textDecoration:"none", color:"white"}}>VR#{vetrequest}</Link>
                 </ListGroup.Item>
               ))}
             </ListGroup>
@@ -451,7 +451,7 @@ function AnimalDetails({ id, incident, organization }) {
           {images.length < 1 ?
             <Carousel className="carousel-wrapper" showThumbs={false} showStatus={false}>
               <AnimalCoverImage
-                animalSpecies={data.species}
+                animalSpecies={data.species_string}
                 animalImageSrc={data.front_image}
                 customStyles={{ width: '100%', padding: '40px' }}
               />

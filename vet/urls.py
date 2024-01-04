@@ -11,6 +11,10 @@ router.register(r'treatmentplan', views.TreatmentPlanViewSet)
 router.register(r'treatmentrequest', views.TreatmentRequestViewSet)
 router.register(r'complaints', views.PresentingComplaintViewSet)
 router.register(r'diagnosis', views.DiagnosisViewSet)
+router.register(r'diagnostics', views.DiagnosticViewSet)
+router.register(r'procedures', views.ProcedureViewSet)
+router.register(r'exam', views.ExamViewSet)
+router.register(r'examquestions', views.ExamQuestionViewSet)
 
 urlpatterns = [
     path('api/', include(router.urls)),

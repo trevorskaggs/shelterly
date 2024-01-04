@@ -5,7 +5,7 @@ import { Form, Formik } from "formik";
 import { ButtonGroup, Card, Col, Image, Form as BootstrapForm } from "react-bootstrap";
 import * as Yup from 'yup';
 import { AddressSearch, DateTimePicker, DropDown, ImageUploader, TextInput } from '../components/Form.js';
-import { catAgeChoices, dogAgeChoices, horseAgeChoices, otherAgeChoices, catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, speciesChoices, sexChoices, dogSizeChoices, catSizeChoices, horseSizeChoices, otherSizeChoices, statusChoices, reportedStatusChoices, unknownChoices } from './constants';
+import { catAgeChoices, dogAgeChoices, horseAgeChoices, otherAgeChoices, catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, sexChoices, dogSizeChoices, catSizeChoices, horseSizeChoices, otherSizeChoices, statusChoices, reportedStatusChoices, unknownChoices } from './constants';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft, faMinusSquare } from '@fortawesome/free-solid-svg-icons';
 import ButtonSpinner from "../components/ButtonSpinner";
@@ -145,6 +145,7 @@ const AnimalForm = (props) => {
   // Initial Animal data.
   const [data, setData] = useState(current_data);
   const [shelters, setShelters] = useState({options: [], shelters: [], room_options: {}, isFetching: false});
+  const [species, setSpecies] = useState({options: []});
 
   const wrapperSetFrontImage = useCallback(val => {
     if (val !== 0){
@@ -180,6 +181,32 @@ const AnimalForm = (props) => {
   useEffect(() => {
     let unmounted = false;
     let source = axios.CancelToken.source();
+
+    const fetchSpecies = () => {
+      setSpecies({options: []});
+      // Fetch Species data.
+      axios.get('/animals/api/species/', {
+        cancelToken: source.token,
+      })
+      .then(response => {
+        if (!unmounted) {
+          let species_options = [];
+          response.data.forEach(result => {
+            // Build species option list.
+            species_options.push({value: result.id, label: result.name});
+          });
+          setSpecies({options: species_options});
+        }
+      })
+      .catch(error => {
+        if (!unmounted) {
+          setSpecies({options: []});
+          setShowSystemError(true);
+        }
+      });
+    };
+    fetchSpecies();
+
     if (id) {
       const fetchAnimalData = async () => {
         // Fetch Animal data.
@@ -237,6 +264,7 @@ const AnimalForm = (props) => {
       });
     };
     fetchShelters();
+
     // Cleanup.
     return () => {
       unmounted = true;
@@ -253,9 +281,8 @@ const AnimalForm = (props) => {
           status: Yup.string(),
           name: Yup.string()
             .max(50, 'Must be 50 characters or less.'),
-          species: Yup.string()
-            .required('Required')
-            .oneOf(speciesChoices.map(option => option['value'])),
+          species: Yup.number()
+            .required('Required'),
           size: Yup.string(),
           age: Yup.string(),
           sex: Yup.string()
@@ -515,7 +542,7 @@ const AnimalForm = (props) => {
                     label="Animal Name"
                     xs="4"
                   />
-                  <Col xs="4">
+                  <Col xs="4" style={{textTransform:'capitalize'}}>
                     <DropDown
                       label="Species*"
                       id="speciesDropdown"
@@ -523,7 +550,7 @@ const AnimalForm = (props) => {
                       type="text"
                       key={`my_unique_species_select_key__${formikProps.values.species}`}
                       ref={speciesRef}
-                      options={speciesChoices}
+                      options={species.options}
                       value={formikProps.values.species||data.species}
                       isClearable={false}
                       onChange={(instance) => {
@@ -532,7 +559,7 @@ const AnimalForm = (props) => {
                         ageRef.current.select.clearValue();
                         pcolorRef.current.select.clearValue();
                         scolorRef.current.select.clearValue();
-                        formikProps.setFieldValue("species", instance === null ? '' : instance.value);
+                        formikProps.setFieldValue("species", instance.value);
                       }}
                     />
                   </Col>

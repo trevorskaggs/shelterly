@@ -21,7 +21,7 @@ import Scrollbar from '../components/Scrollbars';
 import { titleCase } from '../components/Utils';
 import { ITEMS_PER_PAGE } from '../constants';
 import { Legend } from "../components/Map";
-import { catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, speciesChoices, statusChoices } from './constants';
+import { catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, statusChoices } from './constants';
 import AnimalCoverImage from '../components/AnimalCoverImage';
 import { printAnimalCareSchedule, printAllAnimalCareSchedules } from './Utils';
 import { AuthContext } from "../accounts/AccountsReducer";
@@ -68,6 +68,7 @@ function AnimalSearch({ incident, organization }) {
 
   const [data, setData] = useState({animals: [], isFetching: false});
   const [shelters, setShelters] = useState({options: [], isFetching: false});
+  const [speciesChoices, setSpeciesChoices] = useState([]);
   const [animals, setAnimals] = useState([]);
   const [options, setOptions] = useState({species: null, status: null, sex: null, owned: null, pcolor: '', fixed: null, latlng: null, radius: 1.60934, shelter: ''});
   const [searchTerm, setSearchTerm] = useState(search);
@@ -131,7 +132,7 @@ function AnimalSearch({ incident, organization }) {
   };
 
   const handleApplyFilters = (animals) => {
-    setAnimals(animals.filter(animal => options.species ? animal.species === options.species : animal)
+    setAnimals(animals.filter(animal => options.species ? animal.species_string === options.species : animal)
                            .filter(animal => options.status ? animal.status === options.status : animal)
                            .filter(animal => options.owned === 'yes' ? animal.owners.length > 0 : animal)
                            .filter(animal => options.owned === 'no' ? animal.owners.length === 0 : animal)
@@ -225,6 +226,31 @@ function AnimalSearch({ incident, organization }) {
   useEffect(() => {
     let unmounted = false;
     let source = axios.CancelToken.source();
+
+    const fetchSpecies = () => {
+      setSpeciesChoices([]);
+      // Fetch Species data.
+      axios.get('/animals/api/species/', {
+        cancelToken: source.token,
+      })
+      .then(response => {
+        if (!unmounted) {
+          let species_options = [];
+          response.data.forEach(result => {
+            // Build species option list.
+            species_options.push({value: result.id, label: result.name});
+          });
+          setSpeciesChoices(species_options);
+        }
+      })
+      .catch(error => {
+        if (!unmounted) {
+          setShelters({options: []});
+          setShowSystemError(true);
+        }
+      });
+    };
+    fetchSpecies();
 
     const fetchAnimals = async () => {
       setData({animals: [], isFetching: true});
@@ -545,7 +571,7 @@ function AnimalSearch({ incident, organization }) {
                   )
                 : (
                   <AnimalCoverImage
-                    animalSpecies={animal.species}
+                    animalSpecies={animal.species_string}
                     animalImageSrc={
                       animal.lazyImage
                         ? `data:image/png;base64,${getBase64Image(animal.lazyImage)}`
@@ -697,7 +723,7 @@ function AnimalSearch({ incident, organization }) {
                 </Card.Title>
                 <Scrollbar style={{height:"144px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
                   <ListGroup>
-                    <ListGroup.Item>{titleCase(animal.species)}{animal.size ? <span>,&nbsp;{titleCase(animal.size)}</span> : ""}{animal.sex ? <span>,&nbsp;{titleCase(animal.sex)}</span> : ""}{animal.age ? <span>,&nbsp;{titleCase(animal.age)}</span> : ""}</ListGroup.Item>
+                    <ListGroup.Item>{titleCase(animal.species_string)}{animal.size ? <span>,&nbsp;{titleCase(animal.size)}</span> : ""}{animal.sex ? <span>,&nbsp;{titleCase(animal.sex)}</span> : ""}{animal.age ? <span>,&nbsp;{titleCase(animal.age)}</span> : ""}</ListGroup.Item>
                     <ListGroup.Item style={{textTransform:"capitalize"}}><b>Color: </b>{animal.pcolor ? <span>{animal.pcolor}{animal.scolor ? <span> / {animal.scolor}</span> : ""}</span> : "Unknown"}</ListGroup.Item>
                     {animal.owners.map(owner => (
                       <ListGroup.Item key={owner.id}>

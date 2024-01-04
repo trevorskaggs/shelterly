@@ -16,6 +16,7 @@ import {
   faArrowAltCircleLeft,
 } from '@fortawesome/free-solid-svg-icons';
 import * as Yup from 'yup';
+import { AuthContext } from "../accounts/AccountsReducer";
 import { DropDown, TextInput } from '../components/Form';
 import { SystemErrorContext } from '../components/SystemError';
 
@@ -43,12 +44,15 @@ const customStyles = {
 
 const VetRequestForm = (props) => {
 
+  const { state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
   const [data, setData] = useState({
     patient: props.animalid,
     assignee: null,
+    exam: null,
     concern: '',
+    diagnosis: [],
     priority: 'urgent',
     presenting_complaints: [],
   })
@@ -80,7 +84,7 @@ const VetRequestForm = (props) => {
 
     const fetchAssignees = async () => {
       // Fetch assignee data.
-      await axios.get('/accounts/api/user/?vet=true', {
+      await axios.get('/accounts/api/user/?vet=true&organization=' + state.organization.id, {
         cancelToken: source.token,
       })
       .then(response => {
@@ -181,7 +185,7 @@ const VetRequestForm = (props) => {
     >
       {formikProps => (
         <Card border="secondary" className="mt-5">
-          <Card.Header as="h5" className="pl-3"><span style={{ cursor: 'pointer' }} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>{!props.id ? "" : "Update "}Veterinary Request Form</Card.Header>
+          <Card.Header as="h5" className="pl-3"><span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + props.organization + '/' + props.incident + '/vet/vetrequest/' + props.id + '/')} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>{!props.id ? "" : "Update "}Veterinary Request Form</Card.Header>
           <Card.Body>
             <Form>
               <FormGroup>
@@ -253,36 +257,55 @@ const VetRequestForm = (props) => {
                     rows={4}
                   />
                 </Row>
-                {props.id ?
+                {data.exam ?
                 <Row>
-                  <Col xs={"6"}>
-                    <DropDown
+                  <Col xs={"8"}>
+                    <label>Diagnosis</label>
+                    <Select
                       label="Diagnosis"
                       id="diagnosisDropdown"
                       name="diagnosis"
                       type="text"
+                      styles={customStyles}
+                      isMulti
                       options={diagnosisChoices}
-                      value={formikProps.values.diagnosis||data.diagnosis}
+                      value={diagnosisChoices.filter(choice => formikProps.values.diagnosis.includes(choice.value))}
                       isClearable={false}
                       onChange={(instance) => {
-                        formikProps.setFieldValue("diagnosis", instance === null ? '' : instance.value);
+                        let values = [];
+                        instance && instance.forEach(option => {
+                          values.push(option.value);
+                        })
+                        formikProps.setFieldValue("diagnosis", instance === null ? [] : values);
                       }}
                     />
+                    {formikProps.errors['diagnosis'] ? <div style={{ color: "#e74c3c", marginTop: ".5rem", fontSize: "80%" }}>{formikProps.errors['diagnosis']}</div> : ""}
                   </Col>
                 </Row>
                 : ""}
-                {diagnosisChoices.length && formikProps.values.diagnosis === diagnosisChoices.filter(option => option.label === 'OPEN')[0].value ?
-                <Row className="mt-3">
+                {diagnosisChoices.length && formikProps.values.diagnosis.includes(diagnosisChoices.filter(option => option.label === 'OPEN')[0].value) ?
+                <Row className="mt-3" style={{marginBottom:"-15px"}}>
                   <TextInput
                     type="text"
                     label="Other Diagnosis"
-                    name="other_diagnosis"
-                    id="other_diagnosis"
+                    name="diagnosis_other"
+                    id="diagnosis_other"
                     xs="6"
                   />
                 </Row>
                 : ""}
-
+                {data.exam ?
+                <Row className="mt-3" style={{marginBottom:"-15px"}}>
+                  <TextInput
+                    as="textarea"
+                    label="Diagnostic Notes"
+                    name="diagnosis_notes"
+                    id="diagnosis_notes"
+                    xs="6"
+                    rows={3}
+                  />
+                </Row>
+                : ""}
               </FormGroup>
             </Form>
           </Card.Body>

@@ -158,7 +158,7 @@ function buildServiceRequestsDoc(srs = []) {
         `ID: A#${animal.id}`,
         `Status: ${animalStatus}`,
         `Name: ${animal.name || 'Unknown'}`,
-        `Species: ${capitalize(animal.species)}`,
+        `Species: ${capitalize(animal.species_string)}`,
         `Sex: ${capitalize(animal.sex|| 'Unknown')}`,
         `Age: ${capitalize(animal.age || 'Unknown')}`,
         `Size: ${capitalize(animal.size || 'Unknown')}`,

@@ -15,7 +15,6 @@ import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
 import { ITEMS_PER_PAGE } from '../constants';
 import { SystemErrorContext } from '../components/SystemError';
-import { speciesChoices } from '../animals/constants';
 import Flatpickr from 'react-flatpickr';
 
 function VetRequestSearch({ incident, organization }) {
@@ -44,6 +43,7 @@ function VetRequestSearch({ incident, organization }) {
 
   const [data, setData] = useState({vet_requests: [], isFetching: false});
   const [shelters, setShelters] = useState({options: [], isFetching: false});
+  const [speciesChoices, setSpeciesChoices] = useState([]);
   const [assignees, setAssignees] = useState({options: [], isFetching: false});
   const [searchTerm, setSearchTerm] = useState(search);
   const [showFilters, setShowFilters] = useState(false);
@@ -98,7 +98,7 @@ function VetRequestSearch({ incident, organization }) {
   };
 
   const handleApplyFilters = () => {
-    setVetRequests(data.vet_requests.filter(vet_request => options.species ? vet_request.species === options.species : vet_request)
+    setVetRequests(data.vet_requests.filter(vet_request => options.species ? vet_request.animal_object.species_string === options.species : vet_request)
                            .filter(vet_request => options.status ? vet_request.status === options.status : vet_request)
                            .filter(vet_request => options.priority ? vet_request.priority === options.priority : vet_request)
                            .filter(vet_request => options.open ? (startDate <= moment(vet_request.open).format('YYYY-MM-DD') && endDate >= moment(vet_request.open).format('YYYY-MM-DD')) : vet_request)
@@ -144,6 +144,31 @@ function VetRequestSearch({ incident, organization }) {
   useEffect(() => {
     let unmounted = false;
     let source = axios.CancelToken.source();
+
+    const fetchSpecies = () => {
+      setSpeciesChoices([]);
+      // Fetch Species data.
+      axios.get('/animals/api/species/', {
+        cancelToken: source.token,
+      })
+      .then(response => {
+        if (!unmounted) {
+          let species_options = [];
+          response.data.forEach(result => {
+            // Build species option list.
+            species_options.push({value: result.id, label: result.name});
+          });
+          setSpeciesChoices(species_options);
+        }
+      })
+      .catch(error => {
+        if (!unmounted) {
+          setShelters({options: []});
+          setShowSystemError(true);
+        }
+      });
+    };
+    fetchSpecies();
 
     const fetchVetRequests = async () => {
       setData({vet_requests: [], isFetching: true});
@@ -395,7 +420,7 @@ function VetRequestSearch({ incident, organization }) {
                           <b>Patient: </b><Link href={"/" + organization + "/" + incident + "/animals/" + vet_request.animal_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>A#{vet_request.animal_object.id}</Link>
                         </Col>
                         <Col style={{textTransform:"capitalize"}}>
-                          <b>Species:</b> {vet_request.animal_object.species}
+                          <b>Species:</b> {vet_request.animal_object.species_string}
                         </Col>
                       </Row>
                     </ListGroup.Item>

@@ -60,6 +60,7 @@
     "smooth-scroll-into-view-if-needed": "^1.1.32",
     "styled-components": "^5.2.3",
     "svg2pdf.js": "^2.2.1",
+    "use-dynamic-refs": "^1.0.0",
     "websocket": "^1.0.34",
     "yup": "^0.28.3"
   },
@@ -92,6 +93,7 @@
     ]
   },
   "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@babel/preset-env": "^7.13.15",
     "@babel/preset-react": "^7.13.13",
     "babel-loader": "^8.0.6",

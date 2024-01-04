@@ -14,7 +14,6 @@ import { useMark, useSubmitting } from '../hooks';
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
 import ButtonSpinner from '../components/ButtonSpinner';
-import { speciesChoices } from '../animals/constants';
 import { ITEMS_PER_PAGE } from '../constants';
 import { SystemErrorContext } from '../components/SystemError';
 import { AuthContext } from "../accounts/AccountsReducer";
@@ -42,6 +41,7 @@ function PersonSearch({ incident, organization }) {
 	const [searchState, setSearchState] = useState({});
 	const [statusOptions, setStatusOptions] = useState(person);
 	const [searchTerm, setSearchTerm] = useState(search);
+  const [speciesChoices, setSpeciesChoices] = useState([]);
 	const tempSearchTerm = useRef(null);
 	const [page, setPage] = useState(1);
   const [numPages, setNumPages] = useState(1);
@@ -84,10 +84,10 @@ function PersonSearch({ incident, organization }) {
 		let unmounted = false;
 		let source = axios.CancelToken.source();
 
-		const fetchOwners = async () => {
+		const fetchOwners = () => {
 			setData({owners: [], isFetching: true});
 			// Fetch People data.
-			await axios.get('/people/api/person/?search=' + searchTerm + '&status=' + statusOptions + '&incident=' + incident + '&organization=' + organization +'&training=' + (state && state.incident.training), {
+			axios.get('/people/api/person/?search=' + searchTerm + '&status=' + statusOptions + '&incident=' + incident + '&organization=' + organization +'&training=' + (state && state.incident.training), {
 				cancelToken: source.token,
 			})
 			.then(response => {
@@ -98,18 +98,17 @@ function PersonSearch({ incident, organization }) {
 					response.data.forEach(owner => {
 						let species = [];
 						owner.animals.forEach(animal => {
-							if (!species.includes(animal.species)) {
-								species.push(animal.species)
+							if (!species.includes(animal.species_string)) {
+								species.push(animal.species_string)
 							}
 						})
             owner.reporter_animals.forEach(animal => {
-							if (!species.includes(animal.species)) {
-								species.push(animal.species)
+							if (!species.includes(animal.species_string)) {
+								species.push(animal.species_string)
 							}
 						})
-            let sortOrder = speciesChoices.map(sc => sc.value);
             species.sort(function(a, b) {
-              return sortOrder.indexOf(a) - sortOrder.indexOf(b);
+              return a > b;
             });
 						search_state[owner.id] = {species:species, selectedSpecies:species[0]}
 						})
@@ -126,7 +125,8 @@ function PersonSearch({ incident, organization }) {
 				}
 			});
 		};
-		fetchOwners();
+
+    fetchOwners();
 
     const fetchOrganizationData = async () => {
       // Fetch Organization data.
@@ -251,7 +251,7 @@ function PersonSearch({ incident, organization }) {
               {statusOptions === 'owners' ?
               <ListGroup style={{height:"144px", overflowY:"auto", marginTop:"-12px"}}>
                 <Scrollbar style={{height:"144px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
-                  {owner.animals.filter(animal => animal.species === searchState[owner.id].selectedSpecies).map((animal, i) => (
+                  {owner.animals.filter(animal => animal.species_string === searchState[owner.id].selectedSpecies).map((animal, i) => (
                     <ListGroup.Item key={animal.id}>
                       <b>#{animal.id}:</b>&nbsp;&nbsp;<Link href={"/" + organization + "/" + incident + "/animals/" + animal.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.name || "Unknown"}</Link>
                       {animal.color_notes ?
@@ -276,7 +276,7 @@ function PersonSearch({ incident, organization }) {
               {statusOptions === 'reporters' ?
               <ListGroup style={{height:"144px", overflowY:"auto", marginTop:"-12px"}}>
                 <Scrollbar style={{height:"144px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
-                  {owner.reporter_animals.filter(animal => animal.species === searchState[owner.id].selectedSpecies).map((animal, i) => (
+                  {owner.reporter_animals.filter(animal => animal.species_string === searchState[owner.id].selectedSpecies).map((animal, i) => (
                     <ListGroup.Item key={animal.id}>
                       <b>#{animal.id}:</b>&nbsp;&nbsp;<Link href={"/" + organization + "/" + incident + "/animals/" + animal.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.name || "Unknown"}</Link>
                       {animal.color_notes ?

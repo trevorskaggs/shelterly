@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.db.models import Q
 from datetime import datetime
@@ -11,6 +12,29 @@ class PresentingComplaint(models.Model):
 
     name = models.CharField(max_length=200)
 
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        ordering = ('name',)
+
+class Diagnostic(models.Model):
+
+    name = models.CharField(max_length=200)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        ordering = ('name',)
+
+class Procedure(models.Model):
+
+    name = models.CharField(max_length=200)
+
+    def __str__(self):
+        return self.name
+
     class Meta:
         ordering = ('name',)
 
@@ -18,10 +42,42 @@ class Diagnosis(models.Model):
 
     name = models.CharField(max_length=200)
 
+    def __str__(self):
+        return self.name
+
     class Meta:
         ordering = ('name',)
 
-# Create your models here.
+class ExamQuestion(models.Model):
+
+    name = models.CharField(max_length=20, blank=True, null=True)
+    options = ArrayField(models.CharField(max_length=40))
+    categories = ArrayField(models.CharField(max_length=20))
+    allow_not_examined = models.BooleanField()
+    open_notes = models.BooleanField()
+
+    def __str__(self):
+        return self.name
+
+class Exam(models.Model):
+
+    open = models.DateTimeField(auto_now=False, auto_now_add=True)
+    confirm_sex_age = models.BooleanField(blank=True, null=True)
+    confirm_chip = models.BooleanField(blank=True, null=True)
+    temperature = models.CharField(max_length=20, blank=True, null=True)
+    temperature_method = models.CharField(max_length=20, blank=True, null=True)
+    weight = models.IntegerField(blank=True, null=True)
+    weight_unit = models.CharField(max_length=10, blank=True, null=True)
+
+
+class ExamAnswer(models.Model):
+
+    exam = models.ForeignKey(Exam, on_delete=models.SET_NULL, null=True)
+    question = models.ForeignKey(ExamQuestion, on_delete=models.SET_NULL, null=True)
+    answer = models.CharField(max_length=40, blank=True, null=True)
+    answer_notes = models.CharField(max_length=300, blank=True, null=True)
+
+
 class VetRequest(models.Model):
 
     patient = models.ForeignKey(Animal, on_delete=models.DO_NOTHING)
@@ -30,10 +86,18 @@ class VetRequest(models.Model):
     assigned = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
     closed = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
     presenting_complaints = models.ManyToManyField(PresentingComplaint)
+    procedures = models.ManyToManyField(Procedure, blank=True)
+    procedure_other = models.CharField(max_length=50, blank=True, null=True)
+    procedure_notes = models.CharField(max_length=300, blank=True, null=True)
+    diagnostics = models.ManyToManyField(Diagnostic, blank=True)
+    diagnostics_other = models.CharField(max_length=50, blank=True, null=True)
+    diagnostics_notes = models.CharField(max_length=300, blank=True, null=True)
     concern = models.CharField(max_length=200, blank=True, null=True)
     priority = models.CharField(max_length=25, choices=(('urgent', 'Urgent'),('when_available', 'When Available'),), default='urgent')
-    diagnosis = models.ForeignKey(Diagnosis, on_delete=models.SET_NULL, null=True)
-    other_diagnosis = models.CharField(max_length=200, blank=True, null=True)
+    exam = models.ForeignKey(Exam, on_delete=models.SET_NULL, null=True)
+    diagnosis = models.ManyToManyField(Diagnosis, blank=True)
+    diagnosis_other = models.CharField(max_length=50, blank=True, null=True)
+    diagnosis_notes = models.CharField(max_length=300, blank=True, null=True)
     status = models.CharField(max_length=20, default='Open')
 
     def check_closed(self):
@@ -47,15 +111,30 @@ class VetRequest(models.Model):
         ordering = ('-id',)
 
 
+class DiagnosticResult(models.Model):
+
+    result = models.CharField(max_length=20)
+    # results_other = models.CharField(max_length=50)
+    notes = models.CharField(max_length=300)
+    diagnostic = models.ForeignKey(Diagnostic, on_delete=models.SET_NULL, null=True)
+    vet_request = models.ForeignKey(VetRequest, on_delete=models.SET_NULL, null=True)
+
+    def __str__(self):
+        return self.name
+
+    # class Meta:
+    #     ordering = ('name',)
+
+
 class Treatment(models.Model):
 
     description = models.CharField(max_length=200)
-    category = models.CharField(max_length=200)
-    valid_units = models.CharField(max_length=200, blank=True, null=True)
-    valid_routes = models.CharField(max_length=200, blank=True, null=True)
+    category = models.CharField(max_length=50)
+    unit = models.CharField(max_length=20, blank=True, null=True)
+    routes = ArrayField(models.CharField(max_length=8))
 
     class Meta:
-        ordering = ('description',)
+        ordering = ('category', 'description',)
 
 
 class TreatmentPlan(models.Model):

@@ -14,7 +14,7 @@ function AnimalRoomAssignmentCard(props) {
       <div className="row no-gutters" style={{ textTransform:"capitalize" }}>
         <div style={{whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis"}}>
           <AnimalCoverImage
-            animalSpecies={props.animal.species}
+            animalSpecies={props.animal.species_string}
             height="47px"
             width="47px"
             customStyles={{
@@ -27,7 +27,7 @@ function AnimalRoomAssignmentCard(props) {
             </span>
           <div style={{width:"157px"}}>
             #{props.animal.id}&nbsp;
-            {props.animal.species}&nbsp;
+            {props.animal.species_string}&nbsp;
             {props.animal.owner_names.length === 0 ?
             <OverlayTrigger
               key={"stray"}
