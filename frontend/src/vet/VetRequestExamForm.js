@@ -367,6 +367,7 @@ const VetRequestExamForm = (props) => {
                   type="text"
                   label="Weight"
                   xs="3"
+                  value={data.weight || formikProps.values.weight}
                 />
                 <Col xs="1" className="pl-0" style={{marginBottom:"-2px", marginLeft:"-5px"}}>
                   <DropDown
@@ -375,7 +376,7 @@ const VetRequestExamForm = (props) => {
                     type="text"
                     label="Unit"
                     placeholder=""
-                    options={[{value:'k', label:'k'}, {value:'kg', label:'kg'}]}
+                    options={[{value:'g', label:'g'}, {value:'kg', label:'kg'}]}
                     isClearable={false}
                   />
                 </Col>

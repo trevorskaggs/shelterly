@@ -172,7 +172,7 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
                 action.send(self.request.user, verb='assigned service request', target=service_request)
                 animals_dict = {}
                 for animal in service_request.animal_set.filter(status__in=['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE']):
-                    animals_dict[animal.id] = {'status':animal.status, 'name':animal.name, 'species':animal.species, 'color_notes':animal.color_notes, 'pcolor':animal.pcolor, 'scolor':animal.scolor, 'shelter':'', 'room':''}
+                    animals_dict[animal.id] = {'status':animal.status, 'name':animal.name, 'species':animal.species.name, 'color_notes':animal.color_notes, 'pcolor':animal.pcolor, 'scolor':animal.scolor, 'shelter':'', 'room':''}
                 AssignedRequest.objects.create(dispatch_assignment=evac_assignment, service_request=service_request, animals=animals_dict, timestamp=timestamp)
 
             # Notify maps that there is updated data.
@@ -198,7 +198,7 @@ class EvacAssignmentViewSet(viewsets.ModelViewSet):
                 # Add SR to selected DA.
                 animals_dict = {}
                 for animal in service_requests[0].animal_set.filter(status__in=['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)',  'SHELTERED IN PLACE', 'UNABLE TO LOCATE']):
-                    animals_dict[animal.id] = {'name':animal.name, 'species':animal.species, 'status':animal.status, 'color_notes':animal.color_notes, 'pcolor':animal.pcolor, 'scolor':animal.scolor, 'shelter':animal.shelter, 'room':animal.room}
+                    animals_dict[animal.id] = {'name':animal.name, 'species':animal.species.name, 'status':animal.status, 'color_notes':animal.color_notes, 'pcolor':animal.pcolor, 'scolor':animal.scolor, 'shelter':animal.shelter, 'room':animal.room}
                 AssignedRequest.objects.create(dispatch_assignment=evac_assignment, service_request=service_requests[0], animals=animals_dict)
                 action.send(self.request.user, verb='assigned service request', target=service_requests[0])
 

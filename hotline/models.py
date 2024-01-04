@@ -95,7 +95,7 @@ class ServiceRequest(Location):
     def get_feature_json(self):
         species_counts = {'REPORTED':{}, 'REPORTED (EVAC REQUESTED)':{}, 'REPORTED (SIP REQUESTED)':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}}
         for animal in self.animal_set.filter(status__in=['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE']):
-            species_counts[animal.status][animal.species] = species_counts[animal.status].get(animal.species, 0) + 1
+            species_counts[animal.status][animal.species.name] = species_counts[animal.status].get(animal.species.name, 0) + 1
         description = self.location_output.rsplit(',', 1)[0]  + " ("
         count = 0
         for status in [('Reported','REPORTED'), ('Reported (Evac Requested)','REPORTED (EVAC REQUESTED)'), ('Reported (SIP Requested)','REPORTED (SIP REQUESTED)'), ('SIP','SHELTERED IN PLACE'), ('UTL', 'UNABLE TO LOCATE')]:
@@ -103,7 +103,7 @@ class ServiceRequest(Location):
                 if count > 0:
                     description += '; ' 
                 count+= 1
-                description += status[0] + ': ' + ', '.join(f'{value} {key}' + ('s' if value != 1 and animal.species != 'sheep' else '') for key, value in species_counts[status[1]].items()) #123 Ranch Rd, Napa CA (1 cat, 2 dogs)
+                description += status[0] + ': ' + ', '.join(f'{value} {key}' + ('s' if value != 1 and animal.species.name != 'sheep' else '') for key, value in species_counts[status[1]].items()) #123 Ranch Rd, Napa CA (1 cat, 2 dogs)
         description += ")"
         feature_json = {
           "geometry":{

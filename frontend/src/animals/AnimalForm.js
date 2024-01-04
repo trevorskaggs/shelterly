@@ -67,7 +67,7 @@ const AnimalForm = (props) => {
     request: servicerequest_id,
     status: 'REPORTED',
     name: '',
-    species: null,
+    species: '',
     sex: '',
     size: '',
     age: '',
@@ -542,7 +542,7 @@ const AnimalForm = (props) => {
                     label="Animal Name"
                     xs="4"
                   />
-                  <Col xs="4">
+                  <Col xs="4" style={{textTransform:'capitalize'}}>
                     <DropDown
                       label="Species*"
                       id="speciesDropdown"
