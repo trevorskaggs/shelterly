@@ -77,6 +77,9 @@
     "dev": "webpack --mode development ./src/index.js --output /home/sheltuser/shelterly/frontend/src/static/js/main.js",
     "wp_build": "webpack --mode production ./src/index.js --output /home/sheltuser/shelterly/frontend/src/static/js/main.js"
   },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
   "browserslist": {
     "production": [
       ">0.2%",
