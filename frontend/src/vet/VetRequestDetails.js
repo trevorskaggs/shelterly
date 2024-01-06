@@ -8,15 +8,14 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faEdit,
   faPlusSquare,
+  faStethoscope,
   faTimes,
   faCheckSquare,
   faChevronCircleDown,
   faChevronCircleRight
 } from '@fortawesome/free-solid-svg-icons';
 import {
-  faPrescriptionBottlePill,
-  faSquareExclamation,
-  faSquareEllipsis
+  faDiamondExclamation,
 } from '@fortawesome/pro-solid-svg-icons';
 import Header from '../components/Header';
 import { SystemErrorContext } from '../components/SystemError';
@@ -27,9 +26,7 @@ function VetRequestDetails({ id, incident, organization }) {
 
   const priorityText = {urgent:'Urgent', when_available:'When Available'};
 
-  const [data, setData] = useState({id: '', exam: null, patient:{}, assignee:{}, open: '', assigned:'', closed: '', concern: '', priority: '', diagnosis: '', other_diagnosis:'', treatment_plans:[], presenting_complaints:[], exam_object: {answers:{}}, animal_object: {id:'', name:'', species:'', category:'', sex:'', age:'', size:'', pcolor:'', scolor:'', medical_notes:''}});
-  const [examQuestions, setExamQuestions] = useState([]);
-  const [showExam, setShowExam] = useState(true);
+  const [data, setData] = useState({id: '', medical_record: null, requested_by:null, open: '', concern: '', priority: '', presenting_complaints:[], animal_object: {id:'', name:'', species:'', category:'', sex:'', age:'', fixed:'', pcolor:'', scolor:'', medical_notes:'', shelter_object:{}, room_name:''}});
 
   const [showModal, setShowModal] = useState(false);
   const cancelVetRequest = () => {
@@ -43,21 +40,6 @@ function VetRequestDetails({ id, incident, organization }) {
     let unmounted = false;
     let source = axios.CancelToken.source();
 
-    const fetchExamQuestions = async () => {
-      // Fetch exam question data.
-      await axios.get('/vet/api/examquestions/', {
-        cancelToken: source.token,
-      })
-      .then(response => {
-        if (!unmounted) {
-          setExamQuestions(response.data);
-        }
-      })
-      .catch(error => {
-        setShowSystemError(true);
-      });
-    };
-
     const fetchVetRequestData = async () => {
       // Fetch VetRequest Details data.
       await axios.get('/vet/api/vetrequest/' + id + '/?incident=' + incident, {
@@ -66,7 +48,6 @@ function VetRequestDetails({ id, incident, organization }) {
       .then(response => {
         if (!unmounted) {
           setData(response.data);
-          fetchExamQuestions();
         }
       })
       .catch(error => {
@@ -116,6 +97,17 @@ function VetRequestDetails({ id, incident, organization }) {
             <Card.Title>
               <h4>
                 Information
+                {data.caution ? <OverlayTrigger
+                  key={"caution"}
+                  placement="top"
+                  overlay={
+                    <Tooltip id={`tooltip-caution`}>
+                      Please use caution when handling this animal.
+                    </Tooltip>
+                  }
+                >
+                  <FontAwesomeIcon icon={faDiamondExclamation} className="ml-2" inverse />
+                </OverlayTrigger> : ""}
               </h4>
             </Card.Title>
             <hr/>
@@ -128,11 +120,11 @@ function VetRequestDetails({ id, incident, organization }) {
               </ListGroup.Item>
               <ListGroup.Item>
                 <div className="row">
-                  <span className="col-5">
-                    <b>Assignee:</b> {data.assignee_object ? <span>{data.assignee_object.first_name} {data.assignee_object.last_name}</span> : "Unassigned"}
+                  <span className="col-6">
+                    <b>Requested:</b> {data.requested_by_object ? <span>{data.requested_by_object.first_name} {data.requested_by_object.last_name}</span> : "Unknown"}
                   </span>
-                  <span className="col-7">
-                    {data.assigned ? <span><b>Assigned: </b><Moment format="lll">{data.assigned}</Moment></span> : ""}
+                  <span className="col-6">
+                    <b>Opened: </b><Moment format="lll">{data.open}</Moment>
                   </span>
                 </div>
               </ListGroup.Item>
@@ -142,10 +134,6 @@ function VetRequestDetails({ id, incident, organization }) {
               <ListGroup.Item>
                 <b>Concern:</b> {data.concern || "N/A"}
               </ListGroup.Item>
-              {data.exam ? <ListGroup.Item>
-                <b>Diagnosis:</b> {data.diagnosis_text || "N/A"}
-                {data.exam && data.diagnosis_notes ? <div><b>Notes:</b> {data.diagnosis_notes || "N/A"}</div> : ""}
-              </ListGroup.Item> : ""}
             </ListGroup>
           </Card.Body>
         </Card>
@@ -173,13 +161,13 @@ function VetRequestDetails({ id, incident, organization }) {
               <ListGroup.Item>
                 <div className="row" style={{textTransform:"capitalize"}}>
                   <span className="col-6"><b>Age:</b> {data.animal_object.age||"Unknown"}</span>
-                  <span className="col-6"><b>Size:</b> {data.animal_object.size||"Unknown"}</span>
+                  <span className="col-6"><b>Altered:</b> {data.animal_object.fixed||"Unknown"}</span>
                 </div>
               </ListGroup.Item>
               <ListGroup.Item style={{textTransform:"capitalize"}}>
                 <div className="row">
-                  <span className="col-6"><b>Primary Color:</b> {data.animal_object.pcolor||"N/A"}</span>
-                  <span className="col-6"><b>Secondary Color:</b> {data.animal_object.scolor||"N/A"}</span>
+                  <span className="col-6"><b>Location:</b> {data.animal_object.shelter ? data.animal_object.shelter_object.name : "N/A"} {data.animal_object.room_name}</span>
+                  {/* <span className="col-6"><b>Secondary Color:</b> {data.animal_object.scolor||"N/A"}</span> */}
                 </div>
               </ListGroup.Item>
               <ListGroup.Item>
@@ -190,180 +178,24 @@ function VetRequestDetails({ id, incident, organization }) {
         </Card>
       </div>
     </div>
-    <div className="row mt-3">
-      <div className="col-12 d-flex">
-        <Card className="mb-2 border rounded" style={{width:"100%"}}>
-          {data.exam ?
-          <Card.Body style={{marginBottom:"-7px"}}>
-            <Card.Title>
-              <h4 className="mb-0">Exam Results
-                {data.exam && data.status !== 'Canceled' ?
-                <OverlayTrigger
-                  key={"start-exam"}
-                  placement="bottom"
-                  overlay={
-                    <Tooltip id={`tooltip-start-exam`}>
-                      Edit exam
-                    </Tooltip>
-                  }
-                >
-                  <Link href={"/" + organization + "/" + incident + "/vet/vetrequest/" + id + "/exam/"}><FontAwesomeIcon icon={faEdit} className="ml-1" size="lg" style={{cursor:'pointer'}} inverse /></Link>
-                </OverlayTrigger> : ""}
-                <FontAwesomeIcon icon={faChevronCircleRight} hidden={showExam} onClick={() => {setShowExam(true)}} className="ml-1" size="lg" style={{cursor:'pointer'}} inverse />
-                <FontAwesomeIcon icon={faChevronCircleDown} hidden={!showExam} onClick={() => {setShowExam(false)}} className="ml-1" size="lg" style={{cursor:'pointer'}} inverse />
-              </h4>
-            </Card.Title>
-            <hr className="mb-3" />
-            <Collapse in={showExam}>
-              <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
-              <ListGroup.Item>
-                <div className="row" style={{textTransform:"capitalize"}}>
-                  <span className="col-3"><b>Performed:</b> {moment(data.exam_object.open).format('MMM Do HH:mm')}</span>
-                  <span className="col-4"><b>Weight:</b> {data.exam_object.weight}{data.exam_object.weight_unit}</span>
-                </div>
-              </ListGroup.Item>
-              <ListGroup.Item>
-                <div className="row" style={{textTransform:"capitalize"}}>
-                  <span className="col-3"><b>Temperature (F):</b> {data.exam_object.temperature}</span>
-                  <span className="col-4"><b>Temperature Method:</b> {data.exam_object.temperature_method}</span>
-                </div>
-              </ListGroup.Item>
-              {examQuestions.filter(question => question.categories.includes(data.animal_object.category)).map(question => (
-                <ListGroup.Item key={question.id}>
-                  <div className="row" style={{textTransform:"capitalize"}}>
-                    <span className="col-3"><b>{question.name}:</b> {data.exam_object.answers[question.name.toLowerCase().replace(' ','_').replace('/','_')]}</span>
-                    <span className="col-4"><b>Notes:</b> {data.exam_object.answers[question.name.toLowerCase().replace(' ','_').replace('/','_') + '_notes']}</span>
-                  </div>
-                </ListGroup.Item>
-              ))}
-              </ListGroup>
-            </Collapse>
-          </Card.Body>
-          :
-          <Card.Body>
-            <Link href={"/" + organization + "/" + incident + "/vet/vetrequest/" + id + "/workflow"}><Button>Start Exam</Button></Link>
-          </Card.Body>
-          }
+    <Row className="mt-3">
+      <Col style={{width:"170px", maxWidth:"170px", whiteSpace:"nowrap", overflow:"hidden"}}>
+      <Link href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.medical_record + "/workflow"} className="exam-link" style={{textDecoration:"none", color:"white"}}>
+        <Card className="border rounded exam-hover-div" style={{width:"153px", maxWidth:"153px", whiteSpace:"nowrap", overflow:"hidden"}}>
+          <div className="exam-hover-div"><FontAwesomeIcon icon={faStethoscope} size="6x" className="mt-4 mb-4 exam-icon" style={{marginLeft:"30px" }} inverse /></div>
+          <Card.Text className="mb-0 border-top exam-hover-div" style={{textTransform:"capitalize", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis", height:"40px"}}>
+            <span className="ml-1" style={{fontSize:30}}>Start Exam</span>
+          </Card.Text>
         </Card>
-      </div>
-    </div>
-    {data.exam ?
-    <div className="row mt-3">
-      <div className="col-12 d-flex">
-        <Card className="mb-2 border rounded" style={{width:"100%"}}>
-          <Card.Body style={{marginBottom:"-19px"}}>
-            <Card.Title>
-              <h4 className="mb-0">Treatments
-                {data.status !== 'Canceled' ? <OverlayTrigger
-                  key={"add-treatment"}
-                  placement="top"
-                  overlay={
-                    <Tooltip id={`tooltip-add-treatment`}>
-                      Add a treatment to this vet request
-                    </Tooltip>
-                  }
-                >
-                  <Link href={"/" + organization + "/" + incident + "/vet/vetrequest/" + data.id + "/treatment/new"}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
-                </OverlayTrigger> : ""}
-              </h4>
-            </Card.Title>
-            <hr className="mb-3" />
-            {data.treatment_plans.map(treatment_plan => (
-              <Row key={treatment_plan.id} className="ml-0 mb-3">
-                <Link href={"/" + organization + "/" + incident + "/vet/treatment/" + treatment_plan.id} className="treatment-link" style={{textDecoration:"none", color:"white"}}>
-                  <Card className="border rounded treatment-hover-div" style={{height:"100px", width:"745px", whiteSpace:"nowrap", overflow:"hidden"}}>
-                    <div className="row no-gutters hover-div treatment-hover-div" style={{height:"100px", marginRight:"-2px"}}>
-                      <Row className="ml-0 mr-0 w-100" style={{flexWrap:"nowrap"}}>
-                        <div className="border-right" style={{width:"100px"}}>
-                          <FontAwesomeIcon icon={faPrescriptionBottlePill} size="6x" className="ml-1 treatment-icon" style={{marginTop:"5px", paddingRight:"10px"}} inverse />
-                        </div>
-                        <Col style={{marginLeft:"-5px", marginRight:"-25px"}} className="hover-div">
-                          <div className="border treatment-hover-div" style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"10px", marginLeft:"-11px", marginTop: "-1px", fontSize:"18px", width:"100%", backgroundColor:"#615e5e"}}>
-                            {treatment_plan.treatment_object.description}
-                            <span className="float-right">
-                            {treatment_plan.status === 'Complete' ?
-                              <OverlayTrigger
-                                key={"complete-treatment-request"}
-                                placement="top"
-                                overlay={
-                                  <Tooltip id={`tooltip-complete-treatment-request`}>
-                                    All treatment requests are completed.
-                                  </Tooltip>
-                                }
-                              >
-                                <FontAwesomeIcon icon={faCheckSquare} size="3x" className="ml-1 treatment-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
-                              </OverlayTrigger>
-                              : treatment_plan.status === 'Awaiting' ?
-                              <OverlayTrigger
-                                key={"awaiting-action-treatment-request"}
-                                placement="top"
-                                overlay={
-                                  <Tooltip id={`tooltip-awaiting-action-treatment-request`}>
-                                    At least one treatment request is awaiting action.
-                                  </Tooltip>
-                                }
-                              >
-                                <FontAwesomeIcon icon={faSquareExclamation} size="3x" className="ml-1 treatment-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
-                              </OverlayTrigger>
-                              :
-                              <OverlayTrigger
-                                key={"scheduled-treatment-request"}
-                                placement="top"
-                                overlay={
-                                  <Tooltip id={`tooltip-scheduled-treatment-request`}>
-                                    At least one treatment request is scheduled for a future date/time.
-                                  </Tooltip>
-                                }
-                              >
-                                <FontAwesomeIcon icon={faSquareEllipsis} size="3x" className="ml-1 treatment-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
-                              </OverlayTrigger>
-                              }
-                            </span>
-                          </div>
-                          <div style={{marginTop:"6px"}}>
-                            <Row>
-                              <Col>
-                                Start: <Moment format="lll">{treatment_plan.start}</Moment>
-                              </Col>
-                              <Col>
-                                End: <Moment format="lll">{treatment_plan.end}</Moment>
-                              </Col>
-                              <Col>
-                                Frequency: Every {treatment_plan.frequency} hours
-                              </Col>
-                            </Row>
-                          </div>
-                          <div>
-                            <Row>
-                              <Col>
-                                Quantity: {treatment_plan.quantity}
-                              </Col>
-                              <Col>
-                                Unit: {treatment_plan.unit}
-                              </Col>
-                              <Col>
-                                Route: {treatment_plan.route}
-                              </Col>
-                            </Row>
-                          </div>
-                        </Col>
-                      </Row>
-                    </div>
-                  </Card>
-                </Link>
-              </Row>
-            ))}
-            {data.treatment_plans.length < 1 ? <p>No treatments have been created for this request.</p> : ""}
-          </Card.Body>
-        </Card>
-      </div>
-    </div> : ""}
+      </Link>
+      </Col>
+    </Row>
     {/* <History action_history={data.action_history} /> */}
     <Modal show={showModal} onHide={() => setShowModal(false)}>
       <Modal.Header closeButton>
         <Modal.Title>Confirm Veterinary Request Cancelation</Modal.Title>
       </Modal.Header>
-      <Modal.Body>Are you sure you want to cancel this Veterinary Request and associated treatments?</Modal.Body>
+      <Modal.Body>Are you sure you want to cancel this Veterinary Request?</Modal.Body>
       <Modal.Footer>
         <Button variant="primary" onClick={() => cancelVetRequest()}>
           Yes

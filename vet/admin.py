@@ -1,12 +1,15 @@
 from django.contrib import admin
 
-from vet.models import Diagnosis, ExamQuestion, Treatment, TreatmentPlan, TreatmentRequest, PresentingComplaint, VetRequest
+from vet.models import Diagnosis, ExamQuestion, MedicalRecord, Treatment, TreatmentPlan, TreatmentRequest, PresentingComplaint, VetRequest
+
+class MedicalRecordAdmin(admin.ModelAdmin):
+  list_display = ('id', 'patient', 'exam',)
 
 class VetRequestAdmin(admin.ModelAdmin):
-  list_display = ('id', 'patient', 'assignee',)
+  list_display = ('id', 'requested_by',)
 
 class TreatmentPlanAdmin(admin.ModelAdmin):
-  list_display = ('id', 'vet_request', 'treatment',)
+  list_display = ('id', 'medical_record', 'treatment',)
 
 class TreatmentAdmin(admin.ModelAdmin):
   list_display = ('id', 'description', 'category',)
@@ -19,6 +22,7 @@ class PresentingComplaintAdmin(admin.ModelAdmin):
 
 # Register your models here.
 admin.site.register(VetRequest, VetRequestAdmin)
+admin.site.register(MedicalRecord, MedicalRecordAdmin)
 admin.site.register(ExamQuestion)
 admin.site.register(Diagnosis)
 admin.site.register(TreatmentPlan, TreatmentPlanAdmin)

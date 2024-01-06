@@ -437,11 +437,11 @@ function AnimalDetails({ id, incident, organization }) {
                 {data.intake_date ? <div className="mt-1"><b>Intake Date:</b> <Moment format="MMMM Do YYYY HH:mm">{data.intake_date}</Moment></div> : ""}
                 <div className="mt-1"><b>Address:</b> {data.shelter_object.full_address || "Unknown"}</div>
               </ListGroup.Item> : ""}
-              {data.vet_requests.map(vetrequest => (
-                <ListGroup.Item key={vetrequest}>
-                  <b>Veterinary Request:</b> <Link href={"/" + organization + "/" + incident + "/vet/vetrequest/" + vetrequest} className="text-link" style={{textDecoration:"none", color:"white"}}>VR#{vetrequest}</Link>
+              {data.medical_record ?
+                <ListGroup.Item>
+                  <b>Medical Record:</b> <Link href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.medical_record} className="text-link" style={{textDecoration:"none", color:"white"}}>MR#{data.medical_record}</Link>
                 </ListGroup.Item>
-              ))}
+              : ""}
             </ListGroup>
           </Card.Body>
         </Card>

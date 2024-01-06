@@ -23,7 +23,7 @@ function Patient(props) {
               <div className="row" style={{textTransform:"capitalize"}}>
                 <span className="col-3"><b>ID:</b> <Link href={"/" + props.organization + "/" + props.incident + "/animals/" + props.animal.id} className="text-link" style={{textDecoration:"none", color:"white"}}>A#{props.animal.id}</Link></span>
                 <span className="col-3"><b>Name:</b> {props.animal.name||"Unknown"}</span>
-                <span className="col-3"><b>Location:</b> {props.animal.shelter_object ? props.animal.shelter_object.name:"Unknown"} {props.animal.room_name ? props.animal.room_name:""}</span>
+                <span className="col-6"><b>Location:</b> {props.animal.shelter_object ? props.animal.shelter_object.name:"Unknown"}{props.animal.room_name ? <span> - {props.animal.room_name}</span> : ""}</span>
               </div>
             </ListGroup.Item>
             <ListGroup.Item>

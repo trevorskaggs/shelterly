@@ -2,30 +2,28 @@ from datetime import datetime, timedelta
 from rest_framework import filters, permissions, viewsets
 
 from animals.models import Animal
-from vet.models import Diagnosis, Diagnostic, Exam, ExamAnswer, ExamQuestion, PresentingComplaint, Procedure, Treatment, TreatmentPlan, TreatmentRequest, VetRequest
-from vet.serializers import DiagnosisSerializer, DiagnosticSerializer, ExamQuestionSerializer, ExamSerializer, PresentingComplaintSerializer, ProcedureSerializer, TreatmentSerializer, TreatmentPlanSerializer, TreatmentRequestSerializer, VetRequestSerializer
+from vet.models import Diagnosis, Diagnostic, Exam, ExamAnswer, ExamQuestion, MedicalRecord, PresentingComplaint, Procedure, Treatment, TreatmentPlan, TreatmentRequest, VetRequest
+from vet.serializers import DiagnosisSerializer, DiagnosticSerializer, ExamQuestionSerializer, ExamSerializer, MedicalRecordSerializer, PresentingComplaintSerializer, ProcedureSerializer, TreatmentSerializer, TreatmentPlanSerializer, TreatmentRequestSerializer, VetRequestSerializer
+
+class MedicalRecordViewSet(viewsets.ModelViewSet):
+    queryset = MedicalRecord.objects.all()
+    permission_classes = [permissions.IsAuthenticated, ]
+    serializer_class = MedicalRecordSerializer
+
 
 class ExamViewSet(viewsets.ModelViewSet):
     queryset = Exam.objects.all()
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = ExamSerializer
 
-    # def get_queryset(self):
-    #     """
-    #     Returns: Queryset of distinct animals, each annotated with:
-    #         images (List of AnimalImages)
-    #     """
-    #     queryset = (
-    #         Exam.objects.all()
-    #     )
-
     def perform_create(self, serializer):
         if serializer.is_valid():
+            med_record = MedicalRecord.objects.get(id=self.request.data.get('medrecord_id'))
+            serializer.validated_data['medical_record'] = med_record
             exam = serializer.save()
             Animal.objects.filter(id=self.request.data.get('animal_id')).update(age=self.request.data.get('age'), sex=self.request.data.get('sex'), microchip=self.request.data.get('microchip', ''))
-            VetRequest.objects.filter(id=self.request.data.get('vetrequest_id')).update(exam=exam)
             for k,v in self.request.data.items():
-                if k not in ['confirm_sex_age', 'confirm_chip', 'temperature', 'temperature_method', 'weight', 'weight_unit'] and '_notes' not in k and '_id' not in k and self.request.data.get(k + '_id'):
+                if k not in ['open', 'assignee', 'confirm_sex_age', 'confirm_chip', 'temperature', 'temperature_method', 'weight', 'weight_unit', 'weight_estimated', 'pulse', 'respiratory_rate'] and '_notes' not in k and '_id' not in k and self.request.data.get(k + '_id'):
                     ExamAnswer.objects.create(exam=exam, question=ExamQuestion.objects.get(id=self.request.data.get(k + '_id', '')), answer=v, answer_notes=self.request.data.get(k + '_notes', ''))
 
     def perform_update(self, serializer):
@@ -91,49 +89,32 @@ class TreatmentRequestViewSet(viewsets.ModelViewSet):
 
 class VetRequestViewSet(viewsets.ModelViewSet):
     queryset = VetRequest.objects.all()
-    search_fields = ['id', 'assignee__first_name', 'assignee__last_name', 'patient__shelter__name', 'patient__species', 'priority', 'open', 'treatmentplan__treatment__description']
+    search_fields = ['id', 'medical_record__patient__shelter__name', 'medical_record__patient__species', 'priority', 'open']
     filter_backends = (filters.SearchFilter,)
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = VetRequestSerializer
 
     def perform_create(self, serializer):
         if serializer.is_valid():
-
-            # Mark assigned date if we have an assignee.
-            if serializer.validated_data.get('assignee'):
-                serializer.validated_data['assigned'] = datetime.now()
-                serializer.validated_data['status'] = 'Assigned'
-
+            serializer.validated_data['requested_by'] = self.request.user
+            med_record, _ = MedicalRecord.objects.get_or_create(patient=Animal.objects.get(id=self.request.data.get('patient')))
+            serializer.validated_data['medical_record'] = med_record
             serializer.save()
 
-    def perform_update(self, serializer):
-
-        if serializer.is_valid():
-
-            # Mark assigned date if we have an assignee and it is different from current assignee value.
-            if serializer.validated_data.get('assignee') and serializer.instance.assignee != serializer.validated_data.get('assignee'):
-                serializer.validated_data['assigned'] = datetime.now()
-                serializer.validated_data['status'] = 'Assigned'
-            elif serializer.instance.assignee and not serializer.validated_data.get('assignee'):
-                serializer.validated_data['assigned'] = None
-                serializer.validated_data['status'] = 'Open'
-
-            serializer.save()
-
-    # def get_queryset(self):
-    #     """
-    #     Returns: Queryset of distinct animals, each annotated with:
-    #         images (List of AnimalImages)
-    #     """
-    #     queryset = (
-    #         VetRequest.objects.exclude(status="CANCELED").distinct()
-    #         .prefetch_related("owners")
-    #         .select_related("reporter", "room", "request", "shelter")
-    #         .order_by('order')
-    #     )
-    #     if self.request.GET.get('incident'):
-    #         queryset = queryset.filter(incident__slug=self.request.GET.get('incident'))
-    #     return queryset
+    def get_queryset(self):
+        """
+        Returns: Queryset of distinct animals, each annotated with:
+            images (List of AnimalImages)
+        """
+        queryset = (
+            VetRequest.objects.exclude(status="CANCELED").distinct()
+            # .prefetch_related("owners")
+            .select_related("medical_record", "medical_record__patient")
+            # .order_by('order')
+        )
+        # if self.request.GET.get('incident'):
+        #     queryset = queryset.filter(incident__slug=self.request.GET.get('incident'))
+        return queryset
 
 
 class TreatmentPlanViewSet(viewsets.ModelViewSet):

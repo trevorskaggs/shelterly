@@ -19,6 +19,7 @@ import {
 import * as Yup from 'yup';
 import { DropDown, TextInput } from '../components/Form';
 import { SystemErrorContext } from '../components/SystemError';
+import Patient from './components/Patient';
 
 const customStyles = {
   // For the select it self, not the options of the select
@@ -51,26 +52,21 @@ const DiagnosticsForm = (props) => {
 
   const [data, setData] = useState({
     patient: props.animalid,
-    assignee: null,
-    concern: '',
     diagnostics: [],
     diagnostic_notes: '',
     diagnostic_other: '',
-    priority: '',
-    presenting_complaints: [],
     animal_object: {id:''}
   })
 
   const [diagnosticChoices, setDiagnosticChoices] = useState([]);
-  const [procedureChoices, setProcedureChoices] = useState([]);
 
   useEffect(() => {
     let unmounted = false;
     let source = axios.CancelToken.source();
     if (props.id) {
-      const fetchVetRequest = async () => {
-        // Fetch VetRequest data.
-        await axios.get('/vet/api/vetrequest/' + props.id + '/', {
+      const fetchMedRecord = async () => {
+        // Fetch MedRecord data.
+        await axios.get('/vet/api/medrecord/' + props.id + '/', {
           cancelToken: source.token,
         })
         .then(response => {
@@ -82,7 +78,7 @@ const DiagnosticsForm = (props) => {
           setShowSystemError(true);
         });
       };
-      fetchVetRequest();
+      fetchMedRecord();
     };
 
     const fetchDiagnostics = async () => {
@@ -105,27 +101,6 @@ const DiagnosticsForm = (props) => {
     };
 
     fetchDiagnostics();
-
-    const fetchProcedures = async () => {
-      // Fetch procedure data.
-      await axios.get('/vet/api/procedures/', {
-        cancelToken: source.token,
-      })
-      .then(response => {
-        if (!unmounted) {
-          let options = [];
-          response.data.forEach(function(procedure) {
-            options.push({value: procedure.id, label: procedure.name})
-          });
-          setProcedureChoices(options);
-        }
-      })
-      .catch(error => {
-        setShowSystemError(true);
-      });
-    };
-
-    fetchProcedures();
 
     // Cleanup.
     return () => {
@@ -150,7 +125,7 @@ const DiagnosticsForm = (props) => {
             props.onSubmit('diagnostics', values, 'treatments');
           }
           else {
-            navigate('/' + props.organization + '/' + props.incident + '/vet/vetrequest/' + props.id);
+            navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + props.id);
           }
         })
         .catch(error => {
@@ -165,31 +140,10 @@ const DiagnosticsForm = (props) => {
             {is_workflow ?
             <span style={{cursor:'pointer'}} onClick={() => {props.handleBack('diagnostics', 'exam')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
             :
-            <span style={{ cursor: 'pointer' }} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}
+            <span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + props.id + '/')} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}
             Diagnostics Form
             </Card.Header>
-          <div className="col-12 mt-3">
-            <Card className="border rounded" style={{width:"100%"}}>
-              <Card.Body>
-                <Card.Title>
-                  <h4 className="mb-0">Patient</h4>
-                </Card.Title>
-                <hr/>
-                <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
-                  <ListGroup.Item>
-                    <div className="row" style={{textTransform:"capitalize"}}>
-                      <span className="col-3"><b>ID:</b> <Link href={"/" + props.organization + "/" + props.incident + "/animals/" + data.animal_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>A#{data.animal_object.id}</Link></span>
-                      <span className="col-3"><b>Name:</b> {data.animal_object.name||"Unknown"}</span>
-                      <span className="col-3"><b>Species:</b> {data.animal_object.species_string}</span>
-                    </div>
-                  </ListGroup.Item>
-                  <ListGroup.Item>
-                      <span><b>Medical Notes:</b> {data.animal_object.medical_notes || "N/A"}</span>
-                  </ListGroup.Item>
-                </ListGroup>
-              </Card.Body>
-            </Card>
-          </div>
+            <Patient animal={data.animal_object} organization={props.organization} incident={props.incident} />
           <Card.Body>
             <Form>
               <FormGroup>
@@ -242,7 +196,7 @@ const DiagnosticsForm = (props) => {
             </Form>
           </Card.Body>
           <ButtonGroup>
-            <Button type="button" className="btn btn-primary" onClick={() => { formikProps.submitForm() }}>{is_workflow ? "Next" : "Save"}</Button>
+            <Button type="button" className="btn btn-primary" onClick={() => { formikProps.submitForm() }}>{is_workflow ? "Next Step" : "Save"}</Button>
           </ButtonGroup>
         </Card>
       )}

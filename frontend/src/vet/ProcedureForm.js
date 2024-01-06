@@ -69,7 +69,7 @@ const ProcedureForm = (props) => {
     if (props.id) {
       const fetchVetRequest = async () => {
         // Fetch VetRequest data.
-        await axios.get('/vet/api/vetrequest/' + props.id + '/', {
+        await axios.get('/vet/api/medrecord/' + props.id + '/', {
           cancelToken: source.token,
         })
         .then(response => {
@@ -123,13 +123,13 @@ const ProcedureForm = (props) => {
         procedure_notes: Yup.string().nullable().max(300, 'Maximum character limit of 300.'),
       })}
       onSubmit={(values, { setSubmitting }) => {
-        axios.patch('/vet/api/vetrequest/' + props.id + '/', values)
+        axios.patch('/vet/api/medrecord/' + props.id + '/', values)
         .then(response => {
           if (is_workflow) {
             props.onSubmit('procedures', values, 'diagnosis');
           }
           else {
-            navigate('/' + props.organization + '/' + props.incident + '/vet/vetrequest/' + props.id);
+            navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + props.id);
           }
         })
         .catch(error => {

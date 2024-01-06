@@ -5,7 +5,7 @@ import Step from '@material-ui/core/Step';
 import StepLabel from '@material-ui/core/StepLabel';
 import Typography from '@material-ui/core/Typography';
 import { useQueryParams } from 'raviger';
-import VetRequestExamForm from '../vet/VetRequestExamForm';
+import ExamForm from './ExamForm';
 import DiagnosticsForm from '../vet/DiagnosticsForm';
 import TreatmentPlanForm from '../vet/TreatmentPlanForm';
 import PageNotFound from "../components/PageNotFound";
@@ -74,7 +74,7 @@ function getSteps() {
 function getStepContent(id, incident, organization, step, handleStepSubmit, handleBack, state) {
   switch (step) {
     case 0:
-      return <VetRequestExamForm onSubmit={handleStepSubmit} handleBack={handleBack} state={state} id={id} incident={incident} organization={organization} />;
+      return <ExamForm onSubmit={handleStepSubmit} handleBack={handleBack} state={state} id={id} incident={incident} organization={organization} />;
     case 1:
       return <DiagnosticsForm onSubmit={handleStepSubmit} handleBack={handleBack} state={state} id={id} incident={incident} organization={organization} />;
     case 2:

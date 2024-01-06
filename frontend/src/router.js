@@ -44,10 +44,11 @@ import TreatmentRequestForm from "./vet/TreatmentRequestForm";
 import VetRequestDetails from "./vet/VetRequestDetails";
 import VetRequestForm from "./vet/VetRequestForm";
 import VetRequestSearch from "./vet/VetRequestSearch";
-import VetRequestExamForm from "./vet/VetRequestExamForm";
+import ExamForm from "./vet/ExamForm";
 import Organization from "./Organization";
 import VetStepperWorkflow, { initialVetWorkflowData } from "./vet/VetStepperWorkflow";
 import DiagnosticsForm from "./vet/DiagnosticsForm";
+import MedicalRecordDetails from "./vet/MedicalRecordDetails";
 
 export const publicRoutes = {
   "/login": () => <LoginForm />,
@@ -110,15 +111,16 @@ const routes = {
   "/:organization/:incident/shelter/room/edit/:id": ({id, incident, organization}) => <RoomForm id={id} incident={incident} organization={organization} />,
   "/:organization/:incident/shelter/room/:id": ({id, incident, organization}) => <RoomDetails id={id} incident={incident} organization={organization} />,
   "/:organization/:incident/vet/treatment/edit/:id": ({id, incident, organization}) => <TreatmentPlanForm id={id} incident={incident} organization={organization} />,
-  "/:organization/:incident/vet/vetrequest/:vetrequestid/treatment/new": ({vetrequestid, incident, organization}) => <TreatmentPlanForm vetrequestid={vetrequestid} state={initialVetWorkflowData} incident={incident} organization={organization} />,
+  "/:organization/:incident/vet/medrecord/:id": ({id, incident, organization}) => <MedicalRecordDetails id={id} incident={incident} organization={organization} />,
+  "/:organization/:incident/vet/medrecord/:medrecordid/treatment/new": ({medrecordid, incident, organization}) => <TreatmentPlanForm medrecordid={medrecordid} state={initialVetWorkflowData} incident={incident} organization={organization} />,
   "/:organization/:incident/vet/treatment/:id": ({id, incident, organization}) => <TreatmentPlanDetails id={id} incident={incident} organization={organization} />,
   "/:organization/:incident/vet/treatmentrequest/edit/:id": ({id, incident, organization}) => <TreatmentRequestForm id={id} incident={incident} organization={organization} />,
   "/:organization/:incident/vet/vetrequest/search": ({incident, organization}) => <VetRequestSearch incident={incident} organization={organization} />,
   "/:organization/:incident/vet/vetrequest/edit/:id": ({id, incident, organization}) => <VetRequestForm id={id} state={initialWorkflowData} incident={incident} organization={organization} />,
   "/:organization/:incident/vet/vetrequest/:id": ({id, incident, organization}) => <VetRequestDetails id={id} incident={incident} organization={organization} />,
-  "/:organization/:incident/vet/vetrequest/:id/diagnostics": ({id, incident, organization}) => <DiagnosticsForm id={id} state={initialVetWorkflowData} incident={incident} organization={organization} />,
-  "/:organization/:incident/vet/vetrequest/:id/exam": ({id, incident, organization}) => <VetRequestExamForm id={id} incident={incident} organization={organization} />,
-  "/:organization/:incident/vet/vetrequest/:id/workflow": ({id, incident, organization}) => <VetStepperWorkflow id={id} incident={incident} organization={organization} />,
+  "/:organization/:incident/vet/medrecord/:id/diagnostics": ({id, incident, organization}) => <DiagnosticsForm id={id} state={initialVetWorkflowData} incident={incident} organization={organization} />,
+  "/:organization/:incident/vet/medrecord/:id/exam": ({id, incident, organization}) => <ExamForm id={id} incident={incident} organization={organization} />,
+  "/:organization/:incident/vet/medrecord/:id/workflow": ({id, incident, organization}) => <VetStepperWorkflow id={id} incident={incident} organization={organization} />,
 };
 
 export default routes;

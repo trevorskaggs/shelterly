@@ -48,7 +48,7 @@ const TreatmentPlanForm = (props) => {
 
   const [data, setData] = useState(current_data);
 
-  const [vetRequestData, setVetRequestData] = useState({animal_object: {id:'', name:'', species_string:'', medical_notes:''}});
+  const [medRecordData, setMedRecordData] = useState({animal_object: {id:'', name:'', species_string:'', medical_notes:''}});
 
   function calc_requests(formikProps) {
     let duration = moment.duration(moment(formikProps.values.end).add(1, 'm').diff(moment(formikProps.values.start)));
@@ -110,15 +110,15 @@ const TreatmentPlanForm = (props) => {
       fetchTreatmentPlan();
     };
 
-    if (props.vetrequestid) {
+    if (props.medrecordid) {
       const fetchVetRequest = async () => {
         // Fetch VetRequest data.
-        await axios.get('/vet/api/vetrequest/' + props.vetrequestid + '/', {
+        await axios.get('/vet/api/medrecord/' + props.medrecordid + '/', {
           cancelToken: source.token,
         })
         .then(response => {
           if (!unmounted) {
-            setVetRequestData(response.data);
+            setMedRecordData(response.data);
           }
         })
         .catch(error => {
@@ -223,13 +223,13 @@ const TreatmentPlanForm = (props) => {
                 <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
                   <ListGroup.Item>
                     <div className="row" style={{textTransform:"capitalize"}}>
-                      <span className="col-3"><b>ID:</b> <Link href={"/" + props.organization + "/" + props.incident + "/animals/" + vetRequestData.animal_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>A#{vetRequestData.animal_object.id}</Link></span>
-                      <span className="col-3"><b>Name:</b> {vetRequestData.animal_object.name||"Unknown"}</span>
-                      <span className="col-3"><b>Species:</b> {vetRequestData.animal_object.species_string}</span>
+                      <span className="col-3"><b>ID:</b> <Link href={"/" + props.organization + "/" + props.incident + "/animals/" + medRecordData.animal_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>A#{medRecordData.animal_object.id}</Link></span>
+                      <span className="col-3"><b>Name:</b> {medRecordData.animal_object.name||"Unknown"}</span>
+                      <span className="col-3"><b>Species:</b> {medRecordData.animal_object.species_string}</span>
                     </div>
                   </ListGroup.Item>
                   <ListGroup.Item>
-                      <span><b>Medical Notes:</b> {vetRequestData.animal_object.medical_notes || "N/A"}</span>
+                      <span><b>Medical Notes:</b> {medRecordData.animal_object.medical_notes || "N/A"}</span>
                   </ListGroup.Item>
                 </ListGroup>
               </Card.Body>
@@ -354,7 +354,7 @@ const TreatmentPlanForm = (props) => {
             }}>
               {props.state.steps.treatments.length -1 > props.state.treatmentIndex ? "Next Treatment" : "Add Another"}
             </Button> : ""}
-            <Button type="button" className="btn btn-primary border" onClick={() => { setAddAnother(false);formikProps.submitForm() }}>{is_workflow ? "Next" : "Save"}</Button>
+            <Button type="button" className="btn btn-primary border" onClick={() => { setAddAnother(false);formikProps.submitForm() }}>{is_workflow ? "Next Step" : "Save"}</Button>
           </ButtonGroup>
         </Card>
       )}

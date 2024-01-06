@@ -98,13 +98,14 @@ function VetRequestSearch({ incident, organization }) {
   };
 
   const handleApplyFilters = () => {
-    setVetRequests(data.vet_requests.filter(vet_request => options.species ? vet_request.animal_object.species_string === options.species : vet_request)
+    setVetRequests(data.vet_requests
+                          //  .filter(vet_request => options.species ? vet_request.animal_object.species_string === options.species : vet_request)
                            .filter(vet_request => options.status ? vet_request.status === options.status : vet_request)
                            .filter(vet_request => options.priority ? vet_request.priority === options.priority : vet_request)
                            .filter(vet_request => options.open ? (startDate <= moment(vet_request.open).format('YYYY-MM-DD') && endDate >= moment(vet_request.open).format('YYYY-MM-DD')) : vet_request)
-                           .filter(vet_request => options.assignee ? vet_request.assignee === options.assignee : vet_request)
-                           .filter(vet_request => options.shelter && options.shelter !== 'Remote' ? vet_request.animal_object.shelter === options.shelter : vet_request)
-                           .filter(vet_request => options.shelter === 'Remote' ? vet_request.animal_object.shelter === null : vet_request)
+                          //  .filter(vet_request => options.assignee ? vet_request.assignee === options.assignee : vet_request)
+                          //  .filter(vet_request => options.shelter && options.shelter !== 'Remote' ? vet_request.animal_object.shelter === options.shelter : vet_request)
+                          //  .filter(vet_request => options.shelter === 'Remote' ? vet_request.animal_object.shelter === null : vet_request)
     )
   };
 
@@ -181,6 +182,8 @@ function VetRequestSearch({ incident, organization }) {
           setNumPages(Math.ceil(response.data.length / ITEMS_PER_PAGE));
           setData({vet_requests: response.data, isFetching: false});
           setVetRequests(response.data);
+
+          console.log(response.data)
 
           // highlight search terms
           markInstances(searchTerm);
@@ -329,7 +332,7 @@ function VetRequestSearch({ incident, organization }) {
                 <Col xs="5">
                   <Row style={{marginBottom:"-16px"}}>
                     <Col className="pl-0 pr-0 mb-3 mr-3">
-                      <Select
+                      {/* <Select
                         label="Assignee"
                         id="assigneeDropdown"
                         name="assignee"
@@ -342,8 +345,8 @@ function VetRequestSearch({ incident, organization }) {
                         onChange={(instance) => {
                           setOptions({...options, assignee: instance ? instance.value : null});
                         }}
-                      />
-                      <Select
+                      /> */}
+                      {/* <Select
                         label="Shelter"
                         id="shelterDropdown"
                         name="shelter"
@@ -356,7 +359,7 @@ function VetRequestSearch({ incident, organization }) {
                         onChange={(instance) => {
                           setOptions({...options, shelter: instance ? instance.value : ''})
                         }}
-                      />
+                      /> */}
                       <Flatpickr 
                         options={{allowInput: true, altFormat: "F j, Y", dateFormat: "m-d-Y", mode: "range", maxDate: moment().format('MM-DD-YYYY')}}
                         style={{height:"36px", paddingLeft:"11px", borderRadius:".25rem", borderWidth:"1px", borderStyle:"solid"}}
@@ -402,7 +405,7 @@ function VetRequestSearch({ incident, organization }) {
                 <Link href={"/" + organization + "/" + incident + "/vet/vetrequest/" + vet_request.id}><FontAwesomeIcon icon={faDotCircle} className="mr-2" inverse /></Link>
               </OverlayTrigger>
               VR#{vet_request.id}
-              &nbsp;-&nbsp;{vet_request.animal_object.name || "Unknown"}
+              {/* &nbsp;-&nbsp;{vet_request.animal_object.name || "Unknown"} */}
               &nbsp;| {vet_request.status}
             </h4>
           </div>
@@ -416,12 +419,12 @@ function VetRequestSearch({ incident, organization }) {
                   <ListGroup>
                     <ListGroup.Item>
                       <Row>
-                        <Col>
+                        {/* <Col>
                           <b>Patient: </b><Link href={"/" + organization + "/" + incident + "/animals/" + vet_request.animal_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>A#{vet_request.animal_object.id}</Link>
                         </Col>
                         <Col style={{textTransform:"capitalize"}}>
                           <b>Species:</b> {vet_request.animal_object.species_string}
-                        </Col>
+                        </Col> */}
                       </Row>
                     </ListGroup.Item>
                     <ListGroup.Item>
@@ -436,31 +439,16 @@ function VetRequestSearch({ incident, organization }) {
                     </ListGroup.Item>
                     <ListGroup.Item>
                       <Row>
-                        <Col>
+                        {/* <Col>
                           <b>Assignee:</b> {vet_request.assignee_object ? <span>{vet_request.assignee_object.first_name} {vet_request.assignee_object.last_name}</span> : "Unassigned"}
-                        </Col>
-                        <Col>
+                        </Col> */}
+                        {/* <Col>
                           <b>Shelter: </b>{vet_request.shelter_name || "Remote"}
-                        </Col>
+                        </Col> */}
                       </Row>
                     </ListGroup.Item>
                   </ListGroup>
                 </Scrollbar>
-              </Card.Body>
-            </Card>
-            <Card style={{marginBottom:"6px"}}>
-              <Card.Body>
-                <Card.Title style={{marginTop:"-9px", marginBottom:"8px"}}>Treatments</Card.Title>
-                <ListGroup style={{height:"144px", overflowY:"auto"}}>
-                  <Scrollbar style={{height:"144px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
-                    {vet_request.treatment_plans.map((treatment, i) => (
-                      <ListGroup.Item key={treatment.id}>
-                        <Link href={"/" + organization + "/" + incident + "/vet/treatment/" + treatment.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{treatment.treatment_object.description || "Unknown"}</Link>
-                      </ListGroup.Item>
-                    ))}
-                  {vet_request.treatment_plans.length < 1 ? <ListGroup.Item>No Treatments</ListGroup.Item> : ""}
-                  </Scrollbar>
-                </ListGroup>
               </Card.Body>
             </Card>
           </CardGroup>

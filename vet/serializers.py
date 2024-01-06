@@ -2,13 +2,14 @@ from datetime import datetime
 from rest_framework import serializers
 from django.db.models import Q
 
-from .models import Exam, ExamAnswer, ExamQuestion, Diagnosis, Diagnostic, PresentingComplaint, Procedure, VetRequest, Treatment, TreatmentPlan, TreatmentRequest
+from .models import Exam, ExamAnswer, ExamQuestion, Diagnosis, Diagnostic, MedicalRecord, PresentingComplaint, Procedure, VetRequest, Treatment, TreatmentPlan, TreatmentRequest
 from accounts.serializers import UserSerializer
-from animals.serializers import SimpleAnimalSerializer
+from animals.serializers import ModestAnimalSerializer
 
 class ExamSerializer(serializers.ModelSerializer):
 
     answers = serializers.SerializerMethodField()
+    assignee_object = UserSerializer(source='assignee', required=False, read_only=True)
 
     def get_answers(self, obj):
         answer_dict = {}
@@ -79,7 +80,7 @@ class SimpleTreatmentPlanSerializer(serializers.ModelSerializer):
     animal_object = serializers.SerializerMethodField()
 
     def get_animal_object(self, obj):
-        return SimpleAnimalSerializer(obj.vet_request.patient, required=False, read_only=True).data
+        return ModestAnimalSerializer(obj.medical_record.patient, required=False, read_only=True).data
 
     class Meta:
         model = TreatmentPlan
@@ -99,14 +100,12 @@ class TreatmentPlanSerializer(SimpleTreatmentPlanSerializer):
     def get_status(self, obj):
         return "Complete" if obj.treatmentrequest_set.filter(Q(actual_admin_time__isnull=False) | Q(not_administered=True)).count() == obj.treatmentrequest_set.count() else "Awaiting" if obj.treatmentrequest_set.filter(suggested_admin_time__lte=datetime.now(), actual_admin_time__isnull=True).count() > 0 else "Scheduled"
 
+
 class VetRequestSerializer(serializers.ModelSerializer):
-    animal_object = SimpleAnimalSerializer(source='patient', required=False, read_only=True)
-    assignee_object = UserSerializer(source='assignee', required=False, read_only=True)
-    exam_object = ExamSerializer(source='exam', required=False, read_only=True)
-    treatment_plans = TreatmentPlanSerializer(source='treatmentplan_set', required=False, read_only=True, many=True)
+
+    animal_object = serializers.SerializerMethodField()
     complaints_text = serializers.SerializerMethodField()
-    diagnosis_text = serializers.SerializerMethodField()
-    shelter_name = serializers.SerializerMethodField()
+    requested_by_object = UserSerializer(source='requested_by', required=False, read_only=True)
 
     class Meta:
         model = VetRequest
@@ -115,11 +114,23 @@ class VetRequestSerializer(serializers.ModelSerializer):
     def get_complaints_text(self, obj):
         return ', '.join(obj.presenting_complaints.all().values_list('name', flat=True))
 
+    def get_animal_object(self, obj):
+        return ModestAnimalSerializer(obj.medical_record.patient).data
+
+class MedicalRecordSerializer(serializers.ModelSerializer):
+
+    animal_object = ModestAnimalSerializer(source='patient', required=False, read_only=True)
+    exams = ExamSerializer(source='exam_set', many=True, required=False, read_only=True)
+    treatment_plans = TreatmentPlanSerializer(source='treatmentplan_set', required=False, read_only=True, many=True)
+    vet_requests = VetRequestSerializer(source='vetrequest_set', required=False, read_only=True, many=True)
+    diagnosis_text = serializers.SerializerMethodField()
+
     def get_diagnosis_text(self, obj):
         diagnosis = obj.diagnosis.all().values_list('name', flat=True)
         if obj.diagnosis_other:
             list(diagnosis).insert(0, obj.diagnosis_other)
         return ', '.join(diagnosis)
 
-    def get_shelter_name(self, obj):
-        return obj.patient.shelter.name if obj.patient.shelter else ''
+    class Meta:
+        model = MedicalRecord
+        fields = '__all__'

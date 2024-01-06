@@ -6,6 +6,7 @@ from . import views
 app_name = 'vet'
 router = DefaultRouter()
 router.register(r'vetrequest', views.VetRequestViewSet)
+router.register(r'medrecord', views.MedicalRecordViewSet)
 router.register(r'treatment', views.TreatmentViewSet)
 router.register(r'treatmentplan', views.TreatmentPlanViewSet)
 router.register(r'treatmentrequest', views.TreatmentRequestViewSet)

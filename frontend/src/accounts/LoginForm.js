@@ -70,7 +70,7 @@ const Login = () => {
               placeholder="Email"
               size="lg"
               label="Email"
-              formGroupClasses="mb-0 mt-3"
+              formgroupclasses="mb-0 mt-3"
             />
             <TextInput
               type="password"
@@ -79,7 +79,7 @@ const Login = () => {
               placeholder="Password"
               size="lg"
               label="Password"
-              formGroupClasses="mt-0 mb-4 mt-3"
+              formgroupclasses="mt-0 mb-4 mt-3"
             />
             <BootstrapForm.Group as={Col}>
               <Button type="submit" size="lg" className="btn-primary" block>Login{state.isLoading ? <FontAwesomeIcon icon={faSpinner} className="ml-1" spin inverse /> : ""}</Button>
@@ -120,7 +120,7 @@ const Login = () => {
                   id="email"
                   placeholder="Please enter your email address"
                   size="lg"
-                  formGroupClasses="mb-0"
+                  formgroupclasses="mb-0"
                   label="Email Address"
                 />
               </Modal.Body>

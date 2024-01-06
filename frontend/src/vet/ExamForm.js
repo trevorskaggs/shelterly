@@ -30,6 +30,7 @@ import { DropDown, TextInput } from '../components/Form';
 import { SystemErrorContext } from '../components/SystemError';
 import { catAgeChoices, dogAgeChoices, horseAgeChoices, otherAgeChoices, sexChoices } from '../animals/constants';
 import Patient from './components/Patient';
+import { AuthContext } from "../accounts/AccountsReducer";
 
 // From https://stackoverflow.com/a/71290404
 function createYupSchema(schema, config) {
@@ -63,19 +64,22 @@ function createYupSchema(schema, config) {
   return schema;
 }
 
-const VetRequestExamForm = (props) => {
+const ExamForm = (props) => {
 
+  const { dispatch, state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
   // Determine if we're in the vet exam workflow.
   var is_workflow = window.location.pathname.includes("workflow");
 
-  const [data, setData] = useState({id: '', patient:{}, assignee:{}, exam: null, open: '', assigned:'', closed: '', concern: '', priority: '', diagnosis: '', other_diagnosis:'', treatment_plans:[], presenting_complaints:[], exam_object: {'vetrequest_id':props.id, 'confirm_sex_age':false, 'confirm_chip':false, 'weight':null, 'weight_unit':'', 'weight_estimated':false, 'temperature':'', 'temperature_method':'', 'comments':''}, animal_object: {id:'', name:'', species:'', category:'', sex:'', age:'', size:'', pcolor:'', scolor:'', medical_notes:''}})
+  const [data, setData] = useState({id: '', exam: null, open: '', exam_object: {'medrecord_id':props.id, assignee:null, 'confirm_sex_age':false, 'confirm_chip':false, 'weight':null, 'weight_unit':'', 'weight_estimated':false, 'temperature':'', 'temperature_method':'', 'pulse':'', 'respiratory_rate':''}, animal_object: {id:'', name:'', species:'', category:'', sex:'', age:'', size:'', pcolor:'', scolor:'', medical_notes:''}})
   const [examQuestions, setExamQuestions] = useState([]);
   const [showNotes, setShowNotes] = useState({});
+  const [saveAndFinish, setSaveAndFinish] = useState(false);
   const [getRef, setRef] = useDynamicRefs();
   const ordered = useOrderedNodes();
   const [shouldCheckForScroll, setShouldCheckForScroll] = React.useState(false);
+  const [assigneeChoices, setAssigneeChoices] = useState([]);
   const [formSchema, setFormSchema] = useState([{
     id:'confirm_sex_age',
     validationType:"bool",
@@ -148,8 +152,8 @@ const VetRequestExamForm = (props) => {
     let open_notes_dict = {};
     if (props.id) {
       const fetchExam = async () => {
-        // Fetch VetRequest + Exam data.
-        await axios.get('/vet/api/vetrequest/' + props.id + '/', {
+        // Fetch MedRecord + Exam data.
+        await axios.get('/vet/api/medrecord/' + props.id + '/', {
           cancelToken: source.token,
         })
         .then(response => {
@@ -166,7 +170,7 @@ const VetRequestExamForm = (props) => {
             else {
               response.data.exam_object = data.exam_object;
             }
-            response.data.exam_object['vetrequest_id'] = props.id
+            response.data.exam_object['medrecord_id'] = props.id
             response.data.exam_object['age'] = response.data.animal_object.age
             response.data.exam_object['sex'] = response.data.animal_object.sex
             response.data.exam_object['microchip'] = response.data.animal_object.microchip
@@ -245,6 +249,26 @@ const VetRequestExamForm = (props) => {
       };
 
       fetchExam();
+
+      const fetchAssignees = async () => {
+        // Fetch assignee data.
+        await axios.get('/accounts/api/user/?vet=true&organization=' + state.organization.id, {
+          cancelToken: source.token,
+        })
+        .then(response => {
+          if (!unmounted) {
+            let options = [];
+            response.data.forEach(function(person) {
+              options.unshift({value: person.id, label: person.first_name + ' ' + person.last_name})
+            });
+            setAssigneeChoices(options);
+          }
+        })
+        .catch(error => {
+          setShowSystemError(true);
+        });
+      };
+      fetchAssignees();
     };
 
     // Cleanup.
@@ -266,10 +290,15 @@ const VetRequestExamForm = (props) => {
           axios.put('/vet/api/exam/' + data.exam + '/', values)
           .then(response => {
             if (is_workflow) {
-              props.onSubmit('exam', values, 'diagnostics');
+              if (saveAndFinish) {
+                navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + props.id);
+              }
+              else {
+                props.onSubmit('exam', values, 'diagnostics');
+              }
             }
             else {
-              navigate('/' + props.organization + '/' + props.incident + '/vet/vetrequest/' + props.id)
+              navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + props.id);
             }
           })
           .catch(error => {
@@ -281,13 +310,19 @@ const VetRequestExamForm = (props) => {
           axios.post('/vet/api/exam/', values)
           .then(response => {
             if (is_workflow) {
-              props.onSubmit('exam', values, 'diagnostics');
+              if (saveAndFinish) {
+                navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + props.id);
+              }
+              else {
+                props.onSubmit('exam', values, 'diagnostics');
+              }
             }
             else {
-              navigate('/' + props.organization + '/' + props.incident + '/vet/vetrequest/' + props.id)
+              navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + props.id)
             }
           })
           .catch(error => {
+            console.log(error.response)
             setShowSystemError(true);
           });
           setSubmitting(false);
@@ -296,12 +331,28 @@ const VetRequestExamForm = (props) => {
     >
       {formikProps => (
         <Card border="secondary" className="mt-3">
-          <Card.Header as="h5" className="pl-3"><span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + props.organization + '/' + props.incident + '/vet/vetrequest/' + props.id + '/')} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>Veterinary Exam Form</Card.Header>
+          <Card.Header as="h5" className="pl-3"><span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + props.id + '/')} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>Veterinary Exam Form</Card.Header>
           <Patient animal={data.animal_object} organization={props.organization} incident={props.incident} />
           <Card.Body>
             <Form>
               <FormGroup>
               <Row>
+                <Col xs={"4"}>
+                  <DropDown
+                    label="Doctor Assigned"
+                    id="assigneeDropdown"
+                    name="assignee"
+                    type="text"
+                    key={`my_unique_assignee_select_key__${formikProps.values.assignee}`}
+                    options={assigneeChoices}
+                    isClearable={true}
+                    onChange={(instance) => {
+                      formikProps.setFieldValue("assignee", instance === null ? '' : instance.value);
+                    }}
+                  />
+                </Col>
+              </Row>
+              <BootstrapForm.Row className="mt-3">
                 <Col xs="2">
                   <BootstrapForm.Label htmlFor="confirm_sex_age" style={{marginBottom:"-5px"}}>Confirm Age/Sex</BootstrapForm.Label>
                   <div style={{marginLeft:"20px"}}><Field component={Switch} name="confirm_sex_age" type="checkbox" color="primary" /></div>
@@ -321,7 +372,7 @@ const VetRequestExamForm = (props) => {
                     disabled={formikProps.values.confirm_sex_age}
                   />
                 </Col>
-                <Col xs="2" style={{paddingLeft:"0px", marginLeft:"-5px"}}>
+                <Col xs="2">
                   <DropDown
                     label="Sex"
                     id="sexDropDown"
@@ -334,7 +385,7 @@ const VetRequestExamForm = (props) => {
                     value={formikProps.values.sex||data.animal_object.age}
                   />
                 </Col>
-              </Row>
+              </BootstrapForm.Row>
               <Row className="mt-3">
                 <Col xs="2">
                   <BootstrapForm.Label htmlFor="confirm_chip" style={{marginBottom:"-5px"}}>Microchip Present</BootstrapForm.Label>
@@ -350,7 +401,7 @@ const VetRequestExamForm = (props) => {
                     value={formikProps.values.microchip || data.animal_object.microchip}
                   />
               </Row>
-              <Row style={{marginBottom:"-15px"}}>
+              <BootstrapForm.Row style={{marginBottom:"-15px"}}>
                 <TextInput
                   id="weight"
                   name="weight"
@@ -359,7 +410,7 @@ const VetRequestExamForm = (props) => {
                   xs="3"
                   value={data.weight || formikProps.values.weight}
                 />
-                <Col xs="1" className="pl-0" style={{marginBottom:"-2px", marginLeft:"-5px"}}>
+                <Col xs="1" style={{marginBottom:"-2px"}}>
                   <DropDown
                     id={"weight_unit"}
                     name={"weight_unit"}
@@ -379,10 +430,11 @@ const VetRequestExamForm = (props) => {
                   onChange={() => {
                     formikProps.setFieldValue('weight_estimated', !formikProps.values['weight_estimated']);
                   }}
+                  style={{marginTop:"-60px"}}
                 />
                 <span>&nbsp;&nbsp;Estimated</span>
-              </Row>
-              <Row className="mt-3" style={{marginBottom:"-15px"}}>
+              </BootstrapForm.Row>
+              <BootstrapForm.Row className="mt-3" style={{marginBottom:"-15px"}}>
                 <TextInput
                   id="temperature"
                   name="temperature"
@@ -390,7 +442,7 @@ const VetRequestExamForm = (props) => {
                   label="Temperature (F)"
                   xs="2"
                 />
-                <Col xs="2" className="pl-0" style={{marginLeft:"-5px"}}>
+                <Col xs="2">
                   <DropDown
                     key={formikProps.values['temperature_method']}
                     id={"temperature_method"}
@@ -405,14 +457,30 @@ const VetRequestExamForm = (props) => {
                     }}
                   />
                 </Col>
-              </Row>
+              </BootstrapForm.Row>
+              <BootstrapForm.Row className="mt-3" style={{marginBottom:"-15px"}}>
+                <TextInput
+                  id="pulse"
+                  name="pulse"
+                  type="text"
+                  label="Pulse"
+                  xs="2"
+                />
+                <TextInput
+                  id="respiratory_rate"
+                  name="respiratory_rate"
+                  type="text"
+                  label="Respiratory Rate"
+                  xs="2"
+                />
+              </BootstrapForm.Row>
               {examQuestions.map((question, index) =>
                 <span key={question.id}>
                   <Row className="mt-3" style={{marginBottom:"4px"}}>
-                    <Col xs="2" className="pr-0">
+                    <Col xs="2" className="">
                       {question.name}
                     </Col>
-                    <Col xs="2" className="pl-0 pr-0" style={{marginLeft:"-5px"}}>
+                    <Col xs="2" className="pl-0 " style={{marginLeft:"-5px"}}>
                       {question.allow_not_examined ? 
                       <span>
                         <input
@@ -480,7 +548,8 @@ const VetRequestExamForm = (props) => {
             </Form>
           </Card.Body>
           <ButtonGroup>
-            <ButtonSpinner isSubmitting={formikProps.isSubmitting} isSubmittingText="Saving..."  type="submit" className="btn btn-primary" onClick={() => { setShouldCheckForScroll(true);formikProps.submitForm(); }}>{is_workflow ? "Next" : "Save"}</ButtonSpinner>
+            {is_workflow ? <ButtonSpinner isSubmitting={formikProps.isSubmitting} isSubmittingText="Saving..."  type="submit" className="btn btn-primary" onClick={() => { setShouldCheckForScroll(true);setSaveAndFinish(true);formikProps.submitForm(); }}>Save and Finish</ButtonSpinner> : ""}
+            <ButtonSpinner isSubmitting={formikProps.isSubmitting} isSubmittingText="Saving..."  type="submit" className="btn btn-primary border" onClick={() => { setShouldCheckForScroll(true);setSaveAndFinish(false);formikProps.submitForm(); }}>{is_workflow ? "Next Step" : "Save"}</ButtonSpinner>
           </ButtonGroup>
         </Card>
       )}
@@ -488,4 +557,4 @@ const VetRequestExamForm = (props) => {
   );
 };
 
-export default VetRequestExamForm;
+export default ExamForm;

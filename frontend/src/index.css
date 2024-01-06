@@ -247,6 +247,26 @@ input[disabled] {
   color: #b18662 !important;
 }
 
+.exam-link:hover {
+  color: #a52b44 !important;
+}
+
+.exam-hover-div:hover .exam-icon {
+  color: #a52b44 !important;
+}
+
+.exam-hover-div:hover {
+  border-color: #a52b44 !important;
+}
+
+.exam-hover-div:hover .text-border {
+  color: #a52b44 !important;
+}
+
+.exam-hover-div:hover .border-top {
+  border-color: #a52b44 !important;
+}
+
 .text-link:hover {
   color: #6657e7 !important;
   text-decoration: underline !important;

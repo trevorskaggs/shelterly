@@ -67,9 +67,9 @@ const DiagnosisForm = (props) => {
     let unmounted = false;
     let source = axios.CancelToken.source();
     if (props.id) {
-      const fetchVetRequest = async () => {
+      const fetchMedRecord = async () => {
         // Fetch VetRequest data.
-        await axios.get('/vet/api/vetrequest/' + props.id + '/', {
+        await axios.get('/vet/api/medrecord/' + props.id + '/', {
           cancelToken: source.token,
         })
         .then(response => {
@@ -81,7 +81,7 @@ const DiagnosisForm = (props) => {
           setShowSystemError(true);
         });
       };
-      fetchVetRequest();
+      fetchMedRecord();
     };
 
     const fetchDiagnoses = async () => {
@@ -122,9 +122,9 @@ const DiagnosisForm = (props) => {
         diagnosis_notes: Yup.string().nullable().max(300, 'Maximum character limit of 300.'),
       })}
       onSubmit={(values, { setSubmitting }) => {
-        axios.patch('/vet/api/vetrequest/' + props.id + '/', values)
+        axios.patch('/vet/api/medrecord/' + props.id + '/', values)
         .then(response => {
-          navigate('/' + props.organization + '/' + props.incident + '/vet/vetrequest/' + props.id);
+          navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + props.id);
         })
         .catch(error => {
           setShowSystemError(true);
