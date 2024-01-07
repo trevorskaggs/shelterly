@@ -32,6 +32,78 @@ import { catAgeChoices, dogAgeChoices, horseAgeChoices, otherAgeChoices, sexChoi
 import Patient from './components/Patient';
 import { AuthContext } from "../accounts/AccountsReducer";
 
+const initialSchemaData = [{
+  id:'confirm_sex_age',
+  validationType:"bool",
+  validations: [{
+    type:'oneOf',
+    params: [[true], "Age/Sex must be confirmed"]
+  },]},{
+  id:'confirm_chip',
+  validationType:"bool"},{
+    id:'microchip',
+    validationType:"string",
+    validations: [{
+      type:'max',
+      params: [50, "Max of 50 characters allowed"]
+    },]},{
+  id:'weight',
+  validationType:"number",
+  validations: [
+  {
+    type:'nullable',
+    params: []
+  },
+  {
+    type:'required',
+    params: ["This field is required"]
+  },
+]
+},{
+  id:'weight_unit',
+  validationType:"string",
+  validations: [{
+    type:'required',
+    params: ["Required"]
+  },]},{
+    id:'weight_estimated',
+    validationType:"bool"},{
+  id:'temperature',
+  validationType:"string"},{
+  id:'temperature_method',
+  validationType:"string",
+  validations: [{
+    type:'required',
+    params: ["This field is required"]
+  },]},{
+    id:'pulse',
+    validationType:"number",
+    validations: [
+    {
+      type:'nullable',
+      params: []
+    },
+    {
+      type:'required',
+      params: ["This field is required"]
+    },
+  ]
+  },{
+    id:'respiratory_rate',
+    validationType:"number",
+    validations: [
+    {
+      type:'nullable',
+      params: []
+    },
+    {
+      type:'required',
+      params: ["This field is required"]
+    },
+  ]
+  },
+]
+
 // From https://stackoverflow.com/a/71290404
 function createYupSchema(schema, config) {
   const { id, validationType, validations = [] } = config;
@@ -72,7 +144,7 @@ const ExamForm = (props) => {
   // Determine if we're in the vet exam workflow.
   var is_workflow = window.location.pathname.includes("workflow");
 
-  const [data, setData] = useState({id: '', exam: null, open: '', exam_object: {'medrecord_id':props.id, assignee:null, 'confirm_sex_age':false, 'confirm_chip':false, 'weight':null, 'weight_unit':'', 'weight_estimated':false, 'temperature':'', 'temperature_method':'', 'pulse':'', 'respiratory_rate':''}, animal_object: {id:'', name:'', species:'', category:'', sex:'', age:'', size:'', pcolor:'', scolor:'', medical_notes:''}})
+  const [data, setData] = useState({id: '', exam: null, open: '', exam_object: {'medrecord_id':props.medrecordid, assignee:null, 'confirm_sex_age':false, 'confirm_chip':false, 'weight':null, 'weight_unit':'', 'weight_estimated':false, 'temperature':'', 'temperature_method':'', 'pulse':'', 'respiratory_rate':''}, animal_object: {id:'', name:'', species:'', category:'', sex:'', age:'', size:'', pcolor:'', scolor:'', medical_notes:''}})
   const [examQuestions, setExamQuestions] = useState([]);
   const [showNotes, setShowNotes] = useState({});
   const [saveAndFinish, setSaveAndFinish] = useState(false);
@@ -80,51 +152,7 @@ const ExamForm = (props) => {
   const ordered = useOrderedNodes();
   const [shouldCheckForScroll, setShouldCheckForScroll] = React.useState(false);
   const [assigneeChoices, setAssigneeChoices] = useState([]);
-  const [formSchema, setFormSchema] = useState([{
-    id:'confirm_sex_age',
-    validationType:"bool",
-    validations: [{
-      type:'oneOf',
-      params: [[true], "Age/Sex must be confirmed"]
-    },]},{
-    id:'confirm_chip',
-    validationType:"bool"},{
-      id:'microchip',
-      validationType:"string",
-      validations: [{
-        type:'max',
-        params: [50, "Max of 50 characters allowed"]
-      },]},{
-    id:'weight',
-    validationType:"number",
-    validations: [
-    {
-      type:'nullable',
-      params: []
-    },
-    {
-      type:'required',
-      params: ["This field is required"]
-    },
-  ]
-  },{
-    id:'weight_unit',
-    validationType:"string",
-    validations: [{
-      type:'required',
-      params: ["Required"]
-    },]},{
-      id:'weight_estimated',
-      validationType:"bool"},{
-    id:'temperature',
-    validationType:"string"},{
-    id:'temperature_method',
-    validationType:"string",
-    validations: [{
-      type:'required',
-      params: ["This field is required"]
-    },]},
-  ]);
+  const [formSchema, setFormSchema] = useState([]);
   const ageChoices = {'':[], 'dog':dogAgeChoices, 'cat':catAgeChoices, 'horse':horseAgeChoices, 'other':otherAgeChoices}
 
   // Hook scrolling to top error.
@@ -150,27 +178,28 @@ const ExamForm = (props) => {
     let unmounted = false;
     let source = axios.CancelToken.source();
     let open_notes_dict = {};
-    if (props.id) {
+    if (props.medrecordid) {
       const fetchExam = async () => {
         // Fetch MedRecord + Exam data.
-        await axios.get('/vet/api/medrecord/' + props.id + '/', {
+        await axios.get('/vet/api/medrecord/' + props.medrecordid + '/', {
           cancelToken: source.token,
         })
         .then(response => {
           if (!unmounted) {
             // Unpack existing answers and set at exam_object level.
-            if (response.data.exam) {
-              Object.keys(response.data.exam_object.answers).forEach(key => {
-                response.data.exam_object[key] = response.data.exam_object.answers[key];
-                if (key.includes('_notes') && response.data.exam_object.answers[key]) {
-                  open_notes_dict[key.split('_notes')[0]] = true;
-                }
-              })
-            }
-            else {
-              response.data.exam_object = data.exam_object;
-            }
-            response.data.exam_object['medrecord_id'] = props.id
+            // if (response.data.exam) {
+            //   Object.keys(response.data.exam_object.answers).forEach(key => {
+            //     response.data.exam_object[key] = response.data.exam_object.answers[key];
+            //     if (key.includes('_notes') && response.data.exam_object.answers[key]) {
+            //       open_notes_dict[key.split('_notes')[0]] = true;
+            //     }
+            //   })
+            // }
+            // else {
+            //   response.data.exam_object = data.exam_object;
+            // }
+            response.data.exam_object = data.exam_object;
+            response.data.exam_object['medrecord_id'] = props.medrecordid
             response.data.exam_object['age'] = response.data.animal_object.age
             response.data.exam_object['sex'] = response.data.animal_object.sex
             response.data.exam_object['microchip'] = response.data.animal_object.microchip
@@ -181,7 +210,7 @@ const ExamForm = (props) => {
             })
             .then(questionResponse => {
               if (!unmounted) {
-                let config = [...formSchema];
+                let config = [...initialSchemaData];
                 // Filter the questions by the animal category.
                 let filtered_data = questionResponse.data.filter(question => question.categories.includes(response.data.animal_object.category))
                 setExamQuestions(filtered_data);
@@ -276,7 +305,7 @@ const ExamForm = (props) => {
       unmounted = true;
       source.cancel();
     };
-  }, [props.id]);
+  }, [props.medrecordid]);
 
   return (
     <Formik
@@ -291,14 +320,14 @@ const ExamForm = (props) => {
           .then(response => {
             if (is_workflow) {
               if (saveAndFinish) {
-                navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + props.id);
+                navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + props.medrecordid);
               }
               else {
                 props.onSubmit('exam', values, 'diagnostics');
               }
             }
             else {
-              navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + props.id);
+              navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + props.medrecordid);
             }
           })
           .catch(error => {
@@ -311,18 +340,17 @@ const ExamForm = (props) => {
           .then(response => {
             if (is_workflow) {
               if (saveAndFinish) {
-                navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + props.id);
+                navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + props.medrecordid);
               }
               else {
                 props.onSubmit('exam', values, 'diagnostics');
               }
             }
             else {
-              navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + props.id)
+              navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + props.medrecordid)
             }
           })
           .catch(error => {
-            console.log(error.response)
             setShowSystemError(true);
           });
           setSubmitting(false);
@@ -331,149 +359,149 @@ const ExamForm = (props) => {
     >
       {formikProps => (
         <Card border="secondary" className="mt-3">
-          <Card.Header as="h5" className="pl-3"><span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + props.id + '/')} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>Veterinary Exam Form</Card.Header>
+          <Card.Header as="h5" className="pl-3"><span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + props.medrecordid + '/')} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>Veterinary Exam Form</Card.Header>
           <Patient animal={data.animal_object} organization={props.organization} incident={props.incident} />
           <Card.Body>
             <Form>
               <FormGroup>
-              <Row>
-                <Col xs={"4"}>
-                  <DropDown
-                    label="Doctor Assigned"
-                    id="assigneeDropdown"
-                    name="assignee"
+                <BootstrapForm.Row>
+                  <Col xs={"4"}>
+                    <DropDown
+                      label="Doctor Assigned"
+                      id="assigneeDropdown"
+                      name="assignee"
+                      type="text"
+                      key={`my_unique_assignee_select_key__${formikProps.values.assignee}`}
+                      options={assigneeChoices}
+                      isClearable={true}
+                      onChange={(instance) => {
+                        formikProps.setFieldValue("assignee", instance === null ? '' : instance.value);
+                      }}
+                    />
+                  </Col>
+                </BootstrapForm.Row>
+                <BootstrapForm.Row className="mt-3">
+                  <Col xs="2">
+                    <BootstrapForm.Label htmlFor="confirm_sex_age" style={{marginBottom:"-5px"}}>Confirm Age/Sex</BootstrapForm.Label>
+                    <div style={{marginLeft:"20px"}}><Field component={Switch} name="confirm_sex_age" type="checkbox" color="primary" /></div>
+                    {formikProps.errors['confirm_sex_age'] ? <div style={{ color: "#e74c3c", marginTop: ".5rem", fontSize: "80%" }}>{formikProps.errors['confirm_sex_age']}</div> : ""}
+                  </Col>
+                  <Col xs="2">
+                    <DropDown
+                      label="Age"
+                      id="age"
+                      name="age"
+                      type="text"
+                      xs="4"
+                      key={`my_unique_age_select_key__${formikProps.values.age}`}
+                      options={Object.keys(ageChoices).includes(data.animal_object.species) ? ageChoices[data.animal_object.species] : ageChoices['other']}
+                      value={formikProps.values.age||data.animal_object.age}
+                      isClearable={false}
+                      disabled={formikProps.values.confirm_sex_age}
+                    />
+                  </Col>
+                  <Col xs="2">
+                    <DropDown
+                      label="Sex"
+                      id="sexDropDown"
+                      name="sex"
+                      type="text"
+                      key={`my_unique_sex_select_key__${formikProps.values.sex}`}
+                      options={sexChoices}
+                      isClearable={false}
+                      disabled={formikProps.values.confirm_sex_age}
+                      value={formikProps.values.sex||data.animal_object.age}
+                    />
+                  </Col>
+                </BootstrapForm.Row>
+                <Row className="mt-3">
+                  <Col xs="2">
+                    <BootstrapForm.Label htmlFor="confirm_chip" style={{marginBottom:"-5px"}}>Microchip Present</BootstrapForm.Label>
+                    <div style={{marginLeft:"20px"}}><Field component={Switch} name="confirm_chip" type="checkbox" color="primary" /></div>
+                  </Col>
+                  <TextInput
+                      id="microchip"
+                      name="microchip"
+                      type="text"
+                      label="Microchip"
+                      xs="3"
+                      disabled={!formikProps.values.confirm_chip}
+                      value={formikProps.values.microchip || data.animal_object.microchip}
+                    />
+                </Row>
+                <BootstrapForm.Row style={{marginBottom:"-15px"}}>
+                  <TextInput
+                    id="weight"
+                    name="weight"
                     type="text"
-                    key={`my_unique_assignee_select_key__${formikProps.values.assignee}`}
-                    options={assigneeChoices}
-                    isClearable={true}
-                    onChange={(instance) => {
-                      formikProps.setFieldValue("assignee", instance === null ? '' : instance.value);
-                    }}
-                  />
-                </Col>
-              </Row>
-              <BootstrapForm.Row className="mt-3">
-                <Col xs="2">
-                  <BootstrapForm.Label htmlFor="confirm_sex_age" style={{marginBottom:"-5px"}}>Confirm Age/Sex</BootstrapForm.Label>
-                  <div style={{marginLeft:"20px"}}><Field component={Switch} name="confirm_sex_age" type="checkbox" color="primary" /></div>
-                  {formikProps.errors['confirm_sex_age'] ? <div style={{ color: "#e74c3c", marginTop: ".5rem", fontSize: "80%" }}>{formikProps.errors['confirm_sex_age']}</div> : ""}
-                </Col>
-                <Col xs="2">
-                  <DropDown
-                    label="Age"
-                    id="age"
-                    name="age"
-                    type="text"
-                    xs="4"
-                    key={`my_unique_age_select_key__${formikProps.values.age}`}
-                    options={Object.keys(ageChoices).includes(data.animal_object.species) ? ageChoices[data.animal_object.species] : ageChoices['other']}
-                    value={formikProps.values.age||data.animal_object.age}
-                    isClearable={false}
-                    disabled={formikProps.values.confirm_sex_age}
-                  />
-                </Col>
-                <Col xs="2">
-                  <DropDown
-                    label="Sex"
-                    id="sexDropDown"
-                    name="sex"
-                    type="text"
-                    key={`my_unique_sex_select_key__${formikProps.values.sex}`}
-                    options={sexChoices}
-                    isClearable={false}
-                    disabled={formikProps.values.confirm_sex_age}
-                    value={formikProps.values.sex||data.animal_object.age}
-                  />
-                </Col>
-              </BootstrapForm.Row>
-              <Row className="mt-3">
-                <Col xs="2">
-                  <BootstrapForm.Label htmlFor="confirm_chip" style={{marginBottom:"-5px"}}>Microchip Present</BootstrapForm.Label>
-                  <div style={{marginLeft:"20px"}}><Field component={Switch} name="confirm_chip" type="checkbox" color="primary" /></div>
-                </Col>
-                <TextInput
-                    id="microchip"
-                    name="microchip"
-                    type="text"
-                    label="Microchip"
+                    label="Weight"
                     xs="3"
-                    disabled={!formikProps.values.confirm_chip}
-                    value={formikProps.values.microchip || data.animal_object.microchip}
+                    value={data.weight || formikProps.values.weight}
                   />
-              </Row>
-              <BootstrapForm.Row style={{marginBottom:"-15px"}}>
-                <TextInput
-                  id="weight"
-                  name="weight"
-                  type="text"
-                  label="Weight"
-                  xs="3"
-                  value={data.weight || formikProps.values.weight}
-                />
-                <Col xs="1" style={{marginBottom:"-2px"}}>
-                  <DropDown
-                    id={"weight_unit"}
-                    name={"weight_unit"}
-                    type="text"
-                    label="Unit"
-                    placeholder=""
-                    options={[{value:'g', label:'g'}, {value:'kg', label:'kg'}]}
-                    isClearable={false}
-                  />
-                </Col>
-                <input
-                  id="weight_estimated"
-                  name="weight_estimated"
-                  type="checkbox"
-                  className="ml-3"
-                  checked={formikProps.values['weight_estimated']}
-                  onChange={() => {
-                    formikProps.setFieldValue('weight_estimated', !formikProps.values['weight_estimated']);
-                  }}
-                  style={{marginTop:"-60px"}}
-                />
-                <span>&nbsp;&nbsp;Estimated</span>
-              </BootstrapForm.Row>
-              <BootstrapForm.Row className="mt-3" style={{marginBottom:"-15px"}}>
-                <TextInput
-                  id="temperature"
-                  name="temperature"
-                  type="text"
-                  label="Temperature (F)"
-                  xs="2"
-                />
-                <Col xs="2">
-                  <DropDown
-                    key={formikProps.values['temperature_method']}
-                    id={"temperature_method"}
-                    name={"temperature_method"}
-                    type="text"
-                    label="Method"
-                    placeholder=""
-                    options={[{value:'Axillary', label:'Axillary'}, {value:'Rectal', label:'Rectal'}, {value:'Not taken', label:'Not taken'}, {value:'Unable to obtain', label:'Unable to obtain'}]}
-                    isClearable={false}
-                    onChange={(instance) => {
-                      formikProps.setFieldValue('temperature_method', instance === null ? '' : instance.value);
+                  <Col xs="1" style={{marginBottom:"-2px"}}>
+                    <DropDown
+                      id={"weight_unit"}
+                      name={"weight_unit"}
+                      type="text"
+                      label="Unit"
+                      placeholder=""
+                      options={[{value:'g', label:'g'}, {value:'kg', label:'kg'}]}
+                      isClearable={false}
+                    />
+                  </Col>
+                  <input
+                    id="weight_estimated"
+                    name="weight_estimated"
+                    type="checkbox"
+                    className="ml-3"
+                    checked={formikProps.values['weight_estimated']}
+                    onChange={() => {
+                      formikProps.setFieldValue('weight_estimated', !formikProps.values['weight_estimated']);
                     }}
+                    style={{marginTop:"-60px"}}
                   />
-                </Col>
-              </BootstrapForm.Row>
-              <BootstrapForm.Row className="mt-3" style={{marginBottom:"-15px"}}>
-                <TextInput
-                  id="pulse"
-                  name="pulse"
-                  type="text"
-                  label="Pulse"
-                  xs="2"
-                />
-                <TextInput
-                  id="respiratory_rate"
-                  name="respiratory_rate"
-                  type="text"
-                  label="Respiratory Rate"
-                  xs="2"
-                />
-              </BootstrapForm.Row>
+                  <span>&nbsp;&nbsp;Estimated</span>
+                </BootstrapForm.Row>
+                <BootstrapForm.Row className="mt-3" style={{marginBottom:"-15px"}}>
+                  <TextInput
+                    id="temperature"
+                    name="temperature"
+                    type="text"
+                    label="Temperature (F)"
+                    xs="2"
+                  />
+                  <Col xs="2">
+                    <DropDown
+                      key={formikProps.values['temperature_method']}
+                      id={"temperature_method"}
+                      name={"temperature_method"}
+                      type="text"
+                      label="Method"
+                      placeholder=""
+                      options={[{value:'Axillary', label:'Axillary'}, {value:'Rectal', label:'Rectal'}, {value:'Not taken', label:'Not taken'}, {value:'Unable to obtain', label:'Unable to obtain'}]}
+                      isClearable={false}
+                      onChange={(instance) => {
+                        formikProps.setFieldValue('temperature_method', instance === null ? '' : instance.value);
+                      }}
+                    />
+                  </Col>
+                </BootstrapForm.Row>
+                <BootstrapForm.Row className="mt-3" style={{marginBottom:"-15px"}}>
+                  <TextInput
+                    id="pulse"
+                    name="pulse"
+                    type="text"
+                    label="Pulse"
+                    xs="2"
+                  />
+                  <TextInput
+                    id="respiratory_rate"
+                    name="respiratory_rate"
+                    type="text"
+                    label="Respiratory Rate"
+                    xs="2"
+                  />
+                </BootstrapForm.Row>
               {examQuestions.map((question, index) =>
                 <span key={question.id}>
                   <Row className="mt-3" style={{marginBottom:"4px"}}>

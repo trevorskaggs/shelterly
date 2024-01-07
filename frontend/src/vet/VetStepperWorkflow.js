@@ -74,7 +74,7 @@ function getSteps() {
 function getStepContent(id, incident, organization, step, handleStepSubmit, handleBack, state) {
   switch (step) {
     case 0:
-      return <ExamForm onSubmit={handleStepSubmit} handleBack={handleBack} state={state} id={id} incident={incident} organization={organization} />;
+      return <ExamForm onSubmit={handleStepSubmit} handleBack={handleBack} state={state} medrecordid={id} incident={incident} organization={organization} />;
     case 1:
       return <DiagnosticsForm onSubmit={handleStepSubmit} handleBack={handleBack} state={state} id={id} incident={incident} organization={organization} />;
     case 2:

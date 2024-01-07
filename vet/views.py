@@ -21,9 +21,13 @@ class ExamViewSet(viewsets.ModelViewSet):
             med_record = MedicalRecord.objects.get(id=self.request.data.get('medrecord_id'))
             serializer.validated_data['medical_record'] = med_record
             exam = serializer.save()
+            # Close open vet requests once Exam is complete.
+            VetRequest.objects.filter(medical_record=self.request.data.get('medrecord_id')).update(status='Closed')
+            # Update Animal with animal data.
             Animal.objects.filter(id=self.request.data.get('animal_id')).update(age=self.request.data.get('age'), sex=self.request.data.get('sex'), microchip=self.request.data.get('microchip', ''))
+            # Create ExamAnswer objects.
             for k,v in self.request.data.items():
-                if k not in ['open', 'assignee', 'confirm_sex_age', 'confirm_chip', 'temperature', 'temperature_method', 'weight', 'weight_unit', 'weight_estimated', 'pulse', 'respiratory_rate'] and '_notes' not in k and '_id' not in k and self.request.data.get(k + '_id'):
+                if k not in ['open', 'assignee', 'age', 'sex', 'microchip', 'confirm_sex_age', 'confirm_chip', 'temperature', 'temperature_method', 'weight', 'weight_unit', 'weight_estimated', 'pulse', 'respiratory_rate'] and '_notes' not in k and '_id' not in k and self.request.data.get(k + '_id'):
                     ExamAnswer.objects.create(exam=exam, question=ExamQuestion.objects.get(id=self.request.data.get(k + '_id', '')), answer=v, answer_notes=self.request.data.get(k + '_notes', ''))
 
     def perform_update(self, serializer):
@@ -31,7 +35,7 @@ class ExamViewSet(viewsets.ModelViewSet):
             exam = serializer.save()
             Animal.objects.filter(id=self.request.data.get('animal_id')).update(age=self.request.data.get('age'), sex=self.request.data.get('sex'), microchip=self.request.data.get('microchip', ''))
             for k,v in self.request.data.items():
-                if k not in ['confirm_sex_age', 'confirm_chip', 'temperature', 'temperature_method', 'weight', 'weight_unit'] and '_notes' not in k and '_id' not in k and self.request.data.get(k + '_id'):
+                if k not in ['open', 'assignee', 'age', 'sex', 'microchip', 'confirm_sex_age', 'confirm_chip', 'temperature', 'temperature_method', 'weight', 'weight_unit', 'weight_estimated', 'pulse', 'respiratory_rate'] and '_notes' not in k and '_id' not in k and self.request.data.get(k + '_id'):
                     ExamAnswer.objects.update_or_create(exam=exam, question=ExamQuestion.objects.get(id=self.request.data.get(k + '_id')), defaults={'answer':v, 'answer_notes':self.request.data.get(k + '_notes', '')})
 
 
@@ -76,15 +80,15 @@ class TreatmentRequestViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = TreatmentRequestSerializer
 
-    def perform_update(self, serializer):
+    # def perform_update(self, serializer):
 
-        if serializer.is_valid():
+    #     if serializer.is_valid():
 
-            tr = serializer.save()
+    #         tr = serializer.save()
 
-            # Check vet request to see if it needs to be closed.
-            if tr.actual_admin_time:
-                tr.treatment_plan.vet_request.check_closed()
+    #         # Check vet request to see if it needs to be closed.
+    #         if tr.actual_admin_time:
+    #             tr.treatment_plan.vet_request.check_closed()
 
 
 class VetRequestViewSet(viewsets.ModelViewSet):
@@ -128,12 +132,7 @@ class TreatmentPlanViewSet(viewsets.ModelViewSet):
         if serializer.is_valid():
 
             treatment_plan = serializer.save()
-            total_time = treatment_plan.end - treatment_plan.start
-            total_hours = total_time.days * 24 + total_time.seconds // 3600
 
-            for hours in range(int(total_hours / treatment_plan.frequency) + 1):
-                TreatmentRequest.objects.create(treatment_plan=treatment_plan, suggested_admin_time=treatment_plan.start + timedelta(hours=hours*treatment_plan.frequency))
-
-            # If we have a new TP then the vet request cannot be closed.
-            treatment_plan.vet_request.closed = None
-            treatment_plan.vet_request.save()
+            # Create proper number of TreatmentRequests
+            for interval in range(int(24/treatment_plan.frequency) * treatment_plan.days):
+                TreatmentRequest.objects.create(treatment_plan=treatment_plan, suggested_admin_time=treatment_plan.start + timedelta(hours=interval*treatment_plan.frequency))

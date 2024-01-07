@@ -142,8 +142,8 @@ const DiagnosticsForm = (props) => {
             :
             <span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + props.id + '/')} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}
             Diagnostics Form
-            </Card.Header>
-            <Patient animal={data.animal_object} organization={props.organization} incident={props.incident} />
+          </Card.Header>
+          <Patient animal={data.animal_object} organization={props.organization} incident={props.incident} />
           <Card.Body>
             <Form>
               <FormGroup>

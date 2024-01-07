@@ -9,7 +9,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBan, faMedkit, faCut, faEdit, faEnvelope, faLink, faMinusSquare, faTimes, faUserPlus
 } from '@fortawesome/free-solid-svg-icons';
-import { faBadgeSheriff, faClipboardMedical, faClawMarks, faHomeHeart, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
+import { faBadgeSheriff, faUserDoctorMessage, faClawMarks, faHomeHeart, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import { AnimalDeleteModal } from "../components/Modals";
 import Header from '../components/Header';
@@ -167,17 +167,6 @@ function AnimalDetails({ id, incident, organization }) {
         tooltipText='Print Animal Care Schedule'
         printFunc={handleDownloadPdfClick}
       />
-      <OverlayTrigger
-        key={"vetrequest"}
-        placement="bottom"
-        overlay={
-          <Tooltip id={`tooltip-vetrequest`}>
-            Create veterinary request
-          </Tooltip>
-        }
-      >
-        <Link href={"/" + organization + "/" + incident + "/animals/" + id + "/vetrequest/new"} ><FontAwesomeIcon icon={faClipboardMedical} className="mr-1" inverse /></Link>
-      </OverlayTrigger>
       {data.status !== 'REUNITED' ?
       <OverlayTrigger
         key={"reunite"}
@@ -191,6 +180,17 @@ function AnimalDetails({ id, incident, organization }) {
         <FontAwesomeIcon icon={faHomeHeart} onClick={() => setShow(true)} className="mr-1 ml-1" style={{cursor:'pointer'}} inverse />
       </OverlayTrigger>
       : ""}
+      <OverlayTrigger
+        key={"vetrequest"}
+        placement="bottom"
+        overlay={
+          <Tooltip id={`tooltip-vetrequest`}>
+            Create veterinary request
+          </Tooltip>
+        }
+      >
+        <Link href={"/" + organization + "/" + incident + "/animals/" + id + "/vetrequest/new"} ><FontAwesomeIcon icon={faUserDoctorMessage} className="mr-1" inverse /></Link>
+      </OverlayTrigger>
       <OverlayTrigger
         key={"cancel-animal"}
         placement="bottom"

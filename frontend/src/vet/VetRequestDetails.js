@@ -102,7 +102,7 @@ function VetRequestDetails({ id, incident, organization }) {
                   placement="top"
                   overlay={
                     <Tooltip id={`tooltip-caution`}>
-                      Please use caution when handling this animal.
+                      Use caution when handling this animal.
                     </Tooltip>
                   }
                 >
@@ -166,8 +166,7 @@ function VetRequestDetails({ id, incident, organization }) {
               </ListGroup.Item>
               <ListGroup.Item style={{textTransform:"capitalize"}}>
                 <div className="row">
-                  <span className="col-6"><b>Location:</b> {data.animal_object.shelter ? data.animal_object.shelter_object.name : "N/A"} {data.animal_object.room_name}</span>
-                  {/* <span className="col-6"><b>Secondary Color:</b> {data.animal_object.scolor||"N/A"}</span> */}
+                  <span className="col-12"><b>Location:</b> {data.animal_object.shelter ? data.animal_object.shelter_object.name : "N/A"} {data.animal_object.room_name ? <span> - {data.animal_object.room_name}</span> : ""}</span>
                 </div>
               </ListGroup.Item>
               <ListGroup.Item>

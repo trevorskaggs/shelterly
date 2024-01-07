@@ -22,7 +22,7 @@ function TreatmentPlanDetails({ id, incident, organization }) {
 
   const { setShowSystemError } = useContext(SystemErrorContext);
 
-  const [data, setData] = useState({id: '', vet_request:'', treatment_object:{name:'', category:''}, animal_object:{name:'', id:''}, start: '', end:'', frequency: '', quantity: '', unit: '', route: '', treatment_requests:[]});
+  const [data, setData] = useState({id: '', medical_record:null, treatment_object:{name:'', category:''}, animal_object:{name:'', id:''}, days:'', frequency: '', quantity: '', unit: '', route: '', treatment_requests:[]});
 
   const [showModal, setShowModal] = useState(false);
   const cancelTreatmentPlan = () => {
@@ -61,7 +61,7 @@ function TreatmentPlanDetails({ id, incident, organization }) {
     <>
     <Header>
       Treatment #{data.id}
-      <OverlayTrigger
+      {/* <OverlayTrigger
         key={"edit-treatment"}
         placement="bottom"
         overlay={
@@ -70,8 +70,8 @@ function TreatmentPlanDetails({ id, incident, organization }) {
           </Tooltip>
         }
       >
-        <Link href={"/" + organization + "/" + incident + "/vet/treatment/edit/" + id + "/?animal_name=" + data.animal_object.name||"Unknown"}><FontAwesomeIcon icon={faEdit} className="ml-2" inverse /></Link>
-      </OverlayTrigger>
+        <Link href={"/" + organization + "/" + incident + "/vet/treatment/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-2" inverse /></Link>
+      </OverlayTrigger> */}
       <OverlayTrigger
         key={"cancel-vet-request"}
         placement="bottom"
@@ -97,7 +97,7 @@ function TreatmentPlanDetails({ id, incident, organization }) {
               <ListGroup.Item>
                 <Row>
                   <Col>
-                    <b>Veterinary Request:</b>&nbsp;<Link href={"/" + organization + "/" + incident + "/vet/vetrequest/" + data.vet_request} className="text-link" style={{textDecoration:"none", color:"white"}}>VR#{data.vet_request}</Link>
+                    <b>Medical Record:</b>&nbsp;<Link href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.medical_record} className="text-link" style={{textDecoration:"none", color:"white"}}>MR#{data.medical_record}</Link>
                   </Col>
                   <Col>
                     <b>Status:</b> {data.status}
@@ -109,20 +109,15 @@ function TreatmentPlanDetails({ id, incident, organization }) {
               </ListGroup.Item>
               <ListGroup.Item>
                 <div className="row">
-                  <span className="col-6"><b>Start: </b><Moment format="lll">{data.start}</Moment></span>
-                  <span className="col-6"><b>End: </b><Moment format="lll">{data.end}</Moment></span>
+                  <span className="col-3"><b>Quantity:</b> {data.quantity}</span>
+                  <span className="col-3"><b>Unit:</b> {data.unit || '-'}</span>
+                  <span className="col-6"><b>Route:</b> {data.route || '-'}</span>
                 </div>
               </ListGroup.Item>
               <ListGroup.Item>
                 <div className="row">
-                  <span className="col-6"><b>Quantity:</b> {data.quantity}</span>
                   <span className="col-6"><b>Frequency:</b> Every {data.frequency} hours</span>
-                </div>
-              </ListGroup.Item>
-              <ListGroup.Item>
-                <div className="row">
-                  <span className="col-6"><b>Unit:</b> {data.unit}</span>
-                  <span className="col-6"><b>Route:</b> {data.route}</span>
+                  <span className="col-6"><b>Duration:</b> For {data.days} days</span>
                 </div>
               </ListGroup.Item>
             </ListGroup>
@@ -139,26 +134,21 @@ function TreatmentPlanDetails({ id, incident, organization }) {
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
               <ListGroup.Item>
                 <div className="row" style={{textTransform:"capitalize"}}>
-                  <span className="col-6"><b>ID:</b> <Link href={"/" + organization + "/" + incident + "/animals/" + data.animal_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>A#{data.animal_object.id}</Link></span>
-                  <span className="col-6"><b>Name:</b> {data.animal_object.name||"Unknown"}</span>
+                  <span className="col-4"><b>ID:</b> <Link href={"/" + organization + "/" + incident + "/animals/" + data.animal_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>A#{data.animal_object.id}</Link></span>
+                  <span className="col-4"><b>Name:</b> {data.animal_object.name||"Unknown"}</span>
+                  <span className="col-4"><b>Species:</b> {data.animal_object.species_string}</span>
                 </div>
               </ListGroup.Item>
               <ListGroup.Item>
                 <div className="row" style={{textTransform:"capitalize"}}>
-                  <span className="col-6"><b>Species:</b> {data.animal_object.species_string}</span>
-                  <span className="col-6"><b>Sex:</b> {data.animal_object.sex||"Unknown"}</span>
-                </div>
-              </ListGroup.Item>
-              <ListGroup.Item>
-                <div className="row" style={{textTransform:"capitalize"}}>
-                  <span className="col-6"><b>Age:</b> {data.animal_object.age||"Unknown"}</span>
-                  <span className="col-6"><b>Size:</b> {data.animal_object.size||"Unknown"}</span>
+                  <span className="col-4"><b>Age:</b> {data.animal_object.age||"Unknown"}</span>
+                  <span className="col-4"><b>Sex:</b> {data.animal_object.sex||"Unknown"}</span>
+                  <span className="col-4"><b>Altered:</b> {data.animal_object.fixed||"Unknown"}</span>
                 </div>
               </ListGroup.Item>
               <ListGroup.Item style={{textTransform:"capitalize"}}>
                 <div className="row">
-                  <span className="col-6"><b>Primary Color:</b> {data.animal_object.pcolor||"N/A"}</span>
-                  <span className="col-6"><b>Secondary Color:</b> {data.animal_object.scolor||"N/A"}</span>
+                  <span className="col-12"><b>Location:</b> {data.animal_object.shelter_object ? data.animal_object.shelter_object.name:"Unknown"}{data.animal_object.room_name ? <span> - {data.animal_object.room_name}</span> : ""}</span>
                 </div>
               </ListGroup.Item>
               <ListGroup.Item>
@@ -179,7 +169,7 @@ function TreatmentPlanDetails({ id, incident, organization }) {
             <hr className="mb-3" />
               {data.treatment_requests.map(treatment_request => (
               <Row key={treatment_request.id} className="ml-0 mb-3">
-                <Link href={"/" + organization + "/" + incident + "/vet/treatmentrequest/edit/" + treatment_request.id + "?animal_name=" + data.animal_object.name} className="treatment-link" style={{textDecoration:"none", color:"white"}}>
+                <Link href={"/" + organization + "/" + incident + "/vet/treatmentrequest/edit/" + treatment_request.id} className="treatment-link" style={{textDecoration:"none", color:"white"}}>
                   <Card className="border rounded treatment-hover-div" style={{height:"100px", width:"560px", whiteSpace:"nowrap", overflow:"hidden"}}>
                     <div className="row no-gutters hover-div" style={{height:"100px", textTransform:"capitalize", marginRight:"-2px"}}>
                       <Row className="ml-0 mr-0 w-100" style={{flexWrap:"nowrap"}}>
@@ -241,12 +231,19 @@ function TreatmentPlanDetails({ id, incident, organization }) {
                               }
                             </span>
                           </div>
+                          {!treatment_request.not_administered ? <span>
                           <div style={{marginTop:"6px"}}>
                             Actual Admin Time: {treatment_request.actual_admin_time ? <Moment format="lll">{treatment_request.actual_admin_time}</Moment> : "Pending"}
                           </div>
                           <div>
-                            Assignee: {treatment_request.assignee_object ? <span>{treatment_request.assignee_object.first_name} {treatment_request.assignee_object.last_name}</span> : "Unassigned"}
+                            Administered: {treatment_request.assignee_object ? <span>{treatment_request.assignee_object.first_name} {treatment_request.assignee_object.last_name}</span> : "Unassigned"}
                           </div>
+                          </span>
+                          :
+                          <div style={{marginTop:"6px"}}>
+                            Not Administered
+                          </div>
+                          }
                         </Col>
                       </Row>
                     </div>

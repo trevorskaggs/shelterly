@@ -18,23 +18,21 @@ import {
 import * as Yup from 'yup';
 import { Checkbox, DateTimePicker, DropDown } from '../components/Form';
 import { SystemErrorContext } from '../components/SystemError';
+import { AuthContext } from "../accounts/AccountsReducer";
+import Patient from './components/Patient';
 
 const TreatmetRequestForm = (props) => {
 
   const { setShowSystemError } = useContext(SystemErrorContext);
-
-  // Identify any query param data.
-  const [queryParams] = useQueryParams();
-  const {
-    animal_name = 'Unknown'
-  } = queryParams;
+  const { dispatch, state } = useContext(AuthContext);
 
   const [data, setData] = useState({
     treatment_plan: null,
     suggested_admin_time: '',
-    actual_admin_time: '',
+    actual_admin_time: new Date(),
     assignee: null,
-    not_administered: false
+    not_administered: false,
+    treatment_plan_object:{animal_object:{name:''}},
   })
 
   const [assigneeChoices, setAssigneeChoices] = useState([]);
@@ -44,12 +42,13 @@ const TreatmetRequestForm = (props) => {
     let source = axios.CancelToken.source();
 
     const fetchTreatmentRequest = async () => {
-      // Fetch Visit Note data.
+      // Fetch TreatmentRequest data.
       await axios.get('/vet/api/treatmentrequest/' + props.id + '/', {
         cancelToken: source.token,
       })
       .then(response => {
         if (!unmounted) {
+          response.data['actual_admin_time'] = response.data['actual_admin_time'] || new Date()
           setData(response.data);
         }
       })
@@ -61,7 +60,7 @@ const TreatmetRequestForm = (props) => {
 
     const fetchAssignees = async () => {
       // Fetch assignee data.
-      await axios.get('/accounts/api/user/?vet=true', {
+      await axios.get('/accounts/api/user/?vet=true&organization=' + state.organization.id, {
         cancelToken: source.token,
       })
       .then(response => {
@@ -110,14 +109,15 @@ const TreatmetRequestForm = (props) => {
     >
       {formikProps => (
         <Card border="secondary" className="mt-5">
-          <Card.Header as="h5" className="pl-3"><span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + props.organization + "/" + props.incident + "/vet/treatment/" + data.treatment_plan)} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>Treatment Request Form - {animal_name}</Card.Header>
+          <Card.Header as="h5" className="pl-3"><span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + props.organization + "/" + props.incident + "/vet/treatment/" + data.treatment_plan)} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>Treatment Request Form</Card.Header>
+          <Patient animal={data.treatment_plan_object.animal_object} organization={props.organization} incident={props.incident} />
           <Card.Body>
             <Form>
               <FormGroup>
                 <Row>
                   <Col xs={"6"}>
                     <DropDown
-                      label="Assignee"
+                      label="Administered"
                       id="assigneeDropdown"
                       name="assignee"
                       type="text"
@@ -127,6 +127,7 @@ const TreatmetRequestForm = (props) => {
                       onChange={(instance) => {
                         formikProps.setFieldValue("assignee", instance === null ? '' : instance.value);
                       }}
+                      disabled={formikProps.values.not_administered}
                     />
                   </Col>
                 </Row>
@@ -149,11 +150,12 @@ const TreatmetRequestForm = (props) => {
                     name="actual_admin_time"
                     id="actual_admin_time"
                     xs="4"
+                    clearable={false}
                     onChange={(date, dateStr) => {
                       formikProps.setFieldValue("actual_admin_time", dateStr)
                     }}
                     value={formikProps.values.actual_admin_time||null}
-                    disabled={false}
+                    disabled={formikProps.values.not_administered}
                   />
                 </Row>
                 <BootstrapForm.Label className="mt-3">Not Administered</BootstrapForm.Label>
@@ -164,6 +166,8 @@ const TreatmetRequestForm = (props) => {
                     checked={formikProps.values.not_administered || false}
                     onChange={() => {
                       formikProps.setFieldValue("not_administered", !formikProps.values.not_administered);
+                      formikProps.setFieldValue("assignee", null);
+                      formikProps.setFieldValue("actual_admin_time", null);
                     }}
                     style={{
                       transform:"scale(2.0)",

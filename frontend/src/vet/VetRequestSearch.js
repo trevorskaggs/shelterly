@@ -183,8 +183,6 @@ function VetRequestSearch({ incident, organization }) {
           setData({vet_requests: response.data, isFetching: false});
           setVetRequests(response.data);
 
-          console.log(response.data)
-
           // highlight search terms
           markInstances(searchTerm);
         }

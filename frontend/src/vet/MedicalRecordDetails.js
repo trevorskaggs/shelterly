@@ -15,6 +15,7 @@ import {
   faStethoscope
 } from '@fortawesome/free-solid-svg-icons';
 import {
+  faDiamondExclamation,
   faPrescriptionBottlePill,
   faSquareExclamation,
   faSquareEllipsis
@@ -64,7 +65,6 @@ function MedicalRecordDetails({ id, incident, organization }) {
       })
       .then(response => {
         if (!unmounted) {
-          console.log(response.data)
           setData(response.data);
           setActiveVR(response.data.vet_requests[0].id);
           setActiveExam(response.data.exams[0].id);
@@ -94,26 +94,34 @@ function MedicalRecordDetails({ id, incident, organization }) {
         <Card className="border rounded" style={{width:"100%"}}>
           <Card.Body>
             <Card.Title>
-              <h4 className="mb-0">Patient</h4>
+              <h4 className="mb-0">Patient
+                {data.vet_requests.filter(vet_request => vet_request.caution === true).length > 0 ? <OverlayTrigger
+                  key={"caution"}
+                  placement="top"
+                  overlay={
+                    <Tooltip id={`tooltip-caution`}>
+                      Use caution when handling this animal.
+                    </Tooltip>
+                  }
+                >
+                  <FontAwesomeIcon icon={faDiamondExclamation} className="ml-2" inverse />
+                </OverlayTrigger> : ""}
+              </h4>
             </Card.Title>
             <hr/>
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
               <ListGroup.Item>
                 <div className="row" style={{textTransform:"capitalize"}}>
-                  <span className="col-6"><b>ID:</b> <Link href={"/" + organization + "/" + incident + "/animals/" + data.animal_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>A#{data.animal_object.id}</Link></span>
-                  <span className="col-6"><b>Name:</b> {data.animal_object.name||"Unknown"}</span>
+                  <span className="col-4"><b>ID:</b> <Link href={"/" + organization + "/" + incident + "/animals/" + data.animal_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>A#{data.animal_object.id}</Link></span>
+                  <span className="col-4"><b>Name:</b> {data.animal_object.name||"Unknown"}</span>
+                  <span className="col-4"><b>Species:</b> {data.animal_object.species_string}</span>
                 </div>
               </ListGroup.Item>
               <ListGroup.Item>
                 <div className="row" style={{textTransform:"capitalize"}}>
-                  <span className="col-6"><b>Species:</b> {data.animal_object.species_string}</span>
-                  <span className="col-6"><b>Sex:</b> {data.animal_object.sex||"Unknown"}</span>
-                </div>
-              </ListGroup.Item>
-              <ListGroup.Item>
-                <div className="row" style={{textTransform:"capitalize"}}>
-                  <span className="col-6"><b>Age:</b> {data.animal_object.age||"Unknown"}</span>
-                  <span className="col-6"><b>Altered:</b> {data.animal_object.fixed||"Unknown"}</span>
+                  <span className="col-4"><b>Age:</b> {data.animal_object.age||"Unknown"}</span>
+                  <span className="col-4"><b>Sex:</b> {data.animal_object.sex||"Unknown"}</span>
+                  <span className="col-4"><b>Altered:</b> {data.animal_object.fixed||"Unknown"}</span>
                 </div>
               </ListGroup.Item>
               <ListGroup.Item style={{textTransform:"capitalize"}}>
@@ -131,13 +139,13 @@ function MedicalRecordDetails({ id, incident, organization }) {
       <div className="col-6 d-flex pl-0">
         <Card className="border rounded d-flex" style={{width:"100%"}}>
           <Card.Body>
-            <Card.Title style={{marginTop:"-5px"}}>
+            <Card.Title style={{marginTop:"-2px", marginBottom:"-16px", textAlign:"center", alignItems:"center"}}>
               <h4>
-                <Scrollbar horizontal="true" autoHide style={{height:"32px", width:"485px"}} renderView={props => <div {...props} style={{...props.style, marginBottom:"-18px", marginRight:"0px", overflowX:"auto", overflowY: "hidden"}}/>} renderThumbVertical={props => <div {...props} style={{...props.style, display: 'none'}} />}>
+                <Scrollbar horizontal="true" autoHide style={{height:"45px", width:"485px"}} renderView={props => <div {...props} style={{...props.style, marginBottom:"-18px", marginRight:"0px", overflowX:"auto", overflowY: "hidden"}}/>} renderThumbVertical={props => <div {...props} style={{...props.style, display: 'none'}} />}>
                   <ListGroup horizontal>
                   {data.vet_requests.map((vet_request,i) => (
-                    <ListGroup.Item key={vet_request.id} active={vet_request.id === activeVR} style={{textTransform:"capitalize", cursor:'pointer', paddingTop:"2px"}} onClick={() => setActiveVR(vet_request.id)}>
-                      VR#{vet_request.id}
+                    <ListGroup.Item key={vet_request.id} active={vet_request.id === activeVR} style={{textTransform:"capitalize", cursor:'pointer'}} onClick={() => setActiveVR(vet_request.id)}>
+                      <div style={{marginTop:"-3px"}}>VR#{vet_request.id}</div>
                     </ListGroup.Item>
                   ))}
                   </ListGroup>
@@ -149,14 +157,14 @@ function MedicalRecordDetails({ id, incident, organization }) {
             <ListGroup key={vet_request.id} variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
               <ListGroup.Item>
                 <div className="row">
-                  <span className="col-6"><b>Status: </b>{vet_request.status}</span>
-                  <span className="col-6"><b>Priority: </b>{priorityText[vet_request.priority]}</span>
+                  <span className="col-5"><b>Status: </b>{vet_request.status}</span>
+                  <span className="col-7"><b>Opened: </b><Moment format="lll">{vet_request.open}</Moment></span>
                 </div>
               </ListGroup.Item>
               <ListGroup.Item>
                 <div className="row">
-                  <span className="col-6"><b>Opened: </b><Moment format="lll">{vet_request.open}</Moment></span>
-                  <span className="col-6"><b>Requested: </b>{vet_request.requested_by}</span>
+                  <span className="col-5"><b>Priority: </b>{priorityText[vet_request.priority]}</span>
+                  <span className="col-7"><b>Requested:</b> {vet_request.requested_by_object ? <span>{vet_request.requested_by_object.first_name} {vet_request.requested_by_object.last_name}</span> : "Unknown"}</span>
                 </div>
               </ListGroup.Item>
               <ListGroup.Item>
@@ -174,17 +182,36 @@ function MedicalRecordDetails({ id, incident, organization }) {
     {data.exams.length > 0 ? 
     <div className="row mt-3">
       <div className="col-12 d-flex">
-        <Card className="mb-2 border rounded" style={{width:"100%"}}>
-          <Card.Body style={{marginBottom:"-7px"}}>
-            <Card.Title>
+        <Card className="border rounded" style={{width:"100%"}}>
+          <Card.Body style={{marginBottom:showExam ? "-7px" : "-15px"}}>
+            <Card.Title style={{marginTop:"-2px", marginBottom:"-16px"}}>
               <h4 className="mb-0">
-                <Scrollbar horizontal="true" autoHide style={{height:"32px", width:"485px"}} renderView={props => <div {...props} style={{...props.style, marginBottom:"-18px", marginRight:"0px", overflowX:"auto", overflowY: "hidden"}}/>} renderThumbVertical={props => <div {...props} style={{...props.style, display: 'none'}} />}>
+                <Scrollbar horizontal="true" autoHide style={{height:"45px", width:"485px"}} renderView={props => <div {...props} style={{...props.style, marginBottom:"-18px", marginRight:"0px", overflowX:"auto", overflowY: "hidden"}}/>} renderThumbVertical={props => <div {...props} style={{...props.style, display: 'none'}} />}>
                   <ListGroup horizontal>
-                  {data.exams.map((exam,i) => (
-                    <ListGroup.Item key={exam.id} active={exam.id === activeExam} style={{textTransform:"capitalize", cursor:'pointer', paddingTop:"2px"}} onClick={() => setActiveExam(exam.id)}>
-                      Exam {moment(exam.open).format('ll')}
+                    {data.vet_requests.filter(vet_request => vet_request.status === 'Open').length > 0 ? <ListGroup.Item className="small-exam-hover-div" style={{width:"50px"}}>
+                      <OverlayTrigger
+                        key={"start-exam"}
+                        placement="top"
+                        overlay={
+                          <Tooltip id={`tooltip-start-exam`}>
+                            Start a new exam
+                          </Tooltip>
+                        }
+                      >
+                        <Link href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.id + "/workflow"}><FontAwesomeIcon icon={faStethoscope} className="exam-icon" style={{marginLeft:"-8px", marginBottom:"3px"}} inverse /></Link>
+                      </OverlayTrigger>
+                    </ListGroup.Item> : ""}
+                    {data.exams.map((exam,i) => (
+                    <ListGroup.Item key={exam.id} active={exam.id === activeExam} style={{textTransform:"capitalize", cursor:'pointer'}} onClick={() => setActiveExam(exam.id)}>
+                      <div style={{marginTop:"-3px"}}>
+                        Exam {moment(exam.open).format('l')}
+                        {exam.id === activeExam ? <span>
+                          <FontAwesomeIcon icon={faChevronCircleRight} hidden={showExam} onClick={() => {setShowExam(true)}} className="ml-1 fa-move-up" size="sm" style={{cursor:'pointer'}} inverse />
+                          <FontAwesomeIcon icon={faChevronCircleDown} hidden={!showExam} onClick={() => {setShowExam(false)}} className="ml-1 fa-move-up" size="sm" style={{cursor:'pointer'}} inverse />
+                        </span> : ""}
+                      </div>
                     </ListGroup.Item>
-                  ))}
+                    ))}
                   </ListGroup>
                 </Scrollbar>
                 {/* Exam Results */}
@@ -197,15 +224,13 @@ function MedicalRecordDetails({ id, incident, organization }) {
                     </Tooltip>
                   }
                 >
-                  <Link href={"/" + organization + "/" + incident + "/vet/vetrequest/" + id + "/exam/"}><FontAwesomeIcon icon={faEdit} className="ml-1" size="lg" style={{cursor:'pointer'}} inverse /></Link>
+                  <Link href={"/" + organization + "/" + incident + "/vet/medrecord/" + id + "/exam/"}><FontAwesomeIcon icon={faEdit} className="ml-1" size="lg" style={{cursor:'pointer'}} inverse /></Link>
                 </OverlayTrigger> */}
-                {/* <FontAwesomeIcon icon={faChevronCircleRight} hidden={showExam} onClick={() => {setShowExam(true)}} className="ml-1" size="lg" style={{cursor:'pointer'}} inverse />
-                <FontAwesomeIcon icon={faChevronCircleDown} hidden={!showExam} onClick={() => {setShowExam(false)}} className="ml-1" size="lg" style={{cursor:'pointer'}} inverse /> */}
               </h4>
             </Card.Title>
             <hr className="mb-3" />
             {data.exams.filter(exam => exam.id === activeExam).map(exam => (
-            <Collapse in={showExam}>
+            <Collapse in={showExam} key={exam.id}>
               <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
               <ListGroup.Item>
                 <div className="row" style={{textTransform:"capitalize"}}>
@@ -242,37 +267,24 @@ function MedicalRecordDetails({ id, incident, organization }) {
       </div>
     </div>
     :""}
-    {data.vet_requests.length > data.exams.length ? <Row className="mt-3">
-      <Col style={{width:"170px", maxWidth:"170px", whiteSpace:"nowrap", overflow:"hidden"}}>
-      <Link href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.id + "/workflow"} className="exam-link" style={{textDecoration:"none", color:"white"}}>
-        <Card className="border rounded exam-hover-div" style={{width:"153px", maxWidth:"153px", whiteSpace:"nowrap", overflow:"hidden"}}>
-          <div className="exam-hover-div"><FontAwesomeIcon icon={faStethoscope} size="6x" className="mt-4 mb-4 exam-icon" style={{marginLeft:"30px" }} inverse /></div>
-          <Card.Text className="mb-0 border-top exam-hover-div" style={{textTransform:"capitalize", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis", height:"40px"}}>
-            <span className="ml-1" style={{fontSize:30}}>Start Exam</span>
-          </Card.Text>
-        </Card>
-      </Link>
-      </Col>
-    </Row>
-    :""}
     {data.exams.length > 0 ?
-    <div className="row mt-2">
+    <div className="row mt-3">
       <div className="col-12 d-flex">
         <Card className="mb-2 border rounded" style={{width:"100%"}}>
           <Card.Body style={{marginBottom:"-19px"}}>
             <Card.Title>
               <h4 className="mb-0">Treatments
-                {data.status !== 'Canceled' ? <OverlayTrigger
+                <OverlayTrigger
                   key={"add-treatment"}
                   placement="top"
                   overlay={
                     <Tooltip id={`tooltip-add-treatment`}>
-                      Add a treatment to this vet request
+                      Add a treatment for this patient
                     </Tooltip>
                   }
                 >
-                  <Link href={"/" + organization + "/" + incident + "/vet/vetrequest/" + data.id + "/treatment/new"}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
-                </OverlayTrigger> : ""}
+                  <Link href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.id + "/treatment/new"}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
+                </OverlayTrigger>
               </h4>
             </Card.Title>
             <hr className="mb-3" />
@@ -286,7 +298,7 @@ function MedicalRecordDetails({ id, incident, organization }) {
                           <FontAwesomeIcon icon={faPrescriptionBottlePill} size="6x" className="ml-1 treatment-icon" style={{marginTop:"5px", paddingRight:"10px"}} inverse />
                         </div>
                         <Col style={{marginLeft:"-5px", marginRight:"-25px"}} className="hover-div">
-                          <div className="border treatment-hover-div" style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"10px", marginLeft:"-11px", marginTop: "-1px", fontSize:"18px", width:"100%", backgroundColor:"#615e5e"}}>
+                          <div className="border treatment-hover-div" style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"10px", marginLeft:"-11px", marginTop: "-1px", fontSize:"18px", width:"100%", backgroundColor:"rgb(158 153 153)"}}>
                             {treatment_plan.treatment_object.description}
                             <span className="float-right">
                             {treatment_plan.status === 'Complete' ?
@@ -330,27 +342,33 @@ function MedicalRecordDetails({ id, incident, organization }) {
                           </div>
                           <div style={{marginTop:"6px"}}>
                             <Row>
-                              <Col>
+                              <Col xs={4}>
                                 Start: <Moment format="lll">{treatment_plan.start}</Moment>
                               </Col>
-                              <Col>
+                              <Col xs={4}>
                                 End: <Moment format="lll">{treatment_plan.end}</Moment>
                               </Col>
+                              {/* <Col>
+                                Complete: {treatment_plan.treatment_requests.filter(request => request.actual_admin_time).length + "/" + treatment_plan.treatment_requests.filter(request => !request.not_administered).length}
+                              </Col> */}
                               <Col>
-                                Frequency: Every {treatment_plan.frequency} hours
+                                Quantity: {treatment_plan.quantity}
                               </Col>
                             </Row>
                           </div>
                           <div>
                             <Row>
-                              <Col>
-                                Quantity: {treatment_plan.quantity}
+                              <Col xs={4}>
+                                Frequency: every {treatment_plan.frequency} hour{treatment_plan.frequency === 1 ? '' : 's'}
                               </Col>
-                              <Col>
-                                Unit: {treatment_plan.unit}
+                              <Col xs={4}>
+                                Duration: for {treatment_plan.days} day{treatment_plan.days === 1 ? '' : 's'}
                               </Col>
+                              {/* <Col>
+                                Unit: {treatment_plan.unit || '-'}
+                              </Col> */}
                               <Col>
-                                Route: {treatment_plan.route}
+                                Route: {treatment_plan.route || '-'}
                               </Col>
                             </Row>
                           </div>
@@ -361,7 +379,7 @@ function MedicalRecordDetails({ id, incident, organization }) {
                 </Link>
               </Row>
             ))}
-            {data.treatment_plans.length < 1 ? <p>No treatments have been created for this request.</p> : ""}
+            {data.treatment_plans.length < 1 ? <p>No treatments have been created for this patient.</p> : ""}
           </Card.Body>
         </Card>
       </div>

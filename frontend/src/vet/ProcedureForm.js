@@ -19,6 +19,7 @@ import {
 import * as Yup from 'yup';
 import { DropDown, TextInput } from '../components/Form';
 import { SystemErrorContext } from '../components/SystemError';
+import Patient from './components/Patient';
 
 const customStyles = {
   // For the select it self, not the options of the select
@@ -50,14 +51,9 @@ const ProcedureForm = (props) => {
   var is_workflow = window.location.pathname.includes("workflow");
 
   const [data, setData] = useState({
-    patient: props.animalid,
-    assignee: null,
-    concern: '',
     procedures: [],
     procedure_notes: '',
     procedure_other: '',
-    priority: '',
-    presenting_complaints: [],
     animal_object: {id:''}
   })
 
@@ -67,8 +63,8 @@ const ProcedureForm = (props) => {
     let unmounted = false;
     let source = axios.CancelToken.source();
     if (props.id) {
-      const fetchVetRequest = async () => {
-        // Fetch VetRequest data.
+      const fetchMedRecordData = async () => {
+        // Fetch MedRecord data.
         await axios.get('/vet/api/medrecord/' + props.id + '/', {
           cancelToken: source.token,
         })
@@ -81,7 +77,7 @@ const ProcedureForm = (props) => {
           setShowSystemError(true);
         });
       };
-      fetchVetRequest();
+      fetchMedRecordData();
     };
 
 
@@ -146,29 +142,8 @@ const ProcedureForm = (props) => {
             :
             <span style={{ cursor: 'pointer' }} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}
             Procedures Form
-            </Card.Header>
-          <div className="col-12 mt-3">
-            <Card className="border rounded" style={{width:"100%"}}>
-              <Card.Body>
-                <Card.Title>
-                  <h4 className="mb-0">Patient</h4>
-                </Card.Title>
-                <hr/>
-                <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
-                  <ListGroup.Item>
-                    <div className="row" style={{textTransform:"capitalize"}}>
-                      <span className="col-3"><b>ID:</b> <Link href={"/" + props.organization + "/" + props.incident + "/animals/" + data.animal_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>A#{data.animal_object.id}</Link></span>
-                      <span className="col-3"><b>Name:</b> {data.animal_object.name||"Unknown"}</span>
-                      <span className="col-3"><b>Species:</b> {data.animal_object.species_string}</span>
-                    </div>
-                  </ListGroup.Item>
-                  <ListGroup.Item>
-                      <span><b>Medical Notes:</b> {data.animal_object.medical_notes || "N/A"}</span>
-                  </ListGroup.Item>
-                </ListGroup>
-              </Card.Body>
-            </Card>
-          </div>
+          </Card.Header>
+          <Patient animal={data.animal_object} organization={props.organization} incident={props.incident} />
           <Card.Body>
             <Form>
               <FormGroup>
