@@ -10,7 +10,7 @@ User = get_user_model()
 
 class PresentingComplaint(models.Model):
 
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=100)
 
     def __str__(self):
         return self.name
@@ -20,7 +20,7 @@ class PresentingComplaint(models.Model):
 
 class Diagnostic(models.Model):
 
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=100)
 
     def __str__(self):
         return self.name
@@ -30,7 +30,7 @@ class Diagnostic(models.Model):
 
 class Procedure(models.Model):
 
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=100)
 
     def __str__(self):
         return self.name
@@ -40,7 +40,7 @@ class Procedure(models.Model):
 
 class Diagnosis(models.Model):
 
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=100)
 
     def __str__(self):
         return self.name
@@ -51,6 +51,7 @@ class Diagnosis(models.Model):
 class ExamQuestion(models.Model):
 
     name = models.CharField(max_length=20, blank=True, null=True)
+    default = models.CharField(max_length=20, blank=True, null=True)
     options = ArrayField(models.CharField(max_length=40))
     categories = ArrayField(models.CharField(max_length=20))
     allow_not_examined = models.BooleanField()
@@ -59,15 +60,14 @@ class ExamQuestion(models.Model):
     def __str__(self):
         return self.name
 
+    class Meta:
+        ordering = ('name',)
+
 
 class MedicalRecord(models.Model):
 
     patient = models.ForeignKey(Animal, on_delete=models.DO_NOTHING, related_name='medical_record')
-    procedures = models.ManyToManyField(Procedure, blank=True)
-    procedure_other = models.CharField(max_length=50, blank=True, null=True)
     procedure_notes = models.CharField(max_length=300, blank=True, null=True)
-    diagnostics = models.ManyToManyField(Diagnostic, blank=True)
-    diagnostics_other = models.CharField(max_length=50, blank=True, null=True)
     diagnostics_notes = models.CharField(max_length=300, blank=True, null=True)
     diagnosis = models.ManyToManyField(Diagnosis, blank=True)
     diagnosis_other = models.CharField(max_length=50, blank=True, null=True)
@@ -85,13 +85,6 @@ class VetRequest(models.Model):
     concern = models.CharField(max_length=200, blank=True, null=True)
     priority = models.CharField(max_length=25, choices=(('urgent', 'Urgent'),('when_available', 'When Available'),), default='urgent')
     medical_record = models.ForeignKey(MedicalRecord, on_delete=models.SET_NULL, null=True)
-
-    # def check_closed(self):
-    #     # Mark VetRequest as closed if there is at least one TreatmentPlan and all TRs are completed.
-    #     if not self.closed and self.treatmentplan_set.all() and TreatmentRequest.objects.filter(treatment_plan__vet_request=self).filter(Q(actual_admin_time__isnull=True) | Q(not_administered=False)).exists():
-    #         self.closed = datetime.now()
-    #         self.status = 'Closed'
-    #         self.save()
 
     class Meta:
         ordering = ('-id',)
@@ -112,6 +105,9 @@ class Exam(models.Model):
     respiratory_rate = models.FloatField(blank=True, null=True)
     medical_record = models.ForeignKey(MedicalRecord, on_delete=models.SET_NULL, null=True)
 
+    class Meta:
+        ordering = ('-id',)
+
 
 class ExamAnswer(models.Model):
 
@@ -123,9 +119,22 @@ class ExamAnswer(models.Model):
 
 class DiagnosticResult(models.Model):
 
-    result = models.CharField(max_length=20)
-    notes = models.CharField(max_length=300)
+    open = models.DateTimeField(auto_now=False, auto_now_add=True)
+    complete = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
+    other_name = models.CharField(max_length=50, blank=True, null=True)
+    result = models.CharField(max_length=20, blank=True, null=True)
+    notes = models.CharField(max_length=300, blank=True, null=True)
     diagnostic = models.ForeignKey(Diagnostic, on_delete=models.SET_NULL, null=True)
+    medical_record = models.ForeignKey(MedicalRecord, on_delete=models.SET_NULL, null=True)
+
+
+class ProcedureResult(models.Model):
+
+    open = models.DateTimeField(auto_now=False, auto_now_add=True)
+    complete = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
+    other_name = models.CharField(max_length=50, blank=True, null=True)
+    notes = models.CharField(max_length=500, blank=True, null=True)
+    procedure = models.ForeignKey(Procedure, on_delete=models.SET_NULL, null=True)
     medical_record = models.ForeignKey(MedicalRecord, on_delete=models.SET_NULL, null=True)
 
 

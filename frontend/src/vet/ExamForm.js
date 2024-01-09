@@ -144,7 +144,14 @@ const ExamForm = (props) => {
   // Determine if we're in the vet exam workflow.
   var is_workflow = window.location.pathname.includes("workflow");
 
-  const [data, setData] = useState({id: '', exam: null, open: '', exam_object: {'medrecord_id':props.medrecordid, assignee:null, 'confirm_sex_age':false, 'confirm_chip':false, 'weight':null, 'weight_unit':'', 'weight_estimated':false, 'temperature':'', 'temperature_method':'', 'pulse':'', 'respiratory_rate':''}, animal_object: {id:'', name:'', species:'', category:'', sex:'', age:'', size:'', pcolor:'', scolor:'', medical_notes:''}})
+  const initialData = {id: '', exam: null, open: '', exam_object: {'medrecord_id':props.medrecordid, assignee:null, 'confirm_sex_age':false, 'confirm_chip':false, 'weight':null, 'weight_unit':'', 'weight_estimated':false, 'temperature':'', 'temperature_method':'Rectal', 'pulse':'', 'respiratory_rate':''}, animal_object: {id:'', name:'', species:'', category:'', sex:'', age:'', size:'', pcolor:'', scolor:'', medical_notes:''}}
+
+  let current_data = initialData;
+  if (is_workflow) {
+    current_data['exam_object'] = props.state.steps.exam;
+  }
+
+  const [data, setData] = useState(current_data);
   const [examQuestions, setExamQuestions] = useState([]);
   const [showNotes, setShowNotes] = useState({});
   const [saveAndFinish, setSaveAndFinish] = useState(false);
@@ -179,25 +186,13 @@ const ExamForm = (props) => {
     let source = axios.CancelToken.source();
     let open_notes_dict = {};
     if (props.medrecordid) {
-      const fetchExam = async () => {
-        // Fetch MedRecord + Exam data.
+      const fetchMedRecord = async () => {
+        // Fetch MedRecord data.
         await axios.get('/vet/api/medrecord/' + props.medrecordid + '/', {
           cancelToken: source.token,
         })
         .then(response => {
           if (!unmounted) {
-            // Unpack existing answers and set at exam_object level.
-            // if (response.data.exam) {
-            //   Object.keys(response.data.exam_object.answers).forEach(key => {
-            //     response.data.exam_object[key] = response.data.exam_object.answers[key];
-            //     if (key.includes('_notes') && response.data.exam_object.answers[key]) {
-            //       open_notes_dict[key.split('_notes')[0]] = true;
-            //     }
-            //   })
-            // }
-            // else {
-            //   response.data.exam_object = data.exam_object;
-            // }
             response.data.exam_object = data.exam_object;
             response.data.exam_object['medrecord_id'] = props.medrecordid
             response.data.exam_object['age'] = response.data.animal_object.age
@@ -215,9 +210,14 @@ const ExamForm = (props) => {
                 let filtered_data = questionResponse.data.filter(question => question.categories.includes(response.data.animal_object.category))
                 setExamQuestions(filtered_data);
                 filtered_data.forEach(question => {
-                  if (!response.data.exam) {
-                    response.data.exam_object[question.name.toLowerCase().replace(' ','_').replace('/','_')] = '';
-                    response.data.exam_object[question.name.toLowerCase().replace(' ','_').replace('/','_') + '_notes'] = '';
+                  if (props.state && !props.state.steps.exam.id) {
+                    response.data.exam_object[question.name.toLowerCase().replace(' ','_').replace('/','_')] = props.state.steps.exam[question.name.toLowerCase().replace(' ','_').replace('/','_')] || question.default;
+                    response.data.exam_object[question.name.toLowerCase().replace(' ','_').replace('/','_') + '_notes'] = props.state.steps.exam[question.name.toLowerCase().replace(' ','_').replace('/','_') + '_notes'] || '';
+                    response.data.exam_object[question.name.toLowerCase().replace(' ','_').replace('/','_') + '_id'] = question.id;
+
+                    if (props.state.steps.exam[question.name.toLowerCase().replace(' ','_').replace('/','_') + '_notes']) {
+                      open_notes_dict[question.name.toLowerCase().replace(' ','_').replace('/','_')] = true;
+                    }
                   }
                   // Set open notes defaults.
                   open_notes_dict[question.name.toLowerCase().replace(' ','_').replace('/','_')] = open_notes_dict[question.name.toLowerCase().replace(' ','_').replace('/','_')] === true ? true : false;
@@ -277,7 +277,7 @@ const ExamForm = (props) => {
         });
       };
 
-      fetchExam();
+      fetchMedRecord();
 
       const fetchAssignees = async () => {
         // Fetch assignee data.
@@ -315,8 +315,8 @@ const ExamForm = (props) => {
       validationSchema={Yup.object().shape(formSchema)}
       onSubmit={(values, { setSubmitting }) => {
         values['animal_id'] = data.animal_object.id
-        if (data.exam) {
-          axios.put('/vet/api/exam/' + data.exam + '/', values)
+        if (data.exam || values.exam) {
+          axios.put('/vet/api/exam/' + (data.exam || values.exam) + '/', values)
           .then(response => {
             if (is_workflow) {
               if (saveAndFinish) {
@@ -343,6 +343,7 @@ const ExamForm = (props) => {
                 navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + props.medrecordid);
               }
               else {
+                values['exam'] = response.data.id;
                 props.onSubmit('exam', values, 'diagnostics');
               }
             }
@@ -436,7 +437,7 @@ const ExamForm = (props) => {
                     type="text"
                     label="Weight"
                     xs="3"
-                    value={data.weight || formikProps.values.weight}
+                    value={data.weight || formikProps.values.weight || ''}
                   />
                   <Col xs="1" style={{marginBottom:"-2px"}}>
                     <DropDown
@@ -529,7 +530,7 @@ const ExamForm = (props) => {
                       </span> : ""}
                     </Col>
                   </Row>
-                  <Row>
+                  <BootstrapForm.Row>
                     <Col xs="4">
                       <DropDown
                         id={question.name.toLowerCase().replace(' ','_').replace('/','_')}
@@ -553,7 +554,7 @@ const ExamForm = (props) => {
                       <FontAwesomeIcon icon={faChevronCircleRight} hidden={Object.keys(showNotes).length ? showNotes[question.name.toLowerCase().replace(' ','_').replace('/','_')] : true} onClick={() => {setShowNotes(prevState => ({ ...prevState, [question.name.toLowerCase().replace(' ','_').replace('/','_')]:true }));setTimeout(() => (getRef(question.name).current.focus(),3000));}} className="ml-1" style={{cursor:'pointer'}} inverse />
                       <FontAwesomeIcon icon={faChevronCircleDown} hidden={Object.keys(showNotes).length ? !showNotes[question.name.toLowerCase().replace(' ','_').replace('/','_')] : true} onClick={() => {setShowNotes(prevState => ({ ...prevState, [question.name.toLowerCase().replace(' ','_').replace('/','_')]:false }));}} className="ml-1" style={{cursor:'pointer'}} inverse />
                     </Col>
-                  </Row>
+                  </BootstrapForm.Row>
                   <Collapse in={showNotes[question.name.toLowerCase().replace(' ','_').replace('/','_')]}>
                     <div className="mt-2">
                       <TextInput
@@ -562,11 +563,10 @@ const ExamForm = (props) => {
                         id={question.name.toLowerCase().replace(' ','_').replace('/','_') + "_notes"}
                         key={`my_unique_question_notes_key__${formikProps.values[question.name.toLowerCase().replace(' ','_').replace('/','_') + '_notes']}`}
                         ref={setRef(question.name)}
-                        xs="5"
+                        xs="6"
                         rows={3}
                         style={{marginLeft:"-15px", margTop:"-2px"}}
                         errstyle={{marginLeft:"-15px"}}
-                        colstyle={{paddingRight:"0px"}}
                       />
                     </div>
                   </Collapse>

@@ -177,7 +177,7 @@ function AnimalDetails({ id, incident, organization }) {
           </Tooltip>
         }
       >
-        <FontAwesomeIcon icon={faHomeHeart} onClick={() => setShow(true)} className="mr-1 ml-1" style={{cursor:'pointer'}} inverse />
+        <FontAwesomeIcon icon={faHomeHeart} onClick={() => setShow(true)} className="mr-1" style={{cursor:'pointer'}} inverse />
       </OverlayTrigger>
       : ""}
       <OverlayTrigger
@@ -189,7 +189,7 @@ function AnimalDetails({ id, incident, organization }) {
           </Tooltip>
         }
       >
-        <Link href={"/" + organization + "/" + incident + "/animals/" + id + "/vetrequest/new"} ><FontAwesomeIcon icon={faUserDoctorMessage} className="mr-1" inverse /></Link>
+        <Link href={"/" + organization + "/" + incident + "/animals/" + id + "/vetrequest/new"} ><FontAwesomeIcon icon={faUserDoctorMessage} className="mr-1 ml-1" inverse /></Link>
       </OverlayTrigger>
       <OverlayTrigger
         key={"cancel-animal"}

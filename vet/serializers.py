@@ -2,21 +2,23 @@ from datetime import datetime
 from rest_framework import serializers
 from django.db.models import Q
 
-from .models import Exam, ExamAnswer, ExamQuestion, Diagnosis, Diagnostic, MedicalRecord, PresentingComplaint, Procedure, VetRequest, Treatment, TreatmentPlan, TreatmentRequest
+from .models import Exam, ExamAnswer, ExamQuestion, Diagnosis, Diagnostic, DiagnosticResult, MedicalRecord, PresentingComplaint, Procedure, VetRequest, Treatment, TreatmentPlan, TreatmentRequest
 from accounts.serializers import UserSerializer
 from animals.serializers import ModestAnimalSerializer
 
+class ExamAnswerSerializer(serializers.ModelSerializer):
+
+    name = serializers.StringRelatedField(source='question', read_only=True)
+
+    class Meta:
+        model = ExamAnswer
+        fields = '__all__'
+
+
 class ExamSerializer(serializers.ModelSerializer):
 
-    answers = serializers.SerializerMethodField()
     assignee_object = UserSerializer(source='assignee', required=False, read_only=True)
-
-    def get_answers(self, obj):
-        answer_dict = {}
-        for examanswer in obj.examanswer_set.all():
-            answer_dict[examanswer.question.name.lower().replace(' ','_').replace('/','_')] = examanswer.answer
-            answer_dict[examanswer.question.name.lower().replace(' ','_').replace('/','_') + '_notes'] = examanswer.answer_notes
-        return answer_dict
+    answers = ExamAnswerSerializer(source='examanswer_set', required=False, read_only=True, many=True)
 
     class Meta:
         model = Exam
@@ -48,6 +50,19 @@ class DiagnosticSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Diagnostic
+        fields = '__all__'
+
+
+class DiagnosticResultSerializer(serializers.ModelSerializer):
+
+    name = serializers.StringRelatedField(source='diagnostic', read_only=True)
+    animal_object = serializers.SerializerMethodField()
+
+    def get_animal_object(self, obj):
+        return ModestAnimalSerializer(obj.medical_record.patient, required=False, read_only=True).data
+
+    class Meta:
+        model = DiagnosticResult
         fields = '__all__'
 
 
@@ -121,6 +136,7 @@ class MedicalRecordSerializer(serializers.ModelSerializer):
 
     animal_object = ModestAnimalSerializer(source='patient', required=False, read_only=True)
     exams = ExamSerializer(source='exam_set', many=True, required=False, read_only=True)
+    diagnostic_objects = DiagnosticResultSerializer(source='diagnosticresult_set', many=True, required=False, read_only=True)
     treatment_plans = TreatmentPlanSerializer(source='treatmentplan_set', required=False, read_only=True, many=True)
     vet_requests = VetRequestSerializer(source='vetrequest_set', required=False, read_only=True, many=True)
     diagnosis_text = serializers.SerializerMethodField()

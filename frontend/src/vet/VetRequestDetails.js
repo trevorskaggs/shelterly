@@ -1,27 +1,24 @@
 import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
 import Moment from 'react-moment';
-import moment from 'moment';
 import { Link } from 'raviger';
-import { Button, Card, Col, Collapse, ListGroup, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
+import { Button, Card, Col, ListGroup, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faEdit,
-  faPlusSquare,
   faStethoscope,
   faTimes,
-  faCheckSquare,
-  faChevronCircleDown,
-  faChevronCircleRight
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faDiamondExclamation,
 } from '@fortawesome/pro-solid-svg-icons';
 import Header from '../components/Header';
 import { SystemErrorContext } from '../components/SystemError';
+import { AuthContext } from "../accounts/AccountsReducer";
 
 function VetRequestDetails({ id, incident, organization }) {
 
+  const { dispatch, state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
   const priorityText = {urgent:'Urgent', when_available:'When Available'};
@@ -77,7 +74,7 @@ function VetRequestDetails({ id, incident, organization }) {
       >
         <Link href={"/" + organization + "/" + incident + "/vet/vetrequest/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-2" inverse /></Link>
       </OverlayTrigger> : ""}
-      {data.status !== 'Canceled' ? <OverlayTrigger
+      {data.status === 'Open' ? <OverlayTrigger
         key={"cancel-vet-request"}
         placement="bottom"
         overlay={
@@ -96,6 +93,7 @@ function VetRequestDetails({ id, incident, organization }) {
           <Card.Body>
             <Card.Title>
               <h4>
+                <Row className="ml-0 pr-0">
                 Information
                 {data.caution ? <OverlayTrigger
                   key={"caution"}
@@ -108,6 +106,25 @@ function VetRequestDetails({ id, incident, organization }) {
                 >
                   <FontAwesomeIcon icon={faDiamondExclamation} className="ml-2" inverse />
                 </OverlayTrigger> : ""}
+                {state.user.vet_perms && data.status === 'Open' ?
+                <span className="ml-auto mr-3">
+                  <Link href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.medical_record + "/workflow"} className="exam-link" style={{textDecoration:"none", color:"white"}}>
+                    <Card className="border rounded exam-hover-div" style={{height:"27px", minWidth:"202px", maxWidth:"202px", marginTop:"-2px", marginBottom:"-15px", whiteSpace:"nowrap", overflow:"hidden"}}>
+                      <div className="row no-gutters hover-div" style={{textTransform:"capitalize", marginRight:"-2px"}}>
+                        <Col style={{maxWidth:"36px"}}>
+                          <div className="border-right" style={{width:"27px", minWidth:"27px"}}>
+                            <FontAwesomeIcon icon={faStethoscope} className="ml-1 exam-icon" style={{paddingRight:"10px"}} transform={'grow-4 right-4 up-1'} inverse />
+                          </div>
+                        </Col>
+                        <Col style={{fontSize:"17px"}}>
+                          <div style={{marginTop:"2px", marginLeft:"-5px"}}>Start Veterinary Exam</div>
+                        </Col>
+                      </div>
+                    </Card>
+                  </Link>
+                </span>
+                : ""}
+                </Row>
               </h4>
             </Card.Title>
             <hr/>
@@ -121,7 +138,7 @@ function VetRequestDetails({ id, incident, organization }) {
               <ListGroup.Item>
                 <div className="row">
                   <span className="col-6">
-                    <b>Requested:</b> {data.requested_by_object ? <span>{data.requested_by_object.first_name} {data.requested_by_object.last_name}</span> : "Unknown"}
+                    <b>Opener:</b> {data.requested_by_object ? <span>{data.requested_by_object.first_name} {data.requested_by_object.last_name}</span> : "Unknown"}
                   </span>
                   <span className="col-6">
                     <b>Opened: </b><Moment format="lll">{data.open}</Moment>
@@ -148,20 +165,16 @@ function VetRequestDetails({ id, incident, organization }) {
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
               <ListGroup.Item>
                 <div className="row" style={{textTransform:"capitalize"}}>
-                  <span className="col-6"><b>ID:</b> <Link href={"/" + organization + "/" + incident + "/animals/" + data.animal_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>A#{data.animal_object.id}</Link></span>
-                  <span className="col-6"><b>Name:</b> {data.animal_object.name||"Unknown"}</span>
+                  <span className="col-4"><b>ID:</b> <Link href={"/" + organization + "/" + incident + "/animals/" + data.animal_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>A#{data.animal_object.id}</Link></span>
+                  <span className="col-4"><b>Name:</b> {data.animal_object.name||"Unknown"}</span>
+                  <span className="col-4"><b>Species:</b> {data.animal_object.species_string}</span>
                 </div>
               </ListGroup.Item>
               <ListGroup.Item>
                 <div className="row" style={{textTransform:"capitalize"}}>
-                  <span className="col-6"><b>Species:</b> {data.animal_object.species_string}</span>
-                  <span className="col-6"><b>Sex:</b> {data.animal_object.sex||"Unknown"}</span>
-                </div>
-              </ListGroup.Item>
-              <ListGroup.Item>
-                <div className="row" style={{textTransform:"capitalize"}}>
-                  <span className="col-6"><b>Age:</b> {data.animal_object.age||"Unknown"}</span>
-                  <span className="col-6"><b>Altered:</b> {data.animal_object.fixed||"Unknown"}</span>
+                  <span className="col-4"><b>Age:</b> {data.animal_object.age||"Unknown"}</span>
+                  <span className="col-4"><b>Sex:</b> {data.animal_object.sex||"Unknown"}</span>
+                  <span className="col-4"><b>Altered:</b> {data.animal_object.fixed||"Unknown"}</span>
                 </div>
               </ListGroup.Item>
               <ListGroup.Item style={{textTransform:"capitalize"}}>
@@ -172,23 +185,14 @@ function VetRequestDetails({ id, incident, organization }) {
               <ListGroup.Item>
                   <span><b>Medical Notes:</b> {data.animal_object.medical_notes || "N/A"}</span>
               </ListGroup.Item>
+              <ListGroup.Item>
+                  <b>Medical Record:</b> <Link href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.medical_record} className="text-link" style={{textDecoration:"none", color:"white"}}>MR#{data.medical_record}</Link>
+                </ListGroup.Item>
             </ListGroup>
           </Card.Body>
         </Card>
       </div>
     </div>
-    <Row className="mt-3">
-      <Col style={{width:"170px", maxWidth:"170px", whiteSpace:"nowrap", overflow:"hidden"}}>
-      <Link href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.medical_record + "/workflow"} className="exam-link" style={{textDecoration:"none", color:"white"}}>
-        <Card className="border rounded exam-hover-div" style={{width:"153px", maxWidth:"153px", whiteSpace:"nowrap", overflow:"hidden"}}>
-          <div className="exam-hover-div"><FontAwesomeIcon icon={faStethoscope} size="6x" className="mt-4 mb-4 exam-icon" style={{marginLeft:"30px" }} inverse /></div>
-          <Card.Text className="mb-0 border-top exam-hover-div" style={{textTransform:"capitalize", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis", height:"40px"}}>
-            <span className="ml-1" style={{fontSize:30}}>Start Exam</span>
-          </Card.Text>
-        </Card>
-      </Link>
-      </Col>
-    </Row>
     {/* <History action_history={data.action_history} /> */}
     <Modal show={showModal} onHide={() => setShowModal(false)}>
       <Modal.Header closeButton>

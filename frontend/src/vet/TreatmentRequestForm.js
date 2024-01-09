@@ -117,7 +117,7 @@ const TreatmetRequestForm = (props) => {
                 <Row>
                   <Col xs={"6"}>
                     <DropDown
-                      label="Administered"
+                      label="Administrator"
                       id="assigneeDropdown"
                       name="assignee"
                       type="text"

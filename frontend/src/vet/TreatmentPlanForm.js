@@ -68,6 +68,7 @@ const TreatmentPlanForm = (props) => {
   const [addAnother, setAddAnother] = useState(false);
 
   useEffect(() => {
+
     let unmounted = false;
     let source = axios.CancelToken.source();
 
@@ -220,7 +221,7 @@ const TreatmentPlanForm = (props) => {
           <span style={{cursor:'pointer'}} onClick={() => {setAddAnother(false);props.handleBack('treatments', 'diagnostics')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}</span>}
           {!props.id ? "" : "Update "}Treatment Form
           </Card.Header>
-          <Patient animal={data.animal_object.id ? data.animal_object : medRecordData.animal_object} organization={props.organization} incident={props.incident} />
+          <Patient animal={medRecordData.animal_object} organization={props.organization} incident={props.incident} />
           <Card.Body>
             <BootstrapForm as={Form}>
               <FormGroup>

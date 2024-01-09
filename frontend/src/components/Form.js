@@ -153,7 +153,7 @@ const TextInput = React.forwardRef((props, ref) => {
 
   return (
     <>
-    <Form.Group as={Col} xs={props.xs} controlId={props.controlId} className={props.formgroupclasses} hidden={props.hidden} style={props.colstyle} ref={meta.error && registeredRef}>
+    <Form.Group as={Col} xs={props.xs} controlId={props.controlId} className={props.formgroupclasses} hidden={props.hidden} ref={meta.error && registeredRef}>
       {props.label ? <Form.Label>{props.label}</Form.Label> : ""}
       {props.tooltip ?
       <OverlayTrigger

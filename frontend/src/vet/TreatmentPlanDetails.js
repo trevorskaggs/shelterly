@@ -27,7 +27,7 @@ function TreatmentPlanDetails({ id, incident, organization }) {
   const [showModal, setShowModal] = useState(false);
   const cancelTreatmentPlan = () => {
     axios.delete('/vet/api/treatmentplan/' + id + '/')
-    navigate('/' + organization + "/" + incident + "/vet/vetrequest/" + data.vet_request)
+    navigate("/" + organization + "/" + incident + "/vet/medrecord/" + data.medical_record)
   }
 
   // Hook for initializing data.
@@ -73,10 +73,10 @@ function TreatmentPlanDetails({ id, incident, organization }) {
         <Link href={"/" + organization + "/" + incident + "/vet/treatment/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-2" inverse /></Link>
       </OverlayTrigger> */}
       <OverlayTrigger
-        key={"cancel-vet-request"}
+        key={"cancel-treatment"}
         placement="bottom"
         overlay={
-          <Tooltip id={`tooltip-cancel-vet-request`}>
+          <Tooltip id={`tooltip-cancel-treatment`}>
             Cancel treatment
           </Tooltip>
         }
@@ -177,7 +177,7 @@ function TreatmentPlanDetails({ id, incident, organization }) {
                           <FontAwesomeIcon icon={faUserMd} size="6x" className="ml-2 treatment-icon" style={{marginTop:"5px", paddingLeft:"5px"}} inverse />
                         </div>
                         <Col style={{marginLeft:"-5px", marginRight:"-25px"}}>
-                          <div className="border" style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"10px", marginLeft:"-11px", marginTop: "-1px", fontSize:"18px", width:"100%", backgroundColor:"#615e5e"}}>
+                          <div className="border" style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"10px", marginLeft:"-11px", marginTop: "-1px", fontSize:"18px", width:"100%", backgroundColor:"rgb(158 153 153)"}}>
                             Suggested Admin Time: <Moment format="lll">{treatment_request.suggested_admin_time}</Moment>
                             <span className="float-right">
                               {treatment_request.actual_admin_time ?
@@ -236,7 +236,7 @@ function TreatmentPlanDetails({ id, incident, organization }) {
                             Actual Admin Time: {treatment_request.actual_admin_time ? <Moment format="lll">{treatment_request.actual_admin_time}</Moment> : "Pending"}
                           </div>
                           <div>
-                            Administered: {treatment_request.assignee_object ? <span>{treatment_request.assignee_object.first_name} {treatment_request.assignee_object.last_name}</span> : "Unassigned"}
+                            Administrator: {treatment_request.assignee_object ? <span>{treatment_request.assignee_object.first_name} {treatment_request.assignee_object.last_name}</span> : "-"}
                           </div>
                           </span>
                           :

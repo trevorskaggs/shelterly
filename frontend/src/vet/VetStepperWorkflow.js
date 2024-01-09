@@ -78,7 +78,7 @@ function getStepContent(id, incident, organization, step, handleStepSubmit, hand
     case 1:
       return <DiagnosticsForm onSubmit={handleStepSubmit} handleBack={handleBack} state={state} id={id} incident={incident} organization={organization} />;
     case 2:
-      return <TreatmentPlanForm onSubmit={handleStepSubmit} handleBack={handleBack} state={state} vetrequestid={id} incident={incident} organization={organization} />;
+      return <TreatmentPlanForm onSubmit={handleStepSubmit} handleBack={handleBack} state={state} medrecordid={id} incident={incident} organization={organization} />;
     case 3:
       return <ProcedureForm onSubmit={handleStepSubmit} handleBack={handleBack} state={state} id={id} incident={incident} organization={organization} />;
     case 4:
@@ -93,8 +93,7 @@ export const initialVetWorkflowData = {
   treatmentCount: 0,
   treatmentIndex: 0,
   steps: {
-    exam: {
-      id: '',},
+    exam: {'medrecord_id':null, assignee:null, 'confirm_sex_age':false, 'age':'', 'sex':'', 'confirm_chip':true, 'microchip':'', 'weight':null, 'weight_unit':'', 'weight_estimated':false, 'temperature':'', 'temperature_method':'Rectal', 'pulse':'', 'respiratory_rate':''},
     diagnostics: {},
     treatments: [],
     procedures: {},

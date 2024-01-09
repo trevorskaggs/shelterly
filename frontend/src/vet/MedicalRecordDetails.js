@@ -12,13 +12,15 @@ import {
   faCheckSquare,
   faChevronCircleDown,
   faChevronCircleRight,
-  faStethoscope
+  faStethoscope,
+  faVial,
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faDiamondExclamation,
   faPrescriptionBottlePill,
   faSquareExclamation,
-  faSquareEllipsis
+  faSquareEllipsis,
+  faVialCircleCheck
 } from '@fortawesome/pro-solid-svg-icons';
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
@@ -31,7 +33,6 @@ function MedicalRecordDetails({ id, incident, organization }) {
   const priorityText = {urgent:'Urgent', when_available:'When Available'};
 
   const [data, setData] = useState({id: '', exams: [], patient:null, vet_requests:[], open: '', diagnosis: '', other_diagnosis:'', treatment_plans:[], animal_object: {id:'', name:'', species:'', category:'', sex:'', age:'', fixed:'', pcolor:'', scolor:'', medical_notes:'', shelter_object:{}, room_name:''}});
-  const [examQuestions, setExamQuestions] = useState([]);
   const [showExam, setShowExam] = useState(true);
   const [activeVR, setActiveVR] = useState(null);
   const [activeExam, setActiveExam] = useState(null);
@@ -43,21 +44,6 @@ function MedicalRecordDetails({ id, incident, organization }) {
     let unmounted = false;
     let source = axios.CancelToken.source();
 
-    const fetchExamQuestions = async () => {
-      // Fetch exam question data.
-      await axios.get('/vet/api/examquestions/', {
-        cancelToken: source.token,
-      })
-      .then(response => {
-        if (!unmounted) {
-          setExamQuestions(response.data);
-        }
-      })
-      .catch(error => {
-        setShowSystemError(true);
-      });
-    };
-
     const fetchMedRecordData = async () => {
       // Fetch MedicalRecord details data.
       await axios.get('/vet/api/medrecord/' + id + '/?incident=' + incident, {
@@ -68,7 +54,6 @@ function MedicalRecordDetails({ id, incident, organization }) {
           setData(response.data);
           setActiveVR(response.data.vet_requests[0].id);
           setActiveExam(response.data.exams[0].id);
-          fetchExamQuestions();
         }
       })
       .catch(error => {
@@ -94,19 +79,7 @@ function MedicalRecordDetails({ id, incident, organization }) {
         <Card className="border rounded" style={{width:"100%"}}>
           <Card.Body>
             <Card.Title>
-              <h4 className="mb-0">Patient
-                {data.vet_requests.filter(vet_request => vet_request.caution === true).length > 0 ? <OverlayTrigger
-                  key={"caution"}
-                  placement="top"
-                  overlay={
-                    <Tooltip id={`tooltip-caution`}>
-                      Use caution when handling this animal.
-                    </Tooltip>
-                  }
-                >
-                  <FontAwesomeIcon icon={faDiamondExclamation} className="ml-2" inverse />
-                </OverlayTrigger> : ""}
-              </h4>
+              <h4 className="mb-0">Patient</h4>
             </Card.Title>
             <hr/>
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
@@ -139,13 +112,27 @@ function MedicalRecordDetails({ id, incident, organization }) {
       <div className="col-6 d-flex pl-0">
         <Card className="border rounded d-flex" style={{width:"100%"}}>
           <Card.Body>
-            <Card.Title style={{marginTop:"-2px", marginBottom:"-16px", textAlign:"center", alignItems:"center"}}>
+            <Card.Title style={{marginTop:"-2px", marginBottom:"-16px"}}>
               <h4>
-                <Scrollbar horizontal="true" autoHide style={{height:"45px", width:"485px"}} renderView={props => <div {...props} style={{...props.style, marginBottom:"-18px", marginRight:"0px", overflowX:"auto", overflowY: "hidden"}}/>} renderThumbVertical={props => <div {...props} style={{...props.style, display: 'none'}} />}>
+                <Scrollbar horizontal="true" no_shadow="true" autoHide style={{height:"45px", shadowheight:"45px", width:"100%"}} renderView={props => <div {...props} style={{...props.style, marginBottom:"-18px", marginRight:"0px", overflowX:"auto", overflowY: "hidden"}}/>} renderThumbVertical={props => <div {...props} style={{...props.style, display: 'none'}} />}>
                   <ListGroup horizontal>
                   {data.vet_requests.map((vet_request,i) => (
                     <ListGroup.Item key={vet_request.id} active={vet_request.id === activeVR} style={{textTransform:"capitalize", cursor:'pointer'}} onClick={() => setActiveVR(vet_request.id)}>
-                      <div style={{marginTop:"-3px"}}>VR#{vet_request.id}</div>
+                      <Row style={{marginTop:"-3px", width:vet_request.caution ? "94px" : "70px"}}>
+                        VR#{vet_request.id}
+                        {vet_request.caution ?
+                        <OverlayTrigger
+                          key={"caution"}
+                          placement="top"
+                          overlay={
+                            <Tooltip id={`tooltip-caution`}>
+                              Use caution when handling this animal.
+                            </Tooltip>
+                          }
+                        >
+                          <FontAwesomeIcon icon={faDiamondExclamation} className="ml-1 fa-move-down" size="sm" style={{marginTop:"2px"}} inverse />
+                        </OverlayTrigger> : ""}
+                      </Row>
                     </ListGroup.Item>
                   ))}
                   </ListGroup>
@@ -186,7 +173,7 @@ function MedicalRecordDetails({ id, incident, organization }) {
           <Card.Body style={{marginBottom:showExam ? "-7px" : "-15px"}}>
             <Card.Title style={{marginTop:"-2px", marginBottom:"-16px"}}>
               <h4 className="mb-0">
-                <Scrollbar horizontal="true" autoHide style={{height:"45px", width:"485px"}} renderView={props => <div {...props} style={{...props.style, marginBottom:"-18px", marginRight:"0px", overflowX:"auto", overflowY: "hidden"}}/>} renderThumbVertical={props => <div {...props} style={{...props.style, display: 'none'}} />}>
+                <Scrollbar horizontal="true" autoHide no_shadow="true" style={{height:"45px", shadowheight:"45px", width:"100%"}} renderView={props => <div {...props} style={{...props.style, marginBottom:"-18px", marginRight:"0px", overflowX:"auto", overflowY: "hidden"}}/>} renderThumbVertical={props => <div {...props} style={{...props.style, display: 'none'}} />}>
                   <ListGroup horizontal>
                     {data.vet_requests.filter(vet_request => vet_request.status === 'Open').length > 0 ? <ListGroup.Item className="small-exam-hover-div" style={{width:"50px"}}>
                       <OverlayTrigger
@@ -202,9 +189,9 @@ function MedicalRecordDetails({ id, incident, organization }) {
                       </OverlayTrigger>
                     </ListGroup.Item> : ""}
                     {data.exams.map((exam,i) => (
-                    <ListGroup.Item key={exam.id} active={exam.id === activeExam} style={{textTransform:"capitalize", cursor:'pointer'}} onClick={() => setActiveExam(exam.id)}>
-                      <div style={{marginTop:"-3px"}}>
-                        Exam {moment(exam.open).format('l')}
+                    <ListGroup.Item key={exam.id} active={exam.id === activeExam} style={{textTransform:"capitalize", cursor:'pointer', paddingLeft:"5px", paddingRight:"5px"}} onClick={() => setActiveExam(exam.id)}>
+                      <div style={{marginTop:"-3px", width:exam.id === activeExam ? "144px":"121px"}}>
+                        Exam {moment(exam.open).format('MM/DD')}
                         {exam.id === activeExam ? <span>
                           <FontAwesomeIcon icon={faChevronCircleRight} hidden={showExam} onClick={() => {setShowExam(true)}} className="ml-1 fa-move-up" size="sm" style={{cursor:'pointer'}} inverse />
                           <FontAwesomeIcon icon={faChevronCircleDown} hidden={!showExam} onClick={() => {setShowExam(false)}} className="ml-1 fa-move-up" size="sm" style={{cursor:'pointer'}} inverse />
@@ -251,11 +238,11 @@ function MedicalRecordDetails({ id, incident, organization }) {
                   <span className="col-4"><b>Respiratory Rate:</b> {exam.respiratory_rate}</span>
                 </div>
               </ListGroup.Item>
-              {examQuestions.filter(question => question.categories.includes(data.animal_object.category)).map(question => (
-                <ListGroup.Item key={question.id}>
+              {exam.answers.map(answer => (
+                <ListGroup.Item key={answer.id}>
                   <div className="row" style={{textTransform:"capitalize"}}>
-                    <span className="col-3"><b>{question.name}:</b> {exam.answers[question.name.toLowerCase().replace(' ','_').replace('/','_')]}</span>
-                    <span className="col-4"><b>Notes:</b> {exam.answers[question.name.toLowerCase().replace(' ','_').replace('/','_') + '_notes']}</span>
+                    <span className="col-3"><b>{answer.name}:</b> {answer.answer}</span>
+                    <span className="col-4"><b>Notes:</b> {answer.answer_notes}</span>
                   </div>
                 </ListGroup.Item>
               ))}
@@ -346,11 +333,8 @@ function MedicalRecordDetails({ id, incident, organization }) {
                                 Start: <Moment format="lll">{treatment_plan.start}</Moment>
                               </Col>
                               <Col xs={4}>
-                                End: <Moment format="lll">{treatment_plan.end}</Moment>
+                                End: {treatment_plan.end ? <Moment format="lll">{treatment_plan.end}</Moment> : ""}
                               </Col>
-                              {/* <Col>
-                                Complete: {treatment_plan.treatment_requests.filter(request => request.actual_admin_time).length + "/" + treatment_plan.treatment_requests.filter(request => !request.not_administered).length}
-                              </Col> */}
                               <Col>
                                 Quantity: {treatment_plan.quantity}
                               </Col>
@@ -380,6 +364,93 @@ function MedicalRecordDetails({ id, incident, organization }) {
               </Row>
             ))}
             {data.treatment_plans.length < 1 ? <p>No treatments have been created for this patient.</p> : ""}
+          </Card.Body>
+        </Card>
+      </div>
+    </div> : ""}
+    {data.exams.length > 0 ?
+    <div className="row mt-3">
+      <div className="col-12 d-flex">
+        <Card className="mb-2 border rounded" style={{width:"100%"}}>
+          <Card.Body style={{marginBottom:"-19px"}}>
+            <Card.Title>
+              <h4 className="mb-0">Diagnostics
+                <OverlayTrigger
+                  key={"order-diagnostic"}
+                  placement="top"
+                  overlay={
+                    <Tooltip id={`tooltip-order-diagnostic`}>
+                      Order diagnostics for this patient
+                    </Tooltip>
+                  }
+                >
+                  <Link href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.id + "/diagnostics"}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
+                </OverlayTrigger>
+              </h4>
+            </Card.Title>
+            <hr className="mb-3" />
+            {data.diagnostic_objects.map(diagnostic => (
+              <Row key={diagnostic.id} className="ml-0 mb-3">
+                <Link href={"/" + organization + "/" + incident + "/vet/diagnosticresult/edit/" + diagnostic.id} className="treatment-link" style={{textDecoration:"none", color:"white"}}>
+                  <Card className="border rounded treatment-hover-div" style={{height:"100px", width:"745px", whiteSpace:"nowrap", overflow:"hidden"}}>
+                    <div className="row no-gutters hover-div treatment-hover-div" style={{height:"100px", marginRight:"-2px"}}>
+                      <Row className="ml-0 mr-0 w-100" style={{flexWrap:"nowrap"}}>
+                        <div className="border-right" style={{width:"100px"}}>
+                          <FontAwesomeIcon icon={faVial} size="6x" className="treatment-icon" style={{marginTop:"5px", marginLeft:"12px", paddingRight:"10px"}} inverse />
+                        </div>
+                        <Col style={{marginLeft:"-5px", marginRight:"-25px"}} className="hover-div">
+                          <div className="border treatment-hover-div" style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"10px", marginLeft:"-11px", marginTop: "-1px", fontSize:"18px", width:"100%", backgroundColor:"rgb(158 153 153)"}}>
+                            {diagnostic.other_name ? diagnostic.other_name : diagnostic.name} - {diagnostic.result || 'Pending'}
+                            <span className="float-right">
+                            {diagnostic.result ?
+                              <OverlayTrigger
+                                key={"complete-diagnostics"}
+                                placement="top"
+                                overlay={
+                                  <Tooltip id={`tooltip-complete-diagnostics`}>
+                                    Diagnostic order is complete.
+                                  </Tooltip>
+                                }
+                              >
+                                <FontAwesomeIcon icon={faCheckSquare} size="3x" className="ml-1 treatment-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
+                              </OverlayTrigger>
+                              :
+                              <OverlayTrigger
+                                key={"scheduled-diagnostics"}
+                                placement="top"
+                                overlay={
+                                  <Tooltip id={`tooltip-scheduled-diagnostics`}>
+                                    Diagnostic order is pending.
+                                  </Tooltip>
+                                }
+                              >
+                                <FontAwesomeIcon icon={faSquareEllipsis} size="3x" className="ml-1 treatment-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
+                              </OverlayTrigger>
+                              }
+                            </span>
+                          </div>
+                          <div style={{marginTop:"6px"}}>
+                            <Row>
+                              <Col xs={4}>
+                                Ordered: <Moment format="lll">{diagnostic.open}</Moment>
+                              </Col>
+                            </Row>
+                          </div>
+                          <div>
+                            <Row>
+                              <Col>
+                                Notes: {diagnostic.notes || "N/A"}
+                              </Col>
+                            </Row>
+                          </div>
+                        </Col>
+                      </Row>
+                    </div>
+                  </Card>
+                </Link>
+              </Row>
+            ))}
+            {data.diagnostic_objects.length < 1 ? <p>No diagnostics have been ordered for this patient.</p> : ""}
           </Card.Body>
         </Card>
       </div>

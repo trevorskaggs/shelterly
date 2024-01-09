@@ -53,8 +53,8 @@ const DiagnosticsForm = (props) => {
   const [data, setData] = useState({
     patient: props.animalid,
     diagnostics: [],
-    diagnostic_notes: '',
-    diagnostic_other: '',
+    diagnostics_notes: '',
+    diagnostics_other: '',
     animal_object: {id:''}
   })
 
@@ -71,6 +71,8 @@ const DiagnosticsForm = (props) => {
         })
         .then(response => {
           if (!unmounted) {
+            response.data['diagnostics'] = [];
+            response.data['diagnostics_other'] = '';
             setData(response.data);
           }
         })
@@ -115,11 +117,16 @@ const DiagnosticsForm = (props) => {
       enableReinitialize={true}
       validationSchema={Yup.object({
         diagnostics: Yup.array(),
-        diagnostic_other: Yup.string().nullable().max(50, 'Maximum character limit of 50.'),
-        diagnostic_notes: Yup.string().nullable().max(300, 'Maximum character limit of 300.'),
+        diagnostics_other: Yup.string().nullable().max(50, 'Maximum character limit of 50.')
+        .when('diagnostics', {
+          is: (val) => val.includes(diagnosticChoices.filter(choice => choice.label === 'Other')[0].value),
+          then: () => Yup.string().max(50, 'Maximum character limit of 50.').required('Required.'),
+          otherwise: () => Yup.string().nullable().max(50, 'Maximum character limit of 50.'),
+        }),
+        diagnostics_notes: Yup.string().nullable().max(300, 'Maximum character limit of 300.'),
       })}
       onSubmit={(values, { setSubmitting }) => {
-        axios.patch('/vet/api/vetrequest/' + props.id + '/', values)
+        axios.patch('/vet/api/medrecord/' + props.id + '/', values)
         .then(response => {
           if (is_workflow) {
             props.onSubmit('diagnostics', values, 'treatments');
@@ -149,7 +156,7 @@ const DiagnosticsForm = (props) => {
               <FormGroup>
                 <Row className="mb-3">
                   <Col xs={"6"}>
-                    <label>Diagnostics</label>
+                    <label>Order Diagnostics</label>
                     <Select
                       label="Diagnostics"
                       id="diagnosticsDropdown"
@@ -176,8 +183,8 @@ const DiagnosticsForm = (props) => {
                   <TextInput
                     type="text"
                     label="Other Diagnostic"
-                    name="diagnostic_other"
-                    id="diagnostic_other"
+                    name="diagnostics_other"
+                    id="diagnostics_other"
                     xs="6"
                   />
                 </Row>
@@ -186,8 +193,8 @@ const DiagnosticsForm = (props) => {
                   <TextInput
                     as="textarea"
                     label="Diagnostic Notes"
-                    name="diagnostic_notes"
-                    id="diagnostic_notes"
+                    name="diagnostics_notes"
+                    id="diagnostics_notes"
                     xs="6"
                     rows={3}
                   />
@@ -196,7 +203,7 @@ const DiagnosticsForm = (props) => {
             </Form>
           </Card.Body>
           <ButtonGroup>
-            <Button type="button" className="btn btn-primary" onClick={() => { formikProps.submitForm() }}>{is_workflow ? "Next Step" : "Save"}</Button>
+            <Button type="button" className="btn btn-primary" onClick={() => { formikProps.values.diagnostics.length > 0 ? formikProps.submitForm() : props.onSubmit('diagnostics', formikProps.values, 'treatments');}} disabled={!is_workflow && formikProps.values.diagnostics.length === 0}>{is_workflow ? "Next Step" : "Save"}</Button>
           </ButtonGroup>
         </Card>
       )}

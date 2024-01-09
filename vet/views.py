@@ -2,13 +2,41 @@ from datetime import datetime, timedelta
 from rest_framework import filters, permissions, viewsets
 
 from animals.models import Animal
-from vet.models import Diagnosis, Diagnostic, Exam, ExamAnswer, ExamQuestion, MedicalRecord, PresentingComplaint, Procedure, Treatment, TreatmentPlan, TreatmentRequest, VetRequest
-from vet.serializers import DiagnosisSerializer, DiagnosticSerializer, ExamQuestionSerializer, ExamSerializer, MedicalRecordSerializer, PresentingComplaintSerializer, ProcedureSerializer, TreatmentSerializer, TreatmentPlanSerializer, TreatmentRequestSerializer, VetRequestSerializer
+from vet.models import Diagnosis, Diagnostic, DiagnosticResult, Exam, ExamAnswer, ExamQuestion, MedicalRecord, PresentingComplaint, Procedure, Treatment, TreatmentPlan, TreatmentRequest, VetRequest
+from vet.serializers import DiagnosisSerializer, DiagnosticSerializer, DiagnosticResultSerializer, ExamQuestionSerializer, ExamSerializer, MedicalRecordSerializer, PresentingComplaintSerializer, ProcedureSerializer, TreatmentSerializer, TreatmentPlanSerializer, TreatmentRequestSerializer, VetRequestSerializer
 
 class MedicalRecordViewSet(viewsets.ModelViewSet):
     queryset = MedicalRecord.objects.all()
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = MedicalRecordSerializer
+
+    def get_queryset(self):
+        """
+        Returns: Queryset of medical records.
+        """
+        queryset = (
+            MedicalRecord.objects.all()
+            .prefetch_related("exam_set")
+            .prefetch_related("diagnosticresult_set")
+            .prefetch_related("treatmentplan_set")
+            .prefetch_related("vetrequest_set")
+            # .prefetch_related("procedure_set")
+            .select_related("patient")
+            # .order_by('order')
+        )
+        # if self.request.GET.get('incident'):
+        #     queryset = queryset.filter(incident__slug=self.request.GET.get('incident'))
+        return queryset
+
+    def perform_update(self, serializer):
+        if serializer.is_valid():
+            med_record = serializer.save()
+            # Create DiagnosticResults if we receive diagnostic data.
+            for id in self.request.data.get('diagnostics', []):
+                diagnostic = Diagnostic.objects.get(id=id)
+                # Use submitted name for Other option.
+                name = self.request.data.get('diagnostics_other', '') if diagnostic.name == 'Other' else ''
+                DiagnosticResult.objects.create(diagnostic=diagnostic, medical_record=med_record, other_name=name)
 
 
 class ExamViewSet(viewsets.ModelViewSet):
@@ -75,20 +103,26 @@ class DiagnosticViewSet(viewsets.ModelViewSet):
     serializer_class = DiagnosticSerializer
 
 
+class DiagnosticResultViewSet(viewsets.ModelViewSet):
+    queryset = DiagnosticResult.objects.all()
+    permission_classes = [permissions.IsAuthenticated, ]
+    serializer_class = DiagnosticResultSerializer
+
+    def perform_update(self, serializer):
+
+        if serializer.is_valid():
+            if serializer.validated_data.get('result', False) and not serializer.validated_data.get('complete', False):
+                serializer.validated_data['complete'] = datetime.now()
+            elif not serializer.validated_data.get('result', False) and serializer.validated_data.get('complete', False):
+                serializer.validated_data['complete'] = None
+
+            serializer.save()
+
+
 class TreatmentRequestViewSet(viewsets.ModelViewSet):
     queryset = TreatmentRequest.objects.all()
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = TreatmentRequestSerializer
-
-    # def perform_update(self, serializer):
-
-    #     if serializer.is_valid():
-
-    #         tr = serializer.save()
-
-    #         # Check vet request to see if it needs to be closed.
-    #         if tr.actual_admin_time:
-    #             tr.treatment_plan.vet_request.check_closed()
 
 
 class VetRequestViewSet(viewsets.ModelViewSet):
