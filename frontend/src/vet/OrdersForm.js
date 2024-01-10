@@ -43,22 +43,40 @@ const customStyles = {
   // }),
 };
 
-const DiagnosticsForm = (props) => {
+const OrdersForm = (props) => {
 
   const { setShowSystemError } = useContext(SystemErrorContext);
 
   // Determine if we're in the vet exam workflow.
   var is_workflow = window.location.pathname.includes("workflow");
+  var is_diagnostics = window.location.pathname.includes("diagnostics");
+  var is_procedures = window.location.pathname.includes("procedures");
 
-  const [data, setData] = useState({
-    patient: props.animalid,
+  const initialData = {
+    is_workflow: is_workflow,
+    is_diagnostics: is_diagnostics,
+    is_procedures: is_procedures,
     diagnostics: [],
-    diagnostics_notes: '',
+    // diagnostics_notes: '',
     diagnostics_other: '',
+    procedures: [],
+    // procedure_notes: '',
+    procedure_other: '',
     animal_object: {id:''}
-  })
+  }
+  let current_data = initialData;
+  if (is_workflow) {
+    current_data = props.state.steps.orders;
+    current_data['is_workflow'] = is_workflow;
+    current_data['is_diagnostics'] = is_diagnostics;
+    current_data['is_procedures'] = is_procedures;
+  }
+
+  // Initial data.
+  const [data, setData] = useState(current_data);
 
   const [diagnosticChoices, setDiagnosticChoices] = useState([]);
+  const [procedureChoices, setProcedureChoices] = useState([]);
 
   useEffect(() => {
     let unmounted = false;
@@ -73,6 +91,11 @@ const DiagnosticsForm = (props) => {
           if (!unmounted) {
             response.data['diagnostics'] = [];
             response.data['diagnostics_other'] = '';
+            response.data['procedures'] = [];
+            response.data['procedure_other'] = '';
+            response.data['is_workflow'] = is_workflow;
+            response.data['is_diagnostics'] = is_diagnostics;
+            response.data['is_procedures'] = is_procedures;
             setData(response.data);
           }
         })
@@ -104,6 +127,27 @@ const DiagnosticsForm = (props) => {
 
     fetchDiagnostics();
 
+    const fetchProcedures = async () => {
+      // Fetch procedure data.
+      await axios.get('/vet/api/procedures/', {
+        cancelToken: source.token,
+      })
+      .then(response => {
+        if (!unmounted) {
+          let options = [];
+          response.data.forEach(function(procedure) {
+            options.push({value: procedure.id, label: procedure.name})
+          });
+          setProcedureChoices(options);
+        }
+      })
+      .catch(error => {
+        setShowSystemError(true);
+      });
+    };
+
+    fetchProcedures();
+
     // Cleanup.
     return () => {
       unmounted = true;
@@ -116,49 +160,64 @@ const DiagnosticsForm = (props) => {
       initialValues={data}
       enableReinitialize={true}
       validationSchema={Yup.object({
-        diagnostics: Yup.array(),
+        is_workflow: Yup.boolean(),
+        is_diagnostics: Yup.boolean(),
+        is_procedures: Yup.boolean(),
+        diagnostics: Yup.array().when(['is_workflow', 'is_diagnostics'], {
+          is: (is_workflow, is_diagnostics) => is_workflow === false && is_diagnostics,
+          then: Yup.array().min(1, 'Required')}),
         diagnostics_other: Yup.string().nullable().max(50, 'Maximum character limit of 50.')
         .when('diagnostics', {
           is: (val) => val.includes(diagnosticChoices.filter(choice => choice.label === 'Other')[0].value),
           then: () => Yup.string().max(50, 'Maximum character limit of 50.').required('Required.'),
           otherwise: () => Yup.string().nullable().max(50, 'Maximum character limit of 50.'),
         }),
-        diagnostics_notes: Yup.string().nullable().max(300, 'Maximum character limit of 300.'),
+        // diagnostics_notes: Yup.string().nullable().max(300, 'Maximum character limit of 300.'),
+        procedures: Yup.array().when(['is_workflow','is_procedures'], {
+          is: (is_workflow, is_procedures) => is_workflow === false && is_procedures,
+          then: Yup.array().min(1, 'Required')}),
+        procedure_other: Yup.string().nullable().max(50, 'Maximum character limit of 50.')
+        .when('procedures', {
+          is: (val) => val.includes(procedureChoices.filter(choice => choice.label === 'Other')[0].value),
+          then: () => Yup.string().max(50, 'Maximum character limit of 50.').required('Required.'),
+          otherwise: () => Yup.string().nullable().max(50, 'Maximum character limit of 50.'),
+        }),
+        // procedure_notes: Yup.string().nullable().max(300, 'Maximum character limit of 300.'),
       })}
       onSubmit={(values, { setSubmitting }) => {
-        axios.patch('/vet/api/medrecord/' + props.id + '/', values)
-        .then(response => {
-          if (is_workflow) {
-            props.onSubmit('diagnostics', values, 'treatments');
-          }
-          else {
+        if (is_workflow) {
+          props.onSubmit('orders', values, 'treatments');
+        }
+        else {
+          axios.patch('/vet/api/medrecord/' + props.id + '/', values)
+          .then(response => {
             navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + props.id);
-          }
-        })
-        .catch(error => {
-          setShowSystemError(true);
-        });
-        setSubmitting(false);
+          })
+          .catch(error => {
+            setShowSystemError(true);
+          });
+          setSubmitting(false);
+        }
       }}
     >
       {formikProps => (
         <Card border="secondary" className="mt-3">
           <Card.Header as="h5" className="pl-3">
             {is_workflow ?
-            <span style={{cursor:'pointer'}} onClick={() => {props.handleBack('diagnostics', 'exam')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
+            <span style={{cursor:'pointer'}} onClick={() => {props.handleBack('orders', 'exam')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
             :
             <span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + props.id + '/')} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}
-            Diagnostics Form
+            {is_diagnostics ? "Diagnostic " : is_procedures ? "Procedure " : "Diagnostic and Procedure "}Orders Form
           </Card.Header>
           <Patient animal={data.animal_object} organization={props.organization} incident={props.incident} />
           <Card.Body>
             <Form>
               <FormGroup>
+                {is_workflow || is_diagnostics ?
                 <Row className="mb-3">
                   <Col xs={"6"}>
-                    <label>Order Diagnostics</label>
+                    <label>Diagnostic Orders</label>
                     <Select
-                      label="Diagnostics"
                       id="diagnosticsDropdown"
                       name="diagnostics"
                       type="text"
@@ -178,6 +237,7 @@ const DiagnosticsForm = (props) => {
                     {formikProps.errors['diagnostics'] ? <div style={{ color: "#e74c3c", marginTop: ".5rem", fontSize: "80%" }}>{formikProps.errors['diagnostics']}</div> : ""}
                   </Col>
                 </Row>
+                : ""}
                 {diagnosticChoices.length && formikProps.values.diagnostics.includes(diagnosticChoices.filter(option => option.label === 'Other')[0].value) ?
                 <Row>
                   <TextInput
@@ -189,7 +249,44 @@ const DiagnosticsForm = (props) => {
                   />
                 </Row>
                 : ""}
-                <Row style={{marginBottom:"-15px"}}>
+                {is_workflow || is_procedures ?
+                <Row className="mb-3">
+                  <Col xs={"6"}>
+                    <label>Procedure Orders</label>
+                    <Select
+                      label="Procedures"
+                      id="proceduresDropdown"
+                      name="procedures"
+                      type="text"
+                      styles={customStyles}
+                      isMulti
+                      options={procedureChoices}
+                      value={procedureChoices.filter(choice => formikProps.values.procedures.includes(choice.value))}
+                      isClearable={false}
+                      onChange={(instance) => {
+                        let values = [];
+                        instance && instance.forEach(option => {
+                          values.push(option.value);
+                        })
+                        formikProps.setFieldValue("procedures", instance === null ? [] : values);
+                      }}
+                    />
+                    {formikProps.errors['procedures'] ? <div style={{ color: "#e74c3c", marginTop: ".5rem", fontSize: "80%" }}>{formikProps.errors['procedures']}</div> : ""}
+                  </Col>
+                </Row>
+                : ""}
+                {procedureChoices.length && formikProps.values.procedures.includes(procedureChoices.filter(option => option.label === 'Other')[0].value) ?
+                <Row>
+                  <TextInput
+                    type="text"
+                    label="Other Procedure"
+                    name="procedure_other"
+                    id="procedure_other"
+                    xs="6"
+                  />
+                </Row>
+                : ""}
+                {/* <Row style={{marginBottom:"-15px"}}>
                   <TextInput
                     as="textarea"
                     label="Diagnostic Notes"
@@ -198,12 +295,22 @@ const DiagnosticsForm = (props) => {
                     xs="6"
                     rows={3}
                   />
-                </Row>
+                </Row> */}
+                {/* <Row style={{marginBottom:"-15px"}}>
+                  <TextInput
+                    as="textarea"
+                    label="Procedure Notes"
+                    name="procedure_notes"
+                    id="procedure_notes"
+                    xs="6"
+                    rows={3}
+                  />
+                </Row> */}
               </FormGroup>
             </Form>
           </Card.Body>
           <ButtonGroup>
-            <Button type="button" className="btn btn-primary" onClick={() => { formikProps.values.diagnostics.length > 0 ? formikProps.submitForm() : props.onSubmit('diagnostics', formikProps.values, 'treatments');}} disabled={!is_workflow && formikProps.values.diagnostics.length === 0}>{is_workflow ? "Next Step" : "Save"}</Button>
+            <Button type="button" className="btn btn-primary" onClick={() => { is_workflow && formikProps.values.diagnostics.length === 0 ? props.onSubmit('diagnostics', formikProps.values, 'treatments') : formikProps.submitForm();}}>{is_workflow ? "Next Step" : "Save"}</Button>
           </ButtonGroup>
         </Card>
       )}
@@ -211,4 +318,4 @@ const DiagnosticsForm = (props) => {
   );
 };
 
-export default DiagnosticsForm;
+export default OrdersForm;

@@ -90,7 +90,7 @@ const DiagnosticResultForm = (props) => {
         <Card border="secondary" className="mt-3">
           <Card.Header as="h5" className="pl-3">
             <span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + data.medical_record + '/')} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
-            {data.other_name ? data.other_name : data.name} Diagnostic Results
+            {data.other_name ? data.other_name : data.name} Results
           </Card.Header>
           <Patient animal={data.animal_object} organization={props.organization} incident={props.incident} />
           <Card.Body>
@@ -128,6 +128,7 @@ const DiagnosticResultForm = (props) => {
                     id="notes"
                     xs="6"
                     rows={3}
+                    value={formikProps.values.notes || ''}
                   />
                 </Row>
               </FormGroup>

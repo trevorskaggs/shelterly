@@ -78,29 +78,31 @@ function MedicalRecordDetails({ id, incident, organization }) {
     <hr/>
     <div className="row">
       <div className="col-6 d-flex">
-        <Card className="border rounded" style={{width:"100%"}}>
+        <Card className="border rounded d-flex" style={{width:"100%"}}>
           <Card.Body>
             <Card.Title>
               <h4 className="mb-0">
-                Patient
-                {data.vet_requests.filter(vet_request => vet_request.status === 'Open').length > 0 ?
-                <span className="ml-auto mr-3">
-                  <Link href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.id + "/workflow"} className="exam-link" style={{textDecoration:"none", color:"white"}}>
-                    <Card className="border rounded exam-hover-div" style={{height:"27px", minWidth:"202px", maxWidth:"202px", marginTop:"-2px", marginBottom:"-15px", whiteSpace:"nowrap", overflow:"hidden"}}>
-                      <div className="row no-gutters hover-div" style={{textTransform:"capitalize", marginRight:"-2px"}}>
-                        <Col style={{maxWidth:"36px"}}>
-                          <div className="border-right" style={{width:"27px", minWidth:"27px"}}>
-                            <FontAwesomeIcon icon={faStethoscope} className="ml-1 exam-icon" style={{paddingRight:"10px"}} transform={'grow-4 right-4 up-1'} inverse />
-                          </div>
-                        </Col>
-                        <Col style={{fontSize:"17px"}}>
-                          <div style={{marginTop:"2px", marginLeft:"-5px"}}>Start Veterinary Exam</div>
-                        </Col>
-                      </div>
-                    </Card>
-                  </Link>
-                </span>
-                : ""}
+                <Row className="ml-0 pr-0">
+                  Patient
+                  {data.vet_requests.filter(vet_request => vet_request.status === 'Open').length > 0 ?
+                  <span className="ml-auto mr-3">
+                    <Link href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.id + "/workflow"} className="exam-link" style={{textDecoration:"none", color:"white"}}>
+                      <Card className="border rounded exam-hover-div" style={{height:"27px", minWidth:"202px", maxWidth:"202px", marginTop:"-2px", marginBottom:"-15px", whiteSpace:"nowrap", overflow:"hidden"}}>
+                        <div className="row no-gutters hover-div" style={{textTransform:"capitalize", marginRight:"-2px"}}>
+                          <Col style={{maxWidth:"36px"}}>
+                            <div className="border-right" style={{width:"27px", minWidth:"27px"}}>
+                              <FontAwesomeIcon icon={faStethoscope} className="ml-1 exam-icon" style={{paddingRight:"10px"}} transform={'grow-4 right-4 up-1'} inverse />
+                            </div>
+                          </Col>
+                          <Col style={{fontSize:"17px"}}>
+                            <div style={{marginTop:"2px", marginLeft:"-5px"}}>Start Veterinary Exam</div>
+                          </Col>
+                        </div>
+                      </Card>
+                    </Link>
+                  </span>
+                  : ""}
+                </Row>
               </h4>
             </Card.Title>
             <hr/>
@@ -180,7 +182,7 @@ function MedicalRecordDetails({ id, incident, organization }) {
               <ListGroup.Item>
                 <div className="row">
                   <span className="col-5"><b>Priority: </b>{priorityText[vet_request.priority]}</span>
-                  <span className="col-7"><b>Requested:</b> {vet_request.requested_by_object ? <span>{vet_request.requested_by_object.first_name} {vet_request.requested_by_object.last_name}</span> : "Unknown"}</span>
+                  <span className="col-7"><b>Opener:</b> {vet_request.requested_by_object ? <span>{vet_request.requested_by_object.first_name} {vet_request.requested_by_object.last_name}</span> : "Unknown"}</span>
                 </div>
               </ListGroup.Item>
               <ListGroup.Item>
@@ -230,7 +232,7 @@ function MedicalRecordDetails({ id, incident, organization }) {
                 <div className="row" style={{textTransform:"capitalize"}}>
                   <span className="col-3"><b>ID:</b> <Link href={"/" + organization + "/" + incident + "/vet/exam/" + exam.id} className="text-link" style={{textDecoration:"none", color:"white"}}>E#{exam.id}</Link></span>
                   <span className="col-4"><b>Performed:</b> {moment(exam.open).format('lll')}</span>
-                  <span className="col-4"><b>Doctor Assigned:</b> {exam.assignee_object.first_name} {exam.assignee_object.last_name}</span>
+                  <span className="col-4"><b>Examiner:</b> {exam.assignee_object ? <span>{exam.assignee_object.first_name + ' ' + exam.assignee_object.last_name}</span> : "Unknown"}</span>
                 </div>
               </ListGroup.Item>
               <ListGroup.Item>
@@ -269,56 +271,56 @@ function MedicalRecordDetails({ id, incident, organization }) {
           <Card.Body style={{marginBottom:"-19px"}}>
             <Card.Title style={{marginTop:"-2px", marginBottom:"-16px"}}>
               <h4 className="mb-0">
-                  <ListGroup horizontal>
-                    <ListGroup.Item active={"treatments" === activeOrders} className="text-center" style={{textTransform:"capitalize", cursor:'pointer', paddingLeft:"5px", paddingRight:"5px"}} onClick={() => setActiveOrders("treatments")}>
-                      <div style={{marginTop:"-3px", marginLeft:"-1px", width:"183px"}}>
-                        Treatments ({data.treatment_plans.length})
-                        {activeOrders === 'treatments' ? <OverlayTrigger
-                          key={"add-treatment"}
-                          placement="top"
-                          overlay={
-                            <Tooltip id={`tooltip-add-treatment`}>
-                              Add a treatment for this patient
-                            </Tooltip>
-                          }
-                        >
-                          <Link href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.id + "/treatment/new"}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
-                        </OverlayTrigger> : ""}
-                      </div>
-                    </ListGroup.Item>
-                    <ListGroup.Item active={"diagnostics" === activeOrders} className="text-center" style={{textTransform:"capitalize", cursor:'pointer', paddingLeft:"5px", paddingRight:"5px"}} onClick={() => setActiveOrders("diagnostics")}>
-                      <div style={{marginTop:"-3px", marginLeft:"-1px", width:"183px"}}>
-                        Diagnostics ({data.diagnostic_objects.length})
-                        {activeOrders === 'diagnostics' ? <OverlayTrigger
-                          key={"order-diagnostic"}
-                          placement="top"
-                          overlay={
-                            <Tooltip id={`tooltip-order-diagnostic`}>
-                              Order diagnostics for this patient
-                            </Tooltip>
-                          }
-                        >
-                          <Link href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.id + "/diagnostics"}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
-                        </OverlayTrigger> : ""}
-                      </div>
-                    </ListGroup.Item>
-                    <ListGroup.Item active={"procedures" === activeOrders} className="text-center" style={{textTransform:"capitalize", cursor:'pointer', paddingLeft:"5px", paddingRight:"5px"}} onClick={() => setActiveOrders("procedures")}>
-                      <div style={{marginTop:"-3px", marginLeft:"-1px", width:"183px"}}>
-                        Procedures ({data.procedure_objects.length})
-                        {activeOrders === 'procedures' ? <OverlayTrigger
-                          key={"order-procedure"}
-                          placement="top"
-                          overlay={
-                            <Tooltip id={`tooltip-order-procedure`}>
-                              Order procedures for this patient
-                            </Tooltip>
-                          }
-                        >
-                          <Link href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.id + "/procedures"}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
-                        </OverlayTrigger> : ""}
-                      </div>
-                    </ListGroup.Item>
-                  </ListGroup>
+                <ListGroup horizontal>
+                  <ListGroup.Item active={"treatments" === activeOrders} className="text-center" style={{textTransform:"capitalize", cursor:'pointer', paddingLeft:"5px", paddingRight:"5px"}} onClick={() => setActiveOrders("treatments")}>
+                    <div style={{marginTop:"-3px", marginLeft:"-1px", width:"183px"}}>
+                      Treatments ({data.treatment_plans.length})
+                      {activeOrders === 'treatments' ? <OverlayTrigger
+                        key={"add-treatment"}
+                        placement="top"
+                        overlay={
+                          <Tooltip id={`tooltip-add-treatment`}>
+                            Add a treatment for this patient
+                          </Tooltip>
+                        }
+                      >
+                        <Link href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.id + "/treatment/new"}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
+                      </OverlayTrigger> : ""}
+                    </div>
+                  </ListGroup.Item>
+                  <ListGroup.Item active={"diagnostics" === activeOrders} className="text-center" style={{textTransform:"capitalize", cursor:'pointer', paddingLeft:"5px", paddingRight:"5px"}} onClick={() => setActiveOrders("diagnostics")}>
+                    <div style={{marginTop:"-3px", marginLeft:"-1px", width:"183px"}}>
+                      Diagnostics ({data.diagnostic_objects.length})
+                      {activeOrders === 'diagnostics' ? <OverlayTrigger
+                        key={"order-diagnostic"}
+                        placement="top"
+                        overlay={
+                          <Tooltip id={`tooltip-order-diagnostic`}>
+                            Order diagnostics for this patient
+                          </Tooltip>
+                        }
+                      >
+                        <Link href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.id + "/diagnostics"}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
+                      </OverlayTrigger> : ""}
+                    </div>
+                  </ListGroup.Item>
+                  <ListGroup.Item active={"procedures" === activeOrders} className="text-center" style={{textTransform:"capitalize", cursor:'pointer', paddingLeft:"5px", paddingRight:"5px"}} onClick={() => setActiveOrders("procedures")}>
+                    <div style={{marginTop:"-3px", marginLeft:"-1px", width:"183px"}}>
+                      Procedures ({data.procedure_objects.length})
+                      {activeOrders === 'procedures' ? <OverlayTrigger
+                        key={"order-procedure"}
+                        placement="top"
+                        overlay={
+                          <Tooltip id={`tooltip-order-procedure`}>
+                            Order procedures for this patient
+                          </Tooltip>
+                        }
+                      >
+                        <Link href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.id + "/procedures"}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
+                      </OverlayTrigger> : ""}
+                    </div>
+                  </ListGroup.Item>
+                </ListGroup>
               </h4>
             </Card.Title>
             <hr className="mb-3" />
@@ -422,7 +424,7 @@ function MedicalRecordDetails({ id, incident, organization }) {
                         </div>
                         <Col style={{marginLeft:"-5px", marginRight:"-25px"}} className="hover-div">
                           <div className="border treatment-hover-div" style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"10px", marginLeft:"-11px", marginTop: "-1px", fontSize:"18px", width:"100%", backgroundColor:"rgb(158 153 153)"}}>
-                            {diagnostic.other_name ? diagnostic.other_name : diagnostic.name} - {diagnostic.result || 'Pending'}
+                            {diagnostic.other_name ? diagnostic.other_name : diagnostic.name}
                             <span className="float-right">
                             {diagnostic.result ?
                               <OverlayTrigger
@@ -453,9 +455,18 @@ function MedicalRecordDetails({ id, incident, organization }) {
                           </div>
                           <div style={{marginTop:"6px"}}>
                             <Row>
+                              <Col xs={3}>
+                                Result: {diagnostic.result || 'Pending'}
+                              </Col>
+                              {diagnostic.complete ?
+                              <Col xs={4}>
+                                Completed: <Moment format="lll">{diagnostic.complete}</Moment>
+                              </Col>
+                              :
                               <Col xs={4}>
                                 Ordered: <Moment format="lll">{diagnostic.open}</Moment>
                               </Col>
+                              }
                             </Row>
                           </div>
                           <div>
@@ -515,9 +526,18 @@ function MedicalRecordDetails({ id, incident, organization }) {
                           </div>
                           <div style={{marginTop:"6px"}}>
                             <Row>
+                              <Col xs={3}>
+                                Status: {procedure.complete ? 'Complete' : 'Pending'}
+                              </Col>
+                              {procedure.complete ?
+                              <Col xs={4}>
+                                Completed: <Moment format="lll">{procedure.complete}</Moment>
+                              </Col>
+                              :
                               <Col xs={4}>
                                 Ordered: <Moment format="lll">{procedure.open}</Moment>
                               </Col>
+                              }
                             </Row>
                           </div>
                           <div>

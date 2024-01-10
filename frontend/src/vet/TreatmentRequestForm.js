@@ -32,7 +32,7 @@ const TreatmetRequestForm = (props) => {
     actual_admin_time: new Date(),
     assignee: null,
     not_administered: false,
-    treatment_plan_object:{animal_object:{name:''}},
+    treatment_plan_object:{animal_object:{id:'', name:''}},
   })
 
   const [assigneeChoices, setAssigneeChoices] = useState([]);

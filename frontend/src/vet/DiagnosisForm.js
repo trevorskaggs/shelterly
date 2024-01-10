@@ -51,14 +51,9 @@ const DiagnosisForm = (props) => {
   var is_workflow = window.location.pathname.includes("workflow");
 
   const [data, setData] = useState({
-    patient: props.animalid,
-    assignee: null,
-    concern: '',
     diagnosis: [],
     diagnosis_notes: '',
     diagnosis_other: '',
-    priority: 'urgent',
-    presenting_complaints: [],
     animal_object: {id:''}
   })
 
@@ -123,6 +118,24 @@ const DiagnosisForm = (props) => {
         diagnosis_notes: Yup.string().nullable().max(300, 'Maximum character limit of 300.'),
       })}
       onSubmit={(values, { setSubmitting }) => {
+        // Add treatment and order data if we're in a workflow.
+        if (is_workflow) {
+          props.state.steps.treatments.forEach(treatment_values => {
+            // Only post data if we have a treatment value.
+            if (treatment_values.treatment) {
+              axios.post('/vet/api/treatmentplan/', treatment_values)
+              .catch(error => {
+                setShowSystemError(true);
+              });
+            }
+          })
+
+          values['diagnostics'] = props.state.steps.orders.diagnostics
+          values['diagnostics_other'] = props.state.steps.orders.diagnostics_other
+          values['procedures'] = props.state.steps.orders.procedures
+          values['procedure_other'] = props.state.steps.orders.procedure_other
+        }
+
         axios.patch('/vet/api/medrecord/' + props.id + '/', values)
         .then(response => {
           navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + props.id);
@@ -140,7 +153,7 @@ const DiagnosisForm = (props) => {
             <span style={{cursor:'pointer'}} onClick={() => {props.handleBack('diagnostics', 'exam')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
             :
             <span style={{ cursor: 'pointer' }} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}
-            Diagnostics Form
+            Diagnosis Form
           </Card.Header>
           <Patient animal={data.animal_object} organization={props.organization} incident={props.incident} />
           <Card.Body>
@@ -150,7 +163,6 @@ const DiagnosisForm = (props) => {
                   <Col xs={"6"}>
                     <label>Diagnosis</label>
                     <Select
-                      label="Diagnosis"
                       id="diagnosisDropdown"
                       name="diagnosis"
                       type="text"

@@ -147,7 +147,7 @@ class TreatmentPlanSerializer(SimpleTreatmentPlanSerializer):
 
 class TreatmentRequestSerializer(SimpleTreatmentRequestSerializer):
 
-    treatment_plan_object = SimpleTreatmentPlanSerializer(source='treatment_plan', required=False, read_only=True)
+    treatment_plan_object = TreatmentPlanSerializer(source='treatment_plan', required=False, read_only=True)
 
 
 class SimpleVetRequestSerializer(serializers.ModelSerializer):

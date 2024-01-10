@@ -8,6 +8,7 @@ import {
   ButtonGroup,
   Card,
   Col,
+  Form as BootstrapForm,
   FormGroup,
   ListGroup,
   Row,
@@ -17,16 +18,21 @@ import {
   faArrowAltCircleLeft,
 } from '@fortawesome/free-solid-svg-icons';
 import * as Yup from 'yup';
-import { DropDown, TextInput, DateTimePicker } from '../components/Form';
+import { Checkbox, DropDown, TextInput, DateTimePicker } from '../components/Form';
 import { SystemErrorContext } from '../components/SystemError';
+import { AuthContext } from "../accounts/AccountsReducer";
 import Patient from './components/Patient';
 
 const ProcedureResultForm = (props) => {
 
+  const { dispatch, state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
+
+  const [assigneeChoices, setAssigneeChoices] = useState([]);
 
   const [data, setData] = useState({
     open: null,
+    performer: null,
     complete: null,
     name: '',
     other_name: '',
@@ -56,6 +62,26 @@ const ProcedureResultForm = (props) => {
 
     fetchProcedureResult();
 
+    const fetchAssignees = async () => {
+      // Fetch assignee data.
+      await axios.get('/accounts/api/user/?vet=true&organization=' + state.organization.id, {
+        cancelToken: source.token,
+      })
+      .then(response => {
+        if (!unmounted) {
+          let options = [];
+          response.data.forEach(function(person) {
+            options.unshift({value: person.id, label: person.first_name + ' ' + person.last_name})
+          });
+          setAssigneeChoices(options);
+        }
+      })
+      .catch(error => {
+        setShowSystemError(true);
+      });
+    };
+    fetchAssignees();
+
     // Cleanup.
     return () => {
       unmounted = true;
@@ -69,7 +95,8 @@ const ProcedureResultForm = (props) => {
       enableReinitialize={true}
       validationSchema={Yup.object({
         open: Yup.string(),
-        completed: Yup.string().nullable(),
+        performer: Yup.string().nullable(),
+        complete: Yup.string().nullable(),
         other_name: Yup.string().nullable().max(50, 'Maximum character limit of 50.'),
         notes: Yup.string().nullable().max(500, 'Maximum character limit of 500.'),
       })}
@@ -88,7 +115,7 @@ const ProcedureResultForm = (props) => {
         <Card border="secondary" className="mt-3">
           <Card.Header as="h5" className="pl-3">
             <span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + data.medical_record + '/')} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
-            {data.other_name ? data.other_name : data.name} Procedure Results
+            {data.other_name ? data.other_name : data.name} Results
           </Card.Header>
           <Patient animal={data.animal_object} organization={props.organization} incident={props.incident} />
           <Card.Body>
@@ -105,14 +132,45 @@ const ProcedureResultForm = (props) => {
                   />
                 </Row>
                 : ""} */}
-                <Row style={{marginBottom:"-15px"}}>
+                <BootstrapForm.Row>
+                  <Col xs={"4"}>
+                    <DropDown
+                      label="Performer"
+                      id="performerDropdown"
+                      name="performer"
+                      type="text"
+                      key={`my_unique_performer_select_key__${formikProps.values.performer}`}
+                      options={assigneeChoices}
+                      isClearable={true}
+                      onChange={(instance) => {
+                        formikProps.setFieldValue("performer", instance === null ? '' : instance.value);
+                      }}
+                    />
+                  </Col>
+                </BootstrapForm.Row>
+                <Row className="mt-3" style={{marginBottom:"-15px"}}>
                   <TextInput
                     as="textarea"
                     label="Notes"
                     name="notes"
                     id="notes"
-                    xs="6"
-                    rows={3}
+                    xs="8"
+                    rows={4}
+                    value={formikProps.values.notes || ''}
+                  />
+                </Row>
+                <Row className="mt-3">
+                  <DateTimePicker
+                    label="Completed on"
+                    name="complete"
+                    id="complete"
+                    xs="4"
+                    onChange={(date, dateStr) => {
+                      formikProps.setFieldValue("complete", dateStr)
+                    }}
+                    value={formikProps.values.complete||new Date()}
+                    disabled={false}
+                    clearable={true}
                   />
                 </Row>
               </FormGroup>

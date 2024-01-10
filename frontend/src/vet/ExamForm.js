@@ -26,7 +26,7 @@ import {
 import * as Yup from 'yup';
 import { useRegisteredRef } from "react-register-nodes";
 import ButtonSpinner from '../components/ButtonSpinner';
-import { DropDown, TextInput } from '../components/Form';
+import { DateTimePicker, DropDown, TextInput } from '../components/Form';
 import { SystemErrorContext } from '../components/SystemError';
 import { catAgeChoices, dogAgeChoices, horseAgeChoices, otherAgeChoices, sexChoices } from '../animals/constants';
 import Patient from './components/Patient';
@@ -69,7 +69,11 @@ const initialSchemaData = [{
     id:'weight_estimated',
     validationType:"bool"},{
   id:'temperature',
-  validationType:"string"},{
+  validationType:"string",
+  validations: [{
+    type:'required',
+    params: ["This field is required"]
+  },]},{
   id:'temperature_method',
   validationType:"string",
   validations: [{
@@ -374,7 +378,7 @@ const ExamForm = (props) => {
               }
               else {
                 values['exam'] = response.data.id;
-                props.onSubmit('exam', values, 'diagnostics');
+                props.onSubmit('exam', values, 'orders');
               }
             }
             else {
@@ -398,7 +402,7 @@ const ExamForm = (props) => {
                 <BootstrapForm.Row>
                   <Col xs={"4"}>
                     <DropDown
-                      label="Doctor Assigned"
+                      label="Examiner"
                       id="assigneeDropdown"
                       name="assignee"
                       type="text"
@@ -411,6 +415,18 @@ const ExamForm = (props) => {
                     />
                   </Col>
                 </BootstrapForm.Row>
+                {props.id ? <BootstrapForm.Row className="mt-3 pl-0">
+                  <DateTimePicker
+                    label="Performed"
+                    name="open"
+                    id="open"
+                    xs="4"
+                    onChange={(date, dateStr) => {
+                      formikProps.setFieldValue("open", dateStr)
+                    }}
+                    value={formikProps.values.open||null}
+                  />
+                </BootstrapForm.Row> : ""}
                 <BootstrapForm.Row className="mt-3">
                   <Col xs="2">
                     <BootstrapForm.Label htmlFor="confirm_sex_age" style={{marginBottom:"-5px"}}>Confirm Age/Sex</BootstrapForm.Label>

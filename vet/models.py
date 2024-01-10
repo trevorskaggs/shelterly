@@ -116,6 +116,9 @@ class ExamAnswer(models.Model):
     answer = models.CharField(max_length=40, blank=True, null=True)
     answer_notes = models.CharField(max_length=300, blank=True, null=True)
 
+    class Meta:
+        ordering = ('question__name',)
+
 
 class DiagnosticResult(models.Model):
 
@@ -127,15 +130,22 @@ class DiagnosticResult(models.Model):
     diagnostic = models.ForeignKey(Diagnostic, on_delete=models.SET_NULL, null=True)
     medical_record = models.ForeignKey(MedicalRecord, on_delete=models.SET_NULL, null=True)
 
+    class Meta:
+        ordering = ('-id',)
+
 
 class ProcedureResult(models.Model):
 
     open = models.DateTimeField(auto_now=False, auto_now_add=True)
+    performer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     complete = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
     other_name = models.CharField(max_length=50, blank=True, null=True)
     notes = models.CharField(max_length=500, blank=True, null=True)
     procedure = models.ForeignKey(Procedure, on_delete=models.SET_NULL, null=True)
     medical_record = models.ForeignKey(MedicalRecord, on_delete=models.SET_NULL, null=True)
+
+    class Meta:
+        ordering = ('-id',)
 
 
 class Treatment(models.Model):
@@ -164,7 +174,7 @@ class TreatmentPlan(models.Model):
     end = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
 
     class Meta:
-        ordering = ('id',)
+        ordering = ('-id',)
 
 
 class TreatmentRequest(models.Model):

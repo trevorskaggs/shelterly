@@ -131,16 +131,6 @@ class ProcedureResultViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = ProcedureResultSerializer
 
-    def perform_update(self, serializer):
-
-        if serializer.is_valid():
-            if serializer.validated_data.get('notes', False) and not serializer.validated_data.get('complete', False):
-                serializer.validated_data['complete'] = datetime.now()
-            elif not serializer.validated_data.get('notes', False) and serializer.validated_data.get('complete', False):
-                serializer.validated_data['complete'] = None
-
-            serializer.save()
-
 
 class TreatmentRequestViewSet(viewsets.ModelViewSet):
     queryset = TreatmentRequest.objects.all()

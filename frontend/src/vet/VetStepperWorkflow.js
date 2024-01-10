@@ -6,12 +6,11 @@ import StepLabel from '@material-ui/core/StepLabel';
 import Typography from '@material-ui/core/Typography';
 import { useQueryParams } from 'raviger';
 import ExamForm from './ExamForm';
-import DiagnosticsForm from '../vet/DiagnosticsForm';
+import OrdersForm from '../vet/OrdersForm';
 import TreatmentPlanForm from '../vet/TreatmentPlanForm';
 import PageNotFound from "../components/PageNotFound";
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import DiagnosisForm from './DiagnosisForm';
-import ProceduresForm from './ProceduresForm';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -68,7 +67,7 @@ function CustomStepIcon() {
 }
 
 function getSteps() {
-  return ['Intake Exam', 'Order Diagnostics', 'Create Treatments', 'Order Procedures', 'Diagnosis'];
+  return ['Intake Exam', 'Orders', 'Treatments', 'Diagnosis'];
 }
 
 function getStepContent(id, incident, organization, step, handleStepSubmit, handleBack, state) {
@@ -76,12 +75,10 @@ function getStepContent(id, incident, organization, step, handleStepSubmit, hand
     case 0:
       return <ExamForm onSubmit={handleStepSubmit} handleBack={handleBack} state={state} medrecordid={id} incident={incident} organization={organization} />;
     case 1:
-      return <DiagnosticsForm onSubmit={handleStepSubmit} handleBack={handleBack} state={state} id={id} incident={incident} organization={organization} />;
+      return <OrdersForm onSubmit={handleStepSubmit} handleBack={handleBack} state={state} id={id} incident={incident} organization={organization} />;
     case 2:
       return <TreatmentPlanForm onSubmit={handleStepSubmit} handleBack={handleBack} state={state} medrecordid={id} incident={incident} organization={organization} />;
     case 3:
-      return <ProceduresForm onSubmit={handleStepSubmit} handleBack={handleBack} state={state} id={id} incident={incident} organization={organization} />;
-    case 4:
       return <DiagnosisForm onSubmit={handleStepSubmit} handleBack={handleBack} state={state} id={id} incident={incident} organization={organization} />;
     default:
       return <PageNotFound/>;
@@ -92,12 +89,13 @@ export const initialVetWorkflowData = {
   stepIndex: 0,
   treatmentCount: 0,
   treatmentIndex: 0,
+  diagnosticsCount: 0,
+  proceduresCount: 0,
   steps: {
-    exam: {'medrecord_id':null, assignee:null, 'confirm_sex_age':false, 'age':'', 'sex':'', 'confirm_chip':true, 'microchip':'', 'weight':null, 'weight_unit':'', 'weight_estimated':false, 'temperature':'', 'temperature_method':'Rectal', 'pulse':'', 'respiratory_rate':''},
-    diagnostics: {},
+    exam: {'medrecord_id':null, assignee:null, 'confirm_sex_age':false, 'age':'', 'sex':'', 'confirm_chip':true, 'microchip':'', 'weight':null, 'weight_unit':'kg', 'weight_estimated':false, 'temperature':'', 'temperature_method':'Rectal', 'pulse':'', 'respiratory_rate':''},
+    orders: {diagnostics:[], diagnostics_other:'', procedures:[], procedure_other:'', animal_object: {id:''}},
     treatments: [],
-    procedures: {},
-    diagnosis: {},
+    diagnosis: {diagnosis:[], diagnosis_notes:'', diagnosis_other:'', animal_object:{id:''}},
   }
 }
 

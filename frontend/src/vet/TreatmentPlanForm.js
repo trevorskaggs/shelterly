@@ -161,6 +161,7 @@ const TreatmentPlanForm = (props) => {
           is: (is_workflow, treatment) => is_workflow === false || treatment,
           then: Yup.number().integer().positive('Must be positive').required('Required')}),
         start: Yup.string(),
+        end: Yup.string().nullable(),
         quantity: Yup.number().nullable().integer().positive('Must be positive').when(['is_workflow', 'treatment'], {
           is: (is_workflow, treatment) => is_workflow === false || treatment,
           then: Yup.number().integer().positive('Must be positive').required('Required')}),
@@ -168,24 +169,17 @@ const TreatmentPlanForm = (props) => {
         route: Yup.string().nullable(),
       })}
       onSubmit={(values, { resetForm, setSubmitting }) => {
-        if (props.id || (props.state.steps.treatments[props.state.treatmentIndex])) {
-          axios.put('/vet/api/treatmentplan/' + props.id || props.state.steps.treatments[props.state.treatmentIndex].id + '/', values)
+        values['end'] = moment(values.start).add(24 * (values.days - 1), 'h').toDate();
+        if (props.id) {
+          axios.put('/vet/api/treatmentplan/' + props.id + '/', values)
           .then(response => {
             if (addAnother) {
-              if (is_workflow) {
-                props.onSubmit('treatments', values, 'treatments');
-              }
-              // Reset form data with existing treatment data if we have it.
-              let formdata = props.state && props.state.steps.treatments.length > 0 ? props.state.steps.treatments[props.state.treatmentIndex + 1] : data;
+              // Reset form data.
+              let formdata = initialData;
               resetForm({values:formdata});
             }
             else {
-              if (is_workflow) {
-                props.onSubmit('treatments', values, 'diagnoses');
-              }
-              else {
-                navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + props.medrecordid);
-              }
+              navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + props.medrecordid);
             }
           })
           .catch(error => {
@@ -193,36 +187,31 @@ const TreatmentPlanForm = (props) => {
           });
           setSubmitting(false);
         }
-        else if (values.treatment) {
+        else if (is_workflow) {
+          if (addAnother) {
+            values['id'] = response.data.id;
+            props.onSubmit('treatments', values, 'treatments');
+          }
+          else {
+            props.onSubmit('treatments', values, 'diagnoses');
+          }
+        }
+        else {
           axios.post('/vet/api/treatmentplan/', values)
           .then(response => {
             if (addAnother) {
-              if (is_workflow) {
-                values['id'] = response.data.id;
-                props.onSubmit('treatments', values, 'treatments');
-              }
-              // Reset form data with existing treatment data if we have it.
-              let formdata = props.state.steps.treatments[props.state.treatmentIndex + 1] ? props.state.steps.treatments[props.state.treatmentIndex + 1] : initialData;
+              // Reset form data..
+              let formdata = initialData;
               resetForm({values:formdata});
             }
             else {
-              if (is_workflow) {
-                values['id'] = response.data.id;
-                props.onSubmit('treatments', values, 'diagnoses');
-              }
-              else {
-                navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + props.medrecordid);
-              }
+              navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + response.data.medical_record);
             }
           })
           .catch(error => {
             setShowSystemError(true);
           });
           setSubmitting(false);
-        }
-        // Skip submitting step entirely if no data.
-        else {
-          props.onSubmit('treatments', values, 'diagnoses')
         }
       }}
     >
@@ -233,7 +222,7 @@ const TreatmentPlanForm = (props) => {
           :
           <span>{props.state.treatmentIndex > 0 ? <span style={{cursor:'pointer'}} onClick={() => {setAddAnother(false); setData(props.state.steps.treatments[props.state.treatmentIndex-1]); props.handleBack('treatments', 'treatments')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
           :
-          <span style={{cursor:'pointer'}} onClick={() => {setAddAnother(false);props.handleBack('treatments', 'diagnostics')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}</span>}
+          <span style={{cursor:'pointer'}} onClick={() => {setAddAnother(false);props.handleBack('treatments', 'orders')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}</span>}
           {!props.id ? "" : "Update "}Treatment Form
           </Card.Header>
           <Patient animal={medRecordData.animal_object} organization={props.organization} incident={props.incident} />
