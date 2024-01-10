@@ -189,7 +189,6 @@ const TreatmentPlanForm = (props) => {
         }
         else if (is_workflow) {
           if (addAnother) {
-            values['id'] = response.data.id;
             props.onSubmit('treatments', values, 'treatments');
           }
           else {
