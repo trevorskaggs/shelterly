@@ -42,7 +42,7 @@ class MedicalRecordViewSet(viewsets.ModelViewSet):
             for id in self.request.data.get('procedures', []):
                 procedure = Procedure.objects.get(id=id)
                 # Use submitted name for Other option.
-                name = self.request.data.get('procedures_other', '') if procedure.name == 'Other' else ''
+                name = self.request.data.get('procedure_other', '') if procedure.name == 'Other' else ''
                 ProcedureResult.objects.create(procedure=procedure, medical_record=med_record, other_name=name)
 
 
@@ -150,7 +150,7 @@ class TreatmentRequestViewSet(viewsets.ModelViewSet):
 
 class VetRequestViewSet(viewsets.ModelViewSet):
     queryset = VetRequest.objects.all()
-    search_fields = ['id', 'medical_record__patient__shelter__name', 'medical_record__patient__species', 'priority', 'open']
+    search_fields = ['id', 'medical_record__patient__id', 'medical_record__patient__name', 'concern', 'presenting_complaints__name']
     filter_backends = (filters.SearchFilter,)
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = VetRequestSerializer

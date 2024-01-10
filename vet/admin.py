@@ -9,7 +9,7 @@ class MedicalRecordAdmin(admin.ModelAdmin):
   list_display = ('id', 'patient', 'exam',)
 
 class VetRequestAdmin(admin.ModelAdmin):
-  list_display = ('id', 'requested_by',)
+  list_display = ('id', 'requested_by', 'medical_record',)
 
 class TreatmentPlanAdmin(admin.ModelAdmin):
   list_display = ('id', 'medical_record', 'treatment',)

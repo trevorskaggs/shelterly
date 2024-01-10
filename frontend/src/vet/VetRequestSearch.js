@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faDotCircle
 } from '@fortawesome/free-regular-svg-icons';
-import { faChevronDoubleDown, faChevronDoubleUp } from '@fortawesome/pro-solid-svg-icons';
+import { faChevronDoubleDown, faChevronDoubleUp, faDiamondExclamation } from '@fortawesome/pro-solid-svg-icons';
 import Select from 'react-select';
 import Moment from 'react-moment';
 import moment from 'moment';
@@ -15,10 +15,12 @@ import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
 import { ITEMS_PER_PAGE } from '../constants';
 import { SystemErrorContext } from '../components/SystemError';
+import { AuthContext } from "../accounts/AccountsReducer";
 import Flatpickr from 'react-flatpickr';
 
 function VetRequestSearch({ incident, organization }) {
 
+  const { dispatch, state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
   // Identify any query param data.
@@ -36,7 +38,6 @@ function VetRequestSearch({ incident, organization }) {
 
   const statusChoices = [
     { value: 'Open', label: 'Open' },
-    { value: 'Assigned', label: 'Assigned' },
     { value: 'Closed', label: 'Closed' },
     { value: 'Canceled', label: 'Canceled' },
   ];
@@ -44,7 +45,7 @@ function VetRequestSearch({ incident, organization }) {
   const [data, setData] = useState({vet_requests: [], isFetching: false});
   const [shelters, setShelters] = useState({options: [], isFetching: false});
   const [speciesChoices, setSpeciesChoices] = useState([]);
-  const [assignees, setAssignees] = useState({options: [], isFetching: false});
+  const [assignees, setAssignees] = useState([]);
   const [searchTerm, setSearchTerm] = useState(search);
   const [showFilters, setShowFilters] = useState(false);
   const [isDisabled, setIsDisabled] = useState(true);
@@ -52,11 +53,11 @@ function VetRequestSearch({ incident, organization }) {
   const speciesRef = useRef(null);
   const statusRef = useRef(null);
   const priorityRef = useRef(null);
-  const assigneeRef = useRef(null);
+  const openerRef = useRef(null);
   const openRef = useRef(null);
   const shelterRef = useRef(null);
   const [vetRequests, setVetRequests] = useState([]);
-  const [options, setOptions] = useState({species: null, status: null, priority: null, open: null, assignee: null, shelter: ''});
+  const [options, setOptions] = useState({species: '', status: null, priority: null, open: null, assignee: null, shelter: ''});
   const [page, setPage] = useState(1);
   const [numPages, setNumPages] = useState(1);
   const [startDate, setStartDate] = useState(null);
@@ -99,13 +100,13 @@ function VetRequestSearch({ incident, organization }) {
 
   const handleApplyFilters = () => {
     setVetRequests(data.vet_requests
-                          //  .filter(vet_request => options.species ? vet_request.animal_object.species_string === options.species : vet_request)
-                           .filter(vet_request => options.status ? vet_request.status === options.status : vet_request)
-                           .filter(vet_request => options.priority ? vet_request.priority === options.priority : vet_request)
-                           .filter(vet_request => options.open ? (startDate <= moment(vet_request.open).format('YYYY-MM-DD') && endDate >= moment(vet_request.open).format('YYYY-MM-DD')) : vet_request)
-                          //  .filter(vet_request => options.assignee ? vet_request.assignee === options.assignee : vet_request)
-                          //  .filter(vet_request => options.shelter && options.shelter !== 'Remote' ? vet_request.animal_object.shelter === options.shelter : vet_request)
-                          //  .filter(vet_request => options.shelter === 'Remote' ? vet_request.animal_object.shelter === null : vet_request)
+      .filter(vet_request => options.species ? vet_request.animal_object.species_string.toLowerCase() === options.species.toLowerCase() : vet_request)
+      .filter(vet_request => options.status ? vet_request.status === options.status : vet_request)
+      .filter(vet_request => options.priority ? vet_request.priority === options.priority : vet_request)
+      .filter(vet_request => options.open ? (startDate <= moment(vet_request.open).format('YYYY-MM-DD') && endDate >= moment(vet_request.open).format('YYYY-MM-DD')) : vet_request)
+      .filter(vet_request => options.opener ? vet_request.requested_by_object.id === options.opener : vet_request)
+      .filter(vet_request => options.shelter && options.shelter !== 'Remote' ? vet_request.animal_object.shelter === options.shelter : vet_request)
+      .filter(vet_request => options.shelter === 'Remote' ? vet_request.animal_object.shelter === null : vet_request)
     )
   };
 
@@ -116,9 +117,9 @@ function VetRequestSearch({ incident, organization }) {
     if (openRef.current) {
       openRef.current.flatpickr.clear();
     }
-    assigneeRef.current.select.clearValue();
+    openerRef.current.select.clearValue();
     shelterRef.current.select.clearValue();
-    setOptions({species: null, status: null, priority: null, open: null, assignee: null, shelter: ''});
+    setOptions({species: '', status: null, priority: null, open: null, assignee: null, shelter: ''});
     setVetRequests(data.vet_requests);
   };
 
@@ -157,7 +158,7 @@ function VetRequestSearch({ incident, organization }) {
           let species_options = [];
           response.data.forEach(result => {
             // Build species option list.
-            species_options.push({value: result.id, label: result.name});
+            species_options.push({value: result.name, label: result.name});
           });
           setSpeciesChoices(species_options);
         }
@@ -173,8 +174,8 @@ function VetRequestSearch({ incident, organization }) {
 
     const fetchVetRequests = async () => {
       setData({vet_requests: [], isFetching: true});
-      // Fetch ServiceRequest data.
-      await axios.get('/vet/api/vetrequest/?search=' + searchTerm, {
+      // Fetch VetRequest data.
+      await axios.get('/vet/api/vetrequest/?search=' + searchTerm + '&incident=' + incident, {
         cancelToken: source.token,
       })
       .then(response => {
@@ -182,6 +183,15 @@ function VetRequestSearch({ incident, organization }) {
           setNumPages(Math.ceil(response.data.length / ITEMS_PER_PAGE));
           setData({vet_requests: response.data, isFetching: false});
           setVetRequests(response.data);
+
+          // Build opener option list.
+          let openers = [];
+          response.data.forEach(vet_request => {
+            if (openers.filter(opener => opener.value === vet_request.requested_by_object.id).length === 0) {
+              openers.push({'value':vet_request.requested_by_object.id, 'label':vet_request.requested_by_object.first_name + ' ' + vet_request.requested_by_object.last_name});
+            }
+          });
+          setAssignees({options: openers, isFetching:false});
 
           // highlight search terms
           markInstances(searchTerm);
@@ -222,26 +232,6 @@ function VetRequestSearch({ incident, organization }) {
     };
     fetchShelters();
 
-    const fetchAssignees = async () => {
-      // Fetch assignee data.
-      await axios.get('/accounts/api/user/?vet=true', {
-        cancelToken: source.token,
-      })
-      .then(response => {
-        if (!unmounted) {
-          let options = [];
-          response.data.forEach(function(person) {
-            options.unshift({value: person.id, label: person.first_name + ' ' + person.last_name})
-          });
-          setAssignees({options: options, isFetching:false});
-        }
-      })
-      .catch(error => {
-        setShowSystemError(true);
-      });
-    };
-    fetchAssignees();
-
     // Cleanup.
     return () => {
       unmounted = true;
@@ -252,7 +242,7 @@ function VetRequestSearch({ incident, organization }) {
   // Hook handling option changes.
   useEffect(() => {
     const handleDisabled = () => {
-      setIsDisabled(!(options.species || options.status || options.priority || options.open || options.assignee || options.shelter));
+      setIsDisabled(!(options.species || options.status || options.priority || options.open || options.opener || options.shelter));
     };
 
     setNumPages(Math.ceil(vetRequests.length / ITEMS_PER_PAGE));
@@ -281,23 +271,9 @@ function VetRequestSearch({ incident, organization }) {
         <Collapse in={showFilters}>
           <div>
           <Card className="border rounded d-flex" style={{width:"100%"}}>
-            <Card.Body style={{marginBottom:"-16px"}}>
+            <Card.Body>
               <Row>
                 <Col xs={"5"}>
-                  <Select
-                    label="Species"
-                    id="speciesDropdown"
-                    name="species"
-                    type="text"
-                    placeholder="Select Species"
-                    options={speciesChoices}
-                    styles={customStyles}
-                    isClearable={true}
-                    ref={speciesRef}
-                    onChange={(instance) => {
-                      setOptions({...options, species: instance ? instance.value : null});
-                    }}
-                  />
                   <Select
                     label="status"
                     id="statusDropdown"
@@ -326,25 +302,39 @@ function VetRequestSearch({ incident, organization }) {
                       setOptions({...options, priority: instance ? instance.value : null});
                     }}
                   />
+                  <Select
+                    label="Opener"
+                    id="assigneeDropdown"
+                    name="assignee"
+                    type="text"
+                    placeholder="Select Opener"
+                    options={assignees.options}
+                    styles={customStyles}
+                    isClearable={true}
+                    ref={openerRef}
+                    onChange={(instance) => {
+                      setOptions({...options, opener: instance ? instance.value : null});
+                    }}
+                  />
                 </Col>
                 <Col xs="5">
                   <Row style={{marginBottom:"-16px"}}>
-                    <Col className="pl-0 pr-0 mb-3 mr-3">
-                      {/* <Select
-                        label="Assignee"
-                        id="assigneeDropdown"
-                        name="assignee"
+                    <Col className="pl-0 pr-0 mb-3 mr-3" style={{textTransform:"capitalize"}}>
+                      <Select
+                        label="Species"
+                        id="speciesDropdown"
+                        name="species"
                         type="text"
-                        placeholder="Select Assignee"
-                        options={assignees.options}
+                        placeholder="Select Species"
+                        options={speciesChoices}
                         styles={customStyles}
                         isClearable={true}
-                        ref={assigneeRef}
+                        ref={speciesRef}
                         onChange={(instance) => {
-                          setOptions({...options, assignee: instance ? instance.value : null});
+                          setOptions({...options, species: instance ? instance.value : null});
                         }}
-                      /> */}
-                      {/* <Select
+                      />
+                      <Select
                         label="Shelter"
                         id="shelterDropdown"
                         name="shelter"
@@ -357,8 +347,8 @@ function VetRequestSearch({ incident, organization }) {
                         onChange={(instance) => {
                           setOptions({...options, shelter: instance ? instance.value : ''})
                         }}
-                      /> */}
-                      <Flatpickr 
+                      />
+                      <Flatpickr
                         options={{allowInput: true, altFormat: "F j, Y", dateFormat: "m-d-Y", mode: "range", maxDate: moment().format('MM-DD-YYYY')}}
                         style={{height:"36px", paddingLeft:"11px", borderRadius:".25rem", borderWidth:"1px", borderStyle:"solid"}}
                         name={`open`}
@@ -403,7 +393,6 @@ function VetRequestSearch({ incident, organization }) {
                 <Link href={"/" + organization + "/" + incident + "/vet/vetrequest/" + vet_request.id}><FontAwesomeIcon icon={faDotCircle} className="mr-2" inverse /></Link>
               </OverlayTrigger>
               VR#{vet_request.id}
-              {/* &nbsp;-&nbsp;{vet_request.animal_object.name || "Unknown"} */}
               &nbsp;| {vet_request.status}
             </h4>
           </div>
@@ -412,36 +401,65 @@ function VetRequestSearch({ incident, organization }) {
               <Card.Body>
                 <Card.Title style={{marginTop:"-9px", marginBottom:"8px", marginLeft:"0px"}} className="row">
                   Information
+                  {vet_request.caution ? <OverlayTrigger
+                  key={"caution"}
+                  placement="top"
+                  overlay={
+                    <Tooltip id={`tooltip-caution`}>
+                      Use caution when handling this animal.
+                    </Tooltip>
+                  }
+                >
+                  <FontAwesomeIcon icon={faDiamondExclamation} className="ml-1 fa-move-down" inverse />
+                </OverlayTrigger> : ""}
                 </Card.Title>
                 <Scrollbar style={{height:"144px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
                   <ListGroup>
                     <ListGroup.Item>
                       <Row>
-                        {/* <Col>
+                        <Col xs="2">
                           <b>Patient: </b><Link href={"/" + organization + "/" + incident + "/animals/" + vet_request.animal_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>A#{vet_request.animal_object.id}</Link>
                         </Col>
-                        <Col style={{textTransform:"capitalize"}}>
+                        <Col xs="2">
+                          <b>Name: </b>{vet_request.animal_object.name || "Unknown"}
+                        </Col>
+                        <Col xs="2" style={{textTransform:"capitalize"}}>
                           <b>Species:</b> {vet_request.animal_object.species_string}
-                        </Col> */}
+                        </Col>
+                        <Col xs="2" style={{textTransform:"capitalize"}}>
+                          <b>Age:</b> {vet_request.animal_object.age || "Unknown"}
+                        </Col>
+                        <Col xs="2" style={{textTransform:"capitalize"}}>
+                          <b>Sex:</b> {vet_request.animal_object.sex || "Unknown"}
+                        </Col>
+                        <Col xs="2" style={{textTransform:"capitalize"}}>
+                          <b>Altered:</b> {vet_request.animal_object.altered || "Unknown"}
+                        </Col>
                       </Row>
                     </ListGroup.Item>
                     <ListGroup.Item>
                       <Row>
-                        <Col>
+                        <Col xs="2">
                           <b>Priority: </b>{priorityText[vet_request.priority]}
                         </Col>
+                        <Col xs="2">
+                          <b>Opened: </b>{moment(vet_request.open).format('l')}
+                        </Col>
                         <Col>
-                          <b>Opened: </b><Moment format="L">{vet_request.open}</Moment>
+                          <b>Opener: </b>{vet_request.requested_by_object.first_name + ' ' + vet_request.requested_by_object.last_name}
                         </Col>
                       </Row>
                     </ListGroup.Item>
                     <ListGroup.Item>
                       <Row>
+                        <Col>
+                          <b>Complaints:</b> {vet_request.complaints_text}
+                        </Col>
+                        <Col>
+                          <b>Concern: </b>{vet_request.concern}
+                        </Col>
                         {/* <Col>
-                          <b>Assignee:</b> {vet_request.assignee_object ? <span>{vet_request.assignee_object.first_name} {vet_request.assignee_object.last_name}</span> : "Unassigned"}
-                        </Col> */}
-                        {/* <Col>
-                          <b>Shelter: </b>{vet_request.shelter_name || "Remote"}
+                          <b>Shelter: </b>{vet_request.animal_object.shelter_object ? vet_request.animal_object.shelter_object.name:"Unknown"}{vet_request.animal_object.room_name ? <span> - {vet_request.animal_object.room_name}</span> : "Remote"}
                         </Col> */}
                       </Row>
                     </ListGroup.Item>

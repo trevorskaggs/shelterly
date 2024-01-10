@@ -104,7 +104,7 @@ function VetRequestDetails({ id, incident, organization }) {
                     </Tooltip>
                   }
                 >
-                  <FontAwesomeIcon icon={faDiamondExclamation} className="ml-2" inverse />
+                  <FontAwesomeIcon icon={faDiamondExclamation} className="ml-1 fa-move-down" inverse />
                 </OverlayTrigger> : ""}
                 {state.user.vet_perms && data.status === 'Open' ?
                 <span className="ml-auto mr-3">
@@ -141,7 +141,7 @@ function VetRequestDetails({ id, incident, organization }) {
                     <b>Opener:</b> {data.requested_by_object ? <span>{data.requested_by_object.first_name} {data.requested_by_object.last_name}</span> : "Unknown"}
                   </span>
                   <span className="col-6">
-                    <b>Opened: </b><Moment format="lll">{data.open}</Moment>
+                    <b>Opened: </b><Moment format="ll">{data.open}</Moment>
                   </span>
                 </div>
               </ListGroup.Item>

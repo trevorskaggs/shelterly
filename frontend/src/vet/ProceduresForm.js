@@ -117,7 +117,7 @@ const ProceduresForm = (props) => {
       enableReinitialize={true}
       validationSchema={Yup.object({
         procedures: Yup.array(),
-        procedures_other: Yup.string().nullable().max(50, 'Maximum character limit of 50.')
+        procedure_other: Yup.string().nullable().max(50, 'Maximum character limit of 50.')
         .when('procedures', {
           is: (val) => val.includes(procedureChoices.filter(choice => choice.label === 'Other')[0].value),
           then: () => Yup.string().max(50, 'Maximum character limit of 50.').required('Required.'),
