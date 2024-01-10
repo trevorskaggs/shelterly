@@ -2,8 +2,8 @@ from datetime import datetime, timedelta
 from rest_framework import filters, permissions, viewsets
 
 from animals.models import Animal
-from vet.models import Diagnosis, Diagnostic, DiagnosticResult, Exam, ExamAnswer, ExamQuestion, MedicalRecord, PresentingComplaint, Procedure, Treatment, TreatmentPlan, TreatmentRequest, VetRequest
-from vet.serializers import DiagnosisSerializer, DiagnosticSerializer, DiagnosticResultSerializer, ExamQuestionSerializer, ExamSerializer, MedicalRecordSerializer, PresentingComplaintSerializer, ProcedureSerializer, TreatmentSerializer, TreatmentPlanSerializer, TreatmentRequestSerializer, VetRequestSerializer
+from vet.models import Diagnosis, Diagnostic, DiagnosticResult, Exam, ExamAnswer, ExamQuestion, MedicalRecord, PresentingComplaint, Procedure, ProcedureResult, Treatment, TreatmentPlan, TreatmentRequest, VetRequest
+from vet.serializers import DiagnosisSerializer, DiagnosticSerializer, DiagnosticResultSerializer, ExamQuestionSerializer, ExamSerializer, MedicalRecordSerializer, PresentingComplaintSerializer, ProcedureSerializer, ProcedureResultSerializer, TreatmentSerializer, TreatmentPlanSerializer, TreatmentRequestSerializer, VetRequestSerializer
 
 class MedicalRecordViewSet(viewsets.ModelViewSet):
     queryset = MedicalRecord.objects.all()
@@ -20,7 +20,7 @@ class MedicalRecordViewSet(viewsets.ModelViewSet):
             .prefetch_related("diagnosticresult_set")
             .prefetch_related("treatmentplan_set")
             .prefetch_related("vetrequest_set")
-            # .prefetch_related("procedure_set")
+            .prefetch_related("procedureresult_set")
             .select_related("patient")
             # .order_by('order')
         )
@@ -37,6 +37,13 @@ class MedicalRecordViewSet(viewsets.ModelViewSet):
                 # Use submitted name for Other option.
                 name = self.request.data.get('diagnostics_other', '') if diagnostic.name == 'Other' else ''
                 DiagnosticResult.objects.create(diagnostic=diagnostic, medical_record=med_record, other_name=name)
+
+            # Create ProcedureResults if we receive procedure data.
+            for id in self.request.data.get('procedures', []):
+                procedure = Procedure.objects.get(id=id)
+                # Use submitted name for Other option.
+                name = self.request.data.get('procedures_other', '') if procedure.name == 'Other' else ''
+                ProcedureResult.objects.create(procedure=procedure, medical_record=med_record, other_name=name)
 
 
 class ExamViewSet(viewsets.ModelViewSet):
@@ -119,6 +126,22 @@ class DiagnosticResultViewSet(viewsets.ModelViewSet):
             serializer.save()
 
 
+class ProcedureResultViewSet(viewsets.ModelViewSet):
+    queryset = ProcedureResult.objects.all()
+    permission_classes = [permissions.IsAuthenticated, ]
+    serializer_class = ProcedureResultSerializer
+
+    def perform_update(self, serializer):
+
+        if serializer.is_valid():
+            if serializer.validated_data.get('notes', False) and not serializer.validated_data.get('complete', False):
+                serializer.validated_data['complete'] = datetime.now()
+            elif not serializer.validated_data.get('notes', False) and serializer.validated_data.get('complete', False):
+                serializer.validated_data['complete'] = None
+
+            serializer.save()
+
+
 class TreatmentRequestViewSet(viewsets.ModelViewSet):
     queryset = TreatmentRequest.objects.all()
     permission_classes = [permissions.IsAuthenticated, ]
@@ -132,13 +155,6 @@ class VetRequestViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = VetRequestSerializer
 
-    def perform_create(self, serializer):
-        if serializer.is_valid():
-            serializer.validated_data['requested_by'] = self.request.user
-            med_record, _ = MedicalRecord.objects.get_or_create(patient=Animal.objects.get(id=self.request.data.get('patient')))
-            serializer.validated_data['medical_record'] = med_record
-            serializer.save()
-
     def get_queryset(self):
         """
         Returns: Queryset of distinct animals, each annotated with:
@@ -150,9 +166,16 @@ class VetRequestViewSet(viewsets.ModelViewSet):
             .select_related("medical_record", "medical_record__patient")
             # .order_by('order')
         )
-        # if self.request.GET.get('incident'):
-        #     queryset = queryset.filter(incident__slug=self.request.GET.get('incident'))
+        if self.request.GET.get('incident'):
+            queryset = queryset.filter(medical_record__patient__incident__slug=self.request.GET.get('incident'))
         return queryset
+
+    def perform_create(self, serializer):
+        if serializer.is_valid():
+            serializer.validated_data['requested_by'] = self.request.user
+            med_record, _ = MedicalRecord.objects.get_or_create(patient=Animal.objects.get(id=self.request.data.get('patient')))
+            serializer.validated_data['medical_record'] = med_record
+            serializer.save()
 
 
 class TreatmentPlanViewSet(viewsets.ModelViewSet):

@@ -20,7 +20,8 @@ import {
   faPrescriptionBottlePill,
   faSquareExclamation,
   faSquareEllipsis,
-  faVialCircleCheck
+  faVialCircleCheck,
+  faScalpelLineDashed
 } from '@fortawesome/pro-solid-svg-icons';
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
@@ -32,7 +33,7 @@ function MedicalRecordDetails({ id, incident, organization }) {
 
   const priorityText = {urgent:'Urgent', when_available:'When Available'};
 
-  const [data, setData] = useState({id: '', exams: [], patient:null, vet_requests:[], open: '', diagnosis: '', other_diagnosis:'', treatment_plans:[], animal_object: {id:'', name:'', species:'', category:'', sex:'', age:'', fixed:'', pcolor:'', scolor:'', medical_notes:'', shelter_object:{}, room_name:''}});
+  const [data, setData] = useState({id:'', exams:[], diagnostic_objects:[], procedure_objects:[], patient:null, vet_requests:[], open: '', diagnosis: '', other_diagnosis:'', treatment_plans:[], animal_object: {id:'', name:'', species:'', category:'', sex:'', age:'', fixed:'', pcolor:'', scolor:'', medical_notes:'', shelter_object:{}, room_name:''}});
   const [showExam, setShowExam] = useState(true);
   const [activeVR, setActiveVR] = useState(null);
   const [activeExam, setActiveExam] = useState(null);
@@ -201,18 +202,6 @@ function MedicalRecordDetails({ id, incident, organization }) {
                     ))}
                   </ListGroup>
                 </Scrollbar>
-                {/* Exam Results */}
-                {/* <OverlayTrigger
-                  key={"edit-exam"}
-                  placement="bottom"
-                  overlay={
-                    <Tooltip id={`tooltip-start-exam`}>
-                      Edit exam
-                    </Tooltip>
-                  }
-                >
-                  <Link href={"/" + organization + "/" + incident + "/vet/medrecord/" + id + "/exam/"}><FontAwesomeIcon icon={faEdit} className="ml-1" size="lg" style={{cursor:'pointer'}} inverse /></Link>
-                </OverlayTrigger> */}
               </h4>
             </Card.Title>
             <hr className="mb-3" />
@@ -221,6 +210,7 @@ function MedicalRecordDetails({ id, incident, organization }) {
               <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
               <ListGroup.Item>
                 <div className="row" style={{textTransform:"capitalize"}}>
+                  <span className="col-3"><b>ID:</b> <Link href={"/" + organization + "/" + incident + "/vet/exam/" + exam.id} className="text-link" style={{textDecoration:"none", color:"white"}}>E#{exam.id}</Link></span>
                   <span className="col-3"><b>Performed:</b> {moment(exam.open).format('lll')}</span>
                   <span className="col-4"><b>Doctor Assigned:</b> {exam.assignee_object.first_name} {exam.assignee_object.last_name}</span>
                 </div>
@@ -451,6 +441,93 @@ function MedicalRecordDetails({ id, incident, organization }) {
               </Row>
             ))}
             {data.diagnostic_objects.length < 1 ? <p>No diagnostics have been ordered for this patient.</p> : ""}
+          </Card.Body>
+        </Card>
+      </div>
+    </div> : ""}
+    {data.exams.length > 0 ?
+    <div className="row mt-3">
+      <div className="col-12 d-flex">
+        <Card className="mb-2 border rounded" style={{width:"100%"}}>
+          <Card.Body style={{marginBottom:"-19px"}}>
+            <Card.Title>
+              <h4 className="mb-0">Procedures
+                <OverlayTrigger
+                  key={"order-procedure"}
+                  placement="top"
+                  overlay={
+                    <Tooltip id={`tooltip-order-procedure`}>
+                      Order procedures for this patient
+                    </Tooltip>
+                  }
+                >
+                  <Link href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.id + "/procedures"}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
+                </OverlayTrigger>
+              </h4>
+            </Card.Title>
+            <hr className="mb-3" />
+            {data.procedure_objects.map(procedure => (
+              <Row key={procedure.id} className="ml-0 mb-3">
+                <Link href={"/" + organization + "/" + incident + "/vet/procedureresult/edit/" + procedure.id} className="treatment-link" style={{textDecoration:"none", color:"white"}}>
+                  <Card className="border rounded treatment-hover-div" style={{height:"100px", width:"745px", whiteSpace:"nowrap", overflow:"hidden"}}>
+                    <div className="row no-gutters hover-div treatment-hover-div" style={{height:"100px", marginRight:"-2px"}}>
+                      <Row className="ml-0 mr-0 w-100" style={{flexWrap:"nowrap"}}>
+                        <div className="border-right" style={{width:"100px"}}>
+                          <FontAwesomeIcon icon={faScalpelLineDashed} size="6x" className="treatment-icon" style={{marginTop:"5px", marginLeft:"4px", paddingRight:"10px"}} inverse />
+                        </div>
+                        <Col style={{marginLeft:"-5px", marginRight:"-25px"}} className="hover-div">
+                          <div className="border treatment-hover-div" style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"10px", marginLeft:"-11px", marginTop: "-1px", fontSize:"18px", width:"100%", backgroundColor:"rgb(158 153 153)"}}>
+                            {procedure.other_name ? procedure.other_name : procedure.name}
+                            <span className="float-right">
+                            {procedure.complete ?
+                              <OverlayTrigger
+                                key={"complete-procedures"}
+                                placement="top"
+                                overlay={
+                                  <Tooltip id={`tooltip-complete-procedures`}>
+                                    Procedure order is complete.
+                                  </Tooltip>
+                                }
+                              >
+                                <FontAwesomeIcon icon={faCheckSquare} size="3x" className="ml-1 treatment-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
+                              </OverlayTrigger>
+                              :
+                              <OverlayTrigger
+                                key={"scheduled-procedures"}
+                                placement="top"
+                                overlay={
+                                  <Tooltip id={`tooltip-scheduled-procedures`}>
+                                    Procedure order is pending.
+                                  </Tooltip>
+                                }
+                              >
+                                <FontAwesomeIcon icon={faSquareEllipsis} size="3x" className="ml-1 treatment-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
+                              </OverlayTrigger>
+                              }
+                            </span>
+                          </div>
+                          <div style={{marginTop:"6px"}}>
+                            <Row>
+                              <Col xs={4}>
+                                Ordered: <Moment format="lll">{procedure.open}</Moment>
+                              </Col>
+                            </Row>
+                          </div>
+                          <div>
+                            <Row>
+                              <Col>
+                                Notes: {procedure.notes || "N/A"}
+                              </Col>
+                            </Row>
+                          </div>
+                        </Col>
+                      </Row>
+                    </div>
+                  </Card>
+                </Link>
+              </Row>
+            ))}
+            {data.procedure_objects.length < 1 ? <p>No procedures have been ordered for this patient.</p> : ""}
           </Card.Body>
         </Card>
       </div>

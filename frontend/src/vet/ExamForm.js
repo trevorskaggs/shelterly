@@ -144,9 +144,9 @@ const ExamForm = (props) => {
   // Determine if we're in the vet exam workflow.
   var is_workflow = window.location.pathname.includes("workflow");
 
-  const initialData = {id: '', exam: null, open: '', exam_object: {'medrecord_id':props.medrecordid, assignee:null, 'confirm_sex_age':false, 'confirm_chip':false, 'weight':null, 'weight_unit':'', 'weight_estimated':false, 'temperature':'', 'temperature_method':'Rectal', 'pulse':'', 'respiratory_rate':''}, animal_object: {id:'', name:'', species:'', category:'', sex:'', age:'', size:'', pcolor:'', scolor:'', medical_notes:''}}
+  const initialData = {id: '', exam: null, open: '', exam_object: {'medrecord_id':props.medrecordid, assignee:null, 'confirm_sex_age':false, 'confirm_chip':false, 'weight':null, 'weight_unit':'', 'weight_estimated':false, 'temperature':'', 'temperature_method':'Rectal', 'pulse':'', 'respiratory_rate':''}, animal_object: {id:'', name:'', species:'', species_string: '', category:'', sex:'', age:'', size:'', pcolor:'', scolor:'', medical_notes:''}}
 
-  let current_data = initialData;
+  let current_data = {...initialData}
   if (is_workflow) {
     current_data['exam_object'] = props.state.steps.exam;
   }
@@ -185,85 +185,88 @@ const ExamForm = (props) => {
     let unmounted = false;
     let source = axios.CancelToken.source();
     let open_notes_dict = {};
-    if (props.medrecordid) {
-      const fetchMedRecord = async () => {
-        // Fetch MedRecord data.
-        await axios.get('/vet/api/medrecord/' + props.medrecordid + '/', {
-          cancelToken: source.token,
-        })
-        .then(response => {
-          if (!unmounted) {
-            response.data.exam_object = data.exam_object;
-            response.data.exam_object['medrecord_id'] = props.medrecordid
-            response.data.exam_object['age'] = response.data.animal_object.age
-            response.data.exam_object['sex'] = response.data.animal_object.sex
-            response.data.exam_object['microchip'] = response.data.animal_object.microchip
+    
+    const fetchExamQuestionData = async () => {
+      // Fetch exam question data.
+      axios.get('/vet/api/examquestions/', {
+        cancelToken: source.token,
+      })
+      .then(questionResponse => {
+        if (!unmounted) {
+          const filterDataBySpecies = (response) => {
+            let config = [...initialSchemaData];
+            // Filter the questions by the animal category.
+            let filtered_data = questionResponse.data.filter(question => question.categories.includes(response.data.animal_object.category))
+            setExamQuestions(filtered_data);
+            filtered_data.forEach(question => {
+              if (props.state && !props.state.steps.exam.id) {
+                response.data.exam_object[question.name.toLowerCase().replace(' ','_').replace('/','_')] = props.state.steps.exam[question.name.toLowerCase().replace(' ','_').replace('/','_')] || question.default;
+                response.data.exam_object[question.name.toLowerCase().replace(' ','_').replace('/','_') + '_notes'] = props.state.steps.exam[question.name.toLowerCase().replace(' ','_').replace('/','_') + '_notes'] || '';
+                response.data.exam_object[question.name.toLowerCase().replace(' ','_').replace('/','_') + '_id'] = question.id;
 
-            // Fetch exam question data.
-            axios.get('/vet/api/examquestions/', {
-              cancelToken: source.token,
-            })
-            .then(questionResponse => {
-              if (!unmounted) {
-                let config = [...initialSchemaData];
-                // Filter the questions by the animal category.
-                let filtered_data = questionResponse.data.filter(question => question.categories.includes(response.data.animal_object.category))
-                setExamQuestions(filtered_data);
-                filtered_data.forEach(question => {
-                  if (props.state && !props.state.steps.exam.id) {
-                    response.data.exam_object[question.name.toLowerCase().replace(' ','_').replace('/','_')] = props.state.steps.exam[question.name.toLowerCase().replace(' ','_').replace('/','_')] || question.default;
-                    response.data.exam_object[question.name.toLowerCase().replace(' ','_').replace('/','_') + '_notes'] = props.state.steps.exam[question.name.toLowerCase().replace(' ','_').replace('/','_') + '_notes'] || '';
-                    response.data.exam_object[question.name.toLowerCase().replace(' ','_').replace('/','_') + '_id'] = question.id;
-
-                    if (props.state.steps.exam[question.name.toLowerCase().replace(' ','_').replace('/','_') + '_notes']) {
-                      open_notes_dict[question.name.toLowerCase().replace(' ','_').replace('/','_')] = true;
-                    }
-                  }
-                  // Set open notes defaults.
-                  open_notes_dict[question.name.toLowerCase().replace(' ','_').replace('/','_')] = open_notes_dict[question.name.toLowerCase().replace(' ','_').replace('/','_')] === true ? true : false;
-                  // Create a dynamic config for Yup validation.
-                  config.push({
-                    id:question.name.toLowerCase().replace(' ','_').replace('/','_'),
-                    validationType:"string",
-                    validations: [{
-                      type:'required',
-                      params: ["This field is required"]
-                    },
-                    {
-                      type:'nullable',
-                      params: []
-                    },
-                  ]
-                  })
-                  config.push({
-                    id:question.name.toLowerCase().replace(' ','_').replace('/','_') + '_notes',
-                    validationType:"string",
-                    validations: [
+                if (props.state.steps.exam[question.name.toLowerCase().replace(' ','_').replace('/','_') + '_notes']) {
+                  open_notes_dict[question.name.toLowerCase().replace(' ','_').replace('/','_')] = true;
+                }
+              }
+              // Set open notes defaults.
+              open_notes_dict[question.name.toLowerCase().replace(' ','_').replace('/','_')] = open_notes_dict[question.name.toLowerCase().replace(' ','_').replace('/','_')] === true ? true : false;
+              // Create a dynamic config for Yup validation.
+              config.push({
+                id:question.name.toLowerCase().replace(' ','_').replace('/','_'),
+                validationType:"string",
+                validations: [{
+                  type:'required',
+                  params: ["This field is required"]
+                },
+                {
+                  type:'nullable',
+                  params: []
+                },
+              ]
+              })
+              config.push({
+                id:question.name.toLowerCase().replace(' ','_').replace('/','_') + '_notes',
+                validationType:"string",
+                validations: [
+                  {
+                    type:'max',
+                    params: [300, "Max of 300 characters allowed"]
+                  },
+                  {
+                    type: "when",
+                    params: [
+                      question.name.toLowerCase().replace(' ','_').replace('/','_'),
                       {
-                        type:'max',
-                        params: [300, "Max of 300 characters allowed"]
-                      },
-                      {
-                        type: "when",
-                        params: [
-                          question.name.toLowerCase().replace(' ','_').replace('/','_'),
+                        is: 'Other',
+                        then: [
                           {
-                            is: 'Other',
-                            then: [
-                              {
-                                type: "required",
-                                params: ["This field is required"],
-                              },
-                            ],
+                            type: "required",
+                            params: ["This field is required"],
                           },
                         ],
                       },
                     ],
-                  })
-                });
-                const schema = config.reduce(createYupSchema, {});
-                setFormSchema(schema);
-                setShowNotes(open_notes_dict);
+                  },
+                ],
+              })
+            });
+            const schema = config.reduce(createYupSchema, {});
+            setFormSchema(schema);
+            setShowNotes(open_notes_dict);
+          }
+          if (props.medrecordid) {
+            // Fetch MedRecord data.
+            axios.get('/vet/api/medrecord/' + props.medrecordid + '/', {
+              cancelToken: source.token,
+            })
+            .then(response => {
+              if (!unmounted) {
+                response.data.exam_object = data.exam_object;
+                response.data.exam_object['medrecord_id'] = props.medrecordid
+                response.data.exam_object['age'] = response.data.animal_object.age
+                response.data.exam_object['sex'] = response.data.animal_object.sex
+                response.data.exam_object['microchip'] = response.data.animal_object.microchip
+                filterDataBySpecies(response);
                 setData(response.data);
               }
             })
@@ -271,34 +274,61 @@ const ExamForm = (props) => {
               setShowSystemError(true);
             });
           }
-        })
-        .catch(error => {
-          setShowSystemError(true);
-        });
-      };
-
-      fetchMedRecord();
-
-      const fetchAssignees = async () => {
-        // Fetch assignee data.
-        await axios.get('/accounts/api/user/?vet=true&organization=' + state.organization.id, {
-          cancelToken: source.token,
-        })
-        .then(response => {
-          if (!unmounted) {
-            let options = [];
-            response.data.forEach(function(person) {
-              options.unshift({value: person.id, label: person.first_name + ' ' + person.last_name})
-            });
-            setAssigneeChoices(options);
+          if (props.id) {
+            const fetchExamData = async () => {
+              // Fetch exam data.
+              await axios.get('/vet/api/exam/' + props.id + '/', {
+                cancelToken: source.token,
+              })
+              .then(response => {
+                if (!unmounted) {
+                  response.data.answers.forEach(answer => {
+                    response.data[answer.name.toLowerCase().replace(' ','_').replace('/','_')] = answer.answer;
+                    response.data[answer.name.toLowerCase().replace(' ','_').replace('/','_') + '_notes'] = answer.answer_notes;
+                    response.data[answer.name.toLowerCase().replace(' ','_').replace('/','_') + '_id'] = answer.question;
+                  });
+      
+                  response.data['age'] = response.data.animal_object.age
+                  response.data['sex'] = response.data.animal_object.sex
+                  response.data['microchip'] = response.data.animal_object.microchip
+                  filterDataBySpecies(response);
+                  setData(response.data);
+                }
+              })
+              .catch(error => {
+                setShowSystemError(true);
+              });
+            };
+            fetchExamData();
           }
-        })
-        .catch(error => {
-          setShowSystemError(true);
-        });
-      };
-      fetchAssignees();
+        }
+      })
+      .catch(error => {
+        setShowSystemError(true);
+      });
     };
+
+    fetchExamQuestionData();
+
+    const fetchAssignees = async () => {
+      // Fetch assignee data.
+      await axios.get('/accounts/api/user/?vet=true&organization=' + state.organization.id, {
+        cancelToken: source.token,
+      })
+      .then(response => {
+        if (!unmounted) {
+          let options = [];
+          response.data.forEach(function(person) {
+            options.unshift({value: person.id, label: person.first_name + ' ' + person.last_name})
+          });
+          setAssigneeChoices(options);
+        }
+      })
+      .catch(error => {
+        setShowSystemError(true);
+      });
+    };
+    fetchAssignees();
 
     // Cleanup.
     return () => {
@@ -309,14 +339,14 @@ const ExamForm = (props) => {
 
   return (
     <Formik
-      initialValues={data.exam_object}
+      initialValues={props.id ? data : data.exam_object}
       enableReinitialize={true}
       validateOnChange={false}
       validationSchema={Yup.object().shape(formSchema)}
       onSubmit={(values, { setSubmitting }) => {
         values['animal_id'] = data.animal_object.id
-        if (data.exam || values.exam) {
-          axios.put('/vet/api/exam/' + (data.exam || values.exam) + '/', values)
+        if (props.id || values.exam) {
+          axios.put('/vet/api/exam/' + (props.id || values.exam) + '/', values)
           .then(response => {
             if (is_workflow) {
               if (saveAndFinish) {
@@ -327,7 +357,7 @@ const ExamForm = (props) => {
               }
             }
             else {
-              navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + props.medrecordid);
+              navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + data.medical_record);
             }
           })
           .catch(error => {
@@ -360,7 +390,7 @@ const ExamForm = (props) => {
     >
       {formikProps => (
         <Card border="secondary" className="mt-3">
-          <Card.Header as="h5" className="pl-3"><span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + props.medrecordid + '/')} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>Veterinary Exam Form</Card.Header>
+          <Card.Header as="h5" className="pl-3"><span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + (is_workflow ? props.medrecordid : data.medical_record) + '/')} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>Veterinary Exam Form</Card.Header>
           <Patient animal={data.animal_object} organization={props.organization} incident={props.incident} />
           <Card.Body>
             <Form>

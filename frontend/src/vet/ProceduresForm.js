@@ -43,7 +43,7 @@ const customStyles = {
   // }),
 };
 
-const ProcedureForm = (props) => {
+const ProceduresForm = (props) => {
 
   const { setShowSystemError } = useContext(SystemErrorContext);
 
@@ -70,6 +70,8 @@ const ProcedureForm = (props) => {
         })
         .then(response => {
           if (!unmounted) {
+            response.data['procedures'] = [];
+            response.data['procedure_other'] = '';
             setData(response.data);
           }
         })
@@ -115,7 +117,12 @@ const ProcedureForm = (props) => {
       enableReinitialize={true}
       validationSchema={Yup.object({
         procedures: Yup.array(),
-        procedure_other: Yup.string().nullable().max(50, 'Maximum character limit of 50.'),
+        procedures_other: Yup.string().nullable().max(50, 'Maximum character limit of 50.')
+        .when('procedures', {
+          is: (val) => val.includes(procedureChoices.filter(choice => choice.label === 'Other')[0].value),
+          then: () => Yup.string().max(50, 'Maximum character limit of 50.').required('Required.'),
+          otherwise: () => Yup.string().nullable().max(50, 'Maximum character limit of 50.'),
+        }),
         procedure_notes: Yup.string().nullable().max(300, 'Maximum character limit of 300.'),
       })}
       onSubmit={(values, { setSubmitting }) => {
@@ -204,4 +211,4 @@ const ProcedureForm = (props) => {
   );
 };
 
-export default ProcedureForm;
+export default ProceduresForm;

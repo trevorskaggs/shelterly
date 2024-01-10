@@ -50,6 +50,8 @@ import VetStepperWorkflow, { initialVetWorkflowData } from "./vet/VetStepperWork
 import DiagnosticsForm from "./vet/DiagnosticsForm";
 import MedicalRecordDetails from "./vet/MedicalRecordDetails";
 import DiagnosticResultForm from "./vet/DiagnosticResultForm";
+import ProceduresForm from "./vet/ProceduresForm";
+import ProcedureResultForm from "./vet/ProcedureResultForm";
 
 export const publicRoutes = {
   "/login": () => <LoginForm />,
@@ -114,9 +116,11 @@ const routes = {
   "/:organization/:incident/vet/diagnosticresult/edit/:id": ({id, incident, organization}) => <DiagnosticResultForm id={id} incident={incident} organization={organization} />,
   "/:organization/:incident/vet/medrecord/:id": ({id, incident, organization}) => <MedicalRecordDetails id={id} incident={incident} organization={organization} />,
   "/:organization/:incident/vet/medrecord/:id/diagnostics": ({id, incident, organization}) => <DiagnosticsForm id={id} state={initialVetWorkflowData} incident={incident} organization={organization} />,
-  "/:organization/:incident/vet/medrecord/:id/exam": ({id, incident, organization}) => <ExamForm id={id} incident={incident} organization={organization} />,
+  "/:organization/:incident/vet/exam/:id": ({id, incident, organization}) => <ExamForm id={id} incident={incident} organization={organization} />,
+  "/:organization/:incident/vet/medrecord/:id/procedures": ({id, incident, organization}) => <ProceduresForm id={id} state={initialVetWorkflowData} incident={incident} organization={organization} />,
   "/:organization/:incident/vet/medrecord/:id/workflow": ({id, incident, organization}) => <VetStepperWorkflow id={id} incident={incident} organization={organization} />,
   "/:organization/:incident/vet/medrecord/:medrecordid/treatment/new": ({medrecordid, incident, organization}) => <TreatmentPlanForm medrecordid={medrecordid} state={initialVetWorkflowData} incident={incident} organization={organization} />,
+  "/:organization/:incident/vet/procedureresult/edit/:id": ({id, incident, organization}) => <ProcedureResultForm id={id} incident={incident} organization={organization} />,
   "/:organization/:incident/vet/treatment/:id": ({id, incident, organization}) => <TreatmentPlanDetails id={id} incident={incident} organization={organization} />,
   "/:organization/:incident/vet/treatment/edit/:id": ({id, incident, organization}) => <TreatmentPlanForm id={id} incident={incident} organization={organization} />,
   "/:organization/:incident/vet/treatmentrequest/edit/:id": ({id, incident, organization}) => <TreatmentRequestForm id={id} incident={incident} organization={organization} />,

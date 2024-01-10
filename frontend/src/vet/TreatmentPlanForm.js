@@ -31,6 +31,7 @@ const TreatmentPlanForm = (props) => {
   var is_workflow = window.location.pathname.includes("workflow");
 
   let initialData = {
+    is_workflow: is_workflow,
     medical_record: props.medrecordid,
     start: new Date(),
     end: null,
@@ -105,8 +106,9 @@ const TreatmentPlanForm = (props) => {
         })
         .then(response => {
           if (!unmounted) {
-            response.data['category'] = response.data.treatment_object.category
-            response.data['treatment'] = response.data.treatment_object.id
+            response.data['category'] = response.data.treatment_object.category;
+            response.data['treatment'] = response.data.treatment_object.id;
+            response.data['is_workflow'] = is_workflow;
             setData(response.data);
           }
         })
@@ -148,13 +150,22 @@ const TreatmentPlanForm = (props) => {
       validateOnChange={false}
       enableReinitialize={true}
       validationSchema={Yup.object({
-        treatment: Yup.string().required('Required'),
-        frequency: Yup.number().integer().positive('Must be positive').required('Required'),
-        days: Yup.number().integer().positive('Must be positive').required('Required'),
-        start: Yup.string().required('Required'),
-        quantity: Yup.number().integer().positive('Must be positive').required('Required'),
-        unit: Yup.string(),
-        route: Yup.string(),
+        is_workflow: Yup.boolean(),
+        treatment: Yup.string().when('is_workflow', {
+          is: false,
+          then: Yup.string().required('Required')}),
+        frequency: Yup.number().nullable().integer().positive('Must be positive').when(['is_workflow', 'treatment'], {
+          is: (is_workflow, treatment) => is_workflow === false || treatment,
+          then: Yup.number().integer().positive('Must be positive').required('Required')}),
+        days: Yup.number().nullable().integer().positive('Must be positive').when(['is_workflow', 'treatment'], {
+          is: (is_workflow, treatment) => is_workflow === false || treatment,
+          then: Yup.number().integer().positive('Must be positive').required('Required')}),
+        start: Yup.string(),
+        quantity: Yup.number().nullable().integer().positive('Must be positive').when(['is_workflow', 'treatment'], {
+          is: (is_workflow, treatment) => is_workflow === false || treatment,
+          then: Yup.number().integer().positive('Must be positive').required('Required')}),
+        unit: Yup.string().nullable(),
+        route: Yup.string().nullable(),
       })}
       onSubmit={(values, { resetForm, setSubmitting }) => {
         if (props.id || (props.state.steps.treatments[props.state.treatmentIndex])) {
@@ -182,7 +193,7 @@ const TreatmentPlanForm = (props) => {
           });
           setSubmitting(false);
         }
-        else {
+        else if (values.treatment) {
           axios.post('/vet/api/treatmentplan/', values)
           .then(response => {
             if (addAnother) {
@@ -208,6 +219,10 @@ const TreatmentPlanForm = (props) => {
             setShowSystemError(true);
           });
           setSubmitting(false);
+        }
+        // Skip submitting step entirely if no data.
+        else {
+          props.onSubmit('treatments', values, 'diagnoses')
         }
       }}
     >

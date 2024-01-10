@@ -11,7 +11,7 @@ import TreatmentPlanForm from '../vet/TreatmentPlanForm';
 import PageNotFound from "../components/PageNotFound";
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import DiagnosisForm from './DiagnosisForm';
-import ProcedureForm from './ProcedureForm';
+import ProceduresForm from './ProceduresForm';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -80,7 +80,7 @@ function getStepContent(id, incident, organization, step, handleStepSubmit, hand
     case 2:
       return <TreatmentPlanForm onSubmit={handleStepSubmit} handleBack={handleBack} state={state} medrecordid={id} incident={incident} organization={organization} />;
     case 3:
-      return <ProcedureForm onSubmit={handleStepSubmit} handleBack={handleBack} state={state} id={id} incident={incident} organization={organization} />;
+      return <ProceduresForm onSubmit={handleStepSubmit} handleBack={handleBack} state={state} id={id} incident={incident} organization={organization} />;
     case 4:
       return <DiagnosisForm onSubmit={handleStepSubmit} handleBack={handleBack} state={state} id={id} incident={incident} organization={organization} />;
     default:
@@ -160,7 +160,7 @@ function VetStepperWorkflow({ id, incident, organization }) {
           ...prevState,
           stepIndex: prevState.stepIndex + 1,
           treatmentIndex: index,
-          treatmentCount: prevState.treatmentCount + 1,
+          treatmentCount: prevState.treatmentCount + data.treatment ? 1 : 0,
           steps: { ...prevState.steps, [currentStep]:[...prevState.steps.treatments, data] }
         }))
       }
