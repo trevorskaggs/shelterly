@@ -14,18 +14,30 @@ import {
   faChevronCircleRight,
   faStethoscope,
   faVial,
+  faSyringe,
+  faSoap,
+  faEye,
+  faSquare,
+  faWater,
+  faHeart,
+  faTable,
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faDiamondExclamation,
+  faEyeDropperHalf,
   faPrescriptionBottlePill,
   faSquareExclamation,
   faSquareEllipsis,
   faVialCircleCheck,
-  faScalpelLineDashed
+  faScalpelLineDashed,
+  faWalkieTalkie,
+  faScanner,
+  faRectangleVertical
 } from '@fortawesome/pro-solid-svg-icons';
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
 import { SystemErrorContext } from '../components/SystemError';
+import { faBandage, faTankWater } from '@fortawesome/pro-regular-svg-icons';
 
 function MedicalRecordDetails({ id, incident, organization }) {
 
@@ -38,8 +50,6 @@ function MedicalRecordDetails({ id, incident, organization }) {
   const [activeVR, setActiveVR] = useState(null);
   const [activeExam, setActiveExam] = useState(null);
   const [activeOrders, setActiveOrders] = useState("treatments");
-
-  // const [showModal, setShowModal] = useState(false);
 
   // Hook for initializing data.
   useEffect(() => {
@@ -331,7 +341,15 @@ function MedicalRecordDetails({ id, incident, organization }) {
                     <div className="row no-gutters hover-div treatment-hover-div" style={{height:"100px", marginRight:"-2px"}}>
                       <Row className="ml-0 mr-0 w-100" style={{flexWrap:"nowrap"}}>
                         <div className="border-right" style={{width:"100px"}}>
+                        {['Eye Medication','Ear Medication'].includes(treatment_plan.treatment_object.category) ?
+                          <FontAwesomeIcon icon={faEyeDropperHalf} size="6x" className="treatment-icon" style={{marginTop:"5px", marginLeft:"4px"}} transform={'shrink-2'} inverse />
+                          : treatment_plan.treatment_object.category === 'Patient Care' ?
+                          <FontAwesomeIcon icon={faHeart} size="6x" className="treatment-icon" style={{marginTop:"5px", marginLeft:"4px"}} transform={'shrink-2'} inverse />
+                          : treatment_plan.treatment_object.unit === 'ml' ?
+                          <FontAwesomeIcon icon={faSyringe} size="6x" className="treatment-icon" style={{marginTop:"5px", marginLeft:"4px"}} transform={'shrink-2'} inverse />
+                        :
                           <FontAwesomeIcon icon={faPrescriptionBottlePill} size="6x" className="treatment-icon" style={{marginTop:"5px", marginLeft:"-1px"}} transform={'shrink-2'} inverse />
+                        }
                         </div>
                         <Col style={{marginLeft:"-5px", marginRight:"-25px"}} className="hover-div">
                           <div className="border treatment-hover-div" style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"10px", marginLeft:"-11px", marginTop: "-1px", fontSize:"18px", width:"100%", backgroundColor:"rgb(158 153 153)"}}>
@@ -420,8 +438,26 @@ function MedicalRecordDetails({ id, incident, organization }) {
                     <div className="row no-gutters hover-div treatment-hover-div" style={{height:"100px", marginRight:"-2px"}}>
                       <Row className="ml-0 mr-0 w-100" style={{flexWrap:"nowrap"}}>
                         <div className="border-right" style={{width:"100px"}}>
-                          <FontAwesomeIcon icon={faVial} size="6x" className="treatment-icon" style={{marginTop:"5px", marginLeft:"7px"}} inverse />
-                        </div>
+                          {diagnostic.name.toLowerCase().includes('needle') || diagnostic.other_name.toLowerCase().includes('needle') ?
+                            <FontAwesomeIcon icon={faSyringe} size="6x" className="treatment-icon" style={{marginTop:"5px", marginLeft:"4px"}} transform={'shrink-2'} inverse />
+                          : diagnostic.name.toLowerCase().includes('istat') || diagnostic.other_name.toLowerCase().includes('istat') ?
+                            <FontAwesomeIcon icon={faWalkieTalkie} size="6x" className="treatment-icon" style={{marginTop:"5px", marginLeft:"15px"}} transform={'shrink-2'} inverse />
+                          : diagnostic.name.toLowerCase().includes('ultrasound') || diagnostic.other_name.toLowerCase().includes('ultrasound') ?
+                            <FontAwesomeIcon icon={faScanner} size="6x" className="treatment-icon" style={{marginTop:"5px", marginLeft:"-1px"}} transform={'shrink-2'} inverse />
+                          : diagnostic.name.toLowerCase().includes('schirmer') || diagnostic.other_name.toLowerCase().includes('schirmer') ?
+                            <FontAwesomeIcon icon={faEye} size="5x" className="treatment-icon" style={{marginTop:"11px", marginLeft:"8px"}} transform={'grow-1'} inverse />
+                          : diagnostic.name.toLowerCase().includes('eye') || diagnostic.other_name.toLowerCase().includes('eye') ?
+                            <FontAwesomeIcon icon={faEyeDropperHalf} size="5x" className="treatment-icon" style={{marginTop:"11px", marginLeft:"11px"}} transform={'grow-1'} inverse />
+                          : diagnostic.name.toLowerCase().includes('test') || diagnostic.other_name.toLowerCase().includes('test') ?
+                            <span className="fa-layers" style={{marginLeft:"16px"}}>
+                              <FontAwesomeIcon icon={faRectangleVertical} size="5x" className="treatment-icon" style={{marginTop:"7px", marginLeft:"5px"}} transform={'shrink-1'} inverse />
+                              <FontAwesomeIcon icon={faSquare} size="2x" style={{marginLeft:"1px", color:"#303030"}} transform={'down-11 right-10 shrink-2'} inverse />
+                              <FontAwesomeIcon icon={faRectangleVertical} size="2x" style={{marginLeft:"1px", color:"#303030"}} transform={'shrink-4 down-27 right-11'} inverse />
+                            </span>
+                          :
+                            <FontAwesomeIcon icon={faVial} size="6x" className="treatment-icon" style={{marginTop:"5px", marginLeft:"7px"}} inverse />
+                          }
+                          </div>
                         <Col style={{marginLeft:"-5px", marginRight:"-25px"}} className="hover-div">
                           <div className="border treatment-hover-div" style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"10px", marginLeft:"-11px", marginTop: "-1px", fontSize:"18px", width:"100%", backgroundColor:"rgb(158 153 153)"}}>
                             {diagnostic.other_name ? diagnostic.other_name : diagnostic.name}
@@ -491,8 +527,18 @@ function MedicalRecordDetails({ id, incident, organization }) {
                     <div className="row no-gutters hover-div treatment-hover-div" style={{height:"100px", marginRight:"-2px"}}>
                       <Row className="ml-0 mr-0 w-100" style={{flexWrap:"nowrap"}}>
                         <div className="border-right" style={{width:"100px"}}>
-                          <FontAwesomeIcon icon={faScalpelLineDashed} size="6x" className="treatment-icon" style={{marginTop:"5px", marginLeft:"-1px"}} transform={'shrink-2'} inverse />
-                        </div>
+                          {procedure.name.toLowerCase().includes('bandage') || procedure.other_name.toLowerCase().includes('bandage') || procedure.name.toLowerCase().includes('splint') || procedure.other_name.toLowerCase().includes('splint') ?
+                            <FontAwesomeIcon icon={faBandage} size="5x" className="treatment-icon" style={{marginTop:"11px", marginLeft:"3px"}} transform={'shrink-1'} inverse />
+                          : procedure.name.toLowerCase().includes('hydro') || procedure.other_name.toLowerCase().includes('hydro') || procedure.name.toLowerCase().includes('water') || procedure.other_name.toLowerCase().includes('water') ?
+                            <FontAwesomeIcon icon={faWater} size="6x" className="treatment-icon" style={{marginTop:"5px", marginLeft:"-1px"}} transform={'shrink-2'} inverse />
+                          : procedure.name.toLowerCase().includes('eye') || procedure.other_name.toLowerCase().includes('eye') ?
+                            <FontAwesomeIcon icon={faEye} size="5x" className="treatment-icon" style={{marginTop:"11px", marginLeft:"8px"}} transform={'grow-1'} inverse />
+                          : procedure.name.toLowerCase().includes('clean') || procedure.other_name.toLowerCase().includes('clean') ?
+                            <FontAwesomeIcon icon={faSoap} size="6x" className="treatment-icon" style={{marginTop:"5px", marginLeft:"5px"}} transform={'shrink-1'} inverse />
+                          :
+                            <FontAwesomeIcon icon={faScalpelLineDashed} size="6x" className="treatment-icon" style={{marginTop:"5px", marginLeft:"-1px"}} transform={'shrink-2'} inverse />
+                          }
+                          </div>
                         <Col style={{marginLeft:"-5px", marginRight:"-25px"}} className="hover-div">
                           <div className="border treatment-hover-div" style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"10px", marginLeft:"-11px", marginTop: "-1px", fontSize:"18px", width:"100%", backgroundColor:"rgb(158 153 153)"}}>
                             {procedure.other_name ? procedure.other_name : procedure.name}
@@ -560,20 +606,6 @@ function MedicalRecordDetails({ id, incident, organization }) {
       </div>
     </div> : ""}
     {/* <History action_history={data.action_history} /> */}
-    {/* <Modal show={showModal} onHide={() => setShowModal(false)}>
-      <Modal.Header closeButton>
-        <Modal.Title>Confirm Veterinary Request Cancelation</Modal.Title>
-      </Modal.Header>
-      <Modal.Body>Are you sure you want to cancel this Veterinary Request and associated treatments?</Modal.Body>
-      <Modal.Footer>
-        <Button variant="primary" onClick={() => cancelVetRequest()}>
-          Yes
-        </Button>
-        <Button variant="secondary" onClick={() => setShowModal(false)}>
-          Cancel
-        </Button>
-      </Modal.Footer>
-    </Modal> */}
     </>
   );
 };

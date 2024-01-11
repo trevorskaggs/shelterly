@@ -27,6 +27,9 @@ function TreatmentPlanDetails({ id, incident, organization }) {
   const [showModal, setShowModal] = useState(false);
   const cancelTreatmentPlan = () => {
     axios.delete('/vet/api/treatmentplan/' + id + '/')
+    .catch(error => {
+      setShowSystemError(true);
+    });
     navigate("/" + organization + "/" + incident + "/vet/medrecord/" + data.medical_record)
   }
 

@@ -28,6 +28,9 @@ function VetRequestDetails({ id, incident, organization }) {
   const [showModal, setShowModal] = useState(false);
   const cancelVetRequest = () => {
     axios.patch('/vet/api/vetrequest/' + id + '/', {status:'Canceled'})
+    .catch(error => {
+      setShowSystemError(true);
+    });
     setData(prevState => ({ ...prevState, 'status':'Canceled'}));
     setShowModal(false)
   }
