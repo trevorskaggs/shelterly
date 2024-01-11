@@ -55,7 +55,7 @@ function MedicalRecordDetails({ id, incident, organization }) {
         if (!unmounted) {
           setData(response.data);
           setActiveVR(response.data.vet_requests[0].id);
-          setActiveExam(response.data.exams[0].id);
+          setActiveExam(response.data.exams.length > 0? response.data.exams[0].id : null);
         }
       })
       .catch(error => {
@@ -331,7 +331,7 @@ function MedicalRecordDetails({ id, incident, organization }) {
                     <div className="row no-gutters hover-div treatment-hover-div" style={{height:"100px", marginRight:"-2px"}}>
                       <Row className="ml-0 mr-0 w-100" style={{flexWrap:"nowrap"}}>
                         <div className="border-right" style={{width:"100px"}}>
-                          <FontAwesomeIcon icon={faPrescriptionBottlePill} size="6x" className="ml-1 treatment-icon" style={{marginTop:"5px", paddingRight:"10px"}} inverse />
+                          <FontAwesomeIcon icon={faPrescriptionBottlePill} size="6x" className="treatment-icon" style={{marginTop:"5px", marginLeft:"-1px"}} transform={'shrink-2'} inverse />
                         </div>
                         <Col style={{marginLeft:"-5px", marginRight:"-25px"}} className="hover-div">
                           <div className="border treatment-hover-div" style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"10px", marginLeft:"-11px", marginTop: "-1px", fontSize:"18px", width:"100%", backgroundColor:"rgb(158 153 153)"}}>
@@ -420,7 +420,7 @@ function MedicalRecordDetails({ id, incident, organization }) {
                     <div className="row no-gutters hover-div treatment-hover-div" style={{height:"100px", marginRight:"-2px"}}>
                       <Row className="ml-0 mr-0 w-100" style={{flexWrap:"nowrap"}}>
                         <div className="border-right" style={{width:"100px"}}>
-                          <FontAwesomeIcon icon={faVial} size="6x" className="treatment-icon" style={{marginTop:"5px", marginLeft:"12px", paddingRight:"10px"}} inverse />
+                          <FontAwesomeIcon icon={faVial} size="6x" className="treatment-icon" style={{marginTop:"5px", marginLeft:"7px"}} inverse />
                         </div>
                         <Col style={{marginLeft:"-5px", marginRight:"-25px"}} className="hover-div">
                           <div className="border treatment-hover-div" style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"10px", marginLeft:"-11px", marginTop: "-1px", fontSize:"18px", width:"100%", backgroundColor:"rgb(158 153 153)"}}>
@@ -491,7 +491,7 @@ function MedicalRecordDetails({ id, incident, organization }) {
                     <div className="row no-gutters hover-div treatment-hover-div" style={{height:"100px", marginRight:"-2px"}}>
                       <Row className="ml-0 mr-0 w-100" style={{flexWrap:"nowrap"}}>
                         <div className="border-right" style={{width:"100px"}}>
-                          <FontAwesomeIcon icon={faScalpelLineDashed} size="6x" className="treatment-icon" style={{marginTop:"5px", marginLeft:"4px", paddingRight:"10px"}} inverse />
+                          <FontAwesomeIcon icon={faScalpelLineDashed} size="6x" className="treatment-icon" style={{marginTop:"5px", marginLeft:"-1px"}} transform={'shrink-2'} inverse />
                         </div>
                         <Col style={{marginLeft:"-5px", marginRight:"-25px"}} className="hover-div">
                           <div className="border treatment-hover-div" style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"10px", marginLeft:"-11px", marginTop: "-1px", fontSize:"18px", width:"100%", backgroundColor:"rgb(158 153 153)"}}>

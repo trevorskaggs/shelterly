@@ -417,33 +417,33 @@ function VetRequestSearch({ incident, organization }) {
                   <ListGroup>
                     <ListGroup.Item>
                       <Row>
-                        <Col xs="2">
+                        <Col xs="3">
                           <b>Patient: </b><Link href={"/" + organization + "/" + incident + "/animals/" + vet_request.animal_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>A#{vet_request.animal_object.id}</Link>
                         </Col>
-                        <Col xs="2">
+                        <Col xs="3">
                           <b>Name: </b>{vet_request.animal_object.name || "Unknown"}
                         </Col>
-                        <Col xs="2" style={{textTransform:"capitalize"}}>
+                        <Col xs="3" style={{textTransform:"capitalize"}}>
                           <b>Species:</b> {vet_request.animal_object.species_string}
                         </Col>
-                        <Col xs="2" style={{textTransform:"capitalize"}}>
+                        {/* <Col xs="2" style={{textTransform:"capitalize"}}>
                           <b>Age:</b> {vet_request.animal_object.age || "Unknown"}
                         </Col>
                         <Col xs="2" style={{textTransform:"capitalize"}}>
                           <b>Sex:</b> {vet_request.animal_object.sex || "Unknown"}
-                        </Col>
-                        <Col xs="2" style={{textTransform:"capitalize"}}>
+                        </Col> */}
+                        {/* <Col xs="2" style={{textTransform:"capitalize"}}>
                           <b>Altered:</b> {vet_request.animal_object.altered || "Unknown"}
-                        </Col>
+                        </Col> */}
                       </Row>
                     </ListGroup.Item>
                     <ListGroup.Item>
                       <Row>
-                        <Col xs="2">
-                          <b>Priority: </b>{priorityText[vet_request.priority]}
-                        </Col>
-                        <Col xs="2">
+                        <Col xs="3">
                           <b>Opened: </b>{moment(vet_request.open).format('l')}
+                        </Col>
+                        <Col xs="3">
+                          <b>Priority: </b>{priorityText[vet_request.priority]}
                         </Col>
                         <Col>
                           <b>Opener: </b>{vet_request.requested_by_object.first_name + ' ' + vet_request.requested_by_object.last_name}

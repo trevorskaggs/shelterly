@@ -70,6 +70,7 @@ const DiagnosisForm = (props) => {
         })
         .then(response => {
           if (!unmounted) {
+            response.data['diagnosis'] = [];
             setData(response.data);
           }
         })
@@ -113,7 +114,9 @@ const DiagnosisForm = (props) => {
       initialValues={data}
       enableReinitialize={true}
       validationSchema={Yup.object({
-        diagnosis: Yup.array().min(1, 'At least 1 diagnosis must be selected.').required(),
+        diagnosis: Yup.array().when('is_workflow', {
+          is: false,
+          then: Yup.array().min(1, 'Required').required('Required')}),
         diagnosis_other: Yup.string().nullable().max(50, 'Maximum character limit of 50.'),
         diagnosis_notes: Yup.string().nullable().max(300, 'Maximum character limit of 300.'),
       })}

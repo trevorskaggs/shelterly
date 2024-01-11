@@ -2,7 +2,6 @@ import React, { createRef, useContext, useEffect, useRef, useState } from 'react
 import axios from "axios";
 import { Link, navigate } from "raviger";
 import { Field, Form, Formik, } from 'formik';
-import { Switch } from 'formik-material-ui';
 import useDynamicRefs from 'use-dynamic-refs';
 import {
   useOrderedNodes
@@ -26,13 +25,19 @@ import {
 import * as Yup from 'yup';
 import { useRegisteredRef } from "react-register-nodes";
 import ButtonSpinner from '../components/ButtonSpinner';
-import { DateTimePicker, DropDown, TextInput } from '../components/Form';
+import { DateTimePicker, DropDown, TextInput, ToggleSwitch } from '../components/Form';
 import { SystemErrorContext } from '../components/SystemError';
 import { catAgeChoices, dogAgeChoices, horseAgeChoices, otherAgeChoices, sexChoices } from '../animals/constants';
 import Patient from './components/Patient';
 import { AuthContext } from "../accounts/AccountsReducer";
 
 const initialSchemaData = [{
+  id:'assignee',
+  validationType:"string",
+  validations: [{
+    type:'required',
+    params: ["Required"]
+  },]},{
   id:'confirm_sex_age',
   validationType:"bool",
   validations: [{
@@ -50,10 +55,6 @@ const initialSchemaData = [{
   id:'weight',
   validationType:"number",
   validations: [
-  {
-    type:'nullable',
-    params: []
-  },
   {
     type:'required',
     params: ["This field is required"]
@@ -404,7 +405,7 @@ const ExamForm = (props) => {
                       type="text"
                       key={`my_unique_assignee_select_key__${formikProps.values.assignee}`}
                       options={assigneeChoices}
-                      isClearable={true}
+                      isClearable={false}
                       onChange={(instance) => {
                         formikProps.setFieldValue("assignee", instance === null ? '' : instance.value);
                       }}
@@ -425,9 +426,10 @@ const ExamForm = (props) => {
                 </BootstrapForm.Row> : ""}
                 <BootstrapForm.Row className="mt-3">
                   <Col xs="2">
-                    <BootstrapForm.Label htmlFor="confirm_sex_age" style={{marginBottom:"-5px"}}>Confirm Age/Sex</BootstrapForm.Label>
-                    <div style={{marginLeft:"20px"}}><Field component={Switch} name="confirm_sex_age" type="checkbox" color="primary" /></div>
-                    {formikProps.errors['confirm_sex_age'] ? <div style={{ color: "#e74c3c", marginTop: ".5rem", fontSize: "80%" }}>{formikProps.errors['confirm_sex_age']}</div> : ""}
+                    <ToggleSwitch id="confirm_sex_age" name="confirm_sex_age" label="Confirm Age/Sex" disabled={!formikProps.values.age && !formikProps.values.sex} />
+                    {/* <BootstrapForm.Label htmlFor="confirm_sex_age" style={{marginBottom:"-5px"}}>Confirm Age/Sex</BootstrapForm.Label>
+                    <div style={{marginLeft:"20px"}}><Field component={Switch} name="confirm_sex_age" type="checkbox" color="primary" disabled={!formikProps.values.age && !formikProps.values.sex} /></div>
+                    {formikProps.errors['confirm_sex_age'] ? <div style={{ color: "#e74c3c", marginTop: ".5rem", fontSize: "80%" }}>{formikProps.errors['confirm_sex_age']}</div> : ""} */}
                   </Col>
                   <Col xs="2">
                     <DropDown
@@ -459,8 +461,9 @@ const ExamForm = (props) => {
                 </BootstrapForm.Row>
                 <Row className="mt-3">
                   <Col xs="2">
-                    <BootstrapForm.Label htmlFor="confirm_chip" style={{marginBottom:"-5px"}}>Microchip Present</BootstrapForm.Label>
-                    <div style={{marginLeft:"20px"}}><Field component={Switch} name="confirm_chip" type="checkbox" color="primary" /></div>
+                    <ToggleSwitch id="confirm_chip" name="confirm_chip" label="Microchip Present" disabled={false} />
+                    {/* <BootstrapForm.Label htmlFor="confirm_chip" style={{marginBottom:"-5px"}}>Microchip Present</BootstrapForm.Label>
+                    <div style={{marginLeft:"20px"}}><Field component={Switch} name="confirm_chip" type="checkbox" color="primary" /></div> */}
                   </Col>
                   <TextInput
                       id="microchip"
