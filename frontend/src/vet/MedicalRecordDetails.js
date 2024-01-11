@@ -21,23 +21,26 @@ import {
   faWater,
   faHeart,
   faTable,
+  faWifi,
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faDiamondExclamation,
-  faEyeDropperHalf,
+  faEyeDropper,
   faPrescriptionBottlePill,
   faSquareExclamation,
   faSquareEllipsis,
-  faVialCircleCheck,
   faScalpelLineDashed,
-  faWalkieTalkie,
-  faScanner,
-  faRectangleVertical
+  faFlashlight,
+  faPeriod,
+  faMobileScreenButton
 } from '@fortawesome/pro-solid-svg-icons';
+import {
+  faRectangleVertical,
+} from '@fortawesome/sharp-solid-svg-icons';
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
 import { SystemErrorContext } from '../components/SystemError';
-import { faBandage, faTankWater } from '@fortawesome/pro-regular-svg-icons';
+import { faBandage, faRing, faTankWater } from '@fortawesome/pro-regular-svg-icons';
 
 function MedicalRecordDetails({ id, incident, organization }) {
 
@@ -342,7 +345,7 @@ function MedicalRecordDetails({ id, incident, organization }) {
                       <Row className="ml-0 mr-0 w-100" style={{flexWrap:"nowrap"}}>
                         <div className="border-right" style={{width:"100px"}}>
                         {['Eye Medication','Ear Medication'].includes(treatment_plan.treatment_object.category) ?
-                          <FontAwesomeIcon icon={faEyeDropperHalf} size="6x" className="treatment-icon" style={{marginTop:"5px", marginLeft:"4px"}} transform={'shrink-2'} inverse />
+                          <FontAwesomeIcon icon={faEyeDropper} size="6x" className="treatment-icon" style={{marginTop:"5px", marginLeft:"4px"}} transform={'shrink-2'} inverse />
                           : treatment_plan.treatment_object.category === 'Patient Care' ?
                           <FontAwesomeIcon icon={faHeart} size="6x" className="treatment-icon" style={{marginTop:"5px", marginLeft:"4px"}} transform={'shrink-2'} inverse />
                           : treatment_plan.treatment_object.unit === 'ml' ?
@@ -441,18 +444,21 @@ function MedicalRecordDetails({ id, incident, organization }) {
                           {diagnostic.name.toLowerCase().includes('needle') || diagnostic.other_name.toLowerCase().includes('needle') ?
                             <FontAwesomeIcon icon={faSyringe} size="6x" className="treatment-icon" style={{marginTop:"5px", marginLeft:"4px"}} transform={'shrink-2'} inverse />
                           : diagnostic.name.toLowerCase().includes('istat') || diagnostic.other_name.toLowerCase().includes('istat') ?
-                            <FontAwesomeIcon icon={faWalkieTalkie} size="6x" className="treatment-icon" style={{marginTop:"5px", marginLeft:"15px"}} transform={'shrink-2'} inverse />
-                          : diagnostic.name.toLowerCase().includes('ultrasound') || diagnostic.other_name.toLowerCase().includes('ultrasound') ?
-                            <FontAwesomeIcon icon={faScanner} size="6x" className="treatment-icon" style={{marginTop:"5px", marginLeft:"-1px"}} transform={'shrink-2'} inverse />
+                          <span className="fa-layers" style={{marginLeft:"16px"}}>
+                            <FontAwesomeIcon icon={faRectangleVertical} size="3x" className="treatment-icon" style={{marginTop:"7px", marginLeft:"5.5px"}} transform={'shrink-3 down-15 right-4'} inverse />
+                            <FontAwesomeIcon icon={faMobileScreenButton} size="4x" className="treatment-icon" style={{marginLeft:""}} transform={'shrink-2 down-6 right-3'} inverse />
+                          </span>
+                          : diagnostic.name.toLowerCase().includes('culture') || diagnostic.other_name.toLowerCase().includes('culture') ?
+                            <FontAwesomeIcon icon={faRing} size="6x" className="treatment-icon" style={{marginTop:"5px", marginLeft:"-1px"}} transform={'shrink-2 right-1'} inverse />
                           : diagnostic.name.toLowerCase().includes('schirmer') || diagnostic.other_name.toLowerCase().includes('schirmer') ?
                             <FontAwesomeIcon icon={faEye} size="5x" className="treatment-icon" style={{marginTop:"11px", marginLeft:"8px"}} transform={'grow-1'} inverse />
                           : diagnostic.name.toLowerCase().includes('eye') || diagnostic.other_name.toLowerCase().includes('eye') ?
-                            <FontAwesomeIcon icon={faEyeDropperHalf} size="5x" className="treatment-icon" style={{marginTop:"11px", marginLeft:"11px"}} transform={'grow-1'} inverse />
-                          : diagnostic.name.toLowerCase().includes('test') || diagnostic.other_name.toLowerCase().includes('test') ?
+                            <FontAwesomeIcon icon={faEyeDropper} size="5x" className="treatment-icon" style={{marginTop:"11px", marginLeft:"11px"}} transform={'grow-1'} inverse />
+                          : diagnostic.name.toLowerCase().includes('ultrasound') || diagnostic.other_name.toLowerCase().includes('ultrasound') ?
                             <span className="fa-layers" style={{marginLeft:"16px"}}>
-                              <FontAwesomeIcon icon={faRectangleVertical} size="5x" className="treatment-icon" style={{marginTop:"7px", marginLeft:"5px"}} transform={'shrink-1'} inverse />
-                              <FontAwesomeIcon icon={faSquare} size="2x" style={{marginLeft:"1px", color:"#303030"}} transform={'down-11 right-10 shrink-2'} inverse />
-                              <FontAwesomeIcon icon={faRectangleVertical} size="2x" style={{marginLeft:"1px", color:"#303030"}} transform={'shrink-4 down-27 right-11'} inverse />
+                              <FontAwesomeIcon icon={faWifi} size="3x" className="treatment-icon" style={{marginTop:"7px", marginLeft:"5px"}} transform={'shrink-1 up-2 right-8 rotate-45'} inverse />
+                              <FontAwesomeIcon icon={faPeriod} size="3x" className="fa-move-up" style={{marginLeft:"1px", color:"#303030"}} transform={'down-14 right-16 rotate-145'} inverse />
+                              <FontAwesomeIcon icon={faFlashlight} size="4x" className="treatment-icon" transform={'shrink-2 down-14 left-5 rotate-315'} inverse />
                             </span>
                           :
                             <FontAwesomeIcon icon={faVial} size="6x" className="treatment-icon" style={{marginTop:"5px", marginLeft:"7px"}} inverse />
