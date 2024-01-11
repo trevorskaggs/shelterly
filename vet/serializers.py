@@ -182,7 +182,7 @@ class MedicalRecordSerializer(serializers.ModelSerializer):
     diagnostic_objects = SimpleDiagnosticResultSerializer(source='diagnosticresult_set', many=True, required=False, read_only=True)
     treatment_plans = SimpleTreatmentPlanSerializer(source='treatmentplan_set', required=False, read_only=True, many=True)
     procedure_objects = SimpleProcedureResultSerializer(source='procedureresult_set', many=True, required=False, read_only=True)
-    vet_requests = VetRequestSerializer(source='vetrequest_set', required=False, read_only=True, many=True)
+    vet_requests = SimpleVetRequestSerializer(source='vetrequest_set', required=False, read_only=True, many=True)
     diagnosis_text = serializers.SerializerMethodField()
 
     def get_diagnosis_text(self, obj):

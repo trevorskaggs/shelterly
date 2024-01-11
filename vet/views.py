@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from rest_framework import filters, permissions, viewsets
+from django.db.models import Case, Count, Exists, OuterRef, Prefetch, Q, When, Value, BooleanField
 
 from animals.models import Animal
 from vet.models import Diagnosis, Diagnostic, DiagnosticResult, Exam, ExamAnswer, ExamQuestion, MedicalRecord, PresentingComplaint, Procedure, ProcedureResult, Treatment, TreatmentPlan, TreatmentRequest, VetRequest
@@ -16,12 +17,13 @@ class MedicalRecordViewSet(viewsets.ModelViewSet):
         """
         queryset = (
             MedicalRecord.objects.all()
-            .prefetch_related("exam_set")
-            .prefetch_related("diagnosticresult_set")
-            .prefetch_related("treatmentplan_set")
-            .prefetch_related("vetrequest_set")
-            .prefetch_related("procedureresult_set")
-            .select_related("patient")
+            .select_related("patient").select_related("patient__shelter").select_related("patient__room")
+            .prefetch_related(Prefetch('exam_set', Exam.objects.select_related('assignee').prefetch_related('examanswer_set', 'examanswer_set__question')))
+            .prefetch_related(Prefetch('treatmentplan_set', TreatmentPlan.objects.select_related('treatment')))
+            .prefetch_related(Prefetch('vetrequest_set', VetRequest.objects.exclude(status="Canceled").select_related('requested_by').prefetch_related('presenting_complaints')))
+            .prefetch_related(Prefetch('diagnosticresult_set', DiagnosticResult.objects.select_related('medical_record').select_related('medical_record__patient').select_related('diagnostic')))
+            .prefetch_related(Prefetch('procedureresult_set', ProcedureResult.objects.select_related('medical_record').select_related('medical_record__patient').select_related('procedure')))
+            .prefetch_related("diagnosis")
             # .order_by('order')
         )
         # if self.request.GET.get('incident'):
@@ -50,6 +52,20 @@ class ExamViewSet(viewsets.ModelViewSet):
     queryset = Exam.objects.all()
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = ExamSerializer
+
+    def get_queryset(self):
+        """
+        Returns: Queryset of exams.
+        """
+        queryset = (
+            Exam.objects.all()
+            .select_related("medical_record").select_related("medical_record__patient").select_related("medical_record__patient__shelter").select_related("medical_record__patient__room")
+            .prefetch_related(Prefetch('examanswer_set', ExamAnswer.objects.select_related('question')))
+            # .order_by('order')
+        )
+        # if self.request.GET.get('incident'):
+        #     queryset = queryset.filter(incident__slug=self.request.GET.get('incident'))
+        return queryset
 
     def perform_create(self, serializer):
         if serializer.is_valid():

@@ -69,11 +69,7 @@ const initialSchemaData = [{
     id:'weight_estimated',
     validationType:"bool"},{
   id:'temperature',
-  validationType:"string",
-  validations: [{
-    type:'required',
-    params: ["This field is required"]
-  },]},{
+  validationType:"string"},{
   id:'temperature_method',
   validationType:"string",
   validations: [{
