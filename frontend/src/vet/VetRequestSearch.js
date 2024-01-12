@@ -99,8 +99,7 @@ function VetRequestSearch({ incident, organization }) {
   };
 
   const handleApplyFilters = () => {
-    setVetRequests(data.vet_requests
-      .filter(vet_request => options.species ? vet_request.animal_object.species_string.toLowerCase() === options.species.toLowerCase() : vet_request)
+    setVetRequests(data.vet_requests.filter(vet_request => options.species ? vet_request.animal_object.species_string.toLowerCase() === options.species.toLowerCase() : vet_request)
       .filter(vet_request => options.status ? vet_request.status === options.status : vet_request)
       .filter(vet_request => options.priority ? vet_request.priority === options.priority : vet_request)
       .filter(vet_request => options.open ? (startDate <= moment(vet_request.open).format('YYYY-MM-DD') && endDate >= moment(vet_request.open).format('YYYY-MM-DD')) : vet_request)
