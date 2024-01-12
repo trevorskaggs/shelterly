@@ -58,10 +58,28 @@ class ReportViewSet(viewsets.ViewSet):
           small_mammals=Count("animal", filter=Q(animal__species__category__name="small mammal", animal__status='SHELTERED', animal__incident__slug=self.request.GET.get('incident', ''))),
           others=Count("animal", filter=Q(animal__species__category__name="other", animal__status='SHELTERED', animal__incident__slug=self.request.GET.get('incident', ''))),
           total=Count("animal", filter=Q(animal__status='SHELTERED', animal__incident__slug=self.request.GET.get('incident', '')))).values('name', 'avians', 'cats', 'dogs', 'equines', 'reptiles', 'ruminants', 'small_mammals', 'others', 'total').order_by('name')
-        animals_status = Animal.objects.filter(incident__slug=self.request.GET.get('incident', '')).exclude(status='CANCELED').values('species__name').annotate(reported=Count("id", filter=Q(status='REPORTED')), reported_evac=Count("id", filter=Q(status='REPORTED (EVAC REQUESTED)')), reported_sip=Count("id", filter=Q(status='REPORTED (SIP REQUESTED)')), utl=Count("id", filter=Q(status='UNABLE TO LOCATE')), nfa=Count("id", filter=Q(status='NO FURTHER ACTION')), sheltered=Count("id", filter=Q(status='SHELTERED')), sip=Count("id", filter=Q(status='SHELTERED IN PLACE')), reunited=Count("id", filter=Q(status='REUNITED')), deceased=Count("id", filter=Q(status='DECEASED')), total=Count("id")).order_by()
-        animals_ownership = Animal.objects.filter(incident__slug=self.request.GET.get('incident', '')).exclude(status='CANCELED').values('species__name').annotate(owned=Count("id", filter=Q(owners__isnull=False)), stray=Count("id", filter=Q(owners__isnull=True)), total=Count("id")).order_by()
+
+        animals = Animal.objects.exclude(status='CANCELED').filter(incident__slug=self.request.GET.get('incident', '')).prefetch_related('owners').select_related('species').select_related('species__category').distinct()
+
+        animals_status = []
+        # Turn queryset into list so we can append a total row to it.
+        for row in list(animals.values('species__category__name').annotate(reported=Count("id", filter=Q(status='REPORTED'), distinct=True), reported_evac=Count("id", filter=Q(status='REPORTED (EVAC REQUESTED)'), distinct=True), reported_sip=Count("id", filter=Q(status='REPORTED (SIP REQUESTED)'), distinct=True), utl=Count("id", filter=Q(status='UNABLE TO LOCATE'), distinct=True), nfa=Count("id", filter=Q(status='NO FURTHER ACTION'), distinct=True), sheltered=Count("id", filter=Q(status='SHELTERED'), distinct=True), sip=Count("id", filter=Q(status='SHELTERED IN PLACE'), distinct=True), reunited=Count("id", filter=Q(status='REUNITED'), distinct=True), deceased=Count("id", filter=Q(status='DECEASED'), distinct=True)).order_by('species__category__name')):
+            row['last'] = False
+            animals_status.append(row)
+        # Add total row
+        animals_status.append({'species__category__name': 'total', 'reported':sum(v['reported'] for v in animals_status), 'reported_evac':sum(v['reported_evac'] for v in animals_status), 'reported_sip':sum(v['reported_sip'] for v in animals_status), 'utl':sum(v['utl'] for v in animals_status), 'nfa':sum(v['nfa'] for v in animals_status), 'sheltered':sum(v['sheltered'] for v in animals_status), 'sip':sum(v['sip'] for v in animals_status), 'reunited':sum(v['reunited'] for v in animals_status), 'deceased':sum(v['deceased'] for v in animals_status), 'last':True})
+
+        # Turn queryset into list so we can append a total row to it.
+        animals_ownership = []
+        for row in list(animals.values('species__category__name').annotate(owned=Count("id", filter=Q(owners__isnull=False), distinct=True), stray=Count("id", filter=Q(owners__isnull=True), distinct=True)).order_by('species__category__name')):
+            row['last'] = False
+            animals_ownership.append(row)
+        animals_owned = animals.filter(owners__isnull=False).count()
+        animals_total = len(animals)
+        animals_ownership.append({'species__category__name': 'total', 'owned':animals_owned, 'stray':animals_total - animals_owned, 'last':True})
+
         animals_deceased = []
-        for animal in list(Animal.objects.filter(incident__slug=self.request.GET.get('incident', ''), status='DECEASED').values('id', 'name', 'species__name', 'status', 'address', 'city', 'state', 'zip_code')):
+        for animal in list(animals.filter(status='DECEASED').values('id', 'name', 'species__category__name', 'status', 'address', 'city', 'state', 'zip_code')):
             for action in Action.objects.filter(target_object_id=str(animal['id']), verb="changed animal status to DECEASED"):
                 animal['date'] = action.timestamp
                 animals_deceased.append(animal)
