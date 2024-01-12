@@ -16,7 +16,7 @@ class ReportViewSet(viewsets.ViewSet):
 
   def list(self, response):
     if ServiceRequest.objects.filter(incident__slug=self.request.GET.get('incident', '')).exists():
-        start_date = ServiceRequest.objects.filter(incident__slug=self.request.GET.get('incident', '')).annotate(date=TruncDay('timestamp')).values('date').earliest('date')['date']
+        start_date = ServiceRequest.objects.select_related('incident').filter(incident__slug=self.request.GET.get('incident', '')).annotate(date=TruncDay('timestamp')).values('date').earliest('date')['date']
         end_date = timezone.now()
 
         daily_report = []
@@ -24,7 +24,7 @@ class ReportViewSet(viewsets.ViewSet):
         delta = datetime.timedelta(days=1)
 
         while end_date >= start_date:
-          service_requests = ServiceRequest.objects.filter(incident__slug=self.request.GET.get('incident', ''), assignedrequest__timestamp__date=end_date).distinct()
+          service_requests = ServiceRequest.objects.select_related('incident').select_related('assignedrequest').filter(incident__slug=self.request.GET.get('incident', ''), assignedrequest__timestamp__date=end_date).distinct()
           total_assigned = service_requests.count()
           sip_sr_worked = service_requests.filter(sip=True).count()
           utl_sr_worked = service_requests.filter(utl=True).count()
@@ -32,9 +32,9 @@ class ReportViewSet(viewsets.ViewSet):
 
           daily_data = {
             'date': end_date.strftime('%m/%d/%Y'),
-            'total': ServiceRequest.objects.filter(incident__slug=self.request.GET.get('incident', ''), timestamp__date__lte=end_date).count(),
+            'total': ServiceRequest.objects.select_related('incident').filter(incident__slug=self.request.GET.get('incident', ''), timestamp__date__lte=end_date).count(),
             'assigned': total_assigned,
-            'new': ServiceRequest.objects.filter(incident__slug=self.request.GET.get('incident', ''), timestamp__date=end_date).count()
+            'new': ServiceRequest.objects.select_related('incident').filter(incident__slug=self.request.GET.get('incident', ''), timestamp__date=end_date).count()
           }
           daily_report.append(daily_data)
           sr_data = {
@@ -48,7 +48,7 @@ class ReportViewSet(viewsets.ViewSet):
           }
           sr_worked_report.append(sr_data)
           end_date -= delta
-        shelters = Shelter.objects.filter(animal__incident__slug=self.request.GET.get('incident')).annotate(
+        shelters = Shelter.objects.select_related('animal__incident').prefetch_related('animal_set', 'animal_set__species').filter(animal__incident__slug=self.request.GET.get('incident')).annotate(
           avians=Count("animal", filter=Q(animal__species__category__name="avian", animal__status='SHELTERED', animal__incident__slug=self.request.GET.get('incident', ''))),
           cats=Count("animal", filter=Q(animal__species__category__name="cat", animal__status='SHELTERED', animal__incident__slug=self.request.GET.get('incident', ''))),
           dogs=Count("animal", filter=Q(animal__species__category__name="dog", animal__status='SHELTERED', animal__incident__slug=self.request.GET.get('incident', ''))),
@@ -59,10 +59,10 @@ class ReportViewSet(viewsets.ViewSet):
           others=Count("animal", filter=Q(animal__species__category__name="other", animal__status='SHELTERED', animal__incident__slug=self.request.GET.get('incident', ''))),
           total=Count("animal", filter=Q(animal__status='SHELTERED', animal__incident__slug=self.request.GET.get('incident', '')))).values('name', 'avians', 'cats', 'dogs', 'equines', 'reptiles', 'ruminants', 'small_mammals', 'others', 'total').order_by('name')
 
-        animals = Animal.objects.exclude(status='CANCELED').filter(incident__slug=self.request.GET.get('incident', '')).prefetch_related('owners').select_related('species').select_related('species__category').distinct()
+        animals = Animal.objects.select_related('incident').select_related('species').select_related('species__category').prefetch_related('owners').exclude(status='CANCELED').filter(incident__slug=self.request.GET.get('incident', '')).distinct()
 
-        animals_status = []
         # Turn queryset into list so we can append a total row to it.
+        animals_status = []
         for row in list(animals.values('species__category__name').annotate(reported=Count("id", filter=Q(status='REPORTED'), distinct=True), reported_evac=Count("id", filter=Q(status='REPORTED (EVAC REQUESTED)'), distinct=True), reported_sip=Count("id", filter=Q(status='REPORTED (SIP REQUESTED)'), distinct=True), utl=Count("id", filter=Q(status='UNABLE TO LOCATE'), distinct=True), nfa=Count("id", filter=Q(status='NO FURTHER ACTION'), distinct=True), sheltered=Count("id", filter=Q(status='SHELTERED'), distinct=True), sip=Count("id", filter=Q(status='SHELTERED IN PLACE'), distinct=True), reunited=Count("id", filter=Q(status='REUNITED'), distinct=True), deceased=Count("id", filter=Q(status='DECEASED'), distinct=True)).order_by('species__category__name')):
             row['last'] = False
             animals_status.append(row)
@@ -74,15 +74,14 @@ class ReportViewSet(viewsets.ViewSet):
         for row in list(animals.values('species__category__name').annotate(owned=Count("id", filter=Q(owners__isnull=False), distinct=True), stray=Count("id", filter=Q(owners__isnull=True), distinct=True)).order_by('species__category__name')):
             row['last'] = False
             animals_ownership.append(row)
-        animals_owned = animals.filter(owners__isnull=False).count()
-        animals_total = len(animals)
-        animals_ownership.append({'species__category__name': 'total', 'owned':animals_owned, 'stray':animals_total - animals_owned, 'last':True})
+        animals_ownership.append({'species__category__name': 'total', 'owned':sum(v['owned'] for v in animals_ownership), 'stray':sum(v['stray'] for v in animals_ownership), 'last':True})
 
         animals_deceased = []
         for animal in list(animals.filter(status='DECEASED').values('id', 'name', 'species__category__name', 'status', 'address', 'city', 'state', 'zip_code')):
             for action in Action.objects.filter(target_object_id=str(animal['id']), verb="changed animal status to DECEASED"):
                 animal['date'] = action.timestamp
                 animals_deceased.append(animal)
+
         data = {'daily_report':daily_report, 'sr_worked_report':sr_worked_report, 'shelter_report':shelters, 'animal_status_report':animals_status, 'animal_owner_report':animals_ownership, 'animal_deceased_report':sorted(animals_deceased, key=itemgetter('date'), reverse=True)}
         return Response(data)
     return Response({'daily_report':[], 'sr_worked_report':[], 'shelter_report':[], 'animal_status_report':[], 'animal_owner_report':[], 'animal_deceased_report':[]})
