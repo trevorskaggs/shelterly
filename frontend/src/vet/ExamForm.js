@@ -33,8 +33,11 @@ import { AuthContext } from "../accounts/AccountsReducer";
 
 const initialSchemaData = [{
   id:'assignee',
-  validationType:"string",
+  validationType:"number",
   validations: [{
+    type:'nullable',
+    params: []
+  },{
     type:'required',
     params: ["Required"]
   },]},{
@@ -57,7 +60,7 @@ const initialSchemaData = [{
   validations: [
   {
     type:'required',
-    params: ["This field is required"]
+    params: ["Required"]
   },
 ]
 },{
@@ -75,7 +78,7 @@ const initialSchemaData = [{
   validationType:"string",
   validations: [{
     type:'required',
-    params: ["This field is required"]
+    params: ["Required"]
   },]},{
     id:'pulse',
     validationType:"number",
@@ -86,7 +89,7 @@ const initialSchemaData = [{
     },
     {
       type:'required',
-      params: ["This field is required"]
+      params: ["Required"]
     },
   ]
   },{
@@ -99,7 +102,7 @@ const initialSchemaData = [{
     },
     {
       type:'required',
-      params: ["This field is required"]
+      params: ["Required"]
     },
   ]
   },
@@ -217,7 +220,7 @@ const ExamForm = (props) => {
                 validationType:"string",
                 validations: [{
                   type:'required',
-                  params: ["This field is required"]
+                  params: ["Required"]
                 },
                 {
                   type:'nullable',
@@ -242,7 +245,7 @@ const ExamForm = (props) => {
                         then: [
                           {
                             type: "required",
-                            params: ["This field is required"],
+                            params: ["Required"],
                           },
                         ],
                       },

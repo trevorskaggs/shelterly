@@ -92,7 +92,7 @@ export const initialVetWorkflowData = {
   diagnosticsCount: 0,
   proceduresCount: 0,
   steps: {
-    exam: {'medrecord_id':null, assignee:null, 'confirm_sex_age':false, 'age':'', 'sex':'', 'confirm_chip':true, 'microchip':'', 'weight':null, 'weight_unit':'kg', 'weight_estimated':false, 'temperature':'', 'temperature_method':'Rectal', 'pulse':'', 'respiratory_rate':''},
+    exam: {'medrecord_id':null, assignee:null, 'confirm_sex_age':false, 'age':'', 'sex':'', 'confirm_chip':true, 'microchip':'', 'weight':'', 'weight_unit':'kg', 'weight_estimated':false, 'temperature':'', 'temperature_method':'Rectal', 'pulse':'', 'respiratory_rate':''},
     orders: {diagnostics:[], diagnostics_other:'', procedures:[], procedure_other:'', animal_object: {id:''}},
     treatments: [],
     diagnosis: {diagnosis:[], diagnosis_notes:'', diagnosis_other:'', animal_object:{id:''}},
