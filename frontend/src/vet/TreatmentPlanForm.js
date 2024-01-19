@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
-import { navigate, useQueryParams, Link } from "raviger";
+import { navigate, useQueryParams } from "raviger";
 import { Form, Formik } from 'formik';
 import {
   Button,
@@ -20,8 +20,16 @@ import * as Yup from 'yup';
 import { DateTimePicker, DropDown, TextInput } from '../components/Form';
 import { SystemErrorContext } from '../components/SystemError';
 import moment from 'moment';
+import Patient from './components/Patient';
+import { faArrowAltFromRight } from '@fortawesome/pro-solid-svg-icons';
 
 const TreatmentPlanForm = (props) => {
+
+  // Identify any query param data.
+  const [queryParams] = useQueryParams();
+  const {
+    vetrequest_id = null,
+  } = queryParams;
 
   const { setShowSystemError } = useContext(SystemErrorContext);
 
@@ -29,16 +37,20 @@ const TreatmentPlanForm = (props) => {
   var is_workflow = window.location.pathname.includes("workflow");
 
   let initialData = {
-    vet_request: props.vetrequestid,
+    is_workflow: is_workflow,
+    medical_record: props.medrecordid,
     start: new Date(),
-    end: new Date(),
+    end: null,
     category: '',
     treatment: '',
     frequency: '',
+    days: '',
     quantity: '',
     unit: '',
     route: '',
-    treatment_object: {category:''}
+    treatment_object: {category:''},
+    animal_object: {id:''},
+    vet_requests: [],
   }
 
   let current_data = {...initialData};
@@ -48,11 +60,13 @@ const TreatmentPlanForm = (props) => {
 
   const [data, setData] = useState(current_data);
 
-  const [vetRequestData, setVetRequestData] = useState({animal_object: {id:'', name:'', species_string:'', medical_notes:''}});
+  const [medRecordData, setMedRecordData] = useState({animal_object: {id:'', name:'', species_string:'', medical_notes:''}, vet_requests:[]});
 
   function calc_requests(formikProps) {
-    let duration = moment.duration(moment(formikProps.values.end).add(1, 'm').diff(moment(formikProps.values.start)));
-    return Math.trunc(((duration.hours() + (duration.days() * 24)) / formikProps.values.frequency) + 1)
+    if (formikProps.values.days > 0) {
+      return 24 * formikProps.values.days / formikProps.values.frequency
+    }
+    return 1
   };
 
   const [treatmentChoices, setTreatmentChoices] = useState([]);
@@ -62,6 +76,7 @@ const TreatmentPlanForm = (props) => {
   const [addAnother, setAddAnother] = useState(false);
 
   useEffect(() => {
+
     let unmounted = false;
     let source = axios.CancelToken.source();
 
@@ -98,8 +113,9 @@ const TreatmentPlanForm = (props) => {
         })
         .then(response => {
           if (!unmounted) {
-            response.data['category'] = response.data.treatment_object.category
-            response.data['treatment'] = response.data.treatment_object.id
+            response.data['category'] = response.data.treatment_object.category;
+            response.data['treatment'] = response.data.treatment_object.id;
+            response.data['is_workflow'] = is_workflow;
             setData(response.data);
           }
         })
@@ -110,22 +126,27 @@ const TreatmentPlanForm = (props) => {
       fetchTreatmentPlan();
     };
 
-    if (props.vetrequestid) {
-      const fetchVetRequest = async () => {
-        // Fetch VetRequest data.
-        await axios.get('/vet/api/vetrequest/' + props.vetrequestid + '/', {
-          cancelToken: source.token,
-        })
-        .then(response => {
-          if (!unmounted) {
-            setVetRequestData(response.data);
-          }
-        })
-        .catch(error => {
-          setShowSystemError(true);
-        });
-      };
-      fetchVetRequest();
+    if (props.medrecordid) {
+      if (is_workflow) {
+        setMedRecordData(props.state.medRecord);
+      }
+      else {
+        const fetchMedRecord = async () => {
+          // Fetch MedRecord data.
+          await axios.get('/vet/api/medrecord/' + props.medrecordid + '/', {
+            cancelToken: source.token,
+          })
+          .then(response => {
+            if (!unmounted) {
+              setMedRecordData(response.data);
+            }
+          })
+          .catch(error => {
+            setShowSystemError(true);
+          });
+        };
+        fetchMedRecord();
+      }
     };
 
     // Cleanup.
@@ -138,35 +159,39 @@ const TreatmentPlanForm = (props) => {
   return (
     <Formik
       initialValues={data}
+      validateOnChange={false}
       enableReinitialize={true}
       validationSchema={Yup.object({
-        treatment: Yup.string().required('Required'),
-        frequency: Yup.number().positive('Must be positive').required('Required'),
-        start: Yup.string().required('Required'),
-        end: Yup.string().required('Required'),
-        quantity: Yup.number().positive('Must be positive').required('Required'),
-        unit: Yup.string(),
-        route: Yup.string(),
+        is_workflow: Yup.boolean(),
+        treatment: Yup.string().when('is_workflow', {
+          is: false,
+          then: Yup.string().required('Required')}),
+        frequency: Yup.number().nullable().integer().positive('Must be positive').when(['is_workflow', 'treatment'], {
+          is: (is_workflow, treatment) => is_workflow === false || treatment,
+          then: Yup.number().integer().positive('Must be positive').required('Required')}),
+        days: Yup.number().nullable().integer().positive('Must be positive').when(['is_workflow', 'treatment'], {
+          is: (is_workflow, treatment) => is_workflow === false || treatment,
+          then: Yup.number().integer().positive('Must be positive').required('Required')}),
+        start: Yup.string(),
+        end: Yup.string().nullable(),
+        quantity: Yup.number().nullable().integer().positive('Must be positive').when(['is_workflow', 'treatment'], {
+          is: (is_workflow, treatment) => is_workflow === false || treatment,
+          then: Yup.number().integer().positive('Must be positive').required('Required')}),
+        unit: Yup.string().nullable(),
+        route: Yup.string().nullable(),
       })}
       onSubmit={(values, { resetForm, setSubmitting }) => {
-        if (props.id || (props.state.steps.treatments[props.state.treatmentIndex])) {
-          axios.put('/vet/api/treatmentplan/' + props.id || props.state.steps.treatments[props.state.treatmentIndex].id + '/', values)
+        values['end'] = moment(values.start).add(24 * (values.days - 1), 'h').toDate();
+        if (props.id) {
+          axios.put('/vet/api/treatmentplan/' + props.id + '/', values)
           .then(response => {
             if (addAnother) {
-              if (is_workflow) {
-                props.onSubmit('treatments', values, 'treatments');
-              }
-              // Reset form data with existing treatment data if we have it.
-              let formdata = props.state && props.state.steps.treatments.length > 0 ? props.state.steps.treatments[props.state.treatmentIndex + 1] : data;
+              // Reset form data.
+              let formdata = initialData;
               resetForm({values:formdata});
             }
             else {
-              if (is_workflow) {
-                props.onSubmit('treatments', values, 'diagnoses');
-              }
-              else {
-                navigate('/' + props.organization + '/' + props.incident + '/vet/vetrequest/' + props.vetrequestid);
-              }
+              navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + props.medrecordid);
             }
           })
           .catch(error => {
@@ -174,26 +199,24 @@ const TreatmentPlanForm = (props) => {
           });
           setSubmitting(false);
         }
+        else if (is_workflow) {
+          if (addAnother) {
+            props.onSubmit('treatments', values, 'treatments');
+          }
+          else {
+            props.onSubmit('treatments', values, 'diagnoses');
+          }
+        }
         else {
           axios.post('/vet/api/treatmentplan/', values)
           .then(response => {
             if (addAnother) {
-              if (is_workflow) {
-                values['id'] = response.data.id;
-                props.onSubmit('treatments', values, 'treatments');
-              }
-              // Reset form data with existing treatment data if we have it.
-              let formdata = props.state.steps.treatments[props.state.treatmentIndex + 1] ? props.state.steps.treatments[props.state.treatmentIndex + 1] : initialData;
+              // Reset form data..
+              let formdata = initialData;
               resetForm({values:formdata});
             }
             else {
-              if (is_workflow) {
-                values['id'] = response.data.id;
-                props.onSubmit('treatments', values, 'diagnoses');
-              }
-              else {
-                navigate('/' + props.organization + '/' + props.incident + '/vet/vetrequest/' + props.vetrequestid);
-              }
+              navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + response.data.medical_record);
             }
           })
           .catch(error => {
@@ -206,40 +229,19 @@ const TreatmentPlanForm = (props) => {
       {formikProps => (
         <Card border="secondary" className={is_workflow ? "mt-3" : "mt-5"}>
           <Card.Header as="h5" className="pl-3">
-          {!is_workflow ? <span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + props.organization + '/' + props.incident + '/vet/vetrequest/' + props.vetrequestid + '/')} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
+          {!is_workflow ? <span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + props.medrecordid + '/')} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
           :
           <span>{props.state.treatmentIndex > 0 ? <span style={{cursor:'pointer'}} onClick={() => {setAddAnother(false); setData(props.state.steps.treatments[props.state.treatmentIndex-1]); props.handleBack('treatments', 'treatments')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
           :
-          <span style={{cursor:'pointer'}} onClick={() => {setAddAnother(false);props.handleBack('treatments', 'diagnostics')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}</span>}
+          <span style={{cursor:'pointer'}} onClick={() => {setAddAnother(false);props.handleBack('treatments', 'orders')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}</span>}
           {!props.id ? "" : "Update "}Treatment Form
           </Card.Header>
-          <div className="col-12 mt-3">
-            <Card className="border rounded" style={{width:"100%"}}>
-              <Card.Body>
-                <Card.Title>
-                  <h4 className="mb-0">Patient</h4>
-                </Card.Title>
-                <hr/>
-                <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
-                  <ListGroup.Item>
-                    <div className="row" style={{textTransform:"capitalize"}}>
-                      <span className="col-3"><b>ID:</b> <Link href={"/" + props.organization + "/" + props.incident + "/animals/" + vetRequestData.animal_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>A#{vetRequestData.animal_object.id}</Link></span>
-                      <span className="col-3"><b>Name:</b> {vetRequestData.animal_object.name||"Unknown"}</span>
-                      <span className="col-3"><b>Species:</b> {vetRequestData.animal_object.species_string}</span>
-                    </div>
-                  </ListGroup.Item>
-                  <ListGroup.Item>
-                      <span><b>Medical Notes:</b> {vetRequestData.animal_object.medical_notes || "N/A"}</span>
-                  </ListGroup.Item>
-                </ListGroup>
-              </Card.Body>
-            </Card>
-          </div>
+          <Patient animal={data.animal_object.id ? data.animal_object : medRecordData.animal_object} vet_request={vetrequest_id && medRecordData.vet_requests.length > 0 ? medRecordData.vet_requests.filter(vr => vr.id === Number(vetrequest_id))[0] : null} organization={props.organization} incident={props.incident} />
           <Card.Body>
             <BootstrapForm as={Form}>
               <FormGroup>
                 <BootstrapForm.Row>
-                <Col xs={"4"}>
+                <Col xs={"2"}>
                     <DropDown
                       label="Category"
                       id="categoryDropdown"
@@ -252,10 +254,11 @@ const TreatmentPlanForm = (props) => {
                       onChange={(instance) => {
                         formikProps.setFieldValue("category", instance === null ? '' : instance.value);
                         formikProps.setFieldValue("treatment", '');
+                        formikProps.setFieldValue("unit", '');
                       }}
                     />
                   </Col>
-                  <Col xs={"6"}>
+                  <Col xs={"5"}>
                     <DropDown
                       label="Treatment"
                       id="treatmentDropdown"
@@ -267,18 +270,29 @@ const TreatmentPlanForm = (props) => {
                       isClearable={false}
                       onChange={(instance) => {
                         formikProps.setFieldValue("treatment", instance === null ? '' : instance.value);
+                        formikProps.setFieldValue("unit", instance === null ? '' : treatmentChoices.filter(option => option.value === instance.value)[0].unit);
                       }}
+                    />
+                  </Col>
+                  <Col xs={"1"}>
+                    <DropDown
+                      label="Unit"
+                      id="unitDropdown"
+                      name="unit"
+                      type="text"
+                      key={`my_unique_unit_select_key__${formikProps.values.unit}`}
+                      options={treatmentChoices.length > 0 && formikProps.values.treatment ? treatmentChoices.filter(choice => choice.value === formikProps.values.treatment).map(choice => ({'value':choice.unit, 'label':choice.unit})) : [{'value':'', 'label':''}]}
+                      value={formikProps.values.unit||data.unit}//||treatmentChoices.filter(choice => choice.value === formikProps.values.treatment)[0].unit}
+                      isClearable={false}
+                      onChange={(instance) => {
+                        formikProps.setFieldValue("unit", instance === null ? '' : instance.value);
+                      }}
+                      placeholder=""
+                      disabled={true}
                     />
                   </Col>
                 </BootstrapForm.Row>
                 <BootstrapForm.Row className="mt-3 pl-0">
-                  <TextInput
-                    id="frequency"
-                    name="frequency"
-                    type="text"
-                    xs="2"
-                    label="Frequency (in hours)"
-                  />
                   <DateTimePicker
                     label="Start"
                     name="start"
@@ -289,21 +303,18 @@ const TreatmentPlanForm = (props) => {
                     }}
                     value={formikProps.values.start||new Date()}
                     disabled={false}
+                    clearable={false}
                   />
                   <DateTimePicker
                     label="End"
                     name="end"
                     id="end"
                     xs="4"
-                    onChange={(date, dateStr) => {
-                      formikProps.setFieldValue("end", dateStr)
-                    }}
-                    value={formikProps.values.end||new Date()}
-                    disabled={false}
-                    style={{}}
+                    value={formikProps.values.end||formikProps.values.frequency && formikProps.values.days ? moment(formikProps.values.start).add(24 * (formikProps.values.days - 1), 'h').toDate() : null}
+                    disabled={true}
                   />
                 </BootstrapForm.Row>
-                <BootstrapForm.Row>
+                <BootstrapForm.Row className="mt-3 pl-0" style={{marginBottom:"-15px"}}>
                   <TextInput
                     id="quantity"
                     name="quantity"
@@ -311,29 +322,46 @@ const TreatmentPlanForm = (props) => {
                     xs="2"
                     label="Quantity"
                   />
-                  <Col xs={"4"}>
+                  <Col xs={"2"}>
                     <DropDown
-                      label="Unit"
-                      id="unitDropdown"
-                      name="unit"
+                      label="Frequency"
+                      id="frequencyDropdown"
+                      name="frequency"
                       type="text"
-                      key={`my_unique_unit_select_key__${formikProps.values.unit}`}
-                      options={treatmentChoices.length > 0 && formikProps.values.treatment ? treatmentChoices.filter(choice => Number(choice.value) === Number(formikProps.values.treatment)).map(choice => ({'value':choice.unit, 'label':choice.unit})) : []}
-                      value={formikProps.values.unit||data.unit}
+                      key={`my_unique_frequency_select_key__${formikProps.values.frequency}`}
+                      options={[{value:1, label:'every 1 hour'}, {value:2, label:'every 2 hours'}, {value:3, label:'every 3 hours'}, {value:4, label:'every 4 hours'}, {value:6, label:'every 6 hours'}, {value:8, label:'every 8 hours'}, {value:12, label:'every 12 hours'}, {value:24, label:'every 24 hours'}, {value:48, label:'every 48 hours'}]}
+                      value={formikProps.values.frequency||data.frequency}
                       isClearable={false}
                       onChange={(instance) => {
-                        formikProps.setFieldValue("unit", instance === null ? '' : instance.value);
+                        formikProps.setFieldValue("frequency", instance === null ? '' : instance.value);
                       }}
+                      placeholder=""
                     />
                   </Col>
-                  <Col xs={"4"}>
+                  <Col xs={"2"}>
+                    <DropDown
+                      label="Duration"
+                      id="daysDropdown"
+                      name="days"
+                      type="text"
+                      key={`my_unique_days_select_key__${formikProps.values.days}`}
+                      options={[{value:0, label:'for 0 days'}, {value:1, label:'for 1 day'}, {value:2, label:'for 2 days'}, {value:3, label:'for 3 days'}, {value:4, label:'for 4 days'}, {value:5, label:'for 5 days'}, {value:6, label:'for 6 days'}, {value:7, label:'for 7 days'}, {value:14, label:'for 14 days'}]}
+                      value={formikProps.values.days||data.days}
+                      isClearable={false}
+                      onChange={(instance) => {
+                        formikProps.setFieldValue("days", instance === null ? '' : instance.value);
+                      }}
+                      placeholder=""
+                    />
+                  </Col>
+                  <Col xs={"2"}>
                     <DropDown
                       label="Route"
                       id="routeDropdown"
                       name="route"
                       type="text"
                       key={`my_unique_route_select_key__${formikProps.values.route}`}
-                      options={treatmentChoices.length > 0 && formikProps.values.treatment ? treatmentChoices.filter(choice => Number(choice.value) === Number(formikProps.values.treatment))[0].routes.map(route => ({'value':route, 'label':route})) : []}
+                      options={treatmentChoices.length > 0 && formikProps.values.treatment && treatmentChoices.filter(choice => Number(choice.value) === Number(formikProps.values.treatment))[0].routes.length > 0 ? treatmentChoices.filter(choice => Number(choice.value) === Number(formikProps.values.treatment))[0].routes.map(route => ({'value':route, 'label':route})) : [{'value':'', 'label':''}]}
                       value={formikProps.values.route||data.route}
                       isClearable={false}
                       onChange={(instance) => {
@@ -345,7 +373,7 @@ const TreatmentPlanForm = (props) => {
               </FormGroup>
             </BootstrapForm>
           </Card.Body>
-          {formikProps.values.end && formikProps.values.start && formikProps.values.frequency && formikProps.values.frequency > 0 ? <div className="alert alert-warning text-center" style={{fontSize:"16px", marginTop:"-35px"}}>This will generate {calc_requests(formikProps)} treatment request{calc_requests(formikProps) === 1 ? "" : "s"}.</div> : ""}
+          {formikProps.values.days && formikProps.values.frequency && formikProps.values.frequency > 0 ? <div className="alert alert-warning text-center" style={{fontSize:"16px", marginTop:"-20px"}}>This will generate {calc_requests(formikProps)} treatment request{calc_requests(formikProps) === 1 ? "" : "s"}.</div> : ""}
           <ButtonGroup>
             {!props.id ?
             <Button onClick={() => {
@@ -354,7 +382,7 @@ const TreatmentPlanForm = (props) => {
             }}>
               {props.state.steps.treatments.length -1 > props.state.treatmentIndex ? "Next Treatment" : "Add Another"}
             </Button> : ""}
-            <Button type="button" className="btn btn-primary border" onClick={() => { setAddAnother(false);formikProps.submitForm() }}>{is_workflow ? "Next" : "Save"}</Button>
+            <Button type="button" className="btn btn-primary border" onClick={() => { setAddAnother(false);formikProps.submitForm() }}>{is_workflow ? "Next Step" : "Save"}</Button>
           </ButtonGroup>
         </Card>
       )}

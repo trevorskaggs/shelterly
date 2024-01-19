@@ -1,13 +1,15 @@
 import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
 import { navigate } from "raviger";
-import { Form, Formik, } from 'formik';
+import { Field, Form, Formik, } from 'formik';
 import Select from 'react-select';
+import { Switch } from 'formik-material-ui';
 import {
   Button,
   ButtonGroup,
   Card,
   Col,
+  Form as BootstrapForm,
   FormGroup,
   Row,
 } from 'react-bootstrap';
@@ -49,17 +51,15 @@ const VetRequestForm = (props) => {
 
   const [data, setData] = useState({
     patient: props.animalid,
-    assignee: null,
+    requested_by: null,
     exam: null,
     concern: '',
-    diagnosis: [],
     priority: 'urgent',
     presenting_complaints: [],
+    caution: false,
   })
 
-  const [assigneeChoices, setAssigneeChoices] = useState([]);
   const [presentingComplaintChoices, setPresentingComplaintChoices] = useState([]);
-  const [diagnosisChoices, setDiagnosisChoices] = useState([]);
 
   useEffect(() => {
     let unmounted = false;
@@ -82,26 +82,6 @@ const VetRequestForm = (props) => {
       fetchVetRequest();
     };
 
-    const fetchAssignees = async () => {
-      // Fetch assignee data.
-      await axios.get('/accounts/api/user/?vet=true&organization=' + state.organization.id, {
-        cancelToken: source.token,
-      })
-      .then(response => {
-        if (!unmounted) {
-          let options = [];
-          response.data.forEach(function(person) {
-            options.unshift({value: person.id, label: person.first_name + ' ' + person.last_name})
-          });
-          setAssigneeChoices(options);
-        }
-      })
-      .catch(error => {
-        setShowSystemError(true);
-      });
-    };
-    fetchAssignees();
-
     const fetchPresentingComplaints = async () => {
       // Fetch assignee data.
       await axios.get('/vet/api/complaints/', {
@@ -122,28 +102,6 @@ const VetRequestForm = (props) => {
     };
     fetchPresentingComplaints();
 
-    const fetchDiagnoses = async () => {
-      // Fetch diagnosis data.
-      await axios.get('/vet/api/diagnosis/', {
-        cancelToken: source.token,
-      })
-      .then(response => {
-        if (!unmounted) {
-          let options = [];
-          response.data.forEach(function(diagnosis) {
-            options.push({value: diagnosis.id, label: diagnosis.name})
-          });
-          setDiagnosisChoices(options);
-        }
-      })
-      .catch(error => {
-        setShowSystemError(true);
-      });
-    };
-    if (props.id) {
-      fetchDiagnoses();
-    }
-
     // Cleanup.
     return () => {
       unmounted = true;
@@ -156,9 +114,10 @@ const VetRequestForm = (props) => {
       initialValues={data}
       enableReinitialize={true}
       validationSchema={Yup.object({
-        assignee: Yup.number().nullable(),
         concern: Yup.string(),
         priority: Yup.string(),
+        caution: Yup.boolean(),
+        presenting_complaints: Yup.array(),
       })}
       onSubmit={(values, { setSubmitting }) => {
         if (props.id) {
@@ -185,27 +144,18 @@ const VetRequestForm = (props) => {
     >
       {formikProps => (
         <Card border="secondary" className="mt-5">
-          <Card.Header as="h5" className="pl-3"><span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + props.organization + '/' + props.incident + '/vet/vetrequest/' + props.id + '/')} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>{!props.id ? "" : "Update "}Veterinary Request Form</Card.Header>
+          <Card.Header as="h5" className="pl-3">
+            {props.id ? <span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + props.organization + '/' + props.incident + '/vet/vetrequest/' + props.id + '/')} className="mr-3">
+              <FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse />
+            </span>:
+            <span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + props.organization + '/' + props.incident + '/animals/' + props.animalid + '/')} className="mr-3">
+              <FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse />
+            </span>}
+            {!props.id ? "" : "Update "}Veterinary Request Form</Card.Header>
           <Card.Body>
             <Form>
               <FormGroup>
                 <Row>
-                  <Col xs={"4"}>
-                    <DropDown
-                      label="Assignee"
-                      id="assigneeDropdown"
-                      name="assignee"
-                      type="text"
-                      key={`my_unique_assignee_select_key__${formikProps.values.assignee}`}
-                      options={assigneeChoices}
-                      isClearable={true}
-                      onChange={(instance) => {
-                        formikProps.setFieldValue("assignee", instance === null ? '' : instance.value);
-                      }}
-                    />
-                  </Col>
-                </Row>
-                <Row className="mt-3">
                   <Col xs={"4"}>
                     <DropDown
                       label="Priority"
@@ -257,55 +207,12 @@ const VetRequestForm = (props) => {
                     rows={4}
                   />
                 </Row>
-                {data.exam ?
-                <Row>
-                  <Col xs={"8"}>
-                    <label>Diagnosis</label>
-                    <Select
-                      label="Diagnosis"
-                      id="diagnosisDropdown"
-                      name="diagnosis"
-                      type="text"
-                      styles={customStyles}
-                      isMulti
-                      options={diagnosisChoices}
-                      value={diagnosisChoices.filter(choice => formikProps.values.diagnosis.includes(choice.value))}
-                      isClearable={false}
-                      onChange={(instance) => {
-                        let values = [];
-                        instance && instance.forEach(option => {
-                          values.push(option.value);
-                        })
-                        formikProps.setFieldValue("diagnosis", instance === null ? [] : values);
-                      }}
-                    />
-                    {formikProps.errors['diagnosis'] ? <div style={{ color: "#e74c3c", marginTop: ".5rem", fontSize: "80%" }}>{formikProps.errors['diagnosis']}</div> : ""}
+                <Row style={{marginBottom:"-15px"}}>
+                  <Col xs="2">
+                    <BootstrapForm.Label htmlFor="caution" style={{marginBottom:"-5px"}}>Use Caution</BootstrapForm.Label>
+                    <div style={{marginLeft:"-3px"}}><Field component={Switch} name="caution" type="checkbox" color="primary" /></div>
                   </Col>
                 </Row>
-                : ""}
-                {diagnosisChoices.length && formikProps.values.diagnosis.includes(diagnosisChoices.filter(option => option.label === 'OPEN')[0].value) ?
-                <Row className="mt-3" style={{marginBottom:"-15px"}}>
-                  <TextInput
-                    type="text"
-                    label="Other Diagnosis"
-                    name="diagnosis_other"
-                    id="diagnosis_other"
-                    xs="6"
-                  />
-                </Row>
-                : ""}
-                {data.exam ?
-                <Row className="mt-3" style={{marginBottom:"-15px"}}>
-                  <TextInput
-                    as="textarea"
-                    label="Diagnostic Notes"
-                    name="diagnosis_notes"
-                    id="diagnosis_notes"
-                    xs="6"
-                    rows={3}
-                  />
-                </Row>
-                : ""}
               </FormGroup>
             </Form>
           </Card.Body>

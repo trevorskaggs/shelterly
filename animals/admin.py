@@ -7,6 +7,9 @@ from animals.models import Animal, AnimalImage, Species, SpeciesCategory
 class AnimalAdmin(admin.ModelAdmin):
   list_display = ('id', 'status', 'name', 'size')
 
+class SpeciesAdmin(admin.ModelAdmin):
+  list_display = ('id', 'name', 'category')
+
 class AnimalImageAdmin(admin.ModelAdmin):
 
   def animal_str(self, obj: Animal):
@@ -22,5 +25,5 @@ class AnimalImageAdmin(admin.ModelAdmin):
 # Register your models here.
 admin.site.register(Animal, AnimalAdmin)
 admin.site.register(AnimalImage, AnimalImageAdmin)
-admin.site.register(Species)
+admin.site.register(Species, SpeciesAdmin)
 admin.site.register(SpeciesCategory)

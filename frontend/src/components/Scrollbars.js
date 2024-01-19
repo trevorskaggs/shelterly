@@ -74,9 +74,9 @@ class ShadowScrollbars extends Component {
     const shadowRightStyle = {
       position: 'absolute',
       bottom: 0,
-      left: 475,
+      // left: 475,
       right: 0,
-      height: 31,
+      height: style.shadowheight || 31,
       width: 10,
       zIndex: 9999,
       background: 'linear-gradient(to left, rgba(226, 226, 226, 0.4) 0%, rgba(0, 0, 0, 0) 100%)'

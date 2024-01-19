@@ -5,13 +5,12 @@ import Step from '@material-ui/core/Step';
 import StepLabel from '@material-ui/core/StepLabel';
 import Typography from '@material-ui/core/Typography';
 import { useQueryParams } from 'raviger';
-import VetRequestExamForm from '../vet/VetRequestExamForm';
-import DiagnosticsForm from '../vet/DiagnosticsForm';
+import ExamForm from './ExamForm';
+import OrdersForm from '../vet/OrdersForm';
 import TreatmentPlanForm from '../vet/TreatmentPlanForm';
 import PageNotFound from "../components/PageNotFound";
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import DiagnosisForm from './DiagnosisForm';
-import ProcedureForm from './ProcedureForm';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -68,21 +67,19 @@ function CustomStepIcon() {
 }
 
 function getSteps() {
-  return ['Intake Exam', 'Order Diagnostics', 'Create Treatments', 'Order Procedures', 'Diagnosis'];
+  return ['Intake Exam', 'Orders', 'Treatments', 'Diagnosis'];
 }
 
-function getStepContent(id, incident, organization, step, handleStepSubmit, handleBack, state) {
+function getStepContent(id, incident, organization, step, handleStepSubmit, handleBack, handleMedicalRecord, state) {
   switch (step) {
     case 0:
-      return <VetRequestExamForm onSubmit={handleStepSubmit} handleBack={handleBack} state={state} id={id} incident={incident} organization={organization} />;
+      return <ExamForm onSubmit={handleStepSubmit} handleBack={handleBack} handleMedicalRecord={handleMedicalRecord} state={state} medrecordid={id} incident={incident} organization={organization} />;
     case 1:
-      return <DiagnosticsForm onSubmit={handleStepSubmit} handleBack={handleBack} state={state} id={id} incident={incident} organization={organization} />;
+      return <OrdersForm onSubmit={handleStepSubmit} handleBack={handleBack} handleMedicalRecord={handleMedicalRecord} state={state} id={id} incident={incident} organization={organization} />;
     case 2:
-      return <TreatmentPlanForm onSubmit={handleStepSubmit} handleBack={handleBack} state={state} vetrequestid={id} incident={incident} organization={organization} />;
+      return <TreatmentPlanForm onSubmit={handleStepSubmit} handleBack={handleBack} handleMedicalRecord={handleMedicalRecord} state={state} medrecordid={id} incident={incident} organization={organization} />;
     case 3:
-      return <ProcedureForm onSubmit={handleStepSubmit} handleBack={handleBack} state={state} id={id} incident={incident} organization={organization} />;
-    case 4:
-      return <DiagnosisForm onSubmit={handleStepSubmit} handleBack={handleBack} state={state} id={id} incident={incident} organization={organization} />;
+      return <DiagnosisForm onSubmit={handleStepSubmit} handleBack={handleBack} handleMedicalRecord={handleMedicalRecord} state={state} medrecordid={id} incident={incident} organization={organization} />;
     default:
       return <PageNotFound/>;
   }
@@ -92,14 +89,15 @@ export const initialVetWorkflowData = {
   stepIndex: 0,
   treatmentCount: 0,
   treatmentIndex: 0,
+  diagnosticsCount: 0,
+  proceduresCount: 0,
   steps: {
-    exam: {
-      id: '',},
-    diagnostics: {},
+    exam: {'medrecord_id':null, 'vetrequest_id':null, 'assignee':null, 'confirm_sex_age':false, 'age':'', 'sex':'', 'confirm_chip':false, 'microchip':'', 'weight':'', 'weight_unit':'kg', 'weight_estimated':false, 'temperature':'', 'temperature_method':'Rectal', 'pulse':'', 'respiratory_rate':'', 'vet_requests':[]},
+    orders: {diagnostics:[], diagnostics_other:'', procedures:[], procedure_other:'', animal_object: {id:''}, vet_requests: [],},
     treatments: [],
-    procedures: {},
-    diagnosis: {},
-  }
+    diagnosis: {diagnosis:[], diagnosis_notes:'', diagnosis_other:'', animal_object:{id:''}, vet_requests: [],},
+  },
+  medRecord: {id:'', exams:[], diagnostic_objects:[], procedure_objects:[], patient:null, vet_requests:[], open: '', diagnosis: '', other_diagnosis:'', treatment_plans:[], animal_object: {id:'', name:'', species:'', category:'', sex:'', age:'', fixed:'', pcolor:'', scolor:'', medical_notes:'', shelter_object:{}, room_name:''}}
 }
 
 function VetStepperWorkflow({ id, incident, organization }) {
@@ -161,7 +159,7 @@ function VetStepperWorkflow({ id, incident, organization }) {
           ...prevState,
           stepIndex: prevState.stepIndex + 1,
           treatmentIndex: index,
-          treatmentCount: prevState.treatmentCount + 1,
+          treatmentCount: prevState.treatmentCount + data.treatment ? 1 : 0,
           steps: { ...prevState.steps, [currentStep]:[...prevState.steps.treatments, data] }
         }))
       }
@@ -180,6 +178,13 @@ function VetStepperWorkflow({ id, incident, organization }) {
       setActiveStep((prevActiveStep) => prevActiveStep + 1);
     }
   }
+
+  function handleMedicalRecord(data) {
+    setState((prevState) => ({
+      ...prevState,
+      medRecord: data,
+    }))
+  };
 
   return (
     <div className={classes.root}>
@@ -216,7 +221,7 @@ function VetStepperWorkflow({ id, incident, organization }) {
       </Stepper>
       <div>
           <div>
-            <Typography className={classes.instructions} component={'span'}>{getStepContent(id, incident, organization, activeStep, handleStepSubmit, handleBack, state)}</Typography>
+            <Typography className={classes.instructions} component={'span'}>{getStepContent(id, incident, organization, activeStep, handleStepSubmit, handleBack, handleMedicalRecord, state)}</Typography>
           </div>
       </div>
     </div>
