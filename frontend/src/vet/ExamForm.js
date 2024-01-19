@@ -1,6 +1,6 @@
 import React, { createRef, useContext, useEffect, useRef, useState } from 'react';
 import axios from "axios";
-import { Link, navigate } from "raviger";
+import { Link, navigate, useQueryParams } from "raviger";
 import { Field, Form, Formik, } from 'formik';
 import useDynamicRefs from 'use-dynamic-refs';
 import {
@@ -142,13 +142,19 @@ function createYupSchema(schema, config) {
 
 const ExamForm = (props) => {
 
+  // Identify any query param data.
+  const [queryParams] = useQueryParams();
+  const {
+    vetrequest_id = null,
+  } = queryParams;
+
   const { dispatch, state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
   // Determine if we're in the vet exam workflow.
   var is_workflow = window.location.pathname.includes("workflow");
 
-  const initialData = {id: '', exam: null, open: '', exam_object: {'medrecord_id':props.medrecordid, assignee:null, 'confirm_sex_age':false, 'confirm_chip':false, 'weight':null, 'weight_unit':'', 'weight_estimated':false, 'temperature':'', 'temperature_method':'Rectal', 'pulse':'', 'respiratory_rate':''}, animal_object: {id:'', name:'', species:'', species_string: '', category:'', sex:'', age:'', size:'', pcolor:'', scolor:'', medical_notes:''}}
+  const initialData = {id: '', exam: null, open: '', exam_object: {'medrecord_id':props.medrecordid, vetrequest_id:vetrequest_id, 'confirm_sex_age':false, 'confirm_chip':false, 'weight':null, 'weight_unit':'', 'weight_estimated':false, 'temperature':'', 'temperature_method':'Rectal', 'pulse':'', 'respiratory_rate':''}, animal_object: {id:'', name:'', species:'', species_string: '', category:'', sex:'', age:'', size:'', pcolor:'', scolor:'', medical_notes:''}, vet_requests:[]}
 
   let current_data = {...initialData}
   if (is_workflow) {
@@ -272,6 +278,7 @@ const ExamForm = (props) => {
                 response.data.exam_object['microchip'] = response.data.animal_object.microchip
                 filterDataBySpecies(response);
                 setData(response.data);
+                props.handleMedicalRecord(response.data);
               }
             })
             .catch(error => {
@@ -348,7 +355,8 @@ const ExamForm = (props) => {
       validateOnChange={false}
       validationSchema={Yup.object().shape(formSchema)}
       onSubmit={(values, { setSubmitting }) => {
-        values['animal_id'] = data.animal_object.id
+        values['animal_id'] = data.animal_object.id;
+        values['vetrequest_id'] = vetrequest_id;
         if (props.id || values.exam) {
           axios.put('/vet/api/exam/' + (props.id || values.exam) + '/', values)
           .then(response => {
@@ -395,7 +403,7 @@ const ExamForm = (props) => {
       {formikProps => (
         <Card border="secondary" className="mt-3">
           <Card.Header as="h5" className="pl-3"><span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + (is_workflow ? props.medrecordid : data.medical_record) + '/')} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>Veterinary Exam Form</Card.Header>
-          <Patient animal={data.animal_object} organization={props.organization} incident={props.incident} />
+          <Patient animal={data.animal_object} vet_request={vetrequest_id && data.vet_requests.length > 0 ? data.vet_requests.filter(vr => vr.id === Number(vetrequest_id))[0] : data.vet_request_object} organization={props.organization} incident={props.incident} />
           <Card.Body>
             <Form>
               <FormGroup>
@@ -465,8 +473,6 @@ const ExamForm = (props) => {
                 <Row className="mt-3">
                   <Col xs="2">
                     <ToggleSwitch id="confirm_chip" name="confirm_chip" label="Microchip Present" disabled={false} />
-                    {/* <BootstrapForm.Label htmlFor="confirm_chip" style={{marginBottom:"-5px"}}>Microchip Present</BootstrapForm.Label>
-                    <div style={{marginLeft:"20px"}}><Field component={Switch} name="confirm_chip" type="checkbox" color="primary" /></div> */}
                   </Col>
                   <TextInput
                       id="microchip"

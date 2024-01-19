@@ -51,6 +51,7 @@ import OrdersForm from "./vet/OrdersForm";
 import MedicalRecordDetails from "./vet/MedicalRecordDetails";
 import DiagnosticResultForm from "./vet/DiagnosticResultForm";
 import ProcedureResultForm from "./vet/ProcedureResultForm";
+import DiagnosisForm from "./vet/DiagnosisForm";
 
 export const publicRoutes = {
   "/login": () => <LoginForm />,
@@ -118,6 +119,7 @@ const routes = {
   "/:organization/:incident/vet/exam/:id": ({id, incident, organization}) => <ExamForm id={id} incident={incident} organization={organization} />,
   "/:organization/:incident/vet/medrecord/:id/procedures": ({id, incident, organization}) => <OrdersForm id={id} state={initialVetWorkflowData} incident={incident} organization={organization} />,
   "/:organization/:incident/vet/medrecord/:id/workflow": ({id, incident, organization}) => <VetStepperWorkflow id={id} incident={incident} organization={organization} />,
+  "/:organization/:incident/vet/medrecord/:medrecordid/diagnosis/new": ({medrecordid, incident, organization}) => <DiagnosisForm medrecordid={medrecordid} state={initialVetWorkflowData} incident={incident} organization={organization} />,
   "/:organization/:incident/vet/medrecord/:medrecordid/treatment/new": ({medrecordid, incident, organization}) => <TreatmentPlanForm medrecordid={medrecordid} state={initialVetWorkflowData} incident={incident} organization={organization} />,
   "/:organization/:incident/vet/procedureresult/edit/:id": ({id, incident, organization}) => <ProcedureResultForm id={id} incident={incident} organization={organization} />,
   "/:organization/:incident/vet/treatment/:id": ({id, incident, organization}) => <TreatmentPlanDetails id={id} incident={incident} organization={organization} />,

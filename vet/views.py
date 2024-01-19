@@ -71,9 +71,14 @@ class ExamViewSet(viewsets.ModelViewSet):
         if serializer.is_valid():
             med_record = MedicalRecord.objects.get(id=self.request.data.get('medrecord_id'))
             serializer.validated_data['medical_record'] = med_record
+            if self.request.data.get('vetrequest_id'):
+              vet_request = VetRequest.objects.get(id=self.request.data.get('vetrequest_id'))
+              serializer.validated_data['vet_request'] = vet_request
+              # Close open vet request.
+              VetRequest.objects.filter(id=self.request.data.get('vetrequest_id')).update(status='Closed')
+
             exam = serializer.save()
-            # Close open vet requests once Exam is complete.
-            VetRequest.objects.filter(medical_record=self.request.data.get('medrecord_id')).update(status='Closed')
+
             # Update Animal with animal data.
             Animal.objects.filter(id=self.request.data.get('animal_id')).update(age=self.request.data.get('age'), sex=self.request.data.get('sex'), microchip=self.request.data.get('microchip', ''))
             # Create ExamAnswer objects.

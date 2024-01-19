@@ -40,17 +40,20 @@ import {
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
 import { SystemErrorContext } from '../components/SystemError';
+import { AuthContext } from "../accounts/AccountsReducer";
 import { faBandage, faRing, faTankWater } from '@fortawesome/pro-regular-svg-icons';
 
 function MedicalRecordDetails({ id, incident, organization }) {
 
   const { setShowSystemError } = useContext(SystemErrorContext);
+  const { dispatch, state } = useContext(AuthContext);
 
   const priorityText = {urgent:'Urgent', when_available:'When Available'};
 
   const [data, setData] = useState({id:'', exams:[], diagnostic_objects:[], procedure_objects:[], patient:null, vet_requests:[], open: '', diagnosis: '', other_diagnosis:'', treatment_plans:[], animal_object: {id:'', name:'', species:'', category:'', sex:'', age:'', fixed:'', pcolor:'', scolor:'', medical_notes:'', shelter_object:{}, room_name:''}});
-  const [showExam, setShowExam] = useState(true);
+  const [showExam, setShowExam] = useState(false);
   const [activeVR, setActiveVR] = useState(null);
+  const [activeOpenVR, setActiveOpenVR] = useState(null);
   const [activeExam, setActiveExam] = useState(null);
   const [activeOrders, setActiveOrders] = useState("treatments");
 
@@ -67,8 +70,8 @@ function MedicalRecordDetails({ id, incident, organization }) {
       .then(response => {
         if (!unmounted) {
           setData(response.data);
-          setActiveVR(response.data.vet_requests[0].id);
-          setActiveExam(response.data.exams.length > 0? response.data.exams[0].id : null);
+          setActiveOpenVR(response.data.vet_requests.filter(vr => vr.status === 'Open').length > 0 ? response.data.vet_requests.filter(vr => vr.status === 'Open')[0].id : null);
+          setActiveExam(response.data.exams.length > 0 ? response.data.exams[0].id : null);
         }
       })
       .catch(error => {
@@ -97,24 +100,6 @@ function MedicalRecordDetails({ id, incident, organization }) {
               <h4 className="mb-0">
                 <Row className="ml-0 pr-0">
                   Patient
-                  {data.vet_requests.filter(vet_request => vet_request.status === 'Open').length > 0 ?
-                  <span className="ml-auto mr-3">
-                    <Link href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.id + "/workflow"} className="exam-link" style={{textDecoration:"none", color:"white"}}>
-                      <Card className="border rounded exam-hover-div" style={{height:"27px", minWidth:"202px", maxWidth:"202px", marginTop:"-2px", marginBottom:"-15px", whiteSpace:"nowrap", overflow:"hidden"}}>
-                        <div className="row no-gutters hover-div" style={{textTransform:"capitalize", marginRight:"-2px"}}>
-                          <Col style={{maxWidth:"36px"}}>
-                            <div className="border-right" style={{width:"27px", minWidth:"27px"}}>
-                              <FontAwesomeIcon icon={faStethoscope} className="ml-1 exam-icon" style={{paddingRight:"10px"}} transform={'grow-4 right-4 up-1'} inverse />
-                            </div>
-                          </Col>
-                          <Col style={{fontSize:"17px"}}>
-                            <div style={{marginTop:"2px", marginLeft:"-5px"}}>Start Veterinary Exam</div>
-                          </Col>
-                        </div>
-                      </Card>
-                    </Link>
-                  </span>
-                  : ""}
                 </Row>
               </h4>
             </Card.Title>
@@ -154,12 +139,12 @@ function MedicalRecordDetails({ id, incident, organization }) {
                 <Scrollbar horizontal="true" no_shadow="true" autoHide style={{height:"45px", marginLeft:"-1px", shadowheight:"45px", width:"100%"}} renderView={props => <div {...props} style={{...props.style, marginBottom:"-18px", marginRight:"0px", overflowX:"auto", overflowY: "hidden"}}/>} renderThumbVertical={props => <div {...props} style={{...props.style, display: 'none'}} />}>
                   <ListGroup horizontal>
                     <ListGroup.Item style={{backgroundColor:"rgb(158, 153, 153)"}}>
-                      <Row style={{width:"48px"}}>
-                        <div style={{marginTop:"-3px", marginLeft:"4px"}}>VRs</div>
+                      <Row style={{width:"105px"}}>
+                        <div style={{marginTop:"-3px", marginLeft:"4px"}}>Open VRs</div>
                       </Row>
                     </ListGroup.Item>
-                    {data.vet_requests.map((vet_request,i) => (
-                      <ListGroup.Item key={vet_request.id} active={vet_request.id === activeVR} style={{textTransform:"capitalize", cursor:'pointer'}} onClick={() => setActiveVR(vet_request.id)}>
+                    {data.vet_requests.filter(vr => vr.status === 'Open').map(vet_request => (
+                      <ListGroup.Item key={vet_request.id} active={vet_request.id === activeOpenVR} style={{textTransform:"capitalize", cursor:'pointer'}} onClick={() => setActiveVR(vet_request.id)}>
                         <Row style={{marginTop:"-3px", width:vet_request.caution ? "92px" : "68px"}}>
                           <div className="text-center" style={{marginLeft:"4px"}}>
                             {moment(vet_request.open).format('MM/DD')}
@@ -184,12 +169,29 @@ function MedicalRecordDetails({ id, incident, organization }) {
               </h4>
             </Card.Title>
             <hr/>
-            {data.vet_requests.filter(vet_request => vet_request.id === activeVR).map(vet_request => (
+            {data.vet_requests.filter(vet_request => vet_request.id === activeOpenVR).map(vet_request => (
             <ListGroup key={vet_request.id} variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
               <ListGroup.Item>
                 <div className="row">
-                  <span className="col-5"><b>ID: </b><Link href={"/" + organization + "/" + incident + "/vet/vetrequest/" + vet_request.id} className="text-link" style={{textDecoration:"none", color:"white"}}>VR#{vet_request.id}</Link></span>
-                  <span className="col-5"><b>Status: </b>{vet_request.status}</span>
+                  <span className="col-3"><b>ID: </b><Link href={"/" + organization + "/" + incident + "/vet/vetrequest/" + vet_request.id} className="text-link" style={{textDecoration:"none", color:"white"}}>VR#{vet_request.id}</Link></span>
+                  {state.user.vet_perms ?
+                  <span className="ml-auto mr-3">
+                    <Link href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.id + "/workflow?vetrequest_id=" + vet_request.id} className="exam-link" style={{textDecoration:"none", color:"white"}}>
+                      <Card className="border rounded exam-hover-div" style={{height:"27px", minWidth:"202px", maxWidth:"202px", marginTop:"-2px", marginBottom:"-15px", whiteSpace:"nowrap", overflow:"hidden"}}>
+                        <div className="row no-gutters hover-div" style={{textTransform:"capitalize", marginRight:"-2px"}}>
+                          <Col style={{maxWidth:"36px"}}>
+                            <div className="border-right" style={{width:"27px", minWidth:"27px"}}>
+                              <FontAwesomeIcon icon={faStethoscope} className="ml-1 exam-icon" size="lg" inverse />
+                            </div>
+                          </Col>
+                          <Col style={{fontSize:"17px"}}>
+                            <div style={{marginTop:"0px", marginLeft:"-5px"}}>Start Veterinary Exam</div>
+                          </Col>
+                        </div>
+                      </Card>
+                    </Link>
+                  </span>
+                  : ""}
                 </div>
               </ListGroup.Item>
               <ListGroup.Item>
@@ -227,11 +229,22 @@ function MedicalRecordDetails({ id, incident, organization }) {
                       </Row>
                     </ListGroup.Item>
                     {data.exams.map((exam,i) => (
-                    <ListGroup.Item key={exam.id} active={exam.id === activeExam} style={{textTransform:"capitalize", cursor:'pointer', paddingLeft:"5px", paddingRight:"5px"}} onClick={() => setActiveExam(exam.id)}>
-                      <div className="text-center" style={{marginTop:"-3px", width:"70px"}}>
-                        {moment(exam.open).format('MM/DD')}
-                      </div>
-                    </ListGroup.Item>
+                    <ListGroup horizontal key={exam.id}>
+                      <ListGroup.Item key={exam.id} active={exam.id === activeExam} style={{textTransform:"capitalize", cursor:'pointer', paddingLeft:"5px", paddingRight:"5px"}} onClick={() => {setActiveExam(exam.id);setActiveVR(null);}}>
+                        <div className="text-center" style={{marginTop:"-3px", width:"70px"}}>
+                          {moment(exam.open).format('MM/DD')}
+                        </div>
+                      </ListGroup.Item>
+                      {data.vet_requests.filter(vr => vr.id === exam.vet_request).map(vet_request => (
+                      <ListGroup.Item key={vet_request.id} active={vet_request.id === activeVR} style={{textTransform:"capitalize", cursor:'pointer'}} onClick={() => {setActiveVR(vet_request.id);setActiveExam(null);}}>
+                        <Row style={{marginTop:"-3px", width:"38px"}}>
+                          <div className="text-center" style={{marginLeft:"4px"}}>
+                            VR
+                          </div>
+                        </Row>
+                      </ListGroup.Item>
+                      ))}
+                    </ListGroup>
                     ))}
                   </ListGroup>
                 </Scrollbar>
@@ -272,13 +285,38 @@ function MedicalRecordDetails({ id, incident, organization }) {
               </ListGroup>
             </Collapse>
             ))}
+            {data.vet_requests.filter(vr => vr.id === activeVR).map(vet_request => (
+            <Collapse in={showExam} key={vet_request.id}>
+              <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
+              <ListGroup.Item>
+                <div className="row" style={{textTransform:"capitalize"}}>
+                  <span className="col-3"><b>ID:</b> <Link href={"/" + organization + "/" + incident + "/vet/vetrequest/" + vet_request.id} className="text-link" style={{textDecoration:"none", color:"white"}}>VR#{vet_request.id}</Link></span>
+                  <span className="col-4"><b>Opened:</b> {moment(vet_request.open).format('lll')}</span>
+                  <span className="col-5"><b>Opener:</b> {vet_request.requested_by_object ? <span>{vet_request.requested_by_object.first_name + ' ' + vet_request.requested_by_object.last_name}</span> : "Unknown"}</span>
+                </div>
+              </ListGroup.Item>
+              <ListGroup.Item>
+                <div className="row">
+                  <span className="col-3"><b>Priority:</b> {priorityText[vet_request.priority]}</span>
+                  <span className="col-9"><b>Complaints:</b> {vet_request.complaints_text}</span>
+                </div>
+              </ListGroup.Item>
+              <ListGroup.Item>
+                <div className="row">
+                  <span className="col-3"><b>Use Caution:</b> {vet_request.caution ? "True" : "False"}</span>
+                  <span className="col-9"><b>Concern:</b> {vet_request.concern}</span>
+                </div>
+              </ListGroup.Item>
+              </ListGroup>
+            </Collapse>
+            ))}
           </Card.Body>
         </Card>
       </div>
     </div>
     :""}
     {data.exams.length > 0 ?
-    <div className="row mt-3 mb-5">
+    <div className="row mt-3 mb-2">
       <div className="col-12 d-flex">
         <Card className="mb-2 border rounded" style={{width:"100%", minHeight:"552px"}}>
           <Card.Body style={{marginBottom:"-19px"}}>
@@ -611,6 +649,45 @@ function MedicalRecordDetails({ id, incident, organization }) {
         </Card>
       </div>
     </div> : ""}
+    <Row>
+    {data.exams.length > 0 ? <div className="col-12 d-flex">
+        <Card className="border rounded d-flex" style={{width:"100%"}}>
+          <Card.Body>
+            <Card.Title>
+              <h4 className="mb-0">
+                <Row className="ml-0 pr-0">
+                  Diagnoses
+                  <OverlayTrigger
+                    key={"add-diagnosis"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-add-diagnosis`}>
+                        Add a diagnosis for this patient
+                      </Tooltip>
+                    }
+                  >
+                    <Link href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.id + "/diagnosis/new"}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
+                  </OverlayTrigger>
+                </Row>
+              </h4>
+            </Card.Title>
+            <hr/>
+            <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
+              <ListGroup.Item>
+                <div className="row">
+                  <span><b>Diagnoses:</b> {data.diagnosis_text}</span>
+                </div>
+              </ListGroup.Item>
+              <ListGroup.Item>
+                <div className="row">
+                  <span><b>Notes:</b> {data.diagnosis_notes}</span>
+                </div>
+              </ListGroup.Item>
+            </ListGroup>
+          </Card.Body>
+        </Card>
+      </div> : ""}
+    </Row>
     {/* <History action_history={data.action_history} /> */}
     </>
   );

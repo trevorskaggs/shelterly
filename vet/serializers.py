@@ -15,23 +15,6 @@ class ExamAnswerSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class SimpleExamSerializer(serializers.ModelSerializer):
-
-    assignee_object = UserSerializer(source='assignee', required=False, read_only=True)
-    answers = ExamAnswerSerializer(source='examanswer_set', required=False, read_only=True, many=True)
-
-    class Meta:
-        model = Exam
-        fields = '__all__'
-
-class ExamSerializer(SimpleExamSerializer):
-
-    animal_object = serializers.SerializerMethodField()
-
-    def get_animal_object(self, obj):
-        return ModestAnimalSerializer(obj.medical_record.patient, required=False, read_only=True).data
-
-
 class ExamQuestionSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -125,6 +108,10 @@ class SimpleTreatmentRequestSerializer(serializers.ModelSerializer):
 class SimpleTreatmentPlanSerializer(serializers.ModelSerializer):
 
     treatment_object = TreatmentSerializer(source='treatment', required=False, read_only=True)
+    status = serializers.SerializerMethodField()
+
+    def get_status(self, obj):
+        return "Complete" if obj.treatmentrequest_set.filter(Q(actual_admin_time__isnull=True) | Q(not_administered=True)).count() == 0 else "Awaiting" if obj.treatmentrequest_set.filter(suggested_admin_time__lte=datetime.now(), actual_admin_time__isnull=True).count() > 0 else "Scheduled"
 
     class Meta:
         model = TreatmentPlan
@@ -135,14 +122,9 @@ class TreatmentPlanSerializer(SimpleTreatmentPlanSerializer):
 
     animal_object = serializers.SerializerMethodField()
     treatment_requests = SimpleTreatmentRequestSerializer(source='treatmentrequest_set', required=False, read_only=True, many=True)
-    status = serializers.SerializerMethodField()
 
     def get_animal_object(self, obj):
         return ModestAnimalSerializer(obj.medical_record.patient, required=False, read_only=True).data
-
-
-    def get_status(self, obj):
-        return "Complete" if obj.treatmentrequest_set.filter(Q(actual_admin_time__isnull=False) | Q(not_administered=True)).count() == obj.treatmentrequest_set.count() else "Awaiting" if obj.treatmentrequest_set.filter(suggested_admin_time__lte=datetime.now(), actual_admin_time__isnull=True).count() > 0 else "Scheduled"
 
 
 class TreatmentRequestSerializer(SimpleTreatmentRequestSerializer):
@@ -173,6 +155,25 @@ class VetRequestSerializer(SimpleVetRequestSerializer):
 
     def get_animal_object(self, obj):
         return ModestAnimalSerializer(obj.medical_record.patient).data
+
+
+class SimpleExamSerializer(serializers.ModelSerializer):
+
+    assignee_object = UserSerializer(source='assignee', required=False, read_only=True)
+    answers = ExamAnswerSerializer(source='examanswer_set', required=False, read_only=True, many=True)
+
+    class Meta:
+        model = Exam
+        fields = '__all__'
+
+
+class ExamSerializer(SimpleExamSerializer):
+
+    animal_object = serializers.SerializerMethodField()
+    vet_request_object = SimpleVetRequestSerializer(source='vet_request', required=False, read_only=True)
+
+    def get_animal_object(self, obj):
+        return ModestAnimalSerializer(obj.medical_record.patient, required=False, read_only=True).data
 
 
 class MedicalRecordSerializer(serializers.ModelSerializer):

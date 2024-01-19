@@ -209,7 +209,7 @@ const VetRequestForm = (props) => {
                 </Row>
                 <Row style={{marginBottom:"-15px"}}>
                   <Col xs="2">
-                    <BootstrapForm.Label htmlFor="caution" style={{marginBottom:"-5px"}}>Caution</BootstrapForm.Label>
+                    <BootstrapForm.Label htmlFor="caution" style={{marginBottom:"-5px"}}>Use Caution</BootstrapForm.Label>
                     <div style={{marginLeft:"-3px"}}><Field component={Switch} name="caution" type="checkbox" color="primary" /></div>
                   </Col>
                 </Row>

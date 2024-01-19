@@ -111,7 +111,7 @@ function VetRequestDetails({ id, incident, organization }) {
                 </OverlayTrigger> : ""}
                 {state.user.vet_perms && data.status === 'Open' ?
                 <span className="ml-auto mr-3">
-                  <Link href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.medical_record + "/workflow"} className="exam-link" style={{textDecoration:"none", color:"white"}}>
+                  <Link href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.medical_record + "/workflow?vetrequest_id=" + id} className="exam-link" style={{textDecoration:"none", color:"white"}}>
                     <Card className="border rounded exam-hover-div" style={{height:"27px", minWidth:"202px", maxWidth:"202px", marginTop:"-2px", marginBottom:"-15px", whiteSpace:"nowrap", overflow:"hidden"}}>
                       <div className="row no-gutters hover-div" style={{textTransform:"capitalize", marginRight:"-2px"}}>
                         <Col style={{maxWidth:"36px"}}>

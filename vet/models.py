@@ -104,6 +104,7 @@ class Exam(models.Model):
     pulse = models.FloatField(blank=True, null=True)
     respiratory_rate = models.FloatField(blank=True, null=True)
     medical_record = models.ForeignKey(MedicalRecord, on_delete=models.SET_NULL, null=True)
+    vet_request = models.ForeignKey(VetRequest, on_delete=models.SET_NULL, null=True)
 
     class Meta:
         ordering = ('-id',)

@@ -2,8 +2,8 @@
 
 from django.db import migrations
 
-complaints = ['Painful', 'Not eating', 'Vomiting/diarrhea', 'Diarrhea', 'Lameness', 'Trauma/wounds', 'Facial Swelling',
-              'Burns', 'Pale gums', 'Lethargic', 'Collapse', 'Abnormal behavior', 'Eye/ear problems', 'Difficulty breathing',
+complaints = ['Painful', 'Not eating', 'Vomiting', 'Diarrhea', 'Lameness', 'Trauma/wounds', 'Facial Swelling',
+              'Burns', 'Pale gums', 'Lethargic', 'Collapse', 'Abnormal behavior', 'Ear problems', 'Eye problems', 'Difficulty breathing',
               'Labored breathing']
 
 diagnoses = ['Apparently healthy', 'Gatrointestinal problem', 'Parvovirus', 'Stress colotis', 'Intestinal parasites', 'Pancreatits',

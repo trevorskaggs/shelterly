@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
-import { navigate, Link } from "raviger";
+import { navigate, useQueryParams } from "raviger";
 import { Form, Formik, } from 'formik';
 import Select from 'react-select';
 import {
@@ -45,6 +45,12 @@ const customStyles = {
 
 const OrdersForm = (props) => {
 
+  // Identify any query param data.
+  const [queryParams] = useQueryParams();
+  const {
+    vetrequest_id = null,
+  } = queryParams;
+
   const { setShowSystemError } = useContext(SystemErrorContext);
 
   // Determine if we're in the vet exam workflow.
@@ -62,7 +68,8 @@ const OrdersForm = (props) => {
     procedures: [],
     // procedure_notes: '',
     procedure_other: '',
-    animal_object: {id:''}
+    animal_object: {id:''},
+    vet_requests: [],
   }
   let current_data = initialData;
   if (is_workflow) {
@@ -82,28 +89,41 @@ const OrdersForm = (props) => {
     let unmounted = false;
     let source = axios.CancelToken.source();
     if (props.id) {
-      const fetchMedRecord = async () => {
-        // Fetch MedRecord data.
-        await axios.get('/vet/api/medrecord/' + props.id + '/', {
-          cancelToken: source.token,
-        })
-        .then(response => {
-          if (!unmounted) {
-            response.data['diagnostics'] = [];
-            response.data['diagnostics_other'] = '';
-            response.data['procedures'] = [];
-            response.data['procedure_other'] = '';
-            response.data['is_workflow'] = is_workflow;
-            response.data['is_diagnostics'] = is_diagnostics;
-            response.data['is_procedures'] = is_procedures;
-            setData(response.data);
-          }
-        })
-        .catch(error => {
-          setShowSystemError(true);
-        });
-      };
-      fetchMedRecord();
+      if (is_workflow) {
+        let medRecord = {...props.state.medRecord}
+        medRecord['diagnostics'] = [];
+        medRecord['diagnostics_other'] = '';
+        medRecord['procedures'] = [];
+        medRecord['procedure_other'] = '';
+        medRecord['is_workflow'] = is_workflow;
+        medRecord['is_diagnostics'] = is_diagnostics;
+        medRecord['is_procedures'] = is_procedures;
+        setData(medRecord);
+      }
+      else {
+        const fetchMedRecord = async () => {
+          // Fetch MedRecord data.
+          await axios.get('/vet/api/medrecord/' + props.id + '/', {
+            cancelToken: source.token,
+          })
+          .then(response => {
+            if (!unmounted) {
+              response.data['diagnostics'] = [];
+              response.data['diagnostics_other'] = '';
+              response.data['procedures'] = [];
+              response.data['procedure_other'] = '';
+              response.data['is_workflow'] = is_workflow;
+              response.data['is_diagnostics'] = is_diagnostics;
+              response.data['is_procedures'] = is_procedures;
+              setData(response.data);
+            }
+          })
+          .catch(error => {
+            setShowSystemError(true);
+          });
+        };
+        fetchMedRecord();
+      }
     };
 
     const fetchDiagnostics = async () => {
@@ -209,7 +229,7 @@ const OrdersForm = (props) => {
             <span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + props.id + '/')} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}
             {is_diagnostics ? "Diagnostic " : is_procedures ? "Procedure " : "Diagnostic and Procedure "}Orders Form
           </Card.Header>
-          <Patient animal={data.animal_object} organization={props.organization} incident={props.incident} />
+          <Patient animal={data.animal_object} vet_request={vetrequest_id && data.vet_requests.length > 0 ? data.vet_requests.filter(vr => vr.id === Number(vetrequest_id))[0] : null} organization={props.organization} incident={props.incident} />
           <Card.Body>
             <Form>
               <FormGroup>

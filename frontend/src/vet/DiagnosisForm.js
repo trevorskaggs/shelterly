@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
-import { navigate, Link } from "raviger";
+import { navigate, useQueryParams } from "raviger";
 import { Form, Formik, } from 'formik';
 import Select from 'react-select';
 import {
@@ -45,6 +45,12 @@ const customStyles = {
 
 const DiagnosisForm = (props) => {
 
+  // Identify any query param data.
+  const [queryParams] = useQueryParams();
+  const {
+    vetrequest_id = null,
+  } = queryParams;
+
   const { setShowSystemError } = useContext(SystemErrorContext);
 
   // Determine if we're in the vet exam workflow.
@@ -54,7 +60,8 @@ const DiagnosisForm = (props) => {
     diagnosis: [],
     diagnosis_notes: '',
     diagnosis_other: '',
-    animal_object: {id:''}
+    animal_object: {id:''},
+    vet_requests: [],
   })
 
   const [diagnosisChoices, setDiagnosisChoices] = useState([]);
@@ -62,23 +69,28 @@ const DiagnosisForm = (props) => {
   useEffect(() => {
     let unmounted = false;
     let source = axios.CancelToken.source();
-    if (props.id) {
-      const fetchMedRecord = async () => {
-        // Fetch MedRecord data.
-        await axios.get('/vet/api/medrecord/' + props.id + '/', {
-          cancelToken: source.token,
-        })
-        .then(response => {
-          if (!unmounted) {
-            response.data['diagnosis'] = [];
-            setData(response.data);
-          }
-        })
-        .catch(error => {
-          setShowSystemError(true);
-        });
-      };
-      fetchMedRecord();
+    if (props.medrecordid) {
+      if (is_workflow) {
+        setData(props.state.medRecord);
+      }
+      else {
+        const fetchMedRecord = async () => {
+          // Fetch MedRecord data.
+          await axios.get('/vet/api/medrecord/' + props.medrecordid + '/', {
+            cancelToken: source.token,
+          })
+          .then(response => {
+            if (!unmounted) {
+              response.data['diagnosis'] = [];
+              setData(response.data);
+            }
+          })
+          .catch(error => {
+            setShowSystemError(true);
+          });
+        };
+        fetchMedRecord();
+      }
     };
 
     const fetchDiagnoses = async () => {
@@ -107,7 +119,7 @@ const DiagnosisForm = (props) => {
       unmounted = true;
       source.cancel();
     };
-  }, [props.id]);
+  }, [props.medrecordid]);
 
   return (
     <Formik
@@ -139,9 +151,9 @@ const DiagnosisForm = (props) => {
           values['procedure_other'] = props.state.steps.orders.procedure_other
         }
 
-        axios.patch('/vet/api/medrecord/' + props.id + '/', values)
+        axios.patch('/vet/api/medrecord/' + props.medrecordid + '/', values)
         .then(response => {
-          navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + props.id);
+          navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + props.medrecordid);
         })
         .catch(error => {
           setShowSystemError(true);
@@ -158,7 +170,7 @@ const DiagnosisForm = (props) => {
             <span style={{ cursor: 'pointer' }} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}
             Diagnosis Form
           </Card.Header>
-          <Patient animal={data.animal_object} organization={props.organization} incident={props.incident} />
+          <Patient animal={data.animal_object} vet_request={vetrequest_id && data.vet_requests.length > 0 ? data.vet_requests.filter(vr => vr.id === Number(vetrequest_id))[0] : null} organization={props.organization} incident={props.incident} />
           <Card.Body>
             <Form>
               <FormGroup>
@@ -204,6 +216,7 @@ const DiagnosisForm = (props) => {
                     id="diagnosis_notes"
                     xs="6"
                     rows={3}
+                    value={formikProps.values.diagnosis_notes || ''}
                   />
                 </Row>
               </FormGroup>
