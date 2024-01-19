@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
-import { navigate, Link } from "raviger";
+import { navigate, useQueryParams } from "raviger";
 import { Form, Formik, } from 'formik';
 import Select from 'react-select';
 import {
@@ -19,6 +19,7 @@ import {
 import * as Yup from 'yup';
 import { DropDown, TextInput } from '../components/Form';
 import { SystemErrorContext } from '../components/SystemError';
+import Patient from './components/Patient';
 
 const customStyles = {
   // For the select it self, not the options of the select
@@ -44,21 +45,23 @@ const customStyles = {
 
 const DiagnosisForm = (props) => {
 
+  // Identify any query param data.
+  const [queryParams] = useQueryParams();
+  const {
+    vetrequest_id = null,
+  } = queryParams;
+
   const { setShowSystemError } = useContext(SystemErrorContext);
 
   // Determine if we're in the vet exam workflow.
   var is_workflow = window.location.pathname.includes("workflow");
 
   const [data, setData] = useState({
-    patient: props.animalid,
-    assignee: null,
-    concern: '',
     diagnosis: [],
     diagnosis_notes: '',
     diagnosis_other: '',
-    priority: 'urgent',
-    presenting_complaints: [],
-    animal_object: {id:''}
+    animal_object: {id:''},
+    vet_requests: [],
   })
 
   const [diagnosisChoices, setDiagnosisChoices] = useState([]);
@@ -66,22 +69,28 @@ const DiagnosisForm = (props) => {
   useEffect(() => {
     let unmounted = false;
     let source = axios.CancelToken.source();
-    if (props.id) {
-      const fetchVetRequest = async () => {
-        // Fetch VetRequest data.
-        await axios.get('/vet/api/vetrequest/' + props.id + '/', {
-          cancelToken: source.token,
-        })
-        .then(response => {
-          if (!unmounted) {
-            setData(response.data);
-          }
-        })
-        .catch(error => {
-          setShowSystemError(true);
-        });
-      };
-      fetchVetRequest();
+    if (props.medrecordid) {
+      if (is_workflow) {
+        setData(props.state.medRecord);
+      }
+      else {
+        const fetchMedRecord = async () => {
+          // Fetch MedRecord data.
+          await axios.get('/vet/api/medrecord/' + props.medrecordid + '/', {
+            cancelToken: source.token,
+          })
+          .then(response => {
+            if (!unmounted) {
+              response.data['diagnosis'] = [];
+              setData(response.data);
+            }
+          })
+          .catch(error => {
+            setShowSystemError(true);
+          });
+        };
+        fetchMedRecord();
+      }
     };
 
     const fetchDiagnoses = async () => {
@@ -110,21 +119,41 @@ const DiagnosisForm = (props) => {
       unmounted = true;
       source.cancel();
     };
-  }, [props.id]);
+  }, [props.medrecordid]);
 
   return (
     <Formik
       initialValues={data}
       enableReinitialize={true}
       validationSchema={Yup.object({
-        diagnosis: Yup.array().min(1, 'At least 1 diagnosis must be selected.').required(),
+        diagnosis: Yup.array().when('is_workflow', {
+          is: false,
+          then: Yup.array().min(1, 'Required').required('Required')}),
         diagnosis_other: Yup.string().nullable().max(50, 'Maximum character limit of 50.'),
         diagnosis_notes: Yup.string().nullable().max(300, 'Maximum character limit of 300.'),
       })}
       onSubmit={(values, { setSubmitting }) => {
-        axios.patch('/vet/api/vetrequest/' + props.id + '/', values)
+        // Add treatment and order data if we're in a workflow.
+        if (is_workflow) {
+          props.state.steps.treatments.forEach(treatment_values => {
+            // Only post data if we have a treatment value.
+            if (treatment_values.treatment) {
+              axios.post('/vet/api/treatmentplan/', treatment_values)
+              .catch(error => {
+                setShowSystemError(true);
+              });
+            }
+          })
+
+          values['diagnostics'] = props.state.steps.orders.diagnostics
+          values['diagnostics_other'] = props.state.steps.orders.diagnostics_other
+          values['procedures'] = props.state.steps.orders.procedures
+          values['procedure_other'] = props.state.steps.orders.procedure_other
+        }
+
+        axios.patch('/vet/api/medrecord/' + props.medrecordid + '/', values)
         .then(response => {
-          navigate('/' + props.organization + '/' + props.incident + '/vet/vetrequest/' + props.id);
+          navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + props.medrecordid);
         })
         .catch(error => {
           setShowSystemError(true);
@@ -139,30 +168,9 @@ const DiagnosisForm = (props) => {
             <span style={{cursor:'pointer'}} onClick={() => {props.handleBack('diagnostics', 'exam')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
             :
             <span style={{ cursor: 'pointer' }} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}
-            Diagnostics Form
-            </Card.Header>
-          <div className="col-12 mt-3">
-            <Card className="border rounded" style={{width:"100%"}}>
-              <Card.Body>
-                <Card.Title>
-                  <h4 className="mb-0">Patient</h4>
-                </Card.Title>
-                <hr/>
-                <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
-                  <ListGroup.Item>
-                    <div className="row" style={{textTransform:"capitalize"}}>
-                      <span className="col-3"><b>ID:</b> <Link href={"/" + props.organization + "/" + props.incident + "/animals/" + data.animal_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>A#{data.animal_object.id}</Link></span>
-                      <span className="col-3"><b>Name:</b> {data.animal_object.name||"Unknown"}</span>
-                      <span className="col-3"><b>Species:</b> {data.animal_object.species_string}</span>
-                    </div>
-                  </ListGroup.Item>
-                  <ListGroup.Item>
-                      <span><b>Medical Notes:</b> {data.animal_object.medical_notes || "N/A"}</span>
-                  </ListGroup.Item>
-                </ListGroup>
-              </Card.Body>
-            </Card>
-          </div>
+            Diagnosis Form
+          </Card.Header>
+          <Patient animal={data.animal_object} vet_request={vetrequest_id && data.vet_requests.length > 0 ? data.vet_requests.filter(vr => vr.id === Number(vetrequest_id))[0] : null} organization={props.organization} incident={props.incident} />
           <Card.Body>
             <Form>
               <FormGroup>
@@ -170,7 +178,6 @@ const DiagnosisForm = (props) => {
                   <Col xs={"6"}>
                     <label>Diagnosis</label>
                     <Select
-                      label="Diagnosis"
                       id="diagnosisDropdown"
                       name="diagnosis"
                       type="text"
@@ -209,6 +216,7 @@ const DiagnosisForm = (props) => {
                     id="diagnosis_notes"
                     xs="6"
                     rows={3}
+                    value={formikProps.values.diagnosis_notes || ''}
                   />
                 </Row>
               </FormGroup>

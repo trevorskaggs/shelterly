@@ -184,23 +184,23 @@ input[disabled] {
 }
 
 .treatment-link:hover {
-  color: #d3bfb4 !important;
+  color: #a52b44 !important;
 }
 
 .treatment-hover-div:hover .treatment-icon {
-  color: #d3bfb4 !important;
+  color: #a52b44 !important;
 }
 
 .treatment-hover-div:hover {
-  border-color: #d3bfb4 !important;
+  border-color: #a52b44 !important;
 }
 
 .treatment-hover-div:hover .border {
-  border-color: #d3bfb4 !important;
+  border-color: #a52b44 !important;
 }
 
 .treatment-hover-div:hover .border-right {
-  border-color: #d3bfb4 !important;
+  border-color: #a52b44 !important;
 }
 
 .hover-div:hover .shelter-icon {
@@ -245,6 +245,34 @@ input[disabled] {
 
 .animal-hover-div:hover .text-border {
   color: #b18662 !important;
+}
+
+.exam-link:hover {
+  color: #a52b44 !important;
+}
+
+.exam-hover-div:hover .exam-icon {
+  color: #a52b44 !important;
+}
+
+.small-exam-hover-div:hover .exam-icon {
+  color: #a52b44 !important;
+}
+
+.exam-hover-div:hover {
+  border-color: #a52b44 !important;
+}
+
+.exam-hover-div:hover .text-border {
+  color: #a52b44 !important;
+}
+
+.exam-hover-div:hover .border-top {
+  border-color: #a52b44 !important;
+}
+
+.exam-hover-div:hover .border-right {
+  border-color: #a52b44 !important;
 }
 
 .text-link:hover {

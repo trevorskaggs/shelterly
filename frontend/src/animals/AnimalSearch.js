@@ -70,7 +70,7 @@ function AnimalSearch({ incident, organization }) {
   const [shelters, setShelters] = useState({options: [], isFetching: false});
   const [speciesChoices, setSpeciesChoices] = useState([]);
   const [animals, setAnimals] = useState([]);
-  const [options, setOptions] = useState({species: null, status: null, sex: null, owned: null, pcolor: '', fixed: null, latlng: null, radius: 1.60934, shelter: ''});
+  const [options, setOptions] = useState({species: '', status: null, sex: null, owned: null, pcolor: '', fixed: null, latlng: null, radius: 1.60934, shelter: ''});
   const [searchTerm, setSearchTerm] = useState(search);
   const [showFilters, setShowFilters] = useState(false);
   const [isDisabled, setIsDisabled] = useState(true);
@@ -132,15 +132,15 @@ function AnimalSearch({ incident, organization }) {
   };
 
   const handleApplyFilters = (animals) => {
-    setAnimals(animals.filter(animal => options.species ? animal.species_string === options.species : animal)
-                           .filter(animal => options.status ? animal.status === options.status : animal)
-                           .filter(animal => options.owned === 'yes' ? animal.owners.length > 0 : animal)
-                           .filter(animal => options.owned === 'no' ? animal.owners.length === 0 : animal)
-                           .filter(animal => options.fixed ? animal.fixed === options.fixed : animal)
-                           .filter(animal => options.sex === 'unknown' ? animal.sex === '' : options.sex ? animal.sex === options.sex : animal)
-                           .filter(animal => options.pcolor ? animal.pcolor === options.pcolor || animal.scolor === options.pcolor : animal)
-                           .filter(animal => options.latlng ? arePointsNear({lat:animal.latitude, lng: animal.longitude}, options.latlng) : animal)
-                           .filter(animal => options.shelter ? animal.shelter === options.shelter : animal)
+    setAnimals(animals.filter(animal => options.species ? animal.species_string.toLowerCase() === options.species.toLowerCase() : animal)
+                      .filter(animal => options.status ? animal.status === options.status : animal)
+                      .filter(animal => options.owned === 'yes' ? animal.owners.length > 0 : animal)
+                      .filter(animal => options.owned === 'no' ? animal.owners.length === 0 : animal)
+                      .filter(animal => options.fixed ? animal.fixed === options.fixed : animal)
+                      .filter(animal => options.sex === 'unknown' ? animal.sex === '' : options.sex ? animal.sex === options.sex : animal)
+                      .filter(animal => options.pcolor ? animal.pcolor === options.pcolor || animal.scolor === options.pcolor : animal)
+                      .filter(animal => options.latlng ? arePointsNear({lat:animal.latitude, lng: animal.longitude}, options.latlng) : animal)
+                      .filter(animal => options.shelter ? animal.shelter === options.shelter : animal)
     )
   }
 
@@ -152,7 +152,7 @@ function AnimalSearch({ incident, organization }) {
     fixedRef.current.select.clearValue();
     pcolorRef.current.select.clearValue();
     shelterRef.current.select.clearValue();
-    setOptions({species: null, status: null, sex: null, owned: null, pcolor: '', fixed: null, latlng: null, radius: 1.60934});
+    setOptions({species: '', status: null, sex: null, owned: null, pcolor: '', fixed: null, latlng: null, radius: 1.60934});
     setAnimals(data.animals);
   };
 
@@ -238,7 +238,7 @@ function AnimalSearch({ incident, organization }) {
           let species_options = [];
           response.data.forEach(result => {
             // Build species option list.
-            species_options.push({value: result.id, label: result.name});
+            species_options.push({value: result.name, label: result.name});
           });
           setSpeciesChoices(species_options);
         }
@@ -373,7 +373,7 @@ function AnimalSearch({ incident, organization }) {
           <Card className="border rounded d-flex" style={{width:"100%"}}>
             <Card.Body style={{marginBottom:"-16px"}}>
               <Row>
-                <Col xs={"4"}>
+                <Col xs={"4"} style={{textTransform:"capitalize"}}>
                   <Select
                     label="Species"
                     id="speciesDropdown"

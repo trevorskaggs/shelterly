@@ -9,7 +9,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBan, faMedkit, faCut, faEdit, faEnvelope, faLink, faMinusSquare, faTimes, faUserPlus
 } from '@fortawesome/free-solid-svg-icons';
-import { faBadgeSheriff, faClipboardMedical, faClawMarks, faHomeHeart, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
+import { faBadgeSheriff, faUserDoctorMessage, faClawMarks, faHomeHeart, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import { AnimalDeleteModal } from "../components/Modals";
 import Header from '../components/Header';
@@ -167,17 +167,6 @@ function AnimalDetails({ id, incident, organization }) {
         tooltipText='Print Animal Care Schedule'
         printFunc={handleDownloadPdfClick}
       />
-      <OverlayTrigger
-        key={"vetrequest"}
-        placement="bottom"
-        overlay={
-          <Tooltip id={`tooltip-vetrequest`}>
-            Create veterinary request
-          </Tooltip>
-        }
-      >
-        <Link href={"/" + organization + "/" + incident + "/animals/" + id + "/vetrequest/new"} ><FontAwesomeIcon icon={faClipboardMedical} className="mr-1" inverse /></Link>
-      </OverlayTrigger>
       {data.status !== 'REUNITED' ?
       <OverlayTrigger
         key={"reunite"}
@@ -188,9 +177,20 @@ function AnimalDetails({ id, incident, organization }) {
           </Tooltip>
         }
       >
-        <FontAwesomeIcon icon={faHomeHeart} onClick={() => setShow(true)} className="mr-1 ml-1" style={{cursor:'pointer'}} inverse />
+        <FontAwesomeIcon icon={faHomeHeart} onClick={() => setShow(true)} className="mr-1" style={{cursor:'pointer'}} inverse />
       </OverlayTrigger>
       : ""}
+      <OverlayTrigger
+        key={"vetrequest"}
+        placement="bottom"
+        overlay={
+          <Tooltip id={`tooltip-vetrequest`}>
+            Create veterinary request
+          </Tooltip>
+        }
+      >
+        <Link href={"/" + organization + "/" + incident + "/animals/" + id + "/vetrequest/new"} ><FontAwesomeIcon icon={faUserDoctorMessage} className="mr-1 ml-1" inverse /></Link>
+      </OverlayTrigger>
       <OverlayTrigger
         key={"cancel-animal"}
         placement="bottom"
@@ -437,11 +437,11 @@ function AnimalDetails({ id, incident, organization }) {
                 {data.intake_date ? <div className="mt-1"><b>Intake Date:</b> <Moment format="MMMM Do YYYY HH:mm">{data.intake_date}</Moment></div> : ""}
                 <div className="mt-1"><b>Address:</b> {data.shelter_object.full_address || "Unknown"}</div>
               </ListGroup.Item> : ""}
-              {data.vet_requests.map(vetrequest => (
-                <ListGroup.Item key={vetrequest}>
-                  <b>Veterinary Request:</b> <Link href={"/" + organization + "/" + incident + "/vet/vetrequest/" + vetrequest} className="text-link" style={{textDecoration:"none", color:"white"}}>VR#{vetrequest}</Link>
+              {data.medical_record ?
+                <ListGroup.Item>
+                  <b>Medical Record:</b> <Link href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.medical_record} className="text-link" style={{textDecoration:"none", color:"white"}}>MR#{data.medical_record}</Link>
                 </ListGroup.Item>
-              ))}
+              : ""}
             </ListGroup>
           </Card.Body>
         </Card>

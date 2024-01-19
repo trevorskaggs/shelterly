@@ -66,7 +66,7 @@ const ResetPassword = () => {
               type="password"
               label="New Password"
               size="lg"
-              formGroupClasses="mt-3 mb-0"
+              formgroupclasses="mt-3 mb-0"
             />
             <TextInput
               type="password"
@@ -74,7 +74,7 @@ const ResetPassword = () => {
               id="password2"
               label="Confirm Password"
               size="lg"
-              formGroupClasses="mt-3 mb-4"
+              formgroupclasses="mt-3 mb-4"
             />
             <BootstrapForm.Group as={Col}>
               <Button type="submit" size="lg" className="btn-primary" disabled={isSubmitting} block>Save New Password</Button>

@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import axios from 'axios';
-import { useFormikContext, useField } from 'formik';
+import { useFormikContext, useField, Field } from 'formik';
+import { Switch } from 'formik-material-ui';
 import { Button, Col, Image, Form, OverlayTrigger, Tooltip, Row } from 'react-bootstrap';
 import Select, { createFilter } from 'react-select';
 import SimpleValue from 'react-select-simple-value';
@@ -147,13 +148,26 @@ const DateTimePicker = ({ label, xs, clearable, ...props }) => {
   );
 };
 
+const ToggleSwitch = (props) => {
+
+  const [field, meta] = useField(props);
+  const registeredRef = useRegisteredRef(props.name);
+
+  return (
+    <>
+      <Form.Label htmlFor={props.name} style={{marginBottom:"-5px"}}>{props.label}</Form.Label>
+      <div style={{marginLeft:"20px"}} ref={meta.error && registeredRef}><Field component={Switch} id={props.id} name={props.name} type="checkbox" color="primary" disabled={props.disabled} /></div>
+      {meta.error ? <div style={{ color: "#e74c3c", marginTop: ".5rem", fontSize: "80%" }}>{meta.error}</div> : ""}
+    </>
+)}
+
 const TextInput = React.forwardRef((props, ref) => {
   const [field, meta] = useField(props);
   const registeredRef = useRegisteredRef(props.name);
 
   return (
     <>
-    <Form.Group as={Col} xs={props.xs} controlId={props.controlId} className={props.formGroupClasses} hidden={props.hidden} style={props.colstyle} ref={meta.error && registeredRef}>
+    <Form.Group as={Col} xs={props.xs} controlId={props.controlId} className={props.formgroupclasses} hidden={props.hidden} ref={meta.error && registeredRef}>
       {props.label ? <Form.Label>{props.label}</Form.Label> : ""}
       {props.tooltip ?
       <OverlayTrigger
@@ -655,4 +669,4 @@ const AddressSearch = (props) => {
   );
 }
 
-export { AddressLookup, AddressSearch, TextInput, Checkbox, DropDown, ImageUploader, DateTimePicker, DateRangePicker };
+export { AddressLookup, AddressSearch, Checkbox, DropDown, ImageUploader, DateTimePicker, DateRangePicker, TextInput, ToggleSwitch };
