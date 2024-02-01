@@ -27,12 +27,12 @@ const TreatmetRequestForm = (props) => {
   const { dispatch, state } = useContext(AuthContext);
 
   const [data, setData] = useState({
-    treatment_plan: null,
+    medical_record: null,
     suggested_admin_time: '',
     actual_admin_time: new Date(),
     assignee: null,
     not_administered: false,
-    treatment_plan_object:{animal_object:{id:'', name:''}},
+    animal_object:{id:'', name:''},
   })
 
   const [assigneeChoices, setAssigneeChoices] = useState([]);
@@ -48,7 +48,7 @@ const TreatmetRequestForm = (props) => {
       })
       .then(response => {
         if (!unmounted) {
-          response.data['actual_admin_time'] = response.data['actual_admin_time'] || new Date()
+          response.data['actual_admin_time'] = response.data.not_administered ? null : response.data['actual_admin_time'] || new Date()
           setData(response.data);
         }
       })
@@ -98,7 +98,7 @@ const TreatmetRequestForm = (props) => {
         if (props.id) {
           axios.put('/vet/api/treatmentrequest/' + props.id + '/', values)
           .then(response => {
-            navigate('/' + props.organization + '/' + props.incident + '/vet/treatment/' + response.data.treatment_plan)
+            navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + response.data.medical_record)
           })
           .catch(error => {
             setShowSystemError(true);
@@ -109,8 +109,8 @@ const TreatmetRequestForm = (props) => {
     >
       {formikProps => (
         <Card border="secondary" className="mt-5">
-          <Card.Header as="h5" className="pl-3"><span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + props.organization + "/" + props.incident + "/vet/treatment/" + data.treatment_plan)} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>Treatment Request Form</Card.Header>
-          <Patient animal={data.treatment_plan_object.animal_object} organization={props.organization} incident={props.incident} />
+          <Card.Header as="h5" className="pl-3"><span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + props.organization + "/" + props.incident + "/vet/medrecord/" + data.medical_record)} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>Treatment Request Form</Card.Header>
+          <Patient animal={data.animal_object} organization={props.organization} incident={props.incident} />
           <Card.Body>
             <Form>
               <FormGroup>

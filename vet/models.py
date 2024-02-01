@@ -161,30 +161,34 @@ class Treatment(models.Model):
         ordering = ('category', 'description',)
 
 
-class TreatmentPlan(models.Model):
+# class TreatmentPlan(models.Model):
 
-    medical_record = models.ForeignKey(MedicalRecord, on_delete=models.SET_NULL, null=True)
-    treatment = models.ForeignKey(Treatment, on_delete=models.SET_NULL, null=True)
-    frequency = models.IntegerField(blank=True)
-    days = models.IntegerField(blank=True, null=True)
-    quantity = models.FloatField(blank=True)
-    unit = models.CharField(max_length=5, blank=True, null=True)
-    route = models.CharField(max_length=5, blank=True, null=True)
-    status = models.CharField(max_length=20, default='Open')
-    start = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
-    end = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
+#     medical_record = models.ForeignKey(MedicalRecord, on_delete=models.SET_NULL, null=True)
+#     treatment = models.ForeignKey(Treatment, on_delete=models.SET_NULL, null=True)
+#     frequency = models.IntegerField(blank=True)
+#     days = models.IntegerField(blank=True, null=True)
+#     quantity = models.FloatField(blank=True)
+#     unit = models.CharField(max_length=5, blank=True, null=True)
+#     route = models.CharField(max_length=5, blank=True, null=True)
+#     status = models.CharField(max_length=20, default='Open')
+#     start = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
+#     end = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
 
-    class Meta:
-        ordering = ('-id',)
+#     class Meta:
+#         ordering = ('-id',)
 
 
 class TreatmentRequest(models.Model):
 
+    medical_record = models.ForeignKey(MedicalRecord, on_delete=models.SET_NULL, null=True)
+    treatment = models.ForeignKey(Treatment, on_delete=models.SET_NULL, null=True)
+    quantity = models.FloatField(blank=True)
+    unit = models.CharField(max_length=5, blank=True, null=True)
+    route = models.CharField(max_length=5, blank=True, null=True)
     assignee = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True)
     suggested_admin_time = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
     actual_admin_time = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
-    treatment_plan = models.ForeignKey(TreatmentPlan, on_delete=models.SET_NULL, null=True)
     not_administered = models.BooleanField(default=False)
 
     class Meta:
-        ordering = ('id',)
+        ordering = ('-id',)

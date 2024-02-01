@@ -29,6 +29,7 @@ import {
   faPrescriptionBottlePill,
   faSquareExclamation,
   faSquareEllipsis,
+  faSquareX,
   faScalpelLineDashed,
   faFlashlight,
   faPeriod,
@@ -50,7 +51,7 @@ function MedicalRecordDetails({ id, incident, organization }) {
 
   const priorityText = {urgent:'Urgent', when_available:'When Available'};
 
-  const [data, setData] = useState({id:'', exams:[], diagnostic_objects:[], procedure_objects:[], patient:null, vet_requests:[], open: '', diagnosis: '', other_diagnosis:'', treatment_plans:[], animal_object: {id:'', name:'', species:'', category:'', sex:'', age:'', fixed:'', pcolor:'', scolor:'', medical_notes:'', shelter_object:{}, room_name:''}});
+  const [data, setData] = useState({id:'', exams:[], diagnostic_objects:[], procedure_objects:[], patient:null, vet_requests:[], open: '', diagnosis: '', other_diagnosis:'', treatment_requests:[], animal_object: {id:'', name:'', species:'', category:'', sex:'', age:'', fixed:'', pcolor:'', scolor:'', medical_notes:'', shelter_object:{}, room_name:''}});
   const [showExam, setShowExam] = useState(false);
   const [activeVR, setActiveVR] = useState(null);
   const [activeOpenVR, setActiveOpenVR] = useState(null);
@@ -325,7 +326,7 @@ function MedicalRecordDetails({ id, incident, organization }) {
                 <ListGroup horizontal>
                   <ListGroup.Item active={"treatments" === activeOrders} className="text-center" style={{textTransform:"capitalize", cursor:'pointer', paddingLeft:"5px", paddingRight:"5px"}} onClick={() => setActiveOrders("treatments")}>
                     <div style={{marginTop:"-3px", marginLeft:"-1px", width:"183px"}}>
-                      Treatments ({data.treatment_plans.length})
+                      Treatments ({data.treatment_requests.length})
                       {activeOrders === 'treatments' ? <OverlayTrigger
                         key={"add-treatment"}
                         placement="top"
@@ -375,18 +376,18 @@ function MedicalRecordDetails({ id, incident, organization }) {
               </h4>
             </Card.Title>
             <hr className="mb-3" />
-            {activeOrders === 'treatments' && data.treatment_plans.map(treatment_plan => (
-              <Row key={treatment_plan.id} className="ml-0 mb-3">
-                <Link href={"/" + organization + "/" + incident + "/vet/treatment/" + treatment_plan.id} className="treatment-link" style={{textDecoration:"none", color:"white"}}>
+            {activeOrders === 'treatments' && data.treatment_requests.map(treatment_request => (
+              <Row key={treatment_request.id} className="ml-0 mb-3">
+                <Link href={"/" + organization + "/" + incident + "/vet/treatmentrequest/edit/" + treatment_request.id} className="treatment-link" style={{textDecoration:"none", color:"white"}}>
                   <Card className="border rounded treatment-hover-div" style={{height:"100px", width:"745px", whiteSpace:"nowrap", overflow:"hidden"}}>
                     <div className="row no-gutters hover-div treatment-hover-div" style={{height:"100px", marginRight:"-2px"}}>
                       <Row className="ml-0 mr-0 w-100" style={{flexWrap:"nowrap"}}>
                         <div className="border-right" style={{width:"100px"}}>
-                        {['Eye Medication','Ear Medication'].includes(treatment_plan.treatment_object.category) ?
+                        {['Eye Medication','Ear Medication'].includes(treatment_request.treatment_object.category) ?
                           <FontAwesomeIcon icon={faEyeDropper} size="6x" className="treatment-icon" style={{marginTop:"5px", marginLeft:"4px"}} transform={'shrink-2'} inverse />
-                          : treatment_plan.treatment_object.category === 'Patient Care' ?
+                          : treatment_request.treatment_object.category === 'Patient Care' ?
                           <FontAwesomeIcon icon={faHeart} size="6x" className="treatment-icon" style={{marginTop:"5px", marginLeft:"4px"}} transform={'shrink-2'} inverse />
-                          : treatment_plan.treatment_object.unit === 'ml' ?
+                          : treatment_request.treatment_object.unit === 'ml' ?
                           <FontAwesomeIcon icon={faSyringe} size="6x" className="treatment-icon" style={{marginTop:"5px", marginLeft:"4px"}} transform={'shrink-2'} inverse />
                         :
                           <FontAwesomeIcon icon={faPrescriptionBottlePill} size="6x" className="treatment-icon" style={{marginTop:"5px", marginLeft:"-1px"}} transform={'shrink-2'} inverse />
@@ -394,9 +395,9 @@ function MedicalRecordDetails({ id, incident, organization }) {
                         </div>
                         <Col style={{marginLeft:"-5px", marginRight:"-25px"}} className="hover-div">
                           <div className="border treatment-hover-div" style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"10px", marginLeft:"-11px", marginTop: "-1px", fontSize:"18px", width:"100%", backgroundColor:"rgb(158 153 153)"}}>
-                            {treatment_plan.treatment_object.description}
+                            {treatment_request.treatment_object.description}
                             <span className="float-right">
-                            {treatment_plan.status === 'Complete' ?
+                            {treatment_request.actual_admin_time ?
                               <OverlayTrigger
                                 key={"complete-treatment-request"}
                                 placement="top"
@@ -408,13 +409,25 @@ function MedicalRecordDetails({ id, incident, organization }) {
                               >
                                 <FontAwesomeIcon icon={faCheckSquare} size="3x" className="ml-1 treatment-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
                               </OverlayTrigger>
-                              : treatment_plan.status === 'Awaiting' ?
+                              : treatment_request.not_administered ?
+                              <OverlayTrigger
+                                key={"not-administered-treatment-request"}
+                                placement="top"
+                                overlay={
+                                  <Tooltip id={`tooltip-not-administered-treatment-request`}>
+                                    Treatment request was not administered.
+                                  </Tooltip>
+                                }
+                              >
+                                <FontAwesomeIcon icon={faSquareX} size="3x" className="ml-1 treatment-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
+                              </OverlayTrigger>
+                              : new Date(treatment_request.suggested_admin_time) <= new Date() ?
                               <OverlayTrigger
                                 key={"awaiting-action-treatment-request"}
                                 placement="top"
                                 overlay={
                                   <Tooltip id={`tooltip-awaiting-action-treatment-request`}>
-                                    At least one treatment request is awaiting action.
+                                    Treatment request is awaiting action.
                                   </Tooltip>
                                 }
                               >
@@ -435,35 +448,37 @@ function MedicalRecordDetails({ id, incident, organization }) {
                               }
                             </span>
                           </div>
-                          <div style={{marginTop:"6px"}}>
-                            <Row>
-                              <Col xs={4}>
-                                Start: <Moment format="lll">{treatment_plan.start}</Moment>
-                              </Col>
-                              <Col xs={4}>
-                                End: {treatment_plan.end ? <Moment format="lll">{treatment_plan.end}</Moment> : ""}
-                              </Col>
-                              <Col>
-                                Quantity: {treatment_plan.quantity}
-                              </Col>
-                            </Row>
-                          </div>
-                          <div>
-                            <Row>
-                              <Col xs={4}>
-                                Frequency: every {treatment_plan.frequency} hour{treatment_plan.frequency === 1 ? '' : 's'}
-                              </Col>
-                              <Col xs={4}>
-                                Duration: for {treatment_plan.days} day{treatment_plan.days === 1 ? '' : 's'}
-                              </Col>
-                              {/* <Col>
-                                Unit: {treatment_plan.unit || '-'}
-                              </Col> */}
-                              <Col>
-                                Route: {treatment_plan.route || '-'}
-                              </Col>
-                            </Row>
-                          </div>
+                          <Row style={{marginTop:"6px"}}>
+                            {treatment_request.actual_admin_time ?
+                            <Col xs={6}>
+                              Administered: <Moment format="lll">{treatment_request.actual_admin_time}</Moment>
+                            </Col>
+                            :
+                            <Col xs={6}>
+                              Scheduled: <Moment format="lll">{treatment_request.suggested_admin_time}</Moment>
+                            </Col>
+                            }
+                            {treatment_request.assignee_object ?
+                            <Col xs={4}>
+                              Administrator: {treatment_request.assignee_object.first_name} {treatment_request.assignee_object.last_name}
+                            </Col>
+                            :
+                            treatment_request.not_administered ?
+                            <Col xs={6}>
+                              Administrator: Not Administered
+                            </Col> : ""}
+                          </Row>
+                          <Row>
+                            <Col xs={3}>
+                              Quantity: {treatment_request.quantity}
+                            </Col>
+                            <Col xs={3}>
+                              Unit: {treatment_request.unit || '-'}
+                            </Col>
+                            <Col>
+                              Route: {treatment_request.route || '-'}
+                            </Col>
+                          </Row>
                         </Col>
                       </Row>
                     </div>
@@ -471,7 +486,7 @@ function MedicalRecordDetails({ id, incident, organization }) {
                 </Link>
               </Row>
             ))}
-            {activeOrders === 'treatments' && data.treatment_plans.length < 1 ? <p>No treatments have been created for this patient.</p> : ""}
+            {activeOrders === 'treatments' && data.treatment_requests.length < 1 ? <p>No treatments have been created for this patient.</p> : ""}
             {activeOrders === 'diagnostics' && data.diagnostic_objects.map(diagnostic => (
               <Row key={diagnostic.id} className="ml-0 mb-3">
                 <Link href={"/" + organization + "/" + incident + "/vet/diagnosticresult/edit/" + diagnostic.id} className="treatment-link" style={{textDecoration:"none", color:"white"}}>
@@ -533,29 +548,25 @@ function MedicalRecordDetails({ id, incident, organization }) {
                               }
                             </span>
                           </div>
-                          <div style={{marginTop:"6px"}}>
-                            <Row>
-                              <Col xs={3}>
-                                Result: {diagnostic.result || 'Pending'}
-                              </Col>
-                              {diagnostic.complete ?
-                              <Col xs={4}>
-                                Completed: <Moment format="lll">{diagnostic.complete}</Moment>
-                              </Col>
-                              :
-                              <Col xs={4}>
-                                Ordered: <Moment format="lll">{diagnostic.open}</Moment>
-                              </Col>
-                              }
-                            </Row>
-                          </div>
-                          <div>
-                            <Row>
-                              <Col>
-                                Notes: {diagnostic.notes || "N/A"}
-                              </Col>
-                            </Row>
-                          </div>
+                          <Row style={{marginTop:"6px"}}>
+                            <Col xs={3}>
+                              Result: {diagnostic.result || 'Pending'}
+                            </Col>
+                            {diagnostic.complete ?
+                            <Col xs={4}>
+                              Completed: <Moment format="lll">{diagnostic.complete}</Moment>
+                            </Col>
+                            :
+                            <Col xs={4}>
+                              Ordered: <Moment format="lll">{diagnostic.open}</Moment>
+                            </Col>
+                            }
+                          </Row>
+                          <Row>
+                            <Col>
+                              Notes: {diagnostic.notes || "N/A"}
+                            </Col>
+                          </Row>
                         </Col>
                       </Row>
                     </div>
@@ -614,29 +625,25 @@ function MedicalRecordDetails({ id, incident, organization }) {
                               }
                             </span>
                           </div>
-                          <div style={{marginTop:"6px"}}>
-                            <Row>
-                              <Col xs={3}>
-                                Status: {procedure.complete ? 'Complete' : 'Pending'}
-                              </Col>
-                              {procedure.complete ?
-                              <Col xs={4}>
-                                Completed: <Moment format="lll">{procedure.complete}</Moment>
-                              </Col>
-                              :
-                              <Col xs={4}>
-                                Ordered: <Moment format="lll">{procedure.open}</Moment>
-                              </Col>
-                              }
-                            </Row>
-                          </div>
-                          <div>
-                            <Row>
-                              <Col>
-                                Notes: {procedure.notes || "N/A"}
-                              </Col>
-                            </Row>
-                          </div>
+                          <Row style={{marginTop:"6px"}}>
+                            <Col xs={3}>
+                              Status: {procedure.complete ? 'Complete' : 'Pending'}
+                            </Col>
+                            {procedure.complete ?
+                            <Col xs={4}>
+                              Completed: <Moment format="lll">{procedure.complete}</Moment>
+                            </Col>
+                            :
+                            <Col xs={4}>
+                              Ordered: <Moment format="lll">{procedure.open}</Moment>
+                            </Col>
+                            }
+                          </Row>
+                          <Row>
+                            <Col>
+                              Notes: {procedure.notes || "N/A"}
+                            </Col>
+                          </Row>
                         </Col>
                       </Row>
                     </div>

@@ -105,27 +105,6 @@ const TreatmentPlanForm = (props) => {
     };
     fetchTreatments();
 
-    if (props.id) {
-      const fetchTreatmentPlan = async () => {
-        // Fetch TreatmentPlan data.
-        await axios.get('/vet/api/treatmentplan/' + props.id + '/', {
-          cancelToken: source.token,
-        })
-        .then(response => {
-          if (!unmounted) {
-            response.data['category'] = response.data.treatment_object.category;
-            response.data['treatment'] = response.data.treatment_object.id;
-            response.data['is_workflow'] = is_workflow;
-            setData(response.data);
-          }
-        })
-        .catch(error => {
-          setShowSystemError(true);
-        });
-      };
-      fetchTreatmentPlan();
-    };
-
     if (props.medrecordid) {
       if (is_workflow) {
         setMedRecordData(props.state.medRecord);
@@ -166,14 +145,13 @@ const TreatmentPlanForm = (props) => {
         treatment: Yup.string().when('is_workflow', {
           is: false,
           then: Yup.string().required('Required')}),
-        frequency: Yup.number().nullable().integer().positive('Must be positive').when(['is_workflow', 'treatment'], {
+        frequency: Yup.number().nullable().integer().when(['is_workflow', 'treatment'], {
           is: (is_workflow, treatment) => is_workflow === false || treatment,
-          then: Yup.number().integer().positive('Must be positive').required('Required')}),
-        days: Yup.number().nullable().integer().positive('Must be positive').when(['is_workflow', 'treatment'], {
-          is: (is_workflow, treatment) => is_workflow === false || treatment,
+          then: Yup.number().integer().required('Required')}),
+        days: Yup.number().nullable().integer().positive('Must be positive').when(['is_workflow', 'treatment', 'frequency'], {
+          is: (is_workflow, treatment, frequency) => (is_workflow === false || treatment) && frequency > 0,
           then: Yup.number().integer().positive('Must be positive').required('Required')}),
         start: Yup.string(),
-        end: Yup.string().nullable(),
         quantity: Yup.number().nullable().integer().positive('Must be positive').when(['is_workflow', 'treatment'], {
           is: (is_workflow, treatment) => is_workflow === false || treatment,
           then: Yup.number().integer().positive('Must be positive').required('Required')}),
@@ -181,25 +159,7 @@ const TreatmentPlanForm = (props) => {
         route: Yup.string().nullable(),
       })}
       onSubmit={(values, { resetForm, setSubmitting }) => {
-        values['end'] = moment(values.start).add(24 * (values.days - 1), 'h').toDate();
-        if (props.id) {
-          axios.put('/vet/api/treatmentplan/' + props.id + '/', values)
-          .then(response => {
-            if (addAnother) {
-              // Reset form data.
-              let formdata = initialData;
-              resetForm({values:formdata});
-            }
-            else {
-              navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + props.medrecordid);
-            }
-          })
-          .catch(error => {
-            setShowSystemError(true);
-          });
-          setSubmitting(false);
-        }
-        else if (is_workflow) {
+        if (is_workflow) {
           if (addAnother) {
             props.onSubmit('treatments', values, 'treatments');
           }
@@ -208,12 +168,11 @@ const TreatmentPlanForm = (props) => {
           }
         }
         else {
-          axios.post('/vet/api/treatmentplan/', values)
+          axios.post('/vet/api/treatmentrequest/', values)
           .then(response => {
             if (addAnother) {
               // Reset form data..
-              let formdata = initialData;
-              resetForm({values:formdata});
+              resetForm({values:initialData});
             }
             else {
               navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + response.data.medical_record);
@@ -310,7 +269,7 @@ const TreatmentPlanForm = (props) => {
                     name="end"
                     id="end"
                     xs="4"
-                    value={formikProps.values.end||formikProps.values.frequency && formikProps.values.days ? moment(formikProps.values.start).add(24 * (formikProps.values.days - 1), 'h').toDate() : null}
+                    value={formikProps.values.frequency && formikProps.values.days ? moment(formikProps.values.start).add(24 * (formikProps.values.days), 'h').subtract(formikProps.values.frequency, 'h').toDate() : formikProps.values.end}
                     disabled={true}
                   />
                 </BootstrapForm.Row>
@@ -329,11 +288,15 @@ const TreatmentPlanForm = (props) => {
                       name="frequency"
                       type="text"
                       key={`my_unique_frequency_select_key__${formikProps.values.frequency}`}
-                      options={[{value:1, label:'every 1 hour'}, {value:2, label:'every 2 hours'}, {value:3, label:'every 3 hours'}, {value:4, label:'every 4 hours'}, {value:6, label:'every 6 hours'}, {value:8, label:'every 8 hours'}, {value:12, label:'every 12 hours'}, {value:24, label:'every 24 hours'}, {value:48, label:'every 48 hours'}]}
+                      options={[{value:0, label:'once'}, {value:1, label:'every 1 hour'}, {value:2, label:'every 2 hours'}, {value:3, label:'every 3 hours'}, {value:4, label:'every 4 hours'}, {value:6, label:'every 6 hours'}, {value:8, label:'every 8 hours'}, {value:12, label:'every 12 hours'}, {value:24, label:'every 24 hours'}]}
                       value={formikProps.values.frequency||data.frequency}
                       isClearable={false}
                       onChange={(instance) => {
                         formikProps.setFieldValue("frequency", instance === null ? '' : instance.value);
+                        if (instance.value === 0) {
+                          formikProps.setFieldValue("days", null)
+                          formikProps.setFieldValue("end", formikProps.values.start)
+                        }
                       }}
                       placeholder=""
                     />
@@ -345,13 +308,14 @@ const TreatmentPlanForm = (props) => {
                       name="days"
                       type="text"
                       key={`my_unique_days_select_key__${formikProps.values.days}`}
-                      options={[{value:0, label:'for 0 days'}, {value:1, label:'for 1 day'}, {value:2, label:'for 2 days'}, {value:3, label:'for 3 days'}, {value:4, label:'for 4 days'}, {value:5, label:'for 5 days'}, {value:6, label:'for 6 days'}, {value:7, label:'for 7 days'}, {value:14, label:'for 14 days'}]}
+                      options={[{value:1, label:'for 1 day'}, {value:2, label:'for 2 days'}, {value:3, label:'for 3 days'}, {value:4, label:'for 4 days'}, {value:5, label:'for 5 days'}, {value:6, label:'for 6 days'}, {value:7, label:'for 7 days'}, {value:14, label:'for 14 days'}]}
                       value={formikProps.values.days||data.days}
                       isClearable={false}
                       onChange={(instance) => {
                         formikProps.setFieldValue("days", instance === null ? '' : instance.value);
                       }}
                       placeholder=""
+                      disabled={formikProps.values.frequency === 0}
                     />
                   </Col>
                   <Col xs={"2"}>
@@ -374,6 +338,7 @@ const TreatmentPlanForm = (props) => {
             </BootstrapForm>
           </Card.Body>
           {formikProps.values.days && formikProps.values.frequency && formikProps.values.frequency > 0 ? <div className="alert alert-warning text-center" style={{fontSize:"16px", marginTop:"-20px"}}>This will generate {calc_requests(formikProps)} treatment request{calc_requests(formikProps) === 1 ? "" : "s"}.</div> : ""}
+          {formikProps.values.frequency === 0 ? <div className="alert alert-warning text-center" style={{fontSize:"16px", marginTop:"-20px"}}>This will generate 1 treatment request.</div> : ""}
           <ButtonGroup>
             {!props.id ?
             <Button onClick={() => {
