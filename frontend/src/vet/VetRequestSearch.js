@@ -73,26 +73,64 @@ function VetRequestSearch({ incident, organization }) {
     { value: 'Canceled', label: 'Canceled' },
   ];
 
+  const treatmentStatusChoices = [
+    { value: 'Pending', label: 'Pending' },
+    { value: 'Scheduled', label: 'Scheduled' },
+    { value: 'Completed', label: 'Completed' },
+  ];
+
+  const orderStatusChoices = [
+    { value: 'Pending', label: 'Pending' },
+    { value: 'Completed', label: 'Completed' },
+  ];
+
   const [data, setData] = useState({vet_requests:[], treatments:[], diagnostics:[], procedures:[], isFetching:false});
   const [shelters, setShelters] = useState({options:[], isFetching:false});
   const [speciesChoices, setSpeciesChoices] = useState([]);
+  const [treatmentChoices, setTreatmentChoices] = useState([]);
+  const [diagnosticChoices, setDiagnosticChoices] = useState([]);
+  const [procedureChoices, setProcedureChoices] = useState([]);
   const [assignees, setAssignees] = useState([]);
   const [searchTerm, setSearchTerm] = useState(search);
   const [showFilters, setShowFilters] = useState(false);
   const [isDisabled, setIsDisabled] = useState(true);
-  const [vetObject, setVetObject] = useState('vet_request');
+  const [vetObject, setVetObject] = useState('vet_requests');
   const tempSearchTerm = useRef(null);
+  const treatmentRef = useRef(null);
+  const diagnosticRef = useRef(null);
+  const procedureRef = useRef(null);
   const speciesRef = useRef(null);
+  const treatmentSpeciesRef = useRef(null);
+  const diagnosticSpeciesRef = useRef(null);
+  const procedureSpeciesRef = useRef(null);
   const statusRef = useRef(null);
+  const treatmentStatusRef = useRef(null);
+  const diagnosticStatusRef = useRef(null);
+  const procedureStatusRef = useRef(null);
+  const administratorRef = useRef(null);
   const priorityRef = useRef(null);
   const openerRef = useRef(null);
+  const performerRef = useRef(null);
   const openRef = useRef(null);
+  const scheduledRef = useRef(null);
+  const administeredRef = useRef(null);
+  const diagnosticOrderedRef = useRef(null);
+  const diagnosticCompleteRef = useRef(null);
+  const procedureOrderedRef = useRef(null);
+  const procedureCompleteRef = useRef(null);
+  const notAdministeredRef = useRef(null);
   const shelterRef = useRef(null);
+  const treatmentShelterRef = useRef(null);
+  const diagnosticShelterRef = useRef(null);
+  const procedureShelterRef = useRef(null);
   const [vetRequests, setVetRequests] = useState([]);
   const [treatments, setTreatments] = useState([]);
   const [diagnostics, setDiagnostics] = useState([]);
   const [procedures, setProcedures] = useState([]);
-  const [options, setOptions] = useState({species: '', status:null, priority:null, open:null, assignee:null, shelter: ''});
+  const [options, setOptions] = useState({species: '', status:'Open', priority:null, open:null, assignee:null, shelter: ''});
+  const [treatmentOptions, setTreatmentOptions] = useState({species: '', status:'Pending', treatment:'', scheduled:null, administered:null, assignee:null, shelter: '', not_administered:null});
+  const [diagnosticOptions, setDiagnosticOptions] = useState({species: '', status:'Pending', diagnostic:'', ordered:null, complete:null, shelter: ''});
+  const [procedureOptions, setProcedureOptions] = useState({species: '', status:'Pending', procedure:'', ordered:null, complete:null, performer:null, shelter: ''});
   const [page, setPage] = useState(1);
   const [numPages, setNumPages] = useState(1);
   const [startDate, setStartDate] = useState(null);
@@ -134,27 +172,112 @@ function VetRequestSearch({ incident, organization }) {
   };
 
   const handleApplyFilters = () => {
-    setVetRequests(data.vet_requests.filter(vet_request => options.species ? vet_request.animal_object.species_string.toLowerCase() === options.species.toLowerCase() : vet_request)
-      .filter(vet_request => options.status ? vet_request.status === options.status : vet_request)
-      .filter(vet_request => options.priority ? vet_request.priority === options.priority : vet_request)
-      .filter(vet_request => options.open ? (startDate <= moment(vet_request.open).format('YYYY-MM-DD') && endDate >= moment(vet_request.open).format('YYYY-MM-DD')) : vet_request)
-      .filter(vet_request => options.opener ? vet_request.requested_by_object.id === options.opener : vet_request)
-      .filter(vet_request => options.shelter && options.shelter !== 'Remote' ? vet_request.animal_object.shelter === options.shelter : vet_request)
-      .filter(vet_request => options.shelter === 'Remote' ? vet_request.animal_object.shelter === null : vet_request)
-    )
+    if (vetObject === 'vet_requests') {
+      const filtered_requests = data.vet_requests.filter(vet_request => options.species ? vet_request.animal_object.species_string.toLowerCase() === options.species.toLowerCase() : vet_request)
+        .filter(vet_request => options.status ? vet_request.status === options.status : vet_request)
+        .filter(vet_request => options.priority ? vet_request.priority === options.priority : vet_request)
+        .filter(vet_request => options.open ? (startDate <= moment(vet_request.open).format('YYYY-MM-DD') && endDate >= moment(vet_request.open).format('YYYY-MM-DD')) : vet_request)
+        .filter(vet_request => options.opener ? vet_request.requested_by_object.id === options.opener : vet_request)
+        .filter(vet_request => options.shelter && options.shelter !== 'Field' ? vet_request.animal_object.shelter === options.shelter : vet_request)
+        .filter(vet_request => options.shelter === 'Field' ? vet_request.animal_object.shelter === null : vet_request);
+      setVetRequests(filtered_requests);
+      setNumPages(Math.ceil(filtered_requests.length / ITEMS_PER_PAGE));
+    }
+    else if (vetObject === 'treatments') {
+      const filtered_treatments = data.treatments.filter(treatment => treatmentOptions.species ? treatment.animal_object.species_string.toLowerCase() === treatmentOptions.species.toLowerCase() : treatment)
+        .filter(treatment => treatmentOptions.status ? treatment.status === treatmentOptions.status : treatment)
+        .filter(treatment => treatmentOptions.not_administered === true || treatmentOptions.not_administered === false ? treatment.not_administered === treatmentOptions.not_administered : treatment)
+        .filter(treatment => treatmentOptions.treatment ? treatment.treatment_object.description === treatmentOptions.treatment : treatment)
+        .filter(treatment => treatmentOptions.scheduled ? (startDate <= moment(treatment.suggested_admin_time).format('YYYY-MM-DD') && endDate >= moment(treatment.suggested_admin_time).format('YYYY-MM-DD')) : treatment)
+        .filter(treatment => treatmentOptions.administered ? (startDate <= moment(treatment.actual_admin_time).format('YYYY-MM-DD') && endDate >= moment(treatment.actual_admin_time).format('YYYY-MM-DD')) : treatment)
+        .filter(treatment => treatmentOptions.assignee ? treatment.assignee_object && treatment.assignee_object.id === treatmentOptions.assignee : treatment)
+        .filter(treatment => treatmentOptions.shelter && treatmentOptions.shelter !== 'Field' ? treatment.animal_object.shelter === treatmentOptions.shelter : treatment)
+        .filter(treatment => treatmentOptions.shelter === 'Field' ? treatment.animal_object.shelter === null : treatment)
+      setTreatments(filtered_treatments);
+      setNumPages(Math.ceil(filtered_treatments.length / ITEMS_PER_PAGE));
+    }
+    else if (vetObject === 'diagnostics') {
+      const filtered_diagnostics = data.diagnostics.filter(diagnostic => diagnosticOptions.species ? diagnostic.animal_object.species_string.toLowerCase() === diagnosticOptions.species.toLowerCase() : diagnostic)
+        .filter(diagnostic => diagnosticOptions.status ? diagnostic.status === diagnosticOptions.status : diagnostic)
+        .filter(diagnostic => diagnosticOptions.diagnostic ? diagnostic.name === diagnosticOptions.diagnostic : diagnostic)
+        .filter(diagnostic => diagnosticOptions.ordered ? (startDate <= moment(diagnostic.open).format('YYYY-MM-DD') && endDate >= moment(diagnostic.open).format('YYYY-MM-DD')) : diagnostic)
+        .filter(diagnostic => diagnosticOptions.complete ? (startDate <= moment(diagnostic.complete).format('YYYY-MM-DD') && endDate >= moment(diagnostic.complete).format('YYYY-MM-DD')) : diagnostic)
+        .filter(diagnostic => diagnosticOptions.shelter && diagnosticOptions.shelter !== 'Field' ? diagnostic.animal_object.shelter === diagnosticOptions.shelter : diagnostic)
+        .filter(diagnostic => diagnosticOptions.shelter === 'Field' ? diagnostic.animal_object.shelter === null : diagnostic)
+      setDiagnostics(filtered_diagnostics);
+      setNumPages(Math.ceil(filtered_diagnostics.length / ITEMS_PER_PAGE));
+    }
+    else if (vetObject === 'procedures') {
+      const filtered_procedures = data.procedures.filter(procedure => procedureOptions.species ? procedure.animal_object.species_string.toLowerCase() === procedureOptions.species.toLowerCase() : procedure)
+        .filter(procedure => procedureOptions.status ? procedure.status === procedureOptions.status : procedure)
+        .filter(procedure => procedureOptions.procedure ? procedure.name === procedureOptions.procedure : procedure)
+        .filter(procedure => procedureOptions.ordered ? (startDate <= moment(procedure.open).format('YYYY-MM-DD') && endDate >= moment(procedure.open).format('YYYY-MM-DD')) : procedure)
+        .filter(procedure => procedureOptions.complete ? (startDate <= moment(procedure.complete).format('YYYY-MM-DD') && endDate >= moment(procedure.complete).format('YYYY-MM-DD')) : procedure)
+        .filter(procedure => procedureOptions.performer ? procedure.performer_object && procedure.performer_object.id === procedureOptions.performer : procedure)
+        .filter(procedure => procedureOptions.shelter && procedureOptions.shelter !== 'Field' ? procedure.animal_object.shelter === procedureOptions.shelter : procedure)
+        .filter(procedure => procedureOptions.shelter === 'Field' ? procedure.animal_object.shelter === null : procedure)
+      setProcedures(filtered_procedures);
+      setNumPages(Math.ceil(filtered_procedures.length / ITEMS_PER_PAGE));
+    }
   };
 
   const handleClear = () => {
-    speciesRef.current.select.clearValue();
-    statusRef.current.select.clearValue();
-    priorityRef.current.select.clearValue();
-    if (openRef.current) {
-      openRef.current.flatpickr.clear();
+    if (vetObject === 'vet_requests') {
+      speciesRef.current.select.clearValue();
+      statusRef.current.select.clearValue();
+      priorityRef.current.select.clearValue();
+      if (openRef.current) {
+        openRef.current.flatpickr.clear();
+      }
+      openerRef.current.select.clearValue();
+      shelterRef.current.select.clearValue();
+      setOptions({species:'', status:null, priority:null, open:null, assignee:null, shelter:''});
+      setVetRequests(data.vet_requests);
     }
-    openerRef.current.select.clearValue();
-    shelterRef.current.select.clearValue();
-    setOptions({species:'', status:null, priority:null, open:null, assignee:null, shelter:''});
-    setVetRequests(data.vet_requests);
+    else if (vetObject === 'treatments') {
+      treatmentRef.current.select.clearValue();
+      treatmentSpeciesRef.current.select.clearValue();
+      treatmentStatusRef.current.select.clearValue();
+      treatmentShelterRef.current.select.clearValue();
+      notAdministeredRef.current.select.clearValue();
+      administratorRef.current.select.clearValue();
+      if (scheduledRef.current) {
+        scheduledRef.current.flatpickr.clear();
+      }
+      if (administeredRef.current) {
+        administeredRef.current.flatpickr.clear();
+      }
+      setTreatmentOptions({species:'', status:null, not_administered:null, treatment:null, scheduled:null, administered:null, assignee:null, shelter:''});
+      setTreatments(data.treatments);
+    }
+    else if (vetObject === 'diagnostics') {
+      diagnosticRef.current.select.clearValue();
+      diagnosticSpeciesRef.current.select.clearValue();
+      diagnosticStatusRef.current.select.clearValue();
+      diagnosticShelterRef.current.select.clearValue();
+      if (diagnosticOrderedRef.current) {
+        diagnosticOrderedRef.current.flatpickr.clear();
+      }
+      if (diagnosticCompleteRef.current) {
+        diagnosticCompleteRef.current.flatpickr.clear();
+      }
+      setDiagnosticOptions({species:'', status:null, diagnostic:null, ordered:null, complete:null, shelter:''});
+      setDiagnostics(data.diagnostics);
+    }
+    else if (vetObject === 'procedures') {
+      procedureRef.current.select.clearValue();
+      procedureSpeciesRef.current.select.clearValue();
+      procedureStatusRef.current.select.clearValue();
+      procedureShelterRef.current.select.clearValue();
+      if (procedureOrderedRef.current) {
+        procedureOrderedRef.current.flatpickr.clear();
+      }
+      if (procedureCompleteRef.current) {
+        procedureCompleteRef.current.flatpickr.clear();
+      }
+      setProcedureOptions({species:'', status:null, procedure:null, ordered:null, complete:null, performer:null, shelter:''});
+      setProcedures(data.procedures);
+    }
   };
 
   const customStyles = {
@@ -206,10 +329,85 @@ function VetRequestSearch({ incident, organization }) {
     };
     fetchSpecies();
 
+    const fetchTreatments = () => {
+      setTreatmentChoices([]);
+      // Fetch Treatment data.
+      axios.get('/vet/api/treatment/', {
+        cancelToken: source.token,
+      })
+      .then(response => {
+        if (!unmounted) {
+          let treatment_options = [];
+          response.data.forEach(result => {
+            // Build treatment option list.
+            treatment_options.push({value: result.description, label: result.description});
+          });
+          setTreatmentChoices(treatment_options);
+        }
+      })
+      .catch(error => {
+        if (!unmounted) {
+          setTreatmentChoices([]);
+          setShowSystemError(true);
+        }
+      });
+    };
+    fetchTreatments();
+
+    const fetchDiagnostics = () => {
+      setTreatmentChoices([]);
+      // Fetch Treatment data.
+      axios.get('/vet/api/diagnostics/', {
+        cancelToken: source.token,
+      })
+      .then(response => {
+        if (!unmounted) {
+          let diagnostic_options = [];
+          response.data.forEach(result => {
+            // Build diagnostic option list.
+            diagnostic_options.push({value: result.name, label: result.name});
+          });
+          setDiagnosticChoices(diagnostic_options);
+        }
+      })
+      .catch(error => {
+        if (!unmounted) {
+          setDiagnosticChoices([]);
+          setShowSystemError(true);
+        }
+      });
+    };
+    fetchDiagnostics();
+
+    const fetchProcedures = () => {
+      setProcedureChoices([]);
+      // Fetch Procedure data.
+      axios.get('/vet/api/procedures/', {
+        cancelToken: source.token,
+      })
+      .then(response => {
+        if (!unmounted) {
+          let procedure_options = [];
+          response.data.forEach(result => {
+            // Build procedure option list.
+            procedure_options.push({value: result.name, label: result.name});
+          });
+          setProcedureChoices(procedure_options);
+        }
+      })
+      .catch(error => {
+        if (!unmounted) {
+          setProcedureChoices([]);
+          setShowSystemError(true);
+        }
+      });
+    };
+    fetchProcedures();
+
     const fetchShelters = () => {
       setShelters({options: [], isFetching: true});
       // Fetch Shelter data.
-      axios.get('/shelter/api/shelter/?incident=' + incident, {
+      axios.get('/shelter/api/shelter/?incident=' + incident + '&organization=' + organization +'&training=' + (state && state.incident.training), {
         cancelToken: source.token,
       })
       .then(response => {
@@ -219,7 +417,7 @@ function VetRequestSearch({ incident, organization }) {
             // Build shelter option list.
             shelter_options.push({value: shelter.id, label: shelter.name});
           });
-          shelter_options.push({value: 'Remote', label: 'Remote'});
+          shelter_options.push({value: 'Field', label: 'Field'});
           setShelters({options: shelter_options, isFetching:false});
         }
       })
@@ -251,9 +449,9 @@ function VetRequestSearch({ incident, organization }) {
       })
       .then(response => {
         if (!unmounted) {
-          setNumPages(Math.ceil(response.data.length / ITEMS_PER_PAGE));
+          setNumPages(Math.ceil(response.data.filter(vr => vr.status === options.status).length / ITEMS_PER_PAGE));
           setData({vet_requests: response.data, isFetching: false});
-          setVetRequests(response.data);
+          setVetRequests(response.data.filter(vr => vr.status === options.status));
 
           // Build opener option list.
           let openers = [];
@@ -286,9 +484,9 @@ function VetRequestSearch({ incident, organization }) {
       })
       .then(response => {
         if (!unmounted) {
-          console.log(response.data)
+          setNumPages(Math.ceil(response.data.filter(treatment => treatment.status === treatmentOptions.status).length / ITEMS_PER_PAGE));
           setData(prevState => ({ ...prevState, "treatments":response.data }));
-          setTreatments(response.data);
+          setTreatments(response.data.filter(treatment => treatment.status === treatmentOptions.status));
         }
       })
       .catch(error => {
@@ -308,8 +506,9 @@ function VetRequestSearch({ incident, organization }) {
       })
       .then(response => {
         if (!unmounted) {
+          setNumPages(Math.ceil(response.data.filter(diagnostic => diagnostic.status === diagnosticOptions.status).length / ITEMS_PER_PAGE));
           setData(prevState => ({ ...prevState, "diagnostics":response.data }));
-          setDiagnostics(response.data);
+          setDiagnostics(response.data.filter(diagnostic => diagnostic.status === diagnosticOptions.status));
         }
       })
       .catch(error => {
@@ -328,8 +527,9 @@ function VetRequestSearch({ incident, organization }) {
       })
       .then(response => {
         if (!unmounted) {
+          setNumPages(Math.ceil(response.data.filter(procedure => procedure.status === procedureOptions.status).length / ITEMS_PER_PAGE));
           setData(prevState => ({ ...prevState, "procedures":response.data }));
-          setProcedures(response.data);
+          setProcedures(response.data.filter(procedure => procedure.status === procedureOptions.status));
         }
       })
       .catch(error => {
@@ -346,6 +546,7 @@ function VetRequestSearch({ incident, organization }) {
       unmounted = true;
       source.cancel();
     };
+
   }, [searchTerm, incident, vetObject]);
 
   // Hook handling option changes.
@@ -364,7 +565,7 @@ function VetRequestSearch({ incident, organization }) {
       <Header>Search Veterinary Tasks</Header>
       <hr/>
       <Form onSubmit={handleSubmit}>
-        <InputGroup className="mb-3">
+        <InputGroup className="mb-1">
           <FormControl
             type="text"
             placeholder="Search"
@@ -373,18 +574,31 @@ function VetRequestSearch({ incident, organization }) {
             ref={tempSearchTerm}
           />
           <InputGroup.Append>
-            <Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0"}}>Search</Button>
+            <Button variant="outline-light" type="submit" style={{height:"36px", borderRadius:"0 5px 5px 0"}}>Search</Button>
           </InputGroup.Append>
-          <Button variant="outline-light" className="ml-1" onClick={handleShowFilters}>Advanced {showFilters ? <FontAwesomeIcon icon={faChevronDoubleUp} size="sm" /> : <FontAwesomeIcon icon={faChevronDoubleDown} size="sm" />}</Button>
+          <Col className="pl-2 pr-1" style={{maxWidth:"200px"}}>
+          <Select
+            id="typeDropdown"
+            name="vetType"
+            type="text"
+            options={[{value:'vet_requests', label:'Veterinary Requests'}, {value:'treatments', label:'Treatments'}, {value:'diagnostics', label:'Diagnostics'}, {value:'procedures', label:'Procedures'}]}
+            styles={customStyles}
+            isClearable={false}
+            onChange={(instance) => {
+              setVetObject(instance.value)
+            }}
+            defaultValue={{value:'vet_requests', label:'Veterinary Requests'}}
+          />
+          </Col>
+          <Button variant="outline-light" className="ml-1" onClick={handleShowFilters} style={{height:"36px"}}>Advanced {showFilters ? <FontAwesomeIcon icon={faChevronDoubleUp} size="sm" /> : <FontAwesomeIcon icon={faChevronDoubleDown} size="sm" />}</Button>
         </InputGroup>
-        <Collapse in={showFilters}>
+        {vetObject === 'vet_requests' ? <Collapse in={showFilters} className="mb-3">
           <div>
           <Card className="border rounded d-flex" style={{width:"100%"}}>
             <Card.Body>
-              <Row>
+              <Row style={{marginBottom:"-16px"}}>
                 <Col xs={"5"}>
                   <Select
-                    label="status"
                     id="statusDropdown"
                     name="Status"
                     type="text"
@@ -396,9 +610,9 @@ function VetRequestSearch({ incident, organization }) {
                     onChange={(instance) => {
                       setOptions({...options, status: instance ? instance.value : null});
                     }}
+                    value={options.status ? {value:options.status, label:options.status} : null}
                   />
                   <Select
-                    label="Priority"
                     id="priorityDropdown"
                     name="priority"
                     type="text"
@@ -410,9 +624,9 @@ function VetRequestSearch({ incident, organization }) {
                     onChange={(instance) => {
                       setOptions({...options, priority: instance ? instance.value : null});
                     }}
+                    value={options.priority ? {value:options.priority, label:options.priority} : null}
                   />
                   <Select
-                    label="Opener"
                     id="assigneeDropdown"
                     name="assignee"
                     type="text"
@@ -424,13 +638,13 @@ function VetRequestSearch({ incident, organization }) {
                     onChange={(instance) => {
                       setOptions({...options, opener: instance ? instance.value : null});
                     }}
+                    value={options.opener ? assignees.options.filter(assignee => assignee.value === options.opener)[0] : null}
                   />
                 </Col>
                 <Col xs="5">
-                  <Row style={{marginBottom:"-16px"}}>
+                  <Row>
                     <Col className="pl-0 pr-0 mb-3 mr-3" style={{textTransform:"capitalize"}}>
                       <Select
-                        label="Species"
                         id="speciesDropdown"
                         name="species"
                         type="text"
@@ -442,9 +656,9 @@ function VetRequestSearch({ incident, organization }) {
                         onChange={(instance) => {
                           setOptions({...options, species: instance ? instance.value : null});
                         }}
+                        value={options.species ? {value:options.species, label:options.species} : null}
                       />
                       <Select
-                        label="Shelter"
                         id="shelterDropdown"
                         name="shelter"
                         type="text"
@@ -456,13 +670,13 @@ function VetRequestSearch({ incident, organization }) {
                         onChange={(instance) => {
                           setOptions({...options, shelter: instance ? instance.value : ''})
                         }}
+                        value={options.shelter ? shelters.options.filter(shelter => shelter.value === options.shelter)[0] : null}
                       />
                       <Flatpickr
                         options={{allowInput: true, altFormat: "F j, Y", dateFormat: "m-d-Y", mode: "range", maxDate: moment().format('MM-DD-YYYY')}}
                         style={{height:"36px", paddingLeft:"11px", borderRadius:".25rem", borderWidth:"1px", borderStyle:"solid"}}
                         name={`open`}
                         id={`open`}
-                        label="Open"
                         placeholder={"Select Open Date Range"}
                         ref={openRef}
                         className="w-100"
@@ -472,6 +686,7 @@ function VetRequestSearch({ incident, organization }) {
                           }
                           setOptions({...options, open: dateRange ? true : null});
                         }}
+                        value={options.open ? {value:options.open, label:options.open} : null}
                       />
                     </Col>
                   </Row>
@@ -485,15 +700,395 @@ function VetRequestSearch({ incident, organization }) {
           </Card>
           </div>
         </Collapse>
+        : vetObject === 'treatments' ? <Collapse in={showFilters} className="mb-3">
+        <div>
+        <Card className="border rounded d-flex" style={{width:"100%"}}>
+          <Card.Body>
+            <Row style={{marginBottom:"-16px"}}>
+              <Col xs={"5"}>
+                <Select
+                  id="treatmentStatusDropdown"
+                  name="treatmentStatus"
+                  type="text"
+                  placeholder="Select Status"
+                  options={treatmentStatusChoices}
+                  styles={customStyles}
+                  isClearable={true}
+                  ref={treatmentStatusRef}
+                  onChange={(instance) => {
+                    setTreatmentOptions({...treatmentOptions, status: instance ? instance.value : null});
+                  }}
+                  value={treatmentOptions.status ? {value:treatmentOptions.status, label:treatmentOptions.status} : null}
+                />
+                <Select
+                  id="treatmentDropdown"
+                  name="treatment"
+                  type="text"
+                  placeholder="Select Treatment"
+                  options={treatmentChoices}
+                  styles={customStyles}
+                  isClearable={true}
+                  ref={treatmentRef}
+                  onChange={(instance) => {
+                    setTreatmentOptions({...treatmentOptions, treatment: instance ? instance.value : ''})
+                  }}
+                  value={treatmentOptions.treatment ? {value:treatmentOptions.treatment, label:treatmentOptions.treatment} : null}
+                />
+                <Select
+                  id="notAdministeredDropdown"
+                  name="notAdministered"
+                  type="text"
+                  placeholder="Select Not Administered"
+                  options={[{value:true, label:"True"},{value:false, label:'False'}]}
+                  styles={customStyles}
+                  isClearable={true}
+                  ref={notAdministeredRef}
+                  onChange={(instance) => {
+                    setTreatmentOptions({...treatmentOptions, not_administered : instance ? instance.value : null});
+                  }}
+                  value={treatmentOptions.not_administered === true || treatmentOptions.not_administered === false ? {value:treatmentOptions.not_administered, label:treatmentOptions.not_administered === true ? 'True' : 'False'} : null}
+                />
+                <Select
+                  id="administratorDropdown"
+                  name="administrator"
+                  type="text"
+                  placeholder="Select Administrator"
+                  options={assignees.options}
+                  styles={customStyles}
+                  isClearable={true}
+                  ref={administratorRef}
+                  onChange={(instance) => {
+                    setTreatmentOptions({...treatmentOptions, assignee: instance ? instance.value : null});
+                  }}
+                  value={treatmentOptions.assignee ? assignees.options.filter(assignee => assignee.value === treatmentOptions.assignee)[0] : null}
+                />
+              </Col>
+              <Col xs="5">
+                <Row>
+                  <Col className="pl-0 pr-0 mb-3 mr-3" style={{textTransform:"capitalize"}}>
+                    <Select
+                      id="treatmentSpeciesDropdown"
+                      name="treatmentSpecies"
+                      type="text"
+                      placeholder="Select Species"
+                      options={speciesChoices}
+                      styles={customStyles}
+                      isClearable={true}
+                      ref={treatmentSpeciesRef}
+                      onChange={(instance) => {
+                        setTreatmentOptions({...treatmentOptions, species: instance ? instance.value : null});
+                      }}
+                      value={treatmentOptions.species ? {value:treatmentOptions.species, label:treatmentOptions.species} : null}
+                    />
+                    <Select
+                      id="treatmentShelterDropdown"
+                      name="treatmentShelter"
+                      type="text"
+                      placeholder="Select Shelter"
+                      options={shelters.options}
+                      styles={customStyles}
+                      isClearable={true}
+                      ref={treatmentShelterRef}
+                      onChange={(instance) => {
+                        setTreatmentOptions({...treatmentOptions, shelter: instance ? instance.value : ''})
+                      }}
+                      value={treatmentOptions.shelter ? shelters.options.filter(shelter => shelter.value === treatmentOptions.shelter)[0] : null}
+                    />
+                    <Flatpickr
+                      options={{allowInput: true, altFormat: "F j, Y", dateFormat: "m-d-Y", mode: "range", maxDate: moment().format('MM-DD-YYYY')}}
+                      style={{height:"36px", paddingLeft:"11px", borderRadius:".25rem", borderWidth:"1px", borderStyle:"solid"}}
+                      name={`scheduled`}
+                      id={`scheduled`}
+                      placeholder={"Select Scheduled Date Range"}
+                      ref={scheduledRef}
+                      className="w-100"
+                      onChange={(dateRange) => {
+                        if (dateRange) {
+                          parseDateRange(dateRange);
+                        }
+                        setTreatmentOptions({...treatmentOptions, scheduled: dateRange ? true : null});
+                      }}
+                      value={treatmentOptions.scheduled ? {value:treatmentOptions.scheduled, label:treatmentOptions.scheduled} : null}
+                    />
+                    <Flatpickr
+                      options={{allowInput: true, altFormat: "F j, Y", dateFormat: "m-d-Y", mode: "range", maxDate: moment().format('MM-DD-YYYY')}}
+                      style={{height:"36px", marginTop:"12px", paddingLeft:"11px", borderRadius:".25rem", borderWidth:"1px", borderStyle:"solid"}}
+                      name={`administered`}
+                      id={`administered`}
+                      placeholder={"Select Administered Date Range"}
+                      ref={administeredRef}
+                      className="w-100"
+                      onChange={(dateRange) => {
+                        if (dateRange) {
+                          parseDateRange(dateRange);
+                        }
+                        setTreatmentOptions({...treatmentOptions, administered: dateRange ? true : null});
+                      }}
+                      value={treatmentOptions.administered ? {value:treatmentOptions.administered, label:treatmentOptions.administered} : null}
+                    />
+                  </Col>
+                </Row>
+              </Col>
+              <Col className="flex-grow-1 pl-0" xs="2">
+                <Button className="btn btn-primary" style={{maxHeight:"35px", width:"100%"}} onClick={handleApplyFilters} disabled={isDisabled}>Apply</Button>
+                <Button variant="outline-light" style={{maxHeight:"35px", width:"100%", marginTop:"15px"}} onClick={handleClear}>Clear</Button>
+              </Col>
+            </Row>
+          </Card.Body>
+        </Card>
+        </div>
+      </Collapse>
+      : vetObject === 'diagnostics' ?
+      <Collapse in={showFilters} className="mb-3">
+      <div>
+        <Card className="border rounded d-flex" style={{width:"100%"}}>
+          <Card.Body>
+            <Row style={{marginBottom:"-16px"}}>
+              <Col xs={"5"}>
+                <Select
+                  id="diagnosticStatusDropdown"
+                  name="diagnosticStatus"
+                  type="text"
+                  placeholder="Select Status"
+                  options={orderStatusChoices}
+                  styles={customStyles}
+                  isClearable={true}
+                  ref={diagnosticStatusRef}
+                  onChange={(instance) => {
+                    setDiagnosticOptions({...diagnosticOptions, status: instance ? instance.value : null});
+                  }}
+                  value={diagnosticOptions.status ? {value:diagnosticOptions.status, label:diagnosticOptions.status} : null}
+                />
+                {/* <Select
+                  label="Opener"
+                  id="assigneeDropdown"
+                  name="assignee"
+                  type="text"
+                  placeholder="Select Opener"
+                  options={assignees.options}
+                  styles={customStyles}
+                  isClearable={true}
+                  ref={openerRef}
+                  onChange={(instance) => {
+                    setDiagnosticOptions({...diagnosticOptions, opener: instance ? instance.value : null});
+                  }}
+                  value={diagnosticOptions.opener ? {value:diagnosticOptions.opener, label:diagnosticOptions.opener} : null}
+                /> */}
+                <Select
+                  id="diagnosticDropdown"
+                  name="diagnostic"
+                  type="text"
+                  placeholder="Select Diagnostic"
+                  options={diagnosticChoices}
+                  styles={customStyles}
+                  isClearable={true}
+                  ref={diagnosticRef}
+                  onChange={(instance) => {
+                    setDiagnosticOptions({...diagnosticOptions, diagnostic: instance ? instance.value : ''})
+                  }}
+                  value={diagnosticOptions.diagnostic ? {value:diagnosticOptions.diagnostic, label:diagnosticOptions.diagnostic} : null}
+                />
+                <Flatpickr
+                  options={{allowInput: true, altFormat: "F j, Y", dateFormat: "m-d-Y", mode: "range", maxDate: moment().format('MM-DD-YYYY')}}
+                  style={{height:"36px", paddingLeft:"11px", borderRadius:".25rem", borderWidth:"1px", borderStyle:"solid"}}
+                  name={`diagnosticComplete`}
+                  id={`diagnosticComplete`}
+                  placeholder={"Select Completed Date Range"}
+                  ref={diagnosticCompleteRef}
+                  className="w-100"
+                  onChange={(dateRange) => {
+                    if (dateRange) {
+                      parseDateRange(dateRange);
+                    }
+                    setDiagnosticOptions({...diagnosticOptions, complete: dateRange ? true : null});
+                  }}
+                  value={diagnosticOptions.complete ? {value:diagnosticOptions.complete, label:diagnosticOptions.complete} : null}
+                />
+              </Col>
+              <Col xs="5">
+                <Row>
+                  <Col className="pl-0 pr-0 mb-3 mr-3" style={{textTransform:"capitalize"}}>
+                    <Select
+                      id="diagnosticSpeciesDropdown"
+                      name="diagnosticSpecies"
+                      type="text"
+                      placeholder="Select Species"
+                      options={speciesChoices}
+                      styles={customStyles}
+                      isClearable={true}
+                      ref={diagnosticSpeciesRef}
+                      onChange={(instance) => {
+                        setDiagnosticOptions({...diagnosticOptions, species: instance ? instance.value : null});
+                      }}
+                      value={diagnosticOptions.species ? {value:diagnosticOptions.species, label:diagnosticOptions.species} : null}
+                    />
+                    <Select
+                      id="diagnosticShelterDropdown"
+                      name="diagnosticShelter"
+                      type="text"
+                      placeholder="Select Shelter"
+                      options={shelters.options}
+                      styles={customStyles}
+                      isClearable={true}
+                      ref={diagnosticShelterRef}
+                      onChange={(instance) => {
+                        setDiagnosticOptions({...diagnosticOptions, shelter: instance ? instance.value : ''})
+                      }}
+                      value={diagnosticOptions.shelter ? shelters.options.filter(shelter => shelter.value === diagnosticOptions.shelter)[0] : null}
+                    />
+                    <Flatpickr
+                      options={{allowInput: true, altFormat: "F j, Y", dateFormat: "m-d-Y", mode: "range", maxDate: moment().format('MM-DD-YYYY')}}
+                      style={{height:"36px", paddingLeft:"11px", borderRadius:".25rem", borderWidth:"1px", borderStyle:"solid"}}
+                      name={`diagnosticOpen`}
+                      id={`diagnosticOpen`}
+                      placeholder={"Select Ordered Date Range"}
+                      ref={diagnosticOrderedRef}
+                      className="w-100"
+                      onChange={(dateRange) => {
+                        if (dateRange) {
+                          parseDateRange(dateRange);
+                        }
+                        setDiagnosticOptions({...diagnosticOptions, open: dateRange ? true : null});
+                      }}
+                      value={diagnosticOptions.open ? {value:diagnosticOptions.open, label:diagnosticOptions.open} : null}
+                    />
+                  </Col>
+                </Row>
+              </Col>
+              <Col className="flex-grow-1 pl-0" xs="2">
+                <Button className="btn btn-primary" style={{maxHeight:"35px", width:"100%"}} onClick={handleApplyFilters} disabled={isDisabled}>Apply</Button>
+                <Button variant="outline-light" style={{maxHeight:"35px", width:"100%", marginTop:"15px"}} onClick={handleClear}>Clear</Button>
+              </Col>
+            </Row>
+          </Card.Body>
+        </Card>
+        </div>
+      </Collapse> : vetObject === 'procedures' ?
+      <Collapse in={showFilters} className="mb-3">
+      <div>
+        <Card className="border rounded d-flex" style={{width:"100%"}}>
+          <Card.Body>
+            <Row style={{marginBottom:"-16px"}}>
+              <Col xs={"5"}>
+                <Select
+                  id="statusDropdown"
+                  name="procedureStatus"
+                  type="text"
+                  placeholder="Select Status"
+                  options={orderStatusChoices}
+                  styles={customStyles}
+                  isClearable={true}
+                  ref={procedureStatusRef}
+                  onChange={(instance) => {
+                    setProcedureOptions({...procedureOptions, status: instance ? instance.value : null});
+                  }}
+                  value={procedureOptions.status ? {value:procedureOptions.status, label:procedureOptions.status} : null}
+                />
+                <Select
+                  id="procedureDropdown"
+                  name="procedure"
+                  type="text"
+                  placeholder="Select Procedure"
+                  options={procedureChoices}
+                  styles={customStyles}
+                  isClearable={true}
+                  ref={procedureRef}
+                  onChange={(instance) => {
+                    setProcedureOptions({...procedureOptions, procedure: instance ? instance.value : ''})
+                  }}
+                  value={procedureOptions.procedure ? {value:procedureOptions.procedure, label:procedureOptions.procedure} : null}
+                />
+                <Select
+                  id="performerDropdown"
+                  name="performer"
+                  type="text"
+                  placeholder="Select Performer"
+                  options={assignees.options}
+                  styles={customStyles}
+                  isClearable={true}
+                  ref={performerRef}
+                  onChange={(instance) => {
+                    setProcedureOptions({...procedureOptions, performer: instance ? instance.value : null});
+                  }}
+                  value={procedureOptions.performer ? assignees.options.filter(assignee => assignee.value === procedureOptions.performer)[0] : null}
+                />
+                <Flatpickr
+                  options={{allowInput: true, altFormat: "F j, Y", dateFormat: "m-d-Y", mode: "range", maxDate: moment().format('MM-DD-YYYY')}}
+                  style={{height:"36px", paddingLeft:"11px", borderRadius:".25rem", borderWidth:"1px", borderStyle:"solid"}}
+                  name={`procedureComplete`}
+                  id={`procedureComplete`}
+                  placeholder={"Select Completed Date Range"}
+                  ref={procedureCompleteRef}
+                  className="w-100"
+                  onChange={(dateRange) => {
+                    if (dateRange) {
+                      parseDateRange(dateRange);
+                    }
+                    setProcedureOptions({...procedureOptions, complete: dateRange ? true : null});
+                  }}
+                  value={procedureOptions.complete ? {value:procedureOptions.complete, label:procedureOptions.complete} : null}
+                />
+              </Col>
+              <Col xs="5">
+                <Row>
+                  <Col className="pl-0 pr-0 mb-3 mr-3" style={{textTransform:"capitalize"}}>
+                    <Select
+                      id="speciesDropdown"
+                      name="species"
+                      type="text"
+                      placeholder="Select Species"
+                      options={speciesChoices}
+                      styles={customStyles}
+                      isClearable={true}
+                      ref={procedureSpeciesRef}
+                      onChange={(instance) => {
+                        setProcedureOptions({...procedureOptions, species: instance ? instance.value : null});
+                      }}
+                      value={procedureOptions.species ? {value:procedureOptions.species, label:procedureOptions.species} : null}
+                    />
+                    <Select
+                      id="shelterDropdown"
+                      name="shelter"
+                      type="text"
+                      placeholder="Select Shelter"
+                      options={shelters.options}
+                      styles={customStyles}
+                      isClearable={true}
+                      ref={procedureShelterRef}
+                      onChange={(instance) => {
+                        setProcedureOptions({...procedureOptions, shelter: instance ? instance.value : ''})
+                      }}
+                      value={procedureOptions.shelter ? shelters.options.filter(shelter => shelter.value === procedureOptions.shelter)[0] : null}
+                    />
+                    <Flatpickr
+                      options={{allowInput: true, altFormat: "F j, Y", dateFormat: "m-d-Y", mode: "range", maxDate: moment().format('MM-DD-YYYY')}}
+                      style={{height:"36px", paddingLeft:"11px", borderRadius:".25rem", borderWidth:"1px", borderStyle:"solid"}}
+                      name={`procedureOrdered`}
+                      id={`procedureOrdered`}
+                      placeholder={"Select Ordered Date Range"}
+                      ref={procedureOrderedRef}
+                      className="w-100"
+                      onChange={(dateRange) => {
+                        if (dateRange) {
+                          parseDateRange(dateRange);
+                        }
+                        setProcedureOptions({...procedureOptions, open: dateRange ? true : null});
+                      }}
+                      value={procedureOptions.open ? {value:procedureOptions.open, label:procedureOptions.open} : null}
+                    />
+                  </Col>
+                </Row>
+              </Col>
+              <Col className="flex-grow-1 pl-0" xs="2">
+                <Button className="btn btn-primary" style={{maxHeight:"35px", width:"100%"}} onClick={handleApplyFilters} disabled={isDisabled}>Apply</Button>
+                <Button variant="outline-light" style={{maxHeight:"35px", width:"100%", marginTop:"15px"}} onClick={handleClear}>Clear</Button>
+              </Col>
+            </Row>
+          </Card.Body>
+        </Card>
+        </div>
+      </Collapse> : ""}
       </Form>
-      <Row className="ml-0">
-        <ButtonGroup className="float-right align-self-end mb-3">
-          <Button variant={vetObject === "vet_requests" ? "primary" : "secondary"} onClick={vetObject !== "vet_requests" ? () => {setPage(1);setVetObject("vet_requests")} : () => {setPage(1);setVetObject("")}}>Veterinary Requests</Button>
-          <Button variant={vetObject === "treatments" ? "primary" : "secondary"} onClick={vetObject !== "treatments" ? () => {setPage(1);setVetObject("treatments")} : () => {setPage(1);setVetObject("")}}>Treatments</Button>
-          <Button variant={vetObject === "diagnostics" ? "primary" : "secondary"} onClick={vetObject !== "diagnostics" ? () => {setPage(1);setVetObject("diagnostics")} : () => {setPage(1);setVetObject("")}}>Diagnostics</Button>
-          <Button variant={vetObject === "procedures" ? "primary" : "secondary"} onClick={vetObject !== "procedures" ? () => {setPage(1);setVetObject("procedures")} : () => {setPage(1);setVetObject("")}}>Procedures</Button>
-        </ButtonGroup>
-      </Row>
       {vetObject === 'vet_requests' && vetRequests.map((vet_request, index) => (
         <div key={vet_request.id} className="mt-3" hidden={page !== Math.ceil((index+1)/ITEMS_PER_PAGE)}>
           <div className="card-header">
@@ -535,7 +1130,7 @@ function VetRequestSearch({ incident, organization }) {
                     <ListGroup.Item>
                       <Row>
                         <Col xs="3">
-                          <b>Patient: </b><Link href={"/" + organization + "/" + incident + "/animals/" + vet_request.animal_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>A#{vet_request.animal_object.id}</Link>
+                          <b>Patient: </b>A#{vet_request.animal_object.id}
                         </Col>
                         <Col xs="3">
                           <b>Name: </b>{vet_request.animal_object.name || "Unknown"}
@@ -576,7 +1171,7 @@ function VetRequestSearch({ incident, organization }) {
                           <b>Concern: </b>{vet_request.concern}
                         </Col>
                         {/* <Col>
-                          <b>Shelter: </b>{vet_request.animal_object.shelter_object ? vet_request.animal_object.shelter_object.name:"Unknown"}{vet_request.animal_object.room_name ? <span> - {vet_request.animal_object.room_name}</span> : "Remote"}
+                          <b>Shelter: </b>{vet_request.animal_object.shelter_object ? vet_request.animal_object.shelter_object.name:"Unknown"}{vet_request.animal_object.room_name ? <span> - {vet_request.animal_object.room_name}</span> : "Field"}
                         </Col> */}
                       </Row>
                     </ListGroup.Item>
@@ -588,7 +1183,7 @@ function VetRequestSearch({ incident, organization }) {
         </div>
       ))}
       {vetObject === 'treatments' && treatments.map((treatment_request, index) => (
-      <Row key={treatment_request.id} className="ml-0 mb-3">
+      <Row key={treatment_request.id} className="ml-0 mb-3" hidden={page !== Math.ceil((index+1)/ITEMS_PER_PAGE)}>
         <Link href={"/" + organization + "/" + incident + "/vet/treatmentrequest/edit/" + treatment_request.id} className="treatment-link" style={{textDecoration:"none", color:"white"}}>
           <Card className="border rounded treatment-hover-div" style={{height:"120px", width:"845px", whiteSpace:"nowrap", overflow:"hidden"}}>
             <div className="row no-gutters hover-div treatment-hover-div" style={{height:"120px", marginRight:"-2px"}}>
@@ -638,7 +1233,7 @@ function VetRequestSearch({ incident, organization }) {
                         placement="top"
                         overlay={
                           <Tooltip id={`tooltip-awaiting-action-treatment-request`}>
-                            Treatment request is awaiting action.
+                            Treatment request is pending action.
                           </Tooltip>
                         }
                       >
@@ -661,34 +1256,38 @@ function VetRequestSearch({ incident, organization }) {
                   </div>
                   <Row style={{marginTop:"6px"}}>
                     <Col xs={3}>
-                      <b>Patient: </b><Link href={"/" + organization + "/" + incident + "/animals/" + treatment_request.animal_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>A#{treatment_request.animal_object.id}</Link>
+                      <b>Patient: </b>A#{treatment_request.animal_object.id}
                     </Col>
                     <Col xs={3}>
                       <b>Species:</b> <span  style={{textTransform:"capitalize"}}>{treatment_request.animal_object.species_string}</span>
                     </Col>
-                    <Col xs={4}>
+                    <Col xs={6}>
                       <b>Name: </b>{treatment_request.animal_object.name || "Unknown"}
                     </Col>
                   </Row>
                   <Row>
                     {treatment_request.actual_admin_time ?
                     <Col xs={6}>
-                      <b>Administered: </b><Moment format="lll">{treatment_request.actual_admin_time}</Moment>
+                      <b>Administered: </b><Moment format="MMM DD, HH:mm">{treatment_request.actual_admin_time}</Moment>
+                    </Col>
+                    : treatment_request.not_administered ?
+                    <Col xs={6}>
+                      <b>Administered: </b>Not Administered
                     </Col>
                     :
                     <Col xs={6}>
-                      <b>Scheduled: </b><Moment format="lll">{treatment_request.suggested_admin_time}</Moment>
+                      <b>Scheduled: </b><Moment format="MMM DD, HH:mm">{treatment_request.suggested_admin_time}</Moment>
                     </Col>
                     }
-                    {treatment_request.assignee_object ?
+                    {/* {treatment_request.assignee_object ?
                     <Col xs={4}>
                       <b>Administrator: </b>{treatment_request.assignee_object.first_name} {treatment_request.assignee_object.last_name}
                     </Col>
-                    :
-                    treatment_request.not_administered ?
+                    : */}
+                    {/* { */}
                     <Col xs={6}>
-                      <b>Administrator: </b>Not Administered
-                    </Col> : ""}
+                      <b>Location: </b>{treatment_request.animal_object.shelter_object ? <span>{treatment_request.animal_object.shelter_object.name} {treatment_request.animal_object.room_name ? <span> - {treatment_request.animal_object.room_name}</span> : ""}</span> : "Field"}
+                    </Col>
                   </Row>
                   <Row>
                     <Col xs={3}>
@@ -708,8 +1307,8 @@ function VetRequestSearch({ incident, organization }) {
         </Link>
       </Row>
       ))}
-      {vetObject === 'diagnostics' && diagnostics.map(diagnostic => (
-        <Row key={diagnostic.id} className="ml-0 mb-3">
+      {vetObject === 'diagnostics' && diagnostics.map((diagnostic, index) => (
+        <Row key={diagnostic.id} className="ml-0 mb-3" hidden={page !== Math.ceil((index+1)/ITEMS_PER_PAGE)}>
           <Link href={"/" + organization + "/" + incident + "/vet/diagnosticresult/edit/" + diagnostic.id} className="treatment-link" style={{textDecoration:"none", color:"white"}}>
             <Card className="border rounded treatment-hover-div" style={{height:"120px", width:"845px", whiteSpace:"nowrap", overflow:"hidden"}}>
               <div className="row no-gutters hover-div treatment-hover-div" style={{height:"120px", marginRight:"-2px"}}>
@@ -740,7 +1339,7 @@ function VetRequestSearch({ incident, organization }) {
                     </div>
                   <Col style={{marginLeft:"-5px", marginRight:"-25px"}} className="hover-div">
                     <div className="border treatment-hover-div" style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"10px", marginLeft:"-11px", marginTop: "-1px", fontSize:"18px", width:"100%", backgroundColor:"rgb(158 153 153)"}}>
-                      {diagnostic.other_name ? diagnostic.other_name : diagnostic.name}
+                      {diagnostic.other_name ? diagnostic.other_name : diagnostic.name}{diagnostic.result ? <span> - {diagnostic.result}</span> : ""}
                       <span className="float-right">
                       {diagnostic.result ?
                         <OverlayTrigger
@@ -764,14 +1363,14 @@ function VetRequestSearch({ incident, organization }) {
                             </Tooltip>
                           }
                         >
-                          <FontAwesomeIcon icon={faSquareEllipsis} size="3x" className="ml-1 treatment-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
+                          <FontAwesomeIcon icon={faSquareExclamation} size="3x" className="ml-1 treatment-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
                         </OverlayTrigger>
                         }
                       </span>
                     </div>
                     <Row style={{marginTop:"6px"}}>
                       <Col xs={3}>
-                        <b>Patient: </b><Link href={"/" + organization + "/" + incident + "/animals/" + diagnostic.animal_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>A#{diagnostic.animal_object.id}</Link>
+                        <b>Patient: </b>A#{diagnostic.animal_object.id}
                       </Col>
                       <Col xs={3}>
                         <b>Species:</b> <span  style={{textTransform:"capitalize"}}>{diagnostic.animal_object.species_string}</span>
@@ -781,18 +1380,21 @@ function VetRequestSearch({ incident, organization }) {
                       </Col>
                     </Row>
                     <Row>
-                      <Col xs={3}>
+                      {/* <Col xs={3}>
                       <b>Result: </b>{diagnostic.result || 'Pending'}
-                      </Col>
+                      </Col> */}
                       {diagnostic.complete ?
-                      <Col xs={4}>
-                        <b>Completed: </b><Moment format="lll">{diagnostic.complete}</Moment>
+                      <Col xs={6}>
+                        <b>Completed: </b><Moment format="MMM DD, HH:mm">{diagnostic.complete}</Moment>
                       </Col>
                       :
-                      <Col xs={4}>
-                        <b>Ordered: </b><Moment format="lll">{diagnostic.open}</Moment>
+                      <Col xs={6}>
+                        <b>Ordered: </b><Moment format="MMM DD, HH:mm">{diagnostic.open}</Moment>
                       </Col>
                       }
+                      <Col xs={6}>
+                        <b>Location: </b>{diagnostic.animal_object.shelter_object ? <span>{diagnostic.animal_object.shelter_object.name} {diagnostic.animal_object.room_name ? <span> - {diagnostic.animal_object.room_name}</span> : ""}</span> : "Field"}
+                      </Col>
                     </Row>
                     <Row>
                       <Col>
@@ -806,15 +1408,15 @@ function VetRequestSearch({ incident, organization }) {
           </Link>
         </Row>
       ))}
-      {vetObject === 'procedures' && procedures.map(procedure => (
-        <Row key={procedure.id} className="ml-0 mb-3">
+      {vetObject === 'procedures' && procedures.map((procedure, index) => (
+        <Row key={procedure.id} className="ml-0 mb-3" hidden={page !== Math.ceil((index+1)/ITEMS_PER_PAGE)}>
           <Link href={"/" + organization + "/" + incident + "/vet/procedureresult/edit/" + procedure.id} className="treatment-link" style={{textDecoration:"none", color:"white"}}>
             <Card className="border rounded treatment-hover-div" style={{height:"120px", width:"845px", whiteSpace:"nowrap", overflow:"hidden"}}>
               <div className="row no-gutters hover-div treatment-hover-div" style={{height:"120px", marginRight:"-2px"}}>
                 <Row className="ml-0 mr-0 w-100" style={{flexWrap:"nowrap"}}>
                   <div className="border-right" style={{width:"120px"}}>
                     {procedure.name.toLowerCase().includes('bandage') || procedure.other_name.toLowerCase().includes('bandage') || procedure.name.toLowerCase().includes('splint') || procedure.other_name.toLowerCase().includes('splint') ?
-                      <FontAwesomeIcon icon={faBandage} size="6x" className="treatment-icon" style={{marginTop:"11px", marginLeft:"3px"}} transform={'shrink-1'} inverse />
+                      <FontAwesomeIcon icon={faBandage} size="6x" className="treatment-icon" style={{marginTop:"12px", marginLeft:"3px"}} transform={'shrink-1'} inverse />
                     : procedure.name.toLowerCase().includes('hydro') || procedure.other_name.toLowerCase().includes('hydro') || procedure.name.toLowerCase().includes('water') || procedure.other_name.toLowerCase().includes('water') ?
                       <FontAwesomeIcon icon={faWater} size="6x" className="treatment-icon" style={{marginTop:"13px", marginLeft:"9px"}} transform={'grow-1'} inverse />
                     : procedure.name.toLowerCase().includes('eye') || procedure.other_name.toLowerCase().includes('eye') ?
@@ -851,14 +1453,14 @@ function VetRequestSearch({ incident, organization }) {
                             </Tooltip>
                           }
                         >
-                          <FontAwesomeIcon icon={faSquareEllipsis} size="3x" className="ml-1 treatment-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
+                          <FontAwesomeIcon icon={faSquareExclamation} size="3x" className="ml-1 treatment-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
                         </OverlayTrigger>
                         }
                       </span>
                     </div>
                     <Row style={{marginTop:"6px"}}>
                       <Col xs={3}>
-                        <b>Patient: </b><Link href={"/" + organization + "/" + incident + "/animals/" + procedure.animal_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>A#{procedure.animal_object.id}</Link>
+                        <b>Patient: </b>A#{procedure.animal_object.id}
                       </Col>
                       <Col xs={3}>
                         <b>Species:</b> <span  style={{textTransform:"capitalize"}}>{procedure.animal_object.species_string}</span>
@@ -868,18 +1470,21 @@ function VetRequestSearch({ incident, organization }) {
                       </Col>
                     </Row>
                     <Row>
-                      <Col xs={3}>
-                      <b>Status: </b>{procedure.complete ? 'Complete' : 'Pending'}
-                      </Col>
+                      {/* <Col xs={3}>
+                        <b>Status: </b>{procedure.complete ? 'Complete' : 'Pending'}
+                      </Col> */}
                       {procedure.complete ?
-                      <Col xs={4}>
-                        <b>Completed: </b><Moment format="lll">{procedure.complete}</Moment>
+                      <Col xs={6}>
+                        <b>Completed: </b><Moment format="MMM DD, HH:mm">{procedure.complete}</Moment>
                       </Col>
                       :
-                      <Col xs={4}>
-                        <b>Ordered: </b><Moment format="lll">{procedure.open}</Moment>
+                      <Col xs={6}>
+                        <b>Ordered: </b><Moment format="MMM DD, HH:mm">{procedure.open}</Moment>
                       </Col>
                       }
+                      <Col xs={6}>
+                        <b>Location: </b>{procedure.animal_object.shelter_object ? <span>{procedure.animal_object.shelter_object.name} {procedure.animal_object.room_name ? <span> - {procedure.animal_object.room_name}</span> : ""}</span> : "Field"}
+                      </Col>
                     </Row>
                     <Row>
                       <Col>

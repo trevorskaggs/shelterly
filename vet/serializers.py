@@ -55,6 +55,10 @@ class SimpleDiagnosticResultSerializer(serializers.ModelSerializer):
 class DiagnosticResultSerializer(SimpleDiagnosticResultSerializer):
 
     animal_object = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField(read_only=True)
+
+    def get_status(self, obj):
+        return "Completed" if obj.complete else "Pending"
 
     def get_animal_object(self, obj):
         return ModestAnimalSerializer(obj.medical_record.patient, required=False, read_only=True).data
@@ -73,6 +77,10 @@ class ProcedureResultSerializer(SimpleProcedureResultSerializer):
 
     name = serializers.StringRelatedField(source='procedure', read_only=True)
     animal_object = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField(read_only=True)
+
+    def get_status(self, obj):
+        return "Completed" if obj.complete else "Pending"
 
     def get_animal_object(self, obj):
         return ModestAnimalSerializer(obj.medical_record.patient, required=False, read_only=True).data
@@ -103,7 +111,7 @@ class SimpleTreatmentRequestSerializer(serializers.ModelSerializer):
     status = serializers.SerializerMethodField(read_only=True)
 
     def get_status(self, obj):
-        return "Complete" if obj.actual_admin_time != None or obj.not_administered == True else "Awaiting" if type(obj.suggested_admin_time) != str and obj.suggested_admin_time <= datetime.now(obj.suggested_admin_time.tzinfo) and obj.actual_admin_time == None else "Scheduled"
+        return "Not Administered" if obj.not_administered else "Completed" if obj.actual_admin_time != None or obj.not_administered == True else "Pending" if type(obj.suggested_admin_time) != str and obj.suggested_admin_time <= datetime.now(obj.suggested_admin_time.tzinfo) and obj.actual_admin_time == None else "Scheduled"
 
     class Meta:
         model = TreatmentRequest

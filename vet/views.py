@@ -134,6 +134,8 @@ class DiagnosticViewSet(viewsets.ModelViewSet):
 
 class DiagnosticResultViewSet(viewsets.ModelViewSet):
     queryset = DiagnosticResult.objects.all()
+    search_fields = ['id', 'diagnostic__name', 'medical_record__patient__name']
+    filter_backends = (filters.SearchFilter,)
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = DiagnosticResultSerializer
 
@@ -150,6 +152,8 @@ class DiagnosticResultViewSet(viewsets.ModelViewSet):
 
 class ProcedureResultViewSet(viewsets.ModelViewSet):
     queryset = ProcedureResult.objects.all()
+    search_fields = ['id', 'performer__first_name', 'performer__last_name', 'procedure__name', 'medical_record__patient__name']
+    filter_backends = (filters.SearchFilter,)
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = ProcedureResultSerializer
 

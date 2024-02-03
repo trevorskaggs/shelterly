@@ -161,23 +161,6 @@ class Treatment(models.Model):
         ordering = ('category', 'description',)
 
 
-# class TreatmentPlan(models.Model):
-
-#     medical_record = models.ForeignKey(MedicalRecord, on_delete=models.SET_NULL, null=True)
-#     treatment = models.ForeignKey(Treatment, on_delete=models.SET_NULL, null=True)
-#     frequency = models.IntegerField(blank=True)
-#     days = models.IntegerField(blank=True, null=True)
-#     quantity = models.FloatField(blank=True)
-#     unit = models.CharField(max_length=5, blank=True, null=True)
-#     route = models.CharField(max_length=5, blank=True, null=True)
-#     status = models.CharField(max_length=20, default='Open')
-#     start = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
-#     end = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
-
-#     class Meta:
-#         ordering = ('-id',)
-
-
 class TreatmentRequest(models.Model):
 
     medical_record = models.ForeignKey(MedicalRecord, on_delete=models.SET_NULL, null=True)

@@ -15,7 +15,7 @@ class TreatmentAdmin(admin.ModelAdmin):
   list_display = ('id', 'description', 'category',)
 
 class TreatmentRequestAdmin(admin.ModelAdmin):
-  list_display = ('id', 'suggested_admin_time',)
+  list_display = ('id', 'treatment', 'medical_record', 'suggested_admin_time', 'actual_admin_time',)
 
 class PresentingComplaintAdmin(admin.ModelAdmin):
   list_display = ('id', 'name',)

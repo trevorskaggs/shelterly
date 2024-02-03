@@ -427,7 +427,7 @@ function MedicalRecordDetails({ id, incident, organization }) {
                                 placement="top"
                                 overlay={
                                   <Tooltip id={`tooltip-awaiting-action-treatment-request`}>
-                                    Treatment request is awaiting action.
+                                    Treatment request is pending action.
                                   </Tooltip>
                                 }
                               >
@@ -543,7 +543,7 @@ function MedicalRecordDetails({ id, incident, organization }) {
                                   </Tooltip>
                                 }
                               >
-                                <FontAwesomeIcon icon={faSquareEllipsis} size="3x" className="ml-1 treatment-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
+                                <FontAwesomeIcon icon={faSquareExclamation} size="3x" className="ml-1 treatment-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
                               </OverlayTrigger>
                               }
                             </span>
@@ -620,7 +620,7 @@ function MedicalRecordDetails({ id, incident, organization }) {
                                   </Tooltip>
                                 }
                               >
-                                <FontAwesomeIcon icon={faSquareEllipsis} size="3x" className="ml-1 treatment-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
+                                <FontAwesomeIcon icon={faSquareExclamation} size="3x" className="ml-1 treatment-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
                               </OverlayTrigger>
                               }
                             </span>
