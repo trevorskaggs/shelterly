@@ -441,8 +441,9 @@ function VetRequestSearch({ incident, organization }) {
     let unmounted = false;
     let source = axios.CancelToken.source();
 
+    setData(prevState => ({ ...prevState, "isFetching":true }));
+
     const fetchVetRequests = async () => {
-      setData({vet_requests: [], isFetching: true});
       // Fetch VetRequest data.
       await axios.get('/vet/api/vetrequest/?search=' + searchTerm + '&incident=' + incident, {
         cancelToken: source.token,
@@ -450,7 +451,7 @@ function VetRequestSearch({ incident, organization }) {
       .then(response => {
         if (!unmounted) {
           setNumPages(Math.ceil(response.data.filter(vr => vr.status === options.status).length / ITEMS_PER_PAGE));
-          setData({vet_requests: response.data, isFetching: false});
+          setData(prevState => ({ ...prevState, "vet_requests":response.data, isFetching:false }));
           setVetRequests(response.data.filter(vr => vr.status === options.status));
 
           // Build opener option list.
@@ -485,7 +486,7 @@ function VetRequestSearch({ incident, organization }) {
       .then(response => {
         if (!unmounted) {
           setNumPages(Math.ceil(response.data.filter(treatment => treatment.status === treatmentOptions.status).length / ITEMS_PER_PAGE));
-          setData(prevState => ({ ...prevState, "treatments":response.data }));
+          setData(prevState => ({ ...prevState, "treatments":response.data, isFetching:false }));
           setTreatments(response.data.filter(treatment => treatment.status === treatmentOptions.status));
         }
       })
@@ -507,7 +508,7 @@ function VetRequestSearch({ incident, organization }) {
       .then(response => {
         if (!unmounted) {
           setNumPages(Math.ceil(response.data.filter(diagnostic => diagnostic.status === diagnosticOptions.status).length / ITEMS_PER_PAGE));
-          setData(prevState => ({ ...prevState, "diagnostics":response.data }));
+          setData(prevState => ({ ...prevState, "diagnostics":response.data, isFetching:false }));
           setDiagnostics(response.data.filter(diagnostic => diagnostic.status === diagnosticOptions.status));
         }
       })
@@ -528,7 +529,7 @@ function VetRequestSearch({ incident, organization }) {
       .then(response => {
         if (!unmounted) {
           setNumPages(Math.ceil(response.data.filter(procedure => procedure.status === procedureOptions.status).length / ITEMS_PER_PAGE));
-          setData(prevState => ({ ...prevState, "procedures":response.data }));
+          setData(prevState => ({ ...prevState, "procedures":response.data, isFetching:false }));
           setProcedures(response.data.filter(procedure => procedure.status === procedureOptions.status));
         }
       })
@@ -546,7 +547,6 @@ function VetRequestSearch({ incident, organization }) {
       unmounted = true;
       source.cancel();
     };
-
   }, [searchTerm, incident, vetObject]);
 
   // Hook handling option changes.
@@ -969,7 +969,7 @@ function VetRequestSearch({ incident, organization }) {
         <Card className="border rounded d-flex" style={{width:"100%"}}>
           <Card.Body>
             <Row style={{marginBottom:"-16px"}}>
-              <Col xs={"5"}>
+              <Col xs={"5"} className="mb-3">
                 <Select
                   id="statusDropdown"
                   name="procedureStatus"
@@ -1031,7 +1031,7 @@ function VetRequestSearch({ incident, organization }) {
               </Col>
               <Col xs="5">
                 <Row>
-                  <Col className="pl-0 pr-0 mb-3 mr-3" style={{textTransform:"capitalize"}}>
+                  <Col className="pl-0 pr-0 mr-3" style={{textTransform:"capitalize"}}>
                     <Select
                       id="speciesDropdown"
                       name="species"
@@ -1498,7 +1498,11 @@ function VetRequestSearch({ incident, organization }) {
           </Link>
         </Row>
       ))}
-      <p>{data.isFetching ? 'Fetching veterinary requests...' : <span>{data.vet_requests && data.vet_requests.length ? '' : 'No Veterinary Tasks found.'}</span>}</p>
+      <p>{data.isFetching ? <span>{'Fetching ' + (vetObject === 'vet_requests' ? 'veterinary requests' : vetObject === 'treatments' ? 'treatments' : vetObject === 'diagnostics' ? 'diagnostics' : 'procedures') + '...'}</span> : ""}</p>
+      {!data.isFetching && vetObject === 'vet_requests' && vetRequests.length === 0 ? <p>No veterinary requests found.</p> : ""}
+      {!data.isFetching && vetObject === 'treatments' && treatments.length === 0 ? <p>No treatments found.</p> : ""}
+      {!data.isFetching && vetObject === 'diagnostics' && diagnostics.length === 0 ? <p>No diagnostics found.</p> : ""}
+      {!data.isFetching && vetObject === 'procedures' && procedures.length === 0 ? <p>No procedures found.</p> : ""}
       <Pagination className="custom-page-links" size="lg" onClick={(e) => {setFocus(parseInt(e.target.innerText));setPage(parseInt(e.target.innerText))}}>
         {[...Array(numPages).keys()].map(x =>
         <Pagination.Item key={x+1} active={x+1 === page}>
