@@ -11,7 +11,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { faCheckCircle, faQuestionCircle as faQuestionCircleDuo } from '@fortawesome/pro-duotone-svg-icons';
 import { faHomeAlt as faHomeAltReg } from '@fortawesome/pro-regular-svg-icons';
-import { faCircleBolt, faHomeAlt, faDoNotEnter } from '@fortawesome/pro-solid-svg-icons';
+import { faCircleBolt, faHomeAlt, faDoNotEnter, faHouseMedical } from '@fortawesome/pro-solid-svg-icons';
 
 export const Legend = (props) => {
   const { map } = useLeaflet();
@@ -158,6 +158,19 @@ export const shelterMarkerIcon = new L.DivIcon({
   shadowSize: null,
   shadowAnchor: null
 });
+
+const vetShelterIconHTML = ReactDOMServer.renderToString(<FontAwesomeIcon icon={faHouseMedical} className="icon-border" size="lg" color="#b18662" />);
+export const vetShelterMarkerIcon = new L.DivIcon({
+  html: vetShelterIconHTML,
+  iconSize: [0, 0],
+  iconAnchor: [8, 9],
+  className: "vet-shelter-icon",
+  popupAnchor: null,
+  shadowUrl: null,
+  shadowSize: null,
+  shadowAnchor: null
+});
+
 
 const closedIconHTML = ReactDOMServer.renderToString(
   <span className="fa-layers">

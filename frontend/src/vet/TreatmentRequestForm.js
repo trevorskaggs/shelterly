@@ -43,7 +43,7 @@ const TreatmetRequestForm = (props) => {
 
     const fetchTreatmentRequest = async () => {
       // Fetch TreatmentRequest data.
-      await axios.get('/vet/api/treatmentrequest/' + props.id + '/', {
+      await axios.get('/vet/api/treatmentrequest/' + props.id + '/?incident=' + props.incident, {
         cancelToken: source.token,
       })
       .then(response => {

@@ -55,7 +55,7 @@ const DiagnosticResultForm = (props) => {
 
     const fetchDiagnosticResult = async () => {
       // Fetch diagnostic result data.
-      await axios.get('/vet/api/diagnosticresults/' + props.id + '/', {
+      await axios.get('/vet/api/diagnosticresults/' + props.id + '/?incident=' + props.incident, {
         cancelToken: source.token,
       })
       .then(response => {

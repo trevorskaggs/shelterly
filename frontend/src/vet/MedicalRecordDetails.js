@@ -1,6 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
-import Moment from 'react-moment';
 import moment from 'moment';
 import { Link } from 'raviger';
 import { Button, Card, Col, Collapse, ListGroup, ListGroupItem, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
@@ -38,11 +37,14 @@ import {
 import {
   faRectangleVertical,
 } from '@fortawesome/sharp-solid-svg-icons';
+import { faBandage, faRing, faTankWater } from '@fortawesome/pro-regular-svg-icons';
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
 import { SystemErrorContext } from '../components/SystemError';
 import { AuthContext } from "../accounts/AccountsReducer";
-import { faBandage, faRing, faTankWater } from '@fortawesome/pro-regular-svg-icons';
+import TreatmentCard from "./components/TreatmentCard";
+import DiagnosticCard from './components/DiagnosticCard';
+import ProcedureCard from './components/ProcedureCard';
 
 function MedicalRecordDetails({ id, incident, organization }) {
 
@@ -56,7 +58,7 @@ function MedicalRecordDetails({ id, incident, organization }) {
   const [activeVR, setActiveVR] = useState(null);
   const [activeOpenVR, setActiveOpenVR] = useState(null);
   const [activeExam, setActiveExam] = useState(null);
-  const [activeOrders, setActiveOrders] = useState("treatments");
+  const [activeOrders, setActiveOrders] = useState("pending");
 
   // Hook for initializing data.
   useEffect(() => {
@@ -319,13 +321,18 @@ function MedicalRecordDetails({ id, incident, organization }) {
     {data.exams.length > 0 ?
     <div className="row mt-3 mb-2">
       <div className="col-12 d-flex">
-        <Card className="mb-2 border rounded" style={{width:"100%", minHeight:"552px"}}>
-          <Card.Body style={{marginBottom:"-19px"}}>
-            <Card.Title style={{marginTop:"-2px", marginBottom:"-16px"}}>
+        <Card className="mb-2 border rounded" style={{width:"100%", height:"685px"}}>
+          <Card.Body style={{marginBottom:""}}>
+            <Card.Title style={{marginTop:"-2px", marginBottom:"20px"}}>
               <h4 className="mb-0">
-                <ListGroup horizontal>
+                <ListGroup horizontal style={{marginBottom:"-20px"}}>
+                  <ListGroup.Item active={"pending" === activeOrders} className="text-center" style={{textTransform:"capitalize", cursor:'pointer', paddingLeft:"5px", paddingRight:"5px"}} onClick={() => setActiveOrders("pending")}>
+                    <div style={{marginTop:"-3px", marginLeft:"-1px", paddingLeft:"10px", paddingRight:"10px"}}>
+                      All Pending ({data.treatment_requests.filter(tr => tr.status === 'Pending').length + data.diagnostic_objects.filter(diagnostic => diagnostic.status === 'Pending').length + data.procedure_objects.filter(procedure => procedure.status === 'Pending').length})
+                    </div>
+                  </ListGroup.Item>
                   <ListGroup.Item active={"treatments" === activeOrders} className="text-center" style={{textTransform:"capitalize", cursor:'pointer', paddingLeft:"5px", paddingRight:"5px"}} onClick={() => setActiveOrders("treatments")}>
-                    <div style={{marginTop:"-3px", marginLeft:"-1px", width:"183px"}}>
+                    <div style={{marginTop:"-3px", marginLeft:"-1px", paddingLeft:"10px", paddingRight:"10px"}}>
                       Treatments ({data.treatment_requests.length})
                       {activeOrders === 'treatments' ? <OverlayTrigger
                         key={"add-treatment"}
@@ -341,7 +348,7 @@ function MedicalRecordDetails({ id, incident, organization }) {
                     </div>
                   </ListGroup.Item>
                   <ListGroup.Item active={"diagnostics" === activeOrders} className="text-center" style={{textTransform:"capitalize", cursor:'pointer', paddingLeft:"5px", paddingRight:"5px"}} onClick={() => setActiveOrders("diagnostics")}>
-                    <div style={{marginTop:"-3px", marginLeft:"-1px", width:"183px"}}>
+                    <div style={{marginTop:"-3px", marginLeft:"-1px", paddingLeft:"10px", paddingRight:"10px"}}>
                       Diagnostics ({data.diagnostic_objects.length})
                       {activeOrders === 'diagnostics' ? <OverlayTrigger
                         key={"order-diagnostic"}
@@ -357,7 +364,7 @@ function MedicalRecordDetails({ id, incident, organization }) {
                     </div>
                   </ListGroup.Item>
                   <ListGroup.Item active={"procedures" === activeOrders} className="text-center" style={{textTransform:"capitalize", cursor:'pointer', paddingLeft:"5px", paddingRight:"5px"}} onClick={() => setActiveOrders("procedures")}>
-                    <div style={{marginTop:"-3px", marginLeft:"-1px", width:"183px"}}>
+                    <div style={{marginTop:"-3px", marginLeft:"-1px", paddingLeft:"10px", paddingRight:"10px"}}>
                       Procedures ({data.procedure_objects.length})
                       {activeOrders === 'procedures' ? <OverlayTrigger
                         key={"order-procedure"}
@@ -376,288 +383,36 @@ function MedicalRecordDetails({ id, incident, organization }) {
               </h4>
             </Card.Title>
             <hr className="mb-3" />
+            <Scrollbar no_shadow="true" style={{height:"564px", minHeight:"564px"}} renderView={props => <div {...props} style={{...props.style, overflowX:"hidden", marginBottom:"-10px"}}/>}  renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
+            {activeOrders === 'pending' && data.treatment_requests.filter(tr => tr.status === 'Pending').map(treatment_request => (
+              <TreatmentCard incident={incident} organization={organization} treatment_request={treatment_request} />
+            ))}
+            {activeOrders === 'pending' && data.diagnostic_objects.filter(diagnostic => diagnostic.status === 'Pending').map(diagnostic => (
+              <DiagnosticCard incident={incident} organization={organization} diagnostic={diagnostic} />
+            ))}
+            {activeOrders === 'pending' && data.procedure_objects.filter(procedure => procedure.status === 'Pending').map(procedure => (
+              <ProcedureCard incident={incident} organization={organization} procedure={procedure} />
+            ))}
+            
             {activeOrders === 'treatments' && data.treatment_requests.map(treatment_request => (
-              <Row key={treatment_request.id} className="ml-0 mb-3">
-                <Link href={"/" + organization + "/" + incident + "/vet/treatmentrequest/edit/" + treatment_request.id} className="treatment-link" style={{textDecoration:"none", color:"white"}}>
-                  <Card className="border rounded treatment-hover-div" style={{height:"100px", width:"745px", whiteSpace:"nowrap", overflow:"hidden"}}>
-                    <div className="row no-gutters hover-div treatment-hover-div" style={{height:"100px", marginRight:"-2px"}}>
-                      <Row className="ml-0 mr-0 w-100" style={{flexWrap:"nowrap"}}>
-                        <div className="border-right" style={{width:"100px"}}>
-                        {['Eye Medication','Ear Medication'].includes(treatment_request.treatment_object.category) ?
-                          <FontAwesomeIcon icon={faEyeDropper} size="6x" className="treatment-icon" style={{marginTop:"5px", marginLeft:"4px"}} transform={'shrink-2'} inverse />
-                          : treatment_request.treatment_object.category === 'Patient Care' ?
-                          <FontAwesomeIcon icon={faHeart} size="6x" className="treatment-icon" style={{marginTop:"5px", marginLeft:"4px"}} transform={'shrink-2'} inverse />
-                          : treatment_request.treatment_object.unit === 'ml' ?
-                          <FontAwesomeIcon icon={faSyringe} size="6x" className="treatment-icon" style={{marginTop:"5px", marginLeft:"4px"}} transform={'shrink-2'} inverse />
-                        :
-                          <FontAwesomeIcon icon={faPrescriptionBottlePill} size="6x" className="treatment-icon" style={{marginTop:"5px", marginLeft:"-1px"}} transform={'shrink-2'} inverse />
-                        }
-                        </div>
-                        <Col style={{marginLeft:"-5px", marginRight:"-25px"}} className="hover-div">
-                          <div className="border treatment-hover-div" style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"10px", marginLeft:"-11px", marginTop: "-1px", fontSize:"18px", width:"100%", backgroundColor:"rgb(158 153 153)"}}>
-                            {treatment_request.treatment_object.description}
-                            <span className="float-right">
-                            {treatment_request.actual_admin_time ?
-                              <OverlayTrigger
-                                key={"complete-treatment-request"}
-                                placement="top"
-                                overlay={
-                                  <Tooltip id={`tooltip-complete-treatment-request`}>
-                                    All treatment requests are completed.
-                                  </Tooltip>
-                                }
-                              >
-                                <FontAwesomeIcon icon={faCheckSquare} size="3x" className="ml-1 treatment-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
-                              </OverlayTrigger>
-                              : treatment_request.not_administered ?
-                              <OverlayTrigger
-                                key={"not-administered-treatment-request"}
-                                placement="top"
-                                overlay={
-                                  <Tooltip id={`tooltip-not-administered-treatment-request`}>
-                                    Treatment request was not administered.
-                                  </Tooltip>
-                                }
-                              >
-                                <FontAwesomeIcon icon={faSquareX} size="3x" className="ml-1 treatment-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
-                              </OverlayTrigger>
-                              : new Date(treatment_request.suggested_admin_time) <= new Date() ?
-                              <OverlayTrigger
-                                key={"awaiting-action-treatment-request"}
-                                placement="top"
-                                overlay={
-                                  <Tooltip id={`tooltip-awaiting-action-treatment-request`}>
-                                    Treatment request is pending action.
-                                  </Tooltip>
-                                }
-                              >
-                                <FontAwesomeIcon icon={faSquareExclamation} size="3x" className="ml-1 treatment-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
-                              </OverlayTrigger>
-                              :
-                              <OverlayTrigger
-                                key={"scheduled-treatment-request"}
-                                placement="top"
-                                overlay={
-                                  <Tooltip id={`tooltip-scheduled-treatment-request`}>
-                                    At least one treatment request is scheduled for a future date/time.
-                                  </Tooltip>
-                                }
-                              >
-                                <FontAwesomeIcon icon={faSquareEllipsis} size="3x" className="ml-1 treatment-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
-                              </OverlayTrigger>
-                              }
-                            </span>
-                          </div>
-                          <Row style={{marginTop:"6px"}}>
-                            {treatment_request.actual_admin_time ?
-                            <Col xs={6}>
-                              Administered: <Moment format="lll">{treatment_request.actual_admin_time}</Moment>
-                            </Col>
-                            :
-                            <Col xs={6}>
-                              Scheduled: <Moment format="lll">{treatment_request.suggested_admin_time}</Moment>
-                            </Col>
-                            }
-                            {treatment_request.assignee_object ?
-                            <Col xs={4}>
-                              Administrator: {treatment_request.assignee_object.first_name} {treatment_request.assignee_object.last_name}
-                            </Col>
-                            :
-                            treatment_request.not_administered ?
-                            <Col xs={6}>
-                              Administrator: Not Administered
-                            </Col> : ""}
-                          </Row>
-                          <Row>
-                            <Col xs={3}>
-                              Quantity: {treatment_request.quantity}
-                            </Col>
-                            <Col xs={3}>
-                              Unit: {treatment_request.unit || '-'}
-                            </Col>
-                            <Col>
-                              Route: {treatment_request.route || '-'}
-                            </Col>
-                          </Row>
-                        </Col>
-                      </Row>
-                    </div>
-                  </Card>
-                </Link>
-              </Row>
+              <TreatmentCard incident={incident} organization={organization} treatment_request={treatment_request} />
             ))}
             {activeOrders === 'treatments' && data.treatment_requests.length < 1 ? <p>No treatments have been created for this patient.</p> : ""}
             {activeOrders === 'diagnostics' && data.diagnostic_objects.map(diagnostic => (
-              <Row key={diagnostic.id} className="ml-0 mb-3">
-                <Link href={"/" + organization + "/" + incident + "/vet/diagnosticresult/edit/" + diagnostic.id} className="treatment-link" style={{textDecoration:"none", color:"white"}}>
-                  <Card className="border rounded treatment-hover-div" style={{height:"100px", width:"745px", whiteSpace:"nowrap", overflow:"hidden"}}>
-                    <div className="row no-gutters hover-div treatment-hover-div" style={{height:"100px", marginRight:"-2px"}}>
-                      <Row className="ml-0 mr-0 w-100" style={{flexWrap:"nowrap"}}>
-                        <div className="border-right" style={{width:"100px"}}>
-                          {diagnostic.name.toLowerCase().includes('needle') || diagnostic.other_name.toLowerCase().includes('needle') ?
-                            <FontAwesomeIcon icon={faSyringe} size="6x" className="treatment-icon" style={{marginTop:"5px", marginLeft:"4px"}} transform={'shrink-2'} inverse />
-                          : diagnostic.name.toLowerCase().includes('istat') || diagnostic.other_name.toLowerCase().includes('istat') ?
-                          <span className="fa-layers" style={{marginLeft:"16px"}}>
-                            <FontAwesomeIcon icon={faRectangleVertical} size="3x" className="treatment-icon" style={{marginTop:"7px", marginLeft:"5.5px"}} transform={'shrink-3 down-15 right-4'} inverse />
-                            <FontAwesomeIcon icon={faMobileScreenButton} size="4x" className="treatment-icon" style={{marginLeft:""}} transform={'shrink-2 down-6 right-3'} inverse />
-                          </span>
-                          : diagnostic.name.toLowerCase().includes('culture') || diagnostic.other_name.toLowerCase().includes('culture') ?
-                            <FontAwesomeIcon icon={faRing} size="6x" className="treatment-icon" style={{marginTop:"5px", marginLeft:"-1px"}} transform={'shrink-2 right-1'} inverse />
-                          : diagnostic.name.toLowerCase().includes('schirmer') || diagnostic.other_name.toLowerCase().includes('schirmer') ?
-                            <FontAwesomeIcon icon={faEye} size="5x" className="treatment-icon" style={{marginTop:"11px", marginLeft:"8px"}} transform={'grow-1'} inverse />
-                          : diagnostic.name.toLowerCase().includes('eye') || diagnostic.other_name.toLowerCase().includes('eye') ?
-                            <FontAwesomeIcon icon={faEyeDropper} size="5x" className="treatment-icon" style={{marginTop:"11px", marginLeft:"11px"}} transform={'grow-1'} inverse />
-                          : diagnostic.name.toLowerCase().includes('ultrasound') || diagnostic.other_name.toLowerCase().includes('ultrasound') ?
-                            <span className="fa-layers" style={{marginLeft:"16px"}}>
-                              <FontAwesomeIcon icon={faWifi} size="3x" className="treatment-icon" style={{marginTop:"7px", marginLeft:"5px"}} transform={'shrink-1 up-2 right-8 rotate-45'} inverse />
-                              <FontAwesomeIcon icon={faPeriod} size="3x" className="fa-move-up" style={{marginLeft:"1px", color:"#303030"}} transform={'down-14 right-16 rotate-145'} inverse />
-                              <FontAwesomeIcon icon={faFlashlight} size="4x" className="treatment-icon" transform={'shrink-2 down-14 left-5 rotate-315'} inverse />
-                            </span>
-                          :
-                            <FontAwesomeIcon icon={faVial} size="6x" className="treatment-icon" style={{marginTop:"5px", marginLeft:"7px"}} inverse />
-                          }
-                          </div>
-                        <Col style={{marginLeft:"-5px", marginRight:"-25px"}} className="hover-div">
-                          <div className="border treatment-hover-div" style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"10px", marginLeft:"-11px", marginTop: "-1px", fontSize:"18px", width:"100%", backgroundColor:"rgb(158 153 153)"}}>
-                            {diagnostic.other_name ? diagnostic.other_name : diagnostic.name}
-                            <span className="float-right">
-                            {diagnostic.result ?
-                              <OverlayTrigger
-                                key={"complete-diagnostics"}
-                                placement="top"
-                                overlay={
-                                  <Tooltip id={`tooltip-complete-diagnostics`}>
-                                    Diagnostic order is complete.
-                                  </Tooltip>
-                                }
-                              >
-                                <FontAwesomeIcon icon={faCheckSquare} size="3x" className="ml-1 treatment-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
-                              </OverlayTrigger>
-                              :
-                              <OverlayTrigger
-                                key={"scheduled-diagnostics"}
-                                placement="top"
-                                overlay={
-                                  <Tooltip id={`tooltip-scheduled-diagnostics`}>
-                                    Diagnostic order is pending.
-                                  </Tooltip>
-                                }
-                              >
-                                <FontAwesomeIcon icon={faSquareExclamation} size="3x" className="ml-1 treatment-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
-                              </OverlayTrigger>
-                              }
-                            </span>
-                          </div>
-                          <Row style={{marginTop:"6px"}}>
-                            <Col xs={3}>
-                              Result: {diagnostic.result || 'Pending'}
-                            </Col>
-                            {diagnostic.complete ?
-                            <Col xs={4}>
-                              Completed: <Moment format="lll">{diagnostic.complete}</Moment>
-                            </Col>
-                            :
-                            <Col xs={4}>
-                              Ordered: <Moment format="lll">{diagnostic.open}</Moment>
-                            </Col>
-                            }
-                          </Row>
-                          <Row>
-                            <Col>
-                              Notes: {diagnostic.notes || "N/A"}
-                            </Col>
-                          </Row>
-                        </Col>
-                      </Row>
-                    </div>
-                  </Card>
-                </Link>
-              </Row>
+              <DiagnosticCard incident={incident} organization={organization} diagnostic={diagnostic} />
             ))}
             {activeOrders === 'diagnostics' && data.diagnostic_objects.length < 1 ? <p>No diagnostics have been ordered for this patient.</p> : ""}
             {activeOrders === 'procedures' && data.procedure_objects.map(procedure => (
-              <Row key={procedure.id} className="ml-0 mb-3">
-                <Link href={"/" + organization + "/" + incident + "/vet/procedureresult/edit/" + procedure.id} className="treatment-link" style={{textDecoration:"none", color:"white"}}>
-                  <Card className="border rounded treatment-hover-div" style={{height:"100px", width:"745px", whiteSpace:"nowrap", overflow:"hidden"}}>
-                    <div className="row no-gutters hover-div treatment-hover-div" style={{height:"100px", marginRight:"-2px"}}>
-                      <Row className="ml-0 mr-0 w-100" style={{flexWrap:"nowrap"}}>
-                        <div className="border-right" style={{width:"100px"}}>
-                          {procedure.name.toLowerCase().includes('bandage') || procedure.other_name.toLowerCase().includes('bandage') || procedure.name.toLowerCase().includes('splint') || procedure.other_name.toLowerCase().includes('splint') ?
-                            <FontAwesomeIcon icon={faBandage} size="5x" className="treatment-icon" style={{marginTop:"11px", marginLeft:"3px"}} transform={'shrink-1'} inverse />
-                          : procedure.name.toLowerCase().includes('hydro') || procedure.other_name.toLowerCase().includes('hydro') || procedure.name.toLowerCase().includes('water') || procedure.other_name.toLowerCase().includes('water') ?
-                            <FontAwesomeIcon icon={faWater} size="6x" className="treatment-icon" style={{marginTop:"5px", marginLeft:"-1px"}} transform={'shrink-2'} inverse />
-                          : procedure.name.toLowerCase().includes('eye') || procedure.other_name.toLowerCase().includes('eye') ?
-                            <FontAwesomeIcon icon={faEye} size="5x" className="treatment-icon" style={{marginTop:"11px", marginLeft:"8px"}} transform={'grow-1'} inverse />
-                          : procedure.name.toLowerCase().includes('clean') || procedure.other_name.toLowerCase().includes('clean') ?
-                            <FontAwesomeIcon icon={faSoap} size="6x" className="treatment-icon" style={{marginTop:"5px", marginLeft:"5px"}} transform={'shrink-1'} inverse />
-                          :
-                            <FontAwesomeIcon icon={faScalpelLineDashed} size="6x" className="treatment-icon" style={{marginTop:"5px", marginLeft:"-1px"}} transform={'shrink-2'} inverse />
-                          }
-                          </div>
-                        <Col style={{marginLeft:"-5px", marginRight:"-25px"}} className="hover-div">
-                          <div className="border treatment-hover-div" style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"10px", marginLeft:"-11px", marginTop: "-1px", fontSize:"18px", width:"100%", backgroundColor:"rgb(158 153 153)"}}>
-                            {procedure.other_name ? procedure.other_name : procedure.name}
-                            <span className="float-right">
-                            {procedure.complete ?
-                              <OverlayTrigger
-                                key={"complete-procedures"}
-                                placement="top"
-                                overlay={
-                                  <Tooltip id={`tooltip-complete-procedures`}>
-                                    Procedure order is complete.
-                                  </Tooltip>
-                                }
-                              >
-                                <FontAwesomeIcon icon={faCheckSquare} size="3x" className="ml-1 treatment-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
-                              </OverlayTrigger>
-                              :
-                              <OverlayTrigger
-                                key={"scheduled-procedures"}
-                                placement="top"
-                                overlay={
-                                  <Tooltip id={`tooltip-scheduled-procedures`}>
-                                    Procedure order is pending.
-                                  </Tooltip>
-                                }
-                              >
-                                <FontAwesomeIcon icon={faSquareExclamation} size="3x" className="ml-1 treatment-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
-                              </OverlayTrigger>
-                              }
-                            </span>
-                          </div>
-                          <Row style={{marginTop:"6px"}}>
-                            <Col xs={3}>
-                              Status: {procedure.complete ? 'Complete' : 'Pending'}
-                            </Col>
-                            {procedure.complete ?
-                            <Col xs={4}>
-                              Completed: <Moment format="lll">{procedure.complete}</Moment>
-                            </Col>
-                            :
-                            <Col xs={4}>
-                              Ordered: <Moment format="lll">{procedure.open}</Moment>
-                            </Col>
-                            }
-                          </Row>
-                          <Row>
-                            <Col>
-                              Notes: {procedure.notes || "N/A"}
-                            </Col>
-                          </Row>
-                        </Col>
-                      </Row>
-                    </div>
-                  </Card>
-                </Link>
-              </Row>
+              <ProcedureCard incident={incident} organization={organization} procedure={procedure} />
             ))}
             {activeOrders === 'procedures' && data.procedure_objects.length < 1 ? <p>No procedures have been ordered for this patient.</p> : ""}
+            </Scrollbar>
           </Card.Body>
         </Card>
       </div>
     </div> : ""}
     <Row>
-    {data.exams.length > 0 ? <div className="col-12 d-flex">
+    {data.exams.length > 0 ? <div className="col-12 d-flex mb-3">
         <Card className="border rounded d-flex" style={{width:"100%"}}>
           <Card.Body>
             <Card.Title>

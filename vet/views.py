@@ -139,6 +139,18 @@ class DiagnosticResultViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = DiagnosticResultSerializer
 
+    def get_queryset(self):
+        """
+        Returns: Queryset of diagnostic results.
+        """
+        queryset = (
+            DiagnosticResult.objects.filter(medical_record__patient__incident__slug=self.request.GET.get('incident'))
+            .select_related("diagnostic")
+        )
+        if self.request.GET.get('today'):
+            queryset = queryset.filter(open__lte=datetime.today(), complete__isnull=True)
+        return queryset
+
     def perform_update(self, serializer):
 
         if serializer.is_valid():
@@ -157,6 +169,18 @@ class ProcedureResultViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = ProcedureResultSerializer
 
+    def get_queryset(self):
+        """
+        Returns: Queryset of procedure results.
+        """
+        queryset = (
+            ProcedureResult.objects.filter(medical_record__patient__incident__slug=self.request.GET.get('incident'))
+            .select_related("procedure")
+        )
+        if self.request.GET.get('today'):
+            queryset = queryset.filter(open__lte=datetime.today(), complete__isnull=True)
+        return queryset
+
 
 class TreatmentRequestViewSet(viewsets.ModelViewSet):
     queryset = TreatmentRequest.objects.all()
@@ -164,6 +188,18 @@ class TreatmentRequestViewSet(viewsets.ModelViewSet):
     filter_backends = (filters.SearchFilter,)
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = TreatmentRequestSerializer
+
+    def get_queryset(self):
+        """
+        Returns: Queryset of treatment requests.
+        """
+        queryset = (
+            TreatmentRequest.objects.filter(medical_record__patient__incident__slug=self.request.GET.get('incident'))
+            .select_related("treatment")
+        )
+        if self.request.GET.get('today'):
+            queryset = queryset.filter(suggested_admin_time__lte=datetime.today(), actual_admin_time__isnull=True).exclude(not_administered=True)
+        return queryset
 
     def perform_create(self, serializer):
         if serializer.is_valid():

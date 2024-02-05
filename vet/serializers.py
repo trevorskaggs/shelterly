@@ -46,6 +46,10 @@ class DiagnosticSerializer(serializers.ModelSerializer):
 class SimpleDiagnosticResultSerializer(serializers.ModelSerializer):
 
     name = serializers.StringRelatedField(source='diagnostic', read_only=True)
+    status = serializers.SerializerMethodField(read_only=True)
+
+    def get_status(self, obj):
+        return "Completed" if obj.complete else "Pending"
 
     class Meta:
         model = DiagnosticResult
@@ -55,10 +59,6 @@ class SimpleDiagnosticResultSerializer(serializers.ModelSerializer):
 class DiagnosticResultSerializer(SimpleDiagnosticResultSerializer):
 
     animal_object = serializers.SerializerMethodField()
-    status = serializers.SerializerMethodField(read_only=True)
-
-    def get_status(self, obj):
-        return "Completed" if obj.complete else "Pending"
 
     def get_animal_object(self, obj):
         return ModestAnimalSerializer(obj.medical_record.patient, required=False, read_only=True).data
@@ -67,6 +67,10 @@ class DiagnosticResultSerializer(SimpleDiagnosticResultSerializer):
 class SimpleProcedureResultSerializer(serializers.ModelSerializer):
 
     name = serializers.StringRelatedField(source='procedure', read_only=True)
+    status = serializers.SerializerMethodField(read_only=True)
+
+    def get_status(self, obj):
+        return "Completed" if obj.complete else "Pending"
 
     class Meta:
         model = ProcedureResult
@@ -77,10 +81,6 @@ class ProcedureResultSerializer(SimpleProcedureResultSerializer):
 
     name = serializers.StringRelatedField(source='procedure', read_only=True)
     animal_object = serializers.SerializerMethodField()
-    status = serializers.SerializerMethodField(read_only=True)
-
-    def get_status(self, obj):
-        return "Completed" if obj.complete else "Pending"
 
     def get_animal_object(self, obj):
         return ModestAnimalSerializer(obj.medical_record.patient, required=False, read_only=True).data

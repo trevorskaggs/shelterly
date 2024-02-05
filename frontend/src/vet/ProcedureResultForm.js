@@ -59,7 +59,7 @@ const ProcedureResultForm = (props) => {
 
     const fetchProcedureResult = async () => {
       // Fetch procedure result data.
-      await axios.get('/vet/api/procedureresults/' + props.id + '/', {
+      await axios.get('/vet/api/procedureresults/' + props.id + '/?incident=' + props.incident, {
         cancelToken: source.token,
       })
       .then(response => {
