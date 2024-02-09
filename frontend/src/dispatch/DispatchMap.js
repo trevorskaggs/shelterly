@@ -695,7 +695,15 @@ function Deploy({ incident, organization }) {
               <h5 className="mb-0 text-center">Options</h5>
               <hr/>
               <FormCheck id="aco_required" name="aco_required" type="switch" label="ACO Required" checked={statusOptions.aco_required} onChange={handleACO} />
-              <FormCheck id="pending_only" className="mt-3" name="pending_only" type="switch" label="Pending Only" checked={statusOptions.pending_only} onChange={handlePendingOnly} />
+              <FormCheck
+                id="pending_only"
+                className="mt-3"
+                name="pending_only"
+                type="switch"
+                label={`Pending Only (${data?.service_requests?.filter?.((sr) => sr.pending_only)?.length || 0})`}
+                checked={statusOptions.pending_only}
+                onChange={handlePendingOnly}
+              />
             </div>
           </Col>
           <Col xs={10} className="border rounded" style={{marginLeft:"1px", height:"277px", overflowY:"auto", paddingRight:"-1px"}}>
