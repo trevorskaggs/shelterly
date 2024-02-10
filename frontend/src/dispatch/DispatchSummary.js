@@ -18,11 +18,13 @@ import { printDispatchResolutionForm } from './Utils'
 import { AuthContext } from "../accounts/AccountsReducer";
 import { SystemErrorContext } from '../components/SystemError';
 import ShelterlyPrintifyButton from '../components/ShelterlyPrintifyButton';
+import LoadingLink from '../components/LoadingLink';
 
 function DispatchSummary({ id, incident, organization }) {
 
   const { dispatch, state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Initial animal data.
   const [data, setData] = useState({
@@ -59,6 +61,7 @@ function DispatchSummary({ id, incident, organization }) {
       setError("Team name must be 18 characters or less.");
     }
     else {
+      setIsLoading(true);
       await axios.patch('/evac/api/dispatchteam/' + data.team + '/', {'name':teamName})
       .then(response => {
         setData(prevState => ({ ...prevState, "team_object":{ ...prevState.team_object, "name": teamName} }));
@@ -67,7 +70,8 @@ function DispatchSummary({ id, incident, organization }) {
       })
       .catch(error => {
         setShowSystemError(true);
-      });
+      })
+      .finally(() => setIsLoading(false));
     }
   }
 
@@ -113,15 +117,17 @@ function DispatchSummary({ id, incident, organization }) {
 
   const handleGeoJsonDownload = () => {
     var fileDownload = require('js-file-download');
+    setIsLoading(true);
     axios.get('/evac/api/evacassignment/' + data.id +'/download/', { 
             responseType: 'blob',
         }).then(res => {
             fileDownload(res.data, 'DAR-' + data.id + '.geojson');
         }).catch(err => {
-        })
+        }).finally(() => setIsLoading(false));
   }
 
   const handleAddTeamMemberSubmit = async () => {
+    setIsLoading(true);
     await axios.patch('/evac/api/dispatchteam/' + data.team + '/', {'dispatch_id':data.id, 'new_team_members':teamMembers.map(item => item.id[0])})
     .then(response => {
       setData(prevState => ({ ...prevState, "team_member_objects":response.data.team_member_objects, "team_members":response.data.team_members }));
@@ -131,10 +137,12 @@ function DispatchSummary({ id, incident, organization }) {
     })
     .catch(error => {
       setShowSystemError(true);
-    });
+    })
+    .finally(() => setIsLoading(false));
   }
 
   const handleRemoveTeamMemberSubmit = async () => {
+    setIsLoading(true);
     await axios.patch('/evac/api/dispatchteam/' + data.team + '/', {'remove_team_member':teamMemberToDelete.id})
     .then(response => {
       setData(prevState => ({ ...prevState, "team_member_objects":response.data.team_member_objects, "team_members":response.data.team_members }));
@@ -143,7 +151,8 @@ function DispatchSummary({ id, incident, organization }) {
     })
     .catch(error => {
       setShowSystemError(true);
-    });
+    })
+    .finally(() => setIsLoading(false));
   }
 
   const handleDownloadPdfClick = () =>
@@ -153,6 +162,7 @@ function DispatchSummary({ id, incident, organization }) {
   useEffect(() => {
     let unmounted = false;
     let source = axios.CancelToken.source();
+    setIsLoading(true);
 
     const fetchDispatchSummaryData = async () => {
       // Fetch Animal data.
@@ -221,7 +231,8 @@ function DispatchSummary({ id, incident, organization }) {
         if (!unmounted) {
           setShowSystemError(true);
         }
-      });
+      })
+      .finally(() => setIsLoading(false));
     };
 
     fetchDispatchSummaryData();
@@ -278,7 +289,7 @@ function DispatchSummary({ id, incident, organization }) {
           </Tooltip>
         }
       >
-        <Link onClick={handleGeoJsonDownload} href=""><FontAwesomeIcon icon={faDownload} className="ml-2"  inverse /></Link>
+        <LoadingLink onClick={handleGeoJsonDownload} isLoading={isLoading}><FontAwesomeIcon icon={faDownload} className="ml-2"  inverse /></LoadingLink>
       </OverlayTrigger>
     <div style={{fontSize:"18px", marginTop:"10px"}}><b>Opened: </b><Moment format="MMMM Do YYYY, HH:mm">{data.start_time}</Moment>{data.closed && data.end_time ? <span> | <b>Closed: </b><Moment format="MMMM Do YYYY, HH:mm">{data.end_time}</Moment></span> : ""}</div>
     </Header>

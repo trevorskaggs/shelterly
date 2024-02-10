@@ -22,11 +22,14 @@ function PersonDetails({id, incident, organization}) {
   // Determine if this is an owner or reporter when creating a Person.
   let is_owner = window.location.pathname.includes("owner")
 
+  const [isPersonLoading, setIsPersonLoading] = useState(true);
+  const [isOrgLoading, setIsOrgLoading] = useState(true);
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
 
   // Handle animal reunification submit.
   const handleSubmit = async () => {
+    setIsPersonLoading(true);
     await axios.patch('/people/api/person/' + id + '/', {reunite_animals:true})
     .then(response => {
       setData(prevState => ({ ...prevState, "animals":prevState['animals'].map(animal => ({...animal, status:animal.status !== 'DECEASED' ? 'REUNITED' : 'DECEASED'})) }));
@@ -34,7 +37,8 @@ function PersonDetails({id, incident, organization}) {
     })
     .catch(error => {
       setShowSystemError(true);
-    });
+    })
+    .finally(() => setIsPersonLoading(false));
   }
 
   const [data, setData] = useState({
@@ -80,6 +84,8 @@ function PersonDetails({id, incident, organization}) {
   useEffect(() => {
     let unmounted = false;
     let source = axios.CancelToken.source();
+    setIsPersonLoading(true);
+    setIsOrgLoading(true);
 
     const fetchPersonData = async () => {
       // Fetch Person data.
@@ -95,7 +101,8 @@ function PersonDetails({id, incident, organization}) {
         if (!unmounted) {
           setShowSystemError(true);
         }
-      });
+      })
+      .finally(() => setIsPersonLoading(false));
     };
     fetchPersonData();
 
@@ -113,7 +120,8 @@ function PersonDetails({id, incident, organization}) {
         if (!unmounted) {
           setShowSystemError(true);
         }
-      });
+      })
+      .finally(() => setIsOrgLoading(false));
     };
     fetchOrganizationData();
 
@@ -123,6 +131,8 @@ function PersonDetails({id, incident, organization}) {
       source.cancel();
     };
   }, [id, incident]);
+
+  const isLoading = isPersonLoading || isOrgLoading;
 
   return (
     <>
@@ -162,6 +172,7 @@ function PersonDetails({id, incident, organization}) {
         tooltipPlacement='bottom'
         tooltipText='Download Printable Owner Summary'
         printFunc={handleDownloadPdfClick}
+        disabled={isLoading}
       />
     </Header>
     <hr/>

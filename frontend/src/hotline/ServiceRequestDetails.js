@@ -17,11 +17,12 @@ import PhotoDocuments from '../components/PhotoDocuments';
 import { SystemErrorContext } from '../components/SystemError';
 import { printServiceRequestSummary, printSrAnimalCareSchedules } from './Utils'
 import ShelterlyPrintifyButton from '../components/ShelterlyPrintifyButton';
+import LoadingLink from '../components/LoadingLink';
 
 import '../assets/styles.css';
 
 function ServiceRequestDetails({ id, incident, organization }) {
-
+  const [isLoading, setIsLoading] = useState(true);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
   const datetime = useRef(null);
@@ -33,7 +34,9 @@ function ServiceRequestDetails({ id, incident, organization }) {
 
   const [showModal, setShowModal] = useState(false);
   const cancelServiceRequest = () => {
+    setIsLoading(true);
     axios.patch('/hotline/api/servicerequests/' + id + '/', {status:'canceled'})
+      .finally(() => setIsLoading(false));
     setData(prevState => ({ ...prevState, 'status':'Canceled', 'animals':prevState['animals'].map(animal => ({...animal, status:'CANCELED'}))}));
     setShowModal(false)
   }
@@ -79,6 +82,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
 
   // Handle animal reunification submit.
   const handleSubmit = async () => {
+    setIsLoading(true);
     await axios.patch('/hotline/api/servicerequests/' + id + '/', {reunite_animals:true})
     .then(response => {
       setData(prevState => ({ ...prevState, "status":"Closed", "animals":prevState['animals'].map(animal => ({...animal, status:animal.status !== 'DECEASED' ? 'REUNITED' : 'DECEASED'})) }));
@@ -86,7 +90,8 @@ function ServiceRequestDetails({ id, incident, organization }) {
     })
     .catch(error => {
       setShowSystemError(true);
-    });
+    })
+    .finally(() => setIsLoading(false));
   }
 
   const handleDownloadPdfClick = () =>
@@ -109,6 +114,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
   useEffect(() => {
     let unmounted = false;
     let source = axios.CancelToken.source();
+    setIsLoading(true);
 
     const fetchServiceRequestData = async () => {
       // Fetch ServiceRequest data.
@@ -124,7 +130,8 @@ function ServiceRequestDetails({ id, incident, organization }) {
         if (!unmounted) {
           setShowSystemError(true);
         }
-      });
+      })
+      .finally(() => setIsLoading(false));
     };
     fetchServiceRequestData();
     // Cleanup.
@@ -137,7 +144,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
   return (
     <>
       <Header>
-        Service Request #{data.id}
+        Service Request #{data.id || ' - '}
         <OverlayTrigger
           key={"edit-service-request"}
           placement="bottom"
@@ -159,7 +166,9 @@ function ServiceRequestDetails({ id, incident, organization }) {
             </Tooltip>
           }
         >
-          <Link onClick={handleGeoJsonDownload} href=""><FontAwesomeIcon icon={faDownload} className="mx-2"  inverse /></Link>
+          <LoadingLink onClick={handleGeoJsonDownload} isLoading={isLoading}>
+            <FontAwesomeIcon icon={faDownload} className="mx-2"  inverse />
+          </LoadingLink>
         </OverlayTrigger>
 
         <ShelterlyPrintifyButton
@@ -168,6 +177,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
           tooltipPlacement='bottom'
           tooltipText='Download Service Request Summary'
           printFunc={handleDownloadPdfClick}
+          disabled={isLoading}
         />
 
         <OverlayTrigger
@@ -179,7 +189,9 @@ function ServiceRequestDetails({ id, incident, organization }) {
             </Tooltip>
           }
         >
-          <FontAwesomeIcon icon={faTimes} className="ml-1" size="lg" style={{cursor:'pointer'}} inverse onClick={() => {setShowModal(true)}}/>
+          <LoadingLink onClick={() => {setShowModal(true)}} isLoading={isLoading}>
+            <FontAwesomeIcon icon={faTimes} className="ml-1" size="lg" style={{cursor:'pointer'}} inverse />
+          </LoadingLink>
         </OverlayTrigger>
       </Header>
       <Modal show={showModal} onHide={() => setShowModal(false)}>
