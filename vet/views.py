@@ -204,8 +204,6 @@ class TreatmentRequestViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         if serializer.is_valid():
 
-            treatment_request = serializer.save()
-
             # Create proper number of TreatmentRequests
             serializer.validated_data['suggested_admin_time'] = self.request.data.get('start')
             treatment_request = serializer.save()

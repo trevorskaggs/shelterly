@@ -30,14 +30,23 @@ class SimpleAnimalSerializer(serializers.ModelSerializer):
 class ModestAnimalSerializer(SimpleAnimalSerializer):
     front_image = serializers.SerializerMethodField()
     side_image = serializers.SerializerMethodField()
+    found_location = serializers.SerializerMethodField()
+    request_address = serializers.SerializerMethodField()
     owner_names = serializers.StringRelatedField(source='owners', many=True, read_only=True)
     shelter_object = SimpleShelterSerializer(source='shelter', required=False, read_only=True)
     room_name = serializers.StringRelatedField(source='room', read_only=True)
 
     class Meta:
         model = Animal
-        fields = ['id', 'name', 'species', 'species_string', 'aggressive', 'injured', 'fixed', 'request', 'shelter_object', 'shelter', 'status', 'aco_required', 'color_notes',
-        'front_image', 'side_image', 'owner_names', 'sex', 'size', 'age', 'pcolor', 'scolor', 'medical_notes', 'behavior_notes', 'room_name', 'category']
+        fields = ['id', 'name', 'species', 'species_string', 'aggressive', 'injured', 'fixed', 'request', 'found_location', 'request_address', 'shelter_object', 'shelter', 'status', 'aco_required', 'color_notes',
+        'front_image', 'side_image', 'owner_names', 'sex', 'size', 'age', 'pcolor', 'scolor', 'medical_notes', 'behavior_notes', 'room_name', 'category', 'latitude', 'longitude']
+
+    def get_found_location(self, obj):
+        return build_full_address(obj)
+
+    # Custom field for request address.
+    def get_request_address(self, obj):
+        return build_full_address(obj.request)
 
     def get_front_image(self, obj):
         try:
@@ -52,7 +61,6 @@ class ModestAnimalSerializer(SimpleAnimalSerializer):
             except AttributeError:
                 return ''
 
-
     def get_side_image(self, obj):
         try:
             return [animal_image.image.url for animal_image in obj.images if animal_image.category == 'side_image'][0]
@@ -66,10 +74,8 @@ class ModestAnimalSerializer(SimpleAnimalSerializer):
 
 class AnimalSerializer(ModestAnimalSerializer):
     extra_images = serializers.SerializerMethodField()
-    found_location = serializers.SerializerMethodField()
     owners = SimplePersonSerializer(many=True, required=False, read_only=True)
     reporter_object = SimplePersonSerializer(source='reporter', read_only=True)
-    request_address = serializers.SerializerMethodField()
     action_history = serializers.SerializerMethodField()
     room_name = serializers.StringRelatedField(source='room', read_only=True)
     building_name = serializers.StringRelatedField(source='room.building', read_only=True)
@@ -97,13 +103,6 @@ class AnimalSerializer(ModestAnimalSerializer):
             data._mutable = _mutable
 
         return super().to_internal_value(data)
-
-    def get_found_location(self, obj):
-        return build_full_address(obj)
-
-    # Custom field for request address.
-    def get_request_address(self, obj):
-        return build_full_address(obj.request)
 
     # Custom Reporter object field that excludes animals to avoid a circular reference.
     def get_reporter_object(self, obj):

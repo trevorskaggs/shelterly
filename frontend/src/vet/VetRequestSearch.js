@@ -33,7 +33,8 @@ import { faChevronDoubleDown, faChevronDoubleUp, faDiamondExclamation,
   faScalpelLineDashed,
   faFlashlight,
   faPeriod,
-  faMobileScreenButton } from '@fortawesome/pro-solid-svg-icons';
+  faMobileScreenButton,
+  faUserDoctorMessage} from '@fortawesome/pro-solid-svg-icons';
 import { faBandage, faRing, faTankWater } from '@fortawesome/pro-regular-svg-icons';
 import {
   faRectangleVertical,
@@ -94,6 +95,9 @@ function VetRequestSearch({ incident, organization }) {
   const [searchTerm, setSearchTerm] = useState(search);
   const [showFilters, setShowFilters] = useState(false);
   const [isDisabled, setIsDisabled] = useState(true);
+  const [treatmentIsDisabled, setTreatmentIsDisabled] = useState(true);
+  const [diagnosticIsDisabled, setDiagnosticIsDisabled] = useState(true);
+  const [procedureIsDisabled, setProcedureIsDisabled] = useState(true);
   const [vetObject, setVetObject] = useState('vet_requests');
   const tempSearchTerm = useRef(null);
   const treatmentRef = useRef(null);
@@ -171,9 +175,9 @@ function VetRequestSearch({ incident, organization }) {
     }
   };
 
-  const handleApplyFilters = () => {
+  function handleApplyFilters(test) {
     if (vetObject === 'vet_requests') {
-      const filtered_requests = data.vet_requests.filter(vet_request => options.species ? vet_request.animal_object.species_string.toLowerCase() === options.species.toLowerCase() : vet_request)
+      const filtered_requests = test.filter(vet_request => options.species ? vet_request.animal_object.species_string.toLowerCase() === options.species.toLowerCase() : vet_request)
         .filter(vet_request => options.status ? vet_request.status === options.status : vet_request)
         .filter(vet_request => options.priority ? vet_request.priority === options.priority : vet_request)
         .filter(vet_request => options.open ? (startDate <= moment(vet_request.open).format('YYYY-MM-DD') && endDate >= moment(vet_request.open).format('YYYY-MM-DD')) : vet_request)
@@ -184,7 +188,7 @@ function VetRequestSearch({ incident, organization }) {
       setNumPages(Math.ceil(filtered_requests.length / ITEMS_PER_PAGE));
     }
     else if (vetObject === 'treatments') {
-      const filtered_treatments = data.treatments.filter(treatment => treatmentOptions.species ? treatment.animal_object.species_string.toLowerCase() === treatmentOptions.species.toLowerCase() : treatment)
+      const filtered_treatments = test.filter(treatment => treatmentOptions.species ? treatment.animal_object.species_string.toLowerCase() === treatmentOptions.species.toLowerCase() : treatment)
         .filter(treatment => treatmentOptions.status ? treatment.status === treatmentOptions.status : treatment)
         .filter(treatment => treatmentOptions.not_administered === true || treatmentOptions.not_administered === false ? treatment.not_administered === treatmentOptions.not_administered : treatment)
         .filter(treatment => treatmentOptions.treatment ? treatment.treatment_object.description === treatmentOptions.treatment : treatment)
@@ -197,7 +201,7 @@ function VetRequestSearch({ incident, organization }) {
       setNumPages(Math.ceil(filtered_treatments.length / ITEMS_PER_PAGE));
     }
     else if (vetObject === 'diagnostics') {
-      const filtered_diagnostics = data.diagnostics.filter(diagnostic => diagnosticOptions.species ? diagnostic.animal_object.species_string.toLowerCase() === diagnosticOptions.species.toLowerCase() : diagnostic)
+      const filtered_diagnostics = test.filter(diagnostic => diagnosticOptions.species ? diagnostic.animal_object.species_string.toLowerCase() === diagnosticOptions.species.toLowerCase() : diagnostic)
         .filter(diagnostic => diagnosticOptions.status ? diagnostic.status === diagnosticOptions.status : diagnostic)
         .filter(diagnostic => diagnosticOptions.diagnostic ? diagnostic.name === diagnosticOptions.diagnostic : diagnostic)
         .filter(diagnostic => diagnosticOptions.ordered ? (startDate <= moment(diagnostic.open).format('YYYY-MM-DD') && endDate >= moment(diagnostic.open).format('YYYY-MM-DD')) : diagnostic)
@@ -208,7 +212,7 @@ function VetRequestSearch({ incident, organization }) {
       setNumPages(Math.ceil(filtered_diagnostics.length / ITEMS_PER_PAGE));
     }
     else if (vetObject === 'procedures') {
-      const filtered_procedures = data.procedures.filter(procedure => procedureOptions.species ? procedure.animal_object.species_string.toLowerCase() === procedureOptions.species.toLowerCase() : procedure)
+      const filtered_procedures = test.filter(procedure => procedureOptions.species ? procedure.animal_object.species_string.toLowerCase() === procedureOptions.species.toLowerCase() : procedure)
         .filter(procedure => procedureOptions.status ? procedure.status === procedureOptions.status : procedure)
         .filter(procedure => procedureOptions.procedure ? procedure.name === procedureOptions.procedure : procedure)
         .filter(procedure => procedureOptions.ordered ? (startDate <= moment(procedure.open).format('YYYY-MM-DD') && endDate >= moment(procedure.open).format('YYYY-MM-DD')) : procedure)
@@ -452,7 +456,7 @@ function VetRequestSearch({ incident, organization }) {
         if (!unmounted) {
           setNumPages(Math.ceil(response.data.filter(vr => vr.status === options.status).length / ITEMS_PER_PAGE));
           setData(prevState => ({ ...prevState, "vet_requests":response.data, isFetching:false }));
-          setVetRequests(response.data.filter(vr => vr.status === options.status));
+          handleApplyFilters(response.data);
 
           // Build opener option list.
           let openers = [];
@@ -487,7 +491,7 @@ function VetRequestSearch({ incident, organization }) {
         if (!unmounted) {
           setNumPages(Math.ceil(response.data.filter(treatment => treatment.status === treatmentOptions.status).length / ITEMS_PER_PAGE));
           setData(prevState => ({ ...prevState, "treatments":response.data, isFetching:false }));
-          setTreatments(response.data.filter(treatment => treatment.status === treatmentOptions.status));
+          handleApplyFilters(response.data);
         }
       })
       .catch(error => {
@@ -509,7 +513,7 @@ function VetRequestSearch({ incident, organization }) {
         if (!unmounted) {
           setNumPages(Math.ceil(response.data.filter(diagnostic => diagnostic.status === diagnosticOptions.status).length / ITEMS_PER_PAGE));
           setData(prevState => ({ ...prevState, "diagnostics":response.data, isFetching:false }));
-          setDiagnostics(response.data.filter(diagnostic => diagnostic.status === diagnosticOptions.status));
+          handleApplyFilters(response.data);
         }
       })
       .catch(error => {
@@ -530,7 +534,7 @@ function VetRequestSearch({ incident, organization }) {
         if (!unmounted) {
           setNumPages(Math.ceil(response.data.filter(procedure => procedure.status === procedureOptions.status).length / ITEMS_PER_PAGE));
           setData(prevState => ({ ...prevState, "procedures":response.data, isFetching:false }));
-          setProcedures(response.data.filter(procedure => procedure.status === procedureOptions.status));
+          handleApplyFilters(response.data);
         }
       })
       .catch(error => {
@@ -553,12 +557,13 @@ function VetRequestSearch({ incident, organization }) {
   useEffect(() => {
     const handleDisabled = () => {
       setIsDisabled(!(options.species || options.status || options.priority || options.open || options.opener || options.shelter));
+      setTreatmentIsDisabled(!(treatmentOptions.species || treatmentOptions.status || treatmentOptions.treatment || treatmentOptions.scheduled || treatmentOptions.administered || treatmentOptions.assignee || (treatmentOptions.not_administered === true || treatmentOptions.not_administered === false) || treatmentOptions.shelter));
+      setDiagnosticIsDisabled(!(diagnosticOptions.species || diagnosticOptions.status || diagnosticOptions.diagnostic || diagnosticOptions.ordered || diagnosticOptions.complete || diagnosticOptions.shelter));
+      setProcedureIsDisabled(!(procedureOptions.species || procedureOptions.status || procedureOptions.procedure || procedureOptions.ordered || procedureOptions.complete || treatmentOptions.performer || procedureOptions.shelter));
     };
 
-    setNumPages(Math.ceil(vetRequests.length / ITEMS_PER_PAGE));
-    setPage(1);
     handleDisabled();
-  }, [options, vetRequests.length]);
+  }, [options, treatmentOptions, diagnosticOptions, procedureOptions]);
 
   return (
     <div className="ml-2 mr-2">
@@ -686,13 +691,12 @@ function VetRequestSearch({ incident, organization }) {
                           }
                           setOptions({...options, open: dateRange ? true : null});
                         }}
-                        value={options.open ? {value:options.open, label:options.open} : null}
                       />
                     </Col>
                   </Row>
                 </Col>
                 <Col className="flex-grow-1 pl-0" xs="2">
-                  <Button className="btn btn-primary" style={{maxHeight:"35px", width:"100%"}} onClick={handleApplyFilters} disabled={isDisabled}>Apply</Button>
+                  <Button className="btn btn-primary" style={{maxHeight:"35px", width:"100%"}} onClick={(e) => {handleApplyFilters(data.vet_requests)}} disabled={isDisabled}>Apply</Button>
                   <Button variant="outline-light" style={{maxHeight:"35px", width:"100%", marginTop:"15px"}} onClick={handleClear}>Clear</Button>
                 </Col>
               </Row>
@@ -808,7 +812,6 @@ function VetRequestSearch({ incident, organization }) {
                         }
                         setTreatmentOptions({...treatmentOptions, scheduled: dateRange ? true : null});
                       }}
-                      value={treatmentOptions.scheduled ? {value:treatmentOptions.scheduled, label:treatmentOptions.scheduled} : null}
                     />
                     <Flatpickr
                       options={{allowInput: true, altFormat: "F j, Y", dateFormat: "m-d-Y", mode: "range", maxDate: moment().format('MM-DD-YYYY')}}
@@ -824,13 +827,12 @@ function VetRequestSearch({ incident, organization }) {
                         }
                         setTreatmentOptions({...treatmentOptions, administered: dateRange ? true : null});
                       }}
-                      value={treatmentOptions.administered ? {value:treatmentOptions.administered, label:treatmentOptions.administered} : null}
                     />
                   </Col>
                 </Row>
               </Col>
               <Col className="flex-grow-1 pl-0" xs="2">
-                <Button className="btn btn-primary" style={{maxHeight:"35px", width:"100%"}} onClick={handleApplyFilters} disabled={isDisabled}>Apply</Button>
+                <Button className="btn btn-primary" style={{maxHeight:"35px", width:"100%"}} onClick={(e) => {handleApplyFilters(data.treatments)}} disabled={treatmentIsDisabled}>Apply</Button>
                 <Button variant="outline-light" style={{maxHeight:"35px", width:"100%", marginTop:"15px"}} onClick={handleClear}>Clear</Button>
               </Col>
             </Row>
@@ -902,7 +904,6 @@ function VetRequestSearch({ incident, organization }) {
                     }
                     setDiagnosticOptions({...diagnosticOptions, complete: dateRange ? true : null});
                   }}
-                  value={diagnosticOptions.complete ? {value:diagnosticOptions.complete, label:diagnosticOptions.complete} : null}
                 />
               </Col>
               <Col xs="5">
@@ -950,13 +951,12 @@ function VetRequestSearch({ incident, organization }) {
                         }
                         setDiagnosticOptions({...diagnosticOptions, open: dateRange ? true : null});
                       }}
-                      value={diagnosticOptions.open ? {value:diagnosticOptions.open, label:diagnosticOptions.open} : null}
                     />
                   </Col>
                 </Row>
               </Col>
               <Col className="flex-grow-1 pl-0" xs="2">
-                <Button className="btn btn-primary" style={{maxHeight:"35px", width:"100%"}} onClick={handleApplyFilters} disabled={isDisabled}>Apply</Button>
+                <Button className="btn btn-primary" style={{maxHeight:"35px", width:"100%"}} onClick={(e) => {handleApplyFilters(data.diagnostics)}} disabled={diagnosticIsDisabled}>Apply</Button>
                 <Button variant="outline-light" style={{maxHeight:"35px", width:"100%", marginTop:"15px"}} onClick={handleClear}>Clear</Button>
               </Col>
             </Row>
@@ -1026,7 +1026,6 @@ function VetRequestSearch({ incident, organization }) {
                     }
                     setProcedureOptions({...procedureOptions, complete: dateRange ? true : null});
                   }}
-                  value={procedureOptions.complete ? {value:procedureOptions.complete, label:procedureOptions.complete} : null}
                 />
               </Col>
               <Col xs="5">
@@ -1074,13 +1073,12 @@ function VetRequestSearch({ incident, organization }) {
                         }
                         setProcedureOptions({...procedureOptions, open: dateRange ? true : null});
                       }}
-                      value={procedureOptions.open ? {value:procedureOptions.open, label:procedureOptions.open} : null}
                     />
                   </Col>
                 </Row>
               </Col>
               <Col className="flex-grow-1 pl-0" xs="2">
-                <Button className="btn btn-primary" style={{maxHeight:"35px", width:"100%"}} onClick={handleApplyFilters} disabled={isDisabled}>Apply</Button>
+                <Button className="btn btn-primary" style={{maxHeight:"35px", width:"100%"}} onClick={(e) => {handleApplyFilters(data.procedures)}} disabled={procedureIsDisabled}>Apply</Button>
                 <Button variant="outline-light" style={{maxHeight:"35px", width:"100%", marginTop:"15px"}} onClick={handleClear}>Clear</Button>
               </Col>
             </Row>
@@ -1090,97 +1088,96 @@ function VetRequestSearch({ incident, organization }) {
       </Collapse> : ""}
       </Form>
       {vetObject === 'vet_requests' && vetRequests.map((vet_request, index) => (
-        <div key={vet_request.id} className="mt-3" hidden={page !== Math.ceil((index+1)/ITEMS_PER_PAGE)}>
-          <div className="card-header">
-            <h4 style={{marginBottom:"-2px",  marginLeft:"-12px"}}>
-              <OverlayTrigger
-                key={"request-details"}
-                placement="top"
-                overlay={
-                  <Tooltip id={`tooltip-request-details`}>
-                    Veterinary request details
-                  </Tooltip>
-                }
-              >
-                <Link href={"/" + organization + "/" + incident + "/vet/vetrequest/" + vet_request.id}><FontAwesomeIcon icon={faDotCircle} className="mr-2" inverse /></Link>
-              </OverlayTrigger>
-              VR#{vet_request.id}
-              &nbsp;| {vet_request.status}
-            </h4>
-          </div>
-          <CardGroup>
-            <Card style={{marginBottom:"6px"}}>
-              <Card.Body>
-                <Card.Title style={{marginTop:"-9px", marginBottom:"8px", marginLeft:"0px"}} className="row">
-                  Information
-                  {vet_request.caution ? <OverlayTrigger
-                  key={"caution"}
-                  placement="top"
-                  overlay={
-                    <Tooltip id={`tooltip-caution`}>
-                      Use caution when handling this animal.
-                    </Tooltip>
-                  }
-                >
-                  <FontAwesomeIcon icon={faDiamondExclamation} className="ml-1 fa-move-down" inverse />
-                </OverlayTrigger> : ""}
-                </Card.Title>
-                <Scrollbar style={{height:"144px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
-                  <ListGroup>
-                    <ListGroup.Item>
-                      <Row>
-                        <Col xs="3">
-                          <b>Patient: </b>A#{vet_request.animal_object.id}
-                        </Col>
-                        <Col xs="3">
-                          <b>Name: </b>{vet_request.animal_object.name || "Unknown"}
-                        </Col>
-                        <Col xs="3" style={{textTransform:"capitalize"}}>
-                          <b>Species:</b> {vet_request.animal_object.species_string}
-                        </Col>
-                        {/* <Col xs="2" style={{textTransform:"capitalize"}}>
-                          <b>Age:</b> {vet_request.animal_object.age || "Unknown"}
-                        </Col>
-                        <Col xs="2" style={{textTransform:"capitalize"}}>
-                          <b>Sex:</b> {vet_request.animal_object.sex || "Unknown"}
-                        </Col> */}
-                        {/* <Col xs="2" style={{textTransform:"capitalize"}}>
-                          <b>Altered:</b> {vet_request.animal_object.altered || "Unknown"}
-                        </Col> */}
-                      </Row>
-                    </ListGroup.Item>
-                    <ListGroup.Item>
-                      <Row>
-                        <Col xs="3">
-                          <b>Opened: </b>{moment(vet_request.open).format('l')}
-                        </Col>
-                        <Col xs="3">
-                          <b>Priority: </b>{priorityText[vet_request.priority]}
-                        </Col>
-                        <Col>
-                          <b>Opener: </b>{vet_request.requested_by_object.first_name + ' ' + vet_request.requested_by_object.last_name}
-                        </Col>
-                      </Row>
-                    </ListGroup.Item>
-                    <ListGroup.Item>
-                      <Row>
-                        <Col>
-                          <b>Complaints:</b> {vet_request.complaints_text}
-                        </Col>
-                        <Col>
-                          <b>Concern: </b>{vet_request.concern}
-                        </Col>
-                        {/* <Col>
-                          <b>Shelter: </b>{vet_request.animal_object.shelter_object ? vet_request.animal_object.shelter_object.name:"Unknown"}{vet_request.animal_object.room_name ? <span> - {vet_request.animal_object.room_name}</span> : "Field"}
-                        </Col> */}
-                      </Row>
-                    </ListGroup.Item>
-                  </ListGroup>
-                </Scrollbar>
-              </Card.Body>
-            </Card>
-          </CardGroup>
-        </div>
+        <Row key={vet_request.id} className="ml-0 mb-3" hidden={page !== Math.ceil((index+1)/ITEMS_PER_PAGE)}>
+        <Link href={"/" + organization + "/" + incident + "/vet/treatmentrequest/edit/" + vet_request.id} className="treatment-link" style={{textDecoration:"none", color:"white"}}>
+          <Card className="border rounded treatment-hover-div" style={{height:"120px", width:"845px", whiteSpace:"nowrap", overflow:"hidden"}}>
+            <div className="row no-gutters hover-div treatment-hover-div" style={{height:"120px", marginRight:"-2px"}}>
+              <Row className="ml-0 mr-0 w-100" style={{flexWrap:"nowrap"}}>
+                <div className="border-right" style={{width:"120px"}}>
+                  <FontAwesomeIcon icon={faUserDoctorMessage} size="5x" className="treatment-icon" style={{marginTop:"21px", marginLeft:"14px"}} transform={'grow-1'} inverse />
+                </div>
+                <Col style={{marginLeft:"-5px", marginRight:"-25px"}} className="hover-div">
+                  <div className="border treatment-hover-div" style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"10px", marginLeft:"-11px", marginTop: "-1px", fontSize:"18px", width:"100%", backgroundColor:"rgb(158 153 153)"}}>
+                    VR#{vet_request.id} - {priorityText[vet_request.priority]}
+                    <span className="float-right">
+                    {vet_request.status === 'Closed' ?
+                      <OverlayTrigger
+                        key={"complete-treatment-request"}
+                        placement="top"
+                        overlay={
+                          <Tooltip id={`tooltip-complete-treatment-request`}>
+                            All treatment requests are completed.
+                          </Tooltip>
+                        }
+                      >
+                        <FontAwesomeIcon icon={faCheckSquare} size="3x" className="ml-1 treatment-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
+                      </OverlayTrigger>
+                      : vet_request.status === 'Canceled' ?
+                      <OverlayTrigger
+                        key={"not-administered-treatment-request"}
+                        placement="top"
+                        overlay={
+                          <Tooltip id={`tooltip-not-administered-treatment-request`}>
+                            Treatment request was canceled.
+                          </Tooltip>
+                        }
+                      >
+                        <FontAwesomeIcon icon={faSquareX} size="3x" className="ml-1 treatment-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
+                      </OverlayTrigger>
+                      :
+                      <OverlayTrigger
+                        key={"awaiting-action-treatment-request"}
+                        placement="top"
+                        overlay={
+                          <Tooltip id={`tooltip-awaiting-action-treatment-request`}>
+                            Treatment request is pending action.
+                          </Tooltip>
+                        }
+                      >
+                        <FontAwesomeIcon icon={faSquareExclamation} size="3x" className="ml-1 treatment-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
+                      </OverlayTrigger>
+                      }
+                    </span>
+                  </div>
+                  <Row style={{marginTop:"6px"}}>
+                    <Col xs={3}>
+                      <b>Patient: </b>A#{vet_request.animal_object.id}
+                    </Col>
+                    <Col xs={3}>
+                      <b>Species:</b> <span  style={{textTransform:"capitalize"}}>{vet_request.animal_object.species_string}</span>
+                    </Col>
+                    <Col xs={6}>
+                      <b>Name: </b>{vet_request.animal_object.name || "Unknown"}
+                    </Col>
+                  </Row>
+                  <Row>
+                    <Col xs={3}>
+                      <b>Opened: </b><Moment format="MMM DD, HH:mm">{vet_request.open}</Moment>
+                    </Col>
+                    <Col xs={3}>
+                      <b>Opener: </b>{vet_request.requested_by_object.first_name} {vet_request.requested_by_object.last_name}
+                    </Col>
+                    <Col xs={6}>
+                      <b>Location: </b>{vet_request.animal_object.shelter_object ? <span>{vet_request.animal_object.shelter_object.name} {vet_request.animal_object.room_name ? <span> - {vet_request.animal_object.room_name}</span> : ""}</span> : "Field"}
+                    </Col>
+                  </Row>
+                  <Row>
+                    <Col xs={12}>
+                      <b>Complaints: </b>{vet_request.complaints_text}
+                    </Col>
+                    {/* <Col xs={3}>
+                      <b>Unit: </b>{vet_request.unit || '-'}
+                    </Col>
+                    <Col>
+                      <b>Route: </b>{vet_request.route || '-'}
+                    </Col> */}
+                  </Row>
+                </Col>
+              </Row>
+            </div>
+          </Card>
+        </Link>
+      </Row>
       ))}
       {vetObject === 'treatments' && treatments.map((treatment_request, index) => (
       <Row key={treatment_request.id} className="ml-0 mb-3" hidden={page !== Math.ceil((index+1)/ITEMS_PER_PAGE)}>

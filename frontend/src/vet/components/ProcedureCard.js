@@ -42,7 +42,7 @@ function ProcedureCard(props) {
 
   return (
     <>
-    <Row key={props.procedure.id} className="ml-0 mb-3">
+    <Row className="ml-0 mb-3">
       <Link href={"/" + props.organization + "/" + props.incident + "/vet/procedureresult/edit/" + props.procedure.id} className="treatment-link" style={{textDecoration:"none", color:"white"}}>
         <Card className="border rounded treatment-hover-div" style={{height:"100px", width:"745px", whiteSpace:"nowrap", overflow:"hidden"}}>
           <div className="row no-gutters hover-div treatment-hover-div" style={{height:"100px", marginRight:"-2px"}}>
