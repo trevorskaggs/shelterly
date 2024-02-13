@@ -700,7 +700,7 @@ function Deploy({ incident, organization }) {
                 className="mt-3"
                 name="pending_only"
                 type="switch"
-                label={`Pending Only (${data?.service_requests?.filter?.((sr) => sr.pending_only)?.length || 0})`}
+                label={`Hide Pending (${data.service_requests.filter(sr => sr.pending).length || 0}) `}
                 checked={statusOptions.pending_only}
                 onChange={handlePendingOnly}
               />
