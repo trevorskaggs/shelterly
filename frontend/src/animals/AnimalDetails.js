@@ -168,7 +168,12 @@ function AnimalDetails({ id, incident, organization }) {
           </Tooltip>
         }
       >
-        <Link href={"/" + organization + "/" + incident + "/animals/edit/" + id} ><FontAwesomeIcon icon={faEdit} className="ml-2" inverse /></Link>
+        <LoadingLink
+          href={"/" + organization + "/" + incident + "/animals/edit/" + id}
+          isLoading={isLoading}
+        >
+          <FontAwesomeIcon icon={faEdit} className="ml-2" inverse />
+        </LoadingLink>
       </OverlayTrigger>
       <ShelterlyPrintifyButton
         id="animal-details-animal-care-schedule"
@@ -202,7 +207,12 @@ function AnimalDetails({ id, incident, organization }) {
           </Tooltip>
         }
       >
-        <Link href={"/" + organization + "/" + incident + "/animals/" + id + "/vetrequest/new"} ><FontAwesomeIcon icon={faUserDoctorMessage} className="mr-1 ml-1" inverse /></Link>
+        <LoadingLink
+          href={"/" + organization + "/" + incident + "/animals/" + id + "/vetrequest/new"}
+          isLoading={isLoading}
+        >
+          <FontAwesomeIcon icon={faUserDoctorMessage} className="mr-1 ml-1" inverse />
+        </LoadingLink>
       </OverlayTrigger>
       <OverlayTrigger
         key={"cancel-animal"}

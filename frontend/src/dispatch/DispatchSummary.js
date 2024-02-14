@@ -253,6 +253,7 @@ function DispatchSummary({ id, incident, organization }) {
         tooltipPlacement='bottom'
         tooltipText='Print Dispatch Assignment'
         printFunc={handleDownloadPdfClick}
+        disabled={isLoading}
       />
 
       {data.end_time ?
@@ -265,7 +266,12 @@ function DispatchSummary({ id, incident, organization }) {
           </Tooltip>
         }
       >
-        <Link href={"/" + organization + "/" + incident + "/dispatch/resolution/" + id}><FontAwesomeIcon icon={faEdit} inverse /></Link>
+        <LoadingLink
+          href={"/" + organization + "/" + incident + "/dispatch/resolution/" + id}
+          isLoading={isLoading}
+        >
+          <FontAwesomeIcon icon={faEdit} inverse />
+        </LoadingLink>
       </OverlayTrigger>
       :
       <OverlayTrigger
@@ -277,7 +283,12 @@ function DispatchSummary({ id, incident, organization }) {
           </Tooltip>
         }
       >
-        <Link href={"/" + organization + "/" + incident + "/dispatch/resolution/" + id}><FontAwesomeIcon icon={faClipboardCheck} inverse /></Link>
+        <LoadingLink
+          href={"/" + organization + "/" + incident + "/dispatch/resolution/" + id}
+          isLoading={isLoading}
+        >
+          <FontAwesomeIcon icon={faClipboardCheck} inverse />
+        </LoadingLink>
       </OverlayTrigger>
       }
       <OverlayTrigger

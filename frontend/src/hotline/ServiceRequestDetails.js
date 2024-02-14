@@ -154,7 +154,12 @@ function ServiceRequestDetails({ id, incident, organization }) {
             </Tooltip>
           }
         >
-          <Link href={"/" + organization + "/" + incident + "/hotline/servicerequest/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-2" inverse /></Link>
+          <LoadingLink
+            href={"/" + organization + "/" + incident + "/hotline/servicerequest/edit/" + id}
+            isLoading={isLoading}
+          >
+            <FontAwesomeIcon icon={faEdit} className="ml-2" inverse />
+          </LoadingLink>
         </OverlayTrigger>
 
         <OverlayTrigger

@@ -13,6 +13,7 @@ import AnimalCards from '../components/AnimalCards';
 import PhotoDocuments from '../components/PhotoDocuments';
 import { SystemErrorContext } from '../components/SystemError';
 import ShelterlyPrintifyButton from '../components/ShelterlyPrintifyButton';
+import LoadingLink from '../components/LoadingLink';
 import { printOwnerDetails, printOwnerAnimalCareSchedules } from './Utils';
 
 function PersonDetails({id, incident, organization}) {
@@ -148,7 +149,12 @@ function PersonDetails({id, incident, organization}) {
               </Tooltip>
             }
           >
-            <Link href={"/" + organization + "/" + incident + "/people/owner/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-2 mr-1" inverse /></Link>
+            <LoadingLink
+              href={"/" + organization + "/" + incident + "/people/owner/edit/" + id}
+              isLoading={isLoading}
+            >
+              <FontAwesomeIcon icon={faEdit} className="ml-2 mr-1" inverse />
+            </LoadingLink>
           </OverlayTrigger>
         </span>
       :
@@ -162,7 +168,12 @@ function PersonDetails({id, incident, organization}) {
               </Tooltip>
             }
           >
-            <Link href={"/" + organization + "/" + incident + "/people/reporter/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-2 mr-1" inverse /></Link>
+            <LoadingLink
+              href={"/" + organization + "/" + incident + "/people/reporter/edit/" + id}
+              isLoading={isLoading}
+            >
+              <FontAwesomeIcon icon={faEdit} className="ml-2 mr-1" inverse />
+            </LoadingLink>
           </OverlayTrigger>
         </span>
       }
