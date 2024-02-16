@@ -5,7 +5,7 @@ import { Button, Card, Col, ListGroup, OverlayTrigger, Row, Tooltip } from 'reac
 import L from "leaflet";
 import { Marker, Tooltip as MapTooltip } from "react-leaflet";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHome, faPlusSquare } from '@fortawesome/free-solid-svg-icons';
+import { faQuestionCircle as faQuestionCircleDuo, faChevronCircleDown, faChevronCircleUp } from '@fortawesome/pro-duotone-svg-icons';
 import Header from '../components/Header';
 import Map, { vetPendingAnimalLocationMarkerIcon, vetShelterMarkerIcon } from "../components/Map";
 import Scrollbar from '../components/Scrollbars';
@@ -23,7 +23,7 @@ function Vet({ incident, organization }) {
   const [data, setData] = useState({vet_requests:[], treatments:[], diagnostics:[], procedures:[], isFetching: true});
   const [shelterData, setShelterData] = useState({shelters:[], bounds:L.latLngBounds([[0,0]])});
   const [selectedShelter, setSelectedShelter] = useState('all');
-  const [selectedAnimal, setSelectedAnimal] = useState(null);
+  const [selectedAnimal, setSelectedAnimal] = useState({id:null, shelter:'null'});
   const [shelterAnimals, setShelterAnimals] = useState({'Field':[]});
   const [activeOrders, setActiveOrders] = useState("pending");
 
@@ -133,7 +133,7 @@ function Vet({ incident, organization }) {
       <Col xs={10} className="border rounded pl-0 pr-0">
         {shelterData.shelters.length ?
           <Map bounds={shelterData.bounds} className="landing-leaflet-container">
-            {shelterData.shelters.filter(shelter => shelter.id === selectedShelter || selectedShelter === 'all' ? shelter : null).map((shelter, index) => (
+            {shelterData.shelters.filter(shelter => (selectedAnimal.shelter === shelter.id) || (shelter.id === selectedShelter || selectedShelter === 'all' ? shelter : null)).map((shelter, index) => (
               <Marker
                 key={shelter.id}
                 position={[shelter.latitude, shelter.longitude]}
@@ -149,7 +149,7 @@ function Vet({ incident, organization }) {
                 </MapTooltip>
               </Marker>
             ))}
-            {shelterAnimals['Field'].map((animal, index) => (
+            {shelterAnimals['Field'].filter(shelter => (selectedAnimal.id && selectedAnimal.shelter === null) || (selectedShelter === 'all' || selectedShelter === null)).map((animal, index) => (
               <Marker
                 key={animal.id}
                 position={[animal.latitude, animal.longitude]}
@@ -167,33 +167,33 @@ function Vet({ incident, organization }) {
             ))}
           </Map>
         :
-          <Card className="text-center" style={{height:"450px", marginRight:"-1px", paddingTop:"225px", fontSize:"30px"}}>{data.isFetching ? "Fetching" : "No"} Shelters.</Card>
+          <Card className="text-center" style={{height:"450px", marginRight:"-1px", paddingTop:"225px", fontSize:"30px"}}>{data.isFetching ? "Fetching" : "No"} Veterinary Locations.</Card>
         }
       </Col>
       <Col xs={2} className="ml-0 mr-0 pl-0 pr-0 border rounded">
         <Scrollbar no_shadow="true" style={{height:"450px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
           <Button variant={selectedShelter === 'all' ? "primary" : "secondary"} className="border" onClick={() => setSelectedShelter('all')} style={{maxHeight:"36px", width:"100%", marginTop:"-1px"}}>All</Button>
           {shelterData.shelters.map(shelter => (
-            <Button key={shelter.id} title={shelter.name} variant={shelter.id === selectedShelter ? "primary" : "info"} className="border" onClick={() => setSelectedShelter(selectedShelter === shelter.id ? null : shelter.id)} style={{maxHeight:"36px", width:"100%", marginTop:"-1px"}}>
-              {shelter.name}
+            <Button key={shelter.id} title={shelter.name} variant={shelter.id === selectedShelter ? "primary" : "info"} className="border" onClick={() => {setSelectedShelter(shelter.id); setSelectedAnimal({id:null, shelter:'null'});}} style={{maxHeight:"36px", width:"100%", marginTop:"-1px"}}>
+              {shelter.name} {shelter.id === selectedShelter || shelter.id === selectedAnimal.shelter ? <FontAwesomeIcon icon={faChevronCircleDown} size="sm" /> : <FontAwesomeIcon icon={faChevronCircleUp} size="sm" />}
             </Button>
           ))}
-          {Object.entries(shelterAnimals).filter(([key, value]) => Number(key) === selectedShelter).map(([key, value]) => (
-            <Button key={key} title={value.name} variant={value.id === selectedAnimal ? "primary" : "secondary"} className="border" onClick={() => setSelectedAnimal(selectedAnimal === value.id ? null : value.id)} style={{maxHeight:"36px", width:"100%", marginTop:"-1px"}}>
-              {value.name || "Unknown"} - {value.request_address || value.found_location}
+          {(selectedShelter || selectedAnimal.id) && shelterAnimals[selectedAnimal.id ? selectedAnimal.shelter : selectedShelter] && shelterAnimals[selectedAnimal.id ? selectedAnimal.shelter : selectedShelter].map((animal) => (
+            <Button key={animal.id} title={animal.name} variant={animal.id === selectedAnimal.id ? "primary" : "secondary"} className="border" onClick={() => {setSelectedAnimal({id:animal.id, shelter:animal.shelter}); setSelectedShelter('test');}} style={{maxHeight:"36px", width:"100%", marginTop:"-1px"}}>
+              A#{animal.id}
             </Button>
           ))}
-          <Button variant={selectedShelter === null ? "primary" : "info"} className="border" onClick={() => setSelectedShelter(null)} style={{maxHeight:"36px", width:"100%", marginTop:"-1px"}}>Field</Button>
-          {Object.entries(shelterAnimals).filter(([key, value]) => key === 'Field').map(([key, value]) => (
-            <Button key={key} hidden={selectedShelter !== null} title={value.name} variant={value.id === selectedAnimal ? "primary" : "secondary"} className="border" onClick={() => setSelectedAnimal(selectedAnimal === value.id ? null : value.id)} style={{maxHeight:"36px", width:"100%", marginTop:"-1px"}}>
-              {value.name || "Unknown"} - {value.request_address || value.found_location}
+          <Button variant={selectedShelter === null ? "primary" : "info"} className="border" onClick={() => {setSelectedShelter(null);setSelectedAnimal({id:null, shelter:'null'});}} style={{maxHeight:"36px", width:"100%", marginTop:"-1px"}}>Field {null === selectedShelter || (selectedAnimal.id && selectedAnimal.shelter === null) ? <FontAwesomeIcon icon={faChevronCircleDown} size="sm" /> : <FontAwesomeIcon icon={faChevronCircleUp} size="sm" />}</Button>
+          {(selectedShelter === null || (selectedAnimal.id && selectedAnimal.shelter === null)) && shelterAnimals['Field'] && shelterAnimals['Field'].map((animal) => (
+            <Button key={animal.id} title={animal.name} variant={animal.id === selectedAnimal.id ? "primary" : "secondary"} className="border" onClick={() => {setSelectedAnimal({id:animal.id, shelter:animal.shelter}); setSelectedShelter('test');}} style={{maxHeight:"36px", width:"100%", marginTop:"-1px"}}>
+              A#{animal.id}
             </Button>
           ))}
         </Scrollbar>
       </Col>
     </Row>
     <Row className="ml-0 mr-0 border rounded" style={{maxHeight:"38px"}}>
-      <h5 className="card-header" style={{paddingTop:"7px", paddingLeft:"10px", paddingRight:"10px", height:"36px", width:"100%", backgroundColor:"#808080"}}>Shelters</h5>
+      <h5 className="card-header" style={{paddingTop:"7px", paddingLeft:"10px", paddingRight:"10px", height:"36px", width:"100%", backgroundColor:"#808080"}}>Veterinary Locations</h5>
     </Row>
     <hr/>
     <div className="row mb-2">
@@ -205,55 +205,22 @@ function Vet({ incident, organization }) {
                 <ListGroup horizontal style={{marginBottom:"-20px"}}>
                   <ListGroup.Item active={"pending" === activeOrders} className="text-center" style={{textTransform:"capitalize", cursor:'pointer', paddingLeft:"5px", paddingRight:"5px"}} onClick={() => setActiveOrders("pending")}>
                     <div style={{marginTop:"-3px", marginLeft:"-1px", paddingLeft:"10px", paddingRight:"10px"}}>
-                      All Pending ({data.treatments.filter(tr => tr.animal_object.shelter === selectedShelter || (selectedShelter === 'all' && (!tr.animal_object.shelter || Object.keys(shelterAnimals).includes(String(tr.animal_object.shelter))))).length + data.diagnostics.filter(diagnostic => diagnostic.animal_object.shelter === selectedShelter || (selectedShelter === 'all'  && (!diagnostic.animal_object.shelter || Object.keys(shelterAnimals).includes(String(diagnostic.animal_object.shelter))))).length + data.procedures.filter(procedure => procedure.animal_object.shelter === selectedShelter || (selectedShelter === 'all'  && (!procedure.animal_object.shelter || Object.keys(shelterAnimals).includes(String(procedure.animal_object.shelter))))).length})
+                      All Pending ({data.treatments.filter(tr => tr.animal_object.id === selectedAnimal.id || tr.animal_object.shelter === selectedShelter || (selectedShelter === 'all' && (!tr.animal_object.shelter || Object.keys(shelterAnimals).includes(String(tr.animal_object.shelter))))).length + data.diagnostics.filter(diagnostic => diagnostic.animal_object.id === selectedAnimal.id || diagnostic.animal_object.shelter === selectedShelter || (selectedShelter === 'all'  && (!diagnostic.animal_object.shelter || Object.keys(shelterAnimals).includes(String(diagnostic.animal_object.shelter))))).length + data.procedures.filter(procedure => procedure.animal_object.id === selectedAnimal.id || procedure.animal_object.shelter === selectedShelter || (selectedShelter === 'all'  && (!procedure.animal_object.shelter || Object.keys(shelterAnimals).includes(String(procedure.animal_object.shelter))))).length})
                     </div>
                   </ListGroup.Item>
                   <ListGroup.Item active={"treatments" === activeOrders} className="text-center" style={{textTransform:"capitalize", cursor:'pointer', paddingLeft:"5px", paddingRight:"5px"}} onClick={() => setActiveOrders("treatments")}>
                     <div style={{marginTop:"-3px", marginLeft:"-1px", paddingLeft:"10px", paddingRight:"10px"}}>
-                      Treatments ({data.treatments.filter(treatment => treatment.animal_object.shelter === selectedShelter || (selectedShelter === 'all' && (!treatment.animal_object.shelter || Object.keys(shelterAnimals).includes(String(treatment.animal_object.shelter))))).length})
-                      {activeOrders === 'treatments' ? <OverlayTrigger
-                        key={"add-treatment"}
-                        placement="top"
-                        overlay={
-                          <Tooltip id={`tooltip-add-treatment`}>
-                            Add a treatment for this patient
-                          </Tooltip>
-                        }
-                      >
-                        <Link href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.id + "/treatment/new"}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
-                      </OverlayTrigger> : ""}
+                      Treatments ({data.treatments.filter(treatment => treatment.animal_object.id === selectedAnimal.id || treatment.animal_object.shelter === selectedShelter || (selectedShelter === 'all' && (!treatment.animal_object.shelter || Object.keys(shelterAnimals).includes(String(treatment.animal_object.shelter))))).length})
                     </div>
                   </ListGroup.Item>
                   <ListGroup.Item active={"diagnostics" === activeOrders} className="text-center" style={{textTransform:"capitalize", cursor:'pointer', paddingLeft:"5px", paddingRight:"5px"}} onClick={() => setActiveOrders("diagnostics")}>
                     <div style={{marginTop:"-3px", marginLeft:"-1px", paddingLeft:"10px", paddingRight:"10px"}}>
-                      Diagnostics ({data.diagnostics.filter(diagnostic => diagnostic.animal_object.shelter === selectedShelter  || (selectedShelter === 'all' && (!diagnostic.animal_object.shelter || Object.keys(shelterAnimals).includes(String(diagnostic.animal_object.shelter))))).length})
-                      {activeOrders === 'diagnostics' ? <OverlayTrigger
-                        key={"order-diagnostic"}
-                        placement="top"
-                        overlay={
-                          <Tooltip id={`tooltip-order-diagnostic`}>
-                            Order diagnostics for this patient
-                          </Tooltip>
-                        }
-                      >
-                        <Link href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.id + "/diagnostics"}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
-                      </OverlayTrigger> : ""}
+                      Diagnostics ({data.diagnostics.filter(diagnostic => diagnostic.animal_object.id === selectedAnimal.id || diagnostic.animal_object.shelter === selectedShelter  || (selectedShelter === 'all' && (!diagnostic.animal_object.shelter || Object.keys(shelterAnimals).includes(String(diagnostic.animal_object.shelter))))).length})
                     </div>
                   </ListGroup.Item>
                   <ListGroup.Item active={"procedures" === activeOrders} className="text-center" style={{textTransform:"capitalize", cursor:'pointer', paddingLeft:"5px", paddingRight:"5px"}} onClick={() => setActiveOrders("procedures")}>
                     <div style={{marginTop:"-3px", marginLeft:"-1px", paddingLeft:"10px", paddingRight:"10px"}}>
-                      Procedures ({data.procedures.filter(procedure => procedure.animal_object.shelter === selectedShelter || (selectedShelter === 'all' && (!procedure.animal_object.shelter || Object.keys(shelterAnimals).includes(String(procedure.animal_object.shelter))))).length})
-                      {activeOrders === 'procedures' ? <OverlayTrigger
-                        key={"order-procedure"}
-                        placement="top"
-                        overlay={
-                          <Tooltip id={`tooltip-order-procedure`}>
-                            Order procedures for this patient
-                          </Tooltip>
-                        }
-                      >
-                        <Link href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.id + "/procedures"}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
-                      </OverlayTrigger> : ""}
+                      Procedures ({data.procedures.filter(procedure => procedure.animal_object.id === selectedAnimal.id || procedure.animal_object.shelter === selectedShelter || (selectedShelter === 'all' && (!procedure.animal_object.shelter || Object.keys(shelterAnimals).includes(String(procedure.animal_object.shelter))))).length})
                     </div>
                   </ListGroup.Item>
                 </ListGroup>
@@ -261,27 +228,40 @@ function Vet({ incident, organization }) {
             </Card.Title>
             <hr />
             <Scrollbar no_shadow="true" style={{height:"564px", minHeight:"564px"}} renderView={props => <div {...props} style={{...props.style, overflowX:"hidden", marginBottom:"-10px"}}/>}  renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
-            {activeOrders === 'pending' && data.treatments.filter(treatment => treatment.animal_object.shelter === selectedShelter || (selectedShelter === 'all' && (!treatment.animal_object.shelter || Object.keys(shelterAnimals).includes(String(treatment.animal_object.shelter))))).map(treatment_request => (
+            {activeOrders === 'pending' && data.treatments.filter(treatment => treatment.animal_object.id === selectedAnimal.id || treatment.animal_object.shelter === selectedShelter || (selectedShelter === 'all' && (!treatment.animal_object.shelter || Object.keys(shelterAnimals).includes(String(treatment.animal_object.shelter))))).map(treatment_request => (
               <TreatmentCard key={treatment_request.id} incident={incident} organization={organization} treatment_request={treatment_request} />
             ))}
-            {activeOrders === 'pending' && data.diagnostics.filter(diagnostic => diagnostic.animal_object.shelter === selectedShelter || (selectedShelter === 'all' && (!diagnostic.animal_object.shelter || Object.keys(shelterAnimals).includes(String(diagnostic.animal_object.shelter))))).map(diagnostic => (
+            {activeOrders === 'pending' && data.diagnostics.filter(diagnostic => diagnostic.animal_object.id === selectedAnimal.id || diagnostic.animal_object.shelter === selectedShelter || (selectedShelter === 'all' && (!diagnostic.animal_object.shelter || Object.keys(shelterAnimals).includes(String(diagnostic.animal_object.shelter))))).map(diagnostic => (
               <DiagnosticCard key={diagnostic.id} incident={incident} organization={organization} diagnostic={diagnostic} />
             ))}
-            {activeOrders === 'pending' && data.procedures.filter(procedure => procedure.animal_object.shelter === selectedShelter || (selectedShelter === 'all' && (!procedure.animal_object.shelter || Object.keys(shelterAnimals).includes(String(procedure.animal_object.shelter))))).map(procedure => (
+            {activeOrders === 'pending' && data.procedures.filter(procedure => procedure.animal_object.id === selectedAnimal.id || procedure.animal_object.shelter === selectedShelter || (selectedShelter === 'all' && (!procedure.animal_object.shelter || Object.keys(shelterAnimals).includes(String(procedure.animal_object.shelter))))).map(procedure => (
               <ProcedureCard key={procedure.id} incident={incident} organization={organization} procedure={procedure} />
             ))}
-            {activeOrders === 'treatments' && data.treatments.filter(treatment => treatment.animal_object.shelter === selectedShelter || (selectedShelter === 'all' && (!treatment.animal_object.shelter || Object.keys(shelterAnimals).includes(String(treatment.animal_object.shelter))))).map(treatment_request => (
+            {activeOrders === 'treatments' && data.treatments.filter(treatment => treatment.animal_object.id === selectedAnimal.id || treatment.animal_object.shelter === selectedShelter || (selectedShelter === 'all' && (!treatment.animal_object.shelter || Object.keys(shelterAnimals).includes(String(treatment.animal_object.shelter))))).map(treatment_request => (
               <TreatmentCard key={treatment_request.id} incident={incident} organization={organization} treatment_request={treatment_request} />
             ))}
-            {activeOrders === 'treatments' && data.treatments.filter(treatment => treatment.animal_object.shelter === selectedShelter || (selectedShelter === 'all' && (!treatment.animal_object.shelter || Object.keys(shelterAnimals).includes(String(treatment.animal_object.shelter))))).length < 1 ? <p>No treatments have been created for this patient.</p> : ""}
-            {activeOrders === 'diagnostics' && data.diagnostics.filter(diagnostic => diagnostic.animal_object.shelter === selectedShelter || (selectedShelter === 'all' && (!diagnostic.animal_object.shelter || Object.keys(shelterAnimals).includes(String(diagnostic.animal_object.shelter))))).map(diagnostic => (
+            {activeOrders === 'treatments' && data.treatments.filter(treatment => treatment.animal_object.id === selectedAnimal.id || treatment.animal_object.shelter === selectedShelter || (selectedShelter === 'all' && (!treatment.animal_object.shelter || Object.keys(shelterAnimals).includes(String(treatment.animal_object.shelter))))).length < 1 ? <p>No treatments have been created for this patient.</p> : ""}
+            {activeOrders === 'diagnostics' && data.diagnostics.filter(diagnostic => diagnostic.animal_object.id === selectedAnimal.id || diagnostic.animal_object.shelter === selectedShelter || (selectedShelter === 'all' && (!diagnostic.animal_object.shelter || Object.keys(shelterAnimals).includes(String(diagnostic.animal_object.shelter))))).map(diagnostic => (
               <DiagnosticCard key={diagnostic.id} incident={incident} organization={organization} diagnostic={diagnostic} />
             ))}
-            {activeOrders === 'diagnostics' && data.diagnostics.filter(diagnostic => diagnostic.animal_object.shelter === selectedShelter || (selectedShelter === 'all' && (!diagnostic.animal_object.shelter || Object.keys(shelterAnimals).includes(String(diagnostic.animal_object.shelter))))).length < 1 ? <p>No diagnostics have been ordered for this patient.</p> : ""}
-            {activeOrders === 'procedures' && data.procedures.filter(procedure => procedure.animal_object.shelter === selectedShelter || (selectedShelter === 'all' && (!procedure.animal_object.shelter || Object.keys(shelterAnimals).includes(String(procedure.animal_object.shelter))))).map(procedure => (
+            {activeOrders === 'diagnostics' && data.diagnostics.filter(diagnostic => diagnostic.animal_object.id === selectedAnimal.id || diagnostic.animal_object.shelter === selectedShelter || (selectedShelter === 'all' && (!diagnostic.animal_object.shelter || Object.keys(shelterAnimals).includes(String(diagnostic.animal_object.shelter))))).length < 1 ? <p>No diagnostics have been ordered for this patient.</p> : ""}
+            {activeOrders === 'procedures' && data.procedures.filter(procedure => procedure.animal_object.id === selectedAnimal.id || procedure.animal_object.shelter === selectedShelter || (selectedShelter === 'all' && (!procedure.animal_object.shelter || Object.keys(shelterAnimals).includes(String(procedure.animal_object.shelter))))).map(procedure => (
               <ProcedureCard key={procedure.id} incident={incident} organization={organization} procedure={procedure} />
             ))}
-            {activeOrders === 'procedures' && data.procedures.filter(procedure => procedure.animal_object.shelter === selectedShelter || (selectedShelter === 'all' && (!procedure.animal_object.shelter || Object.keys(shelterAnimals).includes(String(procedure.animal_object.shelter))))).length < 1 ? <p>No procedures have been ordered for this patient.</p> : ""}
+            {activeOrders === 'procedures' && data.procedures.filter(procedure => procedure.animal_object.id === selectedAnimal.id || procedure.animal_object.shelter === selectedShelter || (selectedShelter === 'all' && (!procedure.animal_object.shelter || Object.keys(shelterAnimals).includes(String(procedure.animal_object.shelter))))).length < 1 ? <p>No procedures have been ordered for this patient.</p> : ""}
+            
+            {/* {activeOrders === 'treatments' && data.treatments.filter(treatment => treatment.animal_object.id === selectedAnimal.id).map(treatment_request => (
+              <TreatmentCard key={treatment_request.id} incident={incident} organization={organization} treatment_request={treatment_request} />
+            ))}
+            {activeOrders === 'treatments' && data.treatments.filter(treatment => treatment.animal_object.id === selectedAnimal.id).length < 1 ? <p>No treatments have been created for this patient.</p> : ""}
+            {activeOrders === 'diagnostics' && data.diagnostics.filter(diagnostic => diagnostic.animal_object.id === String(selectedAnimal.id) || (selectedShelter === 'all' && (!diagnostic.animal_object.shelter || Object.keys(shelterAnimals).includes(String(diagnostic.animal_object.shelter))))).map(diagnostic => (
+              <DiagnosticCard key={diagnostic.id} incident={incident} organization={organization} diagnostic={diagnostic} />
+            ))}
+            {activeOrders === 'diagnostics' && data.diagnostics.filter(diagnostic => diagnostic.animal_object.id === String(selectedAnimal.id) || (selectedShelter === 'all' && (!diagnostic.animal_object.shelter || Object.keys(shelterAnimals).includes(String(diagnostic.animal_object.shelter))))).length < 1 ? <p>No diagnostics have been ordered for this patient.</p> : ""}
+            {activeOrders === 'procedures' && data.procedures.filter(procedure => procedure.animal_object.id === String(selectedAnimal.id) || (selectedShelter === 'all' && (!procedure.animal_object.shelter || Object.keys(shelterAnimals).includes(String(procedure.animal_object.shelter))))).map(procedure => (
+              <ProcedureCard key={procedure.id} incident={incident} organization={organization} procedure={procedure} />
+            ))}
+            {activeOrders === 'procedures' && data.procedures.filter(procedure => procedure.animal_object.id === String(selectedAnimal.id) || (selectedShelter === 'all' && (!procedure.animal_object.shelter || Object.keys(shelterAnimals).includes(String(procedure.animal_object.shelter))))).length < 1 ? <p>No procedures have been ordered for this patient.</p> : ""} */}
             </Scrollbar>
           </Card.Body>
         </Card>
