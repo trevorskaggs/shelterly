@@ -30,7 +30,7 @@ function Reports({ incident, organization }) {
     result += lineDelimiter;
     array.forEach(item => {
       let ctr = 0;
-      keys.forEach(key => {
+      keys.filter(key => key !== 'last').forEach(key => {
         if (ctr > 0) result += columnDelimiter;
         result += item[key];
         ctr++;

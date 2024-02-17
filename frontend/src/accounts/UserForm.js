@@ -36,7 +36,7 @@ const UserForm = ({ id, organization }) => {
     incident_perms: false,
     vet_perms: false,
     email_notification: false,
-    organizations: [state.organization.id]
+    organizations: []
   })
 
   // Hook for initializing data.
@@ -95,6 +95,8 @@ const UserForm = ({ id, organization }) => {
         email_notification: Yup.boolean(),
       })}
       onSubmit={(values, { setFieldError, setSubmitting }) => {
+        // Pass current organization value.
+        values['organization'] = state.organization.id;
         setTimeout(() => {
           if (id) {
             axios.put('/accounts/api/user/' + id + '/', values)
