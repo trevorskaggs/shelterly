@@ -174,6 +174,17 @@ describe('Utils >  ShelterlyPDF', () => {
       pdf.beforeDraw({ yPosition: pageHeight });
       expect(pdf.numberOfPages).toBe(totalPages + 1);
     });
+
+    it('sets absolute position and returns a function to reset the position', () => {
+      pdf.lastYPosition = 555;
+      const expectedOldYPosition = pdf.lastYPosition;
+      const expectedNewYPosition = 25;
+      const { oldLastYPosition, resetPosition } =
+        pdf.setAbsolutePosition({ x: 100, y: expectedNewYPosition });
+
+      expect(oldLastYPosition).toBe(expectedOldYPosition);
+      expect(typeof resetPosition).toBe('function');
+    })
   });
   
   describe('Document Draw Methods', () => {

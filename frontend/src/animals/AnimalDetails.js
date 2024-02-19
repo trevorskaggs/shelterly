@@ -18,9 +18,9 @@ import { printAnimalCareSchedule } from './Utils';
 import AnimalCoverImage from '../components/AnimalCoverImage';
 import { SystemErrorContext } from '../components/SystemError';
 import ShelterlyPrintifyButton from '../components/ShelterlyPrintifyButton';
+import { useLocationWithRoutes } from '../hooks';
 
 function AnimalDetails({ id, incident, organization }) {
-
   const { state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
   const [images, setImages] = useState([]);
@@ -63,6 +63,7 @@ function AnimalDetails({ id, incident, organization }) {
   const handleOwnerClose = () => setShowOwnerConfirm(false);
   const [showAnimalConfirm, setShowAnimalConfirm] = useState(false);
   const handleAnimalClose = () => setShowAnimalConfirm(false);
+  const { getFullLocationFromPath } = useLocationWithRoutes();
 
   // Handle animal reunited submit.
   const handleSubmit = async () => {
@@ -111,8 +112,10 @@ function AnimalDetails({ id, incident, organization }) {
     });
   }
 
-  const handleDownloadPdfClick = () =>
-    printAnimalCareSchedule(data)
+  const handleDownloadPdfClick = () => {
+    const pageURL = getFullLocationFromPath(`/${organization}/${incident}/animals/${data.id}`)
+    return printAnimalCareSchedule({ ...data, url: pageURL });
+  }
 
   // Hook for initializing data.
   useEffect(() => {

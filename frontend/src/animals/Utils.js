@@ -3,6 +3,22 @@ import ShelterlyPDF from '../utils/pdf';
 import { capitalize } from '../utils/formatString';
 import { SpeciesIcon } from '../components/icons';
 import { DATE_FORMAT } from '../constants';
+import { createQrCode } from '../utils/qrCode';
+
+/**
+ * helper function for drawing the animal details QR code at the top of the animal care schedule pdf
+ */
+async function drawQRCareCode(pdf, animalUrl) {
+  // set absolute position to the top header of each animal care schedule page
+  const { oldLeftMargin, oldLastYPosition, resetPosition } =
+  pdf.setAbsolutePosition({ x: 200, y: 5 });
+
+  // draw QR code
+  await pdf.drawImage({ src: createQrCode(animalUrl) });
+
+  // reset position to continue normal draw operations
+  resetPosition(oldLeftMargin, oldLastYPosition);
+}
 
 async function buildAnimalCareScheduleContent(pdf, animals) {
   for (let i = 0; i < animals.length; i++) {
@@ -10,6 +26,10 @@ async function buildAnimalCareScheduleContent(pdf, animals) {
 
     if (i > 0) {
       pdf.drawPageBreak();
+    }
+
+    if (animal.url) {
+      await drawQRCareCode(pdf, animal.url)
     }
 
     const imageSrc = animal.front_image;
