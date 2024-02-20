@@ -12,7 +12,9 @@ const ShelterlyPrintifyButton = ({
   spinnerSize = 1.5,
   id = 'shelterly-printify-button',
   tooltipPlacement = 'bottom',
-  tooltipText = 'Printify'
+  tooltipText = 'Printify',
+  disabled = false,
+  disabledClassName = 'text-dark'
 }) => {
   const {
     isSubmitting,
@@ -22,6 +24,7 @@ const ShelterlyPrintifyButton = ({
 
   const handleClick = (e) => {
     e.preventDefault();
+    if (disabled) return;
 
     handleSubmitting()
       .then(printFunc)
@@ -57,7 +60,7 @@ const ShelterlyPrintifyButton = ({
           }}
           {...triggerHandler}
         >
-          <span ref={ref} data-testid="icon-test-component"><FontAwesomeIcon icon={faPrint} inverse /></span>
+          <span ref={ref} data-testid="icon-test-component"><FontAwesomeIcon icon={faPrint} className={`${disabled ? disabledClassName : ''}`} inverse /></span>
         </ButtonSpinner>
       )}
     </OverlayTrigger>

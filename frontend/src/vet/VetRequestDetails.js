@@ -14,10 +14,11 @@ import {
 } from '@fortawesome/pro-solid-svg-icons';
 import Header from '../components/Header';
 import { SystemErrorContext } from '../components/SystemError';
+import LoadingLink from '../components/LoadingLink';
 import { AuthContext } from "../accounts/AccountsReducer";
 
 function VetRequestDetails({ id, incident, organization }) {
-
+  const [isLoading, setIsLoading] = useState(true);
   const { dispatch, state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
@@ -39,6 +40,7 @@ function VetRequestDetails({ id, incident, organization }) {
   useEffect(() => {
     let unmounted = false;
     let source = axios.CancelToken.source();
+    setIsLoading(true);
 
     const fetchVetRequestData = async () => {
       // Fetch VetRequest Details data.
@@ -52,7 +54,8 @@ function VetRequestDetails({ id, incident, organization }) {
       })
       .catch(error => {
         setShowSystemError(true);
-      });
+      })
+      .finally(() => setIsLoading(false));
     };
     fetchVetRequestData();
     // Cleanup.
@@ -75,7 +78,12 @@ function VetRequestDetails({ id, incident, organization }) {
           </Tooltip>
         }
       >
-        <Link href={"/" + organization + "/" + incident + "/vet/vetrequest/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-2" inverse /></Link>
+        <LoadingLink
+          href={"/" + organization + "/" + incident + "/vet/vetrequest/edit/" + id}
+          isLoading={isLoading}
+        >
+          <FontAwesomeIcon icon={faEdit} className="ml-2" inverse />
+        </LoadingLink>
       </OverlayTrigger> : ""}
       {data.status === 'Open' ? <OverlayTrigger
         key={"cancel-vet-request"}
@@ -86,7 +94,9 @@ function VetRequestDetails({ id, incident, organization }) {
           </Tooltip>
         }
       >
-        <FontAwesomeIcon icon={faTimes} className="ml-1" size="lg" style={{cursor:'pointer'}} inverse onClick={() => {setShowModal(true)}}/>
+        <LoadingLink onClick={() => {setShowModal(true)}} isLoading={isLoading}>
+          <FontAwesomeIcon icon={faTimes} className="ml-1" size="lg" style={{cursor:'pointer'}} inverse />
+        </LoadingLink>
       </OverlayTrigger> : ""}
     </Header>
     <hr/>

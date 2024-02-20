@@ -55,4 +55,26 @@ describe('Components > ShelterlyPrintifyButton', () => {
       expect(clickHandlerMock).toHaveBeenCalledTimes(1);
     });
   });
+
+  it('should not call clickHandler when button is clicked but disabled', async () => {
+    const clickHandlerMock = jest.fn()
+    const { getByTestId } = render(
+      <ShelterlyPrintifyButton
+        printFunc={clickHandlerMock}
+        tooltipText="Tooltip text"
+        disabled={true}
+      />
+    );
+
+    // Find the button element
+    const buttonElement = getByTestId('button-test-component');
+
+    // Click the button
+    fireEvent.click(buttonElement);
+
+    // Wait for the Promise to resolve (clickHandler to be called)
+    await wait(() => {
+      expect(clickHandlerMock).not.toHaveBeenCalledTimes(1);
+    });
+  })
 });
