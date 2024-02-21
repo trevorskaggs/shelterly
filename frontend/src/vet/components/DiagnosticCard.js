@@ -142,21 +142,21 @@ function DiagnosticCard(props) {
                 </Row> : ""}
                 <Row style={{marginTop:props.animal_object ? "" : "6px"}}>
                   <Col xs={3}>
-                    Result: {props.diagnostic.result || 'Pending'}
+                    <b>Result: </b>{props.diagnostic.result || 'Pending'}
                   </Col>
                   {props.diagnostic.complete ?
                   <Col xs={4}>
-                    Completed: <Moment format="lll">{props.diagnostic.complete}</Moment>
+                    <b>Completed: </b><Moment format="MMM DD, HH:mm">{props.diagnostic.complete}</Moment>
                   </Col>
                   :
                   <Col xs={4}>
-                    Ordered: <Moment format="lll">{props.diagnostic.open}</Moment>
+                    <b>Ordered: </b><Moment format="MMM DD, HH:mm">{props.diagnostic.open}</Moment>
                   </Col>
                   }
                 </Row>
                 <Row>
                   <Col>
-                    Notes: {props.diagnostic.notes || "N/A"}
+                    <b>Notes: </b>{props.diagnostic.notes || "N/A"}
                   </Col>
                 </Row>
               </Col>

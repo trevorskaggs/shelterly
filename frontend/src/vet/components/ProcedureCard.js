@@ -62,14 +62,14 @@ function ProcedureCard(props) {
                 }
               </div>
               :
-              <div className="border-right" style={{width:"120px"}}>
-                {procedure.name.toLowerCase().includes('bandage') || procedure.other_name.toLowerCase().includes('bandage') || procedure.name.toLowerCase().includes('splint') || procedure.other_name.toLowerCase().includes('splint') ?
+              <div className="border-right" style={{width:"100px"}}>
+                {props.procedure.name.toLowerCase().includes('bandage') || props.procedure.other_name.toLowerCase().includes('bandage') || props.procedure.name.toLowerCase().includes('splint') || props.procedure.other_name.toLowerCase().includes('splint') ?
                   <FontAwesomeIcon icon={faBandage} size="6x" className="treatment-icon" style={{marginTop:"12px", marginLeft:"3px"}} transform={'shrink-1'} inverse />
-                : procedure.name.toLowerCase().includes('hydro') || procedure.other_name.toLowerCase().includes('hydro') || procedure.name.toLowerCase().includes('water') || procedure.other_name.toLowerCase().includes('water') ?
+                : props.procedure.name.toLowerCase().includes('hydro') || props.procedure.other_name.toLowerCase().includes('hydro') || props.procedure.name.toLowerCase().includes('water') || props.procedure.other_name.toLowerCase().includes('water') ?
                   <FontAwesomeIcon icon={faWater} size="6x" className="treatment-icon" style={{marginTop:"13px", marginLeft:"9px"}} transform={'grow-1'} inverse />
-                : procedure.name.toLowerCase().includes('eye') || procedure.other_name.toLowerCase().includes('eye') ?
+                : props.procedure.name.toLowerCase().includes('eye') || props.procedure.other_name.toLowerCase().includes('eye') ?
                   <FontAwesomeIcon icon={faEye} size="6x" className="treatment-icon" style={{marginTop:"13px", marginLeft:"9px"}} transform={'grow-1'} inverse />
-                : procedure.name.toLowerCase().includes('clean') || procedure.other_name.toLowerCase().includes('clean') ?
+                : props.procedure.name.toLowerCase().includes('clean') || props.procedure.other_name.toLowerCase().includes('clean') ?
                   <FontAwesomeIcon icon={faSoap} size="6x" className="treatment-icon" style={{marginTop:"13px", marginLeft:"14px"}} transform={'grow-2'} inverse />
                 :
                   <FontAwesomeIcon icon={faScalpelLineDashed} size="6x" className="treatment-icon" style={{marginTop:"13px", marginLeft:"8px"}} transform={'grow-1'} inverse />
@@ -120,21 +120,21 @@ function ProcedureCard(props) {
                 </Row> : ""}
                 <Row style={{marginTop:props.animal_object ? "" : "6px"}}>
                   <Col xs={3}>
-                    Status: {props.procedure.complete ? 'Complete' : 'Pending'}
+                    <b>Status: </b>{props.procedure.complete ? 'Complete' : 'Pending'}
                   </Col>
                   {props.procedure.complete ?
                   <Col xs={4}>
-                    Completed: <Moment format="lll">{props.procedure.complete}</Moment>
+                    <b>Completed: </b><Moment format="MMM DD, HH:mm">{props.procedure.complete}</Moment>
                   </Col>
                   :
                   <Col xs={4}>
-                    Ordered: <Moment format="lll">{props.procedure.open}</Moment>
+                    <b>Ordered: </b><Moment format="MMM DD, HH:mm">{props.procedure.open}</Moment>
                   </Col>
                   }
                 </Row>
                 <Row>
                   <Col>
-                    Notes: {props.procedure.notes || "N/A"}
+                    <b>Notes: </b>{props.procedure.notes || "N/A"}
                   </Col>
                 </Row>
               </Col>

@@ -141,32 +141,32 @@ function TreatmentCard(props) {
                 <Row style={{marginTop:props.animal_object ? "" : "6px"}}>
                   {props.treatment_request.actual_admin_time ?
                   <Col xs={6}>
-                    Administered: <Moment format="lll">{props.treatment_request.actual_admin_time}</Moment>
+                    <b>Administered: </b><Moment format="MMM DD, HH:mm">{props.treatment_request.actual_admin_time}</Moment>
                   </Col>
                   :
                   <Col xs={6}>
-                    Scheduled: <Moment format="lll">{props.treatment_request.suggested_admin_time}</Moment>
+                    <b>Scheduled: </b><Moment format="MMM DD, HH:mm">{props.treatment_request.suggested_admin_time}</Moment>
                   </Col>
                   }
                   {props.treatment_request.assignee_object ?
                   <Col xs={4}>
-                    Administrator: {props.treatment_request.assignee_object.first_name} {props.treatment_request.assignee_object.last_name}
+                    <b>Administrator: </b>{props.treatment_request.assignee_object.first_name} {props.treatment_request.assignee_object.last_name}
                   </Col>
                   :
                   props.treatment_request.not_administered ?
                   <Col xs={6}>
-                    Administrator: Not Administered
+                    <b>Administrator: </b>Not Administered
                   </Col> : ""}
                 </Row>
                 <Row>
                   <Col xs={3}>
-                    Quantity: {props.treatment_request.quantity}
+                    <b>Quantity: </b>{props.treatment_request.quantity}
                   </Col>
                   <Col xs={3}>
-                    Unit: {props.treatment_request.unit || '-'}
+                    <b>Unit: </b>{props.treatment_request.unit || '-'}
                   </Col>
                   <Col>
-                    Route: {props.treatment_request.route || '-'}
+                    <b>Route: </b>{props.treatment_request.route || '-'}
                   </Col>
                 </Row>
               </Col>
