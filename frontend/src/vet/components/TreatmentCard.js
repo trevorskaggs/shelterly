@@ -44,9 +44,22 @@ function TreatmentCard(props) {
     <>
     <Row className="ml-0 mb-3">
       <Link href={"/" + props.organization + "/" + props.incident + "/vet/treatmentrequest/edit/" + props.treatment_request.id} className="treatment-link" style={{textDecoration:"none", color:"white"}}>
-        <Card className="border rounded treatment-hover-div" style={{height:"100px", width:"745px", whiteSpace:"nowrap", overflow:"hidden"}}>
+        <Card className="border rounded treatment-hover-div" style={{height:props.animal_object ? "120px" : "100px", width:"845px", whiteSpace:"nowrap", overflow:"hidden"}}>
           <div className="row no-gutters hover-div treatment-hover-div" style={{height:"100px", marginRight:"-2px"}}>
             <Row className="ml-0 mr-0 w-100" style={{flexWrap:"nowrap"}}>
+              {props.animal_object ?
+              <div className="border-right" style={{width:"120px"}}>
+              {['Eye Medication','Ear Medication'].includes(props.treatment_request.treatment_object ? props.treatment_request.treatment_object.category : '') ?
+                <FontAwesomeIcon icon={faEyeDropper} size="6x" className="treatment-icon" style={{marginTop:"14px", marginLeft:"14px"}} transform={'grow-1'} inverse />
+                : props.treatment_request.treatment_object && props.treatment_request.treatment_object.category === 'Patient Care' ?
+                <FontAwesomeIcon icon={faHeart} size="6x" className="treatment-icon" style={{marginTop:"14px", marginLeft:"14px"}} transform={'grow-1'} inverse />
+                : props.treatment_request.treatment_object && props.treatment_request.treatment_object.unit === 'ml' ?
+                <FontAwesomeIcon icon={faSyringe} size="6x" className="treatment-icon" style={{marginTop:"14px", marginLeft:"13px"}} transform={'grow-1'} inverse />
+              :
+                <FontAwesomeIcon icon={faPrescriptionBottlePill} size="6x" className="treatment-icon" style={{marginTop:"14px", marginLeft:"9px"}} transform={'grow-1'} inverse />
+              }
+              </div>
+              :
               <div className="border-right" style={{width:"100px"}}>
               {['Eye Medication','Ear Medication'].includes(props.treatment_request.treatment_object.category) ?
                 <FontAwesomeIcon icon={faEyeDropper} size="6x" className="treatment-icon" style={{marginTop:"5px", marginLeft:"4px"}} transform={'shrink-2'} inverse />
@@ -58,6 +71,7 @@ function TreatmentCard(props) {
                 <FontAwesomeIcon icon={faPrescriptionBottlePill} size="6x" className="treatment-icon" style={{marginTop:"5px", marginLeft:"-1px"}} transform={'shrink-2'} inverse />
               }
               </div>
+              }
               <Col style={{marginLeft:"-5px", marginRight:"-25px"}} className="hover-div">
                 <div className="border treatment-hover-div" style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"10px", marginLeft:"-11px", marginTop: "-1px", fontSize:"18px", width:"100%", backgroundColor:"rgb(158 153 153)"}}>
                   {props.treatment_request.treatment_object.description}
@@ -113,7 +127,18 @@ function TreatmentCard(props) {
                     }
                   </span>
                 </div>
-                <Row style={{marginTop:"6px"}}>
+                {props.animal_object ? <Row style={{marginTop:"6px"}}>
+                  <Col xs={3}>
+                    <b>Patient: </b>A#{props.animal_object.id}
+                  </Col>
+                  <Col xs={3}>
+                    <b>Species:</b> <span  style={{textTransform:"capitalize"}}>{props.animal_object.species_string}</span>
+                  </Col>
+                  <Col xs={6}>
+                    <b>Name: </b>{props.animal_object.name || "Unknown"}
+                  </Col>
+                </Row> : ""}
+                <Row style={{marginTop:props.animal_object ? "" : "6px"}}>
                   {props.treatment_request.actual_admin_time ?
                   <Col xs={6}>
                     Administered: <Moment format="lll">{props.treatment_request.actual_admin_time}</Moment>
