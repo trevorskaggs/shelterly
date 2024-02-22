@@ -14,8 +14,14 @@ import { faBadgeSheriff, faChevronDoubleDown, faChevronDoubleUp, faClawMarks, fa
 import Moment from 'react-moment';
 import Select, { components } from 'react-select';
 import L from "leaflet";
-import { Circle, Map, Marker, Tooltip as MapTooltip, TileLayer } from "react-leaflet";
-import { useMark, useSubmitting, useDataImg, useLocationWithRoutes } from '../hooks';
+import { Map, TileLayer, LayerGroup } from "react-leaflet";
+import {
+  useMark,
+  useSubmitting,
+  useDataImg,
+  useMapUtils,
+  useLocationWithRoutes,
+} from "../hooks";
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
 import { titleCase } from '../components/Utils';
@@ -82,7 +88,7 @@ function AnimalSearch({ incident, organization }) {
   const fixedRef = useRef(null);
   const pcolorRef = useRef(null);
   const shelterRef = useRef(null);
-  const markerRef = useRef(null);
+  const layerGroupRef = useRef(null);
   const mapRef = useRef(null);
   const [bounds, setBounds] = useState(L.latLngBounds([[0,0]]));
   const [page, setPage] = useState(1);
@@ -153,6 +159,7 @@ function AnimalSearch({ incident, organization }) {
     fixedRef.current.select.clearValue();
     pcolorRef.current.select.clearValue();
     shelterRef.current.select.clearValue();
+    layerGroupRef.current.leafletElement.clearLayers();
     setOptions({species: '', status: null, sex: null, owned: null, pcolor: '', fixed: null, latlng: null, radius: 1.60934});
     setAnimals(data.animals);
   };
@@ -185,12 +192,63 @@ function AnimalSearch({ incident, organization }) {
     }
   };
 
+  function getPointFromLatLng(event) {
+    const { lat = 0, lng = 0 } = event?.latlng || options?.latlng || {};
+    return [lat, lng];
+  }
+
+  function getRadiusOrDefault() {
+    return options?.radius || radiusChoices[0];
+  }
+
+  const { fitMapToPointAndRadius, convertKmToMeters } = useMapUtils({
+    mapFitBounds: (bounds) => {
+      // short delay to update map, to work around race condition
+      const delayMapMs = 300;
+      setTimeout(() => {
+        const { leafletElement: map } = mapRef.current;
+        map.fitBounds(bounds);
+      }, delayMapMs)
+    }
+  });
+
+  function addCircleMarker (latlng, chosenRadius) {
+    const { lat, lng } = latlng;
+    const { leafletElement: layerGroup } = layerGroupRef.current;
+    const radius = chosenRadius || getRadiusOrDefault();
+    const radiusWithPad = convertKmToMeters(radius, 0)
+    const point = getPointFromLatLng({ latlng });
+    layerGroup.clearLayers();
+    const marker = L.marker([lat, lng], { icon: pinMarkerIcon })
+      .addTo(layerGroup);
+    marker.bindTooltip(
+      `Lat: ${+(Math.round(lat + "e+4") + "e-4")}, Lon: ${+(
+        Math.round(lng + "e+4") + "e-4"
+      )}`,
+      {
+        direction: "top",
+      }
+    );
+    L.circle([lat, lng], { radius: radiusWithPad, color: '#ff4c4c', interactive: false }).addTo(layerGroup)
+    fitMapToPointAndRadius(point, radiusWithPad);
+  }
+
   const updatePosition = (e) => {
+    addCircleMarker(e.latlng);
     setOptions({...options, latlng: e.latlng})
   };
 
+  const updateRadius = (instance) => {
+    const chosenRadius = instance ? instance.value : null;
+    if (options.latlng) {
+      addCircleMarker(options.latlng, chosenRadius);
+    }
+    setOptions({ ...options, radius: chosenRadius });
+  }
+
   const clearMarker = () => {
-    setOptions({...options, latlng: null})
+    layerGroupRef.current.leafletElement.clearLayers();
+    setOptions({...options, latlng: null })
   };
 
   function arePointsNear(checkPoint, centerPoint) {
@@ -488,28 +546,20 @@ function AnimalSearch({ incident, organization }) {
                 <Col xs="5">
                   <Row style={{marginBottom:"-16px"}}>
                     <Col className="border rounded pl-0 pr-0 mb-3 mr-3">
-                      <Map ref={mapRef} bounds={bounds} boundsOptions={{padding:[10,10]}} onClick={updatePosition} dragging={false} keyboard={false} className="animal-search-leaflet-container" >
+                      <Map
+                        ref={mapRef}
+                        bounds={bounds}
+                        onClick={updatePosition}
+                        dragging={false}
+                        keyboard={false}
+                        className="animal-search-leaflet-container"
+                      >
                         <Legend position="bottomleft" metric={false} />
                         <TileLayer
                           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                           attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
                         />
-                        {options.latlng ?
-                        <span>
-                        <Marker
-                          position={options.latlng}
-                          icon={pinMarkerIcon}
-                          ref={markerRef}
-                        >
-                          <MapTooltip autoPan={false} direction="top">
-                            <div>
-                              Lat: {+(Math.round(options.latlng.lat + "e+4") + "e-4")}, Lon: {+(Math.round(options.latlng.lng + "e+4") + "e-4")}
-                            </div>
-                          </MapTooltip>
-                        </Marker>
-                        <Circle center={options.latlng} color={'#ff4c4c'} radius={options.radius * 1000} interactive={false} />
-                        </span>
-                        : ""}
+                        <LayerGroup ref={layerGroupRef}></LayerGroup>
                       </Map>
                     </Col>
                   </Row>
@@ -525,9 +575,7 @@ function AnimalSearch({ incident, organization }) {
                         styles={customStyles}
                         defaultValue={radiusChoices[0]}
                         isClearable={false}
-                        onChange={(instance) => {
-                          setOptions({...options, radius: instance ? instance.value : null});
-                        }}
+                        onChange={updateRadius}
                       />
                     </Col>
                     <Button variant="outline-light" className="float-right" style={{maxHeight:"35px"}} onClick={clearMarker}>Clear</Button>
