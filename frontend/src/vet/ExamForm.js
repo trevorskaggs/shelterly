@@ -105,6 +105,15 @@ const initialSchemaData = [{
       params: ["Required"]
     },
   ]
+  },{
+    id:'medical_plan',
+    validationType:"string",
+    validations: [
+    {
+      type:'nullable',
+      params: []
+    },
+  ]
   },
 ]
 
@@ -154,7 +163,7 @@ const ExamForm = (props) => {
   // Determine if we're in the vet exam workflow.
   var is_workflow = window.location.pathname.includes("workflow");
 
-  const initialData = {id: '', exam: null, open: '', exam_object: {'medrecord_id':props.medrecordid, vetrequest_id:vetrequest_id, 'confirm_sex_age':false, 'confirm_chip':false, 'weight':null, 'weight_unit':'', 'weight_estimated':false, 'temperature':'', 'temperature_method':'Rectal', 'pulse':'', 'respiratory_rate':''}, animal_object: {id:'', name:'', species:'', species_string: '', category:'', sex:'', age:'', size:'', pcolor:'', scolor:'', medical_notes:''}, vet_requests:[]}
+  const initialData = {id: '', exam: null, open: '', exam_object: {'medrecord_id':props.medrecordid, vetrequest_id:vetrequest_id, 'confirm_sex_age':false, 'confirm_chip':false, 'weight':null, 'weight_unit':'', 'weight_estimated':false, 'temperature':'', 'temperature_method':'Rectal', 'pulse':'', 'respiratory_rate':'', 'medical_plan':''}, animal_object: {id:'', name:'', species:'', species_string: '', category:'', sex:'', age:'', size:'', pcolor:'', scolor:'', medical_notes:''}, vet_requests:[]}
 
   let current_data = {...initialData}
   if (is_workflow) {
@@ -615,7 +624,6 @@ const ExamForm = (props) => {
                         as="textarea"
                         name={question.name.toLowerCase().replace(' ','').replace('/','') + "_notes"}
                         id={question.name.toLowerCase().replace(' ','_').replace('/','_') + "_notes"}
-                        key={`my_unique_question_notes_key__${formikProps.values[question.name.toLowerCase().replace(' ','_').replace('/','_') + '_notes']}`}
                         ref={setRef(question.name)}
                         xs="6"
                         rows={3}
@@ -626,6 +634,16 @@ const ExamForm = (props) => {
                   </Collapse>
                 </span>
                 )}
+                <Row className="mt-3" style={{marginBottom:"-15px"}}>
+                  <TextInput
+                    as="textarea"
+                    label="Medical Plan"
+                    name="medical_plan"
+                    id="medical_plan"
+                    xs="12"
+                    rows={4}
+                  />
+                </Row>
               </FormGroup>
             </Form>
           </Card.Body>

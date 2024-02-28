@@ -19,11 +19,14 @@ import {
 import * as Yup from 'yup';
 import { DateTimePicker, DropDown, TextInput } from '../components/Form';
 import { SystemErrorContext } from '../components/SystemError';
+import { AuthContext } from "../accounts/AccountsReducer";
 import moment from 'moment';
 import Patient from './components/Patient';
 import { faArrowAltFromRight } from '@fortawesome/pro-solid-svg-icons';
 
 const TreatmentPlanForm = (props) => {
+
+  const { state } = useContext(AuthContext);
 
   // Identify any query param data.
   const [queryParams] = useQueryParams();
@@ -162,6 +165,7 @@ const TreatmentPlanForm = (props) => {
         if (is_workflow) {
           if (addAnother) {
             props.onSubmit('treatments', values, 'treatments');
+            resetForm({values:initialData});
           }
           else {
             props.onSubmit('treatments', values, 'diagnoses');
@@ -175,7 +179,15 @@ const TreatmentPlanForm = (props) => {
               resetForm({values:initialData});
             }
             else {
-              navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + response.data.medical_record);
+              // if (state.prevLocation) {
+              //   if (state.prevLocation.includes('/vet/medrecord/')) {
+              //     navigate(state.prevLocation + '?tab=treatments');
+              //   }
+              //   else {
+              //     navigate(state.prevLocation);
+              //   }
+              // }
+              navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + response.data.medical_record + '?tab=treatments');
             }
           })
           .catch(error => {

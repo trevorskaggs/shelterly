@@ -14,7 +14,7 @@ function Patient(props) {
   return (
     <>
     <div className="row" style={{fontSize:'0.9375rem', letterSpacing:"0.00728em", fontFamily:'"Lato", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"'}}>
-      <div className="col-6 d-flex pr-0">
+      <div className="col-6 d-flex">
         <Card className="border rounded d-flex" style={{width:"100%"}}>
           <Card.Body>
             <Card.Title>

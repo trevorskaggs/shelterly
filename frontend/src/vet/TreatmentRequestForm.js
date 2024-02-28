@@ -16,7 +16,7 @@ import {
   faArrowAltCircleLeft,
 } from '@fortawesome/free-solid-svg-icons';
 import * as Yup from 'yup';
-import { Checkbox, DateTimePicker, DropDown } from '../components/Form';
+import { Checkbox, DateTimePicker, DropDown, TextInput } from '../components/Form';
 import { SystemErrorContext } from '../components/SystemError';
 import { AuthContext } from "../accounts/AccountsReducer";
 import Patient from './components/Patient';
@@ -32,6 +32,7 @@ const TreatmetRequestForm = (props) => {
     actual_admin_time: new Date(),
     assignee: null,
     not_administered: false,
+    notes: '',
     animal_object:{id:'', name:''},
   })
 
@@ -93,12 +94,13 @@ const TreatmetRequestForm = (props) => {
         assignee: Yup.number().nullable(),
         suggested_admin_time: Yup.string().required('Required'),
         actual_admin_time: Yup.string().nullable(),
+        notes: Yup.string().nullable(),
       })}
       onSubmit={(values, { setSubmitting }) => {
         if (props.id) {
           axios.put('/vet/api/treatmentrequest/' + props.id + '/', values)
           .then(response => {
-            navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + response.data.medical_record)
+            navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + response.data.medical_record + '?tab=treatments')
           })
           .catch(error => {
             setShowSystemError(true);
@@ -109,7 +111,14 @@ const TreatmetRequestForm = (props) => {
     >
       {formikProps => (
         <Card border="secondary" className="mt-5">
-          <Card.Header as="h5" className="pl-3"><span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + props.organization + "/" + props.incident + "/vet/medrecord/" + data.medical_record)} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>Treatment Request Form</Card.Header>
+          <Card.Header as="h5" className="pl-3">
+            {state.prevLocation ?
+              <span style={{ cursor: 'pointer' }} onClick={() => navigate(state.prevLocation + '?tab=treatments')} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
+            :
+              <span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + props.organization + "/" + props.incident + "/vet/medrecord/" + data.medical_record + '?tab=treatments')} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
+            }
+            Treatment Request Form
+          </Card.Header>
           <Patient animal={data.animal_object} organization={props.organization} incident={props.incident} />
           <Card.Body>
             <Form>
@@ -150,12 +159,23 @@ const TreatmetRequestForm = (props) => {
                     name="actual_admin_time"
                     id="actual_admin_time"
                     xs="4"
-                    clearable={false}
+                    clearable={true}
                     onChange={(date, dateStr) => {
                       formikProps.setFieldValue("actual_admin_time", dateStr)
                     }}
                     value={formikProps.values.actual_admin_time||null}
                     disabled={formikProps.values.not_administered}
+                  />
+                </Row>
+                <Row className="mt-3" style={{marginBottom:"-15px"}}>
+                  <TextInput
+                    as="textarea"
+                    label="Notes"
+                    name="notes"
+                    id="notes"
+                    xs="8"
+                    rows={4}
+                    value={formikProps.values.notes || ''}
                   />
                 </Row>
                 <BootstrapForm.Label className="mt-3">Not Administered</BootstrapForm.Label>

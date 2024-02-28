@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
 import moment from 'moment';
-import { Link } from 'raviger';
+import { Link, useQueryParams } from 'raviger';
 import { Button, Card, Col, Collapse, ListGroup, ListGroupItem, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -51,6 +51,12 @@ function MedicalRecordDetails({ id, incident, organization }) {
   const { setShowSystemError } = useContext(SystemErrorContext);
   const { dispatch, state } = useContext(AuthContext);
 
+  // Identify any query param data.
+  const [queryParams] = useQueryParams();
+  const {
+    tab = 'pending',
+  } = queryParams;
+
   const priorityText = {urgent:'Urgent', when_available:'When Available'};
 
   const [data, setData] = useState({id:'', exams:[], diagnostic_objects:[], procedure_objects:[], patient:null, vet_requests:[], open: '', diagnosis: '', other_diagnosis:'', treatment_requests:[], animal_object: {id:'', name:'', species:'', category:'', sex:'', age:'', fixed:'', pcolor:'', scolor:'', medical_notes:'', shelter_object:{}, room_name:''}});
@@ -58,7 +64,7 @@ function MedicalRecordDetails({ id, incident, organization }) {
   const [activeVR, setActiveVR] = useState(null);
   const [activeOpenVR, setActiveOpenVR] = useState(null);
   const [activeExam, setActiveExam] = useState(null);
-  const [activeOrders, setActiveOrders] = useState("pending");
+  const [activeOrders, setActiveOrders] = useState(tab);
 
   // Hook for initializing data.
   useEffect(() => {
@@ -281,10 +287,15 @@ function MedicalRecordDetails({ id, incident, organization }) {
                 <ListGroup.Item key={answer.id}>
                   <div className="row" style={{textTransform:"capitalize"}}>
                     <span className="col-3"><b>{answer.name}:</b> {answer.answer}</span>
-                    <span className="col-4"><b>Notes:</b> {answer.answer_notes}</span>
+                    {answer.answer_notes ? <span className="col-4"><b>Notes:</b> {answer.answer_notes}</span> : ""}
                   </div>
                 </ListGroup.Item>
               ))}
+              <ListGroup.Item>
+                <div className="row" style={{textTransform:"capitalize"}}>
+                  <span className="col-12"><b>Medical Plan:</b> {exam.medical_plan || "N/A"}</span>
+                </div>
+              </ListGroup.Item>
               </ListGroup>
             </Collapse>
             ))}
@@ -385,25 +396,25 @@ function MedicalRecordDetails({ id, incident, organization }) {
             <hr className="mb-3" />
             <Scrollbar no_shadow="true" style={{height:"564px", minHeight:"564px"}} renderView={props => <div {...props} style={{...props.style, overflowX:"hidden", marginBottom:"-10px"}}/>}  renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
             {activeOrders === 'pending' && data.treatment_requests.filter(tr => tr.status === 'Pending').map(treatment_request => (
-              <TreatmentCard incident={incident} organization={organization} treatment_request={treatment_request} />
+              <TreatmentCard key={treatment_request.id} incident={incident} organization={organization} treatment_request={treatment_request} />
             ))}
             {activeOrders === 'pending' && data.diagnostic_objects.filter(diagnostic => diagnostic.status === 'Pending').map(diagnostic => (
-              <DiagnosticCard incident={incident} organization={organization} diagnostic={diagnostic} />
+              <DiagnosticCard key={diagnostic.id} incident={incident} organization={organization} diagnostic={diagnostic} />
             ))}
             {activeOrders === 'pending' && data.procedure_objects.filter(procedure => procedure.status === 'Pending').map(procedure => (
-              <ProcedureCard incident={incident} organization={organization} procedure={procedure} />
+              <ProcedureCard key={procedure.id} incident={incident} organization={organization} procedure={procedure} />
             ))}
             
             {activeOrders === 'treatments' && data.treatment_requests.map(treatment_request => (
-              <TreatmentCard incident={incident} organization={organization} treatment_request={treatment_request} />
+              <TreatmentCard key={treatment_request.id} incident={incident} organization={organization} treatment_request={treatment_request} />
             ))}
             {activeOrders === 'treatments' && data.treatment_requests.length < 1 ? <p>No treatments have been created for this patient.</p> : ""}
             {activeOrders === 'diagnostics' && data.diagnostic_objects.map(diagnostic => (
-              <DiagnosticCard incident={incident} organization={organization} diagnostic={diagnostic} />
+              <DiagnosticCard key={diagnostic.id} incident={incident} organization={organization} diagnostic={diagnostic} />
             ))}
             {activeOrders === 'diagnostics' && data.diagnostic_objects.length < 1 ? <p>No diagnostics have been ordered for this patient.</p> : ""}
             {activeOrders === 'procedures' && data.procedure_objects.map(procedure => (
-              <ProcedureCard incident={incident} organization={organization} procedure={procedure} />
+              <ProcedureCard key={procedure.id} incident={incident} organization={organization} procedure={procedure} />
             ))}
             {activeOrders === 'procedures' && data.procedure_objects.length < 1 ? <p>No procedures have been ordered for this patient.</p> : ""}
             </Scrollbar>

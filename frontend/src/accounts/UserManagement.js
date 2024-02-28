@@ -201,7 +201,7 @@ function UserManagement({ organization }) {
           Perms
       </Col>
     </Row>
-    {filteredData.users.map(user => (
+    {filteredData.users.filter(user => !user.is_superuser).map(user => (
       <Card key={user.id} className="rounded w-100 mb-1" style={{height:"32px"}}>
         <div className="row no-gutters flex-nowrap">
           <Col className="border-top border-left border-bottom" style={{height:"32px", paddingLeft:"3px", paddingTop:"5px", marginTop: "-1px", fontSize:"13px", borderTopLeftRadius:"0.25rem", borderBottomLeftRadius:"0.25rem", minWidth:"150px", maxWidth:"150px", backgroundColor:"#615e5e"}}>

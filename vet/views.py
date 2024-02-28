@@ -194,9 +194,10 @@ class TreatmentRequestViewSet(viewsets.ModelViewSet):
         Returns: Queryset of treatment requests.
         """
         queryset = (
-            TreatmentRequest.objects.filter(medical_record__patient__incident__slug=self.request.GET.get('incident'))
-            .select_related("treatment")
+            TreatmentRequest.objects.all().select_related("treatment")
         )
+        if self.request.GET.get('incident'):
+            queryset = queryset.filter(medical_record__patient__incident__slug=self.request.GET.get('incident'))
         if self.request.GET.get('today'):
             queryset = queryset.filter(suggested_admin_time__lte=datetime.today(), actual_admin_time__isnull=True).exclude(not_administered=True)
         return queryset

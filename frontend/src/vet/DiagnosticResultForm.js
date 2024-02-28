@@ -92,7 +92,7 @@ const DiagnosticResultForm = (props) => {
       onSubmit={(values, { setSubmitting }) => {
         axios.patch('/vet/api/diagnosticresults/' + props.id + '/', values)
         .then(response => {
-          navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + data.medical_record);
+          navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + data.medical_record + '?tab=diagnostics');
         })
         .catch(error => {
           setShowSystemError(true);
@@ -103,7 +103,11 @@ const DiagnosticResultForm = (props) => {
       {formikProps => (
         <Card border="secondary" className="mt-3">
           <Card.Header as="h5" className="pl-3" style={{textTransform:"capitalize"}}>
-            <span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + data.medical_record + '/')} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
+            {state.prevLocation ?
+              <span style={{ cursor: 'pointer' }} onClick={() => navigate(state.prevLocation + '?tab=diagnostics')} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
+            :
+              <span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + props.organization + "/" + props.incident + "/vet/medrecord/" + data.medical_record + '?tab=diagnostics')} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
+            }
             {data.other_name ? data.other_name : data.name} Results
             <OverlayTrigger
               key={"cancel-diagnostic-order"}

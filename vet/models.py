@@ -105,6 +105,7 @@ class Exam(models.Model):
     respiratory_rate = models.FloatField(blank=True, null=True)
     medical_record = models.ForeignKey(MedicalRecord, on_delete=models.SET_NULL, null=True)
     vet_request = models.ForeignKey(VetRequest, on_delete=models.SET_NULL, null=True)
+    medical_plan = models.TextField(blank=True, null=True)
 
     class Meta:
         ordering = ('-id',)
@@ -118,7 +119,7 @@ class ExamAnswer(models.Model):
     answer_notes = models.CharField(max_length=300, blank=True, null=True)
 
     class Meta:
-        ordering = ('question__name',)
+        ordering = ('question__id',)
 
 
 class DiagnosticResult(models.Model):
@@ -172,6 +173,7 @@ class TreatmentRequest(models.Model):
     suggested_admin_time = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
     actual_admin_time = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
     not_administered = models.BooleanField(default=False)
+    notes = models.CharField(max_length=500, blank=True, null=True)
 
     class Meta:
         ordering = ('-id',)

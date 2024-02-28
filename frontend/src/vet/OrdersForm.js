@@ -211,7 +211,20 @@ const OrdersForm = (props) => {
         else {
           axios.patch('/vet/api/medrecord/' + props.id + '/', values)
           .then(response => {
-            navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + props.id);
+            // if (state.prevLocation) {
+            //   if (state.prevLocation.includes('/vet/medrecord/')) {
+            //     navigate(state.prevLocation + '?tab=treatments');
+            //   }
+            //   else {
+            //     navigate(state.prevLocation);
+            //   }
+            // }
+            if (window.location.pathname.includes("diagnostics")) {
+              navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + props.id + '?tab=diagnostics');
+            }
+            else {
+              navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + props.id + '?tab=procedures');
+            }
           })
           .catch(error => {
             setShowSystemError(true);
