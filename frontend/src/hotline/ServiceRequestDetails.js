@@ -15,21 +15,22 @@ import History from '../components/History';
 import AnimalCards from '../components/AnimalCards';
 import PhotoDocuments from '../components/PhotoDocuments';
 import { SystemErrorContext } from '../components/SystemError';
-import { printServiceRequestSummary, printSrAnimalCareSchedules } from './Utils'
-import ShelterlyPrintifyButton from '../components/ShelterlyPrintifyButton';
-import LoadingLink from '../components/LoadingLink';
+import ShelterlyPrintifyButton from "../components/ShelterlyPrintifyButton";
+import LoadingLink from "../components/LoadingLink";
+import { useLocationWithRoutes } from '../hooks';
+import { printServiceRequestSummary, printSrAnimalCareSchedules } from './Utils';
 
 import '../assets/styles.css';
 
 function ServiceRequestDetails({ id, incident, organization }) {
   const [isLoading, setIsLoading] = useState(true);
   const { setShowSystemError } = useContext(SystemErrorContext);
-
+  const { getFullLocationFromPath } = useLocationWithRoutes();
   const datetime = useRef(null);
+
   const openCalendar = () => {
     setTimeout(() => datetime.current.flatpickr.open(), 0);
   }
-
   const priorityText = {1:'Highest', 2:'High', 3:'Medium', 4:'Low', 5:'Lowest'};
 
   const [showModal, setShowModal] = useState(false);
@@ -94,11 +95,20 @@ function ServiceRequestDetails({ id, incident, organization }) {
     .finally(() => setIsLoading(false));
   }
 
+  function buildAnimalUrl(animal) {
+    return getFullLocationFromPath(`/${organization}/${incident}/animals/${animal.id}`)
+  }
+
   const handleDownloadPdfClick = () =>
     printServiceRequestSummary(data)
 
-  const handlePrintAllAnimalsClick = () =>
-    printSrAnimalCareSchedules(data.animals, id)
+  const handlePrintAllAnimalsClick = () => {
+    const animals = data.animals.map((animal) => ({
+      ...animal,
+      url: buildAnimalUrl(animal)
+    }));
+    return printSrAnimalCareSchedules(animals, id);
+  }
 
   const handleGeoJsonDownload = () => {
     var fileDownload = require('js-file-download');

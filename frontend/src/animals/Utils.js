@@ -11,7 +11,7 @@ import { createQrCode } from '../utils/qrCode';
 async function drawQRCareCode(pdf, animalUrl) {
   // set absolute position to the top header of each animal care schedule page
   const { oldLeftMargin, oldLastYPosition, resetPosition } =
-  pdf.setAbsolutePosition({ x: 200, y: 5 });
+  pdf.setAbsolutePosition({ x: 200, y: 10 });
 
   // draw QR code
   await pdf.drawImage({ src: createQrCode(animalUrl) });
