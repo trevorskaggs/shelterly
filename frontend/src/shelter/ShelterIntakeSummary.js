@@ -7,6 +7,7 @@ import Header from '../components/Header';
 import { SystemErrorContext } from '../components/SystemError';
 import AnimalCards from '../components/AnimalCards';
 import ShelterlyPrintifyButton from '../components/ShelterlyPrintifyButton';
+import { useLocationWithRoutes } from '../hooks';
 import {
   printIntakeSummaryAnimalCareSchedules,
   printOwnerDetails,
@@ -15,9 +16,7 @@ import {
 } from './Utils';
 
 function ShelterIntakeSummary({ id, incident, organization }) {
-
   const { setShowSystemError } = useContext(SystemErrorContext);
-
   const [data, setData] = useState({
     id: '',
     shelter: '',
@@ -29,15 +28,18 @@ function ShelterIntakeSummary({ id, incident, organization }) {
     person: null,
     person_object: {first_name:'', last_name:''}
   });
-
   const [organizationData, setOrganizationData] = useState({
     name: '',
     short_name: '',
     liability_name: '',
     liability_short_name: '',
   });
-
   const [animalOwners, setAnimalOwners] = useState([]);
+  const { getFullLocationFromPath } = useLocationWithRoutes();
+
+  function buildAnimalUrl(animal) {
+    return getFullLocationFromPath(`/${organization}/${incident}/animals/${animal.id}`)
+  }
 
   const handlePrintOwnerClick = () =>
     printOwnerDetails(data.person_object, organizationData);
@@ -45,8 +47,13 @@ function ShelterIntakeSummary({ id, incident, organization }) {
   const handlePrintAnimalOwnersClick = () =>
     printAllOwnersDetails(animalOwners, organizationData);
 
-  const handlePrintAllAnimalsClick = () =>
-    printIntakeSummaryAnimalCareSchedules(data.animal_objects, id);
+  const handlePrintAllAnimalsClick = () => {
+    const animals = data.animal_objects.map((animal) => ({
+      ...animal,
+      url: buildAnimalUrl(animal)
+    }));
+    return printIntakeSummaryAnimalCareSchedules(animals, id);
+  }
 
   const handlePrintIntakeSummary = async () =>
     printIntakeSummary(data);

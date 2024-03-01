@@ -15,7 +15,7 @@ import Moment from 'react-moment';
 import Select, { components } from 'react-select';
 import L from "leaflet";
 import { Circle, Map, Marker, Tooltip as MapTooltip, TileLayer } from "react-leaflet";
-import { useMark, useSubmitting, useDataImg } from '../hooks';
+import { useMark, useSubmitting, useDataImg, useLocationWithRoutes } from '../hooks';
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
 import { titleCase } from '../components/Utils';
@@ -96,6 +96,7 @@ function AnimalSearch({ incident, organization }) {
   } = useSubmitting();
   const { promiseImage, getBase64Image } = useDataImg();
   const [lazyAnimalImages, setLazyAnimalImages] = useState([]);
+  const { getFullLocationFromPath } = useLocationWithRoutes();
 
   function findLazyAnimalImage (animalId) {
     return lazyAnimalImages.find((lazyAnimal) => lazyAnimal.id === animalId);
@@ -156,8 +157,13 @@ function AnimalSearch({ incident, organization }) {
     setAnimals(data.animals);
   };
 
+  function buildAnimalUrl(animal) {
+    return getFullLocationFromPath(`/${organization}/${incident}/animals/${animal.id}`)
+  }
+
   const handleDownloadPdfClick = (animalId) => {
     const animal = animals.find((animal) => animal.id === animalId);
+    animal.url = buildAnimalUrl(animal);
     printAnimalCareSchedule(animal);
   }
 
@@ -165,7 +171,11 @@ function AnimalSearch({ incident, organization }) {
     e.preventDefault();
 
     handleSubmitting()
-      .then(() => printAllAnimalCareSchedules(animals))
+      .then(() => animals.map((animal) => ({
+        ...animal,
+        url: buildAnimalUrl(animal)
+      })))
+      .then((supplementedAnimals) => printAllAnimalCareSchedules(supplementedAnimals))
       .then(submittingComplete);
   }
 

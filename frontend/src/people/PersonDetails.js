@@ -14,11 +14,13 @@ import PhotoDocuments from '../components/PhotoDocuments';
 import { SystemErrorContext } from '../components/SystemError';
 import ShelterlyPrintifyButton from '../components/ShelterlyPrintifyButton';
 import LoadingLink from '../components/LoadingLink';
+import { useLocationWithRoutes } from "../hooks";
 import { printOwnerDetails, printOwnerAnimalCareSchedules } from './Utils';
 
 function PersonDetails({id, incident, organization}) {
 
   const { setShowSystemError } = useContext(SystemErrorContext);
+  const { getFullLocationFromPath } = useLocationWithRoutes();
 
   // Determine if this is an owner or reporter when creating a Person.
   let is_owner = window.location.pathname.includes("owner")
@@ -70,12 +72,19 @@ function PersonDetails({id, incident, organization}) {
     liability_short_name: '',
   });
 
+  function buildAnimalUrl(animal) {
+    return getFullLocationFromPath(
+      `/${organization}/${incident}/animals/${animal.id}`
+    );
+  }
+
   const handleDownloadPdfClick = () =>
     printOwnerDetails(data, organizationData)
 
   const handlePrintAllAnimalsClick = () => {
     const animals = data.animals.map((animal) => ({
       ...animal,
+      url: buildAnimalUrl(animal),
       owners: [data]
     }));
     return printOwnerAnimalCareSchedules(animals, id)
