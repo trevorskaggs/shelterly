@@ -81,18 +81,18 @@ class ExamViewSet(viewsets.ModelViewSet):
             exam = serializer.save()
 
             # Update Animal with animal data.
-            Animal.objects.filter(id=self.request.data.get('animal_id')).update(age=self.request.data.get('age'), sex=self.request.data.get('sex'), microchip=self.request.data.get('microchip', ''))
+            Animal.objects.filter(id=self.request.data.get('animal_id')).update(age=self.request.data.get('age'), sex=self.request.data.get('sex'), microchip=self.request.data.get('microchip', ''), fixed=self.request.data.get('fixed', ''))
             # Create ExamAnswer objects.
             for k,v in self.request.data.items():
-                if k not in ['open', 'assignee', 'age', 'sex', 'microchip', 'confirm_sex_age', 'confirm_chip', 'temperature', 'temperature_method', 'weight', 'weight_unit', 'weight_estimated', 'pulse', 'respiratory_rate'] and '_notes' not in k and '_id' not in k and self.request.data.get(k + '_id'):
+                if k not in ['open', 'assignee', 'age', 'sex', 'microchip', 'fixed', 'confirm_sex_age', 'confirm_chip', 'temperature', 'temperature_method', 'weight', 'weight_unit', 'weight_estimated', 'pulse', 'respiratory_rate'] and '_notes' not in k and '_id' not in k and self.request.data.get(k + '_id'):
                     ExamAnswer.objects.create(exam=exam, question=ExamQuestion.objects.get(id=self.request.data.get(k + '_id', '')), answer=v, answer_notes=self.request.data.get(k + '_notes', ''))
 
     def perform_update(self, serializer):
         if serializer.is_valid():
             exam = serializer.save()
-            Animal.objects.filter(id=self.request.data.get('animal_id')).update(age=self.request.data.get('age'), sex=self.request.data.get('sex'), microchip=self.request.data.get('microchip', ''))
+            Animal.objects.filter(id=self.request.data.get('animal_id')).update(age=self.request.data.get('age'), sex=self.request.data.get('sex'), microchip=self.request.data.get('microchip', ''), fixed=self.request.data.get('fixed', ''))
             for k,v in self.request.data.items():
-                if k not in ['open', 'assignee', 'age', 'sex', 'microchip', 'confirm_sex_age', 'confirm_chip', 'temperature', 'temperature_method', 'weight', 'weight_unit', 'weight_estimated', 'pulse', 'respiratory_rate'] and '_notes' not in k and '_id' not in k and self.request.data.get(k + '_id'):
+                if k not in ['open', 'assignee', 'age', 'sex', 'microchip', 'fixed', 'confirm_sex_age', 'confirm_chip', 'temperature', 'temperature_method', 'weight', 'weight_unit', 'weight_estimated', 'pulse', 'respiratory_rate'] and '_notes' not in k and '_id' not in k and self.request.data.get(k + '_id'):
                     ExamAnswer.objects.update_or_create(exam=exam, question=ExamQuestion.objects.get(id=self.request.data.get(k + '_id')), defaults={'answer':v, 'answer_notes':self.request.data.get(k + '_notes', '')})
 
 
@@ -144,9 +144,10 @@ class DiagnosticResultViewSet(viewsets.ModelViewSet):
         Returns: Queryset of diagnostic results.
         """
         queryset = (
-            DiagnosticResult.objects.filter(medical_record__patient__incident__slug=self.request.GET.get('incident'))
-            .select_related("diagnostic")
+            DiagnosticResult.objects.all().select_related("diagnostic")
         )
+        if self.request.GET.get('incident'):
+            queryset = queryset.filter(medical_record__patient__incident__slug=self.request.GET.get('incident'))
         if self.request.GET.get('today'):
             queryset = queryset.filter(open__lte=datetime.today(), complete__isnull=True)
         return queryset
@@ -174,9 +175,10 @@ class ProcedureResultViewSet(viewsets.ModelViewSet):
         Returns: Queryset of procedure results.
         """
         queryset = (
-            ProcedureResult.objects.filter(medical_record__patient__incident__slug=self.request.GET.get('incident'))
-            .select_related("procedure")
+            ProcedureResult.objects.all().select_related("procedure")
         )
+        if self.request.GET.get('incident'):
+            queryset = queryset.filter(medical_record__patient__incident__slug=self.request.GET.get('incident'))
         if self.request.GET.get('today'):
             queryset = queryset.filter(open__lte=datetime.today(), complete__isnull=True)
         return queryset

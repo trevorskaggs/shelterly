@@ -62,7 +62,6 @@ function MedicalRecordDetails({ id, incident, organization }) {
   const [data, setData] = useState({id:'', exams:[], diagnostic_objects:[], procedure_objects:[], patient:null, vet_requests:[], open: '', diagnosis: '', other_diagnosis:'', treatment_requests:[], animal_object: {id:'', name:'', species:'', category:'', sex:'', age:'', fixed:'', pcolor:'', scolor:'', medical_notes:'', shelter_object:{}, room_name:''}});
   const [showExam, setShowExam] = useState(false);
   const [activeVR, setActiveVR] = useState(null);
-  const [activeOpenVR, setActiveOpenVR] = useState(null);
   const [activeExam, setActiveExam] = useState(null);
   const [activeOrders, setActiveOrders] = useState(tab);
 
@@ -79,8 +78,8 @@ function MedicalRecordDetails({ id, incident, organization }) {
       .then(response => {
         if (!unmounted) {
           setData(response.data);
-          setActiveOpenVR(response.data.vet_requests.filter(vr => vr.status === 'Open').length > 0 ? response.data.vet_requests.filter(vr => vr.status === 'Open')[0].id : null);
-          setActiveExam(response.data.exams.length > 0 ? response.data.exams[0].id : null);
+          setActiveVR(response.data.vet_requests.filter(vr => vr.status === 'Open').length > 0 ? response.data.vet_requests.filter(vr => vr.status === 'Open')[0].id : null);
+          setShowExam(response.data.vet_requests.filter(vr => vr.status === 'Open').length > 0 ? true : false);
         }
       })
       .catch(error => {
@@ -108,7 +107,7 @@ function MedicalRecordDetails({ id, incident, organization }) {
             <Card.Title>
               <h4 className="mb-0">
                 <Row className="ml-0 pr-0">
-                  Patient
+                  Patient: {data.animal_object.name||"Unknown"}
                 </Row>
               </h4>
             </Card.Title>
@@ -117,20 +116,23 @@ function MedicalRecordDetails({ id, incident, organization }) {
               <ListGroup.Item>
                 <div className="row" style={{textTransform:"capitalize"}}>
                   <span className="col-4"><b>ID:</b> <Link href={"/" + organization + "/" + incident + "/animals/" + data.animal_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>A#{data.animal_object.id}</Link></span>
-                  <span className="col-4"><b>Name:</b> {data.animal_object.name||"Unknown"}</span>
                   <span className="col-4"><b>Species:</b> {data.animal_object.species_string}</span>
+                  <span className="col-4"><b>Age:</b> {data.animal_object.age||"Unknown"}</span>
                 </div>
               </ListGroup.Item>
               <ListGroup.Item>
                 <div className="row" style={{textTransform:"capitalize"}}>
-                  <span className="col-4"><b>Age:</b> {data.animal_object.age||"Unknown"}</span>
                   <span className="col-4"><b>Sex:</b> {data.animal_object.sex||"Unknown"}</span>
                   <span className="col-4"><b>Altered:</b> {data.animal_object.fixed||"Unknown"}</span>
+                  <span className="col-4"><b>Weight:</b> {data.animal_object.weight||"Unknown"}</span>
                 </div>
               </ListGroup.Item>
               <ListGroup.Item style={{textTransform:"capitalize"}}>
                 <div className="row">
-                  <span className="col-12"><b>Location:</b> {data.animal_object.shelter_object ? data.animal_object.shelter_object.name:"Unknown"}{data.animal_object.room_name ? <span> - {data.animal_object.room_name}</span> : ""}</span>
+                  <span className="col-6"><b>Location:</b> {data.animal_object.shelter_object ? <Link href={"/" + organization + "/" + incident + "/shelter/" + data.animal_object.shelter_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.animal_object.shelter_object.name}</Link>:"Unknown"}{data.animal_object.room_name ? <span> - {data.animal_object.room_name}</span> : ""}</span>
+                </div>
+                <div className="row">
+                  {/* <span className="col-6"><b>Owner:</b> {data.animal_object.owner_object ? <Link href={"/" + organization + "/" + incident + "/shelter/" + data.animal_object.shelter_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.animal_object.shelter_object.name}</Link>:"Unknown"}{data.animal_object.room_name ? <span> - {data.animal_object.room_name}</span> : ""}</span> */}
                 </div>
               </ListGroup.Item>
               <ListGroup.Item>
@@ -140,7 +142,45 @@ function MedicalRecordDetails({ id, incident, organization }) {
           </Card.Body>
         </Card>
       </div>
+      {data.exams.length > 0 ?
       <div className="col-6 d-flex pl-0">
+        <Card className="border rounded d-flex" style={{width:"100%"}}>
+          <Card.Body>
+            <Card.Title>
+              <h4 className="mb-0">
+                <Row className="ml-0 pr-0">
+                  Diagnosis/Problem List
+                  <OverlayTrigger
+                    key={"add-diagnosis"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-add-diagnosis`}>
+                        Add a diagnosis for this patient
+                      </Tooltip>
+                    }
+                  >
+                    <Link href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.id + "/diagnosis/new"}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
+                  </OverlayTrigger>
+                </Row>
+              </h4>
+            </Card.Title>
+            <hr/>
+            <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
+              <ListGroup.Item>
+                <div className="row">
+                  <span><b>Diagnoses:</b> {data.diagnosis_text||"N/A"}</span>
+                </div>
+              </ListGroup.Item>
+              <ListGroup.Item>
+                <div className="row">
+                  <span><b>Notes:</b> {data.diagnosis_notes||"N/A"}</span>
+                </div>
+              </ListGroup.Item>
+            </ListGroup>
+          </Card.Body>
+        </Card>
+      </div> : ""}
+      {/* <div className="col-6 d-flex pl-0">
         <Card className="border rounded d-flex" style={{width:"100%"}}>
           <Card.Body>
             <Card.Title style={{marginTop:"-2px", marginBottom:"-16px"}}>
@@ -219,7 +259,7 @@ function MedicalRecordDetails({ id, incident, organization }) {
             ))}
           </Card.Body>
         </Card>
-      </div>
+      </div> */}
     </div>
     {data.exams.length > 0 ? 
     <div className="row mt-3">
@@ -230,22 +270,48 @@ function MedicalRecordDetails({ id, incident, organization }) {
               <h4 className="mb-0" style={{marginRight:"-1px"}}>
                 <Scrollbar horizontal="true" autoHide no_shadow="true" style={{height:"45px", marginLeft:"-1px", shadowheight:"45px", width:"100%"}} renderView={props => <div {...props} style={{...props.style, marginBottom:"-18px", marginRight:"0px", overflowX:"auto", overflowY: "hidden"}}/>} renderThumbVertical={props => <div {...props} style={{...props.style, display: 'none'}} />}>
                   <ListGroup horizontal>
-                    <ListGroup.Item style={{backgroundColor:"rgb(158, 153, 153)"}}>
-                      <Row style={{width:"90px"}}>
-                        <div style={{marginTop:"-3px"}}>Exams</div>
-                        <FontAwesomeIcon icon={faChevronCircleRight} hidden={showExam} onClick={() => {setShowExam(true)}} className="ml-1" size="sm" style={{cursor:'pointer'}} inverse />
-                        <FontAwesomeIcon icon={faChevronCircleDown} hidden={!showExam} onClick={() => {setShowExam(false)}} className="ml-1" size="sm" style={{cursor:'pointer'}} inverse />
+                    <ListGroup.Item className="border rounded" style={{backgroundColor:"rgb(158, 153, 153)", marginRight:"1px"}}>
+                      <Row style={{width:"105px"}}>
+                        <div style={{marginTop:"-3px", marginLeft:"4px"}}>Open VRs</div>
+                      </Row>
+                    </ListGroup.Item>
+                    {data.vet_requests.filter(vr => vr.status === 'Open').map(vet_request => (
+                      <ListGroup.Item key={vet_request.id} active={vet_request.id === activeVR} style={{textTransform:"capitalize", cursor:'pointer'}} onClick={() => {setActiveVR(vet_request.id);setActiveExam(null)}}>
+                        <Row style={{marginTop:"-3px", width:"68px"}}>
+                          <div className="text-center" style={{marginLeft:"4px"}}>
+                            {moment(vet_request.open).format('MM/DD')}
+                            {/* {vet_request.caution ?
+                            <OverlayTrigger
+                              key={"caution"}
+                              placement="top"
+                              overlay={
+                                <Tooltip id={`tooltip-caution`}>
+                                  Use caution when handling this animal.
+                                </Tooltip>
+                              }
+                            >
+                              <FontAwesomeIcon icon={faDiamondExclamation} className="ml-1 fa-move-up" size="sm" style={{marginTop:"-1px"}} transform={'up-1'} inverse />
+                            </OverlayTrigger> : ""} */}
+                          </div>
+                        </Row>
+                      </ListGroup.Item>
+                    ))}
+                    <ListGroup.Item className="border rounded" style={{backgroundColor:"rgb(158, 153, 153)"}}>
+                      <Row style={{width:"72px"}}>
+                        <div style={{marginTop:"-3px", marginLeft:"4px"}}>Exams</div>
+                        {/* <FontAwesomeIcon icon={faChevronCircleRight} hidden={showExam} onClick={() => {setShowExam(true)}} className="ml-1" size="sm" style={{cursor:'pointer'}} inverse />
+                        <FontAwesomeIcon icon={faChevronCircleDown} hidden={!showExam} onClick={() => {setShowExam(false)}} className="ml-1" size="sm" style={{cursor:'pointer'}} inverse /> */}
                       </Row>
                     </ListGroup.Item>
                     {data.exams.map((exam,i) => (
                     <ListGroup horizontal key={exam.id}>
-                      <ListGroup.Item key={exam.id} active={exam.id === activeExam} style={{textTransform:"capitalize", cursor:'pointer', paddingLeft:"5px", paddingRight:"5px"}} onClick={() => {setActiveExam(exam.id);setActiveVR(null);}}>
+                      <ListGroup.Item key={exam.id} active={exam.id === activeExam} style={{textTransform:"capitalize", cursor:'pointer', paddingLeft:"5px", paddingRight:"5px"}} onClick={() => {setActiveExam(exam.id);setActiveVR(null);setShowExam(true);}}>
                         <div className="text-center" style={{marginTop:"-3px", width:"70px"}}>
                           {moment(exam.open).format('MM/DD')}
                         </div>
                       </ListGroup.Item>
                       {data.vet_requests.filter(vr => vr.id === exam.vet_request).map(vet_request => (
-                      <ListGroup.Item key={vet_request.id} active={vet_request.id === activeVR} style={{textTransform:"capitalize", cursor:'pointer'}} onClick={() => {setActiveVR(vet_request.id);setActiveExam(null);}}>
+                      <ListGroup.Item key={vet_request.id} active={vet_request.id === activeVR} style={{textTransform:"capitalize", cursor:'pointer'}} onClick={() => {setActiveVR(vet_request.id);setActiveExam(null);setShowExam(true);}}>
                         <Row style={{marginTop:"-3px", width:"38px"}}>
                           <div className="text-center" style={{marginLeft:"4px"}}>
                             VR
@@ -318,7 +384,7 @@ function MedicalRecordDetails({ id, incident, organization }) {
               <ListGroup.Item>
                 <div className="row">
                   <span className="col-3"><b>Use Caution:</b> {vet_request.caution ? "True" : "False"}</span>
-                  <span className="col-9"><b>Concern:</b> {vet_request.concern}</span>
+                  <span className="col-9"><b>Concern:</b> {vet_request.concern || "None"}</span>
                 </div>
               </ListGroup.Item>
               </ListGroup>
@@ -422,45 +488,6 @@ function MedicalRecordDetails({ id, incident, organization }) {
         </Card>
       </div>
     </div> : ""}
-    <Row>
-    {data.exams.length > 0 ? <div className="col-12 d-flex mb-3">
-        <Card className="border rounded d-flex" style={{width:"100%"}}>
-          <Card.Body>
-            <Card.Title>
-              <h4 className="mb-0">
-                <Row className="ml-0 pr-0">
-                  Diagnoses
-                  <OverlayTrigger
-                    key={"add-diagnosis"}
-                    placement="top"
-                    overlay={
-                      <Tooltip id={`tooltip-add-diagnosis`}>
-                        Add a diagnosis for this patient
-                      </Tooltip>
-                    }
-                  >
-                    <Link href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.id + "/diagnosis/new"}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
-                  </OverlayTrigger>
-                </Row>
-              </h4>
-            </Card.Title>
-            <hr/>
-            <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
-              <ListGroup.Item>
-                <div className="row">
-                  <span><b>Diagnoses:</b> {data.diagnosis_text}</span>
-                </div>
-              </ListGroup.Item>
-              <ListGroup.Item>
-                <div className="row">
-                  <span><b>Notes:</b> {data.diagnosis_notes}</span>
-                </div>
-              </ListGroup.Item>
-            </ListGroup>
-          </Card.Body>
-        </Card>
-      </div> : ""}
-    </Row>
     {/* <History action_history={data.action_history} /> */}
     </>
   );

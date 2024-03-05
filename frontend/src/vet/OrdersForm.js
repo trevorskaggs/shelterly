@@ -248,7 +248,7 @@ const OrdersForm = (props) => {
               <FormGroup>
                 {is_workflow || is_diagnostics ?
                 <Row className="mb-3">
-                  <Col xs={"6"}>
+                  <Col xs={"10"}>
                     <label>Diagnostic Orders</label>
                     <Select
                       id="diagnosticsDropdown"
@@ -284,7 +284,7 @@ const OrdersForm = (props) => {
                 : ""}
                 {is_workflow || is_procedures ?
                 <Row className="mb-3">
-                  <Col xs={"6"}>
+                  <Col xs={"10"}>
                     <label>Procedure Orders</label>
                     <Select
                       label="Procedures"

@@ -5,6 +5,7 @@ from .models import Animal, Species
 from location.utils import build_full_address, build_action_string
 from people.serializers import SimplePersonSerializer
 from shelter.serializers import SimpleShelterSerializer
+from vet.models import Exam
 
 class SpeciesSerializer(serializers.ModelSerializer):
 
@@ -32,6 +33,7 @@ class ModestAnimalSerializer(SimpleAnimalSerializer):
     side_image = serializers.SerializerMethodField()
     found_location = serializers.SerializerMethodField()
     request_address = serializers.SerializerMethodField()
+    weight = serializers.SerializerMethodField()
     owner_names = serializers.StringRelatedField(source='owners', many=True, read_only=True)
     shelter_object = SimpleShelterSerializer(source='shelter', required=False, read_only=True)
     room_name = serializers.StringRelatedField(source='room', read_only=True)
@@ -39,7 +41,7 @@ class ModestAnimalSerializer(SimpleAnimalSerializer):
     class Meta:
         model = Animal
         fields = ['id', 'name', 'species', 'species_string', 'aggressive', 'injured', 'fixed', 'request', 'found_location', 'request_address', 'shelter_object', 'shelter', 'status', 'aco_required', 'color_notes',
-        'front_image', 'side_image', 'owner_names', 'sex', 'size', 'age', 'pcolor', 'scolor', 'medical_notes', 'behavior_notes', 'room_name', 'category', 'latitude', 'longitude']
+        'front_image', 'side_image', 'owner_names', 'sex', 'size', 'age', 'pcolor', 'scolor', 'medical_notes', 'behavior_notes', 'room_name', 'category', 'latitude', 'longitude', 'weight']
 
     def get_found_location(self, obj):
         return build_full_address(obj)
@@ -47,6 +49,14 @@ class ModestAnimalSerializer(SimpleAnimalSerializer):
     # Custom field for request address.
     def get_request_address(self, obj):
         return build_full_address(obj.request)
+
+    # Custom field for the current animal weight.
+    def get_weight(self, obj):
+        exams = Exam.objects.filter(medical_record__patient=obj)
+        if exams:
+            exam = exams.latest('open')
+            return str(exam.weight) + exam.weight_unit
+        return ''
 
     def get_front_image(self, obj):
         try:
@@ -80,13 +90,14 @@ class AnimalSerializer(ModestAnimalSerializer):
     room_name = serializers.StringRelatedField(source='room', read_only=True)
     building_name = serializers.StringRelatedField(source='room.building', read_only=True)
     shelter_object = SimpleShelterSerializer(source='shelter', required=False, read_only=True)
+    vet_requests = serializers.SerializerMethodField()
 
     class Meta:
         model = Animal
         fields = ['id', 'species', 'species_string', 'status', 'aco_required', 'front_image', 'side_image', 'extra_images', 'last_seen', 'intake_date', 'address', 'city', 'state', 'zip_code',
         'aggressive', 'injured', 'fixed', 'confined', 'found_location', 'owner_names', 'owners', 'shelter_object', 'shelter', 'reporter', 'reporter_object', 'request', 'request_address',
         'action_history', 'building_name', 'room', 'room_name', 'name', 'sex', 'size', 'age', 'pcolor', 'scolor', 'color_notes', 'behavior_notes', 'medical_notes',
-        'latitude', 'longitude', 'medical_record', 'microchip']
+        'latitude', 'longitude', 'medical_record', 'microchip', 'vet_requests']
 
     # Truncates latitude and longitude.
     def to_internal_value(self, data):
@@ -103,6 +114,10 @@ class AnimalSerializer(ModestAnimalSerializer):
             data._mutable = _mutable
 
         return super().to_internal_value(data)
+
+    def get_vet_requests(self, obj):
+        from vet.serializers import SimpleVetRequestSerializer
+        return SimpleVetRequestSerializer(obj.medical_record.first().vetrequest_set.all(), required=False, read_only=True, many=True).data
 
     # Custom Reporter object field that excludes animals to avoid a circular reference.
     def get_reporter_object(self, obj):

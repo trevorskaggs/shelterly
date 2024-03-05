@@ -65,15 +65,15 @@ class PersonSerializer(SimplePersonSerializer):
     requests = serializers.SerializerMethodField()
 
     def get_animals(self, obj):
-        from animals.serializers import ModestAnimalSerializer, AnimalSerializer
+        from animals.serializers import SimpleAnimalSerializer, AnimalSerializer
         if hasattr(obj, 'animals'):
-            return ModestAnimalSerializer(obj.animals, many=True).data
+            return SimpleAnimalSerializer(obj.animals, many=True).data
         else:
-            return ModestAnimalSerializer(obj.animal_set.exclude(status='CANCELED'), many=True).data
+            return SimpleAnimalSerializer(obj.animal_set.exclude(status='CANCELED'), many=True).data
 
     def get_reporter_animals(self, obj):
-        from animals.serializers import ModestAnimalSerializer
-        return ModestAnimalSerializer(obj.reporter_animals, many=True).data
+        from animals.serializers import SimpleAnimalSerializer
+        return SimpleAnimalSerializer(obj.reporter_animals, many=True).data
 
     def get_images(self, obj):
         try:

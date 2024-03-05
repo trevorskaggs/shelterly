@@ -56,6 +56,7 @@ const VetRequestForm = (props) => {
     concern: '',
     priority: 'urgent',
     presenting_complaints: [],
+    complaints_other: '',
     caution: false,
   })
 
@@ -118,6 +119,7 @@ const VetRequestForm = (props) => {
         priority: Yup.string(),
         caution: Yup.boolean(),
         presenting_complaints: Yup.array(),
+        complaints_other: Yup.string(),
       })}
       onSubmit={(values, { setSubmitting }) => {
         if (props.id) {
@@ -174,7 +176,7 @@ const VetRequestForm = (props) => {
                     />
                   </Col>
                 </Row>
-                <Row className="mt-3">
+                <Row className="mt-3 mb-3">
                   <Col xs={"8"}>
                     <label>Presenting Complaints</label>
                     <Select
@@ -197,7 +199,18 @@ const VetRequestForm = (props) => {
                     />
                   </Col>
                 </Row>
-                <Row className="mt-3 pl-0">
+                {presentingComplaintChoices.length && formikProps.values.presenting_complaints.includes(presentingComplaintChoices.filter(option => option.label === 'Other')[0].value) ?
+                <Row>
+                  <TextInput
+                    type="text"
+                    label="Other Presenting Complaint"
+                    name="complaints_other"
+                    id="complaints_other"
+                    xs="6"
+                  />
+                </Row>
+                : ""}
+                <Row className="pl-0">
                   <TextInput
                     as="textarea"
                     label="Concern"

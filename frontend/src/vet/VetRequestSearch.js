@@ -59,9 +59,11 @@ function VetRequestSearch({ incident, organization }) {
   const [queryParams] = useQueryParams();
   const {
     search = '',
+    tab = 'vet_requests',
   } = queryParams;
 
   const priorityText = {urgent:'Urgent', when_available:'When Available'};
+  const labelLookup = {vet_requests:'Veterinary Requests', treatments:'Treatments', diagnostics:'Diagnostics', procedures:'Procedures'};
 
   const priorityChoices = [
     { value: 'urgent', label: 'Urgent' },
@@ -98,7 +100,7 @@ function VetRequestSearch({ incident, organization }) {
   const [treatmentIsDisabled, setTreatmentIsDisabled] = useState(true);
   const [diagnosticIsDisabled, setDiagnosticIsDisabled] = useState(true);
   const [procedureIsDisabled, setProcedureIsDisabled] = useState(true);
-  const [vetObject, setVetObject] = useState('vet_requests');
+  const [vetObject, setVetObject] = useState(tab);
   const tempSearchTerm = useRef(null);
   const treatmentRef = useRef(null);
   const diagnosticRef = useRef(null);
@@ -592,7 +594,7 @@ function VetRequestSearch({ incident, organization }) {
             onChange={(instance) => {
               setVetObject(instance.value)
             }}
-            defaultValue={{value:'vet_requests', label:'Veterinary Requests'}}
+            defaultValue={{value:tab, label:labelLookup[tab]}}
           />
           </Col>
           <Button variant="outline-light" className="ml-1" onClick={handleShowFilters} style={{height:"36px"}}>Advanced {showFilters ? <FontAwesomeIcon icon={faChevronDoubleUp} size="sm" /> : <FontAwesomeIcon icon={faChevronDoubleDown} size="sm" />}</Button>

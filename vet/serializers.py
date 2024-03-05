@@ -134,7 +134,9 @@ class SimpleVetRequestSerializer(serializers.ModelSerializer):
     requested_by_object = UserSerializer(source='requested_by', required=False, read_only=True)
 
     def get_complaints_text(self, obj):
-        return ', '.join(obj.presenting_complaints.all().values_list('name', flat=True))
+        text = ', '.join(obj.presenting_complaints.exclude(name='Other').values_list('name', flat=True))
+        text = (text + ', ' + obj.complaints_other) if obj.complaints_other else text
+        return text
 
     class Meta:
         model = VetRequest

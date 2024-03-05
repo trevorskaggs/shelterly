@@ -23,9 +23,12 @@ import {
 import * as Yup from 'yup';
 import { DropDown, TextInput, DateTimePicker } from '../components/Form';
 import { SystemErrorContext } from '../components/SystemError';
+import { AuthContext } from "../accounts/AccountsReducer";
 import Patient from './components/Patient';
 
 const DiagnosticResultForm = (props) => {
+
+  const { state } = useContext(AuthContext);
 
   const { setShowSystemError } = useContext(SystemErrorContext);
 

@@ -24,4 +24,19 @@ class Migration(migrations.Migration):
             name='notes',
             field=models.CharField(blank=True, max_length=500, null=True),
         ),
+        migrations.AddField(
+            model_name='vetrequest',
+            name='complaints_other',
+            field=models.CharField(blank=True, max_length=50, null=True),
+        ),
+        migrations.AlterField(
+            model_name='exam',
+            name='respiratory_rate',
+            field=models.CharField(blank=True, max_length=20, null=True),
+        ),
+        migrations.AlterField(
+            model_name='procedureresult',
+            name='notes',
+            field=models.TextField(blank=True, null=True),
+        ),
     ]

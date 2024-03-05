@@ -437,11 +437,6 @@ function AnimalDetails({ id, incident, organization }) {
                 {data.intake_date ? <div className="mt-1"><b>Intake Date:</b> <Moment format="MMMM Do YYYY HH:mm">{data.intake_date}</Moment></div> : ""}
                 <div className="mt-1"><b>Address:</b> {data.shelter_object.full_address || "Unknown"}</div>
               </ListGroup.Item> : ""}
-              {data.medical_record ?
-                <ListGroup.Item>
-                  <b>Medical Record:</b> <Link href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.medical_record} className="text-link" style={{textDecoration:"none", color:"white"}}>MR#{data.medical_record}</Link>
-                </ListGroup.Item>
-              : ""}
             </ListGroup>
           </Card.Body>
         </Card>
@@ -481,6 +476,27 @@ function AnimalDetails({ id, incident, organization }) {
             </ListGroup>
           </Card.Body>
         </Card>
+        {data.medical_record ?
+        <Card className="border rounded" style={{width:"100%", height:"100%", marginBottom:"16px"}}>
+          <Card.Body>
+            <Card.Title>
+              <h4>Medical</h4>
+            </Card.Title>
+            <hr/>
+            <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
+            {state.user.vet_perms ?
+              <ListGroup.Item>
+                <b>Medical Record:</b> <Link href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.medical_record} className="text-link" style={{textDecoration:"none", color:"white"}}>MR#{data.medical_record}</Link>
+              </ListGroup.Item>
+            : ""}
+            {data.vet_requests.map(vet_request => (
+              <ListGroup.Item key={vet_request.id}>
+                <b>Vet Request:</b> <Link href={"/" + organization + "/" + incident + "/vet/vetrequest/" + vet_request.id} className="text-link" style={{textDecoration:"none", color:"white"}}>VR#{vet_request.id}</Link> - {vet_request.status}
+              </ListGroup.Item>
+            ))}
+            </ListGroup>
+          </Card.Body>
+        </Card> : ""}
       </Col>
     </div>
     <History action_history={data.action_history} />

@@ -35,7 +35,7 @@ const ProcedureResultForm = (props) => {
   const [data, setData] = useState({
     open: null,
     performer: null,
-    complete: null,
+    complete: new Date(),
     name: '',
     other_name: '',
     notes: '',
@@ -64,6 +64,9 @@ const ProcedureResultForm = (props) => {
       })
       .then(response => {
         if (!unmounted) {
+          if (!response.data.complete) {
+            response.data.complete = new Date()
+          }
           setData(response.data);
         }
       })
@@ -111,7 +114,7 @@ const ProcedureResultForm = (props) => {
         performer: Yup.string().nullable(),
         complete: Yup.string().nullable(),
         other_name: Yup.string().nullable().max(50, 'Maximum character limit of 50.'),
-        notes: Yup.string().nullable().max(500, 'Maximum character limit of 500.'),
+        notes: Yup.string().nullable().max(2500, 'Maximum character limit of 2500.'),
       })}
       onSubmit={(values, { setSubmitting }) => {
         axios.patch('/vet/api/procedureresults/' + props.id + '/', values)
@@ -196,7 +199,7 @@ const ProcedureResultForm = (props) => {
                     onChange={(date, dateStr) => {
                       formikProps.setFieldValue("complete", dateStr)
                     }}
-                    value={formikProps.values.complete||new Date()}
+                    value={formikProps.values.complete || new Date()}
                     disabled={false}
                     clearable={true}
                   />
