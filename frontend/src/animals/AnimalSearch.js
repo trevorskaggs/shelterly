@@ -551,7 +551,7 @@ function AnimalSearch({ incident, organization }) {
                         ref={mapRef}
                         bounds={bounds}
                         onClick={updatePosition}
-                        dragging={false}
+                        dragging={true}
                         keyboard={false}
                         className="animal-search-leaflet-container"
                       >
