@@ -873,7 +873,9 @@ class ShelterlyPDF {
         }
       },
       styles: {
-        minCellHeight: rowHeight
+        minCellHeight: rowHeight,
+        lineColor: 60,
+        lineWidth: 1
       },
       columnStyles
     });
