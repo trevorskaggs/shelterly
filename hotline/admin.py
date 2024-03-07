@@ -6,6 +6,7 @@ from hotline.models import ServiceRequest, VisitNote
 from location.utils import build_full_address
 from people.models import Person
 
+@admin.register(ServiceRequest)
 class ServiceRequestAdmin(admin.ModelAdmin):
 
   # def owner_str(self, obj: Person):
@@ -20,10 +21,9 @@ class ServiceRequestAdmin(admin.ModelAdmin):
 
   list_display = ('id', 'address', 'status', 'animal_count')
 
+@admin.register(VisitNote)
 class VisitNoteAdmin(admin.ModelAdmin):
 
   list_display = ('id', 'date_completed', 'notes')
 
 
-admin.site.register(ServiceRequest, ServiceRequestAdmin)
-admin.site.register(VisitNote, VisitNoteAdmin)

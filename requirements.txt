@@ -3,7 +3,7 @@ awscli
 boto3
 channels
 channels_postgres
-Django==3.2.18
+Django==4.1
 django-activity-stream
 django-cors-headers
 django-filter
