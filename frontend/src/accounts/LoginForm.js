@@ -62,7 +62,7 @@ const Login = () => {
           <img src="/static/images/shelterly.png" alt="Logo" style={{height:"120px", width:"120px", marginTop:"-4px", marginLeft:"-4px"}} />
           <h1  style={{fontSize:"100px"}}>Shelterly</h1>
         </Row>
-        <Col xs={{ span:5 }} className="border rounded border-light shadow-sm ml-auto mr-auto mb-auto" style={{maxHeight:"347px"}}>
+        <Col xs={{ span:5 }} className="border rounded border-light shadow-sm ml-auto mr-auto mb-auto">
           <BootstrapForm as={Form}>
             <TextInput
               name="username"
