@@ -25,3 +25,40 @@
 .visually-hidden {
   visibility: hidden;
 }
+
+.clearable-text-input {
+  position: relative;
+}
+
+.clearable-text-input > .clearable-icon-wrapper {
+  position: absolute;
+  height: 35px;
+  width: 35px;
+  top: 31px;
+  right: 0;
+  color: #CCC;
+}
+.clearable-text-input > .clearable-icon-wrapper > .clearable-icon {
+  height: 100%;
+  width: 100%;
+  padding: 10px;
+}
+.clearable-text-input > .clearable-icon-wrapper > .clearable-icon:hover {
+  color: #999;
+}
+
+.clearable-text-input.error > .clearable-icon-wrapper {
+  right: 18px;
+  color: #e74c3c;
+}
+.clearable-text-input.error > .clearable-icon-wrapper > .clearable-icon:hover {
+  color: #e74c3c;
+}
+
+.clearable-text-input.error .form-control {
+  padding-right: calc(1.5em + 1.3rem) !important;
+}
+
+.clearable-text-input [type="text"] {
+  max-height: 35px;
+}
