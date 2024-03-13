@@ -26,6 +26,13 @@ const alignTypes = {
   RIGHT: 'right'
 };
 
+const positionTypes = {
+  ABSOLUTE: 'absolute',
+  INLINE: 'inline'
+};
+
+const defaultPageURL = window?.location?.href || '';
+
 class ShelterlyPDF {
   // private properties
   #jsPDF;
@@ -207,6 +214,74 @@ class ShelterlyPDF {
     }
 
     return yPosition;
+  }
+
+  /**
+   * set the position before drawing
+   *
+   * @example
+   * // first, set position using absolute positioning
+   * const {
+   *  oldLeftMargin,
+   *  oldLastYPosition,
+   *  resetPosition
+   * } = setPosition({ x: 500, y: 100, positionType: 'absolute' });
+   * 
+   * // then, draw stuff
+   * 
+   * // finally, call resetPosition
+   * resetPosition(oldLeftMargin, oldLastYPosition);
+   * @param {object} param0
+   * @param {number} param0.x
+   * @param {number} param0.y
+   * @param {[keyof positionTypes]} [param0.positionType=positionTypes.INLINE]
+   * @returns 
+   */
+  setPosition({
+    x,
+    y,
+    positionType = positionTypes.INLINE
+  }) {
+    // this old that is this callback trick
+    const that = this;
+    function resetPosition(oldX, oldY) {
+      // restore original x/y positions
+      that.#documentLeftMargin = oldX;
+      that.#documentLastYPosition = oldY;
+    }
+
+    switch (positionType) {
+      case positionTypes.ABSOLUTE:
+        // store original x/y positions
+        const oldLeftMargin = this.#documentLeftMargin;
+        const oldLastYPosition = this.#documentLastYPosition;
+
+        // set new x/y positions
+        this.#documentLeftMargin = x;
+        this.#documentLastYPosition = y;
+        return {
+          oldLeftMargin,
+          oldLastYPosition,
+          resetPosition
+        }
+      case positionTypes.INLINE:
+      default:
+        // FUTURE implement inline style positioning
+        console.warn(`Set position style '${positionTypes.INLINE}' not yet implemented.`)
+        break;
+    }
+  }
+
+  /**
+   * shorthand function for calling this.setPosition with positionTypes.ABSOLUTE
+   *
+   * @param {object} param0
+   * @param {number} param0.X
+   * @param {number} param0.y
+   * @returns {{ oldLeftMargin: number; oldLastYPosition: number; resetPosition: function; }}
+   */
+  setAbsolutePosition({ x, y }) {
+    return this.setPosition({ x, y, positionType: positionTypes.ABSOLUTE });
   }
 
   /**
@@ -798,7 +873,9 @@ class ShelterlyPDF {
         }
       },
       styles: {
-        minCellHeight: rowHeight
+        minCellHeight: rowHeight,
+        lineColor: 60,
+        lineWidth: 1
       },
       columnStyles
     });

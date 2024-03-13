@@ -18,12 +18,14 @@ import { printAnimalCareSchedule } from './Utils';
 import AnimalCoverImage from '../components/AnimalCoverImage';
 import { SystemErrorContext } from '../components/SystemError';
 import ShelterlyPrintifyButton from '../components/ShelterlyPrintifyButton';
+import { useLocationWithRoutes } from '../hooks';
+import LoadingLink from '../components/LoadingLink';
 
 function AnimalDetails({ id, incident, organization }) {
-
   const { state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
   const [images, setImages] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Initial animal data.
   const [data, setData] = useState({
@@ -63,9 +65,11 @@ function AnimalDetails({ id, incident, organization }) {
   const handleOwnerClose = () => setShowOwnerConfirm(false);
   const [showAnimalConfirm, setShowAnimalConfirm] = useState(false);
   const handleAnimalClose = () => setShowAnimalConfirm(false);
+  const { getFullLocationFromPath } = useLocationWithRoutes();
 
   // Handle animal reunited submit.
   const handleSubmit = async () => {
+    setIsLoading(true);
     await axios.patch('/animals/api/animal/' + id + '/', {status:'REUNITED', shelter:null, room:null})
     .then(response => {
       setData(response.data);
@@ -73,11 +77,13 @@ function AnimalDetails({ id, incident, organization }) {
     })
     .catch(error => {
       setShowSystemError(true);
-    });
+    })
+    .finally(() => setIsLoading(false));
   }
 
   // Handle remove owner submit.
   const handleOwnerSubmit = async () => {
+    setIsLoading(true);
     await axios.patch('/animals/api/animal/' + id + '/', {remove_owner:ownerToDelete.id})
     .then(response => {
       setData(prevState => ({ ...prevState, "owners":prevState.owners.filter(owner => owner.id !== ownerToDelete.id) }));
@@ -85,11 +91,13 @@ function AnimalDetails({ id, incident, organization }) {
     })
     .catch(error => {
       setShowSystemError(true);
-    });
+    })
+    .finally(() => setIsLoading(false));
   }
 
   // Handle animal removal submit.
   const handleAnimalSubmit = async () => {
+    setIsLoading(true);
     await axios.patch('/animals/api/animal/' + id + '/', {remove_animal:id})
     .then(response => {
       handleAnimalClose();
@@ -108,16 +116,20 @@ function AnimalDetails({ id, incident, organization }) {
     })
     .catch(error => {
       setShowSystemError(true);
-    });
+    })
+    .finally(() => setIsLoading(false));
   }
 
-  const handleDownloadPdfClick = () =>
-    printAnimalCareSchedule(data)
+  const handleDownloadPdfClick = () => {
+    const pageURL = getFullLocationFromPath(`/${organization}/${incident}/animals/${data.id}`)
+    return printAnimalCareSchedule({ ...data, url: pageURL });
+  }
 
   // Hook for initializing data.
   useEffect(() => {
     let unmounted = false;
     let source = axios.CancelToken.source();
+    setIsLoading(true);
     const fetchAnimalData = async () => {
       // Fetch Animal data.
       await axios.get('/animals/api/animal/' + id + '/', {
@@ -135,7 +147,8 @@ function AnimalDetails({ id, incident, organization }) {
         if (!unmounted) {
           setShowSystemError(true);
         }
-      });
+      })
+      .finally(() => setIsLoading(false));
     };
     fetchAnimalData();
     // Cleanup.
@@ -148,7 +161,7 @@ function AnimalDetails({ id, incident, organization }) {
   return (
     <>
     <Header>
-      Animal #{data.id}
+      Animal #{data.id || ' - '}
       <OverlayTrigger
         key={"edit"}
         placement="bottom"
@@ -158,7 +171,12 @@ function AnimalDetails({ id, incident, organization }) {
           </Tooltip>
         }
       >
-        <Link href={"/" + organization + "/" + incident + "/animals/edit/" + id} ><FontAwesomeIcon icon={faEdit} className="ml-2" inverse /></Link>
+        <LoadingLink
+          href={"/" + organization + "/" + incident + "/animals/edit/" + id}
+          isLoading={isLoading}
+        >
+          <FontAwesomeIcon icon={faEdit} className="ml-2" inverse />
+        </LoadingLink>
       </OverlayTrigger>
       <ShelterlyPrintifyButton
         id="animal-details-animal-care-schedule"
@@ -166,19 +184,22 @@ function AnimalDetails({ id, incident, organization }) {
         tooltipPlacement='bottom'
         tooltipText='Print Animal Care Schedule'
         printFunc={handleDownloadPdfClick}
+        disabled={isLoading}
       />
       {data.status !== 'REUNITED' ?
-      <OverlayTrigger
-        key={"reunite"}
-        placement="bottom"
-        overlay={
-          <Tooltip id={`tooltip-reunite`}>
-            Reunite animal
-          </Tooltip>
-        }
-      >
-        <FontAwesomeIcon icon={faHomeHeart} onClick={() => setShow(true)} className="mr-1" style={{cursor:'pointer'}} inverse />
-      </OverlayTrigger>
+        <OverlayTrigger
+          key={"reunite"}
+          placement="bottom"
+          overlay={
+            <Tooltip id={`tooltip-reunite`}>
+              Reunite animal
+            </Tooltip>
+          }
+        >
+          <LoadingLink onClick={() => setShow(true)} isLoading={isLoading}>
+            <FontAwesomeIcon icon={faHomeHeart} className="mr-1" style={{cursor:'pointer'}} inverse />
+          </LoadingLink>
+        </OverlayTrigger>
       : ""}
       <OverlayTrigger
         key={"vetrequest"}
@@ -189,7 +210,12 @@ function AnimalDetails({ id, incident, organization }) {
           </Tooltip>
         }
       >
-        <Link href={"/" + organization + "/" + incident + "/animals/" + id + "/vetrequest/new"} ><FontAwesomeIcon icon={faUserDoctorMessage} className="mr-1 ml-1" inverse /></Link>
+        <LoadingLink
+          href={"/" + organization + "/" + incident + "/animals/" + id + "/vetrequest/new"}
+          isLoading={isLoading}
+        >
+          <FontAwesomeIcon icon={faUserDoctorMessage} className="mr-1 ml-1" inverse />
+        </LoadingLink>
       </OverlayTrigger>
       <OverlayTrigger
         key={"cancel-animal"}
@@ -200,7 +226,9 @@ function AnimalDetails({ id, incident, organization }) {
           </Tooltip>
         }
       >
-        <FontAwesomeIcon icon={faTimes} style={{cursor:'pointer'}} onClick={() => {setShowAnimalConfirm(true);}} className="ml-1" size="lg" inverse />
+        <LoadingLink onClick={() => {setShowAnimalConfirm(true);}} isLoading={isLoading}>
+          <FontAwesomeIcon icon={faTimes} style={{cursor:'pointer'}} className="ml-1" size="lg" inverse />
+        </LoadingLink>
       </OverlayTrigger>
     </Header>
     <hr/>

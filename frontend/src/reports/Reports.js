@@ -30,7 +30,7 @@ function Reports({ incident, organization }) {
     result += lineDelimiter;
     array.forEach(item => {
       let ctr = 0;
-      keys.forEach(key => {
+      keys.filter(key => key !== 'last').forEach(key => {
         if (ctr > 0) result += columnDelimiter;
         result += item[key];
         ctr++;
@@ -209,66 +209,162 @@ function Reports({ incident, organization }) {
   const animal_status_columns = [
     {
       name: 'Species',
-      selector: row => row.species__name ? row.species__name[0].toUpperCase() + row.species__name.slice(1) : row.species__name,
+      selector: row => row.species__category__name ? row.species__category__name[0].toUpperCase() + row.species__category__name.slice(1) : row.species__category__name,
+      conditionalCellStyles: [
+        {
+          when: row => row.last == true,
+          style: {
+            borderTop: 'solid 1px',
+          },
+        },
+      ],
     },
     {
       name: 'Reported',
       selector: row => row.reported,
+      conditionalCellStyles: [
+        {
+          when: row => row.last == true,
+          style: {
+            borderTop: 'solid 1px',
+          },
+        },
+      ],
     },
     {
       name: <div>Reported (Evac)</div>,
       selector: row => row.reported_evac,
+      conditionalCellStyles: [
+        {
+          when: row => row.last == true,
+          style: {
+            borderTop: 'solid 1px',
+          },
+        },
+      ],
     },
     {
       name: <div>Reported (SIP)</div>,
       selector: row => row.reported_sip,
+      conditionalCellStyles: [
+        {
+          when: row => row.last == true,
+          style: {
+            borderTop: 'solid 1px',
+          },
+        },
+      ],
     },
     {
       name: 'UTL',
       selector: row => row.utl,
+      conditionalCellStyles: [
+        {
+          when: row => row.last == true,
+          style: {
+            borderTop: 'solid 1px',
+          },
+        },
+      ],
     },
     {
       name: 'NFA',
       selector: row => row.nfa,
+      conditionalCellStyles: [
+        {
+          when: row => row.last == true,
+          style: {
+            borderTop: 'solid 1px',
+          },
+        },
+      ],
     },
     {
       name: 'Sheltered',
       selector: row => row.sheltered,
+      conditionalCellStyles: [
+        {
+          when: row => row.last == true,
+          style: {
+            borderTop: 'solid 1px',
+          },
+        },
+      ],
     },
     {
       name: 'SIP',
       selector: row => row.sip,
+      conditionalCellStyles: [
+        {
+          when: row => row.last == true,
+          style: {
+            borderTop: 'solid 1px',
+          },
+        },
+      ],
     },
     {
       name: 'Reunited',
       selector: row => row.reunited,
+      conditionalCellStyles: [
+        {
+          when: row => row.last == true,
+          style: {
+            borderTop: 'solid 1px',
+          },
+        },
+      ],
     },
     {
       name: 'Deceased',
       selector: row => row.deceased,
-    },
-    {
-      name: 'Total',
-      selector: row => row.total,
+      conditionalCellStyles: [
+        {
+          when: row => row.last == true,
+          style: {
+            borderTop: 'solid 1px',
+          },
+        },
+      ],
     },
   ];
 
   const animal_owner_columns = [
     {
       name: 'Species',
-      selector: row => row.species_string ? row.species_string[0].toUpperCase() + row.species_string.slice(1) : row.species_string,
+      selector: row => row.species__category__name ? row.species__category__name[0].toUpperCase() + row.species__category__name.slice(1) : row.species__category__name,
+      conditionalCellStyles: [
+        {
+          when: row => row.last == true,
+          style: {
+            borderTop: 'solid 1px',
+          },
+        },
+      ],
     },
     {
       name: 'Owned',
       selector: row => row.owned,
+      conditionalCellStyles: [
+        {
+          when: row => row.last == true,
+          style: {
+            borderTop: 'solid 1px',
+          },
+        },
+      ],
     },
     {
       name: 'Stray',
       selector: row => row.stray,
-    },
-    {
-      name: 'Total',
-      selector: row => row.total,
+      conditionalCellStyles: [
+        {
+          when: row => row.last == true,
+          style: {
+            borderTop: 'solid 1px',
+          },
+        },
+      ],
     },
   ];
 
@@ -292,7 +388,7 @@ function Reports({ incident, organization }) {
     },
     {
       name: 'Species',
-      selector: row => row.species__name ? row.species__name[0].toUpperCase() + row.species__name.slice(1) : row.species__name,
+      selector: row => row.species__category__name ? row.species__category__name[0].toUpperCase() + row.species__category__name.slice(1) : row.species__category__name,
     },
     {
       name: 'STATUS',
@@ -390,6 +486,7 @@ function Reports({ incident, organization }) {
           title={selection.label}
           pagination
           striped
+          noDataComponent={data && data.sr_worked_report.length === 0 && !data.isFetching ? <div style={{padding:"24px"}}>There are no records to display</div> : <div style={{padding:"24px"}}>Fetching report data...</div>}
       />
       : selection.value === 'shelter' ?
       <DataTable
@@ -399,6 +496,7 @@ function Reports({ incident, organization }) {
           title={selection.label}
           pagination
           striped
+          noDataComponent={data && data.shelter_report.length === 0 && !data.isFetching ? <div style={{padding:"24px"}}>There are no records to display</div> : <div style={{padding:"24px"}}>Fetching report data...</div>}
       />
       : selection.value === 'animal_status' ?
       <DataTable
@@ -406,8 +504,8 @@ function Reports({ incident, organization }) {
           data={data.animal_status_report}
           actions={actionsMemo}
           title={selection.label}
-          pagination
           striped
+          noDataComponent={data && data.animal_status_report.length === 0 && !data.isFetching ? <div style={{padding:"24px"}}>There are no records to display</div> : <div style={{padding:"24px"}}>Fetching report data...</div>}
       />
       : selection.value === 'animal_owner' ?
       <DataTable
@@ -415,8 +513,8 @@ function Reports({ incident, organization }) {
           data={data.animal_owner_report}
           actions={actionsMemo}
           title={selection.label}
-          pagination
           striped
+          noDataComponent={data && data.animal_owner_report.length === 0 && !data.isFetching ? <div style={{padding:"24px"}}>There are no records to display</div> : <div style={{padding:"24px"}}>Fetching report data...</div>}
       />
       : selection.value === 'animal_deceased' ?
       <DataTable
@@ -426,6 +524,7 @@ function Reports({ incident, organization }) {
           title={selection.label}
           pagination
           striped
+          noDataComponent={data && data.animal_deceased_report.length === 0 && !data.isFetching ? <div style={{padding:"24px"}}>There are no records to display</div> : <div style={{padding:"24px"}}>Fetching report data...</div>}
       />
       :
       <span/>

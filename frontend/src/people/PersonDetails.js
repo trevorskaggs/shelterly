@@ -13,20 +13,26 @@ import AnimalCards from '../components/AnimalCards';
 import PhotoDocuments from '../components/PhotoDocuments';
 import { SystemErrorContext } from '../components/SystemError';
 import ShelterlyPrintifyButton from '../components/ShelterlyPrintifyButton';
+import LoadingLink from '../components/LoadingLink';
+import { useLocationWithRoutes } from "../hooks";
 import { printOwnerDetails, printOwnerAnimalCareSchedules } from './Utils';
 
 function PersonDetails({id, incident, organization}) {
 
   const { setShowSystemError } = useContext(SystemErrorContext);
+  const { getFullLocationFromPath } = useLocationWithRoutes();
 
   // Determine if this is an owner or reporter when creating a Person.
   let is_owner = window.location.pathname.includes("owner")
 
+  const [isPersonLoading, setIsPersonLoading] = useState(true);
+  const [isOrgLoading, setIsOrgLoading] = useState(true);
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
 
   // Handle animal reunification submit.
   const handleSubmit = async () => {
+    setIsPersonLoading(true);
     await axios.patch('/people/api/person/' + id + '/', {reunite_animals:true})
     .then(response => {
       setData(prevState => ({ ...prevState, "animals":prevState['animals'].map(animal => ({...animal, status:animal.status !== 'DECEASED' ? 'REUNITED' : 'DECEASED'})) }));
@@ -34,7 +40,8 @@ function PersonDetails({id, incident, organization}) {
     })
     .catch(error => {
       setShowSystemError(true);
-    });
+    })
+    .finally(() => setIsPersonLoading(false));
   }
 
   const [data, setData] = useState({
@@ -65,12 +72,19 @@ function PersonDetails({id, incident, organization}) {
     liability_short_name: '',
   });
 
+  function buildAnimalUrl(animal) {
+    return getFullLocationFromPath(
+      `/${organization}/${incident}/animals/${animal.id}`
+    );
+  }
+
   const handleDownloadPdfClick = () =>
     printOwnerDetails(data, organizationData)
 
   const handlePrintAllAnimalsClick = () => {
     const animals = data.animals.map((animal) => ({
       ...animal,
+      url: buildAnimalUrl(animal),
       owners: [data]
     }));
     return printOwnerAnimalCareSchedules(animals, id)
@@ -80,6 +94,8 @@ function PersonDetails({id, incident, organization}) {
   useEffect(() => {
     let unmounted = false;
     let source = axios.CancelToken.source();
+    setIsPersonLoading(true);
+    setIsOrgLoading(true);
 
     const fetchPersonData = async () => {
       // Fetch Person data.
@@ -95,7 +111,8 @@ function PersonDetails({id, incident, organization}) {
         if (!unmounted) {
           setShowSystemError(true);
         }
-      });
+      })
+      .finally(() => setIsPersonLoading(false));
     };
     fetchPersonData();
 
@@ -113,7 +130,8 @@ function PersonDetails({id, incident, organization}) {
         if (!unmounted) {
           setShowSystemError(true);
         }
-      });
+      })
+      .finally(() => setIsOrgLoading(false));
     };
     fetchOrganizationData();
 
@@ -123,6 +141,8 @@ function PersonDetails({id, incident, organization}) {
       source.cancel();
     };
   }, [id, incident]);
+
+  const isLoading = isPersonLoading || isOrgLoading;
 
   return (
     <>
@@ -138,7 +158,12 @@ function PersonDetails({id, incident, organization}) {
               </Tooltip>
             }
           >
-            <Link href={"/" + organization + "/" + incident + "/people/owner/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-2 mr-1" inverse /></Link>
+            <LoadingLink
+              href={"/" + organization + "/" + incident + "/people/owner/edit/" + id}
+              isLoading={isLoading}
+            >
+              <FontAwesomeIcon icon={faEdit} className="ml-2 mr-1" inverse />
+            </LoadingLink>
           </OverlayTrigger>
         </span>
       :
@@ -152,7 +177,12 @@ function PersonDetails({id, incident, organization}) {
               </Tooltip>
             }
           >
-            <Link href={"/" + organization + "/" + incident + "/people/reporter/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-2 mr-1" inverse /></Link>
+            <LoadingLink
+              href={"/" + organization + "/" + incident + "/people/reporter/edit/" + id}
+              isLoading={isLoading}
+            >
+              <FontAwesomeIcon icon={faEdit} className="ml-2 mr-1" inverse />
+            </LoadingLink>
           </OverlayTrigger>
         </span>
       }
@@ -162,6 +192,7 @@ function PersonDetails({id, incident, organization}) {
         tooltipPlacement='bottom'
         tooltipText='Download Printable Owner Summary'
         printFunc={handleDownloadPdfClick}
+        disabled={isLoading}
       />
     </Header>
     <hr/>
