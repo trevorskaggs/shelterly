@@ -61,7 +61,7 @@ class ExamQuestion(models.Model):
         return self.name
 
     class Meta:
-        ordering = ('name',)
+        ordering = ('id',)
 
 
 class MedicalRecord(models.Model):

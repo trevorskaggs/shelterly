@@ -338,7 +338,7 @@ function MedicalRecordDetails({ id, incident, organization }) {
               </ListGroup.Item>
               <ListGroup.Item>
                 <div className="row" style={{textTransform:"capitalize"}}>
-                  <span className="col-3"><b>Weight:</b> {exam.weight_estimated ? "Estimated ":""}{exam.weight}{exam.weight_unit}</span>
+                  <span className="col-3"><b>Weight:</b> {exam.weight_estimated ? "~":""}{exam.weight}{exam.weight_unit}</span>
                   <span className="col-4"><b>Temperature (F):</b> {exam.temperature}</span>
                   <span className="col-4"><b>Temperature Method:</b> {exam.temperature_method}</span>
                 </div>
@@ -368,25 +368,43 @@ function MedicalRecordDetails({ id, incident, organization }) {
             {data.vet_requests.filter(vr => vr.id === activeVR).map(vet_request => (
             <Collapse in={showExam} key={vet_request.id}>
               <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
-              <ListGroup.Item>
-                <div className="row" style={{textTransform:"capitalize"}}>
-                  <span className="col-3"><b>ID:</b> <Link href={"/" + organization + "/" + incident + "/vet/vetrequest/" + vet_request.id} className="text-link" style={{textDecoration:"none", color:"white"}}>VR#{vet_request.id}</Link></span>
-                  <span className="col-4"><b>Opened:</b> {moment(vet_request.open).format('lll')}</span>
-                  <span className="col-5"><b>Opener:</b> {vet_request.requested_by_object ? <span>{vet_request.requested_by_object.first_name + ' ' + vet_request.requested_by_object.last_name}</span> : "Unknown"}</span>
-                </div>
-              </ListGroup.Item>
-              <ListGroup.Item>
-                <div className="row">
-                  <span className="col-3"><b>Priority:</b> {priorityText[vet_request.priority]}</span>
-                  <span className="col-9"><b>Complaints:</b> {vet_request.complaints_text}</span>
-                </div>
-              </ListGroup.Item>
-              <ListGroup.Item>
-                <div className="row">
-                  <span className="col-3"><b>Use Caution:</b> {vet_request.caution ? "True" : "False"}</span>
-                  <span className="col-9"><b>Concern:</b> {vet_request.concern || "None"}</span>
-                </div>
-              </ListGroup.Item>
+              {vet_request.caution ? <div className="alert text-center w-100" style={{fontSize:"16px", marginTop:"-3px", marginRight:"15px", marginBottom:"0px", borderRadius:".25rem", backgroundColor:"#cb3636"}}>Use caution when interacting with this animal.</div> : ""}
+                <ListGroup.Item>
+                  <div className="row" style={{textTransform:"capitalize"}}>
+                    <span className="col-3"><b>ID:</b> <Link href={"/" + organization + "/" + incident + "/vet/vetrequest/" + vet_request.id} className="text-link" style={{textDecoration:"none", color:"white"}}>VR#{vet_request.id}</Link></span>
+                    <span className="col-4"><b>Opened:</b> {moment(vet_request.open).format('lll')}</span>
+                    <span className="col-5"><b>Opener:</b> {vet_request.requested_by_object ? <span>{vet_request.requested_by_object.first_name + ' ' + vet_request.requested_by_object.last_name}</span> : "Unknown"}</span>
+                  </div>
+                </ListGroup.Item>
+                <ListGroup.Item>
+                  <div className="row">
+                    <span className="col-3"><b>Priority:</b> {priorityText[vet_request.priority]}</span>
+                    <span className="col-9"><b>Complaints:</b> {vet_request.complaints_text}</span>
+                  </div>
+                </ListGroup.Item>
+                <ListGroup.Item>
+                  <div className="row" style={{marginBottom:"-10px"}}>
+                    <span className="col-3">
+                      <span className="ml-auto mr-3">
+                        <Link href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.id + "/workflow?vetrequest_id=" + vet_request.id} className="exam-link" style={{textDecoration:"none", color:"white"}}>
+                          <Card className="border rounded exam-hover-div" style={{height:"27px", minWidth:"202px", maxWidth:"202px", marginTop:"-2px", marginBottom:"-15px", whiteSpace:"nowrap", overflow:"hidden"}}>
+                            <div className="row no-gutters hover-div" style={{textTransform:"capitalize", marginRight:"-2px"}}>
+                              <Col style={{maxWidth:"36px"}}>
+                                <div className="border-right" style={{width:"27px", minWidth:"27px"}}>
+                                  <FontAwesomeIcon icon={faStethoscope} className="ml-1 exam-icon" size="lg" inverse />
+                                </div>
+                              </Col>
+                              <Col style={{fontSize:"17px"}}>
+                                <div style={{marginTop:"0px", marginLeft:"-5px"}}>Start Veterinary Exam</div>
+                              </Col>
+                            </div>
+                          </Card>
+                        </Link>
+                      </span>
+                    </span>
+                    <span className="col-9"><b>Concern:</b> {vet_request.concern || "None"}</span>
+                  </div>
+                </ListGroup.Item>
               </ListGroup>
             </Collapse>
             ))}

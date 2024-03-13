@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import axios from 'axios';
-import { Link, navigate } from 'raviger';
+import { Link, navigate, useQueryParams } from 'raviger';
 import { Button, Card, Col, ListGroup, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import L from "leaflet";
 import { Marker, Tooltip as MapTooltip } from "react-leaflet";
@@ -20,12 +20,18 @@ function Vet({ incident, organization }) {
   const { dispatch, state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
+  // Identify any query param data.
+  const [queryParams] = useQueryParams();
+  const {
+    tab = 'pending',
+  } = queryParams;
+
   const [data, setData] = useState({vet_requests:[], treatments:[], diagnostics:[], procedures:[], isFetching: true});
   const [shelterData, setShelterData] = useState({shelters:[], bounds:L.latLngBounds([[0,0]])});
   const [selectedShelter, setSelectedShelter] = useState('all');
   const [selectedAnimal, setSelectedAnimal] = useState({id:null, shelter:'null'});
   const [shelterAnimals, setShelterAnimals] = useState({'Field':[]});
-  const [activeOrders, setActiveOrders] = useState("pending");
+  const [activeOrders, setActiveOrders] = useState(tab);
 
   // Hook for initializing data.
   useEffect(() => {

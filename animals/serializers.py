@@ -55,7 +55,8 @@ class ModestAnimalSerializer(SimpleAnimalSerializer):
         exams = Exam.objects.filter(medical_record__patient=obj)
         if exams:
             exam = exams.latest('open')
-            return str(exam.weight) + exam.weight_unit
+            text = '~' if exam.weight_estimated else ''
+            return text + str(exam.weight) + exam.weight_unit
         return ''
 
     def get_front_image(self, obj):
@@ -117,7 +118,10 @@ class AnimalSerializer(ModestAnimalSerializer):
 
     def get_vet_requests(self, obj):
         from vet.serializers import SimpleVetRequestSerializer
-        return SimpleVetRequestSerializer(obj.medical_record.first().vetrequest_set.all(), required=False, read_only=True, many=True).data
+        med_record = obj.medical_record.first()
+        if med_record:
+            return SimpleVetRequestSerializer(obj.medical_record.first().vetrequest_set.all(), required=False, read_only=True, many=True).data
+        return []
 
     # Custom Reporter object field that excludes animals to avoid a circular reference.
     def get_reporter_object(self, obj):

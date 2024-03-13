@@ -20,7 +20,7 @@ function Patient(props) {
             <Card.Title>
               <h4 className="mb-0">
                 <Row className="ml-0 pr-0">
-                  Patient
+                  Patient: {props.animal.name||"Unknown"}
                 </Row>
               </h4>
             </Card.Title>
@@ -29,15 +29,15 @@ function Patient(props) {
               <ListGroup.Item>
                 <div className="row" style={{textTransform:"capitalize"}}>
                   <span className="col-4"><b>ID:</b> <Link href={"/" + props.organization + "/" + props.incident + "/animals/" + props.animal.id} className="text-link" style={{textDecoration:"none", color:"white"}}>A#{props.animal.id}</Link></span>
-                  <span className="col-4"><b>Name:</b> {props.animal.name||"Unknown"}</span>
                   <span className="col-4"><b>Species:</b> {props.animal.species_string}</span>
+                  <span className="col-4"><b>Age:</b> {props.animal.age||"Unknown"}</span>
                 </div>
               </ListGroup.Item>
               <ListGroup.Item>
                 <div className="row" style={{textTransform:"capitalize"}}>
-                  <span className="col-4"><b>Age:</b> {props.animal.age||"Unknown"}</span>
                   <span className="col-4"><b>Sex:</b> {props.animal.sex||"Unknown"}</span>
                   <span className="col-4"><b>Altered:</b> {props.animal.fixed||"Unknown"}</span>
+                  <span className="col-4"><b>Weight:</b> {props.animal.weight||"Unknown"}</span>
                 </div>
               </ListGroup.Item>
               {/* <ListGroup.Item style={{textTransform:"capitalize"}}>
@@ -78,7 +78,7 @@ function Patient(props) {
           </Card.Body>
         </Card>
       </div> : ""}
-      {props.vet_request && props.vet_request.caution ? <div className="alert alert-danger text-center w-100" style={{fontSize:"16px", marginLeft:"15px", marginRight:"15px", marginBottom:"-5px"}}>Use caution when interacting with this animal.</div> : ""}
+      {props.vet_request && props.vet_request.caution ? <div className="alert text-center w-100" style={{fontSize:"16px", marginLeft:"15px", marginRight:"15px", marginBottom:"-5px", backgroundColor:"#cb3636"}}>Use caution when interacting with this animal.</div> : ""}
     </div>
     </>
   );
