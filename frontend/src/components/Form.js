@@ -437,19 +437,21 @@ const FileUploader = ({ parentStateSetter, ...props }) => {
           errors
         }) => (
           <span className="d-flex flex-wrap align-items-end">
-            {fileList.map((file, index) => (
+            {fileList.map((file, index) => {
+              const dataUrl = isImageFile(file.name) && URL.createObjectURL(file);
+              return (
               <span key={index} className="mt-2 mr-3">
-                {isImageFile(file.name) ? (
-                  <Image width={131} src={file.data_url} alt={file.name} thumbnail />
+                {dataUrl ? (
+                  <Image width={131} src={dataUrl} alt={file.name} thumbnail />
                 ) : (
-                  <FontAwesomeIcon width={131} icon={faFilePdf} />
+                  <FontAwesomeIcon icon={faFilePdf} size="10x" style={{ height: "153px" }} />
                 )}
                 <div className="image-item__btn-wrapper">
                   <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => onFileRemove(index)} style={{backgroundColor:"red"}} />
                   <span className="ml-1">{props.label || file.name}</span>
                 </div>
               </span>
-            ))}
+            )})}
             {fileList.length < props.maxNumber ?
               <span className="d-flex flex-wrap m-0">
                 <span className="text-center ml-0 mr-3 p-0 align-items-end" style={{marginBottom:"-20px"}}>
