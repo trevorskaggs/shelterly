@@ -18,7 +18,7 @@ export const priorityChoices = [
 
 export const DATE_FORMAT = 'YYYYMMDDHHmm';
 
-export const IMAGE_TYPES = ['png', 'jpg', 'gif'];
+export const IMAGE_TYPES = ['png', 'jpg', 'jpeg', 'gif'];
 
 export const FILE_TYPES = ['pdf']
 

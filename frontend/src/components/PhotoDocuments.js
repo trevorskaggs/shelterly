@@ -8,7 +8,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { faPencil } from '@fortawesome/pro-solid-svg-icons';
 import { PhotoDocumentModal, PhotoDocumentEditModal, PhotoDocumentRemovalModal } from './Modals';
-import { getFileNameFromUrl, isImageFile } from './Utils';
+import { isImageFile, getFileNameFromUrl } from '../utils/files'
 
 function PhotoDocuments(props) {
 

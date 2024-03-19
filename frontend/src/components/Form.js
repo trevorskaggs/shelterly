@@ -22,7 +22,7 @@ import Alert from 'react-bootstrap/Alert';
 import { Legend, pinMarkerIcon } from "../components/Map";
 import { STATE_OPTIONS, ACCEPT_FILE_TYPES, IMAGE_COMPRESSION_OPTIONS } from '../constants';
 import imageCompression from 'browser-image-compression';
-import { isImageFile } from './Utils';
+import { isImageFile } from '../utils/files';
 
 const useStyles = makeStyles({
   root: {
