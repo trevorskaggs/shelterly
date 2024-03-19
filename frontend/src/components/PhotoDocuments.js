@@ -3,10 +3,12 @@ import axios from "axios";
 import { Card, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
+  faFilePdf,
   faMinusSquare, faPlusSquare
 } from '@fortawesome/free-solid-svg-icons';
 import { faPencil } from '@fortawesome/pro-solid-svg-icons';
 import { PhotoDocumentModal, PhotoDocumentEditModal, PhotoDocumentRemovalModal } from './Modals';
+import { getFileNameFromUrl, isImageFile } from './Utils';
 
 function PhotoDocuments(props) {
 
@@ -56,12 +58,44 @@ function PhotoDocuments(props) {
             <span className="d-flex flex-wrap align-items-end" style={{marginLeft:"-15px"}}>
             {props.data.images.map((image, index) => (
               <span key={index} className="ml-3 mb-3">
-                <Card className="border rounded animal-hover-div" style={{width:"153px", whiteSpace:"nowrap", overflow:"hidden"}}>
+                <Card
+                  className="border rounded animal-hover-div"
+                  style={{
+                    width:"153px",
+                    whiteSpace:"nowrap",
+                    overflow:"hidden",
+                    textAlign: "center"
+                  }}
+                >
                   <a href={image.url} target="_blank" rel="noreferrer" className="animal-link" style={{textDecoration:"none", color:"white"}}>
-                    <Card.Img className="border-bottom animal-hover-div" variant="top" src={image.url || "/static/images/image-not-found.png"} style={{width:"153px", height:"153px", objectFit: "cover", overflow: "hidden"}} />
+                    {isImageFile(image.url) ? (
+                      <Card.Img
+                        className="border-bottom animal-hover-div"
+                        variant="top"
+                        src={image.url || "/static/images/image-not-found.png"}
+                        style={{
+                          width: "153px",
+                          height: "153px",
+                          objectFit: "cover",
+                          overflow: "hidden",
+                        }}
+                      />
+                    ) : (
+                      <FontAwesomeIcon
+                        icon={faFilePdf}
+                        size="10x"
+                        style={{ height: "153px" }}
+                      />
+                    )}
                   </a>
-                  <Card.Text className="mb-0">
-                    <span title={image.name||image.url.split('/').pop().split('.')[0]} className="ml-1" style={{display:"inline-block", width:"111px", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis", marginBottom:"-5px"}}>{image.name||image.url.split('/').pop().split('.')[0]}</span>
+                  <Card.Text className="mb-0 text-left">
+                    <span
+                      title={image.name||getFileNameFromUrl(image.url)}
+                      className="ml-1"
+                      style={{display:"inline-block", width:"111px", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis", marginBottom:"-5px"}}
+                    >
+                      {image.name||getFileNameFromUrl(image.url)}
+                    </span>
                     <OverlayTrigger
                       key={"edit-photo"}
                       placement="top"

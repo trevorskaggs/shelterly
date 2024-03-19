@@ -3,7 +3,7 @@ import { Button, Card, Modal } from 'react-bootstrap';
 import { Formik } from "formik";
 import axios from 'axios';
 import * as Yup from 'yup';
-import { ImageUploader, TextInput } from '../components/Form.js';
+import { FileUploader, TextInput } from '../components/Form.js';
 import ButtonSpinner from './ButtonSpinner';
 
 const SystemErrorModal = (props) => {
@@ -126,7 +126,7 @@ const PhotoDocumentModal = (props) => {
       onSubmit={ async (values, { resetForm }) => {
         setIsSubmitting(true);
         const formData = new FormData();
-        formData.append('image', props.images[0].file, props.images[0].file.name);
+        formData.append('image', props.images[0], props.images[0].name);
         formData.append('name', values.name);
         await axios.patch(props.url, formData)
         .then(response => {
@@ -155,7 +155,7 @@ const PhotoDocumentModal = (props) => {
             />
             <div className="ml-3">
               <span>Photo Document</span>
-              <ImageUploader
+              <FileUploader
                 value={props.images}
                 id="image"
                 name="image"
