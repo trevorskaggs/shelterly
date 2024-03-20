@@ -353,7 +353,7 @@ const buildDispatchResolutionsDoc = (drs = []) => {
           pdf.drawHRule();
         })
       }
-      pdf.drawCheckBoxLine({ label: 'Forced Entry Permission' });
+      pdf.drawCheckBoxLine({ label: 'Forced Entry Used' });
 
       // owners contacted
       if (assigned_request.service_request_object.owners.length) {
