@@ -54,7 +54,7 @@ class IncidentViewSet(viewsets.ModelViewSet):
                         emails,
                         fail_silently=False,
                         html_message = render_to_string(
-                            'registration_email.html',
+                            'new_incident_email.html',
                             message_data
                         ).strip()
                     )
