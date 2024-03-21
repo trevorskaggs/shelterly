@@ -14,14 +14,14 @@ import { faBadgeSheriff, faChevronDoubleDown, faChevronDoubleUp, faClawMarks, fa
 import Moment from 'react-moment';
 import Select, { components } from 'react-select';
 import L from "leaflet";
-import { Map, TileLayer, LayerGroup } from "react-leaflet";
+import { Map, TileLayer, LayerGroup } from 'react-leaflet';
 import {
   useMark,
   useSubmitting,
   useDataImg,
   useMapUtils,
   useLocationWithRoutes,
-} from "../hooks";
+} from '../hooks';
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
 import { titleCase } from '../components/Utils';
@@ -134,7 +134,11 @@ function AnimalSearch({ incident, organization }) {
   const handleShowFilters = () => {
     setShowFilters(!showFilters);
     setTimeout(() => {
+      console.log('🚀 ~ setTimeout ~ bounds:', bounds)
       mapRef.current.leafletElement.invalidateSize();
+      // if (bounds) {
+      //   mapRef.current.leafletElement.fitBounds(bounds);
+      // }
     }, 1000);
   };
 
@@ -201,13 +205,13 @@ function AnimalSearch({ incident, organization }) {
     return options?.radius || radiusChoices[0];
   }
 
-  const { fitMapToPointAndRadius, convertKmToMeters } = useMapUtils({
-    mapFitBounds: (bounds) => {
+  const { fitMapToPointAndRadius, convertKmToMeters, calculateBoundingBox } = useMapUtils({
+    mapFitBounds: (_bounds) => {
       // short delay to update map, to work around race condition
       const delayMapMs = 300;
       setTimeout(() => {
         const { leafletElement: map } = mapRef.current;
-        map.fitBounds(bounds);
+        map.fitBounds(_bounds);
       }, delayMapMs)
     }
   });
@@ -353,7 +357,27 @@ function AnimalSearch({ incident, organization }) {
           }
           setAnimals(response.data);
           handleApplyFilters(response.data);
-          setBounds(bounds_array.length > 0 ? L.latLngBounds(bounds_array) : L.latLngBounds([[0,0]]));
+
+          const mock_bounds = [
+            ...bounds_array,
+            [
+              '39.342793803239346',
+              '-74.82377316279351'
+            ],
+            [
+              '39.8922623794802',
+              '-76.65833545105535'
+            ]
+          ];
+          let minLatLng = L.latLng(0, 0);
+          let maxLatLng = L.latLng(0, 0);
+          if (Array.isArray(mock_bounds) && mock_bounds.length > 0) {
+            const { minLat, minLng, maxLat, maxLng } = calculateBoundingBox(mock_bounds);
+            console.log('🚀 ~ .then ~ minLat, minLng, maxLat, maxLng:', minLat, minLng, maxLat, maxLng)
+            minLatLng = L.latLng(minLat, minLng);
+            maxLatLng = L.latLng(maxLat, maxLng);
+          }
+          setBounds(L.latLngBounds(minLatLng, maxLatLng));
         }
       })
       .catch(error => {
@@ -406,6 +430,14 @@ function AnimalSearch({ incident, organization }) {
     setPage(1);
     handleDisabled();
   }, [options, animals.length]);
+
+  // TODO delete this debugging useEffect
+  useEffect(() => {
+    if (bounds) {
+      console.log('🚀 ~ useEffect ~ bounds:', bounds)
+      mapRef.current.leafletElement.fitBounds(bounds);
+    }
+  }, [bounds])
 
   return (
     <div className="ml-2 mr-2">
@@ -548,7 +580,6 @@ function AnimalSearch({ incident, organization }) {
                     <Col className="border rounded pl-0 pr-0 mb-3 mr-3">
                       <Map
                         ref={mapRef}
-                        bounds={bounds}
                         onClick={updatePosition}
                         dragging={true}
                         keyboard={false}
