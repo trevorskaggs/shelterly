@@ -135,7 +135,7 @@ function MedicalRecordDetails({ id, incident, organization }) {
                   {/* <span className="col-6"><b>Owner:</b> {data.animal_object.owner_object ? <Link href={"/" + organization + "/" + incident + "/shelter/" + data.animal_object.shelter_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.animal_object.shelter_object.name}</Link>:"Unknown"}{data.animal_object.room_name ? <span> - {data.animal_object.room_name}</span> : ""}</span> */}
                 </div>
               </ListGroup.Item>
-              <ListGroup.Item>
+              <ListGroup.Item style={{marginBottom:"-6px"}}>
                   <span><b>Medical Notes:</b> {data.animal_object.medical_notes || "N/A"}</span>
               </ListGroup.Item>
             </ListGroup>
@@ -271,12 +271,12 @@ function MedicalRecordDetails({ id, incident, organization }) {
                 <Scrollbar horizontal="true" autoHide no_shadow="true" style={{height:"45px", marginLeft:"-1px", shadowheight:"45px", width:"100%"}} renderView={props => <div {...props} style={{...props.style, marginBottom:"-18px", marginRight:"0px", overflowX:"auto", overflowY: "hidden"}}/>} renderThumbVertical={props => <div {...props} style={{...props.style, display: 'none'}} />}>
                   <ListGroup horizontal>
                     <ListGroup.Item className="border rounded" style={{backgroundColor:"rgb(158, 153, 153)", marginRight:"1px"}}>
-                      <Row style={{width:"105px"}}>
-                        <div style={{marginTop:"-3px", marginLeft:"4px"}}>Open VRs</div>
+                      <Row style={{width:"112px"}}>
+                        <div style={{marginTop:"-3px", marginLeft:"4px"}}>Open VRs:</div>
                       </Row>
                     </ListGroup.Item>
                     {data.vet_requests.filter(vr => vr.status === 'Open').map(vet_request => (
-                      <ListGroup.Item key={vet_request.id} active={vet_request.id === activeVR} style={{textTransform:"capitalize", cursor:'pointer'}} onClick={() => {setActiveVR(vet_request.id);setActiveExam(null)}}>
+                      <ListGroup.Item key={vet_request.id} active={vet_request.id === activeVR} style={{textTransform:"capitalize", cursor:'pointer', borderTopLeftRadius:".25rem", borderTopRightRadius:".25rem"}} onClick={() => {setActiveVR(vet_request.id);setActiveExam(null);vet_request.id === activeVR ? setShowExam(!showExam) : setShowExam(true);}}>
                         <Row style={{marginTop:"-3px", width:"68px"}}>
                           <div className="text-center" style={{marginLeft:"4px"}}>
                             {moment(vet_request.open).format('MM/DD')}
@@ -297,21 +297,21 @@ function MedicalRecordDetails({ id, incident, organization }) {
                       </ListGroup.Item>
                     ))}
                     <ListGroup.Item className="border rounded" style={{backgroundColor:"rgb(158, 153, 153)"}}>
-                      <Row style={{width:"72px"}}>
-                        <div style={{marginTop:"-3px", marginLeft:"4px"}}>Exams</div>
+                      <Row style={{width:"77px"}}>
+                        <div style={{marginTop:"-3px", marginLeft:"4px"}}>Exams:</div>
                         {/* <FontAwesomeIcon icon={faChevronCircleRight} hidden={showExam} onClick={() => {setShowExam(true)}} className="ml-1" size="sm" style={{cursor:'pointer'}} inverse />
                         <FontAwesomeIcon icon={faChevronCircleDown} hidden={!showExam} onClick={() => {setShowExam(false)}} className="ml-1" size="sm" style={{cursor:'pointer'}} inverse /> */}
                       </Row>
                     </ListGroup.Item>
                     {data.exams.map((exam,i) => (
                     <ListGroup horizontal key={exam.id}>
-                      <ListGroup.Item key={exam.id} active={exam.id === activeExam} style={{textTransform:"capitalize", cursor:'pointer', paddingLeft:"5px", paddingRight:"5px"}} onClick={() => {setActiveExam(exam.id);setActiveVR(null);setShowExam(true);}}>
+                      <ListGroup.Item key={exam.id} active={exam.id === activeExam} style={{textTransform:"capitalize", cursor:'pointer', paddingLeft:"5px", paddingRight:"5px"}} onClick={() => {setActiveExam(exam.id);setActiveVR(null);exam.id === activeExam ? setShowExam(!showExam) : setShowExam(true);}}>
                         <div className="text-center" style={{marginTop:"-3px", width:"70px"}}>
                           {moment(exam.open).format('MM/DD')}
                         </div>
                       </ListGroup.Item>
                       {data.vet_requests.filter(vr => vr.id === exam.vet_request).map(vet_request => (
-                      <ListGroup.Item key={vet_request.id} active={vet_request.id === activeVR} style={{textTransform:"capitalize", cursor:'pointer'}} onClick={() => {setActiveVR(vet_request.id);setActiveExam(null);setShowExam(true);}}>
+                      <ListGroup.Item key={vet_request.id} active={vet_request.id === activeVR} style={{textTransform:"capitalize", cursor:'pointer'}} onClick={() => {setActiveVR(vet_request.id);setActiveExam(null);vet_request.id === activeVR ? setShowExam(!showExam) : setShowExam(true);}}>
                         <Row style={{marginTop:"-3px", width:"38px"}}>
                           <div className="text-center" style={{marginLeft:"4px"}}>
                             VR

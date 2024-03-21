@@ -45,18 +45,18 @@ function ProcedureCard(props) {
     <Row className="ml-0 mb-3">
       <Link href={"/" + props.organization + "/" + props.incident + "/vet/procedureresult/edit/" + props.procedure.id} className="treatment-link" style={{textDecoration:"none", color:"white"}}>
         <Card className="border rounded treatment-hover-div" style={{height:props.animal_object ? "120px" : "100px", width:"845px", whiteSpace:"nowrap", overflow:"hidden"}}>
-          <div className="row no-gutters hover-div treatment-hover-div" style={{height:"100px", marginRight:"-2px"}}>
+          <div className="row no-gutters hover-div treatment-hover-div" style={{marginRight:"-2px"}}>
             <Row className="ml-0 mr-0 w-100" style={{flexWrap:"nowrap"}}>
               {props.animal_object ?
-              <div className="border-right" style={{minWidth:"120px"}}>
+              <div className="border-right" style={{height:props.animal_object ? "120px" : "100px", minWidth:"120px"}}>
                 {props.procedure.name.toLowerCase().includes('bandage') || props.procedure.other_name.toLowerCase().includes('bandage') || props.procedure.name.toLowerCase().includes('splint') || props.procedure.other_name.toLowerCase().includes('splint') ?
-                  <FontAwesomeIcon icon={faBandage} size="5x" className="treatment-icon" style={{marginTop:"13px", marginLeft:"3px"}} transform={'shrink-1'} inverse />
+                  <FontAwesomeIcon icon={faBandage} size="6x" className="treatment-icon" style={{marginTop:"13px", marginLeft:"3px"}} transform={'shrink-1'} inverse />
                 : props.procedure.name.toLowerCase().includes('hydro') || props.procedure.other_name.toLowerCase().includes('hydro') || props.procedure.name.toLowerCase().includes('water') || props.procedure.other_name.toLowerCase().includes('water') ?
                   <FontAwesomeIcon icon={faWater} size="6x" className="treatment-icon" style={{marginTop:"5px", marginLeft:"-1px"}} transform={'shrink-2'} inverse />
                 : props.procedure.name.toLowerCase().includes('eye') || props.procedure.other_name.toLowerCase().includes('eye') ?
-                  <FontAwesomeIcon icon={faEye} size="5x" className="treatment-icon" style={{marginTop:"14px", marginLeft:"8px"}} transform={'grow-1'} inverse />
+                  <FontAwesomeIcon icon={faEye} size="6x" className="treatment-icon" style={{marginTop:"14px", marginLeft:"8px"}} transform={'grow-1'} inverse />
                 : props.procedure.name.toLowerCase().includes('clean') || props.procedure.other_name.toLowerCase().includes('clean') ?
-                  <FontAwesomeIcon icon={faSoap} size="6x" className="treatment-icon" style={{marginTop:"5px", marginLeft:"5px"}} transform={'shrink-1'} inverse />
+                  <FontAwesomeIcon icon={faSoap} size="6x" className="treatment-icon" style={{marginTop:"14px", marginLeft:"14px"}} transform={'grow-1'} inverse />
                 :
                   <FontAwesomeIcon icon={faScalpelLineDashed} size="6x" className="treatment-icon" style={{marginTop:"12px", marginLeft:"7px"}} transform={'grow-1'} inverse />
                 }
@@ -76,8 +76,8 @@ function ProcedureCard(props) {
                 }
               </div>
               }
-              <Col style={{marginLeft:"-5px", marginRight:"-25px"}} className="hover-div">
-                <div className="border treatment-hover-div" style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"10px", marginLeft:"-11px", marginTop: "-1px", fontSize:"18px", width:"100%", backgroundColor:"rgb(158 153 153)"}}>
+              <Col className="hover-div pl-0 pr-0">
+                <div className="border treatment-hover-div" style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"5px", marginLeft:"-1px", marginTop: "-1px", fontSize:"18px", width:"100%", backgroundColor:"rgb(158 153 153)"}}>
                   {props.procedure.other_name ? props.procedure.other_name : props.procedure.name}
                   <span className="float-right">
                   {props.procedure.complete ?
@@ -107,7 +107,7 @@ function ProcedureCard(props) {
                     }
                   </span>
                 </div>
-                {props.animal_object ? <Row style={{marginTop:"6px"}}>
+                {props.animal_object ? <Row style={{marginTop:"6px", paddingLeft:"10px"}}>
                   <Col xs={3}>
                     <b>Patient: </b>A#{props.animal_object.id}
                   </Col>
@@ -118,7 +118,7 @@ function ProcedureCard(props) {
                     <b>Name: </b>{props.animal_object.name || "Unknown"}
                   </Col>
                 </Row> : ""}
-                <Row style={{marginTop:props.animal_object ? "" : "6px"}}>
+                <Row style={{marginTop:props.animal_object ? "" : "6px", paddingLeft:"10px"}}>
                   <Col xs={3}>
                     <b>Status: </b>{props.procedure.complete ? 'Complete' : 'Pending'}
                   </Col>
@@ -132,7 +132,7 @@ function ProcedureCard(props) {
                   </Col>
                   }
                 </Row>
-                <Row>
+                <Row style={{paddingLeft:"10px"}}>
                   <Col style={{overflowX:"ellipsis"}}>
                     <b>Notes: </b>{props.procedure.notes || "N/A"}
                   </Col>

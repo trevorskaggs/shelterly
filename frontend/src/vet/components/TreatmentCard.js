@@ -46,9 +46,9 @@ function TreatmentCard(props) {
       <Link href={"/" + props.organization + "/" + props.incident + "/vet/treatmentrequest/edit/" + props.treatment_request.id} className="treatment-link" style={{textDecoration:"none", color:"white"}}>
         <Card className="border rounded treatment-hover-div" style={{height:props.animal_object ? "120px" : "100px", width:"845px", whiteSpace:"nowrap", overflow:"hidden"}}>
           <div className="row no-gutters hover-div treatment-hover-div" style={{height:"100px", marginRight:"-2px"}}>
-            <Row className="ml-0 mr-0 w-100" style={{flexWrap:"nowrap"}}>
+            <Row className="ml-0 mr-0  pl-0 pr-0 w-100">
               {props.animal_object ?
-              <div className="border-right" style={{width:"120px"}}>
+              <div className="border-right ml-0 mr-0" style={{height:props.animal_object ? "120px" : "100px", width:"120px"}}>
               {['Eye Medication','Ear Medication'].includes(props.treatment_request.treatment_object ? props.treatment_request.treatment_object.category : '') ?
                 <FontAwesomeIcon icon={faEyeDropper} size="6x" className="treatment-icon" style={{marginTop:"14px", marginLeft:"14px"}} transform={'grow-1'} inverse />
                 : props.treatment_request.treatment_object && props.treatment_request.treatment_object.category === 'Patient Care' ?
@@ -72,8 +72,8 @@ function TreatmentCard(props) {
               }
               </div>
               }
-              <Col style={{marginLeft:"-5px", marginRight:"-25px"}} className="hover-div">
-                <div className="border treatment-hover-div" style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"10px", marginLeft:"-11px", marginTop: "-1px", fontSize:"18px", width:"100%", backgroundColor:"rgb(158 153 153)"}}>
+              <Col className="hover-div pl-0 pr-0">
+                <div className="border treatment-hover-div" style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"5px", marginLeft:"-1px", marginTop: "-1px", fontSize:"18px", width:"100%", backgroundColor:"rgb(158 153 153)"}}>
                   {props.treatment_request.treatment_object.description}
                   <span className="float-right">
                   {props.treatment_request.actual_admin_time ?
@@ -127,7 +127,7 @@ function TreatmentCard(props) {
                     }
                   </span>
                 </div>
-                {props.animal_object ? <Row style={{marginTop:"6px"}}>
+                {props.animal_object ? <Row style={{marginTop:"6px", paddingLeft:"10px"}}>
                   <Col xs={3}>
                     <b>Patient: </b>A#{props.animal_object.id}
                   </Col>
@@ -138,7 +138,7 @@ function TreatmentCard(props) {
                     <b>Name: </b>{props.animal_object.name || "Unknown"}
                   </Col>
                 </Row> : ""}
-                <Row style={{marginTop:props.animal_object ? "" : "6px"}}>
+                <Row style={{marginTop:props.animal_object ? "" : "6px", paddingLeft:"10px"}}>
                   {props.treatment_request.actual_admin_time ?
                   <Col xs={6}>
                     <b>Administered: </b><Moment format="MMM DD, HH:mm">{props.treatment_request.actual_admin_time}</Moment>
@@ -158,7 +158,7 @@ function TreatmentCard(props) {
                     <b>Administrator: </b>Not Administered
                   </Col> : ""}
                 </Row>
-                <Row>
+                <Row style={{paddingLeft:"10px"}}>
                   <Col xs={3}>
                     <b>Quantity: </b>{props.treatment_request.quantity}
                   </Col>

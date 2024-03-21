@@ -4,6 +4,7 @@ import { Link, navigate, useQueryParams } from 'raviger';
 import { Button, Card, Col, ListGroup, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import L from "leaflet";
 import { Marker, Tooltip as MapTooltip } from "react-leaflet";
+import DataTable from 'react-data-table-component';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faQuestionCircle as faQuestionCircleDuo, faChevronCircleDown, faChevronCircleUp } from '@fortawesome/pro-duotone-svg-icons';
 import Header from '../components/Header';
@@ -27,6 +28,7 @@ function Vet({ incident, organization }) {
   } = queryParams;
 
   const [data, setData] = useState({vet_requests:[], treatments:[], diagnostics:[], procedures:[], isFetching: true});
+  const [reportData, setReportData] = useState([]);
   const [shelterData, setShelterData] = useState({shelters:[], bounds:L.latLngBounds([[0,0]])});
   const [selectedShelter, setSelectedShelter] = useState('all');
   const [selectedAnimal, setSelectedAnimal] = useState({id:null, shelter:'null'});
@@ -58,7 +60,14 @@ function Vet({ incident, organization }) {
             axios.get('/vet/api/diagnosticresults/?incident=' + incident + '&today=true'),
             axios.get('/vet/api/procedureresults/?incident=' + incident + '&today=true')
           ]);
+
+          let vet_request_count = {'avian':0, 'cat':0, 'dog':0, 'camelid':0, 'small_mammal':0, 'reptile/amphibian':0, 'equine':0, 'ruminant':0, 'swine':0, 'other':0};
+          vetResponse.data.forEach(vet_request => {
+            vet_request_count[vet_request.animal_object.category] += 1;
+          })
+          let treatment_count = {'avian':0, 'cat':0, 'dog':0, 'camelid':0, 'small_mammal':0, 'reptile/amphibian':0, 'equine':0, 'ruminant':0, 'swine':0, 'other':0};
           treatmentResponse.data.forEach(treatment => {
+            treatment_count[treatment.animal_object.category] += 1;
             if (!track_ids.includes(treatment.animal_object.id) && (treatment.animal_object.shelter === null || shelterResponse.data.map(shelter => shelter.id).includes(treatment.animal_object.shelter))) {
               track_ids.push(treatment.animal_object.id);
               let loc = treatment.animal_object.shelter
@@ -74,8 +83,9 @@ function Vet({ incident, organization }) {
               }
             }
           });
-          
+          let diagnostic_count = {'avian':0, 'cat':0, 'dog':0, 'camelid':0, 'small_mammal':0, 'reptile/amphibian':0, 'equine':0, 'ruminant':0, 'swine':0, 'other':0};
           diagnosticResponse.data.forEach(diagnostic => {
+            diagnostic_count[diagnostic.animal_object.category] += 1;
             if (!track_ids.includes(diagnostic.animal_object.id) && (diagnostic.animal_object.shelter === null || shelterResponse.data.map(shelter => shelter.id).includes(diagnostic.animal_object.shelter))) {
               track_ids.push(diagnostic.animal_object.id);
               let loc = diagnostic.animal_object.shelter
@@ -91,8 +101,9 @@ function Vet({ incident, organization }) {
               }
             }
           });
-
+          let procedure_count = {'avian':0, 'cat':0, 'dog':0, 'camelid':0, 'small_mammal':0, 'reptile/amphibian':0, 'equine':0, 'ruminant':0, 'swine':0, 'other':0};
           procedureResponse.data.forEach(procedure => {
+            procedure_count[procedure.animal_object.category] += 1;
             if (!track_ids.includes(procedure.animal_object.id) && (procedure.animal_object.shelter === null || shelterResponse.data.map(shelter => shelter.id).includes(procedure.animal_object.shelter))) {
               track_ids.push(procedure.animal_object.id);
               let loc = procedure.animal_object.shelter
@@ -108,6 +119,11 @@ function Vet({ incident, organization }) {
               }
             }
           });
+
+          let report_data = Object.keys(vet_request_count).filter(key => vet_request_count[key] + treatment_count[key] + diagnostic_count[key] + procedure_count[key] > 0).map(key => ({'species':key, 'vet_requests':vet_request_count[key], 'treatments':treatment_count[key], 'diagnostics':diagnostic_count[key], 'procedures':procedure_count[key], 'total':vet_request_count[key] + treatment_count[key] + diagnostic_count[key] + procedure_count[key]}));
+          let total = {'species':'total', 'vet_requests':report_data.reduce((a,v) => a = a + v.vet_requests, 0), 'treatments':report_data.reduce((a,v) => a = a + v.treatments, 0), 'diagnostics':report_data.reduce((a,v) => a = a + v.diagnostics, 0), 'procedures':report_data.reduce((a,v) => a = a + v.procedures, 0), 'total':report_data.reduce((a,v) => a = a + v.vet_requests, 0) + report_data.reduce((a,v) => a = a + v.treatments, 0) + report_data.reduce((a,v) => a = a + v.diagnostics, 0) + report_data.reduce((a,v) => a = a + v.procedures, 0)}
+          report_data.push(total)
+          setReportData(report_data);
 
           setData({vet_requests:vetResponse.data, treatments:treatmentResponse.data, diagnostics:diagnosticResponse.data, procedures:procedureResponse.data, isFetching: false});
           setShelterAnimals(shelter_animals);
@@ -131,11 +147,46 @@ function Vet({ incident, organization }) {
     };
   }, [incident, organization]);
 
+  const vet_columns = [
+    {
+      name: 'Species',
+      selector: row => row.species ? row.species[0].toUpperCase() + row.species.slice(1) :  row.species,
+    },
+    {
+      name: 'Vet Requests',
+      selector: row => row.vet_requests,
+    },
+    {
+      name: 'Treatments',
+      selector: row => row.treatments,
+    },
+    {
+      name: 'Diagnostics',
+      selector: row => row.diagnostics,
+    },
+    {
+      name: 'Procedures',
+      selector: row => row.procedures,
+    },
+    {
+      name: 'Total',
+      selector: row => row.total,
+    },
+  ];
+
   return (
     <>
     <Header>Veterinary</Header>
     <hr/>
-    <Row className="ml-0 mr-0 pl-0 pr-0" style={{marginBottom:"-1px"}}>
+    <DataTable
+      columns={vet_columns}
+      data={reportData}
+      title={'Daily Veterinary Tasks'}
+      striped
+      className="vetTable"
+      noDataComponent={!data.isFetching ? <div style={{padding:"24px"}}>There are currently no tasks for today</div> : <div style={{padding:"24px"}}>Fetching daily veterinary task data...</div>}
+    />
+    <Row className="ml-0 mr-0 pl-0 pr-0 mt-3" style={{marginBottom:"-1px"}}>
       <Col xs={10} className="border rounded pl-0 pr-0">
         {shelterData.shelters.length ?
           <Map bounds={shelterData.bounds} className="landing-leaflet-container">

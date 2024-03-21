@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import axios from "axios";
 import { navigate, useQueryParams } from "raviger";
 import { Form, Formik } from 'formik';
@@ -35,6 +35,9 @@ const TreatmentPlanForm = (props) => {
   } = queryParams;
 
   const { setShowSystemError } = useContext(SystemErrorContext);
+
+  const categoryRef = useRef(null);
+  const treatmentRef = useRef(null);
 
   // Determine if we're in the vet exam workflow.
   var is_workflow = window.location.pathname.includes("workflow");
@@ -177,6 +180,8 @@ const TreatmentPlanForm = (props) => {
             if (addAnother) {
               // Reset form data..
               resetForm({values:initialData});
+              categoryRef.current.select.clearValue();
+              treatmentRef.current.select.clearValue();
             }
             else {
               // if (state.prevLocation) {
@@ -212,7 +217,7 @@ const TreatmentPlanForm = (props) => {
             <BootstrapForm as={Form}>
               <FormGroup>
                 <BootstrapForm.Row>
-                <Col xs={"2"}>
+                  <Col xs={"2"}>
                     <DropDown
                       label="Category"
                       id="categoryDropdown"
@@ -221,6 +226,7 @@ const TreatmentPlanForm = (props) => {
                       options={categoryChoices}
                       value={formikProps.values.category||data.category}
                       key={`my_unique_category_select_key__${data.category}`}
+                      ref={categoryRef}
                       isClearable={false}
                       onChange={(instance) => {
                         formikProps.setFieldValue("category", instance === null ? '' : instance.value);
@@ -236,6 +242,7 @@ const TreatmentPlanForm = (props) => {
                       name="treatment"
                       type="text"
                       key={`my_unique_treatment_select_key__${formikProps.values.category}`}
+                      ref={treatmentRef}
                       options={treatmentChoices.filter(option => option.category === formikProps.values.category)}
                       value={formikProps.values.treatment||data.treatment}
                       isClearable={false}

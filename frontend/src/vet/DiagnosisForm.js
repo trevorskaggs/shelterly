@@ -99,7 +99,6 @@ const DiagnosisForm = (props) => {
               .catch(error => {
                 setShowSystemError(true);
               });
-              console.log(response.data)
             }
           })
           .catch(error => {

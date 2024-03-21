@@ -117,12 +117,21 @@ const TreatmetRequestForm = (props) => {
             :
               <span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + props.organization + "/" + props.incident + "/vet/medrecord/" + data.medical_record + '?tab=treatments')} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
             }
-            Treatment Request Form
+            Treatment Form
           </Card.Header>
           <Patient animal={data.animal_object} organization={props.organization} incident={props.incident} />
           <Card.Body>
             <Form>
               <FormGroup>
+                <Row>
+                  <TextInput
+                    id="quantity"
+                    name="quantity"
+                    type="text"
+                    xs="2"
+                    label="Quantity"
+                  />
+                </Row>
                 <Row>
                   <Col xs={"6"}>
                     <DropDown

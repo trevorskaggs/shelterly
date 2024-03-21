@@ -48,7 +48,7 @@ function DiagnosticCard(props) {
           <div className="row no-gutters hover-div treatment-hover-div" style={{height:"100px", marginRight:"-2px"}}>
             <Row className="ml-0 mr-0 w-100" style={{flexWrap:"nowrap"}}>
               {props.animal_object ?
-              <div className="border-right" style={{width:"120px"}}>
+              <div className="border-right" style={{height:props.animal_object ? "120px" : "100px", width:"120px"}}>
               {props.diagnostic.name.toLowerCase().includes('needle') || props.diagnostic.other_name.toLowerCase().includes('needle') ?
                 <FontAwesomeIcon icon={faSyringe} size="6x" className="treatment-icon" style={{marginTop:"13px", marginLeft:"14px"}} transform={'grow-1'} inverse />
               : props.diagnostic.name.toLowerCase().includes('istat') || props.diagnostic.other_name.toLowerCase().includes('istat') ?
@@ -98,8 +98,8 @@ function DiagnosticCard(props) {
                 }
               </div>
               }
-              <Col style={{marginLeft:"-5px", marginRight:"-25px"}} className="hover-div">
-                <div className="border treatment-hover-div" style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"10px", marginLeft:"-11px", marginTop: "-1px", fontSize:"18px", width:"100%", backgroundColor:"rgb(158 153 153)"}}>
+              <Col className="hover-div pl-0 pr-0">
+                <div className="border treatment-hover-div" style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"5px", marginLeft:"-1px", marginTop: "-1px", fontSize:"18px", width:"100%", backgroundColor:"rgb(158 153 153)"}}>
                   {props.diagnostic.other_name ? props.diagnostic.other_name : props.diagnostic.name}
                   <span className="float-right">
                   {props.diagnostic.result ?
@@ -129,7 +129,7 @@ function DiagnosticCard(props) {
                     }
                   </span>
                 </div>
-                {props.animal_object ? <Row style={{marginTop:"6px"}}>
+                {props.animal_object ? <Row style={{marginTop:"6px", paddingLeft:"10px"}}>
                   <Col xs={3}>
                     <b>Patient: </b>A#{props.animal_object.id}
                   </Col>
@@ -140,7 +140,7 @@ function DiagnosticCard(props) {
                     <b>Name: </b>{props.animal_object.name || "Unknown"}
                   </Col>
                 </Row> : ""}
-                <Row style={{marginTop:props.animal_object ? "" : "6px"}}>
+                <Row style={{marginTop:props.animal_object ? "" : "6px", paddingLeft:"10px"}}>
                   <Col xs={3}>
                     <b>Result: </b>{props.diagnostic.result || 'Pending'}
                   </Col>
@@ -154,7 +154,7 @@ function DiagnosticCard(props) {
                   </Col>
                   }
                 </Row>
-                <Row>
+                <Row style={{paddingLeft:"10px"}}>
                   <Col>
                     <b>Notes: </b>{props.diagnostic.notes || "N/A"}
                   </Col>
