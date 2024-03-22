@@ -1,1 +1,1 @@
-{{ user_email }} from the {{ organization_name }} has created a new incident: {{ incident_name }}. Click <h1><a href="{{ site }}/{{ organization_slug }}/{{ incident_slug }}">here</a></h1> to set your password and get started.
+{{ user_email }} from the {{ organization_name }} has created a new incident: {{ incident_name }}. Click <h1><a href="{{ site }}/{{ organization_slug }}/{{ incident_slug }}">here</a></h1> to open the incident.

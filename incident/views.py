@@ -31,6 +31,7 @@ class IncidentViewSet(viewsets.ModelViewSet):
             # Only create incident if user is an Admin.
             if self.request.user.is_superuser or self.request.user.perms.filter(organization=self.request.data.get('organization'))[0].incident_perms:
                 inc = serializer.save()
+                #Check if Incident is a non-training incident, if so, email all admins a notification of creation.
                 if not inc.training:
                     emails = [user.email for user in ShelterlyUser.objects.filter(is_superuser=True)]
                     message_data = {
