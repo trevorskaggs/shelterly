@@ -1,6 +1,9 @@
 from datetime import datetime
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
 from rest_framework import permissions, viewsets
 
+from accounts.models import ShelterlyUser
 from incident.models import Incident, Organization
 from incident.serializers import IncidentSerializer, OrganizationSerializer
 
@@ -27,7 +30,36 @@ class IncidentViewSet(viewsets.ModelViewSet):
 
             # Only create incident if user is an Admin.
             if self.request.user.is_superuser or self.request.user.perms.filter(organization=self.request.data.get('organization'))[0].incident_perms:
-                serializer.save()
+                inc = serializer.save()
+                #Check if Incident is a non-training incident, if so, email all admins a notification of creation.
+                if not inc.training:
+                    emails = [user.email for user in ShelterlyUser.objects.filter(is_superuser=True)]
+                    message_data = {
+                            'user_email': self.request.user.email,
+                            'organization_name': inc.organization.name,
+                            'organization_slug': inc.organization.slug,
+                            'incident_name': inc.name,
+                            'incident_slug': inc.slug
+                    }
+                    send_mail(
+                        # title:
+                        "%s has started a New Incident: %s!" % (inc.organization.name, inc.name),
+                        # message:
+                        render_to_string(
+                            'new_incident_email.txt',
+                            message_data
+                        ).strip(),
+                        # from:
+                        "DoNotReply@shelterly.org",
+                        # to:
+                        emails,
+                        fail_silently=False,
+                        html_message = render_to_string(
+                            'new_incident_email.html',
+                            message_data
+                        ).strip()
+                    )
+
 
     def perform_update(self, serializer):
         if serializer.is_valid():
