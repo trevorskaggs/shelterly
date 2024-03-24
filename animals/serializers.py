@@ -33,6 +33,7 @@ class ModestAnimalSerializer(SimpleAnimalSerializer):
     side_image = serializers.SerializerMethodField()
     found_location = serializers.SerializerMethodField()
     request_address = serializers.SerializerMethodField()
+    request_lat_lon = serializers.SerializerMethodField()
     weight = serializers.SerializerMethodField()
     owner_names = serializers.StringRelatedField(source='owners', many=True, read_only=True)
     shelter_object = SimpleShelterSerializer(source='shelter', required=False, read_only=True)
@@ -40,11 +41,16 @@ class ModestAnimalSerializer(SimpleAnimalSerializer):
 
     class Meta:
         model = Animal
-        fields = ['id', 'name', 'species', 'species_string', 'aggressive', 'injured', 'fixed', 'request', 'found_location', 'request_address', 'shelter_object', 'shelter', 'status', 'aco_required', 'color_notes',
+        fields = ['id', 'name', 'species', 'species_string', 'aggressive', 'injured', 'fixed', 'request', 'found_location', 'request_address', 'request_lat_lon', 'shelter_object', 'shelter', 'status', 'aco_required', 'color_notes',
         'front_image', 'side_image', 'owner_names', 'sex', 'size', 'age', 'pcolor', 'scolor', 'medical_notes', 'medical_record', 'behavior_notes', 'room_name', 'category', 'latitude', 'longitude', 'weight']
 
     def get_found_location(self, obj):
         return build_full_address(obj)
+
+    def get_request_lat_lon(self, obj):
+        if obj.request:
+          return [obj.request.latitude, obj.request.longitude]
+        return None
 
     # Custom field for request address.
     def get_request_address(self, obj):
