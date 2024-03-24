@@ -7,8 +7,11 @@ import L from "leaflet";
 import { Marker, Tooltip as MapTooltip } from "react-leaflet";
 import DataTable from 'react-data-table-component';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faCheckSquare,
+} from '@fortawesome/free-solid-svg-icons';
 import { faQuestionCircle as faQuestionCircleDuo, faChevronCircleDown, faChevronCircleUp } from '@fortawesome/pro-duotone-svg-icons';
-import { faSquareExclamation, faUserDoctorMessage } from '@fortawesome/pro-solid-svg-icons';
+import { faSquareExclamation, faSquareX, faUserDoctorMessage } from '@fortawesome/pro-solid-svg-icons';
 import Header from '../components/Header';
 import Map, { vetPendingAnimalLocationMarkerIcon, vetShelterMarkerIcon } from "../components/Map";
 import Scrollbar from '../components/Scrollbars';
