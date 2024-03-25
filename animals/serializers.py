@@ -124,9 +124,8 @@ class AnimalSerializer(ModestAnimalSerializer):
 
     def get_vet_requests(self, obj):
         from vet.serializers import SimpleVetRequestSerializer
-        med_record = obj.medical_record.first()
-        if med_record:
-            return SimpleVetRequestSerializer(obj.medical_record.first().vetrequest_set.all(), required=False, read_only=True, many=True).data
+        if obj.medical_record:
+            return SimpleVetRequestSerializer(obj.medical_record.vetrequest_set.all(), required=False, read_only=True, many=True).data
         return []
 
     # Custom Reporter object field that excludes animals to avoid a circular reference.

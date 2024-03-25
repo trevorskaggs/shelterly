@@ -245,6 +245,8 @@ class VetRequestViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         if serializer.is_valid():
             serializer.validated_data['requested_by'] = self.request.user
+
             med_record, _ = MedicalRecord.objects.get_or_create(patient=Animal.objects.get(id=self.request.data.get('patient')))
+            Animal.objects.filter(id=self.request.data.get('patient')).update(medical_record=med_record)
             serializer.validated_data['medical_record'] = med_record
             serializer.save()

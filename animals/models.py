@@ -42,6 +42,8 @@ class Animal(Location, OrderedModel):
     reporter = models.ForeignKey(Person, on_delete=models.SET_NULL, blank=True, null=True, related_name="reporter_animals")
     room = models.ForeignKey(Room, on_delete=models.SET_NULL, blank=True, null=True)
     shelter = models.ForeignKey(Shelter, on_delete=models.SET_NULL, blank=True, null=True)
+    medical_record = models.OneToOneField('vet.MedicalRecord', on_delete=models.DO_NOTHING, related_name='patient', null=True, blank=True)
+
     incident = models.ForeignKey(Incident, on_delete=models.CASCADE, default=test_incident)
 
     #choice fields

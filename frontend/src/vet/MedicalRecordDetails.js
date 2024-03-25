@@ -129,7 +129,7 @@ function MedicalRecordDetails({ id, incident, organization }) {
               </ListGroup.Item>
               <ListGroup.Item style={{textTransform:"capitalize"}}>
                 <div className="row">
-                  <span className="col-6"><b>Location:</b> {data.animal_object.shelter_object ? <Link href={"/" + organization + "/" + incident + "/shelter/" + data.animal_object.shelter_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.animal_object.shelter_object.name}</Link>:"Unknown"}{data.animal_object.room_name ? <span> - {data.animal_object.room_name}</span> : ""}</span>
+                  <span className="col-12"><b>Location:</b> {data.animal_object.shelter_object ? <Link href={"/" + organization + "/" + incident + "/shelter/" + data.animal_object.shelter_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.animal_object.shelter_object.name}</Link>:"Unknown"}{data.animal_object.room_name ? <span> - {data.animal_object.room_name}</span> : ""}</span>
                 </div>
                 <div className="row">
                   {/* <span className="col-6"><b>Owner:</b> {data.animal_object.owner_object ? <Link href={"/" + organization + "/" + incident + "/shelter/" + data.animal_object.shelter_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.animal_object.shelter_object.name}</Link>:"Unknown"}{data.animal_object.room_name ? <span> - {data.animal_object.room_name}</span> : ""}</span> */}
@@ -261,7 +261,6 @@ function MedicalRecordDetails({ id, incident, organization }) {
         </Card>
       </div> */}
     </div>
-    {data.exams.length > 0 ? 
     <div className="row mt-3">
       <div className="col-12 d-flex">
         <Card className="border rounded" style={{width:"100%"}}>
@@ -412,7 +411,6 @@ function MedicalRecordDetails({ id, incident, organization }) {
         </Card>
       </div>
     </div>
-    :""}
     {data.exams.length > 0 ?
     <div className="row mt-3 mb-2">
       <div className="col-12 d-flex">

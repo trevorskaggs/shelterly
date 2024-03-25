@@ -66,7 +66,6 @@ class ExamQuestion(models.Model):
 
 class MedicalRecord(models.Model):
 
-    patient = models.ForeignKey(Animal, on_delete=models.DO_NOTHING, related_name='medical_record')
     procedure_notes = models.CharField(max_length=300, blank=True, null=True)
     diagnostics_notes = models.CharField(max_length=300, blank=True, null=True)
     diagnosis = models.ManyToManyField(Diagnosis, blank=True)

@@ -118,7 +118,7 @@ const VetRequestForm = (props) => {
         concern: Yup.string(),
         priority: Yup.string(),
         caution: Yup.boolean(),
-        presenting_complaints: Yup.array(),
+        presenting_complaints: Yup.array().min(1, 'Required'),
         complaints_other: Yup.string(),
       })}
       onSubmit={(values, { setSubmitting }) => {
@@ -178,9 +178,8 @@ const VetRequestForm = (props) => {
                 </Row>
                 <Row className="mt-3 mb-3">
                   <Col xs={"8"}>
-                    <label>Presenting Complaints</label>
+                    <label>Presenting Complaints*</label>
                     <Select
-                      label="Presenting Complaints"
                       id="presenting_complaintsDropdown"
                       name="presenting_complaints"
                       type="text"
@@ -197,6 +196,7 @@ const VetRequestForm = (props) => {
                         formikProps.setFieldValue("presenting_complaints", instance === null ? [] : values);
                       }}
                     />
+                    {formikProps.errors['presenting_complaints'] ? <div style={{ color: "#e74c3c", marginTop: ".5rem", fontSize: "80%" }}>{formikProps.errors['presenting_complaints']}</div> : ""}
                   </Col>
                 </Row>
                 {presentingComplaintChoices.length && formikProps.values.presenting_complaints.includes(presentingComplaintChoices.filter(option => option.label === 'Other')[0].value) ?
