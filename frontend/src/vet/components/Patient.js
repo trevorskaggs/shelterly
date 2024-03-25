@@ -38,7 +38,7 @@ function Patient(props) {
               <ListGroup.Item>
                 <div className="row" style={{textTransform:"capitalize"}}>
                   <span className="col-4"><b>Sex:</b> {props.animal.sex||"Unknown"}</span>
-                  <span className="col-4"><b>Altered:</b> {props.animal.fixed||"Unknown"}</span>
+                  <span className="col-4"><b>Altered:</b> {props.animal.fixed === 'yes' ? "Yes" : props.animal.fixed === 'no' ? "No" : "Unknown"}</span>
                   <span className="col-4"><b>Weight:</b> {props.animal.weight||"Unknown"}</span>
                 </div>
               </ListGroup.Item>
