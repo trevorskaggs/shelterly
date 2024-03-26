@@ -94,7 +94,7 @@ const initialSchemaData = [{
   ]
   },{
     id:'respiratory_rate',
-    validationType:"number",
+    validationType:"string",
     validations: [
     {
       type:'nullable',

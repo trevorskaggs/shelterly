@@ -147,7 +147,9 @@ const VetRequestForm = (props) => {
       {formikProps => (
         <Card border="secondary" className="mt-5">
           <Card.Header as="h5" className="pl-3">
-            {props.id ? <span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + props.organization + '/' + props.incident + '/vet/vetrequest/' + props.id + '/')} className="mr-3">
+            {state.prevLocation ?
+              <span style={{ cursor: 'pointer' }} onClick={() => navigate(state.prevLocation)} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
+            : props.id ? <span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + props.organization + '/' + props.incident + '/vet/vetrequest/' + props.id + '/')} className="mr-3">
               <FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse />
             </span>:
             <span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + props.organization + '/' + props.incident + '/animals/' + props.animalid + '/')} className="mr-3">

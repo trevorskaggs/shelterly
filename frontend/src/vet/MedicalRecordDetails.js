@@ -180,86 +180,6 @@ function MedicalRecordDetails({ id, incident, organization }) {
           </Card.Body>
         </Card>
       </div> : ""}
-      {/* <div className="col-6 d-flex pl-0">
-        <Card className="border rounded d-flex" style={{width:"100%"}}>
-          <Card.Body>
-            <Card.Title style={{marginTop:"-2px", marginBottom:"-16px"}}>
-              <h4 style={{marginRight:"-1px"}}>
-                <Scrollbar horizontal="true" no_shadow="true" autoHide style={{height:"45px", marginLeft:"-1px", shadowheight:"45px", width:"100%"}} renderView={props => <div {...props} style={{...props.style, marginBottom:"-18px", marginRight:"0px", overflowX:"auto", overflowY: "hidden"}}/>} renderThumbVertical={props => <div {...props} style={{...props.style, display: 'none'}} />}>
-                  <ListGroup horizontal>
-                    <ListGroup.Item style={{backgroundColor:"rgb(158, 153, 153)"}}>
-                      <Row style={{width:"105px"}}>
-                        <div style={{marginTop:"-3px", marginLeft:"4px"}}>Open VRs</div>
-                      </Row>
-                    </ListGroup.Item>
-                    {data.vet_requests.filter(vr => vr.status === 'Open').map(vet_request => (
-                      <ListGroup.Item key={vet_request.id} active={vet_request.id === activeOpenVR} style={{textTransform:"capitalize", cursor:'pointer'}} onClick={() => setActiveVR(vet_request.id)}>
-                        <Row style={{marginTop:"-3px", width:vet_request.caution ? "92px" : "68px"}}>
-                          <div className="text-center" style={{marginLeft:"4px"}}>
-                            {moment(vet_request.open).format('MM/DD')}
-                            {vet_request.caution ?
-                            <OverlayTrigger
-                              key={"caution"}
-                              placement="top"
-                              overlay={
-                                <Tooltip id={`tooltip-caution`}>
-                                  Use caution when handling this animal.
-                                </Tooltip>
-                              }
-                            >
-                              <FontAwesomeIcon icon={faDiamondExclamation} className="ml-1 fa-move-up" size="sm" style={{marginTop:"-1px"}} transform={'up-1'} inverse />
-                            </OverlayTrigger> : ""}
-                          </div>
-                        </Row>
-                      </ListGroup.Item>
-                    ))}
-                  </ListGroup>
-                </Scrollbar>
-              </h4>
-            </Card.Title>
-            <hr/>
-            {data.vet_requests.filter(vet_request => vet_request.id === activeOpenVR).map(vet_request => (
-            <ListGroup key={vet_request.id} variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
-              <ListGroup.Item>
-                <div className="row">
-                  <span className="col-3"><b>ID: </b><Link href={"/" + organization + "/" + incident + "/vet/vetrequest/" + vet_request.id} className="text-link" style={{textDecoration:"none", color:"white"}}>VR#{vet_request.id}</Link></span>
-                  {state.user.vet_perms ?
-                  <span className="ml-auto mr-3">
-                    <Link href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.id + "/workflow?vetrequest_id=" + vet_request.id} className="exam-link" style={{textDecoration:"none", color:"white"}}>
-                      <Card className="border rounded exam-hover-div" style={{height:"27px", minWidth:"202px", maxWidth:"202px", marginTop:"-2px", marginBottom:"-15px", whiteSpace:"nowrap", overflow:"hidden"}}>
-                        <div className="row no-gutters hover-div" style={{textTransform:"capitalize", marginRight:"-2px"}}>
-                          <Col style={{maxWidth:"36px"}}>
-                            <div className="border-right" style={{width:"27px", minWidth:"27px"}}>
-                              <FontAwesomeIcon icon={faStethoscope} className="ml-1 exam-icon" size="lg" inverse />
-                            </div>
-                          </Col>
-                          <Col style={{fontSize:"17px"}}>
-                            <div style={{marginTop:"0px", marginLeft:"-5px"}}>Start Veterinary Exam</div>
-                          </Col>
-                        </div>
-                      </Card>
-                    </Link>
-                  </span>
-                  : ""}
-                </div>
-              </ListGroup.Item>
-              <ListGroup.Item>
-                <div className="row">
-                  <span className="col-5"><b>Priority: </b>{priorityText[vet_request.priority]}</span>
-                  <span className="col-7"><b>Opener:</b> {vet_request.requested_by_object ? <span>{vet_request.requested_by_object.first_name} {vet_request.requested_by_object.last_name}</span> : "Unknown"}</span>
-                </div>
-              </ListGroup.Item>
-              <ListGroup.Item>
-                <b>Presenting Complaints:</b> {vet_request.complaints_text || "None"}
-              </ListGroup.Item>
-              <ListGroup.Item>
-                <b>Concern:</b> {vet_request.concern || "N/A"}
-              </ListGroup.Item>
-            </ListGroup>
-            ))}
-          </Card.Body>
-        </Card>
-      </div> */}
     </div>
     <div className="row mt-3">
       <div className="col-12 d-flex">
@@ -295,6 +215,17 @@ function MedicalRecordDetails({ id, incident, organization }) {
                         </Row>
                       </ListGroup.Item>
                     ))}
+                    <OverlayTrigger
+                      key={"caution"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-caution`}>
+                          Open a new VR.
+                        </Tooltip>
+                      }
+                    >
+                      <Link href={"/" + organization + "/" + incident + "/animals/" + data.animal_object.id + "/vetrequest/new"} style={{marginLeft:"-1px", marginRight:"1px"}}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" size="2x" transform={"grow-2"} style={{color:"#a52b44"}} inverse /></Link>
+                    </OverlayTrigger>
                     <ListGroup.Item className="border rounded" style={{backgroundColor:"rgb(158, 153, 153)"}}>
                       <Row style={{width:"77px"}}>
                         <div style={{marginTop:"-3px", marginLeft:"4px"}}>Exams:</div>
@@ -382,7 +313,8 @@ function MedicalRecordDetails({ id, incident, organization }) {
                   </div>
                 </ListGroup.Item>
                 <ListGroup.Item>
-                  <div className="row" style={{marginBottom:"-10px"}}>
+                  <div className="row" style={{marginBottom:vet_request.status !== 'Open' ? "0px" : "-10px"}}>
+                    {vet_request.status === 'Open' ?
                     <span className="col-3">
                       <span className="ml-auto mr-3">
                         <Link href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.id + "/workflow?vetrequest_id=" + vet_request.id} className="exam-link" style={{textDecoration:"none", color:"white"}}>
@@ -400,7 +332,7 @@ function MedicalRecordDetails({ id, incident, organization }) {
                           </Card>
                         </Link>
                       </span>
-                    </span>
+                    </span> : ""}
                     <span className="col-9"><b>Concern:</b> {vet_request.concern || "None"}</span>
                   </div>
                 </ListGroup.Item>
