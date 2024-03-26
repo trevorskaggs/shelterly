@@ -31,7 +31,7 @@ const IncidentForm = ({ id, organization }) => {
     organization: state.organization.id
   });
 
-  const [bounds, setBounds] = useState(L.latLngBounds([[0,0]]));
+  const [bounds, setBounds] = useState(L.latLngBounds([[0, 0]]));
   const [names, setNames] = useState([]);
 
   const markerRef = useRef(null);
@@ -82,7 +82,7 @@ const IncidentForm = ({ id, organization }) => {
             incident_bounds.push([parseFloat(incident_bounds[0][0])-.04,parseFloat(incident_bounds[0][1])+.04])
           }
           if (!id) {
-            setBounds(incident_bounds.length ? incident_bounds : L.latLngBounds([[0,0]]));
+            setBounds(incident_bounds.length ? incident_bounds : L.latLngBounds([[44.967243, -103.771556]]));
           }
           setNames(incident_names);
         }
