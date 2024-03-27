@@ -61,12 +61,11 @@ class ExamQuestion(models.Model):
         return self.name
 
     class Meta:
-        ordering = ('name',)
+        ordering = ('id',)
 
 
 class MedicalRecord(models.Model):
 
-    patient = models.ForeignKey(Animal, on_delete=models.DO_NOTHING, related_name='medical_record')
     procedure_notes = models.CharField(max_length=300, blank=True, null=True)
     diagnostics_notes = models.CharField(max_length=300, blank=True, null=True)
     diagnosis = models.ManyToManyField(Diagnosis, blank=True)
@@ -82,6 +81,7 @@ class VetRequest(models.Model):
     requested_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     caution = models.BooleanField(default=False)
     presenting_complaints = models.ManyToManyField(PresentingComplaint)
+    complaints_other = models.CharField(max_length=50, blank=True, null=True)
     concern = models.CharField(max_length=200, blank=True, null=True)
     priority = models.CharField(max_length=25, choices=(('urgent', 'Urgent'),('when_available', 'When Available'),), default='urgent')
     medical_record = models.ForeignKey(MedicalRecord, on_delete=models.SET_NULL, null=True)
@@ -102,9 +102,10 @@ class Exam(models.Model):
     weight_unit = models.CharField(max_length=10, blank=True, null=True)
     weight_estimated = models.BooleanField(default=False)
     pulse = models.FloatField(blank=True, null=True)
-    respiratory_rate = models.FloatField(blank=True, null=True)
+    respiratory_rate = models.CharField(max_length=20, blank=True, null=True)
     medical_record = models.ForeignKey(MedicalRecord, on_delete=models.SET_NULL, null=True)
     vet_request = models.ForeignKey(VetRequest, on_delete=models.SET_NULL, null=True)
+    medical_plan = models.TextField(blank=True, null=True)
 
     class Meta:
         ordering = ('-id',)
@@ -118,7 +119,7 @@ class ExamAnswer(models.Model):
     answer_notes = models.CharField(max_length=300, blank=True, null=True)
 
     class Meta:
-        ordering = ('question__name',)
+        ordering = ('question__id',)
 
 
 class DiagnosticResult(models.Model):
@@ -141,7 +142,7 @@ class ProcedureResult(models.Model):
     performer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     complete = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
     other_name = models.CharField(max_length=50, blank=True, null=True)
-    notes = models.CharField(max_length=500, blank=True, null=True)
+    notes = models.TextField(blank=True, null=True)
     procedure = models.ForeignKey(Procedure, on_delete=models.SET_NULL, null=True)
     medical_record = models.ForeignKey(MedicalRecord, on_delete=models.SET_NULL, null=True)
 
@@ -161,30 +162,18 @@ class Treatment(models.Model):
         ordering = ('category', 'description',)
 
 
-class TreatmentPlan(models.Model):
+class TreatmentRequest(models.Model):
 
     medical_record = models.ForeignKey(MedicalRecord, on_delete=models.SET_NULL, null=True)
     treatment = models.ForeignKey(Treatment, on_delete=models.SET_NULL, null=True)
-    frequency = models.IntegerField(blank=True)
-    days = models.IntegerField(blank=True, null=True)
     quantity = models.FloatField(blank=True)
     unit = models.CharField(max_length=5, blank=True, null=True)
     route = models.CharField(max_length=5, blank=True, null=True)
-    status = models.CharField(max_length=20, default='Open')
-    start = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
-    end = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
-
-    class Meta:
-        ordering = ('-id',)
-
-
-class TreatmentRequest(models.Model):
-
     assignee = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True)
     suggested_admin_time = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
     actual_admin_time = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
-    treatment_plan = models.ForeignKey(TreatmentPlan, on_delete=models.SET_NULL, null=True)
     not_administered = models.BooleanField(default=False)
+    notes = models.CharField(max_length=500, blank=True, null=True)
 
     class Meta:
-        ordering = ('id',)
+        ordering = ('-id',)

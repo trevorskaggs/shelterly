@@ -16,7 +16,7 @@ import {
   faArrowAltCircleLeft,
 } from '@fortawesome/free-solid-svg-icons';
 import * as Yup from 'yup';
-import { Checkbox, DateTimePicker, DropDown } from '../components/Form';
+import { Checkbox, DateTimePicker, DropDown, TextInput } from '../components/Form';
 import { SystemErrorContext } from '../components/SystemError';
 import { AuthContext } from "../accounts/AccountsReducer";
 import Patient from './components/Patient';
@@ -27,12 +27,13 @@ const TreatmetRequestForm = (props) => {
   const { dispatch, state } = useContext(AuthContext);
 
   const [data, setData] = useState({
-    treatment_plan: null,
+    medical_record: null,
     suggested_admin_time: '',
     actual_admin_time: new Date(),
     assignee: null,
     not_administered: false,
-    treatment_plan_object:{animal_object:{id:'', name:''}},
+    notes: '',
+    animal_object:{id:'', name:''},
   })
 
   const [assigneeChoices, setAssigneeChoices] = useState([]);
@@ -43,12 +44,12 @@ const TreatmetRequestForm = (props) => {
 
     const fetchTreatmentRequest = async () => {
       // Fetch TreatmentRequest data.
-      await axios.get('/vet/api/treatmentrequest/' + props.id + '/', {
+      await axios.get('/vet/api/treatmentrequest/' + props.id + '/?incident=' + props.incident, {
         cancelToken: source.token,
       })
       .then(response => {
         if (!unmounted) {
-          response.data['actual_admin_time'] = response.data['actual_admin_time'] || new Date()
+          response.data['actual_admin_time'] = response.data.not_administered ? null : response.data['actual_admin_time'] || new Date()
           setData(response.data);
         }
       })
@@ -93,12 +94,13 @@ const TreatmetRequestForm = (props) => {
         assignee: Yup.number().nullable(),
         suggested_admin_time: Yup.string().required('Required'),
         actual_admin_time: Yup.string().nullable(),
+        notes: Yup.string().nullable(),
       })}
       onSubmit={(values, { setSubmitting }) => {
         if (props.id) {
           axios.put('/vet/api/treatmentrequest/' + props.id + '/', values)
           .then(response => {
-            navigate('/' + props.organization + '/' + props.incident + '/vet/treatment/' + response.data.treatment_plan)
+            navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + response.data.medical_record + '?tab=treatments')
           })
           .catch(error => {
             setShowSystemError(true);
@@ -109,11 +111,27 @@ const TreatmetRequestForm = (props) => {
     >
       {formikProps => (
         <Card border="secondary" className="mt-5">
-          <Card.Header as="h5" className="pl-3"><span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + props.organization + "/" + props.incident + "/vet/treatment/" + data.treatment_plan)} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>Treatment Request Form</Card.Header>
-          <Patient animal={data.treatment_plan_object.animal_object} organization={props.organization} incident={props.incident} />
+          <Card.Header as="h5" className="pl-3">
+            {state.prevLocation ?
+              <span style={{ cursor: 'pointer' }} onClick={() => navigate(state.prevLocation + '?tab=treatments')} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
+            :
+              <span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + props.organization + "/" + props.incident + "/vet/medrecord/" + data.medical_record + '?tab=treatments')} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
+            }
+            Treatment Form
+          </Card.Header>
+          <Patient animal={data.animal_object} organization={props.organization} incident={props.incident} />
           <Card.Body>
             <Form>
               <FormGroup>
+                <Row>
+                  <TextInput
+                    id="quantity"
+                    name="quantity"
+                    type="text"
+                    xs="2"
+                    label="Quantity"
+                  />
+                </Row>
                 <Row>
                   <Col xs={"6"}>
                     <DropDown
@@ -150,12 +168,23 @@ const TreatmetRequestForm = (props) => {
                     name="actual_admin_time"
                     id="actual_admin_time"
                     xs="4"
-                    clearable={false}
+                    clearable={true}
                     onChange={(date, dateStr) => {
                       formikProps.setFieldValue("actual_admin_time", dateStr)
                     }}
                     value={formikProps.values.actual_admin_time||null}
                     disabled={formikProps.values.not_administered}
+                  />
+                </Row>
+                <Row className="mt-3" style={{marginBottom:"-15px"}}>
+                  <TextInput
+                    as="textarea"
+                    label="Notes"
+                    name="notes"
+                    id="notes"
+                    xs="8"
+                    rows={4}
+                    value={formikProps.values.notes || ''}
                   />
                 </Row>
                 <BootstrapForm.Label className="mt-3">Not Administered</BootstrapForm.Label>

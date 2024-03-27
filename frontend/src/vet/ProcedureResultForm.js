@@ -35,7 +35,7 @@ const ProcedureResultForm = (props) => {
   const [data, setData] = useState({
     open: null,
     performer: null,
-    complete: null,
+    complete: new Date(),
     name: '',
     other_name: '',
     notes: '',
@@ -59,11 +59,14 @@ const ProcedureResultForm = (props) => {
 
     const fetchProcedureResult = async () => {
       // Fetch procedure result data.
-      await axios.get('/vet/api/procedureresults/' + props.id + '/', {
+      await axios.get('/vet/api/procedureresults/' + props.id + '/?incident=' + props.incident, {
         cancelToken: source.token,
       })
       .then(response => {
         if (!unmounted) {
+          if (!response.data.complete) {
+            response.data.complete = new Date()
+          }
           setData(response.data);
         }
       })
@@ -111,12 +114,12 @@ const ProcedureResultForm = (props) => {
         performer: Yup.string().nullable(),
         complete: Yup.string().nullable(),
         other_name: Yup.string().nullable().max(50, 'Maximum character limit of 50.'),
-        notes: Yup.string().nullable().max(500, 'Maximum character limit of 500.'),
+        notes: Yup.string().nullable().max(2500, 'Maximum character limit of 2500.'),
       })}
       onSubmit={(values, { setSubmitting }) => {
         axios.patch('/vet/api/procedureresults/' + props.id + '/', values)
         .then(response => {
-          navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + data.medical_record);
+          navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + data.medical_record + '?tab=procedures');
         })
         .catch(error => {
           setShowSystemError(true);
@@ -127,7 +130,11 @@ const ProcedureResultForm = (props) => {
       {formikProps => (
         <Card border="secondary" className="mt-3">
           <Card.Header as="h5" className="pl-3" style={{textTransform:"capitalize"}}>
-            <span style={{cursor:'pointer'}} onClick={() => navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + data.medical_record + '/')} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
+            {state.prevLocation ?
+              <span style={{ cursor: 'pointer' }} onClick={() => navigate(state.prevLocation + '?tab=procedures')} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
+            :
+              <span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + props.organization + "/" + props.incident + "/vet/medrecord/" + data.medical_record + '?tab=procedures')} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
+            }
             {data.other_name ? data.other_name : data.name} Results
             <OverlayTrigger
               key={"cancel-procedure-order"}
@@ -192,7 +199,7 @@ const ProcedureResultForm = (props) => {
                     onChange={(date, dateStr) => {
                       formikProps.setFieldValue("complete", dateStr)
                     }}
-                    value={formikProps.values.complete||new Date()}
+                    value={formikProps.values.complete || new Date()}
                     disabled={false}
                     clearable={true}
                   />

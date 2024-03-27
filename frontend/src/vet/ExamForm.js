@@ -94,7 +94,7 @@ const initialSchemaData = [{
   ]
   },{
     id:'respiratory_rate',
-    validationType:"number",
+    validationType:"string",
     validations: [
     {
       type:'nullable',
@@ -103,6 +103,15 @@ const initialSchemaData = [{
     {
       type:'required',
       params: ["Required"]
+    },
+  ]
+  },{
+    id:'medical_plan',
+    validationType:"string",
+    validations: [
+    {
+      type:'nullable',
+      params: []
     },
   ]
   },
@@ -154,7 +163,7 @@ const ExamForm = (props) => {
   // Determine if we're in the vet exam workflow.
   var is_workflow = window.location.pathname.includes("workflow");
 
-  const initialData = {id: '', exam: null, open: '', exam_object: {'medrecord_id':props.medrecordid, vetrequest_id:vetrequest_id, 'confirm_sex_age':false, 'confirm_chip':false, 'weight':null, 'weight_unit':'', 'weight_estimated':false, 'temperature':'', 'temperature_method':'Rectal', 'pulse':'', 'respiratory_rate':''}, animal_object: {id:'', name:'', species:'', species_string: '', category:'', sex:'', age:'', size:'', pcolor:'', scolor:'', medical_notes:''}, vet_requests:[]}
+  const initialData = {id: '', exam: null, open: '', exam_object: {'medrecord_id':props.medrecordid, vetrequest_id:vetrequest_id, 'confirm_sex_age':false, 'confirm_chip':false, 'weight':null, 'weight_unit':'', 'weight_estimated':false, 'temperature':'', 'temperature_method':'Rectal', 'pulse':'', 'respiratory_rate':'', 'medical_plan':''}, animal_object: {id:'', name:'', species:'', species_string: '', category:'', sex:'', age:'', fixed:'', size:'', pcolor:'', scolor:'', medical_notes:''}, vet_requests:[]}
 
   let current_data = {...initialData}
   if (is_workflow) {
@@ -276,6 +285,7 @@ const ExamForm = (props) => {
                 response.data.exam_object['age'] = response.data.animal_object.age
                 response.data.exam_object['sex'] = response.data.animal_object.sex
                 response.data.exam_object['microchip'] = response.data.animal_object.microchip
+                response.data.exam_object['fixed'] = response.data.animal_object.fixed
                 filterDataBySpecies(response);
                 setData(response.data);
                 props.handleMedicalRecord(response.data);
@@ -302,6 +312,7 @@ const ExamForm = (props) => {
                   response.data['age'] = response.data.animal_object.age
                   response.data['sex'] = response.data.animal_object.sex
                   response.data['microchip'] = response.data.animal_object.microchip
+                  response.data['fixed'] = response.data.animal_object.fixed
                   filterDataBySpecies(response);
                   setData(response.data);
                 }
@@ -469,20 +480,33 @@ const ExamForm = (props) => {
                       value={formikProps.values.sex||data.animal_object.age}
                     />
                   </Col>
+                  <Col xs="2">
+                    <DropDown
+                      label="Altered"
+                      id="fixedDropDown"
+                      name="fixed"
+                      type="text"
+                      key={`my_unique_fixed_select_key__${formikProps.values.fixed}`}
+                      options={[{value:'yes', label:'Yes'},{value:'no', label:'No'}]}
+                      isClearable={false}
+                      disabled={formikProps.values.confirm_sex_age}
+                      value={formikProps.values.fixed||data.animal_object.age}
+                    />
+                  </Col>
                 </BootstrapForm.Row>
                 <Row className="mt-3">
                   <Col xs="2">
                     <ToggleSwitch id="confirm_chip" name="confirm_chip" label="Microchip Present" disabled={false} />
                   </Col>
                   <TextInput
-                      id="microchip"
-                      name="microchip"
-                      type="text"
-                      label="Microchip"
-                      xs="3"
-                      disabled={!formikProps.values.confirm_chip}
-                      value={formikProps.values.microchip || data.animal_object.microchip}
-                    />
+                    id="microchip"
+                    name="microchip"
+                    type="text"
+                    label="Microchip"
+                    xs="3"
+                    disabled={!formikProps.values.confirm_chip}
+                    value={formikProps.values.microchip || data.animal_object.microchip}
+                  />
                 </Row>
                 <BootstrapForm.Row style={{marginBottom:"-15px"}}>
                   <TextInput
@@ -596,7 +620,7 @@ const ExamForm = (props) => {
                         onChange={(instance) => {
                           formikProps.setFieldValue(question.name.toLowerCase().replace(' ','_').replace('/','_'), instance === null ? '' : instance.value);
                           formikProps.setFieldValue(question.name.toLowerCase().replace(' ','_').replace('/','_') + '_id', instance === null ? '' : question.id);
-                          if (instance.value === 'Other') {
+                          if (instance.value === 'Other' || instance.value === 'Abnormal') {
                             showNotes[question.name.toLowerCase().replace(' ','_').replace('/','_')] = true;
                             setTimeout(() => (getRef(question.name).current.focus(),3000))
                           }
@@ -615,7 +639,6 @@ const ExamForm = (props) => {
                         as="textarea"
                         name={question.name.toLowerCase().replace(' ','').replace('/','') + "_notes"}
                         id={question.name.toLowerCase().replace(' ','_').replace('/','_') + "_notes"}
-                        key={`my_unique_question_notes_key__${formikProps.values[question.name.toLowerCase().replace(' ','_').replace('/','_') + '_notes']}`}
                         ref={setRef(question.name)}
                         xs="6"
                         rows={3}
@@ -626,6 +649,16 @@ const ExamForm = (props) => {
                   </Collapse>
                 </span>
                 )}
+                <Row className="mt-3" style={{marginBottom:"-15px"}}>
+                  <TextInput
+                    as="textarea"
+                    label="Medical Plan"
+                    name="medical_plan"
+                    id="medical_plan"
+                    xs="12"
+                    rows={4}
+                  />
+                </Row>
               </FormGroup>
             </Form>
           </Card.Body>

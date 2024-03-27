@@ -56,6 +56,7 @@ const VetRequestForm = (props) => {
     concern: '',
     priority: 'urgent',
     presenting_complaints: [],
+    complaints_other: '',
     caution: false,
   })
 
@@ -117,7 +118,8 @@ const VetRequestForm = (props) => {
         concern: Yup.string(),
         priority: Yup.string(),
         caution: Yup.boolean(),
-        presenting_complaints: Yup.array(),
+        presenting_complaints: Yup.array().min(1, 'Required'),
+        complaints_other: Yup.string(),
       })}
       onSubmit={(values, { setSubmitting }) => {
         if (props.id) {
@@ -145,7 +147,9 @@ const VetRequestForm = (props) => {
       {formikProps => (
         <Card border="secondary" className="mt-5">
           <Card.Header as="h5" className="pl-3">
-            {props.id ? <span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + props.organization + '/' + props.incident + '/vet/vetrequest/' + props.id + '/')} className="mr-3">
+            {state.prevLocation ?
+              <span style={{ cursor: 'pointer' }} onClick={() => navigate(state.prevLocation)} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
+            : props.id ? <span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + props.organization + '/' + props.incident + '/vet/vetrequest/' + props.id + '/')} className="mr-3">
               <FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse />
             </span>:
             <span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + props.organization + '/' + props.incident + '/animals/' + props.animalid + '/')} className="mr-3">
@@ -174,11 +178,10 @@ const VetRequestForm = (props) => {
                     />
                   </Col>
                 </Row>
-                <Row className="mt-3">
+                <Row className="mt-3 mb-3">
                   <Col xs={"8"}>
-                    <label>Presenting Complaints</label>
+                    <label>Presenting Complaints*</label>
                     <Select
-                      label="Presenting Complaints"
                       id="presenting_complaintsDropdown"
                       name="presenting_complaints"
                       type="text"
@@ -195,9 +198,21 @@ const VetRequestForm = (props) => {
                         formikProps.setFieldValue("presenting_complaints", instance === null ? [] : values);
                       }}
                     />
+                    {formikProps.errors['presenting_complaints'] ? <div style={{ color: "#e74c3c", marginTop: ".5rem", fontSize: "80%" }}>{formikProps.errors['presenting_complaints']}</div> : ""}
                   </Col>
                 </Row>
-                <Row className="mt-3 pl-0">
+                {presentingComplaintChoices.length && formikProps.values.presenting_complaints.includes(presentingComplaintChoices.filter(option => option.label === 'Other')[0].value) ?
+                <Row>
+                  <TextInput
+                    type="text"
+                    label="Other Presenting Complaint"
+                    name="complaints_other"
+                    id="complaints_other"
+                    xs="6"
+                  />
+                </Row>
+                : ""}
+                <Row className="pl-0">
                   <TextInput
                     as="textarea"
                     label="Concern"

@@ -24,7 +24,7 @@ const OwnerContactForm = ({ id, incident, organization }) => {
 
   const [data, setData] = useState({
     owner_name: '',
-    owner_contact_time: '',
+    owner_contact_time: new Date(),
     owner_contact_note: '',
     owner: owner,
   })

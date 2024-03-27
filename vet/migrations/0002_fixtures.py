@@ -4,7 +4,7 @@ from django.db import migrations
 
 complaints = ['Painful', 'Not eating', 'Vomiting', 'Diarrhea', 'Lameness', 'Trauma/wounds', 'Facial Swelling',
               'Burns', 'Pale gums', 'Lethargic', 'Collapse', 'Abnormal behavior', 'Ear problems', 'Eye problems', 'Difficulty breathing',
-              'Labored breathing']
+              'Labored breathing', 'Wellness exam', 'Recheck exam', 'Other']
 
 diagnoses = ['Apparently healthy', 'Gatrointestinal problem', 'Parvovirus', 'Stress colotis', 'Intestinal parasites', 'Pancreatits',
              'Burns', 'Wound/laceration', 'Abrasions', 'Fracture', 'CCL rupture', 'Ectoparasites', 'Corneal ulcer', 'Stromal abscess',
