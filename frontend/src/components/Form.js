@@ -7,9 +7,10 @@ import Select, { createFilter } from 'react-select';
 import SimpleValue from 'react-select-simple-value';
 import Flatpickr from 'react-flatpickr';
 import ImageUploading from 'react-images-uploading';
+import FileUploading from 'react-files-uploading';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faTimes, faMinusSquare, faPlusSquare,
+  faTimes, faMinusSquare, faPlusSquare, faFilePdf,
 } from '@fortawesome/free-solid-svg-icons';
 import Autocomplete from 'react-google-autocomplete';
 import { Map, Marker, Tooltip as MapTooltip, TileLayer } from "react-leaflet";
@@ -19,8 +20,9 @@ import { useRegisteredRef } from "react-register-nodes";
 import { makeStyles } from '@material-ui/core/styles';
 import Alert from 'react-bootstrap/Alert';
 import { Legend, pinMarkerIcon } from "../components/Map";
-import { STATE_OPTIONS } from '../constants';
+import { STATE_OPTIONS, ACCEPT_FILE_TYPES, IMAGE_COMPRESSION_OPTIONS } from '../constants';
 import imageCompression from 'browser-image-compression';
+import { isImageFile } from '../utils/files';
 
 const useStyles = makeStyles({
   root: {
@@ -383,6 +385,99 @@ const ImageUploader = ({ parentStateSetter, ...props }) => {
   );
 }
 
+const FileUploader = ({ parentStateSetter, ...props }) => {
+
+  const { setFieldValue, values } = useFormikContext();
+  const [childState, setChildState] = useState(0);
+  const [meta] = useField(props);
+
+  useEffect(() => {
+    // Call parent function to update parent state.
+    parentStateSetter(childState);
+  }, [parentStateSetter, childState]);
+
+  return (
+    <>
+      <FileUploading
+        {...props}
+        onChange={ async (fileList) => {
+          setChildState(fileList);
+          // splat the most recent uploaded file
+          const [mostRecentFile] = fileList?.slice?.(-1);
+          // Set file to field if it exists.
+          if (mostRecentFile) {
+            const fileIsImage = isImageFile(mostRecentFile.name);
+            let fileFormValue = mostRecentFile;
+            if (fileIsImage) {
+              fileFormValue = await imageCompression(mostRecentFile, IMAGE_COMPRESSION_OPTIONS);
+            }
+            // add the file to array if it's multiple files
+            if (props.multiple) {
+              const multipleFiles = [...(values[props.id]||[])];
+              multipleFiles.push(fileFormValue);
+              fileFormValue = multipleFiles;
+            } else {
+              if (fileIsImage) {
+                const compressedDataUrl = await imageCompression.getDataUrlFromFile(fileFormValue);
+                setFieldValue(props.id + '_data_url', compressedDataUrl);
+              }
+            }
+
+            // set data to Formik context
+            await setFieldValue(props.id, fileFormValue);
+          }
+        }}
+        acceptType={ACCEPT_FILE_TYPES}
+      >
+        {({
+          fileList,
+          onFileUpload,
+          onFileRemove,
+          dragProps,
+          errors
+        }) => (
+          <span className="d-flex flex-wrap align-items-end">
+            {fileList.map((file, index) => {
+              const dataUrl = isImageFile(file.name) && URL.createObjectURL(file);
+              return (
+              <span key={index} className="mt-2 mr-3">
+                {dataUrl ? (
+                  <Image width={131} src={dataUrl} alt={file.name} thumbnail />
+                ) : (
+                  <FontAwesomeIcon icon={faFilePdf} size="10x" style={{ height: "153px" }} />
+                )}
+                <div className="image-item__btn-wrapper">
+                  <FontAwesomeIcon icon={faMinusSquare} inverse onClick={() => onFileRemove(index)} style={{backgroundColor:"red"}} />
+                  <span className="ml-1">{props.label || file.name}</span>
+                </div>
+              </span>
+            )})}
+            {fileList.length < props.maxNumber ?
+              <span className="d-flex flex-wrap m-0">
+                <span className="text-center ml-0 mr-3 p-0 align-items-end" style={{marginBottom:"-20px"}}>
+                <FontAwesomeIcon icon={faPlusSquare} size="10x" inverse onClick={onFileUpload}{...dragProps} />
+                  <div style={{marginTop:-8, marginBottom:20}}>{props.label}</div>
+                  {(meta.touched && meta.error) || errors ?
+                    <div style={{ color:"#e74c3c", fontSize:"80%", marginTop:"-20px", marginBottom:"-20px" }}>
+                      {meta.error ?
+                        <span className="text-left">{meta.error}</span> :
+                        <span>
+                          {errors.maxNumber && <span>Maximum Exceeded</span>}
+                          {errors.acceptType && <span>Invalid file type</span>}
+                        </span>
+                      }
+                    </div> : <div style={{ marginBottom:"20px" }}></div>
+                  }
+                </span>
+              </span> : ""
+            }
+          </span>
+        )}
+      </FileUploading>
+    </>
+  );
+}
+
 const AddressLookup = ({setLatLon, ...props}) => {
 
   const childRef = useRef(null);
@@ -669,4 +764,15 @@ const AddressSearch = (props) => {
   );
 }
 
-export { AddressLookup, AddressSearch, Checkbox, DropDown, ImageUploader, DateTimePicker, DateRangePicker, TextInput, ToggleSwitch };
+export {
+  AddressLookup,
+  AddressSearch,
+  Checkbox,
+  DateRangePicker,
+  DateTimePicker,
+  DropDown,
+  FileUploader,
+  ImageUploader,
+  TextInput,
+  ToggleSwitch,
+};
