@@ -1,4 +1,5 @@
 from datetime import datetime
+from django.contrib.sites.models import Site
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from rest_framework import permissions, viewsets
@@ -35,6 +36,7 @@ class IncidentViewSet(viewsets.ModelViewSet):
                 if not inc.training:
                     emails = [user.email for user in ShelterlyUser.objects.filter(is_superuser=True)]
                     message_data = {
+                            'site': Site.objects.get_current(),
                             'user_email': self.request.user.email,
                             'organization_name': inc.organization.name,
                             'organization_slug': inc.organization.slug,
@@ -83,7 +85,7 @@ class OrganizationViewSet(viewsets.ModelViewSet):
     serializer_class = OrganizationSerializer
 
     def get_queryset(self):
-        queryset = Organization.objects.filter(id__in=self.request.user.organizations.all())
+        queryset = Organization.objects.filter(id__in=self.request.user.organizations.all()).order_by('name')
 
         if self.request.GET.get('slug'):
             queryset = queryset.filter(slug=self.request.GET.get('slug'))

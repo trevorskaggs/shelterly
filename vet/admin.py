@@ -6,7 +6,7 @@ class ExamQuestionAdmin(admin.ModelAdmin):
   list_display = ('id', 'name', 'default',)
 
 class MedicalRecordAdmin(admin.ModelAdmin):
-  list_display = ('id', 'patient', 'exam',)
+  list_display = ('id', 'patient',)
 
 class VetRequestAdmin(admin.ModelAdmin):
   list_display = ('id', 'requested_by', 'medical_record',)
