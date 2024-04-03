@@ -11,6 +11,7 @@ import { faArrowAltCircleLeft, faMinusSquare, faTimes } from '@fortawesome/free-
 import ButtonSpinner from "../components/ButtonSpinner";
 import { AuthContext } from "../accounts/AccountsReducer";
 import { SystemErrorContext } from '../components/SystemError';
+import CustomSelect from "../components/CustomSelect.js";
 
 const AnimalForm = (props) => {
 
@@ -340,7 +341,7 @@ const AnimalForm = (props) => {
             delete values["owners"];
           }
           // handle age or ageText
-          if(values.age === otherAgeChoice.value) {
+          if (values.age === otherAgeChoice.value) {
             values.age = values.ageText;
           }
 
@@ -659,57 +660,14 @@ const AnimalForm = (props) => {
                     />
                   </Col>
                   <Col xs="3">
-                    {(
-                      (formikProps.values.age
-                      && formikProps.values.age === otherAgeChoice.value)
-                      || !ageChoices[formikProps.values.species]?.includes(formikProps.values.age)
-                      || formikProps.values.age !== ''
-                    ) ? (
-                      <div className={`clearable-text-input ${formikProps.errors.ageText ? 'error' : ''}`}>
-                        <TextInput
-                          id="ageText"
-                          name="ageText"
-                          label="Age"
-                          ref={ageTextRef}
-                          value={(() => {
-                            if (
-                              formikProps.values.age !== otherAgeChoice.value
-                              && !ageChoices[formikProps.values.species]?.includes(formikProps.values.age)
-                              && !formikProps.values.ageTest
-                            ) {
-                              return formikProps.values.age;
-                            }
-                            return formikProps.values.ageText;
-                          })()}
-                          formgroupclasses="px-0 pb-0 mb-0"
-                          placeholder="Enter an age"
-                        />
-                        <div className="clearable-icon-wrapper">
-                          <FontAwesomeIcon
-                            className="clearable-icon"
-                            icon={faTimes}
-                            size="sm"
-                            onClick={() => {
-                              formikProps.setFieldValue('age', '');
-                              formikProps.setFieldValue('ageText', '');
-                            }}
-                          />
-                        </div>
-                      </div>
-                    ) : (
-                      <DropDown
-                        label="Age"
-                        id="age"
-                        name="age"
-                        type="text"
-                        xs="4"
-                        key={`my_unique_age_select_key__${formikProps.values.age}`}
-                        ref={ageRef}
-                        options={Object.keys(ageChoices).includes(formikProps.values.species) ? ageChoices[formikProps.values.species] : ageChoices['other']}
-                        value={formikProps.values.age||''}
-                        placeholder={placeholder}
-                      />
-                    )}
+                    <CustomSelect
+                      label="Age"
+                      options={Object.keys(ageChoices).includes(formikProps.values.species)
+                        ? ageChoices[formikProps.values.species]
+                        : ageChoices['other']}
+                      value={formikProps.values.age}
+                      handleValueChange={(value) => formikProps.setFieldValue('age', value)}
+                    />
                   </Col>
                   <Col xs="3">
                     <DropDown
