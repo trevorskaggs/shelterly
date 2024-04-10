@@ -1145,7 +1145,7 @@ function VetRequestSearch({ incident, organization }) {
                   </div>
                   <Row style={{marginTop:"6px"}}>
                     <Col xs={3}>
-                      <b>Patient: </b>A#{vet_request.animal_object.id}
+                      <b>Patient: </b>A#{vet_request.animal_object.id_for_incident}
                     </Col>
                     <Col xs={3}>
                       <b>Species:</b> <span  style={{textTransform:"capitalize"}}>{vet_request.animal_object.species_string}</span>

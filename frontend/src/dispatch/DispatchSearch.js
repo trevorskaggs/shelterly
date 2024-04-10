@@ -277,7 +277,7 @@ function DispatchAssignmentSearch({ incident, organization }) {
                           </span>
                         :""}
                         <br />
-                        SR#{assigned_request.service_request_object.id}: {assigned_request.service_request_object.full_address.split(',')[0]}
+                        SR#{assigned_request.service_request_object.id_for_incident}: {assigned_request.service_request_object.full_address.split(',')[0]}
                       </span>
                     </MapTooltip>
                   </Marker>
@@ -351,7 +351,7 @@ function DispatchAssignmentSearch({ incident, organization }) {
                         </OverlayTrigger>
                         : ""}
                         </span>
-                        <span>SR#{assigned_request.service_request_object.id} - <Link href={"/" + organization + "/" + incident + "/hotline/servicerequest/" + assigned_request.service_request_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link> |
+                        <span>SR#{assigned_request.service_request_object.id_for_incident} - <Link href={"/" + organization + "/" + incident + "/hotline/servicerequest/" + assigned_request.service_request_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link> |
                         {assigned_request.service_request_object.owner_objects.length === 0 ?
                           <OverlayTrigger
                             key={"stray"}

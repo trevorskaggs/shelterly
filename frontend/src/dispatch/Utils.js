@@ -47,7 +47,7 @@ const buildDispatchResolutionsDoc = (drs = []) => {
 
       // Summary page
       pdf.drawSectionHeader({
-        text: `SR#${assigned_request.service_request_object.id} - ${srPriority.label} Priority`,
+        text: `SR#${assigned_request.service_request_object.id_for_incident} - ${srPriority.label} Priority`,
         fontSize: 12
       });
 
@@ -113,7 +113,7 @@ const buildDispatchResolutionsDoc = (drs = []) => {
 
       // SR Header
       pdf.drawSectionHeader({
-        text: `SR#${assigned_request.service_request_object.id} - ${assigned_request.service_request_object.full_address}`,
+        text: `SR#${assigned_request.service_request_object.id_for_incident} - ${assigned_request.service_request_object.full_address}`,
         hRule: false,
         fontSize: 14
       });
@@ -229,7 +229,7 @@ const buildDispatchResolutionsDoc = (drs = []) => {
         pdf.setDocumentFontSize({ size: 11 });
         drawAnimalHeader({
           firstLabel: `***A#${
-            animal.id
+            animal.id_for_incident
           } - ${animal.species_string[0].toUpperCase()}${animal.species_string.slice(1)}\n${
             animal.name || "Unknown"
           }***`,

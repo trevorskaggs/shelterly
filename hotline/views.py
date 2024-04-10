@@ -13,14 +13,16 @@ from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 
 from animals.models import Animal
+from animals.views import MultipleFieldLookupMixin
 from hotline.models import ServiceRequest, ServiceRequestImage, VisitNote
 from incident.models import Incident
 
 from rest_framework import filters, permissions, serializers, viewsets
 from rest_framework.decorators import action as drf_action
 
-class ServiceRequestViewSet(viewsets.ModelViewSet):
+class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
     queryset = ServiceRequest.objects.all()
+    lookup_fields = ['id', 'incident', 'id_for_incident']
     search_fields = ['id', 'address', 'city', 'animal__name', 'owners__first_name', 'owners__last_name', 'owners__phone', 'owners__drivers_license', 'owners__address', 'owners__city', 'reporter__first_name', 'reporter__last_name']
     filter_backends = (filters.SearchFilter, MyCustomOrdering)
     permission_classes = [permissions.IsAuthenticated, ]

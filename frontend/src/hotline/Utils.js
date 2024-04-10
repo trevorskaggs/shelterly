@@ -27,7 +27,7 @@ function buildServiceRequestsDoc(srs = []) {
     pdf.drawPad(20);
 
     // id & priority
-    pdf.drawWrappedText({ text: `SR#${data.id} - ${srPriority.label} Priority` })
+    pdf.drawWrappedText({ text: `SR#${data.id_for_incident} - ${srPriority.label} Priority` })
 
     // status
     pdf.drawWrappedText({ text: `Status: ${data.status.toUpperCase()}` });
@@ -155,7 +155,7 @@ function buildServiceRequestsDoc(srs = []) {
         `${capitalize(animal.status.toLowerCase(), { proper: true })}`;
 
       const animalInfoList = [
-        `ID: A#${animal.id}`,
+        `ID: A#${animal.id_for_incident}`,
         `Status: ${animalStatus}`,
         `Name: ${animal.name || 'Unknown'}`,
         `Species: ${capitalize(animal.species_string)}`,

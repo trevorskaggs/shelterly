@@ -620,7 +620,7 @@ function Deploy({ incident, organization }) {
                           </span>
                         :""}
                         <br />
-                        SR#{service_request.id}: {service_request.full_address}
+                        SR#{service_request.id_for_incident}: {service_request.full_address}
                         {service_request.followup_date ? <div>Followup Date: <Moment format="L">{service_request.followup_date}</Moment></div> : ""}
                         <div>
                         {service_request.aco_required ? <img width={16} height={16} src="/static/images/badge-sheriff.png" alt="ACO Required" className="mr-1" /> : ""}
@@ -951,7 +951,7 @@ function Deploy({ incident, organization }) {
                     </OverlayTrigger>
                     }
                     <span className="ml-2">|
-                    &nbsp;SR#{service_request.id} - {service_request.full_address}</span>
+                    &nbsp;SR#{service_request.id_for_incident} - {service_request.full_address}</span>
                     <OverlayTrigger
                       key={"radius-toggle"}
                       placement="top"

@@ -10,7 +10,7 @@ const initialState = {
   isLoading: false,
   logout: false,
   user: null,
-  incident: {name:'', training:false},
+  incident: {id:'', name:'', training:false},
   organization: {id:'', name:''},
   errors: {},
   location:'',
@@ -116,7 +116,7 @@ function AuthProvider(props) {
       if (incident_slug && !state.incident.name && incident_slug !=='accounts'){
         axios.get('/incident/api/incident/?incident=' + incident_slug)
         .then(incidentResponse => {
-          dispatch({type: "SET_INCIDENT", data: {name:incidentResponse.data[0].name, training:incidentResponse.data[0].training}});
+          dispatch({type: "SET_INCIDENT", data: {id:incidentResponse.data[0].id, name:incidentResponse.data[0].name, training:incidentResponse.data[0].training}});
         })
         .catch(error => {
         });

@@ -37,6 +37,8 @@ class Species(models.Model):
 # Create your models here.
 class Animal(Location, OrderedModel):
 
+    id_for_incident = models.IntegerField(blank=True, null=True)
+
     request = models.ForeignKey(ServiceRequest, on_delete=models.SET_NULL, blank=True, null=True)
     owners = models.ManyToManyField(Person, blank=True)
     reporter = models.ForeignKey(Person, on_delete=models.SET_NULL, blank=True, null=True, related_name="reporter_animals")
@@ -82,7 +84,11 @@ class Animal(Location, OrderedModel):
         elif animal_images.filter(category='side_image').exists():
             return animal_images.filter(category='side_image')[0]
         return None
-    
+
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            self.id_for_incident = Animal.objects.filter(incident=self.incident).count() + 1
+        super(Animal, self).save(*args, **kwargs)
 
     class Meta:
         ordering = ('order', 'id')

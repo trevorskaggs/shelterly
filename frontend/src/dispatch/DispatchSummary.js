@@ -394,7 +394,7 @@ function DispatchSummary({ id, incident, organization }) {
                     </span>
                   :""}
                   <br />
-                  SR#{assigned_request.service_request_object.id}: {assigned_request.service_request_object.full_address.split(',')[0]}, {assigned_request.service_request_object.full_address.split(',')[1]}
+                  SR#{assigned_request.service_request_object.id_for_incident}: {assigned_request.service_request_object.full_address.split(',')[0]}, {assigned_request.service_request_object.full_address.split(',')[1]}
                 </span>
               </MapTooltip>
             </Marker>
@@ -408,7 +408,7 @@ function DispatchSummary({ id, incident, organization }) {
           <Card.Body>
             <Card.Title>
               <h4>
-                SR#{assigned_request.service_request_object.id} -&nbsp;
+                SR#{assigned_request.service_request_object.id_for_incident} -&nbsp;
                 <Link href={"/" + organization + "/" + incident + "/hotline/servicerequest/" + assigned_request.service_request_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link>
                 {assigned_request.visit_note && assigned_request.visit_note.forced_entry ?
                   <OverlayTrigger
@@ -518,7 +518,7 @@ function DispatchSummary({ id, incident, organization }) {
             <h4 className="mt-2" style={{marginBottom:"-2px"}}>Animals</h4>
             {assigned_request.service_request_object.animals.filter(animal => Object.keys(assigned_request.animals).includes(String(animal.id))).map((animal, inception) => (
               <ListGroup.Item key={animal.id}>
-                <span style={{textTransform:"capitalize"}}>A#{animal.id} - <Link href={"/" + organization + "/" + incident + "/animals/" + animal.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.name||"Unknown"}</Link>&nbsp;-&nbsp;{animal.species_string}</span>
+                <span style={{textTransform:"capitalize"}}>A#{animal.id_for_incident} - <Link href={"/" + organization + "/" + incident + "/animals/" + animal.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.name||"Unknown"}</Link>&nbsp;-&nbsp;{animal.species_string}</span>
                 {animal.color_notes ?
                   <OverlayTrigger
                     key={"animal-color-notes"}

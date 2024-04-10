@@ -109,7 +109,7 @@ function ProcedureCard(props) {
                 </div>
                 {props.animal_object ? <Row style={{marginTop:"6px", paddingLeft:"10px"}}>
                   <Col xs={3}>
-                    <b>Patient: </b>A#{props.animal_object.id}
+                    <b>Patient: </b>A#{props.animal_object.id_for_incident}
                   </Col>
                   <Col xs={3}>
                     <b>Species:</b> <span  style={{textTransform:"capitalize"}}>{props.animal_object.species_string}</span>

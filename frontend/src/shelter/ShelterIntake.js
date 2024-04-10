@@ -47,7 +47,7 @@ function AnimalStatus(props) {
         />
       </Col>
       <span style={{ marginTop:"-3px", marginBottom: "-4px", fontSize: "26px", textTransform:"capitalize" }}>
-        A#{props.animal.id} - {props.animal.name || "Unknown"}&nbsp;-&nbsp;{props.animal.species_string}
+        A#{props.animal.id_for_incident} - {props.animal.name || "Unknown"}&nbsp;-&nbsp;{props.animal.species_string}
         {props.animal.color_notes ?
         <OverlayTrigger
           key={"animal-color-notes"}
@@ -253,7 +253,7 @@ function ShelterIntake({ id, incident, organization }) {
                 <Card.Body>
                   <Card.Title style={{marginBottom:"-5px", marginTop:"-5px"}}>
                     <h4>
-                      SR#{assigned_request.service_request_object.id} -&nbsp;
+                      SR#{assigned_request.service_request_object.id_for_incident} -&nbsp;
                       <Link href={"/" + organization + "/" + incident + "/hotline/servicerequest/" + assigned_request.service_request_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link>
                     </h4>
                   </Card.Title>

@@ -168,7 +168,7 @@ const countMatches = (animal_dict) => {
                       </span>
                     :""}
                     <br />
-                    SR#{assigned_request.service_request_object.id}: {assigned_request.service_request_object.full_address}
+                    SR#{assigned_request.service_request_object.id_for_incident}: {assigned_request.service_request_object.full_address}
                     <div>
                       {assigned_request.service_request_object.aco_required ? <img width={16} height={16} src="/static/images/badge-sheriff.png" alt="ACO Required" className="mr-1" /> : ""}
                       {assigned_request.service_request_object.injured ? <img width={16} height={16} src="/static/images/band-aid-solid.png" alt="Injured" className="mr-1" /> : ""}

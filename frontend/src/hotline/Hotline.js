@@ -138,7 +138,7 @@ function Hotline({ incident, organization }) {
               >
                 <MapTooltip autoPan={false}>
                   <span>
-                    SR#{service_request.id}: {service_request.full_address}
+                    SR#{service_request.id_for_incident}: {service_request.full_address}
                     <br/>
                     {mapState[service_request.id] ?
                       <span>

@@ -280,7 +280,7 @@ function ServiceRequestForm(props) {
           <p>
             The following Service Requests have a duplicate address:
             {dupeSRs.map(sr =>
-              <li key={sr.id} style={{marginLeft:"10px"}}><span style={{position:"relative", left:"-5px"}}>SR#{sr.id} - Click <Link target="_blank" href={"/" + props.organization + "/" + incident + "/hotline/servicerequest/" + sr.id} style={{color:"#8d99d4"}}>here</Link> to view this Service Request.</span></li>
+              <li key={sr.id} style={{marginLeft:"10px"}}><span style={{position:"relative", left:"-5px"}}>SR#{sr.id_for_incident} - Click <Link target="_blank" href={"/" + props.organization + "/" + incident + "/hotline/servicerequest/" + sr.id} style={{color:"#8d99d4"}}>here</Link> to view this Service Request.</span></li>
             )}
             <br/>Proceed with creating a new Service Request?
           </p>
