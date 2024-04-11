@@ -35,6 +35,8 @@ class DispatchTeam(models.Model):
 
 class EvacAssignment(models.Model):
 
+    id_for_incident = models.IntegerField(blank=True, null=True)
+
     team = models.ForeignKey(DispatchTeam, on_delete=models.SET_NULL, blank=True, null=True)
     service_requests = models.ManyToManyField(ServiceRequest, through='AssignedRequest', related_name='evacuation_assignments')
     start_time = models.DateTimeField(auto_now_add=True)
@@ -47,6 +49,11 @@ class EvacAssignment(models.Model):
         for service_request in self.service_requests.all():
             geojson['features'].append(service_request.get_feature_json())
         return geojson
+
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            self.id_for_incident = EvacAssignment.objects.filter(incident=self.incident).count() + 1
+        super(EvacAssignment, self).save(*args, **kwargs)
 
     class Meta:
         ordering = ['-start_time',]

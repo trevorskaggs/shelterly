@@ -254,7 +254,7 @@ function ServiceRequestSearch({ incident, organization }) {
                   </Tooltip>
                 }
               >
-                <Link href={"/" + organization + "/" + incident + "/hotline/servicerequest/" + service_request.id}><FontAwesomeIcon icon={faDotCircle} className="mr-2" inverse /></Link>
+                <Link href={"/" + organization + "/" + incident + "/hotline/servicerequest/" + service_request.id_for_incident}><FontAwesomeIcon icon={faDotCircle} className="mr-2" inverse /></Link>
               </OverlayTrigger>
               SR#{service_request.id_for_incident}
               &nbsp;-&nbsp;{service_request.full_address}

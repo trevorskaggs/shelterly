@@ -14,5 +14,5 @@ sr_detail = views.ServiceRequestViewSet.as_view({
 
 urlpatterns = [
     path('api/', include(router.urls)),
-    path('api/incident/<incident>/servicerequest/<id_for_incident>/', sr_detail, name='sr-detail')
+    path('api/incident/<incident>/servicerequests/<id_for_incident>/', sr_detail, name='sr-detail')
 ]

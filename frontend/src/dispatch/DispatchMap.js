@@ -439,7 +439,7 @@ function Deploy({ incident, organization }) {
               }
               // Otherwise navigate to the DA Summary page.
               else {
-                navigate('/' + organization + "/" + incident + '/dispatch/summary/' + response.data.id);
+                navigate('/' + organization + "/" + incident + '/dispatch/summary/' + response.data.id_for_incident);
               }
             })
             .catch(error => {
@@ -1010,7 +1010,7 @@ function Deploy({ incident, organization }) {
                         </Tooltip>
                       }
                     >
-                      <Link href={"/" + organization +"/" + incident + "/hotline/servicerequest/" + service_request.id}><FontAwesomeIcon icon={faClipboardList} inverse /></Link>
+                      <Link href={"/" + organization +"/" + incident + "/hotline/servicerequest/" + service_request.id_for_incident}><FontAwesomeIcon icon={faClipboardList} inverse /></Link>
                     </OverlayTrigger>
                     <OverlayTrigger
                       key={"add-to-dispatch"}

@@ -232,9 +232,9 @@ function DispatchAssignmentSearch({ incident, organization }) {
                   </Tooltip>
                 }
               >
-                <Link href={"/" + organization + "/" + incident + "/dispatch/summary/" + evacuation_assignment.id}><FontAwesomeIcon icon={faDotCircle} className="mr-2" inverse /></Link>
+                <Link href={"/" + organization + "/" + incident + "/dispatch/summary/" + evacuation_assignment.id_for_incident}><FontAwesomeIcon icon={faDotCircle} className="mr-2" inverse /></Link>
               </OverlayTrigger>
-              DA#{evacuation_assignment.id} -&nbsp;
+              DA#{evacuation_assignment.id_for_incident} -&nbsp;
               <Moment format="L">{evacuation_assignment.start_time}</Moment>
               &nbsp;|&nbsp;
               <span title={evacuation_assignment.team ? evacuation_assignment.team_object.name + ": " + evacuation_assignment.team_member_names : ""}>

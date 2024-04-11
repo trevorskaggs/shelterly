@@ -22,8 +22,8 @@ from rest_framework.decorators import action as drf_action
 
 class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
     queryset = ServiceRequest.objects.all()
-    lookup_fields = ['id', 'incident', 'id_for_incident']
-    search_fields = ['id', 'address', 'city', 'animal__name', 'owners__first_name', 'owners__last_name', 'owners__phone', 'owners__drivers_license', 'owners__address', 'owners__city', 'reporter__first_name', 'reporter__last_name']
+    lookup_fields = ['pk', 'incident', 'id_for_incident']
+    search_fields = ['id_for_incident', 'address', 'city', 'animal__name', 'owners__first_name', 'owners__last_name', 'owners__phone', 'owners__drivers_license', 'owners__address', 'owners__city', 'reporter__first_name', 'reporter__last_name']
     filter_backends = (filters.SearchFilter, MyCustomOrdering)
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = SimpleServiceRequestSerializer
@@ -126,7 +126,7 @@ class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
 
         wrapper = FileWrapper(json_file)
         response = HttpResponse(wrapper, content_type='application/json')
-        response['Content-Disposition'] = 'attachement; filename=SR-' + str(pk) + '.geojson'
+        response['Content-Disposition'] = 'attachement; filename=SR-' + str(sr.id_for_incident) + '.geojson'
         return response
 
     @drf_action(detail=False, methods=['GET'], name='Download All GeoJSON')
@@ -144,7 +144,7 @@ class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
         json_file.seek(0)
         wrapper = FileWrapper(json_file)
         response = HttpResponse(wrapper, content_type='application/json')
-        response['Content-Disposition'] = 'attachement; filename=SRs-' + '.geojson'
+        response['Content-Disposition'] = 'attachement; filename=SRs' + '.geojson'
         return response
 
 class VisitNoteViewSet(viewsets.ModelViewSet):

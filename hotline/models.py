@@ -117,7 +117,7 @@ class ServiceRequest(Location):
               ],
               "type":"Point"
           },
-          "id":self.id,
+          "id":self.id_for_incident,
           "type":"Feature",
           "properties":{
               "marker-symbol":"circle-n",
