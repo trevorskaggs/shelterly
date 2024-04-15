@@ -23,9 +23,12 @@ import {
 import * as Yup from 'yup';
 import { DropDown, TextInput, DateTimePicker } from '../components/Form';
 import { SystemErrorContext } from '../components/SystemError';
+import { AuthContext } from "../accounts/AccountsReducer";
 import Patient from './components/Patient';
 
 const DiagnosticResultForm = (props) => {
+
+  const { state } = useContext(AuthContext);
 
   const { setShowSystemError } = useContext(SystemErrorContext);
 
@@ -55,7 +58,7 @@ const DiagnosticResultForm = (props) => {
 
     const fetchDiagnosticResult = async () => {
       // Fetch diagnostic result data.
-      await axios.get('/vet/api/diagnosticresults/' + props.id + '/', {
+      await axios.get('/vet/api/diagnosticresults/' + props.id + '/?incident=' + props.incident, {
         cancelToken: source.token,
       })
       .then(response => {
@@ -92,7 +95,7 @@ const DiagnosticResultForm = (props) => {
       onSubmit={(values, { setSubmitting }) => {
         axios.patch('/vet/api/diagnosticresults/' + props.id + '/', values)
         .then(response => {
-          navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + data.medical_record);
+          navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + data.medical_record + '?tab=diagnostics');
         })
         .catch(error => {
           setShowSystemError(true);
@@ -103,7 +106,11 @@ const DiagnosticResultForm = (props) => {
       {formikProps => (
         <Card border="secondary" className="mt-3">
           <Card.Header as="h5" className="pl-3" style={{textTransform:"capitalize"}}>
-            <span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + data.medical_record + '/')} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
+            {state.prevLocation ?
+              <span style={{ cursor: 'pointer' }} onClick={() => navigate(state.prevLocation + '?tab=diagnostics')} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
+            :
+              <span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + props.organization + "/" + props.incident + "/vet/medrecord/" + data.medical_record + '?tab=diagnostics')} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
+            }
             {data.other_name ? data.other_name : data.name} Results
             <OverlayTrigger
               key={"cancel-diagnostic-order"}

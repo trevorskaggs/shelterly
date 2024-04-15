@@ -1,24 +1,21 @@
 from django.contrib import admin
 
-from vet.models import Diagnosis, Exam, ExamQuestion, MedicalRecord, Treatment, TreatmentPlan, TreatmentRequest, PresentingComplaint, VetRequest
+from vet.models import Diagnosis, Exam, ExamQuestion, MedicalRecord, Treatment, TreatmentRequest, PresentingComplaint, VetRequest
 
 class ExamQuestionAdmin(admin.ModelAdmin):
   list_display = ('id', 'name', 'default',)
 
 class MedicalRecordAdmin(admin.ModelAdmin):
-  list_display = ('id', 'patient', 'exam',)
+  list_display = ('id', 'patient',)
 
 class VetRequestAdmin(admin.ModelAdmin):
   list_display = ('id', 'requested_by', 'medical_record',)
-
-class TreatmentPlanAdmin(admin.ModelAdmin):
-  list_display = ('id', 'medical_record', 'treatment',)
 
 class TreatmentAdmin(admin.ModelAdmin):
   list_display = ('id', 'description', 'category',)
 
 class TreatmentRequestAdmin(admin.ModelAdmin):
-  list_display = ('id', 'suggested_admin_time',)
+  list_display = ('id', 'treatment', 'medical_record', 'suggested_admin_time', 'actual_admin_time',)
 
 class PresentingComplaintAdmin(admin.ModelAdmin):
   list_display = ('id', 'name',)
@@ -29,7 +26,6 @@ admin.site.register(MedicalRecord, MedicalRecordAdmin)
 admin.site.register(ExamQuestion, ExamQuestionAdmin)
 admin.site.register(Diagnosis)
 admin.site.register(Exam)
-admin.site.register(TreatmentPlan, TreatmentPlanAdmin)
 admin.site.register(Treatment, TreatmentAdmin)
 admin.site.register(TreatmentRequest, TreatmentRequestAdmin)
 admin.site.register(PresentingComplaint, PresentingComplaintAdmin)

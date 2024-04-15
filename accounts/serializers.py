@@ -26,25 +26,25 @@ class UserSerializer(serializers.ModelSerializer):
 
     # Custom field for user perms
     def get_user_perms(self, obj):
-        if self.context['request'].GET.get('organization'):
+        if self.context.get('request') and self.context['request'].GET.get('organization'):
             return obj.perms.filter(organization=self.context['request'].GET.get('organization'))[0].user_perms
         return False
 
     # Custom field for incident perms
     def get_incident_perms(self, obj):
-        if self.context['request'].GET.get('organization'):
+        if self.context.get('request') and self.context['request'].GET.get('organization'):
             return obj.perms.filter(organization=self.context['request'].GET.get('organization'))[0].incident_perms
         return False
 
     # Custom field for user perms
     def get_vet_perms(self, obj):
-        if self.context['request'].GET.get('organization'):
+        if self.context.get('request') and self.context['request'].GET.get('organization'):
             return obj.perms.filter(organization=self.context['request'].GET.get('organization'))[0].vet_perms
         return False
 
     # Custom field for user perms
     def get_email_notification(self, obj):
-        if self.context['request'].GET.get('organization'):
+        if self.context.get('request') and self.context['request'].GET.get('organization'):
             return obj.perms.filter(organization=self.context['request'].GET.get('organization'))[0].email_notification
         return False
 

@@ -181,10 +181,10 @@ const TextInput = React.forwardRef((props, ref) => {
           </Tooltip>
         }
       >
-        <Form.Control ref={ref} type="text" isInvalid={meta.touched && meta.error} {...field} {...props} />
+        <Form.Control ref={ref} type="text" isInvalid={meta.touched && meta.error} onFocus={(event) => { event.target.setAttribute('autocomplete', 'off'); }} {...field} {...props} />
       </OverlayTrigger>
       :
-        <Form.Control ref={ref} type="text" isInvalid={meta.touched && meta.error} {...field} {...props} />
+        <Form.Control ref={ref} type="text" isInvalid={meta.touched && meta.error} onFocus={(event) => { event.target.setAttribute('autocomplete', 'off'); }} {...field} {...props} />
       }
       <Form.Control.Feedback type="invalid" style={props.errstyle}>{meta.error}</Form.Control.Feedback>
     </Form.Group>

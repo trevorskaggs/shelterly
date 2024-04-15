@@ -45,6 +45,8 @@ hr {
 /* Data table CSS */
 .rdt_Pagination { border-bottom-left-radius : .25rem; border-bottom-right-radius : .25rem; }
 
+.vetTable { border-bottom-left-radius : .25rem !important; border-bottom-right-radius : .25rem !important; }
+
 .rdt_TableHeader { color : white !important; background-color : #444 !important; border-radius : .25rem; }
 
 /* Leaflet map CSS */

@@ -733,8 +733,8 @@ function AnimalSearch({ incident, organization }) {
                 </Card.Title>
                 <Scrollbar style={{height:"144px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
                   <ListGroup>
-                    <ListGroup.Item>{titleCase(animal.species_string)}{animal.size ? <span>,&nbsp;{titleCase(animal.size)}</span> : ""}{animal.sex ? <span>,&nbsp;{titleCase(animal.sex)}</span> : ""}{animal.age ? <span>,&nbsp;{titleCase(animal.age)}</span> : ""}</ListGroup.Item>
-                    <ListGroup.Item style={{textTransform:"capitalize"}}><b>Color: </b>{animal.pcolor ? <span>{animal.pcolor}{animal.scolor ? <span> / {animal.scolor}</span> : ""}</span> : "Unknown"}</ListGroup.Item>
+                    <ListGroup.Item>{titleCase(animal.species_string)}{animal.size ? <span>,&nbsp;{titleCase(animal.size)}</span> : ""}{animal.sex ? <span>,&nbsp;{titleCase(animal.sex)}</span> : ""}{animal.age ? <span>,&nbsp;{titleCase(animal.age)}</span> : ""}{animal.pcolor ? <span style={{textTransform:"capitalize"}}>,&nbsp;{animal.pcolor}{animal.scolor ? <span>/{animal.scolor}</span> : ""}</span> : ""}</ListGroup.Item>
+                    <ListGroup.Item><b>Microchip: </b> {animal.microchip || "N/A"}</ListGroup.Item>
                     {animal.owners.map(owner => (
                       <ListGroup.Item key={owner.id}>
                         <b>Owner:</b> <Link href={"/" + organization + "/" + incident + "/people/owner/" + owner.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{owner.first_name} {owner.last_name}</Link>

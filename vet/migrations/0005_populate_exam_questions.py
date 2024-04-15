@@ -35,8 +35,8 @@ data_dict = [
     {'name':'Reproductive', 'options':['NSF', 'Pregnant', 'Nursing', 'Lactating', 'Dystocia'], 'default':'NSF', 'categories':['camelid', 'ruminant', 'equine', 'swine'], 'allow_not_examined':True, 'open_notes':True},
     {'name':'Neurologic', 'options':['NSF', 'Abnormal mentation', 'Peripheral neuropathy', 'Other'], 'default':'NSF', 'categories':['cat', 'dog', 'avian', 'small mammal', 'reptile/amphibian', 'camelid', 'ruminant', 'equine', 'swine'], 'allow_not_examined':True, 'open_notes':True},
     {'name':'Rectum', 'options':['NSF', 'Abnormal'], 'default':'NSF', 'categories':['cat', 'dog', 'small mammal', 'camelid', 'ruminant', 'equine', 'swine'], 'allow_not_examined':True, 'open_notes':True},
-    {'name':'BCS', 'options':['1', '2', '3', '4', '5', '6', '7', '8', '9'], 'default':'1', 'categories':['camelid', 'ruminant', 'equine', 'swine'], 'allow_not_examined':False, 'open_notes':False},
-    {'name':'BCS', 'options':['1', '2', '3', '4', '5'], 'default':'1', 'categories':['cat', 'dog', 'small mammal'], 'allow_not_examined':False, 'open_notes':False},
+    {'name':'BCS', 'options':['1', '2', '3', '4', '5', '6', '7', '8', '9'], 'default':'1', 'categories':['cat', 'dog', 'camelid', 'ruminant', 'equine', 'swine'], 'allow_not_examined':False, 'open_notes':False},
+    {'name':'BCS', 'options':['1', '2', '3', '4', '5'], 'default':'1', 'categories':['small mammal'], 'allow_not_examined':False, 'open_notes':False},
     {'name':'Pain Score', 'options':['0', '1', '2', '3', '4', 'Other'], 'default':'0', 'categories':['cat', 'dog', 'avian', 'small mammal', 'reptile/amphibian', 'camelid', 'ruminant', 'equine', 'swine'], 'allow_not_examined':True, 'open_notes':True},
 ]
 

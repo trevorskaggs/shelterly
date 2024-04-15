@@ -5,6 +5,8 @@ from django.dispatch import receiver
 from django.core.exceptions import ValidationError
 import re
 
+from accounts.models import ShelterlyUserOrg
+
 User = get_user_model()
 
 class Organization(models.Model):
@@ -27,6 +29,7 @@ def add_default_admins(sender, instance, created, **kwargs):
     if created:
         for user in User.objects.filter(is_superuser=True):
             user.organizations.add(instance)
+            ShelterlyUserOrg.objects.filter(user=user, organization=instance).update(user_perms=True, incident_perms=True, vet_perms=True)
 
 
 class Incident(models.Model):

@@ -81,8 +81,24 @@ const DiagnosisForm = (props) => {
           })
           .then(response => {
             if (!unmounted) {
-              response.data['diagnosis'] = [];
-              setData(response.data);
+              // Fetch diagnosis data.
+              axios.get('/vet/api/diagnosis/', {
+                cancelToken: source.token,
+              })
+              .then(diagnosisResponse => {
+                if (!unmounted) {
+                  let options = [];
+                  diagnosisResponse.data.filter(diagnosis => !response.data.diagnosis.includes(diagnosis.id)).forEach(function(diagnosis) {
+                    options.push({value: diagnosis.id, label: diagnosis.name})
+                  });
+                  setDiagnosisChoices(options);
+                  response.data['diagnosis'] = [];
+                  setData(response.data);
+                }
+              })
+              .catch(error => {
+                setShowSystemError(true);
+              });
             }
           })
           .catch(error => {
@@ -92,27 +108,6 @@ const DiagnosisForm = (props) => {
         fetchMedRecord();
       }
     };
-
-    const fetchDiagnoses = async () => {
-      // Fetch diagnosis data.
-      await axios.get('/vet/api/diagnosis/', {
-        cancelToken: source.token,
-      })
-      .then(response => {
-        if (!unmounted) {
-          let options = [];
-          response.data.forEach(function(diagnosis) {
-            options.push({value: diagnosis.id, label: diagnosis.name})
-          });
-          setDiagnosisChoices(options);
-        }
-      })
-      .catch(error => {
-        setShowSystemError(true);
-      });
-    };
-
-    fetchDiagnoses();
 
     // Cleanup.
     return () => {
@@ -138,7 +133,7 @@ const DiagnosisForm = (props) => {
           props.state.steps.treatments.forEach(treatment_values => {
             // Only post data if we have a treatment value.
             if (treatment_values.treatment) {
-              axios.post('/vet/api/treatmentplan/', treatment_values)
+              axios.post('/vet/api/treatmentrequest/', treatment_values)
               .catch(error => {
                 setShowSystemError(true);
               });
@@ -174,6 +169,7 @@ const DiagnosisForm = (props) => {
           <Card.Body>
             <Form>
               <FormGroup>
+                {data.diagnosis_text ? <div className="mb-3"><b>Current Diagnoses: </b>{data.diagnosis_text}</div> : ""}
                 <Row className="mb-3">
                   <Col xs={"6"}>
                     <label>Diagnosis</label>

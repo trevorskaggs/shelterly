@@ -37,6 +37,8 @@ const Login = () => {
         })}
         onSubmit={(values, actions ) => {
           dispatch({ type: 'USER_LOADING' });
+          removeCookie("token");
+          setAuthToken();
           axios.post('/login/', values)
           .then(response => {
             // Set token for axios calls.
