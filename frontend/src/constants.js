@@ -17,3 +17,18 @@ export const priorityChoices = [
 ];
 
 export const DATE_FORMAT = 'YYYYMMDDHHmm';
+
+export const IMAGE_TYPES = ['png', 'jpg', 'jpeg', 'gif'];
+
+export const FILE_TYPES = ['pdf']
+
+export const ACCEPT_FILE_TYPES = [
+  ...IMAGE_TYPES,
+  ...FILE_TYPES
+];
+
+export const IMAGE_COMPRESSION_OPTIONS = {
+  maxSizeMB: 1,
+  maxWidthOrHeight: 1920,
+  useWebWorker: true
+};

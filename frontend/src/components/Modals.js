@@ -3,8 +3,11 @@ import { Button, Card, Modal } from 'react-bootstrap';
 import { Formik } from "formik";
 import axios from 'axios';
 import * as Yup from 'yup';
-import { ImageUploader, TextInput } from '../components/Form.js';
+import { FileUploader, TextInput } from '../components/Form.js';
 import ButtonSpinner from './ButtonSpinner';
+import { isImageFile } from '../utils/files.js';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faFilePdf } from '@fortawesome/free-solid-svg-icons';
 
 const SystemErrorModal = (props) => {
 
@@ -126,7 +129,7 @@ const PhotoDocumentModal = (props) => {
       onSubmit={ async (values, { resetForm }) => {
         setIsSubmitting(true);
         const formData = new FormData();
-        formData.append('image', props.images[0].file, props.images[0].file.name);
+        formData.append('image', props.images[0], props.images[0].name);
         formData.append('name', values.name);
         await axios.patch(props.url, formData)
         .then(response => {
@@ -155,7 +158,7 @@ const PhotoDocumentModal = (props) => {
             />
             <div className="ml-3">
               <span>Photo Document</span>
-              <ImageUploader
+              <FileUploader
                 value={props.images}
                 id="image"
                 name="image"
@@ -218,8 +221,26 @@ const PhotoDocumentEditModal = (props) => {
             />
             <div className="ml-3">
               <span>Photo Document</span>
-              <Card className="border rounded" style={{width:"153px", whiteSpace:"nowrap", overflow:"hidden"}}>
-                <Card.Img variant="top" src={props.image.url || "/static/images/image-not-found.png"} style={{width:"153px", height:"153px", objectFit: "cover", overflow: "hidden"}} />
+              <Card className="border rounded" style={{width:"153px", whiteSpace:"nowrap", overflow:"hidden" }}>
+                {isImageFile(props.image.url) ? (
+                      <Card.Img
+                        className="border-bottom animal-hover-div"
+                        variant="top"
+                        src={props.image.url || "/static/images/image-not-found.png"}
+                        style={{
+                          width: "153px",
+                          height: "153px",
+                          objectFit: "cover",
+                          overflow: "hidden",
+                        }}
+                      />
+                    ) : (
+                      <FontAwesomeIcon
+                        icon={faFilePdf}
+                        size="10x"
+                        style={{ height: "153px", margin: "0 auto" }}
+                      />
+                    )}
               </Card>
             </div>
           </Modal.Body>

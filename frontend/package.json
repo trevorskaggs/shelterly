@@ -45,6 +45,7 @@
     "react-custom-scrollbars-2": "^4.2.4",
     "react-data-table-component": "^7.0.2",
     "react-dom": "^16.12.0",
+    "react-files-uploading": "^1.0.2",
     "react-flatpickr": "^3.10.0",
     "react-google-autocomplete": "^2.7.3",
     "react-images-uploading": "^3.1.2",
