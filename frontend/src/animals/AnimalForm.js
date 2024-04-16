@@ -286,7 +286,9 @@ const AnimalForm = (props) => {
           species: Yup.number()
             .required('Required'),
           size: Yup.string(),
-          age: Yup.string(),
+          age: Yup
+            .string()
+            .max(10, 'Must be 10 characters or less'),
           ageText: Yup
             .string()
             .max(10, 'Must be 10 characters or less'),
@@ -575,7 +577,7 @@ const AnimalForm = (props) => {
                       onChange={(instance) => {
                         setPlaceholder("Select...")
                         sizeRef.current.select.clearValue();
-                        ageRef.current.select.clearValue();
+                        // ageRef.current.select.clearValue();
                         pcolorRef.current.select.clearValue();
                         scolorRef.current.select.clearValue();
                         formikProps.setFieldValue("species", instance.value);
@@ -665,8 +667,11 @@ const AnimalForm = (props) => {
                       options={Object.keys(ageChoices).includes(formikProps.values.species)
                         ? ageChoices[formikProps.values.species]
                         : ageChoices['other']}
-                      value={formikProps.values.age}
+                      value={formikProps.values.age || ''}
                       handleValueChange={(value) => formikProps.setFieldValue('age', value)}
+                      ref={ageRef}
+                      optionsKey={formikProps.values.species || ''}
+                      formValidationName="ageText"
                     />
                   </Col>
                   <Col xs="3">
