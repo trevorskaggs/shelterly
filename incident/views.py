@@ -2,7 +2,9 @@ from datetime import datetime
 from django.contrib.sites.models import Site
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
-from rest_framework import permissions, viewsets
+from rest_framework import permissions, status, viewsets
+from rest_framework.response import Response
+from rest_framework.decorators import action
 
 from accounts.models import ShelterlyUser
 from incident.models import Incident, Organization
@@ -16,7 +18,7 @@ class IncidentViewSet(viewsets.ModelViewSet):
     serializer_class = IncidentSerializer
 
     def get_queryset(self):
-        queryset = Incident.objects.all()
+        queryset = Incident.objects.filter(hide=False)
 
         if self.request.GET.get('incident'):
             queryset = queryset.filter(slug=self.request.GET.get('incident'))
@@ -77,6 +79,18 @@ class IncidentViewSet(viewsets.ModelViewSet):
                     else:
                         incident.end_time = datetime.now()
                     incident.save()
+
+    # New method to specifically handle updating the 'hide' property of an incident.
+    @action(detail=True, methods=['patch'], permission_classes=[permissions.IsAdminUser])
+    def hide(self, request, pk=None):
+        try:
+            incident = self.get_object()
+            incident.hide = request.data.get('hide', False)
+            incident.save()
+            return Response({'status': 'hide status updated'}, status=status.HTTP_200_OK)
+        except ValueError:
+            return Response({'error': 'Invalid hide value'}, status=status.HTTP_400_BAD_REQUEST)
+        
 
 # Provides view for User API calls.
 class OrganizationViewSet(viewsets.ModelViewSet):
