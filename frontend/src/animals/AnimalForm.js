@@ -47,7 +47,6 @@ const AnimalForm = (props) => {
   const speciesRef = useRef(null);
   const sexRef = useRef(null);
   const sizeRef = useRef(null);
-  const ageRef = useRef(null);
   const ageTextRef = useRef();
   const pcolorRef = useRef(null);
   const scolorRef = useRef(null);
@@ -663,15 +662,14 @@ const AnimalForm = (props) => {
                   </Col>
                   <Col xs="3">
                     <CustomSelect
-                      label="Age"
+                      label={`Age ${formikProps.values.age}`}
                       options={Object.keys(ageChoices).includes(formikProps.values.species)
                         ? ageChoices[formikProps.values.species]
                         : ageChoices['other']}
                       value={formikProps.values.age || ''}
                       handleValueChange={(value) => formikProps.setFieldValue('age', value)}
-                      ref={ageRef}
                       optionsKey={formikProps.values.species || ''}
-                      formValidationName="ageText"
+                      formValidationName="age"
                     />
                   </Col>
                   <Col xs="3">

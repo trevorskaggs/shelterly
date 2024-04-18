@@ -118,29 +118,17 @@ const CustomSelect = ({
   };
 
   useEffect(() => {
-    const selectedOption = options.find((option) => option.value === value);
-    console.log('🚀 ~ useEffect ~ value:', value)
-    console.log('🚀 ~ useEffect ~ options:', options)
-    console.log('🚀 ~ useEffect ~ selectedOption:', selectedOption)
+    const optionValue = options.find((option) => option.value === value);
     const valueIsOther =
       value && value === otherKey;
-    const valueIsSelectable = selectedOption && !valueIsOther;
+    const valueIsSelectable = optionValue && !valueIsOther;
     const valueIsCustomText = value && !valueIsOther && !valueIsSelectable;
-    console.log('🚀 ~ useEffect ~ valueIsOther:', valueIsOther)
     setIsOtherSelected(valueIsOther || valueIsCustomText);
     setCustomText(valueIsCustomText ? value : '');
     setSelectedOption(
-      options.find((option) => option.value === value)?.value || ''
+      optionValue || ''
     );
   }, [value, options, otherKey]);
-
-  useEffect(() => {
-    console.log('🚀 ~ useEffect ~ selectedOption:', selectedOption)
-    if (selectRef.current) {
-      console.log('🚀 ~ useEffect ~ electRef.current:', selectRef.current)
-      selectRef.current.select.setValue(selectedOption);
-    }
-  }, [selectedOption]);
 
   return (
     <div>
@@ -168,21 +156,17 @@ const CustomSelect = ({
           </div>
         ) : (
           <>
-            <SimpleValue options={options}>
-              {(simpleProps) => (
                 <Select
                   id={selectId}
                   name={selectName}
                   isDisabled={disabled}
-                  ref={selectRef}
                   styles={customStyles}
                   isClearable={true}
                   filterOption={createFilter(filterConfig)}
                   onChange={handleSelectChange}
-                  {...simpleProps}
+                  value={selectedOption}
+                  options={options}
                 />
-              )}
-            </SimpleValue>
           </>
         )}
       </div>
