@@ -50,7 +50,7 @@ const IncidentForm = ({ id, organization }) => {
   const handleClose = () => setShowModal(false);
   const handleShow = () => setShowModal(true);
   const handleConfirm = () => {
-    axios.patch(`/incident/api/incident/${id}/hide`, { hide: true })
+    axios.patch(`/incident/api/incident/${id}/hide/`, { hide: true })
       .then(() => {
         window.location.href = `/${state.user.organization}`;
       })
