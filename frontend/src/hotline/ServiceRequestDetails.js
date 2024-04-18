@@ -20,6 +20,7 @@ import ShelterlyPrintifyButton from "../components/ShelterlyPrintifyButton";
 import LoadingLink from "../components/LoadingLink";
 import { useLocationWithRoutes } from '../hooks';
 import { printServiceRequestSummary, printSrAnimalCareSchedules } from './Utils';
+import { initialState } from '../accounts/AccountsReducer';
 
 import '../assets/styles.css';
 
@@ -133,7 +134,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
 
     const fetchServiceRequestData = async () => {
       // Fetch ServiceRequest data.
-      await axios.get('/hotline/api/incident/' + state.incident.id + '/servicerequests/' + id + '/', {
+      await axios.get('/hotline/api/incident/' + (state ? state.incident.id : 'undefined')  + '/servicerequests/' + id + '/', {
         cancelToken: source.token,
       })
       .then(response => {

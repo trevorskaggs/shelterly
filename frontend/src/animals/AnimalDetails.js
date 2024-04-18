@@ -135,7 +135,7 @@ function AnimalDetails({ id, incident, organization }) {
     setIsLoading(true);
     const fetchAnimalData = async () => {
       // Fetch Animal data.
-      await axios.get('/animals/api/incident/' + state.incident.id + '/animal/' + id + '/', {
+      await axios.get('/animals/api/incident/' + (state ? state.incident.id : 'undefined') + '/animal/' + id + '/', {
         cancelToken: source.token,
       })
       .then(response => {

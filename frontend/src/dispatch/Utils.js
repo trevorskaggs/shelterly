@@ -397,7 +397,7 @@ const buildDispatchResolutionsDoc = (drs = []) => {
 
 function printDispatchResolutionForm(dr = {}) {
   const pdf = buildDispatchResolutionsDoc([dr]);
-  pdf.fileName = `DAR-${dr.id.toString().padStart(3, 0)}`;
+  pdf.fileName = `DAR-${dr.id_for_incident.toString().padStart(3, 0)}`;
   return pdf.saveFile();
 }
 

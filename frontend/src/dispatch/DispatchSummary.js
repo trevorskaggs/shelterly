@@ -121,7 +121,7 @@ function DispatchSummary({ id, incident, organization }) {
     axios.get('/evac/api/evacassignment/' + data.id +'/download/', { 
             responseType: 'blob',
         }).then(res => {
-            fileDownload(res.data, 'DAR-' + data.id + '.geojson');
+            fileDownload(res.data, 'DAR-' + id + '.geojson');
         }).catch(err => {
         }).finally(() => setIsLoading(false));
   }
