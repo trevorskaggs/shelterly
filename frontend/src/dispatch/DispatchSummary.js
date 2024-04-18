@@ -42,7 +42,8 @@ function DispatchSummary({ id, incident, organization }) {
 
   const [mapState, setMapState] = useState({});
   const [teamData, setTeamData] = useState({teams: [], options: [], isFetching: false});
-  const [teamName, setTeamName] = useState('')
+  const [teamName, setTeamName] = useState('');
+  const [defaultTeamName, setDefaultTeamName] = useState(false);
   const [showTeamName, setShowTeamName] = useState(false)
   const handleTeamNameClose = () => {setShowTeamName(false);}
   const [teamMembers, setTeamMembers] = useState([]);
@@ -52,27 +53,37 @@ function DispatchSummary({ id, incident, organization }) {
   const [showTeamMemberConfirm, setShowTeamMemberConfirm] = useState(false);
   const handleTeamMemberClose = () => setShowTeamMemberConfirm(false);
   const [error, setError] = useState('');
+  const [isPreplanned, setIsPreplanned] = useState(false);
 
   const handleTeamNameSubmit = async () => {
-    if (teamName.replace(/ /g, '').length === 0) {
-      setError("Team name cannot be blank.");
+    let requestBody;
+
+    if (defaultTeamName) {
+      requestBody = { defaultName: true };
+    } else {
+      if (teamName.replace(/ /g, '').length === 0) {
+        setError("Team name cannot be blank.");
+        return;
+      }
+      else if (teamName.length > 18) {
+        setError("Team name must be 18 characters or less.");
+        return;
+      }
+
+      requestBody = { name: teamName };
     }
-    else if (teamName.length > 18) {
-      setError("Team name must be 18 characters or less.");
-    }
-    else {
-      setIsLoading(true);
-      await axios.patch('/evac/api/dispatchteam/' + data.team + '/', {'name':teamName})
-      .then(response => {
-        setData(prevState => ({ ...prevState, "team_object":{ ...prevState.team_object, "name": teamName} }));
-        handleTeamNameClose();
-        setError('');
-      })
-      .catch(error => {
-        setShowSystemError(true);
-      })
-      .finally(() => setIsLoading(false));
-    }
+
+    setIsLoading(true);
+    await axios.patch('/evac/api/dispatchteam/' + data.team + '/', requestBody)
+    .then(response => {
+      setData(prevState => ({ ...prevState, "team_object":{ ...prevState.team_object, "name": teamName} }));
+      handleTeamNameClose();
+      setError('');
+    })
+    .catch(error => {
+      setShowSystemError(true);
+    })
+    .finally(() => setIsLoading(false));
   }
 
   // Handle TeamMember selector onChange.
@@ -185,6 +196,7 @@ function DispatchSummary({ id, incident, organization }) {
           setMapState(map_dict);
           setTeamData({teams: [], options: [], isFetching: true});
           setTeamName(response.data.team_object.name);
+          setIsPreplanned(response.data.team_name.match(/^Preplanned [0-9]+$/));
           axios.get('/evac/api/evacteammember/?incident=' + incident + '&organization=' + organization +'&training=' + state.incident.training, {
             cancelToken: source.token,
           })
@@ -598,10 +610,22 @@ function DispatchSummary({ id, incident, organization }) {
           type="text"
           onChange={(event) => {setTeamName(event.target.value)}}
           value={teamName}
+          disabled={defaultTeamName}
         />
         {error ? <div style={{ color: "#e74c3c", marginTop: "-8px", marginLeft: "16px", fontSize: "80%" }}>{error}</div> : ""}
       </Modal.Body>
       <Modal.Footer>
+        {!isLoading && isPreplanned ? (
+          <Form.Check
+            id="defaultNameCheck"
+            type="checkbox"
+            style={{ flexGrow: 1 }}
+            label="Use Default Team Name"
+            onChange={() => setDefaultTeamName(!defaultTeamName)}
+            checked={defaultTeamName}
+          />
+        ) : null}
+        
         <Button variant="primary" onClick={handleTeamNameSubmit}>Save</Button>
         <Button variant="secondary" onClick={handleTeamNameClose}>Cancel</Button>
       </Modal.Footer>
