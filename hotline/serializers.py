@@ -19,7 +19,7 @@ class VisitNoteSerializer(serializers.ModelSerializer):
 
     def get_dispatch_assignment(self, obj):
         if obj.assigned_request.first():
-            return obj.assigned_request.first().dispatch_assignment.id
+            return obj.assigned_request.first().dispatch_assignment.id_for_incident
         return None
     
     def get_service_request(self, obj):

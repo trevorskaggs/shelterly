@@ -7,7 +7,7 @@ import { Carousel } from 'react-responsive-carousel';
 import { Button, Card, Col, ListGroup, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBan, faMedkit, faCut, faEdit, faEnvelope, faLink, faMinusSquare, faTimes, faUserPlus
+  faBan, faMedkit, faCut, faEdit, faEnvelope, faLink, faMinusSquare, faTimes, faUserPlus, faFilePdf
 } from '@fortawesome/free-solid-svg-icons';
 import { faBadgeSheriff, faUserDoctorMessage, faClawMarks, faHomeHeart, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
@@ -20,11 +20,13 @@ import { SystemErrorContext } from '../components/SystemError';
 import ShelterlyPrintifyButton from '../components/ShelterlyPrintifyButton';
 import { useLocationWithRoutes } from '../hooks';
 import LoadingLink from '../components/LoadingLink';
+import { getFileNameFromUrl, isImageFile } from '../utils/files';
 
 function AnimalDetails({ id, incident, organization }) {
   const { state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
   const [images, setImages] = useState([]);
+  const [documents, setDocuments] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Initial animal data.
@@ -142,7 +144,21 @@ function AnimalDetails({ id, incident, organization }) {
         if (!unmounted) {
           setData(response.data);
           let image_urls = [];
-          image_urls = image_urls.concat(response.data.front_image||[]).concat(response.data.side_image||[]).concat(response.data.extra_images);
+          image_urls = image_urls.concat(response.data.front_image||[]).concat(response.data.side_image||[]);
+          const photoDocuments = response.data.extra_images;
+          if (Array.isArray(photoDocuments)) {
+            const extraImages = [];
+            const extraDocuments = [];
+            photoDocuments.forEach((photoDocument) => {
+              if (isImageFile(photoDocument)) {
+                extraImages.push(photoDocument);
+              } else {
+                extraDocuments.push(photoDocument);
+              }
+            });
+            image_urls = image_urls.concat(extraImages);
+            setDocuments(extraDocuments);
+          }
           setImages(image_urls);
         }
       })
@@ -469,6 +485,24 @@ function AnimalDetails({ id, incident, organization }) {
                 <div className="mt-1"><b>Address:</b> {data.shelter_object.full_address || "Unknown"}</div>
               </ListGroup.Item> : ""}
             </ListGroup>
+            {documents.length ? (
+              <>
+                <Card.Title>
+                  <h4 className="mb-0 mt-3">Documents</h4>
+                </Card.Title>
+                <hr />
+                <ListGroup variant="flush" style={{marginBottom:"-13px", marginTop:"-13px"}}>
+                {documents.map((document) => (
+                  <ListGroup.Item key={document}>
+                    <a href={document} target="_blank" rel="noreferrer" className="d-flex flex-row align-items-start" style={{textDecoration:"none", color:"white"}}>
+                      <FontAwesomeIcon icon={faFilePdf} inverse className="align-self-center" />
+                      <span className="ml-2">{getFileNameFromUrl(document)}</span>
+                    </a>
+                  </ListGroup.Item>
+                ))}
+                </ListGroup>
+              </>
+            ) : null}
           </Card.Body>
         </Card>
       </div>

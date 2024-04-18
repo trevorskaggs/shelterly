@@ -20,7 +20,6 @@ import ShelterlyPrintifyButton from "../components/ShelterlyPrintifyButton";
 import LoadingLink from "../components/LoadingLink";
 import { useLocationWithRoutes } from '../hooks';
 import { printServiceRequestSummary, printSrAnimalCareSchedules } from './Utils';
-import { initialState } from '../accounts/AccountsReducer';
 
 import '../assets/styles.css';
 
@@ -514,11 +513,11 @@ function ServiceRequestDetails({ id, incident, organization }) {
                 </h4>
               </Card.Title>
               <hr/>
-              <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
+              <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px", marginLeft:"-15px"}}>
                 {data.assigned_requests.filter(assigned_request => !assigned_request.dispatch_assignment.end_time).map(assigned_request => (
                   <ListGroup.Item key={assigned_request.id}>
                     <b>Active Dispatch Assignment:</b>
-                    &nbsp;<Link href={"/" + organization + "/" + incident + "/dispatch/summary/" + assigned_request.dispatch_assignment.id} className="text-link" style={{textDecoration:"none", color:"white"}}><Moment format="LL">{assigned_request.dispatch_assignment.start_time}</Moment></Link>&nbsp;|&nbsp;
+                    &nbsp;<Link href={"/" + organization + "/" + incident + "/dispatch/summary/" + assigned_request.dispatch_assignment.id_for_incident} className="text-link" style={{textDecoration:"none", color:"white"}}><Moment format="LL">{assigned_request.dispatch_assignment.start_time}</Moment></Link>&nbsp;|&nbsp;
                     {assigned_request.dispatch_assignment.team_name}
                     <OverlayTrigger
                       key={"team-names"}
@@ -540,7 +539,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
                         </Tooltip>
                       }
                     >
-                      <Link href={"/" + organization + "/" + incident + "/dispatch/resolution/" + assigned_request.dispatch_assignment.id}><FontAwesomeIcon icon={faClipboardCheck} className="ml-1" inverse /></Link>
+                      <Link href={"/" + organization + "/" + incident + "/dispatch/resolution/" + assigned_request.dispatch_assignment.id_for_incident}><FontAwesomeIcon icon={faClipboardCheck} className="ml-1" inverse /></Link>
                     </OverlayTrigger>
                   </ListGroup.Item>
                 ))}

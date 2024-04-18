@@ -183,7 +183,7 @@ function ServiceRequestForm(props) {
               });
               Promise.all(promises)
               .then((results) => {
-                navigate('/' + props.organization + '/' + incident + '/hotline/servicerequest/' + response.data.id);
+                navigate('/' + props.organization + '/' + incident + '/hotline/servicerequest/' + response.data.id_from_incident);
               })
             })
             .catch(error => {

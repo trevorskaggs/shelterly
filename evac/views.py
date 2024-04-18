@@ -209,7 +209,7 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                 service_requests = ServiceRequest.objects.filter(id=service_request['id'])
                 # sr_status = 'open' if service_request.get('unable_to_complete', '') else 'assigned'
                 for animal_dict in service_request['animals']:
-                    animals_dict[animal_dict['id']] = {'name':animal_dict.get('name'), 'species':animal_dict.get('species'), 'status':animal_dict.get('status'), 'color_notes':animal_dict.get('color_notes'), 'pcolor':animal_dict.get('pcolor'), 'scolor':animal_dict.get('scolor'), 'shelter':animal_dict.get('shelter'), 'room':animal_dict.get('room')}
+                    animals_dict[animal_dict['id']] = {'id_for_incident':animal_dict.get('id_for_incident'), 'name':animal_dict.get('name'), 'species':animal_dict.get('species'), 'status':animal_dict.get('status'), 'color_notes':animal_dict.get('color_notes'), 'pcolor':animal_dict.get('pcolor'), 'scolor':animal_dict.get('scolor'), 'shelter':animal_dict.get('shelter'), 'room':animal_dict.get('room')}
                     # Record status change if applicable.
                     animal = Animal.objects.get(pk=animal_dict['id'])
                     new_status = animal_dict.get('status')
