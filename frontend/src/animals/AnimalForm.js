@@ -662,7 +662,7 @@ const AnimalForm = (props) => {
                   </Col>
                   <Col xs="3">
                     <CustomSelect
-                      label={`Age ${formikProps.values.age}`}
+                      label="Age"
                       options={Object.keys(ageChoices).includes(formikProps.values.species)
                         ? ageChoices[formikProps.values.species]
                         : ageChoices['other']}

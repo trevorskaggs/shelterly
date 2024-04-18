@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Form } from 'react-bootstrap';
 import Select, { createFilter } from 'react-select';
-import SimpleValue from 'react-select-simple-value';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import { useField } from 'formik';
@@ -30,13 +29,11 @@ const customStyles = {
 
 const CustomSelect = ({
   label,
-  optionsKey = '',
   options,
   otherKey = 'other',
   value,
   handleValueChange,
   disabled,
-  ref,
   filterConfig,
   selectId,
   selectName,
@@ -44,11 +41,11 @@ const CustomSelect = ({
   textInputName,
   formValidationName
 }) => {
+  console.log('🚀 ~ label:', label)
   const [selectedOption, setSelectedOption] = useState('');
   const [customText, setCustomText] = useState('');
   const [isOtherSelected, setIsOtherSelected] = useState(false);
   const [, textInputMeta] = useField(formValidationName);
-  const selectRef = useRef();
 
   const textInputWrapperStyles = {
     position: 'relative',
@@ -64,7 +61,8 @@ const CustomSelect = ({
     borderRadius: 4,
     borderStyle: 'solid',
     borderWidth: 1,
-    width: '100%'
+    width: '100%',
+    paddingLeft: '0.5rem'
   };
   const textInputClearStyles = {
     position: 'absolute',
@@ -72,7 +70,7 @@ const CustomSelect = ({
     right: 0,
     transform: 'translateY(-50%)',
     cursor: 'pointer',
-    color: 'sl(0, 0%, 60%)',
+    color: '#C6C6C6',
     borderWidth: 0,
     backgroundColor: 'transparent',
     padding: 0,
@@ -131,7 +129,7 @@ const CustomSelect = ({
   }, [value, options, otherKey]);
 
   return (
-    <div>
+    <div className="shelterly-custom-select">
       {label ? <Form.Label>{label}</Form.Label> : ""}
       <div>
         {isOtherSelected ? (
@@ -149,24 +147,24 @@ const CustomSelect = ({
               }}
             />
             {!disabled && (
-              <button onClick={handleClear} style={{ ...textInputClearStyles }}>
+              <button onClick={handleClear} className="btn-clear-text-input" style={{ ...textInputClearStyles }}>
                 <FontAwesomeIcon icon={faTimes} style={{cursor:'pointer'}} className="ml-1" size="sm" />
               </button>
             )}
           </div>
         ) : (
           <>
-                <Select
-                  id={selectId}
-                  name={selectName}
-                  isDisabled={disabled}
-                  styles={customStyles}
-                  isClearable={true}
-                  filterOption={createFilter(filterConfig)}
-                  onChange={handleSelectChange}
-                  value={selectedOption}
-                  options={options}
-                />
+            <Select
+              id={selectId}
+              name={selectName}
+              isDisabled={disabled}
+              styles={customStyles}
+              isClearable={true}
+              filterOption={createFilter(filterConfig)}
+              onChange={handleSelectChange}
+              value={selectedOption}
+              options={options}
+            />
           </>
         )}
       </div>
