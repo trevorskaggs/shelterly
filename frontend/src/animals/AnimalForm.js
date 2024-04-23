@@ -5,12 +5,13 @@ import { Form, Formik } from "formik";
 import { ButtonGroup, Card, Col, Image, Form as BootstrapForm } from "react-bootstrap";
 import * as Yup from 'yup';
 import { AddressSearch, DateTimePicker, DropDown, FileUploader, ImageUploader, TextInput } from '../components/Form.js';
-import { catAgeChoices, dogAgeChoices, horseAgeChoices, otherAgeChoices, catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, sexChoices, dogSizeChoices, catSizeChoices, horseSizeChoices, otherSizeChoices, statusChoices, reportedStatusChoices, unknownChoices } from './constants';
+import { catAgeChoices, dogAgeChoices, horseAgeChoices, otherAgeChoices, catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, sexChoices, dogSizeChoices, catSizeChoices, horseSizeChoices, otherSizeChoices, reportedStatusChoices, unknownChoices, otherAgeChoice } from './constants';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowAltCircleLeft, faMinusSquare } from '@fortawesome/free-solid-svg-icons';
+import { faArrowAltCircleLeft, faMinusSquare, faTimes } from '@fortawesome/free-solid-svg-icons';
 import ButtonSpinner from "../components/ButtonSpinner";
 import { AuthContext } from "../accounts/AccountsReducer";
 import { SystemErrorContext } from '../components/SystemError';
+import CustomSelect from "../components/CustomSelect.js";
 
 const AnimalForm = (props) => {
 
@@ -46,7 +47,7 @@ const AnimalForm = (props) => {
   const speciesRef = useRef(null);
   const sexRef = useRef(null);
   const sizeRef = useRef(null);
-  const ageRef = useRef(null);
+  const ageTextRef = useRef();
   const pcolorRef = useRef(null);
   const scolorRef = useRef(null);
   const roomRef = useRef(null);
@@ -284,7 +285,12 @@ const AnimalForm = (props) => {
           species: Yup.number()
             .required('Required'),
           size: Yup.string(),
-          age: Yup.string(),
+          age: Yup
+            .string()
+            .max(10, 'Must be 10 characters or less'),
+          ageText: Yup
+            .string()
+            .max(10, 'Must be 10 characters or less'),
           sex: Yup.string()
             .oneOf(['M', 'F']),
           number_of_animals: Yup.number().required('Required').positive('Value must be positive').integer('Value must be a whole number'),
@@ -320,10 +326,24 @@ const AnimalForm = (props) => {
           longitude: Yup.number()
             .nullable()
         })}
+        validate={(values) => {
+          const errors = {};
+          if (
+            values.age === otherAgeChoice.value
+            && !values.ageText?.trim()
+          ) {
+            errors.ageText = 'Input required'
+          }
+          return errors;
+        }}
         onSubmit={ async (values, { resetForm }) => {
           // Remove owners from form data.
           if (values["owners"]) {
             delete values["owners"];
+          }
+          // handle age or ageText
+          if (values.age === otherAgeChoice.value) {
+            values.age = values.ageText;
           }
 
           // Use FormData so that image files may also be included.
@@ -556,7 +576,7 @@ const AnimalForm = (props) => {
                       onChange={(instance) => {
                         setPlaceholder("Select...")
                         sizeRef.current.select.clearValue();
-                        ageRef.current.select.clearValue();
+                        // ageRef.current.select.clearValue();
                         pcolorRef.current.select.clearValue();
                         scolorRef.current.select.clearValue();
                         formikProps.setFieldValue("species", instance.value);
@@ -641,17 +661,15 @@ const AnimalForm = (props) => {
                     />
                   </Col>
                   <Col xs="3">
-                    <DropDown
+                    <CustomSelect
                       label="Age"
-                      id="age"
-                      name="age"
-                      type="text"
-                      xs="4"
-                      key={`my_unique_age_select_key__${formikProps.values.age}`}
-                      ref={ageRef}
-                      options={Object.keys(ageChoices).includes(formikProps.values.species) ? ageChoices[formikProps.values.species] : ageChoices['other']}
-                      value={formikProps.values.age||''}
-                      placeholder={placeholder}
+                      options={Object.keys(ageChoices).includes(formikProps.values.species)
+                        ? ageChoices[formikProps.values.species]
+                        : ageChoices['other']}
+                      value={formikProps.values.age || ''}
+                      handleValueChange={(value) => formikProps.setFieldValue('age', value)}
+                      optionsKey={formikProps.values.species || ''}
+                      formValidationName="age"
                     />
                   </Col>
                   <Col xs="3">
