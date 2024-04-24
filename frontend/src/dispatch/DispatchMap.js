@@ -360,7 +360,8 @@ function Deploy({ incident, organization }) {
     };
 
     // Only fetch team member data first time.
-    if (teamData.options.length === 0) {
+    // or after triggering a refresh
+    if (teamData.options.length === 0 || triggerRefresh) {
       fetchTeamMembers();
     }
 
@@ -406,43 +407,7 @@ function Deploy({ incident, organization }) {
             .then(response => {
               // Stay on map and remove selected SRs if in Preplanning mode.
               if (preplan) {
-                setData(prevState => ({ ...prevState, "service_requests":data.service_requests.filter(sr => !values.service_requests.includes(String(sr.id))) }));
-                setTotalSelectedState({'REPORTED':{}, 'REPORTED (EVAC REQUESTED)':{}, 'REPORTED (SIP REQUESTED)':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}});
-                setSelectedCount({count:0, disabled:true});
-                setMapState(Object.keys(mapState).filter(key => !values.service_requests.includes(String(key)))
-                  .reduce((obj, key) => {
-                    obj[key] = mapState[key];
-                    return obj;
-                  }, {})
-                );
-                axios.get('/evac/api/dispatchteam/', {
-                  params: {
-                    map: true
-                  },
-                })
-                .then(response => {
-                  let team_names = [];
-                  let team_name = '';
-                  response.data.forEach(function(team) {
-                    team_names.push(team.name);
-                  });
-                  // Provide a default "TeamN" team name that hasn't already be used.
-                  let i = 1;
-                  let name = 'Preplanned '
-                  do {
-                    if (!team_names.includes(name + String(i))){
-                      team_name = name + String(i);
-                    }
-                    i++;
-                  }
-                  while (team_name === '');
-                  setTeamData({teams: response.data, options: [], isFetching: false});
-                  setTeamName(team_name);
-                })
-                .catch(error => {
-                  setTeamData({teams: [], options: [], isFetching: false});
-                  setShowSystemError(true);
-                });
+                setTriggerRefresh(true);
               }
               // Otherwise navigate to the DA Summary page.
               else {
