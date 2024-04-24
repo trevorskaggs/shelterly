@@ -52,7 +52,7 @@ const IncidentForm = ({ id, organization }) => {
   const handleConfirm = () => {
     axios.patch(`/incident/api/incident/${id}/hide/`, { hide: true })
       .then(() => {
-        window.location.href = `/${state.user.organization}`;
+        window.location.href = `/${organization}`;
       })
       .catch(error => {
         console.error("Error hiding incident:", error);
