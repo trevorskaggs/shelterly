@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='shelter',
             name='incident',
-            field=models.ForeignKey(default=shelter.models.test_incident, on_delete=django.db.models.deletion.CASCADE, to='incident.incident'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='incident.incident'),
         ),
         migrations.AddField(
             model_name='shelter',

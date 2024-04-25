@@ -2,15 +2,17 @@ from rest_framework.test import APITestCase
 
 from accounts.models import ShelterlyUser
 from animals.models import Animal
+from incident.models import Incident
 from people.models import Person
 
 class TestViews(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
+        cls.incident = Incident.objects.create(name='Test1', slug='test1', latitude=0, longitude=0)
         cls.user = ShelterlyUser.objects.create_user(email="test@test.com", cell_phone="5555555", password="test", is_active=True)
-        cls.owner = Person.objects.create(first_name="Leroy", last_name="Jenkins")
-        cls.animal = Animal.objects.create(name='bella')
+        cls.owner = Person.objects.create(first_name="Leroy", last_name="Jenkins", incident=cls.incident)
+        cls.animal = Animal.objects.create(name='bella', incident=cls.incident)
         cls.animal.owners.set([cls.owner])
 
     def test_get_all_animals(self):
