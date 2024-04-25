@@ -15,7 +15,7 @@ import CustomSelect from "../components/CustomSelect.js";
 
 const AnimalForm = (props) => {
 
-  const { dispatch, state } = useContext(AuthContext);
+  const { state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
   const id = props.id;
@@ -211,7 +211,7 @@ const AnimalForm = (props) => {
     if (id) {
       const fetchAnimalData = async () => {
         // Fetch Animal data.
-        await axios.get('/animals/api/animal/' + id + '/', {
+        await axios.get('/animals/api/incident/' + state.incident.id + '/animal/' + id + '/', {
           cancelToken: source.token,
         })
         .then(response => {
@@ -317,7 +317,7 @@ const AnimalForm = (props) => {
           side_image: Yup.mixed(),
           extra_images: Yup.array(),
           address: Yup.string(),
-          city: Yup.string(),
+          city: Yup.string().nullable(),
           state: Yup.string(),
           zip_code: Yup.string()
             .max(10, 'Must be 10 characters or less'),
@@ -509,7 +509,7 @@ const AnimalForm = (props) => {
           }
           else {
             if (id) {
-              axios.put('/animals/api/animal/' + id + '/', formData)
+              axios.put('/animals/api/animal/' + data.id + '/', formData)
               .then(function() {
                 navigate('/' + props.organization + incident + '/animals/' + id);
               })
@@ -532,7 +532,7 @@ const AnimalForm = (props) => {
                 }
                 // Else redirect to the animal.
                 else {
-                  navigate('/' + props.organization + incident + '/animals/' + response.data.id);
+                  navigate('/' + props.organization + incident + '/animals/' + id);
                 }
               })
               .catch(error => {

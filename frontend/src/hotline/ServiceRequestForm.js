@@ -68,7 +68,7 @@ function ServiceRequestForm(props) {
     if (id) {
       const fetchServiceRequestData = async () => {
         // Fetch ServiceRequest data.
-        await axios.get('/hotline/api/servicerequests/' + id + '/', {
+        await axios.get('/hotline/api/incident/' + state.incident.id + '/servicerequests/' + id + '/', {
           cancelToken: source.token,
         })
         .then(response => {
@@ -183,7 +183,7 @@ function ServiceRequestForm(props) {
               });
               Promise.all(promises)
               .then((results) => {
-                navigate('/' + props.organization + '/' + incident + '/hotline/servicerequest/' + response.data.id);
+                navigate('/' + props.organization + '/' + incident + '/hotline/servicerequest/' + response.data.id_from_incident);
               })
             })
             .catch(error => {
@@ -194,7 +194,7 @@ function ServiceRequestForm(props) {
           }
         }
         else if (id) {
-          axios.put('/hotline/api/servicerequests/' + id + '/?incident=' + incident, values)
+          axios.put('/hotline/api/servicerequests/' + data.id + '/?incident=' + incident, values)
           .then(function() {
             if (state.prevLocation) {
               navigate(state.prevLocation);
@@ -280,7 +280,7 @@ function ServiceRequestForm(props) {
           <p>
             The following Service Requests have a duplicate address:
             {dupeSRs.map(sr =>
-              <li key={sr.id} style={{marginLeft:"10px"}}><span style={{position:"relative", left:"-5px"}}>SR#{sr.id} - Click <Link target="_blank" href={"/" + props.organization + "/" + incident + "/hotline/servicerequest/" + sr.id} style={{color:"#8d99d4"}}>here</Link> to view this Service Request.</span></li>
+              <li key={sr.id} style={{marginLeft:"10px"}}><span style={{position:"relative", left:"-5px"}}>SR#{sr.id_for_incident} - Click <Link target="_blank" href={"/" + props.organization + "/" + incident + "/hotline/servicerequest/" + sr.id_for_incident} style={{color:"#8d99d4"}}>here</Link> to view this Service Request.</span></li>
             )}
             <br/>Proceed with creating a new Service Request?
           </p>

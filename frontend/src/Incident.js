@@ -22,8 +22,8 @@ function Incident() {
   const path = window.location.pathname;
   const org_slug = path.split('/')[1];
 
-  const handleSubmit = (incident_name, incident_training) => {
-    dispatch({type: "SET_INCIDENT", data: {name:incident_name, training:incident_training}});
+  const handleSubmit = (incident_id, incident_name, incident_training) => {
+    dispatch({type: "SET_INCIDENT", data: {id:incident_id, name:incident_name, training:incident_training}});
     navigate(window.location.pathname + "/" + incident.slug);
   }
 
@@ -108,7 +108,7 @@ function Incident() {
       <SimpleValue options={options}>
         {simpleProps => <Select styles={customStyles} {...simpleProps} className="mt-3" placeholder="Select incident..." onChange={(instance) => setIncident({id:instance.value, slug:instance.slug, name:instance.name, training:instance.training})} />}
       </SimpleValue>
-      <Button size="lg" className="btn-primary mt-3" onClick={() => handleSubmit(incident.name, incident.training)} disabled={incident.id ? false : true} block>Select Incident</Button>
+      <Button size="lg" className="btn-primary mt-3" onClick={() => handleSubmit(incident.id, incident.name, incident.training)} disabled={incident.id ? false : true} block>Select Incident</Button>
       {state.user.is_superuser || state.user.incident_perms ?
         <Row>
           <Col style={{marginRight:"-23px"}}>

@@ -23,6 +23,8 @@ def test_incident():
     return Incident.objects.get(name='Test').id
 
 class ServiceRequest(Location):
+
+    id_for_incident = models.IntegerField(blank=True, null=True)
     
     #keys
     owners = models.ManyToManyField(Person, blank=True, related_name='request')
@@ -115,7 +117,7 @@ class ServiceRequest(Location):
               ],
               "type":"Point"
           },
-          "id":self.id,
+          "id":self.id_for_incident,
           "type":"Feature",
           "properties":{
               "marker-symbol":"circle-n",
@@ -126,6 +128,11 @@ class ServiceRequest(Location):
           }
         }
         return feature_json
+
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            self.id_for_incident = ServiceRequest.objects.filter(incident=self.incident).count() + 1
+        super(ServiceRequest, self).save(*args, **kwargs)
 
     objects = ServiceRequestQueryset.as_manager()
 
@@ -144,7 +151,7 @@ def email_on_creation(sender, instance, **kwargs):
                 'service_request_creation_email.txt',
                 {
                 'site': Site.objects.get_current(),
-                'id': instance.id,
+                'id': instance.id_for_incident,
                 'incident': instance.incident.slug,
                 'address': instance.location_output,
                 }
@@ -158,7 +165,7 @@ def email_on_creation(sender, instance, **kwargs):
                 'service_request_creation_email.html',
                 {
                 'site': Site.objects.get_current(),
-                'id': instance.id,
+                'id': instance.id_for_incident,
                 'incident': instance.incident.slug,
                 'address': instance.location_output,
                 }

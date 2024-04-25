@@ -16,13 +16,15 @@ import {
 import { faRectanglePortrait } from '@fortawesome/pro-solid-svg-icons';
 import { faCheckCircle } from '@fortawesome/pro-duotone-svg-icons';
 import Header from '../components/Header';
+import { AuthContext } from "../accounts/AccountsReducer";
 import { SystemErrorContext } from '../components/SystemError';
 
 function ServiceRequestDispatchAssignment({ id, incident, organization }) {
 
+  const { state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
-  const [currentRequest, setCurrentRequest] = useState({id:'', matches: {}, latitude:0, longitude:0, followup_date:''});
+  const [currentRequest, setCurrentRequest] = useState({id:'', id_for_incident:'', matches: {}, latitude:0, longitude:0, followup_date:''});
   const [data, setData] = useState({dispatch_assignments: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
   const [mapState, setMapState] = useState({});
   const [selected, setSelected] = useState(null);
@@ -90,7 +92,7 @@ function ServiceRequestDispatchAssignment({ id, incident, organization }) {
   const handleSubmit = () => {
     axios.patch('/evac/api/evacassignment/' + selected + '/', {new_service_request:currentRequest.id})
     .then(response => {
-      navigate('/' + organization + '/' + incident + '/dispatch/summary/' + selected)
+      navigate('/' + organization + '/' + incident + '/dispatch/summary/' + response.data.id_for_incident)
     })
     .catch(error => {
       setShowSystemError(true);
@@ -104,7 +106,7 @@ function ServiceRequestDispatchAssignment({ id, incident, organization }) {
 
     const fetchServiceRequests = async () => {
       // Fetch current ServiceRequest data.
-      await axios.get('/hotline/api/servicerequests/' + id + '/', {
+      await axios.get('/hotline/api/incident/' + (state ? state.incident.id : 'undefined')  + '/servicerequests/' + id + '/', {
         cancelToken: source.token,
       })
       .then(currentResponse => {
@@ -222,7 +224,7 @@ function ServiceRequestDispatchAssignment({ id, incident, organization }) {
                   </span>
                 :""}
                 <br />
-                SR#{currentRequest.id}: {currentRequest.full_address}
+                SR#{currentRequest.id_for_incident}: {currentRequest.full_address}
                 {currentRequest.followup_date ? <div>Followup Date: <Moment format="L">{currentRequest.followup_date}</Moment></div> : ""}
                 <div>
                   {currentRequest.aco_required ? <img width={16} height={16} src="/static/images/badge-sheriff.png" alt="ACO Required" className="mr-1" /> : ""}
@@ -259,7 +261,7 @@ function ServiceRequestDispatchAssignment({ id, incident, organization }) {
                     </span>
                   :""}
                   <br />
-                  SR#{assigned_request.service_request_object.id}: {assigned_request.service_request_object.full_address}
+                  SR#{assigned_request.service_request_object.id_for_incident}: {assigned_request.service_request_object.full_address}
                   {assigned_request.service_request_object.followup_date ? <div>Followup Date: <Moment format="L">{assigned_request.service_request_object.followup_date}</Moment></div> : ""}
                   <div>
                     {assigned_request.service_request_object.aco_required ? <img width={16} height={16} src="/static/images/badge-sheriff.png" alt="ACO Required" className="mr-1" /> : ""}
@@ -294,7 +296,7 @@ function ServiceRequestDispatchAssignment({ id, incident, organization }) {
                       </span>
                     :""}
                     <br />
-                    SR#{service_request.id}: {service_request.full_address}
+                    SR#{service_request.id_for_incident}: {service_request.full_address}
                     {service_request.followup_date ? <div>Followup Date: <Moment format="L">{service_request.followup_date}</Moment></div> : ""}
                   </span>
                 </MapTooltip>
@@ -312,7 +314,7 @@ function ServiceRequestDispatchAssignment({ id, incident, organization }) {
       <Col xs={10} className="pl-0 pr-0">
         <div className="card-header d-flex align-items-center rounded" style={{height:"37px"}}><b style={{marginLeft:"-10px"}}>
           Service Request:</b>&nbsp;
-          SR#{currentRequest.id} - {currentRequest.full_address}
+          SR#{currentRequest.id_for_incident} - {currentRequest.full_address}
           {/* {Object.keys(currentRequest.matches).map((key,i) => (
             <span key={key} style={{textTransform:"capitalize"}}>
               {i > 0 && ", "}{prettyText(key.split(',')[0], currentRequest.matches[key])}
@@ -349,7 +351,7 @@ function ServiceRequestDispatchAssignment({ id, incident, organization }) {
                 </Tooltip>
               }
             >
-              <Link href={"/" + organization + "/" + incident + "/dispatch/summary/" + dispatch_assignment.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+              <Link href={"/" + organization + "/" + incident + "/dispatch/summary/" + dispatch_assignment.id_for_incident}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
             </OverlayTrigger>&nbsp;&nbsp;|&nbsp;
             {dispatch_assignment.team ? dispatch_assignment.team_object.name : ""}
             {dispatch_assignment.team ?
@@ -380,7 +382,7 @@ function ServiceRequestDispatchAssignment({ id, incident, organization }) {
                       ))}
                     </span>
                     :""}
-                    &nbsp;|&nbsp;SR#{assigned_request.service_request_object.id} - <Link href={"/" + organization + "/" + incident + "/hotline/servicerequest/" + assigned_request.service_request_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link>
+                    &nbsp;|&nbsp;SR#{assigned_request.service_request_object.id_for_incident} - <Link href={"/" + organization + "/" + incident + "/hotline/servicerequest/" + assigned_request.service_request_object.id_for_incident} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link>
                 </li>
                 : ""}
               </span>
@@ -416,7 +418,7 @@ function ServiceRequestDispatchAssignment({ id, incident, organization }) {
                   </Tooltip>
                 }
               >
-                <Link href={"/" + organization + "/" + incident + "/dispatch/summary/" + dispatch_assignment.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+                <Link href={"/" + organization + "/" + incident + "/dispatch/summary/" + dispatch_assignment.id_for_incident}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
               </OverlayTrigger>&nbsp;&nbsp;|&nbsp;
               {dispatch_assignment.team ? dispatch_assignment.team_object.name : ""}
               {dispatch_assignment.team_member_names ?
@@ -447,7 +449,7 @@ function ServiceRequestDispatchAssignment({ id, incident, organization }) {
                         ))}
                       </span>
                       :""}
-                      &nbsp;|&nbsp;SR#{assigned_request.service_request_object.id} - {assigned_request.service_request_object.full_address}
+                      &nbsp;|&nbsp;SR#{assigned_request.service_request_object.id_for_incident} - {assigned_request.service_request_object.full_address}
                       <OverlayTrigger
                         key={"request-details"}
                         placement="top"
@@ -457,7 +459,7 @@ function ServiceRequestDispatchAssignment({ id, incident, organization }) {
                           </Tooltip>
                         }
                       >
-                        <Link href={"/" + organization + "/" + incident + "/hotline/servicerequest/" + assigned_request.service_request_object.id}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
+                        <Link href={"/" + organization + "/" + incident + "/hotline/servicerequest/" + assigned_request.service_request_object.id_for_incident}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
                       </OverlayTrigger>
                   </li>
                   : ""}

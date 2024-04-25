@@ -26,12 +26,13 @@ class SimpleAnimalSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Animal
-        fields = ['id', 'species', 'species_string', 'category', 'aggressive', 'confined', 'injured', 'status', 'aco_required', 'name', 'sex', 'fixed', 'size', 'age', 'pcolor', 'scolor', 'last_seen', 'color_notes', 'behavior_notes', 'medical_notes']
+        fields = ['id', 'id_for_incident', 'species', 'species_string', 'category', 'aggressive', 'confined', 'injured', 'status', 'aco_required', 'name', 'sex', 'fixed', 'size', 'age', 'pcolor', 'scolor', 'last_seen', 'color_notes', 'behavior_notes', 'medical_notes']
 
 class ModestAnimalSerializer(SimpleAnimalSerializer):
     front_image = serializers.SerializerMethodField()
     side_image = serializers.SerializerMethodField()
     found_location = serializers.SerializerMethodField()
+    request_id_for_incident = serializers.SerializerMethodField()
     request_address = serializers.SerializerMethodField()
     request_lat_lon = serializers.SerializerMethodField()
     weight = serializers.SerializerMethodField()
@@ -41,7 +42,7 @@ class ModestAnimalSerializer(SimpleAnimalSerializer):
 
     class Meta:
         model = Animal
-        fields = ['id', 'name', 'species', 'species_string', 'aggressive', 'injured', 'fixed', 'request', 'found_location', 'request_address', 'request_lat_lon', 'shelter_object', 'shelter', 'status', 'aco_required', 'color_notes',
+        fields = ['id', 'id_for_incident', 'name', 'species', 'species_string', 'aggressive', 'injured', 'fixed', 'request', 'request_id_for_incident', 'found_location', 'request_address', 'request_lat_lon', 'shelter_object', 'shelter', 'status', 'aco_required', 'color_notes',
         'front_image', 'side_image', 'owner_names', 'sex', 'size', 'age', 'pcolor', 'scolor', 'medical_notes', 'medical_record', 'behavior_notes', 'room_name', 'category', 'latitude', 'longitude', 'weight']
 
     def get_found_location(self, obj):
@@ -51,6 +52,11 @@ class ModestAnimalSerializer(SimpleAnimalSerializer):
         if obj.request:
           return [obj.request.latitude, obj.request.longitude]
         return None
+
+    def get_request_id_for_incident(self, obj):
+        if obj.request:
+          return obj.request.id_for_incident
+        return ''
 
     # Custom field for request address.
     def get_request_address(self, obj):
@@ -101,8 +107,8 @@ class AnimalSerializer(ModestAnimalSerializer):
 
     class Meta:
         model = Animal
-        fields = ['id', 'species', 'species_string', 'status', 'aco_required', 'front_image', 'side_image', 'extra_images', 'last_seen', 'intake_date', 'address', 'city', 'state', 'zip_code',
-        'aggressive', 'injured', 'fixed', 'confined', 'found_location', 'owner_names', 'owners', 'shelter_object', 'shelter', 'reporter', 'reporter_object', 'request', 'request_address',
+        fields = ['id', 'id_for_incident', 'species', 'species_string', 'status', 'aco_required', 'front_image', 'side_image', 'extra_images', 'last_seen', 'intake_date', 'address', 'city', 'state', 'zip_code',
+        'aggressive', 'injured', 'fixed', 'confined', 'found_location', 'owner_names', 'owners', 'shelter_object', 'shelter', 'reporter', 'reporter_object', 'request', 'request_id_for_incident', 'request_address',
         'action_history', 'building_name', 'room', 'room_name', 'name', 'sex', 'size', 'age', 'pcolor', 'scolor', 'color_notes', 'behavior_notes', 'medical_notes',
         'latitude', 'longitude', 'medical_record', 'microchip', 'vet_requests']
 

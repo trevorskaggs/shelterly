@@ -14,6 +14,7 @@ import Header from '../components/Header';
 import History from '../components/History';
 import AnimalCards from '../components/AnimalCards';
 import PhotoDocuments from '../components/PhotoDocuments';
+import { AuthContext } from "../accounts/AccountsReducer";
 import { SystemErrorContext } from '../components/SystemError';
 import ShelterlyPrintifyButton from "../components/ShelterlyPrintifyButton";
 import LoadingLink from "../components/LoadingLink";
@@ -23,6 +24,9 @@ import { printServiceRequestSummary, printSrAnimalCareSchedules } from './Utils'
 import '../assets/styles.css';
 
 function ServiceRequestDetails({ id, incident, organization }) {
+
+  const { state } = useContext(AuthContext);
+
   const [isLoading, setIsLoading] = useState(true);
   const { setShowSystemError } = useContext(SystemErrorContext);
   const { getFullLocationFromPath } = useLocationWithRoutes();
@@ -36,7 +40,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
   const [showModal, setShowModal] = useState(false);
   const cancelServiceRequest = () => {
     setIsLoading(true);
-    axios.patch('/hotline/api/servicerequests/' + id + '/', {status:'canceled'})
+    axios.patch('/hotline/api/servicerequests/' + data.id + '/', {status:'canceled'})
       .finally(() => setIsLoading(false));
     setData(prevState => ({ ...prevState, 'status':'Canceled', 'animals':prevState['animals'].map(animal => ({...animal, status:'CANCELED'}))}));
     setShowModal(false)
@@ -45,7 +49,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
   const clearDate = useCallback(() => {
     if (datetime.current) {
       datetime.current.flatpickr.clear();
-      axios.patch('/hotline/api/servicerequests/' + id + '/', {followup_date:null})
+      axios.patch('/hotline/api/servicerequests/' + data.id + '/', {followup_date:null})
       .catch(error => {
         setShowSystemError(true);
       });
@@ -54,6 +58,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
 
   const [data, setData] = useState({
     id: '',
+    id_for_incident: '',
     animals: [],
     owners: [],
     owner_objects: [],
@@ -84,7 +89,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
   // Handle animal reunification submit.
   const handleSubmit = async () => {
     setIsLoading(true);
-    await axios.patch('/hotline/api/servicerequests/' + id + '/', {reunite_animals:true})
+    await axios.patch('/hotline/api/servicerequests/' + data.id + '/', {reunite_animals:true})
     .then(response => {
       setData(prevState => ({ ...prevState, "status":"Closed", "animals":prevState['animals'].map(animal => ({...animal, status:animal.status !== 'DECEASED' ? 'REUNITED' : 'DECEASED'})) }));
       handleClose()
@@ -107,7 +112,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
       ...animal,
       url: buildAnimalUrl(animal)
     }));
-    return printSrAnimalCareSchedules(animals, id);
+    return printSrAnimalCareSchedules(animals, data.id);
   }
 
   const handleGeoJsonDownload = () => {
@@ -128,7 +133,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
 
     const fetchServiceRequestData = async () => {
       // Fetch ServiceRequest data.
-      await axios.get('/hotline/api/servicerequests/' + id + '/', {
+      await axios.get('/hotline/api/incident/' + (state ? state.incident.id : 'undefined')  + '/servicerequests/' + id + '/', {
         cancelToken: source.token,
       })
       .then(response => {
@@ -154,7 +159,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
   return (
     <>
       <Header>
-        Service Request #{data.id || ' - '}
+        Service Request #{data.id_for_incident || ' - '}
         <OverlayTrigger
           key={"edit-service-request"}
           placement="bottom"
@@ -165,7 +170,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
           }
         >
           <LoadingLink
-            href={"/" + organization + "/" + incident + "/hotline/servicerequest/edit/" + id}
+            href={"/" + organization + "/" + incident + "/hotline/servicerequest/edit/" + data.id_for_incident}
             isLoading={isLoading}
           >
             <FontAwesomeIcon icon={faEdit} className="ml-2" inverse />
@@ -380,7 +385,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
                       </Tooltip>
                     }
                   >
-                    <Link href={"/" + organization + "/" + incident + "/people/owner/new?servicerequest_id=" + id}><FontAwesomeIcon icon={faUserPlus} size="sm" className="ml-1" inverse /></Link>
+                    <Link href={"/" + organization + "/" + incident + "/people/owner/new?servicerequest_id=" + data.id}><FontAwesomeIcon icon={faUserPlus} size="sm" className="ml-1" inverse /></Link>
                   </OverlayTrigger>
                 </h4>
               </Card.Title>
@@ -454,7 +459,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
                       </Tooltip>
                     }
                   >
-                    <Link href={"/" + organization + "/" + incident + "/animals/new?servicerequest_id=" + id}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
+                    <Link href={"/" + organization + "/" + incident + "/animals/new?servicerequest_id=" + data.id}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
                   </OverlayTrigger>
                   {data.status.toLowerCase() !== 'closed' ?
                     <OverlayTrigger
@@ -487,7 +492,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
           </Card>
         </div>
       </div>
-      <PhotoDocuments setData={setData} data={data} id={id} object="service request" url={'/hotline/api/servicerequests/' + id + '/'} />
+      <PhotoDocuments setData={setData} data={data} id={data.id} object="service request" url={'/hotline/api/servicerequests/' + data.id + '/'} />
       <div className="row mt-3">
         <div className="col-12 d-flex">
           <Card className="border rounded" style={{width:"100%"}}>
@@ -508,11 +513,11 @@ function ServiceRequestDetails({ id, incident, organization }) {
                 </h4>
               </Card.Title>
               <hr/>
-              <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
+              <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px", marginLeft:"-15px"}}>
                 {data.assigned_requests.filter(assigned_request => !assigned_request.dispatch_assignment.end_time).map(assigned_request => (
                   <ListGroup.Item key={assigned_request.id}>
                     <b>Active Dispatch Assignment:</b>
-                    &nbsp;<Link href={"/" + organization + "/" + incident + "/dispatch/summary/" + assigned_request.dispatch_assignment.id} className="text-link" style={{textDecoration:"none", color:"white"}}><Moment format="LL">{assigned_request.dispatch_assignment.start_time}</Moment></Link>&nbsp;|&nbsp;
+                    &nbsp;<Link href={"/" + organization + "/" + incident + "/dispatch/summary/" + assigned_request.dispatch_assignment.id_for_incident} className="text-link" style={{textDecoration:"none", color:"white"}}><Moment format="LL">{assigned_request.dispatch_assignment.start_time}</Moment></Link>&nbsp;|&nbsp;
                     {assigned_request.dispatch_assignment.team_name}
                     <OverlayTrigger
                       key={"team-names"}
@@ -534,7 +539,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
                         </Tooltip>
                       }
                     >
-                      <Link href={"/" + organization + "/" + incident + "/dispatch/resolution/" + assigned_request.dispatch_assignment.id}><FontAwesomeIcon icon={faClipboardCheck} className="ml-1" inverse /></Link>
+                      <Link href={"/" + organization + "/" + incident + "/dispatch/resolution/" + assigned_request.dispatch_assignment.id_for_incident}><FontAwesomeIcon icon={faClipboardCheck} className="ml-1" inverse /></Link>
                     </OverlayTrigger>
                   </ListGroup.Item>
                 ))}

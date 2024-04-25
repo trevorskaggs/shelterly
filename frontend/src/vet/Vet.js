@@ -262,13 +262,13 @@ function Vet({ incident, organization }) {
           ))}
           {(selectedShelter || selectedAnimal.id) && shelterAnimals[selectedAnimal.id ? selectedAnimal.shelter : selectedShelter] && shelterAnimals[selectedAnimal.id ? selectedAnimal.shelter : selectedShelter].map((animal) => (
             <Button key={animal.id} title={animal.name} variant={animal.id === selectedAnimal.id ? "primary" : "secondary"} className="border" onClick={() => {setSelectedAnimal({id:animal.id, shelter:animal.shelter}); setSelectedShelter('test');}} style={{maxHeight:"36px", width:"100%", marginTop:"-1px"}}>
-              A#{animal.id}
+              A#{animal.id_for_incident}
             </Button>
           ))}
           <Button variant={selectedShelter === null ? "primary" : "info"} className="border" onClick={() => {setSelectedShelter(null);setSelectedAnimal({id:null, shelter:'null'});}} style={{maxHeight:"36px", width:"100%", marginTop:"-1px"}}>Field {null === selectedShelter || (selectedAnimal.id && selectedAnimal.shelter === null) ? <FontAwesomeIcon icon={faChevronCircleDown} size="sm" /> : <FontAwesomeIcon icon={faChevronCircleUp} size="sm" />}</Button>
           {(selectedShelter === null || (selectedAnimal.id && selectedAnimal.shelter === null)) && shelterAnimals['Field'] && shelterAnimals['Field'].map((animal) => (
             <Button key={animal.id} title={animal.name} variant={animal.id === selectedAnimal.id ? "primary" : "secondary"} className="border" onClick={() => {setSelectedAnimal({id:animal.id, shelter:animal.shelter}); setSelectedShelter('test');}} style={{maxHeight:"36px", width:"100%", marginTop:"-1px"}}>
-              A#{animal.id}
+              A#{animal.id_for_incident}
             </Button>
           ))}
         </Scrollbar>
@@ -287,8 +287,8 @@ function Vet({ incident, organization }) {
               {selectedShelter === 'all' ? 'All' : ''}
               {selectedShelter === null ? 'Field' : ''}
               {shelterData.shelters.filter(shelter => (shelter.id === selectedShelter)).map(shelter => (<span className="mb-0">{shelter.name} - {shelter.address}</span>))}
-              {selectedAnimal.id && selectedAnimal.shelter !== null && shelterAnimals[selectedAnimal.shelter].filter(animal => (animal.id === selectedAnimal.id)).map(animal => (<span className="mb-0">A#{animal.id} - {animal.request_address || animal.found_location}</span>))}
-              {shelterAnimals['Field'].filter(animal => (selectedAnimal.id === animal.id && selectedAnimal.shelter === null)).map(animal => (<span className="mb-0">A#{animal.id} - {animal.request_address || animal.found_location}</span>))}
+              {selectedAnimal.id && selectedAnimal.shelter !== null && shelterAnimals[selectedAnimal.shelter].filter(animal => (animal.id === selectedAnimal.id)).map(animal => (<span className="mb-0">A#{animal.id_for_incident} - {animal.request_address || animal.found_location}</span>))}
+              {shelterAnimals['Field'].filter(animal => (selectedAnimal.id === animal.id && selectedAnimal.shelter === null)).map(animal => (<span className="mb-0">A#{animal.id_for_incident} - {animal.request_address || animal.found_location}</span>))}
             </h4>
             </Card.Title>
           </Card.Body>
@@ -386,7 +386,7 @@ function Vet({ incident, organization }) {
                           </div>
                           <Row style={{marginTop:"6px"}}>
                             <Col xs={3}>
-                              <b>Patient: </b>A#{vet_request.animal_object.id}
+                              <b>Patient: </b>A#{vet_request.animal_object.id_for_incident}
                             </Col>
                             <Col xs={3}>
                               <b>Species:</b> <span  style={{textTransform:"capitalize"}}>{vet_request.animal_object.species_string}</span>
@@ -487,7 +487,7 @@ function Vet({ incident, organization }) {
                           </div>
                           <Row style={{marginTop:"6px"}}>
                             <Col xs={3}>
-                              <b>Patient: </b>A#{vet_request.animal_object.id}
+                              <b>Patient: </b>A#{vet_request.animal_object.id_for_incident}
                             </Col>
                             <Col xs={3}>
                               <b>Species:</b> <span  style={{textTransform:"capitalize"}}>{vet_request.animal_object.species_string}</span>

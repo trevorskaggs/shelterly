@@ -232,9 +232,9 @@ function DispatchAssignmentSearch({ incident, organization }) {
                   </Tooltip>
                 }
               >
-                <Link href={"/" + organization + "/" + incident + "/dispatch/summary/" + evacuation_assignment.id}><FontAwesomeIcon icon={faDotCircle} className="mr-2" inverse /></Link>
+                <Link href={"/" + organization + "/" + incident + "/dispatch/summary/" + evacuation_assignment.id_for_incident}><FontAwesomeIcon icon={faDotCircle} className="mr-2" inverse /></Link>
               </OverlayTrigger>
-              DA#{evacuation_assignment.id} -&nbsp;
+              DA#{evacuation_assignment.id_for_incident} -&nbsp;
               <Moment format="L">{evacuation_assignment.start_time}</Moment>
               &nbsp;|&nbsp;
               <span title={evacuation_assignment.team ? evacuation_assignment.team_object.name + ": " + evacuation_assignment.team_member_names : ""}>
@@ -277,7 +277,7 @@ function DispatchAssignmentSearch({ incident, organization }) {
                           </span>
                         :""}
                         <br />
-                        SR#{assigned_request.service_request_object.id}: {assigned_request.service_request_object.full_address.split(',')[0]}
+                        SR#{assigned_request.service_request_object.id_for_incident}: {assigned_request.service_request_object.full_address.split(',')[0]}
                       </span>
                     </MapTooltip>
                   </Marker>
@@ -351,7 +351,7 @@ function DispatchAssignmentSearch({ incident, organization }) {
                         </OverlayTrigger>
                         : ""}
                         </span>
-                        <span>SR#{assigned_request.service_request_object.id} - <Link href={"/" + organization + "/" + incident + "/hotline/servicerequest/" + assigned_request.service_request_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link> |
+                        <span>SR#{assigned_request.service_request_object.id_for_incident} - <Link href={"/" + organization + "/" + incident + "/hotline/servicerequest/" + assigned_request.service_request_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link> |
                         {assigned_request.service_request_object.owner_objects.length === 0 ?
                           <OverlayTrigger
                             key={"stray"}

@@ -19,7 +19,7 @@ class VisitNoteSerializer(serializers.ModelSerializer):
 
     def get_dispatch_assignment(self, obj):
         if obj.assigned_request.first():
-            return obj.assigned_request.first().dispatch_assignment.id
+            return obj.assigned_request.first().dispatch_assignment.id_for_incident
         return None
     
     def get_service_request(self, obj):
@@ -50,7 +50,7 @@ class BarebonesServiceRequestSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ServiceRequest
-        fields = ['id', 'full_address']
+        fields = ['id', 'id_for_incident', 'full_address']
 
     # Custom field for the full address.
     def get_full_address(self, obj):
@@ -79,7 +79,7 @@ class SimpleServiceRequestSerializer(BarebonesServiceRequestSerializer):
 
     class Meta:
         model = ServiceRequest
-        fields = ['id', 'timestamp', 'latitude', 'longitude', 'full_address', 'followup_date', 'owners', 'reporter', 'address', 'city', 'state', 'zip_code', 'apartment', 'reporter', 'directions', 'priority', 'evacuation_assignments', 'pending',
+        fields = ['id', 'id_for_incident', 'timestamp', 'latitude', 'longitude', 'full_address', 'followup_date', 'owners', 'reporter', 'address', 'city', 'state', 'zip_code', 'apartment', 'reporter', 'directions', 'priority', 'evacuation_assignments', 'pending',
         'images', 'animal_count', 'key_provided', 'verbal_permission', 'injured', 'accessible', 'turn_around', 'animals', 'status', 'reported_animals', 'reported_evac', 'reporter_object', 'owner_objects', 'reported_sheltered_in_place', 'sheltered_in_place', 'unable_to_locate', 'aco_required']
 
 
@@ -177,7 +177,7 @@ class ServiceRequestSerializer(SimpleServiceRequestSerializer):
 
     class Meta:
         model = ServiceRequest
-        fields = ['id', 'latitude', 'longitude', 'full_address', 'followup_date', 'status', 'address', 'city', 'state', 'zip_code', 'directions', 'priority',
+        fields = ['id', 'id_for_incident', 'latitude', 'longitude', 'full_address', 'followup_date', 'status', 'address', 'city', 'state', 'zip_code', 'directions', 'priority',
         'injured', 'accessible', 'turn_around', 'animals', 'reporter', 'reported_animals', 'reported_evac', 'sheltered_in_place', 'reported_sheltered_in_place', 'unable_to_locate', 'aco_required',
         'animal_count', 'images', 'key_provided', 'verbal_permission', 'action_history', 'owner_objects', 'reporter_object', 'assigned_requests']
 

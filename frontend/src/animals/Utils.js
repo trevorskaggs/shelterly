@@ -71,7 +71,7 @@ async function buildAnimalCareScheduleContent(pdf, animals) {
     pdf.drawPad(-15);
 
     const labelsList = [
-      [`Animal No: A#${animal.id}`, `Animal Name: ${capitalize(animal.name || 'unknown')}`],
+      [`Animal No: A#${animal.id_for_incident}`, `Animal Name: ${capitalize(animal.name || 'unknown')}`],
       [
         `Intake Date: ${animal.intake_date
           ? new Date(animal.intake_date).toLocaleDateString()
