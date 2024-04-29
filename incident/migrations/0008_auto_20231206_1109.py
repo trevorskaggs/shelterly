@@ -20,9 +20,4 @@ class Migration(migrations.Migration):
             name='slug',
             field=models.CharField(max_length=20, unique=True),
         ),
-        migrations.AddField(
-            model_name='incident',
-            name='hide',
-            field=models.BooleanField(default=False),
-        ),
     ]
