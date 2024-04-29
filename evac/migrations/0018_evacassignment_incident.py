@@ -16,6 +16,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='evacassignment',
             name='incident',
-            field=models.ForeignKey(default=evac.models.test_incident, on_delete=django.db.models.deletion.CASCADE, to='incident.incident'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='incident.incident'),
         ),
     ]

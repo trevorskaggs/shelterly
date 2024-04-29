@@ -3,9 +3,6 @@ from django.db import models
 from hotline.models import ServiceRequest
 from incident.models import Incident
 
-def test_incident():
-    return Incident.objects.get(name='Test').id
-
 class EvacTeamMember(models.Model):
 
     first_name = models.CharField(max_length=50, blank=False)
@@ -13,7 +10,7 @@ class EvacTeamMember(models.Model):
     phone = models.CharField(max_length=50, blank=False)
     agency_id = models.CharField(max_length=50, blank=True)
     show = models.BooleanField(default=True)
-    incident = models.ForeignKey(Incident, on_delete=models.CASCADE, default=test_incident)
+    incident = models.ForeignKey(Incident, on_delete=models.CASCADE)
 
     def __str__(self):
         agency = " (%s)" % (self.agency_id) if self.agency_id else ""
@@ -28,7 +25,7 @@ class DispatchTeam(models.Model):
     team_members = models.ManyToManyField(EvacTeamMember)
     dispatch_date = models.DateTimeField(auto_now_add=True)
     show = models.BooleanField(default=True)
-    incident = models.ForeignKey(Incident, on_delete=models.CASCADE, default=test_incident)
+    incident = models.ForeignKey(Incident, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name
@@ -41,7 +38,7 @@ class EvacAssignment(models.Model):
     service_requests = models.ManyToManyField(ServiceRequest, through='AssignedRequest', related_name='evacuation_assignments')
     start_time = models.DateTimeField(auto_now_add=True)
     end_time = models.DateTimeField(blank=True, null=True)
-    incident = models.ForeignKey(Incident, on_delete=models.CASCADE, default=test_incident)
+    incident = models.ForeignKey(Incident, on_delete=models.CASCADE)
     closed = models.BooleanField(default=False)
 
     def get_geojson(self):

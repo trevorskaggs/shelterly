@@ -112,7 +112,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
       ...animal,
       url: buildAnimalUrl(animal)
     }));
-    return printSrAnimalCareSchedules(animals, data.id);
+    return printSrAnimalCareSchedules(animals, id);
   }
 
   const handleGeoJsonDownload = () => {
@@ -120,7 +120,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
     axios.get('/hotline/api/servicerequests/' + data.id +'/download/', { 
             responseType: 'blob',
         }).then(res => {
-            fileDownload(res.data, 'SR-' + data.id + '.geojson');
+            fileDownload(res.data, 'SR-' + id + '.geojson');
         }).catch(err => {
         })
   }
