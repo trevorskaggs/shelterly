@@ -42,6 +42,7 @@ class Incident(models.Model):
     longitude = models.DecimalField(max_digits=9, decimal_places=4)
     training = models.BooleanField(default=False)
     organization = models.ForeignKey(Organization, on_delete=models.SET_NULL, null=True, blank=True)
+    hide = models.BooleanField(default=False)
 
     def __str__(self):
         return '{}'.format(self.name)

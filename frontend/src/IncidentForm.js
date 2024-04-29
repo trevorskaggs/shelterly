@@ -2,11 +2,19 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import axios from "axios";
 import { navigate } from "raviger";
 import { Field, Formik } from 'formik';
-import { ButtonGroup, Card, Col, Form as BootstrapForm } from 'react-bootstrap';
+import {
+  ButtonGroup,
+  Card,
+  Col,
+  Form as BootstrapForm,
+  Button,
+  Modal,
+} from 'react-bootstrap';
 import { Switch } from 'formik-material-ui';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faArrowAltCircleLeft,
+  faEyeSlash,
 } from '@fortawesome/free-solid-svg-icons';
 import * as Yup from 'yup';
 import L from "leaflet";
@@ -36,6 +44,21 @@ const IncidentForm = ({ id, organization }) => {
 
   const markerRef = useRef(null);
   const mapRef = useRef(null);
+
+  const [showModal, setShowModal] = useState(false);
+
+  const handleClose = () => setShowModal(false);
+  const handleShow = () => setShowModal(true);
+  const handleConfirm = () => {
+    axios.patch(`/incident/api/incident/${id}/hide/`, { hide: true })
+      .then(() => {
+        window.location.href = `/${organization}`;
+      })
+      .catch(error => {
+        console.error("Error hiding incident:", error);
+        setShowSystemError(true);
+      });
+  };
 
   const updatePosition = (setFieldValue) => {
     const marker = markerRef.current;
@@ -168,7 +191,36 @@ const IncidentForm = ({ id, organization }) => {
     >
       {form => (
         <Card border="secondary" className="mt-4 ml-auto mr-auto" style={{width:"50%", maxWidth:"50%"}}>
-          <Card.Header as="h5" className="pl-3"><span style={{ cursor: 'pointer' }} onClick={() => navigate("/" + organization)} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>{id ? 'Edit' : 'New'} Incident</Card.Header>
+          <Card.Header as="h5" className="pl-3 d-flex flex-row justify-content-between">
+            <div>
+              <span style={{ cursor: 'pointer' }} onClick={() => navigate("/" + organization)} className="mr-3">
+                <FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>{id ? 'Edit' : 'New'} Incident
+            </div>
+            {!!id ? (
+              <>
+                <Button variant="outline-danger" size="sm" className="my-0 border-0 text-white" onClick={handleShow}>
+                  <FontAwesomeIcon icon={faEyeSlash} size="1x" inverse />{' '}
+                  Hide Incident
+                </Button><Modal show={showModal} onHide={handleClose}>
+                    <Modal.Header closeButton>
+                      <Modal.Title>Confirm Incident Hide</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                      This action will hide the incident and is only reversible by an administrator. Are you sure you want to proceed?
+                    </Modal.Body>
+                    <Modal.Footer>
+                      <Button variant="secondary" onClick={handleClose}>
+                        Cancel
+                      </Button>
+                      <Button variant="primary" onClick={handleConfirm}>
+                        Confirm
+                      </Button>
+                    </Modal.Footer>
+                  </Modal>
+                </>
+            ) : null}
+
+          </Card.Header>
           <Card.Body>
             <BootstrapForm>
               <BootstrapForm.Row>
