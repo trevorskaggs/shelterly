@@ -134,7 +134,7 @@ function Hotline({ incident, organization }) {
                 key={service_request.id}
                 position={[service_request.latitude, service_request.longitude]}
                 icon={service_request.reported_animals > 0 ? reportedMarkerIcon : service_request.reported_evac > 0 ? reportedEvacMarkerIcon : service_request.reported_sheltered_in_place > 0 ? reportedSIPMarkerIcon : service_request.sheltered_in_place > 0 ? SIPMarkerIcon : service_request.unable_to_locate > 0 ? UTLMarkerIcon : closedMarkerIcon}
-                onClick={() => navigate('/' + organization + "/" + incident + "/hotline/servicerequest/" + service_request.id)}
+                onClick={() => navigate('/' + organization + "/" + incident + "/hotline/servicerequest/" + service_request.id_for_incident)}
               >
                 <MapTooltip autoPan={false}>
                   <span>

@@ -51,6 +51,7 @@ const VetRequestForm = (props) => {
 
   const [data, setData] = useState({
     patient: props.animalid,
+    incident: state.incident.id,
     requested_by: null,
     exam: null,
     concern: '',
