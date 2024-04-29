@@ -27,7 +27,7 @@ function buildServiceRequestsDoc(srs = []) {
     pdf.drawPad(20);
 
     // id & priority
-    pdf.drawWrappedText({ text: `SR#${data.id} - ${srPriority.label} Priority` })
+    pdf.drawWrappedText({ text: `SR#${data.id_for_incident} - ${srPriority.label} Priority` })
 
     // status
     pdf.drawWrappedText({ text: `Status: ${data.status.toUpperCase()}` });
@@ -155,7 +155,7 @@ function buildServiceRequestsDoc(srs = []) {
         `${capitalize(animal.status.toLowerCase(), { proper: true })}`;
 
       const animalInfoList = [
-        `ID: A#${animal.id}`,
+        `ID: A#${animal.id_for_incident}`,
         `Status: ${animalStatus}`,
         `Name: ${animal.name || 'Unknown'}`,
         `Species: ${capitalize(animal.species_string)}`,
@@ -224,7 +224,7 @@ function buildServiceRequestsDoc(srs = []) {
 
 function printServiceRequestSummary(sr = {}) {
   const pdf = buildServiceRequestsDoc([sr]);
-  pdf.fileName = `SR-${sr.id.toString().padStart(3, 0)}`;
+  pdf.fileName = `SR-${sr.id_for_incident.toString().padStart(3, 0)}`;
   return pdf.saveFile();
 }
 
@@ -236,7 +236,7 @@ function printAllServiceRequests(srs = []) {
 
 const printSrAnimalCareSchedules  = async (animals = [], srId = 0) => {
   // sort animals by id
-  const sortedAnimals = [...animals].sort((a,b) => a.id - b.id);
+  const sortedAnimals = [...animals].sort((a,b) => a.id_for_incident - b.id_for_incident);
 
   const  pdf = await buildAnimalCareScheduleDoc(sortedAnimals);
   pdf.fileName = `Shelterly-SR-Animal-Care-Schedules-${srId.toString().padStart(3, 0)}-${moment().format(DATE_FORMAT)}`;

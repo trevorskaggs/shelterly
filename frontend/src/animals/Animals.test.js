@@ -45,7 +45,7 @@ describe("Animal tests", () => {
     expect(screen.getByText("Search"));
   });
   it("Render AnimalView", () => {
-    render(<SystemErrorProvider><AnimalDetails id={1} incident={1} organization={'changeme'} /></SystemErrorProvider>);
+    render(<SystemErrorProvider><AnimalDetails id={1} incident={1} organization={'changeme'} state={{incident:{id:''}}} /></SystemErrorProvider>);
     expect(screen.getByText(/Animal/));
   });
 });

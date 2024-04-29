@@ -1,5 +1,9 @@
 from django.conf import settings
 from django.shortcuts import render
+from django.db.models import Q
+import operator
+from functools import reduce
+from django.shortcuts import get_object_or_404
 from copy import deepcopy
 from datetime import datetime
 from rest_framework import filters, permissions, viewsets
@@ -11,9 +15,21 @@ from incident.models import Incident
 from shelter.models import IntakeSummary
 from people.serializers import SimplePersonSerializer
 
-class AnimalViewSet(viewsets.ModelViewSet):
+class MultipleFieldLookupMixin(object):
+    def get_object(self):
+        queryset = self.get_queryset()             # Get the base queryset
+        queryset = self.filter_queryset(queryset)  # Apply any filter backends
+        filter = {}
+        for field in self.lookup_fields:
+            if self.kwargs.get(field, None):
+                filter[field] = self.kwargs[field]
+        obj = get_object_or_404(queryset, **filter)
+        return obj
+
+class AnimalViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
     queryset = Animal.objects.with_images().exclude(status="CANCELED").order_by('order')
-    search_fields = ['id', 'name', 'microchip', 'request__address', 'request__city', 'owners__first_name', 'owners__last_name', 'owners__phone', 'owners__drivers_license', 'owners__address', 'owners__city', 'reporter__first_name', 'reporter__last_name']
+    lookup_fields = ['pk', 'incident', 'id_for_incident']
+    search_fields = ['id_for_incident', 'name', 'microchip', 'request__address', 'request__city', 'owners__first_name', 'owners__last_name', 'owners__phone', 'owners__drivers_license', 'owners__address', 'owners__city', 'reporter__first_name', 'reporter__last_name']
     filter_backends = (filters.SearchFilter,)
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = AnimalSerializer

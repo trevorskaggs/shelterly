@@ -42,7 +42,8 @@ function DispatchSummary({ id, incident, organization }) {
 
   const [mapState, setMapState] = useState({});
   const [teamData, setTeamData] = useState({teams: [], options: [], isFetching: false});
-  const [teamName, setTeamName] = useState('')
+  const [teamName, setTeamName] = useState('');
+  const [defaultTeamName, setDefaultTeamName] = useState(false);
   const [showTeamName, setShowTeamName] = useState(false)
   const handleTeamNameClose = () => {setShowTeamName(false);}
   const [teamMembers, setTeamMembers] = useState([]);
@@ -52,27 +53,37 @@ function DispatchSummary({ id, incident, organization }) {
   const [showTeamMemberConfirm, setShowTeamMemberConfirm] = useState(false);
   const handleTeamMemberClose = () => setShowTeamMemberConfirm(false);
   const [error, setError] = useState('');
+  const [isPreplanned, setIsPreplanned] = useState(false);
 
   const handleTeamNameSubmit = async () => {
-    if (teamName.replace(/ /g, '').length === 0) {
-      setError("Team name cannot be blank.");
+    let requestBody;
+
+    if (defaultTeamName) {
+      requestBody = { defaultName: true };
+    } else {
+      if (teamName.replace(/ /g, '').length === 0) {
+        setError("Team name cannot be blank.");
+        return;
+      }
+      else if (teamName.length > 18) {
+        setError("Team name must be 18 characters or less.");
+        return;
+      }
+
+      requestBody = { name: teamName };
     }
-    else if (teamName.length > 18) {
-      setError("Team name must be 18 characters or less.");
-    }
-    else {
-      setIsLoading(true);
-      await axios.patch('/evac/api/dispatchteam/' + data.team + '/', {'name':teamName})
-      .then(response => {
-        setData(prevState => ({ ...prevState, "team_object":{ ...prevState.team_object, "name": teamName} }));
-        handleTeamNameClose();
-        setError('');
-      })
-      .catch(error => {
-        setShowSystemError(true);
-      })
-      .finally(() => setIsLoading(false));
-    }
+
+    setIsLoading(true);
+    await axios.patch('/evac/api/dispatchteam/' + data.team + '/', requestBody)
+    .then(response => {
+      setData(prevState => ({ ...prevState, "team_object":{ ...prevState.team_object, "name": teamName} }));
+      handleTeamNameClose();
+      setError('');
+    })
+    .catch(error => {
+      setShowSystemError(true);
+    })
+    .finally(() => setIsLoading(false));
   }
 
   // Handle TeamMember selector onChange.
@@ -121,7 +132,7 @@ function DispatchSummary({ id, incident, organization }) {
     axios.get('/evac/api/evacassignment/' + data.id +'/download/', { 
             responseType: 'blob',
         }).then(res => {
-            fileDownload(res.data, 'DAR-' + data.id + '.geojson');
+            fileDownload(res.data, 'DAR-' + id + '.geojson');
         }).catch(err => {
         }).finally(() => setIsLoading(false));
   }
@@ -166,7 +177,7 @@ function DispatchSummary({ id, incident, organization }) {
 
     const fetchDispatchSummaryData = async () => {
       // Fetch Animal data.
-      await axios.get('/evac/api/evacassignment/' + id + '/', {
+      await axios.get('/evac/api/incident/' + state.incident.id + '/evacassignment/' + id + '/', {
         cancelToken: source.token,
       })
       .then(response => {
@@ -185,6 +196,7 @@ function DispatchSummary({ id, incident, organization }) {
           setMapState(map_dict);
           setTeamData({teams: [], options: [], isFetching: true});
           setTeamName(response.data.team_object.name);
+          setIsPreplanned(response.data.team_name.match(/^Preplanned [0-9]+$/));
           axios.get('/evac/api/evacteammember/?incident=' + incident + '&organization=' + organization +'&training=' + state.incident.training, {
             cancelToken: source.token,
           })
@@ -394,7 +406,7 @@ function DispatchSummary({ id, incident, organization }) {
                     </span>
                   :""}
                   <br />
-                  SR#{assigned_request.service_request_object.id}: {assigned_request.service_request_object.full_address.split(',')[0]}, {assigned_request.service_request_object.full_address.split(',')[1]}
+                  SR#{assigned_request.service_request_object.id_for_incident}: {assigned_request.service_request_object.full_address.split(',')[0]}, {assigned_request.service_request_object.full_address.split(',')[1]}
                 </span>
               </MapTooltip>
             </Marker>
@@ -408,8 +420,8 @@ function DispatchSummary({ id, incident, organization }) {
           <Card.Body>
             <Card.Title>
               <h4>
-                SR#{assigned_request.service_request_object.id} -&nbsp;
-                <Link href={"/" + organization + "/" + incident + "/hotline/servicerequest/" + assigned_request.service_request_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link>
+                SR#{assigned_request.service_request_object.id_for_incident} -&nbsp;
+                <Link href={"/" + organization + "/" + incident + "/hotline/servicerequest/" + assigned_request.service_request_object.id_for_incident} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link>
                 {assigned_request.visit_note && assigned_request.visit_note.forced_entry ?
                   <OverlayTrigger
                     key={"forced"}
@@ -518,7 +530,7 @@ function DispatchSummary({ id, incident, organization }) {
             <h4 className="mt-2" style={{marginBottom:"-2px"}}>Animals</h4>
             {assigned_request.service_request_object.animals.filter(animal => Object.keys(assigned_request.animals).includes(String(animal.id))).map((animal, inception) => (
               <ListGroup.Item key={animal.id}>
-                <span style={{textTransform:"capitalize"}}>A#{animal.id} - <Link href={"/" + organization + "/" + incident + "/animals/" + animal.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.name||"Unknown"}</Link>&nbsp;-&nbsp;{animal.species_string}</span>
+                <span style={{textTransform:"capitalize"}}><Link href={"/" + organization + "/" + incident + "/animals/" + animal.id_for_incident} className="text-link" style={{textDecoration:"none", color:"white"}}>A#{animal.id_for_incident}</Link> - {animal.name||"Unknown"}&nbsp;-&nbsp;{animal.species_string}</span>
                 {animal.color_notes ?
                   <OverlayTrigger
                     key={"animal-color-notes"}
@@ -598,10 +610,22 @@ function DispatchSummary({ id, incident, organization }) {
           type="text"
           onChange={(event) => {setTeamName(event.target.value)}}
           value={teamName}
+          disabled={defaultTeamName}
         />
         {error ? <div style={{ color: "#e74c3c", marginTop: "-8px", marginLeft: "16px", fontSize: "80%" }}>{error}</div> : ""}
       </Modal.Body>
       <Modal.Footer>
+        {!isLoading && isPreplanned ? (
+          <Form.Check
+            id="defaultNameCheck"
+            type="checkbox"
+            style={{ flexGrow: 1 }}
+            label="Use Default Team Name"
+            onChange={() => setDefaultTeamName(!defaultTeamName)}
+            checked={defaultTeamName}
+          />
+        ) : null}
+        
         <Button variant="primary" onClick={handleTeamNameSubmit}>Save</Button>
         <Button variant="secondary" onClick={handleTeamNameClose}>Cancel</Button>
       </Modal.Footer>

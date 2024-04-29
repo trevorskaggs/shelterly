@@ -47,7 +47,7 @@ function AnimalStatus(props) {
         />
       </Col>
       <span style={{ marginTop:"-3px", marginBottom: "-4px", fontSize: "26px", textTransform:"capitalize" }}>
-        A#{props.animal.id} - {props.animal.name || "Unknown"}&nbsp;-&nbsp;{props.animal.species}
+        A#{props.animal.id_for_incident} - {props.animal.name || "Unknown"}&nbsp;-&nbsp;{props.animal.species}
         {props.animal.color_notes ?
         <OverlayTrigger
           key={"animal-color-notes"}
@@ -147,12 +147,12 @@ function ShelterIntake({ id, incident, organization }) {
             if (!unmounted) {
               let da_options = [];
               response.data.forEach((da, index) => {
-                da_options.push({value: da.id, label: "DA#" + da.id + " | " + da.team_name + ": " + da.team_object.display_name});
+                da_options.push({value: da.id, label: "DA#" + da.id_for_incident + " | " + da.team_name + ": " + da.team_object.display_name});
                 response.data[index]["sr_updates"] = [];
                 da.assigned_requests.forEach((assigned_request, inception) => {
                   response.data[index].sr_updates.push({
                     id: assigned_request.service_request_object.id,
-                    animals: Object.keys(assigned_request.animals).map(animal_id => {return {id:animal_id, name:assigned_request.animals[animal_id].name, species:assigned_request.animals[animal_id].species, status:assigned_request.animals[animal_id].status, color_notes:assigned_request.animals[animal_id].color_notes, pcolor:assigned_request.animals[animal_id].pcolor, scolor:assigned_request.animals[animal_id].scolor, request:assigned_request.service_request_object.id, shelter:assigned_request.animals[animal_id].shelter || '', room:assigned_request.animals[animal_id].room || ''}}),
+                    animals: Object.keys(assigned_request.animals).map(animal_id => {return {id:animal_id, id_for_incident:assigned_request.animals[animal_id].id_for_incident, name:assigned_request.animals[animal_id].name, species:assigned_request.animals[animal_id].species, status:assigned_request.animals[animal_id].status, color_notes:assigned_request.animals[animal_id].color_notes, pcolor:assigned_request.animals[animal_id].pcolor, scolor:assigned_request.animals[animal_id].scolor, request:assigned_request.service_request_object.id, shelter:assigned_request.animals[animal_id].shelter || '', room:assigned_request.animals[animal_id].room || ''}}),
                   });
                 });
               });
@@ -253,8 +253,8 @@ function ShelterIntake({ id, incident, organization }) {
                 <Card.Body>
                   <Card.Title style={{marginBottom:"-5px", marginTop:"-5px"}}>
                     <h4>
-                      SR#{assigned_request.service_request_object.id} -&nbsp;
-                      <Link href={"/" + organization + "/" + incident + "/hotline/servicerequest/" + assigned_request.service_request_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link>
+                      SR#{assigned_request.service_request_object.id_for_incident} -&nbsp;
+                      <Link href={"/" + organization + "/" + incident + "/hotline/servicerequest/" + assigned_request.service_request_object.id_for_incident} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link>
                     </h4>
                   </Card.Title>
                   <hr />

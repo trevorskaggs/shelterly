@@ -54,7 +54,7 @@ class DispatchServiceRequestSerializer(SimpleServiceRequestSerializer):
 
     class Meta:
         model = ServiceRequest
-        fields = ['id', 'animals', 'directions', 'latitude', 'longitude', 'full_address', 'followup_date', 'status', 'injured', 'priority', 'key_provided',
+        fields = ['id', 'id_for_incident', 'animals', 'directions', 'latitude', 'longitude', 'full_address', 'followup_date', 'status', 'injured', 'priority', 'key_provided',
         'accessible', 'turn_around' , 'reported_animals', 'reported_evac', 'reported_sheltered_in_place', 'sheltered_in_place', 'unable_to_locate', 'aco_required',
         'owner_contacts', 'owner_objects', 'owners', 'reporter_object', 'visit_notes']
 
@@ -90,7 +90,7 @@ class SimpleEvacAssignmentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = EvacAssignment
-        fields = ['id', 'start_time', 'end_time', 'team_name', 'team_member_names', 'closed']
+        fields = ['id', 'id_for_incident', 'start_time', 'end_time', 'team_name', 'team_member_names', 'closed']
 
 class AssignedRequestServiceRequestSerializer(serializers.ModelSerializer):
 

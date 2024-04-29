@@ -10,9 +10,6 @@ from incident.models import Incident
 from people.models import Person
 from shelter.models import Room, Shelter
 
-def test_incident():
-    return Incident.objects.get(name='Test').id
-
 class SpeciesCategory(models.Model):
     name = models.CharField(max_length=20)
 
@@ -37,6 +34,8 @@ class Species(models.Model):
 # Create your models here.
 class Animal(Location, OrderedModel):
 
+    id_for_incident = models.IntegerField(blank=True, null=True)
+
     request = models.ForeignKey(ServiceRequest, on_delete=models.SET_NULL, blank=True, null=True)
     owners = models.ManyToManyField(Person, blank=True)
     reporter = models.ForeignKey(Person, on_delete=models.SET_NULL, blank=True, null=True, related_name="reporter_animals")
@@ -44,7 +43,7 @@ class Animal(Location, OrderedModel):
     shelter = models.ForeignKey(Shelter, on_delete=models.SET_NULL, blank=True, null=True)
     medical_record = models.OneToOneField('vet.MedicalRecord', on_delete=models.DO_NOTHING, related_name='patient', null=True, blank=True)
 
-    incident = models.ForeignKey(Incident, on_delete=models.CASCADE, default=test_incident)
+    incident = models.ForeignKey(Incident, on_delete=models.CASCADE)
 
     #choice fields
     species = models.ForeignKey(Species, on_delete=models.SET_NULL, null=True)
@@ -82,7 +81,11 @@ class Animal(Location, OrderedModel):
         elif animal_images.filter(category='side_image').exists():
             return animal_images.filter(category='side_image')[0]
         return None
-    
+
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            self.id_for_incident = Animal.objects.filter(incident=self.incident).count() + 1
+        super(Animal, self).save(*args, **kwargs)
 
     class Meta:
         ordering = ('order', 'id')

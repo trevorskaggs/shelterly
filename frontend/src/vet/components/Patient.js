@@ -30,7 +30,7 @@ function Patient(props) {
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
               <ListGroup.Item>
                 <div className="row" style={{textTransform:"capitalize"}}>
-                  <span className="col-4"><b>ID:</b> <Link href={"/" + props.organization + "/" + props.incident + "/animals/" + props.animal.id} className="text-link" style={{textDecoration:"none", color:"white"}}>A#{props.animal.id}</Link></span>
+                  <span className="col-4"><b>ID:</b> <Link href={"/" + props.organization + "/" + props.incident + "/animals/" + props.animal.id} className="text-link" style={{textDecoration:"none", color:"white"}}>A#{props.animal.id_for_incident}</Link></span>
                   <span className="col-4"><b>Species:</b> {props.animal.species_string}</span>
                   <span className="col-4"><b>Age:</b> {props.animal.age||"Unknown"}</span>
                 </div>

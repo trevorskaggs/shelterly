@@ -90,7 +90,7 @@ const buildOwnersContent = (pdf, owners, organization, animalsOverride) => {
       }
 
       const animalInfoList = [
-        `ID: A#${animal.id}`,
+        `ID: A#${animal.id_for_incident}`,
         `Status: ${capitalize(animal.status.toLowerCase(), { proper: true })}`,
         `Name: ${animal.name || 'Unknown'}`,
         `Species: ${capitalize(animal.species_string)}`,

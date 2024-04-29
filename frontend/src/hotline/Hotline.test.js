@@ -8,6 +8,7 @@ import Hotline from "./Hotline";
 import ServiceRequestDetails from "./ServiceRequestDetails";
 import ServiceRequestSearch from "./ServiceRequestSearch";
 import { SystemErrorProvider } from '../components/SystemError';
+import { initialState } from "../accounts/AccountsReducer"
 
 const MOCK_INCIDENT_ID = 1;
 
@@ -35,7 +36,7 @@ describe("Render hotline", () => {
 
 describe("Render ServiceRequestDetails", () => {
   it("Service request details loads", async () => {
-    render(<SystemErrorProvider><ServiceRequestDetails id={1} incident={MOCK_INCIDENT_ID} /></SystemErrorProvider>);
+    render(<SystemErrorProvider><ServiceRequestDetails id={1} incident={MOCK_INCIDENT_ID} state={initialState} /></SystemErrorProvider>);
     expect(screen.getAllByText(/Service Request/)).toBeTruthy();
   });
 });

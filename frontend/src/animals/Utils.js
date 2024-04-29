@@ -71,7 +71,7 @@ async function buildAnimalCareScheduleContent(pdf, animals) {
     pdf.drawPad(-15);
 
     const labelsList = [
-      [`Animal No: A#${animal.id}`, `Animal Name: ${capitalize(animal.name || 'unknown')}`],
+      [`Animal No: A#${animal.id_for_incident}`, `Animal Name: ${capitalize(animal.name || 'unknown')}`],
       [
         `Intake Date: ${animal.intake_date
           ? new Date(animal.intake_date).toLocaleDateString()
@@ -214,13 +214,13 @@ async function buildAnimalCareScheduleDoc (animals) {
 
 async function printAnimalCareSchedule (animal = {}) {
   const pdf = await buildAnimalCareScheduleDoc([animal]);
-  pdf.fileName = pdf.filename || `Shelterly-Animal-Care-Schedule-${animal.id.toString().padStart(3, 0)}-${moment().format(DATE_FORMAT)}`;
+  pdf.fileName = pdf.filename || `Shelterly-Animal-Care-Schedule-${animal.id_for_incident.toString().padStart(3, 0)}-${moment().format(DATE_FORMAT)}`;
   return pdf.saveFile();
 };
 
 async function printAllAnimalCareSchedules (animals = []) {
   // sort animals by id
-  const sortedAnimals = [...animals].sort((a,b) => a.id - b.id);
+  const sortedAnimals = [...animals].sort((a,b) => a.id_for_incident - b.id_for_incident);
 
   const  pdf = await buildAnimalCareScheduleDoc(sortedAnimals);
   pdf.fileName = `Shelterly-Animal-Care-Schedules-${moment().format(DATE_FORMAT)}`;

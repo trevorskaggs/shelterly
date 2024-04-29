@@ -31,8 +31,11 @@ function AnimalDetails({ id, incident, organization }) {
 
   // Initial animal data.
   const [data, setData] = useState({
+    id,
+    id_for_incident: '',
     owners: [],
     request: null,
+    request_id_for_incident: '',
     name: '',
     species_string: '',
     sex: '',
@@ -72,7 +75,7 @@ function AnimalDetails({ id, incident, organization }) {
   // Handle animal reunited submit.
   const handleSubmit = async () => {
     setIsLoading(true);
-    await axios.patch('/animals/api/animal/' + id + '/', {status:'REUNITED', shelter:null, room:null})
+    await axios.patch('/animals/api/animal/' + data.id + '/', {status:'REUNITED', shelter:null, room:null})
     .then(response => {
       setData(response.data);
       handleClose()
@@ -86,7 +89,7 @@ function AnimalDetails({ id, incident, organization }) {
   // Handle remove owner submit.
   const handleOwnerSubmit = async () => {
     setIsLoading(true);
-    await axios.patch('/animals/api/animal/' + id + '/', {remove_owner:ownerToDelete.id})
+    await axios.patch('/animals/api/animal/' + data.id + '/', {remove_owner:ownerToDelete.id})
     .then(response => {
       setData(prevState => ({ ...prevState, "owners":prevState.owners.filter(owner => owner.id !== ownerToDelete.id) }));
       handleOwnerClose();
@@ -100,7 +103,7 @@ function AnimalDetails({ id, incident, organization }) {
   // Handle animal removal submit.
   const handleAnimalSubmit = async () => {
     setIsLoading(true);
-    await axios.patch('/animals/api/animal/' + id + '/', {remove_animal:id})
+    await axios.patch('/animals/api/animal/' + data.id + '/', {remove_animal:id})
     .then(response => {
       handleAnimalClose();
       if (data.request) {
@@ -123,7 +126,7 @@ function AnimalDetails({ id, incident, organization }) {
   }
 
   const handleDownloadPdfClick = () => {
-    const pageURL = getFullLocationFromPath(`/${organization}/${incident}/animals/${data.id}`)
+    const pageURL = getFullLocationFromPath(`/${organization}/${incident}/animals/${id}`)
     return printAnimalCareSchedule({ ...data, url: pageURL });
   }
 
@@ -134,7 +137,7 @@ function AnimalDetails({ id, incident, organization }) {
     setIsLoading(true);
     const fetchAnimalData = async () => {
       // Fetch Animal data.
-      await axios.get('/animals/api/animal/' + id + '/', {
+      await axios.get('/animals/api/incident/' + (state ? state.incident.id : 'undefined') + '/animal/' + id + '/', {
         cancelToken: source.token,
       })
       .then(response => {
@@ -177,7 +180,7 @@ function AnimalDetails({ id, incident, organization }) {
   return (
     <>
     <Header>
-      Animal #{data.id || ' - '}
+      Animal #{data.id_for_incident || ' - '}
       <OverlayTrigger
         key={"edit"}
         placement="bottom"
@@ -466,7 +469,7 @@ function AnimalDetails({ id, incident, organization }) {
             <ListGroup variant="flush" style={{marginBottom:"-13px", marginTop:"-13px"}}>
               {data.found_location ? <ListGroup.Item><b>Found Location: </b>{data.found_location}</ListGroup.Item> : ""}
               {data.request ?
-                <ListGroup.Item><b>Service Request: </b><Link href={"/" + organization + "/" + incident + "/hotline/servicerequest/" + data.request} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.request_address}</Link></ListGroup.Item>
+                <ListGroup.Item><b>Service Request: </b><Link href={"/" + organization + "/" + incident + "/hotline/servicerequest/" + data.request_id_for_incident} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.request_address}</Link></ListGroup.Item>
               : ''}
               {data.shelter ?
               <ListGroup.Item>

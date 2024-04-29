@@ -79,7 +79,7 @@
                         <img style="max-height:144px; max-width:200px; vertical-align: center;" src="{% if animal.kennel_card_image %}{{ animal.kennel_card_image.image.url }}{% else %}{% static 'images/image-not-found.png' %}{% endif %}">
                     </div>
                     <div class='col-4' style="margin-top:-8px;">
-                        Animal No: <b>A#{{ animal.id }}</b><br/>
+                        Animal No: <b>A#{{ animal.id_for_incident }}</b><br/>
                         Intake Date: <b>{{ animal.intake_date|date:"M. d, Y"|default:"N/A" }}</b><br/>
                         Species: <b>{{ animal.species_string|capfirst }}</b><br/>
                         Age: <b>{{ animal.age|capfirst|default:"N/A" }}</b><br/>

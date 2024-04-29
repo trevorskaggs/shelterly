@@ -18,16 +18,13 @@ class BaseShelterModel(models.Model):
         abstract=True
         ordering = ['name',]
 
-def test_incident():
-    return Incident.objects.get(name='Test').id
-
 class Shelter(BaseShelterModel, Location):
 
     name = models.CharField(max_length=100)
     image = models.ImageField(upload_to='media/images/shelter', blank=True, null=True)
     phone = models.CharField(max_length=50, blank=True)
     active = models.BooleanField(default=True)
-    incident = models.ForeignKey(Incident, on_delete=models.CASCADE, default=test_incident)
+    incident = models.ForeignKey(Incident, on_delete=models.CASCADE)
 
     @property
     def location_type(self):

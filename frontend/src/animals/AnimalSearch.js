@@ -557,9 +557,9 @@ function AnimalSearch({ incident, organization }) {
                   </Tooltip>
                 }
               >
-                <Link href={"/" + organization + "/" + incident + "/animals/" + animal.id}><FontAwesomeIcon icon={faDotCircle} className="mr-2" inverse /></Link>
+                <Link href={"/" + organization + "/" + incident + "/animals/" + animal.id_for_incident}><FontAwesomeIcon icon={faDotCircle} className="mr-2" inverse /></Link>
               </OverlayTrigger>
-              A#{animal.id} - {animal.name ? titleCase(animal.name) : "Unknown"}&nbsp;| {titleCase(animal.status)}
+              A#{animal.id_for_incident} - {animal.name ? titleCase(animal.name) : "Unknown"}&nbsp;| {titleCase(animal.status)}
 
               <ShelterlyPrintifyButton
                 id="animal-search-animal-schedules"
