@@ -28,7 +28,7 @@ class TestViews(APITestCase):
         self.assertEqual(response.json().get('name'), 'bella')
 
     def test_search_animal(self):
-        self.animal = Animal.objects.create(name='Einstein')
+        self.animal = Animal.objects.create(name='Einstein', incident=self.incident)
         self.animal.owners.set([self.owner])
         self.client.force_authenticate(self.user)
         response = self.client.get(f'/animals/api/animal/{self.animal.pk}/', {'search':'Einstein'})
@@ -48,8 +48,8 @@ class TestViews(APITestCase):
         self.assertEqual(self.animal.name, 'Darwin')
 
     def test_create_animals(self):
-        self.new_owner = Person.objects.create(first_name="New", last_name="Person")
+        self.new_owner = Person.objects.create(first_name="New", last_name="Person", incident=self.incident)
         self.client.force_authenticate(self.user)
-        response = self.client.post('/animals/api/animal/', {'new_owner':[self.new_owner.pk], 'name':'Phineas'})
+        response = self.client.post('/animals/api/animal/', {'new_owner':[self.new_owner.pk], 'name':'Phineas', 'incident_slug':self.incident.slug})
         self.assertEqual(response.status_code, 201)
         self.assertTrue(Animal.objects.filter(owners=self.new_owner, name='Phineas', status="REPORTED").exists())

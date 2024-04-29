@@ -57,7 +57,7 @@ class TestViews(APITestCase):
         self.new_animal.owners.set([self.new_person])
         self.client.force_authenticate(self.user)
         # Directions are currently a required field.
-        response = self.client.post(f'/hotline/api/servicerequests/', {'owners':[self.new_person.pk], 'address':"123 Main St.", 'city':'Springfield', 'state':'MA', 'directions':"Turn left.", 'latitude':self.new_person.latitude, 'longitude':self.new_person.longitude}, incident=self.incident.id, format='json')
+        response = self.client.post(f'/hotline/api/servicerequests/', {'owners':[self.new_person.pk], 'address':"123 Main St.", 'city':'Springfield', 'state':'MA', 'directions':"Turn left.", 'latitude':self.new_person.latitude, 'longitude':self.new_person.longitude, 'incident_slug':self.incident.slug}, format='json')
         self.assertEqual(response.status_code, 201)
         self.assertTrue(ServiceRequest.objects.filter(owners=self.new_person.pk, address="123 Main St."))
 
@@ -68,6 +68,6 @@ class TestViews(APITestCase):
         self.new_animal.owners.set([self.new_person])
         self.client.force_authenticate(self.user)
         # Should directions be required field?
-        response = self.client.post(f'/hotline/api/servicerequests/', {'reporter':self.person.pk, 'address':"123 Main St.", 'city':'Springfield', 'state':'MA', 'directions':"Turn left.", 'latitude':0, 'longitude':0}, format='json')
+        response = self.client.post(f'/hotline/api/servicerequests/', {'reporter':self.person.pk, 'address':"123 Main St.", 'city':'Springfield', 'state':'MA', 'directions':"Turn left.", 'latitude':0, 'longitude':0, 'incident_slug':self.new_incident.slug}, format='json')
         self.assertEqual(response.status_code, 201)
         self.assertTrue(ServiceRequest.objects.filter(reporter=self.person.pk, address='123 Main St.', directions="Turn left.").exists())
