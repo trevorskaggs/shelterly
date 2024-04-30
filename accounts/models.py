@@ -77,6 +77,7 @@ class ShelterlyUserOrg(models.Model):
     incident_perms = models.BooleanField(default=False)
     vet_perms = models.BooleanField(default=False)
     email_notification = models.BooleanField(default=False)
+    access_expires_at = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
 
 # Send email to user on user creation.
 def email_new_user(sender, **kwargs):

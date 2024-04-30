@@ -15,6 +15,7 @@ class UserSerializer(serializers.ModelSerializer):
     vet_perms = serializers.SerializerMethodField()
     email_notification = serializers.SerializerMethodField()
     org_slugs = serializers.SerializerMethodField()
+    access_expires_at = serializers.SerializerMethodField()
 
     # Custom field for Formated Phone Number
     def get_display_phone(self, obj):
@@ -48,9 +49,15 @@ class UserSerializer(serializers.ModelSerializer):
             return obj.perms.filter(organization=self.context['request'].GET.get('organization'))[0].email_notification
         return False
 
+    # Custom field for user access expiration
+    def get_access_expires_at(self, obj):
+        if self.context.get('request') and self.context['request'].GET.get('organization'):
+            return obj.perms.filter(organization=self.context['request'].GET.get('organization'))[0].access_expires_at
+        return False
+
     def get_org_slugs(self, obj):
         return obj.organizations.all().values_list('slug', flat=True)
 
     class Meta:
         model = User
-        fields = ('agency_id', 'cell_phone', 'first_name', 'id', 'last_name', 'username', 'email', 'is_superuser', 'display_phone', 'user_perms', 'incident_perms', 'vet_perms', 'email_notification', 'organizations', 'org_slugs', 'version')
+        fields = ('agency_id', 'cell_phone', 'first_name', 'id', 'last_name', 'username', 'email', 'is_superuser', 'display_phone', 'user_perms', 'incident_perms', 'vet_perms', 'email_notification', 'organizations', 'org_slugs', 'access_expires_at', 'version')
