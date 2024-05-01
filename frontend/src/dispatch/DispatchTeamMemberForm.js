@@ -32,7 +32,7 @@ const DispatchTeamMemberForm = ({ id, incident, organization }) => {
     last_name: '',
     phone: '',
     agency_id: '',
-    incident: state.incident.id,
+    incident: state ? state.incident.id : 'undefined',
   })
 
   useEffect(() => {
