@@ -27,10 +27,6 @@ class EvacTeamMemberViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         if serializer.is_valid():
-
-            if self.request.data.get('incident_slug'):
-                serializer.validated_data['incident'] = Incident.objects.get(slug=self.request.data.get('incident_slug'))
-
             # Clean phone fields.
             serializer.validated_data['phone'] = ''.join(char for char in serializer.validated_data.get('phone', '') if char.isdigit())
             serializer.save()
@@ -74,10 +70,6 @@ class DispatchTeamViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         if serializer.is_valid():
-
-            if self.request.data.get('incident_slug'):
-                serializer.validated_data['incident'] = Incident.objects.get(slug=self.request.data.get('incident_slug'))
-
             serializer.save()
 
     def perform_update(self, serializer):
