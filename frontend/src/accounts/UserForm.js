@@ -169,7 +169,6 @@ const UserForm = ({ id, organization }) => {
                     }
                     else {
                       setData(initialData);
-                      setExistingUser(false);
                     }
                   }}
                   options={existingUsers.options}
