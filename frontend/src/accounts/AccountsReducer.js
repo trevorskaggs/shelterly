@@ -107,7 +107,12 @@ function AuthProvider(props) {
       if (!state.organization.id && org_slug && org_slug !== 'login') {
         axios.get('/incident/api/organization/?slug=' + org_slug)
         .then(orgResponse => {
-          dispatch({type: "SET_ORGANIZATION", data: {id:orgResponse.data[0].id, name:orgResponse.data[0].name}});
+          if (orgResponse.data.length > 0) {
+            dispatch({type: "SET_ORGANIZATION", data: {id:orgResponse.data[0].id, name:orgResponse.data[0].name}});
+          }
+          else {
+            navigate('/')
+          }
         })
         .catch(error => {
         });

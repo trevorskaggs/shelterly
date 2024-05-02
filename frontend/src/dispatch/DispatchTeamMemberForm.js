@@ -14,10 +14,12 @@ import {
 import * as Yup from 'yup';
 import { TextInput } from '.././components/Form.js';
 import ButtonSpinner from '../components/ButtonSpinner.js';
+import { AuthContext } from "../accounts/AccountsReducer";
 import { SystemErrorContext } from '../components/SystemError';
 
 const DispatchTeamMemberForm = ({ id, incident, organization }) => {
 
+  const { state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
   // Track whether or not to add another evac team member after saving.
@@ -30,7 +32,7 @@ const DispatchTeamMemberForm = ({ id, incident, organization }) => {
     last_name: '',
     phone: '',
     agency_id: '',
-    incident_slug: incident,
+    incident: state ? state.incident.id : 'undefined',
   })
 
   useEffect(() => {

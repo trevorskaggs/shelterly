@@ -76,8 +76,6 @@ class PersonViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         if serializer.is_valid():
-            if self.request.data.get('incident_slug'):
-                serializer.validated_data['incident'] = Incident.objects.get(slug=self.request.data.get('incident_slug'))
             # Check for duplicate owners.
             for owner in Person.objects.filter(first_name=serializer.validated_data['first_name'], last_name=serializer.validated_data['last_name'], phone=serializer.validated_data['phone'], incident__slug=self.request.data.get('incident_slug')):
                 raise serializers.ValidationError(['a duplicate owner with the same name and phone number already exists.', owner.id])

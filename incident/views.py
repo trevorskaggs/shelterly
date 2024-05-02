@@ -1,4 +1,5 @@
-from datetime import datetime
+from datetime import datetime, date
+from django.utils import timezone
 from django.contrib.sites.models import Site
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
@@ -100,8 +101,10 @@ class OrganizationViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = Organization.objects.filter(id__in=self.request.user.organizations.all()).order_by('name')
-
+        copy_queryset = queryset
+        for organization in copy_queryset:
+            if self.request.user.perms.filter(organization=organization)[0].access_expires_at and (date.today() > self.request.user.perms.filter(organization=organization)[0].access_expires_at.date()):
+                queryset = queryset.exclude(id=organization.id)
         if self.request.GET.get('slug'):
             queryset = queryset.filter(slug=self.request.GET.get('slug'))
-
         return queryset
