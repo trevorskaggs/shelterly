@@ -9,6 +9,7 @@ import {
   Card,
   Col,
 } from 'react-bootstrap';
+import { Typeahead } from 'react-bootstrap-typeahead';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faArrowAltCircleLeft,
@@ -27,7 +28,9 @@ const UserForm = ({ id, organization }) => {
   // Regex validators.
   const phoneRegex = /^((\+\d{1,3}(-| )?\(?\d\)?(-| )?\d{1,3})|(\(?\d{2,3}\)?))(-| )?(\d{3,4})(-| )?(\d{4})(( x| ext)\d{1,5}){0,1}$/;
 
-  const [data, setData] = useState({
+  const [existingUsers, setExistingUsers] = useState({data:{}, options:[], fetching:true});
+
+  const initialData = {
     first_name: '',
     last_name: '',
     email: '',
@@ -40,7 +43,9 @@ const UserForm = ({ id, organization }) => {
     access_expires_at: null,
     organizations: [],
     presets: 0
-  })
+  }
+
+  const [data, setData] = useState(initialData)
 
   // Hook for initializing data.
   useEffect(() => {
@@ -65,6 +70,29 @@ const UserForm = ({ id, organization }) => {
       };
       fetchUserData();
     }
+
+    const fetchExistingUserData = async () => {
+      // Fetch all users data.
+      await axios.get('/accounts/api/user/', {
+        cancelToken: source.token,
+      })
+      .then(existingUsersResponse => {
+        if (!unmounted) {
+          let options = [];
+          existingUsersResponse.data.forEach(user => {
+            options.push({id: user.id, label: user.first_name + ' ' + user.last_name + ' - ' + user.display_phone + ' - ' + user.email})
+          })
+          setExistingUsers({data:existingUsersResponse.data, options:options, fetching:false});
+        }
+      })
+      .catch(error => {
+        if (!unmounted) {
+          setShowSystemError(true);
+        }
+      });
+    }
+    fetchExistingUserData();
+
     // Cleanup.
     return () => {
       unmounted = true;
@@ -102,8 +130,8 @@ const UserForm = ({ id, organization }) => {
         // Pass current organization value.
         values['organization'] = state.organization.id;
         setTimeout(() => {
-          if (id) {
-            axios.put('/accounts/api/user/' + id + '/', values)
+          if (data.id) {
+            axios.put('/accounts/api/user/' + data.id + '/', values)
             .then(function () {
               navigate('/' + organization + '/accounts/user_management');
             })
@@ -130,6 +158,26 @@ const UserForm = ({ id, organization }) => {
           <Card.Header as="h5" className="pl-3"><span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + organization + '/accounts/user_management')} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>{state.organization.name} - {id ? "Edit" : "New"} User</Card.Header>
           <Card.Body>
             <BootstrapForm>
+              {!id ? <span>
+                <label>Use Existing User</label>
+                <Typeahead
+                  id="existing_user"
+                  className="mb-3"
+                  onChange={(values) => {
+                    if (values.length) {
+                      setData(existingUsers.data.filter(user => user.id === values[0].id)[0])
+                    }
+                    else {
+                      setData(initialData);
+                      setExistingUser(false);
+                    }
+                  }}
+                  options={existingUsers.options}
+                  placeholder={existingUsers.fetching ? "Loading..." : "Search..."}
+                  disabled={existingUsers.fetching ? true : false}
+                  emptyLabel="No matches found. Please fill out the form below."
+                />
+              </span> : ""}
               <BootstrapForm.Row>
                 <TextInput
                   type="text"

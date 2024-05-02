@@ -109,6 +109,8 @@ class UserViewSet(CreateUserMixin, viewsets.ModelViewSet):
         if serializer.is_valid():
             if self.request.user.is_superuser or self.request.user.perms.filter(organization=self.request.data.get('organization'))[0].user_perms:
                 user = serializer.save()
+                if self.request.data.get('organization') not in user.organizations.all():
+                    user.organizations.add(Organization.objects.get(id=self.request.data.get('organization')))
 
                 if self.request.data.get('reset_password'):
                     ResetPasswordToken = apps.get_model('django_rest_passwordreset', 'ResetPasswordToken')
