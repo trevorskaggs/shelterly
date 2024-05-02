@@ -38,7 +38,8 @@ const UserForm = ({ id, organization }) => {
     vet_perms: false,
     email_notification: false,
     access_expires_at: null,
-    organizations: []
+    organizations: [],
+    presets: 0
   })
 
   // Hook for initializing data.
@@ -190,12 +191,17 @@ const UserForm = ({ id, organization }) => {
                     id="presets"
                     name="presets"
                     type="text"
-                    options={[{value:1, label:'1 day'}, {value:3, label:'3 days'}, {value:5, label:'5 days'}, {value:7, label:'7 days'}, {value:14, label:'14 days'}, {value:30, label:'30 days'}]}
+                    options={[{value:0, label:'Never'}, {value:1, label:'1 day'}, {value:3, label:'3 days'}, {value:5, label:'5 days'}, {value:7, label:'7 days'}, {value:14, label:'14 days'}, {value:30, label:'30 days'}]}
                     onChange={(instance) => {
-                      var access_date = new Date(new Date().setDate(new Date().getDate() + (instance.value - 1)));
-                      formikProps.setFieldValue("access_expires_at", access_date)
+                      if (instance.value > 0) {
+                        var access_date = new Date(new Date().setDate(new Date().getDate() + (instance.value - 1)));
+                        formikProps.setFieldValue("access_expires_at", access_date)
+                      }
+                      else {
+                        formikProps.setFieldValue("access_expires_at", null)
+                      }
+                      formikProps.setFieldValue("presets", instance.value)
                     }}
-                    // value={formikProps.values.presets||'unknown'}
                     isClearable={false}
                   />
                 </Col>
