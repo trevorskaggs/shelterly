@@ -382,7 +382,7 @@ function Deploy({ incident, organization }) {
         temp_team_name: teamName,
         team_members: [],
         service_requests: [],
-        incident_slug: incident,
+        incident: state.incident.id,
       }}
       validationSchema={Yup.object({
         temp_team_name: Yup.string()
