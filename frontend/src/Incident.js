@@ -6,6 +6,10 @@ import SimpleValue from 'react-select-simple-value';
 import { Button, Col, Row } from 'react-bootstrap';
 import { Link, navigate } from "raviger";
 import moment from 'moment';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faCircleT,
+} from '@fortawesome/pro-solid-svg-icons';
 import { loadUser } from "./accounts/AccountsUtils";
 import { AuthContext } from "./accounts/AccountsReducer";
 import { SystemErrorContext } from './components/SystemError';
@@ -101,12 +105,21 @@ function Incident() {
 
   return (
     <>
-    <Row className='ml-auto mr-auto mt-auto align-bottom'>
+    <Row className='ml-auto mr-auto mt-5 align-bottom'>
       <h1 style={{fontSize:"100px", textTransform: 'capitalize'}}>{state.organization.name}</h1>
     </Row>
     <Col xs={{ span:5 }} className="border rounded border-light shadow-sm ml-auto mr-auto mb-auto" style={{minWidth:"572px"}}>
       <SimpleValue options={options}>
-        {simpleProps => <Select styles={customStyles} {...simpleProps} className="mt-3" placeholder="Select incident..." onChange={(instance) => setIncident({id:instance.value, slug:instance.slug, name:instance.name, training:instance.training})} />}
+        {simpleProps => <Select styles={customStyles} {...simpleProps} className="mt-3" placeholder="Select incident..." onChange={(instance) => setIncident({id:instance.value, slug:instance.slug, name:instance.name, training:instance.training})}
+        getOptionLabel={(props) => {
+          return (
+            <div tw="flex items-center gap-2">
+              {props.training ? <FontAwesomeIcon icon={faCircleT} className="mr-1" /> : ""}
+              <span>{props.label}</span>
+            </div>
+          );
+        }}
+                />}
       </SimpleValue>
       <Button size="lg" className="btn-primary mt-3" onClick={() => handleSubmit(incident.id, incident.name, incident.training)} disabled={incident.id ? false : true} block>Select Incident</Button>
       {state.user.is_superuser || state.user.incident_perms ?
@@ -120,11 +133,16 @@ function Incident() {
         </Row>
       : ""}
       <Row>
-        {state.user.is_superuser || state.user.incident_perms ? <Col style={{marginRight:"-23px"}}>
+        {state.user.is_superuser || state.user.incident_perms ? <Col>
           <Link href={'/' + org_slug + '/incident/new'} style={{textDecoration:"none"}}><Button size="lg" className="btn-primary mt-2" block>Create New Incident</Button></Link>
         </Col> : ""}
-        {state.user.is_superuser || state.user.user_perms ? <Col>
+      </Row>
+      <Row>
+        {state.user.is_superuser || state.user.user_perms ? <Col style={{marginRight:"-23px"}}>
           <Link href={'/' + org_slug + '/accounts/user_management'} style={{textDecoration:"none"}}><Button size="lg" className="btn-primary mt-2" block>User Administration</Button></Link>
+        </Col> : ""}
+        {state.user.is_superuser || state.user.user_perms ? <Col>
+          <Link href={'/' + org_slug + '/signup/manage'} style={{textDecoration:"none"}}><Button size="lg" className="btn-primary mt-2" block>Temporary User Registration</Button></Link>
         </Col> : ""}
       </Row>
       <Link href={"/"} style={{textDecoration:"none"}}><Button size="lg" className="btn-primary mt-2 mb-3" block>Return to Organizations</Button></Link>

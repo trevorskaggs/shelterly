@@ -93,25 +93,6 @@ const Menu = ({ state, dispatch, removeCookie, ...props }) => {
         </OverlayTrigger> : ""}
         <span style={{cursor:"pointer"}} className="incident" onClick={() => navigate('/' + path.split('/')[1])}>{state.incident.name}</span>
       </div>
-      {/* <Link href={incident + "/hotline"} className="rounded sidebar" style={{backgroundColor:(path.includes("/hotline/") || path.endsWith("/hotline")) && !path.includes("search") ? "#444444" : "#292b2c", marginLeft:"-33px", marginRight:"-23px", marginBottom:"-10px"}}><FontAwesomeIcon icon={faPhone} fixedWidth inverse className="sidebar-icon mr-2" style={{marginLeft:"23px"}} />HOTLINE</Link>
-      <Link href={incident + "/dispatch"} className="rounded sidebar" style={{backgroundColor:(path.includes("/dispatch/") || path.endsWith("/dispatch")) && !path.includes("search") ? "#444444" : "#292b2c", marginLeft:"-33px", marginRight:"-23px", marginBottom:"-10px"}}><FontAwesomeIcon icon={faBullhorn} fixedWidth inverse className="sidebar-icon mr-2" style={{marginLeft:"23px"}} />DISPATCH</Link>
-      <Link href={incident + "/shelter"} className="rounded sidebar" style={{backgroundColor:path.includes("/shelter/") || path.endsWith("/shelter") ? "#444444" : "#292b2c", marginLeft:"-33px", marginRight:"-23px", marginBottom:"-10px"}}><FontAwesomeIcon icon={faHome} fixedWidth inverse className="sidebar-icon mr-2" style={{marginLeft:"23px"}} />SHELTER</Link>
-      <Link href={incident + "/vet"} className="rounded sidebar" style={{backgroundColor:(path.includes("/vet/") || path.endsWith("/vet")) && !path.includes("search") ? "#444444" : "#292b2c", marginLeft:"-33px", marginRight:"-23px", marginBottom:"-10px"}}><FontAwesomeIcon icon={faHouseMedical} fixedWidth inverse className="sidebar-icon mr-2" style={{marginLeft:"23px"}} />VETMED</Link>
-      <span className="rounded sidebar search" onClick={() => setShowSearch(!showSearch)} style={{cursor:'pointer', marginLeft:"-15px", marginBottom:"-10px"}}><FontAwesomeIcon icon={faSearch} className="sidebar-icon mr-2" fixedWidth inverse /><span className="sidebar-icon">SEARCH</span><FontAwesomeIcon icon={showSearch ? faChevronUp : faChevronDown} size="sm" className="fa-move-up sidebar-icon" fixedWidth inverse /></span>
-      <div className="logo border-bottom text-center" style={{paddingBottom:"12px", letterSpacing:"0.25rem", fontSize:"1.2rem"}} title="Incident">
-        {state.incident.training ? <OverlayTrigger
-          key={"incident-training"}
-          placement="top"
-          overlay={
-            <Tooltip id={`tooltip-incident-training`}>
-              This incident is flagged for training purposes.
-            </Tooltip>
-          }
-        >
-          <FontAwesomeIcon icon={faCircleT} size="" className="mr-1" />
-        </OverlayTrigger> : ""}
-        <span style={{cursor:"pointer"}} className="incident" onClick={() => navigate('/' + path.split('/')[1])}>{state.incident.name}</span>
-      </div> */}
       <Link href={incident + "/hotline"} className="rounded sidebar" style={{backgroundColor:(path.includes("/hotline/") || path.endsWith("/hotline")) && !path.includes("search") ? "#444444" : "#292b2c", marginLeft:"-33px", marginRight:"-23px", marginBottom:"-10px"}}><FontAwesomeIcon icon={faPhone} fixedWidth inverse className="sidebar-icon mr-2" style={{marginLeft:"23px"}} />HOTLINE</Link>
       <Link href={incident + "/dispatch"} className="rounded sidebar" style={{backgroundColor:(path.includes("/dispatch/") || path.endsWith("/dispatch")) && !path.includes("search") ? "#444444" : "#292b2c", marginLeft:"-33px", marginRight:"-23px", marginBottom:"-10px"}}><FontAwesomeIcon icon={faBullhorn} fixedWidth inverse className="sidebar-icon mr-2" style={{marginLeft:"23px"}} />DISPATCH</Link>
       <Link href={incident + "/shelter"} className="rounded sidebar" style={{backgroundColor:path.includes("/shelter/") || path.endsWith("/shelter") ? "#444444" : "#292b2c", marginLeft:"-33px", marginRight:"-23px", marginBottom:"-10px"}}><FontAwesomeIcon icon={faHome} fixedWidth inverse className="sidebar-icon mr-2" style={{marginLeft:"23px"}} />SHELTER</Link>

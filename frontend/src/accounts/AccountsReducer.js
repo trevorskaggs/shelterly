@@ -92,7 +92,7 @@ function AuthProvider(props) {
     window.addEventListener("focus", onFocus);
 
     // Redirect user if they attempt to access an Organization they aren't a member of.
-    if (!Object.keys(publicRoutes).includes(path) && state.user && path !== '/' && !state.user.org_slugs.includes(org_slug)) {
+    if (!Object.keys(publicRoutes).includes(path) && state.user && path !== '/' && !state.user.org_slugs.includes(org_slug) && !path.includes('/signup/')) {
       navigate("/");
     }
 
@@ -118,7 +118,7 @@ function AuthProvider(props) {
         });
       }
       // Fetch Incident data.
-      if (incident_slug && !state.incident.name && incident_slug !=='accounts'){
+      if (incident_slug && !state.incident.name && incident_slug !=='accounts' && !path.includes('/signup/')){
         axios.get('/incident/api/incident/?incident=' + incident_slug)
         .then(incidentResponse => {
           dispatch({type: "SET_INCIDENT", data: {id:incidentResponse.data[0].id, name:incidentResponse.data[0].name, training:incidentResponse.data[0].training}});

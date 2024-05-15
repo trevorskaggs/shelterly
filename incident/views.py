@@ -8,8 +8,8 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 
 from accounts.models import ShelterlyUser
-from incident.models import Incident, Organization
-from incident.serializers import IncidentSerializer, OrganizationSerializer
+from incident.models import Incident, Organization, TemporaryAccess
+from incident.serializers import IncidentSerializer, OrganizationSerializer, TemporaryAccessSerializer
 
 
 # Provides view for User API calls.
@@ -93,7 +93,7 @@ class IncidentViewSet(viewsets.ModelViewSet):
             return Response({'error': 'Invalid hide value'}, status=status.HTTP_400_BAD_REQUEST)
         
 
-# Provides view for User API calls.
+# Provides view for Organization calls.
 class OrganizationViewSet(viewsets.ModelViewSet):
     queryset = Organization.objects.all()
     permission_classes = [permissions.IsAuthenticated]
@@ -108,3 +108,8 @@ class OrganizationViewSet(viewsets.ModelViewSet):
         if self.request.GET.get('slug'):
             queryset = queryset.filter(slug=self.request.GET.get('slug'))
         return queryset
+
+class TemporaryAccessViewSet(viewsets.ModelViewSet):
+    queryset = TemporaryAccess.objects.all()
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = TemporaryAccessSerializer

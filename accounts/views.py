@@ -1,5 +1,6 @@
 import csv
 import io
+from datetime import datetime
 
 from django.contrib.auth import get_user_model, login
 from django.contrib.sites.models import Site
@@ -14,7 +15,7 @@ from rest_framework.authtoken.serializers import AuthTokenSerializer
 
 from accounts.models import ShelterlyUser, ShelterlyUserOrg
 from accounts.serializers import UserSerializer
-from incident.models import Organization
+from incident.models import Organization, TemporaryAccess
 
 User = get_user_model()
 
@@ -107,7 +108,8 @@ class UserViewSet(CreateUserMixin, viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         if serializer.is_valid():
-            if self.request.user.is_superuser or self.request.user.perms.filter(organization=self.request.data.get('organization'))[0].user_perms:
+            perms = self.request.user.perms.filter(organization=self.request.data.get('organization'))
+            if self.request.user.is_superuser or (perms and perms[0].user_perms):
                 user = serializer.save()
                 if self.request.data.get('organization') not in user.organizations.all():
                     user.organizations.add(Organization.objects.get(id=self.request.data.get('organization')))
@@ -145,6 +147,12 @@ class UserViewSet(CreateUserMixin, viewsets.ModelViewSet):
                     )
                 else:
                     ShelterlyUserOrg.objects.filter(user=user, organization=self.request.data.get('organization')).update(access_expires_at=self.request.data.get('access_expires_at', None), user_perms=self.request.data.get('user_perms', False), incident_perms=self.request.data.get('incident_perms', False), vet_perms=self.request.data.get('vet_perms', False), email_notification=self.request.data.get('email_notification', False))
+            elif self.request.data.get('temp_access_id'):
+                user = serializer.save()
+                for access in TemporaryAccess.objects.filter(id=self.request.data.get('temp_access_id'), link_expires_at__gte=datetime.today()):
+                    if self.request.data.get('organization') not in user.organizations.all():
+                        user.organizations.add(Organization.objects.get(id=self.request.data.get('organization')))
+                    ShelterlyUserOrg.objects.filter(user=user, organization=self.request.data.get('organization')).update(access_expires_at=access.access_expires_at)
 
 
     def perform_destroy(self, instance):

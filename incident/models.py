@@ -4,6 +4,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.core.exceptions import ValidationError
 import re
+import uuid
 
 from accounts.models import ShelterlyUserOrg
 
@@ -49,3 +50,10 @@ class Incident(models.Model):
 
     class Meta:
         ordering = ['name']
+
+class TemporaryAccess(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4().hex, editable=False)
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    access_expires_at = models.DateField(auto_now_add=False)
+    link_expires_at = models.DateField(auto_now_add=False)
