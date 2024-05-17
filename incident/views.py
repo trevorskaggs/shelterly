@@ -82,13 +82,16 @@ class IncidentViewSet(viewsets.ModelViewSet):
                     incident.save()
 
     # New method to specifically handle updating the 'hide' property of an incident.
-    @action(detail=True, methods=['patch'], permission_classes=[permissions.IsAdminUser])
+    @action(detail=True, methods=['patch'])
     def hide(self, request, pk=None):
         try:
             incident = self.get_object()
-            incident.hide = request.data.get('hide', False)
-            incident.save()
-            return Response({'status': 'hide status updated'}, status=status.HTTP_200_OK)
+            if self.request.user.is_superuser or self.request.user.perms.filter(organization=incident.organization)[0].incident_perms:
+                incident.hide = request.data.get('hide', False)
+                incident.save()
+                return Response({'status': 'hide status updated'}, status=status.HTTP_200_OK)
+            else:
+                return Response({'error': 'Invalid hide value'}, status=status.HTTP_400_BAD_REQUEST)
         except ValueError:
             return Response({'error': 'Invalid hide value'}, status=status.HTTP_400_BAD_REQUEST)
         
