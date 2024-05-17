@@ -57,10 +57,10 @@ const TemporaryAccessForm = ({ organization }) => {
   useEffect(() => {
     let unmounted = false;
     let source = axios.CancelToken.source();
-    if (state.user.user_perms) {
+    if (state.user.is_superuser || state.user.user_perms) {
       const fetchTempAccess = async () => {
         // Fetch Temporary Access data.
-        await axios.get('/incident/api/tempaccess/', {
+        await axios.get('/incident/api/tempaccess/?organization=' + organization, {
           cancelToken: source.token,
         })
         .then(response => {
@@ -85,9 +85,9 @@ const TemporaryAccessForm = ({ organization }) => {
 
   return (
     <>
-      {state.user.user_perms ? <span>
+      {state.user.is_superuser || state.user.user_perms ? <span className="mt-3 ml-auto mr-auto" style={{width:"80%", maxWidth:"80%"}}>
       <Header>
-        <Link href={"/" + organization} style={{textDecoration:"none", color:"white"}}>{state.organization.name}</Link> - Temporary Access Management
+        <Link href={"/" + organization} style={{textDecoration:"none", color:"white"}}>{state.organization.name}</Link> - User Registration
       </Header>
       <hr/>
       <Formik
@@ -111,7 +111,7 @@ const TemporaryAccessForm = ({ organization }) => {
         }}
       >
       {formikProps => (
-        <Card border="secondary" className="mt-1" style={{width:"35%", maxWidth:"35%"}}>
+        <Card border="secondary" className="mt-1" style={{width:"45%", maxWidth:"45%"}}>
           <Card.Body>
             <Form>
               <BootstrapForm.Row className="mb-3">

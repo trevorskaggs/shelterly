@@ -113,3 +113,9 @@ class TemporaryAccessViewSet(viewsets.ModelViewSet):
     queryset = TemporaryAccess.objects.all()
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = TemporaryAccessSerializer
+
+    def get_queryset(self):
+        queryset = TemporaryAccess.objects.filter(link_expires_at__gte=datetime.today())
+        if self.request.GET.get('organization'):
+            queryset = queryset.filter(organization__slug=self.request.GET.get('organization'))
+        return queryset

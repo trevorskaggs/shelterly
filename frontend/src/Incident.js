@@ -124,6 +124,9 @@ function Incident() {
       <Button size="lg" className="btn-primary mt-3" onClick={() => handleSubmit(incident.id, incident.name, incident.training)} disabled={incident.id ? false : true} block>Select Incident</Button>
       {state.user.is_superuser || state.user.incident_perms ?
         <Row>
+          {state.user.is_superuser || state.user.incident_perms ? <Col style={{marginRight:"-23px"}}>
+            <Link href={'/' + org_slug + '/incident/new'} style={{textDecoration:"none"}}><Button size="lg" className="btn-primary mt-2" block>Create Incident</Button></Link>
+          </Col> : ""}
           <Col style={{marginRight:"-23px"}}>
             <Link href={'/' + org_slug + '/incident/edit/' + incident.id} style={{textDecoration:"none"}}><Button size="lg" className="btn-primary mt-2" disabled={incident.id ? false : true} block>Edit Incident</Button></Link>
           </Col>
@@ -133,16 +136,11 @@ function Incident() {
         </Row>
       : ""}
       <Row>
-        {state.user.is_superuser || state.user.incident_perms ? <Col>
-          <Link href={'/' + org_slug + '/incident/new'} style={{textDecoration:"none"}}><Button size="lg" className="btn-primary mt-2" block>Create New Incident</Button></Link>
-        </Col> : ""}
-      </Row>
-      <Row>
         {state.user.is_superuser || state.user.user_perms ? <Col style={{marginRight:"-23px"}}>
           <Link href={'/' + org_slug + '/accounts/user_management'} style={{textDecoration:"none"}}><Button size="lg" className="btn-primary mt-2" block>User Administration</Button></Link>
         </Col> : ""}
         {state.user.is_superuser || state.user.user_perms ? <Col>
-          <Link href={'/' + org_slug + '/signup/manage'} style={{textDecoration:"none"}}><Button size="lg" className="btn-primary mt-2" block>Temporary User Registration</Button></Link>
+          <Link href={'/' + org_slug + '/signup/manage'} style={{textDecoration:"none"}}><Button size="lg" className="btn-primary mt-2" block>User Registration</Button></Link>
         </Col> : ""}
       </Row>
       <Link href={"/"} style={{textDecoration:"none"}}><Button size="lg" className="btn-primary mt-2 mb-3" block>Return to Organizations</Button></Link>
