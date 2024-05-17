@@ -524,7 +524,7 @@ const AnimalForm = (props) => {
               .then(response => {
                 // If adding to an SR, redirect to the SR.
                 if (servicerequest_id) {
-                  navigate('/' + props.organization + incident + '/hotline/servicerequest/' + servicerequest_id);
+                  navigate('/' + props.organization + incident + '/hotline/servicerequest/' + response.data.request_id_for_incident);
                 }
                 // If adding to an Owner, redirect to the owner.
                 else if (owner_id) {
@@ -532,7 +532,7 @@ const AnimalForm = (props) => {
                 }
                 // Else redirect to the animal.
                 else {
-                  navigate('/' + props.organization + incident + '/animals/' + id);
+                  navigate('/' + props.organization + incident + '/animals/' + response.data.id_for_incident);
                 }
               })
               .catch(error => {
