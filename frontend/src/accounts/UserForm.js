@@ -15,7 +15,7 @@ import {
   faArrowAltCircleLeft,
 } from '@fortawesome/free-solid-svg-icons';
 import * as Yup from 'yup';
-import { DateTimePicker, DropDown, TextInput } from '.././components/Form.js';
+import { DateTimePicker, DropDown, TextInput, ToggleSwitch } from '.././components/Form.js';
 import ButtonSpinner from '../components/ButtonSpinner.js';
 import { SystemErrorContext } from '../components/SystemError';
 import { AuthContext } from "./AccountsReducer";
@@ -219,8 +219,28 @@ const UserForm = ({ id, organization }) => {
                 />
               </BootstrapForm.Row>
               <BootstrapForm.Row className="mb-3">
+                <Col xs="3">
+                  <DropDown
+                    label="Access Expires In"
+                    id="presets"
+                    name="presets"
+                    type="text"
+                    options={[{value:0, label:'Never'}, {value:1, label:'1 day'}, {value:3, label:'3 days'}, {value:5, label:'5 days'}, {value:7, label:'7 days'}, {value:14, label:'14 days'}, {value:30, label:'30 days'}, {value:-1, label:'Custom'}, ]}
+                    onChange={(instance) => {
+                      if (instance.value > 0) {
+                        var access_date = new Date(new Date().setDate(new Date().getDate() + (instance.value - 1)));
+                        formikProps.setFieldValue("access_expires_at", access_date)
+                      }
+                      else if (instance.value === 0) {
+                        formikProps.setFieldValue("access_expires_at", null)
+                      }
+                      formikProps.setFieldValue("presets", instance.value)
+                    }}
+                    isClearable={false}
+                  />
+                </Col>
                 <DateTimePicker
-                  label="Access Expires At"
+                  label="&nbsp;"
                   name="access_expires_at"
                   id="access_expires_at"
                   xs="6"
@@ -230,37 +250,23 @@ const UserForm = ({ id, organization }) => {
                   }}
                   value={formikProps.values.access_expires_at||null}
                   more_options={{minDate:'today'}}
-                  disabled={false}
+                  disabled={formikProps.values.presets !== -1}
                 />
-                <Col xs="3">
-                  <DropDown
-                    label="&nbsp;"
-                    id="presets"
-                    name="presets"
-                    type="text"
-                    options={[{value:0, label:'Never'}, {value:1, label:'1 day'}, {value:3, label:'3 days'}, {value:5, label:'5 days'}, {value:7, label:'7 days'}, {value:14, label:'14 days'}, {value:30, label:'30 days'}]}
-                    onChange={(instance) => {
-                      if (instance.value > 0) {
-                        var access_date = new Date(new Date().setDate(new Date().getDate() + (instance.value - 1)));
-                        formikProps.setFieldValue("access_expires_at", access_date)
-                      }
-                      else {
-                        formikProps.setFieldValue("access_expires_at", null)
-                      }
-                      formikProps.setFieldValue("presets", instance.value)
-                    }}
-                    isClearable={false}
-                  />
+              </BootstrapForm.Row>
+              <BootstrapForm.Row>
+                <Col>
+                  <ToggleSwitch name="user_perms" id="user_perms" label="User Permissions" />
+                </Col>
+                <Col>
+                  <ToggleSwitch name="incident_perms" id="incident_perms" label="Incident Permissions" />
+                </Col>
+                <Col>
+                  <ToggleSwitch name="vet_perms" id="vet_perms" label="Veterinary Permissions" />
+                </Col>
+                <Col>
+                  <ToggleSwitch name="email_notification" id="email_notification" label="SR Email Notification" />
                 </Col>
               </BootstrapForm.Row>
-              <BootstrapForm.Label htmlFor="user_perms">User Permissions</BootstrapForm.Label>
-              <Field component={Switch} name="user_perms" id="user_perms" type="checkbox" color="primary" />
-              <BootstrapForm.Label htmlFor="incident_perms">Incident Permissions</BootstrapForm.Label>
-              <Field component={Switch} name="incident_perms" id="incident_perms" type="checkbox" color="primary" />
-              <BootstrapForm.Label htmlFor="vet_perms">Veterinary Permissions</BootstrapForm.Label>
-              <Field component={Switch} name="vet_perms" id="vet_perms" type="checkbox" color="primary" />
-              <BootstrapForm.Label htmlFor="email_notification">SR Email Notification</BootstrapForm.Label>
-              <Field component={Switch} name="email_notification" id="email_notification" type="checkbox" color="primary" />
             </BootstrapForm>
           </Card.Body>
           <ButtonGroup size="lg">

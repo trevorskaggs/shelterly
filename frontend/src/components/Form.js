@@ -158,7 +158,7 @@ const ToggleSwitch = (props) => {
   return (
     <>
       <Form.Label htmlFor={props.name} style={{marginBottom:"-5px"}}>{props.label}</Form.Label>
-      <div style={{marginLeft:"20px"}} ref={meta.error && registeredRef}><Field component={Switch} id={props.id} name={props.name} type="checkbox" color="primary" disabled={props.disabled} /></div>
+      <div style={{marginLeft:"25px"}} ref={meta.error && registeredRef}><Field component={Switch} id={props.id} name={props.name} type="checkbox" color="primary" disabled={props.disabled} /></div>
       {meta.error ? <div style={{ color: "#e74c3c", marginTop: ".5rem", fontSize: "80%" }}>{meta.error}</div> : ""}
     </>
 )}

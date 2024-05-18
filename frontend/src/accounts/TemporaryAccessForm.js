@@ -16,7 +16,7 @@ import {
   Tooltip,
 } from 'react-bootstrap';
 import {
-  faTimes
+  faArrowAltCircleLeft, faTimes
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -87,7 +87,8 @@ const TemporaryAccessForm = ({ organization }) => {
     <>
       {state.user.is_superuser || state.user.user_perms ? <span className="mt-3 ml-auto mr-auto" style={{width:"80%", maxWidth:"80%"}}>
       <Header>
-        <Link href={"/" + organization} style={{textDecoration:"none", color:"white"}}>{state.organization.name}</Link> - User Registration
+        <span style={{cursor:'pointer'}} onClick={() => navigate("/" + organization)} className="mr-2"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="sm" inverse /></span>
+        {state.organization.name} - User Registration
       </Header>
       <hr/>
       <Formik
@@ -177,7 +178,7 @@ const TemporaryAccessForm = ({ organization }) => {
               onClick={() => { formikProps.submitForm() }}
               data-testid="save_button"
             >
-              Save
+              Create Access Link
             </Button>
           </ButtonGroup>
         </Card>
