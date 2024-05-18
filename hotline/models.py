@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, transaction
 from actstream import action
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
@@ -128,8 +128,13 @@ class ServiceRequest(Location):
 
     def save(self, *args, **kwargs):
         if not self.pk:
-            self.id_for_incident = ServiceRequest.objects.filter(incident=self.incident).count() + 1
-        super(ServiceRequest, self).save(*args, **kwargs)
+            total_srs = ServiceRequest.objects.select_for_update().filter(incident=self.incident).values_list('id', flat=True)
+            with transaction.atomic():
+                count = len(total_srs)
+                self.id_for_incident = count + 1
+                super(ServiceRequest, self).save(*args, **kwargs)
+        else:
+            super(ServiceRequest, self).save(*args, **kwargs)
 
     objects = ServiceRequestQueryset.as_manager()
 

@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.shortcuts import render
+from django.db import transaction
 from django.db.models import Q
 import operator
 from functools import reduce
@@ -34,60 +35,68 @@ class AnimalViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = AnimalSerializer
 
+    # @transaction.atomic
     def perform_create(self, serializer):
-        if serializer.is_valid():
 
-            # Set status to SHELTERED if a shelter is added.
-            if serializer.validated_data.get('shelter'):
-                serializer.validated_data['status'] = 'SHELTERED'
-                serializer.validated_data['intake_date'] = datetime.now()
+            if serializer.is_valid():
 
-            if self.request.data.get('incident_slug'):
-                serializer.validated_data['incident'] = Incident.objects.get(slug=self.request.data.get('incident_slug'))
+                total_animals = Animal.objects.select_for_update().filter(incident__slug=self.request.data.get('incident_slug')).values_list('id', flat=True)
+                with transaction.atomic():
+                    count = len(total_animals)
+                    serializer.validated_data['id_for_incident'] = count + 1
 
-            animal = serializer.save()
-            animals = [animal]
-            action.send(self.request.user, verb='created animal', target=animal)
+                    # Set status to SHELTERED if a shelter is added.
+                    if serializer.validated_data.get('shelter'):
+                        serializer.validated_data['status'] = 'SHELTERED'
+                        serializer.validated_data['intake_date'] = datetime.now()
 
-            # Create multiple copies of animal if specified.
-            for i in range(int(self.request.data.get('number_of_animals', 1)) -1):
-                new_animal = deepcopy(animal)
-                new_animal.id = None
-                new_animal.save()
-                animals.append(new_animal)
+                    if self.request.data.get('incident_slug'):
+                        serializer.validated_data['incident'] = Incident.objects.get(slug=self.request.data.get('incident_slug'))
 
-            for animal in animals:
-                # Add Owner to new animals if included.
-                if self.request.data.get('new_owner', 'undefined') != 'undefined':
-                    animal.owners.add(self.request.data['new_owner'])
+                    animal = serializer.save()
+                    animals = [animal]
+                    action.send(self.request.user, verb='created animal', target=animal)
 
-                # Add ServiceRequest Owner to new animals being added to an SR.
-                if serializer.validated_data.get('request'):
-                    animal.owners.add(*animal.request.owners.all())
+                    # Create multiple copies of animal if specified.
+                    for i in range(int(self.request.data.get('number_of_animals', 1)) -1):
+                        new_animal = deepcopy(animal)
+                        new_animal.id = None
+                        new_animal.id_for_incident = count + i + 2
+                        new_animal.save()
+                        animals.append(new_animal)
 
-                if animal.shelter:
-                    action.send(self.request.user, verb='sheltered animal in', target=animal, action_object=animal.shelter)
-                    action.send(self.request.user, verb='sheltered animal', target=animal.shelter, action_object=animal)
+                    for animal in animals:
+                        # Add Owner to new animals if included.
+                        if self.request.data.get('new_owner', 'undefined') != 'undefined':
+                            animal.owners.add(self.request.data['new_owner'])
 
-                if animal.room:
-                    action.send(self.request.user, verb='roomed animal in', target=animal, action_object=animal.room)
-                    action.send(self.request.user, verb='roomed animal', target=animal.room, action_object=animal)
-                    action.send(self.request.user, verb='roomed animal', target=animal.room.building, action_object=animal)
+                        # Add ServiceRequest Owner to new animals being added to an SR.
+                        if serializer.validated_data.get('request'):
+                            animal.owners.add(*animal.request.owners.all())
 
-                images_data = self.request.FILES
-                for key, image_data in images_data.items():
-                    # Strip out extra numbers from the key (e.g. "extra1" -> "extra")
-                    category = key.translate({ord(num): None for num in '0123456789'})
-                    # Create image object.
-                    AnimalImage.objects.create(image=image_data, animal=animal, category=category)
+                        if animal.shelter:
+                            action.send(self.request.user, verb='sheltered animal in', target=animal, action_object=animal.shelter)
+                            action.send(self.request.user, verb='sheltered animal', target=animal.shelter, action_object=animal)
 
-            # Check to see if there is an intake summary
-            if self.request.data.get('intake_summary', False):
-                IntakeSummary.objects.get(pk=self.request.data.get('intake_summary')).animals.add(*animals)
+                        if animal.room:
+                            action.send(self.request.user, verb='roomed animal in', target=animal, action_object=animal.room)
+                            action.send(self.request.user, verb='roomed animal', target=animal.room, action_object=animal)
+                            action.send(self.request.user, verb='roomed animal', target=animal.room.building, action_object=animal)
 
-            # Check to see if animal SR status should be changed.
-            if animal.request:
-                animal.request.update_status(self.request.user)
+                        images_data = self.request.FILES
+                        for key, image_data in images_data.items():
+                            # Strip out extra numbers from the key (e.g. "extra1" -> "extra")
+                            category = key.translate({ord(num): None for num in '0123456789'})
+                            # Create image object.
+                            AnimalImage.objects.create(image=image_data, animal=animal, category=category)
+
+                    # Check to see if there is an intake summary
+                    if self.request.data.get('intake_summary', False):
+                        IntakeSummary.objects.get(pk=self.request.data.get('intake_summary')).animals.add(*animals)
+
+                    # Check to see if animal SR status should be changed.
+                    if animal.request:
+                        animal.request.update_status(self.request.user)
 
     def perform_update(self, serializer):
         from evac.models import AssignedRequest

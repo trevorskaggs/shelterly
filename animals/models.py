@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, transaction
 from location.models import Location
 from ordered_model.models import OrderedModel
 
@@ -84,8 +84,13 @@ class Animal(Location, OrderedModel):
 
     def save(self, *args, **kwargs):
         if not self.pk:
-            self.id_for_incident = Animal.objects.filter(incident=self.incident).count() + 1
-        super(Animal, self).save(*args, **kwargs)
+            total_animals = Animal.objects.select_for_update().filter(incident=self.incident).values_list('id', flat=True)
+            with transaction.atomic():
+                count = len(total_animals)
+                self.id_for_incident = count + 1
+                super(Animal, self).save(*args, **kwargs)
+        else:
+            super(Animal, self).save(*args, **kwargs)
 
     class Meta:
         ordering = ('order', 'id')

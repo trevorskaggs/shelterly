@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, transaction
 
 from hotline.models import ServiceRequest
 from incident.models import Incident
@@ -49,8 +49,13 @@ class EvacAssignment(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.pk:
-            self.id_for_incident = EvacAssignment.objects.filter(incident=self.incident).count() + 1
-        super(EvacAssignment, self).save(*args, **kwargs)
+            total_das = EvacAssignment.objects.select_for_update().filter(incident=self.incident).values_list('id', flat=True)
+            with transaction.atomic():
+                count = len(total_das)
+                self.id_for_incident = count + 1
+                super(EvacAssignment, self).save(*args, **kwargs)
+        else:
+            super(EvacAssignment, self).save(*args, **kwargs)
 
     class Meta:
         ordering = ['-start_time',]

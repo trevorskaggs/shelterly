@@ -2,6 +2,7 @@ import io
 import json
 
 from evac.models import EvacAssignment
+from django.db import transaction
 from django.db.models import Case, Count, Exists, OuterRef, Prefetch, Q, When, Value, BooleanField
 from django.http import HttpResponse
 from actstream import action
@@ -39,6 +40,12 @@ class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         if serializer.is_valid():
+
+            total_srs = ServiceRequest.objects.select_for_update().filter(incident__slug=self.request.data.get('incident_slug')).values_list('id', flat=True)
+            with transaction.atomic():
+                count = len(total_srs)
+                serializer.validated_data['id_for_incident'] = count + 1
+
             if self.request.data.get('incident_slug'):
                 serializer.validated_data['incident'] = Incident.objects.get(slug=self.request.data.get('incident_slug'))
 

@@ -110,6 +110,9 @@ const AnimalForm = (props) => {
         current_data[String(pair[0])] = null;
         imageList.push({data_url:props.state.steps.animals[props.state.animalIndex].get(pair[0] + '_data_url'), file:pair[1]})
       }
+      else if (['species'].includes(pair[0])) {
+        current_data[String(pair[0])] = Number(pair[1]);
+      }
     }
   }
 
@@ -133,7 +136,7 @@ const AnimalForm = (props) => {
           setSideImage(imageList);
         }
       }
-      else if (['room', 'shelter'].includes(pair[0])) {
+      else if (['room', 'shelter', 'species'].includes(pair[0])) {
         current_data[String(pair[0])] = Number(pair[1]);
       }
       else {

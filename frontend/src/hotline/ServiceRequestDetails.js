@@ -593,7 +593,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
                     : ""}
                   </ListGroup.Item>
                 ))}
-                {data.assigned_requests.length < 1 ? <div className="mt-2 mb-1">Service Request has not been visited yet.</div> : ""}
+                {data.assigned_requests.length < 1 ? <div className="mt-2 mb-1 ml-3">Service Request has not been visited yet.</div> : ""}
               </ListGroup>
             </Card.Body>
           </Card>
