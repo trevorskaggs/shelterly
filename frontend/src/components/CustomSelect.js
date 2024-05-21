@@ -41,7 +41,6 @@ const CustomSelect = ({
   textInputName,
   formValidationName
 }) => {
-  console.log('🚀 ~ label:', label)
   const [selectedOption, setSelectedOption] = useState('');
   const [customText, setCustomText] = useState('');
   const [isOtherSelected, setIsOtherSelected] = useState(false);

@@ -10,6 +10,12 @@
   cursor: pointer;
   text-align: center;
 }
+.fa-icon-spinner-button.d-block {
+  display: block;
+  height: auto;
+  width: auto;
+  text-align: left;
+}
 .fa-icon-spinner-button:hover {
   background-color: transparent;
 }
