@@ -3,7 +3,7 @@ import axios from "axios";
 import { Link, navigate } from 'raviger';
 import { Button, Card, ListGroup, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEdit } from '@fortawesome/free-solid-svg-icons';
+import { faEdit, faArrowAltCircleLeft } from '@fortawesome/free-solid-svg-icons';
 import { faArrowDownToSquare } from '@fortawesome/pro-regular-svg-icons';
 import {
   faTimesSquare,
@@ -66,6 +66,8 @@ function RoomDetails({ id, incident, organization }) {
   return (
     <>
     <Header>
+      <span style={{cursor:'pointer'}} onClick={() => navigate("/" + organization + "/" + incident + "/shelter/building/" + data.building)} className="mr-2"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="sm" inverse /></span>
+      {data.shelter_name} -&nbsp;
       Room Details
       <OverlayTrigger
         key={"edit-room"}
@@ -106,9 +108,6 @@ function RoomDetails({ id, incident, organization }) {
           </ListGroup.Item> : ""}
           <ListGroup.Item>
             <b>Building:</b> <Link href={"/" + organization + "/" + incident + "/shelter/building/" + data.building} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.building_name}</Link>
-          </ListGroup.Item>
-          <ListGroup.Item>
-            <b>Shelter:</b> <Link href={"/" + organization + "/" + incident + "/shelter/" + data.shelter} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.shelter_name}</Link>
           </ListGroup.Item>
         </ListGroup>
       </Card.Body>

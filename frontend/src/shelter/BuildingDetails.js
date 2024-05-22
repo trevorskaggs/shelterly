@@ -4,7 +4,7 @@ import { Link, navigate } from 'raviger';
 import { Button, Card, ListGroup, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faEdit, faPlusSquare,
+  faEdit, faPlusSquare, faArrowAltCircleLeft,
 } from '@fortawesome/free-solid-svg-icons';
 import { faArrowDownToSquare } from '@fortawesome/pro-regular-svg-icons';
 import { faTimesSquare } from '@fortawesome/pro-regular-svg-icons';
@@ -60,6 +60,8 @@ function BuildingDetails({ id, incident, organization }) {
   return (
     <>
     <Header>
+      <span style={{cursor:'pointer'}} onClick={() => navigate("/" + organization + "/" + incident + "/shelter/" + data.shelter)} className="mr-2"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="sm" inverse /></span>
+      {data.shelter_name} -&nbsp;
       Building Details
       <OverlayTrigger
         key={"edit-building"}
@@ -98,9 +100,6 @@ function BuildingDetails({ id, incident, organization }) {
           {data.description ? <ListGroup.Item>
             <b>Description: </b>{data.description}
           </ListGroup.Item> : ""}
-          <ListGroup.Item>
-            <b>Shelter:</b> <Link href={"/" + organization + "/" + incident + "/shelter/" + data.shelter} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.shelter_name}</Link>
-          </ListGroup.Item>
         </ListGroup>
       </Card.Body>
     </Card>

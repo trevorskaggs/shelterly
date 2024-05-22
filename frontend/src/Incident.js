@@ -68,30 +68,33 @@ function Incident() {
     let unmounted = false;
     let source = axios.CancelToken.source();
 
-    const fetchIncidentData = async () => {
-      // Fetch Incident data.
-      await axios.get('/incident/api/incident/?organization_slug=' + org_slug, {
-        cancelToken: source.token,
-      })
-      .then(response => {
-        if (!unmounted) {
-          let options = [];
-          response.data.forEach(incident => {
-            // Build incident option list.
-            if (!incident.end_time || state.user.is_superuser || state.user.incident_perms) {
-              options.push({value: incident.id, label: incident.name + ' (' + moment(incident.start_time).format('MM/DD/YYYY') + (incident.end_time ? ' - ' + moment(incident.end_time).format('MM/DD/YYYY') : '') + ')', slug:incident.slug, name:incident.name, training:incident.training, end_time:incident.end_time});
-            }
-          });
-          setOptions(options)
-        }
-      })
-      .catch(error => {
-        if (!unmounted) {
-          setShowSystemError(true);
-        }
-      });
-    };
-    fetchIncidentData();
+    if (org_slug !== 'login') {
+
+      const fetchIncidentData = async () => {
+        // Fetch Incident data.
+        await axios.get('/incident/api/incident/?organization_slug=' + org_slug, {
+          cancelToken: source.token,
+        })
+        .then(response => {
+          if (!unmounted) {
+            let options = [];
+            response.data.forEach(incident => {
+              // Build incident option list.
+              if (!incident.end_time || state.user.is_superuser || state.user.incident_perms) {
+                options.push({value: incident.id, label: incident.name + ' (' + moment(incident.start_time).format('MM/DD/YYYY') + (incident.end_time ? ' - ' + moment(incident.end_time).format('MM/DD/YYYY') : '') + ')', slug:incident.slug, name:incident.name, training:incident.training, end_time:incident.end_time});
+              }
+            });
+            setOptions(options)
+          }
+        })
+        .catch(error => {
+          if (!unmounted) {
+            setShowSystemError(true);
+          }
+        });
+      };
+      fetchIncidentData();
+    }
 
     // Reload user to get Org permission data
     loadUser({state, dispatch, removeCookie, path});
@@ -101,7 +104,7 @@ function Incident() {
       unmounted = true;
       source.cancel();
     };
-  }, [state.user.is_superuser, state.user.incident_perms]);
+  }, [state.user.is_superuser, state.user.incident_perms, org_slug]);
 
   return (
     <>
