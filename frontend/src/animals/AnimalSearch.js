@@ -272,11 +272,9 @@ function AnimalSearch({ incident, organization }) {
         if (!unmounted) {
           setNumPages(Math.ceil(response.data.length / ITEMS_PER_PAGE));
           setData({animals: response.data, isFetching: false});
-          setAnimals(response.data);
-          
+
           // highlight search terms
           markInstances(searchTerm);
-          handleApplyFilters(response.data);
 
           let bounds_array = [];
 
@@ -296,6 +294,7 @@ function AnimalSearch({ incident, organization }) {
             }
           }
           setAnimals(response.data);
+          handleApplyFilters(response.data);
           setBounds(bounds_array.length > 0 ? L.latLngBounds(bounds_array) : L.latLngBounds([[0,0]]));
         }
       })
@@ -535,7 +534,7 @@ function AnimalSearch({ incident, organization }) {
                   </Row>
                 </Col>
                 <Col className="flex-grow-1 pl-0" xs="3">
-                  <Button className="btn btn-primary" style={{maxHeight:"35px", width:"100%"}} onClick={() => {handleApplyFilters(data.animals)}} disabled={isDisabled}>Apply</Button>
+                  <Button className="btn btn-primary" style={{maxHeight:"35px", width:"100%"}} onClick={() => {setSearchTerm(tempSearchTerm.current.value);}} disabled={isDisabled}>Apply</Button>
                   <Button variant="outline-light" style={{maxHeight:"35px", width:"100%", marginTop:"15px"}} onClick={handleClear}>Clear</Button>
                 </Col>
               </Row>
