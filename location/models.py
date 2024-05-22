@@ -8,6 +8,8 @@ STATE_CHOICES = (
     ('NH', "NH"),('NJ', "NJ"),('NM', "NM"),('NY', "NY"),('NC', "NC"),('ND', "ND"),('OH', "OH"),
     ('OK', "OK"),('OR', "OR"),('PA', "PA"),('RI', "RI"),('SC', "SC"),('SD', "SD"),('TN', "TN"),
     ('TX', "TX"),('VA', "VA"),("VT", "VT"),('WA', "WA"),('WV', "WV"),('WI', "WI"),('WY', "WY"),
+    ('AB', 'AB'),('BC', 'BC'),('MB', 'MB'),('NB', 'NB'),('NL', 'NL'),('NS', 'NS'),('NT', 'NT'),
+    ('NU', 'NU'),('ON', 'ON'),('PE', 'PE'),('QC', 'QC'),('SK', 'SK'),('YT', 'YT')
 )
 
 # Create your models here.
