@@ -1,4 +1,4 @@
-import React, { Fragment, useContext } from "react";
+import React, { Fragment, useContext, useEffect } from "react";
 import { useRoutes } from 'raviger';
 import routes, { publicRoutes } from "./router";
 import { ThemeProvider } from 'styled-components';
@@ -21,6 +21,10 @@ function Shelterly() {
   const organization = path.split('/')[1]
 
   const style = state.user && path !== '/' && path !== '/' + organization && !path.includes('/incident/') && !path.includes('accounts/user') && !path.includes('/reset_password') && !path.includes('/signup') ? {position:"absolute", marginLeft:"335px"} : {position:"absolute", maxWidth:"100%"};
+
+  useEffect(() => {
+    document.title = 'Shelterly';
+  }, []);
 
   return (
     <ThemeProvider theme={theme}>
