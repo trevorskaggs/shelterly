@@ -28,6 +28,7 @@ const UserForm = ({ id, organization }) => {
   // Regex validators.
   const phoneRegex = /^((\+\d{1,3}(-| )?\(?\d\)?(-| )?\d{1,3})|(\(?\d{2,3}\)?))(-| )?(\d{3,4})(-| )?(\d{4})(( x| ext)\d{1,5}){0,1}$/;
 
+  const [existingUser, setExistingUser] = useState(false);
   const [existingUsers, setExistingUsers] = useState({data:{}, options:[], fetching:true});
 
   const initialData = {
@@ -42,7 +43,8 @@ const UserForm = ({ id, organization }) => {
     email_notification: false,
     access_expires_at: null,
     organizations: [],
-    presets: 0
+    presets: 0,
+    existing_user: false
   }
 
   const [data, setData] = useState(initialData)
@@ -73,14 +75,14 @@ const UserForm = ({ id, organization }) => {
 
     const fetchExistingUserData = async () => {
       // Fetch all users data.
-      await axios.get('/accounts/api/user/', {
+      await axios.get('/accounts/api/user/?secure=true&exclude_organization=' + state.organization.id, {
         cancelToken: source.token,
       })
       .then(existingUsersResponse => {
         if (!unmounted) {
           let options = [];
           existingUsersResponse.data.forEach(user => {
-            options.push({id: user.id, label: user.first_name + ' ' + user.last_name + ' - ' + user.display_phone + ' - ' + user.email})
+            options.push({id: user.id, label: user.first_name + ' ' + user.last_name +' - ' + user.display_phone + ' - ' + user.email + ' - ' + (user.org_shorts.join(", "))})
           })
           setExistingUsers({data:existingUsersResponse.data, options:options, fetching:false});
         }
@@ -98,7 +100,7 @@ const UserForm = ({ id, organization }) => {
       unmounted = true;
       source.cancel();
     };
-  }, [id]);
+  }, [id, state.organization.id]);
 
   return (
     <>
@@ -107,6 +109,7 @@ const UserForm = ({ id, organization }) => {
       initialValues={data}
       enableReinitialize={true}
       validationSchema={Yup.object({
+        existing_user: Yup.boolean(),
         first_name: Yup.string()
           .max(50, 'Must be 50 characters or less')
           .required('Required'),
@@ -116,9 +119,11 @@ const UserForm = ({ id, organization }) => {
         email: Yup.string()
           .max(50, 'Must be 50 characters or less')
           .required('Required'),
-        cell_phone: Yup.string()
-          .matches(phoneRegex, "Phone number is not valid")
-          .required('Required'),
+        cell_phone: Yup.string().when('existing_user', {
+          is: false,
+          then: Yup.string().required('Required').matches(phoneRegex, "Phone number is not valid"),
+          otherwise: Yup.string().required('Required')
+        }),
         agency_id: Yup.string().nullable(),
         access_expires_at: Yup.string().nullable(),
         user_perms: Yup.boolean(),
@@ -131,7 +136,14 @@ const UserForm = ({ id, organization }) => {
         values['organization'] = state.organization.id;
         setTimeout(() => {
           if (data.id) {
-            axios.put('/accounts/api/user/' + data.id + '/', values)
+            // Clear out masked phone and email fields if applicable.
+            if (values.cell_phone.includes('*')) {
+              delete values['cell_phone']
+            }
+            if (values.email.includes('*')) {
+              delete values['email']
+            }
+            axios.patch('/accounts/api/user/' + data.id + '/', values)
             .then(function () {
               navigate('/' + organization + '/accounts/user_management');
             })
@@ -165,10 +177,14 @@ const UserForm = ({ id, organization }) => {
                   className="mb-3"
                   onChange={(values) => {
                     if (values.length) {
-                      setData(existingUsers.data.filter(user => user.id === values[0].id)[0])
+                      let user = existingUsers.data.filter(user => user.id === values[0].id)[0];
+                      user['existing_user'] = true;
+                      setData(user);
+                      setExistingUser(true);
                     }
                     else {
                       setData(initialData);
+                      setExistingUser(false);
                     }
                   }}
                   options={existingUsers.options}

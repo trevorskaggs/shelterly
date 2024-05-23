@@ -14,7 +14,7 @@ from rest_framework.decorators import action
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 
 from accounts.models import ShelterlyUser, ShelterlyUserOrg
-from accounts.serializers import UserSerializer
+from accounts.serializers import UserSerializer, SecureUserSerializer
 from incident.models import Organization, TemporaryAccess
 
 User = get_user_model()
@@ -56,11 +56,21 @@ class UserViewSet(CreateUserMixin, viewsets.ModelViewSet):
     queryset = User.objects.all()
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = UserSerializer
+    secure_serializer_class = SecureUserSerializer
+
+    def get_serializer_class(self):
+        if self.request.GET.get('secure', '') == 'true':
+            if hasattr(self, 'secure_serializer_class'):
+                return self.secure_serializer_class
+
+        return super(UserViewSet, self).get_serializer_class()
 
     def get_queryset(self):
         queryset = User.objects.all()
         if self.request.GET.get('organization'):
             queryset = queryset.filter(organizations=self.request.GET.get('organization')).distinct()
+        elif self.request.GET.get('exclude_organization'):
+            queryset = queryset.exclude(organizations=self.request.GET.get('exclude_organization'))
 
         if self.request.GET.get('vet') == 'true':
             queryset = queryset.filter(perms__organization=self.request.GET.get('organization'), perms__vet_perms=True)

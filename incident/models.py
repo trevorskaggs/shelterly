@@ -14,7 +14,7 @@ class Organization(models.Model):
 
     name = models.CharField(max_length=80)
     slug = models.CharField(max_length=20, blank=False, null=False, unique=True)
-    short_name = models.CharField(max_length=40, blank=True, null=True)
+    short_name = models.CharField(max_length=10, default='changeme')
     liability_name = models.CharField(max_length=80)
     liability_short_name = models.CharField(max_length=40)
 
