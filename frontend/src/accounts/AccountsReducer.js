@@ -102,7 +102,7 @@ function AuthProvider(props) {
     }
 
     // Fetch org and incident data if missing.
-    if (state && !state.logout && (!state.organization || (!state.organization.id || !state.incident.name))) {
+    if (state && !state.logout && (!state.organization || (!state.organization.id || !state.incident.name)) && !path.includes('/signup/')) {
       // Fetch Organization data.
       if (!state.organization.id && org_slug && org_slug !== 'login') {
         axios.get('/incident/api/organization/?slug=' + org_slug)
@@ -118,7 +118,7 @@ function AuthProvider(props) {
         });
       }
       // Fetch Incident data.
-      if (incident_slug && !state.incident.name && incident_slug !=='accounts' && !path.includes('/signup/')){
+      if (incident_slug && !state.incident.name && incident_slug !=='accounts'){
         axios.get('/incident/api/incident/?incident=' + incident_slug)
         .then(incidentResponse => {
           dispatch({type: "SET_INCIDENT", data: {id:incidentResponse.data[0].id, name:incidentResponse.data[0].name, training:incidentResponse.data[0].training}});

@@ -36,6 +36,7 @@ const TemporaryAccessForm = ({ organization }) => {
   const { state } = useContext(AuthContext);
 
   const [showModal, setShowModal] = useState('');
+  const [showAddModal, setShowAddModal] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState('');
 
   const [data, setData] = useState({
@@ -91,11 +92,23 @@ const TemporaryAccessForm = ({ organization }) => {
         {state.organization.name} - User Registration
       </Header>
       <hr/>
+      <Card border="secondary" className="mt-1" style={{width:"35%", maxWidth:"35%"}}>
+        <ButtonGroup>
+          <Button
+            type="button"
+            className="btn btn-primary"
+            onClick={() => { setShowAddModal(true) }}
+            data-testid="save_button"
+          >
+            Create Access Link
+          </Button>
+        </ButtonGroup>
+      </Card>
       <Formik
         initialValues={data}
         enableReinitialize={true}
         validationSchema={Yup.object({
-          access_expires_at: Yup.date(),
+          access_expires_at: Yup.date().nullable(),
           link_expires_at: Yup.date(),
         })}
         onSubmit={(values, { setSubmitting }) => {
@@ -112,13 +125,16 @@ const TemporaryAccessForm = ({ organization }) => {
         }}
       >
       {formikProps => (
-        <Card border="secondary" className="mt-1" style={{width:"45%", maxWidth:"45%"}}>
-          <Card.Body>
-            <Form>
-              <BootstrapForm.Row className="mb-3">
-                <Col xs="12">
-                  <Row>
-                    <Col xs="4">
+      <Modal show={showAddModal} onHide={() => setShowAddModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>New Access Link</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <BootstrapForm.Row className="mb-3">
+              <Col xs="12">
+                <Row>
+                  <Col xs="4">
                     <DropDown
                       label="Access Expires In"
                       id="access_expires_at_options"
@@ -137,52 +153,50 @@ const TemporaryAccessForm = ({ organization }) => {
                       }}
                       isClearable={false}
                     />
-                    </Col>
-                    <Col className="ml-0 pl-0" style={{fontSize:"24px", marginTop:"37px"}}>on <Moment format="LL">{formikProps.values.access_expires_at}</Moment></Col>
-                  </Row>
-                </Col>
-              </BootstrapForm.Row>
-              <BootstrapForm.Row>
-                <Col xs="12">
-                  <Row>
-                    <Col xs="4">
-                      <DropDown
-                        label="Link Expires In"
-                        id="link_expires_at_options"
-                        name="link_expires_at_options"
-                        type="text"
-                        options={[{value:1, label:'1 day'}, {value:3, label:'3 days'}, {value:7, label:'7 days'}]}
-                        onChange={(instance) => {
-                          if (instance.value > 0) {
-                            var access_date = new Date(new Date().setDate(new Date().getDate() + (instance.value - 1))).toISOString().split('T')[0];
-                            formikProps.setFieldValue("link_expires_at", access_date)
-                          }
-                          else {
-                            formikProps.setFieldValue("link_expires_at", null)
-                          }
-                          formikProps.setFieldValue("link_expires_at_options", instance.value)
-                        }}
-                        isClearable={false}
-                      />
-                    </Col>
-                    <Col className="ml-0 pl-0" style={{fontSize:"24px", marginTop:"37px"}}>on <Moment format="LL">{formikProps.values.link_expires_at}</Moment></Col>
-                  </Row>
-                </Col>
-              </BootstrapForm.Row>
-            </Form>
-          </Card.Body>
-          <ButtonGroup>
-            <Button
-              type="button"
-              className="btn btn-primary"
-              onClick={() => { formikProps.submitForm() }}
-              data-testid="save_button"
-            >
-              Create Access Link
-            </Button>
-          </ButtonGroup>
-        </Card>
-      )}
+                  </Col>
+                  <Col className="ml-0 pl-0" style={{fontSize:"24px", marginTop:"37px"}}>{formikProps.values.access_expires_at ? <span>on <Moment format="LL">{formikProps.values.access_expires_at}</Moment></span> : ""}</Col>
+                </Row>
+              </Col>
+            </BootstrapForm.Row>
+            <BootstrapForm.Row>
+              <Col xs="12">
+                <Row>
+                  <Col xs="4">
+                    <DropDown
+                      label="Link Expires In"
+                      id="link_expires_at_options"
+                      name="link_expires_at_options"
+                      type="text"
+                      options={[{value:1, label:'1 day'}, {value:3, label:'3 days'}, {value:7, label:'7 days'}]}
+                      onChange={(instance) => {
+                        if (instance.value > 0) {
+                          var access_date = new Date(new Date().setDate(new Date().getDate() + (instance.value - 1))).toISOString().split('T')[0];
+                          formikProps.setFieldValue("link_expires_at", access_date)
+                        }
+                        else {
+                          formikProps.setFieldValue("link_expires_at", null)
+                        }
+                        formikProps.setFieldValue("link_expires_at_options", instance.value)
+                      }}
+                      isClearable={false}
+                    />
+                  </Col>
+                  <Col className="ml-0 pl-0" style={{fontSize:"24px", marginTop:"37px"}}>on <Moment format="LL">{formikProps.values.link_expires_at}</Moment></Col>
+                </Row>
+              </Col>
+            </BootstrapForm.Row>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="primary" onClick={() => {formikProps.submitForm();setShowAddModal(false)}}>
+            Save
+          </Button>
+          <Button variant="secondary" onClick={() => setShowAddModal(false)}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    )}
     </Formik>
     {accessData.map(current_data => (
       <div className="row mt-3">
@@ -220,7 +234,7 @@ const TemporaryAccessForm = ({ organization }) => {
                 <ListGroup.Item>
                   <Row>
                     <Col>
-                      <span><b>Access Expires On: </b><Moment format="LL">{current_data.access_expires_at}</Moment></span>
+                      <span><b>Access Expires On: </b>{current_data.access_expires_at ? <Moment format="LL">{current_data.access_expires_at}</Moment> : "Never"}</span>
                     </Col>
                     <Col>
                       <span><b>Link Expires On: </b><Moment format="LL">{current_data.link_expires_at}</Moment></span>

@@ -52,8 +52,11 @@ class Incident(models.Model):
         ordering = ['name']
 
 class TemporaryAccess(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4().hex, editable=False)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
-    access_expires_at = models.DateField(auto_now_add=False)
+    access_expires_at = models.DateField(auto_now_add=False, blank=True, null=True)
     link_expires_at = models.DateField(auto_now_add=False)
+
+    class Meta:
+        ordering = ['-created_at']

@@ -29,6 +29,11 @@ class OrganizationSerializer(serializers.ModelSerializer):
 
 class TemporaryAccessSerializer(serializers.ModelSerializer):
 
+    org_name = serializers.SerializerMethodField()
+
+    def get_org_name(self, obj):
+        return obj.organization.name
+
     class Meta:
         model = TemporaryAccess
         fields = '__all__'
