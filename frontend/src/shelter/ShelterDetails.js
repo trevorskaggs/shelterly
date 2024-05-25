@@ -74,6 +74,7 @@ function ShelterDetails({ id, incident, organization }) {
   return (
     <>
       <Header>
+        {data.name} -&nbsp;
         Shelter Details
         <OverlayTrigger
           key={"edit-shelter"}
@@ -97,9 +98,6 @@ function ShelterDetails({ id, incident, organization }) {
               </Card.Title>
               <hr/>
               <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
-                <ListGroup.Item>
-                  <b>Name:</b> {data.name}
-                </ListGroup.Item>
                 <ListGroup.Item>
                   <b>Address:</b> {data.full_address}
                 </ListGroup.Item>
@@ -133,7 +131,6 @@ function ShelterDetails({ id, incident, organization }) {
                     <Link href={"/" + organization + "/" + incident + "/shelter/" + id + "/assign"}><FontAwesomeIcon icon={faArrowDownToSquare} size="lg" className="ml-1 fa-move-up" inverse /></Link>
                   </OverlayTrigger>
                 </ListGroup.Item>
-                <ListGroup.Item></ListGroup.Item>
               </ListGroup>
             </Card.Body>
           </Card>

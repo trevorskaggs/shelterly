@@ -78,8 +78,9 @@ const Menu = ({ state, dispatch, removeCookie, ...props }) => {
     return (
     <StyledMenu  {...props} className="flex-column" style={{ height: viewHeight, minHeight:"1025px" }}>
       <Link href={incident} style={{marginTop:"-10px", paddingBottom:"0px", border:"none"}} title="Home"><img src="/static/images/shelterly.png" alt="Logo" /></Link>
-      <div className="logo text-center" style={{marginTop:"10px", marginBottom:"0px", paddingBottom:"0px"}}>SHELTERLY</div>
+      <div className="logo text-center" style={{marginTop:"5px", marginBottom:"0px", paddingBottom:"0px"}}>SHELTERLY</div>
       <div className="logo border-bottom text-center" style={{paddingBottom:"12px", letterSpacing:"0.25rem", fontSize:"1.2rem"}} title="Incident">
+        <span style={{marginLeft:"-18px", marginRight:"-18px"}}>
         {state.incident.training ? <OverlayTrigger
           key={"incident-training"}
           placement="top"
@@ -89,34 +90,16 @@ const Menu = ({ state, dispatch, removeCookie, ...props }) => {
             </Tooltip>
           }
         >
-          <FontAwesomeIcon icon={faCircleT} size="" className="mr-1" />
+          <FontAwesomeIcon icon={faCircleT} className="mr-1" />
         </OverlayTrigger> : ""}
         <span style={{cursor:"pointer"}} className="incident" onClick={() => navigate('/' + path.split('/')[1])}>{state.incident.name}</span>
+        </span>
       </div>
-      {/* <Link href={incident + "/hotline"} className="rounded sidebar" style={{backgroundColor:(path.includes("/hotline/") || path.endsWith("/hotline")) && !path.includes("search") ? "#444444" : "#292b2c", marginLeft:"-33px", marginRight:"-23px", marginBottom:"-10px"}}><FontAwesomeIcon icon={faPhone} fixedWidth inverse className="sidebar-icon mr-2" style={{marginLeft:"23px"}} />HOTLINE</Link>
-      <Link href={incident + "/dispatch"} className="rounded sidebar" style={{backgroundColor:(path.includes("/dispatch/") || path.endsWith("/dispatch")) && !path.includes("search") ? "#444444" : "#292b2c", marginLeft:"-33px", marginRight:"-23px", marginBottom:"-10px"}}><FontAwesomeIcon icon={faBullhorn} fixedWidth inverse className="sidebar-icon mr-2" style={{marginLeft:"23px"}} />DISPATCH</Link>
-      <Link href={incident + "/shelter"} className="rounded sidebar" style={{backgroundColor:path.includes("/shelter/") || path.endsWith("/shelter") ? "#444444" : "#292b2c", marginLeft:"-33px", marginRight:"-23px", marginBottom:"-10px"}}><FontAwesomeIcon icon={faHome} fixedWidth inverse className="sidebar-icon mr-2" style={{marginLeft:"23px"}} />SHELTER</Link>
-      <Link href={incident + "/vet"} className="rounded sidebar" style={{backgroundColor:(path.includes("/vet/") || path.endsWith("/vet")) && !path.includes("search") ? "#444444" : "#292b2c", marginLeft:"-33px", marginRight:"-23px", marginBottom:"-10px"}}><FontAwesomeIcon icon={faHouseMedical} fixedWidth inverse className="sidebar-icon mr-2" style={{marginLeft:"23px"}} />VETMED</Link>
-      <span className="rounded sidebar search" onClick={() => setShowSearch(!showSearch)} style={{cursor:'pointer', marginLeft:"-15px", marginBottom:"-10px"}}><FontAwesomeIcon icon={faSearch} className="sidebar-icon mr-2" fixedWidth inverse /><span className="sidebar-icon">SEARCH</span><FontAwesomeIcon icon={showSearch ? faChevronUp : faChevronDown} size="sm" className="fa-move-up sidebar-icon" fixedWidth inverse /></span>
-      <div className="logo border-bottom text-center" style={{paddingBottom:"12px", letterSpacing:"0.25rem", fontSize:"1.2rem"}} title="Incident">
-        {state.incident.training ? <OverlayTrigger
-          key={"incident-training"}
-          placement="top"
-          overlay={
-            <Tooltip id={`tooltip-incident-training`}>
-              This incident is flagged for training purposes.
-            </Tooltip>
-          }
-        >
-          <FontAwesomeIcon icon={faCircleT} size="" className="mr-1" />
-        </OverlayTrigger> : ""}
-        <span style={{cursor:"pointer"}} className="incident" onClick={() => navigate('/' + path.split('/')[1])}>{state.incident.name}</span>
-      </div> */}
-      <Link href={incident + "/hotline"} className="rounded sidebar" style={{backgroundColor:(path.includes("/hotline/") || path.endsWith("/hotline")) && !path.includes("search") ? "#444444" : "#292b2c", marginLeft:"-33px", marginRight:"-23px", marginBottom:"-10px"}}><FontAwesomeIcon icon={faPhone} fixedWidth inverse className="sidebar-icon mr-2" style={{marginLeft:"23px"}} />HOTLINE</Link>
-      <Link href={incident + "/dispatch"} className="rounded sidebar" style={{backgroundColor:(path.includes("/dispatch/") || path.endsWith("/dispatch")) && !path.includes("search") ? "#444444" : "#292b2c", marginLeft:"-33px", marginRight:"-23px", marginBottom:"-10px"}}><FontAwesomeIcon icon={faBullhorn} fixedWidth inverse className="sidebar-icon mr-2" style={{marginLeft:"23px"}} />DISPATCH</Link>
-      <Link href={incident + "/shelter"} className="rounded sidebar" style={{backgroundColor:path.includes("/shelter/") || path.endsWith("/shelter") ? "#444444" : "#292b2c", marginLeft:"-33px", marginRight:"-23px", marginBottom:"-10px"}}><FontAwesomeIcon icon={faHome} fixedWidth inverse className="sidebar-icon mr-2" style={{marginLeft:"23px"}} />SHELTER</Link>
-      <Link href={incident + "/vet"} className="rounded sidebar" style={{backgroundColor:(path.includes("/vet/") || path.endsWith("/vet")) && !path.includes("search") ? "#444444" : "#292b2c", marginLeft:"-33px", marginRight:"-23px", marginBottom:"-10px"}}><FontAwesomeIcon icon={faHouseMedical} fixedWidth inverse className="sidebar-icon mr-2" style={{marginLeft:"23px"}} />VETMED</Link>
-      <span className="rounded sidebar search" onClick={() => setShowSearch(!showSearch)} style={{cursor:'pointer', marginLeft:"-15px", marginBottom:"-10px"}}><FontAwesomeIcon icon={faSearch} className="sidebar-icon mr-2" fixedWidth inverse /><span className="sidebar-icon">SEARCH</span><FontAwesomeIcon icon={showSearch ? faChevronUp : faChevronDown} size="sm" className="fa-move-up sidebar-icon" fixedWidth inverse /></span>
+      <Link href={incident + "/hotline"} className="rounded sidebar" style={{backgroundColor:(path.includes("/hotline/") || path.endsWith("/hotline")) && !path.includes("search") ? "#444444" : "#292b2c", marginLeft:"-23px", marginRight:"-23px", marginBottom:"-10px"}}><FontAwesomeIcon icon={faPhone} fixedWidth inverse className="sidebar-icon mr-2" style={{marginLeft:"23px"}} />HOTLINE</Link>
+      <Link href={incident + "/dispatch"} className="rounded sidebar" style={{backgroundColor:(path.includes("/dispatch/") || path.endsWith("/dispatch")) && !path.includes("search") ? "#444444" : "#292b2c", marginLeft:"-23px", marginRight:"-23px", marginBottom:"-10px"}}><FontAwesomeIcon icon={faBullhorn} fixedWidth inverse className="sidebar-icon mr-2" style={{marginLeft:"23px"}} />DISPATCH</Link>
+      <Link href={incident + "/shelter"} className="rounded sidebar" style={{backgroundColor:path.includes("/shelter/") || path.endsWith("/shelter") ? "#444444" : "#292b2c", marginLeft:"-23px", marginRight:"-23px", marginBottom:"-10px"}}><FontAwesomeIcon icon={faHome} fixedWidth inverse className="sidebar-icon mr-2" style={{marginLeft:"23px"}} />SHELTER</Link>
+      <Link href={incident + "/vet"} className="rounded sidebar" style={{backgroundColor:(path.includes("/vet/") || path.endsWith("/vet")) && !path.includes("search") ? "#444444" : "#292b2c", marginLeft:"-23px", marginRight:"-23px", marginBottom:"-10px"}}><FontAwesomeIcon icon={faHouseMedical} fixedWidth inverse className="sidebar-icon mr-2" style={{marginLeft:"23px"}} />VETMED</Link>
+      <span className="rounded sidebar search" onClick={() => setShowSearch(!showSearch)} style={{cursor:'pointer', marginLeft:"-5px", marginBottom:"-10px"}}><FontAwesomeIcon icon={faSearch} className="sidebar-icon mr-2" fixedWidth inverse /><span className="sidebar-icon">SEARCH</span><FontAwesomeIcon icon={showSearch ? faChevronUp : faChevronDown} size="sm" className="fa-move-up sidebar-icon" fixedWidth inverse /></span>
       <Collapse in={showSearch}>
         <ListGroup variant="flush" style={{marginTop:"-5px", marginBottom:"-10px"}}>
           <ListGroup.Item action className="rounded sidebar" onClick={() => navigate(incident + '/animals/search')} style={{backgroundColor:path.includes("animals/search") ? "#444444" : "#292b2c"}}><FontAwesomeIcon className="mr-1 sidebar-icon" icon={faSearch} fixedWidth inverse/><span className="sidebar-icon">ANIMALS</span></ListGroup.Item>
@@ -126,8 +109,8 @@ const Menu = ({ state, dispatch, removeCookie, ...props }) => {
           {state.user && (state.user.is_superuser || state.user.vet_perms) ? <ListGroup.Item action className="rounded sidebar" onClick={() => navigate(incident + '/vet/vetrequest/search')} style={{backgroundColor:path.includes("vet/vetrequest/search") ? "#444444" : "#292b2c"}}><FontAwesomeIcon className="mr-1 sidebar-icon" icon={faSearch} fixedWidth inverse/><span className="sidebar-icon">VETERINARY TASKS</span></ListGroup.Item> : ""}
         </ListGroup>
       </Collapse>
-      <Link href={incident + "/reports"} className="rounded sidebar" style={{backgroundColor:path.includes("reports") ? "#444444" : "#292b2c", marginLeft:"-33px", marginRight:"-23px", marginBottom:"-10px"}}><FontAwesomeIcon icon={faFileChartColumn} fixedWidth inverse className="sidebar-icon mr-2" style={{marginLeft:"23px"}} />REPORTS</Link>
-      {state.user ? <Link onClick={() => logoutUser({dispatch}, {removeCookie})} href="#" className="rounded sidebar" style={{marginLeft:"-10px"}}><FontAwesomeIcon icon={faSignOutAlt} className="sidebar-icon mr-2" fixedWidth inverse/>SIGN OUT</Link> : ""}
+      <Link href={incident + "/reports"} className="rounded sidebar" style={{backgroundColor:path.includes("reports") ? "#444444" : "#292b2c", marginLeft:"-2px", marginRight:"-23px", marginBottom:"-10px"}}><FontAwesomeIcon icon={faFileChartColumn} fixedWidth inverse className="sidebar-icon mr-2" />REPORTS</Link>
+      {state.user ? <Link onClick={() => logoutUser({dispatch}, {removeCookie})} href="#" className="rounded sidebar" style={{marginLeft:"0px"}}><FontAwesomeIcon icon={faSignOutAlt} className="sidebar-icon mr-2" fixedWidth inverse/>SIGN OUT</Link> : ""}
     </StyledMenu>
     )
   }

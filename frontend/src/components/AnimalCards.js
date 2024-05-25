@@ -78,7 +78,10 @@ function AnimalCards(props) {
                 {animal.status === "REPORTED (SIP REQUESTED)" ?
                   <OverlayTrigger key={"reported-sip"} placement="top"
                                   overlay={<Tooltip id={`tooltip-reported-sip`}>REPORTED (SIP REQUESTED)</Tooltip>}>
-                      <FontAwesomeIcon className="animal-icon" icon={faExclamationCircle} inverse/>
+                    <span className="fa-layers" style={{marginRight:"6px"}}>
+                      <FontAwesomeIcon icon={faCircle} className="icon-border" transform={'grow-2'} />
+                      <FontAwesomeIcon icon={faHomeAlt} style={{color:"#444"}} transform={'shrink-5 left-1'} inverse />
+                    </span>
                   </OverlayTrigger> : ""}
                 {animal.status === "UNABLE TO LOCATE" ?
                   <OverlayTrigger key={"unable-to-locate"} placement="top"

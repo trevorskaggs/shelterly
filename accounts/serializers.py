@@ -15,6 +15,7 @@ class UserSerializer(serializers.ModelSerializer):
     vet_perms = serializers.SerializerMethodField()
     email_notification = serializers.SerializerMethodField()
     org_slugs = serializers.SerializerMethodField()
+    org_shorts = serializers.SerializerMethodField()
     access_expires_at = serializers.SerializerMethodField()
 
     # Custom field for Formated Phone Number
@@ -53,11 +54,34 @@ class UserSerializer(serializers.ModelSerializer):
     def get_access_expires_at(self, obj):
         if self.context.get('request') and self.context['request'].GET.get('organization'):
             return obj.perms.filter(organization=self.context['request'].GET.get('organization'))[0].access_expires_at
-        return False
+        return None
 
     def get_org_slugs(self, obj):
         return obj.organizations.all().values_list('slug', flat=True)
 
+    def get_org_shorts(self, obj):
+        return obj.organizations.all().values_list('short_name', flat=True)
+
     class Meta:
         model = User
-        fields = ('agency_id', 'cell_phone', 'first_name', 'id', 'last_name', 'username', 'email', 'is_superuser', 'display_phone', 'user_perms', 'incident_perms', 'vet_perms', 'email_notification', 'organizations', 'org_slugs', 'access_expires_at', 'version')
+        fields = ('agency_id', 'cell_phone', 'first_name', 'id', 'last_name', 'username', 'email', 'is_superuser', 'display_phone', 'user_perms', 'incident_perms', 'vet_perms', 'email_notification', 'organizations', 'org_slugs', 'org_shorts', 'access_expires_at', 'version')
+
+class SecureUserSerializer(UserSerializer):
+
+    cell_phone = serializers.SerializerMethodField()
+    display_phone = serializers.SerializerMethodField()
+    email = serializers.SerializerMethodField()
+
+    def get_cell_phone(self, obj):
+        front, back = re.sub(r'(\d{3})(\d{3})(\d{4})(.*)', r'(\1) \2-\3 \4', obj.cell_phone.replace(' ', '')).split("-")
+        return "(***) *** " + back
+
+    # Custom field for Formated Phone Number
+    def get_display_phone(self, obj):
+        front, back = re.sub(r'(\d{3})(\d{3})(\d{4})(.*)', r'(\1) \2-\3 \4', obj.cell_phone.replace(' ', '')).split("-")
+        return "***-" + back[:4]
+    
+    # Custom field for Formated Phone Number
+    def get_email(self, obj):
+        front, back = obj.email.split('@')
+        return front[0] + "*"*(len(front) - 1) + "@" + back

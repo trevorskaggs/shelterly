@@ -374,7 +374,7 @@ export const AddressLookup = ({setData, initialBounds, handleClose, ...props}) =
             options={{
               bounds:{north:incidentLatLon.lat+.1, south:incidentLatLon.lat-.1, east:incidentLatLon.lng+.1, west:incidentLatLon.lng-.1},
               types: ["geocode"],
-              componentRestrictions: { country: "us" },
+              componentRestrictions: { country: ["us", "ca"] },
             }}
             ref={childRef}
             key={String(incidentLatLon.lat)}

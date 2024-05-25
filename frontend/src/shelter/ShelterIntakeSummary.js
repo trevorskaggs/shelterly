@@ -1,8 +1,12 @@
 import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
-import { Link } from 'raviger';
+import { Link, navigate } from 'raviger';
 import { Card, Col, ListGroup, Row } from 'react-bootstrap';
 import Moment from 'react-moment';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faArrowAltCircleLeft
+} from '@fortawesome/free-solid-svg-icons';
 import Header from '../components/Header';
 import { SystemErrorContext } from '../components/SystemError';
 import AnimalCards from '../components/AnimalCards';
@@ -129,11 +133,8 @@ function ShelterIntakeSummary({ id, incident, organization }) {
   return (
     <>
       <Header>
-        {data.intake_type === "owner_walkin"
-          ? "Owner Walk-In "
-          : data.intake_type === "reporter_walkin"
-          ? "Reporter Walk-In "
-          : "Dispatch "}
+        <span style={{cursor:'pointer'}} onClick={() => navigate("/" + organization + "/" + incident + "/shelter/" + data.shelter)} className="mr-2"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="sm" inverse /></span>
+        {data.shelter_name}-&nbsp;
         Intake Summary
       </Header>
       <hr />
@@ -147,7 +148,11 @@ function ShelterIntakeSummary({ id, incident, organization }) {
               <hr/>
               <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
                 <ListGroup.Item>
-                  <b>Shelter:</b> <Link href={"/" + organization + "/" + incident + "/shelter/" + data.shelter} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.shelter_name}</Link>
+                  <b>Type: </b>{data.intake_type === "owner_walkin"
+                    ? "Owner Walk-In "
+                    : data.intake_type === "reporter_walkin"
+                    ? "Reporter Walk-In "
+                    : "Dispatch "}
                 </ListGroup.Item>
                 <ListGroup.Item>
                   <b>Date:</b> <Moment format="MMMM Do YYYY HH:mm">{data.date}</Moment>

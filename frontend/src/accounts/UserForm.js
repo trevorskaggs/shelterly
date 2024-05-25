@@ -15,7 +15,7 @@ import {
   faArrowAltCircleLeft,
 } from '@fortawesome/free-solid-svg-icons';
 import * as Yup from 'yup';
-import { DateTimePicker, DropDown, TextInput } from '.././components/Form.js';
+import { DateTimePicker, DropDown, TextInput, ToggleSwitch } from '.././components/Form.js';
 import ButtonSpinner from '../components/ButtonSpinner.js';
 import { SystemErrorContext } from '../components/SystemError';
 import { AuthContext } from "./AccountsReducer";
@@ -28,6 +28,7 @@ const UserForm = ({ id, organization }) => {
   // Regex validators.
   const phoneRegex = /^((\+\d{1,3}(-| )?\(?\d\)?(-| )?\d{1,3})|(\(?\d{2,3}\)?))(-| )?(\d{3,4})(-| )?(\d{4})(( x| ext)\d{1,5}){0,1}$/;
 
+  const [existingUser, setExistingUser] = useState(false);
   const [existingUsers, setExistingUsers] = useState({data:{}, options:[], fetching:true});
 
   const initialData = {
@@ -42,7 +43,8 @@ const UserForm = ({ id, organization }) => {
     email_notification: false,
     access_expires_at: null,
     organizations: [],
-    presets: 0
+    presets: 0,
+    existing_user: false
   }
 
   const [data, setData] = useState(initialData)
@@ -73,14 +75,14 @@ const UserForm = ({ id, organization }) => {
 
     const fetchExistingUserData = async () => {
       // Fetch all users data.
-      await axios.get('/accounts/api/user/', {
+      await axios.get('/accounts/api/user/?secure=true&exclude_organization=' + state.organization.id, {
         cancelToken: source.token,
       })
       .then(existingUsersResponse => {
         if (!unmounted) {
           let options = [];
           existingUsersResponse.data.forEach(user => {
-            options.push({id: user.id, label: user.first_name + ' ' + user.last_name + ' - ' + user.display_phone + ' - ' + user.email})
+            options.push({id: user.id, label: user.first_name + ' ' + user.last_name +' - ' + user.display_phone + ' - ' + user.email + ' - ' + (user.org_shorts.join(", "))})
           })
           setExistingUsers({data:existingUsersResponse.data, options:options, fetching:false});
         }
@@ -98,7 +100,7 @@ const UserForm = ({ id, organization }) => {
       unmounted = true;
       source.cancel();
     };
-  }, [id]);
+  }, [id, state.organization.id]);
 
   return (
     <>
@@ -107,6 +109,7 @@ const UserForm = ({ id, organization }) => {
       initialValues={data}
       enableReinitialize={true}
       validationSchema={Yup.object({
+        existing_user: Yup.boolean(),
         first_name: Yup.string()
           .max(50, 'Must be 50 characters or less')
           .required('Required'),
@@ -116,9 +119,11 @@ const UserForm = ({ id, organization }) => {
         email: Yup.string()
           .max(50, 'Must be 50 characters or less')
           .required('Required'),
-        cell_phone: Yup.string()
-          .matches(phoneRegex, "Phone number is not valid")
-          .required('Required'),
+        cell_phone: Yup.string().when('existing_user', {
+          is: false,
+          then: Yup.string().required('Required').matches(phoneRegex, "Phone number is not valid"),
+          otherwise: Yup.string().required('Required')
+        }),
         agency_id: Yup.string().nullable(),
         access_expires_at: Yup.string().nullable(),
         user_perms: Yup.boolean(),
@@ -131,7 +136,14 @@ const UserForm = ({ id, organization }) => {
         values['organization'] = state.organization.id;
         setTimeout(() => {
           if (data.id) {
-            axios.put('/accounts/api/user/' + data.id + '/', values)
+            // Clear out masked phone and email fields if applicable.
+            if (values.cell_phone.includes('*')) {
+              delete values['cell_phone']
+            }
+            if (values.email.includes('*')) {
+              delete values['email']
+            }
+            axios.patch('/accounts/api/user/' + data.id + '/', values)
             .then(function () {
               navigate('/' + organization + '/accounts/user_management');
             })
@@ -165,10 +177,14 @@ const UserForm = ({ id, organization }) => {
                   className="mb-3"
                   onChange={(values) => {
                     if (values.length) {
-                      setData(existingUsers.data.filter(user => user.id === values[0].id)[0])
+                      let user = existingUsers.data.filter(user => user.id === values[0].id)[0];
+                      user['existing_user'] = true;
+                      setData(user);
+                      setExistingUser(true);
                     }
                     else {
                       setData(initialData);
+                      setExistingUser(false);
                     }
                   }}
                   options={existingUsers.options}
@@ -219,8 +235,28 @@ const UserForm = ({ id, organization }) => {
                 />
               </BootstrapForm.Row>
               <BootstrapForm.Row className="mb-3">
+                <Col xs="3">
+                  <DropDown
+                    label="Access Expires In"
+                    id="presets"
+                    name="presets"
+                    type="text"
+                    options={[{value:0, label:'Never'}, {value:1, label:'1 day'}, {value:3, label:'3 days'}, {value:5, label:'5 days'}, {value:7, label:'7 days'}, {value:14, label:'14 days'}, {value:30, label:'30 days'}, {value:-1, label:'Custom'}, ]}
+                    onChange={(instance) => {
+                      if (instance.value > 0) {
+                        var access_date = new Date(new Date().setDate(new Date().getDate() + (instance.value - 1)));
+                        formikProps.setFieldValue("access_expires_at", access_date)
+                      }
+                      else if (instance.value === 0) {
+                        formikProps.setFieldValue("access_expires_at", null)
+                      }
+                      formikProps.setFieldValue("presets", instance.value)
+                    }}
+                    isClearable={false}
+                  />
+                </Col>
                 <DateTimePicker
-                  label="Access Expires At"
+                  label="&nbsp;"
                   name="access_expires_at"
                   id="access_expires_at"
                   xs="6"
@@ -230,37 +266,23 @@ const UserForm = ({ id, organization }) => {
                   }}
                   value={formikProps.values.access_expires_at||null}
                   more_options={{minDate:'today'}}
-                  disabled={false}
+                  disabled={formikProps.values.presets !== -1}
                 />
-                <Col xs="3">
-                  <DropDown
-                    label="&nbsp;"
-                    id="presets"
-                    name="presets"
-                    type="text"
-                    options={[{value:0, label:'Never'}, {value:1, label:'1 day'}, {value:3, label:'3 days'}, {value:5, label:'5 days'}, {value:7, label:'7 days'}, {value:14, label:'14 days'}, {value:30, label:'30 days'}]}
-                    onChange={(instance) => {
-                      if (instance.value > 0) {
-                        var access_date = new Date(new Date().setDate(new Date().getDate() + (instance.value - 1)));
-                        formikProps.setFieldValue("access_expires_at", access_date)
-                      }
-                      else {
-                        formikProps.setFieldValue("access_expires_at", null)
-                      }
-                      formikProps.setFieldValue("presets", instance.value)
-                    }}
-                    isClearable={false}
-                  />
+              </BootstrapForm.Row>
+              <BootstrapForm.Row>
+                <Col>
+                  <ToggleSwitch name="user_perms" id="user_perms" label="User Permissions" />
+                </Col>
+                <Col>
+                  <ToggleSwitch name="incident_perms" id="incident_perms" label="Incident Permissions" />
+                </Col>
+                <Col>
+                  <ToggleSwitch name="vet_perms" id="vet_perms" label="Veterinary Permissions" />
+                </Col>
+                <Col>
+                  <ToggleSwitch name="email_notification" id="email_notification" label="SR Email Notification" />
                 </Col>
               </BootstrapForm.Row>
-              <BootstrapForm.Label htmlFor="user_perms">User Permissions</BootstrapForm.Label>
-              <Field component={Switch} name="user_perms" id="user_perms" type="checkbox" color="primary" />
-              <BootstrapForm.Label htmlFor="incident_perms">Incident Permissions</BootstrapForm.Label>
-              <Field component={Switch} name="incident_perms" id="incident_perms" type="checkbox" color="primary" />
-              <BootstrapForm.Label htmlFor="vet_perms">Veterinary Permissions</BootstrapForm.Label>
-              <Field component={Switch} name="vet_perms" id="vet_perms" type="checkbox" color="primary" />
-              <BootstrapForm.Label htmlFor="email_notification">SR Email Notification</BootstrapForm.Label>
-              <Field component={Switch} name="email_notification" id="email_notification" type="checkbox" color="primary" />
             </BootstrapForm>
           </Card.Body>
           <ButtonGroup size="lg">

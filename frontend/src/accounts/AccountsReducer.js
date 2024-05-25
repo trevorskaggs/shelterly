@@ -92,7 +92,7 @@ function AuthProvider(props) {
     window.addEventListener("focus", onFocus);
 
     // Redirect user if they attempt to access an Organization they aren't a member of.
-    if (!Object.keys(publicRoutes).includes(path) && state.user && path !== '/' && !state.user.org_slugs.includes(org_slug)) {
+    if (!Object.keys(publicRoutes).includes(path) && state.user && path !== '/' && !state.user.org_slugs.includes(org_slug) && !path.includes('/signup/')) {
       navigate("/");
     }
 
@@ -102,7 +102,7 @@ function AuthProvider(props) {
     }
 
     // Fetch org and incident data if missing.
-    if (state && !state.logout && (!state.organization || (!state.organization.id || !state.incident.name))) {
+    if (state && !state.logout && (!state.organization || (!state.organization.id || !state.incident.name)) && !path.includes('/signup/')) {
       // Fetch Organization data.
       if (!state.organization.id && org_slug && org_slug !== 'login') {
         axios.get('/incident/api/organization/?slug=' + org_slug)

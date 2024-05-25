@@ -4,6 +4,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.core.exceptions import ValidationError
 import re
+import uuid
 
 from accounts.models import ShelterlyUserOrg
 
@@ -13,7 +14,7 @@ class Organization(models.Model):
 
     name = models.CharField(max_length=80)
     slug = models.CharField(max_length=20, blank=False, null=False, unique=True)
-    short_name = models.CharField(max_length=40, blank=True, null=True)
+    short_name = models.CharField(max_length=10, default='changeme')
     liability_name = models.CharField(max_length=80)
     liability_short_name = models.CharField(max_length=40)
 
@@ -49,3 +50,13 @@ class Incident(models.Model):
 
     class Meta:
         ordering = ['name']
+
+class TemporaryAccess(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    access_expires_at = models.DateField(auto_now_add=False, blank=True, null=True)
+    link_expires_at = models.DateField(auto_now_add=False)
+
+    class Meta:
+        ordering = ['-created_at']

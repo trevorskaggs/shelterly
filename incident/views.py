@@ -8,8 +8,8 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 
 from accounts.models import ShelterlyUser
-from incident.models import Incident, Organization
-from incident.serializers import IncidentSerializer, OrganizationSerializer
+from incident.models import Incident, Organization, TemporaryAccess
+from incident.serializers import IncidentSerializer, OrganizationSerializer, TemporaryAccessSerializer
 
 
 # Provides view for User API calls.
@@ -82,18 +82,21 @@ class IncidentViewSet(viewsets.ModelViewSet):
                     incident.save()
 
     # New method to specifically handle updating the 'hide' property of an incident.
-    @action(detail=True, methods=['patch'], permission_classes=[permissions.IsAdminUser])
+    @action(detail=True, methods=['patch'])
     def hide(self, request, pk=None):
         try:
             incident = self.get_object()
-            incident.hide = request.data.get('hide', False)
-            incident.save()
-            return Response({'status': 'hide status updated'}, status=status.HTTP_200_OK)
+            if self.request.user.is_superuser or self.request.user.perms.filter(organization=incident.organization)[0].incident_perms:
+                incident.hide = request.data.get('hide', False)
+                incident.save()
+                return Response({'status': 'hide status updated'}, status=status.HTTP_200_OK)
+            else:
+                return Response({'error': 'Invalid hide value'}, status=status.HTTP_400_BAD_REQUEST)
         except ValueError:
             return Response({'error': 'Invalid hide value'}, status=status.HTTP_400_BAD_REQUEST)
         
 
-# Provides view for User API calls.
+# Provides view for Organization calls.
 class OrganizationViewSet(viewsets.ModelViewSet):
     queryset = Organization.objects.all()
     permission_classes = [permissions.IsAuthenticated]
@@ -102,9 +105,21 @@ class OrganizationViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = Organization.objects.filter(id__in=self.request.user.organizations.all()).order_by('name')
         copy_queryset = queryset
+        # Filter out organizations if user access has expired.
         for organization in copy_queryset:
-            if self.request.user.perms.filter(organization=organization)[0].access_expires_at and (date.today() > self.request.user.perms.filter(organization=organization)[0].access_expires_at.date()):
+            if not self.request.user.is_superuser and self.request.user.perms.filter(organization=organization)[0].access_expires_at and (date.today() > self.request.user.perms.filter(organization=organization)[0].access_expires_at.date()):
                 queryset = queryset.exclude(id=organization.id)
         if self.request.GET.get('slug'):
             queryset = queryset.filter(slug=self.request.GET.get('slug'))
+        return queryset
+
+class TemporaryAccessViewSet(viewsets.ModelViewSet):
+    queryset = TemporaryAccess.objects.all()
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = TemporaryAccessSerializer
+
+    def get_queryset(self):
+        queryset = TemporaryAccess.objects.filter(link_expires_at__gte=datetime.today())
+        if self.request.GET.get('organization'):
+            queryset = queryset.filter(organization__slug=self.request.GET.get('organization'))
         return queryset

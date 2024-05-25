@@ -26,7 +26,7 @@ function AnimalRoomAssignmentCard(props) {
             {props.animal.name||"Unknown"}
             </span>
           <div style={{width:"157px"}}>
-            #{props.animal.id}&nbsp;
+            #{props.animal.id_for_incident}&nbsp;
             {props.animal.species_string}&nbsp;
             {props.animal.owner_names.length === 0 ?
             <OverlayTrigger

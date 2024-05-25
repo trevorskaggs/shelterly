@@ -158,7 +158,7 @@ const ToggleSwitch = (props) => {
   return (
     <>
       <Form.Label htmlFor={props.name} style={{marginBottom:"-5px"}}>{props.label}</Form.Label>
-      <div style={{marginLeft:"20px"}} ref={meta.error && registeredRef}><Field component={Switch} id={props.id} name={props.name} type="checkbox" color="primary" disabled={props.disabled} /></div>
+      <div style={{marginLeft:"25px"}} ref={meta.error && registeredRef}><Field component={Switch} id={props.id} name={props.name} type="checkbox" color="primary" disabled={props.disabled} /></div>
       {meta.error ? <div style={{ color: "#e74c3c", marginTop: ".5rem", fontSize: "80%" }}>{meta.error}</div> : ""}
     </>
 )}
@@ -515,7 +515,7 @@ const AddressLookup = ({setLatLon, ...props}) => {
 
 
   useEffect(() => {
-    if ((childRef.current && (childRef.current.value.includes(", USA") || childRef.current.value.includes(", United")))) {
+    if ((childRef.current && (childRef.current.value.includes(", USA") || childRef.current.value.includes(", United" || childRef.current.value.includes(", Canada"))))) {
       setError("");
     }
     updateAddr(search);
@@ -563,7 +563,7 @@ const AddressLookup = ({setLatLon, ...props}) => {
       setFieldValue("zip_code", components.postal_code);
       setFieldValue("latitude", suggestion.geometry.location.lat());
       setFieldValue("longitude", suggestion.geometry.location.lng());
-      setFieldValue("full_address", suggestion.formatted_address.replace(', USA', ''));
+      setFieldValue("full_address", suggestion.formatted_address.replace(', USA', '').replace(', United States', '').replace(', Canada', ''));
       setLatLon(suggestion.geometry.location.lat(), suggestion.geometry.location.lng());
       setSearch({});
     }
@@ -607,7 +607,7 @@ const AddressLookup = ({setLatLon, ...props}) => {
             options={{
               bounds:{north:incidentLatLon.lat+.1, south:incidentLatLon.lat-.1, east:incidentLatLon.lng+.1, west:incidentLatLon.lng-.1},
               types: ["geocode"],
-              componentRestrictions: { country: "us" },
+              componentRestrictions: { country: ["us", "ca"] },
             }}
             ref={childRef}
             apiKey={process.env.REACT_APP_GOOGLE_API_KEY}

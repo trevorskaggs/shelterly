@@ -4,6 +4,8 @@ import Incident from "./Incident";
 import IncidentForm from "./IncidentForm";
 import LoginForm from "./accounts/LoginForm";
 import PasswordReset from "./accounts/PasswordReset";
+import TemporaryAccessForm from "./accounts/TemporaryAccessForm";
+import TemporaryAccessRegistration from "./accounts/TemporaryAccessRegistration";
 import UserForm from "./accounts/UserForm";
 import UserManagement from "./accounts/UserManagement";
 import AnimalForm from "./animals/AnimalForm";
@@ -67,6 +69,8 @@ const routes = {
   "/:organization/incident/edit/:id": ({id, organization}) => <IncidentForm id={id} organization={organization} />,
   "/:organization/incident/new": ({organization}) => <IncidentForm organization={organization} />,
   "/:organization/accounts/user/new": ({organization}) => <UserForm organization={organization} />,
+  "/:organization/signup/manage": ({organization}) => <TemporaryAccessForm organization={organization} />,
+  "/:organization/signup/:id": ({id, organization}) => <TemporaryAccessRegistration id={id} organization={organization} />,
   "/:organization/accounts/user/edit/:id": ({id, organization}) => <UserForm id={id} organization={organization} />,
   "/:organization/accounts/user_management": ({organization}) => <UserManagement organization={organization} />,
   "/:organization/:incident/animals/edit/:id": ({id, incident, organization}) => <AnimalForm id={id} state={initialWorkflowData} incident={incident} organization={organization} />,

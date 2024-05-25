@@ -11,7 +11,7 @@ import { SystemErrorContext } from './components/SystemError';
 
 function Organization() {
 
-  const { dispatch, state } = useContext(AuthContext);
+  const { dispatch } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
   const [organization, setOrganization] = useState({id: '', name:'', slug:''});
@@ -78,7 +78,7 @@ function Organization() {
 
   return (
     <>
-    <Row className='ml-auto mr-auto mt-auto align-bottom'>
+    <Row className='ml-auto mr-auto mt-5 align-bottom'>
       <img src="/static/images/shelterly.png" alt="Logo" style={{height:"120px", width:"120px", marginTop:"-4px", marginLeft:"-4px"}} />
       <h1 style={{fontSize:"100px"}}>Shelterly</h1>
     </Row>

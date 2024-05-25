@@ -1,10 +1,10 @@
 import React, { useContext, useState, useEffect } from "react";
-import { Link } from "raviger";
+import { Link, navigate } from "raviger";
 import axios from "axios";
 import { Button, Card, Col, Form, FormControl, InputGroup, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faMinusSquare, faUpload, faUserPlus
+  faArrowAltCircleLeft, faMinusSquare, faUpload, faUserPlus
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faCircleE, faCircleI, faCircleU, faCircleV, faPencil, faUserUnlock
@@ -109,42 +109,45 @@ function UserManagement({ organization }) {
     let unmounted = false;
     let source = axios.CancelToken.source();
 
-    const fetchUserData = async () => {
+    if (state.organization.id) {
+      const fetchUserData = async () => {
 
-      setData({users: [], isFetching: true});
-      axios.get('/accounts/api/user/?organization=' + state.organization.id, {
-        cancelToken: source.token,
-      })
-      .then(response => {
-        if (!unmounted) {
-          setData({users: response.data, isFetching: false});
-          setFilteredData({users: response.data, isFetching: false});
-        }
-      })
-      .catch(error => {
-        if (!unmounted) {
-          setData({users: [], isFetching: false});
-          setShowSystemError(true);
-        }
-      });
+        setData({users: [], isFetching: true});
+        axios.get('/accounts/api/user/?organization=' + state.organization.id, {
+          cancelToken: source.token,
+        })
+        .then(response => {
+          if (!unmounted) {
+            setData({users: response.data, isFetching: false});
+            setFilteredData({users: response.data, isFetching: false});
+          }
+        })
+        .catch(error => {
+          if (!unmounted) {
+            setData({users: [], isFetching: false});
+            setShowSystemError(true);
+          }
+        });
 
-      // Cleanup.
-      return () => {
-        unmounted = true;
-        source.cancel();
-      };
+        // Cleanup.
+        return () => {
+          unmounted = true;
+          source.cancel();
+        };
+      }
+
+      fetchUserData();
     }
 
-  fetchUserData();
-
-  }, []);
+  }, [state.organization.id]);
 
   return (
     <>
     {state.user.is_superuser || state.user.user_perms ?
     <span className="mt-4 ml-auto mr-auto" style={{width:"80%", maxWidth:"80%"}}>
     <Header>
-      <Link href={"/" + organization} style={{textDecoration:"none", color:"white"}}>{state.organization.name}</Link> - User Management
+      <span style={{cursor:'pointer'}} onClick={() => navigate("/" + organization)} className="mr-2"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="sm" inverse /></span>
+      {state.organization.name} - User Management
       <OverlayTrigger
         key={"add-user"}
         placement="bottom"

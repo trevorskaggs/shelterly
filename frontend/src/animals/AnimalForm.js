@@ -110,6 +110,9 @@ const AnimalForm = (props) => {
         current_data[String(pair[0])] = null;
         imageList.push({data_url:props.state.steps.animals[props.state.animalIndex].get(pair[0] + '_data_url'), file:pair[1]})
       }
+      else if (['species'].includes(pair[0])) {
+        current_data[String(pair[0])] = Number(pair[1]);
+      }
     }
   }
 
@@ -133,7 +136,7 @@ const AnimalForm = (props) => {
           setSideImage(imageList);
         }
       }
-      else if (['room', 'shelter'].includes(pair[0])) {
+      else if (['room', 'shelter', 'species'].includes(pair[0])) {
         current_data[String(pair[0])] = Number(pair[1]);
       }
       else {
@@ -524,7 +527,7 @@ const AnimalForm = (props) => {
               .then(response => {
                 // If adding to an SR, redirect to the SR.
                 if (servicerequest_id) {
-                  navigate('/' + props.organization + incident + '/hotline/servicerequest/' + servicerequest_id);
+                  navigate('/' + props.organization + incident + '/hotline/servicerequest/' + response.data.request_id_for_incident);
                 }
                 // If adding to an Owner, redirect to the owner.
                 else if (owner_id) {
@@ -532,7 +535,7 @@ const AnimalForm = (props) => {
                 }
                 // Else redirect to the animal.
                 else {
-                  navigate('/' + props.organization + incident + '/animals/' + id);
+                  navigate('/' + props.organization + incident + '/animals/' + response.data.id_for_incident);
                 }
               })
               .catch(error => {

@@ -6,6 +6,25 @@ from .models import *
 from location.utils import build_full_address, build_action_string
 from animals.models import Animal
 
+class IntakeSummarySerializer(serializers.ModelSerializer):
+
+    animal_objects = serializers.SerializerMethodField()
+    person_object = serializers.SerializerMethodField()
+    shelter_name = serializers.StringRelatedField(source='shelter')
+
+    def get_animal_objects(self, obj):
+        from animals.serializers import AnimalSerializer
+        return AnimalSerializer(obj.animals, many=True).data
+
+    def get_person_object(self, obj):
+        from people.serializers import PersonSerializer
+        return PersonSerializer(obj.person, required=False, read_only=True).data
+
+    class Meta:
+        model = IntakeSummary
+        fields = '__all__'
+
+
 class SimpleRoomSerializer(serializers.ModelSerializer):
     animal_count = serializers.IntegerField(read_only=True)
     building_name = serializers.StringRelatedField(source='building')
@@ -17,6 +36,7 @@ class SimpleRoomSerializer(serializers.ModelSerializer):
     class Meta:
         model = Room
         fields = '__all__'
+
 
 class RoomSerializer(SimpleRoomSerializer):
     animals = serializers.SerializerMethodField()
@@ -48,6 +68,7 @@ class RoomSerializer(SimpleRoomSerializer):
     def get_shelter_name(self, obj):
         return obj.building.shelter.name
 
+
 class SimpleBuildingSerializer(serializers.ModelSerializer):
     shelter_name = serializers.StringRelatedField(source='shelter')
     rooms = SimpleRoomSerializer(source='room_set', many=True, required=False, read_only=True)
@@ -61,9 +82,11 @@ class SimpleBuildingSerializer(serializers.ModelSerializer):
         model = Building
         fields = '__all__'
 
+
 class BuildingSerializer(SimpleBuildingSerializer):
     animal_count = serializers.IntegerField(read_only=True)
     rooms = RoomSerializer(source='room_set', many=True, required=False, read_only=True)
+
 
 class SimpleShelterSerializer(serializers.ModelSerializer):
     full_address = serializers.SerializerMethodField()
@@ -81,6 +104,7 @@ class SimpleShelterSerializer(serializers.ModelSerializer):
         model = Shelter
         fields = '__all__'
 
+
 class ModestShelterSerializer(SimpleShelterSerializer):
     
     buildings = SimpleBuildingSerializer(source='building_set', many=True, required=False, read_only=True)
@@ -96,23 +120,6 @@ class ModestShelterSerializer(SimpleShelterSerializer):
         else:
             return ModestAnimalSerializer(obj.animal_set.filter(room=None).exclude(status='CANCELED'), many=True, required=False, read_only=True).data
 
-class IntakeSummarySerializer(serializers.ModelSerializer):
-
-    animal_objects = serializers.SerializerMethodField()
-    person_object = serializers.SerializerMethodField()
-    shelter_name = serializers.StringRelatedField(source='shelter')
-
-    def get_animal_objects(self, obj):
-        from animals.serializers import AnimalSerializer
-        return AnimalSerializer(obj.animals, many=True).data
-
-    def get_person_object(self, obj):
-        from people.serializers import PersonSerializer
-        return PersonSerializer(obj.person, required=False, read_only=True).data
-
-    class Meta:
-        model = IntakeSummary
-        fields = '__all__'
 
 class ShelterSerializer(ModestShelterSerializer):
     #Single obj serializer
