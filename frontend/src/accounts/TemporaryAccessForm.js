@@ -89,7 +89,7 @@ const TemporaryAccessForm = ({ organization }) => {
       {state.user.is_superuser || state.user.user_perms ? <span className="mt-3 ml-auto mr-auto" style={{width:"80%", maxWidth:"80%"}}>
       <Header>
         <span style={{cursor:'pointer'}} onClick={() => navigate("/" + organization)} className="mr-2"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="sm" inverse /></span>
-        {state.organization.name} - User Registration
+        {state.organization.name} - Access Tokens
       </Header>
       <hr/>
       <Card border="secondary" className="mt-1" style={{width:"35%", maxWidth:"35%"}}>
