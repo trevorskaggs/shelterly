@@ -40,7 +40,6 @@ const TemporaryAccessRegistration = ({ organization, id }) => {
         cancelToken: source.token,
       })
       .then(response => {
-        console.log(response)
         if (!unmounted) {
           setData(response.data);
           // If temp access is still valid.

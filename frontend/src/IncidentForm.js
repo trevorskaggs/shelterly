@@ -32,6 +32,7 @@ const IncidentForm = ({ id, organization }) => {
 
   const [data, setData] = useState({
     name: '',
+    description: '',
     slug: '',
     latitude: '',
     longitude: '',
@@ -162,6 +163,7 @@ const IncidentForm = ({ id, organization }) => {
               }
               return true;
             }),
+        description: Yup.string().max(500, 'Must be 500 characters or less.').nullable(),
         latlon: Yup.string().required('Required'),
         latitude: Yup.number(),
         longitude: Yup.number(),
@@ -229,6 +231,17 @@ const IncidentForm = ({ id, organization }) => {
                   label="Name*"
                   name="name"
                   id="name"
+                  xs="12"
+                />
+              </BootstrapForm.Row>
+              <BootstrapForm.Row>
+                <TextInput
+                  type="text"
+                  as="textarea"
+                  rows={3}
+                  label="Description"
+                  name="description"
+                  id="description"
                   xs="12"
                 />
               </BootstrapForm.Row>

@@ -298,17 +298,6 @@ function UserManagement({ organization }) {
             >
               <FontAwesomeIcon icon={faCircleV} size="lg" className="ml-1" />
             </OverlayTrigger> : ""}
-            {user.email_notification ? <OverlayTrigger
-              key={"email-notification"}
-              placement="top"
-              overlay={
-                <Tooltip id={`tooltip-email-notification`}>
-                  User will receive SR email notifications
-                </Tooltip>
-              }
-            >
-              <FontAwesomeIcon icon={faCircleE} size="lg" className="ml-1" />
-            </OverlayTrigger> : ""}
           </Col>
         </div>
       </Card>

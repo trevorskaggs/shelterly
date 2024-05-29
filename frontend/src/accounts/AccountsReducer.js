@@ -10,7 +10,7 @@ const initialState = {
   isLoading: false,
   logout: false,
   user: null,
-  incident: {id:'', name:'', training:false},
+  incident: {id:'', name:'', description: '', training:false},
   organization: {id:'', name:''},
   errors: {},
   location:'',
@@ -31,7 +31,7 @@ function auth_reducer(state, action) {
       return {...state, user:action.data.user, isAuthenticated: true, isLoading: false, errors: null};
 
     case 'LOGOUT_SUCCESSFUL':
-      return {...state, errors: action.data, user: null, incident: {name:'', training:false}, organization: {id:'', name:''},
+      return {...state, errors: action.data, user: null, incident: {id:'', name:'', description:'', training:false}, organization: {id:'', name:''},
         isAuthenticated: false, isLoading: false, logout: true};
 
     case 'AUTHENTICATION_ERROR':

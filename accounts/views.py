@@ -47,7 +47,7 @@ class CreateUserMixin(object):
             serializer = self.get_serializer(data=request.data)
             user = ShelterlyUser.objects.get(email=request.data.get('email'))
             user.organizations.add(Organization.objects.get(id=request.data.get('organization')))
-            ShelterlyUserOrg.objects.filter(user=user, organization=Organization.objects.get(id=request.data.get('organization'))).update(access_expires_at=request.data.get('access_expires_at', None), user_perms=request.data.get('user_perms', False), incident_perms=request.data.get('incident_perms', False), email_notification=request.data.get('email_notification', False))
+            ShelterlyUserOrg.objects.filter(user=user, organization=Organization.objects.get(id=request.data.get('organization'))).update(access_expires_at=request.data.get('access_expires_at', None), user_perms=request.data.get('user_perms', False), incident_perms=request.data.get('incident_perms', False))
             serializer.is_valid()
             return response.Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -114,7 +114,7 @@ class UserViewSet(CreateUserMixin, viewsets.ModelViewSet):
             if self.request.user.is_superuser or self.request.user.perms.filter(organization=self.request.data.get('organization'))[0].user_perms:
                 user = serializer.save()
                 user.organizations.add(Organization.objects.get(id=self.request.data.get('organization')))
-                ShelterlyUserOrg.objects.filter(user=user, organization=Organization.objects.get(id=self.request.data.get('organization'))).update(access_expires_at=self.request.data.get('access_expires_at', None), user_perms=self.request.data.get('user_perms', False), incident_perms=self.request.data.get('incident_perms', False), vet_perms=self.request.data.get('vet_perms', False), email_notification=self.request.data.get('email_notification', False))
+                ShelterlyUserOrg.objects.filter(user=user, organization=Organization.objects.get(id=self.request.data.get('organization'))).update(access_expires_at=self.request.data.get('access_expires_at', None), user_perms=self.request.data.get('user_perms', False), incident_perms=self.request.data.get('incident_perms', False), vet_perms=self.request.data.get('vet_perms', False))
 
     def perform_update(self, serializer):
         if serializer.is_valid():
@@ -156,7 +156,7 @@ class UserViewSet(CreateUserMixin, viewsets.ModelViewSet):
                         ).strip()
                     )
                 else:
-                    ShelterlyUserOrg.objects.filter(user=user, organization=self.request.data.get('organization')).update(access_expires_at=self.request.data.get('access_expires_at', None), user_perms=self.request.data.get('user_perms', False), incident_perms=self.request.data.get('incident_perms', False), vet_perms=self.request.data.get('vet_perms', False), email_notification=self.request.data.get('email_notification', False))
+                    ShelterlyUserOrg.objects.filter(user=user, organization=self.request.data.get('organization')).update(access_expires_at=self.request.data.get('access_expires_at', None), user_perms=self.request.data.get('user_perms', False), incident_perms=self.request.data.get('incident_perms', False), vet_perms=self.request.data.get('vet_perms', False))
             elif self.request.data.get('temp_access_id'):
                 user = serializer.save()
                 for access in TemporaryAccess.objects.filter(id=self.request.data.get('temp_access_id'), link_expires_at__gte=datetime.today()):

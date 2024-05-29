@@ -37,6 +37,7 @@ class Incident(models.Model):
 
     slug = models.CharField(max_length=20, blank=False, null=False, unique=True)
     name = models.CharField(max_length=20, blank=False, null=False)
+    description = models.CharField(max_length=500, blank=True, null=True)
     start_time = models.DateTimeField(auto_now_add=True)
     end_time = models.DateTimeField(blank=True, null=True)
     latitude = models.DecimalField(max_digits=9, decimal_places=4)
@@ -51,7 +52,17 @@ class Incident(models.Model):
     class Meta:
         ordering = ['name']
 
+
+class IncidentNotification(models.Model):
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    incident = models.ForeignKey(Incident, on_delete=models.CASCADE)
+    hotline_notifications = models.BooleanField(default=False)
+    dispatch_notifications = models.BooleanField(default=False)
+
+
 class TemporaryAccess(models.Model):
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)

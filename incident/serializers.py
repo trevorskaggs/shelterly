@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Incident, Organization, TemporaryAccess
+from .models import Incident, IncidentNotification, Organization, TemporaryAccess
 
 class IncidentSerializer(serializers.ModelSerializer):
 
@@ -36,4 +36,10 @@ class TemporaryAccessSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TemporaryAccess
+        fields = '__all__'
+
+class IncidentNotificationSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = IncidentNotification
         fields = '__all__'

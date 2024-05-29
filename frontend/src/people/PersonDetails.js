@@ -214,7 +214,7 @@ function PersonDetails({id, incident, organization}) {
                   <ListGroup.Item><b>Address: </b>{data.full_address}</ListGroup.Item>
                 : ""}
                 {data.requests.map(request => (
-                  <ListGroup.Item key={request.id}><b>Service Request: </b><Link href={"/" + organization + "/" + incident + "/hotline/servicerequest/" + request.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{request.full_address}</Link></ListGroup.Item>
+                  <ListGroup.Item key={request.id}><b>Service Request: </b><Link href={"/" + organization + "/" + incident + "/hotline/servicerequest/" + request.id_for_incident} className="text-link" style={{textDecoration:"none", color:"white"}}>{request.full_address}</Link></ListGroup.Item>
                 ))}
                 {data.comments ? <ListGroup.Item><b>Comments: </b>{data.comments}</ListGroup.Item>: ''}
               </ListGroup>

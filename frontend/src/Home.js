@@ -23,6 +23,7 @@ function Home({ incident }) {
     <span className="rounded-top">
       <Header>Home<span className="float-right">{state.user.version}</span></Header>
       <hr/>
+      <h4>{state.incident.description}</h4>
     </span>
     </>
   );

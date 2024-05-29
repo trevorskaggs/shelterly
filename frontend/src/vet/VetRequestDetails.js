@@ -119,7 +119,7 @@ function VetRequestDetails({ id, incident, organization }) {
                 >
                   <FontAwesomeIcon icon={faDiamondExclamation} className="ml-1 fa-move-down" inverse />
                 </OverlayTrigger> : ""}
-                {state.user.vet_perms && data.status === 'Open' ?
+                {(state.user.is_superuser || state.user.vet_perms) && data.status === 'Open' ?
                 <span className="ml-auto mr-3">
                   <Link href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.medical_record + "/workflow?vetrequest_id=" + id} className="exam-link" style={{textDecoration:"none", color:"white"}}>
                     <Card className="border rounded exam-hover-div" style={{height:"27px", minWidth:"202px", maxWidth:"202px", marginTop:"-2px", marginBottom:"-15px", whiteSpace:"nowrap", overflow:"hidden"}}>

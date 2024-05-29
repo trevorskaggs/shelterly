@@ -8,6 +8,7 @@ router = DefaultRouter()
 router.register(r'incident', views.IncidentViewSet)
 router.register(r'organization', views.OrganizationViewSet)
 router.register(r'tempaccess', views.TemporaryAccessViewSet)
+router.register(r'notification', views.IncidentNotificationViewSet)
 
 urlpatterns = [
     path('api/', include(router.urls)),

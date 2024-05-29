@@ -40,7 +40,6 @@ const UserForm = ({ id, organization }) => {
     user_perms: false,
     incident_perms: false,
     vet_perms: false,
-    email_notification: false,
     access_expires_at: null,
     organizations: [],
     presets: 0,
@@ -129,7 +128,6 @@ const UserForm = ({ id, organization }) => {
         user_perms: Yup.boolean(),
         incident_perms: Yup.boolean(),
         vet_perms: Yup.boolean(),
-        email_notification: Yup.boolean(),
       })}
       onSubmit={(values, { setFieldError, setSubmitting }) => {
         // Pass current organization value.
@@ -278,9 +276,6 @@ const UserForm = ({ id, organization }) => {
                 </Col>
                 <Col>
                   <ToggleSwitch name="vet_perms" id="vet_perms" label="Veterinary Permissions" />
-                </Col>
-                <Col>
-                  <ToggleSwitch name="email_notification" id="email_notification" label="SR Email Notification" />
                 </Col>
               </BootstrapForm.Row>
             </BootstrapForm>
