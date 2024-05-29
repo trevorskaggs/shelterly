@@ -15,7 +15,7 @@ import { SystemErrorContext } from '../components/SystemError';
 // Form for owner and reporter Person objects.
 const PersonForm = (props) => {
 
-  const { dispatch, state } = useContext(AuthContext);
+  const { state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
   const id = props.id;
@@ -111,6 +111,7 @@ const PersonForm = (props) => {
     latitude: null,
     longitude: null,
     change_reason: '',
+    incident: state.incident.id
   }
   let current_data = initialData;
   if (is_workflow) {
@@ -121,7 +122,7 @@ const PersonForm = (props) => {
       current_data = props.state.steps.reporter
     }
     current_data['show_agency'] = showAgency;
-    current_data['incident_slug'] = props.incident;
+    current_data['incident'] = state.incident.id;
   }
 
   // Initial Person data.

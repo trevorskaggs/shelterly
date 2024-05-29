@@ -17,7 +17,7 @@ const nameRegex = /^[a-z0-9 ,.'-]+$/i;
 
 const ShelterForm = ({ id, incident, organization }) => {
 
-  const { dispatch, state } = useContext(AuthContext);
+  const { state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
   // Initial shelter data.
@@ -31,7 +31,7 @@ const ShelterForm = ({ id, incident, organization }) => {
     state: '',
     zip_code: '',
     // active: true,
-    incident_slug: incident,
+    incident: state.incident.id,
     latitude: null,
     longitude: null,
   });

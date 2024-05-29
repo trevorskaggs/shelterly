@@ -27,10 +27,6 @@ class EvacTeamMemberViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         if serializer.is_valid():
-
-            if self.request.data.get('incident_slug'):
-                serializer.validated_data['incident'] = Incident.objects.get(slug=self.request.data.get('incident_slug'))
-
             # Clean phone fields.
             serializer.validated_data['phone'] = ''.join(char for char in serializer.validated_data.get('phone', '') if char.isdigit())
             serializer.save()
@@ -74,10 +70,6 @@ class DispatchTeamViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         if serializer.is_valid():
-
-            if self.request.data.get('incident_slug'):
-                serializer.validated_data['incident'] = Incident.objects.get(slug=self.request.data.get('incident_slug'))
-
             serializer.save()
 
     def perform_update(self, serializer):
@@ -153,14 +145,10 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
     # When creating, update all service requests to be assigned status.
     def perform_create(self, serializer):
         if serializer.is_valid():
-
-            if self.request.data.get('incident_slug'):
-                serializer.validated_data['incident'] = Incident.objects.get(slug=self.request.data.get('incident_slug'))
-
             timestamp = None
             if ServiceRequest.objects.filter(pk__in=self.request.data['service_requests'], status='assigned').exists():
                 raise serializers.ValidationError(['Duplicate assigned service request error.', list(ServiceRequest.objects.filter(pk__in=self.request.data['service_requests'], status='assigned').values_list('id', flat=True))])
-            team = DispatchTeam.objects.create(name=self.request.data.get('team_name'), incident=Incident.objects.get(slug=self.request.data.get('incident_slug')))
+            team = DispatchTeam.objects.create(name=self.request.data.get('team_name'), incident=Incident.objects.get(pk=self.request.data.get('incident')))
 
             if self.request.data.get('team_members'):
                 team.team_members.set(self.request.data.get('team_members'))

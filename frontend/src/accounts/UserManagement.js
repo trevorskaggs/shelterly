@@ -9,6 +9,7 @@ import {
 import {
   faCircleE, faCircleI, faCircleU, faCircleV, faPencil, faUserUnlock
 } from '@fortawesome/pro-solid-svg-icons';
+import Moment from 'react-moment';
 import Header from "../components/Header";
 import { AuthContext } from "./AccountsReducer";
 import { SystemErrorContext } from '../components/SystemError';
@@ -185,7 +186,7 @@ function UserManagement({ organization }) {
       <Col style={{minWidth:"150px", maxWidth:"150px", marginLeft:"1px"}}>
           First Name
       </Col>
-      <Col style={{minWidth:"358px", maxWidth:"358px"}}>
+      <Col style={{minWidth:"325px", maxWidth:"325px"}}>
           Email
       </Col>
       <Col style={{minWidth:"150px", maxWidth:"150px"}}>
@@ -196,6 +197,9 @@ function UserManagement({ organization }) {
       </Col>
       <Col style={{minWidth:"75px", maxWidth:"75px"}}>
           Actions
+      </Col>
+      <Col style={{paddingRight:"0px", minWidth:"125px", maxWidth:"125px"}}>
+          Access Expires
       </Col>
       <Col style={{minWidth:"75px"}}>
           Perms
@@ -210,7 +214,7 @@ function UserManagement({ organization }) {
           <Col className="border-top border-left border-bottom" style={{height:"32px", paddingLeft:"3px", paddingTop:"5px", marginTop: "-1px", fontSize:"13px", minWidth:"150px", maxWidth:"150px", backgroundColor:"#615e5e"}}>
             {user.first_name}
           </Col>
-          <Col className="border-top border-left border-bottom" style={{height:"32px", paddingLeft:"3px", paddingTop:"5px", marginTop: "-1px", fontSize:"13px", minWidth:"358px", maxWidth:"358px", backgroundColor:"#615e5e"}}>
+          <Col className="border-top border-left border-bottom" style={{height:"32px", paddingLeft:"3px", paddingTop:"5px", marginTop: "-1px", fontSize:"13px", minWidth:"325px", maxWidth:"325px", backgroundColor:"#615e5e"}}>
             {user.email}
           </Col>
           <Col className="border-top border-left border-bottom" style={{height:"32px", paddingLeft:"3px", paddingTop:"5px", marginTop: "-1px", fontSize:"13px", minWidth:"150px", maxWidth:"150px", backgroundColor:"#615e5e"}}>
@@ -253,6 +257,9 @@ function UserManagement({ organization }) {
             >
               <FontAwesomeIcon icon={faUserUnlock} style={{cursor:'pointer'}} size="lg" className="ml-1" onClick={() => {setUserToReset({id:user.id, first_name: user.first_name, last_name: user.last_name});setShowUserResetConfirm(true);}} inverse />
             </OverlayTrigger>
+          </Col>
+          <Col className="border-top border-left border-bottom" style={{height:"32px", paddingLeft:"3px", paddingTop:"5px", marginTop: "-1px", fontSize:"13px", minWidth:"125px", maxWidth:"125px", backgroundColor:"#615e5e"}}>
+            {user.access_expires_at ? <Moment format="LL">{user.access_expires_at}</Moment> : ""}
           </Col>
           <Col className="border" style={{height:"32px", paddingLeft:"3px", paddingTop:"5px", marginTop: "-1px", fontSize:"13px", minWidth:"75px", borderTopRightRadius:"0.25rem", borderBottomRightRadius:"0.25rem", backgroundColor:"#615e5e"}}>
             {user.user_perms ? <OverlayTrigger
