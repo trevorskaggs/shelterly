@@ -4,7 +4,7 @@ import { Link, navigate } from 'raviger';
 import { AuthContext } from "../accounts/AccountsReducer";
 import Moment from 'react-moment';
 import { Carousel } from 'react-responsive-carousel';
-import { Button, Card, Col, ListGroup, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
+import { Button, Card, Col, ListGroup, Modal, OverlayTrigger, Row, Tooltip, Spinner } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBan, faMedkit, faCut, faEdit, faEnvelope, faLink, faMinusSquare, faTimes, faUserPlus, faFilePdf
@@ -20,6 +20,7 @@ import { SystemErrorContext } from '../components/SystemError';
 import ShelterlyPrintifyButton from '../components/ShelterlyPrintifyButton';
 import { useLocationWithRoutes } from '../hooks';
 import LoadingLink from '../components/LoadingLink';
+import ActionsDropdown from '../components/ActionsDropdown';
 import { getFileNameFromUrl, isImageFile } from '../utils/files';
 
 function AnimalDetails({ id, incident, organization }) {
@@ -125,9 +126,13 @@ function AnimalDetails({ id, incident, organization }) {
     .finally(() => setIsLoading(false));
   }
 
-  const handleDownloadPdfClick = () => {
-    const pageURL = getFullLocationFromPath(`/${organization}/${incident}/animals/${id}`)
-    return printAnimalCareSchedule({ ...data, url: pageURL });
+  const handleDownloadPdfClick = async () => {
+    setIsLoading(true);
+    const pageURL = getFullLocationFromPath(`/${organization}/${incident}/animals/${id}`);
+    // wait for 1 tick so spinner will set before the print button locks up the browser
+    await new Promise(resolve => setTimeout(resolve, 0));
+    printAnimalCareSchedule({ ...data, url: pageURL })
+      .finally(() => setIsLoading(false));
   }
 
   // Hook for initializing data.
@@ -179,84 +184,14 @@ function AnimalDetails({ id, incident, organization }) {
 
   return (
     <>
-    <Header>
-      Animal #{data.id_for_incident || ' - '}
-      <OverlayTrigger
-        key={"edit"}
-        placement="bottom"
-        overlay={
-          <Tooltip id={`tooltip-edit`}>
-            Update animal
-          </Tooltip>
-        }
-      >
-        <LoadingLink
-          href={"/" + organization + "/" + incident + "/animals/edit/" + id}
-          isLoading={isLoading}
-        >
-          <FontAwesomeIcon icon={faEdit} className="ml-2" inverse />
-        </LoadingLink>
-      </OverlayTrigger>
-      <ShelterlyPrintifyButton
-        id="animal-details-animal-care-schedule"
-        spinnerSize={2.0}
-        tooltipPlacement='bottom'
-        tooltipText='Print Animal Care Schedule'
-        printFunc={handleDownloadPdfClick}
-        disabled={isLoading}
-      />
-      {data.status !== 'REUNITED' ?
-        <OverlayTrigger
-          key={"reunite"}
-          placement="bottom"
-          overlay={
-            <Tooltip id={`tooltip-reunite`}>
-              Reunite animal
-            </Tooltip>
-          }
-        >
-          <LoadingLink onClick={() => setShow(true)} isLoading={isLoading}>
-            <FontAwesomeIcon icon={faHomeHeart} className="mr-1" style={{cursor:'pointer'}} inverse />
-          </LoadingLink>
-        </OverlayTrigger>
-      : ""}
-      <OverlayTrigger
-        key={"vetrequest"}
-        placement="bottom"
-        overlay={
-          <Tooltip id={`tooltip-vetrequest`}>
-            Create veterinary request
-          </Tooltip>
-        }
-      >
-        <LoadingLink
-          href={"/" + organization + "/" + incident + "/animals/" + id + "/vetrequest/new"}
-          isLoading={isLoading}
-        >
-          <FontAwesomeIcon icon={faUserDoctorMessage} className="mr-1 ml-1" inverse />
-        </LoadingLink>
-      </OverlayTrigger>
-      <OverlayTrigger
-        key={"cancel-animal"}
-        placement="bottom"
-        overlay={
-          <Tooltip id={`tooltip-cancel-animal`}>
-            Cancel animal
-          </Tooltip>
-        }
-      >
-        <LoadingLink onClick={() => {setShowAnimalConfirm(true);}} isLoading={isLoading}>
-          <FontAwesomeIcon icon={faTimes} style={{cursor:'pointer'}} className="ml-1" size="lg" inverse />
-        </LoadingLink>
-      </OverlayTrigger>
-    </Header>
+    <Header>{`Animal #${data.id_for_incident || ' - '}`}</Header>
     <hr/>
     <div className="row" style={{marginBottom:"-13px"}}>
       <div className="col-6 d-flex" style={{marginRight:"-15px"}}>
         <Card className="border rounded d-flex" style={{width:"100%", marginBottom:"16px"}}>
           <Card.Body>
-            <Card.Title>
-              <h4>Information
+            <div className="d-flex justify-content-between">
+              <h4 className="h5 mb-0 pb-0 pt-2">Information
               {data.confined === 'yes' ?
                 <OverlayTrigger
                   key={"confined"}
@@ -366,9 +301,65 @@ function AnimalDetails({ id, incident, organization }) {
                 </span>
               </OverlayTrigger> :
               ""}
-            </h4>
-            </Card.Title>
-            <hr/>
+              </h4>
+              {isLoading ? (
+                <Spinner
+                  className="align-self-center mr-3"
+                  {...{
+                    as: 'span',
+                    animation: 'border',
+                    size: undefined,
+                    role: 'status',
+                    'aria-hidden': 'true',
+                    variant: 'light',
+                    style: {
+                      height: '1.5rem',
+                      width: '1.5rem',
+                      marginBottom: '0.75rem'
+                    }
+                  }}
+                />
+              ) : (
+                <ActionsDropdown alignRight={true} variant="dark" title="Actions">
+                  <ShelterlyPrintifyButton
+                    id="animal-details-animal-care-schedule"
+                    spinnerSize={2.0}
+                    tooltipPlacement='right'
+                    tooltipText='Print Animal Care Schedule'
+                    printFunc={handleDownloadPdfClick}
+                    disabled={isLoading}
+                    noOverlay={true}
+                  />
+                  <LoadingLink
+                    href={"/" + organization + "/" + incident + "/animals/edit/" + id}
+                    isLoading={isLoading}
+                    className="text-white d-block py-1 px-3"
+                  >
+                    <FontAwesomeIcon icon={faEdit} className="mr-1" inverse />
+                    Update Animal
+                  </LoadingLink>
+                {data.status !== 'REUNITED' ?
+                    <LoadingLink onClick={() => setShow(true)} isLoading={isLoading} className="text-white d-block py-1 px-3">
+                      <FontAwesomeIcon icon={faHomeHeart} className="mr-1" style={{cursor:'pointer'}} inverse />
+                      Reunite Animal
+                    </LoadingLink>
+                : ""}
+                  <LoadingLink
+                    href={"/" + organization + "/" + incident + "/animals/" + id + "/vetrequest/new"}
+                    isLoading={isLoading}
+                    className="text-white d-block py-1 px-3"
+                  >
+                    <FontAwesomeIcon icon={faUserDoctorMessage} className="mr-1" inverse />
+                    Create veterinary request
+                  </LoadingLink>
+                  <LoadingLink onClick={() => {setShowAnimalConfirm(true);}} isLoading={isLoading} className="text-white d-block py-1 px-3">
+                    <FontAwesomeIcon icon={faTimes} style={{cursor:'pointer'}} className='mr-1' size="lg" inverse />
+                    Cancel animal
+                  </LoadingLink>
+                </ActionsDropdown>
+              )}
+            </div>
+            <hr className="pt-0 mt-1" />
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px", textTransform:"capitalize"}}>
               <ListGroup.Item>
                 <div className="row">

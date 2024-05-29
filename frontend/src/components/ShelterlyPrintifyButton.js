@@ -14,7 +14,8 @@ const ShelterlyPrintifyButton = ({
   tooltipPlacement = 'bottom',
   tooltipText = 'Printify',
   disabled = false,
-  disabledClassName = 'text-dark'
+  disabledClassName = 'text-dark',
+  noOverlay = false
 }) => {
   const {
     isSubmitting,
@@ -29,6 +30,35 @@ const ShelterlyPrintifyButton = ({
     handleSubmitting()
       .then(printFunc)
       .then(() => submittingComplete());
+  }
+
+  if (noOverlay === true) {
+    const textPlacement = tooltipPlacement === 'right' ? 'right' : 'left';
+    return (
+      <ButtonSpinner
+        data-testid="button-test-component"
+        as="a"
+        variant="outline-light"
+        className="fa-icon-spinner-button d-block text-white px-3 py-1"
+        onClick={handleClick}
+        isSubmitting={isSubmitting}
+        isSubmittingText={''}
+        spinnerProps={{
+          size: undefined,
+          variant: 'light',
+          style: {
+            height: `${spinnerSize}rem`,
+            width: `${spinnerSize}rem`
+          }
+        }}
+      >
+        <span data-testid="icon-test-component">
+          {textPlacement === 'left' ? tooltipText : null}
+          <FontAwesomeIcon icon={faPrint} className={`mr-1 ${disabled ? disabledClassName : ''}`} inverse />
+          {textPlacement === 'right' ? tooltipText : null}
+        </span>
+      </ButtonSpinner>
+    )
   }
 
   return (

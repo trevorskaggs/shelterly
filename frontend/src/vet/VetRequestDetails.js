@@ -2,7 +2,17 @@ import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
 import Moment from 'react-moment';
 import { Link } from 'raviger';
-import { Button, Card, Col, ListGroup, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
+import {
+  Button,
+  Card,
+  Col,
+  ListGroup,
+  Modal,
+  OverlayTrigger,
+  Row,
+  Tooltip,
+  Spinner,
+} from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faEdit,
@@ -15,6 +25,7 @@ import {
 import Header from '../components/Header';
 import { SystemErrorContext } from '../components/SystemError';
 import LoadingLink from '../components/LoadingLink';
+import ActionsDropdown from '../components/ActionsDropdown';
 import { AuthContext } from "../accounts/AccountsReducer";
 
 function VetRequestDetails({ id, incident, organization }) {
@@ -67,45 +78,14 @@ function VetRequestDetails({ id, incident, organization }) {
 
   return (
     <>
-    <Header>
-      Veterinary Request #{data.id}
-      {data.status !== 'Canceled' ? <OverlayTrigger
-        key={"edit-vet-request"}
-        placement="bottom"
-        overlay={
-          <Tooltip id={`tooltip-edit-vet-request`}>
-            Update vet request
-          </Tooltip>
-        }
-      >
-        <LoadingLink
-          href={"/" + organization + "/" + incident + "/vet/vetrequest/edit/" + id}
-          isLoading={isLoading}
-        >
-          <FontAwesomeIcon icon={faEdit} className="ml-2" inverse />
-        </LoadingLink>
-      </OverlayTrigger> : ""}
-      {data.status === 'Open' ? <OverlayTrigger
-        key={"cancel-vet-request"}
-        placement="bottom"
-        overlay={
-          <Tooltip id={`tooltip-cancel-vet-request`}>
-            Cancel veterinary request
-          </Tooltip>
-        }
-      >
-        <LoadingLink onClick={() => {setShowModal(true)}} isLoading={isLoading}>
-          <FontAwesomeIcon icon={faTimes} className="ml-1" size="lg" style={{cursor:'pointer'}} inverse />
-        </LoadingLink>
-      </OverlayTrigger> : ""}
-    </Header>
+    <Header>{`Veterinary Request #${data.id || ' - '}`}</Header>
     <hr/>
     <div className="row">
       <div className="col-6 d-flex">
         <Card className="border rounded d-flex" style={{width:"100%"}}>
           <Card.Body>
-            <Card.Title>
-              <h4>
+            <div className="d-flex justify-content-between">
+              <h4 className="h5 mb-0 pb-0 pt-2">
                 <Row className="ml-0 pr-0">
                 Information
                 {data.caution ? <OverlayTrigger
@@ -139,8 +119,45 @@ function VetRequestDetails({ id, incident, organization }) {
                 : ""}
                 </Row>
               </h4>
-            </Card.Title>
-            <hr/>
+              {isLoading ? (
+                <Spinner
+                  className="align-self-center mr-3"
+                  {...{
+                    as: 'span',
+                    animation: 'border',
+                    size: undefined,
+                    role: 'status',
+                    'aria-hidden': 'true',
+                    variant: 'light',
+                    style: {
+                      height: '1.5rem',
+                      width: '1.5rem',
+                      marginBottom: '0.75rem'
+                    }
+                  }}
+                />
+              ) : (
+                <ActionsDropdown>
+                  {data.status !== 'Canceled' ? <LoadingLink
+                      href={"/" + organization + "/" + incident + "/vet/vetrequest/edit/" + id}
+                      isLoading={isLoading}
+                      className="text-white d-block py-1 px-3"
+                    >
+                      <FontAwesomeIcon icon={faEdit} className="mr-1" inverse />
+                      Update vet request
+                    </LoadingLink> : ""}
+                  {data.status === 'Open' ? <LoadingLink
+                      onClick={() => {setShowModal(true)}}
+                      isLoading={isLoading}
+                      className="text-white d-block py-1 px-3"
+                    >
+                      <FontAwesomeIcon icon={faTimes} className="mr-1" style={{cursor:'pointer'}} inverse />
+                      Cancel veterinary request
+                    </LoadingLink> : ""}
+                </ActionsDropdown>
+              )}
+            </div>
+            <hr className="pt-0 mt-1" />
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
               <ListGroup.Item>
                 <div className="row">
