@@ -16,7 +16,7 @@ import { AddressLookup } from '../components/Map';
 import { SystemErrorContext } from '../components/SystemError';
 import { AuthContext } from "../accounts/AccountsReducer";
 
-function MapLegendControl({}) {
+function MapLegendControl({setShowAddressModal}) {
   return (
       <div className='leaflet-control float-right map-legend mt-2 mr-2'>
           <OverlayTrigger
@@ -28,7 +28,7 @@ function MapLegendControl({}) {
               </Tooltip>
             }
           >
-            <Button className="" onClick={() => setShowAddressModal(true)}>
+            <Button onClick={() => setShowAddressModal(true)}>
               <FontAwesomeIcon icon={faSearch} />
             </Button>
           </OverlayTrigger>
@@ -195,7 +195,7 @@ function Hotline({ incident, organization }) {
       <Col xs={10} className="border rounded pl-0 pr-0">
         {data.service_requests.length ?
           <Map zoom={12} bounds={data.bounds} className="landing-leaflet-container">
-            <MapLegendControl />
+            <MapLegendControl setShowAddressModal={setShowAddressModal} />
             {data.service_requests.filter(service_request => (service_request.status === statusOptions || statusOptions === "all")).map(service_request => (
               <Marker
                 key={service_request.id}

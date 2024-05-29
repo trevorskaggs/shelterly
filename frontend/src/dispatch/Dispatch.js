@@ -17,6 +17,26 @@ import Scrollbar from '../components/Scrollbars';
 import { SystemErrorContext } from '../components/SystemError';
 import { AddressLookup } from '../components/Map';
 
+function MapLegendControl({setShowAddressModal}) {
+  return (
+      <div className='leaflet-control float-right map-legend mt-2 mr-2'>
+          <OverlayTrigger
+            key={"address-finder"}
+            placement="top"
+            overlay={
+              <Tooltip id={`tooltip-address-finder`}>
+                Search for an address to zoom the map to.
+              </Tooltip>
+            }
+          >
+            <Button onClick={() => setShowAddressModal(true)}>
+              <FontAwesomeIcon icon={faSearch} />
+            </Button>
+          </OverlayTrigger>
+      </div>
+  )
+}
+
 function Dispatch({ incident, organization }) {
 
   const { setShowSystemError } = useContext(SystemErrorContext);
@@ -108,21 +128,7 @@ const countMatches = (animal_dict) => {
 
   return (
     <>
-    <Header>Dispatch
-      <OverlayTrigger
-        key={"address-finder"}
-        placement="bottom"
-        overlay={
-          <Tooltip id={`tooltip-address-finder`}>
-            Search for an address to zoom the map to.
-          </Tooltip>
-        }
-      >
-        <Button className="ml-1 fa-move-up" onClick={() => setShowAddressModal(true)}>
-          <FontAwesomeIcon icon={faSearch} />
-        </Button>
-      </OverlayTrigger>
-    </Header>
+    <Header>Dispatch</Header>
     <hr/>
     <Row className="ml-0 mr-0 pl-0 pr-0 mb-0">
       <Col xs={4} className="pl-0 pr-0">
@@ -145,6 +151,7 @@ const countMatches = (animal_dict) => {
       <Col xs={10} className="border rounded pl-0 pr-0">
         {data.dispatch_assignments.length ?
           <Map bounds={data.bounds} className="landing-leaflet-container">
+            <MapLegendControl setShowAddressModal={setShowAddressModal} />
             {data.dispatch_assignments.filter(da => da.id === selectedTeam ? da : showActive && showPreplanned ? da : showActive ? da.team_member_names.length > 0 : showPreplanned ? da.team_member_names.length === 0 : null)
                                       .filter(dispatch_assignment => (selectedTeam == null || dispatch_assignment.id === selectedTeam)).map(dispatch_assignment => (
             <span key={dispatch_assignment.id}>
