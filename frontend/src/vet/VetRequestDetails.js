@@ -144,7 +144,7 @@ function VetRequestDetails({ id, incident, organization }) {
                       className="text-white d-block py-1 px-3"
                     >
                       <FontAwesomeIcon icon={faEdit} className="mr-1" inverse />
-                      Update vet request
+                      Update Vet Request
                     </LoadingLink> : ""}
                   {data.status === 'Open' ? <LoadingLink
                       onClick={() => {setShowModal(true)}}

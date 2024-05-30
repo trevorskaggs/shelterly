@@ -308,17 +308,17 @@ function ServiceRequestDetails({ id, incident, organization }) {
                       className="text-white d-block py-1 px-3"
                     >
                       <FontAwesomeIcon icon={faEdit} className="mr-1" inverse />
-                      Update service request
+                      Update Service Request
                     </LoadingLink>
                     <LoadingLink onClick={handleGeoJsonDownload} isLoading={isLoading} className="text-white d-block py-1 px-3">
                       <FontAwesomeIcon icon={faDownload} className="mr-1"  inverse />
-                      Download service request data as geojson
+                      Download Service Request as Geojson
                     </LoadingLink>
                     <ShelterlyPrintifyButton
                       id="service-request-summary"
                       spinnerSize={2.0}
                       tooltipPlacement='right'
-                      tooltipText='Download Service Request Summary'
+                      tooltipText='Print Service Request as PDF'
                       printFunc={handleDownloadPdfClick}
                       disabled={isLoading}
                       noOverlay={true}

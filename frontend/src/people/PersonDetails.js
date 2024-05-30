@@ -190,7 +190,7 @@ function PersonDetails({id, incident, organization}) {
                       className="text-white d-block py-1 px-3"
                     >
                       <FontAwesomeIcon icon={faEdit} className="mr-1" inverse />
-                      Update owner
+                      Update Owner
                     </LoadingLink>
                   :
                     <LoadingLink
@@ -199,14 +199,14 @@ function PersonDetails({id, incident, organization}) {
                       className="text-white d-block py-1 px-3"
                     >
                       <FontAwesomeIcon icon={faEdit} className="ml-2 mr-1" inverse />
-                      Update reporter
+                      Update Reporter
                     </LoadingLink>
                   }
                   <ShelterlyPrintifyButton
                     id="owner-summary"
                     spinnerSize={2.0}
                     tooltipPlacement='right'
-                    tooltipText='Download Printable Owner Summary'
+                    tooltipText='Download Owner Summary as PDF'
                     printFunc={handleDownloadPdfClick}
                     disabled={isLoading}
                     noOverlay={true}
