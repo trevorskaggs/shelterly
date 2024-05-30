@@ -8,8 +8,8 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 
 from accounts.models import ShelterlyUser
-from incident.models import Incident, Organization, TemporaryAccess
-from incident.serializers import IncidentSerializer, OrganizationSerializer, TemporaryAccessSerializer
+from incident.models import Incident, Organization, TemporaryAccess, IncidentNotification
+from incident.serializers import IncidentSerializer, IncidentNotificationSerializer, OrganizationSerializer, TemporaryAccessSerializer
 
 
 # Provides view for User API calls.
@@ -94,7 +94,16 @@ class IncidentViewSet(viewsets.ModelViewSet):
                 return Response({'error': 'Invalid hide value'}, status=status.HTTP_400_BAD_REQUEST)
         except ValueError:
             return Response({'error': 'Invalid hide value'}, status=status.HTTP_400_BAD_REQUEST)
-        
+
+    # New method to specifically handle updating the 'hide' property of an incident.
+    @action(detail=True, methods=['patch'])
+    def subscribe(self, request, pk=None):
+        try:
+            incident = self.get_object()
+            IncidentNotification.objects.update_or_create(user=self.request.user, incident=incident, defaults={'hotline_notifications':request.data.get('subscribe', False)})
+            return Response({'status': 'success'}, status=status.HTTP_200_OK)
+        except ValueError:
+            return Response({'error': 'Invalid subscribe value'}, status=status.HTTP_400_BAD_REQUEST)
 
 # Provides view for Organization calls.
 class OrganizationViewSet(viewsets.ModelViewSet):
@@ -122,4 +131,20 @@ class TemporaryAccessViewSet(viewsets.ModelViewSet):
         queryset = TemporaryAccess.objects.filter(link_expires_at__gte=datetime.today())
         if self.request.GET.get('organization'):
             queryset = queryset.filter(organization__slug=self.request.GET.get('organization'))
+        return queryset
+
+class IncidentNotificationViewSet(viewsets.ModelViewSet):
+    queryset = IncidentNotification.objects.all()
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = IncidentNotificationSerializer
+
+    def get_queryset(self):
+        queryset = IncidentNotification.objects.all()
+
+        if self.request.GET.get('incident'):
+            queryset = queryset.filter(user=self.request.user, incident__slug=self.request.GET.get('incident'))
+
+        if self.request.GET.get('hotline', False):
+            queryset = queryset.filter(hotline_notifications=True)
+
         return queryset

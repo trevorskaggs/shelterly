@@ -421,7 +421,7 @@ const ExamForm = (props) => {
                 <BootstrapForm.Row>
                   <Col xs={"4"}>
                     <DropDown
-                      label="Examiner"
+                      label="Examiner*"
                       id="assigneeDropdown"
                       name="assignee"
                       type="text"
@@ -448,7 +448,7 @@ const ExamForm = (props) => {
                 </BootstrapForm.Row> : ""}
                 <BootstrapForm.Row className="mt-3">
                   <Col xs="2">
-                    <ToggleSwitch id="confirm_sex_age" name="confirm_sex_age" label="Confirm Age/Sex" disabled={!formikProps.values.age && !formikProps.values.sex} />
+                    <ToggleSwitch id="confirm_sex_age" name="confirm_sex_age" label="Confirm Age/Sex*" disabled={!formikProps.values.age && !formikProps.values.sex} />
                     {/* <BootstrapForm.Label htmlFor="confirm_sex_age" style={{marginBottom:"-5px"}}>Confirm Age/Sex</BootstrapForm.Label>
                     <div style={{marginLeft:"20px"}}><Field component={Switch} name="confirm_sex_age" type="checkbox" color="primary" disabled={!formikProps.values.age && !formikProps.values.sex} /></div>
                     {formikProps.errors['confirm_sex_age'] ? <div style={{ color: "#e74c3c", marginTop: ".5rem", fontSize: "80%" }}>{formikProps.errors['confirm_sex_age']}</div> : ""} */}
@@ -513,7 +513,7 @@ const ExamForm = (props) => {
                     id="weight"
                     name="weight"
                     type="text"
-                    label="Weight"
+                    label="Weight*"
                     xs="3"
                     value={data.weight || formikProps.values.weight || ''}
                   />
@@ -546,7 +546,7 @@ const ExamForm = (props) => {
                     id="temperature"
                     name="temperature"
                     type="text"
-                    label="Temperature (F)"
+                    label="Temperature (F)*"
                     xs="2"
                   />
                   <Col xs="2">
@@ -570,14 +570,14 @@ const ExamForm = (props) => {
                     id="pulse"
                     name="pulse"
                     type="text"
-                    label="Pulse"
+                    label="Pulse*"
                     xs="2"
                   />
                   <TextInput
                     id="respiratory_rate"
                     name="respiratory_rate"
                     type="text"
-                    label="Respiratory Rate"
+                    label="Respiratory Rate*"
                     xs="2"
                   />
                 </BootstrapForm.Row>

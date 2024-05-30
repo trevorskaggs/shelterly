@@ -6,7 +6,7 @@ import { Marker, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
 import Moment from 'react-moment';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCircle, faExclamationCircle, faSearch, faPhone } from '@fortawesome/free-solid-svg-icons';
+import { faBell, faBellSlash, faCircle, faExclamationCircle, faSearch, faPhone } from '@fortawesome/free-solid-svg-icons';
 import { faQuestionCircle as faQuestionCircleDuo } from '@fortawesome/pro-duotone-svg-icons';
 import { faHomeAlt as faHomeAltReg } from '@fortawesome/pro-regular-svg-icons';
 import { faCircleBolt, faHomeAlt, faDoNotEnter } from '@fortawesome/pro-solid-svg-icons';
@@ -14,18 +14,46 @@ import Map, { prettyText, closedMarkerIcon, reportedMarkerIcon, reportedEvacMark
 import Header from "../components/Header";
 import { AddressLookup } from '../components/Map';
 import { SystemErrorContext } from '../components/SystemError';
+import { AuthContext } from "../accounts/AccountsReducer";
+
+function MapLegendControl({setShowAddressModal}) {
+  return (
+      <div className='leaflet-control float-right map-legend mt-2 mr-2'>
+          <OverlayTrigger
+            key={"address-finder"}
+            placement="top"
+            overlay={
+              <Tooltip id={`tooltip-address-finder`}>
+                Search for an address to zoom the map to.
+              </Tooltip>
+            }
+          >
+            <Button onClick={() => setShowAddressModal(true)}>
+              <FontAwesomeIcon icon={faSearch} />
+            </Button>
+          </OverlayTrigger>
+      </div>
+  )
+}
 
 function Hotline({ incident, organization }) {
 
   const { setShowSystemError } = useContext(SystemErrorContext);
+  const { state } = useContext(AuthContext);
 
   const [data, setData] = useState({service_requests: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
   const [mapState, setMapState] = useState({});
   const [showAddressModal, setShowAddressModal] = useState(false);
+  const [isSubscribed, setIsSubscribed] = useState(false);
   const [statusOptions, setStatusOptions] = useState("all");
   const [initialBounds, setInitialBounds] = useState(L.latLngBounds([[0,0]]));
 
   const handleClose = () => {setShowAddressModal(false);}
+
+  const subscribe = () => {
+    axios.patch('/incident/api/incident/' + state.incident.id + '/subscribe/', {'subscribe':!isSubscribed})
+      .finally(() => setIsSubscribed(!isSubscribed));
+  }
 
   // Counts the number of species matches for a service request.
   const countMatches = (service_request) => {
@@ -83,6 +111,28 @@ function Hotline({ incident, organization }) {
 
     fetchServiceRequests();
 
+    const fetchSubscribed = async () => {
+      setData({service_requests: [], isFetching: true, bounds:L.latLngBounds([[0,0]])});
+      // Fetch IncidentNotification data.
+      await axios.get('/incident/api/notification/?incident=' + incident + '&hotline=true', {
+        cancelToken: source.token,
+      })
+      .then(response => {
+        if (!unmounted) {
+          if (response.data.length > 0) {
+            setIsSubscribed(true);
+          }
+        }
+      })
+      .catch(error => {
+        if (!unmounted) {
+          setShowSystemError(true);
+        }
+      });
+    };
+
+    fetchSubscribed();
+
     // Cleanup.
     return () => {
       unmounted = true;
@@ -93,19 +143,35 @@ function Hotline({ incident, organization }) {
   return (
     <>
     <Header>Hotline
-      <OverlayTrigger
-        key={"address-finder"}
-        placement="bottom"
-        overlay={
-          <Tooltip id={`tooltip-address-finder`}>
-            Search for an address to zoom the map to.
-          </Tooltip>
-        }
-      >
-        <Button className="ml-1 fa-move-up" onClick={() => setShowAddressModal(true)}>
-          <FontAwesomeIcon icon={faSearch} />
-        </Button>
-      </OverlayTrigger>
+    {isSubscribed ?
+    <OverlayTrigger
+      key={"unsubscribe"}
+      placement="bottom"
+      overlay={
+        <Tooltip id={`tooltip-unsubscribe`}>
+          Unsubscribe from receiving email notifications when Service Requests are created for this incident.
+        </Tooltip>
+      }
+    >
+      <Button className="ml-1" onClick={() => subscribe()} style={{marginTop:"-8px", width:"44px"}}>
+        <FontAwesomeIcon size="lg" icon={faBellSlash} transform={'left-3'} />
+      </Button>
+    </OverlayTrigger>
+    :
+    <OverlayTrigger
+      key={"subscribe"}
+      placement="bottom"
+      overlay={
+        <Tooltip id={`tooltip-subscribe`}>
+          Subscribe to receive email notifications when Service Requests are created for this incident.
+        </Tooltip>
+      }
+    >
+      <Button className="ml-1" onClick={() => subscribe()} style={{marginTop:"-8px"}}>
+        <FontAwesomeIcon size="lg" icon={faBell} />
+      </Button>
+    </OverlayTrigger>
+    }
     </Header>
     <hr/>
     <Row className="ml-0 mr-0 pl-0 pr-0 mb-0">
@@ -129,6 +195,7 @@ function Hotline({ incident, organization }) {
       <Col xs={10} className="border rounded pl-0 pr-0">
         {data.service_requests.length ?
           <Map zoom={12} bounds={data.bounds} className="landing-leaflet-container">
+            <MapLegendControl setShowAddressModal={setShowAddressModal} />
             {data.service_requests.filter(service_request => (service_request.status === statusOptions || statusOptions === "all")).map(service_request => (
               <Marker
                 key={service_request.id}

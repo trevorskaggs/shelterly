@@ -320,7 +320,7 @@ function DispatchSummary({ id, incident, organization }) {
                   id="dispatch-assignment"
                   spinnerSize={2.0}
                   tooltipPlacement='right'
-                  tooltipText='Print Dispatch Assignment'
+                  tooltipText='Print Dispatch Assignment as PDF'
                   printFunc={handleDownloadPdfClick}
                   disabled={isLoading}
                   noOverlay={true}
@@ -333,7 +333,7 @@ function DispatchSummary({ id, incident, organization }) {
                     isLoading={isLoading}
                   >
                     <FontAwesomeIcon icon={faEdit} className="mr-1" inverse />
-                    Update dispatch assignment
+                    Update Dispatch Assignment
                   </LoadingLink>
                   : <LoadingLink
                     href={"/" + organization + "/" + incident + "/dispatch/resolution/" + id}
@@ -341,7 +341,7 @@ function DispatchSummary({ id, incident, organization }) {
                     isLoading={isLoading}
                   >
                     <FontAwesomeIcon icon={faClipboardCheck} className="mr-1" inverse />
-                    Resolve dispatch assignment
+                    Resolve Dispatch Assignment
                   </LoadingLink>
                 }
                 <LoadingLink
@@ -350,7 +350,7 @@ function DispatchSummary({ id, incident, organization }) {
                   isLoading={isLoading}
                 >
                   <FontAwesomeIcon icon={faDownload} className="mr-1"  inverse />
-                  Download dispatch assignment data as geojson
+                  Download Dispatch Assignment as Geojson
                 </LoadingLink>
               </ActionsDropdown>
             )}

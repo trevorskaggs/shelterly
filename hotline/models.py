@@ -8,7 +8,7 @@ from django.contrib.auth import get_user_model
 from location.models import Location
 from people.models import Person
 from .managers import ServiceRequestQueryset
-from incident.models import Incident
+from incident.models import Incident, IncidentNotification
 
 User = get_user_model()
 
@@ -147,7 +147,7 @@ def email_on_creation(sender, instance, **kwargs):
         # Send email here.
         send_mail(
             # title:
-            "Service Request #" + str(instance.id) + " Created for Shelterly",
+            "Service Request #" + str(instance.id_for_incident) + " Created for Shelterly",
             # message:
             render_to_string(
                 'service_request_creation_email.txt',
@@ -161,7 +161,7 @@ def email_on_creation(sender, instance, **kwargs):
             # from:
             "DoNotReply@shelterly.org",
             # to:
-            User.objects.filter(perms__organization=instance.incident.organization, perms__email_notification=True).values_list('email', flat=True),
+            User.objects.filter(id__in=IncidentNotification.objects.filter(incident=instance.incident, hotline_notifications=True).values_list('user', flat=True)).values_list('email', flat=True),
             fail_silently=False,
             html_message = render_to_string(
                 'service_request_creation_email.html',
