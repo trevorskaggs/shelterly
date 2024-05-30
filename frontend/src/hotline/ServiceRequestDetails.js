@@ -2,7 +2,7 @@ import React, { useCallback, useContext, useEffect, useRef, useState } from 'rea
 import axios from 'axios';
 import { Link } from 'raviger';
 import Moment from 'react-moment';
-import { Button, Card, ListGroup, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Button, Card, ListGroup, Modal, OverlayTrigger, Tooltip, Spinner } from 'react-bootstrap';
 import Flatpickr from 'react-flatpickr';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -18,6 +18,7 @@ import { AuthContext } from "../accounts/AccountsReducer";
 import { SystemErrorContext } from '../components/SystemError';
 import ShelterlyPrintifyButton from "../components/ShelterlyPrintifyButton";
 import LoadingLink from "../components/LoadingLink";
+import ActionsDropdown from '../components/ActionsDropdown';
 import { useLocationWithRoutes } from '../hooks';
 import { printServiceRequestSummary, printSrAnimalCareSchedules } from './Utils';
 
@@ -104,8 +105,13 @@ function ServiceRequestDetails({ id, incident, organization }) {
     return getFullLocationFromPath(`/${organization}/${incident}/animals/${animal.id}`)
   }
 
-  const handleDownloadPdfClick = () =>
+  const handleDownloadPdfClick = async () => {
+    setIsLoading(true);
+    // wait for 1 tick so spinner will set before the print button locks up the browser
+    await new Promise(resolve => setTimeout(resolve, 0));
     printServiceRequestSummary(data)
+      .finally(() => setIsLoading(false));
+  }
 
   const handlePrintAllAnimalsClick = () => {
     const animals = data.animals.map((animal) => ({
@@ -158,62 +164,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
 
   return (
     <>
-      <Header>
-        Service Request #{data.id_for_incident || ' - '}
-        <OverlayTrigger
-          key={"edit-service-request"}
-          placement="bottom"
-          overlay={
-            <Tooltip id={`tooltip-edit-service-request`}>
-              Update service request
-            </Tooltip>
-          }
-        >
-          <LoadingLink
-            href={"/" + organization + "/" + incident + "/hotline/servicerequest/edit/" + data.id_for_incident}
-            isLoading={isLoading}
-          >
-            <FontAwesomeIcon icon={faEdit} className="ml-2" inverse />
-          </LoadingLink>
-        </OverlayTrigger>
-
-        <OverlayTrigger
-          key={"download-geojson"}
-          placement="bottom"
-          overlay={
-            <Tooltip id={`tooltip-download-geojson`}>
-              Download service request data as geojson
-            </Tooltip>
-          }
-        >
-          <LoadingLink onClick={handleGeoJsonDownload} isLoading={isLoading}>
-            <FontAwesomeIcon icon={faDownload} className="mx-2"  inverse />
-          </LoadingLink>
-        </OverlayTrigger>
-
-        <ShelterlyPrintifyButton
-          id="service-request-summary"
-          spinnerSize={2.0}
-          tooltipPlacement='bottom'
-          tooltipText='Download Service Request Summary'
-          printFunc={handleDownloadPdfClick}
-          disabled={isLoading}
-        />
-
-        <OverlayTrigger
-          key={"cancel-service-request"}
-          placement="bottom"
-          overlay={
-            <Tooltip id={`tooltip-cancel-service-request`}>
-              Cancel service request
-            </Tooltip>
-          }
-        >
-          <LoadingLink onClick={() => {setShowModal(true)}} isLoading={isLoading}>
-            <FontAwesomeIcon icon={faTimes} className="ml-1" size="lg" style={{cursor:'pointer'}} inverse />
-          </LoadingLink>
-        </OverlayTrigger>
-      </Header>
+      <Header>{`Service Request #${data.id_for_incident || ' - '}`}</Header>
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Confirm Service Request Cancelation</Modal.Title>
@@ -233,8 +184,8 @@ function ServiceRequestDetails({ id, incident, organization }) {
         <div className="col-6 d-flex">
           <Card className="mb-2 border rounded" style={{width:"100%"}}>
             <Card.Body>
-              <Card.Title>
-                <h4 className="mb-0">Information&nbsp;
+              <div className="d-flex justify-content-between">
+                <h4 className="h5 mb-0 pb-0 pt-2">Information&nbsp;
                   {data.verbal_permission ?
                   <OverlayTrigger
                     key={"verbal"}
@@ -332,7 +283,53 @@ function ServiceRequestDetails({ id, incident, organization }) {
                   </OverlayTrigger>
                   }
                 </h4>
-              </Card.Title>
+                {isLoading ? (
+                  <Spinner
+                    className="align-self-center mr-3"
+                    {...{
+                      as: 'span',
+                      animation: 'border',
+                      size: undefined,
+                      role: 'status',
+                      'aria-hidden': 'true',
+                      variant: 'light',
+                      style: {
+                        height: '1.5rem',
+                        width: '1.5rem',
+                        marginBottom: '0.75rem'
+                      }
+                    }}
+                  />
+                ) : (
+                  <ActionsDropdown alignRight={true} variant="dark" title="Actions">
+                    <LoadingLink
+                      href={"/" + organization + "/" + incident + "/hotline/servicerequest/edit/" + data.id_for_incident}
+                      isLoading={isLoading}
+                      className="text-white d-block py-1 px-3"
+                    >
+                      <FontAwesomeIcon icon={faEdit} className="mr-1" inverse />
+                      Update service request
+                    </LoadingLink>
+                    <LoadingLink onClick={handleGeoJsonDownload} isLoading={isLoading} className="text-white d-block py-1 px-3">
+                      <FontAwesomeIcon icon={faDownload} className="mr-1"  inverse />
+                      Download service request data as geojson
+                    </LoadingLink>
+                    <ShelterlyPrintifyButton
+                      id="service-request-summary"
+                      spinnerSize={2.0}
+                      tooltipPlacement='right'
+                      tooltipText='Download Service Request Summary'
+                      printFunc={handleDownloadPdfClick}
+                      disabled={isLoading}
+                      noOverlay={true}
+                    />
+                    <LoadingLink onClick={() => {setShowModal(true)}} isLoading={isLoading} className="text-white d-block py-1 px-3">
+                      <FontAwesomeIcon icon={faTimes} className="mr-1" size="lg" style={{cursor:'pointer'}} inverse />
+                      Cancel service request
+                    </LoadingLink>
+                  </ActionsDropdown>
+                )}
+              </div>
               <hr/>
               <ListGroup variant="flush">
                 <ListGroup.Item style={{marginTop:"-13px"}}>

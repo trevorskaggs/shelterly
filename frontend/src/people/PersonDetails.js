@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
 import { Link } from 'raviger';
-import { Button, Card, ListGroup, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Button, Card, ListGroup, Modal, OverlayTrigger, Tooltip, Spinner } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEdit, faUserPlus } from '@fortawesome/free-solid-svg-icons';
 import { faHomeHeart, faPhonePlus } from '@fortawesome/pro-solid-svg-icons';
@@ -14,6 +14,7 @@ import PhotoDocuments from '../components/PhotoDocuments';
 import { SystemErrorContext } from '../components/SystemError';
 import ShelterlyPrintifyButton from '../components/ShelterlyPrintifyButton';
 import LoadingLink from '../components/LoadingLink';
+import ActionsDropdown from '../components/ActionsDropdown';
 import { useLocationWithRoutes } from "../hooks";
 import { printOwnerDetails, printOwnerAnimalCareSchedules } from './Utils';
 
@@ -78,8 +79,17 @@ function PersonDetails({id, incident, organization}) {
     );
   }
 
-  const handleDownloadPdfClick = () =>
+  const handleDownloadPdfClick = async () => {
+    setIsPersonLoading(true);
+    setIsOrgLoading(true);
+    // wait for 1 tick so spinner will set before the print button locks up the browser
+    await new Promise(resolve => setTimeout(resolve, 0));
     printOwnerDetails(data, organizationData)
+      .finally(() => {
+        setIsPersonLoading(false);
+        setIsOrgLoading(false);
+      });
+  }
 
   const handlePrintAllAnimalsClick = () => {
     const animals = data.animals.map((animal) => ({
@@ -146,63 +156,64 @@ function PersonDetails({id, incident, organization}) {
 
   return (
     <>
-    <Header>
-      {is_owner ?
-        <span>Owner Details
-          <OverlayTrigger
-            key={"update-owner"}
-            placement="bottom"
-            overlay={
-              <Tooltip id={`tooltip-update-owner`}>
-                Update owner
-              </Tooltip>
-            }
-          >
-            <LoadingLink
-              href={"/" + organization + "/" + incident + "/people/owner/edit/" + id}
-              isLoading={isLoading}
-            >
-              <FontAwesomeIcon icon={faEdit} className="ml-2 mr-1" inverse />
-            </LoadingLink>
-          </OverlayTrigger>
-        </span>
-      :
-        <span>Reporter Details
-          <OverlayTrigger
-            key={"update-reporter"}
-            placement="bottom"
-            overlay={
-              <Tooltip id={`tooltip-update-reporter`}>
-                Update reporter
-              </Tooltip>
-            }
-          >
-            <LoadingLink
-              href={"/" + organization + "/" + incident + "/people/reporter/edit/" + id}
-              isLoading={isLoading}
-            >
-              <FontAwesomeIcon icon={faEdit} className="ml-2 mr-1" inverse />
-            </LoadingLink>
-          </OverlayTrigger>
-        </span>
-      }
-      <ShelterlyPrintifyButton
-        id="owner-summary"
-        spinnerSize={2.0}
-        tooltipPlacement='bottom'
-        tooltipText='Download Printable Owner Summary'
-        printFunc={handleDownloadPdfClick}
-        disabled={isLoading}
-      />
-    </Header>
+    <Header>{is_owner ? 'Owner Details' : 'Reporter Details'}</Header>
     <hr/>
     <div className="row">
       <div className="col-6 d-flex" style={{paddingRight:"9px"}}>
         <Card className="border rounded d-flex" style={{width:"100%", minHeight:"312px"}}>
           <Card.Body>
-            <Card.Title>
-              <h4>Information</h4>
-            </Card.Title>
+            <div className="d-flex justify-content-between">
+              <h4 className="h5 mb-0 pb-0 pt-2">Information</h4>
+              {isLoading ? (
+                <Spinner
+                  className="align-self-center mr-3"
+                  {...{
+                    as: 'span',
+                    animation: 'border',
+                    size: undefined,
+                    role: 'status',
+                    'aria-hidden': 'true',
+                    variant: 'light',
+                    style: {
+                      height: '1.5rem',
+                      width: '1.5rem',
+                      marginBottom: '0.75rem'
+                    }
+                  }}
+                />
+              ) : (
+                <ActionsDropdown alignRight={true} variant="dark" title="Actions">
+                  {is_owner ?
+                    <LoadingLink
+                      href={"/" + organization + "/" + incident + "/people/owner/edit/" + id}
+                      isLoading={isLoading}
+                      className="text-white d-block py-1 px-3"
+                    >
+                      <FontAwesomeIcon icon={faEdit} className="mr-1" inverse />
+                      Update owner
+                    </LoadingLink>
+                  :
+                    <LoadingLink
+                      href={"/" + organization + "/" + incident + "/people/reporter/edit/" + id}
+                      isLoading={isLoading}
+                      className="text-white d-block py-1 px-3"
+                    >
+                      <FontAwesomeIcon icon={faEdit} className="ml-2 mr-1" inverse />
+                      Update reporter
+                    </LoadingLink>
+                  }
+                  <ShelterlyPrintifyButton
+                    id="owner-summary"
+                    spinnerSize={2.0}
+                    tooltipPlacement='right'
+                    tooltipText='Download Printable Owner Summary'
+                    printFunc={handleDownloadPdfClick}
+                    disabled={isLoading}
+                    noOverlay={true}
+                  />
+                </ActionsDropdown>
+              )}
+            </div>
             <hr/>
             <Scrollbar no_shadow="true" style={{height:"222px", marginBottom:"-10px"}} renderView={props => <div {...props} style={{...props.style, marginBottom:"-19px"}}/>} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
               <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>

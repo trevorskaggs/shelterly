@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
 import { Link } from 'raviger';
-import { Button, Card, Col, Form, ListGroup, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
+import { Button, Card, Col, Form, ListGroup, Modal, OverlayTrigger, Row, Tooltip, Spinner } from 'react-bootstrap';
 import { Typeahead } from 'react-bootstrap-typeahead';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -19,6 +19,7 @@ import { AuthContext } from "../accounts/AccountsReducer";
 import { SystemErrorContext } from '../components/SystemError';
 import ShelterlyPrintifyButton from '../components/ShelterlyPrintifyButton';
 import LoadingLink from '../components/LoadingLink';
+import ActionsDropdown from '../components/ActionsDropdown';
 
 function DispatchSummary({ id, incident, organization }) {
 
@@ -166,8 +167,13 @@ function DispatchSummary({ id, incident, organization }) {
     .finally(() => setIsLoading(false));
   }
 
-  const handleDownloadPdfClick = () =>
+  const handleDownloadPdfClick = async () => {
+    setIsLoading(true);
+    // wait for 1 tick so spinner will set before the print button locks up the browser
+    await new Promise(resolve => setTimeout(resolve, 0));
     printDispatchResolutionForm(data)
+      .finally(() => setIsLoading(false));
+  }
 
   // Hook for initializing data.
   useEffect(() => {
@@ -258,95 +264,97 @@ function DispatchSummary({ id, incident, organization }) {
 
   return (
     <>
-    <Header>Dispatch Assignment Summary
-      <ShelterlyPrintifyButton
-        id="dispatch-assignment"
-        spinnerSize={2.0}
-        tooltipPlacement='bottom'
-        tooltipText='Print Dispatch Assignment'
-        printFunc={handleDownloadPdfClick}
-        disabled={isLoading}
-      />
-
-      {data.end_time ?
-      <OverlayTrigger
-        key={"edit-dispatch-assignment"}
-        placement="bottom"
-        overlay={
-          <Tooltip id={`tooltip-edit-dispatch-assignment`}>
-            Update dispatch assignment
-          </Tooltip>
-        }
-      >
-        <LoadingLink
-          href={"/" + organization + "/" + incident + "/dispatch/resolution/" + id}
-          isLoading={isLoading}
-        >
-          <FontAwesomeIcon icon={faEdit} inverse />
-        </LoadingLink>
-      </OverlayTrigger>
-      :
-      <OverlayTrigger
-        key={"resolve-dispatch-assignment"}
-        placement="bottom"
-        overlay={
-          <Tooltip id={`tooltip-resolve-dispatch-assignment`}>
-            Resolve dispatch assignment
-          </Tooltip>
-        }
-      >
-        <LoadingLink
-          href={"/" + organization + "/" + incident + "/dispatch/resolution/" + id}
-          isLoading={isLoading}
-        >
-          <FontAwesomeIcon icon={faClipboardCheck} inverse />
-        </LoadingLink>
-      </OverlayTrigger>
-      }
-      <OverlayTrigger
-        key={"download-geojson"}
-        placement="bottom"
-        overlay={
-          <Tooltip id={`tooltip-download-geojson`}>
-            Download dispatch assignment data as geojson
-          </Tooltip>
-        }
-      >
-        <LoadingLink onClick={handleGeoJsonDownload} isLoading={isLoading}><FontAwesomeIcon icon={faDownload} className="ml-2"  inverse /></LoadingLink>
-      </OverlayTrigger>
+    <Header>Dispatch Assignment Summary</Header>
     <div style={{fontSize:"18px", marginTop:"10px"}}><b>Opened: </b><Moment format="MMMM Do YYYY, HH:mm">{data.start_time}</Moment>{data.closed && data.end_time ? <span> | <b>Closed: </b><Moment format="MMMM Do YYYY, HH:mm">{data.end_time}</Moment></span> : ""}</div>
-    </Header>
     <hr/>
     <Row className="mb-3">
       <Col>
         <Card className="mt-1 border rounded" style={{minHeight:"313px", maxHeight:"313px"}}>
           <Card.Body>
-            <Card.Title>
-              <h4>{data.team_object ? data.team_object.name : "Preplanned"}
-              <OverlayTrigger
-                key={"edit-team-name"}
-                placement="top"
-                overlay={
-                  <Tooltip id={`tooltip-edit-team-name`}>
-                    Edit team name
-                  </Tooltip>
-                }
-              >
-                <FontAwesomeIcon icon={faPencilAlt} className="ml-1 fa-move-up" size="sm" onClick={() => {setShowTeamName(true)}} style={{cursor:'pointer'}} inverse />
-              </OverlayTrigger>
-              <OverlayTrigger
-                key={"add-team-member"}
-                placement="top"
-                overlay={
-                  <Tooltip id={`tooltip-add-team-member`}>
-                    Add team member
-                  </Tooltip>
-                }
-              >
-                <FontAwesomeIcon icon={faUserPlus} className="ml-1 fa-move-up" size="sm" onClick={() => {setShow(true)}} style={{cursor:'pointer'}} inverse />
-              </OverlayTrigger>
+            <div className="d-flex justify-content-between">
+              <h4 className="h5 mb-0 pb-0 pt-2">
+                {data.team_object ? data.team_object.name : "Preplanned"}
+                <OverlayTrigger
+                  key={"edit-team-name"}
+                  placement="top"
+                  overlay={
+                    <Tooltip id={`tooltip-edit-team-name`}>
+                      Edit team name
+                    </Tooltip>
+                  }
+                >
+                  <FontAwesomeIcon icon={faPencilAlt} className="ml-1 fa-move-up" size="sm" onClick={() => {setShowTeamName(true)}} style={{cursor:'pointer'}} inverse />
+                </OverlayTrigger>
+                <OverlayTrigger
+                  key={"add-team-member"}
+                  placement="top"
+                  overlay={
+                    <Tooltip id={`tooltip-add-team-member`}>
+                      Add team member
+                    </Tooltip>
+                  }
+                >
+                  <FontAwesomeIcon icon={faUserPlus} className="ml-1 fa-move-up" size="sm" onClick={() => {setShow(true)}} style={{cursor:'pointer'}} inverse />
+                </OverlayTrigger>
               </h4>
-            </Card.Title>
+              {isLoading ? (
+                <Spinner
+                  className="align-self-center mr-3"
+                  {...{
+                    as: 'span',
+                    animation: 'border',
+                    size: undefined,
+                    role: 'status',
+                    'aria-hidden': 'true',
+                    variant: 'light',
+                    style: {
+                      height: '1.5rem',
+                      width: '1.5rem',
+                      marginBottom: '0.75rem'
+                    }
+                  }}
+                />
+              ) : (
+              <ActionsDropdown alignRight={true} variant="dark" title="Actions">
+                <ShelterlyPrintifyButton
+                  id="dispatch-assignment"
+                  spinnerSize={2.0}
+                  tooltipPlacement='right'
+                  tooltipText='Print Dispatch Assignment'
+                  printFunc={handleDownloadPdfClick}
+                  disabled={isLoading}
+                  noOverlay={true}
+                />
+  
+                {data.end_time
+                  ? <LoadingLink
+                    href={"/" + organization + "/" + incident + "/dispatch/resolution/" + id}
+                    className="text-white d-block py-1 px-3"
+                    isLoading={isLoading}
+                  >
+                    <FontAwesomeIcon icon={faEdit} className="mr-1" inverse />
+                    Update dispatch assignment
+                  </LoadingLink>
+                  : <LoadingLink
+                    href={"/" + organization + "/" + incident + "/dispatch/resolution/" + id}
+                    className="text-white d-block py-1 px-3"
+                    isLoading={isLoading}
+                  >
+                    <FontAwesomeIcon icon={faClipboardCheck} className="mr-1" inverse />
+                    Resolve dispatch assignment
+                  </LoadingLink>
+                }
+                <LoadingLink
+                  onClick={handleGeoJsonDownload}
+                  className="text-white d-block py-1 px-3"
+                  isLoading={isLoading}
+                >
+                  <FontAwesomeIcon icon={faDownload} className="mr-1"  inverse />
+                  Download dispatch assignment data as geojson
+                </LoadingLink>
+              </ActionsDropdown>
+            )}
+            </div>
             <hr/>
             {data.team_member_objects && data.team_member_objects.length > 0 ?
             <Scrollbar no_shadow="true" style={{height:"225px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
