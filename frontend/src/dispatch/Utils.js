@@ -25,7 +25,7 @@ const buildDispatchResolutionsDoc = (drs = []) => {
     }
 
     // draw team section
-    pdf.drawSectionHeader({ text: data.team_object.name, hRule: false, fontSize: 12 });
+    pdf.drawSectionHeader({ text: data.team_object.name, hRule: false, fontSize: 14 });
     pdf.drawPad(10)
     pdf.setDocumentFontSize({ size: 10 });
     pdf.drawTextList({
@@ -48,10 +48,10 @@ const buildDispatchResolutionsDoc = (drs = []) => {
       // Summary page
       pdf.drawSectionHeader({
         text: `SR#${assigned_request.service_request_object.id_for_incident} - ${srPriority.label} Priority`,
-        fontSize: 12
+        fontSize: 14
       });
 
-      pdf.drawPad(15);
+      pdf.drawPad(10);
 
       // status
       pdf.drawWrappedText({
@@ -60,8 +60,8 @@ const buildDispatchResolutionsDoc = (drs = []) => {
       });
 
       // summary address
-      pdf.drawSectionHeader({ text: 'Service Request Address:', fontSize: 12 });
-      pdf.drawPad(15);
+      pdf.drawSectionHeader({ text: 'Service Request Address:', fontSize: 14 });
+      pdf.drawPad(10);
 
       const [addressLine1, ...addressLine2] = assigned_request.service_request_object.full_address.split(',');
 
@@ -86,24 +86,23 @@ const buildDispatchResolutionsDoc = (drs = []) => {
       });
 
       // Animal count
-      pdf.drawSectionHeader({ text: 'Animals', fontSize: 12 });
+      pdf.drawSectionHeader({ text: 'Animals', fontSize: 14 });
 
       const assignedRequestAnimals =
         assigned_request.service_request_object.animals.filter((animal) =>
           Object.keys(assigned_request.animals).includes(String(animal.id))
         );
 
-      pdf.setDocumentFontSize({ size: 10 });
-      buildAnimalCountList(pdf, assignedRequestAnimals, { countLabelMarginTop: -10 });
+      pdf.setDocumentFontSize({ size: 12 });
+      buildAnimalCountList(pdf, assignedRequestAnimals, { countLabelMarginTop: -12 });
 
       // rest document font size
       pdf.setDocumentFontSize();
 
-      pdf.drawPad(15);
+      pdf.drawPad(10);
     });
 
-    // end of summary page break
-    pdf.drawPageBreak();
+    // end of summary
 
     // loop through SR's and page break between each one
     data.assigned_requests.forEach((assigned_request, index) => {
