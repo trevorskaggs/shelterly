@@ -101,6 +101,6 @@
     "@babel/preset-react": "^7.13.13",
     "babel-loader": "^8.0.6",
     "nock": "^13.3.3",
-    "webpack-cli": "^3.3.11"
+    "webpack-cli": "^5.1.4"
   }
 }
