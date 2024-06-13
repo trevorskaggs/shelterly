@@ -180,14 +180,15 @@ const buildOwnersContent = (pdf, owners, organization, animalsOverride) => {
 
       // 3)
       `I agree to contact the agency on a regular basis to keep ${organization.liability_name} ` +
-      'updated on my whereabouts and possible alternate housing.',
+      'updated on my whereabouts and possible alternate housing. ' +
+      'Emergency Contact ____________________',
 
       // 4)
       'I understand that this boarding agreement is temporary and I agree to make arrangements ' +
       'for or claim my pet(s) at the close of the shelter.',
 
       // 5)
-      'I understand that I will be subject to boarding fees at the close of the shelter.',
+      'I understand that I may be subject to boarding fees at the close of the shelter.',
 
       // 6)
       'I understand that photographs of myself and my animal(s) may be taken.'
