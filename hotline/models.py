@@ -145,10 +145,8 @@ class ServiceRequest(Location):
 def email_on_creation(sender, instance, **kwargs):
     if kwargs["created"]:
         # Send email here.
-        send_mass_mail(
-            # title:
+        message = (
             "Service Request #" + str(instance.id_for_incident) + " Created for Shelterly",
-            # message:
             render_to_string(
                 'service_request_creation_email.txt',
                 {
@@ -158,21 +156,11 @@ def email_on_creation(sender, instance, **kwargs):
                 'address': instance.location_output,
                 }
             ).strip(),
-            # from:
             "DoNotReply@shelterly.org",
-            # to:
             User.objects.filter(id__in=IncidentNotification.objects.filter(incident=instance.incident, hotline_notifications=True).values_list('user', flat=True)).values_list('email', flat=True),
-            fail_silently=False,
-            html_message = render_to_string(
-                'service_request_creation_email.html',
-                {
-                'site': Site.objects.get_current(),
-                'id': instance.id_for_incident,
-                'incident': instance.incident.slug,
-                'address': instance.location_output,
-                }
-            ).strip()
         )
+        send_mass_mail((message,), fail_silently=True)
+
 post_save.connect(email_on_creation, sender=ServiceRequest)
 
 
