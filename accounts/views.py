@@ -111,6 +111,9 @@ class UserViewSet(CreateUserMixin, viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         if serializer.is_valid():
+            # Clean phone field.
+            serializer.validated_data['cell_phone'] = ''.join(char for char in serializer.validated_data.get('cell_phone', '') if char.isdigit())
+
             if self.request.user.is_superuser or self.request.user.perms.filter(organization=self.request.data.get('organization'))[0].user_perms:
                 user = serializer.save()
                 user.organizations.add(Organization.objects.get(id=self.request.data.get('organization')))
@@ -118,6 +121,9 @@ class UserViewSet(CreateUserMixin, viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         if serializer.is_valid():
+            # Clean phone field.
+            serializer.validated_data['cell_phone'] = ''.join(char for char in serializer.validated_data.get('cell_phone', '') if char.isdigit())
+
             perms = self.request.user.perms.filter(organization=self.request.data.get('organization'))
             if self.request.user.is_superuser or (perms and perms[0].user_perms):
                 user = serializer.save()
