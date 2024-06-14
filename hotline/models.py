@@ -1,6 +1,6 @@
 from django.db import models, transaction
 from actstream import action
-from django.core.mail import send_mail
+from django.core.mail import send_mass_mail
 from django.template.loader import render_to_string
 from django.contrib.sites.models import Site
 from django.db.models.signals import post_save
@@ -145,7 +145,7 @@ class ServiceRequest(Location):
 def email_on_creation(sender, instance, **kwargs):
     if kwargs["created"]:
         # Send email here.
-        send_mail(
+        send_mass_mail(
             # title:
             "Service Request #" + str(instance.id_for_incident) + " Created for Shelterly",
             # message:
