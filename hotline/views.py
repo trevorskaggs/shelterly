@@ -84,12 +84,12 @@ class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
               ServiceRequestImage.objects.filter(id=self.request.data.get('remove_image')).delete()
 
             elif self.request.data.get('reunite_animals'):
-                service_request.animal_set.exclude(status__in=['DECEASED', 'NO FURTHER ACTION']).update(status='REUNITED', shelter=None, room=None)
-                for animal in service_request.animal_set.exclude(status__in=['DECEASED', 'NO FURTHER ACTION']):
+                for animal in service_request.animal_set.exclude(status__in=['DECEASED', 'NO FURTHER ACTION', 'REUNITED']):
                     action.send(self.request.user, verb=f'changed animal status to reunited', target=animal)
                     for assigned_request in AssignedRequest.objects.filter(service_request=serializer.instance.id, dispatch_assignment__end_time=None):
                         assigned_request.animals[str(serializer.instance.id)]['status'] = 'REUNITED'
                         assigned_request.save()
+                service_request.animal_set.exclude(status__in=['DECEASED', 'NO FURTHER ACTION', 'REUNITED']).update(status='REUNITED', shelter=None, room=None)
                 service_request.update_status(self.request.user)
             else:
                 action.send(self.request.user, verb='updated service request', target=service_request)
