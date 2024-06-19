@@ -154,6 +154,7 @@ def email_on_creation(sender, instance, **kwargs):
                 'id': instance.id_for_incident,
                 'incident': instance.incident.slug,
                 'address': instance.location_output,
+                'sr_creation_date': instance.timestamp.strftime('%m/%d/%Y %H:%M:%S')
                 }
             ).strip(),
             "DoNotReply@shelterly.org",
