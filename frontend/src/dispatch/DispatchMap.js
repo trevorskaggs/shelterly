@@ -41,7 +41,7 @@ function Deploy({ incident, organization }) {
   const [mapState, setMapState] = useState({});
   const [totalSelectedState, setTotalSelectedState] = useState({'REPORTED':{}, 'REPORTED (EVAC REQUESTED)':{}, 'REPORTED (SIP REQUESTED)':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}});
   const [selectedCount, setSelectedCount] = useState({count:0, disabled:true});
-  const [statusOptions, setStatusOptions] = useState({aco_required:false, pending_only: true});
+  const [statusOptions, setStatusOptions] = useState({aco_required:false, hide_pending: true});
   const [triggerRefresh, setTriggerRefresh] = useState(false);
   const [teamData, setTeamData] = useState({teams: [], options: [], isFetching: false});
   const [selected, setSelected] = useState([]);
@@ -66,9 +66,9 @@ function Deploy({ incident, organization }) {
     setStatusOptions(prevState => ({ ...prevState, aco_required:!statusOptions.aco_required }));
   }
 
-  // Handle pending_only toggle.
+  // Handle hide_pending toggle.
   const handlePendingOnly = async event => {
-    setStatusOptions(prevState => ({ ...prevState, pending_only:!statusOptions.pending_only }));
+    setStatusOptions(prevState => ({ ...prevState, hide_pending:!statusOptions.hide_pending }));
   }
 
   // Handle radius circle toggles.
@@ -576,7 +576,7 @@ function Deploy({ incident, organization }) {
             <Map style={{marginRight:"0px"}} bounds={data.bounds} onMoveEnd={onMove}>
               {data.service_requests
               .filter(service_request => statusOptions.aco_required ? service_request.aco_required === statusOptions.aco_required : true)
-              .filter(service_request => statusOptions.pending_only ? service_request.pending === statusOptions.pending_only : true)
+              .filter(service_request => statusOptions.hide_pending ? service_request.pending === statusOptions.hide_pending : true)
               .map(service_request => (
                 <span key={service_request.id}> {mapState[service_request.id] ? 
                   <Marker
@@ -686,12 +686,12 @@ function Deploy({ incident, organization }) {
               <hr/>
               <FormCheck id="aco_required" name="aco_required" type="switch" label="ACO Required" checked={statusOptions.aco_required} onChange={handleACO} />
               <FormCheck
-                id="pending_only"
+                id="hide_pending"
                 className="mt-3"
-                name="pending_only"
+                name="hide_pending"
                 type="switch"
                 label={`Hide Pending (${data.service_requests.filter(sr => sr.pending).length || 0}) `}
-                checked={statusOptions.pending_only}
+                checked={statusOptions.hide_pending}
                 onChange={handlePendingOnly}
               />
             </div>
@@ -700,7 +700,7 @@ function Deploy({ incident, organization }) {
             <Scrollbar no_shadow="true" style={{height:"275px", marginLeft:"-10px", marginRight:"-10px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
               {data.service_requests
               .filter(service_request => statusOptions.aco_required ? service_request.aco_required === statusOptions.aco_required : true)
-              .filter(service_request => statusOptions.pending_only ? service_request.pending === statusOptions.pending_only : true)
+              .filter(service_request => statusOptions.hide_pending ? service_request.pending !== statusOptions.hide_pending : true)
               .map(service_request => (
                 <span key={service_request.id}>{mapState[service_request.id] && (mapState[service_request.id].checked || !mapState[service_request.id].hidden) ?
                 <div className="mt-1 mb-1" style={{}}>
