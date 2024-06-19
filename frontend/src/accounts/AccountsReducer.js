@@ -10,7 +10,7 @@ const initialState = {
   isLoading: false,
   logout: false,
   user: null,
-  incident: {id:'', name:'', description: '', training:false},
+  incident: {id:'', name:'', description: '', training:false, latlng: []},
   organization: {id:'', name:''},
   errors: {},
   location:'',
@@ -31,8 +31,17 @@ function auth_reducer(state, action) {
       return {...state, user:action.data.user, isAuthenticated: true, isLoading: false, errors: null};
 
     case 'LOGOUT_SUCCESSFUL':
-      return {...state, errors: action.data, user: null, incident: {id:'', name:'', description:'', training:false}, organization: {id:'', name:''},
-        isAuthenticated: false, isLoading: false, logout: true};
+      return {
+        ...state,
+        errors: action.data,
+        user: null,
+        incident: { id: "", name: "", description: "", training: false },
+        organization: { id: "", name: "" },
+        isAuthenticated: false,
+        isLoading: false,
+        latlng: [],
+        logout: true,
+      };
 
     case 'AUTHENTICATION_ERROR':
     case 'LOGIN_FAILED':
@@ -121,7 +130,16 @@ function AuthProvider(props) {
       if (incident_slug && !state.incident.name && incident_slug !=='accounts'){
         axios.get('/incident/api/incident/?incident=' + incident_slug)
         .then(incidentResponse => {
-          dispatch({type: "SET_INCIDENT", data: {id:incidentResponse.data[0].id, name:incidentResponse.data[0].name, training:incidentResponse.data[0].training}});
+          const [{ id, name, training, latitude, longitude }] = incidentResponse.data;
+          dispatch({
+            type: "SET_INCIDENT",
+            data: {
+              id: id,
+              name: name,
+              training: training,
+              latlng: [latitude, longitude]
+            },
+          });
         })
         .catch(error => {
         });

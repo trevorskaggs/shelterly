@@ -136,9 +136,9 @@ function AnimalSearch({ incident, organization }) {
     setTimeout(() => {
       console.log('🚀 ~ setTimeout ~ bounds:', bounds)
       mapRef.current.leafletElement.invalidateSize();
-      // if (bounds) {
-      //   mapRef.current.leafletElement.fitBounds(bounds);
-      // }
+      if (bounds) {
+        mapRef.current.leafletElement.fitBounds(bounds);
+      }
     }, 1000);
   };
 
@@ -358,26 +358,22 @@ function AnimalSearch({ incident, organization }) {
           setAnimals(response.data);
           handleApplyFilters(response.data);
 
-          const mock_bounds = [
-            ...bounds_array,
-            [
-              '39.342793803239346',
-              '-74.82377316279351'
-            ],
-            [
-              '39.8922623794802',
-              '-76.65833545105535'
-            ]
-          ];
+          if (state?.incident?.latlng) {
+            bounds_array.push(state.incident.latlng)
+          }
           let minLatLng = L.latLng(0, 0);
           let maxLatLng = L.latLng(0, 0);
-          if (Array.isArray(mock_bounds) && mock_bounds.length > 0) {
-            const { minLat, minLng, maxLat, maxLng } = calculateBoundingBox(mock_bounds);
-            console.log('🚀 ~ .then ~ minLat, minLng, maxLat, maxLng:', minLat, minLng, maxLat, maxLng)
-            minLatLng = L.latLng(minLat, minLng);
-            maxLatLng = L.latLng(maxLat, maxLng);
+          if (Array.isArray(bounds_array) && bounds_array.length > 0) {
+            if (bounds_array.length === 1) {
+              var latlng = new L.latLng(bounds_array[0][0], bounds_array[0][1]);
+              setBounds(latlng.toBounds(5000));
+            } else {
+              const { minLat, minLng, maxLat, maxLng } = calculateBoundingBox(bounds_array);
+              minLatLng = L.latLng(minLat, minLng);
+              maxLatLng = L.latLng(maxLat, maxLng);
+              setBounds(L.latLngBounds(minLatLng, maxLatLng));
+            }
           }
-          setBounds(L.latLngBounds(minLatLng, maxLatLng));
         }
       })
       .catch(error => {
@@ -430,14 +426,6 @@ function AnimalSearch({ incident, organization }) {
     setPage(1);
     handleDisabled();
   }, [options, animals.length]);
-
-  // TODO delete this debugging useEffect
-  useEffect(() => {
-    if (bounds) {
-      console.log('🚀 ~ useEffect ~ bounds:', bounds)
-      mapRef.current.leafletElement.fitBounds(bounds);
-    }
-  }, [bounds])
 
   return (
     <div className="ml-2 mr-2">

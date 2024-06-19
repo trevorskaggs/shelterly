@@ -11,7 +11,6 @@ function useMapUtils({ mapFitBounds }) {
   }
 
   function calculateBoundingBox(latLngs) {
-    console.log('🚀 ~ calculateBoundingBox ~ latLngs:', latLngs)
     let minLat = Infinity;
     let maxLat = -Infinity;
     let minLng = Infinity;
