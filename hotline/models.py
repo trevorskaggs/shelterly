@@ -1,6 +1,6 @@
 from django.db import models, transaction
 from actstream import action
-from django.core.mail import send_mail
+from django.core.mail import send_mass_mail
 from django.template.loader import render_to_string
 from django.contrib.sites.models import Site
 from django.db.models.signals import post_save
@@ -145,10 +145,8 @@ class ServiceRequest(Location):
 def email_on_creation(sender, instance, **kwargs):
     if kwargs["created"]:
         # Send email here.
-        send_mail(
-            # title:
+        message = (
             "Service Request #" + str(instance.id_for_incident) + " Created for Shelterly",
-            # message:
             render_to_string(
                 'service_request_creation_email.txt',
                 {
@@ -156,23 +154,14 @@ def email_on_creation(sender, instance, **kwargs):
                 'id': instance.id_for_incident,
                 'incident': instance.incident.slug,
                 'address': instance.location_output,
+                'sr_creation_date': instance.timestamp.strftime('%m/%d/%Y %H:%M:%S')
                 }
             ).strip(),
-            # from:
             "DoNotReply@shelterly.org",
-            # to:
             User.objects.filter(id__in=IncidentNotification.objects.filter(incident=instance.incident, hotline_notifications=True).values_list('user', flat=True)).values_list('email', flat=True),
-            fail_silently=False,
-            html_message = render_to_string(
-                'service_request_creation_email.html',
-                {
-                'site': Site.objects.get_current(),
-                'id': instance.id_for_incident,
-                'incident': instance.incident.slug,
-                'address': instance.location_output,
-                }
-            ).strip()
         )
+        send_mass_mail((message,), fail_silently=True)
+
 post_save.connect(email_on_creation, sender=ServiceRequest)
 
 

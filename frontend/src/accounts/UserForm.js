@@ -42,7 +42,7 @@ const UserForm = ({ id, organization }) => {
     vet_perms: false,
     access_expires_at: null,
     organizations: [],
-    presets: 0,
+    presets: id ? -1 : 0,
     existing_user: false
   }
 
@@ -60,6 +60,8 @@ const UserForm = ({ id, organization }) => {
         })
         .then(response => {
           if (!unmounted) {
+            // Set phone field to be the pretty version.
+            response.data['cell_phone'] = response.data['display_phone']
             setData(response.data);
           }
         })
@@ -119,9 +121,9 @@ const UserForm = ({ id, organization }) => {
           .max(50, 'Must be 50 characters or less')
           .required('Required'),
         cell_phone: Yup.string().when('existing_user', {
-          is: false,
-          then: Yup.string().required('Required').matches(phoneRegex, "Phone number is not valid"),
-          otherwise: Yup.string().required('Required')
+          is: () => existingUser === false,
+          then: () => Yup.string().required('Required').matches(phoneRegex, "Phone number is not valid").min(10, "Phone number is not valid"),
+          otherwise: () => Yup.string().required('Required')
         }),
         agency_id: Yup.string().nullable(),
         access_expires_at: Yup.string().nullable(),
@@ -239,7 +241,7 @@ const UserForm = ({ id, organization }) => {
                     id="presets"
                     name="presets"
                     type="text"
-                    options={[{value:0, label:'Never'}, {value:1, label:'1 day'}, {value:3, label:'3 days'}, {value:5, label:'5 days'}, {value:7, label:'7 days'}, {value:14, label:'14 days'}, {value:30, label:'30 days'}, {value:-1, label:'Custom'}, ]}
+                    options={[{value:-1, label:' '}, {value:0, label:'Never'}, {value:1, label:'1 day'}, {value:3, label:'3 days'}, {value:5, label:'5 days'}, {value:7, label:'7 days'}, {value:14, label:'14 days'}, {value:30, label:'30 days'}, {value:-1, label:'Custom'}, ]}
                     onChange={(instance) => {
                       if (instance.value > 0) {
                         var access_date = new Date(new Date().setDate(new Date().getDate() + (instance.value - 1)));
