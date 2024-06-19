@@ -132,14 +132,16 @@ class PersonViewSet(viewsets.ModelViewSet):
                 PersonChange.objects.create(user=self.request.user, person=person, changes=change_dict, reason=self.request.data.get('change_reason', ''))
 
             if self.request.data.get('reunite_animals'):
-                person.animal_set.exclude(status__in=['DECEASED', 'NO FURTHER ACTION']).update(status='REUNITED', shelter=None, room=None)
-                for animal in person.animal_set.exclude(status__in=['DECEASED', 'NO FURTHER ACTION']):
+                requests = []
+                for animal in person.animal_set.exclude(status__in=['DECEASED', 'NO FURTHER ACTION', 'REUNITED']):
                     action.send(self.request.user, verb=f'changed animal status to reunited', target=animal)
-                    for assigned_request in AssignedRequest.objects.filter(service_request=serializer.instance.request, dispatch_assignment__end_time=None):
-                        assigned_request.animals[str(serializer.instance.id)]['status'] = 'REUNITED'
-                        assigned_request.save()
-
-                for service_request in person.request.all().exclude(status='closed'):
+                    if animal.request and animal.request not in requests:
+                        requests.append(animal.request)
+                        for assigned_request in AssignedRequest.objects.filter(service_request=animal.request.id, dispatch_assignment__end_time=None):
+                            assigned_request.animals[str(person.id)]['status'] = 'REUNITED'
+                            assigned_request.save()
+                person.animal_set.exclude(status__in=['DECEASED', 'NO FURTHER ACTION', 'REUNITED']).update(status='REUNITED', shelter=None, room=None)
+                for service_request in requests:
                     service_request.update_status(self.request.user)
 
             elif self.request.FILES.keys():
