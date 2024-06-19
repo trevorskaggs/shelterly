@@ -108,10 +108,10 @@ function Deploy({ incident, organization }) {
     // If deselecting.
     if (selected.length > selected_list.length) {
       let team_options = [];
-      teamData.teams.filter(team => team.team_members.filter(value => id_list.includes(value)).length === 0).forEach(function(team) {
+      teamData.teams.filter(team => team.team_object.team_members.filter(value => id_list.includes(value)).length === 0).forEach(function(team) {
         // Add selectable options back if if not already available.
-        if (team.team_members.length && !teamData.options.some(option => option.label === team.name + ": " + team.display_name)) {
-          team_options.push({id:team.team_members, label:team.name + ": " + team.display_name, is_assigned:team.is_assigned});
+        if (team.team_object.team_members.length && !teamData.options.some(option => option.label === team.team_object.name + ": " + team.team_object.display_name)) {
+          team_options.push({id:team.team_object.team_members, label:team.team_object.name + ": " + team.team_object.display_name, is_assigned:team.team_object.is_assigned});
         }
       });
       setTeamData(prevState => ({ ...prevState, "options":team_options.concat(teamData.options.concat(selected.filter(option => !id_list.includes(option.id[0])))) }));
@@ -1057,9 +1057,9 @@ function Deploy({ incident, organization }) {
           onSubmit={(values, { resetForm }) => {
             axios.post('/evac/api/evacteammember/', values)
             .then(response => {
-              let options = [...teamData.options];
-              options.push({id: [response.data.id], label: response.data.display_name, is_assigned:false})
-              setTeamData(prevState => ({ ...prevState, "options":options }));
+              let selected_list = [...selected];
+              selected_list.push({id:response.data.id, label:response.data.first_name + " " + response.data.last_name + (response.data.agency_id ? " (" + response.data.agency_id + ")" : ""), is_assigned:false})
+              setSelected(selected_list);
               handleCloseShowAddTeamMember();
               resetForm();
             })

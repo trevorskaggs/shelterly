@@ -1,4 +1,5 @@
 import re
+from django.db.models import Count, Exists, OuterRef, Prefetch, Q
 
 from rest_framework import serializers
 from actstream.models import target_stream
@@ -36,7 +37,7 @@ class DispatchTeamSerializer(serializers.ModelSerializer):
     display_name = serializers.SerializerMethodField()
     is_assigned = serializers.BooleanField(read_only=True)
 
-    # Custome field for Name Output
+    # Custom field for Name Output
     def get_display_name(self, obj):
         return ", ".join([team_member.first_name + " " + team_member.last_name for team_member in obj.team_members.all()])
 
@@ -104,8 +105,11 @@ class AssignedRequestServiceRequestSerializer(serializers.ModelSerializer):
 
 class EvacAssignmentSerializer(SimpleEvacAssignmentSerializer):
 
-    team_object = DispatchTeamSerializer(source='team', required=False, read_only=True)
     assigned_requests = AssignedRequestDispatchSerializer(many=True, required=False, read_only=True)
+    team_object = serializers.SerializerMethodField()
+
+    def get_team_object(self, obj):
+        return DispatchTeamSerializer(DispatchTeam.objects.filter(id=obj.team.id).annotate(is_assigned=Exists(EvacAssignment.objects.filter(team_id=OuterRef("id"), end_time=None, service_requests__isnull=False, incident=obj.incident)))[0], required=False, read_only=True).data
 
     class Meta:
         model = EvacAssignment
