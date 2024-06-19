@@ -35,7 +35,7 @@ def add_default_admins(sender, instance, created, **kwargs):
 
 class Incident(models.Model):
 
-    slug = models.CharField(max_length=20, blank=False, null=False, unique=True)
+    slug = models.CharField(max_length=20, blank=False, null=False)
     name = models.CharField(max_length=20, blank=False, null=False)
     description = models.CharField(max_length=500, blank=True, null=True)
     start_time = models.DateTimeField(auto_now_add=True)
