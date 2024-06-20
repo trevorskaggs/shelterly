@@ -25,19 +25,20 @@ function Home({ incident }) {
     <span className="rounded-top">
       <Header>Home<span className="float-right">{state.user.version}</span></Header>
       <hr/>
-      <h4>{state.incident.description}</h4>
-      <iframe
-        src={watchdutyUrl}
-        width="100%"
-        height="635"
-        scrolling="no"
-        frameBorder="0"
-        style={{
-          width: "100%",
-          overflow: "auto",
-        }}
-      >
-      </iframe>
+      <div style={{height:"635px" }}>
+        <iframe
+          src={watchdutyUrl}
+          width="100%"
+          height="100%"
+          scrolling="no"
+          frameBorder="0"
+          style={{
+            width: "100%"
+          }}
+        >
+        </iframe>
+        <h4>Incident Description: {state.incident.description}</h4>
+      </div>
     </span>
     </>
   );
