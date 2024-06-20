@@ -37,6 +37,8 @@ const IncidentForm = ({ id, organization }) => {
     latitude: '',
     longitude: '',
     training: false,
+    caltopo_map_id: '',
+    watchduty_map_id: '',
     organization: state.organization.id
   });
 
@@ -167,7 +169,9 @@ const IncidentForm = ({ id, organization }) => {
         latlon: Yup.string().required('Required'),
         latitude: Yup.number(),
         longitude: Yup.number(),
-        training: Yup.boolean()
+        training: Yup.boolean(),
+        caltopo_map_id: Yup.string(),
+        watchduty_map_id: Yup.string()
       })}
       onSubmit={(values, { setSubmitting }) => {
         values['slug'] = values.name.trim().replaceAll(' ','').match(/[a-zA-Z0-9-]+/g)[0];
@@ -244,6 +248,26 @@ const IncidentForm = ({ id, organization }) => {
                   id="description"
                   xs="12"
                 />
+              <BootstrapForm.Row>
+                <TextInput
+                  type="text"
+                  rows={3}
+                  label="CalTopo Map ID"
+                  name="caltopo_map_id"
+                  id="caltopo_map_id"
+                  xs="12"
+                />
+              </BootstrapForm.Row>
+              <BootstrapForm.Row>
+                <TextInput
+                  type="text"
+                  rows={3}
+                  label="WatchDuty Map ID"
+                  name="watchduty_map_id"
+                  id="watchduty_map_id"
+                  xs="12"
+                />
+              </BootstrapForm.Row>
               </BootstrapForm.Row>
               <BootstrapForm.Row>
                 <TextInput

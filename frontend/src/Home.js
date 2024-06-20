@@ -18,12 +18,26 @@ function Home({ incident }) {
   useEffect(() => {
   }, [state.user, incident]);
 
+  const watchdutyUrl = "https://app.watchduty.org/#/i/" + state.incident.watchduty_map_id;
+
   return (
     <>
     <span className="rounded-top">
       <Header>Home<span className="float-right">{state.user.version}</span></Header>
       <hr/>
       <h4>{state.incident.description}</h4>
+      <iframe
+        src={watchdutyUrl}
+        width="100%"
+        height="635"
+        scrolling="no"
+        frameBorder="0"
+        style={{
+          width: "100%",
+          overflow: "auto",
+        }}
+      >
+      </iframe>
     </span>
     </>
   );
