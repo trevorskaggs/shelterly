@@ -110,13 +110,19 @@ class UserViewSet(CreateUserMixin, viewsets.ModelViewSet):
         return response.Response(UserSerializer(ShelterlyUser.objects.filter(id__in=user_ids), many=True).data, status=201)
 
     def perform_create(self, serializer):
+        import ipdb; ipdb.set_trace()
         if serializer.is_valid():
             # Clean phone field.
             serializer.validated_data['cell_phone'] = ''.join(char for char in serializer.validated_data.get('cell_phone', '') if char.isdigit())
 
             if self.request.user.is_superuser or self.request.user.perms.filter(organization=self.request.data.get('organization'))[0].user_perms:
                 user = serializer.save()
-                user.organizations.add(Organization.objects.get(id=self.request.data.get('organization')))
+                org = Organization.objects.get(id=self.request.data.get('organization'))
+                user.organizations.add(org)
+
+                #Email Organization User Management Team
+                new_user_notification(user, org, serializer.context['request'].user)
+
                 ShelterlyUserOrg.objects.filter(user=user, organization=Organization.objects.get(id=self.request.data.get('organization'))).update(access_expires_at=self.request.data.get('access_expires_at', None), user_perms=self.request.data.get('user_perms', False), incident_perms=self.request.data.get('incident_perms', False), vet_perms=self.request.data.get('vet_perms', False))
 
     def perform_update(self, serializer):
@@ -175,3 +181,32 @@ class UserViewSet(CreateUserMixin, viewsets.ModelViewSet):
         if self.request.user.is_superuser or self.request.user.perms.filter(organization=self.request.GET.get('organization')[0])[0].user_perms:
             instance.organizations.remove(Organization.objects.get(id=self.request.GET.get('organization')[0]))
             # instance.delete()
+
+
+def new_user_notification(user, org, admin_user):
+    email_dict = {
+        'user_first_name': user.first_name,
+        'user_last_name': user.last_name,
+        'user_email': user.email,
+        'org_name': org.name,
+        'admin_email': self.user.email,
+        'expire_date': 'adf'
+    }
+    send_mail(
+        # title:
+        "New User (%s, %s - %s) add to %s" % (user.last_name, user.first_name, user.email, org.name),
+        # message:
+        render_to_string(
+            'new_user_notification.txt',
+            email_dict
+        ).strip(),
+        # from:
+        "DoNotReply@shelterly.org",
+        # to:
+        [user.email],
+        fail_silently=False,
+        html_message = render_to_string(
+            'new_user_notification.html',
+            email_dict
+        ).strip()
+    )
