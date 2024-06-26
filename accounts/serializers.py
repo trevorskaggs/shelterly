@@ -19,7 +19,9 @@ class UserSerializer(serializers.ModelSerializer):
 
     # Custom field for Formated Phone Number
     def get_display_phone(self, obj):
-        return re.sub(r'(\d{3})(\d{3})(\d{4})(.*)', r'(\1) \2-\3 \4', obj.cell_phone.replace(' ', ''))
+        if len(obj.cell_phone) > 10:
+            return re.sub(r'(\d{3})(\d{3})(\d{4})(.*)', r'(\1) \2-\3 x\4', obj.cell_phone.replace(' ', ''))
+        return re.sub(r'(\d{3})(\d{3})(\d{4})', r'(\1) \2-\3', obj.cell_phone)
 
     # Custom field for Shelterly version
     def get_version(self, obj):
@@ -69,12 +71,12 @@ class SecureUserSerializer(UserSerializer):
         front, back = re.sub(r'(\d{3})(\d{3})(\d{4})(.*)', r'(\1) \2-\3 \4', obj.cell_phone.replace(' ', '')).split("-")
         return "(***) *** " + back
 
-    # Custom field for Formated Phone Number
+    # Custom field for Formatted Phone Number
     def get_display_phone(self, obj):
         front, back = re.sub(r'(\d{3})(\d{3})(\d{4})(.*)', r'(\1) \2-\3 \4', obj.cell_phone.replace(' ', '')).split("-")
         return "***-" + back[:4]
     
-    # Custom field for Formated Phone Number
+    # Custom field for Formatted Phone Number
     def get_email(self, obj):
         front, back = obj.email.split('@')
         return front[0] + "*"*(len(front) - 1) + "@" + back

@@ -17,6 +17,8 @@ class SimplePersonSerializer(serializers.ModelSerializer):
 
     # Custom field for Formated Phone Number
     def get_display_phone(self, obj):
+        if len(obj.phone) > 10:
+            return re.sub(r'(\d{3})(\d{3})(\d{4})(.*)', r'(\1) \2-\3 x\4', obj.phone.replace(' ', ''))
         return re.sub(r'(\d{3})(\d{3})(\d{4})', r'(\1) \2-\3', obj.phone)
 
     def get_is_owner(self, obj):
