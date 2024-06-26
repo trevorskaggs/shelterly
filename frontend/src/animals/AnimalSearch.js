@@ -277,7 +277,8 @@ function AnimalSearch({ incident, organization }) {
           markInstances(searchTerm);
 
           let bounds_array = [];
-
+          setAnimals(response.data);
+          handleApplyFilters(response.data);
           for (const animal of response.data) {
             if (animal.latitude && animal.longitude) {
               bounds_array.push([animal.latitude, animal.longitude]);
@@ -293,8 +294,6 @@ function AnimalSearch({ incident, organization }) {
               addLazyAnimalImage(animal.id, imgData);
             }
           }
-          setAnimals(response.data);
-          handleApplyFilters(response.data);
           setBounds(bounds_array.length > 0 ? L.latLngBounds(bounds_array) : L.latLngBounds([[0,0]]));
         }
       })
