@@ -115,6 +115,7 @@ function Deploy({ incident, organization }) {
         }
       });
       setTeamData(prevState => ({ ...prevState, "options":team_options.concat(teamData.options.concat(selected.filter(option => !id_list.includes(option.id[0])))) }));
+      setSelectedCount((prevState) => ({...prevState, disabled: (prevState.count > 0 ? false : true)}));
     }
     // Else we're selecting. Remove selection from option list.
     else {
@@ -576,7 +577,7 @@ function Deploy({ incident, organization }) {
             <Map style={{marginRight:"0px"}} bounds={data.bounds} onMoveEnd={onMove}>
               {data.service_requests
               .filter(service_request => statusOptions.aco_required ? service_request.aco_required === statusOptions.aco_required : true)
-              .filter(service_request => statusOptions.hide_pending ? service_request.pending === statusOptions.hide_pending : true)
+              .filter(service_request => statusOptions.hide_pending ? service_request.pending !== statusOptions.hide_pending : true)
               .map(service_request => (
                 <span key={service_request.id}> {mapState[service_request.id] ? 
                   <Marker
@@ -1058,8 +1059,10 @@ function Deploy({ incident, organization }) {
             axios.post('/evac/api/evacteammember/', values)
             .then(response => {
               let selected_list = [...selected];
-              selected_list.push({id:response.data.id, label:response.data.first_name + " " + response.data.last_name + (response.data.agency_id ? " (" + response.data.agency_id + ")" : ""), is_assigned:false})
+              selected_list.push({id:[response.data.id], label:response.data.first_name + " " + response.data.last_name + (response.data.agency_id ? " (" + response.data.agency_id + ")" : ""), is_assigned:false})
               setSelected(selected_list);
+              props.setFieldValue('team_members', [...props.values.team_members, response.data.id]);
+              setSelectedCount((prevState) => ({...prevState, disabled:selectedCount.count > 0 ? false : true}));
               handleCloseShowAddTeamMember();
               resetForm();
             })
