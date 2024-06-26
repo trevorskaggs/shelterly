@@ -19,7 +19,7 @@ class SimplePersonSerializer(serializers.ModelSerializer):
     def get_display_phone(self, obj):
         if len(obj.phone) > 10:
             return re.sub(r'(\d{3})(\d{3})(\d{4})(.*)', r'(\1) \2-\3 x\4', obj.phone.replace(' ', ''))
-        return re.sub(r'(\d{3})(\d{3})(\d{4})', r'(\1) \2-\3', obj.phone)
+        return re.sub(r'(\d{3})(\d{3})(\d{4})', r'(\1) \2-\3', obj.phone.replace(' ', ''))
 
     def get_is_owner(self, obj):
         try:
@@ -29,7 +29,9 @@ class SimplePersonSerializer(serializers.ModelSerializer):
 
     # Custom field for Formated Alt Phone Number
     def get_display_alt_phone(self, obj):
-        return re.sub(r'(\d{3})(\d{3})(\d{4})', r'(\1) \2-\3', obj.alt_phone)
+        if len(obj.alt_phone) > 10:
+            return re.sub(r'(\d{3})(\d{3})(\d{4})(.*)', r'(\1) \2-\3 x\4', obj.alt_phone.replace(' ', ''))
+        return re.sub(r'(\d{3})(\d{3})(\d{4})', r'(\1) \2-\3', obj.alt_phone.replace(' ', ''))
 
     # Truncates latitude and longitude.
     def to_internal_value(self, data):
