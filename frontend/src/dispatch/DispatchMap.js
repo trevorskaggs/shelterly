@@ -1001,7 +1001,7 @@ function Deploy({ incident, organization }) {
                         </Tooltip>
                       }
                     >
-                      <Link href={"/" + organization +"/" + incident + "/hotline/servicerequest/" + service_request.id + "/assign"}><FontAwesomeIcon icon={faMapMarkedAlt} inverse /></Link>
+                      <Link href={"/" + organization +"/" + incident + "/hotline/servicerequest/" + service_request.id_for_incident + "/assign"}><FontAwesomeIcon icon={faMapMarkedAlt} inverse /></Link>
                     </OverlayTrigger>
                   </div>
                 </div>
