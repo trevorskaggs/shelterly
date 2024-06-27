@@ -638,20 +638,7 @@ function Deploy({ incident, organization }) {
               </span>
             </div>
           </Col>
-          <Col className="pr-0" style={{maxWidth:"31px", marginLeft:"2px"}}>
-            <OverlayTrigger
-              key={"add-team-member"}
-              placement="top"
-              overlay={
-                <Tooltip id={`tooltip-add-team-member`}>
-                  Add a new team member
-                </Tooltip>
-              }
-            >
-              <FontAwesomeIcon icon={faPlusSquare} className="ml-1" size="lg" transform="grow-18 down-6" onClick={() => setShowAddTeamMember(true)} style={{cursor:"pointer"}} inverse />
-            </OverlayTrigger>
-          </Col>
-          <Col style={{marginLeft:"15px", paddingRight:"0px", paddingLeft:"0px"}}>
+          <Col style={{marginLeft:"2px", paddingLeft:"2px", paddingRight:"4px"}}>
             {preplan ?
               <BootstrapForm.Control
                 id="disabled_team_name"
@@ -678,6 +665,19 @@ function Deploy({ incident, organization }) {
                 )}
               />
             }
+          </Col>
+          <Col className="pr-0" style={{maxWidth:"31px", paddingLeft:"2px"}}>
+            <OverlayTrigger
+              key={"add-team-member"}
+              placement="top"
+              overlay={
+                <Tooltip id={`tooltip-add-team-member`}>
+                  Add a new team member
+                </Tooltip>
+              }
+            >
+              <FontAwesomeIcon icon={faPlusSquare} className="ml-1" size="lg" transform="grow-18 down-6" onClick={() => setShowAddTeamMember(true)} style={{cursor:"pointer"}} inverse />
+            </OverlayTrigger>
           </Col>
         </Row>
         <Row className="d-flex flex-wrap" style={{marginTop:"-1px", marginRight:"-23px", marginLeft:"6px", minHeight:"36vh", paddingRight:"14px"}}>
