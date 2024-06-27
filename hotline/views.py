@@ -102,7 +102,7 @@ class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                 injured=Exists(Animal.objects.filter(request_id=OuterRef("id"), injured="yes"))
             )
             .annotate(
-                pending=Case(When(Q(followup_date__lte=datetime.today()) | Q(followup_date__isnull=True), then=Value(True)), default=Value(False), output_field=BooleanField())
+                pending=Case(When(followup_date__gte=datetime.today(), then=Value(True)), default=Value(False), output_field=BooleanField())
             ).prefetch_related(Prefetch('animal_set', queryset=Animal.objects.with_images().exclude(status='CANCELED').prefetch_related('owners'), to_attr='animals'))
             .prefetch_related('owners')
             .select_related('reporter')

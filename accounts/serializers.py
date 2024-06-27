@@ -74,7 +74,7 @@ class SecureUserSerializer(UserSerializer):
         except:
             return '***-****'
 
-    # Custom field for Formated Phone Number
+    # Custom field for Formatted Phone Number
     def get_display_phone(self, obj):
         try:
             front, back = re.sub(r'(\d{3})(\d{3})(\d{4})', r'(\1) \2-\3', obj.cell_phone.replace(' ', '')).split("-")
@@ -82,7 +82,7 @@ class SecureUserSerializer(UserSerializer):
         except:
             return '***-****'
     
-    # Custom field for Formated Phone Number
+    # Custom field for Formatted Phone Number
     def get_email(self, obj):
         front, back = obj.email.split('@')
         return front[0] + "*"*(len(front) - 1) + "@" + back

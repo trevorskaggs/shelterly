@@ -104,11 +104,11 @@ function AnimalDetails({ id, incident, organization }) {
   // Handle animal removal submit.
   const handleAnimalSubmit = async () => {
     setIsLoading(true);
-    await axios.patch('/animals/api/animal/' + data.id + '/', {remove_animal:id})
+    await axios.patch('/animals/api/animal/' + data.id + '/', {remove_animal:data.id})
     .then(response => {
       handleAnimalClose();
       if (data.request) {
-        navigate('/' + organization + '/' + incident + '/hotline/servicerequest/' + data.request);
+        navigate('/' + organization + '/' + incident + '/hotline/servicerequest/' + data.request_id_for_incident);
       }
       else if (data.owner) {
         navigate('/' + organization + '/' + incident + '/people/owner/' + data.owner);

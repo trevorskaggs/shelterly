@@ -86,7 +86,7 @@ const IncidentForm = ({ id, organization }) => {
     let source = axios.CancelToken.source();
 
     const fetchIncidents = async () => {
-      // Fetch Visit Note data.
+      // Fetch Incident data.
       await axios.get('/incident/api/incident/?organization_slug=' + organization, {
         cancelToken: source.token,
       })
