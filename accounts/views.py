@@ -133,7 +133,9 @@ class UserViewSet(CreateUserMixin, viewsets.ModelViewSet):
             if self.request.user.is_superuser or (perms and perms[0].user_perms):
                 user = serializer.save()
                 if self.request.data.get('organization') not in user.organizations.all():
-                    user.organizations.add(Organization.objects.get(id=self.request.data.get('organization')))
+                    org = Organization.objects.get(id=self.request.data.get('organization'))
+                    user.organizations.add(org)
+                    new_user_notification(user, org, serializer.context['request'].user)
 
                 if self.request.data.get('reset_password'):
                     ResetPasswordToken = apps.get_model('django_rest_passwordreset', 'ResetPasswordToken')
@@ -188,14 +190,13 @@ def new_user_notification(user, org, admin_user):
         'user_last_name': user.last_name,
         'user_email': user.email,
         'org_name': org.name,
-        'admin_email': self.user.email,
-        'expire_date': 'adf'
+        'admin_email': admin_user.email,
     }
     send_emails = [suo.user.email for suo in ShelterlyUserOrg.objects.filter(organization=org, user_perms=True)]
-    send_emails.append(user.email)
+    #send_emails.append(user.email)
     send_mail(
         # title:
-        "New User (%s, %s - %s) add to %s" % (user.last_name, user.first_name, user.email, org.name),
+        "New User (%s, %s - %s) added to %s by %s." % (user.last_name, user.first_name, user.email, org.name, admin_user.email),
         # message:
         render_to_string(
             'new_user_notification.txt',
