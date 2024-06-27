@@ -361,6 +361,7 @@ function AnimalSearch({ incident, organization }) {
           if (state?.incident?.latlng) {
             bounds_array.push(state.incident.latlng)
           }
+          console.log("🍕 ~ .then ~ bounds_array:", bounds_array);
           let minLatLng = L.latLng(0, 0);
           let maxLatLng = L.latLng(0, 0);
           if (Array.isArray(bounds_array) && bounds_array.length > 0) {
