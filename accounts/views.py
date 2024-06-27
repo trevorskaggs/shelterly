@@ -110,7 +110,6 @@ class UserViewSet(CreateUserMixin, viewsets.ModelViewSet):
         return response.Response(UserSerializer(ShelterlyUser.objects.filter(id__in=user_ids), many=True).data, status=201)
 
     def perform_create(self, serializer):
-        import ipdb; ipdb.set_trace()
         if serializer.is_valid():
             # Clean phone field.
             serializer.validated_data['cell_phone'] = ''.join(char for char in serializer.validated_data.get('cell_phone', '') if char.isdigit())
@@ -192,6 +191,8 @@ def new_user_notification(user, org, admin_user):
         'admin_email': self.user.email,
         'expire_date': 'adf'
     }
+    send_emails = [suo.user.email for suo in ShelterlyUserOrg.objects.filter(organization=org, user_perms=True)]
+    send_emails.append(user.email)
     send_mail(
         # title:
         "New User (%s, %s - %s) add to %s" % (user.last_name, user.first_name, user.email, org.name),
@@ -203,7 +204,7 @@ def new_user_notification(user, org, admin_user):
         # from:
         "DoNotReply@shelterly.org",
         # to:
-        [user.email],
+        [send_emails],
         fail_silently=False,
         html_message = render_to_string(
             'new_user_notification.html',
