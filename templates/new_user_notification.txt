@@ -1,0 +1,1 @@
+{{ user_first_name }} {{ user_last_name }} ({{ user_email }}) has been added to the {{ org_name }} by {{ admin_email }}.
