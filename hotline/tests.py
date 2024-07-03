@@ -30,7 +30,7 @@ class TestViews(APITestCase):
 
     def test_search_service_requests(self):
         self.client.force_authenticate(self.user)
-        response = self.client.get(f'/hotline/api/servicerequests/{self.service_request.pk}/', {'search':'Jane'})
+        response = self.client.get(f'/hotline/api/servicerequests/{self.service_request.pk}/', {'search':'Doe'})
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json().get('owner_objects')[0].get('first_name'), 'Jane')
 
