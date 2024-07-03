@@ -36,6 +36,7 @@ class ModestAnimalSerializer(SimpleAnimalSerializer):
     request_address = serializers.SerializerMethodField()
     request_lat_lon = serializers.SerializerMethodField()
     weight = serializers.SerializerMethodField()
+    owners = SimplePersonSerializer(many=True, required=False, read_only=True)
     owner_names = serializers.StringRelatedField(source='owners', many=True, read_only=True)
     shelter_object = SimpleShelterSerializer(source='shelter', required=False, read_only=True)
     room_name = serializers.StringRelatedField(source='room', read_only=True)
@@ -43,7 +44,7 @@ class ModestAnimalSerializer(SimpleAnimalSerializer):
     class Meta:
         model = Animal
         fields = ['id', 'id_for_incident', 'name', 'species', 'species_string', 'aggressive', 'injured', 'fixed', 'request', 'request_id_for_incident', 'found_location', 'request_address', 'request_lat_lon', 'shelter_object', 'shelter', 'status', 'aco_required', 'color_notes',
-        'front_image', 'side_image', 'owner_names', 'sex', 'size', 'age', 'pcolor', 'scolor', 'medical_notes', 'medical_record', 'behavior_notes', 'room_name', 'category', 'latitude', 'longitude', 'weight']
+        'microchip', 'front_image', 'owners', 'owner_names', 'sex', 'size', 'age', 'pcolor', 'scolor', 'medical_notes', 'medical_record', 'behavior_notes', 'room', 'room_name', 'category', 'latitude', 'longitude', 'weight']
 
     def get_found_location(self, obj):
         return build_full_address(obj)
