@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import axios from "axios";
 import DataTable from 'react-data-table-component';
 import { Button, Row } from 'react-bootstrap';
@@ -19,6 +19,8 @@ function Reports({ incident, organization }) {
   const [storeDate, setStoreDate] = useState('');
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(moment().format('YYYY-MM-DD'));
+
+  const dateRef = useRef(null);
 
   function convertArrayOfObjectsToCSV(array) {
     let result;
@@ -461,6 +463,7 @@ function Reports({ incident, organization }) {
             setEndDate(moment(dateRange[0]).format('YYYY-MM-DD'));
           }
         }}
+        ref={dateRef}
         value={storeDate}
         style={{height:"36px", width:"48%", marginLeft:"6px"}}
       />

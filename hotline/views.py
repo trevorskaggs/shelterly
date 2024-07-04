@@ -24,7 +24,7 @@ from rest_framework.decorators import action as drf_action
 class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
     queryset = ServiceRequest.objects.all()
     lookup_fields = ['pk', 'incident', 'id_for_incident']
-    search_fields = ['id_for_incident', 'address', 'city', 'animal__name', 'owners__first_name', 'owners__last_name', 'owners__phone', 'owners__drivers_license', 'owners__address', 'owners__city', 'reporter__first_name', 'reporter__last_name']
+    search_fields = ['address', 'city', 'animal__name', 'owners__last_name', 'reporter__last_name']
     filter_backends = (filters.SearchFilter, MyCustomOrdering)
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = SimpleServiceRequestSerializer
@@ -34,7 +34,6 @@ class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
         if self.action == 'retrieve':
             if hasattr(self, 'detail_serializer_class'):
                 return self.detail_serializer_class
-
         return super(ServiceRequestViewSet, self).get_serializer_class()
 
 

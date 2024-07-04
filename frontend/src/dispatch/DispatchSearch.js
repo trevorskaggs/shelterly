@@ -4,7 +4,7 @@ import { Button, ButtonGroup, Card, CardGroup, Form, FormControl, InputGroup, Ov
 import { Link, useQueryParams } from "raviger";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faCircle, faExclamationCircle, faQuestionCircle, faUserAlt, faUserAltSlash, faUsers, faPrint
+  faCircle, faExclamationCircle, faInfoCircle, faQuestionCircle, faUserAlt, faUserAltSlash, faUsers, faPrint
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faDotCircle
@@ -38,6 +38,7 @@ function DispatchAssignmentSearch({ incident, organization }) {
   const [data, setData] = useState({evacuation_assignments: [], isFetching: false});
   const [searchTerm, setSearchTerm] = useState(search);
   const tempSearchTerm = useRef(null);
+  const dateRef = useRef(null);
   const [statusOptions, setStatusOptions] = useState(status);
   const [matches, setMatches] = useState({});
   const [bounds, setBounds] = useState({});
@@ -184,7 +185,19 @@ function DispatchAssignmentSearch({ incident, organization }) {
               ref={tempSearchTerm}
           />
           <InputGroup.Append>
-            <Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0"}}>Search</Button>
+            <Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0"}}>Search
+              <OverlayTrigger
+                key={"search-information"}
+                placement="top"
+                overlay={
+                  <Tooltip id={`tooltip-search-information`}>
+                    Searchable fields: team name, team member names, animal names, and service request address fields.
+                  </Tooltip>
+                }
+              >
+                <FontAwesomeIcon icon={faInfoCircle} className="ml-1" size="sm" inverse />
+              </OverlayTrigger>
+            </Button>
           </InputGroup.Append>
           <ButtonGroup className="ml-1">
             <Button variant={statusOptions === "preplanned" ? "primary" : "secondary"} onClick={statusOptions !== "preplanned" ? () => {setPage(1);setStatusOptions("preplanned")} : () => {setPage(1);setStatusOptions("")}}>Preplanned</Button>
@@ -196,6 +209,7 @@ function DispatchAssignmentSearch({ incident, organization }) {
             id={`date_range_picker`}
             placeholder={"Filter by Date Range"}
             style={{width:"210px", marginLeft:"0.25rem"}}
+            ref={dateRef}
             onChange={(dateRange) => {
               if (dateRange.length) {
                 setIsDateSet(true)

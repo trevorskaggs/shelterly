@@ -4,7 +4,7 @@ import { Link, useQueryParams } from 'raviger';
 import { Button, ButtonGroup, Card, CardGroup, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Pagination, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faClipboardList,
+  faClipboardList, faInfoCircle,
   faPrint
 } from '@fortawesome/free-solid-svg-icons';
 import {
@@ -41,7 +41,6 @@ function PersonSearch({ incident, organization }) {
 	const [searchState, setSearchState] = useState({});
 	const [statusOptions, setStatusOptions] = useState(person);
 	const [searchTerm, setSearchTerm] = useState(search);
-  const [speciesChoices, setSpeciesChoices] = useState([]);
 	const tempSearchTerm = useRef(null);
 	const [page, setPage] = useState(1);
   const [numPages, setNumPages] = useState(1);
@@ -108,7 +107,7 @@ function PersonSearch({ incident, organization }) {
 							}
 						})
             species.sort(function(a, b) {
-              return a > b;
+              return a.localeCompare(b);
             });
 						search_state[owner.id] = {species:species, selectedSpecies:species[0]}
 						})
@@ -167,7 +166,19 @@ function PersonSearch({ incident, organization }) {
           ref={tempSearchTerm}
           />
         <InputGroup.Append>
-          <Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0"}}>Search</Button>
+          <Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0"}}>Search
+            <OverlayTrigger
+              key={"search-information"}
+              placement="top"
+              overlay={
+                <Tooltip id={`tooltip-search-information`}>
+                  Searchable fields: name, phone number, email, drivers license, address fields, and animal names.
+                </Tooltip>
+              }
+            >
+              <FontAwesomeIcon icon={faInfoCircle} className="ml-1" size="sm" inverse />
+            </OverlayTrigger>
+          </Button>
         </InputGroup.Append>
         <ButtonGroup className="ml-1">
           <Button variant={statusOptions === "owners" ? "primary" : "secondary"} onClick={statusOptions !== "owners" ? () => {setPage(1);setStatusOptions("owners")} : () => {setPage(1);setStatusOptions("")}}>Owners</Button>

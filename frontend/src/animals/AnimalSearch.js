@@ -5,7 +5,7 @@ import { Link, useQueryParams } from 'raviger';
 import { Button, Card, CardGroup, Col, Collapse, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Pagination, Row, Spinner, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBan, faCalendarDay, faClipboardList, faCut, faEnvelope, faLink, faMapMarkerAlt, faMedkit, faPrint, faUserAltSlash
+  faBan, faCalendarDay, faInfoCircle, faClipboardList, faCut, faEnvelope, faLink, faMapMarkerAlt, faMedkit, faPrint, faUserAltSlash
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faDotCircle
@@ -70,11 +70,13 @@ function AnimalSearch({ incident, organization }) {
   const [shelters, setShelters] = useState({options: [], isFetching: false});
   const [speciesChoices, setSpeciesChoices] = useState([]);
   const [animals, setAnimals] = useState([]);
-  const [options, setOptions] = useState({species: '', status: null, sex: null, owned: null, pcolor: '', fixed: null, latlng: null, radius: 1.60934, shelter: ''});
+  const [options, setOptions] = useState({id:null, species:'', status:null, sex:null, owned:null, pcolor:'', fixed:null, latlng:null, radius:1.60934, shelter:''});
   const [searchTerm, setSearchTerm] = useState(search);
   const [showFilters, setShowFilters] = useState(false);
   const [isDisabled, setIsDisabled] = useState(true);
+  const [triggerRefresh, setTriggerRefresh] = useState(false);
   const tempSearchTerm = useRef(null);
+  const idSearchRef = useRef(null);
   const speciesRef = useRef(null);
   const statusRef = useRef(null);
   const sexRef = useRef(null);
@@ -122,6 +124,7 @@ function AnimalSearch({ incident, organization }) {
   const handleSubmit = async event => {
     event.preventDefault();
     setSearchTerm(tempSearchTerm.current.value);
+    setTriggerRefresh(!triggerRefresh);
     setPage(1);
   };
 
@@ -133,7 +136,8 @@ function AnimalSearch({ incident, organization }) {
   };
 
   const handleApplyFilters = (animals) => {
-    setAnimals(animals.filter(animal => options.species ? animal.species_string.toLowerCase() === options.species.toLowerCase() : animal)
+    setAnimals(animals.filter(animal => options.id ? Number(animal.id_for_incident) === Number(options.id) : animal)
+                      .filter(animal => options.species ? animal.species_string.toLowerCase() === options.species.toLowerCase() : animal)
                       .filter(animal => options.status ? animal.status === options.status : animal)
                       .filter(animal => options.owned === 'yes' ? animal.owners.length > 0 : animal)
                       .filter(animal => options.owned === 'no' ? animal.owners.length === 0 : animal)
@@ -142,6 +146,7 @@ function AnimalSearch({ incident, organization }) {
                       .filter(animal => options.pcolor ? animal.pcolor === options.pcolor || animal.scolor === options.pcolor : animal)
                       .filter(animal => options.latlng ? arePointsNear({lat:animal.latitude, lng: animal.longitude}, options.latlng) : animal)
                       .filter(animal => options.shelter ? animal.shelter === options.shelter : animal)
+                      .map((animal) => (animal.id))
     )
   }
 
@@ -153,8 +158,9 @@ function AnimalSearch({ incident, organization }) {
     fixedRef.current.select.clearValue();
     pcolorRef.current.select.clearValue();
     shelterRef.current.select.clearValue();
-    setOptions({species: '', status: null, sex: null, owned: null, pcolor: '', fixed: null, latlng: null, radius: 1.60934});
-    setAnimals(data.animals);
+    idSearchRef.current.value = '';
+    setOptions({id:null, species:'', status:null, sex:null, owned:null, pcolor:'', fixed:null, latlng:null, radius:1.60934});
+    setAnimals(data.animals.map((animal) => (animal.id)));
   };
 
   function buildAnimalUrl(animal) {
@@ -162,7 +168,7 @@ function AnimalSearch({ incident, organization }) {
   }
 
   const handleDownloadPdfClick = (animalId) => {
-    const animal = animals.find((animal) => animal.id === animalId);
+    const animal = data.animals.find((animal) => animal.id === animalId);
     animal.url = buildAnimalUrl(animal);
     printAnimalCareSchedule(animal);
   }
@@ -171,7 +177,7 @@ function AnimalSearch({ incident, organization }) {
     e.preventDefault();
 
     handleSubmitting()
-      .then(() => animals.map((animal) => ({
+      .then(() => data.animals.filter(animal => animals.includes(animal.id)).map((animal) => ({
         ...animal,
         url: buildAnimalUrl(animal)
       })))
@@ -263,6 +269,7 @@ function AnimalSearch({ incident, organization }) {
     fetchSpecies();
 
     const fetchAnimals = async () => {
+      setNumPages(0);
       setData({animals: [], isFetching: true});
       // Fetch ServiceRequest data.
       await axios.get('/animals/api/animal/?search=' + searchTerm +'&incident=' + incident, {
@@ -277,7 +284,7 @@ function AnimalSearch({ incident, organization }) {
           markInstances(searchTerm);
 
           let bounds_array = [];
-          setAnimals(response.data);
+          setAnimals(response.data.map((animal) => (animal.id)));
           handleApplyFilters(response.data);
           for (const animal of response.data) {
             if (animal.latitude && animal.longitude) {
@@ -335,12 +342,12 @@ function AnimalSearch({ incident, organization }) {
       unmounted = true;
       source.cancel();
     };
-  }, [searchTerm, incident]);
+  }, [incident, searchTerm]);
 
   // Hook handling option changes.
   useEffect(() => {
     const handleDisabled = () => {
-      setIsDisabled(!(options.species || options.status || options.sex || options.owned || options.pcolor || options.fixed || options.latlng || options.shelter));
+      setIsDisabled(!(options.id || options.species || options.status || options.sex || options.owned || options.pcolor || options.fixed || options.latlng || options.shelter));
     };
 
     setNumPages(Math.ceil(animals.length / ITEMS_PER_PAGE));
@@ -362,7 +369,19 @@ function AnimalSearch({ incident, organization }) {
             ref={tempSearchTerm}
           />
           <InputGroup.Append>
-            <Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0"}}>Search</Button>
+            <Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0"}}>Search
+              <OverlayTrigger
+                key={"search-information"}
+                placement="top"
+                overlay={
+                  <Tooltip id={`tooltip-search-information`}>
+                    Searchable fields: name, microchip, address fields, and owner last names.
+                  </Tooltip>
+                }
+              >
+                <FontAwesomeIcon icon={faInfoCircle} className="ml-1" size="sm" inverse />
+              </OverlayTrigger>
+            </Button>
           </InputGroup.Append>
           <Button variant="outline-light" className="ml-1" onClick={handleShowFilters}>Advanced {showFilters ? <FontAwesomeIcon icon={faChevronDoubleUp} size="sm" /> : <FontAwesomeIcon icon={faChevronDoubleDown} size="sm" />}</Button>
           <ButtonSpinner
@@ -533,7 +552,16 @@ function AnimalSearch({ incident, organization }) {
                   </Row>
                 </Col>
                 <Col className="flex-grow-1 pl-0" xs="3">
-                  <Button className="btn btn-primary" style={{maxHeight:"35px", width:"100%"}} onClick={() => {setSearchTerm(tempSearchTerm.current.value);}} disabled={isDisabled}>Apply</Button>
+                <FormControl
+                  type="text"
+                  placeholder="Animal ID"
+                  name="id"
+                  onChange={(event) => {
+                    setOptions({...options, id: event ? event.target.value : null});
+                  }}
+                  ref={idSearchRef}
+                />
+                  <Button className="btn btn-primary mt-3" style={{maxHeight:"35px", width:"100%"}} onClick={() => {tempSearchTerm.current.value !== searchTerm ? setSearchTerm(tempSearchTerm.current.value) : handleApplyFilters(data.animals);}} disabled={isDisabled}>Apply</Button>
                   <Button variant="outline-light" style={{maxHeight:"35px", width:"100%", marginTop:"15px"}} onClick={handleClear}>Clear</Button>
                 </Col>
               </Row>
@@ -542,7 +570,7 @@ function AnimalSearch({ incident, organization }) {
           </div>
         </Collapse>
       </Form>
-      {animals.map((animal, index) => (
+      {data.animals.filter(animal => animals.includes(animal.id)).map((animal, index) => (
         <div key={animal.id} className="mt-3" hidden={page !== Math.ceil((index+1)/ITEMS_PER_PAGE)}>
           <div className="card-header">
             <h4 style={{marginBottom:"-2px",  marginLeft:"-12px"}}>

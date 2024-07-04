@@ -68,8 +68,7 @@ const useStyles = makeStyles({
   },
 });
 
-const DateRangePicker = ({...props}) => {
-  const pickerRef = useRef();
+const DateRangePicker = React.forwardRef((props, ref) => {
   const options = {allowInput: true, dateFormat: props.mode === "single" ? "M d, Y H:i" : "m-d-Y", mode: props.mode === "single" ? "single" : "range", defaultHour:props.hour === 0 ? 0 : props.hour||12, defaultMinute:props.minute||0}
   const styles = {
     ...props.style,
@@ -87,9 +86,9 @@ const DateRangePicker = ({...props}) => {
           borderStyle: "solid",
           flexGrow: 1
         }}
-        ref={pickerRef}
+        ref={ref}
       />
-      {!!pickerRef?.current?.flatpickr?.selectedDates?.length && (
+      {!!ref?.current?.flatpickr?.selectedDates?.length && (
         <Button
           className="text-center bg-white text-dark mx-0 px-2 text-center border-1 border-left-0 text-muted"
           style={{
@@ -100,14 +99,14 @@ const DateRangePicker = ({...props}) => {
             textTransform: 'uppercase',
             fontSize: 'x-small'
           }}
-          onClick={() => pickerRef.current.flatpickr.clear()}
+          onClick={() => ref.current.flatpickr.clear()}
         >
           x
         </Button>
       )}
     </div>
   );
-};
+});
 
 const DateTimePicker = ({ label, xs, clearable, ...props }) => {
 
