@@ -250,6 +250,7 @@ function ServiceRequestSearch({ incident, organization }) {
           </ButtonSpinner>
           <Button
           key={"download-geojson"}
+          className="pr-1"
           placement="bottom"
           variant="outline-light"
           onClick={handleGeoJsonDownload} href="">Download All ({`${filteredServiceRequests.length}`})<FontAwesomeIcon icon={faDownload} className="mx-2 text-light" inverse />
