@@ -107,7 +107,7 @@ function PersonSearch({ incident, organization }) {
 							}
 						})
             species.sort(function(a, b) {
-              return a > b;
+              return a.localeCompare(b);
             });
 						search_state[owner.id] = {species:species, selectedSpecies:species[0]}
 						})

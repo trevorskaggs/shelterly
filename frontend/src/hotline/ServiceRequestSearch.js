@@ -177,9 +177,8 @@ function ServiceRequestSearch({ incident, organization }) {
 								species.push(animal.species_string)
 							}
 						});
-
             species.sort(function(a, b) {
-              return a > b;
+              return a.localeCompare(b);
             });
 						search_state[service_request.id] = {species:species, selectedSpecies:species[0]};
 					});
