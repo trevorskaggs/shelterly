@@ -30,7 +30,6 @@ class SimpleAnimalSerializer(serializers.ModelSerializer):
 
 class ModestAnimalSerializer(SimpleAnimalSerializer):
     front_image = serializers.SerializerMethodField()
-    side_image = serializers.SerializerMethodField()
     found_location = serializers.SerializerMethodField()
     request_id_for_incident = serializers.SerializerMethodField()
     request_address = serializers.SerializerMethodField()
