@@ -183,6 +183,7 @@ class ServiceRequestSerializer(SimpleServiceRequestSerializer):
 
     # Custom field for ordering animals.
     def get_animals(self, obj):
+        # TODO Can this be Modest?
         return AnimalSerializer(obj.animal_set.all().exclude(status='CANCELED').order_by('id'), many=True, required=False, read_only=True).data
 
     def get_assigned_requests(self, obj):

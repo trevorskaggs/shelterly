@@ -172,7 +172,7 @@ function PersonSearch({ incident, organization }) {
               placement="top"
               overlay={
                 <Tooltip id={`tooltip-search-information`}>
-                  Searchable fields: Owner name, phone number, email, address fields, drivers license, and animal names.
+                  Searchable fields: name, phone number, email, drivers license, address fields, and animal names.
                 </Tooltip>
               }
             >

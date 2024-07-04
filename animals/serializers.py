@@ -96,6 +96,7 @@ class ModestAnimalSerializer(SimpleAnimalSerializer):
                 return ''
 
 class AnimalSerializer(ModestAnimalSerializer):
+    side_image = serializers.SerializerMethodField()
     extra_images = serializers.SerializerMethodField()
     owners = SimplePersonSerializer(many=True, required=False, read_only=True)
     reporter_object = SimplePersonSerializer(source='reporter', read_only=True)
