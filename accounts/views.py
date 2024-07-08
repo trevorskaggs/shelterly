@@ -206,7 +206,7 @@ def new_user_notification(user, org, admin_user):
         # from:
         "DoNotReply@shelterly.org",
         # to:
-        [send_emails],
+        send_emails,
         fail_silently=False,
         html_message = render_to_string(
             'new_user_notification.html',
