@@ -102,7 +102,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
   }
 
   function buildAnimalUrl(animal) {
-    return getFullLocationFromPath(`/${organization}/${incident}/animals/${animal.id}`)
+    return getFullLocationFromPath(`/${organization}/${incident}/animals/${animal.id_for_incident}`)
   }
 
   const handleDownloadPdfClick = async () => {

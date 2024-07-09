@@ -14,10 +14,12 @@ import AnimalCards from '../components/AnimalCards';
 import { SystemErrorContext } from '../components/SystemError';
 import ShelterlyPrintifyButton from '../components/ShelterlyPrintifyButton';
 import { printRoomAnimalCareSchedules } from './Utils';
+import { useLocationWithRoutes } from '../hooks';
 
 function RoomDetails({ id, incident, organization }) {
 
   const { setShowSystemError } = useContext(SystemErrorContext);
+  const { getFullLocationFromPath } = useLocationWithRoutes();
 
   const [data, setData] = useState({name:'', description:'', building:null, building_name: '', shelter_name:'', shelter: null, animals:[], action_history:[]});
   const [showModal, setShowModal] = useState(false);
@@ -31,8 +33,15 @@ function RoomDetails({ id, incident, organization }) {
     });
   }
 
+  function buildAnimalUrl(animal) {
+    return getFullLocationFromPath(`/${organization}/${incident}/animals/${animal.id_for_incident}`)
+  }
+
   const handlePrintAllAnimalsClick = () =>
-    printRoomAnimalCareSchedules(data.animals, id)
+    printRoomAnimalCareSchedules(data.animals.map((animal) => ({
+      ...animal,
+      url: buildAnimalUrl(animal)
+    })), id)
 
   // Hook for initializing data.
   useEffect(() => {

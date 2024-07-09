@@ -164,7 +164,7 @@ function AnimalSearch({ incident, organization }) {
   };
 
   function buildAnimalUrl(animal) {
-    return getFullLocationFromPath(`/${organization}/${incident}/animals/${animal.id}`)
+    return getFullLocationFromPath(`/${organization}/${incident}/animals/${animal.id_for_incident}`)
   }
 
   const handleDownloadPdfClick = (animalId) => {
@@ -177,7 +177,7 @@ function AnimalSearch({ incident, organization }) {
     e.preventDefault();
 
     handleSubmitting()
-      .then(() => data.animals.filter(animal => animals.includes(animal.id)).map((animal) => ({
+      .then(() => data.animals.filter(animal => animals.includes(animal.id_for_incident)).map((animal) => ({
         ...animal,
         url: buildAnimalUrl(animal)
       })))

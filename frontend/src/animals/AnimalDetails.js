@@ -128,7 +128,7 @@ function AnimalDetails({ id, incident, organization }) {
 
   const handleDownloadPdfClick = async () => {
     setIsLoading(true);
-    const pageURL = getFullLocationFromPath(`/${organization}/${incident}/animals/${id}`);
+    const pageURL = getFullLocationFromPath(`/${organization}/${incident}/animals/${data.id_for_incident}`);
     // wait for 1 tick so spinner will set before the print button locks up the browser
     await new Promise(resolve => setTimeout(resolve, 0));
     printAnimalCareSchedule({ ...data, url: pageURL })
