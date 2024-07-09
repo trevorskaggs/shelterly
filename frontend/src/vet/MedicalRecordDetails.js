@@ -115,7 +115,7 @@ function MedicalRecordDetails({ id, incident, organization }) {
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
               <ListGroup.Item>
                 <div className="row" style={{textTransform:"capitalize"}}>
-                  <span className="col-4"><b>ID:</b> <Link href={"/" + organization + "/" + incident + "/animals/" + data.animal_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>A#{data.animal_object.id_for_incident}</Link></span>
+                  <span className="col-4"><b>ID:</b> <Link href={"/" + organization + "/" + incident + "/animals/" + data.animal_object.id_for_incident} className="text-link" style={{textDecoration:"none", color:"white"}}>A#{data.animal_object.id_for_incident}</Link></span>
                   <span className="col-4"><b>Species:</b> {data.animal_object.species_string}</span>
                   <span className="col-4"><b>Age:</b> {data.animal_object.age||"Unknown"}</span>
                 </div>
