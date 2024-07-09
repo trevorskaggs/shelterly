@@ -51,7 +51,7 @@ function Hotline({ incident, organization }) {
   const handleClose = () => {setShowAddressModal(false);}
 
   const subscribe = () => {
-    axios.patch('/incident/api/incident/' + state.incident.id + '/subscribe/', {'subscribe':!isSubscribed})
+    axios.patch('/incident/api/incident/' + state.incident.id + '/subscribe/', {'hotline_subscribe':!isSubscribed})
       .finally(() => setIsSubscribed(!isSubscribed));
   }
 
