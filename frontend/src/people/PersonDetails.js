@@ -75,7 +75,7 @@ function PersonDetails({id, incident, organization}) {
 
   function buildAnimalUrl(animal) {
     return getFullLocationFromPath(
-      `/${organization}/${incident}/animals/${animal.id}`
+      `/${organization}/${incident}/animals/${animal.id_for_incident}`
     );
   }
 
