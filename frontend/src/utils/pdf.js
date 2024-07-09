@@ -13,7 +13,8 @@ const defaultFormat = {
 const rgbColors = {
   SHELTERLY_BROWN: [139, 107, 82],
   DEFAULT: [0, 0, 0],
-  WHITE: [255, 255, 255]
+  WHITE: [255, 255, 255],
+  RISKY_RED: [240, 80, 57]
 };
 
 const handlerTypes = {
@@ -542,6 +543,18 @@ class ShelterlyPDF {
 
     // set last y position
     this.#documentLastYPosition = yPosition;
+  }
+
+  drawHRect({
+    color = 'DEFAULT'
+  }) {
+    const yPosition = this.beforeDraw({ yPosition: this.getLastYPositionWithBuffer() });
+    const xPosition = this.#documentLeftMargin;
+    const width = this.pageWidth - (xPosition * 2);
+    const boxColor = rgbColors[color] || rgbColors.DEFAULT;
+    this.#jsPDF.setFillColor(...boxColor);
+    this.#jsPDF.rect(xPosition, yPosition, width, 25, 'F');
+    this.#jsPDF.setFillColor(...rgbColors.DEFAULT);
   }
 
   textWithStyle({ text, xPosition, yPosition }) {
