@@ -42,7 +42,7 @@ function ShelterIntakeSummary({ id, incident, organization }) {
   const { getFullLocationFromPath } = useLocationWithRoutes();
 
   function buildAnimalUrl(animal) {
-    return getFullLocationFromPath(`/${organization}/${incident}/animals/${animal.id}`)
+    return getFullLocationFromPath(`/${organization}/${incident}/animals/${animal.id_for_incident}`)
   }
 
   const handlePrintOwnerClick = () =>
