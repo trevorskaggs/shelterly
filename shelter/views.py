@@ -48,6 +48,7 @@ class ShelterViewSet(viewsets.ModelViewSet):
                     distinct=True
                 )
             )
+            .prefetch_related('intakesummary_set')
             .prefetch_related(
                 Prefetch(
                     "building_set",
