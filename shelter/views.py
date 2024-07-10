@@ -48,7 +48,12 @@ class ShelterViewSet(viewsets.ModelViewSet):
                     distinct=True
                 )
             )
-            .prefetch_related('intakesummary_set')
+            .prefetch_related(
+                        Prefetch(
+                            "intakesummary_set",
+                            IntakeSummary.objects.filter(animals__incident__slug=self.request.GET.get('incident')).select_related("person")
+                        )
+                    )
             .prefetch_related(
                 Prefetch(
                     "building_set",
