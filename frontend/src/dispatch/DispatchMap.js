@@ -226,12 +226,14 @@ function Deploy({ incident, organization }) {
     setMapState(tempMapState);
   }
 
-  useWebSocket('ws://' + window.location.host.replace('localhost:3000', 'localhost:8000') + '/ws/map_data/', {
-    onMessage: (e) => {
-      setNewData(true)
-    },
-    shouldReconnect: (closeEvent) => true,
-  });
+  // Locally working websocket connection.
+  // TODO: bring back?
+  // useWebSocket('ws://' + window.location.host.replace('localhost:3000', 'localhost:8000') + '/ws/map_data/', {
+  //   onMessage: (e) => {
+  //     setNewData(true)
+  //   },
+  //   shouldReconnect: (closeEvent) => true,
+  // });
 
   // Hook for initializing data.
   useEffect(() => {
@@ -443,12 +445,12 @@ function Deploy({ incident, organization }) {
             placement="bottom"
             overlay={
               <Tooltip id={`tooltip-new-data`}>
-                {!newData ? "No new Service Request data available." : "New Service Request data available."}
+                {"Refresh service request data."}
               </Tooltip>
             }
           >
             <span className="d-inline-block">
-              <Button className="fa-move-up" onClick={() => setTriggerRefresh(!triggerRefresh)} disabled={!newData}>
+              <Button className="fa-move-up" onClick={() => setTriggerRefresh(!triggerRefresh)}>
                 <FontAwesomeIcon icon={faRotate} />
               </Button>
             </span>
