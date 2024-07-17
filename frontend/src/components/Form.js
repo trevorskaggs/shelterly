@@ -560,8 +560,8 @@ const AddressLookup = ({setLatLon, ...props}) => {
       setFieldValue("city", components.locality || '');
       setFieldValue("state", components.administrative_area_level_1);
       setFieldValue("zip_code", components.postal_code);
-      setFieldValue("latitude", suggestion.geometry.location.lat());
-      setFieldValue("longitude", suggestion.geometry.location.lng());
+      setFieldValue("latitude", suggestion.geometry.location.lat().toFixed(6));
+      setFieldValue("longitude", suggestion.geometry.location.lng().toFixed(6));
       setFieldValue("full_address", suggestion.formatted_address.replace(', USA', '').replace(', United States', '').replace(', Canada', ''));
       setLatLon(suggestion.geometry.location.lat(), suggestion.geometry.location.lng());
       setSearch({});
