@@ -7,7 +7,7 @@ from django.db.models import Case, Count, Exists, OuterRef, Prefetch, Q, When, V
 from django.http import HttpResponse
 from actstream import action
 from datetime import datetime
-from .serializers import ServiceRequestSerializer, SimpleServiceRequestSerializer, VisitNoteSerializer
+from .serializers import ServiceRequestSerializer, MapServiceRequestSerializer, SimpleServiceRequestSerializer, VisitNoteSerializer
 from .ordering import MyCustomOrdering
 from wsgiref.util import FileWrapper
 from channels.layers import get_channel_layer
@@ -29,11 +29,15 @@ class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = SimpleServiceRequestSerializer
     detail_serializer_class = ServiceRequestSerializer
+    map_serializer_class = MapServiceRequestSerializer
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
             if hasattr(self, 'detail_serializer_class'):
                 return self.detail_serializer_class
+        if self.request.query_params.get('landingmap', False):
+            if hasattr(self, 'map_serializer_class'):
+                return self.map_serializer_class
         return super(ServiceRequestViewSet, self).get_serializer_class()
 
 
@@ -114,7 +118,7 @@ class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
             queryset = queryset.filter(status=status).distinct()
 
         # Exclude SRs without a geolocation when fetching for a map.
-        is_map = self.request.query_params.get('map', '')
+        is_map = self.request.query_params.get('map', '')  or self.request.query_params.get('landingmap', '')
         if is_map == 'true':
             queryset = queryset.exclude(Q(latitude=None) | Q(longitude=None) | Q(animal=None)).exclude(status='canceled')
         if self.request.GET.get('incident'):

@@ -184,8 +184,8 @@ function ShelterDetails({ id, incident, organization }) {
         </Card.Body>
       </Card>
       {/* <History action_history={data.action_history} /> */}
-      <hr/>
-      <h2 className="mb-3">Intake History<FontAwesomeIcon icon={faChevronCircleRight} hidden={showHistory} onClick={() => setShowHistory(!showHistory)} className="ml-2" style={{verticalAlign:"middle"}} inverse /><FontAwesomeIcon icon={faChevronCircleDown} hidden={!showHistory} onClick={() => setShowHistory(!showHistory)} className="ml-2" style={{verticalAlign:"middle"}} inverse /></h2>
+      {data.intake_summaries.length > 0 ? <hr/> : ""}
+      {data.intake_summaries.length > 0 ? <h2 className="mb-3">Intake History<FontAwesomeIcon icon={faChevronCircleRight} hidden={showHistory} onClick={() => setShowHistory(!showHistory)} className="ml-2" style={{verticalAlign:"middle"}} inverse /><FontAwesomeIcon icon={faChevronCircleDown} hidden={!showHistory} onClick={() => setShowHistory(!showHistory)} className="ml-2" style={{verticalAlign:"middle"}} inverse /></h2> : ""}
       {data.intake_summaries.map((intakesummary, index) => (
         <Collapse key={intakesummary.id} in={showHistory} hidden={page !== Math.ceil((index+1)/ITEMS_PER_PAGE)}>
           <div>
