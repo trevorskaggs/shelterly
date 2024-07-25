@@ -15,6 +15,7 @@ from animals.serializers import AnimalSerializer, ModestAnimalSerializer, Specie
 from incident.models import Incident
 from shelter.models import IntakeSummary
 from people.serializers import SimplePersonSerializer
+from vet.models import MedicalRecord, VetRequest
 
 class MultipleFieldLookupMixin(object):
     def get_object(self):
@@ -80,6 +81,14 @@ class AnimalViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                         # Add ServiceRequest Owner to new animals being added to an SR.
                         if serializer.validated_data.get('request'):
                             animal.owners.add(*animal.request.owners.all())
+
+                        # Create VR data if Triage is yellow or red.
+                        if self.request.data.get('priority', 'green') in ['yellow', 'red']:
+                            med_record, _ = MedicalRecord.objects.get_or_create(patient=animal)
+                            animal.medical_record=med_record
+                            animal.save()
+                            vet_request = VetRequest.objects.create(priority=self.request.data.get('priority'), requested_by=self.request.user, caution=self.request.data.get('caution', 'false') == 'true', complaints_other=self.request.data.get('complaints_other'), concern=self.request.data.get('concern'), medical_record=med_record)
+                            vet_request.presenting_complaints.add(*self.request.data.get('presenting_complaints').split(','))
 
                         if animal.shelter:
                             action.send(self.request.user, verb='sheltered animal in', target=animal, action_object=animal.shelter)

@@ -189,7 +189,7 @@ function AnimalDetails({ id, incident, organization }) {
     <div className="row" style={{marginBottom:"-13px"}}>
       <div className="col-6 d-flex" style={{marginRight:"-15px"}}>
         <Card className="border rounded d-flex" style={{width:"100%", marginBottom:"16px"}}>
-          <Card.Body>
+          <Card.Body style={{marginTop:"-10px"}}>
             <div className="d-flex justify-content-between">
               <h4 className="h5 mb-0 pb-0 pt-2">Information
               {data.confined === 'yes' ?
@@ -333,7 +333,8 @@ function AnimalDetails({ id, incident, organization }) {
                   <LoadingLink
                     href={"/" + organization + "/" + incident + "/animals/edit/" + id}
                     isLoading={isLoading}
-                    className="text-white d-block py-1 px-3"
+                    className="text-white d-block py-1"
+                    style={{marginLeft:"14px"}}
                   >
                     <FontAwesomeIcon icon={faEdit} className="mr-1" inverse />
                     Update Animal
@@ -347,14 +348,15 @@ function AnimalDetails({ id, incident, organization }) {
                   <LoadingLink
                     href={"/" + organization + "/" + incident + "/animals/" + id + "/vetrequest/new"}
                     isLoading={isLoading}
-                    className="text-white d-block py-1 px-3"
+                    className="text-white d-block py-1"
+                    style={{marginLeft:"12px"}}
                   >
                     <FontAwesomeIcon icon={faUserDoctorMessage} className="mr-1" inverse />
-                    Create veterinary request
+                    Create Veterinary Request
                   </LoadingLink>
                   <LoadingLink onClick={() => {setShowAnimalConfirm(true);}} isLoading={isLoading} className="text-white d-block py-1 px-3">
                     <FontAwesomeIcon icon={faTimes} style={{cursor:'pointer'}} className='mr-1' size="lg" inverse />
-                    Cancel animal
+                    Cancel Animal
                   </LoadingLink>
                 </ActionsDropdown>
               )}

@@ -99,24 +99,6 @@ function VetRequestDetails({ id, incident, organization }) {
                 >
                   <FontAwesomeIcon icon={faDiamondExclamation} className="ml-1 fa-move-down" inverse />
                 </OverlayTrigger> : ""}
-                {(state.user.is_superuser || state.user.vet_perms) && data.status === 'Open' ?
-                <span className="ml-auto mr-3">
-                  <Link href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.medical_record + "/workflow?vetrequest_id=" + id} className="exam-link" style={{textDecoration:"none", color:"white"}}>
-                    <Card className="border rounded exam-hover-div" style={{height:"27px", minWidth:"202px", maxWidth:"202px", marginTop:"-2px", marginBottom:"-15px", whiteSpace:"nowrap", overflow:"hidden"}}>
-                      <div className="row no-gutters hover-div" style={{textTransform:"capitalize", marginRight:"-2px"}}>
-                        <Col style={{maxWidth:"36px"}}>
-                          <div className="border-right" style={{width:"27px", minWidth:"27px"}}>
-                            <FontAwesomeIcon icon={faStethoscope} className="ml-1 exam-icon" style={{paddingRight:"10px"}} transform={'grow-4 right-4 up-1'} inverse />
-                          </div>
-                        </Col>
-                        <Col style={{fontSize:"17px"}}>
-                          <div style={{marginTop:"2px", marginLeft:"-5px"}}>Start Veterinary Exam</div>
-                        </Col>
-                      </div>
-                    </Card>
-                  </Link>
-                </span>
-                : ""}
                 </Row>
               </h4>
               {isLoading ? (
@@ -138,6 +120,16 @@ function VetRequestDetails({ id, incident, organization }) {
                 />
               ) : (
                 <ActionsDropdown>
+                  {(state.user.is_superuser || state.user.vet_perms) && data.status === 'Open' ?
+                    <LoadingLink
+                      href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.medical_record + "/workflow?vetrequest_id=" + id}
+                      isLoading={isLoading}
+                      className="text-white d-block py-1 px-3"
+                    >
+                      <FontAwesomeIcon icon={faStethoscope} className="mr-1" inverse />
+                      Start Veterinary Exam
+                    </LoadingLink>
+                  : ""}
                   {data.status !== 'Canceled' ? <LoadingLink
                       href={"/" + organization + "/" + incident + "/vet/vetrequest/edit/" + id}
                       isLoading={isLoading}
@@ -151,7 +143,7 @@ function VetRequestDetails({ id, incident, organization }) {
                       isLoading={isLoading}
                       className="text-white d-block py-1 px-3"
                     >
-                      <FontAwesomeIcon icon={faTimes} className="mr-1" style={{cursor:'pointer'}} inverse />
+                      <FontAwesomeIcon icon={faTimes} className="mr-2" style={{cursor:'pointer'}} transform='grow-3' inverse />
                       Cancel veterinary request
                     </LoadingLink> : ""}
                 </ActionsDropdown>

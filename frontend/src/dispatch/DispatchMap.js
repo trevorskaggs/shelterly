@@ -309,7 +309,6 @@ function Deploy({ incident, organization }) {
       await axios.get('/hotline/api/servicerequests/?map=true&incident=' + incident, {
         params: {
           status: 'open',
-          map: true
         },
         cancelToken: source.token,
       })
