@@ -129,11 +129,10 @@ class UserViewSet(CreateUserMixin, viewsets.ModelViewSet):
             # Clean phone field if present.
             if serializer.validated_data.get('cell_phone', False):
                 serializer.validated_data['cell_phone'] = ''.join(char for char in serializer.validated_data.get('cell_phone', '') if char.isdigit())
-
             perms = self.request.user.perms.filter(organization=self.request.data.get('organization'))
             if self.request.user.is_superuser or (perms and perms[0].user_perms):
                 user = serializer.save()
-                if self.request.data.get('organization') not in user.organizations.all():
+                if self.request.data.get('organization') not in user.organizations.all().values_list('id', flat=True):
                     org = Organization.objects.get(id=self.request.data.get('organization'))
                     user.organizations.add(org)
                     new_user_notification(user, org, serializer.context['request'].user)
@@ -174,7 +173,7 @@ class UserViewSet(CreateUserMixin, viewsets.ModelViewSet):
             elif self.request.data.get('temp_access_id'):
                 user = serializer.save()
                 for access in TemporaryAccess.objects.filter(id=self.request.data.get('temp_access_id'), link_expires_at__gte=datetime.today()):
-                    if self.request.data.get('organization') not in user.organizations.all():
+                    if self.request.data.get('organization') not in user.organizations.all().values_list('id', flat=True):
                         user.organizations.add(Organization.objects.get(id=self.request.data.get('organization')))
                     ShelterlyUserOrg.objects.filter(user=user, organization=self.request.data.get('organization')).update(access_expires_at=access.access_expires_at)
 
