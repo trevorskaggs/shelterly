@@ -177,7 +177,7 @@ function AnimalSearch({ incident, organization }) {
     e.preventDefault();
 
     handleSubmitting()
-      .then(() => data.animals.filter(animal => animals.includes(animal.id_for_incident)).map((animal) => ({
+      .then(() => data.animals.filter(animal => animals.includes(animal.id)).map((animal) => ({
         ...animal,
         url: buildAnimalUrl(animal)
       })))
@@ -802,7 +802,7 @@ function AnimalSearch({ incident, organization }) {
               <Card.Body>
               <Card.Title style={{marginTop:"-9px", marginBottom:"8px"}}>Location</Card.Title>
                 <ListGroup>
-                  <ListGroup.Item className='request'><b>Service Request: </b>{animal.request ? <Link href={"/" + organization + "/" + incident + "/hotline/servicerequest/" + animal.request} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.request_address}</Link> : "None"}</ListGroup.Item>
+                  <ListGroup.Item className='request'><b>Service Request: </b>{animal.request ? <Link href={"/" + organization + "/" + incident + "/hotline/servicerequest/" + animal.request_id_for_incident} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.request_address}</Link> : "None"}</ListGroup.Item>
                   <ListGroup.Item><b>Shelter: </b>{animal.shelter ? <Link href={"/" + organization + "/" + incident + "/shelter/" + animal.shelter} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.shelter_object.name}</Link> : "None"}
                     {animal.shelter ?
                     <span>
