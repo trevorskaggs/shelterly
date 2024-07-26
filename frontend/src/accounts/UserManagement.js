@@ -50,7 +50,7 @@ function UserManagement({ organization }) {
   }
 
   const handleResetUserSubmit = async () => {
-    await axios.patch('/accounts/api/user/' + userToReset.id + '/', {'reset_password':true})
+    await axios.patch('/accounts/api/user/' + userToReset.id + '/', {'reset_password':true, 'organization': state.organization.id})
     .then(response => {
       setUserToReset({id: 0, first_name: '', last_name: ''});
       handleUserResetClose();
