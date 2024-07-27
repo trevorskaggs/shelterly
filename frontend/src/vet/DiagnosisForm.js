@@ -74,6 +74,24 @@ const DiagnosisForm = (props) => {
     if (props.medrecordid) {
       if (is_workflow) {
         setData(props.state.medRecord);
+        // Fetch diagnosis data.
+        axios.get('/vet/api/diagnosis/', {
+          cancelToken: source.token,
+        })
+        .then(diagnosisResponse => {
+          if (!unmounted) {
+            let options = [];
+            diagnosisResponse.data.forEach(function(diagnosis) {
+              if (!props.state.medRecord.diagnosis.includes(diagnosis.id)) {
+                options.push({value: diagnosis.id, label: diagnosis.name})
+              }
+            });
+            setDiagnosisChoices(options);
+          }
+        })
+        .catch(error => {
+          setShowSystemError(true);
+        });
       }
       else {
         const fetchMedRecord = async () => {
@@ -157,9 +175,16 @@ const DiagnosisForm = (props) => {
         }
 
         // Add current diagnoses back in.
-        values.original_diagnosis.forEach(diagnosis => (
-          values['diagnosis'].push(diagnosis)
-        ))
+        if (values.original_diagnosis) {
+          values.original_diagnosis.forEach(diagnosis => (
+            values['diagnosis'].push(diagnosis)
+          ))
+        }
+        else if (props.state.medRecord.diagnosis) {
+          props.state.medRecord.diagnosis.forEach(diagnosis => (
+            values['diagnosis'].push(diagnosis)
+          ))
+        }
 
         axios.patch('/vet/api/medrecord/' + props.medrecordid + '/', values)
         .then(response => {
@@ -184,8 +209,7 @@ const DiagnosisForm = (props) => {
           <Card.Body>
             <Form>
               <FormGroup>
-                {/* <div className="mb-3"><b>Current Diagnoses: </b>{data.diagnosis_text}</div> : ""} */}
-                {data.diagnosis_text ? <Row className="mb-3">
+                {data.original_diagnosis ? <Row className="mb-3">
                   <Col xs={"6"}>
                     <label>Current Diagnoses</label>
                     <Select
@@ -202,7 +226,6 @@ const DiagnosisForm = (props) => {
                         instance && instance.forEach(option => {
                           values.push(option.value);
                         })
-                        // setOriginalData()
                         formikProps.setFieldValue("original_diagnosis", instance === null ? [] : values);
                       }}
                     />
