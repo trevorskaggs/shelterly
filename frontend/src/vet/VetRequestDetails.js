@@ -139,7 +139,7 @@ function VetRequestDetails({ id, incident, organization }) {
               ) : (
                 <ActionsDropdown>
                   {data.status !== 'Canceled' ? <LoadingLink
-                      href={"/" + organization + "/" + incident + "/vet/vetrequest/edit/" + id}
+                      href={"/" + organization + "/" + incident + "/vet/vetrequest/" + id}
                       isLoading={isLoading}
                       className="text-white d-block py-1 px-3"
                     >

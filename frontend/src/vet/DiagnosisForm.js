@@ -58,6 +58,7 @@ const DiagnosisForm = (props) => {
 
   const [data, setData] = useState({
     diagnosis: [],
+    original_diagnosis: [],
     diagnosis_notes: '',
     diagnosis_other: '',
     animal_object: {id:''},
@@ -65,6 +66,7 @@ const DiagnosisForm = (props) => {
   })
 
   const [diagnosisChoices, setDiagnosisChoices] = useState([]);
+  const [originalChoices, setOriginalChoices] = useState([]);
 
   useEffect(() => {
     let unmounted = false;
@@ -87,11 +89,19 @@ const DiagnosisForm = (props) => {
               })
               .then(diagnosisResponse => {
                 if (!unmounted) {
+                  let original_options = [];
                   let options = [];
-                  diagnosisResponse.data.filter(diagnosis => !response.data.diagnosis.includes(diagnosis.id)).forEach(function(diagnosis) {
-                    options.push({value: diagnosis.id, label: diagnosis.name})
+                  diagnosisResponse.data.forEach(function(diagnosis) {
+                    if (!response.data.diagnosis.includes(diagnosis.id)) {
+                      options.push({value: diagnosis.id, label: diagnosis.name})
+                    }
+                    else {
+                      original_options.push({value: diagnosis.id, label: diagnosis.name})
+                    }
                   });
                   setDiagnosisChoices(options);
+                  setOriginalChoices(original_options);
+                  response.data['original_diagnosis'] = response.data.diagnosis;
                   response.data['diagnosis'] = [];
                   setData(response.data);
                 }
@@ -146,6 +156,11 @@ const DiagnosisForm = (props) => {
           values['procedure_other'] = props.state.steps.orders.procedure_other
         }
 
+        // Add current diagnoses back in.
+        values.original_diagnosis.forEach(diagnosis => (
+          values['diagnosis'].push(diagnosis)
+        ))
+
         axios.patch('/vet/api/medrecord/' + props.medrecordid + '/', values)
         .then(response => {
           navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + props.medrecordid);
@@ -169,7 +184,30 @@ const DiagnosisForm = (props) => {
           <Card.Body>
             <Form>
               <FormGroup>
-                {data.diagnosis_text ? <div className="mb-3"><b>Current Diagnoses: </b>{data.diagnosis_text}</div> : ""}
+                {/* <div className="mb-3"><b>Current Diagnoses: </b>{data.diagnosis_text}</div> : ""} */}
+                {data.diagnosis_text ? <Row className="mb-3">
+                  <Col xs={"6"}>
+                    <label>Current Diagnoses</label>
+                    <Select
+                      id="originalDiagnosisDropdown"
+                      name="original_diagnosis"
+                      type="text"
+                      styles={customStyles}
+                      isMulti
+                      options={originalChoices}
+                      value={originalChoices.filter(choice => formikProps.values.original_diagnosis.includes(choice.value))}
+                      isClearable={false}
+                      onChange={(instance) => {
+                        let values = [];
+                        instance && instance.forEach(option => {
+                          values.push(option.value);
+                        })
+                        // setOriginalData()
+                        formikProps.setFieldValue("original_diagnosis", instance === null ? [] : values);
+                      }}
+                    />
+                  </Col>
+                </Row> : ""}
                 <Row className="mb-3">
                   <Col xs={"6"}>
                     <label>Diagnosis</label>
