@@ -30,6 +30,7 @@ import { SystemErrorContext } from '../components/SystemError';
 import { catAgeChoices, dogAgeChoices, horseAgeChoices, otherAgeChoices, sexChoices } from '../animals/constants';
 import Patient from './components/Patient';
 import { AuthContext } from "../accounts/AccountsReducer";
+import CustomSelect from "../components/CustomSelect.js";
 
 const initialSchemaData = [{
   id:'assignee',
@@ -441,21 +442,17 @@ const ExamForm = (props) => {
                 <BootstrapForm.Row className="mt-3">
                   <Col xs="2">
                     <ToggleSwitch id="confirm_sex_age" name="confirm_sex_age" label="Confirm Age/Sex*" disabled={!formikProps.values.age && !formikProps.values.sex} />
-                    {/* <BootstrapForm.Label htmlFor="confirm_sex_age" style={{marginBottom:"-5px"}}>Confirm Age/Sex</BootstrapForm.Label>
-                    <div style={{marginLeft:"20px"}}><Field component={Switch} name="confirm_sex_age" type="checkbox" color="primary" disabled={!formikProps.values.age && !formikProps.values.sex} /></div>
-                    {formikProps.errors['confirm_sex_age'] ? <div style={{ color: "#e74c3c", marginTop: ".5rem", fontSize: "80%" }}>{formikProps.errors['confirm_sex_age']}</div> : ""} */}
                   </Col>
                   <Col xs="2">
-                    <DropDown
+                    <CustomSelect
                       label="Age"
-                      id="age"
-                      name="age"
-                      type="text"
-                      xs="4"
-                      key={`my_unique_age_select_key__${formikProps.values.age}`}
-                      options={Object.keys(ageChoices).includes(data.animal_object.species) ? ageChoices[data.animal_object.species] : ageChoices['other']}
-                      value={formikProps.values.age||data.animal_object.age}
-                      isClearable={false}
+                      options={Object.keys(ageChoices).includes(data.animal_object.species)
+                        ? ageChoices[data.animal_object.species]
+                        : ageChoices['other']}
+                      value={formikProps.values.age || data.animal_object.age}
+                      handleValueChange={(value) => formikProps.setFieldValue('age', value)}
+                      optionsKey={data.animal_object.species || data.animal_object.age}
+                      formValidationName="age"
                       disabled={formikProps.values.confirm_sex_age}
                     />
                   </Col>
