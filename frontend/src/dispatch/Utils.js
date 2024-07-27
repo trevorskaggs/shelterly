@@ -9,7 +9,7 @@ const buildDispatchResolutionsDoc = (drs = []) => {
   const pdf = new ShelterlyPDF({}, {
     // adds page numbers to the footer
     addFooterHandler: ShelterlyPDF.HandlerTypes.DEFAULT,
-    pageTitle: `Dispatch Assignment ${drs.length ? `#${drs[0].id}` : ''}`,
+    pageTitle: `Dispatch Assignment ${drs.length ? `#${drs[0].id_for_incident}` : ''}`,
     pageSubtitle: drs.length
       ? `Opened: ${new Date(drs[0].start_time).toLocaleDateString()}`
       : ''
