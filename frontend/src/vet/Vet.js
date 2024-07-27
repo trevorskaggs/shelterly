@@ -334,7 +334,7 @@ function Vet({ incident, organization }) {
             <Scrollbar no_shadow="true" style={{height:"564px", minHeight:"564px"}} renderView={props => <div {...props} style={{...props.style, overflowX:"hidden", marginBottom:"-10px"}}/>}  renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
             {activeOrders === 'pending' && data.vet_requests.filter(vet_request => vet_request.animal_object.id === selectedAnimal.id || vet_request.animal_object.shelter === selectedShelter || (selectedShelter === 'all' && (!vet_request.animal_object.shelter || Object.keys(shelterAnimals).includes(String(vet_request.animal_object.shelter))))).map(vet_request => (
               <Row key={vet_request.id} className="ml-0 mb-3">
-                <Link href={"/" + organization + "/" + incident + "/vet/vetrequest/edit/" + vet_request.id} className="treatment-link" style={{textDecoration:"none", color:"white"}}>
+                <Link href={"/" + organization + "/" + incident + "/vet/vetrequest/" + vet_request.id} className="treatment-link" style={{textDecoration:"none", color:"white"}}>
                   <Card className="border rounded treatment-hover-div" style={{height:"120px", width:"845px", whiteSpace:"nowrap", overflow:"hidden"}}>
                     <div className="row no-gutters hover-div treatment-hover-div" style={{height:"120px", marginRight:"-2px"}}>
                       <Row className="ml-0 mr-0 w-100" style={{flexWrap:"nowrap"}}>
