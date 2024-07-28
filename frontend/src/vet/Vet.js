@@ -32,7 +32,7 @@ function Vet({ incident, organization }) {
     tab = 'pending',
   } = queryParams;
 
-  const priorityText = {urgent:'Urgent', when_available:'When Available'};
+  const priorityText = {urgent:'Urgent', when_available:'When Available', yellow:'Yellow', red:'Red'};
 
   const [data, setData] = useState({vet_requests:[], treatments:[], diagnostics:[], procedures:[], isFetching: true});
   const [reportData, setReportData] = useState([]);

@@ -9,6 +9,7 @@ from rest_framework import permissions
 from .serializers import ShelterSerializer, ModestShelterSerializer, SimpleBuildingSerializer, RoomSerializer, IntakeSummarySerializer
 from animals.models import Animal
 from incident.models import Incident, Organization
+from vet.models import MedicalRecord, VetRequest
 
 class ShelterViewSet(viewsets.ModelViewSet):
     serializer_class = ShelterSerializer
@@ -147,3 +148,17 @@ class IntakeSummaryViewSet(viewsets.ModelViewSet):
     queryset = IntakeSummary.objects.all()
     serializer_class = IntakeSummarySerializer
     permission_classes = [permissions.IsAuthenticated, ]
+
+    def perform_create(self, serializer):
+        if serializer.is_valid():
+            summary = serializer.save()
+            # Create VR data if Triage is yellow or red.
+            for sr_update in self.request.data.get('sr_updates', []):
+                for animal_dict in sr_update.get('animals', []):
+                    if animal_dict.get('priority', 'green') in ['yellow', 'red']:
+                        animal = Animal.objects.get(id=animal_dict['id'])
+                        med_record, _ = MedicalRecord.objects.get_or_create(patient=animal)
+                        animal.medical_record=med_record
+                        animal.save()
+                        vet_request = VetRequest.objects.create(priority=animal_dict.get('priority'), requested_by=self.request.user, caution=animal_dict.get('caution', 'false') == 'true', complaints_other=animal_dict.get('complaints_other'), concern=animal_dict.get('concern'), medical_record=med_record)
+                        vet_request.presenting_complaints.add(*animal_dict.get('presenting_complaints'))

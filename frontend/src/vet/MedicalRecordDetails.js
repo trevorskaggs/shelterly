@@ -57,7 +57,7 @@ function MedicalRecordDetails({ id, incident, organization }) {
     tab = 'pending',
   } = queryParams;
 
-  const priorityText = {urgent:'Urgent', when_available:'When Available'};
+  const priorityText = {urgent:'Urgent', when_available:'When Available', yellow:'Yellow', red:'Red'};
 
   const [data, setData] = useState({id:'', exams:[], diagnostic_objects:[], procedure_objects:[], patient:null, vet_requests:[], open: '', diagnosis: '', other_diagnosis:'', treatment_requests:[], animal_object: {id:'', name:'', species:'', category:'', sex:'', age:'', fixed:'', pcolor:'', scolor:'', medical_notes:'', shelter_object:{}, room_name:''}});
   const [showExam, setShowExam] = useState(false);

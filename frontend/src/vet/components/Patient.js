@@ -11,7 +11,7 @@ function Patient(props) {
 
   const [showModal, setShowModal] = useState(false);
 
-  const priorityText = {urgent:'Urgent', when_available:'When Available'};
+  const priorityText = {urgent:'Urgent', when_available:'When Available', yellow:'Yellow', red:'Red'};
 
   return (
     <>
