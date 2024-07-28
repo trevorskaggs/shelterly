@@ -144,7 +144,7 @@ class DiagnosticResultViewSet(viewsets.ModelViewSet):
         Returns: Queryset of diagnostic results.
         """
         queryset = (
-            DiagnosticResult.objects.all().select_related("diagnostic")
+            DiagnosticResult.objects.all().select_related("diagnostic").select_related("medical_record", "medical_record__patient").exclude(medical_record__patient__status__in=["CANCELED", "REUNITED"])
         )
         if self.request.GET.get('incident'):
             queryset = queryset.filter(medical_record__patient__incident__slug=self.request.GET.get('incident'))
@@ -175,7 +175,7 @@ class ProcedureResultViewSet(viewsets.ModelViewSet):
         Returns: Queryset of procedure results.
         """
         queryset = (
-            ProcedureResult.objects.all().select_related("procedure")
+            ProcedureResult.objects.all().select_related("procedure").select_related("medical_record", "medical_record__patient").exclude(medical_record__patient__status__in=["CANCELED", "REUNITED"])
         )
         if self.request.GET.get('incident'):
             queryset = queryset.filter(medical_record__patient__incident__slug=self.request.GET.get('incident'))
@@ -196,7 +196,7 @@ class TreatmentRequestViewSet(viewsets.ModelViewSet):
         Returns: Queryset of treatment requests.
         """
         queryset = (
-            TreatmentRequest.objects.all().select_related("treatment")
+            TreatmentRequest.objects.all().select_related("treatment").select_related("medical_record", "medical_record__patient").exclude(medical_record__patient__status__in=["CANCELED", "REUNITED"])
         )
         if self.request.GET.get('incident'):
             queryset = queryset.filter(medical_record__patient__incident__slug=self.request.GET.get('incident'))
@@ -234,6 +234,7 @@ class VetRequestViewSet(viewsets.ModelViewSet):
             VetRequest.objects.exclude(status="CANCELED").distinct()
             # .prefetch_related("owners")
             .select_related("medical_record", "medical_record__patient")
+            .exclude(medical_record__patient__status__in=["CANCELED", "REUNITED"])
             # .order_by('order')
         )
         if self.request.GET.get('incident'):
