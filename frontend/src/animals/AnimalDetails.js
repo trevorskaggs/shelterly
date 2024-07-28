@@ -78,8 +78,8 @@ function AnimalDetails({ id, incident, organization }) {
     setIsLoading(true);
     await axios.patch('/animals/api/animal/' + data.id + '/', {status:'REUNITED', shelter:null, room:null})
     .then(response => {
-      setData(response.data);
-      handleClose()
+      setData(prevState => ({ ...prevState, status:'REUNITED', shelter:null, room:null }));
+      handleClose();
     })
     .catch(error => {
       setShowSystemError(true);

@@ -97,7 +97,7 @@ function ServiceRequestSearch({ incident, organization }) {
     e.preventDefault();
 
     handleSubmitting()
-      .then(() => printAllServiceRequests(filteredServiceRequests))
+      .then(() => printAllServiceRequests(data.service_requests.filter(request => (filteredServiceRequests.includes(request.id)))))
       .then(submittingComplete);
   }
 
@@ -109,7 +109,7 @@ function ServiceRequestSearch({ incident, organization }) {
 
   const handleGeoJsonDownload = () => {
     var params = '';
-    filteredServiceRequests.map(sr => sr.id).forEach(id => params = params + "id=" + id + "&")
+    filteredServiceRequests.forEach(id => params = params + "id=" + id + "&")
     // params.append("foo", 5);
     var fileDownload = require('js-file-download');
     axios.get('/hotline/api/servicerequests/download_all/', { 

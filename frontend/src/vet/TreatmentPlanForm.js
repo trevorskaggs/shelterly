@@ -158,9 +158,9 @@ const TreatmentPlanForm = (props) => {
           is: (is_workflow, treatment, frequency) => (is_workflow === false || treatment) && frequency > 0,
           then: Yup.number().integer().positive('Must be positive').required('Required')}),
         start: Yup.string(),
-        quantity: Yup.number().nullable().integer().positive('Must be positive').when(['is_workflow', 'treatment'], {
+        quantity: Yup.number().nullable().positive('Must be positive').when(['is_workflow', 'treatment'], {
           is: (is_workflow, treatment) => is_workflow === false || treatment,
-          then: Yup.number().integer().positive('Must be positive').required('Required')}),
+          then: Yup.number().positive('Must be positive').required('Required')}),
         unit: Yup.string().nullable(),
         route: Yup.string().nullable(),
       })}
