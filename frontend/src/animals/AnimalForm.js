@@ -251,6 +251,8 @@ const AnimalForm = (props) => {
           if (!unmounted) {
             // Initialize number_of_animals because it's not returned by the serializer.
             response.data['number_of_animals'] = 1;
+            response.data['presenting_complaints'] = [];
+            response.data['priority'] = 'green';
             setData(response.data);
             setPlaceholder("Select...");
             // Turn off reinitialization after form load so that data can be modified for image tracking without causing a form reset.
@@ -891,7 +893,7 @@ const AnimalForm = (props) => {
                     disabled={false}
                   />
                 </BootstrapForm.Row>
-                <BootstrapForm.Row className="mb-3 mt-3" hidden={is_intake || id ? false : true}>
+                <BootstrapForm.Row className="mt-3" hidden={is_intake || id ? false : true}>
                   <TextInput
                     id="microchip"
                     name="microchip"

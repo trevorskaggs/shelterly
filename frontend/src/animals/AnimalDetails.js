@@ -542,7 +542,7 @@ function AnimalDetails({ id, incident, organization }) {
             </Card.Title>
             <hr/>
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
-            {state.user.vet_perms ?
+            {state.user.is_superuser || state.user.vet_perms ?
               <ListGroup.Item>
                 <b>Medical Record:</b> <Link href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.medical_record} className="text-link" style={{textDecoration:"none", color:"white"}}>MR#{data.medical_record}</Link>
               </ListGroup.Item>

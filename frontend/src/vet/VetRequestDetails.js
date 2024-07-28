@@ -21,6 +21,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faDiamondExclamation,
+  faFolderMedical
 } from '@fortawesome/pro-solid-svg-icons';
 import Header from '../components/Header';
 import { SystemErrorContext } from '../components/SystemError';
@@ -83,7 +84,7 @@ function VetRequestDetails({ id, incident, organization }) {
     <div className="row">
       <div className="col-6 d-flex">
         <Card className="border rounded d-flex" style={{width:"100%"}}>
-          <Card.Body>
+          <Card.Body style={{marginTop:"-10px"}}>
             <div className="d-flex justify-content-between">
               <h4 className="h5 mb-0 pb-0 pt-2">
                 <Row className="ml-0 pr-0">
@@ -181,7 +182,20 @@ function VetRequestDetails({ id, incident, organization }) {
         <Card className="border rounded" style={{width:"100%"}}>
           <Card.Body>
             <Card.Title>
-              <h4 className="mb-0">Patient</h4>
+              <h4 className="h5 pb-0" style={{marginBottom:"-7px"}}>Patient
+              <span className="float-right">
+                <OverlayTrigger
+                  key={"medical-record"}
+                  placement="top"
+                  overlay={
+                    <Tooltip id={`tooltip-medical-record`}>
+                      View patient medical record.
+                    </Tooltip>
+                  }
+                >
+                  <Link href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.medical_record} style={{textDecoration:"none", color:"white"}}><FontAwesomeIcon icon={faFolderMedical} className="" inverse /></Link>
+                </OverlayTrigger></span>
+              </h4>
             </Card.Title>
             <hr/>
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
@@ -207,9 +221,6 @@ function VetRequestDetails({ id, incident, organization }) {
               <ListGroup.Item>
                   <span><b>Medical Notes:</b> {data.animal_object.medical_notes || "N/A"}</span>
               </ListGroup.Item>
-              <ListGroup.Item>
-                  <b>Medical Record:</b> <Link href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.medical_record} className="text-link" style={{textDecoration:"none", color:"white"}}>MR#{data.medical_record}</Link>
-                </ListGroup.Item>
             </ListGroup>
           </Card.Body>
         </Card>

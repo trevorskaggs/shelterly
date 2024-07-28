@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faNotesMedical, faUserAlt, faUserAltSlash, faCircle, faExclamationCircle, faQuestionCircle, faHome, faHeart, faSkullCrossbones
 } from '@fortawesome/free-solid-svg-icons';
-import { faBadgeSheriff, faCircleBolt, faClawMarks, faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
+import { faFolderMedical, faCircleBolt, faClawMarks, faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
 
 function Patient(props) {
 
@@ -23,6 +23,19 @@ function Patient(props) {
               <h4 className="mb-0">
                 <Row className="ml-0 pr-0">
                   Patient: {props.animal.name||"Unknown"}
+                  <span className="float-right">
+                    <OverlayTrigger
+                      key={"medical-record"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-medical-record`}>
+                          View patient medical record.
+                        </Tooltip>
+                      }
+                    >
+                      <Link href={"/" + props.organization + "/" + props.incident + "/vet/medrecord/" + props.animal.medical_record} style={{textDecoration:"none", color:"white"}}><FontAwesomeIcon icon={faFolderMedical} className="" inverse /></Link>
+                    </OverlayTrigger>
+                  </span>
                 </Row>
               </h4>
             </Card.Title>
@@ -48,20 +61,9 @@ function Patient(props) {
                 </div>
               </ListGroup.Item> */}
               <ListGroup.Item>
-                <div className="row" style={{textTransform:"capitalize"}}>
+                <div className="row">
                   <span className="col-12">
-                    <b>Medical Record:</b> <Link href={"/" + props.organization + "/" + props.incident + "/vet/medrecord/" + props.animal.medical_record} className="text-link" style={{textDecoration:"none", color:"white"}}>MR#{props.animal.medical_record}</Link>
-                    {props.animal.medical_notes ? <OverlayTrigger
-                      key={"edit"}
-                      placement="bottom"
-                      overlay={
-                        <Tooltip id={`tooltip-edit`}>
-                          Click to view animal medical notes.
-                        </Tooltip>
-                      }
-                    >
-                      <FontAwesomeIcon icon={faNotesMedical} className="ml-1" onClick={() => {setShowModal(true)}} style={{cursor:'pointer'}} inverse />
-                    </OverlayTrigger> : ""}
+                    <b>Medical Notes: </b>{props.animal.medical_notes ? props.animal.medical_notes : ""}
                   </span>
                 </div>
               </ListGroup.Item>
@@ -90,6 +92,17 @@ function Patient(props) {
               </ListGroup.Item>
               <ListGroup.Item>
                 <b>Concern:</b> {props.vet_request.concern || "N/A"}
+              </ListGroup.Item>
+            </ListGroup>
+          </Card.Body>
+        </Card>
+      </div> : ""}
+      {props.medical_plan ? <div className="col-12 d-flex pl-0">
+        <Card className="border rounded d-flex" style={{width:"100%"}}>
+          <Card.Body>
+            <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px", whiteSpace: "pre-line"}}>
+              <ListGroup.Item>
+                <b>Medical Plan:</b> {props.medical_plan || "None"}
               </ListGroup.Item>
             </ListGroup>
           </Card.Body>

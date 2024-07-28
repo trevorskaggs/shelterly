@@ -172,6 +172,7 @@ treatments = [{'category':'Anesthetic', 'description':'Propofol (10 mg/ml)', 'un
               {'category':'Patient Care', 'description':'Water', 'unit':'', 'routes':[], 'controlled':False},
               {'category':'Patient Care', 'description':'Other', 'unit':'', 'routes':[], 'controlled':False},
               {'category':'Patient Care', 'description':'Temperature, Pulse, and Respiration', 'unit':'', 'routes':[], 'controlled':False},
+              {'category':'Patient Care', 'description':'IV Catheter Placement', 'unit':'', 'routes':[], 'controlled':False},
               {'category':'Preventative', 'description':'Frontline Plus (feline)', 'unit':'', 'routes':['TD'], 'controlled':False},
               {'category':'Preventative', 'description':'Frontline Plus (K9 9-22 lb)', 'unit':'', 'routes':['TD'], 'controlled':False},
               {'category':'Preventative', 'description':'Frontline Plus (K9 23-44 lb)', 'unit':'', 'routes':['TD'], 'controlled':False},
