@@ -288,7 +288,7 @@ function MedicalRecordDetails({ id, incident, organization }) {
                 </ListGroup.Item>
               ))}
               <ListGroup.Item>
-                <div className="row" style={{textTransform:"capitalize"}}>
+                <div className="row" style={{whiteSpace:"pre-line"}}>
                   <span className="col-12"><b>Medical Plan:</b> {exam.medical_plan || "N/A"}</span>
                 </div>
               </ListGroup.Item>
