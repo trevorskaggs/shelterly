@@ -224,7 +224,7 @@ function MedicalRecordDetails({ id, incident, organization }) {
                         </Tooltip>
                       }
                     >
-                      <Link href={"/" + organization + "/" + incident + "/animals/" + data.animal_object.id + "/vetrequest/new"} style={{marginLeft:"-1px", marginRight:"1px"}}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" size="2x" transform={"grow-2"} style={{color:"#a52b44"}} inverse /></Link>
+                      <Link href={"/" + organization + "/" + incident + "/animals/" + data.animal_object.id_for_incident + "/vetrequest/new"} style={{marginLeft:"-1px", marginRight:"3px"}}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" size="2x" transform={"grow-2"} style={{color:"#a52b44"}} inverse /></Link>
                     </OverlayTrigger>
                     <ListGroup.Item className="border rounded" style={{backgroundColor:"rgb(158, 153, 153)"}}>
                       <Row style={{width:"77px"}}>

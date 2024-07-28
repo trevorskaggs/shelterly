@@ -99,7 +99,7 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
 
     queryset = EvacAssignment.objects.all()
     lookup_fields = ['pk', 'incident', 'id_for_incident']
-    search_fields = ['team__name', 'team__team_members__first_name', 'team__team_members__last_name', 'service_requests__address', 'service_requests__city', 'animal__name',]
+    search_fields = ['team__name', 'team__team_members__first_name', 'team__team_members__last_name', 'service_requests__address', 'service_requests__city', 'service_requests__animal__name',]
     filter_backends = (filters.SearchFilter,)
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = EvacAssignmentSerializer

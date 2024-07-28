@@ -1093,7 +1093,7 @@ function VetRequestSearch({ incident, organization }) {
       </Form>
       {vetObject === 'vet_requests' && vetRequests.map((vet_request, index) => (
       <Row key={vet_request.id} className="ml-0 mb-3" hidden={page !== Math.ceil((index+1)/ITEMS_PER_PAGE)}>
-        <Link href={"/" + organization + "/" + incident + "/vet/vetrequest/edit/" + vet_request.id} className="treatment-link" style={{textDecoration:"none", color:"white"}}>
+        <Link href={"/" + organization + "/" + incident + "/vet/vetrequest/" + vet_request.id} className="treatment-link" style={{textDecoration:"none", color:"white"}}>
           <Card className="border rounded treatment-hover-div" style={{height:"120px", width:"845px", whiteSpace:"nowrap", overflow:"hidden"}}>
             <div className="row no-gutters hover-div treatment-hover-div" style={{height:"120px", marginRight:"-2px"}}>
               <Row className="ml-0 mr-0 w-100" style={{flexWrap:"nowrap"}}>
