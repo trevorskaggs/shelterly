@@ -275,8 +275,8 @@ function MedicalRecordDetails({ id, incident, organization }) {
               </ListGroup.Item>
               <ListGroup.Item>
                 <div className="row" style={{textTransform:"capitalize"}}>
-                  <span className="col-3"><b>Pulse:</b> {exam.pulse}</span>
-                  <span className="col-4"><b>Respiratory Rate:</b> {exam.respiratory_rate}</span>
+                  <span className="col-3"><b>Pulse:</b> {exam.pulse || "N/A"}</span>
+                  <span className="col-4"><b>Respiratory Rate:</b> {exam.respiratory_rate || "N/A"}</span>
                 </div>
               </ListGroup.Item>
               {exam.answers.map(answer => (

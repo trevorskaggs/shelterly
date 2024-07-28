@@ -10,6 +10,7 @@ treatments = [{'category':'Anesthetic', 'description':'Propofol (10 mg/ml)', 'un
               {'category':'Antibiotic', 'description':'Metronidazole (100 mg/ml)', 'unit':'ml', 'routes':['IV'], 'controlled':False},
               {'category':'Antibiotic', 'description':'Unasyn (100 mg/ml)', 'unit':'ml', 'routes':['IV'], 'controlled':False},
               {'category':'Antibiotic', 'description':'Clavamox (62.5 mg/ml)', 'unit':'ml', 'routes':['PO'], 'controlled':False},
+              {'category':'Antibiotic', 'description':'Clavamox (62.5 mg tab)', 'unit':'tab', 'routes':['PO'], 'controlled':False},
               {'category':'Antibiotic', 'description':'Clavamox (250 mg tab)', 'unit':'tab', 'routes':['PO'], 'controlled':False},
               {'category':'Antibiotic', 'description':'Clavamox (125 mg tab)', 'unit':'tab', 'routes':['PO'], 'controlled':False},
               {'category':'Antibiotic', 'description':'Clavamox (375 mg tab)', 'unit':'tab', 'routes':['PO'], 'controlled':False},

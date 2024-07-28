@@ -23,7 +23,7 @@ function Patient(props) {
               <h4 className="mb-0">
                 <Row className="ml-0 pr-0">
                   Patient: {props.animal.name||"Unknown"}
-                  <span className="float-right">
+                  <span className="ml-auto" style={{paddingRight:"15px"}}>
                     <OverlayTrigger
                       key={"medical-record"}
                       placement="top"
@@ -63,7 +63,7 @@ function Patient(props) {
               <ListGroup.Item>
                 <div className="row">
                   <span className="col-12">
-                    <b>Medical Notes: </b>{props.animal.medical_notes ? props.animal.medical_notes : ""}
+                    <b>Medical Notes: </b>{props.animal.medical_notes ? props.animal.medical_notes : "N/A"}
                   </span>
                 </div>
               </ListGroup.Item>
@@ -96,18 +96,22 @@ function Patient(props) {
             </ListGroup>
           </Card.Body>
         </Card>
-      </div> : ""}
-      {props.medical_plan ? <div className="col-12 d-flex pl-0">
+      </div> : props.medical_plan ? <div className="col-6 d-flex pl-0">
         <Card className="border rounded d-flex" style={{width:"100%"}}>
           <Card.Body>
-            <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px", whiteSpace: "pre-line"}}>
+            <Card.Title>
+              <h4 className="mb-0">
+                Medical Plan
+              </h4>
+            </Card.Title>
+            <hr/>
+            <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px", whiteSpace:"pre-line"}}>
               <ListGroup.Item>
-                <b>Medical Plan:</b> {props.medical_plan || "None"}
+                {props.medical_plan}
               </ListGroup.Item>
             </ListGroup>
           </Card.Body>
-        </Card>
-      </div> : ""}
+        </Card></div> : ""}
       {props.vet_request && props.vet_request.caution ? <div className="alert text-center w-100" style={{fontSize:"16px", marginLeft:"15px", marginRight:"15px", marginBottom:"-5px", backgroundColor:"#cb3636"}}>Use caution when interacting with this animal.</div> : ""}
     </div>
     <Modal show={showModal} onHide={() => setShowModal(false)}>

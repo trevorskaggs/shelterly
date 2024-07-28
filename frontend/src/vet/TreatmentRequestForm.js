@@ -119,7 +119,7 @@ const TreatmetRequestForm = (props) => {
             }
             Treatment Form
           </Card.Header>
-          <Patient animal={data.animal_object} organization={props.organization} incident={props.incident} />
+          <Patient animal={data.animal_object} organization={props.organization} incident={props.incident} medical_plan={props.state.steps.exam.medical_plan || data.exams.filter(exam => (exam.medical_plan)).length ? data.exams.filter(exam => (exam.medical_plan))[0].medical_plan : ''} />
           <Card.Body>
             <Form>
               <FormGroup>

@@ -182,7 +182,7 @@ function VetRequestDetails({ id, incident, organization }) {
         <Card className="border rounded" style={{width:"100%"}}>
           <Card.Body>
             <Card.Title>
-              <h4 className="h5 pb-0" style={{marginBottom:"-7px"}}>Patient
+              <h4 className="h5 pb-0" style={{marginBottom:"-7px"}}>Patient: {data.animal_object.name||"Unknown"}
               <span className="float-right">
                 <OverlayTrigger
                   key={"medical-record"}
@@ -202,15 +202,15 @@ function VetRequestDetails({ id, incident, organization }) {
               <ListGroup.Item>
                 <div className="row" style={{textTransform:"capitalize"}}>
                   <span className="col-4"><b>ID:</b> <Link href={"/" + organization + "/" + incident + "/animals/" + data.animal_object.id_for_incident} className="text-link" style={{textDecoration:"none", color:"white"}}>A#{data.animal_object.id_for_incident}</Link></span>
-                  <span className="col-4"><b>Name:</b> {data.animal_object.name||"Unknown"}</span>
                   <span className="col-4"><b>Species:</b> {data.animal_object.species_string}</span>
+                  <span className="col-4"><b>Age:</b> {data.animal_object.age||"Unknown"}</span>
                 </div>
               </ListGroup.Item>
               <ListGroup.Item>
                 <div className="row" style={{textTransform:"capitalize"}}>
-                  <span className="col-4"><b>Age:</b> {data.animal_object.age||"Unknown"}</span>
                   <span className="col-4"><b>Sex:</b> {data.animal_object.sex||"Unknown"}</span>
                   <span className="col-4"><b>Altered:</b> {data.animal_object.fixed||"Unknown"}</span>
+                  <span className="col-4"><b>Weight:</b> {data.animal_object.weight||"Unknown"}</span>
                 </div>
               </ListGroup.Item>
               <ListGroup.Item style={{textTransform:"capitalize"}}>

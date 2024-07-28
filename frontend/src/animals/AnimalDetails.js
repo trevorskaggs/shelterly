@@ -9,7 +9,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBan, faMedkit, faCut, faEdit, faEnvelope, faLink, faMinusSquare, faTimes, faUserPlus, faFilePdf
 } from '@fortawesome/free-solid-svg-icons';
-import { faBadgeSheriff, faUserDoctorMessage, faClawMarks, faHomeHeart, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
+import { faBadgeSheriff, faUserDoctorMessage, faClawMarks, faFolderMedical, faHomeHeart, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import { AnimalDeleteModal } from "../components/Modals";
 import Header from '../components/Header';
@@ -538,15 +538,24 @@ function AnimalDetails({ id, incident, organization }) {
         <Card className="border rounded" style={{width:"100%", height:"100%", marginBottom:"16px"}}>
           <Card.Body>
             <Card.Title>
-              <h4>Medical</h4>
+              <h4>Medical
+                {state.user.is_superuser || state.user.vet_perms ? <span className="float-right">
+                  <OverlayTrigger
+                    key={"medical-record"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-medical-record`}>
+                        View patient medical record.
+                      </Tooltip>
+                    }
+                  >
+                    <Link href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.medical_record} style={{textDecoration:"none", color:"white"}}><FontAwesomeIcon icon={faFolderMedical} className="" inverse /></Link>
+                  </OverlayTrigger>
+                </span> : ""}
+              </h4>
             </Card.Title>
             <hr/>
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
-            {state.user.is_superuser || state.user.vet_perms ?
-              <ListGroup.Item>
-                <b>Medical Record:</b> <Link href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.medical_record} className="text-link" style={{textDecoration:"none", color:"white"}}>MR#{data.medical_record}</Link>
-              </ListGroup.Item>
-            : ""}
             {data.vet_requests.map(vet_request => (
               <ListGroup.Item key={vet_request.id}>
                 <b>Vet Request:</b> <Link href={"/" + organization + "/" + incident + "/vet/vetrequest/" + vet_request.id} className="text-link" style={{textDecoration:"none", color:"white"}}>VR#{vet_request.id}</Link> - {vet_request.status}
