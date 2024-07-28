@@ -99,7 +99,9 @@ function Vet({ incident, organization }) {
               let loc = treatment.animal_object.shelter
               if (!loc) {
                 loc = 'Field';
-                bounds.push([treatment.animal_object.latitude, treatment.animal_object.longitude]);
+                if (treatment.animal_object.latitude) {
+                  bounds.push([treatment.animal_object.latitude, treatment.animal_object.longitude]);
+                }
               }
               if (Object.keys(shelter_animals).includes(loc)) {
                 shelter_animals[loc].push(treatment.animal_object);
@@ -117,7 +119,9 @@ function Vet({ incident, organization }) {
               let loc = diagnostic.animal_object.shelter
               if (!loc) {
                 loc = 'Field';
-                bounds.push([diagnostic.animal_object.latitude, diagnostic.animal_object.longitude]);
+                if (diagnostic.animal_object.latitude) {
+                  bounds.push([diagnostic.animal_object.latitude, diagnostic.animal_object.longitude]);
+                }
               }
               if (Object.keys(shelter_animals).includes(loc)) {
                 shelter_animals[loc].push(diagnostic.animal_object);
@@ -135,7 +139,9 @@ function Vet({ incident, organization }) {
               let loc = procedure.animal_object.shelter
               if (!loc) {
                 loc = 'Field';
-                bounds.push([procedure.animal_object.latitude, procedure.animal_object.longitude]);
+                if (procedure.animal_object.latitude) {
+                  bounds.push([procedure.animal_object.latitude, procedure.animal_object.longitude]);
+                }
               }
               if (Object.keys(shelter_animals).includes(loc)) {
                 shelter_animals[loc].push(procedure.animal_object);
@@ -235,7 +241,7 @@ function Vet({ incident, organization }) {
             {shelterAnimals['Field'].filter(animal => (selectedAnimal.id && selectedAnimal.shelter === null) || (selectedShelter === 'all' || selectedShelter === null)).map((animal, index) => (
               <Marker
                 key={animal.id}
-                position={animal.request_lat_lon ? animal.request_lat_lon : [animal.latitude, animal.longitude]}
+                position={animal.request_lat_lon ? animal.request_lat_lon : animal.latitude ?  [animal.latitude, animal.longitude] : [0,0]}
                 icon={vetPendingAnimalLocationMarkerIcon}
                 // onClick={() => navigate('/' + organization + "/" + incident + "/shelter/" + shelter.id)}
               >
