@@ -504,7 +504,7 @@ const ExamForm = (props) => {
                     type="text"
                     label="Weight*"
                     xs="3"
-                    value={data.weight || formikProps.values.weight || ''}
+                    value={formikProps.values.weight || data.weight || ''}
                   />
                   <Col xs="1" style={{marginBottom:"-2px"}}>
                     <DropDown
