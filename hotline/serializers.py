@@ -136,7 +136,7 @@ class SimpleServiceRequestSerializer(MapServiceRequestSerializer):
 
     full_address = serializers.SerializerMethodField()
     pending = serializers.BooleanField(read_only=True)
-    animals = serializers.SerializerMethodField()
+    animals = SimpleAnimalSerializer(many=True, required=False, read_only=True)
     # these method fields require animals queryset
     reported_animals = serializers.SerializerMethodField()
     reported_evac = serializers.SerializerMethodField()
