@@ -58,10 +58,12 @@ class BarebonesServiceRequestSerializer(serializers.ModelSerializer):
 
 
 class MapServiceRequestSerializer(BarebonesServiceRequestSerializer):
+    from people.serializers import SimplePersonSerializer
 
     full_address = serializers.SerializerMethodField()
     pending = serializers.BooleanField(read_only=True)
-    animals = serializers.SerializerMethodField()
+    animals = SimpleAnimalSerializer(many=True, required=False, read_only=True)
+    owner_objects = SimplePersonSerializer(source='owners', many=True, required=False, read_only=True)
     # these method fields require animals queryset
     reported_animals = serializers.SerializerMethodField()
     reported_evac = serializers.SerializerMethodField()
@@ -75,11 +77,7 @@ class MapServiceRequestSerializer(BarebonesServiceRequestSerializer):
     def get_full_address(self, obj):
         return build_full_address(obj)
 
-    # Custom field for ordering animals.
-    def get_animals(self, obj):
-        return SimpleAnimalSerializer(obj.animal_set.all().exclude(status='CANCELED').order_by('id'), many=True, required=False, read_only=True).data
-
-        # Custom field for if any animal is ACO Required. If it is aggressive or "Other" species.
+    # Custom field for if any animal is ACO Required. If it is aggressive or "Other" species.
     def get_aco_required(self, obj):
         # Performs list comp. on prefetched queryset of animals for this SR to avoid hitting db again.
         try:
@@ -129,7 +127,7 @@ class MapServiceRequestSerializer(BarebonesServiceRequestSerializer):
 
     class Meta:
         model = ServiceRequest
-        fields = ['id', 'id_for_incident', 'timestamp', 'latitude', 'longitude', 'full_address', 'followup_date', 'address', 'city', 'state', 'zip_code', 'apartment', 'directions', 'priority', 'pending',
+        fields = ['id', 'id_for_incident', 'timestamp', 'latitude', 'longitude', 'full_address', 'followup_date', 'address', 'city', 'state', 'zip_code', 'apartment', 'directions', 'priority', 'pending', 'owner_objects',
         'key_provided', 'verbal_permission', 'injured', 'accessible', 'turn_around', 'animals', 'status', 'reported_animals', 'reported_evac', 'reported_sheltered_in_place', 'sheltered_in_place', 'unable_to_locate', 'aco_required']
 
 
@@ -147,8 +145,6 @@ class SimpleServiceRequestSerializer(MapServiceRequestSerializer):
     unable_to_locate = serializers.SerializerMethodField()
     aco_required = serializers.SerializerMethodField(read_only=True)
     injured = serializers.BooleanField(read_only=True)
-    animal_count = serializers.IntegerField(read_only=True)
-    owner_objects = SimplePersonSerializer(source='owners', many=True, required=False, read_only=True)
     reporter_object = SimplePersonSerializer(source='reporter', required=False, read_only=True)
     evacuation_assignments = serializers.SerializerMethodField()
     images = serializers.SerializerMethodField()
@@ -156,7 +152,7 @@ class SimpleServiceRequestSerializer(MapServiceRequestSerializer):
     class Meta:
         model = ServiceRequest
         fields = ['id', 'id_for_incident', 'timestamp', 'latitude', 'longitude', 'full_address', 'followup_date', 'owners', 'reporter', 'address', 'city', 'state', 'zip_code', 'apartment', 'directions', 'priority', 'evacuation_assignments', 'pending',
-        'images', 'animal_count', 'key_provided', 'verbal_permission', 'injured', 'accessible', 'turn_around', 'animals', 'status', 'reported_animals', 'reported_evac', 'reporter_object', 'owner_objects', 'reported_sheltered_in_place', 'sheltered_in_place', 'unable_to_locate', 'aco_required']
+        'images', 'key_provided', 'verbal_permission', 'injured', 'accessible', 'turn_around', 'animals', 'status', 'reported_animals', 'reported_evac', 'reporter_object', 'owner_objects', 'reported_sheltered_in_place', 'sheltered_in_place', 'unable_to_locate', 'aco_required']
 
     def get_evacuation_assignments(self, obj):
         from evac.serializers import SimpleEvacAssignmentSerializer
@@ -189,7 +185,6 @@ class SimpleServiceRequestSerializer(MapServiceRequestSerializer):
 class ServiceRequestSerializer(SimpleServiceRequestSerializer):
 
     action_history = serializers.SerializerMethodField()
-    animal_count = serializers.IntegerField(read_only=True)
     injured = serializers.BooleanField(read_only=True)
     assigned_requests = serializers.SerializerMethodField()
     animals = serializers.SerializerMethodField()
@@ -198,7 +193,7 @@ class ServiceRequestSerializer(SimpleServiceRequestSerializer):
         model = ServiceRequest
         fields = ['id', 'id_for_incident', 'latitude', 'longitude', 'full_address', 'followup_date', 'status', 'address', 'city', 'state', 'zip_code', 'directions', 'priority',
         'injured', 'accessible', 'turn_around', 'animals', 'reporter', 'reported_animals', 'reported_evac', 'sheltered_in_place', 'reported_sheltered_in_place', 'unable_to_locate', 'aco_required',
-        'animal_count', 'images', 'key_provided', 'verbal_permission', 'action_history', 'owner_objects', 'reporter_object', 'assigned_requests']
+        'images', 'key_provided', 'verbal_permission', 'action_history', 'owner_objects', 'reporter_object', 'assigned_requests']
 
     # Custom field for ordering animals.
     def get_animals(self, obj):

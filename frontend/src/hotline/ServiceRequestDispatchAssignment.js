@@ -53,6 +53,21 @@ function ServiceRequestDispatchAssignment({ id, incident, organization }) {
     return matches
   }
 
+  // Counts the number of size/species matches for a assigned request by status.
+  const countDictMatches = (animals) => {
+    var matches = {};
+
+    Object.keys(animals).forEach((animal) => {
+      if (!matches[[animals[animal].species]]) {
+        matches[[animals[animal].species]] = 1;
+      }
+      else {
+        matches[[animals[animal].species]] += 1;
+      }
+    });
+    return matches
+  }
+
   // Show or hide list of DAs based on current map zoom
   const onMove = event => {
     for (const dispatch_assignment of data.dispatch_assignments) {
@@ -129,7 +144,7 @@ function ServiceRequestDispatchAssignment({ id, incident, organization }) {
               response.data.forEach((dispatch_assignment, index) => {
                 let sr_dict = {}
                 for (const assigned_request of dispatch_assignment.assigned_requests) {
-                  const matches = countMatches(assigned_request.service_request_object);
+                  const matches = countDictMatches(assigned_request.animals);
                   sr_dict[assigned_request.service_request_object.id] = {id:assigned_request.service_request_object.id, matches:matches, latitude:assigned_request.service_request_object.latitude, longitude:assigned_request.service_request_object.longitude, full_address:assigned_request.service_request_object.full_address};
                   bounds.push([assigned_request.service_request_object.latitude, assigned_request.service_request_object.longitude]);
                 }
