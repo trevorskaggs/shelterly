@@ -63,6 +63,7 @@ const DiagnosisForm = (props) => {
     diagnosis_other: '',
     animal_object: {id:''},
     vet_requests: [],
+    exams: []
   })
 
   const [diagnosisChoices, setDiagnosisChoices] = useState([]);
@@ -205,7 +206,7 @@ const DiagnosisForm = (props) => {
             <span style={{ cursor: 'pointer' }} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}
             Diagnosis Form
           </Card.Header>
-          <Patient animal={data.animal_object} vet_request={vetrequest_id && data.vet_requests.length > 0 ? data.vet_requests.filter(vr => vr.id === Number(vetrequest_id))[0] : null} organization={props.organization} incident={props.incident} />
+          <Patient animal={data.animal_object} vet_request={null} organization={props.organization} incident={props.incident} medical_plan={props.state.steps.exam && props.state.steps.exam.medical_plan ? props.state.steps.exam.medical_plan : data.exams.filter(exam => (exam.medical_plan)).length ? data.exams.filter(exam => (exam.medical_plan))[0].medical_plan : ''} />
           <Card.Body>
             <Form>
               <FormGroup>

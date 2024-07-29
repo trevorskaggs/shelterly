@@ -66,6 +66,7 @@ const OrdersForm = (props) => {
     // diagnostics_notes: '',
     diagnostics_other: '',
     procedures: [],
+    exams: [],
     // procedure_notes: '',
     procedure_other: '',
     animal_object: {id:''},
@@ -242,7 +243,7 @@ const OrdersForm = (props) => {
             <span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + props.id + '/')} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}
             {is_diagnostics ? "Diagnostic " : is_procedures ? "Procedure " : "Diagnostic and Procedure "}Orders Form
           </Card.Header>
-          <Patient animal={data.animal_object} vet_request={vetrequest_id && data.vet_requests.length > 0 ? data.vet_requests.filter(vr => vr.id === Number(vetrequest_id))[0] : null} organization={props.organization} incident={props.incident} />
+          <Patient animal={data.animal_object} vet_request={null} organization={props.organization} incident={props.incident} medical_plan={props.state.steps.exam && props.state.steps.exam.medical_plan ? props.state.steps.exam.medical_plan : data.exams.filter(exam => (exam.medical_plan)).length ? data.exams.filter(exam => (exam.medical_plan))[0].medical_plan : ''} />
           <Card.Body>
             <Form>
               <FormGroup>

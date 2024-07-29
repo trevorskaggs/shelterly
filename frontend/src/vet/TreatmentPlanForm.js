@@ -66,7 +66,7 @@ const TreatmentPlanForm = (props) => {
 
   const [data, setData] = useState(current_data);
 
-  const [medRecordData, setMedRecordData] = useState({animal_object: {id:'', name:'', species_string:'', medical_notes:''}, vet_requests:[]});
+  const [medRecordData, setMedRecordData] = useState({animal_object: {id:'', name:'', species_string:'', medical_notes:''}, vet_requests:[], exams:[]});
 
   function calc_requests(formikProps) {
     if (formikProps.values.days > 0) {
@@ -212,7 +212,7 @@ const TreatmentPlanForm = (props) => {
           <span style={{cursor:'pointer'}} onClick={() => {setAddAnother(false);props.handleBack('treatments', 'orders')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}</span>}
           {!props.id ? "" : "Update "}Treatment Form
           </Card.Header>
-          <Patient animal={data.animal_object.id ? data.animal_object : medRecordData.animal_object} vet_request={vetrequest_id && medRecordData.vet_requests.length > 0 ? medRecordData.vet_requests.filter(vr => vr.id === Number(vetrequest_id))[0] : null} organization={props.organization} incident={props.incident} />
+          <Patient animal={data.animal_object.id ? data.animal_object : medRecordData.animal_object} vet_request={null} organization={props.organization} incident={props.incident} medical_plan={props.state.steps.exam && props.state.steps.exam.medical_plan ? props.state.steps.exam.medical_plan : medRecordData.exams.filter(exam => (exam.medical_plan)).length ? medRecordData.exams.filter(exam => (exam.medical_plan))[0].medical_plan : ''} />
           <Card.Body>
             <BootstrapForm as={Form}>
               <FormGroup>
