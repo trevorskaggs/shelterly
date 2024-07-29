@@ -40,6 +40,8 @@ const customStyles = {
 
 function AnimalStatus(props) {
 
+  const { setShowSystemError } = useContext(SystemErrorContext);
+
   const [presentingComplaintChoices, setPresentingComplaintChoices] = useState([]);
 
   const roomRef = useRef(null);

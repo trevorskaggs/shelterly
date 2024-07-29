@@ -34,6 +34,8 @@ const TreatmetRequestForm = (props) => {
     not_administered: false,
     notes: '',
     animal_object:{id:'', name:''},
+    treatment_object:{description:''},
+    exams:[]
   })
 
   const [assigneeChoices, setAssigneeChoices] = useState([]);
@@ -49,6 +51,7 @@ const TreatmetRequestForm = (props) => {
       })
       .then(response => {
         if (!unmounted) {
+          console.log(response.data)
           response.data['actual_admin_time'] = response.data.not_administered ? null : response.data['actual_admin_time'] || new Date()
           setData(response.data);
         }
@@ -117,7 +120,7 @@ const TreatmetRequestForm = (props) => {
             :
               <span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + props.organization + "/" + props.incident + "/vet/medrecord/" + data.medical_record + '?tab=treatments')} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
             }
-            Treatment Form
+            Treatment Form - {data.treatment_object.description}
           </Card.Header>
           <Patient animal={data.animal_object} organization={props.organization} incident={props.incident} medical_plan={props.state.steps.exam.medical_plan || data.exams.filter(exam => (exam.medical_plan)).length ? data.exams.filter(exam => (exam.medical_plan))[0].medical_plan : ''} />
           <Card.Body>
@@ -210,7 +213,7 @@ const TreatmetRequestForm = (props) => {
             </Form>
           </Card.Body>
           <ButtonGroup>
-            <Button type="button" className="btn btn-primary" onClick={() => { formikProps.submitForm() }}>Save</Button>
+            <Button type="button" className="btn btn-primary" onClick={() => { formikProps.submitForm() }}>{formikProps.values.assignee ? "Complete" : "Save"}</Button>
           </ButtonGroup>
         </Card>
       )}

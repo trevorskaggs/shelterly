@@ -409,7 +409,7 @@ function MedicalRecordDetails({ id, incident, organization }) {
             </Card.Title>
             <hr className="mb-3" />
             <Scrollbar no_shadow="true" style={{height:"564px", minHeight:"564px"}} renderView={props => <div {...props} style={{...props.style, overflowX:"hidden", marginBottom:"-10px"}}/>}  renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
-            {activeOrders === 'pending' && data.treatment_requests.filter(tr => tr.status === 'Pending').map(treatment_request => (
+            {activeOrders === 'pending' && data.treatment_requests.filter(tr => tr.status === 'Pending').sort((a, b) => new Date(a.suggested_admin_time) - new Date(b.suggested_admin_time)).map(treatment_request => (
               <TreatmentCard key={treatment_request.id} incident={incident} organization={organization} treatment_request={treatment_request} />
             ))}
             {activeOrders === 'pending' && data.diagnostic_objects.filter(diagnostic => diagnostic.status === 'Pending').map(diagnostic => (
@@ -419,7 +419,7 @@ function MedicalRecordDetails({ id, incident, organization }) {
               <ProcedureCard key={procedure.id} incident={incident} organization={organization} procedure={procedure} />
             ))}
             
-            {activeOrders === 'treatments' && data.treatment_requests.map(treatment_request => (
+            {activeOrders === 'treatments' && data.treatment_requests.sort((a, b) => new Date(a.suggested_admin_time) - new Date(b.suggested_admin_time)).map(treatment_request => (
               <TreatmentCard key={treatment_request.id} incident={incident} organization={organization} treatment_request={treatment_request} />
             ))}
             {activeOrders === 'treatments' && data.treatment_requests.length < 1 ? <p>No treatments have been created for this patient.</p> : ""}
