@@ -14,7 +14,7 @@ from asgiref.sync import async_to_sync
 from animals.models import Animal
 from animals.views import MultipleFieldLookupMixin
 from evac.models import AssignedRequest, DispatchTeam, EvacAssignment, EvacTeamMember
-from evac.serializers import DispatchTeamSerializer, EvacAssignmentSerializer, EvacTeamMemberSerializer
+from evac.serializers import DispatchTeamSerializer, EvacAssignmentSerializer, MapEvacAssignmentSerializer, EvacTeamMemberSerializer
 from hotline.models import ServiceRequest, VisitNote
 from incident.models import Incident, Organization
 from people.models import OwnerContact, Person
@@ -103,9 +103,16 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
     filter_backends = (filters.SearchFilter,)
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = EvacAssignmentSerializer
+    map_serializer_class = MapEvacAssignmentSerializer
+
+    def get_serializer_class(self):
+        if self.request.query_params.get('deploy_map', False):
+            if hasattr(self, 'map_serializer_class'):
+                return self.map_serializer_class
+        return super(EvacAssignmentViewSet, self).get_serializer_class()
 
     def get_queryset(self):
-        queryset = EvacAssignment.objects.filter(service_requests__isnull=False, assigned_requests__isnull=False).distinct().order_by('-start_time').prefetch_related(Prefetch('service_requests',
+        queryset = EvacAssignment.objects.filter(service_requests__isnull=False, assigned_requests__isnull=False).distinct().order_by('-start_time').select_related('team').prefetch_related(Prefetch('service_requests',
                     ServiceRequest.objects
             .exclude(status='CANCELED')
             .annotate(animal_count=Count("animal"))
@@ -124,7 +131,7 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                 'service_request__animal_set', queryset=Animal.objects.exclude(status='CANCELED'), to_attr='animals'))))
 
         # Exclude DAs without SRs when fetching for a map.
-        is_map = self.request.query_params.get('map', '')
+        is_map = self.request.query_params.get('map', self.request.query_params.get('deploy_map', ''))
         if is_map == 'true':
             queryset = queryset.exclude(service_requests=None)
 

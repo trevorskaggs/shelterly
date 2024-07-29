@@ -103,13 +103,19 @@ class AssignedRequestServiceRequestSerializer(serializers.ModelSerializer):
         model = AssignedRequest
         fields = '__all__'
 
-class EvacAssignmentSerializer(SimpleEvacAssignmentSerializer):
-
-    assigned_requests = AssignedRequestDispatchSerializer(many=True, required=False, read_only=True)
+class MapEvacAssignmentSerializer(SimpleEvacAssignmentSerializer):
     team_object = serializers.SerializerMethodField()
 
     def get_team_object(self, obj):
         return DispatchTeamSerializer(DispatchTeam.objects.filter(id=obj.team.id).annotate(is_assigned=Exists(EvacAssignment.objects.filter(team_id=OuterRef("id"), end_time=None, service_requests__isnull=False, incident=obj.incident)))[0], required=False, read_only=True).data
+    
+    class Meta:
+        model = EvacAssignment
+        fields = '__all__'
+
+class EvacAssignmentSerializer(MapEvacAssignmentSerializer):
+
+    assigned_requests = AssignedRequestDispatchSerializer(many=True, required=False, read_only=True)
 
     class Meta:
         model = EvacAssignment
