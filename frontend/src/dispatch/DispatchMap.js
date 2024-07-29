@@ -258,7 +258,7 @@ function Deploy({ incident, organization }) {
           // Then fetch all recent Teams.
           axios.get('/evac/api/evacassignment/', {
             params: {
-              map: true,
+              deploy_map: true,
               incident,
             },
             cancelToken: source.token,
