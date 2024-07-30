@@ -102,7 +102,8 @@ const buildDispatchResolutionsDoc = (drs = []) => {
       pdf.drawPad(10);
     });
 
-    // end of summary
+    // end of summary page break
+    pdf.drawPageBreak();
 
     // loop through SR's and page break between each one
     data.assigned_requests.forEach((assigned_request, index) => {
