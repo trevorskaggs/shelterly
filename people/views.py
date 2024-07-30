@@ -94,7 +94,7 @@ class PersonViewSet(viewsets.ModelViewSet):
 
             # If an owner is being added from an animal, update the animal with the new owner.
             if self.request.data.get('animal'):
-                animal = Animal.objects.get(pk=self.request.data.get('animal'))
+                animal = Animal.objects.get(id_for_incident=self.request.data.get('animal'), incident__slug=self.request.data.get('incident_slug'))
                 animal.owners.add(person)
                 if animal.request:
                     animal.request.owners.add(person)

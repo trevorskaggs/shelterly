@@ -294,6 +294,7 @@ const PersonForm = (props) => {
             });
           }
           else {
+            values['incident_slug'] = props.incident;
             axios.post('/people/api/person/', values)
             .then(response => {
               // If SR already exists, redirect to the SR details.

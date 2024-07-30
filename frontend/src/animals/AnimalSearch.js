@@ -571,7 +571,9 @@ function AnimalSearch({ incident, organization }) {
         </Collapse>
       </Form>
       {data.animals.filter(animal => animals.includes(animal.id)).map((animal, index) => (
-        <div key={animal.id} className="mt-3" hidden={page !== Math.ceil((index+1)/ITEMS_PER_PAGE)}>
+        <span key={animal.id}>
+        {page === Math.ceil((index+1)/ITEMS_PER_PAGE) ?
+        <div className="mt-3">
           <div className="card-header">
             <h4 style={{marginBottom:"-2px",  marginLeft:"-12px"}}>
               <OverlayTrigger
@@ -849,7 +851,8 @@ function AnimalSearch({ incident, organization }) {
               </Card.Body>
             </Card>
           </CardGroup>
-          </div>
+        </div> : ""}
+        </span>
       ))}
       <p style={{marginTop:"15px"}}>{data.isFetching ? 'Fetching Animals...' : <span>{animals.length === 0 ? 'No animals found.' : ''}</span>}</p>
       <Pagination className="custom-page-links" size="lg" onClick={(e) => {setFocus(parseInt(e.target.innerText));setPage(parseInt(e.target.innerText))}}>
