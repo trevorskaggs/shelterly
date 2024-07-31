@@ -508,7 +508,7 @@ function DispatchSummary({ id, incident, organization }) {
                     >
                       <FontAwesomeIcon icon={faUserCheck} className="ml-1 fa-move-up" size="sm" inverse />
                     </OverlayTrigger> : ""}
-                    <div><b>Contact Note: </b>{assigned_request.owner_contact.owner_contact_note}</div>
+                    <div style={{whiteSpace:"pre-line"}}><b>Contact Note: </b>{assigned_request.owner_contact.owner_contact_note}</div>
                   </span>
                   : ""}
                 </ListGroup.Item>
@@ -588,7 +588,7 @@ function DispatchSummary({ id, incident, organization }) {
             <hr/>
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
               <h4 className="mt-2" style={{marginBottom:"-2px"}}>Visit Notes</h4>
-                <ListGroup.Item>
+                <ListGroup.Item style={{whiteSpace:"pre-line"}}>
                   {assigned_request.visit_note.notes || "No information available."}
                 </ListGroup.Item>
             </ListGroup>
@@ -597,7 +597,7 @@ function DispatchSummary({ id, incident, organization }) {
           {assigned_request.visit_notes.length > 0 ? <h4 className="mt-2" style={{marginBottom:"-2px"}}>Previous Visit Notes</h4> : ""}
           {assigned_request.visit_notes.map(visit_note =>
             <ListGroup variant="flush" style={{marginBottom:"-13px"}} key={visit_note.id}>
-              <ListGroup.Item key={visit_note.id}>
+              <ListGroup.Item key={visit_note.id} style={{whiteSpace:"pre-line"}}>
               <Link href={"/" + organization + "/" + incident + "/dispatch/summary/" + visit_note.dispatch_assignment} className="text-link" style={{textDecoration:"none", color:"white"}}><Moment format="L">{visit_note.date_completed}</Moment></Link>: {visit_note.notes || "No information available."}
               </ListGroup.Item>
             </ListGroup>
