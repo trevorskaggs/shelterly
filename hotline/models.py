@@ -145,22 +145,24 @@ class ServiceRequest(Location):
 def email_on_creation(sender, instance, **kwargs):
     if kwargs["created"]:
         # Send email here.
-        message = (
-            "Service Request #" + str(instance.id_for_incident) + " Created for Shelterly",
-            render_to_string(
-                'service_request_creation_email.txt',
-                {
-                'site': Site.objects.get_current(),
-                'id': instance.id_for_incident,
-                'incident': instance.incident.slug,
-                'address': instance.location_output,
-                'sr_creation_date': instance.timestamp.strftime('%m/%d/%Y %H:%M:%S')
-                }
-            ).strip(),
-            "DoNotReply@shelterly.org",
-            User.objects.filter(id__in=IncidentNotification.objects.filter(incident=instance.incident, hotline_notifications=True).values_list('user', flat=True)).values_list('email', flat=True),
-        )
-        send_mass_mail((message,), fail_silently=True)
+        users = User.objects.filter(id__in=IncidentNotification.objects.filter(incident=instance.incident, hotline_notifications=True).values_list('user', flat=True)).values_list('email', flat=True)
+        if len(users) > 0:
+            message = (
+                "Service Request #" + str(instance.id_for_incident) + " Created for Shelterly",
+                render_to_string(
+                    'service_request_creation_email.txt',
+                    {
+                    'site': Site.objects.get_current(),
+                    'id': instance.id_for_incident,
+                    'incident': instance.incident.slug,
+                    'address': instance.location_output,
+                    'sr_creation_date': instance.timestamp.strftime('%m/%d/%Y %H:%M:%S')
+                    }
+                ).strip(),
+                "DoNotReply@shelterly.org",
+                users,
+            )
+            send_mass_mail((message,))
 
 post_save.connect(email_on_creation, sender=ServiceRequest)
 
