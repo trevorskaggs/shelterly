@@ -106,7 +106,7 @@ function AnimalStatus(props) {
             </span>
           </OverlayTrigger>
         ) : ""}
-        {props.animal.aco_required ? (
+        {props.animal.aco_required === 'yes' ? (
           <OverlayTrigger
             key={"aco-required"}
             placement="top"
