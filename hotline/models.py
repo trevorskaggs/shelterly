@@ -120,7 +120,7 @@ class ServiceRequest(Location):
               "marker-symbol":"circle-n",
               "marker-color":"#FF0000",
               "description":description,
-              "title":self.id,
+              "title":self.id_for_incident,
               "class":"Marker",
           }
         }
