@@ -277,6 +277,21 @@ export const countMatches = (service_request) => {
   return [matches, status_matches]
 }
 
+// Counts the number of species matches for a assigned request.
+export const countDictMatches = (animals) => {
+  var matches = {};
+
+  Object.keys(animals).forEach((animal) => {
+    if (!matches[[animals[animal].species]]) {
+      matches[[animals[animal].species]] = 1;
+    }
+    else {
+      matches[[animals[animal].species]] += 1;
+    }
+  });
+  return matches
+}
+
 // Takes in animal size, species, and count and returns a pretty string combination.
 export const prettyText = (species, count) => {
   if (count <= 0) {

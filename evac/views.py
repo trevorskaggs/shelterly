@@ -14,7 +14,7 @@ from asgiref.sync import async_to_sync
 from animals.models import Animal
 from animals.views import MultipleFieldLookupMixin
 from evac.models import AssignedRequest, DispatchTeam, EvacAssignment, EvacTeamMember
-from evac.serializers import DispatchTeamSerializer, EvacAssignmentSerializer, MapEvacAssignmentSerializer, EvacTeamMemberSerializer
+from evac.serializers import DispatchTeamSerializer, DeployEvacAssignmentSerializer, EvacAssignmentSerializer, MapEvacAssignmentSerializer, EvacTeamMemberSerializer
 from hotline.models import ServiceRequest, VisitNote
 from incident.models import Incident, Organization
 from people.models import OwnerContact, Person
@@ -103,10 +103,14 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
     filter_backends = (filters.SearchFilter,)
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = EvacAssignmentSerializer
+    deploy_serializer_class = DeployEvacAssignmentSerializer
     map_serializer_class = MapEvacAssignmentSerializer
 
     def get_serializer_class(self):
         if self.request.query_params.get('deploy_map', False):
+            if hasattr(self, 'deploy_serializer_class'):
+                return self.map_serializer_class
+        elif self.request.query_params.get('map', False):
             if hasattr(self, 'map_serializer_class'):
                 return self.map_serializer_class
         return super(EvacAssignmentViewSet, self).get_serializer_class()
@@ -115,7 +119,6 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
         queryset = EvacAssignment.objects.filter(service_requests__isnull=False, assigned_requests__isnull=False).distinct().order_by('-start_time').select_related('team').prefetch_related(Prefetch('service_requests',
                     ServiceRequest.objects
             .exclude(status='CANCELED')
-            .annotate(animal_count=Count("animal"))
             .annotate(
                 injured=Exists(Animal.objects.filter(request_id=OuterRef("id"), injured="yes"))
             ).prefetch_related(Prefetch(
