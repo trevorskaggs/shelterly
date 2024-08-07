@@ -6,8 +6,9 @@ import { Form, Formik } from 'formik';
 import * as Yup from 'yup';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faClipboardList, faArrowAltCircleLeft
+  faClipboardList, faArrowAltCircleLeft, faCommentDots, faBan, faMedkit
 } from '@fortawesome/free-solid-svg-icons';
+import { faBadgeSheriff, faClawMarks } from '@fortawesome/pro-solid-svg-icons';
 import { DropDown } from '../components/Form';
 import Header from '../components/Header';
 import ButtonSpinner from '../components/ButtonSpinner';
@@ -62,6 +63,90 @@ function AnimalStatus(props) {
         </OverlayTrigger>
         : ""}
         {props.animal.pcolor || props.animal.scolor ? <span className="ml-1">({props.animal.pcolor ? props.animal.pcolor : "" }{props.animal.scolor ? <span>{props.animal.pcolor ? <span>/</span> : ""}{props.animal.scolor}</span> : ""})</span>: ""}
+        {props.animal.animal_notes ? (
+          <>
+            <OverlayTrigger
+              key={"animal-notes"}
+              placement="top"
+              overlay={
+                <Tooltip id={"tooltip-animal-notes"}>
+                  {props.animal.animal_notes}
+                </Tooltip>
+              }
+            >
+              <FontAwesomeIcon icon={faCommentDots} className="ml-1 fa-flip-horizontal" inverse />
+            </OverlayTrigger>
+          </>
+        ) : ""}
+        {props.animal.aggressive === 'yes' ? (
+          <OverlayTrigger
+            key={"aggressive"}
+            placement="top"
+            overlay={
+              <Tooltip id={`tooltip-aggressive`}>
+                Animal is aggressive
+              </Tooltip>
+            }
+          >
+            <FontAwesomeIcon icon={faClawMarks} size="sm" className="ml-1" />
+          </OverlayTrigger>
+        ) : props.animal.aggressive === 'no' ? (
+          <OverlayTrigger
+            key={"not-aggressive"}
+            placement="top"
+            overlay={
+              <Tooltip id={`tooltip-aggressive`}>
+                Animal is not aggressive
+              </Tooltip>
+            }
+          >
+            <span className="fa-layers" style={{marginLeft:"2px"}}>
+              <FontAwesomeIcon icon={faClawMarks} size="sm" />
+              <FontAwesomeIcon icon={faBan} color="#ef5151" size="sm" transform={'shrink-2'} />
+            </span>
+          </OverlayTrigger>
+        ) : ""}
+        {props.animal.aco_required === 'yes' ? (
+          <OverlayTrigger
+            key={"aco-required"}
+            placement="top"
+            overlay={
+              <Tooltip id={`tooltip-aco-required`}>
+                ACO required
+              </Tooltip>
+            }
+          >
+            <FontAwesomeIcon icon={faBadgeSheriff} size="sm" className="ml-1" />
+          </OverlayTrigger>
+        ) : ""}
+        {props.animal.injured === 'yes' ? (
+          <OverlayTrigger
+            key={"injured"}
+            placement="top"
+            overlay={
+              <Tooltip id={`tooltip-injured`}>
+                Animal is injured
+              </Tooltip>
+            }
+          >
+            <FontAwesomeIcon icon={faMedkit} size="sm" className="ml-1 fa-move-up" />
+          </OverlayTrigger>
+        ) : props.animal.injured === 'no' ? (
+          <OverlayTrigger
+            key={"not-injured"}
+            placement="top"
+            overlay={
+              <Tooltip id={`tooltip-injured`}>
+                Animal is not injured
+              </Tooltip>
+            }
+          >
+            <span className="fa-layers" style={{marginLeft:"2px"}}>
+              <FontAwesomeIcon icon={faMedkit} size="sm" className="fa-move-up" />
+              <FontAwesomeIcon icon={faBan} color="#ef5151" size="sm" transform={'shrink-2'} />
+            </span>
+          </OverlayTrigger>
+        ) : ""}
       </span>
     </Row>
     {props.formikProps.values && props.formikProps.values.sr_updates[props.index] && props.formikProps.values.sr_updates[props.index].animals[props.inception] && props.formikProps.values.sr_updates[props.index].animals[props.inception].status === 'SHELTERED' ?
@@ -152,7 +237,13 @@ function ShelterIntake({ id, incident, organization }) {
                 da.assigned_requests.forEach((assigned_request, inception) => {
                   response.data[index].sr_updates.push({
                     id: assigned_request.service_request_object.id,
-                    animals: Object.keys(assigned_request.animals).map(animal_id => {return {id:animal_id, id_for_incident:assigned_request.animals[animal_id].id_for_incident, name:assigned_request.animals[animal_id].name, species:assigned_request.animals[animal_id].species, status:assigned_request.animals[animal_id].status, color_notes:assigned_request.animals[animal_id].color_notes, pcolor:assigned_request.animals[animal_id].pcolor, scolor:assigned_request.animals[animal_id].scolor, request:assigned_request.service_request_object.id, shelter:assigned_request.animals[animal_id].shelter || '', room:assigned_request.animals[animal_id].room || ''}}),
+                    animals: Object.keys(assigned_request.animals).map(animal_id => {return {
+                      ...assigned_request.animals[animal_id],
+                      id:animal_id,
+                      request:assigned_request.service_request_object.id,
+                      shelter:assigned_request.animals[animal_id].shelter || '',
+                      room:assigned_request.animals[animal_id].room || ''
+                    }}),
                   });
                 });
               });
