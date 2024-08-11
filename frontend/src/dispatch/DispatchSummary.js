@@ -57,10 +57,10 @@ function DispatchSummary({ id, incident, organization }) {
   const [isPreplanned, setIsPreplanned] = useState(false);
 
   const handleTeamNameSubmit = async () => {
-    let requestBody;
+    const requestBody = {};
 
-    if (defaultTeamName) {
-      requestBody = { defaultName: true };
+    if (defaultTeamName === true || defaultTeamName === false) {
+      requestBody.defaultName = defaultTeamName;
     } else {
       if (teamName.replace(/ /g, '').length === 0) {
         setError("Team name cannot be blank.");
@@ -71,7 +71,7 @@ function DispatchSummary({ id, incident, organization }) {
         return;
       }
 
-      requestBody = { name: teamName };
+      requestBody.name = teamName;
     }
 
     setIsLoading(true);
@@ -144,6 +144,7 @@ function DispatchSummary({ id, incident, organization }) {
     .then(response => {
       setData(prevState => ({ ...prevState, "team_member_objects":response.data.team_member_objects, "team_members":response.data.team_members }));
       setTeamData(prevState => ({ ...prevState, "options":prevState.options.filter(option => !response.data.team_members.includes(option.id)) }));
+      setTeamName(response.data.name)
       setTeamMembers([]);
       handleClose();
     })
@@ -202,6 +203,7 @@ function DispatchSummary({ id, incident, organization }) {
           setMapState(map_dict);
           setTeamData({teams: [], options: [], isFetching: true});
           setTeamName(response.data.team_object.name);
+          setDefaultTeamName(response.data.team_object.default_name === true);
           setIsPreplanned(response.data.team_name.match(/^Preplanned [0-9]+$/));
           axios.get('/evac/api/evacteammember/?incident=' + incident + '&organization=' + organization +'&training=' + state.incident.training, {
             cancelToken: source.token,
@@ -273,7 +275,7 @@ function DispatchSummary({ id, incident, organization }) {
           <Card.Body>
             <div className="d-flex justify-content-between">
               <h4 className="h5 mb-0 pb-0 pt-2">
-                {data.team_object ? data.team_object.name : "Preplanned"}
+                {teamName ? teamName : data.team_object ? data.team_object.name : "Preplanned"}
                 <OverlayTrigger
                   key={"edit-team-name"}
                   placement="top"

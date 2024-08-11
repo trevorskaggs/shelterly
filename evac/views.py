@@ -75,7 +75,6 @@ class DispatchTeamViewSet(viewsets.ModelViewSet):
             serializer.save()
 
     def perform_update(self, serializer):
-
         if serializer.is_valid():
             # Show/hide from map selectors.
             if self.request.data.get('action', '') == 'show':
@@ -83,13 +82,52 @@ class DispatchTeamViewSet(viewsets.ModelViewSet):
             elif self.request.data.get('action', '') == 'hide':
                 serializer.validated_data['show'] = False
 
+            if self.request.data.get('defaultName', '') == True:
+                serializer.validated_data['default_name'] = True
+            elif self.request.data.get('defaultName', '') == False:
+                serializer.validated_data['default_name'] = False
+
             team = serializer.save()
 
             # Add Team Members to DA.
             if self.request.data.get('new_team_members'):
-                # if team length was 0, set AssignedRequest timestamp
                 if team.team_members.count() == 0:
-                    AssignedRequest.objects.filter(dispatch_assignment__team=team.id).update(timestamp=datetime.now())
+                    currentAssignedRequest = AssignedRequest.objects.filter(dispatch_assignment__team=team.id)
+                    if team.default_name == True and team.name.startswith("Preplanned "):
+                        incident_id = currentAssignedRequest[0].dispatch_assignment.incident_id
+
+                        # get used default team names
+                        evacAssignments = EvacAssignment.objects.filter(
+                            service_requests__isnull=False, assigned_requests__isnull=False, end_time__isnull=True, incident=incident_id
+                        ).distinct().select_related('team').prefetch_related(
+                            Prefetch('team', DispatchTeam.objects.prefetch_related('team_members'))
+                        )
+                        unique_team_nums = set()
+                        new_number = 0
+
+                        for evacAssignment in evacAssignments:
+                            if evacAssignment.team is not None:
+                                if "Team " in evacAssignment.team.name:
+                                    team_name = evacAssignment.team.name
+                                    for char in team_name:
+                                        if char.isdigit():
+                                            number = int(''.join(filter(str.isdigit, team_name)))
+                                            unique_team_nums.add(number)
+
+                        # Sort the set of numbers in ascending order
+                        sorted_unique_team_nums = sorted(list(unique_team_nums))
+
+                        while True:
+                            new_number += 1
+                            if new_number not in sorted_unique_team_nums:
+                                break
+
+                        team.name = f"Team {new_number}"
+                        team.save()
+
+                    # if team length was 0, set AssignedRequest timestamp
+                    currentAssignedRequest.update(timestamp=datetime.now())
+
                 team.team_members.add(*self.request.data.get('new_team_members'))
 
             # Remove Team Member from DA.
