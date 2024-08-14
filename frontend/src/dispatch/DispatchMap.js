@@ -258,7 +258,7 @@ function Deploy({ incident, organization }) {
           // Then fetch all recent Teams.
           axios.get('/evac/api/evacassignment/', {
             params: {
-              map: true,
+              deploy_map: true,
               incident,
             },
             cancelToken: source.token,
@@ -308,9 +308,10 @@ function Deploy({ incident, organization }) {
 
     const fetchServiceRequests = async () => {
       // Fetch ServiceRequest data.
-      await axios.get('/hotline/api/servicerequests/?map=true&incident=' + incident, {
+      await axios.get('/hotline/api/servicerequests/?incident=' + incident, {
         params: {
           status: 'open',
+          landingmap: true
         },
         cancelToken: source.token,
       })

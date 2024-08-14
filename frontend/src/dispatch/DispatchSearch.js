@@ -90,18 +90,18 @@ function DispatchAssignmentSearch({ incident, organization }) {
     let status_matches = {'REPORTED':{}, 'REPORTED (EVAC REQUESTED)':{}, 'REPORTED (SIP REQUESTED)':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}};
 
     Object.keys(animal_dict).forEach((animal) => {
-      if (['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE'].indexOf(animal.status) > -1) {
+      if (['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE'].indexOf(animal_dict[animal]['status']) > -1) {
         if (!species_matches[[animal_dict[animal]['species']]]) {
           species_matches[[animal_dict[animal]['species']]] = 1;
         }
         else {
           species_matches[[animal_dict[animal]['species']]] += 1;
         }
-        if (!status_matches[animal.status][[animal_dict[animal]['species']]]) {
-          status_matches[animal.status][[animal_dict[animal]['species']]] = 1;
+        if (!status_matches[animal_dict[animal]['status']][[animal_dict[animal]['species']]]) {
+          status_matches[animal_dict[animal]['status']][[animal_dict[animal]['species']]] = 1;
         }
         else {
-          status_matches[animal.status][[animal_dict[animal]['species']]] += 1;
+          status_matches[animal_dict[animal]['status']][[animal_dict[animal]['species']]] += 1;
         }
       }
     });
@@ -131,7 +131,7 @@ function DispatchAssignmentSearch({ incident, organization }) {
     const fetchDispatchAssignments = async () => {
       setData({evacuation_assignments: [], isFetching: true});
       // Fetch DispatchAssignment data.
-      await axios.get('/evac/api/evacassignment/?search=' + searchTerm + '&status=' + statusOptions +'&incident=' + incident, {
+      await axios.get('/evac/api/evacassignment/?map=true&search=' + searchTerm + '&status=' + statusOptions +'&incident=' + incident, {
         cancelToken: source.token,
       })
       .then(response => {
@@ -330,7 +330,7 @@ function DispatchAssignmentSearch({ incident, organization }) {
                           key={"sip"}
                           placement="top"
                           overlay={
-                            <Tooltip id={`tooltip-utl`}>
+                            <Tooltip id={`tooltip-sip`}>
                               {Object.keys(matches[assigned_request.service_request_object.id].status_matches['SHELTERED IN PLACE']).map((key,i) => (
                                 <span key={key} style={{textTransform:"capitalize"}}>
                                   {i > 0 && ", "}{prettyText('', key.split(',')[0], matches[assigned_request.service_request_object.id].status_matches['SHELTERED IN PLACE'][key])}

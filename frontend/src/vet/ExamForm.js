@@ -627,7 +627,7 @@ const ExamForm = (props) => {
                     <div className="mt-2">
                       <TextInput
                         as="textarea"
-                        name={question.name.toLowerCase().replace(' ','').replace('/','') + "_notes"}
+                        name={question.name.toLowerCase().replace(' ','_').replace('/','_') + "_notes"}
                         id={question.name.toLowerCase().replace(' ','_').replace('/','_') + "_notes"}
                         ref={setRef(question.name)}
                         xs="6"
