@@ -434,10 +434,10 @@ function Vet({ incident, organization }) {
               </Row>
             ))} */}
             {activeOrders === 'pending' && data.pending.filter(pending => pending.animal_object.id === selectedAnimal.id || pending.animal_object.shelter === selectedShelter || (selectedShelter === 'all' && (!pending.animal_object.shelter || Object.keys(shelterAnimals).includes(String(pending.animal_object.shelter))))).sort((a, b) => new Date(a.suggested_admin_time ? a.suggested_admin_time : a.open) - new Date(b.suggested_admin_time ? b.suggested_admin_time : b.open)).map(pending => (
-              <span>
-                {pending.type === 'treatment' ? <TreatmentCard key={pending.id} incident={incident} organization={organization} treatment_request={pending} animal_object={pending.animal_object} />
-                :pending.type === 'diagnostic' ? <DiagnosticCard key={pending.id} incident={incident} organization={organization} diagnostic={pending} animal_object={pending.animal_object} />
-                :pending.type === 'procedure' ? <ProcedureCard key={procedure.id} incident={incident} organization={organization} procedure={pending} animal_object={pending.animal_object} />
+              <span key={pending.id}>
+                {pending.type === 'treatment' ? <TreatmentCard incident={incident} organization={organization} treatment_request={pending} animal_object={pending.animal_object} />
+                :pending.type === 'diagnostic' ? <DiagnosticCard incident={incident} organization={organization} diagnostic={pending} animal_object={pending.animal_object} />
+                :pending.type === 'procedure' ? <ProcedureCard incident={incident} organization={organization} procedure={pending} animal_object={pending.animal_object} />
                 :
                 <Row key={pending.id} className="ml-0 mb-3">
                 <Link href={"/" + organization + "/" + incident + "/vet/vetrequest/" + pending.id} className="treatment-link" style={{textDecoration:"none", color:"white"}}>
