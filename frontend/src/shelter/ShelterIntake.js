@@ -256,9 +256,9 @@ function AnimalStatus(props) {
           name={`sr_updates.${props.index}.animals.${props.inception}.priority`}
           type="text"
           options={[
-            { value: 'green', label: 'Green' },
-            { value: 'yellow', label: 'Yellow' },
-            { value: 'red', label: 'Red' },
+            { value: 'green', label: 'Green (No Problem)' },
+            { value: 'when_available', label: 'Yellow (When Available)' },
+            { value: 'urgent', label: 'Red (Urgent)' },
           ]}
           value={`sr_updates.${props.index}.animals.${props.inception}.priority`}
           isClearable={false}

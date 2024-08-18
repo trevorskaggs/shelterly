@@ -51,7 +51,7 @@ const TreatmetRequestForm = (props) => {
       })
       .then(response => {
         if (!unmounted) {
-          console.log(response.data)
+          response.data['exams'] = [];
           response.data['actual_admin_time'] = response.data.not_administered ? null : response.data['actual_admin_time'] || new Date()
           setData(response.data);
         }
@@ -122,7 +122,7 @@ const TreatmetRequestForm = (props) => {
             }
             Treatment Form - {data.treatment_object.description}
           </Card.Header>
-          <Patient animal={data.animal_object} organization={props.organization} incident={props.incident} medical_plan={props.state.steps.exam.medical_plan || data.exams.filter(exam => (exam.medical_plan)).length ? data.exams.filter(exam => (exam.medical_plan))[0].medical_plan : ''} />
+          <Patient animal={data.animal_object} organization={props.organization} incident={props.incident} medical_plan={props.state && props.state.steps.exam.medical_plan || data.exams.filter(exam => (exam.medical_plan)).length ? data.exams.filter(exam => (exam.medical_plan))[0].medical_plan : ''} />
           <Card.Body>
             <Form>
               <FormGroup>

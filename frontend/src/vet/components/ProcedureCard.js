@@ -78,7 +78,7 @@ function ProcedureCard(props) {
               }
               <Col className="hover-div pl-0 pr-0">
                 <div className="border treatment-hover-div" style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"5px", marginLeft:"-1px", marginTop: "-1px", fontSize:"18px", width:"100%", backgroundColor:"rgb(158 153 153)"}}>
-                  {props.procedure.other_name ? props.procedure.other_name : props.procedure.name}
+                  <span style={{marginLeft:"5px"}}>{props.procedure.other_name ? props.procedure.other_name : props.procedure.name}</span>
                   <span className="float-right">
                   {props.procedure.complete ?
                     <OverlayTrigger
@@ -119,18 +119,18 @@ function ProcedureCard(props) {
                   </Col>
                 </Row> : ""}
                 <Row style={{marginTop:props.animal_object ? "" : "6px", paddingLeft:"10px"}}>
-                  <Col xs={3}>
-                    <b>Status: </b>{props.procedure.complete ? 'Complete' : 'Pending'}
-                  </Col>
                   {props.procedure.complete ?
-                  <Col xs={4}>
+                  <Col xs={3}>
                     <b>Completed: </b><Moment format="MMM DD, HH:mm">{props.procedure.complete}</Moment>
                   </Col>
                   :
-                  <Col xs={4}>
+                  <Col xs={3}>
                     <b>Ordered: </b><Moment format="MMM DD, HH:mm">{props.procedure.open}</Moment>
                   </Col>
                   }
+                  <Col xs={3}>
+                    <b>Status: </b>{props.procedure.complete ? 'Complete' : 'Pending'}
+                  </Col>
                 </Row>
                 <Row style={{paddingLeft:"10px"}}>
                   <Col style={{overflowX:"ellipsis"}}>

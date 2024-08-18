@@ -83,7 +83,7 @@ class AnimalViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                             animal.owners.add(*animal.request.owners.all())
 
                         # Create VR data if Triage is yellow or red.
-                        if self.request.data.get('priority', 'green') in ['yellow', 'red']:
+                        if self.request.data.get('priority', 'green') in ['when_available', 'urgent']:
                             med_record, _ = MedicalRecord.objects.get_or_create(patient=animal)
                             animal.medical_record=med_record
                             animal.save()

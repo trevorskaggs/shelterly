@@ -34,7 +34,7 @@ function VetRequestDetails({ id, incident, organization }) {
   const { dispatch, state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
-  const priorityText = {urgent:'Urgent', when_available:'When Available', yellow:'Yellow', red:'Red'};
+  const priorityText = {urgent:'Urgent (Red)', when_available:'When Available (Yellow)'};
 
   const [data, setData] = useState({id: '', medical_record: null, requested_by:null, open: '', concern: '', priority: '', presenting_complaints:[], animal_object: {id:'', name:'', species:'', category:'', sex:'', age:'', fixed:'', pcolor:'', scolor:'', medical_notes:'', shelter_object:{}, room_name:''}});
 
@@ -132,7 +132,7 @@ function VetRequestDetails({ id, incident, organization }) {
                     </LoadingLink>
                   : ""}
                   {data.status !== 'Canceled' ? <LoadingLink
-                      href={"/" + organization + "/" + incident + "/vet/vetrequest/edit" + id}
+                      href={"/" + organization + "/" + incident + "/vet/vetrequest/edit/" + id}
                       isLoading={isLoading}
                       className="text-white d-block py-1 px-3"
                     >

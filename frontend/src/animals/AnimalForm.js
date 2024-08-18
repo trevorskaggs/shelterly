@@ -817,9 +817,9 @@ const AnimalForm = (props) => {
                       name="priority"
                       type="text"
                       options={[
-                        { value: 'green', label: 'Green' },
-                        { value: 'yellow', label: 'Yellow' },
-                        { value: 'red', label: 'Red' },
+                        { value: 'green', label: 'Green (No Problem)' },
+                        { value: 'when_available', label: 'Yellow (When Available)' },
+                        { value: 'urgent', label: 'Red (Urgent)' },
                       ]}
                       value={formikProps.values.priority||data.priority}
                       isClearable={false}

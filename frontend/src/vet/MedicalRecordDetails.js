@@ -32,7 +32,8 @@ import {
   faScalpelLineDashed,
   faFlashlight,
   faPeriod,
-  faMobileScreenButton
+  faMobileScreenButton,
+  faUserDoctorMessage
 } from '@fortawesome/pro-solid-svg-icons';
 import {
   faRectangleVertical,
@@ -45,6 +46,8 @@ import { AuthContext } from "../accounts/AccountsReducer";
 import TreatmentCard from "./components/TreatmentCard";
 import DiagnosticCard from './components/DiagnosticCard';
 import ProcedureCard from './components/ProcedureCard';
+import ActionsDropdown from '../components/ActionsDropdown';
+import LoadingLink from '../components/LoadingLink';
 
 function MedicalRecordDetails({ id, incident, organization }) {
 
@@ -57,13 +60,15 @@ function MedicalRecordDetails({ id, incident, organization }) {
     tab = 'pending',
   } = queryParams;
 
-  const priorityText = {urgent:'Urgent', when_available:'When Available', yellow:'Yellow', red:'Red'};
+  const priorityText = {urgent:'Urgent (Red)', when_available:'When Available (Yellow)'};
 
-  const [data, setData] = useState({id:'', exams:[], diagnostic_objects:[], procedure_objects:[], patient:null, vet_requests:[], open: '', diagnosis: '', other_diagnosis:'', treatment_requests:[], animal_object: {id:'', name:'', species:'', category:'', sex:'', age:'', fixed:'', pcolor:'', scolor:'', medical_notes:'', shelter_object:{}, room_name:''}});
+  const [data, setData] = useState({id:'', exams:[], diagnostic_objects:[], procedure_objects:[], patient:null, vet_requests:[], pending:[], open: '', diagnosis: '', other_diagnosis:'', treatment_requests:[], animal_object: {id:'', name:'', species:'', category:'', sex:'', age:'', fixed:'', pcolor:'', scolor:'', medical_notes:'', shelter_object:{}, room_name:''}});
   const [showExam, setShowExam] = useState(false);
   const [activeVR, setActiveVR] = useState(null);
   const [activeExam, setActiveExam] = useState(null);
   const [activeOrders, setActiveOrders] = useState(tab);
+  const [isLoading, setIsLoading] = useState(true);
+  const [hideCompleted, setHideCompleted] = useState(true);
 
   // Hook for initializing data.
   useEffect(() => {
@@ -77,6 +82,11 @@ function MedicalRecordDetails({ id, incident, organization }) {
       })
       .then(response => {
         if (!unmounted) {
+          let pending_data = [];
+          pending_data = pending_data.concat(response.data.treatment_requests.map(tr => ({...tr, type:'treatment'})));
+          pending_data = pending_data.concat(response.data.diagnostic_objects.map(diagnostic => ({...diagnostic, type:'diagnostic'})));
+          pending_data = pending_data.concat(response.data.procedure_objects.map(procedure => ({...procedure, type:'procedure'})));
+          response.data['pending'] = pending_data;
           setData(response.data);
           setActiveVR(response.data.vet_requests.filter(vr => vr.status === 'Open').length > 0 ? response.data.vet_requests.filter(vr => vr.status === 'Open')[0].id : null);
           setShowExam(response.data.vet_requests.filter(vr => vr.status === 'Open').length > 0 ? true : false);
@@ -84,7 +94,8 @@ function MedicalRecordDetails({ id, incident, organization }) {
       })
       .catch(error => {
         setShowSystemError(true);
-      });
+      })
+      .finally(() => setIsLoading(false));
     };
     fetchMedRecordData();
     // Cleanup.
@@ -103,14 +114,57 @@ function MedicalRecordDetails({ id, incident, organization }) {
     <div className="row">
       <div className="col-6 d-flex">
         <Card className="border rounded d-flex" style={{width:"100%"}}>
-          <Card.Body>
-            <Card.Title>
-              <h4 className="mb-0">
-                <Row className="ml-0 pr-0">
+          <Card.Body style={{marginTop:"-10px"}}>
+            <div className="d-flex justify-content-between" style={{marginBottom:"-3px"}}>
+              <h4 className="h4 mb-0 pb-0 pt-2">
                   Patient: {data.animal_object.name||"Unknown"}
-                </Row>
               </h4>
-            </Card.Title>
+              <ActionsDropdown alignRight={true} className="pt-1" variant="dark" title="Actions">
+                  <LoadingLink
+                    href={"/" + organization + "/" + incident + "/animals/" + data.animal_object.id_for_incident + "/vetrequest/new"}
+                    isLoading={isLoading}
+                    className="text-white d-block py-1"
+                    style={{marginLeft:"12px"}}
+                  >
+                    <FontAwesomeIcon icon={faUserDoctorMessage} className="mr-1" inverse />
+                    Create Veterinary Request
+                  </LoadingLink>
+                  {data.exams.length ? <LoadingLink
+                    href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.id + "/treatment/new"}
+                    isLoading={isLoading}
+                    className="text-white d-block py-1 px-3"
+                  >
+                    <FontAwesomeIcon icon={faPrescriptionBottlePill} className="mr-1" inverse />
+                    Add Treatment
+                  </LoadingLink> : ""}
+                  {data.exams.length ? <LoadingLink
+                    href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.id + "/diagnostics"}
+                    isLoading={isLoading}
+                    className="text-white d-block py-1"
+                    style={{paddingLeft:"13px"}}
+                  >
+                    <FontAwesomeIcon icon={faVial} className="mr-2" style={{cursor:'pointer'}} transform='grow-3' inverse />
+                    Order Diagnostics
+                  </LoadingLink> : ""}
+                  {data.exams.length ? <LoadingLink
+                    href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.id + "/procedures"}
+                    isLoading={isLoading}
+                    className="text-white d-block py-1"
+                    style={{paddingLeft:"11px"}}
+                  >
+                    <FontAwesomeIcon icon={faScalpelLineDashed} className="mr-2" style={{cursor:'pointer'}} transform='grow-3' inverse />
+                    Order Procedures
+                  </LoadingLink> : ""}
+                  {data.exams.length ? <LoadingLink
+                    href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.id + "/diagnosis/new"}
+                    isLoading={isLoading}
+                    className="text-white d-block py-1 px-3"
+                  >
+                    <FontAwesomeIcon icon={faStethoscope} className="mr-1" inverse />
+                    Add Diagnosis
+                  </LoadingLink> : ""}
+                </ActionsDropdown>
+            </div>
             <hr/>
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
               <ListGroup.Item>
@@ -150,7 +204,7 @@ function MedicalRecordDetails({ id, incident, organization }) {
               <h4 className="mb-0">
                 <Row className="ml-0 pr-0">
                   Diagnosis/Problem List
-                  <OverlayTrigger
+                  {/* <OverlayTrigger
                     key={"add-diagnosis"}
                     placement="top"
                     overlay={
@@ -160,7 +214,7 @@ function MedicalRecordDetails({ id, incident, organization }) {
                     }
                   >
                     <Link href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.id + "/diagnosis/new"}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
-                  </OverlayTrigger>
+                  </OverlayTrigger> */}
                 </Row>
               </h4>
             </Card.Title>
@@ -189,11 +243,11 @@ function MedicalRecordDetails({ id, incident, organization }) {
               <h4 className="mb-0" style={{marginRight:"-1px"}}>
                 <Scrollbar horizontal="true" autoHide no_shadow="true" style={{height:"45px", marginLeft:"-1px", shadowheight:"45px", width:"100%"}} renderView={props => <div {...props} style={{...props.style, marginBottom:"-18px", marginRight:"0px", overflowX:"auto", overflowY: "hidden"}}/>} renderThumbVertical={props => <div {...props} style={{...props.style, display: 'none'}} />}>
                   <ListGroup horizontal>
-                    <ListGroup.Item className="border rounded" style={{backgroundColor:"rgb(158, 153, 153)", marginRight:"1px"}}>
+                    {data.vet_requests.filter(vr => vr.status === 'Open').length ? <ListGroup.Item className="border rounded" style={{backgroundColor:"rgb(158, 153, 153)", marginRight:"1px"}}>
                       <Row style={{width:"112px"}}>
                         <div style={{marginTop:"-3px", marginLeft:"4px"}}>Open VRs:</div>
                       </Row>
-                    </ListGroup.Item>
+                    </ListGroup.Item> : ""}
                     {data.vet_requests.filter(vr => vr.status === 'Open').map(vet_request => (
                       <ListGroup.Item key={vet_request.id} active={vet_request.id === activeVR} style={{textTransform:"capitalize", cursor:'pointer', borderTopLeftRadius:".25rem", borderTopRightRadius:".25rem"}} onClick={() => {setActiveVR(vet_request.id);setActiveExam(null);vet_request.id === activeVR ? setShowExam(!showExam) : setShowExam(true);}}>
                         <Row style={{marginTop:"-3px", width:"68px"}}>
@@ -215,7 +269,7 @@ function MedicalRecordDetails({ id, incident, organization }) {
                         </Row>
                       </ListGroup.Item>
                     ))}
-                    <OverlayTrigger
+                    {/* <OverlayTrigger
                       key={"caution"}
                       placement="top"
                       overlay={
@@ -225,7 +279,7 @@ function MedicalRecordDetails({ id, incident, organization }) {
                       }
                     >
                       <Link href={"/" + organization + "/" + incident + "/animals/" + data.animal_object.id_for_incident + "/vetrequest/new"} style={{marginLeft:"-1px", marginRight:"3px"}}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" size="2x" transform={"grow-2"} style={{color:"#a52b44"}} inverse /></Link>
-                    </OverlayTrigger>
+                    </OverlayTrigger> */}
                     <ListGroup.Item className="border rounded" style={{backgroundColor:"rgb(158, 153, 153)"}}>
                       <Row style={{width:"77px"}}>
                         <div style={{marginTop:"-3px", marginLeft:"4px"}}>Exams:</div>
@@ -350,16 +404,17 @@ function MedicalRecordDetails({ id, incident, organization }) {
           <Card.Body style={{marginBottom:""}}>
             <Card.Title style={{marginTop:"-2px", marginBottom:"20px"}}>
               <h4 className="mb-0">
+                <Row className="ml-0">
                 <ListGroup horizontal style={{marginBottom:"-20px"}}>
                   <ListGroup.Item active={"pending" === activeOrders} className="text-center" style={{textTransform:"capitalize", cursor:'pointer', paddingLeft:"5px", paddingRight:"5px"}} onClick={() => setActiveOrders("pending")}>
                     <div style={{marginTop:"-3px", marginLeft:"-1px", paddingLeft:"10px", paddingRight:"10px"}}>
-                      All Pending ({data.treatment_requests.filter(tr => tr.status === 'Pending').length + data.diagnostic_objects.filter(diagnostic => diagnostic.status === 'Pending').length + data.procedure_objects.filter(procedure => procedure.status === 'Pending').length})
+                      All Pending ({data.pending.filter(pending => pending.status === 'Pending').length})
                     </div>
                   </ListGroup.Item>
                   <ListGroup.Item active={"treatments" === activeOrders} className="text-center" style={{textTransform:"capitalize", cursor:'pointer', paddingLeft:"5px", paddingRight:"5px"}} onClick={() => setActiveOrders("treatments")}>
                     <div style={{marginTop:"-3px", marginLeft:"-1px", paddingLeft:"10px", paddingRight:"10px"}}>
-                      Treatments ({data.treatment_requests.length})
-                      {activeOrders === 'treatments' ? <OverlayTrigger
+                      Treatments ({data.treatment_requests.filter(tr => (!hideCompleted ? tr : tr.status !== 'Completed')).length})
+                      {/* {activeOrders === 'treatments' ? <OverlayTrigger
                         key={"add-treatment"}
                         placement="top"
                         overlay={
@@ -369,13 +424,13 @@ function MedicalRecordDetails({ id, incident, organization }) {
                         }
                       >
                         <Link href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.id + "/treatment/new"}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
-                      </OverlayTrigger> : ""}
+                      </OverlayTrigger> : ""} */}
                     </div>
                   </ListGroup.Item>
                   <ListGroup.Item active={"diagnostics" === activeOrders} className="text-center" style={{textTransform:"capitalize", cursor:'pointer', paddingLeft:"5px", paddingRight:"5px"}} onClick={() => setActiveOrders("diagnostics")}>
                     <div style={{marginTop:"-3px", marginLeft:"-1px", paddingLeft:"10px", paddingRight:"10px"}}>
                       Diagnostics ({data.diagnostic_objects.length})
-                      {activeOrders === 'diagnostics' ? <OverlayTrigger
+                      {/* {activeOrders === 'diagnostics' ? <OverlayTrigger
                         key={"order-diagnostic"}
                         placement="top"
                         overlay={
@@ -385,13 +440,13 @@ function MedicalRecordDetails({ id, incident, organization }) {
                         }
                       >
                         <Link href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.id + "/diagnostics"}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
-                      </OverlayTrigger> : ""}
+                      </OverlayTrigger> : ""} */}
                     </div>
                   </ListGroup.Item>
                   <ListGroup.Item active={"procedures" === activeOrders} className="text-center" style={{textTransform:"capitalize", cursor:'pointer', paddingLeft:"5px", paddingRight:"5px"}} onClick={() => setActiveOrders("procedures")}>
                     <div style={{marginTop:"-3px", marginLeft:"-1px", paddingLeft:"10px", paddingRight:"10px"}}>
                       Procedures ({data.procedure_objects.length})
-                      {activeOrders === 'procedures' ? <OverlayTrigger
+                      {/* {activeOrders === 'procedures' ? <OverlayTrigger
                         key={"order-procedure"}
                         placement="top"
                         overlay={
@@ -401,33 +456,46 @@ function MedicalRecordDetails({ id, incident, organization }) {
                         }
                       >
                         <Link href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.id + "/procedures"}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
-                      </OverlayTrigger> : ""}
+                      </OverlayTrigger> : ""} */}
                     </div>
                   </ListGroup.Item>
                 </ListGroup>
+                {"pending" !== activeOrders ?
+                  <input
+                    id="hide_completed"
+                    name="hide_completed"
+                    type="checkbox"
+                    className="ml-3"
+                    checked={hideCompleted}
+                    onChange={() => {
+                      setHideCompleted(!hideCompleted)
+                    }}
+                    style={{marginTop:"-10px"}}
+                  />: ""}
+                  {"pending" !== activeOrders ?
+                  <span style={{fontSize:"16px"}}>&nbsp;&nbsp;Hide Completed</span> : ""}
+                </Row>
               </h4>
             </Card.Title>
             <hr className="mb-3" />
             <Scrollbar no_shadow="true" style={{height:"564px", minHeight:"564px"}} renderView={props => <div {...props} style={{...props.style, overflowX:"hidden", marginBottom:"-10px"}}/>}  renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
-            {activeOrders === 'pending' && data.treatment_requests.filter(tr => tr.status === 'Pending').sort((a, b) => new Date(a.suggested_admin_time) - new Date(b.suggested_admin_time)).map(treatment_request => (
-              <TreatmentCard key={treatment_request.id} incident={incident} organization={organization} treatment_request={treatment_request} />
+            {activeOrders === 'pending' && data.pending.filter(pending => pending.status === 'Pending').sort((a, b) => new Date(a.suggested_admin_time ? a.suggested_admin_time : a.open) - new Date(b.suggested_admin_time ? b.suggested_admin_time : b.open)).map(pending => (
+              <span>
+              {pending.type === 'treatment' ? <TreatmentCard key={pending.id} incident={incident} organization={organization} treatment_request={pending} />
+              :pending.type === 'diagnostic' ? <DiagnosticCard key={pending.id} incident={incident} organization={organization} diagnostic={pending} />
+              :pending.type === 'procedure' ? <ProcedureCard key={pending.id} incident={incident} organization={organization} procedure={pending} />
+              :""}
+              </span>
             ))}
-            {activeOrders === 'pending' && data.diagnostic_objects.filter(diagnostic => diagnostic.status === 'Pending').map(diagnostic => (
-              <DiagnosticCard key={diagnostic.id} incident={incident} organization={organization} diagnostic={diagnostic} />
-            ))}
-            {activeOrders === 'pending' && data.procedure_objects.filter(procedure => procedure.status === 'Pending').map(procedure => (
-              <ProcedureCard key={procedure.id} incident={incident} organization={organization} procedure={procedure} />
-            ))}
-            
-            {activeOrders === 'treatments' && data.treatment_requests.sort((a, b) => new Date(a.suggested_admin_time) - new Date(b.suggested_admin_time)).map(treatment_request => (
+            {activeOrders === 'treatments' && data.treatment_requests.filter(tr => (!hideCompleted ? tr : tr.status !== 'Completed')).sort((a, b) => new Date(a.suggested_admin_time) - new Date(b.suggested_admin_time)).map(treatment_request => (
               <TreatmentCard key={treatment_request.id} incident={incident} organization={organization} treatment_request={treatment_request} />
             ))}
             {activeOrders === 'treatments' && data.treatment_requests.length < 1 ? <p>No treatments have been created for this patient.</p> : ""}
-            {activeOrders === 'diagnostics' && data.diagnostic_objects.map(diagnostic => (
+            {activeOrders === 'diagnostics' && data.diagnostic_objects.sort((a, b) => new Date(a.open) - new Date(b.open)).map(diagnostic => (
               <DiagnosticCard key={diagnostic.id} incident={incident} organization={organization} diagnostic={diagnostic} />
             ))}
             {activeOrders === 'diagnostics' && data.diagnostic_objects.length < 1 ? <p>No diagnostics have been ordered for this patient.</p> : ""}
-            {activeOrders === 'procedures' && data.procedure_objects.map(procedure => (
+            {activeOrders === 'procedures' && data.procedure_objects.sort((a, b) => new Date(a.open) - new Date(b.open)).map(procedure => (
               <ProcedureCard key={procedure.id} incident={incident} organization={organization} procedure={procedure} />
             ))}
             {activeOrders === 'procedures' && data.procedure_objects.length < 1 ? <p>No procedures have been ordered for this patient.</p> : ""}
