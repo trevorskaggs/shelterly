@@ -39,10 +39,31 @@ const TreatmetRequestForm = (props) => {
   })
 
   const [assigneeChoices, setAssigneeChoices] = useState([]);
+  const [treatmentChoices, setTreatmentChoices] = useState([]);
 
   useEffect(() => {
     let unmounted = false;
     let source = axios.CancelToken.source();
+
+    const fetchTreatments = async () => {
+      // Fetch Treatment data.
+      await axios.get('/vet/api/treatment/', {
+        cancelToken: source.token,
+      })
+      .then(response => {
+        if (!unmounted) {
+          let treatment_options = [];
+          response.data.forEach(function(treatment) {
+            treatment_options.push({value: treatment.id, label: treatment.description, category:treatment.category, unit:treatment.unit, routes:treatment.routes});
+          });
+          setTreatmentChoices(treatment_options);
+        }
+      })
+      .catch(error => {
+        setShowSystemError(true);
+      });
+    };
+    fetchTreatments();
 
     const fetchTreatmentRequest = async () => {
       // Fetch TreatmentRequest data.
@@ -98,6 +119,8 @@ const TreatmetRequestForm = (props) => {
         suggested_admin_time: Yup.string().required('Required'),
         actual_admin_time: Yup.string().nullable(),
         notes: Yup.string().nullable(),
+        quantity: Yup.number().positive('Must be positive').required('Required'),
+        route: Yup.string().nullable(),
       })}
       onSubmit={(values, { setSubmitting }) => {
         if (props.id) {
@@ -126,7 +149,7 @@ const TreatmetRequestForm = (props) => {
           <Card.Body>
             <Form>
               <FormGroup>
-                <Row>
+                <BootstrapForm.Row>
                   <TextInput
                     id="quantity"
                     name="quantity"
@@ -134,8 +157,40 @@ const TreatmetRequestForm = (props) => {
                     xs="2"
                     label="Quantity"
                   />
-                </Row>
-                <Row>
+                  {/* <Col xs={"1"}>
+                    <DropDown
+                      label="Unit"
+                      id="unitDropdown"
+                      name="unit"
+                      type="text"
+                      key={`my_unique_unit_select_key__${formikProps.values.unit}`}
+                      options={treatmentChoices.length > 0 && formikProps.values.treatment ? treatmentChoices.filter(choice => choice.value === formikProps.values.treatment).map(choice => ({'value':choice.unit, 'label':choice.unit})) : [{'value':'', 'label':''}]}
+                      value={formikProps.values.unit||data.unit}//||treatmentChoices.filter(choice => choice.value === formikProps.values.treatment)[0].unit}
+                      isClearable={false}
+                      onChange={(instance) => {
+                        formikProps.setFieldValue("unit", instance === null ? '' : instance.value);
+                      }}
+                      placeholder=""
+                      disabled={true}
+                    />
+                  </Col> */}
+                  <Col xs={"2"}>
+                    <DropDown
+                      label="Route"
+                      id="routeDropdown"
+                      name="route"
+                      type="text"
+                      key={`my_unique_route_select_key__${formikProps.values.route}`}
+                      options={treatmentChoices.length > 0 && formikProps.values.treatment && treatmentChoices.filter(choice => Number(choice.value) === Number(formikProps.values.treatment))[0].routes.length > 0 ? treatmentChoices.filter(choice => Number(choice.value) === Number(formikProps.values.treatment))[0].routes.map(route => ({'value':route, 'label':route})) : [{'value':'', 'label':''}]}
+                      value={formikProps.values.route||data.route}
+                      isClearable={false}
+                      onChange={(instance) => {
+                        formikProps.setFieldValue("route", instance === null ? '' : instance.value);
+                      }}
+                    />
+                  </Col>
+                </BootstrapForm.Row>
+                <BootstrapForm.Row>
                   <Col xs={"6"}>
                     <DropDown
                       label="Administrator"
@@ -151,8 +206,8 @@ const TreatmetRequestForm = (props) => {
                       disabled={formikProps.values.not_administered}
                     />
                   </Col>
-                </Row>
-                <Row className="mt-3 pl-0">
+                </BootstrapForm.Row>
+                <BootstrapForm.Row className="mt-3 pl-0">
                   <DateTimePicker
                     label="Suggested Admin Time"
                     name="suggested_admin_time"
@@ -164,8 +219,8 @@ const TreatmetRequestForm = (props) => {
                     value={formikProps.values.suggested_admin_time||null}
                     disabled={true}
                   />
-                </Row>
-                <Row className="mt-3">
+                </BootstrapForm.Row>
+                <BootstrapForm.Row className="mt-3">
                   <DateTimePicker
                     label="Actual Admin Time"
                     name="actual_admin_time"
@@ -178,8 +233,8 @@ const TreatmetRequestForm = (props) => {
                     value={formikProps.values.actual_admin_time||null}
                     disabled={formikProps.values.not_administered}
                   />
-                </Row>
-                <Row className="mt-3" style={{marginBottom:"-15px"}}>
+                </BootstrapForm.Row>
+                <BootstrapForm.Row className="mt-3" style={{marginBottom:"-15px"}}>
                   <TextInput
                     as="textarea"
                     label="Notes"
@@ -189,9 +244,9 @@ const TreatmetRequestForm = (props) => {
                     rows={4}
                     value={formikProps.values.notes || ''}
                   />
-                </Row>
+                </BootstrapForm.Row>
                 <BootstrapForm.Label className="mt-3">Not Administered</BootstrapForm.Label>
-                <Row className="mb-0 ml-0">
+                <BootstrapForm.Row className="mb-0 ml-0">
                   <Checkbox
                     id="not_administered"
                     name={"not_administered"}
@@ -208,7 +263,7 @@ const TreatmetRequestForm = (props) => {
                       marginTop:"0px"
                     }}
                   />
-                </Row>
+                </BootstrapForm.Row>
               </FormGroup>
             </Form>
           </Card.Body>

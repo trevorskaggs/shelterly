@@ -902,7 +902,7 @@ const AnimalForm = (props) => {
                     xs="6"
                   />
                 </BootstrapForm.Row>
-                <BootstrapForm.Row hidden={id} style={{marginBottom:is_intake ? "" : "-15px", marginTop:is_intake ? "-15px" : ""}}>
+                <BootstrapForm.Row hidden={id} style={{marginBottom:is_intake ? "" : "-15px"}}>
                   <TextInput
                     id="number_of_animals"
                     name="number_of_animals"

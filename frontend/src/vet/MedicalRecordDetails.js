@@ -25,6 +25,7 @@ import {
 import {
   faDiamondExclamation,
   faEyeDropper,
+  faClipboardListCheck,
   faPrescriptionBottlePill,
   faSquareExclamation,
   faSquareEllipsis,
@@ -160,7 +161,7 @@ function MedicalRecordDetails({ id, incident, organization }) {
                     isLoading={isLoading}
                     className="text-white d-block py-1 px-3"
                   >
-                    <FontAwesomeIcon icon={faStethoscope} className="mr-1" inverse />
+                    <FontAwesomeIcon icon={faClipboardListCheck} className="mr-2" inverse />
                     Add Diagnosis
                   </LoadingLink> : ""}
                 </ActionsDropdown>
@@ -269,26 +270,15 @@ function MedicalRecordDetails({ id, incident, organization }) {
                         </Row>
                       </ListGroup.Item>
                     ))}
-                    {/* <OverlayTrigger
-                      key={"caution"}
-                      placement="top"
-                      overlay={
-                        <Tooltip id={`tooltip-caution`}>
-                          Open a new VR.
-                        </Tooltip>
-                      }
-                    >
-                      <Link href={"/" + organization + "/" + incident + "/animals/" + data.animal_object.id_for_incident + "/vetrequest/new"} style={{marginLeft:"-1px", marginRight:"3px"}}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" size="2x" transform={"grow-2"} style={{color:"#a52b44"}} inverse /></Link>
-                    </OverlayTrigger> */}
-                    <ListGroup.Item className="border rounded" style={{backgroundColor:"rgb(158, 153, 153)"}}>
+                    {data.exams.length ? <ListGroup.Item className="border rounded" style={{backgroundColor:"rgb(158, 153, 153)"}}>
                       <Row style={{width:"77px"}}>
                         <div style={{marginTop:"-3px", marginLeft:"4px"}}>Exams:</div>
                         {/* <FontAwesomeIcon icon={faChevronCircleRight} hidden={showExam} onClick={() => {setShowExam(true)}} className="ml-1" size="sm" style={{cursor:'pointer'}} inverse />
                         <FontAwesomeIcon icon={faChevronCircleDown} hidden={!showExam} onClick={() => {setShowExam(false)}} className="ml-1" size="sm" style={{cursor:'pointer'}} inverse /> */}
                       </Row>
-                    </ListGroup.Item>
+                    </ListGroup.Item> : ""}
                     {data.exams.map((exam,i) => (
-                    <ListGroup horizontal key={exam.id}>
+                    <ListGroup horizontal key={exam.id} className="border rounded">
                       <ListGroup.Item key={exam.id} active={exam.id === activeExam} style={{textTransform:"capitalize", cursor:'pointer', paddingLeft:"5px", paddingRight:"5px"}} onClick={() => {setActiveExam(exam.id);setActiveVR(null);exam.id === activeExam ? setShowExam(!showExam) : setShowExam(true);}}>
                         <div className="text-center" style={{marginTop:"-3px", width:"70px"}}>
                           {moment(exam.open).format('MM/DD')}
@@ -354,20 +344,9 @@ function MedicalRecordDetails({ id, incident, organization }) {
               <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
               {vet_request.caution ? <div className="alert text-center w-100" style={{fontSize:"16px", marginTop:"-3px", marginRight:"15px", marginBottom:"0px", borderRadius:".25rem", backgroundColor:"#cb3636"}}>Use caution when interacting with this animal.</div> : ""}
                 <ListGroup.Item>
-                  <div className="row" style={{textTransform:"capitalize"}}>
-                    <span className="col-3"><b>ID:</b> <Link href={"/" + organization + "/" + incident + "/vet/vetrequest/" + vet_request.id} className="text-link" style={{textDecoration:"none", color:"white"}}>VR#{vet_request.id}</Link></span>
-                    <span className="col-4"><b>Opened:</b> {moment(vet_request.open).format('lll')}</span>
-                    <span className="col-5"><b>Opener:</b> {vet_request.requested_by_object ? <span>{vet_request.requested_by_object.first_name + ' ' + vet_request.requested_by_object.last_name}</span> : "Unknown"}</span>
-                  </div>
-                </ListGroup.Item>
-                <ListGroup.Item>
-                  <div className="row">
+                  <div className="row" style={{textTransform:"capitalize", marginBottom:vet_request.status !== 'Open' ? "0px" : "-10px"}}>
+                    <span className="col-2"><b>ID:</b> <Link href={"/" + organization + "/" + incident + "/vet/vetrequest/" + vet_request.id} className="text-link" style={{textDecoration:"none", color:"white"}}>VR#{vet_request.id}</Link></span>
                     <span className="col-3"><b>Priority:</b> {priorityText[vet_request.priority]}</span>
-                    <span className="col-9"><b>Complaints:</b> {vet_request.complaints_text}</span>
-                  </div>
-                </ListGroup.Item>
-                <ListGroup.Item>
-                  <div className="row" style={{marginBottom:vet_request.status !== 'Open' ? "0px" : "-10px"}}>
                     {vet_request.status === 'Open' ?
                     <span className="col-3">
                       <span className="ml-auto mr-3">
@@ -387,7 +366,18 @@ function MedicalRecordDetails({ id, incident, organization }) {
                         </Link>
                       </span>
                     </span> : ""}
-                    <span className="col-9"><b>Concern:</b> {vet_request.concern || "None"}</span>
+                  </div>
+                </ListGroup.Item>
+                <ListGroup.Item>
+                  <div className="row">
+                    <span className="col-5"><b>Opened:</b> {moment(vet_request.open).format('lll')}</span>
+                    <span className="col-5"><b>Opened by:</b> {vet_request.requested_by_object ? <span>{vet_request.requested_by_object.first_name + ' ' + vet_request.requested_by_object.last_name}</span> : "Unknown"}</span>
+                  </div>
+                </ListGroup.Item>
+                <ListGroup.Item>
+                  <div className="row">
+                    <span className="col-5"><b>Complaints:</b> {vet_request.complaints_text}</span>
+                    <span className="col-7"><b>Concern:</b> {vet_request.concern || "None"}</span>
                   </div>
                 </ListGroup.Item>
               </ListGroup>

@@ -191,7 +191,7 @@ function AnimalDetails({ id, incident, organization }) {
         <Card className="border rounded d-flex" style={{width:"100%", marginBottom:"16px"}}>
           <Card.Body style={{marginTop:"-10px"}}>
             <div className="d-flex justify-content-between">
-              <h4 className="h5 mb-0 pb-0 pt-2">Information
+              <h4 className="h5 pt-2" style={{marginBottom:"10px"}}>Information
               {data.confined === 'yes' ?
                 <OverlayTrigger
                   key={"confined"}

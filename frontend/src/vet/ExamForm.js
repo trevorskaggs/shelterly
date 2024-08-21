@@ -361,6 +361,7 @@ const ExamForm = (props) => {
       onSubmit={(values, { setSubmitting }) => {
         values['animal_id'] = data.animal_object.id;
         values['vetrequest_id'] = vetrequest_id;
+        values['organization'] = state.organization.id;
         if (props.id || values.exam) {
           axios.put('/vet/api/exam/' + (props.id || values.exam) + '/', values)
           .then(response => {

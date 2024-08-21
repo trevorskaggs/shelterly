@@ -83,8 +83,8 @@ function Patient(props) {
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
               <ListGroup.Item>
                 <div className="row">
-                  <span className="col-6"><b>ID: </b><Link href={"/" + props.organization + "/" + props.incident + "/vet/vetrequest/" + props.vet_request.id} className="text-link" style={{textDecoration:"none", color:"white"}}>VR#{props.vet_request.id}</Link></span>
-                  <span className="col-6"><b>Priority: </b>{priorityText[props.vet_request.priority]}</span>
+                  <span className="col-5"><b>ID: </b><Link href={"/" + props.organization + "/" + props.incident + "/vet/vetrequest/" + props.vet_request.id} className="text-link" style={{textDecoration:"none", color:"white"}}>VR#{props.vet_request.id}</Link></span>
+                  <span className="col-7"><b>Priority: </b>{priorityText[props.vet_request.priority]}</span>
                 </div>
               </ListGroup.Item>
               <ListGroup.Item>

@@ -86,7 +86,7 @@ function VetRequestDetails({ id, incident, organization }) {
         <Card className="border rounded d-flex" style={{width:"100%"}}>
           <Card.Body style={{marginTop:"-10px"}}>
             <div className="d-flex justify-content-between">
-              <h4 className="h5 mb-0 pb-0 pt-2">
+              <h4 className="h5 pt-2" style={{marginBottom:"10px"}}>
                 <Row className="ml-0 pr-0">
                 Information
                 {data.caution ? <OverlayTrigger
@@ -134,10 +134,11 @@ function VetRequestDetails({ id, incident, organization }) {
                   {data.status !== 'Canceled' ? <LoadingLink
                       href={"/" + organization + "/" + incident + "/vet/vetrequest/edit/" + id}
                       isLoading={isLoading}
-                      className="text-white d-block py-1 px-3"
+                      className="text-white d-block py-1"
+                      style={{marginLeft:"12px"}}
                     >
                       <FontAwesomeIcon icon={faEdit} className="mr-1" inverse />
-                      Update Vet Request
+                      Update Veterinary Request
                     </LoadingLink> : ""}
                   {data.status === 'Open' ? <LoadingLink
                       onClick={() => {setShowModal(true)}}
@@ -145,7 +146,7 @@ function VetRequestDetails({ id, incident, organization }) {
                       className="text-white d-block py-1 px-3"
                     >
                       <FontAwesomeIcon icon={faTimes} className="mr-2" style={{cursor:'pointer'}} transform='grow-3' inverse />
-                      Cancel veterinary request
+                      Cancel Veterinary Request
                     </LoadingLink> : ""}
                 </ActionsDropdown>
               )}
@@ -161,7 +162,7 @@ function VetRequestDetails({ id, incident, organization }) {
               <ListGroup.Item>
                 <div className="row">
                   <span className="col-6">
-                    <b>Opener:</b> {data.requested_by_object ? <span>{data.requested_by_object.first_name} {data.requested_by_object.last_name}</span> : "Unknown"}
+                    <b>Opened by:</b> {data.requested_by_object ? <span>{data.requested_by_object.first_name} {data.requested_by_object.last_name}</span> : "Unknown"}
                   </span>
                   <span className="col-6">
                     <b>Opened: </b><Moment format="ll">{data.open}</Moment>
@@ -182,7 +183,7 @@ function VetRequestDetails({ id, incident, organization }) {
         <Card className="border rounded" style={{width:"100%"}}>
           <Card.Body>
             <Card.Title>
-              <h4 className="h5 pb-0" style={{marginBottom:"-7px"}}>Patient: {data.animal_object.name||"Unknown"}
+              <h4 className="h5 pb-0" style={{marginBottom:"-3px"}}>Patient: {data.animal_object.name||"Unknown"}
               <span className="float-right">
                 <OverlayTrigger
                   key={"medical-record"}
