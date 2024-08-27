@@ -2,23 +2,83 @@ import React, { useContext, useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { Link, navigate } from 'raviger';
 import { ButtonGroup, Card, Col, Form as BootstrapForm, ListGroup, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
-import { Form, Formik } from 'formik';
+import { Field, Form, Formik } from 'formik';
 import * as Yup from 'yup';
+import { Switch } from 'formik-material-ui';
+import Select from 'react-select';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faClipboardList, faArrowAltCircleLeft, faCommentDots, faBan, faMedkit
 } from '@fortawesome/free-solid-svg-icons';
+import { DropDown, TextInput } from '../components/Form';
 import { faBadgeSheriff, faClawMarks } from '@fortawesome/pro-solid-svg-icons';
-import { DropDown } from '../components/Form';
 import Header from '../components/Header';
 import ButtonSpinner from '../components/ButtonSpinner';
 import { SystemErrorContext } from '../components/SystemError';
 import { statusLabelLookup } from "../utils/formatString";
 
+const customStyles = {
+  // For the select it self, not the options of the select
+  control: (styles, { isDisabled}) => {
+    return {
+      ...styles,
+      color: '#FFF',
+      cursor: isDisabled ? 'not-allowed' : 'default',
+      backgroundColor: isDisabled ? '#DFDDDD' : 'white',
+      height: 35,
+      minHeight: 35
+    }
+  },
+  option: provided => ({
+    ...provided,
+    color: 'black'
+  }),
+  // singleValue: (styles, { isDisabled }) => ({
+  //   ...styles,
+  //   color: isDisabled ? '#595959' : 'black'
+  // }),
+};
+
 function AnimalStatus(props) {
+
+  const { setShowSystemError } = useContext(SystemErrorContext);
+
+  const [presentingComplaintChoices, setPresentingComplaintChoices] = useState([]);
 
   const roomRef = useRef(null);
   const shelterRef = useRef(null);
+
+  // Hook for initializing data.
+  useEffect(() => {
+    let unmounted = false;
+    let source = axios.CancelToken.source();
+
+    const fetchPresentingComplaints = async () => {
+      // Fetch assignee data.
+      await axios.get('/vet/api/complaints/', {
+        cancelToken: source.token,
+      })
+      .then(response => {
+        if (!unmounted) {
+          let options = [];
+          response.data.forEach(function(complaint) {
+            options.push({value: complaint.id, label: complaint.name})
+          });
+          setPresentingComplaintChoices(options);
+        }
+      })
+      .catch(error => {
+        setShowSystemError(true);
+      });
+    };
+    fetchPresentingComplaints();
+
+    // Cleanup.
+    return () => {
+      unmounted = true;
+      source.cancel();
+    };
+  }, []);
 
   return (
     <>
@@ -187,6 +247,80 @@ function AnimalStatus(props) {
       </Col>
     </Row>
     : ""}
+    {props.formikProps.values && props.formikProps.values.sr_updates[props.index] && props.formikProps.values.sr_updates[props.index].animals[props.inception] && props.formikProps.values.sr_updates[props.index].animals[props.inception].status === 'SHELTERED' ?
+    <span><BootstrapForm.Row style={{marginLeft:"-15px"}}>
+      <Col xs={"4"} className="mt-3 pl-0" style={{marginLeft:"-5px"}}>
+        <DropDown
+          label="Triage"
+          id={`sr_updates.${props.index}.animals.${props.inception}.priority`}
+          name={`sr_updates.${props.index}.animals.${props.inception}.priority`}
+          type="text"
+          options={[
+            { value: 'green', label: 'Green (No Problem)' },
+            { value: 'when_available', label: 'Yellow (When Available)' },
+            { value: 'urgent', label: 'Red (Urgent)' },
+          ]}
+          value={`sr_updates.${props.index}.animals.${props.inception}.priority`}
+          isClearable={false}
+          onChange={(instance) => {
+            props.formikProps.setFieldValue(`sr_updates.${props.index}.animals.${props.inception}.priority`, instance === null ? '' : instance.value);
+          }}
+        />
+      </Col>
+    </BootstrapForm.Row>
+    {props.formikProps.values.sr_updates[props.index].animals[props.inception].priority !== 'green' ? <BootstrapForm.Row className="mt-3 mb-3" style={{marginLeft:"-15px"}}>
+      <Col xs={"8"} className="pl-0" style={{marginLeft:"-5px"}}>
+        <label>Presenting Complaints*</label>
+        <Select
+          id={`sr_updates.${props.index}.animals.${props.inception}.presenting_complaints`}
+          name={`sr_updates.${props.index}.animals.${props.inception}.presenting_complaints`}
+          type="text"
+          styles={customStyles}
+          isMulti
+          options={presentingComplaintChoices}
+          value={presentingComplaintChoices.filter(choice => props.formikProps.values.sr_updates[props.index].animals[props.inception].presenting_complaints && props.formikProps.values.sr_updates[props.index].animals[props.inception].presenting_complaints.includes(choice.value))}
+          isClearable={true}
+          onChange={(instance) => {
+            let values = [];
+            instance && instance.forEach(option => {
+              values.push(option.value);
+            })
+            props.formikProps.setFieldValue(`sr_updates.${props.index}.animals.${props.inception}.presenting_complaints`, instance === null ? [] : values);
+          }}
+        />
+        {props.formikProps.errors['presenting_complaints'] ? <div style={{ color: "#e74c3c", marginTop: ".5rem", fontSize: "80%" }}>{props.formikProps.errors['presenting_complaints']}</div> : ""}
+      </Col>
+    </BootstrapForm.Row>: ""}
+    {presentingComplaintChoices.length && props.formikProps.values.sr_updates[props.index].animals[props.inception].presenting_complaints && props.formikProps.values.sr_updates[props.index].animals[props.inception].presenting_complaints.includes(presentingComplaintChoices.filter(option => option.label === 'Other')[0].value) ?
+    <BootstrapForm.Row className="pl-0" style={{marginLeft:"-15px"}}>
+      <TextInput
+        type="text"
+        label="Other Presenting Complaint"
+        name={`sr_updates.${props.index}.animals.${props.inception}.complaints_other`}
+        id={`sr_updates.${props.index}.animals.${props.inception}.complaints_other`}
+        xs="6"
+        style={{marginLeft:"-5px"}}
+      />
+    </BootstrapForm.Row>
+    : ""}
+    {props.formikProps.values.sr_updates[props.index].animals[props.inception].priority !== 'green' ? <Row className="pl-0" style={{marginLeft:"-30px"}}>
+      <TextInput
+        as="textarea"
+        label="Concern"
+        name={`sr_updates.${props.index}.animals.${props.inception}.concern`}
+        id={`sr_updates.${props.index}.animals.${props.inception}.concern`}
+        xs="8"
+        rows={4}
+        style={{marginLeft:"-5px"}}
+      />
+    </Row> : ""}
+    {props.formikProps.values.sr_updates[props.index].animals[props.inception].priority !== 'green' ? <Row className="pl-0" style={{marginBottom:"-15px", marginLeft:"-30px"}}>
+      <Col xs="2" style={{marginLeft:"-5px", marginBottom:"3px"}}>
+        <BootstrapForm.Label htmlFor="caution" style={{marginBottom:"-5px"}}>Use Caution</BootstrapForm.Label>
+        <div style={{marginLeft:"-3px"}}><Field component={Switch} name={`sr_updates.${props.index}.animals.${props.inception}.caution`} type="checkbox" color="primary" /></div>
+      </Col>
+    </Row> : ""}
+    </span> : ""}
     </>
   )
 }
@@ -240,9 +374,11 @@ function ShelterIntake({ id, incident, organization }) {
                     animals: Object.keys(assigned_request.animals).map(animal_id => {return {
                       ...assigned_request.animals[animal_id],
                       id:animal_id,
+                      id_for_incident:assigned_request.animals[animal_id].id_for_incident,
                       request:assigned_request.service_request_object.id,
                       shelter:assigned_request.animals[animal_id].shelter || '',
-                      room:assigned_request.animals[animal_id].room || ''
+                      room:assigned_request.animals[animal_id].room || '',
+                      priority:'green'
                     }}),
                   });
                 });

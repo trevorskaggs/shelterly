@@ -64,12 +64,12 @@ function VetRequestSearch({ incident, organization }) {
     tab = 'vet_requests',
   } = queryParams;
 
-  const priorityText = {urgent:'Urgent', when_available:'When Available'};
+  const priorityText = {urgent:'Urgent (Red)', when_available:'When Available (Yellow)'};
   const labelLookup = {vet_requests:'Veterinary Requests', treatments:'Treatments', diagnostics:'Diagnostics', procedures:'Procedures'};
 
   const priorityChoices = [
-    { value: 'urgent', label: 'Urgent' },
-    { value: 'when_available', label: 'When Available' },
+    { value: 'urgent', label: 'Urgent (Red)' },
+    { value: 'when_available', label: 'When Available (Yellow)' },
   ];
 
   const statusChoices = [

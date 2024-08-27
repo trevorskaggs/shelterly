@@ -5,13 +5,13 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faNotesMedical, faUserAlt, faUserAltSlash, faCircle, faExclamationCircle, faQuestionCircle, faHome, faHeart, faSkullCrossbones
 } from '@fortawesome/free-solid-svg-icons';
-import { faBadgeSheriff, faCircleBolt, faClawMarks, faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
+import { faFolderMedical, faCircleBolt, faClawMarks, faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
 
 function Patient(props) {
 
   const [showModal, setShowModal] = useState(false);
 
-  const priorityText = {urgent:'Urgent', when_available:'When Available'};
+  const priorityText = {urgent:'Urgent (Red)', when_available:'When Available (Yellow)'};
 
   return (
     <>
@@ -23,6 +23,19 @@ function Patient(props) {
               <h4 className="mb-0">
                 <Row className="ml-0 pr-0">
                   Patient: {props.animal.name||"Unknown"}
+                  <span className="ml-auto" style={{paddingRight:"15px"}}>
+                    <OverlayTrigger
+                      key={"medical-record"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-medical-record`}>
+                          View patient medical record.
+                        </Tooltip>
+                      }
+                    >
+                      <Link href={"/" + props.organization + "/" + props.incident + "/vet/medrecord/" + props.animal.medical_record} style={{textDecoration:"none", color:"white"}}><FontAwesomeIcon icon={faFolderMedical} className="" inverse /></Link>
+                    </OverlayTrigger>
+                  </span>
                 </Row>
               </h4>
             </Card.Title>
@@ -48,20 +61,9 @@ function Patient(props) {
                 </div>
               </ListGroup.Item> */}
               <ListGroup.Item>
-                <div className="row" style={{textTransform:"capitalize"}}>
+                <div className="row">
                   <span className="col-12">
-                    <b>Medical Record:</b> <Link href={"/" + props.organization + "/" + props.incident + "/vet/medrecord/" + props.animal.medical_record} className="text-link" style={{textDecoration:"none", color:"white"}}>MR#{props.animal.medical_record}</Link>
-                    {props.animal.medical_notes ? <OverlayTrigger
-                      key={"edit"}
-                      placement="bottom"
-                      overlay={
-                        <Tooltip id={`tooltip-edit`}>
-                          Click to view animal medical notes.
-                        </Tooltip>
-                      }
-                    >
-                      <FontAwesomeIcon icon={faNotesMedical} className="ml-1" onClick={() => {setShowModal(true)}} style={{cursor:'pointer'}} inverse />
-                    </OverlayTrigger> : ""}
+                    <b>Medical Notes: </b>{props.animal.medical_notes ? props.animal.medical_notes : "N/A"}
                   </span>
                 </div>
               </ListGroup.Item>
@@ -81,8 +83,8 @@ function Patient(props) {
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
               <ListGroup.Item>
                 <div className="row">
-                  <span className="col-6"><b>ID: </b><Link href={"/" + props.organization + "/" + props.incident + "/vet/vetrequest/" + props.vet_request.id} className="text-link" style={{textDecoration:"none", color:"white"}}>VR#{props.vet_request.id}</Link></span>
-                  <span className="col-6"><b>Priority: </b>{priorityText[props.vet_request.priority]}</span>
+                  <span className="col-5"><b>ID: </b><Link href={"/" + props.organization + "/" + props.incident + "/vet/vetrequest/" + props.vet_request.id} className="text-link" style={{textDecoration:"none", color:"white"}}>VR#{props.vet_request.id}</Link></span>
+                  <span className="col-7"><b>Priority: </b>{priorityText[props.vet_request.priority]}</span>
                 </div>
               </ListGroup.Item>
               <ListGroup.Item>
@@ -94,7 +96,22 @@ function Patient(props) {
             </ListGroup>
           </Card.Body>
         </Card>
-      </div> : ""}
+      </div> : props.medical_plan ? <div className="col-6 d-flex pl-0">
+        <Card className="border rounded d-flex" style={{width:"100%"}}>
+          <Card.Body>
+            <Card.Title>
+              <h4 className="mb-0">
+                Medical Plan
+              </h4>
+            </Card.Title>
+            <hr/>
+            <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px", whiteSpace:"pre-line"}}>
+              <ListGroup.Item>
+                {props.medical_plan}
+              </ListGroup.Item>
+            </ListGroup>
+          </Card.Body>
+        </Card></div> : ""}
       {props.vet_request && props.vet_request.caution ? <div className="alert text-center w-100" style={{fontSize:"16px", marginLeft:"15px", marginRight:"15px", marginBottom:"-5px", backgroundColor:"#cb3636"}}>Use caution when interacting with this animal.</div> : ""}
     </div>
     <Modal show={showModal} onHide={() => setShowModal(false)}>

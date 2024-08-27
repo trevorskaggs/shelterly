@@ -177,7 +177,7 @@ class VisitNote(models.Model):
 
     date_completed = models.DateTimeField(blank=True, null=True)
     forced_entry = models.BooleanField(default=False)
-    notes = models.CharField(max_length=500, blank=True)
+    notes = models.TextField(max_length=2500, blank=True)
 
     class Meta:
         ordering = ['-date_completed',]

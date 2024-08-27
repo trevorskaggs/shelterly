@@ -1,9 +1,11 @@
 import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { navigate, useNavigationPrompt, useQueryParams } from 'raviger';
-import { Form, Formik } from "formik";
+import { Field, Form, Formik } from "formik";
+import Select from 'react-select';
 import { ButtonGroup, Card, Col, Image, Form as BootstrapForm } from "react-bootstrap";
 import * as Yup from 'yup';
+import { Switch } from 'formik-material-ui';
 import { AddressSearch, DateTimePicker, DropDown, FileUploader, ImageUploader, TextInput } from '../components/Form.js';
 import { catAgeChoices, dogAgeChoices, horseAgeChoices, otherAgeChoices, catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, sexChoices, dogSizeChoices, catSizeChoices, horseSizeChoices, otherSizeChoices, reportedStatusChoices, unknownChoices, otherAgeChoice } from './constants';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -12,6 +14,28 @@ import ButtonSpinner from "../components/ButtonSpinner";
 import { AuthContext } from "../accounts/AccountsReducer";
 import { SystemErrorContext } from '../components/SystemError';
 import CustomSelect from "../components/CustomSelect.js";
+
+const customStyles = {
+  // For the select it self, not the options of the select
+  control: (styles, { isDisabled}) => {
+    return {
+      ...styles,
+      color: '#FFF',
+      cursor: isDisabled ? 'not-allowed' : 'default',
+      backgroundColor: isDisabled ? '#DFDDDD' : 'white',
+      height: 35,
+      minHeight: 35
+    }
+  },
+  option: provided => ({
+    ...provided,
+    color: 'black'
+  }),
+  // singleValue: (styles, { isDisabled }) => ({
+  //   ...styles,
+  //   color: isDisabled ? '#595959' : 'black'
+  // }),
+};
 
 const AnimalForm = (props) => {
 
@@ -55,6 +79,7 @@ const AnimalForm = (props) => {
   const ageChoices = {'':[], 'dog':dogAgeChoices, 'cat':catAgeChoices, 'horse':horseAgeChoices, 'other':otherAgeChoices}
   const colorChoices = {'':[], 'dog':dogColorChoices, 'cat':catColorChoices, 'horse':horseColorChoices, 'other':otherColorChoices}
   const sizeChoices = {'':[], 'dog':dogSizeChoices, 'cat':catSizeChoices, 'horse':horseSizeChoices, 'other':otherSizeChoices}
+  const [presentingComplaintChoices, setPresentingComplaintChoices] = useState([]);
 
   // Track whether or not to add another animal after saving.
   const [addAnother, setAddAnother] = useState(false);
@@ -82,6 +107,11 @@ const AnimalForm = (props) => {
     injured: 'unknown',
     behavior_notes: '',
     medical_notes: '',
+    priority: 'green',
+    presenting_complaints: [],
+    complaints_other: '',
+    concern: '',
+    caution: false,
     last_seen: null,
     microchip: '',
     number_of_animals: 1,
@@ -221,6 +251,8 @@ const AnimalForm = (props) => {
           if (!unmounted) {
             // Initialize number_of_animals because it's not returned by the serializer.
             response.data['number_of_animals'] = 1;
+            response.data['presenting_complaints'] = [];
+            response.data['priority'] = 'green';
             setData(response.data);
             setPlaceholder("Select...");
             // Turn off reinitialization after form load so that data can be modified for image tracking without causing a form reset.
@@ -268,6 +300,26 @@ const AnimalForm = (props) => {
       });
     };
     fetchShelters();
+
+    const fetchPresentingComplaints = async () => {
+      // Fetch assignee data.
+      await axios.get('/vet/api/complaints/', {
+        cancelToken: source.token,
+      })
+      .then(response => {
+        if (!unmounted) {
+          let options = [];
+          response.data.forEach(function(complaint) {
+            options.push({value: complaint.id, label: complaint.name})
+          });
+          setPresentingComplaintChoices(options);
+        }
+      })
+      .catch(error => {
+        setShowSystemError(true);
+      });
+    };
+    fetchPresentingComplaints();
 
     // Cleanup.
     return () => {
@@ -757,6 +809,76 @@ const AnimalForm = (props) => {
                     xs="12"
                   />
                 </BootstrapForm.Row>
+                {is_intake ? <BootstrapForm.Row>
+                  <Col xs={"4"}>
+                    <DropDown
+                      label="Triage"
+                      id="priorityDropdown"
+                      name="priority"
+                      type="text"
+                      options={[
+                        { value: 'green', label: 'Green (No Problem)' },
+                        { value: 'when_available', label: 'Yellow (When Available)' },
+                        { value: 'urgent', label: 'Red (Urgent)' },
+                      ]}
+                      value={formikProps.values.priority||data.priority}
+                      isClearable={false}
+                      onChange={(instance) => {
+                        formikProps.setFieldValue("priority", instance === null ? '' : instance.value);
+                      }}
+                    />
+                  </Col>
+                </BootstrapForm.Row> : ""}
+                {formikProps.values.priority !== 'green' ? <BootstrapForm.Row className="mt-3 mb-3">
+                  <Col xs={"8"}>
+                    <label>Presenting Complaints*</label>
+                    <Select
+                      id="presenting_complaintsDropdown"
+                      name="presenting_complaints"
+                      type="text"
+                      styles={customStyles}
+                      isMulti
+                      options={presentingComplaintChoices}
+                      value={presentingComplaintChoices.filter(choice => formikProps.values.presenting_complaints.includes(choice.value))}
+                      isClearable={true}
+                      onChange={(instance) => {
+                        let values = [];
+                        instance && instance.forEach(option => {
+                          values.push(option.value);
+                        })
+                        formikProps.setFieldValue("presenting_complaints", instance === null ? [] : values);
+                      }}
+                    />
+                    {formikProps.errors['presenting_complaints'] ? <div style={{ color: "#e74c3c", marginTop: ".5rem", fontSize: "80%" }}>{formikProps.errors['presenting_complaints']}</div> : ""}
+                  </Col>
+                </BootstrapForm.Row>: ""}
+                {presentingComplaintChoices.length && formikProps.values.presenting_complaints.includes(presentingComplaintChoices.filter(option => option.label === 'Other')[0].value) ?
+                <BootstrapForm.Row>
+                  <TextInput
+                    type="text"
+                    label="Other Presenting Complaint"
+                    name="complaints_other"
+                    id="complaints_other"
+                    xs="6"
+                  />
+                </BootstrapForm.Row>
+                : ""}
+                {formikProps.values.priority !== 'green' ? <BootstrapForm.Row className="pl-0">
+                  <TextInput
+                    as="textarea"
+                    label="Concern"
+                    name="concern"
+                    id="concern"
+                    xs="8"
+                    rows={4}
+                  />
+                </BootstrapForm.Row> : ""}
+                {formikProps.values.priority !== 'green' ? <BootstrapForm.Row style={{marginBottom:"-15px"}}>
+                  <Col xs="2">
+                    <BootstrapForm.Label htmlFor="caution" style={{marginBottom:"-5px"}}>Use Caution</BootstrapForm.Label>
+                    <div style={{marginLeft:"-3px"}}><Field component={Switch} name="caution" type="checkbox" color="primary" /></div>
+                  </Col>
+                </BootstrapForm.Row> : ""}
                 <BootstrapForm.Row className={!is_intake ? "mb-3" : ""}>
                   <DateTimePicker
                     label="Last Seen"
@@ -771,7 +893,7 @@ const AnimalForm = (props) => {
                     disabled={false}
                   />
                 </BootstrapForm.Row>
-                <BootstrapForm.Row className="mb-3" hidden={is_intake || id ? false : true}>
+                <BootstrapForm.Row className="mt-3" hidden={is_intake || id ? false : true}>
                   <TextInput
                     id="microchip"
                     name="microchip"
@@ -828,7 +950,7 @@ const AnimalForm = (props) => {
                 </span>
                 <AddressSearch formikProps={formikProps} label="Search for Animal Found Location" hidden={is_intake ? !is_reporter : !Boolean(id)} incident={props.incident} error="Animal Found Location was not selected." />
                 <span hidden={is_workflow && !is_intake}>
-                  <p className={id || is_reporter ? "mb-0" : "mb-0 mt-3"}>Image Files</p>
+                  <p className={"mb-0"}>Image Files</p>
                   <BootstrapForm.Row className="align-items-end">
                     {data.front_image ?
                       <span className="mt-2 ml-1 mr-3">

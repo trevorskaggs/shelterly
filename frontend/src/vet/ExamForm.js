@@ -361,6 +361,7 @@ const ExamForm = (props) => {
       onSubmit={(values, { setSubmitting }) => {
         values['animal_id'] = data.animal_object.id;
         values['vetrequest_id'] = vetrequest_id;
+        values['organization'] = state.organization.id;
         if (props.id || values.exam) {
           axios.put('/vet/api/exam/' + (props.id || values.exam) + '/', values)
           .then(response => {
@@ -407,7 +408,7 @@ const ExamForm = (props) => {
       {formikProps => (
         <Card border="secondary" className="mt-3">
           <Card.Header as="h5" className="pl-3"><span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + (is_workflow ? props.medrecordid : data.medical_record) + '/')} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>Veterinary Exam Form</Card.Header>
-          <Patient animal={data.animal_object} vet_request={vetrequest_id && data.vet_requests.length > 0 ? data.vet_requests.filter(vr => vr.id === Number(vetrequest_id))[0] : data.vet_request_object} organization={props.organization} incident={props.incident} />
+          <Patient animal={data.animal_object} vet_request={vetrequest_id && data.vet_requests.length > 0 ? data.vet_requests.filter(vr => vr.id === Number(vetrequest_id))[0] : data.vet_request_object} organization={props.organization} incident={props.incident} medical_plan={props.state ? props.state.steps.exam.medical_plan : ""} />
           <Card.Body>
             <Form>
               <FormGroup>
