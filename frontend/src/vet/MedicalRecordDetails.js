@@ -162,7 +162,7 @@ function MedicalRecordDetails({ id, incident, organization }) {
                     className="text-white d-block py-1 px-3"
                   >
                     <FontAwesomeIcon icon={faClipboardListCheck} className="mr-2" inverse />
-                    Add Diagnosis
+                    Modify Diagnosis
                   </LoadingLink> : ""}
                 </ActionsDropdown>
             </div>
