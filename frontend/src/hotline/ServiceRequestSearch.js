@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState, useRef } from 'react';
 import axios from "axios";
-import { Link, useQueryParams } from 'raviger';
+import { Link, navigate, useQueryParams } from 'raviger';
 import { Button, ButtonGroup, Card, CardGroup, Col, Collapse, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Pagination, Row, Tooltip } from 'react-bootstrap';
 import moment from 'moment';
 import Select, { components } from 'react-select';
@@ -57,8 +57,6 @@ function ServiceRequestSearch({ incident, organization }) {
 
   const [data, setData] = useState({service_requests: [], isFetching: false});
   const [searchState, setSearchState] = useState({});
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
   const [triggerRefresh, setTriggerRefresh] = useState(false);
   const [searchTerm, setSearchTerm] = useState(search);
   const tempSearchTerm = useRef(null);
@@ -72,6 +70,7 @@ function ServiceRequestSearch({ incident, organization }) {
   const [showFilters, setShowFilters] = useState(false);
   const [isDisabled, setIsDisabled] = useState(true);
   const [options, setOptions] = useState({id:null, priority:null, status:status, open_start:null, open_end:null});
+  const [goToID, setGoToID] = useState('');
   const { markInstances } = useMark();
   const {
     isSubmittingById,
@@ -84,6 +83,10 @@ function ServiceRequestSearch({ incident, organization }) {
   // Update searchTerm when field input changes.
   const handleChange = event => {
     tempSearchTerm.current.value = event.target.value;
+  };
+
+  const handleIDChange = async event => {
+    setGoToID(event.target.value);
   };
 
   // Use searchTerm to filter service_requests.
@@ -213,51 +216,68 @@ function ServiceRequestSearch({ incident, organization }) {
       <Header>Search Service Requests</Header>
       <hr/>
       <Form onSubmit={handleSubmit}>
-        <InputGroup className="mb-3">
-          <FormControl
-            type="text"
-            placeholder="Search"
-            name="searchTerm"
-            onChange={handleChange}
-            ref={tempSearchTerm}
-          />
-          <InputGroup.Append>
-            <Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0"}}>Search
-              <OverlayTrigger
-                key={"search-information"}
-                placement="top"
-                overlay={
-                  <Tooltip id={`tooltip-search-information`}>
-                    Searchable fields: address fields, animal names, and animal owner last names.
-                  </Tooltip>
-                }
-              >
-                <FontAwesomeIcon icon={faInfoCircle} className="ml-1" size="sm" inverse />
-              </OverlayTrigger>
-            </Button>
-          </InputGroup.Append>
-          <Button variant="outline-light" className="ml-1" onClick={() => {setShowFilters(!showFilters)}}>Advanced {showFilters ? <FontAwesomeIcon icon={faChevronDoubleUp} size="sm" /> : <FontAwesomeIcon icon={faChevronDoubleDown} size="sm" />}</Button>
-          <ButtonSpinner
+        <Row>
+          <Col xs="2" style={{maxWidth:"150px", marginRight:"-10px", paddingRight:"0px"}}>
+            <InputGroup>
+              <FormControl
+                type="text"
+                placeholder="ID #"
+                name="searchIDTerm"
+                onChange={handleIDChange}
+              />
+              <InputGroup.Append>
+                <Button variant="outline-light" type="submit" disabled={!goToID} style={{borderRadius:"0 5px 5px 0"}} onClick={(e) => {navigate("/" + organization + "/" + incident + "/hotline/servicerequest/" + goToID)}}>Go</Button>
+              </InputGroup.Append>
+            </InputGroup>
+          </Col>
+          <Col>
+          <InputGroup>
+            <FormControl
+              type="text"
+              placeholder="Search"
+              name="searchTerm"
+              onChange={handleChange}
+              ref={tempSearchTerm}
+            />
+            <InputGroup.Append>
+              <Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0"}}>Search
+                <OverlayTrigger
+                  key={"search-information"}
+                  placement="top"
+                  overlay={
+                    <Tooltip id={`tooltip-search-information`}>
+                      Searchable fields: address fields, animal names, and animal owner last names.
+                    </Tooltip>
+                  }
+                >
+                  <FontAwesomeIcon icon={faInfoCircle} className="ml-1" size="sm" inverse />
+                </OverlayTrigger>
+              </Button>
+            </InputGroup.Append>
+            <Button variant="outline-light" className="ml-1" onClick={() => {setShowFilters(!showFilters)}}>Advanced {showFilters ? <FontAwesomeIcon icon={faChevronDoubleUp} size="sm" /> : <FontAwesomeIcon icon={faChevronDoubleDown} size="sm" />}</Button>
+            <ButtonSpinner
+              variant="outline-light"
+              className="ml-1 mr-1 print-all-btn-icon"
+              onClick={handlePrintAllClick}
+              isSubmitting={isSubmittingById()}
+              isSubmittingText={submittingLabel}
+            >
+              Print All ({`${filteredServiceRequests.length}`})
+              <FontAwesomeIcon icon={faPrint} className="ml-2 text-light" inverse />
+            </ButtonSpinner>
+            <Button
+            key={"download-geojson"}
+            className="pr-1"
+            placement="bottom"
             variant="outline-light"
-            className="ml-1 mr-1 print-all-btn-icon"
-            onClick={handlePrintAllClick}
-            isSubmitting={isSubmittingById()}
-            isSubmittingText={submittingLabel}
-          >
-            Print All ({`${filteredServiceRequests.length}`})
-            <FontAwesomeIcon icon={faPrint} className="ml-2 text-light" inverse />
-          </ButtonSpinner>
-          <Button
-          key={"download-geojson"}
-          className="pr-1"
-          placement="bottom"
-          variant="outline-light"
-          onClick={handleGeoJsonDownload} href="">Download All ({`${filteredServiceRequests.length}`})<FontAwesomeIcon icon={faDownload} className="mx-2 text-light" inverse />
-        </Button>
-        </InputGroup>
+            onClick={handleGeoJsonDownload} href="">Download All ({`${filteredServiceRequests.length}`})<FontAwesomeIcon icon={faDownload} className="mx-2 text-light" inverse />
+          </Button>
+          </InputGroup>
+          </Col>
+        </Row>
         <Collapse in={showFilters}>
           <div>
-          <Card className="border rounded d-flex" style={{width:"100%"}}>
+          <Card className="border rounded d-flex mt-3" style={{width:"100%"}}>
             <Card.Body style={{marginBottom:"-16px"}}>
               <Row>
                 <Col xs={"4"} style={{textTransform:"capitalize"}}>
@@ -338,16 +358,7 @@ function ServiceRequestSearch({ incident, organization }) {
                   </Row>
                 </Col>
                 <Col className="flex-grow-1 pl-0" xs="3">
-                  <FormControl
-                    type="text"
-                    placeholder="SR ID"
-                    name="id"
-                    onChange={(event) => {
-                      setOptions({...options, id: event ? event.target.value : null});
-                    }}
-                    ref={idSearchRef}
-                  />
-                  <Button className="btn btn-primary mt-3" style={{maxHeight:"35px", width:"100%"}} onClick={() => {tempSearchTerm.current.value !== searchTerm ? setSearchTerm(tempSearchTerm.current.value) : handleApplyFilters(data.service_requests);}} disabled={isDisabled}>Apply</Button>
+                  <Button className="btn btn-primary" style={{maxHeight:"35px", width:"100%"}} onClick={() => {tempSearchTerm.current.value !== searchTerm ? setSearchTerm(tempSearchTerm.current.value) : handleApplyFilters(data.service_requests);}} disabled={isDisabled}>Apply</Button>
                   <Button className="mb-3" variant="outline-light" style={{maxHeight:"35px", width:"100%", marginTop:"15px"}} onClick={handleClear}>Clear</Button>
                 </Col>
               </Row>
