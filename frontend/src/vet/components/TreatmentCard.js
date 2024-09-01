@@ -43,7 +43,7 @@ function TreatmentCard(props) {
   return (
     <>
     <Row className="ml-0 mb-3">
-      <Link href={"/" + props.organization + "/" + props.incident + "/vet/treatmentrequest/edit/" + props.treatment_request.id} className="treatment-link" style={{textDecoration:"none", color:"white"}}>
+      <Link href={"/" + props.organization + "/" + props.incident + "/vet/treatment/" + props.treatment_request.treatment_plan} className="treatment-link" style={{textDecoration:"none", color:"white"}}>
         <Card className="border rounded treatment-hover-div" style={{height:props.animal_object ? "120px" : "100px", width:"845px", whiteSpace:"nowrap", overflow:"hidden"}}>
           <div className="row no-gutters hover-div treatment-hover-div" style={{height:"100px", marginRight:"-2px"}}>
             <Row className="ml-0 mr-0  pl-0 pr-0 w-100">

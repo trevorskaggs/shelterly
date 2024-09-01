@@ -209,7 +209,7 @@ const ExamForm = (props) => {
             let config = [...initialSchemaData];
             // Filter the questions by the animal category.
             let filtered_data = questionResponse.data.filter(question => question.categories.includes(response.data.animal_object.category))
-            setExamQuestions(filtered_data);
+            setExamQuestions(filtered_data.length ? filtered_data : questionResponse.data);
             filtered_data.forEach(question => {
               if (props.state && !props.state.steps.exam.id) {
                 response.data.exam_object[question.name.toLowerCase().replace(' ','_').replace('/','_')] = props.state.steps.exam[question.name.toLowerCase().replace(' ','_').replace('/','_')] || question.default;

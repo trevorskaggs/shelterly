@@ -13,6 +13,7 @@ import {
 import {
   faSquareExclamation,
   faSquareEllipsis,
+  faFolderMedical,
   faSquareX
 } from '@fortawesome/pro-solid-svg-icons';
 import Header from '../components/Header';
@@ -22,7 +23,7 @@ function TreatmentPlanDetails({ id, incident, organization }) {
 
   const { setShowSystemError } = useContext(SystemErrorContext);
 
-  const [data, setData] = useState({id: '', medical_record:null, treatment_object:{name:'', category:''}, animal_object:{name:'', id:''}, days:'', frequency: '', quantity: '', unit: '', route: '', treatment_requests:[]});
+  const [data, setData] = useState({id: '', medical_record:null, animal_object:{name:'', id:''}, days:'', frequency: '', quantity: '', unit: '', route: '', treatment_requests:[]});
 
   const [showModal, setShowModal] = useState(false);
   const cancelTreatmentPlan = () => {
@@ -63,7 +64,7 @@ function TreatmentPlanDetails({ id, incident, organization }) {
   return (
     <>
     <Header>
-      Treatment #{data.id}
+      {data.treatment_requests.length? data.treatment_requests[0]['treatment_object'].description : ''}
       {/* <OverlayTrigger
         key={"edit-treatment"}
         placement="bottom"
@@ -100,27 +101,21 @@ function TreatmentPlanDetails({ id, incident, organization }) {
               <ListGroup.Item>
                 <Row>
                   <Col>
-                    <b>Medical Record:</b>&nbsp;<Link href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.medical_record} className="text-link" style={{textDecoration:"none", color:"white"}}>MR#{data.medical_record}</Link>
-                  </Col>
-                  <Col>
-                    <b>Status:</b> {data.status}
+                    <b>Status:</b> {data.treatment_requests.filter(tr => ['Pending', 'Scheduled'].includes(tr.status)).length > 0 ? 'Open' : 'Completed'}
                   </Col>
                 </Row>
               </ListGroup.Item>
               <ListGroup.Item>
-                <b>Treatment:</b> {data.treatment_object.description}
-              </ListGroup.Item>
-              <ListGroup.Item>
                 <div className="row">
-                  <span className="col-3"><b>Quantity:</b> {data.quantity}</span>
-                  <span className="col-3"><b>Unit:</b> {data.unit || '-'}</span>
-                  <span className="col-6"><b>Route:</b> {data.route || '-'}</span>
+                  <span className="col-4"><b>Quantity:</b> {data.quantity}</span>
+                  <span className="col-4"><b>Unit:</b> {data.unit || '-'}</span>
+                  <span className="col-4"><b>Route:</b> {data.route || '-'}</span>
                 </div>
               </ListGroup.Item>
               <ListGroup.Item>
                 <div className="row">
-                  <span className="col-6"><b>Frequency:</b> Every {data.frequency} hours</span>
-                  <span className="col-6"><b>Duration:</b> For {data.days} days</span>
+                  <span className="col-6"><b>Frequency:</b> every {data.frequency} hours</span>
+                  <span className="col-6"><b>Duration:</b> for {data.days} days</span>
                 </div>
               </ListGroup.Item>
             </ListGroup>
@@ -131,27 +126,40 @@ function TreatmentPlanDetails({ id, incident, organization }) {
         <Card className="border rounded" style={{width:"100%"}}>
           <Card.Body>
             <Card.Title>
-              <h4 className="mb-0">Patient</h4>
+              <h4 className="h5 pb-0" style={{marginBottom:"-3px"}}>Patient: {data.animal_object.name||"Unknown"}
+              <span className="float-right">
+                <OverlayTrigger
+                  key={"medical-record"}
+                  placement="top"
+                  overlay={
+                    <Tooltip id={`tooltip-medical-record`}>
+                      View patient medical record.
+                    </Tooltip>
+                  }
+                >
+                  <Link href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.medical_record} style={{textDecoration:"none", color:"white"}}><FontAwesomeIcon icon={faFolderMedical} className="" inverse /></Link>
+                </OverlayTrigger></span>
+              </h4>
             </Card.Title>
             <hr/>
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
               <ListGroup.Item>
                 <div className="row" style={{textTransform:"capitalize"}}>
-                  <span className="col-4"><b>ID:</b> <Link href={"/" + organization + "/" + incident + "/animals/" + data.animal_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>A#{data.animal_object.id_for_incident}</Link></span>
-                  <span className="col-4"><b>Name:</b> {data.animal_object.name||"Unknown"}</span>
+                  <span className="col-4"><b>ID:</b> <Link href={"/" + organization + "/" + incident + "/animals/" + data.animal_object.id_for_incident} className="text-link" style={{textDecoration:"none", color:"white"}}>A#{data.animal_object.id_for_incident}</Link></span>
                   <span className="col-4"><b>Species:</b> {data.animal_object.species_string}</span>
+                  <span className="col-4"><b>Age:</b> {data.animal_object.age||"Unknown"}</span>
                 </div>
               </ListGroup.Item>
               <ListGroup.Item>
                 <div className="row" style={{textTransform:"capitalize"}}>
-                  <span className="col-4"><b>Age:</b> {data.animal_object.age||"Unknown"}</span>
                   <span className="col-4"><b>Sex:</b> {data.animal_object.sex||"Unknown"}</span>
                   <span className="col-4"><b>Altered:</b> {data.animal_object.fixed||"Unknown"}</span>
+                  <span className="col-4"><b>Weight:</b> {data.animal_object.weight||"Unknown"}</span>
                 </div>
               </ListGroup.Item>
               <ListGroup.Item style={{textTransform:"capitalize"}}>
                 <div className="row">
-                  <span className="col-12"><b>Location:</b> {data.animal_object.shelter_object ? data.animal_object.shelter_object.name:"Unknown"}{data.animal_object.room_name ? <span> - {data.animal_object.room_name}</span> : ""}</span>
+                  <span className="col-12"><b>Location:</b> {data.animal_object.shelter ? data.animal_object.shelter_object.name : "N/A"} {data.animal_object.room_name ? <span> - {data.animal_object.room_name}</span> : ""}</span>
                 </div>
               </ListGroup.Item>
               <ListGroup.Item>
@@ -170,7 +178,7 @@ function TreatmentPlanDetails({ id, incident, organization }) {
               <h4 className="mb-0">Treatment Requests</h4>
             </Card.Title>
             <hr className="mb-3" />
-              {data.treatment_requests.map(treatment_request => (
+              {data.treatment_requests.sort((a, b) => new Date(a.suggested_admin_time) - new Date(b.suggested_admin_time)).map(treatment_request => (
               <Row key={treatment_request.id} className="ml-0 mb-3">
                 <Link href={"/" + organization + "/" + incident + "/vet/treatmentrequest/edit/" + treatment_request.id} className="treatment-link" style={{textDecoration:"none", color:"white"}}>
                   <Card className="border rounded treatment-hover-div" style={{height:"100px", width:"560px", whiteSpace:"nowrap", overflow:"hidden"}}>

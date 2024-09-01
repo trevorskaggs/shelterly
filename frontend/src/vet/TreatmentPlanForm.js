@@ -66,7 +66,7 @@ const TreatmentPlanForm = (props) => {
 
   const [data, setData] = useState(current_data);
 
-  const [medRecordData, setMedRecordData] = useState({animal_object: {id:'', name:'', species_string:'', medical_notes:''}, vet_requests:[], exams:[]});
+  const [medRecordData, setMedRecordData] = useState({id:'', animal_object: {id:'', name:'', species_string:'', medical_notes:''}, vet_requests:[], exams:[]});
 
   function calc_requests(formikProps) {
     if (formikProps.values.days > 0) {
@@ -192,7 +192,7 @@ const TreatmentPlanForm = (props) => {
               //     navigate(state.prevLocation);
               //   }
               // }
-              navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + response.data.medical_record + '?tab=treatments');
+              navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + medRecordData.id + '?tab=treatments');
             }
           })
           .catch(error => {

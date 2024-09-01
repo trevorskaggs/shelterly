@@ -84,10 +84,15 @@ function MedicalRecordDetails({ id, incident, organization }) {
       .then(response => {
         if (!unmounted) {
           let pending_data = [];
-          pending_data = pending_data.concat(response.data.treatment_requests.map(tr => ({...tr, type:'treatment'})));
+          let treatment_requests = [];
+          response.data.treatment_plans.forEach(plan => {
+              pending_data = plan.treatment_requests.filter(tr => tr.status === 'Pending').length ? pending_data.concat([plan.treatment_requests.filter(tr => tr.status === 'Pending').map(tr => ({...tr, type:'treatment'}))[0]]) : pending_data;
+              treatment_requests = plan.treatment_requests.filter(tr => tr.status !== 'Completed').length > 0 ? treatment_requests.concat([plan.treatment_requests.filter(tr => tr.status !== 'Completed')[plan.treatment_requests.filter(tr => tr.status !== 'Completed').length -1]]) : [plan.treatment_requests[0]]
+          });
           pending_data = pending_data.concat(response.data.diagnostic_objects.map(diagnostic => ({...diagnostic, type:'diagnostic'})));
           pending_data = pending_data.concat(response.data.procedure_objects.map(procedure => ({...procedure, type:'procedure'})));
           response.data['pending'] = pending_data;
+          response.data['treatment_requests'] = treatment_requests;
           setData(response.data);
           setActiveVR(response.data.vet_requests.filter(vr => vr.status === 'Open').length > 0 ? response.data.vet_requests.filter(vr => vr.status === 'Open')[0].id : null);
           setShowExam(response.data.vet_requests.filter(vr => vr.status === 'Open').length > 0 ? true : false);
@@ -398,59 +403,26 @@ function MedicalRecordDetails({ id, incident, organization }) {
                 <ListGroup horizontal style={{marginBottom:"-20px"}}>
                   <ListGroup.Item active={"pending" === activeOrders} className="text-center" style={{textTransform:"capitalize", cursor:'pointer', paddingLeft:"5px", paddingRight:"5px"}} onClick={() => setActiveOrders("pending")}>
                     <div style={{marginTop:"-3px", marginLeft:"-1px", paddingLeft:"10px", paddingRight:"10px"}}>
-                      All Pending ({data.pending.filter(pending => pending.status === 'Pending').length})
+                      All Pending ({data.pending.length})
                     </div>
                   </ListGroup.Item>
                   <ListGroup.Item active={"treatments" === activeOrders} className="text-center" style={{textTransform:"capitalize", cursor:'pointer', paddingLeft:"5px", paddingRight:"5px"}} onClick={() => setActiveOrders("treatments")}>
                     <div style={{marginTop:"-3px", marginLeft:"-1px", paddingLeft:"10px", paddingRight:"10px"}}>
                       Treatments ({data.treatment_requests.filter(tr => (!hideCompleted ? tr : tr.status !== 'Completed')).length})
-                      {/* {activeOrders === 'treatments' ? <OverlayTrigger
-                        key={"add-treatment"}
-                        placement="top"
-                        overlay={
-                          <Tooltip id={`tooltip-add-treatment`}>
-                            Add a treatment for this patient
-                          </Tooltip>
-                        }
-                      >
-                        <Link href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.id + "/treatment/new"}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
-                      </OverlayTrigger> : ""} */}
                     </div>
                   </ListGroup.Item>
                   <ListGroup.Item active={"diagnostics" === activeOrders} className="text-center" style={{textTransform:"capitalize", cursor:'pointer', paddingLeft:"5px", paddingRight:"5px"}} onClick={() => setActiveOrders("diagnostics")}>
                     <div style={{marginTop:"-3px", marginLeft:"-1px", paddingLeft:"10px", paddingRight:"10px"}}>
                       Diagnostics ({data.diagnostic_objects.length})
-                      {/* {activeOrders === 'diagnostics' ? <OverlayTrigger
-                        key={"order-diagnostic"}
-                        placement="top"
-                        overlay={
-                          <Tooltip id={`tooltip-order-diagnostic`}>
-                            Order diagnostics for this patient
-                          </Tooltip>
-                        }
-                      >
-                        <Link href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.id + "/diagnostics"}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
-                      </OverlayTrigger> : ""} */}
                     </div>
                   </ListGroup.Item>
                   <ListGroup.Item active={"procedures" === activeOrders} className="text-center" style={{textTransform:"capitalize", cursor:'pointer', paddingLeft:"5px", paddingRight:"5px"}} onClick={() => setActiveOrders("procedures")}>
                     <div style={{marginTop:"-3px", marginLeft:"-1px", paddingLeft:"10px", paddingRight:"10px"}}>
                       Procedures ({data.procedure_objects.length})
-                      {/* {activeOrders === 'procedures' ? <OverlayTrigger
-                        key={"order-procedure"}
-                        placement="top"
-                        overlay={
-                          <Tooltip id={`tooltip-order-procedure`}>
-                            Order procedures for this patient
-                          </Tooltip>
-                        }
-                      >
-                        <Link href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.id + "/procedures"}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
-                      </OverlayTrigger> : ""} */}
                     </div>
                   </ListGroup.Item>
                 </ListGroup>
-                {"pending" !== activeOrders ?
+                {/* {"pending" !== activeOrders ?
                   <input
                     id="hide_completed"
                     name="hide_completed"
@@ -463,13 +435,13 @@ function MedicalRecordDetails({ id, incident, organization }) {
                     style={{marginTop:"-10px"}}
                   />: ""}
                   {"pending" !== activeOrders ?
-                  <span style={{fontSize:"16px"}}>&nbsp;&nbsp;Hide Completed</span> : ""}
+                  <span style={{fontSize:"16px"}}>&nbsp;&nbsp;Hide Completed</span> : ""} */}
                 </Row>
               </h4>
             </Card.Title>
             <hr className="mb-3" />
             <Scrollbar no_shadow="true" style={{height:"564px", minHeight:"564px"}} renderView={props => <div {...props} style={{...props.style, overflowX:"hidden", marginBottom:"-10px"}}/>}  renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
-            {activeOrders === 'pending' && data.pending.filter(pending => pending.status === 'Pending').sort((a, b) => new Date(a.suggested_admin_time ? a.suggested_admin_time : a.open) - new Date(b.suggested_admin_time ? b.suggested_admin_time : b.open)).map(pending => (
+            {activeOrders === 'pending' && data.pending.sort((a, b) => new Date(a.suggested_admin_time ? a.suggested_admin_time : a.open) - new Date(b.suggested_admin_time ? b.suggested_admin_time : b.open)).map(pending => (
               <span>
               {pending.type === 'treatment' ? <TreatmentCard key={pending.id} incident={incident} organization={organization} treatment_request={pending} />
               :pending.type === 'diagnostic' ? <DiagnosticCard key={pending.id} incident={incident} organization={organization} diagnostic={pending} />

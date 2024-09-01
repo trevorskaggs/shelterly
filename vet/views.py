@@ -4,8 +4,8 @@ from django.db.models import Case, Count, Exists, OuterRef, Prefetch, Q, When, V
 from dateutil import parser
 
 from animals.models import Animal
-from vet.models import Diagnosis, Diagnostic, DiagnosticResult, Exam, ExamAnswer, ExamQuestion, MedicalRecord, PresentingComplaint, Procedure, ProcedureResult, Treatment, TreatmentRequest, VetRequest
-from vet.serializers import DiagnosisSerializer, DiagnosticSerializer, DiagnosticResultSerializer, ExamQuestionSerializer, ExamSerializer, MedicalRecordSerializer, PresentingComplaintSerializer, ProcedureSerializer, ProcedureResultSerializer, TreatmentSerializer, TreatmentRequestSerializer, VetRequestSerializer
+from vet.models import Diagnosis, Diagnostic, DiagnosticResult, Exam, ExamAnswer, ExamQuestion, MedicalRecord, PresentingComplaint, Procedure, ProcedureResult, Treatment, TreatmentPlan, TreatmentRequest, VetRequest
+from vet.serializers import DiagnosisSerializer, DiagnosticSerializer, DiagnosticResultSerializer, ExamQuestionSerializer, ExamSerializer, MedicalRecordSerializer, PresentingComplaintSerializer, ProcedureSerializer, ProcedureResultSerializer, TreatmentSerializer, TreatmentPlanSerializer, TreatmentRequestSerializer, VetRequestSerializer
 
 class MedicalRecordViewSet(viewsets.ModelViewSet):
     queryset = MedicalRecord.objects.all()
@@ -21,7 +21,7 @@ class MedicalRecordViewSet(viewsets.ModelViewSet):
             .select_related("patient").select_related("patient__shelter").select_related("patient__room")
             .prefetch_related(Prefetch('exam_set', Exam.objects.select_related('assignee').prefetch_related('examanswer_set', 'examanswer_set__question')))
             .prefetch_related(Prefetch('vetrequest_set', VetRequest.objects.exclude(status="Canceled").select_related('requested_by').prefetch_related('presenting_complaints')))
-            .prefetch_related(Prefetch('treatmentrequest_set', TreatmentRequest.objects.select_related('treatment')))
+            .prefetch_related(Prefetch('treatmentplan_set', TreatmentPlan.objects.prefetch_related('treatmentrequest_set')))
             .prefetch_related(Prefetch('diagnosticresult_set', DiagnosticResult.objects.select_related('medical_record').select_related('medical_record__patient').select_related('diagnostic')))
             .prefetch_related(Prefetch('procedureresult_set', ProcedureResult.objects.select_related('medical_record').select_related('medical_record__patient').select_related('procedure')))
             .prefetch_related("diagnosis")
@@ -122,6 +122,12 @@ class TreatmentViewSet(viewsets.ModelViewSet):
     serializer_class = TreatmentSerializer
 
 
+class TreatmentPlanViewSet(viewsets.ModelViewSet):
+    queryset = TreatmentPlan.objects.all()
+    permission_classes = [permissions.IsAuthenticated, ]
+    serializer_class = TreatmentPlanSerializer
+
+
 class DiagnosisViewSet(viewsets.ModelViewSet):
     queryset = Diagnosis.objects.all()
     permission_classes = [permissions.IsAuthenticated, ]
@@ -198,16 +204,20 @@ class TreatmentRequestViewSet(viewsets.ModelViewSet):
         Returns: Queryset of treatment requests.
         """
         queryset = (
-            TreatmentRequest.objects.all().select_related("treatment").select_related("medical_record", "medical_record__patient").exclude(medical_record__patient__status__in=["CANCELED", "REUNITED"])
+            TreatmentRequest.objects.all().select_related("treatment").select_related("treatment_plan", "treatment_plan__medical_record", "treatment_plan__medical_record__patient").exclude(treatment_plan__medical_record__patient__status__in=["CANCELED", "REUNITED"])
         )
         if self.request.GET.get('incident'):
-            queryset = queryset.filter(medical_record__patient__incident__slug=self.request.GET.get('incident'))
+            queryset = queryset.filter(treatment_plan__medical_record__patient__incident__slug=self.request.GET.get('incident'))
         if self.request.GET.get('today'):
             queryset = queryset.filter(suggested_admin_time__lte=datetime.today(), actual_admin_time__isnull=True).exclude(not_administered=True)
         return queryset
 
     def perform_create(self, serializer):
         if serializer.is_valid():
+
+            # Create TreatmentPlan.
+            plan = TreatmentPlan.objects.create(medical_record=MedicalRecord.objects.get(id=self.request.data.get('medical_record')), quantity=self.request.data.get('quantity'), unit=self.request.data.get('unit'), route=self.request.data.get('route'), frequency=self.request.data.get('frequency'), days=self.request.data.get('days'))
+            serializer.validated_data['treatment_plan'] = plan
 
             # Create proper number of TreatmentRequests
             serializer.validated_data['suggested_admin_time'] = self.request.data.get('start')
