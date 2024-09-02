@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faMinusCircle, faUserAlt, faUserAltSlash, faCircle, faExclamationCircle, faQuestionCircle, faHome, faHeart, faSkullCrossbones
 } from '@fortawesome/free-solid-svg-icons';
-import { faBadgeSheriff, faCircleBolt, faClawMarks, faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
+import { faBadgeSheriff, faCircleBolt, faClawMarks, faClipboardMedical, faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
 import AnimalCoverImage from './AnimalCoverImage';
 
 function AnimalCards(props) {
@@ -55,6 +55,18 @@ function AnimalCards(props) {
                   <FontAwesomeIcon icon={faUserAlt} size="sm" />
                 </OverlayTrigger>}
                 </span> : ""}
+                {animal.medical_record ?
+                <OverlayTrigger
+                  key={"medical"}
+                  placement="top"
+                  overlay={
+                    <Tooltip id={`tooltip-medical`}>
+                      Animal has a medical record
+                    </Tooltip>
+                  }
+                >
+                  <FontAwesomeIcon icon={faClipboardMedical} className="ml-1" size="sm" />
+                </OverlayTrigger> : ""}
                 {props.show_status ?
                 <span>
                 {animal.status === "SHELTERED IN PLACE" ?
