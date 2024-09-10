@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='incident',
             name='caltopo_map_id',
-            field=models.CharField(blank=True, max_length=5, null=True),
+            field=models.CharField(blank=True, max_length=10, null=True),
         ),
         migrations.AddField(
             model_name='incident',

@@ -44,7 +44,7 @@ class Incident(models.Model):
     longitude = models.DecimalField(max_digits=9, decimal_places=4)
     training = models.BooleanField(default=False)
     organization = models.ForeignKey(Organization, on_delete=models.SET_NULL, null=True, blank=True)
-    caltopo_map_id = models.CharField(max_length=5, blank=True, null=True)
+    caltopo_map_id = models.CharField(max_length=10, blank=True, null=True)
     watchduty_map_id = models.CharField(max_length=10, blank=True, null=True)
     hide = models.BooleanField(default=False)
 

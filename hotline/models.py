@@ -1,4 +1,6 @@
+import sartopo_python
 from django.db import models, transaction
+from django.conf import settings
 from actstream import action
 from django.core.mail import send_mass_mail
 from django.template.loader import render_to_string
@@ -125,6 +127,29 @@ class ServiceRequest(Location):
           }
         }
         return feature_json
+
+    def push_json(self):
+        sts = sartopo_python.SartopoSession('sartopo.com',
+            self.incident.caltopo_map_id,
+            id=settings.CALTOPO_ID,
+            key=settings.CALTOPO_KEY,
+            accountId=settings.CALTOPO_ACCOUNT_ID,
+            sync=False,
+        )
+        feature_json = self.get_feature_json()
+        lon = feature_json['geometry']['coordinates'][0]
+        lat = feature_json['geometry']['coordinates'][1]
+        payload = {}
+        payload.update(feature_json['properties'])
+        marker_keys = []
+        for key in payload.keys():
+            if 'marker' in key:
+               marker_keys.append(key)
+        for key in marker_keys:
+            payload[key.replace('marker-', '')] = payload[key]
+            payload.pop(key, None)
+        payload.pop('class', None)
+        sts.addMarker(lon=lon, lat=lat, **payload)
 
     def save(self, *args, **kwargs):
         if not self.pk:

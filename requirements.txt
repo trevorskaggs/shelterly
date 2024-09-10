@@ -14,6 +14,7 @@ djangorestframework>=3.12
 django-storages==1.13.2
 django-rest-passwordreset
 ipython
+sartopo-python==2.0.0
 pillow
 psycopg2-binary
 pytz==2018.9
