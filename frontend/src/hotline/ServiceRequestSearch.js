@@ -264,22 +264,6 @@ function ServiceRequestSearch({ incident, organization }) {
           onClick={handleGeoJsonPush} href="">Push All ({`${filteredServiceRequests.length}`})<FontAwesomeIcon icon={faDownload} className="mx-2 text-light" inverse />
         </Button>
         </InputGroup>
-        <Row className="mr-0 pr-0 no-gutters" style={{marginTop:"-5px"}}>
-          <Col className="pr-2">
-            <DateRangePicker
-              name={`start_date_range_picker`}
-              id={`start_date_range_picker`}
-              placeholder={"Opened Start Date"}
-              mode="single"
-              data-enable-time={true}
-              clearable={"true"}
-              hour={0}
-              style={{height:"36px"}}
-              onChange={(dateRange) => {
-                setStartDate(dateRange.length ? dateRange[0] : null)
-                setTriggerRefresh(!triggerRefresh)
-              }}
-            />
         <Row>
           <Col xs="2" style={{maxWidth:"150px", marginRight:"-10px", paddingRight:"0px"}}>
             <InputGroup>
