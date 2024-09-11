@@ -362,6 +362,7 @@ function DispatchSummary({ id, incident, organization }) {
                   <FontAwesomeIcon icon={faDownload} className="mr-1"  inverse />
                   Download Dispatch Assignment as Geojson
                 </LoadingLink>
+                { state.incident.caltopo_map_id ?
                 <LoadingLink
                   onClick={handleGeoJsonPush}
                   className="text-white d-block py-1 px-3"
@@ -370,6 +371,7 @@ function DispatchSummary({ id, incident, organization }) {
                   <FontAwesomeIcon icon={faDownload} className="mr-1"  inverse />
                   Push Dispatch Assignment to CalTopo
                 </LoadingLink>
+                : ''}
               </ActionsDropdown>
             )}
             </div>

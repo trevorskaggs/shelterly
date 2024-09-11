@@ -338,7 +338,6 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
 
     @drf_action(detail=True, methods=['GET'], name='Push GeoJSON')
     def push(self, request, pk=None):
-        import ipdb; ipdb.set_trace()
         ea = EvacAssignment.objects.get(id=pk)
         data = {}
         for sr in ea.service_requests.all():

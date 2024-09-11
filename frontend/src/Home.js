@@ -8,7 +8,6 @@ function Home({ incident }) {
 
   // Initial state.
   const { state } = useContext(AuthContext);
-
   // Hook for initializing data.
   useEffect(() => {
   }, [state.user, incident]);
@@ -20,6 +19,7 @@ function Home({ incident }) {
     <span className="rounded-top">
       <Header>Home<span className="float-right">{state.user.version}</span></Header>
       <hr/>
+      { state.incident.watchduty_map_id ? 
       <div style={{height:"635px" }}>
         <iframe
           src={watchdutyUrl}
@@ -32,8 +32,9 @@ function Home({ incident }) {
           }}
         >
         </iframe>
-        <h4>Incident Description: {state.incident.description}</h4>
       </div>
+      : ""}
+      <h4>Incident Description: {state.incident.description}</h4>
     </span>
     </>
   );

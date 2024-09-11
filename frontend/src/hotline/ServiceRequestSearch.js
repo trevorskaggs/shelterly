@@ -14,6 +14,7 @@ import {
 import { faChevronDoubleDown, faChevronDoubleUp, faHammerCrash, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import Moment from 'react-moment';
 import { DATE_FORMAT } from '../constants';
+import { AuthContext } from "../accounts/AccountsReducer";
 import { useMark, useSubmitting } from '../hooks';
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
@@ -26,6 +27,7 @@ import { printAllServiceRequests } from './Utils';
 function ServiceRequestSearch({ incident, organization }) {
 
   const { setShowSystemError } = useContext(SystemErrorContext);
+  const { state } = useContext(AuthContext);
 
   // Identify any query param data.
   const [queryParams] = useQueryParams();
@@ -286,12 +288,14 @@ function ServiceRequestSearch({ incident, organization }) {
             variant="outline-light"
             onClick={handleGeoJsonDownload} href="">Download All ({`${filteredServiceRequests.length}`})<FontAwesomeIcon icon={faDownload} className="mx-2 text-light" inverse />
           </Button>
-            <Button
+          { state.incident.caltopo_map_id ?
+          <Button
             key={"push-geojson"}
             placement="bottom"
             variant="outline-light"
             onClick={handleGeoJsonPush} href="">Push All ({`${filteredServiceRequests.length}`})<FontAwesomeIcon icon={faDownload} className="mx-2 text-light" inverse />
           </Button>
+          : ''}
           </InputGroup>
           </Col>
         </Row>
