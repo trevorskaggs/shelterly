@@ -93,7 +93,7 @@ class ServiceRequest(Location):
 
         self.save()
 
-    def get_feature_json(self):
+    def get_feature_description(self):
         species_counts = {'REPORTED':{}, 'REPORTED (EVAC REQUESTED)':{}, 'REPORTED (SIP REQUESTED)':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}}
         for animal in self.animal_set.filter(status__in=['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE']):
             species_counts[animal.status][animal.species.name] = species_counts[animal.status].get(animal.species.name, 0) + 1
@@ -106,6 +106,10 @@ class ServiceRequest(Location):
                 count+= 1
                 description += status[0] + ': ' + ', '.join(f'{value} {key}' + ('s' if value != 1 and animal.species.name != 'sheep' else '') for key, value in species_counts[status[1]].items()) #123 Ranch Rd, Napa CA (1 cat, 2 dogs)
         description += ")"
+        return description
+
+    def get_feature_json(self):
+        description = self.get_feature_description()
         feature_json = {
           "geometry":{
               "coordinates":[
@@ -136,19 +140,14 @@ class ServiceRequest(Location):
             accountId=settings.CALTOPO_ACCOUNT_ID,
             sync=False,
         )
-        feature_json = self.get_feature_json()
-        lon = feature_json['geometry']['coordinates'][0]
-        lat = feature_json['geometry']['coordinates'][1]
-        payload = {}
-        payload.update(feature_json['properties'])
-        marker_keys = []
-        for key in payload.keys():
-            if 'marker' in key:
-               marker_keys.append(key)
-        for key in marker_keys:
-            payload[key.replace('marker-', '')] = payload[key]
-            payload.pop(key, None)
-        payload.pop('class', None)
+        payload = {
+            'title': str(self.id),
+            'color': '#FF0000',
+            'symbol': 'circle-n',
+            'description': self.get_feature_description()
+        }
+        lon = self.longitude
+        lat = self.latitude
         sts.addMarker(lon=lon, lat=lat, **payload)
 
     def save(self, *args, **kwargs):
