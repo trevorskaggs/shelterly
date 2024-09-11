@@ -58,13 +58,16 @@ const DiagnosisForm = (props) => {
 
   const [data, setData] = useState({
     diagnosis: [],
+    original_diagnosis: [],
     diagnosis_notes: '',
     diagnosis_other: '',
     animal_object: {id:''},
     vet_requests: [],
+    exams: []
   })
 
   const [diagnosisChoices, setDiagnosisChoices] = useState([]);
+  const [originalChoices, setOriginalChoices] = useState([]);
 
   useEffect(() => {
     let unmounted = false;
@@ -72,6 +75,24 @@ const DiagnosisForm = (props) => {
     if (props.medrecordid) {
       if (is_workflow) {
         setData(props.state.medRecord);
+        // Fetch diagnosis data.
+        axios.get('/vet/api/diagnosis/', {
+          cancelToken: source.token,
+        })
+        .then(diagnosisResponse => {
+          if (!unmounted) {
+            let options = [];
+            diagnosisResponse.data.forEach(function(diagnosis) {
+              if (!props.state.medRecord.diagnosis.includes(diagnosis.id)) {
+                options.push({value: diagnosis.id, label: diagnosis.name})
+              }
+            });
+            setDiagnosisChoices(options);
+          }
+        })
+        .catch(error => {
+          setShowSystemError(true);
+        });
       }
       else {
         const fetchMedRecord = async () => {
@@ -87,11 +108,19 @@ const DiagnosisForm = (props) => {
               })
               .then(diagnosisResponse => {
                 if (!unmounted) {
+                  let original_options = [];
                   let options = [];
-                  diagnosisResponse.data.filter(diagnosis => !response.data.diagnosis.includes(diagnosis.id)).forEach(function(diagnosis) {
-                    options.push({value: diagnosis.id, label: diagnosis.name})
+                  diagnosisResponse.data.forEach(function(diagnosis) {
+                    if (!response.data.diagnosis.includes(diagnosis.id)) {
+                      options.push({value: diagnosis.id, label: diagnosis.name})
+                    }
+                    else {
+                      original_options.push({value: diagnosis.id, label: diagnosis.name})
+                    }
                   });
                   setDiagnosisChoices(options);
+                  setOriginalChoices(original_options);
+                  response.data['original_diagnosis'] = response.data.diagnosis;
                   response.data['diagnosis'] = [];
                   setData(response.data);
                 }
@@ -146,6 +175,18 @@ const DiagnosisForm = (props) => {
           values['procedure_other'] = props.state.steps.orders.procedure_other
         }
 
+        // Add current diagnoses back in.
+        if (values.original_diagnosis) {
+          values.original_diagnosis.forEach(diagnosis => (
+            values['diagnosis'].push(diagnosis)
+          ))
+        }
+        else if (props.state.medRecord.diagnosis) {
+          props.state.medRecord.diagnosis.forEach(diagnosis => (
+            values['diagnosis'].push(diagnosis)
+          ))
+        }
+
         axios.patch('/vet/api/medrecord/' + props.medrecordid + '/', values)
         .then(response => {
           navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + props.medrecordid);
@@ -165,11 +206,32 @@ const DiagnosisForm = (props) => {
             <span style={{ cursor: 'pointer' }} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}
             Diagnosis Form
           </Card.Header>
-          <Patient animal={data.animal_object} vet_request={vetrequest_id && data.vet_requests.length > 0 ? data.vet_requests.filter(vr => vr.id === Number(vetrequest_id))[0] : null} organization={props.organization} incident={props.incident} />
+          <Patient animal={data.animal_object} vet_request={null} organization={props.organization} incident={props.incident} medical_plan={props.state.steps.exam && props.state.steps.exam.medical_plan ? props.state.steps.exam.medical_plan : data.exams.filter(exam => (exam.medical_plan)).length ? data.exams.filter(exam => (exam.medical_plan))[0].medical_plan : ''} />
           <Card.Body>
             <Form>
               <FormGroup>
-                {data.diagnosis_text ? <div className="mb-3"><b>Current Diagnoses: </b>{data.diagnosis_text}</div> : ""}
+                {data.original_diagnosis ? <Row className="mb-3">
+                  <Col xs={"6"}>
+                    <label>Current Diagnoses</label>
+                    <Select
+                      id="originalDiagnosisDropdown"
+                      name="original_diagnosis"
+                      type="text"
+                      styles={customStyles}
+                      isMulti
+                      options={originalChoices}
+                      value={originalChoices.filter(choice => formikProps.values.original_diagnosis.includes(choice.value))}
+                      isClearable={false}
+                      onChange={(instance) => {
+                        let values = [];
+                        instance && instance.forEach(option => {
+                          values.push(option.value);
+                        })
+                        formikProps.setFieldValue("original_diagnosis", instance === null ? [] : values);
+                      }}
+                    />
+                  </Col>
+                </Row> : ""}
                 <Row className="mb-3">
                   <Col xs={"6"}>
                     <label>Diagnosis</label>

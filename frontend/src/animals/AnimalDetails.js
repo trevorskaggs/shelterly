@@ -9,7 +9,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBan, faMedkit, faCut, faEdit, faEnvelope, faLink, faMinusSquare, faTimes, faUserPlus, faFilePdf
 } from '@fortawesome/free-solid-svg-icons';
-import { faBadgeSheriff, faUserDoctorMessage, faClawMarks, faHomeHeart, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
+import { faBadgeSheriff, faUserDoctorMessage, faClawMarks, faFolderMedical, faHomeHeart, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import { AnimalDeleteModal } from "../components/Modals";
 import Header from '../components/Header';
@@ -78,8 +78,8 @@ function AnimalDetails({ id, incident, organization }) {
     setIsLoading(true);
     await axios.patch('/animals/api/animal/' + data.id + '/', {status:'REUNITED', shelter:null, room:null})
     .then(response => {
-      setData(response.data);
-      handleClose()
+      setData(prevState => ({ ...prevState, status:'REUNITED', shelter:null, room:null }));
+      handleClose();
     })
     .catch(error => {
       setShowSystemError(true);
@@ -104,11 +104,11 @@ function AnimalDetails({ id, incident, organization }) {
   // Handle animal removal submit.
   const handleAnimalSubmit = async () => {
     setIsLoading(true);
-    await axios.patch('/animals/api/animal/' + data.id + '/', {remove_animal:id})
+    await axios.patch('/animals/api/animal/' + data.id + '/', {remove_animal:data.id})
     .then(response => {
       handleAnimalClose();
       if (data.request) {
-        navigate('/' + organization + '/' + incident + '/hotline/servicerequest/' + data.request);
+        navigate('/' + organization + '/' + incident + '/hotline/servicerequest/' + data.request_id_for_incident);
       }
       else if (data.owner) {
         navigate('/' + organization + '/' + incident + '/people/owner/' + data.owner);
@@ -128,7 +128,7 @@ function AnimalDetails({ id, incident, organization }) {
 
   const handleDownloadPdfClick = async () => {
     setIsLoading(true);
-    const pageURL = getFullLocationFromPath(`/${organization}/${incident}/animals/${id}`);
+    const pageURL = getFullLocationFromPath(`/${organization}/${incident}/animals/${data.id_for_incident}`);
     // wait for 1 tick so spinner will set before the print button locks up the browser
     await new Promise(resolve => setTimeout(resolve, 0));
     printAnimalCareSchedule({ ...data, url: pageURL })
@@ -189,9 +189,9 @@ function AnimalDetails({ id, incident, organization }) {
     <div className="row" style={{marginBottom:"-13px"}}>
       <div className="col-6 d-flex" style={{marginRight:"-15px"}}>
         <Card className="border rounded d-flex" style={{width:"100%", marginBottom:"16px"}}>
-          <Card.Body>
+          <Card.Body style={{marginTop:"-10px"}}>
             <div className="d-flex justify-content-between">
-              <h4 className="h5 mb-0 pb-0 pt-2">Information
+              <h4 className="h5 pt-2" style={{marginBottom:"10px"}}>Information
               {data.confined === 'yes' ?
                 <OverlayTrigger
                   key={"confined"}
@@ -333,7 +333,8 @@ function AnimalDetails({ id, incident, organization }) {
                   <LoadingLink
                     href={"/" + organization + "/" + incident + "/animals/edit/" + id}
                     isLoading={isLoading}
-                    className="text-white d-block py-1 px-3"
+                    className="text-white d-block py-1"
+                    style={{marginLeft:"14px"}}
                   >
                     <FontAwesomeIcon icon={faEdit} className="mr-1" inverse />
                     Update Animal
@@ -347,14 +348,15 @@ function AnimalDetails({ id, incident, organization }) {
                   <LoadingLink
                     href={"/" + organization + "/" + incident + "/animals/" + id + "/vetrequest/new"}
                     isLoading={isLoading}
-                    className="text-white d-block py-1 px-3"
+                    className="text-white d-block py-1"
+                    style={{marginLeft:"12px"}}
                   >
                     <FontAwesomeIcon icon={faUserDoctorMessage} className="mr-1" inverse />
-                    Create veterinary request
+                    Create Veterinary Request
                   </LoadingLink>
                   <LoadingLink onClick={() => {setShowAnimalConfirm(true);}} isLoading={isLoading} className="text-white d-block py-1 px-3">
                     <FontAwesomeIcon icon={faTimes} style={{cursor:'pointer'}} className='mr-1' size="lg" inverse />
-                    Cancel animal
+                    Cancel Animal
                   </LoadingLink>
                 </ActionsDropdown>
               )}
@@ -536,15 +538,24 @@ function AnimalDetails({ id, incident, organization }) {
         <Card className="border rounded" style={{width:"100%", height:"100%", marginBottom:"16px"}}>
           <Card.Body>
             <Card.Title>
-              <h4>Medical</h4>
+              <h4>Medical
+                {state.user.is_superuser || state.user.vet_perms ? <span className="float-right">
+                  <OverlayTrigger
+                    key={"medical-record"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-medical-record`}>
+                        View patient medical record.
+                      </Tooltip>
+                    }
+                  >
+                    <Link href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.medical_record} style={{textDecoration:"none", color:"white"}}><FontAwesomeIcon icon={faFolderMedical} className="" inverse /></Link>
+                  </OverlayTrigger>
+                </span> : ""}
+              </h4>
             </Card.Title>
             <hr/>
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
-            {state.user.vet_perms ?
-              <ListGroup.Item>
-                <b>Medical Record:</b> <Link href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.medical_record} className="text-link" style={{textDecoration:"none", color:"white"}}>MR#{data.medical_record}</Link>
-              </ListGroup.Item>
-            : ""}
             {data.vet_requests.map(vet_request => (
               <ListGroup.Item key={vet_request.id}>
                 <b>Vet Request:</b> <Link href={"/" + organization + "/" + incident + "/vet/vetrequest/" + vet_request.id} className="text-link" style={{textDecoration:"none", color:"white"}}>VR#{vet_request.id}</Link> - {vet_request.status}

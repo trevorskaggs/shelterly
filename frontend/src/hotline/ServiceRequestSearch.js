@@ -1,11 +1,12 @@
 import React, { useContext, useEffect, useState, useRef } from 'react';
 import axios from "axios";
-import { Link, useQueryParams } from 'raviger';
-import { Button, ButtonGroup, Card, CardGroup, Col, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Pagination, Row, Tooltip } from 'react-bootstrap';
+import { Link, navigate, useQueryParams } from 'raviger';
+import { Button, ButtonGroup, Card, CardGroup, Col, Collapse, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Pagination, Row, Tooltip } from 'react-bootstrap';
 import moment from 'moment';
+import Select, { components } from 'react-select';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBan, faCar, faChevronDown, faChevronUp, faDownload, faEquals, faClipboardList, faEnvelope, faKey, faTrailer, faPrint
+  faBan, faCar, faChevronDown, faChevronUp, faDownload, faEquals, faClipboardList, faEnvelope, faInfoCircle, faKey, faTrailer, faPrint
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faDotCircle
@@ -35,17 +36,41 @@ function ServiceRequestSearch({ incident, organization }) {
 
   const priorityText = {1:'Highest', 2:'High', 3:'Medium', 4:'Low', 5:'Lowest'};
 
+  const customStyles = {
+    // For the select it self, not the options of the select
+    control: (styles, { isDisabled}) => {
+      return {
+        ...styles,
+        color: '#FFF',
+        cursor: isDisabled ? 'not-allowed' : 'default',
+        backgroundColor: isDisabled ? '#DFDDDD' : 'white',
+        height: 35,
+        minHeight: 35,
+        marginBottom: "15px"
+      }
+    },
+    option: provided => ({
+      ...provided,
+      color: 'black'
+    }),
+  };
+
   const [data, setData] = useState({service_requests: [], isFetching: false});
   const [searchState, setSearchState] = useState({});
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
   const [triggerRefresh, setTriggerRefresh] = useState(false);
   const [searchTerm, setSearchTerm] = useState(search);
-  const [speciesChoices, setSpeciesChoices] = useState([]);
   const tempSearchTerm = useRef(null);
+  const idSearchRef = useRef(null);
+  const priorityRef = useRef(null);
+  const statusRef = useRef(null);
+  const openStartRef = useRef(null);
+  const openEndRef = useRef(null);
   const [page, setPage] = useState(1);
   const [numPages, setNumPages] = useState(1);
-  const [statusOptions, setStatusOptions] = useState(status);
+  const [showFilters, setShowFilters] = useState(false);
+  const [isDisabled, setIsDisabled] = useState(true);
+  const [options, setOptions] = useState({id:null, priority:null, status:status, open_start:null, open_end:null});
+  const [goToID, setGoToID] = useState('');
   const { markInstances } = useMark();
   const {
     isSubmittingById,
@@ -53,11 +78,15 @@ function ServiceRequestSearch({ incident, organization }) {
     submittingComplete,
     submittingLabel
   } = useSubmitting();
-  const [filteredServiceRequests, setFilteredServiceRequests] = useState(data.service_requests);
+  const [filteredServiceRequests, setFilteredServiceRequests] = useState(data.service_requests.map((request) => (request.id)));
 
   // Update searchTerm when field input changes.
   const handleChange = event => {
     tempSearchTerm.current.value = event.target.value;
+  };
+
+  const handleIDChange = async event => {
+    setGoToID(event.target.value);
   };
 
   // Use searchTerm to filter service_requests.
@@ -71,7 +100,7 @@ function ServiceRequestSearch({ incident, organization }) {
     e.preventDefault();
 
     handleSubmitting()
-      .then(() => printAllServiceRequests(filteredServiceRequests))
+      .then(() => printAllServiceRequests(data.service_requests.filter(request => (filteredServiceRequests.includes(request.id)))))
       .then(submittingComplete);
   }
 
@@ -83,7 +112,7 @@ function ServiceRequestSearch({ incident, organization }) {
 
   const handleGeoJsonDownload = () => {
     var params = '';
-    filteredServiceRequests.map(sr => sr.id).forEach(id => params = params + "id=" + id + "&")
+    filteredServiceRequests.forEach(id => params = params + "id=" + id + "&")
     // params.append("foo", 5);
     var fileDownload = require('js-file-download');
     axios.get('/hotline/api/servicerequests/download_all/', { 
@@ -111,20 +140,36 @@ function ServiceRequestSearch({ incident, organization }) {
         })
   }
 
-  // Hook for filtering service requests
+  // Hook handling option changes.
   useEffect(() => {
-    if (data.isFetching) return;
-    if (startDate && endDate) {
-      const srSubset = data.service_requests.filter((sr) => 
-        moment(startDate) <= moment(sr.timestamp) && moment(endDate) >= moment(sr.timestamp)
-      )
-      setFilteredServiceRequests(srSubset);
-      setNumPages(Math.ceil(srSubset.length / ITEMS_PER_PAGE));
-    } else {
-      setFilteredServiceRequests(data.service_requests);
-      setNumPages(Math.ceil(data.service_requests.length / ITEMS_PER_PAGE));
-    }
-  }, [data, startDate, endDate, triggerRefresh])
+    const handleDisabled = () => {
+      setIsDisabled(!(options.id || options.priority || options.status || options.open_start || options.open_end));
+    };
+
+    setNumPages(Math.ceil(filteredServiceRequests.length / ITEMS_PER_PAGE));
+    setPage(1);
+    handleDisabled();
+  }, [options, filteredServiceRequests.length]);
+
+  const handleApplyFilters = (service_requests) => {
+    setFilteredServiceRequests(service_requests.filter(service_request => options.id ? Number(service_request.id_for_incident) === Number(options.id) : service_request)
+                      .filter(service_request => options.priority ? service_request.priority === options.priority : service_request)
+                      .filter(service_request => options.status ? service_request.status === options.status : service_request)
+                      .filter(service_request => options.open_start ? moment(options.open_start) <= moment(service_request.timestamp) : service_request)
+                      .filter(service_request => options.open_end ? moment(options.open_end) >= moment(service_request.timestamp) : service_request)
+                      .map((service_request) => (service_request.id))
+    )
+  }
+
+  const handleClear = () => {
+    priorityRef.current.select.clearValue();
+    statusRef.current.select.clearValue();
+    openStartRef.current.flatpickr.clear();
+    openEndRef.current.flatpickr.clear();
+    idSearchRef.current.value = '';
+    setOptions({id:null, priority:null, status:null, open_start:null, open_end:null});
+    setFilteredServiceRequests(data.service_requests.map((service_request) => (service_request.id)));
+  };
 
   // Hook for initializing data.
   useEffect(() => {
@@ -134,7 +179,7 @@ function ServiceRequestSearch({ incident, organization }) {
     const fetchServiceRequests = () => {
       setData({service_requests: [], isFetching: true});
       // Fetch ServiceRequest data.
-      axios.get('/hotline/api/servicerequests/?search=' + searchTerm + '&status=' + statusOptions + '&incident=' + incident, {
+      axios.get('/hotline/api/servicerequests/?search=' + searchTerm + '&incident=' + incident, {
         cancelToken: source.token,
       })
       .then(response => {
@@ -149,9 +194,8 @@ function ServiceRequestSearch({ incident, organization }) {
 								species.push(animal.species_string)
 							}
 						});
-
             species.sort(function(a, b) {
-              return a > b;
+              return a.localeCompare(b);
             });
 						search_state[service_request.id] = {species:species, selectedSpecies:species[0]};
 					});
@@ -159,6 +203,9 @@ function ServiceRequestSearch({ incident, organization }) {
 
           // highlight search terms
           markInstances(searchTerm);
+
+          setFilteredServiceRequests(response.data.map((request) => (request.id)));
+          handleApplyFilters(response.data);
         }
       })
       .catch(error => {
@@ -176,7 +223,7 @@ function ServiceRequestSearch({ incident, organization }) {
       unmounted = true;
       source.cancel();
     };
-  }, [searchTerm, statusOptions, incident]);
+  }, [searchTerm, incident]);
 
   return (
     <div className="ml-2 mr-2">
@@ -233,35 +280,158 @@ function ServiceRequestSearch({ incident, organization }) {
                 setTriggerRefresh(!triggerRefresh)
               }}
             />
+        <Row>
+          <Col xs="2" style={{maxWidth:"150px", marginRight:"-10px", paddingRight:"0px"}}>
+            <InputGroup>
+              <FormControl
+                type="text"
+                placeholder="ID #"
+                name="searchIDTerm"
+                onChange={handleIDChange}
+              />
+              <InputGroup.Append>
+                <Button variant="outline-light" type="submit" disabled={!goToID} style={{borderRadius:"0 5px 5px 0"}} onClick={(e) => {navigate("/" + organization + "/" + incident + "/hotline/servicerequest/" + goToID)}}>Go</Button>
+              </InputGroup.Append>
+            </InputGroup>
           </Col>
           <Col>
-            <DateRangePicker
-              name={`end_date_range_picker`}
-              id={`end_date_range_picker`}
-              placeholder={"Opened End Date"}
-              mode="single"
-              data-enable-time={true}
-              clearable={"true"}
-              hour={23}
-              minute={59}
-              style={{height:"36px"}}
-              onChange={(dateRange) => {
-                setEndDate(dateRange.length ? dateRange[0] : null)
-                setTriggerRefresh(!triggerRefresh)
-              }}
+          <InputGroup>
+            <FormControl
+              type="text"
+              placeholder="Search"
+              name="searchTerm"
+              onChange={handleChange}
+              ref={tempSearchTerm}
             />
-          </Col>
-          <Col xs={6}>
-            <ButtonGroup className="float-right align-self-end">
-              <Button variant={statusOptions === "open" ? "primary" : "secondary"} onClick={statusOptions !== "open" ? () => {setPage(1);setStatusOptions("open")} : () => {setPage(1);setStatusOptions("")}}>Open</Button>
-              <Button variant={statusOptions === "assigned" ? "primary" : "secondary"} onClick={statusOptions !== "assigned" ? () => {setPage(1);setStatusOptions("assigned")} : () => {setPage(1);setStatusOptions("")}}>Assigned</Button>
-              <Button variant={statusOptions === "closed" ? "primary" : "secondary"} onClick={statusOptions !== "closed" ? () => {setPage(1);setStatusOptions("closed")} : () => {setPage(1);setStatusOptions("")}}>Closed</Button>
-              <Button variant={statusOptions === "canceled" ? "primary" : "secondary"} onClick={statusOptions !== "canceled" ? () => {setPage(1);setStatusOptions("canceled")} : () => {setPage(1);setStatusOptions("")}}>Canceled</Button>
-            </ButtonGroup>
+            <InputGroup.Append>
+              <Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0"}}>Search
+                <OverlayTrigger
+                  key={"search-information"}
+                  placement="top"
+                  overlay={
+                    <Tooltip id={`tooltip-search-information`}>
+                      Searchable fields: address fields, animal names, and animal owner last names.
+                    </Tooltip>
+                  }
+                >
+                  <FontAwesomeIcon icon={faInfoCircle} className="ml-1" size="sm" inverse />
+                </OverlayTrigger>
+              </Button>
+            </InputGroup.Append>
+            <Button variant="outline-light" className="ml-1" onClick={() => {setShowFilters(!showFilters)}}>Advanced {showFilters ? <FontAwesomeIcon icon={faChevronDoubleUp} size="sm" /> : <FontAwesomeIcon icon={faChevronDoubleDown} size="sm" />}</Button>
+            <ButtonSpinner
+              variant="outline-light"
+              className="ml-1 mr-1 print-all-btn-icon"
+              onClick={handlePrintAllClick}
+              isSubmitting={isSubmittingById()}
+              isSubmittingText={submittingLabel}
+            >
+              Print All ({`${filteredServiceRequests.length}`})
+              <FontAwesomeIcon icon={faPrint} className="ml-2 text-light" inverse />
+            </ButtonSpinner>
+            <Button
+            key={"download-geojson"}
+            className="pr-1"
+            placement="bottom"
+            variant="outline-light"
+            onClick={handleGeoJsonDownload} href="">Download All ({`${filteredServiceRequests.length}`})<FontAwesomeIcon icon={faDownload} className="mx-2 text-light" inverse />
+          </Button>
+          </InputGroup>
           </Col>
         </Row>
+        <Collapse in={showFilters}>
+          <div>
+          <Card className="border rounded d-flex mt-3" style={{width:"100%"}}>
+            <Card.Body style={{marginBottom:"-16px"}}>
+              <Row>
+                <Col xs={"4"} style={{textTransform:"capitalize"}}>
+                  <Select
+                    label="Status"
+                    id="statusDropdown"
+                    name="Status"
+                    type="text"
+                    placeholder="Select Status"
+                    options={[{ value: 'open', label: 'Open' },{ value: 'assigned', label: 'Assigned' },{ value: 'closed', label: 'Closed' },{ value: 'canceled', label: 'Canceled' },]}
+                    styles={customStyles}
+                    isClearable={true}
+                    ref={statusRef}
+                    onChange={(instance) => {
+                      setOptions({...options, status: instance ? instance.value : null});
+                    }}
+                  />
+                  <Select
+                    label="Priority"
+                    id="priorityDropdown"
+                    name="priority"
+                    type="text"
+                    placeholder="Select Priority"
+                    options={[{ value: 1, label: 'Highest' },
+                    { value: 2, label: 'High' },
+                    { value: 3, label: 'Medium' },
+                    { value: 4, label: 'Low' },
+                    { value: 5, label: 'Lowest' }]}
+                    styles={customStyles}
+                    isClearable={true}
+                    ref={priorityRef}
+                    onChange={(instance) => {
+                      setOptions({...options, priority: instance ? instance.value : null})
+                    }}
+                  />
+                </Col>
+                <Col xs="5">
+                  <Row style={{marginBottom:"0px"}}>
+                    <Col style={{marginLeft:"-15px", paddingRight:"0px"}}>
+                      <DateRangePicker
+                        name={`start_date_range_picker`}
+                        id={`start_date_range_picker`}
+                        placeholder={"Opened Start Date"}
+                        mode="single"
+                        data-enable-time={true}
+                        clearable={"true"}
+                        hour={0}
+                        style={{height:"36px"}}
+                        ref={openStartRef}
+                        onChange={(dateRange) => {
+                          setOptions({...options, open_start: dateRange.length ? dateRange[0] : null})
+                          // setStartDate(dateRange.length ? dateRange[0] : null)
+                          setTriggerRefresh(!triggerRefresh)
+                        }}
+                      />
+                    </Col>
+                  </Row>
+                  <Row className="mt-3" style={{maxHeight:"37px"}}>
+                    <Col style={{marginLeft:"-15px", paddingRight:"0px"}}>
+                      <DateRangePicker
+                        name={`end_date_range_picker`}
+                        id={`end_date_range_picker`}
+                        placeholder={"Opened End Date"}
+                        mode="single"
+                        data-enable-time={true}
+                        clearable={"true"}
+                        hour={23}
+                        minute={59}
+                        style={{height:"36px"}}
+                        ref={openEndRef}
+                        onChange={(dateRange) => {
+                          // setEndDate(dateRange.length ? dateRange[0] : null)
+                          setOptions({...options, end_start: dateRange.length ? dateRange[0] : null})
+                          setTriggerRefresh(!triggerRefresh)
+                        }}
+                      />
+                    </Col>
+                  </Row>
+                </Col>
+                <Col className="flex-grow-1 pl-0" xs="3">
+                  <Button className="btn btn-primary" style={{maxHeight:"35px", width:"100%"}} onClick={() => {tempSearchTerm.current.value !== searchTerm ? setSearchTerm(tempSearchTerm.current.value) : handleApplyFilters(data.service_requests);}} disabled={isDisabled}>Apply</Button>
+                  <Button className="mb-3" variant="outline-light" style={{maxHeight:"35px", width:"100%", marginTop:"15px"}} onClick={handleClear}>Clear</Button>
+                </Col>
+              </Row>
+            </Card.Body>
+          </Card>
+          </div>
+        </Collapse>
       </Form>
-      {filteredServiceRequests.map((service_request, index) => (
+      {data.service_requests.filter(request => filteredServiceRequests.includes(request.id)).map((service_request, index) => (
         <div key={service_request.id} className="mt-3" hidden={page !== Math.ceil((index+1)/ITEMS_PER_PAGE)}>
           <div className="card-header">
             <h4 style={{marginBottom:"-2px",  marginLeft:"-12px"}}>
@@ -526,7 +696,7 @@ function ServiceRequestSearch({ incident, organization }) {
                     <Scrollbar style={{height:"144px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
                       {service_request.animals.filter(animal => animal.species_string === searchState[service_request.id].selectedSpecies).map((animal, i) => (
                         <ListGroup.Item key={animal.id}>
-                          <b>A#{animal.id_for_incident}:</b>&nbsp;&nbsp;<Link href={"/" + organization + "/" + incident + "/animals/" + animal.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.name || "Unknown"}</Link>
+                          <b>A#{animal.id_for_incident}:</b>&nbsp;&nbsp;<Link href={"/" + organization + "/" + incident + "/animals/" + animal.id_for_incident} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.name || "Unknown"}</Link>
                           {animal.color_notes ?
                           <OverlayTrigger
                             key={"animal-color-notes"}

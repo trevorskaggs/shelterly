@@ -12,7 +12,7 @@ from people.serializers import OwnerContactSerializer, PersonSerializer, HeavyPe
 # Provides view for Person API calls.
 class PersonViewSet(viewsets.ModelViewSet):
     queryset = Person.objects.all()
-    search_fields = ['id', 'first_name', 'last_name', 'address', 'city', 'phone', 'email', 'drivers_license', 'animal__name', 'reporter_animals__name',]
+    search_fields = ['first_name', 'last_name', 'address', 'city', 'phone', 'email', 'drivers_license', 'animal__name', 'reporter_animals__name',]
     filter_backends = (filters.SearchFilter,)
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = PersonSerializer
@@ -94,7 +94,7 @@ class PersonViewSet(viewsets.ModelViewSet):
 
             # If an owner is being added from an animal, update the animal with the new owner.
             if self.request.data.get('animal'):
-                animal = Animal.objects.get(pk=self.request.data.get('animal'))
+                animal = Animal.objects.get(id_for_incident=self.request.data.get('animal'), incident__slug=self.request.data.get('incident_slug'))
                 animal.owners.add(person)
                 if animal.request:
                     animal.request.owners.add(person)

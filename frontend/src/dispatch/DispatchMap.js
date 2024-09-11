@@ -5,7 +5,7 @@ import { Form, Formik } from 'formik';
 import { Button, Col, Form as BootstrapForm, FormCheck, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBan, faBandAid, faBullseye, faCalendarDay, faCar, faChevronDown, faChevronUp, faEquals, faExclamationTriangle, faCircle, faClipboardList, faExclamationCircle, faMapMarkedAlt, faQuestionCircle, faPencilAlt, faTrailer, faUserAlt, faUserAltSlash
+  faBan, faBandAid, faBullseye, faCalendarDay, faCar, faChevronDown, faChevronUp, faEquals, faExclamationTriangle, faCircle, faClipboardList, faExclamationCircle, faMapMarkedAlt, faQuestionCircle, faPencilAlt, faPlusSquare, faTrailer, faUserAlt, faUserAltSlash
 } from '@fortawesome/free-solid-svg-icons';
 import { faBadgeSheriff, faChevronDoubleDown, faChevronDoubleUp, faCircleBolt, faHomeAlt, faRotate } from '@fortawesome/pro-solid-svg-icons';
 import { faHomeAlt as faHomeAltReg } from '@fortawesome/pro-regular-svg-icons';
@@ -30,6 +30,9 @@ function Deploy({ incident, organization }) {
   const { dispatch, state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
+  // Regex validators.
+  const phoneRegex = /^((\+\d{1,3}(-| )?\(?\d\)?(-| )?\d{1,3})|(\(?\d{2,3}\)?))(-| )?(\d{3,4})(-| )?(\d{4})(( x| ext)\d{1,5}){0,1}$/;
+
   // Determine if this is a preplanning workflow.
   let preplan = window.location.pathname.includes("preplan")
 
@@ -38,7 +41,7 @@ function Deploy({ incident, organization }) {
   const [mapState, setMapState] = useState({});
   const [totalSelectedState, setTotalSelectedState] = useState({'REPORTED':{}, 'REPORTED (EVAC REQUESTED)':{}, 'REPORTED (SIP REQUESTED)':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}});
   const [selectedCount, setSelectedCount] = useState({count:0, disabled:true});
-  const [statusOptions, setStatusOptions] = useState({aco_required:false, pending_only: true});
+  const [statusOptions, setStatusOptions] = useState({aco_required:false, hide_pending: true});
   const [triggerRefresh, setTriggerRefresh] = useState(false);
   const [teamData, setTeamData] = useState({teams: [], options: [], isFetching: false});
   const [selected, setSelected] = useState([]);
@@ -47,6 +50,8 @@ function Deploy({ incident, organization }) {
   const handleClose = () => setShow(false);
   const [show, setShow] = useState(false);
   const [error, setError] = useState('');
+  const [showAddTeamMember, setShowAddTeamMember] = useState(false);
+  const handleCloseShowAddTeamMember = () => setShowAddTeamMember(false);
   const [showDispatchDuplicateSRModal, setShowDispatchDuplicateSRModal] = useState(false);
   const [duplicateSRs, setDuplicateSRs] = useState([]);
   const handleCloseDispatchDuplicateSRModal = () => {setDuplicateSRs([]);setShowDispatchDuplicateSRModal(false);}
@@ -61,9 +66,9 @@ function Deploy({ incident, organization }) {
     setStatusOptions(prevState => ({ ...prevState, aco_required:!statusOptions.aco_required }));
   }
 
-  // Handle pending_only toggle.
+  // Handle hide_pending toggle.
   const handlePendingOnly = async event => {
-    setStatusOptions(prevState => ({ ...prevState, pending_only:!statusOptions.pending_only }));
+    setStatusOptions(prevState => ({ ...prevState, hide_pending:!statusOptions.hide_pending }));
   }
 
   // Handle radius circle toggles.
@@ -103,13 +108,14 @@ function Deploy({ incident, organization }) {
     // If deselecting.
     if (selected.length > selected_list.length) {
       let team_options = [];
-      teamData.teams.filter(team => team.team_members.filter(value => id_list.includes(value)).length === 0).forEach(function(team) {
+      teamData.teams.filter(team => team.team_object.team_members.filter(value => id_list.includes(value)).length === 0).forEach(function(team) {
         // Add selectable options back if if not already available.
-        if (team.team_members.length && !teamData.options.some(option => option.label === team.name + ": " + team.display_name)) {
-          team_options.push({id:team.team_members, label:team.name + ": " + team.display_name, is_assigned:team.is_assigned});
+        if (team.team_object.team_members.length && !teamData.options.some(option => option.label === team.team_object.name + ": " + team.team_object.display_name)) {
+          team_options.push({id:team.team_object.team_members, label:team.team_object.name + ": " + team.team_object.display_name, is_assigned:team.team_object.is_assigned});
         }
       });
       setTeamData(prevState => ({ ...prevState, "options":team_options.concat(teamData.options.concat(selected.filter(option => !id_list.includes(option.id[0])))) }));
+      setSelectedCount((prevState) => ({...prevState, disabled: (prevState.count > 0 ? false : true)}));
     }
     // Else we're selecting. Remove selection from option list.
     else {
@@ -220,12 +226,14 @@ function Deploy({ incident, organization }) {
     setMapState(tempMapState);
   }
 
-  useWebSocket('ws://' + window.location.host.replace('localhost:3000', 'localhost:8000') + '/ws/map_data/', {
-    onMessage: (e) => {
-      setNewData(true)
-    },
-    shouldReconnect: (closeEvent) => true,
-  });
+  // Locally working websocket connection.
+  // TODO: bring back?
+  // useWebSocket('ws://' + window.location.host.replace('localhost:3000', 'localhost:8000') + '/ws/map_data/', {
+  //   onMessage: (e) => {
+  //     setNewData(true)
+  //   },
+  //   shouldReconnect: (closeEvent) => true,
+  // });
 
   // Hook for initializing data.
   useEffect(() => {
@@ -250,7 +258,7 @@ function Deploy({ incident, organization }) {
           // Then fetch all recent Teams.
           axios.get('/evac/api/evacassignment/', {
             params: {
-              map: true,
+              deploy_map: true,
               incident,
             },
             cancelToken: source.token,
@@ -300,10 +308,10 @@ function Deploy({ incident, organization }) {
 
     const fetchServiceRequests = async () => {
       // Fetch ServiceRequest data.
-      await axios.get('/hotline/api/servicerequests/?map=true&incident=' + incident, {
+      await axios.get('/hotline/api/servicerequests/?incident=' + incident, {
         params: {
           status: 'open',
-          map: true
+          landingmap: true
         },
         cancelToken: source.token,
       })
@@ -437,12 +445,12 @@ function Deploy({ incident, organization }) {
             placement="bottom"
             overlay={
               <Tooltip id={`tooltip-new-data`}>
-                {!newData ? "No new Service Request data available." : "New Service Request data available."}
+                {"Refresh service request data."}
               </Tooltip>
             }
           >
             <span className="d-inline-block">
-              <Button className="fa-move-up" onClick={() => setTriggerRefresh(!triggerRefresh)} disabled={!newData}>
+              <Button className="fa-move-up" onClick={() => setTriggerRefresh(!triggerRefresh)}>
                 <FontAwesomeIcon icon={faRotate} />
               </Button>
             </span>
@@ -571,7 +579,7 @@ function Deploy({ incident, organization }) {
             <Map style={{marginRight:"0px"}} bounds={data.bounds} onMoveEnd={onMove}>
               {data.service_requests
               .filter(service_request => statusOptions.aco_required ? service_request.aco_required === statusOptions.aco_required : true)
-              .filter(service_request => statusOptions.pending_only ? service_request.pending === statusOptions.pending_only : true)
+              .filter(service_request => statusOptions.hide_pending ? service_request.pending !== statusOptions.hide_pending : true)
               .map(service_request => (
                 <span key={service_request.id}> {mapState[service_request.id] ? 
                   <Marker
@@ -615,9 +623,9 @@ function Deploy({ incident, organization }) {
           <Col xs={2} className="pl-0 pr-0" style={{marginLeft:"-1px", marginRight:"1px"}}>
             <Button type="submit" className="btn-block mt-auto border" disabled={selectedCount.disabled || (!preplan && props.values.team_members.length === 0)}>{preplan ? "PREPLAN" : "DEPLOY"}</Button>
           </Col>
-          <Col xs={2} className="pl-0 pr-0 ml-1">
+          <Col className="pl-0 pr-0 ml-1" style={{maxWidth:"170px"}}>
             <div className="card-header border rounded text-center" style={{height:"37px", marginLeft:"-6px", marginRight:"-11px", paddingTop:"6px", whiteSpace:"nowrap"}}>
-              <span style={{marginLeft:"-10px"}}>{props.values.team_name || teamName}
+              <span style={{marginLeft:"-12px"}}>{props.values.team_name || teamName}
                 {!preplan ? <OverlayTrigger
                   key={"edit-team-name"}
                   placement="top"
@@ -632,7 +640,7 @@ function Deploy({ incident, organization }) {
               </span>
             </div>
           </Col>
-          <Col xs={8} style={{marginLeft:"-4px", paddingRight:"0px"}}>
+          <Col style={{marginLeft:"2px", paddingLeft:"2px", paddingRight:"4px"}}>
             {preplan ?
               <BootstrapForm.Control
                 id="disabled_team_name"
@@ -660,6 +668,19 @@ function Deploy({ incident, organization }) {
               />
             }
           </Col>
+          <Col className="pr-0" style={{maxWidth:"31px", paddingLeft:"2px"}}>
+            <OverlayTrigger
+              key={"add-team-member"}
+              placement="top"
+              overlay={
+                <Tooltip id={`tooltip-add-team-member`}>
+                  Add a new team member
+                </Tooltip>
+              }
+            >
+              <FontAwesomeIcon icon={faPlusSquare} className="ml-1" size="lg" transform="grow-18 down-6" onClick={() => setShowAddTeamMember(true)} style={{cursor:"pointer"}} inverse />
+            </OverlayTrigger>
+          </Col>
         </Row>
         <Row className="d-flex flex-wrap" style={{marginTop:"-1px", marginRight:"-23px", marginLeft:"6px", minHeight:"36vh", paddingRight:"14px"}}>
           <Col xs={2} className="d-flex flex-column pl-0 pr-0" style={{marginLeft:"-7px", marginRight:"-2px", height:"277px"}}>
@@ -668,12 +689,12 @@ function Deploy({ incident, organization }) {
               <hr/>
               <FormCheck id="aco_required" name="aco_required" type="switch" label="ACO Required" checked={statusOptions.aco_required} onChange={handleACO} />
               <FormCheck
-                id="pending_only"
+                id="hide_pending"
                 className="mt-3"
-                name="pending_only"
+                name="hide_pending"
                 type="switch"
                 label={`Hide Pending (${data.service_requests.filter(sr => sr.pending).length || 0}) `}
-                checked={statusOptions.pending_only}
+                checked={statusOptions.hide_pending}
                 onChange={handlePendingOnly}
               />
             </div>
@@ -682,7 +703,7 @@ function Deploy({ incident, organization }) {
             <Scrollbar no_shadow="true" style={{height:"275px", marginLeft:"-10px", marginRight:"-10px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
               {data.service_requests
               .filter(service_request => statusOptions.aco_required ? service_request.aco_required === statusOptions.aco_required : true)
-              .filter(service_request => statusOptions.pending_only ? service_request.pending === statusOptions.pending_only : true)
+              .filter(service_request => statusOptions.hide_pending ? service_request.pending !== statusOptions.hide_pending : true)
               .map(service_request => (
                 <span key={service_request.id}>{mapState[service_request.id] && (mapState[service_request.id].checked || !mapState[service_request.id].hidden) ?
                 <div className="mt-1 mb-1" style={{}}>
@@ -923,7 +944,7 @@ function Deploy({ incident, organization }) {
                     </OverlayTrigger>
                     }
                     <span className="ml-2">|
-                    &nbsp;SR#{service_request.id_for_incident} - {service_request.full_address}</span>
+                    &nbsp;<Link href={"/" + organization +"/" + incident + "/hotline/servicerequest/" + service_request.id_for_incident} className="text-link" style={{textDecoration:"none", color:"white"}}>SR#{service_request.id_for_incident}</Link> - {service_request.full_address}</span>
                     <OverlayTrigger
                       key={"radius-toggle"}
                       placement="top"
@@ -974,17 +995,6 @@ function Deploy({ incident, organization }) {
                       </OverlayTrigger>
                     }
                     <OverlayTrigger
-                      key={"request-details"}
-                      placement="top"
-                      overlay={
-                        <Tooltip id={`tooltip-request-details`}>
-                          Service request details
-                        </Tooltip>
-                      }
-                    >
-                      <Link href={"/" + organization +"/" + incident + "/hotline/servicerequest/" + service_request.id_for_incident}><FontAwesomeIcon icon={faClipboardList} inverse /></Link>
-                    </OverlayTrigger>
-                    <OverlayTrigger
                       key={"add-to-dispatch"}
                       placement="top"
                       overlay={
@@ -993,7 +1003,7 @@ function Deploy({ incident, organization }) {
                         </Tooltip>
                       }
                     >
-                      <Link href={"/" + organization +"/" + incident + "/hotline/servicerequest/" + service_request.id + "/assign"}><FontAwesomeIcon icon={faMapMarkedAlt} className="ml-1" inverse /></Link>
+                      <Link href={"/" + organization +"/" + incident + "/hotline/servicerequest/" + service_request.id_for_incident + "/assign"}><FontAwesomeIcon icon={faMapMarkedAlt} inverse /></Link>
                     </OverlayTrigger>
                   </div>
                 </div>
@@ -1026,6 +1036,91 @@ function Deploy({ incident, organization }) {
             <Button variant="secondary" onClick={handleClose}>Close</Button>
           </Modal.Footer>
         </Modal>
+        <Formik
+          initialValues={{
+            first_name: '',
+            last_name: '',
+            phone: '',
+            agency_id: '',
+            incident: state ? state.incident.id : 'undefined',
+          }}
+          enableReinitialize={true}
+          validationSchema={Yup.object({
+            first_name: Yup.string()
+              .max(50, 'Must be 50 characters or less')
+              .required('Required'),
+            last_name: Yup.string()
+              .max(50, 'Must be 50 characters or less')
+              .required('Required'),
+            phone: Yup.string()
+              .matches(phoneRegex, "Phone number is not valid")
+              .required('Required'),
+            agency_id: Yup.string(),
+          })}
+          onSubmit={(values, { resetForm }) => {
+            axios.post('/evac/api/evacteammember/', values)
+            .then(response => {
+              let selected_list = [...selected];
+              selected_list.push({id:[response.data.id], label:response.data.first_name + " " + response.data.last_name + (response.data.agency_id ? " (" + response.data.agency_id + ")" : ""), is_assigned:false})
+              setSelected(selected_list);
+              props.setFieldValue('team_members', [...props.values.team_members, response.data.id]);
+              setSelectedCount((prevState) => ({...prevState, disabled:selectedCount.count > 0 ? false : true}));
+              handleCloseShowAddTeamMember();
+              resetForm();
+            })
+            .catch(error => {
+              setShowSystemError(true);
+            });
+          }}
+        >
+          {formikProps => (
+            <Modal show={showAddTeamMember} onHide={handleCloseShowAddTeamMember}>
+              <Modal.Header closeButton>
+                <Modal.Title>Add Team Member</Modal.Title>
+              </Modal.Header>
+              <Modal.Body>
+                <BootstrapForm>
+                  <BootstrapForm.Row>
+                    <TextInput
+                      type="text"
+                      label="First Name*"
+                      name="first_name"
+                      id="first_name"
+                      xs="6"
+                    />
+                    <TextInput
+                      type="text"
+                      label="Last Name*"
+                      name="last_name"
+                      id="last_name"
+                      xs="6"
+                    />
+                  </BootstrapForm.Row>
+                  <BootstrapForm.Row>
+                    <TextInput
+                      type="text"
+                      label="Phone*"
+                      name="phone"
+                      id="phone"
+                      xs="6"
+                    />
+                    <TextInput
+                      type="text"
+                      label="Agency ID"
+                      name="agency_id"
+                      id="agency_id"
+                      xs="6"
+                    />
+                  </BootstrapForm.Row>
+                </BootstrapForm>
+              </Modal.Body>
+              <Modal.Footer>
+                <Button variant="primary" onClick={() => formikProps.submitForm()}>Save</Button>
+                <Button variant="secondary" onClick={handleCloseShowAddTeamMember}>Close</Button>
+              </Modal.Footer>
+            </Modal>
+          )}
+        </Formik>
       </Form>
     )}
   </Formik>

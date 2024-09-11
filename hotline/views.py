@@ -7,7 +7,7 @@ from django.db.models import Case, Count, Exists, OuterRef, Prefetch, Q, When, V
 from django.http import HttpResponse, JsonResponse
 from actstream import action
 from datetime import datetime
-from .serializers import ServiceRequestSerializer, SimpleServiceRequestSerializer, VisitNoteSerializer
+from .serializers import ServiceRequestSerializer, MapServiceRequestSerializer, SimpleServiceRequestSerializer, VisitNoteSerializer
 from .ordering import MyCustomOrdering
 from wsgiref.util import FileWrapper
 from channels.layers import get_channel_layer
@@ -24,17 +24,20 @@ from rest_framework.decorators import action as drf_action
 class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
     queryset = ServiceRequest.objects.all()
     lookup_fields = ['pk', 'incident', 'id_for_incident']
-    search_fields = ['id_for_incident', 'address', 'city', 'animal__name', 'owners__first_name', 'owners__last_name', 'owners__phone', 'owners__drivers_license', 'owners__address', 'owners__city', 'reporter__first_name', 'reporter__last_name']
+    search_fields = ['address', 'city', 'animal__name', 'owners__last_name', 'reporter__last_name']
     filter_backends = (filters.SearchFilter, MyCustomOrdering)
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = SimpleServiceRequestSerializer
     detail_serializer_class = ServiceRequestSerializer
+    map_serializer_class = MapServiceRequestSerializer
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
             if hasattr(self, 'detail_serializer_class'):
                 return self.detail_serializer_class
-
+        if self.request.query_params.get('landingmap', False):
+            if hasattr(self, 'map_serializer_class'):
+                return self.map_serializer_class
         return super(ServiceRequestViewSet, self).get_serializer_class()
 
 
@@ -97,13 +100,12 @@ class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = (
             ServiceRequest.objects.all()
-            .annotate(animal_count=Count("animal"))
             .annotate(
                 injured=Exists(Animal.objects.filter(request_id=OuterRef("id"), injured="yes"))
             )
             .annotate(
-                pending=Case(When(Q(followup_date__lte=datetime.today()) | Q(followup_date__isnull=True), then=Value(True)), default=Value(False), output_field=BooleanField())
-            ).prefetch_related(Prefetch('animal_set', queryset=Animal.objects.with_images().exclude(status='CANCELED').prefetch_related('owners'), to_attr='animals'))
+                pending=Case(When(followup_date__gte=datetime.today(), then=Value(True)), default=Value(False), output_field=BooleanField())
+            ).prefetch_related(Prefetch('animal_set', queryset=Animal.objects.with_images().exclude(status='CANCELED').order_by('id').prefetch_related('owners').select_related('species'), to_attr='animals'))
             .prefetch_related('owners')
             .select_related('reporter')
             .prefetch_related(Prefetch('evacuation_assignments', EvacAssignment.objects.select_related('team').prefetch_related('team__team_members')))
@@ -115,7 +117,7 @@ class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
             queryset = queryset.filter(status=status).distinct()
 
         # Exclude SRs without a geolocation when fetching for a map.
-        is_map = self.request.query_params.get('map', '')
+        is_map = self.request.query_params.get('map', '')  or self.request.query_params.get('landingmap', '')
         if is_map == 'true':
             queryset = queryset.exclude(Q(latitude=None) | Q(longitude=None) | Q(animal=None)).exclude(status='canceled')
         if self.request.GET.get('incident'):

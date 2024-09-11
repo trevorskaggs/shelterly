@@ -30,20 +30,20 @@ class SimpleAnimalSerializer(serializers.ModelSerializer):
 
 class ModestAnimalSerializer(SimpleAnimalSerializer):
     front_image = serializers.SerializerMethodField()
-    side_image = serializers.SerializerMethodField()
     found_location = serializers.SerializerMethodField()
     request_id_for_incident = serializers.SerializerMethodField()
     request_address = serializers.SerializerMethodField()
     request_lat_lon = serializers.SerializerMethodField()
     weight = serializers.SerializerMethodField()
+    owners = SimplePersonSerializer(many=True, required=False, read_only=True)
     owner_names = serializers.StringRelatedField(source='owners', many=True, read_only=True)
     shelter_object = SimpleShelterSerializer(source='shelter', required=False, read_only=True)
     room_name = serializers.StringRelatedField(source='room', read_only=True)
 
     class Meta:
         model = Animal
-        fields = ['id', 'id_for_incident', 'name', 'species', 'species_string', 'aggressive', 'injured', 'fixed', 'request', 'request_id_for_incident', 'found_location', 'request_address', 'request_lat_lon', 'shelter_object', 'shelter', 'status', 'aco_required', 'color_notes',
-        'front_image', 'side_image', 'owner_names', 'sex', 'size', 'age', 'pcolor', 'scolor', 'medical_notes', 'medical_record', 'behavior_notes', 'room_name', 'category', 'latitude', 'longitude', 'weight']
+        fields = ['id', 'id_for_incident', 'name', 'species', 'species_string', 'confined', 'aggressive', 'injured', 'fixed', 'request', 'request_id_for_incident', 'found_location', 'request_address', 'request_lat_lon', 'shelter_object', 'shelter', 'status', 'aco_required', 'color_notes',
+        'microchip', 'front_image', 'intake_date', 'owners', 'owner_names', 'sex', 'size', 'age', 'pcolor', 'scolor', 'medical_notes', 'medical_record', 'behavior_notes', 'room', 'room_name', 'category', 'latitude', 'longitude', 'weight']
 
     def get_found_location(self, obj):
         return build_full_address(obj)
@@ -96,6 +96,7 @@ class ModestAnimalSerializer(SimpleAnimalSerializer):
                 return ''
 
 class AnimalSerializer(ModestAnimalSerializer):
+    side_image = serializers.SerializerMethodField()
     extra_images = serializers.SerializerMethodField()
     owners = SimplePersonSerializer(many=True, required=False, read_only=True)
     reporter_object = SimplePersonSerializer(source='reporter', read_only=True)

@@ -102,7 +102,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
   }
 
   function buildAnimalUrl(animal) {
-    return getFullLocationFromPath(`/${organization}/${incident}/animals/${animal.id}`)
+    return getFullLocationFromPath(`/${organization}/${incident}/animals/${animal.id_for_incident}`)
   }
 
   const handleDownloadPdfClick = async () => {
@@ -369,7 +369,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
                     options={{clickOpens:false, altInput:true, altInputClass:"hide-input", altFormat:"F j, Y h:i K", minDate:new Date()}}
                     onChange={(date, dateStr) => {
                       setData(prevState => ({ ...prevState, "followup_date":dateStr }));
-                      axios.patch('/hotline/api/servicerequests/' + id + '/', {followup_date:date[0]})
+                      axios.patch('/hotline/api/servicerequests/' + data.id + '/', {followup_date:date[0]})
                       .catch(error => {
                         setShowSystemError(true);
                       });
@@ -595,11 +595,11 @@ function ServiceRequestDetails({ id, incident, organization }) {
                     >
                       <Link href={"/" + organization + "/" + incident + "/dispatch/assignment/note/" + assigned_request.visit_note.id}> <FontAwesomeIcon icon={faEdit} inverse /></Link>
                     </OverlayTrigger>
-                    <div className="mt-1 mb-0"><b>Outcome:</b> {assigned_request.visit_note.notes||"No visit information available."}</div>
+                    <div className="mt-1 mb-0" style={{whiteSpace:"pre-line"}}><b>Outcome:</b> {assigned_request.visit_note.notes||"No visit information available."}</div>
                     {assigned_request.owner_contact ?
                     <span>
                       {assigned_request.owner_contact.owner_name ? <div className="mt-1 mb-0"><b>Owner Contacted:</b> {assigned_request.owner_contact.owner_name} {assigned_request.owner_contact.owner_contact_time ? <span>on <Moment format="LLL">{assigned_request.owner_contact.owner_contact_time}</Moment></span> : ""}</div> : ""}
-                      <div className="mt-1 mb-0"><b>Contact Notes:</b> {assigned_request.owner_contact.owner_contact_note||"No contact information available."}</div>
+                      <div className="mt-1 mb-0" style={{whiteSpace:"pre-line"}}><b>Contact Notes:</b> {assigned_request.owner_contact.owner_contact_note||"No contact information available."}</div>
                     </span>
                     : ""}
                   </ListGroup.Item>

@@ -74,7 +74,7 @@ function TreatmentCard(props) {
               }
               <Col className="hover-div pl-0 pr-0">
                 <div className="border treatment-hover-div" style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"5px", marginLeft:"-1px", marginTop: "-1px", fontSize:"18px", width:"100%", backgroundColor:"rgb(158 153 153)"}}>
-                  {props.treatment_request.treatment_object.description}
+                  <span style={{marginLeft:"5px"}}>{props.treatment_request.treatment_object.description}</span>
                   <span className="float-right">
                   {props.treatment_request.actual_admin_time ?
                     <OverlayTrigger

@@ -68,7 +68,7 @@ const VisitNoteForm = ({ id, incident, organization }) => {
       enableReinitialize={true}
       validationSchema={Yup.object({
         date_completed: Yup.date(),
-        notes: Yup.string(),
+        notes: Yup.string().max(2500, 'Must be 2500 characters or less.'),
       })}
       onSubmit={(values, { setSubmitting }) => {
         setTimeout(() => {

@@ -13,8 +13,9 @@ from asgiref.sync import async_to_sync
 
 from animals.models import Animal
 from animals.views import MultipleFieldLookupMixin
+from animals.serializers import AnimalSerializer
 from evac.models import AssignedRequest, DispatchTeam, EvacAssignment, EvacTeamMember
-from evac.serializers import DispatchTeamSerializer, EvacAssignmentSerializer, EvacTeamMemberSerializer
+from evac.serializers import DispatchTeamSerializer, DeployEvacAssignmentSerializer, EvacAssignmentSerializer, MapEvacAssignmentSerializer, EvacTeamMemberSerializer
 from hotline.models import ServiceRequest, VisitNote
 from incident.models import Incident, Organization
 from people.models import OwnerContact, Person
@@ -99,16 +100,26 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
 
     queryset = EvacAssignment.objects.all()
     lookup_fields = ['pk', 'incident', 'id_for_incident']
-    search_fields = ['id_for_incident', 'team__name', 'team__team_members__first_name', 'team__team_members__last_name', 'service_requests__owners__first_name', 'service_requests__owners__last_name', 'service_requests__owners__phone', 'service_requests__owners__drivers_license', 'service_requests__address', 'service_requests__reporter__first_name', 'service_requests__reporter__last_name']
+    search_fields = ['team__name', 'team__team_members__first_name', 'team__team_members__last_name', 'service_requests__address', 'service_requests__city', 'service_requests__animal__name',]
     filter_backends = (filters.SearchFilter,)
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = EvacAssignmentSerializer
+    deploy_serializer_class = DeployEvacAssignmentSerializer
+    map_serializer_class = MapEvacAssignmentSerializer
+
+    def get_serializer_class(self):
+        if self.request.query_params.get('deploy_map', False):
+            if hasattr(self, 'deploy_serializer_class'):
+                return self.map_serializer_class
+        elif self.request.query_params.get('map', False):
+            if hasattr(self, 'map_serializer_class'):
+                return self.map_serializer_class
+        return super(EvacAssignmentViewSet, self).get_serializer_class()
 
     def get_queryset(self):
-        queryset = EvacAssignment.objects.filter(service_requests__isnull=False, assigned_requests__isnull=False).distinct().order_by('-start_time').prefetch_related(Prefetch('service_requests',
+        queryset = EvacAssignment.objects.filter(service_requests__isnull=False, assigned_requests__isnull=False).distinct().order_by('-start_time').select_related('team').prefetch_related(Prefetch('service_requests',
                     ServiceRequest.objects
             .exclude(status='CANCELED')
-            .annotate(animal_count=Count("animal"))
             .annotate(
                 injured=Exists(Animal.objects.filter(request_id=OuterRef("id"), injured="yes"))
             ).prefetch_related(Prefetch(
@@ -124,7 +135,7 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                 'service_request__animal_set', queryset=Animal.objects.exclude(status='CANCELED'), to_attr='animals'))))
 
         # Exclude DAs without SRs when fetching for a map.
-        is_map = self.request.query_params.get('map', '')
+        is_map = self.request.query_params.get('map', self.request.query_params.get('deploy_map', ''))
         if is_map == 'true':
             queryset = queryset.exclude(service_requests=None)
 
@@ -168,8 +179,23 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
             for service_request in service_requests:
                 action.send(self.request.user, verb='assigned service request', target=service_request)
                 animals_dict = {}
-                for animal in service_request.animal_set.filter(status__in=['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE']):
-                    animals_dict[animal.id] = {'id_for_incident':animal.id_for_incident, 'status':animal.status, 'name':animal.name, 'species':animal.species.name, 'color_notes':animal.color_notes, 'pcolor':animal.pcolor, 'scolor':animal.scolor, 'shelter':'', 'room':''}
+                full_animal_set = AnimalSerializer(service_request.animal_set.all().filter(status__in=['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE']), many=True, required=False, read_only=True).data
+                for animal in full_animal_set:
+                    animals_dict[animal["id"]] = {
+                        'id_for_incident':animal["id_for_incident"],
+                        'status':animal["status"],
+                        'name':animal["name"],
+                        'species':animal["species_string"],
+                        'color_notes':animal["color_notes"],
+                        'pcolor':animal["pcolor"],
+                        'scolor':animal["scolor"],
+                        'shelter':'',
+                        'room':'',
+                        'animal_notes':animal["behavior_notes"],
+                        'aggressive':animal["aggressive"],
+                        'aco_required':animal["aco_required"],
+                        'injured':animal["injured"],
+                    }
                 AssignedRequest.objects.create(dispatch_assignment=evac_assignment, service_request=service_request, animals=animals_dict, timestamp=timestamp)
 
             # Notify maps that there is updated data.
@@ -194,8 +220,23 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                     old_da.service_requests.remove(service_requests[0])
                 # Add SR to selected DA.
                 animals_dict = {}
-                for animal in service_requests[0].animal_set.filter(status__in=['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)',  'SHELTERED IN PLACE', 'UNABLE TO LOCATE']):
-                    animals_dict[animal.id] = {'id_for_incident':animal.id_for_incident, 'name':animal.name, 'species':animal.species.name, 'status':animal.status, 'color_notes':animal.color_notes, 'pcolor':animal.pcolor, 'scolor':animal.scolor, 'shelter':animal.shelter, 'room':animal.room}
+                full_animal_set = AnimalSerializer(service_requests[0].animal_set.filter(status__in=['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE']), many=True, required=False, read_only=True).data
+                for animal in full_animal_set:
+                    animals_dict[animal["id"]] = {
+                        "id_for_incident": animal["id_for_incident"],
+                        "name": animal["name"],
+                        "species": animal["species_string"],
+                        "status": animal["status"],
+                        "color_notes": animal["color_notes"],
+                        "pcolor": animal["pcolor"],
+                        "scolor": animal["scolor"],
+                        "shelter": animal["shelter"],
+                        "room": animal["room"],
+                        'animal_notes':animal["behavior_notes"],
+                        'aggressive':animal["aggressive"],
+                        'aco_required':animal["aco_required"],
+                        'injured':animal["injured"],
+                    }
                 AssignedRequest.objects.create(dispatch_assignment=evac_assignment, service_request=service_requests[0], animals=animals_dict)
                 action.send(self.request.user, verb='assigned service request', target=service_requests[0])
 
@@ -204,7 +245,21 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                 service_requests = ServiceRequest.objects.filter(id=service_request['id'])
                 # sr_status = 'open' if service_request.get('unable_to_complete', '') else 'assigned'
                 for animal_dict in service_request['animals']:
-                    animals_dict[animal_dict['id']] = {'id_for_incident':animal_dict.get('id_for_incident'), 'name':animal_dict.get('name'), 'species':animal_dict.get('species'), 'status':animal_dict.get('status'), 'color_notes':animal_dict.get('color_notes'), 'pcolor':animal_dict.get('pcolor'), 'scolor':animal_dict.get('scolor'), 'shelter':animal_dict.get('shelter'), 'room':animal_dict.get('room')}
+                    animals_dict[animal_dict["id"]] = {
+                        "id_for_incident": animal_dict.get("id_for_incident"),
+                        "name": animal_dict.get("name"),
+                        "species": animal_dict.get("species"),
+                        "status": animal_dict.get("status"),
+                        "color_notes": animal_dict.get("color_notes"),
+                        "pcolor": animal_dict.get("pcolor"),
+                        "scolor": animal_dict.get("scolor"),
+                        "shelter": animal_dict.get("shelter"),
+                        "room": animal_dict.get("room"),
+                        'animal_notes':animal_dict.get("animal_notes"),
+                        'aggressive':animal_dict.get("aggressive"),
+                        'aco_required':animal_dict.get("aco_required"),
+                        'injured':animal_dict.get("injured"),
+                    }
                     # Record status change if applicable.
                     animal = Animal.objects.get(pk=animal_dict['id'])
                     new_status = animal_dict.get('status')

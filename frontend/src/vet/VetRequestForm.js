@@ -168,8 +168,8 @@ const VetRequestForm = (props) => {
                       name="priority"
                       type="text"
                       options={[
-                        { value: 'urgent', label: 'Urgent' },
-                        { value: 'when_available', label: 'When Available' },
+                        { value: 'urgent', label: 'Urgent (Red)' },
+                        { value: 'when_available', label: 'When Available (Yellow)' },
                       ]}
                       value={formikProps.values.priority||data.priority}
                       isClearable={false}

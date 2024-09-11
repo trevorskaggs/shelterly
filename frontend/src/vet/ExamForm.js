@@ -30,6 +30,7 @@ import { SystemErrorContext } from '../components/SystemError';
 import { catAgeChoices, dogAgeChoices, horseAgeChoices, otherAgeChoices, sexChoices } from '../animals/constants';
 import Patient from './components/Patient';
 import { AuthContext } from "../accounts/AccountsReducer";
+import CustomSelect from "../components/CustomSelect.js";
 
 const initialSchemaData = [{
   id:'assignee',
@@ -87,10 +88,6 @@ const initialSchemaData = [{
       type:'nullable',
       params: []
     },
-    {
-      type:'required',
-      params: ["Required"]
-    },
   ]
   },{
     id:'respiratory_rate',
@@ -99,10 +96,6 @@ const initialSchemaData = [{
     {
       type:'nullable',
       params: []
-    },
-    {
-      type:'required',
-      params: ["Required"]
     },
   ]
   },{
@@ -163,7 +156,7 @@ const ExamForm = (props) => {
   // Determine if we're in the vet exam workflow.
   var is_workflow = window.location.pathname.includes("workflow");
 
-  const initialData = {id: '', exam: null, open: '', exam_object: {'medrecord_id':props.medrecordid, vetrequest_id:vetrequest_id, 'confirm_sex_age':false, 'confirm_chip':false, 'weight':null, 'weight_unit':'', 'weight_estimated':false, 'temperature':'', 'temperature_method':'Rectal', 'pulse':'', 'respiratory_rate':'', 'medical_plan':''}, animal_object: {id:'', name:'', species:'', species_string: '', category:'', sex:'', age:'', fixed:'', size:'', pcolor:'', scolor:'', medical_notes:''}, vet_requests:[]}
+  const initialData = {id: '', exam: null, open: '', exam_object: {'medrecord_id':props.medrecordid, vetrequest_id:vetrequest_id, 'confirm_sex_age':false, 'confirm_chip':false, 'weight':null, 'weight_unit':'', 'weight_estimated':false, 'temperature':'', 'temperature_method':'Rectal', 'pulse':null, 'respiratory_rate':'', 'medical_plan':''}, animal_object: {id:'', name:'', species:'', species_string: '', category:'', sex:'', age:'', fixed:'', size:'', pcolor:'', scolor:'', medical_notes:''}, vet_requests:[]}
 
   let current_data = {...initialData}
   if (is_workflow) {
@@ -368,6 +361,7 @@ const ExamForm = (props) => {
       onSubmit={(values, { setSubmitting }) => {
         values['animal_id'] = data.animal_object.id;
         values['vetrequest_id'] = vetrequest_id;
+        values['organization'] = state.organization.id;
         if (props.id || values.exam) {
           axios.put('/vet/api/exam/' + (props.id || values.exam) + '/', values)
           .then(response => {
@@ -414,7 +408,7 @@ const ExamForm = (props) => {
       {formikProps => (
         <Card border="secondary" className="mt-3">
           <Card.Header as="h5" className="pl-3"><span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + (is_workflow ? props.medrecordid : data.medical_record) + '/')} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>Veterinary Exam Form</Card.Header>
-          <Patient animal={data.animal_object} vet_request={vetrequest_id && data.vet_requests.length > 0 ? data.vet_requests.filter(vr => vr.id === Number(vetrequest_id))[0] : data.vet_request_object} organization={props.organization} incident={props.incident} />
+          <Patient animal={data.animal_object} vet_request={vetrequest_id && data.vet_requests.length > 0 ? data.vet_requests.filter(vr => vr.id === Number(vetrequest_id))[0] : data.vet_request_object} organization={props.organization} incident={props.incident} medical_plan={props.state ? props.state.steps.exam.medical_plan : ""} />
           <Card.Body>
             <Form>
               <FormGroup>
@@ -449,21 +443,17 @@ const ExamForm = (props) => {
                 <BootstrapForm.Row className="mt-3">
                   <Col xs="2">
                     <ToggleSwitch id="confirm_sex_age" name="confirm_sex_age" label="Confirm Age/Sex*" disabled={!formikProps.values.age && !formikProps.values.sex} />
-                    {/* <BootstrapForm.Label htmlFor="confirm_sex_age" style={{marginBottom:"-5px"}}>Confirm Age/Sex</BootstrapForm.Label>
-                    <div style={{marginLeft:"20px"}}><Field component={Switch} name="confirm_sex_age" type="checkbox" color="primary" disabled={!formikProps.values.age && !formikProps.values.sex} /></div>
-                    {formikProps.errors['confirm_sex_age'] ? <div style={{ color: "#e74c3c", marginTop: ".5rem", fontSize: "80%" }}>{formikProps.errors['confirm_sex_age']}</div> : ""} */}
                   </Col>
                   <Col xs="2">
-                    <DropDown
+                    <CustomSelect
                       label="Age"
-                      id="age"
-                      name="age"
-                      type="text"
-                      xs="4"
-                      key={`my_unique_age_select_key__${formikProps.values.age}`}
-                      options={Object.keys(ageChoices).includes(data.animal_object.species) ? ageChoices[data.animal_object.species] : ageChoices['other']}
-                      value={formikProps.values.age||data.animal_object.age}
-                      isClearable={false}
+                      options={Object.keys(ageChoices).includes(data.animal_object.species)
+                        ? ageChoices[data.animal_object.species]
+                        : ageChoices['other']}
+                      value={formikProps.values.age || data.animal_object.age}
+                      handleValueChange={(value) => formikProps.setFieldValue('age', value)}
+                      optionsKey={data.animal_object.species || data.animal_object.age}
+                      formValidationName="age"
                       disabled={formikProps.values.confirm_sex_age}
                     />
                   </Col>
@@ -515,7 +505,7 @@ const ExamForm = (props) => {
                     type="text"
                     label="Weight*"
                     xs="3"
-                    value={data.weight || formikProps.values.weight || ''}
+                    value={formikProps.values.weight || data.weight || ''}
                   />
                   <Col xs="1" style={{marginBottom:"-2px"}}>
                     <DropDown
@@ -570,14 +560,14 @@ const ExamForm = (props) => {
                     id="pulse"
                     name="pulse"
                     type="text"
-                    label="Pulse*"
+                    label="Pulse"
                     xs="2"
                   />
                   <TextInput
                     id="respiratory_rate"
                     name="respiratory_rate"
                     type="text"
-                    label="Respiratory Rate*"
+                    label="Respiratory Rate"
                     xs="2"
                   />
                 </BootstrapForm.Row>
@@ -603,6 +593,7 @@ const ExamForm = (props) => {
                               setTimeout(() => (getRef(question.name).current.focus(),3000))
                             }
                           }}
+                          tabIndex="-1"
                         />
                         <span>&nbsp;&nbsp;Not examined</span>
                       </span> : ""}
@@ -637,7 +628,7 @@ const ExamForm = (props) => {
                     <div className="mt-2">
                       <TextInput
                         as="textarea"
-                        name={question.name.toLowerCase().replace(' ','').replace('/','') + "_notes"}
+                        name={question.name.toLowerCase().replace(' ','_').replace('/','_') + "_notes"}
                         id={question.name.toLowerCase().replace(' ','_').replace('/','_') + "_notes"}
                         ref={setRef(question.name)}
                         xs="6"

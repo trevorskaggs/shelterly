@@ -32,9 +32,9 @@ function Vet({ incident, organization }) {
     tab = 'pending',
   } = queryParams;
 
-  const priorityText = {urgent:'Urgent', when_available:'When Available'};
+  const priorityText = {urgent:'Urgent (Red)', when_available:'When Available (Yellow)'};
 
-  const [data, setData] = useState({vet_requests:[], treatments:[], diagnostics:[], procedures:[], isFetching: true});
+  const [data, setData] = useState({vet_requests:[], treatments:[], diagnostics:[], procedures:[], pending:[], isFetching: true});
   const [reportData, setReportData] = useState([]);
   const [shelterData, setShelterData] = useState({shelters:[], bounds:L.latLngBounds([[0,0]])});
   const [selectedShelter, setSelectedShelter] = useState('all');
@@ -61,6 +61,7 @@ function Vet({ incident, organization }) {
 
           let track_ids = [];
           let shelter_animals = {'Field':[]};
+          let pending_data = [];
           const [vetResponse, treatmentResponse, diagnosticResponse, procedureResponse] = await Promise.all([
             axios.get('/vet/api/vetrequest/?incident=' + incident + '&today=true'),
             axios.get('/vet/api/treatmentrequest/?incident=' + incident + '&today=true'),
@@ -70,6 +71,8 @@ function Vet({ incident, organization }) {
 
           let vet_request_count = {'avian':0, 'cat':0, 'dog':0, 'camelid':0, 'small mammal':0, 'reptile/amphibian':0, 'equine':0, 'ruminant':0, 'swine':0, 'other':0};
           vetResponse.data.forEach(vet_request => {
+            vet_request['type'] = 'vet_request';
+            pending_data.push(vet_request);
             vet_request_count[vet_request.animal_object.category] += 1;
             if (!track_ids.includes(vet_request.animal_object.id) && (vet_request.animal_object.shelter === null || shelterResponse.data.map(shelter => shelter.id).includes(vet_request.animal_object.shelter))) {
               track_ids.push(vet_request.animal_object.id);
@@ -93,13 +96,17 @@ function Vet({ incident, organization }) {
           })
           let treatment_count = {'avian':0, 'cat':0, 'dog':0, 'camelid':0, 'small mammal':0, 'reptile/amphibian':0, 'equine':0, 'ruminant':0, 'swine':0, 'other':0};
           treatmentResponse.data.forEach(treatment => {
+            treatment['type'] = 'treatment';
+            pending_data.push(treatment);
             treatment_count[treatment.animal_object.category] += 1;
             if (!track_ids.includes(treatment.animal_object.id) && (treatment.animal_object.shelter === null || shelterResponse.data.map(shelter => shelter.id).includes(treatment.animal_object.shelter))) {
               track_ids.push(treatment.animal_object.id);
               let loc = treatment.animal_object.shelter
               if (!loc) {
                 loc = 'Field';
-                bounds.push([treatment.animal_object.latitude, treatment.animal_object.longitude]);
+                if (treatment.animal_object.latitude) {
+                  bounds.push([treatment.animal_object.latitude, treatment.animal_object.longitude]);
+                }
               }
               if (Object.keys(shelter_animals).includes(loc)) {
                 shelter_animals[loc].push(treatment.animal_object);
@@ -111,13 +118,17 @@ function Vet({ incident, organization }) {
           });
           let diagnostic_count = {'avian':0, 'cat':0, 'dog':0, 'camelid':0, 'small mammal':0, 'reptile/amphibian':0, 'equine':0, 'ruminant':0, 'swine':0, 'other':0};
           diagnosticResponse.data.forEach(diagnostic => {
+            diagnostic['type'] = 'diagnostic';
+            pending_data.push(diagnostic);
             diagnostic_count[diagnostic.animal_object.category] += 1;
             if (!track_ids.includes(diagnostic.animal_object.id) && (diagnostic.animal_object.shelter === null || shelterResponse.data.map(shelter => shelter.id).includes(diagnostic.animal_object.shelter))) {
               track_ids.push(diagnostic.animal_object.id);
               let loc = diagnostic.animal_object.shelter
               if (!loc) {
                 loc = 'Field';
-                bounds.push([diagnostic.animal_object.latitude, diagnostic.animal_object.longitude]);
+                if (diagnostic.animal_object.latitude) {
+                  bounds.push([diagnostic.animal_object.latitude, diagnostic.animal_object.longitude]);
+                }
               }
               if (Object.keys(shelter_animals).includes(loc)) {
                 shelter_animals[loc].push(diagnostic.animal_object);
@@ -129,13 +140,17 @@ function Vet({ incident, organization }) {
           });
           let procedure_count = {'avian':0, 'cat':0, 'dog':0, 'camelid':0, 'small mammal':0, 'reptile/amphibian':0, 'equine':0, 'ruminant':0, 'swine':0, 'other':0};
           procedureResponse.data.forEach(procedure => {
+            procedure['type'] = 'procedure';
+            pending_data.push(procedure);
             procedure_count[procedure.animal_object.category] += 1;
             if (!track_ids.includes(procedure.animal_object.id) && (procedure.animal_object.shelter === null || shelterResponse.data.map(shelter => shelter.id).includes(procedure.animal_object.shelter))) {
               track_ids.push(procedure.animal_object.id);
               let loc = procedure.animal_object.shelter
               if (!loc) {
                 loc = 'Field';
-                bounds.push([procedure.animal_object.latitude, procedure.animal_object.longitude]);
+                if (procedure.animal_object.latitude) {
+                  bounds.push([procedure.animal_object.latitude, procedure.animal_object.longitude]);
+                }
               }
               if (Object.keys(shelter_animals).includes(loc)) {
                 shelter_animals[loc].push(procedure.animal_object);
@@ -151,7 +166,7 @@ function Vet({ incident, organization }) {
           report_data.push(total)
           setReportData(report_data);
 
-          setData({vet_requests:vetResponse.data, treatments:treatmentResponse.data, diagnostics:diagnosticResponse.data, procedures:procedureResponse.data, isFetching: false});
+          setData({vet_requests:vetResponse.data, treatments:treatmentResponse.data, diagnostics:diagnosticResponse.data, procedures:procedureResponse.data, pending:pending_data, isFetching: false});
           setShelterAnimals(shelter_animals);
           setShelterData({shelters: shelterResponse.data, bounds:bounds.length > 0 ? bounds : L.latLngBounds([[0,0]])});
         }
@@ -235,7 +250,7 @@ function Vet({ incident, organization }) {
             {shelterAnimals['Field'].filter(animal => (selectedAnimal.id && selectedAnimal.shelter === null) || (selectedShelter === 'all' || selectedShelter === null)).map((animal, index) => (
               <Marker
                 key={animal.id}
-                position={animal.request_lat_lon ? animal.request_lat_lon : [animal.latitude, animal.longitude]}
+                position={animal.request_lat_lon ? animal.request_lat_lon : animal.latitude ?  [animal.latitude, animal.longitude] : [0,0]}
                 icon={vetPendingAnimalLocationMarkerIcon}
                 // onClick={() => navigate('/' + organization + "/" + incident + "/shelter/" + shelter.id)}
               >
@@ -304,7 +319,7 @@ function Vet({ incident, organization }) {
                 <ListGroup horizontal style={{marginBottom:"-20px"}}>
                   <ListGroup.Item active={"pending" === activeOrders} className="text-center" style={{textTransform:"capitalize", cursor:'pointer', paddingLeft:"5px", paddingRight:"5px"}} onClick={() => setActiveOrders("pending")}>
                     <div style={{marginTop:"-3px", marginLeft:"-1px", paddingLeft:"10px", paddingRight:"10px"}}>
-                      All Pending ({data.treatments.filter(tr => tr.animal_object.id === selectedAnimal.id || tr.animal_object.shelter === selectedShelter || (selectedShelter === 'all' && (!tr.animal_object.shelter || Object.keys(shelterAnimals).includes(String(tr.animal_object.shelter))))).length + data.diagnostics.filter(diagnostic => diagnostic.animal_object.id === selectedAnimal.id || diagnostic.animal_object.shelter === selectedShelter || (selectedShelter === 'all'  && (!diagnostic.animal_object.shelter || Object.keys(shelterAnimals).includes(String(diagnostic.animal_object.shelter))))).length + data.procedures.filter(procedure => procedure.animal_object.id === selectedAnimal.id || procedure.animal_object.shelter === selectedShelter || (selectedShelter === 'all'  && (!procedure.animal_object.shelter || Object.keys(shelterAnimals).includes(String(procedure.animal_object.shelter))))).length})
+                      All Pending ({data.pending.filter(pending => pending.animal_object.id === selectedAnimal.id || pending.animal_object.shelter === selectedShelter || (selectedShelter === 'all' && (!pending.animal_object.shelter || Object.keys(shelterAnimals).includes(String(pending.animal_object.shelter))))).length})
                     </div>
                   </ListGroup.Item>
                   <ListGroup.Item active={"vet_requests" === activeOrders} className="text-center" style={{textTransform:"capitalize", cursor:'pointer', paddingLeft:"5px", paddingRight:"5px"}} onClick={() => setActiveOrders("vet_requests")}>
@@ -332,9 +347,9 @@ function Vet({ incident, organization }) {
             </Card.Title>
             <hr />
             <Scrollbar no_shadow="true" style={{height:"564px", minHeight:"564px"}} renderView={props => <div {...props} style={{...props.style, overflowX:"hidden", marginBottom:"-10px"}}/>}  renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
-            {activeOrders === 'pending' && data.vet_requests.filter(vet_request => vet_request.animal_object.id === selectedAnimal.id || vet_request.animal_object.shelter === selectedShelter || (selectedShelter === 'all' && (!vet_request.animal_object.shelter || Object.keys(shelterAnimals).includes(String(vet_request.animal_object.shelter))))).map(vet_request => (
+            {/* {activeOrders === 'pending' && data.vet_requests.filter(vet_request => vet_request.animal_object.id === selectedAnimal.id || vet_request.animal_object.shelter === selectedShelter || (selectedShelter === 'all' && (!vet_request.animal_object.shelter || Object.keys(shelterAnimals).includes(String(vet_request.animal_object.shelter))))).map(vet_request => (
               <Row key={vet_request.id} className="ml-0 mb-3">
-                <Link href={"/" + organization + "/" + incident + "/vet/vetrequest/edit/" + vet_request.id} className="treatment-link" style={{textDecoration:"none", color:"white"}}>
+                <Link href={"/" + organization + "/" + incident + "/vet/vetrequest/" + vet_request.id} className="treatment-link" style={{textDecoration:"none", color:"white"}}>
                   <Card className="border rounded treatment-hover-div" style={{height:"120px", width:"845px", whiteSpace:"nowrap", overflow:"hidden"}}>
                     <div className="row no-gutters hover-div treatment-hover-div" style={{height:"120px", marginRight:"-2px"}}>
                       <Row className="ml-0 mr-0 w-100" style={{flexWrap:"nowrap"}}>
@@ -410,12 +425,6 @@ function Vet({ incident, organization }) {
                             <Col xs={12}>
                               <b>Complaints: </b>{vet_request.complaints_text}
                             </Col>
-                            {/* <Col xs={3}>
-                              <b>Unit: </b>{vet_request.unit || '-'}
-                            </Col>
-                            <Col>
-                              <b>Route: </b>{vet_request.route || '-'}
-                            </Col> */}
                           </Row>
                         </Col>
                       </Row>
@@ -423,19 +432,103 @@ function Vet({ incident, organization }) {
                   </Card>
                 </Link>
               </Row>
+            ))} */}
+            {activeOrders === 'pending' && data.pending.filter(pending => pending.animal_object.id === selectedAnimal.id || pending.animal_object.shelter === selectedShelter || (selectedShelter === 'all' && (!pending.animal_object.shelter || Object.keys(shelterAnimals).includes(String(pending.animal_object.shelter))))).sort((a, b) => new Date(a.suggested_admin_time ? a.suggested_admin_time : a.open) - new Date(b.suggested_admin_time ? b.suggested_admin_time : b.open)).map(pending => (
+              <span key={pending.id}>
+                {pending.type === 'treatment' ? <TreatmentCard incident={incident} organization={organization} treatment_request={pending} animal_object={pending.animal_object} />
+                :pending.type === 'diagnostic' ? <DiagnosticCard incident={incident} organization={organization} diagnostic={pending} animal_object={pending.animal_object} />
+                :pending.type === 'procedure' ? <ProcedureCard incident={incident} organization={organization} procedure={pending} animal_object={pending.animal_object} />
+                :
+                <Row key={pending.id} className="ml-0 mb-3">
+                <Link href={"/" + organization + "/" + incident + "/vet/vetrequest/" + pending.id} className="treatment-link" style={{textDecoration:"none", color:"white"}}>
+                  <Card className="border rounded treatment-hover-div" style={{height:"120px", width:"845px", whiteSpace:"nowrap", overflow:"hidden"}}>
+                    <div className="row no-gutters hover-div treatment-hover-div" style={{height:"120px", marginRight:"-2px"}}>
+                      <Row className="ml-0 mr-0 w-100" style={{flexWrap:"nowrap"}}>
+                        <div className="border-right" style={{width:"120px"}}>
+                          <FontAwesomeIcon icon={faUserDoctorMessage} size="5x" className="treatment-icon" style={{marginTop:"21px", marginLeft:"14px"}} transform={'grow-1'} inverse />
+                        </div>
+                        <Col style={{marginLeft:"-5px", marginRight:"-25px"}} className="hover-div">
+                          <div className="border treatment-hover-div" style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"10px", marginLeft:"-11px", marginTop: "-1px", fontSize:"18px", width:"100%", backgroundColor:"rgb(158 153 153)"}}>
+                            VR#{pending.id} - {priorityText[pending.priority]}
+                            <span className="float-right">
+                            {pending.status === 'Closed' ?
+                              <OverlayTrigger
+                                key={"complete-treatment-request"}
+                                placement="top"
+                                overlay={
+                                  <Tooltip id={`tooltip-complete-treatment-request`}>
+                                    All treatment requests are completed.
+                                  </Tooltip>
+                                }
+                              >
+                                <FontAwesomeIcon icon={faCheckSquare} size="3x" className="ml-1 treatment-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
+                              </OverlayTrigger>
+                              : pending.status === 'Canceled' ?
+                              <OverlayTrigger
+                                key={"not-administered-treatment-request"}
+                                placement="top"
+                                overlay={
+                                  <Tooltip id={`tooltip-not-administered-treatment-request`}>
+                                    Treatment request was canceled.
+                                  </Tooltip>
+                                }
+                              >
+                                <FontAwesomeIcon icon={faSquareX} size="3x" className="ml-1 treatment-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
+                              </OverlayTrigger>
+                              :
+                              <OverlayTrigger
+                                key={"awaiting-action-treatment-request"}
+                                placement="top"
+                                overlay={
+                                  <Tooltip id={`tooltip-awaiting-action-treatment-request`}>
+                                    Treatment request is pending action.
+                                  </Tooltip>
+                                }
+                              >
+                                <FontAwesomeIcon icon={faSquareExclamation} size="3x" className="ml-1 treatment-icon" style={{marginTop:"-13px", marginRight:"-3px"}} transform={'shrink-2'} inverse />
+                              </OverlayTrigger>
+                              }
+                            </span>
+                          </div>
+                          <Row style={{marginTop:"6px"}}>
+                            <Col xs={3}>
+                              <b>Patient: </b>A#{pending.animal_object.id_for_incident}
+                            </Col>
+                            <Col xs={3}>
+                              <b>Species:</b> <span  style={{textTransform:"capitalize"}}>{pending.animal_object.species_string}</span>
+                            </Col>
+                            <Col xs={6}>
+                              <b>Name: </b>{pending.animal_object.name || "Unknown"}
+                            </Col>
+                          </Row>
+                          <Row>
+                            <Col xs={3}>
+                              <b>Opened: </b><Moment format="MMM DD, HH:mm">{pending.open}</Moment>
+                            </Col>
+                            <Col xs={3}>
+                              <b>Opener: </b>{pending.requested_by_object.first_name} {pending.requested_by_object.last_name}
+                            </Col>
+                            <Col xs={6}>
+                              <b>Location: </b>{pending.animal_object.shelter_object ? <span>{pending.animal_object.shelter_object.name} {pending.animal_object.room_name ? <span> - {pending.animal_object.room_name}</span> : ""}</span> : "Field"}
+                            </Col>
+                          </Row>
+                          <Row>
+                            <Col xs={12}>
+                              <b>Complaints: </b>{pending.complaints_text}
+                            </Col>
+                          </Row>
+                        </Col>
+                      </Row>
+                    </div>
+                  </Card>
+                </Link>
+              </Row>
+                }
+                </span>
             ))}
-            {activeOrders === 'pending' && data.treatments.filter(treatment => treatment.animal_object.id === selectedAnimal.id || treatment.animal_object.shelter === selectedShelter || (selectedShelter === 'all' && (!treatment.animal_object.shelter || Object.keys(shelterAnimals).includes(String(treatment.animal_object.shelter))))).map(treatment_request => (
-              <TreatmentCard key={treatment_request.id} incident={incident} organization={organization} treatment_request={treatment_request} animal_object={treatment_request.animal_object} />
-            ))}
-            {activeOrders === 'pending' && data.diagnostics.filter(diagnostic => diagnostic.animal_object.id === selectedAnimal.id || diagnostic.animal_object.shelter === selectedShelter || (selectedShelter === 'all' && (!diagnostic.animal_object.shelter || Object.keys(shelterAnimals).includes(String(diagnostic.animal_object.shelter))))).map(diagnostic => (
-              <DiagnosticCard key={diagnostic.id} incident={incident} organization={organization} diagnostic={diagnostic} animal_object={diagnostic.animal_object} />
-            ))}
-            {activeOrders === 'pending' && data.procedures.filter(procedure => procedure.animal_object.id === selectedAnimal.id || procedure.animal_object.shelter === selectedShelter || (selectedShelter === 'all' && (!procedure.animal_object.shelter || Object.keys(shelterAnimals).includes(String(procedure.animal_object.shelter))))).map(procedure => (
-              <ProcedureCard key={procedure.id} incident={incident} organization={organization} procedure={procedure} animal_object={procedure.animal_object} />
-            ))}
-            {activeOrders === 'vet_requests' && data.vet_requests.filter(vet_request => vet_request.animal_object.id === selectedAnimal.id || vet_request.animal_object.shelter === selectedShelter || (selectedShelter === 'all' && (!vet_request.animal_object.shelter || Object.keys(shelterAnimals).includes(String(vet_request.animal_object.shelter))))).map(vet_request => (
+            {activeOrders === 'vet_requests' && data.vet_requests.filter(vet_request => vet_request.animal_object.id === selectedAnimal.id || vet_request.animal_object.shelter === selectedShelter || (selectedShelter === 'all' && (!vet_request.animal_object.shelter || Object.keys(shelterAnimals).includes(String(vet_request.animal_object.shelter))))).sort((a, b) => new Date(a.open) - new Date(b.open)).map(vet_request => (
               <Row key={vet_request.id} className="ml-0 mb-3">
-                <Link href={"/" + organization + "/" + incident + "/vet/vetrequest/edit/" + vet_request.id} className="treatment-link" style={{textDecoration:"none", color:"white"}}>
+                <Link href={"/" + organization + "/" + incident + "/vet/vetrequest/" + vet_request.id} className="treatment-link" style={{textDecoration:"none", color:"white"}}>
                   <Card className="border rounded treatment-hover-div" style={{height:"120px", width:"845px", whiteSpace:"nowrap", overflow:"hidden"}}>
                     <div className="row no-gutters hover-div treatment-hover-div" style={{height:"120px", marginRight:"-2px"}}>
                       <Row className="ml-0 mr-0 w-100" style={{flexWrap:"nowrap"}}>
@@ -511,12 +604,6 @@ function Vet({ incident, organization }) {
                             <Col xs={12}>
                               <b>Complaints: </b>{vet_request.complaints_text}
                             </Col>
-                            {/* <Col xs={3}>
-                              <b>Unit: </b>{vet_request.unit || '-'}
-                            </Col>
-                            <Col>
-                              <b>Route: </b>{vet_request.route || '-'}
-                            </Col> */}
                           </Row>
                         </Col>
                       </Row>
@@ -526,15 +613,15 @@ function Vet({ incident, organization }) {
               </Row>
             ))}
             {activeOrders === 'vet_requests' && data.vet_requests.filter(vet_request => vet_request.animal_object.id === selectedAnimal.id || vet_request.animal_object.shelter === selectedShelter || (selectedShelter === 'all' && (!vet_request.animal_object.shelter || Object.keys(shelterAnimals).includes(String(vet_request.animal_object.shelter))))).length < 1 ? <p>No Veterinary Requests have been created for this patient.</p> : ""}
-            {activeOrders === 'treatments' && data.treatments.filter(treatment => treatment.animal_object.id === selectedAnimal.id || treatment.animal_object.shelter === selectedShelter || (selectedShelter === 'all' && (!treatment.animal_object.shelter || Object.keys(shelterAnimals).includes(String(treatment.animal_object.shelter))))).map(treatment_request => (
+            {activeOrders === 'treatments' && data.treatments.filter(treatment => treatment.animal_object.id === selectedAnimal.id || treatment.animal_object.shelter === selectedShelter || (selectedShelter === 'all' && (!treatment.animal_object.shelter || Object.keys(shelterAnimals).includes(String(treatment.animal_object.shelter))))).sort((a, b) => new Date(a.suggested_admin_time) - new Date(b.suggested_admin_time)).map(treatment_request => (
               <TreatmentCard key={treatment_request.id} incident={incident} organization={organization} treatment_request={treatment_request} animal_object={treatment_request.animal_object} />
             ))}
             {activeOrders === 'treatments' && data.treatments.filter(treatment => treatment.animal_object.id === selectedAnimal.id || treatment.animal_object.shelter === selectedShelter || (selectedShelter === 'all' && (!treatment.animal_object.shelter || Object.keys(shelterAnimals).includes(String(treatment.animal_object.shelter))))).length < 1 ? <p>No treatments have been created for this patient.</p> : ""}
-            {activeOrders === 'diagnostics' && data.diagnostics.filter(diagnostic => diagnostic.animal_object.id === selectedAnimal.id || diagnostic.animal_object.shelter === selectedShelter || (selectedShelter === 'all' && (!diagnostic.animal_object.shelter || Object.keys(shelterAnimals).includes(String(diagnostic.animal_object.shelter))))).map(diagnostic => (
+            {activeOrders === 'diagnostics' && data.diagnostics.filter(diagnostic => diagnostic.animal_object.id === selectedAnimal.id || diagnostic.animal_object.shelter === selectedShelter || (selectedShelter === 'all' && (!diagnostic.animal_object.shelter || Object.keys(shelterAnimals).includes(String(diagnostic.animal_object.shelter))))).sort((a, b) => new Date(a.open) - new Date(b.open)).map(diagnostic => (
               <DiagnosticCard key={diagnostic.id} incident={incident} organization={organization} diagnostic={diagnostic} animal_object={diagnostic.animal_object} />
             ))}
             {activeOrders === 'diagnostics' && data.diagnostics.filter(diagnostic => diagnostic.animal_object.id === selectedAnimal.id || diagnostic.animal_object.shelter === selectedShelter || (selectedShelter === 'all' && (!diagnostic.animal_object.shelter || Object.keys(shelterAnimals).includes(String(diagnostic.animal_object.shelter))))).length < 1 ? <p>No diagnostics have been ordered for this patient.</p> : ""}
-            {activeOrders === 'procedures' && data.procedures.filter(procedure => procedure.animal_object.id === selectedAnimal.id || procedure.animal_object.shelter === selectedShelter || (selectedShelter === 'all' && (!procedure.animal_object.shelter || Object.keys(shelterAnimals).includes(String(procedure.animal_object.shelter))))).map(procedure => (
+            {activeOrders === 'procedures' && data.procedures.filter(procedure => procedure.animal_object.id === selectedAnimal.id || procedure.animal_object.shelter === selectedShelter || (selectedShelter === 'all' && (!procedure.animal_object.shelter || Object.keys(shelterAnimals).includes(String(procedure.animal_object.shelter))))).sort((a, b) => new Date(a.open) - new Date(b.open)).map(procedure => (
               <ProcedureCard key={procedure.id} incident={incident} organization={organization} procedure={procedure} animal_object={procedure.animal_object} />
             ))}
             {activeOrders === 'procedures' && data.procedures.filter(procedure => procedure.animal_object.id === selectedAnimal.id || procedure.animal_object.shelter === selectedShelter || (selectedShelter === 'all' && (!procedure.animal_object.shelter || Object.keys(shelterAnimals).includes(String(procedure.animal_object.shelter))))).length < 1 ? <p>No procedures have been ordered for this patient.</p> : ""}

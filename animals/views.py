@@ -11,10 +11,11 @@ from rest_framework import filters, permissions, viewsets
 from actstream import action
 
 from animals.models import Animal, AnimalImage, Species
-from animals.serializers import AnimalSerializer, SpeciesSerializer
+from animals.serializers import AnimalSerializer, ModestAnimalSerializer, SpeciesSerializer
 from incident.models import Incident
 from shelter.models import IntakeSummary
 from people.serializers import SimplePersonSerializer
+from vet.models import MedicalRecord, VetRequest
 
 class MultipleFieldLookupMixin(object):
     def get_object(self):
@@ -30,10 +31,17 @@ class MultipleFieldLookupMixin(object):
 class AnimalViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
     queryset = Animal.objects.with_images().exclude(status="CANCELED").order_by('order')
     lookup_fields = ['pk', 'incident', 'id_for_incident']
-    search_fields = ['id_for_incident', 'name', 'microchip', 'request__address', 'request__city', 'owners__first_name', 'owners__last_name', 'owners__phone', 'owners__drivers_license', 'owners__address', 'owners__city', 'reporter__first_name', 'reporter__last_name']
+    search_fields = ['name', 'microchip', 'address', 'city', 'request__address', 'request__city', 'owners__address', 'owners__city', 'owners__last_name', 'reporter__last_name']
     filter_backends = (filters.SearchFilter,)
     permission_classes = [permissions.IsAuthenticated, ]
-    serializer_class = AnimalSerializer
+    serializer_class = ModestAnimalSerializer
+    detail_serializer_class = AnimalSerializer
+
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            if hasattr(self, 'detail_serializer_class'):
+                return self.detail_serializer_class
+        return super(AnimalViewSet, self).get_serializer_class()
 
     # @transaction.atomic
     def perform_create(self, serializer):
@@ -73,6 +81,14 @@ class AnimalViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                         # Add ServiceRequest Owner to new animals being added to an SR.
                         if serializer.validated_data.get('request'):
                             animal.owners.add(*animal.request.owners.all())
+
+                        # Create VR data if Triage is yellow or red.
+                        if self.request.data.get('priority', 'green') in ['when_available', 'urgent']:
+                            med_record, _ = MedicalRecord.objects.get_or_create(patient=animal)
+                            animal.medical_record=med_record
+                            animal.save()
+                            vet_request = VetRequest.objects.create(priority=self.request.data.get('priority'), requested_by=self.request.user, caution=self.request.data.get('caution', 'false') == 'true', complaints_other=self.request.data.get('complaints_other'), concern=self.request.data.get('concern'), medical_record=med_record)
+                            vet_request.presenting_complaints.add(*self.request.data.get('presenting_complaints').split(','))
 
                         if animal.shelter:
                             action.send(self.request.user, verb='sheltered animal in', target=animal, action_object=animal.shelter)
