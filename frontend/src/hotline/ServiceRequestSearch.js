@@ -128,7 +128,7 @@ function ServiceRequestSearch({ incident, organization }) {
 
   const handleGeoJsonPush = () => {
     var params = '';
-    filteredServiceRequests.map(sr => sr.id).forEach(id => params = params + "id=" + id + "&")
+    filteredServiceRequests.forEach(id => params = params + "id=" + id + "&")
     axios.get('/hotline/api/servicerequests/push_all/', { 
             params: {
               ids: params
@@ -230,40 +230,6 @@ function ServiceRequestSearch({ incident, organization }) {
       <Header>Search Service Requests</Header>
       <hr/>
       <Form onSubmit={handleSubmit}>
-        <InputGroup className="mb-3">
-          <FormControl
-            type="text"
-            placeholder="Search"
-            name="searchTerm"
-            onChange={handleChange}
-            ref={tempSearchTerm}
-          />
-          <InputGroup.Append>
-            <Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0"}}>Search</Button>
-          </InputGroup.Append>
-          <ButtonSpinner
-            variant="outline-light"
-            className="ml-1 mr-1 print-all-btn-icon"
-            onClick={handlePrintAllClick}
-            isSubmitting={isSubmittingById()}
-            isSubmittingText={submittingLabel}
-          >
-            Print All ({`${filteredServiceRequests.length}`})
-            <FontAwesomeIcon icon={faPrint} className="ml-2 text-light" inverse />
-          </ButtonSpinner>
-          <Button
-          key={"download-geojson"}
-          placement="bottom"
-          variant="outline-light"
-          onClick={handleGeoJsonDownload} href="">Download All ({`${filteredServiceRequests.length}`})<FontAwesomeIcon icon={faDownload} className="mx-2 text-light" inverse />
-        </Button>
-          <Button
-          key={"push-geojson"}
-          placement="bottom"
-          variant="outline-light"
-          onClick={handleGeoJsonPush} href="">Push All ({`${filteredServiceRequests.length}`})<FontAwesomeIcon icon={faDownload} className="mx-2 text-light" inverse />
-        </Button>
-        </InputGroup>
         <Row>
           <Col xs="2" style={{maxWidth:"150px", marginRight:"-10px", paddingRight:"0px"}}>
             <InputGroup>
@@ -319,6 +285,12 @@ function ServiceRequestSearch({ incident, organization }) {
             placement="bottom"
             variant="outline-light"
             onClick={handleGeoJsonDownload} href="">Download All ({`${filteredServiceRequests.length}`})<FontAwesomeIcon icon={faDownload} className="mx-2 text-light" inverse />
+          </Button>
+            <Button
+            key={"push-geojson"}
+            placement="bottom"
+            variant="outline-light"
+            onClick={handleGeoJsonPush} href="">Push All ({`${filteredServiceRequests.length}`})<FontAwesomeIcon icon={faDownload} className="mx-2 text-light" inverse />
           </Button>
           </InputGroup>
           </Col>
