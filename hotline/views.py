@@ -154,8 +154,8 @@ class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
         response['Content-Disposition'] = 'attachement; filename=SRs' + '.geojson'
         return response
 
-    @drf_action(detail=True, methods=['POST'], name='Push GeoJSON')
-    def push_geojson(self, request, pk=None)
+    @drf_action(detail=True, methods=['GET'], name='Push GeoJSON')
+    def push(self, request, pk=None):
         sr = ServiceRequest.objects.get(id=pk)
         success = True
         try:
@@ -165,17 +165,18 @@ class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
         data = {sr.id: {'status': success}}
         return JsonResponse(data)
 
-    @drf_action(detail=True, methods=['POST'], name='Push All GeoJSON')
-    def push_geojson_all(self, request)
+    @drf_action(detail=False, methods=['GET'], name='Push All GeoJSON')
+    def push_all(self, request):
         data = {}
         for sr_id in self.request.GET.get('ids').replace('&','').split('id='):
-            sr = ServiceRequest.objects.get(id=sr_id)
-            success = True
-            try:
-                sr.push_json()
-            except:
-                success = False
-            data[sr.id] = {'status': success}
+            if sr_id:
+                sr = ServiceRequest.objects.get(id=sr_id)
+                success = True
+                try:
+                    sr.push_json()
+                except:
+                    success = False
+                data[sr.id] = {'status': success}
         return JsonResponse(data)
 
 class VisitNoteViewSet(viewsets.ModelViewSet):

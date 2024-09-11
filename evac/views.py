@@ -281,8 +281,9 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
         response['Content-Disposition'] = 'attachement; filename=DAR-' + str(ea.id_for_incident) + '.geojson'
         return response
 
-    @drf_action(detail=True, methods=['POST'], name='Push GeoJSON')
-    def push_geojson(self, request, pk=None):
+    @drf_action(detail=True, methods=['GET'], name='Push GeoJSON')
+    def push(self, request, pk=None):
+        import ipdb; ipdb.set_trace()
         ea = EvacAssignment.objects.get(id=pk)
         data = {}
         for sr in ea.service_requests.all():
