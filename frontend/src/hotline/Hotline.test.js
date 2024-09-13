@@ -43,7 +43,7 @@ describe("Render ServiceRequestDetails", () => {
 
 describe("Render ServiceRequestSearch", () => {
   it("Empty table loads", async () => {
-    render(<SystemErrorProvider><ServiceRequestSearch incident={MOCK_INCIDENT_ID} /></SystemErrorProvider>);
+    render(<SystemErrorProvider><ServiceRequestSearch incident={MOCK_INCIDENT_ID} state={initialState} /></SystemErrorProvider>);
     expect(await screen.getByText("Fetching service requests...")).toBeTruthy();
   });
 });
