@@ -164,7 +164,7 @@ class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
             sr.push_json()
         except:
             success = False
-        data = {sr.id: {'status': success}}
+        data = {sr.id_for_incident: {'status': success}}
         return JsonResponse(data)
 
     @drf_action(detail=False, methods=['GET'], name='Push All GeoJSON')
@@ -178,7 +178,7 @@ class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                     sr.push_json()
                 except:
                     success = False
-                data[sr.id] = {'status': success}
+                data[sr.id_for_incident] = {'status': success}
         return JsonResponse(data)
 
 class VisitNoteViewSet(viewsets.ModelViewSet):

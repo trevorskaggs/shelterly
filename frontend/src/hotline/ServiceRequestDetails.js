@@ -6,7 +6,7 @@ import { Button, Card, ListGroup, Modal, OverlayTrigger, Tooltip, Spinner } from
 import Flatpickr from 'react-flatpickr';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBan, faCar, faClipboardCheck, faDownload, faEdit, faEnvelope, faHouseDamage,
+  faBan, faCar, faClipboardCheck, faDownload, faUpload, faEdit, faEnvelope, faHouseDamage,
   faKey, faMapMarkedAlt, faPlusSquare, faTimes, faTrailer, faUserPlus, faUsers
 } from '@fortawesome/free-solid-svg-icons';
 import { faCalendarEdit, faHammerCrash, faHomeHeart, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
@@ -326,7 +326,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
                     </LoadingLink>
                     { state.incident.caltopo_map_id ?
                     <LoadingLink onClick={handleGeoJsonPush} isLoading={isLoading} className="text-white d-block py-1 px-3">
-                      <FontAwesomeIcon icon={faDownload} className="mr-1"  inverse />
+                      <FontAwesomeIcon icon={faUpload} className="mr-1"  inverse />
                       Push Service Request to CalTopo
                     </LoadingLink>
                     : ''}

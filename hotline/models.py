@@ -141,7 +141,7 @@ class ServiceRequest(Location):
             sync=False,
         )
         payload = {
-            'title': str(self.id),
+            'title': str(self.id_for_incident),
             'color': '#FF0000',
             'symbol': 'circle-n',
             'description': self.get_feature_description()

@@ -5,7 +5,7 @@ import { Button, Card, Col, Form, ListGroup, Modal, OverlayTrigger, Row, Tooltip
 import { Typeahead } from 'react-bootstrap-typeahead';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faCalendarDay, faClipboardCheck, faClipboardList, faDownload, faEdit, faEnvelope, faHouseDamage, faBriefcaseMedical, faMinusSquare, faPencilAlt, faUserCheck, faUserPlus
+  faCalendarDay, faClipboardCheck, faClipboardList, faDownload, faUpload, faEdit, faEnvelope, faHouseDamage, faBriefcaseMedical, faMinusSquare, faPencilAlt, faUserCheck, faUserPlus
 } from '@fortawesome/free-solid-svg-icons';
 import { faExclamationSquare, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import { Marker, Tooltip as MapTooltip } from "react-leaflet";
@@ -368,7 +368,7 @@ function DispatchSummary({ id, incident, organization }) {
                   className="text-white d-block py-1 px-3"
                   isLoading={isLoading}
                 >
-                  <FontAwesomeIcon icon={faDownload} className="mr-1"  inverse />
+                  <FontAwesomeIcon icon={faUpload} className="mr-1"  inverse />
                   Push Dispatch Assignment to CalTopo
                 </LoadingLink>
                 : ''}

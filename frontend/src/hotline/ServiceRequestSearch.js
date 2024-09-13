@@ -6,7 +6,7 @@ import moment from 'moment';
 import Select, { components } from 'react-select';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBan, faCar, faChevronDown, faChevronUp, faDownload, faEquals, faClipboardList, faEnvelope, faInfoCircle, faKey, faTrailer, faPrint
+  faBan, faCar, faChevronDown, faChevronUp, faDownload, faUpload, faEquals, faClipboardList, faEnvelope, faInfoCircle, faKey, faTrailer, faPrint
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faDotCircle
@@ -23,6 +23,7 @@ import { SystemErrorContext } from '../components/SystemError';
 import ButtonSpinner from '../components/ButtonSpinner';
 import { DateRangePicker } from '../components/Form';
 import { printAllServiceRequests } from './Utils';
+import { DownloadButton } from '../components/DownloadButton';
 
 function ServiceRequestSearch({ incident, organization }) {
 
@@ -112,7 +113,16 @@ function ServiceRequestSearch({ incident, organization }) {
     }
   }
 
-  const handleGeoJsonDownload = () => {
+  const handleGeoJsonDownload = (e) => {
+    e.preventDefault();
+
+    handleSubmitting()
+    .then(() => downloadGeoJson()
+      )
+    .then(submittingComplete)
+  }
+
+  const downloadGeoJson= () => {
     var params = '';
     filteredServiceRequests.forEach(id => params = params + "id=" + id + "&")
     // params.append("foo", 5);
@@ -128,18 +138,24 @@ function ServiceRequestSearch({ incident, organization }) {
         })
   }
 
-  const handleGeoJsonPush = () => {
+  const handleGeoJsonPush = (e) => {
+    e.preventDefault();
+    handleSubmitting()
+    .then(() => pushData()
+      )
+    .then(submittingComplete)
+  }
+
+  async function pushData(){
     var params = '';
     filteredServiceRequests.forEach(id => params = params + "id=" + id + "&")
-    axios.get('/hotline/api/servicerequests/push_all/', { 
+    const response = await axios.get('/hotline/api/servicerequests/push_all/', { 
             params: {
               ids: params
             },
             responseType: 'json',
-        }).then(res => {
-            console.log(res);
-        }).catch(err => {
-        })
+    }).catch(err => {
+    })
   }
 
   // Hook handling option changes.
@@ -281,21 +297,28 @@ function ServiceRequestSearch({ incident, organization }) {
               Print All ({`${filteredServiceRequests.length}`})
               <FontAwesomeIcon icon={faPrint} className="ml-2 text-light" inverse />
             </ButtonSpinner>
-            <Button
-            key={"download-geojson"}
-            className="pr-1"
-            placement="bottom"
-            variant="outline-light"
-            onClick={handleGeoJsonDownload} href="">Download All ({`${filteredServiceRequests.length}`})<FontAwesomeIcon icon={faDownload} className="mx-2 text-light" inverse />
-          </Button>
-          { state.incident.caltopo_map_id ?
-          <Button
-            key={"push-geojson"}
-            placement="bottom"
-            variant="outline-light"
-            onClick={handleGeoJsonPush} href="">Push All ({`${filteredServiceRequests.length}`})<FontAwesomeIcon icon={faDownload} className="mx-2 text-light" inverse />
-          </Button>
-          : ''}
+            <ButtonSpinner
+              variant="outline-light"
+              className="ml-1 mr-1 print-all-btn-icon"
+              onClick={handleGeoJsonDownload}
+              isSubmitting={isSubmittingById()}
+              isSubmittingText={submittingLabel}
+            >
+              Download All ({`${filteredServiceRequests.length}`})
+              <FontAwesomeIcon icon={faDownload} className="ml-2 text-light" inverse />
+            </ButtonSpinner>
+            { state.incident.caltopo_map_id ?
+            <ButtonSpinner
+              variant="outline-light"
+              className="ml-1 mr-1 print-all-btn-icon"
+              onClick={handleGeoJsonPush}
+              isSubmitting={isSubmittingById()}
+              isSubmittingText={submittingLabel}
+            >
+              Push All ({`${filteredServiceRequests.length}`})
+              <FontAwesomeIcon icon={faUpload} className="ml-2 text-light" inverse />
+            </ButtonSpinner>
+            : ''}
           </InputGroup>
           </Col>
         </Row>
