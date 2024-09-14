@@ -3,7 +3,7 @@ from django.conf import settings
 
 class MediaStorage(S3Boto3Storage):
 
-    location = 'media/%s/%s' % (settings.ORGANIZATION, settings.INCIDENT_NAME) 
+    location = 'media'
 
 class StaticStorage(S3Boto3Storage):
     

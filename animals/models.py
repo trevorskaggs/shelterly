@@ -97,6 +97,11 @@ class Animal(Location, OrderedModel):
 
 class AnimalImage(models.Model):
 
-    image = models.ImageField(upload_to='images/')
+    def get_upload_to(instance, filename):
+        org_slug = instance.animal.incident.organization.slug
+        animal_pk = instance.animal.pk
+        return 'images/%s/%s/%s' % (org_slug, animal_pk, filename)
+
+    image = models.ImageField(upload_to=get_upload_to)
     animal = models.ForeignKey(Animal, on_delete=models.SET_NULL, null=True)
     category = models.CharField(max_length=20)
