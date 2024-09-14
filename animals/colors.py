@@ -2,6 +2,7 @@ UNKNOWN_CHOICE = ('Unknown', 'Unknown')
 
 DOG_COLOR_CHOICES = (
     ('black', 'Black'),
+    ('brindle' 'Brindle'),
     ('brown', 'Brown'),
     ('gray', 'Gray'),
     ('merle', 'Merle'),

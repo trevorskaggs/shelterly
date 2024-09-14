@@ -339,6 +339,7 @@ const AnimalForm = (props) => {
             .max(50, 'Must be 50 characters or less.'),
           species: Yup.number()
             .required('Required'),
+          species_string: Yup.string(),
           size: Yup.string(),
           age: Yup
             .string()
@@ -635,6 +636,7 @@ const AnimalForm = (props) => {
                         pcolorRef.current.select.clearValue();
                         scolorRef.current.select.clearValue();
                         formikProps.setFieldValue("species", instance.value);
+                        formikProps.setFieldValue("species_string", instance.label);
                       }}
                     />
                   </Col>
@@ -647,7 +649,7 @@ const AnimalForm = (props) => {
                       isClearable={true}
                       key={`my_unique_size_select_key__${formikProps.values.size}`}
                       ref={sizeRef}
-                      options={Object.keys(sizeChoices).includes(formikProps.values.species) ? sizeChoices[formikProps.values.species] : sizeChoices['other']}
+                      options={Object.keys(sizeChoices).includes(formikProps.values.species_string) ? sizeChoices[formikProps.values.species_string] : sizeChoices['other']}
                       value={formikProps.values.size||''}
                       placeholder={placeholder}
                     />
@@ -663,7 +665,7 @@ const AnimalForm = (props) => {
                       key={`my_unique_pcolor_select_key__${formikProps.values.pcolor}`}
                       ref={pcolorRef}
                       style={{marginTop:"2px"}}
-                      options={Object.keys(colorChoices).includes(formikProps.values.species) ? colorChoices[formikProps.values.species] : colorChoices['other']}
+                      options={Object.keys(colorChoices).includes(formikProps.values.species_string) ? colorChoices[formikProps.values.species_string] : colorChoices['other']}
                       value={formikProps.values.pcolor||''}
                       placeholder={placeholder}
                     />
@@ -675,7 +677,7 @@ const AnimalForm = (props) => {
                       key={`my_unique_scolor_select_key__${formikProps.values.scolor}`}
                       ref={scolorRef}
                       style={{marginTop:"23px"}}
-                      options={Object.keys(colorChoices).includes(formikProps.values.species) ? colorChoices[formikProps.values.species] : colorChoices['other']}
+                      options={Object.keys(colorChoices).includes(formikProps.values.species_string) ? colorChoices[formikProps.values.species_string] : colorChoices['other']}
                       value={formikProps.values.scolor||''}
                       placeholder={placeholder}
                     />
@@ -718,12 +720,12 @@ const AnimalForm = (props) => {
                   <Col xs="3">
                     <CustomSelect
                       label="Age"
-                      options={Object.keys(ageChoices).includes(formikProps.values.species)
-                        ? ageChoices[formikProps.values.species]
+                      options={Object.keys(ageChoices).includes(formikProps.values.species_string)
+                        ? ageChoices[formikProps.values.species_string]
                         : ageChoices['other']}
                       value={formikProps.values.age || ''}
                       handleValueChange={(value) => formikProps.setFieldValue('age', value)}
-                      optionsKey={formikProps.values.species || ''}
+                      optionsKey={formikProps.values.species_string || ''}
                       formValidationName="age"
                     />
                   </Col>
