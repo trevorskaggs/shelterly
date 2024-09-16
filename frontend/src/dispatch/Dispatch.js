@@ -16,6 +16,7 @@ import Header from "../components/Header";
 import Scrollbar from '../components/Scrollbars';
 import { SystemErrorContext } from '../components/SystemError';
 import { AddressLookup } from '../components/Map';
+import { AuthContext } from "../accounts/AccountsReducer";
 
 function MapLegendControl({setShowAddressModal}) {
   return (
@@ -40,6 +41,7 @@ function MapLegendControl({setShowAddressModal}) {
 function Dispatch({ incident, organization }) {
 
   const { setShowSystemError } = useContext(SystemErrorContext);
+  const { state } = useContext(AuthContext);
 
   const [data, setData] = useState({dispatch_assignments: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
   const [mapState, setMapState] = useState({});
@@ -53,7 +55,7 @@ function Dispatch({ incident, organization }) {
   const handleClose = () => {setShowAddressModal(false);}
 
   const subscribe = () => {
-      axios.patch('/incident/api/incident/' + incident.id + '/subscribe/', {'dispatch_subscribe':!isSubscribed})
+      axios.patch('/incident/api/incident/' + state.incident.id + '/subscribe/', {'dispatch_subscribe':!isSubscribed})
       .finally(() => setIsSubscribed(!isSubscribed));
   }
 
@@ -131,12 +133,13 @@ const countMatches = (animal_dict) => {
         cancelToken: source.token,
       })
       .then(response => {
-        if (!unmounted) {
-          console.log(response);
-          //if (response.data.length > 0) {
+        if (response.data.length > 0) {
             setIsSubscribed(true);
-          //}
         }
+        else {
+            setIsSubscribed(false);
+        }
+        console.log(response.data, isSubscribed);
       })
       .catch(error => {
         if (!unmounted) {
@@ -167,8 +170,8 @@ const countMatches = (animal_dict) => {
         </Tooltip>
       }
     >
-      <Button className="ml-1" onClick={() => subscribe()} style={{marginTop:"-8px", width:"44px"}}>
-        <FontAwesomeIcon size="lg" icon={faBellSlash} transform={'left-3'} />
+      <Button className="ml-1" onClick={() => subscribe()} style={{marginTop:"-8px", background:"#a72b46"}}>
+        <FontAwesomeIcon size="lg" icon={faBellSlash} />
       </Button>
     </OverlayTrigger>
     :
@@ -181,7 +184,7 @@ const countMatches = (animal_dict) => {
         </Tooltip>
       }
     >
-      <Button className="ml-1" onClick={() => subscribe()} style={{marginTop:"-8px"}}>
+      <Button className="ml-1" onClick={() => subscribe()} style={{marginTop:"-8px", background:"#365a7d"}}>
         <FontAwesomeIcon size="lg" icon={faBell} />
       </Button>
     </OverlayTrigger>

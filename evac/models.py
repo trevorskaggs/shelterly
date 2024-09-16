@@ -1,7 +1,14 @@
+from django.contrib.auth import get_user_model
+from django.contrib.sites.models import Site
+from django.core.mail import send_mass_mail
 from django.db import models, transaction
+from django.db.models.signals import post_save
+from django.template.loader import render_to_string
 
 from hotline.models import ServiceRequest
-from incident.models import Incident
+from incident.models import Incident, IncidentNotification
+
+User = get_user_model()
 
 class EvacTeamMember(models.Model):
 
@@ -59,6 +66,42 @@ class EvacAssignment(models.Model):
 
     class Meta:
         ordering = ['-start_time',]
+
+# Send email to dispatch users on creation.
+def email_on_creation(sender, instance, **kwargs):
+    if kwargs["created"]:
+        # Send email here.
+        incident_notifications = IncidentNotification.objects.filter(incident=instance.incident)
+        user_emails = incident_notifications.values_list('user__email', flat=True)
+        if len(user_emails) > 0:
+            sr_addresses = []
+            for sr in instance.service_requests.all():
+                sr_address.append('SR#%s: %s, %s, %s' % sr.id_for_incident, sr.address, sr.city, sr.state)
+            email_data = {
+                'site': Site.objects.get_current(),
+                'user': sender.user.email,
+                'id': instance.id_for_incident,
+                'incident': instance.incident.slug,
+                'organization': instance.incident.organization.slug,
+                'team_name': instance.team.name,
+                'team_members': ', '.join(str(m) for m in instance.team.team_members.all()),
+                'sr_addresses': '\n'.join(sr_add for sr_add in sr_addresses),
+                'da_creation_date': instance.start_time.strftime('%m/%d/%Y %H:%M:%S')
+            }
+            message = (
+                "Dispatch Assignment #" + str(instance.id_for_incident) + " Created for Shelterly",
+                render_to_string(
+                    'dispatch_assignment_creation_email.txt',
+                    email_data
+                ).strip(),
+                "DoNotReply@shelterly.org",
+                user_emails,
+            )
+            send_mass_mail((message,))
+
+
+post_save.connect(email_on_creation, sender=EvacAssignment)
+
 
 class AssignedRequest(models.Model):
 

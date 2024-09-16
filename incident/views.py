@@ -99,7 +99,6 @@ class IncidentViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['patch'])
     def subscribe(self, request, pk=None):
         try:
-            import ipdb; ipdb.set_trace()
             incident = self.get_object()
             if 'hotline_subscribe' in request.data.keys():
                 IncidentNotification.objects.update_or_create(user=self.request.user, incident=incident, defaults={'hotline_notifications':request.data.get('hotline_subscribe', False)})

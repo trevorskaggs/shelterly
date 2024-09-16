@@ -145,8 +145,9 @@ class ServiceRequest(Location):
 def email_on_creation(sender, instance, **kwargs):
     if kwargs["created"]:
         # Send email here.
-        users = User.objects.filter(id__in=IncidentNotification.objects.filter(incident=instance.incident, hotline_notifications=True).values_list('user', flat=True)).values_list('email', flat=True)
-        if len(users) > 0:
+        incident_notifications = IncidentNotification.objects.filter(incident=instance.incident)
+        user_emails = incident_notifications.user_set.all().values_list('email', flat=True)
+        if len(user_emails) > 0:
             message = (
                 "Service Request #" + str(instance.id_for_incident) + " Created for Shelterly",
                 render_to_string(
@@ -160,7 +161,7 @@ def email_on_creation(sender, instance, **kwargs):
                     }
                 ).strip(),
                 "DoNotReply@shelterly.org",
-                users,
+                user_emails,
             )
             send_mass_mail((message,))
 
