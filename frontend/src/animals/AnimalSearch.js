@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState, useRef } from 'react';
 import ReactDOMServer from 'react-dom/server';
 import axios from "axios";
-import { Link, useQueryParams } from 'raviger';
+import { Link, navigate, useQueryParams } from 'raviger';
 import { Button, Card, CardGroup, Col, Collapse, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Pagination, Row, Spinner, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -74,6 +74,7 @@ function AnimalSearch({ incident, organization }) {
   const [searchTerm, setSearchTerm] = useState(search);
   const [showFilters, setShowFilters] = useState(false);
   const [isDisabled, setIsDisabled] = useState(true);
+  const [goToID, setGoToID] = useState('');
   const [triggerRefresh, setTriggerRefresh] = useState(false);
   const tempSearchTerm = useRef(null);
   const idSearchRef = useRef(null);
@@ -120,6 +121,10 @@ function AnimalSearch({ incident, organization }) {
     tempSearchTerm.current.value = event.target.value;
   };
 
+  const handleIDChange = async event => {
+    setGoToID(event.target.value);
+  };
+
   // Use searchTerm to filter service_requests.
   const handleSubmit = async event => {
     event.preventDefault();
@@ -164,7 +169,7 @@ function AnimalSearch({ incident, organization }) {
   };
 
   function buildAnimalUrl(animal) {
-    return getFullLocationFromPath(`/${organization}/${incident}/animals/${animal.id}`)
+    return getFullLocationFromPath(`/${organization}/${incident}/animals/${animal.id_for_incident}`)
   }
 
   const handleDownloadPdfClick = (animalId) => {
@@ -360,44 +365,61 @@ function AnimalSearch({ incident, organization }) {
       <Header>Search Animals</Header>
       <hr/>
       <Form onSubmit={handleSubmit}>
-        <InputGroup className="mb-3">
-          <FormControl
-            type="text"
-            placeholder="Search"
-            name="searchTerm"
-            onChange={handleChange}
-            ref={tempSearchTerm}
-          />
-          <InputGroup.Append>
-            <Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0"}}>Search
-              <OverlayTrigger
-                key={"search-information"}
-                placement="top"
-                overlay={
-                  <Tooltip id={`tooltip-search-information`}>
-                    Searchable fields: name, microchip, address fields, and owner last names.
-                  </Tooltip>
-                }
+        <Row>
+          <Col xs="2" style={{maxWidth:"150px", marginRight:"-10px", paddingRight:"0px"}}>
+            <InputGroup>
+              <FormControl
+                type="text"
+                placeholder="ID #"
+                name="searchIDTerm"
+                onChange={handleIDChange}
+              />
+              <InputGroup.Append>
+                <Button variant="outline-light" type="submit" disabled={!goToID} style={{borderRadius:"0 5px 5px 0"}} onClick={(e) => {navigate("/" + organization + "/" + incident + "/animals/" + goToID)}}>Go</Button>
+              </InputGroup.Append>
+            </InputGroup>
+          </Col>
+          <Col>
+            <InputGroup>
+              <FormControl
+                type="text"
+                placeholder="Search"
+                name="searchTerm"
+                onChange={handleChange}
+                ref={tempSearchTerm}
+              />
+              <InputGroup.Append>
+                <Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0"}}>Search
+                  <OverlayTrigger
+                    key={"search-information"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-search-information`}>
+                        Searchable fields: name, microchip, address fields, and owner last names.
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon icon={faInfoCircle} className="ml-1" size="sm" inverse />
+                  </OverlayTrigger>
+                </Button>
+              </InputGroup.Append>
+              <Button variant="outline-light" className="ml-1" onClick={handleShowFilters}>Advanced {showFilters ? <FontAwesomeIcon icon={faChevronDoubleUp} size="sm" /> : <FontAwesomeIcon icon={faChevronDoubleDown} size="sm" />}</Button>
+              <ButtonSpinner
+                variant="outline-light"
+                className="ml-1 print-all-btn-icon"
+                onClick={handlePrintAllClick}
+                isSubmitting={isSubmitting}
+                isSubmittingText={submittingLabel}
               >
-                <FontAwesomeIcon icon={faInfoCircle} className="ml-1" size="sm" inverse />
-              </OverlayTrigger>
-            </Button>
-          </InputGroup.Append>
-          <Button variant="outline-light" className="ml-1" onClick={handleShowFilters}>Advanced {showFilters ? <FontAwesomeIcon icon={faChevronDoubleUp} size="sm" /> : <FontAwesomeIcon icon={faChevronDoubleDown} size="sm" />}</Button>
-          <ButtonSpinner
-            variant="outline-light"
-            className="ml-1 print-all-btn-icon"
-            onClick={handlePrintAllClick}
-            isSubmitting={isSubmitting}
-            isSubmittingText={submittingLabel}
-          >
-            Print All ({`${animals.length}`})
-            <FontAwesomeIcon icon={faPrint} className="ml-2 text-light" inverse />
-          </ButtonSpinner>
-        </InputGroup>
+                Print All ({`${animals.length}`})
+                <FontAwesomeIcon icon={faPrint} className="ml-2 text-light" inverse />
+              </ButtonSpinner>
+            </InputGroup>
+          </Col>
+        </Row>
         <Collapse in={showFilters}>
           <div>
-          <Card className="border rounded d-flex" style={{width:"100%"}}>
+          <Card className="border rounded d-flex mt-3" style={{width:"100%"}}>
             <Card.Body style={{marginBottom:"-16px"}}>
               <Row>
                 <Col xs={"4"} style={{textTransform:"capitalize"}}>
@@ -552,15 +574,6 @@ function AnimalSearch({ incident, organization }) {
                   </Row>
                 </Col>
                 <Col className="flex-grow-1 pl-0" xs="3">
-                <FormControl
-                  type="text"
-                  placeholder="Animal ID"
-                  name="id"
-                  onChange={(event) => {
-                    setOptions({...options, id: event ? event.target.value : null});
-                  }}
-                  ref={idSearchRef}
-                />
                   <Button className="btn btn-primary mt-3" style={{maxHeight:"35px", width:"100%"}} onClick={() => {tempSearchTerm.current.value !== searchTerm ? setSearchTerm(tempSearchTerm.current.value) : handleApplyFilters(data.animals);}} disabled={isDisabled}>Apply</Button>
                   <Button variant="outline-light" style={{maxHeight:"35px", width:"100%", marginTop:"15px"}} onClick={handleClear}>Clear</Button>
                 </Col>
@@ -571,7 +584,9 @@ function AnimalSearch({ incident, organization }) {
         </Collapse>
       </Form>
       {data.animals.filter(animal => animals.includes(animal.id)).map((animal, index) => (
-        <div key={animal.id} className="mt-3" hidden={page !== Math.ceil((index+1)/ITEMS_PER_PAGE)}>
+        <span key={animal.id}>
+        {page === Math.ceil((index+1)/ITEMS_PER_PAGE) ?
+        <div className="mt-3">
           <div className="card-header">
             <h4 style={{marginBottom:"-2px",  marginLeft:"-12px"}}>
               <OverlayTrigger
@@ -802,7 +817,7 @@ function AnimalSearch({ incident, organization }) {
               <Card.Body>
               <Card.Title style={{marginTop:"-9px", marginBottom:"8px"}}>Location</Card.Title>
                 <ListGroup>
-                  <ListGroup.Item className='request'><b>Service Request: </b>{animal.request ? <Link href={"/" + organization + "/" + incident + "/hotline/servicerequest/" + animal.request} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.request_address}</Link> : "None"}</ListGroup.Item>
+                  <ListGroup.Item className='request'><b>Service Request: </b>{animal.request ? <Link href={"/" + organization + "/" + incident + "/hotline/servicerequest/" + animal.request_id_for_incident} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.request_address}</Link> : "None"}</ListGroup.Item>
                   <ListGroup.Item><b>Shelter: </b>{animal.shelter ? <Link href={"/" + organization + "/" + incident + "/shelter/" + animal.shelter} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.shelter_object.name}</Link> : "None"}
                     {animal.shelter ?
                     <span>
@@ -849,7 +864,8 @@ function AnimalSearch({ incident, organization }) {
               </Card.Body>
             </Card>
           </CardGroup>
-          </div>
+        </div> : ""}
+        </span>
       ))}
       <p style={{marginTop:"15px"}}>{data.isFetching ? 'Fetching Animals...' : <span>{animals.length === 0 ? 'No animals found.' : ''}</span>}</p>
       <Pagination className="custom-page-links" size="lg" onClick={(e) => {setFocus(parseInt(e.target.innerText));setPage(parseInt(e.target.innerText))}}>

@@ -100,7 +100,7 @@ function DiagnosticCard(props) {
               }
               <Col className="hover-div pl-0 pr-0">
                 <div className="border treatment-hover-div" style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"5px", marginLeft:"-1px", marginTop: "-1px", fontSize:"18px", width:"100%", backgroundColor:"rgb(158 153 153)"}}>
-                  {props.diagnostic.other_name ? props.diagnostic.other_name : props.diagnostic.name}
+                  <span style={{marginLeft:"5px"}}>{props.diagnostic.other_name ? props.diagnostic.other_name : props.diagnostic.name}</span>
                   <span className="float-right">
                   {props.diagnostic.result ?
                     <OverlayTrigger
@@ -141,18 +141,18 @@ function DiagnosticCard(props) {
                   </Col>
                 </Row> : ""}
                 <Row style={{marginTop:props.animal_object ? "" : "6px", paddingLeft:"10px"}}>
-                  <Col xs={3}>
-                    <b>Result: </b>{props.diagnostic.result || 'Pending'}
-                  </Col>
                   {props.diagnostic.complete ?
-                  <Col xs={4}>
+                  <Col xs={3}>
                     <b>Completed: </b><Moment format="MMM DD, HH:mm">{props.diagnostic.complete}</Moment>
                   </Col>
                   :
-                  <Col xs={4}>
+                  <Col xs={3}>
                     <b>Ordered: </b><Moment format="MMM DD, HH:mm">{props.diagnostic.open}</Moment>
                   </Col>
                   }
+                  <Col xs={3}>
+                    <b>Result: </b>{props.diagnostic.result || 'Pending'}
+                  </Col>
                 </Row>
                 <Row style={{paddingLeft:"10px"}}>
                   <Col>

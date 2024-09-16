@@ -45,25 +45,40 @@ class DispatchTeamSerializer(serializers.ModelSerializer):
         model = DispatchTeam
         fields = '__all__'
 
-class DispatchServiceRequestSerializer(SimpleServiceRequestSerializer):
+class SimpleDispatchServiceRequestSerializer(SimpleServiceRequestSerializer):
+    owner_objects = SimplePersonSerializer(source='owners', many=True, required=False, read_only=True)
+
+    class Meta:
+        model = ServiceRequest
+        fields = ['id', 'id_for_incident', 'directions', 'latitude', 'longitude', 'full_address', 'followup_date', 'status', 'injured', 'priority', 'key_provided',
+        'accessible', 'turn_around' , 'reported_animals', 'reported_evac', 'reported_sheltered_in_place', 'sheltered_in_place', 'unable_to_locate', 'aco_required',
+        'owners', 'owner_objects']
+
+class DispatchServiceRequestSerializer(SimpleDispatchServiceRequestSerializer):
 
     animals = SimpleAnimalSerializer(many=True, read_only=True)
-    owner_contacts = OwnerContactSerializer(source='ownercontact_set', many=True, required=False, read_only=True)
-    owner_objects = SimplePersonSerializer(source='owners', many=True, required=False, read_only=True)
+    # owner_contacts = OwnerContactSerializer(source='ownercontact_set', many=True, required=False, read_only=True)
     reporter_object = SimplePersonSerializer(source='reporter', required=False, read_only=True)
     visit_notes = VisitNoteSerializer(source='visitnote_set', many=True, required=False, read_only=True)
 
     class Meta:
         model = ServiceRequest
-        fields = ['id', 'id_for_incident', 'animals', 'directions', 'latitude', 'longitude', 'full_address', 'followup_date', 'status', 'injured', 'priority', 'key_provided',
+        fields = ['id', 'animals', 'id_for_incident', 'directions', 'latitude', 'longitude', 'full_address', 'followup_date', 'status', 'injured', 'priority', 'key_provided',
         'accessible', 'turn_around' , 'reported_animals', 'reported_evac', 'reported_sheltered_in_place', 'sheltered_in_place', 'unable_to_locate', 'aco_required',
-        'owner_contacts', 'owner_objects', 'owners', 'reporter_object', 'visit_notes']
+        'owners', 'owner_objects', 'reporter_object', 'visit_notes']
 
-class AssignedRequestDispatchSerializer(serializers.ModelSerializer):
+class SimpleAssignedRequestDispatchSerializer(serializers.ModelSerializer):
+    service_request_object = SimpleDispatchServiceRequestSerializer(source='service_request', required=False, read_only=True)
 
+    class Meta:
+        model = AssignedRequest
+        fields = '__all__'
+
+class AssignedRequestDispatchSerializer(SimpleAssignedRequestDispatchSerializer):
+
+    # visit_note = VisitNoteSerializer(required=False, read_only=True)
+    # owner_contact = OwnerContactSerializer(required=False, read_only=True)
     service_request_object = DispatchServiceRequestSerializer(source='service_request', required=False, read_only=True)
-    visit_note = VisitNoteSerializer(required=False, read_only=True)
-    owner_contact = OwnerContactSerializer(required=False, read_only=True)
     visit_notes = serializers.SerializerMethodField()
 
     def get_visit_notes(self, obj):
@@ -103,13 +118,27 @@ class AssignedRequestServiceRequestSerializer(serializers.ModelSerializer):
         model = AssignedRequest
         fields = '__all__'
 
-class EvacAssignmentSerializer(SimpleEvacAssignmentSerializer):
-
-    assigned_requests = AssignedRequestDispatchSerializer(many=True, required=False, read_only=True)
+class DeployEvacAssignmentSerializer(SimpleEvacAssignmentSerializer):
     team_object = serializers.SerializerMethodField()
 
     def get_team_object(self, obj):
         return DispatchTeamSerializer(DispatchTeam.objects.filter(id=obj.team.id).annotate(is_assigned=Exists(EvacAssignment.objects.filter(team_id=OuterRef("id"), end_time=None, service_requests__isnull=False, incident=obj.incident)))[0], required=False, read_only=True).data
+    
+    class Meta:
+        model = EvacAssignment
+        fields = '__all__'
+
+class MapEvacAssignmentSerializer(DeployEvacAssignmentSerializer):
+
+    assigned_requests = SimpleAssignedRequestDispatchSerializer(many=True, required=False, read_only=True)
+
+    class Meta:
+        model = EvacAssignment
+        fields = '__all__'
+
+class EvacAssignmentSerializer(MapEvacAssignmentSerializer):
+
+    assigned_requests = AssignedRequestDispatchSerializer(many=True, required=False, read_only=True)
 
     class Meta:
         model = EvacAssignment

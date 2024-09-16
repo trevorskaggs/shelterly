@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState, useRef } from 'react';
 import axios from "axios";
-import { Button, ButtonGroup, Card, CardGroup, Form, FormControl, InputGroup, OverlayTrigger, Pagination, Tooltip } from "react-bootstrap";
-import { Link, useQueryParams } from "raviger";
+import { Button, ButtonGroup, Card, CardGroup, Col, Form, FormControl, InputGroup, OverlayTrigger, Pagination, Row, Tooltip } from "react-bootstrap";
+import { Link, navigate, useQueryParams } from "raviger";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCircle, faExclamationCircle, faInfoCircle, faQuestionCircle, faUserAlt, faUserAltSlash, faUsers, faPrint
@@ -45,6 +45,7 @@ function DispatchAssignmentSearch({ incident, organization }) {
   const [page, setPage] = useState(1);
   const [numPages, setNumPages] = useState(1);
   const [isDateSet, setIsDateSet] = useState(false);
+  const [goToID, setGoToID] = useState('');
   const { markInstances } = useMark();
   const {
     isSubmittingById,
@@ -61,6 +62,10 @@ function DispatchAssignmentSearch({ incident, organization }) {
   // Update searchTerm when field input changes.
   const handleChange = event => {
     tempSearchTerm.current.value = event.target.value;
+  };
+
+  const handleIDChange = async event => {
+    setGoToID(event.target.value);
   };
 
   // Use searchTerm to filter service_requests.
@@ -90,18 +95,18 @@ function DispatchAssignmentSearch({ incident, organization }) {
     let status_matches = {'REPORTED':{}, 'REPORTED (EVAC REQUESTED)':{}, 'REPORTED (SIP REQUESTED)':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}};
 
     Object.keys(animal_dict).forEach((animal) => {
-      if (['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE'].indexOf(animal.status) > -1) {
+      if (['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE'].indexOf(animal_dict[animal]['status']) > -1) {
         if (!species_matches[[animal_dict[animal]['species']]]) {
           species_matches[[animal_dict[animal]['species']]] = 1;
         }
         else {
           species_matches[[animal_dict[animal]['species']]] += 1;
         }
-        if (!status_matches[animal.status][[animal_dict[animal]['species']]]) {
-          status_matches[animal.status][[animal_dict[animal]['species']]] = 1;
+        if (!status_matches[animal_dict[animal]['status']][[animal_dict[animal]['species']]]) {
+          status_matches[animal_dict[animal]['status']][[animal_dict[animal]['species']]] = 1;
         }
         else {
-          status_matches[animal.status][[animal_dict[animal]['species']]] += 1;
+          status_matches[animal_dict[animal]['status']][[animal_dict[animal]['species']]] += 1;
         }
       }
     });
@@ -131,7 +136,7 @@ function DispatchAssignmentSearch({ incident, organization }) {
     const fetchDispatchAssignments = async () => {
       setData({evacuation_assignments: [], isFetching: true});
       // Fetch DispatchAssignment data.
-      await axios.get('/evac/api/evacassignment/?search=' + searchTerm + '&status=' + statusOptions +'&incident=' + incident, {
+      await axios.get('/evac/api/evacassignment/?map=true&search=' + searchTerm + '&status=' + statusOptions +'&incident=' + incident, {
         cancelToken: source.token,
       })
       .then(response => {
@@ -176,62 +181,79 @@ function DispatchAssignmentSearch({ incident, organization }) {
       <Header>Search Dispatch Assignments</Header>
       <hr/>
       <Form onSubmit={handleSubmit}>
-        <InputGroup className="mb-3">
-          <FormControl
-              type="text"
-              placeholder="Search"
-              name="searchTerm"
-              onChange={handleChange}
-              ref={tempSearchTerm}
-          />
-          <InputGroup.Append>
-            <Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0"}}>Search
-              <OverlayTrigger
-                key={"search-information"}
-                placement="top"
-                overlay={
-                  <Tooltip id={`tooltip-search-information`}>
-                    Searchable fields: team name, team member names, animal names, and service request address fields.
-                  </Tooltip>
-                }
+        <Row>
+          <Col xs="2" style={{maxWidth:"150px", marginRight:"-10px", paddingRight:"0px"}}>
+            <InputGroup>
+              <FormControl
+                type="text"
+                placeholder="ID #"
+                name="searchIDTerm"
+                onChange={handleIDChange}
+              />
+              <InputGroup.Append>
+                <Button variant="outline-light" type="submit" disabled={!goToID} style={{borderRadius:"0 5px 5px 0"}} onClick={(e) => {navigate("/" + organization + "/" + incident + "/dispatch/summary/" + goToID)}}>Go</Button>
+              </InputGroup.Append>
+            </InputGroup>
+          </Col>
+          <Col>
+            <InputGroup>
+              <FormControl
+                  type="text"
+                  placeholder="Search"
+                  name="searchTerm"
+                  onChange={handleChange}
+                  ref={tempSearchTerm}
+              />
+              <InputGroup.Append>
+                <Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0"}}>Search
+                  <OverlayTrigger
+                    key={"search-information"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-search-information`}>
+                        Searchable fields: team name, team member names, animal names, and service request address fields.
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon icon={faInfoCircle} className="ml-1" size="sm" inverse />
+                  </OverlayTrigger>
+                </Button>
+              </InputGroup.Append>
+              <ButtonGroup className="ml-1">
+                <Button variant={statusOptions === "preplanned" ? "primary" : "secondary"} onClick={statusOptions !== "preplanned" ? () => {setPage(1);setStatusOptions("preplanned")} : () => {setPage(1);setStatusOptions("")}}>Preplanned</Button>
+                <Button variant={statusOptions === "active" ? "primary" : "secondary"} onClick={statusOptions !== "active" ? () => {setPage(1);setStatusOptions("active")} : () => {setPage(1);setStatusOptions("")}}>Active</Button>
+                <Button variant={statusOptions === "resolved" ? "primary" : "secondary"} onClick={statusOptions !== "resolved" ? () => {setPage(1);setStatusOptions("resolved")} : () => {setPage(1);setStatusOptions("")}}>Closed</Button>
+              </ButtonGroup>
+              <DateRangePicker
+                name={`date_range_picker`}
+                id={`date_range_picker`}
+                placeholder={"Filter by Date Range"}
+                style={{width:"210px", marginLeft:"0.25rem"}}
+                ref={dateRef}
+                onChange={(dateRange) => {
+                  if (dateRange.length) {
+                    setIsDateSet(true)
+                    parseDateRange(dateRange)
+                    setNumPages(Math.ceil(filteredEvacAssignments.length / ITEMS_PER_PAGE));
+                  } else {
+                    setIsDateSet(false)
+                    setNumPages(Math.ceil(data.evacuation_assignments.length / ITEMS_PER_PAGE));
+                  }
+                }}
+              />
+              <ButtonSpinner
+                variant="outline-light"
+                className="ml-1 print-all-btn-icon"
+                onClick={handlePrintAllClick}
+                isSubmitting={isSubmittingById()}
+                isSubmittingText={submittingLabel}
               >
-                <FontAwesomeIcon icon={faInfoCircle} className="ml-1" size="sm" inverse />
-              </OverlayTrigger>
-            </Button>
-          </InputGroup.Append>
-          <ButtonGroup className="ml-1">
-            <Button variant={statusOptions === "preplanned" ? "primary" : "secondary"} onClick={statusOptions !== "preplanned" ? () => {setPage(1);setStatusOptions("preplanned")} : () => {setPage(1);setStatusOptions("")}}>Preplanned</Button>
-            <Button variant={statusOptions === "active" ? "primary" : "secondary"} onClick={statusOptions !== "active" ? () => {setPage(1);setStatusOptions("active")} : () => {setPage(1);setStatusOptions("")}}>Active</Button>
-            <Button variant={statusOptions === "resolved" ? "primary" : "secondary"} onClick={statusOptions !== "resolved" ? () => {setPage(1);setStatusOptions("resolved")} : () => {setPage(1);setStatusOptions("")}}>Closed</Button>
-          </ButtonGroup>
-          <DateRangePicker
-            name={`date_range_picker`}
-            id={`date_range_picker`}
-            placeholder={"Filter by Date Range"}
-            style={{width:"210px", marginLeft:"0.25rem"}}
-            ref={dateRef}
-            onChange={(dateRange) => {
-              if (dateRange.length) {
-                setIsDateSet(true)
-                parseDateRange(dateRange)
-                setNumPages(Math.ceil(filteredEvacAssignments.length / ITEMS_PER_PAGE));
-              } else {
-                setIsDateSet(false)
-                setNumPages(Math.ceil(data.evacuation_assignments.length / ITEMS_PER_PAGE));
-              }
-            }}
-          />
-          <ButtonSpinner
-            variant="outline-light"
-            className="ml-1 print-all-btn-icon"
-            onClick={handlePrintAllClick}
-            isSubmitting={isSubmittingById()}
-            isSubmittingText={submittingLabel}
-          >
-            Print All ({`${filteredEvacAssignments.length}`})
-            <FontAwesomeIcon icon={faPrint} className="ml-2 text-light" inverse />
-          </ButtonSpinner>
-        </InputGroup>
+                Print All ({`${filteredEvacAssignments.length}`})
+                <FontAwesomeIcon icon={faPrint} className="ml-2 text-light" inverse />
+              </ButtonSpinner>
+            </InputGroup>
+          </Col>
+        </Row>
       </Form>
       {filteredEvacAssignments.map((evacuation_assignment, index) => (
         <div key={evacuation_assignment.id} className="mt-3" hidden={page !== Math.ceil((index+1)/ITEMS_PER_PAGE)}>
@@ -330,7 +352,7 @@ function DispatchAssignmentSearch({ incident, organization }) {
                           key={"sip"}
                           placement="top"
                           overlay={
-                            <Tooltip id={`tooltip-utl`}>
+                            <Tooltip id={`tooltip-sip`}>
                               {Object.keys(matches[assigned_request.service_request_object.id].status_matches['SHELTERED IN PLACE']).map((key,i) => (
                                 <span key={key} style={{textTransform:"capitalize"}}>
                                   {i > 0 && ", "}{prettyText('', key.split(',')[0], matches[assigned_request.service_request_object.id].status_matches['SHELTERED IN PLACE'][key])}
@@ -365,7 +387,7 @@ function DispatchAssignmentSearch({ incident, organization }) {
                         </OverlayTrigger>
                         : ""}
                         </span>
-                        <span>SR#{assigned_request.service_request_object.id_for_incident} - <Link href={"/" + organization + "/" + incident + "/hotline/servicerequest/" + assigned_request.service_request_object.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link> |
+                        <span>SR#{assigned_request.service_request_object.id_for_incident} - <Link href={"/" + organization + "/" + incident + "/hotline/servicerequest/" + assigned_request.service_request_object.id_for_incident} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link> |
                         {assigned_request.service_request_object.owner_objects.length === 0 ?
                           <OverlayTrigger
                             key={"stray"}

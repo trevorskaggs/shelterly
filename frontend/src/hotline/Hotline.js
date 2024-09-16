@@ -80,7 +80,7 @@ function Hotline({ incident, organization }) {
       // Fetch ServiceRequest data.
       await axios.get('/hotline/api/servicerequests/?incident=' + incident, {
         params: {
-          map: true
+          landingmap: true
         },
         cancelToken: source.token,
       })

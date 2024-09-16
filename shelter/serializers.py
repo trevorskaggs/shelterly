@@ -6,7 +6,13 @@ from .models import *
 from location.utils import build_full_address, build_action_string
 from animals.models import Animal
 
-class IntakeSummarySerializer(serializers.ModelSerializer):
+class SimpleIntakeSummarySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = IntakeSummary
+        fields = '__all__'
+
+class IntakeSummarySerializer(SimpleIntakeSummarySerializer):
 
     animal_objects = serializers.SerializerMethodField()
     person_object = serializers.SerializerMethodField()
@@ -19,10 +25,6 @@ class IntakeSummarySerializer(serializers.ModelSerializer):
     def get_person_object(self, obj):
         from people.serializers import PersonSerializer
         return PersonSerializer(obj.person, required=False, read_only=True).data
-
-    class Meta:
-        model = IntakeSummary
-        fields = '__all__'
 
 
 class SimpleRoomSerializer(serializers.ModelSerializer):
@@ -124,7 +126,7 @@ class ModestShelterSerializer(SimpleShelterSerializer):
 class ShelterSerializer(ModestShelterSerializer):
     #Single obj serializer
     buildings = BuildingSerializer(source='building_set', many=True, required=False, read_only=True)
-    intake_summaries = IntakeSummarySerializer(source='intakesummary_set', many=True, required=False, read_only=True)
+    intake_summaries = SimpleIntakeSummarySerializer(source='intakesummary_set', many=True, required=False, read_only=True)
     # action_history = serializers.SerializerMethodField()
 
     # def get_action_history(self, obj):

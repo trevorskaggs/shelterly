@@ -32,6 +32,25 @@ async function buildAnimalCareScheduleContent(pdf, animals) {
       await drawQRCareCode(pdf, animal.url)
     }
 
+    // checking for risk indications
+    let riskIndication = false;
+    [animal.aggressive, animal.aco_required, animal.injured].forEach((riskValue) => {
+      if (riskValue.toString().toLowerCase() === 'yes') {
+        riskIndication = true;
+      }
+    })
+    if (riskIndication) {
+      pdf.resetDocumentLeftMargin();
+      pdf.drawPad(-21);
+      pdf.drawHRect({ color: 'RISKY_RED' });
+      pdf.setDocumentColors({ rgb: [255, 255, 255]});
+      pdf.drawPad(18)
+      pdf.documentLeftMargin = pdf.pageWidth / 2 - 5;
+      pdf.drawSingleLineText({ text: '***!!!***' });
+      pdf.setDocumentColors();
+      pdf.resetDocumentLeftMargin();
+    }
+
     const imageSrc = animal.front_image;
     let graphicOptions = {
       display: 'inline',

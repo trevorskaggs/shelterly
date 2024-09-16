@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState, useRef } from 'react';
 import axios from "axios";
-import { Link, useQueryParams } from 'raviger';
-import { Button, ButtonGroup, Card, CardGroup, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Pagination, Tooltip } from 'react-bootstrap';
+import { Link, navigate, useQueryParams } from 'raviger';
+import { Button, ButtonGroup, Card, CardGroup, Col, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Pagination, Row, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faClipboardList, faInfoCircle,
@@ -44,6 +44,7 @@ function PersonSearch({ incident, organization }) {
 	const tempSearchTerm = useRef(null);
 	const [page, setPage] = useState(1);
   const [numPages, setNumPages] = useState(1);
+  const [goToID, setGoToID] = useState('');
 	const { markInstances } = useMark();
   const {
     isSubmittingById,
@@ -55,6 +56,10 @@ function PersonSearch({ incident, organization }) {
   // Update searchTerm when field input changes.
   const handleChange = event => {
     tempSearchTerm.current.value = event.target.value;
+  };
+
+  const handleIDChange = async event => {
+    setGoToID(event.target.value);
   };
 
   // Use searchTerm to filter owners.
@@ -157,44 +162,61 @@ function PersonSearch({ incident, organization }) {
     <Header>Search Owners</Header>
     <hr/>
     <Form onSubmit={handleSubmit}>
-      <InputGroup className="mb-3">
-        <FormControl
-          type="text"
-          placeholder="Search"
-          name="searchTerm"
-          onChange={handleChange}
-          ref={tempSearchTerm}
-          />
-        <InputGroup.Append>
-          <Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0"}}>Search
-            <OverlayTrigger
-              key={"search-information"}
-              placement="top"
-              overlay={
-                <Tooltip id={`tooltip-search-information`}>
-                  Searchable fields: name, phone number, email, drivers license, address fields, and animal names.
-                </Tooltip>
-              }
+      <Row>
+        <Col xs="2" style={{maxWidth:"150px", marginRight:"-10px", paddingRight:"0px"}}>
+          <InputGroup>
+            <FormControl
+              type="text"
+              placeholder="ID #"
+              name="searchIDTerm"
+              onChange={handleIDChange}
+            />
+            <InputGroup.Append>
+              <Button variant="outline-light" type="submit" disabled={!goToID} style={{borderRadius:"0 5px 5px 0"}} onClick={(e) => {navigate("/" + organization + "/" + incident + "/people/owner/" + goToID)}}>Go</Button>
+            </InputGroup.Append>
+          </InputGroup>
+        </Col>
+        <Col>
+          <InputGroup>
+            <FormControl
+              type="text"
+              placeholder="Search"
+              name="searchTerm"
+              onChange={handleChange}
+              ref={tempSearchTerm}
+              />
+            <InputGroup.Append>
+              <Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0"}}>Search
+                <OverlayTrigger
+                  key={"search-information"}
+                  placement="top"
+                  overlay={
+                    <Tooltip id={`tooltip-search-information`}>
+                      Searchable fields: name, phone number, email, drivers license, address fields, and animal names.
+                    </Tooltip>
+                  }
+                >
+                  <FontAwesomeIcon icon={faInfoCircle} className="ml-1" size="sm" inverse />
+                </OverlayTrigger>
+              </Button>
+            </InputGroup.Append>
+            <ButtonGroup className="ml-1">
+              <Button variant={statusOptions === "owners" ? "primary" : "secondary"} onClick={statusOptions !== "owners" ? () => {setPage(1);setStatusOptions("owners")} : () => {setPage(1);setStatusOptions("")}}>Owners</Button>
+              <Button variant={statusOptions === "reporters" ? "primary" : "secondary"} onClick={statusOptions !== "reporters" ? () => {setPage(1);setStatusOptions("reporters")} : () => {setPage(1);setStatusOptions("")}}>Reporters</Button>
+            </ButtonGroup>
+            <ButtonSpinner
+              variant="outline-light"
+              className="ml-1 print-all-btn-icon"
+              onClick={handlePrintAllClick}
+              isSubmitting={isSubmittingById()}
+              isSubmittingText={submittingLabel}
             >
-              <FontAwesomeIcon icon={faInfoCircle} className="ml-1" size="sm" inverse />
-            </OverlayTrigger>
-          </Button>
-        </InputGroup.Append>
-        <ButtonGroup className="ml-1">
-          <Button variant={statusOptions === "owners" ? "primary" : "secondary"} onClick={statusOptions !== "owners" ? () => {setPage(1);setStatusOptions("owners")} : () => {setPage(1);setStatusOptions("")}}>Owners</Button>
-          <Button variant={statusOptions === "reporters" ? "primary" : "secondary"} onClick={statusOptions !== "reporters" ? () => {setPage(1);setStatusOptions("reporters")} : () => {setPage(1);setStatusOptions("")}}>Reporters</Button>
-        </ButtonGroup>
-        <ButtonSpinner
-          variant="outline-light"
-          className="ml-1 print-all-btn-icon"
-          onClick={handlePrintAllClick}
-          isSubmitting={isSubmittingById()}
-          isSubmittingText={submittingLabel}
-        >
-          Print All ({`${data.owners.length}`})
-          <FontAwesomeIcon icon={faPrint} className="ml-2 text-light" inverse />
-        </ButtonSpinner>
-      </InputGroup>
+              Print All ({`${data.owners.length}`})
+              <FontAwesomeIcon icon={faPrint} className="ml-2 text-light" inverse />
+            </ButtonSpinner>
+          </InputGroup>
+        </Col>
+      </Row>
     </Form>
     {data.owners.map((owner, index) => (
       <div key={owner.id} className="mt-3" hidden={page !== Math.ceil((index+1)/ITEMS_PER_PAGE)}>

@@ -16,7 +16,7 @@ const ActionsDropdown = ({
       </Dropdown.Toggle>
       <Dropdown.Menu>
         {React.Children.map(children, (child, index) => (
-          <Dropdown.Item key={index} as="div" className="p-0">
+          <Dropdown.Item key={index} as="div" className="pt-0 pb-0 pl-0 pr-3">
             {child}
           </Dropdown.Item>
         ))}

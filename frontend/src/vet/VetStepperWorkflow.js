@@ -92,10 +92,10 @@ export const initialVetWorkflowData = {
   diagnosticsCount: 0,
   proceduresCount: 0,
   steps: {
-    exam: {'medrecord_id':null, 'vetrequest_id':null, 'assignee':null, 'confirm_sex_age':false, 'age':'', 'sex':'', 'confirm_chip':false, 'microchip':'', 'weight':'', 'weight_unit':'kg', 'weight_estimated':false, 'temperature':'', 'medical_plan':'', 'temperature_method':'Rectal', 'pulse':'', 'respiratory_rate':'', 'vet_requests':[]},
-    orders: {diagnostics:[], diagnostics_other:'', procedures:[], procedure_other:'', animal_object: {id:''}, vet_requests: [],},
+    exam: {'medrecord_id':null, 'vetrequest_id':null, 'assignee':null, 'confirm_sex_age':false, 'age':'', 'sex':'', 'confirm_chip':false, 'microchip':'', 'weight':'', 'weight_unit':'kg', 'weight_estimated':false, 'temperature':'', 'medical_plan':'', 'temperature_method':'Rectal', 'pulse':null, 'respiratory_rate':'', 'vet_requests':[]},
+    orders: {diagnostics:[], diagnostics_other:'', procedures:[], procedure_other:'', animal_object: {id:''}, vet_requests: [], exams:[]},
     treatments: [],
-    diagnosis: {diagnosis:[], diagnosis_notes:'', diagnosis_other:'', animal_object:{id:''}, vet_requests: [],},
+    diagnosis: {diagnosis:[], diagnosis_notes:'', diagnosis_other:'', animal_object:{id:''}, vet_requests: [], exams:[]},
   },
   medRecord: {id:'', exams:[], diagnostic_objects:[], procedure_objects:[], patient:null, vet_requests:[], open: '', diagnosis: '', other_diagnosis:'', treatment_plans:[], animal_object: {id:'', name:'', species:'', category:'', sex:'', age:'', fixed:'', pcolor:'', scolor:'', medical_notes:'', shelter_object:{}, room_name:''}}
 }

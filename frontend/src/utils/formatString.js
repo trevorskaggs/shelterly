@@ -31,5 +31,6 @@ export const statusLabelLookup = {
   'SHELTERED IN PLACE': 'Sheltered In Place (SIP)',
   'UNABLE TO LOCATE': 'Unable To Locate (UTL)',
   'NO FURTHER ACTION': 'No Further Action (NFA)',
+  'REUNITED': 'Reunited',
   'DECEASED': 'Deceased',
 };

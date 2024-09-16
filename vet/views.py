@@ -70,30 +70,32 @@ class ExamViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         if serializer.is_valid():
-            med_record = MedicalRecord.objects.get(id=self.request.data.get('medrecord_id'))
-            serializer.validated_data['medical_record'] = med_record
-            if self.request.data.get('vetrequest_id'):
-              vet_request = VetRequest.objects.get(id=self.request.data.get('vetrequest_id'))
-              serializer.validated_data['vet_request'] = vet_request
-              # Close open vet request.
-              VetRequest.objects.filter(id=self.request.data.get('vetrequest_id')).update(status='Closed')
+            if self.request.user.is_superuser or self.request.user.perms.filter(organization=self.request.data.get('organization'))[0].vet_perms:
+                med_record = MedicalRecord.objects.get(id=self.request.data.get('medrecord_id'))
+                serializer.validated_data['medical_record'] = med_record
+                if self.request.data.get('vetrequest_id'):
+                  vet_request = VetRequest.objects.get(id=self.request.data.get('vetrequest_id'))
+                  serializer.validated_data['vet_request'] = vet_request
+                  # Close open vet request.
+                  VetRequest.objects.filter(id=self.request.data.get('vetrequest_id')).update(status='Closed')
 
-            exam = serializer.save()
+                exam = serializer.save()
 
-            # Update Animal with animal data.
-            Animal.objects.filter(id=self.request.data.get('animal_id')).update(age=self.request.data.get('age'), sex=self.request.data.get('sex'), microchip=self.request.data.get('microchip', ''), fixed=self.request.data.get('fixed', ''))
-            # Create ExamAnswer objects.
-            for k,v in self.request.data.items():
-                if k not in ['open', 'assignee', 'age', 'sex', 'microchip', 'fixed', 'confirm_sex_age', 'confirm_chip', 'temperature', 'temperature_method', 'weight', 'weight_unit', 'weight_estimated', 'pulse', 'respiratory_rate'] and '_notes' not in k and '_id' not in k and self.request.data.get(k + '_id'):
-                    ExamAnswer.objects.create(exam=exam, question=ExamQuestion.objects.get(id=self.request.data.get(k + '_id', '')), answer=v, answer_notes=self.request.data.get(k + '_notes', ''))
+                # Update Animal with animal data.
+                Animal.objects.filter(id=self.request.data.get('animal_id')).update(age=self.request.data.get('age'), sex=self.request.data.get('sex'), microchip=self.request.data.get('microchip', ''), fixed=self.request.data.get('fixed', ''))
+                # Create ExamAnswer objects.
+                for k,v in self.request.data.items():
+                    if k not in ['open', 'assignee', 'age', 'sex', 'microchip', 'fixed', 'confirm_sex_age', 'confirm_chip', 'temperature', 'temperature_method', 'weight', 'weight_unit', 'weight_estimated', 'pulse', 'respiratory_rate'] and '_notes' not in k and '_id' not in k and self.request.data.get(k + '_id'):
+                        ExamAnswer.objects.create(exam=exam, question=ExamQuestion.objects.get(id=self.request.data.get(k + '_id', '')), answer=v, answer_notes=self.request.data.get(k + '_notes', ''))
 
     def perform_update(self, serializer):
         if serializer.is_valid():
-            exam = serializer.save()
-            Animal.objects.filter(id=self.request.data.get('animal_id')).update(age=self.request.data.get('age'), sex=self.request.data.get('sex'), microchip=self.request.data.get('microchip', ''), fixed=self.request.data.get('fixed', ''))
-            for k,v in self.request.data.items():
-                if k not in ['open', 'assignee', 'age', 'sex', 'microchip', 'fixed', 'confirm_sex_age', 'confirm_chip', 'temperature', 'temperature_method', 'weight', 'weight_unit', 'weight_estimated', 'pulse', 'respiratory_rate'] and '_notes' not in k and '_id' not in k and self.request.data.get(k + '_id'):
-                    ExamAnswer.objects.update_or_create(exam=exam, question=ExamQuestion.objects.get(id=self.request.data.get(k + '_id')), defaults={'answer':v, 'answer_notes':self.request.data.get(k + '_notes', '')})
+            if self.request.user.is_superuser or self.request.user.perms.filter(organization=self.request.data.get('organization'))[0].vet_perms:
+                exam = serializer.save()
+                Animal.objects.filter(id=self.request.data.get('animal_id')).update(age=self.request.data.get('age'), sex=self.request.data.get('sex'), microchip=self.request.data.get('microchip', ''), fixed=self.request.data.get('fixed', ''))
+                for k,v in self.request.data.items():
+                    if k not in ['open', 'assignee', 'age', 'sex', 'microchip', 'fixed', 'confirm_sex_age', 'confirm_chip', 'temperature', 'temperature_method', 'weight', 'weight_unit', 'weight_estimated', 'pulse', 'respiratory_rate'] and '_notes' not in k and '_id' not in k and self.request.data.get(k + '_id'):
+                        ExamAnswer.objects.update_or_create(exam=exam, question=ExamQuestion.objects.get(id=self.request.data.get(k + '_id')), defaults={'answer':v, 'answer_notes':self.request.data.get(k + '_notes', '')})
 
 
 class ExamQuestionViewSet(viewsets.ModelViewSet):
@@ -144,7 +146,7 @@ class DiagnosticResultViewSet(viewsets.ModelViewSet):
         Returns: Queryset of diagnostic results.
         """
         queryset = (
-            DiagnosticResult.objects.all().select_related("diagnostic")
+            DiagnosticResult.objects.all().select_related("diagnostic").select_related("medical_record", "medical_record__patient").exclude(medical_record__patient__status__in=["CANCELED", "REUNITED"])
         )
         if self.request.GET.get('incident'):
             queryset = queryset.filter(medical_record__patient__incident__slug=self.request.GET.get('incident'))
@@ -175,7 +177,7 @@ class ProcedureResultViewSet(viewsets.ModelViewSet):
         Returns: Queryset of procedure results.
         """
         queryset = (
-            ProcedureResult.objects.all().select_related("procedure")
+            ProcedureResult.objects.all().select_related("procedure").select_related("medical_record", "medical_record__patient").exclude(medical_record__patient__status__in=["CANCELED", "REUNITED"])
         )
         if self.request.GET.get('incident'):
             queryset = queryset.filter(medical_record__patient__incident__slug=self.request.GET.get('incident'))
@@ -196,7 +198,7 @@ class TreatmentRequestViewSet(viewsets.ModelViewSet):
         Returns: Queryset of treatment requests.
         """
         queryset = (
-            TreatmentRequest.objects.all().select_related("treatment")
+            TreatmentRequest.objects.all().select_related("treatment").select_related("medical_record", "medical_record__patient").exclude(medical_record__patient__status__in=["CANCELED", "REUNITED"])
         )
         if self.request.GET.get('incident'):
             queryset = queryset.filter(medical_record__patient__incident__slug=self.request.GET.get('incident'))
@@ -234,6 +236,7 @@ class VetRequestViewSet(viewsets.ModelViewSet):
             VetRequest.objects.exclude(status="CANCELED").distinct()
             # .prefetch_related("owners")
             .select_related("medical_record", "medical_record__patient")
+            .exclude(medical_record__patient__status__in=["CANCELED", "REUNITED"])
             # .order_by('order')
         )
         if self.request.GET.get('incident'):
