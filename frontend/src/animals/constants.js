@@ -31,6 +31,7 @@ export const otherSizeChoices = [
 
 export const dogColorChoices = [
   {value:'black', label:'Black'},
+  {value:'brindle', label:'Brindle'},
   {value:'brown', label:'Brown'},
   {value:'gray', label:'Gray'},
   {value:'merle', label:'Merle'},
