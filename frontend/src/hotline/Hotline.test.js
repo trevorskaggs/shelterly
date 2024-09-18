@@ -36,14 +36,14 @@ describe("Render hotline", () => {
 
 describe("Render ServiceRequestDetails", () => {
   it("Service request details loads", async () => {
-    render(<SystemErrorProvider><ServiceRequestDetails id={1} incident={MOCK_INCIDENT_ID}/></SystemErrorProvider>);
+    render(<SystemErrorProvider><ServiceRequestDetails id={1} incident={MOCK_INCIDENT_ID} state={initialState}/></SystemErrorProvider>);
     expect(screen.getAllByText(/Service Request/)).toBeTruthy();
   });
 });
 
 describe("Render ServiceRequestSearch", () => {
   it("Empty table loads", async () => {
-    render(<SystemErrorProvider><ServiceRequestSearch incident={MOCK_INCIDENT_ID} state={initialState} /></SystemErrorProvider>);
+    render(<SystemErrorProvider><ServiceRequestSearch incident={MOCK_INCIDENT_ID}/></SystemErrorProvider>);
     expect(await screen.getByText("Fetching service requests...")).toBeTruthy();
   });
 });
