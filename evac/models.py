@@ -26,6 +26,7 @@ class DispatchTeam(models.Model):
     dispatch_date = models.DateTimeField(auto_now_add=True)
     show = models.BooleanField(default=True)
     incident = models.ForeignKey(Incident, on_delete=models.CASCADE)
+    default_name = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
