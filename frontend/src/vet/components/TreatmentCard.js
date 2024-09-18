@@ -165,8 +165,11 @@ function TreatmentCard(props) {
                   <Col xs={3}>
                     <b>Unit: </b>{props.treatment_request.unit || '-'}
                   </Col>
-                  <Col>
+                  <Col xs={3}>
                     <b>Route: </b>{props.treatment_request.route || '-'}
+                  </Col>
+                  <Col>
+                    <b>Num: </b>{props.treatment_request.num || '-'}
                   </Col>
                 </Row>
               </Col>

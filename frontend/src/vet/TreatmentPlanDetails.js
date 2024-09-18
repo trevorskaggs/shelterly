@@ -14,9 +14,12 @@ import {
   faSquareExclamation,
   faSquareEllipsis,
   faFolderMedical,
-  faSquareX
+  faSquareX,
+  faCancel
 } from '@fortawesome/pro-solid-svg-icons';
 import Header from '../components/Header';
+import LoadingLink from '../components/LoadingLink';
+import ActionsDropdown from '../components/ActionsDropdown';
 import { SystemErrorContext } from '../components/SystemError';
 
 function TreatmentPlanDetails({ id, incident, organization }) {
@@ -24,14 +27,15 @@ function TreatmentPlanDetails({ id, incident, organization }) {
   const { setShowSystemError } = useContext(SystemErrorContext);
 
   const [data, setData] = useState({id: '', medical_record:null, animal_object:{name:'', id:''}, days:'', frequency: '', quantity: '', unit: '', route: '', treatment_requests:[]});
+  const [isLoading, setIsLoading] = useState(true);
 
   const [showModal, setShowModal] = useState(false);
   const cancelTreatmentPlan = () => {
-    axios.delete('/vet/api/treatmentplan/' + id + '/')
+    axios.delete('/vet/api/treatmentplan/' + id + '/?organization=' + organization)
     .catch(error => {
       setShowSystemError(true);
     });
-    navigate("/" + organization + "/" + incident + "/vet/medrecord/" + data.medical_record)
+    navigate("/" + organization + "/" + incident + "/vet/medrecord/" + data.medical_record + '?tab=treatments')
   }
 
   // Hook for initializing data.
@@ -47,6 +51,7 @@ function TreatmentPlanDetails({ id, incident, organization }) {
       .then(response => {
         if (!unmounted) {
           setData(response.data);
+          setIsLoading(false)
         }
       })
       .catch(error => {
@@ -64,39 +69,37 @@ function TreatmentPlanDetails({ id, incident, organization }) {
   return (
     <>
     <Header>
-      {data.treatment_requests.length? data.treatment_requests[0]['treatment_object'].description : ''}
-      {/* <OverlayTrigger
-        key={"edit-treatment"}
-        placement="bottom"
-        overlay={
-          <Tooltip id={`tooltip-edit-treatment`}>
-            Update treatment
-          </Tooltip>
-        }
-      >
-        <Link href={"/" + organization + "/" + incident + "/vet/treatment/edit/" + id}><FontAwesomeIcon icon={faEdit} className="ml-2" inverse /></Link>
-      </OverlayTrigger> */}
-      <OverlayTrigger
-        key={"cancel-treatment"}
-        placement="bottom"
-        overlay={
-          <Tooltip id={`tooltip-cancel-treatment`}>
-            Cancel treatment
-          </Tooltip>
-        }
-      >
-        <FontAwesomeIcon icon={faTimes} className="ml-2" size="lg" style={{cursor:'pointer'}} inverse onClick={() => {setShowModal(true)}}/>
-      </OverlayTrigger>
+      {data.treatment_requests.length ? data.treatment_requests[0]['treatment_object'].description : ''}
     </Header>
     <hr/>
     <div className="row">
       <div className="col-6 d-flex">
         <Card className="border rounded d-flex" style={{width:"100%"}}>
-          <Card.Body>
-            <Card.Title>
-              <h4>Information</h4>
-            </Card.Title>
-            <hr/>
+          <Card.Body style={{marginTop:"-10px"}}>
+            <div className="d-flex justify-content-between">
+              <h4 className="h5 pt-2" style={{marginBottom:"10px"}}>
+                <Row className="ml-0 pr-0">Information</Row>
+              </h4>
+              <ActionsDropdown>
+                <LoadingLink
+                  href={"/" + organization + "/" + incident + "/vet/treatment/edit/" + id}
+                  isLoading={isLoading}
+                  className="text-white d-block py-1 px-3"
+                >
+                  <FontAwesomeIcon icon={faEdit} className="mr-1" inverse />
+                  Edit all unadministered treatment requests
+                </LoadingLink>
+                <LoadingLink
+                  isLoading={isLoading}
+                  className="text-white d-block py-1 px-3"
+                  onClick={() => {setShowModal(true)}}
+                >
+                  <FontAwesomeIcon icon={faCancel} className="mr-1" inverse />
+                  Cancel all unadministered treatment requests
+                </LoadingLink>
+              </ActionsDropdown>
+            </div>
+            <hr className="pt-0 mt-1" />
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
               <ListGroup.Item>
                 <Row>
@@ -262,7 +265,7 @@ function TreatmentPlanDetails({ id, incident, organization }) {
                 </Link>
               </Row>
               ))}
-            {data.treatment_requests.length < 1 ? <p>No treatment requests have been created for this treatment plan.</p> : ""}
+            {data.treatment_requests.length < 1 ? <p>No treatment requests have been created for this treatment.</p> : ""}
           </Card.Body>
         </Card>
       </div>
@@ -272,7 +275,7 @@ function TreatmentPlanDetails({ id, incident, organization }) {
       <Modal.Header closeButton>
         <Modal.Title>Confirm Treatment Cancelation</Modal.Title>
       </Modal.Header>
-      <Modal.Body>Are you sure you want to cancel this Treatment and associated treatment requests?</Modal.Body>
+      <Modal.Body>Are you sure you want to cancel this treatment and any remaining unadministered treatment requests?</Modal.Body>
       <Modal.Footer>
         <Button variant="primary" onClick={() => cancelTreatmentPlan()}>
           Yes

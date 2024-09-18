@@ -127,6 +127,13 @@ class TreatmentPlanViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = TreatmentPlanSerializer
 
+    def perform_destroy(self, instance):
+        if self.request.user.is_superuser or self.request.user.perms.filter(organization__slug=self.request.GET.get('organization')[0])[0].vet_perms:
+            for tr in instance.treatmentrequest_set.filter(assignee__isnull=True).filter(actual_admin_time__isnull=True):
+                tr.delete()
+            if len(instance.treatmentrequest_set.all()) == 0:
+                instance.delete()
+
 
 class DiagnosisViewSet(viewsets.ModelViewSet):
     queryset = Diagnosis.objects.all()

@@ -188,4 +188,4 @@ class TreatmentRequest(models.Model):
     notes = models.CharField(max_length=500, blank=True, null=True)
 
     class Meta:
-        ordering = ('-id',)
+        ordering = ('id',)

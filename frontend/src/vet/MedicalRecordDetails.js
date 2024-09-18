@@ -86,13 +86,21 @@ function MedicalRecordDetails({ id, incident, organization }) {
           let pending_data = [];
           let treatment_requests = [];
           response.data.treatment_plans.forEach(plan => {
-              pending_data = plan.treatment_requests.filter(tr => tr.status === 'Pending').length ? pending_data.concat([plan.treatment_requests.filter(tr => tr.status === 'Pending').map(tr => ({...tr, type:'treatment'}))[0]]) : pending_data;
-              treatment_requests = plan.treatment_requests.filter(tr => tr.status !== 'Completed').length > 0 ? treatment_requests.concat([plan.treatment_requests.filter(tr => tr.status !== 'Completed')[plan.treatment_requests.filter(tr => tr.status !== 'Completed').length -1]]) : [plan.treatment_requests[0]]
+              pending_data = plan.treatment_requests.filter(tr => tr.status === 'Pending').length ? pending_data.concat([plan.treatment_requests.filter(tr => tr.status === 'Pending').map(tr => ({...tr, type:'treatment', 'num':((plan.treatment_requests.length - plan.treatment_requests.filter(tr => tr.status !== 'Completed').length) + 1) + ' of ' + plan.treatment_requests.length}))[0]]) : pending_data;
+              if (plan.treatment_requests.filter(tr => tr.status !== 'Completed').length > 0) {
+                let tr = {...plan.treatment_requests.filter(tr => tr.status !== 'Completed')[0], 'num':((plan.treatment_requests.length - plan.treatment_requests.filter(tr => tr.status !== 'Completed').length) + 1) + ' of ' + plan.treatment_requests.length}
+                treatment_requests = treatment_requests.concat([tr]);
+              }
+              else {
+                let tr = {...plan.treatment_requests[plan.treatment_requests.length -1], 'num':plan.treatment_requests.length + ' of ' + plan.treatment_requests.length}
+                treatment_requests = treatment_requests.concat([tr]);
+              }
           });
           pending_data = pending_data.concat(response.data.diagnostic_objects.map(diagnostic => ({...diagnostic, type:'diagnostic'})));
           pending_data = pending_data.concat(response.data.procedure_objects.map(procedure => ({...procedure, type:'procedure'})));
           response.data['pending'] = pending_data;
           response.data['treatment_requests'] = treatment_requests;
+
           setData(response.data);
           setActiveVR(response.data.vet_requests.filter(vr => vr.status === 'Open').length > 0 ? response.data.vet_requests.filter(vr => vr.status === 'Open')[0].id : null);
           setShowExam(response.data.vet_requests.filter(vr => vr.status === 'Open').length > 0 ? true : false);
@@ -408,7 +416,7 @@ function MedicalRecordDetails({ id, incident, organization }) {
                   </ListGroup.Item>
                   <ListGroup.Item active={"treatments" === activeOrders} className="text-center" style={{textTransform:"capitalize", cursor:'pointer', paddingLeft:"5px", paddingRight:"5px"}} onClick={() => setActiveOrders("treatments")}>
                     <div style={{marginTop:"-3px", marginLeft:"-1px", paddingLeft:"10px", paddingRight:"10px"}}>
-                      Treatments ({data.treatment_requests.filter(tr => (!hideCompleted ? tr : tr.status !== 'Completed')).length})
+                      Treatments ({data.treatment_requests.length})
                     </div>
                   </ListGroup.Item>
                   <ListGroup.Item active={"diagnostics" === activeOrders} className="text-center" style={{textTransform:"capitalize", cursor:'pointer', paddingLeft:"5px", paddingRight:"5px"}} onClick={() => setActiveOrders("diagnostics")}>
@@ -449,7 +457,10 @@ function MedicalRecordDetails({ id, incident, organization }) {
               :""}
               </span>
             ))}
-            {activeOrders === 'treatments' && data.treatment_requests.filter(tr => (!hideCompleted ? tr : tr.status !== 'Completed')).sort((a, b) => new Date(a.suggested_admin_time) - new Date(b.suggested_admin_time)).map(treatment_request => (
+            {activeOrders === 'treatments' && data.treatment_requests.filter(tr => tr.status !== 'Completed').sort((a, b) => new Date(a.suggested_admin_time) - new Date(b.suggested_admin_time)).map(treatment_request => (
+              <TreatmentCard key={treatment_request.id} incident={incident} organization={organization} treatment_request={treatment_request} />
+            ))}
+            {activeOrders === 'treatments' && data.treatment_requests.filter(tr => tr.status === 'Completed').sort((a, b) => new Date(a.actual_admin_time) - new Date(b.actual_admin_time)).map(treatment_request => (
               <TreatmentCard key={treatment_request.id} incident={incident} organization={organization} treatment_request={treatment_request} />
             ))}
             {activeOrders === 'treatments' && data.treatment_requests.length < 1 ? <p>No treatments have been created for this patient.</p> : ""}
