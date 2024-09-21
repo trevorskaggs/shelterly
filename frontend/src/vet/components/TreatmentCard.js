@@ -49,7 +49,7 @@ function TreatmentCard(props) {
             <Row className="ml-0 mr-0  pl-0 pr-0 w-100">
               {props.animal_object ?
               <div className="border-right ml-0 mr-0" style={{height:props.animal_object ? "120px" : "100px", width:"120px"}}>
-              {['Eye Medication','Ear Medication'].includes(props.treatment_request.treatment_object ? props.treatment_request.treatment_object.category : '') ?
+              {props.treatment_request.treatment_object['Eye Medication','Ear Medication'].includes(props.treatment_request.treatment_object ? props.treatment_request.treatment_object.category : '') ?
                 <FontAwesomeIcon icon={faEyeDropper} size="6x" className="treatment-icon" style={{marginTop:"14px", marginLeft:"14px"}} transform={'grow-1'} inverse />
                 : props.treatment_request.treatment_object && props.treatment_request.treatment_object.category === 'Patient Care' ?
                 <FontAwesomeIcon icon={faHeart} size="6x" className="treatment-icon" style={{marginTop:"14px", marginLeft:"14px"}} transform={'grow-1'} inverse />
@@ -61,11 +61,11 @@ function TreatmentCard(props) {
               </div>
               :
               <div className="border-right" style={{width:"100px"}}>
-              {['Eye Medication','Ear Medication'].includes(props.treatment_request.treatment_object.category) ?
+              {props.treatment_request.treatment_object && ['Eye Medication','Ear Medication'].includes(props.treatment_request.treatment_object.category) ?
                 <FontAwesomeIcon icon={faEyeDropper} size="6x" className="treatment-icon" style={{marginTop:"5px", marginLeft:"4px"}} transform={'shrink-2'} inverse />
-                : props.treatment_request.treatment_object.category === 'Patient Care' ?
+                : props.treatment_request.treatment_object && props.treatment_request.treatment_object.category === 'Patient Care' ?
                 <FontAwesomeIcon icon={faHeart} size="6x" className="treatment-icon" style={{marginTop:"5px", marginLeft:"4px"}} transform={'shrink-2'} inverse />
-                : props.treatment_request.treatment_object.unit === 'ml' ?
+                : props.treatment_request.treatment_object && props.treatment_request.treatment_object.treatment_object && props.treatment_request.treatment_object.unit === 'ml' ?
                 <FontAwesomeIcon icon={faSyringe} size="6x" className="treatment-icon" style={{marginTop:"5px", marginLeft:"4px"}} transform={'shrink-2'} inverse />
               :
                 <FontAwesomeIcon icon={faPrescriptionBottlePill} size="6x" className="treatment-icon" style={{marginTop:"5px", marginLeft:"-1px"}} transform={'shrink-2'} inverse />
@@ -74,7 +74,7 @@ function TreatmentCard(props) {
               }
               <Col className="hover-div pl-0 pr-0">
                 <div className="border treatment-hover-div" style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"5px", marginLeft:"-1px", marginTop: "-1px", fontSize:"18px", width:"100%", backgroundColor:"rgb(158 153 153)"}}>
-                  <span style={{marginLeft:"5px"}}>{props.treatment_request.treatment_object.description}</span>
+                  <span style={{marginLeft:"5px"}}>{props.treatment_request.treatment_object ? props.treatment_request.treatment_object.description : ""}</span>
                   <span className="float-right">
                   {props.treatment_request.actual_admin_time ?
                     <OverlayTrigger

@@ -69,7 +69,7 @@ function TreatmentPlanDetails({ id, incident, organization }) {
   return (
     <>
     <Header>
-      {data.treatment_requests.length ? data.treatment_requests[0]['treatment_object'].description : ''}
+      Treatment Details
     </Header>
     <hr/>
     <div className="row">
@@ -104,7 +104,8 @@ function TreatmentPlanDetails({ id, incident, organization }) {
               <ListGroup.Item>
                 <Row>
                   <Col>
-                    <b>Status:</b> {data.treatment_requests.filter(tr => ['Pending', 'Scheduled'].includes(tr.status)).length > 0 ? 'Open' : 'Completed'}
+                    <b>Treatment: </b>{data.description}
+                    {/* <b>Status:</b> {data.treatment_requests.filter(tr => ['Pending', 'Scheduled'].includes(tr.status)).length > 0 ? 'Open' : 'Completed'} */}
                   </Col>
                 </Row>
               </ListGroup.Item>

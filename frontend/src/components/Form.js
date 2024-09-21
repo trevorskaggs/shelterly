@@ -112,6 +112,10 @@ const DateTimePicker = ({ label, xs, clearable, ...props }) => {
 
   const [field, meta] = useField(props);
 
+  const setDate = () => {
+    props.setFieldValue(props.name, new Date());
+  };
+
   const registeredRef = useRegisteredRef(props.name);
   const datetime = useRef(null);
 
@@ -142,6 +146,7 @@ const DateTimePicker = ({ label, xs, clearable, ...props }) => {
       <span className="d-flex" style={{marginLeft:"-1px", marginRight:"-1px"}}>
         <Flatpickr className="datetime_picker" ref={datetime} data-enable-time options={{...options, ...props.more_options}} {...field} {...props} />
         {clearable === false || props.disabled === true ? "" : <span>{field.value ? <FontAwesomeIcon icon={faTimes} style={{position:"relative", left: "-22px", marginTop:"11px", marginRight:"-10px", color:"#808080"}} onClick={clearDate} /> : ""}</span>}
+        {props.now === true ? <Button onClick={() => setDate()}>Now</Button> : ""}
       </span>
       {meta.touched && meta.error ? <div style={{ color: "#e74c3c", marginTop: ".3rem", fontSize: "80%" }}>{meta.error}</div> : ""}
       </Form.Group>

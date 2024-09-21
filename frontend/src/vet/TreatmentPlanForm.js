@@ -28,12 +28,6 @@ const TreatmentPlanForm = (props) => {
 
   const { state } = useContext(AuthContext);
 
-  // Identify any query param data.
-  const [queryParams] = useQueryParams();
-  const {
-    vetrequest_id = null,
-  } = queryParams;
-
   const { setShowSystemError } = useContext(SystemErrorContext);
 
   const categoryRef = useRef(null);
@@ -86,6 +80,44 @@ const TreatmentPlanForm = (props) => {
     let unmounted = false;
     let source = axios.CancelToken.source();
 
+    const fetchMedRecord = async (mr) => {
+      // Fetch MedRecord data.
+      await axios.get('/vet/api/medrecord/' + mr + '/', {
+        cancelToken: source.token,
+      })
+      .then(response => {
+        if (!unmounted) {
+          setMedRecordData(response.data);
+        }
+      })
+      .catch(error => {
+        setShowSystemError(true);
+      });
+    };
+
+    const fetchTreatmentPlanData = async () => {
+      // Fetch TreatmentPlan data.
+      await axios.get('/vet/api/treatmentplan/' + props.id + '/?incident=' + props.incident, {
+          cancelToken: source.token,
+      })
+      .then(response => {
+        if (!unmounted) {
+          response.data['frequency'] = null;
+          response.data['days'] = null;
+          response.data['start'] = new Date();
+          response.data['treatment'] = response.data.treatment_requests[0].treatment
+          setData(response.data);
+          fetchMedRecord(response.data.medical_record);
+        }
+      })
+      .catch(error => {
+        setShowSystemError(true);
+      });
+    };
+    if (props.id) {
+      fetchTreatmentPlanData();
+    }
+
     const fetchTreatments = async () => {
       // Fetch Treatment data.
       await axios.get('/vet/api/treatment/', {
@@ -116,21 +148,7 @@ const TreatmentPlanForm = (props) => {
         setMedRecordData(props.state.medRecord);
       }
       else {
-        const fetchMedRecord = async () => {
-          // Fetch MedRecord data.
-          await axios.get('/vet/api/medrecord/' + props.medrecordid + '/', {
-            cancelToken: source.token,
-          })
-          .then(response => {
-            if (!unmounted) {
-              setMedRecordData(response.data);
-            }
-          })
-          .catch(error => {
-            setShowSystemError(true);
-          });
-        };
-        fetchMedRecord();
+        fetchMedRecord(props.medrecordid);
       }
     };
 
@@ -152,10 +170,10 @@ const TreatmentPlanForm = (props) => {
           is: false,
           then: Yup.string().required('Required')}),
         frequency: Yup.number().nullable().integer().when(['is_workflow', 'treatment'], {
-          is: (is_workflow, treatment) => is_workflow === false || treatment,
+          is: (is_workflow, treatment) => (is_workflow === false || treatment) && !props.id,
           then: Yup.number().integer().required('Required')}),
         days: Yup.number().nullable().integer().positive('Must be positive').when(['is_workflow', 'treatment', 'frequency'], {
-          is: (is_workflow, treatment, frequency) => (is_workflow === false || treatment) && frequency > 0,
+          is: (is_workflow, treatment, frequency) => (is_workflow === false || treatment) && frequency > 0 && !props.id,
           then: Yup.number().integer().positive('Must be positive').required('Required')}),
         start: Yup.string(),
         quantity: Yup.number().nullable().positive('Must be positive').when(['is_workflow', 'treatment'], {
@@ -173,6 +191,15 @@ const TreatmentPlanForm = (props) => {
           else {
             props.onSubmit('treatments', values, 'diagnoses');
           }
+        }
+        else if (props.id) {
+          axios.patch('/vet/api/treatmentplan/' + props.id + '/', values)
+          .then(response => {
+            navigate('/' + props.organization + '/' + props.incident + '/vet/treatment/' + props.id);
+          })
+          .catch(error => {
+            setShowSystemError(true);
+          });
         }
         else {
           axios.post('/vet/api/treatmentrequest/', values)
@@ -205,14 +232,14 @@ const TreatmentPlanForm = (props) => {
       {formikProps => (
         <Card border="secondary" className={is_workflow ? "mt-3" : "mt-5"}>
           <Card.Header as="h5" className="pl-3">
-          {!is_workflow ? <span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + props.medrecordid + '/')} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
+          {!is_workflow ? <span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + props.organization + '/' + props.incident + '/vet/treatment/' + props.id + '/')} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
           :
           <span>{props.state.treatmentIndex > 0 ? <span style={{cursor:'pointer'}} onClick={() => {setAddAnother(false); setData(props.state.steps.treatments[props.state.treatmentIndex-1]); props.handleBack('treatments', 'treatments')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
           :
           <span style={{cursor:'pointer'}} onClick={() => {setAddAnother(false);props.handleBack('treatments', 'orders')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}</span>}
           {!props.id ? "" : "Update "}Treatment Form
           </Card.Header>
-          <Patient animal={data.animal_object.id ? data.animal_object : medRecordData.animal_object} vet_request={null} organization={props.organization} incident={props.incident} medical_plan={props.state.steps.exam && props.state.steps.exam.medical_plan ? props.state.steps.exam.medical_plan : medRecordData.exams.filter(exam => (exam.medical_plan)).length ? medRecordData.exams.filter(exam => (exam.medical_plan))[0].medical_plan : ''} />
+          <Patient animal={data.animal_object.id ? data.animal_object : medRecordData.animal_object} vet_request={null} organization={props.organization} incident={props.incident} medical_plan={props.state && props.state.steps.exam && props.state.steps.exam.medical_plan ? props.state.steps.exam.medical_plan : medRecordData.exams.filter(exam => (exam.medical_plan)).length ? medRecordData.exams.filter(exam => (exam.medical_plan))[0].medical_plan : ''} />
           <Card.Body>
             <BootstrapForm as={Form}>
               <FormGroup>
@@ -233,6 +260,7 @@ const TreatmentPlanForm = (props) => {
                         formikProps.setFieldValue("treatment", '');
                         formikProps.setFieldValue("unit", '');
                       }}
+                      disabled={props.id}
                     />
                   </Col>
                   <Col xs={"5"}>
@@ -250,6 +278,7 @@ const TreatmentPlanForm = (props) => {
                         formikProps.setFieldValue("treatment", instance === null ? '' : instance.value);
                         formikProps.setFieldValue("unit", instance === null ? '' : treatmentChoices.filter(option => option.value === instance.value)[0].unit);
                       }}
+                      disabled={props.id}
                     />
                   </Col>
                   <Col xs={"1"}>

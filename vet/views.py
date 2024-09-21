@@ -127,9 +127,27 @@ class TreatmentPlanViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = TreatmentPlanSerializer
 
+    def perform_update(self, serializer):
+        if serializer.is_valid():
+            plan = serializer.save()
+
+            # Recreate new requests if we have an updated frequency.
+            if self.request.data.get('frequency'):
+                # Clean up unadministered requests.
+                for tr in TreatmentRequest.objects.filter(treatment_plan=plan).filter(assignee__isnull=True):
+                    tr.delete()
+                # Create proper number of new TreatmentRequests.
+                for interval in range(int(24/self.request.data.get('frequency')) * self.request.data.get('days', 0)):
+                    time = parser.parse(self.request.data.get('start')) + timedelta(hours=interval*self.request.data.get('frequency'))
+                    treatment = Treatment.objects.get(description=serializer.validated_data['description'])
+                    TreatmentRequest.objects.create(treatment_plan=plan, treatment=treatment, suggested_admin_time=time, quantity=serializer.validated_data['quantity'], unit=serializer.validated_data['unit'], route=serializer.validated_data['route'])
+            # Otherwise just update existing unadministered requests.
+            else:
+                TreatmentRequest.objects.filter(treatment_plan=plan).filter(assignee__isnull=True).update(quantity=self.request.data.get('quantity'), route=self.request.data.get('route'))
+
     def perform_destroy(self, instance):
         if self.request.user.is_superuser or self.request.user.perms.filter(organization__slug=self.request.GET.get('organization')[0])[0].vet_perms:
-            for tr in instance.treatmentrequest_set.filter(assignee__isnull=True).filter(actual_admin_time__isnull=True):
+            for tr in instance.treatmentrequest_set.filter(assignee__isnull=True):
                 tr.delete()
             if len(instance.treatmentrequest_set.all()) == 0:
                 instance.delete()
@@ -223,7 +241,7 @@ class TreatmentRequestViewSet(viewsets.ModelViewSet):
         if serializer.is_valid():
 
             # Create TreatmentPlan.
-            plan = TreatmentPlan.objects.create(medical_record=MedicalRecord.objects.get(id=self.request.data.get('medical_record')), quantity=self.request.data.get('quantity'), unit=self.request.data.get('unit'), route=self.request.data.get('route'), frequency=self.request.data.get('frequency'), days=self.request.data.get('days'))
+            plan = TreatmentPlan.objects.create(medical_record=MedicalRecord.objects.get(id=self.request.data.get('medical_record')), quantity=self.request.data.get('quantity'), unit=self.request.data.get('unit'), route=self.request.data.get('route'), frequency=self.request.data.get('frequency'), days=self.request.data.get('days'), category=self.request.data.get('category'), description=Treatment.objects.get(pk=self.request.data.get('treatment')).description)
             serializer.validated_data['treatment_plan'] = plan
 
             # Create proper number of TreatmentRequests

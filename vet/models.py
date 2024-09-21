@@ -170,6 +170,8 @@ class TreatmentPlan(models.Model):
     route = models.CharField(max_length=5, blank=True, null=True)
     frequency = models.IntegerField(blank=True, null=True)
     days = models.IntegerField(blank=True, null=True)
+    description = models.CharField(max_length=200, blank=True, null=True)
+    category = models.CharField(max_length=50, blank=True, null=True)
 
     class Meta:
         ordering = ('-id',)
