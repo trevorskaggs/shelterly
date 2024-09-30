@@ -18,6 +18,7 @@ router.register(r'procedures', views.ProcedureViewSet)
 router.register(r'procedureresults', views.ProcedureResultViewSet)
 router.register(r'exam', views.ExamViewSet)
 router.register(r'examquestions', views.ExamQuestionViewSet)
+router.register(r'medicalnote', views.MedicalNoteViewSet)
 
 urlpatterns = [
     path('api/', include(router.urls)),

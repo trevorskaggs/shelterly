@@ -4,8 +4,8 @@ from django.db.models import Case, Count, Exists, OuterRef, Prefetch, Q, When, V
 from dateutil import parser
 
 from animals.models import Animal
-from vet.models import Diagnosis, Diagnostic, DiagnosticResult, Exam, ExamAnswer, ExamQuestion, MedicalRecord, PresentingComplaint, Procedure, ProcedureResult, Treatment, TreatmentPlan, TreatmentRequest, VetRequest
-from vet.serializers import DiagnosisSerializer, DiagnosticSerializer, DiagnosticResultSerializer, ExamQuestionSerializer, ExamSerializer, MedicalRecordSerializer, PresentingComplaintSerializer, ProcedureSerializer, ProcedureResultSerializer, TreatmentSerializer, TreatmentPlanSerializer, TreatmentRequestSerializer, VetRequestSerializer
+from vet.models import Diagnosis, Diagnostic, DiagnosticResult, Exam, ExamAnswer, ExamQuestion, MedicalNote, MedicalRecord, PresentingComplaint, Procedure, ProcedureResult, Treatment, TreatmentPlan, TreatmentRequest, VetRequest
+from vet.serializers import DiagnosisSerializer, DiagnosticSerializer, DiagnosticResultSerializer, ExamQuestionSerializer, ExamSerializer, MedicalNoteSerializer, MedicalRecordSerializer, PresentingComplaintSerializer, ProcedureSerializer, ProcedureResultSerializer, TreatmentSerializer, TreatmentPlanSerializer, TreatmentRequestSerializer, VetRequestSerializer
 
 class MedicalRecordViewSet(viewsets.ModelViewSet):
     queryset = MedicalRecord.objects.all()
@@ -72,6 +72,7 @@ class ExamViewSet(viewsets.ModelViewSet):
         if serializer.is_valid():
             if self.request.user.is_superuser or self.request.user.perms.filter(organization=self.request.data.get('organization'))[0].vet_perms:
                 med_record = MedicalRecord.objects.get(id=self.request.data.get('medrecord_id'))
+                MedicalRecord.objects.filter(id=self.request.data.get('medrecord_id')).update(medical_plan=self.request.data.get('medical_plan'))
                 serializer.validated_data['medical_record'] = med_record
                 if self.request.data.get('vetrequest_id'):
                   vet_request = VetRequest.objects.get(id=self.request.data.get('vetrequest_id'))
@@ -91,11 +92,30 @@ class ExamViewSet(viewsets.ModelViewSet):
     def perform_update(self, serializer):
         if serializer.is_valid():
             if self.request.user.is_superuser or self.request.user.perms.filter(organization=self.request.data.get('organization'))[0].vet_perms:
+                MedicalRecord.objects.filter(id=self.request.data.get('medrecord_id')).update(medical_plan=self.request.data.get('medical_plan'))
                 exam = serializer.save()
                 Animal.objects.filter(id=self.request.data.get('animal_id')).update(age=self.request.data.get('age'), sex=self.request.data.get('sex'), microchip=self.request.data.get('microchip', ''), fixed=self.request.data.get('fixed', ''))
                 for k,v in self.request.data.items():
                     if k not in ['open', 'assignee', 'age', 'sex', 'microchip', 'fixed', 'confirm_sex_age', 'confirm_chip', 'temperature', 'temperature_method', 'weight', 'weight_unit', 'weight_estimated', 'pulse', 'respiratory_rate'] and '_notes' not in k and '_id' not in k and self.request.data.get(k + '_id'):
                         ExamAnswer.objects.update_or_create(exam=exam, question=ExamQuestion.objects.get(id=self.request.data.get(k + '_id')), defaults={'answer':v, 'answer_notes':self.request.data.get(k + '_notes', '')})
+
+
+class MedicalNoteViewSet(viewsets.ModelViewSet):
+    queryset = MedicalNote.objects.all()
+    permission_classes = [permissions.IsAuthenticated, ]
+    serializer_class = MedicalNoteSerializer
+
+    def perform_create(self, serializer):
+        if serializer.is_valid():
+            note = serializer.save()
+            note.open = self.request.data.get('open')
+            note.save()
+
+    def perform_update(self, serializer):
+        if serializer.is_valid():
+            note = serializer.save()
+            note.open = self.request.data.get('open')
+            note.save()
 
 
 class ExamQuestionViewSet(viewsets.ModelViewSet):

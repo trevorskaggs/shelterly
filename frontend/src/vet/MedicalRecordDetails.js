@@ -34,7 +34,8 @@ import {
   faFlashlight,
   faPeriod,
   faMobileScreenButton,
-  faUserDoctorMessage
+  faUserDoctorMessage,
+  faNoteMedical
 } from '@fortawesome/pro-solid-svg-icons';
 import {
   faRectangleVertical,
@@ -63,13 +64,12 @@ function MedicalRecordDetails({ id, incident, organization }) {
 
   const priorityText = {urgent:'Urgent (Red)', when_available:'When Available (Yellow)'};
 
-  const [data, setData] = useState({id:'', exams:[], diagnostic_objects:[], procedure_objects:[], patient:null, vet_requests:[], pending:[], open: '', diagnosis: '', other_diagnosis:'', treatment_requests:[], animal_object: {id:'', name:'', species:'', category:'', sex:'', age:'', fixed:'', pcolor:'', scolor:'', medical_notes:'', shelter_object:{}, room_name:''}});
+  const [data, setData] = useState({id:'', exams:[], diagnostic_objects:[], procedure_objects:[], medical_notes:[], patient:null, vet_requests:[], pending:[], open: '', diagnosis: '', other_diagnosis:'', medical_plan:'', medical_notes:[], treatment_requests:[], animal_object: {id:'', name:'', species:'', category:'', sex:'', age:'', fixed:'', pcolor:'', scolor:'', medical_notes:'', shelter_object:{}, room_name:''}});
   const [showExam, setShowExam] = useState(false);
   const [activeVR, setActiveVR] = useState(null);
   const [activeExam, setActiveExam] = useState(null);
   const [activeOrders, setActiveOrders] = useState(tab);
   const [isLoading, setIsLoading] = useState(true);
-  const [hideCompleted, setHideCompleted] = useState(true);
 
   // Hook for initializing data.
   useEffect(() => {
@@ -122,7 +122,7 @@ function MedicalRecordDetails({ id, incident, organization }) {
   return (
     <>
     <Header>
-      Medical Record #{data.id}
+      Patient Medical Record
     </Header>
     <hr/>
     <div className="row">
@@ -131,7 +131,7 @@ function MedicalRecordDetails({ id, incident, organization }) {
           <Card.Body style={{marginTop:"-10px"}}>
             <div className="d-flex justify-content-between" style={{marginBottom:"-3px"}}>
               <h4 className="h4 mb-0 pb-0 pt-2">
-                  Patient: {data.animal_object.name||"Unknown"}
+                Patient: {data.animal_object.name||"Unknown"}
               </h4>
               <ActionsDropdown alignRight={true} className="pt-1" variant="dark" title="Actions">
                   <LoadingLink
@@ -143,6 +143,22 @@ function MedicalRecordDetails({ id, incident, organization }) {
                     <FontAwesomeIcon icon={faUserDoctorMessage} className="mr-1" inverse />
                     Create Veterinary Request
                   </LoadingLink>
+                  {data.exams.length ? <LoadingLink
+                    href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.id}
+                    isLoading={isLoading}
+                    className="text-white d-block py-1 px-3"
+                  >
+                    <FontAwesomeIcon icon={faEdit} className="mr-1" inverse />
+                    Update Medical Plan
+                  </LoadingLink> : ""}
+                  {data.exams.length ? <LoadingLink
+                    href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.id + "/medicalnote/new"}
+                    isLoading={isLoading}
+                    className="text-white d-block py-1 px-3"
+                  >
+                    <FontAwesomeIcon icon={faNoteMedical} className="mr-1" inverse />
+                    Add Medical Note
+                  </LoadingLink> : ""}
                   {data.exams.length ? <LoadingLink
                     href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.id + "/treatment/new"}
                     isLoading={isLoading}
@@ -175,7 +191,7 @@ function MedicalRecordDetails({ id, incident, organization }) {
                     className="text-white d-block py-1 px-3"
                   >
                     <FontAwesomeIcon icon={faClipboardListCheck} className="mr-2" inverse />
-                    Modify Diagnosis
+                    Update Diagnosis
                   </LoadingLink> : ""}
                 </ActionsDropdown>
             </div>
@@ -217,31 +233,15 @@ function MedicalRecordDetails({ id, incident, organization }) {
             <Card.Title>
               <h4 className="mb-0">
                 <Row className="ml-0 pr-0">
-                  Diagnosis/Problem List
-                  {/* <OverlayTrigger
-                    key={"add-diagnosis"}
-                    placement="top"
-                    overlay={
-                      <Tooltip id={`tooltip-add-diagnosis`}>
-                        Add a diagnosis for this patient
-                      </Tooltip>
-                    }
-                  >
-                    <Link href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.id + "/diagnosis/new"}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
-                  </OverlayTrigger> */}
+                  Medical Plan
                 </Row>
               </h4>
             </Card.Title>
             <hr/>
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
               <ListGroup.Item>
-                <div className="row">
-                  <span><b>Diagnoses:</b> {data.diagnosis_text||"N/A"}</span>
-                </div>
-              </ListGroup.Item>
-              <ListGroup.Item>
-                <div className="row">
-                  <span><b>Notes:</b> {data.diagnosis_notes||"N/A"}</span>
+                <div className="row" style={{whiteSpace:"pre-line"}}>
+                  <span className="col-12">{data.medical_plan || "N/A"}</span>
                 </div>
               </ListGroup.Item>
             </ListGroup>
@@ -344,11 +344,6 @@ function MedicalRecordDetails({ id, incident, organization }) {
                   </div>
                 </ListGroup.Item>
               ))}
-              <ListGroup.Item>
-                <div className="row" style={{whiteSpace:"pre-line"}}>
-                  <span className="col-12"><b>Medical Plan:</b> {exam.medical_plan || "N/A"}</span>
-                </div>
-              </ListGroup.Item>
               </ListGroup>
             </Collapse>
             ))}
@@ -476,6 +471,57 @@ function MedicalRecordDetails({ id, incident, organization }) {
           </Card.Body>
         </Card>
       </div>
+    </div> : ""}
+    {data.exams.length > 0 ?
+    <div className="d-flex pl-0 mb-3">
+      <Card className="border rounded d-flex" style={{width:"100%"}}>
+        <Card.Body>
+          <Card.Title>
+            <h4 className="mb-0">
+              <Row className="ml-0 pr-0">
+                Diagnosis/Problem List
+              </Row>
+            </h4>
+          </Card.Title>
+          <hr/>
+          <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
+            <ListGroup.Item>
+              <div className="row">
+                <span><b>Diagnoses:</b> {data.diagnosis_text||"N/A"}</span>
+              </div>
+            </ListGroup.Item>
+            <ListGroup.Item>
+              <div className="row">
+                <span><b>Notes:</b> {data.diagnosis_notes||"N/A"}</span>
+              </div>
+            </ListGroup.Item>
+          </ListGroup>
+        </Card.Body>
+      </Card>
+    </div> : ""}
+    {data.exams.length > 0 && data.medical_notes.length > 0 ?
+    <div className="d-flex pl-0 mb-3">
+      <Card className="border rounded d-flex" style={{width:"100%"}}>
+        <Card.Body>
+          <Card.Title>
+            <h4 className="mb-0">
+              <Row className="ml-0 pr-0">
+                Medical Notes
+              </Row>
+            </h4>
+          </Card.Title>
+          <hr/>
+          <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
+            {data.medical_notes.map(note => (
+              <ListGroup.Item>
+                <div className="row">
+                  <span><Link href={"/" + organization + "/" + incident + "/vet/medicalnote/edit/" + note.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{moment(note.open).format('MM/DD')}</Link> - {note.note}</span>
+                </div>
+              </ListGroup.Item>
+            ))}
+          </ListGroup>
+        </Card.Body>
+      </Card>
     </div> : ""}
     {/* <History action_history={data.action_history} /> */}
     </>
