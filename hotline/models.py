@@ -41,6 +41,7 @@ class ServiceRequest(Location):
     turn_around = models.BooleanField(default=False)
     sip = models.BooleanField(default=False)
     utl = models.BooleanField(default=False)
+    caltopo_feature_id = models.CharField(blank=True, max_length=100)
 
     #post_fields
     followup_date = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
@@ -126,7 +127,7 @@ class ServiceRequest(Location):
               "marker-symbol":"circle-n",
               "marker-color":"#FF0000",
               "description":description,
-              "title":self.id_for_incident,
+              "title": "SR#" + str(self.id_for_incident),
               "class":"Marker",
           }
         }
@@ -140,15 +141,23 @@ class ServiceRequest(Location):
             accountId=settings.CALTOPO_ACCOUNT_ID,
             sync=False,
         )
+        # If the SR has already previously been pushed to Caltopo, it will have
+        # a caltopo_feature_id, try to remove old object to create new one.
+        if self.caltopo_feature_id:
+            try:
+                sts.delMarker(markerOrId=self.caltopo_feature_id)
+            except:
+                pass
         payload = {
-            'title': str(self.id_for_incident),
+            'title': "SR#" + str(self.id_for_incident),
             'color': '#FF0000',
             'symbol': 'circle-n',
             'description': self.get_feature_description()
         }
         lon = self.longitude
         lat = self.latitude
-        sts.addMarker(lon=lon, lat=lat, **payload)
+        self.caltopo_feature_id = sts.addMarker(lon=lon, lat=lat, **payload)
+        self.save()
 
     def save(self, *args, **kwargs):
         if not self.pk:
