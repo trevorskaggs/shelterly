@@ -170,8 +170,8 @@ const IncidentForm = ({ id, organization }) => {
         latitude: Yup.number(),
         longitude: Yup.number(),
         training: Yup.boolean(),
-        caltopo_map_id: Yup.string(),
-        watchduty_map_id: Yup.string()
+        caltopo_map_id: Yup.string().nullable(),
+        watchduty_map_id: Yup.string().nullable()
       })}
       onSubmit={(values, { setSubmitting }) => {
         values['slug'] = values.name.trim().replaceAll(' ','').match(/[a-zA-Z0-9-]+/g)[0];
@@ -248,7 +248,9 @@ const IncidentForm = ({ id, organization }) => {
                   id="description"
                   xs="12"
                 />
+              </BootstrapForm.Row>
               <BootstrapForm.Row>
+              { state.organization.caltopo_enabled ?
                 <TextInput
                   type="text"
                   rows={3}
@@ -256,9 +258,8 @@ const IncidentForm = ({ id, organization }) => {
                   name="caltopo_map_id"
                   id="caltopo_map_id"
                   xs="12"
-                />
-              </BootstrapForm.Row>
-              <BootstrapForm.Row>
+                /> : ""}
+              { state.organization.watchduty_enabled ?
                 <TextInput
                   type="text"
                   rows={3}
@@ -266,8 +267,7 @@ const IncidentForm = ({ id, organization }) => {
                   name="watchduty_map_id"
                   id="watchduty_map_id"
                   xs="12"
-                />
-              </BootstrapForm.Row>
+                /> : ""}
               </BootstrapForm.Row>
               <BootstrapForm.Row>
                 <TextInput

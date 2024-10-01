@@ -11,7 +11,7 @@ const initialState = {
   logout: false,
   user: null,
   incident: {id:'', name:'', description: '', training:false, watchduty_map_id: '', caltopo_map_id: ''},
-  organization: {id:'', name:''},
+  organization: {id:'', name:'', watchduty_enabled: '', caltopo_enabled: ''},
   errors: {},
   location:'',
   prevLocation: '',
@@ -108,7 +108,7 @@ function AuthProvider(props) {
         axios.get('/incident/api/organization/?slug=' + org_slug)
         .then(orgResponse => {
           if (orgResponse.data.length > 0) {
-            dispatch({type: "SET_ORGANIZATION", data: {id:orgResponse.data[0].id, name:orgResponse.data[0].name}});
+            dispatch({type: "SET_ORGANIZATION", data: {id:orgResponse.data[0].id, name:orgResponse.data[0].name, watchduty_enabled:orgResponse.data[0].watchduty_enabled, caltopo_enabled:orgResponse.data[0].caltopo_enabled}});
           }
           else {
             navigate('/')
