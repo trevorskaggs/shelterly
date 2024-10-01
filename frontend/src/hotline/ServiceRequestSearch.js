@@ -307,7 +307,7 @@ function ServiceRequestSearch({ incident, organization }) {
               Download All ({`${filteredServiceRequests.length}`})
               <FontAwesomeIcon icon={faDownload} className="ml-2 text-light" inverse />
             </ButtonSpinner>
-            { state.incident.caltopo_map_id ?
+            { state && state.incident.caltopo_map_id ?
             <ButtonSpinner
               variant="outline-light"
               className="ml-1 mr-1 print-all-btn-icon"
