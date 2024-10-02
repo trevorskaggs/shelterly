@@ -72,6 +72,17 @@ class MedicalRecord(models.Model):
     diagnosis_other = models.CharField(max_length=50, blank=True, null=True)
     diagnosis_notes = models.CharField(max_length=300, blank=True, null=True)
     medical_status = models.CharField(max_length=20, default='Healthy')
+    medical_plan = models.TextField(blank=True, null=True)
+
+
+class MedicalNote(models.Model):
+
+    note = models.TextField(blank=True, null=True)
+    open = models.DateTimeField(auto_now=False, auto_now_add=True)
+    medical_record = models.ForeignKey(MedicalRecord, on_delete=models.SET_NULL, null=True)
+
+    class Meta:
+        ordering = ('-open',)
 
 
 class VetRequest(models.Model):
@@ -105,7 +116,6 @@ class Exam(models.Model):
     respiratory_rate = models.CharField(max_length=20, blank=True, null=True)
     medical_record = models.ForeignKey(MedicalRecord, on_delete=models.SET_NULL, null=True)
     vet_request = models.ForeignKey(VetRequest, on_delete=models.SET_NULL, null=True)
-    medical_plan = models.TextField(blank=True, null=True)
 
     class Meta:
         ordering = ('-id',)
@@ -162,9 +172,23 @@ class Treatment(models.Model):
         ordering = ('category', 'description',)
 
 
-class TreatmentRequest(models.Model):
+class TreatmentPlan(models.Model):
 
     medical_record = models.ForeignKey(MedicalRecord, on_delete=models.SET_NULL, null=True)
+    quantity = models.FloatField(blank=True, null=True)
+    unit = models.CharField(max_length=5, blank=True, null=True)
+    route = models.CharField(max_length=5, blank=True, null=True)
+    frequency = models.IntegerField(blank=True, null=True)
+    days = models.IntegerField(blank=True, null=True)
+    description = models.CharField(max_length=200, blank=True, null=True)
+    category = models.CharField(max_length=50, blank=True, null=True)
+
+    class Meta:
+        ordering = ('-id',)
+
+class TreatmentRequest(models.Model):
+
+    treatment_plan = models.ForeignKey(TreatmentPlan, on_delete=models.CASCADE, null=True)
     treatment = models.ForeignKey(Treatment, on_delete=models.SET_NULL, null=True)
     quantity = models.FloatField(blank=True)
     unit = models.CharField(max_length=5, blank=True, null=True)
@@ -176,4 +200,4 @@ class TreatmentRequest(models.Model):
     notes = models.CharField(max_length=500, blank=True, null=True)
 
     class Meta:
-        ordering = ('-id',)
+        ordering = ('id',)

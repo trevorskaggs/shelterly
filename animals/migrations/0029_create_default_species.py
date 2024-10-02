@@ -6,7 +6,7 @@ species = [
   { 'name': 'alpaca', 'plural': 'alpacas', 'category':'camelid' },
   { 'name': 'cat', 'plural': 'cats', 'category':'cat' },
   { 'name': 'chicken', 'plural': 'chickens', 'category':'avian' },
-  { 'name': 'cow', 'plural': 'cows', 'category':'ruminant' },
+  { 'name': 'cattle', 'plural': 'cattle', 'category':'ruminant' },
   { 'name': 'dog', 'plural': 'dogs', 'category':'dog' },
   { 'name': 'donkey', 'plural': 'donkeys', 'category':'equine' },
   { 'name': 'duck', 'plural': 'ducks', 'category':'avian' },

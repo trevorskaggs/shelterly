@@ -298,7 +298,7 @@ export const prettyText = (species, count) => {
     return "";
   }
   let plural = ""
-  if (count > 1 && species !== "sheep") {
+  if (count > 1 && !["sheep", "cattle"].includes(species)) {
     plural = "s"
   }
 

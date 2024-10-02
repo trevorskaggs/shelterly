@@ -50,6 +50,7 @@ import ExamForm from "./vet/ExamForm";
 import Organization from "./Organization";
 import VetStepperWorkflow, { initialVetWorkflowData } from "./vet/VetStepperWorkflow";
 import OrdersForm from "./vet/OrdersForm";
+import MedicalNoteForm from "./vet/MedicalNoteForm";
 import MedicalRecordDetails from "./vet/MedicalRecordDetails";
 import DiagnosticResultForm from "./vet/DiagnosticResultForm";
 import ProcedureResultForm from "./vet/ProcedureResultForm";
@@ -127,6 +128,8 @@ const routes = {
   "/:organization/:incident/vet/medrecord/:id/workflow": ({id, incident, organization}) => <VetStepperWorkflow id={id} incident={incident} organization={organization} />,
   "/:organization/:incident/vet/medrecord/:medrecordid/diagnosis/new": ({medrecordid, incident, organization}) => <DiagnosisForm medrecordid={medrecordid} state={initialVetWorkflowData} incident={incident} organization={organization} />,
   "/:organization/:incident/vet/medrecord/:medrecordid/treatment/new": ({medrecordid, incident, organization}) => <TreatmentPlanForm medrecordid={medrecordid} state={initialVetWorkflowData} incident={incident} organization={organization} />,
+  "/:organization/:incident/vet/medrecord/:medrecordid/medicalnote/new": ({medrecordid, incident, organization}) => <MedicalNoteForm medrecordid={medrecordid} incident={incident} organization={organization} />,
+  "/:organization/:incident/vet/medicalnote/edit/:id": ({id, incident, organization}) => <MedicalNoteForm id={id} incident={incident} organization={organization} />,
   "/:organization/:incident/vet/procedureresult/edit/:id": ({id, incident, organization}) => <ProcedureResultForm id={id} incident={incident} organization={organization} />,
   "/:organization/:incident/vet/treatment/:id": ({id, incident, organization}) => <TreatmentPlanDetails id={id} incident={incident} organization={organization} />,
   "/:organization/:incident/vet/treatment/edit/:id": ({id, incident, organization}) => <TreatmentPlanForm id={id} incident={incident} organization={organization} />,

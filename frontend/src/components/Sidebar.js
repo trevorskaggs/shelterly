@@ -79,7 +79,7 @@ const Menu = ({ state, dispatch, removeCookie, ...props }) => {
     <StyledMenu  {...props} className="flex-column" style={{ height: viewHeight, minHeight:"1025px" }}>
       <Link href={incident} style={{marginTop:"-10px", paddingBottom:"0px", border:"none"}} title="Home"><img src="/static/images/shelterly.png" alt="Logo" /></Link>
       <div className="logo text-center" style={{marginTop:"5px", marginBottom:"0px", paddingBottom:"0px"}}>SHELTERLY</div>
-      <div className="logo border-bottom text-center" style={{paddingBottom:"12px", letterSpacing:"0.25rem", fontSize:"1.2rem"}} title="Incident">
+      <div className="logo border-bottom text-center" style={{paddingBottom:"12px", letterSpacing:"0.20rem", fontSize:"1.15rem"}} title="Incident">
         <span style={{marginLeft:"-18px", marginRight:"-18px"}}>
         {state.incident.training ? <OverlayTrigger
           key={"incident-training"}

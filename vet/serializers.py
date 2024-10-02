@@ -2,7 +2,7 @@ from datetime import datetime
 from rest_framework import serializers
 from django.db.models import Q
 
-from .models import Exam, ExamAnswer, ExamQuestion, Diagnosis, Diagnostic, DiagnosticResult, MedicalRecord, PresentingComplaint, Procedure, ProcedureResult, VetRequest, Treatment, TreatmentRequest
+from .models import Exam, ExamAnswer, ExamQuestion, Diagnosis, Diagnostic, DiagnosticResult, MedicalNote, MedicalRecord, PresentingComplaint, Procedure, ProcedureResult, VetRequest, Treatment, TreatmentPlan, TreatmentRequest
 from accounts.serializers import UserSerializer
 from animals.serializers import ModestAnimalSerializer
 
@@ -121,11 +121,25 @@ class SimpleTreatmentRequestSerializer(serializers.ModelSerializer):
 class TreatmentRequestSerializer(SimpleTreatmentRequestSerializer):
 
     animal_object = serializers.SerializerMethodField()
+    medical_record = serializers.PrimaryKeyRelatedField(source='treatmentplan__medical_record', read_only=True)
 
     def get_animal_object(self, obj):
-        if obj.medical_record:
-          return ModestAnimalSerializer(obj.medical_record.patient, required=False, read_only=True).data
+        if obj.treatment_plan and obj.treatment_plan.medical_record:
+            return ModestAnimalSerializer(obj.treatment_plan.medical_record.patient, required=False, read_only=True).data
         return {}
+
+
+class TreatmentPlanSerializer(serializers.ModelSerializer):
+
+    treatment_requests = SimpleTreatmentRequestSerializer(source='treatmentrequest_set', required=False, read_only=True, many=True)
+    animal_object = serializers.SerializerMethodField()
+
+    def get_animal_object(self, obj):
+        return ModestAnimalSerializer(obj.medical_record.patient, required=False, read_only=True).data
+
+    class Meta:
+        model = TreatmentPlan
+        fields = '__all__'
 
 
 class SimpleVetRequestSerializer(serializers.ModelSerializer):
@@ -169,9 +183,20 @@ class ExamSerializer(SimpleExamSerializer):
 
     animal_object = serializers.SerializerMethodField()
     vet_request_object = SimpleVetRequestSerializer(source='vet_request', required=False, read_only=True)
+    medical_plan = serializers.SerializerMethodField()
 
     def get_animal_object(self, obj):
         return ModestAnimalSerializer(obj.medical_record.patient, required=False, read_only=True).data
+
+    def get_medical_plan(self, obj):
+        return obj.medical_record.medical_plan
+
+
+class MedicalNoteSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = MedicalNote
+        fields = '__all__'
 
 
 class MedicalRecordSerializer(serializers.ModelSerializer):
@@ -179,9 +204,10 @@ class MedicalRecordSerializer(serializers.ModelSerializer):
     animal_object = ModestAnimalSerializer(source='patient', required=False, read_only=True)
     exams = SimpleExamSerializer(source='exam_set', many=True, required=False, read_only=True)
     diagnostic_objects = SimpleDiagnosticResultSerializer(source='diagnosticresult_set', many=True, required=False, read_only=True)
-    treatment_requests = SimpleTreatmentRequestSerializer(source='treatmentrequest_set', required=False, read_only=True, many=True)
+    treatment_plans = TreatmentPlanSerializer(source='treatmentplan_set', required=False, read_only=True, many=True)
     procedure_objects = SimpleProcedureResultSerializer(source='procedureresult_set', many=True, required=False, read_only=True)
     vet_requests = SimpleVetRequestSerializer(source='vetrequest_set', required=False, read_only=True, many=True)
+    medical_notes = MedicalNoteSerializer(source='medicalnote_set', required=False, read_only=True, many=True)
     diagnosis_text = serializers.SerializerMethodField()
 
     def get_diagnosis_text(self, obj):

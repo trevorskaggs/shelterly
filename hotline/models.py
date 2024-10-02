@@ -102,7 +102,7 @@ class ServiceRequest(Location):
                 if count > 0:
                     description += '; ' 
                 count+= 1
-                description += status[0] + ': ' + ', '.join(f'{value} {key}' + ('s' if value != 1 and animal.species.name != 'sheep' else '') for key, value in species_counts[status[1]].items()) #123 Ranch Rd, Napa CA (1 cat, 2 dogs)
+                description += status[0] + ': ' + ', '.join(f'{value} {key}' + ('s' if value != 1 and animal.species.name != 'sheep' and animal.species.name != 'cattle' else '') for key, value in species_counts[status[1]].items()) #123 Ranch Rd, Napa CA (1 cat, 2 dogs)
         description += ")"
         feature_json = {
           "geometry":{

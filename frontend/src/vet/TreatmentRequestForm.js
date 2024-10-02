@@ -29,7 +29,7 @@ const TreatmetRequestForm = (props) => {
   const [data, setData] = useState({
     medical_record: null,
     suggested_admin_time: '',
-    actual_admin_time: new Date(),
+    actual_admin_time: '',
     assignee: null,
     not_administered: false,
     notes: '',
@@ -73,7 +73,7 @@ const TreatmetRequestForm = (props) => {
       .then(response => {
         if (!unmounted) {
           response.data['exams'] = [];
-          response.data['actual_admin_time'] = response.data.not_administered ? null : response.data['actual_admin_time'] || new Date()
+          response.data['actual_admin_time'] = response.data.not_administered ? null : response.data['actual_admin_time'] || null
           setData(response.data);
         }
       })
@@ -124,9 +124,12 @@ const TreatmetRequestForm = (props) => {
       })}
       onSubmit={(values, { setSubmitting }) => {
         if (props.id) {
+          if (!values.actual_admin_time) {
+            values['actual_admin_time'] = null;
+          }
           axios.put('/vet/api/treatmentrequest/' + props.id + '/', values)
           .then(response => {
-            navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + response.data.medical_record + '?tab=treatments')
+            navigate('/' + props.organization + '/' + props.incident + '/vet/treatment/' + data.treatment_plan)
           })
           .catch(error => {
             setShowSystemError(true);
@@ -141,7 +144,7 @@ const TreatmetRequestForm = (props) => {
             {state.prevLocation ?
               <span style={{ cursor: 'pointer' }} onClick={() => navigate(state.prevLocation + '?tab=treatments')} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
             :
-              <span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + props.organization + "/" + props.incident + "/vet/medrecord/" + data.medical_record + '?tab=treatments')} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
+              <span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + props.organization + "/" + props.incident + "/vet/treatment/" + data.treatment_plan)} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
             }
             Treatment Form - {data.treatment_object.description}
           </Card.Header>
@@ -227,11 +230,13 @@ const TreatmetRequestForm = (props) => {
                     id="actual_admin_time"
                     xs="4"
                     clearable={true}
+                    now={true}
                     onChange={(date, dateStr) => {
                       formikProps.setFieldValue("actual_admin_time", dateStr)
                     }}
                     value={formikProps.values.actual_admin_time||null}
                     disabled={formikProps.values.not_administered}
+                    setFieldValue={formikProps.setFieldValue}
                   />
                 </BootstrapForm.Row>
                 <BootstrapForm.Row className="mt-3" style={{marginBottom:"-15px"}}>

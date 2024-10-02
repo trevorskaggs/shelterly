@@ -8,7 +8,7 @@ router = DefaultRouter()
 router.register(r'vetrequest', views.VetRequestViewSet)
 router.register(r'medrecord', views.MedicalRecordViewSet)
 router.register(r'treatment', views.TreatmentViewSet)
-# router.register(r'treatmentplan', views.TreatmentPlanViewSet)
+router.register(r'treatmentplan', views.TreatmentPlanViewSet)
 router.register(r'treatmentrequest', views.TreatmentRequestViewSet)
 router.register(r'complaints', views.PresentingComplaintViewSet)
 router.register(r'diagnosis', views.DiagnosisViewSet)
@@ -18,6 +18,7 @@ router.register(r'procedures', views.ProcedureViewSet)
 router.register(r'procedureresults', views.ProcedureResultViewSet)
 router.register(r'exam', views.ExamViewSet)
 router.register(r'examquestions', views.ExamQuestionViewSet)
+router.register(r'medicalnote', views.MedicalNoteViewSet)
 
 urlpatterns = [
     path('api/', include(router.urls)),

@@ -156,7 +156,7 @@ const ExamForm = (props) => {
   // Determine if we're in the vet exam workflow.
   var is_workflow = window.location.pathname.includes("workflow");
 
-  const initialData = {id: '', exam: null, open: '', exam_object: {'medrecord_id':props.medrecordid, vetrequest_id:vetrequest_id, 'confirm_sex_age':false, 'confirm_chip':false, 'weight':null, 'weight_unit':'', 'weight_estimated':false, 'temperature':'', 'temperature_method':'Rectal', 'pulse':null, 'respiratory_rate':'', 'medical_plan':''}, animal_object: {id:'', name:'', species:'', species_string: '', category:'', sex:'', age:'', fixed:'', size:'', pcolor:'', scolor:'', medical_notes:''}, vet_requests:[]}
+  const initialData = {id: '', exam: null, open: '', medical_plan:'', exam_object: {'medrecord_id':props.medrecordid, vetrequest_id:vetrequest_id, 'confirm_sex_age':false, 'confirm_chip':false, 'weight':null, 'weight_unit':'', 'weight_estimated':false, 'temperature':'', 'temperature_method':'Rectal', 'pulse':null, 'respiratory_rate':''}, animal_object: {id:'', name:'', species:'', species_string: '', category:'', sex:'', age:'', fixed:'', size:'', pcolor:'', scolor:'', medical_notes:''}, vet_requests:[]}
 
   let current_data = {...initialData}
   if (is_workflow) {
@@ -209,7 +209,7 @@ const ExamForm = (props) => {
             let config = [...initialSchemaData];
             // Filter the questions by the animal category.
             let filtered_data = questionResponse.data.filter(question => question.categories.includes(response.data.animal_object.category))
-            setExamQuestions(filtered_data);
+            setExamQuestions(filtered_data.length ? filtered_data : questionResponse.data);
             filtered_data.forEach(question => {
               if (props.state && !props.state.steps.exam.id) {
                 response.data.exam_object[question.name.toLowerCase().replace(' ','_').replace('/','_')] = props.state.steps.exam[question.name.toLowerCase().replace(' ','_').replace('/','_')] || question.default;
@@ -275,6 +275,7 @@ const ExamForm = (props) => {
               if (!unmounted) {
                 response.data.exam_object = data.exam_object;
                 response.data.exam_object['medrecord_id'] = props.medrecordid
+                response.data.exam_object['medical_plan'] = response.data.medical_plan
                 response.data.exam_object['age'] = response.data.animal_object.age
                 response.data.exam_object['sex'] = response.data.animal_object.sex
                 response.data.exam_object['microchip'] = response.data.animal_object.microchip
@@ -362,6 +363,13 @@ const ExamForm = (props) => {
         values['animal_id'] = data.animal_object.id;
         values['vetrequest_id'] = vetrequest_id;
         values['organization'] = state.organization.id;
+        // Update the medical plan if we're in a workflow.
+        if (is_workflow) {
+          let medRecord = {...props.state.medRecord};
+          medRecord['medical_plan'] = values.medical_plan;
+          props.handleMedicalRecord(medRecord);
+        }
+
         if (props.id || values.exam) {
           axios.put('/vet/api/exam/' + (props.id || values.exam) + '/', values)
           .then(response => {
@@ -408,7 +416,7 @@ const ExamForm = (props) => {
       {formikProps => (
         <Card border="secondary" className="mt-3">
           <Card.Header as="h5" className="pl-3"><span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + (is_workflow ? props.medrecordid : data.medical_record) + '/')} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>Veterinary Exam Form</Card.Header>
-          <Patient animal={data.animal_object} vet_request={vetrequest_id && data.vet_requests.length > 0 ? data.vet_requests.filter(vr => vr.id === Number(vetrequest_id))[0] : data.vet_request_object} organization={props.organization} incident={props.incident} medical_plan={props.state ? props.state.steps.exam.medical_plan : ""} />
+          <Patient animal={data.animal_object} vet_request={vetrequest_id && data.vet_requests.length > 0 ? data.vet_requests.filter(vr => vr.id === Number(vetrequest_id))[0] : data.vet_request_object} organization={props.organization} incident={props.incident} medical_plan={props.state ? props.state.medRecord.medical_plan : data.medical_plan} />
           <Card.Body>
             <Form>
               <FormGroup>
