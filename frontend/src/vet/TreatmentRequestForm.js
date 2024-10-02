@@ -124,9 +124,12 @@ const TreatmetRequestForm = (props) => {
       })}
       onSubmit={(values, { setSubmitting }) => {
         if (props.id) {
+          if (!values.actual_admin_time) {
+            values['actual_admin_time'] = null;
+          }
           axios.put('/vet/api/treatmentrequest/' + props.id + '/', values)
           .then(response => {
-            navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + data.animal_object.medical_record + '?tab=treatments')
+            navigate('/' + props.organization + '/' + props.incident + '/vet/treatment/' + data.treatment_plan)
           })
           .catch(error => {
             setShowSystemError(true);
@@ -141,7 +144,7 @@ const TreatmetRequestForm = (props) => {
             {state.prevLocation ?
               <span style={{ cursor: 'pointer' }} onClick={() => navigate(state.prevLocation + '?tab=treatments')} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
             :
-              <span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + props.organization + "/" + props.incident + "/vet/medrecord/" + data.animal_object.medical_record + '?tab=treatments')} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
+              <span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + props.organization + "/" + props.incident + "/vet/treatment/" + data.treatment_plan)} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
             }
             Treatment Form - {data.treatment_object.description}
           </Card.Header>

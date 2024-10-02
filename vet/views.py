@@ -154,7 +154,7 @@ class TreatmentPlanViewSet(viewsets.ModelViewSet):
             # Recreate new requests if we have an updated frequency.
             if self.request.data.get('frequency'):
                 # Clean up unadministered requests.
-                for tr in TreatmentRequest.objects.filter(treatment_plan=plan).filter(assignee__isnull=True):
+                for tr in TreatmentRequest.objects.filter(treatment_plan=plan).filter(assignee__isnull=True).exclude(not_administered=True):
                     tr.delete()
                 # Create proper number of new TreatmentRequests.
                 for interval in range(int(24/self.request.data.get('frequency')) * self.request.data.get('days', 0)):
@@ -163,11 +163,11 @@ class TreatmentPlanViewSet(viewsets.ModelViewSet):
                     TreatmentRequest.objects.create(treatment_plan=plan, treatment=treatment, suggested_admin_time=time, quantity=serializer.validated_data['quantity'], unit=serializer.validated_data['unit'], route=serializer.validated_data['route'])
             # Otherwise just update existing unadministered requests.
             else:
-                TreatmentRequest.objects.filter(treatment_plan=plan).filter(assignee__isnull=True).update(quantity=self.request.data.get('quantity'), route=self.request.data.get('route'))
+                TreatmentRequest.objects.filter(treatment_plan=plan).filter(assignee__isnull=True).exclude(not_administered=True).update(quantity=self.request.data.get('quantity'), route=self.request.data.get('route'))
 
     def perform_destroy(self, instance):
         if self.request.user.is_superuser or self.request.user.perms.filter(organization__slug=self.request.GET.get('organization')[0])[0].vet_perms:
-            for tr in instance.treatmentrequest_set.filter(assignee__isnull=True):
+            for tr in instance.treatmentrequest_set.filter(assignee__isnull=True).exclude(not_administered=True):
                 tr.delete()
             if len(instance.treatmentrequest_set.all()) == 0:
                 instance.delete()

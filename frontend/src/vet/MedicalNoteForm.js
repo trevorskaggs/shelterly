@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
-import { navigate, useQueryParams } from "raviger";
+import { Link, navigate, useQueryParams } from "raviger";
 import { Form, Formik, } from 'formik';
 import Select from 'react-select';
 import {
@@ -11,11 +11,15 @@ import {
   Form as BootstrapForm,
   FormGroup,
   ListGroup,
+  Modal,
+  OverlayTrigger,
+  Tooltip,
   Row,
 } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faArrowAltCircleLeft,
+  faTimes,
 } from '@fortawesome/free-solid-svg-icons';
 import * as Yup from 'yup';
 import { DateTimePicker, DropDown, TextInput } from '../components/Form';
@@ -50,11 +54,17 @@ const MedicalNoteForm = (props) => {
 
   const [data, setData] = useState({
     diagnosis: [],
-    open: null,
+    open: new Date(),
     medical_record: props.medrecordid,
     note: '',
   });
   const [medRecordData, setMedRecordData] = useState({id:'', medical_plan:'', animal_object: {id:'', name:'', species_string:'', medical_notes:''}, vet_requests:[], exams:[]});
+
+  const [showModal, setShowModal] = useState(false);
+  const deleteMedicalNote = () => {
+    axios.delete('/vet/api/medicalnote/' + props.id + '/')
+      .finally(() => navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + data.medical_record));
+  }
 
   useEffect(() => {
     let unmounted = false;
@@ -102,12 +112,13 @@ const MedicalNoteForm = (props) => {
   }, [props.medrecordid]);
 
   return (
+    <>
     <Formik
       initialValues={data}
       enableReinitialize={true}
       validationSchema={Yup.object({
-        // open: Yup.string().nullable().max(50, 'Maximum character limit of 50.'),
-        note: Yup.string().nullable().max(300, 'Maximum character limit of 300.'),
+        open: Yup.string().required('Required'),
+        note: Yup.string().required('Required').max(3000, 'Maximum character limit of 3000.'),
       })}
       onSubmit={(values, { setSubmitting }) => {
         if (props.id) {
@@ -136,6 +147,17 @@ const MedicalNoteForm = (props) => {
           <Card.Header as="h5" className="pl-3">
             <span style={{ cursor: 'pointer' }} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
             Medical Note Form
+              {props.id ? <OverlayTrigger
+                key={"delete-note"}
+                placement="bottom"
+                overlay={
+                  <Tooltip id={`tooltip-delete-note`}>
+                    Delete daily medical note
+                  </Tooltip>
+                }
+              >
+                <FontAwesomeIcon icon={faTimes} onClick={() => setShowModal(true)} style={{cursor:'pointer'}} className='ml-1' size="lg" inverse />
+              </OverlayTrigger> : ""}
           </Card.Header>
           <Patient animal={medRecordData.animal_object} vet_request={null} organization={props.organization} incident={props.incident} medical_plan={medRecordData.medical_plan} />
           <Card.Body>
@@ -175,6 +197,21 @@ const MedicalNoteForm = (props) => {
         </Card>
       )}
     </Formik>
+    <Modal show={showModal} onHide={() => setShowModal(false)}>
+      <Modal.Header closeButton>
+        <Modal.Title>Confirm Medical Note Deletion</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>Are you sure you want to delete this daily medical note?</Modal.Body>
+      <Modal.Footer>
+        <Button variant="primary" onClick={() => deleteMedicalNote()}>
+          Yes
+        </Button>
+        <Button variant="secondary" onClick={() => setShowModal(false)}>
+          Cancel
+        </Button>
+      </Modal.Footer>
+    </Modal>
+    </>
   );
 };
 

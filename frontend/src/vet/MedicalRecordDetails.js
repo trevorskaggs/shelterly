@@ -143,21 +143,21 @@ function MedicalRecordDetails({ id, incident, organization }) {
                     <FontAwesomeIcon icon={faUserDoctorMessage} className="mr-1" inverse />
                     Create Veterinary Request
                   </LoadingLink>
-                  {data.exams.length ? <LoadingLink
+                  {/* {data.exams.length ? <LoadingLink
                     href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.id}
                     isLoading={isLoading}
                     className="text-white d-block py-1 px-3"
                   >
                     <FontAwesomeIcon icon={faEdit} className="mr-1" inverse />
                     Update Medical Plan
-                  </LoadingLink> : ""}
+                  </LoadingLink> : ""} */}
                   {data.exams.length ? <LoadingLink
                     href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.id + "/medicalnote/new"}
                     isLoading={isLoading}
                     className="text-white d-block py-1 px-3"
                   >
                     <FontAwesomeIcon icon={faNoteMedical} className="mr-1" inverse />
-                    Add Medical Note
+                    Add Daily Medical Note
                   </LoadingLink> : ""}
                   {data.exams.length ? <LoadingLink
                     href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.id + "/treatment/new"}
@@ -506,7 +506,7 @@ function MedicalRecordDetails({ id, incident, organization }) {
           <Card.Title>
             <h4 className="mb-0">
               <Row className="ml-0 pr-0">
-                Medical Notes
+                Daily Medical Notes
               </Row>
             </h4>
           </Card.Title>
