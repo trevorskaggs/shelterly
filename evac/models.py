@@ -2,8 +2,10 @@ from django.contrib.auth import get_user_model
 from django.contrib.sites.models import Site
 from django.core.mail import send_mass_mail
 from django.db import models, transaction
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, m2m_changed
+from django.dispatch import receiver
 from django.template.loader import render_to_string
+
 
 from hotline.models import ServiceRequest
 from incident.models import Incident, IncidentNotification
@@ -69,23 +71,24 @@ class EvacAssignment(models.Model):
 
 # Send email to dispatch users on creation.
 def email_on_creation(sender, instance, **kwargs):
-    if kwargs["created"]:
+    import ipdb; ipdb.set_trace()
+    if kwargs:
         # Send email here.
         incident_notifications = IncidentNotification.objects.filter(incident=instance.incident)
         user_emails = incident_notifications.values_list('user__email', flat=True)
         if len(user_emails) > 0:
             sr_addresses = []
             for sr in instance.service_requests.all():
-                sr_address.append('SR#%s: %s, %s, %s' % sr.id_for_incident, sr.address, sr.city, sr.state)
+                sr_addresses.append('SR#%s: %s, %s, %s' % sr.id_for_incident, sr.address, sr.city, sr.state)
+            sr_adds  = '\n'.join(sr_add for sr_add in sr_addresses)
             email_data = {
                 'site': Site.objects.get_current(),
-                'user': sender.user.email,
                 'id': instance.id_for_incident,
                 'incident': instance.incident.slug,
                 'organization': instance.incident.organization.slug,
                 'team_name': instance.team.name,
                 'team_members': ', '.join(str(m) for m in instance.team.team_members.all()),
-                'sr_addresses': '\n'.join(sr_add for sr_add in sr_addresses),
+                'sr_addresses': sr_adds,
                 'da_creation_date': instance.start_time.strftime('%m/%d/%Y %H:%M:%S')
             }
             message = (
@@ -99,9 +102,7 @@ def email_on_creation(sender, instance, **kwargs):
             )
             send_mass_mail((message,))
 
-
-post_save.connect(email_on_creation, sender=EvacAssignment)
-
+m2m_changed.connect(email_on_creation, sender='evac.AssignedRequest')
 
 class AssignedRequest(models.Model):
 
