@@ -146,7 +146,7 @@ def email_on_creation(sender, instance, **kwargs):
     if kwargs["created"]:
         # Send email here.
         incident_notifications = IncidentNotification.objects.filter(incident=instance.incident)
-        user_emails = incident_notifications.user_set.all().values_list('email', flat=True)
+        user_emails = [inc_not.user.email for inc_not in incident_notifications.all()]
         if len(user_emails) > 0:
             message = (
                 "Service Request #" + str(instance.id_for_incident) + " Created for Shelterly",

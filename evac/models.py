@@ -70,6 +70,7 @@ class EvacAssignment(models.Model):
         ordering = ['-start_time',]
 
 # Send email to dispatch users on creation.
+@receiver(m2m_changed, sender='hotline.ServiceRequest')
 def email_on_creation(sender, instance, **kwargs):
     import ipdb; ipdb.set_trace()
     if kwargs:
@@ -101,8 +102,6 @@ def email_on_creation(sender, instance, **kwargs):
                 user_emails,
             )
             send_mass_mail((message,))
-
-m2m_changed.connect(email_on_creation, sender='evac.AssignedRequest')
 
 class AssignedRequest(models.Model):
 
