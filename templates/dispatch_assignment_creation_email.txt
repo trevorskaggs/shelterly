@@ -3,5 +3,5 @@ Team Name: {{ team_name }}.
 Team Members: {{ team_members }}.
 
 Service Requests:
-{{ sr_addressess }}
-Click <a href="{{ site }}/{{ organization }}/{{ incident }}/dispatch/summary/{{ id }}">here</a> to view the details.
+{{ sr_addresses }}
+{{ site }}/{{ organization }}/{{ incident }}/dispatch/summary/{{ id }} to view the details.

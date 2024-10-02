@@ -14,7 +14,7 @@ from asgiref.sync import async_to_sync
 from animals.models import Animal
 from animals.views import MultipleFieldLookupMixin
 from animals.serializers import AnimalSerializer
-from evac.models import AssignedRequest, DispatchTeam, EvacAssignment, EvacTeamMember
+from evac.models import AssignedRequest, DispatchTeam, EvacAssignment, EvacTeamMember, email_on_creation
 from evac.serializers import DispatchTeamSerializer, DeployEvacAssignmentSerializer, EvacAssignmentSerializer, MapEvacAssignmentSerializer, EvacTeamMemberSerializer
 from hotline.models import ServiceRequest, VisitNote
 from incident.models import Incident, Organization
@@ -198,6 +198,8 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                     }
                 AssignedRequest.objects.create(dispatch_assignment=evac_assignment, service_request=service_request, animals=animals_dict, timestamp=timestamp)
 
+            # Send email notification of creation.
+            email_on_creation(evac_assignment)
             # Notify maps that there is updated data.
             channel_layer = get_channel_layer()
             async_to_sync(channel_layer.group_send)("map", {"type":"new_data"})
