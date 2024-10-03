@@ -1,0 +1,7 @@
+DA#{{ id }} was created on {{ da_creation_date }}.
+Team Name: {{ team_name }}.
+Team Members: {{ team_members }}.
+
+Service Requests:
+{{ sr_addresses }}
+{{ site }}/{{ organization }}/{{ incident }}/dispatch/summary/{{ id }} to view the details.

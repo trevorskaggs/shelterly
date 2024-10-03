@@ -6,7 +6,7 @@ import { Marker, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBullhorn, faCircle, faExclamationCircle, faMapMarkedAlt, faSearch, faTimesCircle, faUsers
+  faBell, faBellSlash, faBullhorn, faCircle, faExclamationCircle, faMapMarkedAlt, faSearch, faTimesCircle, faUsers
 } from '@fortawesome/free-solid-svg-icons';
 import { faQuestionCircle as faQuestionCircleDuo, faChevronCircleDown, faChevronCircleUp } from '@fortawesome/pro-duotone-svg-icons';
 import { faHomeAlt as faHomeAltReg } from '@fortawesome/pro-regular-svg-icons';
@@ -16,6 +16,7 @@ import Header from "../components/Header";
 import Scrollbar from '../components/Scrollbars';
 import { SystemErrorContext } from '../components/SystemError';
 import { AddressLookup } from '../components/Map';
+import { AuthContext } from "../accounts/AccountsReducer";
 
 function MapLegendControl({setShowAddressModal}) {
   return (
@@ -40,6 +41,7 @@ function MapLegendControl({setShowAddressModal}) {
 function Dispatch({ incident, organization }) {
 
   const { setShowSystemError } = useContext(SystemErrorContext);
+  const { state } = useContext(AuthContext);
 
   const [data, setData] = useState({dispatch_assignments: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
   const [mapState, setMapState] = useState({});
@@ -47,9 +49,15 @@ function Dispatch({ incident, organization }) {
   const [showActive, setShowActive] = useState(true);
   const [showPreplanned, setShowPreplanned] = useState(true);
   const [showAddressModal, setShowAddressModal] = useState(false);
+  const [isSubscribed, setIsSubscribed] = useState(false);
   const [initialBounds, setInitialBounds] = useState(L.latLngBounds([[0,0]]));
 
   const handleClose = () => {setShowAddressModal(false);}
+
+  const subscribe = () => {
+      axios.patch('/incident/api/incident/' + state.incident.id + '/subscribe/', {'dispatch_subscribe':!isSubscribed})
+      .finally(() => setIsSubscribed(!isSubscribed));
+  }
 
   // Counts the number of size/species matches for a service request by status.
 const countMatches = (animal_dict) => {
@@ -119,6 +127,29 @@ const countMatches = (animal_dict) => {
 
     fetchDispatchAssignments();
 
+    const fetchSubscribed = async () => {
+      // Fetch IncidentNotification data.
+      await axios.get('/incident/api/notification/?incident=' + incident + '&dispatch=true', {
+        cancelToken: source.token,
+      })
+      .then(response => {
+        if (response.data.length > 0) {
+            setIsSubscribed(true);
+        }
+        else {
+            setIsSubscribed(false);
+        }
+        console.log(response.data, isSubscribed);
+      })
+      .catch(error => {
+        if (!unmounted) {
+          setShowSystemError(true);
+        }
+      });
+    };
+
+    fetchSubscribed();
+
     // Cleanup.
     return () => {
       unmounted = true;
@@ -128,7 +159,37 @@ const countMatches = (animal_dict) => {
 
   return (
     <>
-    <Header>Dispatch</Header>
+    <Header>Dispatch
+    {isSubscribed ?
+    <OverlayTrigger
+      key={"unsubscribe"}
+      placement="bottom"
+      overlay={
+        <Tooltip id={`tooltip-unsubscribe`}>
+          Unsubscribe from receiving email notifications when Dispatch Assignements are created for this incident.
+        </Tooltip>
+      }
+    >
+      <Button className="ml-1" onClick={() => subscribe()} style={{marginTop:"-8px", background:"#a72b46"}}>
+        <FontAwesomeIcon size="lg" icon={faBellSlash} />
+      </Button>
+    </OverlayTrigger>
+    :
+    <OverlayTrigger
+      key={"subscribe"}
+      placement="bottom"
+      overlay={
+        <Tooltip id={`tooltip-subscribe`}>
+          Subscribe to receive email notifications when Dispatch Assignements are created for this incident.
+        </Tooltip>
+      }
+    >
+      <Button className="ml-1" onClick={() => subscribe()} style={{marginTop:"-8px", background:"#365a7d"}}>
+        <FontAwesomeIcon size="lg" icon={faBell} />
+      </Button>
+    </OverlayTrigger>
+    }
+    </Header>
     <hr/>
     <Row className="ml-0 mr-0 pl-0 pr-0 mb-0">
       <Col xs={4} className="pl-0 pr-0">

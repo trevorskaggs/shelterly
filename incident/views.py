@@ -100,7 +100,10 @@ class IncidentViewSet(viewsets.ModelViewSet):
     def subscribe(self, request, pk=None):
         try:
             incident = self.get_object()
-            IncidentNotification.objects.update_or_create(user=self.request.user, incident=incident, defaults={'hotline_notifications':request.data.get('subscribe', False)})
+            if 'hotline_subscribe' in request.data.keys():
+                IncidentNotification.objects.update_or_create(user=self.request.user, incident=incident, defaults={'hotline_notifications':request.data.get('hotline_subscribe', False)})
+            if 'dispatch_subscribe' in request.data.keys():
+                IncidentNotification.objects.update_or_create(user=self.request.user, incident=incident, defaults={'dispatch_notifications':request.data.get('dispatch_subscribe', False)})
             return Response({'status': 'success'}, status=status.HTTP_200_OK)
         except ValueError:
             return Response({'error': 'Invalid subscribe value'}, status=status.HTTP_400_BAD_REQUEST)
@@ -146,5 +149,8 @@ class IncidentNotificationViewSet(viewsets.ModelViewSet):
 
         if self.request.GET.get('hotline', False):
             queryset = queryset.filter(hotline_notifications=True)
+
+        if self.request.GET.get('dispatch', False):
+            queryset = queryset.filter(dispatch_notifications=True)
 
         return queryset

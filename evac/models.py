@@ -1,7 +1,16 @@
+from django.contrib.auth import get_user_model
+from django.contrib.sites.models import Site
+from django.core.mail import send_mass_mail
 from django.db import models, transaction
+from django.db.models.signals import post_save, m2m_changed
+from django.dispatch import receiver
+from django.template.loader import render_to_string
+
 
 from hotline.models import ServiceRequest
-from incident.models import Incident
+from incident.models import Incident, IncidentNotification
+
+User = get_user_model()
 
 class EvacTeamMember(models.Model):
 
@@ -69,3 +78,34 @@ class AssignedRequest(models.Model):
     owner_contact = models.ForeignKey('people.OwnerContact', null=True, on_delete=models.CASCADE, related_name='assigned_request')
     visit_note = models.ForeignKey('hotline.VisitNote', null=True, on_delete=models.CASCADE, related_name='assigned_request')
     timestamp = models.DateTimeField(null=True, blank=True)
+
+def email_on_creation(evac_assignment):
+    # Send email here.
+    incident_notifications = IncidentNotification.objects.filter(incident=evac_assignment.incident)
+    user_emails = incident_notifications.values_list('user__email', flat=True)
+    if len(user_emails) > 0:
+        sr_addresses = []
+        for sr in evac_assignment.service_requests.all():
+            sr_addresses.append('SR#%s: %s, %s, %s' % (sr.id_for_incident, sr.address, sr.city, sr.state))
+        import ipdb; ipdb.set_trace()
+        sr_adds  = '\n'.join(sr_add for sr_add in sr_addresses)
+        email_data = {
+            'site': Site.objects.get_current(),
+            'id': evac_assignment.id_for_incident,
+            'incident': evac_assignment.incident.slug,
+            'organization': evac_assignment.incident.organization.slug,
+            'team_name': evac_assignment.team.name,
+            'team_members': ', '.join(str(m) for m in evac_assignment.team.team_members.all()),
+            'sr_addresses': sr_adds,
+            'da_creation_date': evac_assignment.start_time.strftime('%m/%d/%Y %H:%M:%S')
+        }
+        message = (
+            "Dispatch Assignment #" + str(evac_assignment.id_for_incident) + " Created for Shelterly",
+            render_to_string(
+                'dispatch_assignment_creation_email.txt',
+                email_data
+            ).strip(),
+            "DoNotReply@shelterly.org",
+            user_emails,
+        )
+        send_mass_mail((message,))
