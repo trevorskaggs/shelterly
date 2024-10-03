@@ -15,6 +15,8 @@ class Organization(models.Model):
     short_name = models.CharField(max_length=10, default='changeme')
     liability_name = models.CharField(max_length=80)
     liability_short_name = models.CharField(max_length=40)
+    caltopo_enabled = models.BooleanField(default=False)
+    watchduty_enabled = models.BooleanField(default=False)
 
     def __str__(self):
         return '{}'.format(self.name)
@@ -42,6 +44,8 @@ class Incident(models.Model):
     longitude = models.DecimalField(max_digits=9, decimal_places=4)
     training = models.BooleanField(default=False)
     organization = models.ForeignKey(Organization, on_delete=models.SET_NULL, null=True, blank=True)
+    caltopo_map_id = models.CharField(max_length=10, blank=True, null=True)
+    watchduty_map_id = models.CharField(max_length=10, blank=True, null=True)
     hide = models.BooleanField(default=False)
 
     def __str__(self):

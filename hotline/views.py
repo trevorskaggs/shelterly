@@ -4,7 +4,7 @@ import json
 from evac.models import EvacAssignment
 from django.db import transaction
 from django.db.models import Case, Count, Exists, OuterRef, Prefetch, Q, When, Value, BooleanField
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from actstream import action
 from datetime import datetime
 from .serializers import ServiceRequestSerializer, MapServiceRequestSerializer, SimpleServiceRequestSerializer, VisitNoteSerializer
@@ -139,7 +139,7 @@ class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
         return response
 
     @drf_action(detail=False, methods=['GET'], name='Download All GeoJSON')
-    def download_all(self, request, pk=None):
+    def download_all(self, request):
         json_file = io.StringIO()
         features = []
         for id in self.request.GET.get('ids').replace('&','').split('id='):
@@ -155,6 +155,31 @@ class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
         response = HttpResponse(wrapper, content_type='application/json')
         response['Content-Disposition'] = 'attachement; filename=SRs' + '.geojson'
         return response
+
+    @drf_action(detail=True, methods=['GET'], name='Push GeoJSON')
+    def push(self, request, pk=None):
+        sr = ServiceRequest.objects.get(id=pk)
+        success = True
+        try:
+            sr.push_json()
+        except:
+            success = False
+        data = {sr.id_for_incident: {'status': success}}
+        return JsonResponse(data)
+
+    @drf_action(detail=False, methods=['GET'], name='Push All GeoJSON')
+    def push_all(self, request):
+        data = {}
+        for sr_id in self.request.GET.get('ids').replace('&','').split('id='):
+            if sr_id:
+                sr = ServiceRequest.objects.get(id=sr_id)
+                success = True
+                try:
+                    sr.push_json()
+                except:
+                    success = False
+                data[sr.id_for_incident] = {'status': success}
+        return JsonResponse(data)
 
 class VisitNoteViewSet(viewsets.ModelViewSet):
 

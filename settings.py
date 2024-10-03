@@ -31,6 +31,11 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 SECRET_KEY = os.environ.get('SECRET_KEY')
 SHELTERLY_VERSION = __version__
 
+# CALTOPO SETTINGS
+CALTOPO_ID = os.environ.get('CALTOPO_ID')
+CALTOPO_KEY = os.environ.get('CALTOPO_KEY')
+CALTOPO_ACCOUNT_ID = os.environ.get('CALTOPO_ACCOUNT_ID')
+
 DEBUG = False
 USE_S3 = True
 # SECURITY WARNING: don't run with debug turned on in production!

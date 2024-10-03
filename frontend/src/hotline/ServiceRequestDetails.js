@@ -6,7 +6,7 @@ import { Button, Card, ListGroup, Modal, OverlayTrigger, Tooltip, Spinner } from
 import Flatpickr from 'react-flatpickr';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBan, faCar, faClipboardCheck, faDownload, faEdit, faEnvelope, faHouseDamage,
+  faBan, faCar, faClipboardCheck, faDownload, faUpload, faEdit, faEnvelope, faHouseDamage,
   faKey, faMapMarkedAlt, faPlusSquare, faTimes, faTrailer, faUserPlus, faUsers
 } from '@fortawesome/free-solid-svg-icons';
 import { faCalendarEdit, faHammerCrash, faHomeHeart, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
@@ -122,13 +122,23 @@ function ServiceRequestDetails({ id, incident, organization }) {
   }
 
   const handleGeoJsonDownload = () => {
+    setIsLoading(true);
     var fileDownload = require('js-file-download');
-    axios.get('/hotline/api/servicerequests/' + data.id +'/download/', { 
+    axios.get('/hotline/api/servicerequests/' + data.id +'/download/', {
             responseType: 'blob',
         }).then(res => {
             fileDownload(res.data, 'SR-' + id + '.geojson');
         }).catch(err => {
-        })
+        }).finally(() => setIsLoading(false));
+  }
+
+  const handleGeoJsonPush = () => {
+    axios.get('/hotline/api/servicerequests/' + data.id + '/push/', {
+            responseType: 'json',
+        }).then(res => {
+            console.log(res);
+        }).catch(err => {
+        }).finally(() => setIsLoading(false));
   }
 
   // Hook for initializing data.
@@ -314,6 +324,12 @@ function ServiceRequestDetails({ id, incident, organization }) {
                       <FontAwesomeIcon icon={faDownload} className="mr-1"  inverse />
                       Download Service Request as Geojson
                     </LoadingLink>
+                    { state && state.incident.caltopo_map_id ?
+                    <LoadingLink onClick={handleGeoJsonPush} isLoading={isLoading} className="text-white d-block py-1 px-3">
+                      <FontAwesomeIcon icon={faUpload} className="mr-1"  inverse />
+                      Push Service Request to CalTopo
+                    </LoadingLink>
+                    : ''}
                     <ShelterlyPrintifyButton
                       id="service-request-summary"
                       spinnerSize={2.0}

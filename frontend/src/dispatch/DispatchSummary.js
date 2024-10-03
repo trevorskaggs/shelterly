@@ -5,7 +5,7 @@ import { Button, Card, Col, Form, ListGroup, Modal, OverlayTrigger, Row, Tooltip
 import { Typeahead } from 'react-bootstrap-typeahead';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faCalendarDay, faClipboardCheck, faClipboardList, faDownload, faEdit, faEnvelope, faHouseDamage, faBriefcaseMedical, faMinusSquare, faPencilAlt, faUserCheck, faUserPlus
+  faCalendarDay, faClipboardCheck, faClipboardList, faDownload, faUpload, faEdit, faEnvelope, faHouseDamage, faBriefcaseMedical, faMinusSquare, faPencilAlt, faUserCheck, faUserPlus
 } from '@fortawesome/free-solid-svg-icons';
 import { faExclamationSquare, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import { Marker, Tooltip as MapTooltip } from "react-leaflet";
@@ -130,10 +130,20 @@ function DispatchSummary({ id, incident, organization }) {
   const handleGeoJsonDownload = () => {
     var fileDownload = require('js-file-download');
     setIsLoading(true);
-    axios.get('/evac/api/evacassignment/' + data.id +'/download/', { 
+    axios.get('/evac/api/evacassignment/' + data.id +'/download/', {
             responseType: 'blob',
         }).then(res => {
             fileDownload(res.data, 'DAR-' + id + '.geojson');
+        }).catch(err => {
+        }).finally(() => setIsLoading(false));
+  }
+
+  const handleGeoJsonPush = () => {
+    setIsLoading(true);
+    axios.get('/evac/api/evacassignment/' + data.id +'/push/', {
+            responseType: 'json',
+        }).then(res => {
+            console.log(res)
         }).catch(err => {
         }).finally(() => setIsLoading(false));
   }
@@ -352,6 +362,16 @@ function DispatchSummary({ id, incident, organization }) {
                   <FontAwesomeIcon icon={faDownload} className="mr-1"  inverse />
                   Download Dispatch Assignment as Geojson
                 </LoadingLink>
+                { state.incident.caltopo_map_id ?
+                <LoadingLink
+                  onClick={handleGeoJsonPush}
+                  className="text-white d-block py-1 px-3"
+                  isLoading={isLoading}
+                >
+                  <FontAwesomeIcon icon={faUpload} className="mr-1"  inverse />
+                  Push Dispatch Assignment to CalTopo
+                </LoadingLink>
+                : ''}
               </ActionsDropdown>
             )}
             </div>

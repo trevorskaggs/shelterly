@@ -1,4 +1,6 @@
+import sartopo_python
 from django.db import models, transaction
+from django.conf import settings
 from actstream import action
 from django.core.mail import send_mass_mail
 from django.template.loader import render_to_string
@@ -39,6 +41,7 @@ class ServiceRequest(Location):
     turn_around = models.BooleanField(default=False)
     sip = models.BooleanField(default=False)
     utl = models.BooleanField(default=False)
+    caltopo_feature_id = models.CharField(blank=True, max_length=100)
 
     #post_fields
     followup_date = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
@@ -91,7 +94,7 @@ class ServiceRequest(Location):
 
         self.save()
 
-    def get_feature_json(self):
+    def get_feature_description(self):
         species_counts = {'REPORTED':{}, 'REPORTED (EVAC REQUESTED)':{}, 'REPORTED (SIP REQUESTED)':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}}
         for animal in self.animal_set.filter(status__in=['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE']):
             species_counts[animal.status][animal.species.name] = species_counts[animal.status].get(animal.species.name, 0) + 1
@@ -104,6 +107,10 @@ class ServiceRequest(Location):
                 count+= 1
                 description += status[0] + ': ' + ', '.join(f'{value} {key}' + ('s' if value != 1 and animal.species.name != 'sheep' and animal.species.name != 'cattle' else '') for key, value in species_counts[status[1]].items()) #123 Ranch Rd, Napa CA (1 cat, 2 dogs)
         description += ")"
+        return description
+
+    def get_feature_json(self):
+        description = self.get_feature_description()
         feature_json = {
           "geometry":{
               "coordinates":[
@@ -120,11 +127,37 @@ class ServiceRequest(Location):
               "marker-symbol":"circle-n",
               "marker-color":"#FF0000",
               "description":description,
-              "title":self.id_for_incident,
+              "title": "SR#" + str(self.id_for_incident),
               "class":"Marker",
           }
         }
         return feature_json
+
+    def push_json(self):
+        sts = sartopo_python.SartopoSession('sartopo.com',
+            self.incident.caltopo_map_id,
+            id=settings.CALTOPO_ID,
+            key=settings.CALTOPO_KEY,
+            accountId=settings.CALTOPO_ACCOUNT_ID,
+            sync=False,
+        )
+        # If the SR has already previously been pushed to Caltopo, it will have
+        # a caltopo_feature_id, try to remove old object to create new one.
+        if self.caltopo_feature_id:
+            try:
+                sts.delMarker(markerOrId=self.caltopo_feature_id)
+            except:
+                pass
+        payload = {
+            'title': "SR#" + str(self.id_for_incident),
+            'color': '#FF0000',
+            'symbol': 'circle-n',
+            'description': self.get_feature_description()
+        }
+        lon = self.longitude
+        lat = self.latitude
+        self.caltopo_feature_id = sts.addMarker(lon=lon, lat=lat, **payload)
+        self.save()
 
     def save(self, *args, **kwargs):
         if not self.pk:
