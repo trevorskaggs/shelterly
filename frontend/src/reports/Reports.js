@@ -88,7 +88,7 @@ function Reports({ incident, organization }) {
       })
       .catch(error => {
         if (!unmounted) {
-          setData({'isFetching':false, 'daily_report':[], 'sr_worked_report':[], 'shelter_report':[], 'animal_status_report':[], 'animal_owner_report':[], 'animals_deceased_report':[]});
+          setData({'isFetching':false, 'daily_report':[], 'sr_worked_report':[], 'shelter_report':[], 'shelter_intake_report': [], 'animal_status_report':[], 'animal_owner_report':[], 'animals_deceased_report':[]});
           setShowSystemError(true);
         }
       });
@@ -207,6 +207,59 @@ function Reports({ incident, organization }) {
   ];
 
   const [shelterColumns, setShelterColumns] = useState(shelter_columns);
+
+  const shelter_intake_columns = [
+    {
+      name: 'Date',
+      selector: row => row.date,
+      format: row => moment(row.date).format('MM/DD/YY')
+    },
+    {
+      name: 'Avians',
+      selector: row => row.avian,
+      compact: true,
+    },
+    {
+      name: 'Cats',
+      selector: row => row.cat,
+      compact: true,
+    },
+    {
+      name: 'Dogs',
+      selector: row => row.dog,
+      compact: true,
+    },
+    {
+      name: 'Equines',
+      selector: row => row.equine,
+      compact: true,
+    },
+    {
+      name: 'Reptiles/Amphibians',
+      selector: row => row.reptileamphibian,
+      compact: true,
+    },
+    {
+      name: 'Ruminants',
+      selector: row => row.ruminant,
+      compact: true,
+    },
+    {
+      name: 'Small Mammals',
+      selector: row => row.small_mammal,
+      compact: true,
+    },
+    {
+      name: 'Others',
+      selector: row => row.other,
+      compact: true,
+    },
+    {
+      name: 'Total',
+      selector: row => row.total,
+      compact: true,
+    }
+  ]
 
   const animal_status_columns = [
     {
@@ -402,6 +455,7 @@ function Reports({ incident, organization }) {
     {value:'daily', label:"Daily Report", key:"daily_report"},
     {value:'worked', label:"Service Requests Worked Report", key:"sr_worked_report"},
     {value:'shelter', label:"Shelter Report", key:"shelter_report"},
+    {value:'shelter_intake', label:"Shelter Intake Report", key:"shelter_intake"},
     {value:'animal_deceased', label:"Deceased Animal Report", key:"animals_deceased_report"},
     {value:'animal_status', label:"Total Animals By Status Report", key:"animal_status_report"},
     {value:'animal_owner', label:"Total Animals By Ownership Report", key:"animal_owner_report"},
@@ -443,7 +497,7 @@ function Reports({ incident, organization }) {
           setSelection(instance)
         }}
       />
-      { selection.value === 'daily' || selection.value === 'worked' ?
+      { selection.value === 'daily' || selection.value === 'worked' || selection.value === 'shelter_intake' ?
       <DateRangePicker
         name={`date_range_picker`}
         id={`date_range_picker`}
@@ -500,6 +554,17 @@ function Reports({ incident, organization }) {
           pagination
           striped
           noDataComponent={data && data.shelter_report.length === 0 && !data.isFetching ? <div style={{padding:"24px"}}>There are no records to display</div> : <div style={{padding:"24px"}}>Fetching report data...</div>}
+      />
+      : selection.value === 'shelter_intake' ?
+      <DataTable
+          columns={shelter_intake_columns}
+          data={data && data.shelter_intake_report ? data.shelter_intake_report.filter(row => (startDate ? startDate <= moment(row.date)
+            .format('YYYY-MM-DD') && endDate >= moment(row.date).format('YYYY-MM-DD') : row)) : []}
+          actions={actionsMemo}
+          title={selection.label}
+          pagination
+          striped
+          noDataComponent={data && data.shelter_intake_report.length === 0 && !data.isFetching ? <div style={{padding:"24px"}}>There are no records to display</div> : <div style={{padding:"24px"}}>Fetching report data...</div>}
       />
       : selection.value === 'animal_status' ?
       <DataTable
