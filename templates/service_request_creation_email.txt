@@ -1,2 +1,2 @@
 SR#{{ id }} has been created at {{ address }} in the {{ incident }} incident at {{ sr_creation_date }}.
-Click <a href="{{ site }}/{{ incident }}/hotline/servicerequest/{{ id }}">here</a> to view the details.
+Click {{ site }}/{{ incident }}/hotline/servicerequest/{{ id }} to view the details.
