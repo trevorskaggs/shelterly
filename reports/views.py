@@ -15,8 +15,9 @@ from django.utils import timezone
 class ReportViewSet(viewsets.ViewSet):
 
   def list(self, response):
-    if ServiceRequest.objects.filter(incident__slug=self.request.GET.get('incident', '')).exists():
-        start_date = ServiceRequest.objects.select_related('incident').filter(incident__slug=self.request.GET.get('incident', '')).annotate(date=TruncDay('timestamp')).values('date').earliest('date')['date']
+    incident_slug = self.request.GET.get('incident', '')
+    if ServiceRequest.objects.filter(incident__slug=incident_slug).exists():
+        start_date = ServiceRequest.objects.select_related('incident').filter(incident__slug=incident_slug).annotate(date=TruncDay('timestamp')).values('date').earliest('date')['date']
         end_date = timezone.now()
 
         daily_report = []
@@ -24,11 +25,11 @@ class ReportViewSet(viewsets.ViewSet):
         shelter_intake_report = []
         delta = datetime.timedelta(days=1)
 
-        animals = Animal.objects.select_related('incident').select_related('species').select_related('species__category').prefetch_related('owners').exclude(status='CANCELED').filter(incident__slug=self.request.GET.get('incident', '')).distinct()
+        animals = Animal.objects.select_related('incident').select_related('species').select_related('species__category').prefetch_related('owners').exclude(status='CANCELED').filter(incident__slug=incident_slug).distinct()
         animal_categories = [sc.replace('/', '').replace(' ', '_') for sc in SpeciesCategory.objects.all().values_list('name', flat=True)]
 
         while end_date >= start_date:
-          service_requests = ServiceRequest.objects.select_related('incident').select_related('assignedrequest').filter(incident__slug=self.request.GET.get('incident', ''), assignedrequest__timestamp__date=end_date).distinct()
+          service_requests = ServiceRequest.objects.select_related('incident').select_related('assignedrequest').filter(incident__slug=incident_slug, assignedrequest__timestamp__date=end_date).distinct()
           total_assigned = service_requests.count()
           sip_sr_worked = service_requests.filter(sip=True).count()
           utl_sr_worked = service_requests.filter(utl=True).count()
@@ -37,9 +38,9 @@ class ReportViewSet(viewsets.ViewSet):
 
           daily_data = {
             'date': end_date.strftime('%m/%d/%Y'),
-            'total': ServiceRequest.objects.select_related('incident').filter(incident__slug=self.request.GET.get('incident', ''), timestamp__date__lte=end_date).count(),
+            'total': ServiceRequest.objects.select_related('incident').filter(incident__slug=incident_slug, timestamp__date__lte=end_date).count(),
             'assigned': total_assigned,
-            'new': ServiceRequest.objects.select_related('incident').filter(incident__slug=self.request.GET.get('incident', ''), timestamp__date=end_date).count()
+            'new': ServiceRequest.objects.select_related('incident').filter(incident__slug=incident_slug, timestamp__date=end_date).count()
           }
           daily_report.append(daily_data)
 
@@ -64,15 +65,15 @@ class ReportViewSet(viewsets.ViewSet):
 
           end_date -= delta
         shelters = Shelter.objects.select_related('animal__incident').prefetch_related('animal_set', 'animal_set__species').filter(animal__incident__slug=self.request.GET.get('incident')).annotate(
-          avians=Count("animal", filter=Q(animal__species__category__name="avian", animal__status='SHELTERED', animal__incident__slug=self.request.GET.get('incident', ''))),
-          cats=Count("animal", filter=Q(animal__species__category__name="cat", animal__status='SHELTERED', animal__incident__slug=self.request.GET.get('incident', ''))),
-          dogs=Count("animal", filter=Q(animal__species__category__name="dog", animal__status='SHELTERED', animal__incident__slug=self.request.GET.get('incident', ''))),
-          equines=Count("animal", filter=Q(animal__species__category__name="equine", animal__status='SHELTERED', animal__incident__slug=self.request.GET.get('incident', ''))),
-          reptiles=Count("animal", filter=Q(animal__species__category__name="reptile/amphibian", animal__status='SHELTERED', animal__incident__slug=self.request.GET.get('incident', ''))),
-          ruminants=Count("animal", filter=Q(animal__species__category__name="ruminant", animal__status='SHELTERED', animal__incident__slug=self.request.GET.get('incident', ''))),
-          small_mammals=Count("animal", filter=Q(animal__species__category__name="small mammal", animal__status='SHELTERED', animal__incident__slug=self.request.GET.get('incident', ''))),
-          others=Count("animal", filter=Q(animal__species__category__name="other", animal__status='SHELTERED', animal__incident__slug=self.request.GET.get('incident', ''))),
-          total=Count("animal", filter=Q(animal__status='SHELTERED', animal__incident__slug=self.request.GET.get('incident', '')))).values('name', 'avians', 'cats', 'dogs', 'equines', 'reptiles', 'ruminants', 'small_mammals', 'others', 'total').order_by('name')
+          avians=Count("animal", filter=Q(animal__species__category__name="avian", animal__status='SHELTERED', animal__incident__slug=incident_slug)),
+          cats=Count("animal", filter=Q(animal__species__category__name="cat", animal__status='SHELTERED', animal__incident__slug=incident_slug)),
+          dogs=Count("animal", filter=Q(animal__species__category__name="dog", animal__status='SHELTERED', animal__incident__slug=incident_slug)),
+          equines=Count("animal", filter=Q(animal__species__category__name="equine", animal__status='SHELTERED', animal__incident__slug=incident_slug)),
+          reptiles=Count("animal", filter=Q(animal__species__category__name="reptile/amphibian", animal__status='SHELTERED', animal__incident__slug=incident_slug)),
+          ruminants=Count("animal", filter=Q(animal__species__category__name="ruminant", animal__status='SHELTERED', animal__incident__slug=incident_slug)),
+          small_mammals=Count("animal", filter=Q(animal__species__category__name="small mammal", animal__status='SHELTERED', animal__incident__slug=incident_slug)),
+          others=Count("animal", filter=Q(animal__species__category__name="other", animal__status='SHELTERED', animal__incident__slug=incident_slug)),
+          total=Count("animal", filter=Q(animal__status='SHELTERED', animal__incident__slug=incident_slug))).values('name', 'avians', 'cats', 'dogs', 'equines', 'reptiles', 'ruminants', 'small_mammals', 'others', 'total').order_by('name')
         # Turn queryset into list so we can append a total row to it.
         animals_status = []
         for row in list(animals.values('species__category__name').annotate(reported=Count("id", filter=Q(status='REPORTED'), distinct=True), reported_evac=Count("id", filter=Q(status='REPORTED (EVAC REQUESTED)'), distinct=True), reported_sip=Count("id", filter=Q(status='REPORTED (SIP REQUESTED)'), distinct=True), utl=Count("id", filter=Q(status='UNABLE TO LOCATE'), distinct=True), nfa=Count("id", filter=Q(status='NO FURTHER ACTION'), distinct=True), sheltered=Count("id", filter=Q(status='SHELTERED'), distinct=True), sip=Count("id", filter=Q(status='SHELTERED IN PLACE'), distinct=True), reunited=Count("id", filter=Q(status='REUNITED'), distinct=True), deceased=Count("id", filter=Q(status='DECEASED'), distinct=True)).order_by('species__category__name')):
@@ -95,8 +96,9 @@ class ReportViewSet(viewsets.ViewSet):
                 animals_deceased.append(animal)
 
         duplicate_sr_report = []
-        for dupe_sr in ServiceRequest.objects.exclude(status='canceled').values('address', 'city', 'state', 'zip_code').order_by('address', 'city', 'state', 'zip_code').annotate(Count('pk')).filter(pk__count__gt=1):
-            dupe_sr_ids = ', '.join([str(pk) for pk in ServiceRequest.objects.exclude(status='canceled').filter(address=dupe_sr['address'], city=dupe_sr['city'], state=dupe_sr['state'], zip_code=dupe_sr['zip_code']).values_list('id_for_incident', flat=True)])
+        active_incident_srs = ServiceRequest.objects.filter(incident__slug=incident_slug).exclude(status='canceled')
+        for dupe_sr in active_incident_srs.values('address', 'city', 'state', 'zip_code').order_by('address', 'city', 'state', 'zip_code').annotate(Count('pk')).filter(pk__count__gt=1):
+            dupe_sr_ids = ', '.join([str(pk) for pk in active_incident_srs.filter(address=dupe_sr['address'], city=dupe_sr['city'], state=dupe_sr['state'], zip_code=dupe_sr['zip_code']).values_list('id_for_incident', flat=True)])
             duplicate_sr_report.append({
               'address': dupe_sr['address'],
               'city': dupe_sr['city'],
