@@ -13,7 +13,7 @@ function Reports({ incident, organization }) {
   // Initial state.
   const { setShowSystemError } = useContext(SystemErrorContext);
 
-  const [data, setData] = useState({'isFetching':true, 'daily_report':[], 'sr_worked_report':[], 'shelter_report':[], 'animal_status_report':[], 'animal_owner_report':[], 'animals_deceased_report':[]});
+  const [data, setData] = useState({'isFetching':true, 'daily_report':[], 'sr_worked_report':[], 'shelter_report':[], 'shelter_intake_report': [], 'animal_status_report':[], 'animal_owner_report':[], 'animals_deceased_report':[], 'duplicate_sr_report': []});
   const [selection, setSelection] = useState({value:'daily', label:"Daily Report", key:"daily_report"});
 
   const [storeDate, setStoreDate] = useState('');
@@ -88,7 +88,7 @@ function Reports({ incident, organization }) {
       })
       .catch(error => {
         if (!unmounted) {
-          setData({'isFetching':false, 'daily_report':[], 'sr_worked_report':[], 'shelter_report':[], 'animal_status_report':[], 'animal_owner_report':[], 'animals_deceased_report':[]});
+          setData({'isFetching':false, 'daily_report':[], 'sr_worked_report':[], 'shelter_report':[], 'shelter_intake_report': [], 'animal_status_report':[], 'animal_owner_report':[], 'animals_deceased_report':[], 'duplicate_sr_report': []});
           setShowSystemError(true);
         }
       });
@@ -207,6 +207,59 @@ function Reports({ incident, organization }) {
   ];
 
   const [shelterColumns, setShelterColumns] = useState(shelter_columns);
+
+  const shelter_intake_columns = [
+    {
+      name: 'Date',
+      selector: row => row.date,
+      format: row => moment(row.date).format('MM/DD/YY')
+    },
+    {
+      name: 'Avians',
+      selector: row => row.avian,
+      compact: true,
+    },
+    {
+      name: 'Cats',
+      selector: row => row.cat,
+      compact: true,
+    },
+    {
+      name: 'Dogs',
+      selector: row => row.dog,
+      compact: true,
+    },
+    {
+      name: 'Equines',
+      selector: row => row.equine,
+      compact: true,
+    },
+    {
+      name: 'Reptiles/Amphibians',
+      selector: row => row.reptileamphibian,
+      compact: true,
+    },
+    {
+      name: 'Ruminants',
+      selector: row => row.ruminant,
+      compact: true,
+    },
+    {
+      name: 'Small Mammals',
+      selector: row => row.small_mammal,
+      compact: true,
+    },
+    {
+      name: 'Others',
+      selector: row => row.other,
+      compact: true,
+    },
+    {
+      name: 'Total',
+      selector: row => row.total,
+      compact: true,
+    }
+  ]
 
   const animal_status_columns = [
     {
@@ -398,13 +451,31 @@ function Reports({ incident, organization }) {
     },
   ];
 
+  const duplicate_sr_columns = [
+    {
+      name: 'Address',
+      selector: row => row.address + (row.city ? (", " + row.city) : ", ") + ", " + row.state + " " + row.zip_code,
+      grow: 2,
+    },
+    {
+      name: 'Count',
+      selector: row => row.count
+    },
+    {
+      name: 'SR#',
+      selector: row => row.sr_ids,
+    },
+  ];
+
   const reportChoices = [
     {value:'daily', label:"Daily Report", key:"daily_report"},
     {value:'worked', label:"Service Requests Worked Report", key:"sr_worked_report"},
     {value:'shelter', label:"Shelter Report", key:"shelter_report"},
+    {value:'shelter_intake', label:"Shelter Intake Report", key:"shelter_intake"},
     {value:'animal_deceased', label:"Deceased Animal Report", key:"animals_deceased_report"},
     {value:'animal_status', label:"Total Animals By Status Report", key:"animal_status_report"},
     {value:'animal_owner', label:"Total Animals By Ownership Report", key:"animal_owner_report"},
+    {value:'duplicate_sr', label: "Duplicate SR Report", key:"duplicate_sr_report"}
   ]
 
   const customStyles = {
@@ -443,7 +514,7 @@ function Reports({ incident, organization }) {
           setSelection(instance)
         }}
       />
-      { selection.value === 'daily' || selection.value === 'worked' ?
+      { selection.value === 'daily' || selection.value === 'worked' || selection.value === 'shelter_intake' ?
       <DateRangePicker
         name={`date_range_picker`}
         id={`date_range_picker`}
@@ -501,6 +572,17 @@ function Reports({ incident, organization }) {
           striped
           noDataComponent={data && data.shelter_report.length === 0 && !data.isFetching ? <div style={{padding:"24px"}}>There are no records to display</div> : <div style={{padding:"24px"}}>Fetching report data...</div>}
       />
+      : selection.value === 'shelter_intake' ?
+      <DataTable
+          columns={shelter_intake_columns}
+          data={data && data.shelter_intake_report ? data.shelter_intake_report.filter(row => (startDate ? startDate <= moment(row.date)
+            .format('YYYY-MM-DD') && endDate >= moment(row.date).format('YYYY-MM-DD') : row)) : []}
+          actions={actionsMemo}
+          title={selection.label}
+          pagination
+          striped
+          noDataComponent={data && data.shelter_intake_report.length === 0 && !data.isFetching ? <div style={{padding:"24px"}}>There are no records to display</div> : <div style={{padding:"24px"}}>Fetching report data...</div>}
+      />
       : selection.value === 'animal_status' ?
       <DataTable
           columns={animal_status_columns}
@@ -518,6 +600,16 @@ function Reports({ incident, organization }) {
           title={selection.label}
           striped
           noDataComponent={data && data.animal_owner_report.length === 0 && !data.isFetching ? <div style={{padding:"24px"}}>There are no records to display</div> : <div style={{padding:"24px"}}>Fetching report data...</div>}
+      />
+      : selection.value === 'duplicate_sr' ?
+      <DataTable
+          columns={duplicate_sr_columns}
+          data={data.duplicate_sr_report}
+          actions={actionsMemo}
+          title={selection.label}
+          pagination
+          striped
+          noDataComponent={data && data.duplicate_sr_report.length === 0 && !data.isFetching ? <div style={{padding:"24px"}}>There are no records to display</div> : <div style={{padding:"24px"}}>Fetching report data...</div>}
       />
       : selection.value === 'animal_deceased' ?
       <DataTable
