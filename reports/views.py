@@ -94,6 +94,18 @@ class ReportViewSet(viewsets.ViewSet):
                 animal['date'] = action.timestamp
                 animals_deceased.append(animal)
 
-        data = {'daily_report':daily_report, 'sr_worked_report':sr_worked_report, 'shelter_report':shelters, 'shelter_intake_report': shelter_intake_report, 'animal_status_report':animals_status, 'animal_owner_report':animals_ownership, 'animal_deceased_report':sorted(animals_deceased, key=itemgetter('date'), reverse=True)}
+        duplicate_sr_report = []
+        for dupe_sr in ServiceRequest.objects.exclude(status='canceled').values('address', 'city', 'state', 'zip_code').order_by('address', 'city', 'state', 'zip_code').annotate(Count('pk')).filter(pk__count__gt=1):
+            dupe_sr_ids = ', '.join([str(pk) for pk in ServiceRequest.objects.exclude(status='canceled').filter(address=dupe_sr['address'], city=dupe_sr['city'], state=dupe_sr['state'], zip_code=dupe_sr['zip_code']).values_list('id_for_incident', flat=True)])
+            duplicate_sr_report.append({
+              'address': dupe_sr['address'],
+              'city': dupe_sr['city'],
+              'state': dupe_sr['state'],
+              'zip_code': dupe_sr['zip_code'],
+              'count': dupe_sr['pk__count'],
+              'sr_ids': dupe_sr_ids
+            })
+
+        data = {'daily_report':daily_report, 'sr_worked_report':sr_worked_report, 'shelter_report':shelters, 'shelter_intake_report': shelter_intake_report, 'animal_status_report':animals_status, 'animal_owner_report':animals_ownership, 'animal_deceased_report':sorted(animals_deceased, key=itemgetter('date'), reverse=True), 'duplicate_sr_report': duplicate_sr_report}
         return Response(data)
     return Response({'daily_report':[], 'sr_worked_report':[], 'shelter_report':[], 'shelter_intake_report': [], 'animal_status_report':[], 'animal_owner_report':[], 'animal_deceased_report':[]})
