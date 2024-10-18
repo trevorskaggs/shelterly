@@ -143,14 +143,6 @@ function MedicalRecordDetails({ id, incident, organization }) {
                     <FontAwesomeIcon icon={faUserDoctorMessage} className="mr-1" inverse />
                     Create Veterinary Request
                   </LoadingLink>
-                  {/* {data.exams.length ? <LoadingLink
-                    href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.id}
-                    isLoading={isLoading}
-                    className="text-white d-block py-1 px-3"
-                  >
-                    <FontAwesomeIcon icon={faEdit} className="mr-1" inverse />
-                    Update Medical Plan
-                  </LoadingLink> : ""} */}
                   {data.exams.length ? <LoadingLink
                     href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.id + "/medicalnote/new"}
                     isLoading={isLoading}
@@ -158,6 +150,14 @@ function MedicalRecordDetails({ id, incident, organization }) {
                   >
                     <FontAwesomeIcon icon={faNoteMedical} className="mr-1" inverse />
                     Add Daily Medical Note
+                  </LoadingLink> : ""}
+                  {data.exams.length ? <LoadingLink
+                    href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.id + "/medicalplan/edit"}
+                    isLoading={isLoading}
+                    className="text-white d-block py-1 px-3"
+                  >
+                    <FontAwesomeIcon icon={faEdit} className="mr-1" inverse />
+                    Edit Medical Plan
                   </LoadingLink> : ""}
                   {data.exams.length ? <LoadingLink
                     href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.id + "/treatment/new"}
