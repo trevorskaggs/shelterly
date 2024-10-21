@@ -163,7 +163,7 @@ class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
         try:
             sr.push_json()
         except Exception as error:
-            print ("Caltopo Error on SR#" + sr.id + ": " + error)
+            print ("Caltopo Error on SR#" + str(sr.id) + ": " + error)
             success = False
         data = {sr.id_for_incident: {'status': success}}
         return JsonResponse(data)
