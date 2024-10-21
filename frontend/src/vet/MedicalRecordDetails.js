@@ -1,8 +1,11 @@
 import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
 import moment from 'moment';
+import { Field, Form, Formik, } from 'formik';
+import { DateTimePicker, TextInput } from '../components/Form';
+import * as Yup from 'yup';
 import { Link, useQueryParams } from 'raviger';
-import { Button, Card, Col, Collapse, ListGroup, ListGroupItem, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
+import { Button, Card, Col, Collapse, Form as BootstrapForm, ListGroup, ListGroupItem, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faEdit,
@@ -70,6 +73,8 @@ function MedicalRecordDetails({ id, incident, organization }) {
   const [activeExam, setActiveExam] = useState(null);
   const [activeOrders, setActiveOrders] = useState(tab);
   const [isLoading, setIsLoading] = useState(true);
+  const [showMedicalNotesForm, setShowMedicalNotesForm] = useState(false);
+  const handleClose = () => setShowMedicalNotesForm(false);
 
   // Hook for initializing data.
   useEffect(() => {
@@ -220,7 +225,17 @@ function MedicalRecordDetails({ id, incident, organization }) {
                 </div>
               </ListGroup.Item>
               <ListGroup.Item style={{marginBottom:"-6px"}}>
-                  <span><b>Medical Notes:</b> {data.animal_object.medical_notes || "N/A"}</span>
+                  <span><b>Medical Notes<OverlayTrigger
+                    key={"edit-animal-medical-notes"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-edit-animal-medical-notes`}>
+                        Edit animal medical notes
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon icon={faEdit} onClick={() => {setShowMedicalNotesForm(true)}} size="sm" className="ml-1" style={{ cursor: 'pointer' }} inverse />
+                  </OverlayTrigger>:</b> {data.animal_object.medical_notes || "N/A"}</span>
               </ListGroup.Item>
             </ListGroup>
           </Card.Body>
@@ -523,6 +538,47 @@ function MedicalRecordDetails({ id, incident, organization }) {
         </Card.Body>
       </Card>
     </div> : ""}
+    <Formik
+      initialValues={data.animal_object}
+      enableReinitialize={true}
+      validationSchema={Yup.object({
+        medical_notes: Yup.string().max(2500, 'Must be 2500 characters or less.'),
+      })}
+      onSubmit={(values, { setSubmitting }) => {
+        axios.patch('/animals/api/animal/' + data.animal_object.id + '/', values)
+        .then(response => {
+          setData(prevState => ({ ...prevState, animal_object:response.data}));
+          setShowMedicalNotesForm(false);
+        })
+        .catch(error => {
+          setShowSystemError(true);
+        });
+      }}
+    >
+      {formikProps => (
+    <Modal show={showMedicalNotesForm} onHide={handleClose}>
+      <Modal.Header closeButton>
+        <Modal.Title>Edit Animal Medical Notes</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <BootstrapForm.Row className="">
+          <TextInput
+            as="textarea"
+            // label="Notes"
+            name="medical_notes"
+            id="medical_notes"
+            xs="12"
+            rows={7}
+          />
+        </BootstrapForm.Row>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="primary" onClick={() => {formikProps.submitForm();}}>Save</Button>
+        <Button variant="secondary" onClick={handleClose}>Close</Button>
+      </Modal.Footer>
+    </Modal>
+    )}
+    </Formik>
     {/* <History action_history={data.action_history} /> */}
     </>
   );
