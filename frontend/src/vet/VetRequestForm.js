@@ -21,6 +21,7 @@ import * as Yup from 'yup';
 import { AuthContext } from "../accounts/AccountsReducer";
 import { DropDown, TextInput } from '../components/Form';
 import { SystemErrorContext } from '../components/SystemError';
+import Patient from './components/Patient';
 
 const customStyles = {
   // For the select it self, not the options of the select
@@ -59,7 +60,9 @@ const VetRequestForm = (props) => {
     presenting_complaints: [],
     complaints_other: '',
     caution: false,
-  })
+  });
+
+  const [animalData, setAnimalData] = useState({});
 
   const [presentingComplaintChoices, setPresentingComplaintChoices] = useState([]);
 
@@ -75,6 +78,7 @@ const VetRequestForm = (props) => {
         .then(response => {
           if (!unmounted) {
             setData(response.data);
+            setAnimalData(response.data.animal_object)
           }
         })
         .catch(error => {
@@ -82,6 +86,26 @@ const VetRequestForm = (props) => {
         });
       };
       fetchVetRequest();
+    };
+
+    if (props.animalid) {
+      const fetchAnimalData = async () => {
+        // Fetch Animal data.
+        await axios.get('/animals/api/incident/' + (state ? state.incident.id : 'undefined') + '/animal/' + props.animalid ? props.animalid : data.animal_object.id_for_incident + '/', {
+          cancelToken: source.token,
+        })
+        .then(response => {
+          if (!unmounted) {
+            setAnimalData(response.data);
+          }
+        })
+        .catch(error => {
+          if (!unmounted) {
+            setShowSystemError(true);
+          }
+        })
+      };
+      fetchAnimalData();
     };
 
     const fetchPresentingComplaints = async () => {
@@ -156,7 +180,9 @@ const VetRequestForm = (props) => {
             <span style={{ cursor: 'pointer' }} onClick={() => navigate('/' + props.organization + '/' + props.incident + '/animals/' + props.animalid + '/')} className="mr-3">
               <FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse />
             </span>}
-            {!props.id ? "" : "Update "}Veterinary Request Form</Card.Header>
+            {!props.id ? "" : "Update "}Veterinary Request Form
+          </Card.Header>
+          <Patient animal={animalData} vet_request={null} organization={props.organization} incident={props.incident} />
           <Card.Body>
             <Form>
               <FormGroup>
