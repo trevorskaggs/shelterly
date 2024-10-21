@@ -36,7 +36,7 @@ function Deploy({ incident, organization }) {
   // Determine if this is a preplanning workflow.
   let preplan = window.location.pathname.includes("preplan")
 
-  const [data, setData] = useState({service_requests: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
+  const [data, setData] = useState({service_requests: [], isFetching: true, bounds:L.latLngBounds([[0,0]])});
   const [newData, setNewData] = useState(false);
   const [mapState, setMapState] = useState({});
   const [totalSelectedState, setTotalSelectedState] = useState({'REPORTED':{}, 'REPORTED (EVAC REQUESTED)':{}, 'REPORTED (SIP REQUESTED)':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}});
@@ -307,6 +307,7 @@ function Deploy({ incident, organization }) {
     };
 
     const fetchServiceRequests = async () => {
+      setData({...data, isFetching: true});
       // Fetch ServiceRequest data.
       await axios.get('/hotline/api/servicerequests/?incident=' + incident, {
         params: {
@@ -450,7 +451,7 @@ function Deploy({ incident, organization }) {
             }
           >
             <span className="d-inline-block">
-              <Button className="fa-move-up" onClick={() => setTriggerRefresh(!triggerRefresh)}>
+              <Button className="fa-move-up" onClick={() => setTriggerRefresh(!triggerRefresh)} disabled={data.isFetching}>
                 <FontAwesomeIcon icon={faRotate} />
               </Button>
             </span>
