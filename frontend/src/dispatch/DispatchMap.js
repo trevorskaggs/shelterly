@@ -944,7 +944,18 @@ function Deploy({ incident, organization }) {
                     </OverlayTrigger>
                     }
                     <span className="ml-2">|
-                    &nbsp;<Link href={"/" + organization +"/" + incident + "/hotline/servicerequest/" + service_request.id_for_incident} className="text-link" style={{textDecoration:"none", color:"white"}}>SR#{service_request.id_for_incident}</Link> - {service_request.full_address}</span>
+                    &nbsp;<Link href={"/" + organization +"/" + incident + "/hotline/servicerequest/" + service_request.id_for_incident} className="text-link" style={{textDecoration:"none", color:"white"}}>SR#{service_request.id_for_incident}</Link>
+                    {service_request.followup_date ? <span> (
+                      {/* <OverlayTrigger
+                      key={"followup-date"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-followup-date`}>
+                          Followup date
+                        </Tooltip>
+                      }
+                    ><FontAwesomeIcon icon={faCalendarDay} className="fa-move-up" size="sm" /></OverlayTrigger>:  */}
+                    <Moment format="MM/DD/YY">{service_request.followup_date}</Moment>)</span> : ""} - {service_request.full_address}</span>
                     <OverlayTrigger
                       key={"radius-toggle"}
                       placement="top"
@@ -956,7 +967,7 @@ function Deploy({ incident, organization }) {
                     >
                       <FontAwesomeIcon icon={faBullseye} color={mapState[service_request.id].radius === "enabled" ? "red" : ""} className="ml-1 mr-1" style={{cursor:'pointer'}} onClick={() => handleRadius(service_request.id)} />
                     </OverlayTrigger>
-                    {service_request.followup_date ?
+                    {/* {service_request.followup_date ?
                     <OverlayTrigger
                       key={"followup-date"}
                       placement="top"
@@ -967,7 +978,7 @@ function Deploy({ incident, organization }) {
                       }
                     >
                       <FontAwesomeIcon icon={faCalendarDay} className="mr-1" />
-                    </OverlayTrigger> : ""}
+                    </OverlayTrigger> : ""} */}
                     {service_request.owner_objects.length === 0 ?
                       <OverlayTrigger
                         key={"stray"}

@@ -6,13 +6,14 @@ import { Button, ButtonGroup, Card, Col, Form as BootstrapForm, Modal } from "re
 import * as Yup from 'yup';
 import { Switch } from 'formik-material-ui';
 import 'flatpickr/dist/themes/light.css';
-import { AddressSearch, DropDown, TextInput } from '../components/Form';
+import { AddressSearch, DateTimePicker, DropDown, TextInput } from '../components/Form';
 import { AuthContext } from "../accounts/AccountsReducer";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft } from '@fortawesome/free-solid-svg-icons';
 import ButtonSpinner from '../components/ButtonSpinner';
 import { priorityChoices } from '../constants';
 import { SystemErrorContext } from '../components/SystemError';
+import moment from 'moment';
 
 // Form for Service Request objects.
 function ServiceRequestForm(props) {
@@ -47,6 +48,7 @@ function ServiceRequestForm(props) {
     reporter: null,
     directions: props.state.steps.request.directions || '',
     priority: props.state.steps.request.priority || 2,
+    followup_date: props.state.steps.request.followup_date || new Date(),
     address: props.state.steps.request.address || props.state.steps.owner.address || '',
     apartment: props.state.steps.request.apartment || props.state.steps.owner.apartment || '',
     city: props.state.steps.request.city || props.state.steps.owner.city || '',
@@ -237,6 +239,20 @@ function ServiceRequestForm(props) {
                   }}
                 />
               </Col>
+            </BootstrapForm.Row>
+            <BootstrapForm.Row className="mt-3 mb-3">
+              <DateTimePicker
+                label="Service Request Followup Date"
+                name={`followup_date`}
+                id={`followup_date`}
+                // more_options={{minDate:new Date()}}
+                xs="4"
+                data-enable-time={false}
+                onChange={(date, dateStr) => {
+                  formikProps.setFieldValue(`followup_date`, dateStr)
+                }}
+                value={formikProps.values.followup_date||data.followup_date}
+              />
             </BootstrapForm.Row>
             <BootstrapForm.Row>
               <TextInput
