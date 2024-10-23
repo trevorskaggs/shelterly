@@ -11,11 +11,12 @@ from django.template.loader import render_to_string
 from knox.views import LoginView as KnoxLoginView
 from rest_framework import generics, permissions, response, status, exceptions, viewsets
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 
 from accounts.models import ShelterlyUser, ShelterlyUserOrg
 from accounts.serializers import UserSerializer, SecureUserSerializer
-from incident.models import Organization, TemporaryAccess
+from incident.models import Incident, Organization, TemporaryAccess
 
 User = get_user_model()
 
@@ -37,6 +38,9 @@ class UserAuth(generics.RetrieveAPIView):
     serializer_class = UserSerializer
 
     def get_object(self):
+        # Fail check if the incident is closed and the user doesn't have incident perms or superuser access.
+        if self.request.GET.get('incident', False) and Incident.objects.get(id=self.request.GET.get('incident', False)).end_time and not self.request.user.is_superuser and not self.request.user.perms.filter(organization=self.request.GET.get('organization'))[0].incident_perms:
+            raise ValidationError(detail='Incident is closed.')
         return self.request.user
 
 class CreateUserMixin(object):

@@ -139,6 +139,7 @@ export const initialWorkflowData = {
       latitude: null,
       longitude: null,
       directions:'',
+      followup_date: new Date(),
       verbal_permission: false,
       key_required: false,
       accessible: false,

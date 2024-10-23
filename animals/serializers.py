@@ -37,13 +37,14 @@ class ModestAnimalSerializer(SimpleAnimalSerializer):
     weight = serializers.SerializerMethodField()
     owners = SimplePersonSerializer(many=True, required=False, read_only=True)
     owner_names = serializers.StringRelatedField(source='owners', many=True, read_only=True)
+    reporter_object = SimplePersonSerializer(source='reporter', read_only=True)
     shelter_object = SimpleShelterSerializer(source='shelter', required=False, read_only=True)
     room_name = serializers.StringRelatedField(source='room', read_only=True)
 
     class Meta:
         model = Animal
         fields = ['id', 'id_for_incident', 'name', 'species', 'species_string', 'confined', 'aggressive', 'injured', 'fixed', 'request', 'request_id_for_incident', 'found_location', 'request_address', 'request_lat_lon', 'shelter_object', 'shelter', 'status', 'aco_required', 'color_notes',
-        'microchip', 'front_image', 'intake_date', 'owners', 'owner_names', 'sex', 'size', 'age', 'pcolor', 'scolor', 'medical_notes', 'medical_record', 'behavior_notes', 'room', 'room_name', 'category', 'latitude', 'longitude', 'weight', 'reporter']
+        'microchip', 'front_image', 'intake_date', 'owners', 'owner_names', 'sex', 'size', 'age', 'pcolor', 'scolor', 'medical_notes', 'medical_record', 'behavior_notes', 'room', 'room_name', 'category', 'latitude', 'longitude', 'weight', 'reporter', 'reporter_object']
 
     def get_found_location(self, obj):
         return build_full_address(obj)
@@ -99,7 +100,6 @@ class AnimalSerializer(ModestAnimalSerializer):
     side_image = serializers.SerializerMethodField()
     extra_images = serializers.SerializerMethodField()
     owners = SimplePersonSerializer(many=True, required=False, read_only=True)
-    reporter_object = SimplePersonSerializer(source='reporter', read_only=True)
     action_history = serializers.SerializerMethodField()
     room_name = serializers.StringRelatedField(source='room', read_only=True)
     building_name = serializers.StringRelatedField(source='room.building', read_only=True)
