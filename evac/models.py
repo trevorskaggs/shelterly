@@ -87,7 +87,6 @@ def email_on_creation(evac_assignment):
         sr_addresses = []
         for sr in evac_assignment.service_requests.all():
             sr_addresses.append('SR#%s: %s, %s, %s' % (sr.id_for_incident, sr.address, sr.city, sr.state))
-        import ipdb; ipdb.set_trace()
         sr_adds  = '\n'.join(sr_add for sr_add in sr_addresses)
         email_data = {
             'site': Site.objects.get_current(),
