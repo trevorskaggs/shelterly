@@ -188,6 +188,7 @@ def email_on_creation(sender, instance, **kwargs):
                     {
                     'site': Site.objects.get_current(),
                     'id': instance.id_for_incident,
+                    'organization': instance.incident.organization.slug,
                     'incident': instance.incident.slug,
                     'address': instance.location_output,
                     'sr_creation_date': instance.timestamp.strftime('%m/%d/%Y %H:%M:%S')
