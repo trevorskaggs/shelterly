@@ -1,19 +1,22 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import axios from "axios";
 import { Link, navigate } from 'raviger';
 import { AuthContext } from "../accounts/AccountsReducer";
 import Moment from 'react-moment';
 import { Carousel } from 'react-responsive-carousel';
-import { Button, Card, Col, ListGroup, Modal, OverlayTrigger, Row, Tooltip, Spinner } from 'react-bootstrap';
+import { Button, Card, Col, Form as BootstrapForm, ListGroup, Modal, OverlayTrigger, Row, Tooltip, Spinner } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBan, faMedkit, faCut, faEdit, faEnvelope, faLink, faMinusSquare, faTimes, faUserPlus, faFilePdf
 } from '@fortawesome/free-solid-svg-icons';
-import { faBadgeSheriff, faUserDoctorMessage, faClawMarks, faFolderMedical, faHomeHeart, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
+import { faBadgeSheriff, faUserDoctorMessage, faClawMarks, faFolderMedical, faHomeHeart, faPhoneRotary, faRightLeft } from '@fortawesome/pro-solid-svg-icons';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
+import * as Yup from 'yup';
+import { Formik } from "formik";
 import { AnimalDeleteModal } from "../components/Modals";
 import Header from '../components/Header';
 import History from '../components/History';
+import { DropDown } from '../components/Form.js';
 import { printAnimalCareSchedule } from './Utils';
 import AnimalCoverImage from '../components/AnimalCoverImage';
 import { SystemErrorContext } from '../components/SystemError';
@@ -66,12 +69,18 @@ function AnimalDetails({ id, incident, organization }) {
 
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
+  const [showTransfer, setShowTransfer] = useState(false);
+  const handleCloseTransfer = () => setShowTransfer(false);
   const [ownerToDelete, setOwnerToDelete] = useState({id:0, name:''});
   const [showOwnerConfirm, setShowOwnerConfirm] = useState(false);
   const handleOwnerClose = () => setShowOwnerConfirm(false);
   const [showAnimalConfirm, setShowAnimalConfirm] = useState(false);
   const handleAnimalClose = () => setShowAnimalConfirm(false);
   const { getFullLocationFromPath } = useLocationWithRoutes();
+  const [shelters, setShelters] = useState({options: [], shelters: [], room_options: {}, isFetching: false});
+
+  const roomRef = useRef(null);
+  const shelterRef = useRef(null);
 
   // Handle animal reunited submit.
   const handleSubmit = async () => {
@@ -175,6 +184,40 @@ function AnimalDetails({ id, incident, organization }) {
       .finally(() => setIsLoading(false));
     };
     fetchAnimalData();
+
+    const fetchShelters = () => {
+      setShelters({options: [], shelters: [], room_options: {}, isFetching: true});
+      // Fetch Shelter data.
+      axios.get('/shelter/api/shelter/?incident=' + incident + '&organization=' + organization +'&training=' + (state && state.incident.training), {
+        cancelToken: source.token,
+      })
+      .then(response => {
+        if (!unmounted) {
+          let options = [];
+          let room_options = {};
+          response.data.forEach(shelter => {
+            // Build shelter option list.
+            options.push({value: shelter.id, label: shelter.name});
+            room_options[shelter.id] = [];
+            shelter.buildings.forEach(building => {
+              building.rooms.forEach(room => {
+                // Build room option list identified by shelter ID.
+                room_options[shelter.id].push({value: room.id, label: room.building_name + ' - ' + room.name + ' (' + room.animal_count + ' animals)'});
+              });
+            });
+          });
+          setShelters({options: options, shelters:response.data, room_options:room_options, isFetching:false});
+        }
+      })
+      .catch(error => {
+        if (!unmounted) {
+          setShelters({options: [], shelters: [], room_options: {}, isFetching: false});
+          setShowSystemError(true);
+        }
+      });
+    };
+    fetchShelters();
+
     // Cleanup.
     return () => {
       unmounted = true;
@@ -339,12 +382,18 @@ function AnimalDetails({ id, incident, organization }) {
                     <FontAwesomeIcon icon={faEdit} className="mr-1" inverse />
                     Update Animal
                   </LoadingLink>
-                {data.status !== 'REUNITED' ?
+                  {data.status !== 'REUNITED' ?
                     <LoadingLink onClick={() => setShow(true)} isLoading={isLoading} className="text-white d-block py-1 px-3">
                       <FontAwesomeIcon icon={faHomeHeart} className="mr-1" style={{cursor:'pointer'}} inverse />
                       Reunite Animal
                     </LoadingLink>
-                : ""}
+                  : ""}
+                  {data.status === 'SHELTERED' ?
+                    <LoadingLink onClick={() => setShowTransfer(true)} isLoading={isLoading} className="text-white d-block py-1 px-3">
+                      <FontAwesomeIcon icon={faRightLeft} className="mr-1" style={{cursor:'pointer'}} inverse />
+                      Transfer Animal
+                    </LoadingLink>
+                  : ""}
                   <LoadingLink
                     href={"/" + organization + "/" + incident + "/animals/" + id + "/vetrequest/new"}
                     isLoading={isLoading}
@@ -595,6 +644,70 @@ function AnimalDetails({ id, incident, organization }) {
         <Button variant="secondary" onClick={handleOwnerClose}>Close</Button>
       </Modal.Footer>
     </Modal>
+    <Formik
+      initialValues={data}
+      enableReinitialize={true}
+      // validationSchema={Yup.object({
+      // })}
+      onSubmit={(values, { setSubmitting }) => {
+        axios.patch('/animals/api/animal/' + data.id + '/', values)
+        .then(response => {
+          setData(prevState => ({ ...prevState, shelter:response.data.shelter, shelter_object:response.data.shelter_object, room:response.data.room, room_name:response.data.room_name}));
+          setShowTransfer(false);
+        })
+        .catch(error => {
+          setShowSystemError(true);
+        });
+      }}
+    >
+      {formikProps => (
+      <Modal show={showTransfer} onHide={handleCloseTransfer}>
+        <Modal.Header closeButton>
+          <Modal.Title>Transfer Animal</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <BootstrapForm.Row className="">
+            <Col xs="12">
+              <DropDown
+                label="To Shelter / Room"
+                id="shelter"
+                type="text"
+                name="shelter"
+                options={shelters.options}
+                isClearable={false}
+                // ref={shelterRef}
+                key={`my_unique_shelter_select_key__${formikProps.values.shelter}`}
+                onChange={(instance) => {
+                  roomRef.current.select.clearValue();
+                  formikProps.setFieldValue("room", '');
+                  formikProps.setFieldValue("shelter", instance === null ? '' : instance.value);
+                }}
+                value={formikProps.values.shelter||''}
+              />
+            </Col>
+          </BootstrapForm.Row>
+          <BootstrapForm.Row className="mt-3 mb-3">
+            <Col xs="12">
+              <DropDown
+                id="room"
+                type="text"
+                name="room"
+                ref={roomRef}
+                key={`my_unique_room_select_key__${formikProps.values.room}`}
+                options={shelters.room_options[formikProps.values.shelter] ? shelters.room_options[formikProps.values.shelter] : []}
+                isClearable={true}
+                value={formikProps.values.room||''}
+              />
+            </Col>
+          </BootstrapForm.Row>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="primary" onClick={() => {formikProps.submitForm();}}>Save</Button>
+          <Button variant="secondary" onClick={handleCloseTransfer}>Close</Button>
+        </Modal.Footer>
+      </Modal>
+      )}
+    </Formik>
     <AnimalDeleteModal name={data.name} show={showAnimalConfirm} handleClose={handleAnimalClose} handleSubmit={handleAnimalSubmit} />
     </>
   );
