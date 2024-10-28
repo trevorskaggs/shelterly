@@ -914,7 +914,7 @@ const AnimalForm = (props) => {
                   />
                 </BootstrapForm.Row>
                 {/* Only show Shelter selection on intake and update. */}
-                <span hidden={(!Boolean(id) && !is_intake) || data.status !== 'SHELTERED'}>
+                {/* <span hidden={(!Boolean(id) && !is_intake) || data.status !== 'SHELTERED'}>
                   <BootstrapForm.Row className={is_intake ? "" : "mt-3"}>
                     <Col xs="6">
                       <DropDown
@@ -949,7 +949,7 @@ const AnimalForm = (props) => {
                       />
                     </Col>
                   </BootstrapForm.Row>
-                </span>
+                </span> */}
                 <AddressSearch formikProps={formikProps} label="Search for Animal Found Location" hidden={is_intake ? !is_reporter : !Boolean(id)} incident={props.incident} error="Animal Found Location was not selected." />
                 <span hidden={is_workflow && !is_intake}>
                   <p className={"mb-0"}>Image Files</p>
