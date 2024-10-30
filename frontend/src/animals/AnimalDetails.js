@@ -80,7 +80,6 @@ function AnimalDetails({ id, incident, organization }) {
   const [shelters, setShelters] = useState({options: [], shelters: [], room_options: {}, isFetching: false});
 
   const roomRef = useRef(null);
-  const shelterRef = useRef(null);
 
   // Handle animal reunited submit.
   const handleSubmit = async () => {
@@ -391,7 +390,7 @@ function AnimalDetails({ id, incident, organization }) {
                   {data.status === 'SHELTERED' ?
                     <LoadingLink onClick={() => setShowTransfer(true)} isLoading={isLoading} className="text-white d-block py-1 px-3">
                       <FontAwesomeIcon icon={faRightLeft} className="mr-1" style={{cursor:'pointer'}} inverse />
-                      Transfer Animal
+                      Transfer Animal Between Shelters
                     </LoadingLink>
                   : ""}
                   <LoadingLink

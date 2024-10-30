@@ -10,7 +10,7 @@ const ActionsDropdown = ({
   variant = 'dark'
 }) => {
   return (
-    <Dropdown size={size} className={className} alignRight={true}>
+    <Dropdown size={size} className={className} alignRight={true} style={{paddingTop:"5px"}}>
       <Dropdown.Toggle variant={variant} id={id}>
         {title}
       </Dropdown.Toggle>
