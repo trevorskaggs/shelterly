@@ -91,7 +91,7 @@ const VetRequestForm = (props) => {
     if (props.animalid) {
       const fetchAnimalData = async () => {
         // Fetch Animal data.
-        await axios.get('/animals/api/incident/' + (state ? state.incident.id : 'undefined') + '/animal/' + props.animalid ? props.animalid : data.animal_object.id_for_incident + '/', {
+        await axios.get('/animals/api/incident/' + (state ? state.incident.id : 'undefined') + '/animal/' + (props.animalid ? props.animalid : data.animal_object.id_for_incident) + '/', {
           cancelToken: source.token,
         })
         .then(response => {
